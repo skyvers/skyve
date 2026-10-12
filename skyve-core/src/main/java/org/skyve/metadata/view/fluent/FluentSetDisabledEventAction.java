@@ -1,6 +1,10 @@
 package org.skyve.metadata.view.fluent;
 
+import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.metadata.view.event.SetDisabledEventAction;
+
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 
 /**
  * Builds {@link SetDisabledEventAction} metadata using a fluent API.
@@ -34,7 +38,7 @@ public class FluentSetDisabledEventAction extends FluentEventAction {
 	 */
 	public FluentSetDisabledEventAction from(@SuppressWarnings("hiding") SetDisabledEventAction action) {
 		binding(action.getBinding());
-		disabledConditionName(action.getDisabledConditionName());
+		BindUtil.copyAuthoredCondition(action.getXmlDisabledCondition(), action.getXmlEnabledCondition(), this::disabledCondition, this::enabledCondition);
 
 		return this;
 	}
@@ -52,14 +56,26 @@ public class FluentSetDisabledEventAction extends FluentEventAction {
 	}
 
 	/**
-	 * Sets the condition used to compute the disabled state.
+	 * Sets the {@code disabled} condition as authored; the opposite sense of {@link #enabledCondition(String)}.
 	 *
-	 * @param disabledConditionName
-	 *            the condition name
+	 * @param disabledCondition
+	 *            a condition name, an inline condition expression or a boolean literal
 	 * @return this builder
 	 */
-	public FluentSetDisabledEventAction disabledConditionName(String disabledConditionName) {
-		action.setDisabledConditionName(disabledConditionName);
+	public @Nonnull FluentSetDisabledEventAction disabledCondition(@Nullable String disabledCondition) {
+		action.setXmlDisabledCondition(disabledCondition);
+		return this;
+	}
+
+	/**
+	 * Sets the {@code enabled} condition as authored; the opposite sense of {@link #disabledCondition(String)}.
+	 *
+	 * @param enabledCondition
+	 *            a condition name, an inline condition expression or a boolean literal
+	 * @return this builder
+	 */
+	public @Nonnull FluentSetDisabledEventAction enabledCondition(@Nullable String enabledCondition) {
+		action.setXmlEnabledCondition(enabledCondition);
 		return this;
 	}
 

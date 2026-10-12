@@ -2,7 +2,6 @@ package org.skyve.impl.metadata.view.widget.bound.tabular;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.startsWith;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -59,17 +58,17 @@ class ListGridTest {
 	}
 
 	@Test
-	void setInvisibleConditionNameAndGet() {
+	void setInvisibleConditionAndGet() {
 		ListGrid lg = new ListGrid();
-		lg.setInvisibleConditionName("hiddenWhen");
-		assertThat(lg.getInvisibleConditionName(), is("hiddenWhen"));
+		lg.setXmlInvisibleCondition("hiddenWhen");
+		assertThat(lg.getInvisibleCondition(), is("hiddenWhen"));
 	}
 
 	@Test
-	void setVisibleConditionNameNegatesCondition() {
+	void setVisibleConditionNegatesCondition() {
 		ListGrid lg = new ListGrid();
-		lg.setVisibleConditionName("showWhen");
-		assertThat(lg.getInvisibleConditionName(), startsWith("not"));
+		lg.setXmlVisibleCondition("showWhen");
+		assertThat(lg.getInvisibleCondition(), is("notShowWhen"));
 	}
 
 	// ---- ListGrid specific ----
@@ -87,73 +86,73 @@ class ListGridTest {
 	}
 
 	@Test
-	void setDisabledConditionNameAndGet() {
+	void setDisabledConditionAndGet() {
 		ListGrid lg = new ListGrid();
-		lg.setDisabledConditionName("isDisabled");
-		assertThat(lg.getDisabledConditionName(), is("isDisabled"));
+		lg.setXmlDisabledCondition("isDisabled");
+		assertThat(lg.getDisabledCondition(), is("isDisabled"));
 	}
 
 	@Test
-	void setEnabledConditionNameNegatesCondition() {
+	void setEnabledConditionNegatesCondition() {
 		ListGrid lg = new ListGrid();
-		lg.setEnabledConditionName("isEnabled");
-		assertThat(lg.getDisabledConditionName(), startsWith("not"));
+		lg.setXmlEnabledCondition("isEnabled");
+		assertThat(lg.getDisabledCondition(), is("notIsEnabled"));
 	}
 
 	@Test
-	void setDisableAddConditionNameAndGet() {
+	void setDisableAddConditionAndGet() {
 		ListGrid lg = new ListGrid();
-		lg.setDisableAddConditionName("noAdd");
-		assertThat(lg.getDisableAddConditionName(), is("noAdd"));
+		lg.setXmlDisableAddCondition("noAdd");
+		assertThat(lg.getDisableAddCondition(), is("noAdd"));
 	}
 
 	@Test
-	void setEnableAddConditionNameNegatesCondition() {
+	void setEnableAddConditionNegatesCondition() {
 		ListGrid lg = new ListGrid();
-		lg.setEnableAddConditionName("canAdd");
-		assertThat(lg.getDisableAddConditionName(), startsWith("not"));
+		lg.setXmlEnableAddCondition("canAdd");
+		assertThat(lg.getDisableAddCondition(), is("notCanAdd"));
 	}
 
 	@Test
-	void setDisableZoomConditionNameAndGet() {
+	void setDisableZoomConditionAndGet() {
 		ListGrid lg = new ListGrid();
-		lg.setDisableZoomConditionName("noZoom");
-		assertThat(lg.getDisableZoomConditionName(), is("noZoom"));
+		lg.setXmlDisableZoomCondition("noZoom");
+		assertThat(lg.getDisableZoomCondition(), is("noZoom"));
 	}
 
 	@Test
-	void setEnableZoomConditionNameNegatesCondition() {
+	void setEnableZoomConditionNegatesCondition() {
 		ListGrid lg = new ListGrid();
-		lg.setEnableZoomConditionName("canZoom");
-		assertThat(lg.getDisableZoomConditionName(), startsWith("not"));
+		lg.setXmlEnableZoomCondition("canZoom");
+		assertThat(lg.getDisableZoomCondition(), is("notCanZoom"));
 	}
 
 	@Test
-	void setDisableEditConditionNameAndGet() {
+	void setDisableEditConditionAndGet() {
 		ListGrid lg = new ListGrid();
-		lg.setDisableEditConditionName("noEdit");
-		assertThat(lg.getDisableEditConditionName(), is("noEdit"));
+		lg.setXmlDisableEditCondition("noEdit");
+		assertThat(lg.getDisableEditCondition(), is("noEdit"));
 	}
 
 	@Test
-	void setEnableEditConditionNameNegatesCondition() {
+	void setEnableEditConditionNegatesCondition() {
 		ListGrid lg = new ListGrid();
-		lg.setEnableEditConditionName("canEdit");
-		assertThat(lg.getDisableEditConditionName(), startsWith("not"));
+		lg.setXmlEnableEditCondition("canEdit");
+		assertThat(lg.getDisableEditCondition(), is("notCanEdit"));
 	}
 
 	@Test
-	void setDisableRemoveConditionNameAndGet() {
+	void setDisableRemoveConditionAndGet() {
 		ListGrid lg = new ListGrid();
-		lg.setDisableRemoveConditionName("noRemove");
-		assertThat(lg.getDisableRemoveConditionName(), is("noRemove"));
+		lg.setXmlDisableRemoveCondition("noRemove");
+		assertThat(lg.getDisableRemoveCondition(), is("noRemove"));
 	}
 
 	@Test
-	void setEnableRemoveConditionNameNegatesCondition() {
+	void setEnableRemoveConditionNegatesCondition() {
 		ListGrid lg = new ListGrid();
-		lg.setEnableRemoveConditionName("canRemove");
-		assertThat(lg.getDisableRemoveConditionName(), startsWith("not"));
+		lg.setXmlEnableRemoveCondition("canRemove");
+		assertThat(lg.getDisableRemoveCondition(), is("notCanRemove"));
 	}
 
 	@Test

@@ -64,10 +64,10 @@ public class ResponsiveComponentBuilder extends TabularComponentBuilder {
 	@Override
 	public UIComponent border(UIComponent component, 
 								String borderTitle,
-								String invisibleConditionName,
+								String invisibleCondition,
 								Integer pixelWidth,
 								Collapsible collapsible) {
-		Panel result = (Panel) super.border(component, borderTitle, invisibleConditionName, pixelWidth, collapsible);
+		Panel result = (Panel) super.border(component, borderTitle, invisibleCondition, pixelWidth, collapsible);
 		// reset percentage width styles
 		result.setStyle(null);
 		result.setStyleClass(UtilImpl.PRIMEFLEX ? "p-col-12" : "ui-g-12");
@@ -87,10 +87,10 @@ public class ResponsiveComponentBuilder extends TabularComponentBuilder {
 	public EventSourceComponent checkBox(EventSourceComponent component,
 											String dataWidgetVar,
 											CheckBox checkBox,
-											String formDisabledConditionName,
+											String formDisabledCondition,
 											String title,
 											@Nullable String requiredMessage) {
-		EventSourceComponent result = super.checkBox(component, dataWidgetVar, checkBox, formDisabledConditionName, title, requiredMessage);
+		EventSourceComponent result = super.checkBox(component, dataWidgetVar, checkBox, formDisabledCondition, title, requiredMessage);
 		addFloatLabelClass(result.getComponent());
 		return result;
 	}
@@ -99,11 +99,11 @@ public class ResponsiveComponentBuilder extends TabularComponentBuilder {
 	public EventSourceComponent colourPicker(EventSourceComponent component,
 												String dataWidgetVar,
 												ColourPicker colour,
-												String formDisabledConditionName,
+												String formDisabledCondition,
 												String title,
 												@Nullable String requiredMessage,
 												HorizontalAlignment textAlignment) {
-		EventSourceComponent result = super.colourPicker(component, dataWidgetVar, colour, formDisabledConditionName, title, requiredMessage, textAlignment);
+		EventSourceComponent result = super.colourPicker(component, dataWidgetVar, colour, formDisabledCondition, title, requiredMessage, textAlignment);
 		addFloatLabelClass(result.getComponent());
 		return result;
 	}
@@ -112,13 +112,13 @@ public class ResponsiveComponentBuilder extends TabularComponentBuilder {
 	public @Nonnull UIComponent content(@Nullable UIComponent component,
 											@Nullable String dataWidgetVar,
 											@Nonnull ContentUpload content,
-											@Nullable String formDisabledConditionName,
+											@Nullable String formDisabledCondition,
 											@Nullable String title,
 											@Nullable String requiredMessage,
 											@Nullable HorizontalAlignment textAlignment,
 											boolean formContext,
 											boolean imageUpload) {
-		UIComponent result = super.content(component, dataWidgetVar, content, formDisabledConditionName, title, requiredMessage, textAlignment, formContext, imageUpload);
+		UIComponent result = super.content(component, dataWidgetVar, content, formDisabledCondition, title, requiredMessage, textAlignment, formContext, imageUpload);
 		addFloatLabelClass(result);
 		return result;
 	}
@@ -127,22 +127,22 @@ public class ResponsiveComponentBuilder extends TabularComponentBuilder {
 	public UIComponent addContentSignature(UIComponent component,
 											UIComponent layout,
 											ContentSignature signature,
-											String formDisabledConditionName,
+											String formDisabledCondition,
 											String title,
 											@Nullable String requiredMessage) {
 		addFloatLabelClass(layout);
-		return super.addContentSignature(component, layout, signature, formDisabledConditionName, title, requiredMessage);
+		return super.addContentSignature(component, layout, signature, formDisabledCondition, title, requiredMessage);
 	}
 
 	@Override
 	public EventSourceComponent geometry(EventSourceComponent component,
 											String dataWidgetVar,
 											Geometry geometry,
-											String formDisabledConditionName,
+											String formDisabledCondition,
 											String title,
 											@Nullable String requiredMessage,
 											HorizontalAlignment textAlignment) {
-		EventSourceComponent result = super.geometry(component, dataWidgetVar, geometry, formDisabledConditionName, title, requiredMessage, textAlignment);
+		EventSourceComponent result = super.geometry(component, dataWidgetVar, geometry, formDisabledCondition, title, requiredMessage, textAlignment);
 		addFloatLabelClass(result.getComponent());
 		return result;
 	}
@@ -150,10 +150,10 @@ public class ResponsiveComponentBuilder extends TabularComponentBuilder {
 	@Override
 	public EventSourceComponent geometryMap(EventSourceComponent component,
 												GeometryMap geometry,
-												String formDisabledConditionName,
+												String formDisabledCondition,
 												String title,
 												@Nullable String requiredMessage) {
-		EventSourceComponent result = super.geometryMap(component, geometry, formDisabledConditionName, title, requiredMessage);
+		EventSourceComponent result = super.geometryMap(component, geometry, formDisabledCondition, title, requiredMessage);
 		addFloatLabelClass(result.getComponent());
 		
 		// Grow the map form item in its flex grid, if it has no width defined
@@ -169,10 +169,10 @@ public class ResponsiveComponentBuilder extends TabularComponentBuilder {
 	public UIComponent html(UIComponent component,
 								String dataWidgetVar,
 								HTML html,
-								String formDisabledConditionName,
+								String formDisabledCondition,
 								String title,
 								@Nullable String requiredMessage) {
-		UIComponent result = super.html(component, dataWidgetVar, html, formDisabledConditionName, title, requiredMessage);
+		UIComponent result = super.html(component, dataWidgetVar, html, formDisabledCondition, title, requiredMessage);
 		addFloatLabelClass(result);
 		return result;
 	}
@@ -195,10 +195,10 @@ public class ResponsiveComponentBuilder extends TabularComponentBuilder {
 	public EventSourceComponent radio(EventSourceComponent component,
 										String dataWidgetVar,
 										Radio radio,
-										String formDisabledConditionName,
+										String formDisabledCondition,
 										String title,
 										@Nullable String requiredMessage) {
-		EventSourceComponent result = super.radio(component, dataWidgetVar, radio, formDisabledConditionName, title, requiredMessage);
+		EventSourceComponent result = super.radio(component, dataWidgetVar, radio, formDisabledCondition, title, requiredMessage);
 		addFloatLabelClass(result.getComponent());
 		return result;
 	}
@@ -207,10 +207,10 @@ public class ResponsiveComponentBuilder extends TabularComponentBuilder {
 	public EventSourceComponent richText(EventSourceComponent component,
 											String dataWidgetVar,
 											RichText text,
-											String formDisabledConditionName,
+											String formDisabledCondition,
 											String title,
 											@Nullable String requiredMessage) {
-		EventSourceComponent result = super.richText(component, dataWidgetVar, text, formDisabledConditionName, title, requiredMessage);
+		EventSourceComponent result = super.richText(component, dataWidgetVar, text, formDisabledCondition, title, requiredMessage);
 		addFloatLabelClass(result.getComponent());
 		return result;
 	}

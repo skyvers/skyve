@@ -267,7 +267,7 @@ public abstract class LayoutBuilder extends AbstractFacesBuilder {
 	 * @param md optional medium breakpoint width
 	 * @param lg optional large breakpoint width
 	 * @param xl optional extra-large breakpoint width
-	 * @param invisibleConditionName optional invisible condition expression
+	 * @param invisibleCondition optional invisible condition expression
 	 * @return the resulting current component for subsequent layout operations
 	 */
 	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
@@ -282,7 +282,7 @@ public abstract class LayoutBuilder extends AbstractFacesBuilder {
 												Integer md,
 												Integer lg,
 												Integer xl,
-												String invisibleConditionName);
+												String invisibleCondition);
 	
 	/**
 	 * Finalises processing after a component has been added to a container.

@@ -3,13 +3,18 @@ package org.skyve.impl.metadata.view.component;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.DynamicTest.dynamicTest;
+import static org.mockito.Mockito.mock;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Stream;
 
+import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
+import org.junit.jupiter.api.TestFactory;
 import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.module.ModuleImpl;
 import org.skyve.impl.metadata.view.ActionImpl;
@@ -77,34 +82,47 @@ import org.skyve.metadata.controller.ImplicitActionName;
 class ComponentViewVisitorTest {
 
 	private static CustomerImpl mockCustomer() {
-		return Mockito.mock(CustomerImpl.class);
+		return mock(CustomerImpl.class);
 	}
 
 	private static ModuleImpl mockModule() {
-		return Mockito.mock(ModuleImpl.class);
+		return mock(ModuleImpl.class);
 	}
 
 	private static ComponentViewVisitor visitor(ViewImpl view) {
 		return new ComponentViewVisitor(mockCustomer(), mockModule(), null, view, "desktop",
-				null, Collections.emptyList(), null);
+				null, Collections.emptyList(), Collections.emptyList(), null);
 	}
 
 	private static ComponentViewVisitor visitorWithPrefix(ViewImpl view, String prefix) {
 		return new ComponentViewVisitor(mockCustomer(), mockModule(), null, view, "desktop",
-				prefix, Collections.emptyList(), null);
+				prefix, Collections.emptyList(), Collections.emptyList(), null);
 	}
 
 	private static ComponentViewVisitor visitorWithWidgetId(ViewImpl view, String widgetId) {
 		return new ComponentViewVisitor(mockCustomer(), mockModule(), null, view, "desktop",
-				null, Collections.emptyList(), widgetId);
+				null, Collections.emptyList(), Collections.emptyList(), widgetId);
 	}
 
-	private static ComponentViewVisitor visitorWithNames(ViewImpl view, String from, String to) {
-		ComponentNameMap nameMap = new ComponentNameMap();
-		nameMap.setFromComponent(from);
-		nameMap.setMappedTo(to);
+	private static ComponentTranslation mapping(String from, String to) {
+		ComponentTranslation result = new ComponentTranslation();
+		result.setFromComponent(from);
+		result.setMappedTo(to);
+		return result;
+	}
+
+	private static ComponentViewVisitor visitorWithActions(ViewImpl view, String from, String to) {
 		return new ComponentViewVisitor(mockCustomer(), mockModule(), null, view, "desktop",
-				null, List.of(nameMap), null);
+				null, List.of(mapping(from, to)), Collections.emptyList(), null);
+	}
+
+	private static ComponentViewVisitor visitorWithConditions(ViewImpl view, String from, String to) {
+		return visitorWithConditions(view, null, from, to);
+	}
+
+	private static ComponentViewVisitor visitorWithConditions(ViewImpl view, String prefix, String from, String to) {
+		return new ComponentViewVisitor(mockCustomer(), mockModule(), null, view, "desktop",
+				prefix, Collections.emptyList(), List.of(mapping(from, to)), null);
 	}
 
 	// ---- Basic traversal tests ----
@@ -345,15 +363,15 @@ class ComponentViewVisitorTest {
 		assertEquals(null, textField.getBinding());
 	}
 
-	// ---- Name translation tests ----
+	// ---- Action and condition mapping tests ----
 
 	@Test
-	void actionNameTranslatedViaNameMap() {
+	void actionNameTranslatedViaActionMappings() {
 		ViewImpl view = new ViewImpl();
 		Button button = new Button();
 		button.setActionName("componentAction");
 		view.getContained().add(button);
-		ComponentViewVisitor v = visitorWithNames(view, "componentAction", "viewAction");
+		ComponentViewVisitor v = visitorWithActions(view, "componentAction", "viewAction");
 		v.visit();
 		assertEquals("viewAction", button.getActionName());
 	}
@@ -364,7 +382,7 @@ class ComponentViewVisitorTest {
 		Button button = new Button();
 		button.setActionName("notMapped");
 		view.getContained().add(button);
-		ComponentViewVisitor v = visitorWithNames(view, "something", "other");
+		ComponentViewVisitor v = visitorWithActions(view, "something", "other");
 		v.visit();
 		assertEquals("notMapped", button.getActionName());
 	}
@@ -373,12 +391,452 @@ class ComponentViewVisitorTest {
 	void negatedConditionTranslated() {
 		ViewImpl view = new ViewImpl();
 		VBox vbox = new VBox();
-		vbox.setInvisibleConditionName("notActive");
+		vbox.setXmlInvisibleCondition("notActive");
 		view.getContained().add(vbox);
 		// Map "active" -> "enabled"; the negation "notActive" should translate to "notEnabled"
-		ComponentViewVisitor v = visitorWithNames(view, "active", "enabled");
+		ComponentViewVisitor v = visitorWithConditions(view, "active", "enabled");
 		v.visit();
-		assertEquals("notEnabled", vbox.getInvisibleConditionName());
+		assertEquals("notEnabled", vbox.getInvisibleCondition());
+	}
+
+	@Test
+	void inlineConditionExpressionTakesTheBindingPrefix() {
+		ViewImpl view = new ViewImpl();
+		VBox vbox = new VBox();
+		vbox.setXmlInvisibleCondition("{el:bean.active}");
+		view.getContained().add(vbox);
+		visitorWithPrefix(view, "contact").visit();
+		assertEquals("{el:bean.contact.active}", vbox.getInvisibleCondition());
+	}
+
+	@Test
+	void inverseOfInlineConditionExpressionTakesTheBindingPrefixAndKeepsItsSense() {
+		ViewImpl view = new ViewImpl();
+		VBox vbox = new VBox();
+		vbox.setXmlVisibleCondition("{el:bean.active}");
+		view.getContained().add(vbox);
+		visitorWithPrefix(view, "contact").visit();
+		assertEquals("not{el:bean.contact.active}", vbox.getInvisibleCondition());
+	}
+
+	@Test
+	void inlineConditionAuthoredAsVisibleStaysAuthoredAsVisible() {
+		ViewImpl view = new ViewImpl();
+		VBox vbox = new VBox();
+		vbox.setXmlVisibleCondition("{el:bean.active}");
+		view.getContained().add(vbox);
+		visitorWithPrefix(view, "contact").visit();
+		// the inverse of the expression is derived, never stored
+		assertEquals("{el:bean.contact.active}", vbox.getXmlVisibleCondition());
+		assertNull(vbox.getXmlInvisibleCondition());
+	}
+
+	@Test
+	void conditionNameAuthoredAsVisibleIsMappedAndStaysAuthoredAsVisible() {
+		ViewImpl view = new ViewImpl();
+		VBox vbox = new VBox();
+		vbox.setXmlVisibleCondition("active");
+		view.getContained().add(vbox);
+		visitorWithConditions(view, "active", "enabled").visit();
+		assertEquals("enabled", vbox.getXmlVisibleCondition());
+		assertNull(vbox.getXmlInvisibleCondition());
+		assertEquals("notEnabled", vbox.getInvisibleCondition());
+	}
+
+	@Test
+	void conditionAuthoredAsInvisibleStaysAuthoredAsInvisible() {
+		ViewImpl view = new ViewImpl();
+		VBox vbox = new VBox();
+		vbox.setXmlInvisibleCondition("active");
+		view.getContained().add(vbox);
+		visitorWithConditions(view, "active", "enabled").visit();
+		assertEquals("enabled", vbox.getXmlInvisibleCondition());
+		assertNull(vbox.getXmlVisibleCondition());
+	}
+
+	@Test
+	void enabledConditionOnAnInputKeepsItsAuthoredSense() {
+		ViewImpl view = new ViewImpl();
+		Form form = new Form();
+		form.getColumns().add(new FormColumn());
+		FormRow row = new FormRow();
+		FormItem item = new FormItem();
+		TextField text = new TextField();
+		text.setBinding("name");
+		text.setXmlEnabledCondition("{el:bean.editable}");
+		item.setWidget(text);
+		row.getItems().add(item);
+		form.getRows().add(row);
+		view.getContained().add(form);
+		visitorWithPrefix(view, "contact").visit();
+		assertEquals("{el:bean.contact.editable}", text.getXmlEnabledCondition());
+		assertNull(text.getXmlDisabledCondition());
+		assertEquals("not{el:bean.contact.editable}", text.getDisabledCondition());
+	}
+
+	@Test
+	void gridAndLookupFlagsKeepTheirAuthoredSense() {
+		ViewImpl view = new ViewImpl();
+		DataGrid dataGrid = new DataGrid();
+		dataGrid.setBinding("lines");
+		dataGrid.setXmlEnableAddCondition("canAdd");
+		dataGrid.setXmlDisableEditCondition("noEdit");
+		dataGrid.setXmlEnableRemoveCondition("{el:bean.open}");
+		dataGrid.setXmlDisableZoomCondition("{el:bean.closed}");
+		view.getContained().add(dataGrid);
+		ListGrid listGrid = new ListGrid();
+		listGrid.setXmlEnableAddCondition("canAdd");
+		listGrid.setXmlEnableEditCondition("canEdit");
+		listGrid.setXmlEnableRemoveCondition("canRemove");
+		listGrid.setXmlEnableZoomCondition("canZoom");
+		view.getContained().add(listGrid);
+		Form form = new Form();
+		form.getColumns().add(new FormColumn());
+		FormRow row = new FormRow();
+		FormItem item = new FormItem();
+		LookupDescription lookup = new LookupDescription();
+		lookup.setBinding("owner");
+		lookup.setXmlEnablePickCondition("canPick");
+		lookup.setXmlEnableClearCondition("canClear");
+		lookup.setXmlEnableAddCondition("canAdd");
+		lookup.setXmlEnableEditCondition("canEdit");
+		item.setWidget(lookup);
+		row.getItems().add(item);
+		form.getRows().add(row);
+		view.getContained().add(form);
+
+		visitorWithPrefix(view, "contact").visit();
+
+		assertEquals("canAdd", dataGrid.getXmlEnableAddCondition());
+		assertNull(dataGrid.getXmlDisableAddCondition());
+		assertEquals("noEdit", dataGrid.getXmlDisableEditCondition());
+		assertNull(dataGrid.getXmlEnableEditCondition());
+		assertEquals("{el:bean.contact.open}", dataGrid.getXmlEnableRemoveCondition());
+		assertNull(dataGrid.getXmlDisableRemoveCondition());
+		assertEquals("{el:bean.contact.closed}", dataGrid.getXmlDisableZoomCondition());
+
+		assertEquals("canAdd", listGrid.getXmlEnableAddCondition());
+		assertEquals("canEdit", listGrid.getXmlEnableEditCondition());
+		assertEquals("canRemove", listGrid.getXmlEnableRemoveCondition());
+		assertEquals("canZoom", listGrid.getXmlEnableZoomCondition());
+		assertEquals("notCanZoom", listGrid.getDisableZoomCondition());
+
+		assertEquals("canPick", lookup.getXmlEnablePickCondition());
+		assertEquals("canClear", lookup.getXmlEnableClearCondition());
+		assertEquals("canAdd", lookup.getXmlEnableAddCondition());
+		assertEquals("canEdit", lookup.getXmlEnableEditCondition());
+		assertNull(lookup.getXmlDisablePickCondition());
+	}
+
+	@Test
+	void inlineConditionExpressionWithoutBindingPrefixKeptAsIs() {
+		ViewImpl view = new ViewImpl();
+		VBox vbox = new VBox();
+		vbox.setXmlInvisibleCondition("{el:bean.active}");
+		view.getContained().add(vbox);
+		visitor(view).visit();
+		assertEquals("{el:bean.active}", vbox.getInvisibleCondition());
+	}
+
+	@Test
+	void actionMappingsAreNotAppliedToConditions() {
+		ViewImpl view = new ViewImpl();
+		VBox vbox = new VBox();
+		vbox.setXmlInvisibleCondition("active");
+		view.getContained().add(vbox);
+		visitorWithActions(view, "active", "enabled").visit();
+		assertEquals("active", vbox.getXmlInvisibleCondition());
+	}
+
+	@Test
+	void conditionMappingsAreNotAppliedToActionNames() {
+		ViewImpl view = new ViewImpl();
+		Button button = new Button();
+		button.setActionName("active");
+		TextField text = textFieldIn(view);
+		text.getChangedActions().add(changedServerAction("active"));
+		view.getContained().add(button);
+		visitorWithConditions(view, "active", "enabled").visit();
+		assertEquals("active", button.getActionName());
+		assertEquals("active", ((ServerSideActionEventAction) text.getChangedActions().get(0)).getActionName());
+	}
+
+	@Test
+	void actionNameStartingWithNotIsNotTreatedAsANegatedCondition() {
+		ViewImpl view = new ViewImpl();
+		Button button = new Button();
+		button.setActionName("notifyAll");
+		view.getContained().add(button);
+		// were the action a condition, notifyAll would be the inverse of ifyAll
+		visitorWithActions(view, "ifyAll", "other").visit();
+		assertEquals("notifyAll", button.getActionName());
+	}
+
+	@Test
+	void nullActionNameStaysNull() {
+		ViewImpl view = new ViewImpl();
+		Button button = new Button();
+		view.getContained().add(button);
+		visitorWithActions(view, "componentAction", "viewAction").visit();
+		assertNull(button.getActionName());
+	}
+
+	@Test
+	void serverSideEventActionNamesAreMappedOnInputsAndGrids() {
+		ViewImpl view = new ViewImpl();
+		TextField text = textFieldIn(view);
+		text.getChangedActions().add(changedServerAction("componentAction"));
+		text.getChangedActions().add(changedServerAction("unmapped"));
+		DataGrid grid = new DataGrid();
+		grid.setBinding("lines");
+		grid.getAddedActions().add(changedServerAction("componentAction"));
+		view.getContained().add(grid);
+		visitorWithActions(view, "componentAction", "viewAction").visit();
+		assertEquals("viewAction", ((ServerSideActionEventAction) text.getChangedActions().get(0)).getActionName());
+		assertEquals("unmapped", ((ServerSideActionEventAction) text.getChangedActions().get(1)).getActionName());
+		assertEquals("viewAction", ((ServerSideActionEventAction) grid.getAddedActions().get(0)).getActionName());
+	}
+
+	/**
+	 * Each case is the attribute authored in the component view, its value, the component binding,
+	 * the condition mapping (from, to), then the invisible and visible attributes expected in the
+	 * containing view and the derived invisible condition renderers read.
+	 */
+	@TestFactory
+	Stream<DynamicTest> conditionMappingsTranslateEitherAttributeOfAPair() {
+		String a = "{el:bean.a}";
+		String b = "{el:bean.b}";
+		String[][] cases = {
+			// condition names
+			{"invisible", "active", null, "active", "enabled", "enabled", null, "enabled"},
+			{"visible", "active", null, "active", "enabled", null, "enabled", "notEnabled"},
+			{"invisible", "notActive", null, "active", "enabled", "notEnabled", null, "notEnabled"},
+			{"visible", "notActive", null, "active", "enabled", null, "notEnabled", "enabled"},
+			{"invisible", "notActive", null, "notActive", "hidden", "hidden", null, "hidden"},
+			{"invisible", "other", null, "active", "enabled", "other", null, "other"},
+			{"invisible", "notOther", null, "active", "enabled", "notOther", null, "notOther"},
+			// a binding never changes a condition name or what a condition is mapped to
+			{"invisible", "active", "contact", "active", "enabled", "enabled", null, "enabled"},
+			{"invisible", "other", "contact", "active", "enabled", "other", null, "other"},
+			// inline expressions mapped to condition names
+			{"invisible", a, null, a, "enabled", "enabled", null, "enabled"},
+			{"visible", a, null, a, "enabled", null, "enabled", "notEnabled"},
+			{"invisible", a, "contact", a, "enabled", "enabled", null, "enabled"},
+			{"visible", a, "contact", a, "notEnabled", null, "notEnabled", "enabled"},
+			// inline expressions mapped to inline expressions
+			{"invisible", a, null, a, b, b, null, b},
+			{"visible", a, null, a, b, null, b, "not" + b},
+			{"invisible", a, "contact", a, b, b, null, b},
+			{"visible", a, "contact", a, b, null, b, "not" + b},
+			// condition names mapped to inline expressions
+			{"invisible", "active", null, "active", b, b, null, b},
+			{"visible", "active", null, "active", b, null, b, "not" + b},
+			// ... where the inverse of an expression would have to be stored, the other attribute is used
+			{"invisible", "notActive", null, "active", b, null, b, "not" + b},
+			{"visible", "notActive", null, "active", b, b, null, b},
+			// an inline expression without a mapping takes the binding prefix, whatever else is mapped
+			{"invisible", "{el:bean.c}", "contact", a, "enabled", "{el:bean.contact.c}", null, "{el:bean.contact.c}"},
+			{"visible", "{el:bean.c}", "contact", a, b, null, "{el:bean.contact.c}", "not{el:bean.contact.c}"},
+			{"invisible", "{el:bean.c}", null, a, "enabled", "{el:bean.c}", null, "{el:bean.c}"},
+			// a mapping matches the exact text of the expression
+			{"invisible", "{el:bean.a }", null, a, "enabled", "{el:bean.a }", null, "{el:bean.a }"},
+			{"invisible", "{el: bean.a}", "contact", a, "enabled", "{el:bean.contact.a}", null, "{el:bean.contact.a}"},
+			// boolean literals
+			{"invisible", "true", "contact", "active", "enabled", "true", null, "true"},
+			{"visible", "true", "contact", "active", "enabled", null, "true", "false"},
+			{"invisible", "active", null, "active", "true", "true", null, "true"},
+			{"visible", "active", null, "active", "false", null, "false", "true"},
+			// nothing authored
+			{"invisible", null, "contact", "active", "enabled", null, null, null},
+		};
+		return Stream.of(cases).map(c -> dynamicTest(c[0] + "=" + c[1] + " in " + c[2] + " with " + c[3] + " -> " + c[4], () -> {
+			ViewImpl view = new ViewImpl();
+			VBox vbox = new VBox();
+			if ("visible".equals(c[0])) {
+				vbox.setXmlVisibleCondition(c[1]);
+			}
+			else {
+				vbox.setXmlInvisibleCondition(c[1]);
+			}
+			view.getContained().add(vbox);
+			visitorWithConditions(view, c[2], c[3], c[4]).visit();
+			assertEquals(c[5], vbox.getXmlInvisibleCondition(), "invisible attribute");
+			assertEquals(c[6], vbox.getXmlVisibleCondition(), "visible attribute");
+			assertEquals(c[7], vbox.getInvisibleCondition(), "derived invisible condition");
+		}));
+	}
+
+	@Test
+	void conditionMappingsApplyToTheDisabledPairOfAnInput() {
+		ViewImpl view = new ViewImpl();
+		TextField text = textFieldIn(view);
+		text.setXmlEnabledCondition("{el:bean.editable}");
+		text.setXmlVisibleCondition("shown");
+		visitorWithConditions(view, "contact", "{el:bean.editable}", "canEdit").visit();
+		assertEquals("canEdit", text.getXmlEnabledCondition());
+		assertNull(text.getXmlDisabledCondition());
+		assertEquals("notCanEdit", text.getDisabledCondition());
+		assertEquals("shown", text.getXmlVisibleCondition());
+	}
+
+	@Test
+	void conditionMappingsApplyToGridAndLookupFlags() {
+		ViewImpl view = new ViewImpl();
+		String open = "{el:bean.open}";
+		DataGrid dataGrid = new DataGrid();
+		dataGrid.setBinding("lines");
+		dataGrid.setXmlEnableAddCondition(open);
+		dataGrid.setXmlDisableEditCondition(open);
+		dataGrid.setXmlEnableRemoveCondition("notOpen");
+		dataGrid.setXmlDisableZoomCondition("notOpen");
+		view.getContained().add(dataGrid);
+		ListGrid listGrid = new ListGrid();
+		listGrid.setXmlEnableAddCondition(open);
+		listGrid.setXmlDisableEditCondition(open);
+		listGrid.setXmlEnableRemoveCondition(open);
+		listGrid.setXmlDisableZoomCondition(open);
+		view.getContained().add(listGrid);
+		LookupDescription lookup = new LookupDescription();
+		lookup.setBinding("owner");
+		lookup.setXmlEnablePickCondition(open);
+		lookup.setXmlDisableClearCondition(open);
+		lookup.setXmlEnableAddCondition(open);
+		lookup.setXmlDisableEditCondition(open);
+		addToForm(view, lookup);
+
+		new ComponentViewVisitor(mockCustomer(), mockModule(), null, view, "desktop", "contact",
+				Collections.emptyList(),
+				List.of(mapping(open, "{el:bean.unlocked}"), mapping("open", "{el:bean.unlocked}")),
+				null).visit();
+
+		String unlocked = "{el:bean.unlocked}";
+		assertEquals(unlocked, dataGrid.getXmlEnableAddCondition());
+		assertEquals(unlocked, dataGrid.getXmlDisableEditCondition());
+		// notOpen maps to the inverse of an expression, which is stored through the other attribute
+		assertEquals(unlocked, dataGrid.getXmlDisableRemoveCondition());
+		assertNull(dataGrid.getXmlEnableRemoveCondition());
+		assertEquals(unlocked, dataGrid.getXmlEnableZoomCondition());
+		assertNull(dataGrid.getXmlDisableZoomCondition());
+
+		assertEquals(unlocked, listGrid.getXmlEnableAddCondition());
+		assertEquals(unlocked, listGrid.getXmlDisableEditCondition());
+		assertEquals(unlocked, listGrid.getXmlEnableRemoveCondition());
+		assertEquals(unlocked, listGrid.getXmlDisableZoomCondition());
+
+		assertEquals(unlocked, lookup.getXmlEnablePickCondition());
+		assertEquals(unlocked, lookup.getXmlDisableClearCondition());
+		assertEquals(unlocked, lookup.getXmlEnableAddCondition());
+		assertEquals(unlocked, lookup.getXmlDisableEditCondition());
+		assertEquals("not" + unlocked, lookup.getDisablePickCondition());
+	}
+
+	@TestFactory
+	Stream<DynamicTest> conditionMappingsApplyToAnUnpairedCondition() {
+		String a = "{el:bean.a}";
+		// authored postRefresh, component binding, mapping from, mapping to, expected
+		String[][] cases = {
+			{"active", null, "active", "enabled", "enabled"},
+			{"notActive", null, "active", "enabled", "notEnabled"},
+			{"other", "contact", "active", "enabled", "other"},
+			{a, "contact", a, "enabled", "enabled"},
+			{a, "contact", a, "{el:bean.b}", "{el:bean.b}"},
+			{a, "contact", "active", "enabled", "{el:bean.contact.a}"},
+			{a, null, "active", "enabled", a},
+			// there is no opposite attribute to store this through, so the inverse is kept
+			{"notActive", null, "active", a, "not" + a},
+			{null, "contact", "active", "enabled", null},
+		};
+		return Stream.of(cases).map(c -> dynamicTest(c[0] + " in " + c[1] + " with " + c[2] + " -> " + c[3], () -> {
+			ViewImpl view = new ViewImpl();
+			ListGrid listGrid = new ListGrid();
+			listGrid.setPostRefreshCondition(c[0]);
+			view.getContained().add(listGrid);
+			ListRepeater repeater = new ListRepeater();
+			repeater.setPostRefreshCondition(c[0]);
+			view.getContained().add(repeater);
+			visitorWithConditions(view, c[1], c[2], c[3]).visit();
+			assertEquals(c[4], listGrid.getPostRefreshCondition());
+			assertEquals(c[4], repeater.getPostRefreshCondition());
+		}));
+	}
+
+	@Test
+	void conditionMappingsApplyToSetDisabledAndSetInvisibleEventActions() {
+		ViewImpl view = new ViewImpl();
+		TextField text = textFieldIn(view);
+		SetDisabledEventAction setDisabled = new SetDisabledEventAction();
+		setDisabled.setBinding("other");
+		setDisabled.setXmlEnabledCondition("{el:bean.a}");
+		text.getChangedActions().add(setDisabled);
+		SetInvisibleEventAction setInvisible = new SetInvisibleEventAction();
+		setInvisible.setBinding("other");
+		setInvisible.setXmlInvisibleCondition("notActive");
+		text.getChangedActions().add(setInvisible);
+		new ComponentViewVisitor(mockCustomer(), mockModule(), null, view, "desktop", "contact",
+				Collections.emptyList(),
+				List.of(mapping("{el:bean.a}", "canEdit"), mapping("active", "{el:bean.b}")),
+				null).visit();
+		assertEquals("contact.other", setDisabled.getBinding());
+		assertEquals("canEdit", setDisabled.getXmlEnabledCondition());
+		assertNull(setDisabled.getXmlDisabledCondition());
+		assertEquals("{el:bean.b}", setInvisible.getXmlVisibleCondition());
+		assertNull(setInvisible.getXmlInvisibleCondition());
+	}
+
+	@Test
+	void translationsWithABlankSideAreIgnored() {
+		ViewImpl view = new ViewImpl();
+		VBox vbox = new VBox();
+		vbox.setXmlInvisibleCondition("active");
+		view.getContained().add(vbox);
+		Button button = new Button();
+		button.setActionName("componentAction");
+		view.getContained().add(button);
+		List<ComponentTranslation> incomplete = List.of(mapping(" ", "other"), mapping("active", ""), mapping("componentAction", null), mapping(null, null));
+		new ComponentViewVisitor(mockCustomer(), mockModule(), null, view, "desktop", "contact", incomplete, incomplete, null).visit();
+		assertEquals("active", vbox.getXmlInvisibleCondition());
+		assertEquals("componentAction", button.getActionName());
+	}
+
+	@Test
+	void translationsAreTrimmed() {
+		ViewImpl view = new ViewImpl();
+		VBox vbox = new VBox();
+		vbox.setXmlInvisibleCondition("active");
+		view.getContained().add(vbox);
+		visitorWithConditions(view, "  active ", " enabled\t").visit();
+		assertEquals("enabled", vbox.getXmlInvisibleCondition());
+	}
+
+	@Test
+	void laterMappingOfTheSameConditionWins() {
+		ViewImpl view = new ViewImpl();
+		VBox vbox = new VBox();
+		vbox.setXmlInvisibleCondition("active");
+		view.getContained().add(vbox);
+		new ComponentViewVisitor(mockCustomer(), mockModule(), null, view, "desktop", null,
+				Collections.emptyList(),
+				List.of(mapping("active", "first"), mapping("active", "second")),
+				null).visit();
+		assertEquals("second", vbox.getXmlInvisibleCondition());
+	}
+
+	private static TextField textFieldIn(ViewImpl view) {
+		TextField result = new TextField();
+		result.setBinding("name");
+		addToForm(view, result);
+		return result;
+	}
+
+	private static void addToForm(ViewImpl view, org.skyve.metadata.MetaData widget) {
+		Form form = new Form();
+		form.getColumns().add(new FormColumn());
+		FormRow row = new FormRow();
+		FormItem item = new FormItem();
+		item.setWidget(widget);
+		row.getItems().add(item);
+		form.getRows().add(row);
+		view.getContained().add(form);
 	}
 
 	// ---- widgetId capture tests ----

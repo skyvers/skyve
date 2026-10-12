@@ -1,6 +1,10 @@
 package org.skyve.metadata.view.fluent;
 
+import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.metadata.view.widget.DialogButton;
+
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 
 /**
  * Builds {@link DialogButton} metadata for opening configured dialogs.
@@ -50,8 +54,8 @@ public class FluentDialogButton extends FluentWidget {
 		if (b != null) {
 			modalDialog(b.booleanValue());
 		}
-		invisibleConditionName(button.getInvisibleConditionName());
-		disabledConditionName(button.getDisabledConditionName());
+		BindUtil.copyAuthoredCondition(button.getXmlInvisibleCondition(), button.getXmlVisibleCondition(), this::invisibleCondition, this::visibleCondition);
+		BindUtil.copyAuthoredCondition(button.getXmlDisabledCondition(), button.getXmlEnabledCondition(), this::disabledCondition, this::enabledCondition);
 
 		button.getParameters().forEach(p -> addParameter(new FluentParameter().from(p)));
 
@@ -154,26 +158,50 @@ public class FluentDialogButton extends FluentWidget {
 	}
 
 	/**
-	 * Sets the condition name controlling button visibility.
+	 * Sets the {@code invisible} condition as authored; the opposite sense of {@link #visibleCondition(String)}.
 	 *
-	 * @param invisibleConditionName
-	 *            the visibility condition name
+	 * @param invisibleCondition
+	 *            a condition name, an inline condition expression or a boolean literal
 	 * @return this builder
 	 */
-	public FluentDialogButton invisibleConditionName(String invisibleConditionName) {
-		button.setInvisibleConditionName(invisibleConditionName);
+	public @Nonnull FluentDialogButton invisibleCondition(@Nullable String invisibleCondition) {
+		button.setXmlInvisibleCondition(invisibleCondition);
 		return this;
 	}
 
 	/**
-	 * Sets the condition name controlling button enabled state.
+	 * Sets the {@code visible} condition as authored; the opposite sense of {@link #invisibleCondition(String)}.
 	 *
-	 * @param disabledConditionName
-	 *            the disable condition name
+	 * @param visibleCondition
+	 *            a condition name, an inline condition expression or a boolean literal
 	 * @return this builder
 	 */
-	public FluentDialogButton disabledConditionName(String disabledConditionName) {
-		button.setDisabledConditionName(disabledConditionName);
+	public @Nonnull FluentDialogButton visibleCondition(@Nullable String visibleCondition) {
+		button.setXmlVisibleCondition(visibleCondition);
+		return this;
+	}
+
+	/**
+	 * Sets the {@code disabled} condition as authored; the opposite sense of {@link #enabledCondition(String)}.
+	 *
+	 * @param disabledCondition
+	 *            a condition name, an inline condition expression or a boolean literal
+	 * @return this builder
+	 */
+	public @Nonnull FluentDialogButton disabledCondition(@Nullable String disabledCondition) {
+		button.setXmlDisabledCondition(disabledCondition);
+		return this;
+	}
+
+	/**
+	 * Sets the {@code enabled} condition as authored; the opposite sense of {@link #disabledCondition(String)}.
+	 *
+	 * @param enabledCondition
+	 *            a condition name, an inline condition expression or a boolean literal
+	 * @return this builder
+	 */
+	public @Nonnull FluentDialogButton enabledCondition(@Nullable String enabledCondition) {
+		button.setXmlEnabledCondition(enabledCondition);
 		return this;
 	}
 

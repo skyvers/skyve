@@ -40,12 +40,12 @@ class FluentViewWidgetTest {
 
 	@Test
 	void fluentTabDisabledConditionSetsValue() {
-		assertEquals("notReady", new FluentTab().disabledConditionName("notReady").get().getDisabledConditionName());
+		assertEquals("notReady", new FluentTab().disabledCondition("notReady").get().getDisabledCondition());
 	}
 
 	@Test
 	void fluentTabInvisibleConditionSetsValue() {
-		assertEquals("hidden", new FluentTab().invisibleConditionName("hidden").get().getInvisibleConditionName());
+		assertEquals("hidden", new FluentTab().invisibleCondition("hidden").get().getInvisibleCondition());
 	}
 
 	// ---- FluentLabel --------------------------------------------------------
@@ -67,7 +67,7 @@ class FluentViewWidgetTest {
 
 	@Test
 	void fluentLabelInvisibleConditionSetsValue() {
-		assertEquals("cond", new FluentLabel().invisibleConditionName("cond").get().getInvisibleConditionName());
+		assertEquals("cond", new FluentLabel().invisibleCondition("cond").get().getInvisibleCondition());
 	}
 
 	@Test
@@ -213,8 +213,8 @@ class FluentViewWidgetTest {
 	}
 
 	@Test
-	void fluentViewRefreshConditionNameSetsValue() {
-		assertEquals("needsRefresh", new FluentView().refreshConditionName("needsRefresh").get().getRefreshConditionName());
+	void fluentViewRefreshIfConditionSetsValue() {
+		assertEquals("needsRefresh", new FluentView().refreshIfCondition("needsRefresh").get().getRefreshIfCondition());
 	}
 
 	@Test
@@ -231,7 +231,7 @@ class FluentViewWidgetTest {
 
 	@Test
 	void fluentSpacerInvisibleConditionSetsValue() {
-		assertEquals("hidden", new FluentSpacer().invisibleConditionName("hidden").get().getInvisibleConditionName());
+		assertEquals("hidden", new FluentSpacer().invisibleCondition("hidden").get().getInvisibleCondition());
 	}
 
 	// ---- FluentTabPane -------------------------------------------------------

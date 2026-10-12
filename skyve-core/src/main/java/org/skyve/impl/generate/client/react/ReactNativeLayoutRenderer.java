@@ -186,7 +186,7 @@ public class ReactNativeLayoutRenderer extends LayoutRenderer {
 												Integer pixelWidth,
 												Integer responsiveWidth,
 												Integer percentageWidth,
-												String invisibleConditionName) {
+												String invisibleCondition) {
 		if (component != null) {
 			return component;
 		}

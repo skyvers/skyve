@@ -373,7 +373,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		StringBuilder expr = new StringBuilder(96);
 		TabView result = (TabView) a.createComponent(TabView.COMPONENT_TYPE);
 		// NB We can't turn prependId off as PF doesn't work.
-		setInvisible(result, tabPane.getInvisibleConditionName(), null);
+		setInvisible(result, tabPane.getInvisibleCondition(), null);
 		setId(result, tabPane.getWidgetId());
 		String id = result.getId();
 		String selectedTabIndexBinding = tabPane.getSelectedTabIndexBinding();
@@ -419,8 +419,8 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 
 		Tab result = (Tab) a.createComponent(Tab.COMPONENT_TYPE);
 		putOutputTextFacetValueOrValueExpression(result, "title", title, ViewRenderer.shouldEscape(tab.getEscapeTitle()));
-		setDisabled(result, tab.getDisabledConditionName(), null);
-		setInvisible(result, tab.getInvisibleConditionName(), null);
+		setDisabled(result, tab.getDisabledCondition(), null);
+		setInvisible(result, tab.getInvisibleCondition(), null);
 		setId(result, null);
 		return result;
 	}
@@ -497,14 +497,14 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 	@Override
 	public UIComponent border(UIComponent component,
 								String borderTitle,
-								String invisibleConditionName,
+								String invisibleCondition,
 								Integer pixelWidth,
 								Collapsible collapsible) {
 		if (component != null) {
 			return component;
 		}
 
-		return panel(borderTitle, invisibleConditionName, pixelWidth, collapsible, null);
+		return panel(borderTitle, invisibleCondition, pixelWidth, collapsible, null);
 	}
 
 	@Override
@@ -525,7 +525,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 								String iconStyleClass,
 								String toolTip,
 								ZoomIn zoomIn,
-								String formDisabledConditionName) {
+								String formDisabledCondition) {
 		if (component != null) {
 			return component;
 		}
@@ -538,8 +538,8 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		result.setTitle(sanitiseFacesText(toolTip));
 
 		setSizeAndTextAlignStyle(result, null, zoomIn.getPixelWidth(), null, null, zoomIn.getPixelHeight(), null, null);
-		setInvisible(result, zoomIn.getInvisibleConditionName(), null);
-		setDisabled(result, zoomIn.getDisabledConditionName(), formDisabledConditionName);
+		setInvisible(result, zoomIn.getInvisibleCondition(), null);
+		setDisabled(result, zoomIn.getDisabledCondition(), formDisabledCondition);
 		setId(result, null);
 
 		zoomInActionExpression(zoomIn.getBinding(), result);
@@ -569,7 +569,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 										String toolTip,
 										String confirmationText,
 										org.skyve.impl.metadata.view.widget.Button button,
-										String formDisabledConditionName,
+										String formDisabledCondition,
 										Action action) {
 		if (component != null) {
 			return component;
@@ -587,9 +587,9 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 				                button.getPixelWidth(),
 				                button.getPixelHeight(),
 				                actionConfirmation(confirmationText, action),
-				                action.getDisabledConditionName(),
-				                formDisabledConditionName,
-				                action.getInvisibleConditionName(),
+				                action.getDisabledCondition(),
+				                formDisabledCondition,
+				                action.getInvisibleCondition(),
 				                properties.get(PROCESS_KEY),
 				                properties.get(UPDATE_KEY),
 				                false);
@@ -602,7 +602,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 										String toolTip,
 										String confirmationText,
 										org.skyve.impl.metadata.view.widget.Button button,
-										String formDisabledConditionName,
+										String formDisabledCondition,
 										Action action) {
 		if (component != null) {
 			return component;
@@ -616,9 +616,9 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 								button.getPixelHeight(),
 								action.getClientValidation(),
 								actionConfirmation(confirmationText, action),
-								action.getDisabledConditionName(),
-								formDisabledConditionName,
-								action.getInvisibleConditionName());
+								action.getDisabledCondition(),
+								formDisabledCondition,
+								action.getInvisibleCondition());
 	}
 
 	@Override
@@ -630,7 +630,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 										String toolTip,
 										String confirmationText,
 										org.skyve.impl.metadata.view.widget.Button button,
-										String formDisabledConditionName,
+										String formDisabledCondition,
 										Action action) {
 		if (component != null) {
 			return component;
@@ -647,9 +647,9 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 								button.getPixelWidth(),
 								button.getPixelHeight(),
 								actionConfirmation(confirmationText, action),
-								action.getDisabledConditionName(),
-								formDisabledConditionName,
-								action.getInvisibleConditionName(),
+								action.getDisabledCondition(),
+								formDisabledCondition,
+								action.getInvisibleCondition(),
 								properties.get(PROCESS_KEY),
 								properties.get(UPDATE_KEY));
 	}
@@ -661,7 +661,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 										String toolTip,
 										String confirmationText,
 										org.skyve.impl.metadata.view.widget.Button button,
-										String formDisabledConditionName,
+										String formDisabledCondition,
 										Action action) {
 		if (component != null) {
 			return component;
@@ -676,9 +676,9 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 								button.getPixelHeight(),
 								action.getClientValidation(),
 								actionConfirmation(confirmationText, action),
-								action.getDisabledConditionName(),
-								formDisabledConditionName,
-								action.getInvisibleConditionName(),
+								action.getDisabledCondition(),
+								formDisabledCondition,
+								action.getInvisibleCondition(),
 								capture,
 								useActionUploadDialog(capture));
 	}
@@ -699,7 +699,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 							blurb.getTextAlignment(),
 							blurb.getPixelWidth(),
 							blurb.getPixelHeight(),
-							blurb.getInvisibleConditionName(),
+							blurb.getInvisibleCondition(),
 							! Boolean.FALSE.equals(blurb.getEscape()),
 							blurb.getSanitise(),
 							true);
@@ -716,14 +716,14 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 	 * @param component existing component to reuse; when non-{@code null}, returned unchanged
 	 * @param label raw button label and nullable escape flag
 	 * @param button dialog-button metadata
-	 * @param formDisabledConditionName optional form-level disabled condition
+	 * @param formDisabledCondition optional form-level disabled condition
 	 * @return existing component or configured command button; never {@code null} when newly created
 	 */
 	@Override
 	public UIComponent dialogButton(UIComponent component,
 										EscapableText label,
 										DialogButton button,
-										String formDisabledConditionName) {
+										String formDisabledCondition) {
 		if (component != null) {
 			return component;
 		}
@@ -731,8 +731,8 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		CommandButton result = (CommandButton) a.createComponent(CommandButton.COMPONENT_TYPE);
 		setCommandButtonText(result, label);
 		result.setType("button");
-		setDisabled(result, button.getDisabledConditionName(), formDisabledConditionName);
-		setInvisible(result, button.getInvisibleConditionName(), null);
+		setDisabled(result, button.getDisabledCondition(), formDisabledCondition);
+		setInvisible(result, button.getInvisibleCondition(), null);
 		setId(result, null);
 		return result;
 	}
@@ -786,7 +786,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 							label.getTextAlignment(),
 							label.getPixelWidth(),
 							label.getPixelHeight(),
-							label.getInvisibleConditionName(),
+							label.getInvisibleCondition(),
 							! Boolean.FALSE.equals(label.getEscape()),
 							label.getSanitise(),
 							false);
@@ -799,7 +799,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 										HorizontalAlignment alignment,
 										Integer pixelWidth,
 										Integer pixelHeight,
-										String invisibleConditionName,
+										String invisibleCondition,
 										boolean escape,
 										Sanitisation sanitise,
 										boolean blurb) {
@@ -827,7 +827,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 
 		// Ensure the default width is 100% for blurbs (which could have a background style) or for labels or blurbs that have a text alignment attribute
 		setSizeAndTextAlignStyle(result, null, pixelWidth, null, null, pixelHeight, null, (blurb || (alignment != null)) ? ONE_HUNDRED : null);
-		setInvisible(result, invisibleConditionName, null);
+		setInvisible(result, invisibleCondition, null);
 
 		return result;
 	}
@@ -844,24 +844,24 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		columnPriority = 1;
 		dataGridMinimumWidth = ordered ? 34 : 0;
 
-		String disabledConditionName = grid.getDisabledConditionName();
-		String disableZoomConditionName = grid.getDisableZoomConditionName();
+		String disabledCondition = grid.getDisabledCondition();
+		String disableZoomCondition = grid.getDisableZoomCondition();
 		@SuppressWarnings("java:S3358") // nest ternary if ok here
-		String[] clickToZoomDisabledConditionNames = (disableZoomConditionName == null) ?
-														((disabledConditionName == null) ?
+		String[] clickToZoomDisabledConditions = (disableZoomCondition == null) ?
+														((disabledCondition == null) ?
 															null :
-															new String[] {disabledConditionName}) :
-														((disabledConditionName == null) ?
-															new String[] {disableZoomConditionName} :
-															new String[] {disableZoomConditionName, disabledConditionName});
+															new String[] {disabledCondition}) :
+														((disabledCondition == null) ?
+															new String[] {disableZoomCondition} :
+															new String[] {disableZoomCondition, disabledCondition});
 
 		final DataTable dataTable = dataTable(grid.getBinding(),
 												dataWidgetVar,
-												grid.getInvisibleConditionName(),
+												grid.getInvisibleCondition(),
 												((! Boolean.TRUE.equals(grid.getInline())) &&
 														(! Boolean.FALSE.equals(grid.getShowZoom())) &&
 														(! Boolean.FALSE.equals(grid.getEditable()))),
-												clickToZoomDisabledConditionNames,
+												clickToZoomDisabledConditions,
 												grid.getSelectedIdBinding(),
 												grid.getSelectedActions(),
 												ordered,
@@ -901,7 +901,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 
 		DataTable result = dataTable(repeater.getBinding(),
 										dataWidgetVar,
-										repeater.getInvisibleConditionName(),
+										repeater.getInvisibleCondition(),
 										false,
 										null,
 										null,
@@ -1164,7 +1164,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 					((canCreate && (! Boolean.FALSE.equals(grid.getShowAdd()))) ? " skyve-card-toolbar" : ""));
 			List<UIComponent> children = col.getChildren();
 
-			String disabledConditionName = grid.getDisabledConditionName();
+			String disabledCondition = grid.getDisabledCondition();
 
 			// column header is a vertical flex with a little bit of space between the 2 buttons if needed
 			final HtmlPanelGroup columnHeader = (HtmlPanelGroup) a.createComponent(HtmlPanelGroup.COMPONENT_TYPE);
@@ -1173,12 +1173,12 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 			col.getFacets().put("header", columnHeader);
 
 			if (canCreate && (! Boolean.FALSE.equals(grid.getShowAdd()))) {
-				CommandButton button = createDataGridAddButton(grid, dataWidgetVar, singularDocumentAlias, inline, dataWidgetBinding, disabledConditionName);
+				CommandButton button = createDataGridAddButton(grid, dataWidgetVar, singularDocumentAlias, inline, dataWidgetBinding, disabledCondition);
 				columnHeader.getChildren().add(button);
 			}
 
 			if (! Boolean.FALSE.equals(grid.getShowZoom())) {
-				CommandButton button = createDataGridZoomButton(grid, dataWidgetVar, singularDocumentAlias, inline, dataWidgetBinding, disabledConditionName);
+				CommandButton button = createDataGridZoomButton(grid, dataWidgetVar, singularDocumentAlias, inline, dataWidgetBinding, disabledCondition);
 				children.add(button);
 			}
 
@@ -1188,7 +1188,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 					children.add(label(null, " "));
 				}
 
-				CommandButton button = createDataGridRemoveButton(grid, dataWidgetVar, singularDocumentAlias, dataWidgetBinding, disabledConditionName);
+				CommandButton button = createDataGridRemoveButton(grid, dataWidgetVar, singularDocumentAlias, dataWidgetBinding, disabledCondition);
 				children.add(button);
 			}
 
@@ -1228,7 +1228,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 														String singularDocumentAlias,
 														boolean inline,
 														String dataWidgetBinding,
-														String disabledConditionName) {
+														String disabledCondition) {
 		CommandButton result = (CommandButton) a.createComponent(CommandButton.COMPONENT_TYPE);
 		setId(result, null);
 		result.setValue(null);
@@ -1243,15 +1243,15 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		else { // else default update
 			result.setUpdate(update);
 		}
-		String disableAddConditionName = grid.getDisableAddConditionName();
+		String disableAddCondition = grid.getDisableAddCondition();
 		@SuppressWarnings("java:S3358") // nest ternary if ok here
-		String[] createDisabled = (disableAddConditionName == null) ?
-									((disabledConditionName == null) ?
+		String[] createDisabled = (disableAddCondition == null) ?
+									((disabledCondition == null) ?
 										null :
-										new String[] {disabledConditionName}) :
-									((disabledConditionName == null) ?
-										new String[] {disableAddConditionName} :
-										new String[] {disableAddConditionName, disabledConditionName});
+										new String[] {disabledCondition}) :
+									((disabledCondition == null) ?
+										new String[] {disableAddCondition} :
+										new String[] {disableAddCondition, disabledCondition});
 		ValueExpression disabled = createOredValueExpressionFromConditions(createDisabled);
 		if (disabled != null) {
 			result.setValueExpression("disabled", disabled);
@@ -1260,7 +1260,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		return result;
 	}
 
-	protected CommandButton createDataGridRemoveButton(DataGrid grid, String dataWidgetVar, String singularDocumentAlias, String dataWidgetBinding, String disabledConditionName) {
+	protected CommandButton createDataGridRemoveButton(DataGrid grid, String dataWidgetVar, String singularDocumentAlias, String dataWidgetBinding, String disabledCondition) {
 		CommandButton result = (CommandButton) a.createComponent(CommandButton.COMPONENT_TYPE);
 		setId(result, null);
 		result.setValue(null);
@@ -1273,15 +1273,15 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		result.setUpdate(update); // update all forms (by default)
 
 		action(result, ImplicitActionName.Remove, null, dataWidgetBinding, dataWidgetVar, true, grid.getRemovedActions());
-		String disableRemoveConditionName = grid.getDisableRemoveConditionName();
+		String disableRemoveCondition = grid.getDisableRemoveCondition();
 		@SuppressWarnings("java:S3358") // nest ternary if ok here
-		String[] removeDisabled = (disableRemoveConditionName == null) ?
-									((disabledConditionName == null) ?
+		String[] removeDisabled = (disableRemoveCondition == null) ?
+									((disabledCondition == null) ?
 										null :
-										new String[] {disabledConditionName}) :
-									((disabledConditionName == null) ?
-										new String[] {disableRemoveConditionName} :
-										new String[] {disableRemoveConditionName, disabledConditionName});
+										new String[] {disabledCondition}) :
+									((disabledCondition == null) ?
+										new String[] {disableRemoveCondition} :
+										new String[] {disableRemoveCondition, disabledCondition});
 		if (removeDisabled != null) {
 			result.setValueExpression("disabled",
 										createOredValueExpressionFromConditions(removeDisabled));
@@ -1289,7 +1289,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		return result;
 	}
 
-	protected CommandButton createDataGridZoomButton(DataGrid grid, String dataWidgetVar, String singularDocumentAlias, boolean inline, String dataWidgetBinding, String disabledConditionName) {
+	protected CommandButton createDataGridZoomButton(DataGrid grid, String dataWidgetVar, String singularDocumentAlias, boolean inline, String dataWidgetBinding, String disabledCondition) {
 		CommandButton result = (CommandButton) a.createComponent(CommandButton.COMPONENT_TYPE);
 		setId(result, null);
 		result.setValue(null);
@@ -1298,15 +1298,15 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		result.setProcess(process);
 		result.setUpdate(update);
 		action(result, ImplicitActionName.Navigate, null, dataWidgetBinding, dataWidgetVar, inline, null);
-		String disableZoomConditionName = grid.getDisableZoomConditionName();
+		String disableZoomCondition = grid.getDisableZoomCondition();
 		@SuppressWarnings("java:S3358") // nest ternary if ok here
-		String[] zoomDisabled = (disableZoomConditionName == null) ?
-									((disabledConditionName == null) ?
+		String[] zoomDisabled = (disableZoomCondition == null) ?
+									((disabledCondition == null) ?
 										null :
-										new String[] {disabledConditionName}) :
-									((disabledConditionName == null) ?
-										new String[] {disableZoomConditionName} :
-										new String[] {disableZoomConditionName, disabledConditionName});
+										new String[] {disabledCondition}) :
+									((disabledCondition == null) ?
+										new String[] {disableZoomCondition} :
+										new String[] {disableZoomCondition, disabledCondition});
 		if (zoomDisabled != null) {
 			result.setValueExpression("disabled",
 										createOredValueExpressionFromConditions(zoomDisabled));
@@ -1396,7 +1396,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 	public EventSourceComponent geometry(EventSourceComponent component,
 											String dataWidgetVar,
 											Geometry geometry,
-											String formDisabledConditionName,
+											String formDisabledCondition,
 											String title,
 											@Nullable String requiredMessage,
 											HorizontalAlignment textAlignment) {
@@ -1426,8 +1426,8 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 											requiredMessage,
 											textAlignment,
 											false,
-											geometry.getDisabledConditionName(),
-											formDisabledConditionName,
+											geometry.getDisabledCondition(),
+											formDisabledCondition,
 											null,
 											null,
 											null,
@@ -1439,8 +1439,8 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 							id,
 							binding,
 							geometry.getType(),
-							geometry.getDisabledConditionName(),
-							formDisabledConditionName);
+							geometry.getDisabledCondition(),
+							formDisabledCondition);
 		return new EventSourceComponent(result, textField);
 	}
 
@@ -1462,8 +1462,8 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 									String id,
 									String binding,
 									GeometryInputType type,
-									String disabledConditionName,
-									String formDisabledConditionName) {
+									String disabledCondition,
+									String formDisabledCondition) {
 		CommandButton mapButton = (CommandButton) a.createComponent(CommandButton.COMPONENT_TYPE);
 		setId(mapButton, null);
 		String mapButtonId = mapButton.getId();
@@ -1471,7 +1471,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		mapButton.setTitle("Map");
 		mapButton.setValue(null);
 		mapButton.setType("button"); // no process or update required
-		setDisabled(mapButton, disabledConditionName, formDisabledConditionName);
+		setDisabled(mapButton, disabledCondition, formDisabledCondition);
 		// for admin theme
 		setSizeAndTextAlignStyle(mapButton, null, Integer.valueOf(30), null, null, Integer.valueOf(30), null, null);
 		toAddTo.add(mapButton);
@@ -1514,8 +1514,8 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		panel.setValueExpression("onShow", generateMapScriptExpression(mapDiv.getClientId(),
 																			binding,
 																			type,
-																			disabledConditionName,
-																			formDisabledConditionName,
+																			disabledCondition,
+																			formDisabledCondition,
 																			false,
 																			panel instanceof Dialog));
 
@@ -1535,7 +1535,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 	@Override
 	public EventSourceComponent geometryMap(EventSourceComponent component,
 												GeometryMap geometry,
-												String formDisabledConditionName,
+												String formDisabledCondition,
 												String title,
 												@Nullable String requiredMessage) {
 		if (component != null) {
@@ -1557,8 +1557,8 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		script.setValueExpression("value", generateMapScriptExpression(mapDiv.getClientId(),
 																		geometry.getBinding(),
 																		geometry.getType(),
-																		geometry.getDisabledConditionName(),
-																		formDisabledConditionName,
+																		geometry.getDisabledCondition(),
+																		formDisabledCondition,
 																		true));
 		result.getChildren().add(script);
 
@@ -1568,14 +1568,14 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 	private ValueExpression generateMapScriptExpression(String mapDivClientId,
 															String geometryBinding,
 															GeometryInputType type,
-															String disabledConditionName,
-															String formDisabledConditionName,
+															String disabledCondition,
+															String formDisabledCondition,
 															boolean includeScriptTag) {
 		return generateMapScriptExpression(mapDivClientId,
 											geometryBinding,
 											type,
-											disabledConditionName,
-											formDisabledConditionName,
+											disabledCondition,
+											formDisabledCondition,
 											includeScriptTag,
 											false);
 	}
@@ -1583,8 +1583,8 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 	private ValueExpression generateMapScriptExpression(String mapDivClientId,
 															String geometryBinding,
 															GeometryInputType type,
-															String disabledConditionName,
-															String formDisabledConditionName,
+															String disabledCondition,
+															String formDisabledCondition,
 															boolean includeScriptTag,
 															boolean lockScroll) {
 		StringBuilder value = new StringBuilder(128);
@@ -1600,20 +1600,20 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		else {
 			value.append("'").append(type).append("', ");
 		}
-		if (formDisabledConditionName == null) {
-			if (disabledConditionName != null) {
-				value.append(createOredValueExpressionFragmentFromConditions(new String[] {disabledConditionName}));
+		if (formDisabledCondition == null) {
+			if (disabledCondition != null) {
+				value.append(createOredValueExpressionFragmentFromConditions(new String[] {disabledCondition}));
 			}
 			else {
 				value.append("false");
 			}
 		}
 		else {
-			if (disabledConditionName == null) {
-				value.append(createOredValueExpressionFragmentFromConditions(new String[] {formDisabledConditionName}));
+			if (disabledCondition == null) {
+				value.append(createOredValueExpressionFragmentFromConditions(new String[] {formDisabledCondition}));
 			}
 			else {
-				value.append(createOredValueExpressionFragmentFromConditions(new String[] {disabledConditionName, formDisabledConditionName}));
+				value.append(createOredValueExpressionFragmentFromConditions(new String[] {disabledCondition, formDisabledCondition}));
 			}
 		}
 		value.append(", ").append(includeScriptTag).append(")}");
@@ -1745,16 +1745,16 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		String drivingDocumentName = drivingDocument.getName();
 
 		boolean createRendered = (! aggregateQuery) && (! Boolean.FALSE.equals(grid.getShowAdd()));
-		String disableAddConditionName = grid.getDisableAddConditionName();
-		String disabledConditionName = grid.getDisabledConditionName();
+		String disableAddCondition = grid.getDisableAddCondition();
+		String disabledCondition = grid.getDisabledCondition();
 		@SuppressWarnings("java:S3358") // nest ternary if ok here
-		String[] createDisabled = (disableAddConditionName == null) ?
-									((disabledConditionName == null) ?
+		String[] createDisabled = (disableAddCondition == null) ?
+									((disabledCondition == null) ?
 											null :
-											new String[] {disabledConditionName}) :
-									((disabledConditionName == null) ?
-											new String[] {disableAddConditionName} :
-											new String[] {disableAddConditionName, disabledConditionName});
+											new String[] {disabledCondition}) :
+									((disabledCondition == null) ?
+											new String[] {disableAddCondition} :
+											new String[] {disableAddCondition, disabledCondition});
 		boolean zoomRendered = (! aggregateQuery) && (! Boolean.FALSE.equals(grid.getShowZoom()));
 
 		DataTable result = (DataTable) a.createComponent(DataTable.COMPONENT_TYPE);
@@ -1779,13 +1779,13 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
     		addDataTableSelection(result, grid.getSelectedIdBinding(), grid.getSelectedActions(), modelName, true);
     	}
     	else if (zoomRendered) {
-    		if (grid.getDisableZoomConditionName() == null) {
+    		if (grid.getDisableZoomCondition() == null) {
 	    		result.setSelectionMode("single");
     		}
     		else {
 	    		result.setValueExpression("selectionMode",
 	    									ef.createValueExpression(elc, String.format("#{(%s) ? '' : 'single'}",
-	    																					createOredValueExpressionFragmentFromConditions(new String[] {grid.getDisableZoomConditionName()})),
+	    																					createOredValueExpressionFragmentFromConditions(new String[] {grid.getDisableZoomCondition()})),
 	    																					String.class));
     		}
 
@@ -1919,7 +1919,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 									        								createDisabled,
 									        								(createUrlParams == null) ? null : createUrlParams.toString(),
 									        								zoomRendered,
-									        								grid.getDisableZoomConditionName(),
+									        								grid.getDisableZoomCondition(),
 									        								showFilter,
 																			result.getId(),
 																			grid.getProperties());
@@ -2199,10 +2199,10 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 													   String documentName,
 													   boolean canCreateDocument,
 													   boolean createRendered,
-													   String[] createDisabledConditionNames,
+													   String[] createDisabledConditions,
 													   String createUrlParams,
 													   boolean zoomRendered,
-													   String zoomDisabledConditionName,
+													   String zoomDisabledCondition,
 													   boolean showFilter,
 													   String parentId,
 													   Map<String, String> properties) {
@@ -2230,7 +2230,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 			button.setTitle("New record");
 			button.setIcon(Icons.FONT_NEW);
 			button.setType("button"); // no process or update required
-			ValueExpression disabled = createOredValueExpressionFromConditions(createDisabledConditionNames);
+			ValueExpression disabled = createOredValueExpressionFromConditions(createDisabledConditions);
 			if (disabled != null) {
 				button.setValueExpression("disabled", disabled);
 			}
@@ -2258,14 +2258,14 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		}
 
 		if (zoomRendered) {
-			final UIComponent button = createListGridZoomButton(zoomDisabledConditionName, properties);
+			final UIComponent button = createListGridZoomButton(zoomDisabledCondition, properties);
 			column.getChildren().add(button);
 		}
 
 		return column;
 	}
 
-	protected UIComponent createListGridZoomButton(String zoomDisabledConditionName,
+	protected UIComponent createListGridZoomButton(String zoomDisabledCondition,
 													@SuppressWarnings({"unused", "java:S1172"}) Map<String, String> properties) {
 		final CommandButton button = (CommandButton) a.createComponent(CommandButton.COMPONENT_TYPE);
 		setId(button, null);
@@ -2273,9 +2273,9 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		button.setTitle("View Detail");
 		button.setIcon(Icons.FONT_ZOOM_IN);
 		button.setType("button"); // no process or update required
-		if (zoomDisabledConditionName != null) {
+		if (zoomDisabledCondition != null) {
 			button.setValueExpression("disabled",
-					createValueExpressionFromCondition(zoomDisabledConditionName, null));
+					createValueExpressionFromCondition(zoomDisabledCondition, null));
 		}
 		StringBuilder value = new StringBuilder(128);
 		value.append("SKYVE.PF.pushHistory(\\'./?a=").append(WebAction.e.toString());
@@ -2301,9 +2301,9 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		List<UIComponent> items = result.getChildren();
 
 		ValueExpression disableZoom = null;
-		String disableZoomConditionName = grid.getDisableZoomConditionName();
-		if (disableZoomConditionName != null) {
-			disableZoom = createValueExpressionFromCondition(disableZoomConditionName, null);
+		String disableZoomCondition = grid.getDisableZoomCondition();
+		if (disableZoomCondition != null) {
+			disableZoom = createValueExpressionFromCondition(disableZoomCondition, null);
 		}
 
 		// Add Zoom In menu item
@@ -2513,7 +2513,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 	public EventSourceComponent checkBox(EventSourceComponent component,
 											String dataWidgetVar,
 											CheckBox checkBox,
-											String formDisabledConditionName,
+											String formDisabledCondition,
 											String title,
 											@Nullable String requiredMessage) {
 		if (component != null) {
@@ -2524,8 +2524,8 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 									checkBox.getBinding(),
 									title,
 									requiredMessage,
-									checkBox.getDisabledConditionName(),
-									formDisabledConditionName,
+									checkBox.getDisabledCondition(),
+									formDisabledCondition,
 									! Boolean.FALSE.equals(checkBox.getTriState()));
 		return new EventSourceComponent(result, result);
 	}
@@ -2534,7 +2534,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 	public EventSourceComponent colourPicker(EventSourceComponent component,
 												String dataWidgetVar,
 												ColourPicker colour,
-												String formDisabledConditionName,
+												String formDisabledCondition,
 												String title,
 												@Nullable String requiredMessage,
 												HorizontalAlignment textAlignment) {
@@ -2547,8 +2547,8 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 											title,
 											requiredMessage,
 											textAlignment,
-											colour.getDisabledConditionName(),
-											formDisabledConditionName,
+											colour.getDisabledCondition(),
+											formDisabledCondition,
 											colour.getPixelWidth());
 		return new EventSourceComponent(result, result);
 	}
@@ -2557,7 +2557,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 	public EventSourceComponent combo(EventSourceComponent component,
 										String dataWidgetVar,
 										Combo combo,
-										String formDisabledConditionName,
+										String formDisabledCondition,
 										String title,
 										@Nullable String requiredMessage) {
 		if (component != null) {
@@ -2569,8 +2569,8 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 													binding,
 									                title,
 									                requiredMessage,
-									                combo.getDisabledConditionName(),
-									                formDisabledConditionName,
+									                combo.getDisabledCondition(),
+									                formDisabledCondition,
 									                null);
 		UISelectItems i = selectItems(null, null, dataWidgetVar, binding, true);
 		result.getChildren().add(i);
@@ -2589,7 +2589,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 	 * @param component existing component to preserve, or {@code null}
 	 * @param dataWidgetVar data widget variable, or {@code null}
 	 * @param content content widget metadata; must not be {@code null}
-	 * @param formDisabledConditionName form disabled condition, or {@code null}
+	 * @param formDisabledCondition form disabled condition, or {@code null}
 	 * @param title field title, or {@code null}
 	 * @param requiredMessage optional required-field message, or {@code null}
 	 * @param textAlignment text alignment, or {@code null}
@@ -2604,7 +2604,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 	public @Nonnull UIComponent content(@Nullable UIComponent component,
 											@Nullable String dataWidgetVar,
 											@Nonnull ContentUpload content,
-											@Nullable String formDisabledConditionName,
+											@Nullable String formDisabledCondition,
 											@Nullable String title,
 											@Nullable String requiredMessage,
 											@Nullable HorizontalAlignment textAlignment,
@@ -2630,7 +2630,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		ContentDisplay display = content.getResolvedDisplay();
 		boolean auto = ContentDisplay.auto.equals(display);
 		boolean showMarkup = isContentMarkupAllowed(content, display);
-		String disabledConditionName = content.getDisabledConditionName();
+		String disabledCondition = content.getDisabledCondition();
 		List<UIComponent> mediaChildren = toAddTo;
 		if (auto) {
 			HtmlPanelGroup mediaGroup = (HtmlPanelGroup) a.createComponent(HtmlPanelGroup.COMPONENT_TYPE);
@@ -2650,8 +2650,8 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 																									auto ? companionFieldName(binding) : null,
 																									dataWidgetVar,
 																									fullUploadDialog),
-																		disabledConditionName,
-																		formDisabledConditionName)
+																		disabledCondition,
+																		formDisabledCondition)
 										: null;
 
 		if (ContentDisplay.link.equals(display) || auto) {
@@ -2704,8 +2704,8 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 								binding,
 								sanitisedBinding,
 								requiredMessage,
-								disabledConditionName,
-								formDisabledConditionName,
+								disabledCondition,
+								formDisabledCondition,
 								imageUpload,
 								showMarkup,
 								auto,
@@ -2870,7 +2870,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 	public UIComponent addContentSignature(UIComponent component,
 											UIComponent layout,
 											ContentSignature signature,
-											String formDisabledConditionName,
+											String formDisabledCondition,
 											String title,
 											@Nullable String requiredMessage) {
 		if (component != null) {
@@ -2911,17 +2911,17 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		signatureComponent.setValueExpression("rendered", ef.createValueExpression(elc, sb.toString(), Boolean.class));
 
 		// Set signature readonly
-		String disabledConditionName = signature.getDisabledConditionName();
-		if (disabledConditionName != null) {
-			if (formDisabledConditionName == null) {
-				signatureComponent.setValueExpression("readonly", createValueExpressionFromCondition(disabledConditionName, null));
+		String disabledCondition = signature.getDisabledCondition();
+		if (disabledCondition != null) {
+			if (formDisabledCondition == null) {
+				signatureComponent.setValueExpression("readonly", createValueExpressionFromCondition(disabledCondition, null));
 			}
 			else {
-				signatureComponent.setValueExpression("readonly", createOredValueExpressionFromConditions(new String[] {disabledConditionName, formDisabledConditionName}));
+				signatureComponent.setValueExpression("readonly", createOredValueExpressionFromConditions(new String[] {disabledCondition, formDisabledCondition}));
 			}
 		}
-		else if (formDisabledConditionName != null) {
-			signatureComponent.setValueExpression("readonly", createValueExpressionFromCondition(formDisabledConditionName, null));
+		else if (formDisabledCondition != null) {
+			signatureComponent.setValueExpression("readonly", createValueExpressionFromCondition(formDisabledCondition, null));
 		}
 
 		toAddTo.add(signatureComponent);
@@ -2950,7 +2950,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		button.setIcon(Icons.FONT_UPLOAD);
 		button.setTitle("Submit Signature");
 		button.setStyle("width:75px");
-		setDisabled(button, disabledConditionName, formDisabledConditionName);
+		setDisabled(button, disabledCondition, formDisabledCondition);
 		button.setProcess("@this"); // process the button
 		button.setUpdate(id); // update the signature widget
 		// action
@@ -2992,7 +2992,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		button.setTitle("Clear Signature");
 		button.setStyle("width:75px");
 		button.setType("button"); // no process or update required
-		setDisabled(button, disabledConditionName, formDisabledConditionName);
+		setDisabled(button, disabledCondition, formDisabledCondition);
 		// onclick
 		sb.setLength(0);
 		sb.append("SKYVE.PF.getById('").append(clientId).append("_signature').signature('clear')");
@@ -3011,7 +3011,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		button.setIcon(Icons.FONT_CLEAR);
 		button.setTitle("Clear Signature");
 		button.setStyle("width:75px");
-		setDisabled(button, disabledConditionName, formDisabledConditionName);
+		setDisabled(button, disabledCondition, formDisabledCondition);
 		button.setProcess("@this"); // process the button
 		button.setUpdate(id); // update the signature widget
 		// action
@@ -3052,8 +3052,8 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 									@Nonnull String binding,
 									String sanitisedBinding,
 									@Nullable String requiredMessage,
-									String disabledConditionName,
-									String formDisabledConditionName,
+									String disabledCondition,
+									String formDisabledCondition,
 									boolean image,
 									boolean showMarkup,
 									boolean auto,
@@ -3093,15 +3093,15 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		actionButton.setButtonStyle("width:30px;height:30px;text-align:center");
 		actionButton.setButtonStyleClass("skyveContentActionButton");
 		actionButton.setMenuStyleClass("skyveContentActionMenu");
-		setDisabled(actionButton, disabledConditionName, formDisabledConditionName);
+		setDisabled(actionButton, disabledCondition, formDisabledCondition);
 		actionGroupChildren.add(actionButton);
 		List<UIComponent> actionItems = actionButton.getChildren();
 
 		UIMenuItem uploadItem = createContentMenuItem("Upload " + contentActionNoun,
 														Icons.FONT_UPLOAD,
 														null,
-														disabledConditionName,
-														formDisabledConditionName);
+														disabledCondition,
+														formDisabledCondition);
 		actionItems.add(uploadItem);
 
 		String overlayVar = id + "_" + sanitisedBinding + "Overlay";
@@ -3162,8 +3162,8 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		UIMenuItem clearItem = createContentMenuItem("Clear " + contentActionNoun,
 														Icons.FONT_CLEAR,
 														null,
-														disabledConditionName,
-														formDisabledConditionName);
+														disabledCondition,
+														formDisabledCondition);
 		if (auto) {
 			clearItem.setOnclick(String.format("SKYVE.PF.clearContent('%s','%s','%s');return false",
 												sanitisedBinding,
@@ -3183,8 +3183,8 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 				UIMenuItem markupItem = createContentMenuItem("Mark Up Image",
 																Icons.FONT_EDIT,
 																null,
-																disabledConditionName,
-																formDisabledConditionName);
+																disabledCondition,
+																formDisabledCondition);
 				StringBuilder markupStyleClass = new StringBuilder(64);
 				markupStyleClass.append("skyveContentMarkupAction skyveContentMarkupAction-").append(id).append('_').append(sanitisedBinding);
 				if (! isContentMarkupInitiallyVisible(display, dataWidgetVar, binding)) {
@@ -3231,8 +3231,8 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 	private UIMenuItem createContentMenuItem(String value,
 												String icon,
 												@Nullable String onclick,
-												String disabledConditionName,
-												String formDisabledConditionName) {
+												String disabledCondition,
+												String formDisabledCondition) {
 		UIMenuItem result = (UIMenuItem) a.createComponent(UIMenuItem.COMPONENT_TYPE);
 		setId(result, null);
 		result.setValue(value);
@@ -3242,7 +3242,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		if (onclick != null) {
 			result.setOnclick(onclick);
 		}
-		setDisabled(result, disabledConditionName, formDisabledConditionName);
+		setDisabled(result, disabledCondition, formDisabledCondition);
 		return result;
 	}
 
@@ -3419,7 +3419,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 	public UIComponent html(UIComponent component,
 								String dataWidgetVar,
 								HTML html,
-								String formDisabledConditionName,
+								String formDisabledCondition,
 								String title,
 								@Nullable String requiredMessage) {
 		if (component != null) {
@@ -3430,8 +3430,8 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 						html.getBinding(),
 						title,
 						requiredMessage,
-						html.getDisabledConditionName(),
-						formDisabledConditionName,
+						html.getDisabledCondition(),
+						formDisabledCondition,
 						html.getSanitise());
 	}
 
@@ -3439,7 +3439,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 	public EventSourceComponent lookupDescription(EventSourceComponent component,
 													String dataWidgetVar,
 													LookupDescription lookup,
-													String formDisabledConditionName,
+													String formDisabledCondition,
 													String title,
 													@Nullable String requiredMessage,
 													HorizontalAlignment textAlignment,
@@ -3455,8 +3455,8 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 													title,
 													requiredMessage,
 													textAlignment,
-													lookup.getDisabledConditionName(),
-													formDisabledConditionName,
+													lookup.getDisabledCondition(),
+													formDisabledCondition,
 													displayBinding,
 													query,
 													lookup.getFilterParameters(),
@@ -3473,7 +3473,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 	public EventSourceComponent password(EventSourceComponent component,
 											String dataWidgetVar,
 											org.skyve.impl.metadata.view.widget.bound.input.Password password,
-											String formDisabledConditionName,
+											String formDisabledCondition,
 											String title,
 											@Nullable String requiredMessage,
 											HorizontalAlignment textAlignment) {
@@ -3486,8 +3486,8 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 					                title,
 					                requiredMessage,
 					                textAlignment,
-					                password.getDisabledConditionName(),
-					                formDisabledConditionName,
+					                password.getDisabledCondition(),
+					                formDisabledCondition,
 					                password.getPixelWidth());
 		result.setRedisplay(true);
 		return new EventSourceComponent(result, result);
@@ -3497,7 +3497,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 	public EventSourceComponent radio(EventSourceComponent component,
 										String dataWidgetVar,
 										Radio radio,
-										String formDisabledConditionName,
+										String formDisabledCondition,
 										String title,
 										@Nullable String requiredMessage) {
 		if (component != null) {
@@ -3509,8 +3509,8 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 												binding,
 				                                title,
 				                                requiredMessage,
-				                                radio.getDisabledConditionName(),
-				                                formDisabledConditionName,
+				                                radio.getDisabledCondition(),
+				                                formDisabledCondition,
 				                                Boolean.FALSE.equals(radio.getVertical()));
         result.getAttributes().put("binding", radio.getBinding());
         UISelectItems i = selectItems(null, null, dataWidgetVar, binding, false);
@@ -3522,7 +3522,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 	public EventSourceComponent richText(EventSourceComponent component,
 											String dataWidgetVar,
 											RichText text,
-											String formDisabledConditionName,
+											String formDisabledCondition,
 											String title,
 											@Nullable String requiredMessage) {
 		if (component != null) {
@@ -3533,8 +3533,8 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 									text.getBinding(),
 									title,
 									requiredMessage,
-									text.getDisabledConditionName(),
-									formDisabledConditionName,
+									text.getDisabledCondition(),
+									formDisabledCondition,
 									text.getSanitise());
 		return new EventSourceComponent(result, result);
 	}
@@ -3543,7 +3543,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 	public EventSourceComponent spinner(EventSourceComponent component,
 											String dataWidgetVar,
 											org.skyve.impl.metadata.view.widget.bound.input.Spinner spinner,
-											String formDisabledConditionName,
+											String formDisabledCondition,
 											String title,
 											@Nullable String requiredMessage,
 											HorizontalAlignment textAlignment,
@@ -3561,8 +3561,8 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 									spinner.getMin(),
 									spinner.getMax(),
 									spinner.getStep(),
-									spinner.getDisabledConditionName(),
-									formDisabledConditionName,
+									spinner.getDisabledCondition(),
+									formDisabledCondition,
 									facesConverter,
 									spinner.getPixelWidth());
 		return new EventSourceComponent(result, result);
@@ -3572,7 +3572,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 	public EventSourceComponent slider(EventSourceComponent component,
 											String dataWidgetVar,
 											org.skyve.impl.metadata.view.widget.bound.input.Slider slider,
-											String formDisabledConditionName,
+											String formDisabledCondition,
 											String title,
 											@Nullable String requiredMessage,
 											Converter<?> facesConverter) {
@@ -3607,8 +3607,8 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 										slider.getBinding(),
 										title,
 										requiredMessage,
-										slider.getDisabledConditionName(),
-										formDisabledConditionName);
+										slider.getDisabledCondition(),
+										formDisabledCondition);
 		sliderComponent.setFor(hidden.getId());
 		sliderComponent.setDisplay(display.getId());
 		sliderComponent.setDisplayTemplate("{value}");
@@ -3669,7 +3669,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 	public EventSourceComponent textArea(EventSourceComponent component,
 											String dataWidgetVar,
 											TextArea text,
-											String formDisabledConditionName,
+											String formDisabledCondition,
 											String title,
 											@Nullable String requiredMessage,
 											HorizontalAlignment textAlignment,
@@ -3684,8 +3684,8 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 											requiredMessage,
 											textAlignment,
 											Boolean.FALSE.equals(text.getEditable()),
-											text.getDisabledConditionName(),
-											formDisabledConditionName,
+											text.getDisabledCondition(),
+											formDisabledCondition,
 											length,
 											text.getPixelWidth(),
 											text.getPixelHeight());
@@ -3701,7 +3701,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 	public EventSourceComponent text(EventSourceComponent component,
 										String dataWidgetVar,
 										TextField text,
-										String formDisabledConditionName,
+										String formDisabledCondition,
 										String title,
 										@Nullable String requiredMessage,
 										HorizontalAlignment textAlignment,
@@ -3738,8 +3738,8 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		                            textAlignment,
 		                            text.getPixelWidth(),
 		                            false,
-		                            text.getDisabledConditionName(),
-		                            formDisabledConditionName,
+		                            text.getDisabledCondition(),
+		                            formDisabledCondition,
 		                            facesConverter);
         }
         else if ((mutableFormat != null) && (mutableFormat.getMask() != null)) {
@@ -3749,8 +3749,8 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 								requiredMessage,
 								textAlignment,
 								Boolean.FALSE.equals(text.getEditable()),
-								text.getDisabledConditionName(),
-								formDisabledConditionName,
+								text.getDisabledCondition(),
+								formDisabledCondition,
 								length,
 								mutableFormat,
 								facesConverter,
@@ -3763,9 +3763,9 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 	        					title,
 	        					requiredMessage,
 	        					textAlignment,
-	        					text.getDisabledConditionName(),
+	        					text.getDisabledCondition(),
 	        					length,
-	        					formDisabledConditionName,
+	        					formDisabledCondition,
 	        					complete,
 	        					text.getKeyboardType(),
 	        					text.getPixelWidth());
@@ -3777,8 +3777,8 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 								requiredMessage,
 								textAlignment,
 								Boolean.FALSE.equals(text.getEditable()),
-								text.getDisabledConditionName(),
-								formDisabledConditionName,
+								text.getDisabledCondition(),
+								formDisabledCondition,
 								length,
 								(mutableFormat == null) ? null : mutableFormat.getTextCase(),
 								facesConverter,
@@ -3814,9 +3814,9 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 									dataWidgetVar,
 									link.getPixelWidth(),
 									actionConfirmation(confirmationText, action),
-									action.getDisabledConditionName(),
+									action.getDisabledCondition(),
 									null,
-									action.getInvisibleConditionName(),
+									action.getInvisibleCondition(),
 									properties.get(PROCESS_KEY),
 									properties.get(UPDATE_KEY));
 		}
@@ -3832,9 +3832,9 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 							null,
 							action.getClientValidation(),
 							actionConfirmation(confirmationText, action),
-							action.getDisabledConditionName(),
+							action.getDisabledCondition(),
 							null,
-							action.getInvisibleConditionName(),
+							action.getInvisibleCondition(),
 							properties.get(PROCESS_KEY),
 							properties.get(UPDATE_KEY));
 	}
@@ -3858,9 +3858,9 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 								null,
 								action.getClientValidation(),
 								actionConfirmation(confirmationText, action),
-								action.getDisabledConditionName(),
+								action.getDisabledCondition(),
 								null,
-								action.getInvisibleConditionName());
+								action.getInvisibleCondition());
 	}
 
 	@Override
@@ -3887,9 +3887,9 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 								null,
 								null,
 								actionConfirmation(confirmationText, action),
-								action.getDisabledConditionName(),
+								action.getDisabledCondition(),
 								null,
-								action.getInvisibleConditionName(),
+								action.getInvisibleCondition(),
 								properties.get(PROCESS_KEY),
 								properties.get(UPDATE_KEY));
 	}
@@ -3914,9 +3914,9 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 								null,
 								action.getClientValidation(),
 								actionConfirmation(confirmationText, action),
-								action.getDisabledConditionName(),
+								action.getDisabledCondition(),
 								null,
-								action.getInvisibleConditionName(),
+								action.getInvisibleCondition(),
 								capture,
 								useActionUploadDialog(capture));
 	}
@@ -3945,9 +3945,9 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 								null,
 								null,
 								actionConfirmation(confirmationText, action),
-								action.getDisabledConditionName(),
+								action.getDisabledCondition(),
 								null,
-								action.getInvisibleConditionName(),
+								action.getInvisibleCondition(),
 								properties.get(PROCESS_KEY),
 								properties.get(UPDATE_KEY),
 								canDelete);
@@ -3979,9 +3979,9 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 								null,
 								null,
 								actionConfirmation(confirmationText, action),
-								action.getDisabledConditionName(),
+								action.getDisabledCondition(),
 								null,
-								action.getInvisibleConditionName(),
+								action.getInvisibleCondition(),
 								properties.get(PROCESS_KEY),
 								properties.get(UPDATE_KEY),
 								false);
@@ -5040,7 +5040,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		result.setTitle(sanitiseFacesText(tooltip));
 
 		setSizeAndTextAlignStyle(result, null, pixelWidth, null, null, null, null, null);
-		setDisabled(result, disabled, formDisabled);
+		setDisabled(result, dataWidgetVar, disabled, formDisabled);
 		setInvisible(result, dataWidgetVar, invisible, null);
 		setConfirmation(result, confirmationText);
 		setId(result, null);
@@ -5107,7 +5107,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		action(result, implicitActionName, actionName, dataWidgetBinding, dataWidgetVar, inline, null);
 
 		setSizeAndTextAlignStyle(result, null, pixelWidth, null, null, pixelHeight, null, null);
-		setDisabled(result, disabled, formDisabled);
+		setDisabled(result, dataWidgetVar, disabled, formDisabled);
 		setInvisible(result, dataWidgetVar, invisible, null);
 		setConfirmation(result, confirmationText);
 		setId(result, null);
@@ -5222,7 +5222,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 
 		Spacer result = (Spacer) a.createComponent(Spacer.COMPONENT_TYPE);
 		setSizeAndTextAlignStyle(result, null, spacer.getPixelWidth(), null, null, spacer.getPixelHeight(), null, null);
-		setInvisible(result, spacer.getInvisibleConditionName(), null);
+		setInvisible(result, spacer.getInvisibleCondition(), null);
 		setId(result, null);
 
 		return result;
@@ -5244,7 +5244,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 									image.getPixelHeight(),
 									image.getPercentageHeight(),
 									null);
-		setInvisible(result, image.getInvisibleConditionName(), null);
+		setInvisible(result, image.getInvisibleCondition(), null);
 		setId(result, null);
 		return result;
 	}
@@ -5285,7 +5285,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 									pixelHeight,
 									image.getPercentageHeight(),
 									null);
-		setInvisible(result, image.getInvisibleConditionName(), null);
+		setInvisible(result, image.getInvisibleCondition(), null);
 		setId(result, null);
 		return result;
 	}
@@ -5371,9 +5371,9 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 	}
 
 	private @Nonnull String createDisabledAwareOnclick(@Nonnull String onclick,
-														@Nullable String disabledConditionName,
-														@Nullable String formDisabledConditionName) {
-		String disabledExpression = createDisabledExpression(disabledConditionName, formDisabledConditionName);
+														@Nullable String disabledCondition,
+														@Nullable String formDisabledCondition) {
+		String disabledExpression = createDisabledExpression(disabledCondition, formDisabledCondition);
 		if (disabledExpression == null) {
 			return onclick;
 		}
@@ -5388,14 +5388,14 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		return String.format("#{(%s) ? 'return false' : %s}", disabledExpression, onclickBody);
 	}
 
-	private @Nullable String createDisabledExpression(@Nullable String disabledConditionName, @Nullable String formDisabledConditionName) {
-		if (disabledConditionName == null) {
-			return (formDisabledConditionName == null) ? null : createOredValueExpressionFragmentFromConditions(new String[] {formDisabledConditionName});
+	private @Nullable String createDisabledExpression(@Nullable String disabledCondition, @Nullable String formDisabledCondition) {
+		if (disabledCondition == null) {
+			return (formDisabledCondition == null) ? null : createOredValueExpressionFragmentFromConditions(new String[] {formDisabledCondition});
 		}
-		if (formDisabledConditionName == null) {
-			return createOredValueExpressionFragmentFromConditions(new String[] {disabledConditionName});
+		if (formDisabledCondition == null) {
+			return createOredValueExpressionFragmentFromConditions(new String[] {disabledCondition});
 		}
-		return createOredValueExpressionFragmentFromConditions(new String[] {disabledConditionName, formDisabledConditionName});
+		return createOredValueExpressionFragmentFromConditions(new String[] {disabledCondition, formDisabledCondition});
 	}
 
 	// TODO do the grids
@@ -5754,7 +5754,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 									String dataWidgetVar,
 									String invisible,
 									boolean clickToZoom,
-									String[] clickToZoomDisabledConditionNames,
+									String[] clickToZoomDisabledConditions,
 									String selectedIdBinding,
 									List<EventAction> selectedActions,
 									boolean ordered,
@@ -5790,7 +5790,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 			ajax.addAjaxBehaviorListener(new AjaxBehaviorListenerImpl(me, me));
 			ajax.setProcess(process);
 
-			ValueExpression disabled = createOredValueExpressionFromConditions(clickToZoomDisabledConditionNames);
+			ValueExpression disabled = createOredValueExpressionFromConditions(clickToZoomDisabledConditions);
 			if (disabled != null) {
 				ajax.setValueExpression("disabled", disabled);
 			}

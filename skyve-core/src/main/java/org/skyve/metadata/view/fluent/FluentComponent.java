@@ -1,6 +1,11 @@
 package org.skyve.metadata.view.fluent;
 
+import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.metadata.view.component.Component;
+import org.skyve.impl.metadata.view.component.ComponentTranslation;
+
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 
 /**
  * Builds {@link Component} metadata instances using fluent mutation methods.
@@ -39,7 +44,14 @@ public class FluentComponent extends FluentBoundWidget<FluentComponent> {
 		name(component.getName());
 		widgetId(component.getWidgetId());
 
-		invisibleConditionName(component.getInvisibleConditionName());
+		BindUtil.copyAuthoredCondition(component.getXmlInvisibleCondition(), component.getXmlVisibleCondition(), this::invisibleCondition, this::visibleCondition);
+
+		for (ComponentTranslation action : component.getActions()) {
+			addAction(action.getFromComponent(), action.getMappedTo());
+		}
+		for (ComponentTranslation condition : component.getConditions()) {
+			addCondition(condition.getFromComponent(), condition.getMappedTo());
+		}
 
 		super.from(component);
 		return this;
@@ -94,15 +106,83 @@ public class FluentComponent extends FluentBoundWidget<FluentComponent> {
 	}
 
 	/**
-	 * Sets the condition name controlling component visibility.
+	 * Sets the {@code invisible} condition as authored; the opposite sense of {@link #visibleCondition(String)}.
 	 *
-	 * @param invisibleConditionName
-	 *            the condition name that hides the component when satisfied
+	 * @param invisibleCondition
+	 *            a condition name, an inline condition expression or a boolean literal
 	 * @return this builder
 	 */
-	public FluentComponent invisibleConditionName(String invisibleConditionName) {
-		component.setInvisibleConditionName(invisibleConditionName);
+	public @Nonnull FluentComponent invisibleCondition(@Nullable String invisibleCondition) {
+		component.setXmlInvisibleCondition(invisibleCondition);
 		return this;
+	}
+
+	/**
+	 * Sets the {@code visible} condition as authored; the opposite sense of {@link #invisibleCondition(String)}.
+	 *
+	 * @param visibleCondition
+	 *            a condition name, an inline condition expression or a boolean literal
+	 * @return this builder
+	 */
+	public @Nonnull FluentComponent visibleCondition(@Nullable String visibleCondition) {
+		component.setXmlVisibleCondition(visibleCondition);
+		return this;
+	}
+
+	/**
+	 * Adds an action mapping, authored as an {@code <action/>} within {@code <actions>}.
+	 *
+	 * @param fromComponent
+	 *            the action name used in the component view
+	 * @param mappedTo
+	 *            the action name to use in the containing view
+	 * @return this builder
+	 */
+	public @Nonnull FluentComponent addAction(@Nonnull String fromComponent, @Nonnull String mappedTo) {
+		component.getActions().add(newTranslation(fromComponent, mappedTo));
+		return this;
+	}
+
+	/**
+	 * Removes all action mappings.
+	 *
+	 * @return this builder
+	 */
+	public @Nonnull FluentComponent clearActions() {
+		component.getActions().clear();
+		return this;
+	}
+
+	/**
+	 * Adds a condition mapping, authored as a {@code <condition/>} within {@code <conditions>}.
+	 *
+	 * @param fromComponent
+	 *            the condition used in the component view: a condition name, or an inline condition expression
+	 *            exactly as it is written there
+	 * @param mappedTo
+	 *            the condition to use in the containing view: a condition name or an inline condition expression
+	 * @return this builder
+	 */
+	public @Nonnull FluentComponent addCondition(@Nonnull String fromComponent, @Nonnull String mappedTo) {
+		component.getConditions().add(newTranslation(fromComponent, mappedTo));
+		return this;
+	}
+
+	/**
+	 * Removes all condition mappings.
+	 *
+	 * @return this builder
+	 */
+	public @Nonnull FluentComponent clearConditions() {
+		component.getConditions().clear();
+		return this;
+	}
+
+	private static @Nonnull ComponentTranslation newTranslation(@Nonnull String fromComponent, @Nonnull String mappedTo) {
+		ComponentTranslation result = new ComponentTranslation();
+		result.setFromComponent(fromComponent);
+		result.setMappedTo(mappedTo);
+		return result;
 	}
 
 	/**

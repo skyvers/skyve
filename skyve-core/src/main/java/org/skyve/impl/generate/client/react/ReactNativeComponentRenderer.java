@@ -65,7 +65,7 @@ public class ReactNativeComponentRenderer extends ComponentRenderer {
 	}
 
 	@Override
-	public RenderedComponent view(RenderedComponent component, String invisibleConditionName) {
+	public RenderedComponent view(RenderedComponent component, String invisibleCondition) {
 		imports.put("{ View }", REACT_NATIVE_IMPORT);
 		RenderedComponent result = new RenderedComponent().setAfter("</View>").setIndent(startingIndent);
 		StringBuilder output = result.getOutput();
@@ -102,7 +102,7 @@ public class ReactNativeComponentRenderer extends ComponentRenderer {
 	@Override
 	public RenderedComponent border(RenderedComponent component,
 										String title,
-										String invisibileConditionName,
+										String invisibleCondition,
 										Integer pixelWidth) {
 		//imports.put("{Card}", "primereact/card");
 		RenderedComponent result = new RenderedComponent();

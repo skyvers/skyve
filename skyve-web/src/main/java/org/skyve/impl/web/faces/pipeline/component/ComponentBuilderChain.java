@@ -280,7 +280,7 @@ public class ComponentBuilderChain extends ComponentBuilder {
 	 *
 	 * @param component the source component
 	 * @param title the border title
-	 * @param invisibileConditionName optional invisible condition
+	 * @param invisibleCondition optional invisible condition
 	 * @param pixelWidth optional pixel width
 	 * @param collapsible collapsible metadata
 	 * @return the transformed component
@@ -288,12 +288,12 @@ public class ComponentBuilderChain extends ComponentBuilder {
 	@Override
 	public UIComponent border(UIComponent component,
 								String title,
-								String invisibileConditionName,
+								String invisibleCondition,
 								Integer pixelWidth,
 								Collapsible collapsible) {
 		UIComponent result = component;
 		for (ComponentBuilder builder : builders) {
-			result = builder.border(result, title, invisibileConditionName, pixelWidth, collapsible);
+			result = builder.border(result, title, invisibleCondition, pixelWidth, collapsible);
 		}
 		return result;
 	}
@@ -320,17 +320,17 @@ public class ComponentBuilderChain extends ComponentBuilder {
 	 * @param component the source component
 	 * @param label raw button label and nullable escape flag
 	 * @param button dialog-button metadata
-	 * @param formDisabledConditionName optional form-level disabled condition
+	 * @param formDisabledCondition optional form-level disabled condition
 	 * @return the transformed component
 	 */
 	@Override
 	public UIComponent dialogButton(UIComponent component,
 										EscapableText label,
 										DialogButton button,
-										String formDisabledConditionName) {
+										String formDisabledCondition) {
 		UIComponent result = component;
 		for (ComponentBuilder builder : builders) {
-			result = builder.dialogButton(result, label, button, formDisabledConditionName);
+			result = builder.dialogButton(result, label, button, formDisabledCondition);
 		}
 		return result;
 	}
@@ -359,7 +359,7 @@ public class ComponentBuilderChain extends ComponentBuilder {
 	 * @param iconStyleClass icon style class
 	 * @param toolTip tooltip text
 	 * @param zoomIn zoom-in metadata
-	 * @param formDisabledConditionName form disabled condition
+	 * @param formDisabledCondition form disabled condition
 	 * @return the transformed component
 	 */
 	@Override
@@ -368,7 +368,7 @@ public class ComponentBuilderChain extends ComponentBuilder {
 										String iconStyleClass,
 										String toolTip,
 										ZoomIn zoomIn,
-										String formDisabledConditionName) {
+										String formDisabledCondition) {
 		UIComponent result = component;
 		for (ComponentBuilder builder : builders) {
 			result = builder.zoomIn(result, 
@@ -376,7 +376,7 @@ public class ComponentBuilderChain extends ComponentBuilder {
 										iconStyleClass,
 										toolTip,
 										zoomIn,
-										formDisabledConditionName);
+										formDisabledCondition);
 		}
 		return result;
 	}
@@ -392,7 +392,7 @@ public class ComponentBuilderChain extends ComponentBuilder {
 	 * @param toolTip tooltip text
 	 * @param confirmationText confirmation text
 	 * @param button button metadata
-	 * @param formDisabledConditionName form disabled condition
+	 * @param formDisabledCondition form disabled condition
 	 * @param action action metadata
 	 * @return the transformed component
 	 */
@@ -405,7 +405,7 @@ public class ComponentBuilderChain extends ComponentBuilder {
 										String toolTip,
 										String confirmationText, 
 										Button button,
-										String formDisabledConditionName,
+										String formDisabledCondition,
 										Action action) {
 		UIComponent result = component;
 		for (ComponentBuilder builder : builders) {
@@ -417,7 +417,7 @@ public class ComponentBuilderChain extends ComponentBuilder {
 											toolTip,
 											confirmationText,
 											button,
-											formDisabledConditionName,
+											formDisabledCondition,
 											action);
 		}
 		return result;
@@ -432,7 +432,7 @@ public class ComponentBuilderChain extends ComponentBuilder {
 	 * @param toolTip tooltip text
 	 * @param confirmationText confirmation text
 	 * @param button button metadata
-	 * @param formDisabledConditionName form disabled condition
+	 * @param formDisabledCondition form disabled condition
 	 * @param action action metadata
 	 * @return the transformed component
 	 */
@@ -443,7 +443,7 @@ public class ComponentBuilderChain extends ComponentBuilder {
 										String toolTip,
 										String confirmationText, 
 										Button button,
-										String formDisabledConditionName,
+										String formDisabledCondition,
 										Action action) {
 		UIComponent result = component;
 		for (ComponentBuilder builder : builders) {
@@ -453,7 +453,7 @@ public class ComponentBuilderChain extends ComponentBuilder {
 											toolTip,
 											confirmationText,
 											button,
-											formDisabledConditionName,
+											formDisabledCondition,
 											action);
 		}
 		return result;
@@ -470,7 +470,7 @@ public class ComponentBuilderChain extends ComponentBuilder {
 	 * @param toolTip tooltip text
 	 * @param confirmationText confirmation text
 	 * @param button button metadata
-	 * @param formDisabledConditionName form disabled condition
+	 * @param formDisabledCondition form disabled condition
 	 * @param action action metadata
 	 * @return the transformed component
 	 */
@@ -483,7 +483,7 @@ public class ComponentBuilderChain extends ComponentBuilder {
 										String toolTip,
 										String confirmationText, 
 										Button button,
-										String formDisabledConditionName,
+										String formDisabledCondition,
 										Action action) {
 		UIComponent result = component;
 		for (ComponentBuilder builder : builders) {
@@ -495,7 +495,7 @@ public class ComponentBuilderChain extends ComponentBuilder {
 												toolTip,
 												confirmationText,
 												button,
-												formDisabledConditionName,
+												formDisabledCondition,
 												action);
 		}
 		return result;
@@ -510,7 +510,7 @@ public class ComponentBuilderChain extends ComponentBuilder {
 	 * @param toolTip tooltip text
 	 * @param confirmationText confirmation text
 	 * @param button button metadata
-	 * @param formDisabledConditionName form disabled condition
+	 * @param formDisabledCondition form disabled condition
 	 * @param action action metadata
 	 * @return the transformed component
 	 */
@@ -521,7 +521,7 @@ public class ComponentBuilderChain extends ComponentBuilder {
 										String toolTip,
 										String confirmationText, 
 										Button button,
-										String formDisabledConditionName,
+										String formDisabledCondition,
 										Action action) {
 		UIComponent result = component;
 		for (ComponentBuilder builder : builders) {
@@ -531,7 +531,7 @@ public class ComponentBuilderChain extends ComponentBuilder {
 											toolTip,
 											confirmationText,
 											button,
-											formDisabledConditionName,
+											formDisabledCondition,
 											action);
 		}
 		return result;
@@ -832,7 +832,7 @@ public class ComponentBuilderChain extends ComponentBuilder {
 	 * @param component the source event source component
 	 * @param dataWidgetVar the data widget variable
 	 * @param geometry the geometry metadata
-	 * @param formDisabledConditionName the form disabled condition name
+	 * @param formDisabledCondition the form disabled condition name
 	 * @param title the field title
 	 * @param requiredMessage the optional required message
 	 * @param textAlignment the text alignment
@@ -842,13 +842,13 @@ public class ComponentBuilderChain extends ComponentBuilder {
 	public EventSourceComponent geometry(EventSourceComponent component,
 											String dataWidgetVar,
 											Geometry geometry,
-											String formDisabledConditionName,
+											String formDisabledCondition,
 											String title,
 											@Nullable String requiredMessage,
 											HorizontalAlignment textAlignment) {
 		EventSourceComponent result = component;
 		for (ComponentBuilder builder : builders) {
-			result = builder.geometry(result, dataWidgetVar, geometry, formDisabledConditionName, title, requiredMessage, textAlignment);
+			result = builder.geometry(result, dataWidgetVar, geometry, formDisabledCondition, title, requiredMessage, textAlignment);
 		}
 		return result;
 	}
@@ -858,7 +858,7 @@ public class ComponentBuilderChain extends ComponentBuilder {
 	 *
 	 * @param component the source event source component
 	 * @param geometry the geometry-map metadata
-	 * @param formDisabledConditionName the form disabled condition name
+	 * @param formDisabledCondition the form disabled condition name
 	 * @param title the field title
 	 * @param requiredMessage the optional required message
 	 * @return the transformed event source component
@@ -866,12 +866,12 @@ public class ComponentBuilderChain extends ComponentBuilder {
 	@Override
 	public EventSourceComponent geometryMap(EventSourceComponent component,
 												GeometryMap geometry,
-												String formDisabledConditionName,
+												String formDisabledCondition,
 												String title,
 												@Nullable String requiredMessage) {
 		EventSourceComponent result = component;
 		for (ComponentBuilder builder : builders) {
-			result = builder.geometryMap(result, geometry, formDisabledConditionName, title, requiredMessage);
+			result = builder.geometryMap(result, geometry, formDisabledCondition, title, requiredMessage);
 		}
 		return result;
 	}
@@ -1023,7 +1023,7 @@ public class ComponentBuilderChain extends ComponentBuilder {
 	 * @param component the source event source component
 	 * @param dataWidgetVar the data widget variable
 	 * @param checkBox the checkbox metadata
-	 * @param formDisabledConditionName the form disabled condition name
+	 * @param formDisabledCondition the form disabled condition name
 	 * @param title the field title
 	 * @param requiredMessage the optional required message
 	 * @return the transformed event source component
@@ -1032,7 +1032,7 @@ public class ComponentBuilderChain extends ComponentBuilder {
 	public EventSourceComponent checkBox(EventSourceComponent component,
 											String dataWidgetVar,
 											CheckBox checkBox,
-											String formDisabledConditionName,
+											String formDisabledCondition,
 											String title,
 											@Nullable String requiredMessage) {
 		EventSourceComponent result = component;
@@ -1040,7 +1040,7 @@ public class ComponentBuilderChain extends ComponentBuilder {
 			result = builder.checkBox(result,
 										dataWidgetVar,
 										checkBox,
-										formDisabledConditionName,
+										formDisabledCondition,
 										title,
 										requiredMessage);
 		}
@@ -1053,7 +1053,7 @@ public class ComponentBuilderChain extends ComponentBuilder {
 	 * @param component the source event source component
 	 * @param dataWidgetVar the data widget variable
 	 * @param colour the colour-picker metadata
-	 * @param formDisabledConditionName the form disabled condition name
+	 * @param formDisabledCondition the form disabled condition name
 	 * @param title the field title
 	 * @param requiredMessage the optional required message
 	 * @param textAlignment the text alignment
@@ -1063,7 +1063,7 @@ public class ComponentBuilderChain extends ComponentBuilder {
 	public EventSourceComponent colourPicker(EventSourceComponent component,
 												String dataWidgetVar,
 												ColourPicker colour,
-												String formDisabledConditionName,
+												String formDisabledCondition,
 												String title,
 												@Nullable String requiredMessage,
 												HorizontalAlignment textAlignment) {
@@ -1072,7 +1072,7 @@ public class ComponentBuilderChain extends ComponentBuilder {
 			result = builder.colourPicker(result,
 											dataWidgetVar,
 											colour,
-											formDisabledConditionName,
+											formDisabledCondition,
 											title,
 											requiredMessage,
 											textAlignment);
@@ -1086,7 +1086,7 @@ public class ComponentBuilderChain extends ComponentBuilder {
 	 * @param component the source event source component
 	 * @param dataWidgetVar the data widget variable
 	 * @param combo the combo metadata
-	 * @param formDisabledConditionName the form disabled condition name
+	 * @param formDisabledCondition the form disabled condition name
 	 * @param title the field title
 	 * @param requiredMessage the optional required message
 	 * @return the transformed event source component
@@ -1095,12 +1095,12 @@ public class ComponentBuilderChain extends ComponentBuilder {
 	public EventSourceComponent combo(EventSourceComponent component,
 										String dataWidgetVar,
 										Combo combo,
-										String formDisabledConditionName,
+										String formDisabledCondition,
 										String title,
 										@Nullable String requiredMessage) {
 		EventSourceComponent result = component;
 		for (ComponentBuilder builder : builders) {
-			result = builder.combo(result, dataWidgetVar, combo, formDisabledConditionName,  title, requiredMessage);
+			result = builder.combo(result, dataWidgetVar, combo, formDisabledCondition,  title, requiredMessage);
 		}
 		return result;
 	}
@@ -1112,7 +1112,7 @@ public class ComponentBuilderChain extends ComponentBuilder {
 	 *        produced one
 	 * @param dataWidgetVar the data widget variable, or {@code null}
 	 * @param content the content metadata; must not be {@code null}
-	 * @param formDisabledConditionName the form disabled condition name, or
+	 * @param formDisabledCondition the form disabled condition name, or
 	 *        {@code null}
 	 * @param title the field title, or {@code null}
 	 * @param requiredMessage the optional required message
@@ -1124,7 +1124,7 @@ public class ComponentBuilderChain extends ComponentBuilder {
 	public @Nullable UIComponent content(@Nullable UIComponent component,
 											@Nullable String dataWidgetVar,
 											@Nonnull ContentUpload content,
-											@Nullable String formDisabledConditionName,
+											@Nullable String formDisabledCondition,
 											@Nullable String title,
 											@Nullable String requiredMessage,
 											@Nullable HorizontalAlignment textAlignment,
@@ -1132,7 +1132,7 @@ public class ComponentBuilderChain extends ComponentBuilder {
 											boolean imageUpload) {
 		UIComponent result = component;
 		for (ComponentBuilder builder : builders) {
-			result = builder.content(result, dataWidgetVar, content, formDisabledConditionName, title, requiredMessage, textAlignment, formContext, imageUpload);
+			result = builder.content(result, dataWidgetVar, content, formDisabledCondition, title, requiredMessage, textAlignment, formContext, imageUpload);
 		}
 		return result;
 	}
@@ -1143,7 +1143,7 @@ public class ComponentBuilderChain extends ComponentBuilder {
 	 * @param component the source component
 	 * @param layout the current layout component
 	 * @param signature the signature metadata
-	 * @param formDisabledConditionName the form disabled condition name
+	 * @param formDisabledCondition the form disabled condition name
 	 * @param title the field title
 	 * @param requiredMessage the optional required message
 	 * @return the transformed component
@@ -1152,12 +1152,12 @@ public class ComponentBuilderChain extends ComponentBuilder {
 	public UIComponent addContentSignature(UIComponent component,
 											UIComponent layout,
 											ContentSignature signature,
-											String formDisabledConditionName,
+											String formDisabledCondition,
 											String title,
 											@Nullable String requiredMessage) {
 		UIComponent result = component;
 		for (ComponentBuilder builder : builders) {
-			result = builder.addContentSignature(result, layout, signature, formDisabledConditionName, title, requiredMessage);
+			result = builder.addContentSignature(result, layout, signature, formDisabledCondition, title, requiredMessage);
 		}
 		return result;
 	}
@@ -1168,7 +1168,7 @@ public class ComponentBuilderChain extends ComponentBuilder {
 	 * @param component the source component
 	 * @param dataWidgetVar the data widget variable
 	 * @param html the HTML metadata
-	 * @param formDisabledConditionName the form disabled condition name
+	 * @param formDisabledCondition the form disabled condition name
 	 * @param title the field title
 	 * @param requiredMessage the optional required message
 	 * @return the transformed component
@@ -1177,12 +1177,12 @@ public class ComponentBuilderChain extends ComponentBuilder {
 	public UIComponent html(UIComponent component,
 								String dataWidgetVar,
 								HTML html,
-								String formDisabledConditionName,
+								String formDisabledCondition,
 								String title,
 								@Nullable String requiredMessage) {
 		UIComponent result = component;
 		for (ComponentBuilder builder : builders) {
-			result = builder.html(result, dataWidgetVar, html, formDisabledConditionName, title, requiredMessage);
+			result = builder.html(result, dataWidgetVar, html, formDisabledCondition, title, requiredMessage);
 		}
 		return result;
 	}
@@ -1193,7 +1193,7 @@ public class ComponentBuilderChain extends ComponentBuilder {
 	 * @param component the source event source component
 	 * @param dataWidgetVar the data widget variable
 	 * @param lookup the lookup metadata
-	 * @param formDisabledConditionName the form disabled condition name
+	 * @param formDisabledCondition the form disabled condition name
 	 * @param title the field title
 	 * @param requiredMessage the optional required message
 	 * @param textAlignment the text alignment
@@ -1206,7 +1206,7 @@ public class ComponentBuilderChain extends ComponentBuilder {
 	public EventSourceComponent lookupDescription(EventSourceComponent component,
 													String dataWidgetVar,
 													LookupDescription lookup,
-													String formDisabledConditionName,
+													String formDisabledCondition,
 													String title,
 													@Nullable String requiredMessage,
 													HorizontalAlignment textAlignment,
@@ -1218,7 +1218,7 @@ public class ComponentBuilderChain extends ComponentBuilder {
 			result = builder.lookupDescription(result,
 												dataWidgetVar,
 												lookup,
-												formDisabledConditionName,
+												formDisabledCondition,
 												title,
 												requiredMessage,
 												textAlignment,
@@ -1235,7 +1235,7 @@ public class ComponentBuilderChain extends ComponentBuilder {
 	 * @param component the source event source component
 	 * @param dataWidgetVar the data widget variable
 	 * @param password the password metadata
-	 * @param formDisabledConditionName the form disabled condition name
+	 * @param formDisabledCondition the form disabled condition name
 	 * @param title the field title
 	 * @param requiredMessage the optional required message
 	 * @param textAlignment the text alignment
@@ -1245,13 +1245,13 @@ public class ComponentBuilderChain extends ComponentBuilder {
 	public EventSourceComponent password(EventSourceComponent component,
 											String dataWidgetVar,
 											Password password,
-											String formDisabledConditionName,
+											String formDisabledCondition,
 											String title,
 											@Nullable String requiredMessage,
 											HorizontalAlignment textAlignment) {
 		EventSourceComponent result = component;
 		for (ComponentBuilder builder : builders) {
-			result = builder.password(result, dataWidgetVar, password, formDisabledConditionName, title, requiredMessage, textAlignment);
+			result = builder.password(result, dataWidgetVar, password, formDisabledCondition, title, requiredMessage, textAlignment);
 		}
 		return result;
 	}
@@ -1262,7 +1262,7 @@ public class ComponentBuilderChain extends ComponentBuilder {
 	 * @param component the source event source component
 	 * @param dataWidgetVar the data widget variable
 	 * @param radio the radio metadata
-	 * @param formDisabledConditionName the form disabled condition name
+	 * @param formDisabledCondition the form disabled condition name
 	 * @param title the field title
 	 * @param requiredMessage the optional required message
 	 * @return the transformed event source component
@@ -1271,12 +1271,12 @@ public class ComponentBuilderChain extends ComponentBuilder {
 	public EventSourceComponent radio(EventSourceComponent component,
 										String dataWidgetVar,
 										Radio radio,
-										String formDisabledConditionName,
+										String formDisabledCondition,
 										String title,
 										@Nullable String requiredMessage) {
 		EventSourceComponent result = component;
 		for (ComponentBuilder builder : builders) {
-			result = builder.radio(result, dataWidgetVar, radio, formDisabledConditionName, title, requiredMessage);
+			result = builder.radio(result, dataWidgetVar, radio, formDisabledCondition, title, requiredMessage);
 		}
 		return result;
 	}
@@ -1287,7 +1287,7 @@ public class ComponentBuilderChain extends ComponentBuilder {
 	 * @param component the source event source component
 	 * @param dataWidgetVar the data widget variable
 	 * @param text the rich-text metadata
-	 * @param formDisabledConditionName the form disabled condition name
+	 * @param formDisabledCondition the form disabled condition name
 	 * @param title the field title
 	 * @param requiredMessage the optional required message
 	 * @return the transformed event source component
@@ -1296,12 +1296,12 @@ public class ComponentBuilderChain extends ComponentBuilder {
 	public EventSourceComponent richText(EventSourceComponent component,
 											String dataWidgetVar,
 											RichText text,
-											String formDisabledConditionName,
+											String formDisabledCondition,
 											String title,
 											@Nullable String requiredMessage) {
 		EventSourceComponent result = component;
 		for (ComponentBuilder builder : builders) {
-			result = builder.richText(result, dataWidgetVar, text, formDisabledConditionName, title, requiredMessage);
+			result = builder.richText(result, dataWidgetVar, text, formDisabledCondition, title, requiredMessage);
 		}
 		return result;
 	}
@@ -1312,7 +1312,7 @@ public class ComponentBuilderChain extends ComponentBuilder {
 	 * @param component the source event source component
 	 * @param dataWidgetVar the data widget variable
 	 * @param spinner the spinner metadata
-	 * @param formDisabledConditionName the form disabled condition name
+	 * @param formDisabledCondition the form disabled condition name
 	 * @param title the field title
 	 * @param requiredMessage the optional required message
 	 * @param textAlignment the text alignment
@@ -1323,14 +1323,14 @@ public class ComponentBuilderChain extends ComponentBuilder {
 	public EventSourceComponent spinner(EventSourceComponent component,
 											String dataWidgetVar,
 											Spinner spinner,
-											String formDisabledConditionName,
+											String formDisabledCondition,
 											String title,
 											@Nullable String requiredMessage,
 											HorizontalAlignment textAlignment,
 											jakarta.faces.convert.Converter<?> facesConverter) {
 		EventSourceComponent result = component;
 		for (ComponentBuilder builder : builders) {
-			result = builder.spinner(result, dataWidgetVar, spinner, formDisabledConditionName, title, requiredMessage, textAlignment, facesConverter);
+			result = builder.spinner(result, dataWidgetVar, spinner, formDisabledCondition, title, requiredMessage, textAlignment, facesConverter);
 		}
 		return result;
 	}
@@ -1341,7 +1341,7 @@ public class ComponentBuilderChain extends ComponentBuilder {
 	 * @param component the source event source component
 	 * @param dataWidgetVar the data widget variable
 	 * @param slider the slider metadata
-	 * @param formDisabledConditionName the form disabled condition name
+	 * @param formDisabledCondition the form disabled condition name
 	 * @param title the field title
 	 * @param requiredMessage the optional required message
 	 * @param facesConverter the Faces converter
@@ -1351,13 +1351,13 @@ public class ComponentBuilderChain extends ComponentBuilder {
 	public EventSourceComponent slider(EventSourceComponent component,
 											String dataWidgetVar,
 											Slider slider,
-											String formDisabledConditionName,
+											String formDisabledCondition,
 											String title,
 											@Nullable String requiredMessage,
 											jakarta.faces.convert.Converter<?> facesConverter) {
 		EventSourceComponent result = component;
 		for (ComponentBuilder builder : builders) {
-			result = builder.slider(result, dataWidgetVar, slider, formDisabledConditionName, title, requiredMessage, facesConverter);
+			result = builder.slider(result, dataWidgetVar, slider, formDisabledCondition, title, requiredMessage, facesConverter);
 		}
 		return result;
 	}
@@ -1368,7 +1368,7 @@ public class ComponentBuilderChain extends ComponentBuilder {
 	 * @param component the source event source component
 	 * @param dataWidgetVar the data widget variable
 	 * @param text the text-area metadata
-	 * @param formDisabledConditionName the form disabled condition name
+	 * @param formDisabledCondition the form disabled condition name
 	 * @param title the field title
 	 * @param requiredMessage the optional required message
 	 * @param textAlignment the text alignment
@@ -1379,14 +1379,14 @@ public class ComponentBuilderChain extends ComponentBuilder {
 	public EventSourceComponent textArea(EventSourceComponent component,
 											String dataWidgetVar,
 											TextArea text,
-											String formDisabledConditionName,
+											String formDisabledCondition,
 											String title,
 											@Nullable String requiredMessage,
 											HorizontalAlignment textAlignment,
 											Integer length) {
 		EventSourceComponent result = component;
 		for (ComponentBuilder builder : builders) {
-			result = builder.textArea(result, dataWidgetVar, text, formDisabledConditionName, title, requiredMessage, textAlignment, length);
+			result = builder.textArea(result, dataWidgetVar, text, formDisabledCondition, title, requiredMessage, textAlignment, length);
 		}
 		return result;
 	}
@@ -1397,7 +1397,7 @@ public class ComponentBuilderChain extends ComponentBuilder {
 	 * @param component the source component
 	 * @param dataWidgetVar the data widget variable
 	 * @param text text metadata
-	 * @param formDisabledConditionName form disabled condition
+	 * @param formDisabledCondition form disabled condition
 	 * @param title field title
 	 * @param requiredMessage optional required message
 	 * @param textAlignment text alignment
@@ -1411,7 +1411,7 @@ public class ComponentBuilderChain extends ComponentBuilder {
 	public EventSourceComponent text(EventSourceComponent component,
 										String dataWidgetVar,
 										TextField text,
-										String formDisabledConditionName,
+										String formDisabledCondition,
 										String title,
 										@Nullable String requiredMessage,
 										HorizontalAlignment textAlignment,
@@ -1424,7 +1424,7 @@ public class ComponentBuilderChain extends ComponentBuilder {
 			result = builder.text(result,
 									dataWidgetVar,
 									text,
-									formDisabledConditionName,
+									formDisabledCondition,
 									title,
 									requiredMessage,
 									textAlignment,

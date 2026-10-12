@@ -284,14 +284,14 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 	 *
 	 * @param component the current component
 	 * @param title the border title
-	 * @param invisibileConditionName invisible condition name
+	 * @param invisibleCondition invisible condition name
 	 * @param pixelWidth optional pixel width
 	 * @param collapsible collapsible metadata
 	 * @return the resulting border component
 	 */
 	public abstract UIComponent border(UIComponent component,
 										String title,
-										String invisibileConditionName,
+										String invisibleCondition,
 										Integer pixelWidth,
 										Collapsible collapsible);
 
@@ -310,13 +310,13 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 	 * @param component the current component
 	 * @param label raw button label and nullable escape flag
 	 * @param button dialog-button metadata
-	 * @param formDisabledConditionName optional form-level disabled condition
+	 * @param formDisabledCondition optional form-level disabled condition
 	 * @return the resulting dialog-button component
 	 */
 	public abstract UIComponent dialogButton(UIComponent component,
 												EscapableText label,
 												DialogButton button,
-												String formDisabledConditionName);
+												String formDisabledCondition);
 	
 	/**
 	 * Creates a spacer component.
@@ -335,7 +335,7 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 	 * @param iconStyleClass icon style class
 	 * @param toolTip tooltip text
 	 * @param zoomIn zoom-in metadata
-	 * @param formDisabledConditionName form disabled condition
+	 * @param formDisabledCondition form disabled condition
 	 * @return the resulting component
 	 */
 	public abstract UIComponent zoomIn(UIComponent component,
@@ -343,7 +343,7 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 											String iconStyleClass,
 											String toolTip,
 											ZoomIn zoomIn, 
-											String formDisabledConditionName);
+											String formDisabledCondition);
 
 	/**
 	 * Creates a generic action button component.
@@ -356,7 +356,7 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 	 * @param toolTip tooltip text
 	 * @param confirmationText confirmation text
 	 * @param button button metadata
-	 * @param formDisabledConditionName form disabled condition
+	 * @param formDisabledCondition form disabled condition
 	 * @param action action metadata
 	 * @return the resulting component
 	 */
@@ -369,7 +369,7 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 												String toolTip,
 												String confirmationText, 
 												Button button, 
-												String formDisabledConditionName,
+												String formDisabledCondition,
 												Action action);
 
 	/**
@@ -381,7 +381,7 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 	 * @param toolTip tooltip text
 	 * @param confirmationText confirmation text
 	 * @param button button metadata
-	 * @param formDisabledConditionName form disabled condition
+	 * @param formDisabledCondition form disabled condition
 	 * @param action action metadata
 	 * @return the resulting component
 	 */
@@ -392,7 +392,7 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 												String toolTip,
 												String confirmationText, 
 												Button button, 
-												String formDisabledConditionName,
+												String formDisabledCondition,
 												Action action);
 												
 	/**
@@ -406,7 +406,7 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 	 * @param toolTip tooltip text
 	 * @param confirmationText confirmation text
 	 * @param button button metadata
-	 * @param formDisabledConditionName form disabled condition
+	 * @param formDisabledCondition form disabled condition
 	 * @param action action metadata
 	 * @return the resulting component
 	 */
@@ -419,7 +419,7 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 												String toolTip,
 												String confirmationText, 
 												Button button, 
-												String formDisabledConditionName,
+												String formDisabledCondition,
 												Action action);
 
 	/**
@@ -431,7 +431,7 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 	 * @param toolTip tooltip text
 	 * @param confirmationText confirmation text
 	 * @param button button metadata
-	 * @param formDisabledConditionName form disabled condition
+	 * @param formDisabledCondition form disabled condition
 	 * @param action action metadata
 	 * @return the resulting component
 	 */
@@ -442,7 +442,7 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 												String toolTip,
 												String confirmationText, 
 												Button button, 
-												String formDisabledConditionName,
+												String formDisabledCondition,
 												Action action);
 
 	/**
@@ -728,7 +728,7 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 	 * @param component the existing wrapper component
 	 * @param dataWidgetVar the data-widget variable
 	 * @param geometry the geometry metadata
-	 * @param formDisabledConditionName form disabled condition
+	 * @param formDisabledCondition form disabled condition
 	 * @param title field title
 	 * @param requiredMessage optional required-message text
 	 * @param textAlignment text alignment
@@ -737,7 +737,7 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 	public abstract EventSourceComponent geometry(EventSourceComponent component, 
 													String dataWidgetVar, 
 													Geometry geometry, 
-													String formDisabledConditionName,
+													String formDisabledCondition,
 													String title, 
 													@Nullable String requiredMessage,
 													HorizontalAlignment textAlignment);
@@ -747,14 +747,14 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 	 *
 	 * @param component the existing wrapper component
 	 * @param geometry the geometry-map metadata
-	 * @param formDisabledConditionName form disabled condition
+	 * @param formDisabledCondition form disabled condition
 	 * @param title field title
 	 * @param requiredMessage optional required-message text
 	 * @return the resulting wrapper component
 	 */
 	public abstract EventSourceComponent geometryMap(EventSourceComponent component, 
 														GeometryMap geometry, 
-														String formDisabledConditionName,
+														String formDisabledCondition,
 														String title, 
 														@Nullable String requiredMessage);
 
@@ -791,7 +791,7 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 	 * @param component the existing wrapper component
 	 * @param dataWidgetVar the data-widget variable
 	 * @param checkBox the checkbox metadata
-	 * @param formDisabledConditionName form disabled condition
+	 * @param formDisabledCondition form disabled condition
 	 * @param title field title
 	 * @param requiredMessage optional required-message text
 	 * @return the resulting wrapper component
@@ -799,7 +799,7 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 	public abstract EventSourceComponent checkBox(EventSourceComponent component, 
 													String dataWidgetVar, 
 													CheckBox checkBox, 
-													String formDisabledConditionName,
+													String formDisabledCondition,
 													String title, 
 													@Nullable String requiredMessage);
 
@@ -809,7 +809,7 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 	 * @param component the existing wrapper component
 	 * @param dataWidgetVar the data-widget variable
 	 * @param colour the colour-picker metadata
-	 * @param formDisabledConditionName form disabled condition
+	 * @param formDisabledCondition form disabled condition
 	 * @param title field title
 	 * @param requiredMessage optional required-message text
 	 * @param textAlignment text alignment
@@ -818,7 +818,7 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 	public abstract EventSourceComponent colourPicker(EventSourceComponent component, 
 														String dataWidgetVar, 
 														ColourPicker colour, 
-														String formDisabledConditionName,
+														String formDisabledCondition,
 														String title, 
 														@Nullable String requiredMessage,
 														HorizontalAlignment textAlignment);
@@ -831,7 +831,7 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 	 * @param component the existing wrapper component
 	 * @param dataWidgetVar the data-widget variable
 	 * @param combo the combo metadata
-	 * @param formDisabledConditionName form disabled condition
+	 * @param formDisabledCondition form disabled condition
 	 * @param title field title
 	 * @param requiredMessage optional required-message text
 	 * @return the resulting wrapper component
@@ -839,7 +839,7 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 	public abstract EventSourceComponent combo(EventSourceComponent component, 
 												String dataWidgetVar, 
 												Combo combo, 
-												String formDisabledConditionName,
+												String formDisabledCondition,
 												String title, 
 												@Nullable String requiredMessage);
 
@@ -851,7 +851,7 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 	 * @param dataWidgetVar the data-widget variable, or {@code null} outside a data
 	 *        widget
 	 * @param content the content metadata; must not be {@code null}
-	 * @param formDisabledConditionName form disabled condition, or {@code null}
+	 * @param formDisabledCondition form disabled condition, or {@code null}
 	 * @param title field title, or {@code null}
 	 * @param requiredMessage optional required-message text
 	 * @param textAlignment text alignment, or {@code null} to use renderer defaults
@@ -865,7 +865,7 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 	public abstract @Nullable UIComponent content(@Nullable UIComponent component,
 											@Nullable String dataWidgetVar,
 											@Nonnull ContentUpload content,
-											@Nullable String formDisabledConditionName,
+											@Nullable String formDisabledCondition,
 											@Nullable String title,
 											@Nullable String requiredMessage,
 											@Nullable HorizontalAlignment textAlignment,
@@ -878,7 +878,7 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 	 * @param component the current component
 	 * @param layout the target layout component
 	 * @param signature the content-signature metadata
-	 * @param formDisabledConditionName form disabled condition
+	 * @param formDisabledCondition form disabled condition
 	 * @param title field title
 	 * @param requiredMessage optional required-message text
 	 * @return the resulting layout component
@@ -886,7 +886,7 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 	public abstract UIComponent addContentSignature(UIComponent component,
 														UIComponent layout, 
 														ContentSignature signature, 
-														String formDisabledConditionName,
+														String formDisabledCondition,
 														String title, 
 														@Nullable String requiredMessage);
 
@@ -896,7 +896,7 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 	 * @param component the current component
 	 * @param dataWidgetVar the data-widget variable
 	 * @param html the HTML metadata
-	 * @param formDisabledConditionName form disabled condition
+	 * @param formDisabledCondition form disabled condition
 	 * @param title field title
 	 * @param requiredMessage optional required-message text
 	 * @return the resulting HTML editor component
@@ -904,7 +904,7 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 	public abstract UIComponent html(UIComponent component, 
 										String dataWidgetVar, 
 										HTML html, 
-										String formDisabledConditionName,
+										String formDisabledCondition,
 										String title, 
 										@Nullable String requiredMessage);
 
@@ -914,7 +914,7 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 	 * @param component the existing wrapper component
 	 * @param dataWidgetVar the data-widget variable
 	 * @param lookup the lookup metadata
-	 * @param formDisabledConditionName form disabled condition
+	 * @param formDisabledCondition form disabled condition
 	 * @param title field title
 	 * @param requiredMessage optional required-message text
 	 * @param textAlignment text alignment
@@ -927,7 +927,7 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 	public abstract EventSourceComponent lookupDescription(EventSourceComponent component, 
 															String dataWidgetVar,
 															LookupDescription lookup,
-															String formDisabledConditionName,
+															String formDisabledCondition,
 															String title,
 															@Nullable String requiredMessage,
 															HorizontalAlignment textAlignment,
@@ -941,7 +941,7 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 	 * @param component the existing wrapper component
 	 * @param dataWidgetVar the data-widget variable
 	 * @param password the password metadata
-	 * @param formDisabledConditionName form disabled condition
+	 * @param formDisabledCondition form disabled condition
 	 * @param title field title
 	 * @param requiredMessage optional required-message text
 	 * @param textAlignment text alignment
@@ -950,7 +950,7 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 	public abstract EventSourceComponent password(EventSourceComponent component, 
 													String dataWidgetVar,
 													Password password,
-													String formDisabledConditionName,
+													String formDisabledCondition,
 													String title,
 													@Nullable String requiredMessage,
 													HorizontalAlignment textAlignment);
@@ -961,7 +961,7 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 	 * @param component the existing wrapper component
 	 * @param dataWidgetVar the data-widget variable
 	 * @param radio the radio metadata
-	 * @param formDisabledConditionName form disabled condition
+	 * @param formDisabledCondition form disabled condition
 	 * @param title field title
 	 * @param requiredMessage optional required-message text
 	 * @return the resulting wrapper component
@@ -969,7 +969,7 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 	public abstract EventSourceComponent radio(EventSourceComponent component, 
 												String dataWidgetVar,
 												Radio radio,
-												String formDisabledConditionName,
+												String formDisabledCondition,
 												String title,
 												@Nullable String requiredMessage);
 	
@@ -979,7 +979,7 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 	 * @param component the existing wrapper component
 	 * @param dataWidgetVar the data-widget variable
 	 * @param text the rich-text metadata
-	 * @param formDisabledConditionName form disabled condition
+	 * @param formDisabledCondition form disabled condition
 	 * @param title field title
 	 * @param requiredMessage optional required-message text
 	 * @return the resulting wrapper component
@@ -987,7 +987,7 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 	public abstract EventSourceComponent richText(EventSourceComponent component, 
 													String dataWidgetVar,
 													RichText text,
-													String formDisabledConditionName,
+													String formDisabledCondition,
 													String title,
 													@Nullable String requiredMessage);
 	
@@ -997,7 +997,7 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 	 * @param component the existing wrapper component
 	 * @param dataWidgetVar the data-widget variable
 	 * @param spinner the spinner metadata
-	 * @param formDisabledConditionName form disabled condition
+	 * @param formDisabledCondition form disabled condition
 	 * @param title field title
 	 * @param requiredMessage optional required-message text
 	 * @param textAlignment text alignment
@@ -1008,7 +1008,7 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 	public abstract EventSourceComponent spinner(EventSourceComponent component, 
 													String dataWidgetVar,
 													Spinner spinner,
-													String formDisabledConditionName,
+													String formDisabledCondition,
 													String title,
 													@Nullable String requiredMessage,
 													HorizontalAlignment textAlignment,
@@ -1020,7 +1020,7 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 	 * @param component the existing wrapper component
 	 * @param dataWidgetVar the data-widget variable
 	 * @param slider the slider metadata
-	 * @param formDisabledConditionName form disabled condition
+	 * @param formDisabledCondition form disabled condition
 	 * @param title field title
 	 * @param requiredMessage optional required-message text
 	 * @param facesConverter JSF converter instance
@@ -1029,7 +1029,7 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 	public abstract EventSourceComponent slider(EventSourceComponent component, 
 													String dataWidgetVar,
 													Slider slider,
-													String formDisabledConditionName,
+													String formDisabledCondition,
 													String title,
 													@Nullable String requiredMessage,
 													jakarta.faces.convert.Converter<?> facesConverter);
@@ -1040,7 +1040,7 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 	 * @param component the existing wrapper component
 	 * @param dataWidgetVar the data-widget variable
 	 * @param text the text-field metadata
-	 * @param formDisabledConditionName form disabled condition
+	 * @param formDisabledCondition form disabled condition
 	 * @param title field title
 	 * @param requiredMessage optional required-message text
 	 * @param textAlignment text alignment
@@ -1054,7 +1054,7 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 	public abstract EventSourceComponent text(EventSourceComponent component, 
 												String dataWidgetVar, 
 												TextField text, 
-												String formDisabledConditionName,
+												String formDisabledCondition,
 												String title, 
 												@Nullable String requiredMessage,
 												HorizontalAlignment textAlignment,
@@ -1069,7 +1069,7 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 	 * @param component the existing wrapper component
 	 * @param dataWidgetVar the data-widget variable
 	 * @param text the text-area metadata
-	 * @param formDisabledConditionName form disabled condition
+	 * @param formDisabledCondition form disabled condition
 	 * @param title field title
 	 * @param requiredMessage optional required-message text
 	 * @param textAlignment text alignment
@@ -1080,7 +1080,7 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 	public abstract EventSourceComponent textArea(EventSourceComponent component, 
 													String dataWidgetVar,
 													TextArea text,
-													String formDisabledConditionName,
+													String formDisabledCondition,
 													String title,
 													@Nullable String requiredMessage,
 													HorizontalAlignment textAlignment,

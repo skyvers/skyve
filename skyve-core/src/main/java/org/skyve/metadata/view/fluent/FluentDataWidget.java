@@ -1,6 +1,10 @@
 package org.skyve.metadata.view.fluent;
 
+import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.metadata.view.widget.bound.tabular.AbstractDataWidget;
+
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 
 public abstract class FluentDataWidget<T extends FluentDataWidget<T>> extends FluentBoundWidget<T> implements FluentRelativeSize<T> {
 	protected FluentDataWidget() {
@@ -14,7 +18,7 @@ public abstract class FluentDataWidget<T extends FluentDataWidget<T>> extends Fl
 		title(data.getTitle());
 		escapeTitle(data.getEscapeTitle());
 		relativeSize(data, this);
-		invisibleConditionName(data.getInvisibleConditionName());
+		BindUtil.copyAuthoredCondition(data.getXmlInvisibleCondition(), data.getXmlVisibleCondition(), this::invisibleCondition, this::visibleCondition);
 		return (T) this;
 	}
 	
@@ -143,9 +147,29 @@ public abstract class FluentDataWidget<T extends FluentDataWidget<T>> extends Fl
 		return (T) this;
 	}
 	
+	/**
+	 * Sets the {@code invisible} condition as authored; the opposite sense of {@link #visibleCondition(String)}.
+	 *
+	 * @param invisibleCondition
+	 *            a condition name, an inline condition expression or a boolean literal
+	 * @return this builder
+	 */
 	@SuppressWarnings("unchecked")
-	public T invisibleConditionName(String invisibleConditionName) {
-		get().setInvisibleConditionName(invisibleConditionName);
+	public @Nonnull T invisibleCondition(@Nullable String invisibleCondition) {
+		get().setXmlInvisibleCondition(invisibleCondition);
+		return (T) this;
+	}
+
+	/**
+	 * Sets the {@code visible} condition as authored; the opposite sense of {@link #invisibleCondition(String)}.
+	 *
+	 * @param visibleCondition
+	 *            a condition name, an inline condition expression or a boolean literal
+	 * @return this builder
+	 */
+	@SuppressWarnings("unchecked")
+	public @Nonnull T visibleCondition(@Nullable String visibleCondition) {
+		get().setXmlVisibleCondition(visibleCondition);
 		return (T) this;
 	}
 

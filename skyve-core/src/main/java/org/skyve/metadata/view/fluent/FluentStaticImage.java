@@ -1,6 +1,10 @@
 package org.skyve.metadata.view.fluent;
 
+import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.metadata.view.widget.StaticImage;
+
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 
 /**
  * Builds {@link StaticImage} widget metadata using a fluent API.
@@ -33,7 +37,7 @@ public class FluentStaticImage extends FluentWidget implements FluentRelativeSiz
 
 		relativeSize(image, this);
 
-		invisibleConditionName(image.getInvisibleConditionName());
+		BindUtil.copyAuthoredCondition(image.getXmlInvisibleCondition(), image.getXmlVisibleCondition(), this::invisibleCondition, this::visibleCondition);
 		
 		return this;
 	}
@@ -206,13 +210,26 @@ public class FluentStaticImage extends FluentWidget implements FluentRelativeSiz
 	}
 	
 	/**
-	 * Sets the condition name that hides this static image.
+	 * Sets the {@code invisible} condition as authored; the opposite sense of {@link #visibleCondition(String)}.
 	 *
-	 * @param invisibleConditionName the condition name
+	 * @param invisibleCondition
+	 *            a condition name, an inline condition expression or a boolean literal
 	 * @return this builder
 	 */
-	public FluentStaticImage invisibleConditionName(String invisibleConditionName) {
-		image.setInvisibleConditionName(invisibleConditionName);
+	public @Nonnull FluentStaticImage invisibleCondition(@Nullable String invisibleCondition) {
+		image.setXmlInvisibleCondition(invisibleCondition);
+		return this;
+	}
+
+	/**
+	 * Sets the {@code visible} condition as authored; the opposite sense of {@link #invisibleCondition(String)}.
+	 *
+	 * @param visibleCondition
+	 *            a condition name, an inline condition expression or a boolean literal
+	 * @return this builder
+	 */
+	public @Nonnull FluentStaticImage visibleCondition(@Nullable String visibleCondition) {
+		image.setXmlVisibleCondition(visibleCondition);
 		return this;
 	}
 

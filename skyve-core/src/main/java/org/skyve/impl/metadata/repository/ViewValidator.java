@@ -131,8 +131,10 @@ import org.skyve.persistence.DocumentQuery.AggregateFunction;
 import org.skyve.report.ReportFormat;
 import org.skyve.util.Binder;
 import org.skyve.util.Binder.TargetMetaData;
+import org.skyve.util.ExpressionEvaluator;
 
 import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 
 // TODO check suggestion attributes on text fields etc
 /**
@@ -308,15 +310,28 @@ class ViewValidator extends ViewVisitor {
 		return result;
 	}
 
-	private void validateConditionName(String conditionName, String widgetIdentifier) {
+	@SuppressWarnings("java:S3776") // Complexity OK
+	private void validateCondition(@Nullable String condition, @Nonnull String widgetIdentifier) {
 		// ignore true and false when checking the condition exists
-		if ((conditionName != null) && (! "true".equals(conditionName)) && (! "false".equals(conditionName))) {
+		if ((condition != null) && (! "true".equals(condition)) && (! "false".equals(condition))) {
+			// an inline condition expression (or its inverse) must evaluate to a boolean
+			boolean negatedExpression = BindUtil.isNegatedSkyveExpression(condition);
+			if (negatedExpression || BindUtil.isSkyveExpression(condition)) {
+				String expression = negatedExpression ? condition.substring(3) : condition;
+				String error = ExpressionEvaluator.validate(expression, Boolean.class, customer, module, document);
+				if (error != null) {
+					throw new MetaDataException(widgetIdentifier + IN + viewIdentifier +
+													" has an inline condition " + expression + " with an error : " + error);
+				}
+				return;
+			}
+
 			// reverse the sense of the condition if it starts with "not"
-			String testConditionName = conditionName;
+			String testConditionName = condition;
 			if (testConditionName.startsWith("not")) {
 				if (! Character.isUpperCase(testConditionName.charAt(3))) {
 					throw new MetaDataException(widgetIdentifier + IN + viewIdentifier +
-													"references condition " + conditionName + " which is not correctly camel cased (eg notTrue)");
+													"references condition " + condition + " which is not correctly camel cased (eg notTrue)");
 				}
 				testConditionName = Character.toLowerCase(testConditionName.charAt(3)) + testConditionName.substring(4);
 			}
@@ -325,15 +340,15 @@ class ViewValidator extends ViewVisitor {
 			if ((! Bean.PERSISTED_KEY.equals(testConditionName)) &&
 					(! Bean.CREATED_KEY.equals(testConditionName)) &&
 					(! Bean.CHANGED_KEY.equals(testConditionName))) {
-				validateCondition(module, document, testConditionName, widgetIdentifier);
+				validateConditionExists(module, document, testConditionName, widgetIdentifier);
 			}
 		}
 	}
 
-	private void validateCondition(ModuleImpl currentModule,
-									DocumentImpl currentDocument,
-									String testConditionName,
-									String widgetIdentifier) {
+	private void validateConditionExists(ModuleImpl currentModule,
+											DocumentImpl currentDocument,
+											String testConditionName,
+											String widgetIdentifier) {
 		if (! currentDocument.getConditionNames().contains(testConditionName)) {
 			Extends extension = currentDocument.getExtends();
 			if (extension == null) {
@@ -343,7 +358,7 @@ class ViewValidator extends ViewVisitor {
 
 			DocumentImpl baseDocument = (DocumentImpl) currentModule.getDocument(customer, extension.getDocumentName());
 			ModuleImpl baseModule = (ModuleImpl) repository.getModule(customer, baseDocument.getOwningModuleName());
-			validateCondition(baseModule, baseDocument, testConditionName, widgetIdentifier);
+			validateConditionExists(baseModule, baseDocument, testConditionName, widgetIdentifier);
 		}
 	}
 
@@ -623,8 +638,8 @@ class ViewValidator extends ViewVisitor {
 							zoomInIdentifier,
 							AttributeType.association,
 							AttributeType.inverseOne);
-		validateConditionName(zoomIn.getDisabledConditionName(), zoomInIdentifier);
-		validateConditionName(zoomIn.getInvisibleConditionName(), zoomInIdentifier);
+		validateCondition(zoomIn.getDisabledCondition(), zoomInIdentifier);
+		validateCondition(zoomIn.getInvisibleCondition(), zoomInIdentifier);
 		validateSize(zoomIn, zoomInIdentifier);
 
 		if ((ActionShow.icon == zoomIn.getShow()) &&
@@ -637,7 +652,7 @@ class ViewValidator extends ViewVisitor {
 	@Override
 	public void visitDynamicImage(DynamicImage image, boolean parentVisible, boolean parentEnabled) {
 		String imageIdentifier = "Dynamic Image " + image.getName();
-		validateConditionName(image.getInvisibleConditionName(), imageIdentifier);
+		validateCondition(image.getInvisibleCondition(), imageIdentifier);
 		validateParameterBindings(image.getParameters(), imageIdentifier);
 		validateSize(image, imageIdentifier);
 	}
@@ -657,8 +672,8 @@ class ViewValidator extends ViewVisitor {
 							true,
 							checkBoxIdentifier,
 							AttributeType.bool);
-		validateConditionName(checkBox.getDisabledConditionName(), checkBoxIdentifier);
-		validateConditionName(checkBox.getInvisibleConditionName(), checkBoxIdentifier);
+		validateCondition(checkBox.getDisabledCondition(), checkBoxIdentifier);
+		validateCondition(checkBox.getInvisibleCondition(), checkBoxIdentifier);
 		validateSize(checkBox, checkBoxIdentifier);
 	}
 
@@ -680,8 +695,8 @@ class ViewValidator extends ViewVisitor {
 							false,
 							membershipIdentifier,
 							AttributeType.collection);
-		validateConditionName(membership.getDisabledConditionName(), membershipIdentifier);
-		validateConditionName(membership.getInvisibleConditionName(), membershipIdentifier);
+		validateCondition(membership.getDisabledCondition(), membershipIdentifier);
+		validateCondition(membership.getInvisibleCondition(), membershipIdentifier);
 	}
 
 	@Override
@@ -708,8 +723,8 @@ class ViewValidator extends ViewVisitor {
 							true,
 							colourIdentifier,
 							AttributeType.colour);
-		validateConditionName(colour.getDisabledConditionName(), colourIdentifier);
-		validateConditionName(colour.getInvisibleConditionName(), colourIdentifier);
+		validateCondition(colour.getDisabledCondition(), colourIdentifier);
+		validateCondition(colour.getInvisibleCondition(), colourIdentifier);
 		validateSize(colour, colourIdentifier);
 	}
 
@@ -741,8 +756,8 @@ class ViewValidator extends ViewVisitor {
 							AttributeType.bool,
 							AttributeType.integer,
 							AttributeType.longInteger);
-		validateConditionName(combo.getDisabledConditionName(), comboIdentifier);
-		validateConditionName(combo.getInvisibleConditionName(), comboIdentifier);
+		validateCondition(combo.getDisabledCondition(), comboIdentifier);
+		validateCondition(combo.getInvisibleCondition(), comboIdentifier);
 		validateSize(combo, comboIdentifier);
 	}
 
@@ -778,8 +793,8 @@ class ViewValidator extends ViewVisitor {
 							AttributeType.content,
 							AttributeType.image);
 		validateContentDisplayCapture(content, contentIdentifier);
-		validateConditionName(content.getDisabledConditionName(), contentIdentifier);
-		validateConditionName(content.getInvisibleConditionName(), contentIdentifier);
+		validateCondition(content.getDisabledCondition(), contentIdentifier);
+		validateCondition(content.getInvisibleCondition(), contentIdentifier);
 		validateSize(content, contentIdentifier);
 	}
 
@@ -829,8 +844,8 @@ class ViewValidator extends ViewVisitor {
 							signatureIdentifier,
 							AttributeType.content,
 							AttributeType.image);
-		validateConditionName(signature.getDisabledConditionName(), signatureIdentifier);
-		validateConditionName(signature.getInvisibleConditionName(), signatureIdentifier);
+		validateCondition(signature.getDisabledCondition(), signatureIdentifier);
+		validateCondition(signature.getInvisibleCondition(), signatureIdentifier);
 		validateSize(signature, signatureIdentifier);
 
 		String colour = signature.getRgbHexBackgroundColour();
@@ -857,11 +872,11 @@ class ViewValidator extends ViewVisitor {
 	public void visitDataGrid(DataGrid grid, boolean parentVisible, boolean parentEnabled) {
 		visitDataWidget(grid, "DataGrid");
 		validateBinding(null, grid.getSelectedIdBinding(), false, false, false, true, dataWidgetIdentifier, AttributeType.id);
-		validateConditionName(grid.getDisabledConditionName(), dataWidgetIdentifier);
-		validateConditionName(grid.getDisableAddConditionName(), dataWidgetIdentifier);
-		validateConditionName(grid.getDisableEditConditionName(), dataWidgetIdentifier);
-		validateConditionName(grid.getDisableRemoveConditionName(), dataWidgetIdentifier);
-		validateConditionName(grid.getDisableZoomConditionName(), dataWidgetIdentifier);
+		validateCondition(grid.getDisabledCondition(), dataWidgetIdentifier);
+		validateCondition(grid.getDisableAddCondition(), dataWidgetIdentifier);
+		validateCondition(grid.getDisableEditCondition(), dataWidgetIdentifier);
+		validateCondition(grid.getDisableRemoveCondition(), dataWidgetIdentifier);
+		validateCondition(grid.getDisableZoomCondition(), dataWidgetIdentifier);
 	}
 
 	@Override
@@ -892,7 +907,7 @@ class ViewValidator extends ViewVisitor {
 							dataWidgetIdentifier,
 							AttributeType.collection,
 							AttributeType.inverseMany);
-		validateConditionName(widget.getInvisibleConditionName(), dataWidgetIdentifier);
+		validateCondition(widget.getInvisibleCondition(), dataWidgetIdentifier);
 		validateSize(widget, dataWidgetIdentifier);
 	}
 
@@ -963,8 +978,8 @@ class ViewValidator extends ViewVisitor {
 	@Override
 	public void visitDialogButton(DialogButton button, boolean parentVisible, boolean parentEnabled) {
 		String buttonIdentifier = "A Dialog Button" + button.getDialogName();
-		validateConditionName(button.getDisabledConditionName(), buttonIdentifier);
-		validateConditionName(button.getInvisibleConditionName(), buttonIdentifier);
+		validateCondition(button.getDisabledCondition(), buttonIdentifier);
+		validateCondition(button.getInvisibleCondition(), buttonIdentifier);
 		validateParameterBindings(button.getParameters(), buttonIdentifier);
 	}
 
@@ -977,8 +992,8 @@ class ViewValidator extends ViewVisitor {
 		else {
 			formIdentifier = "Form " + formIdentifier;
 		}
-		validateConditionName(form.getDisabledConditionName(), formIdentifier);
-		validateConditionName(form.getInvisibleConditionName(), formIdentifier);
+		validateCondition(form.getDisabledCondition(), formIdentifier);
+		validateCondition(form.getInvisibleCondition(), formIdentifier);
 		validateSize(form, formIdentifier);
 		validateMessageExpressions(form.getLocalisedBorderTitle(), formIdentifier, BORDER_TITLE);
 		validateCollapsible(form.getCollapsible(),
@@ -1023,8 +1038,8 @@ class ViewValidator extends ViewVisitor {
 							true,
 							geometryIdentifier,
 							AttributeType.geometry);
-		validateConditionName(geometry.getDisabledConditionName(), geometryIdentifier);
-		validateConditionName(geometry.getInvisibleConditionName(), geometryIdentifier);
+		validateCondition(geometry.getDisabledCondition(), geometryIdentifier);
+		validateCondition(geometry.getInvisibleCondition(), geometryIdentifier);
 		validateSize(geometry, geometryIdentifier);
 	}
 
@@ -1044,8 +1059,8 @@ class ViewValidator extends ViewVisitor {
 							true,
 							geometryIdentifier,
 							AttributeType.geometry);
-		validateConditionName(geometry.getDisabledConditionName(), geometryIdentifier);
-		validateConditionName(geometry.getInvisibleConditionName(), geometryIdentifier);
+		validateCondition(geometry.getDisabledCondition(), geometryIdentifier);
+		validateCondition(geometry.getInvisibleCondition(), geometryIdentifier);
 		validateSize(geometry, geometryIdentifier);
 	}
 
@@ -1058,7 +1073,7 @@ class ViewValidator extends ViewVisitor {
 	public void visitMap(MapDisplay map, boolean parentVisible, boolean parentEnabled) {
 		String geometryIdentifier = "Map with model " + map.getModelName();
 		validateSize(map, geometryIdentifier);
-		validateConditionName(map.getInvisibleConditionName(), geometryIdentifier);
+		validateCondition(map.getInvisibleCondition(), geometryIdentifier);
 		validateMapModelName(map.getModelName(), geometryIdentifier);
 	}
 
@@ -1072,7 +1087,7 @@ class ViewValidator extends ViewVisitor {
 			throw new MetaDataException(chartIdentifier + IN + viewIdentifier + " requires a modelName or a model but not both.");
 		}
 		validateSize(chart, chartIdentifier);
-		validateConditionName(chart.getInvisibleConditionName(), chartIdentifier);
+		validateCondition(chart.getInvisibleCondition(), chartIdentifier);
 		if (modelName != null) {
 			validateChartModelName(chart.getModelName(), chartIdentifier);
 		}
@@ -1185,7 +1200,7 @@ class ViewValidator extends ViewVisitor {
 		String id = hbox.getWidgetId();
 		String boxIdentifier = ((id == null) ? "A HBox" : "HBox " + id) + ((borderTitle == null) ? "" : " titled " + borderTitle);
 		validateSize(hbox, boxIdentifier);
-		validateConditionName(hbox.getInvisibleConditionName(), boxIdentifier);
+		validateCondition(hbox.getInvisibleCondition(), boxIdentifier);
 		validateMessageExpressions(hbox.getLocalisedBorderTitle(), boxIdentifier, BORDER_TITLE);
 		validateCollapsible(hbox.getCollapsible(),
 								hbox.getBorderTitle(),
@@ -1209,8 +1224,8 @@ class ViewValidator extends ViewVisitor {
 							true,
 							htmlIdentifier,
 							AttributeType.markup);
-		validateConditionName(html.getDisabledConditionName(), htmlIdentifier);
-		validateConditionName(html.getInvisibleConditionName(), htmlIdentifier);
+		validateCondition(html.getDisabledCondition(), htmlIdentifier);
+		validateCondition(html.getInvisibleCondition(), htmlIdentifier);
 		validateSize(html, htmlIdentifier);
 	}
 
@@ -1227,7 +1242,7 @@ class ViewValidator extends ViewVisitor {
 			throw new MetaDataException(blurbIdentifier + IN + viewIdentifier + " has no markup specified.");
 		}
 		validateMessageExpressions(blurb.getLocalisedMarkup(), blurbIdentifier, "markup");
-		validateConditionName(blurb.getInvisibleConditionName(), blurbIdentifier);
+		validateCondition(blurb.getInvisibleCondition(), blurbIdentifier);
 		validateSize(blurb, blurbIdentifier);
 	}
 
@@ -1253,7 +1268,7 @@ class ViewValidator extends ViewVisitor {
 							false,
 							labelIdentifier);
 		validateMessageExpressions(label.getLocalisedValue(), labelIdentifier, "a value");
-		validateConditionName(label.getInvisibleConditionName(), labelIdentifier);
+		validateCondition(label.getInvisibleCondition(), labelIdentifier);
 		validateSize(label, labelIdentifier);
 	}
 
@@ -1263,13 +1278,13 @@ class ViewValidator extends ViewVisitor {
 		String modelName = grid.getModelName();
 		String listGridIdentifier = "ListGrid " + ((modelName != null) ? modelName : queryName);
 		validateSize(grid, listGridIdentifier);
-		validateConditionName(grid.getDisabledConditionName(), listGridIdentifier);
-		validateConditionName(grid.getInvisibleConditionName(), listGridIdentifier);
-		validateConditionName(grid.getDisableAddConditionName(), listGridIdentifier);
-		validateConditionName(grid.getDisableEditConditionName(), listGridIdentifier);
-		validateConditionName(grid.getDisableZoomConditionName(), listGridIdentifier);
-		validateConditionName(grid.getDisableRemoveConditionName(), listGridIdentifier);
-		validateConditionName(grid.getPostRefreshConditionName(), listGridIdentifier);
+		validateCondition(grid.getDisabledCondition(), listGridIdentifier);
+		validateCondition(grid.getInvisibleCondition(), listGridIdentifier);
+		validateCondition(grid.getDisableAddCondition(), listGridIdentifier);
+		validateCondition(grid.getDisableEditCondition(), listGridIdentifier);
+		validateCondition(grid.getDisableZoomCondition(), listGridIdentifier);
+		validateCondition(grid.getDisableRemoveCondition(), listGridIdentifier);
+		validateCondition(grid.getPostRefreshCondition(), listGridIdentifier);
 		validateBinding(null, grid.getSelectedIdBinding(), false, false, false, true, listGridIdentifier, AttributeType.id);
 		Document drivingDocument = validateQueryOrModel(queryName, modelName, listGridIdentifier);
 		validateFilterParameterBindings(grid.getFilterParameters(), listGridIdentifier, drivingDocument);
@@ -1284,8 +1299,8 @@ class ViewValidator extends ViewVisitor {
 		String modelName = repeater.getModelName();
 		String listRepeaterIdentifier = "ListRepeater " + ((modelName != null) ? modelName : queryName);
 		validateSize(repeater, listRepeaterIdentifier);
-		validateConditionName(repeater.getInvisibleConditionName(), listRepeaterIdentifier);
-		validateConditionName(repeater.getPostRefreshConditionName(), listRepeaterIdentifier);
+		validateCondition(repeater.getInvisibleCondition(), listRepeaterIdentifier);
+		validateCondition(repeater.getPostRefreshCondition(), listRepeaterIdentifier);
 		Document drivingDocument = validateQueryOrModel(queryName, modelName, listRepeaterIdentifier);
 		validateFilterParameterBindings(repeater.getFilterParameters(), listRepeaterIdentifier, drivingDocument);
 		validateParameterBindings(repeater.getParameters(), listRepeaterIdentifier);
@@ -1299,13 +1314,13 @@ class ViewValidator extends ViewVisitor {
 		String modelName = grid.getModelName();
 		String treeGridIdentifier = "TreeGrid " + ((modelName != null) ? modelName : queryName);
 		validateSize(grid, treeGridIdentifier);
-		validateConditionName(grid.getDisabledConditionName(), treeGridIdentifier);
-		validateConditionName(grid.getInvisibleConditionName(), treeGridIdentifier);
-		validateConditionName(grid.getDisableAddConditionName(), treeGridIdentifier);
-		validateConditionName(grid.getDisableEditConditionName(), treeGridIdentifier);
-		validateConditionName(grid.getDisableZoomConditionName(), treeGridIdentifier);
-		validateConditionName(grid.getDisableRemoveConditionName(), treeGridIdentifier);
-		validateConditionName(grid.getPostRefreshConditionName(), treeGridIdentifier);
+		validateCondition(grid.getDisabledCondition(), treeGridIdentifier);
+		validateCondition(grid.getInvisibleCondition(), treeGridIdentifier);
+		validateCondition(grid.getDisableAddCondition(), treeGridIdentifier);
+		validateCondition(grid.getDisableEditCondition(), treeGridIdentifier);
+		validateCondition(grid.getDisableZoomCondition(), treeGridIdentifier);
+		validateCondition(grid.getDisableRemoveCondition(), treeGridIdentifier);
+		validateCondition(grid.getPostRefreshCondition(), treeGridIdentifier);
 		validateBinding(null, grid.getSelectedIdBinding(), false, false, false, true, treeGridIdentifier, AttributeType.id);
 		validateBinding(null, grid.getRootIdBinding(), false, false, false, true, treeGridIdentifier);
 		Document drivingDocument = validateQueryOrModel(queryName, modelName, treeGridIdentifier);
@@ -1327,8 +1342,8 @@ class ViewValidator extends ViewVisitor {
 							membershipIdentifier,
 							AttributeType.collection,
 							AttributeType.inverseMany);
-		validateConditionName(membership.getDisabledConditionName(), membershipIdentifier);
-		validateConditionName(membership.getInvisibleConditionName(), membershipIdentifier);
+		validateCondition(membership.getDisabledCondition(), membershipIdentifier);
+		validateCondition(membership.getInvisibleCondition(), membershipIdentifier);
 		validateSize(membership, membershipIdentifier);
 	}
 
@@ -1352,8 +1367,8 @@ class ViewValidator extends ViewVisitor {
 							false,
 							comparisonIdentifier,
 							AttributeType.association);
-		validateConditionName(comparison.getDisabledConditionName(), comparisonIdentifier);
-		validateConditionName(comparison.getInvisibleConditionName(), comparisonIdentifier);
+		validateCondition(comparison.getDisabledCondition(), comparisonIdentifier);
+		validateCondition(comparison.getInvisibleCondition(), comparisonIdentifier);
 		validateComparisonModelName(comparison.getModelName(), comparisonIdentifier);
 		validateSize(comparison, comparisonIdentifier);
 	}
@@ -1385,12 +1400,12 @@ class ViewValidator extends ViewVisitor {
 							false,
 							true,
 							lookupIdentifier);
-		validateConditionName(lookup.getDisabledConditionName(), lookupIdentifier);
-		validateConditionName(lookup.getInvisibleConditionName(), lookupIdentifier);
-		validateConditionName(lookup.getDisablePickConditionName(), lookupIdentifier);
-		validateConditionName(lookup.getDisableEditConditionName(), lookupIdentifier);
-		validateConditionName(lookup.getDisableAddConditionName(), lookupIdentifier);
-		validateConditionName(lookup.getDisableClearConditionName(), lookupIdentifier);
+		validateCondition(lookup.getDisabledCondition(), lookupIdentifier);
+		validateCondition(lookup.getInvisibleCondition(), lookupIdentifier);
+		validateCondition(lookup.getDisablePickCondition(), lookupIdentifier);
+		validateCondition(lookup.getDisableEditCondition(), lookupIdentifier);
+		validateCondition(lookup.getDisableAddCondition(), lookupIdentifier);
+		validateCondition(lookup.getDisableClearCondition(), lookupIdentifier);
 		String modelName = lookup.getModelName();
 		String queryName = lookup.getQuery();
 		Document drivingDocument = (modelName == null) ?
@@ -1550,8 +1565,8 @@ class ViewValidator extends ViewVisitor {
 							true,
 							passwordIdentifier,
 							AttributeType.text);
-		validateConditionName(password.getDisabledConditionName(), passwordIdentifier);
-		validateConditionName(password.getInvisibleConditionName(), passwordIdentifier);
+		validateCondition(password.getDisabledCondition(), passwordIdentifier);
+		validateCondition(password.getInvisibleCondition(), passwordIdentifier);
 		validateSize(password, passwordIdentifier);
 	}
 
@@ -1572,7 +1587,7 @@ class ViewValidator extends ViewVisitor {
 							false,
 							true,
 							progressBarIdentifier);
-		validateConditionName(progressBar.getInvisibleConditionName(), progressBarIdentifier);
+		validateCondition(progressBar.getInvisibleCondition(), progressBarIdentifier);
 		validateSize(progressBar, progressBarIdentifier);
 	}
 
@@ -1597,8 +1612,8 @@ class ViewValidator extends ViewVisitor {
 							AttributeType.bool,
 							AttributeType.integer,
 							AttributeType.longInteger);
-		validateConditionName(radio.getDisabledConditionName(), radioIdentifier);
-		validateConditionName(radio.getInvisibleConditionName(), radioIdentifier);
+		validateCondition(radio.getDisabledCondition(), radioIdentifier);
+		validateCondition(radio.getInvisibleCondition(), radioIdentifier);
 		validateSize(radio, radioIdentifier);
 	}
 
@@ -1625,8 +1640,8 @@ class ViewValidator extends ViewVisitor {
 							richTextIdentifier,
 							AttributeType.memo,
 							AttributeType.markup);
-		validateConditionName(richText.getDisabledConditionName(), richTextIdentifier);
-		validateConditionName(richText.getInvisibleConditionName(), richTextIdentifier);
+		validateCondition(richText.getDisabledCondition(), richTextIdentifier);
+		validateCondition(richText.getInvisibleCondition(), richTextIdentifier);
 		validateSize(richText, richTextIdentifier);
 	}
 
@@ -1651,8 +1666,8 @@ class ViewValidator extends ViewVisitor {
 							false,
 							true,
 							sliderIdentifier);
-		validateConditionName(slider.getDisabledConditionName(), sliderIdentifier);
-		validateConditionName(slider.getInvisibleConditionName(), sliderIdentifier);
+		validateCondition(slider.getDisabledCondition(), sliderIdentifier);
+		validateCondition(slider.getInvisibleCondition(), sliderIdentifier);
 		validateSize(slider, sliderIdentifier);
 	}
 
@@ -1666,7 +1681,7 @@ class ViewValidator extends ViewVisitor {
 	@Override
 	public void visitSpacer(Spacer spacer) {
 		String spacerIdentifier = "A Spacer";
-		validateConditionName(spacer.getInvisibleConditionName(), spacerIdentifier);
+		validateCondition(spacer.getInvisibleCondition(), spacerIdentifier);
 		validateSize(spacer, spacerIdentifier);
 	}
 
@@ -1684,8 +1699,8 @@ class ViewValidator extends ViewVisitor {
 							false,
 							true,
 							spinnerIdentifier);
-		validateConditionName(spinner.getDisabledConditionName(), spinnerIdentifier);
-		validateConditionName(spinner.getInvisibleConditionName(), spinnerIdentifier);
+		validateCondition(spinner.getDisabledCondition(), spinnerIdentifier);
+		validateCondition(spinner.getInvisibleCondition(), spinnerIdentifier);
 		validateSize(spinner, spinnerIdentifier);
 	}
 
@@ -1699,7 +1714,7 @@ class ViewValidator extends ViewVisitor {
 	@Override
 	public void visitStaticImage(StaticImage image, boolean parentVisible, boolean parentEnabled) {
 		String imageIdentifier = "StaticImage " + image.getRelativeFile();
-		validateConditionName(image.getInvisibleConditionName(), imageIdentifier);
+		validateCondition(image.getInvisibleCondition(), imageIdentifier);
 		validateSize(image, imageIdentifier);
 	}
 
@@ -1707,7 +1722,7 @@ class ViewValidator extends ViewVisitor {
 	@SuppressWarnings("java:S3776") // Complexity OK
 	public void visitLink(Link link, boolean parentVisible, boolean parentEnabled) {
 		final String linkIdentifier = "Link " + link.getValue();
-		validateConditionName(link.getInvisibleConditionName(), linkIdentifier);
+		validateCondition(link.getInvisibleCondition(), linkIdentifier);
 		validateSize(link, linkIdentifier);
 
 		new ReferenceProcessor() {
@@ -1921,8 +1936,8 @@ class ViewValidator extends ViewVisitor {
 	@Override
 	public void visitTab(Tab tab, boolean parentVisible, boolean parentEnabled) {
 		String tabIdentifier = "Tab " + tab.getTitle();
-		validateConditionName(tab.getDisabledConditionName(), tabIdentifier);
-		validateConditionName(tab.getInvisibleConditionName(), tabIdentifier);
+		validateCondition(tab.getDisabledCondition(), tabIdentifier);
+		validateCondition(tab.getInvisibleCondition(), tabIdentifier);
 		validateMessageExpressions(tab.getLocalisedTitle(), tabIdentifier, "title");
 	}
 
@@ -1936,8 +1951,8 @@ class ViewValidator extends ViewVisitor {
 			tabPaneIdentifier = "A TabPane";
 		}
 		validateSize(tabPane, tabPaneIdentifier);
-		validateConditionName(tabPane.getDisabledConditionName(), tabPaneIdentifier);
-		validateConditionName(tabPane.getInvisibleConditionName(), tabPaneIdentifier);
+		validateCondition(tabPane.getDisabledCondition(), tabPaneIdentifier);
+		validateCondition(tabPane.getInvisibleCondition(), tabPaneIdentifier);
 		validateBinding(null,
 							tabPane.getSelectedTabIndexBinding(),
 							false,
@@ -1963,8 +1978,8 @@ class ViewValidator extends ViewVisitor {
 							false,
 							true,
 							textIdentifier);
-		validateConditionName(text.getDisabledConditionName(), textIdentifier);
-		validateConditionName(text.getInvisibleConditionName(), textIdentifier);
+		validateCondition(text.getDisabledCondition(), textIdentifier);
+		validateCondition(text.getInvisibleCondition(), textIdentifier);
 		validateSize(text, textIdentifier);
 	}
 
@@ -1989,8 +2004,8 @@ class ViewValidator extends ViewVisitor {
 							false,
 							true,
 							textIdentifier);
-		validateConditionName(text.getDisabledConditionName(), textIdentifier);
-		validateConditionName(text.getInvisibleConditionName(), textIdentifier);
+		validateCondition(text.getDisabledCondition(), textIdentifier);
+		validateCondition(text.getInvisibleCondition(), textIdentifier);
 		validateSize(text, textIdentifier);
 	}
 
@@ -2015,7 +2030,7 @@ class ViewValidator extends ViewVisitor {
 		String id = vbox.getWidgetId();
 		String boxIdentifier = ((id == null) ? "A VBox" : "VBox " + id) + ((borderTitle == null) ? "" : " titled " + borderTitle);
 		validateSize(vbox, boxIdentifier);
-		validateConditionName(vbox.getInvisibleConditionName(), boxIdentifier);
+		validateCondition(vbox.getInvisibleCondition(), boxIdentifier);
 		validateMessageExpressions(vbox.getLocalisedBorderTitle(), boxIdentifier, BORDER_TITLE);
 		validateCollapsible(vbox.getCollapsible(),
 								vbox.getBorderTitle(),
@@ -2042,7 +2057,7 @@ class ViewValidator extends ViewVisitor {
 		}
 
 		validateActionName(view.getRefreshActionName(), viewIdentifier);
-		validateConditionName(view.getRefreshConditionName(), viewIdentifier);
+		validateCondition(view.getRefreshIfCondition(), viewIdentifier);
 		if ((view.getHelpURL() != null) && (view.getHelpRelativeFileName() != null)) {
 			throw new MetaDataException(viewIdentifier + " should define one of helpURL or helpRelativeFileName but not both");
 		}
@@ -2118,8 +2133,8 @@ class ViewValidator extends ViewVisitor {
 	private void validateAction(ActionImpl action) {
 		String actionIdentifier = "Action " + action.getName();
 
-		validateConditionName(action.getDisabledConditionName(), actionIdentifier);
-		validateConditionName(action.getInvisibleConditionName(), actionIdentifier);
+		validateCondition(action.getDisabledCondition(), actionIdentifier);
+		validateCondition(action.getInvisibleCondition(), actionIdentifier);
 		validateParameterBindings(action.getParameters(), actionIdentifier);
 
 		if ((ActionShow.icon == action.getShow()) &&
@@ -2521,12 +2536,12 @@ class ViewValidator extends ViewVisitor {
 							false,
 							widgetIdentifier,
 							AttributeType.bool);
-		String disabledConditionName = setDisabled.getDisabledConditionName();
-		if (disabledConditionName == null) {
+		String disabledCondition = setDisabled.getDisabledCondition();
+		if (disabledCondition == null) {
 			throw new MetaDataException(widgetIdentifier + IN + viewIdentifier +
 											" requires a [disabled] or [enabled] condition name.");
 		}
-		validateConditionName(disabledConditionName, widgetIdentifier);
+		validateCondition(disabledCondition, widgetIdentifier);
 	}
 
 	@Override
@@ -2572,12 +2587,12 @@ class ViewValidator extends ViewVisitor {
 							false,
 							widgetIdentifier,
 							AttributeType.bool);
-		String invisibleConditionName = setInvisible.getInvisibleConditionName();
-		if (invisibleConditionName == null) {
+		String invisibleCondition = setInvisible.getInvisibleCondition();
+		if (invisibleCondition == null) {
 			throw new MetaDataException(widgetIdentifier + IN + viewIdentifier +
 											" requires an [invisible] or [visible] condition name.");
 		}
-		validateConditionName(invisibleConditionName, widgetIdentifier);
+		validateCondition(invisibleCondition, widgetIdentifier);
 	}
 
 	@Override
@@ -2588,7 +2603,7 @@ class ViewValidator extends ViewVisitor {
 				(sidebar.getResponsiveWidth() == null)) {
 			throw new MetaDataException(sidebarIdentifier + IN + viewIdentifier + " requires at least one of [percentageWidth, pixelWidth, responsiveWidth]");
 		}
-		validateConditionName(sidebar.getInvisibleConditionName(), sidebarIdentifier);
+		validateCondition(sidebar.getInvisibleCondition(), sidebarIdentifier);
 	}
 
 	@Override

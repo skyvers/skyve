@@ -15,11 +15,13 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.beanutils.PropertyUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
+import org.skyve.domain.DynamicBean;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.types.Decimal;
 import org.skyve.domain.types.Decimal10;
@@ -31,7 +33,9 @@ import org.skyve.impl.metadata.user.UserImpl;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
+import org.skyve.metadata.model.Extends;
 import org.skyve.metadata.model.document.Document;
+import org.skyve.metadata.model.document.Relation;
 import org.skyve.metadata.module.Module;
 import org.skyve.util.ExpressionEvaluator;
 import org.skyve.util.Util;
@@ -69,16 +73,24 @@ public class ELExpressionEvaluator extends ExpressionEvaluator {
 	public static final String RTEL_PREFIX = "rtel";
 
 	private static final Logger LOGGER = SkyveLoggerFactory.getLogger(ELExpressionEvaluator.class);
-	private static final String BEAN_VARIABLE = "bean";
-	private static final String USER_VARIABLE = "user";
-	private static final String STASH_VARIABLE = "stash";
+	static final String BEAN_VARIABLE = "bean";
+	static final String USER_VARIABLE = "user";
+	static final String STASH_VARIABLE = "stash";
+
 	private static final Map<String, Method> FIXED_FUNCTIONS = fixedFunctions();
 	private static final BindingELResolver BINDING_RESOLVER = new BindingELResolver();
-	/** Immutable enum bindings per bean class; ClassValue does not pin redeployed class loaders. */
+
+	/**
+	 * The enumerations an expression evaluated against a bean class can name, keyed by simple name.
+	 * The class's own enumerations are there from the start (see {@link #enumBeans(Class)}).
+	 * The enumerations of related documents are added as expressions name them; only names that
+	 * resolved are kept, so the map is bounded by the enumerations that can be reached.
+	 * ClassValue does not pin redeployed class loaders.
+	 */
 	static final ClassValue<Map<String, ELClass>> ENUM_BEANS = new ClassValue<>() {
 		@Override
 		protected Map<String, ELClass> computeValue(Class<?> type) {
-			return enumBeans(type);
+			return new ConcurrentHashMap<>(enumBeans(type));
 		}
 	};
 
@@ -491,26 +503,97 @@ public class ELExpressionEvaluator extends ExpressionEvaluator {
 	}
 	
 	/**
-	 * Prefixes {@code bean} bindings in the expression with the supplied binding path.
+	 * Prefixes every reference to the {@code bean} variable in the expression with the supplied binding path.
+	 *
+	 * <p>The expression is scanned, so only the {@code bean} identifier itself is
+	 * rewritten, whatever follows it: {@code bean.x} becomes {@code bean.binding.x}, {@code bean['x']}
+	 * becomes {@code bean.binding['x']} and a bare {@code bean} becomes {@code bean.binding}.
+	 * String literals are left alone, as are identifiers that merely contain {@code bean},
+	 * a property called {@code bean} ({@code stash.bean}) and a function called {@code bean}.
+	 *
+	 * <p>A lambda parameter called {@code bean} is not recognised and is rewritten like the variable.
 	 *
 	 * @param expression the expression buffer to mutate
-	 * @param binding the binding path to insert before each {@code bean} reference
+	 * @param binding the binding path to insert after each {@code bean} reference
 	 */
 	@Override
 	public void prefixBindingWithoutPrefixOrSuffix(StringBuilder expression, String binding) {
-		// Append binding to "bean."
-		int beanIndex = expression.indexOf("bean.");
-		while (beanIndex >= 0) {
-			beanIndex += 5;
-			expression.insert(beanIndex, '.');
-			expression.insert(beanIndex, binding);
-			beanIndex = expression.indexOf("bean.", beanIndex);
+		int i = 0;
+		while (i < expression.length()) {
+			char c = expression.charAt(i);
+			if ((c == '\'') || (c == '"')) {
+				i = endOfStringLiteral(expression, i);
+			}
+			else if (Character.isJavaIdentifierPart(c)) {
+				int start = i;
+				do {
+					i++;
+				}
+				while ((i < expression.length()) && Character.isJavaIdentifierPart(expression.charAt(i)));
+				if (isBeanReference(expression, start, i)) {
+					expression.insert(i, binding).insert(i, '.');
+					i += binding.length() + 1;
+				}
+			}
+			else {
+				i++;
+			}
 		}
-		// check if ends with "bean" and append binding
+	}
+
+	/**
+	 * Finds the end of the string literal that opens at the given index.
+	 *
+	 * @param expression the expression being scanned
+	 * @param start the index of the opening quote
+	 * @return the index after the closing quote, or the expression length when the literal is not closed
+	 */
+	private static int endOfStringLiteral(@Nonnull CharSequence expression, int start) {
+		char quote = expression.charAt(start);
 		int length = expression.length();
-		if ((length >= 4) && "bean".equals(expression.substring(length - 4, length))) {
-			expression.append('.').append(binding);
+		int i = start + 1;
+		while (i < length) {
+			char c = expression.charAt(i);
+			if (c == '\\') { // skip the escaped character
+				i += 2;
+			}
+			else if (c == quote) {
+				return i + 1;
+			}
+			else {
+				i++;
+			}
 		}
+		return length;
+	}
+
+	/**
+	 * Determines whether the word between the given indices is a reference to the {@code bean} variable.
+	 *
+	 * @param expression the expression being scanned
+	 * @param start the index of the first character of the word
+	 * @param end the index after the last character of the word
+	 * @return {@code true} if the word is {@code bean}, is not a property of something else and is not a function name
+	 */
+	private static boolean isBeanReference(@Nonnull CharSequence expression, int start, int end) {
+		if (((end - start) != BEAN_VARIABLE.length()) || (! BEAN_VARIABLE.contentEquals(expression.subSequence(start, end)))) {
+			return false;
+		}
+		// a property of something else - x.bean
+		int i = start - 1;
+		while ((i >= 0) && Character.isWhitespace(expression.charAt(i))) {
+			i--;
+		}
+		if ((i >= 0) && (expression.charAt(i) == '.')) {
+			return false;
+		}
+		// a function - bean(...)
+		i = end;
+		int length = expression.length();
+		while ((i < length) && Character.isWhitespace(expression.charAt(i))) {
+			i++;
+		}
+		return (i >= length) || (expression.charAt(i) != '(');
 	}
 	
 	/**
@@ -535,7 +618,8 @@ public class ELExpressionEvaluator extends ExpressionEvaluator {
 				throw new IllegalArgumentException("A customer is required to validate against a document");
 			}
 			result.defineBean(BEAN_VARIABLE, document);
-			defineEnumBeans(result, customer, document);
+			Set<String> localEnumNames = defineEnumBeans(result, customer, document);
+			manager.addELResolver(new ValidationEnumELResolver(localEnumNames, customer, document));
 		}
 		manager.addELResolver(new ValidationELResolver(customer));
 		return result;
@@ -549,15 +633,213 @@ public class ELExpressionEvaluator extends ExpressionEvaluator {
 	 * @param processor the validation processor to define the enum beans on
 	 * @param customer the customer metadata context
 	 * @param document the document whose attributes declare the enumerations
+	 * @return the simple names that were bound
 	 */
-	private static void defineEnumBeans(@Nonnull ELProcessor processor, @Nonnull Customer customer, @Nonnull Document document) {
+	private static @Nonnull Set<String> defineEnumBeans(@Nonnull ELProcessor processor, @Nonnull Customer customer, @Nonnull Document document) {
 		Set<String> boundNames = new HashSet<>();
 		for (Enumeration enumeration : staticEnumerations(customer, document)) {
 			String name = enumeration.toJavaIdentifier();
 			if (boundNames.add(name)) {
-				Class<?> enumClass = loadEnumClass(enumeration);
-				processor.defineBean(name, (enumClass == null) ? enumeration : new ELClass(enumClass));
+				processor.defineBean(name, enumBean(enumeration));
 			}
+		}
+		return boundNames;
+	}
+
+	/**
+	 * Determines what an enumeration name evaluates to during validation.
+	 *
+	 * @param enumeration the enumeration metadata
+	 * @return the generated enum class when it can be loaded, and the enumeration metadata otherwise
+	 * 			(during domain generation, before the class exists)
+	 */
+	private static @Nonnull Object enumBean(@Nonnull Enumeration enumeration) {
+		Class<?> enumClass = loadEnumClass(enumeration);
+		return (enumClass == null) ? enumeration : new ELClass(enumClass);
+	}
+
+	/**
+	 * Finds the static enumeration with the given simple name that is declared closest to a document,
+	 * amongst the documents it is related to.
+	 *
+	 * <p>The documents are searched breadth first along associations, collections and inverses,
+	 * including inherited ones, so an enumeration one relation away is found before one two relations away.
+	 * The document's own enumerations are not considered; they are bound by name already.
+	 *
+	 * <p>Complexity: visits each reachable document at most once, and stops at the first distance with a match.
+	 *
+	 * @param customer the customer metadata context
+	 * @param document the document to search from
+	 * @param name the simple name of the enumeration
+	 * @return the enumeration, or {@code null} if no related document declares one of that name
+	 * @throws MetaDataException if different enumerations of that name are declared at the closest distance
+	 */
+	static @Nullable Enumeration relatedEnumeration(@Nonnull Customer customer, @Nonnull Document document, @Nonnull String name) {
+		Set<String> visited = new HashSet<>();
+		visited.add(qualifiedName(document));
+		List<Document> level = relatedDocuments(customer, List.of(document), visited);
+		while (! level.isEmpty()) {
+			Enumeration result = null;
+			String resultDocumentName = null;
+			for (Document related : level) {
+				Enumeration candidate = staticEnumeration(customer, related, name);
+				if (candidate != null) {
+					if (result == null) {
+						result = candidate;
+						resultDocumentName = qualifiedName(related);
+					}
+					else if (! enumClassName(result).equals(enumClassName(candidate))) {
+						throw new MetaDataException("Enumeration " + name + " is ambiguous for document " + qualifiedName(document) +
+														" as it is declared by both " + resultDocumentName + " and " + qualifiedName(related) +
+														", which are equally closely related to it");
+					}
+				}
+			}
+			if (result != null) {
+				return result;
+			}
+			level = relatedDocuments(customer, level, visited);
+		}
+		return null;
+	}
+
+	/**
+	 * Lists the documents that the given documents are related to and that have not been visited yet.
+	 *
+	 * @param customer the customer metadata context
+	 * @param documents the documents whose relations, including inherited ones, are to be followed
+	 * @param visited the qualified names of the documents already visited, which is added to
+	 * @return the related documents, in the order their relations are declared
+	 */
+	private static @Nonnull List<Document> relatedDocuments(@Nonnull Customer customer, @Nonnull List<Document> documents, @Nonnull Set<String> visited) {
+		List<Document> result = new ArrayList<>();
+		for (Document document : documents) {
+			for (Document current = document; current != null; current = baseDocument(customer, current)) {
+				addRelatedDocuments(customer, current, visited, result);
+			}
+		}
+		return result;
+	}
+
+	/**
+	 * Adds the documents that a document's own relations target and that have not been visited yet.
+	 * A relation names its document within the module of the document that declares it.
+	 */
+	private static void addRelatedDocuments(@Nonnull Customer customer, @Nonnull Document document, @Nonnull Set<String> visited, @Nonnull List<Document> related) {
+		Module module = customer.getModule(document.getOwningModuleName());
+		for (Attribute attribute : document.getAttributes()) {
+			if (attribute instanceof Relation relation) {
+				Document target = module.getDocument(customer, relation.getDocumentName());
+				if (visited.add(qualifiedName(target))) {
+					related.add(target);
+				}
+			}
+		}
+	}
+
+	/**
+	 * Returns the document that a document extends, or {@code null} when it extends none.
+	 */
+	private static @Nullable Document baseDocument(@Nonnull Customer customer, @Nonnull Document document) {
+		Extends inherits = document.getExtends();
+		return (inherits == null) ? null : customer.getModule(document.getOwningModuleName()).getDocument(customer, inherits.getDocumentName());
+	}
+
+	/**
+	 * Finds the document's static enumeration with the given simple name, preferring a local declaration.
+	 *
+	 * @param customer the customer metadata context
+	 * @param document the document whose attributes declare the enumerations
+	 * @param name the simple name of the enumeration
+	 * @return the enumeration, or {@code null} if the document has none of that name
+	 */
+	private static @Nullable Enumeration staticEnumeration(@Nonnull Customer customer, @Nonnull Document document, @Nonnull String name) {
+		for (Enumeration enumeration : staticEnumerations(customer, document)) {
+			if (name.equals(enumeration.toJavaIdentifier())) {
+				return enumeration;
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * Names the enum class that implements an enumeration, without loading it.
+	 *
+	 * @param enumeration the enumeration metadata
+	 * @return the fully qualified name of the hand-coded or generated enum class
+	 */
+	private static @Nonnull String enumClassName(@Nonnull Enumeration enumeration) {
+		String result = enumeration.getImplementingEnumClassName();
+		if (result == null) {
+			result = enumeration.getEncapsulatingClassName() + '$' + enumeration.toJavaIdentifier();
+		}
+		return result;
+	}
+
+	private static @Nonnull String qualifiedName(@Nonnull Document document) {
+		return document.getOwningModuleName() + '.' + document.getName();
+	}
+
+	/**
+	 * Resolves the enumerations of related documents while an expression is validated.
+	 */
+	private static final class ValidationEnumELResolver extends EnumELResolver {
+		private final Customer customer;
+		private final Document document;
+
+		private ValidationEnumELResolver(@Nonnull Set<String> localEnumNames, @Nonnull Customer customer, @Nonnull Document document) {
+			super(localEnumNames);
+			this.customer = customer;
+			this.document = document;
+		}
+
+		@Override
+		@Nullable Object find(@Nonnull String name) {
+			Enumeration enumeration = relatedEnumeration(customer, document, name);
+			return (enumeration == null) ? null : enumBean(enumeration);
+		}
+	}
+
+	/**
+	 * Resolves enumerations while an expression is evaluated against a bean: the bean class's own,
+	 * and those of related documents. A related enumeration that is found is remembered for the
+	 * bean's class, unless that class is one of the framework's dynamic bean classes, which are
+	 * shared by every dynamic document.
+	 */
+	private static final class EvaluationEnumELResolver extends EnumELResolver {
+		private final Bean bean;
+		private final Map<String, ELClass> enumBeans;
+
+		private EvaluationEnumELResolver(@Nonnull Bean bean) {
+			super(Set.of());
+			this.bean = bean;
+			enumBeans = ENUM_BEANS.get(bean.getClass());
+		}
+
+		@Override
+		@Nullable Object remembered(@Nonnull String name) {
+			return enumBeans.get(name);
+		}
+
+		@Override
+		@Nullable Object find(@Nonnull String name) {
+			String moduleName = bean.getBizModule();
+			String documentName = bean.getBizDocument();
+			if ((moduleName == null) || (documentName == null)) {
+				return null;
+			}
+			Customer customer = CORE.getCustomer();
+			Document document = customer.getModule(moduleName).getDocument(customer, documentName);
+			Enumeration enumeration = relatedEnumeration(customer, document, name);
+			Class<?> enumClass = (enumeration == null) ? null : loadEnumClass(enumeration);
+			if (enumClass == null) {
+				return null;
+			}
+			ELClass result = new ELClass(enumClass);
+			if (! DynamicBean.class.getPackageName().equals(bean.getClass().getPackageName())) {
+				enumBeans.putIfAbsent(name, result);
+			}
+			return result;
 		}
 	}
 
@@ -617,7 +899,7 @@ public class ELExpressionEvaluator extends ExpressionEvaluator {
 		manager.addELResolver(BINDING_RESOLVER);
 		if (bean != null) {
 			manager.defineBean(BEAN_VARIABLE, bean);
-			ENUM_BEANS.get(bean.getClass()).forEach(manager::defineBean);
+			manager.addELResolver(new EvaluationEnumELResolver(bean));
 		}
 		manager.defineBean(USER_VARIABLE, CORE.getUser());
 		manager.defineBean(STASH_VARIABLE, CORE.getStash());

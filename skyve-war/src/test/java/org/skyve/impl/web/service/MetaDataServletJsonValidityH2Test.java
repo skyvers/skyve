@@ -15,6 +15,7 @@ import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
 import org.skyve.impl.metadata.module.menu.CalendarItem;
 import org.skyve.impl.metadata.module.menu.LinkItem;
@@ -46,7 +47,7 @@ import modules.test.AbstractSkyveTest;
  * the output at fault. Fixture views are put into the repository under a UX/UI name nothing else uses, and menus are
  * rendered for a user of this test's own, whose menus are a private copy.
  */
-@SuppressWarnings("java:S1192") // Repeated values are deliberate metadata rendering fixtures.
+@SuppressWarnings({"java:S1192", "java:S3011", "java:S112"}) // Repeated values are deliberate metadata rendering fixtures.
 class MetaDataServletJsonValidityH2Test extends AbstractSkyveTest {
 	private static final String FIXTURE_UXUI = "jsonValidityFixture";
 	private static final String MENU_UXUI = "external";
@@ -166,6 +167,58 @@ class MetaDataServletJsonValidityH2Test extends AbstractSkyveTest {
 
 		assertEquals("https://example.com/help", text(view, "helpURL"));
 		assertEquals(30, number(view, "refreshTimeInSeconds").intValue());
+	}
+
+	@Test
+	void viewRefreshIfConditionIsNamedByItsIdentifierWithItsExpression() throws Exception {
+		JsonNode view = renderFixture("refreshTimeInSeconds=\"30\" refreshIf=\"{role:kitchensink.Maintainer}\"",
+				item("<textField binding=\"text\" />"), "");
+
+		assertEquals(BindUtil.conditionIdentifier("{role:kitchensink.Maintainer}"), text(view, "refreshIfCondition"));
+		assertEquals("{role:kitchensink.Maintainer}", text(view, "refreshIfConditionExpression"));
+	}
+
+	@Test
+	void lookupDescriptionEnableConditionsAreNamedByTheirIdentifiersWithTheirExpressions() throws Exception {
+		JsonNode lookup = widget(renderFixture("", item("<lookupDescription binding=\"lookupDescription\" descriptionBinding=\"description\""
+				+ " enablePick=\"{role:kitchensink.Pick}\" enableEdit=\"{role:kitchensink.Edit}\""
+				+ " disableAdd=\"{role:kitchensink.Add}\" disableClear=\"{role:kitchensink.Clear}\" />"), ""), "lookupDescription");
+
+		// an enable attribute is the inverse of the disable condition the client is given
+		assertEquals("not" + BindUtil.conditionIdentifier("{role:kitchensink.Pick}"), text(lookup, "disablePickCondition"));
+		assertEquals("{role:kitchensink.Pick}", text(lookup, "disablePickConditionExpression"));
+		assertEquals("not" + BindUtil.conditionIdentifier("{role:kitchensink.Edit}"), text(lookup, "disableEditCondition"));
+		assertEquals("{role:kitchensink.Edit}", text(lookup, "disableEditConditionExpression"));
+		assertEquals(BindUtil.conditionIdentifier("{role:kitchensink.Add}"), text(lookup, "disableAddCondition"));
+		assertEquals("{role:kitchensink.Add}", text(lookup, "disableAddConditionExpression"));
+		assertEquals(BindUtil.conditionIdentifier("{role:kitchensink.Clear}"), text(lookup, "disableClearCondition"));
+		assertEquals("{role:kitchensink.Clear}", text(lookup, "disableClearConditionExpression"));
+	}
+
+	@Test
+	void dataGridEnableConditionsAreNamedByTheirIdentifiersWithTheirExpressions() throws Exception {
+		JsonNode grid = widget(renderFixture("", "<dataGrid binding=\"inlineGrid\""
+				+ " enableAdd=\"{role:kitchensink.Add}\" disableEdit=\"{role:kitchensink.Edit}\""
+				+ " enableRemove=\"{role:kitchensink.Remove}\" disableZoom=\"{role:kitchensink.Zoom}\">"
+				+ "<boundColumn binding=\"booleanFlag\" /></dataGrid>", ""), "dataGrid");
+
+		assertEquals("not" + BindUtil.conditionIdentifier("{role:kitchensink.Add}"), text(grid, "disableAddCondition"));
+		assertEquals("{role:kitchensink.Add}", text(grid, "disableAddConditionExpression"));
+		assertEquals(BindUtil.conditionIdentifier("{role:kitchensink.Edit}"), text(grid, "disableEditCondition"));
+		assertEquals("{role:kitchensink.Edit}", text(grid, "disableEditConditionExpression"));
+		assertEquals("not" + BindUtil.conditionIdentifier("{role:kitchensink.Remove}"), text(grid, "disableRemoveCondition"));
+		assertEquals("{role:kitchensink.Remove}", text(grid, "disableRemoveConditionExpression"));
+		assertEquals(BindUtil.conditionIdentifier("{role:kitchensink.Zoom}"), text(grid, "disableZoomCondition"));
+		assertEquals("{role:kitchensink.Zoom}", text(grid, "disableZoomConditionExpression"));
+	}
+
+	@Test
+	void conditionNamesAreWrittenWithoutAnExpression() throws Exception {
+		JsonNode grid = widget(renderFixture("", "<dataGrid binding=\"inlineGrid\" disableAdd=\"persisted\">"
+				+ "<boundColumn binding=\"booleanFlag\" /></dataGrid>", ""), "dataGrid");
+
+		assertEquals("persisted", text(grid, "disableAddCondition"));
+		assertFalse(grid.has("disableAddConditionExpression"), grid.toString());
 	}
 
 	@Test

@@ -21,6 +21,7 @@ import org.skyve.metadata.DecoratedMetaData;
 import org.skyve.metadata.view.Disableable;
 import org.skyve.metadata.view.Editable;
 
+import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlElementRef;
@@ -28,6 +29,7 @@ import jakarta.xml.bind.annotation.XmlElementRefs;
 import jakarta.xml.bind.annotation.XmlElementWrapper;
 import jakarta.xml.bind.annotation.XmlElements;
 import jakarta.xml.bind.annotation.XmlRootElement;
+import jakarta.xml.bind.annotation.XmlTransient;
 import jakarta.xml.bind.annotation.XmlType;
 import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
@@ -49,16 +51,16 @@ import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 			propOrder = {"inline", 
 							"editable",
 							"wordWrap",
-							"disabledConditionName", 
-							"enabledConditionName", 
-							"disableAddConditionName",
-							"enableAddConditionName",
-							"disableZoomConditionName",
-							"enableZoomConditionName",
-							"disableEditConditionName",
-							"enableEditConditionName",
-							"disableRemoveConditionName",
-							"enableRemoveConditionName",
+							"xmlDisabledCondition", 
+							"xmlEnabledCondition", 
+							"xmlDisableAddCondition",
+							"xmlEnableAddCondition",
+							"xmlDisableZoomCondition",
+							"xmlEnableZoomCondition",
+							"xmlDisableEditCondition",
+							"xmlEnableEditCondition",
+							"xmlDisableRemoveCondition",
+							"xmlEnableRemoveCondition",
 							"showAdd",
 							"showZoom",
 							"showEdit",
@@ -81,12 +83,17 @@ public class DataGrid extends AbstractDataWidget implements DecoratedMetaData,
 														Selectable {
 	private static final long serialVersionUID = 5341133860997684429L;
 
-	private String disabledConditionName;
+	private String disabledCondition;
+	private String enabledCondition;
 	
-	private String disableAddConditionName;
-	private String disableZoomConditionName;
-	private String disableEditConditionName;
-	private String disableRemoveConditionName;
+	private String disableAddCondition;
+	private String enableAddCondition;
+	private String disableZoomCondition;
+	private String enableZoomCondition;
+	private String disableEditCondition;
+	private String enableEditCondition;
+	private String disableRemoveCondition;
+	private String enableRemoveCondition;
 
 	private Boolean showAdd;
 	private Boolean showZoom;
@@ -188,218 +195,311 @@ public class DataGrid extends AbstractDataWidget implements DecoratedMetaData,
 	}
 
 	/**
-	 * Returns the disabled condition expression.
+	 * Returns the derived {@code disabled} condition that renderers and other consumers read.
 	 *
-	 * @return the disabled condition expression, or {@code null} when not set
+	 * @return the {@code disabled} attribute as authored, or else the negation of the authored
+	 * 			{@code enabled} attribute; {@code null} when neither was authored
 	 */
 	@Override
-	public String getDisabledConditionName() {
-		return disabledConditionName;
+	@XmlTransient
+	public @Nullable String getDisabledCondition() {
+		return (disabledCondition != null) ? disabledCondition : BindUtil.negateCondition(enabledCondition);
 	}
 
 	/**
-	 * Sets the disabled condition expression directly.
+	 * Sets the {@code disabled} attribute as authored.
 	 *
-	 * @param disabledConditionName the disabled condition expression
+	 * <p>Side effects: clears any authored {@code enabled} attribute.
+	 *
+	 * @param disabledCondition a condition name, an inline condition expression or a boolean literal; may be {@code null}
 	 */
 	@Override
 	@XmlAttribute(name = "disabled", required = false)
-	public void setDisabledConditionName(String disabledConditionName) {
-		this.disabledConditionName = UtilImpl.processStringValue(disabledConditionName);
-	}
-	
-	/**
-	 * JAXB-only placeholder for {@code enabled}; value is derived via {@link #setEnabledConditionName(String)}.
-	 *
-	 * @return always {@code null}; JAXB writes via {@code setEnabledConditionName}
-	 */
-	// to enable JAXB XML marshaling
-	@SuppressWarnings("static-method")
-	String getEnabledConditionName() {
-		return null;
+	public void setXmlDisabledCondition(@Nullable String disabledCondition) {
+		this.disabledCondition = UtilImpl.processStringValue(disabledCondition);
+		this.enabledCondition = null;
 	}
 
 	/**
-	 * Sets the enabled condition by storing its negation as the disabled condition.
+	 * Returns the {@code disabled} attribute as authored.
 	 *
-	 * @param enabledConditionName a condition expression that enables the grid
+	 * @return the authored condition, or {@code null} when {@code enabled} or neither was authored
+	 */
+	@Override
+	public @Nullable String getXmlDisabledCondition() {
+		return disabledCondition;
+	}
+
+	
+	/**
+	 * Returns the {@code enabled} attribute as authored.
+	 *
+	 * @return the authored condition, or {@code null} when {@code disabled} or neither was authored
+	 */
+	@Override
+	public @Nullable String getXmlEnabledCondition() {
+		return enabledCondition;
+	}
+
+	/**
+	 * Sets the {@code enabled} attribute as authored.
+	 *
+	 * <p>Side effects: clears any authored {@code disabled} attribute, so that
+	 * {@link #getDisabledCondition()} returns the negation of this condition.
+	 *
+	 * @param enabledCondition a condition name, an inline condition expression or a boolean literal; may be {@code null}
 	 */
 	@Override
 	@XmlAttribute(name = "enabled", required = false)
-	public void setEnabledConditionName(String enabledConditionName) {
-		this.disabledConditionName = BindUtil.negateCondition(UtilImpl.processStringValue(enabledConditionName));
+	public void setXmlEnabledCondition(@Nullable String enabledCondition) {
+		this.enabledCondition = UtilImpl.processStringValue(enabledCondition);
+		this.disabledCondition = null;
 	}
 
 	/**
-	 * Returns the disable-add condition expression.
+	 * Returns the derived {@code disableAdd} condition that renderers and other consumers read.
 	 *
-	 * @return the disable-add condition expression, or {@code null} when not set
+	 * @return the {@code disableAdd} attribute as authored, or else the negation of the authored
+	 * 			{@code enableAdd} attribute; {@code null} when neither was authored
 	 */
 	@Override
-	public String getDisableAddConditionName() {
-		return disableAddConditionName;
+	@XmlTransient
+	public @Nullable String getDisableAddCondition() {
+		return (disableAddCondition != null) ? disableAddCondition : BindUtil.negateCondition(enableAddCondition);
 	}
 
 	/**
-	 * Sets the disable-add condition expression directly.
+	 * Sets the {@code disableAdd} attribute as authored.
 	 *
-	 * @param disableAddConditionName the disable-add condition expression
+	 * <p>Side effects: clears any authored {@code enableAdd} attribute.
+	 *
+	 * @param disableAddCondition a condition name, an inline condition expression or a boolean literal; may be {@code null}
 	 */
 	@Override
 	@XmlAttribute(name = "disableAdd", required = false)
-	public void setDisableAddConditionName(String disableAddConditionName) {
-		this.disableAddConditionName = UtilImpl.processStringValue(disableAddConditionName);
-	}
-	
-	/**
-	 * JAXB-only placeholder for {@code enableAdd}; value is derived via {@link #setEnableAddConditionName(String)}.
-	 *
-	 * @return always {@code null}; JAXB writes via {@code setEnableAddConditionName}
-	 */
-	// to enable JAXB XML marshaling
-	@SuppressWarnings("static-method")
-	String getEnableAddConditionName() {
-		return null;
+	public void setXmlDisableAddCondition(@Nullable String disableAddCondition) {
+		this.disableAddCondition = UtilImpl.processStringValue(disableAddCondition);
+		this.enableAddCondition = null;
 	}
 
 	/**
-	 * Sets the add-enabled condition by storing its negation as the add-disabled condition.
+	 * Returns the {@code disableAdd} attribute as authored.
 	 *
-	 * @param enableAddConditionName a condition expression that enables add actions
+	 * @return the authored condition, or {@code null} when {@code enableAdd} or neither was authored
+	 */
+	@Override
+	public @Nullable String getXmlDisableAddCondition() {
+		return disableAddCondition;
+	}
+
+	
+	/**
+	 * Returns the {@code enableAdd} attribute as authored.
+	 *
+	 * @return the authored condition, or {@code null} when {@code disableAdd} or neither was authored
+	 */
+	@Override
+	public @Nullable String getXmlEnableAddCondition() {
+		return enableAddCondition;
+	}
+
+	/**
+	 * Sets the {@code enableAdd} attribute as authored.
+	 *
+	 * <p>Side effects: clears any authored {@code disableAdd} attribute, so that
+	 * {@link #getDisableAddCondition()} returns the negation of this condition.
+	 *
+	 * @param enableAddCondition a condition name, an inline condition expression or a boolean literal; may be {@code null}
 	 */
 	@Override
 	@XmlAttribute(name = "enableAdd", required = false)
-	public void setEnableAddConditionName(String enableAddConditionName) {
-		this.disableAddConditionName = BindUtil.negateCondition(UtilImpl.processStringValue(enableAddConditionName));
+	public void setXmlEnableAddCondition(@Nullable String enableAddCondition) {
+		this.enableAddCondition = UtilImpl.processStringValue(enableAddCondition);
+		this.disableAddCondition = null;
 	}
 
 	/**
-	 * Returns the disable-zoom condition expression.
+	 * Returns the derived {@code disableZoom} condition that renderers and other consumers read.
 	 *
-	 * @return the disable-zoom condition expression, or {@code null} when not set
+	 * @return the {@code disableZoom} attribute as authored, or else the negation of the authored
+	 * 			{@code enableZoom} attribute; {@code null} when neither was authored
 	 */
 	@Override
-	public String getDisableZoomConditionName() {
-		return disableZoomConditionName;
+	@XmlTransient
+	public @Nullable String getDisableZoomCondition() {
+		return (disableZoomCondition != null) ? disableZoomCondition : BindUtil.negateCondition(enableZoomCondition);
 	}
 
 	/**
-	 * Sets the disable-zoom condition expression directly.
+	 * Sets the {@code disableZoom} attribute as authored.
 	 *
-	 * @param disableZoomConditionName the disable-zoom condition expression
+	 * <p>Side effects: clears any authored {@code enableZoom} attribute.
+	 *
+	 * @param disableZoomCondition a condition name, an inline condition expression or a boolean literal; may be {@code null}
 	 */
 	@Override
 	@XmlAttribute(name = "disableZoom", required = false)
-	public void setDisableZoomConditionName(String disableZoomConditionName) {
-		this.disableZoomConditionName = UtilImpl.processStringValue(disableZoomConditionName);
+	public void setXmlDisableZoomCondition(@Nullable String disableZoomCondition) {
+		this.disableZoomCondition = UtilImpl.processStringValue(disableZoomCondition);
+		this.enableZoomCondition = null;
 	}
 
 	/**
-	 * JAXB-only placeholder for {@code enableZoom}; value is derived via {@link #setEnableZoomConditionName(String)}.
+	 * Returns the {@code disableZoom} attribute as authored.
 	 *
-	 * @return always {@code null}; JAXB writes via {@code setEnableZoomConditionName}
+	 * @return the authored condition, or {@code null} when {@code enableZoom} or neither was authored
 	 */
-	// to enable JAXB XML marshaling
-	@SuppressWarnings("static-method")
-	String getEnableZoomConditionName() {
-		return null;
+	@Override
+	public @Nullable String getXmlDisableZoomCondition() {
+		return disableZoomCondition;
 	}
 
 	/**
-	 * Sets the zoom-enabled condition by storing its negation as the zoom-disabled condition.
+	 * Returns the {@code enableZoom} attribute as authored.
 	 *
-	 * @param enableZoomConditionName a condition expression that enables zoom actions
+	 * @return the authored condition, or {@code null} when {@code disableZoom} or neither was authored
+	 */
+	@Override
+	public @Nullable String getXmlEnableZoomCondition() {
+		return enableZoomCondition;
+	}
+
+	/**
+	 * Sets the {@code enableZoom} attribute as authored.
+	 *
+	 * <p>Side effects: clears any authored {@code disableZoom} attribute, so that
+	 * {@link #getDisableZoomCondition()} returns the negation of this condition.
+	 *
+	 * @param enableZoomCondition a condition name, an inline condition expression or a boolean literal; may be {@code null}
 	 */
 	@Override
 	@XmlAttribute(name = "enableZoom", required = false)
-	public void setEnableZoomConditionName(String enableZoomConditionName) {
-		this.disableZoomConditionName =  BindUtil.negateCondition(UtilImpl.processStringValue(enableZoomConditionName));
+	public void setXmlEnableZoomCondition(@Nullable String enableZoomCondition) {
+		this.enableZoomCondition = UtilImpl.processStringValue(enableZoomCondition);
+		this.disableZoomCondition = null;
 	}
 
 	/**
-	 * Returns the disable-edit condition expression.
+	 * Returns the derived {@code disableEdit} condition that renderers and other consumers read.
 	 *
-	 * @return the disable-edit condition expression, or {@code null} when not set
+	 * @return the {@code disableEdit} attribute as authored, or else the negation of the authored
+	 * 			{@code enableEdit} attribute; {@code null} when neither was authored
 	 */
 	@Override
-	public String getDisableEditConditionName() {
-		return disableEditConditionName;
+	@XmlTransient
+	public @Nullable String getDisableEditCondition() {
+		return (disableEditCondition != null) ? disableEditCondition : BindUtil.negateCondition(enableEditCondition);
 	}
 
 	/**
-	 * Sets the disable-edit condition expression directly.
+	 * Sets the {@code disableEdit} attribute as authored.
 	 *
-	 * @param disableEditConditionName the disable-edit condition expression
+	 * <p>Side effects: clears any authored {@code enableEdit} attribute.
+	 *
+	 * @param disableEditCondition a condition name, an inline condition expression or a boolean literal; may be {@code null}
 	 */
 	@Override
 	@XmlAttribute(name = "disableEdit", required = false)
-	public void setDisableEditConditionName(String disableEditConditionName) {
-		this.disableEditConditionName = UtilImpl.processStringValue(disableEditConditionName);
+	public void setXmlDisableEditCondition(@Nullable String disableEditCondition) {
+		this.disableEditCondition = UtilImpl.processStringValue(disableEditCondition);
+		this.enableEditCondition = null;
 	}
 
 	/**
-	 * JAXB-only placeholder for {@code enableEdit}; value is derived via {@link #setEnableEditConditionName(String)}.
+	 * Returns the {@code disableEdit} attribute as authored.
 	 *
-	 * @return always {@code null}; JAXB writes via {@code setEnableEditConditionName}
+	 * @return the authored condition, or {@code null} when {@code enableEdit} or neither was authored
 	 */
-	// to enable JAXB XML marshaling
-	@SuppressWarnings("static-method")
-	String getEnableEditConditionName() {
-		return null;
+	@Override
+	public @Nullable String getXmlDisableEditCondition() {
+		return disableEditCondition;
 	}
 
 	/**
-	 * Sets the edit-enabled condition by storing its negation as the edit-disabled condition.
+	 * Returns the {@code enableEdit} attribute as authored.
 	 *
-	 * @param enableEditConditionName a condition expression that enables edit actions
+	 * @return the authored condition, or {@code null} when {@code disableEdit} or neither was authored
+	 */
+	@Override
+	public @Nullable String getXmlEnableEditCondition() {
+		return enableEditCondition;
+	}
+
+	/**
+	 * Sets the {@code enableEdit} attribute as authored.
+	 *
+	 * <p>Side effects: clears any authored {@code disableEdit} attribute, so that
+	 * {@link #getDisableEditCondition()} returns the negation of this condition.
+	 *
+	 * @param enableEditCondition a condition name, an inline condition expression or a boolean literal; may be {@code null}
 	 */
 	@Override
 	@XmlAttribute(name = "enableEdit", required = false)
-	public void setEnableEditConditionName(String enableEditConditionName) {
-		this.disableEditConditionName = BindUtil.negateCondition(UtilImpl.processStringValue(enableEditConditionName));
+	public void setXmlEnableEditCondition(@Nullable String enableEditCondition) {
+		this.enableEditCondition = UtilImpl.processStringValue(enableEditCondition);
+		this.disableEditCondition = null;
 	}
 
 	/**
-	 * Returns the disable-remove condition expression.
+	 * Returns the derived {@code disableRemove} condition that renderers and other consumers read.
 	 *
-	 * @return the disable-remove condition expression, or {@code null} when not set
+	 * @return the {@code disableRemove} attribute as authored, or else the negation of the authored
+	 * 			{@code enableRemove} attribute; {@code null} when neither was authored
 	 */
 	@Override
-	public String getDisableRemoveConditionName() {
-		return disableRemoveConditionName;
+	@XmlTransient
+	public @Nullable String getDisableRemoveCondition() {
+		return (disableRemoveCondition != null) ? disableRemoveCondition : BindUtil.negateCondition(enableRemoveCondition);
 	}
 
 	/**
-	 * Sets the disable-remove condition expression directly.
+	 * Sets the {@code disableRemove} attribute as authored.
 	 *
-	 * @param disableRemoveConditionName the disable-remove condition expression
+	 * <p>Side effects: clears any authored {@code enableRemove} attribute.
+	 *
+	 * @param disableRemoveCondition a condition name, an inline condition expression or a boolean literal; may be {@code null}
 	 */
 	@Override
 	@XmlAttribute(name = "disableRemove", required = false)
-	public void setDisableRemoveConditionName(String disableRemoveConditionName) {
-		this.disableRemoveConditionName = UtilImpl.processStringValue(disableRemoveConditionName);
-	}
-	
-	/**
-	 * JAXB-only placeholder for {@code enableRemove}; value is derived via {@link #setEnableRemoveConditionName(String)}.
-	 *
-	 * @return always {@code null}; JAXB writes via {@code setEnableRemoveConditionName}
-	 */
-	// to enable JAXB XML marshaling
-	@SuppressWarnings("static-method")
-	String getEnableRemoveConditionName() {
-		return null;
+	public void setXmlDisableRemoveCondition(@Nullable String disableRemoveCondition) {
+		this.disableRemoveCondition = UtilImpl.processStringValue(disableRemoveCondition);
+		this.enableRemoveCondition = null;
 	}
 
 	/**
-	 * Sets the remove-enabled condition by storing its negation as the remove-disabled condition.
+	 * Returns the {@code disableRemove} attribute as authored.
 	 *
-	 * @param enableRemoveConditionName a condition expression that enables remove actions
+	 * @return the authored condition, or {@code null} when {@code enableRemove} or neither was authored
+	 */
+	@Override
+	public @Nullable String getXmlDisableRemoveCondition() {
+		return disableRemoveCondition;
+	}
+
+	
+	/**
+	 * Returns the {@code enableRemove} attribute as authored.
+	 *
+	 * @return the authored condition, or {@code null} when {@code disableRemove} or neither was authored
+	 */
+	@Override
+	public @Nullable String getXmlEnableRemoveCondition() {
+		return enableRemoveCondition;
+	}
+
+	/**
+	 * Sets the {@code enableRemove} attribute as authored.
+	 *
+	 * <p>Side effects: clears any authored {@code disableRemove} attribute, so that
+	 * {@link #getDisableRemoveCondition()} returns the negation of this condition.
+	 *
+	 * @param enableRemoveCondition a condition name, an inline condition expression or a boolean literal; may be {@code null}
 	 */
 	@Override
 	@XmlAttribute(name = "enableRemove", required = false)
-	public void setEnableRemoveConditionName(String enableRemoveConditionName) {
-		this.disableRemoveConditionName = BindUtil.negateCondition(UtilImpl.processStringValue(enableRemoveConditionName));
+	public void setXmlEnableRemoveCondition(@Nullable String enableRemoveCondition) {
+		this.enableRemoveCondition = UtilImpl.processStringValue(enableRemoveCondition);
+		this.disableRemoveCondition = null;
 	}
 
 	/**

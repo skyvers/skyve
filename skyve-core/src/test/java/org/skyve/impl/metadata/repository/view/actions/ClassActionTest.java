@@ -60,11 +60,11 @@ class ClassActionTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void setVisibleConditionNameNegatesCondition() {
+	void setVisibleConditionNegatesCondition() {
 		CustomAction action = new CustomAction();
-		action.setVisibleConditionName("showAction");
-		// setVisibleConditionName stores the negated form as invisibleConditionName
-		assertThat(action.getInvisibleConditionName(), is("notShowAction"));
+		action.setXmlVisibleCondition("showAction");
+		// the invisible condition is derived as the negation of the authored visible condition
+		assertThat(action.getInvisibleCondition(), is("notShowAction"));
 	}
 
         @Test
@@ -97,25 +97,22 @@ class ClassActionTest {
 
         @Test
         @SuppressWarnings("static-method")
-        void actionMetaDataJaxbGetVisibleConditionNameReturnsNull() {
-                // Package-private method for JAXB marshaling
-                assertNull(new CustomAction().getVisibleConditionName());
+        void actionMetaDataXmlVisibleConditionIsNullByDefault() {
+                assertNull(new CustomAction().getXmlVisibleCondition());
         }
 
         @Test
         @SuppressWarnings("static-method")
-        void actionMetaDataJaxbGetEnabledConditionNameReturnsNull() {
-                // Package-private method for JAXB marshaling
-                assertNull(new CustomAction().getEnabledConditionName());
+        void actionMetaDataXmlEnabledConditionIsNullByDefault() {
+                assertNull(new CustomAction().getXmlEnabledCondition());
         }
 
 	@Test
 	@SuppressWarnings("static-method")
-	void actionMetaDataSetEnabledConditionNameSetsDisabledNegation() {
-		// setEnabledConditionName negates the condition and stores it as disabledConditionName
+	void actionMetaDataSetEnabledConditionDerivesNegatedCondition() {
 		SaveAction action = new SaveAction();
-		action.setEnabledConditionName("myCondition");
-		// The disabled condition should be the negation of "myCondition"
-		assertNotNull(action.getDisabledConditionName());
+		action.setXmlEnabledCondition("myCondition");
+		// the disabled condition is derived as the negation of the authored enabled condition
+		assertThat(action.getDisabledCondition(), is("notMyCondition"));
 	}
 }

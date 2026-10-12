@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -28,8 +29,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.stream.Stream;
 
-import com.sun.management.ThreadMXBean;
-
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestFactory;
@@ -46,6 +45,8 @@ import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.user.User;
+
+import com.sun.management.ThreadMXBean;
 
 import jakarta.el.ELClass;
 import jakarta.el.ELProcessor;
@@ -130,8 +131,123 @@ import jakarta.el.ELProcessor;
 			{"bean", "myField", "bean.myField"},
 			{"x + y", "field", "x + y"},
 			{"bean.name", "contact", "bean.contact.name"},
-			{"user.name", "field", "user.name"}
+			{"user.name", "field", "user.name"},
+			{"", "b", ""},
+			{"bean.x + bean.y", "a.b", "bean.a.b.x + bean.a.b.y"},
+			{"user.contact.name eq bean.name", "b", "user.contact.name eq bean.b.name"},
+			{"bean.flag&&bean.other", "b", "bean.b.flag&&bean.b.other"},
+			{"!bean.flag", "b", "!bean.b.flag"},
+			{"(bean)", "b", "(bean.b)"},
+			{"[bean, bean.x]", "b", "[bean.b, bean.b.x]"},
+			{"bean.lines.stream().anyMatch(l -> l.active)", "b", "bean.b.lines.stream().anyMatch(l -> l.active)"},
+			{"bean.mapType eq MapType.gmap", "b", "bean.b.mapType eq MapType.gmap"},
+			{"1e5 + bean.x", "b", "1e5 + bean.b.x"}
 		};
+		return prefixBindingTests(evaluator, cases);
+	}
+
+	@TestFactory
+	Stream<DynamicTest> prefixBindingRewritesBeanWhateverFollowsIt() {
+		ELExpressionEvaluator evaluator = new ELExpressionEvaluator(false);
+		String[][] cases = {
+			{"bean['flag']", "b", "bean.b['flag']"},
+			{"bean [ 'flag' ]", "b", "bean.b [ 'flag' ]"},
+			{"bean[\"flag\"] and bean['other']", "b", "bean.b[\"flag\"] and bean.b['other']"},
+			{"bean .flag", "b", "bean.b .flag"},
+			{"empty bean", "b", "empty bean.b"},
+			{"bean eq null", "b", "bean.b eq null"},
+			{"bean == null ? false : bean.flag", "b", "bean.b == null ? false : bean.b.flag"},
+			{"not empty bean.lines and bean", "b", "not empty bean.b.lines and bean.b"},
+			{"bean.flag ? bean : null", "b", "bean.b.flag ? bean.b : null"},
+			{"fn:check(bean)", "b", "fn:check(bean.b)"},
+			{"fn:check(bean, bean.x)", "b", "fn:check(bean.b, bean.b.x)"}
+		};
+		return prefixBindingTests(evaluator, cases);
+	}
+
+	@TestFactory
+	Stream<DynamicTest> prefixBindingLeavesOtherIdentifiersAlone() {
+		ELExpressionEvaluator evaluator = new ELExpressionEvaluator(false);
+		String[][] cases = {
+			{"myBean.flag", "b", "myBean.flag"},
+			{"mybean.flag", "b", "mybean.flag"},
+			{"beans.flag", "b", "beans.flag"},
+			{"bean1.flag", "b", "bean1.flag"},
+			{"1bean.flag", "b", "1bean.flag"},
+			{"_bean.flag", "b", "_bean.flag"},
+			{"$bean.flag", "b", "$bean.flag"},
+			{"Bean.flag", "b", "Bean.flag"},
+			{"BEAN.flag", "b", "BEAN.flag"},
+			{"bea.flag", "b", "bea.flag"},
+			{"stash.bean.flag", "b", "stash.bean.flag"},
+			{"stash . bean", "b", "stash . bean"},
+			{"stash.\n\tbean.flag", "b", "stash.\n\tbean.flag"},
+			{"bean.bean", "b", "bean.b.bean"},
+			{"bean.bean.bean", "b", "bean.b.bean.bean"},
+			{"bean(1)", "b", "bean(1)"},
+			{"bean (1)", "b", "bean (1)"},
+			{"fn:bean(bean)", "b", "fn:bean(bean.b)"},
+			// the inserted binding is not scanned again
+			{"bean.x", "bean", "bean.bean.x"},
+			{"bean", "bean.bean", "bean.bean.bean"}
+		};
+		return prefixBindingTests(evaluator, cases);
+	}
+
+	@TestFactory
+	Stream<DynamicTest> prefixBindingLeavesStringLiteralsAlone() {
+		ELExpressionEvaluator evaluator = new ELExpressionEvaluator(false);
+		String[][] cases = {
+			{"bean.name eq 'bean.counter'", "b", "bean.b.name eq 'bean.counter'"},
+			{"bean.name eq \"bean.counter\"", "b", "bean.b.name eq \"bean.counter\""},
+			{"'bean' eq bean.name", "b", "'bean' eq bean.b.name"},
+			{"stash['bean'].x", "b", "stash['bean'].x"},
+			{"stash['mybean.x'] eq 'y'", "b", "stash['mybean.x'] eq 'y'"},
+			{"bean.name eq 'it\\'s bean.x' and bean.flag", "b", "bean.b.name eq 'it\\'s bean.x' and bean.b.flag"},
+			{"bean.name eq \"say \\\"bean.x\\\"\" and bean.flag", "b", "bean.b.name eq \"say \\\"bean.x\\\"\" and bean.b.flag"},
+			{"bean.name eq 'a \"bean.x\" b' and bean.flag", "b", "bean.b.name eq 'a \"bean.x\" b' and bean.b.flag"},
+			{"bean.name eq \"a 'bean.x' b\" and bean.flag", "b", "bean.b.name eq \"a 'bean.x' b\" and bean.b.flag"},
+			{"bean.name eq 'ends in a backslash \\\\' and bean.flag", "b", "bean.b.name eq 'ends in a backslash \\\\' and bean.b.flag"},
+			{"bean.name eq '' and bean.flag", "b", "bean.b.name eq '' and bean.b.flag"},
+			// a literal that is never closed runs to the end of the expression
+			{"bean.name eq 'unterminated bean.x", "b", "bean.b.name eq 'unterminated bean.x"},
+			{"bean.name eq 'unterminated bean.x\\", "b", "bean.b.name eq 'unterminated bean.x\\"},
+			{"'", "b", "'"}
+		};
+		return prefixBindingTests(evaluator, cases);
+	}
+
+	@Test
+	void prefixBindingRewritesALambdaParameterCalledBean() {
+		// a known limit - the parameter is indistinguishable from the variable without parsing the expression
+		StringBuilder expression = new StringBuilder("xs.stream().anyMatch(bean -> bean.ok)");
+		new ELExpressionEvaluator(false).prefixBindingWithoutPrefixOrSuffix(expression, "b");
+		assertEquals("xs.stream().anyMatch(bean.b -> bean.b.ok)", expression.toString());
+	}
+
+	@TestFactory
+	Stream<DynamicTest> prefixBindingAppliesToWholeSkyveExpressions() {
+		// expression, binding, expected
+		String[][] cases = {
+			{"{el:bean.flag}", "b", "{el:bean.b.flag}"},
+			{"{el:bean['flag']}", "b", "{el:bean.b['flag']}"},
+			{"{rtel:empty bean}", "b", "{rtel:empty bean.b}"},
+			{"{el: bean.flag }", "b", "{el:bean.b.flag}"},
+			{"{el:bean.name eq 'bean.x'}", "b", "{el:bean.b.name eq 'bean.x'}"},
+			{"{el:stash['mybean.x'] eq bean.name}", "b", "{el:stash['mybean.x'] eq bean.b.name}"},
+			{"{el:user.name eq 'x'}", "b", "{el:user.name eq 'x'}"}
+		};
+		return Stream.of(cases).map(c -> dynamicTest(c[0] + " with " + c[1], () ->
+			assertEquals(c[2], org.skyve.util.ExpressionEvaluator.prefixBinding(c[0], c[1]))));
+	}
+
+	@Test
+	void prefixMessageExpressionsUsesTheSameRewriting() {
+		assertEquals("{b.name} is {el:bean.b['flag'] ? 'bean.on' : 'off'} for {el:mybean.x}",
+						BindUtil.prefixMessageExpressions("{name} is {el:bean['flag'] ? 'bean.on' : 'off'} for {el:mybean.x}", "b"));
+	}
+
+	private static Stream<DynamicTest> prefixBindingTests(ELExpressionEvaluator evaluator, String[][] cases) {
 		return Stream.of(cases).map(c -> dynamicTest(c[0] + " with " + c[1], () -> {
 			StringBuilder sb = new StringBuilder(c[0]);
 			evaluator.prefixBindingWithoutPrefixOrSuffix(sb, c[1]);
@@ -463,12 +579,20 @@ import jakarta.el.ELProcessor;
 	}
 
 	@Test
-	void enumBeansAreCachedImmutablePerClass() {
+	void enumBeansAreCachedPerClass() {
 		Map<String, ELClass> first = ELExpressionEvaluator.ENUM_BEANS.get(ImportedEnumBean.class);
 		assertSame(first, ELExpressionEvaluator.ENUM_BEANS.get(ImportedEnumBean.class));
 		assertEquals(EnumBean.Choice.class, first.get("Choice").getKlass());
+		// each class has a map of its own, seeded from but separate to what is discovered for it
+		assertNotSame(ELExpressionEvaluator.ENUM_BEANS.get(EnumBean.class), first);
+		assertEquals(ELExpressionEvaluator.enumBeans(ImportedEnumBean.class).keySet(), first.keySet());
+	}
+
+	@Test
+	void discoveredEnumBeansAreImmutable() {
+		Map<String, ELClass> discovered = ELExpressionEvaluator.enumBeans(ImportedEnumBean.class);
 		ELClass other = new ELClass(EnumBean.Choice.class);
-		assertThrows(UnsupportedOperationException.class, () -> first.put("Other", other));
+		assertThrows(UnsupportedOperationException.class, () -> discovered.put("Other", other));
 	}
 
 	@Test

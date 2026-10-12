@@ -7,7 +7,9 @@ import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.view.Disableable;
 import org.skyve.metadata.view.Invisible;
 
+import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlAttribute;
+import jakarta.xml.bind.annotation.XmlTransient;
 import jakarta.xml.bind.annotation.XmlType;
 
 /**
@@ -23,106 +25,136 @@ import jakarta.xml.bind.annotation.XmlType;
  * @see ChangeableInputWidget
  */
 @XmlType(namespace = XMLMetaData.VIEW_NAMESPACE,
-			propOrder = {"invisibleConditionName", "visibleConditionName", "disabledConditionName", "enabledConditionName"})
+			propOrder = {"xmlInvisibleCondition", "xmlVisibleCondition", "xmlDisabledCondition", "xmlEnabledCondition"})
 public abstract class InputWidget extends AbstractBound implements Disableable, Invisible {
 	private static final long serialVersionUID = -5332816537102477174L;
 
-	private String disabledConditionName;
-	private String invisibleConditionName;
+	// Each condition pair is stored as authored so that marshaling is lossless.
+	// At most one field of a pair is non-null.
+	private String disabledCondition;
+	private String enabledCondition;
+	private String invisibleCondition;
+	private String visibleCondition;
 
 	/**
-	 * Returns the disable-condition expression for this widget.
+	 * Returns the derived {@code disabled} condition that renderers and other consumers read.
 	 *
-	 * @return the condition that disables the widget, or {@code null} when always enabled.
+	 * @return the {@code disabled} attribute as authored, or else the negation of the authored
+	 * 			{@code enabled} attribute; {@code null} when neither was authored
 	 */
 	@Override
-	public String getDisabledConditionName() {
-		return disabledConditionName;
+	@XmlTransient
+	public @Nullable String getDisabledCondition() {
+		return (disabledCondition != null) ? disabledCondition : BindUtil.negateCondition(enabledCondition);
 	}
 
 	/**
-	 * Sets the disable-condition expression for this widget.
+	 * Sets the {@code disabled} attribute as authored.
 	 *
-	 * @param disabledConditionName a condition expression that disables the widget,
-	 *            or {@code null}/blank to clear the condition.
+	 * <p>Side effects: clears any authored {@code enabled} attribute.
+	 *
+	 * @param disabledCondition a condition name, an inline condition expression or a boolean literal; may be {@code null}
 	 */
 	@Override
 	@XmlAttribute(name = "disabled", required = false)
-	public void setDisabledConditionName(String disabledConditionName) {
-		this.disabledConditionName = UtilImpl.processStringValue(disabledConditionName);
+	public void setXmlDisabledCondition(@Nullable String disabledCondition) {
+		this.disabledCondition = UtilImpl.processStringValue(disabledCondition);
+		this.enabledCondition = null;
 	}
 
 	/**
-	 * JAXB-only placeholder accessor for the {@code enabled} attribute.
+	 * Returns the {@code disabled} attribute as authored.
 	 *
-	 * @return always {@code null}; the canonical stored form is the disabled condition.
+	 * @return the authored condition, or {@code null} when {@code enabled} or neither was authored
 	 */
-	// to enable JAXB XML marshaling
-	@SuppressWarnings("static-method")
-	String getEnabledConditionName() {
-		return null;
+	@Override
+	public @Nullable String getXmlDisabledCondition() {
+		return disabledCondition;
 	}
 
 	/**
-	 * Sets the enabled condition by storing its logical negation as the disabled condition.
+	 * Returns the {@code enabled} attribute as authored.
 	 *
-	 * <p>Side effects: updates {@code disabledConditionName}. This keeps
-	 * {@code enabled="..."} and {@code disabled="..."} metadata mutually exclusive
-	 * while preserving one internal representation.
+	 * @return the authored condition, or {@code null} when {@code disabled} or neither was authored
+	 */
+	@Override
+	public @Nullable String getXmlEnabledCondition() {
+		return enabledCondition;
+	}
+
+	/**
+	 * Sets the {@code enabled} attribute as authored.
 	 *
-	 * @param enabledConditionName a condition expression that enables the widget
+	 * <p>Side effects: clears any authored {@code disabled} attribute, so that
+	 * {@link #getDisabledCondition()} returns the negation of this condition.
+	 *
+	 * @param enabledCondition a condition name, an inline condition expression or a boolean literal; may be {@code null}
 	 */
 	@Override
 	@XmlAttribute(name = "enabled", required = false)
-	public void setEnabledConditionName(String enabledConditionName) {
-		this.disabledConditionName = BindUtil.negateCondition(UtilImpl.processStringValue(enabledConditionName));
+	public void setXmlEnabledCondition(@Nullable String enabledCondition) {
+		this.enabledCondition = UtilImpl.processStringValue(enabledCondition);
+		this.disabledCondition = null;
 	}
 
 	/**
-	 * Returns the invisible-condition expression for this widget.
+	 * Returns the derived {@code invisible} condition that renderers and other consumers read.
 	 *
-	 * @return the condition that hides the widget, or {@code null} when always visible.
+	 * @return the {@code invisible} attribute as authored, or else the negation of the authored
+	 * 			{@code visible} attribute; {@code null} when neither was authored
 	 */
 	@Override
-	public String getInvisibleConditionName() {
-		return invisibleConditionName;
+	@XmlTransient
+	public @Nullable String getInvisibleCondition() {
+		return (invisibleCondition != null) ? invisibleCondition : BindUtil.negateCondition(visibleCondition);
 	}
 
 	/**
-	 * Sets the invisible-condition expression for this widget.
+	 * Sets the {@code invisible} attribute as authored.
 	 *
-	 * @param invisibleConditionName a condition expression that hides the widget,
-	 *            or {@code null}/blank to clear the condition.
+	 * <p>Side effects: clears any authored {@code visible} attribute.
+	 *
+	 * @param invisibleCondition a condition name, an inline condition expression or a boolean literal; may be {@code null}
 	 */
 	@Override
 	@XmlAttribute(name = "invisible", required = false)
-	public void setInvisibleConditionName(String invisibleConditionName) {
-		this.invisibleConditionName = UtilImpl.processStringValue(invisibleConditionName);
+	public void setXmlInvisibleCondition(@Nullable String invisibleCondition) {
+		this.invisibleCondition = UtilImpl.processStringValue(invisibleCondition);
+		this.visibleCondition = null;
 	}
 
 	/**
-	 * JAXB-only placeholder accessor for the {@code visible} attribute.
+	 * Returns the {@code invisible} attribute as authored.
 	 *
-	 * @return always {@code null}; the canonical stored form is the invisible condition.
+	 * @return the authored condition, or {@code null} when {@code visible} or neither was authored
 	 */
-	// to enable JAXB XML marshaling
-	@SuppressWarnings("static-method")
-	String getVisibleConditionName() {
-		return null;
+	@Override
+	public @Nullable String getXmlInvisibleCondition() {
+		return invisibleCondition;
 	}
 
 	/**
-	 * Sets the visible condition by storing its logical negation as the invisible condition.
+	 * Returns the {@code visible} attribute as authored.
 	 *
-	 * <p>Side effects: updates {@code invisibleConditionName}. This keeps
-	 * {@code visible="..."} and {@code invisible="..."} metadata mutually exclusive
-	 * while preserving one internal representation.
+	 * @return the authored condition, or {@code null} when {@code invisible} or neither was authored
+	 */
+	@Override
+	public @Nullable String getXmlVisibleCondition() {
+		return visibleCondition;
+	}
+
+	/**
+	 * Sets the {@code visible} attribute as authored.
 	 *
-	 * @param visibleConditionName a condition expression that makes the widget visible
+	 * <p>Side effects: clears any authored {@code invisible} attribute, so that
+	 * {@link #getInvisibleCondition()} returns the negation of this condition.
+	 *
+	 * @param visibleCondition a condition name, an inline condition expression or a boolean literal; may be {@code null}
 	 */
 	@Override
 	@XmlAttribute(name = "visible", required = false)
-	public void setVisibleConditionName(String visibleConditionName) {
-		this.invisibleConditionName = BindUtil.negateCondition(UtilImpl.processStringValue(visibleConditionName));
+	public void setXmlVisibleCondition(@Nullable String visibleCondition) {
+		this.visibleCondition = UtilImpl.processStringValue(visibleCondition);
+		this.invisibleCondition = null;
 	}
 }

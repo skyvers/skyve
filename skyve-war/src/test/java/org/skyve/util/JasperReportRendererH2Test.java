@@ -57,7 +57,7 @@ class JasperReportRendererH2Test extends AbstractH2Test {
 
 	@Test
 	void renderDesignWithBandInvisibleConditionContainsPrintWhen() throws Exception {
-		// Set an invisibleConditionName on the first non-empty detail band to exercise
+		// Set an invisible condition on the first non-empty detail band to exercise
 		// JasperReportRenderer.getPrintWhenExpressionFromInvisibleCondition
 		spec.getBands().stream()
 				.filter(b -> ReportBand.BandType.detail.equals(b.getBandType()))
@@ -66,6 +66,19 @@ class JasperReportRendererH2Test extends AbstractH2Test {
 				.ifPresent(b -> b.setInvisibleConditionName("condition"));
 		String jrxml = new JasperReportRenderer(spec).getJrxml();
 		assertThat(jrxml, containsString("printWhenExpression"));
+		assertThat(jrxml, containsString("!$F{THIS}.evaluateCondition(\"condition\")"));
+	}
+
+	@Test
+	void reportWithAnInlineInvisibleConditionCompiles() throws Exception {
+		// the quotes exercise the escaping of the expression into a java string literal
+		spec.getBands().stream()
+				.filter(b -> ReportBand.BandType.detail.equals(b.getBandType()))
+				.filter(b -> !b.getElements().isEmpty())
+				.findFirst()
+				.orElseThrow()
+				.setInvisibleConditionName("not{el:bean.text eq \"x\"}");
+		assertThat(new JasperReportRenderer(spec).getReport(), notNullValue());
 	}
 
 	@Test

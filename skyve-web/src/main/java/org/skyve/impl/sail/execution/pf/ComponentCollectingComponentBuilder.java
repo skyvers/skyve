@@ -109,7 +109,7 @@ class ComponentCollectingComponentBuilder extends NoOpComponentBuilder {
 	 * @param toolTip tooltip text
 	 * @param confirmationText optional confirmation text
 	 * @param button button metadata definition
-	 * @param formDisabledConditionName optional form disabled condition
+	 * @param formDisabledCondition optional form disabled condition
 	 * @param action action metadata definition
 	 * @return the supplied component
 	 */
@@ -122,7 +122,7 @@ class ComponentCollectingComponentBuilder extends NoOpComponentBuilder {
 										String toolTip,
 										String confirmationText, 
 										org.skyve.impl.metadata.view.widget.Button button,
-										String formDisabledConditionName,
+										String formDisabledCondition,
 										Action action) {
 		if (component != null) {
 			context.put(button.getActionName(), component, button);
@@ -170,7 +170,7 @@ class ComponentCollectingComponentBuilder extends NoOpComponentBuilder {
 	 * @param toolTip tooltip text
 	 * @param confirmationText optional confirmation text
 	 * @param button button metadata definition
-	 * @param formDisabledConditionName optional form disabled condition
+	 * @param formDisabledCondition optional form disabled condition
 	 * @param action action metadata definition
 	 * @return the supplied component
 	 */
@@ -183,7 +183,7 @@ class ComponentCollectingComponentBuilder extends NoOpComponentBuilder {
 										String toolTip,
 										String confirmationText, 
 										org.skyve.impl.metadata.view.widget.Button button,
-										String formDisabledConditionName,
+										String formDisabledCondition,
 										Action action) {
 		if (component != null) {
 			context.put(action.getName(), component, action);
@@ -226,7 +226,7 @@ class ComponentCollectingComponentBuilder extends NoOpComponentBuilder {
 	 * @param toolTip tooltip text
 	 * @param confirmationText optional confirmation text
 	 * @param button button metadata definition
-	 * @param formDisabledConditionName optional form disabled condition
+	 * @param formDisabledCondition optional form disabled condition
 	 * @param action action metadata definition
 	 * @return the supplied component
 	 */
@@ -237,7 +237,7 @@ class ComponentCollectingComponentBuilder extends NoOpComponentBuilder {
 										String toolTip,
 										String confirmationText, 
 										org.skyve.impl.metadata.view.widget.Button button,
-										String formDisabledConditionName,
+										String formDisabledCondition,
 										Action action) {
 		if (component != null) {
 			context.put(action.getName(), component, action);
@@ -280,7 +280,7 @@ class ComponentCollectingComponentBuilder extends NoOpComponentBuilder {
 	 * @param toolTip tooltip text
 	 * @param confirmationText optional confirmation text
 	 * @param button button metadata definition
-	 * @param formDisabledConditionName optional form disabled condition
+	 * @param formDisabledCondition optional form disabled condition
 	 * @param action action metadata definition
 	 * @return the supplied component
 	 */
@@ -291,7 +291,7 @@ class ComponentCollectingComponentBuilder extends NoOpComponentBuilder {
 										String toolTip,
 										String confirmationText, 
 										org.skyve.impl.metadata.view.widget.Button button,
-										String formDisabledConditionName,
+										String formDisabledCondition,
 										Action action) {
 		if (component != null) {
 			context.put(action.getName(), component, action);
@@ -452,7 +452,7 @@ class ComponentCollectingComponentBuilder extends NoOpComponentBuilder {
 	 * @param component the rendered checkbox component
 	 * @param dataWidgetVar optional data-widget variable
 	 * @param checkBox checkbox widget metadata
-	 * @param formDisabledConditionName form-level disabled condition
+	 * @param formDisabledCondition form-level disabled condition
 	 * @param title field title
 	 * @param requiredMessage optional required-field message
 	 * @return the supplied component
@@ -461,7 +461,7 @@ class ComponentCollectingComponentBuilder extends NoOpComponentBuilder {
 	public EventSourceComponent checkBox(EventSourceComponent component,
 											String dataWidgetVar,
 											CheckBox checkBox,
-											String formDisabledConditionName,
+											String formDisabledCondition,
 											String title,
 											@Nullable String requiredMessage) {
 		return putByBinding(checkBox, component);
@@ -473,7 +473,7 @@ class ComponentCollectingComponentBuilder extends NoOpComponentBuilder {
 	 * @param component the rendered colour-picker component
 	 * @param dataWidgetVar optional data-widget variable
 	 * @param colour colour-picker metadata
-	 * @param formDisabledConditionName form-level disabled condition
+	 * @param formDisabledCondition form-level disabled condition
 	 * @param title field title
 	 * @param requiredMessage optional required-field message
 	 * @param textAlignment text alignment metadata
@@ -483,7 +483,7 @@ class ComponentCollectingComponentBuilder extends NoOpComponentBuilder {
 	public EventSourceComponent colourPicker(EventSourceComponent component,
 												String dataWidgetVar,
 												ColourPicker colour,
-												String formDisabledConditionName,
+												String formDisabledCondition,
 												String title,
 												@Nullable String requiredMessage,
 												HorizontalAlignment textAlignment) {
@@ -496,7 +496,7 @@ class ComponentCollectingComponentBuilder extends NoOpComponentBuilder {
 	 * @param component the rendered combo component
 	 * @param dataWidgetVar optional data-widget variable
 	 * @param combo combo metadata
-	 * @param formDisabledConditionName form-level disabled condition
+	 * @param formDisabledCondition form-level disabled condition
 	 * @param title field title
 	 * @param requiredMessage optional required-field message
 	 * @return the supplied component
@@ -505,7 +505,7 @@ class ComponentCollectingComponentBuilder extends NoOpComponentBuilder {
 	public EventSourceComponent combo(EventSourceComponent component,
 										String dataWidgetVar,
 										Combo combo,
-										String formDisabledConditionName,
+										String formDisabledCondition,
 										String title,
 										@Nullable String requiredMessage) {
 		return putByBinding(combo, component);
@@ -517,7 +517,7 @@ class ComponentCollectingComponentBuilder extends NoOpComponentBuilder {
 	 * @param component the rendered content component, or {@code null}
 	 * @param dataWidgetVar optional data-widget variable, or {@code null}
 	 * @param content content metadata; must not be {@code null}
-	 * @param formDisabledConditionName form-level disabled condition, or {@code null}
+	 * @param formDisabledCondition form-level disabled condition, or {@code null}
 	 * @param title field title, or {@code null}
 	 * @param requiredMessage optional required-field message
 	 * @param textAlignment text alignment metadata, or {@code null}
@@ -529,7 +529,7 @@ class ComponentCollectingComponentBuilder extends NoOpComponentBuilder {
 	public @Nullable UIComponent content(@Nullable UIComponent component,
 											@Nullable String dataWidgetVar,
 											@Nonnull ContentUpload content,
-											@Nullable String formDisabledConditionName,
+											@Nullable String formDisabledCondition,
 											@Nullable String title,
 											@Nullable String requiredMessage,
 											@Nullable HorizontalAlignment textAlignment,
@@ -544,7 +544,7 @@ class ComponentCollectingComponentBuilder extends NoOpComponentBuilder {
 	 * @param component the rendered HTML component
 	 * @param dataWidgetVar optional data-widget variable
 	 * @param html HTML widget metadata
-	 * @param formDisabledConditionName form-level disabled condition
+	 * @param formDisabledCondition form-level disabled condition
 	 * @param title field title
 	 * @param requiredMessage optional required-field message
 	 * @return the supplied component
@@ -553,7 +553,7 @@ class ComponentCollectingComponentBuilder extends NoOpComponentBuilder {
 	public UIComponent html(UIComponent component,
 								String dataWidgetVar,
 								HTML html,
-								String formDisabledConditionName,
+								String formDisabledCondition,
 								String title,
 								@Nullable String requiredMessage) {
 		return putByBinding(html, component);
@@ -565,7 +565,7 @@ class ComponentCollectingComponentBuilder extends NoOpComponentBuilder {
 	 * @param component the rendered lookup component
 	 * @param dataWidgetVar optional data-widget variable
 	 * @param lookup lookup widget metadata
-	 * @param formDisabledConditionName form-level disabled condition
+	 * @param formDisabledCondition form-level disabled condition
 	 * @param title field title
 	 * @param requiredMessage optional required-field message
 	 * @param textAlignment text alignment metadata
@@ -578,7 +578,7 @@ class ComponentCollectingComponentBuilder extends NoOpComponentBuilder {
 	public EventSourceComponent lookupDescription(EventSourceComponent component,
 													String dataWidgetVar,
 													LookupDescription lookup,
-													String formDisabledConditionName,
+													String formDisabledCondition,
 													String title,
 													@Nullable String requiredMessage,
 													HorizontalAlignment textAlignment,
@@ -596,7 +596,7 @@ class ComponentCollectingComponentBuilder extends NoOpComponentBuilder {
 	 * @param iconStyleClass icon style class
 	 * @param toolTip tooltip text
 	 * @param zoomIn zoom metadata
-	 * @param formDisabledConditionName form-level disabled condition
+	 * @param formDisabledCondition form-level disabled condition
 	 * @return the supplied component
 	 */
 	@Override
@@ -605,7 +605,7 @@ class ComponentCollectingComponentBuilder extends NoOpComponentBuilder {
 								String iconStyleClass,
 								String toolTip,
 								ZoomIn zoomIn,
-								String formDisabledConditionName) {
+								String formDisabledCondition) {
 		if (component != null) {
 			context.put(zoomIn.getBinding() + ".zoomIn", component, zoomIn);
 		}
@@ -619,7 +619,7 @@ class ComponentCollectingComponentBuilder extends NoOpComponentBuilder {
 	 * @param component the rendered password component
 	 * @param dataWidgetVar optional data-widget variable
 	 * @param password password metadata
-	 * @param formDisabledConditionName form-level disabled condition
+	 * @param formDisabledCondition form-level disabled condition
 	 * @param title field title
 	 * @param requiredMessage optional required-field message
 	 * @param textAlignment text alignment metadata
@@ -629,7 +629,7 @@ class ComponentCollectingComponentBuilder extends NoOpComponentBuilder {
 	public EventSourceComponent password(EventSourceComponent component,
 											String dataWidgetVar,
 											Password password,
-											String formDisabledConditionName,
+											String formDisabledCondition,
 											String title,
 											@Nullable String requiredMessage,
 											HorizontalAlignment textAlignment) {
@@ -642,7 +642,7 @@ class ComponentCollectingComponentBuilder extends NoOpComponentBuilder {
 	 * @param component the rendered radio component
 	 * @param dataWidgetVar optional data-widget variable
 	 * @param radio radio metadata
-	 * @param formDisabledConditionName form-level disabled condition
+	 * @param formDisabledCondition form-level disabled condition
 	 * @param title field title
 	 * @param requiredMessage optional required-field message
 	 * @return the supplied component
@@ -651,7 +651,7 @@ class ComponentCollectingComponentBuilder extends NoOpComponentBuilder {
 	public EventSourceComponent radio(EventSourceComponent component,
 										String dataWidgetVar,
 										Radio radio,
-										String formDisabledConditionName,
+										String formDisabledCondition,
 										String title,
 										@Nullable String requiredMessage) {
 		return putByBinding(radio, component);
@@ -663,7 +663,7 @@ class ComponentCollectingComponentBuilder extends NoOpComponentBuilder {
 	 * @param component the rendered rich-text component
 	 * @param dataWidgetVar optional data-widget variable
 	 * @param text rich-text metadata
-	 * @param formDisabledConditionName form-level disabled condition
+	 * @param formDisabledCondition form-level disabled condition
 	 * @param title field title
 	 * @param requiredMessage optional required-field message
 	 * @return the supplied component
@@ -672,7 +672,7 @@ class ComponentCollectingComponentBuilder extends NoOpComponentBuilder {
 	public EventSourceComponent richText(EventSourceComponent component,
 											String dataWidgetVar,
 											RichText text,
-											String formDisabledConditionName,
+											String formDisabledCondition,
 											String title,
 											@Nullable String requiredMessage) {
 		return putByBinding(text, component);
@@ -684,7 +684,7 @@ class ComponentCollectingComponentBuilder extends NoOpComponentBuilder {
 	 * @param component the rendered spinner component
 	 * @param dataWidgetVar optional data-widget variable
 	 * @param spinner spinner metadata
-	 * @param formDisabledConditionName form-level disabled condition
+	 * @param formDisabledCondition form-level disabled condition
 	 * @param title field title
 	 * @param requiredMessage optional required-field message
 	 * @param textAlignment text alignment metadata
@@ -695,7 +695,7 @@ class ComponentCollectingComponentBuilder extends NoOpComponentBuilder {
 	public EventSourceComponent spinner(EventSourceComponent component,
 											String dataWidgetVar,
 											Spinner spinner,
-											String formDisabledConditionName,
+											String formDisabledCondition,
 											String title,
 											@Nullable String requiredMessage,
 											HorizontalAlignment textAlignment,
@@ -709,7 +709,7 @@ class ComponentCollectingComponentBuilder extends NoOpComponentBuilder {
 	 * @param component the rendered slider component
 	 * @param dataWidgetVar optional data-widget variable
 	 * @param spinner slider metadata
-	 * @param formDisabledConditionName form-level disabled condition
+	 * @param formDisabledCondition form-level disabled condition
 	 * @param title field title
 	 * @param requiredMessage optional required-field message
 	 * @param facesConverter resolved Faces converter
@@ -719,7 +719,7 @@ class ComponentCollectingComponentBuilder extends NoOpComponentBuilder {
 	public EventSourceComponent slider(EventSourceComponent component,
 										String dataWidgetVar,
 										Slider spinner,
-										String formDisabledConditionName,
+										String formDisabledCondition,
 										String title,
 										String requiredMessage,
 										jakarta.faces.convert.Converter<?> facesConverter) {
@@ -749,7 +749,7 @@ class ComponentCollectingComponentBuilder extends NoOpComponentBuilder {
 	 * @param component the rendered text component
 	 * @param dataWidgetVar optional data-widget variable
 	 * @param text text-field widget metadata
-	 * @param formDisabledConditionName form-level disabled condition
+	 * @param formDisabledCondition form-level disabled condition
 	 * @param title field title
 	 * @param requiredMessage optional required-field message
 	 * @param textAlignment text alignment metadata
@@ -763,7 +763,7 @@ class ComponentCollectingComponentBuilder extends NoOpComponentBuilder {
 	public EventSourceComponent text(EventSourceComponent component,
 										String dataWidgetVar,
 										TextField text,
-										String formDisabledConditionName,
+										String formDisabledCondition,
 										String title,
 										@Nullable String requiredMessage,
 										HorizontalAlignment textAlignment,
@@ -780,7 +780,7 @@ class ComponentCollectingComponentBuilder extends NoOpComponentBuilder {
 	 * @param component the rendered text-area component
 	 * @param dataWidgetVar optional data-widget variable
 	 * @param text text-area metadata
-	 * @param formDisabledConditionName form-level disabled condition
+	 * @param formDisabledCondition form-level disabled condition
 	 * @param title field title
 	 * @param requiredMessage optional required-field message
 	 * @param textAlignment text alignment metadata
@@ -791,7 +791,7 @@ class ComponentCollectingComponentBuilder extends NoOpComponentBuilder {
 	public EventSourceComponent textArea(EventSourceComponent component,
 											String dataWidgetVar,
 											TextArea text,
-											String formDisabledConditionName,
+											String formDisabledCondition,
 											String title,
 											@Nullable String requiredMessage,
 											HorizontalAlignment textAlignment,

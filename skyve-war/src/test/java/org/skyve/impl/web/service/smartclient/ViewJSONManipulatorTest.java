@@ -1,5 +1,8 @@
 package org.skyve.impl.web.service.smartclient;
 
+import java.util.List;
+import java.util.Map;
+
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.skyve.impl.metadata.repository.view.actions.BizExportAction;
@@ -67,6 +70,7 @@ import org.skyve.impl.metadata.view.event.SetInvisibleEventAction;
 import org.skyve.impl.metadata.view.event.ToggleDisabledEventAction;
 import org.skyve.impl.metadata.view.event.ToggleVisibilityEventAction;
 import org.skyve.domain.messages.MessageSeverity;
+import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.metadata.view.reference.ActionReference;
 import org.skyve.impl.metadata.view.reference.ContentReference;
 import org.skyve.impl.metadata.view.reference.EditViewReference;
@@ -80,11 +84,15 @@ import org.skyve.impl.metadata.view.widget.bound.ParameterImpl;
 import org.skyve.impl.web.AbstractWebContext;
 import org.skyve.metadata.controller.ImplicitActionName;
 import org.skyve.metadata.view.View;
+import org.skyve.metadata.view.View.ViewType;
 import org.skyve.report.ReportFormat;
+import org.skyve.util.JSON;
 import org.skyve.util.Util;
 
 import modules.test.AbstractSkyveTest;
 import modules.test.domain.AllAttributesPersistent;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -111,7 +119,7 @@ class ViewJSONManipulatorTest extends AbstractSkyveTest {
 			throws Exception {
 		ViewImpl view = createView();
 		Blurb b2 = (Blurb) ((Form) view.getContained().get(0)).getRows().get(1).getItems().get(0).getWidget();
-		b2.setInvisibleConditionName("true");
+		b2.setXmlInvisibleCondition("true");
 
 		AllAttributesPersistent bean = Util.constructRandomInstance(u, m, aapd, 0);
 		ViewJSONManipulator vjm = new ViewJSONManipulator(u, m, aapd, view, TEST_UXUI, bean, 0, 0, false);
@@ -128,7 +136,7 @@ class ViewJSONManipulatorTest extends AbstractSkyveTest {
 			throws Exception {
 		ViewImpl view = createView();
 		Blurb b1 = (Blurb) ((Form) view.getContained().get(0)).getRows().get(0).getItems().get(0).getWidget();
-		b1.setInvisibleConditionName("true");
+		b1.setXmlInvisibleCondition("true");
 
 		AllAttributesPersistent bean = Util.constructRandomInstance(u, m, aapd, 0);
 		ViewJSONManipulator vjm = new ViewJSONManipulator(u, m, aapd, view, TEST_UXUI, bean, 0, 0, false);
@@ -144,7 +152,7 @@ class ViewJSONManipulatorTest extends AbstractSkyveTest {
 	void testFirstFormFormatsInvisible()
 			throws Exception {
 		ViewImpl view = createView();
-		((Form) view.getContained().get(0)).setInvisibleConditionName("true");
+		((Form) view.getContained().get(0)).setXmlInvisibleCondition("true");
 		view.getContained().add(createForm());
 
 		AllAttributesPersistent bean = Util.constructRandomInstance(u, m, aapd, 0);
@@ -208,6 +216,181 @@ class ViewJSONManipulatorTest extends AbstractSkyveTest {
 		String json = vjm.toJSON(ctx, null);
 		assertNotNull(json);
 		assertTrue(json.contains("booleanFlag"));
+	}
+
+	@Test
+	void testViewWithInlineConditionsCorrelatesTheViewScriptWithThePayload() throws Exception {
+		final String expression = "{el:bean.booleanFlag}";
+		ViewImpl view = new ViewImpl();
+		view.setName(ViewType.edit.toString());
+		view.setTitle("TEST");
+
+		Form form = new Form();
+		form.getColumns().add(new FormColumn());
+		FormRow row = new FormRow();
+		form.getRows().add(row);
+		FormItem item = new FormItem();
+		CheckBox cb = new CheckBox();
+		cb.setBinding("booleanFlag");
+		// one expression in both senses: disabled when the flag is set, visible when the flag is set
+		cb.setXmlDisabledCondition(expression);
+		cb.setXmlVisibleCondition(expression);
+		item.setWidget(cb);
+		row.getItems().add(item);
+		view.getContained().add(form);
+
+		String identifier = BindUtil.conditionIdentifier(expression);
+
+		// The generated view definition refers to the expression by identifier only
+		SmartClientViewRenderer renderer = SmartClientGeneratorServlet.newRenderer(u, m, aapd, view, TEST_UXUI, false);
+		renderer.visit();
+		String code = renderer.getCode().toString();
+		assertTrue(code.contains("disabledCondition:'" + identifier + "'"), code);
+		assertTrue(code.contains("invisibleCondition:'not" + identifier + "'"), code);
+		assertFalse(code.contains("{el:"), code);
+
+		// and the payload carries the evaluated value and its complement under the same identifiers
+		for (Boolean flag : new Boolean[] {Boolean.TRUE, Boolean.FALSE}) {
+			AllAttributesPersistent bean = Util.constructRandomInstance(u, m, aapd, 0);
+			bean.setBooleanFlag(flag);
+			ViewJSONManipulator vjm = new ViewJSONManipulator(u, m, aapd, view, TEST_UXUI, bean, 0, 0, false);
+			vjm.visit();
+			AbstractWebContext ctx = mockWebContext();
+			ctx.setCurrentBean(bean);
+			String json = vjm.toJSON(ctx, null);
+			@SuppressWarnings("unchecked")
+			Map<String, Object> values = (Map<String, Object>) JSON.unmarshall(json);
+
+			assertEquals(flag, values.get(identifier));
+			assertEquals(Boolean.valueOf(! flag.booleanValue()), values.get("not" + identifier));
+			assertFalse(json.contains("{el:"), json);
+		}
+	}
+
+	@Test
+	void testViewWithInlineConditionsOnGridAndLookupFlags() throws Exception {
+		// one expression used only as authored, and one used only through an enable attribute (its inverse)
+		final String flagged = "{el:bean.booleanFlag}";
+		final String texted = "{el:bean.text eq 'x'}";
+		ViewImpl view = new ViewImpl();
+		view.setName(ViewType.edit.toString());
+		view.setTitle("TEST");
+
+		DataGrid grid = new DataGrid();
+		grid.setBinding("aggregatedCollection");
+		grid.setXmlDisableAddCondition(flagged);
+		grid.setXmlDisableZoomCondition(flagged);
+		grid.setXmlEnableEditCondition(texted);
+		grid.setXmlEnableRemoveCondition(texted);
+		DataGridBoundColumn column = new DataGridBoundColumn();
+		column.setBinding("bizKey");
+		grid.getColumns().add(column);
+		view.getContained().add(grid);
+
+		Form form = new Form();
+		form.getColumns().add(new FormColumn());
+		FormRow row = new FormRow();
+		form.getRows().add(row);
+		FormItem item = new FormItem();
+		LookupDescription lookup = new LookupDescription();
+		lookup.setBinding("aggregatedAssociation");
+		lookup.setDescriptionBinding("bizKey");
+		lookup.setXmlDisablePickCondition(flagged);
+		lookup.setXmlDisableClearCondition(flagged);
+		lookup.setXmlEnableEditCondition(texted);
+		lookup.setXmlEnableAddCondition(texted);
+		item.setWidget(lookup);
+		row.getItems().add(item);
+		view.getContained().add(form);
+
+		String flaggedIdentifier = BindUtil.conditionIdentifier(flagged);
+		String notTextedIdentifier = "not" + BindUtil.conditionIdentifier(texted);
+
+		SmartClientViewRenderer renderer = SmartClientGeneratorServlet.newRenderer(u, m, aapd, view, TEST_UXUI, false);
+		renderer.visit();
+		String code = renderer.getCode().toString();
+		assertTrue(code.contains("disableAddCondition:'" + flaggedIdentifier + "'"), code);
+		assertTrue(code.contains("disableZoomCondition:'" + flaggedIdentifier + "'"), code);
+		assertTrue(code.contains("disableEditCondition:'" + notTextedIdentifier + "'"), code);
+		assertTrue(code.contains("disableRemoveCondition:'" + notTextedIdentifier + "'"), code);
+		assertTrue(code.contains("disablePickCondition:'" + flaggedIdentifier + "'"), code);
+		assertTrue(code.contains("disableClearCondition:'" + flaggedIdentifier + "'"), code);
+		assertTrue(code.contains("disableAddCondition:'" + notTextedIdentifier + "'"), code);
+		assertFalse(code.contains("{el:"), code);
+
+		AllAttributesPersistent bean = Util.constructRandomInstance(u, m, aapd, 1);
+		bean.setBooleanFlag(Boolean.TRUE);
+		bean.setText("x");
+		ViewJSONManipulator vjm = new ViewJSONManipulator(u, m, aapd, view, TEST_UXUI, bean, 0, 0, false);
+		vjm.visit();
+		AbstractWebContext ctx = mockWebContext();
+		ctx.setCurrentBean(bean);
+		@SuppressWarnings("unchecked")
+		Map<String, Object> values = (Map<String, Object>) JSON.unmarshall(vjm.toJSON(ctx, null));
+
+		// only the senses the view refers to are sent
+		assertEquals(Boolean.TRUE, values.get(flaggedIdentifier));
+		assertFalse(values.containsKey("not" + flaggedIdentifier));
+		assertEquals(Boolean.FALSE, values.get(notTextedIdentifier));
+		assertFalse(values.containsKey(BindUtil.conditionIdentifier(texted)));
+	}
+
+	@Test
+	void testViewWithDataGridContainerColumnWithLabelsHavingInlineConditions() throws Exception {
+		ViewImpl view = new ViewImpl();
+		view.setTitle("TEST");
+
+		DataGrid grid = new DataGrid();
+		grid.setBinding("aggregatedCollection");
+		DataGridContainerColumn col = new DataGridContainerColumn();
+		Label hiddenWhenFlagged = new Label();
+		hiddenWhenFlagged.setBinding("text");
+		hiddenWhenFlagged.setXmlInvisibleCondition("{el:bean.booleanFlag}");
+		col.getWidgets().add(hiddenWhenFlagged);
+		Label shownWhenFlagged = new Label();
+		shownWhenFlagged.setBinding("text");
+		shownWhenFlagged.setXmlVisibleCondition("{el:bean.booleanFlag}");
+		col.getWidgets().add(shownWhenFlagged);
+		Label hiddenWhenPersisted = new Label();
+		hiddenWhenPersisted.setBinding("text");
+		hiddenWhenPersisted.setXmlInvisibleCondition("persisted");
+		col.getWidgets().add(hiddenWhenPersisted);
+		grid.getColumns().add(col);
+		view.getContained().add(grid);
+
+		Form form = new Form();
+		form.getColumns().add(new FormColumn());
+		view.getContained().add(form);
+
+		AllAttributesPersistent bean = Util.constructRandomInstance(u, m, aapd, 2);
+		List<AllAttributesPersistent> rows = bean.getAggregatedCollection();
+		assertFalse(rows.isEmpty());
+		// the first row is flagged and the rest are not, unlike the view's bean
+		bean.setBooleanFlag(Boolean.FALSE);
+		for (AllAttributesPersistent row : rows) {
+			row.setBooleanFlag(Boolean.FALSE);
+			row.setText("a");
+		}
+		rows.get(0).setBooleanFlag(Boolean.TRUE);
+		ViewJSONManipulator vjm = new ViewJSONManipulator(u, m, aapd, view, TEST_UXUI, bean, 0, 0, false);
+		vjm.visit();
+		AbstractWebContext ctx = mockWebContext();
+		ctx.setCurrentBean(bean);
+		String json = vjm.toJSON(ctx, null);
+		assertFalse(json.contains("{el:"), json);
+
+		// each row's markup carries a display style resolved from that row
+		@SuppressWarnings("unchecked")
+		Map<String, Object> values = (Map<String, Object>) JSON.unmarshall(json);
+		@SuppressWarnings("unchecked")
+		List<Map<String, Object>> rowValues = (List<Map<String, Object>>) values.get("aggregatedCollection");
+		assertEquals(rows.size(), rowValues.size());
+		String shown = "<span style=\"\">a</span>";
+		String hidden = "<span style=\"display:none;\">a</span>";
+		assertEquals(hidden + "&nbsp;" + shown + "&nbsp;" + shown, rowValues.get(0).get("_0"));
+		for (int i = 1, l = rowValues.size(); i < l; i++) {
+			assertEquals(shown + "&nbsp;" + hidden + "&nbsp;" + shown, rowValues.get(i).get("_0"));
+		}
 	}
 
 	@Test
@@ -1255,7 +1438,7 @@ class ViewJSONManipulatorTest extends AbstractSkyveTest {
 		tf.setBinding("text");
 		SetDisabledEventAction setDisabled = new SetDisabledEventAction();
 		setDisabled.setBinding("text");
-		setDisabled.setDisabledConditionName("condition");
+		setDisabled.setXmlDisabledCondition("condition");
 		tf.getChangedActions().add(setDisabled);
 		item.setWidget(tf);
 		row.getItems().add(item);
@@ -1340,7 +1523,7 @@ class ViewJSONManipulatorTest extends AbstractSkyveTest {
 		tf.setBinding("text");
 		SetInvisibleEventAction setInvisible = new SetInvisibleEventAction();
 		setInvisible.setBinding("text");
-		setInvisible.setInvisibleConditionName("condition");
+		setInvisible.setXmlInvisibleCondition("condition");
 		tf.getChangedActions().add(setInvisible);
 		item.setWidget(tf);
 		row.getItems().add(item);
@@ -1438,10 +1621,10 @@ class ViewJSONManipulatorTest extends AbstractSkyveTest {
 
 		ListGrid lg = new ListGrid();
 		lg.setQueryName("qExpressionQuery");
-		lg.setDisableAddConditionName("condition");
-		lg.setDisableEditConditionName("condition");
-		lg.setDisableZoomConditionName("condition");
-		lg.setDisableRemoveConditionName("condition");
+		lg.setXmlDisableAddCondition("condition");
+		lg.setXmlDisableEditCondition("condition");
+		lg.setXmlDisableZoomCondition("condition");
+		lg.setXmlDisableRemoveCondition("condition");
 		lg.setSelectedIdBinding("text");
 		view.getContained().add(lg);
 
@@ -1505,10 +1688,10 @@ class ViewJSONManipulatorTest extends AbstractSkyveTest {
 
 		DataGrid grid = new DataGrid();
 		grid.setBinding("aggregatedCollection");
-		grid.setDisableAddConditionName("condition");
-		grid.setDisableEditConditionName("condition");
-		grid.setDisableZoomConditionName("condition");
-		grid.setDisableRemoveConditionName("condition");
+		grid.setXmlDisableAddCondition("condition");
+		grid.setXmlDisableEditCondition("condition");
+		grid.setXmlDisableZoomCondition("condition");
+		grid.setXmlDisableRemoveCondition("condition");
 		DataGridBoundColumn col = new DataGridBoundColumn();
 		col.setBinding("bizKey");
 		grid.getColumns().add(col);
@@ -1535,7 +1718,7 @@ class ViewJSONManipulatorTest extends AbstractSkyveTest {
 		FormItem item = new FormItem();
 		TextField tf = new TextField();
 		tf.setBinding("text");
-		tf.setInvisibleConditionName("condition");
+		tf.setXmlInvisibleCondition("condition");
 		item.setWidget(tf);
 		row.getItems().add(item);
 		view.getContained().add(form);
@@ -1561,7 +1744,7 @@ class ViewJSONManipulatorTest extends AbstractSkyveTest {
 		FormItem item = new FormItem();
 		TextField tf = new TextField();
 		tf.setBinding("text");
-		tf.setDisabledConditionName("condition");
+		tf.setXmlDisabledCondition("condition");
 		item.setWidget(tf);
 		row.getItems().add(item);
 		view.getContained().add(form);
@@ -1588,8 +1771,8 @@ class ViewJSONManipulatorTest extends AbstractSkyveTest {
 		LookupDescription ld = new LookupDescription();
 		ld.setBinding("aggregatedAssociation");
 		ld.setDescriptionBinding("aggregatedAssociation_bizKey");
-		ld.setDisabledConditionName("condition");
-		ld.setInvisibleConditionName("notCondition");
+		ld.setXmlDisabledCondition("condition");
+		ld.setXmlInvisibleCondition("notCondition");
 		item.setWidget(ld);
 		row.getItems().add(item);
 		view.getContained().add(form);
@@ -1648,10 +1831,10 @@ class ViewJSONManipulatorTest extends AbstractSkyveTest {
 		view.setTitle("TEST");
 
 		TabPane tabPane = new TabPane();
-		tabPane.setInvisibleConditionName("condition");
+		tabPane.setXmlInvisibleCondition("condition");
 		Tab tab = new Tab();
 		tab.setTitle("Tab 1");
-		tab.setInvisibleConditionName("notCondition");
+		tab.setXmlInvisibleCondition("notCondition");
 		Form form = new Form();
 		form.getColumns().add(new FormColumn());
 		FormRow row = new FormRow();
@@ -1727,7 +1910,7 @@ class ViewJSONManipulatorTest extends AbstractSkyveTest {
 
 		Form form = new Form();
 		form.getColumns().add(new FormColumn());
-		form.setInvisibleConditionName("condition");
+		form.setXmlInvisibleCondition("condition");
 		FormRow row = new FormRow();
 		form.getRows().add(row);
 		FormItem item = new FormItem();
@@ -2180,7 +2363,7 @@ class ViewJSONManipulatorTest extends AbstractSkyveTest {
 		FormItem item = new FormItem();
 		TextField tf = new TextField();
 		tf.setBinding("text");
-		tf.setDisabledConditionName("true");
+		tf.setXmlDisabledCondition("true");
 		item.setWidget(tf);
 		row.getItems().add(item);
 		view.getContained().add(form);

@@ -1,9 +1,6 @@
 package org.skyve.impl.metadata.view.model.chart;
 
-import java.math.BigInteger;
-import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
-
+import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.metadata.view.model.ModelMetaData;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
@@ -63,20 +60,31 @@ public class ChartBuilderMetaData implements ModelMetaData {
 	private String jFreeChartPostProcessorClassName;
 	private String primeFacesChartPostProcessorClassName;
 	
+	/**
+	 * Returns the name this inline chart model is known by, to the view that declares it and to clients.
+	 *
+	 * <p>The name is the identifier of the model's definition (see {@link BindUtil#identifier(String)}),
+	 * so it depends only on the definition: the same definition has the same name wherever
+	 * and whenever it is asked for, and a different definition has a different one.
+	 *
+	 * <p>Side effects: the name is worked out on first use and kept. Mutating the model
+	 * after that does not change it.
+	 *
+	 * @return the 27 character model name
+	 * @throws MetaDataException if the definition cannot be marshalled to derive the name from
+	 */
 	@Override
 	@XmlTransient
 	public String getModelName() {
 		if (modelName == null) {
+			String definition;
 			try {
-		    	@SuppressWarnings("java:S4790") // Just to make a unique name within the character limit - not for security purposes
-				final MessageDigest md = MessageDigest.getInstance("MD5");
-				String hash = JSON.marshall(this);
-				md.update(hash.getBytes(StandardCharsets.UTF_8));
-				modelName = "M" + new BigInteger(1, md.digest()).toString(36);
+				definition = JSON.marshall(this);
 			}
 			catch (Exception e) {
 				throw new MetaDataException("ChartBuilderMetaData cannot generate a model name", e);
 			}
+			modelName = BindUtil.identifier(definition);
 		}
 		return modelName;
 	}

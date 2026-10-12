@@ -1,6 +1,10 @@
 package org.skyve.metadata.view.fluent;
 
+import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.metadata.view.widget.bound.input.LookupDescription;
+
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 
 /**
  * Builds {@link LookupDescription} widget metadata using a fluent API.
@@ -32,10 +36,10 @@ public class FluentLookupDescription extends FluentInputWidget<FluentLookupDescr
 		descriptionBinding(lookup.getDescriptionBinding());
 		query(lookup.getQuery());
 		modelName(lookup.getModelName());
-		disableEditConditionName(lookup.getDisableEditConditionName());
-		disableAddConditionName(lookup.getDisableAddConditionName());
-		disableClearConditionName(lookup.getDisableClearConditionName());
-		disablePickConditionName(lookup.getDisablePickConditionName());
+		BindUtil.copyAuthoredCondition(lookup.getXmlDisableEditCondition(), lookup.getXmlEnableEditCondition(), this::disableEditCondition, this::enableEditCondition);
+		BindUtil.copyAuthoredCondition(lookup.getXmlDisableAddCondition(), lookup.getXmlEnableAddCondition(), this::disableAddCondition, this::enableAddCondition);
+		BindUtil.copyAuthoredCondition(lookup.getXmlDisableClearCondition(), lookup.getXmlEnableClearCondition(), this::disableClearCondition, this::enableClearCondition);
+		BindUtil.copyAuthoredCondition(lookup.getXmlDisablePickCondition(), lookup.getXmlEnablePickCondition(), this::disablePickCondition, this::enablePickCondition);
 		Boolean b = lookup.getEditable();
 		if (b != null) {
 			editable(b.booleanValue());
@@ -90,46 +94,98 @@ public class FluentLookupDescription extends FluentInputWidget<FluentLookupDescr
 	}
 
 	/**
-	 * Sets the condition name that disables the edit button.
+	 * Sets the {@code disableEdit} condition as authored; the opposite sense of {@link #enableEditCondition(String)}.
 	 *
-	 * @param disableEditConditionName the condition name
+	 * @param disableEditCondition
+	 *            a condition name, an inline condition expression or a boolean literal
 	 * @return this builder
 	 */
-	public FluentLookupDescription disableEditConditionName(String disableEditConditionName) {
-		lookup.setDisableEditConditionName(disableEditConditionName);
+	public @Nonnull FluentLookupDescription disableEditCondition(@Nullable String disableEditCondition) {
+		lookup.setXmlDisableEditCondition(disableEditCondition);
 		return this;
 	}
 
 	/**
-	 * Sets the condition name that disables the add button.
+	 * Sets the {@code enableEdit} condition as authored; the opposite sense of {@link #disableEditCondition(String)}.
 	 *
-	 * @param disableAddConditionName the condition name
+	 * @param enableEditCondition
+	 *            a condition name, an inline condition expression or a boolean literal
 	 * @return this builder
 	 */
-	public FluentLookupDescription disableAddConditionName(String disableAddConditionName) {
-		lookup.setDisableAddConditionName(disableAddConditionName);
+	public @Nonnull FluentLookupDescription enableEditCondition(@Nullable String enableEditCondition) {
+		lookup.setXmlEnableEditCondition(enableEditCondition);
 		return this;
 	}
 
 	/**
-	 * Sets the condition name that disables the clear button.
+	 * Sets the {@code disableAdd} condition as authored; the opposite sense of {@link #enableAddCondition(String)}.
 	 *
-	 * @param disableClearConditionName the condition name
+	 * @param disableAddCondition
+	 *            a condition name, an inline condition expression or a boolean literal
 	 * @return this builder
 	 */
-	public FluentLookupDescription disableClearConditionName(String disableClearConditionName) {
-		lookup.setDisableClearConditionName(disableClearConditionName);
+	public @Nonnull FluentLookupDescription disableAddCondition(@Nullable String disableAddCondition) {
+		lookup.setXmlDisableAddCondition(disableAddCondition);
 		return this;
 	}
 
 	/**
-	 * Sets the condition name that disables the pick button.
+	 * Sets the {@code enableAdd} condition as authored; the opposite sense of {@link #disableAddCondition(String)}.
 	 *
-	 * @param disablePickConditionName the condition name
+	 * @param enableAddCondition
+	 *            a condition name, an inline condition expression or a boolean literal
 	 * @return this builder
 	 */
-	public FluentLookupDescription disablePickConditionName(String disablePickConditionName) {
-		lookup.setDisablePickConditionName(disablePickConditionName);
+	public @Nonnull FluentLookupDescription enableAddCondition(@Nullable String enableAddCondition) {
+		lookup.setXmlEnableAddCondition(enableAddCondition);
+		return this;
+	}
+
+	/**
+	 * Sets the {@code disableClear} condition as authored; the opposite sense of {@link #enableClearCondition(String)}.
+	 *
+	 * @param disableClearCondition
+	 *            a condition name, an inline condition expression or a boolean literal
+	 * @return this builder
+	 */
+	public @Nonnull FluentLookupDescription disableClearCondition(@Nullable String disableClearCondition) {
+		lookup.setXmlDisableClearCondition(disableClearCondition);
+		return this;
+	}
+
+	/**
+	 * Sets the {@code enableClear} condition as authored; the opposite sense of {@link #disableClearCondition(String)}.
+	 *
+	 * @param enableClearCondition
+	 *            a condition name, an inline condition expression or a boolean literal
+	 * @return this builder
+	 */
+	public @Nonnull FluentLookupDescription enableClearCondition(@Nullable String enableClearCondition) {
+		lookup.setXmlEnableClearCondition(enableClearCondition);
+		return this;
+	}
+
+	/**
+	 * Sets the {@code disablePick} condition as authored; the opposite sense of {@link #enablePickCondition(String)}.
+	 *
+	 * @param disablePickCondition
+	 *            a condition name, an inline condition expression or a boolean literal
+	 * @return this builder
+	 */
+	public @Nonnull FluentLookupDescription disablePickCondition(@Nullable String disablePickCondition) {
+		lookup.setXmlDisablePickCondition(disablePickCondition);
+		return this;
+	}
+
+	/**
+	 * Sets the {@code enablePick} condition as authored; the opposite sense of {@link #disablePickCondition(String)}.
+	 *
+	 * @param enablePickCondition
+	 *            a condition name, an inline condition expression or a boolean literal
+	 * @return this builder
+	 */
+	public @Nonnull FluentLookupDescription enablePickCondition(@Nullable String enablePickCondition) {
+		lookup.setXmlEnablePickCondition(enablePickCondition);
 		return this;
 	}
 

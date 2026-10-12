@@ -5,6 +5,9 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.text.ParseException;
 import java.util.Arrays;
 import java.util.Collections;
@@ -13,6 +16,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.SortedMap;
 import java.util.StringTokenizer;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.UnaryOperator;
 
@@ -179,6 +183,25 @@ public final class BindUtil {
 		return ((length > 1) && 
 					(expression.charAt(0) == '{') && 
 					(expression.charAt(length - 1) == '}'));
+	}
+
+	/**
+	 * Tests whether a condition is the inverse of an inline expression, that is {@code not{...}}.
+	 *
+	 * <p>This form is never authored. It is what {@link #negateCondition(String)} returns for an
+	 * inline condition expression, so that a view widget can report the opposite sense of an
+	 * expression authored on its {@code visible} or {@code enabled} style attribute.
+	 * It cannot be confused with a negated condition name, which has an upper case letter after {@code not}.
+	 *
+	 * @param condition	The condition to test.
+	 * @return	{@code true} when the condition is {@code not} followed by a Skyve expression.
+	 */
+	public static boolean isNegatedSkyveExpression(@Nonnull String condition) {
+		int length = condition.length();
+		return ((length > 4) &&
+					condition.startsWith(NOT) &&
+					(condition.charAt(3) == '{') &&
+					(condition.charAt(length - 1) == '}'));
 	}
 	
 	public static @Nullable String validateMessageExpressions(@Nonnull String message, 
@@ -394,6 +417,19 @@ public final class BindUtil {
 		return result.toString();
 	}
 
+	/**
+	 * Evaluates a view or document condition against a bean.
+	 *
+	 * <p>A condition is a boolean literal, a condition name (optionally negated with a {@code not} prefix),
+	 * an inline condition expression <code>{...}</code>, or the inverse of one
+	 * (see {@link #isNegatedSkyveExpression(String)}).
+	 * An expression that yields {@code null} is false, and its inverse is the strict complement.
+	 *
+	 * @param bean	The bean to evaluate against.
+	 * @param condition	The condition to evaluate.
+	 * @return	The result of the condition.
+	 * @throws MetaDataException	When the condition does not exist or cannot be evaluated.
+	 */
 	public static boolean evaluateCondition(@Nonnull Bean bean, @Nonnull String condition) {
 		if (String.valueOf(true).equals(condition)) {
 			return true;
@@ -403,8 +439,13 @@ public final class BindUtil {
 		}
 
 		try {
-			return isSkyveExpression(condition) ? evaluateConditionExpression(bean, condition)
-					: evaluateNamedCondition(bean, condition);
+			if (isSkyveExpression(condition)) {
+				return evaluateConditionExpression(bean, condition);
+			}
+			if (isNegatedSkyveExpression(condition)) {
+				return (! evaluateConditionExpression(bean, condition.substring(3)));
+			}
+			return evaluateNamedCondition(bean, condition);
 		}
 		catch (Exception e) {
 			throw new MetaDataException("Condition " + bean.getBizModule() + "." + bean.getBizDocument() + "." + condition + " is not valid", e);
@@ -440,6 +481,41 @@ public final class BindUtil {
 		return negated ? Boolean.FALSE.equals(value) : Boolean.TRUE.equals(value);
 	}
 
+	/**
+	 * Copies a condition pair to a target in the sense it was authored.
+	 *
+	 * <p>Each setter of a pair clears the opposite attribute, so setting both in turn loses the first.
+	 * This sets the positive attribute when that is the one authored, and the negative attribute otherwise,
+	 * which clears the target pair when neither was authored.
+	 *
+	 * @param authoredNegativeCondition	The negative attribute as authored (for example {@code invisible}), may be {@code null}.
+	 * @param authoredPositiveCondition	The positive attribute as authored (for example {@code visible}), {@code null} when it was not authored.
+	 * @param negativeSetter	Sets the negative attribute as authored on the target.
+	 * @param positiveSetter	Sets the positive attribute as authored on the target.
+	 */
+	public static void copyAuthoredCondition(@Nullable String authoredNegativeCondition,
+												@Nullable String authoredPositiveCondition,
+												@Nonnull Consumer<String> negativeSetter,
+												@Nonnull Consumer<String> positiveSetter) {
+		if (authoredPositiveCondition == null) {
+			negativeSetter.accept(authoredNegativeCondition);
+		}
+		else {
+			positiveSetter.accept(authoredPositiveCondition);
+		}
+	}
+
+	/**
+	 * Returns the condition with the opposite sense.
+	 *
+	 * <p>Boolean literals are swapped, a condition name gains or loses its {@code not} prefix
+	 * (with the following letter capitalised or decapitalised), and an inline condition expression
+	 * <code>{...}</code> gains or loses a verbatim {@code not} prefix.
+	 * Negating twice returns the original condition.
+	 *
+	 * @param condition	The condition to negate, may be {@code null}.
+	 * @return	The negated condition, or {@code null} when the condition is {@code null}.
+	 */
 	public static @Nullable String negateCondition(@Nullable String condition) {
         String result = null;
 
@@ -449,6 +525,12 @@ public final class BindUtil {
 	        }
 	        else if ("false".equals(condition)) {
 	            result = "true";
+	        }
+	        else if (isSkyveExpression(condition)) { // inline expression
+	            result = NOT + condition;
+	        }
+	        else if (isNegatedSkyveExpression(condition)) { // inverse of an inline expression
+	            result = condition.substring(3);
 	        }
 	        else if (condition.startsWith(NOT)) {
 	            result = Introspector.decapitalize(condition.substring(3));
@@ -462,6 +544,106 @@ public final class BindUtil {
         }
         
         return result;
+	}
+
+	private static final String IDENTIFIER_LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+	private static final String IDENTIFIER_ALPHANUMERICS = "0123456789" + IDENTIFIER_LETTERS;
+	private static final int IDENTIFIER_LENGTH = 27;
+
+	/**
+	 * Returns the name under which a view condition is known to a client.
+	 *
+	 * <p>{@code true}, {@code false} and condition names are returned unchanged.
+	 * An inline condition expression <code>{...}</code> is replaced by the identifier of the
+	 * expression text, including the braces (see {@link #identifier(String)}).
+	 * The inverse of an inline expression (see {@link #isNegatedSkyveExpression(String)})
+	 * is {@code not} followed by the identifier of the expression, verbatim.
+	 *
+	 * <p>Invariant: the result depends only on the condition text, so independently produced
+	 * outputs (a cached view definition and a later data payload) agree without shared state.
+	 *
+	 * <p>Complexity: one SHA-1 digest and a fixed number of arithmetic steps per inline expression;
+	 * nothing is cached.
+	 *
+	 * @param condition	The condition as held by view metadata.
+	 * @return	The condition name, or the identifier for an inline condition expression.
+	 */
+	public static @Nonnull String conditionIdentifier(@Nonnull String condition) {
+		boolean negated = isNegatedSkyveExpression(condition);
+		if (! (negated || isSkyveExpression(condition))) {
+			return condition;
+		}
+		if (! negated) {
+			return identifier(condition);
+		}
+
+		char[] result = new char[3 + IDENTIFIER_LENGTH];
+		NOT.getChars(0, 3, result, 0);
+		identifier(condition.substring(3), result, 3);
+		return new String(result);
+	}
+
+	/**
+	 * Returns a short identifier for some text, for use where a client and the server, or two
+	 * requests, have to agree on a name for the same thing without sharing any state.
+	 *
+	 * <p>The identifier is the SHA-1 digest of the text (UTF-8) written in full as
+	 * 27 alphanumeric characters starting with a letter, which makes it a valid
+	 * JavaScript identifier containing no underscore.
+	 *
+	 * <p>Invariant: the result depends only on the text, and is the same in every JVM.
+	 * The digest is not truncated; two texts share an identifier only if their SHA-1 digests are equal.
+	 * It is a fingerprint, not a secret - anyone who can guess the text can compute it.
+	 *
+	 * <p>Complexity: one SHA-1 digest and a fixed number of arithmetic steps; nothing is cached.
+	 *
+	 * @param text	The text to identify.
+	 * @return	The 27 character identifier.
+	 */
+	public static @Nonnull String identifier(@Nonnull String text) {
+		char[] result = new char[IDENTIFIER_LENGTH];
+		identifier(text, result, 0);
+		return new String(result);
+	}
+
+	/**
+	 * Writes the identifier of some text (see {@link #identifier(String)}) into a character array.
+	 *
+	 * @param text	The text to identify.
+	 * @param result	The array to write the 27 characters of the identifier to.
+	 * @param offset	The index in the array of the first character to write.
+	 */
+	@SuppressWarnings("java:S4790") // SHA-1 is used as a fingerprint here, not for security
+	private static void identifier(@Nonnull String text, @Nonnull char[] result, int offset) {
+		byte[] digest;
+		try {
+			digest = MessageDigest.getInstance("SHA-1").digest(text.getBytes(StandardCharsets.UTF_8));
+		}
+		catch (NoSuchAlgorithmException e) {
+			throw new IllegalStateException("SHA-1 is not available to identify " + text, e);
+		}
+
+		// The 160 bit digest as 5 big-endian unsigned 32 bit limbs
+		int[] limbs = new int[5];
+		for (int i = 0; i < 5; i++) {
+			int limbOffset = i * 4;
+			limbs[i] = ((digest[limbOffset] & 0xFF) << 24) |
+						((digest[limbOffset + 1] & 0xFF) << 16) |
+						((digest[limbOffset + 2] & 0xFF) << 8) |
+						(digest[limbOffset + 3] & 0xFF);
+		}
+
+		// 26 base 62 digits from the right, leaving a quotient less than 52 (2^160 / 62^26 < 37) for the leading letter
+		for (int i = offset + IDENTIFIER_LENGTH - 1; i > offset; i--) {
+			long remainder = 0;
+			for (int j = 0; j < 5; j++) {
+				long current = (remainder << 32) | (limbs[j] & 0xFFFFFFFFL);
+				limbs[j] = (int) (current / 62);
+				remainder = current % 62;
+			}
+			result[i] = IDENTIFIER_ALPHANUMERICS.charAt((int) remainder);
+		}
+		result[offset] = IDENTIFIER_LETTERS.charAt(limbs[4]);
 	}
 	
 	/**
@@ -579,7 +761,7 @@ public final class BindUtil {
 		}
 	}
 
-	@SuppressWarnings("unchecked") // unchecked for enum conversion
+	@SuppressWarnings("unchecked")
 	private static @Nonnull Object convertEnumValue(@Nonnull Class<?> type, @Nonnull Object value) {
 		if (value instanceof Enumeration enumeration) {
 			return convertEnumValue(type, enumeration.toCode());

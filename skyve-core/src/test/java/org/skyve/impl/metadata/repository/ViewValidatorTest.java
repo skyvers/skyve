@@ -131,7 +131,7 @@ import org.skyve.impl.metadata.model.document.field.Text;
 import org.skyve.persistence.DocumentQuery.AggregateFunction;
 
 @ExtendWith(MockitoExtension.class)
-@SuppressWarnings("all")
+@SuppressWarnings({"all", "java:S3011"})
 class ViewValidatorTest {
 
 	@Mock
@@ -280,7 +280,7 @@ class ViewValidatorTest {
 	@Test
 	void spacer_trueCondition_noException() {
 		Spacer s = new Spacer();
-		s.setInvisibleConditionName("true");
+		s.setXmlInvisibleCondition("true");
 		view.getContained().add(s);
 		ViewValidator v = newValidator();
 		assertDoesNotThrow(v::visit);
@@ -289,7 +289,7 @@ class ViewValidatorTest {
 	@Test
 	void spacer_falseCondition_noException() {
 		Spacer s = new Spacer();
-		s.setInvisibleConditionName("false");
+		s.setXmlInvisibleCondition("false");
 		view.getContained().add(s);
 		ViewValidator v = newValidator();
 		assertDoesNotThrow(v::visit);
@@ -298,7 +298,7 @@ class ViewValidatorTest {
 	@Test
 	void spacer_persistedCondition_noException() {
 		Spacer s = new Spacer();
-		s.setInvisibleConditionName("persisted");
+		s.setXmlInvisibleCondition("persisted");
 		view.getContained().add(s);
 		ViewValidator v = newValidator();
 		assertDoesNotThrow(v::visit);
@@ -307,7 +307,7 @@ class ViewValidatorTest {
 	@Test
 	void spacer_createdCondition_noException() {
 		Spacer s = new Spacer();
-		s.setInvisibleConditionName("created");
+		s.setXmlInvisibleCondition("created");
 		view.getContained().add(s);
 		ViewValidator v = newValidator();
 		assertDoesNotThrow(v::visit);
@@ -316,7 +316,7 @@ class ViewValidatorTest {
 	@Test
 	void spacer_changedCondition_noException() {
 		Spacer s = new Spacer();
-		s.setInvisibleConditionName("changed");
+		s.setXmlInvisibleCondition("changed");
 		view.getContained().add(s);
 		ViewValidator v = newValidator();
 		assertDoesNotThrow(v::visit);
@@ -326,7 +326,7 @@ class ViewValidatorTest {
 	void spacer_notCondition_validConditionInDocument_noException() {
 		document.getConditions().put("myFlag", new ConditionImpl());
 		Spacer s = new Spacer();
-		s.setInvisibleConditionName("notMyFlag");
+		s.setXmlInvisibleCondition("notMyFlag");
 		view.getContained().add(s);
 		ViewValidator v = newValidator();
 		assertDoesNotThrow(v::visit);
@@ -336,16 +336,64 @@ class ViewValidatorTest {
 	void spacer_validConditionInDocument_noException() {
 		document.getConditions().put("myFlag", new ConditionImpl());
 		Spacer s = new Spacer();
-		s.setInvisibleConditionName("myFlag");
+		s.setXmlInvisibleCondition("myFlag");
 		view.getContained().add(s);
 		ViewValidator v = newValidator();
 		assertDoesNotThrow(v::visit);
 	}
 
 	@Test
+	void spacer_inlineConditionExpression_noException() {
+		Spacer s = new Spacer();
+		s.setXmlInvisibleCondition("{el:true}");
+		view.getContained().add(s);
+		ViewValidator v = newValidator();
+		assertDoesNotThrow(v::visit);
+	}
+
+	@Test
+	void spacer_inlineConditionExpressionOnVisible_noException() {
+		Spacer s = new Spacer();
+		s.setXmlVisibleCondition("{el:true}");
+		view.getContained().add(s);
+		ViewValidator v = newValidator();
+		assertDoesNotThrow(v::visit);
+	}
+
+	@Test
+	void spacer_inlineConditionExpressionNotBoolean_throws() {
+		Spacer s = new Spacer();
+		s.setXmlInvisibleCondition("{el:'text'}");
+		view.getContained().add(s);
+		ViewValidator v = newValidator();
+		assertThrows(MetaDataException.class, v::visit);
+	}
+
+	@Test
+	void spacer_inlineConditionExpressionMalformed_throws() {
+		Spacer s = new Spacer();
+		s.setXmlInvisibleCondition("{el:)(}");
+		view.getContained().add(s);
+		ViewValidator v = newValidator();
+		assertThrows(MetaDataException.class, v::visit);
+	}
+
+	@Test
+	void spacer_inlineConditionExpressionUnknownPrefix_throws() {
+		Spacer s = new Spacer();
+		s.setXmlVisibleCondition("{noSuchPrefix:whatever}");
+		view.getContained().add(s);
+		ViewValidator v = newValidator();
+		MetaDataException e = assertThrows(MetaDataException.class, v::visit);
+		// the positive expression is reported, never the stored inverse
+		assertTrue(e.getMessage().contains("{noSuchPrefix:whatever}"));
+		assertFalse(e.getMessage().contains("not{"));
+	}
+
+	@Test
 	void spacer_unknownCondition_throws() {
 		Spacer s = new Spacer();
-		s.setInvisibleConditionName("noSuchCondition");
+		s.setXmlInvisibleCondition("noSuchCondition");
 		view.getContained().add(s);
 		ViewValidator v = newValidator();
 		assertThrows(MetaDataException.class, v::visit);
@@ -355,7 +403,7 @@ class ViewValidatorTest {
 	void spacer_notConditionBadCamelCase_throws() {
 		// "notxxx" — 'x' is lower-case after "not" → must be MetaDataException
 		Spacer s = new Spacer();
-		s.setInvisibleConditionName("notxxx");
+		s.setXmlInvisibleCondition("notxxx");
 		view.getContained().add(s);
 		ViewValidator v = newValidator();
 		assertThrows(MetaDataException.class, v::visit);
@@ -414,7 +462,7 @@ class ViewValidatorTest {
 		document.getConditions().put("showBlurb", new ConditionImpl());
 		Blurb b = new Blurb();
 		b.setMarkup("<p>Content</p>");
-		b.setInvisibleConditionName("showBlurb");
+		b.setXmlInvisibleCondition("showBlurb");
 		view.getContained().add(b);
 		ViewValidator v = newValidator();
 		assertDoesNotThrow(v::visit);
@@ -732,7 +780,7 @@ class ViewValidatorTest {
 	@Test
 	void spacer_notConditionWithInvalidCamelCase_throws() {
 		Spacer s = new Spacer();
-		s.setInvisibleConditionName("notmyFlag");
+		s.setXmlInvisibleCondition("notmyFlag");
 		view.getContained().add(s);
 		ViewValidator v = newValidator();
 		assertThrows(MetaDataException.class, v::visit);
@@ -755,7 +803,7 @@ class ViewValidatorTest {
 		when(module.getDocument(customer, "BaseDoc")).thenReturn(baseDocument);
 
 		Spacer s = new Spacer();
-		s.setInvisibleConditionName("baseFlag");
+		s.setXmlInvisibleCondition("baseFlag");
 		view.getContained().add(s);
 
 		ViewValidator v = newValidator(childDocument);
@@ -778,7 +826,7 @@ class ViewValidatorTest {
 		when(module.getDocument(customer, "BaseDoc")).thenReturn(baseDocument);
 
 		Spacer s = new Spacer();
-		s.setInvisibleConditionName("missingFlag");
+		s.setXmlInvisibleCondition("missingFlag");
 		view.getContained().add(s);
 
 		ViewValidator v = newValidator(childDocument);
@@ -789,7 +837,7 @@ class ViewValidatorTest {
 	void blurb_unknownCondition_throws() {
 		Blurb b = new Blurb();
 		b.setMarkup("<p>Content</p>");
-		b.setInvisibleConditionName("noSuchCond");
+		b.setXmlInvisibleCondition("noSuchCond");
 		view.getContained().add(b);
 		ViewValidator v = newValidator();
 		assertThrows(MetaDataException.class, v::visit);
@@ -842,7 +890,7 @@ class ViewValidatorTest {
 	@Test
 	void hbox_unknownCondition_throws() {
 		HBox hbox = new HBox();
-		hbox.setInvisibleConditionName("badCondition");
+		hbox.setXmlInvisibleCondition("badCondition");
 		view.getContained().add(hbox);
 		ViewValidator v = newValidator();
 		assertThrows(MetaDataException.class, v::visit);
@@ -879,7 +927,7 @@ class ViewValidatorTest {
 	@Test
 	void vbox_unknownCondition_throws() {
 		VBox vbox = new VBox();
-		vbox.setInvisibleConditionName("badCond");
+		vbox.setXmlInvisibleCondition("badCond");
 		view.getContained().add(vbox);
 		ViewValidator v = newValidator();
 		assertThrows(MetaDataException.class, v::visit);
@@ -920,7 +968,7 @@ class ViewValidatorTest {
 	@Test
 	void tabPane_unknownCondition_throws() {
 		TabPane tabPane = new TabPane();
-		tabPane.setInvisibleConditionName("badCondition");
+		tabPane.setXmlInvisibleCondition("badCondition");
 		view.getContained().add(tabPane);
 		ViewValidator v = newValidator();
 		assertThrows(MetaDataException.class, v::visit);
@@ -950,7 +998,7 @@ class ViewValidatorTest {
 	@Test
 	void tab_unknownDisabledCondition_throws() {
 		Tab tab = new Tab();
-		tab.setDisabledConditionName("badCond");
+		tab.setXmlDisabledCondition("badCond");
 		TabPane tabPane = new TabPane();
 		tabPane.getTabs().add(tab);
 		view.getContained().add(tabPane);
@@ -1090,7 +1138,7 @@ class ViewValidatorTest {
 		ActionImpl action = new ActionImpl();
 		action.setName("myAction");
 		action.setImplicitName(ImplicitActionName.Save);
-		action.setDisabledConditionName("noSuchCondition");
+		action.setXmlDisabledCondition("noSuchCondition");
 		view.putAction(action);
 		ViewValidator v = newValidator();
 		assertThrows(MetaDataException.class, v::visit);
@@ -1102,7 +1150,7 @@ class ViewValidatorTest {
 		ActionImpl action = new ActionImpl();
 		action.setName("myAction");
 		action.setImplicitName(ImplicitActionName.Save);
-		action.setDisabledConditionName("canSave");
+		action.setXmlDisabledCondition("canSave");
 		view.putAction(action);
 		ViewValidator v = newValidator();
 		assertDoesNotThrow(v::visit);
@@ -1167,19 +1215,19 @@ class ViewValidatorTest {
 		assertDoesNotThrow(v::visit);
 	}
 
-	// ---- refreshConditionName on view ----
+	// ---- refreshIfCondition on view ----
 
 	@Test
-	void view_refreshConditionName_unknown_throws() {
-		view.setRefreshConditionName("noSuch");
+	void view_refreshIfCondition_unknown_throws() {
+		view.setRefreshIfCondition("noSuch");
 		ViewValidator v = newValidator();
 		assertThrows(MetaDataException.class, v::visit);
 	}
 
 	@Test
-	void view_refreshConditionName_valid_noException() {
+	void view_refreshIfCondition_valid_noException() {
 		document.getConditions().put("refreshable", new ConditionImpl());
-		view.setRefreshConditionName("refreshable");
+		view.setRefreshIfCondition("refreshable");
 		ViewValidator v = newValidator();
 		assertDoesNotThrow(v::visit);
 	}
@@ -1211,7 +1259,7 @@ class ViewValidatorTest {
 		document.getConditions().put("isVisible", new ConditionImpl());
 		Tab tab = new Tab();
 		HBox hbox = new HBox();
-		hbox.setInvisibleConditionName("isVisible");
+		hbox.setXmlInvisibleCondition("isVisible");
 		tab.getContained().add(hbox);
 		TabPane tabPane = new TabPane();
 		tabPane.getTabs().add(tab);
@@ -1225,7 +1273,7 @@ class ViewValidatorTest {
 		document.getConditions().put("flag", new ConditionImpl());
 		Spacer s1 = new Spacer();
 		Spacer s2 = new Spacer();
-		s2.setInvisibleConditionName("flag");
+		s2.setXmlInvisibleCondition("flag");
 		Blurb b = new Blurb();
 		b.setMarkup("<p>ok</p>");
 		view.getContained().add(s1);
@@ -1934,11 +1982,11 @@ class ViewValidatorTest {
 	void setAndToggleEventActions_invalidBinding_throw() {
 		SetDisabledEventAction setDisabled = new SetDisabledEventAction();
 		setDisabled.setBinding("missingBool");
-		setDisabled.setDisabledConditionName("flag");
+		setDisabled.setXmlDisabledCondition("flag");
 
 		SetInvisibleEventAction setInvisible = new SetInvisibleEventAction();
 		setInvisible.setBinding("missingBool");
-		setInvisible.setInvisibleConditionName("flag");
+		setInvisible.setXmlInvisibleCondition("flag");
 
 		ToggleDisabledEventAction toggleDisabled = new ToggleDisabledEventAction();
 		toggleDisabled.setBinding("missingBool");
@@ -2013,7 +2061,7 @@ class ViewValidatorTest {
 	void sidebar_unknownInvisibleCondition_throws() {
 		Sidebar sidebar = new Sidebar();
 		sidebar.setPixelWidth(Integer.valueOf(300));
-		sidebar.setInvisibleConditionName("missingCondition");
+		sidebar.setXmlInvisibleCondition("missingCondition");
 
 		ViewValidator v = newValidator();
 		assertThrows(MetaDataException.class, () -> v.visitSidebar(sidebar, true, true));
@@ -2064,7 +2112,7 @@ class ViewValidatorTest {
 		document.getConditions().put("flag", new ConditionImpl());
 		Sidebar sidebar = new Sidebar();
 		sidebar.setPixelWidth(Integer.valueOf(300));
-		sidebar.setInvisibleConditionName("flag");
+		sidebar.setXmlInvisibleCondition("flag");
 
 		ViewValidator v = newValidator();
 		assertDoesNotThrow(() -> v.visitSidebar(sidebar, true, true));
@@ -2876,7 +2924,7 @@ class ViewValidatorTest {
 	void dialogButton_unknownDisabledCondition_throws() {
 		DialogButton button = new DialogButton();
 		button.setDialogName("confirmDelete");
-		button.setDisabledConditionName("noSuchCond");
+		button.setXmlDisabledCondition("noSuchCond");
 		ViewValidator v = newValidator();
 		assertThrows(MetaDataException.class, () -> v.visitDialogButton(button, true, true));
 	}
@@ -2887,7 +2935,7 @@ class ViewValidatorTest {
 	void form_withDisabledCondition_noException() {
 		document.getConditions().put("formDisabled", new ConditionImpl());
 		Form form = new Form();
-		form.setDisabledConditionName("formDisabled");
+		form.setXmlDisabledCondition("formDisabled");
 		FormRow row = new FormRow();
 		FormItem item = new FormItem();
 		item.setWidget(new Spacer());
@@ -2901,7 +2949,7 @@ class ViewValidatorTest {
 	@Test
 	void form_missingCondition_throws() {
 		Form form = new Form();
-		form.setDisabledConditionName("missingCond");
+		form.setXmlDisabledCondition("missingCond");
 		FormRow row = new FormRow();
 		FormItem item = new FormItem();
 		item.setWidget(new Spacer());
@@ -2971,7 +3019,7 @@ class ViewValidatorTest {
 	void staticImage_unknownCondition_throws() {
 		StaticImage image = new StaticImage();
 		image.setRelativeFile("logo.png");
-		image.setInvisibleConditionName("missingCond");
+		image.setXmlInvisibleCondition("missingCond");
 		ViewValidator v = newValidator();
 		assertThrows(MetaDataException.class, () -> v.visitStaticImage(image, true, true));
 	}
@@ -2980,7 +3028,7 @@ class ViewValidatorTest {
 	void dynamicImage_unknownInvisibleCondition_throws() {
 		org.skyve.impl.metadata.view.widget.DynamicImage image = new org.skyve.impl.metadata.view.widget.DynamicImage();
 		image.setName("chart");
-		image.setInvisibleConditionName("missingCond");
+		image.setXmlInvisibleCondition("missingCond");
 		ViewValidator v = newValidator();
 		assertThrows(MetaDataException.class, () -> v.visitDynamicImage(image, true, true));
 	}
@@ -3059,11 +3107,11 @@ class ViewValidatorTest {
 		document.getConditions().put("dgFlag", new ConditionImpl());
 		DataGrid grid = new DataGrid();
 		grid.setBinding("items");
-		grid.setDisabledConditionName("dgFlag");
-		grid.setDisableAddConditionName("dgFlag");
-		grid.setDisableEditConditionName("dgFlag");
-		grid.setDisableRemoveConditionName("dgFlag");
-		grid.setDisableZoomConditionName("dgFlag");
+		grid.setXmlDisabledCondition("dgFlag");
+		grid.setXmlDisableAddCondition("dgFlag");
+		grid.setXmlDisableEditCondition("dgFlag");
+		grid.setXmlDisableRemoveCondition("dgFlag");
+		grid.setXmlDisableZoomCondition("dgFlag");
 		view.getContained().add(grid);
 		ViewValidator v = newValidator();
 		assertDoesNotThrow(v::visit);
@@ -3081,12 +3129,12 @@ class ViewValidatorTest {
 		when(module.getDocument(customer, "TestDoc")).thenReturn(document);
 		ListGrid grid = new ListGrid();
 		grid.setQueryName("crudQuery");
-		grid.setDisabledConditionName("crudFlag");
-		grid.setDisableAddConditionName("crudFlag");
-		grid.setDisableEditConditionName("crudFlag");
-		grid.setDisableZoomConditionName("crudFlag");
-		grid.setDisableRemoveConditionName("crudFlag");
-		grid.setPostRefreshConditionName("crudFlag");
+		grid.setXmlDisabledCondition("crudFlag");
+		grid.setXmlDisableAddCondition("crudFlag");
+		grid.setXmlDisableEditCondition("crudFlag");
+		grid.setXmlDisableZoomCondition("crudFlag");
+		grid.setXmlDisableRemoveCondition("crudFlag");
+		grid.setPostRefreshCondition("crudFlag");
 		ViewValidator v = newValidator();
 		assertDoesNotThrow(() -> v.visitListGrid(grid, true, true));
 	}
@@ -3103,12 +3151,12 @@ class ViewValidatorTest {
 		when(module.getDocument(customer, "TestDoc")).thenReturn(document);
 		TreeGrid grid = new TreeGrid();
 		grid.setQueryName("treeQ");
-		grid.setDisabledConditionName("treeFlag");
-		grid.setDisableAddConditionName("treeFlag");
-		grid.setDisableEditConditionName("treeFlag");
-		grid.setDisableZoomConditionName("treeFlag");
-		grid.setDisableRemoveConditionName("treeFlag");
-		grid.setPostRefreshConditionName("treeFlag");
+		grid.setXmlDisabledCondition("treeFlag");
+		grid.setXmlDisableAddCondition("treeFlag");
+		grid.setXmlDisableEditCondition("treeFlag");
+		grid.setXmlDisableZoomCondition("treeFlag");
+		grid.setXmlDisableRemoveCondition("treeFlag");
+		grid.setPostRefreshCondition("treeFlag");
 		ViewValidator v = newValidator();
 		assertDoesNotThrow(() -> v.visitTreeGrid(grid, true, true));
 	}
@@ -3125,8 +3173,8 @@ class ViewValidatorTest {
 		when(module.getDocument(customer, "TestDoc")).thenReturn(document);
 		ListRepeater repeater = new ListRepeater();
 		repeater.setQueryName("repQ");
-		repeater.setInvisibleConditionName("repFlag");
-		repeater.setPostRefreshConditionName("repFlag");
+		repeater.setXmlInvisibleCondition("repFlag");
+		repeater.setPostRefreshCondition("repFlag");
 		ViewValidator v = newValidator();
 		assertDoesNotThrow(() -> v.visitListRepeater(repeater, true, true));
 	}
@@ -3667,10 +3715,10 @@ class ViewValidatorTest {
 		document.getConditions().put("showFlag", new ConditionImpl());
 		SetDisabledEventAction setDisabled = new SetDisabledEventAction();
 		setDisabled.setBinding("published");
-		setDisabled.setDisabledConditionName("showFlag");
+		setDisabled.setXmlDisabledCondition("showFlag");
 		SetInvisibleEventAction setInvisible = new SetInvisibleEventAction();
 		setInvisible.setBinding("published");
-		setInvisible.setInvisibleConditionName("showFlag");
+		setInvisible.setXmlInvisibleCondition("showFlag");
 		ToggleDisabledEventAction toggleDisabled = new ToggleDisabledEventAction();
 		toggleDisabled.setBinding("published");
 		ToggleVisibilityEventAction toggleVisibility = new ToggleVisibilityEventAction();

@@ -21,6 +21,7 @@ import org.skyve.metadata.NamedMetaData;
 import org.skyve.metadata.controller.ImplicitActionName;
 import org.skyve.metadata.view.View.ViewParameter;
 
+import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlElementWrapper;
@@ -58,7 +59,7 @@ import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 							"helpRelativeFileName",
 							"helpURL",
 							"refreshTimeInSeconds",
-							"refreshConditionName", 
+							"refreshIfCondition", 
 							"refreshActionName",
 							"parameters",
 							"accesses",
@@ -77,7 +78,7 @@ public class ViewMetaData extends Container implements NamedMetaData, Convertibl
 	private Sidebar sidebar = null;
 	private Actions actions = null;
 	private Integer refreshTimeInSeconds;
-	private String refreshConditionName;
+	private String refreshIfCondition;
 	private String refreshActionName;
 	private List<ViewParameter> parameters = new ArrayList<>();
 	private ViewUserAccessesMetaData accesses = null;
@@ -280,22 +281,22 @@ public class ViewMetaData extends Container implements NamedMetaData, Convertibl
 	}
 
 	/**
-	 * Returns the optional refresh condition expression name.
+	 * Returns the {@code refreshIf} condition as authored, which controls whether the view auto-refreshes; it has no opposite attribute.
 	 *
-	 * @return refresh condition name, or {@code null}
+	 * @return a condition name, an inline condition expression or a boolean literal; {@code null} when not authored
 	 */
-	public String getRefreshConditionName() {
-		return refreshConditionName;
+	public @Nullable String getRefreshIfCondition() {
+		return refreshIfCondition;
 	}
 
 	/**
-	 * Sets the optional refresh condition expression name.
+	 * Sets the {@code refreshIf} condition as authored.
 	 *
-	 * @param refreshConditionName refresh condition name
+	 * @param refreshIfCondition a condition name, an inline condition expression or a boolean literal; may be {@code null}
 	 */
 	@XmlAttribute(name = "refreshIf", required = false)
-	public void setRefreshConditionName(String refreshConditionName) {
-		this.refreshConditionName = UtilImpl.processStringValue(refreshConditionName);
+	public void setRefreshIfCondition(@Nullable String refreshIfCondition) {
+		this.refreshIfCondition = UtilImpl.processStringValue(refreshIfCondition);
 	}
 
 	/**
@@ -463,12 +464,12 @@ public class ViewMetaData extends Container implements NamedMetaData, Convertibl
 		}
 
 		result.setRefreshTimeInSeconds(getRefreshTimeInSeconds());
-		value = getRefreshConditionName();
+		value = getRefreshIfCondition();
 		if (value != null) {
 			if (result.getRefreshTimeInSeconds() == null) {
 				throw new MetaDataException(metaDataName + " : The view [refreshIf] is defined but no [refreshTimeInSeconds] is defined in " + getName() + VIEW_NAME_SEPARATOR + metaDataName);
 			}
-			result.setRefreshConditionName(value);
+			result.setRefreshIfCondition(value);
 		}
 		value = getRefreshActionName();
 		if (value != null) {

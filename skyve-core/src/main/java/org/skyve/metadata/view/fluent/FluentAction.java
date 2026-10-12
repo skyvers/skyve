@@ -1,5 +1,6 @@
 package org.skyve.metadata.view.fluent;
 
+import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.metadata.repository.view.actions.ActionMetaData;
 import org.skyve.impl.metadata.repository.view.actions.AddAction;
 import org.skyve.impl.metadata.repository.view.actions.BizExportAction;
@@ -19,6 +20,9 @@ import org.skyve.impl.metadata.repository.view.actions.UploadAction;
 import org.skyve.impl.metadata.repository.view.actions.ZoomOutAction;
 import org.skyve.impl.metadata.view.ActionImpl;
 import org.skyve.metadata.view.Action;
+
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 
 /**
  * Provides fluent configuration for common {@link Action} metadata attributes.
@@ -52,8 +56,8 @@ public abstract class FluentAction<T extends FluentAction<T>> {
 		iconStyleClass(action.getIconStyleClass());
 		confirmationText(action.getConfirmationText());
 		escapeConfirm(action.getEscapeConfirm());
-		disabledConditionName(action.getDisabledConditionName());
-		invisibleConditionName(action.getInvisibleConditionName());
+		BindUtil.copyAuthoredCondition(action.getXmlDisabledCondition(), action.getXmlEnabledCondition(), this::disabledCondition, this::enabledCondition);
+		BindUtil.copyAuthoredCondition(action.getXmlInvisibleCondition(), action.getXmlVisibleCondition(), this::invisibleCondition, this::visibleCondition);
 		action.getProperties().entrySet().forEach(p -> putProperty(p.getKey(), p.getValue()));
 		return (T) this;
 	}
@@ -281,28 +285,54 @@ public abstract class FluentAction<T extends FluentAction<T>> {
 	}
 
 	/**
-	 * Sets the name of the condition controlling whether the action is disabled.
+	 * Sets the {@code disabled} condition as authored; the opposite sense of {@link #enabledCondition(String)}.
 	 *
-	 * @param disabledConditionName
-	 *            the condition name used to compute disabled state
+	 * @param disabledCondition
+	 *            a condition name, an inline condition expression or a boolean literal
 	 * @return this builder
 	 */
 	@SuppressWarnings("unchecked")
-	public T disabledConditionName(String disabledConditionName) {
-		get().setDisabledConditionName(disabledConditionName);
+	public @Nonnull T disabledCondition(@Nullable String disabledCondition) {
+		get().setXmlDisabledCondition(disabledCondition);
 		return (T) this;
 	}
 
 	/**
-	 * Sets the name of the condition controlling whether the action is hidden.
+	 * Sets the {@code enabled} condition as authored; the opposite sense of {@link #disabledCondition(String)}.
 	 *
-	 * @param invisibleConditionName
-	 *            the condition name used to compute visibility
+	 * @param enabledCondition
+	 *            a condition name, an inline condition expression or a boolean literal
 	 * @return this builder
 	 */
 	@SuppressWarnings("unchecked")
-	public T invisibleConditionName(String invisibleConditionName) {
-		get().setInvisibleConditionName(invisibleConditionName);
+	public @Nonnull T enabledCondition(@Nullable String enabledCondition) {
+		get().setXmlEnabledCondition(enabledCondition);
+		return (T) this;
+	}
+
+	/**
+	 * Sets the {@code invisible} condition as authored; the opposite sense of {@link #visibleCondition(String)}.
+	 *
+	 * @param invisibleCondition
+	 *            a condition name, an inline condition expression or a boolean literal
+	 * @return this builder
+	 */
+	@SuppressWarnings("unchecked")
+	public @Nonnull T invisibleCondition(@Nullable String invisibleCondition) {
+		get().setXmlInvisibleCondition(invisibleCondition);
+		return (T) this;
+	}
+
+	/**
+	 * Sets the {@code visible} condition as authored; the opposite sense of {@link #invisibleCondition(String)}.
+	 *
+	 * @param visibleCondition
+	 *            a condition name, an inline condition expression or a boolean literal
+	 * @return this builder
+	 */
+	@SuppressWarnings("unchecked")
+	public @Nonnull T visibleCondition(@Nullable String visibleCondition) {
+		get().setXmlVisibleCondition(visibleCondition);
 		return (T) this;
 	}
 

@@ -7,6 +7,10 @@ These notes collect release-ready framework changes introduced for Skyve 10.
 - [Reusable Deployed Integration Testing](deployed-integration-testing.md)
 - [Theme Resolution](theme-resolution.md)
 - [View Boilerplate Escaping](view-boilerplate-escaping.md)
+- [Inline Conditions in Views](inline-conditions.md)
+  - Behaviour change: in PrimeFaces, the `disabled` condition of a `link` to an action
+    inside a `dataGrid` or `dataRepeater` is now evaluated against the row, as its
+    `invisible` condition already was. It was evaluated against the view's bean.
 - [Lucene Content Identifiers and Garbage Collection](#lucene-content-identifiers-and-garbage-collection)
 - [Scheduled Backups and Azure Copies](#scheduled-backups-and-azure-copies)
 

@@ -118,52 +118,52 @@ class ZoomInTest {
 	}
 
 	@Test
-	void disabledConditionNameRoundTrip() {
+	void disabledConditionRoundTrip() {
 		ZoomIn z = new ZoomIn();
-		z.setDisabledConditionName("readonly");
-		assertEquals("readonly", z.getDisabledConditionName());
+		z.setXmlDisabledCondition("readonly");
+		assertEquals("readonly", z.getDisabledCondition());
 	}
 
 	@Test
-	void enabledConditionNameNegated() {
+	void enabledConditionNegated() {
 		ZoomIn z = new ZoomIn();
-		z.setEnabledConditionName("editable");
-		assertEquals("notEditable", z.getDisabledConditionName());
+		z.setXmlEnabledCondition("editable");
+		assertEquals("notEditable", z.getDisabledCondition());
 	}
 
 	@Test
-	void enabledConditionNameNotPrefixedNegated() {
+	void enabledConditionNotPrefixedNegated() {
 		ZoomIn z = new ZoomIn();
-		z.setEnabledConditionName("notReady");
-		assertEquals("ready", z.getDisabledConditionName());
+		z.setXmlEnabledCondition("notReady");
+		assertEquals("ready", z.getDisabledCondition());
 	}
 
 	@Test
-	void enabledConditionNameBlankBecomesNullDisabled() {
+	void enabledConditionBlankBecomesNullDisabled() {
 		ZoomIn z = new ZoomIn();
-		z.setEnabledConditionName("  ");
-		assertNull(z.getDisabledConditionName());
+		z.setXmlEnabledCondition("  ");
+		assertNull(z.getDisabledCondition());
 	}
 
 	@Test
-	void invisibleConditionNameRoundTrip() {
+	void invisibleConditionRoundTrip() {
 		ZoomIn z = new ZoomIn();
-		z.setInvisibleConditionName("hidden");
-		assertEquals("hidden", z.getInvisibleConditionName());
+		z.setXmlInvisibleCondition("hidden");
+		assertEquals("hidden", z.getInvisibleCondition());
 	}
 
 	@Test
-	void visibleConditionNameNegated() {
+	void visibleConditionNegated() {
 		ZoomIn z = new ZoomIn();
-		z.setVisibleConditionName("visible");
-		assertEquals("notVisible", z.getInvisibleConditionName());
+		z.setXmlVisibleCondition("visible");
+		assertEquals("notVisible", z.getInvisibleCondition());
 	}
 
 	@Test
-	void visibleConditionNameBlankBecomesNullInvisible() {
+	void visibleConditionBlankBecomesNullInvisible() {
 		ZoomIn z = new ZoomIn();
-		z.setVisibleConditionName("  ");
-		assertNull(z.getInvisibleConditionName());
+		z.setXmlVisibleCondition("  ");
+		assertNull(z.getInvisibleCondition());
 	}
 
 	@Test
@@ -187,13 +187,13 @@ class ZoomInTest {
 	}
 
 	@Test
-	void enabledConditionNameJaxbGetterReturnsNull() {
-		assertNull(new ZoomIn().getEnabledConditionName());
+	void xmlEnabledConditionIsNullByDefault() {
+		assertNull(new ZoomIn().getXmlEnabledCondition());
 	}
 
 	@Test
-	void visibleConditionNameJaxbGetterReturnsNull() {
-		assertNull(new ZoomIn().getVisibleConditionName());
+	void xmlVisibleConditionIsNullByDefault() {
+		assertNull(new ZoomIn().getXmlVisibleCondition());
 	}
 
 	@Test

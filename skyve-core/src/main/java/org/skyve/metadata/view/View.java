@@ -14,6 +14,7 @@ import org.skyve.metadata.ReloadableMetaData;
 import org.skyve.metadata.SerializableMetaData;
 import org.skyve.util.Util;
 
+import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlType;
 
@@ -110,12 +111,11 @@ public interface View extends NamedMetaData, PersistentMetaData, ReloadableMetaD
 	}
 	
 	/**
-	 * Returns the name of the document condition that triggers an auto-refresh of
-	 * this view when it evaluates to {@code true}.
+	 * Returns the {@code refreshIf} condition as authored, which controls whether the view auto-refreshes; it has no opposite attribute.
 	 *
-	 * @return the refresh condition name, or {@code null} if not set
+	 * @return a condition name, an inline condition expression or a boolean literal; {@code null} when not authored
 	 */
-	public String getRefreshConditionName();
+	public @Nullable String getRefreshIfCondition();
 	
 	/**
 	 * Returns the polling interval (in seconds) used to auto-refresh this view.

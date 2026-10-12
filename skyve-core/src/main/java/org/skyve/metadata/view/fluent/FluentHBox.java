@@ -1,10 +1,14 @@
 package org.skyve.metadata.view.fluent;
 
+import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.metadata.view.HorizontalAlignment;
 import org.skyve.impl.metadata.view.ShrinkWrap;
 import org.skyve.impl.metadata.view.VerticalAlignment;
 import org.skyve.impl.metadata.view.container.Collapsible;
 import org.skyve.impl.metadata.view.container.HBox;
+
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 
 /**
  * Fluent builder for horizontal box container metadata.
@@ -49,7 +53,7 @@ public class FluentHBox extends FluentContainer<FluentHBox> implements FluentBox
 		horizontalAlignment(box.getHorizontalAlignment());
 		verticalAlignment(box.getVerticalAlignment());
 
-		invisibleConditionName(box.getInvisibleConditionName());
+		BindUtil.copyAuthoredCondition(box.getXmlInvisibleCondition(), box.getXmlVisibleCondition(), this::invisibleCondition, this::visibleCondition);
 		
 		super.from(box);
 		
@@ -359,14 +363,26 @@ public class FluentHBox extends FluentContainer<FluentHBox> implements FluentBox
 	}
 	
 	/**
-	 * Sets the condition name that hides this box when true.
+	 * Sets the {@code invisible} condition as authored; the opposite sense of {@link #visibleCondition(String)}.
 	 *
-	 * @param invisibleConditionName
-	 *            invisibility condition identifier
+	 * @param invisibleCondition
+	 *            a condition name, an inline condition expression or a boolean literal
 	 * @return this builder
 	 */
-	public FluentHBox invisibleConditionName(String invisibleConditionName) {
-		box.setInvisibleConditionName(invisibleConditionName);
+	public @Nonnull FluentHBox invisibleCondition(@Nullable String invisibleCondition) {
+		box.setXmlInvisibleCondition(invisibleCondition);
+		return this;
+	}
+
+	/**
+	 * Sets the {@code visible} condition as authored; the opposite sense of {@link #invisibleCondition(String)}.
+	 *
+	 * @param visibleCondition
+	 *            a condition name, an inline condition expression or a boolean literal
+	 * @return this builder
+	 */
+	public @Nonnull FluentHBox visibleCondition(@Nullable String visibleCondition) {
+		box.setXmlVisibleCondition(visibleCondition);
 		return this;
 	}
 

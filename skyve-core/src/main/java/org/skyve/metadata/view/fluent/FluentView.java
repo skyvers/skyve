@@ -17,6 +17,7 @@ import org.skyve.metadata.view.View;
 import org.skyve.metadata.view.View.ViewParameter;
 
 import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 
 /**
  * Fluent builder for top-level {@link View} metadata.
@@ -64,7 +65,7 @@ public class FluentView extends FluentContainer<FluentView> {
 		if (i != null) {
 			refreshTimeInSeconds(i.intValue());
 		}
-		refreshConditionName(view.getRefreshConditionName());
+		refreshIfCondition(view.getRefreshIfCondition());
 		refreshActionName(view.getRefreshActionName());
 
 		Sidebar sidebar = view.getSidebar();
@@ -532,14 +533,14 @@ public class FluentView extends FluentContainer<FluentView> {
 	}
 
 	/**
-	 * Sets the condition name controlling automatic refresh.
+	 * Sets the {@code refreshIf} condition as authored.
 	 *
-	 * @param refreshConditionName
-	 *            refresh condition identifier
+	 * @param refreshIfCondition
+	 *            a condition name, an inline condition expression or a boolean literal
 	 * @return this builder
 	 */
-	public FluentView refreshConditionName(String refreshConditionName) {
-		view.setRefreshConditionName(refreshConditionName);
+	public @Nonnull FluentView refreshIfCondition(@Nullable String refreshIfCondition) {
+		view.setRefreshIfCondition(refreshIfCondition);
 		return this;
 	}
 

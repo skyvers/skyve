@@ -2,15 +2,18 @@ package org.skyve.impl.metadata.view.model.chart;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.skyve.impl.bind.BindUtil;
 import org.skyve.metadata.SortDirection;
 import org.skyve.metadata.view.model.chart.OrderBy;
 import org.skyve.persistence.DocumentQuery.AggregateFunction;
+import org.skyve.util.JSON;
 
 class ChartBuilderMetaDataTest {
 
@@ -246,13 +249,57 @@ class ChartBuilderMetaDataTest {
 	}
 
 	@Test
-	void getModelNameStartsWithM() {
+	void getModelNameIsALetterFirstAlphanumericOfFixedLength() {
 		md.setModuleName("myModule");
 		md.setLabel("Test");
 		md.setCategoryBinding("field");
 		md.setValueBinding("count");
 		String name = md.getModelName();
-		assertTrue(name.startsWith("M"), "Model name must start with M");
+		assertTrue(name.matches("[A-Za-z][0-9A-Za-z]{26}"), name);
+	}
+
+	@Test
+	void getModelNameIsTheIdentifierOfTheDefinition() {
+		md.setModuleName("myModule");
+		md.setLabel("Test");
+		md.setCategoryBinding("field");
+		md.setValueBinding("count");
+		String definition = JSON.marshall(md);
+		assertThat(md.getModelName(), is(BindUtil.identifier(definition)));
+	}
+
+	@Test
+	void getModelNameIsTheSameForTheSameDefinition() {
+		ChartBuilderMetaData other = new ChartBuilderMetaData();
+		for (ChartBuilderMetaData model : new ChartBuilderMetaData[] {md, other}) {
+			model.setModuleName("myModule");
+			model.setLabel("Test");
+			model.setCategoryBinding("field");
+			model.setValueBinding("count");
+		}
+		assertThat(other.getModelName(), is(md.getModelName()));
+	}
+
+	@Test
+	void getModelNameDiffersForDifferentDefinitions() {
+		ChartBuilderMetaData other = new ChartBuilderMetaData();
+		for (ChartBuilderMetaData model : new ChartBuilderMetaData[] {md, other}) {
+			model.setModuleName("myModule");
+			model.setLabel("Test");
+			model.setCategoryBinding("field");
+		}
+		md.setValueBinding("count");
+		other.setValueBinding("total");
+		assertNotEquals(md.getModelName(), other.getModelName());
+	}
+
+	@Test
+	void getModelNameDoesNotChangeOnceWorkedOut() {
+		md.setModuleName("myModule");
+		md.setValueBinding("count");
+		String name = md.getModelName();
+		md.setValueBinding("total");
+		assertThat(md.getModelName(), is(name));
 	}
 
 	@Test

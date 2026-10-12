@@ -1,6 +1,10 @@
 package org.skyve.metadata.view.fluent;
 
+import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.metadata.view.widget.Spacer;
+
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 
 /**
  * Fluent builder for spacer widget metadata.
@@ -34,7 +38,7 @@ public class FluentSpacer extends FluentWidget implements FluentAbsoluteSize<Flu
 	 */
 	public FluentSpacer from(@SuppressWarnings("hiding") Spacer spacer) {
 
-		invisibleConditionName(spacer.getInvisibleConditionName());
+		BindUtil.copyAuthoredCondition(spacer.getXmlInvisibleCondition(), spacer.getXmlVisibleCondition(), this::invisibleCondition, this::visibleCondition);
 
 		absoluteSize(spacer, this);
 
@@ -42,14 +46,26 @@ public class FluentSpacer extends FluentWidget implements FluentAbsoluteSize<Flu
 	}
 
 	/**
-	 * Sets the condition name that hides this spacer when it evaluates to true.
+	 * Sets the {@code invisible} condition as authored; the opposite sense of {@link #visibleCondition(String)}.
 	 *
-	 * @param invisibleConditionName
-	 *            the invisibility condition identifier
+	 * @param invisibleCondition
+	 *            a condition name, an inline condition expression or a boolean literal
 	 * @return this builder
 	 */
-	public FluentSpacer invisibleConditionName(String invisibleConditionName) {
-		spacer.setInvisibleConditionName(invisibleConditionName);
+	public @Nonnull FluentSpacer invisibleCondition(@Nullable String invisibleCondition) {
+		spacer.setXmlInvisibleCondition(invisibleCondition);
+		return this;
+	}
+
+	/**
+	 * Sets the {@code visible} condition as authored; the opposite sense of {@link #invisibleCondition(String)}.
+	 *
+	 * @param visibleCondition
+	 *            a condition name, an inline condition expression or a boolean literal
+	 * @return this builder
+	 */
+	public @Nonnull FluentSpacer visibleCondition(@Nullable String visibleCondition) {
+		spacer.setXmlVisibleCondition(visibleCondition);
 		return this;
 	}
 

@@ -3,6 +3,7 @@ package org.skyve.metadata.view.fluent;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.metadata.view.HorizontalAlignment;
 import org.skyve.impl.metadata.view.container.Collapsible;
 import org.skyve.impl.metadata.view.container.form.Form;
@@ -11,6 +12,9 @@ import org.skyve.impl.metadata.view.container.form.FormLabelLayout;
 import org.skyve.impl.metadata.view.container.form.FormRow;
 import org.skyve.metadata.MetaData;
 import org.skyve.metadata.view.widget.bound.Bound;
+
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 
 /**
  * Fluent builder for form container metadata.
@@ -57,8 +61,8 @@ public class FluentForm extends FluentWidget implements FluentRelativeSize<Fluen
 		collapsible(form.getCollapsible());
 		labelLayout(form.getLabelLayout());
 
-		disabledConditionName(form.getDisabledConditionName());
-		invisibleConditionName(form.getInvisibleConditionName());
+		BindUtil.copyAuthoredCondition(form.getXmlDisabledCondition(), form.getXmlEnabledCondition(), this::disabledCondition, this::enabledCondition);
+		BindUtil.copyAuthoredCondition(form.getXmlInvisibleCondition(), form.getXmlVisibleCondition(), this::invisibleCondition, this::visibleCondition);
 
 		form.getColumns().forEach(c -> addColumn(new FluentFormColumn().from(c)));
 
@@ -331,26 +335,50 @@ public class FluentForm extends FluentWidget implements FluentRelativeSize<Fluen
 	}
 	
 	/**
-	 * Sets the condition name that disables this form when true.
+	 * Sets the {@code disabled} condition as authored; the opposite sense of {@link #enabledCondition(String)}.
 	 *
-	 * @param disabledConditionName
-	 *            disabled condition identifier
+	 * @param disabledCondition
+	 *            a condition name, an inline condition expression or a boolean literal
 	 * @return this builder
 	 */
-	public FluentForm disabledConditionName(String disabledConditionName) {
-		form.setDisabledConditionName(disabledConditionName);
+	public @Nonnull FluentForm disabledCondition(@Nullable String disabledCondition) {
+		form.setXmlDisabledCondition(disabledCondition);
 		return this;
 	}
 
 	/**
-	 * Sets the condition name that hides this form when true.
+	 * Sets the {@code enabled} condition as authored; the opposite sense of {@link #disabledCondition(String)}.
 	 *
-	 * @param invisibleConditionName
-	 *            invisibility condition identifier
+	 * @param enabledCondition
+	 *            a condition name, an inline condition expression or a boolean literal
 	 * @return this builder
 	 */
-	public FluentForm invisibleConditionName(String invisibleConditionName) {
-		form.setInvisibleConditionName(invisibleConditionName);
+	public @Nonnull FluentForm enabledCondition(@Nullable String enabledCondition) {
+		form.setXmlEnabledCondition(enabledCondition);
+		return this;
+	}
+
+	/**
+	 * Sets the {@code invisible} condition as authored; the opposite sense of {@link #visibleCondition(String)}.
+	 *
+	 * @param invisibleCondition
+	 *            a condition name, an inline condition expression or a boolean literal
+	 * @return this builder
+	 */
+	public @Nonnull FluentForm invisibleCondition(@Nullable String invisibleCondition) {
+		form.setXmlInvisibleCondition(invisibleCondition);
+		return this;
+	}
+
+	/**
+	 * Sets the {@code visible} condition as authored; the opposite sense of {@link #invisibleCondition(String)}.
+	 *
+	 * @param visibleCondition
+	 *            a condition name, an inline condition expression or a boolean literal
+	 * @return this builder
+	 */
+	public @Nonnull FluentForm visibleCondition(@Nullable String visibleCondition) {
+		form.setXmlVisibleCondition(visibleCondition);
 		return this;
 	}
 

@@ -40,6 +40,7 @@ import org.skyve.metadata.view.Action;
 import org.skyve.metadata.view.View;
 import org.skyve.metadata.view.widget.bound.Parameter;
 
+@SuppressWarnings("java:S2447") // the stubbed metadata interfaces use a null Boolean for "not set"
 class MetadataBoilerplateEscapingTest {
 
 	@Test
@@ -251,32 +252,52 @@ class MetadataBoilerplateEscapingTest {
 		}
 
 		@Override
-		public String getDisabledConditionName() {
+		public String getDisabledCondition() {
 			return null;
 		}
 
 		@Override
-		public void setDisabledConditionName(String disabledConditionName) {
+		public void setXmlDisabledCondition(String disabledCondition) {
 			// default-method test only
 		}
 
 		@Override
-		public void setEnabledConditionName(String disabledConditionName) {
+		public void setXmlEnabledCondition(String disabledCondition) {
 			// default-method test only
 		}
 
 		@Override
-		public String getInvisibleConditionName() {
+		public String getInvisibleCondition() {
 			return null;
 		}
 
 		@Override
-		public void setInvisibleConditionName(String invisibleConditionName) {
+		public String getXmlInvisibleCondition() {
+			return null;
+		}
+
+		@Override
+		public String getXmlVisibleCondition() {
+			return null;
+		}
+
+		@Override
+		public String getXmlDisabledCondition() {
+			return null;
+		}
+
+		@Override
+		public String getXmlEnabledCondition() {
+			return null;
+		}
+
+		@Override
+		public void setXmlInvisibleCondition(String invisibleCondition) {
 			// default-method test only
 		}
 
 		@Override
-		public void setVisibleConditionName(String visibleConditionName) {
+		public void setXmlVisibleCondition(String visibleCondition) {
 			// default-method test only
 		}
 

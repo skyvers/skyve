@@ -1135,8 +1135,8 @@ isc.EditView.addMethods({
 
 					const shouldRefresh =
 						forcePostRefresh ||
-						grid.postRefreshConditionName === undefined ||
-						this._evaluateConditionName(grid.postRefreshConditionName, values);
+						grid.postRefreshCondition === undefined ||
+						this._evaluateCondition(grid.postRefreshCondition, values);
 
 					if (!shouldRefresh) {
 						continue; // Skip if the condition doesn't allow refresh
@@ -1265,7 +1265,7 @@ isc.EditView.addMethods({
 	 * @param {Object} values - the values object to evaluate the condition against.
 	 * @returns {boolean} - the result of the condition evaluation.
 	 */
-	_evaluateConditionName: function (conditionName, values) {
+	_evaluateCondition: function (conditionName, values) {
 		if (!conditionName) return false;
 
 		switch (conditionName) {
@@ -1407,22 +1407,22 @@ isc.EditView.addMethods({
 		// Helper function to update a widget's capability based on a condition name
 		const updateCapability = (capabilityKey, conditionName) => {
 			if (widget[conditionName]) {
-				widget[capabilityKey] = !this._evaluateConditionName(
+				widget[capabilityKey] = !this._evaluateCondition(
 					widget[conditionName],
 					values,
 				);
 			}
 		};
 
-		updateCapability("canPick", "disablePickConditionName");
-		updateCapability("canAdd", "disableAddConditionName");
-		updateCapability("canZoom", "disableZoomConditionName");
-		updateCapability("canEdit", "disableEditConditionName");
-		updateCapability("canRemove", "disableRemoveConditionName");
-		updateCapability("canClear", "disableClearConditionName");
+		updateCapability("canPick", "disablePickCondition");
+		updateCapability("canAdd", "disableAddCondition");
+		updateCapability("canZoom", "disableZoomCondition");
+		updateCapability("canEdit", "disableEditCondition");
+		updateCapability("canRemove", "disableRemoveCondition");
+		updateCapability("canClear", "disableClearCondition");
 
 		// Set overall disabled state based on a specific condition
-		this._setDisabled(widget, parent, widget.disabledConditionName, values);
+		this._setDisabled(widget, parent, widget.disabledCondition, values);
 	},
 
 	/**
@@ -1430,12 +1430,12 @@ isc.EditView.addMethods({
 	 *
 	 * @param {Object} widget - the widget to enable or disable.
 	 * @param {Object} parent - the parent container of the widget.
-	 * @param {string} disabledConditionName - the condition name used for evaluation.
+	 * @param {string} disabledCondition - the condition name used for evaluation.
 	 * @param {Object} values - the values to evaluate the condition against.
 	 */
-	_setDisabled: function (widget, parent, disabledConditionName, values) {
+	_setDisabled: function (widget, parent, disabledCondition, values) {
 		// Evaluate whether the widget should be disabled
-		const isDisabled = this._evaluateConditionName(disabledConditionName, values);
+		const isDisabled = this._evaluateCondition(disabledCondition, values);
 
 		// Set required state if applicable (visibility takes precedence)
 		if (
@@ -1470,9 +1470,9 @@ isc.EditView.addMethods({
 	 * Applies a disabled state to a widget based on the provided binding and condition.
 	 *
 	 * @param {string} binding - the binding key used to retrieve the widget.
-	 * @param {string} disabledConditionName - the condition name used to determine if the widget should be disabled.
+	 * @param {string} disabledCondition - the condition name used to determine if the widget should be disabled.
 	 */
-	setDisabled: function (binding, disabledConditionName) {
+	setDisabled: function (binding, disabledCondition) {
 		const widget = this._vm.getItem(binding);
 
 		if (!widget) {
@@ -1480,7 +1480,7 @@ isc.EditView.addMethods({
 		}
 
 		const values = this.gather(false);
-		this._updateDisabledState(widget, null, disabledConditionName, values);
+		this._updateDisabledState(widget, null, disabledCondition, values);
 	},
 
 	/**
@@ -1532,7 +1532,7 @@ isc.EditView.addMethods({
 		return this._setInvisible(
 			widget,
 			parent,
-			widget.invisibleConditionName,
+			widget.invisibleCondition,
 			values,
 			forceInvisible,
 		);
@@ -1544,7 +1544,7 @@ isc.EditView.addMethods({
 	 *
 	 * @param {Object} widget - the widget whose visibility will be updated.
 	 * @param {Object} parent - the parent container of the widget.
-	 * @param {string} invisibleConditionName - the condition to evaluate for widget invisibility.
+	 * @param {string} invisibleCondition - the condition to evaluate for widget invisibility.
 	 * @param {Object} values - the values used to evaluate the invisibility condition.
 	 * @param {boolean} [forceInvisible=false] - if set to `true`, forces the widget to be invisible regardless of the condition.
 	 * @returns {boolean} - the final invisibility state (`true` if invisible, `false` otherwise).
@@ -1552,14 +1552,14 @@ isc.EditView.addMethods({
 	_setInvisible: function (
 		widget,
 		parent,
-		invisibleConditionName,
+		invisibleCondition,
 		values,
 		forceInvisible = false,
 	) {
 		let invisible = forceInvisible;
 
 		if (!invisible) {
-			invisible = this._evaluateConditionName(invisibleConditionName, values);
+			invisible = this._evaluateCondition(invisibleCondition, values);
 		}
 
 		// Adjust 'required' state based on visibility
@@ -1585,9 +1585,9 @@ isc.EditView.addMethods({
 	 * Sets the visibility of a widget based on a condition name. If the widget exists, it will evaluate the invisibility condition and apply the corresponding visibility state.
 	 *
 	 * @param {string} binding - the binding key used to retrieve the widget.
-	 * @param {string} invisibleConditionName - the condition to evaluate for widget invisibility.
+	 * @param {string} invisibleCondition - the condition to evaluate for widget invisibility.
 	 */
-	setInvisible: function (binding, invisibleConditionName) {
+	setInvisible: function (binding, invisibleCondition) {
 		const widget = this._vm.getItem(binding);
 
 		if (!widget) {
@@ -1595,7 +1595,7 @@ isc.EditView.addMethods({
 		}
 
 		const values = this.gather(false);
-		this._setInvisible(widget, null, invisibleConditionName, values);
+		this._setInvisible(widget, null, invisibleCondition, values);
 	},
 });
 
@@ -2157,9 +2157,9 @@ isc.BizTabPane.addMethods({
 			icon: bizTab.icon,
 			prompt: bizTab.prompt,
 			pane: bizTab.pane,
-			disabledConditionName: bizTab.disabledConditionName,
-			invisibleConditionName: bizTab.invisibleConditionName,
-			selectedConditionName: bizTab.selectedConditionName,
+			disabledCondition: bizTab.disabledCondition,
+			invisibleCondition: bizTab.invisibleCondition,
+			selectedCondition: bizTab.selectedCondition,
 		});
 	},
 
@@ -2191,9 +2191,9 @@ isc.BizTabPane.addMethods({
 					name: bizTab.name,
 					title: bizTab.title,
 					pane: bizTab.pane,
-					disabledConditionName: bizTab.disabledConditionName,
-					invisibleConditionName: bizTab.invisibleConditionName,
-					selectedConditionName: bizTab.selectedConditionName,
+					disabledCondition: bizTab.disabledCondition,
+					invisibleCondition: bizTab.invisibleCondition,
+					selectedCondition: bizTab.selectedCondition,
 				},
 				tabPosition,
 			);

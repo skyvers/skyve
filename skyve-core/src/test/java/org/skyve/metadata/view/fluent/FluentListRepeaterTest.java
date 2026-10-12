@@ -55,13 +55,13 @@ class FluentListRepeaterTest {
 	}
 
 	@Test
-	void postRefreshConditionNameSetsValue() {
-		assertThat(new FluentListRepeater().postRefreshConditionName("cond").get().getPostRefreshConditionName(), is("cond"));
+	void postRefreshConditionSetsValue() {
+		assertThat(new FluentListRepeater().postRefreshCondition("cond").get().getPostRefreshCondition(), is("cond"));
 	}
 
 	@Test
-	void invisibleConditionNameSetsValue() {
-		assertThat(new FluentListRepeater().invisibleConditionName("invisible").get().getInvisibleConditionName(), is("invisible"));
+	void invisibleConditionSetsValue() {
+		assertThat(new FluentListRepeater().invisibleCondition("invisible").get().getInvisibleCondition(), is("invisible"));
 	}
 
 	@Test
@@ -150,10 +150,10 @@ class FluentListRepeaterTest {
 	}
 
 	@Test
-	void fromCopiesInvisibleConditionName() {
+	void fromCopiesInvisibleCondition() {
 		ListRepeater src = new ListRepeater();
-		src.setInvisibleConditionName("invisible");
-		assertThat(new FluentListRepeater().from(src).get().getInvisibleConditionName(), is("invisible"));
+		src.setXmlInvisibleCondition("invisible");
+		assertThat(new FluentListRepeater().from(src).get().getInvisibleCondition(), is("invisible"));
 	}
 
 	@Test

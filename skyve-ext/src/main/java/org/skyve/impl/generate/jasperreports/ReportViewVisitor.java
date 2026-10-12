@@ -931,7 +931,7 @@ public class ReportViewVisitor extends ViewVisitor {
 	 */
 	@Override
 	public void visitColourPicker(ColourPicker arg0, boolean arg1, boolean arg2) {
-		addElementFromItem(arg0.getBinding(), ElementType.colourPicker, arg0.getPixelWidth(), null, null, null, null, arg0.getInvisibleConditionName());	
+		addElementFromItem(arg0.getBinding(), ElementType.colourPicker, arg0.getPixelWidth(), null, null, null, null, arg0.getInvisibleCondition());	
 	}
 
 	/**
@@ -967,7 +967,7 @@ public class ReportViewVisitor extends ViewVisitor {
 	 */
 	@Override
 	public void visitContentSignature(ContentSignature arg0, boolean arg1, boolean arg2) {
-		addElementFromItem(arg0.getBinding(), ReportElement.ElementType.contentImage, arg0.getPixelWidth(), null, null, arg0.getPixelHeight(), null, arg0.getInvisibleConditionName());
+		addElementFromItem(arg0.getBinding(), ReportElement.ElementType.contentImage, arg0.getPixelWidth(), null, null, arg0.getPixelHeight(), null, arg0.getInvisibleCondition());
 	}
 
 	/**
@@ -1004,11 +1004,11 @@ public class ReportViewVisitor extends ViewVisitor {
 				, widget.getResponsiveWidth()
 				, Boolean.FALSE
 				, ContainerType.subreport
-				, widget.getInvisibleConditionName());
+				, widget.getInvisibleCondition());
 		
 		
 		// add a subreport element to the report
-		addElementFromItem(widget.getBinding(), ReportElement.ElementType.subreport, widget.getPixelWidth(), widget.getPercentageWidth(), widget.getResponsiveWidth(), widget.getPixelHeight(), null, widget.getInvisibleConditionName());
+		addElementFromItem(widget.getBinding(), ReportElement.ElementType.subreport, widget.getPixelWidth(), widget.getPercentageWidth(), widget.getResponsiveWidth(), widget.getPixelHeight(), null, widget.getInvisibleCondition());
 
 		//construct the subreport itself
 		ReportElement subE  = currentContainer.getElements().get(currentContainer.getElements().size()-1);
@@ -1091,7 +1091,7 @@ public class ReportViewVisitor extends ViewVisitor {
 	 */
 	@Override
 	public void visitDynamicImage(DynamicImage arg0, boolean arg1, boolean arg2) {
-		addElementFromItem(arg0.getName(), ReportElement.ElementType.dynamicImage, arg0.getPixelWidth(), arg0.getPercentageWidth(), arg0.getResponsiveWidth(), arg0.getPixelHeight(), null, arg0.getInvisibleConditionName());
+		addElementFromItem(arg0.getName(), ReportElement.ElementType.dynamicImage, arg0.getPixelWidth(), arg0.getPercentageWidth(), arg0.getResponsiveWidth(), arg0.getPixelHeight(), null, arg0.getInvisibleCondition());
 
 	}
 
@@ -1101,7 +1101,7 @@ public class ReportViewVisitor extends ViewVisitor {
 	@Override
 	public void visitForm(Form arg0, boolean arg1, boolean arg2) {
 		addContainer(arg0.getWidgetId(), arg0.getBorderTitle(), arg0.getBorder(), arg0.getPixelWidth(), arg0.getPercentageWidth(), arg0.getResponsiveWidth(), Boolean.TRUE,
-				ContainerType.form, arg0.getInvisibleConditionName());
+				ContainerType.form, arg0.getInvisibleCondition());
 		row = 0;
 		inForm = true;
 	}
@@ -1140,7 +1140,7 @@ public class ReportViewVisitor extends ViewVisitor {
 	 */
 	@Override
 	public void visitGeometry(Geometry arg0, boolean arg1, boolean arg2) {
-		addElementFromItem(arg0.getBinding(), ElementType.geometry, arg0.getPixelWidth(), null, null, null, null, arg0.getInvisibleConditionName());
+		addElementFromItem(arg0.getBinding(), ElementType.geometry, arg0.getPixelWidth(), null, null, null, null, arg0.getInvisibleCondition());
 	}
 
 	/**
@@ -1156,7 +1156,7 @@ public class ReportViewVisitor extends ViewVisitor {
 	 */
 	@Override
 	public void visitGeometryMap(GeometryMap arg0, boolean arg1, boolean arg2) {
-		addElementFromItem(arg0.getBinding(), ElementType.geometry, arg0.getPixelWidth(), null, null, null, null, arg0.getInvisibleConditionName());
+		addElementFromItem(arg0.getBinding(), ElementType.geometry, arg0.getPixelWidth(), null, null, null, null, arg0.getInvisibleCondition());
 	}
 
 	/**
@@ -1176,7 +1176,7 @@ public class ReportViewVisitor extends ViewVisitor {
 		if (Boolean.TRUE.equals(design.getVerticalise())) {
 			horiz = Boolean.FALSE;
 		}
-		addContainer(arg0.getWidgetId(), arg0.getBorderTitle(), arg0.getBorder(), arg0.getPixelWidth(), arg0.getPercentageWidth(), arg0.getResponsiveWidth(), horiz, ContainerType.hbox, arg0.getInvisibleConditionName());
+		addContainer(arg0.getWidgetId(), arg0.getBorderTitle(), arg0.getBorder(), arg0.getPixelWidth(), arg0.getPercentageWidth(), arg0.getResponsiveWidth(), horiz, ContainerType.hbox, arg0.getInvisibleCondition());
 	}
 
 	/**
@@ -1368,7 +1368,7 @@ public class ReportViewVisitor extends ViewVisitor {
 	 */
 	@Override
 	public void visitRadio(Radio arg0, boolean arg1, boolean arg2) {
-		addElementFromItem(arg0.getBinding(), ElementType.radio, arg0.getPixelWidth(), null, null, null, null, arg0.getInvisibleConditionName());
+		addElementFromItem(arg0.getBinding(), ElementType.radio, arg0.getPixelWidth(), null, null, null, null, arg0.getInvisibleCondition());
 	}
 
 	/**
@@ -1385,7 +1385,7 @@ public class ReportViewVisitor extends ViewVisitor {
 	 */
 	@Override
 	public void visitRichText(RichText arg0, boolean arg1, boolean arg2) {
-		addElementFromItem(arg0.getBinding(), ElementType.richTextField, arg0.getPixelWidth(), null, null, null, null, arg0.getInvisibleConditionName());
+		addElementFromItem(arg0.getBinding(), ElementType.richTextField, arg0.getPixelWidth(), null, null, null, null, arg0.getInvisibleCondition());
 	}
 
 	/**
@@ -1420,7 +1420,7 @@ public class ReportViewVisitor extends ViewVisitor {
 	 */
 	@Override
 	public void visitSlider(Slider arg0, boolean arg1, boolean arg2) {
-		addElementFromItem(arg0.getBinding(), ElementType.slider, arg0.getPixelWidth(), null, null, null, null, arg0.getInvisibleConditionName());	
+		addElementFromItem(arg0.getBinding(), ElementType.slider, arg0.getPixelWidth(), null, null, null, null, arg0.getInvisibleCondition());	
 	}
 
 	/**
@@ -1436,7 +1436,7 @@ public class ReportViewVisitor extends ViewVisitor {
 	 */
 	@Override
 	public void visitSpinner(Spinner arg0, boolean arg1, boolean arg2) {
-		addElementFromItem(arg0.getBinding(), ElementType.spinner, arg0.getPixelWidth(), null, null, null, null, arg0.getInvisibleConditionName());
+		addElementFromItem(arg0.getBinding(), ElementType.spinner, arg0.getPixelWidth(), null, null, null, null, arg0.getInvisibleCondition());
 	}
 
 	/**
@@ -1444,7 +1444,7 @@ public class ReportViewVisitor extends ViewVisitor {
 	 */
 	@Override
 	public void visitStaticImage(StaticImage arg0, boolean arg1, boolean arg2) {
-		addElementFromItem(arg0.getRelativeFile(), ReportElement.ElementType.staticImage, arg0.getPixelWidth(), arg0.getPercentageWidth(), arg0.getResponsiveWidth(), arg0.getPixelHeight(), null, arg0.getInvisibleConditionName());
+		addElementFromItem(arg0.getRelativeFile(), ReportElement.ElementType.staticImage, arg0.getPixelWidth(), arg0.getPercentageWidth(), arg0.getResponsiveWidth(), arg0.getPixelHeight(), null, arg0.getInvisibleCondition());
 	}
 
 	/**
@@ -1452,7 +1452,7 @@ public class ReportViewVisitor extends ViewVisitor {
 	 */
 	@Override
 	public void visitTab(Tab arg0, boolean arg1, boolean arg2) {
-		addContainer(null, arg0.getLocalisedTitle(), Boolean.TRUE, null, null, null, Boolean.FALSE, ContainerType.tab, arg0.getInvisibleConditionName());
+		addContainer(null, arg0.getLocalisedTitle(), Boolean.TRUE, null, null, null, Boolean.FALSE, ContainerType.tab, arg0.getInvisibleCondition());
 	}
 
 	/**
@@ -1468,7 +1468,7 @@ public class ReportViewVisitor extends ViewVisitor {
 	 */
 	@Override
 	public void visitTextArea(TextArea arg0, boolean arg1, boolean arg2) {
-		addElementFromItem(arg0.getBinding(), ReportElement.ElementType.textField, arg0.getPixelWidth(), null, null, null, null, arg0.getInvisibleConditionName());
+		addElementFromItem(arg0.getBinding(), ReportElement.ElementType.textField, arg0.getPixelWidth(), null, null, null, null, arg0.getInvisibleCondition());
 	}
 
 	/**
@@ -1476,7 +1476,7 @@ public class ReportViewVisitor extends ViewVisitor {
 	 */
 	@Override
 	public void visitTextField(TextField arg0, boolean arg1, boolean arg2) {
-		addElementFromItem(arg0.getBinding(), ReportElement.ElementType.textField, arg0.getPixelWidth(), null, null, null, null, arg0.getInvisibleConditionName());
+		addElementFromItem(arg0.getBinding(), ReportElement.ElementType.textField, arg0.getPixelWidth(), null, null, null, null, arg0.getInvisibleCondition());
 	}
 
 	/**
@@ -1511,8 +1511,15 @@ public class ReportViewVisitor extends ViewVisitor {
 	 */
 	@Override
 	public void visitVBox(VBox arg0, boolean arg1, boolean arg2) {
-		addContainer(arg0.getWidgetId(), arg0.getBorderTitle(), arg0.getBorder(), arg0.getPixelWidth(), arg0.getPercentageWidth(), arg0.getResponsiveWidth(), Boolean.FALSE,
-				ContainerType.vbox, arg0.getInvisibleConditionName());
+		addContainer(arg0.getWidgetId(),
+						arg0.getBorderTitle(),
+						arg0.getBorder(),
+						arg0.getPixelWidth(),
+						arg0.getPercentageWidth(),
+						arg0.getResponsiveWidth(),
+						Boolean.FALSE,
+						ContainerType.vbox,
+						arg0.getInvisibleCondition());
 	}
 
 	/**

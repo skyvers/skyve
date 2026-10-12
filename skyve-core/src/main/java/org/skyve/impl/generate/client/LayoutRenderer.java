@@ -179,7 +179,7 @@ public abstract class LayoutRenderer extends AbstractRenderer {
 	 * @param pixelWidth fixed width constraint, if present
 	 * @param responsiveWidth responsive width constraint, if present
 	 * @param percentageWidth percentage width constraint, if present
-	 * @param invisibleConditionName visibility condition expression for the child
+	 * @param invisibleCondition visibility condition expression for the child
 	 * @return the active render node to continue processing with
 	 */
 	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
@@ -190,7 +190,7 @@ public abstract class LayoutRenderer extends AbstractRenderer {
 														Integer pixelWidth, 
 														Integer responsiveWidth,
 														Integer percentageWidth,
-														String invisibleConditionName);
+														String invisibleCondition);
 	
 	/**
 	 * Finalises insertion into a generated container.

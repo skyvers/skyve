@@ -12,6 +12,8 @@ import org.skyve.metadata.view.TextOutput.Sanitisation;
 import org.skyve.util.OWASP;
 import org.skyve.web.UserAgentType;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.el.ELContext;
 import jakarta.el.ExpressionFactory;
 import jakarta.el.ValueExpression;
@@ -150,20 +152,59 @@ public abstract class AbstractFacesBuilder {
 	 * Applies disabled-state value expressions for widget-level and form-level conditions.
 	 *
 	 * @param component the component to update
-	 * @param disabledConditionName the optional widget disabled condition
-	 * @param formDisabledConditionName the optional form disabled condition
+	 * @param disabledCondition the optional widget disabled condition
+	 * @param formDisabledCondition the optional form disabled condition
 	 */
-	protected void setDisabled(UIComponent component, String disabledConditionName, String formDisabledConditionName) {
-		if (disabledConditionName != null) {
-			if (formDisabledConditionName == null) {
-				component.setValueExpression("disabled", createValueExpressionFromCondition(disabledConditionName, null));
+	protected void setDisabled(UIComponent component, String disabledCondition, String formDisabledCondition) {
+		if (disabledCondition != null) {
+			if (formDisabledCondition == null) {
+				component.setValueExpression("disabled", createValueExpressionFromCondition(disabledCondition, null));
 			}
 			else {
-				component.setValueExpression("disabled", createOredValueExpressionFromConditions(new String[] {disabledConditionName, formDisabledConditionName}));
+				component.setValueExpression("disabled", createOredValueExpressionFromConditions(new String[] {disabledCondition, formDisabledCondition}));
 			}
 		}
-		else if (formDisabledConditionName != null) {
-			component.setValueExpression("disabled", createValueExpressionFromCondition(formDisabledConditionName, null));
+		else if (formDisabledCondition != null) {
+			component.setValueExpression("disabled", createValueExpressionFromCondition(formDisabledCondition, null));
+		}
+	}
+
+	/**
+	 * Applies disabled-state value expressions for a widget-level condition using a data-widget variable.
+	 *
+	 * @param component the component to update
+	 * @param dataWidgetVar the data-widget variable name, or {@code null} outside a data widget,
+	 * 						in which case the condition is evaluated against the current bean
+	 * @param disabledCondition the optional widget disabled condition
+	 * @param formDisabledCondition the optional form disabled condition, always evaluated against the current bean
+	 */
+	protected void setDisabled(UIComponent component, String dataWidgetVar, String disabledCondition, String formDisabledCondition) {
+		if ((dataWidgetVar == null) || (disabledCondition == null)) {
+			// not in a data widget, or only a form condition, so the conditions apply to the current bean
+			setDisabled(component, disabledCondition, formDisabledCondition);
+		}
+		else {
+			StringBuilder fragment = new StringBuilder(64);
+			if (String.valueOf(true).equals(disabledCondition) || String.valueOf(false).equals(disabledCondition)) {
+				fragment.append(disabledCondition);
+			}
+			else {
+				@SuppressWarnings("null") // if dataWidgetVar is not null, then sanitised is not null
+				@Nonnull String row = BindUtil.sanitiseBinding(dataWidgetVar);
+				fragment.append(createConditionFragment(row, disabledCondition));
+			}
+			if (formDisabledCondition != null) {
+				// the form belongs to the view, not the row
+				fragment.append(" or ").append(createOredValueExpressionFragmentFromConditions(new String[] {formDisabledCondition}));
+			}
+			component.setValueExpression("disabled", createValueExpressionFromFragment(null,
+																						false,
+																						fragment.toString(),
+																						false,
+																						null,
+																						Boolean.class,
+																						false,
+																						Sanitisation.none));
 		}
 	}
 
@@ -171,12 +212,12 @@ public abstract class AbstractFacesBuilder {
 	 * Applies a rendered expression from an invisible condition.
 	 *
 	 * @param component the component to update
-	 * @param invisibleConditionName the optional invisible condition
+	 * @param invisibleCondition the optional invisible condition
 	 * @param extraELToAnd extra EL condition appended using logical AND
 	 */
-	protected void setInvisible(UIComponent component, String invisibleConditionName, String extraELToAnd) {
-		if (invisibleConditionName != null) {
-			String visible = BindUtil.negateCondition(invisibleConditionName);
+	protected void setInvisible(UIComponent component, String invisibleCondition, String extraELToAnd) {
+		if (invisibleCondition != null) {
+			String visible = BindUtil.negateCondition(invisibleCondition);
 			component.setValueExpression("rendered", createValueExpressionFromCondition(visible, extraELToAnd));
 		}
 	}
@@ -185,21 +226,43 @@ public abstract class AbstractFacesBuilder {
 	 * Applies a rendered expression from an invisible condition using a data-widget variable.
 	 *
 	 * @param component the component to update
-	 * @param dataWidgetVar the data-widget variable name
-	 * @param invisibleConditionName the optional invisible condition
+	 * @param dataWidgetVar the data-widget variable name, or {@code null} outside a data widget,
+	 * 						in which case the condition is evaluated against the current bean
+	 * @param invisibleCondition the optional invisible condition
 	 * @param extraELToAnd extra EL condition appended using logical AND
 	 */
-	protected void setInvisible(UIComponent component, String dataWidgetVar, String invisibleConditionName, String extraELToAnd) {
-		if (invisibleConditionName != null) {
-			final String visible = BindUtil.negateCondition(invisibleConditionName);
-			component.setValueExpression("rendered",  createValueExpressionFromFragment(dataWidgetVar,
-																							true,
-																							visible,
-																							false,
-																							extraELToAnd,
-																							Boolean.class,
-																							false,
-																							Sanitisation.none));
+	protected void setInvisible(UIComponent component, String dataWidgetVar, String invisibleCondition, String extraELToAnd) {
+		if ((dataWidgetVar == null) ||
+				String.valueOf(true).equals(invisibleCondition) ||
+				String.valueOf(false).equals(invisibleCondition)) {
+			// not in a data widget, so the condition applies to the current bean, or a boolean literal, which needs no bean
+			setInvisible(component, invisibleCondition, extraELToAnd);
+		}
+		else if (invisibleCondition != null) {
+			@SuppressWarnings("null") // if invisibleCondition is not null, then its negation is not null
+			final @Nonnull String visible = BindUtil.negateCondition(invisibleCondition);
+			if (isInlineCondition(visible)) {
+				@SuppressWarnings("null") // if dataWidgetVar is not null, then sanitised is not null
+				@Nonnull String row = BindUtil.sanitiseBinding(dataWidgetVar);
+				component.setValueExpression("rendered",  createValueExpressionFromFragment(null,
+																								false,
+																								createConditionFragment(row, visible),
+																								false,
+																								extraELToAnd,
+																								Boolean.class,
+																								false,
+																								Sanitisation.none));
+			}
+			else {
+				component.setValueExpression("rendered",  createValueExpressionFromFragment(dataWidgetVar,
+																								true,
+																								visible,
+																								false,
+																								extraELToAnd,
+																								Boolean.class,
+																								false,
+																								Sanitisation.none));
+			}
 		}
 	}
 
@@ -415,8 +478,55 @@ public abstract class AbstractFacesBuilder {
 
 			return createValueExpressionFromFragment(null, false, extraELConditionToAnd, false, null, Boolean.class, false, Sanitisation.none);
 		}
+		else if (isInlineCondition(condition)) {
+			return createValueExpressionFromFragment(null,
+														false,
+														createConditionFragment(managedBeanName + ".currentBean", condition),
+														false,
+														extraELConditionToAnd,
+														Boolean.class,
+														false,
+														Sanitisation.none);
+		}
 
 		return createValueExpressionFromFragment(condition, true, extraELConditionToAnd, Boolean.class, false, Sanitisation.none);
+	}
+
+	/**
+	 * Tests whether a condition is an inline condition expression or the inverse of one,
+	 * as opposed to a condition name or a boolean literal.
+	 *
+	 * @param condition the condition held by view metadata; may be {@code null}
+	 * @return {@code true} when the condition must be evaluated as an expression
+	 */
+	protected static boolean isInlineCondition(@Nullable String condition) {
+		return (condition != null) &&
+				(BindUtil.isSkyveExpression(condition) || BindUtil.isNegatedSkyveExpression(condition));
+	}
+
+	/**
+	 * Builds the EL fragment (without <code>#{}</code>) that evaluates a condition against a bean adapter.
+	 *
+	 * <p>A condition name is looked up on the adapter as a map key, as it always has been.
+	 * An inline condition expression cannot be, because the adapter treats a key containing
+	 * braces as a message to format, so it is passed to the adapter's condition evaluation method
+	 * as an EL string literal instead.
+	 *
+	 * @param beanExpression the EL expression that resolves to the bean adapter
+	 * @param condition a condition name, an inline condition expression or its inverse; not a boolean literal
+	 * @return the EL fragment
+	 */
+	protected static @Nonnull String createConditionFragment(@Nonnull String beanExpression, @Nonnull String condition) {
+		StringBuilder result = new StringBuilder(beanExpression.length() + condition.length() + 24);
+		result.append(beanExpression);
+		if (isInlineCondition(condition)) {
+			// escape for an EL string literal
+			result.append(".evaluateCondition('").append(condition.replace("\\", "\\\\").replace("'", "\\'")).append("')");
+		}
+		else {
+			result.append("['").append(condition).append("']");
+		}
+		return result.toString();
 	}
 	
 	/**
@@ -434,7 +544,7 @@ public abstract class AbstractFacesBuilder {
 					result.append(condition);
 				}
 				else {
-					result.append(managedBeanName).append(".currentBean['").append(condition).append("']");
+					result.append(createConditionFragment(managedBeanName + ".currentBean", condition));
 				}
 				result.append(" or ");
 			}
@@ -476,14 +586,14 @@ public abstract class AbstractFacesBuilder {
 	 * @param nowrap whether white-space should be nowrap
 	 * @param middle whether vertical middle alignment is applied
 	 * @param blockLayout whether block layout is used
-	 * @param invisibleConditionName optional invisible condition
+	 * @param invisibleCondition optional invisible condition
 	 * @param widgetId optional widget ID
 	 * @return the configured panel group
 	 */
 	protected HtmlPanelGroup panelGroup(boolean nowrap, 
 											boolean middle, 
 											boolean blockLayout,
-											String invisibleConditionName,
+											String invisibleCondition,
 											String widgetId) {
 		HtmlPanelGroup result = (HtmlPanelGroup) a.createComponent(HtmlPanelGroup.COMPONENT_TYPE);
 		StringBuilder style = new StringBuilder(32);
@@ -496,7 +606,7 @@ public abstract class AbstractFacesBuilder {
 		if (! style.isEmpty()) {
 			result.setStyle(style.toString());
 		}
-		setInvisible(result, invisibleConditionName, null);
+		setInvisible(result, invisibleCondition, null);
 		setId(result, widgetId);
 		if (blockLayout) {
 			result.setLayout("block");

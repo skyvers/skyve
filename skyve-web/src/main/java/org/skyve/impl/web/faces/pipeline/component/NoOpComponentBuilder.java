@@ -100,7 +100,7 @@ public class NoOpComponentBuilder extends ComponentBuilder {
 	@Override
 	public UIComponent border(UIComponent component,
 								String title,
-								String invisibileConditionName,
+								String invisibleCondition,
 								Integer pixelWidth,
 								Collapsible collapsible) {
 		return component;
@@ -122,14 +122,14 @@ public class NoOpComponentBuilder extends ComponentBuilder {
 	 * @param component the current component
 	 * @param label raw button label and nullable escape flag
 	 * @param button dialog-button metadata
-	 * @param formDisabledConditionName optional form-level disabled condition
+	 * @param formDisabledCondition optional form-level disabled condition
 	 * @return the original component
 	 */
 	@Override
 	public UIComponent dialogButton(UIComponent component,
 										EscapableText label,
 										DialogButton button,
-										String formDisabledConditionName) {
+										String formDisabledCondition) {
 		return component;
 	}
 
@@ -139,7 +139,7 @@ public class NoOpComponentBuilder extends ComponentBuilder {
 										String iconStyleClass,
 										String toolTip,
 										ZoomIn zoomIn,
-										String formDisabledConditionName) {
+										String formDisabledCondition) {
 		return component;
 	}
 
@@ -152,7 +152,7 @@ public class NoOpComponentBuilder extends ComponentBuilder {
 										String toolTip,
 										String confirmationText, 
 										Button button,
-										String formDisabledConditionName,
+										String formDisabledCondition,
 										Action action) {
 		return component;
 	}
@@ -164,7 +164,7 @@ public class NoOpComponentBuilder extends ComponentBuilder {
 										String toolTip,
 										String confirmationText, 
 										Button button,
-										String formDisabledConditionName,
+										String formDisabledCondition,
 										Action action) {
 		return component;
 	}
@@ -178,7 +178,7 @@ public class NoOpComponentBuilder extends ComponentBuilder {
 										String toolTip,
 										String confirmationText, 
 										Button button,
-										String formDisabledConditionName,
+										String formDisabledCondition,
 										Action action) {
 		return component;
 	}
@@ -190,7 +190,7 @@ public class NoOpComponentBuilder extends ComponentBuilder {
 										String toolTip,
 										String confirmationText, 
 										Button button,
-										String formDisabledConditionName,
+										String formDisabledCondition,
 										Action action) {
 		return component;
 	}
@@ -292,7 +292,7 @@ public class NoOpComponentBuilder extends ComponentBuilder {
 	public EventSourceComponent geometry(EventSourceComponent component,
 											String dataWidgetVar,
 											Geometry geometry,
-											String formDisabledConditionName,
+											String formDisabledCondition,
 											String title,
 											@Nullable String requiredMessage,
 											HorizontalAlignment textAlignment) {
@@ -302,7 +302,7 @@ public class NoOpComponentBuilder extends ComponentBuilder {
 	@Override
 	public EventSourceComponent geometryMap(EventSourceComponent component,
 												GeometryMap geometry,
-												String formDisabledConditionName,
+												String formDisabledCondition,
 												String title,
 												@Nullable String requiredMessage) {
 		return component;
@@ -370,7 +370,7 @@ public class NoOpComponentBuilder extends ComponentBuilder {
 	public EventSourceComponent checkBox(EventSourceComponent component,
 											String dataWidgetVar,
 											CheckBox checkBox,
-											String formDisabledConditionName,
+											String formDisabledCondition,
 											String title,
 											@Nullable String requiredMessage) {
 		return component;
@@ -380,7 +380,7 @@ public class NoOpComponentBuilder extends ComponentBuilder {
 	public EventSourceComponent colourPicker(EventSourceComponent component,
 												String dataWidgetVar,
 												ColourPicker colour,
-												String formDisabledConditionName,
+												String formDisabledCondition,
 												String title,
 												@Nullable String requiredMessage,
 												HorizontalAlignment textAlignment) {
@@ -391,7 +391,7 @@ public class NoOpComponentBuilder extends ComponentBuilder {
 	public EventSourceComponent combo(EventSourceComponent component,
 										String dataWidgetVar,
 										Combo combo,
-										String formDisabledConditionName,
+										String formDisabledCondition,
 										String title,
 										@Nullable String requiredMessage) {
 		return component;
@@ -401,7 +401,7 @@ public class NoOpComponentBuilder extends ComponentBuilder {
 	public @Nullable UIComponent content(@Nullable UIComponent component,
 											@Nullable String dataWidgetVar,
 											@Nonnull ContentUpload content,
-											@Nullable String formDisabledConditionName,
+											@Nullable String formDisabledCondition,
 											@Nullable String title,
 											@Nullable String requiredMessage,
 											@Nullable HorizontalAlignment textAlignment,
@@ -414,7 +414,7 @@ public class NoOpComponentBuilder extends ComponentBuilder {
 	public UIComponent addContentSignature(UIComponent component,
 												UIComponent layout,
 												ContentSignature signature,
-												String formDisabledConditionName,
+												String formDisabledCondition,
 												String title,
 												@Nullable String requiredMessage) {
 		return component;
@@ -424,7 +424,7 @@ public class NoOpComponentBuilder extends ComponentBuilder {
 	public UIComponent html(UIComponent component,
 								String dataWidgetVar,
 								HTML html,
-								String formDisabledConditionName,
+								String formDisabledCondition,
 								String title,
 								@Nullable String requiredMessage) {
 		return component;
@@ -434,7 +434,7 @@ public class NoOpComponentBuilder extends ComponentBuilder {
 	public EventSourceComponent lookupDescription(EventSourceComponent component,
 													String dataWidgetVar,
 													LookupDescription lookup,
-													String formDisabledConditionName,
+													String formDisabledCondition,
 													String title,
 													@Nullable String requiredMessage,
 													HorizontalAlignment textAlignment,
@@ -448,7 +448,7 @@ public class NoOpComponentBuilder extends ComponentBuilder {
 	public EventSourceComponent password(EventSourceComponent component,
 											String dataWidgetVar,
 											Password password,
-											String formDisabledConditionName,
+											String formDisabledCondition,
 											String title,
 											@Nullable String requiredMessage,
 											HorizontalAlignment textAlignment) {
@@ -459,7 +459,7 @@ public class NoOpComponentBuilder extends ComponentBuilder {
 	public EventSourceComponent radio(EventSourceComponent component,
 										String dataWidgetVar,
 										Radio radio,
-										String formDisabledConditionName,
+										String formDisabledCondition,
 										String title,
 										@Nullable String requiredMessage) {
 		return component;
@@ -469,7 +469,7 @@ public class NoOpComponentBuilder extends ComponentBuilder {
 	public EventSourceComponent richText(EventSourceComponent component,
 											String dataWidgetVar,
 											RichText text,
-											String formDisabledConditionName,
+											String formDisabledCondition,
 											String title,
 											@Nullable String requiredMessage) {
 		return component;
@@ -479,7 +479,7 @@ public class NoOpComponentBuilder extends ComponentBuilder {
 	public EventSourceComponent spinner(EventSourceComponent component,
 											String dataWidgetVar,
 											Spinner spinner,
-											String formDisabledConditionName,
+											String formDisabledCondition,
 											String title,
 											@Nullable String requiredMessage,
 											HorizontalAlignment textAlignment,
@@ -491,7 +491,7 @@ public class NoOpComponentBuilder extends ComponentBuilder {
 	public EventSourceComponent slider(EventSourceComponent component,
 											String dataWidgetVar,
 											Slider spinner,
-											String formDisabledConditionName,
+											String formDisabledCondition,
 											String title,
 											@Nullable String requiredMessage,
 											jakarta.faces.convert.Converter<?> facesConverter) {
@@ -502,7 +502,7 @@ public class NoOpComponentBuilder extends ComponentBuilder {
 	public EventSourceComponent textArea(EventSourceComponent component,
 											String dataWidgetVar,
 											TextArea text,
-											String formDisabledConditionName,
+											String formDisabledCondition,
 											String title,
 											@Nullable String requiredMessage,
 											HorizontalAlignment textAlignment,
@@ -514,7 +514,7 @@ public class NoOpComponentBuilder extends ComponentBuilder {
 	public EventSourceComponent text(EventSourceComponent component,
 										String dataWidgetVar,
 										TextField text,
-										String formDisabledConditionName,
+										String formDisabledCondition,
 										String title,
 										@Nullable String requiredMessage,
 										HorizontalAlignment textAlignment,

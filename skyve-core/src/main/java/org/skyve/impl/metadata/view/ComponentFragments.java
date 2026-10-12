@@ -72,14 +72,14 @@ class ComponentFragments {
 						if (widgetId == null) { // full view clone
 							view.resolve(uxui, c, m, d, generate);
 							result = view;
-							ComponentViewVisitor visitor = new ComponentViewVisitor(c, m, d, result, uxui, component.getBinding(), component.getNames(), widgetId);
+							ComponentViewVisitor visitor = new ComponentViewVisitor(c, m, d, result, uxui, component.getBinding(), component.getActions(), component.getConditions(), widgetId);
 							visitor.visit();
 						}
 						else { // partial vie clone for a widget Id
 							// Create a new temp view and add the relevant part as a child
 							result = new ViewImpl();
 							// Note that visit without resolving first works
-							ComponentViewVisitor visitor = new ComponentViewVisitor(c, m, d, view, uxui, component.getBinding(), component.getNames(), widgetId);
+							ComponentViewVisitor visitor = new ComponentViewVisitor(c, m, d, view, uxui, component.getBinding(), component.getActions(), component.getConditions(), widgetId);
 							visitor.visit();
 							result.getContained().addAll(visitor.getContained());
 							// Now resolve the new view

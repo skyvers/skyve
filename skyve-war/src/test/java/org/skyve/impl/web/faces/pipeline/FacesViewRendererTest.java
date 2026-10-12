@@ -125,7 +125,7 @@ class FacesViewRendererTest extends AbstractSkyveTest {
 											Integer md,
 											Integer lg,
 											Integer xl,
-											String invisibleConditionName) {
+											String invisibleCondition) {
 			if (component != null) {
 				return component;
 			}
@@ -833,7 +833,7 @@ class FacesViewRendererTest extends AbstractSkyveTest {
 		tf.setBinding("text");
 		SetDisabledEventAction setDisabled = new SetDisabledEventAction();
 		setDisabled.setBinding("text");
-		setDisabled.setDisabledConditionName("false");
+		setDisabled.setXmlDisabledCondition("false");
 		tf.getChangedActions().add(setDisabled);
 		view.getContained().add(createFormWithWidget(tf));
 
@@ -849,7 +849,7 @@ class FacesViewRendererTest extends AbstractSkyveTest {
 		tf.setBinding("text");
 		SetInvisibleEventAction setInvisible = new SetInvisibleEventAction();
 		setInvisible.setBinding("text");
-		setInvisible.setInvisibleConditionName("false");
+		setInvisible.setXmlInvisibleCondition("false");
 		tf.getChangedActions().add(setInvisible);
 		view.getContained().add(createFormWithWidget(tf));
 

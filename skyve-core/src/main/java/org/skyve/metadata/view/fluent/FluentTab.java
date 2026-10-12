@@ -1,6 +1,10 @@
 package org.skyve.metadata.view.fluent;
 
+import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.metadata.view.container.Tab;
+
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 
 /**
  * Fluent builder for tab container metadata.
@@ -39,8 +43,8 @@ public class FluentTab extends FluentContainer<FluentTab> {
 		escapeTitle(tab.getEscapeTitle());
 		icon16x16RelativeFileName(tab.getIcon16x16RelativeFileName());
 		iconStyleClass(tab.getIconStyleClass());
-		disabledConditionName(tab.getDisabledConditionName());
-		invisibleConditionName(tab.getInvisibleConditionName());
+		BindUtil.copyAuthoredCondition(tab.getXmlDisabledCondition(), tab.getXmlEnabledCondition(), this::disabledCondition, this::enabledCondition);
+		BindUtil.copyAuthoredCondition(tab.getXmlInvisibleCondition(), tab.getXmlVisibleCondition(), this::invisibleCondition, this::visibleCondition);
 		
 		super.from(tab);
 
@@ -105,26 +109,50 @@ public class FluentTab extends FluentContainer<FluentTab> {
 	}
 
 	/**
-	 * Sets the condition name that disables this tab when it evaluates to true.
+	 * Sets the {@code disabled} condition as authored; the opposite sense of {@link #enabledCondition(String)}.
 	 *
-	 * @param disabledConditionName
-	 *            the disabled condition identifier
+	 * @param disabledCondition
+	 *            a condition name, an inline condition expression or a boolean literal
 	 * @return this builder
 	 */
-	public FluentTab disabledConditionName(String disabledConditionName) {
-		tab.setDisabledConditionName(disabledConditionName);
+	public @Nonnull FluentTab disabledCondition(@Nullable String disabledCondition) {
+		tab.setXmlDisabledCondition(disabledCondition);
 		return this;
 	}
 
 	/**
-	 * Sets the condition name that hides this tab when it evaluates to true.
+	 * Sets the {@code enabled} condition as authored; the opposite sense of {@link #disabledCondition(String)}.
 	 *
-	 * @param invisibleConditionName
-	 *            the invisibility condition identifier
+	 * @param enabledCondition
+	 *            a condition name, an inline condition expression or a boolean literal
 	 * @return this builder
 	 */
-	public FluentTab invisibleConditionName(String invisibleConditionName) {
-		tab.setInvisibleConditionName(invisibleConditionName);
+	public @Nonnull FluentTab enabledCondition(@Nullable String enabledCondition) {
+		tab.setXmlEnabledCondition(enabledCondition);
+		return this;
+	}
+
+	/**
+	 * Sets the {@code invisible} condition as authored; the opposite sense of {@link #visibleCondition(String)}.
+	 *
+	 * @param invisibleCondition
+	 *            a condition name, an inline condition expression or a boolean literal
+	 * @return this builder
+	 */
+	public @Nonnull FluentTab invisibleCondition(@Nullable String invisibleCondition) {
+		tab.setXmlInvisibleCondition(invisibleCondition);
+		return this;
+	}
+
+	/**
+	 * Sets the {@code visible} condition as authored; the opposite sense of {@link #invisibleCondition(String)}.
+	 *
+	 * @param visibleCondition
+	 *            a condition name, an inline condition expression or a boolean literal
+	 * @return this builder
+	 */
+	public @Nonnull FluentTab visibleCondition(@Nullable String visibleCondition) {
+		tab.setXmlVisibleCondition(visibleCondition);
 		return this;
 	}
 

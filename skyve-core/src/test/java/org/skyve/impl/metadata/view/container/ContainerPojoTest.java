@@ -4,7 +4,6 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
-import static org.hamcrest.Matchers.startsWith;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
@@ -36,17 +35,17 @@ class ContainerPojoTest {
 	}
 
 	@Test
-	void hboxSetVisibleConditionNameNegatesCondition() {
+	void hboxSetVisibleConditionNegatesCondition() {
 		HBox box = new HBox();
-		box.setVisibleConditionName("isVisible");
-		assertThat(box.getInvisibleConditionName(), startsWith("not"));
+		box.setXmlVisibleCondition("isVisible");
+		assertThat(box.getInvisibleCondition(), is("notIsVisible"));
 	}
 
 	@Test
-	void hboxSetInvisibleConditionNameRoundtrip() {
+	void hboxSetInvisibleConditionRoundtrip() {
 		HBox box = new HBox();
-		box.setInvisibleConditionName("isHidden");
-		assertThat(box.getInvisibleConditionName(), is("isHidden"));
+		box.setXmlInvisibleCondition("isHidden");
+		assertThat(box.getInvisibleCondition(), is("isHidden"));
 	}
 
 	@Test
@@ -99,17 +98,17 @@ class ContainerPojoTest {
 	}
 
 	@Test
-	void vboxSetVisibleConditionNameNegatesCondition() {
+	void vboxSetVisibleConditionNegatesCondition() {
 		VBox box = new VBox();
-		box.setVisibleConditionName("isVisible");
-		assertThat(box.getInvisibleConditionName(), startsWith("not"));
+		box.setXmlVisibleCondition("isVisible");
+		assertThat(box.getInvisibleCondition(), is("notIsVisible"));
 	}
 
 	@Test
-	void vboxSetInvisibleConditionNameRoundtrip() {
+	void vboxSetInvisibleConditionRoundtrip() {
 		VBox box = new VBox();
-		box.setInvisibleConditionName("hiddenWhen");
-		assertThat(box.getInvisibleConditionName(), is("hiddenWhen"));
+		box.setXmlInvisibleCondition("hiddenWhen");
+		assertThat(box.getInvisibleCondition(), is("hiddenWhen"));
 	}
 
 	@Test
@@ -148,24 +147,24 @@ class ContainerPojoTest {
 	}
 
 	@Test
-	void sidebarSetInvisibleConditionNameRoundtrip() {
+	void sidebarSetInvisibleConditionRoundtrip() {
 		Sidebar sidebar = new Sidebar();
-		sidebar.setInvisibleConditionName("hiddenWhen");
-		assertThat(sidebar.getInvisibleConditionName(), is("hiddenWhen"));
+		sidebar.setXmlInvisibleCondition("hiddenWhen");
+		assertThat(sidebar.getInvisibleCondition(), is("hiddenWhen"));
 	}
 
 	@Test
-	void sidebarBlankInvisibleConditionNameBecomesNull() {
+	void sidebarBlankInvisibleConditionBecomesNull() {
 		Sidebar sidebar = new Sidebar();
-		sidebar.setInvisibleConditionName("  ");
-		assertNull(sidebar.getInvisibleConditionName());
+		sidebar.setXmlInvisibleCondition("  ");
+		assertNull(sidebar.getInvisibleCondition());
 	}
 
 	@Test
-	void sidebarSetVisibleConditionNameNegatesCondition() {
+	void sidebarSetVisibleConditionNegatesCondition() {
 		Sidebar sidebar = new Sidebar();
-		sidebar.setVisibleConditionName("isVisible");
-		assertThat(sidebar.getInvisibleConditionName(), startsWith("not"));
+		sidebar.setXmlVisibleCondition("isVisible");
+		assertThat(sidebar.getInvisibleCondition(), is("notIsVisible"));
 	}
 
 	@Test
@@ -231,31 +230,31 @@ class ContainerPojoTest {
 	}
 
 	@Test
-	void tabSetDisabledConditionNameRoundtrip() {
+	void tabSetDisabledConditionRoundtrip() {
 		Tab tab = new Tab();
-		tab.setDisabledConditionName("isDisabled");
-		assertThat(tab.getDisabledConditionName(), is("isDisabled"));
+		tab.setXmlDisabledCondition("isDisabled");
+		assertThat(tab.getDisabledCondition(), is("isDisabled"));
 	}
 
 	@Test
-	void tabSetEnabledConditionNameNegatesCondition() {
+	void tabSetEnabledConditionNegatesCondition() {
 		Tab tab = new Tab();
-		tab.setEnabledConditionName("isEnabled");
-		assertThat(tab.getDisabledConditionName(), startsWith("not"));
+		tab.setXmlEnabledCondition("isEnabled");
+		assertThat(tab.getDisabledCondition(), is("notIsEnabled"));
 	}
 
 	@Test
-	void tabSetVisibleConditionNameNegatesCondition() {
+	void tabSetVisibleConditionNegatesCondition() {
 		Tab tab = new Tab();
-		tab.setVisibleConditionName("isVisible");
-		assertThat(tab.getInvisibleConditionName(), startsWith("not"));
+		tab.setXmlVisibleCondition("isVisible");
+		assertThat(tab.getInvisibleCondition(), is("notIsVisible"));
 	}
 
 	@Test
-	void tabSetInvisibleConditionNameRoundtrip() {
+	void tabSetInvisibleConditionRoundtrip() {
 		Tab tab = new Tab();
-		tab.setInvisibleConditionName("hiddenWhen");
-		assertThat(tab.getInvisibleConditionName(), is("hiddenWhen"));
+		tab.setXmlInvisibleCondition("hiddenWhen");
+		assertThat(tab.getInvisibleCondition(), is("hiddenWhen"));
 	}
 
 	@Test

@@ -74,9 +74,9 @@ class FluentDialogButtonTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void invisibleConditionNameReturnsSelf() {
+	void invisibleConditionReturnsSelf() {
 		FluentDialogButton b = new FluentDialogButton();
-		FluentDialogButton result = b.invisibleConditionName("hiddenCond");
+		FluentDialogButton result = b.invisibleCondition("hiddenCond");
 		assertSame(b, result);
 	}
 

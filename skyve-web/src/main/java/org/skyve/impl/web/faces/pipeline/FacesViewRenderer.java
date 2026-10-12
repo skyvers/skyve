@@ -336,7 +336,7 @@ public class FacesViewRenderer extends ViewRenderer {
 						tabPane.getMd(),
 						tabPane.getLg(),
 						tabPane.getXl(),
-						tabPane.getInvisibleConditionName());
+						tabPane.getInvisibleCondition());
 
 		if (renderingThisFragment && (current == null)) {
 			current = component;
@@ -408,7 +408,7 @@ public class FacesViewRenderer extends ViewRenderer {
 	@Override
 	public void renderVBox(String borderTitle, VBox vbox) {
 		UIComponent layout = lb.vboxLayout(null, vbox);
-		addToContainerWithPotentialBorder(layout, vbox.getBorder(), borderTitle, vbox, vbox.getInvisibleConditionName(), vbox.getCollapsible(), vbox.getWidgetId());
+		addToContainerWithPotentialBorder(layout, vbox.getBorder(), borderTitle, vbox, vbox.getInvisibleCondition(), vbox.getCollapsible(), vbox.getWidgetId());
 	}
 
 	/**
@@ -431,7 +431,7 @@ public class FacesViewRenderer extends ViewRenderer {
 	@Override
 	public void renderHBox(String borderTitle, HBox hbox) {
 		UIComponent layout = lb.hboxLayout(null, hbox);
-		addToContainerWithPotentialBorder(layout, hbox.getBorder(), borderTitle, hbox, hbox.getInvisibleConditionName(), hbox.getCollapsible(), hbox.getWidgetId());
+		addToContainerWithPotentialBorder(layout, hbox.getBorder(), borderTitle, hbox, hbox.getInvisibleCondition(), hbox.getCollapsible(), hbox.getWidgetId());
 	}
 
 	/**
@@ -454,8 +454,8 @@ public class FacesViewRenderer extends ViewRenderer {
 	@Override
 	public void renderForm(String borderTitle, Form form) {
 		UIComponent layout = lb.formLayout(null, form);
-		addToContainerWithPotentialBorder(layout, form.getBorder(), borderTitle, form, form.getInvisibleConditionName(), form.getCollapsible(), form.getWidgetId());
-// TODO form.getDisabledConditionName() form.getLabelDefaultHorizontalAlignment()
+		addToContainerWithPotentialBorder(layout, form.getBorder(), borderTitle, form, form.getInvisibleCondition(), form.getCollapsible(), form.getWidgetId());
+// TODO form.getDisabledCondition() form.getLabelDefaultHorizontalAlignment()
 	}
 
 	/**
@@ -659,17 +659,17 @@ public class FacesViewRenderer extends ViewRenderer {
 	 *
 	 * @return the inherited disabled condition, or {@code null} when there is none
 	 */
-	private @Nullable String containingDisabledConditionName() {
+	private @Nullable String containingDisabledCondition() {
 		Form currentForm = getCurrentForm();
 		if (currentForm != null) {
-			return currentForm.getDisabledConditionName();
+			return currentForm.getDisabledCondition();
 		}
 
 		AbstractDataWidget dataWidget = getCurrentDataWidget();
 		if ((getCurrentBoundColumn() != null) &&
 				(dataWidget instanceof DataGrid dataGrid) &&
 				Boolean.TRUE.equals(dataGrid.getInline())) {
-			return dataGrid.getDisabledConditionName();
+			return dataGrid.getDisabledCondition();
 		}
 		return null;
 	}
@@ -715,7 +715,7 @@ public class FacesViewRenderer extends ViewRenderer {
 						confirmationText,
 						action,
 						button,
-						containingDisabledConditionName());
+						containingDisabledCondition());
 	}
 
 	/**
@@ -752,7 +752,7 @@ public class FacesViewRenderer extends ViewRenderer {
 	 * @param confirmationText confirmation text
 	 * @param action action metadata
 	 * @param button button metadata
-	 * @param formDisabledConditionName form-level disabled condition
+	 * @param formDisabledCondition form-level disabled condition
 	 */
 	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
 	private void renderButton(String label,
@@ -762,7 +762,7 @@ public class FacesViewRenderer extends ViewRenderer {
 								String confirmationText,
 								Action action,
 								Button button,
-								String formDisabledConditionName) {
+								String formDisabledCondition) {
 		ImplicitActionName name = action.getImplicitName();
 		UIComponent c = null;
 		if (ImplicitActionName.Report.equals(name)) {
@@ -772,7 +772,7 @@ public class FacesViewRenderer extends ViewRenderer {
 									toolTip,
 									confirmationText,
 									button,
-									formDisabledConditionName,
+									formDisabledCondition,
 									action);
 		}
 		else if (ImplicitActionName.Download.equals(name)) {
@@ -784,7 +784,7 @@ public class FacesViewRenderer extends ViewRenderer {
 									toolTip,
 									confirmationText,
 									button,
-									formDisabledConditionName,
+									formDisabledCondition,
 									action);
 		}
 		else if (ImplicitActionName.Upload.equals(name)) {
@@ -794,7 +794,7 @@ public class FacesViewRenderer extends ViewRenderer {
 									toolTip,
 									confirmationText,
 									button,
-									formDisabledConditionName,
+									formDisabledCondition,
 									action);
 		}
 		else {
@@ -806,13 +806,13 @@ public class FacesViewRenderer extends ViewRenderer {
 									toolTip,
 									confirmationText,
 									button,
-									formDisabledConditionName,
+									formDisabledCondition,
 									action);
 		}
 		addComponent(null,
 						formColspan,
 						null,
-						action.getInvisibleConditionName(),
+						action.getInvisibleCondition(),
 						null,
 						c,
 						button.getPixelWidth(),
@@ -835,7 +835,7 @@ public class FacesViewRenderer extends ViewRenderer {
 	 */
 	@Override
 	public void renderFormZoomIn(String label, String iconUrl, String iconStyleClass, String toolTip, ZoomIn zoomIn) {
-		renderZoomIn(label, getCurrentWidgetColspan(), iconStyleClass, toolTip, zoomIn, containingDisabledConditionName());
+		renderZoomIn(label, getCurrentWidgetColspan(), iconStyleClass, toolTip, zoomIn, containingDisabledCondition());
 	}
 
 	/**
@@ -860,19 +860,19 @@ public class FacesViewRenderer extends ViewRenderer {
 	 * @param iconStyleClass icon style class
 	 * @param toolTip tooltip text
 	 * @param zoomIn zoom-in metadata
-	 * @param formDisabledConditionName form-level disabled condition
+	 * @param formDisabledCondition form-level disabled condition
 	 */
 	protected void renderZoomIn(String label,
 									int formColspan,
 									String iconStyleClass,
 									String toolTip,
 									ZoomIn zoomIn,
-									String formDisabledConditionName) {
-		UIComponent z = cb.zoomIn(null, label, iconStyleClass, toolTip, zoomIn, formDisabledConditionName);
+									String formDisabledCondition) {
+		UIComponent z = cb.zoomIn(null, label, iconStyleClass, toolTip, zoomIn, formDisabledCondition);
 		addComponent(null,
 						formColspan,
 						null,
-						zoomIn.getInvisibleConditionName(),
+						zoomIn.getInvisibleCondition(),
 						null,
 						z,
 						zoomIn.getPixelWidth(),
@@ -895,7 +895,7 @@ public class FacesViewRenderer extends ViewRenderer {
 		addComponent(null,
 						0,
 						null,
-						map.getInvisibleConditionName(),
+						map.getInvisibleCondition(),
 						null,
 						m,
 						map.getPixelWidth(),
@@ -918,7 +918,7 @@ public class FacesViewRenderer extends ViewRenderer {
 		addComponent(null,
 						0,
 						null,
-						chart.getInvisibleConditionName(),
+						chart.getInvisibleCondition(),
 						null,
 						c,
 						chart.getPixelWidth(),
@@ -962,7 +962,7 @@ public class FacesViewRenderer extends ViewRenderer {
 		EventSourceComponent c = cb.geometry(null,
 												dataWidgetVar,
 												geometry,
-												containingDisabledConditionName(),
+												containingDisabledCondition(),
 												title,
 												requiredMessage,
 												CORE.getCustomisations().determineDefaultWidgetTextAlignment(currentUxUi, AttributeType.geometry));
@@ -970,7 +970,7 @@ public class FacesViewRenderer extends ViewRenderer {
 		addComponent(title,
 						formColspan,
 						requiredMessage,
-						geometry.getInvisibleConditionName(),
+						geometry.getInvisibleCondition(),
 						getCurrentWidgetHelp(),
 						c.getComponent(),
 						geometry.getPixelWidth(),
@@ -1013,14 +1013,14 @@ public class FacesViewRenderer extends ViewRenderer {
 		String requiredMessage = getPrimeFacesRequiredMessage();
 		EventSourceComponent c = cb.geometryMap(null,
 													geometry,
-													containingDisabledConditionName(),
+													containingDisabledCondition(),
 													title,
 													requiredMessage);
 		eventSource = c.getEventSource();
 		addComponent(title,
 						getCurrentWidgetColspan(),
 						requiredMessage,
-						geometry.getInvisibleConditionName(),
+						geometry.getInvisibleCondition(),
 						getCurrentWidgetHelp(),
 						c.getComponent(),
 						geometry.getPixelWidth(),
@@ -1070,11 +1070,11 @@ public class FacesViewRenderer extends ViewRenderer {
 		UIComponent bn = cb.dialogButton(null,
 											EscapableText.of(label, shouldEscape(button.getEscapeDisplayName())),
 											button,
-											containingDisabledConditionName());
+											containingDisabledCondition());
 		addComponent(null,
 						formColspan,
 						null,
-						button.getInvisibleConditionName(),
+						button.getInvisibleCondition(),
 						null,
 						bn,
 						null,
@@ -1118,7 +1118,7 @@ public class FacesViewRenderer extends ViewRenderer {
 			addComponent(null,
 							formColspan,
 							null,
-							spacer.getInvisibleConditionName(),
+							spacer.getInvisibleCondition(),
 							null,
 							component,
 							spacer.getPixelWidth(),
@@ -1165,7 +1165,7 @@ public class FacesViewRenderer extends ViewRenderer {
 		addComponent(null,
 						formColspan,
 						null,
-						image.getInvisibleConditionName(),
+						image.getInvisibleCondition(),
 						null,
 						i,
 						image.getPixelWidth(),
@@ -1209,7 +1209,7 @@ public class FacesViewRenderer extends ViewRenderer {
 		addComponent(null,
 						0,
 						null,
-						image.getInvisibleConditionName(),
+						image.getInvisibleCondition(),
 						null,
 						i,
 						image.getPixelWidth(),
@@ -1306,7 +1306,7 @@ public class FacesViewRenderer extends ViewRenderer {
 				c.set(cb.outputLink(dataWidgetVar,
 										EscapableText.of(value, shouldEscape(link.getEscapeValue())),
 										href.toString(),
-										link.getInvisibleConditionName(),
+										link.getInvisibleCondition(),
 										target));
 			}
 
@@ -1348,7 +1348,7 @@ public class FacesViewRenderer extends ViewRenderer {
 			addComponent(null,
 							formColspan,
 							null,
-							link.getInvisibleConditionName(),
+							link.getInvisibleCondition(),
 							null,
 							component,
 							link.getPixelWidth(),
@@ -1414,7 +1414,7 @@ public class FacesViewRenderer extends ViewRenderer {
 		addComponent(null,
 						formColspan,
 						null,
-						blurb.getInvisibleConditionName(),
+						blurb.getInvisibleCondition(),
 						null,
 						c,
 						blurb.getPixelWidth(),
@@ -1481,7 +1481,7 @@ public class FacesViewRenderer extends ViewRenderer {
 		addComponent(null,
 						formColspan,
 						null,
-						label.getInvisibleConditionName(),
+						label.getInvisibleCondition(),
 						null,
 						c,
 						label.getPixelWidth(),
@@ -1504,7 +1504,7 @@ public class FacesViewRenderer extends ViewRenderer {
 		addComponent(null,
 						getCurrentWidgetColspan(),
 						null,
-						progressBar.getInvisibleConditionName(),
+						progressBar.getInvisibleCondition(),
 						null,
 						p,
 						progressBar.getPixelWidth(),
@@ -1554,7 +1554,7 @@ public class FacesViewRenderer extends ViewRenderer {
 											(title == null) ? Boolean.FALSE : Boolean.TRUE,
 											title,
 											grid,
-											grid.getInvisibleConditionName(),
+											grid.getInvisibleCondition(),
 											null,
 											null);
 		
@@ -1617,7 +1617,7 @@ public class FacesViewRenderer extends ViewRenderer {
 											(title == null) ? Boolean.FALSE : Boolean.TRUE,
 											title,
 											repeater,
-											repeater.getInvisibleConditionName(),
+											repeater.getInvisibleCondition(),
 											null,
 											null);
 	}
@@ -1670,7 +1670,7 @@ public class FacesViewRenderer extends ViewRenderer {
 						grid.getMd(),
 						grid.getLg(),
 						grid.getXl(),
-						grid.getInvisibleConditionName()); // TODO tree grid
+						grid.getInvisibleCondition()); // TODO tree grid
 	}
 
 	/**
@@ -1733,7 +1733,7 @@ public class FacesViewRenderer extends ViewRenderer {
 											(title == null) ? Boolean.FALSE : Boolean.TRUE,
 											title,
 											grid,
-											grid.getInvisibleConditionName(),
+											grid.getInvisibleCondition(),
 											null,
 											grid.getWidgetId());
 
@@ -1772,7 +1772,7 @@ public class FacesViewRenderer extends ViewRenderer {
 											(title == null) ? Boolean.FALSE : Boolean.TRUE,
 											title,
 											repeater,
-											repeater.getInvisibleConditionName(),
+											repeater.getInvisibleCondition(),
 											null,
 											repeater.getWidgetId());
 		gridColumnExpression = new StringBuilder(512);
@@ -2020,14 +2020,14 @@ public class FacesViewRenderer extends ViewRenderer {
 		EventSourceComponent c = cb.checkBox(null,
 												dataWidgetVar,
 												checkBox,
-												containingDisabledConditionName(),
+												containingDisabledCondition(),
 												title,
 												requiredMessage);
 		eventSource = c.getEventSource();
 		addComponent(title,
 						formColspan,
 						requiredMessage,
-						checkBox.getInvisibleConditionName(),
+						checkBox.getInvisibleCondition(),
 						getCurrentWidgetHelp(),
 						c.getComponent(),
 						checkBox.getPixelWidth(),
@@ -2068,7 +2068,7 @@ public class FacesViewRenderer extends ViewRenderer {
 	public void renderCheckMembership(CheckMembership membership) {
 		UIComponentBase c = (UIComponentBase) cb.label(null, "checkMembership"); // TODO check membership
 		eventSource = c;
-		addToContainer(c, null, null, null, null, null, null, null, membership.getInvisibleConditionName());
+		addToContainer(c, null, null, null, null, null, null, null, membership.getInvisibleCondition());
 	}
 
 	/**
@@ -2117,7 +2117,7 @@ public class FacesViewRenderer extends ViewRenderer {
 		EventSourceComponent c = cb.colourPicker(null,
 													dataWidgetVar,
 													colour,
-													containingDisabledConditionName(),
+													containingDisabledCondition(),
 													title,
 													requiredMessage,
 													CORE.getCustomisations().determineDefaultWidgetTextAlignment(currentUxUi, attributeType));
@@ -2125,7 +2125,7 @@ public class FacesViewRenderer extends ViewRenderer {
 		addComponent(title,
 						formColspan,
 						requiredMessage,
-						colour.getInvisibleConditionName(),
+						colour.getInvisibleCondition(),
 						getCurrentWidgetHelp(),
 						c.getComponent(),
 						colour.getPixelWidth(),
@@ -2189,14 +2189,14 @@ public class FacesViewRenderer extends ViewRenderer {
 		EventSourceComponent c = cb.combo(null,
 											dataWidgetVar,
 											combo,
-											containingDisabledConditionName(),
+											containingDisabledCondition(),
 											title,
 											requiredMessage);
 		eventSource = c.getEventSource();
 		addComponent(title,
 						formColspan,
 						requiredMessage,
-						combo.getInvisibleConditionName(),
+						combo.getInvisibleCondition(),
 						getCurrentWidgetHelp(),
 						c.getComponent(),
 						combo.getPixelWidth(),
@@ -2276,7 +2276,7 @@ public class FacesViewRenderer extends ViewRenderer {
 		UIComponent c = cb.content(null,
 									dataWidgetVar,
 									content,
-									containingDisabledConditionName(),
+									containingDisabledCondition(),
 									title,
 									requiredMessage,
 									CORE.getCustomisations().determineDefaultWidgetTextAlignment(currentUxUi, attributeType),
@@ -2285,7 +2285,7 @@ public class FacesViewRenderer extends ViewRenderer {
 		addComponent(title,
 						formColspan,
 						requiredMessage,
-						content.getInvisibleConditionName(),
+						content.getInvisibleCondition(),
 						getCurrentWidgetHelp(),
 						c,
 						content.getPixelWidth(),
@@ -2310,7 +2310,7 @@ public class FacesViewRenderer extends ViewRenderer {
 		addComponent(title,
 						getCurrentWidgetColspan(),
 						requiredMessage,
-						signature.getInvisibleConditionName(),
+						signature.getInvisibleCondition(),
 						getCurrentWidgetHelp(),
 						c,
 						signature.getPixelWidth(),
@@ -2323,7 +2323,7 @@ public class FacesViewRenderer extends ViewRenderer {
 		cb.addContentSignature(null,
 								c,
 								signature,
-								containingDisabledConditionName(),
+								containingDisabledCondition(),
 								title,
 								requiredMessage);
 	}
@@ -2360,13 +2360,13 @@ public class FacesViewRenderer extends ViewRenderer {
 		UIComponent c = cb.html(null,
 									dataWidgetVar,
 									html,
-									containingDisabledConditionName(),
+									containingDisabledCondition(),
 									title,
 									requiredMessage);
 		addComponent(title,
 						formColspan,
 						requiredMessage,
-						html.getInvisibleConditionName(),
+						html.getInvisibleCondition(),
 						getCurrentWidgetHelp(),
 						c,
 						html.getPixelWidth(),
@@ -2405,7 +2405,7 @@ public class FacesViewRenderer extends ViewRenderer {
 						null,
 						null,
 						null,
-						membership.getInvisibleConditionName());
+						membership.getInvisibleCondition());
 	}
 
 	/**
@@ -2437,7 +2437,7 @@ public class FacesViewRenderer extends ViewRenderer {
 						comparison.getMd(),
 						comparison.getLg(),
 						comparison.getXl(),
-						comparison.getInvisibleConditionName());
+						comparison.getInvisibleCondition());
 		addedToContainer();
 	}
 
@@ -2498,7 +2498,7 @@ public class FacesViewRenderer extends ViewRenderer {
 		EventSourceComponent c = cb.lookupDescription(null,
 														dataWidgetVar,
 														lookup,
-														containingDisabledConditionName(),
+														containingDisabledCondition(),
 														title,
 														requiredMessage,
 														CORE.getCustomisations().determineDefaultWidgetTextAlignment(currentUxUi, attributeType),
@@ -2510,7 +2510,7 @@ public class FacesViewRenderer extends ViewRenderer {
 		addComponent(title,
 						formColspan,
 						requiredMessage,
-						lookup.getInvisibleConditionName(),
+						lookup.getInvisibleCondition(),
 						getCurrentWidgetHelp(),
 						c.getComponent(),
 						lookup.getPixelWidth(),
@@ -2565,7 +2565,7 @@ public class FacesViewRenderer extends ViewRenderer {
 		EventSourceComponent c = cb.password(null,
 												dataWidgetVar,
 												password,
-												containingDisabledConditionName(),
+												containingDisabledCondition(),
 												title,
 												requiredMessage,
 												(attribute != null) ?
@@ -2575,7 +2575,7 @@ public class FacesViewRenderer extends ViewRenderer {
 		addComponent(title,
 						formColspan,
 						requiredMessage,
-						password.getInvisibleConditionName(),
+						password.getInvisibleCondition(),
 						getCurrentWidgetHelp(),
 						c.getComponent(),
 						password.getPixelWidth(),
@@ -2613,14 +2613,14 @@ public class FacesViewRenderer extends ViewRenderer {
 		EventSourceComponent c = cb.radio(null,
 											dataWidgetVar,
 											radio,
-											containingDisabledConditionName(),
+											containingDisabledCondition(),
 											title,
 											requiredMessage);
 		eventSource = c.getEventSource();
 		addComponent(title,
 						formColspan,
 						requiredMessage,
-						radio.getInvisibleConditionName(),
+						radio.getInvisibleCondition(),
 						getCurrentWidgetHelp(),
 						c.getComponent(),
 						radio.getPixelWidth(),
@@ -2658,14 +2658,14 @@ public class FacesViewRenderer extends ViewRenderer {
 		EventSourceComponent c = cb.richText(null,
 												dataWidgetVar,
 												text,
-												containingDisabledConditionName(),
+												containingDisabledCondition(),
 												title,
 												requiredMessage);
 		eventSource = c.getEventSource();
 		addComponent(title,
 						formColspan,
 						requiredMessage,
-						text.getInvisibleConditionName(),
+						text.getInvisibleCondition(),
 						getCurrentWidgetHelp(),
 						c.getComponent(),
 						text.getPixelWidth(),
@@ -2711,7 +2711,7 @@ public class FacesViewRenderer extends ViewRenderer {
 		EventSourceComponent c = cb.slider(null,
 												dataWidgetVar,
 												slider,
-												containingDisabledConditionName(),
+												containingDisabledCondition(),
 												title,
 												requiredMessage,
 												convertConverter(converter, type));
@@ -2719,7 +2719,7 @@ public class FacesViewRenderer extends ViewRenderer {
 		addComponent(title,
 						formColspan,
 						requiredMessage,
-						slider.getInvisibleConditionName(),
+						slider.getInvisibleCondition(),
 						getCurrentWidgetHelp(),
 						c.getComponent(),
 						slider.getPixelWidth(),
@@ -2765,7 +2765,7 @@ public class FacesViewRenderer extends ViewRenderer {
 		EventSourceComponent c = cb.spinner(null,
 												dataWidgetVar,
 												spinner,
-												containingDisabledConditionName(),
+												containingDisabledCondition(),
 												title,
 												requiredMessage,
 												CORE.getCustomisations().determineDefaultWidgetTextAlignment(currentUxUi, attributeType),
@@ -2774,7 +2774,7 @@ public class FacesViewRenderer extends ViewRenderer {
 		addComponent(title,
 						formColspan,
 						requiredMessage,
-						spinner.getInvisibleConditionName(),
+						spinner.getInvisibleCondition(),
 						getCurrentWidgetHelp(),
 						c.getComponent(),
 						spinner.getPixelWidth(),
@@ -2820,7 +2820,7 @@ public class FacesViewRenderer extends ViewRenderer {
 		EventSourceComponent c = cb.textArea(null,
 												dataWidgetVar,
 												text,
-												containingDisabledConditionName(),
+												containingDisabledCondition(),
 												title,
 												requiredMessage,
 												CORE.getCustomisations().determineDefaultWidgetTextAlignment(currentUxUi, attributeType),
@@ -2829,7 +2829,7 @@ public class FacesViewRenderer extends ViewRenderer {
 		addComponent(title,
 						formColspan,
 						requiredMessage,
-						text.getInvisibleConditionName(),
+						text.getInvisibleCondition(),
 						getCurrentWidgetHelp(),
 						c.getComponent(),
 						text.getPixelWidth(),
@@ -2902,7 +2902,7 @@ public class FacesViewRenderer extends ViewRenderer {
 		EventSourceComponent c = cb.text(null,
 											dataWidgetVar,
 											text,
-											containingDisabledConditionName(),
+											containingDisabledCondition(),
 											title,
 											requiredMessage,
 											CORE.getCustomisations().determineDefaultWidgetTextAlignment(currentUxUi, attributeType),
@@ -2914,7 +2914,7 @@ public class FacesViewRenderer extends ViewRenderer {
 		addComponent(title,
 						formColspan,
 						requiredMessage,
-						text.getInvisibleConditionName(),
+						text.getInvisibleCondition(),
 						getCurrentWidgetHelp(),
 						c.getComponent(),
 						text.getPixelWidth(),
@@ -3201,7 +3201,7 @@ public class FacesViewRenderer extends ViewRenderer {
 	 * @param md optional medium breakpoint width
 	 * @param lg optional large breakpoint width
 	 * @param xl optional extra-large breakpoint width
-	 * @param invisibleConditionName invisible-condition expression
+	 * @param invisibleCondition invisible-condition expression
 	 */
 	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
 	private void addToContainer(UIComponent component,
@@ -3212,7 +3212,7 @@ public class FacesViewRenderer extends ViewRenderer {
 									Integer md,
 									Integer lg,
 									Integer xl,
-									String invisibleConditionName) {
+									String invisibleCondition) {
 		Deque<Container> currentContainers = getCurrentContainers();
 		if (currentContainers.isEmpty()) {
 			throw new IllegalStateException("Trying to add to a container but there is nothing in the stack of currentContainers!!");
@@ -3230,7 +3230,7 @@ public class FacesViewRenderer extends ViewRenderer {
 										md,
 										lg,
 										xl,
-										invisibleConditionName);
+										invisibleCondition);
 	}
 
 	/**
@@ -3252,7 +3252,7 @@ public class FacesViewRenderer extends ViewRenderer {
 	 * @param border whether border rendering is requested
 	 * @param borderTitle border title
 	 * @param size relative-size metadata
-	 * @param invisibleConditionName invisible-condition expression
+	 * @param invisibleCondition invisible-condition expression
 	 * @param collapsible optional collapsible metadata
 	 * @param thisWidgetId optional widget id for fragment rendering
 	 */
@@ -3260,7 +3260,7 @@ public class FacesViewRenderer extends ViewRenderer {
 													Boolean border,
 													String borderTitle,
 													RelativeSize size,
-													String invisibleConditionName,
+													String invisibleCondition,
 													Collapsible collapsible,
 													String thisWidgetId) {
 		boolean bordered = (collapsible != null) || Boolean.TRUE.equals(border);
@@ -3271,7 +3271,7 @@ public class FacesViewRenderer extends ViewRenderer {
 			cb.setCurrentInputTitleEscape(resolveBorderTitleEscape(size));
 			UIComponent borderComponent;
 			try {
-				borderComponent = cb.border(null, borderTitle, invisibleConditionName, size.getPixelWidth(), collapsible);
+				borderComponent = cb.border(null, borderTitle, invisibleCondition, size.getPixelWidth(), collapsible);
 			}
 			finally {
 				cb.setCurrentInputTitleEscape(true);
@@ -3284,7 +3284,7 @@ public class FacesViewRenderer extends ViewRenderer {
 							size.getMd(),
 							size.getLg(),
 							size.getXl(),
-							invisibleConditionName);
+							invisibleCondition);
 	
 			lb.addBorderLayout(borderComponent, component);
 	
@@ -3302,7 +3302,7 @@ public class FacesViewRenderer extends ViewRenderer {
 							size.getMd(),
 							size.getLg(),
 							size.getXl(),
-							invisibleConditionName);
+							invisibleCondition);
 	
 			// start rendering if appropriate
 			if ((widgetId != null) && (widgetId.equals(thisWidgetId))) {

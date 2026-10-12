@@ -1,6 +1,10 @@
 package org.skyve.metadata.view.fluent;
 
+import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.metadata.view.widget.bound.tabular.ListGrid;
+
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 
 /**
  * Builds {@link ListGrid} widget metadata using a fluent API.
@@ -38,7 +42,8 @@ public class FluentListGrid extends FluentWidget implements FluentRelativeSize<F
 		escapeTitle(grid.getEscapeTitle());
 		queryName(grid.getQueryName());
 		modelName(grid.getModelName());
-		postRefreshConditionName(grid.getPostRefreshConditionName());
+		postRefreshCondition(grid.getPostRefreshCondition());
+		BindUtil.copyAuthoredCondition(grid.getXmlInvisibleCondition(), grid.getXmlVisibleCondition(), this::invisibleCondition, this::visibleCondition);
 		grid.getFilterParameters();
 		grid.getParameters();
 		
@@ -48,11 +53,11 @@ public class FluentListGrid extends FluentWidget implements FluentRelativeSize<F
 
 		grid.getFilterParameters().forEach(f -> addFilterParameter(new FluentFilterParameter().from(f)));
 
-		disabledConditionName(grid.getDisabledConditionName());
-		disableAddConditionName(grid.getDisableAddConditionName());
-		disableZoomConditionName(grid.getDisableZoomConditionName());
-		disableEditConditionName(grid.getDisableEditConditionName());
-		disableRemoveConditionName(grid.getDisableRemoveConditionName());
+		BindUtil.copyAuthoredCondition(grid.getXmlDisabledCondition(), grid.getXmlEnabledCondition(), this::disabledCondition, this::enabledCondition);
+		BindUtil.copyAuthoredCondition(grid.getXmlDisableAddCondition(), grid.getXmlEnableAddCondition(), this::disableAddCondition, this::enableAddCondition);
+		BindUtil.copyAuthoredCondition(grid.getXmlDisableZoomCondition(), grid.getXmlEnableZoomCondition(), this::disableZoomCondition, this::enableZoomCondition);
+		BindUtil.copyAuthoredCondition(grid.getXmlDisableEditCondition(), grid.getXmlEnableEditCondition(), this::disableEditCondition, this::enableEditCondition);
+		BindUtil.copyAuthoredCondition(grid.getXmlDisableRemoveCondition(), grid.getXmlEnableRemoveCondition(), this::disableRemoveCondition, this::enableRemoveCondition);
 		Boolean b = grid.getShowAdd();
 		if (b != null) {
 			showAdd(b.booleanValue());
@@ -175,14 +180,14 @@ public class FluentListGrid extends FluentWidget implements FluentRelativeSize<F
 	}
 	
 	/**
-	 * Sets the condition name evaluated after the list is refreshed.
+	 * Sets the {@code postRefresh} condition as authored.
 	 *
-	 * @param postRefreshConditionName
-	 *            the condition name
+	 * @param postRefreshCondition
+	 *            a condition name, an inline condition expression or a boolean literal
 	 * @return this builder
 	 */
-	public FluentListGrid postRefreshConditionName(String postRefreshConditionName) {
-		grid.setPostRefreshConditionName(postRefreshConditionName);
+	public @Nonnull FluentListGrid postRefreshCondition(@Nullable String postRefreshCondition) {
+		grid.setPostRefreshCondition(postRefreshCondition);
 		return this;
 	}
 
@@ -211,14 +216,26 @@ public class FluentListGrid extends FluentWidget implements FluentRelativeSize<F
 	}
 
 	/**
-	 * Sets the condition name that hides this list grid.
+	 * Sets the {@code invisible} condition as authored; the opposite sense of {@link #visibleCondition(String)}.
 	 *
-	 * @param invisibleConditionName
-	 *            the condition name
+	 * @param invisibleCondition
+	 *            a condition name, an inline condition expression or a boolean literal
 	 * @return this builder
 	 */
-	public FluentListGrid invisibleConditionName(String invisibleConditionName) {
-		grid.setInvisibleConditionName(invisibleConditionName);
+	public @Nonnull FluentListGrid invisibleCondition(@Nullable String invisibleCondition) {
+		grid.setXmlInvisibleCondition(invisibleCondition);
+		return this;
+	}
+
+	/**
+	 * Sets the {@code visible} condition as authored; the opposite sense of {@link #invisibleCondition(String)}.
+	 *
+	 * @param visibleCondition
+	 *            a condition name, an inline condition expression or a boolean literal
+	 * @return this builder
+	 */
+	public @Nonnull FluentListGrid visibleCondition(@Nullable String visibleCondition) {
+		grid.setXmlVisibleCondition(visibleCondition);
 		return this;
 	}
 
@@ -392,62 +409,122 @@ public class FluentListGrid extends FluentWidget implements FluentRelativeSize<F
 	}
 
 	/**
-	 * Sets the condition name that disables this list grid.
+	 * Sets the {@code disabled} condition as authored; the opposite sense of {@link #enabledCondition(String)}.
 	 *
-	 * @param disabledConditionName
-	 *            the condition name
+	 * @param disabledCondition
+	 *            a condition name, an inline condition expression or a boolean literal
 	 * @return this builder
 	 */
-	public FluentListGrid disabledConditionName(String disabledConditionName) {
-		grid.setDisabledConditionName(disabledConditionName);
+	public @Nonnull FluentListGrid disabledCondition(@Nullable String disabledCondition) {
+		grid.setXmlDisabledCondition(disabledCondition);
 		return this;
 	}
 
 	/**
-	 * Sets the condition name that disables the add action on this list grid.
+	 * Sets the {@code enabled} condition as authored; the opposite sense of {@link #disabledCondition(String)}.
 	 *
-	 * @param disableAddConditionName
-	 *            the condition name
+	 * @param enabledCondition
+	 *            a condition name, an inline condition expression or a boolean literal
 	 * @return this builder
 	 */
-	public FluentListGrid disableAddConditionName(String disableAddConditionName) {
-		grid.setDisableAddConditionName(disableAddConditionName);
+	public @Nonnull FluentListGrid enabledCondition(@Nullable String enabledCondition) {
+		grid.setXmlEnabledCondition(enabledCondition);
 		return this;
 	}
 
 	/**
-	 * Sets the condition name that disables the zoom action on this list grid.
+	 * Sets the {@code disableAdd} condition as authored; the opposite sense of {@link #enableAddCondition(String)}.
 	 *
-	 * @param disableZoomConditionName
-	 *            the condition name
+	 * @param disableAddCondition
+	 *            a condition name, an inline condition expression or a boolean literal
 	 * @return this builder
 	 */
-	public FluentListGrid disableZoomConditionName(String disableZoomConditionName) {
-		grid.setDisableZoomConditionName(disableZoomConditionName);
+	public @Nonnull FluentListGrid disableAddCondition(@Nullable String disableAddCondition) {
+		grid.setXmlDisableAddCondition(disableAddCondition);
 		return this;
 	}
 
 	/**
-	 * Sets the condition name that disables the edit action on this list grid.
+	 * Sets the {@code enableAdd} condition as authored; the opposite sense of {@link #disableAddCondition(String)}.
 	 *
-	 * @param disableEditConditionName
-	 *            the condition name
+	 * @param enableAddCondition
+	 *            a condition name, an inline condition expression or a boolean literal
 	 * @return this builder
 	 */
-	public FluentListGrid disableEditConditionName(String disableEditConditionName) {
-		grid.setDisableEditConditionName(disableEditConditionName);
+	public @Nonnull FluentListGrid enableAddCondition(@Nullable String enableAddCondition) {
+		grid.setXmlEnableAddCondition(enableAddCondition);
 		return this;
 	}
 
 	/**
-	 * Sets the condition name that disables the remove action on this list grid.
+	 * Sets the {@code disableZoom} condition as authored; the opposite sense of {@link #enableZoomCondition(String)}.
 	 *
-	 * @param disableRemoveConditionName
-	 *            the condition name
+	 * @param disableZoomCondition
+	 *            a condition name, an inline condition expression or a boolean literal
 	 * @return this builder
 	 */
-	public FluentListGrid disableRemoveConditionName(String disableRemoveConditionName) {
-		grid.setDisableRemoveConditionName(disableRemoveConditionName);
+	public @Nonnull FluentListGrid disableZoomCondition(@Nullable String disableZoomCondition) {
+		grid.setXmlDisableZoomCondition(disableZoomCondition);
+		return this;
+	}
+
+	/**
+	 * Sets the {@code enableZoom} condition as authored; the opposite sense of {@link #disableZoomCondition(String)}.
+	 *
+	 * @param enableZoomCondition
+	 *            a condition name, an inline condition expression or a boolean literal
+	 * @return this builder
+	 */
+	public @Nonnull FluentListGrid enableZoomCondition(@Nullable String enableZoomCondition) {
+		grid.setXmlEnableZoomCondition(enableZoomCondition);
+		return this;
+	}
+
+	/**
+	 * Sets the {@code disableEdit} condition as authored; the opposite sense of {@link #enableEditCondition(String)}.
+	 *
+	 * @param disableEditCondition
+	 *            a condition name, an inline condition expression or a boolean literal
+	 * @return this builder
+	 */
+	public @Nonnull FluentListGrid disableEditCondition(@Nullable String disableEditCondition) {
+		grid.setXmlDisableEditCondition(disableEditCondition);
+		return this;
+	}
+
+	/**
+	 * Sets the {@code enableEdit} condition as authored; the opposite sense of {@link #disableEditCondition(String)}.
+	 *
+	 * @param enableEditCondition
+	 *            a condition name, an inline condition expression or a boolean literal
+	 * @return this builder
+	 */
+	public @Nonnull FluentListGrid enableEditCondition(@Nullable String enableEditCondition) {
+		grid.setXmlEnableEditCondition(enableEditCondition);
+		return this;
+	}
+
+	/**
+	 * Sets the {@code disableRemove} condition as authored; the opposite sense of {@link #enableRemoveCondition(String)}.
+	 *
+	 * @param disableRemoveCondition
+	 *            a condition name, an inline condition expression or a boolean literal
+	 * @return this builder
+	 */
+	public @Nonnull FluentListGrid disableRemoveCondition(@Nullable String disableRemoveCondition) {
+		grid.setXmlDisableRemoveCondition(disableRemoveCondition);
+		return this;
+	}
+
+	/**
+	 * Sets the {@code enableRemove} condition as authored; the opposite sense of {@link #disableRemoveCondition(String)}.
+	 *
+	 * @param enableRemoveCondition
+	 *            a condition name, an inline condition expression or a boolean literal
+	 * @return this builder
+	 */
+	public @Nonnull FluentListGrid enableRemoveCondition(@Nullable String enableRemoveCondition) {
+		grid.setXmlEnableRemoveCondition(enableRemoveCondition);
 		return this;
 	}
 

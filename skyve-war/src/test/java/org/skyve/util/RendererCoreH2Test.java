@@ -191,10 +191,10 @@ class RendererCoreH2Test extends AbstractH2Test {
 		assertFalse(identifier.isEmpty());
 	}
 
-	// --- renderBand with invisibleConditionName ---
+	// --- renderBand with an invisible condition ---
 
 	@Test
-	void renderBandWithInvisibleConditionNameContainsPrintWhenExpression() {
+	void renderBandWithInvisibleConditionContainsPrintWhenExpression() {
 		ReportBand band = new ReportBand();
 		band.setBandType(ReportBand.BandType.detail);
 		band.setInvisibleConditionName("someCondition");
@@ -209,7 +209,7 @@ class RendererCoreH2Test extends AbstractH2Test {
 
 		String jrxml = Renderer.renderBand(band);
 		assertThat(jrxml, containsString("printWhenExpression"));
-		// invisibleConditionName is negated by flipCondition: "someCondition" -> "notSomeCondition"
-		assertThat(jrxml, containsString("notSomeCondition"));
+		// the band prints when the invisible condition is false
+		assertThat(jrxml, containsString("!$F{THIS}.evaluateCondition(\"someCondition\")"));
 	}
 }

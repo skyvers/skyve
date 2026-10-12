@@ -55,6 +55,7 @@ import org.skyve.metadata.view.widget.bound.Parameter;
 import org.skyve.util.Binder.TargetMetaData;
 
 import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 
 /**
  * Runtime implementation of the {@link View} metadata interface.
@@ -88,7 +89,7 @@ public class ViewImpl extends Container implements View {
 	private Sidebar sidebar;
 	private LinkedHashMap<String, Action> actions = new LinkedHashMap<>();
 	private Integer refreshTimeInSeconds;
-	private String refreshConditionName;
+	private String refreshIfCondition;
 	private String refreshActionName;
 	private List<ViewParameter> parameters = new ArrayList<>();
 	private String documentation;
@@ -112,22 +113,24 @@ public class ViewImpl extends Container implements View {
 	private transient Set<UserAccess> accesses = null;
 	
 	/**
-	 * Returns the condition name controlling auto-refresh, or {@code null} if auto-refresh is unconditional.
+	 * Returns the {@code refreshIf} condition as authored, which controls whether the view auto-refreshes; it has no opposite attribute.
 	 *
-	 * @return the condition name, or {@code null} if auto-refresh fires unconditionally
+	 * @return a condition name, an inline condition expression or a boolean literal; {@code null} when not authored
 	 */
 	@Override
-	public String getRefreshConditionName() {
-		return refreshConditionName;
+	public @Nullable String getRefreshIfCondition() {
+		return refreshIfCondition;
 	}
 
 	/**
-	 * Sets the condition name controlling auto-refresh.
+	 * Sets the {@code refreshIf} condition as authored.
 	 *
-	 * @param refreshConditionName the condition name to set
+	 * <p>The value is stored as given. It comes from {@code ViewMetaData}, which has normalised it already.
+	 *
+	 * @param refreshIfCondition a condition name, an inline condition expression or a boolean literal; may be {@code null}
 	 */
-	public void setRefreshConditionName(String refreshConditionName) {
-		this.refreshConditionName = refreshConditionName;
+	public void setRefreshIfCondition(@Nullable String refreshIfCondition) {
+		this.refreshIfCondition = refreshIfCondition;
 	}
 
 	/**

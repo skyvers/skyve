@@ -37,13 +37,13 @@ class FluentViewAdditionalWidgetsTest {
 		source.setDialogHeight(Integer.valueOf(420));
 		source.setDialogWidth(Integer.valueOf(640));
 		source.setModalDialog(Boolean.TRUE);
-		source.setInvisibleConditionName("hideDialogButton");
-		source.setDisabledConditionName("disableDialogButton");
+		source.setXmlInvisibleCondition("hideDialogButton");
+		source.setXmlDisabledCondition("disableDialogButton");
 		source.getParameters().add(new ParameterImpl());
 
 		FluentDialogButton fluent = new FluentDialogButton().from(source);
 		fluent.displayName("Display").dialogName("details").command("viewDetails").dialogHeight(320).dialogWidth(480).modalDialog(false);
-		fluent.invisibleConditionName("hide").disabledConditionName("disable").addParameter(new FluentParameter().name("mode").value("edit"));
+		fluent.invisibleCondition("hide").disabledCondition("disable").addParameter(new FluentParameter().name("mode").value("edit"));
 
 		assertThat(new FluentDialogButton().get(), is(notNullValue()));
 		assertThat(fluent.get().getDisplayName(), is("Display"));
@@ -62,12 +62,12 @@ class FluentViewAdditionalWidgetsTest {
 		mapSource.setLoading(LoadingType.lazy);
 		mapSource.setRefreshTimeInSeconds(Integer.valueOf(30));
 		mapSource.setShowRefreshControls(Boolean.TRUE);
-		mapSource.setInvisibleConditionName("hideMap");
+		mapSource.setXmlInvisibleCondition("hideMap");
 		mapSource.setPixelWidth(Integer.valueOf(640));
 		mapSource.setPixelHeight(Integer.valueOf(360));
 
 		FluentMapDisplay map = new FluentMapDisplay().from(mapSource);
-		map.modelName("updatedModel").loading(LoadingType.eager).refreshTimeInSeconds(45).showRefreshControls(false).invisibleConditionName("hideUpdated");
+		map.modelName("updatedModel").loading(LoadingType.eager).refreshTimeInSeconds(45).showRefreshControls(false).invisibleCondition("hideUpdated");
 		map.pixelWidth(800).pixelHeight(400).percentageWidth(90).percentageHeight(60).minPixelWidth(250).maxPixelWidth(1000).minPixelHeight(150).maxPixelHeight(750);
 		map.responsiveWidth(12).sm(3).md(5).lg(7).xl(9);
 		assertThat(map.get().getModelName(), is("updatedModel"));
@@ -99,9 +99,9 @@ class FluentViewAdditionalWidgetsTest {
 		chartSource.setType(Chart.ChartType.bar);
 		chartSource.setModelName("salesModel");
 		chartSource.setModel(model);
-		chartSource.setInvisibleConditionName("hideChart");
+		chartSource.setXmlInvisibleCondition("hideChart");
 		FluentChart chart = new FluentChart().from(chartSource);
-		chart.type(Chart.ChartType.pie).modelName("updatedChartModel").model(model).invisibleConditionName("chartHidden");
+		chart.type(Chart.ChartType.pie).modelName("updatedChartModel").model(model).invisibleCondition("chartHidden");
 		chart.pixelWidth(700).pixelHeight(320).minPixelWidth(200).maxPixelWidth(900).minPixelHeight(160).maxPixelHeight(600);
 		chart.percentageWidth(85).percentageHeight(45).responsiveWidth(12).sm(2).md(4).lg(6).xl(8);
 		assertThat(new FluentChart().get(), is(notNullValue()));
@@ -111,11 +111,11 @@ class FluentViewAdditionalWidgetsTest {
 		comparisonSource.setModelName("comparisonModel");
 		comparisonSource.setEditable(Boolean.TRUE);
 		comparisonSource.setBinding("bindingOne");
-		comparisonSource.setDisabledConditionName("disableCmp");
-		comparisonSource.setInvisibleConditionName("hideCmp");
+		comparisonSource.setXmlDisabledCondition("disableCmp");
+		comparisonSource.setXmlInvisibleCondition("hideCmp");
 		FluentComparison comparison = new FluentComparison().from(comparisonSource);
 		comparison.modelName("updatedComparisonModel").editable(false).binding("bindingTwo");
-		comparison.disabledConditionName("disableUpdated").invisibleConditionName("hideUpdated");
+		comparison.disabledCondition("disableUpdated").invisibleCondition("hideUpdated");
 		comparison.pixelWidth(640).pixelHeight(460).minPixelWidth(280).maxPixelWidth(980).minPixelHeight(220).maxPixelHeight(700);
 		comparison.percentageWidth(78).percentageHeight(66).responsiveWidth(9).sm(3).md(5).lg(7).xl(11);
 		assertThat(new FluentComparison().get(), is(notNullValue()));
@@ -125,11 +125,11 @@ class FluentViewAdditionalWidgetsTest {
 		GeometryMap mapSource = new GeometryMap();
 		mapSource.setType(GeometryInputType.polygon);
 		mapSource.setBinding("geometryBinding");
-		mapSource.setDisabledConditionName("disableGeometry");
-		mapSource.setInvisibleConditionName("hideGeometry");
+		mapSource.setXmlDisabledCondition("disableGeometry");
+		mapSource.setXmlInvisibleCondition("hideGeometry");
 		mapSource.getChangedActions().add(new RerenderEventAction());
 		FluentGeometryMap map = new FluentGeometryMap().from(mapSource);
-		map.type(GeometryInputType.line).binding("updatedBinding").disabledConditionName("disableUpdated").invisibleConditionName("hideUpdated");
+		map.type(GeometryInputType.line).binding("updatedBinding").disabledCondition("disableUpdated").invisibleCondition("hideUpdated");
 		map.pixelWidth(640).pixelHeight(320).minPixelWidth(300).maxPixelWidth(900).minPixelHeight(180).maxPixelHeight(640);
 		map.percentageWidth(92).percentageHeight(58).responsiveWidth(12).sm(2).md(4).lg(6).xl(8);
 		map.addAction(new FluentRerenderEventAction().clientValidation(false));
@@ -139,14 +139,14 @@ class FluentViewAdditionalWidgetsTest {
 
 		StaticImage imageSource = new StaticImage();
 		imageSource.setRelativeFile("images/source.svg");
-		imageSource.setInvisibleConditionName("hideStatic");
+		imageSource.setXmlInvisibleCondition("hideStatic");
 		FluentStaticImage image = new FluentStaticImage().from(imageSource);
-		image.relativeFile("images/updated.svg").invisibleConditionName("hideUpdated").pixelWidth(360).pixelHeight(220);
+		image.relativeFile("images/updated.svg").invisibleCondition("hideUpdated").pixelWidth(360).pixelHeight(220);
 		image.minPixelWidth(120).maxPixelWidth(500).minPixelHeight(100).maxPixelHeight(300).percentageWidth(60).percentageHeight(40);
 		image.responsiveWidth(8).sm(1).md(2).lg(3).xl(4);
 		assertThat(new FluentStaticImage().get(), is(notNullValue()));
 		assertThat(image.get().getRelativeFile(), is("images/updated.svg"));
-		assertThat(image.get().getInvisibleConditionName(), is("hideUpdated"));
+		assertThat(image.get().getInvisibleCondition(), is("hideUpdated"));
 	}
 
 	@Test
@@ -154,7 +154,7 @@ class FluentViewAdditionalWidgetsTest {
 		FluentDataRepeater repeater = new FluentDataRepeater();
 		repeater.showColumnHeaders(Boolean.TRUE).showGrid(Boolean.FALSE).binding("rows").widgetId("repeaterWidget").title("Rows");
 		repeater.pixelWidth(620).pixelHeight(360).minPixelWidth(220).maxPixelWidth(900).minPixelHeight(150).maxPixelHeight(700);
-		repeater.percentageWidth(90).percentageHeight(55).responsiveWidth(10).sm(2).md(4).lg(6).xl(8).invisibleConditionName("hideRepeater");
+		repeater.percentageWidth(90).percentageHeight(55).responsiveWidth(10).sm(2).md(4).lg(6).xl(8).invisibleCondition("hideRepeater");
 		repeater.addBoundColumn(new FluentDataGridBoundColumn().binding("name").title("Name"));
 		repeater.addContainerColumn(0, new FluentDataGridContainerColumn().title("Container"));
 		assertThat(repeater.getContainerColumn(0).get().getTitle(), is("Container"));
@@ -185,13 +185,13 @@ class FluentViewAdditionalWidgetsTest {
 		textSource.setMinPixelHeight(Integer.valueOf(100));
 		textSource.setKeyboardType(KeyboardType.numeric);
 		textSource.setBinding("notes");
-		textSource.setDisabledConditionName("disableNotes");
-		textSource.setInvisibleConditionName("hideNotes");
+		textSource.setXmlDisabledCondition("disableNotes");
+		textSource.setXmlInvisibleCondition("hideNotes");
 		textSource.getChangedActions().add(new RerenderEventAction());
 		textSource.getFocusActions().add(new RerenderEventAction());
 		textSource.getBlurActions().add(new RerenderEventAction());
 		FluentTextArea text = new FluentTextArea().from(textSource);
-		text.wordWrap(false).editable(false).binding("updatedNotes").disabledConditionName("disableUpdated").invisibleConditionName("hideUpdated");
+		text.wordWrap(false).editable(false).binding("updatedNotes").disabledCondition("disableUpdated").invisibleCondition("hideUpdated");
 		assertSame(text, text.minPixelHeight(110));
 		assertSame(text, text.keyboardType(KeyboardType.decimal));
 		assertSame(text, text.pixelWidth(420));
@@ -209,11 +209,11 @@ class FluentViewAdditionalWidgetsTest {
 		sidebarSource.setPercentageWidth(Integer.valueOf(40));
 		sidebarSource.setFloatingPixelWidthBreakpoint(Integer.valueOf(1200));
 		sidebarSource.setFloatingPixelWidth(Integer.valueOf(280));
-		sidebarSource.setInvisibleConditionName("hideSidebar");
+		sidebarSource.setXmlInvisibleCondition("hideSidebar");
 		sidebarSource.getContained().add(new StaticImage());
 		FluentSidebar sidebar = new FluentSidebar().from(sidebarSource);
 		sidebar.widgetId("updatedSidebar").pixelWidth(300).responsiveWidth(6).percentageWidth(50);
-		sidebar.floatingPixelWidthBreakpoint(1300).floatingPixelWidth(320).invisibleConditionName("hideUpdated");
+		sidebar.floatingPixelWidthBreakpoint(1300).floatingPixelWidth(320).invisibleCondition("hideUpdated");
 		sidebar.addStaticImage(new FluentStaticImage().relativeFile("sidebar.svg"));
 		assertThat(new FluentSidebar().get(), is(notNullValue()));
 		assertThat(sidebar.get().getWidgetId(), is("updatedSidebar"));

@@ -46,73 +46,73 @@ class DataGridTest {
 	}
 
 	@Test
-	void disabledConditionNameRoundTrip() {
+	void disabledConditionRoundTrip() {
 		DataGrid dg = new DataGrid();
-		dg.setDisabledConditionName("notEditable");
-		assertEquals("notEditable", dg.getDisabledConditionName());
+		dg.setXmlDisabledCondition("notEditable");
+		assertEquals("notEditable", dg.getDisabledCondition());
 	}
 
 	@Test
-	void enabledConditionNameNegatesAndStoresAsDisabled() {
+	void enabledConditionNegatesToDisabledCondition() {
 		DataGrid dg = new DataGrid();
-		dg.setEnabledConditionName("editable");
-		assertEquals("notEditable", dg.getDisabledConditionName());
+		dg.setXmlEnabledCondition("editable");
+		assertEquals("notEditable", dg.getDisabledCondition());
 	}
 
 	@Test
-	void disableAddConditionNameRoundTrip() {
+	void disableAddConditionRoundTrip() {
 		DataGrid dg = new DataGrid();
-		dg.setDisableAddConditionName("noAdd");
-		assertEquals("noAdd", dg.getDisableAddConditionName());
+		dg.setXmlDisableAddCondition("noAdd");
+		assertEquals("noAdd", dg.getDisableAddCondition());
 	}
 
 	@Test
-	void enableAddConditionNameNegatesAndStoresAsDisableAdd() {
+	void enableAddConditionNegatesToDisableAddCondition() {
 		DataGrid dg = new DataGrid();
-		dg.setEnableAddConditionName("canAdd");
-		assertEquals("notCanAdd", dg.getDisableAddConditionName());
+		dg.setXmlEnableAddCondition("canAdd");
+		assertEquals("notCanAdd", dg.getDisableAddCondition());
 	}
 
 	@Test
-	void disableZoomConditionNameRoundTrip() {
+	void disableZoomConditionRoundTrip() {
 		DataGrid dg = new DataGrid();
-		dg.setDisableZoomConditionName("noZoom");
-		assertEquals("noZoom", dg.getDisableZoomConditionName());
+		dg.setXmlDisableZoomCondition("noZoom");
+		assertEquals("noZoom", dg.getDisableZoomCondition());
 	}
 
 	@Test
-	void enableZoomConditionNameNegatesAndStoresAsDisableZoom() {
+	void enableZoomConditionNegatesToDisableZoomCondition() {
 		DataGrid dg = new DataGrid();
-		dg.setEnableZoomConditionName("canZoom");
-		assertEquals("notCanZoom", dg.getDisableZoomConditionName());
+		dg.setXmlEnableZoomCondition("canZoom");
+		assertEquals("notCanZoom", dg.getDisableZoomCondition());
 	}
 
 	@Test
-	void disableEditConditionNameRoundTrip() {
+	void disableEditConditionRoundTrip() {
 		DataGrid dg = new DataGrid();
-		dg.setDisableEditConditionName("noEdit");
-		assertEquals("noEdit", dg.getDisableEditConditionName());
+		dg.setXmlDisableEditCondition("noEdit");
+		assertEquals("noEdit", dg.getDisableEditCondition());
 	}
 
 	@Test
-	void enableEditConditionNameNegatesAndStoresAsDisableEdit() {
+	void enableEditConditionNegatesToDisableEditCondition() {
 		DataGrid dg = new DataGrid();
-		dg.setEnableEditConditionName("canEdit");
-		assertEquals("notCanEdit", dg.getDisableEditConditionName());
+		dg.setXmlEnableEditCondition("canEdit");
+		assertEquals("notCanEdit", dg.getDisableEditCondition());
 	}
 
 	@Test
-	void disableRemoveConditionNameRoundTrip() {
+	void disableRemoveConditionRoundTrip() {
 		DataGrid dg = new DataGrid();
-		dg.setDisableRemoveConditionName("noRemove");
-		assertEquals("noRemove", dg.getDisableRemoveConditionName());
+		dg.setXmlDisableRemoveCondition("noRemove");
+		assertEquals("noRemove", dg.getDisableRemoveCondition());
 	}
 
 	@Test
-	void enableRemoveConditionNameNegatesAndStoresAsDisableRemove() {
+	void enableRemoveConditionNegatesToDisableRemoveCondition() {
 		DataGrid dg = new DataGrid();
-		dg.setEnableRemoveConditionName("canRemove");
-		assertEquals("notCanRemove", dg.getDisableRemoveConditionName());
+		dg.setXmlEnableRemoveCondition("canRemove");
+		assertEquals("notCanRemove", dg.getDisableRemoveCondition());
 	}
 
 	@Test
@@ -211,41 +211,41 @@ class DataGridTest {
 	}
 
 	@Test
-	void setInvisibleConditionNameAndGet() {
+	void setInvisibleConditionAndGet() {
 		DataGrid dg = new DataGrid();
-		dg.setInvisibleConditionName("hiddenWhen");
-		assertEquals("hiddenWhen", dg.getInvisibleConditionName());
+		dg.setXmlInvisibleCondition("hiddenWhen");
+		assertEquals("hiddenWhen", dg.getInvisibleCondition());
 	}
 
 	@Test
-	void setVisibleConditionNameNegatesCondition() {
+	void setVisibleConditionNegatesCondition() {
 		DataGrid dg = new DataGrid();
-		dg.setVisibleConditionName("showWhen");
-		assertNotNull(dg.getInvisibleConditionName());
+		dg.setXmlVisibleCondition("showWhen");
+		assertEquals("notShowWhen", dg.getInvisibleCondition());
 	}
 
 	@Test
-	void jaxbHelperGetEnabledConditionNameReturnsNull() {
-		assertNull(new DataGrid().getEnabledConditionName());
+	void xmlEnabledConditionIsNullByDefault() {
+		assertNull(new DataGrid().getXmlEnabledCondition());
 	}
 
 	@Test
-	void jaxbHelperGetEnableAddConditionNameReturnsNull() {
-		assertNull(new DataGrid().getEnableAddConditionName());
+	void xmlEnableAddConditionIsNullByDefault() {
+		assertNull(new DataGrid().getXmlEnableAddCondition());
 	}
 
 	@Test
-	void jaxbHelperGetEnableZoomConditionNameReturnsNull() {
-		assertNull(new DataGrid().getEnableZoomConditionName());
+	void xmlEnableZoomConditionIsNullByDefault() {
+		assertNull(new DataGrid().getXmlEnableZoomCondition());
 	}
 
 	@Test
-	void jaxbHelperGetEnableEditConditionNameReturnsNull() {
-		assertNull(new DataGrid().getEnableEditConditionName());
+	void xmlEnableEditConditionIsNullByDefault() {
+		assertNull(new DataGrid().getXmlEnableEditCondition());
 	}
 
 	@Test
-	void jaxbHelperGetEnableRemoveConditionNameReturnsNull() {
-		assertNull(new DataGrid().getEnableRemoveConditionName());
+	void xmlEnableRemoveConditionIsNullByDefault() {
+		assertNull(new DataGrid().getXmlEnableRemoveCondition());
 	}
 }

@@ -49,17 +49,17 @@ class FluentTabTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void disabledConditionNameReturnsSelf() {
+	void disabledConditionReturnsSelf() {
 		FluentTab t = new FluentTab();
-		FluentTab result = t.disabledConditionName("isReadOnly");
+		FluentTab result = t.disabledCondition("isReadOnly");
 		assertSame(t, result);
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	void invisibleConditionNameReturnsSelf() {
+	void invisibleConditionReturnsSelf() {
 		FluentTab t = new FluentTab();
-		FluentTab result = t.invisibleConditionName("hiddenCond");
+		FluentTab result = t.invisibleCondition("hiddenCond");
 		assertSame(t, result);
 	}
 }

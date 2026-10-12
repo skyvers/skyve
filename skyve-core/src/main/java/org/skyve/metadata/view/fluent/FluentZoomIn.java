@@ -1,7 +1,11 @@
 package org.skyve.metadata.view.fluent;
 
+import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.metadata.view.widget.bound.ZoomIn;
 import org.skyve.metadata.view.Action.ActionShow;
+
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 
 /**
  * Builds {@link ZoomIn} action metadata using a fluent API.
@@ -40,8 +44,8 @@ public class FluentZoomIn extends FluentBoundWidget<FluentZoomIn>
 		iconStyleClass(zoom.getIconStyleClass());
 		toolTip(zoom.getToolTip());
 		escapeToolTip(zoom.getEscapeToolTip());
-		disabledConditionName(zoom.getDisabledConditionName());
-		invisibleConditionName(zoom.getInvisibleConditionName());
+		BindUtil.copyAuthoredCondition(zoom.getXmlDisabledCondition(), zoom.getXmlEnabledCondition(), this::disabledCondition, this::enabledCondition);
+		BindUtil.copyAuthoredCondition(zoom.getXmlInvisibleCondition(), zoom.getXmlVisibleCondition(), this::invisibleCondition, this::visibleCondition);
 		show(zoom.getShow());
 		absoluteSize(zoom, this);
 		constrainableHeight(zoom, this);
@@ -137,24 +141,50 @@ public class FluentZoomIn extends FluentBoundWidget<FluentZoomIn>
 	}
 
 	/**
-	 * Sets the condition name that disables this zoom-in action.
+	 * Sets the {@code disabled} condition as authored; the opposite sense of {@link #enabledCondition(String)}.
 	 *
-	 * @param disabledConditionName the condition name
+	 * @param disabledCondition
+	 *            a condition name, an inline condition expression or a boolean literal
 	 * @return this builder
 	 */
-	public FluentZoomIn disabledConditionName(String disabledConditionName) {
-		zoom.setDisabledConditionName(disabledConditionName);
+	public @Nonnull FluentZoomIn disabledCondition(@Nullable String disabledCondition) {
+		zoom.setXmlDisabledCondition(disabledCondition);
 		return this;
 	}
 
 	/**
-	 * Sets the condition name that hides this zoom-in action.
+	 * Sets the {@code enabled} condition as authored; the opposite sense of {@link #disabledCondition(String)}.
 	 *
-	 * @param invisibleConditionName the condition name
+	 * @param enabledCondition
+	 *            a condition name, an inline condition expression or a boolean literal
 	 * @return this builder
 	 */
-	public FluentZoomIn invisibleConditionName(String invisibleConditionName) {
-		zoom.setInvisibleConditionName(invisibleConditionName);
+	public @Nonnull FluentZoomIn enabledCondition(@Nullable String enabledCondition) {
+		zoom.setXmlEnabledCondition(enabledCondition);
+		return this;
+	}
+
+	/**
+	 * Sets the {@code invisible} condition as authored; the opposite sense of {@link #visibleCondition(String)}.
+	 *
+	 * @param invisibleCondition
+	 *            a condition name, an inline condition expression or a boolean literal
+	 * @return this builder
+	 */
+	public @Nonnull FluentZoomIn invisibleCondition(@Nullable String invisibleCondition) {
+		zoom.setXmlInvisibleCondition(invisibleCondition);
+		return this;
+	}
+
+	/**
+	 * Sets the {@code visible} condition as authored; the opposite sense of {@link #invisibleCondition(String)}.
+	 *
+	 * @param visibleCondition
+	 *            a condition name, an inline condition expression or a boolean literal
+	 * @return this builder
+	 */
+	public @Nonnull FluentZoomIn visibleCondition(@Nullable String visibleCondition) {
+		zoom.setXmlVisibleCondition(visibleCondition);
 		return this;
 	}
 

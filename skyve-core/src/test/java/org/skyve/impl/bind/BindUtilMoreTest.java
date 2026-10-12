@@ -10,6 +10,8 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -34,7 +36,7 @@ import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
 
-@SuppressWarnings("static-method")
+@SuppressWarnings({"static-method", "java:S3011"})
 class BindUtilMoreTest {
 
 	// --- containsSkyveExpressions ---
@@ -502,16 +504,16 @@ class BindUtilMoreTest {
 
 	@Test
 	void evaluateConditionWithImplicitConditionReturnsTrueWhenPropertyIsTrue() {
-		AbstractPersistence persistence = Mockito.mock(AbstractPersistence.class,
+		AbstractPersistence persistence = mock(AbstractPersistence.class,
 				Mockito.withSettings().defaultAnswer(Mockito.CALLS_REAL_METHODS));
-		User user = Mockito.mock(User.class);
-		Customer customer = Mockito.mock(Customer.class);
-		Module module = Mockito.mock(Module.class);
-		Document document = Mockito.mock(Document.class);
-		Mockito.when(user.getCustomer()).thenReturn(customer);
-		Mockito.when(customer.getModule("mod")).thenReturn(module);
-		Mockito.when(module.getDocument(customer, "Doc")).thenReturn(document);
-		Mockito.when(document.getCondition("myFlag")).thenReturn(null);
+		User user = mock(User.class);
+		Customer customer = mock(Customer.class);
+		Module module = mock(Module.class);
+		Document document = mock(Document.class);
+		when(user.getCustomer()).thenReturn(customer);
+		when(customer.getModule("mod")).thenReturn(module);
+		when(module.getDocument(customer, "Doc")).thenReturn(document);
+		when(document.getCondition("myFlag")).thenReturn(null);
 		persistence.setUser(user);
 		persistence.setForThread();
 		try {
@@ -527,16 +529,16 @@ class BindUtilMoreTest {
 
 	@Test
 	void evaluateConditionWithImplicitConditionReturnsFalseWhenPropertyAbsent() {
-		AbstractPersistence persistence = Mockito.mock(AbstractPersistence.class,
+		AbstractPersistence persistence = mock(AbstractPersistence.class,
 				Mockito.withSettings().defaultAnswer(Mockito.CALLS_REAL_METHODS));
-		User user = Mockito.mock(User.class);
-		Customer customer = Mockito.mock(Customer.class);
-		Module module = Mockito.mock(Module.class);
-		Document document = Mockito.mock(Document.class);
-		Mockito.when(user.getCustomer()).thenReturn(customer);
-		Mockito.when(customer.getModule("mod")).thenReturn(module);
-		Mockito.when(module.getDocument(customer, "Doc")).thenReturn(document);
-		Mockito.when(document.getCondition("myFlag")).thenReturn(null);
+		User user = mock(User.class);
+		Customer customer = mock(Customer.class);
+		Module module = mock(Module.class);
+		Document document = mock(Document.class);
+		when(user.getCustomer()).thenReturn(customer);
+		when(customer.getModule("mod")).thenReturn(module);
+		when(module.getDocument(customer, "Doc")).thenReturn(document);
+		when(document.getCondition("myFlag")).thenReturn(null);
 		persistence.setUser(user);
 		persistence.setForThread();
 		try {
@@ -552,16 +554,16 @@ class BindUtilMoreTest {
 
 	@Test
 	void evaluateConditionWithNegatedImplicitConditionReturnsTrueWhenPropertyIsTrue() {
-		AbstractPersistence persistence = Mockito.mock(AbstractPersistence.class,
+		AbstractPersistence persistence = mock(AbstractPersistence.class,
 				Mockito.withSettings().defaultAnswer(Mockito.CALLS_REAL_METHODS));
-		User user = Mockito.mock(User.class);
-		Customer customer = Mockito.mock(Customer.class);
-		Module module = Mockito.mock(Module.class);
-		Document document = Mockito.mock(Document.class);
-		Mockito.when(user.getCustomer()).thenReturn(customer);
-		Mockito.when(customer.getModule("mod")).thenReturn(module);
-		Mockito.when(module.getDocument(customer, "Doc")).thenReturn(document);
-		Mockito.when(document.getCondition("myFlag")).thenReturn(null);
+		User user = mock(User.class);
+		Customer customer = mock(Customer.class);
+		Module module = mock(Module.class);
+		Document document = mock(Document.class);
+		when(user.getCustomer()).thenReturn(customer);
+		when(customer.getModule("mod")).thenReturn(module);
+		when(module.getDocument(customer, "Doc")).thenReturn(document);
+		when(document.getCondition("myFlag")).thenReturn(null);
 		persistence.setUser(user);
 		persistence.setForThread();
 		try {
@@ -579,20 +581,20 @@ class BindUtilMoreTest {
 
 	@Test
 	void evaluateConditionWithSkyveExpressionDocumentConditionReturnsFalseWhenNegated() {
-		AbstractPersistence persistence = Mockito.mock(AbstractPersistence.class,
+		AbstractPersistence persistence = mock(AbstractPersistence.class,
 				Mockito.withSettings().defaultAnswer(Mockito.CALLS_REAL_METHODS));
-		User user = Mockito.mock(User.class);
-		Customer customer = Mockito.mock(Customer.class);
-		Module module = Mockito.mock(Module.class);
-		Document document = Mockito.mock(Document.class);
-		Condition condish = Mockito.mock(Condition.class);
-		Mockito.when(user.getCustomer()).thenReturn(customer);
-		Mockito.when(customer.getModule("mod")).thenReturn(module);
-		Mockito.when(module.getDocument(customer, "Doc")).thenReturn(document);
+		User user = mock(User.class);
+		Customer customer = mock(Customer.class);
+		Module module = mock(Module.class);
+		Document document = mock(Document.class);
+		Condition condish = mock(Condition.class);
+		when(user.getCustomer()).thenReturn(customer);
+		when(customer.getModule("mod")).thenReturn(module);
+		when(module.getDocument(customer, "Doc")).thenReturn(document);
 		// conditionName = "myFlag" (stripped from "notMyFlag") → returns non-null condition
-		Mockito.when(document.getCondition("myFlag")).thenReturn(condish);
+		when(document.getCondition("myFlag")).thenReturn(condish);
 		// expression is a Skyve expression that evaluates to true
-		Mockito.when(condish.getExpression()).thenReturn("{el:true}");
+		when(condish.getExpression()).thenReturn("{el:true}");
 		persistence.setUser(user);
 		persistence.setForThread();
 		try {
@@ -607,14 +609,68 @@ class BindUtilMoreTest {
 	}
 
 	@Test
-	void evaluateConditionWrapsExceptionAsMetaDataException() {
-		AbstractPersistence persistence = Mockito.mock(AbstractPersistence.class,
+	void evaluateConditionInlineExpressionReturnsItsValue() {
+		withMockedUser(() -> {
+			DynamicBean bean = new DynamicBean("mod", "Doc", new HashMap<>());
+			assertTrue(BindUtil.evaluateCondition(bean, "{el:true}"));
+			assertFalse(BindUtil.evaluateCondition(bean, "{el:false}"));
+		});
+	}
+
+	@Test
+	void evaluateConditionInverseOfInlineExpressionReturnsTheComplement() {
+		withMockedUser(() -> {
+			DynamicBean bean = new DynamicBean("mod", "Doc", new HashMap<>());
+			assertFalse(BindUtil.evaluateCondition(bean, "not{el:true}"));
+			assertTrue(BindUtil.evaluateCondition(bean, "not{el:false}"));
+		});
+	}
+
+	@Test
+	void evaluateConditionInlineExpressionYieldingNullIsFalseAndItsInverseIsTrue() {
+		withMockedUser(() -> {
+			DynamicBean bean = new DynamicBean("mod", "Doc", new HashMap<>());
+			assertFalse(BindUtil.evaluateCondition(bean, "{el:null}"));
+			assertTrue(BindUtil.evaluateCondition(bean, "not{el:null}"));
+		});
+	}
+
+	@Test
+	void evaluateConditionInvalidInlineExpressionThrowsMetaDataException() {
+		withMockedUser(() -> {
+			DynamicBean bean = new DynamicBean("mod", "Doc", new HashMap<>());
+			assertThrows(MetaDataException.class, () -> BindUtil.evaluateCondition(bean, "{noSuchPrefix:whatever}"));
+		});
+	}
+
+	/**
+	 * Runs a test body with a persistence carrying a mocked user and customer bound to the thread.
+	 */
+	private static void withMockedUser(Runnable test) {
+		AbstractPersistence persistence = mock(AbstractPersistence.class,
 				Mockito.withSettings().defaultAnswer(Mockito.CALLS_REAL_METHODS));
-		User user = Mockito.mock(User.class);
-		Customer customer = Mockito.mock(Customer.class);
-		Mockito.when(user.getCustomer()).thenReturn(customer);
+		User user = mock(User.class);
+		Customer customer = mock(Customer.class);
+		when(user.getCustomer()).thenReturn(customer);
+		persistence.setUser(user);
+		persistence.setForThread();
+		try {
+			test.run();
+		}
+		finally {
+			clearPersistenceThreadLocal();
+		}
+	}
+
+	@Test
+	void evaluateConditionWrapsExceptionAsMetaDataException() {
+		AbstractPersistence persistence = mock(AbstractPersistence.class,
+				Mockito.withSettings().defaultAnswer(Mockito.CALLS_REAL_METHODS));
+		User user = mock(User.class);
+		Customer customer = mock(Customer.class);
+		when(user.getCustomer()).thenReturn(customer);
 		// module lookup throws to trigger the catch block
-		Mockito.when(customer.getModule("mod")).thenThrow(new RuntimeException("no module"));
+		when(customer.getModule("mod")).thenThrow(new RuntimeException("no module"));
 		persistence.setUser(user);
 		persistence.setForThread();
 		try {
@@ -631,12 +687,12 @@ class BindUtilMoreTest {
 
 	@Test
 	void validateBindingForConditionNameReturnsTargetMetaDataWithBooleanType() {
-		Customer customer = Mockito.mock(Customer.class);
-		Module module = Mockito.mock(Module.class);
-		Document document = Mockito.mock(Document.class);
-		Condition condition = Mockito.mock(Condition.class);
-		Mockito.when(document.getCondition("myFlag")).thenReturn(condition);
-		Mockito.when(document.getOwningModuleName()).thenReturn("mod");
+		Customer customer = mock(Customer.class);
+		Module module = mock(Module.class);
+		Document document = mock(Document.class);
+		Condition condition = mock(Condition.class);
+		when(document.getCondition("myFlag")).thenReturn(condition);
+		when(document.getOwningModuleName()).thenReturn("mod");
 		org.skyve.util.Binder.TargetMetaData result =
 				BindUtil.validateBinding(customer, module, document, "myFlag");
 		assertNotNull(result);
@@ -645,13 +701,13 @@ class BindUtilMoreTest {
 
 	@Test
 	void validateBindingForNegatedConditionNameReturnsTargetMetaDataWithBooleanType() {
-		Customer customer = Mockito.mock(Customer.class);
-		Module module = Mockito.mock(Module.class);
-		Document document = Mockito.mock(Document.class);
-		Condition condition = Mockito.mock(Condition.class);
+		Customer customer = mock(Customer.class);
+		Module module = mock(Module.class);
+		Document document = mock(Document.class);
+		Condition condition = mock(Condition.class);
 		// "notMyFlag" strips to "myFlag" for the condition lookup
-		Mockito.when(document.getCondition("myFlag")).thenReturn(condition);
-		Mockito.when(document.getOwningModuleName()).thenReturn("mod");
+		when(document.getCondition("myFlag")).thenReturn(condition);
+		when(document.getOwningModuleName()).thenReturn("mod");
 		org.skyve.util.Binder.TargetMetaData result =
 				BindUtil.validateBinding(customer, module, document, "notMyFlag");
 		assertNotNull(result);

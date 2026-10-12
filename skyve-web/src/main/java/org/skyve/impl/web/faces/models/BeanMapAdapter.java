@@ -21,6 +21,7 @@ import org.skyve.util.logging.Category;
 import org.skyve.web.WebContext;
 import org.slf4j.Logger;
 
+import jakarta.annotation.Nonnull;
 import jakarta.faces.model.SelectItem;
 
 /**
@@ -197,6 +198,32 @@ public final class BeanMapAdapter implements Map<String, Object>, Serializable {
 				return result;
 			}
 		}.execute();
+	}
+
+	/**
+	 * Evaluates an inline condition expression, or the inverse of one, against the adapted bean for EL callers.
+	 *
+	 * <p>Condition names are resolved through {@link #get(Object)} as bindings. An inline expression cannot be,
+	 * because a key containing braces is formatted as a message and yields display text, not a boolean.
+	 *
+	 * <p>Side effects: stores the result in the delegate map under the condition text.
+	 *
+	 * @param condition the inline condition expression as held by view metadata
+	 * @return the result of the condition; {@code false} when it could not be evaluated,
+	 * 			in which case the failure has been reported through the faces action
+	 */
+	public boolean evaluateCondition(final @Nonnull String condition) {
+		Boolean result = new FacesAction<Boolean>() {
+			@Override
+			public Boolean callback() throws Exception {
+				Boolean value = Boolean.valueOf(BindUtil.evaluateCondition(bean, condition));
+				delegate.put(condition, value);
+
+				if (UtilImpl.FACES_TRACE) FACES_LOGGER.trace("BeanMapAdapter.evaluateCondition {} = {}", condition, value);
+				return value;
+			}
+		}.execute();
+		return Boolean.TRUE.equals(result);
 	}
 
 	/**

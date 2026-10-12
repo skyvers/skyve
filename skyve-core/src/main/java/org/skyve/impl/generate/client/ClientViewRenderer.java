@@ -228,7 +228,7 @@ public class ClientViewRenderer extends ViewRenderer {
         				tabPane.getPixelWidth(), 
         				tabPane.getResponsiveWidth(), 
         				tabPane.getPercentageWidth(),
-        				tabPane.getInvisibleConditionName());
+        				tabPane.getInvisibleCondition());
 	}
 
 	/**
@@ -269,12 +269,12 @@ public class ClientViewRenderer extends ViewRenderer {
 		// Cater for a border if this thing has a border
 		RenderedComponent border = null;
 		if (Boolean.TRUE.equals(vbox.getBorder())) {
-			border = cr.border(null, borderTitle, vbox.getInvisibleConditionName(), vbox.getPixelWidth());
+			border = cr.border(null, borderTitle, vbox.getInvisibleCondition(), vbox.getPixelWidth());
 			addToContainer(border, 
 							vbox.getPixelWidth(), 
 							vbox.getResponsiveWidth(),
 							vbox.getPercentageWidth(),
-							vbox.getInvisibleConditionName());
+							vbox.getInvisibleCondition());
 		}
 
 		RenderedComponent layout = lr.vboxLayout(null, vbox);
@@ -288,7 +288,7 @@ public class ClientViewRenderer extends ViewRenderer {
 							vbox.getPixelWidth(), 
 							vbox.getResponsiveWidth(),
 							vbox.getPercentageWidth(),
-							vbox.getInvisibleConditionName());
+							vbox.getInvisibleCondition());
 		}
 		current = layout;
 	}
@@ -313,12 +313,12 @@ public class ClientViewRenderer extends ViewRenderer {
 		// Cater for a border if this thing has a border
 		RenderedComponent border = null;
 		if (Boolean.TRUE.equals(hbox.getBorder())) {
-			border = cr.border(null, borderTitle, hbox.getInvisibleConditionName(), hbox.getPixelWidth());
+			border = cr.border(null, borderTitle, hbox.getInvisibleCondition(), hbox.getPixelWidth());
 			addToContainer(border, 
 							hbox.getPixelWidth(), 
 							hbox.getResponsiveWidth(),
 							hbox.getPercentageWidth(),
-							hbox.getInvisibleConditionName());
+							hbox.getInvisibleCondition());
 		}
 
 		RenderedComponent layout = lr.hboxLayout(null, hbox);
@@ -332,7 +332,7 @@ public class ClientViewRenderer extends ViewRenderer {
 							hbox.getPixelWidth(), 
 							hbox.getResponsiveWidth(),
 							hbox.getPercentageWidth(),
-							hbox.getInvisibleConditionName());
+							hbox.getInvisibleCondition());
 		}
 		current = layout;
 	}
@@ -357,12 +357,12 @@ public class ClientViewRenderer extends ViewRenderer {
 		// Cater for a border if this thing has a border
 		RenderedComponent border = null;
 		if (Boolean.TRUE.equals(form.getBorder())) {
-			border = cr.border(null, borderTitle, form.getInvisibleConditionName(), form.getPixelWidth());
+			border = cr.border(null, borderTitle, form.getInvisibleCondition(), form.getPixelWidth());
 			addToContainer(border, 
 							form.getPixelWidth(), 
 							form.getResponsiveWidth(),
 							form.getPercentageWidth(),
-							form.getInvisibleConditionName());
+							form.getInvisibleCondition());
 		}
 
 		RenderedComponent layout = lr.formLayout(null, form);
@@ -376,10 +376,10 @@ public class ClientViewRenderer extends ViewRenderer {
 							form.getPixelWidth(), 
 							form.getResponsiveWidth(),
 							form.getPercentageWidth(),
-							form.getInvisibleConditionName());
+							form.getInvisibleCondition());
 		}
 		current = layout;
-// TODO form.getDisabledConditionName() form.getLabelDefaultHorizontalAlignment()
+// TODO form.getDisabledCondition() form.getLabelDefaultHorizontalAlignment()
 	}
 
 	/**
@@ -591,7 +591,7 @@ public class ClientViewRenderer extends ViewRenderer {
 	    addComponent(null, 
 	    				formColspan,
 	    				null, 
-	    				action.getInvisibleConditionName(), 
+	    				action.getInvisibleCondition(), 
 	    				null,
 	    				c, 
 	    				button.getPixelWidth(), 
@@ -637,7 +637,7 @@ public class ClientViewRenderer extends ViewRenderer {
 	    addComponent(null, 
 	    				formColspan,
 	    				null, 
-	    				zoomIn.getInvisibleConditionName(), 
+	    				zoomIn.getInvisibleCondition(), 
 	    				null,
 	    				c, 
 	    				zoomIn.getPixelWidth(), 
@@ -678,7 +678,7 @@ public class ClientViewRenderer extends ViewRenderer {
 	    addComponent(null,
 	    				formColspan,
 	    				null, 
-	    				geometry.getInvisibleConditionName(), 
+	    				geometry.getInvisibleCondition(), 
 	    				null,
 	    				c, 
 	    				geometry.getPixelWidth(), 
@@ -714,7 +714,7 @@ public class ClientViewRenderer extends ViewRenderer {
 	    addComponent(null, 
 	    				getCurrentWidgetColspan(),
 	    				null, 
-	    				geometry.getInvisibleConditionName(), 
+	    				geometry.getInvisibleCondition(), 
 	    				null,
 	    				c, 
 	    				geometry.getPixelWidth(), 
@@ -740,7 +740,7 @@ public class ClientViewRenderer extends ViewRenderer {
 	    addComponent(null, 
 	    				0,
 	    				null, 
-	    				map.getInvisibleConditionName(), 
+	    				map.getInvisibleCondition(), 
 	    				null,
 	    				l, 
 	    				map.getPixelWidth(), 
@@ -757,7 +757,7 @@ public class ClientViewRenderer extends ViewRenderer {
 	    addComponent(null, 
 	    				0,
 	    				null, 
-	    				chart.getInvisibleConditionName(), 
+	    				chart.getInvisibleCondition(), 
 	    				null,
 	    				l, 
 	    				chart.getPixelWidth(), 
@@ -790,7 +790,7 @@ public class ClientViewRenderer extends ViewRenderer {
 	    addComponent(null, 
 	    				formColspan,
 	    				null, 
-	    				button.getInvisibleConditionName(), 
+	    				button.getInvisibleCondition(), 
 	    				null,
 	    				bn, 
 	    				null, 
@@ -815,7 +815,7 @@ public class ClientViewRenderer extends ViewRenderer {
 		addComponent(null, 
 						0,
 						null, 
-						image.getInvisibleConditionName(), 
+						image.getInvisibleCondition(), 
 						null,
 						i, 
 						image.getPixelWidth(), 
@@ -848,7 +848,7 @@ public class ClientViewRenderer extends ViewRenderer {
 			addComponent(null, 
 							formColspan,
 							null, 
-							spacer.getInvisibleConditionName(), 
+							spacer.getInvisibleCondition(), 
 							null,
 							component, 
 							spacer.getPixelWidth(), 
@@ -895,7 +895,7 @@ public class ClientViewRenderer extends ViewRenderer {
 		addComponent(null, 
 						formColspan,
 						null, 
-						image.getInvisibleConditionName(), 
+						image.getInvisibleCondition(), 
 						null,
 						i, 
 						image.getPixelWidth(), 
@@ -944,7 +944,7 @@ public class ClientViewRenderer extends ViewRenderer {
 		addComponent(null, 
 						formColspan,
 						null, 
-						blurb.getInvisibleConditionName(), 
+						blurb.getInvisibleCondition(), 
 						null,
 						c, 
 						blurb.getPixelWidth(), 
@@ -1036,7 +1036,7 @@ public class ClientViewRenderer extends ViewRenderer {
 				href.append("./?a=").append(WebAction.e.toString()).append("&m=").append(reference.getModuleName());
 				href.append("&d=").append(reference.getDocumentName()).append("&i={").append(reference.getBinding()).append('}');
 				c.set(cr.label(null, "external link")); // TODO link
-				//c.set(cr.outputLink(listVar, value, href.toString(), link.getInvisibleConditionName(), target));
+				//c.set(cr.outputLink(listVar, value, href.toString(), link.getInvisibleCondition(), target));
 			}
 
 			/**
@@ -1072,7 +1072,7 @@ public class ClientViewRenderer extends ViewRenderer {
 		addComponent(null, 
 						formColspan,
 						null, 
-						link.getInvisibleConditionName(), 
+						link.getInvisibleCondition(), 
 						null,
 						c.get(), 
 						link.getPixelWidth(), 
@@ -1119,7 +1119,7 @@ public class ClientViewRenderer extends ViewRenderer {
 	    addComponent(null, 
 	    				formColspan,
 	    				null, 
-	    				label.getInvisibleConditionName(), 
+	    				label.getInvisibleCondition(), 
 	    				null,
 	    				c, 
 	    				label.getPixelWidth(), 
@@ -1136,7 +1136,7 @@ public class ClientViewRenderer extends ViewRenderer {
 	    addComponent(null,
 	    				getCurrentWidgetColspan(),
 	    				null, 
-	    				progressBar.getInvisibleConditionName(), 
+	    				progressBar.getInvisibleCondition(), 
 	    				null,
 	    				p, 
 	    				progressBar.getPixelWidth(), 
@@ -1156,7 +1156,7 @@ public class ClientViewRenderer extends ViewRenderer {
 											title,
 											grid,
 											aggregateQuery);
-		addToContainer(l, grid.getPixelWidth(), grid.getResponsiveWidth(), grid.getPercentageWidth(), grid.getInvisibleConditionName());
+		addToContainer(l, grid.getPixelWidth(), grid.getResponsiveWidth(), grid.getPercentageWidth(), grid.getInvisibleCondition());
 	}
 
 	/**
@@ -1197,7 +1197,7 @@ public class ClientViewRenderer extends ViewRenderer {
 												title,
 												Boolean.TRUE.equals(repeater.getShowColumnHeaders()),
 												Boolean.TRUE.equals(repeater.getShowGrid()));
-		addToContainer(r, repeater.getPixelWidth(), repeater.getResponsiveWidth(), repeater.getPercentageWidth(), repeater.getInvisibleConditionName());
+		addToContainer(r, repeater.getPixelWidth(), repeater.getResponsiveWidth(), repeater.getPercentageWidth(), repeater.getInvisibleCondition());
 	}
 
 	/**
@@ -1230,7 +1230,7 @@ public class ClientViewRenderer extends ViewRenderer {
 	@Override
 	public void renderTreeGrid(String title, TreeGrid grid) {
 		RenderedComponent l = cr.label(null, "treeGrid");
-		addToContainer(l, grid.getPixelWidth(), grid.getResponsiveWidth(), grid.getPercentageWidth(), grid.getInvisibleConditionName()); // TODO tree grid
+		addToContainer(l, grid.getPixelWidth(), grid.getResponsiveWidth(), grid.getPercentageWidth(), grid.getInvisibleCondition()); // TODO tree grid
 	}
 
 	/**
@@ -1279,7 +1279,7 @@ public class ClientViewRenderer extends ViewRenderer {
 		// Create the datagrid faces component
 		dataWidgetVar = BindUtil.sanitiseBinding(dataWidgetBinding) + "Row";
 		RenderedComponent g = cr.dataGrid(null, dataWidgetVar, ordered, title, grid);
-        addToContainer(g, grid.getPixelWidth(), grid.getResponsiveWidth(), grid.getPercentageWidth(), grid.getInvisibleConditionName());
+        addToContainer(g, grid.getPixelWidth(), grid.getResponsiveWidth(), grid.getPercentageWidth(), grid.getInvisibleCondition());
 		gridColumnExpression = new StringBuilder(512);
 	}
 
@@ -1292,7 +1292,7 @@ public class ClientViewRenderer extends ViewRenderer {
 		dataWidgetBinding = repeater.getBinding();
 		dataWidgetVar = BindUtil.sanitiseBinding(dataWidgetBinding) + "Row";
 		RenderedComponent r = cr.dataRepeater(null, dataWidgetVar, title, repeater);
-        addToContainer(r, repeater.getPixelWidth(), repeater.getResponsiveWidth(), repeater.getPercentageWidth(), repeater.getInvisibleConditionName());
+        addToContainer(r, repeater.getPixelWidth(), repeater.getResponsiveWidth(), repeater.getPercentageWidth(), repeater.getInvisibleCondition());
 		gridColumnExpression = new StringBuilder(512);
 	}
 
@@ -1457,7 +1457,7 @@ public class ClientViewRenderer extends ViewRenderer {
 		addComponent(title,
 						formColspan,
 						requiredMessage,
-						checkBox.getInvisibleConditionName(), 
+						checkBox.getInvisibleCondition(), 
 						getCurrentWidgetHelp(),
 						c, 
 						checkBox.getPixelWidth(), 
@@ -1488,7 +1488,7 @@ public class ClientViewRenderer extends ViewRenderer {
 	public void renderCheckMembership(CheckMembership membership) {
 		RenderedComponent c = cr.label(null, "checkMembership"); // TODO check membership
         eventSource = c;
-        addToContainer(c, null, null, null, membership.getInvisibleConditionName());
+        addToContainer(c, null, null, null, membership.getInvisibleCondition());
 	}
 
 	/**
@@ -1527,7 +1527,7 @@ public class ClientViewRenderer extends ViewRenderer {
 		addComponent(title, 
 						formColspan,
 						requiredMessage, 
-						colour.getInvisibleConditionName(), 
+						colour.getInvisibleCondition(), 
 						getCurrentWidgetHelp(),
 						c, 
 						colour.getPixelWidth(), 
@@ -1578,7 +1578,7 @@ public class ClientViewRenderer extends ViewRenderer {
 		addComponent(title, 
 						formColspan,
 						requiredMessage, 
-						combo.getInvisibleConditionName(), 
+						combo.getInvisibleCondition(), 
 						getCurrentWidgetHelp(),
 						s, 
 						combo.getPixelWidth(), 
@@ -1645,7 +1645,7 @@ public class ClientViewRenderer extends ViewRenderer {
 		addComponent(title,
 						formColspan,
 						null,
-						content.getInvisibleConditionName(),
+						content.getInvisibleCondition(),
 						getCurrentWidgetHelp(),
 						c,
 						content.getPixelWidth(),
@@ -1664,7 +1664,7 @@ public class ClientViewRenderer extends ViewRenderer {
         addComponent(title, 
         				getCurrentWidgetColspan(),
         				null, 
-        				signature.getInvisibleConditionName(), 
+        				signature.getInvisibleCondition(), 
         				getCurrentWidgetHelp(),
         				c, 
         				signature.getPixelWidth(), 
@@ -1698,7 +1698,7 @@ public class ClientViewRenderer extends ViewRenderer {
         addComponent(title, 
         				formColspan,
         				requiredMessage, 
-        				html.getInvisibleConditionName(), 
+        				html.getInvisibleCondition(), 
         				getCurrentWidgetHelp(),
         				c, 
         				html.getPixelWidth(), 
@@ -1713,7 +1713,7 @@ public class ClientViewRenderer extends ViewRenderer {
 	public void renderListMembership(String candidatesHeading, String membersHeading, ListMembership membership) {
 		RenderedComponent c = cr.listMembership(null, membership);
 		eventSource = c;
-		addToContainer(c, membership.getPixelWidth(), null, null, membership.getInvisibleConditionName());
+		addToContainer(c, membership.getPixelWidth(), null, null, membership.getInvisibleCondition());
 	}
 
 	/**
@@ -1731,7 +1731,7 @@ public class ClientViewRenderer extends ViewRenderer {
 	@Override
 	public void renderComparison(Comparison comparison) {
 		RenderedComponent c = cr.label(null, "comparison"); // TODO comparison
-        addToContainer(c, comparison.getPixelWidth(), comparison.getResponsiveWidth(), comparison.getPercentageWidth(), comparison.getInvisibleConditionName());
+        addToContainer(c, comparison.getPixelWidth(), comparison.getResponsiveWidth(), comparison.getPercentageWidth(), comparison.getInvisibleCondition());
         addedToContainer();
 	}
 
@@ -1778,7 +1778,7 @@ public class ClientViewRenderer extends ViewRenderer {
         addComponent(title,
         				formColspan,
         				requiredMessage, 
-        				lookup.getInvisibleConditionName(), 
+        				lookup.getInvisibleCondition(), 
         				getCurrentWidgetHelp(),
         				c, 
         				lookup.getPixelWidth(), 
@@ -1837,7 +1837,7 @@ public class ClientViewRenderer extends ViewRenderer {
         addComponent(title,
         				formColspan,
         				requiredMessage, 
-        				password.getInvisibleConditionName(), 
+        				password.getInvisibleCondition(), 
         				getCurrentWidgetHelp(),
         				c, 
         				password.getPixelWidth(), 
@@ -1888,7 +1888,7 @@ public class ClientViewRenderer extends ViewRenderer {
 		addComponent(title, 
 						formColspan,
 						requiredMessage, 
-						radio.getInvisibleConditionName(), 
+						radio.getInvisibleCondition(), 
 						getCurrentWidgetHelp(),
 						c, 
 						radio.getPixelWidth(), 
@@ -1939,7 +1939,7 @@ public class ClientViewRenderer extends ViewRenderer {
         addComponent(title, 
         				formColspan,
         				requiredMessage, 
-        				text.getInvisibleConditionName(), 
+        				text.getInvisibleCondition(), 
         				getCurrentWidgetHelp(),
         				c, 
         				text.getPixelWidth(), 
@@ -1990,7 +1990,7 @@ public class ClientViewRenderer extends ViewRenderer {
         addComponent(title, 
         				formColspan,
         				requiredMessage, 
-        				slider.getInvisibleConditionName(), 
+        				slider.getInvisibleCondition(), 
         				getCurrentWidgetHelp(),
         				c, 
         				slider.getPixelWidth(), 
@@ -2041,7 +2041,7 @@ public class ClientViewRenderer extends ViewRenderer {
         addComponent(title, 
         				formColspan,
         				requiredMessage, 
-        				spinner.getInvisibleConditionName(), 
+        				spinner.getInvisibleCondition(), 
         				getCurrentWidgetHelp(),
         				c, 
         				spinner.getPixelWidth(), 
@@ -2100,7 +2100,7 @@ public class ClientViewRenderer extends ViewRenderer {
         addComponent(title,
         				formColspan,
         				requiredMessage, 
-        				text.getInvisibleConditionName(), 
+        				text.getInvisibleCondition(), 
         				getCurrentWidgetHelp(),
         				c, 
         				text.getPixelWidth(), 
@@ -2197,7 +2197,7 @@ public class ClientViewRenderer extends ViewRenderer {
 		addComponent(title, 
 						formColspan,
 						requiredMessage, 
-						text.getInvisibleConditionName(), 
+						text.getInvisibleCondition(), 
 						getCurrentWidgetHelp(),
 						c, 
 						text.getPixelWidth(), 
@@ -2241,7 +2241,7 @@ public class ClientViewRenderer extends ViewRenderer {
 									Integer pixelWidth, 
 									Integer responsiveWidth,
 									Integer percentageWidth,
-									String invisibleConditionName) {
+									String invisibleCondition) {
 		Deque<Container> currentContainers = getCurrentContainers();
 		if (currentContainers.isEmpty()) {
 			throw new IllegalStateException("Trying to add to a container but there is nothing in the stack of currentContainers!!");
@@ -2255,7 +2255,7 @@ public class ClientViewRenderer extends ViewRenderer {
 										pixelWidth, 
 										responsiveWidth, 
 										percentageWidth,
-										invisibleConditionName);
+										invisibleCondition);
 	}
 
 	/**

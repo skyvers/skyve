@@ -498,7 +498,7 @@ public class LayoutBuilderChain extends LayoutBuilder {
 	 * @param md optional medium breakpoint width
 	 * @param lg optional large breakpoint width
 	 * @param xl optional extra-large breakpoint width
-	 * @param invisibleConditionName invisible condition name
+	 * @param invisibleCondition invisible condition name
 	 * @return resulting component
 	 */
 	@Override
@@ -513,7 +513,7 @@ public class LayoutBuilderChain extends LayoutBuilder {
 										Integer md,
 										Integer lg,
 										Integer xl,
-										String invisibleConditionName) {
+										String invisibleCondition) {
 		UIComponent result = component;
 		for (LayoutBuilder builder : builders) {
 			result = builder.addToContainer(result,
@@ -527,7 +527,7 @@ public class LayoutBuilderChain extends LayoutBuilder {
 												md,
 												lg,
 												xl,
-												invisibleConditionName);
+												invisibleCondition);
 		}
 		return result;
 	}

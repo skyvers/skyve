@@ -129,27 +129,27 @@ class ActionImplTest {
 	}
 
 	@Test
-	void invisibleConditionNameRoundTrip() {
-		action.setInvisibleConditionName("notVisible");
-		assertEquals("notVisible", action.getInvisibleConditionName());
+	void invisibleConditionRoundTrip() {
+		action.setXmlInvisibleCondition("notVisible");
+		assertEquals("notVisible", action.getInvisibleCondition());
 	}
 
 	@Test
-	void visibleConditionNameNegatesAndStoresAsInvisible() {
-		action.setVisibleConditionName("visible");
-		assertEquals("notVisible", action.getInvisibleConditionName());
+	void visibleConditionNegatesToInvisibleCondition() {
+		action.setXmlVisibleCondition("visible");
+		assertEquals("notVisible", action.getInvisibleCondition());
 	}
 
 	@Test
-	void disabledConditionNameRoundTrip() {
-		action.setDisabledConditionName("disabled");
-		assertEquals("disabled", action.getDisabledConditionName());
+	void disabledConditionRoundTrip() {
+		action.setXmlDisabledCondition("disabled");
+		assertEquals("disabled", action.getDisabledCondition());
 	}
 
 	@Test
-	void enabledConditionNameNegatesAndStoresAsDisabled() {
-		action.setEnabledConditionName("enabled");
-		assertEquals("notEnabled", action.getDisabledConditionName());
+	void enabledConditionNegatesToDisabledCondition() {
+		action.setXmlEnabledCondition("enabled");
+		assertEquals("notEnabled", action.getDisabledCondition());
 	}
 
 	@Test
@@ -405,14 +405,82 @@ class ActionImplTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void jaxbHelperGetVisibleConditionNameReturnsNull() {
-		assertNull(new ActionImpl().getVisibleConditionName());
+	void conversionsToAndFromARepositoryActionKeepTheAuthoredSenseOfEachPair() {
+		ActionImpl authored = new ActionImpl();
+		authored.setImplicitName(ImplicitActionName.Save);
+		authored.setXmlVisibleCondition("{el:bean.active}");
+		authored.setXmlDisabledCondition("locked");
+
+		org.skyve.impl.metadata.repository.view.actions.ActionMetaData repository = authored.toRepositoryAction();
+		assertEquals("{el:bean.active}", repository.getXmlVisibleCondition());
+		assertNull(repository.getXmlInvisibleCondition());
+		assertEquals("locked", repository.getXmlDisabledCondition());
+		assertNull(repository.getXmlEnabledCondition());
+
+		ActionImpl back = repository.toMetaDataAction();
+		assertEquals("{el:bean.active}", back.getXmlVisibleCondition());
+		assertNull(back.getXmlInvisibleCondition());
+		assertEquals("not{el:bean.active}", back.getInvisibleCondition());
+		assertEquals("locked", back.getXmlDisabledCondition());
+		assertNull(back.getXmlEnabledCondition());
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	void jaxbHelperGetEnabledConditionNameReturnsNull() {
-		assertNull(new ActionImpl().getEnabledConditionName());
+	void conversionsToAndFromARepositoryActionKeepTheOppositeAuthoredSenseToo() {
+		ActionImpl authored = new ActionImpl();
+		authored.setImplicitName(ImplicitActionName.Save);
+		authored.setXmlInvisibleCondition("hidden");
+		authored.setXmlEnabledCondition("editable");
+
+		org.skyve.impl.metadata.repository.view.actions.ActionMetaData repository = authored.toRepositoryAction();
+		assertEquals("hidden", repository.getXmlInvisibleCondition());
+		assertNull(repository.getXmlVisibleCondition());
+		assertEquals("editable", repository.getXmlEnabledCondition());
+		assertNull(repository.getXmlDisabledCondition());
+
+		ActionImpl back = repository.toMetaDataAction();
+		assertEquals("hidden", back.getXmlInvisibleCondition());
+		assertEquals("editable", back.getXmlEnabledCondition());
+		assertEquals("notEditable", back.getDisabledCondition());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void authoredVisibleAndEnabledAreNullUntilSet() {
+		assertNull(new ActionImpl().getXmlVisibleCondition());
+		assertNull(new ActionImpl().getXmlEnabledCondition());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void visibleIsKeptAsAuthoredAndInvisibleIsDerived() {
+		ActionImpl authored = new ActionImpl();
+		authored.setXmlVisibleCondition("{el:bean.active}");
+		assertEquals("{el:bean.active}", authored.getXmlVisibleCondition());
+		assertNull(authored.getXmlInvisibleCondition());
+		assertEquals("not{el:bean.active}", authored.getInvisibleCondition());
+
+		// the last attribute of the pair set wins
+		authored.setXmlInvisibleCondition("hidden");
+		assertEquals("hidden", authored.getXmlInvisibleCondition());
+		assertNull(authored.getXmlVisibleCondition());
+		assertEquals("hidden", authored.getInvisibleCondition());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void enabledIsKeptAsAuthoredAndDisabledIsDerived() {
+		ActionImpl authored = new ActionImpl();
+		authored.setXmlEnabledCondition("editable");
+		assertEquals("editable", authored.getXmlEnabledCondition());
+		assertNull(authored.getXmlDisabledCondition());
+		assertEquals("notEditable", authored.getDisabledCondition());
+
+		authored.setXmlDisabledCondition("locked");
+		assertEquals("locked", authored.getXmlDisabledCondition());
+		assertNull(authored.getXmlEnabledCondition());
+		assertEquals("locked", authored.getDisabledCondition());
 	}
 
 	@Test

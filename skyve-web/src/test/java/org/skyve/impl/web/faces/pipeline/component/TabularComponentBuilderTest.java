@@ -188,8 +188,8 @@ class TabularComponentBuilderTest {
 			setValueOrValueExpression(value, valueSetter, valueExpressionName, component);
 		}
 
-		void invokeSetDisabledForTest(UIComponent component, String disabledConditionName, String parentDisabledConditionName) {
-			setDisabled(component, disabledConditionName, parentDisabledConditionName);
+		void invokeSetDisabledForTest(UIComponent component, String disabledCondition, String parentDisabledCondition) {
+			setDisabled(component, disabledCondition, parentDisabledCondition);
 		}
 
 		UIComponent invokeCreateSpecialColumnFilterFacetComponentForTest(Document modelDrivingDocument,
@@ -441,7 +441,7 @@ class TabularComponentBuilderTest {
 		}
 
 		@Override
-		protected UIComponent createListGridZoomButton(String zoomDisabledConditionName, Map<String, String> properties) {
+		protected UIComponent createListGridZoomButton(String zoomDisabledCondition, Map<String, String> properties) {
 			return zoomButton;
 		}
 	}
@@ -740,7 +740,7 @@ class TabularComponentBuilderTest {
 		String[] actionCreateDisabled;
 		String actionCreateUrlParams;
 		boolean actionZoomRendered;
-		String actionZoomDisabledConditionName;
+		String actionZoomDisabledCondition;
 		boolean actionShowFilter;
 		String actionParentId;
 		Map<String, String> actionProperties;
@@ -772,10 +772,10 @@ class TabularComponentBuilderTest {
 															String documentName,
 															boolean canCreateDocument,
 															boolean createRendered,
-															String[] createDisabledConditionNames,
+															String[] createDisabledConditions,
 															String createUrlParams,
 															boolean zoomRendered,
-															String zoomDisabledConditionName,
+															String zoomDisabledCondition,
 															boolean showFilter,
 															String parentId,
 															Map<String, String> properties) {
@@ -784,10 +784,10 @@ class TabularComponentBuilderTest {
 			this.actionDocumentName = documentName;
 			this.actionCanCreateDocument = canCreateDocument;
 			this.actionCreateRendered = createRendered;
-			this.actionCreateDisabled = createDisabledConditionNames;
+			this.actionCreateDisabled = createDisabledConditions;
 			this.actionCreateUrlParams = createUrlParams;
 			this.actionZoomRendered = zoomRendered;
-			this.actionZoomDisabledConditionName = zoomDisabledConditionName;
+			this.actionZoomDisabledCondition = zoomDisabledCondition;
 			this.actionShowFilter = showFilter;
 			this.actionParentId = parentId;
 			this.actionProperties = properties;
@@ -848,8 +848,8 @@ class TabularComponentBuilderTest {
 		return invokeListGrid(true, grid -> {
 			grid.setShowZoom(Boolean.FALSE);
 			grid.setShowFilter(Boolean.TRUE);
-			grid.setDisableAddConditionName("disableAdd");
-			grid.setDisabledConditionName("disableGrid");
+			grid.setXmlDisableAddCondition("disableAdd");
+			grid.setXmlDisabledCondition("disableGrid");
 			grid.getProperties().put("process", "@this");
 		});
 	}
@@ -1536,7 +1536,7 @@ class TabularComponentBuilderTest {
 		CheckBox checkBox = new CheckBox();
 		checkBox.setBinding("active");
 		checkBox.setTriState(Boolean.TRUE);
-		checkBox.setDisabledConditionName("checkDisabled");
+		checkBox.setXmlDisabledCondition("checkDisabled");
 
 		EventSourceComponent result = builder.checkBox(null, "row", checkBox, "formDisabled", "Active", "Required");
 
@@ -1571,7 +1571,7 @@ class TabularComponentBuilderTest {
 		ColourPicker colourPicker = new ColourPicker();
 		colourPicker.setBinding("themeColour");
 		colourPicker.setPixelWidth(Integer.valueOf(160));
-		colourPicker.setDisabledConditionName("colourDisabled");
+		colourPicker.setXmlDisabledCondition("colourDisabled");
 
 		EventSourceComponent result = builder.colourPicker(null,
 															"row",
@@ -1856,7 +1856,7 @@ class TabularComponentBuilderTest {
 		content.setBinding("doc.attachment");
 		content.setDisplay(ContentDisplay.auto);
 		content.setEditable(Boolean.TRUE);
-		content.setDisabledConditionName("attachmentDisabled");
+		content.setXmlDisabledCondition("attachmentDisabled");
 		content.setShowMarkup(Boolean.FALSE);
 		UIComponent result = builder.content(null, "row", content, "formDisabled", "Attachment", null, HorizontalAlignment.left, true, false);
 
@@ -2032,7 +2032,7 @@ class TabularComponentBuilderTest {
 		content.setDisplay(ContentDisplay.link);
 		content.setCapture(ContentCapture.camera);
 		content.setEditable(Boolean.TRUE);
-		content.setDisabledConditionName("attachmentDisabled");
+		content.setXmlDisabledCondition("attachmentDisabled");
 		content.setShowMarkup(Boolean.FALSE);
 		UIComponent result = builder.content(null, "row", content, "formDisabled", "Attachment", null, HorizontalAlignment.left, true, false);
 
@@ -2328,7 +2328,7 @@ class TabularComponentBuilderTest {
 		LookupDescription lookup = new LookupDescription();
 		lookup.setBinding("customer");
 		lookup.setPixelWidth(Integer.valueOf(280));
-		lookup.setDisabledConditionName("lookupDisabled");
+		lookup.setXmlDisabledCondition("lookupDisabled");
 		QueryDefinition query = mock(QueryDefinition.class);
 
 		EventSourceComponent result = builder.lookupDescription(null,
@@ -2361,7 +2361,7 @@ class TabularComponentBuilderTest {
 		org.skyve.impl.metadata.view.widget.bound.input.Password password = new org.skyve.impl.metadata.view.widget.bound.input.Password();
 		password.setBinding("secret");
 		password.setPixelWidth(Integer.valueOf(220));
-		password.setDisabledConditionName("passwordDisabled");
+		password.setXmlDisabledCondition("passwordDisabled");
 
 		EventSourceComponent result = builder.password(null,
 														"row",
@@ -2458,7 +2458,7 @@ class TabularComponentBuilderTest {
 		spinner.setMax(Double.valueOf(5.0));
 		spinner.setStep(Double.valueOf(0.5));
 		spinner.setPixelWidth(Integer.valueOf(120));
-		spinner.setDisabledConditionName("spinnerDisabled");
+		spinner.setXmlDisabledCondition("spinnerDisabled");
 		Converter<?> facesConverter = mock(Converter.class);
 
 		EventSourceComponent result = builder.spinner(null,
@@ -2541,7 +2541,7 @@ class TabularComponentBuilderTest {
 		textArea.setBinding("notes");
 		textArea.setEditable(Boolean.FALSE);
 		textArea.setKeyboardType(KeyboardType.tel);
-		textArea.setDisabledConditionName("textAreaDisabled");
+		textArea.setXmlDisabledCondition("textAreaDisabled");
 		textArea.setPixelWidth(Integer.valueOf(300));
 		textArea.setPixelHeight(Integer.valueOf(80));
 
@@ -2807,7 +2807,7 @@ class TabularComponentBuilderTest {
 		CapturingInputDelegationBuilder builder = new CapturingInputDelegationBuilder();
 		TextField textField = new TextField();
 		textField.setBinding("name");
-		textField.setDisabledConditionName("textDisabled");
+		textField.setXmlDisabledCondition("textDisabled");
 		textField.setKeyboardType(KeyboardType.search);
 		textField.setPixelWidth(Integer.valueOf(180));
 		Converter<?> facesConverter = mock(Converter.class);
@@ -2913,7 +2913,7 @@ class TabularComponentBuilderTest {
 		textField.setComplete(CompleteType.suggest);
 		textField.setKeyboardType(KeyboardType.search);
 		textField.setPixelWidth(Integer.valueOf(220));
-		textField.setDisabledConditionName("completeDisabled");
+		textField.setXmlDisabledCondition("completeDisabled");
 
 		EventSourceComponent result = builder.text(null,
 													"row",
@@ -3007,8 +3007,8 @@ class TabularComponentBuilderTest {
 		when(action.getName()).thenReturn("saveAction");
 		when(action.getClientValidation()).thenReturn(Boolean.TRUE);
 		when(action.getEscapeConfirm()).thenReturn(null);
-		when(action.getDisabledConditionName()).thenReturn("linkDisabled");
-		when(action.getInvisibleConditionName()).thenReturn("linkInvisible");
+		when(action.getDisabledCondition()).thenReturn("linkDisabled");
+		when(action.getInvisibleCondition()).thenReturn("linkInvisible");
 
 		UIComponent result = builder.actionLink(null,
 													"orders",
@@ -3051,8 +3051,8 @@ class TabularComponentBuilderTest {
 		when(action.getImplicitName()).thenReturn(ImplicitActionName.Download);
 		when(action.getName()).thenReturn("downloadCsv");
 		when(action.getEscapeConfirm()).thenReturn(null);
-		when(action.getDisabledConditionName()).thenReturn("downloadDisabled");
-		when(action.getInvisibleConditionName()).thenReturn("downloadInvisible");
+		when(action.getDisabledCondition()).thenReturn("downloadDisabled");
+		when(action.getInvisibleCondition()).thenReturn("downloadInvisible");
 
 		UIComponent result = builder.actionLink(null,
 													"orders",
@@ -3163,8 +3163,8 @@ class TabularComponentBuilderTest {
 		Action action = mock(Action.class);
 		when(action.getImplicitName()).thenReturn(ImplicitActionName.Download);
 		when(action.getName()).thenReturn("downloadCsv");
-		when(action.getDisabledConditionName()).thenReturn(null);
-		when(action.getInvisibleConditionName()).thenReturn(null);
+		when(action.getDisabledCondition()).thenReturn(null);
+		when(action.getInvisibleCondition()).thenReturn(null);
 
 		UIComponent result = builder.actionLink(null,
 												"orders",
@@ -3199,8 +3199,8 @@ class TabularComponentBuilderTest {
 
 		Action action = mock(Action.class);
 		when(action.getName()).thenReturn("downloadInvoice");
-		when(action.getDisabledConditionName()).thenReturn(null);
-		when(action.getInvisibleConditionName()).thenReturn(null);
+		when(action.getDisabledCondition()).thenReturn(null);
+		when(action.getInvisibleCondition()).thenReturn(null);
 		Map<String, String> properties = new HashMap<>();
 		properties.put("process", "@this");
 		properties.put("update", "@none");
@@ -3231,8 +3231,8 @@ class TabularComponentBuilderTest {
 		when(action.getClientValidation()).thenReturn(Boolean.TRUE);
 		when(action.getEscapeDisplayName()).thenReturn(null);
 		when(action.getEscapeConfirm()).thenReturn(null);
-		when(action.getDisabledConditionName()).thenReturn("uploadDisabled");
-		when(action.getInvisibleConditionName()).thenReturn("uploadInvisible");
+		when(action.getDisabledCondition()).thenReturn("uploadDisabled");
+		when(action.getInvisibleCondition()).thenReturn("uploadInvisible");
 
 		UIComponent result = builder.upload(null, "Upload", "pi pi-upload", "Upload file", "Proceed?", action);
 
@@ -3262,8 +3262,8 @@ class TabularComponentBuilderTest {
 		when(action.getName()).thenReturn("removeLine");
 		when(action.getEscapeDisplayName()).thenReturn(null);
 		when(action.getEscapeConfirm()).thenReturn(null);
-		when(action.getDisabledConditionName()).thenReturn("removeDisabled");
-		when(action.getInvisibleConditionName()).thenReturn("removeInvisible");
+		when(action.getDisabledCondition()).thenReturn("removeDisabled");
+		when(action.getInvisibleCondition()).thenReturn("removeInvisible");
 		Map<String, String> properties = new HashMap<>();
 		properties.put("process", "@this");
 		properties.put("update", "@none");
@@ -3300,8 +3300,8 @@ class TabularComponentBuilderTest {
 
 		Action action = mock(Action.class);
 		when(action.getName()).thenReturn("approve");
-		when(action.getDisabledConditionName()).thenReturn("approveDisabled");
-		when(action.getInvisibleConditionName()).thenReturn("approveInvisible");
+		when(action.getDisabledCondition()).thenReturn("approveDisabled");
+		when(action.getInvisibleCondition()).thenReturn("approveInvisible");
 		Map<String, String> properties = new HashMap<>();
 		properties.put("process", "@form");
 		properties.put("update", "@(form)");
@@ -3451,8 +3451,8 @@ class TabularComponentBuilderTest {
 		when(action.getParameters()).thenReturn(parameters);
 		when(action.getClientValidation()).thenReturn(Boolean.FALSE);
 		when(action.getEscapeDisplayName()).thenReturn(null);
-		when(action.getDisabledConditionName()).thenReturn(null);
-		when(action.getInvisibleConditionName()).thenReturn(null);
+		when(action.getDisabledCondition()).thenReturn(null);
+		when(action.getInvisibleCondition()).thenReturn(null);
 
 		UIComponent result = builder.report(null, "Run Report", null, "Open report", null, action);
 
@@ -3558,7 +3558,7 @@ class TabularComponentBuilderTest {
 		assertEquals("disableGrid", r.builder.actionCreateDisabled[1]);
 		assertNull(r.builder.actionCreateUrlParams);
 		assertFalse(r.builder.actionZoomRendered);
-		assertNull(r.builder.actionZoomDisabledConditionName);
+		assertNull(r.builder.actionZoomDisabledCondition);
 		assertTrue(r.builder.actionShowFilter);
 		assertEquals("listGridId", r.builder.actionParentId);
 		assertSame(r.grid.getProperties(), r.builder.actionProperties);
@@ -3569,8 +3569,8 @@ class TabularComponentBuilderTest {
 		ListGridCallResult r = invokeListGrid(true, grid -> {
 			grid.setShowZoom(Boolean.FALSE);
 			grid.setShowFilter(Boolean.TRUE);
-			grid.setDisableAddConditionName(null);
-			grid.setDisabledConditionName("disableGrid");
+			grid.setXmlDisableAddCondition(null);
+			grid.setXmlDisabledCondition("disableGrid");
 		});
 
 		assertNotNull(r.builder.actionCreateDisabled);
@@ -3583,8 +3583,8 @@ class TabularComponentBuilderTest {
 		ListGridCallResult r = invokeListGrid(true, grid -> {
 			grid.setShowZoom(Boolean.FALSE);
 			grid.setShowFilter(Boolean.TRUE);
-			grid.setDisableAddConditionName("disableAdd");
-			grid.setDisabledConditionName(null);
+			grid.setXmlDisableAddCondition("disableAdd");
+			grid.setXmlDisabledCondition(null);
 		});
 
 		assertNotNull(r.builder.actionCreateDisabled);
@@ -3612,8 +3612,8 @@ class TabularComponentBuilderTest {
 		ListGridCallResult r = invokeListGrid(false, grid -> {
 			grid.setShowZoom(Boolean.FALSE);
 			grid.setShowFilter(Boolean.TRUE);
-			grid.setDisableAddConditionName("disableAdd");
-			grid.setDisabledConditionName("disableGrid");
+			grid.setXmlDisableAddCondition("disableAdd");
+			grid.setXmlDisabledCondition("disableGrid");
 		});
 
 		verify(r.emptyMessage).setValue(TabularComponentBuilder.EMPTY_DATA_TABLE_MESSAGE);
@@ -3625,7 +3625,7 @@ class TabularComponentBuilderTest {
 
 		ListGridCallResult r = invokeListGrid(true, grid -> {
 			grid.setShowZoom(Boolean.TRUE);
-			grid.setDisableZoomConditionName("disableZoom");
+			grid.setXmlDisableZoomCondition("disableZoom");
 			grid.setShowFilter(Boolean.TRUE);
 			grid.setSelectedIdBinding(null);
 		});
@@ -3641,7 +3641,7 @@ class TabularComponentBuilderTest {
 
 		ListGridCallResult r = invokeListGrid(true, grid -> {
 			grid.setShowZoom(Boolean.TRUE);
-			grid.setDisableZoomConditionName(null);
+			grid.setXmlDisableZoomCondition(null);
 			grid.setShowFilter(Boolean.TRUE);
 			grid.setSelectedIdBinding(null);
 		});
@@ -3806,7 +3806,7 @@ class TabularComponentBuilderTest {
 		when(mockExpressionFactory.createValueExpression(any(ELContext.class), anyString(), eq(Boolean.class))).thenReturn(disabledExpression);
 
 		ListGrid grid = new ListGrid();
-		grid.setDisableZoomConditionName("disableZoom");
+		grid.setXmlDisableZoomCondition("disableZoom");
 
 		UIComponent result = builder.listGridContextMenu(null, "listGrid1", grid);
 
@@ -4386,8 +4386,8 @@ class TabularComponentBuilderTest {
 		Action action = mock(Action.class);
 		when(action.getImplicitName()).thenReturn(ImplicitActionName.OK);
 		when(action.getName()).thenReturn("saveAction");
-		when(action.getDisabledConditionName()).thenReturn("disabledExpr");
-		when(action.getInvisibleConditionName()).thenReturn("invisibleExpr");
+		when(action.getDisabledCondition()).thenReturn("disabledExpr");
+		when(action.getInvisibleCondition()).thenReturn("invisibleExpr");
 
 		UIComponent result = builder.actionButton(null,
 													"orders",
@@ -4432,8 +4432,8 @@ class TabularComponentBuilderTest {
 		Action action = mock(Action.class);
 		when(action.getName()).thenReturn("uploadContent");
 		when(action.getClientValidation()).thenReturn(Boolean.TRUE);
-		when(action.getDisabledConditionName()).thenReturn("uploadDisabled");
-		when(action.getInvisibleConditionName()).thenReturn("uploadInvisible");
+		when(action.getDisabledCondition()).thenReturn("uploadDisabled");
+		when(action.getInvisibleCondition()).thenReturn("uploadInvisible");
 
 		UIComponent result = builder.uploadButton(null,
 													"Upload",
@@ -4496,8 +4496,8 @@ class TabularComponentBuilderTest {
 		when(action.getClientValidation()).thenReturn(Boolean.TRUE);
 		when(action.getEscapeDisplayName()).thenReturn(null);
 		when(action.getEscapeConfirm()).thenReturn(null);
-		when(action.getDisabledConditionName()).thenReturn(null);
-		when(action.getInvisibleConditionName()).thenReturn(null);
+		when(action.getDisabledCondition()).thenReturn(null);
+		when(action.getInvisibleCondition()).thenReturn(null);
 		when(action.getProperties()).thenReturn(Map.of());
 
 		UIComponent result = builder.upload(null,
@@ -4561,8 +4561,8 @@ class TabularComponentBuilderTest {
 		when(action.getClientValidation()).thenReturn(Boolean.FALSE);
 		when(action.getEscapeDisplayName()).thenReturn(null);
 		when(action.getEscapeConfirm()).thenReturn(null);
-		when(action.getDisabledConditionName()).thenReturn(null);
-		when(action.getInvisibleConditionName()).thenReturn(null);
+		when(action.getDisabledCondition()).thenReturn(null);
+		when(action.getInvisibleCondition()).thenReturn(null);
 		when(action.getProperties()).thenReturn(Map.of("capture", "camera"));
 
 		UIComponent result = builder.upload(null,
@@ -4623,8 +4623,8 @@ class TabularComponentBuilderTest {
 		when(action.getClientValidation()).thenReturn(Boolean.FALSE);
 		when(action.getEscapeDisplayName()).thenReturn(null);
 		when(action.getEscapeConfirm()).thenReturn(null);
-		when(action.getDisabledConditionName()).thenReturn(null);
-		when(action.getInvisibleConditionName()).thenReturn(null);
+		when(action.getDisabledCondition()).thenReturn(null);
+		when(action.getInvisibleCondition()).thenReturn(null);
 		when(action.getProperties()).thenReturn(Map.of("capture", "all"));
 
 		UIComponent result = builder.uploadButton(null,
@@ -4731,8 +4731,8 @@ class TabularComponentBuilderTest {
 		when(action.getName()).thenReturn("downloadCsv");
 		when(action.getEscapeDisplayName()).thenReturn(null);
 		when(action.getEscapeConfirm()).thenReturn(null);
-		when(action.getDisabledConditionName()).thenReturn(null);
-		when(action.getInvisibleConditionName()).thenReturn(null);
+		when(action.getDisabledCondition()).thenReturn(null);
+		when(action.getInvisibleCondition()).thenReturn(null);
 		Map<String, String> properties = new HashMap<>();
 		when(action.getProperties()).thenReturn(properties);
 
@@ -4775,8 +4775,8 @@ class TabularComponentBuilderTest {
 
 		Action action = mock(Action.class);
 		when(action.getName()).thenReturn("downloadPdf");
-		when(action.getDisabledConditionName()).thenReturn(null);
-		when(action.getInvisibleConditionName()).thenReturn(null);
+		when(action.getDisabledCondition()).thenReturn(null);
+		when(action.getInvisibleCondition()).thenReturn(null);
 		Map<String, String> properties = new HashMap<>();
 		properties.put("process", "@this");
 		properties.put("update", "@none");
@@ -5813,7 +5813,7 @@ class TabularComponentBuilderTest {
 		when(mockExpressionFactory.createValueExpression(any(ELContext.class), anyString(), eq(Boolean.class))).thenReturn(renderedExpr);
 
 		StaticImage imageWidget = new StaticImage();
-		imageWidget.setInvisibleConditionName("condition");
+		imageWidget.setXmlInvisibleCondition("condition");
 
 		UIComponent result = builder.staticImage(null, "test.png", imageWidget);
 
@@ -6137,7 +6137,7 @@ class TabularComponentBuilderTest {
 
 		DataGrid grid = new DataGrid();
 		grid.setBinding("items");
-		grid.setDisableAddConditionName("disableAdd");
+		grid.setXmlDisableAddCondition("disableAdd");
 
 		builder.createDataGridAddButton(grid, "row", "Item", false, "items", null);
 
@@ -6155,7 +6155,7 @@ class TabularComponentBuilderTest {
 
 		DataGrid grid = new DataGrid();
 		grid.setBinding("items");
-		grid.setDisableRemoveConditionName("disableRemove");
+		grid.setXmlDisableRemoveCondition("disableRemove");
 
 		builder.createDataGridRemoveButton(grid, "row", "Item", "items", null);
 
@@ -6173,7 +6173,7 @@ class TabularComponentBuilderTest {
 
 		DataGrid grid = new DataGrid();
 		grid.setBinding("items");
-		grid.setDisableZoomConditionName("disableZoom");
+		grid.setXmlDisableZoomCondition("disableZoom");
 
 		builder.createDataGridZoomButton(grid, "row", "Item", false, "items", null);
 
@@ -6401,8 +6401,8 @@ class TabularComponentBuilderTest {
 		Action action = mock(Action.class);
 		when(action.getName()).thenReturn("doUpload");
 		when(action.getClientValidation()).thenReturn(null);
-		when(action.getDisabledConditionName()).thenReturn(null);
-		when(action.getInvisibleConditionName()).thenReturn(null);
+		when(action.getDisabledCondition()).thenReturn(null);
+		when(action.getInvisibleCondition()).thenReturn(null);
 
 		UIComponent result = builder.upload(null, "UploadLabel", "icon", "tip", null, action);
 		assertSame(builder.delegatedUploadButtonResult, result);
