@@ -2,6 +2,7 @@ package org.skyve.util;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.lang.invoke.MethodHandles;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.util.concurrent.ConcurrentHashMap;
@@ -111,56 +112,11 @@ public class Proxy {
 			throw new IllegalArgumentException("proxied argument is a Proxy");
 		}
 		Class<?> proxiedClass = proxied.getClass();
-		Class<?> delegateClass = delegate.getClass();
 
-		// Cater for the bootstrap class loader
-		final ClassLoader classLoader = (proxiedClass.getClassLoader() == null) ? Thread.currentThread().getContextClassLoader() : proxiedClass.getClassLoader();
+		Class<T> proxyClass = (Class<T>) (proxiedTransient ?
+											CLASS_TO_PROXY_CLASS_WITH_TRANSIENT_PROXIED.computeIfAbsent(proxiedClass, k -> defineProxyClass(k, true)) :
+											CLASS_TO_PROXY_CLASS_WITH_SERIALIZABLE_PROXIED.computeIfAbsent(proxiedClass, k -> defineProxyClass(k, false)));
 
-		// Only proxy public methods so that the proxied object can still be serialized
-		// Ensure that we inject the new class definition into the proxied class' class loader so that Serialization can work.
-		ProxyInvocationHandler<T> handler = new ProxyInvocationHandler<>();
-		Class<T> proxyClass = null;
-		if (proxiedTransient) {
-			proxyClass = (Class<T>) CLASS_TO_PROXY_CLASS_WITH_TRANSIENT_PROXIED.computeIfAbsent(
-											proxiedClass,
-											k -> {
-												try (Unloaded<?> unloaded = new ByteBuddy()
-														.subclass(proxiedClass)
-														.method(ElementMatchers.isPublic()).intercept(InvocationHandlerAdapter.of(handler))
-														.implement(Serializable.class)
-														.defineField(PROXIED_FIELD_NAME, proxiedClass, Opcodes.ACC_PUBLIC | Opcodes.ACC_TRANSIENT)
-														.defineField(DELEGATE_FIELD_NAME, delegateClass, Visibility.PUBLIC)
-														.make()) {
-													try (Loaded<?> loaded = unloaded.load(classLoader, ClassLoadingStrategy.Default.INJECTION)) {
-														return (Class<? extends Serializable>) loaded.getLoaded();
-													}
-												}
-												catch (IOException e) {
-													throw new DomainException(PROXY_CREATION_FAILED + proxied, e);
-												}
-											});
-		}
-		else {
-			proxyClass = (Class<T>) CLASS_TO_PROXY_CLASS_WITH_SERIALIZABLE_PROXIED.computeIfAbsent(
-											proxiedClass,
-											k -> {
-												try (Unloaded<?> unloaded = new ByteBuddy()
-														.subclass(proxiedClass)
-														.method(ElementMatchers.isPublic()).intercept(InvocationHandlerAdapter.of(handler))
-														.implement(Serializable.class)
-														.defineField(PROXIED_FIELD_NAME, proxiedClass, Visibility.PUBLIC)
-														.defineField(DELEGATE_FIELD_NAME, delegateClass, Visibility.PUBLIC)
-														.make()) {
-													try (Loaded<?> loaded = unloaded.load(classLoader, ClassLoadingStrategy.Default.INJECTION)) {
-														return (Class<? extends Serializable>) loaded.getLoaded();
-													}
-												}
-												catch (IOException e) {
-													throw new DomainException(PROXY_CREATION_FAILED + proxied, e);
-												}
-											});
-		}
-										
 		// Instantiate and set
 		try {
 			T proxy = proxyClass.getDeclaredConstructor().newInstance();
@@ -173,6 +129,65 @@ public class Proxy {
 		}
 	}
 	
+	/**
+	 * Generates the proxy sub-class of a proxied class and defines it alongside the proxied class.
+	 *
+	 * <p>Only public methods are proxied so that the proxied object can still be serialized.
+	 * The delegate field takes any {@link ProxyDelegate}, as the one class is used for every
+	 * proxy of the proxied class whatever delegate each is given.
+	 *
+	 * @param proxiedClass	The class to sub-class. Must be non-final.
+	 * @param proxiedTransient	Whether the field for the proxied object is transient.
+	 * @return	The proxy sub-class.
+	 * @throws DomainException	If the sub-class cannot be generated.
+	 */
+	@SuppressWarnings("unchecked")
+	private static Class<? extends Serializable> defineProxyClass(Class<?> proxiedClass, boolean proxiedTransient) {
+		// Cater for the bootstrap class loader
+		ClassLoader classLoader = (proxiedClass.getClassLoader() == null) ? Thread.currentThread().getContextClassLoader() : proxiedClass.getClassLoader();
+		int proxiedModifiers = proxiedTransient ? (Opcodes.ACC_PUBLIC | Opcodes.ACC_TRANSIENT) : Opcodes.ACC_PUBLIC;
+
+		try (Unloaded<?> unloaded = new ByteBuddy()
+				.subclass(proxiedClass)
+				.method(ElementMatchers.isPublic()).intercept(InvocationHandlerAdapter.of(new ProxyInvocationHandler<>()))
+				.implement(Serializable.class)
+				.defineField(PROXIED_FIELD_NAME, proxiedClass, proxiedModifiers)
+				.defineField(DELEGATE_FIELD_NAME, ProxyDelegate.class, Visibility.PUBLIC)
+				.make()) {
+			try (Loaded<?> loaded = unloaded.load(classLoader, loadingStrategy(proxiedClass))) {
+				return (Class<? extends Serializable>) loaded.getLoaded();
+			}
+		}
+		catch (IOException e) {
+			throw new DomainException(PROXY_CREATION_FAILED + proxiedClass, e);
+		}
+	}
+
+	/**
+	 * Determines how to define the proxy sub-class in the proxied class' class loader, which is where
+	 * it has to be for Serialization to work.
+	 *
+	 * <p>The sub-class is defined through a lookup on the proxied class wherever the proxied class allows that,
+	 * which is the case for application classes and needs no JVM options.
+	 * A class the bootstrap class loader loaded, or one in a module that is not open to Skyve, does not allow it.
+	 * Its sub-class is injected reflectively instead, which only works when the JVM is started with
+	 * {@code --add-opens java.base/java.lang=ALL-UNNAMED}.
+	 *
+	 * @param proxiedClass	The class being sub-classed.
+	 * @return	The strategy to load the sub-class with.
+	 */
+	private static ClassLoadingStrategy<ClassLoader> loadingStrategy(Class<?> proxiedClass) {
+		if (proxiedClass.getClassLoader() != null) {
+			try {
+				return ClassLoadingStrategy.UsingLookup.of(MethodHandles.privateLookupIn(proxiedClass, MethodHandles.lookup()));
+			}
+			catch (@SuppressWarnings("unused") IllegalAccessException e) {
+				// the proxied class is not open to us - inject instead
+			}
+		}
+		return ClassLoadingStrategy.Default.INJECTION;
+	}
+
 	/**
 	 * Return the proxied object from a proxy.
 	 * @param <T>
