@@ -4,6 +4,8 @@ import java.util.List;
 
 import org.skyve.metadata.view.widget.FilterParameter;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * Mixin interface for view elements that support declarative pre-filter parameters.
  *
@@ -23,5 +25,5 @@ public interface Filterable extends Parameterizable {
 	 *
 	 * @return a non-{@code null} list of filter parameters; may be empty
 	 */
-	public List<FilterParameter> getFilterParameters();
+	public @Nonnull List<FilterParameter> getFilterParameters();
 }

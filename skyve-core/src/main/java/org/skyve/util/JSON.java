@@ -130,7 +130,7 @@ public class JSON {
 	 * @throws Exception if parsing or Java object reconstruction fails
 	 */
 	@SuppressWarnings({"null", "java:S2637"}) // call-through with nulls
-	public static final Object unmarshall(@Nonnull String json) 
+	public static final @Nullable Object unmarshall(@Nonnull String json) 
 	throws Exception {
 		return unmarshall(null, json);
 	}

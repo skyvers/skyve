@@ -16,6 +16,7 @@ import org.skyve.report.Reporting;
 import org.skyve.util.GeoIPService;
 import org.skyve.util.MailService;
 
+import jakarta.annotation.Nonnull;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Produces;
 
@@ -41,7 +42,7 @@ public class SkyveCDIProducer implements Serializable {
 	 * @return A serializable {@link Persistence} proxy.
 	 */
 	@Produces
-	public static Persistence getPersistence() {
+	public static @Nonnull Persistence getPersistence() {
 		return new PersistenceInjectable();
 	}
 
@@ -51,7 +52,7 @@ public class SkyveCDIProducer implements Serializable {
 	 * @return A serializable {@link User} proxy.
 	 */
 	@Produces
-	public static User getUser() {
+	public static @Nonnull User getUser() {
 		return new UserInjectable();
 	}
 
@@ -61,7 +62,7 @@ public class SkyveCDIProducer implements Serializable {
 	 * @return A serializable {@link Customer} proxy.
 	 */
 	@Produces
-	public static Customer getCustomer() {
+	public static @Nonnull Customer getCustomer() {
 		return new CustomerInjectable();
 	}
 
@@ -71,7 +72,7 @@ public class SkyveCDIProducer implements Serializable {
 	 * @return The current request/thread stash map.
 	 */
 	@Produces
-	public static Map<String, Object> getStash() {
+	public static @Nonnull Map<String, Object> getStash() {
 		return CORE.getStash();
 	}
 	
@@ -81,7 +82,7 @@ public class SkyveCDIProducer implements Serializable {
 	 * @return A serializable {@link Repository} proxy.
 	 */
 	@Produces
-	public static Repository getRepository() {
+	public static @Nonnull Repository getRepository() {
 		return new RepositoryInjectable();
 	}
 	
@@ -91,7 +92,7 @@ public class SkyveCDIProducer implements Serializable {
 	 * @return A serializable {@link AddInManager} proxy.
 	 */
 	@Produces
-	public static AddInManager getAddInManager() {
+	public static @Nonnull AddInManager getAddInManager() {
 		return new AddInManagerInjectable();
 	}
 
@@ -101,7 +102,7 @@ public class SkyveCDIProducer implements Serializable {
 	 * @return A serializable {@link Reporting} proxy.
 	 */
 	@Produces
-	public static Reporting getReporting() {
+	public static @Nonnull Reporting getReporting() {
 		return new ReportingInjectable();
 	}
 
@@ -111,7 +112,7 @@ public class SkyveCDIProducer implements Serializable {
 	 * @return A serializable {@link Caching} proxy.
 	 */
 	@Produces
-	public static Caching getCaching() {
+	public static @Nonnull Caching getCaching() {
 		return new CachingInjectable();
 	}
 
@@ -121,7 +122,7 @@ public class SkyveCDIProducer implements Serializable {
 	 * @return A serializable {@link JobScheduler} proxy.
 	 */
 	@Produces
-	public static JobScheduler getJobScheduler() {
+	public static @Nonnull JobScheduler getJobScheduler() {
 		return new JobSchedulerInjectable();
 	}
 
@@ -131,7 +132,7 @@ public class SkyveCDIProducer implements Serializable {
 	 * @return A serializable {@link NumberGenerator} proxy.
 	 */
 	@Produces
-	public static NumberGenerator getNumberGenerator() {
+	public static @Nonnull NumberGenerator getNumberGenerator() {
 		return new NumberGeneratorInjectable();
 	}
 
@@ -141,7 +142,7 @@ public class SkyveCDIProducer implements Serializable {
 	 * @return A serializable {@link GeoIPService} proxy.
 	 */
 	@Produces
-	public static GeoIPService getGeoIPService() {
+	public static @Nonnull GeoIPService getGeoIPService() {
 		return new GeoIPServiceInjectable();
 	}
 
@@ -151,7 +152,7 @@ public class SkyveCDIProducer implements Serializable {
 	 * @return A serializable {@link MailService} proxy.
 	 */
 	@Produces
-	public static MailService getMailService() {
+	public static @Nonnull MailService getMailService() {
 		return new MailServiceInjectable();
 	}
 }

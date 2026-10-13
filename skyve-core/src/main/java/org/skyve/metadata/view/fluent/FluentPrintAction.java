@@ -2,6 +2,8 @@ package org.skyve.metadata.view.fluent;
 
 import org.skyve.impl.metadata.repository.view.actions.PrintAction;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * Builds {@link PrintAction} metadata using a fluent API.
  */
@@ -21,7 +23,7 @@ public class FluentPrintAction extends FluentValidatableAction<FluentPrintAction
 	 * @param action
 	 *            the action instance to wrap
 	 */
-	public FluentPrintAction(PrintAction action) {
+	public FluentPrintAction(@Nonnull PrintAction action) {
 		this.action = action;
 	}
 	
@@ -32,7 +34,7 @@ public class FluentPrintAction extends FluentValidatableAction<FluentPrintAction
 	 *            the source action metadata
 	 * @return this builder
 	 */
-	public FluentPrintAction from(@SuppressWarnings("hiding") PrintAction action) {
+	public @Nonnull FluentPrintAction from(@SuppressWarnings("hiding") @Nonnull PrintAction action) {
 		super.fromBase(action);
 		return this;
 	}
@@ -41,7 +43,7 @@ public class FluentPrintAction extends FluentValidatableAction<FluentPrintAction
 	 * Returns the wrapped repository action instance.
 	 */
 	@Override
-	public PrintAction get() {
+	public @Nonnull PrintAction get() {
 		return action;
 	}
 }

@@ -85,7 +85,7 @@ public class MetaDataQueryDefinitionImpl extends QueryDefinitionImpl implements 
 	private List<MetaDataQueryColumn> columns = new ArrayList<>();
 
 	@Override
-	public Module getDocumentModule(Customer customer) {
+	public @Nonnull Module getDocumentModule(@Nonnull Customer customer) {
 		Module result = getOwningModule();
 		DocumentRef ref = result.getDocumentRefs().get(getDocumentName());
 		String referencedModuleName = ref.getReferencedModuleName();
@@ -97,7 +97,7 @@ public class MetaDataQueryDefinitionImpl extends QueryDefinitionImpl implements 
 	}
 
 	@Override
-	public String getDocumentName() {
+	public @Nonnull String getDocumentName() {
 		return documentName;
 	}
 
@@ -106,7 +106,7 @@ public class MetaDataQueryDefinitionImpl extends QueryDefinitionImpl implements 
 	}
 
 	@Override
-	public Boolean getPolymorphic() {
+	public @Nullable Boolean getPolymorphic() {
 		return polymorphic;
 	}
 
@@ -124,7 +124,7 @@ public class MetaDataQueryDefinitionImpl extends QueryDefinitionImpl implements 
 	}
 
 	@Override
-	public String getFromClause() {
+	public @Nullable String getFromClause() {
 		return fromClause;
 	}
 
@@ -133,7 +133,7 @@ public class MetaDataQueryDefinitionImpl extends QueryDefinitionImpl implements 
 	}
 
 	@Override
-	public String getFilterClause() {
+	public @Nullable String getFilterClause() {
 		return filterClause;
 	}
 
@@ -142,7 +142,7 @@ public class MetaDataQueryDefinitionImpl extends QueryDefinitionImpl implements 
 	}
 
 	@Override
-	public String getGroupClause() {
+	public @Nullable String getGroupClause() {
 		return groupClause;
 	}
 
@@ -151,7 +151,7 @@ public class MetaDataQueryDefinitionImpl extends QueryDefinitionImpl implements 
 	}
 
 	@Override
-	public String getOrderClause() {
+	public @Nullable String getOrderClause() {
 		return orderClause;
 	}
 
@@ -160,14 +160,14 @@ public class MetaDataQueryDefinitionImpl extends QueryDefinitionImpl implements 
 	}
 
 	@Override
-	public List<MetaDataQueryColumn> getColumns() {
+	public @Nonnull List<MetaDataQueryColumn> getColumns() {
 		return columns;
 	}
 
 	@Override
 	@SuppressWarnings({"incomplete-switch", "java:S3776", "java:S6541"}) // complexity OK
-	public DocumentQuery constructDocumentQuery(AggregateFunction summaryType,
-													String tagId) {
+	public @Nonnull DocumentQuery constructDocumentQuery(@Nullable AggregateFunction summaryType,
+													@Nullable String tagId) {
 		AbstractPersistence persistence = AbstractPersistence.get();
 		User user = persistence.getUser();
 		Customer customer = user.getCustomer();

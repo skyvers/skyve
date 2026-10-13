@@ -23,14 +23,14 @@ public class FluentCheckBox extends FluentChangeableInputWidget<FluentCheckBox> 
 	 *
 	 * @param check the metadata instance to mutate
 	 */
-	public FluentCheckBox(CheckBox check) {
+	public FluentCheckBox(@Nonnull CheckBox check) {
 		this.check = check;
 	}
 
 	/**
 	 * Copies check-box metadata into this fluent builder.
 	 */
-	public FluentCheckBox from(@SuppressWarnings("hiding") CheckBox check) {
+	public @Nonnull FluentCheckBox from(@SuppressWarnings("hiding") @Nonnull CheckBox check) {
 		Boolean b = check.getTriState();
 		if (b != null) {
 			triState(b.booleanValue());
@@ -49,7 +49,7 @@ public class FluentCheckBox extends FluentChangeableInputWidget<FluentCheckBox> 
 	 * @return this builder
 	 */
 	@Override
-	public FluentCheckBox pixelWidth(int width) {
+	public @Nonnull FluentCheckBox pixelWidth(int width) {
 		check.setPixelWidth(Integer.valueOf(width));
 		return this;
 	}
@@ -61,7 +61,7 @@ public class FluentCheckBox extends FluentChangeableInputWidget<FluentCheckBox> 
 	 * @return this builder
 	 */
 	@Override
-	public FluentCheckBox pixelHeight(int height) {
+	public @Nonnull FluentCheckBox pixelHeight(int height) {
 		check.setPixelHeight(Integer.valueOf(height));
 		return this;
 	}
@@ -72,7 +72,7 @@ public class FluentCheckBox extends FluentChangeableInputWidget<FluentCheckBox> 
 	 * @param triState true to allow indeterminate state, false for binary state only
 	 * @return this builder
 	 */
-	public FluentCheckBox triState(boolean triState) {
+	public @Nonnull FluentCheckBox triState(boolean triState) {
 		check.setTriState(triState ? Boolean.TRUE : Boolean.FALSE);
 		return this;
 	}
@@ -96,7 +96,7 @@ public class FluentCheckBox extends FluentChangeableInputWidget<FluentCheckBox> 
 	 * @return the mutable check-box metadata being configured
 	 */
 	@Override
-	public CheckBox get() {
+	public @Nonnull CheckBox get() {
 		return check;
 	}
 

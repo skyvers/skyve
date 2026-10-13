@@ -29,6 +29,9 @@ import org.skyve.metadata.view.model.comparison.ComparisonModel;
 import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.metadata.view.model.map.MapModel;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * A MutableCachedRepository that uses a plain TreeMap as the cache and is not thread-safe.
  * It implements the Repository Java/Code methods as no-ops.
@@ -43,157 +46,157 @@ public abstract class AbstractDynamicRepository extends MutableCachedRepository 
 	}
 
 	@Override
-	public <T extends Bean> Bizlet<T> getBizlet(Customer customer, Document document, boolean runtime) {
+	public @Nullable <T extends Bean> Bizlet<T> getBizlet(@Nullable Customer customer, @Nonnull Document document, boolean runtime) {
 		return null;
 	}
 
 	@Override
-	public BizletMetaData getMetaDataBizlet(Customer customer, Document document) {
+	public @Nullable BizletMetaData getMetaDataBizlet(@Nullable Customer customer, @Nonnull Document document) {
 		return null;
 	}
 
 	@Override
-	public <T extends Bean> DynamicImage<T> getDynamicImage(Customer customer, Document document, String imageName, boolean runtime) {
+	public @Nullable <T extends Bean> DynamicImage<T> getDynamicImage(@Nullable Customer customer, @Nonnull Document document, @Nonnull String imageName, boolean runtime) {
 		return null;
 	}
 
 	@Override
-	public <T extends Bean, C extends Bean> ComparisonModel<T, C> getComparisonModel(Customer customer, Document document, String modelName, boolean runtime) {
+	public @Nullable <T extends Bean, C extends Bean> ComparisonModel<T, C> getComparisonModel(@Nullable Customer customer, @Nonnull Document document, @Nonnull String modelName, boolean runtime) {
 		return null;
 	}
 
 	@Override
-	public <T extends Bean> MapModel<T> getMapModel(Customer customer, Document document, String modelName, boolean runtime) {
+	public @Nullable <T extends Bean> MapModel<T> getMapModel(@Nullable Customer customer, @Nonnull Document document, @Nonnull String modelName, boolean runtime) {
 		return null;
 	}
 
 	@Override
-	public <T extends Bean> ChartModel<T> getChartModel(Customer customer, Document document, String modelName, boolean runtime) {
+	public @Nullable <T extends Bean> ChartModel<T> getChartModel(@Nullable Customer customer, @Nonnull Document document, @Nonnull String modelName, boolean runtime) {
 		return null;
 	}
 
 	@Override
-	public <T extends Bean> ListModel<T> getListModel(Customer customer, Document document, String modelName, boolean runtime) {
+	public @Nullable <T extends Bean> ListModel<T> getListModel(@Nullable Customer customer, @Nonnull Document document, @Nonnull String modelName, boolean runtime) {
 		return null;
 	}
 
 	@Override
-	public ServerSideAction<Bean> getServerSideAction(Customer customer, Document document, String className, boolean runtime) {
+	public @Nullable ServerSideAction<Bean> getServerSideAction(@Nullable Customer customer, @Nonnull Document document, @Nonnull String className, boolean runtime) {
 		return null;
 	}
 
 	@Override
-	public ActionMetaData getMetaDataAction(Customer customer, Document document, String actionName) {
+	public @Nullable ActionMetaData getMetaDataAction(@Nullable Customer customer, @Nonnull Document document, @Nonnull String actionName) {
 		return null;
 	}
 	
 	@Override
-	public BizExportAction getBizExportAction(Customer customer, Document document, String className, boolean runtime) {
+	public @Nullable BizExportAction getBizExportAction(@Nullable Customer customer, @Nonnull Document document, @Nonnull String className, boolean runtime) {
 		return null;
 	}
 
 	@Override
-	public BizImportAction getBizImportAction(Customer customer, Document document, String className, boolean runtime) {
+	public @Nullable BizImportAction getBizImportAction(@Nullable Customer customer, @Nonnull Document document, @Nonnull String className, boolean runtime) {
 		return null;
 	}
 
 	@Override
-	public DownloadAction<Bean> getDownloadAction(Customer customer, Document document, String className, boolean runtime) {
+	public @Nullable DownloadAction<Bean> getDownloadAction(@Nullable Customer customer, @Nonnull Document document, @Nonnull String className, boolean runtime) {
 		return null;
 	}
 
 	@Override
-	public UploadAction<Bean> getUploadAction(Customer customer, Document document, String className, boolean runtime) {
+	public @Nullable UploadAction<Bean> getUploadAction(@Nullable Customer customer, @Nonnull Document document, @Nonnull String className, boolean runtime) {
 		return null;
 	}
 
 	@Override
-	public void validateCustomerForGenerateDomain(Customer customer) {
+	public void validateCustomerForGenerateDomain(@Nonnull Customer customer) {
 		// nothing to do
 	}
 
 	@Override
-	public void validateModuleForGenerateDomain(Customer customer, Module module) {
+	public void validateModuleForGenerateDomain(@Nonnull Customer customer, @Nonnull Module module) {
 		// nothing to do
 	}
 
 	@Override
-	public void validateDocumentForGenerateDomain(Customer customer, Document document) {
+	public void validateDocumentForGenerateDomain(@Nonnull Customer customer, @Nonnull Document document) {
 		// nothing to do
 	}
 
 	@Override
-	public void validateViewForGenerateDomain(Customer customer, Document document, View view, String uxui) {
+	public void validateViewForGenerateDomain(@Nonnull Customer customer, @Nonnull Document document, @Nonnull View view, @Nonnull String uxui) {
 		// nothing to do
 	}
 
 	@Override
-	public Router getGlobalRouter() {
+	public @Nullable Router getGlobalRouter() {
 		return null;
 	}
 
 	@Override
-	public List<Router> getModuleRouters() {
+	public @Nonnull List<Router> getModuleRouters() {
 		return Collections.emptyList();
 	}
 
 	@Override
-	public String getReportFileName(Customer customer, Document document, String reportName) {
+	public @Nullable String getReportFileName(@Nullable Customer customer, @Nonnull Document document, @Nonnull String reportName) {
 		return null;
 	}
 
 	@Override
-	public Class<?> getJavaClass(Customer customer, String fullyQualifiedJavaCodeName) {
+	public @Nullable Class<?> getJavaClass(@Nullable Customer customer, @Nonnull String fullyQualifiedJavaCodeName) {
 		return null;
 	}
 
 	@Override
-	public UserImpl retrieveUser(String userPrincipal) {
+	public @Nullable UserImpl retrieveUser(@Nonnull String userPrincipal) {
 		return null;
 	}
 
 	@Override
-	public void resetMenus(User user) {
+	public void resetMenus(@Nonnull User user) {
 		// nothing to do
 	}
 
 	@Override
-	public boolean populatePermissions(User user) {
+	public boolean populatePermissions(@Nonnull User user) {
 		return false;
 	}
 
 	@Override
-	public void resetUserPermissions(User user) {
+	public void resetUserPermissions(@Nonnull User user) {
 		// nothing to do
 	}
 	
 	@Override
-	public boolean populateUser(User user, Connection connection) {
+	public boolean populateUser(@Nonnull User user, @Nonnull Connection connection) {
 		return false;
 	}
 
 	@Override
-	public List<UserJobSchedule> retrieveAllScheduledJobsForAllCustomers() {
+	public @Nonnull List<UserJobSchedule> retrieveAllScheduledJobsForAllCustomers() {
 		return Collections.emptyList();
 	}
 
 	@Override
-	public List<UserJobSchedule> retrieveAllScheduledReportsForAllCustomers() {
+	public @Nonnull List<UserJobSchedule> retrieveAllScheduledReportsForAllCustomers() {
 		return Collections.emptyList();
 	}
 
 	@Override
-	public String retrievePublicUserName(String customerName) {
+	public @Nullable String retrievePublicUserName(@Nonnull String customerName) {
 		return null;
 	}
 	
 	@Override
-	public File findResourceFile(String resourcePath, String customerName, String moduleName) {
+	public @Nullable File findResourceFile(@Nonnull String resourcePath, @Nullable String customerName, @Nullable String moduleName) {
 		return null;
 	}
 
 	@Override
-	public Object getDataFactory(Customer customer, Document document) {
+	public @Nullable Object getDataFactory(@Nullable Customer customer, @Nonnull Document document) {
 		return null;
 	}
 }

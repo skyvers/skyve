@@ -2,6 +2,8 @@ package org.skyve.metadata.view.model.map;
 
 import org.locationtech.jts.geom.Geometry;
 
+import jakarta.annotation.Nullable;
+
 public class MapFeature {
 	private Geometry geometry;
 	private boolean zoomable = true;
@@ -17,15 +19,15 @@ public class MapFeature {
 	}
 
 	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
-	public MapFeature(Geometry geometry,
+	public MapFeature(@Nullable Geometry geometry,
 						boolean zoomable,
 						boolean editable,
-						String strokeColour,
-						String fillColour,
+						@Nullable String strokeColour,
+						@Nullable String fillColour,
 						float fillOpacity,
-						String iconRelativeFilePath,
-						Integer iconAnchorX,
-						Integer iconAnchorY) {
+						@Nullable String iconRelativeFilePath,
+						@Nullable Integer iconAnchorX,
+						@Nullable Integer iconAnchorY) {
 		this.geometry = geometry;
 		this.zoomable = zoomable;
 		this.editable = editable;
@@ -37,11 +39,11 @@ public class MapFeature {
 		this.iconAnchorY = iconAnchorY;
 	}
 
-	public Geometry getGeometry() {
+	public @Nullable Geometry getGeometry() {
 		return geometry;
 	}
 
-	public void setGeometry(Geometry geometry) {
+	public void setGeometry(@Nullable Geometry geometry) {
 		this.geometry = geometry;
 	}
 
@@ -61,19 +63,19 @@ public class MapFeature {
 		this.editable = editable;
 	}
 
-	public String getStrokeColour() {
+	public @Nullable String getStrokeColour() {
 		return strokeColour;
 	}
 
-	public void setStrokeColour(String strokeColour) {
+	public void setStrokeColour(@Nullable String strokeColour) {
 		this.strokeColour = strokeColour;
 	}
 
-	public String getFillColour() {
+	public @Nullable String getFillColour() {
 		return fillColour;
 	}
 
-	public void setFillColour(String fillColour) {
+	public void setFillColour(@Nullable String fillColour) {
 		this.fillColour = fillColour;
 	}
 
@@ -98,27 +100,27 @@ public class MapFeature {
 		this.fillOpacity = value;
 	}
 
-	public String getIconRelativeFilePath() {
+	public @Nullable String getIconRelativeFilePath() {
 		return iconRelativeFilePath;
 	}
 
-	public void setIconRelativeFilePath(String iconRelativeFilePath) {
+	public void setIconRelativeFilePath(@Nullable String iconRelativeFilePath) {
 		this.iconRelativeFilePath = iconRelativeFilePath;
 	}
 
-	public Integer getIconAnchorX() {
+	public @Nullable Integer getIconAnchorX() {
 		return iconAnchorX;
 	}
 
-	public void setIconAnchorX(Integer iconAnchorX) {
+	public void setIconAnchorX(@Nullable Integer iconAnchorX) {
 		this.iconAnchorX = iconAnchorX;
 	}
 
-	public Integer getIconAnchorY() {
+	public @Nullable Integer getIconAnchorY() {
 		return iconAnchorY;
 	}
 
-	public void setIconAnchorY(Integer iconAnchorY) {
+	public void setIconAnchorY(@Nullable Integer iconAnchorY) {
 		this.iconAnchorY = iconAnchorY;
 	}
 }

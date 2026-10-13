@@ -3,6 +3,9 @@ package org.skyve.metadata.module.fluent;
 import org.skyve.impl.metadata.repository.module.QueryDefinitionMetaData;
 import org.skyve.metadata.module.query.QueryDefinition;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Builds full query definitions including descriptive and timeout fields.
  */
@@ -20,7 +23,7 @@ public abstract class FluentQueryDefinition<T extends FluentQueryDefinition<T>> 
 	 * @param query The source query definition.
 	 */
 	@Override
-	protected void from(QueryDefinition query) {
+	protected void from(@Nonnull QueryDefinition query) {
 		super.from(query);
 		description(query.getDescription());
 		documentation(query.getDocumentation());
@@ -35,7 +38,7 @@ public abstract class FluentQueryDefinition<T extends FluentQueryDefinition<T>> 
 	 * @return this fluent instance.
 	 */
 	@SuppressWarnings("unchecked")
-	public T description(String description) {
+	public @Nonnull T description(@Nonnull String description) {
 		get().setDescription(description);
 		return (T) this;
 	}
@@ -47,7 +50,7 @@ public abstract class FluentQueryDefinition<T extends FluentQueryDefinition<T>> 
 	 * @return this fluent instance.
 	 */
 	@SuppressWarnings("unchecked")
-	public T documentation(String documentation) {
+	public @Nonnull T documentation(@Nullable String documentation) {
 		get().setDocumentation(documentation);
 		return (T) this;
 	}
@@ -59,7 +62,7 @@ public abstract class FluentQueryDefinition<T extends FluentQueryDefinition<T>> 
 	 * @return this fluent instance.
 	 */
 	@SuppressWarnings("unchecked")
-	public T timeoutInSeconds(int timeoutInSeconds) {
+	public @Nonnull T timeoutInSeconds(int timeoutInSeconds) {
 		get().setTimeoutInSeconds(Integer.valueOf(timeoutInSeconds));
 		return (T) this;
 	}
@@ -70,5 +73,5 @@ public abstract class FluentQueryDefinition<T extends FluentQueryDefinition<T>> 
 	 * @return The backing query definition metadata.
 	 */
 	@Override
-	public abstract QueryDefinitionMetaData get();
+	public abstract @Nonnull QueryDefinitionMetaData get();
 }

@@ -25,14 +25,14 @@ public class FluentLookupDescription extends FluentInputWidget<FluentLookupDescr
 	 *
 	 * @param lookup the metadata instance to mutate
 	 */
-	public FluentLookupDescription(LookupDescription lookup) {
+	public FluentLookupDescription(@Nonnull LookupDescription lookup) {
 		this.lookup = lookup;
 	}
 
 	/**
 	 * Copies lookup metadata, actions, parameters, and drop-down columns into this builder.
 	 */
-	public FluentLookupDescription from(@SuppressWarnings("hiding") LookupDescription lookup) {
+	public @Nonnull FluentLookupDescription from(@SuppressWarnings("hiding") @Nonnull LookupDescription lookup) {
 		descriptionBinding(lookup.getDescriptionBinding());
 		query(lookup.getQuery());
 		modelName(lookup.getModelName());
@@ -69,7 +69,7 @@ public class FluentLookupDescription extends FluentInputWidget<FluentLookupDescr
 	 * @param descriptionBinding the description binding expression
 	 * @return this builder
 	 */
-	public FluentLookupDescription descriptionBinding(String descriptionBinding) {
+	public @Nonnull FluentLookupDescription descriptionBinding(@Nullable String descriptionBinding) {
 		lookup.setDescriptionBinding(descriptionBinding);
 		return this;
 	}
@@ -80,7 +80,7 @@ public class FluentLookupDescription extends FluentInputWidget<FluentLookupDescr
 	 * @param query the query name
 	 * @return this builder
 	 */
-	public FluentLookupDescription query(String query) {
+	public @Nonnull FluentLookupDescription query(@Nullable String query) {
 		lookup.setQuery(query);
 		return this;
 	}
@@ -91,7 +91,7 @@ public class FluentLookupDescription extends FluentInputWidget<FluentLookupDescr
 	 * @param modelName the model name
 	 * @return this builder
 	 */
-	public FluentLookupDescription modelName(String modelName) {
+	public @Nonnull FluentLookupDescription modelName(@Nullable String modelName) {
 		lookup.setModelName(modelName);
 		return this;
 	}
@@ -198,7 +198,7 @@ public class FluentLookupDescription extends FluentInputWidget<FluentLookupDescr
 	 * @param editable {@code true} to allow editing
 	 * @return this builder
 	 */
-	public FluentLookupDescription editable(boolean editable) {
+	public @Nonnull FluentLookupDescription editable(boolean editable) {
 		lookup.setEditable(editable ? Boolean.TRUE : Boolean.FALSE);
 		return this;
 	}
@@ -206,7 +206,7 @@ public class FluentLookupDescription extends FluentInputWidget<FluentLookupDescr
 	/**
 	 * Appends a drop-down column definition to the wrapped lookup metadata.
 	 */
-	public FluentLookupDescription addDropDownColumn(FluentLookupDescriptionColumn column) {
+	public @Nonnull FluentLookupDescription addDropDownColumn(@Nonnull FluentLookupDescriptionColumn column) {
 		lookup.getDropDownColumns().add(column.get());
 		return this;
 	}
@@ -214,7 +214,7 @@ public class FluentLookupDescription extends FluentInputWidget<FluentLookupDescr
 	/**
 	 * Appends an edited action definition to the wrapped lookup metadata.
 	 */
-	public FluentLookupDescription addEditedAction(FluentEventAction action) {
+	public @Nonnull FluentLookupDescription addEditedAction(@Nonnull FluentEventAction action) {
 		lookup.getEditedActions().add(action.get());
 		return this;
 	}
@@ -222,7 +222,7 @@ public class FluentLookupDescription extends FluentInputWidget<FluentLookupDescr
 	/**
 	 * Appends an added action definition to the wrapped lookup metadata.
 	 */
-	public FluentLookupDescription addAddedAction(FluentEventAction action) {
+	public @Nonnull FluentLookupDescription addAddedAction(@Nonnull FluentEventAction action) {
 		lookup.getAddedActions().add(action.get());
 		return this;
 	}
@@ -230,7 +230,7 @@ public class FluentLookupDescription extends FluentInputWidget<FluentLookupDescr
 	/**
 	 * Appends a cleared action definition to the wrapped lookup metadata.
 	 */
-	public FluentLookupDescription addClearedAction(FluentEventAction action) {
+	public @Nonnull FluentLookupDescription addClearedAction(@Nonnull FluentEventAction action) {
 		lookup.getClearedActions().add(action.get());
 		return this;
 	}
@@ -238,7 +238,7 @@ public class FluentLookupDescription extends FluentInputWidget<FluentLookupDescr
 	/**
 	 * Appends a picked action definition to the wrapped lookup metadata.
 	 */
-	public FluentLookupDescription addPickedAction(FluentEventAction action) {
+	public @Nonnull FluentLookupDescription addPickedAction(@Nonnull FluentEventAction action) {
 		lookup.getPickedActions().add(action.get());
 		return this;
 	}
@@ -246,7 +246,7 @@ public class FluentLookupDescription extends FluentInputWidget<FluentLookupDescr
 	/**
 	 * Appends a filter parameter definition to the wrapped lookup metadata.
 	 */
-	public FluentLookupDescription addFilterParameter(FluentFilterParameter filterParameter) {
+	public @Nonnull FluentLookupDescription addFilterParameter(@Nonnull FluentFilterParameter filterParameter) {
 		lookup.getFilterParameters().add(filterParameter.get());
 		return this;
 	}
@@ -254,7 +254,7 @@ public class FluentLookupDescription extends FluentInputWidget<FluentLookupDescr
 	/**
 	 * Appends a parameter definition to the wrapped lookup metadata.
 	 */
-	public FluentLookupDescription addParameter(FluentParameter parameter) {
+	public @Nonnull FluentLookupDescription addParameter(@Nonnull FluentParameter parameter) {
 		lookup.getParameters().add(parameter.get());
 		return this;
 	}
@@ -266,7 +266,7 @@ public class FluentLookupDescription extends FluentInputWidget<FluentLookupDescr
 	 * @return this builder
 	 */
 	@Override
-	public FluentLookupDescription pixelWidth(int width) {
+	public @Nonnull FluentLookupDescription pixelWidth(int width) {
 		lookup.setPixelWidth(Integer.valueOf(width));
 		return this;
 	}
@@ -290,7 +290,7 @@ public class FluentLookupDescription extends FluentInputWidget<FluentLookupDescr
 	 * @return the mutable lookup-description metadata being configured
 	 */
 	@Override
-	public LookupDescription get() {
+	public @Nonnull LookupDescription get() {
 		return lookup;
 	}
 }

@@ -17,6 +17,7 @@ import org.skyve.metadata.view.Parameterizable;
 import org.skyve.metadata.view.widget.bound.Parameter;
 import org.skyve.util.Util;
 
+import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlElement;
@@ -92,7 +93,7 @@ public class DialogButton implements Parameterizable, Disableable, Invisible, Fo
 					name = "parameter",
 					type = ParameterImpl.class,
 					required = false)
-	public List<Parameter> getParameters() {
+	public @Nonnull List<Parameter> getParameters() {
 		return parameters;
 	}
 
@@ -101,7 +102,7 @@ public class DialogButton implements Parameterizable, Disableable, Invisible, Fo
 	 *
 	 * @return the button label
 	 */
-	public String getDisplayName() {
+	public @Nullable String getDisplayName() {
 		return displayName;
 	}
 
@@ -110,7 +111,7 @@ public class DialogButton implements Parameterizable, Disableable, Invisible, Fo
 	 *
 	 * @return the localised display label
 	 */
-	public String getLocalisedDisplayName() {
+	public @Nullable String getLocalisedDisplayName() {
 		return Util.i18n(displayName);
 	}
 
@@ -119,7 +120,7 @@ public class DialogButton implements Parameterizable, Disableable, Invisible, Fo
 	 *
 	 * @return {@code Boolean.FALSE} to allow trusted markup; {@code null} or {@code Boolean.TRUE} to escape at the renderer boundary
 	 */
-	public Boolean getEscapeDisplayName() {
+	public @Nullable Boolean getEscapeDisplayName() {
 		return escapeDisplayName;
 	}
 	
@@ -129,7 +130,7 @@ public class DialogButton implements Parameterizable, Disableable, Invisible, Fo
 	 * @param displayName the button label
 	 */
 	@XmlAttribute(required = true)
-	public void setDisplayName(String displayName) {
+	public void setDisplayName(@Nullable String displayName) {
 		this.displayName = UtilImpl.processStringValue(displayName);
 	}
 
@@ -139,7 +140,7 @@ public class DialogButton implements Parameterizable, Disableable, Invisible, Fo
 	 * @param escapeDisplayName {@code Boolean.FALSE} to allow trusted markup; {@code null} or {@code Boolean.TRUE} to escape at the renderer boundary
 	 */
 	@XmlAttribute(required = false)
-	public void setEscapeDisplayName(Boolean escapeDisplayName) {
+	public void setEscapeDisplayName(@Nullable Boolean escapeDisplayName) {
 		this.escapeDisplayName = escapeDisplayName;
 	}
 
@@ -148,7 +149,7 @@ public class DialogButton implements Parameterizable, Disableable, Invisible, Fo
 	 *
 	 * @return the dialog name, or {@code null} when a command is used instead
 	 */
-	public String getDialogName() {
+	public @Nullable String getDialogName() {
 		return dialogName;
 	}
 	
@@ -158,7 +159,7 @@ public class DialogButton implements Parameterizable, Disableable, Invisible, Fo
 	 * @param dialogName the dialog name, or {@code null} when a command is used instead
 	 */
 	@XmlAttribute(required = false)
-	public void setDialogName(String dialogName) {
+	public void setDialogName(@Nullable String dialogName) {
 		this.dialogName = UtilImpl.processStringValue(dialogName);
 	}
 
@@ -167,7 +168,7 @@ public class DialogButton implements Parameterizable, Disableable, Invisible, Fo
 	 *
 	 * @return the dialog command, or {@code null} when opening a named dialog directly
 	 */
-	public String getCommand() {
+	public @Nullable String getCommand() {
 		return command;
 	}
 
@@ -177,7 +178,7 @@ public class DialogButton implements Parameterizable, Disableable, Invisible, Fo
 	 * @param command the dialog command, or {@code null} when opening a named dialog directly
 	 */
 	@XmlAttribute(required = false)
-	public void setCommand(String command) {
+	public void setCommand(@Nullable String command) {
 		this.command = UtilImpl.processStringValue(command);
 	}
 
@@ -186,7 +187,7 @@ public class DialogButton implements Parameterizable, Disableable, Invisible, Fo
 	 *
 	 * @return the dialog width in pixels
 	 */
-	public Integer getDialogWidth() {
+	public @Nullable Integer getDialogWidth() {
 		return dialogWidth;
 	}
 
@@ -196,7 +197,7 @@ public class DialogButton implements Parameterizable, Disableable, Invisible, Fo
 	 * @param dialogWidth the dialog width in pixels
 	 */
 	@XmlAttribute(required = false)
-	public void setDialogWidth(Integer dialogWidth) {
+	public void setDialogWidth(@Nullable Integer dialogWidth) {
 		this.dialogWidth = dialogWidth;
 	}
 
@@ -205,7 +206,7 @@ public class DialogButton implements Parameterizable, Disableable, Invisible, Fo
 	 *
 	 * @return the dialog height in pixels
 	 */
-	public Integer getDialogHeight() {
+	public @Nullable Integer getDialogHeight() {
 		return dialogHeight;
 	}
 
@@ -215,7 +216,7 @@ public class DialogButton implements Parameterizable, Disableable, Invisible, Fo
 	 * @param dialogHeight the dialog height in pixels
 	 */
 	@XmlAttribute(required = false)
-	public void setDialogHeight(Integer dialogHeight) {
+	public void setDialogHeight(@Nullable Integer dialogHeight) {
 		this.dialogHeight = dialogHeight;
 	}
 
@@ -224,7 +225,7 @@ public class DialogButton implements Parameterizable, Disableable, Invisible, Fo
 	 *
 	 * @return {@code true} when the dialog is modal
 	 */
-	public Boolean isModalDialog() {
+	public @Nullable Boolean isModalDialog() {
 		return modalDialog;
 	}
 
@@ -234,7 +235,7 @@ public class DialogButton implements Parameterizable, Disableable, Invisible, Fo
 	 * @param modalDialog {@code true} to open the dialog modally
 	 */
 	@XmlAttribute(required = false)
-	public void setModalDialog(Boolean modalDialog) {
+	public void setModalDialog(@Nullable Boolean modalDialog) {
 		this.modalDialog = modalDialog;
 	}
 
@@ -367,7 +368,7 @@ public class DialogButton implements Parameterizable, Disableable, Invisible, Fo
 	 * @return the mutable decorator property map keyed by property name
 	 */
 	@Override
-	public Map<String, String> getProperties() {
+	public @Nonnull Map<String, String> getProperties() {
 		return properties;
 	}
 }

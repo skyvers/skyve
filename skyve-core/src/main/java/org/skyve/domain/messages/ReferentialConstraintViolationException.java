@@ -3,6 +3,9 @@ package org.skyve.domain.messages;
 import java.util.Collections;
 import java.util.List;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Thrown when a delete is blocked by a referential integrity constraint.
  *
@@ -30,7 +33,7 @@ public class ReferentialConstraintViolationException extends DomainException imp
 	 * @param bizKey the bizKey
 	 * @param referencingDocumentAlias the referencingDocumentAlias
 	 */
-	public ReferentialConstraintViolationException(String documentAlias, String bizKey, String referencingDocumentAlias) {
+	public ReferentialConstraintViolationException(@Nullable String documentAlias, @Nullable String bizKey, @Nullable String referencingDocumentAlias) {
 		super(MESSAGE_KEY, documentAlias, bizKey, referencingDocumentAlias);
 		messages = Collections.singletonList(new Message(getMessage()));
 	}
@@ -40,7 +43,7 @@ public class ReferentialConstraintViolationException extends DomainException imp
 	 * @return the result
 	 */
 	@Override
-	public List<Message> getMessages() {
+	public @Nonnull List<Message> getMessages() {
 		return messages;
 	}
 }

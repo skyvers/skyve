@@ -11,6 +11,7 @@ import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.view.Invisible;
 
+import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlElement;
@@ -58,7 +59,7 @@ public class Spacer implements AbsoluteSize, FormItemWidget, Invisible {
 	 * @return the pixel width, or {@code null} when not set
 	 */
 	@Override
-	public Integer getPixelWidth() {
+	public @Nullable Integer getPixelWidth() {
 		return pixelWidth;
 	}
 
@@ -69,7 +70,7 @@ public class Spacer implements AbsoluteSize, FormItemWidget, Invisible {
 	 */
 	@Override
 	@XmlAttribute
-	public void setPixelWidth(Integer pixelWidth) {
+	public void setPixelWidth(@Nullable Integer pixelWidth) {
 		this.pixelWidth = pixelWidth;
 	}
 
@@ -79,7 +80,7 @@ public class Spacer implements AbsoluteSize, FormItemWidget, Invisible {
 	 * @return the pixel height, or {@code null} when not set
 	 */
 	@Override
-	public Integer getPixelHeight() {
+	public @Nullable Integer getPixelHeight() {
 		return pixelHeight;
 	}
 
@@ -90,7 +91,7 @@ public class Spacer implements AbsoluteSize, FormItemWidget, Invisible {
 	 */
 	@Override
 	@XmlAttribute
-	public void setPixelHeight(Integer pixelHeight) {
+	public void setPixelHeight(@Nullable Integer pixelHeight) {
 		this.pixelHeight = pixelHeight;
 	}
 
@@ -100,7 +101,7 @@ public class Spacer implements AbsoluteSize, FormItemWidget, Invisible {
 	 * @return the mutable decorator property map keyed by property name
 	 */
 	@Override
-	public Map<String, String> getProperties() {
+	public @Nonnull Map<String, String> getProperties() {
 		return properties;
 	}
 

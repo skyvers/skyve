@@ -19,6 +19,9 @@ import net.bytebuddy.implementation.InvocationHandlerAdapter;
 import net.bytebuddy.jar.asm.Opcodes;
 import net.bytebuddy.matcher.ElementMatchers;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Create a Serializable dynamic proxy for an object instance that will route all public methods through the invoke method of its ProxyDelegate.
  * The proxy will be a sub-class of the instance given, so the instance's class must be non-final.
@@ -60,7 +63,7 @@ public class Proxy {
 	private static class ProxyInvocationHandler <T extends Object> implements InvocationHandler {
 		@Override
 		@SuppressWarnings("unchecked")
-		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+		public @Nullable Object invoke(@Nonnull Object proxy, @Nonnull Method method, @Nullable Object[] args) throws Throwable {
 			Class<?> proxyClass = proxy.getClass();
 			T proxied = (T) proxyClass.getDeclaredField(PROXIED_FIELD_NAME).get(proxy);
 			ProxyDelegate<T> delegate = (ProxyDelegate<T>) proxyClass.getDeclaredField(DELEGATE_FIELD_NAME).get(proxy);
@@ -82,7 +85,7 @@ public class Proxy {
 	 * @param delegate	Used to process the method calls made
 	 * @return	The proxy that represents the proxied object.
 	 */
-	public static <T extends Object> T of(T proxied, ProxyDelegate<T> delegate) {
+	public static @Nonnull <T extends Object> T of(@Nonnull T proxied, @Nonnull ProxyDelegate<T> delegate) {
 		return of(proxied, delegate, false);
 	}
 	
@@ -94,7 +97,7 @@ public class Proxy {
 	 * @param delegate	Used to process the method calls made
 	 * @return	The proxy that represents the proxied object.
 	 */
-	public static <T extends Object> T ofTransient(T proxied, ProxyDelegate<T> delegate) {
+	public static @Nonnull <T extends Object> T ofTransient(@Nonnull T proxied, @Nonnull ProxyDelegate<T> delegate) {
 		return of(proxied, delegate, true);
 	}
 	
@@ -107,7 +110,7 @@ public class Proxy {
 	 * @return	The proxy instance.
 	 */
 	@SuppressWarnings({"unchecked"})
-	private static <T extends Object> T of(T proxied, ProxyDelegate<T> delegate, boolean proxiedTransient) {
+	private static @Nonnull <T extends Object> T of(@Nonnull T proxied, @Nonnull ProxyDelegate<T> delegate, boolean proxiedTransient) {
 		if (Proxy.isProxy(proxied)) {
 			throw new IllegalArgumentException("proxied argument is a Proxy");
 		}
@@ -142,7 +145,7 @@ public class Proxy {
 	 * @throws DomainException	If the sub-class cannot be generated.
 	 */
 	@SuppressWarnings("unchecked")
-	private static Class<? extends Serializable> defineProxyClass(Class<?> proxiedClass, boolean proxiedTransient) {
+	private static @Nonnull Class<? extends Serializable> defineProxyClass(@Nonnull Class<?> proxiedClass, boolean proxiedTransient) {
 		// Cater for the bootstrap class loader
 		ClassLoader classLoader = (proxiedClass.getClassLoader() == null) ? Thread.currentThread().getContextClassLoader() : proxiedClass.getClassLoader();
 		int proxiedModifiers = proxiedTransient ? (Opcodes.ACC_PUBLIC | Opcodes.ACC_TRANSIENT) : Opcodes.ACC_PUBLIC;
@@ -176,7 +179,7 @@ public class Proxy {
 	 * @param proxiedClass	The class being sub-classed.
 	 * @return	The strategy to load the sub-class with.
 	 */
-	private static ClassLoadingStrategy<ClassLoader> loadingStrategy(Class<?> proxiedClass) {
+	private static @Nonnull ClassLoadingStrategy<ClassLoader> loadingStrategy(@Nonnull Class<?> proxiedClass) {
 		if (proxiedClass.getClassLoader() != null) {
 			try {
 				return ClassLoadingStrategy.UsingLookup.of(MethodHandles.privateLookupIn(proxiedClass, MethodHandles.lookup()));
@@ -195,7 +198,7 @@ public class Proxy {
 	 * @return	The proxied object.
 	 */
 	@SuppressWarnings("unchecked")
-	public static <T extends Object> T deproxy(T proxy) {
+	public static @Nullable <T extends Object> T deproxy(@Nonnull T proxy) {
 		try {
 			return (T) proxy.getClass().getDeclaredField(PROXIED_FIELD_NAME).get(proxy);
 		}
@@ -210,7 +213,7 @@ public class Proxy {
 	 * @param proxy	The proxy to reproxy.
 	 * @param proxied	The new proxied object.
 	 */
-	public static <T extends Object> void reproxy(T proxy, T proxied) {
+	public static <T extends Object> void reproxy(@Nonnull T proxy, @Nonnull T proxied) {
 		try {
 			proxy.getClass().getDeclaredField(PROXIED_FIELD_NAME).set(proxy, proxied);
 		}
@@ -225,7 +228,7 @@ public class Proxy {
 	 * @return	true if it is a proxy, otherwise false
 	 */
 	@SuppressWarnings("null")
-	public static boolean isProxy(Object proxy) {
+	public static boolean isProxy(@Nullable Object proxy) {
 		boolean result = (proxy != null);
 
 		if (result) {
@@ -247,7 +250,7 @@ public class Proxy {
 	 * @return	The delegate object.
 	 */
 	@SuppressWarnings("unchecked")
-	public static <T extends Object> ProxyDelegate<T> getDelegate(T proxy) {
+	public static @Nonnull <T extends Object> ProxyDelegate<T> getDelegate(@Nonnull T proxy) {
 		try {
 			return (ProxyDelegate<T>) proxy.getClass().getDeclaredField(DELEGATE_FIELD_NAME).get(proxy);
 		}

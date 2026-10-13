@@ -12,6 +12,9 @@ import org.skyve.domain.Bean;
 import org.skyve.domain.types.Decimal;
 import org.skyve.util.Binder;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 public class InMemoryFilter implements Filter {
 	private static final String BETWEEN_OPERATOR = "between";
 
@@ -23,7 +26,7 @@ public class InMemoryFilter implements Filter {
 		private T value;
 		private T start;
 		private T end;
-		MyPredicate(String binding, String operatorDescription, T value, T start, T end) {
+		MyPredicate(@Nonnull String binding, @Nonnull String operatorDescription, @Nullable T value, @Nullable T start, @Nullable T end) {
 			this.binding = binding;
 			this.operatorDescription = operatorDescription;
 			this.value = value;
@@ -32,10 +35,10 @@ public class InMemoryFilter implements Filter {
 		}
 		
 		@SuppressWarnings("hiding")
-		abstract boolean evaluate(Object bean, String binding, T value, T start, T end) throws Exception;
+		abstract boolean evaluate(@Nonnull Object bean, @Nonnull String binding, @Nullable T value, @Nullable T start, @Nullable T end) throws Exception;
 		
 		@Override
-		public final boolean evaluate(Object object) {
+		public final boolean evaluate(@Nonnull Object object) {
 			try {
 				return evaluate(object, binding, value, start, end);
 			}
@@ -45,7 +48,7 @@ public class InMemoryFilter implements Filter {
 		}
 		
 		@Override
-		public String toString() {
+		public @Nonnull String toString() {
 			StringBuilder result = new StringBuilder(128);
 
 			result.append(binding).append(' ').append(operatorDescription);
@@ -61,12 +64,12 @@ public class InMemoryFilter implements Filter {
 	}
 	
 	@Override
-	public void addAnd(Filter filter) {
+	public void addAnd(@Nonnull Filter filter) {
 		predicates.add(PredicateUtils.allPredicate(((InMemoryFilter) filter).predicates));
 	}
 
 	@Override
-	public void addOr(Filter filter) {
+	public void addOr(@Nonnull Filter filter) {
 		// make a new predicate with the existing predicates and'd, unless there is only 1
 		// ie make 2 arguments and or them together
 		Predicate predicate1 = PredicateUtils.allPredicate(predicates);
@@ -76,236 +79,236 @@ public class InMemoryFilter implements Filter {
 	}
 
 	@Override
-	public void addTagged(String tagId, boolean tagged) {
+	public void addTagged(@Nonnull String tagId, boolean tagged) {
 		// TODO Auto-generated method stub
 	}
 
 	@Override
-	public void addNull(final String binding) {
+	public void addNull(final @Nonnull String binding) {
 		predicates.add(new MyPredicate<>(binding, "is null", null, null, null) {
 			@Override
 			@SuppressWarnings("hiding")
-			boolean evaluate(Object bean, String binding, Object value, Object start, Object end) throws Exception {
+			boolean evaluate(@Nonnull Object bean, @Nonnull String binding, @Nullable Object value, @Nullable Object start, @Nullable Object end) throws Exception {
 				return (Binder.get(bean, binding) == null);
 			}
 		});
 	}
 
 	@Override
-	public void addNotNull(String binding) {
+	public void addNotNull(@Nonnull String binding) {
 		predicates.add(new MyPredicate<>(binding, "is not null", null, null, null) {
 			@Override
 			@SuppressWarnings("hiding")
-			boolean evaluate(Object bean, String binding, Object value, Object start, Object end) throws Exception {
+			boolean evaluate(@Nonnull Object bean, @Nonnull String binding, @Nullable Object value, @Nullable Object start, @Nullable Object end) throws Exception {
 				return (Binder.get(bean, binding) != null);
 			}
 		});
 	}
 
 	@Override
-	public void addEquals(String binding, final String value) {
+	public void addEquals(@Nonnull String binding, final @Nonnull String value) {
 		predicates.add(new MyPredicate<>(binding, "=", value, null, null) {
 			@Override
 			@SuppressWarnings("hiding")
-			boolean evaluate(Object bean, String binding, String value, String start, String end) throws Exception {
+			boolean evaluate(@Nonnull Object bean, @Nonnull String binding, @Nullable String value, @Nullable String start, @Nullable String end) throws Exception {
 				return (value.equals(Binder.get(bean, binding)));
 			}
 		});
 	}
 
 	@Override
-	public void addEquals(String binding, Date value) {
+	public void addEquals(@Nonnull String binding, @Nonnull Date value) {
 		predicates.add(new MyPredicate<>(binding, "=", value, null, null) {
 			@Override
 			@SuppressWarnings("hiding")
-			boolean evaluate(Object bean, String binding, Date value, Date start, Date end) throws Exception {
+			boolean evaluate(@Nonnull Object bean, @Nonnull String binding, @Nullable Date value, @Nullable Date start, @Nullable Date end) throws Exception {
 				return (value.equals(Binder.get(bean, binding)));
 			}
 		});
 	}
 
 	@Override
-	public void addEquals(String binding, Integer value) {
+	public void addEquals(@Nonnull String binding, @Nonnull Integer value) {
 		predicates.add(new MyPredicate<>(binding, "=", value, null, null) {
 			@Override
 			@SuppressWarnings("hiding")
-			boolean evaluate(Object bean, String binding, Integer value, Integer start, Integer end) throws Exception {
+			boolean evaluate(@Nonnull Object bean, @Nonnull String binding, @Nullable Integer value, @Nullable Integer start, @Nullable Integer end) throws Exception {
 				return (value.equals(Binder.get(bean, binding)));
 			}
 		});
 	}
 
 	@Override
-	public void addEquals(String binding, Long value) {
+	public void addEquals(@Nonnull String binding, @Nonnull Long value) {
 		predicates.add(new MyPredicate<>(binding, "=", value, null, null) {
 			@Override
 			@SuppressWarnings("hiding")
-			boolean evaluate(Object bean, String binding, Long value, Long start, Long end) throws Exception {
+			boolean evaluate(@Nonnull Object bean, @Nonnull String binding, @Nullable Long value, @Nullable Long start, @Nullable Long end) throws Exception {
 				return (value.equals(Binder.get(bean, binding)));
 			}
 		});
 	}
 
 	@Override
-	public void addEquals(String binding, Decimal value) {
+	public void addEquals(@Nonnull String binding, @Nonnull Decimal value) {
 		predicates.add(new MyPredicate<>(binding, "=", value, null, null) {
 			@Override
 			@SuppressWarnings("hiding")
-			boolean evaluate(Object bean, String binding, Decimal value, Decimal start, Decimal end) throws Exception {
+			boolean evaluate(@Nonnull Object bean, @Nonnull String binding, @Nullable Decimal value, @Nullable Decimal start, @Nullable Decimal end) throws Exception {
 				return (value.equals(Binder.get(bean, binding)));
 			}
 		});
 	}
 
 	@Override
-	public void addEquals(String binding, Boolean value) {
+	public void addEquals(@Nonnull String binding, @Nonnull Boolean value) {
 		predicates.add(new MyPredicate<>(binding, "=", value, null, null) {
 			@Override
 			@SuppressWarnings("hiding")
-			boolean evaluate(Object bean, String binding, Boolean value, Boolean start, Boolean end) throws Exception {
+			boolean evaluate(@Nonnull Object bean, @Nonnull String binding, @Nullable Boolean value, @Nullable Boolean start, @Nullable Boolean end) throws Exception {
 				return (value.equals(Binder.get(bean, binding)));
 			}
 		});
 	}
 
 	@Override
-	public void addEquals(String binding, Enum<?> value) {
+	public void addEquals(@Nonnull String binding, @Nonnull Enum<?> value) {
 		predicates.add(new MyPredicate<Enum<?>>(binding, "=", value, null, null) {
 			@Override
 			@SuppressWarnings("hiding")
-			boolean evaluate(Object bean, String binding, Enum<?> value, Enum<?> start, Enum<?> end) throws Exception {
+			boolean evaluate(@Nonnull Object bean, @Nonnull String binding, @Nullable Enum<?> value, @Nullable Enum<?> start, @Nullable Enum<?> end) throws Exception {
 				return (value.equals(Binder.convert(value.getClass(), Binder.get(bean, binding))));
 			}
 		});
 	}
 
 	@Override
-	public void addEquals(String binding, Geometry value) {
+	public void addEquals(@Nonnull String binding, @Nonnull Geometry value) {
 		predicates.add(new MyPredicate<>(binding, "=", value, null, null) {
 			@Override
 			@SuppressWarnings("hiding")
-			boolean evaluate(Object bean, String binding, Geometry value, Geometry start, Geometry end) throws Exception {
+			boolean evaluate(@Nonnull Object bean, @Nonnull String binding, @Nullable Geometry value, @Nullable Geometry start, @Nullable Geometry end) throws Exception {
 				return (value.equals(Binder.convert(Geometry.class, Binder.get(bean, binding))));
 			}
 		});
 	}
 
 	@Override
-	public void addNotEquals(String binding, String value) {
+	public void addNotEquals(@Nonnull String binding, @Nonnull String value) {
 		predicates.add(new MyPredicate<>(binding, "!=", value, null, null) {
 			@Override
 			@SuppressWarnings("hiding")
-			boolean evaluate(Object bean, String binding, String value, String start, String end) throws Exception {
+			boolean evaluate(@Nonnull Object bean, @Nonnull String binding, @Nullable String value, @Nullable String start, @Nullable String end) throws Exception {
 				return (! value.equals(Binder.get(bean, binding)));
 			}
 		});
 	}
 
 	@Override
-	public void addNotEquals(String binding, Date value) {
+	public void addNotEquals(@Nonnull String binding, @Nonnull Date value) {
 		predicates.add(new MyPredicate<>(binding, "!=", value, null, null) {
 			@Override
 			@SuppressWarnings("hiding")
-			boolean evaluate(Object bean, String binding, Date value, Date start, Date end) throws Exception {
+			boolean evaluate(@Nonnull Object bean, @Nonnull String binding, @Nullable Date value, @Nullable Date start, @Nullable Date end) throws Exception {
 				return (! value.equals(Binder.get(bean, binding)));
 			}
 		});
 	}
 
 	@Override
-	public void addNotEquals(String binding, Integer value) {
+	public void addNotEquals(@Nonnull String binding, @Nonnull Integer value) {
 		predicates.add(new MyPredicate<>(binding, "!=", value, null, null) {
 			@Override
 			@SuppressWarnings("hiding")
-			boolean evaluate(Object bean, String binding, Integer value, Integer start, Integer end) throws Exception {
+			boolean evaluate(@Nonnull Object bean, @Nonnull String binding, @Nullable Integer value, @Nullable Integer start, @Nullable Integer end) throws Exception {
 				return (! value.equals(Binder.get(bean, binding)));
 			}
 		});
 	}
 
 	@Override
-	public void addNotEquals(String binding, Long value) {
+	public void addNotEquals(@Nonnull String binding, @Nonnull Long value) {
 		predicates.add(new MyPredicate<>(binding, "!=", value, null, null) {
 			@Override
 			@SuppressWarnings("hiding")
-			boolean evaluate(Object bean, String binding, Long value, Long start, Long end) throws Exception {
+			boolean evaluate(@Nonnull Object bean, @Nonnull String binding, @Nullable Long value, @Nullable Long start, @Nullable Long end) throws Exception {
 				return (! value.equals(Binder.get(bean, binding)));
 			}
 		});
 	}
 
 	@Override
-	public void addNotEquals(String binding, Decimal value) {
+	public void addNotEquals(@Nonnull String binding, @Nonnull Decimal value) {
 		predicates.add(new MyPredicate<>(binding, "!=", value, null, null) {
 			@Override
 			@SuppressWarnings("hiding")
-			boolean evaluate(Object bean, String binding, Decimal value, Decimal start, Decimal end) throws Exception {
+			boolean evaluate(@Nonnull Object bean, @Nonnull String binding, @Nullable Decimal value, @Nullable Decimal start, @Nullable Decimal end) throws Exception {
 				return (! value.equals(Binder.get(bean, binding)));
 			}
 		});
 	}
 
 	@Override
-	public void addNotEquals(String binding, Boolean value) {
+	public void addNotEquals(@Nonnull String binding, @Nonnull Boolean value) {
 		predicates.add(new MyPredicate<>(binding, "!=", value, null, null) {
 			@Override
 			@SuppressWarnings("hiding")
-			boolean evaluate(Object bean, String binding, Boolean value, Boolean start, Boolean end) throws Exception {
+			boolean evaluate(@Nonnull Object bean, @Nonnull String binding, @Nullable Boolean value, @Nullable Boolean start, @Nullable Boolean end) throws Exception {
 				return (! value.equals(Binder.get(bean, binding)));
 			}
 		});
 	}
 
 	@Override
-	public void addNotEquals(String binding, Enum<?> value) {
+	public void addNotEquals(@Nonnull String binding, @Nonnull Enum<?> value) {
 		predicates.add(new MyPredicate<Enum<?>>(binding, "!=", value, null, null) {
 			@Override
 			@SuppressWarnings("hiding")
-			boolean evaluate(Object bean, String binding, Enum<?> value, Enum<?> start, Enum<?> end) throws Exception {
+			boolean evaluate(@Nonnull Object bean, @Nonnull String binding, @Nullable Enum<?> value, @Nullable Enum<?> start, @Nullable Enum<?> end) throws Exception {
 				return (! value.equals(Binder.convert(value.getClass(), Binder.get(bean, binding))));
 			}
 		});
 	}
 
 	@Override
-	public void addNotEquals(String binding, Geometry value) {
+	public void addNotEquals(@Nonnull String binding, @Nonnull Geometry value) {
 		predicates.add(new MyPredicate<>(binding, "!=", value, null, null) {
 			@Override
 			@SuppressWarnings("hiding")
-			boolean evaluate(Object bean, String binding, Geometry value, Geometry start, Geometry end) throws Exception {
+			boolean evaluate(@Nonnull Object bean, @Nonnull String binding, @Nullable Geometry value, @Nullable Geometry start, @Nullable Geometry end) throws Exception {
 				return (! value.equals(Binder.convert(Geometry.class, Binder.get(bean, binding))));
 			}
 		});
 	}
 
 	@Override
-	public void addEqualsIgnoreCase(String binding, String value) {
+	public void addEqualsIgnoreCase(@Nonnull String binding, @Nonnull String value) {
 		predicates.add(new MyPredicate<>(binding, "equalsIgnoreCase", value, null, null) {
 			@Override
 			@SuppressWarnings("hiding")
-			boolean evaluate(Object bean, String binding, String value, String start, String end) throws Exception {
+			boolean evaluate(@Nonnull Object bean, @Nonnull String binding, @Nullable String value, @Nullable String start, @Nullable String end) throws Exception {
 				return (value.equalsIgnoreCase((String) Binder.get(bean, binding)));
 			}
 		});
 	}
 
 	@Override
-	public void addNotEqualsIgnoreCase(String binding, String value) {
+	public void addNotEqualsIgnoreCase(@Nonnull String binding, @Nonnull String value) {
 		predicates.add(new MyPredicate<>(binding, "! equalsIgnoreCase", value, null, null) {
 			@Override
 			@SuppressWarnings("hiding")
-			boolean evaluate(Object bean, String binding, String value, String start, String end) throws Exception {
+			boolean evaluate(@Nonnull Object bean, @Nonnull String binding, @Nullable String value, @Nullable String start, @Nullable String end) throws Exception {
 				return (! value.equalsIgnoreCase((String) Binder.get(bean, binding)));
 			}
 		});
 	}
 
 	@Override
-	public void addContains(String binding, String value) {
+	public void addContains(@Nonnull String binding, @Nonnull String value) {
 		predicates.add(new MyPredicate<>(binding, "contains", value, null, null) {
 			@Override
 			@SuppressWarnings("hiding")
-			boolean evaluate(Object bean, String binding, String value, String start, String end) throws Exception {
+			boolean evaluate(@Nonnull Object bean, @Nonnull String binding, @Nullable String value, @Nullable String start, @Nullable String end) throws Exception {
 				String beanValue = (String) Binder.get(bean, binding);
 				return ((beanValue != null) && beanValue.toUpperCase().contains(value.toUpperCase()));
 			}
@@ -313,11 +316,11 @@ public class InMemoryFilter implements Filter {
 	}
 
 	@Override
-	public void addNotContains(String binding, String value) {
+	public void addNotContains(@Nonnull String binding, @Nonnull String value) {
 		predicates.add(new MyPredicate<>(binding, "! contains", value, null, null) {
 			@Override
 			@SuppressWarnings("hiding")
-			boolean evaluate(Object bean, String binding, String value, String start, String end) throws Exception {
+			boolean evaluate(@Nonnull Object bean, @Nonnull String binding, @Nullable String value, @Nullable String start, @Nullable String end) throws Exception {
 				String beanValue = (String) Binder.get(bean, binding);
 				return ((beanValue == null) || (! beanValue.toUpperCase().contains(value.toUpperCase())));
 			}
@@ -325,11 +328,11 @@ public class InMemoryFilter implements Filter {
 	}
 
 	@Override
-	public void addStartsWith(String binding, String value) {
+	public void addStartsWith(@Nonnull String binding, @Nonnull String value) {
 		predicates.add(new MyPredicate<>(binding, "startsWith", value, null, null) {
 			@Override
 			@SuppressWarnings("hiding")
-			boolean evaluate(Object bean, String binding, String value, String start, String end) throws Exception {
+			boolean evaluate(@Nonnull Object bean, @Nonnull String binding, @Nullable String value, @Nullable String start, @Nullable String end) throws Exception {
 				String beanValue = (String) Binder.get(bean, binding);
 				return ((beanValue != null) && beanValue.toUpperCase().startsWith(value.toUpperCase()));
 			}
@@ -337,11 +340,11 @@ public class InMemoryFilter implements Filter {
 	}
 
 	@Override
-	public void addNotStartsWith(String binding, String value) {
+	public void addNotStartsWith(@Nonnull String binding, @Nonnull String value) {
 		predicates.add(new MyPredicate<>(binding, "! startsWith", value, null, null) {
 			@Override
 			@SuppressWarnings("hiding")
-			boolean evaluate(Object bean, String binding, String value, String start, String end) throws Exception {
+			boolean evaluate(@Nonnull Object bean, @Nonnull String binding, @Nullable String value, @Nullable String start, @Nullable String end) throws Exception {
 				String beanValue = (String) Binder.get(bean, binding);
 				return ((beanValue == null) || (! beanValue.toUpperCase().startsWith(value.toUpperCase())));
 			}
@@ -349,11 +352,11 @@ public class InMemoryFilter implements Filter {
 	}
 
 	@Override
-	public void addEndsWith(String binding, String value) {
+	public void addEndsWith(@Nonnull String binding, @Nonnull String value) {
 		predicates.add(new MyPredicate<>(binding, "endsWith", value, null, null) {
 			@Override
 			@SuppressWarnings("hiding")
-			boolean evaluate(Object bean, String binding, String value, String start, String end) throws Exception {
+			boolean evaluate(@Nonnull Object bean, @Nonnull String binding, @Nullable String value, @Nullable String start, @Nullable String end) throws Exception {
 				String beanValue = (String) Binder.get(bean, binding);
 				return ((beanValue != null) && beanValue.toUpperCase().endsWith(value.toUpperCase()));
 			}
@@ -361,11 +364,11 @@ public class InMemoryFilter implements Filter {
 	}
 
 	@Override
-	public void addNotEndsWith(String binding, String value) {
+	public void addNotEndsWith(@Nonnull String binding, @Nonnull String value) {
 		predicates.add(new MyPredicate<>(binding, "! endsWith", value, null, null) {
 			@Override
 			@SuppressWarnings("hiding")
-			boolean evaluate(Object bean, String binding, String value, String start, String end) throws Exception {
+			boolean evaluate(@Nonnull Object bean, @Nonnull String binding, @Nullable String value, @Nullable String start, @Nullable String end) throws Exception {
 				String beanValue = (String) Binder.get(bean, binding);
 				return ((beanValue == null) || (! beanValue.toUpperCase().endsWith(value.toUpperCase())));
 			}
@@ -373,11 +376,11 @@ public class InMemoryFilter implements Filter {
 	}
 
 	@Override
-	public void addGreaterThan(String binding, String value) {
+	public void addGreaterThan(@Nonnull String binding, @Nonnull String value) {
 		predicates.add(new MyPredicate<>(binding, ">", value, null, null) {
 			@Override
 			@SuppressWarnings("hiding")
-			boolean evaluate(Object bean, String binding, String value, String start, String end) throws Exception {
+			boolean evaluate(@Nonnull Object bean, @Nonnull String binding, @Nullable String value, @Nullable String start, @Nullable String end) throws Exception {
 				String beanValue = (String) Binder.get(bean, binding);
 				return ((beanValue != null) && beanValue.compareTo(value) > 0);
 			}
@@ -385,11 +388,11 @@ public class InMemoryFilter implements Filter {
 	}
 
 	@Override
-	public void addGreaterThan(String binding, Date value) {
+	public void addGreaterThan(@Nonnull String binding, @Nonnull Date value) {
 		predicates.add(new MyPredicate<>(binding, ">", value, null, null) {
 			@Override
 			@SuppressWarnings("hiding")
-			boolean evaluate(Object bean, String binding, Date value, Date start, Date end) throws Exception {
+			boolean evaluate(@Nonnull Object bean, @Nonnull String binding, @Nullable Date value, @Nullable Date start, @Nullable Date end) throws Exception {
 				Date beanValue = (Date) Binder.get(bean, binding);
 				return ((beanValue != null) && beanValue.compareTo(value) > 0);
 			}
@@ -397,11 +400,11 @@ public class InMemoryFilter implements Filter {
 	}
 
 	@Override
-	public void addGreaterThan(String binding, Integer value) {
+	public void addGreaterThan(@Nonnull String binding, @Nonnull Integer value) {
 		predicates.add(new MyPredicate<>(binding,  ">", value, null, null) {
 			@Override
 			@SuppressWarnings("hiding")
-			boolean evaluate(Object bean, String binding, Integer value, Integer start, Integer end) throws Exception {
+			boolean evaluate(@Nonnull Object bean, @Nonnull String binding, @Nullable Integer value, @Nullable Integer start, @Nullable Integer end) throws Exception {
 				Integer beanValue = (Integer) Binder.get(bean, binding);
 				return ((beanValue != null) && beanValue.compareTo(value) > 0);
 			}
@@ -409,11 +412,11 @@ public class InMemoryFilter implements Filter {
 	}
 
 	@Override
-	public void addGreaterThan(String binding, Long value) {
+	public void addGreaterThan(@Nonnull String binding, @Nonnull Long value) {
 		predicates.add(new MyPredicate<>(binding,  ">", value, null, null) {
 			@Override
 			@SuppressWarnings("hiding")
-			boolean evaluate(Object bean, String binding, Long value, Long start, Long end) throws Exception {
+			boolean evaluate(@Nonnull Object bean, @Nonnull String binding, @Nullable Long value, @Nullable Long start, @Nullable Long end) throws Exception {
 				Long beanValue = (Long) Binder.get(bean, binding);
 				return ((beanValue != null) && beanValue.compareTo(value) > 0);
 			}
@@ -421,11 +424,11 @@ public class InMemoryFilter implements Filter {
 	}
 
 	@Override
-	public void addGreaterThan(String binding, Decimal value) {
+	public void addGreaterThan(@Nonnull String binding, @Nonnull Decimal value) {
 		predicates.add(new MyPredicate<>(binding,  ">", value, null, null) {
 			@Override
 			@SuppressWarnings("hiding")
-			boolean evaluate(Object bean, String binding, Decimal value, Decimal start, Decimal end) throws Exception {
+			boolean evaluate(@Nonnull Object bean, @Nonnull String binding, @Nullable Decimal value, @Nullable Decimal start, @Nullable Decimal end) throws Exception {
 				Decimal beanValue = (Decimal) Binder.get(bean, binding);
 				return ((beanValue != null) && beanValue.compareTo(value) > 0);
 			}
@@ -433,11 +436,11 @@ public class InMemoryFilter implements Filter {
 	}
 
 	@Override
-	public void addGreaterThanOrEqualTo(String binding, String value) {
+	public void addGreaterThanOrEqualTo(@Nonnull String binding, @Nonnull String value) {
 		predicates.add(new MyPredicate<>(binding,  ">=", value, null, null) {
 			@Override
 			@SuppressWarnings("hiding")
-			boolean evaluate(Object bean, String binding, String value, String start, String end) throws Exception {
+			boolean evaluate(@Nonnull Object bean, @Nonnull String binding, @Nullable String value, @Nullable String start, @Nullable String end) throws Exception {
 				String beanValue = (String) Binder.get(bean, binding);
 				return ((beanValue != null) && beanValue.compareTo(value) >= 0);
 			}
@@ -445,11 +448,11 @@ public class InMemoryFilter implements Filter {
 	}
 
 	@Override
-	public void addGreaterThanOrEqualTo(String binding, Date value) {
+	public void addGreaterThanOrEqualTo(@Nonnull String binding, @Nonnull Date value) {
 		predicates.add(new MyPredicate<>(binding, ">=", value, null, null) {
 			@Override
 			@SuppressWarnings("hiding")
-			boolean evaluate(Object bean, String binding, Date value, Date start, Date end) throws Exception {
+			boolean evaluate(@Nonnull Object bean, @Nonnull String binding, @Nullable Date value, @Nullable Date start, @Nullable Date end) throws Exception {
 				Date beanValue = (Date) Binder.get(bean, binding);
 				return ((beanValue != null) && beanValue.compareTo(value) >= 0);
 			}
@@ -457,11 +460,11 @@ public class InMemoryFilter implements Filter {
 	}
 
 	@Override
-	public void addGreaterThanOrEqualTo(String binding, Integer value) {
+	public void addGreaterThanOrEqualTo(@Nonnull String binding, @Nonnull Integer value) {
 		predicates.add(new MyPredicate<>(binding, ">=", value, null, null) {
 			@Override
 			@SuppressWarnings("hiding")
-			boolean evaluate(Object bean, String binding, Integer value, Integer start, Integer end) throws Exception {
+			boolean evaluate(@Nonnull Object bean, @Nonnull String binding, @Nullable Integer value, @Nullable Integer start, @Nullable Integer end) throws Exception {
 				Integer beanValue = (Integer) Binder.get(bean, binding);
 				return ((beanValue != null) && beanValue.compareTo(value) >= 0);
 			}
@@ -469,11 +472,11 @@ public class InMemoryFilter implements Filter {
 	}
 
 	@Override
-	public void addGreaterThanOrEqualTo(String binding, Long value) {
+	public void addGreaterThanOrEqualTo(@Nonnull String binding, @Nonnull Long value) {
 		predicates.add(new MyPredicate<>(binding, ">=", value, null, null) {
 			@Override
 			@SuppressWarnings("hiding")
-			boolean evaluate(Object bean, String binding, Long value, Long start, Long end) throws Exception {
+			boolean evaluate(@Nonnull Object bean, @Nonnull String binding, @Nullable Long value, @Nullable Long start, @Nullable Long end) throws Exception {
 				Long beanValue = (Long) Binder.get(bean, binding);
 				return ((beanValue != null) && beanValue.compareTo(value) >= 0);
 			}
@@ -481,11 +484,11 @@ public class InMemoryFilter implements Filter {
 	}
 
 	@Override
-	public void addGreaterThanOrEqualTo(String binding, Decimal value) {
+	public void addGreaterThanOrEqualTo(@Nonnull String binding, @Nonnull Decimal value) {
 		predicates.add(new MyPredicate<>(binding, ">=", value, null, null) {
 			@Override
 			@SuppressWarnings("hiding")
-			boolean evaluate(Object bean, String binding, Decimal value, Decimal start, Decimal end) throws Exception {
+			boolean evaluate(@Nonnull Object bean, @Nonnull String binding, @Nullable Decimal value, @Nullable Decimal start, @Nullable Decimal end) throws Exception {
 				Decimal beanValue = (Decimal) Binder.get(bean, binding);
 				return ((beanValue != null) && beanValue.compareTo(value) >= 0);
 			}
@@ -493,11 +496,11 @@ public class InMemoryFilter implements Filter {
 	}
 
 	@Override
-	public void addLessThan(String binding, String value) {
+	public void addLessThan(@Nonnull String binding, @Nonnull String value) {
 		predicates.add(new MyPredicate<>(binding, "<", value, null, null) {
 			@Override
 			@SuppressWarnings("hiding")
-			boolean evaluate(Object bean, String binding, String value, String start, String end) throws Exception {
+			boolean evaluate(@Nonnull Object bean, @Nonnull String binding, @Nullable String value, @Nullable String start, @Nullable String end) throws Exception {
 				String beanValue = (String) Binder.get(bean, binding);
 				return ((beanValue != null) && beanValue.compareTo(value) < 0);
 			}
@@ -505,11 +508,11 @@ public class InMemoryFilter implements Filter {
 	}
 
 	@Override
-	public void addLessThan(String binding, Date value) {
+	public void addLessThan(@Nonnull String binding, @Nonnull Date value) {
 		predicates.add(new MyPredicate<>(binding, "<", value, null, null) {
 			@Override
 			@SuppressWarnings("hiding")
-			boolean evaluate(Object bean, String binding, Date value, Date start, Date end) throws Exception {
+			boolean evaluate(@Nonnull Object bean, @Nonnull String binding, @Nullable Date value, @Nullable Date start, @Nullable Date end) throws Exception {
 				Date beanValue = (Date) Binder.get(bean, binding);
 				return ((beanValue != null) && beanValue.compareTo(value) < 0);
 			}
@@ -517,11 +520,11 @@ public class InMemoryFilter implements Filter {
 	}
 
 	@Override
-	public void addLessThan(String binding, Integer value) {
+	public void addLessThan(@Nonnull String binding, @Nonnull Integer value) {
 		predicates.add(new MyPredicate<>(binding, "<", value, null, null) {
 			@Override
 			@SuppressWarnings("hiding")
-			boolean evaluate(Object bean, String binding, Integer value, Integer start, Integer end) throws Exception {
+			boolean evaluate(@Nonnull Object bean, @Nonnull String binding, @Nullable Integer value, @Nullable Integer start, @Nullable Integer end) throws Exception {
 				Integer beanValue = (Integer) Binder.get(bean, binding);
 				return ((beanValue != null) && beanValue.compareTo(value) < 0);
 			}
@@ -529,11 +532,11 @@ public class InMemoryFilter implements Filter {
 	}
 
 	@Override
-	public void addLessThan(String binding, Long value) {
+	public void addLessThan(@Nonnull String binding, @Nonnull Long value) {
 		predicates.add(new MyPredicate<>(binding, "<", value, null, null) {
 			@Override
 			@SuppressWarnings("hiding")
-			boolean evaluate(Object bean, String binding, Long value, Long start, Long end) throws Exception {
+			boolean evaluate(@Nonnull Object bean, @Nonnull String binding, @Nullable Long value, @Nullable Long start, @Nullable Long end) throws Exception {
 				Long beanValue = (Long) Binder.get(bean, binding);
 				return ((beanValue != null) && beanValue.compareTo(value) < 0);
 			}
@@ -541,11 +544,11 @@ public class InMemoryFilter implements Filter {
 	}
 
 	@Override
-	public void addLessThan(String binding, Decimal value) {
+	public void addLessThan(@Nonnull String binding, @Nonnull Decimal value) {
 		predicates.add(new MyPredicate<>(binding, "<", value, null, null) {
 			@Override
 			@SuppressWarnings("hiding")
-			boolean evaluate(Object bean, String binding, Decimal value, Decimal start, Decimal end) throws Exception {
+			boolean evaluate(@Nonnull Object bean, @Nonnull String binding, @Nullable Decimal value, @Nullable Decimal start, @Nullable Decimal end) throws Exception {
 				Decimal beanValue = (Decimal) Binder.get(bean, binding);
 				return ((beanValue != null) && beanValue.compareTo(value) < 0);
 			}
@@ -553,11 +556,11 @@ public class InMemoryFilter implements Filter {
 	}
 
 	@Override
-	public void addLessThanOrEqualTo(String binding, String value) {
+	public void addLessThanOrEqualTo(@Nonnull String binding, @Nonnull String value) {
 		predicates.add(new MyPredicate<>(binding, "<=", value, null, null) {
 			@Override
 			@SuppressWarnings("hiding")
-			boolean evaluate(Object bean, String binding, String value, String start, String end) throws Exception {
+			boolean evaluate(@Nonnull Object bean, @Nonnull String binding, @Nullable String value, @Nullable String start, @Nullable String end) throws Exception {
 				String beanValue = (String) Binder.get(bean, binding);
 				return ((beanValue != null) && beanValue.compareTo(value) <= 0);
 			}
@@ -565,11 +568,11 @@ public class InMemoryFilter implements Filter {
 	}
 
 	@Override
-	public void addLessThanOrEqualTo(String binding, Date value) {
+	public void addLessThanOrEqualTo(@Nonnull String binding, @Nonnull Date value) {
 		predicates.add(new MyPredicate<>(binding, "<=", value, null, null) {
 			@Override
 			@SuppressWarnings("hiding")
-			boolean evaluate(Object bean, String binding, Date value, Date start, Date end) throws Exception {
+			boolean evaluate(@Nonnull Object bean, @Nonnull String binding, @Nullable Date value, @Nullable Date start, @Nullable Date end) throws Exception {
 				Date beanValue = (Date) Binder.get(bean, binding);
 				return ((beanValue != null) && beanValue.compareTo(value) <= 0);
 			}
@@ -577,11 +580,11 @@ public class InMemoryFilter implements Filter {
 	}
 
 	@Override
-	public void addLessThanOrEqualTo(String binding, Integer value) {
+	public void addLessThanOrEqualTo(@Nonnull String binding, @Nonnull Integer value) {
 		predicates.add(new MyPredicate<>(binding, "<=", value, null, null) {
 			@Override
 			@SuppressWarnings("hiding")
-			boolean evaluate(Object bean, String binding, Integer value, Integer start, Integer end) throws Exception {
+			boolean evaluate(@Nonnull Object bean, @Nonnull String binding, @Nullable Integer value, @Nullable Integer start, @Nullable Integer end) throws Exception {
 				Integer beanValue = (Integer) Binder.get(bean, binding);
 				return ((beanValue != null) && beanValue.compareTo(value) <= 0);
 			}
@@ -589,11 +592,11 @@ public class InMemoryFilter implements Filter {
 	}
 
 	@Override
-	public void addLessThanOrEqualTo(String binding, Long value) {
+	public void addLessThanOrEqualTo(@Nonnull String binding, @Nonnull Long value) {
 		predicates.add(new MyPredicate<>(binding, "<=", value, null, null) {
 			@Override
 			@SuppressWarnings("hiding")
-			boolean evaluate(Object bean, String binding, Long value, Long start, Long end) throws Exception {
+			boolean evaluate(@Nonnull Object bean, @Nonnull String binding, @Nullable Long value, @Nullable Long start, @Nullable Long end) throws Exception {
 				Long beanValue = (Long) Binder.get(bean, binding);
 				return ((beanValue != null) && beanValue.compareTo(value) <= 0);
 			}
@@ -601,11 +604,11 @@ public class InMemoryFilter implements Filter {
 	}
 
 	@Override
-	public void addLessThanOrEqualTo(String binding, Decimal value) {
+	public void addLessThanOrEqualTo(@Nonnull String binding, @Nonnull Decimal value) {
 		predicates.add(new MyPredicate<>(binding, "<=", value, null, null) {
 			@Override
 			@SuppressWarnings("hiding")
-			boolean evaluate(Object bean, String binding, Decimal value, Decimal start, Decimal end) throws Exception {
+			boolean evaluate(@Nonnull Object bean, @Nonnull String binding, @Nullable Decimal value, @Nullable Decimal start, @Nullable Decimal end) throws Exception {
 				Decimal beanValue = (Decimal) Binder.get(bean, binding);
 				return ((beanValue != null) && beanValue.compareTo(value) <= 0);
 			}
@@ -613,11 +616,11 @@ public class InMemoryFilter implements Filter {
 	}
 
 	@Override
-	public void addBetween(String binding, String start, String end) {
+	public void addBetween(@Nonnull String binding, @Nonnull String start, @Nonnull String end) {
 		predicates.add(new MyPredicate<>(binding, BETWEEN_OPERATOR, null, start, end) {
 			@Override
 			@SuppressWarnings("hiding")
-			boolean evaluate(Object bean, String binding, String value, String start, String end) throws Exception {
+			boolean evaluate(@Nonnull Object bean, @Nonnull String binding, @Nullable String value, @Nullable String start, @Nullable String end) throws Exception {
 				String beanValue = (String) Binder.get(bean, binding);
 				if (beanValue == null) {
 					return false;
@@ -629,11 +632,11 @@ public class InMemoryFilter implements Filter {
 	}
 
 	@Override
-	public void addBetween(String binding, Date start, Date end) {
+	public void addBetween(@Nonnull String binding, @Nonnull Date start, @Nonnull Date end) {
 		predicates.add(new MyPredicate<>(binding, BETWEEN_OPERATOR, null, start, end) {
 			@Override
 			@SuppressWarnings("hiding")
-			boolean evaluate(Object bean, String binding, Date value, Date start, Date end) throws Exception {
+			boolean evaluate(@Nonnull Object bean, @Nonnull String binding, @Nullable Date value, @Nullable Date start, @Nullable Date end) throws Exception {
 				Date beanValue = (Date) Binder.get(bean, binding);
 				return ((beanValue != null) && (start.compareTo(beanValue) <= 0) && (end.compareTo(beanValue) >= 0));
 			}
@@ -641,11 +644,11 @@ public class InMemoryFilter implements Filter {
 	}
 
 	@Override
-	public void addBetween(String binding, Integer start, Integer end) {
+	public void addBetween(@Nonnull String binding, @Nonnull Integer start, @Nonnull Integer end) {
 		predicates.add(new MyPredicate<>(binding, BETWEEN_OPERATOR, null, start, end) {
 			@Override
 			@SuppressWarnings("hiding")
-			boolean evaluate(Object bean, String binding, Integer value, Integer start, Integer end) throws Exception {
+			boolean evaluate(@Nonnull Object bean, @Nonnull String binding, @Nullable Integer value, @Nullable Integer start, @Nullable Integer end) throws Exception {
 				Integer beanValue = (Integer) Binder.get(bean, binding);
 				return ((beanValue != null) && (start.compareTo(beanValue) <= 0) && (end.compareTo(beanValue) >= 0));
 			}
@@ -653,11 +656,11 @@ public class InMemoryFilter implements Filter {
 	}
 
 	@Override
-	public void addBetween(String binding, Long start, Long end) {
+	public void addBetween(@Nonnull String binding, @Nonnull Long start, @Nonnull Long end) {
 		predicates.add(new MyPredicate<>(binding, BETWEEN_OPERATOR, null, start, end) {
 			@Override
 			@SuppressWarnings("hiding")
-			boolean evaluate(Object bean, String binding, Long value, Long start, Long end) throws Exception {
+			boolean evaluate(@Nonnull Object bean, @Nonnull String binding, @Nullable Long value, @Nullable Long start, @Nullable Long end) throws Exception {
 				Long beanValue = (Long) Binder.get(bean, binding);
 				return ((beanValue != null) && (start.compareTo(beanValue) <= 0) && (end.compareTo(beanValue) >= 0));
 			}
@@ -665,11 +668,11 @@ public class InMemoryFilter implements Filter {
 	}
 
 	@Override
-	public void addBetween(String binding, Decimal start, Decimal end) {
+	public void addBetween(@Nonnull String binding, @Nonnull Decimal start, @Nonnull Decimal end) {
 		predicates.add(new MyPredicate<>(binding, BETWEEN_OPERATOR, null, start, end) {
 			@Override
 			@SuppressWarnings("hiding")
-			boolean evaluate(Object bean, String binding, Decimal value, Decimal start, Decimal end) throws Exception {
+			boolean evaluate(@Nonnull Object bean, @Nonnull String binding, @Nullable Decimal value, @Nullable Decimal start, @Nullable Decimal end) throws Exception {
 				Decimal beanValue = (Decimal) Binder.get(bean, binding);
 				return ((beanValue != null) && (start.compareTo(beanValue) <= 0) && (end.compareTo(beanValue) >= 0));
 			}
@@ -677,11 +680,11 @@ public class InMemoryFilter implements Filter {
 	}
 
 	@Override
-	public void addIn(String binding, Object... values) {
+	public void addIn(@Nonnull String binding, @Nonnull Object... values) {
 		predicates.add(new MyPredicate<>(binding, "in", values, null, null) {
 			@Override
 			@SuppressWarnings("hiding")
-			boolean evaluate(Object bean, String binding, Object[] values, Object[] start, Object[] end) throws Exception {
+			boolean evaluate(@Nonnull Object bean, @Nonnull String binding, @Nullable Object[] values, @Nullable Object[] start, @Nullable Object[] end) throws Exception {
 				if (values.length > 0) {
 					Object beanValue = Binder.get(bean, binding);
 					if (beanValue != null) {
@@ -698,11 +701,11 @@ public class InMemoryFilter implements Filter {
 	}
 
 	@Override
-	public void addNotIn(String binding, Object... values) {
+	public void addNotIn(@Nonnull String binding, @Nonnull Object... values) {
 		predicates.add(new MyPredicate<>(binding, "not in", values, null, null) {
 			@Override
 			@SuppressWarnings("hiding")
-			boolean evaluate(Object bean, String binding, Object[] values, Object[] start, Object[] end) throws Exception {
+			boolean evaluate(@Nonnull Object bean, @Nonnull String binding, @Nullable Object[] values, @Nullable Object[] start, @Nullable Object[] end) throws Exception {
 				if (values.length > 0) {
 					Object beanValue = Binder.get(bean, binding);
 					if (beanValue != null) {
@@ -719,11 +722,11 @@ public class InMemoryFilter implements Filter {
 	}
 
 	@Override
-	public void addWithin(String binding, Geometry value) {
+	public void addWithin(@Nonnull String binding, @Nonnull Geometry value) {
 		predicates.add(new MyPredicate<>(binding, "within", value, null, null) {
 			@Override
 			@SuppressWarnings("hiding")
-			boolean evaluate(Object bean, String binding, Geometry value, Geometry start, Geometry end) throws Exception {
+			boolean evaluate(@Nonnull Object bean, @Nonnull String binding, @Nullable Geometry value, @Nullable Geometry start, @Nullable Geometry end) throws Exception {
 				Geometry beanValue = (Geometry) Binder.get(bean, binding);
 				return ((beanValue != null) && beanValue.within(value));
 			}
@@ -731,11 +734,11 @@ public class InMemoryFilter implements Filter {
 	}
 
 	@Override
-	public void addContains(String binding, Geometry value) {
+	public void addContains(@Nonnull String binding, @Nonnull Geometry value) {
 		predicates.add(new MyPredicate<>(binding, "contains", value, null, null) {
 			@Override
 			@SuppressWarnings("hiding")
-			boolean evaluate(Object bean, String binding, Geometry value, Geometry start, Geometry end) throws Exception {
+			boolean evaluate(@Nonnull Object bean, @Nonnull String binding, @Nullable Geometry value, @Nullable Geometry start, @Nullable Geometry end) throws Exception {
 				Geometry beanValue = (Geometry) Binder.get(bean, binding);
 				return ((beanValue != null) && beanValue.contains(value));
 			}
@@ -743,11 +746,11 @@ public class InMemoryFilter implements Filter {
 	}
 
 	@Override
-	public void addCrosses(String binding, Geometry value) {
+	public void addCrosses(@Nonnull String binding, @Nonnull Geometry value) {
 		predicates.add(new MyPredicate<>(binding, "crosses", value, null, null) {
 			@Override
 			@SuppressWarnings("hiding")
-			boolean evaluate(Object bean, String binding, Geometry value, Geometry start, Geometry end) throws Exception {
+			boolean evaluate(@Nonnull Object bean, @Nonnull String binding, @Nullable Geometry value, @Nullable Geometry start, @Nullable Geometry end) throws Exception {
 				Geometry beanValue = (Geometry) Binder.get(bean, binding);
 				return ((beanValue != null) && beanValue.crosses(value));
 			}
@@ -755,11 +758,11 @@ public class InMemoryFilter implements Filter {
 	}
 
 	@Override
-	public void addDisjoint(String binding, Geometry value) {
+	public void addDisjoint(@Nonnull String binding, @Nonnull Geometry value) {
 		predicates.add(new MyPredicate<>(binding, "disjoint", value, null, null) {
 			@Override
 			@SuppressWarnings("hiding")
-			boolean evaluate(Object bean, String binding, Geometry value, Geometry start, Geometry end) throws Exception {
+			boolean evaluate(@Nonnull Object bean, @Nonnull String binding, @Nullable Geometry value, @Nullable Geometry start, @Nullable Geometry end) throws Exception {
 				Geometry beanValue = (Geometry) Binder.get(bean, binding);
 				return ((beanValue != null) && beanValue.disjoint(value));
 			}
@@ -767,11 +770,11 @@ public class InMemoryFilter implements Filter {
 	}
 
 	@Override
-	public void addIntersects(String binding, Geometry value) {
+	public void addIntersects(@Nonnull String binding, @Nonnull Geometry value) {
 		predicates.add(new MyPredicate<>(binding, "intersects", value, null, null) {
 			@Override
 			@SuppressWarnings("hiding")
-			boolean evaluate(Object bean, String binding, Geometry value, Geometry start, Geometry end) throws Exception {
+			boolean evaluate(@Nonnull Object bean, @Nonnull String binding, @Nullable Geometry value, @Nullable Geometry start, @Nullable Geometry end) throws Exception {
 				Geometry beanValue = (Geometry) Binder.get(bean, binding);
 				return ((beanValue != null) && beanValue.intersects(value));
 			}
@@ -779,11 +782,11 @@ public class InMemoryFilter implements Filter {
 	}
 
 	@Override
-	public void addOverlaps(String binding, Geometry value) {
+	public void addOverlaps(@Nonnull String binding, @Nonnull Geometry value) {
 		predicates.add(new MyPredicate<>(binding, "overlaps", value, null, null) {
 			@Override
 			@SuppressWarnings("hiding")
-			boolean evaluate(Object bean, String binding, Geometry value, Geometry start, Geometry end) throws Exception {
+			boolean evaluate(@Nonnull Object bean, @Nonnull String binding, @Nullable Geometry value, @Nullable Geometry start, @Nullable Geometry end) throws Exception {
 				Geometry beanValue = (Geometry) Binder.get(bean, binding);
 				return ((beanValue != null) && beanValue.overlaps(value));
 			}
@@ -791,11 +794,11 @@ public class InMemoryFilter implements Filter {
 	}
 
 	@Override
-	public void addTouches(String binding, Geometry value) {
+	public void addTouches(@Nonnull String binding, @Nonnull Geometry value) {
 		predicates.add(new MyPredicate<>(binding, "touches", value, null, null) {
 			@Override
 			@SuppressWarnings("hiding")
-			boolean evaluate(Object bean, String binding, Geometry value, Geometry start, Geometry end) throws Exception {
+			boolean evaluate(@Nonnull Object bean, @Nonnull String binding, @Nullable Geometry value, @Nullable Geometry start, @Nullable Geometry end) throws Exception {
 				Geometry beanValue = (Geometry) Binder.get(bean, binding);
 				return ((beanValue != null) && beanValue.touches(value));
 			}
@@ -807,7 +810,7 @@ public class InMemoryFilter implements Filter {
 		return predicates.isEmpty();
 	}
 	
-	public void filter(List<Bean> rows) {
+	public void filter(@Nonnull List<Bean> rows) {
 		CollectionUtils.filter(rows, PredicateUtils.allPredicate(predicates));
 	}
 }

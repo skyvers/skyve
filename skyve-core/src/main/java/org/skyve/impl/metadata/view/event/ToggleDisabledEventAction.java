@@ -6,6 +6,7 @@ import java.util.Map;
 import org.skyve.impl.metadata.view.widget.bound.AbstractBound;
 import org.skyve.impl.util.XMLMetaData;
 
+import jakarta.annotation.Nonnull;
 import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
@@ -32,7 +33,7 @@ public class ToggleDisabledEventAction extends AbstractBound implements EventAct
 	private Map<String, String> properties = new LinkedHashMap<>();
 
 	@Override
-	public Map<String, String> getProperties() {
+	public @Nonnull Map<String, String> getProperties() {
 		return properties;
 	}
 }

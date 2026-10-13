@@ -4,6 +4,7 @@ import org.skyve.impl.metadata.repository.module.ModuleDocumentMetaData;
 import org.skyve.metadata.module.Module.DocumentRef;
 
 import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 
 /**
  * Builds module-to-document references.
@@ -23,7 +24,7 @@ public class FluentModuleDocument {
 	 *
 	 * @param document The metadata to mutate.
 	 */
-	public FluentModuleDocument(ModuleDocumentMetaData document) {
+	public FluentModuleDocument(@Nonnull ModuleDocumentMetaData document) {
 		this.document = document;
 	}
 
@@ -34,7 +35,7 @@ public class FluentModuleDocument {
 	 * @param ref The source module document reference.
 	 * @return this fluent instance.
 	 */
-	public FluentModuleDocument from(String documentName, DocumentRef ref) {
+	public @Nonnull FluentModuleDocument from(@Nonnull String documentName, @Nonnull DocumentRef ref) {
 		moduleRef(ref.getReferencedModuleName());
 		ref(documentName);
 		defaultQueryName(ref.getDefaultQueryName());
@@ -49,7 +50,7 @@ public class FluentModuleDocument {
 	 * @param moduleName The referenced module name.
 	 * @return this fluent instance.
 	 */
-	public FluentModuleDocument moduleRef(String moduleName) {
+	public @Nonnull FluentModuleDocument moduleRef(@Nullable String moduleName) {
 		document.setModuleRef(moduleName);
 		return this;
 	}
@@ -60,7 +61,7 @@ public class FluentModuleDocument {
 	 * @param documentName The referenced document name.
 	 * @return this fluent instance.
 	 */
-	public FluentModuleDocument ref(String documentName) {
+	public @Nonnull FluentModuleDocument ref(@Nonnull String documentName) {
 		document.setRef(documentName);
 		return this;
 	}
@@ -71,7 +72,7 @@ public class FluentModuleDocument {
 	 * @param queryName The default query name.
 	 * @return this fluent instance.
 	 */
-	public FluentModuleDocument defaultQueryName(String queryName) {
+	public @Nonnull FluentModuleDocument defaultQueryName(@Nullable String queryName) {
 		document.setDefaultQueryName(queryName);
 		return this;
 	}
@@ -94,7 +95,7 @@ public class FluentModuleDocument {
 	 *
 	 * @return The module document metadata instance.
 	 */
-	public ModuleDocumentMetaData get() {
+	public @Nonnull ModuleDocumentMetaData get() {
 		return document;
 	}
 }

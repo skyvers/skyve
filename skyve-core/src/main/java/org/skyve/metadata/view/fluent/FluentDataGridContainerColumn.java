@@ -30,7 +30,7 @@ public class FluentDataGridContainerColumn extends FluentDataGridColumn<FluentDa
 	 * @param column
 	 *            the metadata instance to mutate
 	 */
-	public FluentDataGridContainerColumn(DataGridContainerColumn column) {
+	public FluentDataGridContainerColumn(@Nonnull DataGridContainerColumn column) {
 		this.column = column;
 	}
 
@@ -43,7 +43,7 @@ public class FluentDataGridContainerColumn extends FluentDataGridColumn<FluentDa
 	 * @throws IllegalStateException
 	 *             if an unsupported widget type is encountered
 	 */
-	public FluentDataGridContainerColumn from(@SuppressWarnings("hiding") DataGridContainerColumn column) {
+	public @Nonnull FluentDataGridContainerColumn from(@SuppressWarnings("hiding") @Nonnull DataGridContainerColumn column) {
 		super.from(column);
 
 		for (MetaData widget : column.getWidgets()) {
@@ -80,7 +80,7 @@ public class FluentDataGridContainerColumn extends FluentDataGridColumn<FluentDa
 	 *            the link builder whose widget is appended
 	 * @return this builder
 	 */
-	public FluentDataGridContainerColumn addWidget(FluentLink link) {
+	public @Nonnull FluentDataGridContainerColumn addWidget(@Nonnull FluentLink link) {
 		column.getWidgets().add(link.get());
 		return this;
 	}
@@ -102,7 +102,7 @@ public class FluentDataGridContainerColumn extends FluentDataGridColumn<FluentDa
 	 * @param image the static image builder whose widget is appended
 	 * @return this builder
 	 */
-	public FluentDataGridContainerColumn addWidget(FluentStaticImage image) {
+	public @Nonnull FluentDataGridContainerColumn addWidget(@Nonnull FluentStaticImage image) {
 		column.getWidgets().add(image.get());
 		return this;
 	}
@@ -113,7 +113,7 @@ public class FluentDataGridContainerColumn extends FluentDataGridColumn<FluentDa
 	 * @param image the dynamic image builder whose widget is appended
 	 * @return this builder
 	 */
-	public FluentDataGridContainerColumn addWidget(FluentDynamicImage image) {
+	public @Nonnull FluentDataGridContainerColumn addWidget(@Nonnull FluentDynamicImage image) {
 		column.getWidgets().add(image.get());
 		return this;
 	}
@@ -124,7 +124,7 @@ public class FluentDataGridContainerColumn extends FluentDataGridColumn<FluentDa
 	 * @param blurb the blurb builder whose widget is appended
 	 * @return this builder
 	 */
-	public FluentDataGridContainerColumn addWidget(FluentBlurb blurb) {
+	public @Nonnull FluentDataGridContainerColumn addWidget(@Nonnull FluentBlurb blurb) {
 		column.getWidgets().add(blurb.get());
 		return this;
 	}
@@ -135,7 +135,7 @@ public class FluentDataGridContainerColumn extends FluentDataGridColumn<FluentDa
 	 * @param label the label builder whose widget is appended
 	 * @return this builder
 	 */
-	public FluentDataGridContainerColumn addWidget(FluentLabel label) {
+	public @Nonnull FluentDataGridContainerColumn addWidget(@Nonnull FluentLabel label) {
 		column.getWidgets().add(label.get());
 		return this;
 	}
@@ -146,7 +146,7 @@ public class FluentDataGridContainerColumn extends FluentDataGridColumn<FluentDa
 	 * @return the wrapped container column metadata
 	 */
 	@Override
-	public DataGridContainerColumn get() {
+	public @Nonnull DataGridContainerColumn get() {
 		return column;
 	}
 }

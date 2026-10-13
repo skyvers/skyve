@@ -25,7 +25,7 @@ public class FluentTab extends FluentContainer<FluentTab> {
 	 * @param tab
 	 *            the tab metadata to mutate
 	 */
-	public FluentTab(Tab tab) {
+	public FluentTab(@Nonnull Tab tab) {
 		this.tab = tab;
 	}
 
@@ -38,7 +38,7 @@ public class FluentTab extends FluentContainer<FluentTab> {
 	 *            the source tab metadata
 	 * @return this builder
 	 */
-	public FluentTab from(@SuppressWarnings("hiding") Tab tab) {
+	public @Nonnull FluentTab from(@SuppressWarnings("hiding") @Nonnull Tab tab) {
 		title(tab.getTitle());
 		escapeTitle(tab.getEscapeTitle());
 		icon16x16RelativeFileName(tab.getIcon16x16RelativeFileName());
@@ -58,7 +58,7 @@ public class FluentTab extends FluentContainer<FluentTab> {
 	 *            the caption displayed for this tab
 	 * @return this builder
 	 */
-	public FluentTab title(String title) {
+	public @Nonnull FluentTab title(@Nullable String title) {
 		tab.setTitle(title);
 		return this;
 	}
@@ -69,7 +69,7 @@ public class FluentTab extends FluentContainer<FluentTab> {
 	 * @param escapeTitle {@code false} to allow trusted markup; {@code true} to escape at the renderer boundary
 	 * @return this builder
 	 */
-	public FluentTab escapeTitle(boolean escapeTitle) {
+	public @Nonnull FluentTab escapeTitle(boolean escapeTitle) {
 		return escapeTitle(escapeTitle ? Boolean.TRUE : Boolean.FALSE);
 	}
 
@@ -79,7 +79,7 @@ public class FluentTab extends FluentContainer<FluentTab> {
 	 * @param escapeTitle {@code Boolean.FALSE} to allow trusted markup; {@code null} or {@code Boolean.TRUE} to escape at the renderer boundary
 	 * @return this builder
 	 */
-	public FluentTab escapeTitle(Boolean escapeTitle) {
+	public @Nonnull FluentTab escapeTitle(@Nullable Boolean escapeTitle) {
 		tab.setEscapeTitle(escapeTitle);
 		return this;
 	}
@@ -91,7 +91,7 @@ public class FluentTab extends FluentContainer<FluentTab> {
 	 *            the icon resource path
 	 * @return this builder
 	 */
-	public FluentTab icon16x16RelativeFileName(String icon16x16RelativeFileName) {
+	public @Nonnull FluentTab icon16x16RelativeFileName(@Nullable String icon16x16RelativeFileName) {
 		tab.setIcon16x16RelativeFileName(icon16x16RelativeFileName);
 		return this;
 	}
@@ -103,7 +103,7 @@ public class FluentTab extends FluentContainer<FluentTab> {
 	 *            the icon style class
 	 * @return this builder
 	 */
-	public FluentTab iconStyleClass(String iconStyleClass) {
+	public @Nonnull FluentTab iconStyleClass(@Nullable String iconStyleClass) {
 		tab.setIconStyleClass(iconStyleClass);
 		return this;
 	}
@@ -175,7 +175,7 @@ public class FluentTab extends FluentContainer<FluentTab> {
 	 * @return the mutable tab metadata
 	 */
 	@Override
-	public Tab get() {
+	public @Nonnull Tab get() {
 		return tab;
 	}
 }

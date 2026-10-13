@@ -6,6 +6,9 @@ import java.util.Objects;
 
 import org.apache.commons.text.StringSubstitutor;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Used to replace Strings in a property map with a value defined by a variable.
  */
@@ -18,7 +21,7 @@ public class VariableExpander {
 		this(DEFAULT_DELIMITER);
 	}
 
-	public VariableExpander(String delimiter) {
+	public VariableExpander(@Nullable String delimiter) {
 		this.delimiter = delimiter;
 	}
 
@@ -29,7 +32,7 @@ public class VariableExpander {
 	 *
 	 */
 	@SuppressWarnings("unchecked")
-	public Map<String, Object> expand(Map<String, Object> properties, Map<String, String> variables) {
+	public @Nonnull Map<String, Object> expand(@Nonnull Map<String, Object> properties, @Nullable Map<String, String> variables) {
 		final Map<String, Object> expandedProperties = new HashMap<>();
 		final StringSubstitutor stringSubstitutor = new StringSubstitutor(variables); 
 		stringSubstitutor.setValueDelimiter(delimiter);

@@ -12,6 +12,9 @@ import org.skyve.persistence.BizQL;
 import org.skyve.persistence.DocumentQuery;
 import org.skyve.util.Binder;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Generate the ChartData based on a simple declarative method call chain.
  * The chart is generated from a BizQL or a document query and the values are extracted 
@@ -32,7 +35,7 @@ public class ProjectedChartBuilder {
 	 * @param moduleName
 	 * @param documentName
 	 */
-	public ProjectedChartBuilder with(@SuppressWarnings("hiding") DocumentQuery query) {
+	public @Nonnull ProjectedChartBuilder with(@SuppressWarnings("hiding") @Nonnull DocumentQuery query) {
 		this.query = query;
 		return this;
 	}
@@ -41,7 +44,7 @@ public class ProjectedChartBuilder {
 	 * BizQL Builder.
 	 * @param bizql
 	 */
-	public ProjectedChartBuilder with(@SuppressWarnings("hiding") BizQL bizql) {
+	public @Nonnull ProjectedChartBuilder with(@SuppressWarnings("hiding") @Nonnull BizQL bizql) {
 		this.bizql = bizql;
 		return this;
 	}
@@ -50,7 +53,7 @@ public class ProjectedChartBuilder {
 	 * Set the category data field
 	 * @param alias
 	 */
-	public ProjectedChartBuilder category(String alias) {
+	public @Nonnull ProjectedChartBuilder category(@Nonnull String alias) {
 		categoryAlias = alias;
 		return this;
 	}
@@ -59,7 +62,7 @@ public class ProjectedChartBuilder {
 	 * Set the value data field.
 	 * @param alias
 	 */
-	public ProjectedChartBuilder value(String alias) {
+	public @Nonnull ProjectedChartBuilder value(@Nonnull String alias) {
 		valueAlias = alias;
 		return this;
 	}
@@ -68,7 +71,7 @@ public class ProjectedChartBuilder {
 	 * Add a JFreeChart post processor to this chart.
 	 * @param fullyQualifiedJFreeChartPostProcessorClassName	The postProcessor to add.
 	 */
-	public ProjectedChartBuilder jFreeChartPostProcessorClassName(@SuppressWarnings("hiding") String fullyQualifiedJFreeChartPostProcessorClassName) {
+	public @Nonnull ProjectedChartBuilder jFreeChartPostProcessorClassName(@SuppressWarnings("hiding") @Nullable String fullyQualifiedJFreeChartPostProcessorClassName) {
 		this.fullyQualifiedJFreeChartPostProcessorClassName = fullyQualifiedJFreeChartPostProcessorClassName;
 		return this;
 	}
@@ -77,7 +80,7 @@ public class ProjectedChartBuilder {
 	 * Add a PrimeFaces Chart post processor to this chart.
 	 * @param fullyQualifiedPrimeFacesChartPostProcessorClassName	The postProcessor to add.
 	 */
-	public ProjectedChartBuilder primeFacesChartPostProcessorClassName(@SuppressWarnings("hiding") String fullyQualifiedPrimeFacesChartPostProcessorClassName) {
+	public @Nonnull ProjectedChartBuilder primeFacesChartPostProcessorClassName(@SuppressWarnings("hiding") @Nullable String fullyQualifiedPrimeFacesChartPostProcessorClassName) {
 		this.fullyQualifiedPrimeFacesChartPostProcessorClassName = fullyQualifiedPrimeFacesChartPostProcessorClassName;
 		return this;
 	}
@@ -87,7 +90,7 @@ public class ProjectedChartBuilder {
 	 * @param label	The data set label.
 	 * @return	The ChartData.
 	 */
-	public ChartData build(String label) {
+	public @Nonnull ChartData build(@Nullable String label) {
 		return build(null, label);
 	}
 
@@ -97,7 +100,7 @@ public class ProjectedChartBuilder {
 	 * @param label	The data set label.
 	 * @return	The ChartData.
 	 */
-	public ChartData build(String title, String label) {
+	public @Nonnull ChartData build(@Nullable String title, @Nullable String label) {
 		return build(new RainbowColourSeries(), new RainbowColourSeries(), title, label);
 	}
 	
@@ -108,9 +111,9 @@ public class ProjectedChartBuilder {
 	 * @param label
 	 * @return	The ChartData.
 	 */
-	public ChartData build(ColourSeries backgroundColours,
-							ColourSeries borderColours,
-							String label) {
+	public @Nonnull ChartData build(@Nonnull ColourSeries backgroundColours,
+							@Nonnull ColourSeries borderColours,
+							@Nullable String label) {
 		return build(backgroundColours, borderColours, null, label);
 	}
 	
@@ -122,10 +125,10 @@ public class ProjectedChartBuilder {
 	 * @param label
 	 * @return	The ChartData.
 	 */
-	public ChartData build(ColourSeries backgroundColours,
-							ColourSeries borderColours,
-							String title,
-							String label) {
+	public @Nonnull ChartData build(@Nonnull ColourSeries backgroundColours,
+							@Nonnull ColourSeries borderColours,
+							@Nullable String title,
+							@Nullable String label) {
 		List<Bean> data = query();
 		backgroundColours.setSize(data.size());
 		borderColours.setSize(data.size());
@@ -146,7 +149,7 @@ public class ProjectedChartBuilder {
 		return result;
 	}
 	
-	private List<Bean> query() {
+	private @Nullable List<Bean> query() {
 		List<Bean> result = null;
 		if (query != null) {
 			result = query.projectedResults();

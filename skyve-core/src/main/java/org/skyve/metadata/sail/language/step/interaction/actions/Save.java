@@ -5,6 +5,8 @@ import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.controller.ImplicitActionName;
 import org.skyve.metadata.sail.execution.Executor;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
@@ -31,7 +33,7 @@ public class Save extends AbstractAction {
 	 * Returns the createView.
 	 * @return the result
 	 */
-	public Boolean getCreateView() {
+	public @Nullable Boolean getCreateView() {
 		return createView;
 	}
 	
@@ -40,7 +42,7 @@ public class Save extends AbstractAction {
 	 * @param createView the createView
 	 */
 	@XmlAttribute(name = "createView")
-	public void setCreateView(Boolean createView) {
+	public void setCreateView(@Nullable Boolean createView) {
 		this.createView = createView;
 	}
 
@@ -49,7 +51,7 @@ public class Save extends AbstractAction {
 	 * @param executor the executor
 	 */
 	@Override
-	public void execute(Executor executor) {
+	public void execute(@Nonnull Executor executor) {
 		executor.executeSave(this);
 	}
 	
@@ -59,7 +61,7 @@ public class Save extends AbstractAction {
 	 * @return the result
 	 */
 	@Override
-	public String getIdentifier(AutomationContext context) {
+	public @Nonnull String getIdentifier(@Nonnull AutomationContext context) {
 		return ImplicitActionName.Save.toString();
 	}
 }

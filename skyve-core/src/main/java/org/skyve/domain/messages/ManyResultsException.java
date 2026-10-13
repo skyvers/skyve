@@ -3,6 +3,8 @@ package org.skyve.domain.messages;
 import java.util.Collections;
 import java.util.List;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * Thrown by query methods that expect exactly one result but find more than one.
  *
@@ -31,7 +33,7 @@ public class ManyResultsException extends DomainException implements MessageExce
 	 * @return the result
 	 */
 	@Override
-	public List<Message> getMessages() {
+	public @Nonnull List<Message> getMessages() {
 		return messages;
 	}
 }

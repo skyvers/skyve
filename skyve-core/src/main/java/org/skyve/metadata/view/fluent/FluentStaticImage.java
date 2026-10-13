@@ -24,14 +24,14 @@ public class FluentStaticImage extends FluentWidget implements FluentRelativeSiz
 	 *
 	 * @param image the metadata instance to mutate
 	 */
-	public FluentStaticImage(StaticImage image) {
+	public FluentStaticImage(@Nonnull StaticImage image) {
 		this.image = image;
 	}
 	
 	/**
 	 * Copies static-image metadata into this fluent builder.
 	 */
-	public FluentStaticImage from(@SuppressWarnings("hiding") StaticImage image) {
+	public @Nonnull FluentStaticImage from(@SuppressWarnings("hiding") @Nonnull StaticImage image) {
 		relativeFile(image.getRelativeFile());
 		relativeSize(image, this);
 		BindUtil.copyAuthoredCondition(image.getXmlInvisibleCondition(), image.getXmlVisibleCondition(), this::invisibleCondition, this::visibleCondition);
@@ -46,7 +46,7 @@ public class FluentStaticImage extends FluentWidget implements FluentRelativeSiz
 	 * @param relativeFile the relative file path to the image
 	 * @return this builder
 	 */
-	public FluentStaticImage relativeFile(String relativeFile) {
+	public @Nonnull FluentStaticImage relativeFile(@Nullable String relativeFile) {
 		image.setRelativeFile(relativeFile);
 		return this;
 	}
@@ -58,7 +58,7 @@ public class FluentStaticImage extends FluentWidget implements FluentRelativeSiz
 	 * @return this builder
 	 */
 	@Override
-	public FluentStaticImage pixelWidth(int pixelWidth) {
+	public @Nonnull FluentStaticImage pixelWidth(int pixelWidth) {
 		image.setPixelWidth(Integer.valueOf(pixelWidth));
 		return this;
 	}
@@ -70,7 +70,7 @@ public class FluentStaticImage extends FluentWidget implements FluentRelativeSiz
 	 * @return this builder
 	 */
 	@Override
-	public FluentStaticImage responsiveWidth(int responsiveWidth) {
+	public @Nonnull FluentStaticImage responsiveWidth(int responsiveWidth) {
 		image.setResponsiveWidth(Integer.valueOf(responsiveWidth));
 		return this;
 	}
@@ -82,7 +82,7 @@ public class FluentStaticImage extends FluentWidget implements FluentRelativeSiz
 	 * @return this builder
 	 */
 	@Override
-	public FluentStaticImage sm(int sm) {
+	public @Nonnull FluentStaticImage sm(int sm) {
 		image.setSm(Integer.valueOf(sm));
 		return this;
 	}
@@ -94,7 +94,7 @@ public class FluentStaticImage extends FluentWidget implements FluentRelativeSiz
 	 * @return this builder
 	 */
 	@Override
-	public FluentStaticImage md(int md) {
+	public @Nonnull FluentStaticImage md(int md) {
 		image.setMd(Integer.valueOf(md));
 		return this;
 	}
@@ -106,7 +106,7 @@ public class FluentStaticImage extends FluentWidget implements FluentRelativeSiz
 	 * @return this builder
 	 */
 	@Override
-	public FluentStaticImage lg(int lg) {
+	public @Nonnull FluentStaticImage lg(int lg) {
 		image.setLg(Integer.valueOf(lg));
 		return this;
 	}
@@ -118,7 +118,7 @@ public class FluentStaticImage extends FluentWidget implements FluentRelativeSiz
 	 * @return this builder
 	 */
 	@Override
-	public FluentStaticImage xl(int xl) {
+	public @Nonnull FluentStaticImage xl(int xl) {
 		image.setXl(Integer.valueOf(xl));
 		return this;
 	}
@@ -130,7 +130,7 @@ public class FluentStaticImage extends FluentWidget implements FluentRelativeSiz
 	 * @return this builder
 	 */
 	@Override
-	public FluentStaticImage percentageWidth(int percentageWidth) {
+	public @Nonnull FluentStaticImage percentageWidth(int percentageWidth) {
 		image.setPercentageWidth(Integer.valueOf(percentageWidth));
 		return this;
 	}
@@ -142,7 +142,7 @@ public class FluentStaticImage extends FluentWidget implements FluentRelativeSiz
 	 * @return this builder
 	 */
 	@Override
-	public FluentStaticImage minPixelWidth(int minPixelWidth) {
+	public @Nonnull FluentStaticImage minPixelWidth(int minPixelWidth) {
 		image.setMinPixelWidth(Integer.valueOf(minPixelWidth));
 		return this;
 	}
@@ -154,7 +154,7 @@ public class FluentStaticImage extends FluentWidget implements FluentRelativeSiz
 	 * @return this builder
 	 */
 	@Override
-	public FluentStaticImage maxPixelWidth(int maxPixelWidth) {
+	public @Nonnull FluentStaticImage maxPixelWidth(int maxPixelWidth) {
 		image.setMaxPixelWidth(Integer.valueOf(maxPixelWidth));
 		return this;
 	}
@@ -166,7 +166,7 @@ public class FluentStaticImage extends FluentWidget implements FluentRelativeSiz
 	 * @return this builder
 	 */
 	@Override
-	public FluentStaticImage pixelHeight(int pixelHeight) {
+	public @Nonnull FluentStaticImage pixelHeight(int pixelHeight) {
 		image.setPixelHeight(Integer.valueOf(pixelHeight));
 		return this;
 	}
@@ -178,7 +178,7 @@ public class FluentStaticImage extends FluentWidget implements FluentRelativeSiz
 	 * @return this builder
 	 */
 	@Override
-	public FluentStaticImage percentageHeight(int percentageHeight) {
+	public @Nonnull FluentStaticImage percentageHeight(int percentageHeight) {
 		image.setPercentageHeight(Integer.valueOf(percentageHeight));
 		return this;
 	}
@@ -190,7 +190,7 @@ public class FluentStaticImage extends FluentWidget implements FluentRelativeSiz
 	 * @return this builder
 	 */
 	@Override
-	public FluentStaticImage minPixelHeight(int minPixelHeight) {
+	public @Nonnull FluentStaticImage minPixelHeight(int minPixelHeight) {
 		image.setMinPixelHeight(Integer.valueOf(minPixelHeight));
 		return this;
 	}
@@ -202,7 +202,7 @@ public class FluentStaticImage extends FluentWidget implements FluentRelativeSiz
 	 * @return this builder
 	 */
 	@Override
-	public FluentStaticImage maxPixelHeight(int maxPixelHeight) {
+	public @Nonnull FluentStaticImage maxPixelHeight(int maxPixelHeight) {
 		image.setMaxPixelHeight(Integer.valueOf(maxPixelHeight));
 		return this;
 	}
@@ -250,7 +250,7 @@ public class FluentStaticImage extends FluentWidget implements FluentRelativeSiz
 	 * @return the mutable static-image metadata being configured
 	 */
 	@Override
-	public StaticImage get() {
+	public @Nonnull StaticImage get() {
 		return image;
 	}
 }

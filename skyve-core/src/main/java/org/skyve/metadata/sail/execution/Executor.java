@@ -44,6 +44,8 @@ import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateTree
 import org.skyve.metadata.sail.language.step.interaction.session.Login;
 import org.skyve.metadata.sail.language.step.interaction.session.Logout;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * Visitor over the SAIL language model that drives execution of automation scripts.
  *
@@ -67,256 +69,256 @@ public interface Executor {
 	 * Executes a complete {@link Automation} script, including its before/after procedures
 	 * and all contained {@link Interaction} steps.
 	 */
-	public void executeAutomation(Automation automation);
+	public void executeAutomation(@Nonnull Automation automation);
 
 	/**
 	 * Executes a single named {@link Interaction} within an automation run.
 	 */
-	public void executeInteraction(Interaction interaction);
+	public void executeInteraction(@Nonnull Interaction interaction);
 
 	/**
 	 * Executes executePushListContext.
 	 * @param push the push
 	 */
-	public void executePushListContext(PushListContext push);
+	public void executePushListContext(@Nonnull PushListContext push);
 
 	/**
 	 * Executes executePushEditContext.
 	 * @param push the push
 	 */
-	public void executePushEditContext(PushEditContext push);
+	public void executePushEditContext(@Nonnull PushEditContext push);
 
 	/**
 	 * Executes executePopContext.
 	 * @param pop the pop
 	 */
-	public void executePopContext(PopContext pop);
+	public void executePopContext(@Nonnull PopContext pop);
 
 	/**
 	 * Executes executeClearContext.
 	 * @param clear the clear
 	 */
-	public void executeClearContext(ClearContext clear);
+	public void executeClearContext(@Nonnull ClearContext clear);
 	
 	/**
 	 * Executes executeLogin.
 	 * @param login the login
 	 */
-	public void executeLogin(Login login);
+	public void executeLogin(@Nonnull Login login);
 
 	/**
 	 * Executes executeLogout.
 	 * @param logout the logout
 	 */
-	public void executeLogout(Logout logout);
+	public void executeLogout(@Nonnull Logout logout);
 
 	/**
 	 * Executes executeNavigateList.
 	 * @param list the list
 	 */
-	public void executeNavigateList(NavigateList list);
+	public void executeNavigateList(@Nonnull NavigateList list);
 
 	/**
 	 * Executes executeNavigateEdit.
 	 * @param edit the edit
 	 */
-	public void executeNavigateEdit(NavigateEdit edit);
+	public void executeNavigateEdit(@Nonnull NavigateEdit edit);
 
 	/**
 	 * Executes executeNavigateTree.
 	 * @param tree the tree
 	 */
-	public void executeNavigateTree(NavigateTree tree);
+	public void executeNavigateTree(@Nonnull NavigateTree tree);
 
 	/**
 	 * Executes executeNavigateMap.
 	 * @param map the map
 	 */
-	public void executeNavigateMap(NavigateMap map);
+	public void executeNavigateMap(@Nonnull NavigateMap map);
 
 	/**
 	 * Executes executeNavigateCalendar.
 	 * @param calendar the calendar
 	 */
-	public void executeNavigateCalendar(NavigateCalendar calendar);
+	public void executeNavigateCalendar(@Nonnull NavigateCalendar calendar);
 
 	/**
 	 * Executes executeNavigateLink.
 	 * @param link the link
 	 */
-	public void executeNavigateLink(NavigateLink link);
+	public void executeNavigateLink(@Nonnull NavigateLink link);
 	
 	/**
 	 * Executes executeTabSelect.
 	 * @param tabSelect the tabSelect
 	 */
-	public void executeTabSelect(TabSelect tabSelect);
+	public void executeTabSelect(@Nonnull TabSelect tabSelect);
 
 	/**
 	 * Executes executeTestDataEnter.
 	 * @param testDataEnter the testDataEnter
 	 */
-	public void executeTestDataEnter(TestDataEnter testDataEnter);
+	public void executeTestDataEnter(@Nonnull TestDataEnter testDataEnter);
 
 	/**
 	 * Executes executeDataEnter.
 	 * @param dataEnter the dataEnter
 	 */
-	public void executeDataEnter(DataEnter dataEnter);
+	public void executeDataEnter(@Nonnull DataEnter dataEnter);
 	
 	/**
 	 * Executes executeOk.
 	 * @param ok the ok
 	 */
-	public void executeOk(Ok ok);
+	public void executeOk(@Nonnull Ok ok);
 
 	/**
 	 * Executes executeSave.
 	 * @param save the save
 	 */
-	public void executeSave(Save save);
+	public void executeSave(@Nonnull Save save);
 
 	/**
 	 * Executes executeCancel.
 	 * @param cancel the cancel
 	 */
-	public void executeCancel(Cancel cancel);
+	public void executeCancel(@Nonnull Cancel cancel);
 
 	/**
 	 * Executes executeDelete.
 	 * @param delete the delete
 	 */
-	public void executeDelete(Delete delete);
+	public void executeDelete(@Nonnull Delete delete);
 
 	/**
 	 * Executes executeZoomOut.
 	 * @param zoomOut the zoomOut
 	 */
-	public void executeZoomOut(ZoomOut zoomOut);
+	public void executeZoomOut(@Nonnull ZoomOut zoomOut);
 
 	/**
 	 * Executes executeRemove.
 	 * @param remove the remove
 	 */
-	public void executeRemove(Remove remove);
+	public void executeRemove(@Nonnull Remove remove);
 
 	/**
 	 * Executes executeAction.
 	 * @param action the action
 	 */
-	public void executeAction(Action action);
+	public void executeAction(@Nonnull Action action);
 
 	/**
 	 * Executes executeLookupDescriptionAutoComplete.
 	 * @param complete the complete
 	 */
-	public void executeLookupDescriptionAutoComplete(LookupDescriptionAutoComplete complete);
+	public void executeLookupDescriptionAutoComplete(@Nonnull LookupDescriptionAutoComplete complete);
 
 	/**
 	 * Executes executeLookupDescriptionPick.
 	 * @param pick the pick
 	 */
-	public void executeLookupDescriptionPick(LookupDescriptionPick pick);
+	public void executeLookupDescriptionPick(@Nonnull LookupDescriptionPick pick);
 
 	/**
 	 * Executes executeLookupDescriptionNew.
 	 * @param nu the nu
 	 */
-	public void executeLookupDescriptionNew(LookupDescriptionNew nu);
+	public void executeLookupDescriptionNew(@Nonnull LookupDescriptionNew nu);
 
 	/**
 	 * Executes executeLookupDescriptionEdit.
 	 * @param edit the edit
 	 */
-	public void executeLookupDescriptionEdit(LookupDescriptionEdit edit);
+	public void executeLookupDescriptionEdit(@Nonnull LookupDescriptionEdit edit);
 
 	/**
 	 * Executes executeZoomIn.
 	 * @param zoom the zoom
 	 */
-	public void executeZoomIn(ZoomIn zoom);
+	public void executeZoomIn(@Nonnull ZoomIn zoom);
 	
 	/**
 	 * Executes executeDataGridNew.
 	 * @param nu the nu
 	 */
-	public void executeDataGridNew(DataGridNew nu);
+	public void executeDataGridNew(@Nonnull DataGridNew nu);
 
 	/**
 	 * Executes executeDataGridZoom.
 	 * @param zoom the zoom
 	 */
-	public void executeDataGridZoom(DataGridZoom zoom);
+	public void executeDataGridZoom(@Nonnull DataGridZoom zoom);
 
 	/**
 	 * Executes executeDataGridEdit.
 	 * @param edit the edit
 	 */
-	public void executeDataGridEdit(DataGridEdit edit);
+	public void executeDataGridEdit(@Nonnull DataGridEdit edit);
 
 	/**
 	 * Executes executeDataGridRemove.
 	 * @param remove the remove
 	 */
-	public void executeDataGridRemove(DataGridRemove remove);
+	public void executeDataGridRemove(@Nonnull DataGridRemove remove);
 
 	/**
 	 * Executes executeDataGridSelect.
 	 * @param select the select
 	 */
-	public void executeDataGridSelect(DataGridSelect select);
+	public void executeDataGridSelect(@Nonnull DataGridSelect select);
 	
 	/**
 	 * Executes executeListGridNew.
 	 * @param nu the nu
 	 */
-	public void executeListGridNew(ListGridNew nu);
+	public void executeListGridNew(@Nonnull ListGridNew nu);
 
 	/**
 	 * Executes executeListGridZoom.
 	 * @param zoom the zoom
 	 */
-	public void executeListGridZoom(ListGridZoom zoom);
+	public void executeListGridZoom(@Nonnull ListGridZoom zoom);
 
 	/**
 	 * Executes executeListGridSelect.
 	 * @param select the select
 	 */
-	public void executeListGridSelect(ListGridSelect select);
+	public void executeListGridSelect(@Nonnull ListGridSelect select);
 
 	/**
 	 * Executes executeTestValue.
 	 * @param test the test
 	 */
-	public void executeTestValue(TestValue test);
+	public void executeTestValue(@Nonnull TestValue test);
 
 	/**
 	 * Executes executeTestSuccess.
 	 * @param test the test
 	 */
-	public void executeTestSuccess(TestSuccess test);
+	public void executeTestSuccess(@Nonnull TestSuccess test);
 
 	/**
 	 * Executes executeTestFailure.
 	 * @param test the test
 	 */
-	public void executeTestFailure(TestFailure test);
+	public void executeTestFailure(@Nonnull TestFailure test);
 
 	/**
 	 * Executes executeExecute.
 	 * @param execute the execute
 	 */
-	public void executeExecute(Execute execute);
+	public void executeExecute(@Nonnull Execute execute);
 
 	/**
 	 * Executes executeComment.
 	 * @param comment the comment
 	 */
-	public void executeComment(Comment comment);
+	public void executeComment(@Nonnull Comment comment);
 
 	/**
 	 * Executes executePause.
 	 * @param pause the pause
 	 */
-	public void executePause(Pause pause);
+	public void executePause(@Nonnull Pause pause);
 }

@@ -1,5 +1,7 @@
 package org.skyve.metadata.view.fluent;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * Defines fluent APIs for bounded height constraints.
  *
@@ -14,5 +16,5 @@ interface FluentConstrainableHeight<T extends FluentConstrainableHeight<T>> exte
 	 *            the maximum allowed height in pixels
 	 * @return the fluent builder
 	 */
-	T maxPixelHeight(int maxPixelHeight);
+	@Nonnull T maxPixelHeight(int maxPixelHeight);
 }

@@ -1,5 +1,7 @@
 package org.skyve.cache;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * Configures the conversation snapshot cache.
  *
@@ -53,7 +55,7 @@ public class ConversationCacheConfig extends EHCacheConfig<String, byte[]> {
 	 * @return config details in JSON-like form
 	 */
 	@Override
-	public String toString() {
+	public @Nonnull String toString() {
 		StringBuilder sb = new StringBuilder(128);
 		sb.append("{heapSizeEntries:").append(getHeapSizeEntries());
 		sb.append(",offHeapSizeInMB:").append(getOffHeapSizeInMB());

@@ -18,6 +18,7 @@ import org.skyve.metadata.DecoratedMetaData;
 import org.skyve.metadata.view.Disableable;
 import org.skyve.metadata.view.Invisible;
 
+import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlElement;
@@ -118,7 +119,7 @@ public final class Form implements DecoratedMetaData, Identifiable, RelativeSize
 	 * @return a mutable list of column definitions; never {@code null}
 	 */
 	@XmlElement(namespace = XMLMetaData.VIEW_NAMESPACE, name = "column", required = true)
-	public List<FormColumn> getColumns() {
+	public @Nonnull List<FormColumn> getColumns() {
 		return columns;
 	}
 
@@ -130,7 +131,7 @@ public final class Form implements DecoratedMetaData, Identifiable, RelativeSize
 	 * @return a mutable list of rows; never {@code null}
 	 */
 	@XmlElement(namespace = XMLMetaData.VIEW_NAMESPACE, name = "row", required = true)
-	public List<FormRow> getRows() {
+	public @Nonnull List<FormRow> getRows() {
 		return rows;
 	}
 
@@ -140,7 +141,7 @@ public final class Form implements DecoratedMetaData, Identifiable, RelativeSize
 	 * @return the widget identifier, or {@code null} when not configured
 	 */
 	@Override
-	public String getWidgetId() {
+	public @Nullable String getWidgetId() {
 		return widgetId;
 	}
 
@@ -150,7 +151,7 @@ public final class Form implements DecoratedMetaData, Identifiable, RelativeSize
 	 * @param widgetId  identifier value to store; may be {@code null} or blank
 	 */
 	@XmlAttribute(required = false)
-	public void setWidgetId(String widgetId) {
+	public void setWidgetId(@Nullable String widgetId) {
 		this.widgetId = UtilImpl.processStringValue(widgetId);
 	}
 
@@ -160,7 +161,7 @@ public final class Form implements DecoratedMetaData, Identifiable, RelativeSize
 	 * @return {@code true} when a border is requested, {@code false} when disabled, or {@code null} when unspecified
 	 */
 	@Override
-	public Boolean getBorder() {
+	public @Nullable Boolean getBorder() {
 		return border;
 	}
 
@@ -171,7 +172,7 @@ public final class Form implements DecoratedMetaData, Identifiable, RelativeSize
 	 */
 	@Override
 	@XmlAttribute(required = false)
-	public void setBorder(Boolean border) {
+	public void setBorder(@Nullable Boolean border) {
 		this.border = border;
 	}
 
@@ -181,7 +182,7 @@ public final class Form implements DecoratedMetaData, Identifiable, RelativeSize
 	 * @return border title text, or {@code null} when not configured
 	 */
 	@Override
-	public String getBorderTitle() {
+	public @Nullable String getBorderTitle() {
 		return borderTitle;
 	}
 
@@ -191,7 +192,7 @@ public final class Form implements DecoratedMetaData, Identifiable, RelativeSize
 	 * @return {@code Boolean.FALSE} to allow trusted markup; {@code null} or {@code Boolean.TRUE} to escape at the renderer boundary
 	 */
 	@Override
-	public Boolean getEscapeBorderTitle() {
+	public @Nullable Boolean getEscapeBorderTitle() {
 		return escapeBorderTitle;
 	}
 
@@ -202,7 +203,7 @@ public final class Form implements DecoratedMetaData, Identifiable, RelativeSize
 	 */
 	@Override
 	@XmlAttribute(required = false)
-	public void setBorderTitle(String borderTitle) {
+	public void setBorderTitle(@Nullable String borderTitle) {
 		this.borderTitle = borderTitle;
 	}
 
@@ -213,7 +214,7 @@ public final class Form implements DecoratedMetaData, Identifiable, RelativeSize
 	 */
 	@Override
 	@XmlAttribute(required = false)
-	public void setEscapeBorderTitle(Boolean escapeBorderTitle) {
+	public void setEscapeBorderTitle(@Nullable Boolean escapeBorderTitle) {
 		this.escapeBorderTitle = escapeBorderTitle;
 	}
 
@@ -223,7 +224,7 @@ public final class Form implements DecoratedMetaData, Identifiable, RelativeSize
 	 * @return percentage height, or {@code null} when unset
 	 */
 	@Override
-	public Integer getPercentageHeight() {
+	public @Nullable Integer getPercentageHeight() {
 		return percentageHeight;
 	}
 
@@ -234,7 +235,7 @@ public final class Form implements DecoratedMetaData, Identifiable, RelativeSize
 	 */
 	@Override
 	@XmlAttribute(required = false)
-	public void setPercentageHeight(Integer percentageHeight) {
+	public void setPercentageHeight(@Nullable Integer percentageHeight) {
 		this.percentageHeight = percentageHeight;
 	}
 
@@ -244,7 +245,7 @@ public final class Form implements DecoratedMetaData, Identifiable, RelativeSize
 	 * @return percentage width, or {@code null} when unset
 	 */
 	@Override
-	public Integer getPercentageWidth() {
+	public @Nullable Integer getPercentageWidth() {
 		return percentageWidth;
 	}
 
@@ -255,7 +256,7 @@ public final class Form implements DecoratedMetaData, Identifiable, RelativeSize
 	 */
 	@Override
 	@XmlAttribute(required = false)
-	public void setPercentageWidth(Integer percentageWidth) {
+	public void setPercentageWidth(@Nullable Integer percentageWidth) {
 		this.percentageWidth = percentageWidth;
 	}
 
@@ -265,7 +266,7 @@ public final class Form implements DecoratedMetaData, Identifiable, RelativeSize
 	 * @return pixel height, or {@code null} when unset
 	 */
 	@Override
-	public Integer getPixelHeight() {
+	public @Nullable Integer getPixelHeight() {
 		return pixelHeight;
 	}
 
@@ -276,7 +277,7 @@ public final class Form implements DecoratedMetaData, Identifiable, RelativeSize
 	 */
 	@Override
 	@XmlAttribute(required = false)
-	public void setPixelHeight(Integer pixelHeight) {
+	public void setPixelHeight(@Nullable Integer pixelHeight) {
 		this.pixelHeight = pixelHeight;
 	}
 
@@ -287,7 +288,7 @@ public final class Form implements DecoratedMetaData, Identifiable, RelativeSize
 	 * @return minimum pixel height, or {@code null} when unset
 	 */
 	@Override
-	public Integer getMinPixelHeight() {
+	public @Nullable Integer getMinPixelHeight() {
 		return minPixelHeight;
 	}
 
@@ -298,7 +299,7 @@ public final class Form implements DecoratedMetaData, Identifiable, RelativeSize
 	 */
 	@Override
 	@XmlAttribute(required = false)
-	public void setMinPixelHeight(Integer minPixelHeight) {
+	public void setMinPixelHeight(@Nullable Integer minPixelHeight) {
 		this.minPixelHeight = minPixelHeight;
 	}
 
@@ -308,7 +309,7 @@ public final class Form implements DecoratedMetaData, Identifiable, RelativeSize
 	 * @return maximum pixel height, or {@code null} when unset
 	 */
 	@Override
-	public Integer getMaxPixelHeight() {
+	public @Nullable Integer getMaxPixelHeight() {
 		return maxPixelHeight;
 	}
 
@@ -319,7 +320,7 @@ public final class Form implements DecoratedMetaData, Identifiable, RelativeSize
 	 */
 	@Override
 	@XmlAttribute(required = false)
-	public void setMaxPixelHeight(Integer maxPixelHeight) {
+	public void setMaxPixelHeight(@Nullable Integer maxPixelHeight) {
 		this.maxPixelHeight = maxPixelHeight;
 	}
 
@@ -329,7 +330,7 @@ public final class Form implements DecoratedMetaData, Identifiable, RelativeSize
 	 * @return pixel width, or {@code null} when unset
 	 */
 	@Override
-	public Integer getPixelWidth() {
+	public @Nullable Integer getPixelWidth() {
 		return pixelWidth;
 	}
 
@@ -340,7 +341,7 @@ public final class Form implements DecoratedMetaData, Identifiable, RelativeSize
 	 */
 	@Override
 	@XmlAttribute(required = false)
-	public void setPixelWidth(Integer pixelWidth) {
+	public void setPixelWidth(@Nullable Integer pixelWidth) {
 		this.pixelWidth = pixelWidth;
 	}
 
@@ -350,7 +351,7 @@ public final class Form implements DecoratedMetaData, Identifiable, RelativeSize
 	 * @return responsive width value, or {@code null} when unset
 	 */
 	@Override
-	public Integer getResponsiveWidth() {
+	public @Nullable Integer getResponsiveWidth() {
 		return responsiveWidth;
 	}
 
@@ -361,7 +362,7 @@ public final class Form implements DecoratedMetaData, Identifiable, RelativeSize
 	 */
 	@Override
 	@XmlAttribute(required = false)
-	public void setResponsiveWidth(Integer responsiveWidth) {
+	public void setResponsiveWidth(@Nullable Integer responsiveWidth) {
 		this.responsiveWidth = responsiveWidth;
 	}
 
@@ -371,7 +372,7 @@ public final class Form implements DecoratedMetaData, Identifiable, RelativeSize
 	 * @return small-breakpoint width, or {@code null} when unset
 	 */
 	@Override
-	public Integer getSm() {
+	public @Nullable Integer getSm() {
 		return sm;
 	}
 	
@@ -382,7 +383,7 @@ public final class Form implements DecoratedMetaData, Identifiable, RelativeSize
 	 */
 	@Override
 	@XmlAttribute(required = false)
-	public void setSm(Integer sm) {
+	public void setSm(@Nullable Integer sm) {
 		this.sm = sm;
 	}
 
@@ -392,7 +393,7 @@ public final class Form implements DecoratedMetaData, Identifiable, RelativeSize
 	 * @return medium-breakpoint width, or {@code null} when unset
 	 */
 	@Override
-	public Integer getMd() {
+	public @Nullable Integer getMd() {
 		return md;
 	}
 	
@@ -403,7 +404,7 @@ public final class Form implements DecoratedMetaData, Identifiable, RelativeSize
 	 */
 	@Override
 	@XmlAttribute(required = false)
-	public void setMd(Integer md) {
+	public void setMd(@Nullable Integer md) {
 		this.md = md;
 	}
 	
@@ -413,7 +414,7 @@ public final class Form implements DecoratedMetaData, Identifiable, RelativeSize
 	 * @return large-breakpoint width, or {@code null} when unset
 	 */
 	@Override
-	public Integer getLg() {
+	public @Nullable Integer getLg() {
 		return lg;
 	}
 	
@@ -424,7 +425,7 @@ public final class Form implements DecoratedMetaData, Identifiable, RelativeSize
 	 */
 	@Override
 	@XmlAttribute(required = false)
-	public void setLg(Integer lg) {
+	public void setLg(@Nullable Integer lg) {
 		this.lg = lg;
 	}
 
@@ -434,7 +435,7 @@ public final class Form implements DecoratedMetaData, Identifiable, RelativeSize
 	 * @return extra-large-breakpoint width, or {@code null} when unset
 	 */
 	@Override
-	public Integer getXl() {
+	public @Nullable Integer getXl() {
 		return xl;
 	}
 	
@@ -445,7 +446,7 @@ public final class Form implements DecoratedMetaData, Identifiable, RelativeSize
 	 */
 	@Override
 	@XmlAttribute(required = false)
-	public void setXl(Integer xl) {
+	public void setXl(@Nullable Integer xl) {
 		this.xl = xl;
 	}
 
@@ -455,7 +456,7 @@ public final class Form implements DecoratedMetaData, Identifiable, RelativeSize
 	 * @return minimum pixel width, or {@code null} when unset
 	 */
 	@Override
-	public Integer getMinPixelWidth() {
+	public @Nullable Integer getMinPixelWidth() {
 		return minPixelWidth;
 	}
 
@@ -466,7 +467,7 @@ public final class Form implements DecoratedMetaData, Identifiable, RelativeSize
 	 */
 	@Override
 	@XmlAttribute(required = false)
-	public void setMinPixelWidth(Integer minPixelWidth) {
+	public void setMinPixelWidth(@Nullable Integer minPixelWidth) {
 		this.minPixelWidth = minPixelWidth;
 	}
 
@@ -476,7 +477,7 @@ public final class Form implements DecoratedMetaData, Identifiable, RelativeSize
 	 * @return maximum pixel width, or {@code null} when unset
 	 */
 	@Override
-	public Integer getMaxPixelWidth() {
+	public @Nullable Integer getMaxPixelWidth() {
 		return maxPixelWidth;
 	}
 
@@ -487,7 +488,7 @@ public final class Form implements DecoratedMetaData, Identifiable, RelativeSize
 	 */
 	@Override
 	@XmlAttribute(required = false)
-	public void setMaxPixelWidth(Integer maxPixelWidth) {
+	public void setMaxPixelWidth(@Nullable Integer maxPixelWidth) {
 		this.maxPixelWidth = maxPixelWidth;
 	}
 
@@ -498,7 +499,7 @@ public final class Form implements DecoratedMetaData, Identifiable, RelativeSize
 	 *
 	 * @return the default label alignment, or {@code null} when no override is defined
 	 */
-	public HorizontalAlignment getLabelDefaultHorizontalAlignment() {
+	public @Nullable HorizontalAlignment getLabelDefaultHorizontalAlignment() {
 		return labelDefaultHorizontalAlignment;
 	}
 
@@ -508,7 +509,7 @@ public final class Form implements DecoratedMetaData, Identifiable, RelativeSize
 	 * @param labelDefaultHorizontalAlignment  default label alignment to apply; may be {@code null}
 	 */
 	@XmlAttribute(name = "defaultLabelAlign", required = false)
-	public void setLabelDefaultHorizontalAlignment(HorizontalAlignment labelDefaultHorizontalAlignment) {
+	public void setLabelDefaultHorizontalAlignment(@Nullable HorizontalAlignment labelDefaultHorizontalAlignment) {
 		this.labelDefaultHorizontalAlignment = labelDefaultHorizontalAlignment;
 	}
 	
@@ -517,7 +518,7 @@ public final class Form implements DecoratedMetaData, Identifiable, RelativeSize
 	 *
 	 * @return the collapse mode, or {@code null} when collapsibility is not configured
 	 */
-	public Collapsible getCollapsible() {
+	public @Nullable Collapsible getCollapsible() {
 		return collapsible;
 	}
 
@@ -527,7 +528,7 @@ public final class Form implements DecoratedMetaData, Identifiable, RelativeSize
 	 * @param collapsible  collapse mode to apply; may be {@code null}
 	 */
 	@XmlAttribute(required = false)
-	public void setCollapsible(Collapsible collapsible) {
+	public void setCollapsible(@Nullable Collapsible collapsible) {
 		this.collapsible = collapsible;
 	}
 
@@ -536,7 +537,7 @@ public final class Form implements DecoratedMetaData, Identifiable, RelativeSize
 	 *
 	 * @return the label layout strategy, or {@code null} to use module defaults
 	 */
-	public FormLabelLayout getLabelLayout() {
+	public @Nullable FormLabelLayout getLabelLayout() {
 		return labelLayout;
 	}
 
@@ -546,7 +547,7 @@ public final class Form implements DecoratedMetaData, Identifiable, RelativeSize
 	 * @param labelLayout  label layout strategy to apply; may be {@code null}
 	 */
 	@XmlAttribute(name = "labelLayout", required = false)
-	public void setLabelLayout(FormLabelLayout labelLayout) {
+	public void setLabelLayout(@Nullable FormLabelLayout labelLayout) {
 		this.labelLayout = labelLayout;
 	}
 
@@ -678,7 +679,7 @@ public final class Form implements DecoratedMetaData, Identifiable, RelativeSize
 	 * @return a mutable property map; never {@code null}
 	 */
 	@Override
-	public Map<String, String> getProperties() {
+	public @Nonnull Map<String, String> getProperties() {
 		return properties;
 	}
 }

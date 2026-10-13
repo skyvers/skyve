@@ -2,6 +2,8 @@ package org.skyve.metadata.view.fluent;
 
 import org.skyve.impl.metadata.view.widget.bound.input.FocusableInputWidget;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * Provides fluent operations shared by focus-aware input widget metadata builders.
  *
@@ -19,7 +21,7 @@ public abstract class FluentFocusableInputWidget<T extends FluentFocusableInputW
 	 * Copies shared focus and blur action bindings from the source widget metadata.
 	 */
 	@SuppressWarnings("unchecked")
-	protected T from(FocusableInputWidget input) {
+	protected @Nonnull T from(@Nonnull FocusableInputWidget input) {
 		super.from(input);
 		input.getFocusActions().forEach(a -> addFocusAction(FluentEventAction.from(a)));
 		input.getBlurActions().forEach(a -> addBlurAction(FluentEventAction.from(a)));
@@ -30,7 +32,7 @@ public abstract class FluentFocusableInputWidget<T extends FluentFocusableInputW
 	 * Appends a focus action to the wrapped widget metadata.
 	 */
 	@SuppressWarnings("unchecked")
-	public T addFocusAction(FluentEventAction action) {
+	public @Nonnull T addFocusAction(@Nonnull FluentEventAction action) {
 		get().getFocusActions().add(action.get());
 		return (T) this;
 	}
@@ -39,7 +41,7 @@ public abstract class FluentFocusableInputWidget<T extends FluentFocusableInputW
 	 * Appends a blur action to the wrapped widget metadata.
 	 */
 	@SuppressWarnings("unchecked")
-	public T addBlurAction(FluentEventAction action) {
+	public @Nonnull T addBlurAction(@Nonnull FluentEventAction action) {
 		get().getBlurActions().add(action.get());
 		return (T) this;
 	}
@@ -50,5 +52,5 @@ public abstract class FluentFocusableInputWidget<T extends FluentFocusableInputW
 	 * @return the mutable focusable-input-widget metadata being configured
 	 */
 	@Override
-	public abstract FocusableInputWidget get();
+	public abstract @Nonnull FocusableInputWidget get();
 }

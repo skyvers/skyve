@@ -14,6 +14,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * This class wraps around a {@link PreparedStatement} and allows the programmer
  * to set parameters by name instead of by index. This eliminates any confusion
@@ -57,7 +60,7 @@ public class NamedParameterPreparedStatement implements AutoCloseable {
 	 * @throws SQLException
 	 *             if the statement could not be created
 	 */
-	public NamedParameterPreparedStatement(Connection connection, String query)
+	public NamedParameterPreparedStatement(@Nonnull Connection connection, @Nonnull String query)
 			throws SQLException {
 		String parsedQuery = parse(query);
 		statement = connection.prepareStatement(parsedQuery);
@@ -73,7 +76,7 @@ public class NamedParameterPreparedStatement implements AutoCloseable {
 	 * @return the parsed query
 	 */
 	@SuppressWarnings("java:S3776") // Complexity OK
-	private String parse(String query) {
+	private @Nonnull String parse(@Nonnull String query) {
 		Map<String, List<Integer>> tempMap = new HashMap<>();
 
 		// I was originally using regular expressions, but they didn't work well
@@ -150,7 +153,7 @@ public class NamedParameterPreparedStatement implements AutoCloseable {
 	 * @throws IllegalArgumentException
 	 *             if the parameter does not exist
 	 */
-	private int[] getIndexes(String name) {
+	private @Nonnull int[] getIndexes(@Nonnull String name) {
 		int[] indexes = indexMap.get(name);
 		if (indexes == null) {
 			throw new IllegalArgumentException("Parameter not found: " + name);
@@ -162,7 +165,7 @@ public class NamedParameterPreparedStatement implements AutoCloseable {
 	/**
 	 * Sets a parameter.
 	 */
-	public void setObject(String name, Object value) throws SQLException {
+	public void setObject(@Nonnull String name, @Nullable Object value) throws SQLException {
 		int[] indexes = getIndexes(name);
 		for (int i = 0; i < indexes.length; i++) {
 			statement.setObject(indexes[i], value);
@@ -172,7 +175,7 @@ public class NamedParameterPreparedStatement implements AutoCloseable {
 	/**
 	 * Sets a byte[] parameter.
 	 */
-	public void setBytes(String name, byte[] value) throws SQLException {
+	public void setBytes(@Nonnull String name, @Nullable byte[] value) throws SQLException {
 		int[] indexes = getIndexes(name);
 		for (int i = 0; i < indexes.length; i++) {
 			statement.setBytes(indexes[i], value);
@@ -182,7 +185,7 @@ public class NamedParameterPreparedStatement implements AutoCloseable {
 	/**
 	 * Sets a null parameter.
 	 */
-	public void setNull(String name, int sqlType) throws SQLException {
+	public void setNull(@Nonnull String name, int sqlType) throws SQLException {
 		int[] indexes = getIndexes(name);
 		for (int i = 0; i < indexes.length; i++) {
 			statement.setNull(indexes[i], sqlType);
@@ -192,7 +195,7 @@ public class NamedParameterPreparedStatement implements AutoCloseable {
 	/**
 	 * Sets a parameter.
 	 */
-	public void setString(String name, String value) throws SQLException {
+	public void setString(@Nonnull String name, @Nullable String value) throws SQLException {
 		int[] indexes = getIndexes(name);
 		for (int i = 0; i < indexes.length; i++) {
 			statement.setString(indexes[i], value);
@@ -202,7 +205,7 @@ public class NamedParameterPreparedStatement implements AutoCloseable {
 	/**
 	 * Sets a parameter.
 	 */
-	public void setBoolean(String name, boolean value) throws SQLException {
+	public void setBoolean(@Nonnull String name, boolean value) throws SQLException {
 		int[] indexes = getIndexes(name);
 		for (int i = 0; i < indexes.length; i++) {
 			statement.setBoolean(indexes[i], value);
@@ -212,7 +215,7 @@ public class NamedParameterPreparedStatement implements AutoCloseable {
 	/**
 	 * Sets a parameter.
 	 */
-	public void setInt(String name, int value) throws SQLException {
+	public void setInt(@Nonnull String name, int value) throws SQLException {
 		int[] indexes = getIndexes(name);
 		for (int i = 0; i < indexes.length; i++) {
 			statement.setInt(indexes[i], value);
@@ -222,7 +225,7 @@ public class NamedParameterPreparedStatement implements AutoCloseable {
 	/**
 	 * Sets a parameter.
 	 */
-	public void setLong(String name, long value) throws SQLException {
+	public void setLong(@Nonnull String name, long value) throws SQLException {
 		int[] indexes = getIndexes(name);
 		for (int i = 0; i < indexes.length; i++) {
 			statement.setLong(indexes[i], value);
@@ -232,7 +235,7 @@ public class NamedParameterPreparedStatement implements AutoCloseable {
 	/**
 	 * Sets a parameter.
 	 */
-	public void setTimestamp(String name, Timestamp value) throws SQLException {
+	public void setTimestamp(@Nonnull String name, @Nullable Timestamp value) throws SQLException {
 		int[] indexes = getIndexes(name);
 		for (int i = 0; i < indexes.length; i++) {
 			statement.setTimestamp(indexes[i], value);
@@ -242,7 +245,7 @@ public class NamedParameterPreparedStatement implements AutoCloseable {
 	/**
 	 * Sets a parameter
 	 */
-	public void setDate(String name, Date value) throws SQLException {
+	public void setDate(@Nonnull String name, @Nullable Date value) throws SQLException {
 		int[] indexes = getIndexes(name);
 		for (int i = 0; i < indexes.length; i++) {
 			statement.setDate(indexes[i], value);
@@ -252,7 +255,7 @@ public class NamedParameterPreparedStatement implements AutoCloseable {
 	/**
 	 * Sets a parameter
 	 */
-	public void setTime(String name, Time value) throws SQLException {
+	public void setTime(@Nonnull String name, @Nullable Time value) throws SQLException {
 		int[] indexes = getIndexes(name);
 		for (int i = 0; i < indexes.length; i++) {
 			statement.setTime(indexes[i], value);
@@ -262,7 +265,7 @@ public class NamedParameterPreparedStatement implements AutoCloseable {
 	/**
 	 * Sets a parameter
 	 */
-	public void setBigDecimal(String name, BigDecimal value) throws SQLException {
+	public void setBigDecimal(@Nonnull String name, @Nullable BigDecimal value) throws SQLException {
 		int[] indexes = getIndexes(name);
 		for (int i = 0; i < indexes.length; i++) {
 			statement.setBigDecimal(indexes[i], value);
@@ -274,7 +277,7 @@ public class NamedParameterPreparedStatement implements AutoCloseable {
 	 * 
 	 * @return the statement
 	 */
-	public PreparedStatement getStatement() {
+	public @Nonnull PreparedStatement getStatement() {
 		return statement;
 	}
 
@@ -298,7 +301,7 @@ public class NamedParameterPreparedStatement implements AutoCloseable {
 	 *             if an error occurred
 	 * @see PreparedStatement#executeQuery()
 	 */
-	public ResultSet executeQuery() throws SQLException {
+	public @Nonnull ResultSet executeQuery() throws SQLException {
 		return statement.executeQuery();
 	}
 
@@ -347,7 +350,7 @@ public class NamedParameterPreparedStatement implements AutoCloseable {
 	 * @throws SQLException
 	 *             if something went wrong
 	 */
-	public int[] executeBatch() throws SQLException {
+	public @Nonnull int[] executeBatch() throws SQLException {
 		return statement.executeBatch();
 	}
 	

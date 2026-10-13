@@ -4,6 +4,7 @@ import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.SerializableMetaData;
 
+import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlType;
 
@@ -21,12 +22,12 @@ public class GrantedTo implements SerializableMetaData {
 
 	private String roleName;
 
-	public String getRoleName() {
+	public @Nullable String getRoleName() {
 		return roleName;
 	}
 
 	@XmlAttribute(name = "name", required = true)
-	public void setRoleName(String roleName) {
+	public void setRoleName(@Nullable String roleName) {
 		this.roleName = UtilImpl.processStringValue(roleName);
 	}
 }

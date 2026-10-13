@@ -54,6 +54,7 @@ import org.skyve.domain.types.converters.timestamp.YYYY_MM_DD_HH24_MI_SS;
 import org.skyve.domain.types.converters.timestamp.YYYY_MM_DD_HH_MI_SS;
 import org.skyve.impl.util.XMLMetaData;
 
+import jakarta.annotation.Nonnull;
 import jakarta.xml.bind.annotation.XmlType;
 
 /**
@@ -128,7 +129,7 @@ public enum ConverterName {
                                                                                      Function.identity()));
 
 	private Converter<?> converter;
-	private ConverterName(Converter<?> converter) {
+	private ConverterName(@Nonnull Converter<?> converter) {
 		this.converter = converter;
 	}
 
@@ -136,7 +137,7 @@ public enum ConverterName {
 	 * Returns the converter.
 	 * @return the result
 	 */
-	public Converter<?> getConverter() {
+	public @Nonnull Converter<?> getConverter() {
 		return converter;
 	}
 
@@ -146,7 +147,7 @@ public enum ConverterName {
      * @param converter
      * @return
      */
-    public static ConverterName valueOf(Converter<?> converter) {
+    public static @Nonnull ConverterName valueOf(@Nonnull Converter<?> converter) {
 
         if (converter == null || !classToInstanceIndex.containsKey(converter.getClass())) {
 

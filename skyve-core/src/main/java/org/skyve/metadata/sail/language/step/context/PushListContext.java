@@ -7,6 +7,8 @@ import org.skyve.metadata.sail.execution.Executor;
 import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateList;
 import org.skyve.web.UserAgentType;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
@@ -33,7 +35,7 @@ public class PushListContext extends NavigateList {
 	 * Returns the uxui.
 	 * @return the result
 	 */
-	public String getUxui() {
+	public @Nullable String getUxui() {
 		return uxui;
 	}
 	
@@ -42,7 +44,7 @@ public class PushListContext extends NavigateList {
 	 * @param uxui the uxui
 	 */
 	@XmlAttribute(name = "uxui")
-	public void setUxui(String uxui) {
+	public void setUxui(@Nullable String uxui) {
 		this.uxui = UtilImpl.processStringValue(uxui);
 	}
 
@@ -50,7 +52,7 @@ public class PushListContext extends NavigateList {
 	 * Returns the userAgentType.
 	 * @return the result
 	 */
-	public UserAgentType getUserAgentType() {
+	public @Nullable UserAgentType getUserAgentType() {
 		return userAgentType;
 	}
 	
@@ -59,7 +61,7 @@ public class PushListContext extends NavigateList {
 	 * @param userAgentType the userAgentType
 	 */
 	@XmlAttribute(name = "userAgentType")
-	public void setUserAgentType(UserAgentType userAgentType) {
+	public void setUserAgentType(@Nullable UserAgentType userAgentType) {
 		this.userAgentType = userAgentType;
 	}
 	
@@ -68,7 +70,7 @@ public class PushListContext extends NavigateList {
 	 * @param executor the executor
 	 */
 	@Override
-	public void execute(Executor executor) {
+	public void execute(@Nonnull Executor executor) {
 		executor.executePushListContext(this);
 	}
 
@@ -78,7 +80,7 @@ public class PushListContext extends NavigateList {
 	 * @return the result
 	 */
 	@Override
-	public String getIdentifier(AutomationContext context) {
+	public @Nonnull String getIdentifier(@Nonnull AutomationContext context) {
 		return NavigateList.listGridIdentifier(context, getModuleName(), getQueryName(), getDocumentName(), getModelName());
 	}
 }

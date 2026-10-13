@@ -3,6 +3,8 @@ package org.skyve.job;
 import org.skyve.domain.types.Timestamp;
 import org.skyve.metadata.user.User;
 
+import jakarta.annotation.Nullable;
+
 /**
  * Carries the current state snapshot for a scheduled or running job.
  *
@@ -24,7 +26,7 @@ public class JobDescription {
 	 *
 	 * @return Job name
 	 */
-	public String getName() {
+	public @Nullable String getName() {
 		return name;
 	}
 
@@ -33,7 +35,7 @@ public class JobDescription {
 	 *
 	 * @param name Job name
 	 */
-	public void setName(String name) {
+	public void setName(@Nullable String name) {
 		this.name = name;
 	}
 
@@ -60,7 +62,7 @@ public class JobDescription {
 	 *
 	 * @return Job log text
 	 */
-	public String getLogging() {
+	public @Nullable String getLogging() {
 		return logging;
 	}
 
@@ -69,7 +71,7 @@ public class JobDescription {
 	 *
 	 * @param logging Job log text
 	 */
-	public void setLogging(String logging) {
+	public void setLogging(@Nullable String logging) {
 		this.logging = logging;
 	}
 
@@ -78,7 +80,7 @@ public class JobDescription {
 	 *
 	 * @return Job status value
 	 */
-	public JobStatus getStatus() {
+	public @Nullable JobStatus getStatus() {
 		return status;
 	}
 
@@ -87,7 +89,7 @@ public class JobDescription {
 	 *
 	 * @param status Job status value
 	 */
-	public void setStatus(JobStatus status) {
+	public void setStatus(@Nullable JobStatus status) {
 		this.status = status;
 	}
 
@@ -96,7 +98,7 @@ public class JobDescription {
 	 *
 	 * @return End timestamp, or {@code null} while running
 	 */
-	public Timestamp getEndTime() {
+	public @Nullable Timestamp getEndTime() {
 		return endTime;
 	}
 
@@ -105,7 +107,7 @@ public class JobDescription {
 	 *
 	 * @param endTime End timestamp
 	 */
-	public void setEndTime(Timestamp endTime) {
+	public void setEndTime(@Nullable Timestamp endTime) {
 		this.endTime = endTime;
 	}
 
@@ -114,7 +116,7 @@ public class JobDescription {
 	 *
 	 * @return Start timestamp
 	 */
-	public Timestamp getStartTime() {
+	public @Nullable Timestamp getStartTime() {
 		return startTime;
 	}
 
@@ -123,7 +125,7 @@ public class JobDescription {
 	 *
 	 * @param startTime Start timestamp
 	 */
-	public void setStartTime(Timestamp startTime) {
+	public void setStartTime(@Nullable Timestamp startTime) {
 		this.startTime = startTime;
 	}
 	
@@ -132,7 +134,7 @@ public class JobDescription {
 	 *
 	 * @return Job user context
 	 */
-	public User getUser() {
+	public @Nullable User getUser() {
 		return user;
 	}
 	
@@ -141,7 +143,7 @@ public class JobDescription {
 	 *
 	 * @param user Job user context
 	 */
-	public void setUser(User user) {
+	public void setUser(@Nullable User user) {
 		this.user = user;
 	}
 
@@ -150,7 +152,7 @@ public class JobDescription {
 	 *
 	 * @return Instance identifier
 	 */
-	public String getInstanceId() {
+	public @Nullable String getInstanceId() {
 		return instanceId;
 	}
 
@@ -159,7 +161,7 @@ public class JobDescription {
 	 *
 	 * @param instanceId Instance identifier
 	 */
-	public void setInstanceId(String instanceId) {
+	public void setInstanceId(@Nullable String instanceId) {
 		this.instanceId = instanceId;
 	}
 }

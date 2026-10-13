@@ -2,6 +2,8 @@ package org.skyve.metadata;
 
 import java.util.Map;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * Metadata that supports arbitrary key-value property extensions.
  *
@@ -25,5 +27,5 @@ public interface DecoratedMetaData extends SerializableMetaData {
 	 *
 	 * @return a map of property name to value; never {@code null}, may be empty
 	 */
-	public Map<String, String> getProperties();
+	public @Nonnull Map<String, String> getProperties();
 }

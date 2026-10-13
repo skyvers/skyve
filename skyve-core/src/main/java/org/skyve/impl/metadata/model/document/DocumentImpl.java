@@ -73,6 +73,7 @@ import org.skyve.util.logging.Category;
 import org.slf4j.Logger;
 
 import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 
 /**
  * Runtime implementation of the {@link Document} contract, populated from a
@@ -199,7 +200,7 @@ public class DocumentImpl extends ModelImpl implements Document {
 	 */
 	@Override
 	@SuppressWarnings({ "unused", "null" }) // Defensive check against App coders Bizlet.newIntance() returning null
-	public <T extends Bean> T newInstance(User user) throws Exception {
+	public @Nonnull <T extends Bean> T newInstance(@Nonnull User user) throws Exception {
 		Customer customer = user.getCustomer();
 		T result = newInstance(customer);
 		
@@ -250,7 +251,7 @@ public class DocumentImpl extends ModelImpl implements Document {
 	 * @throws ClassNotFoundException if a mapped class cannot be loaded.
 	 */
 	@SuppressWarnings({"unchecked", "java:S3776", "java:S1141"}) // Complexity OK; try-catch is clearer here than multiple ifs and throws is required for Class.forName()
-	public <T extends Bean> Class<T> getBeanClass(@Nonnull Customer customer)
+	public @Nonnull <T extends Bean> Class<T> getBeanClass(@Nonnull Customer customer)
 	throws ClassNotFoundException {
 		if (isDynamic()) {
 			Persistent persistent = getPersistent();
@@ -353,7 +354,7 @@ public class DocumentImpl extends ModelImpl implements Document {
 	 * @throws Exception if class resolution or object construction fails.
 	 */
 	@SuppressWarnings({"java:S3776", "java:S112"}) // Complexity OK; throws Exception in API for app coder convenience
-	public <T extends Bean> T newInstance(Customer customer) throws Exception {
+	public @Nonnull <T extends Bean> T newInstance(@Nonnull Customer customer) throws Exception {
 		T result = null;
 		
 		if (isDynamic()) {
@@ -431,7 +432,7 @@ public class DocumentImpl extends ModelImpl implements Document {
 	/**
 	 * Populates dynamic default values for dynamic attributes on a compiled bean instance.
 	 */
-	public void populateDynamicAttributeDefaults(Customer customer, Bean bean) {
+	public void populateDynamicAttributeDefaults(@Nonnull Customer customer, @Nonnull Bean bean) {
 		Module m = customer.getModule(getOwningModuleName());
 
 		getAllAttributes(customer).forEach(a -> {
@@ -449,7 +450,7 @@ public class DocumentImpl extends ModelImpl implements Document {
 	 * @return the resolved default value, or {@code null} when no default applies.
 	 */
 	@SuppressWarnings("java:S3776") // Complexity OK
-	private static Object dynamicDefaultValue(Attribute attribute, Bean bean) {
+	private static @Nullable Object dynamicDefaultValue(@Nonnull Attribute attribute, @Nonnull Bean bean) {
 		Object result = null;
 		
 		if (attribute instanceof Field field) {
@@ -494,7 +495,7 @@ public class DocumentImpl extends ModelImpl implements Document {
 	 * @return the matching constraint, or {@code null} if it is not defined.
 	 */
 	@Override
-	public UniqueConstraint getUniqueConstraint(String name) {
+	public @Nullable UniqueConstraint getUniqueConstraint(@Nonnull String name) {
 		return (UniqueConstraint) getMetaData(name);
 	}
 
@@ -506,7 +507,7 @@ public class DocumentImpl extends ModelImpl implements Document {
 	 *
 	 * @param constraint the constraint metadata to register.
 	 */
-	public void putUniqueConstraint(UniqueConstraint constraint) {
+	public void putUniqueConstraint(@Nonnull UniqueConstraint constraint) {
 		putMetaData(constraint.getName(), constraint);
 		uniqueConstraints.add(constraint);
 	}
@@ -519,7 +520,7 @@ public class DocumentImpl extends ModelImpl implements Document {
 	 * @return the resolved dynamic image, or {@code null} if none is defined.
 	 */
 	@Override
-	public <T extends Bean> DynamicImage<T> getDynamicImage(Customer customer, String name) {
+	public @Nonnull <T extends Bean> DynamicImage<T> getDynamicImage(@Nullable Customer customer, @Nonnull String name) {
 		DynamicImage<T> result = ProvidedRepositoryFactory.get().getDynamicImage(customer, this, name, true);
 		if (result == null) {
 			throw new MetaDataException(DOCUMENT_PREFIX + getName() + " has no dynamic image defined for " + name);
@@ -533,7 +534,7 @@ public class DocumentImpl extends ModelImpl implements Document {
 	 * @return an unmodifiable list of unique constraints in declaration order.
 	 */
 	@Override
-	public List<UniqueConstraint> getUniqueConstraints() {
+	public @Nonnull List<UniqueConstraint> getUniqueConstraints() {
 		return Collections.unmodifiableList(uniqueConstraints);
 	}
 
@@ -544,7 +545,7 @@ public class DocumentImpl extends ModelImpl implements Document {
 	 * @return the matching reference, or {@code null} if the field is not a reference.
 	 */
 	@Override
-	public Reference getReferenceByName(String referenceName) {
+	public @Nonnull Reference getReferenceByName(@Nonnull String referenceName) {
 		return referencesByFieldNames.get(referenceName);
 	}
 
@@ -558,7 +559,7 @@ public class DocumentImpl extends ModelImpl implements Document {
 	 * @throws IllegalStateException if the relation or its target document is not defined.
 	 */
 	@Override
-	public Document getRelatedDocument(Customer customer, String relationName) {
+	public @Nonnull Document getRelatedDocument(@Nonnull Customer customer, @Nonnull String relationName) {
 		Relation relation = relationsByFieldNames.get(relationName);
 
 		// Find the relation up the document extension hierarchy
@@ -588,7 +589,7 @@ public class DocumentImpl extends ModelImpl implements Document {
 	 * @return the live set view of reference field names.
 	 */
 	@Override
-	public Set<String> getReferenceNames() {
+	public @Nonnull Set<String> getReferenceNames() {
 		return referencesByFieldNames.keySet();
 	}
 
@@ -600,7 +601,7 @@ public class DocumentImpl extends ModelImpl implements Document {
 	 *
 	 * @param relation the relation metadata to register.
 	 */
-	public void putRelation(Relation relation) {
+	public void putRelation(@Nonnull Relation relation) {
 		relationsByFieldNames.put(relation.getName(), relation);
 		if (relation instanceof Reference reference) {
 			referencesByFieldNames.put(reference.getName(), reference);
@@ -614,7 +615,7 @@ public class DocumentImpl extends ModelImpl implements Document {
 	 * @return the parent document name, or {@code null} when this document has no parent.
 	 */
 	@Override
-	public String getParentDocumentName() {
+	public @Nullable String getParentDocumentName() {
 		return parentDocumentName;
 	}
 
@@ -623,7 +624,7 @@ public class DocumentImpl extends ModelImpl implements Document {
 	 *
 	 * @param parentDocumentName the parent document name, or {@code null} for a root document.
 	 */
-	public void setParentDocumentName(String parentDocumentName) {
+	public void setParentDocumentName(@Nullable String parentDocumentName) {
 		this.parentDocumentName = parentDocumentName;
 	}
 	
@@ -633,7 +634,7 @@ public class DocumentImpl extends ModelImpl implements Document {
 	 * @return {@code Boolean.TRUE} to create the index, {@code Boolean.FALSE} to suppress it,
 	 *         or {@code null} to use repository defaults.
 	 */
-	public Boolean getParentDatabaseIndex() {
+	public @Nullable Boolean getParentDatabaseIndex() {
 		return parentDatabaseIndex;
 	}
 
@@ -643,7 +644,7 @@ public class DocumentImpl extends ModelImpl implements Document {
 	 * @param parentDatabaseIndex {@code Boolean.TRUE} to create the index,
 	 *        {@code Boolean.FALSE} to suppress it, or {@code null} to use repository defaults.
 	 */
-	public void setParentDatabaseIndex(Boolean parentDatabaseIndex) {
+	public void setParentDatabaseIndex(@Nullable Boolean parentDatabaseIndex) {
 		this.parentDatabaseIndex = parentDatabaseIndex;
 	}
 
@@ -652,7 +653,7 @@ public class DocumentImpl extends ModelImpl implements Document {
 	 *
 	 * @return the business-key method source, or {@code null} if none is defined.
 	 */
-	public String getBizKeyMethodCode() {
+	public @Nullable String getBizKeyMethodCode() {
 		return bizKeyMethodCode;
 	}
 
@@ -661,7 +662,7 @@ public class DocumentImpl extends ModelImpl implements Document {
 	 *
 	 * @param bizKeyMethodCode the business-key method source.
 	 */
-	public void setBizKeyMethodCode(String bizKeyMethodCode) {
+	public void setBizKeyMethodCode(@Nullable String bizKeyMethodCode) {
 		this.bizKeyMethodCode = bizKeyMethodCode;
 	}
 
@@ -671,7 +672,7 @@ public class DocumentImpl extends ModelImpl implements Document {
 	 * @return the business-key expression, or {@code null} if none is defined.
 	 */
 	@Override
-	public String getBizKeyExpression() {
+	public @Nullable String getBizKeyExpression() {
 		return bizKeyExpression;
 	}
 
@@ -680,7 +681,7 @@ public class DocumentImpl extends ModelImpl implements Document {
 	 *
 	 * @param bizKeyExpression the expression used to derive the business key.
 	 */
-	public void setBizKeyExpression(String bizKeyExpression) {
+	public void setBizKeyExpression(@Nullable String bizKeyExpression) {
 		this.bizKeyExpression = bizKeyExpression;
 	}
 	
@@ -690,7 +691,7 @@ public class DocumentImpl extends ModelImpl implements Document {
 	 * @return the business-key sensitivity.
 	 */
 	@Override
-	public Sensitivity getBizKeySensitity() {
+	public @Nullable Sensitivity getBizKeySensitity() {
 		return bizKeySensitity;
 	}
 
@@ -699,7 +700,7 @@ public class DocumentImpl extends ModelImpl implements Document {
 	 *
 	 * @param bizKeySensitity the business-key sensitivity.
 	 */
-	public void setBizKeySensitity(Sensitivity bizKeySensitity) {
+	public void setBizKeySensitity(@Nullable Sensitivity bizKeySensitity) {
 		this.bizKeySensitity = bizKeySensitity;
 	}
 
@@ -713,7 +714,7 @@ public class DocumentImpl extends ModelImpl implements Document {
 	 * @param bean the persistent bean whose business key should be updated.
 	 */
 	@Override
-	public void setBizKey(PersistentBean bean) {
+	public void setBizKey(@Nonnull PersistentBean bean) {
 		// Get the bizKey value
 		String bizKey = null;
 		if (isDynamic()) {
@@ -770,7 +771,7 @@ public class DocumentImpl extends ModelImpl implements Document {
 	 *
 	 * @return the live condition map keyed by condition name.
 	 */
-	public Map<String, Condition> getConditions() {
+	public @Nonnull Map<String, Condition> getConditions() {
 		return conditions;
 	}
 
@@ -782,7 +783,7 @@ public class DocumentImpl extends ModelImpl implements Document {
 	 * @return the parent document metadata, or {@code null} when this document has no parent.
 	 */
 	@Override
-	public Document getParentDocument(Customer customer) {
+	public @Nullable Document getParentDocument(@Nullable Customer customer) {
 		Document result = null;
 
 		if (parentDocumentName != null) {
@@ -811,7 +812,7 @@ public class DocumentImpl extends ModelImpl implements Document {
 	 * @return the resolved bizlet, a metadata-only adapter, or {@code null} if no bizlet exists.
 	 */
 	@Override
-	public <T extends Bean> Bizlet<T> getBizlet(Customer customer) {
+	public @Nullable <T extends Bean> Bizlet<T> getBizlet(@Nullable Customer customer) {
 		ProvidedRepository repository = ProvidedRepositoryFactory.get();
 		Bizlet<T> result = repository.getBizlet(customer, this, true);
 		BizletMetaData metaDataBizlet = repository.getMetaDataBizlet(customer, this);
@@ -834,7 +835,7 @@ public class DocumentImpl extends ModelImpl implements Document {
 	 * @return the resolved comparison model, or {@code null} if none is defined.
 	 */
 	@Override
-	public <T extends Bean, C extends Bean> ComparisonModel<T, C> getComparisonModel(Customer customer, String modelName, boolean runtime) {
+	public @Nonnull <T extends Bean, C extends Bean> ComparisonModel<T, C> getComparisonModel(@Nullable Customer customer, @Nonnull String modelName, boolean runtime) {
 		ComparisonModel<T, C> result = ProvidedRepositoryFactory.get().getComparisonModel(customer, this, modelName, runtime);
 		if (result == null) {
 			throw new MetaDataException(DOCUMENT_PREFIX + getName() + " has no comparison model defined for " + modelName);
@@ -851,7 +852,7 @@ public class DocumentImpl extends ModelImpl implements Document {
 	 * @return the resolved map model, or {@code null} if none is defined.
 	 */
 	@Override
-	public <T extends Bean> MapModel<T> getMapModel(Customer customer, String modelName, boolean runtime) {
+	public @Nonnull <T extends Bean> MapModel<T> getMapModel(@Nullable Customer customer, @Nonnull String modelName, boolean runtime) {
 		MapModel<T> result = ProvidedRepositoryFactory.get().getMapModel(customer, this, modelName, runtime);
 		if (result == null) {
 			throw new MetaDataException(DOCUMENT_PREFIX + getName() + " has no map model defined for " + modelName);
@@ -868,7 +869,7 @@ public class DocumentImpl extends ModelImpl implements Document {
 	 * @return the resolved chart model, or {@code null} if none is defined.
 	 */
 	@Override
-	public <T extends Bean> ChartModel<T> getChartModel(Customer customer, String modelName, boolean runtime) {
+	public @Nonnull <T extends Bean> ChartModel<T> getChartModel(@Nullable Customer customer, @Nonnull String modelName, boolean runtime) {
 		ChartModel<T> result = ProvidedRepositoryFactory.get().getChartModel(customer, this, modelName, runtime);
 		if (result == null) {
 			throw new MetaDataException(DOCUMENT_PREFIX + getName() + " has no chart model defined for " + modelName);
@@ -885,7 +886,7 @@ public class DocumentImpl extends ModelImpl implements Document {
 	 * @return the resolved list model, or {@code null} if none is defined.
 	 */
 	@Override
-	public <T extends Bean> ListModel<T> getListModel(Customer customer, String modelName, boolean runtime) {
+	public @Nonnull <T extends Bean> ListModel<T> getListModel(@Nullable Customer customer, @Nonnull String modelName, boolean runtime) {
 		ListModel<T> result = ProvidedRepositoryFactory.get().getListModel(customer, this, modelName, runtime);
 		if (result == null) {
 			throw new MetaDataException(DOCUMENT_PREFIX + getName() + " has no list model defined for " + modelName);
@@ -905,7 +906,7 @@ public class DocumentImpl extends ModelImpl implements Document {
 	 * @return the resolved server-side action, or {@code null} if none is defined.
 	 */
 	@Override
-	public ServerSideAction<Bean> getServerSideAction(Customer customer, String className, boolean runtime) {
+	public @Nonnull ServerSideAction<Bean> getServerSideAction(@Nullable Customer customer, @Nonnull String className, boolean runtime) {
 		ProvidedRepository repository = ProvidedRepositoryFactory.get();
 		ActionMetaData metaDataAction = repository.getMetaDataAction(customer, this, className);
 		if (metaDataAction != null) {
@@ -928,7 +929,7 @@ public class DocumentImpl extends ModelImpl implements Document {
 	 * @return the resolved export action, or {@code null} if none is defined.
 	 */
 	@Override
-	public BizExportAction getBizExportAction(Customer customer, String className, boolean runtime) {
+	public @Nonnull BizExportAction getBizExportAction(@Nullable Customer customer, @Nonnull String className, boolean runtime) {
 		BizExportAction result = ProvidedRepositoryFactory.get().getBizExportAction(customer, this, className, runtime);
 		if (result == null) {
 			throw new MetaDataException(DOCUMENT_PREFIX + getName() + " has no BizPort export action defined for " + className);
@@ -945,7 +946,7 @@ public class DocumentImpl extends ModelImpl implements Document {
 	 * @return the resolved import action, or {@code null} if none is defined.
 	 */
 	@Override
-	public BizImportAction getBizImportAction(Customer customer, String className, boolean runtime) {
+	public @Nonnull BizImportAction getBizImportAction(@Nullable Customer customer, @Nonnull String className, boolean runtime) {
 		BizImportAction result = ProvidedRepositoryFactory.get().getBizImportAction(customer, this, className, runtime);
 		if (result == null) {
 			throw new MetaDataException(DOCUMENT_PREFIX + getName() + " has no BizPort import action defined for " + className);
@@ -962,7 +963,7 @@ public class DocumentImpl extends ModelImpl implements Document {
 	 * @return the resolved download action, or {@code null} if none is defined.
 	 */
 	@Override
-	public DownloadAction<Bean> getDownloadAction(Customer customer, String className, boolean runtime) {
+	public @Nonnull DownloadAction<Bean> getDownloadAction(@Nullable Customer customer, @Nonnull String className, boolean runtime) {
 		DownloadAction<Bean> result = ProvidedRepositoryFactory.get().getDownloadAction(customer, this, className, runtime);
 		if (result == null) {
 			throw new MetaDataException(DOCUMENT_PREFIX + getName() + " has no download action defined for " + className);
@@ -979,7 +980,7 @@ public class DocumentImpl extends ModelImpl implements Document {
 	 * @return the resolved upload action, or {@code null} if none is defined.
 	 */
 	@Override
-	public UploadAction<Bean> getUploadAction(Customer customer, String className, boolean runtime) {
+	public @Nonnull UploadAction<Bean> getUploadAction(@Nullable Customer customer, @Nonnull String className, boolean runtime) {
 		UploadAction<Bean> result = ProvidedRepositoryFactory.get().getUploadAction(customer, this, className, runtime);
 		if (result == null) {
 			throw new MetaDataException(DOCUMENT_PREFIX + getName() + " has no upload action defined for " + className);
@@ -1003,10 +1004,10 @@ public class DocumentImpl extends ModelImpl implements Document {
 	 * @throws MetaDataException if bizlet or query-based resolution fails.
 	 */
 	@SuppressWarnings("java:S3776") // Complexity OK
-	public <T extends Bean> List<DomainValue> getDomainValues(CustomerImpl customer,
-																DomainType domainType,
-																Attribute attribute,
-																T owningBean,
+	public @Nonnull <T extends Bean> List<DomainValue> getDomainValues(@Nonnull CustomerImpl customer,
+																@Nullable DomainType domainType,
+																@Nonnull Attribute attribute,
+																@Nullable T owningBean,
 																boolean runtime) {
 		List<DomainValue> result = null;
 		
@@ -1079,7 +1080,7 @@ public class DocumentImpl extends ModelImpl implements Document {
 	 * @return the resolved query-backed domain values, an empty list for transient targets,
 	 *         or {@code null} when the attribute is not query-backed.
 	 */
-	private List<DomainValue> useQuery(Customer customer, Attribute attribute) {
+	private @Nullable List<DomainValue> useQuery(@Nonnull Customer customer, @Nonnull Attribute attribute) {
 		List<DomainValue> result = null;
 		
 		if (attribute instanceof Reference reference) {
@@ -1127,7 +1128,7 @@ public class DocumentImpl extends ModelImpl implements Document {
 	 * @return the live set of defined action names.
 	 */
 	@Override
-	public Set<String> getDefinedActionNames() {
+	public @Nonnull Set<String> getDefinedActionNames() {
 		return definedActionNames;
 	}
 
@@ -1137,7 +1138,7 @@ public class DocumentImpl extends ModelImpl implements Document {
 	 * @return the live set view of condition names.
 	 */
 	@Override
-	public Set<String> getConditionNames() {
+	public @Nonnull Set<String> getConditionNames() {
 		return conditions.keySet();
 	}
 
@@ -1148,7 +1149,7 @@ public class DocumentImpl extends ModelImpl implements Document {
 	 * @return the matching condition, or {@code null} if it is not defined.
 	 */
 	@Override
-	public Condition getCondition(String conditionName) {
+	public @Nullable Condition getCondition(@Nonnull String conditionName) {
 		return conditions.get(conditionName);
 	}
 
@@ -1163,7 +1164,7 @@ public class DocumentImpl extends ModelImpl implements Document {
 	 * @return the resolved view, or {@code null} if no suitable view exists.
 	 */
 	@Override
-	public View getView(String uxui, Customer customer, String name) {
+	public @Nonnull View getView(@Nullable String uxui, @Nullable Customer customer, @Nonnull String name) {
 		ProvidedRepository repository = ProvidedRepositoryFactory.get();
 		View view = repository.getView(uxui, customer, this, name);
 		// if we want a create view and there isn't one, get the edit view instead
@@ -1184,7 +1185,7 @@ public class DocumentImpl extends ModelImpl implements Document {
 	 * @return the document documentation, or {@code null} if none is defined.
 	 */
 	@Override
-	public String getDocumentation() {
+	public @Nullable String getDocumentation() {
 		return documentation;
 	}
 
@@ -1195,7 +1196,7 @@ public class DocumentImpl extends ModelImpl implements Document {
 	 *
 	 * @param documentation the documentation text.
 	 */
-	public void setDocumentation(String documentation) {
+	public void setDocumentation(@Nullable String documentation) {
 		this.documentation = UtilImpl.processStringValue(documentation);
 	}
 	
@@ -1205,7 +1206,7 @@ public class DocumentImpl extends ModelImpl implements Document {
 	 * @return the live property map keyed by property name.
 	 */
 	@Override
-	public Map<String, String> getProperties() {
+	public @Nonnull Map<String, String> getProperties() {
 		return properties;
 	}
 	
@@ -1226,7 +1227,7 @@ public class DocumentImpl extends ModelImpl implements Document {
 	 *
 	 * @return the shared business-key attribute metadata.
 	 */
-	public static Text getBizKeyAttribute() {
+	public static @Nonnull Text getBizKeyAttribute() {
 		return bizKeyField;
 	}
 	
@@ -1246,7 +1247,7 @@ public class DocumentImpl extends ModelImpl implements Document {
 	 *
 	 * @return the shared ordinal attribute metadata.
 	 */
-	public static org.skyve.impl.metadata.model.document.field.Integer getBizOrdinalAttribute() {
+	public static @Nonnull org.skyve.impl.metadata.model.document.field.Integer getBizOrdinalAttribute() {
 		return bizOrdinalField;
 	}
 }

@@ -4,6 +4,7 @@ import org.skyve.impl.metadata.repository.module.QueryMetaData;
 import org.skyve.metadata.module.query.QueryDefinition;
 
 import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 
 /**
  * Builds query metadata with fluent setters shared by query definitions and references.
@@ -21,7 +22,7 @@ public abstract class FluentQuery<T extends FluentQuery<T>> {
 	 *
 	 * @param query The source query definition to copy from.
 	 */
-	protected void from(QueryDefinition query) {
+	protected void from(@Nonnull QueryDefinition query) {
 		name(query.getName());
 	}
 
@@ -32,7 +33,7 @@ public abstract class FluentQuery<T extends FluentQuery<T>> {
 	 * @return this fluent instance.
 	 */
 	@SuppressWarnings("unchecked")
-	public T name(String name) {
+	public @Nonnull T name(@Nullable String name) {
 		get().setName(name);
 		return (T) this;
 	}
@@ -56,5 +57,5 @@ public abstract class FluentQuery<T extends FluentQuery<T>> {
 	 *
 	 * @return The backing metadata instance.
 	 */
-	public abstract QueryMetaData get();
+	public abstract @Nonnull QueryMetaData get();
 }

@@ -10,6 +10,8 @@ import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.model.document.UniqueConstraint;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlElementWrapper;
@@ -38,7 +40,7 @@ public class UniqueConstraintImpl implements UniqueConstraint {
 	 * @return Returns the name.
 	 */
 	@Override
-	public String getName() {
+	public @Nullable String getName() {
 		return name;
 	}
 
@@ -46,27 +48,27 @@ public class UniqueConstraintImpl implements UniqueConstraint {
 	 * @param name The name to set.
 	 */
 	@XmlAttribute(name = "name", required = true)
-	public void setName(String name) {
+	public void setName(@Nullable String name) {
 		this.name = UtilImpl.processStringValue(name);
 	}
 
 	@Override
-	public DocumentScope getScope() {
+	public @Nullable DocumentScope getScope() {
 		return scope;
 	}
 
 	@XmlTransient // not used in collection unique constraints
-	public void setScope(DocumentScope scope) {
+	public void setScope(@Nullable DocumentScope scope) {
 		this.scope = scope;
 	}
 
 	@Override
-	public String getDescription() {
+	public @Nullable String getDescription() {
 		return description;
 	}
 
 	@XmlAttribute
-	public void setDescription(String description) {
+	public void setDescription(@Nullable String description) {
 		this.description = UtilImpl.processStringValue(description);
 	}
 
@@ -74,7 +76,7 @@ public class UniqueConstraintImpl implements UniqueConstraint {
 	 * @return Returns the message.
 	 */
 	@Override
-	public String getMessage() {
+	public @Nullable String getMessage() {
 		return message;
 	}
 
@@ -83,7 +85,7 @@ public class UniqueConstraintImpl implements UniqueConstraint {
 	 */
 	@XmlElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE, name = "message", required = true)
 	@XmlJavaTypeAdapter(CDATAAdapter.class)
-	public void setMessage(String message) {
+	public void setMessage(@Nullable String message) {
 		this.message = UtilImpl.processStringValue(message);
 	}
 
@@ -93,12 +95,12 @@ public class UniqueConstraintImpl implements UniqueConstraint {
 	@Override
 	@XmlElementWrapper(namespace = XMLMetaData.DOCUMENT_NAMESPACE, name = "fieldReferences")
 	@XmlElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE, name = "ref", required = true)
-	public List<String> getFieldNames() {
+	public @Nonnull List<String> getFieldNames() {
 		return fieldNames;
 	}
 	
 	@Override
-	public Map<String, String> getProperties() {
+	public @Nonnull Map<String, String> getProperties() {
 		return properties;
 	}
 }

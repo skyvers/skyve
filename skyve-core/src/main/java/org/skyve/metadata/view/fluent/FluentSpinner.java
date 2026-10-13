@@ -2,6 +2,8 @@ package org.skyve.metadata.view.fluent;
 
 import org.skyve.impl.metadata.view.widget.bound.input.Spinner;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * Builds {@link Spinner} widget metadata using a fluent API.
  */
@@ -22,7 +24,7 @@ public class FluentSpinner extends FluentTextField {
 	 * @param spinner
 	 *            the metadata instance to mutate
 	 */
-	public FluentSpinner(Spinner spinner) {
+	public FluentSpinner(@Nonnull Spinner spinner) {
 		super(spinner);
 		this.spinner = spinner;
 	}
@@ -34,7 +36,7 @@ public class FluentSpinner extends FluentTextField {
 	 *            the source metadata to copy
 	 * @return this builder
 	 */
-	public FluentSpinner from(@SuppressWarnings("hiding") Spinner spinner) {
+	public @Nonnull FluentSpinner from(@SuppressWarnings("hiding") @Nonnull Spinner spinner) {
 		Double d = spinner.getMin();
 		if (d != null) {
 			min(d.doubleValue());
@@ -58,7 +60,7 @@ public class FluentSpinner extends FluentTextField {
 	 * @param min the minimum value
 	 * @return this builder
 	 */
-	public FluentSpinner min(double min) {
+	public @Nonnull FluentSpinner min(double min) {
 		spinner.setMin(Double.valueOf(min));
 		return this;
 	}
@@ -69,7 +71,7 @@ public class FluentSpinner extends FluentTextField {
 	 * @param max the maximum value
 	 * @return this builder
 	 */
-	public FluentSpinner max(double max) {
+	public @Nonnull FluentSpinner max(double max) {
 		spinner.setMax(Double.valueOf(max));
 		return this;
 	}
@@ -80,7 +82,7 @@ public class FluentSpinner extends FluentTextField {
 	 * @param step the step value
 	 * @return this builder
 	 */
-	public FluentSpinner step(double step) {
+	public @Nonnull FluentSpinner step(double step) {
 		spinner.setStep(Double.valueOf(step));
 		return this;
 	}
@@ -91,7 +93,7 @@ public class FluentSpinner extends FluentTextField {
 	 * @return the wrapped spinner metadata
 	 */
 	@Override
-	public Spinner get() {
+	public @Nonnull Spinner get() {
 		return spinner;
 	}
 }

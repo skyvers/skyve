@@ -8,6 +8,8 @@ import org.skyve.metadata.SortDirection;
 import org.skyve.metadata.view.TextOutput.Sanitisation;
 import org.skyve.util.Util;
 
+import jakarta.annotation.Nullable;
+
 /**
  * Declares a column within a {@link MetaDataQueryDefinition}.
  *
@@ -35,7 +37,7 @@ public interface MetaDataQueryColumn extends NamedMetaData, DecoratedMetaData {
 	 * @return the display name; may be {@code null} if the column inherits its label
 	 *         from the document attribute
 	 */
-	public String getDisplayName();
+	public @Nullable String getDisplayName();
 	
 	/**
 	 * Returns the localised display name for the current user locale.
@@ -45,7 +47,7 @@ public interface MetaDataQueryColumn extends NamedMetaData, DecoratedMetaData {
 	 *
 	 * @return a non-{@code null} localised display name
 	 */
-	public default String getLocalisedDisplayName() {
+	public default @Nullable String getLocalisedDisplayName() {
 		return Util.i18n(getDisplayName());
 	}
 	
@@ -58,7 +60,7 @@ public interface MetaDataQueryColumn extends NamedMetaData, DecoratedMetaData {
 	 *
 	 * @return the binding path; may be {@code null} for expression-only columns
 	 */
-	public String getBinding();
+	public @Nullable String getBinding();
 	
 	/**
 	 * Returns the default filter operator applied to this column in list views.
@@ -68,7 +70,7 @@ public interface MetaDataQueryColumn extends NamedMetaData, DecoratedMetaData {
 	 *
 	 * @return the default filter operator, or {@code null} to use the type-based default
 	 */
-	public FilterOperator getFilterOperator();
+	public @Nullable FilterOperator getFilterOperator();
 	
 	/**
 	 * Returns the default filter expression pre-populated in the column filter field.
@@ -78,7 +80,7 @@ public interface MetaDataQueryColumn extends NamedMetaData, DecoratedMetaData {
 	 *
 	 * @return the default filter expression, or {@code null} if none
 	 */
-	public String getFilterExpression();
+	public @Nullable String getFilterExpression();
 	
 	/**
 	 * Returns the default sort direction for this column.
@@ -88,7 +90,7 @@ public interface MetaDataQueryColumn extends NamedMetaData, DecoratedMetaData {
 	 *
 	 * @return the default sort direction, or {@code null} for no default sort
 	 */
-	public SortDirection getSortOrder();
+	public @Nullable SortDirection getSortOrder();
 	
 	/**
 	 * Returns whether this column is hidden in the list view.
@@ -106,14 +108,14 @@ public interface MetaDataQueryColumn extends NamedMetaData, DecoratedMetaData {
 	 *
 	 * @return the column width in pixels, or {@code null}
 	 */
-	public Integer getPixelWidth();
+	public @Nullable Integer getPixelWidth();
 	
 	/**
 	 * Returns the horizontal alignment for cell content in this column.
 	 *
 	 * @return the alignment; may be {@code null} to use the type-based default
 	 */
-	public HorizontalAlignment getAlignment();
+	public @Nullable HorizontalAlignment getAlignment();
 	
 	/**
 	 * Returns whether HTML special characters in cell values should be escaped.
@@ -133,5 +135,5 @@ public interface MetaDataQueryColumn extends NamedMetaData, DecoratedMetaData {
 	 *
 	 * @return the sanitisation mode; may be {@code null} for no sanitisation
 	 */
-	public Sanitisation getSanitise();
+	public @Nullable Sanitisation getSanitise();
 }

@@ -81,9 +81,9 @@ public interface Model extends NamedMetaData {
 	 * @return the plural alias; may be {@code null}
 	 * @see #getLocalisedPluralAlias()
 	 */
-	String getPluralAlias();
+	@Nullable String getPluralAlias();
 
-	default String getLocalisedPluralAlias() {
+	default @Nullable String getLocalisedPluralAlias() {
 		return Util.i18n(getPluralAlias());
 	}
 	
@@ -93,9 +93,9 @@ public interface Model extends NamedMetaData {
 	 * @return the singular alias; may be {@code null}
 	 * @see #getLocalisedSingularAlias()
 	 */
-	String getSingularAlias();
+	@Nullable String getSingularAlias();
 
-	default String getLocalisedSingularAlias() {
+	default @Nullable String getLocalisedSingularAlias() {
 		return Util.i18n(getSingularAlias());
 	}
 	
@@ -105,9 +105,9 @@ public interface Model extends NamedMetaData {
 	 * @return the description; may be {@code null}
 	 * @see #getLocalisedDescription()
 	 */
-	String getDescription();
+	@Nullable String getDescription();
 	
-	default String getLocalisedDescription() {
+	default @Nullable String getLocalisedDescription() {
 		return Util.i18n(getDescription());
 	}
 	
@@ -146,14 +146,14 @@ public interface Model extends NamedMetaData {
 	 *
 	 * @return the dynamic settings, or {@code null} if not configured
 	 */
-	Dynamic getDynamism();
+	@Nullable Dynamic getDynamism();
 	
 	/**
 	 * Returns the parent document descriptor when this model uses document inheritance.
 	 *
 	 * @return the extends descriptor, or {@code null} if this model has no parent
 	 */
-	Extends getExtends();
+	@Nullable Extends getExtends();
 
 	/**
 	 * Returns whether the generated domain class for this model should be declared abstract.
@@ -169,9 +169,9 @@ public interface Model extends NamedMetaData {
 	 */
 	boolean isAudited();;
 	
-	String getIcon16x16RelativeFileName();
+	@Nullable String getIcon16x16RelativeFileName();
 
-	String getIcon32x32RelativeFileName();
+	@Nullable String getIcon32x32RelativeFileName();
 
-	String getIconStyleClass();
+	@Nullable String getIconStyleClass();
 }

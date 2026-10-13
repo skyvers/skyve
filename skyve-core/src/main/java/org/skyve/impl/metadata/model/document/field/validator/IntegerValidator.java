@@ -6,6 +6,8 @@ import org.skyve.domain.types.converters.Converter;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.user.User;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
 
@@ -25,12 +27,12 @@ public class IntegerValidator extends RangeValidator<Integer> {
 	private static final long serialVersionUID = -4605898071552499592L;
 
 	@Override
-	public void validate(User user,
-							Integer value,
-							String binding,
-							String localisedDisplayName,
-							Converter<Integer> converter,
-							ValidationException e) {
+	public void validate(@Nonnull User user,
+							@Nullable Integer value,
+							@Nonnull String binding,
+							@Nullable String localisedDisplayName,
+							@Nullable Converter<Integer> converter,
+							@Nonnull ValidationException e) {
 		if (value != null) {
 			Integer min = getMin();
 			Integer max = getMax();

@@ -6,6 +6,8 @@ import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.sail.execution.Executor;
 import org.skyve.metadata.sail.language.Step;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
@@ -28,7 +30,7 @@ public class NavigateLink implements Step {
 	 * Returns the href.
 	 * @return the result
 	 */
-	public String getHref() {
+	public @Nullable String getHref() {
 		return href;
 	}
 
@@ -37,7 +39,7 @@ public class NavigateLink implements Step {
 	 * @param href the href
 	 */
 	@XmlAttribute(name = "href", required = true)
-	public void setHref(String href) {
+	public void setHref(@Nullable String href) {
 		this.href = UtilImpl.processStringValue(href);
 	}
 
@@ -46,7 +48,7 @@ public class NavigateLink implements Step {
 	 * @param executor the executor
 	 */
 	@Override
-	public void execute(Executor executor) {
+	public void execute(@Nonnull Executor executor) {
 		executor.executeNavigateLink(this);
 	}
 
@@ -56,7 +58,7 @@ public class NavigateLink implements Step {
 	 * @return the result
 	 */
 	@Override
-	public String getIdentifier(AutomationContext context) {
+	public @Nullable String getIdentifier(@Nonnull AutomationContext context) {
 		return href;
 	}
 }

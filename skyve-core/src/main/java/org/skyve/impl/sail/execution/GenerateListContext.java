@@ -2,6 +2,8 @@ package org.skyve.impl.sail.execution;
 
 import org.skyve.metadata.sail.language.step.context.PushListContext;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * Marker interface for list context generation in the UI test framework.
  * <p>
@@ -9,5 +11,5 @@ import org.skyve.metadata.sail.language.step.context.PushListContext;
  */
 public interface GenerateListContext {
 
-	PushListContext pushListContext();
+	@Nonnull PushListContext pushListContext();
 }

@@ -9,6 +9,9 @@ import org.skyve.persistence.BizQL;
 import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.SQL;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Generate the ChartData based on a simple declarative method call chain.
  * The chart is generated from a BizQL, a document query or an SQL and the values are extracted 
@@ -29,7 +32,7 @@ public class TupleChartBuilder {
 	 * Document Query builder.
 	 * @param query
 	 */
-	public TupleChartBuilder with(@SuppressWarnings("hiding") DocumentQuery query) {
+	public @Nonnull TupleChartBuilder with(@SuppressWarnings("hiding") @Nonnull DocumentQuery query) {
 		this.query = query;
 		return this;
 	}
@@ -37,7 +40,7 @@ public class TupleChartBuilder {
 	 * BizQL builder.
 	 * @param bizql
 	 */
-	public TupleChartBuilder with(@SuppressWarnings("hiding") BizQL bizql) {
+	public @Nonnull TupleChartBuilder with(@SuppressWarnings("hiding") @Nonnull BizQL bizql) {
 		this.bizql = bizql;
 		return this;
 	}
@@ -46,7 +49,7 @@ public class TupleChartBuilder {
 	 * SQL builder.
 	 * @param sql
 	 */
-	public TupleChartBuilder with(@SuppressWarnings("hiding") SQL sql) {
+	public @Nonnull TupleChartBuilder with(@SuppressWarnings("hiding") @Nonnull SQL sql) {
 		this.sql = sql;
 		return this;
 	}
@@ -55,7 +58,7 @@ public class TupleChartBuilder {
 	 * Add a JFreeChart post processor to this chart.
 	 * @param fullyQualifiedJFreeChartPostProcessorClassName	The postProcessor to add.
 	 */
-	public TupleChartBuilder jFreeChartPostProcessorClassName(@SuppressWarnings("hiding") String fullyQualifiedJFreeChartPostProcessorClassName) {
+	public @Nonnull TupleChartBuilder jFreeChartPostProcessorClassName(@SuppressWarnings("hiding") @Nullable String fullyQualifiedJFreeChartPostProcessorClassName) {
 		this.fullyQualifiedJFreeChartPostProcessorClassName = fullyQualifiedJFreeChartPostProcessorClassName;
 		return this;
 	}
@@ -64,7 +67,7 @@ public class TupleChartBuilder {
 	 * Add a PrimeFaces Chart post processor to this chart.
 	 * @param fullyQualifiedPrimeFacesChartPostProcessorClassName	The postProcessor to add.
 	 */
-	public TupleChartBuilder primeFacesChartPostProcessorClassName(@SuppressWarnings("hiding") String fullyQualifiedPrimeFacesChartPostProcessorClassName) {
+	public @Nonnull TupleChartBuilder primeFacesChartPostProcessorClassName(@SuppressWarnings("hiding") @Nullable String fullyQualifiedPrimeFacesChartPostProcessorClassName) {
 		this.fullyQualifiedPrimeFacesChartPostProcessorClassName = fullyQualifiedPrimeFacesChartPostProcessorClassName;
 		return this;
 	}
@@ -74,7 +77,7 @@ public class TupleChartBuilder {
 	 * @param label	The data set label.
 	 * @return	The ChartData.
 	 */
-	public ChartData build(String label) {
+	public @Nonnull ChartData build(@Nullable String label) {
 		return build(null, label);
 	}
 
@@ -84,7 +87,7 @@ public class TupleChartBuilder {
 	 * @param label	The data set label.
 	 * @return	The ChartData.
 	 */
-	public ChartData build(String title, String label) {
+	public @Nonnull ChartData build(@Nullable String title, @Nullable String label) {
 		return build(new RainbowColourSeries(), new RainbowColourSeries(), title, label);
 	}
 	
@@ -95,9 +98,9 @@ public class TupleChartBuilder {
 	 * @param label
 	 * @return	The ChartData.
 	 */
-	public ChartData build(ColourSeries backgroundColours,
-							ColourSeries borderColours,
-							String label) {
+	public @Nonnull ChartData build(@Nonnull ColourSeries backgroundColours,
+							@Nonnull ColourSeries borderColours,
+							@Nullable String label) {
 		return build(backgroundColours, borderColours, null, label);
 	}
 	
@@ -109,10 +112,10 @@ public class TupleChartBuilder {
 	 * @param label
 	 * @return	The ChartData.
 	 */
-	public ChartData build(ColourSeries backgroundColours,
-							ColourSeries borderColours,
-							String title,
-							String label) {
+	public @Nonnull ChartData build(@Nonnull ColourSeries backgroundColours,
+							@Nonnull ColourSeries borderColours,
+							@Nullable String title,
+							@Nullable String label) {
 		List<Object[]> data = query();
 		backgroundColours.setSize(data.size());
 		borderColours.setSize(data.size());
@@ -132,7 +135,7 @@ public class TupleChartBuilder {
 		return result;
 	}
 	
-	private List<Object[]> query() {
+	private @Nullable List<Object[]> query() {
 		List<Object[]> result = null;
 		if (query != null) {
 			result = query.tupleResults();

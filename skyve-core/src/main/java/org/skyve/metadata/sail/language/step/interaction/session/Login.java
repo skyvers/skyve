@@ -6,6 +6,8 @@ import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.sail.execution.Executor;
 import org.skyve.metadata.sail.language.Step;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
@@ -33,7 +35,7 @@ public class Login implements Step {
 	 * Returns the customer.
 	 * @return the result
 	 */
-	public String getCustomer() {
+	public @Nullable String getCustomer() {
 		return customer;
 	}
 
@@ -42,7 +44,7 @@ public class Login implements Step {
 	 * @param customer the customer
 	 */
 	@XmlAttribute
-	public void setCustomer(String customer) {
+	public void setCustomer(@Nullable String customer) {
 		this.customer = UtilImpl.processStringValue(customer);
 	}
 
@@ -50,7 +52,7 @@ public class Login implements Step {
 	 * Returns the user.
 	 * @return the result
 	 */
-	public String getUser() {
+	public @Nullable String getUser() {
 		return user;
 	}
 
@@ -59,7 +61,7 @@ public class Login implements Step {
 	 * @param user the user
 	 */
 	@XmlAttribute(required = true)
-	public void setUser(String user) {
+	public void setUser(@Nullable String user) {
 		this.user = UtilImpl.processStringValue(user);
 	}
 
@@ -67,7 +69,7 @@ public class Login implements Step {
 	 * Returns the password.
 	 * @return the result
 	 */
-	public String getPassword() {
+	public @Nullable String getPassword() {
 		return password;
 	}
 
@@ -76,7 +78,7 @@ public class Login implements Step {
 	 * @param password the password
 	 */
 	@XmlAttribute(required = true)
-	public void setPassword(String password) {
+	public void setPassword(@Nullable String password) {
 		this.password = UtilImpl.processStringValue(password);
 	}
 
@@ -85,7 +87,7 @@ public class Login implements Step {
 	 * @param executor the executor
 	 */
 	@Override
-	public void execute(Executor executor) {
+	public void execute(@Nonnull Executor executor) {
 		executor.executeLogin(this);
 	}
 	
@@ -95,7 +97,7 @@ public class Login implements Step {
 	 * @return the result
 	 */
 	@Override
-	public String getIdentifier(AutomationContext context) {
+	public @Nullable String getIdentifier(@Nonnull AutomationContext context) {
 		return null;
 	}
 }

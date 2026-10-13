@@ -21,6 +21,7 @@ import org.skyve.metadata.user.Role;
 import org.skyve.metadata.view.View.ViewType;
 
 import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 
 /**
  * Builds module metadata including documents, queries, roles, jobs, and menu structure.
@@ -40,7 +41,7 @@ public class FluentModule {
 	 *
 	 * @param module The metadata to mutate.
 	 */
-	public FluentModule(ModuleMetaData module) {
+	public FluentModule(@Nonnull ModuleMetaData module) {
 		this.module = module;
 	}
 
@@ -53,7 +54,7 @@ public class FluentModule {
 	 * @param module The source module definition.
 	 * @return this fluent instance.
 	 */
-	public FluentModule from(@SuppressWarnings("hiding") Module module) {
+	public @Nonnull FluentModule from(@SuppressWarnings("hiding") @Nonnull Module module) {
 		name(module.getName());
 		title(module.getTitle());
 		documentation(module.getDocumentation());
@@ -104,7 +105,7 @@ public class FluentModule {
 	 * @param name The module name.
 	 * @return this fluent instance.
 	 */
-	public FluentModule name(String name) {
+	public @Nonnull FluentModule name(@Nonnull String name) {
 		module.setName(name);
 		return this;
 	}
@@ -115,7 +116,7 @@ public class FluentModule {
 	 * @param title The module title.
 	 * @return this fluent instance.
 	 */
-	public FluentModule title(String title) {
+	public @Nonnull FluentModule title(@Nonnull String title) {
 		module.setTitle(title);
 		return this;
 	}
@@ -126,7 +127,7 @@ public class FluentModule {
 	 * @param documentation The module documentation.
 	 * @return this fluent instance.
 	 */
-	public FluentModule documentation(String documentation) {
+	public @Nonnull FluentModule documentation(@Nullable String documentation) {
 		module.setDocumentation(documentation);
 		return this;
 	}
@@ -137,7 +138,7 @@ public class FluentModule {
 	 * @param prototype {@code true} to mark as prototype.
 	 * @return this fluent instance.
 	 */
-	public FluentModule prototype(boolean prototype) {
+	public @Nonnull FluentModule prototype(boolean prototype) {
 		module.setPrototype(prototype ? Boolean.TRUE : Boolean.FALSE);
 		return this;
 	}
@@ -148,7 +149,7 @@ public class FluentModule {
 	 * @param layout The form label layout.
 	 * @return this fluent instance.
 	 */
-	public FluentModule formLabelLayout(FormLabelLayout layout) {
+	public @Nonnull FluentModule formLabelLayout(@Nullable FormLabelLayout layout) {
 		module.setFormLabelLayout(layout);
 		return this;
 	}
@@ -159,7 +160,7 @@ public class FluentModule {
 	 * @param homeRef The home view type.
 	 * @return this fluent instance.
 	 */
-	public FluentModule homeRef(ViewType homeRef) {
+	public @Nonnull FluentModule homeRef(@Nullable ViewType homeRef) {
 		module.setHomeRef(homeRef);
 		return this;
 	}
@@ -170,7 +171,7 @@ public class FluentModule {
 	 * @param documentName The home document name.
 	 * @return this fluent instance.
 	 */
-	public FluentModule homeDocument(String documentName) {
+	public @Nonnull FluentModule homeDocument(@Nullable String documentName) {
 		module.setHomeDocument(documentName);
 		return this;
 	}
@@ -181,7 +182,7 @@ public class FluentModule {
 	 * @param job The job wrapper.
 	 * @return this fluent instance.
 	 */
-	public FluentModule addJob(FluentJob job) {
+	public @Nonnull FluentModule addJob(@Nonnull FluentJob job) {
 		module.getJobs().add(job.get());
 		return this;
 	}
@@ -192,7 +193,7 @@ public class FluentModule {
 	 * @param name The job name.
 	 * @return this fluent instance.
 	 */
-	public FluentModule removeJob(String name) {
+	public @Nonnull FluentModule removeJob(@Nonnull String name) {
 		module.getJobs().removeIf(j -> name.equals(j.getName()));
 		return this;
 	}
@@ -202,7 +203,7 @@ public class FluentModule {
 	 *
 	 * @return this fluent instance.
 	 */
-	public FluentModule clearJobs() {
+	public @Nonnull FluentModule clearJobs() {
 		module.getJobs().clear();
 		return this;
 	}
@@ -213,7 +214,7 @@ public class FluentModule {
 	 * @param name The job name.
 	 * @return A fluent wrapper for the matched job, or {@code null} when not found.
 	 */
-	public FluentJob findJob(String name) {
+	public @Nullable FluentJob findJob(@Nonnull String name) {
 		JobMetaDataImpl result = module.getJobs().stream().filter(j -> name.equals(j.getName())).findAny().orElse(null);
 		if (result != null) {
 			return new FluentJob(result);
@@ -227,7 +228,7 @@ public class FluentModule {
 	 * @param document The document wrapper.
 	 * @return this fluent instance.
 	 */
-	public FluentModule addDocument(FluentModuleDocument document) {
+	public @Nonnull FluentModule addDocument(@Nonnull FluentModuleDocument document) {
 		module.getDocuments().add(document.get());
 		return this;
 	}
@@ -238,7 +239,7 @@ public class FluentModule {
 	 * @param name The document name.
 	 * @return this fluent instance.
 	 */
-	public FluentModule removeDocument(String name) {
+	public @Nonnull FluentModule removeDocument(@Nonnull String name) {
 		module.getDocuments().removeIf(d -> name.equals(d.getRef()));
 		// TOD remove document privileges?
 		return this;
@@ -249,7 +250,7 @@ public class FluentModule {
 	 *
 	 * @return this fluent instance.
 	 */
-	public FluentModule clearDocuments() {
+	public @Nonnull FluentModule clearDocuments() {
 		module.getDocuments().clear();
 		return this;
 	}
@@ -260,7 +261,7 @@ public class FluentModule {
 	 * @param name The referenced document name.
 	 * @return A fluent wrapper for the matched module document, or {@code null} when not found.
 	 */
-	public FluentModuleDocument findDocument(String name) {
+	public @Nullable FluentModuleDocument findDocument(@Nonnull String name) {
 		ModuleDocumentMetaData result = module.getDocuments().stream().filter(d -> name.equals(d.getRef())).findAny().orElse(null);
 		if (result != null) {
 			return new FluentModuleDocument(result);
@@ -274,7 +275,7 @@ public class FluentModule {
 	 * @param query The metadata query wrapper.
 	 * @return this fluent instance.
 	 */
-	public FluentModule addMetaDataQuery(FluentMetaDataQuery query) {
+	public @Nonnull FluentModule addMetaDataQuery(@Nonnull FluentMetaDataQuery query) {
 		module.getQueries().add(query.get());
 		return this;
 	}
@@ -285,7 +286,7 @@ public class FluentModule {
 	 * @param name The metadata query name.
 	 * @return A fluent wrapper for the matched metadata query, or {@code null} when not found.
 	 */
-	public FluentMetaDataQuery findMetaDataQuery(String name) {
+	public @Nullable FluentMetaDataQuery findMetaDataQuery(@Nonnull String name) {
 		MetaDataQueryMetaData result = (MetaDataQueryMetaData) module.getQueries().stream().filter(q -> name.equals(q.getName())).findAny().orElse(null);
 		if (result != null) {
 			return new FluentMetaDataQuery(result);
@@ -299,7 +300,7 @@ public class FluentModule {
 	 * @param sql The SQL query wrapper.
 	 * @return this fluent instance.
 	 */
-	public FluentModule addSQL(FluentSQL sql) {
+	public @Nonnull FluentModule addSQL(@Nonnull FluentSQL sql) {
 		module.getQueries().add(sql.get());
 		return this;
 	}
@@ -310,7 +311,7 @@ public class FluentModule {
 	 * @param name The SQL query name.
 	 * @return A fluent wrapper for the matched SQL query, or {@code null} when not found.
 	 */
-	public FluentSQL findSQL(String name) {
+	public @Nullable FluentSQL findSQL(@Nonnull String name) {
 		SQLMetaData result = (SQLMetaData) module.getQueries().stream().filter(q -> name.equals(q.getName())).findAny().orElse(null);
 		if (result != null) {
 			return new FluentSQL(result);
@@ -324,7 +325,7 @@ public class FluentModule {
 	 * @param bizql The BizQL query wrapper.
 	 * @return this fluent instance.
 	 */
-	public FluentModule addBizQL(FluentBizQL bizql) {
+	public @Nonnull FluentModule addBizQL(@Nonnull FluentBizQL bizql) {
 		module.getQueries().add(bizql.get());
 		return this;
 	}
@@ -335,7 +336,7 @@ public class FluentModule {
 	 * @param name The BizQL query name.
 	 * @return A fluent wrapper for the matched BizQL query, or {@code null} when not found.
 	 */
-	public FluentBizQL findBizQL(String name) {
+	public @Nullable FluentBizQL findBizQL(@Nonnull String name) {
 		BizQLMetaData result = (BizQLMetaData) module.getQueries().stream().filter(q -> name.equals(q.getName())).findAny().orElse(null);
 		if (result != null) {
 			return new FluentBizQL(result);
@@ -349,7 +350,7 @@ public class FluentModule {
 	 * @param name The query name.
 	 * @return this fluent instance.
 	 */
-	public FluentModule removeQuery(String name) {
+	public @Nonnull FluentModule removeQuery(@Nonnull String name) {
 		module.getQueries().removeIf(q -> name.equals(q.getName()));
 		return this;
 	}
@@ -359,7 +360,7 @@ public class FluentModule {
 	 *
 	 * @return this fluent instance.
 	 */
-	public FluentModule clearQueries() {
+	public @Nonnull FluentModule clearQueries() {
 		module.getQueries().clear();
 		return this;
 	}
@@ -370,7 +371,7 @@ public class FluentModule {
 	 * @param role The role wrapper.
 	 * @return this fluent instance.
 	 */
-	public FluentModule addRole(FluentModuleRole role) {
+	public @Nonnull FluentModule addRole(@Nonnull FluentModuleRole role) {
 		module.getRoles().add(role.get());
 		return this;
 	}
@@ -381,7 +382,7 @@ public class FluentModule {
 	 * @param name The role name.
 	 * @return this fluent instance.
 	 */
-	public FluentModule removeRole(String name) {
+	public @Nonnull FluentModule removeRole(@Nonnull String name) {
 		module.getRoles().removeIf(r -> name.equals(r.getName()));
 		return this;
 	}
@@ -391,7 +392,7 @@ public class FluentModule {
 	 *
 	 * @return this fluent instance.
 	 */
-	public FluentModule clearRoles() {
+	public @Nonnull FluentModule clearRoles() {
 		module.getRoles().clear();
 		return this;
 	}
@@ -402,7 +403,7 @@ public class FluentModule {
 	 * @param name The role name.
 	 * @return A fluent wrapper for the matched role, or {@code null} when not found.
 	 */
-	public FluentModuleRole findRole(String name) {
+	public @Nullable FluentModuleRole findRole(@Nonnull String name) {
 		ModuleRoleMetaData role = module.getRoles().stream().filter(r -> r.getName().equals(name)).findAny().orElse(null);
 		if (role != null) {
 			return new FluentModuleRole(role);
@@ -416,7 +417,7 @@ public class FluentModule {
 	 * @param menu The menu wrapper.
 	 * @return this fluent instance.
 	 */
-	public FluentModule menu(FluentMenu menu) {
+	public @Nonnull FluentModule menu(@Nonnull FluentMenu menu) {
 		module.setMenu(menu.get());
 		return this;
 	}
@@ -439,7 +440,7 @@ public class FluentModule {
 	 *
 	 * @return The module metadata instance.
 	 */
-	public ModuleMetaData get() {
+	public @Nonnull ModuleMetaData get() {
 		return module;
 	}
 }

@@ -15,6 +15,7 @@ import org.skyve.metadata.view.Invisible;
 import org.skyve.metadata.view.TextOutput;
 import org.skyve.util.Util;
 
+import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlElement;
@@ -92,7 +93,7 @@ public class Label extends AbstractBound implements Invisible, AbsoluteSize, Con
 	 *
 	 * @return the raw label value expression
 	 */
-	public String getValue() {
+	public @Nullable String getValue() {
 		return value;
 	}
 	
@@ -101,7 +102,7 @@ public class Label extends AbstractBound implements Invisible, AbsoluteSize, Con
 	 *
 	 * @return the localised label value
 	 */
-	public String getLocalisedValue() {
+	public @Nullable String getLocalisedValue() {
 		return Util.i18n(value);
 	}
 
@@ -111,7 +112,7 @@ public class Label extends AbstractBound implements Invisible, AbsoluteSize, Con
 	 * @param value the label value expression
 	 */
 	@XmlAttribute(required = false)
-	public void setValue(String value) {
+	public void setValue(@Nullable String value) {
 		this.value = UtilImpl.processStringValue(value);
 	}
 
@@ -120,7 +121,7 @@ public class Label extends AbstractBound implements Invisible, AbsoluteSize, Con
 	 *
 	 * @return the target binding expression
 	 */
-	public String getFor() {
+	public @Nullable String getFor() {
 		return forBinding;
 	}
 
@@ -130,7 +131,7 @@ public class Label extends AbstractBound implements Invisible, AbsoluteSize, Con
 	 * @param forBinding the target binding expression
 	 */
 	@XmlAttribute(name = "for", required = false)
-	public void setFor(String forBinding) {
+	public void setFor(@Nullable String forBinding) {
 		this.forBinding = UtilImpl.processStringValue(forBinding);
 	}
 
@@ -140,7 +141,7 @@ public class Label extends AbstractBound implements Invisible, AbsoluteSize, Con
 	 * @return the configured pixel width
 	 */
 	@Override
-	public Integer getPixelWidth() {
+	public @Nullable Integer getPixelWidth() {
 		return pixelWidth;
 	}
 
@@ -151,7 +152,7 @@ public class Label extends AbstractBound implements Invisible, AbsoluteSize, Con
 	 */
 	@Override
 	@XmlAttribute(required = false)
-	public void setPixelWidth(Integer pixelWidth) {
+	public void setPixelWidth(@Nullable Integer pixelWidth) {
 		this.pixelWidth = pixelWidth;
 	}
 
@@ -161,7 +162,7 @@ public class Label extends AbstractBound implements Invisible, AbsoluteSize, Con
 	 * @return the configured pixel height
 	 */
 	@Override
-	public Integer getPixelHeight() {
+	public @Nullable Integer getPixelHeight() {
 		return pixelHeight;
 	}
 
@@ -172,7 +173,7 @@ public class Label extends AbstractBound implements Invisible, AbsoluteSize, Con
 	 */
 	@Override
 	@XmlAttribute(required = false)
-	public void setPixelHeight(Integer pixelHeight) {
+	public void setPixelHeight(@Nullable Integer pixelHeight) {
 		this.pixelHeight = pixelHeight;
 	}
 
@@ -242,7 +243,7 @@ public class Label extends AbstractBound implements Invisible, AbsoluteSize, Con
 	 *
 	 * @return {@code true} when formatted output is enabled
 	 */
-	public Boolean getFormatted() {
+	public @Nullable Boolean getFormatted() {
 		return formatted;
 	}
 
@@ -252,7 +253,7 @@ public class Label extends AbstractBound implements Invisible, AbsoluteSize, Con
 	 * @param formatted {@code true} to preserve formatting
 	 */
 	@XmlAttribute(name = "formatted", required = false)
-	public void setFormatted(Boolean formatted) {
+	public void setFormatted(@Nullable Boolean formatted) {
 		this.formatted = formatted;
 	}
 
@@ -261,7 +262,7 @@ public class Label extends AbstractBound implements Invisible, AbsoluteSize, Con
 	 *
 	 * @return the text alignment, or {@code null} for renderer default
 	 */
-	public HorizontalAlignment getTextAlignment() {
+	public @Nullable HorizontalAlignment getTextAlignment() {
 		return textAlignment;
 	}
 
@@ -271,7 +272,7 @@ public class Label extends AbstractBound implements Invisible, AbsoluteSize, Con
 	 * @param textAlignment the alignment to apply
 	 */
 	@XmlAttribute(name = "textAlignment", required = false)
-	public void setTextAlignment(HorizontalAlignment textAlignment) {
+	public void setTextAlignment(@Nullable HorizontalAlignment textAlignment) {
 		this.textAlignment = textAlignment;
 	}
 
@@ -281,7 +282,7 @@ public class Label extends AbstractBound implements Invisible, AbsoluteSize, Con
 	 * @return {@code true} when escaping is enabled
 	 */
 	@Override
-	public Boolean getEscape() {
+	public @Nullable Boolean getEscape() {
 		return escape;
 	}
 
@@ -291,7 +292,7 @@ public class Label extends AbstractBound implements Invisible, AbsoluteSize, Con
 	 * @param escape {@code true} to escape output
 	 */
 	@XmlAttribute
-	public void setEscape(Boolean escape) {
+	public void setEscape(@Nullable Boolean escape) {
 		this.escape = escape;
 	}
 
@@ -301,7 +302,7 @@ public class Label extends AbstractBound implements Invisible, AbsoluteSize, Con
 	 * @return the sanitisation strategy, or {@code null} when default behavior applies
 	 */
 	@Override
-	public Sanitisation getSanitise() {
+	public @Nullable Sanitisation getSanitise() {
 		return sanitise;
 	}
 
@@ -311,7 +312,7 @@ public class Label extends AbstractBound implements Invisible, AbsoluteSize, Con
 	 * @param sanitise the sanitisation strategy to apply
 	 */
 	@XmlAttribute
-	public void setSanitise(Sanitisation sanitise) {
+	public void setSanitise(@Nullable Sanitisation sanitise) {
 		this.sanitise = sanitise;
 	}
 
@@ -321,7 +322,7 @@ public class Label extends AbstractBound implements Invisible, AbsoluteSize, Con
 	 * @return mutable decorator property map keyed by property name
 	 */
 	@Override
-	public Map<String, String> getProperties() {
+	public @Nonnull Map<String, String> getProperties() {
 		return properties;
 	}
 }

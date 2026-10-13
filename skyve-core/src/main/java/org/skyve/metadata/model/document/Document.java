@@ -83,7 +83,7 @@ public interface Document extends Model, PersistentMetaData, ReloadableMetaData,
 	 * @param name The name of the dynamic image
 	 * @return The dynamic image definition or null if not found
 	 */
-	public @Nonnull <T extends Bean> DynamicImage<T> getDynamicImage(Customer customer, String name);
+	public @Nonnull <T extends Bean> DynamicImage<T> getDynamicImage(@Nullable Customer customer, @Nonnull String name);
 
 	/**
 	 * Gets all unique constraints defined directly on this document (not including those from parent documents).
@@ -98,7 +98,7 @@ public interface Document extends Model, PersistentMetaData, ReloadableMetaData,
 	 * @param referenceName The name of the reference to retrieve
 	 * @return The reference or null if not found
 	 */
-	public @Nonnull Reference getReferenceByName(String referenceName);
+	public @Nonnull Reference getReferenceByName(@Nonnull String referenceName);
 
 	/**
 	 * Retrieves the document that is related through the specified relation.

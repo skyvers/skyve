@@ -10,46 +10,49 @@ import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.query.MetaDataQueryColumn;
 import org.skyve.persistence.DocumentQuery;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 public class InMemoryDocumentQueryListModel<T extends Bean> extends InMemoryListModel<T> {
 	@SuppressWarnings("unused")
 	private DocumentQuery query;
 	
-	public InMemoryDocumentQueryListModel(Module module, Document drivingDocument, DocumentQuery query) {
+	public InMemoryDocumentQueryListModel(@Nonnull Module module, @Nonnull Document drivingDocument, @Nonnull DocumentQuery query) {
 		super(module, drivingDocument);
 		this.query = query;
 	}
 	
 	@Override
-	public void postConstruct(Customer customer, boolean runtime) {
+	public void postConstruct(@Nonnull Customer customer, boolean runtime) {
 		// TODO Auto-generated method stub
 	}
 	
 	@Override
-	public List<Bean> getRows() throws Exception {
+	public @Nullable List<Bean> getRows() throws Exception {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public String getDescription() {
+	public @Nullable String getDescription() {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public List<MetaDataQueryColumn> getColumns() {
+	public @Nonnull List<MetaDataQueryColumn> getColumns() {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public Bean update(String bizId, SortedMap<String, Object> properties) throws Exception {
+	public @Nullable Bean update(@Nonnull String bizId, @Nonnull SortedMap<String, Object> properties) throws Exception {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public void remove(String bizId) throws Exception {
+	public void remove(@Nonnull String bizId) throws Exception {
 		// TODO Auto-generated method stub
 		
 	}

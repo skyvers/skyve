@@ -7,6 +7,9 @@ import org.skyve.CORE;
 import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.Persistence;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * A dynamic (schema-less) {@link PersistentBean} that also implements {@link HierarchicalBean}.
  *
@@ -26,7 +29,7 @@ public class DynamicPersistentHierarchicalBean extends DynamicPersistentBean imp
 	 * @param bizDocument the bizDocument
 	 * @param properties the properties
 	 */
-	public DynamicPersistentHierarchicalBean(String bizModule, String bizDocument, Map<String, Object> properties) {
+	public DynamicPersistentHierarchicalBean(@Nonnull String bizModule, @Nonnull String bizDocument, @Nonnull Map<String, Object> properties) {
 		super(bizModule, bizDocument, properties);
 	}
 
@@ -35,7 +38,7 @@ public class DynamicPersistentHierarchicalBean extends DynamicPersistentBean imp
 	 * @return the result
 	 */
 	@Override
-	public String getBizParentId() {
+	public @Nullable String getBizParentId() {
 		return (String) get(HierarchicalBean.PARENT_ID);
 	}
 
@@ -44,7 +47,7 @@ public class DynamicPersistentHierarchicalBean extends DynamicPersistentBean imp
 	 * @param bizParentId the bizParentId
 	 */
 	@Override
-	public void setBizParentId(String bizParentId) {
+	public void setBizParentId(@Nullable String bizParentId) {
 		set(HierarchicalBean.PARENT_ID, bizParentId);
 	}
 
@@ -53,7 +56,7 @@ public class DynamicPersistentHierarchicalBean extends DynamicPersistentBean imp
 	 * @return the result
 	 */
 	@Override
-	public Bean getParent() {
+	public @Nullable Bean getParent() {
 		Bean result = null;
 		
 		final String bizParentId = getBizParentId();
@@ -72,7 +75,7 @@ public class DynamicPersistentHierarchicalBean extends DynamicPersistentBean imp
 	 * @return the result
 	 */
 	@Override
-	public List<Bean> getChildren() {
+	public @Nonnull List<Bean> getChildren() {
 		Persistence p = CORE.getPersistence();
 		DocumentQuery q = p.newDocumentQuery(getBizModule(), getBizDocument());
 		q.getFilter().addEquals(HierarchicalBean.PARENT_ID, getBizId());

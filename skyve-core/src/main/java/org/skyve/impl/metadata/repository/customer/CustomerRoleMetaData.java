@@ -15,6 +15,8 @@ import org.skyve.metadata.customer.CustomerRole;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.Role;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlElementWrapper;
 import jakarta.xml.bind.annotation.XmlType;
@@ -53,7 +55,7 @@ public class CustomerRoleMetaData extends NamedMetaData implements CustomerRole 
 	 * @return role description text, or {@code null}
 	 */
 	@Override
-	public String getDescription() {
+	public @Nullable String getDescription() {
 		return description;
 	}
 
@@ -64,7 +66,7 @@ public class CustomerRoleMetaData extends NamedMetaData implements CustomerRole 
 	 */
 	@XmlElement(namespace = XMLMetaData.CUSTOMER_NAMESPACE, required = true)
 	@XmlJavaTypeAdapter(CDATAAdapter.class)
-	public void setDescription(String description) {
+	public void setDescription(@Nullable String description) {
 		this.description = UtilImpl.processStringValue(description);
 	}
 
@@ -75,7 +77,7 @@ public class CustomerRoleMetaData extends NamedMetaData implements CustomerRole 
 	 */
 	@XmlElementWrapper(namespace = XMLMetaData.CUSTOMER_NAMESPACE, name = "roles")
 	@XmlElement(namespace = XMLMetaData.CUSTOMER_NAMESPACE, name = "role", required = true)
-	public List<CustomerModuleRoleMetaData> getRoles() {
+	public @Nonnull List<CustomerModuleRoleMetaData> getRoles() {
 		return roles;
 	}
 
@@ -85,7 +87,7 @@ public class CustomerRoleMetaData extends NamedMetaData implements CustomerRole 
 	 * @return role documentation text, or {@code null}
 	 */
 	@Override
-	public String getDocumentation() {
+	public @Nullable String getDocumentation() {
 		return documentation;
 	}
 
@@ -96,7 +98,7 @@ public class CustomerRoleMetaData extends NamedMetaData implements CustomerRole 
 	 */
 	@XmlElement(namespace = XMLMetaData.CUSTOMER_NAMESPACE)
 	@XmlJavaTypeAdapter(CDATAAdapter.class)
-	public void setDocumentation(String documentation) {
+	public void setDocumentation(@Nullable String documentation) {
 		this.documentation = UtilImpl.processStringValue(documentation);
 	}
 	
@@ -106,7 +108,7 @@ public class CustomerRoleMetaData extends NamedMetaData implements CustomerRole 
 	 * @return mutable role property map
 	 */
 	@Override
-	public Map<String, String> getProperties() {
+	public @Nonnull Map<String, String> getProperties() {
 		return properties;
 	}
 	
@@ -116,7 +118,7 @@ public class CustomerRoleMetaData extends NamedMetaData implements CustomerRole 
 	 * @param customer the customer providing module definitions
 	 * @return resolved runtime module roles in declaration order
 	 */
-	public List<Role> getModuleRoles(Customer customer) {
+	public @Nonnull List<Role> getModuleRoles(@Nonnull Customer customer) {
 		List<Role> result = new ArrayList<>(roles.size());
 		for (CustomerModuleRoleMetaData role : roles) {
 			Module module = customer.getModule(role.getModuleName());

@@ -24,7 +24,7 @@ public abstract class FluentMenuAction<T extends FluentMenuAction<T>> {
 	 * @return this fluent instance.
 	 */
 	@SuppressWarnings("unchecked")
-	protected T from(MenuItem item) {
+	protected @Nonnull T from(@Nonnull MenuItem item) {
 		name(item.getName());
 		item.getUxUis().forEach(this::addUxUi);
 		item.getProperties().entrySet().forEach(p -> putProperty(p.getKey(), p.getValue()));
@@ -39,7 +39,7 @@ public abstract class FluentMenuAction<T extends FluentMenuAction<T>> {
 	 * @return this fluent instance.
 	 */
 	@SuppressWarnings("unchecked")
-	public T name(String name) {
+	public @Nonnull T name(@Nonnull String name) {
 		get().setName(name);
 		return (T) this;
 	}
@@ -51,7 +51,7 @@ public abstract class FluentMenuAction<T extends FluentMenuAction<T>> {
 	 * @return this fluent instance.
 	 */
 	@SuppressWarnings("unchecked")
-	public T addUxUi(String uxui) {
+	public @Nonnull T addUxUi(@Nonnull String uxui) {
 		ApplicableTo applicable = new ApplicableTo();
 		applicable.setUxUi(uxui);
 		get().getUxuis().add(applicable);
@@ -65,7 +65,7 @@ public abstract class FluentMenuAction<T extends FluentMenuAction<T>> {
 	 * @return this fluent instance.
 	 */
 	@SuppressWarnings("unchecked")
-	public T removeUxUi(String uxui) {
+	public @Nonnull T removeUxUi(@Nonnull String uxui) {
 		get().getUxuis().removeIf(u -> uxui.equals(u.getUxUi()));
 		return (T) this;
 	}
@@ -76,7 +76,7 @@ public abstract class FluentMenuAction<T extends FluentMenuAction<T>> {
 	 * @return this fluent instance.
 	 */
 	@SuppressWarnings("unchecked")
-	public T clearUxUis() {
+	public @Nonnull T clearUxUis() {
 		get().getUxuis().clear();
 		return (T) this;
 	}
@@ -100,5 +100,5 @@ public abstract class FluentMenuAction<T extends FluentMenuAction<T>> {
 	 *
 	 * @return The action metadata instance.
 	 */
-	public abstract ActionMetaData get();
+	public abstract @Nonnull ActionMetaData get();
 }

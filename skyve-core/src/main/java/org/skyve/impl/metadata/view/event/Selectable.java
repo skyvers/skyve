@@ -2,6 +2,9 @@ package org.skyve.impl.metadata.view.event;
 
 import java.util.List;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Mixin interface for widgets that fire a row-selection event.
  *
@@ -11,7 +14,7 @@ import java.util.List;
  * @see EventSource
  */
 public interface Selectable extends EventSource {
-	public List<EventAction> getSelectedActions();
-	public String getSelectedIdBinding();
-	public void setSelectedIdBinding(String selectedIdBinding);
+	public @Nonnull List<EventAction> getSelectedActions();
+	public @Nullable String getSelectedIdBinding();
+	public void setSelectedIdBinding(@Nullable String selectedIdBinding);
 }

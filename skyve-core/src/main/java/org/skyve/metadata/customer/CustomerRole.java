@@ -3,6 +3,8 @@ package org.skyve.metadata.customer;
 import org.skyve.metadata.DecoratedMetaData;
 import org.skyve.metadata.NamedMetaData;
 
+import jakarta.annotation.Nullable;
+
 /**
  * A customer-level aggregate security role.
  *
@@ -18,7 +20,7 @@ public interface CustomerRole extends NamedMetaData, DecoratedMetaData {
 	 *
 	 * @return the description; may be {@code null}
 	 */
-	public String getDescription();
+	public @Nullable String getDescription();
 
 	/**
 	 * Returns extended documentation (HTML or plain text) describing the purpose and
@@ -26,5 +28,5 @@ public interface CustomerRole extends NamedMetaData, DecoratedMetaData {
 	 *
 	 * @return the documentation; may be {@code null}
 	 */
-	public String getDocumentation();
+	public @Nullable String getDocumentation();
 }

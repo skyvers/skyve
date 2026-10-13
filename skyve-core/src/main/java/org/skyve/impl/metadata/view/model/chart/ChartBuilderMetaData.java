@@ -9,6 +9,8 @@ import org.skyve.metadata.view.model.chart.Bucket;
 import org.skyve.persistence.DocumentQuery.AggregateFunction;
 import org.skyve.util.JSON;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlElementRef;
@@ -75,7 +77,7 @@ public class ChartBuilderMetaData implements ModelMetaData {
 	 */
 	@Override
 	@XmlTransient
-	public String getModelName() {
+	public @Nonnull String getModelName() {
 		if (modelName == null) {
 			String definition;
 			try {
@@ -89,55 +91,55 @@ public class ChartBuilderMetaData implements ModelMetaData {
 		return modelName;
 	}
 
-	public String getTitle() {
+	public @Nullable String getTitle() {
 		return title;
 	}
 	@XmlAttribute(required = false)
-	public void setTitle(String title) {
+	public void setTitle(@Nullable String title) {
 		this.title = UtilImpl.processStringValue(title);
 	}
 
-	public String getLabel() {
+	public @Nullable String getLabel() {
 		return label;
 	}
 	@XmlAttribute(required = true)
-	public void setLabel(String label) {
+	public void setLabel(@Nullable String label) {
 		this.label = UtilImpl.processStringValue(label);
 	}
 	
-	public String getModuleName() {
+	public @Nullable String getModuleName() {
 		return moduleName;
 	}
 	@XmlAttribute(required = true)
-	public void setModuleName(String moduleName) {
+	public void setModuleName(@Nullable String moduleName) {
 		this.moduleName = UtilImpl.processStringValue(moduleName);
 	}
 	
-	public String getDocumentName() {
+	public @Nullable String getDocumentName() {
 		return documentName;
 	}
 	@XmlAttribute
-	public void setDocumentName(String documentName) {
+	public void setDocumentName(@Nullable String documentName) {
 		this.documentName = UtilImpl.processStringValue(documentName);
 	}
 
-	public String getQueryName() {
+	public @Nullable String getQueryName() {
 		return queryName;
 	}
 	@XmlAttribute
-	public void setQueryName(String queryName) {
+	public void setQueryName(@Nullable String queryName) {
 		this.queryName = UtilImpl.processStringValue(queryName);
 	}
 
-	public String getCategoryBinding() {
+	public @Nullable String getCategoryBinding() {
 		return categoryBinding;
 	}
 	@XmlAttribute(required = true)
-	public void setCategoryBinding(String categoryBinding) {
+	public void setCategoryBinding(@Nullable String categoryBinding) {
 		this.categoryBinding = UtilImpl.processStringValue(categoryBinding);
 	}
 
-	public Bucket getCategoryBucket() {
+	public @Nullable Bucket getCategoryBucket() {
 		return categoryBucket;
 	}
 	
@@ -147,58 +149,58 @@ public class ChartBuilderMetaData implements ModelMetaData {
 						@XmlElementRef(type = TemporalBucketMetaData.class),
 						@XmlElementRef(type = TextLengthBucketMetaData.class),
 						@XmlElementRef(type = TextStartsWithBucketMetaData.class)})
-	public void setCategoryBucket(Bucket categoryBucket) {
+	public void setCategoryBucket(@Nullable Bucket categoryBucket) {
 		this.categoryBucket = categoryBucket;
 		if (categoryBucket instanceof NumericRangeBucketMetaData range) {
 			range.convert();
 		}
 	}
 
-	public String getValueBinding() {
+	public @Nullable String getValueBinding() {
 		return valueBinding;
 	}
 	@XmlAttribute(required = true)
-	public void setValueBinding(String valueBinding) {
+	public void setValueBinding(@Nullable String valueBinding) {
 		this.valueBinding = UtilImpl.processStringValue(valueBinding);
 	}
 	
-	public AggregateFunction getValueFunction() {
+	public @Nullable AggregateFunction getValueFunction() {
 		return valueFunction;
 	}
 	@XmlAttribute
-	public void setValueFunction(AggregateFunction valueFunction) {
+	public void setValueFunction(@Nullable AggregateFunction valueFunction) {
 		this.valueFunction = valueFunction;
 	}
 
-	public ChartBuilderTopMetaData getTop() {
+	public @Nullable ChartBuilderTopMetaData getTop() {
 		return top;
 	}
 	@XmlElement(namespace = XMLMetaData.VIEW_NAMESPACE)
-	public void setTop(ChartBuilderTopMetaData top) {
+	public void setTop(@Nullable ChartBuilderTopMetaData top) {
 		this.top = top;
 	}
 	
-	public ChartBuilderOrderMetaData getOrder() {
+	public @Nullable ChartBuilderOrderMetaData getOrder() {
 		return order;
 	}
 	@XmlElement(namespace = XMLMetaData.VIEW_NAMESPACE)
-	public void setOrder(ChartBuilderOrderMetaData order) {
+	public void setOrder(@Nullable ChartBuilderOrderMetaData order) {
 		this.order = order;
 	}
 
-	public String getJFreeChartPostProcessorClassName() {
+	public @Nullable String getJFreeChartPostProcessorClassName() {
 		return jFreeChartPostProcessorClassName;
 	}
 	@XmlElement(namespace = XMLMetaData.VIEW_NAMESPACE)
-	public void setJFreeChartPostProcessorClassName(String jFreeChartPostProcessorClassName) {
+	public void setJFreeChartPostProcessorClassName(@Nullable String jFreeChartPostProcessorClassName) {
 		this.jFreeChartPostProcessorClassName = UtilImpl.processStringValue(jFreeChartPostProcessorClassName);
 	}
 
-	public String getPrimeFacesChartPostProcessorClassName() {
+	public @Nullable String getPrimeFacesChartPostProcessorClassName() {
 		return primeFacesChartPostProcessorClassName;
 	}
 	@XmlElement(namespace = XMLMetaData.VIEW_NAMESPACE)
-	public void setPrimeFacesChartPostProcessorClassName(String primeFacesChartPostProcessorClassName) {
+	public void setPrimeFacesChartPostProcessorClassName(@Nullable String primeFacesChartPostProcessorClassName) {
 		this.primeFacesChartPostProcessorClassName = UtilImpl.processStringValue(primeFacesChartPostProcessorClassName);
 	}
 }

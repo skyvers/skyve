@@ -6,6 +6,7 @@ import org.skyve.impl.metadata.view.widget.bound.tabular.DataGridContainerColumn
 import org.skyve.impl.metadata.view.widget.bound.tabular.DataRepeater;
 
 import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 
 /**
  * Builds {@link DataRepeater} metadata for repeated tabular content.
@@ -26,7 +27,7 @@ public class FluentDataRepeater extends FluentDataWidget<FluentDataRepeater> {
 	 * @param data
 	 *            the metadata instance to mutate
 	 */
-	public FluentDataRepeater(DataRepeater data) {
+	public FluentDataRepeater(@Nonnull DataRepeater data) {
 		this.data = data;
 	}
 
@@ -37,7 +38,7 @@ public class FluentDataRepeater extends FluentDataWidget<FluentDataRepeater> {
 	 *            the source metadata to copy
 	 * @return this builder
 	 */
-	public FluentDataRepeater from(@SuppressWarnings("hiding") DataRepeater data) {
+	public @Nonnull FluentDataRepeater from(@SuppressWarnings("hiding") @Nonnull DataRepeater data) {
 
 		showColumnHeaders(data.getShowColumnHeaders());
 		showGrid(data.getShowGrid());
@@ -65,7 +66,7 @@ public class FluentDataRepeater extends FluentDataWidget<FluentDataRepeater> {
 	 *            {@code Boolean.TRUE} to render headers, {@code Boolean.FALSE} to hide them, or {@code null} to clear the setting
 	 * @return this builder
 	 */
-	public FluentDataRepeater showColumnHeaders(Boolean showColumnHeaders) {
+	public @Nonnull FluentDataRepeater showColumnHeaders(@Nullable Boolean showColumnHeaders) {
 		data.setShowColumnHeaders(showColumnHeaders);
 		return this;
 	}
@@ -77,7 +78,7 @@ public class FluentDataRepeater extends FluentDataWidget<FluentDataRepeater> {
 	 *            {@code Boolean.TRUE} to render the grid, {@code Boolean.FALSE} to hide it, or {@code null} to clear the setting
 	 * @return this builder
 	 */
-	public FluentDataRepeater showGrid(Boolean showGrid) {
+	public @Nonnull FluentDataRepeater showGrid(@Nullable Boolean showGrid) {
 		data.setShowGrid(showGrid);
 		return this;
 	}
@@ -89,7 +90,7 @@ public class FluentDataRepeater extends FluentDataWidget<FluentDataRepeater> {
 	 *            the bound column to append
 	 * @return this builder
 	 */
-	public FluentDataRepeater addBoundColumn(FluentDataGridBoundColumn column) {
+	public @Nonnull FluentDataRepeater addBoundColumn(@Nonnull FluentDataGridBoundColumn column) {
 		data.getColumns().add(column.get());
 		return this;
 	}
@@ -103,7 +104,7 @@ public class FluentDataRepeater extends FluentDataWidget<FluentDataRepeater> {
 	 *            the bound column to insert
 	 * @return this builder
 	 */
-	public FluentDataRepeater addBoundColumn(int index, FluentDataGridBoundColumn column) {
+	public @Nonnull FluentDataRepeater addBoundColumn(int index, @Nonnull FluentDataGridBoundColumn column) {
 		data.getColumns().add(index, column.get());
 		return this;
 	}
@@ -115,7 +116,7 @@ public class FluentDataRepeater extends FluentDataWidget<FluentDataRepeater> {
 	 *            the column position
 	 * @return the wrapped bound column
 	 */
-	public FluentDataGridBoundColumn getBoundColumn(int index) {
+	public @Nonnull FluentDataGridBoundColumn getBoundColumn(int index) {
 		return new FluentDataGridBoundColumn((DataGridBoundColumn) data.getColumns().get(index));
 	}
 	
@@ -126,7 +127,7 @@ public class FluentDataRepeater extends FluentDataWidget<FluentDataRepeater> {
 	 *            the container column to append
 	 * @return this builder
 	 */
-	public FluentDataRepeater addContainerColumn(FluentDataGridContainerColumn column) {
+	public @Nonnull FluentDataRepeater addContainerColumn(@Nonnull FluentDataGridContainerColumn column) {
 		data.getColumns().add(column.get());
 		return this;
 	}
@@ -140,7 +141,7 @@ public class FluentDataRepeater extends FluentDataWidget<FluentDataRepeater> {
 	 *            the container column to insert
 	 * @return this builder
 	 */
-	public FluentDataRepeater addContainerColumn(int index, FluentDataGridContainerColumn column) {
+	public @Nonnull FluentDataRepeater addContainerColumn(int index, @Nonnull FluentDataGridContainerColumn column) {
 		data.getColumns().add(index, column.get());
 		return this;
 	}
@@ -152,7 +153,7 @@ public class FluentDataRepeater extends FluentDataWidget<FluentDataRepeater> {
 	 *            the column position
 	 * @return the wrapped container column
 	 */
-	public FluentDataGridContainerColumn getContainerColumn(int index) {
+	public @Nonnull FluentDataGridContainerColumn getContainerColumn(int index) {
 		return new FluentDataGridContainerColumn((DataGridContainerColumn) data.getColumns().get(index));
 	}
 
@@ -163,7 +164,7 @@ public class FluentDataRepeater extends FluentDataWidget<FluentDataRepeater> {
 	 *            the column position to remove
 	 * @return this builder
 	 */
-	public FluentDataRepeater removeColumn(int index) {
+	public @Nonnull FluentDataRepeater removeColumn(int index) {
 		data.getColumns().remove(index);
 		return this;
 	}
@@ -173,7 +174,7 @@ public class FluentDataRepeater extends FluentDataWidget<FluentDataRepeater> {
 	 *
 	 * @return this builder
 	 */
-	public FluentDataRepeater clearColumns() {
+	public @Nonnull FluentDataRepeater clearColumns() {
 		data.getColumns().clear();
 		return this;
 	}
@@ -197,7 +198,7 @@ public class FluentDataRepeater extends FluentDataWidget<FluentDataRepeater> {
 	 * @return the wrapped data repeater metadata
 	 */
 	@Override
-	public DataRepeater get() {
+	public @Nonnull DataRepeater get() {
 		return data;
 	}
 }

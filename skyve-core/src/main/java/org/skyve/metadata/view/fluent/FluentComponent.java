@@ -26,7 +26,7 @@ public class FluentComponent extends FluentBoundWidget<FluentComponent> {
 	 * @param component
 	 *            the metadata instance to mutate
 	 */
-	public FluentComponent(Component component) {
+	public FluentComponent(@Nonnull Component component) {
 		this.component = component;
 	}
 
@@ -37,7 +37,7 @@ public class FluentComponent extends FluentBoundWidget<FluentComponent> {
 	 *            the source metadata to copy from
 	 * @return this builder
 	 */
-	public FluentComponent from(@SuppressWarnings("hiding") Component component) {
+	public @Nonnull FluentComponent from(@SuppressWarnings("hiding") @Nonnull Component component) {
 		moduleName(component.getModuleName());
 		documentName(component.getDocumentName());
 		name(component.getName());
@@ -66,7 +66,7 @@ public class FluentComponent extends FluentBoundWidget<FluentComponent> {
 	 *            the module containing the component definition
 	 * @return this builder
 	 */
-	public FluentComponent moduleName(String moduleName) {
+	public @Nonnull FluentComponent moduleName(@Nullable String moduleName) {
 		component.setModuleName(moduleName);
 		return this;
 	}
@@ -78,7 +78,7 @@ public class FluentComponent extends FluentBoundWidget<FluentComponent> {
 	 *            the document containing the component definition
 	 * @return this builder
 	 */
-	public FluentComponent documentName(String documentName) {
+	public @Nonnull FluentComponent documentName(@Nullable String documentName) {
 		component.setDocumentName(documentName);
 		return this;
 	}
@@ -90,7 +90,7 @@ public class FluentComponent extends FluentBoundWidget<FluentComponent> {
 	 *            the component name
 	 * @return this builder
 	 */
-	public FluentComponent name(String name) {
+	public @Nonnull FluentComponent name(@Nullable String name) {
 		component.setName(name);
 		return this;
 	}
@@ -102,7 +102,7 @@ public class FluentComponent extends FluentBoundWidget<FluentComponent> {
 	 *            the widget identifier
 	 * @return this builder
 	 */
-	public FluentComponent widgetId(String widgetId) {
+	public @Nonnull FluentComponent widgetId(@Nullable String widgetId) {
 		component.setWidgetId(widgetId);
 		return this;
 	}
@@ -206,7 +206,7 @@ public class FluentComponent extends FluentBoundWidget<FluentComponent> {
 	 * @return the wrapped component metadata
 	 */
 	@Override
-	public Component get() {
+	public @Nonnull Component get() {
 		return component;
 	}
 }

@@ -2,6 +2,8 @@ package org.skyve.metadata.view.fluent;
 
 import org.skyve.impl.metadata.repository.view.actions.DeleteAction;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * Builds {@link DeleteAction} metadata using a fluent API.
  */
@@ -21,7 +23,7 @@ public class FluentDeleteAction extends FluentValidatableAction<FluentDeleteActi
 	 * @param action
 	 *            the action instance to wrap
 	 */
-	public FluentDeleteAction(DeleteAction action) {
+	public FluentDeleteAction(@Nonnull DeleteAction action) {
 		this.action = action;
 	}
 	
@@ -32,7 +34,7 @@ public class FluentDeleteAction extends FluentValidatableAction<FluentDeleteActi
 	 *            the source action metadata
 	 * @return this builder
 	 */
-	public FluentDeleteAction from(@SuppressWarnings("hiding") DeleteAction action) {
+	public @Nonnull FluentDeleteAction from(@SuppressWarnings("hiding") @Nonnull DeleteAction action) {
 		super.fromBase(action);
 		return this;
 	}
@@ -41,7 +43,7 @@ public class FluentDeleteAction extends FluentValidatableAction<FluentDeleteActi
 	 * Returns the wrapped repository action instance.
 	 */
 	@Override
-	public DeleteAction get() {
+	public @Nonnull DeleteAction get() {
 		return action;
 	}
 }

@@ -22,7 +22,7 @@ public class FluentDefaultWidget extends FluentBoundWidget<FluentDefaultWidget> 
 	 *
 	 * @param widget the metadata instance to mutate
 	 */
-	public FluentDefaultWidget(DefaultWidget widget) {
+	public FluentDefaultWidget(@Nonnull DefaultWidget widget) {
 		this.widget = widget;
 	}
 	
@@ -33,7 +33,7 @@ public class FluentDefaultWidget extends FluentBoundWidget<FluentDefaultWidget> 
 	 *            the source metadata to copy
 	 * @return this builder
 	 */
-	public FluentDefaultWidget from(@SuppressWarnings("hiding") DefaultWidget widget) {
+	public @Nonnull FluentDefaultWidget from(@SuppressWarnings("hiding") @Nonnull DefaultWidget widget) {
 		super.from(widget);
 		widget.getProperties().entrySet().forEach(p -> putProperty(p.getKey(), p.getValue()));
 		return this;
@@ -58,7 +58,7 @@ public class FluentDefaultWidget extends FluentBoundWidget<FluentDefaultWidget> 
 	 * @return the mutable default-widget metadata being configured
 	 */
 	@Override
-	public DefaultWidget get() {
+	public @Nonnull DefaultWidget get() {
 		return widget;
 	}
 }

@@ -2,6 +2,8 @@ package org.skyve.metadata.view.fluent;
 
 import org.skyve.impl.metadata.repository.view.actions.CancelAction;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * Builds {@link CancelAction} metadata using a fluent API.
  */
@@ -21,7 +23,7 @@ public class FluentCancelAction extends FluentAction<FluentCancelAction> {
 	 * @param action
 	 *            the action instance to wrap
 	 */
-	public FluentCancelAction(CancelAction action) {
+	public FluentCancelAction(@Nonnull CancelAction action) {
 		this.action = action;
 	}
 
@@ -32,7 +34,7 @@ public class FluentCancelAction extends FluentAction<FluentCancelAction> {
 	 *            the source action metadata
 	 * @return this builder
 	 */
-	public FluentCancelAction from(@SuppressWarnings("hiding") CancelAction action) {
+	public @Nonnull FluentCancelAction from(@SuppressWarnings("hiding") @Nonnull CancelAction action) {
 		super.fromBase(action);
 		return this;
 	}
@@ -41,7 +43,7 @@ public class FluentCancelAction extends FluentAction<FluentCancelAction> {
 	 * Returns the wrapped repository action instance.
 	 */
 	@Override
-	public CancelAction get() {
+	public @Nonnull CancelAction get() {
 		return action;
 	}
 }

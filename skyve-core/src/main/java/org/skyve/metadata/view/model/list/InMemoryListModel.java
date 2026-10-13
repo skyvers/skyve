@@ -28,13 +28,16 @@ import org.skyve.util.Binder;
 import org.skyve.util.Binder.TargetMetaData;
 import org.skyve.web.SortParameter;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 public abstract class InMemoryListModel<T extends Bean> extends ListModel<T> {
 	private Module module;
 	private Document drivingDocument;
 	private Map<String, Object> parameters;
 	private List<Bean> rows;
 	
-	protected InMemoryListModel(Module module, Document drivingDocument) {
+	protected InMemoryListModel(@Nonnull Module module, @Nonnull Document drivingDocument) {
 		setDrivingDocument(module, drivingDocument);
 	}
 	
@@ -50,13 +53,13 @@ public abstract class InMemoryListModel<T extends Bean> extends ListModel<T> {
 	 * @param module
 	 * @param drivingDocument
 	 */
-	protected void setDrivingDocument(Module module, Document drivingDocument) {
+	protected void setDrivingDocument(@Nonnull Module module, @Nonnull Document drivingDocument) {
 		this.module = module;
 		this.drivingDocument = drivingDocument;
 	}
 	
 	@Override
-	public void postConstruct(Customer customer, boolean runtime) {
+	public void postConstruct(@Nonnull Customer customer, boolean runtime) {
 		projections.add(Bean.DOCUMENT_ID);
 		projections.add(PersistentBean.LOCK_NAME);
 		projections.add(PersistentBean.TAGGED_NAME);
@@ -93,24 +96,24 @@ public abstract class InMemoryListModel<T extends Bean> extends ListModel<T> {
 	 * 
 	 * @param rows
 	 */
-	public abstract List<Bean> getRows() throws Exception;
+	public abstract @Nullable List<Bean> getRows() throws Exception;
 	
 	@Override
-	public Document getDrivingDocument() {
+	public @Nullable Document getDrivingDocument() {
 		return drivingDocument;
 	}
 
 	private Set<String> projections = new TreeSet<>();
 	
 	@Override
-	public Set<String> getProjections() {
+	public @Nonnull Set<String> getProjections() {
 		return projections;
 	}
 
 	private InMemoryFilter filter;
 	
 	@Override
-	public final Filter getFilter() {
+	public final @Nonnull Filter getFilter() {
 		if (filter == null) {
 			filter = (InMemoryFilter) newFilter();
 		}
@@ -118,12 +121,12 @@ public abstract class InMemoryListModel<T extends Bean> extends ListModel<T> {
 	}
 
 	@Override
-	public Filter newFilter() {
+	public @Nonnull Filter newFilter() {
 		return new InMemoryFilter();
 	}
 
 	@Override
-	public void putParameter(String name, Object value) {
+	public void putParameter(@Nonnull String name, @Nullable Object value) {
 		if (parameters == null) {
 			parameters = new TreeMap<>();
 		}
@@ -193,7 +196,7 @@ public abstract class InMemoryListModel<T extends Bean> extends ListModel<T> {
 	}
 	
 	@SuppressWarnings("java:S3776") // Complexity OK
-	private Bean summarize() {
+	private @Nonnull Bean summarize() {
 		Map<String, Object> summaryData = new TreeMap<>();
 
 		AggregateFunction summary = getSummary();
@@ -242,7 +245,7 @@ public abstract class InMemoryListModel<T extends Bean> extends ListModel<T> {
 		return new DynamicBean(module.getName(), drivingDocument.getName(), summaryData);
 	}
 	
-	private static void count(String binding, Bean row, Map<String, Object> summaryData) {
+	private static void count(@Nonnull String binding, @Nonnull Bean row, @Nonnull Map<String, Object> summaryData) {
 		Object value = ((row instanceof TransientBean) && binding.equals(PersistentBean.FLAG_COMMENT_NAME)) ? null : Binder.get(row, binding);
 		if (value != null) {
 			Long count = (Long) summaryData.get(binding);
@@ -251,7 +254,7 @@ public abstract class InMemoryListModel<T extends Bean> extends ListModel<T> {
 		}
 	}
 	
-	private void minOrMax(Map<String, Object> summaryData, boolean max) {
+	private void minOrMax(@Nonnull Map<String, Object> summaryData, boolean max) {
 		for (Bean row : rows) {
 			for (MetaDataQueryColumn column : getColumns()) {
 				String binding = column.getBinding();
@@ -261,7 +264,7 @@ public abstract class InMemoryListModel<T extends Bean> extends ListModel<T> {
 		}
 	}
 	
-	private static void minOrMax(String binding, Bean row, Map<String, Object> summaryData, boolean max) {
+	private static void minOrMax(@Nonnull String binding, @Nonnull Bean row, @Nonnull Map<String, Object> summaryData, boolean max) {
 		@SuppressWarnings("unchecked")
 		Comparable<Object> value = ((row instanceof TransientBean) && binding.equals(PersistentBean.FLAG_COMMENT_NAME)) ? null : (Comparable<Object>) Binder.get(row, binding);
 		if (value != null) {
@@ -279,7 +282,7 @@ public abstract class InMemoryListModel<T extends Bean> extends ListModel<T> {
 		}
 	}
 	
-	private void sum(Map<String, Object> summaryData) {
+	private void sum(@Nonnull Map<String, Object> summaryData) {
 		for (Bean row : rows) {
 			for (MetaDataQueryColumn column : getColumns()) {
 				String binding = column.getBinding();
@@ -302,7 +305,7 @@ public abstract class InMemoryListModel<T extends Bean> extends ListModel<T> {
 	}
 	
 	@Override
-	public Page fetch() throws Exception {
+	public @Nonnull Page fetch() throws Exception {
 		rows = getRows();
 		if (rows == null) {
 			rows = new ArrayList<>(0);
@@ -336,7 +339,7 @@ public abstract class InMemoryListModel<T extends Bean> extends ListModel<T> {
 
 	@Override
 	@SuppressWarnings("resource") // Ownership of the returned iterable passes to the caller.
-	public AutoClosingIterable<Bean> iterate() throws Exception {
+	public @Nonnull AutoClosingIterable<Bean> iterate() throws Exception {
 		rows = getRows();
 		if (rows == null) {
 			rows = new ArrayList<>(0);

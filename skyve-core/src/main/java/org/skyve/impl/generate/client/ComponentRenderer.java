@@ -59,7 +59,7 @@ public abstract class ComponentRenderer extends AbstractRenderer {
 	 * @param invisibleCondition the visibility expression for the generated wrapper
 	 * @return the generated root view component
 	 */
-	public abstract RenderedComponent view(RenderedComponent component, String invisibleCondition);
+	public abstract @Nonnull RenderedComponent view(@Nullable RenderedComponent component, @Nonnull String invisibleCondition);
 
 	/**
 	 * Creates toolbar components for the current rendered view.
@@ -68,7 +68,7 @@ public abstract class ComponentRenderer extends AbstractRenderer {
 	 * @param widgetId the source actions widget identifier
 	 * @return toolbar components, or {@code null} when no toolbar should be emitted
 	 */
-	public abstract List<RenderedComponent> toolbars(List<RenderedComponent> components, String widgetId);
+	public abstract @Nullable List<RenderedComponent> toolbars(@Nullable List<RenderedComponent> components, @Nullable String widgetId);
 
 	/**
 	 * Creates the component used to render a tab-pane container.
@@ -77,7 +77,7 @@ public abstract class ComponentRenderer extends AbstractRenderer {
 	 * @param tabPane the source Skyve tab-pane metadata
 	 * @return the generated tab-pane component
 	 */
-	public abstract RenderedComponent tabPane(RenderedComponent component, TabPane tabPane);
+	public abstract @Nonnull RenderedComponent tabPane(@Nullable RenderedComponent component, @Nonnull TabPane tabPane);
 	
 	/**
 	 * Creates a rendered tab component for the supplied tab metadata.
@@ -87,7 +87,7 @@ public abstract class ComponentRenderer extends AbstractRenderer {
 	 * @param tab the source tab metadata
 	 * @return the generated tab component
 	 */
-	public abstract RenderedComponent tab(RenderedComponent component, String title, Tab tab);
+	public abstract @Nonnull RenderedComponent tab(@Nullable RenderedComponent component, @Nullable String title, @Nonnull Tab tab);
 	
 	/**
 	 * Creates a border wrapper component used by bordered containers.
@@ -98,10 +98,10 @@ public abstract class ComponentRenderer extends AbstractRenderer {
 	 * @param pixelWidth explicit width for fixed-width borders, if any
 	 * @return the generated border wrapper component
 	 */
-	public abstract RenderedComponent border(RenderedComponent component,
-												String title,
-												String invisibleCondition,
-												Integer pixelWidth);
+	public abstract @Nonnull RenderedComponent border(@Nullable RenderedComponent component,
+												@Nullable String title,
+												@Nullable String invisibleCondition,
+												@Nullable Integer pixelWidth);
 
 	/**
 	 * Creates a static text label component.
@@ -110,7 +110,7 @@ public abstract class ComponentRenderer extends AbstractRenderer {
 	 * @param value label text value
 	 * @return the generated label component
 	 */
-	public abstract RenderedComponent label(RenderedComponent component, String value);
+	public abstract @Nonnull RenderedComponent label(@Nullable RenderedComponent component, @Nonnull String value);
 	
 	/**
 	 * Creates a spacer component.
@@ -119,7 +119,7 @@ public abstract class ComponentRenderer extends AbstractRenderer {
 	 * @param spacer source spacer metadata
 	 * @return the generated spacer component
 	 */
-	public abstract RenderedComponent spacer(RenderedComponent component, Spacer spacer);
+	public abstract @Nullable RenderedComponent spacer(@Nullable RenderedComponent component, @Nonnull Spacer spacer);
 	
 	/**
 	 * Creates an action button component bound to a document or row context.
@@ -131,11 +131,11 @@ public abstract class ComponentRenderer extends AbstractRenderer {
 	 * @param action resolved action metadata
 	 * @return the generated action button component
 	 */
-	public abstract RenderedComponent actionButton(RenderedComponent component,
-													String dataWidgetBinding, 
-													String dataWidgetVar, 
-													Button button, 
-													Action action);
+	public abstract @Nonnull RenderedComponent actionButton(@Nullable RenderedComponent component,
+													@Nullable String dataWidgetBinding, 
+													@Nullable String dataWidgetVar, 
+													@Nonnull Button button, 
+													@Nonnull Action action);
 
 	/**
 	 * Creates a report button component.
@@ -145,9 +145,9 @@ public abstract class ComponentRenderer extends AbstractRenderer {
 	 * @param action resolved report action
 	 * @return the generated report button component
 	 */
-	public abstract RenderedComponent reportButton(RenderedComponent component, 
-												Button button, 
-												Action action);
+	public abstract @Nonnull RenderedComponent reportButton(@Nullable RenderedComponent component, 
+												@Nonnull Button button, 
+												@Nonnull Action action);
 
 	/**
 	 * Creates a download button component.
@@ -159,11 +159,11 @@ public abstract class ComponentRenderer extends AbstractRenderer {
 	 * @param documentName target document name
 	 * @return the generated download button component
 	 */
-	public abstract RenderedComponent downloadButton(RenderedComponent component,
-														Button button, 
-														Action action, 
-														String moduleName, 
-														String documentName);
+	public abstract @Nonnull RenderedComponent downloadButton(@Nullable RenderedComponent component,
+														@Nonnull Button button, 
+														@Nonnull Action action, 
+														@Nonnull String moduleName, 
+														@Nonnull String documentName);
 	
 
 	/**
@@ -174,7 +174,7 @@ public abstract class ComponentRenderer extends AbstractRenderer {
 	 * @param image source static image metadata
 	 * @return the generated static image component
 	 */
-	public abstract RenderedComponent staticImage(RenderedComponent component, String fileUrl, StaticImage image);
+	public abstract @Nonnull RenderedComponent staticImage(@Nullable RenderedComponent component, @Nonnull String fileUrl, @Nonnull StaticImage image);
 
 	/**
 	 * Creates a dynamic image component that resolves content from the target document.
@@ -185,10 +185,10 @@ public abstract class ComponentRenderer extends AbstractRenderer {
 	 * @param documentName target document name
 	 * @return the generated dynamic image component
 	 */
-	public abstract RenderedComponent dynamicImage(RenderedComponent component, 
-													DynamicImage image, 
-													String moduleName, 
-													String documentName);
+	public abstract @Nonnull RenderedComponent dynamicImage(@Nullable RenderedComponent component, 
+													@Nonnull DynamicImage image, 
+													@Nonnull String moduleName, 
+													@Nonnull String documentName);
 	
 	/**
 	 * Creates a blurb component from literal markup or a binding expression.
@@ -200,11 +200,11 @@ public abstract class ComponentRenderer extends AbstractRenderer {
 	 * @param blurb source blurb metadata
 	 * @return the generated blurb component
 	 */
-	public abstract RenderedComponent blurb(RenderedComponent component, 
-												String dataWidgetVar, 
-												String value, 
-												String binding, 
-												Blurb blurb);
+	public abstract @Nonnull RenderedComponent blurb(@Nullable RenderedComponent component, 
+												@Nullable String dataWidgetVar, 
+												@Nullable String value, 
+												@Nullable String binding, 
+												@Nonnull Blurb blurb);
 
 	/**
 	 * Creates a label component that may resolve its value from the bound row context.
@@ -216,11 +216,11 @@ public abstract class ComponentRenderer extends AbstractRenderer {
 	 * @param label source label metadata
 	 * @return the generated bound-label component
 	 */
-	public abstract RenderedComponent label(RenderedComponent component,
-												String dataWidgetVar,
-												String value,
-												String binding,
-												Label label);
+	public abstract @Nonnull RenderedComponent label(@Nullable RenderedComponent component,
+												@Nullable String dataWidgetVar,
+												@Nullable String value,
+												@Nullable String binding,
+												@Nonnull Label label);
 
 	/**
 	 * Creates a data-grid component.
@@ -233,11 +233,11 @@ public abstract class ComponentRenderer extends AbstractRenderer {
 	 * @return the generated data-grid component
 	 */
 
-	public abstract RenderedComponent dataGrid(RenderedComponent component,
-												String dataWidgetVar,
+	public abstract @Nonnull RenderedComponent dataGrid(@Nullable RenderedComponent component,
+												@Nullable String dataWidgetVar,
 												boolean ordered,
-												String title,
-												DataGrid grid);
+												@Nullable String title,
+												@Nonnull DataGrid grid);
 
 	/**
 	 * Creates a data repeater component.
@@ -254,10 +254,10 @@ public abstract class ComponentRenderer extends AbstractRenderer {
 	 * @param repeater source repeater metadata
 	 * @return the generated data-repeater component
 	 */
-	public abstract RenderedComponent dataRepeater(RenderedComponent component,
-													String dataWidgetVar,
-													String title,
-													DataRepeater repeater);
+	public abstract @Nonnull RenderedComponent dataRepeater(@Nullable RenderedComponent component,
+													@Nullable String dataWidgetVar,
+													@Nullable String title,
+													@Nonnull DataRepeater repeater);
 
 	/**
 	 * Adds a bound column component to a data-grid style widget.
@@ -273,14 +273,14 @@ public abstract class ComponentRenderer extends AbstractRenderer {
 	 * @return the updated insertion point component
 	 */
 	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
-	public abstract RenderedComponent addDataGridBoundColumn(RenderedComponent component,
-																RenderedComponent current, 
-																AbstractDataWidget widget,
-																DataGridBoundColumn column,
-																String dataWidgetVar,
-																String columnTitle,
-																String columnBinding,
-																StringBuilder gridColumnExpression);
+	public abstract @Nonnull RenderedComponent addDataGridBoundColumn(@Nullable RenderedComponent component,
+																@Nonnull RenderedComponent current, 
+																@Nonnull AbstractDataWidget widget,
+																@Nonnull DataGridBoundColumn column,
+																@Nullable String dataWidgetVar,
+																@Nullable String columnTitle,
+																@Nonnull String columnBinding,
+																@Nonnull StringBuilder gridColumnExpression);
 
 	/**
 	 * Finalises insertion of a bound column and returns the active render node.
@@ -289,7 +289,7 @@ public abstract class ComponentRenderer extends AbstractRenderer {
 	 * @param current current component insertion point
 	 * @return the updated insertion point component
 	 */
-	public abstract RenderedComponent addedDataGridBoundColumn(RenderedComponent component, RenderedComponent current);
+	public abstract @Nonnull RenderedComponent addedDataGridBoundColumn(@Nullable RenderedComponent component, @Nonnull RenderedComponent current);
 
 	/**
 	 * Adds a container column component to a data-grid style widget.
@@ -301,11 +301,11 @@ public abstract class ComponentRenderer extends AbstractRenderer {
 	 * @param column source container-column metadata
 	 * @return the updated insertion point component
 	 */
-	public abstract RenderedComponent addDataGridContainerColumn(RenderedComponent component,
-																	RenderedComponent current,
-																	AbstractDataWidget widget,
-																	String columnTitle,
-																	DataGridContainerColumn column);
+	public abstract @Nonnull RenderedComponent addDataGridContainerColumn(@Nullable RenderedComponent component,
+																	@Nonnull RenderedComponent current,
+																	@Nonnull AbstractDataWidget widget,
+																	@Nullable String columnTitle,
+																	@Nonnull DataGridContainerColumn column);
 
 	/**
 	 * Finalises insertion of a container column and returns the active render node.
@@ -314,7 +314,7 @@ public abstract class ComponentRenderer extends AbstractRenderer {
 	 * @param current current component insertion point
 	 * @return the updated insertion point component
 	 */
-	public abstract RenderedComponent addedDataGridContainerColumn(RenderedComponent component, RenderedComponent current);
+	public abstract @Nonnull RenderedComponent addedDataGridContainerColumn(@Nullable RenderedComponent component, @Nonnull RenderedComponent current);
 
 	/**
 	 * Adds the synthetic action column for a data grid.
@@ -328,12 +328,12 @@ public abstract class ComponentRenderer extends AbstractRenderer {
 	 * @param inline whether actions render inline
 	 * @return the updated insertion point component
 	 */
-	public abstract RenderedComponent addDataGridActionColumn(RenderedComponent component,
-																RenderedComponent current, 
-																DataGrid grid,
-																String dataWidgetVar,
-																String gridColumnExpression,
-																String singluarDocumentAlias,
+	public abstract @Nonnull RenderedComponent addDataGridActionColumn(@Nullable RenderedComponent component,
+																@Nonnull RenderedComponent current, 
+																@Nonnull DataGrid grid,
+																@Nullable String dataWidgetVar,
+																@Nonnull String gridColumnExpression,
+																@Nullable String singluarDocumentAlias,
 																boolean inline);
 	
 	/**
@@ -348,12 +348,12 @@ public abstract class ComponentRenderer extends AbstractRenderer {
 	 * @param aggregateQuery whether the backing query is aggregate
 	 * @return the generated list-grid component
 	 */
-	public abstract RenderedComponent listGrid(RenderedComponent component,
-												String modelDocumentName,
-												String modelName,
-												ListModel<Bean> model,
-												String title,
-												ListGrid listGrid,
+	public abstract @Nonnull RenderedComponent listGrid(@Nullable RenderedComponent component,
+												@Nonnull String modelDocumentName,
+												@Nonnull String modelName,
+												@Nonnull ListModel<Bean> model,
+												@Nullable String title,
+												@Nonnull ListGrid listGrid,
 												boolean aggregateQuery);
 
 	/**
@@ -379,13 +379,13 @@ public abstract class ComponentRenderer extends AbstractRenderer {
 	 * @return the generated list-repeater component
 	 */
 	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
-	public abstract RenderedComponent listRepeater(RenderedComponent component,
-													String modelDocumentName,
-													String modelName,
-													ListModel<Bean> model, 
-													List<FilterParameter> filterParameters,
-													List<Parameter> parameters,
-													String title,
+	public abstract @Nonnull RenderedComponent listRepeater(@Nullable RenderedComponent component,
+													@Nonnull String modelDocumentName,
+													@Nonnull String modelName,
+													@Nonnull ListModel<Bean> model, 
+													@Nonnull List<FilterParameter> filterParameters,
+													@Nonnull List<Parameter> parameters,
+													@Nullable String title,
 													boolean showColumnHeaders,
 													boolean showGrid);
 
@@ -396,7 +396,7 @@ public abstract class ComponentRenderer extends AbstractRenderer {
 	 * @param membership source list-membership metadata
 	 * @return the generated list-membership component
 	 */
-	public abstract RenderedComponent listMembership(RenderedComponent component, ListMembership membership);
+	public abstract @Nonnull RenderedComponent listMembership(@Nullable RenderedComponent component, @Nonnull ListMembership membership);
 	
 	/**
 	 * Creates a checkbox input component.
@@ -408,10 +408,10 @@ public abstract class ComponentRenderer extends AbstractRenderer {
 	 * @param requiredMessage optional required-message expression
 	 * @return the generated checkbox component
 	 */
-	public abstract RenderedComponent checkBox(RenderedComponent component, 
-												String dataWidgetVar, 
-												CheckBox checkBox, 
-												String title, 
+	public abstract @Nonnull RenderedComponent checkBox(@Nullable RenderedComponent component, 
+												@Nullable String dataWidgetVar, 
+												@Nonnull CheckBox checkBox, 
+												@Nullable String title, 
 												@Nullable String requiredMessage);
 
 	/**
@@ -424,10 +424,10 @@ public abstract class ComponentRenderer extends AbstractRenderer {
 	 * @param requiredMessage optional required-message expression
 	 * @return the generated colour-picker component
 	 */
-	public abstract RenderedComponent colourPicker(RenderedComponent component, 
-													String dataWidgetVar, 
-													ColourPicker colour, 
-													String title, 
+	public abstract @Nonnull RenderedComponent colourPicker(@Nullable RenderedComponent component, 
+													@Nullable String dataWidgetVar, 
+													@Nonnull ColourPicker colour, 
+													@Nullable String title, 
 													@Nullable String requiredMessage);
 	
 	/**
@@ -440,10 +440,10 @@ public abstract class ComponentRenderer extends AbstractRenderer {
 	 * @param requiredMessage optional required-message expression
 	 * @return the generated combo component
 	 */
-	public abstract RenderedComponent combo(RenderedComponent component, 
-												String dataWidgetVar, 
-												Combo combo, 
-												String title, 
+	public abstract @Nonnull RenderedComponent combo(@Nullable RenderedComponent component, 
+												@Nullable String dataWidgetVar, 
+												@Nonnull Combo combo, 
+												@Nullable String title, 
 												@Nullable String requiredMessage);
 
 	/**
@@ -472,10 +472,10 @@ public abstract class ComponentRenderer extends AbstractRenderer {
 	 * @param requiredMessage optional required-message expression
 	 * @return the generated content-signature component
 	 */
-	public abstract RenderedComponent contentSignature(RenderedComponent component, 
-														String dataWidgetVar, 
-														ContentSignature signature, 
-														String title, 
+	public abstract @Nonnull RenderedComponent contentSignature(@Nullable RenderedComponent component, 
+														@Nullable String dataWidgetVar, 
+														@Nonnull ContentSignature signature, 
+														@Nullable String title, 
 														@Nullable String requiredMessage);
 
 	/**
@@ -488,10 +488,10 @@ public abstract class ComponentRenderer extends AbstractRenderer {
 	 * @param requiredMessage optional required-message expression
 	 * @return the generated HTML input component
 	 */
-	public abstract RenderedComponent html(RenderedComponent component, 
-											String dataWidgetVar, 
-											HTML html, 
-											String title, 
+	public abstract @Nonnull RenderedComponent html(@Nullable RenderedComponent component, 
+											@Nullable String dataWidgetVar, 
+											@Nonnull HTML html, 
+											@Nullable String title, 
 											@Nullable String requiredMessage);
 
 	/**
@@ -506,13 +506,13 @@ public abstract class ComponentRenderer extends AbstractRenderer {
 	 * @param query resolved lookup query definition
 	 * @return the generated lookup-description component
 	 */
-	public abstract RenderedComponent lookupDescription(RenderedComponent component, 
-															String dataWidgetVar,
-															LookupDescription lookup,
-															String title,
+	public abstract @Nonnull RenderedComponent lookupDescription(@Nullable RenderedComponent component, 
+															@Nullable String dataWidgetVar,
+															@Nonnull LookupDescription lookup,
+															@Nullable String title,
 															@Nullable String requiredMessage,
-															String displayBinding,
-															QueryDefinition query);
+															@Nullable String displayBinding,
+															@Nullable QueryDefinition query);
 	
 	/**
 	 * Creates a password input component.
@@ -524,10 +524,10 @@ public abstract class ComponentRenderer extends AbstractRenderer {
 	 * @param requiredMessage optional required-message expression
 	 * @return the generated password component
 	 */
-	public abstract RenderedComponent password(RenderedComponent component, 
-												String dataWidgetVar,
-												Password password,
-												String title,
+	public abstract @Nonnull RenderedComponent password(@Nullable RenderedComponent component, 
+												@Nullable String dataWidgetVar,
+												@Nonnull Password password,
+												@Nullable String title,
 												@Nullable String requiredMessage);
 
 	/**
@@ -540,10 +540,10 @@ public abstract class ComponentRenderer extends AbstractRenderer {
 	 * @param requiredMessage optional required-message expression
 	 * @return the generated radio component
 	 */
-	public abstract RenderedComponent radio(RenderedComponent component, 
-												String dataWidgetVar,
-												Radio radio,
-												String title,
+	public abstract @Nonnull RenderedComponent radio(@Nullable RenderedComponent component, 
+												@Nullable String dataWidgetVar,
+												@Nonnull Radio radio,
+												@Nullable String title,
 												@Nullable String requiredMessage);
 	
 	/**
@@ -556,10 +556,10 @@ public abstract class ComponentRenderer extends AbstractRenderer {
 	 * @param requiredMessage optional required-message expression
 	 * @return the generated rich-text component
 	 */
-	public abstract RenderedComponent richText(RenderedComponent component, 
-												String dataWidgetVar,
-												RichText text,
-												String title,
+	public abstract @Nonnull RenderedComponent richText(@Nullable RenderedComponent component, 
+												@Nullable String dataWidgetVar,
+												@Nonnull RichText text,
+												@Nullable String title,
 												@Nullable String requiredMessage);
 	
 	/**
@@ -572,10 +572,10 @@ public abstract class ComponentRenderer extends AbstractRenderer {
 	 * @param requiredMessage optional required-message expression
 	 * @return the generated spinner component
 	 */
-	public abstract RenderedComponent spinner(RenderedComponent component, 
-												String dataWidgetVar,
-												Spinner spinner,
-												String title,
+	public abstract @Nonnull RenderedComponent spinner(@Nullable RenderedComponent component, 
+												@Nullable String dataWidgetVar,
+												@Nonnull Spinner spinner,
+												@Nullable String title,
 												@Nullable String requiredMessage);
 	
 	/**
@@ -592,14 +592,14 @@ public abstract class ComponentRenderer extends AbstractRenderer {
 	 * @return the generated text-field component
 	 */
 	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
-	public abstract RenderedComponent text(RenderedComponent component, 
-											String dataWidgetVar, 
-											TextField text, 
-											String title, 
+	public abstract @Nonnull RenderedComponent text(@Nullable RenderedComponent component, 
+											@Nullable String dataWidgetVar, 
+											@Nonnull TextField text, 
+											@Nullable String title, 
 											@Nullable String requiredMessage,
-											Integer length,
-											Converter<?> converter,
-											Format<?> format);
+											@Nullable Integer length,
+											@Nullable Converter<?> converter,
+											@Nullable Format<?> format);
 
 	/**
 	 * Creates a text-area input component.
@@ -612,12 +612,12 @@ public abstract class ComponentRenderer extends AbstractRenderer {
 	 * @param length maximum rendered/editable length
 	 * @return the generated text-area component
 	 */
-	public abstract RenderedComponent textArea(RenderedComponent component, 
-												String dataWidgetVar,
-												TextArea text,
-												String title,
+	public abstract @Nonnull RenderedComponent textArea(@Nullable RenderedComponent component, 
+												@Nullable String dataWidgetVar,
+												@Nonnull TextArea text,
+												@Nullable String title,
 												@Nullable String requiredMessage,
-												Integer length);
+												@Nullable Integer length);
 	
 	/**
 	 * Returns an output-link fragment for renderers that support direct hyperlink generation.
@@ -632,11 +632,11 @@ public abstract class ComponentRenderer extends AbstractRenderer {
 	 * @return renderer-specific link output, or an empty string when unsupported
 	 */
 	@SuppressWarnings("static-method")
-	public String outputLink(String dataWidgetVar, 
-										String value, 
-										String href, 
-										String invisible,
-										ReferenceTarget target) {
+	public @Nonnull String outputLink(@Nullable String dataWidgetVar, 
+										@Nullable String value, 
+										@Nonnull String href, 
+										@Nullable String invisible,
+										@Nullable ReferenceTarget target) {
 /*
 		HtmlOutputLink result = (HtmlOutputLink) a.createComponent(HtmlOutputLink.COMPONENT_TYPE);
 		if (dataWidgetVar != null) {
@@ -695,12 +695,12 @@ public abstract class ComponentRenderer extends AbstractRenderer {
 */
 
 	@SuppressWarnings("unused")
-	public void addAjaxBehavior(RenderedComponent component, 
-									String eventName,
-									String collectionBinding,
-									String dataWidgetVar,
-									String rerenderSource, 
-									List<EventAction> actions) {
+	public void addAjaxBehavior(@Nonnull RenderedComponent component, 
+									@Nonnull String eventName,
+									@Nullable String collectionBinding,
+									@Nullable String dataWidgetVar,
+									@Nullable String rerenderSource, 
+									@Nonnull List<EventAction> actions) {
 /*
 		ActionFacesAttributes attributes = determineActionFacesAttributes(actions);
 		AjaxBehavior ajax = (AjaxBehavior) a.createBehavior(AjaxBehavior.BEHAVIOR_ID);
@@ -738,11 +738,11 @@ public abstract class ComponentRenderer extends AbstractRenderer {
 	 * @param action resolved action metadata
 	 * @return the generated action link component
 	 */
-	public abstract RenderedComponent actionLink(RenderedComponent component,
-													String dataWidgetBinding,
-													String dataWidgetVar,
-													Link link,
-													Action action);
+	public abstract @Nonnull RenderedComponent actionLink(@Nullable RenderedComponent component,
+													@Nullable String dataWidgetBinding,
+													@Nullable String dataWidgetVar,
+													@Nonnull Link link,
+													@Nonnull Action action);
 
 	/**
 	 * Creates a report action component.
@@ -751,7 +751,7 @@ public abstract class ComponentRenderer extends AbstractRenderer {
 	 * @param action resolved report action metadata
 	 * @return the generated report action component
 	 */
-	public abstract RenderedComponent report(RenderedComponent component, Action action);
+	public abstract @Nonnull RenderedComponent report(@Nullable RenderedComponent component, @Nonnull Action action);
 	
 	/**
 	 * Creates a download action component.
@@ -762,10 +762,10 @@ public abstract class ComponentRenderer extends AbstractRenderer {
 	 * @param documentName target document name
 	 * @return the generated download action component
 	 */
-	public abstract RenderedComponent download(RenderedComponent component, 
-												Action action,
-												String moduleName,
-												String documentName);
+	public abstract @Nonnull RenderedComponent download(@Nullable RenderedComponent component, 
+												@Nonnull Action action,
+												@Nonnull String moduleName,
+												@Nonnull String documentName);
 
 	/**
 	 * Creates an upload action component.
@@ -774,7 +774,7 @@ public abstract class ComponentRenderer extends AbstractRenderer {
 	 * @param action resolved upload action metadata
 	 * @return the generated upload action component
 	 */
-	public abstract RenderedComponent upload(RenderedComponent component, Action action);
+	public abstract @Nonnull RenderedComponent upload(@Nullable RenderedComponent component, @Nonnull Action action);
 
 	/**
 	 * Creates a generic action component for implicit or explicit action metadata.
@@ -787,10 +787,10 @@ public abstract class ComponentRenderer extends AbstractRenderer {
 	 * @param title resolved action title
 	 * @return the generated action component
 	 */
-	public abstract RenderedComponent action(RenderedComponent component, 
-												String dataWidgetBinding, 
-												String dataWidgetVar,
-												Action action, 
-												ImplicitActionName name, 
-												String title);
+	public abstract @Nonnull RenderedComponent action(@Nullable RenderedComponent component, 
+												@Nullable String dataWidgetBinding, 
+												@Nullable String dataWidgetVar,
+												@Nonnull Action action, 
+												@Nullable ImplicitActionName name, 
+												@Nullable String title);
 }

@@ -32,7 +32,7 @@ public abstract class FluentStatement<T extends FluentStatement<T>> {
 	 * @return this fluent statement
 	 */
 	@SuppressWarnings("unchecked")
-	protected T fromBase(StatementMetaData statement) {
+	protected @Nonnull T fromBase(@Nonnull StatementMetaData statement) {
 		statement.getProperties().entrySet().forEach(p -> putProperty(p.getKey(), p.getValue()));
 		return (T) this;
 	}
@@ -46,7 +46,7 @@ public abstract class FluentStatement<T extends FluentStatement<T>> {
 	 * @throws IllegalStateException if the statement type is unsupported
 	 */
 	@SuppressWarnings("unchecked")
-	public static <T extends FluentStatement<T>> T from(StatementMetaData statement) {
+	public static @Nonnull <T extends FluentStatement<T>> T from(@Nonnull StatementMetaData statement) {
 		if (statement instanceof IfStatement ifStatement) {
 			return (T) new FluentIfStatement().from(ifStatement);
 		}
@@ -75,5 +75,5 @@ public abstract class FluentStatement<T extends FluentStatement<T>> {
 	 *
 	 * @return backing statement metadata
 	 */
-	public abstract StatementMetaData get();
+	public abstract @Nonnull StatementMetaData get();
 }

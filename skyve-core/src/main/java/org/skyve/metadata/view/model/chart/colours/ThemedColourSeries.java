@@ -2,6 +2,8 @@ package org.skyve.metadata.view.model.chart.colours;
 
 import java.awt.Color;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * Produce darker shades of the base colour given.
  * 
@@ -18,7 +20,7 @@ public class ThemedColourSeries extends ColourSeries {
 		this(BIZHUB_BLUE);
 	}
 	
-	public ThemedColourSeries(Color baseColour) {
+	public ThemedColourSeries(@Nonnull Color baseColour) {
 		this.current = baseColour;
 	}
 	
@@ -34,7 +36,7 @@ public class ThemedColourSeries extends ColourSeries {
 	
 
 	@Override
-	public Color next() {
+	public @Nonnull Color next() {
 		current = new Color(current.getRed() - redDiff,
 								current.getGreen() - greenDiff,
 								current.getBlue() - blueDiff);

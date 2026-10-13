@@ -7,6 +7,9 @@ import org.skyve.impl.metadata.repository.module.MetaDataQueryContentColumnMetaD
 import org.skyve.metadata.module.query.MetaDataQueryContentColumn;
 import org.skyve.metadata.view.TextOutput.Sanitisation;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Implementation of a content (file) column in a metadata query.
  *
@@ -30,34 +33,34 @@ public class MetaDataQueryContentColumnImpl extends AbstractMetaDataQueryColumn 
 	private Map<String, String> properties = new LinkedHashMap<>();
 	
 	@Override
-	public DisplayType getDisplay() {
+	public @Nullable DisplayType getDisplay() {
 		return display;
 	}
 	
-	public void setDisplay(DisplayType display) {
+	public void setDisplay(@Nullable DisplayType display) {
 		this.display = display;
 	}
 	
 	@Override
-	public Integer getPixelHeight() {
+	public @Nullable Integer getPixelHeight() {
 		return pixelHeight;
 	}
 	
-	public void setPixelHeight(Integer pixelHeight) {
+	public void setPixelHeight(@Nullable Integer pixelHeight) {
 		this.pixelHeight = pixelHeight;
 	}
 	
 	@Override
-	public String getEmptyThumbnailRelativeFile() {
+	public @Nullable String getEmptyThumbnailRelativeFile() {
 		return emptyThumbnailRelativeFile;
 	}
 
-	public void setEmptyThumbnailRelativeFile(String emptyThumbnailRelativeFile) {
+	public void setEmptyThumbnailRelativeFile(@Nullable String emptyThumbnailRelativeFile) {
 		this.emptyThumbnailRelativeFile = emptyThumbnailRelativeFile;
 	}
 
 	@Override
-	public Map<String, String> getProperties() {
+	public @Nonnull Map<String, String> getProperties() {
 		return properties;
 	}
 	
@@ -73,7 +76,7 @@ public class MetaDataQueryContentColumnImpl extends AbstractMetaDataQueryColumn 
 	 * Don't sanitise content columns
 	 */
 	@Override
-	public Sanitisation getSanitise() {
+	public @Nonnull Sanitisation getSanitise() {
 		return Sanitisation.none;
 	}
 }

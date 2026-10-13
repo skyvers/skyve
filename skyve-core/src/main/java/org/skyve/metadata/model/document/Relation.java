@@ -2,6 +2,8 @@ package org.skyve.metadata.model.document;
 
 import org.skyve.metadata.model.Attribute;
 
+import jakarta.annotation.Nullable;
+
 /**
  * Base contract for all relational attributes (associations, collections, and inverses).
  *
@@ -18,7 +20,7 @@ public interface Relation extends Attribute {
 	 *
 	 * @return the target document name; never {@code null}
 	 */
-	public String getDocumentName();
+	public @Nullable String getDocumentName();
 	
 	@Override
 	default boolean isScalar() {

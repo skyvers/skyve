@@ -26,7 +26,7 @@ public class FluentZoomIn extends FluentBoundWidget<FluentZoomIn>
 	 *
 	 * @param zoom the metadata instance to mutate
 	 */
-	public FluentZoomIn(ZoomIn zoom) {
+	public FluentZoomIn(@Nonnull ZoomIn zoom) {
 		this.zoom = zoom;
 	}
 
@@ -37,7 +37,7 @@ public class FluentZoomIn extends FluentBoundWidget<FluentZoomIn>
 	 *            the source metadata to copy
 	 * @return this builder
 	 */
-	public FluentZoomIn from(@SuppressWarnings("hiding") ZoomIn zoom) {
+	public @Nonnull FluentZoomIn from(@SuppressWarnings("hiding") @Nonnull ZoomIn zoom) {
 		displayName(zoom.getDisplayName());
 		escapeDisplayName(zoom.getEscapeDisplayName());
 		relativeIconFileName(zoom.getRelativeIconFileName());
@@ -62,7 +62,7 @@ public class FluentZoomIn extends FluentBoundWidget<FluentZoomIn>
 	 * @param displayName the label text
 	 * @return this builder
 	 */
-	public FluentZoomIn displayName(String displayName) {
+	public @Nonnull FluentZoomIn displayName(@Nullable String displayName) {
 		zoom.setDisplayName(displayName);
 		return this;
 	}
@@ -73,7 +73,7 @@ public class FluentZoomIn extends FluentBoundWidget<FluentZoomIn>
 	 * @param escapeDisplayName {@code false} to allow trusted markup; {@code true} to escape at the renderer boundary
 	 * @return this builder
 	 */
-	public FluentZoomIn escapeDisplayName(boolean escapeDisplayName) {
+	public @Nonnull FluentZoomIn escapeDisplayName(boolean escapeDisplayName) {
 		return escapeDisplayName(escapeDisplayName ? Boolean.TRUE : Boolean.FALSE);
 	}
 
@@ -83,7 +83,7 @@ public class FluentZoomIn extends FluentBoundWidget<FluentZoomIn>
 	 * @param escapeDisplayName {@code Boolean.FALSE} to allow trusted markup; {@code null} or {@code Boolean.TRUE} to escape at the renderer boundary
 	 * @return this builder
 	 */
-	public FluentZoomIn escapeDisplayName(Boolean escapeDisplayName) {
+	public @Nonnull FluentZoomIn escapeDisplayName(@Nullable Boolean escapeDisplayName) {
 		zoom.setEscapeDisplayName(escapeDisplayName);
 		return this;
 	}
@@ -94,7 +94,7 @@ public class FluentZoomIn extends FluentBoundWidget<FluentZoomIn>
 	 * @param relativeIconFileName the relative path to the icon file
 	 * @return this builder
 	 */
-	public FluentZoomIn relativeIconFileName(String relativeIconFileName) {
+	public @Nonnull FluentZoomIn relativeIconFileName(@Nullable String relativeIconFileName) {
 		zoom.setRelativeIconFileName(relativeIconFileName);
 		return this;
 	}
@@ -105,7 +105,7 @@ public class FluentZoomIn extends FluentBoundWidget<FluentZoomIn>
 	 * @param iconStyleClass the CSS class name
 	 * @return this builder
 	 */
-	public FluentZoomIn iconStyleClass(String iconStyleClass) {
+	public @Nonnull FluentZoomIn iconStyleClass(@Nullable String iconStyleClass) {
 		zoom.setIconStyleClass(iconStyleClass);
 		return this;
 	}
@@ -116,7 +116,7 @@ public class FluentZoomIn extends FluentBoundWidget<FluentZoomIn>
 	 * @param toolTip the tooltip string
 	 * @return this builder
 	 */
-	public FluentZoomIn toolTip(String toolTip) {
+	public @Nonnull FluentZoomIn toolTip(@Nullable String toolTip) {
 		zoom.setToolTip(toolTip);
 		return this;
 	}
@@ -127,7 +127,7 @@ public class FluentZoomIn extends FluentBoundWidget<FluentZoomIn>
 	 * @param escapeToolTip {@code false} to allow trusted markup; {@code true} to escape at the renderer boundary
 	 * @return this builder
 	 */
-	public FluentZoomIn escapeToolTip(boolean escapeToolTip) {
+	public @Nonnull FluentZoomIn escapeToolTip(boolean escapeToolTip) {
 		return escapeToolTip(escapeToolTip ? Boolean.TRUE : Boolean.FALSE);
 	}
 
@@ -137,7 +137,7 @@ public class FluentZoomIn extends FluentBoundWidget<FluentZoomIn>
 	 * @param escapeToolTip {@code Boolean.FALSE} to allow trusted markup; {@code null} or {@code Boolean.TRUE} to escape at the renderer boundary
 	 * @return this builder
 	 */
-	public FluentZoomIn escapeToolTip(Boolean escapeToolTip) {
+	public @Nonnull FluentZoomIn escapeToolTip(@Nullable Boolean escapeToolTip) {
 		zoom.setEscapeToolTip(escapeToolTip);
 		return this;
 	}
@@ -196,7 +196,7 @@ public class FluentZoomIn extends FluentBoundWidget<FluentZoomIn>
 	 * @param show the show mode
 	 * @return this builder
 	 */
-	public FluentZoomIn show(ActionShow show) {
+	public @Nonnull FluentZoomIn show(@Nullable ActionShow show) {
 		zoom.setShow(show);
 		return this;
 	}
@@ -208,7 +208,7 @@ public class FluentZoomIn extends FluentBoundWidget<FluentZoomIn>
 	 * @return this builder
 	 */
 	@Override
-	public FluentZoomIn pixelWidth(int width) {
+	public @Nonnull FluentZoomIn pixelWidth(int width) {
 		zoom.setPixelWidth(Integer.valueOf(width));
 		return this;
 	}
@@ -220,7 +220,7 @@ public class FluentZoomIn extends FluentBoundWidget<FluentZoomIn>
 	 * @return this builder
 	 */
 	@Override
-	public FluentZoomIn pixelHeight(int height) {
+	public @Nonnull FluentZoomIn pixelHeight(int height) {
 		zoom.setPixelHeight(Integer.valueOf(height));
 		return this;
 	}
@@ -232,7 +232,7 @@ public class FluentZoomIn extends FluentBoundWidget<FluentZoomIn>
 	 * @return this builder
 	 */
 	@Override
-	public FluentZoomIn minPixelHeight(int minPixelHeight) {
+	public @Nonnull FluentZoomIn minPixelHeight(int minPixelHeight) {
 		zoom.setMinPixelHeight(Integer.valueOf(minPixelHeight));
 		return this;
 	}
@@ -244,7 +244,7 @@ public class FluentZoomIn extends FluentBoundWidget<FluentZoomIn>
 	 * @return this builder
 	 */
 	@Override
-	public FluentZoomIn maxPixelHeight(int maxPixelHeight) {
+	public @Nonnull FluentZoomIn maxPixelHeight(int maxPixelHeight) {
 		zoom.setMaxPixelHeight(Integer.valueOf(maxPixelHeight));
 		return this;
 	}
@@ -268,7 +268,7 @@ public class FluentZoomIn extends FluentBoundWidget<FluentZoomIn>
 	 * @return the mutable zoom-in metadata being configured
 	 */
 	@Override
-	public ZoomIn get() {
+	public @Nonnull ZoomIn get() {
 		return zoom;
 	}
 }

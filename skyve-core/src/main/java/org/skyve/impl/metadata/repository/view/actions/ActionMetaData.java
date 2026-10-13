@@ -11,6 +11,7 @@ import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.DecoratedMetaData;
 import org.skyve.metadata.controller.ImplicitActionName;
 
+import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlElement;
@@ -72,7 +73,7 @@ public abstract class ActionMetaData implements DecoratedMetaData {
 	 *
 	 * @return implicit action name, or {@code null}
 	 */
-	public ImplicitActionName getImplicitName() {
+	public @Nullable ImplicitActionName getImplicitName() {
 		return implicitName;
 	}
 
@@ -81,7 +82,7 @@ public abstract class ActionMetaData implements DecoratedMetaData {
 	 *
 	 * @return explicit action name, or {@code null}
 	 */
-	public String getName() {
+	public @Nullable String getName() {
 		return name;
 	}
 
@@ -91,7 +92,7 @@ public abstract class ActionMetaData implements DecoratedMetaData {
 	 * @param name explicit action name
 	 */
 	@XmlAttribute(required = false)
-	public void setName(String name) {
+	public void setName(@Nullable String name) {
 		this.name = UtilImpl.processStringValue(name);
 	}
 
@@ -100,7 +101,7 @@ public abstract class ActionMetaData implements DecoratedMetaData {
 	 *
 	 * @return display label, or {@code null}
 	 */
-	public String getDisplayName() {
+	public @Nullable String getDisplayName() {
 		return displayName;
 	}
 
@@ -109,7 +110,7 @@ public abstract class ActionMetaData implements DecoratedMetaData {
 	 *
 	 * @return {@code Boolean.FALSE} to allow trusted markup; {@code null} or {@code Boolean.TRUE} to escape at the renderer boundary
 	 */
-	public Boolean getEscapeDisplayName() {
+	public @Nullable Boolean getEscapeDisplayName() {
 		return escapeDisplayName;
 	}
 
@@ -119,7 +120,7 @@ public abstract class ActionMetaData implements DecoratedMetaData {
 	 * @param displayName display label
 	 */
 	@XmlAttribute(required = false)
-	public void setDisplayName(String displayName) {
+	public void setDisplayName(@Nullable String displayName) {
 		this.displayName = UtilImpl.processStringValue(displayName);
 	}
 
@@ -129,7 +130,7 @@ public abstract class ActionMetaData implements DecoratedMetaData {
 	 * @param escapeDisplayName {@code Boolean.FALSE} to allow trusted markup; {@code null} or {@code Boolean.TRUE} to escape at the renderer boundary
 	 */
 	@XmlAttribute(required = false)
-	public void setEscapeDisplayName(Boolean escapeDisplayName) {
+	public void setEscapeDisplayName(@Nullable Boolean escapeDisplayName) {
 		this.escapeDisplayName = escapeDisplayName;
 	}
 
@@ -138,7 +139,7 @@ public abstract class ActionMetaData implements DecoratedMetaData {
 	 *
 	 * @return relative icon file name, or {@code null}
 	 */
-	public String getRelativeIconFileName() {
+	public @Nullable String getRelativeIconFileName() {
 		return relativeIconFileName;
 	}
 
@@ -148,7 +149,7 @@ public abstract class ActionMetaData implements DecoratedMetaData {
 	 * @param relativeIconFileName relative icon file name
 	 */
 	@XmlAttribute(required = false)
-	public void setRelativeIconFileName(String relativeIconFileName) {
+	public void setRelativeIconFileName(@Nullable String relativeIconFileName) {
 		this.relativeIconFileName = UtilImpl.processStringValue(relativeIconFileName);
 	}
 
@@ -157,7 +158,7 @@ public abstract class ActionMetaData implements DecoratedMetaData {
 	 *
 	 * @return icon CSS style class, or {@code null}
 	 */
-	public String getIconStyleClass() {
+	public @Nullable String getIconStyleClass() {
 		return iconStyleClass;
 	}
 
@@ -167,7 +168,7 @@ public abstract class ActionMetaData implements DecoratedMetaData {
 	 * @param iconStyleClass icon CSS style class
 	 */
 	@XmlAttribute(required = false)
-	public void setIconStyleClass(String iconStyleClass) {
+	public void setIconStyleClass(@Nullable String iconStyleClass) {
 		this.iconStyleClass = UtilImpl.processStringValue(iconStyleClass);
 	}
 
@@ -176,7 +177,7 @@ public abstract class ActionMetaData implements DecoratedMetaData {
 	 *
 	 * @return tooltip text, or {@code null}
 	 */
-	public String getToolTip() {
+	public @Nullable String getToolTip() {
 		return toolTip;
 	}
 
@@ -185,7 +186,7 @@ public abstract class ActionMetaData implements DecoratedMetaData {
 	 *
 	 * @return {@code Boolean.FALSE} to allow trusted markup; {@code null} or {@code Boolean.TRUE} to escape at the renderer boundary
 	 */
-	public Boolean getEscapeToolTip() {
+	public @Nullable Boolean getEscapeToolTip() {
 		return escapeToolTip;
 	}
 
@@ -195,7 +196,7 @@ public abstract class ActionMetaData implements DecoratedMetaData {
 	 * @param toolTip tooltip text
 	 */
 	@XmlAttribute(required = false)
-	public void setToolTip(String toolTip) {
+	public void setToolTip(@Nullable String toolTip) {
 		this.toolTip = UtilImpl.processStringValue(toolTip);
 	}
 
@@ -205,7 +206,7 @@ public abstract class ActionMetaData implements DecoratedMetaData {
 	 * @param escapeToolTip {@code Boolean.FALSE} to allow trusted markup; {@code null} or {@code Boolean.TRUE} to escape at the renderer boundary
 	 */
 	@XmlAttribute(required = false)
-	public void setEscapeToolTip(Boolean escapeToolTip) {
+	public void setEscapeToolTip(@Nullable Boolean escapeToolTip) {
 		this.escapeToolTip = escapeToolTip;
 	}
 
@@ -214,7 +215,7 @@ public abstract class ActionMetaData implements DecoratedMetaData {
 	 *
 	 * @return confirmation text, or {@code null}
 	 */
-	public String getConfirmationText() {
+	public @Nullable String getConfirmationText() {
 		return confirmationText;
 	}
 
@@ -223,7 +224,7 @@ public abstract class ActionMetaData implements DecoratedMetaData {
 	 *
 	 * @return {@code Boolean.FALSE} to allow trusted markup; {@code null} or {@code Boolean.TRUE} to escape at the renderer boundary
 	 */
-	public Boolean getEscapeConfirm() {
+	public @Nullable Boolean getEscapeConfirm() {
 		return escapeConfirm;
 	}
 
@@ -233,7 +234,7 @@ public abstract class ActionMetaData implements DecoratedMetaData {
 	 * @param confirmationText confirmation text
 	 */
 	@XmlAttribute(name = "confirm", required = false)
-	public void setConfirmationText(String confirmationText) {
+	public void setConfirmationText(@Nullable String confirmationText) {
 		this.confirmationText = UtilImpl.processStringValue(confirmationText);
 	}
 
@@ -243,7 +244,7 @@ public abstract class ActionMetaData implements DecoratedMetaData {
 	 * @param escapeConfirm {@code Boolean.FALSE} to allow trusted markup; {@code null} or {@code Boolean.TRUE} to escape at the renderer boundary
 	 */
 	@XmlAttribute(name = "escapeConfirm", required = false)
-	public void setEscapeConfirm(Boolean escapeConfirm) {
+	public void setEscapeConfirm(@Nullable Boolean escapeConfirm) {
 		this.escapeConfirm = escapeConfirm;
 	}
 
@@ -371,7 +372,7 @@ public abstract class ActionMetaData implements DecoratedMetaData {
 	 * @return mutable action property map
 	 */
 	@Override
-	public Map<String, String> getProperties() {
+	public @Nonnull Map<String, String> getProperties() {
 		return properties;
 	}
 
@@ -383,7 +384,7 @@ public abstract class ActionMetaData implements DecoratedMetaData {
 	 *
 	 * @return a populated runtime action instance
 	 */
-	public ActionImpl toMetaDataAction() {
+	public @Nonnull ActionImpl toMetaDataAction() {
 		ActionImpl result = new ActionImpl();
 
 		result.setConfirmationText(confirmationText);

@@ -8,6 +8,7 @@ import org.skyve.metadata.module.Module;
 import org.skyve.metadata.SerializableMetaData;
 import org.skyve.metadata.user.UserAccess;
 
+import jakarta.annotation.Nonnull;
 import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlType;
 
@@ -39,7 +40,7 @@ public abstract class ModuleRoleUserAccessMetaData implements SerializableMetaDa
 	 * @return the mutable backing list of UX/UI restrictions, never {@code null}
 	 */
 	@XmlElement(namespace = XMLMetaData.MODULE_NAMESPACE, name = "uxui")
-	public List<ModuleRoleUserAccessUxUiMetadata> getUxuis() {
+	public @Nonnull List<ModuleRoleUserAccessUxUiMetadata> getUxuis() {
 		return uxuis;
 	}
 	
@@ -51,7 +52,7 @@ public abstract class ModuleRoleUserAccessMetaData implements SerializableMetaDa
 	 * @param module the resolved module containing documents, queries, and related resources
 	 * @throws org.skyve.metadata.MetaDataException if required attributes are missing or invalid
 	 */
-	public abstract void validate(String metaDataName, String roleName, Module module);
+	public abstract void validate(@Nonnull String metaDataName, @Nonnull String roleName, @Nonnull Module module);
 
 	/**
 	 * Converts this metadata declaration into a runtime {@link UserAccess} value.
@@ -59,5 +60,5 @@ public abstract class ModuleRoleUserAccessMetaData implements SerializableMetaDa
 	 * @param moduleName the owning module name for access types scoped to the current module
 	 * @return the runtime user-access descriptor
 	 */
-	public abstract UserAccess toUserAccess(String moduleName);
+	public abstract @Nonnull UserAccess toUserAccess(@Nonnull String moduleName);
 }

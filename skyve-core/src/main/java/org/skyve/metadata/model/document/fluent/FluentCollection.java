@@ -8,6 +8,9 @@ import org.skyve.metadata.model.document.Collection;
 import org.skyve.metadata.model.document.Collection.CollectionType;
 import org.skyve.metadata.model.document.UniqueConstraint;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Builds {@link CollectionImpl} metadata using fluent mutation methods.
  */
@@ -24,14 +27,14 @@ public class FluentCollection extends FluentReference<FluentCollection> {
 	/**
 	 * Creates a fluent builder instance.
 	 */
-	public FluentCollection(CollectionImpl collection) {
+	public FluentCollection(@Nonnull CollectionImpl collection) {
 		this.collection = collection;
 	}
 
 	/**
 	 * Copies collection metadata, including ordering and unique-constraint definitions.
 	 */
-	public FluentCollection from(@SuppressWarnings("hiding") Collection collection) {
+	public @Nonnull FluentCollection from(@SuppressWarnings("hiding") @Nonnull Collection collection) {
 		super.from(collection);
 		type(collection.getType());
 		ordered(Boolean.TRUE.equals(collection.getOrdered()));
@@ -63,7 +66,7 @@ public class FluentCollection extends FluentReference<FluentCollection> {
 	/**
 	 * Updates metadata on this fluent builder.
 	 */
-	public FluentCollection type(CollectionType type) {
+	public @Nonnull FluentCollection type(@Nonnull CollectionType type) {
 		collection.setType(type);
 		return this;
 	}
@@ -71,7 +74,7 @@ public class FluentCollection extends FluentReference<FluentCollection> {
 	/**
 	 * Updates metadata on this fluent builder.
 	 */
-	public FluentCollection ordered(boolean ordered) {
+	public @Nonnull FluentCollection ordered(boolean ordered) {
 		collection.setOrdered(ordered ? Boolean.TRUE : Boolean.FALSE);
 		return this;
 	}
@@ -79,7 +82,7 @@ public class FluentCollection extends FluentReference<FluentCollection> {
 	/**
 	 * Updates metadata on this fluent builder.
 	 */
-	public FluentCollection minCardinality(int minCardinality) {
+	public @Nonnull FluentCollection minCardinality(int minCardinality) {
 		collection.setMinCardinality(minCardinality);
 		return this;
 	}
@@ -87,7 +90,7 @@ public class FluentCollection extends FluentReference<FluentCollection> {
 	/**
 	 * Updates metadata on this fluent builder.
 	 */
-	public FluentCollection maxCardinality(int maxCardinality) {
+	public @Nonnull FluentCollection maxCardinality(int maxCardinality) {
 		collection.setMaxCardinality(Integer.valueOf(maxCardinality));
 		return this;
 	}
@@ -95,7 +98,7 @@ public class FluentCollection extends FluentReference<FluentCollection> {
 	/**
 	 * Updates metadata on this fluent builder.
 	 */
-	public FluentCollection ownerDatabaseIndex(boolean ownerDatabaseIndex) {
+	public @Nonnull FluentCollection ownerDatabaseIndex(boolean ownerDatabaseIndex) {
 		collection.setOwnerDatabaseIndex(ownerDatabaseIndex ? Boolean.TRUE : Boolean.FALSE);
 		return this;
 	}
@@ -103,7 +106,7 @@ public class FluentCollection extends FluentReference<FluentCollection> {
 	/**
 	 * Updates metadata on this fluent builder.
 	 */
-	public FluentCollection elementDatabaseIndex(boolean elementDatabaseIndex) {
+	public @Nonnull FluentCollection elementDatabaseIndex(boolean elementDatabaseIndex) {
 		collection.setElementDatabaseIndex(elementDatabaseIndex ? Boolean.TRUE : Boolean.FALSE);
 		return this;
 	}
@@ -111,7 +114,7 @@ public class FluentCollection extends FluentReference<FluentCollection> {
 	/**
 	 * Updates metadata on this fluent builder.
 	 */
-	public FluentCollection cacheName(String cacheName) {
+	public @Nonnull FluentCollection cacheName(@Nullable String cacheName) {
 		collection.setCacheName(cacheName);
 		return this;
 	}
@@ -121,7 +124,7 @@ public class FluentCollection extends FluentReference<FluentCollection> {
 	 *
 	 * <p>Side effects: mutates the ordering list in insertion order.
 	 */
-	public FluentCollection addOrdering(FluentCollectionOrdering ordering) {
+	public @Nonnull FluentCollection addOrdering(@Nonnull FluentCollectionOrdering ordering) {
 		collection.getOrdering().add(ordering.get());
 		return this;
 	}
@@ -129,14 +132,14 @@ public class FluentCollection extends FluentReference<FluentCollection> {
 	/**
 	 * Removes ordering definitions that match {@code by}.
 	 */
-	public FluentCollection removeOrdering(String by) {
+	public @Nonnull FluentCollection removeOrdering(@Nonnull String by) {
 		collection.getOrdering().removeIf(o -> by.equals(o.getBy()));
 		return this;
 	}
 	/**
 	 * Clears all matching metadata definitions from this builder.
 	 */
-	public FluentCollection clearOrdering() {
+	public @Nonnull FluentCollection clearOrdering() {
 		collection.getOrdering().clear();
 		return this;
 	}
@@ -146,7 +149,7 @@ public class FluentCollection extends FluentReference<FluentCollection> {
 	 *
 	 * @return a fluent wrapper around the matching ordering, or {@code null} if none match
 	 */
-	public FluentCollectionOrdering findOrdering(String by) {
+	public @Nullable FluentCollectionOrdering findOrdering(@Nonnull String by) {
 		OrderingImpl result = (OrderingImpl) collection.getOrdering().stream().filter(o -> by.equals(o.getBy())).findAny().orElse(null);
 		if (result != null) {
 			return new FluentCollectionOrdering(result);
@@ -157,21 +160,21 @@ public class FluentCollection extends FluentReference<FluentCollection> {
 	/**
 	 * Appends a unique-constraint definition.
 	 */
-	public FluentCollection addUniqueConstraint(FluentCollectionUniqueConstraint constraint) {
+	public @Nonnull FluentCollection addUniqueConstraint(@Nonnull FluentCollectionUniqueConstraint constraint) {
 		collection.getUniqueConstraints().add(constraint.get());
 		return this;
 	}
 	/**
 	 * Removes matching metadata definitions from this builder.
 	 */
-	public FluentCollection removeUniqueConstraint(String name) {
+	public @Nonnull FluentCollection removeUniqueConstraint(@Nonnull String name) {
 		collection.getUniqueConstraints().removeIf(u -> name.equals(u.getName()));
 		return this;
 	}
 	/**
 	 * Clears all matching metadata definitions from this builder.
 	 */
-	public FluentCollection clearUniqueConstraints() {
+	public @Nonnull FluentCollection clearUniqueConstraints() {
 		collection.getUniqueConstraints().clear();
 		return this;
 	}
@@ -181,7 +184,7 @@ public class FluentCollection extends FluentReference<FluentCollection> {
 	 *
 	 * @return a fluent wrapper around the matching constraint, or {@code null} if none match
 	 */
-	public FluentCollectionUniqueConstraint findUniqueConstraint(String name) {
+	public @Nullable FluentCollectionUniqueConstraint findUniqueConstraint(@Nonnull String name) {
 		UniqueConstraintImpl result = (UniqueConstraintImpl) collection.getUniqueConstraints().stream().filter(u -> name.equals(u.getName())).findAny().orElse(null);
 		if (result != null) {
 			return new FluentCollectionUniqueConstraint(result);
@@ -193,7 +196,7 @@ public class FluentCollection extends FluentReference<FluentCollection> {
 	 * Returns the mutable collection metadata instance being built.
 	 */
 	@Override
-	public CollectionImpl get() {
+	public @Nonnull CollectionImpl get() {
 		return collection;
 	}
 }

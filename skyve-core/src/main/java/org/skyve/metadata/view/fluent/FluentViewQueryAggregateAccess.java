@@ -4,6 +4,9 @@ import java.util.Set;
 
 import org.skyve.impl.metadata.repository.view.access.ViewQueryAggregateUserAccessMetaData;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * A fluent helper builder class to construct and manipulate the {@link ViewQueryAggregateUserAccessMetaData} metadata.
  * 
@@ -20,14 +23,14 @@ public class FluentViewQueryAggregateAccess extends FluentViewUserAccess<FluentV
 	/**
 	 * Creates a new FluentViewQueryAggregateAccess from the specified ViewQueryAggregateUserAccessMetaData.
 	 */
-	public FluentViewQueryAggregateAccess(ViewQueryAggregateUserAccessMetaData access) {
+	public FluentViewQueryAggregateAccess(@Nonnull ViewQueryAggregateUserAccessMetaData access) {
 		this.access = access;
 	}
 
 	/**
 	 * Returns a FluentViewQueryAggregateAccess from a runtime metadata.
 	 */
-	protected FluentViewQueryAggregateAccess from(String queryName, Set<String> uxuis) {
+	protected @Nonnull FluentViewQueryAggregateAccess from(@Nonnull String queryName, @Nonnull Set<String> uxuis) {
 		queryName(queryName);
 		uxuis.forEach(u -> addUxUi(u));
 		return this;
@@ -36,7 +39,7 @@ public class FluentViewQueryAggregateAccess extends FluentViewUserAccess<FluentV
 	/**
 	 * Specifies the query name for this FluentViewQueryAggregateAccess.
 	 */
-	public FluentViewQueryAggregateAccess queryName(final String queryName) {
+	public @Nonnull FluentViewQueryAggregateAccess queryName(final @Nullable String queryName) {
 		access.setQueryName(queryName);
 		return this;
 	}
@@ -45,7 +48,7 @@ public class FluentViewQueryAggregateAccess extends FluentViewUserAccess<FluentV
 	 * Returns the underlying view user access metadata from this builder.
 	 */
 	@Override
-	public ViewQueryAggregateUserAccessMetaData get() {
+	public @Nonnull ViewQueryAggregateUserAccessMetaData get() {
 		return access;
 	}
 }

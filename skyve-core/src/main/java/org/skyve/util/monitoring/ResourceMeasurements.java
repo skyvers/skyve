@@ -8,6 +8,8 @@ import java.util.Arrays;
 import java.util.Map;
 import java.util.TreeMap;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * ResourceMeasurements collects and aggregates system resource usage metrics
  * (CPU and RAM Usage) across multiple rolling time windows.
@@ -69,7 +71,7 @@ public class ResourceMeasurements implements Serializable {
 	 *
 	 * @return second-indexed fractional percentages; never {@code null}
 	 */
-	public Map<Integer, Float> getSecondsSystemCpuUsageUsage() {
+	public @Nonnull Map<Integer, Float> getSecondsSystemCpuUsageUsage() {
 		return getMap(secondsSystemCpuUsage);
 	}
 
@@ -78,7 +80,7 @@ public class ResourceMeasurements implements Serializable {
 	 *
 	 * @return minute-indexed fractional percentages; never {@code null}
 	 */
-	public Map<Integer, Float> getMinutesSystemCpuUsageUsage() {
+	public @Nonnull Map<Integer, Float> getMinutesSystemCpuUsageUsage() {
 		return getMap(minutesSystemCpuUsage);
 	}
 
@@ -87,7 +89,7 @@ public class ResourceMeasurements implements Serializable {
 	 *
 	 * @return hour-indexed fractional percentages; never {@code null}
 	 */
-	public Map<Integer, Float> getHoursSystemCpuUsage() {
+	public @Nonnull Map<Integer, Float> getHoursSystemCpuUsage() {
 		return getMap(hoursSystemCpuUsage);
 	}
 
@@ -96,7 +98,7 @@ public class ResourceMeasurements implements Serializable {
 	 *
 	 * @return day-indexed fractional percentages; never {@code null}
 	 */
-	public Map<Integer, Float> getDaysSystemCpuUsage() {
+	public @Nonnull Map<Integer, Float> getDaysSystemCpuUsage() {
 		return getMap(daysSystemCpuUsage);
 	}
 
@@ -105,11 +107,11 @@ public class ResourceMeasurements implements Serializable {
 	 *
 	 * @return week-indexed fractional percentages; never {@code null}
 	 */
-	public Map<Integer, Float> getWeeksSystemCpuUsage() {
+	public @Nonnull Map<Integer, Float> getWeeksSystemCpuUsage() {
 		return getMap(weeksSystemCpuUsage);
 	}
 
-	private static Map<Integer, Float> getMap(short[] array) {
+	private static @Nonnull Map<Integer, Float> getMap(@Nonnull short[] array) {
 		TreeMap<Integer, Float> result = new TreeMap<>();
 		for (int i = 0, l = array.length; i < l; i++) {
 			short value = array[i];
@@ -125,7 +127,7 @@ public class ResourceMeasurements implements Serializable {
 	 *
 	 * @return second-indexed fractional percentages; never {@code null}
 	 */
-	public Map<Integer, Float> getSecondsHeapRamUsage() {
+	public @Nonnull Map<Integer, Float> getSecondsHeapRamUsage() {
 		return getMap(secondsHeapRamUsage);
 	}
 
@@ -134,7 +136,7 @@ public class ResourceMeasurements implements Serializable {
 	 *
 	 * @return minute-indexed fractional percentages; never {@code null}
 	 */
-	public Map<Integer, Float> getMinutesHeapRamUsage() {
+	public @Nonnull Map<Integer, Float> getMinutesHeapRamUsage() {
 		return getMap(minutesHeapRamUsage);
 	}
 
@@ -143,7 +145,7 @@ public class ResourceMeasurements implements Serializable {
 	 *
 	 * @return hour-indexed fractional percentages; never {@code null}
 	 */
-	public Map<Integer, Float> getHoursHeapRamUsage() {
+	public @Nonnull Map<Integer, Float> getHoursHeapRamUsage() {
 		return getMap(hoursHeapRamUsage);
 	}
 
@@ -152,7 +154,7 @@ public class ResourceMeasurements implements Serializable {
 	 *
 	 * @return day-indexed fractional percentages; never {@code null}
 	 */
-	public Map<Integer, Float> getDaysHeapRamUsage() {
+	public @Nonnull Map<Integer, Float> getDaysHeapRamUsage() {
 		return getMap(daysHeapRamUsage);
 	}
 
@@ -161,7 +163,7 @@ public class ResourceMeasurements implements Serializable {
 	 *
 	 * @return week-indexed fractional percentages; never {@code null}
 	 */
-	public Map<Integer, Float> getWeeksHeapRamUsage() {
+	public @Nonnull Map<Integer, Float> getWeeksHeapRamUsage() {
 		return getMap(weeksHeapRamUsage);
 	}
 
@@ -267,7 +269,7 @@ public class ResourceMeasurements implements Serializable {
 		lastWeek = Integer.MIN_VALUE;
 	}
 
-	private static void rollup(short[] source, short[] target, int targetIndex) {
+	private static void rollup(@Nonnull short[] source, @Nonnull short[] target, int targetIndex) {
 		int sum = 0;
 		int count = 0;
 		for (short v : source) {
@@ -279,13 +281,13 @@ public class ResourceMeasurements implements Serializable {
 		target[targetIndex] = (count > 0) ? (short) (sum / count) : Short.MIN_VALUE;
 	}
 	
-	private static void clear(short[] cpu, short[] ram) {
+	private static void clear(@Nonnull short[] cpu, @Nonnull short[] ram) {
 		Arrays.fill(cpu, Short.MIN_VALUE);
 		Arrays.fill(ram, Short.MIN_VALUE);
 	}
 
 	@Override
-	public synchronized String toString() {
+	public synchronized @Nonnull String toString() {
 		StringBuilder result = new StringBuilder(256);
 		result.append("ResourceMeasurements:\n");
 
@@ -304,7 +306,7 @@ public class ResourceMeasurements implements Serializable {
 		return result.toString();
 	}
 
-	private static void prettyPrint(StringBuilder sb, String label, short[] values) {
+	private static void prettyPrint(@Nonnull StringBuilder sb, @Nonnull String label, @Nonnull short[] values) {
 		sb.append(label).append(": ");
 		boolean any = false;
 		for (int i = 0; i < values.length; i++) {

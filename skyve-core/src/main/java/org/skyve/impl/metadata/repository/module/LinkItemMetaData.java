@@ -3,6 +3,7 @@ package org.skyve.impl.metadata.repository.module;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
 
+import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
@@ -24,11 +25,11 @@ public class LinkItemMetaData extends ItemMetaData {
 
 	private String href;
 
-	public String getHref() {
+	public @Nullable String getHref() {
 		return href;
 	}
 	@XmlAttribute(name = "href", required = true)
-	public void setHref(String href) {
+	public void setHref(@Nullable String href) {
 		this.href = UtilImpl.processStringValue(href);
 	}
 }

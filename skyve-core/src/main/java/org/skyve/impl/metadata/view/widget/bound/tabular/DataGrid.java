@@ -21,6 +21,7 @@ import org.skyve.metadata.DecoratedMetaData;
 import org.skyve.metadata.view.Disableable;
 import org.skyve.metadata.view.Editable;
 
+import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlElement;
@@ -125,7 +126,7 @@ public class DataGrid extends AbstractDataWidget implements DecoratedMetaData,
 	 *
 	 * @return {@code true} when the grid should render inline
 	 */
-	public Boolean getInline() {
+	public @Nullable Boolean getInline() {
 		return inline;
 	}
 
@@ -135,7 +136,7 @@ public class DataGrid extends AbstractDataWidget implements DecoratedMetaData,
 	 * @param inline {@code true} to render inline
 	 */
 	@XmlAttribute(name = "inline", required = false)
-	public void setInline(Boolean inline) {
+	public void setInline(@Nullable Boolean inline) {
 		this.inline = inline;
 	}
 
@@ -145,7 +146,7 @@ public class DataGrid extends AbstractDataWidget implements DecoratedMetaData,
 	 * @return {@code true} when inline editing is enabled
 	 */
 	@Override
-	public Boolean getEditable() {
+	public @Nullable Boolean getEditable() {
 		return editable;
 	}
 
@@ -156,7 +157,7 @@ public class DataGrid extends AbstractDataWidget implements DecoratedMetaData,
 	 */
 	@Override
 	@XmlAttribute(name = "editable", required = false)
-	public void setEditable(Boolean editable) {
+	public void setEditable(@Nullable Boolean editable) {
 		this.editable = editable;
 	}
 
@@ -165,7 +166,7 @@ public class DataGrid extends AbstractDataWidget implements DecoratedMetaData,
 	 *
 	 * @return {@code true} when wrapping is enabled
 	 */
-	public Boolean getWordWrap() {
+	public @Nullable Boolean getWordWrap() {
 		return wordWrap;
 	}
 
@@ -175,7 +176,7 @@ public class DataGrid extends AbstractDataWidget implements DecoratedMetaData,
 	 * @param wordWrap {@code true} to enable wrapping
 	 */
 	@XmlAttribute(name = "wrap", required = false)
-	public void setWordWrap(Boolean wordWrap) {
+	public void setWordWrap(@Nullable Boolean wordWrap) {
 		this.wordWrap = wordWrap;
 	}
 
@@ -190,7 +191,7 @@ public class DataGrid extends AbstractDataWidget implements DecoratedMetaData,
 	@Override
 	@XmlElements({@XmlElement(namespace = XMLMetaData.VIEW_NAMESPACE, name = "boundColumn", type = DataGridBoundColumn.class, required = true),
 						@XmlElement(namespace = XMLMetaData.VIEW_NAMESPACE, name = "containerColumn", type = DataGridContainerColumn.class, required = true)})
-	public List<DataGridColumn> getColumns() {
+	public @Nonnull List<DataGridColumn> getColumns() {
 		return columns;
 	}
 
@@ -507,7 +508,7 @@ public class DataGrid extends AbstractDataWidget implements DecoratedMetaData,
 	 *
 	 * @return {@code true} when the add action is shown
 	 */
-	public Boolean getShowAdd() {
+	public @Nullable Boolean getShowAdd() {
 		return showAdd;
 	}
 
@@ -517,7 +518,7 @@ public class DataGrid extends AbstractDataWidget implements DecoratedMetaData,
 	 * @param showAdd {@code true} to show the add action
 	 */
 	@XmlAttribute(name = "showAdd", required = false)
-	public void setShowAdd(Boolean showAdd) {
+	public void setShowAdd(@Nullable Boolean showAdd) {
 		this.showAdd = showAdd;
 	}
 
@@ -526,7 +527,7 @@ public class DataGrid extends AbstractDataWidget implements DecoratedMetaData,
 	 *
 	 * @return {@code true} when the zoom action is shown
 	 */
-	public Boolean getShowZoom() {
+	public @Nullable Boolean getShowZoom() {
 		return showZoom;
 	}
 
@@ -536,7 +537,7 @@ public class DataGrid extends AbstractDataWidget implements DecoratedMetaData,
 	 * @param showZoom {@code true} to show the zoom action
 	 */
 	@XmlAttribute(name = "showZoom", required = false)
-	public void setShowZoom(Boolean showZoom) {
+	public void setShowZoom(@Nullable Boolean showZoom) {
 		this.showZoom = showZoom;
 	}
 
@@ -545,7 +546,7 @@ public class DataGrid extends AbstractDataWidget implements DecoratedMetaData,
 	 *
 	 * @return {@code true} when the edit action is shown
 	 */
-	public Boolean getShowEdit() {
+	public @Nullable Boolean getShowEdit() {
 		return showEdit;
 	}
 
@@ -555,7 +556,7 @@ public class DataGrid extends AbstractDataWidget implements DecoratedMetaData,
 	 * @param showEdit {@code true} to show the edit action
 	 */
 	@XmlAttribute(name = "showEdit", required = false)
-	public void setShowEdit(Boolean showEdit) {
+	public void setShowEdit(@Nullable Boolean showEdit) {
 		this.showEdit = showEdit;
 	}
 
@@ -564,7 +565,7 @@ public class DataGrid extends AbstractDataWidget implements DecoratedMetaData,
 	 *
 	 * @return {@code true} when the remove action is shown
 	 */
-	public Boolean getShowRemove() {
+	public @Nullable Boolean getShowRemove() {
 		return showRemove;
 	}
 
@@ -574,7 +575,7 @@ public class DataGrid extends AbstractDataWidget implements DecoratedMetaData,
 	 * @param showRemove {@code true} to show the remove action
 	 */
 	@XmlAttribute(name = "showRemove", required = false)
-	public void setShowRemove(Boolean showRemove) {
+	public void setShowRemove(@Nullable Boolean showRemove) {
 		this.showRemove = showRemove;
 	}
 
@@ -583,7 +584,7 @@ public class DataGrid extends AbstractDataWidget implements DecoratedMetaData,
 	 *
 	 * @return {@code true} when the deselect action is shown
 	 */
-	public Boolean getShowDeselect() {
+	public @Nullable Boolean getShowDeselect() {
 		return showDeselect;
 	}
 
@@ -593,7 +594,7 @@ public class DataGrid extends AbstractDataWidget implements DecoratedMetaData,
 	 * @param showDeselect {@code true} to show the deselect action
 	 */
 	@XmlAttribute(name = "showDeselect", required = false)
-	public void setShowDeselect(Boolean showDeselect) {
+	public void setShowDeselect(@Nullable Boolean showDeselect) {
 		this.showDeselect = showDeselect;
 	}
 
@@ -603,7 +604,7 @@ public class DataGrid extends AbstractDataWidget implements DecoratedMetaData,
 	 * @return the selected row identifier binding, or {@code null} when not set
 	 */
 	@Override
-	public String getSelectedIdBinding() {
+	public @Nullable String getSelectedIdBinding() {
 		return selectedIdBinding;
 	}
 
@@ -614,7 +615,7 @@ public class DataGrid extends AbstractDataWidget implements DecoratedMetaData,
 	 */
 	@Override
 	@XmlAttribute(name = "selectedIdBinding")
-	public void setSelectedIdBinding(String selectedIdBinding) {
+	public void setSelectedIdBinding(@Nullable String selectedIdBinding) {
 		this.selectedIdBinding = UtilImpl.processStringValue(selectedIdBinding);
 	}
 
@@ -629,7 +630,7 @@ public class DataGrid extends AbstractDataWidget implements DecoratedMetaData,
 						@XmlElementRef(type = ServerSideActionEventAction.class),
 						@XmlElementRef(type = SetDisabledEventAction.class),
 						@XmlElementRef(type = SetInvisibleEventAction.class)})
-	public List<EventAction> getAddedActions() {
+	public @Nonnull List<EventAction> getAddedActions() {
 		return addedActions;
 	}
 
@@ -644,7 +645,7 @@ public class DataGrid extends AbstractDataWidget implements DecoratedMetaData,
 						@XmlElementRef(type = ServerSideActionEventAction.class),
 						@XmlElementRef(type = SetDisabledEventAction.class),
 						@XmlElementRef(type = SetInvisibleEventAction.class)})
-	public List<EventAction> getEditedActions() {
+	public @Nonnull List<EventAction> getEditedActions() {
 		return editedActions;
 	}
 
@@ -659,7 +660,7 @@ public class DataGrid extends AbstractDataWidget implements DecoratedMetaData,
 						@XmlElementRef(type = ServerSideActionEventAction.class),
 						@XmlElementRef(type = SetDisabledEventAction.class),
 						@XmlElementRef(type = SetInvisibleEventAction.class)})
-	public List<EventAction> getRemovedActions() {
+	public @Nonnull List<EventAction> getRemovedActions() {
 		return removedActions;
 	}
 	
@@ -674,7 +675,7 @@ public class DataGrid extends AbstractDataWidget implements DecoratedMetaData,
 						@XmlElementRef(type = ServerSideActionEventAction.class),
 						@XmlElementRef(type = SetDisabledEventAction.class),
 						@XmlElementRef(type = SetInvisibleEventAction.class)})
-	public List<EventAction> getSelectedActions() {
+	public @Nonnull List<EventAction> getSelectedActions() {
 		return selectedActions;
 	}
 
@@ -684,7 +685,7 @@ public class DataGrid extends AbstractDataWidget implements DecoratedMetaData,
 	 * @return mutable decorator property map keyed by property name
 	 */
 	@Override
-	public Map<String, String> getProperties() {
+	public @Nonnull Map<String, String> getProperties() {
 		return properties;
 	}
 }

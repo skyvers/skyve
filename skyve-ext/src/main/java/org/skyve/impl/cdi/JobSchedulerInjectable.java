@@ -13,6 +13,8 @@ import org.skyve.metadata.module.JobMetaData;
 import org.skyve.metadata.user.User;
 import org.skyve.web.BackgroundTask;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.enterprise.inject.Alternative;
 
 /**
@@ -49,7 +51,7 @@ public class JobSchedulerInjectable implements JobScheduler, Serializable {
 	 * @param user the user context for execution.
 	 */
 	@Override
-	public void runOneShotJob(JobMetaData job, Bean parameter, User user) {
+	public void runOneShotJob(@Nonnull JobMetaData job, @Nullable Bean parameter, @Nonnull User user) {
 		EXT.getJobScheduler().runOneShotJob(job, parameter, user);
 	}
 
@@ -62,7 +64,7 @@ public class JobSchedulerInjectable implements JobScheduler, Serializable {
 	 * @param sleepAtEndInSeconds the post-execution delay in seconds.
 	 */
 	@Override
-	public void runOneShotJob(JobMetaData job, Bean parameter, User user, int sleepAtEndInSeconds) {
+	public void runOneShotJob(@Nonnull JobMetaData job, @Nullable Bean parameter, @Nonnull User user, int sleepAtEndInSeconds) {
 		EXT.getJobScheduler().runOneShotJob(job, parameter, user, sleepAtEndInSeconds);
 	}
 
@@ -75,7 +77,7 @@ public class JobSchedulerInjectable implements JobScheduler, Serializable {
 	 * @param <T> the bean type handled by the background task.
 	 */
 	@Override
-	public <T extends Bean> void runBackgroundTask(Class<? extends BackgroundTask<T>> taskClass, User user, String webId) {
+	public <T extends Bean> void runBackgroundTask(@Nonnull Class<? extends BackgroundTask<T>> taskClass, @Nonnull User user, @Nonnull String webId) {
 		EXT.getJobScheduler().runBackgroundTask(taskClass, user, webId);
 	}
 
@@ -96,7 +98,7 @@ public class JobSchedulerInjectable implements JobScheduler, Serializable {
 	 * @param when the scheduled execution time.
 	 */
 	@Override
-	public void scheduleOneShotJob(JobMetaData job, Bean parameter, User user, Date when) {
+	public void scheduleOneShotJob(@Nonnull JobMetaData job, @Nullable Bean parameter, @Nonnull User user, @Nonnull Date when) {
 		EXT.getJobScheduler().scheduleOneShotJob(job, parameter, user, when);
 	}
 
@@ -107,7 +109,7 @@ public class JobSchedulerInjectable implements JobScheduler, Serializable {
 	 * @param user the user context used for scheduling.
 	 */
 	@Override
-	public void scheduleJob(JobSchedule jobSchedule, User user) {
+	public void scheduleJob(@Nonnull JobSchedule jobSchedule, @Nonnull User user) {
 		EXT.getJobScheduler().scheduleJob(jobSchedule, user);
 	}
 
@@ -118,7 +120,7 @@ public class JobSchedulerInjectable implements JobScheduler, Serializable {
 	 * @param customerName the owning customer name.
 	 */
 	@Override
-	public void unscheduleJob(String uuid, String customerName) {
+	public void unscheduleJob(@Nonnull String uuid, @Nonnull String customerName) {
 		EXT.getJobScheduler().unscheduleJob(uuid, customerName);
 	}
 
@@ -129,7 +131,7 @@ public class JobSchedulerInjectable implements JobScheduler, Serializable {
 	 * @param user the user context used for scheduling.
 	 */
 	@Override
-	public void scheduleReport(JobSchedule reportSchedule, User user) {
+	public void scheduleReport(@Nonnull JobSchedule reportSchedule, @Nonnull User user) {
 		EXT.getJobScheduler().scheduleReport(reportSchedule, user);
 	}
 
@@ -140,7 +142,7 @@ public class JobSchedulerInjectable implements JobScheduler, Serializable {
 	 * @param customerName the owning customer name.
 	 */
 	@Override
-	public void unscheduleReport(String uuid, String customerName) {
+	public void unscheduleReport(@Nonnull String uuid, @Nonnull String customerName) {
 		EXT.getJobScheduler().unscheduleReport(uuid, customerName);
 	}
 
@@ -150,7 +152,7 @@ public class JobSchedulerInjectable implements JobScheduler, Serializable {
 	 * @return running jobs for the current customer context.
 	 */
 	@Override
-	public List<JobDescription> getCustomerRunningJobs() {
+	public @Nonnull List<JobDescription> getCustomerRunningJobs() {
 		return EXT.getJobScheduler().getCustomerRunningJobs();
 	}
 
@@ -161,7 +163,7 @@ public class JobSchedulerInjectable implements JobScheduler, Serializable {
 	 * @return true if cancellation was requested successfully; otherwise false.
 	 */
 	@Override
-	public boolean cancelJob(String instanceId) {
+	public boolean cancelJob(@Nonnull String instanceId) {
 		return EXT.getJobScheduler().cancelJob(instanceId);
 	}
 	
@@ -187,7 +189,7 @@ public class JobSchedulerInjectable implements JobScheduler, Serializable {
 	 * @param restoreOptions the restore options bean.
 	 */
 	@Override
-	public void runRestoreJob(Bean restoreOptions) {
+	public void runRestoreJob(@Nonnull Bean restoreOptions) {
 		EXT.getJobScheduler().preRestore();
 	}
 	

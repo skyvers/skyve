@@ -9,6 +9,9 @@ import java.util.regex.Pattern;
 
 import org.skyve.nlp.cron.ExpressionElementProvider;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Parses phrases like {@code every 15th of march} into day-of-month and month cron fields.
  */
@@ -58,7 +61,7 @@ public class EveryDayNumber implements ExpressionElementProvider {
 	 * @return {@code true} when an ordinal day and month are captured.
 	 */
 	@Override
-	public boolean matches(String value) {
+	public boolean matches(@Nonnull String value) {
 		Matcher m = compiledPattern.matcher(value);
 		while (m.find()) {
 			for (int i = 0; i <= m.groupCount(); i++) {
@@ -84,7 +87,7 @@ public class EveryDayNumber implements ExpressionElementProvider {
 	 * @return {@code "0"}.
 	 */
 	@Override
-	public String getMinuteElement() {
+	public @Nonnull String getMinuteElement() {
 		return "0";
 	}
 
@@ -104,7 +107,7 @@ public class EveryDayNumber implements ExpressionElementProvider {
 	 * @return {@code "0"}.
 	 */
 	@Override
-	public String getHourElement() {
+	public @Nonnull String getHourElement() {
 		return "0";
 	}
 
@@ -124,7 +127,7 @@ public class EveryDayNumber implements ExpressionElementProvider {
 	 * @return The day token, or {@code null} when unavailable.
 	 */
 	@Override
-	public String getDayNumberElement() {
+	public @Nullable String getDayNumberElement() {
 		return segments.size() >= 3 ? segments.get(2) : null;
 	}
 
@@ -144,7 +147,7 @@ public class EveryDayNumber implements ExpressionElementProvider {
 	 * @return The numeric month token, or {@code null} when unavailable.
 	 */
 	@Override
-	public String getMonthElement() {
+	public @Nullable String getMonthElement() {
 		return segments.size() >= 5 && monthMap.get(segments.get(4).toLowerCase()) != null
 				? monthMap.get(segments.get(4).toLowerCase())
 				: null;
@@ -166,7 +169,7 @@ public class EveryDayNumber implements ExpressionElementProvider {
 	 * @return {@code "*"}.
 	 */
 	@Override
-	public String getDayOfWeekElement() {
+	public @Nonnull String getDayOfWeekElement() {
 			return "*";
 	}
 

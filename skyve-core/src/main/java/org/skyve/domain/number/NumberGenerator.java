@@ -1,5 +1,8 @@
 package org.skyve.domain.number;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Generates unique, monotonically increasing document sequence numbers.
  *
@@ -29,7 +32,7 @@ public interface NumberGenerator {
 	 * @param fieldName    the field name that holds the sequence
 	 * @return the next integer sequence value
 	 */
-	default Integer nextInt(String moduleName, String documentName, String fieldName) {
+	default @Nonnull Integer nextInt(@Nonnull String moduleName, @Nonnull String documentName, @Nonnull String fieldName) {
 		return Integer.valueOf(Integer.parseInt(next(null, moduleName, documentName, fieldName, 0)));
 	}
 
@@ -42,7 +45,7 @@ public interface NumberGenerator {
 	 * @param fieldName    the field name that holds the sequence
 	 * @return the next long sequence value
 	 */
-	default Long nextLong(String moduleName, String documentName, String fieldName) {
+	default @Nonnull Long nextLong(@Nonnull String moduleName, @Nonnull String documentName, @Nonnull String fieldName) {
 		return Long.valueOf(Long.parseLong(next(null, moduleName, documentName, fieldName, 0)));
 	}
 
@@ -55,7 +58,7 @@ public interface NumberGenerator {
 	 * @param fieldName    the field name that holds the sequence
 	 * @return the next sequence value string
 	 */
-	default String next(String moduleName, String documentName, String fieldName) {
+	default @Nonnull String next(@Nonnull String moduleName, @Nonnull String documentName, @Nonnull String fieldName) {
 		return next(null, moduleName, documentName, fieldName, 0);
 	}
 
@@ -70,7 +73,7 @@ public interface NumberGenerator {
 	 *                      zero-padded on the left
 	 * @return the next sequence value string
 	 */
-	default String next(String moduleName, String documentName, String fieldName, int minimumLength) {
+	default @Nonnull String next(@Nonnull String moduleName, @Nonnull String documentName, @Nonnull String fieldName, int minimumLength) {
 		return next(null, moduleName, documentName, fieldName, minimumLength);
 	}
 	
@@ -84,7 +87,7 @@ public interface NumberGenerator {
 	 * @param fieldName    the field name that holds the sequence
 	 * @return the next sequence value string, e.g. {@code "INV42"}
 	 */
-	default String next(String prefix, String moduleName, String documentName, String fieldName) {
+	default @Nonnull String next(@Nullable String prefix, @Nonnull String moduleName, @Nonnull String documentName, @Nonnull String fieldName) {
 		return next(prefix, moduleName, documentName, fieldName, 0);
 	}
 
@@ -104,9 +107,9 @@ public interface NumberGenerator {
 	 * @param minimumLength the minimum length of the number when specified as a string
 	 * @return the next sequence number
 	 */
-	String next(String prefix,
-					String moduleName,
-					String documentName,
-					String fieldName,
+	@Nonnull String next(@Nullable String prefix,
+					@Nonnull String moduleName,
+					@Nonnull String documentName,
+					@Nonnull String fieldName,
 					int minimumLength);
 }

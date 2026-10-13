@@ -55,6 +55,9 @@ import org.slf4j.Logger;
 
 import net.gcardone.junidecode.Junidecode;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Primary framework configuration façade and miscellaneous utility class.
  *
@@ -461,7 +464,7 @@ public class UtilImpl {
 	private static String absoluteBasePath;
 
 	@SuppressWarnings("java:S3776")
-	public static String getAbsoluteBasePath() {
+	public static @Nullable String getAbsoluteBasePath() {
 		if (absoluteBasePath == null) {
 			if (APPS_JAR_DIRECTORY != null) {
 				absoluteBasePath = APPS_JAR_DIRECTORY;
@@ -493,7 +496,7 @@ public class UtilImpl {
 	}
 
 	@SuppressWarnings("unchecked")
-	public static Map<String, Object> readJSONConfig(InputStream inputStream) throws Exception {
+	public static @Nullable Map<String, Object> readJSONConfig(@Nonnull InputStream inputStream) throws Exception {
 		String json = null;
 		try (Scanner scanner = new Scanner(inputStream)) {
 			json = scanner.useDelimiter("\\Z").next();
@@ -506,11 +509,11 @@ public class UtilImpl {
 	}
 
 	@SuppressWarnings("unchecked")
-	public static final <T extends Serializable> T cloneBySerialization(T object) {
+	public static final @Nonnull <T extends Serializable> T cloneBySerialization(@Nonnull T object) {
 		return (T) SerializationHelper.clone(object);
 	}
 
-	public static final <T extends Serializable> T cloneToTransientBySerialization(T object) {
+	public static final @Nonnull <T extends Serializable> T cloneToTransientBySerialization(@Nonnull T object) {
 		if (object instanceof List<?> list) {
 			for (Object element : list) {
 				if (element instanceof AbstractPersistentBean bean) {
@@ -533,7 +536,7 @@ public class UtilImpl {
 	 * 
 	 * @param bean The bean to load.
 	 */
-	public static void populateFully(final Bean bean) {
+	public static void populateFully(final @Nonnull Bean bean) {
 		User user = CORE.getUser();
 		Customer customer = user.getCustomer();
 
@@ -543,11 +546,11 @@ public class UtilImpl {
 		// Ensure that everything is loaded
 		new BeanVisitor(true, false) {
 			@Override
-			protected boolean accept(String binding,
-										Document documentAccepted,
-										Document owningDocument,
-										Relation owningRelation,
-										Bean beanAccepted) {
+			protected boolean accept(@Nonnull String binding,
+										@Nonnull Document documentAccepted,
+										@Nullable Document owningDocument,
+										@Nullable Relation owningRelation,
+										@Nonnull Bean beanAccepted) {
 				// do nothing - just visiting loads the instance from the database
 				return true;
 			}
@@ -558,7 +561,7 @@ public class UtilImpl {
 	 * Utility method to ensure that CDI injects are performed on existing (newly created) objects.
 	 * @param target	The target object to inject dependencies into (recursively)
 	 */
-	public static void inject(Object target) {
+	public static void inject(@Nonnull Object target) {
 		BeanProvider.injectFields(target);
 	}
 	
@@ -570,7 +573,7 @@ public class UtilImpl {
 	 * @return the resolved proxy or possibleProxy
 	 */
 	@SuppressWarnings("unchecked")
-	public static <T> T deproxy(T possibleProxy) throws ClassCastException {
+	public static @Nullable <T> T deproxy(@Nullable T possibleProxy) throws ClassCastException {
 		if (possibleProxy instanceof HibernateProxy hibernateProxy) {
 			return (T) hibernateProxy.getHibernateLazyInitializer().getImplementation();
 		}
@@ -579,7 +582,7 @@ public class UtilImpl {
 	}
 
 	@SuppressWarnings("java:S3776")
-	public static void setTransient(Object object) {
+	public static void setTransient(@Nullable Object object) {
 		if (object instanceof List<?> list) {
 			for (Object element : list) {
 				setTransient(element);
@@ -615,7 +618,7 @@ public class UtilImpl {
 
 	// set the data group of a bean and all its children
 	@SuppressWarnings("java:S3776")
-	public static void setDataGroup(Object object, String bizDataGroupId) {
+	public static void setDataGroup(@Nullable Object object, @Nullable String bizDataGroupId) {
 		if (object instanceof List<?> list) {
 			for (Object element : list) {
 				setDataGroup(element, bizDataGroupId);
@@ -653,7 +656,7 @@ public class UtilImpl {
 	 * @param value The String.
 	 * @return null, if the trimmed value is empty, otherwise value.
 	 */
-	public static String processStringValue(String value) {
+	public static @Nullable String processStringValue(@Nullable String value) {
 		String result = value;
 
 		if (result != null) {
@@ -669,7 +672,7 @@ public class UtilImpl {
 	/**
 	 * Change unicode text to ascii.
 	 */
-	public static String unidecode(String value) {
+	public static @Nonnull String unidecode(@Nonnull String value) {
 		return Junidecode.unidecode(value);
 	}
 
@@ -684,7 +687,7 @@ public class UtilImpl {
 	 * @return The updated path if any slashes or <code>/modules</code> need to be added
 	 */
 	@SuppressWarnings("java:S1075") // always use *nix style slashes internally
-	public static String cleanupModuleDirectory(final String path) {
+	public static @Nullable String cleanupModuleDirectory(final @Nullable String path) {
 		if ((path != null) && (! path.isEmpty())) {
 			String updatedPath = path;
 
@@ -710,9 +713,9 @@ public class UtilImpl {
     public static record ArchiveConfig(
             int exportRuntimeSec,
             int exportBatchSize,
-            List<ArchiveDocConfig> docConfigs,
-            ArchivedDocumentCacheConfig cacheConfig, 
-            ArchiveSchedule schedule) {
+            @Nullable List<ArchiveDocConfig> docConfigs,
+            @Nullable ArchivedDocumentCacheConfig cacheConfig, 
+            @Nonnull ArchiveSchedule schedule) {
 
         protected static final String ARCHIVE_DIR = "archive";
         protected static final String INDEX_DIR = "index";
@@ -728,7 +731,7 @@ public class UtilImpl {
             return StringUtils.trimToNull(schedule().cron()) != null;
         }
 
-        public Optional<ArchiveDocConfig> findArchiveDocConfig(String module, String document) {
+        public @Nonnull Optional<ArchiveDocConfig> findArchiveDocConfig(@Nullable String module, @Nullable String document) {
 
             if (docConfigs == null || module == null || document == null) {
                 return Optional.empty();
@@ -740,14 +743,14 @@ public class UtilImpl {
                              .findFirst();
         }
 
-        public static record ArchiveDocConfig(String module, String document, String directory, int retainDeletedDocumentsDays) {
+        public static record ArchiveDocConfig(@Nonnull String module, @Nonnull String document, @Nonnull String directory, int retainDeletedDocumentsDays) {
 
             /**
              * The directory we will store exported documents in <em>.archive</em> files
              * 
              * @return
              */
-            public Path getArchiveDirectory() {
+            public @Nonnull Path getArchiveDirectory() {
                 return Path.of(CONTENT_DIRECTORY, ARCHIVE_DIR, this.directory);
             }
 
@@ -756,16 +759,16 @@ public class UtilImpl {
              * 
              * @return
              */
-            public Path getIndexDirectory() {
+            public @Nonnull Path getIndexDirectory() {
                 return getArchiveDirectory().resolve(INDEX_DIR);
             }
         }
         
-        public static record ArchiveSchedule(String cron, String customerName, String userName) {
+        public static record ArchiveSchedule(@Nonnull String cron, @Nonnull String customerName, @Nonnull String userName) {
 
             public static final ArchiveSchedule DEFUALT = new ArchiveSchedule("", "", "");
 
-            public User getUser() {
+            public @Nonnull User getUser() {
                 SuperUser u = new SuperUser();
                 u.setName(userName());
                 u.setId(userName());

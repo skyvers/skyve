@@ -2,6 +2,9 @@ package org.skyve.content;
 
 import java.io.Serializable;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Content.
  * 
@@ -17,12 +20,12 @@ abstract class Content implements Serializable {
 	protected String bizUserId;
 	protected String bizId;
 
-	protected Content(String bizCustomer, 
-						String bizModule,
-						String bizDocument,
-						String bizDataGroupId,
-						String bizUserId,
-						String bizId) {
+	protected Content(@Nonnull String bizCustomer, 
+						@Nonnull String bizModule,
+						@Nonnull String bizDocument,
+						@Nullable String bizDataGroupId,
+						@Nonnull String bizUserId,
+						@Nonnull String bizId) {
 		this.bizCustomer = bizCustomer;
 		this.bizModule = bizModule;
 		this.bizDocument = bizDocument;
@@ -36,7 +39,7 @@ abstract class Content implements Serializable {
 	 * This is used to restrict visibility of searched documents.
 	 * @return
 	 */
-	public final String getBizCustomer() {
+	public final @Nonnull String getBizCustomer() {
 		return bizCustomer;
 	}
 
@@ -45,7 +48,7 @@ abstract class Content implements Serializable {
 	 * This is used to restrict visibility of searched documents.
 	 * @return
 	 */
-	public final String getBizDataGroupId() {
+	public final @Nullable String getBizDataGroupId() {
 		return bizDataGroupId;
 	}
 
@@ -54,7 +57,7 @@ abstract class Content implements Serializable {
 	 * This is used to restrict visibility of searched documents.
 	 * @return
 	 */
-	public final String getBizDocument() {
+	public final @Nonnull String getBizDocument() {
 		return bizDocument;
 	}
 
@@ -63,7 +66,7 @@ abstract class Content implements Serializable {
 	 * This is used to restrict visibility of searched documents.
 	 * @return
 	 */
-	public final String getBizModule() {
+	public final @Nonnull String getBizModule() {
 		return bizModule;
 	}
 
@@ -72,7 +75,7 @@ abstract class Content implements Serializable {
 	 * This is used to restrict visibility of searched documents.
 	 * @return
 	 */
-	public final String getBizUserId() {
+	public final @Nonnull String getBizUserId() {
 		return bizUserId;
 	}
 
@@ -80,7 +83,7 @@ abstract class Content implements Serializable {
 	 * The bizId of the related bean.
 	 * @return
 	 */
-	public final String getBizId() {
+	public final @Nonnull String getBizId() {
 		return bizId;
 	}
 }

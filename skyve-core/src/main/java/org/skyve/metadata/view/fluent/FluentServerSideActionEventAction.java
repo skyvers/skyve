@@ -3,6 +3,7 @@ package org.skyve.metadata.view.fluent;
 import org.skyve.impl.metadata.view.event.ServerSideActionEventAction;
 
 import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 
 /**
  * Builds {@link ServerSideActionEventAction} metadata using a fluent API.
@@ -23,7 +24,7 @@ public class FluentServerSideActionEventAction extends FluentEventAction {
 	 * @param action
 	 *            the action instance to wrap
 	 */
-	public FluentServerSideActionEventAction(ServerSideActionEventAction action) {
+	public FluentServerSideActionEventAction(@Nonnull ServerSideActionEventAction action) {
 		this.action = action;
 	}
 
@@ -34,7 +35,7 @@ public class FluentServerSideActionEventAction extends FluentEventAction {
 	 *            the source action metadata
 	 * @return this builder
 	 */
-	public FluentServerSideActionEventAction from(@SuppressWarnings("hiding") ServerSideActionEventAction action) {
+	public @Nonnull FluentServerSideActionEventAction from(@SuppressWarnings("hiding") @Nonnull ServerSideActionEventAction action) {
 		actionName(action.getActionName());
 		action.getProperties().entrySet().forEach(p -> putProperty(p.getKey(), p.getValue()));
 
@@ -48,7 +49,7 @@ public class FluentServerSideActionEventAction extends FluentEventAction {
 	 *            the server action name
 	 * @return this builder
 	 */
-	public FluentServerSideActionEventAction actionName(String actionName) {
+	public @Nonnull FluentServerSideActionEventAction actionName(@Nullable String actionName) {
 		action.setActionName(actionName);
 		return this;
 	}
@@ -70,7 +71,7 @@ public class FluentServerSideActionEventAction extends FluentEventAction {
 	 * Returns the wrapped event action instance.
 	 */
 	@Override
-	public ServerSideActionEventAction get() {
+	public @Nonnull ServerSideActionEventAction get() {
 		return action;
 	}
 }

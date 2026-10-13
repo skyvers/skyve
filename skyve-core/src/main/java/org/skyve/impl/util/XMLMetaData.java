@@ -51,6 +51,7 @@ import org.skyve.util.logging.SkyveLoggerFactory;
 import org.slf4j.Logger;
 import org.xml.sax.SAXException;
 
+import jakarta.annotation.Nonnull;
 import jakarta.xml.bind.JAXBContext;
 import jakarta.xml.bind.JAXBException;
 import jakarta.xml.bind.Marshaller;
@@ -151,7 +152,7 @@ public class XMLMetaData {
 		// prevent construction
 	}
 
-	public static String marshalRouter(Router router) {
+	public static @Nonnull String marshalRouter(@Nonnull Router router) {
 		try {
 			Marshaller marshaller = ROUTER_CONTEXT.createMarshaller();
 			marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.FALSE);
@@ -170,7 +171,7 @@ public class XMLMetaData {
 		}
 	}
 
-	public static Router unmarshalRouterFile(String file) {
+	public static @Nonnull Router unmarshalRouterFile(@Nonnull String file) {
 		// NB Cannot use FileReader in here as it doesn't work with UTF-8 properly on linux.
 		// We need to specifically mention UTF-8 to get this to happen in the adapter abomination below
 		File f = new File(file);
@@ -192,7 +193,7 @@ public class XMLMetaData {
 		}
 	}
 
-	public static Router unmarshalRouterString(String xml) {
+	public static @Nonnull Router unmarshalRouterString(@Nonnull String xml) {
 		try (StringReader sr = new StringReader(xml)) {
 			Unmarshaller unmarshaller = ROUTER_CONTEXT.createUnmarshaller();
 			unmarshaller.setSchema(ROUTER_SCHEMA);
@@ -203,7 +204,7 @@ public class XMLMetaData {
 		}
 	}
 
-	public static String marshalCustomer(CustomerMetaData customer) {
+	public static @Nonnull String marshalCustomer(@Nonnull CustomerMetaData customer) {
 		try {
 			Marshaller marshaller = CUSTOMER_CONTEXT.createMarshaller();
 			marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.FALSE);
@@ -231,7 +232,7 @@ public class XMLMetaData {
 	 * @param customer The customer to output to a file
 	 * @param sourceDirectory The root source directory, e.g. <code>src/main/java</code>
 	 */
-	public static void marshalCustomer(CustomerMetaData customer, String sourceDirectory) {
+	public static void marshalCustomer(@Nonnull CustomerMetaData customer, @Nonnull String sourceDirectory) {
 		// NB Cannot use FileWriter in here as it doesn't work with UTF-8 properly on Linux.
 		// We need to specifically mention UTF-8 to get this to happen in the adapter abomination below
 		StringBuilder filePath = new StringBuilder(64);
@@ -262,7 +263,7 @@ public class XMLMetaData {
 		}
 	}
 
-	public static CustomerMetaData unmarshalCustomerFile(String file) {
+	public static @Nonnull CustomerMetaData unmarshalCustomerFile(@Nonnull String file) {
 		// NB Cannot use FileReader in here as it doesn't work with UTF-8 properly on linux.
 		// We need to specifically mention UTF-8 to get this to happen in the adapter abomination below
 		File f = new File(file);
@@ -284,7 +285,7 @@ public class XMLMetaData {
 		}
 	}
 
-	public static CustomerMetaData unmarshalCustomerString(String xml) {
+	public static @Nonnull CustomerMetaData unmarshalCustomerString(@Nonnull String xml) {
 		try (StringReader sr = new StringReader(xml)) {
 			Unmarshaller unmarshaller = CUSTOMER_CONTEXT.createUnmarshaller();
 			unmarshaller.setSchema(CUSTOMER_SCHEMA);
@@ -295,7 +296,7 @@ public class XMLMetaData {
 		}
 	}
 
-	public static String marshalModule(ModuleMetaData module, boolean overridden) {
+	public static @Nonnull String marshalModule(@Nonnull ModuleMetaData module, boolean overridden) {
 		try {
 			Marshaller marshaller = MODULE_CONTEXT.createMarshaller();
 			marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.FALSE);
@@ -330,7 +331,7 @@ public class XMLMetaData {
 	 * @param overridden Should be true if this module is a customer override, false otherwise
 	 * @param modulesDirectory The root source modules directory, e.g. <code>src/main/java/modules</code>
 	 */
-	public static void marshalModule(ModuleMetaData module, boolean overridden, String modulesDirectory) {
+	public static void marshalModule(@Nonnull ModuleMetaData module, boolean overridden, @Nonnull String modulesDirectory) {
 		// NB Cannot use FileWriter in here as it doesn't work with UTF-8 properly on Linux.
 		// We need to specifically mention UTF-8 to get this to happen in the adapter abomination below
 		StringBuilder filePath = new StringBuilder(64);
@@ -361,7 +362,7 @@ public class XMLMetaData {
 		}
 	}
 
-	public static ModuleMetaData unmarshalModuleFile(String file) {
+	public static @Nonnull ModuleMetaData unmarshalModuleFile(@Nonnull String file) {
 		// NB Cannot use FileReader in here as it doesn't work with UTF-8 properly on linux.
 		// We need to specifically mention UTF-8 to get this to happen in the adapter abomination below
 		File f = new File(file);
@@ -383,7 +384,7 @@ public class XMLMetaData {
 		}
 	}
 
-	public static ModuleMetaData unmarshalModuleString(String xml) {
+	public static @Nonnull ModuleMetaData unmarshalModuleString(@Nonnull String xml) {
 		try (StringReader sr = new StringReader(xml)) {
 			Unmarshaller unmarshaller = MODULE_CONTEXT.createUnmarshaller();
 			unmarshaller.setSchema(MODULE_SCHEMA);
@@ -394,7 +395,7 @@ public class XMLMetaData {
 		}
 	}
 
-	public static String marshalDocument(DocumentMetaData document, boolean overridden) {
+	public static @Nonnull String marshalDocument(@Nonnull DocumentMetaData document, boolean overridden) {
 		try {
 			Marshaller marshaller = DOCUMENT_CONTEXT.createMarshaller();
 			marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.FALSE);
@@ -428,7 +429,7 @@ public class XMLMetaData {
 	 * @param overridden Should be true if this document is a customer override, false otherwise
 	 * @param documentModuleDirectory The path to the module this document belongs to
 	 */
-	public static void marshalDocument(DocumentMetaData document, boolean overridden, String documentModuleDirectory) {
+	public static void marshalDocument(@Nonnull DocumentMetaData document, boolean overridden, @Nonnull String documentModuleDirectory) {
 		// NB Cannot use FileWriter in here as it doesn't work with UTF-8 properly on Linux.
 		// We need to specifically mention UTF-8 to get this to happen in the adapter abomination below
 		StringBuilder filePath = new StringBuilder(64);
@@ -459,7 +460,7 @@ public class XMLMetaData {
 		}
 	}
 
-	public static DocumentMetaData unmarshalDocumentFile(String file) {
+	public static @Nonnull DocumentMetaData unmarshalDocumentFile(@Nonnull String file) {
 		// NB Cannot use FileReader in here as it doesn't work with UTF-8 properly on linux.
 		// We need to specifically mention UTF-8 to get this to happen in the adapter abomination below
 		File f = new File(file);
@@ -481,7 +482,7 @@ public class XMLMetaData {
 		}
 	}
 
-	public static DocumentMetaData unmarshalDocumentString(String xml) {
+	public static @Nonnull DocumentMetaData unmarshalDocumentString(@Nonnull String xml) {
 		try (StringReader sr = new StringReader(xml)) {
 			Unmarshaller unmarshaller = DOCUMENT_CONTEXT.createUnmarshaller();
 			unmarshaller.setSchema(DOCUMENT_SCHEMA);
@@ -492,7 +493,7 @@ public class XMLMetaData {
 		}
 	}
 
-	public static String marshalBizlet(BizletMetaData bizlet, boolean customerOverridden) {
+	public static @Nonnull String marshalBizlet(@Nonnull BizletMetaData bizlet, boolean customerOverridden) {
 		try {
 			Marshaller marshaller = BIZLET_CONTEXT.createMarshaller();
 			marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.FALSE);
@@ -526,7 +527,7 @@ public class XMLMetaData {
 	 * @param customerOverridden Should be true if this bizlet is a customer override, false otherwise
 	 * @param bizletDocumentDirectory The path to the document this bizlet belongs to
 	 */
-	public static void marshalBizlet(BizletMetaData bizlet, boolean customerOverridden, String bizletDocumentDirectory) {
+	public static void marshalBizlet(@Nonnull BizletMetaData bizlet, boolean customerOverridden, @Nonnull String bizletDocumentDirectory) {
 		// NB Cannot use FileWriter in here as it doesn't work with UTF-8 properly on Linux.
 		// We need to specifically mention UTF-8 to get this to happen in the adapter abomination below
 		StringBuilder filePath = new StringBuilder(64);
@@ -556,7 +557,7 @@ public class XMLMetaData {
 		}
 	}
 	
-	public static BizletMetaData unmarshalBizletFile(String file) {
+	public static @Nonnull BizletMetaData unmarshalBizletFile(@Nonnull String file) {
 		// NB Cannot use FileReader in here as it doesn't work with UTF-8 properly on linux.
 		// We need to specifically mention UTF-8 to get this to happen in the adapter abomination below
 		File f = new File(file);
@@ -578,7 +579,7 @@ public class XMLMetaData {
 		}
 	}
 
-	public static BizletMetaData unmarshalBizletString(String xml) {
+	public static @Nonnull BizletMetaData unmarshalBizletString(@Nonnull String xml) {
 		try (StringReader sr = new StringReader(xml)) {
 			Unmarshaller unmarshaller = BIZLET_CONTEXT.createUnmarshaller();
 			unmarshaller.setSchema(BEHAVIOUR_SCHEMA);
@@ -589,7 +590,7 @@ public class XMLMetaData {
 		}
 	}
 
-	public static String marshalAction(ActionMetaData action, boolean customerOverridden) {
+	public static @Nonnull String marshalAction(@Nonnull ActionMetaData action, boolean customerOverridden) {
 		try {
 			Marshaller marshaller = ACTION_CONTEXT.createMarshaller();
 			marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.FALSE);
@@ -626,7 +627,7 @@ public class XMLMetaData {
 	 * @param customerOverridden Should be true if this action is a customer override, false otherwise
 	 * @param actionDocumentDirectory The path to the document this action belongs to
 	 */
-	public static void marshalAction(ActionMetaData action, boolean customerOverridden, String actionDocumentDirectory) {
+	public static void marshalAction(@Nonnull ActionMetaData action, boolean customerOverridden, @Nonnull String actionDocumentDirectory) {
 		// NB Cannot use FileWriter in here as it doesn't work with UTF-8 properly on Linux.
 		// We need to specifically mention UTF-8 to get this to happen in the adapter abomination below
 		StringBuilder filePath = new StringBuilder(64);
@@ -657,7 +658,7 @@ public class XMLMetaData {
 		}
 	}
 	
-	public static ActionMetaData unmarshalActionFile(String file) {
+	public static @Nonnull ActionMetaData unmarshalActionFile(@Nonnull String file) {
 		// NB Cannot use FileReader in here as it doesn't work with UTF-8 properly on linux.
 		// We need to specifically mention UTF-8 to get this to happen in the adapter abomination below
 		File f = new File(file);
@@ -679,7 +680,7 @@ public class XMLMetaData {
 		}
 	}
 
-	public static ActionMetaData unmarshalActionString(String xml) {
+	public static @Nonnull ActionMetaData unmarshalActionString(@Nonnull String xml) {
 		try (StringReader sr = new StringReader(xml)) {
 			Unmarshaller unmarshaller = ACTION_CONTEXT.createUnmarshaller();
 			unmarshaller.setSchema(BEHAVIOUR_SCHEMA);
@@ -690,7 +691,7 @@ public class XMLMetaData {
 		}
 	}
 
-	public static String marshalView(ViewMetaData view, boolean customerOverridden, boolean uxuiOverridden) {
+	public static @Nonnull String marshalView(@Nonnull ViewMetaData view, boolean customerOverridden, boolean uxuiOverridden) {
 		try {
 			Marshaller marshaller = VIEW_CONTEXT.createMarshaller();
 			marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.FALSE);
@@ -731,7 +732,7 @@ public class XMLMetaData {
 	 * @param uxuiOverridden Should be true if this view is an Ux/UI override, false otherwise
 	 * @param viewDocumentDirectory The path to the document this view belongs to
 	 */
-	public static void marshalView(ViewMetaData view, boolean customerOverridden, boolean uxuiOverridden, String viewDocumentDirectory) {
+	public static void marshalView(@Nonnull ViewMetaData view, boolean customerOverridden, boolean uxuiOverridden, @Nonnull String viewDocumentDirectory) {
 		// NB Cannot use FileWriter in here as it doesn't work with UTF-8 properly on Linux.
 		// We need to specifically mention UTF-8 to get this to happen in the adapter abomination below
 		StringBuilder filePath = new StringBuilder(64);
@@ -762,7 +763,7 @@ public class XMLMetaData {
 		}
 	}
 	
-	public static ViewMetaData unmarshalViewFile(String file) {
+	public static @Nonnull ViewMetaData unmarshalViewFile(@Nonnull String file) {
 		// NB Cannot use FileReader in here as it doesn't work with UTF-8 properly on linux.
 		// We need to specifically mention UTF-8 to get this to happen in the adapter abomination below
 		File f = new File(file);
@@ -784,7 +785,7 @@ public class XMLMetaData {
 		}
 	}
 
-	public static ViewMetaData unmarshalViewString(String xml) {
+	public static @Nonnull ViewMetaData unmarshalViewString(@Nonnull String xml) {
 		try (StringReader sr = new StringReader(xml)) {
 			Unmarshaller unmarshaller = VIEW_CONTEXT.createUnmarshaller();
 			unmarshaller.setSchema(VIEW_SCHEMA);
@@ -795,7 +796,7 @@ public class XMLMetaData {
 		}
 	}
 
-	public static String marshalSAIL(Automation automation) {
+	public static @Nonnull String marshalSAIL(@Nonnull Automation automation) {
 		try {
 			Marshaller marshaller = SAIL_CONTEXT.createMarshaller();
 			marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.FALSE);
@@ -815,7 +816,7 @@ public class XMLMetaData {
 		}
 	}
 
-	public static Automation unmarshalSAILFile(String file) {
+	public static @Nonnull Automation unmarshalSAILFile(@Nonnull String file) {
 		// NB Cannot use FileReader in here as it doesn't work with UTF-8 properly on linux.
 		// We need to specifically mention UTF-8 to get this to happen in the adapter abomination below
 		try (FileInputStream fis = new FileInputStream(file)) {
@@ -834,7 +835,7 @@ public class XMLMetaData {
 		}
 	}
 
-	public static Automation unmarshalSAILString(String sail) {
+	public static @Nonnull Automation unmarshalSAILString(@Nonnull String sail) {
 		try (StringReader sr = new StringReader(sail)) {
 			Unmarshaller unmarshaller = SAIL_CONTEXT.createUnmarshaller();
 			unmarshaller.setSchema(SAIL_SCHEMA);
@@ -1014,11 +1015,11 @@ public class XMLMetaData {
 	 * @throws IOException if writing the XML fails
 	 */
 	@SuppressWarnings("java:S3776") // complexity OK
-	private static String format(Document document) throws IOException {
+	private static @Nonnull String format(@Nonnull Document document) throws IOException {
 		// Keep this ordering next to the writer: JAXB property order does not define XML attribute order.
 		document.accept(new VisitorSupport() {
 			@Override
-			public void visit(Element element) {
+			public void visit(@Nonnull Element element) {
 				List<Attribute> attributes = new ArrayList<>(element.attributes());
 				if (attributes.size() < 2) {
 					return;
@@ -1043,7 +1044,7 @@ public class XMLMetaData {
 			private boolean rootAttributesPending = true;
 
 			@Override
-			protected void writeNamespace(Namespace namespace) throws IOException {
+			protected void writeNamespace(@Nonnull Namespace namespace) throws IOException {
 				if (rootAttributesPending) {
 					rootNamespaces.add(namespace);
 				}
@@ -1053,7 +1054,7 @@ public class XMLMetaData {
 			}
 
 			@Override
-			protected void writeAttributes(Element element) throws IOException {
+			protected void writeAttributes(@Nonnull Element element) throws IOException {
 				if (!rootAttributesPending) {
 					super.writeAttributes(element);
 					return;
@@ -1084,7 +1085,7 @@ public class XMLMetaData {
 	/*
 	 * returns a JAXP 1.3 schema by parsing the specified resource.
 	 */
-	private static Schema getSchema(String schemaFileName) 
+	private static @Nonnull Schema getSchema(@Nonnull String schemaFileName) 
 	throws JAXBException {
 		try {
 			return SecureDom4j.newSchemaFactory().newSchema(new File(schemaFileName));
@@ -1111,14 +1112,14 @@ public class XMLMetaData {
 		private Namespace target;
 		private String targetUri;
 
-		JAXBFixingVisitor(String targetNamespaceUri) {
+		JAXBFixingVisitor(@Nonnull String targetNamespaceUri) {
 			target = Namespace.get("", targetNamespaceUri);
 			targetUri = targetNamespaceUri;
 		}
 
 		@Override
 		@SuppressWarnings("java:S3776") // Complexity OK
-		public void visit(Element node) {
+		public void visit(@Nonnull Element node) {
 			Namespace ns = node.getNamespace();
 
 			String uri = ns.getURI();
@@ -1305,7 +1306,7 @@ public class XMLMetaData {
 			}
 		}
 		
-		private static void removeDefaultAttributes(Element node, Map<String, Boolean> attributesToRemove) {
+		private static void removeDefaultAttributes(@Nonnull Element node, @Nonnull Map<String, Boolean> attributesToRemove) {
 			Iterator<?> attributes = node.attributes().iterator();
 			while (attributes.hasNext()) {
 				Attribute a = (Attribute) attributes.next();
@@ -1318,7 +1319,7 @@ public class XMLMetaData {
 		}
 
 		@SuppressWarnings("java:S3776") // complexity OK
-		private static void removeEmptyChildElements(Element parent, String[] nodesToRemove) {
+		private static void removeEmptyChildElements(@Nonnull Element parent, @Nonnull String[] nodesToRemove) {
 			Set<String> nodesToRemoveSet = Set.of(nodesToRemove);
 			boolean removed = false;
 			ListIterator<Element> childNodes = parent.elements().listIterator();
@@ -1353,7 +1354,7 @@ public class XMLMetaData {
 	}
 	
 	
-	public static void main(String[] args) throws Exception {
+	public static void main(@Nonnull String[] args) throws Exception {
 		JAXBContext jaxbContext = JAXBContext.newInstance(CustomerMetaData.class, 
 															ModuleMetaData.class,
 															DocumentMetaData.class,
@@ -1364,7 +1365,7 @@ public class XMLMetaData {
 															Automation.class);
 		jaxbContext.generateSchema(new SchemaOutputResolver() {
 			@Override
-			public Result createOutput(String namespaceUri, String suggestedFileName) throws IOException {
+			public @Nonnull Result createOutput(@Nonnull String namespaceUri, @Nonnull String suggestedFileName) throws IOException {
 				File file = null;
 				if (namespaceUri.endsWith("/common")) {
 					file = new File("common.xsd");

@@ -6,6 +6,8 @@ import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.UserAccess;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
@@ -35,7 +37,7 @@ public class ModuleRoleReportUserAccessMetaData extends ModuleRoleUserAccessMeta
 	 *
 	 * @return the target module name
 	 */
-	public String getModuleName() {
+	public @Nullable String getModuleName() {
 		return moduleName;
 	}
 
@@ -48,7 +50,7 @@ public class ModuleRoleReportUserAccessMetaData extends ModuleRoleUserAccessMeta
 	 * @param moduleName the target module name; blank values become {@code null}
 	 */
 	@XmlAttribute(name = "module", required = true)
-	public void setModuleName(String moduleName) {
+	public void setModuleName(@Nullable String moduleName) {
 		this.moduleName = UtilImpl.processStringValue(moduleName);
 	}
 
@@ -57,7 +59,7 @@ public class ModuleRoleReportUserAccessMetaData extends ModuleRoleUserAccessMeta
 	 *
 	 * @return the target document name
 	 */
-	public String getDocumentName() {
+	public @Nullable String getDocumentName() {
 		return documentName;
 	}
 
@@ -70,7 +72,7 @@ public class ModuleRoleReportUserAccessMetaData extends ModuleRoleUserAccessMeta
 	 * @param documentName the target document name; blank values become {@code null}
 	 */
 	@XmlAttribute(name = "document", required = true)
-	public void setDocumentName(String documentName) {
+	public void setDocumentName(@Nullable String documentName) {
 		this.documentName = UtilImpl.processStringValue(documentName);
 	}
 
@@ -79,7 +81,7 @@ public class ModuleRoleReportUserAccessMetaData extends ModuleRoleUserAccessMeta
 	 *
 	 * @return the target report name
 	 */
-	public String getReportName() {
+	public @Nullable String getReportName() {
 		return reportName;
 	}
 
@@ -92,7 +94,7 @@ public class ModuleRoleReportUserAccessMetaData extends ModuleRoleUserAccessMeta
 	 * @param reportName the target report name; blank values become {@code null}
 	 */
 	@XmlAttribute(name = "report", required = true)
-	public void setReportName(String reportName) {
+	public void setReportName(@Nullable String reportName) {
 		this.reportName = UtilImpl.processStringValue(reportName);
 	}
 	
@@ -105,7 +107,7 @@ public class ModuleRoleReportUserAccessMetaData extends ModuleRoleUserAccessMeta
 	 * @throws MetaDataException if {@code module}, {@code document}, or {@code report} is missing
 	 */
 	@Override
-	public void validate(String metaDataName, String roleName, Module module) {
+	public void validate(@Nonnull String metaDataName, @Nonnull String roleName, @Nonnull Module module) {
 		if (moduleName == null) {
 			throw new MetaDataException(metaDataName + " : [module] is required for all report user accesses defined in module role " + roleName);
 		}
@@ -125,7 +127,7 @@ public class ModuleRoleReportUserAccessMetaData extends ModuleRoleUserAccessMeta
 	 * @return the runtime report user access
 	 */
 	@Override
-	public UserAccess toUserAccess(String unusedModuleName) {
+	public @Nonnull UserAccess toUserAccess(@Nonnull String unusedModuleName) {
 		return UserAccess.report(moduleName, documentName, reportName);
 	}
 }

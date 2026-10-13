@@ -3,6 +3,7 @@ package org.skyve.impl.metadata.view.widget.bound.tabular;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
 
+import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
@@ -26,12 +27,12 @@ public class TreeGrid extends ListGrid {
 
 	private String rootIdBinding;
 	
-	public String getRootIdBinding() {
+	public @Nullable String getRootIdBinding() {
 		return rootIdBinding;
 	}
 
 	@XmlAttribute(name = "rootIdBinding")
-	public void setRootIdBinding(String rootIdBinding) {
+	public void setRootIdBinding(@Nullable String rootIdBinding) {
 		this.rootIdBinding = UtilImpl.processStringValue(rootIdBinding);
 	}
 }

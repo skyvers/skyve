@@ -22,6 +22,8 @@ import org.skyve.metadata.model.document.Bizlet;
 import org.skyve.metadata.model.document.Bizlet.DomainValue;
 import org.skyve.metadata.module.Module;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.enterprise.inject.Alternative;
 
 /**
@@ -40,7 +42,7 @@ public class CustomerInjectable implements Customer {
 	 * @return the configured customer name.
 	 */
 	@Override
-	public String getName() {
+	public @Nullable String getName() {
 		return CORE.getCustomer().getName();
 	}
 
@@ -80,7 +82,7 @@ public class CustomerInjectable implements Customer {
 	 * @return the default language tag.
 	 */
 	@Override
-	public String getLanguageTag() {
+	public @Nullable String getLanguageTag() {
 		return CORE.getCustomer().getLanguageTag();
 	}
 
@@ -90,7 +92,7 @@ public class CustomerInjectable implements Customer {
 	 * @return the date-only converter.
 	 */
 	@Override
-	public Converter<DateOnly> getDefaultDateConverter() {
+	public @Nonnull Converter<DateOnly> getDefaultDateConverter() {
 		return CORE.getCustomer().getDefaultDateConverter();
 	}
 
@@ -100,7 +102,7 @@ public class CustomerInjectable implements Customer {
 	 * @return the date-time converter.
 	 */
 	@Override
-	public Converter<DateTime> getDefaultDateTimeConverter() {
+	public @Nonnull Converter<DateTime> getDefaultDateTimeConverter() {
 		return CORE.getCustomer().getDefaultDateTimeConverter();
 	}
 
@@ -110,7 +112,7 @@ public class CustomerInjectable implements Customer {
 	 * @return the time-only converter.
 	 */
 	@Override
-	public Converter<TimeOnly> getDefaultTimeConverter() {
+	public @Nonnull Converter<TimeOnly> getDefaultTimeConverter() {
 		return CORE.getCustomer().getDefaultTimeConverter();
 	}
 
@@ -120,7 +122,7 @@ public class CustomerInjectable implements Customer {
 	 * @return the timestamp converter.
 	 */
 	@Override
-	public Converter<Timestamp> getDefaultTimestampConverter() {
+	public @Nonnull Converter<Timestamp> getDefaultTimestampConverter() {
 		return CORE.getCustomer().getDefaultTimestampConverter();
 	}
 
@@ -130,7 +132,7 @@ public class CustomerInjectable implements Customer {
 	 * @return the home module.
 	 */
 	@Override
-	public Module getHomeModule() {
+	public @Nullable Module getHomeModule() {
 		return CORE.getCustomer().getHomeModule();
 	}
 
@@ -141,7 +143,7 @@ public class CustomerInjectable implements Customer {
 	 * @return the module if found, otherwise null.
 	 */
 	@Override
-	public Module getModule(String moduleName) {
+	public @Nonnull Module getModule(@Nonnull String moduleName) {
 		return CORE.getCustomer().getModule(moduleName);
 	}
 
@@ -151,7 +153,7 @@ public class CustomerInjectable implements Customer {
 	 * @return the module list.
 	 */
 	@Override
-	public List<Module> getModules() {
+	public @Nonnull List<Module> getModules() {
 		return CORE.getCustomer().getModules();
 	}
 
@@ -161,7 +163,7 @@ public class CustomerInjectable implements Customer {
 	 * @return the role collection.
 	 */
 	@Override
-	public Collection<CustomerRole> getRoles() {
+	public @Nonnull Collection<CustomerRole> getRoles() {
 		return CORE.getCustomer().getRoles();
 	}
 
@@ -173,7 +175,7 @@ public class CustomerInjectable implements Customer {
 	 */
 
 	@Override
-	public CustomerRole getRole(String roleName) {
+	public @Nullable CustomerRole getRole(@Nonnull String roleName) {
 		return CORE.getCustomer().getRole(roleName);
 	}
 
@@ -193,7 +195,7 @@ public class CustomerInjectable implements Customer {
 	 * @return the interceptor metadata collection.
 	 */
 	@Override
-	public Collection<InterceptorMetaData> getInterceptors() {
+	public @Nonnull Collection<InterceptorMetaData> getInterceptors() {
 		return CORE.getCustomer().getInterceptors();
 	}
 
@@ -203,7 +205,7 @@ public class CustomerInjectable implements Customer {
 	 * @return the observer metadata collection.
 	 */
 	@Override
-	public Collection<ObserverMetaData> getObservers() {
+	public @Nonnull Collection<ObserverMetaData> getObservers() {
 		return CORE.getCustomer().getObservers();
 	}
 
@@ -213,7 +215,7 @@ public class CustomerInjectable implements Customer {
 	 * @return the UI resources.
 	 */
 	@Override
-	public UIResources getUiResources() {
+	public @Nullable UIResources getUiResources() {
 		return CORE.getCustomer().getUiResources();
 	}
 
@@ -223,7 +225,7 @@ public class CustomerInjectable implements Customer {
 	 * @return the HTML resources.
 	 */
 	@Override
-	public HTMLResources getHtmlResources() {
+	public @Nullable HTMLResources getHtmlResources() {
 		return CORE.getCustomer().getHtmlResources();
 	}
 
@@ -233,7 +235,7 @@ public class CustomerInjectable implements Customer {
 	 * @return the login resources.
 	 */
 	@Override
-	public LoginResources getLoginResources() {
+	public @Nullable LoginResources getLoginResources() {
 		return CORE.getCustomer().getLoginResources();
 	}
 
@@ -243,7 +245,7 @@ public class CustomerInjectable implements Customer {
 	 * @return the JFreeChart post-processor class name.
 	 */
 	@Override
-	public String getJFreeChartPostProcessorClassName() {
+	public @Nullable String getJFreeChartPostProcessorClassName() {
 		return CORE.getCustomer().getJFreeChartPostProcessorClassName();
 	}
 
@@ -253,7 +255,7 @@ public class CustomerInjectable implements Customer {
 	 * @return the PrimeFaces chart post-processor class name.
 	 */
 	@Override
-	public String getPrimeFacesChartPostProcessorClassName() {
+	public @Nullable String getPrimeFacesChartPostProcessorClassName() {
 		return CORE.getCustomer().getPrimeFacesChartPostProcessorClassName();
 	}
 
@@ -270,10 +272,10 @@ public class CustomerInjectable implements Customer {
 	 * @throws Exception if domain value evaluation fails.
 	 */
 	@Override
-	public <T extends Bean> List<DomainValue> getConstantDomainValues(Bizlet<T> bizlet,
-																		String moduleName,
-																		String documentName,
-																		Attribute attribute)
+	public @Nonnull <T extends Bean> List<DomainValue> getConstantDomainValues(@Nullable Bizlet<T> bizlet,
+																		@Nonnull String moduleName,
+																		@Nonnull String documentName,
+																		@Nonnull Attribute attribute)
 	throws Exception {
 		return CORE.getCustomer().getConstantDomainValues(bizlet, moduleName, documentName, attribute);
 	}

@@ -4,6 +4,7 @@ import org.skyve.impl.metadata.view.widget.Button;
 import org.skyve.metadata.view.Action.ActionShow;
 
 import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 
 /**
  * Builds {@link Button} widget metadata using a fluent API.
@@ -24,14 +25,14 @@ public class FluentButton extends FluentWidget implements FluentAbsoluteSize<Flu
 	 *
 	 * @param button the metadata instance to mutate
 	 */
-	public FluentButton(Button button) {
+	public FluentButton(@Nonnull Button button) {
 		this.button = button;
 	}
 	
 	/**
 	 * Copies button metadata into this fluent builder.
 	 */
-	public FluentButton from(@SuppressWarnings("hiding") Button button) {
+	public @Nonnull FluentButton from(@SuppressWarnings("hiding") @Nonnull Button button) {
 		actionName(button.getActionName());
 		absoluteSize(button, this);
 		constrainableHeight(button, this);
@@ -47,7 +48,7 @@ public class FluentButton extends FluentWidget implements FluentAbsoluteSize<Flu
 	 * @param actionName the action identifier
 	 * @return this builder
 	 */
-	public FluentButton actionName(String actionName) {
+	public @Nonnull FluentButton actionName(@Nullable String actionName) {
 		button.setActionName(actionName);
 		return this;
 	}
@@ -59,7 +60,7 @@ public class FluentButton extends FluentWidget implements FluentAbsoluteSize<Flu
 	 * @return this builder
 	 */
 	@Override
-	public FluentButton pixelWidth(int width) {
+	public @Nonnull FluentButton pixelWidth(int width) {
 		button.setPixelWidth(Integer.valueOf(width));
 		return this;
 	}
@@ -71,7 +72,7 @@ public class FluentButton extends FluentWidget implements FluentAbsoluteSize<Flu
 	 * @return this builder
 	 */
 	@Override
-	public FluentButton pixelHeight(int height) {
+	public @Nonnull FluentButton pixelHeight(int height) {
 		button.setPixelHeight(Integer.valueOf(height));
 		return this;
 	}
@@ -83,7 +84,7 @@ public class FluentButton extends FluentWidget implements FluentAbsoluteSize<Flu
 	 * @return this builder
 	 */
 	@Override
-	public FluentButton minPixelHeight(int minPixelHeight) {
+	public @Nonnull FluentButton minPixelHeight(int minPixelHeight) {
 		button.setMinPixelHeight(Integer.valueOf(minPixelHeight));
 		return this;
 	}
@@ -95,7 +96,7 @@ public class FluentButton extends FluentWidget implements FluentAbsoluteSize<Flu
 	 * @return this builder
 	 */
 	@Override
-	public FluentButton maxPixelHeight(int maxPixelHeight) {
+	public @Nonnull FluentButton maxPixelHeight(int maxPixelHeight) {
 		button.setMaxPixelHeight(Integer.valueOf(maxPixelHeight));
 		return this;
 	}
@@ -106,7 +107,7 @@ public class FluentButton extends FluentWidget implements FluentAbsoluteSize<Flu
 	 * @param show the action show mode
 	 * @return this builder
 	 */
-	public FluentButton show(ActionShow show) {
+	public @Nonnull FluentButton show(@Nullable ActionShow show) {
 		button.setShow(show);
 		return this;
 	}
@@ -130,7 +131,7 @@ public class FluentButton extends FluentWidget implements FluentAbsoluteSize<Flu
 	 * @return the mutable button metadata being configured
 	 */
 	@Override
-	public Button get() {
+	public @Nonnull Button get() {
 		return button;
 	}
 }

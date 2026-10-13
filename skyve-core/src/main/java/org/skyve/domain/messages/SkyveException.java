@@ -3,6 +3,7 @@ package org.skyve.domain.messages;
 import org.skyve.util.Util;
 
 import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 
 /**
  * Abstract base class for all Skyve runtime exceptions.
@@ -85,7 +86,7 @@ public abstract class SkyveException extends RuntimeException {
 							@Nonnull Throwable cause,
 							boolean enableSuppression,
 							boolean writableStackTrace,
-							String... i18nValues) {
+							@Nullable String... i18nValues) {
 		super(Util.nullSafeI18n(message, i18nValues), cause, enableSuppression, writableStackTrace);
 	}
 
@@ -95,7 +96,7 @@ public abstract class SkyveException extends RuntimeException {
 	 * @param cause the cause
 	 * @param i18nValues the i18nValues
 	 */
-	public SkyveException(@Nonnull String message, @Nonnull Throwable cause, String... i18nValues) {
+	public SkyveException(@Nonnull String message, @Nonnull Throwable cause, @Nullable String... i18nValues) {
 		super(Util.nullSafeI18n(message, i18nValues), cause);
 	}
 
@@ -104,7 +105,7 @@ public abstract class SkyveException extends RuntimeException {
 	 * @param message the message
 	 * @param i18nValues the i18nValues
 	 */
-	public SkyveException(@Nonnull String message, String... i18nValues) {
+	public SkyveException(@Nonnull String message, @Nullable String... i18nValues) {
 		super(Util.nullSafeI18n(message, i18nValues));
 	}
 

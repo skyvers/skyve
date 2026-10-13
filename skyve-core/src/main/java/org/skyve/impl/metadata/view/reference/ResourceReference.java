@@ -2,6 +2,7 @@ package org.skyve.impl.metadata.view.reference;
 
 import org.skyve.impl.util.XMLMetaData;
 
+import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
@@ -18,12 +19,12 @@ public class ResourceReference implements Reference {
 
 	private String relativeFile;
 
-	public String getRelativeFile() {
+	public @Nullable String getRelativeFile() {
 		return relativeFile;
 	}
 
 	@XmlAttribute(required = true)
-	public void setRelativeFile(String relativeFile) {
+	public void setRelativeFile(@Nullable String relativeFile) {
 		this.relativeFile = relativeFile;
 	}
 }

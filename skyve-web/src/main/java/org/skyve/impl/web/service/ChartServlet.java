@@ -107,7 +107,7 @@ public class ChartServlet extends HttpServlet {
 	 */
 	@Override
 	@SuppressWarnings("java:S1989") // there exists JavaEE error pages
-	protected void doGet(HttpServletRequest request, HttpServletResponse response)
+	protected void doGet(@Nonnull HttpServletRequest request, @Nonnull HttpServletResponse response)
 	throws ServletException, IOException {
 		response.setContentType(MimeType.json.toString());
 		response.setCharacterEncoding(StandardCharsets.UTF_8.name());
@@ -162,7 +162,7 @@ public class ChartServlet extends HttpServlet {
 	 */
 	@Override
 	@SuppressWarnings("java:S1989") // there exists JavaEE error pages
-	protected void doPost(HttpServletRequest request, HttpServletResponse response)
+	protected void doPost(@Nonnull HttpServletRequest request, @Nonnull HttpServletResponse response)
 	throws ServletException, IOException {
 		doGet(request, response);
 	}
@@ -222,7 +222,7 @@ public class ChartServlet extends HttpServlet {
 	}
 
 	@SuppressWarnings("java:S3776") // Complexity OK
-	private static String processListModel(HttpServletRequest request)
+	private static @Nonnull String processListModel(@Nonnull HttpServletRequest request)
 	throws Exception {
 		User user = CORE.getUser();
 		Customer customer = user.getCustomer();
@@ -350,7 +350,7 @@ public class ChartServlet extends HttpServlet {
 		return ChartConfigRenderer.config(type, pfModel);
 	}
 
-	private static String emptyResponse() {
+	private static @Nonnull String emptyResponse() {
 		return "{}";
 	}
 }

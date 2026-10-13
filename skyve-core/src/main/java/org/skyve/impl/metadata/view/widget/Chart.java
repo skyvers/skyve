@@ -12,6 +12,7 @@ import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.DecoratedMetaData;
 import org.skyve.metadata.view.Invisible;
 
+import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlElement;
@@ -96,7 +97,7 @@ public class Chart implements DecoratedMetaData, RelativeSize, Invisible {
 	 *
 	 * @return the inline chart-model metadata, or {@code null} when the chart uses a named model
 	 */
-	public ChartBuilderMetaData getModel() {
+	public @Nullable ChartBuilderMetaData getModel() {
 		return model;
 	}
 
@@ -106,7 +107,7 @@ public class Chart implements DecoratedMetaData, RelativeSize, Invisible {
 	 * @param model the inline chart-model metadata, or {@code null} when using a named model
 	 */
 	@XmlElement(namespace = XMLMetaData.VIEW_NAMESPACE)
-	public void setModel(ChartBuilderMetaData model) {
+	public void setModel(@Nullable ChartBuilderMetaData model) {
 		this.model = model;
 	}
 
@@ -115,7 +116,7 @@ public class Chart implements DecoratedMetaData, RelativeSize, Invisible {
 	 *
 	 * @return the chart type
 	 */
-	public ChartType getType() {
+	public @Nullable ChartType getType() {
 		return type;
 	}
 
@@ -125,7 +126,7 @@ public class Chart implements DecoratedMetaData, RelativeSize, Invisible {
 	 * @param type the chart type
 	 */
 	@XmlAttribute(required = true)
-	public void setType(ChartType type) {
+	public void setType(@Nullable ChartType type) {
 		this.type = type;
 	}
 
@@ -134,7 +135,7 @@ public class Chart implements DecoratedMetaData, RelativeSize, Invisible {
 	 *
 	 * @return the chart model name, or {@code null} when using an inline model
 	 */
-	public String getModelName() {
+	public @Nullable String getModelName() {
 		return modelName;
 	}
 
@@ -144,7 +145,7 @@ public class Chart implements DecoratedMetaData, RelativeSize, Invisible {
 	 * @param modelName the chart model name, or {@code null} when using an inline model
 	 */
 	@XmlAttribute
-	public void setModelName(String modelName) {
+	public void setModelName(@Nullable String modelName) {
 		this.modelName = UtilImpl.processStringValue(modelName);
 	}
 
@@ -154,7 +155,7 @@ public class Chart implements DecoratedMetaData, RelativeSize, Invisible {
 	 * @return the pixel width, or {@code null} when width is not fixed
 	 */
 	@Override
-	public Integer getPixelWidth() {
+	public @Nullable Integer getPixelWidth() {
 		return pixelWidth;
 	}
 
@@ -165,7 +166,7 @@ public class Chart implements DecoratedMetaData, RelativeSize, Invisible {
 	 */
 	@Override
 	@XmlAttribute(required = false)
-	public void setPixelWidth(Integer pixelWidth) {
+	public void setPixelWidth(@Nullable Integer pixelWidth) {
 		this.pixelWidth = pixelWidth;
 	}
 
@@ -175,7 +176,7 @@ public class Chart implements DecoratedMetaData, RelativeSize, Invisible {
 	 * @return the responsive width, or {@code null} when not set
 	 */
 	@Override
-	public Integer getResponsiveWidth() {
+	public @Nullable Integer getResponsiveWidth() {
 		return responsiveWidth;
 	}
 
@@ -186,7 +187,7 @@ public class Chart implements DecoratedMetaData, RelativeSize, Invisible {
 	 */
 	@Override
 	@XmlAttribute(required = false)
-	public void setResponsiveWidth(Integer responsiveWidth) {
+	public void setResponsiveWidth(@Nullable Integer responsiveWidth) {
 		this.responsiveWidth = responsiveWidth;
 	}
 
@@ -196,7 +197,7 @@ public class Chart implements DecoratedMetaData, RelativeSize, Invisible {
 	 * @return the small-breakpoint width, or {@code null} when not set
 	 */
 	@Override
-	public Integer getSm() {
+	public @Nullable Integer getSm() {
 		return sm;
 	}
 	
@@ -207,7 +208,7 @@ public class Chart implements DecoratedMetaData, RelativeSize, Invisible {
 	 */
 	@Override
 	@XmlAttribute(required = false)
-	public void setSm(Integer sm) {
+	public void setSm(@Nullable Integer sm) {
 		this.sm = sm;
 	}
 
@@ -217,7 +218,7 @@ public class Chart implements DecoratedMetaData, RelativeSize, Invisible {
 	 * @return the medium-breakpoint width, or {@code null} when not set
 	 */
 	@Override
-	public Integer getMd() {
+	public @Nullable Integer getMd() {
 		return md;
 	}
 	
@@ -228,7 +229,7 @@ public class Chart implements DecoratedMetaData, RelativeSize, Invisible {
 	 */
 	@Override
 	@XmlAttribute(required = false)
-	public void setMd(Integer md) {
+	public void setMd(@Nullable Integer md) {
 		this.md = md;
 	}
 	
@@ -238,7 +239,7 @@ public class Chart implements DecoratedMetaData, RelativeSize, Invisible {
 	 * @return the large-breakpoint width, or {@code null} when not set
 	 */
 	@Override
-	public Integer getLg() {
+	public @Nullable Integer getLg() {
 		return lg;
 	}
 	
@@ -249,7 +250,7 @@ public class Chart implements DecoratedMetaData, RelativeSize, Invisible {
 	 */
 	@Override
 	@XmlAttribute(required = false)
-	public void setLg(Integer lg) {
+	public void setLg(@Nullable Integer lg) {
 		this.lg = lg;
 	}
 
@@ -259,7 +260,7 @@ public class Chart implements DecoratedMetaData, RelativeSize, Invisible {
 	 * @return the extra-large-breakpoint width, or {@code null} when not set
 	 */
 	@Override
-	public Integer getXl() {
+	public @Nullable Integer getXl() {
 		return xl;
 	}
 	
@@ -270,7 +271,7 @@ public class Chart implements DecoratedMetaData, RelativeSize, Invisible {
 	 */
 	@Override
 	@XmlAttribute(required = false)
-	public void setXl(Integer xl) {
+	public void setXl(@Nullable Integer xl) {
 		this.xl = xl;
 	}
 	
@@ -280,7 +281,7 @@ public class Chart implements DecoratedMetaData, RelativeSize, Invisible {
 	 * @return the percentage width, or {@code null} when not set
 	 */
 	@Override
-	public Integer getPercentageWidth() {
+	public @Nullable Integer getPercentageWidth() {
 		return percentageWidth;
 	}
 
@@ -291,7 +292,7 @@ public class Chart implements DecoratedMetaData, RelativeSize, Invisible {
 	 */
 	@Override
 	@XmlAttribute(required = false)
-	public void setPercentageWidth(Integer percentageWidth) {
+	public void setPercentageWidth(@Nullable Integer percentageWidth) {
 		this.percentageWidth = percentageWidth;
 	}
 
@@ -301,7 +302,7 @@ public class Chart implements DecoratedMetaData, RelativeSize, Invisible {
 	 * @return the minimum pixel width, or {@code null} when no minimum is enforced
 	 */
 	@Override
-	public Integer getMinPixelWidth() {
+	public @Nullable Integer getMinPixelWidth() {
 		return minPixelWidth;
 	}
 
@@ -312,7 +313,7 @@ public class Chart implements DecoratedMetaData, RelativeSize, Invisible {
 	 */
 	@Override
 	@XmlAttribute(required = false)
-	public void setMinPixelWidth(Integer minPixelWidth) {
+	public void setMinPixelWidth(@Nullable Integer minPixelWidth) {
 		this.minPixelWidth = minPixelWidth;
 	}
 
@@ -322,7 +323,7 @@ public class Chart implements DecoratedMetaData, RelativeSize, Invisible {
 	 * @return the maximum pixel width, or {@code null} when no maximum is enforced
 	 */
 	@Override
-	public Integer getMaxPixelWidth() {
+	public @Nullable Integer getMaxPixelWidth() {
 		return maxPixelWidth;
 	}
 
@@ -333,7 +334,7 @@ public class Chart implements DecoratedMetaData, RelativeSize, Invisible {
 	 */
 	@Override
 	@XmlAttribute(required = false)
-	public void setMaxPixelWidth(Integer maxPixelWidth) {
+	public void setMaxPixelWidth(@Nullable Integer maxPixelWidth) {
 		this.maxPixelWidth = maxPixelWidth;
 	}
 
@@ -343,7 +344,7 @@ public class Chart implements DecoratedMetaData, RelativeSize, Invisible {
 	 * @return the pixel height, or {@code null} when height is not fixed
 	 */
 	@Override
-	public Integer getPixelHeight() {
+	public @Nullable Integer getPixelHeight() {
 		return pixelHeight;
 	}
 
@@ -354,7 +355,7 @@ public class Chart implements DecoratedMetaData, RelativeSize, Invisible {
 	 */
 	@Override
 	@XmlAttribute(required = false)
-	public void setPixelHeight(Integer pixelHeight) {
+	public void setPixelHeight(@Nullable Integer pixelHeight) {
 		this.pixelHeight = pixelHeight;
 	}
 
@@ -364,7 +365,7 @@ public class Chart implements DecoratedMetaData, RelativeSize, Invisible {
 	 * @return the percentage height, or {@code null} when not set
 	 */
 	@Override
-	public Integer getPercentageHeight() {
+	public @Nullable Integer getPercentageHeight() {
 		return percentageHeight;
 	}
 
@@ -375,7 +376,7 @@ public class Chart implements DecoratedMetaData, RelativeSize, Invisible {
 	 */
 	@Override
 	@XmlAttribute(required = false)
-	public void setPercentageHeight(Integer percentageHeight) {
+	public void setPercentageHeight(@Nullable Integer percentageHeight) {
 		this.percentageHeight = percentageHeight;
 	}
 
@@ -385,7 +386,7 @@ public class Chart implements DecoratedMetaData, RelativeSize, Invisible {
 	 * @return the minimum pixel height, or {@code null} when no minimum is enforced
 	 */
 	@Override
-	public Integer getMinPixelHeight() {
+	public @Nullable Integer getMinPixelHeight() {
 		return minPixelHeight;
 	}
 
@@ -396,7 +397,7 @@ public class Chart implements DecoratedMetaData, RelativeSize, Invisible {
 	 */
 	@Override
 	@XmlAttribute(required = false)
-	public void setMinPixelHeight(Integer minPixelHeight) {
+	public void setMinPixelHeight(@Nullable Integer minPixelHeight) {
 		this.minPixelHeight = minPixelHeight;
 	}
 
@@ -406,7 +407,7 @@ public class Chart implements DecoratedMetaData, RelativeSize, Invisible {
 	 * @return the maximum pixel height, or {@code null} when no maximum is enforced
 	 */
 	@Override
-	public Integer getMaxPixelHeight() {
+	public @Nullable Integer getMaxPixelHeight() {
 		return maxPixelHeight;
 	}
 
@@ -417,7 +418,7 @@ public class Chart implements DecoratedMetaData, RelativeSize, Invisible {
 	 */
 	@Override
 	@XmlAttribute(required = false)
-	public void setMaxPixelHeight(Integer maxPixelHeight) {
+	public void setMaxPixelHeight(@Nullable Integer maxPixelHeight) {
 		this.maxPixelHeight = maxPixelHeight;
 	}
 
@@ -488,7 +489,7 @@ public class Chart implements DecoratedMetaData, RelativeSize, Invisible {
 	 * @return the mutable decorator property map keyed by property name
 	 */
 	@Override
-	public Map<String, String> getProperties() {
+	public @Nonnull Map<String, String> getProperties() {
 		return properties;
 	}
 }

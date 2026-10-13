@@ -3,6 +3,7 @@ package org.skyve.metadata.behaviour.fluent;
 import org.skyve.impl.metadata.repository.behaviour.ActionMetaData;
 
 import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 
 /**
  * Builds and mutates {@link ActionMetaData} instances using a fluent API.
@@ -25,7 +26,7 @@ public class FluentAction {
 	 *
 	 * @param action the backing metadata instance
 	 */
-	public FluentAction(ActionMetaData action) {
+	public FluentAction(@Nonnull ActionMetaData action) {
 		this.action = action;
 	}
 
@@ -35,7 +36,7 @@ public class FluentAction {
 	 * @param action the source action metadata
 	 * @return this builder
 	 */
-	public FluentAction from(@SuppressWarnings("hiding") ActionMetaData action) {
+	public @Nonnull FluentAction from(@SuppressWarnings("hiding") @Nonnull ActionMetaData action) {
 		name(action.getName());
 		documentation(action.getDocumentation());
 		action.getStatements().forEach(a -> addStatement(FluentStatement.from(a)));
@@ -50,7 +51,7 @@ public class FluentAction {
 	 * @param name action name
 	 * @return this builder
 	 */
-	public FluentAction name(String name) {
+	public @Nonnull FluentAction name(@Nullable String name) {
 		action.setName(name);
 		return this;
 	}
@@ -61,7 +62,7 @@ public class FluentAction {
 	 * @param documentation action documentation text
 	 * @return this builder
 	 */
-	public FluentAction documentation(String documentation) {
+	public @Nonnull FluentAction documentation(@Nullable String documentation) {
 		action.setDocumentation(documentation);
 		return this;
 	}
@@ -72,7 +73,7 @@ public class FluentAction {
 	 * @param statement the statement wrapper to append
 	 * @return this builder
 	 */
-	public FluentAction addStatement(FluentStatement<?> statement) {
+	public @Nonnull FluentAction addStatement(@Nonnull FluentStatement<?> statement) {
 		action.getStatements().add(statement.get());
 		return this;
 	}
@@ -84,7 +85,7 @@ public class FluentAction {
 	 * @param statement the statement wrapper to insert
 	 * @return this builder
 	 */
-	public FluentAction addStatement(int index, FluentStatement<?> statement) {
+	public @Nonnull FluentAction addStatement(int index, @Nonnull FluentStatement<?> statement) {
 		action.getStatements().add(index, statement.get());
 		return this;
 	}
@@ -94,7 +95,7 @@ public class FluentAction {
 	 *
 	 * @return this builder
 	 */
-	public FluentAction clearStatements() {
+	public @Nonnull FluentAction clearStatements() {
 		action.getStatements().clear();
 		return this;
 	}
@@ -117,7 +118,7 @@ public class FluentAction {
 	 *
 	 * @return the backing action metadata
 	 */
-	public ActionMetaData get() {
+	public @Nonnull ActionMetaData get() {
 		return action;
 	}
 }

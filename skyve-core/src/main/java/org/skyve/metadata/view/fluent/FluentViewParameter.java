@@ -2,6 +2,9 @@ package org.skyve.metadata.view.fluent;
 
 import org.skyve.metadata.view.View.ViewParameter;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Builds {@link ViewParameter} metadata used by view-level parameter binding.
  */
@@ -21,7 +24,7 @@ public class FluentViewParameter {
 	 * @param parameter
 	 *            the metadata instance to mutate
 	 */
-	public FluentViewParameter(ViewParameter parameter) {
+	public FluentViewParameter(@Nonnull ViewParameter parameter) {
 		this.parameter = parameter;
 	}
 	
@@ -32,7 +35,7 @@ public class FluentViewParameter {
 	 *            the source metadata to copy
 	 * @return this builder
 	 */
-	public FluentViewParameter from(@SuppressWarnings("hiding") ViewParameter parameter) {
+	public @Nonnull FluentViewParameter from(@SuppressWarnings("hiding") @Nonnull ViewParameter parameter) {
 		fromBinding(parameter.getFromBinding());
 		boundTo(parameter.getBoundTo());
 		return this;
@@ -45,7 +48,7 @@ public class FluentViewParameter {
 	 *            the binding expression evaluated to obtain the value
 	 * @return this builder
 	 */
-	public FluentViewParameter fromBinding(String fromBinding) {
+	public @Nonnull FluentViewParameter fromBinding(@Nullable String fromBinding) {
 		parameter.setFromBinding(fromBinding);
 		return this;
 	}
@@ -57,7 +60,7 @@ public class FluentViewParameter {
 	 *            the target parameter destination
 	 * @return this builder
 	 */
-	public FluentViewParameter boundTo(String boundTo) {
+	public @Nonnull FluentViewParameter boundTo(@Nullable String boundTo) {
 		parameter.setBoundTo(boundTo);
 		return this;
 	}
@@ -67,7 +70,7 @@ public class FluentViewParameter {
 	 *
 	 * @return the wrapped view-parameter metadata
 	 */
-	public ViewParameter get() {
+	public @Nonnull ViewParameter get() {
 		return parameter;
 	}
 }

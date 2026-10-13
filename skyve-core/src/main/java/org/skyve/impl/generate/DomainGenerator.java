@@ -206,12 +206,12 @@ public abstract class DomainGenerator {
 	protected DomainGenerator(boolean write,
 								boolean debug,
 								boolean multiTenant,
-								DialectOptions dialectOptions,
-								String srcPath,
-								String generatedSrcPath,
-								String testPath,
-								String generatedTestPath,
-								String[] excludedModules) {
+								@Nonnull DialectOptions dialectOptions,
+								@Nonnull String srcPath,
+								@Nonnull String generatedSrcPath,
+								@Nonnull String testPath,
+								@Nonnull String generatedTestPath,
+								@Nullable String[] excludedModules) {
 		this.write = write;
 		this.debug = debug;
 		this.multiTenant = multiTenant;
@@ -297,15 +297,15 @@ public abstract class DomainGenerator {
 	public abstract void generate() throws Exception;
 
 	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
-	public static final DomainGenerator newDomainGenerator(boolean write,
+	public static final @Nonnull DomainGenerator newDomainGenerator(boolean write,
 															boolean debug,
 															boolean multiTenant,
-															DialectOptions dialectOptions,
-															String srcPath,
-															String generatedSrcPath,
-															String testPath,
-															String generatedTestPath,
-															String... excludedModules) {
+															@Nonnull DialectOptions dialectOptions,
+															@Nonnull String srcPath,
+															@Nonnull String generatedSrcPath,
+															@Nonnull String testPath,
+															@Nonnull String generatedTestPath,
+															@Nullable String... excludedModules) {
 		return new OverridableDomainGenerator(write,
 												debug,
 												multiTenant,
@@ -321,7 +321,7 @@ public abstract class DomainGenerator {
 	 * Validate a customer.
 	 */
 	@SuppressWarnings("java:S106") // command line utility can use stdout/stderr
-	public static void validate(String customerName) {
+	public static void validate(@Nonnull String customerName) {
 		long millis = System.currentTimeMillis();
 		DomainGenerator jenny = DomainGenerator.newDomainGenerator(false, false, false, DialectOptions.H2_NO_INDEXES, "", "", "", "", "");
 		try {
@@ -368,12 +368,12 @@ public abstract class DomainGenerator {
 	public static void generate(boolean validate,
 									boolean debug,
 									boolean multiTenant,
-									DialectOptions dialectOptions,
-									String srcPath,
-									String generatedSrcPath,
-									String testPath,
-									String generatedTestPath,
-									String... excludedModules)
+									@Nonnull DialectOptions dialectOptions,
+									@Nonnull String srcPath,
+									@Nonnull String generatedSrcPath,
+									@Nonnull String testPath,
+									@Nonnull String generatedTestPath,
+									@Nullable String... excludedModules)
 	throws Exception {
 		System.out.println("SRC PATH=" + srcPath);
 		System.out.println("GENERATED SRC PATH=" + generatedSrcPath);
@@ -457,7 +457,7 @@ public abstract class DomainGenerator {
 	 * @throws Exception
 	 */
 	@SuppressWarnings({"java:S3776", "java:S106"}) // Complexity OK, command line utility can use stdout/stderr
-	public static void main(String[] args) throws Exception {
+	public static void main(@Nonnull String[] args) throws Exception {
 		if (args.length < 5) {
 			System.err.println("You must have at least the validate flag, src path, generated path, test path and generated test path as arguments"
 					+ " - usually \"true src/main/java/ src/generated/java/ src/test/java/ src/generatedTest/java/\"");

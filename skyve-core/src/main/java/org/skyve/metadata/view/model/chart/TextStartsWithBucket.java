@@ -1,5 +1,7 @@
 package org.skyve.metadata.view.model.chart;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlTransient;
 
 /**
@@ -20,7 +22,7 @@ public class TextStartsWithBucket implements Bucket {
 	}
 	
 	@Override
-	public String bizQLExpression(String categoryBinding) {
+	public @Nonnull String bizQLExpression(@Nonnull String categoryBinding) {
 		StringBuilder result = new StringBuilder(32);
 		if (! caseSensitive) {
 			result.append("upper(");
@@ -33,7 +35,7 @@ public class TextStartsWithBucket implements Bucket {
 	}
 	
 	@Override
-	public String label(Object category) {
+	public @Nullable String label(@Nullable Object category) {
 		return (category == null) ? null : category.toString();
 	}
 }

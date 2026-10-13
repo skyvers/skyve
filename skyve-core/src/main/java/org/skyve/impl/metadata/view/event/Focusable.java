@@ -2,6 +2,8 @@ package org.skyve.impl.metadata.view.event;
 
 import java.util.List;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * Mixin interface for input widgets that fire focus and blur events.
  *
@@ -12,6 +14,6 @@ import java.util.List;
  * @see EventSource
  */
 public interface Focusable extends EventSource {
-	public List<EventAction> getFocusActions();
-	public List<EventAction> getBlurActions();
+	public @Nonnull List<EventAction> getFocusActions();
+	public @Nonnull List<EventAction> getBlurActions();
 }

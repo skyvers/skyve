@@ -503,10 +503,10 @@ public interface ProvidedRepository extends CachedRepository {
 		}
 	}
 
-	private static void notifyObserver(ProvidedRepository repository,
-										String customerName,
-										String errorPrefix,
-										Consumer<Customer> notifier) {
+	private static void notifyObserver(@Nonnull ProvidedRepository repository,
+										@Nonnull String customerName,
+										@Nonnull String errorPrefix,
+										@Nonnull Consumer<Customer> notifier) {
 		Customer customer = repository.getCustomer(customerName);
 		if (customer == null) {
 			throw new IllegalStateException(errorPrefix + customerName + " does not exist.");

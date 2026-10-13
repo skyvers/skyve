@@ -2,6 +2,8 @@ package org.skyve.metadata.view.fluent;
 
 import org.skyve.impl.metadata.repository.view.actions.AddAction;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * Builds {@link AddAction} metadata using a fluent API.
  */
@@ -21,7 +23,7 @@ public class FluentAddAction extends FluentAction<FluentAddAction> {
 	 * @param action
 	 *            the action instance to wrap
 	 */
-	public FluentAddAction(AddAction action) {
+	public FluentAddAction(@Nonnull AddAction action) {
 		this.action = action;
 	}
 
@@ -32,7 +34,7 @@ public class FluentAddAction extends FluentAction<FluentAddAction> {
 	 *            the source action metadata
 	 * @return this builder
 	 */
-	public FluentAddAction from(@SuppressWarnings("hiding") AddAction action) {
+	public @Nonnull FluentAddAction from(@SuppressWarnings("hiding") @Nonnull AddAction action) {
 		super.fromBase(action);
 		return this;
 	}
@@ -41,7 +43,7 @@ public class FluentAddAction extends FluentAction<FluentAddAction> {
 	 * Returns the wrapped repository action instance.
 	 */
 	@Override
-	public AddAction get() {
+	public @Nonnull AddAction get() {
 		return action;
 	}
 }

@@ -13,6 +13,8 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.TreeMap;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * Renders React Native edit view component code from Skyve metadata.
  */
@@ -22,11 +24,11 @@ public class ReactNativeEditView extends ReactComponent {
 	private View createView;
 	private View editView;
 
-	public ReactNativeEditView(ReactGenerator generator, String moduleName, String componentName) {
+	public ReactNativeEditView(@Nonnull ReactGenerator generator, @Nonnull String moduleName, @Nonnull String componentName) {
 		super(generator, moduleName, componentName);
 	}
 
-	public void setViews(Module module, Document document) {
+	public void setViews(@Nonnull Module module, @Nonnull Document document) {
 		this.module = module;
 		this.document = document;
 		Customer c = CORE.getCustomer();
@@ -36,7 +38,7 @@ public class ReactNativeEditView extends ReactComponent {
 
 	@Override
 	@SuppressWarnings("java:S3776") // Complexity OK
-	protected void create(FileWriter fw) throws IOException {
+	protected void create(@Nonnull FileWriter fw) throws IOException {
 		Map<String, String> imports = new TreeMap<>();
 		String editJsx = null;
 		String createJsx = null;
@@ -107,7 +109,7 @@ public class ReactNativeEditView extends ReactComponent {
 		fw.write("}\n");
 	}
 
-	private static void addNavigationOptions(FileWriter fw, View view, String startingIndent) throws IOException {
+	private static void addNavigationOptions(@Nonnull FileWriter fw, @Nonnull View view, @Nonnull String startingIndent) throws IOException {
 		fw.write(startingIndent);
 		fw.write("const navigation = useNavigation();\n");
 		fw.write(startingIndent);

@@ -26,14 +26,14 @@ public class FluentBlurb extends FluentWidget implements FluentAbsoluteSize<Flue
 	 *
 	 * @param blurb the metadata instance to mutate
 	 */
-	public FluentBlurb(Blurb blurb) {
+	public FluentBlurb(@Nonnull Blurb blurb) {
 		this.blurb = blurb;
 	}
 
 	/**
 	 * Copies blurb metadata into this fluent builder.
 	 */
-	public FluentBlurb from(@SuppressWarnings("hiding") Blurb blurb) {
+	public @Nonnull FluentBlurb from(@SuppressWarnings("hiding") @Nonnull Blurb blurb) {
 
 		markup(blurb.getMarkup());
 
@@ -58,7 +58,7 @@ public class FluentBlurb extends FluentWidget implements FluentAbsoluteSize<Flue
 	 * @param markup the markup content
 	 * @return this builder
 	 */
-	public FluentBlurb markup(String markup) {
+	public @Nonnull FluentBlurb markup(@Nullable String markup) {
 		blurb.setMarkup(markup);
 		return this;
 	}
@@ -70,7 +70,7 @@ public class FluentBlurb extends FluentWidget implements FluentAbsoluteSize<Flue
 	 * @return this builder
 	 */
 	@Override
-	public FluentBlurb pixelWidth(int pixelWidth) {
+	public @Nonnull FluentBlurb pixelWidth(int pixelWidth) {
 		blurb.setPixelWidth(Integer.valueOf(pixelWidth));
 		return this;
 	}
@@ -82,7 +82,7 @@ public class FluentBlurb extends FluentWidget implements FluentAbsoluteSize<Flue
 	 * @return this builder
 	 */
 	@Override
-	public FluentBlurb pixelHeight(int pixelHeight) {
+	public @Nonnull FluentBlurb pixelHeight(int pixelHeight) {
 		blurb.setPixelHeight(Integer.valueOf(pixelHeight));
 		return this;
 	}
@@ -117,7 +117,7 @@ public class FluentBlurb extends FluentWidget implements FluentAbsoluteSize<Flue
 	 * @param textAlignment the alignment to apply
 	 * @return this builder
 	 */
-	public FluentBlurb textAlignment(HorizontalAlignment textAlignment) {
+	public @Nonnull FluentBlurb textAlignment(@Nullable HorizontalAlignment textAlignment) {
 		blurb.setTextAlignment(textAlignment);
 		return this;
 	}
@@ -128,7 +128,7 @@ public class FluentBlurb extends FluentWidget implements FluentAbsoluteSize<Flue
 	 * @param escape true to escape markup, false to render markup
 	 * @return this builder
 	 */
-	public FluentBlurb escape(boolean escape) {
+	public @Nonnull FluentBlurb escape(boolean escape) {
 		blurb.setEscape(escape ? Boolean.TRUE : Boolean.FALSE);
 		return this;
 	}
@@ -139,7 +139,7 @@ public class FluentBlurb extends FluentWidget implements FluentAbsoluteSize<Flue
 	 * @param sanitise the sanitisation strategy
 	 * @return this builder
 	 */
-	public FluentBlurb sanitise(Sanitisation sanitise) {
+	public @Nonnull FluentBlurb sanitise(@Nullable Sanitisation sanitise) {
 		blurb.setSanitise(sanitise);
 		return this;
 	}
@@ -163,7 +163,7 @@ public class FluentBlurb extends FluentWidget implements FluentAbsoluteSize<Flue
 	 * @return the mutable blurb metadata being configured
 	 */
 	@Override
-	public Blurb get() {
+	public @Nonnull Blurb get() {
 		return blurb;
 	}
 }

@@ -2,6 +2,8 @@ package org.skyve.impl.metadata.view.event;
 
 import java.util.List;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * Mixin interface for widget containers that fire a remove-item event.
  *
@@ -11,5 +13,5 @@ import java.util.List;
  * @see EventSource
  */
 public interface Removable extends EventSource {
-	public List<EventAction> getRemovedActions();
+	public @Nonnull List<EventAction> getRemovedActions();
 }

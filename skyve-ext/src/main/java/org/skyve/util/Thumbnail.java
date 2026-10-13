@@ -64,7 +64,7 @@ public class Thumbnail {
 	 * File constructor
 	 * @param file	The image file.
 	 */
-	public Thumbnail(File file) throws IOException {
+	public Thumbnail(@Nonnull File file) throws IOException {
 		bytes = FileUtil.bytes(file);
 		mimeType = MimeType.fromFileName(file.getName());
 	}
@@ -73,7 +73,7 @@ public class Thumbnail {
 	 * Content constructor
 	 * @param content	The attachment.
 	 */
-	public Thumbnail(AttachmentContent content) throws IOException {
+	public Thumbnail(@Nonnull AttachmentContent content) throws IOException {
 		this(content, 0, 0);
 	}
 
@@ -89,7 +89,7 @@ public class Thumbnail {
 	 * @param height	The required height
 	 * @throws IOException
 	 */
-	public Thumbnail(File file, int width, int height) throws IOException {
+	public Thumbnail(@Nonnull File file, int width, int height) throws IOException {
 		// Wait until we are below max concurrency
 		while (CONCURRENT.size() > UtilImpl.THUMBNAIL_CONCURRENT_THREADS) {
 			sleep();
@@ -126,7 +126,7 @@ public class Thumbnail {
 	 * @param height	The required height	(if <=0 this will not be processed)
 	 * @throws IOException
 	 */
-	public Thumbnail(AttachmentContent content, int width, int height) throws IOException {
+	public Thumbnail(@Nonnull AttachmentContent content, int width, int height) throws IOException {
 		// No processing required - ie no resize and no SVG burning, just return content bytes and mime type.
 		String markup = content.getMarkup();
 		if (((width <= 0) || (height <= 0)) && (markup == null)) {
@@ -179,7 +179,7 @@ public class Thumbnail {
 	 * @param height	The required height
 	 * @throws IOException
 	 */
-	public Thumbnail(InputStream inputStream, String url, String contentType, int width, int height)
+	public Thumbnail(@Nonnull InputStream inputStream, @Nonnull String url, @Nonnull String contentType, int width, int height)
 	throws IOException {
 		// Wait until we are below max concurrency
 		while (CONCURRENT.size() > UtilImpl.THUMBNAIL_CONCURRENT_THREADS) {
@@ -225,7 +225,7 @@ public class Thumbnail {
 	 * @param bytes
 	 * @throws IOException
 	 */
-	private void determineCacheKey(String uri) throws IOException{
+	private void determineCacheKey(@Nonnull String uri) throws IOException{
 		try {
 	    	@SuppressWarnings("java:S4790") // Just to make a unique name within the character limit - not for security purposes
 			MessageDigest md = MessageDigest.getInstance("SHA1"); // SHA-1 base 32 is 32 chars
@@ -240,7 +240,7 @@ public class Thumbnail {
 	 * Get the bytes for this thumb nail generated in the constructors.
 	 * @return	the bytes
 	 */
-	public byte[] getBytes() {
+	public @Nonnull byte[] getBytes() {
 		return bytes;
 	}
 	
@@ -248,7 +248,7 @@ public class Thumbnail {
 	 * Get the mime type for this thumb nail.
 	 * @return	MimeType.png, MimeType.svg or null for unknown
 	 */
-	public MimeType getMimeType() {
+	public @Nullable MimeType getMimeType() {
 		return mimeType;
 	}
 	

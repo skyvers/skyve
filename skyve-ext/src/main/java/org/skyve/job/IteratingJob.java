@@ -4,6 +4,7 @@ import java.util.Collection;
 
 import org.skyve.persistence.Persistence;
 
+import jakarta.annotation.Nonnull;
 import jakarta.inject.Inject;
 
 /**
@@ -91,12 +92,12 @@ public abstract class IteratingJob<T> extends CancellableJob {
 	/**
 	 * @return The collection of elements to iterate over.
 	 */
-	protected abstract Collection<T> getElements();
+	protected abstract @Nonnull Collection<T> getElements();
 
 	/**
 	 * @param element The element to perform the operation on.
 	 */
-	protected abstract void operation(T element) throws Exception;
+	protected abstract void operation(@Nonnull T element) throws Exception;
 
 	/**
 	 * @return Boolean that determines whether processing should continue if the operation fails.
@@ -142,7 +143,7 @@ public abstract class IteratingJob<T> extends CancellableJob {
 	 *
 	 * @param persistence Persistence to use for partial commits.
 	 */
-	protected void setPersistence(Persistence persistence) {
+	protected void setPersistence(@Nonnull Persistence persistence) {
 		this.persistence = persistence;
 	}
 

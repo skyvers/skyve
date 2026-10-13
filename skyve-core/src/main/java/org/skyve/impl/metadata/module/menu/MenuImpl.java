@@ -8,6 +8,8 @@ import java.util.Map;
 import org.skyve.metadata.module.menu.Menu;
 import org.skyve.metadata.module.menu.MenuItem;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * Represents a menu.
  */
@@ -18,12 +20,12 @@ public class MenuImpl implements Menu {
 	private Map<String, String> properties = new LinkedHashMap<>();
 
 	@Override
-	public List<MenuItem> getItems() {
+	public @Nonnull List<MenuItem> getItems() {
 		return menuItemList;
 	}
 
 	@Override
-	public Map<String, String> getProperties() {
+	public @Nonnull Map<String, String> getProperties() {
 		return properties;
 	}
 	
@@ -32,7 +34,7 @@ public class MenuImpl implements Menu {
 	 * Only if at least one of its items is applicable
 	 */
 	@Override
-	public boolean isApplicable(String uxui) {
+	public boolean isApplicable(@Nonnull String uxui) {
 		boolean result = false;
 
 		for (MenuItem item : menuItemList) {
@@ -51,7 +53,7 @@ public class MenuImpl implements Menu {
 	 * @return The <code>String</code> representation.
 	 */
 	@Override
-	public String toString() {
+	public @Nonnull String toString() {
 		StringBuilder menuStructure = new StringBuilder();
 
 		for (MenuItem item : getItems()) {

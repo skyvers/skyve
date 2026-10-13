@@ -10,6 +10,8 @@ import org.skyve.impl.metadata.view.MinimumHeight;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.view.Editable;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlRootElement;
@@ -46,70 +48,70 @@ public class TextArea extends ChangeableInputWidget implements Editable, Absolut
 		return true;
 	}
 	
-	public Boolean getWordWrap() {
+	public @Nullable Boolean getWordWrap() {
 		return wordWrap;
 	}
 
 	@XmlAttribute(name = "wrap", required = false)
-	public void setWordWrap(Boolean wordWrap) {
+	public void setWordWrap(@Nullable Boolean wordWrap) {
 		this.wordWrap = wordWrap;
 	}
 
 	@Override
-	public Boolean getEditable() {
+	public @Nullable Boolean getEditable() {
 		return editable;
 	}
 
 	@Override
 	@XmlAttribute(name = "editable", required = false)
-	public void setEditable(Boolean editable) {
+	public void setEditable(@Nullable Boolean editable) {
 		this.editable = editable;
 	}
 
-	public KeyboardType getKeyboardType() {
+	public @Nullable KeyboardType getKeyboardType() {
 		return keyboardType;
 	}
 
 	@XmlAttribute(name = "keyboardType", required = false)
-	public void setKeyboardType(KeyboardType keyboardType) {
+	public void setKeyboardType(@Nullable KeyboardType keyboardType) {
 		this.keyboardType = keyboardType;
 	}
 
 	@Override
-	public Integer getPixelWidth() {
+	public @Nullable Integer getPixelWidth() {
 		return pixelWidth;
 	}
 
 	@Override
 	@XmlAttribute(required = false)
-	public void setPixelWidth(Integer pixelWidth) {
+	public void setPixelWidth(@Nullable Integer pixelWidth) {
 		this.pixelWidth = pixelWidth;
 	}
 
 	@Override
-	public Integer getPixelHeight() {
+	public @Nullable Integer getPixelHeight() {
 		return pixelHeight;
 	}
 
 	@Override
 	@XmlAttribute(required = false)
-	public void setPixelHeight(Integer pixelHeight) {
+	public void setPixelHeight(@Nullable Integer pixelHeight) {
 		this.pixelHeight = pixelHeight;
 	}
 
 	@Override
-	public Integer getMinPixelHeight() {
+	public @Nullable Integer getMinPixelHeight() {
 		return minPixelHeight;
 	}
 
 	@Override
 	@XmlAttribute(required = false)
-	public void setMinPixelHeight(Integer minPixelHeight) {
+	public void setMinPixelHeight(@Nullable Integer minPixelHeight) {
 		this.minPixelHeight = minPixelHeight;
 	}
 
 	@Override
-	public Map<String, String> getProperties() {
+	public @Nonnull Map<String, String> getProperties() {
 		return properties;
 	}
 }

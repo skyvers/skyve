@@ -2,6 +2,9 @@ package org.skyve.metadata.module.fluent;
 
 import org.skyve.impl.metadata.repository.module.MapItemMetaData;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Builds map menu item metadata.
  */
@@ -20,7 +23,7 @@ public class FluentMapItem extends FluentMenuItem<FluentMapItem> {
 	 *
 	 * @param item The metadata to mutate.
 	 */
-	public FluentMapItem(MapItemMetaData item) {
+	public FluentMapItem(@Nonnull MapItemMetaData item) {
 		this.item = item;
 	}
 
@@ -30,7 +33,7 @@ public class FluentMapItem extends FluentMenuItem<FluentMapItem> {
 	 * @param item The source map menu item.
 	 * @return this fluent instance.
 	 */
-	public FluentMapItem from(@SuppressWarnings("hiding") org.skyve.impl.metadata.module.menu.MapItem item) {
+	public @Nonnull FluentMapItem from(@SuppressWarnings("hiding") @Nonnull org.skyve.impl.metadata.module.menu.MapItem item) {
 		super.from(item);
 		documentName(item.getDocumentName());
 		queryName(item.getQueryName());
@@ -53,7 +56,7 @@ public class FluentMapItem extends FluentMenuItem<FluentMapItem> {
 	 * @param documentName The document name.
 	 * @return this fluent instance.
 	 */
-	public FluentMapItem documentName(String documentName) {
+	public @Nonnull FluentMapItem documentName(@Nullable String documentName) {
 		item.setDocumentName(documentName);
 		return this;
 	}
@@ -64,7 +67,7 @@ public class FluentMapItem extends FluentMenuItem<FluentMapItem> {
 	 * @param queryName The query name.
 	 * @return this fluent instance.
 	 */
-	public FluentMapItem queryName(String queryName) {
+	public @Nonnull FluentMapItem queryName(@Nullable String queryName) {
 		item.setQueryName(queryName);
 		return this;
 	}
@@ -75,7 +78,7 @@ public class FluentMapItem extends FluentMenuItem<FluentMapItem> {
 	 * @param modelName The model name.
 	 * @return this fluent instance.
 	 */
-	public FluentMapItem modelName(String modelName) {
+	public @Nonnull FluentMapItem modelName(@Nullable String modelName) {
 		item.setModelName(modelName);
 		return this;
 	}
@@ -86,7 +89,7 @@ public class FluentMapItem extends FluentMenuItem<FluentMapItem> {
 	 * @param geometryBinding The geometry binding expression.
 	 * @return this fluent instance.
 	 */
-	public FluentMapItem geometryBinding(String geometryBinding) {
+	public @Nonnull FluentMapItem geometryBinding(@Nonnull String geometryBinding) {
 		item.setGeometryBinding(geometryBinding);
 		return this;
 	}
@@ -97,7 +100,7 @@ public class FluentMapItem extends FluentMenuItem<FluentMapItem> {
 	 * @param refreshTimeInSeconds The refresh interval.
 	 * @return this fluent instance.
 	 */
-	public FluentMapItem refreshTimeInSeconds(int refreshTimeInSeconds) {
+	public @Nonnull FluentMapItem refreshTimeInSeconds(int refreshTimeInSeconds) {
 		item.setRefreshTimeInSeconds(Integer.valueOf(refreshTimeInSeconds));
 		return this;
 	}
@@ -108,7 +111,7 @@ public class FluentMapItem extends FluentMenuItem<FluentMapItem> {
 	 * @param showRefreshControls {@code true} to show refresh controls.
 	 * @return this fluent instance.
 	 */
-	public FluentMapItem showRefreshControls(boolean showRefreshControls) {
+	public @Nonnull FluentMapItem showRefreshControls(boolean showRefreshControls) {
 		item.setShowRefreshControls(showRefreshControls ? Boolean.TRUE : Boolean.FALSE);
 		return this;
 	}
@@ -119,7 +122,7 @@ public class FluentMapItem extends FluentMenuItem<FluentMapItem> {
 	 * @return The map item metadata instance.
 	 */
 	@Override
-	public MapItemMetaData get() {
+	public @Nonnull MapItemMetaData get() {
 		return item;
 	}
 }

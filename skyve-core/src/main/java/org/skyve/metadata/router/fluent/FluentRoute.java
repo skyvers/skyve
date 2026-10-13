@@ -9,6 +9,7 @@ import org.skyve.metadata.view.View.ViewType;
 import org.skyve.web.WebAction;
 
 import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 
 /**
  * Builds one route outcome and its match criteria.
@@ -28,7 +29,7 @@ public class FluentRoute {
 	 *
 	 * @param route backing route metadata
 	 */
-	public FluentRoute(Route route) {
+	public FluentRoute(@Nonnull Route route) {
 		this.route = route;
 	}
 
@@ -38,7 +39,7 @@ public class FluentRoute {
 	 * @param route source route metadata
 	 * @return this builder
 	 */
-	public FluentRoute from(@SuppressWarnings("hiding") Route route) {
+	public @Nonnull FluentRoute from(@SuppressWarnings("hiding") @Nonnull Route route) {
 		outcomeUrl(route.getOutcomeUrl());
 		route.getCriteria().forEach(c -> addCriteria(new FluentRouteCriteria().from(c)));
 		route.getProperties().entrySet().forEach(p -> putProperty(p.getKey(), p.getValue()));
@@ -52,7 +53,7 @@ public class FluentRoute {
 	 * @param outcomeUrl outcome URL
 	 * @return this builder
 	 */
-	public FluentRoute outcomeUrl(String outcomeUrl) {
+	public @Nonnull FluentRoute outcomeUrl(@Nullable String outcomeUrl) {
 		route.setOutcomeUrl(outcomeUrl);
 		return this;
 	}
@@ -63,7 +64,7 @@ public class FluentRoute {
 	 * @param criteria criteria wrapper
 	 * @return this builder
 	 */
-	public FluentRoute addCriteria(FluentRouteCriteria criteria) {
+	public @Nonnull FluentRoute addCriteria(@Nonnull FluentRouteCriteria criteria) {
 		route.getCriteria().add(criteria.get());
 		return this;
 	}
@@ -74,7 +75,7 @@ public class FluentRoute {
 	 * @param exampleCriteria criteria template; null fields are treated as wildcards
 	 * @return this builder
 	 */
-	public FluentRoute removeCriteria(FluentRouteCriteria exampleCriteria) {
+	public @Nonnull FluentRoute removeCriteria(@Nonnull FluentRouteCriteria exampleCriteria) {
 		RouteCriteria example = exampleCriteria.get();
 		String customerName = example.getCustomerName();
 		String dataGroupId = example.getDataGroupId();
@@ -101,7 +102,7 @@ public class FluentRoute {
 	 * @param exampleCriteria criteria template; null fields are treated as wildcards
 	 * @return matching criteria wrappers, possibly empty
 	 */
-	public List<FluentRouteCriteria> findCriteria(FluentRouteCriteria exampleCriteria) {
+	public @Nonnull List<FluentRouteCriteria> findCriteria(@Nonnull FluentRouteCriteria exampleCriteria) {
 		RouteCriteria example = exampleCriteria.get();
 		String customerName = example.getCustomerName();
 		String dataGroupId = example.getDataGroupId();
@@ -130,7 +131,7 @@ public class FluentRoute {
 	 *
 	 * @return this builder
 	 */
-	public FluentRoute clearCriteria() {
+	public @Nonnull FluentRoute clearCriteria() {
 		route.getCriteria().clear();
 		return this;
 	}
@@ -153,7 +154,7 @@ public class FluentRoute {
 	 *
 	 * @return backing route metadata
 	 */
-	public Route get() {
+	public @Nonnull Route get() {
 		return route;
 	}
 }

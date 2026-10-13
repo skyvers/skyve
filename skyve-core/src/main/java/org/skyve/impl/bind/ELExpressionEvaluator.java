@@ -89,7 +89,7 @@ public class ELExpressionEvaluator extends ExpressionEvaluator {
 	 */
 	static final ClassValue<Map<String, ELClass>> ENUM_BEANS = new ClassValue<>() {
 		@Override
-		protected Map<String, ELClass> computeValue(Class<?> type) {
+		protected @Nonnull Map<String, ELClass> computeValue(@Nonnull Class<?> type) {
 			return new ConcurrentHashMap<>(enumBeans(type));
 		}
 	};
@@ -101,14 +101,14 @@ public class ELExpressionEvaluator extends ExpressionEvaluator {
 		private Map<String, Method> localFunctions;
 		private final FunctionMapper functions = new FunctionMapper() {
 			@Override
-			public Method resolveFunction(String prefix, String localName) {
+			public @Nullable Method resolveFunction(@Nonnull String prefix, @Nonnull String localName) {
 				String key = prefix + ':' + localName;
 				Method result = (localFunctions == null) ? null : localFunctions.get(key);
 				return (result == null) ? FIXED_FUNCTIONS.get(key) : result;
 			}
 
 			@Override
-			public void mapFunction(String prefix, String localName, Method method) {
+			public void mapFunction(@Nonnull String prefix, @Nonnull String localName, @Nullable Method method) {
 				if (localFunctions == null) {
 					localFunctions = new HashMap<>();
 				}
@@ -116,23 +116,23 @@ public class ELExpressionEvaluator extends ExpressionEvaluator {
 			}
 		};
 
-		private FunctionContext(ELContext original) {
+		private FunctionContext(@Nonnull ELContext original) {
 			resolver = original.getELResolver();
 			variables = original.getVariableMapper();
 		}
 
 		@Override
-		public ELResolver getELResolver() {
+		public @Nonnull ELResolver getELResolver() {
 			return resolver;
 		}
 
 		@Override
-		public FunctionMapper getFunctionMapper() {
+		public @Nonnull FunctionMapper getFunctionMapper() {
 			return functions;
 		}
 
 		@Override
-		public VariableMapper getVariableMapper() {
+		public @Nonnull VariableMapper getVariableMapper() {
 			return variables;
 		}
 	}
@@ -249,7 +249,7 @@ public class ELExpressionEvaluator extends ExpressionEvaluator {
 	 * @return the evaluated value, or {@code null} when the expression resolves to null
 	 */
 	@Override
-	public Object evaluateWithoutPrefixOrSuffix(String expression, Bean bean) {
+	public @Nullable Object evaluateWithoutPrefixOrSuffix(@Nonnull String expression, @Nullable Bean bean) {
 		return newSkyveEvaluationProcessor(bean).eval(expression);
 	}
 
@@ -261,7 +261,7 @@ public class ELExpressionEvaluator extends ExpressionEvaluator {
 	 * @return the display text derived from the evaluated value
 	 */
 	@Override
-	public String formatWithoutPrefixOrSuffix(String expression, Bean bean) {
+	public @Nonnull String formatWithoutPrefixOrSuffix(@Nonnull String expression, @Nullable Bean bean) {
 		return BindUtil.toDisplay(CORE.getCustomer(), evaluateWithoutPrefixOrSuffix(expression, bean));
 	}
 	
@@ -278,11 +278,11 @@ public class ELExpressionEvaluator extends ExpressionEvaluator {
 	 */
 	@Override
 	@SuppressWarnings("java:S3776") // Complexity OK
-	public String validateWithoutPrefixOrSuffix(String expression,
-													Class<?> returnType,
-													Customer customer,
-													Module module,
-													Document document) {
+	public @Nullable String validateWithoutPrefixOrSuffix(@Nonnull String expression,
+													@Nullable Class<?> returnType,
+													@Nullable Customer customer,
+													@Nullable Module module,
+													@Nullable Document document) {
 		String result = null;
 
 		if (typesafe) {
@@ -334,10 +334,10 @@ public class ELExpressionEvaluator extends ExpressionEvaluator {
 	 */
 	@Override
 	@SuppressWarnings({"java:S3776", "java:S6541"}) // complexity OK
-	public List<String> completeWithoutPrefixOrSuffix(String fragment,
-														Customer customer,
-														Module module,
-														Document document) {
+	public @Nonnull List<String> completeWithoutPrefixOrSuffix(@Nullable String fragment,
+														@Nonnull Customer customer,
+														@Nonnull Module module,
+														@Nonnull Document document) {
 		List<String> result = new ArrayList<>();
 		
 		String input = (fragment == null) ? "" : fragment;
@@ -484,7 +484,7 @@ public class ELExpressionEvaluator extends ExpressionEvaluator {
 	 * @param input
 	 * @param completions
 	 */
-	private static void newExpression(String input, List<String> completions) {
+	private static void newExpression(@Nonnull String input, @Nonnull List<String> completions) {
 		int i = input.length();
 		char lastChar = input.isEmpty() ? '\0' : input.charAt(i - 1);
 		if (lastChar != ']' && lastChar != ')') {
@@ -517,7 +517,7 @@ public class ELExpressionEvaluator extends ExpressionEvaluator {
 	 * @param binding the binding path to insert after each {@code bean} reference
 	 */
 	@Override
-	public void prefixBindingWithoutPrefixOrSuffix(StringBuilder expression, String binding) {
+	public void prefixBindingWithoutPrefixOrSuffix(@Nonnull StringBuilder expression, @Nonnull String binding) {
 		int i = 0;
 		while (i < expression.length()) {
 			char c = expression.charAt(i);
@@ -604,7 +604,7 @@ public class ELExpressionEvaluator extends ExpressionEvaluator {
 	 * @return a configured processor with Skyve EL functions and validation resolvers
 	 * @throws IllegalArgumentException if {@code document} is given without a {@code customer}
 	 */
-	public static ELProcessor newSkyveValidationProcessor(@Nullable Customer customer, @Nullable Document document) {
+	public static @Nonnull ELProcessor newSkyveValidationProcessor(@Nullable Customer customer, @Nullable Document document) {
 		ELProcessor result = new ELProcessor();
 		ELManager manager = result.getELManager();
 		manager.setELContext(new FunctionContext(manager.getELContext()));
@@ -892,7 +892,7 @@ public class ELExpressionEvaluator extends ExpressionEvaluator {
 	 * @param bean the bean to expose as {@code bean}; may be {@code null}
 	 * @return a configured processor with Skyve EL functions and runtime binding resolvers
 	 */
-	public static ELProcessor newSkyveEvaluationProcessor(@Nullable Bean bean) {
+	public static @Nonnull ELProcessor newSkyveEvaluationProcessor(@Nullable Bean bean) {
 		ELProcessor result = new ELProcessor();
 		ELManager manager = result.getELManager();
 		manager.setELContext(new FunctionContext(manager.getELContext()));

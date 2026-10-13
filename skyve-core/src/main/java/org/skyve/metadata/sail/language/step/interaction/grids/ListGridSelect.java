@@ -7,6 +7,8 @@ import org.skyve.metadata.sail.execution.Executor;
 import org.skyve.metadata.sail.language.Step;
 import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateList;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
@@ -34,7 +36,7 @@ public class ListGridSelect implements Step {
 	 * Returns the moduleName.
 	 * @return the result
 	 */
-	public String getModuleName() {
+	public @Nullable String getModuleName() {
 		return moduleName;
 	}
 
@@ -43,7 +45,7 @@ public class ListGridSelect implements Step {
 	 * @param moduleName the moduleName
 	 */
 	@XmlAttribute(name = "module")
-	public void setModuleName(String moduleName) {
+	public void setModuleName(@Nullable String moduleName) {
 		this.moduleName = UtilImpl.processStringValue(moduleName);
 	}
 
@@ -51,7 +53,7 @@ public class ListGridSelect implements Step {
 	 * Returns the documentName.
 	 * @return the result
 	 */
-	public String getDocumentName() {
+	public @Nullable String getDocumentName() {
 		return documentName;
 	}
 
@@ -60,7 +62,7 @@ public class ListGridSelect implements Step {
 	 * @param documentName the documentName
 	 */
 	@XmlAttribute(name = "document")
-	public void setDocumentName(String documentName) {
+	public void setDocumentName(@Nullable String documentName) {
 		this.documentName = UtilImpl.processStringValue(documentName);
 	}
 
@@ -68,7 +70,7 @@ public class ListGridSelect implements Step {
 	 * Returns the queryName.
 	 * @return the result
 	 */
-	public String getQueryName() {
+	public @Nullable String getQueryName() {
 		return queryName;
 	}
 
@@ -77,7 +79,7 @@ public class ListGridSelect implements Step {
 	 * @param queryName the queryName
 	 */
 	@XmlAttribute(name = "query")
-	public void setQueryName(String queryName) {
+	public void setQueryName(@Nullable String queryName) {
 		this.queryName = UtilImpl.processStringValue(queryName);
 	}
 
@@ -85,7 +87,7 @@ public class ListGridSelect implements Step {
 	 * Returns the modelName.
 	 * @return the result
 	 */
-	public String getModelName() {
+	public @Nullable String getModelName() {
 		return modelName;
 	}
 
@@ -94,7 +96,7 @@ public class ListGridSelect implements Step {
 	 * @param modelName the modelName
 	 */
 	@XmlAttribute(name = "model")
-	public void setModelName(String modelName) {
+	public void setModelName(@Nullable String modelName) {
 		this.modelName = UtilImpl.processStringValue(modelName);
 	}
 
@@ -102,7 +104,7 @@ public class ListGridSelect implements Step {
 	 * Returns the row.
 	 * @return the result
 	 */
-	public Integer getRow() {
+	public @Nullable Integer getRow() {
 		return row;
 	}
 
@@ -111,7 +113,7 @@ public class ListGridSelect implements Step {
 	 * @param row the row
 	 */
 	@XmlAttribute(name = "row", required = true)
-	public void setRow(Integer row) {
+	public void setRow(@Nullable Integer row) {
 		this.row = row;
 	}
 
@@ -120,7 +122,7 @@ public class ListGridSelect implements Step {
 	 * @param executor the executor
 	 */
 	@Override
-	public void execute(Executor executor) {
+	public void execute(@Nonnull Executor executor) {
 		executor.executeListGridSelect(this);
 	}
 
@@ -130,7 +132,7 @@ public class ListGridSelect implements Step {
 	 * @return the result
 	 */
 	@Override
-	public String getIdentifier(AutomationContext context) {
+	public @Nonnull String getIdentifier(@Nonnull AutomationContext context) {
 		String identifier = NavigateList.listGridIdentifier(context, moduleName, queryName, documentName, modelName);
 		return identifier + ".select";
 	}

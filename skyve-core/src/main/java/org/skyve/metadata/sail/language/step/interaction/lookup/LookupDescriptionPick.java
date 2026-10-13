@@ -6,6 +6,8 @@ import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.sail.execution.Executor;
 import org.skyve.metadata.sail.language.Step;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
@@ -33,7 +35,7 @@ public class LookupDescriptionPick implements Step {
 	 * Returns the binding.
 	 * @return the result
 	 */
-	public String getBinding() {
+	public @Nullable String getBinding() {
 		return binding;
 	}
 
@@ -42,7 +44,7 @@ public class LookupDescriptionPick implements Step {
 	 * @param binding the binding
 	 */
 	@XmlAttribute(name = "binding", required = true)
-	public void setBinding(String binding) {
+	public void setBinding(@Nullable String binding) {
 		this.binding = UtilImpl.processStringValue(binding);
 	}
 
@@ -50,7 +52,7 @@ public class LookupDescriptionPick implements Step {
 	 * Returns the row.
 	 * @return the result
 	 */
-	public Integer getRow() {
+	public @Nullable Integer getRow() {
 		return row;
 	}
 
@@ -59,7 +61,7 @@ public class LookupDescriptionPick implements Step {
 	 * @param row the row
 	 */
 	@XmlAttribute(name = "row", required = true)
-	public void setRow(Integer row) {
+	public void setRow(@Nullable Integer row) {
 		this.row = row;
 	}
 
@@ -68,7 +70,7 @@ public class LookupDescriptionPick implements Step {
 	 * @param executor the executor
 	 */
 	@Override
-	public void execute(Executor executor) {
+	public void execute(@Nonnull Executor executor) {
 		executor.executeLookupDescriptionPick(this);
 	}
 	
@@ -78,7 +80,7 @@ public class LookupDescriptionPick implements Step {
 	 * @return the result
 	 */
 	@Override
-	public String getIdentifier(AutomationContext context) {
+	public @Nonnull String getIdentifier(@Nonnull AutomationContext context) {
 		return binding + ".pick";
 	}
 }

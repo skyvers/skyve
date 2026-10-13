@@ -21,6 +21,9 @@ import org.skyve.nlp.cron.elementprovider.recurring.EveryMonthStep;
 import org.skyve.nlp.cron.elementprovider.recurring.EveryWeek;
 import org.skyve.nlp.cron.elementprovider.recurring.EveryYear;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Natural Cron Expression Parser converted and enhanced Java implementation of
  * https://github.com/bpolaszek/natural-cron-expression.
@@ -79,7 +82,7 @@ public class NaturalCronExpressionParser {
 	 * @throws CronParserException If no valid cron expression can be derived.
 	 */
 	@SuppressWarnings("java:S3776") // Complexity OK
-	public CronExpression parse(final String string) {
+	public @Nullable CronExpression parse(final @Nullable String string) {
 
 		if (string != null) {
 			String e = string.toLowerCase();
@@ -159,27 +162,27 @@ public class NaturalCronExpressionParser {
 		return null;
 	}
 
-	private static boolean shouldUpdateSecond(ExpressionElementProvider subParser, boolean isSecondElementLocked) {
+	private static boolean shouldUpdateSecond(@Nonnull ExpressionElementProvider subParser, boolean isSecondElementLocked) {
 		return subParser.canProvideSecond() && !isSecondElementLocked;
 	}
 
-	private static boolean shouldUpdateMinute(ExpressionElementProvider subParser, boolean isMinuteElementLocked) {
+	private static boolean shouldUpdateMinute(@Nonnull ExpressionElementProvider subParser, boolean isMinuteElementLocked) {
 		return subParser.canProvideMinute() && !isMinuteElementLocked;
 	}
 
-	private static boolean shouldUpdateHour(ExpressionElementProvider subParser, boolean isHourElementLocked) {
+	private static boolean shouldUpdateHour(@Nonnull ExpressionElementProvider subParser, boolean isHourElementLocked) {
 		return subParser.canProvideHour() && !isHourElementLocked;
 	}
 
-	private static boolean shouldUpdateDayNumber(ExpressionElementProvider subParser, boolean isDayNumberElementLocked) {
+	private static boolean shouldUpdateDayNumber(@Nonnull ExpressionElementProvider subParser, boolean isDayNumberElementLocked) {
 		return subParser.canProvideDayNumber() && !isDayNumberElementLocked;
 	}
 
-	private static boolean shouldUpdateMonth(ExpressionElementProvider subParser, boolean isMonthElementLocked) {
+	private static boolean shouldUpdateMonth(@Nonnull ExpressionElementProvider subParser, boolean isMonthElementLocked) {
 		return subParser.canProvideMonth() && !isMonthElementLocked;
 	}
 
-	private static boolean shouldUpdateDayOfWeek(ExpressionElementProvider subParser, boolean isDayOfWeekElementLocked) {
+	private static boolean shouldUpdateDayOfWeek(@Nonnull ExpressionElementProvider subParser, boolean isDayOfWeekElementLocked) {
 		return subParser.canProvideDayOfWeek() && !isDayOfWeekElementLocked;
 	}
 }

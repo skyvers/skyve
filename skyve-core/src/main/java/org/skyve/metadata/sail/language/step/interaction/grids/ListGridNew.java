@@ -7,6 +7,8 @@ import org.skyve.metadata.sail.execution.Executor;
 import org.skyve.metadata.sail.language.Step;
 import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateList;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
@@ -36,7 +38,7 @@ public class ListGridNew implements Step {
 	 * Returns the moduleName.
 	 * @return the result
 	 */
-	public String getModuleName() {
+	public @Nullable String getModuleName() {
 		return moduleName;
 	}
 
@@ -45,7 +47,7 @@ public class ListGridNew implements Step {
 	 * @param moduleName the moduleName
 	 */
 	@XmlAttribute(name = "module")
-	public void setModuleName(String moduleName) {
+	public void setModuleName(@Nullable String moduleName) {
 		this.moduleName = UtilImpl.processStringValue(moduleName);
 	}
 
@@ -53,7 +55,7 @@ public class ListGridNew implements Step {
 	 * Returns the documentName.
 	 * @return the result
 	 */
-	public String getDocumentName() {
+	public @Nullable String getDocumentName() {
 		return documentName;
 	}
 
@@ -62,7 +64,7 @@ public class ListGridNew implements Step {
 	 * @param documentName the documentName
 	 */
 	@XmlAttribute(name = "document")
-	public void setDocumentName(String documentName) {
+	public void setDocumentName(@Nullable String documentName) {
 		this.documentName = UtilImpl.processStringValue(documentName);
 	}
 
@@ -70,7 +72,7 @@ public class ListGridNew implements Step {
 	 * Returns the queryName.
 	 * @return the result
 	 */
-	public String getQueryName() {
+	public @Nullable String getQueryName() {
 		return queryName;
 	}
 
@@ -79,7 +81,7 @@ public class ListGridNew implements Step {
 	 * @param queryName the queryName
 	 */
 	@XmlAttribute(name = "query")
-	public void setQueryName(String queryName) {
+	public void setQueryName(@Nullable String queryName) {
 		this.queryName = UtilImpl.processStringValue(queryName);
 	}
 
@@ -87,7 +89,7 @@ public class ListGridNew implements Step {
 	 * Returns the modelName.
 	 * @return the result
 	 */
-	public String getModelName() {
+	public @Nullable String getModelName() {
 		return modelName;
 	}
 
@@ -96,7 +98,7 @@ public class ListGridNew implements Step {
 	 * @param modelName the modelName
 	 */
 	@XmlAttribute(name = "model")
-	public void setModelName(String modelName) {
+	public void setModelName(@Nullable String modelName) {
 		this.modelName = UtilImpl.processStringValue(modelName);
 	}
 
@@ -104,7 +106,7 @@ public class ListGridNew implements Step {
 	 * Returns the createView.
 	 * @return the result
 	 */
-	public Boolean getCreateView() {
+	public @Nullable Boolean getCreateView() {
 		return createView;
 	}
 	
@@ -113,7 +115,7 @@ public class ListGridNew implements Step {
 	 * @param createView the createView
 	 */
 	@XmlAttribute(name = "createView")
-	public void setCreateView(Boolean createView) {
+	public void setCreateView(@Nullable Boolean createView) {
 		this.createView = createView;
 	}
 
@@ -122,7 +124,7 @@ public class ListGridNew implements Step {
 	 * @param executor the executor
 	 */
 	@Override
-	public void execute(Executor executor) {
+	public void execute(@Nonnull Executor executor) {
 		executor.executeListGridNew(this);
 	}
 	
@@ -132,7 +134,7 @@ public class ListGridNew implements Step {
 	 * @return the result
 	 */
 	@Override
-	public String getIdentifier(AutomationContext context) {
+	public @Nonnull String getIdentifier(@Nonnull AutomationContext context) {
 		String identifier = NavigateList.listGridIdentifier(context, moduleName, queryName, documentName, modelName);
 		return identifier + ".new";
 	}

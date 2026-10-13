@@ -11,6 +11,9 @@ import java.util.TreeSet;
 
 import org.skyve.content.MimeType;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Encapsulates and builds an email message.
  * The default content type is HTML.
@@ -34,7 +37,7 @@ public class Mail implements Serializable {
 	 * @param recipientEmailAddresses
 	 * @return this
 	 */
-	public Mail addTo(@SuppressWarnings("hiding") Collection<String> recipientEmailAddresses) {
+	public @Nonnull Mail addTo(@SuppressWarnings("hiding") @Nullable Collection<String> recipientEmailAddresses) {
 		if (recipientEmailAddresses != null) {
 			this.recipientEmailAddresses.addAll(recipientEmailAddresses);
 		}
@@ -46,7 +49,7 @@ public class Mail implements Serializable {
 	 * @param recipientEmailAddress
 	 * @return this
 	 */
-	public Mail addTo(String recipientEmailAddress) {
+	public @Nonnull Mail addTo(@Nullable String recipientEmailAddress) {
 		if (recipientEmailAddress != null) {
 			recipientEmailAddresses.add(recipientEmailAddress);
 		}
@@ -58,7 +61,7 @@ public class Mail implements Serializable {
 	 * @param recipientEmailAddresses
 	 * @return this
 	 */
-	public Mail addTo(@SuppressWarnings("hiding") String... recipientEmailAddresses) {
+	public @Nonnull Mail addTo(@SuppressWarnings("hiding") @Nullable String... recipientEmailAddresses) {
 		if (recipientEmailAddresses != null) {
 			for (String recipientEmailAddress : recipientEmailAddresses) {
 				addTo(recipientEmailAddress);
@@ -67,7 +70,7 @@ public class Mail implements Serializable {
 		return this;
 	}
 	
-	public Set<String> getRecipientEmailAddresses() {
+	public @Nonnull Set<String> getRecipientEmailAddresses() {
 		return recipientEmailAddresses;
 	}
 	
@@ -76,7 +79,7 @@ public class Mail implements Serializable {
 	 * @param ccEmailAddress
 	 * @return this
 	 */
-	public Mail addCC(@SuppressWarnings("hiding") Collection<String> ccEmailAddresses) {
+	public @Nonnull Mail addCC(@SuppressWarnings("hiding") @Nullable Collection<String> ccEmailAddresses) {
 		if (ccEmailAddresses != null) {
 			this.ccEmailAddresses.addAll(ccEmailAddresses);
 		}
@@ -88,7 +91,7 @@ public class Mail implements Serializable {
 	 * @param ccEmailAddresses
 	 * @return this
 	 */
-	public Mail addCC(String ccEmailAddress) {
+	public @Nonnull Mail addCC(@Nullable String ccEmailAddress) {
 		if (ccEmailAddress != null) {
 			ccEmailAddresses.add(ccEmailAddress);
 		}
@@ -100,7 +103,7 @@ public class Mail implements Serializable {
 	 * @param ccEmailAddresses
 	 * @return this
 	 */
-	public Mail addCC(@SuppressWarnings("hiding") String... ccEmailAddresses) {
+	public @Nonnull Mail addCC(@SuppressWarnings("hiding") @Nullable String... ccEmailAddresses) {
 		if (ccEmailAddresses != null) {
 			for (String ccEmailAddress : ccEmailAddresses) {
 				addCC(ccEmailAddress);
@@ -109,7 +112,7 @@ public class Mail implements Serializable {
 		return this;
 	}
 
-	public Set<String> getCcEmailAddresses() {
+	public @Nonnull Set<String> getCcEmailAddresses() {
 		return ccEmailAddresses;
 	}
 	
@@ -118,7 +121,7 @@ public class Mail implements Serializable {
 	 * @param bccEmailAddresses
 	 * @return this
 	 */
-	public Mail addBCC(@SuppressWarnings("hiding") Collection<String> bccEmailAddresses) {
+	public @Nonnull Mail addBCC(@SuppressWarnings("hiding") @Nullable Collection<String> bccEmailAddresses) {
 		if (bccEmailAddresses != null) {
 			this.bccEmailAddresses.addAll(bccEmailAddresses);
 		}
@@ -130,7 +133,7 @@ public class Mail implements Serializable {
 	 * @param bccEmailAddress
 	 * @return this
 	 */
-	public Mail addBCC(String bccEmailAddress) {
+	public @Nonnull Mail addBCC(@Nullable String bccEmailAddress) {
 		if (bccEmailAddress != null) {
 			bccEmailAddresses.add(bccEmailAddress);
 		}
@@ -142,7 +145,7 @@ public class Mail implements Serializable {
 	 * @param bccEmailAddresses
 	 * @return this
 	 */
-	public Mail addBCC(@SuppressWarnings("hiding") String... bccEmailAddresses) {
+	public @Nonnull Mail addBCC(@SuppressWarnings("hiding") @Nullable String... bccEmailAddresses) {
 		if (bccEmailAddresses != null) {
 			for (String bccEmailAddress : bccEmailAddresses) {
 				addBCC(bccEmailAddress);
@@ -151,7 +154,7 @@ public class Mail implements Serializable {
 		return this;
 	}
 
-	public Set<String> getBccEmailAddresses() {
+	public @Nonnull Set<String> getBccEmailAddresses() {
 		return bccEmailAddresses;
 	}
 	
@@ -160,12 +163,12 @@ public class Mail implements Serializable {
 	 * @param senderEmailAddress
 	 * @return this
 	 */
-	public Mail from(@SuppressWarnings("hiding") String senderEmailAddress) {
+	public @Nonnull Mail from(@SuppressWarnings("hiding") @Nullable String senderEmailAddress) {
 		this.senderEmailAddress = senderEmailAddress;
 		return this;
 	}
 
-	public String getSenderEmailAddress() {
+	public @Nullable String getSenderEmailAddress() {
 		return senderEmailAddress;
 	}
 	
@@ -174,12 +177,12 @@ public class Mail implements Serializable {
 	 * @param subject
 	 * @return this
 	 */
-	public Mail subject(@SuppressWarnings("hiding") String subject) {
+	public @Nonnull Mail subject(@SuppressWarnings("hiding") @Nullable String subject) {
 		this.subject = subject;
 		return this;
 	}
 	
-	public String getSubject() {
+	public @Nullable String getSubject() {
 		return subject;
 	}
 
@@ -188,12 +191,12 @@ public class Mail implements Serializable {
 	 * @param body
 	 * @return this
 	 */
-	public Mail body(@SuppressWarnings("hiding") String body) {
+	public @Nonnull Mail body(@SuppressWarnings("hiding") @Nullable String body) {
 		this.body = body;
 		return this;
 	}
 
-	public String getBody() {
+	public @Nullable String getBody() {
 		return body;
 	}
 	
@@ -202,7 +205,7 @@ public class Mail implements Serializable {
 	 * @param contentType
 	 * @return this
 	 */
-	public Mail contentType(@SuppressWarnings("hiding") MimeType contentType) {
+	public @Nonnull Mail contentType(@SuppressWarnings("hiding") @Nonnull MimeType contentType) {
 		this.contentType = contentType;
 		return this;
 	}
@@ -211,7 +214,7 @@ public class Mail implements Serializable {
 	 * Set the mail to be text/plain
 	 * @return this
 	 */
-	public Mail textPlain() {
+	public @Nonnull Mail textPlain() {
 		this.contentType = MimeType.plain;
 		return this;
 	}
@@ -220,12 +223,12 @@ public class Mail implements Serializable {
 	 * Set the mail to be html - this is the default.
 	 * @return this
 	 */
-	public Mail html() {
+	public @Nonnull Mail html() {
 		this.contentType = MimeType.html;
 		return this;
 	}
 	
-	public MimeType getContentType() {
+	public @Nonnull MimeType getContentType() {
 		return contentType;
 	}
 	
@@ -234,7 +237,7 @@ public class Mail implements Serializable {
 	 * @param attachments
 	 * @return this
 	 */
-	public Mail attach(@SuppressWarnings("hiding") Collection<MailAttachment> attachments) {
+	public @Nonnull Mail attach(@SuppressWarnings("hiding") @Nullable Collection<MailAttachment> attachments) {
 		if (attachments != null) {
 			this.attachments.addAll(attachments);
 		}
@@ -246,7 +249,7 @@ public class Mail implements Serializable {
 	 * @param attachment
 	 * @return this
 	 */
-	public Mail attach(MailAttachment attachment) {
+	public @Nonnull Mail attach(@Nullable MailAttachment attachment) {
 		if (attachment != null) {
 			attachments.add(attachment);
 		}
@@ -258,7 +261,7 @@ public class Mail implements Serializable {
 	 * @param attachments
 	 * @return this
 	 */
-	public Mail attach(@SuppressWarnings("hiding") MailAttachment... attachments) {
+	public @Nonnull Mail attach(@SuppressWarnings("hiding") @Nullable MailAttachment... attachments) {
 		if (attachments != null) {
 			for (MailAttachment attachment : attachments) {
 				attach(attachment);
@@ -274,11 +277,11 @@ public class Mail implements Serializable {
 	 * @param attachmentMimeType
 	 * @return this
 	 */
-	public Mail attach(String attachmentFileName, byte[] attachment, MimeType attachmentMimeType) {
+	public @Nonnull Mail attach(@Nullable String attachmentFileName, @Nullable byte[] attachment, @Nonnull MimeType attachmentMimeType) {
 		return attach(new MailAttachment(attachmentFileName, attachment, attachmentMimeType));
 	}
 
-	public List<MailAttachment> getAttachments() {
+	public @Nonnull List<MailAttachment> getAttachments() {
 		return attachments;
 	}
 	
@@ -287,7 +290,7 @@ public class Mail implements Serializable {
 	 * @param headers
 	 * @return this
 	 */
-	public Mail header(@SuppressWarnings("hiding") Map<String, String> headers) {
+	public @Nonnull Mail header(@SuppressWarnings("hiding") @Nullable Map<String, String> headers) {
 		if (headers != null) {
 			this.headers.putAll(headers);
 		}
@@ -300,7 +303,7 @@ public class Mail implements Serializable {
 	 * @param headerValue
 	 * @return this
 	 */
-	public Mail header(String headerName, String headerValue) {
+	public @Nonnull Mail header(@Nonnull String headerName, @Nonnull String headerValue) {
 		headers.put(headerName, headerValue);
 		return this;
 	}
@@ -310,12 +313,12 @@ public class Mail implements Serializable {
 	 * from the file system as unsent - ready to send.
 	 * @return this
 	 */
-	public Mail unsent() {
+	public @Nonnull Mail unsent() {
 		header("X-Unsent", "1");
 		return this;
 	}
 	
-	public Map<String, String> getHeaders() {
+	public @Nonnull Map<String, String> getHeaders() {
 		return headers;
 	}
 }

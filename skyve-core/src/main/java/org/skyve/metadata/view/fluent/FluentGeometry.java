@@ -4,6 +4,7 @@ import org.skyve.impl.metadata.view.widget.bound.input.Geometry;
 import org.skyve.impl.metadata.view.widget.bound.input.GeometryInputType;
 
 import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 
 /**
  * Builds {@link Geometry} widget metadata using a fluent API.
@@ -24,7 +25,7 @@ public class FluentGeometry extends FluentChangeableInputWidget<FluentGeometry> 
 	 *
 	 * @param geometry the metadata instance to mutate
 	 */
-	public FluentGeometry(Geometry geometry) {
+	public FluentGeometry(@Nonnull Geometry geometry) {
 		this.geometry = geometry;
 	}
 
@@ -35,7 +36,7 @@ public class FluentGeometry extends FluentChangeableInputWidget<FluentGeometry> 
 	 *            the source metadata to copy
 	 * @return this builder
 	 */
-	public FluentGeometry from(@SuppressWarnings("hiding") Geometry geometry) {
+	public @Nonnull FluentGeometry from(@SuppressWarnings("hiding") @Nonnull Geometry geometry) {
 		type(geometry.getType());
 		absoluteWidth(geometry, this);
 		super.from(geometry);
@@ -50,7 +51,7 @@ public class FluentGeometry extends FluentChangeableInputWidget<FluentGeometry> 
 	 * @param type the geometry input type
 	 * @return this builder
 	 */
-	public FluentGeometry type(GeometryInputType type) {
+	public @Nonnull FluentGeometry type(@Nullable GeometryInputType type) {
 		geometry.setType(type);
 		return this;
 	}
@@ -62,7 +63,7 @@ public class FluentGeometry extends FluentChangeableInputWidget<FluentGeometry> 
 	 * @return this builder
 	 */
 	@Override
-	public FluentGeometry pixelWidth(int width) {
+	public @Nonnull FluentGeometry pixelWidth(int width) {
 		geometry.setPixelWidth(Integer.valueOf(width));
 		return this;
 	}
@@ -86,7 +87,7 @@ public class FluentGeometry extends FluentChangeableInputWidget<FluentGeometry> 
 	 * @return the mutable geometry metadata being configured
 	 */
 	@Override
-	public Geometry get() {
+	public @Nonnull Geometry get() {
 		return geometry;
 	}
 }

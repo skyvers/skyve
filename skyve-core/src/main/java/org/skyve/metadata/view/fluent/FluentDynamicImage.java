@@ -3,6 +3,7 @@ package org.skyve.metadata.view.fluent;
 import org.skyve.impl.metadata.view.widget.DynamicImage;
 
 import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 
 /**
  * Builds {@link DynamicImage} widget metadata using a fluent API.
@@ -22,14 +23,14 @@ public class FluentDynamicImage extends FluentWidget implements FluentRelativeSi
 	 *
 	 * @param image the metadata instance to mutate
 	 */
-	public FluentDynamicImage(DynamicImage image) {
+	public FluentDynamicImage(@Nonnull DynamicImage image) {
 		this.image = image;
 	}
 
 	/**
 	 * Copies dynamic-image metadata into this fluent builder.
 	 */
-	public FluentDynamicImage from(@SuppressWarnings("hiding") DynamicImage image) {
+	public @Nonnull FluentDynamicImage from(@SuppressWarnings("hiding") @Nonnull DynamicImage image) {
 		name(image.getName());
 		Integer i = image.getImageInitialPixelWidth();
 		if (i != null) {
@@ -54,7 +55,7 @@ public class FluentDynamicImage extends FluentWidget implements FluentRelativeSi
 	 * @param name the renderer name
 	 * @return this builder
 	 */
-	public FluentDynamicImage name(String name) {
+	public @Nonnull FluentDynamicImage name(@Nullable String name) {
 		image.setName(name);
 		return this;
 	}
@@ -65,7 +66,7 @@ public class FluentDynamicImage extends FluentWidget implements FluentRelativeSi
 	 * @param imageInitialPixelWidth the initial pixel width
 	 * @return this builder
 	 */
-	public FluentDynamicImage imageInitialPixelWidth(int imageInitialPixelWidth) {
+	public @Nonnull FluentDynamicImage imageInitialPixelWidth(int imageInitialPixelWidth) {
 		image.setImageInitialPixelWidth(Integer.valueOf(imageInitialPixelWidth));
 		return this;
 	}
@@ -76,7 +77,7 @@ public class FluentDynamicImage extends FluentWidget implements FluentRelativeSi
 	 * @param imageInitialPixelHeight the initial pixel height
 	 * @return this builder
 	 */
-	public FluentDynamicImage imageInitialPixelHeight(int imageInitialPixelHeight) {
+	public @Nonnull FluentDynamicImage imageInitialPixelHeight(int imageInitialPixelHeight) {
 		image.setImageInitialPixelHeight(Integer.valueOf(imageInitialPixelHeight));
 		return this;
 	}
@@ -88,7 +89,7 @@ public class FluentDynamicImage extends FluentWidget implements FluentRelativeSi
 	 * @return this builder
 	 */
 	@Override
-	public FluentDynamicImage pixelHeight(int height) {
+	public @Nonnull FluentDynamicImage pixelHeight(int height) {
 		image.setPixelHeight(Integer.valueOf(height));
 		return this;
 	}
@@ -100,7 +101,7 @@ public class FluentDynamicImage extends FluentWidget implements FluentRelativeSi
 	 * @return this builder
 	 */
 	@Override
-	public FluentDynamicImage pixelWidth(int width) {
+	public @Nonnull FluentDynamicImage pixelWidth(int width) {
 		image.setPixelWidth(Integer.valueOf(width));
 		return this;
 	}
@@ -112,7 +113,7 @@ public class FluentDynamicImage extends FluentWidget implements FluentRelativeSi
 	 * @return this builder
 	 */
 	@Override
-	public FluentDynamicImage minPixelWidth(int minPixelWidth) {
+	public @Nonnull FluentDynamicImage minPixelWidth(int minPixelWidth) {
 		image.setMinPixelWidth(Integer.valueOf(minPixelWidth));
 		return this;
 	}
@@ -124,7 +125,7 @@ public class FluentDynamicImage extends FluentWidget implements FluentRelativeSi
 	 * @return this builder
 	 */
 	@Override
-	public FluentDynamicImage maxPixelWidth(int maxPixelWidth) {
+	public @Nonnull FluentDynamicImage maxPixelWidth(int maxPixelWidth) {
 		image.setMaxPixelWidth(Integer.valueOf(maxPixelWidth));
 		return this;
 	}
@@ -136,7 +137,7 @@ public class FluentDynamicImage extends FluentWidget implements FluentRelativeSi
 	 * @return this builder
 	 */
 	@Override
-	public FluentDynamicImage maxPixelHeight(int maxPixelHeight) {
+	public @Nonnull FluentDynamicImage maxPixelHeight(int maxPixelHeight) {
 		image.setMaxPixelHeight(Integer.valueOf(maxPixelHeight));
 		return this;
 	}
@@ -148,7 +149,7 @@ public class FluentDynamicImage extends FluentWidget implements FluentRelativeSi
 	 * @return this builder
 	 */
 	@Override
-	public FluentDynamicImage minPixelHeight(int minPixelHeight) {
+	public @Nonnull FluentDynamicImage minPixelHeight(int minPixelHeight) {
 		image.setMinPixelHeight(Integer.valueOf(minPixelHeight));
 		return this;
 	}
@@ -160,7 +161,7 @@ public class FluentDynamicImage extends FluentWidget implements FluentRelativeSi
 	 * @return this builder
 	 */
 	@Override
-	public FluentDynamicImage percentageWidth(int percentageWidth) {
+	public @Nonnull FluentDynamicImage percentageWidth(int percentageWidth) {
 		image.setPercentageWidth(Integer.valueOf(percentageWidth));
 		return this;
 	}
@@ -172,7 +173,7 @@ public class FluentDynamicImage extends FluentWidget implements FluentRelativeSi
 	 * @return this builder
 	 */
 	@Override
-	public FluentDynamicImage percentageHeight(int percentageHeight) {
+	public @Nonnull FluentDynamicImage percentageHeight(int percentageHeight) {
 		image.setPercentageHeight(Integer.valueOf(percentageHeight));
 		return this;
 	}
@@ -184,7 +185,7 @@ public class FluentDynamicImage extends FluentWidget implements FluentRelativeSi
 	 * @return this builder
 	 */
 	@Override
-	public FluentDynamicImage responsiveWidth(int responsiveWidth) {
+	public @Nonnull FluentDynamicImage responsiveWidth(int responsiveWidth) {
 		image.setResponsiveWidth(Integer.valueOf(responsiveWidth));
 		return this;
 	}
@@ -196,7 +197,7 @@ public class FluentDynamicImage extends FluentWidget implements FluentRelativeSi
 	 * @return this builder
 	 */
 	@Override
-	public FluentDynamicImage sm(int sm) {
+	public @Nonnull FluentDynamicImage sm(int sm) {
 		image.setSm(Integer.valueOf(sm));
 		return this;
 	}
@@ -208,7 +209,7 @@ public class FluentDynamicImage extends FluentWidget implements FluentRelativeSi
 	 * @return this builder
 	 */
 	@Override
-	public FluentDynamicImage md(int md) {
+	public @Nonnull FluentDynamicImage md(int md) {
 		image.setMd(Integer.valueOf(md));
 		return this;
 	}
@@ -220,7 +221,7 @@ public class FluentDynamicImage extends FluentWidget implements FluentRelativeSi
 	 * @return this builder
 	 */
 	@Override
-	public FluentDynamicImage lg(int lg) {
+	public @Nonnull FluentDynamicImage lg(int lg) {
 		image.setLg(Integer.valueOf(lg));
 		return this;
 	}
@@ -232,7 +233,7 @@ public class FluentDynamicImage extends FluentWidget implements FluentRelativeSi
 	 * @return this builder
 	 */
 	@Override
-	public FluentDynamicImage xl(int xl) {
+	public @Nonnull FluentDynamicImage xl(int xl) {
 		image.setXl(Integer.valueOf(xl));
 		return this;
 	}
@@ -240,7 +241,7 @@ public class FluentDynamicImage extends FluentWidget implements FluentRelativeSi
 	/**
 	 * Appends an image parameter definition to the wrapped metadata.
 	 */
-	public FluentDynamicImage addParameter(FluentParameter parameter) {
+	public @Nonnull FluentDynamicImage addParameter(@Nonnull FluentParameter parameter) {
 		image.getParameters().add(parameter.get());
 		return this;
 	}
@@ -264,7 +265,7 @@ public class FluentDynamicImage extends FluentWidget implements FluentRelativeSi
 	 * @return the mutable dynamic-image metadata being configured
 	 */
 	@Override
-	public DynamicImage get() {
+	public @Nonnull DynamicImage get() {
 		return image;
 	}
 }

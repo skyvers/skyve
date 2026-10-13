@@ -3,6 +3,7 @@ package org.skyve.metadata.view.fluent;
 import org.skyve.impl.metadata.view.event.ToggleDisabledEventAction;
 
 import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 
 /**
  * Builds {@link ToggleDisabledEventAction} metadata using a fluent API.
@@ -23,7 +24,7 @@ public class FluentToggleDisabledEventAction extends FluentEventAction {
 	 * @param action
 	 *            the action instance to wrap
 	 */
-	public FluentToggleDisabledEventAction(ToggleDisabledEventAction action) {
+	public FluentToggleDisabledEventAction(@Nonnull ToggleDisabledEventAction action) {
 		this.action = action;
 	}
 
@@ -34,7 +35,7 @@ public class FluentToggleDisabledEventAction extends FluentEventAction {
 	 *            the source action metadata
 	 * @return this builder
 	 */
-	public FluentToggleDisabledEventAction from(@SuppressWarnings("hiding") ToggleDisabledEventAction action) {
+	public @Nonnull FluentToggleDisabledEventAction from(@SuppressWarnings("hiding") @Nonnull ToggleDisabledEventAction action) {
 		binding(action.getBinding());
 		action.getProperties().entrySet().forEach(p -> putProperty(p.getKey(), p.getValue()));
 		
@@ -48,7 +49,7 @@ public class FluentToggleDisabledEventAction extends FluentEventAction {
 	 *            the target binding expression
 	 * @return this builder
 	 */
-	public FluentToggleDisabledEventAction binding(String binding) {
+	public @Nonnull FluentToggleDisabledEventAction binding(@Nullable String binding) {
 		action.setBinding(binding);
 		return this;
 	}
@@ -70,7 +71,7 @@ public class FluentToggleDisabledEventAction extends FluentEventAction {
 	 * Returns the wrapped event action instance.
 	 */
 	@Override
-	public ToggleDisabledEventAction get() {
+	public @Nonnull ToggleDisabledEventAction get() {
 		return action;
 	}
 }

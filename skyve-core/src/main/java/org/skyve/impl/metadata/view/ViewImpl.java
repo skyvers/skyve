@@ -139,7 +139,7 @@ public class ViewImpl extends Container implements View {
 	 * @return the interval in seconds, or {@code null} if auto-refresh is disabled
 	 */
 	@Override
-	public Integer getRefreshTimeInSeconds() {
+	public @Nullable Integer getRefreshTimeInSeconds() {
 		return refreshTimeInSeconds;
 	}
 
@@ -148,7 +148,7 @@ public class ViewImpl extends Container implements View {
 	 *
 	 * @param refreshTimeInSeconds the interval in seconds, or {@code null} to disable auto-refresh
 	 */
-	public void setRefreshTimeInSeconds(Integer refreshTimeInSeconds) {
+	public void setRefreshTimeInSeconds(@Nullable Integer refreshTimeInSeconds) {
 		this.refreshTimeInSeconds = refreshTimeInSeconds;
 	}
 
@@ -158,7 +158,7 @@ public class ViewImpl extends Container implements View {
 	 * @return the action name, or {@code null} if none is configured
 	 */
 	@Override
-	public String getRefreshActionName() {
+	public @Nullable String getRefreshActionName() {
 		return refreshActionName;
 	}
 
@@ -167,7 +167,7 @@ public class ViewImpl extends Container implements View {
 	 *
 	 * @param refreshActionName the action name to set
 	 */
-	public void setRefreshActionName(String refreshActionName) {
+	public void setRefreshActionName(@Nullable String refreshActionName) {
 		this.refreshActionName = refreshActionName;
 	}
 
@@ -177,7 +177,7 @@ public class ViewImpl extends Container implements View {
 	 * @return the logical view name
 	 */
 	@Override
-	public String getName() {
+	public @Nullable String getName() {
 		return name;
 	}
 
@@ -186,7 +186,7 @@ public class ViewImpl extends Container implements View {
 	 *
 	 * @param name the logical name to assign
 	 */
-	public void setName(String name) {
+	public void setName(@Nullable String name) {
 		this.name = name;
 	}
 
@@ -237,7 +237,7 @@ public class ViewImpl extends Container implements View {
 	 * @return the project-relative icon file name, or {@code null} if none
 	 */
 	@Override
-	public String getIcon32x32RelativeFileName() {
+	public @Nullable String getIcon32x32RelativeFileName() {
 		return icon32x32RelativeFileName;
 	}
 
@@ -246,7 +246,7 @@ public class ViewImpl extends Container implements View {
 	 *
 	 * @param icon32x32RelativeFileName the project-relative icon file name
 	 */
-	public void setIcon32x32RelativeFileName(String icon32x32RelativeFileName) {
+	public void setIcon32x32RelativeFileName(@Nullable String icon32x32RelativeFileName) {
 		this.icon32x32RelativeFileName = icon32x32RelativeFileName;
 	}
 
@@ -256,7 +256,7 @@ public class ViewImpl extends Container implements View {
 	 * @return the CSS style class, or {@code null} if none
 	 */
 	@Override
-	public String getIconStyleClass() {
+	public @Nullable String getIconStyleClass() {
 		return iconStyleClass;
 	}
 
@@ -265,7 +265,7 @@ public class ViewImpl extends Container implements View {
 	 *
 	 * @param iconStyleClass the CSS style class
 	 */
-	public void setIconStyleClass(String iconStyleClass) {
+	public void setIconStyleClass(@Nullable String iconStyleClass) {
 		this.iconStyleClass = iconStyleClass;
 	}
 
@@ -275,7 +275,7 @@ public class ViewImpl extends Container implements View {
 	 * @return the project-relative help document file name, or {@code null} if none
 	 */
 	@Override
-	public String getHelpRelativeFileName() {
+	public @Nullable String getHelpRelativeFileName() {
 		return helpRelativeFileName;
 	}
 
@@ -284,7 +284,7 @@ public class ViewImpl extends Container implements View {
 	 *
 	 * @param helpRelativeFileName the project-relative help document file name
 	 */
-	public void setHelpRelativeFileName(String helpRelativeFileName) {
+	public void setHelpRelativeFileName(@Nullable String helpRelativeFileName) {
 		this.helpRelativeFileName = helpRelativeFileName;
 	}
 
@@ -294,7 +294,7 @@ public class ViewImpl extends Container implements View {
 	 * @return the external help page URL, or {@code null} if none
 	 */
 	@Override
-	public String getHelpURL() {
+	public @Nullable String getHelpURL() {
 		return helpURL;
 	}
 
@@ -303,7 +303,7 @@ public class ViewImpl extends Container implements View {
 	 *
 	 * @param helpURL the external help page URL
 	 */
-	public void setHelpURL(String helpURL) {
+	public void setHelpURL(@Nullable String helpURL) {
 		this.helpURL = helpURL;
 	}
 	
@@ -313,7 +313,7 @@ public class ViewImpl extends Container implements View {
 	 * @return the display title, or {@code null} if not explicitly set
 	 */
 	@Override
-	public String getTitle() {
+	public @Nullable String getTitle() {
 		return title;
 	}
 
@@ -322,7 +322,7 @@ public class ViewImpl extends Container implements View {
 	 *
 	 * @return {@code Boolean.FALSE} to allow trusted markup; {@code null} or {@code Boolean.TRUE} to escape at the renderer boundary
 	 */
-	public Boolean getEscapeTitle() {
+	public @Nullable Boolean getEscapeTitle() {
 		return escapeTitle;
 	}
 
@@ -331,7 +331,7 @@ public class ViewImpl extends Container implements View {
 	 *
 	 * @param title the display title
 	 */
-	public void setTitle(String title) {
+	public void setTitle(@Nullable String title) {
 		this.title = title;
 	}
 
@@ -340,7 +340,7 @@ public class ViewImpl extends Container implements View {
 	 *
 	 * @param escapeTitle {@code Boolean.FALSE} to allow trusted markup; {@code null} or {@code Boolean.TRUE} to escape at the renderer boundary
 	 */
-	public void setEscapeTitle(Boolean escapeTitle) {
+	public void setEscapeTitle(@Nullable Boolean escapeTitle) {
 		this.escapeTitle = escapeTitle;
 	}
 
@@ -350,7 +350,7 @@ public class ViewImpl extends Container implements View {
 	 * @return the widget ID, or {@code null} for default positioning
 	 */
 	@Override
-	public String getActionsWidgetId() {
+	public @Nullable String getActionsWidgetId() {
 		return actionsWidgetId;
 	}
 
@@ -359,7 +359,7 @@ public class ViewImpl extends Container implements View {
 	 *
 	 * @param actionsWidgetId the widget ID of the actions area
 	 */
-	public void setActionsWidgetId(String actionsWidgetId) {
+	public void setActionsWidgetId(@Nullable String actionsWidgetId) {
 		this.actionsWidgetId = actionsWidgetId;
 	}
 
@@ -370,7 +370,7 @@ public class ViewImpl extends Container implements View {
 	 * @return the matching action, or {@code null} if not found
 	 */
 	@Override
-	public Action getAction(String actionName) {
+	public @Nullable Action getAction(@Nonnull String actionName) {
 		return actions.get(actionName);
 	}
 
@@ -382,7 +382,7 @@ public class ViewImpl extends Container implements View {
 	 *
 	 * @param action the action metadata to register
 	 */
-	public void putAction(Action action) {
+	public void putAction(@Nonnull Action action) {
 		actions.put(action.getName(), action);
 	}
 
@@ -392,7 +392,7 @@ public class ViewImpl extends Container implements View {
 	 * @return ordered collection of all actions; never {@code null}
 	 */
 	@Override
-	public Collection<Action> getActions() {
+	public @Nonnull Collection<Action> getActions() {
 		return actions.values();
 	}
 
@@ -402,7 +402,7 @@ public class ViewImpl extends Container implements View {
 	 * @return the sidebar container, or {@code null} if this view has no sidebar
 	 */
 	@Override
-	public Sidebar getSidebar() {
+	public @Nullable Sidebar getSidebar() {
 		return sidebar;
 	}
 
@@ -411,7 +411,7 @@ public class ViewImpl extends Container implements View {
 	 *
 	 * @param sidebar the sidebar container, or {@code null} to remove it
 	 */
-	public void setSidebar(Sidebar sidebar) {
+	public void setSidebar(@Nullable Sidebar sidebar) {
 		this.sidebar = sidebar;
 	}
 
@@ -421,7 +421,7 @@ public class ViewImpl extends Container implements View {
 	 * @return the list of view parameters; never {@code null}
 	 */
 	@Override
-	public List<ViewParameter> getParameters() {
+	public @Nonnull List<ViewParameter> getParameters() {
 		return parameters;
 	}
 
@@ -431,7 +431,7 @@ public class ViewImpl extends Container implements View {
 	 * @return the documentation string, or {@code null} if none
 	 */
 	@Override
-	public String getDocumentation() {
+	public @Nullable String getDocumentation() {
 		return documentation;
 	}
 
@@ -440,7 +440,7 @@ public class ViewImpl extends Container implements View {
 	 *
 	 * @param documentation the documentation string
 	 */
-	public void setDocumentation(String documentation) {
+	public void setDocumentation(@Nullable String documentation) {
 		this.documentation = documentation;
 	}
 	
@@ -452,7 +452,7 @@ public class ViewImpl extends Container implements View {
 	 * @return the inline model metadata, or {@code null} if the model is defined externally
 	 */
 	@Override
-	public ModelMetaData getInlineModel(String modelName) {
+	public @Nullable ModelMetaData getInlineModel(@Nonnull String modelName) {
 		return inlineModels.get(modelName);
 	}
 	
@@ -462,7 +462,7 @@ public class ViewImpl extends Container implements View {
 	 * @return the customer name, or {@code null} if this is not a customer-specific override
 	 */
 	@Override
-	public String getOverriddenCustomerName() {
+	public @Nullable String getOverriddenCustomerName() {
 		return overriddenCustomerName;
 	}
 
@@ -471,7 +471,7 @@ public class ViewImpl extends Container implements View {
 	 *
 	 * @param overriddenCustomerName the customer name
 	 */
-	public void setOverriddenCustomerName(String overriddenCustomerName) {
+	public void setOverriddenCustomerName(@Nullable String overriddenCustomerName) {
 		this.overriddenCustomerName = overriddenCustomerName;
 	}
 
@@ -481,7 +481,7 @@ public class ViewImpl extends Container implements View {
 	 * @return the UX/UI name, or {@code null} if this is not a UX/UI-specific override
 	 */
 	@Override
-	public String getOverriddenUxUiName() {
+	public @Nullable String getOverriddenUxUiName() {
 		return overriddenUxUiName;
 	}
 
@@ -490,7 +490,7 @@ public class ViewImpl extends Container implements View {
 	 *
 	 * @param overriddenUxUiName the UX/UI name
 	 */
-	public void setOverriddenUxUiName(String overriddenUxUiName) {
+	public void setOverriddenUxUiName(@Nullable String overriddenUxUiName) {
 		this.overriddenUxUiName = overriddenUxUiName;
 	}
 
@@ -500,7 +500,7 @@ public class ViewImpl extends Container implements View {
 	 * @return the mutable, insertion-ordered property map; never {@code null}
 	 */
 	@Override
-	public Map<String, String> getProperties() {
+	public @Nonnull Map<String, String> getProperties() {
 		return properties;
 	}
 
@@ -520,7 +520,7 @@ public class ViewImpl extends Container implements View {
 	 *         or {@code null} if access control has not been enabled and accesses have not been generated
 	 */
 	@SuppressWarnings("java:S3776") // Complexity OK
-	public Set<UserAccess> getAccesses(CustomerImpl customer, Document document, String uxui) {
+	public @Nullable Set<UserAccess> getAccesses(@Nonnull CustomerImpl customer, @Nonnull Document document, @Nonnull String uxui) {
 		Set<UserAccess> result = accesses;
 		if (result != null) { // accesses were generated
 			for (Component component : components) {
@@ -601,10 +601,10 @@ public class ViewImpl extends Container implements View {
 	 * @param accessesMetaData repository access definitions, or {@code null}
 	 */
 	@SuppressWarnings("java:S3776") // Complexity OK
-	public void convertAccesses(Module module,
-									String documentName,
-									String metaDataName,
-									ViewUserAccessesMetaData accessesMetaData) {
+	public void convertAccesses(@Nonnull Module module,
+									@Nonnull String documentName,
+									@Nonnull String metaDataName,
+									@Nullable ViewUserAccessesMetaData accessesMetaData) {
 		final String moduleName = module.getName();
 		
 		// Populate User Accesses
@@ -658,7 +658,7 @@ public class ViewImpl extends Container implements View {
 	 * @param generate whether missing accesses should be generated when access control is enabled
 	 */
 	@SuppressWarnings("java:S3776") // Complexity OK
-	public void resolve(String uxui, Customer customer, Module module, Document document, boolean generate) {
+	public void resolve(@Nullable String uxui, @Nullable Customer customer, @Nonnull Module module, @Nonnull Document document, boolean generate) {
 		final String moduleName = module.getName();
 		final String documentName = document.getName();
 
@@ -670,7 +670,7 @@ public class ViewImpl extends Container implements View {
 
 		new NoOpViewVisitor((CustomerImpl) customer, (ModuleImpl) module, (DocumentImpl) document, this, uxui) {
 			@Override
-			public void visitComponent(Component component, boolean parentVisible, boolean parentEnabled) {
+			public void visitComponent(@Nonnull Component component, boolean parentVisible, boolean parentEnabled) {
 				// Overrides visitComponent standard behaviour to link to the component
 				component.link(currentUxUi, customer, module, document, name);
 				components.add(component);
@@ -692,7 +692,7 @@ public class ViewImpl extends Container implements View {
 			 * @param contentDocumentName owning document for the content binding
 			 * @param binding content binding relative to the current view or data-grid row
 			 */
-			private void addContentAccess(String contentModuleName, String contentDocumentName, String binding) {
+			private void addContentAccess(@Nonnull String contentModuleName, @Nonnull String contentDocumentName, @Nonnull String binding) {
 				String contentBinding = binding;
 				if (dataGridBinding != null) {
 					StringBuilder sb = new StringBuilder(dataGridBinding.length() + 1 + binding.length());
@@ -703,7 +703,7 @@ public class ViewImpl extends Container implements View {
 			}
 			
 			@Override
-			public void visitContentSignature(ContentSignature signature, boolean parentVisible, boolean parentEnabled) {
+			public void visitContentSignature(@Nonnull ContentSignature signature, boolean parentVisible, boolean parentEnabled) {
 				if (determineAccesses) {
 					String binding = signature.getBinding();
 					if (dataGridBinding != null) {
@@ -716,7 +716,7 @@ public class ViewImpl extends Container implements View {
 			}
 			
 			@Override
-			public void visitChart(Chart chart, boolean parentVisible, boolean parentEnabled) {
+			public void visitChart(@Nonnull Chart chart, boolean parentVisible, boolean parentEnabled) {
 				String modelName = chart.getModelName();
 
 				// Add any inlined models to the view
@@ -736,7 +736,7 @@ public class ViewImpl extends Container implements View {
 			private String dataGridBinding = null;
 			
 			@Override
-			public void visitDataGrid(DataGrid grid, boolean parentVisible, boolean parentEnabled) {
+			public void visitDataGrid(@Nonnull DataGrid grid, boolean parentVisible, boolean parentEnabled) {
 				if (determineAccesses) {
 					dataGridBinding = grid.getBinding();
 					if (! (Boolean.FALSE.equals(grid.getShowAdd()) && Boolean.FALSE.equals(grid.getShowZoom()))) {
@@ -746,7 +746,7 @@ public class ViewImpl extends Container implements View {
 			}
 
 			@Override
-			public void visitedDataGrid(DataGrid grid, boolean parentVisible, boolean parentEnabled) {
+			public void visitedDataGrid(@Nonnull DataGrid grid, boolean parentVisible, boolean parentEnabled) {
 				if (determineAccesses) {
 					dataGridBinding = null;
 				}
@@ -755,7 +755,7 @@ public class ViewImpl extends Container implements View {
 			// NB DataRepeater cannot zoom in
 			
 			@Override
-			public void visitDynamicImage(DynamicImage image, boolean parentVisible, boolean parentEnabled) {
+			public void visitDynamicImage(@Nonnull DynamicImage image, boolean parentVisible, boolean parentEnabled) {
 				if (determineAccesses) {
 					String imageName = image.getName();
 					accesses.add(UserAccess.dynamicImage(moduleName, documentName, imageName));
@@ -763,7 +763,7 @@ public class ViewImpl extends Container implements View {
 			}
 
 			@Override
-			public void visitListGrid(ListGrid grid, boolean parentVisible, boolean parentEnabled) {
+			public void visitListGrid(@Nonnull ListGrid grid, boolean parentVisible, boolean parentEnabled) {
 				if (determineAccesses) {
 					String modelName = grid.getModelName();
 					String queryName = grid.getQueryName();
@@ -796,7 +796,7 @@ public class ViewImpl extends Container implements View {
 			}
 			
 			@Override
-			public void visitListRepeater(ListRepeater repeater, boolean parentVisible, boolean parentEnabled) {
+			public void visitListRepeater(@Nonnull ListRepeater repeater, boolean parentVisible, boolean parentEnabled) {
 				if (determineAccesses) {
 					String modelName = repeater.getModelName();
 					if (modelName != null) {
@@ -811,7 +811,7 @@ public class ViewImpl extends Container implements View {
 			}
 			
 			@Override
-			public void visitLookupDescription(LookupDescription lookup, boolean parentVisible, boolean parentEnabled) {
+			public void visitLookupDescription(@Nonnull LookupDescription lookup, boolean parentVisible, boolean parentEnabled) {
 				if (determineAccesses) {
 					String binding = lookup.getBinding();
 					if (dataGridBinding != null) {
@@ -871,7 +871,7 @@ public class ViewImpl extends Container implements View {
 			}
 			
 			@Override
-			public void visitMap(MapDisplay map, boolean parentVisible, boolean parentEnabled) {
+			public void visitMap(@Nonnull MapDisplay map, boolean parentVisible, boolean parentEnabled) {
 				if (determineAccesses) {
 					String modelName = map.getModelName();
 					accesses.add(UserAccess.modelAggregate(moduleName, documentName, modelName));
@@ -881,7 +881,7 @@ public class ViewImpl extends Container implements View {
 			}
 			
 			@Override
-			public void visitTextField(TextField text, boolean parentVisible, boolean parentEnabled) {
+			public void visitTextField(@Nonnull TextField text, boolean parentVisible, boolean parentEnabled) {
 				if (determineAccesses) {
 					CompleteType type = text.getComplete();
 					if (type == CompleteType.previous) {
@@ -898,7 +898,7 @@ public class ViewImpl extends Container implements View {
 			/** {@inheritDoc} */
 			
 			@Override
-			public void visitTreeGrid(TreeGrid grid, boolean parentVisible, boolean parentEnabled) {
+			public void visitTreeGrid(@Nonnull TreeGrid grid, boolean parentVisible, boolean parentEnabled) {
 				if (determineAccesses) {
 					visitListGrid(grid, parentVisible, parentEnabled);
 				}
@@ -906,7 +906,7 @@ public class ViewImpl extends Container implements View {
 			/** {@inheritDoc} */
 			
 			@Override
-			public void visitZoomIn(ZoomIn zoomIn, boolean parentVisible, boolean parentEnabled) {
+			public void visitZoomIn(@Nonnull ZoomIn zoomIn, boolean parentVisible, boolean parentEnabled) {
 				if (determineAccesses) {
 					accessThroughBinding(zoomIn.getBinding());
 				}
@@ -918,7 +918,7 @@ public class ViewImpl extends Container implements View {
 			 * @param binding relation binding from the current document context
 			 * @throws MetaDataException if the binding cannot be resolved to a related document
 			 */
-			private void accessThroughBinding(String binding) {
+			private void accessThroughBinding(@Nonnull String binding) {
 				TargetMetaData target = BindUtil.getMetaDataForBinding(customer, module, document, binding);
 
 				Document relatedDocument = null;
@@ -942,7 +942,7 @@ public class ViewImpl extends Container implements View {
 			}
 			
 			@Override
-			public void visitReportAction(ActionImpl action) {
+			public void visitReportAction(@Nonnull ActionImpl action) {
 				String reportName = action.getResourceName();
 
 				String reportModuleName = null;
@@ -977,7 +977,7 @@ public class ViewImpl extends Container implements View {
 	 *
 	 * @return this instance with transient state restored
 	 */
-	private Object readResolve() {
+	private @Nonnull Object readResolve() {
 		inlineModels = new TreeMap<>();
 		fragments = new ComponentFragments(this);
 		components = new HashSet<>();
@@ -998,7 +998,7 @@ public class ViewImpl extends Container implements View {
 	 * @param component the component whose fragment should be resolved
 	 * @return the resolved fragment view for the component
 	 */
-	public ViewImpl getFragment(CustomerImpl c, ModuleImpl m, DocumentImpl d, String uxui, Component component) {
+	public @Nonnull ViewImpl getFragment(@Nonnull CustomerImpl c, @Nonnull ModuleImpl m, @Nonnull DocumentImpl d, @Nonnull String uxui, @Nonnull Component component) {
 		return fragments.get(c, m, d, uxui, component, (accesses != null));
 	}
 }

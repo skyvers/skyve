@@ -4,6 +4,9 @@ import java.util.Set;
 
 import org.skyve.impl.metadata.repository.view.access.ViewDynamicImageUserAccessMetaData;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * A fluent helper builder class to construct and manipulate the {@link ViewDynamicImageUserAccessMetaData} metadata.
  * 
@@ -20,14 +23,14 @@ public class FluentViewDynamicImageAccess extends FluentViewUserAccess<FluentVie
 	/**
 	 * Creates a new FluentViewDynamicImageAccess from the specified ViewDynamicImageUserAccessMetaData.
 	 */
-	public FluentViewDynamicImageAccess(ViewDynamicImageUserAccessMetaData access) {
+	public FluentViewDynamicImageAccess(@Nonnull ViewDynamicImageUserAccessMetaData access) {
 		this.access = access;
 	}
 
 	/**
 	 * Returns a FluentViewDynamicImageAccess from a runtime metadata.
 	 */
-	protected FluentViewDynamicImageAccess from(String imageName, Set<String> uxuis) {
+	protected @Nonnull FluentViewDynamicImageAccess from(@Nonnull String imageName, @Nonnull Set<String> uxuis) {
 		imageName(imageName);
 		uxuis.forEach(u -> addUxUi(u));
 		return this;
@@ -36,7 +39,7 @@ public class FluentViewDynamicImageAccess extends FluentViewUserAccess<FluentVie
 	/**
 	 * Specifies the image name for this FluentViewDynamicImageAccess.
 	 */
-	public FluentViewDynamicImageAccess imageName(final String imageName) {
+	public @Nonnull FluentViewDynamicImageAccess imageName(final @Nullable String imageName) {
 		access.setImageName(imageName);
 		return this;
 	}
@@ -45,7 +48,7 @@ public class FluentViewDynamicImageAccess extends FluentViewUserAccess<FluentVie
 	 * Returns the underlying view user access metadata from this builder.
 	 */
 	@Override
-	public ViewDynamicImageUserAccessMetaData get() {
+	public @Nonnull ViewDynamicImageUserAccessMetaData get() {
 		return access;
 	}
 }

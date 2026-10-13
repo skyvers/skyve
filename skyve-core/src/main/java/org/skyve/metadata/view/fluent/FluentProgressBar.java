@@ -26,7 +26,7 @@ public class FluentProgressBar extends FluentBoundWidget<FluentProgressBar>
 	 * @param bar
 	 *            the metadata instance to mutate
 	 */
-	public FluentProgressBar(ProgressBar bar) {
+	public FluentProgressBar(@Nonnull ProgressBar bar) {
 		this.bar = bar;
 	}
 
@@ -37,7 +37,7 @@ public class FluentProgressBar extends FluentBoundWidget<FluentProgressBar>
 	 *            the source metadata to copy
 	 * @return this builder
 	 */
-	public FluentProgressBar from(@SuppressWarnings("hiding") ProgressBar bar) {
+	public @Nonnull FluentProgressBar from(@SuppressWarnings("hiding") @Nonnull ProgressBar bar) {
 		BindUtil.copyAuthoredCondition(bar.getXmlInvisibleCondition(), bar.getXmlVisibleCondition(), this::invisibleCondition, this::visibleCondition);
 		absoluteSize(bar, this);
 		constrainableSize(bar, this);
@@ -78,7 +78,7 @@ public class FluentProgressBar extends FluentBoundWidget<FluentProgressBar>
 	 * @return this builder
 	 */
 	@Override
-	public FluentProgressBar pixelWidth(int width) {
+	public @Nonnull FluentProgressBar pixelWidth(int width) {
 		bar.setPixelWidth(Integer.valueOf(width));
 		return this;
 	}
@@ -90,7 +90,7 @@ public class FluentProgressBar extends FluentBoundWidget<FluentProgressBar>
 	 * @return this builder
 	 */
 	@Override
-	public FluentProgressBar pixelHeight(int height) {
+	public @Nonnull FluentProgressBar pixelHeight(int height) {
 		bar.setPixelHeight(Integer.valueOf(height));
 		return this;
 	}
@@ -102,7 +102,7 @@ public class FluentProgressBar extends FluentBoundWidget<FluentProgressBar>
 	 * @return this builder
 	 */
 	@Override
-	public FluentProgressBar maxPixelHeight(int maxPixelHeight) {
+	public @Nonnull FluentProgressBar maxPixelHeight(int maxPixelHeight) {
 		bar.setMaxPixelHeight(Integer.valueOf(maxPixelHeight));
 		return this;
 	}
@@ -114,7 +114,7 @@ public class FluentProgressBar extends FluentBoundWidget<FluentProgressBar>
 	 * @return this builder
 	 */
 	@Override
-	public FluentProgressBar minPixelHeight(int minPixelHeight) {
+	public @Nonnull FluentProgressBar minPixelHeight(int minPixelHeight) {
 		bar.setMinPixelHeight(Integer.valueOf(minPixelHeight));
 		return this;
 	}
@@ -126,7 +126,7 @@ public class FluentProgressBar extends FluentBoundWidget<FluentProgressBar>
 	 * @return this builder
 	 */
 	@Override
-	public FluentProgressBar minPixelWidth(int minPixelWidth) {
+	public @Nonnull FluentProgressBar minPixelWidth(int minPixelWidth) {
 		bar.setMinPixelWidth(Integer.valueOf(minPixelWidth));
 		return this;
 	}
@@ -138,7 +138,7 @@ public class FluentProgressBar extends FluentBoundWidget<FluentProgressBar>
 	 * @return this builder
 	 */
 	@Override
-	public FluentProgressBar maxPixelWidth(int maxPixelWidth) {
+	public @Nonnull FluentProgressBar maxPixelWidth(int maxPixelWidth) {
 		bar.setMaxPixelWidth(Integer.valueOf(maxPixelWidth));
 		return this;
 	}
@@ -162,7 +162,7 @@ public class FluentProgressBar extends FluentBoundWidget<FluentProgressBar>
 	 * @return the wrapped progress-bar metadata
 	 */
 	@Override
-	public ProgressBar get() {
+	public @Nonnull ProgressBar get() {
 		return bar;
 	}
 }

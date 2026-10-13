@@ -59,7 +59,7 @@ abstract class EnumELResolver extends ELResolver {
 	abstract @Nullable Object find(@Nonnull String name);
 
 	@Override
-	public Object getValue(ELContext context, Object base, Object property) {
+	public @Nullable Object getValue(@Nonnull ELContext context, @Nullable Object base, @Nullable Object property) {
 		if ((base != null) || (! (property instanceof String name)) || VARIABLES.contains(name) || boundNames.contains(name)) {
 			return null;
 		}
@@ -82,22 +82,22 @@ abstract class EnumELResolver extends ELResolver {
 	}
 
 	@Override
-	public Class<?> getType(ELContext context, Object base, Object property) {
+	public @Nullable Class<?> getType(@Nonnull ELContext context, @Nullable Object base, @Nullable Object property) {
 		return null; // an enumeration name is not assignable
 	}
 
 	@Override
-	public void setValue(ELContext context, Object base, Object property, Object value) {
+	public void setValue(@Nonnull ELContext context, @Nullable Object base, @Nullable Object property, @Nullable Object value) {
 		// an enumeration name is not assignable
 	}
 
 	@Override
-	public boolean isReadOnly(ELContext context, Object base, Object property) {
+	public boolean isReadOnly(@Nonnull ELContext context, @Nullable Object base, @Nullable Object property) {
 		return false; // not handled here
 	}
 
 	@Override
-	public Class<?> getCommonPropertyType(ELContext context, Object base) {
+	public @Nullable Class<?> getCommonPropertyType(@Nonnull ELContext context, @Nullable Object base) {
 		return null;
 	}
 }

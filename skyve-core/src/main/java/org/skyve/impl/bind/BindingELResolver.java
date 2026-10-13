@@ -2,6 +2,8 @@ package org.skyve.impl.bind;
 
 import org.skyve.domain.Bean;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.el.ELContext;
 import jakarta.el.ELResolver;
 
@@ -15,7 +17,7 @@ class BindingELResolver extends ELResolver {
 	}
 	
 	@Override
-	public Class<?> getType(ELContext context, Object base, Object property) {
+	public @Nullable Class<?> getType(@Nonnull ELContext context, @Nullable Object base, @Nullable Object property) {
 		if ((base instanceof Bean bean) && (property instanceof String binding)) {
 			context.setPropertyResolved(true);
 			return BindUtil.getPropertyType(bean, binding);
@@ -24,7 +26,7 @@ class BindingELResolver extends ELResolver {
 	}
 
 	@Override
-	public Object getValue(ELContext context, Object base, Object property) {
+	public @Nullable Object getValue(@Nonnull ELContext context, @Nullable Object base, @Nullable Object property) {
 		if ((base instanceof Bean bean) && (property instanceof String binding)) {
 			context.setPropertyResolved(base, property);
 			return BindUtil.get(bean, binding);
@@ -33,7 +35,7 @@ class BindingELResolver extends ELResolver {
 	}
 	
 	@Override
-	public void setValue(ELContext context, Object base, Object property, Object val) {
+	public void setValue(@Nonnull ELContext context, @Nullable Object base, @Nullable Object property, @Nullable Object val) {
 		if ((base instanceof Bean bean) && (property instanceof String binding)) {
 			context.setPropertyResolved(base, property);
 			BindUtil.set(bean, binding, val);
@@ -41,7 +43,7 @@ class BindingELResolver extends ELResolver {
 	}
 
 	@Override
-	public boolean isReadOnly(ELContext context, Object base, Object property) {
+	public boolean isReadOnly(@Nonnull ELContext context, @Nullable Object base, @Nullable Object property) {
 		if ((base instanceof Bean bean) && (property instanceof String simplePropertyName)) {
 			context.setPropertyResolved(true);
 			return BindUtil.isMutable(bean, simplePropertyName);
@@ -50,7 +52,7 @@ class BindingELResolver extends ELResolver {
 	}
 
 	@Override
-	public Class<?> getCommonPropertyType(ELContext context, Object base) {
+	public @Nonnull Class<?> getCommonPropertyType(@Nonnull ELContext context, @Nullable Object base) {
 		return Object.class;
 	}
 }

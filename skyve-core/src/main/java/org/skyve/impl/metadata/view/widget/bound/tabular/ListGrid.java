@@ -20,6 +20,7 @@ import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.DecoratedMetaData;
 import org.skyve.metadata.view.Disableable;
 
+import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlElement;
@@ -452,7 +453,7 @@ public class ListGrid extends AbstractListWidget implements DecoratedMetaData,
 	 *
 	 * @return {@code true} when the add action is shown
 	 */
-	public Boolean getShowAdd() {
+	public @Nullable Boolean getShowAdd() {
 		return showAdd;
 	}
 
@@ -462,7 +463,7 @@ public class ListGrid extends AbstractListWidget implements DecoratedMetaData,
 	 * @param showAdd {@code true} to show the add action
 	 */
 	@XmlAttribute(name = "showAdd", required = false)
-	public void setShowAdd(Boolean showAdd) {
+	public void setShowAdd(@Nullable Boolean showAdd) {
 		this.showAdd = showAdd;
 	}
 
@@ -471,7 +472,7 @@ public class ListGrid extends AbstractListWidget implements DecoratedMetaData,
 	 *
 	 * @return {@code true} when the zoom action is shown
 	 */
-	public Boolean getShowZoom() {
+	public @Nullable Boolean getShowZoom() {
 		return showZoom;
 	}
 
@@ -481,7 +482,7 @@ public class ListGrid extends AbstractListWidget implements DecoratedMetaData,
 	 * @param showZoom {@code true} to show the zoom action
 	 */
 	@XmlAttribute(name = "showZoom", required = false)
-	public void setShowZoom(Boolean showZoom) {
+	public void setShowZoom(@Nullable Boolean showZoom) {
 		this.showZoom = showZoom;
 	}
 
@@ -490,7 +491,7 @@ public class ListGrid extends AbstractListWidget implements DecoratedMetaData,
 	 *
 	 * @return {@code true} when the edit action is shown
 	 */
-	public Boolean getShowEdit() {
+	public @Nullable Boolean getShowEdit() {
 		return showEdit;
 	}
 
@@ -500,7 +501,7 @@ public class ListGrid extends AbstractListWidget implements DecoratedMetaData,
 	 * @param showEdit {@code true} to show the edit action
 	 */
 	@XmlAttribute(name = "showEdit", required = false)
-	public void setShowEdit(Boolean showEdit) {
+	public void setShowEdit(@Nullable Boolean showEdit) {
 		this.showEdit = showEdit;
 	}
 
@@ -509,7 +510,7 @@ public class ListGrid extends AbstractListWidget implements DecoratedMetaData,
 	 *
 	 * @return {@code true} when the remove action is shown
 	 */
-	public Boolean getShowRemove() {
+	public @Nullable Boolean getShowRemove() {
 		return showRemove;
 	}
 
@@ -519,7 +520,7 @@ public class ListGrid extends AbstractListWidget implements DecoratedMetaData,
 	 * @param showRemove {@code true} to show the remove action
 	 */
 	@XmlAttribute(name = "showRemove", required = false)
-	public void setShowRemove(Boolean showRemove) {
+	public void setShowRemove(@Nullable Boolean showRemove) {
 		this.showRemove = showRemove;
 	}
 
@@ -528,7 +529,7 @@ public class ListGrid extends AbstractListWidget implements DecoratedMetaData,
 	 *
 	 * @return {@code true} when the deselect action is shown
 	 */
-	public Boolean getShowDeselect() {
+	public @Nullable Boolean getShowDeselect() {
 		return showDeselect;
 	}
 
@@ -538,7 +539,7 @@ public class ListGrid extends AbstractListWidget implements DecoratedMetaData,
 	 * @param showDeselect {@code true} to show the deselect action
 	 */
 	@XmlAttribute(name = "showDeselect", required = false)
-	public void setShowDeselect(Boolean showDeselect) {
+	public void setShowDeselect(@Nullable Boolean showDeselect) {
 		this.showDeselect = showDeselect;
 	}
 
@@ -547,7 +548,7 @@ public class ListGrid extends AbstractListWidget implements DecoratedMetaData,
 	 *
 	 * @return {@code true} when export is shown
 	 */
-	public Boolean getShowExport() {
+	public @Nullable Boolean getShowExport() {
 		return showExport;
 	}
 
@@ -557,7 +558,7 @@ public class ListGrid extends AbstractListWidget implements DecoratedMetaData,
 	 * @param showExport {@code true} to show export
 	 */
 	@XmlAttribute(name = "showExport", required = false)
-	public void setShowExport(Boolean showExport) {
+	public void setShowExport(@Nullable Boolean showExport) {
 		this.showExport = showExport;
 	}
 
@@ -566,7 +567,7 @@ public class ListGrid extends AbstractListWidget implements DecoratedMetaData,
 	 *
 	 * @return {@code true} when charting is shown
 	 */
-	public Boolean getShowChart() {
+	public @Nullable Boolean getShowChart() {
 		return showChart;
 	}
 
@@ -576,7 +577,7 @@ public class ListGrid extends AbstractListWidget implements DecoratedMetaData,
 	 * @param showChart {@code true} to show charting
 	 */
 	@XmlAttribute(name = "showChart", required = false)
-	public void setShowChart(Boolean showChart) {
+	public void setShowChart(@Nullable Boolean showChart) {
 		this.showChart = showChart;
 	}
 
@@ -585,7 +586,7 @@ public class ListGrid extends AbstractListWidget implements DecoratedMetaData,
 	 *
 	 * @return {@code true} when the filter UI is shown
 	 */
-	public Boolean getShowFilter() {
+	public @Nullable Boolean getShowFilter() {
 		return showFilter;
 	}
 
@@ -595,7 +596,7 @@ public class ListGrid extends AbstractListWidget implements DecoratedMetaData,
 	 * @param showFilter {@code true} to show the filter UI
 	 */
 	@XmlAttribute(name = "showFilter", required = false)
-	public void setShowFilter(Boolean showFilter) {
+	public void setShowFilter(@Nullable Boolean showFilter) {
 		this.showFilter = showFilter;
 	}
 
@@ -604,7 +605,7 @@ public class ListGrid extends AbstractListWidget implements DecoratedMetaData,
 	 *
 	 * @return {@code true} when summary information is shown
 	 */
-	public Boolean getShowSummary() {
+	public @Nullable Boolean getShowSummary() {
 		return showSummary;
 	}
 
@@ -614,7 +615,7 @@ public class ListGrid extends AbstractListWidget implements DecoratedMetaData,
 	 * @param showSummary {@code true} to show summary information
 	 */
 	@XmlAttribute(name = "showSummary", required = false)
-	public void setShowSummary(Boolean showSummary) {
+	public void setShowSummary(@Nullable Boolean showSummary) {
 		this.showSummary = showSummary;
 	}
 
@@ -623,7 +624,7 @@ public class ListGrid extends AbstractListWidget implements DecoratedMetaData,
 	 *
 	 * @return {@code true} when snap actions are shown
 	 */
-	public Boolean getShowSnap() {
+	public @Nullable Boolean getShowSnap() {
 		return showSnap;
 	}
 
@@ -633,7 +634,7 @@ public class ListGrid extends AbstractListWidget implements DecoratedMetaData,
 	 * @param showSnap {@code true} to show snap actions
 	 */
 	@XmlAttribute(name = "showSnap", required = false)
-	public void setShowSnap(Boolean showSnap) {
+	public void setShowSnap(@Nullable Boolean showSnap) {
 		this.showSnap = showSnap;
 	}
 
@@ -642,7 +643,7 @@ public class ListGrid extends AbstractListWidget implements DecoratedMetaData,
 	 *
 	 * @return {@code true} when tag actions are shown
 	 */
-	public Boolean getShowTag() {
+	public @Nullable Boolean getShowTag() {
 		return showTag;
 	}
 
@@ -652,7 +653,7 @@ public class ListGrid extends AbstractListWidget implements DecoratedMetaData,
 	 * @param showTag {@code true} to show tag actions
 	 */
 	@XmlAttribute(name = "showTag", required = false)
-	public void setShowTag(Boolean showTag) {
+	public void setShowTag(@Nullable Boolean showTag) {
 		this.showTag = showTag;
 	}
 
@@ -661,7 +662,7 @@ public class ListGrid extends AbstractListWidget implements DecoratedMetaData,
 	 *
 	 * @return {@code true} when flag actions are shown
 	 */
-	public Boolean getShowFlag() {
+	public @Nullable Boolean getShowFlag() {
 		return showFlag;
 	}
 
@@ -671,7 +672,7 @@ public class ListGrid extends AbstractListWidget implements DecoratedMetaData,
 	 * @param showFlag {@code true} to show flag actions
 	 */
 	@XmlAttribute(name = "showFlag", required = false)
-	public void setShowFlag(Boolean showFlag) {
+	public void setShowFlag(@Nullable Boolean showFlag) {
 		this.showFlag = showFlag;
 	}
 
@@ -680,7 +681,7 @@ public class ListGrid extends AbstractListWidget implements DecoratedMetaData,
 	 *
 	 * @return {@code true} when auto-population is enabled
 	 */
-	public Boolean getAutoPopulate() {
+	public @Nullable Boolean getAutoPopulate() {
 		return autoPopulate;
 	}
 
@@ -690,7 +691,7 @@ public class ListGrid extends AbstractListWidget implements DecoratedMetaData,
 	 * @param autoPopulate {@code true} to enable auto-population
 	 */
 	@XmlAttribute(name = "autoPopulate", required = false)
-	public void setAutoPopulate(Boolean autoPopulate) {
+	public void setAutoPopulate(@Nullable Boolean autoPopulate) {
 		this.autoPopulate = autoPopulate;
 	}
 
@@ -700,7 +701,7 @@ public class ListGrid extends AbstractListWidget implements DecoratedMetaData,
 	 * @return the selected-row identifier binding, or {@code null} when not set
 	 */
 	@Override
-	public String getSelectedIdBinding() {
+	public @Nullable String getSelectedIdBinding() {
 		return selectedIdBinding;
 	}
 
@@ -711,7 +712,7 @@ public class ListGrid extends AbstractListWidget implements DecoratedMetaData,
 	 */
 	@Override
 	@XmlAttribute(name = "selectedIdBinding")
-	public void setSelectedIdBinding(String selectedIdBinding) {
+	public void setSelectedIdBinding(@Nullable String selectedIdBinding) {
 		this.selectedIdBinding = UtilImpl.processStringValue(selectedIdBinding);
 	}
 
@@ -726,7 +727,7 @@ public class ListGrid extends AbstractListWidget implements DecoratedMetaData,
 						@XmlElementRef(type = ServerSideActionEventAction.class),
 						@XmlElementRef(type = SetDisabledEventAction.class),
 						@XmlElementRef(type = SetInvisibleEventAction.class)})
-	public List<EventAction> getEditedActions() {
+	public @Nonnull List<EventAction> getEditedActions() {
 		return editedActions;
 	}
 
@@ -741,7 +742,7 @@ public class ListGrid extends AbstractListWidget implements DecoratedMetaData,
 						@XmlElementRef(type = ServerSideActionEventAction.class),
 						@XmlElementRef(type = SetDisabledEventAction.class),
 						@XmlElementRef(type = SetInvisibleEventAction.class)})
-	public List<EventAction> getRemovedActions() {
+	public @Nonnull List<EventAction> getRemovedActions() {
 		return removedActions;
 	}
 
@@ -756,7 +757,7 @@ public class ListGrid extends AbstractListWidget implements DecoratedMetaData,
 						@XmlElementRef(type = ServerSideActionEventAction.class),
 						@XmlElementRef(type = SetDisabledEventAction.class),
 						@XmlElementRef(type = SetInvisibleEventAction.class)})
-	public List<EventAction> getSelectedActions() {
+	public @Nonnull List<EventAction> getSelectedActions() {
 		return selectedActions;
 	}
 	
@@ -769,7 +770,7 @@ public class ListGrid extends AbstractListWidget implements DecoratedMetaData,
 	 */
 	@Override
 	@XmlTransient
-	public String getSource() {
+	public @Nullable String getSource() {
 		String queryName = getQueryName();
 		return (queryName == null) ? getModelName() : queryName;
 	}
@@ -780,7 +781,7 @@ public class ListGrid extends AbstractListWidget implements DecoratedMetaData,
 	 * @return mutable decorator property map keyed by property name
 	 */
 	@Override
-	public Map<String, String> getProperties() {
+	public @Nonnull Map<String, String> getProperties() {
 		return properties;
 	}
 }

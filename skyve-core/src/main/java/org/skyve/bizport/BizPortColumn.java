@@ -2,6 +2,9 @@ package org.skyve.bizport;
 
 import org.skyve.metadata.model.Attribute.AttributeType;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Defines metadata and validation constraints for a single
  * {@link BizPortSheet} column.
@@ -64,7 +67,7 @@ public final class BizPortColumn {
 	 * @param comment	A comment used as a tooltip/hint.
 	 * @param type	The type of the column.
 	 */
-	public BizPortColumn(String title, String comment, AttributeType type) {
+	public BizPortColumn(@Nullable String title, @Nullable String comment, @Nonnull AttributeType type) {
 		this.title = title;
 		this.comment = comment;
 		this.type = type;
@@ -76,7 +79,7 @@ public final class BizPortColumn {
 	 * @param title	The column title.  Displayed to the user.
 	 * @param comment	A comment used as a tooltip/hint.
 	 */
-	public BizPortColumn(String title, String comment) {
+	public BizPortColumn(@Nullable String title, @Nullable String comment) {
 		this.title = title;
 		this.comment = comment;
 	}
@@ -87,7 +90,7 @@ public final class BizPortColumn {
 	 * @return the display title shown in the sheet header; may be {@code null} while a
 	 *         column definition is being assembled
 	 */
-	public String getTitle() {
+	public @Nullable String getTitle() {
 		return title;
 	}
 	
@@ -96,7 +99,7 @@ public final class BizPortColumn {
 	 *
 	 * @param title the display title to use in the sheet header
 	 */
-	public void setTitle(String title) {
+	public void setTitle(@Nullable String title) {
 		this.title = title;
 	}
 	
@@ -106,7 +109,7 @@ public final class BizPortColumn {
 	 * @return the tooltip/comment text shown to spreadsheet users, or {@code null} when
 	 *         no hint is configured
 	 */
-	public String getComment() {
+	public @Nullable String getComment() {
 		return comment;
 	}
 	
@@ -115,7 +118,7 @@ public final class BizPortColumn {
 	 *
 	 * @param comment the tooltip/comment text to attach to the header cell
 	 */
-	public void setComment(String comment) {
+	public void setComment(@Nullable String comment) {
 		this.comment = comment;
 	}
 	
@@ -125,7 +128,7 @@ public final class BizPortColumn {
 	 * @return the configured attribute type, or {@code null} when type resolution is
 	 *         deferred to import parsing
 	 */
-	public AttributeType getType() {
+	public @Nullable AttributeType getType() {
 		return type;
 	}
 	
@@ -134,7 +137,7 @@ public final class BizPortColumn {
 	 *
 	 * @param type the attribute type for this column
 	 */
-	public void setType(AttributeType type) {
+	public void setType(@Nullable AttributeType type) {
 		this.type = type;
 	}
 	
@@ -143,7 +146,7 @@ public final class BizPortColumn {
 	 *
 	 * @return the dropdown/range values, or {@code null} when unrestricted
 	 */
-	public String[] getRangeValues() {
+	public @Nullable String[] getRangeValues() {
 		return rangeValues;
 	}
 	
@@ -156,7 +159,7 @@ public final class BizPortColumn {
 	 * @param rangeValues allowable values, in display order; {@code null} removes the
 	 *        restriction
 	 */
-	public void setRangeValues(String[] rangeValues) {
+	public void setRangeValues(@Nullable String[] rangeValues) {
 		this.rangeValues = rangeValues;
 	}
 	
@@ -165,7 +168,7 @@ public final class BizPortColumn {
 	 *
 	 * @return the inclusive lower bound, or {@code null} when no minimum is configured
 	 */
-	public Object getMinValue() {
+	public @Nullable Object getMinValue() {
 		return minValue;
 	}
 	
@@ -175,7 +178,7 @@ public final class BizPortColumn {
 	 * @param minValue the inclusive lower bound, expressed in the column's logical type;
 	 *        {@code null} removes the lower-bound constraint
 	 */
-	public void setMinValue(Object minValue) {
+	public void setMinValue(@Nullable Object minValue) {
 		this.minValue = minValue;
 	}
 	
@@ -184,7 +187,7 @@ public final class BizPortColumn {
 	 *
 	 * @return the inclusive upper bound, or {@code null} when no maximum is configured
 	 */
-	public Object getMaxValue() {
+	public @Nullable Object getMaxValue() {
 		return maxValue;
 	}
 	
@@ -194,7 +197,7 @@ public final class BizPortColumn {
 	 * @param maxValue the inclusive upper bound, expressed in the column's logical type;
 	 *        {@code null} removes the upper-bound constraint
 	 */
-	public void setMaxValue(Object maxValue) {
+	public void setMaxValue(@Nullable Object maxValue) {
 		this.maxValue = maxValue;
 	}
 
@@ -204,7 +207,7 @@ public final class BizPortColumn {
 	 * @return the target sheet key used for lookup validation, or {@code null} when this
 	 *         column is not a reference
 	 */
-	public SheetKey getReferencedSheet() {
+	public @Nullable SheetKey getReferencedSheet() {
 		return referencedSheet;
 	}
 
@@ -214,7 +217,7 @@ public final class BizPortColumn {
 	 * @param referencedSheet the target sheet key, or {@code null} to clear reference
 	 *        semantics
 	 */
-	public void setReferencedSheet(SheetKey referencedSheet) {
+	public void setReferencedSheet(@Nullable SheetKey referencedSheet) {
 		this.referencedSheet = referencedSheet;
 	}
 

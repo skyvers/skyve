@@ -7,6 +7,8 @@ import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.sail.execution.Executor;
 import org.skyve.metadata.sail.language.Step;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
 import jakarta.xml.bind.annotation.XmlValue;
@@ -32,7 +34,7 @@ public class Execute implements Step {
 	 * Returns the script.
 	 * @return the result
 	 */
-	public String getScript() {
+	public @Nullable String getScript() {
 		return script;
 	}
 
@@ -42,7 +44,7 @@ public class Execute implements Step {
 	 */
 	@XmlValue
 	@XmlJavaTypeAdapter(CDATAAdapter.class)
-	public void setScript(String script) {
+	public void setScript(@Nullable String script) {
 		this.script = UtilImpl.processStringValue(script);
 	}
 
@@ -51,7 +53,7 @@ public class Execute implements Step {
 	 * @param executor the executor
 	 */
 	@Override
-	public void execute(Executor executor) {
+	public void execute(@Nonnull Executor executor) {
 		executor.executeExecute(this);
 	}
 	
@@ -61,7 +63,7 @@ public class Execute implements Step {
 	 * @return the result
 	 */
 	@Override
-	public String getIdentifier(AutomationContext context) {
+	public @Nullable String getIdentifier(@Nonnull AutomationContext context) {
 		return null;
 	}
 }

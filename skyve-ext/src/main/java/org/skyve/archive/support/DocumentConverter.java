@@ -8,6 +8,8 @@ import org.apache.lucene.document.DateTools.Resolution;
 import org.apache.lucene.document.Document;
 import org.skyve.domain.Bean;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * SPI for converting domain beans to Apache Lucene {@link org.apache.lucene.document.Document}
  * instances for content-store indexing.
@@ -34,7 +36,7 @@ public interface DocumentConverter {
      * @param bean
      * @return
      */
-    public Document convert(Bean bean);
+    public @Nonnull Document convert(@Nonnull Bean bean);
 
     /**
      * Does this converter handle the given module/document?
@@ -43,13 +45,13 @@ public interface DocumentConverter {
      * @param document
      * @return
      */
-    public boolean handles(String module, String document);
+    public boolean handles(@Nonnull String module, @Nonnull String document);
 
-    public static String dateToString(Date date) {
+    public static @Nonnull String dateToString(@Nonnull Date date) {
         return DateTools.dateToString(date, Resolution.MILLISECOND);
     }
 
-    public static Date stringToDate(String dateStr) {
+    public static @Nonnull Date stringToDate(@Nonnull String dateStr) {
         try {
             return DateTools.stringToDate(dateStr);
         } catch (ParseException e) {
@@ -74,7 +76,7 @@ public interface DocumentConverter {
      * @param binding
      * @return
      */
-    public static String toSortBinding(String binding) {
+    public static @Nonnull String toSortBinding(@Nonnull String binding) {
         return binding + "_sort";
     }
 }

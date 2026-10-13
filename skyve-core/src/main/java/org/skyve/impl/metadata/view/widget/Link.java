@@ -23,6 +23,7 @@ import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.view.Invisible;
 import org.skyve.util.Util;
 
+import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlElement;
@@ -77,7 +78,7 @@ public class Link implements Invisible, AbsoluteWidth, FormItemWidget {
 	 *
 	 * @return the link reference
 	 */
-	public Reference getReference() {
+	public @Nullable Reference getReference() {
 		return reference;
 	}
 
@@ -95,7 +96,7 @@ public class Link implements Invisible, AbsoluteWidth, FormItemWidget {
 						@XmlElementRef(type = QueryListViewReference.class),
 						@XmlElementRef(type = ReportReference.class),
 						@XmlElementRef(type = ResourceReference.class)})
-	public void setReference(Reference reference) {
+	public void setReference(@Nullable Reference reference) {
 		this.reference = reference;
 	}
 
@@ -104,7 +105,7 @@ public class Link implements Invisible, AbsoluteWidth, FormItemWidget {
 	 *
 	 * @return the reference target, or {@code null} when the default target is used
 	 */
-	public ReferenceTarget getTarget() {
+	public @Nullable ReferenceTarget getTarget() {
 		return target;
 	}
 
@@ -114,7 +115,7 @@ public class Link implements Invisible, AbsoluteWidth, FormItemWidget {
 	 * @param target the reference target
 	 */
 	@XmlElement(namespace = XMLMetaData.VIEW_NAMESPACE)
-	public void setTarget(ReferenceTarget target) {
+	public void setTarget(@Nullable ReferenceTarget target) {
 		this.target = target;
 	}
 
@@ -123,7 +124,7 @@ public class Link implements Invisible, AbsoluteWidth, FormItemWidget {
 	 *
 	 * @return the raw link label value
 	 */
-	public String getValue() {
+	public @Nullable String getValue() {
 		return value;
 	}
 
@@ -132,7 +133,7 @@ public class Link implements Invisible, AbsoluteWidth, FormItemWidget {
 	 *
 	 * @return the localised link label
 	 */
-	public String getLocalisedValue() {
+	public @Nullable String getLocalisedValue() {
 		return Util.i18n(value);
 	}
 
@@ -141,7 +142,7 @@ public class Link implements Invisible, AbsoluteWidth, FormItemWidget {
 	 *
 	 * @return {@code Boolean.FALSE} to allow trusted markup; {@code null} or {@code Boolean.TRUE} to escape at the renderer boundary
 	 */
-	public Boolean getEscapeValue() {
+	public @Nullable Boolean getEscapeValue() {
 		return escapeValue;
 	}
 	
@@ -151,7 +152,7 @@ public class Link implements Invisible, AbsoluteWidth, FormItemWidget {
 	 * @param value the raw link label value
 	 */
 	@XmlAttribute(required = false)
-	public void setValue(String value) {
+	public void setValue(@Nullable String value) {
 		this.value = UtilImpl.processStringValue(value);
 	}
 	
@@ -161,7 +162,7 @@ public class Link implements Invisible, AbsoluteWidth, FormItemWidget {
 	 * @param escapeValue {@code Boolean.FALSE} to allow trusted markup; {@code null} or {@code Boolean.TRUE} to escape at the renderer boundary
 	 */
 	@XmlAttribute(required = false)
-	public void setEscapeValue(Boolean escapeValue) {
+	public void setEscapeValue(@Nullable Boolean escapeValue) {
 		this.escapeValue = escapeValue;
 	}
 
@@ -171,7 +172,7 @@ public class Link implements Invisible, AbsoluteWidth, FormItemWidget {
 	 * @return the pixel width, or {@code null} when not fixed
 	 */
 	@Override
-	public Integer getPixelWidth() {
+	public @Nullable Integer getPixelWidth() {
 		return pixelWidth;
 	}
 
@@ -182,7 +183,7 @@ public class Link implements Invisible, AbsoluteWidth, FormItemWidget {
 	 */
 	@Override
 	@XmlAttribute(required = false)
-	public void setPixelWidth(Integer pixelWidth) {
+	public void setPixelWidth(@Nullable Integer pixelWidth) {
 		this.pixelWidth = pixelWidth;
 	}
 
@@ -253,7 +254,7 @@ public class Link implements Invisible, AbsoluteWidth, FormItemWidget {
 	 * @return the mutable decorator property map keyed by property name
 	 */
 	@Override
-	public Map<String, String> getProperties() {
+	public @Nonnull Map<String, String> getProperties() {
 		return properties;
 	}
 }

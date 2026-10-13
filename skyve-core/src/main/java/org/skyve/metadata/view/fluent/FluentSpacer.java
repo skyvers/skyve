@@ -25,7 +25,7 @@ public class FluentSpacer extends FluentWidget implements FluentAbsoluteSize<Flu
 	 * @param spacer
 	 *            the spacer metadata to mutate
 	 */
-	public FluentSpacer(Spacer spacer) {
+	public FluentSpacer(@Nonnull Spacer spacer) {
 		this.spacer = spacer;
 	}
 
@@ -36,7 +36,7 @@ public class FluentSpacer extends FluentWidget implements FluentAbsoluteSize<Flu
 	 *            the source spacer metadata
 	 * @return this builder
 	 */
-	public FluentSpacer from(@SuppressWarnings("hiding") Spacer spacer) {
+	public @Nonnull FluentSpacer from(@SuppressWarnings("hiding") @Nonnull Spacer spacer) {
 		BindUtil.copyAuthoredCondition(spacer.getXmlInvisibleCondition(), spacer.getXmlVisibleCondition(), this::invisibleCondition, this::visibleCondition);
 		absoluteSize(spacer, this);
 		spacer.getProperties().entrySet().forEach(p -> putProperty(p.getKey(), p.getValue()));
@@ -76,7 +76,7 @@ public class FluentSpacer extends FluentWidget implements FluentAbsoluteSize<Flu
 	 * @return this builder
 	 */
 	@Override
-	public FluentSpacer pixelWidth(int width) {
+	public @Nonnull FluentSpacer pixelWidth(int width) {
 		spacer.setPixelWidth(Integer.valueOf(width));
 		return this;
 	}
@@ -89,7 +89,7 @@ public class FluentSpacer extends FluentWidget implements FluentAbsoluteSize<Flu
 	 * @return this builder
 	 */
 	@Override
-	public FluentSpacer pixelHeight(int height) {
+	public @Nonnull FluentSpacer pixelHeight(int height) {
 		spacer.setPixelHeight(Integer.valueOf(height));
 		return this;
 	}
@@ -113,7 +113,7 @@ public class FluentSpacer extends FluentWidget implements FluentAbsoluteSize<Flu
 	 * @return the mutable spacer metadata
 	 */
 	@Override
-	public Spacer get() {
+	public @Nonnull Spacer get() {
 		return spacer;
 	}
 }

@@ -49,6 +49,8 @@ import org.skyve.metadata.user.UserAccess;
 import org.skyve.metadata.view.TextOutput.Sanitisation;
 import org.skyve.metadata.view.View.ViewType;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlElementRef;
@@ -125,7 +127,7 @@ public class ModuleMetaData extends NamedMetaData implements ConvertibleMetaData
 	 *
 	 * @return the module title
 	 */
-	public String getTitle() {
+	public @Nullable String getTitle() {
 		return title;
 	}
 
@@ -138,7 +140,7 @@ public class ModuleMetaData extends NamedMetaData implements ConvertibleMetaData
 	 * @param title the module title; blank values become {@code null}
 	 */
 	@XmlAttribute(required = true)
-	public void setTitle(String title) {
+	public void setTitle(@Nullable String title) {
 		this.title = UtilImpl.processStringValue(title);
 	}
 
@@ -147,7 +149,7 @@ public class ModuleMetaData extends NamedMetaData implements ConvertibleMetaData
 	 *
 	 * @return {@code Boolean.TRUE} when prototype-mode is enabled, otherwise {@code null} or {@code Boolean.FALSE}
 	 */
-	public Boolean getPrototype() {
+	public @Nullable Boolean getPrototype() {
 		return prototype;
 	}
 
@@ -157,7 +159,7 @@ public class ModuleMetaData extends NamedMetaData implements ConvertibleMetaData
 	 * @param prototype the prototype flag
 	 */
 	@XmlAttribute
-	public void setPrototype(Boolean prototype) {
+	public void setPrototype(@Nullable Boolean prototype) {
 		this.prototype = prototype;
 	}
 
@@ -166,7 +168,7 @@ public class ModuleMetaData extends NamedMetaData implements ConvertibleMetaData
 	 *
 	 * @return the home document name
 	 */
-	public String getHomeDocument() {
+	public @Nullable String getHomeDocument() {
 		return homeDocument;
 	}
 
@@ -176,7 +178,7 @@ public class ModuleMetaData extends NamedMetaData implements ConvertibleMetaData
 	 * @param formLabelLayout the form label layout strategy
 	 */
 	@XmlAttribute
-	public void setFormLabelLayout(FormLabelLayout formLabelLayout) {
+	public void setFormLabelLayout(@Nullable FormLabelLayout formLabelLayout) {
 		this.formLabelLayout = formLabelLayout;
 	}
 
@@ -185,7 +187,7 @@ public class ModuleMetaData extends NamedMetaData implements ConvertibleMetaData
 	 *
 	 * @return the configured form label layout, or {@code null} when unspecified
 	 */
-	public FormLabelLayout getFormLabelLayout() {
+	public @Nullable FormLabelLayout getFormLabelLayout() {
 		return formLabelLayout;
 	}
 
@@ -198,7 +200,7 @@ public class ModuleMetaData extends NamedMetaData implements ConvertibleMetaData
 	 * @param homeDocument the home document name; blank values become {@code null}
 	 */
 	@XmlElement(namespace = XMLMetaData.MODULE_NAMESPACE, required = true)
-	public void setHomeDocument(String homeDocument) {
+	public void setHomeDocument(@Nullable String homeDocument) {
 		this.homeDocument = UtilImpl.processStringValue(homeDocument);
 	}
 
@@ -207,7 +209,7 @@ public class ModuleMetaData extends NamedMetaData implements ConvertibleMetaData
 	 *
 	 * @return the configured home view type, or {@code null} to default to list view during conversion
 	 */
-	public ViewType getHomeRef() {
+	public @Nullable ViewType getHomeRef() {
 		return homeRef;
 	}
 
@@ -217,7 +219,7 @@ public class ModuleMetaData extends NamedMetaData implements ConvertibleMetaData
 	 * @param homeRef the home view type
 	 */
 	@XmlElement(namespace = XMLMetaData.MODULE_NAMESPACE)
-	public void setHomeRef(ViewType homeRef) {
+	public void setHomeRef(@Nullable ViewType homeRef) {
 		this.homeRef = homeRef;
 	}
 
@@ -230,7 +232,7 @@ public class ModuleMetaData extends NamedMetaData implements ConvertibleMetaData
 	 */
 	@XmlElementWrapper(namespace = XMLMetaData.MODULE_NAMESPACE, name = "jobs")
 	@XmlElement(namespace = XMLMetaData.MODULE_NAMESPACE, name = "job", required = true)
-	public List<JobMetaDataImpl> getJobs() {
+	public @Nonnull List<JobMetaDataImpl> getJobs() {
 		return jobs;
 	}
 
@@ -243,7 +245,7 @@ public class ModuleMetaData extends NamedMetaData implements ConvertibleMetaData
 	 */
 	@XmlElementWrapper(namespace = XMLMetaData.MODULE_NAMESPACE, name = "documents")
 	@XmlElement(namespace = XMLMetaData.MODULE_NAMESPACE, name = "document", required = true)
-	public List<ModuleDocumentMetaData> getDocuments() {
+	public @Nonnull List<ModuleDocumentMetaData> getDocuments() {
 		return documents;
 	}
 
@@ -261,7 +263,7 @@ public class ModuleMetaData extends NamedMetaData implements ConvertibleMetaData
 						@XmlElementRef(type = MetaDataQueryReferenceMetaData.class),
 						@XmlElementRef(type = SQLReferenceMetaData.class),
 						@XmlElementRef(type = BizQLReferenceMetaData.class)})
-	public List<QueryMetaData> getQueries() {
+	public @Nonnull List<QueryMetaData> getQueries() {
 		return queries;
 	}
 
@@ -274,7 +276,7 @@ public class ModuleMetaData extends NamedMetaData implements ConvertibleMetaData
 	 */
 	@XmlElementWrapper(namespace = XMLMetaData.MODULE_NAMESPACE, name = "roles")
 	@XmlElement(namespace = XMLMetaData.MODULE_NAMESPACE, name = "role", required = true)
-	public List<ModuleRoleMetaData> getRoles() {
+	public @Nonnull List<ModuleRoleMetaData> getRoles() {
 		return roles;
 	}
 
@@ -283,7 +285,7 @@ public class ModuleMetaData extends NamedMetaData implements ConvertibleMetaData
 	 *
 	 * @return the menu descriptor
 	 */
-	public MenuMetaData getMenu() {
+	public @Nullable MenuMetaData getMenu() {
 		return menu;
 	}
 
@@ -293,7 +295,7 @@ public class ModuleMetaData extends NamedMetaData implements ConvertibleMetaData
 	 * @param menu the menu descriptor
 	 */
 	@XmlElement(namespace = XMLMetaData.MODULE_NAMESPACE, required = true)
-	public void setMenu(MenuMetaData menu) {
+	public void setMenu(@Nullable MenuMetaData menu) {
 		this.menu = menu;
 	}
 
@@ -302,7 +304,7 @@ public class ModuleMetaData extends NamedMetaData implements ConvertibleMetaData
 	 *
 	 * @return documentation text, or {@code null}
 	 */
-	public String getDocumentation() {
+	public @Nullable String getDocumentation() {
 		return documentation;
 	}
 
@@ -316,7 +318,7 @@ public class ModuleMetaData extends NamedMetaData implements ConvertibleMetaData
 	 */
 	@XmlElement(namespace = XMLMetaData.MODULE_NAMESPACE)
 	@XmlJavaTypeAdapter(CDATAAdapter.class)
-	public void setDocumentation(String documentation) {
+	public void setDocumentation(@Nullable String documentation) {
 		this.documentation = UtilImpl.processStringValue(documentation);
 	}
 
@@ -348,7 +350,7 @@ public class ModuleMetaData extends NamedMetaData implements ConvertibleMetaData
 	 * @return the mutable module property map, never {@code null}
 	 */
 	@Override
-	public Map<String, String> getProperties() {
+	public @Nonnull Map<String, String> getProperties() {
 		return properties;
 	}
 
@@ -371,7 +373,7 @@ public class ModuleMetaData extends NamedMetaData implements ConvertibleMetaData
 	 */
 	@Override
 	@SuppressWarnings({"java:S3776", "java:S6541"}) // complexity OK
-	public Module convert(String metaDataName) {
+	public @Nonnull Module convert(@Nonnull String metaDataName) {
 		ModuleImpl result = new ModuleImpl();
 		result.setLastModifiedMillis(getLastModifiedMillis());
 
@@ -887,10 +889,10 @@ public class ModuleMetaData extends NamedMetaData implements ConvertibleMetaData
 	 * @throws MetaDataException if required action attributes are missing or inconsistent
 	 */
 	@SuppressWarnings("java:S3776") // Complexity OK
-	private void populateModuleMenu(String metaDataName,
-										List<MenuItem> items,
-										List<ActionMetaData> actions,
-										Set<String> validRoleNames) {
+	private void populateModuleMenu(@Nonnull String metaDataName,
+										@Nonnull List<MenuItem> items,
+										@Nonnull List<ActionMetaData> actions,
+										@Nonnull Set<String> validRoleNames) {
 		for (ActionMetaData action : actions) {
 			if (action instanceof GroupMetaData group) {
 				String value = action.getName();
@@ -1111,10 +1113,10 @@ public class ModuleMetaData extends NamedMetaData implements ConvertibleMetaData
 	 * @param metadata the source item metadata
 	 * @throws MetaDataException if required name/grant attributes are missing, duplicated, or invalid
 	 */
-	private void populateItem(String metaDataName,
-								Set<String> validRoleNames,
-								AbstractMenuItem result,
-								ItemMetaData metadata) {
+	private void populateItem(@Nonnull String metaDataName,
+								@Nonnull Set<String> validRoleNames,
+								@Nonnull AbstractMenuItem result,
+								@Nonnull ItemMetaData metadata) {
 		String value = metadata.getName();
 		if (value == null) {
 			throw new MetaDataException(metaDataName + " : The [name] for a menu item is required");
@@ -1159,11 +1161,11 @@ public class ModuleMetaData extends NamedMetaData implements ConvertibleMetaData
 	 * @param documentNames document names used to prevent query/document naming collisions
 	 * @throws MetaDataException if required fields are missing or naming rules are violated
 	 */
-	private static void populateQueryProperties(QueryDefinitionMetaData queryMetaData,
-													QueryDefinitionImpl query,
-													String metaDataName,
-													Set<String> queryNames,
-													Set<String> documentNames) {
+	private static void populateQueryProperties(@Nonnull QueryDefinitionMetaData queryMetaData,
+													@Nonnull QueryDefinitionImpl query,
+													@Nonnull String metaDataName,
+													@Nonnull Set<String> queryNames,
+													@Nonnull Set<String> documentNames) {
 		String value = queryMetaData.getName();
 
 		if (value == null) {
@@ -1196,10 +1198,10 @@ public class ModuleMetaData extends NamedMetaData implements ConvertibleMetaData
 	 * @param documentNames document names used to prevent query/document naming collisions
 	 * @throws MetaDataException if the query name is duplicated or conflicts with a document name
 	 */
-	private static void validateQueryName(String name,
-											String metaDataName,
-											Set<String> queryNames,
-											Set<String> documentNames) {
+	private static void validateQueryName(@Nonnull String name,
+											@Nonnull String metaDataName,
+											@Nonnull Set<String> queryNames,
+											@Nonnull Set<String> documentNames) {
 		if (! queryNames.add(name)) {
 			throw new MetaDataException(metaDataName + " : Duplicate query named " + name);
 		}
@@ -1219,10 +1221,10 @@ public class ModuleMetaData extends NamedMetaData implements ConvertibleMetaData
 	 * @param uxuisToAddTo destination set receiving validated UX/UI names
 	 * @throws MetaDataException if a UX/UI name is missing or duplicated
 	 */
-	private static void populateUxuis(String metaDataName,
-										String itemName,
-										List<ApplicableTo> uxuis,
-										Set<String> uxuisToAddTo) {
+	private static void populateUxuis(@Nonnull String metaDataName,
+										@Nonnull String itemName,
+										@Nonnull List<ApplicableTo> uxuis,
+										@Nonnull Set<String> uxuisToAddTo) {
 		Set<String> applicableUxuis = new TreeSet<>();
 		for (ApplicableTo uxui : uxuis) {
 			String value = uxui.getUxUi();

@@ -23,14 +23,14 @@ public class FluentCheckMembership extends FluentChangeableInputWidget<FluentChe
 	 *
 	 * @param check the metadata instance to mutate
 	 */
-	public FluentCheckMembership(CheckMembership check) {
+	public FluentCheckMembership(@Nonnull CheckMembership check) {
 		this.check = check;
 	}
 
 	/**
 	 * Copies check-membership metadata into this fluent builder.
 	 */
-	public FluentCheckMembership from(@SuppressWarnings("hiding") CheckMembership check) {
+	public @Nonnull FluentCheckMembership from(@SuppressWarnings("hiding") @Nonnull CheckMembership check) {
 		super.from(check);
 		check.getProperties().entrySet().forEach(p -> putProperty(p.getKey(), p.getValue()));
 		return this;
@@ -55,7 +55,7 @@ public class FluentCheckMembership extends FluentChangeableInputWidget<FluentChe
 	 * @return the mutable membership metadata being configured
 	 */
 	@Override
-	public CheckMembership get() {
+	public @Nonnull CheckMembership get() {
 		return check;
 	}
 }

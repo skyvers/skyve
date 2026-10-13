@@ -1,5 +1,7 @@
 package org.skyve.impl.metadata.view;
 
+import jakarta.annotation.Nullable;
+
 /**
  * Mixin interface for view widgets that declare a relative (percentage or column)
  * width.
@@ -8,8 +10,8 @@ package org.skyve.impl.metadata.view;
  * width attribute, overriding the absolute pixel width when both are present.
  */
 public interface RelativeWidth extends AbsoluteWidth {
-	public Integer getPercentageWidth();
-	public void setPercentageWidth(Integer percentageWidth);
-	public Integer getResponsiveWidth();
-	public void setResponsiveWidth(Integer responsiveWidth);
+	public @Nullable Integer getPercentageWidth();
+	public void setPercentageWidth(@Nullable Integer percentageWidth);
+	public @Nullable Integer getResponsiveWidth();
+	public void setResponsiveWidth(@Nullable Integer responsiveWidth);
 }

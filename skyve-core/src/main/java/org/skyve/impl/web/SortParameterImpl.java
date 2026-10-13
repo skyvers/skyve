@@ -5,6 +5,9 @@ import java.io.Serializable;
 import org.skyve.metadata.SortDirection;
 import org.skyve.web.SortParameter;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Immutable value type representing a single sort parameter (binding + direction)
  * extracted from a web request or provided programmatically.
@@ -18,26 +21,26 @@ public class SortParameterImpl implements Serializable, SortParameter {
 	private SortDirection direction;
 
 	@Override
-	public String getBy() {
+	public @Nullable String getBy() {
 		return by;
 	}
 
 	@Override
-	public void setBy(String by) {
+	public void setBy(@Nonnull String by) {
 		this.by = by;
 	}
 
 	@Override
-	public SortDirection getDirection() {
+	public @Nullable SortDirection getDirection() {
 		return direction;
 	}
 
 	@Override
-	public void setDirection(SortDirection direction) {
+	public void setDirection(@Nullable SortDirection direction) {
 		this.direction = direction;
 	}
 
-	public void populateFromString(String string) {
+	public void populateFromString(@Nonnull String string) {
 		int spaceIndex = string.indexOf(' ');
 		if (spaceIndex < 0) {
 			throw new IllegalStateException("No space in the string value");
@@ -47,7 +50,7 @@ public class SortParameterImpl implements Serializable, SortParameter {
 	}
 
 	@Override
-	public String toString() {
+	public @Nonnull String toString() {
 		return String.format("%s %s", by, direction.toString());
 	}
 }

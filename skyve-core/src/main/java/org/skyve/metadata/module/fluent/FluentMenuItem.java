@@ -4,6 +4,8 @@ import org.skyve.impl.metadata.repository.module.GrantedTo;
 import org.skyve.impl.metadata.repository.module.ItemMetaData;
 import org.skyve.metadata.module.menu.MenuItem;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * Base fluent builder for role-constrained menu items.
  */
@@ -23,7 +25,7 @@ public abstract class FluentMenuItem<T extends FluentMenuItem<T>> extends Fluent
 	 */
 	@Override
 	@SuppressWarnings("unchecked")
-	protected T from(MenuItem item) {
+	protected @Nonnull T from(@Nonnull MenuItem item) {
 		super.from(item);
 		item.getRoleNames().forEach(this::addRole);
 		return (T) this;
@@ -36,7 +38,7 @@ public abstract class FluentMenuItem<T extends FluentMenuItem<T>> extends Fluent
 	 * @return this fluent instance.
 	 */
 	@SuppressWarnings("unchecked")
-	public T addRole(String roleName) {
+	public @Nonnull T addRole(@Nonnull String roleName) {
 		GrantedTo role = new GrantedTo();
 		role.setRoleName(roleName);
 		get().getRoles().add(role);
@@ -50,7 +52,7 @@ public abstract class FluentMenuItem<T extends FluentMenuItem<T>> extends Fluent
 	 * @return this fluent instance.
 	 */
 	@SuppressWarnings("unchecked")
-	public T removeRole(String name) {
+	public @Nonnull T removeRole(@Nonnull String name) {
 		get().getRoles().removeIf(r -> name.equals(r.getRoleName()));
 		return (T) this;
 	}
@@ -61,7 +63,7 @@ public abstract class FluentMenuItem<T extends FluentMenuItem<T>> extends Fluent
 	 * @return this fluent instance.
 	 */
 	@SuppressWarnings("unchecked")
-	public T clearRoles() {
+	public @Nonnull T clearRoles() {
 		get().getRoles().clear();
 		return (T) this;
 	}
@@ -72,5 +74,5 @@ public abstract class FluentMenuItem<T extends FluentMenuItem<T>> extends Fluent
 	 * @return The item metadata instance.
 	 */
 	@Override
-	public abstract ItemMetaData get();
+	public abstract @Nonnull ItemMetaData get();
 }

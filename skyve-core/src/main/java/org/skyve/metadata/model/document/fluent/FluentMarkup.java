@@ -2,6 +2,8 @@ package org.skyve.metadata.model.document.fluent;
 
 import org.skyve.impl.metadata.model.document.field.Markup;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * Provides a fluent builder for FluentMarkup metadata.
  */
@@ -18,7 +20,7 @@ public class FluentMarkup extends FluentConstrainableField<FluentMarkup> {
 	/**
 	 * Creates a fluent builder instance.
 	 */
-	public FluentMarkup(Markup markup) {
+	public FluentMarkup(@Nonnull Markup markup) {
 		this.markup = markup;
 	}
 
@@ -26,7 +28,7 @@ public class FluentMarkup extends FluentConstrainableField<FluentMarkup> {
 	 * Copies metadata values from an existing definition into this builder.
 	 */
 
-	public FluentMarkup from(@SuppressWarnings("hiding") Markup markup) {
+	public @Nonnull FluentMarkup from(@SuppressWarnings("hiding") @Nonnull Markup markup) {
 		super.from(markup);
 		return this;
 	}
@@ -35,7 +37,7 @@ public class FluentMarkup extends FluentConstrainableField<FluentMarkup> {
 	 * Returns the mutable metadata instance represented by this builder.
 	 */
 	@Override
-	public Markup get() {
+	public @Nonnull Markup get() {
 		return markup;
 	}
 }

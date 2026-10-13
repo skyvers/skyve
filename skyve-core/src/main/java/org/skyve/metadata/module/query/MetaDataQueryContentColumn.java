@@ -2,6 +2,8 @@ package org.skyve.metadata.module.query;
 
 import org.skyve.impl.metadata.repository.module.MetaDataQueryContentColumnMetaData.DisplayType;
 
+import jakarta.annotation.Nullable;
+
 /**
  * A {@link MetaDataQueryColumn} that displays a content attachment as a thumbnail image
  * or as a downloadable link in list views.
@@ -19,7 +21,7 @@ public interface MetaDataQueryContentColumn extends MetaDataQueryColumn {
 	 *
 	 * @return the display type; never {@code null}
 	 */
-	public DisplayType getDisplay();
+	public @Nullable DisplayType getDisplay();
 
 	/**
 	 * Returns the explicit pixel height for thumbnail display, or {@code null} to use
@@ -27,7 +29,7 @@ public interface MetaDataQueryContentColumn extends MetaDataQueryColumn {
 	 *
 	 * @return the thumbnail height in pixels, or {@code null}
 	 */
-	public Integer getPixelHeight();
+	public @Nullable Integer getPixelHeight();
 
 	/**
 	 * Returns the context-relative path to the placeholder thumbnail image shown when
@@ -35,5 +37,5 @@ public interface MetaDataQueryContentColumn extends MetaDataQueryColumn {
 	 *
 	 * @return the relative path to the empty-state thumbnail, or {@code null} if none
 	 */
-	public String getEmptyThumbnailRelativeFile();
+	public @Nullable String getEmptyThumbnailRelativeFile();
 }

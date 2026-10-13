@@ -4,6 +4,9 @@ import org.skyve.impl.metadata.repository.module.MetaDataQueryContentColumnMetaD
 import org.skyve.impl.metadata.repository.module.MetaDataQueryContentColumnMetaData.DisplayType;
 import org.skyve.metadata.module.query.MetaDataQueryContentColumn;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Builds metadata query content column definitions.
  */
@@ -22,7 +25,7 @@ public class FluentMetaDataQueryContentColumn extends FluentMetaDataQueryColumn<
 	 *
 	 * @param column The metadata to mutate.
 	 */
-	public FluentMetaDataQueryContentColumn(MetaDataQueryContentColumnMetaData column) {
+	public FluentMetaDataQueryContentColumn(@Nonnull MetaDataQueryContentColumnMetaData column) {
 		this.column = column;
 	}	
 
@@ -32,7 +35,7 @@ public class FluentMetaDataQueryContentColumn extends FluentMetaDataQueryColumn<
 	 * @param column The source content column definition.
 	 * @return this fluent instance.
 	 */
-	public FluentMetaDataQueryContentColumn from(@SuppressWarnings("hiding") MetaDataQueryContentColumn column) {
+	public @Nonnull FluentMetaDataQueryContentColumn from(@SuppressWarnings("hiding") @Nonnull MetaDataQueryContentColumn column) {
 		super.from(column);
 		display(column.getDisplay());
 		Integer i = column.getPixelHeight();
@@ -49,7 +52,7 @@ public class FluentMetaDataQueryContentColumn extends FluentMetaDataQueryColumn<
 	 * @param display The content display type.
 	 * @return this fluent instance.
 	 */
-	public FluentMetaDataQueryContentColumn display(DisplayType display) {
+	public @Nonnull FluentMetaDataQueryContentColumn display(@Nullable DisplayType display) {
 		column.setDisplay(display);
 		return this;
 	}
@@ -60,7 +63,7 @@ public class FluentMetaDataQueryContentColumn extends FluentMetaDataQueryColumn<
 	 * @param pixelHeight The pixel height.
 	 * @return this fluent instance.
 	 */
-	public FluentMetaDataQueryContentColumn pixelHeight(int pixelHeight) {
+	public @Nonnull FluentMetaDataQueryContentColumn pixelHeight(int pixelHeight) {
 		column.setPixelHeight(Integer.valueOf(pixelHeight));
 		return this;
 	}
@@ -71,7 +74,7 @@ public class FluentMetaDataQueryContentColumn extends FluentMetaDataQueryColumn<
 	 * @param emptyThumbnailRelativeFile The relative thumbnail file path.
 	 * @return this fluent instance.
 	 */
-	public FluentMetaDataQueryContentColumn emptyThumbnailRelativeFile(String emptyThumbnailRelativeFile) {
+	public @Nonnull FluentMetaDataQueryContentColumn emptyThumbnailRelativeFile(@Nullable String emptyThumbnailRelativeFile) {
 		column.setEmptyThumbnailRelativeFile(emptyThumbnailRelativeFile);
 		return this;
 	}
@@ -82,7 +85,7 @@ public class FluentMetaDataQueryContentColumn extends FluentMetaDataQueryColumn<
 	 * @return The content column metadata instance.
 	 */
 	@Override
-	public MetaDataQueryContentColumnMetaData get() {
+	public @Nonnull MetaDataQueryContentColumnMetaData get() {
 		return column;
 	}
 }

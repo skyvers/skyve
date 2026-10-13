@@ -35,6 +35,8 @@ import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.model.document.Relation;
 import org.skyve.metadata.module.Module;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.el.ELContext;
 import jakarta.el.ELResolver;
 import jakarta.el.MethodNotFoundException;
@@ -88,12 +90,12 @@ class ValidationELResolver extends ELResolver {
 		TERMINATING_MOCKS.put(String.class, "");
 	}
 	
-	ValidationELResolver(Customer customer) {
+	ValidationELResolver(@Nullable Customer customer) {
 		this.customer = customer;
 	}
 	
 	@Override
-	public Class<?> getType(ELContext context, Object base, Object property) {
+	public @Nullable Class<?> getType(@Nonnull ELContext context, @Nullable Object base, @Nonnull Object property) {
 		Class<?> type = getType(base, property);
 		if (type != null) {
 			context.setPropertyResolved(true);
@@ -102,7 +104,7 @@ class ValidationELResolver extends ELResolver {
 	}
 
 	@Override
-	public Object getValue(ELContext context, Object base, Object property) {
+	public @Nullable Object getValue(@Nonnull ELContext context, @Nullable Object base, @Nonnull Object property) {
 		Object value = getClassOrDocument(base, property);
 		if (value != null) {
 			context.setPropertyResolved(base, property);
@@ -111,7 +113,7 @@ class ValidationELResolver extends ELResolver {
 	}
 	
 	@Override
-	public void setValue(ELContext context, Object base, Object property, Object val) {
+	public void setValue(@Nonnull ELContext context, @Nullable Object base, @Nonnull Object property, @Nullable Object val) {
 		Class<?> type = getType(base, property);
 		if (type != null) {
 			if (val == null) {
@@ -151,7 +153,7 @@ class ValidationELResolver extends ELResolver {
 	 * @return an enum code, document, list, or class
 	 */
 	@SuppressWarnings({"java:S6541", "java:S3776"}) // Not a brain method
-	private Object getClassOrDocument(Object base, Object property) {
+	private @Nullable Object getClassOrDocument(@Nullable Object base, @Nonnull Object property) {
 		Object object = base;
 		final String propertyName = property.toString();
 		if (object instanceof Enumeration enumeration) {
@@ -259,7 +261,7 @@ class ValidationELResolver extends ELResolver {
 		return null; // we don't handle it
 	}
 
-	private Class<?> getType(Object base, Object property) {
+	private @Nullable Class<?> getType(@Nullable Object base, @Nonnull Object property) {
 		Class<?> result = null;
 		
 		Object value = getClassOrDocument(base, property);
@@ -286,7 +288,7 @@ class ValidationELResolver extends ELResolver {
 	
 	@Override
 	@SuppressWarnings("java:S3776") // Cognitive Complexity not too high
-	public Object invoke(ELContext context, Object base, Object method, Class<?>[] paramTypes, Object[] params) {
+	public @Nullable Object invoke(@Nonnull ELContext context, @Nullable Object base, @Nonnull Object method, @Nullable Class<?>[] paramTypes, @Nullable Object[] params) {
 		Class<?> type = null;
 		if (Object.class.equals(base)) { // we are not in type-safe mode
 			context.setPropertyResolved(base, method);
@@ -337,7 +339,7 @@ class ValidationELResolver extends ELResolver {
 
 	@Override
 	@SuppressWarnings("java:S3776") // Complexity OK
-	public boolean isReadOnly(ELContext context, Object base, Object property) {
+	public boolean isReadOnly(@Nonnull ELContext context, @Nullable Object base, @Nonnull Object property) {
 		if (Object.class.equals(base)) { // we are not in type-safe mode
 			context.setPropertyResolved(true);
 			return false;
@@ -414,7 +416,7 @@ class ValidationELResolver extends ELResolver {
 	}
 
 	@Override
-	public Class<?> getCommonPropertyType(ELContext context, Object base) {
+	public @Nullable Class<?> getCommonPropertyType(@Nonnull ELContext context, @Nullable Object base) {
 		if (base instanceof DocumentImpl) {
 			return Object.class;
 		}
@@ -434,7 +436,7 @@ class ValidationELResolver extends ELResolver {
 		return null;
 	}
 	
-	private static Object mock(Class<?> type) {
+	private static @Nonnull Object mock(@Nonnull Class<?> type) {
 		// Validation expressions can invoke methods on these values, so never share mutable mocks.
 		if (Date.class.equals(type)) {
 			return new Date();
@@ -464,7 +466,7 @@ class ValidationELResolver extends ELResolver {
 	}
 
 	@SuppressWarnings("java:S2201") // we are using this to validate input
-	private static void checkInteger(Object p) {
+	private static void checkInteger(@Nonnull Object p) {
 		if (! (p instanceof Number)) {
 			if (p instanceof String string) {
 				Integer.parseInt(string); // throws NumberFormatException

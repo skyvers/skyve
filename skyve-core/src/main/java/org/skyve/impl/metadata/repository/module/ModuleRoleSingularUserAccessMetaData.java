@@ -3,6 +3,7 @@ package org.skyve.impl.metadata.repository.module;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.user.UserAccess;
 
+import jakarta.annotation.Nonnull;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
 
@@ -29,7 +30,7 @@ public class ModuleRoleSingularUserAccessMetaData extends ModuleRoleDocumentAggr
 	 * @return the runtime singular user access
 	 */
 	@Override
-	public UserAccess toUserAccess(String moduleName) {
+	public @Nonnull UserAccess toUserAccess(@Nonnull String moduleName) {
 		return UserAccess.singular(moduleName, getDocumentName());
 	}
 }

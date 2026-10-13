@@ -26,7 +26,7 @@ abstract class MetaDataExpressionEvaluator extends ExpressionEvaluator {
 	private static final String BINDING_DESCRIPTION = "Binding ";
 
 	@SuppressWarnings("static-method")
-	protected @Nullable Attribute obtainAttribute(String expression, Bean bean) {
+	protected @Nullable Attribute obtainAttribute(@Nonnull String expression, @Nonnull Bean bean) {
 		Customer c = CORE.getCustomer();
 		Module m = c.getModule(bean.getBizModule());
 		Document d = m.getDocument(c, bean.getBizDocument());
@@ -35,11 +35,11 @@ abstract class MetaDataExpressionEvaluator extends ExpressionEvaluator {
 	}
 
 	@Override
-	public String validateWithoutPrefixOrSuffix(String expression,
-													Class<?> returnType,
-													Customer customer,
-													Module module,
-													Document document) {
+	public @Nullable String validateWithoutPrefixOrSuffix(@Nonnull String expression,
+													@Nullable Class<?> returnType,
+													@Nullable Customer customer,
+													@Nullable Module module,
+													@Nullable Document document) {
 		if (customer == null) {
 			throw new IllegalArgumentException("customer can't be null for a binding expression");
 		}
@@ -75,10 +75,10 @@ abstract class MetaDataExpressionEvaluator extends ExpressionEvaluator {
 
 	@Override
 	@SuppressWarnings("java:S3776") // Complexity OK
-	public List<String> completeWithoutPrefixOrSuffix(String fragment,
-														Customer customer,
-														Module module,
-														Document document) {
+	public @Nonnull List<String> completeWithoutPrefixOrSuffix(@Nullable String fragment,
+														@Nonnull Customer customer,
+														@Nonnull Module module,
+														@Nonnull Document document) {
 		List<String> result = new ArrayList<>();
 
 		Document targetDocument = null;

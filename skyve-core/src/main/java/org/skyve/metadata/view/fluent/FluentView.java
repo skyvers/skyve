@@ -38,7 +38,7 @@ public class FluentView extends FluentContainer<FluentView> {
 	 * @param view
 	 *            the view metadata to mutate
 	 */
-	public FluentView(ViewMetaData view) {
+	public FluentView(@Nonnull ViewMetaData view) {
 		this.view = view;
 	}
 
@@ -52,7 +52,7 @@ public class FluentView extends FluentContainer<FluentView> {
 	 *            the source view metadata
 	 * @return this builder
 	 */
-	public FluentView from(@SuppressWarnings("hiding") View view) {
+	public @Nonnull FluentView from(@SuppressWarnings("hiding") @Nonnull View view) {
 		name(view.getName());
 		title(view.getTitle());
 		escapeTitle(((ViewImpl) view).getEscapeTitle());
@@ -93,7 +93,7 @@ public class FluentView extends FluentContainer<FluentView> {
 	 *            the view identifier
 	 * @return this builder
 	 */
-	public FluentView name(String name) {
+	public @Nonnull FluentView name(@Nullable String name) {
 		view.setName(name);
 		return this;
 	}
@@ -105,7 +105,7 @@ public class FluentView extends FluentContainer<FluentView> {
 	 *            the display title
 	 * @return this builder
 	 */
-	public FluentView title(String title) {
+	public @Nonnull FluentView title(@Nullable String title) {
 		view.setTitle(title);
 		return this;
 	}
@@ -116,7 +116,7 @@ public class FluentView extends FluentContainer<FluentView> {
 	 * @param escapeTitle {@code false} to allow trusted markup; {@code true} to escape at the renderer boundary
 	 * @return this builder
 	 */
-	public FluentView escapeTitle(boolean escapeTitle) {
+	public @Nonnull FluentView escapeTitle(boolean escapeTitle) {
 		return escapeTitle(escapeTitle ? Boolean.TRUE : Boolean.FALSE);
 	}
 
@@ -126,7 +126,7 @@ public class FluentView extends FluentContainer<FluentView> {
 	 * @param escapeTitle {@code Boolean.FALSE} to allow trusted markup; {@code null} or {@code Boolean.TRUE} to escape at the renderer boundary
 	 * @return this builder
 	 */
-	public FluentView escapeTitle(Boolean escapeTitle) {
+	public @Nonnull FluentView escapeTitle(@Nullable Boolean escapeTitle) {
 		view.setEscapeTitle(escapeTitle);
 		return this;
 	}
@@ -138,7 +138,7 @@ public class FluentView extends FluentContainer<FluentView> {
 	 *            icon style class
 	 * @return this builder
 	 */
-	public FluentView iconStyleClass(String iconStyleClass) {
+	public @Nonnull FluentView iconStyleClass(@Nullable String iconStyleClass) {
 		view.setIconStyleClass(iconStyleClass);
 		return this;
 	}
@@ -150,7 +150,7 @@ public class FluentView extends FluentContainer<FluentView> {
 	 *            relative icon file path
 	 * @return this builder
 	 */
-	public FluentView icon32x32RelativeFileName(String icon32x32RelativeFileName) {
+	public @Nonnull FluentView icon32x32RelativeFileName(@Nullable String icon32x32RelativeFileName) {
 		view.setIcon32x32RelativeFileName(icon32x32RelativeFileName);
 		return this;
 	}
@@ -162,7 +162,7 @@ public class FluentView extends FluentContainer<FluentView> {
 	 *            documentation content
 	 * @return this builder
 	 */
-	public FluentView documentation(String documentation) {
+	public @Nonnull FluentView documentation(@Nullable String documentation) {
 		view.setDocumentation(documentation);
 		return this;
 	}
@@ -170,14 +170,14 @@ public class FluentView extends FluentContainer<FluentView> {
 	/**
 	 * Adds a new {@link FluentViewDocumentAggregateAccess} to this view.
 	 */
-	public FluentView addDocumentAggregateAccess(FluentViewDocumentAggregateAccess access) {
+	public @Nonnull FluentView addDocumentAggregateAccess(@Nonnull FluentViewDocumentAggregateAccess access) {
 		return addAccess(access);
 	}
 
 	/**
 	 * Finds the view document aggregate access in this view's list of accesses.
 	 */
-	public FluentViewDocumentAggregateAccess findDocumentAggregateAccess(final String documentName) {
+	public @Nullable FluentViewDocumentAggregateAccess findDocumentAggregateAccess(final @Nonnull String documentName) {
 		ViewUserAccessesMetaData accesses = view.getAccesses();
 		if (accesses == null) {
 			return null;
@@ -194,7 +194,7 @@ public class FluentView extends FluentContainer<FluentView> {
 	 * Removes the {@link ViewDocumentAggregateUserAccessMetaData} with the specified
 	 * document name if one is defined for this view.
 	 */
-	public FluentView removeDocumentAggregateAccess(final String documentName) {
+	public @Nonnull FluentView removeDocumentAggregateAccess(final @Nonnull String documentName) {
 		ViewUserAccessesMetaData accesses = view.getAccesses();
 		if (accesses != null) {
 			accesses.getAccesses().removeIf(a -> ((a instanceof ViewDocumentAggregateUserAccessMetaData vda) &&
@@ -206,14 +206,14 @@ public class FluentView extends FluentContainer<FluentView> {
 	/**
 	 * Adds a new {@link FluentViewModelAggregateAccess} to this view.
 	 */
-	public FluentView addModelAggregateAccess(FluentViewModelAggregateAccess access) {
+	public @Nonnull FluentView addModelAggregateAccess(@Nonnull FluentViewModelAggregateAccess access) {
 		return addAccess(access);
 	}
 
 	/**
 	 * Finds the view model aggregate access in this view's list of accesses.
 	 */
-	public FluentViewModelAggregateAccess findModelAggregateAccess(final String modelName) {
+	public @Nullable FluentViewModelAggregateAccess findModelAggregateAccess(final @Nonnull String modelName) {
 		ViewUserAccessesMetaData accesses = view.getAccesses();
 		if (accesses == null) {
 			return null;
@@ -230,7 +230,7 @@ public class FluentView extends FluentContainer<FluentView> {
 	 * Removes the {@link ViewModelAggregateUserAccessMetaData} with the specified
 	 * document name if one is defined for this view.
 	 */
-	public FluentView removeModelAggregateAccess(final String modelName) {
+	public @Nonnull FluentView removeModelAggregateAccess(final @Nonnull String modelName) {
 		ViewUserAccessesMetaData accesses = view.getAccesses();
 		if (accesses != null) {
 			accesses.getAccesses().removeIf(a -> ((a instanceof ViewModelAggregateUserAccessMetaData vma) &&
@@ -242,14 +242,14 @@ public class FluentView extends FluentContainer<FluentView> {
 	/**
 	 * Adds a new {@link FluentViewPreviousCompleteAccess} to this view.
 	 */
-	public FluentView addPreviousCompleteAccess(FluentViewPreviousCompleteAccess access) {
+	public @Nonnull FluentView addPreviousCompleteAccess(@Nonnull FluentViewPreviousCompleteAccess access) {
 		return addAccess(access);
 	}
 
 	/**
 	 * Finds the view previous complete access in this view's list of accesses.
 	 */
-	public FluentViewPreviousCompleteAccess findPreviousCompleteAccess(final String binding) {
+	public @Nullable FluentViewPreviousCompleteAccess findPreviousCompleteAccess(final @Nonnull String binding) {
 		ViewUserAccessesMetaData accesses = view.getAccesses();
 		if (accesses == null) {
 			return null;
@@ -266,7 +266,7 @@ public class FluentView extends FluentContainer<FluentView> {
 	 * Removes the {@link ViewPreviousCompleteUserAccessMetaData} with the specified
 	 * document name if one is defined for this view.
 	 */
-	public FluentView removePreviousCompleteAccess(final String binding) {
+	public @Nonnull FluentView removePreviousCompleteAccess(final @Nonnull String binding) {
 		ViewUserAccessesMetaData accesses = view.getAccesses();
 		if (accesses != null) {
 			accesses.getAccesses().removeIf(a -> ((a instanceof ViewPreviousCompleteUserAccessMetaData vpc) &&
@@ -278,14 +278,14 @@ public class FluentView extends FluentContainer<FluentView> {
 	/**
 	 * Adds a new {@link FluentViewQueryAggregateAccess} to this view.
 	 */
-	public FluentView addQueryAggregateAccess(FluentViewQueryAggregateAccess access) {
+	public @Nonnull FluentView addQueryAggregateAccess(@Nonnull FluentViewQueryAggregateAccess access) {
 		return addAccess(access);
 	}
 
 	/**
 	 * Finds the view query access in this view's list of accesses.
 	 */
-	public FluentViewQueryAggregateAccess findQueryAggregateAccess(final String queryName) {
+	public @Nullable FluentViewQueryAggregateAccess findQueryAggregateAccess(final @Nonnull String queryName) {
 		ViewUserAccessesMetaData accesses = view.getAccesses();
 		if (accesses == null) {
 			return null;
@@ -302,7 +302,7 @@ public class FluentView extends FluentContainer<FluentView> {
 	 * Removes the {@link ViewQueryAggregateUserAccessMetaData} with the specified
 	 * document name if one is defined for this view.
 	 */
-	public FluentView removeQueryAggregateAccess(final String queryName) {
+	public @Nonnull FluentView removeQueryAggregateAccess(final @Nonnull String queryName) {
 		ViewUserAccessesMetaData accesses = view.getAccesses();
 		if (accesses != null) {
 			accesses.getAccesses().removeIf(a -> ((a instanceof ViewQueryAggregateUserAccessMetaData vqa) &&
@@ -314,14 +314,14 @@ public class FluentView extends FluentContainer<FluentView> {
 	/**
 	 * Adds a new {@link FluentViewSingularAccess} to this view.
 	 */
-	public FluentView addSingularAccess(FluentViewSingularAccess access) {
+	public @Nonnull FluentView addSingularAccess(@Nonnull FluentViewSingularAccess access) {
 		return addAccess(access);
 	}
 
 	/**
 	 * Finds the view singular access in this view's list of accesses.
 	 */
-	public FluentViewSingularAccess findSingularAccess(final String documentName) {
+	public @Nullable FluentViewSingularAccess findSingularAccess(final @Nonnull String documentName) {
 		ViewUserAccessesMetaData accesses = view.getAccesses();
 		if (accesses == null) {
 			return null;
@@ -338,7 +338,7 @@ public class FluentView extends FluentContainer<FluentView> {
 	 * Removes the {@link ViewSingularUserAccessMetaData} with the specified
 	 * document name if one is defined for this view.
 	 */
-	public FluentView removeSingularAccess(final String documentName) {
+	public @Nonnull FluentView removeSingularAccess(final @Nonnull String documentName) {
 		ViewUserAccessesMetaData accesses = view.getAccesses();
 		if (accesses != null) {
 			accesses.getAccesses().removeIf(a -> ((a instanceof ViewSingularUserAccessMetaData vs) &&
@@ -350,14 +350,14 @@ public class FluentView extends FluentContainer<FluentView> {
 	/**
 	 * Adds a new {@link FluentViewReportAccess} to this view.
 	 */
-	public FluentView addReportAccess(FluentViewReportAccess access) {
+	public @Nonnull FluentView addReportAccess(@Nonnull FluentViewReportAccess access) {
 		return addAccess(access);
 	}
 
 	/**
 	 * Finds the view report access in this view's list of accesses.
 	 */
-	public FluentViewReportAccess findReportAccess(final String moduleName, final String documentName, final String reportName) {
+	public @Nullable FluentViewReportAccess findReportAccess(final @Nonnull String moduleName, final @Nonnull String documentName, final @Nonnull String reportName) {
 		ViewUserAccessesMetaData accesses = view.getAccesses();
 		if (accesses == null) {
 			return null;
@@ -376,7 +376,7 @@ public class FluentView extends FluentContainer<FluentView> {
 	 * Removes the {@link ViewReportUserAccessMetaData} with the specified
 	 * module name, document name and report name if one is defined for this view.
 	 */
-	public FluentView removeReportAccess(final String moduleName, final String documentName, final String reportName) {
+	public @Nonnull FluentView removeReportAccess(final @Nonnull String moduleName, final @Nonnull String documentName, final @Nonnull String reportName) {
 		ViewUserAccessesMetaData accesses = view.getAccesses();
 		if (accesses != null) {
 			accesses.getAccesses().removeIf(a -> ((a instanceof ViewReportUserAccessMetaData vr) &&
@@ -390,14 +390,14 @@ public class FluentView extends FluentContainer<FluentView> {
 	/**
 	 * Adds a new {@link FluentViewDynamicImageAccess} to this view.
 	 */
-	public FluentView addDynamicImageAccess(FluentViewDynamicImageAccess access) {
+	public @Nonnull FluentView addDynamicImageAccess(@Nonnull FluentViewDynamicImageAccess access) {
 		return addAccess(access);
 	}
 
 	/**
 	 * Finds the view dynamic image access in this view's list of accesses.
 	 */
-	public FluentViewDynamicImageAccess findDynamicImageAccess(final String imageName) {
+	public @Nullable FluentViewDynamicImageAccess findDynamicImageAccess(final @Nonnull String imageName) {
 		ViewUserAccessesMetaData accesses = view.getAccesses();
 		if (accesses == null) {
 			return null;
@@ -414,7 +414,7 @@ public class FluentView extends FluentContainer<FluentView> {
 	 * Removes the {@link ViewDynamicImageUserAccessMetaData} with the specified
 	 * image name if one is defined for this view.
 	 */
-	public FluentView removeDynamicImageAccess(final String imageName) {
+	public @Nonnull FluentView removeDynamicImageAccess(final @Nonnull String imageName) {
 		ViewUserAccessesMetaData accesses = view.getAccesses();
 		if (accesses != null) {
 			accesses.getAccesses().removeIf(a -> ((a instanceof ViewDynamicImageUserAccessMetaData vdi) &&
@@ -426,14 +426,14 @@ public class FluentView extends FluentContainer<FluentView> {
 	/**
 	 * Adds a new {@link FluentViewContentAccess} to this view.
 	 */
-	public FluentView addContentAccess(FluentViewContentAccess access) {
+	public @Nonnull FluentView addContentAccess(@Nonnull FluentViewContentAccess access) {
 		return addAccess(access);
 	}
 
 	/**
 	 * Finds the view content access in this view's list of accesses.
 	 */
-	public FluentViewContentAccess findContentAccess(final String binding) {
+	public @Nullable FluentViewContentAccess findContentAccess(final @Nonnull String binding) {
 		ViewUserAccessesMetaData accesses = view.getAccesses();
 		if (accesses == null) {
 			return null;
@@ -450,7 +450,7 @@ public class FluentView extends FluentContainer<FluentView> {
 	 * Removes the {@link ViewContentUserAccessMetaData} with the specified
 	 * binding if one is defined for this view.
 	 */
-	public FluentView removeContentAccess(final String binding) {
+	public @Nonnull FluentView removeContentAccess(final @Nonnull String binding) {
 		ViewUserAccessesMetaData accesses = view.getAccesses();
 		if (accesses != null) {
 			accesses.getAccesses().removeIf(a -> ((a instanceof ViewContentUserAccessMetaData vc) &&
@@ -462,7 +462,7 @@ public class FluentView extends FluentContainer<FluentView> {
 	/**
 	 * Clears all the accesses for this module role.
 	 */
-	public FluentView clearAccesses() {
+	public @Nonnull FluentView clearAccesses() {
 		ViewUserAccessesMetaData accesses = view.getAccesses();
 		if (accesses != null) {
 			accesses.getAccesses().clear();
@@ -478,7 +478,7 @@ public class FluentView extends FluentContainer<FluentView> {
 	 *
 	 * @return this builder
 	 */
-	public FluentView removeAccesses() {
+	public @Nonnull FluentView removeAccesses() {
 		view.setAccesses(null);
 		return this;
 	}
@@ -492,7 +492,7 @@ public class FluentView extends FluentContainer<FluentView> {
 	 *            {@code true} to enable generated access metadata
 	 * @return this builder
 	 */
-	public FluentView generateAccesses(boolean generate) {
+	public @Nonnull FluentView generateAccesses(boolean generate) {
 		ViewUserAccessesMetaData accesses = establishViewAccesses();
 		accesses.setGenerate(generate);
 		return this;
@@ -505,7 +505,7 @@ public class FluentView extends FluentContainer<FluentView> {
 	 *            relative help file path
 	 * @return this builder
 	 */
-	public FluentView helpRelativeFileName(String helpRelativeFileName) {
+	public @Nonnull FluentView helpRelativeFileName(@Nullable String helpRelativeFileName) {
 		view.setHelpRelativeFileName(helpRelativeFileName);
 		return this;
 	}
@@ -517,7 +517,7 @@ public class FluentView extends FluentContainer<FluentView> {
 	 *            help URL
 	 * @return this builder
 	 */
-	public FluentView helpURL(String helpURL) {
+	public @Nonnull FluentView helpURL(@Nullable String helpURL) {
 		view.setHelpURL(helpURL);
 		return this;
 	}
@@ -529,7 +529,7 @@ public class FluentView extends FluentContainer<FluentView> {
 	 *            refresh interval in seconds
 	 * @return this builder
 	 */
-	public FluentView refreshTimeInSeconds(int refreshTimeInSeconds) {
+	public @Nonnull FluentView refreshTimeInSeconds(int refreshTimeInSeconds) {
 		view.setRefreshTimeInSeconds(Integer.valueOf(refreshTimeInSeconds));
 		return this;
 	}
@@ -553,7 +553,7 @@ public class FluentView extends FluentContainer<FluentView> {
 	 *            refresh action identifier
 	 * @return this builder
 	 */
-	public FluentView refreshActionName(String refreshActionName) {
+	public @Nonnull FluentView refreshActionName(@Nullable String refreshActionName) {
 		view.setRefreshActionName(refreshActionName);
 		return this;
 	}
@@ -565,7 +565,7 @@ public class FluentView extends FluentContainer<FluentView> {
 	 *            sidebar builder
 	 * @return this builder
 	 */
-	public FluentView sidebar(FluentSidebar sidebar) {
+	public @Nonnull FluentView sidebar(@Nonnull FluentSidebar sidebar) {
 		view.setSidebar(sidebar.get());
 		return this;
 	}
@@ -577,7 +577,7 @@ public class FluentView extends FluentContainer<FluentView> {
 	 *            actions builder
 	 * @return this builder
 	 */
-	public FluentView actions(FluentActions actions) {
+	public @Nonnull FluentView actions(@Nonnull FluentActions actions) {
 		view.setActions(actions.get());
 		return this;
 	}
@@ -589,7 +589,7 @@ public class FluentView extends FluentContainer<FluentView> {
 	 *            parameter builder to append
 	 * @return this builder
 	 */
-	public FluentView addParameter(FluentViewParameter parameter) {
+	public @Nonnull FluentView addParameter(@Nonnull FluentViewParameter parameter) {
 		view.getParameters().add(parameter.get());
 		return this;
 	}
@@ -604,7 +604,7 @@ public class FluentView extends FluentContainer<FluentView> {
 	 *            binding to remove
 	 * @return this builder
 	 */
-	public FluentView removeParameter(String binding) {
+	public @Nonnull FluentView removeParameter(@Nonnull String binding) {
 		view.getParameters().removeIf(p -> (binding.equals(p.getBoundTo()) || binding.equals(p.getFromBinding())));
 		return this;
 	}
@@ -614,7 +614,7 @@ public class FluentView extends FluentContainer<FluentView> {
 	 *
 	 * @return this builder
 	 */
-	public FluentView clearParameters() {
+	public @Nonnull FluentView clearParameters() {
 		view.getParameters().clear();
 		return this;
 	}
@@ -626,7 +626,7 @@ public class FluentView extends FluentContainer<FluentView> {
 	 *            the binding to match against {@code boundTo} and {@code fromBinding}
 	 * @return the matching parameter wrapper, or {@code null} when no parameter matches
 	 */
-	public FluentViewParameter findParameter(String binding) {
+	public @Nullable FluentViewParameter findParameter(@Nonnull String binding) {
 		ViewParameter result = view.getParameters().stream()
 				.filter(p -> (binding.equals(p.getBoundTo()) || binding.equals(p.getFromBinding()))).findAny().orElse(null);
 		if (result != null) {
@@ -654,7 +654,7 @@ public class FluentView extends FluentContainer<FluentView> {
 	 * @return the mutable view metadata
 	 */
 	@Override
-	public ViewMetaData get() {
+	public @Nonnull ViewMetaData get() {
 		return view;
 	}
 
@@ -672,7 +672,7 @@ public class FluentView extends FluentContainer<FluentView> {
 	/**
 	 * Adds a new {@link FluentViewUserAccess} to this module role.
 	 */
-	private <T extends FluentViewUserAccess<?, ?>> FluentView addAccess(T access) {
+	private @Nonnull <T extends FluentViewUserAccess<?, ?>> FluentView addAccess(@Nonnull T access) {
 		ViewUserAccessesMetaData accesses = establishViewAccesses();
 		accesses.getAccesses().add(access.get());
 		return this;

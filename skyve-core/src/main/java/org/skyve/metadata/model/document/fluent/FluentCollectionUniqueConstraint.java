@@ -5,6 +5,7 @@ import org.skyve.metadata.model.document.UniqueConstraint;
 import org.skyve.metadata.model.document.UniqueConstraint.DocumentScope;
 
 import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 
 /**
  * Provides a fluent builder for FluentCollectionUniqueConstraint metadata.
@@ -22,7 +23,7 @@ public class FluentCollectionUniqueConstraint {
 	/**
 	 * Creates a fluent builder instance.
 	 */
-	public FluentCollectionUniqueConstraint(UniqueConstraintImpl constraint) {
+	public FluentCollectionUniqueConstraint(@Nonnull UniqueConstraintImpl constraint) {
 		this.constraint = constraint;
 	}
 
@@ -30,7 +31,7 @@ public class FluentCollectionUniqueConstraint {
 	 * Copies metadata values from an existing definition into this builder.
 	 */
 
-	public FluentCollectionUniqueConstraint from(@SuppressWarnings("hiding") UniqueConstraint constraint) {
+	public @Nonnull FluentCollectionUniqueConstraint from(@SuppressWarnings("hiding") @Nonnull UniqueConstraint constraint) {
 		name(constraint.getName());
 		description(constraint.getDescription());
 		scope(constraint.getScope());
@@ -44,7 +45,7 @@ public class FluentCollectionUniqueConstraint {
 	/**
 	 * Updates metadata on this fluent builder.
 	 */
-	public FluentCollectionUniqueConstraint name(String name) {
+	public @Nonnull FluentCollectionUniqueConstraint name(@Nullable String name) {
 		constraint.setName(name);
 		return this;
 	}
@@ -52,7 +53,7 @@ public class FluentCollectionUniqueConstraint {
 	/**
 	 * Updates metadata on this fluent builder.
 	 */
-	public FluentCollectionUniqueConstraint description(String description) {
+	public @Nonnull FluentCollectionUniqueConstraint description(@Nullable String description) {
 		constraint.setDescription(description);
 		return this;
 	}
@@ -60,7 +61,7 @@ public class FluentCollectionUniqueConstraint {
 	/**
 	 * Updates metadata on this fluent builder.
 	 */
-	public FluentCollectionUniqueConstraint scope(DocumentScope scope) {
+	public @Nonnull FluentCollectionUniqueConstraint scope(@Nullable DocumentScope scope) {
 		constraint.setScope(scope);
 		return this;
 	}
@@ -68,7 +69,7 @@ public class FluentCollectionUniqueConstraint {
 	/**
 	 * Updates metadata on this fluent builder.
 	 */
-	public FluentCollectionUniqueConstraint message(String message) {
+	public @Nonnull FluentCollectionUniqueConstraint message(@Nullable String message) {
 		constraint.setMessage(message);
 		return this;
 	}
@@ -76,7 +77,7 @@ public class FluentCollectionUniqueConstraint {
 	/**
 	 * Appends a constrained field name.
 	 */
-	public FluentCollectionUniqueConstraint addFieldName(String fieldName) {
+	public @Nonnull FluentCollectionUniqueConstraint addFieldName(@Nonnull String fieldName) {
 		constraint.getFieldNames().add(fieldName);
 		return this;
 	}
@@ -84,7 +85,7 @@ public class FluentCollectionUniqueConstraint {
 	/**
 	 * Removes constrained field names matching {@code fieldName}.
 	 */
-	public FluentCollectionUniqueConstraint removeFieldName(String fieldName) {
+	public @Nonnull FluentCollectionUniqueConstraint removeFieldName(@Nonnull String fieldName) {
 		constraint.getFieldNames().remove(fieldName);
 		return this;
 	}
@@ -92,7 +93,7 @@ public class FluentCollectionUniqueConstraint {
 	/**
 	 * Clears all constrained field names.
 	 */
-	public FluentCollectionUniqueConstraint clearFieldNames() {
+	public @Nonnull FluentCollectionUniqueConstraint clearFieldNames() {
 		constraint.getFieldNames().clear();
 		return this;
 	}
@@ -113,7 +114,7 @@ public class FluentCollectionUniqueConstraint {
 	/**
 	 * Returns the mutable collection unique-constraint metadata being built.
 	 */
-	public UniqueConstraintImpl get() {
+	public @Nonnull UniqueConstraintImpl get() {
 		return constraint;
 	}
 }

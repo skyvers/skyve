@@ -46,6 +46,7 @@ import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateTree
 import org.skyve.metadata.sail.language.step.interaction.session.Login;
 import org.skyve.metadata.sail.language.step.interaction.session.Logout;
 
+import jakarta.annotation.Nonnull;
 import jakarta.xml.bind.annotation.XmlElementRef;
 import jakarta.xml.bind.annotation.XmlElementRefs;
 import jakarta.xml.bind.annotation.XmlRootElement;
@@ -117,7 +118,7 @@ public class Procedure {
 						@XmlElementRef(type = PushEditContext.class),
 						@XmlElementRef(type = PopContext.class),
 						@XmlElementRef(type = ClearContext.class)})
-	public List<Step> getSteps() {
+	public @Nonnull List<Step> getSteps() {
 		return steps;
 	}
 }

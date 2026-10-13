@@ -101,7 +101,7 @@ public class MapServlet extends HttpServlet {
 	 */
 	@Override
 	@SuppressWarnings("java:S1989") // there exists JavaEE error pages
-	protected void doGet(HttpServletRequest request, HttpServletResponse response)
+	protected void doGet(@Nonnull HttpServletRequest request, @Nonnull HttpServletResponse response)
 	throws ServletException, IOException {
 		response.setContentType(MimeType.json.toString());
 		response.setCharacterEncoding(StandardCharsets.UTF_8.name());
@@ -157,7 +157,7 @@ public class MapServlet extends HttpServlet {
 		}
 	}
 	
-	private static String processQuery(HttpServletRequest request)
+	private static @Nonnull String processQuery(@Nonnull HttpServletRequest request)
 	throws Exception {
 		String moduleName = request.getParameter(AbstractWebContext.MODULE_NAME);
 		String documentOrQueryName = request.getParameter(AbstractWebContext.QUERY_NAME);
@@ -194,7 +194,7 @@ public class MapServlet extends HttpServlet {
 		return result;
 	}
 	
-	private static String processCollection(HttpServletRequest request)
+	private static @Nullable String processCollection(@Nonnull HttpServletRequest request)
 	throws Exception {
 		// Get the bean from the conversation
 		Customer customer = CORE.getCustomer();
@@ -252,7 +252,7 @@ public class MapServlet extends HttpServlet {
 		return json;
 	}
 	
-	private static Geometry mapBounds(HttpServletRequest request) throws ParseException {
+	private static @Nonnull Geometry mapBounds(@Nonnull HttpServletRequest request) throws ParseException {
 		Geometry result = null;
 
 		WKTReader wkt = new WKTReader();
@@ -293,7 +293,7 @@ public class MapServlet extends HttpServlet {
 		return result;
 	}
 	
-	private static String emptyResponse() {
+	private static @Nonnull String emptyResponse() {
 		return JSON.marshall(CORE.getCustomer(), new MapResult());
 	}
 }

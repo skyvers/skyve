@@ -2,6 +2,8 @@ package org.skyve.metadata.view.fluent;
 
 import org.skyve.impl.metadata.repository.view.actions.DownloadAction;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * Builds {@link DownloadAction} metadata using a fluent API.
  */
@@ -21,7 +23,7 @@ public class FluentDownloadAction extends FluentClassAction<FluentDownloadAction
 	 * @param action
 	 *            the action instance to wrap
 	 */
-	public FluentDownloadAction(DownloadAction action) {
+	public FluentDownloadAction(@Nonnull DownloadAction action) {
 		this.action = action;
 	}
 	
@@ -32,7 +34,7 @@ public class FluentDownloadAction extends FluentClassAction<FluentDownloadAction
 	 *            the source action metadata
 	 * @return this builder
 	 */
-	public FluentDownloadAction from(@SuppressWarnings("hiding") DownloadAction action) {
+	public @Nonnull FluentDownloadAction from(@SuppressWarnings("hiding") @Nonnull DownloadAction action) {
 		super.fromBase(action);
 		return this;
 	}
@@ -41,7 +43,7 @@ public class FluentDownloadAction extends FluentClassAction<FluentDownloadAction
 	 * Returns the wrapped repository action instance.
 	 */
 	@Override
-	public DownloadAction get() {
+	public @Nonnull DownloadAction get() {
 		return action;
 	}
 }

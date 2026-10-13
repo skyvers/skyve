@@ -6,6 +6,9 @@ import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.persistence.hibernate.AbstractHibernatePersistence;
 import org.skyve.metadata.user.User;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Generates document sequence numbers in an autonomous (inner) database
  * transaction, so that sequence allocation is committed immediately and
@@ -13,7 +16,7 @@ import org.skyve.metadata.user.User;
  */
 public class DocumentNumberAutonomousTransactionGenerator extends AbstractDocumentNumberGenerator {
 	@Override
-	public String next(String prefix, String moduleName, String documentName, String fieldName, int minimumLength) {
+	public @Nonnull String next(@Nullable String prefix, @Nonnull String moduleName, @Nonnull String documentName, @Nonnull String fieldName, int minimumLength) {
 		AbstractHibernatePersistence pers = (AbstractHibernatePersistence) CORE.getPersistence();
 		User user = pers.getUser();
 		try {

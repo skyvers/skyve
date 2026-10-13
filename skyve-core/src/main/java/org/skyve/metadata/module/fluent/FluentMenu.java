@@ -19,6 +19,7 @@ import org.skyve.metadata.module.menu.MenuGroup;
 import org.skyve.metadata.module.menu.MenuItem;
 
 import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 
 /**
  * Builds module menu metadata, including nested groups and concrete item types.
@@ -38,7 +39,7 @@ public class FluentMenu {
 	 *
 	 * @param menu The metadata to mutate.
 	 */
-	public FluentMenu(MenuMetaData menu) {
+	public FluentMenu(@Nonnull MenuMetaData menu) {
 		this.menu = menu;
 	}
 
@@ -51,7 +52,7 @@ public class FluentMenu {
 	 * @return this fluent instance.
 	 * @throws IllegalStateException If a source menu item type is not supported.
 	 */
-	public FluentMenu from(@SuppressWarnings("hiding") org.skyve.metadata.module.menu.Menu menu) {
+	public @Nonnull FluentMenu from(@SuppressWarnings("hiding") @Nonnull org.skyve.metadata.module.menu.Menu menu) {
 		for (MenuItem item :  menu.getItems()) {
 			if (item instanceof EditItem edit) {
 				addAction(new FluentEditItem().from(edit));
@@ -83,7 +84,7 @@ public class FluentMenu {
 		return this;
 	}
 	
-	private ActionMetaData findAction(String name) {
+	private @Nullable ActionMetaData findAction(@Nonnull String name) {
 		return menu.getActions().stream().filter(a -> name.equals(a.getName())).findAny().orElse(null);
 	}
 	
@@ -93,7 +94,7 @@ public class FluentMenu {
 	 * @param action The menu action wrapper.
 	 * @return this fluent instance.
 	 */
-	public FluentMenu addAction(FluentMenuAction<?> action) {
+	public @Nonnull FluentMenu addAction(@Nonnull FluentMenuAction<?> action) {
 		menu.getActions().add(action.get());
 		return this;
 	}
@@ -104,14 +105,14 @@ public class FluentMenu {
 	 * @param group The group wrapper.
 	 * @return this fluent instance.
 	 */
-	public FluentMenu addGroup(FluentMenuGroup group) {
+	public @Nonnull FluentMenu addGroup(@Nonnull FluentMenuGroup group) {
 		return addAction(group);
 	}
 
 	/**
 	 * Finds and returns the matching item from the wrapped metadata, or null when none matches.
 	 */
-	public FluentMenuGroup findGroup(String name) {
+	public @Nullable FluentMenuGroup findGroup(@Nonnull String name) {
 		GroupMetaData result = (GroupMetaData) findAction(name);
 		if (result != null) {
 			return new FluentMenuGroup(result);
@@ -125,14 +126,14 @@ public class FluentMenu {
 	 * @param calendar The calendar item wrapper.
 	 * @return this fluent instance.
 	 */
-	public FluentMenu addCalendarItem(FluentCalendarItem calendar) {
+	public @Nonnull FluentMenu addCalendarItem(@Nonnull FluentCalendarItem calendar) {
 		return addAction(calendar);
 	}
 
 	/**
 	 * Finds and returns the matching item from the wrapped metadata, or null when none matches.
 	 */
-	public FluentCalendarItem findCalendarItem(String name) {
+	public @Nullable FluentCalendarItem findCalendarItem(@Nonnull String name) {
 		CalendarItemMetaData result = (CalendarItemMetaData) findAction(name);
 		if (result != null) {
 			return new FluentCalendarItem(result);
@@ -146,14 +147,14 @@ public class FluentMenu {
 	 * @param edit The edit item wrapper.
 	 * @return this fluent instance.
 	 */
-	public FluentMenu addEditItem(FluentEditItem edit) {
+	public @Nonnull FluentMenu addEditItem(@Nonnull FluentEditItem edit) {
 		return addAction(edit);
 	}
 
 	/**
 	 * Finds and returns the matching item from the wrapped metadata, or null when none matches.
 	 */
-	public FluentEditItem findEditItem(String name) {
+	public @Nullable FluentEditItem findEditItem(@Nonnull String name) {
 		EditItemMetaData result = (EditItemMetaData) findAction(name);
 		if (result != null) {
 			return new FluentEditItem(result);
@@ -167,14 +168,14 @@ public class FluentMenu {
 	 * @param link The link item wrapper.
 	 * @return this fluent instance.
 	 */
-	public FluentMenu addLinkItem(FluentLinkItem link) {
+	public @Nonnull FluentMenu addLinkItem(@Nonnull FluentLinkItem link) {
 		return addAction(link);
 	}
 
 	/**
 	 * Finds and returns the matching item from the wrapped metadata, or null when none matches.
 	 */
-	public FluentLinkItem findLinkItem(String name) {
+	public @Nullable FluentLinkItem findLinkItem(@Nonnull String name) {
 		LinkItemMetaData result = (LinkItemMetaData) findAction(name);
 		if (result != null) {
 			return new FluentLinkItem(result);
@@ -188,14 +189,14 @@ public class FluentMenu {
 	 * @param list The list item wrapper.
 	 * @return this fluent instance.
 	 */
-	public FluentMenu addListItem(FluentListItem list) {
+	public @Nonnull FluentMenu addListItem(@Nonnull FluentListItem list) {
 		return addAction(list);
 	}
 
 	/**
 	 * Finds and returns the matching item from the wrapped metadata, or null when none matches.
 	 */
-	public FluentListItem findListItem(String name) {
+	public @Nullable FluentListItem findListItem(@Nonnull String name) {
 		ListItemMetaData result = (ListItemMetaData) findAction(name);
 		if (result != null) {
 			return new FluentListItem(result);
@@ -209,14 +210,14 @@ public class FluentMenu {
 	 * @param map The map item wrapper.
 	 * @return this fluent instance.
 	 */
-	public FluentMenu addMapItem(FluentMapItem map) {
+	public @Nonnull FluentMenu addMapItem(@Nonnull FluentMapItem map) {
 		return addAction(map);
 	}
 
 	/**
 	 * Finds and returns the matching item from the wrapped metadata, or null when none matches.
 	 */
-	public FluentMapItem findMapItem(String name) {
+	public @Nullable FluentMapItem findMapItem(@Nonnull String name) {
 		MapItemMetaData result = (MapItemMetaData) findAction(name);
 		if (result != null) {
 			return new FluentMapItem(result);
@@ -230,14 +231,14 @@ public class FluentMenu {
 	 * @param tree The tree item wrapper.
 	 * @return this fluent instance.
 	 */
-	public FluentMenu addTreeItem(FluentTreeItem tree) {
+	public @Nonnull FluentMenu addTreeItem(@Nonnull FluentTreeItem tree) {
 		return addAction(tree);
 	}
 	
 	/**
 	 * Finds and returns the matching item from the wrapped metadata, or null when none matches.
 	 */
-	public FluentTreeItem findTreeItem(String name) {
+	public @Nullable FluentTreeItem findTreeItem(@Nonnull String name) {
 		TreeItemMetaData result = (TreeItemMetaData) findAction(name);
 		if (result != null) {
 			return new FluentTreeItem(result);
@@ -251,7 +252,7 @@ public class FluentMenu {
 	 * @param name The action name.
 	 * @return this fluent instance.
 	 */
-	public FluentMenu removeMenuAction(String name) {
+	public @Nonnull FluentMenu removeMenuAction(@Nonnull String name) {
 		menu.getActions().removeIf(a -> name.equals(a.getName()));
 		return this;
 	}	
@@ -261,7 +262,7 @@ public class FluentMenu {
 	 *
 	 * @return this fluent instance.
 	 */
-	public FluentMenu clearMenuActions() {
+	public @Nonnull FluentMenu clearMenuActions() {
 		menu.getActions().clear();
 		return this;
 	}	
@@ -284,7 +285,7 @@ public class FluentMenu {
 	 *
 	 * @return The menu metadata instance.
 	 */
-	public MenuMetaData get() {
+	public @Nonnull MenuMetaData get() {
 		return menu;
 	}
 }

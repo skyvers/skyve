@@ -4,6 +4,8 @@ import org.hibernate.dialect.Dialect;
 import org.hibernate.dialect.unique.DefaultUniqueDelegate;
 import org.hibernate.mapping.UniqueKey;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * A unique delegate that generates an ANSI SQL 2016 UNIQUE NULLS DISTINCT clause.
  */
@@ -13,7 +15,7 @@ public class NullsDistinctUniqueDelegate extends DefaultUniqueDelegate {
 	 *
 	 * @param dialect the owning Hibernate dialect
 	 */
-	public NullsDistinctUniqueDelegate(Dialect dialect) {
+	public NullsDistinctUniqueDelegate(@Nonnull Dialect dialect) {
 		super(dialect);
 	}
 	
@@ -24,7 +26,7 @@ public class NullsDistinctUniqueDelegate extends DefaultUniqueDelegate {
 	 * @return the rewritten SQL fragment containing {@code unique nulls distinct}
 	 */
 	@Override
-	protected String uniqueConstraintSql(UniqueKey uniqueKey) {
+	protected @Nonnull String uniqueConstraintSql(@Nonnull UniqueKey uniqueKey) {
 		String result = super.uniqueConstraintSql(uniqueKey);
 		return result.replace("unique (", "unique nulls distinct (");
 	}

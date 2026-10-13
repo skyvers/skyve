@@ -266,7 +266,7 @@ public class FileUtil {
 				Path root = directory.toPath();
 				Files.walkFileTree(root, new SimpleFileVisitor<Path>() {
 					@Override
-					public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+					public @Nonnull FileVisitResult visitFile(@Nonnull Path file, @Nonnull BasicFileAttributes attrs) throws IOException {
 						addPathToZip(root, file, zos);
 						return FileVisitResult.CONTINUE;
 					}
@@ -399,7 +399,7 @@ public class FileUtil {
 		}
 	}
 
-	private static String dirpart(@Nonnull String name) {
+	private static @Nullable String dirpart(@Nonnull String name) {
 		int s = Math.max(name.lastIndexOf('/'), name.lastIndexOf('\\'));
 		return (s == -1) ? null : name.substring( 0, s );
 	  }

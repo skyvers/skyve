@@ -1,5 +1,7 @@
 package org.skyve.persistence;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 
 /**
  * Connection configuration for a Skyve data store (a relational database).
@@ -44,8 +46,8 @@ public class DataStore {
 	 * @param dialectClassName   the fully qualified Hibernate Dialect class name;
 	 *                           must not be {@code null}
 	 */
-	public DataStore(String jndiDataSourceName,
-						String dialectClassName) {
+	public DataStore(@Nonnull String jndiDataSourceName,
+						@Nonnull String dialectClassName) {
 		this(jndiDataSourceName, dialectClassName, 0, 0);
 	}
 	
@@ -60,8 +62,8 @@ public class DataStore {
 	 *                                          {@code 0} means no timeout
 	 * @param asyncConnectionTimeoutInSeconds   timeout for background-job connections in seconds;
 	 *                                          {@code 0} means no timeout
-	 */	public DataStore(String jndiDataSourceName,
-						String dialectClassName,
+	 */	public DataStore(@Nonnull String jndiDataSourceName,
+						@Nonnull String dialectClassName,
 						int oltpConnectionTimeoutInSeconds,
 						int asyncConnectionTimeoutInSeconds) {
 		this.jndiDataSourceName = jndiDataSourceName;
@@ -77,7 +79,7 @@ public class DataStore {
 	 * @param jdbcUrl             the JDBC connection URL; must not be {@code null}
 	 * @param dialectClassName    the fully qualified Hibernate Dialect class name; must not be {@code null}
 	 */
-	public DataStore(String jdbcDriverClassName, String jdbcUrl, String dialectClassName) {
+	public DataStore(@Nonnull String jdbcDriverClassName, @Nonnull String jdbcUrl, @Nonnull String dialectClassName) {
 		this(jdbcDriverClassName, jdbcUrl, dialectClassName, 0, 0);
 	}
 	
@@ -89,9 +91,9 @@ public class DataStore {
 	 * @param dialectClassName                  the fully qualified Hibernate Dialect class name; must not be {@code null}
 	 * @param oltpConnectionTimeoutInSeconds    timeout for UI/forms connections in seconds; {@code 0} means no timeout
 	 * @param asyncConnectionTimeoutInSeconds   timeout for background-job connections in seconds; {@code 0} means no timeout
-	 */	public DataStore(String jdbcDriverClassName,
-						String jdbcUrl,
-						String dialectClassName,
+	 */	public DataStore(@Nonnull String jdbcDriverClassName,
+						@Nonnull String jdbcUrl,
+						@Nonnull String dialectClassName,
 						int oltpConnectionTimeoutInSeconds,
 						int asyncConnectionTimeoutInSeconds) {
 		this(jdbcDriverClassName, jdbcUrl, null, null, dialectClassName, oltpConnectionTimeoutInSeconds, asyncConnectionTimeoutInSeconds);
@@ -105,11 +107,11 @@ public class DataStore {
 	 * @param userName            the database username; may be {@code null} for unauthenticated connections
 	 * @param password            the database password; may be {@code null}
 	 * @param dialectClassName    the fully qualified Hibernate Dialect class name; must not be {@code null}
-	 */	public DataStore(String jdbcDriverClassName, 
-						String jdbcUrl,
-						String userName,
-						String password,
-						String dialectClassName) {
+	 */	public DataStore(@Nonnull String jdbcDriverClassName, 
+						@Nonnull String jdbcUrl,
+						@Nullable String userName,
+						@Nullable String password,
+						@Nonnull String dialectClassName) {
 		this(jdbcDriverClassName, jdbcUrl, userName, password, dialectClassName, 0, 0);
 	}
 	
@@ -124,11 +126,11 @@ public class DataStore {
 	 * @param oltpConnectionTimeoutInSeconds    timeout for UI/forms connections in seconds; {@code 0} means no timeout
 	 * @param asyncConnectionTimeoutInSeconds   timeout for background-job connections in seconds; {@code 0} means no timeout
 	 */
-	 public DataStore(String jdbcDriverClassName, 
-						String jdbcUrl,
-						String userName,
-						String password,
-						String dialectClassName,
+	 public DataStore(@Nonnull String jdbcDriverClassName, 
+						@Nonnull String jdbcUrl,
+						@Nullable String userName,
+						@Nullable String password,
+						@Nonnull String dialectClassName,
 						int oltpConnectionTimeoutInSeconds,
 						int asyncConnectionTimeoutInSeconds) {
 		this.jdbcDriverClassName = jdbcDriverClassName;
@@ -145,7 +147,7 @@ public class DataStore {
 	 *
 	 * @return the dialect class name; never {@code null} for a properly configured store
 	 */
-	public String getDialectClassName() {
+	public @Nonnull String getDialectClassName() {
 		return dialectClassName;
 	}
 
@@ -155,7 +157,7 @@ public class DataStore {
 	 *
 	 * @return the JNDI data source name, or {@code null}
 	 */
-	public String getJndiDataSourceName() {
+	public @Nullable String getJndiDataSourceName() {
 		return jndiDataSourceName;
 	}
 
@@ -165,7 +167,7 @@ public class DataStore {
 	 *
 	 * @return the JDBC driver class name, or {@code null}
 	 */
-	public String getJdbcDriverClassName() {
+	public @Nullable String getJdbcDriverClassName() {
 		return jdbcDriverClassName;
 	}
 
@@ -174,7 +176,7 @@ public class DataStore {
 	 *
 	 * @return the JDBC URL, or {@code null}
 	 */
-	public String getJdbcUrl() {
+	public @Nullable String getJdbcUrl() {
 		return jdbcUrl;
 	}
 
@@ -184,7 +186,7 @@ public class DataStore {
 	 *
 	 * @return the username, or {@code null}
 	 */
-	public String getUserName() {
+	public @Nullable String getUserName() {
 		return userName;
 	}
 
@@ -193,7 +195,7 @@ public class DataStore {
 	 *
 	 * @return the password, or {@code null}
 	 */
-	public String getPassword() {
+	public @Nullable String getPassword() {
 		return password;
 	}
 

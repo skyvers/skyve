@@ -16,6 +16,9 @@ import org.hibernate.type.LiteralType;
 import org.hibernate.usertype.UserType;
 import org.skyve.domain.types.TimeOnly;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Hibernate {@link org.hibernate.usertype.UserType} that maps the Skyve
  * {@link org.skyve.domain.types.TimeOnly} type to a SQL {@code TIME} column.
@@ -24,17 +27,17 @@ public class TimeOnlyUserType implements UserType, LiteralType<Date>, Serializab
 	private static final long serialVersionUID = 8170300540374728474L;
 
 	@Override
-	public int[] sqlTypes() {
+	public @Nonnull int[] sqlTypes() {
 		return new int[] {Types.TIME};
 	}
 
 	@Override
-	public Class<?> returnedClass() {
+	public @Nonnull Class<?> returnedClass() {
 		return TimeOnly.class;
 	}
 
 	@Override
-	public boolean equals(Object x, Object y) throws HibernateException {
+	public boolean equals(@Nullable Object x, @Nullable Object y) throws HibernateException {
 		if (x == y) {
 			return true;
 		}
@@ -61,7 +64,7 @@ public class TimeOnlyUserType implements UserType, LiteralType<Date>, Serializab
 	}
 
 	@Override
-	public int hashCode(Object o) 
+	public int hashCode(@Nonnull Object o) 
 	throws HibernateException {
 		Calendar calendar = Calendar.getInstance();
 		calendar.setTime((java.util.Date) o);
@@ -75,7 +78,7 @@ public class TimeOnlyUserType implements UserType, LiteralType<Date>, Serializab
 	}
 
 	@Override
-	public Object nullSafeGet(ResultSet rs, String[] names, SharedSessionContractImplementor session, Object owner)
+	public @Nullable Object nullSafeGet(@Nonnull ResultSet rs, @Nonnull String[] names, @Nullable SharedSessionContractImplementor session, @Nullable Object owner)
 	throws HibernateException, SQLException {
 		Time value = rs.getTime(names[0]);
 		if (rs.wasNull()) {
@@ -86,7 +89,7 @@ public class TimeOnlyUserType implements UserType, LiteralType<Date>, Serializab
 	}
 
 	@Override
-	public void nullSafeSet(PreparedStatement ps, Object value, int index, SharedSessionContractImplementor session)
+	public void nullSafeSet(@Nonnull PreparedStatement ps, @Nullable Object value, int index, @Nullable SharedSessionContractImplementor session)
 	throws HibernateException, SQLException {
 		if (value == null) {
 			ps.setNull(index, Types.TIME);
@@ -97,7 +100,7 @@ public class TimeOnlyUserType implements UserType, LiteralType<Date>, Serializab
 	}
 
 	@Override
-	public Object deepCopy(Object value)
+	public @Nullable Object deepCopy(@Nullable Object value)
 	throws HibernateException {
 		return (value == null) ? null : new TimeOnly(((Date) value).getTime());
 	}
@@ -108,25 +111,25 @@ public class TimeOnlyUserType implements UserType, LiteralType<Date>, Serializab
 	}
 
 	@Override
-	public Serializable disassemble(Object value)
+	public @Nullable Serializable disassemble(@Nullable Object value)
 	throws HibernateException {
 		return (Serializable) value;
 	}
 
 	@Override
-	public Object assemble(Serializable cached, Object owner)
+	public @Nullable Object assemble(@Nullable Serializable cached, @Nullable Object owner)
 	throws HibernateException {
 		return cached;
 	}
 
 	@Override
-	public Object replace(Object original, Object target, Object owner)
+	public @Nullable Object replace(@Nullable Object original, @Nullable Object target, @Nullable Object owner)
 	throws HibernateException {
 		return original;
 	}
 
 	@Override
-	public String objectToSQLString(Date value, Dialect dialect)
+	public @Nonnull String objectToSQLString(@Nullable Date value, @Nullable Dialect dialect)
 	throws Exception {
 		return (value == null) ? "NULL" : '\'' + new Time(value.getTime()).toString() + '\'';
 	}

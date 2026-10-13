@@ -2,6 +2,9 @@ package org.skyve.metadata.model.document.fluent;
 
 import org.skyve.impl.metadata.model.document.AbstractInverse;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Provides a fluent builder for FluentInverse metadata.
  */
@@ -17,7 +20,7 @@ public abstract class FluentInverse<T extends FluentInverse<T>> extends FluentAt
 	 * Copies inverse relationship metadata, including cascade semantics.
 	 */
 	@SuppressWarnings("unchecked")
-	protected T from(AbstractInverse inverse) {
+	protected @Nonnull T from(@Nonnull AbstractInverse inverse) {
 		super.from(inverse);
 		documentName(inverse.getDocumentName());
 		referenceName(inverse.getReferenceName());
@@ -29,7 +32,7 @@ public abstract class FluentInverse<T extends FluentInverse<T>> extends FluentAt
 	 * Updates metadata on this fluent builder.
 	 */
 	@SuppressWarnings("unchecked")
-	public T documentName(String documentName) {
+	public @Nonnull T documentName(@Nullable String documentName) {
 		get().setDocumentName(documentName);
 		return (T) this;
 	}
@@ -38,7 +41,7 @@ public abstract class FluentInverse<T extends FluentInverse<T>> extends FluentAt
 	 * Updates metadata on this fluent builder.
 	 */
 	@SuppressWarnings("unchecked")
-	public T referenceName(String referenceName) {
+	public @Nonnull T referenceName(@Nullable String referenceName) {
 		get().setDocumentName(referenceName);
 		return (T) this;
 	}
@@ -47,11 +50,11 @@ public abstract class FluentInverse<T extends FluentInverse<T>> extends FluentAt
 	 * Updates metadata on this fluent builder.
 	 */
 	@SuppressWarnings("unchecked")
-	public T cascade(boolean cascade) {
+	public @Nonnull T cascade(boolean cascade) {
 		get().setCascade(cascade ? Boolean.TRUE : Boolean.FALSE);
 		return (T) this;
 	}
 
 	@Override
-	public abstract AbstractInverse get();
+	public abstract @Nonnull AbstractInverse get();
 }

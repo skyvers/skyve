@@ -24,6 +24,7 @@ import org.skyve.metadata.view.Filterable;
 import org.skyve.metadata.view.widget.FilterParameter;
 import org.skyve.metadata.view.widget.bound.Parameter;
 
+import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlElement;
@@ -119,7 +120,7 @@ public class LookupDescription extends InputWidget implements FormItemWidget, Ed
 	 *
 	 * @return the description binding expression
 	 */
-	public String getDescriptionBinding() {
+	public @Nullable String getDescriptionBinding() {
 		return descriptionBinding;
 	}
 
@@ -129,7 +130,7 @@ public class LookupDescription extends InputWidget implements FormItemWidget, Ed
 	 * @param descriptionBinding the description binding expression to apply
 	 */
 	@XmlAttribute(required = true)
-	public void setDescriptionBinding(String descriptionBinding) {
+	public void setDescriptionBinding(@Nullable String descriptionBinding) {
 		this.descriptionBinding = descriptionBinding;
 	}
 
@@ -138,7 +139,7 @@ public class LookupDescription extends InputWidget implements FormItemWidget, Ed
 	 *
 	 * @return the configured query name, or {@code null} when default resolution is used
 	 */
-	public String getQuery() {
+	public @Nullable String getQuery() {
 		return query;
 	}
 
@@ -148,7 +149,7 @@ public class LookupDescription extends InputWidget implements FormItemWidget, Ed
 	 * @param query the lookup query name
 	 */
 	@XmlAttribute(required = false)
-	public void setQuery(String query) {
+	public void setQuery(@Nullable String query) {
 		this.query = UtilImpl.processStringValue(query);
 	}
 
@@ -157,7 +158,7 @@ public class LookupDescription extends InputWidget implements FormItemWidget, Ed
 	 *
 	 * @return the model name, or {@code null} to use query resolution
 	 */
-	public String getModelName() {
+	public @Nullable String getModelName() {
 		return modelName;
 	}
 
@@ -167,7 +168,7 @@ public class LookupDescription extends InputWidget implements FormItemWidget, Ed
 	 * @param modelName the model name; blank values are normalised to {@code null}
 	 */
 	@XmlAttribute(name = "model", required = false)
-	public void setModelName(String modelName) {
+	public void setModelName(@Nullable String modelName) {
 		this.modelName = UtilImpl.processStringValue(modelName);
 	}
 
@@ -401,7 +402,7 @@ public class LookupDescription extends InputWidget implements FormItemWidget, Ed
 	 * @return {@code true} when editable interactions are enabled; otherwise {@code false}
 	 */
 	@Override
-	public Boolean getEditable() {
+	public @Nullable Boolean getEditable() {
 		return editable;
 	}
 
@@ -412,7 +413,7 @@ public class LookupDescription extends InputWidget implements FormItemWidget, Ed
 	 */
 	@Override
 	@XmlAttribute(name = "editable", required = false)
-	public void setEditable(Boolean editable) {
+	public void setEditable(@Nullable Boolean editable) {
 		this.editable = editable;
 	}
 
@@ -422,7 +423,7 @@ public class LookupDescription extends InputWidget implements FormItemWidget, Ed
 	 * @return the absolute pixel width, or {@code null} to use renderer defaults
 	 */
 	@Override
-	public Integer getPixelWidth() {
+	public @Nullable Integer getPixelWidth() {
 		return pixelWidth;
 	}
 
@@ -433,7 +434,7 @@ public class LookupDescription extends InputWidget implements FormItemWidget, Ed
 	 */
 	@Override
 	@XmlAttribute(required = false)
-	public void setPixelWidth(Integer pixelWidth) {
+	public void setPixelWidth(@Nullable Integer pixelWidth) {
 		this.pixelWidth = pixelWidth;
 	}
 	
@@ -446,7 +447,7 @@ public class LookupDescription extends InputWidget implements FormItemWidget, Ed
 	 */
 	@XmlElementWrapper(namespace = XMLMetaData.VIEW_NAMESPACE, name = "dropDown")
 	@XmlElement(namespace = XMLMetaData.VIEW_NAMESPACE, name = "column", required = false)
-	public List<LookupDescriptionColumn> getDropDownColumns() {
+	public @Nonnull List<LookupDescriptionColumn> getDropDownColumns() {
 		return dropDownColumns;
 	}
 
@@ -460,7 +461,7 @@ public class LookupDescription extends InputWidget implements FormItemWidget, Ed
 					name = "filterParameter",
 					type = FilterParameterImpl.class,
 					required = false)
-	public List<FilterParameter> getFilterParameters() {
+	public @Nonnull List<FilterParameter> getFilterParameters() {
 		return filterParameters;
 	}
 
@@ -474,7 +475,7 @@ public class LookupDescription extends InputWidget implements FormItemWidget, Ed
 					name = "parameter",
 					type = ParameterImpl.class,
 					required = false)
-	public List<Parameter> getParameters() {
+	public @Nonnull List<Parameter> getParameters() {
 		return parameters;
 	}
 
@@ -488,7 +489,7 @@ public class LookupDescription extends InputWidget implements FormItemWidget, Ed
 						@XmlElementRef(type = ServerSideActionEventAction.class),
 						@XmlElementRef(type = SetDisabledEventAction.class),
 						@XmlElementRef(type = SetInvisibleEventAction.class)})
-	public List<EventAction> getPickedActions() {
+	public @Nonnull List<EventAction> getPickedActions() {
 		return pickedActions;
 	}
 
@@ -502,7 +503,7 @@ public class LookupDescription extends InputWidget implements FormItemWidget, Ed
 						@XmlElementRef(type = ServerSideActionEventAction.class),
 						@XmlElementRef(type = SetDisabledEventAction.class),
 						@XmlElementRef(type = SetInvisibleEventAction.class)})
-	public List<EventAction> getClearedActions() {
+	public @Nonnull List<EventAction> getClearedActions() {
 		return clearedActions;
 	}
 
@@ -517,7 +518,7 @@ public class LookupDescription extends InputWidget implements FormItemWidget, Ed
 						@XmlElementRef(type = ServerSideActionEventAction.class),
 						@XmlElementRef(type = SetDisabledEventAction.class),
 						@XmlElementRef(type = SetInvisibleEventAction.class)})
-	public List<EventAction> getEditedActions() {
+	public @Nonnull List<EventAction> getEditedActions() {
 		return editedActions;
 	}
 
@@ -532,7 +533,7 @@ public class LookupDescription extends InputWidget implements FormItemWidget, Ed
 						@XmlElementRef(type = ServerSideActionEventAction.class),
 						@XmlElementRef(type = SetDisabledEventAction.class),
 						@XmlElementRef(type = SetInvisibleEventAction.class)})
-	public List<EventAction> getAddedActions() {
+	public @Nonnull List<EventAction> getAddedActions() {
 		return addedActions;
 	}
 
@@ -542,7 +543,7 @@ public class LookupDescription extends InputWidget implements FormItemWidget, Ed
 	 * @return mutable decorator property map keyed by property name
 	 */
 	@Override
-	public Map<String, String> getProperties() {
+	public @Nonnull Map<String, String> getProperties() {
 		return properties;
 	}
 }

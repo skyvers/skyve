@@ -7,6 +7,8 @@ import javax.swing.text.MaskFormatter;
 import org.apache.commons.text.WordUtils;
 import org.skyve.impl.util.XMLMetaData;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlType;
 
 /**
@@ -51,7 +53,7 @@ public class Format<T> {
 	 * @param mask      the mask string using A/#/L notation, or {@code null} for no mask
 	 * @param textCase  the desired text-case transformation, or {@code null} for no change
 	 */
-	public Format(String mask, TextCase textCase) {
+	public Format(@Nullable String mask, @Nullable TextCase textCase) {
 		this.mask = mask;
 		this.textCase = textCase;
 	}
@@ -61,7 +63,7 @@ public class Format<T> {
 	 *
 	 * @return the mask, or {@code null} if no mask was specified
 	 */
-	public final String getMask() {
+	public final @Nullable String getMask() {
 		return mask;
 	}
 	
@@ -70,7 +72,7 @@ public class Format<T> {
 	 *
 	 * @return the text case, or {@code null} if none was specified
 	 */
-	public final TextCase getTextCase() {
+	public final @Nullable TextCase getTextCase() {
 		return textCase;
 	}
 	
@@ -83,7 +85,7 @@ public class Format<T> {
 	 * @throws ParseException if the value does not match the mask
 	 */
 	@SuppressWarnings("unchecked")
-	public final T fromDisplayValue(String value) throws ParseException {
+	public final @Nonnull T fromDisplayValue(@Nonnull String value) throws ParseException {
 		MaskFormatter maskFormatter = getMaskFormatter();
 		T result = (maskFormatter == null) ? (T) value : (T) maskFormatter.stringToValue(value);
 		if (result instanceof String string) {
@@ -101,7 +103,7 @@ public class Format<T> {
 	 * @return the display string; never {@code null}
 	 * @throws ParseException if the mask formatter cannot represent {@code value}
 	 */
-	public final String toDisplayValue(T value) throws ParseException {
+	public final @Nonnull String toDisplayValue(@Nullable T value) throws ParseException {
 		MaskFormatter maskFormatter = getMaskFormatter();
 		String displayValue = (maskFormatter == null) ? 
 								((value == null) ? "" : value.toString()) : 
@@ -109,7 +111,7 @@ public class Format<T> {
 		return applyCase(displayValue, textCase);
 	}
 
-	private static String applyCase(String value, TextCase textCase) {
+	private static @Nullable String applyCase(@Nullable String value, @Nullable TextCase textCase) {
 		String result = value;
 		if ((result != null) && (textCase != null)) {
 			if (TextCase.lower.equals(textCase)) {
@@ -143,7 +145,7 @@ public class Format<T> {
 	 * H - Any hex character (0-9, a-f or A-F). 
 	 * 
 	 */
-	private MaskFormatter getMaskFormatter() throws ParseException {
+	private @Nullable MaskFormatter getMaskFormatter() throws ParseException {
 		if ((mask != null) && (maskFormatterMask == null)) {
 			maskFormatterMask = mask.replace("U", "'U");
 			maskFormatterMask = maskFormatterMask.replace("?", "'?");

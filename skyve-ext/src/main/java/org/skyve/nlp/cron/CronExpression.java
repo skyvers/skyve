@@ -6,6 +6,9 @@ import java.util.regex.Pattern;
 
 import org.skyve.CORE;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Represents a six-field cron expression and provides conversion helpers to and from
  * natural-language phrases.
@@ -23,7 +26,7 @@ public class CronExpression {
 		// default constructor
 	}
 
-	public CronExpression(String second, String minute, String hour, String dayNumber, String month, String dayOfWeek) {
+	public CronExpression(@Nullable String second, @Nullable String minute, @Nullable String hour, @Nullable String dayNumber, @Nullable String month, @Nullable String dayOfWeek) {
 		super();
 		this.second = second;
 		this.minute = minute;
@@ -33,7 +36,7 @@ public class CronExpression {
 		this.dayOfWeek = dayOfWeek;
 	}
 
-	public CronExpression(Integer second, Integer minute, Integer hour, Integer dayNumber, Integer month, Integer dayOfWeek) {
+	public CronExpression(@Nullable Integer second, @Nullable Integer minute, @Nullable Integer hour, @Nullable Integer dayNumber, @Nullable Integer month, @Nullable Integer dayOfWeek) {
 		super();
 		this.second = second != null ? String.valueOf(second) : null;
 		this.minute = minute != null ? String.valueOf(minute) : null;
@@ -50,7 +53,7 @@ public class CronExpression {
 	 * @return The parsed expression, or {@code null} when {@code expression} is {@code null}.
 	 * @throws CronParserException If the text does not contain exactly six fields.
 	 */
-	public static CronExpression fromExpression(final String expression) {
+	public static @Nullable CronExpression fromExpression(final @Nullable String expression) {
 		if (expression != null) {
 			String[] parts = expression.split("\\s");
 			if (parts.length != 6) {
@@ -74,7 +77,7 @@ public class CronExpression {
 	/**
 	 * Returns the second.
 	 */
-	public String getSecond() {
+	public @Nullable String getSecond() {
 		return second;
 	}
 
@@ -90,7 +93,7 @@ public class CronExpression {
 	 *
 	 * @return This expression for fluent configuration.
 	 */
-	public CronExpression setSecond(String second) {
+	public @Nonnull CronExpression setSecond(@Nullable String second) {
 		this.second = second;
 		return this;
 	}
@@ -100,14 +103,14 @@ public class CronExpression {
 	 *
 	 * @return This expression for fluent configuration.
 	 */
-	public CronExpression setSecond(Integer second) {
+	public @Nonnull CronExpression setSecond(@Nonnull Integer second) {
 		return setSecond(String.valueOf(second));
 	}
 
 	/**
 	 * Returns the minute.
 	 */
-	public String getMinute() {
+	public @Nullable String getMinute() {
 		return minute;
 	}
 
@@ -123,7 +126,7 @@ public class CronExpression {
 	 *
 	 * @return This expression for fluent configuration.
 	 */
-	public CronExpression setMinute(String minute) {
+	public @Nonnull CronExpression setMinute(@Nullable String minute) {
 		this.minute = minute;
 		return this;
 	}
@@ -133,14 +136,14 @@ public class CronExpression {
 	 *
 	 * @return This expression for fluent configuration.
 	 */
-	public CronExpression setMinute(Integer minute) {
+	public @Nonnull CronExpression setMinute(@Nonnull Integer minute) {
 		return setMinute(String.valueOf(minute));
 	}
 
 	/**
 	 * Returns the hour.
 	 */
-	public String getHour() {
+	public @Nullable String getHour() {
 		return hour;
 	}
 
@@ -156,7 +159,7 @@ public class CronExpression {
 	 *
 	 * @return This expression for fluent configuration.
 	 */
-	public CronExpression setHour(String hour) {
+	public @Nonnull CronExpression setHour(@Nullable String hour) {
 		this.hour = hour;
 		return this;
 	}
@@ -166,14 +169,14 @@ public class CronExpression {
 	 *
 	 * @return This expression for fluent configuration.
 	 */
-	public CronExpression setHour(Integer minute) {
+	public @Nonnull CronExpression setHour(@Nonnull Integer minute) {
 		return setHour(String.valueOf(minute));
 	}
 
 	/**
 	 * Returns the dayNumber.
 	 */
-	public String getDayNumber() {
+	public @Nullable String getDayNumber() {
 		return dayNumber;
 	}
 
@@ -189,7 +192,7 @@ public class CronExpression {
 	 *
 	 * @return This expression for fluent configuration.
 	 */
-	public CronExpression setDayNumber(String dayNumber) {
+	public @Nonnull CronExpression setDayNumber(@Nullable String dayNumber) {
 		this.dayNumber = dayNumber;
 		return this;
 	}
@@ -199,14 +202,14 @@ public class CronExpression {
 	 *
 	 * @return This expression for fluent configuration.
 	 */
-	public CronExpression setDayNumber(Integer minute) {
+	public @Nonnull CronExpression setDayNumber(@Nonnull Integer minute) {
 		return setDayNumber(String.valueOf(minute));
 	}
 
 	/**
 	 * Returns the month.
 	 */
-	public String getMonth() {
+	public @Nullable String getMonth() {
 		return month;
 	}
 
@@ -222,7 +225,7 @@ public class CronExpression {
 	 *
 	 * @return This expression for fluent configuration.
 	 */
-	public CronExpression setMonth(String month) {
+	public @Nonnull CronExpression setMonth(@Nullable String month) {
 		this.month = month;
 		return this;
 	}
@@ -232,14 +235,14 @@ public class CronExpression {
 	 *
 	 * @return This expression for fluent configuration.
 	 */
-	public CronExpression setMonth(Integer minute) {
+	public @Nonnull CronExpression setMonth(@Nonnull Integer minute) {
 		return setMonth(String.valueOf(minute));
 	}
 
 	/**
 	 * Returns the dayOfWeek.
 	 */
-	public String getDayOfWeek() {
+	public @Nullable String getDayOfWeek() {
 		return dayOfWeek;
 	}
 
@@ -255,7 +258,7 @@ public class CronExpression {
 	 *
 	 * @return This expression for fluent configuration.
 	 */
-	public CronExpression setDayOfWeek(String dayOfWeek) {
+	public @Nonnull CronExpression setDayOfWeek(@Nullable String dayOfWeek) {
 		this.dayOfWeek = dayOfWeek;
 		return this;
 	}
@@ -265,7 +268,7 @@ public class CronExpression {
 	 *
 	 * @return This expression for fluent configuration.
 	 */
-	public CronExpression setDayOfWeek(Integer minute) {
+	public @Nonnull CronExpression setDayOfWeek(@Nonnull Integer minute) {
 		return setDayOfWeek(String.valueOf(minute));
 	}
 
@@ -285,7 +288,7 @@ public class CronExpression {
 	 * @return A natural-language description, or {@code null} when no fields are set.
 	 */
 	@SuppressWarnings({"boxing", "java:S3776"}) // Complexity OK
-	public String toNaturalLanguage() {
+	public @Nullable String toNaturalLanguage() {
 		if (!hasNothing()) {
 			// check if it's one of our static expressions
 			String expression = toString();
@@ -411,7 +414,7 @@ public class CronExpression {
 	 */
 	@Override
 	@SuppressWarnings("boxing")
-	public String toString() {
+	public @Nonnull String toString() {
 		return String.format("%s %s %s %s %s %s",
 				hasSecond() ? getSecond() : 0,
 				hasMinute() ? getMinute() : 0,
@@ -427,7 +430,7 @@ public class CronExpression {
 	 * @param day
 	 * @return
 	 */
-	private static String getDayNumberSuffix(int day) {
+	private static @Nonnull String getDayNumberSuffix(int day) {
 		if (day >= 11 && day <= 13) {
 			return "th";
 		}

@@ -1,5 +1,7 @@
 package org.skyve.metadata.model.document;
 
+import jakarta.annotation.Nullable;
+
 /**
  * An owning-side relational attribute that carries a reference type and an optional default query.
  *
@@ -26,12 +28,12 @@ public interface Reference extends Relation {
 	 *
 	 * @return the default query name, or {@code null} if the document's default query applies
 	 */
-	public String getQueryName();
+	public @Nullable String getQueryName();
 
 	/**
 	 * Returns the specific reference type that governs the ORM mapping and lifecycle behaviour.
 	 *
 	 * @return the reference type; never {@code null}
 	 */
-	public ReferenceType getType();
+	public @Nullable ReferenceType getType();
 }

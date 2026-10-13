@@ -2,6 +2,8 @@ package org.skyve.metadata.view.fluent;
 
 import org.skyve.impl.metadata.repository.view.actions.BizExportAction;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * Builds {@link BizExportAction} metadata using a fluent API.
  */
@@ -21,7 +23,7 @@ public class FluentBizExportAction extends FluentClassAction<FluentBizExportActi
 	 * @param action
 	 *            the action instance to wrap
 	 */
-	public FluentBizExportAction(BizExportAction action) {
+	public FluentBizExportAction(@Nonnull BizExportAction action) {
 		this.action = action;
 	}
 	
@@ -32,7 +34,7 @@ public class FluentBizExportAction extends FluentClassAction<FluentBizExportActi
 	 *            the source action metadata
 	 * @return this builder
 	 */
-	public FluentBizExportAction from(@SuppressWarnings("hiding") BizExportAction action) {
+	public @Nonnull FluentBizExportAction from(@SuppressWarnings("hiding") @Nonnull BizExportAction action) {
 		super.from(action);
 		return this;
 	}
@@ -41,7 +43,7 @@ public class FluentBizExportAction extends FluentClassAction<FluentBizExportActi
 	 * Returns the wrapped repository action instance.
 	 */
 	@Override
-	public BizExportAction get() {
+	public @Nonnull BizExportAction get() {
 		return action;
 	}
 }

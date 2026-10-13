@@ -3,6 +3,7 @@ package org.skyve.metadata.view.fluent;
 import org.skyve.impl.metadata.view.widget.bound.input.ContentSignature;
 
 import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 
 /**
  * Builds {@link ContentSignature} widget metadata using a fluent API.
@@ -23,7 +24,7 @@ public class FluentContentSignature extends FluentInputWidget<FluentContentSigna
 	 *
 	 * @param signature the metadata instance to mutate
 	 */
-	public FluentContentSignature(ContentSignature signature) {
+	public FluentContentSignature(@Nonnull ContentSignature signature) {
 		this.signature = signature;
 	}
 
@@ -34,7 +35,7 @@ public class FluentContentSignature extends FluentInputWidget<FluentContentSigna
 	 *            the source metadata to copy
 	 * @return this builder
 	 */
-	public FluentContentSignature from(@SuppressWarnings("hiding") ContentSignature signature) {
+	public @Nonnull FluentContentSignature from(@SuppressWarnings("hiding") @Nonnull ContentSignature signature) {
 		rgbHexBackgroundColour(signature.getRgbHexBackgroundColour());
 		rgbHexForegroundColour(signature.getRgbHexForegroundColour());
 
@@ -53,7 +54,7 @@ public class FluentContentSignature extends FluentInputWidget<FluentContentSigna
 	 * @param rgbHexBackgroundColour the hex colour value
 	 * @return this builder
 	 */
-	public FluentContentSignature rgbHexBackgroundColour(String rgbHexBackgroundColour) {
+	public @Nonnull FluentContentSignature rgbHexBackgroundColour(@Nullable String rgbHexBackgroundColour) {
 		signature.setRgbHexBackgroundColour(rgbHexBackgroundColour);
 		return this;
 	}
@@ -64,7 +65,7 @@ public class FluentContentSignature extends FluentInputWidget<FluentContentSigna
 	 * @param rgbHexForegroundColour the hex colour value
 	 * @return this builder
 	 */
-	public FluentContentSignature rgbHexForegroundColour(String rgbHexForegroundColour) {
+	public @Nonnull FluentContentSignature rgbHexForegroundColour(@Nullable String rgbHexForegroundColour) {
 		signature.setRgbHexForegroundColour(rgbHexForegroundColour);
 		return this;
 	}
@@ -76,7 +77,7 @@ public class FluentContentSignature extends FluentInputWidget<FluentContentSigna
 	 * @return this builder
 	 */
 	@Override
-	public FluentContentSignature pixelWidth(int width) {
+	public @Nonnull FluentContentSignature pixelWidth(int width) {
 		signature.setPixelWidth(Integer.valueOf(width));
 		return this;
 	}
@@ -88,7 +89,7 @@ public class FluentContentSignature extends FluentInputWidget<FluentContentSigna
 	 * @return this builder
 	 */
 	@Override
-	public FluentContentSignature pixelHeight(int height) {
+	public @Nonnull FluentContentSignature pixelHeight(int height) {
 		signature.setPixelHeight(Integer.valueOf(height));
 		return this;
 	}
@@ -112,7 +113,7 @@ public class FluentContentSignature extends FluentInputWidget<FluentContentSigna
 	 * @return the mutable content-signature metadata being configured
 	 */
 	@Override
-	public ContentSignature get() {
+	public @Nonnull ContentSignature get() {
 		return signature;
 	}
 }

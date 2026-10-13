@@ -64,7 +64,7 @@ public interface User extends NamedMetaData {
 	 *
 	 * @return the user's language tag, or {@code null}
 	 */
-	String getLanguageTag();
+	@Nullable String getLanguageTag();
 	
 	/**
 	 * Determine the user's locale in the following way.
@@ -74,12 +74,12 @@ public interface User extends NamedMetaData {
 	 * 
 	 * @return	The appropriate locale.
 	 */
-	Locale getLocale();
+	@Nullable Locale getLocale();
 	
 	/**
 	 * @return	The hashed password value as stored in the data store.
 	 */
-	String getPasswordHash();
+	@Nullable String getPasswordHash();
 
 	/**
 	 * Does the password need to be changed before accessing the system.
@@ -95,14 +95,14 @@ public interface User extends NamedMetaData {
 	 *
 	 * @return the contact bean id, or {@code null}
 	 */
-	String getContactId();
+	@Nullable String getContactId();
 	
 	/**
 	 * Returns the display name of the contact linked to this user.
 	 *
 	 * @return the contact name, or {@code null} if no contact is linked
 	 */
-	String getContactName();
+	@Nullable String getContactName();
 	
 	/**
 	 * Returns the content repository ID of the user's contact avatar image,
@@ -110,7 +110,7 @@ public interface User extends NamedMetaData {
 	 *
 	 * @return the content id of the avatar image, or {@code null}
 	 */
-	String getContactImageId();
+	@Nullable String getContactImageId();
 	
 	/**
 	 * Returns the URL for a thumbnail of the user's contact image at the given dimensions.
@@ -122,13 +122,13 @@ public interface User extends NamedMetaData {
 	 * @param height  the desired thumbnail height in pixels
 	 * @return the thumbnail URL, or {@code null}
 	 */
-	String getContactImageUrl(int width, int height);
+	@Nullable String getContactImageUrl(int width, int height);
 	
 	/**
 	 * Returns a 2 Upper Case initials for the contact name if possible.
 	 * @return	Avatar Initials
 	 */
-	String getContactAvatarInitials();
+	@Nonnull String getContactAvatarInitials();
 
 	/**
 	 * Returns the resolved {@link Customer} for this user.
@@ -138,10 +138,10 @@ public interface User extends NamedMetaData {
 	 *
 	 * @return the user's customer; never {@code null}
 	 */
-	Customer getCustomer();
+	@Nonnull Customer getCustomer();
 	
-	String getCustomerName();
-	void setCustomerName(String customerName);
+	@Nullable String getCustomerName();
+	void setCustomerName(@Nullable String customerName);
 	
 	/**
 	 * Returns the data group identifier scoping this user's data access, or {@code null}
@@ -153,15 +153,15 @@ public interface User extends NamedMetaData {
 	 *
 	 * @return the data group id, or {@code null} if not applicable
 	 */
-	String getDataGroupId();
-	void setDataGroupId(String dataGroupId);
+	@Nullable String getDataGroupId();
+	void setDataGroupId(@Nullable String dataGroupId);
 	
 	/**
 	 * Returns the name of the module that is the default landing page for this user.
 	 *
 	 * @return the home module name; may be {@code null}
 	 */
-	String getHomeModuleName();
+	@Nullable String getHomeModuleName();
 
 	/**
 	 * Returns the names of all modules accessible to this user based on their role
@@ -169,7 +169,7 @@ public interface User extends NamedMetaData {
 	 *
 	 * @return a non-{@code null} set of accessible module names
 	 */
-	Set<String> getAccessibleModuleNames();
+	@Nonnull Set<String> getAccessibleModuleNames();
 
 	/**
 	 * Returns {@code true} if this user has been assigned the specified role.
@@ -178,7 +178,7 @@ public interface User extends NamedMetaData {
 	 * @param roleName    the role name within the module; must not be {@code null}
 	 * @return {@code true} if the user holds the role
 	 */
-	boolean isInRole(String moduleName, String roleName);
+	boolean isInRole(@Nonnull String moduleName, @Nonnull String roleName);
 	
 	/**
 	 * Returns the effective {@link DocumentPermissionScope} for the user on the given
@@ -188,7 +188,7 @@ public interface User extends NamedMetaData {
 	 * @param documentName  the document name; must not be {@code null}
 	 * @return the effective scope; {@link DocumentPermissionScope#none} if no roles grant access
 	 */
-	DocumentPermissionScope getScope(String moduleName, String documentName);
+	@Nonnull DocumentPermissionScope getScope(@Nonnull String moduleName, @Nonnull String documentName);
 	
 	/**
 	 * Returns {@code true} if this user can read the given bean, considering both the
@@ -207,12 +207,12 @@ public interface User extends NamedMetaData {
 	 * @param beanBizUserId       the user id that owns the bean, or {@code null}
 	 * @return {@code true} if the user may read this bean
 	 */
-	boolean canReadBean(String beanBizId,
-							String beanBizModule,
-							String beanBizDocument,
-							String beanBizCustomer,
-							String beanBizDataGroupId,
-							String beanBizUserId);
+	boolean canReadBean(@Nonnull String beanBizId,
+							@Nonnull String beanBizModule,
+							@Nonnull String beanBizDocument,
+							@Nullable String beanBizCustomer,
+							@Nullable String beanBizDataGroupId,
+							@Nullable String beanBizUserId);
 	
 	/**
 	 * Returns {@code true} if this user can search or view the given content attachment.
@@ -229,13 +229,13 @@ public interface User extends NamedMetaData {
 	 * @param attributeName   the content attribute binding name
 	 * @return {@code true} if access to the content is allowed
 	 */
-	boolean canAccessContent(String bizId,
-								String bizModule,
-								String bizDocument,
-								String bizCustomer,
-								String bizDataGroupId,
-								String bizUserId,
-								String attributeName);
+	boolean canAccessContent(@Nonnull String bizId,
+								@Nonnull String bizModule,
+								@Nonnull String bizDocument,
+								@Nullable String bizCustomer,
+								@Nullable String bizDataGroupId,
+								@Nullable String bizUserId,
+								@Nonnull String attributeName);
 	
 	/**
 	 * Returns {@code true} if this user has any form of access to the given document
@@ -244,7 +244,7 @@ public interface User extends NamedMetaData {
 	 * @param document  the document to test; must not be {@code null}
 	 * @return {@code true} if the user can access the document
 	 */
-	boolean canAccessDocument(Document document);
+	boolean canAccessDocument(@Nonnull Document document);
 	
 	/**
 	 * Returns {@code true} if this user may create new instances of the given document.
@@ -252,7 +252,7 @@ public interface User extends NamedMetaData {
 	 * @param document  the document to test; must not be {@code null}
 	 * @return {@code true} if create permission is granted
 	 */
-	boolean canCreateDocument(Document document);
+	boolean canCreateDocument(@Nonnull Document document);
 	
 	/**
 	 * Returns {@code true} if this user has permission to use the flag/notes feature.
@@ -267,7 +267,7 @@ public interface User extends NamedMetaData {
 	 * @param document  the document to test; must not be {@code null}
 	 * @return {@code true} if read permission is granted
 	 */
-	boolean canReadDocument(Document document);
+	boolean canReadDocument(@Nonnull Document document);
 	
 	/**
 	 * Returns {@code true} if this user has access to the full-text search feature.
@@ -290,7 +290,7 @@ public interface User extends NamedMetaData {
 	 * @param document  the document to test; must not be {@code null}
 	 * @return {@code true} if update permission is granted
 	 */
-	boolean canUpdateDocument(Document document);
+	boolean canUpdateDocument(@Nonnull Document document);
 	
 	/**
 	 * Returns {@code true} if this user may delete instances of the given document.
@@ -298,7 +298,7 @@ public interface User extends NamedMetaData {
 	 * @param document  the document to test; must not be {@code null}
 	 * @return {@code true} if delete permission is granted
 	 */
-	boolean canDeleteDocument(Document document);
+	boolean canDeleteDocument(@Nonnull Document document);
 	
 	/**
 	 * Returns {@code true} if this user may execute the named action on the given document.
@@ -307,7 +307,7 @@ public interface User extends NamedMetaData {
 	 * @param actionName  the name of the action to test; must not be {@code null}
 	 * @return {@code true} if the action is permitted
 	 */
-	boolean canExecuteAction(Document document, String actionName);
+	boolean canExecuteAction(@Nonnull Document document, @Nonnull String actionName);
 	
 	/**
 	 * Does the given router UX/UI have access to the given UserAccess.
@@ -321,5 +321,5 @@ public interface User extends NamedMetaData {
 	/**
 	 * User (session) attributes. Keep this small since the user is in the web session.
 	 */
-	public Map<String, Object> getAttributes();
+	public @Nonnull Map<String, Object> getAttributes();
 }

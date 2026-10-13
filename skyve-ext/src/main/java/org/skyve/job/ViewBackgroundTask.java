@@ -14,6 +14,9 @@ import org.skyve.util.logging.SkyveLoggerFactory;
 import org.skyve.web.BackgroundTask;
 import org.slf4j.Logger;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * This is the default implementation of BackgroundTask integration and serves as the extension point.
  * @author mike
@@ -30,7 +33,7 @@ public abstract class ViewBackgroundTask<T extends Bean> implements BackgroundTa
 	 * Get the bean for the task.
 	 */
 	@Override
-	public final T getBean() {
+	public final @Nullable T getBean() {
 		return bean;
 	}
 	
@@ -52,7 +55,7 @@ public abstract class ViewBackgroundTask<T extends Bean> implements BackgroundTa
 	 * Quartz integration point.
 	 */
 	@Override
-	public final void execute(JobExecutionContext context) 
+	public final void execute(@Nonnull JobExecutionContext context) 
 	throws JobExecutionException {
 		AbstractPersistence persistence = null;
 		try {

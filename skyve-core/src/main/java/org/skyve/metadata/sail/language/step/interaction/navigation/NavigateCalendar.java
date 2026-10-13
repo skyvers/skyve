@@ -2,6 +2,8 @@ package org.skyve.metadata.sail.language.step.interaction.navigation;
 
 import org.skyve.metadata.sail.execution.Executor;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
@@ -31,7 +33,7 @@ public class NavigateCalendar extends NavigateList {
 	 * Returns the startBinding.
 	 * @return the result
 	 */
-	public String getStartBinding() {
+	public @Nullable String getStartBinding() {
 		return startBinding;
 	}
 
@@ -40,7 +42,7 @@ public class NavigateCalendar extends NavigateList {
 	 * @param startBinding the startBinding
 	 */
 	@XmlAttribute(name = "startBinding")
-	public void setStartBinding(String startBinding) {
+	public void setStartBinding(@Nullable String startBinding) {
 		this.startBinding = UtilImpl.processStringValue(startBinding);
 	}
 
@@ -48,7 +50,7 @@ public class NavigateCalendar extends NavigateList {
 	 * Returns the endBinding.
 	 * @return the result
 	 */
-	public String getEndBinding() {
+	public @Nullable String getEndBinding() {
 		return endBinding;
 	}
 
@@ -57,7 +59,7 @@ public class NavigateCalendar extends NavigateList {
 	 * @param endBinding the endBinding
 	 */
 	@XmlAttribute(name = "endBinding")
-	public void setEndBinding(String endBinding) {
+	public void setEndBinding(@Nullable String endBinding) {
 		this.endBinding = UtilImpl.processStringValue(endBinding);
 	}
 
@@ -66,7 +68,7 @@ public class NavigateCalendar extends NavigateList {
 	 * @param executor the executor
 	 */
 	@Override
-	public void execute(Executor executor) {
+	public void execute(@Nonnull Executor executor) {
 		executor.executeNavigateCalendar(this);
 	}
 }

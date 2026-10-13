@@ -5,6 +5,8 @@ import java.io.IOException;
 import java.util.Set;
 import java.util.TreeSet;
 
+import jakarta.annotation.Nonnull;
+
 /*
 Integrate font-awesome
 Page listgrid
@@ -21,7 +23,7 @@ public class ReactGenerator {
 	File srcSkyveViewsPath;
 	Set<ReactComponent> components = new TreeSet<>();
 
-	public ReactGenerator(String uxui, String projectFolderPath) {
+	public ReactGenerator(@Nonnull String uxui, @Nonnull String projectFolderPath) {
 		this.uxui = uxui;
 		this.projectFolderPath = projectFolderPath;
 		if (! new File(projectFolderPath).exists()) {
@@ -40,7 +42,7 @@ public class ReactGenerator {
 		}
 	}
 
-	public static void main(String[] args) throws Exception {
+	public static void main(@Nonnull String[] args) throws Exception {
 		new ReactGenerator("desktop", "/Users/mike/Downloads/sigma-master/").generate();
 	}
 }

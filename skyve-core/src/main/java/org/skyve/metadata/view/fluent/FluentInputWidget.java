@@ -23,7 +23,7 @@ public abstract class FluentInputWidget<T extends FluentInputWidget<T>>  extends
 	 * Copies shared input-widget state from the source metadata instance.
 	 */
 	@SuppressWarnings("unchecked")
-	protected T from(InputWidget input) {
+	protected @Nonnull T from(@Nonnull InputWidget input) {
 		super.from(input);
 		BindUtil.copyAuthoredCondition(input.getXmlDisabledCondition(), input.getXmlEnabledCondition(), this::disabledCondition, this::enabledCondition);
 		BindUtil.copyAuthoredCondition(input.getXmlInvisibleCondition(), input.getXmlVisibleCondition(), this::invisibleCondition, this::visibleCondition);
@@ -88,5 +88,5 @@ public abstract class FluentInputWidget<T extends FluentInputWidget<T>>  extends
 	 * @return the mutable input-widget metadata being configured
 	 */
 	@Override
-	public abstract InputWidget get();
+	public abstract @Nonnull InputWidget get();
 }

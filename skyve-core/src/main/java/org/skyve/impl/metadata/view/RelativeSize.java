@@ -1,5 +1,7 @@
 package org.skyve.impl.metadata.view;
 
+import jakarta.annotation.Nullable;
+
 /**
  * Mixin interface for view widgets that support the full set of size attributes:
  * absolute pixel size, responsive column width, and height constraints.
@@ -9,6 +11,6 @@ package org.skyve.impl.metadata.view;
  * most content container widgets.
  */
 public interface RelativeSize extends AbsoluteSize, ResponsiveWidth, ConstrainableSize {
-	public Integer getPercentageHeight();
-	public void setPercentageHeight(Integer percentageHeight);
+	public @Nullable Integer getPercentageHeight();
+	public void setPercentageHeight(@Nullable Integer percentageHeight);
 }

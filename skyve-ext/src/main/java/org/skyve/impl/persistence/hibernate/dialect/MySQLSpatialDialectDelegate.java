@@ -21,6 +21,9 @@ import org.hibernate.tool.schema.internal.StandardIndexExporter;
 import org.hibernate.tool.schema.spi.Exporter;
 import org.locationtech.jts.geom.Geometry;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * MySQL-specific {@link SkyveDialect} delegate that centralizes spatial conversion rules and
  * index DDL customizations used by Skyve.
@@ -37,7 +40,7 @@ class MySQLSpatialDialectDelegate implements SkyveDialect, Serializable {
 	 *
 	 * @param dialect the concrete Hibernate dialect that will emit index DDL
 	 */
-	public MySQLSpatialDialectDelegate(Dialect dialect) {
+	public MySQLSpatialDialectDelegate(@Nonnull Dialect dialect) {
 		// We override index exporter for MySQL so that we can specify the max length of indexes.
 		// We use 1024 as we assume that innodb_large_prefix setting is ON - default in MySQL > 5.7.
 		indexExporter = new StandardIndexExporter(dialect) {
@@ -50,7 +53,7 @@ class MySQLSpatialDialectDelegate implements SkyveDialect, Serializable {
 			 * @return SQL statements for creating the index
 			 */
 			@Override
-			public String[] getSqlCreateStrings(Index index, Metadata metadata) {
+			public @Nonnull String[] getSqlCreateStrings(@Nonnull Index index, @Nonnull Metadata metadata) {
 				@SuppressWarnings("deprecation")
 				String[] result = super.getSqlCreateStrings(index, metadata);
 
@@ -90,7 +93,7 @@ class MySQLSpatialDialectDelegate implements SkyveDialect, Serializable {
 	 * @return the geometry type descriptor bound to this dialect
 	 */
 	@Override
-	public JTSGeometryType getGeometryType() {
+	public @Nonnull JTSGeometryType getGeometryType() {
 		return geometryType;
 	}
 
@@ -102,7 +105,7 @@ class MySQLSpatialDialectDelegate implements SkyveDialect, Serializable {
 	 * @return the converted value suitable for JDBC persistence
 	 */
 	@Override
-	public Object convertToPersistedValue(Geometry geometry) {
+	public @Nullable Object convertToPersistedValue(@Nonnull Geometry geometry) {
 		final WkbEncoder encoder = Wkb.newEncoder(Wkb.Dialect.MYSQL_WKB);
 		final ByteBuffer buffer = encoder.encode(JTS.from(geometry), ByteOrder.NDR);
 		return (buffer == null) ? null : buffer.toByteArray();
@@ -116,7 +119,7 @@ class MySQLSpatialDialectDelegate implements SkyveDialect, Serializable {
 	 * @return the converted JTS geometry value
 	 */
 	@Override
-	public Geometry convertFromPersistedValue(Object geometry) {
+	public @Nonnull Geometry convertFromPersistedValue(@Nonnull Object geometry) {
 		final ByteBuffer buffer = ByteBuffer.from((byte[]) geometry);
 		final WkbDecoder decoder = Wkb.newDecoder(Wkb.Dialect.MYSQL_WKB);
 		return JTS.to(decoder.decode(buffer));
@@ -130,7 +133,7 @@ class MySQLSpatialDialectDelegate implements SkyveDialect, Serializable {
 	 * @return true when column change DDL should be emitted, otherwise false
 	 */
 	@Override
-	public boolean isAlterTableColumnChangeRequired(Column column, ColumnInformation columnInfo) {
+	public boolean isAlterTableColumnChangeRequired(@Nonnull Column column, @Nullable ColumnInformation columnInfo) {
 		boolean result = DDLDelegate.isAlterTableColumnChangeRequired(column, columnInfo);
 		// remove false positive where MySQL treats any varchar > 255 in length as various sizes of its text types.
 		if (result && (columnInfo != null) && (columnInfo.getTypeCode() == Types.LONGVARCHAR) && column.getLength() >= 255) {
@@ -145,7 +148,7 @@ class MySQLSpatialDialectDelegate implements SkyveDialect, Serializable {
 	 * @return the SQL fragment used for alter-column statements
 	 */
 	@Override
-	public String getModifyColumnString() {
+	public @Nonnull String getModifyColumnString() {
 		return "modify column";
 	}
 	
@@ -155,7 +158,7 @@ class MySQLSpatialDialectDelegate implements SkyveDialect, Serializable {
 	 * @return the Skyve RDBMS enum value for this dialect
 	 */
 	@Override
-	public RDBMS getRDBMS() {
+	public @Nonnull RDBMS getRDBMS() {
 		return RDBMS.mysql;
 	}
 	
@@ -164,7 +167,7 @@ class MySQLSpatialDialectDelegate implements SkyveDialect, Serializable {
 	 *
 	 * @return the configured MySQL-aware index exporter
 	 */
-	Exporter<Index> getIndexExporter() {
+	@Nonnull Exporter<Index> getIndexExporter() {
 		return indexExporter;
 	}
 }

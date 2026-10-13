@@ -19,6 +19,8 @@ import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.util.Util;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlElementRef;
@@ -75,7 +77,7 @@ public class ListMembership extends InputWidget implements MembershipWidget, Abs
 						@XmlElementRef(type = SetInvisibleEventAction.class),
 						@XmlElementRef(type = ToggleDisabledEventAction.class),
 						@XmlElementRef(type = ToggleVisibilityEventAction.class)})
-	public List<EventAction> getChangedActions() {
+	public @Nonnull List<EventAction> getChangedActions() {
 		return changedActions;
 	}
 
@@ -83,7 +85,7 @@ public class ListMembership extends InputWidget implements MembershipWidget, Abs
 	 * Returns the absolute pixel width, or {@code null} when renderer defaults apply.
 	 */
 	@Override
-	public Integer getPixelWidth() {
+	public @Nullable Integer getPixelWidth() {
 		return pixelWidth;
 	}
 
@@ -92,7 +94,7 @@ public class ListMembership extends InputWidget implements MembershipWidget, Abs
 	 */
 	@Override
 	@XmlAttribute(name = "pixelWidth", required = false)
-	public void setPixelWidth(Integer pixelWidth) {
+	public void setPixelWidth(@Nullable Integer pixelWidth) {
 		this.pixelWidth = pixelWidth;
 	}
 
@@ -100,7 +102,7 @@ public class ListMembership extends InputWidget implements MembershipWidget, Abs
 	 * Returns the minimum pixel height constraint, or {@code null} when unconstrained.
 	 */
 	@Override
-	public Integer getMinPixelHeight() {
+	public @Nullable Integer getMinPixelHeight() {
 		return minPixelHeight;
 	}
 
@@ -109,14 +111,14 @@ public class ListMembership extends InputWidget implements MembershipWidget, Abs
 	 */
 	@Override
 	@XmlAttribute(name = "minPixelHeight", required = false)
-	public void setMinPixelHeight(Integer minPixelHeight) {
+	public void setMinPixelHeight(@Nullable Integer minPixelHeight) {
 		this.minPixelHeight = minPixelHeight;
 	}
 
 	/**
 	 * Returns the configured heading text for the candidate list.
 	 */
-	public String getCandidatesHeading() {
+	public @Nullable String getCandidatesHeading() {
 		return candidatesHeading;
 	}
 
@@ -125,7 +127,7 @@ public class ListMembership extends InputWidget implements MembershipWidget, Abs
 	 *
 	 * @return the localised candidates heading
 	 */
-	public String getLocalisedCandidatesHeading() {
+	public @Nullable String getLocalisedCandidatesHeading() {
 		return Util.i18n(candidatesHeading);
 	}
 
@@ -134,7 +136,7 @@ public class ListMembership extends InputWidget implements MembershipWidget, Abs
 	 *
 	 * @return {@code Boolean.FALSE} to allow trusted markup; {@code null} or {@code Boolean.TRUE} to escape at the renderer boundary
 	 */
-	public Boolean getEscapeCandidatesHeading() {
+	public @Nullable Boolean getEscapeCandidatesHeading() {
 		return escapeCandidatesHeading;
 	}
 	
@@ -142,7 +144,7 @@ public class ListMembership extends InputWidget implements MembershipWidget, Abs
 	 * Sets the candidate-list heading after trimming and empty-string normalisation.
 	 */
 	@XmlAttribute(required = false)
-	public void setCandidatesHeading(String candidatesHeading) {
+	public void setCandidatesHeading(@Nullable String candidatesHeading) {
 		this.candidatesHeading = UtilImpl.processStringValue(candidatesHeading);
 	}
 
@@ -152,14 +154,14 @@ public class ListMembership extends InputWidget implements MembershipWidget, Abs
 	 * @param escapeCandidatesHeading {@code Boolean.FALSE} to allow trusted markup; {@code null} or {@code Boolean.TRUE} to escape at the renderer boundary
 	 */
 	@XmlAttribute(required = false)
-	public void setEscapeCandidatesHeading(Boolean escapeCandidatesHeading) {
+	public void setEscapeCandidatesHeading(@Nullable Boolean escapeCandidatesHeading) {
 		this.escapeCandidatesHeading = escapeCandidatesHeading;
 	}
 
 	/**
 	 * Returns the configured heading text for the members list.
 	 */
-	public String getMembersHeading() {
+	public @Nullable String getMembersHeading() {
 		return membersHeading;
 	}
 
@@ -168,7 +170,7 @@ public class ListMembership extends InputWidget implements MembershipWidget, Abs
 	 *
 	 * @return the localised members heading
 	 */
-	public String getLocalisedMembersHeading() {
+	public @Nullable String getLocalisedMembersHeading() {
 		return Util.i18n(membersHeading);
 	}
 
@@ -177,7 +179,7 @@ public class ListMembership extends InputWidget implements MembershipWidget, Abs
 	 *
 	 * @return {@code Boolean.FALSE} to allow trusted markup; {@code null} or {@code Boolean.TRUE} to escape at the renderer boundary
 	 */
-	public Boolean getEscapeMembersHeading() {
+	public @Nullable Boolean getEscapeMembersHeading() {
 		return escapeMembersHeading;
 	}
 	
@@ -185,7 +187,7 @@ public class ListMembership extends InputWidget implements MembershipWidget, Abs
 	 * Sets the members-list heading after trimming and empty-string normalisation.
 	 */
 	@XmlAttribute(required = false)
-	public void setMembersHeading(String membersHeading) {
+	public void setMembersHeading(@Nullable String membersHeading) {
 		this.membersHeading = UtilImpl.processStringValue(membersHeading);
 	}
 
@@ -195,7 +197,7 @@ public class ListMembership extends InputWidget implements MembershipWidget, Abs
 	 * @param escapeMembersHeading {@code Boolean.FALSE} to allow trusted markup; {@code null} or {@code Boolean.TRUE} to escape at the renderer boundary
 	 */
 	@XmlAttribute(required = false)
-	public void setEscapeMembersHeading(Boolean escapeMembersHeading) {
+	public void setEscapeMembersHeading(@Nullable Boolean escapeMembersHeading) {
 		this.escapeMembersHeading = escapeMembersHeading;
 	}
 
@@ -203,7 +205,7 @@ public class ListMembership extends InputWidget implements MembershipWidget, Abs
 	 * Returns the mutable decorator property map for this widget.
 	 */
 	@Override
-	public Map<String, String> getProperties() {
+	public @Nonnull Map<String, String> getProperties() {
 		return properties;
 	}
 }

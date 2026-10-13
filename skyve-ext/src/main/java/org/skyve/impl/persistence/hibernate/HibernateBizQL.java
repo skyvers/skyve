@@ -36,7 +36,7 @@ public class HibernateBizQL extends AbstractBizQL {
 	 * @return the matching bean results
 	 */
 	@Override
-	public <T extends Bean> List<T> beanResults() {
+	public @Nonnull <T extends Bean> List<T> beanResults() {
 		Query<T> query = delegate.createHibernateQuery(this);
 		return delegate.list(query, true, true, false);
 	}
@@ -49,7 +49,7 @@ public class HibernateBizQL extends AbstractBizQL {
 	 */
 	@Override
 	@SuppressWarnings("resource") // Ownership of the returned AutoClosingIterable passes to the caller.
-	public <T extends Bean> AutoClosingIterable<T> beanIterable() {
+	public @Nonnull <T extends Bean> AutoClosingIterable<T> beanIterable() {
 		Query<T> query = delegate.createHibernateQuery(this);
 		return delegate.iterate(query, true, true, false);
 	}
@@ -61,7 +61,7 @@ public class HibernateBizQL extends AbstractBizQL {
 	 * @return the projected query results
 	 */
 	@Override
-	public <T extends Bean> List<T> projectedResults() {
+	public @Nonnull <T extends Bean> List<T> projectedResults() {
 		Query<T> query = delegate.createHibernateQuery(this);
 		return delegate.list(query, false, false, false);
 	}
@@ -74,7 +74,7 @@ public class HibernateBizQL extends AbstractBizQL {
 	 */
 	@Override
 	@SuppressWarnings("resource") // Ownership of the returned AutoClosingIterable passes to the caller.
-	public <T extends Bean> AutoClosingIterable<T> projectedIterable() {
+	public @Nonnull <T extends Bean> AutoClosingIterable<T> projectedIterable() {
 		Query<T> query = delegate.createHibernateQuery(this);
 		return delegate.iterate(query, false, false, false);
 	}
@@ -87,7 +87,7 @@ public class HibernateBizQL extends AbstractBizQL {
 	 * @return scalar query results
 	 */
 	@Override
-	public <T> List<T> scalarResults(Class<T> type) {
+	public @Nonnull <T> List<T> scalarResults(@Nonnull Class<T> type) {
 		Query<T> query = delegate.createHibernateQuery(this);
 		return delegate.list(query, true, true, false);
 	}
@@ -101,7 +101,7 @@ public class HibernateBizQL extends AbstractBizQL {
 	 */
 	@Override
 	@SuppressWarnings("resource") // Ownership of the returned AutoClosingIterable passes to the caller.
-	public <T> AutoClosingIterable<T> scalarIterable(Class<T> type) {
+	public @Nonnull <T> AutoClosingIterable<T> scalarIterable(@Nonnull Class<T> type) {
 		Query<T> query = delegate.createHibernateQuery(this);
 		return delegate.iterate(query, true, true, false);
 	}
@@ -112,7 +112,7 @@ public class HibernateBizQL extends AbstractBizQL {
 	 * @return tuple rows where each element represents a projected column value
 	 */
 	@Override
-	public List<Object[]> tupleResults() {
+	public @Nonnull List<Object[]> tupleResults() {
 		Query<Object[]> query = delegate.createHibernateQuery(this);
 		return delegate.list(query, true, false, true);
 	}
@@ -124,7 +124,7 @@ public class HibernateBizQL extends AbstractBizQL {
 	 */
 	@Override
 	@SuppressWarnings("resource") // Ownership of the returned AutoClosingIterable passes to the caller.
-	public AutoClosingIterable<Object[]> tupleIterable() {
+	public @Nonnull AutoClosingIterable<Object[]> tupleIterable() {
 		Query<Object[]> query = delegate.createHibernateQuery(this);
 		return delegate.iterate(query, true, false, true);
 	}
@@ -146,7 +146,7 @@ public class HibernateBizQL extends AbstractBizQL {
 	 * @return this query for fluent chaining
 	 */
 	@Override
-	public BizQL setFirstResult(int first) {
+	public @Nonnull BizQL setFirstResult(int first) {
 		delegate.setFirstResult(first);
 		return this;
 	}
@@ -158,7 +158,7 @@ public class HibernateBizQL extends AbstractBizQL {
 	 * @return this query for fluent chaining
 	 */
 	@Override
-	public BizQL setMaxResults(int max) {
+	public @Nonnull BizQL setMaxResults(int max) {
 		delegate.setMaxResults(max);
 		return this;
 	}

@@ -25,7 +25,7 @@ public class FluentTabPane extends FluentWidget implements FluentRelativeSize<Fl
 	 * @param tabPane
 	 *            the tab-pane metadata to mutate
 	 */
-	public FluentTabPane(TabPane tabPane) {
+	public FluentTabPane(@Nonnull TabPane tabPane) {
 		pane = tabPane;
 	}
 	
@@ -39,7 +39,7 @@ public class FluentTabPane extends FluentWidget implements FluentRelativeSize<Fl
 	 *            the source tab-pane metadata
 	 * @return this builder
 	 */
-	public FluentTabPane from(TabPane tabPane) {
+	public @Nonnull FluentTabPane from(@Nonnull TabPane tabPane) {
 		widgetId(tabPane.getWidgetId());
 		
 		relativeSize(tabPane, this);
@@ -63,7 +63,7 @@ public class FluentTabPane extends FluentWidget implements FluentRelativeSize<Fl
 	 *            the widget identifier
 	 * @return this builder
 	 */
-	public FluentTabPane widgetId(String widgetId) {
+	public @Nonnull FluentTabPane widgetId(@Nullable String widgetId) {
 		pane.setWidgetId(widgetId);
 		return this;
 	}
@@ -76,7 +76,7 @@ public class FluentTabPane extends FluentWidget implements FluentRelativeSize<Fl
 	 * @return this builder
 	 */
 	@Override
-	public FluentTabPane pixelWidth(int pixelWidth) {
+	public @Nonnull FluentTabPane pixelWidth(int pixelWidth) {
 		pane.setPixelWidth(Integer.valueOf(pixelWidth));
 		return this;
 	}
@@ -89,7 +89,7 @@ public class FluentTabPane extends FluentWidget implements FluentRelativeSize<Fl
 	 * @return this builder
 	 */
 	@Override
-	public FluentTabPane responsiveWidth(int responsiveWidth) {
+	public @Nonnull FluentTabPane responsiveWidth(int responsiveWidth) {
 		pane.setResponsiveWidth(Integer.valueOf(responsiveWidth));
 		return this;
 	}
@@ -102,7 +102,7 @@ public class FluentTabPane extends FluentWidget implements FluentRelativeSize<Fl
 	 * @return this builder
 	 */
 	@Override
-	public FluentTabPane sm(int sm) {
+	public @Nonnull FluentTabPane sm(int sm) {
 		pane.setSm(Integer.valueOf(sm));
 		return this;
 	}
@@ -115,7 +115,7 @@ public class FluentTabPane extends FluentWidget implements FluentRelativeSize<Fl
 	 * @return this builder
 	 */
 	@Override
-	public FluentTabPane md(int md) {
+	public @Nonnull FluentTabPane md(int md) {
 		pane.setMd(Integer.valueOf(md));
 		return this;
 	}
@@ -128,7 +128,7 @@ public class FluentTabPane extends FluentWidget implements FluentRelativeSize<Fl
 	 * @return this builder
 	 */
 	@Override
-	public FluentTabPane lg(int lg) {
+	public @Nonnull FluentTabPane lg(int lg) {
 		pane.setLg(Integer.valueOf(lg));
 		return this;
 	}
@@ -141,7 +141,7 @@ public class FluentTabPane extends FluentWidget implements FluentRelativeSize<Fl
 	 * @return this builder
 	 */
 	@Override
-	public FluentTabPane xl(int xl) {
+	public @Nonnull FluentTabPane xl(int xl) {
 		pane.setXl(Integer.valueOf(xl));
 		return this;
 	}
@@ -154,7 +154,7 @@ public class FluentTabPane extends FluentWidget implements FluentRelativeSize<Fl
 	 * @return this builder
 	 */
 	@Override
-	public FluentTabPane percentageWidth(int percentageWidth) {
+	public @Nonnull FluentTabPane percentageWidth(int percentageWidth) {
 		pane.setPercentageWidth(Integer.valueOf(percentageWidth));
 		return this;
 	}
@@ -167,7 +167,7 @@ public class FluentTabPane extends FluentWidget implements FluentRelativeSize<Fl
 	 * @return this builder
 	 */
 	@Override
-	public FluentTabPane minPixelWidth(int minPixelWidth) {
+	public @Nonnull FluentTabPane minPixelWidth(int minPixelWidth) {
 		pane.setMinPixelWidth(Integer.valueOf(minPixelWidth));
 		return this;
 	}
@@ -180,7 +180,7 @@ public class FluentTabPane extends FluentWidget implements FluentRelativeSize<Fl
 	 * @return this builder
 	 */
 	@Override
-	public FluentTabPane maxPixelWidth(int maxPixelWidth) {
+	public @Nonnull FluentTabPane maxPixelWidth(int maxPixelWidth) {
 		pane.setMaxPixelWidth(Integer.valueOf(maxPixelWidth));
 		return this;
 	}
@@ -193,7 +193,7 @@ public class FluentTabPane extends FluentWidget implements FluentRelativeSize<Fl
 	 * @return this builder
 	 */
 	@Override
-	public FluentTabPane pixelHeight(int pixelHeight) {
+	public @Nonnull FluentTabPane pixelHeight(int pixelHeight) {
 		pane.setPixelHeight(Integer.valueOf(pixelHeight));
 		return this;
 	}
@@ -206,7 +206,7 @@ public class FluentTabPane extends FluentWidget implements FluentRelativeSize<Fl
 	 * @return this builder
 	 */
 	@Override
-	public FluentTabPane percentageHeight(int percentageHeight) {
+	public @Nonnull FluentTabPane percentageHeight(int percentageHeight) {
 		pane.setPercentageHeight(Integer.valueOf(percentageHeight));
 		return this;
 	}
@@ -219,7 +219,7 @@ public class FluentTabPane extends FluentWidget implements FluentRelativeSize<Fl
 	 * @return this builder
 	 */
 	@Override
-	public FluentTabPane minPixelHeight(int minPixelHeight) {
+	public @Nonnull FluentTabPane minPixelHeight(int minPixelHeight) {
 		pane.setMinPixelHeight(Integer.valueOf(minPixelHeight));
 		return this;
 	}
@@ -232,7 +232,7 @@ public class FluentTabPane extends FluentWidget implements FluentRelativeSize<Fl
 	 * @return this builder
 	 */
 	@Override
-	public FluentTabPane maxPixelHeight(int maxPixelHeight) {
+	public @Nonnull FluentTabPane maxPixelHeight(int maxPixelHeight) {
 		pane.setMaxPixelHeight(Integer.valueOf(maxPixelHeight));
 		return this;
 	}
@@ -292,7 +292,7 @@ public class FluentTabPane extends FluentWidget implements FluentRelativeSize<Fl
 	 *            binding expression for the selected tab index
 	 * @return this builder
 	 */
-	public FluentTabPane selectedTabIndexBinding(String selectedTabIndexBinding) {
+	public @Nonnull FluentTabPane selectedTabIndexBinding(@Nullable String selectedTabIndexBinding) {
 		pane.setSelectedTabIndexBinding(selectedTabIndexBinding);
 		return this;
 	}
@@ -304,7 +304,7 @@ public class FluentTabPane extends FluentWidget implements FluentRelativeSize<Fl
 	 *            tab builder to append
 	 * @return this builder
 	 */
-	public FluentTabPane addTab(FluentTab tab) {
+	public @Nonnull FluentTabPane addTab(@Nonnull FluentTab tab) {
 		pane.getTabs().add(tab.get());
 		return this;
 	}
@@ -318,7 +318,7 @@ public class FluentTabPane extends FluentWidget implements FluentRelativeSize<Fl
 	 *            tab builder to insert
 	 * @return this builder
 	 */
-	public FluentTabPane addTab(int index, FluentTab tab) {
+	public @Nonnull FluentTabPane addTab(int index, @Nonnull FluentTab tab) {
 		pane.getTabs().add(index, tab.get());
 		return this;
 	}
@@ -330,7 +330,7 @@ public class FluentTabPane extends FluentWidget implements FluentRelativeSize<Fl
 	 *            zero-based tab index
 	 * @return the tab wrapper at {@code index}
 	 */
-	public FluentTab getTab(int index) {
+	public @Nonnull FluentTab getTab(int index) {
 		return new FluentTab(pane.getTabs().get(index));
 	}
 
@@ -341,7 +341,7 @@ public class FluentTabPane extends FluentWidget implements FluentRelativeSize<Fl
 	 *            zero-based tab index
 	 * @return this builder
 	 */
-	public FluentTabPane removeTab(int index) {
+	public @Nonnull FluentTabPane removeTab(int index) {
 		pane.getTabs().remove(index);
 		return this;
 	}
@@ -351,7 +351,7 @@ public class FluentTabPane extends FluentWidget implements FluentRelativeSize<Fl
 	 *
 	 * @return this builder
 	 */
-	public FluentTabPane clearTabs() {
+	public @Nonnull FluentTabPane clearTabs() {
 		pane.getTabs().clear();
 		return this;
 	}
@@ -375,7 +375,7 @@ public class FluentTabPane extends FluentWidget implements FluentRelativeSize<Fl
 	 * @return the mutable tab-pane metadata
 	 */
 	@Override
-	public TabPane get() {
+	public @Nonnull TabPane get() {
 		return pane;
 	}
 }

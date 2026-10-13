@@ -3,6 +3,8 @@ package org.skyve.archive.support;
 import org.skyve.domain.Bean;
 import org.skyve.domain.types.Timestamp;
 
+import jakarta.annotation.Nullable;
+
 /**
  * Marker interface for domain beans that participate in the Skyve archive lifecycle.
  *
@@ -30,11 +32,11 @@ public interface ArchiveableBean extends Bean {
     @SuppressWarnings("java:S115") // Property-name constants mirror generated domain binding names.
     public static final String archiveFilenamePropertyName = "archiveFilename";
 
-    public Timestamp getArchiveTimestamp();
+    public @Nullable Timestamp getArchiveTimestamp();
 
-    public String getArchiveFilename();
+    public @Nullable String getArchiveFilename();
 
-    public void setArchiveTimestamp(Timestamp archiveTimestamp);
+    public void setArchiveTimestamp(@Nullable Timestamp archiveTimestamp);
 
-    public void setArchiveFilename(String archiveFilename);
+    public void setArchiveFilename(@Nullable String archiveFilename);
 }

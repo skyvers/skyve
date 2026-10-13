@@ -4,6 +4,9 @@ import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Use to produce a series of colours for the size given.
  * Note that the class is depleted once <code>size</code> colours have been generated.
@@ -19,7 +22,7 @@ public abstract class ColourSeries {
 	 * Get the current colour in the series.
 	 * @return	The current colour.
 	 */
-	public Color getCurrent() {
+	public @Nullable Color getCurrent() {
 		return current;
 	}
 
@@ -28,7 +31,7 @@ public abstract class ColourSeries {
 	 * @param alpha
 	 * @return	The current colour.
 	 */
-	public Color getCurrent(int alpha) {
+	public @Nonnull Color getCurrent(int alpha) {
 		return new Color(current.getRed(), current.getGreen(), current.getBlue(), alpha);
 	}
 
@@ -44,14 +47,14 @@ public abstract class ColourSeries {
 	 * Sets the current colour to the next colour in the colour series and returns the new current colour.
 	 * @return	The new current colour.
 	 */
-	public abstract Color next();
+	public abstract @Nonnull Color next();
 
 	/**
 	 * Gets the next colour in the colour series with the given alpha.
 	 * @param alpha
 	 * @return	The next colour.
 	 */	 
-	public Color next(int alpha) {
+	public @Nonnull Color next(int alpha) {
 		next();
 		return getCurrent(alpha);
 	}
@@ -60,7 +63,7 @@ public abstract class ColourSeries {
 	 * List all the colours in the series.
 	 * @return
 	 */
-	public List<Color> list() {
+	public @Nonnull List<Color> list() {
 		List<Color> result = new ArrayList<>(size);
 		for (int i = 0; i < size; i++) {
 			result.add(getCurrent());
@@ -73,7 +76,7 @@ public abstract class ColourSeries {
 	 * List all the colours in the series with the given alpha.
 	 * @return
 	 */
-	public List<Color> list(int alpha) {
+	public @Nonnull List<Color> list(int alpha) {
 		List<Color> result = new ArrayList<>(size);
 		for (int i = 0; i < size; i++) {
 			result.add(getCurrent(alpha));

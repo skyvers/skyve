@@ -13,6 +13,9 @@ import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.Role;
 import org.skyve.metadata.user.UserAccess;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Runtime implementation of {@link org.skyve.metadata.user.Role} that carries
  * the role's document and action privilege set, content restrictions and
@@ -34,59 +37,59 @@ public class RoleImpl implements Role {
 	private Map<String, String> properties = new LinkedHashMap<>();
 	
 	@Override
-	public String getDescription() {
+	public @Nullable String getDescription() {
 		return description;
 	}
 
-	public void setDescription(String description) {
+	public void setDescription(@Nullable String description) {
 		this.description = description;
 	}
 
 	@Override
-	public String getName() {
+	public @Nullable String getName() {
 		return name;
 	}
 
-	public void setName(String name) {
+	public void setName(@Nonnull String name) {
 		this.name = name;
 	}
 
-	public List<Privilege> getPrivileges() {
+	public @Nonnull List<Privilege> getPrivileges() {
 		return privileges;
 	}
 
-	public List<ContentRestriction> getContentRestrictions() {
+	public @Nonnull List<ContentRestriction> getContentRestrictions() {
 		return contentRestrictions;
 	}
 
-	public List<ContentPermission> getContentPermissions() {
+	public @Nonnull List<ContentPermission> getContentPermissions() {
 		return contentPermissions;
 	}
 
-	public Map<UserAccess, Set<String>> getAccesses() {
+	public @Nonnull Map<UserAccess, Set<String>> getAccesses() {
 		return accesses;
 	}
 	
 	@Override
-	public Module getOwningModule() {
+	public @Nonnull Module getOwningModule() {
 		return owningModule;
 	}
 
-	public void setOwningModule(Module owningModule) {
+	public void setOwningModule(@Nonnull Module owningModule) {
 		this.owningModule = owningModule;
 	}
 
 	@Override
-	public String getDocumentation() {
+	public @Nullable String getDocumentation() {
 		return documentation;
 	}
 
-	public void setDocumentation(String documentation) {
+	public void setDocumentation(@Nullable String documentation) {
 		this.documentation = documentation;
 	}
 	
 	@Override
-	public Map<String, String> getProperties() {
+	public @Nonnull Map<String, String> getProperties() {
 		return properties;
 	}
 }

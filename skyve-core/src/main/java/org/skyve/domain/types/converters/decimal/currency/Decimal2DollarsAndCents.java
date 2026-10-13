@@ -11,6 +11,9 @@ import org.skyve.domain.types.converters.Format;
 import org.skyve.domain.types.converters.Validator;
 import org.skyve.metadata.model.Attribute.AttributeType;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Converts {@link Decimal2} values using dollars-and-cents formatting.
  */
@@ -22,7 +25,7 @@ public class Decimal2DollarsAndCents implements Converter<Decimal2> {
 	 * @return the result value
 	 */
 	@Override
-	public Class<Decimal2> getValueType() {
+	public @Nonnull Class<Decimal2> getValueType() {
 		return Decimal2.class;
 	}
 	
@@ -32,7 +35,7 @@ public class Decimal2DollarsAndCents implements Converter<Decimal2> {
 	 * @return the result value
 	 */
 	@Override
-	public String toDisplayValue(Decimal2 value) throws ConversionException {
+	public @Nonnull String toDisplayValue(@Nonnull Decimal2 value) throws ConversionException {
 		try {
 			DecimalFormat df = CORE.getDecimalFormat(PATTERN);
 			df.setParseBigDecimal(true);
@@ -49,7 +52,7 @@ public class Decimal2DollarsAndCents implements Converter<Decimal2> {
 	 * @return the result value
 	 */
 	@Override
-	public Decimal2 fromDisplayValue(String displayValue) throws ConversionException {
+	public @Nonnull Decimal2 fromDisplayValue(@Nonnull String displayValue) throws ConversionException {
 		try {
 			String numberValue = displayValue;
 			if (displayValue.startsWith("$")) {
@@ -70,7 +73,7 @@ public class Decimal2DollarsAndCents implements Converter<Decimal2> {
 	 * @return the result value
 	 */
 	@Override
-	public AttributeType getAttributeType() {
+	public @Nonnull AttributeType getAttributeType() {
 		return AttributeType.decimal2;
 	}
 	
@@ -79,7 +82,7 @@ public class Decimal2DollarsAndCents implements Converter<Decimal2> {
 	 * @return the result value
 	 */
 	@Override
-	public Format<Decimal2> getFormat() {
+	public @Nullable Format<Decimal2> getFormat() {
 		return null;
 	}
 	
@@ -88,7 +91,7 @@ public class Decimal2DollarsAndCents implements Converter<Decimal2> {
 	 * @return the result value
 	 */
 	@Override
-	public Validator<Decimal2> getValidator() {
+	public @Nullable Validator<Decimal2> getValidator() {
 		return null;
 	}
 	
@@ -97,7 +100,7 @@ public class Decimal2DollarsAndCents implements Converter<Decimal2> {
 	 * @return the result value
 	 */
 	@Override
-	public String getFormatPattern() {
+	public @Nonnull String getFormatPattern() {
 		return PATTERN;
 	}
 }

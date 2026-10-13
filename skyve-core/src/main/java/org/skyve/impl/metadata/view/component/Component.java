@@ -96,40 +96,40 @@ public class Component extends AbstractBound implements NamedMetaData, Decorated
 	@XmlElement(name = "condition", namespace = XMLMetaData.VIEW_NAMESPACE)
 	private List<ComponentTranslation> conditions = new ArrayList<>();
 
-	public String getModuleName() {
+	public @Nullable String getModuleName() {
 		return moduleName;
 	}
 
 	@XmlAttribute(name = "module", required = false)
-	public void setModuleName(String moduleName) {
+	public void setModuleName(@Nullable String moduleName) {
 		this.moduleName = moduleName;
 	}
 
-	public String getDocumentName() {
+	public @Nullable String getDocumentName() {
 		return documentName;
 	}
 
 	@XmlAttribute(name = "document", required = false)
-	public void setDocumentName(String documentName) {
+	public void setDocumentName(@Nullable String documentName) {
 		this.documentName = documentName;
 	}
 
 	@Override
-	public String getName() {
+	public @Nullable String getName() {
 		return name;
 	}
 
 	@XmlAttribute(name = "name")
-	public void setName(String name) {
+	public void setName(@Nullable String name) {
 		this.name = name;
 	}
 
-	public String getWidgetId() {
+	public @Nullable String getWidgetId() {
 		return widgetId;
 	}
 
 	@XmlAttribute(name = "widgetId")
-	public void setWidgetId(String widgetId) {
+	public void setWidgetId(@Nullable String widgetId) {
 		this.widgetId = widgetId;
 	}
 
@@ -195,7 +195,7 @@ public class Component extends AbstractBound implements NamedMetaData, Decorated
 	}
 
 	@Override
-	public Map<String, String> getProperties() {
+	public @Nonnull Map<String, String> getProperties() {
 		return properties;
 	}
 
@@ -231,7 +231,7 @@ public class Component extends AbstractBound implements NamedMetaData, Decorated
 	private String targetDocument;
 	private String targetView;
 	
-	public ViewImpl getFragment(CustomerImpl customer, String uxui) {
+	public @Nonnull ViewImpl getFragment(@Nonnull CustomerImpl customer, @Nonnull String uxui) {
 		ModuleImpl m = (ModuleImpl) customer.getModule(targetModule);
 		DocumentImpl d = (DocumentImpl) m.getDocument(customer, targetDocument);
 		ViewImpl v = (ViewImpl) d.getView(uxui, customer, targetView);
@@ -249,7 +249,7 @@ public class Component extends AbstractBound implements NamedMetaData, Decorated
 	}
 
 	@SuppressWarnings("java:S3776") // Complexity OK
-	public void link(String uxui, CustomerImpl customer, ModuleImpl owningModule, DocumentImpl owningDocument, String viewName) {
+	public void link(@Nullable String uxui, @Nonnull CustomerImpl customer, @Nonnull ModuleImpl owningModule, @Nonnull DocumentImpl owningDocument, @Nullable String viewName) {
 		String binding = getBinding();
 		ModuleImpl m = null;
 		DocumentImpl d = null;

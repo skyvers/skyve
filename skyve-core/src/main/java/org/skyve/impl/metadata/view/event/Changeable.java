@@ -4,6 +4,8 @@ import java.util.List;
 
 import org.skyve.metadata.view.widget.bound.Bound;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * Mixin interface for bound input widgets that fire a value-change event.
  *
@@ -14,5 +16,5 @@ import org.skyve.metadata.view.widget.bound.Bound;
  * @see org.skyve.metadata.view.widget.bound.Bound
  */
 public interface Changeable extends Bound {
-	public List<EventAction> getChangedActions();
+	public @Nonnull List<EventAction> getChangedActions();
 }

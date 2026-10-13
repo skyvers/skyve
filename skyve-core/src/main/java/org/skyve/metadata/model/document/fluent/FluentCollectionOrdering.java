@@ -4,6 +4,9 @@ import org.skyve.impl.metadata.OrderingImpl;
 import org.skyve.metadata.Ordering;
 import org.skyve.metadata.SortDirection;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Provides a fluent builder for FluentCollectionOrdering metadata.
  */
@@ -20,7 +23,7 @@ public class FluentCollectionOrdering {
 	/**
 	 * Creates a fluent builder instance.
 	 */
-	public FluentCollectionOrdering(OrderingImpl ordering) {
+	public FluentCollectionOrdering(@Nonnull OrderingImpl ordering) {
 		this.ordering = ordering;
 	}
 
@@ -28,7 +31,7 @@ public class FluentCollectionOrdering {
 	 * Copies metadata values from an existing definition into this builder.
 	 */
 
-	public FluentCollectionOrdering from(@SuppressWarnings("hiding") Ordering ordering) {
+	public @Nonnull FluentCollectionOrdering from(@SuppressWarnings("hiding") @Nonnull Ordering ordering) {
 		by(ordering.getBy());
 		sort(ordering.getSort());
 		return this;
@@ -37,7 +40,7 @@ public class FluentCollectionOrdering {
 	/**
 	 * Updates metadata on this fluent builder.
 	 */
-	public FluentCollectionOrdering by(String by) {
+	public @Nonnull FluentCollectionOrdering by(@Nullable String by) {
 		ordering.setBy(by);
 		return this;
 	}
@@ -45,14 +48,14 @@ public class FluentCollectionOrdering {
 	/**
 	 * Updates metadata on this fluent builder.
 	 */
-	public FluentCollectionOrdering sort(SortDirection sort) {
+	public @Nonnull FluentCollectionOrdering sort(@Nullable SortDirection sort) {
 		ordering.setSort(sort);
 		return this;
 	}
 	/**
 	 * Returns the mutable metadata instance represented by this builder.
 	 */
-	public OrderingImpl get() {
+	public @Nonnull OrderingImpl get() {
 		return ordering;
 	}
 }

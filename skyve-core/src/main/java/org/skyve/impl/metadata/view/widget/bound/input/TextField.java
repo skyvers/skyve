@@ -9,6 +9,8 @@ import org.skyve.impl.metadata.view.FormItemWidget;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.view.Editable;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlRootElement;
@@ -47,47 +49,47 @@ public class TextField extends ChangeableInputWidget implements Editable, Absolu
 	}
 	
 	@Override
-	public Boolean getEditable() {
+	public @Nullable Boolean getEditable() {
 		return editable;
 	}
 
 	@Override
 	@XmlAttribute(name = "editable", required = false)
-	public void setEditable(Boolean editable) {
+	public void setEditable(@Nullable Boolean editable) {
 		this.editable = editable;
 	}
 
-	public KeyboardType getKeyboardType() {
+	public @Nullable KeyboardType getKeyboardType() {
 		return keyboardType;
 	}
 
 	@XmlAttribute(name = "keyboardType", required = false)
-	public void setKeyboardType(KeyboardType keyboardType) {
+	public void setKeyboardType(@Nullable KeyboardType keyboardType) {
 		this.keyboardType = keyboardType;
 	}
 
-	public CompleteType getComplete() {
+	public @Nullable CompleteType getComplete() {
 		return complete;
 	}
 
 	@XmlAttribute(required = false)
-	public void setComplete(CompleteType complete) {
+	public void setComplete(@Nullable CompleteType complete) {
 		this.complete = complete;
 	}
 
 	@Override
-	public Integer getPixelWidth() {
+	public @Nullable Integer getPixelWidth() {
 		return pixelWidth;
 	}
 
 	@Override
 	@XmlAttribute(required = false)
-	public void setPixelWidth(Integer pixelWidth) {
+	public void setPixelWidth(@Nullable Integer pixelWidth) {
 		this.pixelWidth = pixelWidth;
 	}
 
 	@Override
-	public Map<String, String> getProperties() {
+	public @Nonnull Map<String, String> getProperties() {
 		return properties;
 	}
 }

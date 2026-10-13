@@ -1,5 +1,7 @@
 package org.skyve.impl.metadata.module.menu;
 
+import jakarta.annotation.Nullable;
+
 /**
  * Menu item that opens the calendar view of a document or query.
  *
@@ -20,17 +22,17 @@ public class CalendarItem extends AbstractDocumentOrQueryOrModelMenuItem {
 	private String startBinding;
 	private String endBinding;
 
-	public String getStartBinding() {
+	public @Nullable String getStartBinding() {
 		return startBinding;
 	}
-	public void setStartBinding(String startBinding) {
+	public void setStartBinding(@Nullable String startBinding) {
 		this.startBinding = startBinding;
 	}
 
-	public String getEndBinding() {
+	public @Nullable String getEndBinding() {
 		return endBinding;
 	}
-	public void setEndBinding(String endBinding) {
+	public void setEndBinding(@Nullable String endBinding) {
 		this.endBinding = endBinding;
 	}
 }

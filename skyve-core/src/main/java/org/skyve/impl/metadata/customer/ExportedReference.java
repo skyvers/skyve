@@ -7,6 +7,8 @@ import org.skyve.metadata.model.document.Collection.CollectionType;
 import org.skyve.metadata.model.document.Reference.ReferenceType;
 import org.skyve.util.Util;
 
+import jakarta.annotation.Nullable;
+
 /**
  * Records a cross-module referential dependency from one document to another.
  *
@@ -32,47 +34,47 @@ public class ExportedReference implements Serializable {
 	private ReferenceType type;
 	private boolean required;
 	
-	public String getDocumentAlias() {
+	public @Nullable String getDocumentAlias() {
 		return documentAlias;
 	}
 	
-	public String getLocalisedDocumentAlias() {
+	public @Nullable String getLocalisedDocumentAlias() {
 		return Util.i18n(documentAlias);
 	}
 
-	public void setDocumentAlias(String documentAlias) {
+	public void setDocumentAlias(@Nullable String documentAlias) {
 		this.documentAlias = documentAlias;
 	}
 
-	public String getReferenceFieldName() {
+	public @Nullable String getReferenceFieldName() {
 		return referenceFieldName;
 	}
 
-	public void setReferenceFieldName(String referenceFieldName) {
+	public void setReferenceFieldName(@Nullable String referenceFieldName) {
 		this.referenceFieldName = referenceFieldName;
 	}
 
-	public Persistent getPersistent() {
+	public @Nullable Persistent getPersistent() {
 		return persistent;
 	}
 
-	public void setPersistent(Persistent persistent) {
+	public void setPersistent(@Nullable Persistent persistent) {
 		this.persistent = persistent;
 	}
 
-	public String getDocumentName() {
+	public @Nullable String getDocumentName() {
 		return documentName;
 	}
 
-	public void setDocumentName(String documentName) {
+	public void setDocumentName(@Nullable String documentName) {
 		this.documentName = documentName;
 	}
 
-	public String getModuleName() {
+	public @Nullable String getModuleName() {
 		return moduleName;
 	}
 
-	public void setModuleName(String moduleName) {
+	public void setModuleName(@Nullable String moduleName) {
 		this.moduleName = moduleName;
 	}
 
@@ -80,11 +82,11 @@ public class ExportedReference implements Serializable {
 		return (type instanceof CollectionType);
 	}
 
-	public ReferenceType getType() {
+	public @Nullable ReferenceType getType() {
 		return type;
 	}
 
-	public void setType(ReferenceType type) {
+	public void setType(@Nullable ReferenceType type) {
 		this.type = type;
 	}
 

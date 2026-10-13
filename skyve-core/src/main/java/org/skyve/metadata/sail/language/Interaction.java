@@ -48,6 +48,8 @@ import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateTree
 import org.skyve.metadata.sail.language.step.interaction.session.Login;
 import org.skyve.metadata.sail.language.step.interaction.session.Logout;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlElementRef;
@@ -88,7 +90,7 @@ public class Interaction implements Executable {
 	 * Returns the name.
 	 * @return the result
 	 */
-	public String getName() {
+	public @Nullable String getName() {
 		return name;
 	}
 
@@ -97,7 +99,7 @@ public class Interaction implements Executable {
 	 * @param name the name
 	 */
 	@XmlAttribute(required = true)
-	public void setName(String name) {
+	public void setName(@Nullable String name) {
 		this.name = UtilImpl.processStringValue(name);
 	}
 	
@@ -105,7 +107,7 @@ public class Interaction implements Executable {
 	 * Returns the before.
 	 * @return the result
 	 */
-	public Procedure getBefore() {
+	public @Nullable Procedure getBefore() {
 		return before;
 	}
 
@@ -114,7 +116,7 @@ public class Interaction implements Executable {
 	 * @param before the before
 	 */
 	@XmlElement(namespace = XMLMetaData.SAIL_NAMESPACE, name = "before")
-	public void setBefore(Procedure before) {
+	public void setBefore(@Nullable Procedure before) {
 		this.before = before;
 	}
 
@@ -122,7 +124,7 @@ public class Interaction implements Executable {
 	 * Returns the after.
 	 * @return the result
 	 */
-	public Procedure getAfter() {
+	public @Nullable Procedure getAfter() {
 		return after;
 	}
 
@@ -131,7 +133,7 @@ public class Interaction implements Executable {
 	 * @param after the after
 	 */
 	@XmlElement(namespace = XMLMetaData.SAIL_NAMESPACE, name = "after")
-	public void setAfter(Procedure after) {
+	public void setAfter(@Nullable Procedure after) {
 		this.after = after;
 	}
 
@@ -181,7 +183,7 @@ public class Interaction implements Executable {
 						@XmlElementRef(type = PushEditContext.class),
 						@XmlElementRef(type = PopContext.class),
 						@XmlElementRef(type = ClearContext.class)})
-	public List<Step> getSteps() {
+	public @Nonnull List<Step> getSteps() {
 		return steps;
 	}
 	
@@ -190,7 +192,7 @@ public class Interaction implements Executable {
 	 * @param executor the executor
 	 */
 	@Override
-	public void execute(Executor executor) {
+	public void execute(@Nonnull Executor executor) {
 		executor.executeInteraction(this);
 	}
 }

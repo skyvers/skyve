@@ -7,6 +7,8 @@ import org.skyve.impl.domain.types.jaxb.CDATAAdapter;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlElementRef;
@@ -46,77 +48,77 @@ public class MetaDataQueryMetaData extends QueryDefinitionMetaData {
 	private String ordering;
 	private List<MetaDataQueryColumnMetaData> columns = new ArrayList<>();
 
-	public String getDocumentName() {
+	public @Nullable String getDocumentName() {
 		return documentName;
 	}
 
 	@XmlAttribute(required = true)
-	public void setDocumentName(String documentName) {
+	public void setDocumentName(@Nullable String documentName) {
 		this.documentName = UtilImpl.processStringValue(documentName);
 	}
 
-	public Boolean getPolymorphic() {
+	public @Nullable Boolean getPolymorphic() {
 		return polymorphic;
 	}
 
 	@XmlAttribute
-	public void setPolymorphic(Boolean polymorphic) {
+	public void setPolymorphic(@Nullable Boolean polymorphic) {
 		this.polymorphic = polymorphic;
 	}
 
-	public Boolean getAggregate() {
+	public @Nullable Boolean getAggregate() {
 		return aggregate;
 	}
 
 	@XmlAttribute
-	public void setAggregate(Boolean aggregate) {
+	public void setAggregate(@Nullable Boolean aggregate) {
 		this.aggregate = aggregate;
 	}
 
-	public String getFrom() {
+	public @Nullable String getFrom() {
 		return from;
 	}
 
 	@XmlElement(namespace = XMLMetaData.MODULE_NAMESPACE)
 	@XmlJavaTypeAdapter(CDATAAdapter.class)
-	public void setFrom(String from) {
+	public void setFrom(@Nullable String from) {
 		this.from =  UtilImpl.processStringValue(from);
 	}
 
-	public String getFilter() {
+	public @Nullable String getFilter() {
 		return filter;
 	}
 
 	@XmlElement(namespace = XMLMetaData.MODULE_NAMESPACE)
 	@XmlJavaTypeAdapter(CDATAAdapter.class)
-	public void setFilter(String filter) {
+	public void setFilter(@Nullable String filter) {
 		this.filter =  UtilImpl.processStringValue(filter);
 	}
 
-	public String getGrouping() {
+	public @Nullable String getGrouping() {
 		return grouping;
 	}
 
 	@XmlElement(namespace = XMLMetaData.MODULE_NAMESPACE)
 	@XmlJavaTypeAdapter(CDATAAdapter.class)
-	public void setGrouping(String grouping) {
+	public void setGrouping(@Nullable String grouping) {
 		this.grouping =  UtilImpl.processStringValue(grouping);
 	}
 
-	public String getOrdering() {
+	public @Nullable String getOrdering() {
 		return ordering;
 	}
 
 	@XmlElement(namespace = XMLMetaData.MODULE_NAMESPACE)
 	@XmlJavaTypeAdapter(CDATAAdapter.class)
-	public void setOrdering(String ordering) {
+	public void setOrdering(@Nullable String ordering) {
 		this.ordering =  UtilImpl.processStringValue(ordering);
 	}
 
 	@XmlElementWrapper(namespace = XMLMetaData.MODULE_NAMESPACE, name = "columns")
 	@XmlElementRefs({@XmlElementRef(type = MetaDataQueryProjectedColumnMetaData.class),
 						@XmlElementRef(type = MetaDataQueryContentColumnMetaData.class)})
-	public List<MetaDataQueryColumnMetaData> getColumns() {
+	public @Nonnull List<MetaDataQueryColumnMetaData> getColumns() {
 		return columns;
 	}
 }

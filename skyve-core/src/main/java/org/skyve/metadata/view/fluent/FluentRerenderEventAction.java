@@ -23,7 +23,7 @@ public class FluentRerenderEventAction extends FluentEventAction {
 	 * @param action
 	 *            the action instance to wrap
 	 */
-	public FluentRerenderEventAction(RerenderEventAction action) {
+	public FluentRerenderEventAction(@Nonnull RerenderEventAction action) {
 		this.action = action;
 	}
 
@@ -34,7 +34,7 @@ public class FluentRerenderEventAction extends FluentEventAction {
 	 *            the source action metadata
 	 * @return this builder
 	 */
-	public FluentRerenderEventAction from(@SuppressWarnings("hiding") RerenderEventAction action) {
+	public @Nonnull FluentRerenderEventAction from(@SuppressWarnings("hiding") @Nonnull RerenderEventAction action) {
 		clientValidation(! Boolean.FALSE.equals(action.getClientValidation()));
 		action.getProperties().entrySet().forEach(p -> putProperty(p.getKey(), p.getValue()));
 
@@ -48,7 +48,7 @@ public class FluentRerenderEventAction extends FluentEventAction {
 	 *            whether client validation is required
 	 * @return this builder
 	 */
-	public FluentRerenderEventAction clientValidation(boolean clientValidation) {
+	public @Nonnull FluentRerenderEventAction clientValidation(boolean clientValidation) {
 		action.setClientValidation(clientValidation ? Boolean.TRUE : Boolean.FALSE);
 		return this;
 	}
@@ -70,7 +70,7 @@ public class FluentRerenderEventAction extends FluentEventAction {
 	 * Returns the wrapped event action instance.
 	 */
 	@Override
-	public RerenderEventAction get() {
+	public @Nonnull RerenderEventAction get() {
 		return action;
 	}
 }

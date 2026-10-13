@@ -3,6 +3,7 @@ package org.skyve.impl.metadata.repository.module;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
 
+import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
@@ -27,35 +28,35 @@ public class TreeItemMetaData extends ItemMetaData {
 	private String modelName;
 	private Boolean autoPopulate;
 	
-	public String getDocumentName() {
+	public @Nullable String getDocumentName() {
 		return documentName;
 	}
 	@XmlAttribute(name = "document")
-	public void setDocumentName(String documentName) {
+	public void setDocumentName(@Nullable String documentName) {
 		this.documentName = UtilImpl.processStringValue(documentName);
 	}
 
-	public String getQueryName() {
+	public @Nullable String getQueryName() {
 		return queryName;
 	}
 	@XmlAttribute(name = "query")
-	public void setQueryName(String queryName) {
+	public void setQueryName(@Nullable String queryName) {
 		this.queryName = UtilImpl.processStringValue(queryName);
 	}
 
-	public String getModelName() {
+	public @Nullable String getModelName() {
 		return modelName;
 	}
 	@XmlAttribute(name = "model")
-	public void setModelName(String modelName) {
+	public void setModelName(@Nullable String modelName) {
 		this.modelName = UtilImpl.processStringValue(modelName);
 	}
 
-	public Boolean getAutoPopulate() {
+	public @Nullable Boolean getAutoPopulate() {
 		return autoPopulate;
 	}
 	@XmlAttribute(name = "autoPopulate")
-	public void setAutoPopulate(Boolean autoPopulate) {
+	public void setAutoPopulate(@Nullable Boolean autoPopulate) {
 		this.autoPopulate = autoPopulate;
 	}
 }

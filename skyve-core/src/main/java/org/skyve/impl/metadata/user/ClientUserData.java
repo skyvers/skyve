@@ -6,6 +6,8 @@ import java.util.TreeMap;
 
 import org.skyve.metadata.module.menu.Menu;
 
+import jakarta.annotation.Nullable;
+
 /**
  * A serialisable snapshot of the current user's identity and permissions,
  * transferred to client-side code (e.g. the SmartClient or Vue front-end).
@@ -32,83 +34,83 @@ public class ClientUserData {
 
 	private Map<String, Menu> moduleMenuMap = new TreeMap<>();
 
-	public Set<String> getActions() {
+	public @Nullable Set<String> getActions() {
 		return actions;
 	}
 
-	public void setActions(Set<String> actions) {
+	public void setActions(@Nullable Set<String> actions) {
 		this.actions = actions;
 	}
 
-	public String getContactId() {
+	public @Nullable String getContactId() {
 		return contactId;
 	}
 
-	public void setContactId(String contactId) {
+	public void setContactId(@Nullable String contactId) {
 		this.contactId = contactId;
 	}
 
-	public String getContactName() {
+	public @Nullable String getContactName() {
 		return contactName;
 	}
 
-	public void setContactName(String contactName) {
+	public void setContactName(@Nullable String contactName) {
 		this.contactName = contactName;
 	}
 
-	public String getCustomerName() {
+	public @Nullable String getCustomerName() {
 		return customerName;
 	}
 
-	public void setCustomerName(String customerName) {
+	public void setCustomerName(@Nullable String customerName) {
 		this.customerName = customerName;
 	}
 
-	public String getDataGroupId() {
+	public @Nullable String getDataGroupId() {
 		return dataGroupId;
 	}
 
-	public void setDataGroupId(String dataGroupId) {
+	public void setDataGroupId(@Nullable String dataGroupId) {
 		this.dataGroupId = dataGroupId;
 	}
 
-	public Map<String, Map<String, Boolean>> getDocumentPermissions() {
+	public @Nullable Map<String, Map<String, Boolean>> getDocumentPermissions() {
 		return documentPermissions;
 	}
 
-	public void setDocumentPermissions(Map<String, Map<String, Boolean>> documentPermissions) {
+	public void setDocumentPermissions(@Nullable Map<String, Map<String, Boolean>> documentPermissions) {
 		this.documentPermissions = documentPermissions;
 	}
 
-	public String getId() {
+	public @Nullable String getId() {
 		return id;
 	}
 
-	public void setId(String id) {
+	public void setId(@Nullable String id) {
 		this.id = id;
 	}
 
-	public String getName() {
+	public @Nullable String getName() {
 		return name;
 	}
 
-	public void setName(String name) {
+	public void setName(@Nullable String name) {
 		this.name = name;
 	}
 
-	public Set<String> getRoleNames() {
+	public @Nullable Set<String> getRoleNames() {
 		return roleNames;
 	}
 
-	public void setRoleNames(Set<String> roleNames) {
+	public void setRoleNames(@Nullable Set<String> roleNames) {
 		this.roleNames = roleNames;
 	}
 
-	public Map<String, Menu> getModuleMenuMap() {
+	public @Nullable Map<String, Menu> getModuleMenuMap() {
 		return moduleMenuMap;
 	}
 
-	public void setModuleMenuMap(Map<String, Menu> moduleMenuMap) {
+	public void setModuleMenuMap(@Nullable Map<String, Menu> moduleMenuMap) {
 		this.moduleMenuMap = moduleMenuMap;
 	}
 }

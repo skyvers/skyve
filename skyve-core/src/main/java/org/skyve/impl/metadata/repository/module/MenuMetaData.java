@@ -9,6 +9,7 @@ import org.skyve.impl.metadata.repository.PropertyMapAdapter;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.DecoratedMetaData;
 
+import jakarta.annotation.Nonnull;
 import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlElementRef;
 import jakarta.xml.bind.annotation.XmlElementRefs;
@@ -40,12 +41,12 @@ public class MenuMetaData implements DecoratedMetaData {
 
 
 	@XmlElementRefs({@XmlElementRef(type = ItemMetaData.class), @XmlElementRef(type = GroupMetaData.class)})
-	public List<ActionMetaData> getActions() {
+	public @Nonnull List<ActionMetaData> getActions() {
 		return actions;
 	}
 	
 	@Override
-	public Map<String, String> getProperties() {
+	public @Nonnull Map<String, String> getProperties() {
 		return properties;
 	}
 }

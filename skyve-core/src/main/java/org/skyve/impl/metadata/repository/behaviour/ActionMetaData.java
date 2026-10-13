@@ -21,6 +21,8 @@ import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.NamedMetaData;
 import org.skyve.metadata.ReloadableMetaData;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlElementRef;
@@ -74,7 +76,7 @@ public class ActionMetaData implements NamedMetaData, ConvertibleMetaData<Action
 	 * @return action name, or {@code null} when unspecified
 	 */
 	@Override
-	public String getName() {
+	public @Nullable String getName() {
 		return name;
 	}
 
@@ -84,7 +86,7 @@ public class ActionMetaData implements NamedMetaData, ConvertibleMetaData<Action
 	 * @param name action name, trimmed to {@code null} when blank
 	 */
 	@XmlAttribute(required = true)
-	public void setName(String name) {
+	public void setName(@Nullable String name) {
 		this.name = UtilImpl.processStringValue(name);
 	}
 
@@ -93,7 +95,7 @@ public class ActionMetaData implements NamedMetaData, ConvertibleMetaData<Action
 	 *
 	 * @return documentation text, or {@code null} when unspecified
 	 */
-	public String getDocumentation() {
+	public @Nullable String getDocumentation() {
 		return documentation;
 	}
 	
@@ -104,7 +106,7 @@ public class ActionMetaData implements NamedMetaData, ConvertibleMetaData<Action
 	 */
 	@XmlElement(namespace = XMLMetaData.BEHAVIOUR_NAMESPACE)
 	@XmlJavaTypeAdapter(CDATAAdapter.class)
-	public void setDocumentation(String documentation) {
+	public void setDocumentation(@Nullable String documentation) {
 		this.documentation = UtilImpl.processStringValue(documentation);
 	}
 
@@ -113,7 +115,7 @@ public class ActionMetaData implements NamedMetaData, ConvertibleMetaData<Action
 	 *
 	 * @return mutable statement list in declaration order
 	 */
-	public List<StatementMetaData> getStatements() {
+	public @Nonnull List<StatementMetaData> getStatements() {
 		return statements;
 	}
 
@@ -166,7 +168,7 @@ public class ActionMetaData implements NamedMetaData, ConvertibleMetaData<Action
 	 * @throws MetaDataException if the action name is missing
 	 */
 	@Override
-	public ActionMetaData convert(String metaDataName) {
+	public @Nonnull ActionMetaData convert(@Nonnull String metaDataName) {
 		String theName = getName();
 		if (theName == null) {
 			throw new MetaDataException(metaDataName + " : The action [name] is required for action " + metaDataName);
@@ -183,7 +185,7 @@ public class ActionMetaData implements NamedMetaData, ConvertibleMetaData<Action
 	 * @return mutable action property map
 	 */
 	@Override
-	public Map<String, String> getProperties() {
+	public @Nonnull Map<String, String> getProperties() {
 		return properties;
 	}
 	
@@ -194,7 +196,7 @@ public class ActionMetaData implements NamedMetaData, ConvertibleMetaData<Action
 	 *
 	 * @param bean the document instance bound to this action execution
 	 */
-	public void execute(Bean bean) {
+	public void execute(@Nonnull Bean bean) {
 		statements.forEach(s -> s.execute(bean));
 	}
 }

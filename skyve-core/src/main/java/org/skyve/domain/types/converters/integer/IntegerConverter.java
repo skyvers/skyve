@@ -7,6 +7,9 @@ import org.skyve.domain.types.converters.Validator;
 import org.skyve.metadata.model.Attribute.AttributeType;
 import org.skyve.util.BeanValidator;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Converts integer attribute values using plain integer formatting/parsing.
  */
@@ -16,7 +19,7 @@ public class IntegerConverter implements Converter<Integer> {
 	 * @return the result value
 	 */
 	@Override
-	public Class<Integer> getValueType() {
+	public @Nonnull Class<Integer> getValueType() {
 		return Integer.class;
 	}
 	
@@ -26,7 +29,7 @@ public class IntegerConverter implements Converter<Integer> {
 	 * @return the result value
 	 */
 	@Override
-	public Integer fromDisplayValue(String displayValue) throws ConversionException {
+	public @Nonnull Integer fromDisplayValue(@Nonnull String displayValue) throws ConversionException {
 		try {
             return Integer.valueOf(displayValue);
 		}
@@ -50,7 +53,7 @@ public class IntegerConverter implements Converter<Integer> {
 	 * @return the result value
 	 */
 	@Override
-	public String toDisplayValue(Integer value) throws ConversionException {
+	public @Nonnull String toDisplayValue(@Nonnull Integer value) throws ConversionException {
 		try {
 			return value.toString();
 		}
@@ -64,7 +67,7 @@ public class IntegerConverter implements Converter<Integer> {
 	 * @return the result value
 	 */
 	@Override
-	public AttributeType getAttributeType() {
+	public @Nonnull AttributeType getAttributeType() {
 		return AttributeType.integer;
 	}
 
@@ -73,7 +76,7 @@ public class IntegerConverter implements Converter<Integer> {
 	 * @return the result value
 	 */
 	@Override
-	public Format<Integer> getFormat() {
+	public @Nullable Format<Integer> getFormat() {
 		return null;
 	}
 
@@ -82,7 +85,7 @@ public class IntegerConverter implements Converter<Integer> {
 	 * @return the result value
 	 */
 	@Override
-	public Validator<Integer> getValidator() {
+	public @Nullable Validator<Integer> getValidator() {
 		return null;
 	}
 	
@@ -91,7 +94,7 @@ public class IntegerConverter implements Converter<Integer> {
 	 * @return the result value
 	 */
 	@Override
-	public String getFormatPattern() {
+	public @Nullable String getFormatPattern() {
 		return null;
 	}
 }

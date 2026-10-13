@@ -3,6 +3,7 @@ package org.skyve.impl.metadata.view.reference;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
 
+import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
@@ -19,12 +20,12 @@ public class QueryListViewReference implements Reference {
 	
 	private String queryName;
 	
-	public String getQueryName() {
+	public @Nullable String getQueryName() {
 		return queryName;
 	}
 
 	@XmlAttribute(name="query", required = true)
-	public void setQueryName(String queryName) {
+	public void setQueryName(@Nullable String queryName) {
 		this.queryName = UtilImpl.processStringValue(queryName);
 	}
 }

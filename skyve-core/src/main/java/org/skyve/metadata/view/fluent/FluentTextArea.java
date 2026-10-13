@@ -4,6 +4,7 @@ import org.skyve.impl.metadata.view.widget.bound.input.KeyboardType;
 import org.skyve.impl.metadata.view.widget.bound.input.TextArea;
 
 import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 
 /**
  * Builds {@link TextArea} widget metadata using a fluent API.
@@ -25,7 +26,7 @@ public class FluentTextArea extends FluentChangeableInputWidget<FluentTextArea> 
 	 * @param text
 	 *            the metadata instance to mutate
 	 */
-	public FluentTextArea(TextArea text) {
+	public FluentTextArea(@Nonnull TextArea text) {
 		this.text = text;
 	}
 
@@ -36,7 +37,7 @@ public class FluentTextArea extends FluentChangeableInputWidget<FluentTextArea> 
 	 *            the source metadata to copy
 	 * @return this builder
 	 */
-	public FluentTextArea from(@SuppressWarnings("hiding") TextArea text) {
+	public @Nonnull FluentTextArea from(@SuppressWarnings("hiding") @Nonnull TextArea text) {
 		Boolean b = text.getWordWrap();
 		if (b != null) {
 			wordWrap(b.booleanValue());
@@ -69,7 +70,7 @@ public class FluentTextArea extends FluentChangeableInputWidget<FluentTextArea> 
 	 *            {@code true} to enable word wrap
 	 * @return this builder
 	 */
-	public FluentTextArea wordWrap(boolean wordWrap) {
+	public @Nonnull FluentTextArea wordWrap(boolean wordWrap) {
 		text.setWordWrap(wordWrap ? Boolean.TRUE : Boolean.FALSE);
 		return this;
 	}
@@ -81,7 +82,7 @@ public class FluentTextArea extends FluentChangeableInputWidget<FluentTextArea> 
 	 *            {@code true} to allow editing
 	 * @return this builder
 	 */
-	public FluentTextArea editable(boolean editable) {
+	public @Nonnull FluentTextArea editable(boolean editable) {
 		text.setEditable(editable ? Boolean.TRUE : Boolean.FALSE);
 		return this;
 	}
@@ -93,7 +94,7 @@ public class FluentTextArea extends FluentChangeableInputWidget<FluentTextArea> 
 	 *            the minimum pixel height
 	 * @return this builder
 	 */
-	public FluentTextArea minPixelHeight(int minPixelHeight) {
+	public @Nonnull FluentTextArea minPixelHeight(int minPixelHeight) {
 		text.setMinPixelHeight(Integer.valueOf(minPixelHeight));
 		return this;
 	}
@@ -105,7 +106,7 @@ public class FluentTextArea extends FluentChangeableInputWidget<FluentTextArea> 
 	 *            the keyboard type
 	 * @return this builder
 	 */
-	public FluentTextArea keyboardType(KeyboardType keyboardType) {
+	public @Nonnull FluentTextArea keyboardType(@Nullable KeyboardType keyboardType) {
 		text.setKeyboardType(keyboardType);
 		return this;
 	}
@@ -118,7 +119,7 @@ public class FluentTextArea extends FluentChangeableInputWidget<FluentTextArea> 
 	 * @return this builder
 	 */
 	@Override
-	public FluentTextArea pixelWidth(int width) {
+	public @Nonnull FluentTextArea pixelWidth(int width) {
 		text.setPixelWidth(Integer.valueOf(width));
 		return this;
 	}
@@ -131,7 +132,7 @@ public class FluentTextArea extends FluentChangeableInputWidget<FluentTextArea> 
 	 * @return this builder
 	 */
 	@Override
-	public FluentTextArea pixelHeight(int height) {
+	public @Nonnull FluentTextArea pixelHeight(int height) {
 		text.setPixelHeight(Integer.valueOf(height));
 		return this;
 	}
@@ -155,7 +156,7 @@ public class FluentTextArea extends FluentChangeableInputWidget<FluentTextArea> 
 	 * @return the wrapped text-area metadata
 	 */
 	@Override
-	public TextArea get() {
+	public @Nonnull TextArea get() {
 		return text;
 	}
 }

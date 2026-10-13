@@ -25,7 +25,7 @@ public class FluentSetDisabledEventAction extends FluentEventAction {
 	 * @param action
 	 *            the action instance to wrap
 	 */
-	public FluentSetDisabledEventAction(SetDisabledEventAction action) {
+	public FluentSetDisabledEventAction(@Nonnull SetDisabledEventAction action) {
 		this.action = action;
 	}
 
@@ -36,7 +36,7 @@ public class FluentSetDisabledEventAction extends FluentEventAction {
 	 *            the source action metadata
 	 * @return this builder
 	 */
-	public FluentSetDisabledEventAction from(@SuppressWarnings("hiding") SetDisabledEventAction action) {
+	public @Nonnull FluentSetDisabledEventAction from(@SuppressWarnings("hiding") @Nonnull SetDisabledEventAction action) {
 		binding(action.getBinding());
 		BindUtil.copyAuthoredCondition(action.getXmlDisabledCondition(), action.getXmlEnabledCondition(), this::disabledCondition, this::enabledCondition);
 		action.getProperties().entrySet().forEach(p -> putProperty(p.getKey(), p.getValue()));
@@ -51,7 +51,7 @@ public class FluentSetDisabledEventAction extends FluentEventAction {
 	 *            the target binding expression
 	 * @return this builder
 	 */
-	public FluentSetDisabledEventAction binding(String binding) {
+	public @Nonnull FluentSetDisabledEventAction binding(@Nullable String binding) {
 		action.setBinding(binding);
 		return this;
 	}
@@ -97,7 +97,7 @@ public class FluentSetDisabledEventAction extends FluentEventAction {
 	 * Returns the wrapped event action instance.
 	 */
 	@Override
-	public SetDisabledEventAction get() {
+	public @Nonnull SetDisabledEventAction get() {
 		return action;
 	}
 }

@@ -36,7 +36,7 @@ public class Decimal10TwoDecimalPlaces implements Converter<Decimal10> {
 	 * @return the result value
 	 */
 	@Override
-	public String toDisplayValue(Decimal10 value) {
+	public @Nonnull String toDisplayValue(@Nonnull Decimal10 value) {
 		try {
 			DecimalFormat df = CORE.getDecimalFormat(PATTERN);
 			df.setParseBigDecimal(true);
@@ -53,7 +53,7 @@ public class Decimal10TwoDecimalPlaces implements Converter<Decimal10> {
 	 * @return the result value
 	 */
 	@Override
-	public Decimal10 fromDisplayValue(String displayValue) {
+	public @Nonnull Decimal10 fromDisplayValue(@Nonnull String displayValue) {
 		try {
 			DecimalFormat df = CORE.getDecimalFormat(PATTERN);
 			df.setParseBigDecimal(true);
@@ -69,7 +69,7 @@ public class Decimal10TwoDecimalPlaces implements Converter<Decimal10> {
 	 * @return the result value
 	 */
 	@Override
-	public AttributeType getAttributeType() {
+	public @Nonnull AttributeType getAttributeType() {
 		return AttributeType.decimal10;
 	}
 
@@ -78,7 +78,7 @@ public class Decimal10TwoDecimalPlaces implements Converter<Decimal10> {
 	 * @return the result value
 	 */
 	@Override
-	public Format<Decimal10> getFormat() {
+	public @Nullable Format<Decimal10> getFormat() {
 		return null;
 	}
 
@@ -87,7 +87,7 @@ public class Decimal10TwoDecimalPlaces implements Converter<Decimal10> {
 	 * @return the result value
 	 */
 	@Override
-	public Validator<Decimal10> getValidator() {
+	public @Nullable Validator<Decimal10> getValidator() {
 		return null;
 	}
 

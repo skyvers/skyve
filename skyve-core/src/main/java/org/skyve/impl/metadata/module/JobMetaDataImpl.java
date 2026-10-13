@@ -9,6 +9,8 @@ import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.module.JobMetaData;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlTransient;
@@ -58,42 +60,42 @@ public class JobMetaDataImpl extends NamedMetaData implements JobMetaData {
 	private Map<String, String> properties = new LinkedHashMap<>();
 	
 	@Override
-	public String getDisplayName() {
+	public @Nullable String getDisplayName() {
 		return displayName;
 	}
 
 	@XmlAttribute(required = true)
-	public void setDisplayName(String displayName) {
+	public void setDisplayName(@Nullable String displayName) {
 		this.displayName = displayName;
 	}
 
 	@Override
-	public String getClassName() {
+	public @Nullable String getClassName() {
 		return className;
 	}
 
 	@XmlAttribute(required = true)
-	public void setClassName(String className) {
+	public void setClassName(@Nullable String className) {
 		this.className = UtilImpl.processStringValue(className);
 	}
 	
 	@Override
-	public String getDescription() {
+	public @Nullable String getDescription() {
 		return description;
 	}
 
 	@XmlAttribute
-	public void setDescription(String description) {
+	public void setDescription(@Nullable String description) {
 		this.description = UtilImpl.processStringValue(description);
 	}
 
 	@Override
-	public Map<String, String> getProperties() {
+	public @Nonnull Map<String, String> getProperties() {
 		return properties;
 	}
 	
 	@Override
-	public String getOwningModuleName() {
+	public @Nullable String getOwningModuleName() {
 		return owningModuleName;
 	}
 
@@ -101,7 +103,7 @@ public class JobMetaDataImpl extends NamedMetaData implements JobMetaData {
 	 * This is called in convert method.
 	 */
 	@XmlTransient
-	public void setOwningModuleName(String owningModuleName) {
+	public void setOwningModuleName(@Nullable String owningModuleName) {
 		this.owningModuleName = owningModuleName;
 	}
 }

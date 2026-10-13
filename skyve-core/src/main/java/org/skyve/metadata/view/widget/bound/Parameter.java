@@ -2,6 +2,8 @@ package org.skyve.metadata.view.widget.bound;
 
 import org.skyve.metadata.NamedMetaData;
 
+import jakarta.annotation.Nullable;
+
 /**
  * A named binding-to-value mapping used to pass a value into a child view or action.
  *
@@ -19,7 +21,7 @@ public interface Parameter extends NamedMetaData {
 	 *
 	 * @return the literal parameter value, or {@code null}
 	 */
-	public String getValue();
+	public @Nullable String getValue();
 
 	/**
 	 * Returns the binding path on the current bean whose value is passed as the
@@ -27,5 +29,5 @@ public interface Parameter extends NamedMetaData {
 	 *
 	 * @return the value binding path, or {@code null}
 	 */
-	public String getValueBinding();
+	public @Nullable String getValueBinding();
 }

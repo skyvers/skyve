@@ -6,6 +6,9 @@ import java.util.Map;
 import org.skyve.metadata.model.Attribute.UsageType;
 import org.skyve.metadata.model.document.Condition;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Runtime implementation of a {@link Condition} declared on a document.
  *
@@ -29,39 +32,39 @@ public class ConditionImpl implements Condition {
 	private Map<String, String> properties = new LinkedHashMap<>();
 
 	@Override
-	public String getDocumentation() {
+	public @Nullable String getDocumentation() {
 		return documentation;
 	}
-	public void setDocumentation(String documentation) {
+	public void setDocumentation(@Nullable String documentation) {
 		this.documentation = documentation;
 	}
 
 	@Override
-	public String getDescription() {
+	public @Nullable String getDescription() {
 		return description;
 	}
-	public void setDescription(String description) {
+	public void setDescription(@Nullable String description) {
 		this.description = description;
 	}
 
 	@Override
-	public String getExpression() {
+	public @Nullable String getExpression() {
 		return expression;
 	}
-	public void setExpression(String expression) {
+	public void setExpression(@Nullable String expression) {
 		this.expression = expression;
 	}
 
 	@Override
-	public UsageType getUsage() {
+	public @Nullable UsageType getUsage() {
 		return usage;
 	}
-	public void setUsage(UsageType usage) {
+	public void setUsage(@Nullable UsageType usage) {
 		this.usage = usage;
 	}
 	
 	@Override
-	public Map<String, String> getProperties() {
+	public @Nonnull Map<String, String> getProperties() {
 		return properties;
 	}
 }

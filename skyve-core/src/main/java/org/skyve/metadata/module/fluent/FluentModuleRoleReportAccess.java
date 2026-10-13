@@ -4,6 +4,8 @@ import java.util.Set;
 
 import org.skyve.impl.metadata.repository.module.ModuleRoleReportUserAccessMetaData;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * A fluent helper builder class to construct and manipulate the {@link ModuleRoleReportUserAccessMetaData} metadata.
  * 
@@ -21,17 +23,17 @@ public class FluentModuleRoleReportAccess extends
 	/**
 	 * Creates a new FluentModuleRoleReportAccess from the specified ModuleRoleReportUserAccessMetaData.
 	 */
-	public FluentModuleRoleReportAccess(ModuleRoleReportUserAccessMetaData access) {
+	public FluentModuleRoleReportAccess(@Nonnull ModuleRoleReportUserAccessMetaData access) {
 		this.access = access;
 	}
 
 	/**
 	 * Returns a FluentModuleRoleReportAccess from a runtime metadata.
 	 */
-	protected FluentModuleRoleReportAccess from(String moduleName, 
-													String documentName,
-													String reportName,
-													Set<String> uxuis) {
+	protected @Nonnull FluentModuleRoleReportAccess from(@Nonnull String moduleName, 
+													@Nonnull String documentName,
+													@Nonnull String reportName,
+													@Nonnull Set<String> uxuis) {
 		moduleName(moduleName);
 		documentName(documentName);
 		reportName(reportName);
@@ -42,7 +44,7 @@ public class FluentModuleRoleReportAccess extends
 	/**
 	 * Specifies the module name for this FluentModuleRoleReportAccess.
 	 */
-	public FluentModuleRoleReportAccess moduleName(final String moduleName) {
+	public @Nonnull FluentModuleRoleReportAccess moduleName(final @Nonnull String moduleName) {
 		access.setModuleName(moduleName);
 		return this;
 	}
@@ -50,7 +52,7 @@ public class FluentModuleRoleReportAccess extends
 	/**
 	 * Specifies the document name for this FluentModuleRoleReportAccess.
 	 */
-	public FluentModuleRoleReportAccess documentName(final String documentName) {
+	public @Nonnull FluentModuleRoleReportAccess documentName(final @Nonnull String documentName) {
 		access.setDocumentName(documentName);
 		return this;
 	}
@@ -58,7 +60,7 @@ public class FluentModuleRoleReportAccess extends
 	/**
 	 * Specifies the report name for this FluentModuleRoleReportAccess.
 	 */
-	public FluentModuleRoleReportAccess reportName(final String reportName) {
+	public @Nonnull FluentModuleRoleReportAccess reportName(final @Nonnull String reportName) {
 		access.setReportName(reportName);
 		return this;
 	}
@@ -67,7 +69,7 @@ public class FluentModuleRoleReportAccess extends
 	 * Returns the underlying module role access metadata from this builder.
 	 */
 	@Override
-	public ModuleRoleReportUserAccessMetaData get() {
+	public @Nonnull ModuleRoleReportUserAccessMetaData get() {
 		return access;
 	}
 }

@@ -4,6 +4,9 @@ import java.util.Set;
 
 import org.skyve.impl.metadata.repository.view.access.ViewReportUserAccessMetaData;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * A fluent helper builder class to construct and manipulate the {@link ViewReportUserAccessMetaData} metadata.
  * 
@@ -20,14 +23,14 @@ public class FluentViewReportAccess extends FluentViewUserAccess<FluentViewRepor
 	/**
 	 * Creates a new FluentViewReportAccess from the specified ViewReportUserAccessMetaData.
 	 */
-	public FluentViewReportAccess(ViewReportUserAccessMetaData access) {
+	public FluentViewReportAccess(@Nonnull ViewReportUserAccessMetaData access) {
 		this.access = access;
 	}
 
 	/**
 	 * Returns a FluentViewReportAccess from a runtime metadata.
 	 */
-	protected FluentViewReportAccess from(String moduleName, String documentName, String reportName, Set<String> uxuis) {
+	protected @Nonnull FluentViewReportAccess from(@Nonnull String moduleName, @Nonnull String documentName, @Nonnull String reportName, @Nonnull Set<String> uxuis) {
 		moduleName(moduleName);
 		documentName(documentName);
 		reportName(reportName);
@@ -38,7 +41,7 @@ public class FluentViewReportAccess extends FluentViewUserAccess<FluentViewRepor
 	/**
 	 * Specifies the module name for this FluentViewReportAccess.
 	 */
-	public FluentViewReportAccess moduleName(final String moduleName) {
+	public @Nonnull FluentViewReportAccess moduleName(final @Nullable String moduleName) {
 		access.setModuleName(moduleName);
 		return this;
 	}
@@ -46,7 +49,7 @@ public class FluentViewReportAccess extends FluentViewUserAccess<FluentViewRepor
 	/**
 	 * Specifies the document name for this FluentViewReportAccess.
 	 */
-	public FluentViewReportAccess documentName(final String documentName) {
+	public @Nonnull FluentViewReportAccess documentName(final @Nullable String documentName) {
 		access.setDocumentName(documentName);
 		return this;
 	}
@@ -54,7 +57,7 @@ public class FluentViewReportAccess extends FluentViewUserAccess<FluentViewRepor
 	/**
 	 * Specifies the report name for this FluentViewReportAccess.
 	 */
-	public FluentViewReportAccess reportName(final String reportName) {
+	public @Nonnull FluentViewReportAccess reportName(final @Nullable String reportName) {
 		access.setReportName(reportName);
 		return this;
 	}
@@ -63,7 +66,7 @@ public class FluentViewReportAccess extends FluentViewUserAccess<FluentViewRepor
 	 * Returns the underlying model aggregate user access metadata from this builder.
 	 */
 	@Override
-	public ViewReportUserAccessMetaData get() {
+	public @Nonnull ViewReportUserAccessMetaData get() {
 		return access;
 	}
 }

@@ -18,6 +18,8 @@ import org.skyve.impl.metadata.view.event.ToggleDisabledEventAction;
 import org.skyve.impl.metadata.view.event.ToggleVisibilityEventAction;
 import org.skyve.impl.util.XMLMetaData;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlElementRef;
@@ -94,7 +96,7 @@ public class GeometryMap extends InputWidget implements RelativeSize, Changeable
 	 *
 	 * @return the configured geometry type constraint, or {@code null} to allow any type.
 	 */
-	public GeometryInputType getType() {
+	public @Nullable GeometryInputType getType() {
 		return type;
 	}
 
@@ -104,7 +106,7 @@ public class GeometryMap extends InputWidget implements RelativeSize, Changeable
 	 * @param type the geometry type constraint, or {@code null} for no explicit type restriction.
 	 */
 	@XmlAttribute(required = false)
-	public void setType(GeometryInputType type) {
+	public void setType(@Nullable GeometryInputType type) {
 		this.type = type;
 	}
 
@@ -114,7 +116,7 @@ public class GeometryMap extends InputWidget implements RelativeSize, Changeable
 	 * @return the pixel width, or {@code null} when not explicitly set.
 	 */
 	@Override
-	public Integer getPixelWidth() {
+	public @Nullable Integer getPixelWidth() {
 		return pixelWidth;
 	}
 
@@ -125,7 +127,7 @@ public class GeometryMap extends InputWidget implements RelativeSize, Changeable
 	 */
 	@Override
 	@XmlAttribute(required = false)
-	public void setPixelWidth(Integer pixelWidth) {
+	public void setPixelWidth(@Nullable Integer pixelWidth) {
 		this.pixelWidth = pixelWidth;
 	}
 
@@ -135,7 +137,7 @@ public class GeometryMap extends InputWidget implements RelativeSize, Changeable
 	 * @return the responsive width value, or {@code null} when unset.
 	 */
 	@Override
-	public Integer getResponsiveWidth() {
+	public @Nullable Integer getResponsiveWidth() {
 		return responsiveWidth;
 	}
 
@@ -146,7 +148,7 @@ public class GeometryMap extends InputWidget implements RelativeSize, Changeable
 	 */
 	@Override
 	@XmlAttribute(required = false)
-	public void setResponsiveWidth(Integer responsiveWidth) {
+	public void setResponsiveWidth(@Nullable Integer responsiveWidth) {
 		this.responsiveWidth = responsiveWidth;
 	}
 
@@ -156,7 +158,7 @@ public class GeometryMap extends InputWidget implements RelativeSize, Changeable
 	 * @return the {@code sm} width, or {@code null} when unset.
 	 */
 	@Override
-	public Integer getSm() {
+	public @Nullable Integer getSm() {
 		return sm;
 	}
 	
@@ -167,7 +169,7 @@ public class GeometryMap extends InputWidget implements RelativeSize, Changeable
 	 */
 	@Override
 	@XmlAttribute(required = false)
-	public void setSm(Integer sm) {
+	public void setSm(@Nullable Integer sm) {
 		this.sm = sm;
 	}
 
@@ -177,7 +179,7 @@ public class GeometryMap extends InputWidget implements RelativeSize, Changeable
 	 * @return the {@code md} width, or {@code null} when unset.
 	 */
 	@Override
-	public Integer getMd() {
+	public @Nullable Integer getMd() {
 		return md;
 	}
 	
@@ -188,7 +190,7 @@ public class GeometryMap extends InputWidget implements RelativeSize, Changeable
 	 */
 	@Override
 	@XmlAttribute(required = false)
-	public void setMd(Integer md) {
+	public void setMd(@Nullable Integer md) {
 		this.md = md;
 	}
 	
@@ -198,7 +200,7 @@ public class GeometryMap extends InputWidget implements RelativeSize, Changeable
 	 * @return the {@code lg} width, or {@code null} when unset.
 	 */
 	@Override
-	public Integer getLg() {
+	public @Nullable Integer getLg() {
 		return lg;
 	}
 	
@@ -209,7 +211,7 @@ public class GeometryMap extends InputWidget implements RelativeSize, Changeable
 	 */
 	@Override
 	@XmlAttribute(required = false)
-	public void setLg(Integer lg) {
+	public void setLg(@Nullable Integer lg) {
 		this.lg = lg;
 	}
 
@@ -219,7 +221,7 @@ public class GeometryMap extends InputWidget implements RelativeSize, Changeable
 	 * @return the {@code xl} width, or {@code null} when unset.
 	 */
 	@Override
-	public Integer getXl() {
+	public @Nullable Integer getXl() {
 		return xl;
 	}
 	
@@ -230,7 +232,7 @@ public class GeometryMap extends InputWidget implements RelativeSize, Changeable
 	 */
 	@Override
 	@XmlAttribute(required = false)
-	public void setXl(Integer xl) {
+	public void setXl(@Nullable Integer xl) {
 		this.xl = xl;
 	}
 
@@ -240,7 +242,7 @@ public class GeometryMap extends InputWidget implements RelativeSize, Changeable
 	 * @return the percentage width, or {@code null} when unset.
 	 */
 	@Override
-	public Integer getPercentageWidth() {
+	public @Nullable Integer getPercentageWidth() {
 		return percentageWidth;
 	}
 
@@ -251,7 +253,7 @@ public class GeometryMap extends InputWidget implements RelativeSize, Changeable
 	 */
 	@Override
 	@XmlAttribute(required = false)
-	public void setPercentageWidth(Integer percentageWidth) {
+	public void setPercentageWidth(@Nullable Integer percentageWidth) {
 		this.percentageWidth = percentageWidth;
 	}
 
@@ -261,7 +263,7 @@ public class GeometryMap extends InputWidget implements RelativeSize, Changeable
 	 * @return the minimum pixel width, or {@code null} when unset.
 	 */
 	@Override
-	public Integer getMinPixelWidth() {
+	public @Nullable Integer getMinPixelWidth() {
 		return minPixelWidth;
 	}
 
@@ -272,7 +274,7 @@ public class GeometryMap extends InputWidget implements RelativeSize, Changeable
 	 */
 	@Override
 	@XmlAttribute(required = false)
-	public void setMinPixelWidth(Integer minPixelWidth) {
+	public void setMinPixelWidth(@Nullable Integer minPixelWidth) {
 		this.minPixelWidth = minPixelWidth;
 	}
 
@@ -282,7 +284,7 @@ public class GeometryMap extends InputWidget implements RelativeSize, Changeable
 	 * @return the maximum pixel width, or {@code null} when unset.
 	 */
 	@Override
-	public Integer getMaxPixelWidth() {
+	public @Nullable Integer getMaxPixelWidth() {
 		return maxPixelWidth;
 	}
 
@@ -293,7 +295,7 @@ public class GeometryMap extends InputWidget implements RelativeSize, Changeable
 	 */
 	@Override
 	@XmlAttribute(required = false)
-	public void setMaxPixelWidth(Integer maxPixelWidth) {
+	public void setMaxPixelWidth(@Nullable Integer maxPixelWidth) {
 		this.maxPixelWidth = maxPixelWidth;
 	}
 
@@ -303,7 +305,7 @@ public class GeometryMap extends InputWidget implements RelativeSize, Changeable
 	 * @return the pixel height, or {@code null} when not explicitly set.
 	 */
 	@Override
-	public Integer getPixelHeight() {
+	public @Nullable Integer getPixelHeight() {
 		return pixelHeight;
 	}
 
@@ -314,7 +316,7 @@ public class GeometryMap extends InputWidget implements RelativeSize, Changeable
 	 */
 	@Override
 	@XmlAttribute(required = false)
-	public void setPixelHeight(Integer pixelHeight) {
+	public void setPixelHeight(@Nullable Integer pixelHeight) {
 		this.pixelHeight = pixelHeight;
 	}
 
@@ -324,7 +326,7 @@ public class GeometryMap extends InputWidget implements RelativeSize, Changeable
 	 * @return the percentage height, or {@code null} when unset.
 	 */
 	@Override
-	public Integer getPercentageHeight() {
+	public @Nullable Integer getPercentageHeight() {
 		return percentageHeight;
 	}
 
@@ -335,7 +337,7 @@ public class GeometryMap extends InputWidget implements RelativeSize, Changeable
 	 */
 	@Override
 	@XmlAttribute(required = false)
-	public void setPercentageHeight(Integer percentageHeight) {
+	public void setPercentageHeight(@Nullable Integer percentageHeight) {
 		this.percentageHeight = percentageHeight;
 	}
 
@@ -345,7 +347,7 @@ public class GeometryMap extends InputWidget implements RelativeSize, Changeable
 	 * @return the minimum pixel height, or {@code null} when unset.
 	 */
 	@Override
-	public Integer getMinPixelHeight() {
+	public @Nullable Integer getMinPixelHeight() {
 		return minPixelHeight;
 	}
 
@@ -356,7 +358,7 @@ public class GeometryMap extends InputWidget implements RelativeSize, Changeable
 	 */
 	@Override
 	@XmlAttribute(required = false)
-	public void setMinPixelHeight(Integer minPixelHeight) {
+	public void setMinPixelHeight(@Nullable Integer minPixelHeight) {
 		this.minPixelHeight = minPixelHeight;
 	}
 
@@ -366,7 +368,7 @@ public class GeometryMap extends InputWidget implements RelativeSize, Changeable
 	 * @return the maximum pixel height, or {@code null} when unset.
 	 */
 	@Override
-	public Integer getMaxPixelHeight() {
+	public @Nullable Integer getMaxPixelHeight() {
 		return maxPixelHeight;
 	}
 
@@ -377,7 +379,7 @@ public class GeometryMap extends InputWidget implements RelativeSize, Changeable
 	 */
 	@Override
 	@XmlAttribute(required = false)
-	public void setMaxPixelHeight(Integer maxPixelHeight) {
+	public void setMaxPixelHeight(@Nullable Integer maxPixelHeight) {
 		this.maxPixelHeight = maxPixelHeight;
 	}
 
@@ -394,7 +396,7 @@ public class GeometryMap extends InputWidget implements RelativeSize, Changeable
 						@XmlElementRef(type = SetInvisibleEventAction.class),
 						@XmlElementRef(type = ToggleDisabledEventAction.class),
 						@XmlElementRef(type = ToggleVisibilityEventAction.class)})
-	public List<EventAction> getChangedActions() {
+	public @Nonnull List<EventAction> getChangedActions() {
 		return changedActions;
 	}
 	
@@ -404,7 +406,7 @@ public class GeometryMap extends InputWidget implements RelativeSize, Changeable
 	 * @return the mutable property map, never {@code null}.
 	 */
 	@Override
-	public Map<String, String> getProperties() {
+	public @Nonnull Map<String, String> getProperties() {
 		return properties;
 	}
 }

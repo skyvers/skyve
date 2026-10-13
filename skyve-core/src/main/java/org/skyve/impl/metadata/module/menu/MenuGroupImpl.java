@@ -6,6 +6,9 @@ import java.util.TreeSet;
 import org.skyve.metadata.module.menu.MenuGroup;
 import org.skyve.metadata.module.menu.MenuItem;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Represents a menu group (composite of {@link MenuItem}s). 
  * This class comprises the Composite part of the GoF composite pattern.
@@ -27,14 +30,14 @@ public final class MenuGroupImpl extends MenuImpl implements MenuGroup {
 	 * Javadoc from revsa.revnet.menu.MenuItem
 	 */
 	@Override
-	public final String getName() {
+	public final @Nullable String getName() {
 		return name;
 	}
 
 	/**
 	 * Javadoc from revsa.revnet.menu.MenuItem
 	 */
-	public final void setName(String name) {
+	public final void setName(@Nonnull String name) {
 		this.name = name;
 	} // setName
 
@@ -42,7 +45,7 @@ public final class MenuGroupImpl extends MenuImpl implements MenuGroup {
 	 * From {@link MenuImpl}.
 	 */
 	@Override
-	public final String toString() {
+	public final @Nonnull String toString() {
 		StringBuilder menuStructure = new StringBuilder();
 
 		if (getName() != null) {
@@ -57,12 +60,12 @@ public final class MenuGroupImpl extends MenuImpl implements MenuGroup {
 	}
 
 	@Override
-	public final Set<String> getRoleNames() {
+	public final @Nullable Set<String> getRoleNames() {
 		return null;
 	}
 
 	@Override
-	public final Set<String> getUxUis() {
+	public final @Nonnull Set<String> getUxUis() {
 		return uxuis;
 	}
 
@@ -71,7 +74,7 @@ public final class MenuGroupImpl extends MenuImpl implements MenuGroup {
 	 * there are uxuis defined and it contains this uxui.
 	 */
 	@Override
-	public boolean isApplicable(String uxui) {
+	public boolean isApplicable(@Nonnull String uxui) {
 		boolean result = false;
 		if (uxuis.isEmpty()) {
 			for (MenuItem item : getItems()) {

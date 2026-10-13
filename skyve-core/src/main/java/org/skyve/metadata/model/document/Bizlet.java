@@ -343,7 +343,7 @@ public class Bizlet<T extends Bean> implements MetaData {
 	 * @throws Exception
 	 */
 	@SuppressWarnings({"java:S112", "java:S1130"}) // Intentionally permitted exceptions
-	public T preExecute(@Nonnull ImplicitActionName actionName,
+	public @Nonnull T preExecute(@Nonnull ImplicitActionName actionName,
 							@Nonnull T bean,
 							@Nullable Bean parentBean,
 							@Nonnull WebContext webContext) throws Exception {

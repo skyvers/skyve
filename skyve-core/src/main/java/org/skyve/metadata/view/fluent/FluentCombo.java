@@ -23,14 +23,14 @@ public class FluentCombo extends FluentChangeableInputWidget<FluentCombo> implem
 	 *
 	 * @param combo the metadata instance to mutate
 	 */
-	public FluentCombo(Combo combo) {
+	public FluentCombo(@Nonnull Combo combo) {
 		this.combo = combo;
 	}
 
 	/**
 	 * Copies combo metadata into this fluent builder.
 	 */
-	public FluentCombo from(@SuppressWarnings("hiding") Combo combo) {
+	public @Nonnull FluentCombo from(@SuppressWarnings("hiding") @Nonnull Combo combo) {
 		absoluteWidth(combo, this);
 		super.from(combo);
 		combo.getProperties().entrySet().forEach(p -> putProperty(p.getKey(), p.getValue()));
@@ -45,7 +45,7 @@ public class FluentCombo extends FluentChangeableInputWidget<FluentCombo> implem
 	 * @return this builder
 	 */
 	@Override
-	public FluentCombo pixelWidth(int width) {
+	public @Nonnull FluentCombo pixelWidth(int width) {
 		combo.setPixelWidth(Integer.valueOf(width));
 		return this;
 	}
@@ -69,7 +69,7 @@ public class FluentCombo extends FluentChangeableInputWidget<FluentCombo> implem
 	 * @return the mutable combo metadata being configured
 	 */
 	@Override
-	public Combo get() {
+	public @Nonnull Combo get() {
 		return combo;
 	}
 }

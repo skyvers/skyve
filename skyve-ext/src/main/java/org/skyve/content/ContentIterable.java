@@ -2,6 +2,8 @@ package org.skyve.content;
 
 import java.util.Iterator;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * Iterable returned by ContentManager.all() to allow iterating over all content with resource handling.
  * @author mike
@@ -16,5 +18,5 @@ public interface ContentIterable extends Iterable<SearchResult> {
 	}
 
 	@Override
-	public ContentIterator iterator();
+	public @Nonnull ContentIterator iterator();
 }

@@ -1,5 +1,7 @@
 package org.skyve.metadata.view.model.chart;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlTransient;
 
 /**
@@ -18,14 +20,14 @@ public class NumericMultipleBucket implements Bucket {
 	}
 
 	@Override
-	public String bizQLExpression(String categoryBinding) {
+	public @Nonnull String bizQLExpression(@Nonnull String categoryBinding) {
 		StringBuilder result = new StringBuilder(32);
 		result.append("floor(bean.").append(categoryBinding).append(" / ").append(multiple).append(".0 + 0.001)");
 		return result.toString();
 	}
 	
 	@Override
-	public String label(Object category) {
+	public @Nullable String label(@Nullable Object category) {
 		if (category instanceof Number number) {
 			int value = number.intValue();
 			return String.format("%d-%s", Integer.valueOf(value * multiple), Integer.valueOf((value + 1) * multiple));

@@ -25,6 +25,8 @@ import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute.AttributeType;
 import org.skyve.util.Util;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlElementWrapper;
@@ -101,7 +103,7 @@ public class CustomerMetaData extends NamedMetaData implements ConvertibleMetaDa
 	 *
 	 * @return BCP-47 language tag, or {@code null}
 	 */
-	public String getLanguage() {
+	public @Nullable String getLanguage() {
 		return language;
 	}
 
@@ -111,7 +113,7 @@ public class CustomerMetaData extends NamedMetaData implements ConvertibleMetaDa
 	 * @param language BCP-47 language tag
 	 */
 	@XmlAttribute
-	public void setLanguage(String language) {
+	public void setLanguage(@Nullable String language) {
 		this.language = Util.processStringValue(language);
 	}
 
@@ -120,7 +122,7 @@ public class CustomerMetaData extends NamedMetaData implements ConvertibleMetaDa
 	 *
 	 * @return UI resource metadata, or {@code null}
 	 */
-	public UIResources getUiResources() {
+	public @Nullable UIResources getUiResources() {
 		return uiResources;
 	}
 
@@ -130,7 +132,7 @@ public class CustomerMetaData extends NamedMetaData implements ConvertibleMetaDa
 	 * @param uiResources UI resource metadata
 	 */
 	@XmlElement(namespace = XMLMetaData.CUSTOMER_NAMESPACE)
-	public void setUiResources(UIResources uiResources) {
+	public void setUiResources(@Nullable UIResources uiResources) {
 		this.uiResources = uiResources;
 	}
 
@@ -139,7 +141,7 @@ public class CustomerMetaData extends NamedMetaData implements ConvertibleMetaDa
 	 *
 	 * @return HTML resource metadata, or {@code null}
 	 */
-	public HTMLResourcesMetaData getHtmlResources() {
+	public @Nullable HTMLResourcesMetaData getHtmlResources() {
 		return htmlResources;
 	}
 
@@ -149,7 +151,7 @@ public class CustomerMetaData extends NamedMetaData implements ConvertibleMetaDa
 	 * @param htmlResources HTML resource metadata
 	 */
 	@XmlElement(namespace = XMLMetaData.CUSTOMER_NAMESPACE)
-	public void setHtmlResources(HTMLResourcesMetaData htmlResources) {
+	public void setHtmlResources(@Nullable HTMLResourcesMetaData htmlResources) {
 		this.htmlResources = htmlResources;
 	}
 
@@ -158,7 +160,7 @@ public class CustomerMetaData extends NamedMetaData implements ConvertibleMetaDa
 	 *
 	 * @return login resource metadata, or {@code null}
 	 */
-	public LoginResourcesMetaData getLoginResources() {
+	public @Nullable LoginResourcesMetaData getLoginResources() {
 		return loginResources;
 	}
 
@@ -168,7 +170,7 @@ public class CustomerMetaData extends NamedMetaData implements ConvertibleMetaDa
 	 * @param loginResources login resource metadata
 	 */
 	@XmlElement(namespace = XMLMetaData.CUSTOMER_NAMESPACE)
-	public void setLoginResources(LoginResourcesMetaData loginResources) {
+	public void setLoginResources(@Nullable LoginResourcesMetaData loginResources) {
 		this.loginResources = loginResources;
 	}
 
@@ -177,7 +179,7 @@ public class CustomerMetaData extends NamedMetaData implements ConvertibleMetaDa
 	 *
 	 * @return configured date converter name
 	 */
-	public ConverterName getDefaultDateConverter() {
+	public @Nullable ConverterName getDefaultDateConverter() {
 		return defaultDateConverter;
 	}
 
@@ -187,7 +189,7 @@ public class CustomerMetaData extends NamedMetaData implements ConvertibleMetaDa
 	 * @param defaultDateConverter configured date converter name
 	 */
 	@XmlElement(namespace = XMLMetaData.CUSTOMER_NAMESPACE, required = true)
-	public void setDefaultDateConverter(ConverterName defaultDateConverter) {
+	public void setDefaultDateConverter(@Nullable ConverterName defaultDateConverter) {
 		this.defaultDateConverter = defaultDateConverter;
 	}
 
@@ -196,7 +198,7 @@ public class CustomerMetaData extends NamedMetaData implements ConvertibleMetaDa
 	 *
 	 * @return configured date-time converter name
 	 */
-	public ConverterName getDefaultDateTimeConverter() {
+	public @Nullable ConverterName getDefaultDateTimeConverter() {
 		return defaultDateTimeConverter;
 	}
 
@@ -206,7 +208,7 @@ public class CustomerMetaData extends NamedMetaData implements ConvertibleMetaDa
 	 * @param defaultDateTimeConverter configured date-time converter name
 	 */
 	@XmlElement(namespace = XMLMetaData.CUSTOMER_NAMESPACE, required = true)
-	public void setDefaultDateTimeConverter(ConverterName defaultDateTimeConverter) {
+	public void setDefaultDateTimeConverter(@Nullable ConverterName defaultDateTimeConverter) {
 		this.defaultDateTimeConverter = defaultDateTimeConverter;
 	}
 
@@ -215,7 +217,7 @@ public class CustomerMetaData extends NamedMetaData implements ConvertibleMetaDa
 	 *
 	 * @return configured time converter name
 	 */
-	public ConverterName getDefaultTimeConverter() {
+	public @Nullable ConverterName getDefaultTimeConverter() {
 		return defaultTimeConverter;
 	}
 
@@ -225,7 +227,7 @@ public class CustomerMetaData extends NamedMetaData implements ConvertibleMetaDa
 	 * @param defaultTimeConverter configured time converter name
 	 */
 	@XmlElement(namespace = XMLMetaData.CUSTOMER_NAMESPACE, required = true)
-	public void setDefaultTimeConverter(ConverterName defaultTimeConverter) {
+	public void setDefaultTimeConverter(@Nullable ConverterName defaultTimeConverter) {
 		this.defaultTimeConverter = defaultTimeConverter;
 	}
 
@@ -234,7 +236,7 @@ public class CustomerMetaData extends NamedMetaData implements ConvertibleMetaDa
 	 *
 	 * @return configured timestamp converter name
 	 */
-	public ConverterName getDefaultTimestampConverter() {
+	public @Nullable ConverterName getDefaultTimestampConverter() {
 		return defaultTimestampConverter;
 	}
 
@@ -244,7 +246,7 @@ public class CustomerMetaData extends NamedMetaData implements ConvertibleMetaDa
 	 * @param defaultTimestampConverter configured timestamp converter name
 	 */
 	@XmlElement(namespace = XMLMetaData.CUSTOMER_NAMESPACE, required = true)
-	public void setDefaultTimestampConverter(ConverterName defaultTimestampConverter) {
+	public void setDefaultTimestampConverter(@Nullable ConverterName defaultTimestampConverter) {
 		this.defaultTimestampConverter = defaultTimestampConverter;
 	}
 
@@ -253,7 +255,7 @@ public class CustomerMetaData extends NamedMetaData implements ConvertibleMetaDa
 	 *
 	 * @return customer module metadata, or {@code null}
 	 */
-	public CustomerModulesMetaData getModules() {
+	public @Nullable CustomerModulesMetaData getModules() {
 		return modules;
 	}
 
@@ -263,7 +265,7 @@ public class CustomerMetaData extends NamedMetaData implements ConvertibleMetaDa
 	 * @param modules customer module metadata
 	 */
 	@XmlElement(namespace = XMLMetaData.CUSTOMER_NAMESPACE, required = true)
-	public void setModules(CustomerModulesMetaData modules) {
+	public void setModules(@Nullable CustomerModulesMetaData modules) {
 		this.modules = modules;
 	}
 
@@ -272,7 +274,7 @@ public class CustomerMetaData extends NamedMetaData implements ConvertibleMetaDa
 	 *
 	 * @return customer role metadata, or {@code null}
 	 */
-	public CustomerRolesMetaData getRoles() {
+	public @Nullable CustomerRolesMetaData getRoles() {
 		return roles;
 	}
 
@@ -282,7 +284,7 @@ public class CustomerMetaData extends NamedMetaData implements ConvertibleMetaDa
 	 * @param roles customer role metadata
 	 */
 	@XmlElement(namespace = XMLMetaData.CUSTOMER_NAMESPACE, required = false)
-	public void setRoles(CustomerRolesMetaData roles) {
+	public void setRoles(@Nullable CustomerRolesMetaData roles) {
 		this.roles = roles;
 	}
 
@@ -293,7 +295,7 @@ public class CustomerMetaData extends NamedMetaData implements ConvertibleMetaDa
 	 */
 	@XmlElementWrapper(namespace = XMLMetaData.CUSTOMER_NAMESPACE, name = "textSearchRoles")
 	@XmlElement(namespace = XMLMetaData.CUSTOMER_NAMESPACE, name = "role", required = true)
-	public List<CustomerFeatureRoleMetaData> getTextSearchRoles() {
+	public @Nonnull List<CustomerFeatureRoleMetaData> getTextSearchRoles() {
 		return textSearchRoles;
 	}
 	
@@ -304,7 +306,7 @@ public class CustomerMetaData extends NamedMetaData implements ConvertibleMetaDa
 	 */
 	@XmlElementWrapper(namespace = XMLMetaData.CUSTOMER_NAMESPACE, name = "flagRoles")
 	@XmlElement(namespace = XMLMetaData.CUSTOMER_NAMESPACE, name = "role", required = true)
-	public List<CustomerFeatureRoleMetaData> getFlagRoles() {
+	public @Nonnull List<CustomerFeatureRoleMetaData> getFlagRoles() {
 		return flagRoles;
 	}
 	
@@ -315,7 +317,7 @@ public class CustomerMetaData extends NamedMetaData implements ConvertibleMetaDa
 	 */
 	@XmlElementWrapper(namespace = XMLMetaData.CUSTOMER_NAMESPACE, name = "switchModeRoles")
 	@XmlElement(namespace = XMLMetaData.CUSTOMER_NAMESPACE, name = "role", required = true)
-	public List<CustomerFeatureRoleMetaData> getSwitchModeRoles() {
+	public @Nonnull List<CustomerFeatureRoleMetaData> getSwitchModeRoles() {
 		return switchModeRoles;
 	}
 	
@@ -326,7 +328,7 @@ public class CustomerMetaData extends NamedMetaData implements ConvertibleMetaDa
 	 */
 	@XmlElementWrapper(namespace = XMLMetaData.CUSTOMER_NAMESPACE, name = "interceptors")
 	@XmlElement(namespace = XMLMetaData.CUSTOMER_NAMESPACE, name = "interceptor", required = true)
-	public List<InterceptorMetaDataImpl> getInterceptors() {
+	public @Nonnull List<InterceptorMetaDataImpl> getInterceptors() {
 		return interceptors;
 	}
 
@@ -337,7 +339,7 @@ public class CustomerMetaData extends NamedMetaData implements ConvertibleMetaDa
 	 */
 	@XmlElementWrapper(namespace = XMLMetaData.CUSTOMER_NAMESPACE, name = "observers")
 	@XmlElement(namespace = XMLMetaData.CUSTOMER_NAMESPACE, name = "observer", required = true)
-	public List<ObserverMetaDataImpl> getObservers() {
+	public @Nonnull List<ObserverMetaDataImpl> getObservers() {
 		return observers;
 	}
 
@@ -346,7 +348,7 @@ public class CustomerMetaData extends NamedMetaData implements ConvertibleMetaDa
 	 *
 	 * @return JFreeChart post-processor class name, or {@code null}
 	 */
-	public String getJFreeChartPostProcessorClassName() {
+	public @Nullable String getJFreeChartPostProcessorClassName() {
 		return fullyQualifiedJFreeChartPostProcessorClassName;
 	}
 
@@ -356,7 +358,7 @@ public class CustomerMetaData extends NamedMetaData implements ConvertibleMetaDa
 	 * @param fullyQualifiedJFreeChartPostProcessorClassName class name to use
 	 */
 	@XmlElement(namespace = XMLMetaData.CUSTOMER_NAMESPACE)
-	public void setJFreeChartPostProcessorClassName(String fullyQualifiedJFreeChartPostProcessorClassName) {
+	public void setJFreeChartPostProcessorClassName(@Nullable String fullyQualifiedJFreeChartPostProcessorClassName) {
 		this.fullyQualifiedJFreeChartPostProcessorClassName = Util.processStringValue(fullyQualifiedJFreeChartPostProcessorClassName);
 	}
 
@@ -365,7 +367,7 @@ public class CustomerMetaData extends NamedMetaData implements ConvertibleMetaDa
 	 *
 	 * @return PrimeFaces chart post-processor class name, or {@code null}
 	 */
-	public String getPrimeFacesChartPostProcessorClassName() {
+	public @Nullable String getPrimeFacesChartPostProcessorClassName() {
 		return fullyQualifiedPrimeFacesChartPostProcessorClassName;
 	}
 
@@ -375,7 +377,7 @@ public class CustomerMetaData extends NamedMetaData implements ConvertibleMetaDa
 	 * @param fullyQualifiedPrimeFacesChartPostProcessorClassName class name to use
 	 */
 	@XmlElement(namespace = XMLMetaData.CUSTOMER_NAMESPACE)
-	public void setPrimeFacesChartPostProcessorClassName(String fullyQualifiedPrimeFacesChartPostProcessorClassName) {
+	public void setPrimeFacesChartPostProcessorClassName(@Nullable String fullyQualifiedPrimeFacesChartPostProcessorClassName) {
 		this.fullyQualifiedPrimeFacesChartPostProcessorClassName = Util.processStringValue(fullyQualifiedPrimeFacesChartPostProcessorClassName);
 	}
 
@@ -405,7 +407,7 @@ public class CustomerMetaData extends NamedMetaData implements ConvertibleMetaDa
 	 * @return mutable customer property map
 	 */
 	@Override
-	public Map<String, String> getProperties() {
+	public @Nonnull Map<String, String> getProperties() {
 		return properties;
 	}
 
@@ -424,7 +426,7 @@ public class CustomerMetaData extends NamedMetaData implements ConvertibleMetaDa
 	 */
 	@Override
 	@SuppressWarnings("java:S3776") // Complexity OK
-	public CustomerImpl convert(String metaDataName) {
+	public @Nonnull CustomerImpl convert(@Nonnull String metaDataName) {
 		CustomerImpl result = new CustomerImpl();
 		result.setLastModifiedMillis(getLastModifiedMillis());
 		String value = getName();
@@ -595,8 +597,8 @@ public class CustomerMetaData extends NamedMetaData implements ConvertibleMetaDa
 	 * @throws MetaDataException if role/module references are invalid or duplicated
 	 */
 	@SuppressWarnings("java:S3776") // Complexity OK
-	private static void populateFeatureRoles(List<CustomerFeatureRoleMetaData> featureRoles, Set<String> featureModuleRoles,
-			String metaDataName, CustomerRolesMetaData roles, Map<String, FormLabelLayout> moduleEntries) {
+	private static void populateFeatureRoles(@Nonnull List<CustomerFeatureRoleMetaData> featureRoles, @Nonnull Set<String> featureModuleRoles,
+			@Nonnull String metaDataName, @Nullable CustomerRolesMetaData roles, @Nonnull Map<String, FormLabelLayout> moduleEntries) {
 		for (CustomerFeatureRoleMetaData featureRole : featureRoles) {
 			String roleName = featureRole.getName();
 			if (roleName == null) {

@@ -6,6 +6,9 @@ import java.lang.reflect.InvocationTargetException;
 import org.apache.commons.beanutils.PropertyUtilsBean;
 import org.skyve.impl.util.UtilImpl;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Resolves BeanUtils property access against deproxied Hibernate entities.
  *
@@ -25,7 +28,7 @@ public class DeproxyingPropertyUtilsBean extends PropertyUtilsBean {
 	 * @throws NoSuchMethodException if the property does not exist
 	 */
 	@Override
-	public Object getSimpleProperty(Object bean, String name)
+	public @Nullable Object getSimpleProperty(@Nonnull Object bean, @Nonnull String name)
 	throws IllegalAccessException, InvocationTargetException, NoSuchMethodException {
 		Object deproxiedBean = UtilImpl.deproxy(bean);
 		return super.getSimpleProperty(deproxiedBean, name);
@@ -42,7 +45,7 @@ public class DeproxyingPropertyUtilsBean extends PropertyUtilsBean {
 	 * @throws NoSuchMethodException if the property does not exist
 	 */
 	@Override
-	public void setSimpleProperty(Object bean, String name, Object value)
+	public void setSimpleProperty(@Nonnull Object bean, @Nonnull String name, @Nullable Object value)
 	throws IllegalAccessException, InvocationTargetException, NoSuchMethodException {
 		Object deproxiedBean = UtilImpl.deproxy(bean);
 		Object deproxiedValue = UtilImpl.deproxy(value);
@@ -60,7 +63,7 @@ public class DeproxyingPropertyUtilsBean extends PropertyUtilsBean {
 	 * @throws NoSuchMethodException if the property does not exist
 	 */
 	@Override
-	public Class<?> getPropertyType(Object bean, String name)
+	public @Nullable Class<?> getPropertyType(@Nonnull Object bean, @Nonnull String name)
 	throws IllegalAccessException, InvocationTargetException, NoSuchMethodException {
 		Object deproxiedBean = UtilImpl.deproxy(bean);
 		return super.getPropertyType(deproxiedBean, name);
@@ -77,7 +80,7 @@ public class DeproxyingPropertyUtilsBean extends PropertyUtilsBean {
 	 * @throws NoSuchMethodException if the property does not exist
 	 */
 	@Override
-	public PropertyDescriptor getPropertyDescriptor(Object bean, String name)
+	public @Nullable PropertyDescriptor getPropertyDescriptor(@Nonnull Object bean, @Nonnull String name)
 	throws IllegalAccessException, InvocationTargetException, NoSuchMethodException {
 		Object deproxiedBean = UtilImpl.deproxy(bean);
 		return super.getPropertyDescriptor(deproxiedBean, name);
@@ -95,7 +98,7 @@ public class DeproxyingPropertyUtilsBean extends PropertyUtilsBean {
 	 * @throws NoSuchMethodException if the property does not exist
 	 */
 	@Override
-	public Object getIndexedProperty(Object bean, String name, int index)
+	public @Nullable Object getIndexedProperty(@Nonnull Object bean, @Nonnull String name, int index)
 	throws IllegalAccessException, InvocationTargetException, NoSuchMethodException {
 		Object deproxiedBean = UtilImpl.deproxy(bean);
 		return super.getIndexedProperty(deproxiedBean, name, index);
@@ -113,7 +116,7 @@ public class DeproxyingPropertyUtilsBean extends PropertyUtilsBean {
 	 * @throws NoSuchMethodException if the property does not exist
 	 */
 	@Override
-	public void setIndexedProperty(Object bean, String name, int index, Object value)
+	public void setIndexedProperty(@Nonnull Object bean, @Nonnull String name, int index, @Nullable Object value)
 	throws IllegalAccessException, InvocationTargetException, NoSuchMethodException {
 		Object deproxiedBean = UtilImpl.deproxy(bean);
 		Object deproxiedValue = UtilImpl.deproxy(value);
@@ -132,7 +135,7 @@ public class DeproxyingPropertyUtilsBean extends PropertyUtilsBean {
 	 * @throws NoSuchMethodException if the property does not exist
 	 */
 	@Override
-	public Object getMappedProperty(Object bean, String name, String key)
+	public @Nullable Object getMappedProperty(@Nonnull Object bean, @Nonnull String name, @Nonnull String key)
 	throws IllegalAccessException, InvocationTargetException, NoSuchMethodException {
 		Object deproxiedBean = UtilImpl.deproxy(bean);
 		return super.getMappedProperty(deproxiedBean, name, key);
@@ -150,7 +153,7 @@ public class DeproxyingPropertyUtilsBean extends PropertyUtilsBean {
 	 * @throws NoSuchMethodException if the property does not exist
 	 */
 	@Override
-	public void setMappedProperty(Object bean, String name, String key, Object value)
+	public void setMappedProperty(@Nonnull Object bean, @Nonnull String name, @Nonnull String key, @Nullable Object value)
 	throws IllegalAccessException, InvocationTargetException, NoSuchMethodException {
 		Object deproxiedBean = UtilImpl.deproxy(bean);
 		Object deproxiedValue = UtilImpl.deproxy(value);

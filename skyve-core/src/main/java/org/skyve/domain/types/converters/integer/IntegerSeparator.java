@@ -7,6 +7,9 @@ import org.skyve.domain.types.converters.Validator;
 import org.skyve.metadata.model.Attribute.AttributeType;
 import org.skyve.util.BeanValidator;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Converts integer values using grouped thousands separator formatting.
  */
@@ -16,7 +19,7 @@ public class IntegerSeparator implements Converter<Integer> {
 	 * @return the result value
 	 */
 	@Override
-	public Class<Integer> getValueType() {
+	public @Nonnull Class<Integer> getValueType() {
 		return Integer.class;
 	}
 	
@@ -26,7 +29,7 @@ public class IntegerSeparator implements Converter<Integer> {
 	 * @return the result value
 	 */
 	@Override
-	public Integer fromDisplayValue(String displayValue) throws ConversionException {
+	public @Nonnull Integer fromDisplayValue(@Nonnull String displayValue) throws ConversionException {
 		try {
 			String result = displayValue.replace(",", "");
 			return Integer.valueOf(result);
@@ -51,7 +54,7 @@ public class IntegerSeparator implements Converter<Integer> {
 	 * @return the result value
 	 */
 	@Override
-	public String toDisplayValue(Integer value) throws ConversionException {
+	public @Nonnull String toDisplayValue(@Nonnull Integer value) throws ConversionException {
 		try {
 			return String.format("%,d", value);
 		}
@@ -65,7 +68,7 @@ public class IntegerSeparator implements Converter<Integer> {
 	 * @return the result value
 	 */
 	@Override
-	public AttributeType getAttributeType() {
+	public @Nonnull AttributeType getAttributeType() {
 		return AttributeType.integer;
 	}
 
@@ -74,7 +77,7 @@ public class IntegerSeparator implements Converter<Integer> {
 	 * @return the result value
 	 */
 	@Override
-	public Format<Integer> getFormat() {
+	public @Nullable Format<Integer> getFormat() {
 		return null;
 	}
 
@@ -83,7 +86,7 @@ public class IntegerSeparator implements Converter<Integer> {
 	 * @return the result value
 	 */
 	@Override
-	public Validator<Integer> getValidator() {
+	public @Nullable Validator<Integer> getValidator() {
 		return null;
 	}
 	
@@ -92,7 +95,7 @@ public class IntegerSeparator implements Converter<Integer> {
 	 * @return the result value
 	 */
 	@Override
-	public String getFormatPattern() {
+	public @Nullable String getFormatPattern() {
 		return null;
 	}
 }

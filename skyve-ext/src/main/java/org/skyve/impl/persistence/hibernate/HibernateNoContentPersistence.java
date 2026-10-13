@@ -3,6 +3,8 @@ package org.skyve.impl.persistence.hibernate;
 import org.skyve.content.BeanContent;
 import org.skyve.domain.PersistentBean;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * {@link AbstractHibernatePersistence} variant that does not manage a content store,
  * used in contexts where binary attachment storage is not required or is
@@ -17,12 +19,12 @@ public class HibernateNoContentPersistence extends AbstractHibernatePersistence 
 	}
 
 	@Override
-	protected void removeBeanContent(PersistentBean bean) throws Exception {
+	protected void removeBeanContent(@Nonnull PersistentBean bean) throws Exception {
 		// no-op
 	}
 
 	@Override
-	protected void putBeanContent(BeanContent content) throws Exception {
+	protected void putBeanContent(@Nonnull BeanContent content) throws Exception {
 		// no-op
 	}
 }

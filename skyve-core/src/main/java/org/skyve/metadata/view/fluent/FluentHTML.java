@@ -4,6 +4,7 @@ import org.skyve.impl.metadata.view.widget.bound.input.HTML;
 import org.skyve.metadata.view.TextOutput.Sanitisation;
 
 import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 
 /**
  * Builds {@link HTML} widget metadata using a fluent API.
@@ -23,7 +24,7 @@ public class FluentHTML extends FluentInputWidget<FluentHTML> implements FluentA
 	 *
 	 * @param html the metadata instance to mutate
 	 */
-	public FluentHTML(HTML html) {
+	public FluentHTML(@Nonnull HTML html) {
 		this.html = html;
 	}
 
@@ -34,7 +35,7 @@ public class FluentHTML extends FluentInputWidget<FluentHTML> implements FluentA
 	 *            the source metadata to copy
 	 * @return this builder
 	 */
-	public FluentHTML from(@SuppressWarnings("hiding") HTML html) {
+	public @Nonnull FluentHTML from(@SuppressWarnings("hiding") @Nonnull HTML html) {
 		sanitise(html.getSanitise());
 		absoluteSize(html, this);
 		super.from(html);
@@ -49,7 +50,7 @@ public class FluentHTML extends FluentInputWidget<FluentHTML> implements FluentA
 	 * @param sanitise the sanitisation policy to apply
 	 * @return this builder
 	 */
-	public FluentHTML sanitise(Sanitisation sanitise) {
+	public @Nonnull FluentHTML sanitise(@Nullable Sanitisation sanitise) {
 		html.setSanitise(sanitise);
 		return this;
 	}
@@ -61,7 +62,7 @@ public class FluentHTML extends FluentInputWidget<FluentHTML> implements FluentA
 	 * @return this builder
 	 */
 	@Override
-	public FluentHTML pixelWidth(int width) {
+	public @Nonnull FluentHTML pixelWidth(int width) {
 		html.setPixelWidth(Integer.valueOf(width));
 		return this;
 	}
@@ -73,7 +74,7 @@ public class FluentHTML extends FluentInputWidget<FluentHTML> implements FluentA
 	 * @return this builder
 	 */
 	@Override
-	public FluentHTML pixelHeight(int height) {
+	public @Nonnull FluentHTML pixelHeight(int height) {
 		html.setPixelHeight(Integer.valueOf(height));
 		return this;
 	}
@@ -97,7 +98,7 @@ public class FluentHTML extends FluentInputWidget<FluentHTML> implements FluentA
 	 * @return the mutable HTML metadata being configured
 	 */
 	@Override
-	public HTML get() {
+	public @Nonnull HTML get() {
 		return html;
 	}
 }

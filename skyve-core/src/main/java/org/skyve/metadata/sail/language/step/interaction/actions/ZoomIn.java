@@ -5,6 +5,8 @@ import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.sail.execution.Executor;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
@@ -26,7 +28,7 @@ public class ZoomIn extends AbstractAction {
 	 * Returns the binding.
 	 * @return the result
 	 */
-	public String getBinding() {
+	public @Nullable String getBinding() {
 		return binding;
 	}
 
@@ -35,7 +37,7 @@ public class ZoomIn extends AbstractAction {
 	 * @param binding the binding
 	 */
 	@XmlAttribute(name = "binding", required = true)
-	public void setBinding(String binding) {
+	public void setBinding(@Nullable String binding) {
 		this.binding = UtilImpl.processStringValue(binding);
 	}
 
@@ -44,7 +46,7 @@ public class ZoomIn extends AbstractAction {
 	 * @param executor the executor
 	 */
 	@Override
-	public void execute(Executor executor) {
+	public void execute(@Nonnull Executor executor) {
 		executor.executeZoomIn(this);
 	}
 	
@@ -54,7 +56,7 @@ public class ZoomIn extends AbstractAction {
 	 * @return the result
 	 */
 	@Override
-	public String getIdentifier(AutomationContext context) {
+	public @Nonnull String getIdentifier(@Nonnull AutomationContext context) {
 		return binding + ".zoomIn";
 	}
 }

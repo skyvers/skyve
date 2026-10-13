@@ -141,7 +141,7 @@ public interface Module extends NamedMetaData, PersistentMetaData, ReloadableMet
 		 * @return the result
 		 */
 		@Override
-		public Map<String, String> getProperties() {
+		public @Nonnull Map<String, String> getProperties() {
 			return properties;
 		}
 	}

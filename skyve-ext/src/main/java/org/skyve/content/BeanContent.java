@@ -5,6 +5,8 @@ import java.util.TreeMap;
 
 import org.skyve.domain.PersistentBean;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * Represents bean data stored in a content repository against the bean's bizId.
  * The bizId is the unique identifier used to manipulate this content.
@@ -17,7 +19,7 @@ public class BeanContent extends Content {
 	 * Bean constructor.
 	 * @param bean
 	 */
-	public BeanContent(PersistentBean bean) {
+	public BeanContent(@Nonnull PersistentBean bean) {
 		super(bean.getBizCustomer(),
 				bean.getBizModule(),
 				bean.getBizDocument(),
@@ -32,7 +34,7 @@ public class BeanContent extends Content {
 	 * Other bean properties that require indexing.
 	 * @return
 	 */
-	public Map<String, String> getProperties() {
+	public @Nonnull Map<String, String> getProperties() {
 		return properties;
 	}
 }

@@ -23,6 +23,9 @@ import org.skyve.metadata.customer.Customer;
 import org.slf4j.Logger;
 import org.skyve.util.logging.SkyveLoggerFactory;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Orchestrates Flutter client code generation for modules and views.
  *
@@ -39,7 +42,7 @@ public class FlutterGenerator {
 
     private File projectPath;
 
-    public FlutterGenerator(GeneratorConfig config) {
+    public FlutterGenerator(@Nonnull GeneratorConfig config) {
         this.config = config;
         Validate.notEmpty(config.getUxui());
         Validate.notEmpty(config.getProjectName());
@@ -56,11 +59,11 @@ public class FlutterGenerator {
                                                     .getCustomer(config.getCustomerName()));
     }
 
-    public GeneratorConfig getConfig() {
+    public @Nonnull GeneratorConfig getConfig() {
         return config;
     }
 
-    void refreshFile(String resourcePath, String flutterPath, Map<String, String> substitutions) throws IOException {
+    void refreshFile(@Nonnull String resourcePath, @Nonnull String flutterPath, @Nonnull Map<String, String> substitutions) throws IOException {
         File file = new File(projectPath, flutterPath);
         if (file.exists()) {
             if (! file.delete()) {
@@ -95,7 +98,7 @@ public class FlutterGenerator {
      * @param substitutions
      * @throws IOException
      */
-    private void refreshAll(String relativeFolderPath, Collection<String> fileNames, Map<String, String> substitutions)
+    private void refreshAll(@Nonnull String relativeFolderPath, @Nonnull Collection<String> fileNames, @Nonnull Map<String, String> substitutions)
             throws IOException {
 
         File dir = new File(projectPath, relativeFolderPath);
@@ -162,63 +165,63 @@ public class FlutterGenerator {
         private Collection<MoDoc> modocWhitelist = new ArrayList<>();
         private Customer customer;
 
-        public String getUxui() {
+        public @Nullable String getUxui() {
             return uxui;
         }
 
-        public void setCustomer(Customer customer) {
+        public void setCustomer(@Nullable Customer customer) {
             this.customer = customer;
         }
 
-        public Customer getCustomer() {
+        public @Nullable Customer getCustomer() {
             return customer;
         }
 
-        public void setUxui(String uxui) {
+        public void setUxui(@Nullable String uxui) {
             this.uxui = uxui;
         }
 
-        public String getProjectName() {
+        public @Nullable String getProjectName() {
             return projectName;
         }
 
-        public void setProjectName(String projectName) {
+        public void setProjectName(@Nullable String projectName) {
             this.projectName = projectName;
         }
 
-        public String getProjectPath() {
+        public @Nullable String getProjectPath() {
             return projectPath;
         }
 
-        public void setProjectPath(String projectPath) {
+        public void setProjectPath(@Nullable String projectPath) {
             this.projectPath = projectPath;
         }
 
-        public String getCustomerName() {
+        public @Nullable String getCustomerName() {
             return customerName;
         }
 
-        public void setCustomerName(String customerName) {
+        public void setCustomerName(@Nullable String customerName) {
             this.customerName = customerName;
         }
 
-        public Collection<MoDoc> getModocWhitelist() {
+        public @Nonnull Collection<MoDoc> getModocWhitelist() {
             return modocWhitelist;
         }
 
-        public void addModocWhitelistEntry(String modocEntry) {
+        public void addModocWhitelistEntry(@Nonnull String modocEntry) {
             modocWhitelist.add(MoDoc.fromString(modocEntry));
         }
 
-        public File getLibViewsPath() {
+        public @Nullable File getLibViewsPath() {
             return libViewsPath;
         }
 
-        public void setLibViewsPath(File libViewsPath) {
+        public void setLibViewsPath(@Nullable File libViewsPath) {
             this.libViewsPath = libViewsPath;
         }
 
-        public boolean allowsMoDoc(String module, String document) {
+        public boolean allowsMoDoc(@Nullable String module, @Nullable String document) {
 
             return modocWhitelist.stream()
                                  .anyMatch(md -> md.matches(module, document));
@@ -232,12 +235,12 @@ public class FlutterGenerator {
         private final String module;
         private final String document;
 
-        public MoDoc(String module, String document) {
+        public MoDoc(@Nonnull String module, @Nonnull String document) {
             this.module = Validate.notEmpty(module);
             this.document = Validate.notEmpty(document);
         }
 
-        public static MoDoc fromString(String modocString) {
+        public static @Nonnull MoDoc fromString(@Nonnull String modocString) {
 
             String module = StringUtils.substringBefore(modocString, ".");
             String document = StringUtils.substringAfter(modocString, ".");
@@ -245,22 +248,22 @@ public class FlutterGenerator {
             return new MoDoc(module, document);
         }
 
-        public String getModule() {
+        public @Nonnull String getModule() {
             return module;
         }
 
-        public String getDocument() {
+        public @Nonnull String getDocument() {
             return document;
         }
 
-        public boolean matches(String mod, String doc) {
+        public boolean matches(@Nullable String mod, @Nullable String doc) {
 
             return (this.module.equals(WILDCARD) || this.module.equals(mod))
                     && (this.document.equals(WILDCARD) || this.document.equals(doc));
         }
 
         @Override
-        public String toString() {
+        public @Nonnull String toString() {
             return "MoDoc[" + module + "." + document + "]";
         }
     }

@@ -3,6 +3,8 @@ package org.skyve.metadata.module.fluent;
 import org.skyve.impl.metadata.module.query.QueryReferenceImpl;
 import org.skyve.impl.metadata.repository.module.QueryReferenceMetaData;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * Builds query reference metadata that points to definitions in this or another module.
  */
@@ -19,7 +21,7 @@ public abstract class FluentQueryReference<T extends FluentQueryReference<T>> ex
 	 *
 	 * @param query The source query reference.
 	 */
-	protected void from(QueryReferenceImpl query) {
+	protected void from(@Nonnull QueryReferenceImpl query) {
 		super.from(query);
 		moduleRef(query.getModuleRef());
 		ref(query.getRef());
@@ -32,7 +34,7 @@ public abstract class FluentQueryReference<T extends FluentQueryReference<T>> ex
 	 * @return this fluent instance.
 	 */
 	@SuppressWarnings("unchecked")
-	public T moduleRef(String moduleRef) {
+	public @Nonnull T moduleRef(@Nonnull String moduleRef) {
 		get().setModuleRef(moduleRef);
 		return (T) this;
 	}
@@ -44,7 +46,7 @@ public abstract class FluentQueryReference<T extends FluentQueryReference<T>> ex
 	 * @return this fluent instance.
 	 */
 	@SuppressWarnings("unchecked")
-	public T ref(String ref) {
+	public @Nonnull T ref(@Nonnull String ref) {
 		get().setRef(ref);
 		return (T) this;
 	}
@@ -55,5 +57,5 @@ public abstract class FluentQueryReference<T extends FluentQueryReference<T>> ex
 	 * @return The backing query reference metadata.
 	 */
 	@Override
-	public abstract QueryReferenceMetaData get();
+	public abstract @Nonnull QueryReferenceMetaData get();
 }

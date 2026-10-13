@@ -6,6 +6,8 @@ import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.UserAccess;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
@@ -33,7 +35,7 @@ public class ModuleRoleDocumentAggregateUserAccessMetaData extends ModuleRoleUse
 	 *
 	 * @return the target document name
 	 */
-	public String getDocumentName() {
+	public @Nullable String getDocumentName() {
 		return documentName;
 	}
 
@@ -46,7 +48,7 @@ public class ModuleRoleDocumentAggregateUserAccessMetaData extends ModuleRoleUse
 	 * @param documentName the target document name; blank values become {@code null}
 	 */
 	@XmlAttribute(name = "document", required = true)
-	public void setDocumentName(String documentName) {
+	public void setDocumentName(@Nullable String documentName) {
 		this.documentName = UtilImpl.processStringValue(documentName);
 	}
 	
@@ -59,7 +61,7 @@ public class ModuleRoleDocumentAggregateUserAccessMetaData extends ModuleRoleUse
 	 * @throws MetaDataException if {@code document} is missing or does not resolve in {@code module}
 	 */
 	@Override
-	public void validate(String metaDataName, String roleName, Module module) {
+	public void validate(@Nonnull String metaDataName, @Nonnull String roleName, @Nonnull Module module) {
 		if (documentName == null) {
 			throw new MetaDataException(metaDataName + " : [document] is required for all documentAggregate, modelAggregate, previousComplete & singular user accesses defined in module role " + roleName);
 		}
@@ -75,7 +77,7 @@ public class ModuleRoleDocumentAggregateUserAccessMetaData extends ModuleRoleUse
 	 * @return the runtime document-aggregate user access
 	 */
 	@Override
-	public UserAccess toUserAccess(String moduleName) {
+	public @Nonnull UserAccess toUserAccess(@Nonnull String moduleName) {
 		return UserAccess.documentAggregate(moduleName, documentName);
 	}
 }

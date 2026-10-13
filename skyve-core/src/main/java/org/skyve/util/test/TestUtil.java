@@ -53,6 +53,7 @@ import org.slf4j.Logger;
 import com.mifmif.common.regex.Generex;
 
 import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 
 /**
  * Generates and mutates deterministic/random test data for Skyve domain documents.
@@ -119,7 +120,7 @@ public class TestUtil {
 	 * @return The bean with a modified attribute with a different random value if possible
 	 * @throws IOException
 	 */
-	public static <T extends PersistentBean> T updateAttribute(final T bean, final Attribute attribute) throws IOException {
+	public static @Nonnull <T extends PersistentBean> T updateAttribute(final @Nonnull T bean, final @Nullable Attribute attribute) throws IOException {
 		return updateAttribute(null, null, bean, attribute);
 	}
 
@@ -134,8 +135,8 @@ public class TestUtil {
 	 * @throws IOException
 	 */
 	@SuppressWarnings({ "unchecked", "boxing" })
-	public static <T extends PersistentBean> T updateAttribute(final Module module, final Document document, final T bean,
-			final Attribute attribute) throws IOException {
+	public static @Nonnull <T extends PersistentBean> T updateAttribute(final @Nullable Module module, final @Nullable Document document, final @Nonnull T bean,
+			final @Nullable Attribute attribute) throws IOException {
 		if (attribute == null) {
 			return bean;
 		}
@@ -221,7 +222,7 @@ public class TestUtil {
 	 * @param document The document to retrieve the excluded attributes for
 	 * @return The list of excluded attribute names
 	 */
-	public static List<String> retrieveExcludedUpdateAttributes(Module module, Document document) {
+	public static @Nonnull List<String> retrieveExcludedUpdateAttributes(@Nonnull Module module, @Nonnull Document document) {
 		String className = String.format("modules.%1$s.%2$s.%2$sFactory", module.getName(), document.getName());
 		LOGGER.debug("Looking for factory class {}", className);
 		try {
@@ -241,7 +242,7 @@ public class TestUtil {
 	/**
 	 * Creates a cache key for an attribute so it is unique per document.
 	 */
-	private static String attributeKey(final Module module, final Document document, final String attributeName) {
+	private static @Nullable String attributeKey(final @Nullable Module module, final @Nullable Document document, final @Nullable String attributeName) {
 		if (attributeName != null) {
 			if (module != null && document != null) {
 				return String.format("%s.%s.%s", module.getName(), document.getName(), attributeName);
@@ -351,7 +352,7 @@ public class TestUtil {
 	 * @param filename The name of the file to check
 	 * @return True if the string contains a period followed by at least one character, false otherwise
 	 */
-	private static boolean hasExtension(final String filename) {
+	private static boolean hasExtension(final @Nullable String filename) {
 		if (filename != null && ! filename.isEmpty() && filename.indexOf(".") > 0) {
 			if (! (filename.substring(filename.indexOf(".") + 1)).isEmpty()) {
 				return true;
@@ -367,7 +368,7 @@ public class TestUtil {
 	 * @param attribute The attribute to generate the random decimal for
 	 * @return A random decimal
 	 */
-	public static Decimal randomDecimal(Attribute attribute) {
+	public static @Nonnull Decimal randomDecimal(@Nonnull Attribute attribute) {
 		Decimal min = new Decimal2(0), max = new Decimal2(10000);
 
 		DecimalValidator validator = null;
@@ -405,7 +406,7 @@ public class TestUtil {
 	 * @param length The requested total email length
 	 * @return A pseudo-random email string
 	 */
-	public static String randomEmail(int length) {
+	public static @Nonnull String randomEmail(int length) {
 		int addressLength = (int) Math.floor((length - 2) / 2.0);
 		int domainLength = (int) Math.floor((length - 2) / 2.0) - 2;
 
@@ -434,7 +435,7 @@ public class TestUtil {
 	 * @param currentValue The current int value of the enum so that it is not chosen again
 	 * @return A random enum constant or null if this is a dynamic enum (with no class)
 	 */
-	public static <T extends Enum<?>> T randomEnum(Class<T> type, Integer currentValue) {
+	public static @Nullable <T extends Enum<?>> T randomEnum(@Nonnull Class<T> type, @Nullable Integer currentValue) {
 		int x;
 		T[] constants = type.getEnumConstants();
 		if (constants == null) { // no enum values - maybe this is a dynamic enum
@@ -461,7 +462,7 @@ public class TestUtil {
 	 * @param length The maximum length of the random string
 	 * @return A format compliant random string
 	 */
-	private static String randomFormat(TextFormat textFormat, int length) {
+	private static @Nonnull String randomFormat(@Nonnull TextFormat textFormat, int length) {
 
 		String mask = textFormat.getMask();
 		String out = new String();
@@ -516,7 +517,7 @@ public class TestUtil {
 	 * @return A random integer
 	 */
 	@SuppressWarnings("java:S3776") // Complexity OK
-	public static Integer randomInteger(Attribute attribute) {
+	public static @Nonnull Integer randomInteger(@Nonnull Attribute attribute) {
 		int min = 0, max = 10000;
 
 		// if there is a min and max make sure it is within the range
@@ -554,7 +555,7 @@ public class TestUtil {
 	 * @param regularExpression The regular expression to comply to
 	 * @return A regex compliant random string, or null
 	 */
-	public static String randomRegex(String regularExpression, Integer length) {
+	public static @Nullable String randomRegex(@Nonnull String regularExpression, @Nullable Integer length) {
 		// strip anchors as they are not supported
 		String expression = regularExpression;
 		if (regularExpression.startsWith("^") && regularExpression.endsWith("$")) {
@@ -580,7 +581,7 @@ public class TestUtil {
 		return null;
 	}
 
-	private static String randomString(int length) {
+	private static @Nonnull String randomString(int length) {
 		char[] guts = new char[length];
 		for (int i = 0; i < length; i++) {
 			guts[i] = Character.toChars(65 + (int) (RANDOM.nextDouble() * 26))[0];
@@ -606,7 +607,7 @@ public class TestUtil {
 	 * @throws IOException
 	 */
 	@SuppressWarnings("java:S3776") // Complexity OK
-	public static String randomText(String customerName, Module module, Document document, Attribute attribute)
+	public static @Nullable String randomText(@Nullable String customerName, @Nullable Module module, @Nullable Document document, @Nullable Attribute attribute)
 			throws IOException {
 		if (attribute != null) {
 			String fileName = null;
@@ -744,7 +745,7 @@ public class TestUtil {
 		return null;
 	}
 
-	private static String randomText(Module module, Document document, Attribute attribute) throws IOException {
+	private static @Nullable String randomText(@Nullable Module module, @Nullable Document document, @Nullable Attribute attribute) throws IOException {
 		String customerName = null;
 		User user = CORE.getUser();
 		Customer customer = user.getCustomer();
@@ -777,9 +778,9 @@ public class TestUtil {
 	 * @throws IOException
 	 */
 	@SuppressWarnings("java:S3776") // Complexity OK
-	private static String randomValueFromFile(String customerName, final Module module, final Document document,
-			final String attributeName,
-			final String... fileName) throws IOException {
+	private static @Nullable String randomValueFromFile(@Nullable String customerName, final @Nullable Module module, final @Nullable Document document,
+			final @Nullable String attributeName,
+			final @Nullable String... fileName) throws IOException {
 		if (attributeName != null) {
 			final String key = attributeKey(module, document, attributeName);
 
@@ -838,7 +839,7 @@ public class TestUtil {
 	 * @return A list of strings for each line in the file, null if the input stream cannot be read
 	 * @throws IOException
 	 */
-	private static List<String> readFromInputStream(InputStream inputStream) throws IOException {
+	private static @Nullable List<String> readFromInputStream(@Nullable InputStream inputStream) throws IOException {
 		if (inputStream == null) {
 			return null;
 		}
@@ -857,7 +858,7 @@ public class TestUtil {
 	 * 
 	 * @param arr The array to shuffle
 	 */
-	private static void shuffleArray(String[] arr) {
+	private static void shuffleArray(@Nonnull String[] arr) {
 		for (int i = arr.length - 1; i > 0; i--) {
 			int index = RANDOM.nextInt(i + 1);
 			// Simple swap
@@ -883,7 +884,7 @@ public class TestUtil {
 	 * @param q - the query to find a random value from
 	 * @return - the random bean from the query result
 	 */
-	public static <T extends Bean> T findRandomDocumentQueryResult(DocumentQuery q) {
+	public static @Nullable <T extends Bean> T findRandomDocumentQueryResult(@Nonnull DocumentQuery q) {
 		AbstractDocumentQuery aq = ((AbstractDocumentQuery) q);
 
 		aq.clearProjections();

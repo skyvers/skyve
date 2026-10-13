@@ -9,6 +9,7 @@ import org.skyve.impl.metadata.repository.PropertyMapAdapter;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.DecoratedMetaData;
 
+import jakarta.annotation.Nonnull;
 import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlElementRef;
 import jakarta.xml.bind.annotation.XmlRootElement;
@@ -45,7 +46,7 @@ public class FormRow implements DecoratedMetaData {
 	 * @return a mutable list of row items; never {@code null}
 	 */
 	@XmlElementRef(type = FormItem.class)
-	public List<FormItem> getItems() {
+	public @Nonnull List<FormItem> getItems() {
 		return items;
 	}
 
@@ -55,7 +56,7 @@ public class FormRow implements DecoratedMetaData {
 	 * @return a mutable property map; never {@code null}
 	 */
 	@Override
-	public Map<String, String> getProperties() {
+	public @Nonnull Map<String, String> getProperties() {
 		return properties;
 	}
 }

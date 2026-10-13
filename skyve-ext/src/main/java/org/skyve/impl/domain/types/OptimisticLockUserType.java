@@ -14,6 +14,9 @@ import org.hibernate.usertype.UserType;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.types.OptimisticLock;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Hibernate {@link org.hibernate.usertype.UserType} that maps a Skyve
  * {@link org.skyve.domain.types.OptimisticLock} composite value to its
@@ -23,29 +26,29 @@ public class OptimisticLockUserType implements UserType, Serializable, LiteralTy
 	private static final long serialVersionUID = 3237725890005410642L;
 
 	@Override
-	public int[] sqlTypes() {
+	public @Nonnull int[] sqlTypes() {
 		return new int[] {Types.VARCHAR};
 	}
 
 	@Override
-	public Class<?> returnedClass() {
+	public @Nonnull Class<?> returnedClass() {
 		return OptimisticLock.class;
 	}
 
 	@Override
-	public boolean equals(Object x, Object y)
+	public boolean equals(@Nullable Object x, @Nullable Object y)
 	throws HibernateException {
 		return (x == y) || ((x != null) && (y != null) && ((OptimisticLock) x).equals(y));
 	}
 
 	@Override
-	public int hashCode(Object o)
+	public int hashCode(@Nonnull Object o)
 	throws HibernateException {
 		return ((OptimisticLock) o).hashCode();
 	}
 
 	@Override
-	public Object nullSafeGet(ResultSet rs, String[] names, SharedSessionContractImplementor session, Object owner)
+	public @Nullable Object nullSafeGet(@Nonnull ResultSet rs, @Nonnull String[] names, @Nullable SharedSessionContractImplementor session, @Nullable Object owner)
 	throws HibernateException, SQLException {
 		String value = rs.getString(names[0]);
 		if (rs.wasNull() || (value == null) || value.isEmpty()) {
@@ -61,7 +64,7 @@ public class OptimisticLockUserType implements UserType, Serializable, LiteralTy
 	}
 
 	@Override
-	public void nullSafeSet(PreparedStatement ps, Object value, int index, SharedSessionContractImplementor session)
+	public void nullSafeSet(@Nonnull PreparedStatement ps, @Nullable Object value, int index, @Nullable SharedSessionContractImplementor session)
 	throws HibernateException, SQLException {
 		if (value == null) {
 			ps.setNull(index, Types.VARCHAR);
@@ -72,7 +75,7 @@ public class OptimisticLockUserType implements UserType, Serializable, LiteralTy
 	}
 
 	@Override
-	public Object deepCopy(Object value)
+	public @Nullable Object deepCopy(@Nullable Object value)
 	throws HibernateException {
 		try {
 			return (value == null) ? null : new OptimisticLock(value.toString());
@@ -88,25 +91,25 @@ public class OptimisticLockUserType implements UserType, Serializable, LiteralTy
 	}
 
 	@Override
-	public Serializable disassemble(Object value)
+	public @Nullable Serializable disassemble(@Nullable Object value)
 	throws HibernateException {
 		return (Serializable) value;
 	}
 
 	@Override
-	public Object assemble(Serializable cached, Object owner)
+	public @Nullable Object assemble(@Nullable Serializable cached, @Nullable Object owner)
 	throws HibernateException {
 		return cached;
 	}
 
 	@Override
-	public Object replace(Object original, Object target, Object owner)
+	public @Nullable Object replace(@Nullable Object original, @Nullable Object target, @Nullable Object owner)
 	throws HibernateException {
 		return original;
 	}
 
 	@Override
-	public String objectToSQLString(OptimisticLock value, Dialect dialect)
+	public @Nonnull String objectToSQLString(@Nullable OptimisticLock value, @Nullable Dialect dialect)
 	throws Exception {
 		return (value == null) ? "NULL" : value.toString();
 	}

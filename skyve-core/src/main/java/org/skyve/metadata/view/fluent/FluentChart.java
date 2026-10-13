@@ -26,14 +26,14 @@ public class FluentChart extends FluentWidget implements FluentRelativeSize<Flue
 	 *
 	 * @param chart the metadata instance to mutate
 	 */
-	public FluentChart(Chart chart) {
+	public FluentChart(@Nonnull Chart chart) {
 		this.chart = chart;
 	}
 
 	/**
 	 * Copies chart metadata into this fluent builder.
 	 */
-	public FluentChart from(@SuppressWarnings("hiding") Chart chart) {
+	public @Nonnull FluentChart from(@SuppressWarnings("hiding") @Nonnull Chart chart) {
 		type(chart.getType());
 		modelName(chart.getModelName());
 		model(chart.getModel());
@@ -50,7 +50,7 @@ public class FluentChart extends FluentWidget implements FluentRelativeSize<Flue
 	 * @param type the chart type
 	 * @return this builder
 	 */
-	public FluentChart type(ChartType type) {
+	public @Nonnull FluentChart type(@Nullable ChartType type) {
 		chart.setType(type);
 		return this;
 	}
@@ -61,7 +61,7 @@ public class FluentChart extends FluentWidget implements FluentRelativeSize<Flue
 	 * @param modelName the chart model name
 	 * @return this builder
 	 */
-	public FluentChart modelName(String modelName) {
+	public @Nonnull FluentChart modelName(@Nullable String modelName) {
 		chart.setModelName(modelName);
 		return this;
 	}
@@ -96,7 +96,7 @@ public class FluentChart extends FluentWidget implements FluentRelativeSize<Flue
 	 * @param model the chart builder metadata
 	 * @return this builder
 	 */
-	public FluentChart model(ChartBuilderMetaData model) {
+	public @Nonnull FluentChart model(@Nullable ChartBuilderMetaData model) {
 		chart.setModel(model);
 		return this;
 	}
@@ -108,7 +108,7 @@ public class FluentChart extends FluentWidget implements FluentRelativeSize<Flue
 	 * @return this builder
 	 */
 	@Override
-	public FluentChart pixelHeight(int height) {
+	public @Nonnull FluentChart pixelHeight(int height) {
 		chart.setPixelHeight(Integer.valueOf(height));
 		return this;
 	}
@@ -120,7 +120,7 @@ public class FluentChart extends FluentWidget implements FluentRelativeSize<Flue
 	 * @return this builder
 	 */
 	@Override
-	public FluentChart pixelWidth(int width) {
+	public @Nonnull FluentChart pixelWidth(int width) {
 		chart.setPixelWidth(Integer.valueOf(width));
 		return this;
 	}
@@ -132,7 +132,7 @@ public class FluentChart extends FluentWidget implements FluentRelativeSize<Flue
 	 * @return this builder
 	 */
 	@Override
-	public FluentChart minPixelWidth(int minPixelWidth) {
+	public @Nonnull FluentChart minPixelWidth(int minPixelWidth) {
 		chart.setMinPixelWidth(Integer.valueOf(minPixelWidth));
 		return this;
 	}
@@ -144,7 +144,7 @@ public class FluentChart extends FluentWidget implements FluentRelativeSize<Flue
 	 * @return this builder
 	 */
 	@Override
-	public FluentChart maxPixelWidth(int maxPixelWidth) {
+	public @Nonnull FluentChart maxPixelWidth(int maxPixelWidth) {
 		chart.setMaxPixelWidth(Integer.valueOf(maxPixelWidth));
 		return this;
 	}
@@ -156,7 +156,7 @@ public class FluentChart extends FluentWidget implements FluentRelativeSize<Flue
 	 * @return this builder
 	 */
 	@Override
-	public FluentChart maxPixelHeight(int maxPixelHeight) {
+	public @Nonnull FluentChart maxPixelHeight(int maxPixelHeight) {
 		chart.setMaxPixelHeight(Integer.valueOf(maxPixelHeight));
 		return this;
 	}
@@ -168,7 +168,7 @@ public class FluentChart extends FluentWidget implements FluentRelativeSize<Flue
 	 * @return this builder
 	 */
 	@Override
-	public FluentChart minPixelHeight(int minPixelHeight) {
+	public @Nonnull FluentChart minPixelHeight(int minPixelHeight) {
 		chart.setMinPixelHeight(Integer.valueOf(minPixelHeight));
 		return this;
 	}
@@ -180,7 +180,7 @@ public class FluentChart extends FluentWidget implements FluentRelativeSize<Flue
 	 * @return this builder
 	 */
 	@Override
-	public FluentChart percentageWidth(int percentageWidth) {
+	public @Nonnull FluentChart percentageWidth(int percentageWidth) {
 		chart.setPercentageWidth(Integer.valueOf(percentageWidth));
 		return this;
 	}
@@ -192,7 +192,7 @@ public class FluentChart extends FluentWidget implements FluentRelativeSize<Flue
 	 * @return this builder
 	 */
 	@Override
-	public FluentChart percentageHeight(int percentageHeight) {
+	public @Nonnull FluentChart percentageHeight(int percentageHeight) {
 		chart.setPercentageHeight(Integer.valueOf(percentageHeight));
 		return this;
 	}
@@ -204,7 +204,7 @@ public class FluentChart extends FluentWidget implements FluentRelativeSize<Flue
 	 * @return this builder
 	 */
 	@Override
-	public FluentChart responsiveWidth(int responsiveWidth) {
+	public @Nonnull FluentChart responsiveWidth(int responsiveWidth) {
 		chart.setResponsiveWidth(Integer.valueOf(responsiveWidth));
 		return this;
 	}
@@ -216,7 +216,7 @@ public class FluentChart extends FluentWidget implements FluentRelativeSize<Flue
 	 * @return this builder
 	 */
 	@Override
-	public FluentChart sm(int sm) {
+	public @Nonnull FluentChart sm(int sm) {
 		chart.setSm(Integer.valueOf(sm));
 		return this;
 	}
@@ -228,7 +228,7 @@ public class FluentChart extends FluentWidget implements FluentRelativeSize<Flue
 	 * @return this builder
 	 */
 	@Override
-	public FluentChart md(int md) {
+	public @Nonnull FluentChart md(int md) {
 		chart.setMd(Integer.valueOf(md));
 		return this;
 	}
@@ -240,7 +240,7 @@ public class FluentChart extends FluentWidget implements FluentRelativeSize<Flue
 	 * @return this builder
 	 */
 	@Override
-	public FluentChart lg(int lg) {
+	public @Nonnull FluentChart lg(int lg) {
 		chart.setLg(Integer.valueOf(lg));
 		return this;
 	}
@@ -252,7 +252,7 @@ public class FluentChart extends FluentWidget implements FluentRelativeSize<Flue
 	 * @return this builder
 	 */
 	@Override
-	public FluentChart xl(int xl) {
+	public @Nonnull FluentChart xl(int xl) {
 		chart.setXl(Integer.valueOf(xl));
 		return this;
 	}
@@ -276,7 +276,7 @@ public class FluentChart extends FluentWidget implements FluentRelativeSize<Flue
 	 * @return the mutable chart metadata being configured
 	 */
 	@Override
-	public Chart get() {
+	public @Nonnull Chart get() {
 		return chart;
 	}
 

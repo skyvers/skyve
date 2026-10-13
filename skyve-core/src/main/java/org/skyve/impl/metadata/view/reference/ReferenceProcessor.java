@@ -13,6 +13,9 @@ import org.skyve.metadata.view.View.ViewType;
 import org.skyve.util.Binder.TargetMetaData;
 import org.skyve.web.UserAgentType;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Abstract dispatcher that processes concrete {@link Reference} subtypes.
  *
@@ -23,7 +26,7 @@ import org.skyve.web.UserAgentType;
  * <p>Threading: not thread-safe; one processor instance per conversion run.
  */
 public abstract class ReferenceProcessor {
-	public final void process(Reference reference) {
+	public final void process(@Nullable Reference reference) {
 		if (reference instanceof ActionReference actionReference) {
 			processActionReference(actionReference);
 		}
@@ -56,22 +59,22 @@ public abstract class ReferenceProcessor {
 		}
 	}
 	
-	public abstract void processActionReference(ActionReference reference);
-	public abstract void processContentReference(ContentReference reference);
-	public abstract void processDefaultListViewReference(DefaultListViewReference reference);
-	public abstract void processEditViewReference(EditViewReference reference);
-	public abstract void processExternalReference(ExternalReference reference);
-	public abstract void processImplicitActionReference(ImplicitActionReference reference);
-	public abstract void processQueryListViewReference(QueryListViewReference reference);
-	public abstract void processReportReference(ReportReference reference);
-	public abstract void processResourceReference(ResourceReference reference);
+	public abstract void processActionReference(@Nonnull ActionReference reference);
+	public abstract void processContentReference(@Nonnull ContentReference reference);
+	public abstract void processDefaultListViewReference(@Nonnull DefaultListViewReference reference);
+	public abstract void processEditViewReference(@Nonnull EditViewReference reference);
+	public abstract void processExternalReference(@Nonnull ExternalReference reference);
+	public abstract void processImplicitActionReference(@Nonnull ImplicitActionReference reference);
+	public abstract void processQueryListViewReference(@Nonnull QueryListViewReference reference);
+	public abstract void processReportReference(@Nonnull ReportReference reference);
+	public abstract void processResourceReference(@Nonnull ResourceReference reference);
 	
-	public static final Action obtainActionForActionReference(ActionReference reference,
-																Customer customer,
-																Module module,
-																Document document,
-																String dataWidgetBinding,
-																UserAgentType userAgentType) {
+	public static final @Nullable Action obtainActionForActionReference(@Nonnull ActionReference reference,
+																@Nullable Customer customer,
+																@Nonnull Module module,
+																@Nonnull Document document,
+																@Nonnull String dataWidgetBinding,
+																@Nonnull UserAgentType userAgentType) {
 		final TargetMetaData listTarget = BindUtil.getMetaDataForBinding(customer, module, document, dataWidgetBinding);
 
 		final Document listDocument;

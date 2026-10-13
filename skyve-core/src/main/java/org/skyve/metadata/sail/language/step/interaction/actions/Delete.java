@@ -5,6 +5,7 @@ import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.controller.ImplicitActionName;
 import org.skyve.metadata.sail.execution.Executor;
 
+import jakarta.annotation.Nonnull;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
 
@@ -28,7 +29,7 @@ public class Delete extends AbstractAction {
 	 * @param executor the executor
 	 */
 	@Override
-	public void execute(Executor executor) {
+	public void execute(@Nonnull Executor executor) {
 		executor.executeDelete(this);
 	}
 	
@@ -38,7 +39,7 @@ public class Delete extends AbstractAction {
 	 * @return the result
 	 */
 	@Override
-	public String getIdentifier(AutomationContext context) {
+	public @Nonnull String getIdentifier(@Nonnull AutomationContext context) {
 		return ImplicitActionName.Delete.toString();
 	}
 }

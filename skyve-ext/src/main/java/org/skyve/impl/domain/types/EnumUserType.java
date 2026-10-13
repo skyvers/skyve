@@ -14,6 +14,9 @@ import org.hibernate.usertype.ParameterizedType;
 import org.hibernate.usertype.UserType;
 import org.skyve.domain.types.Enumeration;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Hibernate {@link org.hibernate.usertype.UserType} that persists Skyve enum
  * attributes as their {@code code()} string value in a SQL {@code VARCHAR} column.
@@ -27,7 +30,7 @@ public class EnumUserType implements UserType, Serializable, ParameterizedType {
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public void setParameterValues(Properties parameters) {
+	public void setParameterValues(@Nonnull Properties parameters) {
         String enumClassName = parameters.getProperty("enumClass");
         try {
             enumClass = (Class<? extends Enum<?>>) Thread.currentThread().getContextClassLoader().loadClass(enumClassName).asSubclass(Enum.class);
@@ -39,7 +42,7 @@ public class EnumUserType implements UserType, Serializable, ParameterizedType {
         readResolve();
 	}
 
-	private Object readResolve() {
+	private @Nonnull Object readResolve() {
 		try {
             toCodeMethod = enumClass.getMethod(Enumeration.TO_CODE_METHOD_NAME);
         }
@@ -58,29 +61,29 @@ public class EnumUserType implements UserType, Serializable, ParameterizedType {
 	}
 	
 	@Override
-	public Object assemble(Serializable cached, Object owner)
+	public @Nullable Object assemble(@Nullable Serializable cached, @Nullable Object owner)
 	throws HibernateException {
 		return cached;
 	}
 
 	@Override
-	public Object deepCopy(Object value)
+	public @Nullable Object deepCopy(@Nullable Object value)
 	throws HibernateException {
 		return value;
 	}
 
 	@Override
-	public Serializable disassemble(Object value) throws HibernateException {
+	public @Nullable Serializable disassemble(@Nullable Object value) throws HibernateException {
 		return (Serializable) value;
 	}
 
 	@Override
-	public boolean equals(Object x, Object y) throws HibernateException {
+	public boolean equals(@Nullable Object x, @Nullable Object y) throws HibernateException {
 		return (x == y) || ((x != null) && (y != null) && x.equals(y));
 	}
 
 	@Override
-	public int hashCode(Object o) throws HibernateException {
+	public int hashCode(@Nonnull Object o) throws HibernateException {
 		return o.hashCode();
 	}
 
@@ -90,7 +93,7 @@ public class EnumUserType implements UserType, Serializable, ParameterizedType {
 	}
 
 	@Override
-	public Object nullSafeGet(ResultSet rs, String[] names, SharedSessionContractImplementor session, Object owner)
+	public @Nullable Object nullSafeGet(@Nonnull ResultSet rs, @Nonnull String[] names, @Nullable SharedSessionContractImplementor session, @Nullable Object owner)
 	throws HibernateException, SQLException {
         String code = rs.getString(names[0]);
 		if ((rs.wasNull()) || (code == null) || code.isEmpty()) {
@@ -107,7 +110,7 @@ public class EnumUserType implements UserType, Serializable, ParameterizedType {
 	}
 
 	@Override
-	public void nullSafeSet(PreparedStatement ps, Object value, int index, SharedSessionContractImplementor session)
+	public void nullSafeSet(@Nonnull PreparedStatement ps, @Nullable Object value, int index, @Nullable SharedSessionContractImplementor session)
 	throws HibernateException, SQLException {
         try {
             if (value == null) {
@@ -128,18 +131,18 @@ public class EnumUserType implements UserType, Serializable, ParameterizedType {
 	}
 
 	@Override
-	public Object replace(Object original, Object target, Object owner)
+	public @Nullable Object replace(@Nullable Object original, @Nullable Object target, @Nullable Object owner)
 	throws HibernateException {
 		return original;
 	}
 
 	@Override
-	public Class<?> returnedClass() {
+	public @Nonnull Class<?> returnedClass() {
 		return enumClass;
 	}
 
 	@Override
-	public int[] sqlTypes() {
+	public @Nonnull int[] sqlTypes() {
 		return new int[] {Types.VARCHAR};
 	}
 }

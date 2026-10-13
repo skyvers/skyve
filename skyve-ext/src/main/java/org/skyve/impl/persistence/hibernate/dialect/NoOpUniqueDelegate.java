@@ -5,6 +5,8 @@ import org.hibernate.dialect.Dialect;
 import org.hibernate.dialect.unique.DefaultUniqueDelegate;
 import org.hibernate.mapping.UniqueKey;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * Suppresses Hibernate unique-key DDL generation for dialects that cannot use Skyve's desired semantics.
  */
@@ -14,7 +16,7 @@ public class NoOpUniqueDelegate extends DefaultUniqueDelegate {
 	 *
 	 * @param dialect the owning Hibernate dialect
 	 */
-	public NoOpUniqueDelegate(Dialect dialect) {
+	public NoOpUniqueDelegate(@Nonnull Dialect dialect) {
 		super(dialect);
 	}
 	
@@ -26,7 +28,7 @@ public class NoOpUniqueDelegate extends DefaultUniqueDelegate {
 	 * @return an empty string
 	 */
 	@Override
-	public String getAlterTableToAddUniqueKeyCommand(UniqueKey uniqueKey, Metadata metadata) {
+	public @Nonnull String getAlterTableToAddUniqueKeyCommand(@Nonnull UniqueKey uniqueKey, @Nonnull Metadata metadata) {
 		return "";
 	}
 	
@@ -38,7 +40,7 @@ public class NoOpUniqueDelegate extends DefaultUniqueDelegate {
 	 * @return an empty string
 	 */
 	@Override
-	public String getAlterTableToDropUniqueKeyCommand(UniqueKey uniqueKey, Metadata metadata) {
+	public @Nonnull String getAlterTableToDropUniqueKeyCommand(@Nonnull UniqueKey uniqueKey, @Nonnull Metadata metadata) {
 		return "";
 	}
 }

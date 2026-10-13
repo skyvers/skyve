@@ -21,6 +21,7 @@ import org.skyve.metadata.NamedMetaData;
 import org.skyve.metadata.controller.ImplicitActionName;
 import org.skyve.metadata.view.View.ViewParameter;
 
+import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlElement;
@@ -95,7 +96,7 @@ public class ViewMetaData extends Container implements NamedMetaData, Convertibl
 	 * @return view name
 	 */
 	@Override
-	public String getName() {
+	public @Nullable String getName() {
 		return name;
 	}
 
@@ -105,7 +106,7 @@ public class ViewMetaData extends Container implements NamedMetaData, Convertibl
 	 * @param name view name
 	 */
 	@XmlAttribute(required = true)
-	public void setName(String name) {
+	public void setName(@Nullable String name) {
 		this.name = UtilImpl.processStringValue(name);
 	}
 
@@ -114,7 +115,7 @@ public class ViewMetaData extends Container implements NamedMetaData, Convertibl
 	 *
 	 * @return view title
 	 */
-	public String getTitle() {
+	public @Nullable String getTitle() {
 		return title;
 	}
 
@@ -123,7 +124,7 @@ public class ViewMetaData extends Container implements NamedMetaData, Convertibl
 	 *
 	 * @return {@code Boolean.FALSE} to allow trusted markup; {@code null} or {@code Boolean.TRUE} to escape at the renderer boundary
 	 */
-	public Boolean getEscapeTitle() {
+	public @Nullable Boolean getEscapeTitle() {
 		return escapeTitle;
 	}
 
@@ -133,7 +134,7 @@ public class ViewMetaData extends Container implements NamedMetaData, Convertibl
 	 * @param title view title
 	 */
 	@XmlAttribute(required = true)
-	public void setTitle(String title) {
+	public void setTitle(@Nullable String title) {
 		this.title = UtilImpl.processStringValue(title);
 	}
 
@@ -143,7 +144,7 @@ public class ViewMetaData extends Container implements NamedMetaData, Convertibl
 	 * @param escapeTitle {@code Boolean.FALSE} to allow trusted markup; {@code null} or {@code Boolean.TRUE} to escape at the renderer boundary
 	 */
 	@XmlAttribute(required = false)
-	public void setEscapeTitle(Boolean escapeTitle) {
+	public void setEscapeTitle(@Nullable Boolean escapeTitle) {
 		this.escapeTitle = escapeTitle;
 	}
 
@@ -152,7 +153,7 @@ public class ViewMetaData extends Container implements NamedMetaData, Convertibl
 	 *
 	 * @return icon path, or {@code null}
 	 */
-	public String getIcon32x32RelativeFileName() {
+	public @Nullable String getIcon32x32RelativeFileName() {
 		return icon32x32RelativeFileName;
 	}
 
@@ -162,7 +163,7 @@ public class ViewMetaData extends Container implements NamedMetaData, Convertibl
 	 * @param icon32x32RelativeFileName icon path
 	 */
 	@XmlAttribute(name = "icon32x32RelativeFileName")
-	public void setIcon32x32RelativeFileName(String icon32x32RelativeFileName) {
+	public void setIcon32x32RelativeFileName(@Nullable String icon32x32RelativeFileName) {
 		this.icon32x32RelativeFileName = UtilImpl.processStringValue(icon32x32RelativeFileName);
 	}
 
@@ -171,7 +172,7 @@ public class ViewMetaData extends Container implements NamedMetaData, Convertibl
 	 *
 	 * @return icon style class, or {@code null}
 	 */
-	public String getIconStyleClass() {
+	public @Nullable String getIconStyleClass() {
 		return iconStyleClass;
 	}
 
@@ -181,7 +182,7 @@ public class ViewMetaData extends Container implements NamedMetaData, Convertibl
 	 * @param iconStyleClass icon style class
 	 */
 	@XmlAttribute(name = "iconStyleClass")
-	public void setIconStyleClass(String iconStyleClass) {
+	public void setIconStyleClass(@Nullable String iconStyleClass) {
 		this.iconStyleClass = UtilImpl.processStringValue(iconStyleClass);
 	}
 
@@ -190,7 +191,7 @@ public class ViewMetaData extends Container implements NamedMetaData, Convertibl
 	 *
 	 * @return relative help file path, or {@code null}
 	 */
-	public String getHelpRelativeFileName() {
+	public @Nullable String getHelpRelativeFileName() {
 		return helpRelativeFileName;
 	}
 
@@ -200,7 +201,7 @@ public class ViewMetaData extends Container implements NamedMetaData, Convertibl
 	 * @param helpRelativeFileName relative help file path
 	 */
 	@XmlAttribute(name = "helpRelativeFileName")
-	public void setHelpRelativeFileName(String helpRelativeFileName) {
+	public void setHelpRelativeFileName(@Nullable String helpRelativeFileName) {
 		this.helpRelativeFileName = UtilImpl.processStringValue(helpRelativeFileName);
 	}
 
@@ -209,7 +210,7 @@ public class ViewMetaData extends Container implements NamedMetaData, Convertibl
 	 *
 	 * @return help URL, or {@code null}
 	 */
-	public String getHelpURL() {
+	public @Nullable String getHelpURL() {
 		return helpURL;
 	}
 
@@ -219,7 +220,7 @@ public class ViewMetaData extends Container implements NamedMetaData, Convertibl
 	 * @param helpURL help URL
 	 */
 	@XmlAttribute(name = "helpURL")
-	public void setHelpURL(String helpURL) {
+	public void setHelpURL(@Nullable String helpURL) {
 		this.helpURL = UtilImpl.processStringValue(helpURL);
 	}
 
@@ -228,7 +229,7 @@ public class ViewMetaData extends Container implements NamedMetaData, Convertibl
 	 *
 	 * @return sidebar definition, or {@code null}
 	 */
-	public Sidebar getSidebar() {
+	public @Nullable Sidebar getSidebar() {
 		return sidebar;
 	}
 
@@ -238,7 +239,7 @@ public class ViewMetaData extends Container implements NamedMetaData, Convertibl
 	 * @param sidebar sidebar definition
 	 */
 	@XmlElement(namespace = XMLMetaData.VIEW_NAMESPACE, required = false, nillable = false)
-	public void setSidebar(Sidebar sidebar) {
+	public void setSidebar(@Nullable Sidebar sidebar) {
 		this.sidebar = sidebar;
 	}
 
@@ -247,7 +248,7 @@ public class ViewMetaData extends Container implements NamedMetaData, Convertibl
 	 *
 	 * @return actions definition, or {@code null}
 	 */
-	public Actions getActions() {
+	public @Nullable Actions getActions() {
 		return actions;
 	}
 
@@ -257,7 +258,7 @@ public class ViewMetaData extends Container implements NamedMetaData, Convertibl
 	 * @param actions actions definition
 	 */
 	@XmlElement(namespace = XMLMetaData.VIEW_NAMESPACE, required = false, nillable = false)
-	public void setActions(Actions actions) {
+	public void setActions(@Nullable Actions actions) {
 		this.actions = actions;
 	}
 
@@ -266,7 +267,7 @@ public class ViewMetaData extends Container implements NamedMetaData, Convertibl
 	 *
 	 * @return refresh interval in seconds, or {@code null}
 	 */
-	public Integer getRefreshTimeInSeconds() {
+	public @Nullable Integer getRefreshTimeInSeconds() {
 		return refreshTimeInSeconds;
 	}
 
@@ -276,7 +277,7 @@ public class ViewMetaData extends Container implements NamedMetaData, Convertibl
 	 * @param refreshTimeInSeconds refresh interval in seconds
 	 */
 	@XmlAttribute(name = "refreshTimeInSeconds", required = false)
-	public void setRefreshTimeInSeconds(Integer refreshTimeInSeconds) {
+	public void setRefreshTimeInSeconds(@Nullable Integer refreshTimeInSeconds) {
 		this.refreshTimeInSeconds = refreshTimeInSeconds;
 	}
 
@@ -304,7 +305,7 @@ public class ViewMetaData extends Container implements NamedMetaData, Convertibl
 	 *
 	 * @return refresh action name, or {@code null}
 	 */
-	public String getRefreshActionName() {
+	public @Nullable String getRefreshActionName() {
 		return refreshActionName;
 	}
 
@@ -314,7 +315,7 @@ public class ViewMetaData extends Container implements NamedMetaData, Convertibl
 	 * @param refreshActionName refresh action name
 	 */
 	@XmlAttribute(name = "refreshAction", required = false)
-	public void setRefreshActionName(String refreshActionName) {
+	public void setRefreshActionName(@Nullable String refreshActionName) {
 		this.refreshActionName = UtilImpl.processStringValue(refreshActionName);
 	}
 
@@ -326,7 +327,7 @@ public class ViewMetaData extends Container implements NamedMetaData, Convertibl
 					name = "parameter",
 					type = ViewParameter.class,
 					required = false)
-	public List<ViewParameter> getParameters() {
+	public @Nonnull List<ViewParameter> getParameters() {
 		return parameters;
 	}
 	
@@ -335,7 +336,7 @@ public class ViewMetaData extends Container implements NamedMetaData, Convertibl
 	 *
 	 * @return access-control metadata, or {@code null}
 	 */
-	public ViewUserAccessesMetaData getAccesses() {
+	public @Nullable ViewUserAccessesMetaData getAccesses() {
 		return accesses;
 	}
 
@@ -345,7 +346,7 @@ public class ViewMetaData extends Container implements NamedMetaData, Convertibl
 	 * @param accesses access-control metadata
 	 */
 	@XmlElement(namespace = XMLMetaData.VIEW_NAMESPACE, required = false)
-	public void setAccesses(ViewUserAccessesMetaData accesses) {
+	public void setAccesses(@Nullable ViewUserAccessesMetaData accesses) {
 		this.accesses = accesses ;
 	}
 
@@ -354,7 +355,7 @@ public class ViewMetaData extends Container implements NamedMetaData, Convertibl
 	 *
 	 * @return documentation text, or {@code null}
 	 */
-	public String getDocumentation() {
+	public @Nullable String getDocumentation() {
 		return documentation;
 	}
 	
@@ -365,7 +366,7 @@ public class ViewMetaData extends Container implements NamedMetaData, Convertibl
 	 */
 	@XmlElement(namespace = XMLMetaData.VIEW_NAMESPACE)
 	@XmlJavaTypeAdapter(CDATAAdapter.class)
-	public void setDocumentation(String documentation) {
+	public void setDocumentation(@Nullable String documentation) {
 		this.documentation = documentation;
 	}
 
@@ -402,7 +403,7 @@ public class ViewMetaData extends Container implements NamedMetaData, Convertibl
 	 */
 	@Override
 	@SuppressWarnings("java:S3776") // Complexity OK
-	public ViewImpl convert(String metaDataName) {
+	public @Nonnull ViewImpl convert(@Nonnull String metaDataName) {
 		ViewImpl result = new ViewImpl();
 		result.setLastModifiedMillis(getLastModifiedMillis());
 		
@@ -506,7 +507,7 @@ public class ViewMetaData extends Container implements NamedMetaData, Convertibl
 	 * @return mutable property map
 	 */
 	@Override
-	public Map<String, String> getProperties() {
+	public @Nonnull Map<String, String> getProperties() {
 		return properties;
 	}
 }

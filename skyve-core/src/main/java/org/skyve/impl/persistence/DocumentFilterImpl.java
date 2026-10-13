@@ -87,7 +87,7 @@ public class DocumentFilterImpl implements DocumentFilter {
 	 * @return this filter for fluent chaining
 	 */
 	@Override
-	public DocumentFilter addEquals(String binding, Object operand) {
+	public @Nonnull DocumentFilter addEquals(@Nonnull String binding, @Nonnull Object operand) {
 		return addAliasedEquals(DocumentQuery.THIS_ALIAS, binding, operand);
 	}
 	
@@ -97,7 +97,7 @@ public class DocumentFilterImpl implements DocumentFilter {
 	 * @return this filter for fluent chaining
 	 */
 	@Override
-	public DocumentFilter addAliasedEquals(String entityAlias, String binding, Object operand) {
+	public @Nonnull DocumentFilter addAliasedEquals(@Nonnull String entityAlias, @Nonnull String binding, @Nonnull Object operand) {
 		return appendRestriction(entityAlias, binding, " = ", operand, false, false, null, null, false);
 	}
 
@@ -107,7 +107,7 @@ public class DocumentFilterImpl implements DocumentFilter {
 	 * @return this filter for fluent chaining
 	 */
 	@Override
-	public DocumentFilter addIn(String binding, Object...operands) {
+	public @Nonnull DocumentFilter addIn(@Nonnull String binding, @Nonnull Object...operands) {
 		return addIn(DocumentQuery.THIS_ALIAS, binding, false, operands);
 	}
 
@@ -117,7 +117,7 @@ public class DocumentFilterImpl implements DocumentFilter {
 	 * @return this filter for fluent chaining
 	 */
 	@Override
-	public DocumentFilter addAliasedIn(String entityAlias, String binding, Object...operands) {
+	public @Nonnull DocumentFilter addAliasedIn(@Nonnull String entityAlias, @Nonnull String binding, @Nonnull Object...operands) {
 		return addIn(entityAlias, binding, false, operands);
 	}
 
@@ -127,7 +127,7 @@ public class DocumentFilterImpl implements DocumentFilter {
 	 * @return this filter for fluent chaining
 	 */
 	@Override
-	public DocumentFilter addNotIn(String binding, Object... operands) {
+	public @Nonnull DocumentFilter addNotIn(@Nonnull String binding, @Nonnull Object... operands) {
 		return addIn(DocumentQuery.THIS_ALIAS, binding, true, operands);
 	}
 
@@ -137,7 +137,7 @@ public class DocumentFilterImpl implements DocumentFilter {
 	 * @return this filter for fluent chaining
 	 */
 	@Override
-	public DocumentFilter addAliasedNotIn(String entityAlias, String binding, Object... operands) {
+	public @Nonnull DocumentFilter addAliasedNotIn(@Nonnull String entityAlias, @Nonnull String binding, @Nonnull Object... operands) {
 		return addIn(entityAlias, binding, true, operands);
 	}
 	
@@ -149,7 +149,7 @@ public class DocumentFilterImpl implements DocumentFilter {
 	 * case-insensitive matching semantics.
 	 */
 	@SuppressWarnings("java:S3776") // Complexity OK
-	private DocumentFilter addIn(@Nonnull String entityAlias, @Nonnull String binding, boolean not, Object... operands) {
+	private @Nonnull DocumentFilter addIn(@Nonnull String entityAlias, @Nonnull String binding, boolean not, @Nonnull Object... operands) {
 		if (! filterClause.isEmpty()) {
 			filterClause.append(AND_OPERATOR);
 		}
@@ -206,7 +206,7 @@ public class DocumentFilterImpl implements DocumentFilter {
 	 * @return this filter for fluent chaining
 	 */
 	@Override
-	public DocumentFilter addNotEquals(String binding, Object operand) {
+	public @Nonnull DocumentFilter addNotEquals(@Nonnull String binding, @Nonnull Object operand) {
 		return addAliasedNotEquals(DocumentQuery.THIS_ALIAS, binding, operand);
 	}
 	
@@ -216,7 +216,7 @@ public class DocumentFilterImpl implements DocumentFilter {
 	 * @return this filter for fluent chaining
 	 */
 	@Override
-	public DocumentFilter addAliasedNotEquals(String entityAlias, String binding, Object operand) {
+	public @Nonnull DocumentFilter addAliasedNotEquals(@Nonnull String entityAlias, @Nonnull String binding, @Nonnull Object operand) {
 		return appendRestriction(entityAlias, binding, " != ", operand, false, false, null, null, false);
 	}
 
@@ -226,7 +226,7 @@ public class DocumentFilterImpl implements DocumentFilter {
 	 * @return this filter for fluent chaining
 	 */
 	@Override
-	public DocumentFilter addGreaterThan(String binding, Object operand) {
+	public @Nonnull DocumentFilter addGreaterThan(@Nonnull String binding, @Nonnull Object operand) {
 		return addAliasedGreaterThan(DocumentQuery.THIS_ALIAS, binding, operand);
 	}
 	
@@ -236,7 +236,7 @@ public class DocumentFilterImpl implements DocumentFilter {
 	 * @return this filter for fluent chaining
 	 */
 	@Override
-	public DocumentFilter addAliasedGreaterThan(String entityAlias, String binding, Object operand) {
+	public @Nonnull DocumentFilter addAliasedGreaterThan(@Nonnull String entityAlias, @Nonnull String binding, @Nonnull Object operand) {
 		return appendRestriction(entityAlias, binding, " > ", operand, false, false, null, null, false);
 	}
 
@@ -246,7 +246,7 @@ public class DocumentFilterImpl implements DocumentFilter {
 	 * @return this filter for fluent chaining
 	 */
 	@Override
-	public DocumentFilter addGreaterThanOrEqualTo(String binding, Object operand) {
+	public @Nonnull DocumentFilter addGreaterThanOrEqualTo(@Nonnull String binding, @Nonnull Object operand) {
 		return addAliasedGreaterThanOrEqualTo(DocumentQuery.THIS_ALIAS, binding, operand);
 	}
 	
@@ -256,7 +256,7 @@ public class DocumentFilterImpl implements DocumentFilter {
 	 * @return this filter for fluent chaining
 	 */
 	@Override
-	public DocumentFilter addAliasedGreaterThanOrEqualTo(String entityAlias, String binding, Object operand) {
+	public @Nonnull DocumentFilter addAliasedGreaterThanOrEqualTo(@Nonnull String entityAlias, @Nonnull String binding, @Nonnull Object operand) {
 		return appendRestriction(entityAlias, binding, " >= ", operand, false, false, null, null, false);
 	}
 
@@ -266,7 +266,7 @@ public class DocumentFilterImpl implements DocumentFilter {
 	 * @return this filter for fluent chaining
 	 */
 	@Override
-	public DocumentFilter addLessThan(String binding, Object operand) {
+	public @Nonnull DocumentFilter addLessThan(@Nonnull String binding, @Nonnull Object operand) {
 		return addAliasedLessThan(DocumentQuery.THIS_ALIAS, binding, operand);
 	}
 	
@@ -276,7 +276,7 @@ public class DocumentFilterImpl implements DocumentFilter {
 	 * @return this filter for fluent chaining
 	 */
 	@Override
-	public DocumentFilter addAliasedLessThan(String entityAlias, String binding, Object operand) {
+	public @Nonnull DocumentFilter addAliasedLessThan(@Nonnull String entityAlias, @Nonnull String binding, @Nonnull Object operand) {
 		return appendRestriction(entityAlias, binding, " < ", operand, false, false, null, null, false);
 	}
 
@@ -286,7 +286,7 @@ public class DocumentFilterImpl implements DocumentFilter {
 	 * @return this filter for fluent chaining
 	 */
 	@Override
-	public DocumentFilter addLessThanOrEqualTo(String binding, Object operand) {
+	public @Nonnull DocumentFilter addLessThanOrEqualTo(@Nonnull String binding, @Nonnull Object operand) {
 		return addAliasedLessThanOrEqualTo(DocumentQuery.THIS_ALIAS, binding, operand);
 	}
 	
@@ -296,7 +296,7 @@ public class DocumentFilterImpl implements DocumentFilter {
 	 * @return this filter for fluent chaining
 	 */
 	@Override
-	public DocumentFilter addAliasedLessThanOrEqualTo(String entityAlias, String binding, Object operand) {
+	public @Nonnull DocumentFilter addAliasedLessThanOrEqualTo(@Nonnull String entityAlias, @Nonnull String binding, @Nonnull Object operand) {
 		return appendRestriction(entityAlias, binding, " <= ", operand, false, false, null, null, false);
 	}
 
@@ -306,7 +306,7 @@ public class DocumentFilterImpl implements DocumentFilter {
 	 * @return this filter for fluent chaining
 	 */
 	@Override
-	public DocumentFilter addLike(String binding, String operand) {
+	public @Nonnull DocumentFilter addLike(@Nonnull String binding, @Nonnull String operand) {
 		return addAliasedLike(DocumentQuery.THIS_ALIAS, binding, operand);
 	}
 
@@ -316,7 +316,7 @@ public class DocumentFilterImpl implements DocumentFilter {
 	 * @return this filter for fluent chaining
 	 */
 	@Override
-	public DocumentFilter addAliasedLike(String entityAlias, String binding, String operand) {
+	public @Nonnull DocumentFilter addAliasedLike(@Nonnull String entityAlias, @Nonnull String binding, @Nonnull String operand) {
 		return appendRestriction(entityAlias, binding, LIKE_OPERATOR, operand, false, useStr(binding), null, null, false);
 	}
 
@@ -326,7 +326,7 @@ public class DocumentFilterImpl implements DocumentFilter {
 	 * @return this filter for fluent chaining
 	 */
 	@Override
-	public DocumentFilter addNotLike(String binding, String operand) {
+	public @Nonnull DocumentFilter addNotLike(@Nonnull String binding, @Nonnull String operand) {
 		return addAliasedNotLike(DocumentQuery.THIS_ALIAS, binding, operand);
 	}
 	
@@ -336,7 +336,7 @@ public class DocumentFilterImpl implements DocumentFilter {
 	 * @return this filter for fluent chaining
 	 */
 	@Override
-	public DocumentFilter addAliasedNotLike(String entityAlias, String binding, String operand) {
+	public @Nonnull DocumentFilter addAliasedNotLike(@Nonnull String entityAlias, @Nonnull String binding, @Nonnull String operand) {
 		return appendRestriction(entityAlias, binding, NOT_LIKE_OPERATOR, operand, false, useStr(binding), null, null, false);
 	}
 
@@ -346,7 +346,7 @@ public class DocumentFilterImpl implements DocumentFilter {
 	 * @return this filter for fluent chaining
 	 */
 	@Override
-	public DocumentFilter addEquals(String binding, Geometry geometry) {
+	public @Nonnull DocumentFilter addEquals(@Nonnull String binding, @Nonnull Geometry geometry) {
 		return addAliasedEquals(DocumentQuery.THIS_ALIAS, binding, geometry);
 	}
 	
@@ -356,7 +356,7 @@ public class DocumentFilterImpl implements DocumentFilter {
 	 * @return this filter for fluent chaining
 	 */
 	@Override
-	public DocumentFilter addAliasedEquals(String entityAlias, String binding, Geometry geometry) {
+	public @Nonnull DocumentFilter addAliasedEquals(@Nonnull String entityAlias, @Nonnull String binding, @Nonnull Geometry geometry) {
 		return appendRestriction(entityAlias, binding, null, geometry, false, false, "equals(", GEOMETRY_TRUE_SUFFIX, false);
 	}
 
@@ -366,7 +366,7 @@ public class DocumentFilterImpl implements DocumentFilter {
 	 * @return this filter for fluent chaining
 	 */
 	@Override
-	public DocumentFilter addDisjoint(String binding, Geometry geometry) {
+	public @Nonnull DocumentFilter addDisjoint(@Nonnull String binding, @Nonnull Geometry geometry) {
 		return addAliasedDisjoint(DocumentQuery.THIS_ALIAS, binding, geometry);
 	}
 	
@@ -376,7 +376,7 @@ public class DocumentFilterImpl implements DocumentFilter {
 	 * @return this filter for fluent chaining
 	 */
 	@Override
-	public DocumentFilter addAliasedDisjoint(String entityAlias, String binding, Geometry geometry) {
+	public @Nonnull DocumentFilter addAliasedDisjoint(@Nonnull String entityAlias, @Nonnull String binding, @Nonnull Geometry geometry) {
 		return appendRestriction(entityAlias, binding, null, geometry, false, false, "disjoint(", GEOMETRY_TRUE_SUFFIX, false);
 	}
 	
@@ -386,7 +386,7 @@ public class DocumentFilterImpl implements DocumentFilter {
 	 * @return this filter for fluent chaining
 	 */
 	@Override
-	public DocumentFilter addIntersects(String binding, Geometry geometry) {
+	public @Nonnull DocumentFilter addIntersects(@Nonnull String binding, @Nonnull Geometry geometry) {
 		return addAliasedIntersects(DocumentQuery.THIS_ALIAS, binding, geometry);
 	}
 	
@@ -396,7 +396,7 @@ public class DocumentFilterImpl implements DocumentFilter {
 	 * @return this filter for fluent chaining
 	 */
 	@Override
-	public DocumentFilter addAliasedIntersects(String entityAlias, String binding, Geometry geometry) {
+	public @Nonnull DocumentFilter addAliasedIntersects(@Nonnull String entityAlias, @Nonnull String binding, @Nonnull Geometry geometry) {
 		return appendRestriction(entityAlias, binding, null, geometry, false, false, "intersects(", GEOMETRY_TRUE_SUFFIX, false);
 	}
 
@@ -406,7 +406,7 @@ public class DocumentFilterImpl implements DocumentFilter {
 	 * @return this filter for fluent chaining
 	 */
 	@Override
-	public DocumentFilter addTouches(String binding, Geometry geometry) {
+	public @Nonnull DocumentFilter addTouches(@Nonnull String binding, @Nonnull Geometry geometry) {
 		return addAliasedTouches(DocumentQuery.THIS_ALIAS, binding, geometry);
 	}
 	
@@ -416,7 +416,7 @@ public class DocumentFilterImpl implements DocumentFilter {
 	 * @return this filter for fluent chaining
 	 */
 	@Override
-	public DocumentFilter addAliasedTouches(String entityAlias, String binding, Geometry geometry) {
+	public @Nonnull DocumentFilter addAliasedTouches(@Nonnull String entityAlias, @Nonnull String binding, @Nonnull Geometry geometry) {
 		return appendRestriction(entityAlias, binding, null, geometry, false, false, "touches(", GEOMETRY_TRUE_SUFFIX, false);
 	}
 
@@ -426,7 +426,7 @@ public class DocumentFilterImpl implements DocumentFilter {
 	 * @return this filter for fluent chaining
 	 */
 	@Override
-	public DocumentFilter addCrosses(String binding, Geometry geometry) {
+	public @Nonnull DocumentFilter addCrosses(@Nonnull String binding, @Nonnull Geometry geometry) {
 		return addAliasedCrosses(DocumentQuery.THIS_ALIAS, binding, geometry);
 	}
 	
@@ -436,7 +436,7 @@ public class DocumentFilterImpl implements DocumentFilter {
 	 * @return this filter for fluent chaining
 	 */
 	@Override
-	public DocumentFilter addAliasedCrosses(String entityAlias, String binding, Geometry geometry) {
+	public @Nonnull DocumentFilter addAliasedCrosses(@Nonnull String entityAlias, @Nonnull String binding, @Nonnull Geometry geometry) {
 		return appendRestriction(entityAlias, binding, null, geometry, false, false, "crosses(", GEOMETRY_TRUE_SUFFIX, false);
 	}
 
@@ -446,7 +446,7 @@ public class DocumentFilterImpl implements DocumentFilter {
 	 * @return this filter for fluent chaining
 	 */
 	@Override
-	public DocumentFilter addWithin(String binding, Geometry geometry) {
+	public @Nonnull DocumentFilter addWithin(@Nonnull String binding, @Nonnull Geometry geometry) {
 		return addAliasedWithin(DocumentQuery.THIS_ALIAS, binding, geometry);
 	}
 	
@@ -456,7 +456,7 @@ public class DocumentFilterImpl implements DocumentFilter {
 	 * @return this filter for fluent chaining
 	 */
 	@Override
-	public DocumentFilter addAliasedWithin(String entityAlias, String binding, Geometry geometry) {
+	public @Nonnull DocumentFilter addAliasedWithin(@Nonnull String entityAlias, @Nonnull String binding, @Nonnull Geometry geometry) {
 		return appendRestriction(entityAlias, binding, null, geometry, false, false, "within(", GEOMETRY_TRUE_SUFFIX, false);
 	}
 	
@@ -466,7 +466,7 @@ public class DocumentFilterImpl implements DocumentFilter {
 	 * @return this filter for fluent chaining
 	 */
 	@Override
-	public DocumentFilter addContains(String binding, Geometry geometry) {
+	public @Nonnull DocumentFilter addContains(@Nonnull String binding, @Nonnull Geometry geometry) {
 		return addAliasedContains(DocumentQuery.THIS_ALIAS, binding, geometry);
 	}
 	
@@ -476,7 +476,7 @@ public class DocumentFilterImpl implements DocumentFilter {
 	 * @return this filter for fluent chaining
 	 */
 	@Override
-	public DocumentFilter addAliasedContains(String entityAlias, String binding, Geometry geometry) {
+	public @Nonnull DocumentFilter addAliasedContains(@Nonnull String entityAlias, @Nonnull String binding, @Nonnull Geometry geometry) {
 		return appendRestriction(entityAlias, binding, null, geometry, false, false, "contains(", GEOMETRY_TRUE_SUFFIX, false);
 	}
 	
@@ -486,7 +486,7 @@ public class DocumentFilterImpl implements DocumentFilter {
 	 * @return this filter for fluent chaining
 	 */
 	@Override
-	public DocumentFilter addOverlaps(String binding, Geometry geometry) {
+	public @Nonnull DocumentFilter addOverlaps(@Nonnull String binding, @Nonnull Geometry geometry) {
 		return addAliasedOverlaps(DocumentQuery.THIS_ALIAS, binding, geometry);
 	}
 	
@@ -496,7 +496,7 @@ public class DocumentFilterImpl implements DocumentFilter {
 	 * @return this filter for fluent chaining
 	 */
 	@Override
-	public DocumentFilter addAliasedOverlaps(String entityAlias, String binding, Geometry geometry) {
+	public @Nonnull DocumentFilter addAliasedOverlaps(@Nonnull String entityAlias, @Nonnull String binding, @Nonnull Geometry geometry) {
 		return appendRestriction(entityAlias, binding, null, geometry, false, false, "overlaps(", GEOMETRY_TRUE_SUFFIX, false);
 	}
 	
@@ -506,7 +506,7 @@ public class DocumentFilterImpl implements DocumentFilter {
 	 * @return this filter for fluent chaining
 	 */
 	@Override
-	public DocumentFilter addNullOrEquals(String binding, Object operand) {
+	public @Nonnull DocumentFilter addNullOrEquals(@Nonnull String binding, @Nonnull Object operand) {
 		return addAliasedNullOrEquals(DocumentQuery.THIS_ALIAS, binding, operand);
 	}
 	
@@ -516,7 +516,7 @@ public class DocumentFilterImpl implements DocumentFilter {
 	 * @return this filter for fluent chaining
 	 */
 	@Override
-	public DocumentFilter addAliasedNullOrEquals(String entityAlias, String binding, Object operand) {
+	public @Nonnull DocumentFilter addAliasedNullOrEquals(@Nonnull String entityAlias, @Nonnull String binding, @Nonnull Object operand) {
 		return appendRestriction(entityAlias, binding, " = ", operand, true, false, null, null, false);
 	}
 
@@ -526,7 +526,7 @@ public class DocumentFilterImpl implements DocumentFilter {
 	 * @return this filter for fluent chaining
 	 */
 	@Override
-	public DocumentFilter addNullOrNotEquals(String binding, Object operand) {
+	public @Nonnull DocumentFilter addNullOrNotEquals(@Nonnull String binding, @Nonnull Object operand) {
 		return addAliasedNullOrNotEquals(DocumentQuery.THIS_ALIAS, binding, operand);
 	}
 	
@@ -536,7 +536,7 @@ public class DocumentFilterImpl implements DocumentFilter {
 	 * @return this filter for fluent chaining
 	 */
 	@Override
-	public DocumentFilter addAliasedNullOrNotEquals(String entityAlias, String binding, Object operand) {
+	public @Nonnull DocumentFilter addAliasedNullOrNotEquals(@Nonnull String entityAlias, @Nonnull String binding, @Nonnull Object operand) {
 		return appendRestriction(entityAlias, binding, " != ", operand, true, false, null, null, false);
 	}
 
@@ -546,7 +546,7 @@ public class DocumentFilterImpl implements DocumentFilter {
 	 * @return this filter for fluent chaining
 	 */
 	@Override
-	public DocumentFilter addNullOrGreaterThan(String binding, Object operand) {
+	public @Nonnull DocumentFilter addNullOrGreaterThan(@Nonnull String binding, @Nonnull Object operand) {
 		return addAliasedNullOrGreaterThan(DocumentQuery.THIS_ALIAS, binding, operand);
 	}
 	
@@ -556,7 +556,7 @@ public class DocumentFilterImpl implements DocumentFilter {
 	 * @return this filter for fluent chaining
 	 */
 	@Override
-	public DocumentFilter addAliasedNullOrGreaterThan(String entityAlias, String binding, Object operand) {
+	public @Nonnull DocumentFilter addAliasedNullOrGreaterThan(@Nonnull String entityAlias, @Nonnull String binding, @Nonnull Object operand) {
 		return appendRestriction(entityAlias, binding, " > ", operand, true, false, null, null, false);
 	}
 
@@ -566,7 +566,7 @@ public class DocumentFilterImpl implements DocumentFilter {
 	 * @return this filter for fluent chaining
 	 */
 	@Override
-	public DocumentFilter addNullOrGreaterThanOrEqualTo(String binding, Object operand) {
+	public @Nonnull DocumentFilter addNullOrGreaterThanOrEqualTo(@Nonnull String binding, @Nonnull Object operand) {
 		return addAliasedNullOrGreaterThanOrEqualTo(DocumentQuery.THIS_ALIAS, binding, operand);
 	}
 	
@@ -576,7 +576,7 @@ public class DocumentFilterImpl implements DocumentFilter {
 	 * @return this filter for fluent chaining
 	 */
 	@Override
-	public DocumentFilter addAliasedNullOrGreaterThanOrEqualTo(String entityAlias, String binding, Object operand) {
+	public @Nonnull DocumentFilter addAliasedNullOrGreaterThanOrEqualTo(@Nonnull String entityAlias, @Nonnull String binding, @Nonnull Object operand) {
 		return appendRestriction(entityAlias, binding, " >= ", operand, true, false, null, null, false);
 	}
 
@@ -586,7 +586,7 @@ public class DocumentFilterImpl implements DocumentFilter {
 	 * @return this filter for fluent chaining
 	 */
 	@Override
-	public DocumentFilter addNullOrLessThan(String binding, Object operand) {
+	public @Nonnull DocumentFilter addNullOrLessThan(@Nonnull String binding, @Nonnull Object operand) {
 		return addAliasedNullOrLessThan(DocumentQuery.THIS_ALIAS, binding, operand);
 	}
 	
@@ -596,7 +596,7 @@ public class DocumentFilterImpl implements DocumentFilter {
 	 * @return this filter for fluent chaining
 	 */
 	@Override
-	public DocumentFilter addAliasedNullOrLessThan(String entityAlias, String binding, Object operand) {
+	public @Nonnull DocumentFilter addAliasedNullOrLessThan(@Nonnull String entityAlias, @Nonnull String binding, @Nonnull Object operand) {
 		return appendRestriction(entityAlias, binding, " < ", operand, true, false, null, null, false);
 	}
 
@@ -606,7 +606,7 @@ public class DocumentFilterImpl implements DocumentFilter {
 	 * @return this filter for fluent chaining
 	 */
 	@Override
-	public DocumentFilter addNullOrLessThanOrEqualTo(String binding, Object operand) {
+	public @Nonnull DocumentFilter addNullOrLessThanOrEqualTo(@Nonnull String binding, @Nonnull Object operand) {
 		return addAliasedNullOrLessThanOrEqualTo(DocumentQuery.THIS_ALIAS, binding, operand);
 	}
 	
@@ -616,7 +616,7 @@ public class DocumentFilterImpl implements DocumentFilter {
 	 * @return this filter for fluent chaining
 	 */
 	@Override
-	public DocumentFilter addAliasedNullOrLessThanOrEqualTo(String entityAlias, String binding, Object operand) {
+	public @Nonnull DocumentFilter addAliasedNullOrLessThanOrEqualTo(@Nonnull String entityAlias, @Nonnull String binding, @Nonnull Object operand) {
 		return appendRestriction(entityAlias, binding, " <= ", operand, true, false, null, null, false);
 	}
 
@@ -626,7 +626,7 @@ public class DocumentFilterImpl implements DocumentFilter {
 	 * @return this filter for fluent chaining
 	 */
 	@Override
-	public DocumentFilter addNullOrLike(String binding, String operand) {
+	public @Nonnull DocumentFilter addNullOrLike(@Nonnull String binding, @Nonnull String operand) {
 		return addAliasedNullOrLike(DocumentQuery.THIS_ALIAS, binding, operand);
 	}
 	
@@ -636,7 +636,7 @@ public class DocumentFilterImpl implements DocumentFilter {
 	 * @return this filter for fluent chaining
 	 */
 	@Override
-	public DocumentFilter addAliasedNullOrLike(String entityAlias, String binding, String operand) {
+	public @Nonnull DocumentFilter addAliasedNullOrLike(@Nonnull String entityAlias, @Nonnull String binding, @Nonnull String operand) {
 		return appendRestriction(entityAlias, binding, LIKE_OPERATOR, operand, true, useStr(binding), null, null, false);
 	}
 
@@ -646,7 +646,7 @@ public class DocumentFilterImpl implements DocumentFilter {
 	 * @return this filter for fluent chaining
 	 */
 	@Override
-	public DocumentFilter addNullOrNotLike(String binding, String operand) {
+	public @Nonnull DocumentFilter addNullOrNotLike(@Nonnull String binding, @Nonnull String operand) {
 		return addAliasedNullOrNotLike(DocumentQuery.THIS_ALIAS, binding, operand);
 	}
 	
@@ -656,7 +656,7 @@ public class DocumentFilterImpl implements DocumentFilter {
 	 * @return this filter for fluent chaining
 	 */
 	@Override
-	public DocumentFilter addAliasedNullOrNotLike(String entityAlias, String binding, String operand) {
+	public @Nonnull DocumentFilter addAliasedNullOrNotLike(@Nonnull String entityAlias, @Nonnull String binding, @Nonnull String operand) {
 		return appendRestriction(entityAlias, binding, NOT_LIKE_OPERATOR, operand, true, useStr(binding), null, null, false);
 	}
 
@@ -666,7 +666,7 @@ public class DocumentFilterImpl implements DocumentFilter {
 	 * @return this filter for fluent chaining
 	 */
 	@Override
-	public DocumentFilter addNullOrEquals(String binding, Geometry geometry) {
+	public @Nonnull DocumentFilter addNullOrEquals(@Nonnull String binding, @Nonnull Geometry geometry) {
 		return addAliasedNullOrEquals(DocumentQuery.THIS_ALIAS, binding, geometry);
 	}
 	
@@ -676,7 +676,7 @@ public class DocumentFilterImpl implements DocumentFilter {
 	 * @return this filter for fluent chaining
 	 */
 	@Override
-	public DocumentFilter addAliasedNullOrEquals(String entityAlias, String binding, Geometry geometry) {
+	public @Nonnull DocumentFilter addAliasedNullOrEquals(@Nonnull String entityAlias, @Nonnull String binding, @Nonnull Geometry geometry) {
 		return appendRestriction(entityAlias, binding, null, geometry, true, false, "equals(", GEOMETRY_TRUE_SUFFIX, false);
 	}
 
@@ -686,7 +686,7 @@ public class DocumentFilterImpl implements DocumentFilter {
 	 * @return this filter for fluent chaining
 	 */
 	@Override
-	public DocumentFilter addNullOrDisjoint(String binding, Geometry geometry) {
+	public @Nonnull DocumentFilter addNullOrDisjoint(@Nonnull String binding, @Nonnull Geometry geometry) {
 		return addAliasedNullOrDisjoint(DocumentQuery.THIS_ALIAS, binding, geometry);
 	}
 	
@@ -696,7 +696,7 @@ public class DocumentFilterImpl implements DocumentFilter {
 	 * @return this filter for fluent chaining
 	 */
 	@Override
-	public DocumentFilter addAliasedNullOrDisjoint(String entityAlias, String binding, Geometry geometry) {
+	public @Nonnull DocumentFilter addAliasedNullOrDisjoint(@Nonnull String entityAlias, @Nonnull String binding, @Nonnull Geometry geometry) {
 		return appendRestriction(entityAlias, binding, null, geometry, true, false, "disjoint(", GEOMETRY_TRUE_SUFFIX, false);
 	}
 	
@@ -706,7 +706,7 @@ public class DocumentFilterImpl implements DocumentFilter {
 	 * @return this filter for fluent chaining
 	 */
 	@Override
-	public DocumentFilter addNullOrIntersects(String binding, Geometry geometry) {
+	public @Nonnull DocumentFilter addNullOrIntersects(@Nonnull String binding, @Nonnull Geometry geometry) {
 		return addAliasedNullOrIntersects(DocumentQuery.THIS_ALIAS, binding, geometry);
 	}
 	
@@ -716,7 +716,7 @@ public class DocumentFilterImpl implements DocumentFilter {
 	 * @return this filter for fluent chaining
 	 */
 	@Override
-	public DocumentFilter addAliasedNullOrIntersects(String entityAlias, String binding, Geometry geometry) {
+	public @Nonnull DocumentFilter addAliasedNullOrIntersects(@Nonnull String entityAlias, @Nonnull String binding, @Nonnull Geometry geometry) {
 		return appendRestriction(entityAlias, binding, null, geometry, true, false, "intersects(", GEOMETRY_TRUE_SUFFIX, false);
 	}
 
@@ -726,7 +726,7 @@ public class DocumentFilterImpl implements DocumentFilter {
 	 * @return this filter for fluent chaining
 	 */
 	@Override
-	public DocumentFilter addNullOrTouches(String binding, Geometry geometry) {
+	public @Nonnull DocumentFilter addNullOrTouches(@Nonnull String binding, @Nonnull Geometry geometry) {
 		return addAliasedNullOrTouches(DocumentQuery.THIS_ALIAS, binding, geometry);
 	}
 	
@@ -736,7 +736,7 @@ public class DocumentFilterImpl implements DocumentFilter {
 	 * @return this filter for fluent chaining
 	 */
 	@Override
-	public DocumentFilter addAliasedNullOrTouches(String entityAlias, String binding, Geometry geometry) {
+	public @Nonnull DocumentFilter addAliasedNullOrTouches(@Nonnull String entityAlias, @Nonnull String binding, @Nonnull Geometry geometry) {
 		return appendRestriction(entityAlias, binding, null, geometry, true, false, "touches(", GEOMETRY_TRUE_SUFFIX, false);
 	}
 
@@ -746,7 +746,7 @@ public class DocumentFilterImpl implements DocumentFilter {
 	 * @return this filter for fluent chaining
 	 */
 	@Override
-	public DocumentFilter addNullOrCrosses(String binding, Geometry geometry) {
+	public @Nonnull DocumentFilter addNullOrCrosses(@Nonnull String binding, @Nonnull Geometry geometry) {
 		return addAliasedNullOrCrosses(DocumentQuery.THIS_ALIAS, binding, geometry);
 	}
 	
@@ -756,7 +756,7 @@ public class DocumentFilterImpl implements DocumentFilter {
 	 * @return this filter for fluent chaining
 	 */
 	@Override
-	public DocumentFilter addAliasedNullOrCrosses(String entityAlias, String binding, Geometry geometry) {
+	public @Nonnull DocumentFilter addAliasedNullOrCrosses(@Nonnull String entityAlias, @Nonnull String binding, @Nonnull Geometry geometry) {
 		return appendRestriction(entityAlias, binding, null, geometry, true, false, "crosses(", GEOMETRY_TRUE_SUFFIX, false);
 	}
 
@@ -766,7 +766,7 @@ public class DocumentFilterImpl implements DocumentFilter {
 	 * @return this filter for fluent chaining
 	 */
 	@Override
-	public DocumentFilter addNullOrWithin(String binding, Geometry geometry) {
+	public @Nonnull DocumentFilter addNullOrWithin(@Nonnull String binding, @Nonnull Geometry geometry) {
 		return addAliasedNullOrWithin(DocumentQuery.THIS_ALIAS, binding, geometry);
 	}
 	
@@ -776,7 +776,7 @@ public class DocumentFilterImpl implements DocumentFilter {
 	 * @return this filter for fluent chaining
 	 */
 	@Override
-	public DocumentFilter addAliasedNullOrWithin(String entityAlias, String binding, Geometry geometry) {
+	public @Nonnull DocumentFilter addAliasedNullOrWithin(@Nonnull String entityAlias, @Nonnull String binding, @Nonnull Geometry geometry) {
 		return appendRestriction(entityAlias, binding, null, geometry, true, false, "within(", GEOMETRY_TRUE_SUFFIX, false);
 	}
 	
@@ -786,7 +786,7 @@ public class DocumentFilterImpl implements DocumentFilter {
 	 * @return this filter for fluent chaining
 	 */
 	@Override
-	public DocumentFilter addNullOrContains(String binding, Geometry geometry) {
+	public @Nonnull DocumentFilter addNullOrContains(@Nonnull String binding, @Nonnull Geometry geometry) {
 		return addAliasedNullOrContains(DocumentQuery.THIS_ALIAS, binding, geometry);
 	}
 	
@@ -796,7 +796,7 @@ public class DocumentFilterImpl implements DocumentFilter {
 	 * @return this filter for fluent chaining
 	 */
 	@Override
-	public DocumentFilter addAliasedNullOrContains(String entityAlias, String binding, Geometry geometry) {
+	public @Nonnull DocumentFilter addAliasedNullOrContains(@Nonnull String entityAlias, @Nonnull String binding, @Nonnull Geometry geometry) {
 		return appendRestriction(entityAlias, binding, null, geometry, true, false, "contains(", GEOMETRY_TRUE_SUFFIX, false);
 	}
 	
@@ -806,7 +806,7 @@ public class DocumentFilterImpl implements DocumentFilter {
 	 * @return this filter for fluent chaining
 	 */
 	@Override
-	public DocumentFilter addNullOrOverlaps(String binding, Geometry geometry) {
+	public @Nonnull DocumentFilter addNullOrOverlaps(@Nonnull String binding, @Nonnull Geometry geometry) {
 		return addAliasedNullOrOverlaps(DocumentQuery.THIS_ALIAS, binding, geometry);
 	}
 	
@@ -816,7 +816,7 @@ public class DocumentFilterImpl implements DocumentFilter {
 	 * @return this filter for fluent chaining
 	 */
 	@Override
-	public DocumentFilter addAliasedNullOrOverlaps(String entityAlias, String binding, Geometry geometry) {
+	public @Nonnull DocumentFilter addAliasedNullOrOverlaps(@Nonnull String entityAlias, @Nonnull String binding, @Nonnull Geometry geometry) {
 		return appendRestriction(entityAlias, binding, null, geometry, true, false, "overlaps(", GEOMETRY_TRUE_SUFFIX, false);
 	}
 	
@@ -826,7 +826,7 @@ public class DocumentFilterImpl implements DocumentFilter {
 	 * @return this filter for fluent chaining
 	 */
 	@Override
-	public DocumentFilter addNull(String binding) {
+	public @Nonnull DocumentFilter addNull(@Nonnull String binding) {
 		return addAliasedNull(DocumentQuery.THIS_ALIAS, binding);
 	}
 	
@@ -836,7 +836,7 @@ public class DocumentFilterImpl implements DocumentFilter {
 	 * @return this filter for fluent chaining
 	 */
 	@Override
-	public DocumentFilter addAliasedNull(String entityAlias, String binding) {
+	public @Nonnull DocumentFilter addAliasedNull(@Nonnull String entityAlias, @Nonnull String binding) {
 		if (! filterClause.isEmpty()) {
 			filterClause.append(AND_OPERATOR);
 		}
@@ -850,7 +850,7 @@ public class DocumentFilterImpl implements DocumentFilter {
 	 * @return this filter for fluent chaining
 	 */
 	@Override
-	public DocumentFilter addNotNull(String binding) {
+	public @Nonnull DocumentFilter addNotNull(@Nonnull String binding) {
 		return addAliasedNotNull(DocumentQuery.THIS_ALIAS, binding);
 	}
 	
@@ -860,7 +860,7 @@ public class DocumentFilterImpl implements DocumentFilter {
 	 * @return this filter for fluent chaining
 	 */
 	@Override
-	public DocumentFilter addAliasedNotNull(String entityAlias, String binding) {
+	public @Nonnull DocumentFilter addAliasedNotNull(@Nonnull String entityAlias, @Nonnull String binding) {
 		if (! filterClause.isEmpty()) {
 			filterClause.append(AND_OPERATOR);
 		}
@@ -874,7 +874,7 @@ public class DocumentFilterImpl implements DocumentFilter {
 	 * @return this filter for fluent chaining
 	 */
 	@Override
-	public DocumentFilter addBetween(String binding, Object minOperand, Object maxOperand) {
+	public @Nonnull DocumentFilter addBetween(@Nonnull String binding, @Nonnull Object minOperand, @Nonnull Object maxOperand) {
 		return addAliasedBetween(DocumentQuery.THIS_ALIAS, binding, minOperand, maxOperand);
 	}
 	
@@ -885,7 +885,7 @@ public class DocumentFilterImpl implements DocumentFilter {
 	 * are wrapped in {@code lower(...)} for case-insensitive comparison.
 	 */
 	@Override
-	public DocumentFilter addAliasedBetween(String entityAlias, String binding, Object minOperand, Object maxOperand) {
+	public @Nonnull DocumentFilter addAliasedBetween(@Nonnull String entityAlias, @Nonnull String binding, @Nonnull Object minOperand, @Nonnull Object maxOperand) {
 		// Its probably wisest (although untested as yet) to use the DB lower function 
 		// on parameters to use its char set and collation.
 		String minParameterName = PARAMETER_PREFIX + owningQuery.parameterNumber++;
@@ -923,7 +923,7 @@ public class DocumentFilterImpl implements DocumentFilter {
 	 * @return this filter for fluent chaining
 	 */
 	@Override
-	public DocumentFilter addCollectionSizeEquals(String binding, int operand) {
+	public @Nonnull DocumentFilter addCollectionSizeEquals(@Nonnull String binding, int operand) {
 		return addAliasedCollectionSizeEquals(DocumentQuery.THIS_ALIAS, binding, operand);
 	}
 	
@@ -933,7 +933,7 @@ public class DocumentFilterImpl implements DocumentFilter {
 	 * @return this filter for fluent chaining
 	 */
 	@Override
-	public DocumentFilter addAliasedCollectionSizeEquals(String entityAlias, String binding, int operand) {
+	public @Nonnull DocumentFilter addAliasedCollectionSizeEquals(@Nonnull String entityAlias, @Nonnull String binding, int operand) {
 		return appendRestriction(entityAlias, binding, ".size = ", Integer.valueOf(operand), false, false, null, null, false);
 	}
 
@@ -943,7 +943,7 @@ public class DocumentFilterImpl implements DocumentFilter {
 	 * @return this filter for fluent chaining
 	 */
 	@Override
-	public DocumentFilter addCollectionSizeNotEquals(String binding, int operand) {
+	public @Nonnull DocumentFilter addCollectionSizeNotEquals(@Nonnull String binding, int operand) {
 		return addAliasedCollectionSizeNotEquals(DocumentQuery.THIS_ALIAS, binding, operand);
 	}
 	
@@ -953,7 +953,7 @@ public class DocumentFilterImpl implements DocumentFilter {
 	 * @return this filter for fluent chaining
 	 */
 	@Override
-	public DocumentFilter addAliasedCollectionSizeNotEquals(String entityAlias, String binding, int operand) {
+	public @Nonnull DocumentFilter addAliasedCollectionSizeNotEquals(@Nonnull String entityAlias, @Nonnull String binding, int operand) {
 		return appendRestriction(entityAlias, binding, ".size != ", Integer.valueOf(operand), false, false, null, null, false);
 	}
 
@@ -963,7 +963,7 @@ public class DocumentFilterImpl implements DocumentFilter {
 	 * @return this filter for fluent chaining
 	 */
 	@Override
-	public DocumentFilter addCollectionSizeGreaterThan(String binding, int operand) {
+	public @Nonnull DocumentFilter addCollectionSizeGreaterThan(@Nonnull String binding, int operand) {
 		return addAliasedCollectionSizeGreaterThan(DocumentQuery.THIS_ALIAS, binding, operand);
 	}
 	
@@ -973,7 +973,7 @@ public class DocumentFilterImpl implements DocumentFilter {
 	 * @return this filter for fluent chaining
 	 */
 	@Override
-	public DocumentFilter addAliasedCollectionSizeGreaterThan(String entityAlias, String binding, int operand) {
+	public @Nonnull DocumentFilter addAliasedCollectionSizeGreaterThan(@Nonnull String entityAlias, @Nonnull String binding, int operand) {
 		return appendRestriction(entityAlias, binding, ".size > ", Integer.valueOf(operand), false, false, null, null, false);
 	}
 
@@ -983,7 +983,7 @@ public class DocumentFilterImpl implements DocumentFilter {
 	 * @return this filter for fluent chaining
 	 */
 	@Override
-	public DocumentFilter addCollectionSizeGreaterThanOrEqualTo(String binding, int operand) {
+	public @Nonnull DocumentFilter addCollectionSizeGreaterThanOrEqualTo(@Nonnull String binding, int operand) {
 		return addAliasedCollectionSizeGreaterThanOrEqualTo(DocumentQuery.THIS_ALIAS, binding, operand);
 	}
 
@@ -993,7 +993,7 @@ public class DocumentFilterImpl implements DocumentFilter {
 	 * @return this filter for fluent chaining
 	 */
 	@Override
-	public DocumentFilter addAliasedCollectionSizeGreaterThanOrEqualTo(String entityAlias, String binding, int operand) {
+	public @Nonnull DocumentFilter addAliasedCollectionSizeGreaterThanOrEqualTo(@Nonnull String entityAlias, @Nonnull String binding, int operand) {
 		return appendRestriction(entityAlias, binding, ".size >= ", Integer.valueOf(operand), false, false, null, null, false);
 	}
 
@@ -1003,7 +1003,7 @@ public class DocumentFilterImpl implements DocumentFilter {
 	 * @return this filter for fluent chaining
 	 */
 	@Override
-	public DocumentFilter addCollectionSizeLessThan(String binding, int operand) {
+	public @Nonnull DocumentFilter addCollectionSizeLessThan(@Nonnull String binding, int operand) {
 		return addAliasedCollectionSizeLessThan(DocumentQuery.THIS_ALIAS, binding, operand);
 	}
 	
@@ -1013,7 +1013,7 @@ public class DocumentFilterImpl implements DocumentFilter {
 	 * @return this filter for fluent chaining
 	 */
 	@Override
-	public DocumentFilter addAliasedCollectionSizeLessThan(String entityAlias, String binding, int operand) {
+	public @Nonnull DocumentFilter addAliasedCollectionSizeLessThan(@Nonnull String entityAlias, @Nonnull String binding, int operand) {
 		return appendRestriction(entityAlias, binding, ".size < ", Integer.valueOf(operand), false, false, null, null, false);
 	}
 
@@ -1023,7 +1023,7 @@ public class DocumentFilterImpl implements DocumentFilter {
 	 * @return this filter for fluent chaining
 	 */
 	@Override
-	public DocumentFilter addCollectionSizeLessThanOrEqualTo(String binding, int operand) {
+	public @Nonnull DocumentFilter addCollectionSizeLessThanOrEqualTo(@Nonnull String binding, int operand) {
 		return addAliasedCollectionSizeLessThanOrEqualTo(DocumentQuery.THIS_ALIAS, binding, operand);
 	}
 	
@@ -1033,7 +1033,7 @@ public class DocumentFilterImpl implements DocumentFilter {
 	 * @return this filter for fluent chaining
 	 */
 	@Override
-	public DocumentFilter addAliasedCollectionSizeLessThanOrEqualTo(String entityAlias, String binding, int operand) {
+	public @Nonnull DocumentFilter addAliasedCollectionSizeLessThanOrEqualTo(@Nonnull String entityAlias, @Nonnull String binding, int operand) {
 		return appendRestriction(entityAlias, binding, ".size <= ", Integer.valueOf(operand), false, false, null, null, false);
 	}
 	
@@ -1043,7 +1043,7 @@ public class DocumentFilterImpl implements DocumentFilter {
 	 * @return this filter for fluent chaining
 	 */
 	@Override
-	public DocumentFilter addMemberOfCollection(String binding, Bean operand) {
+	public @Nonnull DocumentFilter addMemberOfCollection(@Nonnull String binding, @Nonnull Bean operand) {
 		return addAliasedMemberOfCollection(DocumentQuery.THIS_ALIAS, binding, operand);
 	}
 
@@ -1053,7 +1053,7 @@ public class DocumentFilterImpl implements DocumentFilter {
 	 * @return this filter for fluent chaining
 	 */
 	@Override
-	public DocumentFilter addAliasedMemberOfCollection(String entityAlias, String binding, Bean operand) {
+	public @Nonnull DocumentFilter addAliasedMemberOfCollection(@Nonnull String entityAlias, @Nonnull String binding, @Nonnull Bean operand) {
 		return appendRestriction(entityAlias, binding, " member of ", operand, false, false, null, null, true);
 	}
 
@@ -1063,7 +1063,7 @@ public class DocumentFilterImpl implements DocumentFilter {
 	 * @return this filter for fluent chaining
 	 */
 	@Override
-	public DocumentFilter addNotMemberOfCollection(String binding, Bean operand) {
+	public @Nonnull DocumentFilter addNotMemberOfCollection(@Nonnull String binding, @Nonnull Bean operand) {
 		return addAliasedNotMemberOfCollection(DocumentQuery.THIS_ALIAS, binding, operand);
 	}
 
@@ -1073,7 +1073,7 @@ public class DocumentFilterImpl implements DocumentFilter {
 	 * @return this filter for fluent chaining
 	 */
 	@Override
-	public DocumentFilter addAliasedNotMemberOfCollection(String entityAlias, String binding, Bean operand) {
+	public @Nonnull DocumentFilter addAliasedNotMemberOfCollection(@Nonnull String entityAlias, @Nonnull String binding, @Nonnull Bean operand) {
 		return appendRestriction(entityAlias, binding, " not member of ", operand, false, false, null, null, true);
 	}
 
@@ -1096,7 +1096,7 @@ public class DocumentFilterImpl implements DocumentFilter {
 	 * @return this filter for fluent chaining
 	 */
 	@SuppressWarnings({"java:S107", "java:S3776"}) // Long parameter list preserves the existing framework/API contract; complexity OK.
-	private DocumentFilter appendRestriction(@Nonnull String entityAlias,
+	private @Nonnull DocumentFilter appendRestriction(@Nonnull String entityAlias,
 												@Nonnull String binding,
 												@Nullable String operator,
 												@Nonnull Object operand,
@@ -1203,7 +1203,7 @@ public class DocumentFilterImpl implements DocumentFilter {
 	 * @return this filter for fluent chaining
 	 */
 	@Override
-	public DocumentFilter addAnd(DocumentFilter filter) {
+	public @Nonnull DocumentFilter addAnd(@Nonnull DocumentFilter filter) {
 		if (! filterClause.isEmpty()) {
 			filterClause.append(AND_OPERATOR);
 		}
@@ -1218,7 +1218,7 @@ public class DocumentFilterImpl implements DocumentFilter {
 	 * @return this filter for fluent chaining
 	 */
 	@Override
-	public DocumentFilter addOr(DocumentFilter filter) {
+	public @Nonnull DocumentFilter addOr(@Nonnull DocumentFilter filter) {
 		if (! filterClause.isEmpty()) {
 			filterClause.insert(0, '(');
 			filterClause.append(") OR ");
@@ -1236,7 +1236,7 @@ public class DocumentFilterImpl implements DocumentFilter {
 	 * @return this filter for fluent chaining
 	 */
 	@Override
-	public DocumentFilter addExpression(String expression) {
+	public @Nonnull DocumentFilter addExpression(@Nonnull String expression) {
 		if (! filterClause.isEmpty()) {
 			filterClause.append(AND_OPERATOR);
 		}
@@ -1256,7 +1256,7 @@ public class DocumentFilterImpl implements DocumentFilter {
 	 * Returns the SQL/HQL filter clause built so far.
 	 */
 	@Override
-	public String toString() {
+	public @Nonnull String toString() {
 		return filterClause.toString();
 	}
 

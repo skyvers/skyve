@@ -2,6 +2,8 @@ package org.skyve.metadata.view.fluent;
 
 import org.skyve.impl.metadata.repository.view.actions.ValidatableAction;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * Adds client-validation controls to fluent action builders.
  *
@@ -24,7 +26,7 @@ public abstract class FluentValidatableAction<T extends FluentValidatableAction<
 	 * @return this builder
 	 */
 	@SuppressWarnings("unchecked")
-	protected T from(ValidatableAction action) {
+	protected @Nonnull T from(@Nonnull ValidatableAction action) {
 		super.from(action);
 		clientValidation(! Boolean.FALSE.equals(action.getClientValidation()));
 		return (T) this;
@@ -38,7 +40,7 @@ public abstract class FluentValidatableAction<T extends FluentValidatableAction<
 	 * @return this builder
 	 */
 	@SuppressWarnings("unchecked")
-	public T clientValidation(boolean clientValidation) {
+	public @Nonnull T clientValidation(boolean clientValidation) {
 		get().setClientValidation(clientValidation ? Boolean.TRUE : Boolean.FALSE);
 		return (T) this;
 	}
@@ -47,5 +49,5 @@ public abstract class FluentValidatableAction<T extends FluentValidatableAction<
 	 * Returns the wrapped repository action instance.
 	 */
 	@Override
-	public abstract ValidatableAction get();
+	public abstract @Nonnull ValidatableAction get();
 }

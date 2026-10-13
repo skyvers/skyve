@@ -15,6 +15,9 @@ import org.hibernate.type.StringType;
 import org.hibernate.type.Type;
 import org.hibernate.type.TypeResolver;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Builds the where IN clause that wraps the identifiers to be updated/deleted.
  *
@@ -25,13 +28,13 @@ public class InlineIdsInClauseBuilder extends IdsClauseBuilder {
 	private final int chunkLimit;
 
 	public InlineIdsInClauseBuilder(
-			Dialect dialect, Type identifierType, TypeResolver typeResolver, String[] columns, List<Object[]> ids) {
+			@Nonnull Dialect dialect, @Nonnull Type identifierType, @Nonnull TypeResolver typeResolver, @Nonnull String[] columns, @Nonnull List<Object[]> ids) {
 		super(dialect, identifierType, typeResolver, columns, ids);
 		this.chunkLimit = dialect.getInExpressionCountLimit();
 	}
 
 	@Override
-	public String toStatement() {
+	public @Nonnull String toStatement() {
 		StringBuilder buffer = new StringBuilder();
 
 		String columnNames = String.join(",", (CharSequence[]) getColumns());
@@ -56,7 +59,7 @@ public class InlineIdsInClauseBuilder extends IdsClauseBuilder {
 		return buffer.toString();
 	}
 
-	private StringBuilder appendSqlValuesToIdInClause(Object[] values, StringBuilder buffer) {
+	private @Nonnull StringBuilder appendSqlValuesToIdInClause(@Nonnull Object[] values, @Nonnull StringBuilder buffer) {
 		for (int i = 0; i < values.length; i++) {
 			if (i > 0) {
 				buffer.append(",");
@@ -66,7 +69,7 @@ public class InlineIdsInClauseBuilder extends IdsClauseBuilder {
 		return buffer;
 	}
 
-	private StringBuilder appendSqlValueToIdInClause(Object value, StringBuilder buffer) {
+	private @Nonnull StringBuilder appendSqlValueToIdInClause(@Nullable Object value, @Nonnull StringBuilder buffer) {
 		if (value == null) {
 			return buffer.append("null");
 		}

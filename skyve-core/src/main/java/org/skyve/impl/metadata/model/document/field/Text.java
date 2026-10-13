@@ -3,6 +3,7 @@ package org.skyve.impl.metadata.model.document.field;
 import org.skyve.impl.metadata.model.document.field.validator.TextValidator;
 import org.skyve.impl.util.XMLMetaData;
 
+import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
@@ -47,21 +48,21 @@ public class Text extends ConvertibleField implements LengthField {
 		this.length = length;
 	}
 	
-	public TextFormat getFormat() {
+	public @Nullable TextFormat getFormat() {
 		return format;
 	}
 
 	@XmlElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
-	public void setFormat(TextFormat format) {
+	public void setFormat(@Nullable TextFormat format) {
 		this.format = format;
 	}
 
-	public TextValidator getValidator() {
+	public @Nullable TextValidator getValidator() {
 		return validator;
 	}
 
 	@XmlElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
-	public void setValidator(TextValidator validator) {
+	public void setValidator(@Nullable TextValidator validator) {
 		this.validator = validator;
 	}
 }

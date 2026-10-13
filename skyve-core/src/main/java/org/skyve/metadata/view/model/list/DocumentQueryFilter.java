@@ -11,6 +11,9 @@ import org.skyve.persistence.DocumentFilter;
 import org.skyve.util.logging.Category;
 import org.slf4j.Logger;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 public class DocumentQueryFilter implements Filter {
     private static final Logger QUERY_LOGGER = Category.QUERY.logger();
 	private static final String EQUALS_LOG = "{} equals {}";
@@ -27,14 +30,14 @@ public class DocumentQueryFilter implements Filter {
 	// Indicates if the filter is empty - ie has no predicates added
 	private boolean empty = true;
 	
-	DocumentQueryFilter(DocumentFilter detailFilter, DocumentFilter summaryFilter) {
+	DocumentQueryFilter(@Nonnull DocumentFilter detailFilter, @Nullable DocumentFilter summaryFilter) {
 		this.detailFilter = detailFilter;
 		this.summaryFilter = summaryFilter;
 		user = CORE.getUser();
 	}
 	
 	@Override
-	public void addAnd(Filter filter) {
+	public void addAnd(@Nonnull Filter filter) {
 		empty = false;
 		detailFilter.addAnd(((DocumentQueryFilter) filter).detailFilter);
 		if (summaryFilter != null) {
@@ -43,7 +46,7 @@ public class DocumentQueryFilter implements Filter {
 	}
 
 	@Override
-	public void addOr(Filter filter) {
+	public void addOr(@Nonnull Filter filter) {
 		empty = false;
 		detailFilter.addOr(((DocumentQueryFilter) filter).detailFilter);
 		if (summaryFilter != null) {
@@ -52,7 +55,7 @@ public class DocumentQueryFilter implements Filter {
 	}
 
 	@Override
-	public void addTagged(String tagId, boolean tagged) {
+	public void addTagged(@Nonnull String tagId, boolean tagged) {
 		empty = false;
 		if (UtilImpl.QUERY_TRACE) QUERY_LOGGER.info("add tagged {} with tagId {}", Boolean.valueOf(tagged), tagId);
 		StringBuilder sb = new StringBuilder(64);
@@ -78,7 +81,7 @@ public class DocumentQueryFilter implements Filter {
 	}
 
 	@Override
-	public void addNull(String binding) {
+	public void addNull(@Nonnull String binding) {
 		empty = false;
 		if (UtilImpl.QUERY_TRACE) QUERY_LOGGER.info("{} is null", binding);
 		detailFilter.addNull(binding);
@@ -88,7 +91,7 @@ public class DocumentQueryFilter implements Filter {
 	}
 
 	@Override
-	public void addNotNull(String binding) {
+	public void addNotNull(@Nonnull String binding) {
 		empty = false;
 		if (UtilImpl.QUERY_TRACE) QUERY_LOGGER.info("{} is not null", binding);
 		detailFilter.addNotNull(binding);
@@ -98,7 +101,7 @@ public class DocumentQueryFilter implements Filter {
 	}
 
 	@Override
-	public void addEquals(String binding, String value) {
+	public void addEquals(@Nonnull String binding, @Nonnull String value) {
 		empty = false;
 		if (UtilImpl.QUERY_TRACE) QUERY_LOGGER.info(EQUALS_LOG, binding, value);
 		detailFilter.addEquals(binding, value);
@@ -108,7 +111,7 @@ public class DocumentQueryFilter implements Filter {
 	}
 
 	@Override
-	public void addEquals(String binding, Date value) {
+	public void addEquals(@Nonnull String binding, @Nonnull Date value) {
 		empty = false;
 		if (UtilImpl.QUERY_TRACE) QUERY_LOGGER.info(EQUALS_LOG, binding, value);
 		detailFilter.addEquals(binding, value);
@@ -118,7 +121,7 @@ public class DocumentQueryFilter implements Filter {
 	}
 
 	@Override
-	public void addEquals(String binding, Integer value) {
+	public void addEquals(@Nonnull String binding, @Nonnull Integer value) {
 		empty = false;
 		if (UtilImpl.QUERY_TRACE) QUERY_LOGGER.info(EQUALS_LOG, binding, value);
 		detailFilter.addEquals(binding, value);
@@ -128,7 +131,7 @@ public class DocumentQueryFilter implements Filter {
 	}
 
 	@Override
-	public void addEquals(String binding, Long value) {
+	public void addEquals(@Nonnull String binding, @Nonnull Long value) {
 		empty = false;
 		if (UtilImpl.QUERY_TRACE) QUERY_LOGGER.info(EQUALS_LOG, binding, value);
 		detailFilter.addEquals(binding, value);
@@ -138,7 +141,7 @@ public class DocumentQueryFilter implements Filter {
 	}
 
 	@Override
-	public void addEquals(String binding, Decimal value) {
+	public void addEquals(@Nonnull String binding, @Nonnull Decimal value) {
 		empty = false;
 		if (UtilImpl.QUERY_TRACE) QUERY_LOGGER.info(EQUALS_LOG, binding, value);
 		detailFilter.addEquals(binding, value);
@@ -148,7 +151,7 @@ public class DocumentQueryFilter implements Filter {
 	}
 
 	@Override
-	public void addEquals(String binding, Boolean value) {
+	public void addEquals(@Nonnull String binding, @Nonnull Boolean value) {
 		empty = false;
 		if (UtilImpl.QUERY_TRACE) QUERY_LOGGER.info(EQUALS_LOG, binding, value);
 		detailFilter.addEquals(binding, value);
@@ -158,7 +161,7 @@ public class DocumentQueryFilter implements Filter {
 	}
 
 	@Override
-	public void addEquals(String binding, Enum<?> value) {
+	public void addEquals(@Nonnull String binding, @Nonnull Enum<?> value) {
 		empty = false;
 		if (UtilImpl.QUERY_TRACE) QUERY_LOGGER.info(EQUALS_LOG, binding, value);
 		detailFilter.addEquals(binding, value);
@@ -168,7 +171,7 @@ public class DocumentQueryFilter implements Filter {
 	}
 
 	@Override
-	public void addEquals(String binding, Geometry value) {
+	public void addEquals(@Nonnull String binding, @Nonnull Geometry value) {
 		empty = false;
 		if (UtilImpl.QUERY_TRACE) QUERY_LOGGER.info(EQUALS_LOG, binding, value);
 		detailFilter.addEquals(binding, value);
@@ -178,7 +181,7 @@ public class DocumentQueryFilter implements Filter {
 	}
 
 	@Override
-	public void addNotEquals(String binding, String value) {
+	public void addNotEquals(@Nonnull String binding, @Nonnull String value) {
 		empty = false;
 		if (UtilImpl.QUERY_TRACE) QUERY_LOGGER.info(NOT_EQUALS_LOG, binding, value);
 		detailFilter.addNotEquals(binding, value);
@@ -188,7 +191,7 @@ public class DocumentQueryFilter implements Filter {
 	}
 
 	@Override
-	public void addNotEquals(String binding, Date value) {
+	public void addNotEquals(@Nonnull String binding, @Nonnull Date value) {
 		empty = false;
 		if (UtilImpl.QUERY_TRACE) QUERY_LOGGER.info(NOT_EQUALS_LOG, binding, value);
 		detailFilter.addNotEquals(binding, value);
@@ -198,7 +201,7 @@ public class DocumentQueryFilter implements Filter {
 	}
 
 	@Override
-	public void addNotEquals(String binding, Integer value) {
+	public void addNotEquals(@Nonnull String binding, @Nonnull Integer value) {
 		empty = false;
 		if (UtilImpl.QUERY_TRACE) QUERY_LOGGER.info(NOT_EQUALS_LOG, binding, value);
 		detailFilter.addNotEquals(binding, value);
@@ -208,7 +211,7 @@ public class DocumentQueryFilter implements Filter {
 	}
 
 	@Override
-	public void addNotEquals(String binding, Long value) {
+	public void addNotEquals(@Nonnull String binding, @Nonnull Long value) {
 		empty = false;
 		if (UtilImpl.QUERY_TRACE) QUERY_LOGGER.info(NOT_EQUALS_LOG, binding, value);
 		detailFilter.addNotEquals(binding, value);
@@ -218,7 +221,7 @@ public class DocumentQueryFilter implements Filter {
 	}
 
 	@Override
-	public void addNotEquals(String binding, Decimal value) {
+	public void addNotEquals(@Nonnull String binding, @Nonnull Decimal value) {
 		empty = false;
 		if (UtilImpl.QUERY_TRACE) QUERY_LOGGER.info(NOT_EQUALS_LOG, binding, value);
 		detailFilter.addNotEquals(binding, value);
@@ -228,7 +231,7 @@ public class DocumentQueryFilter implements Filter {
 	}
 
 	@Override
-	public void addNotEquals(String binding, Boolean value) {
+	public void addNotEquals(@Nonnull String binding, @Nonnull Boolean value) {
 		empty = false;
 		if (UtilImpl.QUERY_TRACE) QUERY_LOGGER.info(NOT_EQUALS_LOG, binding, value);
 		detailFilter.addNotEquals(binding, value);
@@ -238,7 +241,7 @@ public class DocumentQueryFilter implements Filter {
 	}
 
 	@Override
-	public void addNotEquals(String binding, Enum<?> value) {
+	public void addNotEquals(@Nonnull String binding, @Nonnull Enum<?> value) {
 		empty = false;
 		if (UtilImpl.QUERY_TRACE) QUERY_LOGGER.info(NOT_EQUALS_LOG, binding, value);
 		detailFilter.addNotEquals(binding, value);
@@ -248,7 +251,7 @@ public class DocumentQueryFilter implements Filter {
 	}
 
 	@Override
-	public void addNotEquals(String binding, Geometry value) {
+	public void addNotEquals(@Nonnull String binding, @Nonnull Geometry value) {
 		empty = false;
 		if (UtilImpl.QUERY_TRACE) QUERY_LOGGER.info(NOT_EQUALS_LOG, binding, value);
 		detailFilter.addNotEquals(binding, value);
@@ -258,7 +261,7 @@ public class DocumentQueryFilter implements Filter {
 	}
 
 	@Override
-	public void addEqualsIgnoreCase(String binding, String value) {
+	public void addEqualsIgnoreCase(@Nonnull String binding, @Nonnull String value) {
 		empty = false;
 		if (UtilImpl.QUERY_TRACE) QUERY_LOGGER.info("{} equalsIgnoreCase {}", binding, value);
 		detailFilter.addLike(binding, value);
@@ -268,7 +271,7 @@ public class DocumentQueryFilter implements Filter {
 	}
 
 	@Override
-	public void addNotEqualsIgnoreCase(String binding, String value) {
+	public void addNotEqualsIgnoreCase(@Nonnull String binding, @Nonnull String value) {
 		empty = false;
 		if (UtilImpl.QUERY_TRACE) QUERY_LOGGER.info("{} notEqualsIgnoreCase {}", binding, value);
 		detailFilter.addNotLike(binding, value);
@@ -278,7 +281,7 @@ public class DocumentQueryFilter implements Filter {
 	}
 
 	@Override
-	public void addContains(String binding, String value) {
+	public void addContains(@Nonnull String binding, @Nonnull String value) {
 		empty = false;
 		if (UtilImpl.QUERY_TRACE) QUERY_LOGGER.info("{} contains {}", binding, value);
 		String operand = new StringBuilder(32).append('%').append(value).append('%').toString();
@@ -289,7 +292,7 @@ public class DocumentQueryFilter implements Filter {
 	}
 
 	@Override
-	public void addNotContains(String binding, String value) {
+	public void addNotContains(@Nonnull String binding, @Nonnull String value) {
 		empty = false;
 		if (UtilImpl.QUERY_TRACE) QUERY_LOGGER.info("{} notContains {}", binding, value);
 		String operand = new StringBuilder(32).append('%').append(value).append('%').toString();
@@ -300,7 +303,7 @@ public class DocumentQueryFilter implements Filter {
 	}
 
 	@Override
-	public void addStartsWith(String binding, String value) {
+	public void addStartsWith(@Nonnull String binding, @Nonnull String value) {
 		empty = false;
 		if (UtilImpl.QUERY_TRACE) QUERY_LOGGER.info("{} startsWith {}", binding, value);
 		String operand = new StringBuilder(32).append(value).append('%').toString();
@@ -311,7 +314,7 @@ public class DocumentQueryFilter implements Filter {
 	}
 
 	@Override
-	public void addNotStartsWith(String binding, String value) {
+	public void addNotStartsWith(@Nonnull String binding, @Nonnull String value) {
 		empty = false;
 		if (UtilImpl.QUERY_TRACE) QUERY_LOGGER.info("{} notStartsWith {}", binding, value);
 		String operand = new StringBuilder(32).append(value).append('%').toString();
@@ -322,7 +325,7 @@ public class DocumentQueryFilter implements Filter {
 	}
 
 	@Override
-	public void addEndsWith(String binding, String value) {
+	public void addEndsWith(@Nonnull String binding, @Nonnull String value) {
 		empty = false;
 		if (UtilImpl.QUERY_TRACE) QUERY_LOGGER.info("{} endsWith {}", binding, value);
 		String operand = new StringBuilder(32).append('%').append(value).toString();
@@ -333,7 +336,7 @@ public class DocumentQueryFilter implements Filter {
 	}
 
 	@Override
-	public void addNotEndsWith(String binding, String value) {
+	public void addNotEndsWith(@Nonnull String binding, @Nonnull String value) {
 		empty = false;
 		if (UtilImpl.QUERY_TRACE) QUERY_LOGGER.info("{} notEndsWith {}", binding, value);
 		String operand = new StringBuilder(32).append('%').append(value).toString();
@@ -344,7 +347,7 @@ public class DocumentQueryFilter implements Filter {
 	}
 
 	@Override
-	public void addGreaterThan(String binding, String value) {
+	public void addGreaterThan(@Nonnull String binding, @Nonnull String value) {
 		empty = false;
 		if (UtilImpl.QUERY_TRACE) QUERY_LOGGER.info(GREATER_THAN_LOG, binding, value);
 		detailFilter.addGreaterThan(binding, value);
@@ -354,7 +357,7 @@ public class DocumentQueryFilter implements Filter {
 	}
 
 	@Override
-	public void addGreaterThan(String binding, Date value) {
+	public void addGreaterThan(@Nonnull String binding, @Nonnull Date value) {
 		empty = false;
 		if (UtilImpl.QUERY_TRACE) QUERY_LOGGER.info(GREATER_THAN_LOG, binding, value);
 		detailFilter.addGreaterThan(binding, value);
@@ -364,7 +367,7 @@ public class DocumentQueryFilter implements Filter {
 	}
 
 	@Override
-	public void addGreaterThan(String binding, Integer value) {
+	public void addGreaterThan(@Nonnull String binding, @Nonnull Integer value) {
 		empty = false;
 		if (UtilImpl.QUERY_TRACE) QUERY_LOGGER.info(GREATER_THAN_LOG, binding, value);
 		detailFilter.addGreaterThan(binding, value);
@@ -374,7 +377,7 @@ public class DocumentQueryFilter implements Filter {
 	}
 
 	@Override
-	public void addGreaterThan(String binding, Long value) {
+	public void addGreaterThan(@Nonnull String binding, @Nonnull Long value) {
 		empty = false;
 		if (UtilImpl.QUERY_TRACE) QUERY_LOGGER.info(GREATER_THAN_LOG, binding, value);
 		detailFilter.addGreaterThan(binding, value);
@@ -384,7 +387,7 @@ public class DocumentQueryFilter implements Filter {
 	}
 
 	@Override
-	public void addGreaterThan(String binding, Decimal value) {
+	public void addGreaterThan(@Nonnull String binding, @Nonnull Decimal value) {
 		empty = false;
 		if (UtilImpl.QUERY_TRACE) QUERY_LOGGER.info(GREATER_THAN_LOG, binding, value);
 		detailFilter.addGreaterThan(binding, value);
@@ -394,7 +397,7 @@ public class DocumentQueryFilter implements Filter {
 	}
 
 	@Override
-	public void addGreaterThanOrEqualTo(String binding, String value) {
+	public void addGreaterThanOrEqualTo(@Nonnull String binding, @Nonnull String value) {
 		empty = false;
 		if (UtilImpl.QUERY_TRACE) QUERY_LOGGER.info(GREATER_THAN_EQUAL_LOG, binding, value);
 		detailFilter.addGreaterThanOrEqualTo(binding, value);
@@ -404,7 +407,7 @@ public class DocumentQueryFilter implements Filter {
 	}
 
 	@Override
-	public void addGreaterThanOrEqualTo(String binding, Date value) {
+	public void addGreaterThanOrEqualTo(@Nonnull String binding, @Nonnull Date value) {
 		empty = false;
 		if (UtilImpl.QUERY_TRACE) QUERY_LOGGER.info(GREATER_THAN_EQUAL_LOG, binding, value);
 		detailFilter.addGreaterThanOrEqualTo(binding, value);
@@ -414,7 +417,7 @@ public class DocumentQueryFilter implements Filter {
 	}
 
 	@Override
-	public void addGreaterThanOrEqualTo(String binding, Integer value) {
+	public void addGreaterThanOrEqualTo(@Nonnull String binding, @Nonnull Integer value) {
 		empty = false;
 		if (UtilImpl.QUERY_TRACE) QUERY_LOGGER.info(GREATER_THAN_EQUAL_LOG, binding, value);
 		detailFilter.addGreaterThanOrEqualTo(binding, value);
@@ -424,7 +427,7 @@ public class DocumentQueryFilter implements Filter {
 	}
 
 	@Override
-	public void addGreaterThanOrEqualTo(String binding, Long value) {
+	public void addGreaterThanOrEqualTo(@Nonnull String binding, @Nonnull Long value) {
 		empty = false;
 		if (UtilImpl.QUERY_TRACE) QUERY_LOGGER.info(GREATER_THAN_EQUAL_LOG, binding, value);
 		detailFilter.addGreaterThanOrEqualTo(binding, value);
@@ -434,7 +437,7 @@ public class DocumentQueryFilter implements Filter {
 	}
 
 	@Override
-	public void addGreaterThanOrEqualTo(String binding, Decimal value) {
+	public void addGreaterThanOrEqualTo(@Nonnull String binding, @Nonnull Decimal value) {
 		empty = false;
 		if (UtilImpl.QUERY_TRACE) QUERY_LOGGER.info(GREATER_THAN_EQUAL_LOG, binding, value);
 		detailFilter.addGreaterThanOrEqualTo(binding, value);
@@ -444,7 +447,7 @@ public class DocumentQueryFilter implements Filter {
 	}
 
 	@Override
-	public void addLessThan(String binding, String value) {
+	public void addLessThan(@Nonnull String binding, @Nonnull String value) {
 		empty = false;
 		if (UtilImpl.QUERY_TRACE) QUERY_LOGGER.info(LESS_THAN_LOG, binding, value);
 		detailFilter.addLessThan(binding, value);
@@ -454,7 +457,7 @@ public class DocumentQueryFilter implements Filter {
 	}
 
 	@Override
-	public void addLessThan(String binding, Date value) {
+	public void addLessThan(@Nonnull String binding, @Nonnull Date value) {
 		empty = false;
 		if (UtilImpl.QUERY_TRACE) QUERY_LOGGER.info(LESS_THAN_LOG, binding, value);
 		detailFilter.addLessThan(binding, value);
@@ -464,7 +467,7 @@ public class DocumentQueryFilter implements Filter {
 	}
 
 	@Override
-	public void addLessThan(String binding, Integer value) {
+	public void addLessThan(@Nonnull String binding, @Nonnull Integer value) {
 		empty = false;
 		if (UtilImpl.QUERY_TRACE) QUERY_LOGGER.info(LESS_THAN_LOG, binding, value);
 		detailFilter.addLessThan(binding, value);
@@ -474,7 +477,7 @@ public class DocumentQueryFilter implements Filter {
 	}
 
 	@Override
-	public void addLessThan(String binding, Long value) {
+	public void addLessThan(@Nonnull String binding, @Nonnull Long value) {
 		empty = false;
 		if (UtilImpl.QUERY_TRACE) QUERY_LOGGER.info(LESS_THAN_LOG, binding, value);
 		detailFilter.addLessThan(binding, value);
@@ -484,7 +487,7 @@ public class DocumentQueryFilter implements Filter {
 	}
 
 	@Override
-	public void addLessThan(String binding, Decimal value) {
+	public void addLessThan(@Nonnull String binding, @Nonnull Decimal value) {
 		empty = false;
 		if (UtilImpl.QUERY_TRACE) QUERY_LOGGER.info(LESS_THAN_LOG, binding, value);
 		detailFilter.addLessThan(binding, value);
@@ -494,7 +497,7 @@ public class DocumentQueryFilter implements Filter {
 	}
 
 	@Override
-	public void addLessThanOrEqualTo(String binding, String value) {
+	public void addLessThanOrEqualTo(@Nonnull String binding, @Nonnull String value) {
 		empty = false;
 		if (UtilImpl.QUERY_TRACE) QUERY_LOGGER.info(LESS_THAN_EQUAL_LOG, binding, value);
 		detailFilter.addLessThanOrEqualTo(binding, value);
@@ -504,7 +507,7 @@ public class DocumentQueryFilter implements Filter {
 	}
 
 	@Override
-	public void addLessThanOrEqualTo(String binding, Date value) {
+	public void addLessThanOrEqualTo(@Nonnull String binding, @Nonnull Date value) {
 		empty = false;
 		if (UtilImpl.QUERY_TRACE) QUERY_LOGGER.info(LESS_THAN_EQUAL_LOG, binding, value);
 		detailFilter.addLessThanOrEqualTo(binding, value);
@@ -514,7 +517,7 @@ public class DocumentQueryFilter implements Filter {
 	}
 
 	@Override
-	public void addLessThanOrEqualTo(String binding, Integer value) {
+	public void addLessThanOrEqualTo(@Nonnull String binding, @Nonnull Integer value) {
 		empty = false;
 		if (UtilImpl.QUERY_TRACE) QUERY_LOGGER.info(LESS_THAN_EQUAL_LOG, binding, value);
 		detailFilter.addLessThanOrEqualTo(binding, value);
@@ -524,7 +527,7 @@ public class DocumentQueryFilter implements Filter {
 	}
 
 	@Override
-	public void addLessThanOrEqualTo(String binding, Long value) {
+	public void addLessThanOrEqualTo(@Nonnull String binding, @Nonnull Long value) {
 		empty = false;
 		if (UtilImpl.QUERY_TRACE) QUERY_LOGGER.info(LESS_THAN_EQUAL_LOG, binding, value);
 		detailFilter.addLessThanOrEqualTo(binding, value);
@@ -534,7 +537,7 @@ public class DocumentQueryFilter implements Filter {
 	}
 
 	@Override
-	public void addLessThanOrEqualTo(String binding, Decimal value) {
+	public void addLessThanOrEqualTo(@Nonnull String binding, @Nonnull Decimal value) {
 		empty = false;
 		if (UtilImpl.QUERY_TRACE) QUERY_LOGGER.info(LESS_THAN_EQUAL_LOG, binding, value);
 		detailFilter.addLessThanOrEqualTo(binding, value);
@@ -544,7 +547,7 @@ public class DocumentQueryFilter implements Filter {
 	}
 
 	@Override
-	public void addBetween(String binding, String start, String end) {
+	public void addBetween(@Nonnull String binding, @Nonnull String start, @Nonnull String end) {
 		empty = false;
 		if (UtilImpl.QUERY_TRACE) QUERY_LOGGER.info(BETWEEN_LOG, binding, start, end);
 		detailFilter.addBetween(binding, start, end);
@@ -554,7 +557,7 @@ public class DocumentQueryFilter implements Filter {
 	}
 
 	@Override
-	public void addBetween(String binding, Date start, Date end) {
+	public void addBetween(@Nonnull String binding, @Nonnull Date start, @Nonnull Date end) {
 		empty = false;
 		if (UtilImpl.QUERY_TRACE) QUERY_LOGGER.info(BETWEEN_LOG, binding, start, end);
 		detailFilter.addBetween(binding, start, end);
@@ -564,7 +567,7 @@ public class DocumentQueryFilter implements Filter {
 	}
 
 	@Override
-	public void addBetween(String binding, Integer start, Integer end) {
+	public void addBetween(@Nonnull String binding, @Nonnull Integer start, @Nonnull Integer end) {
 		empty = false;
 		if (UtilImpl.QUERY_TRACE) QUERY_LOGGER.info(BETWEEN_LOG, binding, start, end);
 		detailFilter.addBetween(binding, start, end);
@@ -574,7 +577,7 @@ public class DocumentQueryFilter implements Filter {
 	}
 
 	@Override
-	public void addBetween(String binding, Long start, Long end) {
+	public void addBetween(@Nonnull String binding, @Nonnull Long start, @Nonnull Long end) {
 		empty = false;
 		if (UtilImpl.QUERY_TRACE) QUERY_LOGGER.info(BETWEEN_LOG, binding, start, end);
 		detailFilter.addBetween(binding, start, end);
@@ -584,7 +587,7 @@ public class DocumentQueryFilter implements Filter {
 	}
 
 	@Override
-	public void addBetween(String binding, Decimal start, Decimal end) {
+	public void addBetween(@Nonnull String binding, @Nonnull Decimal start, @Nonnull Decimal end) {
 		empty = false;
 		if (UtilImpl.QUERY_TRACE) QUERY_LOGGER.info(BETWEEN_LOG, binding, start, end);
 		detailFilter.addBetween(binding, start, end);
@@ -594,17 +597,17 @@ public class DocumentQueryFilter implements Filter {
 	}
 
 	@Override
-	public void addIn(String binding, Object... values) {
+	public void addIn(@Nonnull String binding, @Nonnull Object... values) {
 		in(binding, false, values);
 	}
 
 	@Override
-	public void addNotIn(String binding, Object... values) {
+	public void addNotIn(@Nonnull String binding, @Nonnull Object... values) {
 		in(binding, true, values);
 	}
 	
 	@SuppressWarnings("java:S3776") // Complexity OK
-	private void in(String binding, boolean not, Object... values) {
+	private void in(@Nonnull String binding, boolean not, @Nonnull Object... values) {
 		empty = false;
 		if (UtilImpl.QUERY_TRACE) {
 			StringBuilder sb = new StringBuilder(20 + (7 * values.length));
@@ -646,7 +649,7 @@ public class DocumentQueryFilter implements Filter {
 	}
 	
 	@Override
-	public void addWithin(String binding, Geometry value) {
+	public void addWithin(@Nonnull String binding, @Nonnull Geometry value) {
 		empty = false;
 		if (UtilImpl.QUERY_TRACE) QUERY_LOGGER.info("{} within {}", binding, value);
 		detailFilter.addWithin(binding, value);
@@ -656,7 +659,7 @@ public class DocumentQueryFilter implements Filter {
 	}
 
 	@Override
-	public void addContains(String binding, Geometry value) {
+	public void addContains(@Nonnull String binding, @Nonnull Geometry value) {
 		empty = false;
 		if (UtilImpl.QUERY_TRACE) QUERY_LOGGER.info("{} contains {}", binding, value);
 		detailFilter.addContains(binding, value);
@@ -666,7 +669,7 @@ public class DocumentQueryFilter implements Filter {
 	}
 
 	@Override
-	public void addCrosses(String binding, Geometry value) {
+	public void addCrosses(@Nonnull String binding, @Nonnull Geometry value) {
 		empty = false;
 		if (UtilImpl.QUERY_TRACE) QUERY_LOGGER.info("{} crosses {}", binding, value);
 		detailFilter.addCrosses(binding, value);
@@ -676,7 +679,7 @@ public class DocumentQueryFilter implements Filter {
 	}
 
 	@Override
-	public void addDisjoint(String binding, Geometry value) {
+	public void addDisjoint(@Nonnull String binding, @Nonnull Geometry value) {
 		empty = false;
 		if (UtilImpl.QUERY_TRACE) QUERY_LOGGER.info("{} disjoint {}", binding, value);
 		detailFilter.addDisjoint(binding, value);
@@ -686,7 +689,7 @@ public class DocumentQueryFilter implements Filter {
 	}
 
 	@Override
-	public void addIntersects(String binding, Geometry value) {
+	public void addIntersects(@Nonnull String binding, @Nonnull Geometry value) {
 		empty = false;
 		if (UtilImpl.QUERY_TRACE) QUERY_LOGGER.info("{} intersects {}", binding, value);
 		detailFilter.addIntersects(binding, value);
@@ -696,7 +699,7 @@ public class DocumentQueryFilter implements Filter {
 	}
 
 	@Override
-	public void addOverlaps(String binding, Geometry value) {
+	public void addOverlaps(@Nonnull String binding, @Nonnull Geometry value) {
 		empty = false;
 		if (UtilImpl.QUERY_TRACE) QUERY_LOGGER.info("{} overlaps {}", binding, value);
 		detailFilter.addOverlaps(binding, value);
@@ -706,7 +709,7 @@ public class DocumentQueryFilter implements Filter {
 	}
 
 	@Override
-	public void addTouches(String binding, Geometry value) {
+	public void addTouches(@Nonnull String binding, @Nonnull Geometry value) {
 		empty = false;
 		if (UtilImpl.QUERY_TRACE) QUERY_LOGGER.info("{} touches {}", binding, value);
 		detailFilter.addTouches(binding, value);

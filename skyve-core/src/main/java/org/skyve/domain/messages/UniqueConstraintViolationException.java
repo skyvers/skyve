@@ -5,6 +5,9 @@ import java.util.List;
 
 import org.skyve.metadata.model.document.Document;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Thrown when a unique constraint declared in document metadata is violated.
  *
@@ -30,7 +33,7 @@ public class UniqueConstraintViolationException extends DomainException implemen
 	 * @param constraintName
 	 * @param message
 	 */
-	public UniqueConstraintViolationException(Document document, String constraintName, String message) {
+	public UniqueConstraintViolationException(@Nullable Document document, @Nonnull String constraintName, @Nonnull String message) {
 		super(message, false);
 		messages.add(new Message(message));
 		this.document = document;
@@ -44,10 +47,10 @@ public class UniqueConstraintViolationException extends DomainException implemen
 	 * @param binding
 	 * @param message
 	 */
-	public UniqueConstraintViolationException(Document document,
-												String constraintName,
-												String binding,
-												String message) {
+	public UniqueConstraintViolationException(@Nonnull Document document,
+												@Nonnull String constraintName,
+												@Nonnull String binding,
+												@Nonnull String message) {
 		super("Constraint " + constraintName + " in document " + document.getOwningModuleName() + "." + document.getName() +
 				" is violated with message :- " + message, false);
 		messages.add(new Message(binding, message));
@@ -59,7 +62,7 @@ public class UniqueConstraintViolationException extends DomainException implemen
 	 * Returns the document.
 	 * @return the result
 	 */
-	public Document getDocument() {
+	public @Nullable Document getDocument() {
 		return document;
 	}
 	
@@ -67,7 +70,7 @@ public class UniqueConstraintViolationException extends DomainException implemen
 	 * 
 	 * @return
 	 */
-	public String getConstraintName() {
+	public @Nonnull String getConstraintName() {
 		return constraintName;
 	}
 
@@ -76,7 +79,7 @@ public class UniqueConstraintViolationException extends DomainException implemen
 	 * @return the result
 	 */
 	@Override
-	public List<Message> getMessages() {
+	public @Nonnull List<Message> getMessages() {
 		return messages;
 	}
 }

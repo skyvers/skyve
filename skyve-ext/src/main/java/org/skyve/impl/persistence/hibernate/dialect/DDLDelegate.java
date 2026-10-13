@@ -35,6 +35,9 @@ import org.skyve.impl.persistence.hibernate.dialect.SkyveDialect.RDBMS;
 import org.slf4j.Logger;
 import org.skyve.util.logging.SkyveLoggerFactory;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Utility class that applies Hibernate DDL migration scripts to the database,
  * delegating schema-diffing to the Hibernate {@code StandardServiceRegistry}.
@@ -63,7 +66,7 @@ public class DDLDelegate {
 	 * @throws SQLException if the datastore connection or schema inspection cannot be established
 	 */
     @SuppressWarnings("java:S3776") // Complexity OK
-    public static List<String> migrate(ServiceRegistry standardRegistry, Metadata metadata, SkyveDialect skyveDialect, boolean execute)
+    public static @Nonnull List<String> migrate(@Nonnull ServiceRegistry standardRegistry, @Nonnull Metadata metadata, @Nonnull SkyveDialect skyveDialect, boolean execute)
 	throws SQLException {
 		List<String> result = new ArrayList<>(20);
 		
@@ -93,7 +96,7 @@ public class DDLDelegate {
 				 * @return null because this isolator is backed directly by an external connection
 				 */
 				@Override
-				public JdbcContext getJdbcContext() {
+				public @Nullable JdbcContext getJdbcContext() {
 					return null;
 				}
 				
@@ -103,7 +106,7 @@ public class DDLDelegate {
 				 * @return the datastore connection opened by migrate
 				 */
 				@Override
-				public Connection getIsolatedConnection() {
+				public @Nonnull Connection getIsolatedConnection() {
 					return connection;
 				}
 			};
@@ -117,7 +120,7 @@ public class DDLDelegate {
 					 * @return true to delegate all class loading requests to this factory
 					 */
 					@Override
-					public boolean match(String name) {
+					public boolean match(@Nonnull String name) {
 						return true;
 					}
 
@@ -129,7 +132,7 @@ public class DDLDelegate {
 					 * @throws ClassNotFoundException if the class cannot be loaded
 					 */
 					@Override
-					public Class<?> loadClass(String name) throws ClassNotFoundException {
+					public @Nonnull Class<?> loadClass(@Nonnull String name) throws ClassNotFoundException {
 						return Thread.currentThread().getContextClassLoader().loadClass(name);
 					}
 				});
@@ -192,11 +195,11 @@ public class DDLDelegate {
 	 */
 	// from org.hibernate.mapping.Table
 	@SuppressWarnings("java:S3776") // Complexity OK
-	private static Iterable<String> sqlAlterTableDDL(SkyveDialect skyveDialect, 
-														Table table, 
-														TableInformation tableInfo,
-														SqlStringGenerationContext sqlStringGenerationContext,
-														Metadata metadata) {
+	private static @Nonnull Iterable<String> sqlAlterTableDDL(@Nonnull SkyveDialect skyveDialect, 
+														@Nonnull Table table, 
+														@Nonnull TableInformation tableInfo,
+														@Nonnull SqlStringGenerationContext sqlStringGenerationContext,
+														@Nonnull Metadata metadata) {
 		List<String> result = new ArrayList<>();
 		
 		final Dialect dialect = (Dialect) skyveDialect;
@@ -252,7 +255,7 @@ public class DDLDelegate {
 	 * @param columnInfo the extracted live database column metadata
 	 * @return true when a type/size/precision/scale difference requires a column change statement, otherwise false
 	 */
-	static final boolean isAlterTableColumnChangeRequired(Column column, ColumnInformation columnInfo) {
+	static final boolean isAlterTableColumnChangeRequired(@Nonnull Column column, @Nullable ColumnInformation columnInfo) {
 /*
 		if (columnInfo != null) {
 			System.out.println("" + column.getSqlType() + " : " + 

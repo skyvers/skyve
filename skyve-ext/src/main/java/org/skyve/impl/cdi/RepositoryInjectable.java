@@ -10,6 +10,8 @@ import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.repository.Repository;
 import org.skyve.metadata.user.User;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.enterprise.inject.Alternative;
 
 /**
@@ -31,7 +33,7 @@ public class RepositoryInjectable implements Repository, Serializable {
 	 * @return the resolved resource file, or null if no resource matches.
 	 */
 	@Override
-	public File findResourceFile(String resourcePath, String customerName, String moduleName) {
+	public @Nullable File findResourceFile(@Nonnull String resourcePath, @Nullable String customerName, @Nullable String moduleName) {
 		return CORE.getRepository().findResourceFile(resourcePath, customerName, moduleName);
 	}
 
@@ -41,7 +43,7 @@ public class RepositoryInjectable implements Repository, Serializable {
 	 * @return the repository router.
 	 */
 	@Override
-	public Router getRouter() {
+	public @Nullable Router getRouter() {
 		return CORE.getRepository().getRouter();
 	}
 
@@ -52,7 +54,7 @@ public class RepositoryInjectable implements Repository, Serializable {
 	 * @return the resolved customer metadata, or null if not found.
 	 */
 	@Override
-	public Customer getCustomer(String customerName) {
+	public @Nullable Customer getCustomer(@Nonnull String customerName) {
 		return CORE.getRepository().getCustomer(customerName);
 	}
 
@@ -64,7 +66,7 @@ public class RepositoryInjectable implements Repository, Serializable {
 	 * @return the configured data factory instance, or null if none is defined.
 	 */
 	@Override
-	public Object getDataFactory(Customer customer, Document document) {
+	public @Nullable Object getDataFactory(@Nullable Customer customer, @Nonnull Document document) {
 		return CORE.getRepository().getDataFactory(customer, document);
 	}
 	
@@ -75,7 +77,7 @@ public class RepositoryInjectable implements Repository, Serializable {
 	 * @return the resolved user, or null if no user matches.
 	 */
 	@Override
-	public User retrieveUser(String userName) {
+	public @Nullable User retrieveUser(@Nonnull String userName) {
 		return CORE.getRepository().retrieveUser(userName);
 	}
 }

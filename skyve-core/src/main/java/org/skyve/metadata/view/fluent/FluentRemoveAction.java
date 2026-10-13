@@ -2,6 +2,8 @@ package org.skyve.metadata.view.fluent;
 
 import org.skyve.impl.metadata.repository.view.actions.RemoveAction;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * Builds {@link RemoveAction} metadata using a fluent API.
  */
@@ -21,7 +23,7 @@ public class FluentRemoveAction extends FluentAction<FluentRemoveAction> {
 	 * @param action
 	 *            the action instance to wrap
 	 */
-	public FluentRemoveAction(RemoveAction action) {
+	public FluentRemoveAction(@Nonnull RemoveAction action) {
 		this.action = action;
 	}
 
@@ -32,7 +34,7 @@ public class FluentRemoveAction extends FluentAction<FluentRemoveAction> {
 	 *            the source action metadata
 	 * @return this builder
 	 */
-	public FluentRemoveAction from(@SuppressWarnings("hiding") RemoveAction action) {
+	public @Nonnull FluentRemoveAction from(@SuppressWarnings("hiding") @Nonnull RemoveAction action) {
 		super.fromBase(action);
 		return this;
 	}
@@ -41,7 +43,7 @@ public class FluentRemoveAction extends FluentAction<FluentRemoveAction> {
 	 * Returns the wrapped repository action instance.
 	 */
 	@Override
-	public RemoveAction get() {
+	public @Nonnull RemoveAction get() {
 		return action;
 	}
 }

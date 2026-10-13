@@ -8,6 +8,8 @@ import org.skyve.domain.types.Timestamp;
 import org.skyve.metadata.user.User;
 import org.skyve.util.Util;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * Thrown when the persistence layer detects a concurrent modification of a
  * {@link org.skyve.domain.PersistentBean}.
@@ -48,7 +50,7 @@ public class OptimisticLockException extends DomainException implements MessageE
 	 * @param operationType the operationType
 	 * @param persistentLock the persistentLock
 	 */
-	public OptimisticLockException(User user, OperationType operationType, OptimisticLock persistentLock) {
+	public OptimisticLockException(@Nonnull User user, @Nonnull OperationType operationType, @Nonnull OptimisticLock persistentLock) {
 		super("Optimistic Lock failed - updated by user " + 
 				persistentLock.getUsername() + 
 				" at " + 
@@ -77,7 +79,7 @@ public class OptimisticLockException extends DomainException implements MessageE
 	 * @return the result
 	 */
 	@Override
-	public List<Message> getMessages() {
+	public @Nonnull List<Message> getMessages() {
 		return messages;
 	}
 }

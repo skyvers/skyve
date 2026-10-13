@@ -8,6 +8,8 @@ import org.skyve.impl.metadata.view.AbsoluteWidth;
 import org.skyve.impl.metadata.view.FormItemWidget;
 import org.skyve.impl.util.XMLMetaData;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlRootElement;
@@ -51,7 +53,7 @@ public class Geometry extends ChangeableInputWidget implements AbsoluteWidth, Fo
 	 * @return the permitted geometry input type, or {@code null} when the client
 	 *         should use its default mode
 	 */
-	public GeometryInputType getType() {
+	public @Nullable GeometryInputType getType() {
 		return type;
 	}
 
@@ -62,7 +64,7 @@ public class Geometry extends ChangeableInputWidget implements AbsoluteWidth, Fo
 	 *        the client default
 	 */
 	@XmlAttribute(required = false)
-	public void setType(GeometryInputType type) {
+	public void setType(@Nullable GeometryInputType type) {
 		this.type = type;
 	}
 
@@ -72,7 +74,7 @@ public class Geometry extends ChangeableInputWidget implements AbsoluteWidth, Fo
 	 * @return the explicit pixel width, or {@code null} when the client default width applies
 	 */
 	@Override
-	public Integer getPixelWidth() {
+	public @Nullable Integer getPixelWidth() {
 		return pixelWidth;
 	}
 
@@ -84,7 +86,7 @@ public class Geometry extends ChangeableInputWidget implements AbsoluteWidth, Fo
 	 */
 	@Override
 	@XmlAttribute(required = false)
-	public void setPixelWidth(Integer pixelWidth) {
+	public void setPixelWidth(@Nullable Integer pixelWidth) {
 		this.pixelWidth = pixelWidth;
 	}
 
@@ -97,7 +99,7 @@ public class Geometry extends ChangeableInputWidget implements AbsoluteWidth, Fo
 	 * @return a mutable property map, never {@code null}
 	 */
 	@Override
-	public Map<String, String> getProperties() {
+	public @Nonnull Map<String, String> getProperties() {
 		return properties;
 	}
 }

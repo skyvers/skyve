@@ -7,6 +7,9 @@ import java.util.regex.Pattern;
 
 import org.skyve.nlp.cron.ExpressionElementProvider;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Parses 24-hour clock values in {@code HH:mm} form and exposes cron field tokens.
  */
@@ -33,7 +36,7 @@ public class Base24Hour implements ExpressionElementProvider {
 	 * @return {@code true} when one or more time tokens were captured.
 	 */
 	@Override
-	public boolean matches(String value) {
+	public boolean matches(@Nonnull String value) {
 		Matcher m = compiledPattern.matcher(value);
 		while (m.find()) {
 			for (int i = 0; i <= m.groupCount(); i++) {
@@ -61,7 +64,7 @@ public class Base24Hour implements ExpressionElementProvider {
 	 * @return The minute token, or {@code null} when no minute component was matched.
 	 */
 	@Override
-	public String getMinuteElement() {
+	public @Nullable String getMinuteElement() {
 		return segments.size() > 2 ? String.valueOf(Integer.parseInt(segments.get(2))) : null;
 	}
 
@@ -81,7 +84,7 @@ public class Base24Hour implements ExpressionElementProvider {
 	 * @return The hour token, or {@code null} when no hour component was matched.
 	 */
 	@Override
-	public String getHourElement() {
+	public @Nullable String getHourElement() {
 		return segments.size() > 1 ? String.valueOf(Integer.parseInt(segments.get(1))) : null;
 	}
 
@@ -101,7 +104,7 @@ public class Base24Hour implements ExpressionElementProvider {
 	 * @return {@code null}, as this provider does not supply day-of-month values.
 	 */
 	@Override
-	public String getDayNumberElement() {
+	public @Nullable String getDayNumberElement() {
 		return null;
 	}
 
@@ -121,7 +124,7 @@ public class Base24Hour implements ExpressionElementProvider {
 	 * @return {@code null}, as this provider does not supply month values.
 	 */
 	@Override
-	public String getMonthElement() {
+	public @Nullable String getMonthElement() {
 		return null;
 	}
 
@@ -141,7 +144,7 @@ public class Base24Hour implements ExpressionElementProvider {
 	 * @return {@code null}, as this provider does not supply day-of-week values.
 	 */
 	@Override
-	public String getDayOfWeekElement() {
+	public @Nullable String getDayOfWeekElement() {
 		return null;
 	}
 

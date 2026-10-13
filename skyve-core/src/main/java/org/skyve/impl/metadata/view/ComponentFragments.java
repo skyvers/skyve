@@ -13,6 +13,8 @@ import org.skyve.impl.metadata.view.component.Component;
 import org.skyve.impl.metadata.view.component.ComponentViewVisitor;
 import org.skyve.impl.util.UtilImpl;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * A Thread-Safe (reentrant) Weak Referenced Map of other views' components to the fragments they point to.
  * 
@@ -21,7 +23,7 @@ import org.skyve.impl.util.UtilImpl;
 class ComponentFragments {
 	private ViewImpl owner = null;
 	
-	public ComponentFragments(ViewImpl owner) {
+	public ComponentFragments(@Nonnull ViewImpl owner) {
 		this.owner = owner;
 	}
 	
@@ -51,7 +53,7 @@ class ComponentFragments {
 	 * @param generate	Whether to generate the access control list for the fragment
 	 * @return	The fragment (as a view)
 	 */
-	ViewImpl get(CustomerImpl c, ModuleImpl m, DocumentImpl d, String uxui, Component component, boolean generate) {
+	@Nonnull ViewImpl get(@Nonnull CustomerImpl c, @Nonnull ModuleImpl m, @Nonnull DocumentImpl d, @Nonnull String uxui, @Nonnull Component component, boolean generate) {
 		ViewImpl result = null;
 
 		read.lock(); // take read lock

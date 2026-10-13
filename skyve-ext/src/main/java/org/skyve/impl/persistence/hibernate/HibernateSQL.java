@@ -69,7 +69,7 @@ class HibernateSQL extends AbstractSQL {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public <T extends Bean> List<T> beanResults() {
+	public @Nonnull <T extends Bean> List<T> beanResults() {
 		String moduleName = getModuleName();
 		String documentName = getDocumentName();
 		
@@ -97,7 +97,7 @@ class HibernateSQL extends AbstractSQL {
 	 */
 	@Override
 	@SuppressWarnings("resource")
-	public <T extends Bean> AutoClosingIterable<T> beanIterable() {
+	public @Nonnull <T extends Bean> AutoClosingIterable<T> beanIterable() {
 		String moduleName = getModuleName();
 		String documentName = getDocumentName();
 
@@ -123,7 +123,7 @@ class HibernateSQL extends AbstractSQL {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public <T> List<T> scalarResults(Class<T> type) {
+	public @Nonnull <T> List<T> scalarResults(@Nonnull Class<T> type) {
 		try {
 			NativeQuery<T> query = createQueryFromSQL();
 			List<T> results = query.list();
@@ -148,7 +148,7 @@ class HibernateSQL extends AbstractSQL {
 	 */
 	@Override
 	@SuppressWarnings("resource")
-	public <T> AutoClosingIterable<T> scalarIterable(Class<T> type) {
+	public @Nonnull <T> AutoClosingIterable<T> scalarIterable(@Nonnull Class<T> type) {
 		try {
 			return new HibernateAutoClosingIterable<>(createQueryFromSQL().scroll(), true, false);
 		}
@@ -168,7 +168,7 @@ class HibernateSQL extends AbstractSQL {
 	 */
 	@Override
 	@SuppressWarnings("unchecked")
-	public List<Object[]> tupleResults() {
+	public @Nonnull List<Object[]> tupleResults() {
 		try {
 			List<?> results = createQueryFromSQL().list();
 			if ((! results.isEmpty()) && (! (results.get(0) instanceof Object[]))) {
@@ -192,7 +192,7 @@ class HibernateSQL extends AbstractSQL {
 	 */
 	@Override
 	@SuppressWarnings("resource")
-	public AutoClosingIterable<Object[]> tupleIterable() {
+	public @Nonnull AutoClosingIterable<Object[]> tupleIterable() {
 		try {
 			return new HibernateAutoClosingIterable<>(createQueryFromSQL().scroll(), false, true);
 		}
@@ -211,7 +211,7 @@ class HibernateSQL extends AbstractSQL {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public List<DynaBean> dynaResults() {
+	public @Nonnull List<DynaBean> dynaResults() {
 		try {
 			try (NamedParameterPreparedStatement ps = new NamedParameterPreparedStatement(persistence.getConnection(), toQueryString())) {
 				prepareStatement(ps, UtilImpl.DATA_STORE, AbstractHibernatePersistence.getDialect());
@@ -233,7 +233,7 @@ class HibernateSQL extends AbstractSQL {
 	 */
 	@Override
 	@SuppressWarnings("resource")
-	public AutoClosingIterable<DynaBean> dynaIterable() {
+	public @Nonnull AutoClosingIterable<DynaBean> dynaIterable() {
 		try {
 			return new DynaIterable(persistence.getConnection(), this, UtilImpl.DATA_STORE, AbstractHibernatePersistence.getDialect());
 		}

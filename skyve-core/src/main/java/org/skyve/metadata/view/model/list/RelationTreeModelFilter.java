@@ -27,6 +27,9 @@ import org.skyve.util.BeanVisitor;
 import org.skyve.util.Binder;
 import org.skyve.util.Icons;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * This filter produces the child rows for the RelationTreeModel.
  * 
@@ -39,7 +42,7 @@ public class RelationTreeModelFilter<T extends Bean> extends InMemoryFilter {
 	private String parentId = null;
 	private Set<String> stopDocuments = new TreeSet<>();
 	
-	RelationTreeModelFilter(T bean, String... stopDocuments) {
+	RelationTreeModelFilter(@Nullable T bean, @Nullable String... stopDocuments) {
 		this.bean = bean;
 		if (stopDocuments != null) {
 			for (String stop : stopDocuments) {
@@ -49,14 +52,14 @@ public class RelationTreeModelFilter<T extends Bean> extends InMemoryFilter {
 	}
 	
 	@Override
-	public void addNull(String binding) {
+	public void addNull(@Nonnull String binding) {
 		if (! HierarchicalBean.PARENT_ID.equals(binding)) {
 			super.addNull(binding);
 		}
 	}
 
 	@Override
-	public void addEquals(String binding, String value) {
+	public void addEquals(@Nonnull String binding, @Nonnull String value) {
 		if (HierarchicalBean.PARENT_ID.equals(binding)) {
 			parentId = value;
 		}
@@ -66,7 +69,7 @@ public class RelationTreeModelFilter<T extends Bean> extends InMemoryFilter {
 	}
 
 	@Override
-	public void filter(List<Bean> rows) {
+	public void filter(@Nonnull List<Bean> rows) {
 		if (bean != null) {
 			if (parentId == null) { // root node
 				// Add our bean as the root node
@@ -82,7 +85,7 @@ public class RelationTreeModelFilter<T extends Bean> extends InMemoryFilter {
 	/**
 	 *  Find the bean for the tree node that was just expanded
 	 */
-	private Bean findParent() {
+	private @Nullable Bean findParent() {
 		MutableObject<Bean> result = new MutableObject<>();
 		
 		Customer c = CORE.getCustomer();
@@ -93,11 +96,11 @@ public class RelationTreeModelFilter<T extends Bean> extends InMemoryFilter {
 		String searchId = parentId.substring(0, 36); // remove the random ID from the end
 		new BeanVisitor(true, false) {
 			@Override
-			protected boolean accept(String binding,
-										Document document,
-										Document owningDocument,
-										Relation owningRelation,
-										Bean visitedBean)
+			protected boolean accept(@Nonnull String binding,
+										@Nonnull Document document,
+										@Nullable Document owningDocument,
+										@Nullable Relation owningRelation,
+										@Nonnull Bean visitedBean)
 			throws Exception {
 				if (searchId.equals(visitedBean.getBizId())) {
 					result.setValue(visitedBean);
@@ -114,7 +117,7 @@ public class RelationTreeModelFilter<T extends Bean> extends InMemoryFilter {
 	 * Add the children to the rows to return for the parent node just expanded.
 	 */
 	@SuppressWarnings("java:S3776") // Complexity OK
-	private void addChildren(List<Bean> rows, Bean parent) {
+	private void addChildren(@Nonnull List<Bean> rows, @Nonnull Bean parent) {
 		Customer c = CORE.getCustomer();
 		Module m = c.getModule(parent.getBizModule());
 		Document d = m.getDocument(c, parent.getBizDocument());
@@ -148,7 +151,7 @@ public class RelationTreeModelFilter<T extends Bean> extends InMemoryFilter {
 	/**
 	 * Generate a DynamicBean for the bean to add as a row.
 	 */
-	private static DynamicBean newOutlineFromBean(Bean bean, String bizParentId) {
+	private static @Nonnull DynamicBean newOutlineFromBean(@Nonnull Bean bean, @Nullable String bizParentId) {
 		final User u = CORE.getUser();
 		final Customer c = u.getCustomer();
 		

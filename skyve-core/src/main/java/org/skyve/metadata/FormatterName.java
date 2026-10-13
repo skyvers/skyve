@@ -8,6 +8,7 @@ import org.skyve.domain.types.formatters.TimeDurationFormatter;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.view.TextOutput.Sanitisation;
 
+import jakarta.annotation.Nonnull;
 import jakarta.xml.bind.annotation.XmlType;
 
 /**
@@ -131,7 +132,7 @@ public enum FormatterName {
 	EscapedJSString(new StringFormatter(false, false, true, null));
 
 	private Formatter<?> formatter;
-	private FormatterName(Formatter<?> formatter) {
+	private FormatterName(@Nonnull Formatter<?> formatter) {
 		this.formatter = formatter;
 	}
 	
@@ -140,7 +141,7 @@ public enum FormatterName {
 	 * @return the result
 	 */
 	@SuppressWarnings("unchecked")
-	public <T> Formatter<T> getFormatter() {
+	public @Nonnull <T> Formatter<T> getFormatter() {
 		return (Formatter<T>) formatter;
 	}
 }

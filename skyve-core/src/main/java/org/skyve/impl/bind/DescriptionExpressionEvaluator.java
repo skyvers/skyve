@@ -3,6 +3,9 @@ package org.skyve.impl.bind;
 import org.skyve.domain.Bean;
 import org.skyve.metadata.model.Attribute;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Resolves {@code {desc:...}} expressions to an attribute's localised description.
  */
@@ -24,7 +27,7 @@ public class DescriptionExpressionEvaluator extends MetaDataExpressionEvaluator 
 	 * @return the attribute description, or {@code null} when the attribute cannot be resolved
 	 */
 	@Override
-	public Object evaluateWithoutPrefixOrSuffix(String expression, Bean bean) {
+	public @Nullable Object evaluateWithoutPrefixOrSuffix(@Nonnull String expression, @Nullable Bean bean) {
 		Attribute a = obtainAttribute(expression, bean);
 		return (a == null) ? null : a.getLocalisedDescription();
 	}
@@ -37,7 +40,7 @@ public class DescriptionExpressionEvaluator extends MetaDataExpressionEvaluator 
 	 * @return the description text, or an empty string when unresolved
 	 */
 	@Override
-	public String formatWithoutPrefixOrSuffix(String expression, Bean bean) {
+	public @Nonnull String formatWithoutPrefixOrSuffix(@Nonnull String expression, @Nullable Bean bean) {
 		Object result = evaluateWithoutPrefixOrSuffix(expression, bean);
 		return (result == null) ? "" : result.toString();
 	}
@@ -49,7 +52,7 @@ public class DescriptionExpressionEvaluator extends MetaDataExpressionEvaluator 
 	 * @param binding the binding path to prepend
 	 */
 	@Override
-	public void prefixBindingWithoutPrefixOrSuffix(StringBuilder expression, String binding) {
+	public void prefixBindingWithoutPrefixOrSuffix(@Nonnull StringBuilder expression, @Nonnull String binding) {
 		expression.insert(0, '.');
 		expression.insert(0, binding);
 	}

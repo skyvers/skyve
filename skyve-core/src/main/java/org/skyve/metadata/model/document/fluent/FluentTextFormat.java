@@ -3,6 +3,9 @@ package org.skyve.metadata.model.document.fluent;
 import org.skyve.domain.types.converters.Format.TextCase;
 import org.skyve.impl.metadata.model.document.field.TextFormat;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Provides a fluent builder for FluentTextFormat metadata.
  */
@@ -19,7 +22,7 @@ public class FluentTextFormat {
 	/**
 	 * Creates a fluent builder instance.
 	 */
-	public FluentTextFormat(TextFormat format) {
+	public FluentTextFormat(@Nonnull TextFormat format) {
 		this.format = format;
 	}
 
@@ -27,7 +30,7 @@ public class FluentTextFormat {
 	 * Copies metadata values from an existing definition into this builder.
 	 */
 
-	public FluentTextFormat from(@SuppressWarnings("hiding") TextFormat format) {
+	public @Nonnull FluentTextFormat from(@SuppressWarnings("hiding") @Nonnull TextFormat format) {
 		mask(format.getMask());
 		textCase(format.getCase());
 		return this;
@@ -36,7 +39,7 @@ public class FluentTextFormat {
 	/**
 	 * Updates metadata on this fluent builder.
 	 */
-	public FluentTextFormat mask(String mask) {
+	public @Nonnull FluentTextFormat mask(@Nullable String mask) {
 		format.setMask(mask);
 		return this;
 	}
@@ -44,14 +47,14 @@ public class FluentTextFormat {
 	/**
 	 * Updates metadata on this fluent builder.
 	 */
-	public FluentTextFormat textCase(TextCase textCase) {
+	public @Nonnull FluentTextFormat textCase(@Nullable TextCase textCase) {
 		format.setCase(textCase);
 		return this;
 	}
 	/**
 	 * Returns the mutable metadata instance represented by this builder.
 	 */
-	public TextFormat get() {
+	public @Nonnull TextFormat get() {
 		return format;
 	}
 }

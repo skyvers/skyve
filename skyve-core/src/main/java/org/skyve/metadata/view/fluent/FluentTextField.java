@@ -5,6 +5,7 @@ import org.skyve.impl.metadata.view.widget.bound.input.KeyboardType;
 import org.skyve.impl.metadata.view.widget.bound.input.TextField;
 
 import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 
 /**
  * Builds {@link TextField} widget metadata using a fluent API.
@@ -26,7 +27,7 @@ public class FluentTextField extends FluentChangeableInputWidget<FluentTextField
 	 * @param text
 	 *            the metadata instance to mutate
 	 */
-	public FluentTextField(TextField text) {
+	public FluentTextField(@Nonnull TextField text) {
 		this.text = text;
 	}
 
@@ -37,7 +38,7 @@ public class FluentTextField extends FluentChangeableInputWidget<FluentTextField
 	 *            the source metadata to copy
 	 * @return this builder
 	 */
-	public FluentTextField from(@SuppressWarnings("hiding") TextField text) {
+	public @Nonnull FluentTextField from(@SuppressWarnings("hiding") @Nonnull TextField text) {
 		Boolean b = text.getEditable();
 		if (b != null) {
 			editable(b.booleanValue());
@@ -61,7 +62,7 @@ public class FluentTextField extends FluentChangeableInputWidget<FluentTextField
 	 *            {@code true} to allow editing
 	 * @return this builder
 	 */
-	public FluentTextField editable(boolean editable) {
+	public @Nonnull FluentTextField editable(boolean editable) {
 		text.setEditable(editable ? Boolean.TRUE : Boolean.FALSE);
 		return this;
 	}
@@ -73,7 +74,7 @@ public class FluentTextField extends FluentChangeableInputWidget<FluentTextField
 	 *            the keyboard type
 	 * @return this builder
 	 */
-	public FluentTextField keyboardType(KeyboardType keyboardType) {
+	public @Nonnull FluentTextField keyboardType(@Nullable KeyboardType keyboardType) {
 		text.setKeyboardType(keyboardType);
 		return this;
 	}
@@ -85,7 +86,7 @@ public class FluentTextField extends FluentChangeableInputWidget<FluentTextField
 	 *            the complete type
 	 * @return this builder
 	 */
-	public FluentTextField complete(CompleteType complete) {
+	public @Nonnull FluentTextField complete(@Nullable CompleteType complete) {
 		text.setComplete(complete);
 		return this;
 	}
@@ -98,7 +99,7 @@ public class FluentTextField extends FluentChangeableInputWidget<FluentTextField
 	 * @return this builder
 	 */
 	@Override
-	public FluentTextField pixelWidth(int width) {
+	public @Nonnull FluentTextField pixelWidth(int width) {
 		text.setPixelWidth(Integer.valueOf(width));
 		return this;
 	}
@@ -122,7 +123,7 @@ public class FluentTextField extends FluentChangeableInputWidget<FluentTextField
 	 * @return the wrapped text-field metadata
 	 */
 	@Override
-	public TextField get() {
+	public @Nonnull TextField get() {
 		return text;
 	}
 }

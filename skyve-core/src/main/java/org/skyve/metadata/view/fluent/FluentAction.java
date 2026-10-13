@@ -46,7 +46,7 @@ public abstract class FluentAction<T extends FluentAction<T>> {
 	 * @return this builder
 	 */
 	@SuppressWarnings("unchecked")
-	protected T fromBase(ActionMetaData action) {
+	protected @Nonnull T fromBase(@Nonnull ActionMetaData action) {
 		name(action.getName());
 		displayName(action.getDisplayName());
 		escapeDisplayName(action.getEscapeDisplayName());
@@ -71,7 +71,7 @@ public abstract class FluentAction<T extends FluentAction<T>> {
 	 *            the concrete fluent action type
 	 * @return a builder that wraps metadata equivalent to {@code action}
 	 */
-	public static <T extends FluentAction<T>> T from(Action action) {
+	public static @Nonnull <T extends FluentAction<T>> T from(@Nonnull Action action) {
 		ActionMetaData a = ((ActionImpl) action).toRepositoryAction();
 		return from(a);
 	}
@@ -88,7 +88,7 @@ public abstract class FluentAction<T extends FluentAction<T>> {
 	 *             if the action type is not supported
 	 */
 	@SuppressWarnings({"unchecked", "java:S3776"}) // Complexity OK
-	public static <T extends FluentAction<T>> T from(ActionMetaData action) {
+	public static @Nonnull <T extends FluentAction<T>> T from(@Nonnull ActionMetaData action) {
 		if (action instanceof DefaultsAction defaults) {
 			return (T) new FluentDefaultsAction().from(defaults);
 		}
@@ -148,7 +148,7 @@ public abstract class FluentAction<T extends FluentAction<T>> {
 	 * @return this builder
 	 */
 	@SuppressWarnings("unchecked")
-	public T name(String name) {
+	public @Nonnull T name(@Nullable String name) {
 		get().setName(name);
 		return (T) this;
 	}
@@ -161,7 +161,7 @@ public abstract class FluentAction<T extends FluentAction<T>> {
 	 * @return this builder
 	 */
 	@SuppressWarnings("unchecked")
-	public T displayName(String displayName) {
+	public @Nonnull T displayName(@Nullable String displayName) {
 		get().setDisplayName(displayName);
 		return (T) this;
 	}
@@ -172,7 +172,7 @@ public abstract class FluentAction<T extends FluentAction<T>> {
 	 * @param escapeDisplayName {@code false} to allow trusted markup; {@code true} to escape at the renderer boundary
 	 * @return this builder
 	 */
-	public T escapeDisplayName(boolean escapeDisplayName) {
+	public @Nonnull T escapeDisplayName(boolean escapeDisplayName) {
 		return escapeDisplayName(escapeDisplayName ? Boolean.TRUE : Boolean.FALSE);
 	}
 
@@ -183,7 +183,7 @@ public abstract class FluentAction<T extends FluentAction<T>> {
 	 * @return this builder
 	 */
 	@SuppressWarnings("unchecked")
-	public T escapeDisplayName(Boolean escapeDisplayName) {
+	public @Nonnull T escapeDisplayName(@Nullable Boolean escapeDisplayName) {
 		get().setEscapeDisplayName(escapeDisplayName);
 		return (T) this;
 	}
@@ -196,7 +196,7 @@ public abstract class FluentAction<T extends FluentAction<T>> {
 	 * @return this builder
 	 */
 	@SuppressWarnings("unchecked")
-	public T toolTip(String toolTip) {
+	public @Nonnull T toolTip(@Nullable String toolTip) {
 		get().setToolTip(toolTip);
 		return (T) this;
 	}
@@ -207,7 +207,7 @@ public abstract class FluentAction<T extends FluentAction<T>> {
 	 * @param escapeToolTip {@code false} to allow trusted markup; {@code true} to escape at the renderer boundary
 	 * @return this builder
 	 */
-	public T escapeToolTip(boolean escapeToolTip) {
+	public @Nonnull T escapeToolTip(boolean escapeToolTip) {
 		return escapeToolTip(escapeToolTip ? Boolean.TRUE : Boolean.FALSE);
 	}
 
@@ -218,7 +218,7 @@ public abstract class FluentAction<T extends FluentAction<T>> {
 	 * @return this builder
 	 */
 	@SuppressWarnings("unchecked")
-	public T escapeToolTip(Boolean escapeToolTip) {
+	public @Nonnull T escapeToolTip(@Nullable Boolean escapeToolTip) {
 		get().setEscapeToolTip(escapeToolTip);
 		return (T) this;
 	}
@@ -231,7 +231,7 @@ public abstract class FluentAction<T extends FluentAction<T>> {
 	 * @return this builder
 	 */
 	@SuppressWarnings("unchecked")
-	public T relativeIconFileName(String relativeIconFileName) {
+	public @Nonnull T relativeIconFileName(@Nullable String relativeIconFileName) {
 		get().setRelativeIconFileName(relativeIconFileName);
 		return (T) this;
 	}
@@ -244,7 +244,7 @@ public abstract class FluentAction<T extends FluentAction<T>> {
 	 * @return this builder
 	 */
 	@SuppressWarnings("unchecked")
-	public T iconStyleClass(String iconStyleClass) {
+	public @Nonnull T iconStyleClass(@Nullable String iconStyleClass) {
 		get().setIconStyleClass(iconStyleClass);
 		return (T) this;
 	}
@@ -257,7 +257,7 @@ public abstract class FluentAction<T extends FluentAction<T>> {
 	 * @return this builder
 	 */
 	@SuppressWarnings("unchecked")
-	public T confirmationText(String confirmationText) {
+	public @Nonnull T confirmationText(@Nullable String confirmationText) {
 		get().setConfirmationText(confirmationText);
 		return (T) this;
 	}
@@ -268,7 +268,7 @@ public abstract class FluentAction<T extends FluentAction<T>> {
 	 * @param escapeConfirm {@code false} to allow trusted markup; {@code true} to escape at the renderer boundary
 	 * @return this builder
 	 */
-	public T escapeConfirm(boolean escapeConfirm) {
+	public @Nonnull T escapeConfirm(boolean escapeConfirm) {
 		return escapeConfirm(escapeConfirm ? Boolean.TRUE : Boolean.FALSE);
 	}
 
@@ -279,7 +279,7 @@ public abstract class FluentAction<T extends FluentAction<T>> {
 	 * @return this builder
 	 */
 	@SuppressWarnings("unchecked")
-	public T escapeConfirm(Boolean escapeConfirm) {
+	public @Nonnull T escapeConfirm(@Nullable Boolean escapeConfirm) {
 		get().setEscapeConfirm(escapeConfirm);
 		return (T) this;
 	}
@@ -355,5 +355,5 @@ public abstract class FluentAction<T extends FluentAction<T>> {
 	/**
 	 * Returns the wrapped repository action instance.
 	 */
-	public abstract ActionMetaData get();
+	public abstract @Nonnull ActionMetaData get();
 }

@@ -40,6 +40,9 @@ import org.skyve.util.test.SkyveFixture.FixtureType;
 import org.skyve.util.test.TestUtil;
 import org.slf4j.Logger;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * <p>
  * DataBuilder is used to create random instances of domain objects generated from Skyve document definitions.
@@ -138,7 +141,7 @@ public class DataBuilder {
 	 * @param fixture	The name of the fixture
 	 * @return
 	 */
-	public DataBuilder fixture(@SuppressWarnings("hiding") String fixture) {
+	public @Nonnull DataBuilder fixture(@SuppressWarnings("hiding") @Nullable String fixture) {
 		this.fixture = fixture;
 		return this;
 	}
@@ -149,7 +152,7 @@ public class DataBuilder {
 	 * @param type	The implicit fixture type.
 	 * @return
 	 */
-	public DataBuilder fixture(FixtureType type) {
+	public @Nonnull DataBuilder fixture(@Nonnull FixtureType type) {
 		if (FixtureType.crud == type) {
 			depth = Integer.MAX_VALUE;
 			optionalReferences = false;
@@ -169,7 +172,7 @@ public class DataBuilder {
 	 * @param include
 	 * @return
 	 */
-	public DataBuilder required(boolean include) {
+	public @Nonnull DataBuilder required(boolean include) {
 		requiredScalars = include;
 		requiredReferences = include;
 		return this;
@@ -181,7 +184,7 @@ public class DataBuilder {
 	 * @param includeReferences
 	 * @return
 	 */
-	public DataBuilder required(boolean includeScalars, boolean includeReferences) {
+	public @Nonnull DataBuilder required(boolean includeScalars, boolean includeReferences) {
 		requiredScalars = includeScalars;
 		requiredReferences = includeReferences;
 		return this;
@@ -192,7 +195,7 @@ public class DataBuilder {
 	 * @param include
 	 * @return
 	 */
-	public DataBuilder optional(boolean include) {
+	public @Nonnull DataBuilder optional(boolean include) {
 		optionalScalars = include;
 		optionalReferences = include;
 		return this;
@@ -204,7 +207,7 @@ public class DataBuilder {
 	 * @param includeReferences
 	 * @return
 	 */
-	public DataBuilder optional(boolean includeScalars, boolean includeReferences) {
+	public @Nonnull DataBuilder optional(boolean includeScalars, boolean includeReferences) {
 		optionalScalars = includeScalars;
 		optionalReferences = includeReferences;
 		return this;
@@ -215,7 +218,7 @@ public class DataBuilder {
 	 * @param include
 	 * @return
 	 */
-	public DataBuilder persistent(boolean include) {
+	public @Nonnull DataBuilder persistent(boolean include) {
 		persistent = include;
 		return this;
 	}
@@ -225,7 +228,7 @@ public class DataBuilder {
 	 * @param include
 	 * @return
 	 */
-	public DataBuilder transients(boolean include) {
+	public @Nonnull DataBuilder transients(boolean include) {
 		this.transients = include;
 		return this;
 	}
@@ -235,7 +238,7 @@ public class DataBuilder {
 	 * @param include
 	 * @return
 	 */
-	public DataBuilder view(boolean include) {
+	public @Nonnull DataBuilder view(boolean include) {
 		this.view = include;
 		return this;
 	}
@@ -245,7 +248,7 @@ public class DataBuilder {
 	 * @param include
 	 * @return
 	 */
-	public DataBuilder domain(boolean include) {
+	public @Nonnull DataBuilder domain(boolean include) {
 		this.domain = include;
 		return this;
 	}
@@ -255,7 +258,7 @@ public class DataBuilder {
 	 * @param include
 	 * @return
 	 */
-	public DataBuilder deprecated(boolean include) {
+	public @Nonnull DataBuilder deprecated(boolean include) {
 		this.deprecated = include;
 		return this;
 	}
@@ -266,7 +269,7 @@ public class DataBuilder {
 	 * @param include
 	 * @return
 	 */
-	public DataBuilder type(AttributeType type, boolean include) {
+	public @Nonnull DataBuilder type(@Nonnull AttributeType type, boolean include) {
 		if (types == null) {
 			types = new EnumMap<>(AttributeType.class);
 		}
@@ -281,7 +284,7 @@ public class DataBuilder {
 	 * @param include
 	 * @return
 	 */
-	public DataBuilder name(String name, boolean include) {
+	public @Nonnull DataBuilder name(@Nonnull String name, boolean include) {
 		if (names == null) {
 			names = new HashMap<>();
 		}
@@ -295,7 +298,7 @@ public class DataBuilder {
 	 * @param cardinality
 	 * @return
 	 */
-	public DataBuilder cardinality(String binding, int cardinality) {
+	public @Nonnull DataBuilder cardinality(@Nonnull String binding, int cardinality) {
 		if (cardinalities == null) {
 			cardinalities = new HashMap<>();
 		}
@@ -308,7 +311,7 @@ public class DataBuilder {
 	 * @param depth
 	 * @return
 	 */
-	public DataBuilder depth(@SuppressWarnings("hiding") int depth) {
+	public @Nonnull DataBuilder depth(@SuppressWarnings("hiding") int depth) {
 		this.depth = depth;
 		return this;
 	}
@@ -320,7 +323,7 @@ public class DataBuilder {
 	 * @param depth
 	 * @return
 	 */
-	public DataBuilder depth(String binding, @SuppressWarnings("hiding") int depth) {
+	public @Nonnull DataBuilder depth(@Nonnull String binding, @SuppressWarnings("hiding") int depth) {
 		if (depths == null) {
 			depths = new HashMap<>();
 		}
@@ -348,7 +351,7 @@ public class DataBuilder {
 	 * @param documentName Document name to instantiate
 	 * @return Populated bean instance
 	 */
-	public <T extends Bean> T build(String moduleName, String documentName) {
+	public @Nonnull <T extends Bean> T build(@Nonnull String moduleName, @Nonnull String documentName) {
 		return build(moduleName, documentName, true);
 	}
 	
@@ -362,11 +365,11 @@ public class DataBuilder {
 	 * @param documentName Document name to instantiate
 	 * @return Populated bean instance
 	 */
-	public <T extends Bean> T factoryBuild(String moduleName, String documentName) {
+	public @Nonnull <T extends Bean> T factoryBuild(@Nonnull String moduleName, @Nonnull String documentName) {
 		return build(moduleName, documentName, false);
 	}
 	
-	private <T extends Bean> T build(String moduleName, String documentName, boolean allowFactoryRecursion) {
+	private @Nonnull <T extends Bean> T build(@Nonnull String moduleName, @Nonnull String documentName, boolean allowFactoryRecursion) {
 		Module m = customer.getModule(moduleName);
 		Document d = m.getDocument(customer, documentName);
 		initialiseCycleTracking();
@@ -380,7 +383,7 @@ public class DataBuilder {
 	 * @param document Resolved document metadata
 	 * @return Populated bean instance
 	 */
-	public <T extends Bean> T build(Module module, Document document) {
+	public @Nonnull <T extends Bean> T build(@Nonnull Module module, @Nonnull Document document) {
 		return build(module, document, true);
 	}
 
@@ -391,11 +394,11 @@ public class DataBuilder {
 	 * @param document Resolved document metadata
 	 * @return Populated bean instance
 	 */
-	public <T extends Bean> T factoryBuild(Module module, Document document) {
+	public @Nonnull <T extends Bean> T factoryBuild(@Nonnull Module module, @Nonnull Document document) {
 		return build(module, document, false);
 	}
 
-	private <T extends Bean> T build(Module module, Document document, boolean allowFactoryRecursion) {
+	private @Nonnull <T extends Bean> T build(@Nonnull Module module, @Nonnull Document document, boolean allowFactoryRecursion) {
 		initialiseCycleTracking();
 		return build(module, document, "", 0, allowFactoryRecursion);
 	}
@@ -405,7 +408,7 @@ public class DataBuilder {
 	 * @param document
 	 * @return
 	 */
-	public <T extends Bean> T build(Document document) {
+	public @Nonnull <T extends Bean> T build(@Nonnull Document document) {
 		return build(document, true);
 	}
 	
@@ -414,11 +417,11 @@ public class DataBuilder {
 	 * @param document
 	 * @return
 	 */
-	public <T extends Bean> T factoryBuild(Document document) {
+	public @Nonnull <T extends Bean> T factoryBuild(@Nonnull Document document) {
 		return build(document, false);
 	}
 
-	private <T extends Bean> T build(Document document, boolean allowFactoryRecursion) {
+	private @Nonnull <T extends Bean> T build(@Nonnull Document document, boolean allowFactoryRecursion) {
 		Module m = customer.getModule(document.getOwningModuleName());
 		initialiseCycleTracking();
 		return build(m, document, "", 0, allowFactoryRecursion);
@@ -436,9 +439,9 @@ public class DataBuilder {
 	 * @return
 	 */
 	@SuppressWarnings({"java:S3776", "java:S6541", "java:S1066", "java:S135"}) // Complexity OK, "for" and "if" OK
-	private synchronized <T extends Bean> T build(Module module,
-													Document document,
-													String binding,
+	private synchronized @Nonnull <T extends Bean> T build(@Nonnull Module module,
+													@Nonnull Document document,
+													@Nonnull String binding,
 													int currentDepth,
 													boolean allowFactoryRecursion) {
 		T result = null;
@@ -548,7 +551,7 @@ public class DataBuilder {
 	 * @return
 	 * @throws Exception
 	 */
-	private <T extends Bean> T randomBean(Module module, Document document)
+	private @Nonnull <T extends Bean> T randomBean(@Nonnull Module module, @Nonnull Document document)
 	throws Exception {
 		T result = document.newInstance(user);
 		
@@ -614,7 +617,7 @@ public class DataBuilder {
 	 * @return
 	 */
 	@SuppressWarnings({"java:S3776", "java:S1126"}) // complexity OK
-	private boolean filter(Attribute attribute) {
+	private boolean filter(@Nonnull Attribute attribute) {
 		String name = attribute.getName();
 		AttributeType type = attribute.getAttributeType();
 
@@ -679,7 +682,7 @@ public class DataBuilder {
 	}
 	
 	@SuppressWarnings({"unchecked", "java:S3776"}) // complexity OK
-	private <T extends Bean> T dataFactory(DocumentImpl document, int currentDepth)
+	private @Nullable <T extends Bean> T dataFactory(@Nonnull DocumentImpl document, int currentDepth)
 	throws ClassNotFoundException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
 		T result = null;
 		
@@ -755,7 +758,7 @@ public class DataBuilder {
 	 * Get domain values for a document attribute if they exist
 	 * @return null if there are no domain values or "" if there is a domain value set defined but no yielded values
 	 */
-	private static String randomDomainValue(Customer customer, Document document, Attribute attribute, Bean bean) {
+	private static @Nullable String randomDomainValue(@Nonnull Customer customer, @Nonnull Document document, @Nonnull Attribute attribute, @Nonnull Bean bean) {
 		String result = null;
 
 		DomainType domainType = attribute.getDomainType();
@@ -773,7 +776,7 @@ public class DataBuilder {
 	}
 	
 	@SuppressWarnings("java:S106") // Trace mode intentionally writes to stdout for test fixture generation visibility.
-	private static void trace(@SuppressWarnings("hiding") StringBuilder trace, int currentDepth) {
+	private static void trace(@SuppressWarnings("hiding") @Nonnull StringBuilder trace, int currentDepth) {
 		for (int i = 0; i < currentDepth; i++) {
 			trace.insert(0, "    ");
 		}

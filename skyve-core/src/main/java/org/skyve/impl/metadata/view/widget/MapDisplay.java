@@ -12,6 +12,7 @@ import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.DecoratedMetaData;
 import org.skyve.metadata.view.Invisible;
 
+import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlElement;
@@ -86,7 +87,7 @@ public class MapDisplay implements DecoratedMetaData, RelativeSize, Invisible {
 	 *
 	 * @return the map model name
 	 */
-	public String getModelName() {
+	public @Nullable String getModelName() {
 		return modelName;
 	}
 
@@ -96,7 +97,7 @@ public class MapDisplay implements DecoratedMetaData, RelativeSize, Invisible {
 	 * @param modelName the map model name
 	 */
 	@XmlAttribute(required = true)
-	public void setModelName(String modelName) {
+	public void setModelName(@Nullable String modelName) {
 		this.modelName = UtilImpl.processStringValue(modelName);
 	}
 
@@ -105,7 +106,7 @@ public class MapDisplay implements DecoratedMetaData, RelativeSize, Invisible {
 	 *
 	 * @return the loading strategy
 	 */
-	public LoadingType getLoading() {
+	public @Nullable LoadingType getLoading() {
 		return loading;
 	}
 
@@ -115,7 +116,7 @@ public class MapDisplay implements DecoratedMetaData, RelativeSize, Invisible {
 	 * @param loading the loading strategy
 	 */
 	@XmlAttribute
-	public void setLoading(LoadingType loading) {
+	public void setLoading(@Nullable LoadingType loading) {
 		this.loading = loading;
 	}
 
@@ -124,7 +125,7 @@ public class MapDisplay implements DecoratedMetaData, RelativeSize, Invisible {
 	 *
 	 * @return the refresh interval in seconds, or {@code null} when auto-refresh is disabled
 	 */
-	public Integer getRefreshTimeInSeconds() {
+	public @Nullable Integer getRefreshTimeInSeconds() {
 		return refreshTimeInSeconds;
 	}
 
@@ -134,7 +135,7 @@ public class MapDisplay implements DecoratedMetaData, RelativeSize, Invisible {
 	 * @param refreshTimeInSeconds the refresh interval in seconds, or {@code null} to disable auto-refresh
 	 */
 	@XmlAttribute(required = false)
-	public void setRefreshTimeInSeconds(Integer refreshTimeInSeconds) {
+	public void setRefreshTimeInSeconds(@Nullable Integer refreshTimeInSeconds) {
 		this.refreshTimeInSeconds = refreshTimeInSeconds;
 	}
 
@@ -143,7 +144,7 @@ public class MapDisplay implements DecoratedMetaData, RelativeSize, Invisible {
 	 *
 	 * @return {@code true} if refresh controls are shown, otherwise {@code false}, or {@code null} when unspecified
 	 */
-	public Boolean getShowRefreshControls() {
+	public @Nullable Boolean getShowRefreshControls() {
 		return showRefreshControls;
 	}
 
@@ -153,7 +154,7 @@ public class MapDisplay implements DecoratedMetaData, RelativeSize, Invisible {
 	 * @param showRefreshControls {@code true} to show refresh controls, {@code false} to hide them
 	 */
 	@XmlAttribute(required = false)
-	public void setShowRefreshControls(Boolean showRefreshControls) {
+	public void setShowRefreshControls(@Nullable Boolean showRefreshControls) {
 		this.showRefreshControls = showRefreshControls;
 	}
 
@@ -163,7 +164,7 @@ public class MapDisplay implements DecoratedMetaData, RelativeSize, Invisible {
 	 * @return the pixel width, or {@code null} when width is not fixed
 	 */
 	@Override
-	public Integer getPixelWidth() {
+	public @Nullable Integer getPixelWidth() {
 		return pixelWidth;
 	}
 
@@ -174,7 +175,7 @@ public class MapDisplay implements DecoratedMetaData, RelativeSize, Invisible {
 	 */
 	@Override
 	@XmlAttribute(required = false)
-	public void setPixelWidth(Integer pixelWidth) {
+	public void setPixelWidth(@Nullable Integer pixelWidth) {
 		this.pixelWidth = pixelWidth;
 	}
 
@@ -184,7 +185,7 @@ public class MapDisplay implements DecoratedMetaData, RelativeSize, Invisible {
 	 * @return the responsive width, or {@code null} when not set
 	 */
 	@Override
-	public Integer getResponsiveWidth() {
+	public @Nullable Integer getResponsiveWidth() {
 		return responsiveWidth;
 	}
 
@@ -195,7 +196,7 @@ public class MapDisplay implements DecoratedMetaData, RelativeSize, Invisible {
 	 */
 	@Override
 	@XmlAttribute(required = false)
-	public void setResponsiveWidth(Integer responsiveWidth) {
+	public void setResponsiveWidth(@Nullable Integer responsiveWidth) {
 		this.responsiveWidth = responsiveWidth;
 	}
 
@@ -205,7 +206,7 @@ public class MapDisplay implements DecoratedMetaData, RelativeSize, Invisible {
 	 * @return the small-breakpoint width, or {@code null} when not set
 	 */
 	@Override
-	public Integer getSm() {
+	public @Nullable Integer getSm() {
 		return sm;
 	}
 	
@@ -216,7 +217,7 @@ public class MapDisplay implements DecoratedMetaData, RelativeSize, Invisible {
 	 */
 	@Override
 	@XmlAttribute(required = false)
-	public void setSm(Integer sm) {
+	public void setSm(@Nullable Integer sm) {
 		this.sm = sm;
 	}
 
@@ -226,7 +227,7 @@ public class MapDisplay implements DecoratedMetaData, RelativeSize, Invisible {
 	 * @return the medium-breakpoint width, or {@code null} when not set
 	 */
 	@Override
-	public Integer getMd() {
+	public @Nullable Integer getMd() {
 		return md;
 	}
 	
@@ -237,7 +238,7 @@ public class MapDisplay implements DecoratedMetaData, RelativeSize, Invisible {
 	 */
 	@Override
 	@XmlAttribute(required = false)
-	public void setMd(Integer md) {
+	public void setMd(@Nullable Integer md) {
 		this.md = md;
 	}
 	
@@ -247,7 +248,7 @@ public class MapDisplay implements DecoratedMetaData, RelativeSize, Invisible {
 	 * @return the large-breakpoint width, or {@code null} when not set
 	 */
 	@Override
-	public Integer getLg() {
+	public @Nullable Integer getLg() {
 		return lg;
 	}
 	
@@ -258,7 +259,7 @@ public class MapDisplay implements DecoratedMetaData, RelativeSize, Invisible {
 	 */
 	@Override
 	@XmlAttribute(required = false)
-	public void setLg(Integer lg) {
+	public void setLg(@Nullable Integer lg) {
 		this.lg = lg;
 	}
 
@@ -268,7 +269,7 @@ public class MapDisplay implements DecoratedMetaData, RelativeSize, Invisible {
 	 * @return the extra-large-breakpoint width, or {@code null} when not set
 	 */
 	@Override
-	public Integer getXl() {
+	public @Nullable Integer getXl() {
 		return xl;
 	}
 	
@@ -279,7 +280,7 @@ public class MapDisplay implements DecoratedMetaData, RelativeSize, Invisible {
 	 */
 	@Override
 	@XmlAttribute(required = false)
-	public void setXl(Integer xl) {
+	public void setXl(@Nullable Integer xl) {
 		this.xl = xl;
 	}
 
@@ -289,7 +290,7 @@ public class MapDisplay implements DecoratedMetaData, RelativeSize, Invisible {
 	 * @return the percentage width, or {@code null} when not set
 	 */
 	@Override
-	public Integer getPercentageWidth() {
+	public @Nullable Integer getPercentageWidth() {
 		return percentageWidth;
 	}
 
@@ -300,7 +301,7 @@ public class MapDisplay implements DecoratedMetaData, RelativeSize, Invisible {
 	 */
 	@Override
 	@XmlAttribute(required = false)
-	public void setPercentageWidth(Integer percentageWidth) {
+	public void setPercentageWidth(@Nullable Integer percentageWidth) {
 		this.percentageWidth = percentageWidth;
 	}
 
@@ -310,7 +311,7 @@ public class MapDisplay implements DecoratedMetaData, RelativeSize, Invisible {
 	 * @return the minimum pixel width, or {@code null} when no minimum is enforced
 	 */
 	@Override
-	public Integer getMinPixelWidth() {
+	public @Nullable Integer getMinPixelWidth() {
 		return minPixelWidth;
 	}
 
@@ -321,7 +322,7 @@ public class MapDisplay implements DecoratedMetaData, RelativeSize, Invisible {
 	 */
 	@Override
 	@XmlAttribute(required = false)
-	public void setMinPixelWidth(Integer minPixelWidth) {
+	public void setMinPixelWidth(@Nullable Integer minPixelWidth) {
 		this.minPixelWidth = minPixelWidth;
 	}
 
@@ -331,7 +332,7 @@ public class MapDisplay implements DecoratedMetaData, RelativeSize, Invisible {
 	 * @return the maximum pixel width, or {@code null} when no maximum is enforced
 	 */
 	@Override
-	public Integer getMaxPixelWidth() {
+	public @Nullable Integer getMaxPixelWidth() {
 		return maxPixelWidth;
 	}
 
@@ -342,7 +343,7 @@ public class MapDisplay implements DecoratedMetaData, RelativeSize, Invisible {
 	 */
 	@Override
 	@XmlAttribute(required = false)
-	public void setMaxPixelWidth(Integer maxPixelWidth) {
+	public void setMaxPixelWidth(@Nullable Integer maxPixelWidth) {
 		this.maxPixelWidth = maxPixelWidth;
 	}
 
@@ -352,7 +353,7 @@ public class MapDisplay implements DecoratedMetaData, RelativeSize, Invisible {
 	 * @return the pixel height, or {@code null} when height is not fixed
 	 */
 	@Override
-	public Integer getPixelHeight() {
+	public @Nullable Integer getPixelHeight() {
 		return pixelHeight;
 	}
 
@@ -363,7 +364,7 @@ public class MapDisplay implements DecoratedMetaData, RelativeSize, Invisible {
 	 */
 	@Override
 	@XmlAttribute(required = false)
-	public void setPixelHeight(Integer pixelHeight) {
+	public void setPixelHeight(@Nullable Integer pixelHeight) {
 		this.pixelHeight = pixelHeight;
 	}
 
@@ -373,7 +374,7 @@ public class MapDisplay implements DecoratedMetaData, RelativeSize, Invisible {
 	 * @return the percentage height, or {@code null} when not set
 	 */
 	@Override
-	public Integer getPercentageHeight() {
+	public @Nullable Integer getPercentageHeight() {
 		return percentageHeight;
 	}
 
@@ -384,7 +385,7 @@ public class MapDisplay implements DecoratedMetaData, RelativeSize, Invisible {
 	 */
 	@Override
 	@XmlAttribute(required = false)
-	public void setPercentageHeight(Integer percentageHeight) {
+	public void setPercentageHeight(@Nullable Integer percentageHeight) {
 		this.percentageHeight = percentageHeight;
 	}
 
@@ -394,7 +395,7 @@ public class MapDisplay implements DecoratedMetaData, RelativeSize, Invisible {
 	 * @return the minimum pixel height, or {@code null} when no minimum is enforced
 	 */
 	@Override
-	public Integer getMinPixelHeight() {
+	public @Nullable Integer getMinPixelHeight() {
 		return minPixelHeight;
 	}
 
@@ -405,7 +406,7 @@ public class MapDisplay implements DecoratedMetaData, RelativeSize, Invisible {
 	 */
 	@Override
 	@XmlAttribute(required = false)
-	public void setMinPixelHeight(Integer minPixelHeight) {
+	public void setMinPixelHeight(@Nullable Integer minPixelHeight) {
 		this.minPixelHeight = minPixelHeight;
 	}
 
@@ -415,7 +416,7 @@ public class MapDisplay implements DecoratedMetaData, RelativeSize, Invisible {
 	 * @return the maximum pixel height, or {@code null} when no maximum is enforced
 	 */
 	@Override
-	public Integer getMaxPixelHeight() {
+	public @Nullable Integer getMaxPixelHeight() {
 		return maxPixelHeight;
 	}
 
@@ -426,7 +427,7 @@ public class MapDisplay implements DecoratedMetaData, RelativeSize, Invisible {
 	 */
 	@Override
 	@XmlAttribute(required = false)
-	public void setMaxPixelHeight(Integer maxPixelHeight) {
+	public void setMaxPixelHeight(@Nullable Integer maxPixelHeight) {
 		this.maxPixelHeight = maxPixelHeight;
 	}
 
@@ -497,7 +498,7 @@ public class MapDisplay implements DecoratedMetaData, RelativeSize, Invisible {
 	 * @return the mutable decorator property map keyed by property name
 	 */
 	@Override
-	public Map<String, String> getProperties() {
+	public @Nonnull Map<String, String> getProperties() {
 		return properties;
 	}
 }

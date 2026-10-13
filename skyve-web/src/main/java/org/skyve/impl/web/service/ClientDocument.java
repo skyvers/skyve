@@ -7,6 +7,9 @@ import org.skyve.impl.metadata.view.ViewImpl;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.view.View.ViewType;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Encapsulates all information about a document.
  * Document - the Repository Document
@@ -23,7 +26,7 @@ public final class ClientDocument {
 	 *
 	 * @return document metadata
 	 */
-	public Document getDocument() {
+	public @Nullable Document getDocument() {
 		return document;
 	}
 
@@ -32,7 +35,7 @@ public final class ClientDocument {
 	 *
 	 * @param document document metadata
 	 */
-	public void setDocument(Document document) {
+	public void setDocument(@Nullable Document document) {
 		this.document = document;
 	}
 
@@ -41,7 +44,7 @@ public final class ClientDocument {
 	 *
 	 * @return mutable map of view definitions
 	 */
-	public Map<ViewType, ViewImpl> getViews() {
+	public @Nonnull Map<ViewType, ViewImpl> getViews() {
 		return views;
 	}
 }

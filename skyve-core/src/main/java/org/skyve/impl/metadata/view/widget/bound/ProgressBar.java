@@ -12,6 +12,7 @@ import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.view.Invisible;
 
+import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlElement;
@@ -73,7 +74,7 @@ public class ProgressBar extends AbstractBound implements Invisible, AbsoluteSiz
 	 * @return the configured pixel width
 	 */
 	@Override
-	public Integer getPixelWidth() {
+	public @Nullable Integer getPixelWidth() {
 		return pixelWidth;
 	}
 
@@ -84,7 +85,7 @@ public class ProgressBar extends AbstractBound implements Invisible, AbsoluteSiz
 	 */
 	@Override
 	@XmlAttribute(required = false)
-	public void setPixelWidth(Integer pixelWidth) {
+	public void setPixelWidth(@Nullable Integer pixelWidth) {
 		this.pixelWidth = pixelWidth;
 	}
 
@@ -94,7 +95,7 @@ public class ProgressBar extends AbstractBound implements Invisible, AbsoluteSiz
 	 * @return the minimum width in pixels, or {@code null} when unconstrained
 	 */
 	@Override
-	public Integer getMinPixelWidth() {
+	public @Nullable Integer getMinPixelWidth() {
 		return minPixelWidth;
 	}
 
@@ -105,7 +106,7 @@ public class ProgressBar extends AbstractBound implements Invisible, AbsoluteSiz
 	 */
 	@Override
 	@XmlAttribute(required = false)
-	public void setMinPixelWidth(Integer minPixelWidth) {
+	public void setMinPixelWidth(@Nullable Integer minPixelWidth) {
 		this.minPixelWidth = minPixelWidth;
 	}
 
@@ -115,7 +116,7 @@ public class ProgressBar extends AbstractBound implements Invisible, AbsoluteSiz
 	 * @return the maximum width in pixels, or {@code null} when unconstrained
 	 */
 	@Override
-	public Integer getMaxPixelWidth() {
+	public @Nullable Integer getMaxPixelWidth() {
 		return maxPixelWidth;
 	}
 
@@ -126,7 +127,7 @@ public class ProgressBar extends AbstractBound implements Invisible, AbsoluteSiz
 	 */
 	@Override
 	@XmlAttribute(required = false)
-	public void setMaxPixelWidth(Integer maxPixelWidth) {
+	public void setMaxPixelWidth(@Nullable Integer maxPixelWidth) {
 		this.maxPixelWidth = maxPixelWidth;
 	}
 
@@ -136,7 +137,7 @@ public class ProgressBar extends AbstractBound implements Invisible, AbsoluteSiz
 	 * @return the configured pixel height
 	 */
 	@Override
-	public Integer getPixelHeight() {
+	public @Nullable Integer getPixelHeight() {
 		return pixelHeight;
 	}
 
@@ -147,7 +148,7 @@ public class ProgressBar extends AbstractBound implements Invisible, AbsoluteSiz
 	 */
 	@Override
 	@XmlAttribute(required = false)
-	public void setPixelHeight(Integer pixelHeight) {
+	public void setPixelHeight(@Nullable Integer pixelHeight) {
 		this.pixelHeight = pixelHeight;
 	}
 
@@ -157,7 +158,7 @@ public class ProgressBar extends AbstractBound implements Invisible, AbsoluteSiz
 	 * @return the minimum height in pixels, or {@code null} when unconstrained
 	 */
 	@Override
-	public Integer getMinPixelHeight() {
+	public @Nullable Integer getMinPixelHeight() {
 		return minPixelHeight;
 	}
 
@@ -168,7 +169,7 @@ public class ProgressBar extends AbstractBound implements Invisible, AbsoluteSiz
 	 */
 	@Override
 	@XmlAttribute(required = false)
-	public void setMinPixelHeight(Integer minPixelHeight) {
+	public void setMinPixelHeight(@Nullable Integer minPixelHeight) {
 		this.minPixelHeight = minPixelHeight;
 	}
 
@@ -178,7 +179,7 @@ public class ProgressBar extends AbstractBound implements Invisible, AbsoluteSiz
 	 * @return the maximum height in pixels, or {@code null} when unconstrained
 	 */
 	@Override
-	public Integer getMaxPixelHeight() {
+	public @Nullable Integer getMaxPixelHeight() {
 		return maxPixelHeight;
 	}
 
@@ -189,7 +190,7 @@ public class ProgressBar extends AbstractBound implements Invisible, AbsoluteSiz
 	 */
 	@Override
 	@XmlAttribute(required = false)
-	public void setMaxPixelHeight(Integer maxPixelHeight) {
+	public void setMaxPixelHeight(@Nullable Integer maxPixelHeight) {
 		this.maxPixelHeight = maxPixelHeight;
 	}
 
@@ -260,7 +261,7 @@ public class ProgressBar extends AbstractBound implements Invisible, AbsoluteSiz
 	 * @return mutable decorator property map keyed by property name
 	 */
 	@Override
-	public Map<String, String> getProperties() {
+	public @Nonnull Map<String, String> getProperties() {
 		return properties;
 	}
 }

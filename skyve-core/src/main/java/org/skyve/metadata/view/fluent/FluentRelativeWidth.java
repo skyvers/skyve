@@ -1,5 +1,7 @@
 package org.skyve.metadata.view.fluent;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * Defines fluent APIs for relative width configuration.
  *
@@ -14,7 +16,7 @@ interface FluentRelativeWidth<T extends FluentRelativeWidth<T>> extends FluentAb
 	 *            the percentage width
 	 * @return the fluent builder
 	 */
-	T percentageWidth(int width);
+	@Nonnull T percentageWidth(int width);
 
 	/**
 	 * Sets the responsive width breakpoint value.
@@ -23,5 +25,5 @@ interface FluentRelativeWidth<T extends FluentRelativeWidth<T>> extends FluentAb
 	 *            the responsive width value
 	 * @return the fluent builder
 	 */
-	T responsiveWidth(int width);
+	@Nonnull T responsiveWidth(int width);
 }

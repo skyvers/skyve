@@ -4,6 +4,7 @@ import org.skyve.impl.metadata.module.JobMetaDataImpl;
 import org.skyve.metadata.module.JobMetaData;
 
 import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 
 /**
  * Builds scheduled job metadata for a module definition.
@@ -23,7 +24,7 @@ public class FluentJob {
 	 *
 	 * @param job The metadata to mutate.
 	 */
-	public FluentJob(JobMetaDataImpl job) {
+	public FluentJob(@Nonnull JobMetaDataImpl job) {
 		this.job = job;
 	}
 
@@ -33,7 +34,7 @@ public class FluentJob {
 	 * @param job The source definition.
 	 * @return this fluent instance.
 	 */
-	public FluentJob from(@SuppressWarnings("hiding") JobMetaData job) {
+	public @Nonnull FluentJob from(@SuppressWarnings("hiding") @Nonnull JobMetaData job) {
 		name(job.getName());
 		displayName(job.getDisplayName());
 		description(job.getDescription());
@@ -49,7 +50,7 @@ public class FluentJob {
 	 * @param name The job name.
 	 * @return this fluent instance.
 	 */
-	public FluentJob name(String name) {
+	public @Nonnull FluentJob name(@Nonnull String name) {
 		job.setName(name);
 		return this;
 	}
@@ -60,7 +61,7 @@ public class FluentJob {
 	 * @param displayName The display name.
 	 * @return this fluent instance.
 	 */
-	public FluentJob displayName(String displayName) {
+	public @Nonnull FluentJob displayName(@Nullable String displayName) {
 		job.setDisplayName(displayName);
 		return this;
 	}
@@ -71,7 +72,7 @@ public class FluentJob {
 	 * @param description The job description.
 	 * @return this fluent instance.
 	 */
-	public FluentJob description(String description) {
+	public @Nonnull FluentJob description(@Nullable String description) {
 		job.setDescription(description);
 		return this;
 	}
@@ -82,7 +83,7 @@ public class FluentJob {
 	 * @param fullyQualifiedClassName The implementation class name.
 	 * @return this fluent instance.
 	 */
-	public FluentJob className(String fullyQualifiedClassName) {
+	public @Nonnull FluentJob className(@Nullable String fullyQualifiedClassName) {
 		job.setClassName(fullyQualifiedClassName);
 		return this;
 	}
@@ -105,7 +106,7 @@ public class FluentJob {
 	 *
 	 * @return The job metadata instance.
 	 */
-	public JobMetaDataImpl get() {
+	public @Nonnull JobMetaDataImpl get() {
 		return job;
 	}
 }

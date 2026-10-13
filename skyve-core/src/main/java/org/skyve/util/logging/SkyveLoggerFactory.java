@@ -6,6 +6,9 @@ import org.slf4j.LoggerFactory;
 import org.slf4j.Marker;
 import org.slf4j.spi.LocationAwareLogger;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Factory for sanitising {@link Logger} wrappers that strip CR, LF, and other
  * ASCII control characters from log messages and {@link String} arguments before
@@ -43,7 +46,7 @@ public final class SkyveLoggerFactory {
 	 * @param clazz the class to name the logger after; must not be {@code null}
 	 * @return a sanitising {@link Logger}; never {@code null}
 	 */
-	public static Logger getLogger(Class<?> clazz) {
+	public static @Nonnull Logger getLogger(@Nonnull Class<?> clazz) {
 		return new SanitisingLogger(LoggerFactory.getLogger(clazz));
 	}
 
@@ -56,7 +59,7 @@ public final class SkyveLoggerFactory {
 	 * @param delegate the logger to wrap; must not be {@code null}
 	 * @return a sanitising {@link Logger}; never {@code null}
 	 */
-	static Logger wrap(Logger delegate) {
+	static @Nonnull Logger wrap(@Nonnull Logger delegate) {
 		return new SanitisingLogger(delegate);
 	}
 
@@ -67,7 +70,7 @@ public final class SkyveLoggerFactory {
 	 * @param name the logger name; must not be {@code null}
 	 * @return a sanitising {@link Logger}; never {@code null}
 	 */
-	public static Logger getLogger(String name) {
+	public static @Nonnull Logger getLogger(@Nonnull String name) {
 		return new SanitisingLogger(LoggerFactory.getLogger(name));
 	}
 
@@ -77,7 +80,7 @@ public final class SkyveLoggerFactory {
 	 * @param category the framework logging category; must not be {@code null}
 	 * @return a sanitising {@link Logger}; never {@code null}
 	 */
-	public static Logger getLogger(Category category) {
+	public static @Nonnull Logger getLogger(@Nonnull Category category) {
 		return new SanitisingLogger(LoggerFactory.getLogger(category.getName()));
 	}
 
@@ -105,12 +108,12 @@ public final class SkyveLoggerFactory {
 		 *
 		 * @param delegate the logger to receive sanitised calls; must not be {@code null}
 		 */
-		private SanitisingLogger(Logger delegate) {
+		private SanitisingLogger(@Nonnull Logger delegate) {
 			this.delegate = delegate;
 		}
 
 		@Override
-		public String getName() {
+		public @Nonnull String getName() {
 			return delegate.getName();
 		}
 
@@ -120,57 +123,57 @@ public final class SkyveLoggerFactory {
 		}
 
 		@Override
-		public void trace(String msg) {
+		public void trace(@Nullable String msg) {
 			log(null, LocationAwareLogger.TRACE_INT, msg, null, null, () -> delegate.trace(sanitise(msg)));
 		}
 
 		@Override
-		public void trace(String format, Object arg) {
+		public void trace(@Nullable String format, @Nullable Object arg) {
 			log(null, LocationAwareLogger.TRACE_INT, format, new Object[] {arg}, null, () -> delegate.trace(sanitise(format), sanitiseArg(arg)));
 		}
 
 		@Override
-		public void trace(String format, Object arg1, Object arg2) {
+		public void trace(@Nullable String format, @Nullable Object arg1, @Nullable Object arg2) {
 			log(null, LocationAwareLogger.TRACE_INT, format, new Object[] {arg1, arg2}, null, () -> delegate.trace(sanitise(format), sanitiseArg(arg1), sanitiseArg(arg2)));
 		}
 
 		@Override
-		public void trace(String format, Object... arguments) {
+		public void trace(@Nullable String format, @Nullable Object... arguments) {
 			log(null, LocationAwareLogger.TRACE_INT, format, arguments, null, () -> delegate.trace(sanitise(format), sanitiseArgs(arguments)));
 		}
 
 		@Override
-		public void trace(String msg, Throwable t) {
+		public void trace(@Nullable String msg, @Nullable Throwable t) {
 			log(null, LocationAwareLogger.TRACE_INT, msg, null, t, () -> delegate.trace(sanitise(msg), t));
 		}
 
 		@Override
-		public boolean isTraceEnabled(Marker marker) {
+		public boolean isTraceEnabled(@Nullable Marker marker) {
 			return delegate.isTraceEnabled(marker);
 		}
 
 		@Override
-		public void trace(Marker marker, String msg) {
+		public void trace(@Nullable Marker marker, @Nullable String msg) {
 			log(marker, LocationAwareLogger.TRACE_INT, msg, null, null, () -> delegate.trace(marker, sanitise(msg)));
 		}
 
 		@Override
-		public void trace(Marker marker, String format, Object arg) {
+		public void trace(@Nullable Marker marker, @Nullable String format, @Nullable Object arg) {
 			log(marker, LocationAwareLogger.TRACE_INT, format, new Object[] {arg}, null, () -> delegate.trace(marker, sanitise(format), sanitiseArg(arg)));
 		}
 
 		@Override
-		public void trace(Marker marker, String format, Object arg1, Object arg2) {
+		public void trace(@Nullable Marker marker, @Nullable String format, @Nullable Object arg1, @Nullable Object arg2) {
 			log(marker, LocationAwareLogger.TRACE_INT, format, new Object[] {arg1, arg2}, null, () -> delegate.trace(marker, sanitise(format), sanitiseArg(arg1), sanitiseArg(arg2)));
 		}
 
 		@Override
-		public void trace(Marker marker, String format, Object... argArray) {
+		public void trace(@Nullable Marker marker, @Nullable String format, @Nullable Object... argArray) {
 			log(marker, LocationAwareLogger.TRACE_INT, format, argArray, null, () -> delegate.trace(marker, sanitise(format), sanitiseArgs(argArray)));
 		}
 
 		@Override
-		public void trace(Marker marker, String msg, Throwable t) {
+		public void trace(@Nullable Marker marker, @Nullable String msg, @Nullable Throwable t) {
 			log(marker, LocationAwareLogger.TRACE_INT, msg, null, t, () -> delegate.trace(marker, sanitise(msg), t));
 		}
 
@@ -180,57 +183,57 @@ public final class SkyveLoggerFactory {
 		}
 
 		@Override
-		public void debug(String msg) {
+		public void debug(@Nullable String msg) {
 			log(null, LocationAwareLogger.DEBUG_INT, msg, null, null, () -> delegate.debug(sanitise(msg)));
 		}
 
 		@Override
-		public void debug(String format, Object arg) {
+		public void debug(@Nullable String format, @Nullable Object arg) {
 			log(null, LocationAwareLogger.DEBUG_INT, format, new Object[] {arg}, null, () -> delegate.debug(sanitise(format), sanitiseArg(arg)));
 		}
 
 		@Override
-		public void debug(String format, Object arg1, Object arg2) {
+		public void debug(@Nullable String format, @Nullable Object arg1, @Nullable Object arg2) {
 			log(null, LocationAwareLogger.DEBUG_INT, format, new Object[] {arg1, arg2}, null, () -> delegate.debug(sanitise(format), sanitiseArg(arg1), sanitiseArg(arg2)));
 		}
 
 		@Override
-		public void debug(String format, Object... arguments) {
+		public void debug(@Nullable String format, @Nullable Object... arguments) {
 			log(null, LocationAwareLogger.DEBUG_INT, format, arguments, null, () -> delegate.debug(sanitise(format), sanitiseArgs(arguments)));
 		}
 
 		@Override
-		public void debug(String msg, Throwable t) {
+		public void debug(@Nullable String msg, @Nullable Throwable t) {
 			log(null, LocationAwareLogger.DEBUG_INT, msg, null, t, () -> delegate.debug(sanitise(msg), t));
 		}
 
 		@Override
-		public boolean isDebugEnabled(Marker marker) {
+		public boolean isDebugEnabled(@Nullable Marker marker) {
 			return delegate.isDebugEnabled(marker);
 		}
 
 		@Override
-		public void debug(Marker marker, String msg) {
+		public void debug(@Nullable Marker marker, @Nullable String msg) {
 			log(marker, LocationAwareLogger.DEBUG_INT, msg, null, null, () -> delegate.debug(marker, sanitise(msg)));
 		}
 
 		@Override
-		public void debug(Marker marker, String format, Object arg) {
+		public void debug(@Nullable Marker marker, @Nullable String format, @Nullable Object arg) {
 			log(marker, LocationAwareLogger.DEBUG_INT, format, new Object[] {arg}, null, () -> delegate.debug(marker, sanitise(format), sanitiseArg(arg)));
 		}
 
 		@Override
-		public void debug(Marker marker, String format, Object arg1, Object arg2) {
+		public void debug(@Nullable Marker marker, @Nullable String format, @Nullable Object arg1, @Nullable Object arg2) {
 			log(marker, LocationAwareLogger.DEBUG_INT, format, new Object[] {arg1, arg2}, null, () -> delegate.debug(marker, sanitise(format), sanitiseArg(arg1), sanitiseArg(arg2)));
 		}
 
 		@Override
-		public void debug(Marker marker, String format, Object... arguments) {
+		public void debug(@Nullable Marker marker, @Nullable String format, @Nullable Object... arguments) {
 			log(marker, LocationAwareLogger.DEBUG_INT, format, arguments, null, () -> delegate.debug(marker, sanitise(format), sanitiseArgs(arguments)));
 		}
 
 		@Override
-		public void debug(Marker marker, String msg, Throwable t) {
+		public void debug(@Nullable Marker marker, @Nullable String msg, @Nullable Throwable t) {
 			log(marker, LocationAwareLogger.DEBUG_INT, msg, null, t, () -> delegate.debug(marker, sanitise(msg), t));
 		}
 
@@ -240,57 +243,57 @@ public final class SkyveLoggerFactory {
 		}
 
 		@Override
-		public void info(String msg) {
+		public void info(@Nullable String msg) {
 			log(null, LocationAwareLogger.INFO_INT, msg, null, null, () -> delegate.info(sanitise(msg)));
 		}
 
 		@Override
-		public void info(String format, Object arg) {
+		public void info(@Nullable String format, @Nullable Object arg) {
 			log(null, LocationAwareLogger.INFO_INT, format, new Object[] {arg}, null, () -> delegate.info(sanitise(format), sanitiseArg(arg)));
 		}
 
 		@Override
-		public void info(String format, Object arg1, Object arg2) {
+		public void info(@Nullable String format, @Nullable Object arg1, @Nullable Object arg2) {
 			log(null, LocationAwareLogger.INFO_INT, format, new Object[] {arg1, arg2}, null, () -> delegate.info(sanitise(format), sanitiseArg(arg1), sanitiseArg(arg2)));
 		}
 
 		@Override
-		public void info(String format, Object... arguments) {
+		public void info(@Nullable String format, @Nullable Object... arguments) {
 			log(null, LocationAwareLogger.INFO_INT, format, arguments, null, () -> delegate.info(sanitise(format), sanitiseArgs(arguments)));
 		}
 
 		@Override
-		public void info(String msg, Throwable t) {
+		public void info(@Nullable String msg, @Nullable Throwable t) {
 			log(null, LocationAwareLogger.INFO_INT, msg, null, t, () -> delegate.info(sanitise(msg), t));
 		}
 
 		@Override
-		public boolean isInfoEnabled(Marker marker) {
+		public boolean isInfoEnabled(@Nullable Marker marker) {
 			return delegate.isInfoEnabled(marker);
 		}
 
 		@Override
-		public void info(Marker marker, String msg) {
+		public void info(@Nullable Marker marker, @Nullable String msg) {
 			log(marker, LocationAwareLogger.INFO_INT, msg, null, null, () -> delegate.info(marker, sanitise(msg)));
 		}
 
 		@Override
-		public void info(Marker marker, String format, Object arg) {
+		public void info(@Nullable Marker marker, @Nullable String format, @Nullable Object arg) {
 			log(marker, LocationAwareLogger.INFO_INT, format, new Object[] {arg}, null, () -> delegate.info(marker, sanitise(format), sanitiseArg(arg)));
 		}
 
 		@Override
-		public void info(Marker marker, String format, Object arg1, Object arg2) {
+		public void info(@Nullable Marker marker, @Nullable String format, @Nullable Object arg1, @Nullable Object arg2) {
 			log(marker, LocationAwareLogger.INFO_INT, format, new Object[] {arg1, arg2}, null, () -> delegate.info(marker, sanitise(format), sanitiseArg(arg1), sanitiseArg(arg2)));
 		}
 
 		@Override
-		public void info(Marker marker, String format, Object... arguments) {
+		public void info(@Nullable Marker marker, @Nullable String format, @Nullable Object... arguments) {
 			log(marker, LocationAwareLogger.INFO_INT, format, arguments, null, () -> delegate.info(marker, sanitise(format), sanitiseArgs(arguments)));
 		}
 
 		@Override
-		public void info(Marker marker, String msg, Throwable t) {
+		public void info(@Nullable Marker marker, @Nullable String msg, @Nullable Throwable t) {
 			log(marker, LocationAwareLogger.INFO_INT, msg, null, t, () -> delegate.info(marker, sanitise(msg), t));
 		}
 
@@ -300,57 +303,57 @@ public final class SkyveLoggerFactory {
 		}
 
 		@Override
-		public void warn(String msg) {
+		public void warn(@Nullable String msg) {
 			log(null, LocationAwareLogger.WARN_INT, msg, null, null, () -> delegate.warn(sanitise(msg)));
 		}
 
 		@Override
-		public void warn(String format, Object arg) {
+		public void warn(@Nullable String format, @Nullable Object arg) {
 			log(null, LocationAwareLogger.WARN_INT, format, new Object[] {arg}, null, () -> delegate.warn(sanitise(format), sanitiseArg(arg)));
 		}
 
 		@Override
-		public void warn(String format, Object... arguments) {
+		public void warn(@Nullable String format, @Nullable Object... arguments) {
 			log(null, LocationAwareLogger.WARN_INT, format, arguments, null, () -> delegate.warn(sanitise(format), sanitiseArgs(arguments)));
 		}
 
 		@Override
-		public void warn(String format, Object arg1, Object arg2) {
+		public void warn(@Nullable String format, @Nullable Object arg1, @Nullable Object arg2) {
 			log(null, LocationAwareLogger.WARN_INT, format, new Object[] {arg1, arg2}, null, () -> delegate.warn(sanitise(format), sanitiseArg(arg1), sanitiseArg(arg2)));
 		}
 
 		@Override
-		public void warn(String msg, Throwable t) {
+		public void warn(@Nullable String msg, @Nullable Throwable t) {
 			log(null, LocationAwareLogger.WARN_INT, msg, null, t, () -> delegate.warn(sanitise(msg), t));
 		}
 
 		@Override
-		public boolean isWarnEnabled(Marker marker) {
+		public boolean isWarnEnabled(@Nullable Marker marker) {
 			return delegate.isWarnEnabled(marker);
 		}
 
 		@Override
-		public void warn(Marker marker, String msg) {
+		public void warn(@Nullable Marker marker, @Nullable String msg) {
 			log(marker, LocationAwareLogger.WARN_INT, msg, null, null, () -> delegate.warn(marker, sanitise(msg)));
 		}
 
 		@Override
-		public void warn(Marker marker, String format, Object arg) {
+		public void warn(@Nullable Marker marker, @Nullable String format, @Nullable Object arg) {
 			log(marker, LocationAwareLogger.WARN_INT, format, new Object[] {arg}, null, () -> delegate.warn(marker, sanitise(format), sanitiseArg(arg)));
 		}
 
 		@Override
-		public void warn(Marker marker, String format, Object arg1, Object arg2) {
+		public void warn(@Nullable Marker marker, @Nullable String format, @Nullable Object arg1, @Nullable Object arg2) {
 			log(marker, LocationAwareLogger.WARN_INT, format, new Object[] {arg1, arg2}, null, () -> delegate.warn(marker, sanitise(format), sanitiseArg(arg1), sanitiseArg(arg2)));
 		}
 
 		@Override
-		public void warn(Marker marker, String format, Object... arguments) {
+		public void warn(@Nullable Marker marker, @Nullable String format, @Nullable Object... arguments) {
 			log(marker, LocationAwareLogger.WARN_INT, format, arguments, null, () -> delegate.warn(marker, sanitise(format), sanitiseArgs(arguments)));
 		}
 
 		@Override
-		public void warn(Marker marker, String msg, Throwable t) {
+		public void warn(@Nullable Marker marker, @Nullable String msg, @Nullable Throwable t) {
 			log(marker, LocationAwareLogger.WARN_INT, msg, null, t, () -> delegate.warn(marker, sanitise(msg), t));
 		}
 
@@ -360,57 +363,57 @@ public final class SkyveLoggerFactory {
 		}
 
 		@Override
-		public void error(String msg) {
+		public void error(@Nullable String msg) {
 			log(null, LocationAwareLogger.ERROR_INT, msg, null, null, () -> delegate.error(sanitise(msg)));
 		}
 
 		@Override
-		public void error(String format, Object arg) {
+		public void error(@Nullable String format, @Nullable Object arg) {
 			log(null, LocationAwareLogger.ERROR_INT, format, new Object[] {arg}, null, () -> delegate.error(sanitise(format), sanitiseArg(arg)));
 		}
 
 		@Override
-		public void error(String format, Object arg1, Object arg2) {
+		public void error(@Nullable String format, @Nullable Object arg1, @Nullable Object arg2) {
 			log(null, LocationAwareLogger.ERROR_INT, format, new Object[] {arg1, arg2}, null, () -> delegate.error(sanitise(format), sanitiseArg(arg1), sanitiseArg(arg2)));
 		}
 
 		@Override
-		public void error(String format, Object... arguments) {
+		public void error(@Nullable String format, @Nullable Object... arguments) {
 			log(null, LocationAwareLogger.ERROR_INT, format, arguments, null, () -> delegate.error(sanitise(format), sanitiseArgs(arguments)));
 		}
 
 		@Override
-		public void error(String msg, Throwable t) {
+		public void error(@Nullable String msg, @Nullable Throwable t) {
 			log(null, LocationAwareLogger.ERROR_INT, msg, null, t, () -> delegate.error(sanitise(msg), t));
 		}
 
 		@Override
-		public boolean isErrorEnabled(Marker marker) {
+		public boolean isErrorEnabled(@Nullable Marker marker) {
 			return delegate.isErrorEnabled(marker);
 		}
 
 		@Override
-		public void error(Marker marker, String msg) {
+		public void error(@Nullable Marker marker, @Nullable String msg) {
 			log(marker, LocationAwareLogger.ERROR_INT, msg, null, null, () -> delegate.error(marker, sanitise(msg)));
 		}
 
 		@Override
-		public void error(Marker marker, String format, Object arg) {
+		public void error(@Nullable Marker marker, @Nullable String format, @Nullable Object arg) {
 			log(marker, LocationAwareLogger.ERROR_INT, format, new Object[] {arg}, null, () -> delegate.error(marker, sanitise(format), sanitiseArg(arg)));
 		}
 
 		@Override
-		public void error(Marker marker, String format, Object arg1, Object arg2) {
+		public void error(@Nullable Marker marker, @Nullable String format, @Nullable Object arg1, @Nullable Object arg2) {
 			log(marker, LocationAwareLogger.ERROR_INT, format, new Object[] {arg1, arg2}, null, () -> delegate.error(marker, sanitise(format), sanitiseArg(arg1), sanitiseArg(arg2)));
 		}
 
 		@Override
-		public void error(Marker marker, String format, Object... arguments) {
+		public void error(@Nullable Marker marker, @Nullable String format, @Nullable Object... arguments) {
 			log(marker, LocationAwareLogger.ERROR_INT, format, arguments, null, () -> delegate.error(marker, sanitise(format), sanitiseArgs(arguments)));
 		}
 
 		@Override
-		public void error(Marker marker, String msg, Throwable t) {
+		public void error(@Nullable Marker marker, @Nullable String msg, @Nullable Throwable t) {
 			log(marker, LocationAwareLogger.ERROR_INT, msg, null, t, () -> delegate.error(marker, sanitise(msg), t));
 		}
 
@@ -432,7 +435,7 @@ public final class SkyveLoggerFactory {
 		 * @param fallback  the ordinary SLF4J call to use when the delegate is not
 		 *                  location-aware; must not be {@code null}
 		 */
-		private void log(Marker marker, int level, String msg, Object[] arguments, Throwable throwable, Runnable fallback) {
+		private void log(@Nullable Marker marker, int level, @Nullable String msg, @Nullable Object[] arguments, @Nullable Throwable throwable, @Nonnull Runnable fallback) {
 			if (delegate instanceof LocationAwareLogger law) {
 				Throwable normalisedThrowable = normaliseThrowable(arguments, throwable);
 				Object[] normalisedArguments = normaliseArgs(arguments, normalisedThrowable, throwable);
@@ -448,7 +451,7 @@ public final class SkyveLoggerFactory {
 		 * @param value the string to sanitise; may be {@code null}
 		 * @return a sanitised string, or {@code null} when {@code value} is {@code null}
 		 */
-		private static String sanitise(String value) {
+		private static @Nullable String sanitise(@Nullable String value) {
 			return OWASP.sanitiseLog(value);
 		}
 
@@ -459,7 +462,7 @@ public final class SkyveLoggerFactory {
 		 * @param args the argument array; may be {@code null}
 		 * @return a sanitised copy, or an empty array if {@code args} was {@code null}
 		 */
-		private static Object[] sanitiseArgs(Object[] args) {
+		private static @Nonnull Object[] sanitiseArgs(@Nullable Object[] args) {
 			if (args == null) {
 				return new Object[0];
 			}
@@ -477,7 +480,7 @@ public final class SkyveLoggerFactory {
 		 * @param arg the logging argument; may be {@code null}
 		 * @return the sanitised string, or the original argument for non-string values
 		 */
-		private static Object sanitiseArg(Object arg) {
+		private static @Nullable Object sanitiseArg(@Nullable Object arg) {
 			return (arg instanceof String string) ? sanitise(string) : arg;
 		}
 
@@ -492,7 +495,7 @@ public final class SkyveLoggerFactory {
 		 * @param throwable the explicit throwable, or {@code null}
 		 * @return the throwable to forward, or {@code null}
 		 */
-		private static Throwable normaliseThrowable(Object[] arguments, Throwable throwable) {
+		private static @Nullable Throwable normaliseThrowable(@Nullable Object[] arguments, @Nullable Throwable throwable) {
 			if ((throwable != null) || (arguments == null) || (arguments.length == 0)) {
 				return throwable;
 			}
@@ -511,7 +514,7 @@ public final class SkyveLoggerFactory {
 		 *                            overload, or {@code null}
 		 * @return sanitised formatting arguments; never {@code null}
 		 */
-		private static Object[] normaliseArgs(Object[] arguments, Throwable normalisedThrowable, Throwable explicitThrowable) {
+		private static @Nonnull Object[] normaliseArgs(@Nullable Object[] arguments, @Nullable Throwable normalisedThrowable, @Nullable Throwable explicitThrowable) {
 			if ((arguments == null) || (normalisedThrowable == explicitThrowable)) {
 				return sanitiseArgs(arguments);
 			}

@@ -11,6 +11,8 @@ import org.skyve.domain.types.Enumeration;
 import org.skyve.metadata.model.document.Bizlet.DomainValue;
 import org.skyve.util.Util;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlEnum;
 
 /**
@@ -51,7 +53,7 @@ public interface ReportDataset extends PersistentBean {
 		/** @hidden */
 		private static List<DomainValue> domainValues = Stream.of(values()).map(DatasetType::toDomainValue).collect(Collectors.toUnmodifiableList());
 
-		private DatasetType(String code, String description) {
+		private DatasetType(@Nonnull String code, @Nonnull String description) {
 			this.code = code;
 			this.description = description;
 			this.domainValue = new DomainValue(code, description);
@@ -63,7 +65,7 @@ public interface ReportDataset extends PersistentBean {
 		 * @return the persisted dataset type code
 		 */
 		@Override
-		public String toCode() {
+		public @Nonnull String toCode() {
 			return code;
 		}
 
@@ -73,7 +75,7 @@ public interface ReportDataset extends PersistentBean {
 		 * @return the localised description
 		 */
 		@Override
-		public String toLocalisedDescription() {
+		public @Nonnull String toLocalisedDescription() {
 			return Util.i18n(description);
 		}
 
@@ -83,7 +85,7 @@ public interface ReportDataset extends PersistentBean {
 		 * @return the corresponding domain value
 		 */
 		@Override
-		public DomainValue toDomainValue() {
+		public @Nonnull DomainValue toDomainValue() {
 			return domainValue;
 		}
 
@@ -93,7 +95,7 @@ public interface ReportDataset extends PersistentBean {
 		 * @param code the persisted code to match
 		 * @return the matching enum value, or {@code null} when no value matches
 		 */
-		public static DatasetType fromCode(String code) {
+		public static @Nullable DatasetType fromCode(@Nullable String code) {
 			DatasetType result = null;
 
 			for (DatasetType value : values()) {
@@ -112,7 +114,7 @@ public interface ReportDataset extends PersistentBean {
 		 * @param description the localised description to match
 		 * @return the matching enum value, or {@code null} when no value matches
 		 */
-		public static DatasetType fromLocalisedDescription(String description) {
+		public static @Nullable DatasetType fromLocalisedDescription(@Nullable String description) {
 			DatasetType result = null;
 
 			for (DatasetType value : values()) {
@@ -130,7 +132,7 @@ public interface ReportDataset extends PersistentBean {
 		 *
 		 * @return immutable domain values for this enum
 		 */
-		public static List<DomainValue> toDomainValues() {
+		public static @Nonnull List<DomainValue> toDomainValues() {
 			return domainValues;
 		}
 	}
@@ -140,21 +142,21 @@ public interface ReportDataset extends PersistentBean {
 	 *
 	 * @return the dataset type
 	 */
-	DatasetType getDatasetType();
+	@Nullable DatasetType getDatasetType();
 
 	/**
 	 * Returns the logical dataset name used by the report engine.
 	 *
 	 * @return the dataset name
 	 */
-	String getDatasetName();
+	@Nullable String getDatasetName();
 
 	/**
 	 * Returns the configured BizQL/SQL query text when the dataset type is query based.
 	 *
 	 * @return the configured query text, or {@code null}
 	 */
-	String getQuery();
+	@Nullable String getQuery();
 
 	/**
 	 * Executes the configured BizQL query dataset.
@@ -162,7 +164,7 @@ public interface ReportDataset extends PersistentBean {
 	 * @return query result rows as Skyve beans
 	 * @throws Exception if query execution fails
 	 */
-	List<Bean> executeQuery() throws Exception;
+	@Nullable List<Bean> executeQuery() throws Exception;
 
 	/**
 	 * Executes the configured SQL query dataset.
@@ -170,12 +172,12 @@ public interface ReportDataset extends PersistentBean {
 	 * @return query result rows as dynamic beans
 	 * @throws Exception if query execution fails
 	 */
-	List<DynaBean> executeSQLQuery() throws Exception;
+	@Nullable List<DynaBean> executeSQLQuery() throws Exception;
 
 	/**
 	 * Executes the configured class-backed dataset provider.
 	 *
 	 * @return dataset rows as dynamic beans
 	 */
-	List<DynaBean> executeClass();
+	@Nullable List<DynaBean> executeClass();
 }

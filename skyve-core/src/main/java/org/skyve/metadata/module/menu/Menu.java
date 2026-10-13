@@ -4,6 +4,8 @@ import java.util.List;
 
 import org.skyve.metadata.DecoratedMetaData;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * Represents the navigational menu for a Skyve module.
  *
@@ -32,7 +34,7 @@ public interface Menu extends DecoratedMetaData {
 	 *
 	 * @return a mutable ordered list of top-level menu items; never {@code null}
 	 */
-	public List<MenuItem> getItems();
+	public @Nonnull List<MenuItem> getItems();
 
 	/**
 	 * Returns {@code true} if this menu should be rendered for the given UX/UI variant.
@@ -43,5 +45,5 @@ public interface Menu extends DecoratedMetaData {
 	 * @param uxui  the UX/UI name to test; may be {@code null} to indicate no variant filter
 	 * @return {@code true} if this menu is visible under the given UX/UI
 	 */
-	public boolean isApplicable(String uxui);
+	public boolean isApplicable(@Nonnull String uxui);
 }

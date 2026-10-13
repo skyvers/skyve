@@ -5,13 +5,15 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 
+import jakarta.annotation.Nonnull;
+
 abstract class ReactComponent implements Comparable<ReactComponent> {
 	protected ReactGenerator generator;
 	private String key;
 	protected String moduleName;
 	protected String componentName;
 	
-	ReactComponent(ReactGenerator generator, String moduleName, String componentName) {
+	ReactComponent(@Nonnull ReactGenerator generator, @Nonnull String moduleName, @Nonnull String componentName) {
 		this.generator = generator;
 		this.moduleName = moduleName;
 		this.componentName = componentName; 
@@ -19,7 +21,7 @@ abstract class ReactComponent implements Comparable<ReactComponent> {
 	}
 	
 	@Override
-	public int compareTo(ReactComponent o) {
+	public int compareTo(@Nonnull ReactComponent o) {
 		return key.compareTo(o.key);
 	}
 	
@@ -39,5 +41,5 @@ System.out.println(component);
 		}
 	}
 	
-	protected abstract void create(FileWriter fw) throws IOException;
+	protected abstract void create(@Nonnull FileWriter fw) throws IOException;
 }

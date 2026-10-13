@@ -27,7 +27,7 @@ public class FluentLink extends FluentWidget implements FluentAbsoluteWidth<Flue
 	 * @param link
 	 *            the metadata instance to mutate
 	 */
-	public FluentLink(Link link) {
+	public FluentLink(@Nonnull Link link) {
 		this.link = link;
 	}
 
@@ -38,7 +38,7 @@ public class FluentLink extends FluentWidget implements FluentAbsoluteWidth<Flue
 	 *            the source metadata to copy
 	 * @return this builder
 	 */
-	public FluentLink from(@SuppressWarnings("hiding") Link link) {
+	public @Nonnull FluentLink from(@SuppressWarnings("hiding") @Nonnull Link link) {
 		reference(link.getReference());
 		target(link.getTarget());
 		value(link.getValue());
@@ -57,7 +57,7 @@ public class FluentLink extends FluentWidget implements FluentAbsoluteWidth<Flue
 	 *            the link reference target
 	 * @return this builder
 	 */
-	public FluentLink reference(Reference reference) {
+	public @Nonnull FluentLink reference(@Nullable Reference reference) {
 		link.setReference(reference);
 		return this;
 	}
@@ -69,7 +69,7 @@ public class FluentLink extends FluentWidget implements FluentAbsoluteWidth<Flue
 	 *            the reference target behaviour
 	 * @return this builder
 	 */
-	public FluentLink target(ReferenceTarget target) {
+	public @Nonnull FluentLink target(@Nullable ReferenceTarget target) {
 		link.setTarget(target);
 		return this;
 	}
@@ -81,7 +81,7 @@ public class FluentLink extends FluentWidget implements FluentAbsoluteWidth<Flue
 	 *            the rendered link value
 	 * @return this builder
 	 */
-	public FluentLink value(String value) {
+	public @Nonnull FluentLink value(@Nullable String value) {
 		link.setValue(value);
 		return this;
 	}
@@ -92,7 +92,7 @@ public class FluentLink extends FluentWidget implements FluentAbsoluteWidth<Flue
 	 * @param escapeValue {@code false} to allow trusted markup; {@code true} to escape at the renderer boundary
 	 * @return this builder
 	 */
-	public FluentLink escapeValue(boolean escapeValue) {
+	public @Nonnull FluentLink escapeValue(boolean escapeValue) {
 		return escapeValue(escapeValue ? Boolean.TRUE : Boolean.FALSE);
 	}
 
@@ -102,7 +102,7 @@ public class FluentLink extends FluentWidget implements FluentAbsoluteWidth<Flue
 	 * @param escapeValue {@code Boolean.FALSE} to allow trusted markup; {@code null} or {@code Boolean.TRUE} to escape at the renderer boundary
 	 * @return this builder
 	 */
-	public FluentLink escapeValue(Boolean escapeValue) {
+	public @Nonnull FluentLink escapeValue(@Nullable Boolean escapeValue) {
 		link.setEscapeValue(escapeValue);
 		return this;
 	}
@@ -139,7 +139,7 @@ public class FluentLink extends FluentWidget implements FluentAbsoluteWidth<Flue
 	 * @return this builder
 	 */
 	@Override
-	public FluentLink pixelWidth(int width) {
+	public @Nonnull FluentLink pixelWidth(int width) {
 		link.setPixelWidth(Integer.valueOf(width));
 		return this;
 	}
@@ -163,7 +163,7 @@ public class FluentLink extends FluentWidget implements FluentAbsoluteWidth<Flue
 	 * @return the wrapped link metadata
 	 */
 	@Override
-	public Link get() {
+	public @Nonnull Link get() {
 		return link;
 	}
 }

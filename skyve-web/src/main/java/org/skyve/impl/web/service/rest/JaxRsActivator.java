@@ -5,6 +5,7 @@ import java.util.Set;
 
 import org.skyve.impl.content.rest.RestRemoteContentManagerServer;
 
+import jakarta.annotation.Nonnull;
 import jakarta.ws.rs.ApplicationPath;
 import jakarta.ws.rs.core.Application;
 
@@ -17,7 +18,7 @@ public class JaxRsActivator extends Application {
 	 * Returns JAX-RS resource classes exposed by the Skyve REST application.
 	 */
 	@Override
-	public Set<Class<?>> getClasses() {
+	public @Nonnull Set<Class<?>> getClasses() {
 		final Set<Class<?>> classes = new HashSet<>();
 		classes.add(RestService.class);
 		classes.add(RestRemoteContentManagerServer.class);

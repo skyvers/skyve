@@ -73,6 +73,8 @@ import org.skyve.metadata.model.document.Interface;
 import org.skyve.metadata.model.document.Relation;
 import org.skyve.util.Icons;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlElementRef;
 import jakarta.xml.bind.annotation.XmlElementRefs;
@@ -132,7 +134,7 @@ public class DocumentMetaData extends NamedMetaData implements ConvertibleMetaDa
 	private static final String VALIDATOR_MUST_DEFINE_MIN_OR_MAX = " : The validator on field ";
 	private static final String MUST_DEFINE_EITHER_MIN_OR_MAX = " must define either a min or max.";
 
-	private static boolean isAsciiJavaIdentifierPath(String value) {
+	private static boolean isAsciiJavaIdentifierPath(@Nonnull String value) {
 		boolean expectingIdentifierStart = true;
 		boolean foundIdentifierPart = false;
 		for (int i = 0, l = value.length(); i < l; i++) {
@@ -198,7 +200,7 @@ public class DocumentMetaData extends NamedMetaData implements ConvertibleMetaDa
 	 *
 	 * @return inheritance strategy, or {@code null}
 	 */
-	public Extends getExtends() {
+	public @Nullable Extends getExtends() {
 		return inherits;
 	}
 
@@ -208,7 +210,7 @@ public class DocumentMetaData extends NamedMetaData implements ConvertibleMetaDa
 	 * @param inherits inheritance strategy
 	 */
 	@XmlElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
-	public void setExtends(Extends inherits) {
+	public void setExtends(@Nullable Extends inherits) {
 		this.inherits = inherits;
 	}
 
@@ -217,7 +219,7 @@ public class DocumentMetaData extends NamedMetaData implements ConvertibleMetaDa
 	 *
 	 * @return {@code true} when abstract, otherwise {@code false} or {@code null}
 	 */
-	public java.lang.Boolean getAbstract() {
+	public @Nullable java.lang.Boolean getAbstract() {
 		return abstractClass;
 	}
 
@@ -227,7 +229,7 @@ public class DocumentMetaData extends NamedMetaData implements ConvertibleMetaDa
 	 * @param abstractClass abstract flag
 	 */
 	@XmlElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
-	public void setAbstract(java.lang.Boolean abstractClass) {
+	public void setAbstract(@Nullable java.lang.Boolean abstractClass) {
 		this.abstractClass = abstractClass;
 	}
 
@@ -236,7 +238,7 @@ public class DocumentMetaData extends NamedMetaData implements ConvertibleMetaDa
 	 *
 	 * @return persistence metadata, or {@code null} for transient documents
 	 */
-	public Persistent getPersistent() {
+	public @Nullable Persistent getPersistent() {
 		return persistent;
 	}
 
@@ -246,7 +248,7 @@ public class DocumentMetaData extends NamedMetaData implements ConvertibleMetaDa
 	 * @param persistent persistence metadata
 	 */
 	@XmlElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE, required = false)
-	public void setPersistent(Persistent persistent) {
+	public void setPersistent(@Nullable Persistent persistent) {
 		this.persistent = persistent;
 	}
 
@@ -255,7 +257,7 @@ public class DocumentMetaData extends NamedMetaData implements ConvertibleMetaDa
 	 *
 	 * @return dynamic metadata, or {@code null}
 	 */
-	public Dynamic getDynamic() {
+	public @Nullable Dynamic getDynamic() {
 		return dynamic;
 	}
 
@@ -265,7 +267,7 @@ public class DocumentMetaData extends NamedMetaData implements ConvertibleMetaDa
 	 * @param dynamic dynamic metadata
 	 */
 	@XmlElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
-	public void setDynamic(Dynamic dynamic) {
+	public void setDynamic(@Nullable Dynamic dynamic) {
 		this.dynamic = dynamic;
 	}
 
@@ -274,7 +276,7 @@ public class DocumentMetaData extends NamedMetaData implements ConvertibleMetaDa
 	 *
 	 * @return singular alias
 	 */
-	public String getSingularAlias() {
+	public @Nullable String getSingularAlias() {
 		return singularAlias;
 	}
 
@@ -284,7 +286,7 @@ public class DocumentMetaData extends NamedMetaData implements ConvertibleMetaDa
 	 * @param singularAlias singular alias value
 	 */
 	@XmlElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE, required = true)
-	public void setSingularAlias(String singularAlias) {
+	public void setSingularAlias(@Nullable String singularAlias) {
 		this.singularAlias = UtilImpl.processStringValue(singularAlias);
 	}
 
@@ -293,7 +295,7 @@ public class DocumentMetaData extends NamedMetaData implements ConvertibleMetaDa
 	 *
 	 * @return plural alias
 	 */
-	public String getPluralAlias() {
+	public @Nullable String getPluralAlias() {
 		return pluralAlias;
 	}
 
@@ -303,7 +305,7 @@ public class DocumentMetaData extends NamedMetaData implements ConvertibleMetaDa
 	 * @param pluralAlias plural alias value
 	 */
 	@XmlElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE, required = true)
-	public void setPluralAlias(String pluralAlias) {
+	public void setPluralAlias(@Nullable String pluralAlias) {
 		this.pluralAlias = UtilImpl.processStringValue(pluralAlias);
 	}
 
@@ -312,7 +314,7 @@ public class DocumentMetaData extends NamedMetaData implements ConvertibleMetaDa
 	 *
 	 * @return 16x16 icon path, or {@code null}
 	 */
-	public String getIcon16x16RelativeFilePath() {
+	public @Nullable String getIcon16x16RelativeFilePath() {
 		return icon16x16RelativeFilePath;
 	}
 
@@ -322,7 +324,7 @@ public class DocumentMetaData extends NamedMetaData implements ConvertibleMetaDa
 	 * @param icon16x16RelativeFilePath 16x16 icon path
 	 */
 	@XmlElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
-	public void setIcon16x16RelativeFilePath(String icon16x16RelativeFilePath) {
+	public void setIcon16x16RelativeFilePath(@Nullable String icon16x16RelativeFilePath) {
 		this.icon16x16RelativeFilePath = UtilImpl.processStringValue(icon16x16RelativeFilePath);
 	}
 
@@ -331,7 +333,7 @@ public class DocumentMetaData extends NamedMetaData implements ConvertibleMetaDa
 	 *
 	 * @return icon style class, or {@code null}
 	 */
-	public String getIconStyleClass() {
+	public @Nullable String getIconStyleClass() {
 		return iconStyleClass;
 	}
 
@@ -341,7 +343,7 @@ public class DocumentMetaData extends NamedMetaData implements ConvertibleMetaDa
 	 * @param iconStyleClass icon style class
 	 */
 	@XmlElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
-	public void setIconStyleClass(String iconStyleClass) {
+	public void setIconStyleClass(@Nullable String iconStyleClass) {
 		this.iconStyleClass = UtilImpl.processStringValue(iconStyleClass);
 	}
 
@@ -350,7 +352,7 @@ public class DocumentMetaData extends NamedMetaData implements ConvertibleMetaDa
 	 *
 	 * @return 32x32 icon path, or {@code null}
 	 */
-	public String getIcon32x32RelativeFilePath() {
+	public @Nullable String getIcon32x32RelativeFilePath() {
 		return icon32x32RelativeFilePath;
 	}
 
@@ -360,7 +362,7 @@ public class DocumentMetaData extends NamedMetaData implements ConvertibleMetaDa
 	 * @param icon32x32RelativeFilePath 32x32 icon path
 	 */
 	@XmlElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
-	public void setIcon32x32RelativeFilePath(String icon32x32RelativeFilePath) {
+	public void setIcon32x32RelativeFilePath(@Nullable String icon32x32RelativeFilePath) {
 		this.icon32x32RelativeFilePath = UtilImpl.processStringValue(icon32x32RelativeFilePath);
 	}
 
@@ -369,7 +371,7 @@ public class DocumentMetaData extends NamedMetaData implements ConvertibleMetaDa
 	 *
 	 * @return audit flag, or {@code null} to use defaults
 	 */
-	public java.lang.Boolean getAudited() {
+	public @Nullable java.lang.Boolean getAudited() {
 		return audited;
 	}
 
@@ -379,7 +381,7 @@ public class DocumentMetaData extends NamedMetaData implements ConvertibleMetaDa
 	 * @param audited audit flag
 	 */
 	@XmlElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
-	public void setAudited(java.lang.Boolean audited) {
+	public void setAudited(@Nullable java.lang.Boolean audited) {
 		this.audited = audited;
 	}
 
@@ -388,7 +390,7 @@ public class DocumentMetaData extends NamedMetaData implements ConvertibleMetaDa
 	 *
 	 * @return document description, or {@code null}
 	 */
-	public String getDescription() {
+	public @Nullable String getDescription() {
 		return description;
 	}
 
@@ -399,7 +401,7 @@ public class DocumentMetaData extends NamedMetaData implements ConvertibleMetaDa
 	 */
 	@XmlElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
 	@XmlJavaTypeAdapter(CDATAAdapter.class)
-	public void setDescription(String description) {
+	public void setDescription(@Nullable String description) {
 		this.description = UtilImpl.processStringValue(description);
 	}
 
@@ -408,7 +410,7 @@ public class DocumentMetaData extends NamedMetaData implements ConvertibleMetaDa
 	 *
 	 * @return parent document metadata, or {@code null}
 	 */
-	public ParentDocument getParentDocument() {
+	public @Nullable ParentDocument getParentDocument() {
 		return parentDocument;
 	}
 
@@ -418,7 +420,7 @@ public class DocumentMetaData extends NamedMetaData implements ConvertibleMetaDa
 	 * @param parentDocument parent document metadata
 	 */
 	@XmlElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
-	public void setParentDocument(ParentDocument parentDocument) {
+	public void setParentDocument(@Nullable ParentDocument parentDocument) {
 		this.parentDocument = parentDocument;
 	}
 
@@ -427,7 +429,7 @@ public class DocumentMetaData extends NamedMetaData implements ConvertibleMetaDa
 	 *
 	 * @return business-key metadata, or {@code null}
 	 */
-	public BizKey getBizKey() {
+	public @Nullable BizKey getBizKey() {
 		return bizKey;
 	}
 
@@ -437,7 +439,7 @@ public class DocumentMetaData extends NamedMetaData implements ConvertibleMetaDa
 	 * @param bizKey business-key metadata
 	 */
 	@XmlElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
-	public void setBizKey(BizKey bizKey) {
+	public void setBizKey(@Nullable BizKey bizKey) {
 		this.bizKey = bizKey;
 	}
 
@@ -450,7 +452,7 @@ public class DocumentMetaData extends NamedMetaData implements ConvertibleMetaDa
 	@XmlElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE,
 			name = "interface",
 			type = InterfaceImpl.class)
-	public List<Interface> getImplements() {
+	public @Nonnull List<Interface> getImplements() {
 		return interfaces;
 	}
 
@@ -485,7 +487,7 @@ public class DocumentMetaData extends NamedMetaData implements ConvertibleMetaDa
 						@XmlElementRef(type = InverseMany.class),
 						@XmlElementRef(type = Geometry.class),
 						@XmlElementRef(type = Id.class)})
-	public List<Attribute> getAttributes() {
+	public @Nonnull List<Attribute> getAttributes() {
 		return attributes;
 	}
 
@@ -496,7 +498,7 @@ public class DocumentMetaData extends NamedMetaData implements ConvertibleMetaDa
 	 */
 	@XmlElementWrapper(namespace = XMLMetaData.DOCUMENT_NAMESPACE, name = "conditions")
 	@XmlElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE, name = "condition", required = true)
-	public List<ConditionMetaData> getConditions() {
+	public @Nonnull List<ConditionMetaData> getConditions() {
 		return conditions;
 	}
 
@@ -507,7 +509,7 @@ public class DocumentMetaData extends NamedMetaData implements ConvertibleMetaDa
 	 */
 	@XmlElementWrapper(namespace = XMLMetaData.DOCUMENT_NAMESPACE, name = "uniqueConstraints")
 	@XmlElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE, name = "constraint", required = false)
-	public List<UniqueConstraint> getUniqueConstraints() {
+	public @Nonnull List<UniqueConstraint> getUniqueConstraints() {
 		return uniqueConstraints;
 	}
 
@@ -516,7 +518,7 @@ public class DocumentMetaData extends NamedMetaData implements ConvertibleMetaDa
 	 *
 	 * @return documentation text, or {@code null}
 	 */
-	public String getDocumentation() {
+	public @Nullable String getDocumentation() {
 		return documentation;
 	}
 
@@ -527,7 +529,7 @@ public class DocumentMetaData extends NamedMetaData implements ConvertibleMetaDa
 	 */
 	@XmlElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
 	@XmlJavaTypeAdapter(CDATAAdapter.class)
-	public void setDocumentation(String documentation) {
+	public void setDocumentation(@Nullable String documentation) {
 		this.documentation = UtilImpl.processStringValue(documentation);
 	}
 
@@ -537,7 +539,7 @@ public class DocumentMetaData extends NamedMetaData implements ConvertibleMetaDa
 	 * @return mutable document property map
 	 */
 	@Override
-	public Map<String, String> getProperties() {
+	public @Nonnull Map<String, String> getProperties() {
 		return properties;
 	}
 
@@ -574,7 +576,7 @@ public class DocumentMetaData extends NamedMetaData implements ConvertibleMetaDa
 	 */
 	@Override
 	@SuppressWarnings({"java:S3776", "java:S6541"}) // complexity OK
-	public Document convert(String metaDataName) {
+	public @Nonnull Document convert(@Nonnull String metaDataName) {
 		DocumentImpl result = new DocumentImpl();
 		result.setLastModifiedMillis(getLastModifiedMillis());
 

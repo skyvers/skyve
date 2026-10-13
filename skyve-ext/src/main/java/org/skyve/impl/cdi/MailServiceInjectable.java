@@ -9,6 +9,7 @@ import org.skyve.util.Mail;
 import org.skyve.util.MailDispatchOutcome;
 import org.skyve.util.MailService;
 
+import jakarta.annotation.Nonnull;
 import jakarta.enterprise.inject.Alternative;
 
 /**
@@ -28,7 +29,7 @@ public class MailServiceInjectable implements MailService, Serializable {
 	 * @param out the output stream receiving the MIME payload.
 	 */
 	@Override
-	public void writeMail(Mail mail, OutputStream out) {
+	public void writeMail(@Nonnull Mail mail, @Nonnull OutputStream out) {
 		EXT.getMailService().writeMail(mail, out);
 	}
 
@@ -40,7 +41,7 @@ public class MailServiceInjectable implements MailService, Serializable {
 	 * @param mail the mail definition to send.
 	 */
 	@Override
-	public void sendMail(Mail mail) {
+	public void sendMail(@Nonnull Mail mail) {
 		EXT.getMailService().sendMail(mail);
 	}
 
@@ -52,7 +53,7 @@ public class MailServiceInjectable implements MailService, Serializable {
 	 * @param mails the mail definitions to send.
 	 */
 	@Override
-	public void sendBulkMail(List<Mail> mails) {
+	public void sendBulkMail(@Nonnull List<Mail> mails) {
 		EXT.getMailService().sendBulkMail(mails);
 	}
 
@@ -63,7 +64,7 @@ public class MailServiceInjectable implements MailService, Serializable {
 	 * @return the dispatch outcome for the submitted message.
 	 */
 	@Override
-	public MailDispatchOutcome dispatchMail(Mail mail) {
+	public @Nonnull MailDispatchOutcome dispatchMail(@Nonnull Mail mail) {
 		return EXT.getMailService().dispatchMail(mail);
 	}
 
@@ -74,7 +75,7 @@ public class MailServiceInjectable implements MailService, Serializable {
 	 * @return the aggregate dispatch outcome for all submitted messages.
 	 */
 	@Override
-	public MailDispatchOutcome dispatchBulkMail(List<Mail> mails) {
+	public @Nonnull MailDispatchOutcome dispatchBulkMail(@Nonnull List<Mail> mails) {
 		return EXT.getMailService().dispatchBulkMail(mails);
 	}
 }

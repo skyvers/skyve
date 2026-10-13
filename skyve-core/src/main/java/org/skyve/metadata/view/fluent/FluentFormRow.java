@@ -23,7 +23,7 @@ public class FluentFormRow {
 	 * @param row
 	 *            the row metadata to mutate
 	 */
-	public FluentFormRow(FormRow row) {
+	public FluentFormRow(@Nonnull FormRow row) {
 		this.row = row;
 	}
 	
@@ -36,7 +36,7 @@ public class FluentFormRow {
 	 *            the source row metadata
 	 * @return this builder
 	 */
-	public FluentFormRow from(@SuppressWarnings("hiding") FormRow row) {
+	public @Nonnull FluentFormRow from(@SuppressWarnings("hiding") @Nonnull FormRow row) {
 		row.getItems().forEach(i -> addItem(new FluentFormItem().from(i)));
 		row.getProperties().entrySet().forEach(p -> putProperty(p.getKey(), p.getValue()));
 		return this;
@@ -49,7 +49,7 @@ public class FluentFormRow {
 	 *            the item to append
 	 * @return this builder
 	 */
-	public FluentFormRow addItem(FluentFormItem item) {
+	public @Nonnull FluentFormRow addItem(@Nonnull FluentFormItem item) {
 		row.getItems().add(item.get());
 		return this;
 	}
@@ -63,7 +63,7 @@ public class FluentFormRow {
 	 *            the item to insert
 	 * @return this builder
 	 */
-	public FluentFormRow addItem(int index, FluentFormItem item) {
+	public @Nonnull FluentFormRow addItem(int index, @Nonnull FluentFormItem item) {
 		row.getItems().add(index, item.get());
 		return this;
 	}
@@ -75,7 +75,7 @@ public class FluentFormRow {
 	 *            zero-based row index
 	 * @return the item wrapper at {@code index}
 	 */
-	public FluentFormItem getItem(int index) {
+	public @Nonnull FluentFormItem getItem(int index) {
 		return new FluentFormItem(row.getItems().get(index));
 	}
 	
@@ -86,7 +86,7 @@ public class FluentFormRow {
 	 *            zero-based row index
 	 * @return this builder
 	 */
-	public FluentFormRow removeItem(int index) {
+	public @Nonnull FluentFormRow removeItem(int index) {
 		row.getItems().remove(index);
 		return this;
 	}
@@ -96,7 +96,7 @@ public class FluentFormRow {
 	 *
 	 * @return this builder
 	 */
-	public FluentFormRow clearItems() {
+	public @Nonnull FluentFormRow clearItems() {
 		row.getItems().clear();
 		return this;
 	}
@@ -119,7 +119,7 @@ public class FluentFormRow {
 	 *
 	 * @return the mutable row metadata
 	 */
-	public FormRow get() {
+	public @Nonnull FormRow get() {
 		return row;
 	}
 }

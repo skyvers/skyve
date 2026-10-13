@@ -3,6 +3,9 @@ package org.skyve.impl.domain.number;
 import org.skyve.CORE;
 import org.skyve.persistence.Persistence;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Standard {@link AbstractDocumentNumberGenerator} that retrieves the current-thread
  * persistence instance from {@link org.skyve.CORE#getPersistence()} to increment
@@ -16,7 +19,7 @@ import org.skyve.persistence.Persistence;
  */
 public class DocumentNumberGenerator extends AbstractDocumentNumberGenerator {
 	@Override
-	public String next(String prefix, String moduleName, String documentName, String fieldName, int minimumLength) {
+	public @Nonnull String next(@Nullable String prefix, @Nonnull String moduleName, @Nonnull String documentName, @Nonnull String fieldName, int minimumLength) {
 		Persistence pers = CORE.getPersistence();
 		return getNextNumber(pers, prefix, moduleName, documentName, fieldName, minimumLength);
 	}

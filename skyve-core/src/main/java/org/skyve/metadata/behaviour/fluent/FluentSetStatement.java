@@ -2,6 +2,9 @@ package org.skyve.metadata.behaviour.fluent;
 
 import org.skyve.impl.metadata.behaviour.SetStatement;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Builds a behaviour {@code set} statement.
  *
@@ -22,7 +25,7 @@ public class FluentSetStatement extends FluentStatement<FluentSetStatement> {
 	 *
 	 * @param setStatement the backing statement metadata
 	 */
-	public FluentSetStatement(SetStatement setStatement) {
+	public FluentSetStatement(@Nonnull SetStatement setStatement) {
 		this.setStatement = setStatement;
 	}
 
@@ -32,7 +35,7 @@ public class FluentSetStatement extends FluentStatement<FluentSetStatement> {
 	 * @param setStatement source metadata
 	 * @return this builder
 	 */
-	public FluentSetStatement from(@SuppressWarnings("hiding") SetStatement setStatement) {
+	public @Nonnull FluentSetStatement from(@SuppressWarnings("hiding") @Nonnull SetStatement setStatement) {
 		super.fromBase(setStatement);
 		binding(setStatement.getBinding());
 		expression(setStatement.getExpression());
@@ -45,7 +48,7 @@ public class FluentSetStatement extends FluentStatement<FluentSetStatement> {
 	 * @param binding dot-path binding expression
 	 * @return this builder
 	 */
-	public FluentSetStatement binding(String binding) {
+	public @Nonnull FluentSetStatement binding(@Nullable String binding) {
 		setStatement.setBinding(binding);
 		return this;
 	}
@@ -56,7 +59,7 @@ public class FluentSetStatement extends FluentStatement<FluentSetStatement> {
 	 * @param expression Skyve expression string
 	 * @return this builder
 	 */
-	public FluentSetStatement expression(String expression) {
+	public @Nonnull FluentSetStatement expression(@Nullable String expression) {
 		setStatement.setExpression(expression);
 		return this;
 	}
@@ -67,7 +70,7 @@ public class FluentSetStatement extends FluentStatement<FluentSetStatement> {
 	 * @return backing set statement metadata
 	 */
 	@Override
-	public SetStatement get() {
+	public @Nonnull SetStatement get() {
 		return setStatement;
 	}
 }

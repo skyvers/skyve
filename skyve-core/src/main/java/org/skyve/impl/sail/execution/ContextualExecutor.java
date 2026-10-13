@@ -25,6 +25,9 @@ import org.skyve.metadata.view.View.ViewType;
 import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.web.UserAgentType;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Base class for executors that maintain and manage a stack of {@link AutomationContext} instances
  * while running SAIL automation steps.
@@ -39,7 +42,7 @@ public abstract class ContextualExecutor<T extends AutomationContext> implements
 
 	private Deque<T> contextStack = new ArrayDeque<>(8);
 
-	protected final void push(T context) {
+	protected final void push(@Nonnull T context) {
 		String uxui = context.getUxui();
 		if (uxui == null) {
 			context.setUxui(currentUxUi);
@@ -57,7 +60,7 @@ public abstract class ContextualExecutor<T extends AutomationContext> implements
 		contextStack.push(context);
 	}
 
-	protected final T pop() {
+	protected final @Nonnull T pop() {
 		T result = contextStack.pop();
 
 		T current = contextStack.peek();
@@ -76,7 +79,7 @@ public abstract class ContextualExecutor<T extends AutomationContext> implements
 		return result;
 	}
 	
-	protected final T peek() {
+	protected final @Nullable T peek() {
 		return contextStack.peek();
 	}
 	
@@ -89,7 +92,7 @@ public abstract class ContextualExecutor<T extends AutomationContext> implements
 	 * This is intended to be called by sub-classes.
 	 */
 	@Override
-	public void executeAutomation(Automation automation) {
+	public void executeAutomation(@Nonnull Automation automation) {
 		currentUxUi = automation.getUxui();
 		currentUserAgentType = automation.getUserAgentType();
 		testStrategy = automation.getTestStrategy();
@@ -100,7 +103,7 @@ public abstract class ContextualExecutor<T extends AutomationContext> implements
 	 * This is intended to be called by sub-classes.
 	 */
 	@Override
-	public void executeNavigateList(NavigateList list) {
+	public void executeNavigateList(@Nonnull NavigateList list) {
 		T context = peek();
 		context.setViewType(ViewType.list);
 		
@@ -132,7 +135,7 @@ public abstract class ContextualExecutor<T extends AutomationContext> implements
 	 * This is intended to be called by sub-classes.
 	 */
 	@Override
-	public void executeNavigateEdit(NavigateEdit edit) {
+	public void executeNavigateEdit(@Nonnull NavigateEdit edit) {
 		T context = peek();
 		context.setViewType(ViewType.edit);
 		context.setModuleName(edit.getModuleName());
@@ -144,7 +147,7 @@ public abstract class ContextualExecutor<T extends AutomationContext> implements
 	 * This is intended to be called by sub-classes.
 	 */
 	@Override
-	public void executeNavigateTree(NavigateTree tree) {
+	public void executeNavigateTree(@Nonnull NavigateTree tree) {
 		executeNavigateList(tree);
 	}
 
@@ -153,7 +156,7 @@ public abstract class ContextualExecutor<T extends AutomationContext> implements
 	 * This is intended to be called by sub-classes.
 	 */
 	@Override
-	public void executeNavigateMap(NavigateMap map) {
+	public void executeNavigateMap(@Nonnull NavigateMap map) {
 		executeNavigateList(map);
 	}
 
@@ -162,7 +165,7 @@ public abstract class ContextualExecutor<T extends AutomationContext> implements
 	 * This is intended to be called by sub-classes.
 	 */
 	@Override
-	public void executeNavigateCalendar(NavigateCalendar calendar) {
+	public void executeNavigateCalendar(@Nonnull NavigateCalendar calendar) {
 		executeNavigateList(calendar);
 	}
 	
@@ -171,17 +174,17 @@ public abstract class ContextualExecutor<T extends AutomationContext> implements
 	 * This is intended to be called by sub-classes.
 	 */
 	@Override
-	public void executeNavigateLink(NavigateLink link) {
+	public void executeNavigateLink(@Nonnull NavigateLink link) {
 		T context = peek();
 		context.setDocumentName(null);
 		context.setViewType(null);
 	}
 	
-	public TestStrategy getTestStrategy() {
+	public @Nullable TestStrategy getTestStrategy() {
 		return testStrategy;
 	}
 	
-	public T newContext(PushListContext push, T newContext) {
+	public @Nonnull T newContext(@Nonnull PushListContext push, @Nonnull T newContext) {
 		String moduleName = push.getModuleName();
 		Customer c = CORE.getUser().getCustomer();
 		Module m = c.getModule(moduleName);
@@ -220,7 +223,7 @@ public abstract class ContextualExecutor<T extends AutomationContext> implements
 		return newContext;
 	}
 	
-	public T newContext(PushEditContext push, T newContext) {
+	public @Nonnull T newContext(@Nonnull PushEditContext push, @Nonnull T newContext) {
 		newContext.setModuleName(push.getModuleName());
 		newContext.setDocumentName(push.getDocumentName());
 

@@ -59,6 +59,7 @@ import org.skyve.domain.types.converters.timestamp.YYYY_MM_DD_HH_MI_SS;
 import org.skyve.util.Util;
 
 import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 
 /**
  * Signals that a {@link org.skyve.domain.types.converters.Converter} could not parse a
@@ -422,7 +423,7 @@ public class ConversionException extends DomainException implements MessageExcep
 	 * @param i18nKey the i18nKey
 	 * @param i18nValues the i18nValues
 	 */
-	public ConversionException(@Nonnull String i18nKey, String... i18nValues) {
+	public ConversionException(@Nonnull String i18nKey, @Nullable String... i18nValues) {
 		super("Conversion failed for converter :- " + i18nKey, false);
 		messages = Collections.singletonList(new Message(Util.nullSafeI18n(i18nKey, i18nValues)));
 	}
@@ -442,7 +443,7 @@ public class ConversionException extends DomainException implements MessageExcep
 	 * @return the result
 	 */
 	@Override
-	public List<Message> getMessages() {
+	public @Nonnull List<Message> getMessages() {
 		return messages;
 	}
 }

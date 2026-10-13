@@ -4,6 +4,8 @@ import org.skyve.impl.metadata.view.ActionImpl;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.view.Action.ActionShow;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlType;
 
@@ -30,7 +32,7 @@ public abstract class PositionableAction extends ActionMetaData {
 	 *
 	 * @return {@code true} for action-panel placement, {@code false} otherwise, or {@code null}
 	 */
-	public Boolean getInActionPanel() {
+	public @Nullable Boolean getInActionPanel() {
 		return inActionPanel;
 	}
 	
@@ -40,7 +42,7 @@ public abstract class PositionableAction extends ActionMetaData {
 	 * @param inActionPanel {@code true} to place in the action panel, {@code false} otherwise
 	 */
 	@XmlAttribute(required = false)
-	public void setInActionPanel(Boolean inActionPanel) {
+	public void setInActionPanel(@Nullable Boolean inActionPanel) {
 		this.inActionPanel = inActionPanel;
 	}
 
@@ -49,7 +51,7 @@ public abstract class PositionableAction extends ActionMetaData {
 	 *
 	 * @return visibility mode, or {@code null}
 	 */
-	public ActionShow getShow() {
+	public @Nullable ActionShow getShow() {
 		return show;
 	}
 	
@@ -59,7 +61,7 @@ public abstract class PositionableAction extends ActionMetaData {
 	 * @param show visibility mode
 	 */
 	@XmlAttribute(required = false)
-	public void setShow(ActionShow show) {
+	public void setShow(@Nullable ActionShow show) {
 		this.show = show;
 	}
 
@@ -69,7 +71,7 @@ public abstract class PositionableAction extends ActionMetaData {
 	 * @return runtime action metadata with action-panel and show settings applied
 	 */
 	@Override
-	public ActionImpl toMetaDataAction() {
+	public @Nonnull ActionImpl toMetaDataAction() {
 		ActionImpl result = super.toMetaDataAction();
 		result.setInActionPanel(inActionPanel);
 		result.setShow(show);

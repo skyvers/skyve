@@ -37,7 +37,7 @@ public abstract class SingletonCachedBizlet<T extends PersistentBean> extends Si
 	 * Gets a memoised version of the singleton instance (if it is customer or global scoped).
 	 */
 	@Override
-	public T newInstance(T bean) throws Exception {
+	public @Nonnull T newInstance(@Nonnull T bean) throws Exception {
 		return resolveCachedNewInstance(bean);
 	}
 	

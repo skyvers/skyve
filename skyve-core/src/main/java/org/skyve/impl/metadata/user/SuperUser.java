@@ -12,6 +12,9 @@ import org.skyve.metadata.user.DocumentPermissionScope;
 import org.skyve.metadata.user.User;
 import org.skyve.util.logging.SkyveLoggerFactory;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * A {@link UserImpl} subclass with all document and action privileges granted.
  *
@@ -40,7 +43,7 @@ public class SuperUser extends UserImpl {
 	 *
 	 * @param user the source user whose identity/customer context is copied.
 	 */
-	public SuperUser(User user) {
+	public SuperUser(@Nonnull User user) {
 		this();
     	setContactId(user.getContactId());
     	setContactName(user.getContactName());
@@ -64,7 +67,7 @@ public class SuperUser extends UserImpl {
 	 * @return always {@code true}.
 	 */
 	@Override
-	public boolean isInRole(String moduleName, String roleName) {
+	public boolean isInRole(@Nonnull String moduleName, @Nonnull String roleName) {
 		return true;
 	}
 	
@@ -76,7 +79,7 @@ public class SuperUser extends UserImpl {
 	 * @return the resolved scope, defaulting from {@code none} to {@code customer}.
 	 */
 	@Override
-	public DocumentPermissionScope getScope(String moduleName, String documentName) {
+	public @Nonnull DocumentPermissionScope getScope(@Nonnull String moduleName, @Nonnull String documentName) {
 		DocumentPermissionScope result = super.getScope(moduleName, documentName);
 		if (DocumentPermissionScope.none.equals(result)) {
 			result = DocumentPermissionScope.customer;
@@ -91,12 +94,12 @@ public class SuperUser extends UserImpl {
 	 * @return always {@code true}.
 	 */
 	@Override
-	public boolean canReadBean(String beanBizId,
-								String beanBizModule,
-								String beanBizDocument,
-								String beanBizCustomer,
-								String beanBizDataGroupId,
-								String beanBizUserId) {
+	public boolean canReadBean(@Nonnull String beanBizId,
+								@Nonnull String beanBizModule,
+								@Nonnull String beanBizDocument,
+								@Nullable String beanBizCustomer,
+								@Nullable String beanBizDataGroupId,
+								@Nullable String beanBizUserId) {
 		return true;
 	}
 
@@ -106,7 +109,7 @@ public class SuperUser extends UserImpl {
 	 * @return always {@code true}.
 	 */
 	@Override
-	public boolean canAccessDocument(Document document) {
+	public boolean canAccessDocument(@Nonnull Document document) {
 		return true;
 	}
 
@@ -117,7 +120,7 @@ public class SuperUser extends UserImpl {
 	 * @return always {@code true}.
 	 */
 	@Override
-	public boolean canCreateDocument(Document document) {
+	public boolean canCreateDocument(@Nonnull Document document) {
 		return true;
 	}
 
@@ -128,7 +131,7 @@ public class SuperUser extends UserImpl {
 	 * @return always {@code true}.
 	 */
 	@Override
-	public boolean canDeleteDocument(Document document) {
+	public boolean canDeleteDocument(@Nonnull Document document) {
 		return true;
 	}
 
@@ -140,7 +143,7 @@ public class SuperUser extends UserImpl {
 	 * @return always {@code true}.
 	 */
 	@Override
-	public boolean canExecuteAction(Document document, String actionName) {
+	public boolean canExecuteAction(@Nonnull Document document, @Nonnull String actionName) {
 		return true;
 	}
 
@@ -161,7 +164,7 @@ public class SuperUser extends UserImpl {
 	 * @return always {@code true}.
 	 */
 	@Override
-	public boolean canReadDocument(Document document) {
+	public boolean canReadDocument(@Nonnull Document document) {
 		return true;
 	}
 
@@ -192,7 +195,7 @@ public class SuperUser extends UserImpl {
 	 * @return always {@code true}.
 	 */
 	@Override
-	public boolean canUpdateDocument(Document document) {
+	public boolean canUpdateDocument(@Nonnull Document document) {
 		return true;
 	}
 
@@ -202,7 +205,7 @@ public class SuperUser extends UserImpl {
 	 * @return module names, or {@code null} if customer metadata cannot be resolved.
 	 */
 	@Override
-	public Set<String> getAccessibleModuleNames() {
+	public @Nonnull Set<String> getAccessibleModuleNames() {
 		try {
 			return new TreeSet<>(((CustomerImpl) getCustomer()).getModuleEntries().keySet());//Repository.get().getAllVanillaModuleNames());
 		}

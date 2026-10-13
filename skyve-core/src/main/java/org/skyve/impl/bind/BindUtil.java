@@ -1978,7 +1978,7 @@ public final class BindUtil {
 	}
 
 	@SuppressWarnings("unchecked")
-	public static Object get(@Nonnull Map<String, Object> map, @Nonnull String binding) {
+	public static @Nullable Object get(@Nonnull Map<String, Object> map, @Nonnull String binding) {
 		String alias = sanitiseBinding(binding);
 		Object result = null;
 		if (map.containsKey(binding)) {

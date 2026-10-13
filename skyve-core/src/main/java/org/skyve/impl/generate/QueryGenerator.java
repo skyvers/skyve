@@ -30,6 +30,9 @@ import org.skyve.metadata.repository.ProvidedRepository;
 import org.slf4j.Logger;
 import org.skyve.util.logging.SkyveLoggerFactory;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Generates query-related artefacts from module metadata.
  *
@@ -43,7 +46,7 @@ public class QueryGenerator {
 		// do nothing
 	}
 
-	public static List<QueryDefinition> generate(Customer customer, Module module, boolean includeAssociationBizKeys) {
+	public static @Nonnull List<QueryDefinition> generate(@Nullable Customer customer, @Nonnull Module module, boolean includeAssociationBizKeys) {
 		Set<String> documentNames = module.getDocumentRefs().keySet();
 		List<QueryDefinition> result = new ArrayList<>(documentNames.size());
 
@@ -58,7 +61,7 @@ public class QueryGenerator {
 	}
 
 	@SuppressWarnings("java:S3776") // Complexity OK
-	public static String generateQueryXML(Customer customer, Module module, boolean includeAssociationBizKeys) {
+	public static @Nonnull String generateQueryXML(@Nullable Customer customer, @Nonnull Module module, boolean includeAssociationBizKeys) {
 		ModuleMetaData newModule = new ModuleMetaData();
 
 		List<QueryMetaData> metaDataQueries = newModule.getQueries();
@@ -128,7 +131,7 @@ public class QueryGenerator {
 		return XMLMetaData.marshalModule(newModule, false);
 	}
 	
-	public static void main(String[] args) throws Exception {
+	public static void main(@Nonnull String[] args) throws Exception {
 		String customerName = null;
 		String moduleName = null;
 		boolean includeAssociationBizKeys = false;

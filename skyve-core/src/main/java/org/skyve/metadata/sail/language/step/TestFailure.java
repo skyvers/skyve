@@ -6,6 +6,8 @@ import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.sail.execution.Executor;
 import org.skyve.metadata.sail.language.Step;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
@@ -31,7 +33,7 @@ public class TestFailure implements Step {
 	 * Returns the message.
 	 * @return the result
 	 */
-	public String getMessage() {
+	public @Nullable String getMessage() {
 		return message;
 	}
 
@@ -40,7 +42,7 @@ public class TestFailure implements Step {
 	 * @param message the message
 	 */
 	@XmlAttribute(name = "message")
-	public void setMessage(String message) {
+	public void setMessage(@Nullable String message) {
 		this.message = UtilImpl.processStringValue(message);
 	}
 
@@ -49,7 +51,7 @@ public class TestFailure implements Step {
 	 * @param executor the executor
 	 */
 	@Override
-	public void execute(Executor executor) {
+	public void execute(@Nonnull Executor executor) {
 		executor.executeTestFailure(this);
 	}
 	
@@ -59,7 +61,7 @@ public class TestFailure implements Step {
 	 * @return the result
 	 */
 	@Override
-	public String getIdentifier(AutomationContext context) {
+	public @Nonnull String getIdentifier(@Nonnull AutomationContext context) {
 		return "Failure";
 	}
 }

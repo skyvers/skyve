@@ -11,6 +11,9 @@ import org.skyve.impl.metadata.repository.module.ModuleMetaData;
 import org.skyve.impl.metadata.repository.router.Router;
 import org.skyve.impl.metadata.repository.view.ViewMetaData;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Extend or use this repository for dynamic domains where there is no on-demand loading.
  * This implementation does not have a thread safe cache and mutations should happen before the repository is placed in the chain.
@@ -40,7 +43,7 @@ public class UnsynchronisedDynamicRepository extends AbstractDynamicRepository {
 	 * Returns {@code null} because no router is loaded from an external source.
 	 */
 	@Override
-	public Router loadRouter() {
+	public @Nullable Router loadRouter() {
 		// nothing to do as metadata will be added programmatically
 		return null;
 	}
@@ -61,7 +64,7 @@ public class UnsynchronisedDynamicRepository extends AbstractDynamicRepository {
 	 * @return always {@code null}
 	 */
 	@Override
-	public CustomerMetaData loadCustomer(String customerName) {
+	public @Nullable CustomerMetaData loadCustomer(@Nonnull String customerName) {
 		// nothing to do as metadata will be added programmatically
 		return null;
 	}
@@ -73,7 +76,7 @@ public class UnsynchronisedDynamicRepository extends AbstractDynamicRepository {
 	 * @return always {@link Long#MIN_VALUE}
 	 */
 	@Override
-	public long customerLastModifiedMillis(String customerName) {
+	public long customerLastModifiedMillis(@Nonnull String customerName) {
 		// never reload as metadata will be added programmatically
 		return Long.MIN_VALUE;
 	}
@@ -86,7 +89,7 @@ public class UnsynchronisedDynamicRepository extends AbstractDynamicRepository {
 	 * @return always {@code null}
 	 */
 	@Override
-	public ModuleMetaData loadModule(String customerName, String moduleName) {
+	public @Nullable ModuleMetaData loadModule(@Nullable String customerName, @Nonnull String moduleName) {
 		// nothing to do as metadata will be added programmatically
 		return null;
 	}
@@ -99,7 +102,7 @@ public class UnsynchronisedDynamicRepository extends AbstractDynamicRepository {
 	 * @return always {@link Long#MIN_VALUE}
 	 */
 	@Override
-	public long moduleLastModifiedMillis(String customerName, String moduleName) {
+	public long moduleLastModifiedMillis(@Nullable String customerName, @Nonnull String moduleName) {
 		// never reload as metadata will be added programmatically
 		return Long.MIN_VALUE;
 	}
@@ -113,7 +116,7 @@ public class UnsynchronisedDynamicRepository extends AbstractDynamicRepository {
 	 * @return always {@code null}
 	 */
 	@Override
-	public DocumentMetaData loadDocument(String customerName, String moduleName, String documentName) {
+	public @Nullable DocumentMetaData loadDocument(@Nullable String customerName, @Nonnull String moduleName, @Nonnull String documentName) {
 		// nothing to do as metadata will be added programmatically
 		return null;
 	}
@@ -127,7 +130,7 @@ public class UnsynchronisedDynamicRepository extends AbstractDynamicRepository {
 	 * @return always {@link Long#MIN_VALUE}
 	 */
 	@Override
-	public long documentLastModifiedMillis(String customerName, String moduleName, String documentName) {
+	public long documentLastModifiedMillis(@Nullable String customerName, @Nonnull String moduleName, @Nonnull String documentName) {
 		// never reload as metadata will be added programmatically
 		return Long.MIN_VALUE;
 	}
@@ -143,7 +146,7 @@ public class UnsynchronisedDynamicRepository extends AbstractDynamicRepository {
 	 * @return always {@code null}
 	 */
 	@Override
-	public ViewMetaData loadView(String customerName, String moduleName, String documentName, String uxui, String viewName) {
+	public @Nullable ViewMetaData loadView(@Nullable String customerName, @Nonnull String moduleName, @Nonnull String documentName, @Nullable String uxui, @Nonnull String viewName) {
 		// nothing to do as metadata will be added programmatically
 		return null;
 	}
@@ -159,7 +162,7 @@ public class UnsynchronisedDynamicRepository extends AbstractDynamicRepository {
 	 * @return always {@link Long#MIN_VALUE}
 	 */
 	@Override
-	public long viewLastModifiedMillis(String customerName, String moduleName, String documentName, String uxui, String viewName) {
+	public long viewLastModifiedMillis(@Nullable String customerName, @Nonnull String moduleName, @Nonnull String documentName, @Nullable String uxui, @Nonnull String viewName) {
 		// never reload as metadata will be added programmatically
 		return Long.MIN_VALUE;
 	}
@@ -174,7 +177,7 @@ public class UnsynchronisedDynamicRepository extends AbstractDynamicRepository {
 	 * @return always {@code null}
 	 */
 	@Override
-	public ActionMetaData loadMetaDataAction(String customerName, String moduleName, String documentName, String actionName) {
+	public @Nullable ActionMetaData loadMetaDataAction(@Nullable String customerName, @Nonnull String moduleName, @Nonnull String documentName, @Nonnull String actionName) {
 		// nothing to do as metadata will be added programmatically
 		return null;
 	}
@@ -189,7 +192,7 @@ public class UnsynchronisedDynamicRepository extends AbstractDynamicRepository {
 	 * @return always {@link Long#MIN_VALUE}
 	 */
 	@Override
-	public long metaDataActionLastModifiedMillis(String customerName, String moduleName, String documentName, String actionName) {
+	public long metaDataActionLastModifiedMillis(@Nullable String customerName, @Nonnull String moduleName, @Nonnull String documentName, @Nonnull String actionName) {
 		// never reload as metadata will be added programmatically
 		return Long.MIN_VALUE;
 	}
@@ -203,7 +206,7 @@ public class UnsynchronisedDynamicRepository extends AbstractDynamicRepository {
 	 * @return always {@code null}
 	 */
 	@Override
-	public BizletMetaData loadMetaDataBizlet(String customerName, String moduleName, String documentName) {
+	public @Nullable BizletMetaData loadMetaDataBizlet(@Nullable String customerName, @Nonnull String moduleName, @Nonnull String documentName) {
 		// nothing to do as metadata will be added programmatically
 		return null;
 	}
@@ -217,7 +220,7 @@ public class UnsynchronisedDynamicRepository extends AbstractDynamicRepository {
 	 * @return always {@link Long#MIN_VALUE}
 	 */
 	@Override
-	public long metaDataBizletLastModifiedMillis(String customerName, String moduleName, String documentName) {
+	public long metaDataBizletLastModifiedMillis(@Nullable String customerName, @Nonnull String moduleName, @Nonnull String documentName) {
 		// never reload as metadata will be added programmatically
 		return Long.MIN_VALUE;
 	}
@@ -226,7 +229,7 @@ public class UnsynchronisedDynamicRepository extends AbstractDynamicRepository {
 	 * Returns an empty list because this repository does not discover customer folders.
 	 */
 	@Override
-	public List<String> getAllCustomerNames() {
+	public @Nonnull List<String> getAllCustomerNames() {
 		// TODO should I find the customer cache keys?
 		return Collections.emptyList();
 	}
@@ -235,7 +238,7 @@ public class UnsynchronisedDynamicRepository extends AbstractDynamicRepository {
 	 * Returns an empty list because this repository does not discover module folders.
 	 */
 	@Override
-	public List<String> getAllVanillaModuleNames() {
+	public @Nonnull List<String> getAllVanillaModuleNames() {
 		// TODO should I find the vanilla module cache keys?
 		return Collections.emptyList();
 	}

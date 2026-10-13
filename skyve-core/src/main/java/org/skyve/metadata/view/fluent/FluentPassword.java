@@ -24,7 +24,7 @@ public class FluentPassword extends FluentChangeableInputWidget<FluentPassword> 
 	 * @param password
 	 *            the metadata instance to mutate
 	 */
-	public FluentPassword(Password password) {
+	public FluentPassword(@Nonnull Password password) {
 		this.password = password;
 	}
 
@@ -35,7 +35,7 @@ public class FluentPassword extends FluentChangeableInputWidget<FluentPassword> 
 	 *            the source metadata to copy
 	 * @return this builder
 	 */
-	public FluentPassword from(@SuppressWarnings("hiding") Password password) {
+	public @Nonnull FluentPassword from(@SuppressWarnings("hiding") @Nonnull Password password) {
 		absoluteWidth(password, this);
 		super.from(password);
 		password.getProperties().entrySet().forEach(p -> putProperty(p.getKey(), p.getValue()));
@@ -51,7 +51,7 @@ public class FluentPassword extends FluentChangeableInputWidget<FluentPassword> 
 	 * @return this builder
 	 */
 	@Override
-	public FluentPassword pixelWidth(int width) {
+	public @Nonnull FluentPassword pixelWidth(int width) {
 		password.setPixelWidth(Integer.valueOf(width));
 		return this;
 	}
@@ -75,7 +75,7 @@ public class FluentPassword extends FluentChangeableInputWidget<FluentPassword> 
 	 * @return the wrapped password metadata
 	 */
 	@Override
-	public Password get() {
+	public @Nonnull Password get() {
 		return password;
 	}
 }

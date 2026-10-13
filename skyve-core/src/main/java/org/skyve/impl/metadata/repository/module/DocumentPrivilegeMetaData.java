@@ -11,6 +11,8 @@ import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.DecoratedMetaData;
 import org.skyve.metadata.user.DocumentPermission;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlType;
@@ -50,41 +52,41 @@ public class DocumentPrivilegeMetaData implements DecoratedMetaData {
 	@XmlJavaTypeAdapter(PropertyMapAdapter.class)
 	private Map<String, String> properties = new LinkedHashMap<>();
 
-	public String getDocumentName() {
+	public @Nullable String getDocumentName() {
 		return documentName;
 	}
 
 	@XmlAttribute(name = "name", required = true)
-	public void setDocumentName(String documentName) {
+	public void setDocumentName(@Nullable String documentName) {
 		this.documentName = UtilImpl.processStringValue(documentName);
 	}
 
-	public DocumentPermission getPermission() {
+	public @Nullable DocumentPermission getPermission() {
 		return permission;
 	}
 
 	@XmlAttribute(required = true)
-	public void setPermission(DocumentPermission permission) {
+	public void setPermission(@Nullable DocumentPermission permission) {
 		this.permission = permission;
 	}
 
 	@XmlElement(namespace = XMLMetaData.MODULE_NAMESPACE, name = "action", required = false)
-	public List<ActionPrivilegeMetaData> getActions() {
+	public @Nonnull List<ActionPrivilegeMetaData> getActions() {
 		return actions;
 	}
 
 	@XmlElement(namespace = XMLMetaData.MODULE_NAMESPACE, name = "contentRestriction", required = false)
-	public List<ContentRestriction> getContentRestrictions() {
+	public @Nonnull List<ContentRestriction> getContentRestrictions() {
 		return contentRestrictions;
 	}
 
 	@XmlElement(namespace = XMLMetaData.MODULE_NAMESPACE, name = "contentPermission", required = false)
-	public List<ContentPermission> getContentPermissions() {
+	public @Nonnull List<ContentPermission> getContentPermissions() {
 		return contentPermissions;
 	}
 	
 	@Override
-	public Map<String, String> getProperties() {
+	public @Nonnull Map<String, String> getProperties() {
 		return properties;
 	}
 }

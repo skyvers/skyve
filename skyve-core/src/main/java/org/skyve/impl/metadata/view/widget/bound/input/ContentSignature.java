@@ -8,6 +8,8 @@ import org.skyve.impl.metadata.view.AbsoluteSize;
 import org.skyve.impl.metadata.view.FormItemWidget;
 import org.skyve.impl.util.XMLMetaData;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlRootElement;
@@ -60,7 +62,7 @@ public class ContentSignature extends InputWidget implements AbsoluteSize, FormI
 	 *         width should be used
 	 */
 	@Override
-	public Integer getPixelWidth() {
+	public @Nullable Integer getPixelWidth() {
 		return pixelWidth;
 	}
 
@@ -72,7 +74,7 @@ public class ContentSignature extends InputWidget implements AbsoluteSize, FormI
 	 */
 	@Override
 	@XmlAttribute(required = false)
-	public void setPixelWidth(Integer pixelWidth) {
+	public void setPixelWidth(@Nullable Integer pixelWidth) {
 		this.pixelWidth = pixelWidth;
 	}
 
@@ -83,7 +85,7 @@ public class ContentSignature extends InputWidget implements AbsoluteSize, FormI
 	 *         height should be used
 	 */
 	@Override
-	public Integer getPixelHeight() {
+	public @Nullable Integer getPixelHeight() {
 		return pixelHeight;
 	}
 
@@ -95,7 +97,7 @@ public class ContentSignature extends InputWidget implements AbsoluteSize, FormI
 	 */
 	@Override
 	@XmlAttribute(required = false)
-	public void setPixelHeight(Integer pixelHeight) {
+	public void setPixelHeight(@Nullable Integer pixelHeight) {
 		this.pixelHeight = pixelHeight;
 	}
 
@@ -108,7 +110,7 @@ public class ContentSignature extends InputWidget implements AbsoluteSize, FormI
 	 * @return a mutable property map, never {@code null}
 	 */
 	@Override
-	public Map<String, String> getProperties() {
+	public @Nonnull Map<String, String> getProperties() {
 		return properties;
 	}
 	
@@ -118,7 +120,7 @@ public class ContentSignature extends InputWidget implements AbsoluteSize, FormI
 	 * @return an RGB hex colour (for example {@code #FFFFFF}), or {@code null}
 	 *         to use the client default
 	 */
-	public String getRgbHexBackgroundColour() {
+	public @Nullable String getRgbHexBackgroundColour() {
 		return rgbHexBackgroundColour;
 	}
 
@@ -129,7 +131,7 @@ public class ContentSignature extends InputWidget implements AbsoluteSize, FormI
 	 *        {@code #FFFFFF}), or {@code null} to use the client default
 	 */
 	@XmlAttribute(required = false)
-	public void setRgbHexBackgroundColour(String rgbHexBackgroundColour) {
+	public void setRgbHexBackgroundColour(@Nullable String rgbHexBackgroundColour) {
 		this.rgbHexBackgroundColour = rgbHexBackgroundColour;
 	}
 	
@@ -139,7 +141,7 @@ public class ContentSignature extends InputWidget implements AbsoluteSize, FormI
 	 * @return an RGB hex colour (for example {@code #000000}), or {@code null}
 	 *         to use the client default
 	 */
-	public String getRgbHexForegroundColour() {
+	public @Nullable String getRgbHexForegroundColour() {
 		return rgbHexForegroundColour;
 	}
 
@@ -150,7 +152,7 @@ public class ContentSignature extends InputWidget implements AbsoluteSize, FormI
 	 *        {@code #000000}), or {@code null} to use the client default
 	 */
 	@XmlAttribute(required = false)
-	public void setRgbHexForegroundColour(String rgbHexForegroundColour) {
+	public void setRgbHexForegroundColour(@Nullable String rgbHexForegroundColour) {
 		this.rgbHexForegroundColour = rgbHexForegroundColour;
 	}	
 }

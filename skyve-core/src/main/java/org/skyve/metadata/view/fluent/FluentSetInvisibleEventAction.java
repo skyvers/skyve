@@ -25,7 +25,7 @@ public class FluentSetInvisibleEventAction extends FluentEventAction {
 	 * @param action
 	 *            the action instance to wrap
 	 */
-	public FluentSetInvisibleEventAction(SetInvisibleEventAction action) {
+	public FluentSetInvisibleEventAction(@Nonnull SetInvisibleEventAction action) {
 		this.action = action;
 	}
 
@@ -36,7 +36,7 @@ public class FluentSetInvisibleEventAction extends FluentEventAction {
 	 *            the source action metadata
 	 * @return this builder
 	 */
-	public FluentSetInvisibleEventAction from(@SuppressWarnings("hiding") SetInvisibleEventAction action) {
+	public @Nonnull FluentSetInvisibleEventAction from(@SuppressWarnings("hiding") @Nonnull SetInvisibleEventAction action) {
 		binding(action.getBinding());
 		BindUtil.copyAuthoredCondition(action.getXmlInvisibleCondition(), action.getXmlVisibleCondition(), this::invisibleCondition, this::visibleCondition);
 		action.getProperties().entrySet().forEach(p -> putProperty(p.getKey(), p.getValue()));
@@ -51,7 +51,7 @@ public class FluentSetInvisibleEventAction extends FluentEventAction {
 	 *            the target binding expression
 	 * @return this builder
 	 */
-	public FluentSetInvisibleEventAction binding(String binding) {
+	public @Nonnull FluentSetInvisibleEventAction binding(@Nullable String binding) {
 		action.setBinding(binding);
 		return this;
 	}
@@ -97,7 +97,7 @@ public class FluentSetInvisibleEventAction extends FluentEventAction {
 	 * Returns the wrapped event action instance.
 	 */
 	@Override
-	public SetInvisibleEventAction get() {
+	public @Nonnull SetInvisibleEventAction get() {
 		return action;
 	}
 }

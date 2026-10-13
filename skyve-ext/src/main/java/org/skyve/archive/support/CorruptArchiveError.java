@@ -12,6 +12,8 @@ import org.skyve.metadata.model.document.Bizlet.DomainValue;
 import org.skyve.util.Util;
 
 import jakarta.annotation.Generated;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlEnum;
 
 /**
@@ -43,70 +45,70 @@ public interface CorruptArchiveError extends PersistentBean {
      *
      * @return Corrupt archive file name
      */
-    public String getFilename();
+    public @Nullable String getFilename();
 
     /**
      * Sets the original file name of the corrupt archive payload.
      *
      * @param filename Corrupt archive file name
      */
-    public void setFilename(String filename);
+    public void setFilename(@Nullable String filename);
 
     /**
      * Returns the archive type module that the payload was expected to target.
      *
      * @return Archive type module name
      */
-    public String getArchiveTypeModule();
+    public @Nullable String getArchiveTypeModule();
 
     /**
      * Sets the archive type module that the payload was expected to target.
      *
      * @param archiveTypeModule Archive type module name
      */
-    public void setArchiveTypeModule(String archiveTypeModule);
+    public void setArchiveTypeModule(@Nullable String archiveTypeModule);
 
     /**
      * Returns the archive type document that the payload was expected to target.
      *
      * @return Archive type document name
      */
-    public String getArchiveTypeDocument();
+    public @Nullable String getArchiveTypeDocument();
 
     /**
      * Sets the archive type document that the payload was expected to target.
      *
      * @param archiveTypeDocument Archive type document name
      */
-    public void setArchiveTypeDocument(String archiveTypeDocument);
+    public void setArchiveTypeDocument(@Nullable String archiveTypeDocument);
 
     /**
      * Returns when this corrupt archive record was captured.
      *
      * @return Capture timestamp
      */
-    public Timestamp getTimestamp();
+    public @Nullable Timestamp getTimestamp();
 
     /**
      * Sets when this corrupt archive record was captured.
      *
      * @param timestamp Capture timestamp
      */
-    public void setTimestamp(Timestamp timestamp);
+    public void setTimestamp(@Nullable Timestamp timestamp);
 
     /**
      * Returns the current remediation resolution state.
      *
      * @return Resolution state
      */
-    public Resolution getResolution();
+    public @Nullable Resolution getResolution();
 
     /**
      * Sets the current remediation resolution state.
      *
      * @param resolution Resolution state
      */
-    public void setResolution(Resolution resolution);
+    public void setResolution(@Nullable Resolution resolution);
 
     /**
      * Defines remediation states for corrupt archive records.
@@ -146,7 +148,7 @@ public interface CorruptArchiveError extends PersistentBean {
                                                               .map(Resolution::toDomainValue)
                                                               .collect(Collectors.toUnmodifiableList());
 
-        private Resolution(String code, String description) {
+        private Resolution(@Nonnull String code, @Nonnull String description) {
             this.code = code;
             this.description = description;
             this.domainValue = new DomainValue(code, description);
@@ -158,7 +160,7 @@ public interface CorruptArchiveError extends PersistentBean {
          * @return Stable code used for storage and transport
          */
         @Override
-        public String toCode() {
+        public @Nonnull String toCode() {
             return code;
         }
 
@@ -168,7 +170,7 @@ public interface CorruptArchiveError extends PersistentBean {
          * @return Localised description
          */
         @Override
-        public String toLocalisedDescription() {
+        public @Nonnull String toLocalisedDescription() {
             return Util.i18n(description);
         }
 
@@ -178,7 +180,7 @@ public interface CorruptArchiveError extends PersistentBean {
          * @return Domain value for UI/list model usage
          */
         @Override
-        public DomainValue toDomainValue() {
+        public @Nonnull DomainValue toDomainValue() {
             return domainValue;
         }
 
@@ -188,7 +190,7 @@ public interface CorruptArchiveError extends PersistentBean {
          * @param code Persisted resolution code
          * @return Matching resolution, or {@code null} when unmatched
          */
-        public static Resolution fromCode(String code) {
+        public static @Nullable Resolution fromCode(@Nullable String code) {
             Resolution result = null;
 
             for (Resolution value : values()) {
@@ -207,7 +209,7 @@ public interface CorruptArchiveError extends PersistentBean {
          * @param description Localised description text
          * @return Matching resolution, or {@code null} when unmatched
          */
-        public static Resolution fromLocalisedDescription(String description) {
+        public static @Nullable Resolution fromLocalisedDescription(@Nullable String description) {
             Resolution result = null;
 
             for (Resolution value : values()) {
@@ -226,7 +228,7 @@ public interface CorruptArchiveError extends PersistentBean {
          *
          * @return Immutable list of domain values
          */
-        public static List<DomainValue> toDomainValues() {
+        public static @Nonnull List<DomainValue> toDomainValues() {
             return domainValues;
         }
     }

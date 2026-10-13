@@ -14,6 +14,7 @@ import org.skyve.metadata.ReloadableMetaData;
 import org.skyve.metadata.SerializableMetaData;
 import org.skyve.util.Util;
 
+import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlType;
@@ -79,7 +80,7 @@ public interface View extends NamedMetaData, PersistentMetaData, ReloadableMetaD
 		 * Returns the fromBinding.
 		 * @return the result
 		 */
-		public String getFromBinding() {
+		public @Nullable String getFromBinding() {
 			return fromBinding;
 		}
 
@@ -88,7 +89,7 @@ public interface View extends NamedMetaData, PersistentMetaData, ReloadableMetaD
 		 * @param fromBinding the fromBinding
 		 */
 		@XmlAttribute(required = true)
-		public void setFromBinding(String fromBinding) {
+		public void setFromBinding(@Nullable String fromBinding) {
 			this.fromBinding = UtilImpl.processStringValue(fromBinding);
 		}
 		
@@ -96,7 +97,7 @@ public interface View extends NamedMetaData, PersistentMetaData, ReloadableMetaD
 		 * Returns the boundTo.
 		 * @return the result
 		 */
-		public String getBoundTo() {
+		public @Nullable String getBoundTo() {
 			return boundTo;
 		}
 
@@ -105,7 +106,7 @@ public interface View extends NamedMetaData, PersistentMetaData, ReloadableMetaD
 		 * @param boundTo the boundTo
 		 */
 		@XmlAttribute(required = true)
-		public void setBoundTo(String boundTo) {
+		public void setBoundTo(@Nullable String boundTo) {
 			this.boundTo = UtilImpl.processStringValue(boundTo);
 		}
 	}
@@ -122,14 +123,14 @@ public interface View extends NamedMetaData, PersistentMetaData, ReloadableMetaD
 	 *
 	 * @return the refresh period in seconds, or {@code null} if auto-refresh is disabled
 	 */
-	public Integer getRefreshTimeInSeconds();
+	public @Nullable Integer getRefreshTimeInSeconds();
 	
 	/**
 	 * Returns the name of the server-side action executed when the view auto-refreshes.
 	 *
 	 * @return the refresh action name, or {@code null} to refresh the view without an action
 	 */
-	public String getRefreshActionName();
+	public @Nullable String getRefreshActionName();
 	
 	/**
 	 * Returns the view title shown in the browser tab and view header.
@@ -138,14 +139,14 @@ public interface View extends NamedMetaData, PersistentMetaData, ReloadableMetaD
 	 *
 	 * @return the view title; may be {@code null}
 	 */
-	public String getTitle();
+	public @Nullable String getTitle();
 
 	/**
 	 * Returns the localised view title for the current user locale.
 	 *
 	 * @return a non-{@code null} localised title
 	 */
-	public default String getLocalisedTitle() {
+	public default @Nullable String getLocalisedTitle() {
 		return Util.i18n(getTitle());
 	}
 	
@@ -154,28 +155,28 @@ public interface View extends NamedMetaData, PersistentMetaData, ReloadableMetaD
 	 *
 	 * @return the relative icon path, or {@code null} if none
 	 */
-	public String getIcon32x32RelativeFileName();
+	public @Nullable String getIcon32x32RelativeFileName();
 	
 	/**
 	 * Returns the CSS class used to render the view icon (e.g. a Font Awesome class).
 	 *
 	 * @return the icon CSS class, or {@code null} if none
 	 */
-	public String getIconStyleClass();
+	public @Nullable String getIconStyleClass();
 	
 	/**
 	 * Returns the context-relative path to the help HTML file for this view.
 	 *
 	 * @return the relative path to the help file, or {@code null} if none
 	 */
-	public String getHelpRelativeFileName();
+	public @Nullable String getHelpRelativeFileName();
 
 	/**
 	 * Returns the absolute URL to the external help page for this view.
 	 *
 	 * @return the help URL, or {@code null} if none
 	 */
-	public String getHelpURL();
+	public @Nullable String getHelpURL();
 
 	/**
 	 * Returns the sidebar configuration for this view, or {@code null} if no sidebar
@@ -183,14 +184,14 @@ public interface View extends NamedMetaData, PersistentMetaData, ReloadableMetaD
 	 *
 	 * @return the sidebar metadata, or {@code null}
 	 */
-	public Sidebar getSidebar();
+	public @Nullable Sidebar getSidebar();
 	
 	/**
 	 * The widgetId of the actions panel for the renderer to point at if needed in isolation.
 	 * 
 	 * @return
 	 */
-	public String getActionsWidgetId();
+	public @Nullable String getActionsWidgetId();
 
 	/**
 	 * Returns the action declared on this view with the given name, or {@code null}
@@ -199,14 +200,14 @@ public interface View extends NamedMetaData, PersistentMetaData, ReloadableMetaD
 	 * @param actionName  the action name to look up; must not be {@code null}
 	 * @return the action, or {@code null}
 	 */
-	public Action getAction(String actionName);
+	public @Nullable Action getAction(@Nonnull String actionName);
 	
 	/**
 	 * Returns all actions declared on this view.
 	 *
 	 * @return a non-{@code null} collection of actions; may be empty
 	 */
-	public Collection<Action> getActions();
+	public @Nonnull Collection<Action> getActions();
 
 	/**
 	 * Returns the named inline model metadata (e.g. a chart model) embedded within
@@ -215,7 +216,7 @@ public interface View extends NamedMetaData, PersistentMetaData, ReloadableMetaD
 	 * @param modelName  the model name to look up; must not be {@code null}
 	 * @return the model metadata, or {@code null}
 	 */
-	public ModelMetaData getInlineModel(String modelName);
+	public @Nullable ModelMetaData getInlineModel(@Nonnull String modelName);
 	
 	/**
 	 * Returns the list of view parameters that may be populated when creating a new
@@ -226,24 +227,24 @@ public interface View extends NamedMetaData, PersistentMetaData, ReloadableMetaD
 	 *
 	 * @return a non-{@code null} list of view parameters; may be empty
 	 */
-	public List<ViewParameter> getParameters();
+	public @Nonnull List<ViewParameter> getParameters();
 	
 	/**
 	 * Returns optional long-form documentation for this view.
 	 *
 	 * @return the documentation string, or {@code null} if none
 	 */
-	public String getDocumentation();
+	public @Nullable String getDocumentation();
 	
 	/**
 	 * The customer name for this overridden view, or null if not overridden.
 	 * @return The overridden customer name or null. 
 	 */
-	public String getOverriddenCustomerName();
+	public @Nullable String getOverriddenCustomerName();
 	
 	/**
 	 * The ux/ui name for this overridden view, or null if not overridden.
 	 * @return The overridden ux/ui name or null. 
 	 */
-	public String getOverriddenUxUiName();
+	public @Nullable String getOverriddenUxUiName();
 }

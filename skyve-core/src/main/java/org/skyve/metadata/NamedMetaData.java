@@ -1,5 +1,7 @@
 package org.skyve.metadata;
 
+import jakarta.annotation.Nullable;
+
 /**
  * Metadata that carries an identifier name.
  *
@@ -18,5 +20,5 @@ public interface NamedMetaData extends SerializableMetaData {
 	 *
 	 * @return the name; never {@code null}
 	 */
-	public String getName();
+	public @Nullable String getName();
 }

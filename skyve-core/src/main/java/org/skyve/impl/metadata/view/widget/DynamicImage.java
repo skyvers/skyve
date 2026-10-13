@@ -16,6 +16,7 @@ import org.skyve.metadata.view.Invisible;
 import org.skyve.metadata.view.Parameterizable;
 import org.skyve.metadata.view.widget.bound.Parameter;
 
+import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlElement;
@@ -93,7 +94,7 @@ public class DynamicImage implements DecoratedMetaData, RelativeSize, Invisible,
 	 *
 	 * @return the provider name
 	 */
-	public String getName() {
+	public @Nullable String getName() {
 		return name;
 	}
 
@@ -103,7 +104,7 @@ public class DynamicImage implements DecoratedMetaData, RelativeSize, Invisible,
 	 * @param name the provider name
 	 */
 	@XmlAttribute(required = true)
-	public void setName(String name) {
+	public void setName(@Nullable String name) {
 		this.name = UtilImpl.processStringValue(name);
 	}
 
@@ -112,7 +113,7 @@ public class DynamicImage implements DecoratedMetaData, RelativeSize, Invisible,
 	 *
 	 * @return the initial image width in pixels, or {@code null} when not set
 	 */
-	public Integer getImageInitialPixelWidth() {
+	public @Nullable Integer getImageInitialPixelWidth() {
 		return imageInitialPixelWidth;
 	}
 
@@ -122,7 +123,7 @@ public class DynamicImage implements DecoratedMetaData, RelativeSize, Invisible,
 	 * @param imageInitialPixelWidth the initial image width in pixels
 	 */
 	@XmlAttribute(required = false)
-	public void setImageInitialPixelWidth(Integer imageInitialPixelWidth) {
+	public void setImageInitialPixelWidth(@Nullable Integer imageInitialPixelWidth) {
 		this.imageInitialPixelWidth = imageInitialPixelWidth;
 	}
 
@@ -131,7 +132,7 @@ public class DynamicImage implements DecoratedMetaData, RelativeSize, Invisible,
 	 *
 	 * @return the initial image height in pixels, or {@code null} when not set
 	 */
-	public Integer getImageInitialPixelHeight() {
+	public @Nullable Integer getImageInitialPixelHeight() {
 		return imageInitialPixelHeight;
 	}
 
@@ -141,7 +142,7 @@ public class DynamicImage implements DecoratedMetaData, RelativeSize, Invisible,
 	 * @param imageInitialPixelHeight the initial image height in pixels
 	 */
 	@XmlAttribute(required = false)
-	public void setImageInitialPixelHeight(Integer imageInitialPixelHeight) {
+	public void setImageInitialPixelHeight(@Nullable Integer imageInitialPixelHeight) {
 		this.imageInitialPixelHeight = imageInitialPixelHeight;
 	}
 
@@ -151,7 +152,7 @@ public class DynamicImage implements DecoratedMetaData, RelativeSize, Invisible,
 	 * @return the pixel width, or {@code null} when width is not fixed
 	 */
 	@Override
-	public Integer getPixelWidth() {
+	public @Nullable Integer getPixelWidth() {
 		return pixelWidth;
 	}
 
@@ -162,7 +163,7 @@ public class DynamicImage implements DecoratedMetaData, RelativeSize, Invisible,
 	 */
 	@Override
 	@XmlAttribute(required = false)
-	public void setPixelWidth(Integer pixelWidth) {
+	public void setPixelWidth(@Nullable Integer pixelWidth) {
 		this.pixelWidth = pixelWidth;
 	}
 
@@ -172,7 +173,7 @@ public class DynamicImage implements DecoratedMetaData, RelativeSize, Invisible,
 	 * @return the responsive width, or {@code null} when not set
 	 */
 	@Override
-	public Integer getResponsiveWidth() {
+	public @Nullable Integer getResponsiveWidth() {
 		return responsiveWidth;
 	}
 
@@ -183,7 +184,7 @@ public class DynamicImage implements DecoratedMetaData, RelativeSize, Invisible,
 	 */
 	@Override
 	@XmlAttribute(required = false)
-	public void setResponsiveWidth(Integer responsiveWidth) {
+	public void setResponsiveWidth(@Nullable Integer responsiveWidth) {
 		this.responsiveWidth = responsiveWidth;
 	}
 
@@ -193,7 +194,7 @@ public class DynamicImage implements DecoratedMetaData, RelativeSize, Invisible,
 	 * @return the small-breakpoint width, or {@code null} when not set
 	 */
 	@Override
-	public Integer getSm() {
+	public @Nullable Integer getSm() {
 		return sm;
 	}
 	
@@ -204,7 +205,7 @@ public class DynamicImage implements DecoratedMetaData, RelativeSize, Invisible,
 	 */
 	@Override
 	@XmlAttribute(required = false)
-	public void setSm(Integer sm) {
+	public void setSm(@Nullable Integer sm) {
 		this.sm = sm;
 	}
 
@@ -214,7 +215,7 @@ public class DynamicImage implements DecoratedMetaData, RelativeSize, Invisible,
 	 * @return the medium-breakpoint width, or {@code null} when not set
 	 */
 	@Override
-	public Integer getMd() {
+	public @Nullable Integer getMd() {
 		return md;
 	}
 	
@@ -225,7 +226,7 @@ public class DynamicImage implements DecoratedMetaData, RelativeSize, Invisible,
 	 */
 	@Override
 	@XmlAttribute(required = false)
-	public void setMd(Integer md) {
+	public void setMd(@Nullable Integer md) {
 		this.md = md;
 	}
 	
@@ -235,7 +236,7 @@ public class DynamicImage implements DecoratedMetaData, RelativeSize, Invisible,
 	 * @return the large-breakpoint width, or {@code null} when not set
 	 */
 	@Override
-	public Integer getLg() {
+	public @Nullable Integer getLg() {
 		return lg;
 	}
 	
@@ -246,7 +247,7 @@ public class DynamicImage implements DecoratedMetaData, RelativeSize, Invisible,
 	 */
 	@Override
 	@XmlAttribute(required = false)
-	public void setLg(Integer lg) {
+	public void setLg(@Nullable Integer lg) {
 		this.lg = lg;
 	}
 
@@ -256,7 +257,7 @@ public class DynamicImage implements DecoratedMetaData, RelativeSize, Invisible,
 	 * @return the extra-large-breakpoint width, or {@code null} when not set
 	 */
 	@Override
-	public Integer getXl() {
+	public @Nullable Integer getXl() {
 		return xl;
 	}
 	
@@ -267,7 +268,7 @@ public class DynamicImage implements DecoratedMetaData, RelativeSize, Invisible,
 	 */
 	@Override
 	@XmlAttribute(required = false)
-	public void setXl(Integer xl) {
+	public void setXl(@Nullable Integer xl) {
 		this.xl = xl;
 	}
 
@@ -277,7 +278,7 @@ public class DynamicImage implements DecoratedMetaData, RelativeSize, Invisible,
 	 * @return the percentage width, or {@code null} when not set
 	 */
 	@Override
-	public Integer getPercentageWidth() {
+	public @Nullable Integer getPercentageWidth() {
 		return percentageWidth;
 	}
 
@@ -288,7 +289,7 @@ public class DynamicImage implements DecoratedMetaData, RelativeSize, Invisible,
 	 */
 	@Override
 	@XmlAttribute(required = false)
-	public void setPercentageWidth(Integer percentageWidth) {
+	public void setPercentageWidth(@Nullable Integer percentageWidth) {
 		this.percentageWidth = percentageWidth;
 	}
 
@@ -298,7 +299,7 @@ public class DynamicImage implements DecoratedMetaData, RelativeSize, Invisible,
 	 * @return the minimum pixel width, or {@code null} when no minimum is enforced
 	 */
 	@Override
-	public Integer getMinPixelWidth() {
+	public @Nullable Integer getMinPixelWidth() {
 		return minPixelWidth;
 	}
 
@@ -309,7 +310,7 @@ public class DynamicImage implements DecoratedMetaData, RelativeSize, Invisible,
 	 */
 	@Override
 	@XmlAttribute(required = false)
-	public void setMinPixelWidth(Integer minPixelWidth) {
+	public void setMinPixelWidth(@Nullable Integer minPixelWidth) {
 		this.minPixelWidth = minPixelWidth;
 	}
 
@@ -319,7 +320,7 @@ public class DynamicImage implements DecoratedMetaData, RelativeSize, Invisible,
 	 * @return the maximum pixel width, or {@code null} when no maximum is enforced
 	 */
 	@Override
-	public Integer getMaxPixelWidth() {
+	public @Nullable Integer getMaxPixelWidth() {
 		return maxPixelWidth;
 	}
 
@@ -330,7 +331,7 @@ public class DynamicImage implements DecoratedMetaData, RelativeSize, Invisible,
 	 */
 	@Override
 	@XmlAttribute(required = false)
-	public void setMaxPixelWidth(Integer maxPixelWidth) {
+	public void setMaxPixelWidth(@Nullable Integer maxPixelWidth) {
 		this.maxPixelWidth = maxPixelWidth;
 	}
 
@@ -340,7 +341,7 @@ public class DynamicImage implements DecoratedMetaData, RelativeSize, Invisible,
 	 * @return the pixel height, or {@code null} when height is not fixed
 	 */
 	@Override
-	public Integer getPixelHeight() {
+	public @Nullable Integer getPixelHeight() {
 		return pixelHeight;
 	}
 
@@ -351,7 +352,7 @@ public class DynamicImage implements DecoratedMetaData, RelativeSize, Invisible,
 	 */
 	@Override
 	@XmlAttribute(required = false)
-	public void setPixelHeight(Integer pixelHeight) {
+	public void setPixelHeight(@Nullable Integer pixelHeight) {
 		this.pixelHeight = pixelHeight;
 	}
 
@@ -361,7 +362,7 @@ public class DynamicImage implements DecoratedMetaData, RelativeSize, Invisible,
 	 * @return the percentage height, or {@code null} when not set
 	 */
 	@Override
-	public Integer getPercentageHeight() {
+	public @Nullable Integer getPercentageHeight() {
 		return percentageHeight;
 	}
 
@@ -372,7 +373,7 @@ public class DynamicImage implements DecoratedMetaData, RelativeSize, Invisible,
 	 */
 	@Override
 	@XmlAttribute(required = false)
-	public void setPercentageHeight(Integer percentageHeight) {
+	public void setPercentageHeight(@Nullable Integer percentageHeight) {
 		this.percentageHeight = percentageHeight;
 	}
 
@@ -448,7 +449,7 @@ public class DynamicImage implements DecoratedMetaData, RelativeSize, Invisible,
 					name = "parameter",
 					type = ParameterImpl.class,
 					required = false)
-	public List<Parameter> getParameters() {
+	public @Nonnull List<Parameter> getParameters() {
 		return parameters;
 	}
 
@@ -458,7 +459,7 @@ public class DynamicImage implements DecoratedMetaData, RelativeSize, Invisible,
 	 * @return the minimum pixel height, or {@code null} when no minimum is enforced
 	 */
 	@Override
-	public Integer getMinPixelHeight() {
+	public @Nullable Integer getMinPixelHeight() {
 		return minPixelHeight;
 	}
 
@@ -469,7 +470,7 @@ public class DynamicImage implements DecoratedMetaData, RelativeSize, Invisible,
 	 */
 	@Override
 	@XmlAttribute(required = false)
-	public void setMinPixelHeight(Integer minPixelHeight) {
+	public void setMinPixelHeight(@Nullable Integer minPixelHeight) {
 		this.minPixelHeight = minPixelHeight;
 	}
 
@@ -479,7 +480,7 @@ public class DynamicImage implements DecoratedMetaData, RelativeSize, Invisible,
 	 * @return the maximum pixel height, or {@code null} when no maximum is enforced
 	 */
 	@Override
-	public Integer getMaxPixelHeight() {
+	public @Nullable Integer getMaxPixelHeight() {
 		return maxPixelHeight;
 	}
 
@@ -490,7 +491,7 @@ public class DynamicImage implements DecoratedMetaData, RelativeSize, Invisible,
 	 */
 	@Override
 	@XmlAttribute(required = false)
-	public void setMaxPixelHeight(Integer maxPixelHeight) {
+	public void setMaxPixelHeight(@Nullable Integer maxPixelHeight) {
 		this.maxPixelHeight = maxPixelHeight;
 	}
 
@@ -500,7 +501,7 @@ public class DynamicImage implements DecoratedMetaData, RelativeSize, Invisible,
 	 * @return the mutable decorator property map keyed by property name
 	 */
 	@Override
-	public Map<String, String> getProperties() {
+	public @Nonnull Map<String, String> getProperties() {
 		return properties;
 	}
 }

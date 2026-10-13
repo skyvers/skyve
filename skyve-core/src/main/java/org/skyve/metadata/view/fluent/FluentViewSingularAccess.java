@@ -4,6 +4,9 @@ import java.util.Set;
 
 import org.skyve.impl.metadata.repository.view.access.ViewSingularUserAccessMetaData;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * A fluent helper builder class to construct and manipulate the {@link ViewSingularUserAccessMetaData} metadata.
  * 
@@ -20,14 +23,14 @@ public class FluentViewSingularAccess extends FluentViewUserAccess<FluentViewSin
 	/**
 	 * Creates a new FluentViewSingularAccess from the specified ViewSingularUserAccessMetaData.
 	 */
-	public FluentViewSingularAccess(ViewSingularUserAccessMetaData access) {
+	public FluentViewSingularAccess(@Nonnull ViewSingularUserAccessMetaData access) {
 		this.access = access;
 	}
 
 	/**
 	 * Returns a FluentViewSingularAccess from a runtime metadata.
 	 */
-	protected FluentViewSingularAccess from(String documentName, Set<String> uxuis) {
+	protected @Nonnull FluentViewSingularAccess from(@Nonnull String documentName, @Nonnull Set<String> uxuis) {
 		documentName(documentName);
 		uxuis.forEach(u -> addUxUi(u));
 		return this;
@@ -36,7 +39,7 @@ public class FluentViewSingularAccess extends FluentViewUserAccess<FluentViewSin
 	/**
 	 * Specifies the document name for this FluentViewSingularAccess
 	 */
-	public FluentViewSingularAccess documentName(final String documentName) {
+	public @Nonnull FluentViewSingularAccess documentName(final @Nullable String documentName) {
 		access.setDocumentName(documentName);
 		return this;
 	}
@@ -45,7 +48,7 @@ public class FluentViewSingularAccess extends FluentViewUserAccess<FluentViewSin
 	 * Returns the underlying view user access metadata from this builder.
 	 */
 	@Override
-	public ViewSingularUserAccessMetaData get() {
+	public @Nonnull ViewSingularUserAccessMetaData get() {
 		return access;
 	}
 }

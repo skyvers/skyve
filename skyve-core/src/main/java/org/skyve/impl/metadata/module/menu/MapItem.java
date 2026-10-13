@@ -1,5 +1,8 @@
 package org.skyve.impl.metadata.module.menu;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Menu item that opens the map view of a document or query.
  *
@@ -20,22 +23,22 @@ public class MapItem extends AbstractDocumentOrQueryOrModelMenuItem {
 	private Integer refreshTimeInSeconds;
 	private Boolean showRefreshControls;
 
-	public String getGeometryBinding() {
+	public @Nullable String getGeometryBinding() {
 		return geometryBinding;
 	}
-	public void setGeometryBinding(String geometryBinding) {
+	public void setGeometryBinding(@Nonnull String geometryBinding) {
 		this.geometryBinding = geometryBinding;
 	}
-	public Integer getRefreshTimeInSeconds() {
+	public @Nullable Integer getRefreshTimeInSeconds() {
 		return refreshTimeInSeconds;
 	}
-	public void setRefreshTimeInSeconds(Integer refreshTimeInSeconds) {
+	public void setRefreshTimeInSeconds(@Nullable Integer refreshTimeInSeconds) {
 		this.refreshTimeInSeconds = refreshTimeInSeconds;
 	}
-	public Boolean getShowRefreshControls() {
+	public @Nullable Boolean getShowRefreshControls() {
 		return showRefreshControls;
 	}
-	public void setShowRefreshControls(Boolean showRefreshControls) {
+	public void setShowRefreshControls(@Nullable Boolean showRefreshControls) {
 		this.showRefreshControls = showRefreshControls;
 	}
 }

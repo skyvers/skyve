@@ -4,6 +4,9 @@ import org.skyve.impl.metadata.model.document.field.Field;
 import org.skyve.impl.metadata.model.document.field.Field.GeneratedType;
 import org.skyve.impl.metadata.model.document.field.Field.IndexType;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Provides a fluent builder for FluentField metadata.
  */
@@ -19,7 +22,7 @@ public abstract class FluentField<T extends FluentField<T>> extends FluentAttrib
 	 * Copies field-level metadata, including validation and generation settings.
 	 */
 	@SuppressWarnings("unchecked")
-	protected T from(Field field) {
+	protected @Nonnull T from(@Nonnull Field field) {
 		super.from(field);
 		required(field.isRequired());
 		requiredMessage(field.getRequiredMessage());
@@ -35,7 +38,7 @@ public abstract class FluentField<T extends FluentField<T>> extends FluentAttrib
 	 * Updates metadata on this fluent builder.
 	 */
 	@SuppressWarnings("unchecked")
-	public T required(boolean required) {
+	public @Nonnull T required(boolean required) {
 		get().setRequired(required);
 		return (T) this;
 	}
@@ -44,7 +47,7 @@ public abstract class FluentField<T extends FluentField<T>> extends FluentAttrib
 	 * Updates metadata on this fluent builder.
 	 */
 	@SuppressWarnings("unchecked")
-	public T requiredMessage(String message) {
+	public @Nonnull T requiredMessage(@Nullable String message) {
 		get().setRequiredMessage(message);
 		return (T) this;
 	}
@@ -53,7 +56,7 @@ public abstract class FluentField<T extends FluentField<T>> extends FluentAttrib
 	 * Updates metadata on this fluent builder.
 	 */
 	@SuppressWarnings("unchecked")
-	public T persistent(boolean persistent) {
+	public @Nonnull T persistent(boolean persistent) {
 		get().setPersistent(persistent);
 		return (T) this;
 	}
@@ -62,7 +65,7 @@ public abstract class FluentField<T extends FluentField<T>> extends FluentAttrib
 	 * Updates metadata on this fluent builder.
 	 */
 	@SuppressWarnings("unchecked")
-	public T dynamic(boolean dynamic) {
+	public @Nonnull T dynamic(boolean dynamic) {
 		get().setDynamic(dynamic);
 		return (T) this;
 	}
@@ -71,7 +74,7 @@ public abstract class FluentField<T extends FluentField<T>> extends FluentAttrib
 	 * Updates metadata on this fluent builder.
 	 */
 	@SuppressWarnings("unchecked")
-	public T index(IndexType index) {
+	public @Nonnull T index(@Nullable IndexType index) {
 		get().setIndex(index);
 		return (T) this;
 	}
@@ -80,7 +83,7 @@ public abstract class FluentField<T extends FluentField<T>> extends FluentAttrib
 	 * Updates metadata on this fluent builder.
 	 */
 	@SuppressWarnings("unchecked")
-	public T defaultValue(String defaultValue) {
+	public @Nonnull T defaultValue(@Nullable String defaultValue) {
 		get().setDefaultValue(defaultValue);
 		return (T) this;
 	}
@@ -89,11 +92,11 @@ public abstract class FluentField<T extends FluentField<T>> extends FluentAttrib
 	 * Updates metadata on this fluent builder.
 	 */
 	@SuppressWarnings("unchecked")
-	public T generated(GeneratedType generated) {
+	public @Nonnull T generated(@Nullable GeneratedType generated) {
 		get().setGenerated(generated);
 		return (T) this;
 	}
 
 	@Override
-	public abstract Field get();
+	public abstract @Nonnull Field get();
 }

@@ -13,6 +13,7 @@ import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.DecoratedMetaData;
 import org.skyve.metadata.view.Invisible;
 
+import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlElement;
@@ -124,7 +125,7 @@ public class Sidebar extends Container implements Identifiable, Invisible, Relat
 	 * @return widget identifier, or {@code null} when not configured
 	 */
 	@Override
-	public String getWidgetId() {
+	public @Nullable String getWidgetId() {
 		return widgetId;
 	}
 
@@ -136,7 +137,7 @@ public class Sidebar extends Container implements Identifiable, Invisible, Relat
 	 * @param widgetId  widget identifier; may be {@code null} or blank
 	 */
 	@XmlAttribute(required = false)
-	public void setWidgetId(String widgetId) {
+	public void setWidgetId(@Nullable String widgetId) {
 		this.widgetId = UtilImpl.processStringValue(widgetId);
 	}
 
@@ -145,7 +146,7 @@ public class Sidebar extends Container implements Identifiable, Invisible, Relat
 	 *
 	 * @return the floating width in pixels, or {@code null} to use renderer defaults
 	 */
-	public Integer getFloatingPixelWidth() {
+	public @Nullable Integer getFloatingPixelWidth() {
 		return floatingPixelWidth;
 	}
 
@@ -155,7 +156,7 @@ public class Sidebar extends Container implements Identifiable, Invisible, Relat
 	 * @param floatingPixelWidth  floating width in pixels; may be {@code null}
 	 */
 	@XmlAttribute(required = false)
-	public void setFloatingPixelWidth(Integer floatingPixelWidth) {
+	public void setFloatingPixelWidth(@Nullable Integer floatingPixelWidth) {
 		this.floatingPixelWidth = floatingPixelWidth;
 	}
 
@@ -164,7 +165,7 @@ public class Sidebar extends Container implements Identifiable, Invisible, Relat
 	 *
 	 * @return a breakpoint width in pixels, or {@code null} when not configured
 	 */
-	public Integer getFloatingPixelWidthBreakpoint() {
+	public @Nullable Integer getFloatingPixelWidthBreakpoint() {
 		return floatingPixelWidthBreakpoint;
 	}
 
@@ -174,7 +175,7 @@ public class Sidebar extends Container implements Identifiable, Invisible, Relat
 	 * @param floatingPixelWidthBreakpoint  breakpoint width in pixels
 	 */
 	@XmlAttribute(required = true)
-	public void setFloatingPixelWidthBreakpoint(Integer floatingPixelWidthBreakpoint) {
+	public void setFloatingPixelWidthBreakpoint(@Nullable Integer floatingPixelWidthBreakpoint) {
 		this.floatingPixelWidthBreakpoint = floatingPixelWidthBreakpoint;
 	}
 
@@ -184,7 +185,7 @@ public class Sidebar extends Container implements Identifiable, Invisible, Relat
 	 * @return pixel width, or {@code null} when unset
 	 */
 	@Override
-	public Integer getPixelWidth() {
+	public @Nullable Integer getPixelWidth() {
 		return pixelWidth;
 	}
 
@@ -195,7 +196,7 @@ public class Sidebar extends Container implements Identifiable, Invisible, Relat
 	 */
 	@Override
 	@XmlAttribute(required = false)
-	public void setPixelWidth(Integer pixelWidth) {
+	public void setPixelWidth(@Nullable Integer pixelWidth) {
 		this.pixelWidth = pixelWidth;
 	}
 
@@ -205,7 +206,7 @@ public class Sidebar extends Container implements Identifiable, Invisible, Relat
 	 * @return percentage width, or {@code null} when unset
 	 */
 	@Override
-	public Integer getPercentageWidth() {
+	public @Nullable Integer getPercentageWidth() {
 		return percentageWidth;
 	}
 
@@ -216,7 +217,7 @@ public class Sidebar extends Container implements Identifiable, Invisible, Relat
 	 */
 	@Override
 	@XmlAttribute(required = false)
-	public void setPercentageWidth(Integer percentageWidth) {
+	public void setPercentageWidth(@Nullable Integer percentageWidth) {
 		this.percentageWidth = percentageWidth;
 	}
 
@@ -226,7 +227,7 @@ public class Sidebar extends Container implements Identifiable, Invisible, Relat
 	 * @return responsive width value, or {@code null} when unset
 	 */
 	@Override
-	public Integer getResponsiveWidth() {
+	public @Nullable Integer getResponsiveWidth() {
 		return responsiveWidth;
 	}
 
@@ -237,7 +238,7 @@ public class Sidebar extends Container implements Identifiable, Invisible, Relat
 	 */
 	@Override
 	@XmlAttribute(required = false)
-	public void setResponsiveWidth(Integer responsiveWidth) {
+	public void setResponsiveWidth(@Nullable Integer responsiveWidth) {
 		this.responsiveWidth = responsiveWidth;
 	}
 	
@@ -247,7 +248,7 @@ public class Sidebar extends Container implements Identifiable, Invisible, Relat
 	 * @return a mutable property map; never {@code null}
 	 */
 	@Override
-	public Map<String, String> getProperties() {
+	public @Nonnull Map<String, String> getProperties() {
 		return properties;
 	}
 }

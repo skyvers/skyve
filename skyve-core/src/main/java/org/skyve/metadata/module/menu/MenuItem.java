@@ -6,6 +6,9 @@ import org.skyve.metadata.DecoratedMetaData;
 import org.skyve.metadata.NamedMetaData;
 import org.skyve.util.Util;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * A single navigable element within a Skyve module menu.
  *
@@ -38,7 +41,7 @@ public interface MenuItem extends NamedMetaData, DecoratedMetaData {
 	 *
 	 * @return a non-{@code null} localised display name
 	 */
-	public default String getLocalisedName() {
+	public default @Nullable String getLocalisedName() {
 		return Util.i18n(getName());
 	}
 	
@@ -50,7 +53,7 @@ public interface MenuItem extends NamedMetaData, DecoratedMetaData {
 	 *
 	 * @return a non-{@code null} set of permitted role names; empty means unrestricted
 	 */
-	public Set<String> getRoleNames();
+	public @Nullable Set<String> getRoleNames();
 	
 	/**
 	 * Returns the set of UX/UI variant names for which this item is visible.
@@ -60,7 +63,7 @@ public interface MenuItem extends NamedMetaData, DecoratedMetaData {
 	 *
 	 * @return a non-{@code null} set of permitted UX/UI names; empty means unrestricted
 	 */
-	public Set<String> getUxUis();
+	public @Nonnull Set<String> getUxUis();
 	
 	/**
 	 * Returns {@code true} if this menu item should be rendered for the given UX/UI variant.
@@ -71,5 +74,5 @@ public interface MenuItem extends NamedMetaData, DecoratedMetaData {
 	 * @param uxui  the UX/UI name to test; may be {@code null} to bypass UX/UI filtering
 	 * @return {@code true} if this item is applicable for the given UX/UI
 	 */
-	public boolean isApplicable(String uxui);
+	public boolean isApplicable(@Nonnull String uxui);
 }

@@ -8,6 +8,7 @@ import org.skyve.domain.Bean;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.web.WebContext;
 
+import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 
 /**
@@ -73,31 +74,31 @@ public abstract class AbstractWebContext implements WebContext {
 
 	private transient Bean currentBean;
 
-	protected AbstractWebContext(String key) {
+	protected AbstractWebContext(@Nonnull String key) {
 		this.key = key;
 	}
 	
 	@Override
-	public String getKey() {
+	public @Nonnull String getKey() {
 		return key;
 	}
 	
 	@Override
-	public void setKey(String key) {
+	public void setKey(@Nonnull String key) {
 		this.key = key;
 	}
 	
-	public String getSessionId() {
+	public @Nullable String getSessionId() {
 		return sessionId;
 	}
 	
 	@Override
-	public final Bean getBean(String bizId) {
+	public final @Nullable Bean getBean(@Nonnull String bizId) {
 		return contextBeans.get(bizId);
 	}
 
 	@Override
-	public final Bean getCurrentBean() {
+	public final @Nonnull Bean getCurrentBean() {
 		if (currentBean == null) {
 			throw new IllegalStateException("currentBean should not be null when requested");
 		}
@@ -109,7 +110,7 @@ public abstract class AbstractWebContext implements WebContext {
 	}
 	
 	@Override
-	public final void setCurrentBean(Bean currentBean) {
+	public final void setCurrentBean(@Nullable Bean currentBean) {
 		if (currentBean == null) {
 			if (this.currentBean != null) {
 				contextBeans.remove(this.currentBean.getBizId());
@@ -126,7 +127,7 @@ public abstract class AbstractWebContext implements WebContext {
 	 * @return
 	 */
 	@Override
-	public final String getWebId() {
+	public final @Nonnull String getWebId() {
 		if (currentBean == null) {
 			return key;
 		}
@@ -135,20 +136,20 @@ public abstract class AbstractWebContext implements WebContext {
 	}
 	
 	@Override
-	public final String getAction() {
+	public final @Nullable String getAction() {
 		return action;
 	}
 
 	@Override
-	public final void setAction(String action) {
+	public final void setAction(@Nullable String action) {
 		this.action = action;
 	}
 	
-	public AbstractPersistence getConversation() {
+	public @Nullable AbstractPersistence getConversation() {
 		return conversation;
 	}
 
-	public void setConversation(AbstractPersistence conversation) {
+	public void setConversation(@Nullable AbstractPersistence conversation) {
 		this.conversation = conversation;
 	}
 
@@ -156,16 +157,16 @@ public abstract class AbstractWebContext implements WebContext {
 	 * Get a list of accumulated growls to display.
 	 * @return	<code>null</code> or [{severity:'info/warn/error/fatal', summary: 'message'}...]
 	 */
-	public abstract List<Map<String, String>> getGrowls();
+	public abstract @Nullable List<Map<String, String>> getGrowls();
 
 	/**
 	 * Get a list of accumulated messages to display.
 	 * @return	<code>null</code> or [{severity:'info/warn/error/fatal', summary: 'message'}...]
 	 */
-	public abstract List<Map<String, String>> getMessages();
+	public abstract @Nullable List<Map<String, String>> getMessages();
 	
 	@Override
-	public String toString() {
+	public @Nonnull String toString() {
 		return super.toString() + '#' + getWebId();
 	}
 	

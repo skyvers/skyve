@@ -11,6 +11,8 @@ import org.skyve.metadata.user.DocumentPermissionScope;
 import org.skyve.metadata.user.User;
 import org.skyve.metadata.user.UserAccess;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.enterprise.inject.Alternative;
 
 /**
@@ -29,7 +31,7 @@ public class UserInjectable implements User {
 	 * @return the display name.
 	 */
 	@Override
-	public String getName() {
+	public @Nullable String getName() {
 		return CORE.getUser().getName();
 	}
 
@@ -39,7 +41,7 @@ public class UserInjectable implements User {
 	 * @return the user identifier.
 	 */
 	@Override
-	public String getId() {
+	public @Nonnull String getId() {
 		return CORE.getUser().getId();
 	}
 
@@ -49,7 +51,7 @@ public class UserInjectable implements User {
 	 * @param id the user identifier.
 	 */
 	@Override
-	public void setId(String id) {
+	public void setId(@Nonnull String id) {
 		CORE.getUser().setId(id);
 	}
 
@@ -59,7 +61,7 @@ public class UserInjectable implements User {
 	 * @return the session identifier.
 	 */
 	@Override
-	public String getSessionId() {
+	public @Nullable String getSessionId() {
 		return CORE.getUser().getSessionId();
 	}
 
@@ -69,7 +71,7 @@ public class UserInjectable implements User {
 	 * @return the language tag.
 	 */
 	@Override
-	public String getLanguageTag() {
+	public @Nullable String getLanguageTag() {
 		return CORE.getUser().getLanguageTag();
 	}
 
@@ -79,7 +81,7 @@ public class UserInjectable implements User {
 	 * @return the locale.
 	 */
 	@Override
-	public Locale getLocale() {
+	public @Nullable Locale getLocale() {
 		return CORE.getUser().getLocale();
 	}
 
@@ -89,7 +91,7 @@ public class UserInjectable implements User {
 	 * @return the password hash.
 	 */
 	@Override
-	public String getPasswordHash() {
+	public @Nullable String getPasswordHash() {
 		return CORE.getUser().getPasswordHash();
 	}
 
@@ -109,7 +111,7 @@ public class UserInjectable implements User {
 	 * @return the contact identifier.
 	 */
 	@Override
-	public String getContactId() {
+	public @Nullable String getContactId() {
 		return CORE.getUser().getContactId();
 	}
 
@@ -119,7 +121,7 @@ public class UserInjectable implements User {
 	 * @return the contact name.
 	 */
 	@Override
-	public String getContactName() {
+	public @Nullable String getContactName() {
 		return CORE.getUser().getContactName();
 	}
 
@@ -129,7 +131,7 @@ public class UserInjectable implements User {
 	 * @return the contact image identifier.
 	 */
 	@Override
-	public String getContactImageId() {
+	public @Nullable String getContactImageId() {
 		return CORE.getUser().getContactImageId();
 	}
 
@@ -141,7 +143,7 @@ public class UserInjectable implements User {
 	 * @return the contact image URL.
 	 */
 	@Override
-	public String getContactImageUrl(int width, int height) {
+	public @Nullable String getContactImageUrl(int width, int height) {
 		return CORE.getUser().getContactImageUrl(width, height);
 	}
 	
@@ -151,7 +153,7 @@ public class UserInjectable implements User {
 	 * @return the contact avatar initials.
 	 */
 	@Override
-	public String getContactAvatarInitials() {
+	public @Nonnull String getContactAvatarInitials() {
 		return CORE.getUser().getContactAvatarInitials();
 	}
 	
@@ -161,7 +163,7 @@ public class UserInjectable implements User {
 	 * @return the active customer.
 	 */
 	@Override
-	public Customer getCustomer() {
+	public @Nonnull Customer getCustomer() {
 		return CORE.getUser().getCustomer();
 	}
 
@@ -171,7 +173,7 @@ public class UserInjectable implements User {
 	 * @return the customer name.
 	 */
 	@Override
-	public String getCustomerName() {
+	public @Nullable String getCustomerName() {
 		return CORE.getUser().getCustomerName();
 	}
 
@@ -181,7 +183,7 @@ public class UserInjectable implements User {
 	 * @param customerName the customer name.
 	 */
 	@Override
-	public void setCustomerName(String customerName) {
+	public void setCustomerName(@Nullable String customerName) {
 		CORE.getUser().setCustomerName(customerName);
 	}
 
@@ -191,7 +193,7 @@ public class UserInjectable implements User {
 	 * @return the data group identifier.
 	 */
 	@Override
-	public String getDataGroupId() {
+	public @Nullable String getDataGroupId() {
 		return CORE.getUser().getDataGroupId();
 	}
 
@@ -201,7 +203,7 @@ public class UserInjectable implements User {
 	 * @param dataGroupId the data group identifier.
 	 */
 	@Override
-	public void setDataGroupId(String dataGroupId) {
+	public void setDataGroupId(@Nullable String dataGroupId) {
 		CORE.getUser().setDataGroupId(dataGroupId);
 	}
 
@@ -211,7 +213,7 @@ public class UserInjectable implements User {
 	 * @return the home module name.
 	 */
 	@Override
-	public String getHomeModuleName() {
+	public @Nullable String getHomeModuleName() {
 		return CORE.getUser().getHomeModuleName();
 	}
 
@@ -221,7 +223,7 @@ public class UserInjectable implements User {
 	 * @return accessible module names.
 	 */
 	@Override
-	public Set<String> getAccessibleModuleNames() {
+	public @Nonnull Set<String> getAccessibleModuleNames() {
 		return CORE.getUser().getAccessibleModuleNames();
 	}
 
@@ -233,7 +235,7 @@ public class UserInjectable implements User {
 	 * @return true if the user is in the role; otherwise false.
 	 */
 	@Override
-	public boolean isInRole(String moduleName, String roleName) {
+	public boolean isInRole(@Nonnull String moduleName, @Nonnull String roleName) {
 		return CORE.getUser().isInRole(moduleName, roleName);
 	}
 
@@ -245,7 +247,7 @@ public class UserInjectable implements User {
 	 * @return the resolved permission scope.
 	 */
 	@Override
-	public DocumentPermissionScope getScope(String moduleName, String documentName) {
+	public @Nonnull DocumentPermissionScope getScope(@Nonnull String moduleName, @Nonnull String documentName) {
 		return CORE.getUser().getScope(moduleName, documentName);
 	}
 
@@ -261,12 +263,12 @@ public class UserInjectable implements User {
 	 * @return true if the bean can be read; otherwise false.
 	 */
 	@Override
-	public boolean canReadBean(String beanBizId,
-								String beanBizModule,
-								String beanBizDocument,
-								String beanBizCustomer,
-								String beanBizDataGroupId,
-								String beanBizUserId) {
+	public boolean canReadBean(@Nonnull String beanBizId,
+								@Nonnull String beanBizModule,
+								@Nonnull String beanBizDocument,
+								@Nullable String beanBizCustomer,
+								@Nullable String beanBizDataGroupId,
+								@Nullable String beanBizUserId) {
 		return CORE.getUser().canReadBean(beanBizId,
 											beanBizModule,
 											beanBizDocument,
@@ -288,13 +290,13 @@ public class UserInjectable implements User {
 	 * @return true if content access is allowed; otherwise false.
 	 */
 	@Override
-	public boolean canAccessContent(String bizId,
-										String bizModule,
-										String bizDocument,
-										String bizCustomer,
-										String bizDataGroupId,
-										String bizUserId,
-										String attributeName) {
+	public boolean canAccessContent(@Nonnull String bizId,
+										@Nonnull String bizModule,
+										@Nonnull String bizDocument,
+										@Nullable String bizCustomer,
+										@Nullable String bizDataGroupId,
+										@Nullable String bizUserId,
+										@Nonnull String attributeName) {
 		return CORE.getUser().canAccessContent(bizId,
 												bizModule,
 												bizDocument,
@@ -311,7 +313,7 @@ public class UserInjectable implements User {
 	 * @return true if access is allowed; otherwise false.
 	 */
 	@Override
-	public boolean canAccessDocument(Document document) {
+	public boolean canAccessDocument(@Nonnull Document document) {
 		return CORE.getUser().canAccessDocument(document);
 	}
 
@@ -322,7 +324,7 @@ public class UserInjectable implements User {
 	 * @return true if create is allowed; otherwise false.
 	 */
 	@Override
-	public boolean canCreateDocument(Document document) {
+	public boolean canCreateDocument(@Nonnull Document document) {
 		return CORE.getUser().canCreateDocument(document);
 	}
 
@@ -343,7 +345,7 @@ public class UserInjectable implements User {
 	 * @return true if read is allowed; otherwise false.
 	 */
 	@Override
-	public boolean canReadDocument(Document document) {
+	public boolean canReadDocument(@Nonnull Document document) {
 		return CORE.getUser().canReadDocument(document);
 	}
 
@@ -374,7 +376,7 @@ public class UserInjectable implements User {
 	 * @return true if update is allowed; otherwise false.
 	 */
 	@Override
-	public boolean canUpdateDocument(Document document) {
+	public boolean canUpdateDocument(@Nonnull Document document) {
 		return CORE.getUser().canUpdateDocument(document);
 	}
 
@@ -385,7 +387,7 @@ public class UserInjectable implements User {
 	 * @return true if delete is allowed; otherwise false.
 	 */
 	@Override
-	public boolean canDeleteDocument(Document document) {
+	public boolean canDeleteDocument(@Nonnull Document document) {
 		return CORE.getUser().canDeleteDocument(document);
 	}
 
@@ -397,7 +399,7 @@ public class UserInjectable implements User {
 	 * @return true if action execution is allowed; otherwise false.
 	 */
 	@Override
-	public boolean canExecuteAction(Document document, String actionName) {
+	public boolean canExecuteAction(@Nonnull Document document, @Nonnull String actionName) {
 		return CORE.getUser().canExecuteAction(document, actionName);
 	}
 
@@ -409,7 +411,7 @@ public class UserInjectable implements User {
 	 * @return true if access is allowed; otherwise false.
 	 */
 	@Override
-	public boolean canAccess(UserAccess access, String uxui) {
+	public boolean canAccess(@Nonnull UserAccess access, @Nonnull String uxui) {
 		return CORE.getUser().canAccess(access, uxui);
 	}
 	
@@ -419,7 +421,7 @@ public class UserInjectable implements User {
 	 * @return mutable user attributes.
 	 */
 	@Override
-	public Map<String, Object> getAttributes() {
+	public @Nonnull Map<String, Object> getAttributes() {
 		return CORE.getUser().getAttributes();
 	}
 }

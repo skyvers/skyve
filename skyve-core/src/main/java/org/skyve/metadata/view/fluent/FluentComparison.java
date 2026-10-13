@@ -3,6 +3,7 @@ package org.skyve.metadata.view.fluent;
 import org.skyve.impl.metadata.view.widget.bound.input.Comparison;
 
 import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 
 /**
  * Builds {@link Comparison} widget metadata using a fluent API.
@@ -22,14 +23,14 @@ public class FluentComparison extends FluentInputWidget<FluentComparison> implem
 	 *
 	 * @param comparison the metadata instance to mutate
 	 */
-	public FluentComparison(Comparison comparison) {
+	public FluentComparison(@Nonnull Comparison comparison) {
 		this.comparison = comparison;
 	}
 
 	/**
 	 * Copies comparison metadata into this fluent builder.
 	 */
-	public FluentComparison from(@SuppressWarnings("hiding") Comparison comparison) {
+	public @Nonnull FluentComparison from(@SuppressWarnings("hiding") @Nonnull Comparison comparison) {
 		relativeSize(comparison, this);
 
 		modelName(comparison.getModelName());
@@ -51,7 +52,7 @@ public class FluentComparison extends FluentInputWidget<FluentComparison> implem
 	 * @param modelName the model name
 	 * @return this builder
 	 */
-	public FluentComparison modelName(String modelName) {
+	public @Nonnull FluentComparison modelName(@Nullable String modelName) {
 		comparison.setModelName(modelName);
 		return this;
 	}
@@ -62,7 +63,7 @@ public class FluentComparison extends FluentInputWidget<FluentComparison> implem
 	 * @param editable {@code true} to allow editing
 	 * @return this builder
 	 */
-	public FluentComparison editable(boolean editable) {
+	public @Nonnull FluentComparison editable(boolean editable) {
 		comparison.setEditable(editable ? Boolean.TRUE : Boolean.FALSE);
 		return this;
 	}
@@ -74,7 +75,7 @@ public class FluentComparison extends FluentInputWidget<FluentComparison> implem
 	 * @return this builder
 	 */
 	@Override
-	public FluentComparison pixelHeight(int height) {
+	public @Nonnull FluentComparison pixelHeight(int height) {
 		comparison.setPixelHeight(Integer.valueOf(height));
 		return this;
 	}
@@ -86,7 +87,7 @@ public class FluentComparison extends FluentInputWidget<FluentComparison> implem
 	 * @return this builder
 	 */
 	@Override
-	public FluentComparison pixelWidth(int width) {
+	public @Nonnull FluentComparison pixelWidth(int width) {
 		comparison.setPixelWidth(Integer.valueOf(width));
 		return this;
 	}
@@ -98,7 +99,7 @@ public class FluentComparison extends FluentInputWidget<FluentComparison> implem
 	 * @return this builder
 	 */
 	@Override
-	public FluentComparison minPixelWidth(int minPixelWidth) {
+	public @Nonnull FluentComparison minPixelWidth(int minPixelWidth) {
 		comparison.setMinPixelWidth(Integer.valueOf(minPixelWidth));
 		return this;
 	}
@@ -110,7 +111,7 @@ public class FluentComparison extends FluentInputWidget<FluentComparison> implem
 	 * @return this builder
 	 */
 	@Override
-	public FluentComparison maxPixelWidth(int maxPixelWidth) {
+	public @Nonnull FluentComparison maxPixelWidth(int maxPixelWidth) {
 		comparison.setMaxPixelWidth(Integer.valueOf(maxPixelWidth));
 		return this;
 	}
@@ -122,7 +123,7 @@ public class FluentComparison extends FluentInputWidget<FluentComparison> implem
 	 * @return this builder
 	 */
 	@Override
-	public FluentComparison maxPixelHeight(int maxPixelHeight) {
+	public @Nonnull FluentComparison maxPixelHeight(int maxPixelHeight) {
 		comparison.setMaxPixelHeight(Integer.valueOf(maxPixelHeight));
 		return this;
 	}
@@ -134,7 +135,7 @@ public class FluentComparison extends FluentInputWidget<FluentComparison> implem
 	 * @return this builder
 	 */
 	@Override
-	public FluentComparison minPixelHeight(int minPixelHeight) {
+	public @Nonnull FluentComparison minPixelHeight(int minPixelHeight) {
 		comparison.setMinPixelHeight(Integer.valueOf(minPixelHeight));
 		return this;
 	}
@@ -146,7 +147,7 @@ public class FluentComparison extends FluentInputWidget<FluentComparison> implem
 	 * @return this builder
 	 */
 	@Override
-	public FluentComparison percentageWidth(int percentageWidth) {
+	public @Nonnull FluentComparison percentageWidth(int percentageWidth) {
 		comparison.setPercentageWidth(Integer.valueOf(percentageWidth));
 		return this;
 	}
@@ -158,7 +159,7 @@ public class FluentComparison extends FluentInputWidget<FluentComparison> implem
 	 * @return this builder
 	 */
 	@Override
-	public FluentComparison percentageHeight(int percentageHeight) {
+	public @Nonnull FluentComparison percentageHeight(int percentageHeight) {
 		comparison.setPercentageHeight(Integer.valueOf(percentageHeight));
 		return this;
 	}
@@ -170,7 +171,7 @@ public class FluentComparison extends FluentInputWidget<FluentComparison> implem
 	 * @return this builder
 	 */
 	@Override
-	public FluentComparison responsiveWidth(int responsiveWidth) {
+	public @Nonnull FluentComparison responsiveWidth(int responsiveWidth) {
 		comparison.setResponsiveWidth(Integer.valueOf(responsiveWidth));
 		return this;
 	}
@@ -182,7 +183,7 @@ public class FluentComparison extends FluentInputWidget<FluentComparison> implem
 	 * @return this builder
 	 */
 	@Override
-	public FluentComparison sm(int sm) {
+	public @Nonnull FluentComparison sm(int sm) {
 		comparison.setSm(Integer.valueOf(sm));
 		return this;
 	}
@@ -194,7 +195,7 @@ public class FluentComparison extends FluentInputWidget<FluentComparison> implem
 	 * @return this builder
 	 */
 	@Override
-	public FluentComparison md(int md) {
+	public @Nonnull FluentComparison md(int md) {
 		comparison.setMd(Integer.valueOf(md));
 		return this;
 	}
@@ -206,7 +207,7 @@ public class FluentComparison extends FluentInputWidget<FluentComparison> implem
 	 * @return this builder
 	 */
 	@Override
-	public FluentComparison lg(int lg) {
+	public @Nonnull FluentComparison lg(int lg) {
 		comparison.setLg(Integer.valueOf(lg));
 		return this;
 	}
@@ -218,7 +219,7 @@ public class FluentComparison extends FluentInputWidget<FluentComparison> implem
 	 * @return this builder
 	 */
 	@Override
-	public FluentComparison xl(int xl) {
+	public @Nonnull FluentComparison xl(int xl) {
 		comparison.setXl(Integer.valueOf(xl));
 		return this;
 	}
@@ -242,7 +243,7 @@ public class FluentComparison extends FluentInputWidget<FluentComparison> implem
 	 * @return the mutable comparison metadata being configured
 	 */
 	@Override
-	public Comparison get() {
+	public @Nonnull Comparison get() {
 		return comparison;
 	}
 

@@ -10,6 +10,9 @@ import org.skyve.domain.messages.DomainException;
 import org.skyve.impl.util.LoggingIteratorAdapter;
 import org.skyve.persistence.AutoClosingIterable;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Auto-closing iterable that wraps a Hibernate scroll result set, closing the
  * underlying {@link org.hibernate.ScrollableResults} when the iterator is exhausted
@@ -33,7 +36,7 @@ public class HibernateAutoClosingIterable<T> implements AutoClosingIterable<T> {
 	 * @param assertSingle whether iteration should fail when a row contains more than one projected value
 	 * @param assertMultiple whether iteration should fail when a row contains one or fewer projected values
 	 */
-	public HibernateAutoClosingIterable(ScrollableResults results, boolean assertSingle, boolean assertMultiple) {
+	public HibernateAutoClosingIterable(@Nonnull ScrollableResults results, boolean assertSingle, boolean assertMultiple) {
 		this(null, null, results, null, assertSingle, assertMultiple);
 	}
 	
@@ -51,10 +54,10 @@ public class HibernateAutoClosingIterable<T> implements AutoClosingIterable<T> {
 	 * @param assertSingle whether iteration should fail when a row contains more than one projected value
 	 * @param assertMultiple whether iteration should fail when a row contains one or fewer projected values
 	 */
-	public HibernateAutoClosingIterable(String moduleName, 
-											String documentName, 
-											ScrollableResults results, 
-											String[] aliases,
+	public HibernateAutoClosingIterable(@Nullable String moduleName, 
+											@Nullable String documentName, 
+											@Nonnull ScrollableResults results, 
+											@Nullable String[] aliases,
 											boolean assertSingle,
 											boolean assertMultiple) {
 		this.moduleName = moduleName;
@@ -78,10 +81,10 @@ public class HibernateAutoClosingIterable<T> implements AutoClosingIterable<T> {
 		@SuppressWarnings("hiding")
 		private String[] aliases = null;
 
-		private HibernateIterator(String moduleName, 
-									String documentName, 
-									ScrollableResults results, 
-									String[] aliases) {
+		private HibernateIterator(@Nullable String moduleName, 
+									@Nullable String documentName, 
+									@Nonnull ScrollableResults results, 
+									@Nullable String[] aliases) {
 			this.moduleName = moduleName;
 			this.documentName = documentName;
 			this.results = results;
@@ -114,7 +117,7 @@ public class HibernateAutoClosingIterable<T> implements AutoClosingIterable<T> {
 		 */
 		@Override
 		@SuppressWarnings({"unchecked", "java:S2272"}) // hasNext() has side-effects
-		public Z next() {
+		public @Nullable Z next() {
 			Z result = null;
 
 			Object[] tuple = results.get();
@@ -172,7 +175,7 @@ public class HibernateAutoClosingIterable<T> implements AutoClosingIterable<T> {
 	 * @return an auto-closing iterator over the current results
 	 */
 	@Override
-	public Iterator<T> iterator() {
+	public @Nonnull Iterator<T> iterator() {
 		Iterator<T> i = new HibernateIterator<>(moduleName, documentName, results, aliases);
 		return new LoggingIteratorAdapter<>(i);
 	}

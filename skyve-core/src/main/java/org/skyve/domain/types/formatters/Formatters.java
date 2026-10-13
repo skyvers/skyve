@@ -50,7 +50,7 @@ public class Formatters {
 	 * Get the Set of formatter names.
 	 * @return	An unmodified set of all formatter names registered
 	 */
-	public static Set<String> getNames() {
+	public static @Nonnull Set<String> getNames() {
 		return Collections.unmodifiableSet(FORMATTERS.keySet());
 	}
 }

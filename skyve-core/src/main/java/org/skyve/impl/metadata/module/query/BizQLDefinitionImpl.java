@@ -24,7 +24,7 @@ public class BizQLDefinitionImpl extends QueryDefinitionImpl implements BizQLDef
 	private String query;
 
 	@Override
-	public String getQuery() {
+	public @Nonnull String getQuery() {
 		return query;
 	}
 

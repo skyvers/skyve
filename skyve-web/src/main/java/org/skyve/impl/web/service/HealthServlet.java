@@ -28,6 +28,7 @@ import org.skyve.util.monitoring.Monitoring;
 import org.slf4j.Logger;
 import org.skyve.util.logging.SkyveLoggerFactory;
 
+import jakarta.annotation.Nonnull;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
@@ -69,7 +70,7 @@ public class HealthServlet extends HttpServlet {
 	 */
 	@Override
 	@SuppressWarnings("java:S1989") // there exists JavaEE error pages
-	protected void doGet(HttpServletRequest request, HttpServletResponse response)
+	protected void doGet(@Nonnull HttpServletRequest request, @Nonnull HttpServletResponse response)
 	throws ServletException, IOException {
 		// If health check is off, send the 404 page
 		if (! UtilImpl.HEALTH_CHECK) {
@@ -107,7 +108,7 @@ public class HealthServlet extends HttpServlet {
 	 * @return	The JSON.
 	 */
 	@SuppressWarnings("java:S3776") // Complexity OK
-	private static StringBuilder determineResponse() {
+	private static @Nonnull StringBuilder determineResponse() {
 		StringBuilder result = new StringBuilder(128);
 		
 		// Persistence

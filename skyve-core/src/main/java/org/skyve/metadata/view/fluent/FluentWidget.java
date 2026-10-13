@@ -11,6 +11,8 @@ import org.skyve.impl.metadata.view.ResponsiveWidth;
 import org.skyve.impl.metadata.view.container.Box;
 import org.skyve.metadata.MetaData;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * Provides shared size and layout copy helpers for fluent widget builders.
  */
@@ -27,12 +29,12 @@ public abstract class FluentWidget {
 	 *
 	 * @return the mutable metadata being configured
 	 */
-	public abstract MetaData get();
+	public abstract @Nonnull MetaData get();
 	
 	/**
 	 * Copies absolute width settings when present on the source metadata.
 	 */
-	protected static void absoluteWidth(AbsoluteWidth from, FluentAbsoluteWidth<?> to) {
+	protected static void absoluteWidth(@Nonnull AbsoluteWidth from, @Nonnull FluentAbsoluteWidth<?> to) {
 		Integer i = from.getPixelWidth();
 		if (i != null) {
 			to.pixelWidth(i.intValue());
@@ -42,7 +44,7 @@ public abstract class FluentWidget {
 	/**
 	 * Copies absolute width and height settings when present on the source metadata.
 	 */
-	protected static void absoluteSize(AbsoluteSize from, FluentAbsoluteSize<?> to) {
+	protected static void absoluteSize(@Nonnull AbsoluteSize from, @Nonnull FluentAbsoluteSize<?> to) {
 		absoluteWidth(from, to);
 		Integer i = from.getPixelHeight();
 		if (i != null) {
@@ -53,7 +55,7 @@ public abstract class FluentWidget {
 	/**
 	 * Copies minimum height constraints when present on the source metadata.
 	 */
-	protected static void minimumHeight(MinimumHeight from, FluentMinimumHeight<?> to) {
+	protected static void minimumHeight(@Nonnull MinimumHeight from, @Nonnull FluentMinimumHeight<?> to) {
 		Integer i = from.getMinPixelHeight();
 		if (i != null) {
 			to.minPixelHeight(i.intValue());
@@ -63,7 +65,7 @@ public abstract class FluentWidget {
 	/**
 	 * Copies minimum and maximum height constraints when present on the source metadata.
 	 */
-	protected static void constrainableHeight(ConstrainableHeight from, FluentConstrainableHeight<?> to) {
+	protected static void constrainableHeight(@Nonnull ConstrainableHeight from, @Nonnull FluentConstrainableHeight<?> to) {
 		minimumHeight(from, to);
 		Integer i = from.getMaxPixelHeight();
 		if (i != null) {
@@ -74,7 +76,7 @@ public abstract class FluentWidget {
 	/**
 	 * Copies min/max width and height constraints when present on the source metadata.
 	 */
-	protected static void constrainableSize(ConstrainableSize from, FluentConstrainableSize<?> to) {
+	protected static void constrainableSize(@Nonnull ConstrainableSize from, @Nonnull FluentConstrainableSize<?> to) {
 		constrainableHeight(from, to);
 		Integer i = from.getMinPixelWidth();
 		if (i != null) {
@@ -89,7 +91,7 @@ public abstract class FluentWidget {
 	/**
 	 * Copies absolute and relative width settings when present on the source metadata.
 	 */
-	protected static void relativeWidth(RelativeWidth from, FluentRelativeWidth<?> to) {
+	protected static void relativeWidth(@Nonnull RelativeWidth from, @Nonnull FluentRelativeWidth<?> to) {
 		absoluteWidth(from, to);
 		
 		Integer i = from.getPercentageWidth();
@@ -105,7 +107,7 @@ public abstract class FluentWidget {
 	/**
 	 * Copies responsive breakpoint widths when present on the source metadata.
 	 */
-	protected static void responsiveWidth(ResponsiveWidth from, FluentRelativeSize<?> to) {
+	protected static void responsiveWidth(@Nonnull ResponsiveWidth from, @Nonnull FluentRelativeSize<?> to) {
 		relativeWidth(from, to);
 		
 		Integer i = from.getSm();
@@ -130,7 +132,7 @@ public abstract class FluentWidget {
 	/**
 	 * Copies relative size, responsive width, and constraint settings when present.
 	 */
-	protected static void relativeSize(RelativeSize from, FluentRelativeSize<?> to) {
+	protected static void relativeSize(@Nonnull RelativeSize from, @Nonnull FluentRelativeSize<?> to) {
 		responsiveWidth(from, to);
 		constrainableSize(from, to);
 
@@ -147,7 +149,7 @@ public abstract class FluentWidget {
 	/**
 	 * Copies shared box container size and spacing settings when present.
 	 */
-	protected static void box(Box from, FluentBox<?> to) {
+	protected static void box(@Nonnull Box from, @Nonnull FluentBox<?> to) {
 		relativeSize(from, to);
 		to.shrinkWrap(from.getShrinkWrap());
 		Integer i = from.getPixelPadding();

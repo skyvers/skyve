@@ -9,6 +9,8 @@ import org.skyve.impl.metadata.repository.PropertyMapAdapter;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.DecoratedMetaData;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlElementRef;
@@ -49,30 +51,30 @@ public class DataRepeater extends AbstractDataWidget implements DecoratedMetaDat
 	@Override
 	@XmlElementRefs({@XmlElementRef(type = DataGridBoundColumn.class),
 						@XmlElementRef(type = DataGridContainerColumn.class)})
-	public List<DataGridColumn> getColumns() {
+	public @Nonnull List<DataGridColumn> getColumns() {
 		return columns;
 	}
 
-	public Boolean getShowColumnHeaders() {
+	public @Nullable Boolean getShowColumnHeaders() {
 		return showColumnHeaders;
 	}
 
 	@XmlAttribute(name = "showColumnHeaders", required = false)
-	public void setShowColumnHeaders(Boolean showColumnHeaders) {
+	public void setShowColumnHeaders(@Nullable Boolean showColumnHeaders) {
 		this.showColumnHeaders = showColumnHeaders;
 	}
 
-	public Boolean getShowGrid() {
+	public @Nullable Boolean getShowGrid() {
 		return showGrid;
 	}
 
 	@XmlAttribute(name = "showGrid", required = false)
-	public void setShowGrid(Boolean showGrid) {
+	public void setShowGrid(@Nullable Boolean showGrid) {
 		this.showGrid = showGrid;
 	}
 
 	@Override
-	public Map<String, String> getProperties() {
+	public @Nonnull Map<String, String> getProperties() {
 		return properties;
 	}
 }

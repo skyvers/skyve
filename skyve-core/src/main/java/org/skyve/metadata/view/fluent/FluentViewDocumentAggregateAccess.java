@@ -4,6 +4,9 @@ import java.util.Set;
 
 import org.skyve.impl.metadata.repository.view.access.ViewDocumentAggregateUserAccessMetaData;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * A fluent helper builder class to construct and manipulate the {@link ViewDocumentAggregateUserAccessMetaData} metadata.
  * 
@@ -20,14 +23,14 @@ public class FluentViewDocumentAggregateAccess extends FluentViewUserAccess<Flue
 	/**
 	 * Creates a new FluentModuleRoleDocumentAggregateAccess from the specified ViewDocumentAggregateUserAccessMetaData.
 	 */
-	public FluentViewDocumentAggregateAccess(ViewDocumentAggregateUserAccessMetaData access) {
+	public FluentViewDocumentAggregateAccess(@Nonnull ViewDocumentAggregateUserAccessMetaData access) {
 		this.access = access;
 	}
 
 	/**
 	 * Returns a FluentViewDocumentAggregateAccess from a runtime metadata.
 	 */
-	protected FluentViewDocumentAggregateAccess from(String documentName, Set<String> uxuis) {
+	protected @Nonnull FluentViewDocumentAggregateAccess from(@Nonnull String documentName, @Nonnull Set<String> uxuis) {
 		documentName(documentName);
 		uxuis.forEach(u -> addUxUi(u));
 		return this;
@@ -36,7 +39,7 @@ public class FluentViewDocumentAggregateAccess extends FluentViewUserAccess<Flue
 	/**
 	 * Specifies the document name for this FluentViewDocumentAggregateAccess.
 	 */
-	public FluentViewDocumentAggregateAccess documentName(final String documentName) {
+	public @Nonnull FluentViewDocumentAggregateAccess documentName(final @Nullable String documentName) {
 		access.setDocumentName(documentName);
 		return this;
 	}
@@ -45,7 +48,7 @@ public class FluentViewDocumentAggregateAccess extends FluentViewUserAccess<Flue
 	 * Returns the underlying document aggregate user access metadata from this builder.
 	 */
 	@Override
-	public ViewDocumentAggregateUserAccessMetaData get() {
+	public @Nonnull ViewDocumentAggregateUserAccessMetaData get() {
 		return access;
 	}
 }

@@ -34,6 +34,7 @@ import org.slf4j.Logger;
 import com.google.common.base.MoreObjects;
 
 import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 
 /**
  * Runtime implementation of {@link org.skyve.metadata.user.User} carrying the
@@ -130,7 +131,7 @@ public class UserImpl implements User {
 	 * @return the user identifier.
 	 */
 	@Override
-	public String getId() {
+	public @Nonnull String getId() {
 		return id;
 	}
 
@@ -140,7 +141,7 @@ public class UserImpl implements User {
 	 * @param id the user identifier.
 	 */
 	@Override
-	public void setId(String id) {
+	public void setId(@Nonnull String id) {
 		this.id = id;
 	}
 
@@ -150,7 +151,7 @@ public class UserImpl implements User {
 	 * @return the user display name.
 	 */
 	@Override
-	public String getName() {
+	public @Nullable String getName() {
 		return name;
 	}
 
@@ -159,7 +160,7 @@ public class UserImpl implements User {
 	 *
 	 * @param name the user display name.
 	 */
-	public void setName(String name) {
+	public void setName(@Nullable String name) {
 		this.name = name;
 	}
 
@@ -169,7 +170,7 @@ public class UserImpl implements User {
 	 * @return the session identifier.
 	 */
 	@Override
-	public String getSessionId() {
+	public @Nullable String getSessionId() {
 		return sessionId;
 	}
 
@@ -187,7 +188,7 @@ public class UserImpl implements User {
 	 * @return the IETF BCP 47 language tag, or {@code null} when not set.
 	 */
 	@Override
-	public String getLanguageTag() {
+	public @Nullable String getLanguageTag() {
 		return languageTag;
 	}
 	
@@ -196,7 +197,7 @@ public class UserImpl implements User {
 	 *
 	 * @param languageTag the IETF BCP 47 language tag.
 	 */
-	public void setLanguageTag(String languageTag) {
+	public void setLanguageTag(@Nullable String languageTag) {
 		this.languageTag = languageTag;
 		if (languageTag == null) {
 			locale = null;
@@ -209,7 +210,7 @@ public class UserImpl implements User {
     /**
      * Reinstate the transient locale value from the language tag after Serialization.
      */
-    protected Object readResolve() {
+    protected @Nonnull Object readResolve() {
         setLanguageTag(languageTag);
         return this;
     }
@@ -220,7 +221,7 @@ public class UserImpl implements User {
 	 * @return the locale derived from language tag or request context.
 	 */
 	@Override
-	public Locale getLocale() {
+	public @Nullable Locale getLocale() {
 		return locale;
 	}
 
@@ -229,7 +230,7 @@ public class UserImpl implements User {
 	 *
 	 * @param locale the request locale to cache for this user.
 	 */
-	public void setWebLocale(Locale locale) {
+	public void setWebLocale(@Nonnull Locale locale) {
 		if (languageTag == null) {
 			this.locale = locale;
 		}
@@ -241,7 +242,7 @@ public class UserImpl implements User {
 	 * @return the password hash.
 	 */
 	@Override
-	public String getPasswordHash() {
+	public @Nullable String getPasswordHash() {
 		return passwordHash;
 	}
 
@@ -250,7 +251,7 @@ public class UserImpl implements User {
 	 *
 	 * @param passwordHash the password hash.
 	 */
-	public void setPasswordHash(String passwordHash) {
+	public void setPasswordHash(@Nullable String passwordHash) {
 		this.passwordHash = passwordHash;
 	}
 
@@ -279,7 +280,7 @@ public class UserImpl implements User {
 	 * @return the contact identifier.
 	 */
 	@Override
-	public String getContactId() {
+	public @Nullable String getContactId() {
 		return contactId;
 	}
 
@@ -288,7 +289,7 @@ public class UserImpl implements User {
 	 *
 	 * @param contactId the contact identifier.
 	 */
-	public void setContactId(String contactId) {
+	public void setContactId(@Nullable String contactId) {
 		this.contactId = contactId;
 	}
 
@@ -298,7 +299,7 @@ public class UserImpl implements User {
 	 * @return the contact display name.
 	 */
 	@Override
-	public String getContactName() {
+	public @Nullable String getContactName() {
 		return contactName;
 	}
 
@@ -307,7 +308,7 @@ public class UserImpl implements User {
 	 *
 	 * @param contactName the contact display name.
 	 */
-	public void setContactName(String contactName) {
+	public void setContactName(@Nullable String contactName) {
 		this.contactName = contactName;
 	}
 
@@ -317,7 +318,7 @@ public class UserImpl implements User {
 	 * @return the contact image identifier.
 	 */
 	@Override
-	public String getContactImageId() {
+	public @Nullable String getContactImageId() {
 		return contactImageId;
 	}
 
@@ -326,7 +327,7 @@ public class UserImpl implements User {
 	 *
 	 * @param contactImageId the contact image identifier.
 	 */
-	public void setContactImageId(String contactImageId) {
+	public void setContactImageId(@Nullable String contactImageId) {
 		this.contactImageId = contactImageId;
 	}
 
@@ -338,7 +339,7 @@ public class UserImpl implements User {
 	 * @return the content URL, or {@code null} when no contact image is available.
 	 */
 	@Override
-	public String getContactImageUrl(int width, int height) {
+	public @Nullable String getContactImageUrl(int width, int height) {
 		if (contactImageId == null) {
 			return null;
 		}
@@ -355,7 +356,7 @@ public class UserImpl implements User {
 	 * @return one or two uppercase initials, or {@code "??"} when no name is available.
 	 */
 	@Override
-	public String getContactAvatarInitials() {
+	public @Nonnull String getContactAvatarInitials() {
 		String n = (contactName == null) ? name : contactName;
 		if (n == null) {
 			return "??";
@@ -378,7 +379,7 @@ public class UserImpl implements User {
 	 * @return The attributes Map.
 	 */
 	@Override
-	public Map<String, Object> getAttributes() {
+	public @Nonnull Map<String, Object> getAttributes() {
 		return attributes;
 	}
 
@@ -388,7 +389,7 @@ public class UserImpl implements User {
 	 * @return the current customer metadata, or {@code null} if it cannot be resolved.
 	 */
 	@Override
-	public Customer getCustomer() {
+	public @Nonnull Customer getCustomer() {
 		return ProvidedRepositoryFactory.get().getCustomer(customerName);
 	}
 
@@ -398,7 +399,7 @@ public class UserImpl implements User {
 	 * @param customerName the customer name.
 	 */
 	@Override
-	public void setCustomerName(String customerName) {
+	public void setCustomerName(@Nullable String customerName) {
 		this.customerName = customerName;
 	}
 
@@ -408,7 +409,7 @@ public class UserImpl implements User {
 	 * @return the customer name.
 	 */
 	@Override
-	public String getCustomerName() {
+	public @Nullable String getCustomerName() {
 		return customerName;
 	}
 
@@ -418,7 +419,7 @@ public class UserImpl implements User {
 	 * @return the data-group identifier, or {@code null} for ungrouped users.
 	 */
 	@Override
-	public String getDataGroupId() {
+	public @Nullable String getDataGroupId() {
 		return dataGroupId;
 	}
 
@@ -428,7 +429,7 @@ public class UserImpl implements User {
 	 * @param dataGroupId the data-group identifier.
 	 */
 	@Override
-	public void setDataGroupId(String dataGroupId) {
+	public void setDataGroupId(@Nullable String dataGroupId) {
 		this.dataGroupId = dataGroupId;
 	}
 
@@ -438,7 +439,7 @@ public class UserImpl implements User {
 	 * @return the home module name.
 	 */
 	@Override
-	public String getHomeModuleName() {
+	public @Nullable String getHomeModuleName() {
 		return homeModuleName;
 	}
 
@@ -447,7 +448,7 @@ public class UserImpl implements User {
 	 *
 	 * @param homeModuleName the home module name.
 	 */
-	public void setHomeModuleName(String homeModuleName) {
+	public void setHomeModuleName(@Nullable String homeModuleName) {
 		this.homeModuleName = homeModuleName;
 	}
 
@@ -459,7 +460,7 @@ public class UserImpl implements User {
 	 *
 	 * @param role the role to merge into effective permissions.
 	 */
-	public void addRole(RoleImpl role) {
+	public void addRole(@Nonnull RoleImpl role) {
 		String roleName = new StringBuilder(128).append(role.getOwningModule().getName()).append('.').append(role.getName()).toString();
 		
 		// Only continue if role hasn't been added already
@@ -491,7 +492,7 @@ public class UserImpl implements User {
 	 * @param moduleName the module the action belongs to
 	 * @param actionPrivilege the action
 	 */
-	protected void addActionPermission(String moduleName, ActionPrivilege actionPrivilege) {
+	protected void addActionPermission(@Nonnull String moduleName, @Nonnull ActionPrivilege actionPrivilege) {
 		// will add to set if not already present
 		StringBuilder sb = new StringBuilder();
 		sb.append(moduleName).append('.');
@@ -506,7 +507,7 @@ public class UserImpl implements User {
 	 * @param documentName the document
 	 * @param documentPermission the permission
 	 */
-	protected void putDocumentPermission(String moduleName, String documentName, DocumentPermission documentPermission) {
+	protected void putDocumentPermission(@Nonnull String moduleName, @Nonnull String documentName, @Nonnull DocumentPermission documentPermission) {
 		DocumentPermission mergedPermission = documentPermission;
 		
 		String fullyQualifiedDocumentName = new StringBuilder(128).append(moduleName).append('.').append(documentName).toString();
@@ -524,7 +525,7 @@ public class UserImpl implements User {
 	 * @param moduleName the module the content restriction belongs to
 	 * @param contentRestriction the content restriction
 	 */
-	protected void addContentRestriction(String moduleName, ContentRestriction contentRestriction) {
+	protected void addContentRestriction(@Nonnull String moduleName, @Nonnull ContentRestriction contentRestriction) {
 		// will add to set if not already present
 		StringBuilder key = new StringBuilder(196);
 		key.append(moduleName).append('.');
@@ -539,7 +540,7 @@ public class UserImpl implements User {
 	 * @param moduleName the module the content permission belongs to
 	 * @param contentPermission the content permission
 	 */
-	protected void addContentPermission(String moduleName, ContentPermission contentPermission) {
+	protected void addContentPermission(@Nonnull String moduleName, @Nonnull ContentPermission contentPermission) {
 		// will add to set if not already present
 		StringBuilder key = new StringBuilder(196);
 		key.append(moduleName).append('.');
@@ -554,7 +555,7 @@ public class UserImpl implements User {
 	 * @return the permission map key set in {@code <module>.<document>} form.
 	 */
 
-	public Set<String> getFullyQualifiedDocumentNames() {
+	public @Nonnull Set<String> getFullyQualifiedDocumentNames() {
 		return documentPermissions.keySet();
 	}
 
@@ -564,7 +565,7 @@ public class UserImpl implements User {
 	 * @param moduleName
 	 * @return
 	 */
-	public Menu getModuleMenu(String moduleName) {
+	public @Nullable Menu getModuleMenu(@Nonnull String moduleName) {
 		return moduleMenuMap.get(moduleName);
 	}
 
@@ -573,7 +574,7 @@ public class UserImpl implements User {
 	 * @param moduleName the module
 	 * @param menu the menu for that module
 	 */
-	public void putModuleMenu(Module module, Menu menu) {
+	public void putModuleMenu(@Nonnull Module module, @Nonnull Menu menu) {
 		moduleMenuMap.put(module.getName(), menu);
 	}
 
@@ -589,7 +590,7 @@ public class UserImpl implements User {
 	 * Returns module names that currently have at least one accessible menu item.
 	 */
 	@Override
-	public Set<String> getAccessibleModuleNames() {
+	public @Nonnull Set<String> getAccessibleModuleNames() {
 		Set<String> result = new TreeSet<>();
 
 		// add module name if menu has accessible items
@@ -612,7 +613,7 @@ public class UserImpl implements User {
 	 * @return {@code true} when the role is effectively held.
 	 */
 	@Override
-	public boolean isInRole(String moduleName, String roleName) {
+	public boolean isInRole(@Nonnull String moduleName, @Nonnull String roleName) {
 		String fullyQualifiedRoleName = new StringBuilder(128).append(moduleName).append('.').append(roleName).toString();
 		return roleNames.contains(fullyQualifiedRoleName) || // user has the role
 		// looking for data administrator role,
@@ -631,7 +632,7 @@ public class UserImpl implements User {
 	 *         permission exists.
 	 */
 	@Override
-	public DocumentPermissionScope getScope(String moduleName, String documentName) {
+	public @Nonnull DocumentPermissionScope getScope(@Nonnull String moduleName, @Nonnull String documentName) {
 		DocumentPermissionScope result = DocumentPermissionScope.none;
 		String key = new StringBuilder(128).append(moduleName).append('.').append(documentName).toString();
 		DocumentPermission permission = documentPermissions.get(key);
@@ -661,12 +662,12 @@ public class UserImpl implements User {
 	 */
 	@Override
 	@SuppressWarnings({"incomplete-switch", "java:S3776"}) // Complexity OK
-	public boolean canReadBean(String beanBizId,
-								String beanBizModule,
-								String beanBizDocument,
-								String beanBizCustomer,
-								String beanBizDataGroupId,
-								String beanBizUserId) {
+	public boolean canReadBean(@Nonnull String beanBizId,
+								@Nonnull String beanBizModule,
+								@Nonnull String beanBizDocument,
+								@Nullable String beanBizCustomer,
+								@Nullable String beanBizDataGroupId,
+								@Nullable String beanBizUserId) {
 		boolean result = false;
 		
 		String key = new StringBuilder(128).append(beanBizModule).append('.').append(beanBizDocument).toString();
@@ -770,13 +771,13 @@ public class UserImpl implements User {
 	 * @return <code>true</code> if access is allowed, otherwise <code>false</code>.
 	 */
 	@Override
-	public boolean canAccessContent(String bizId,
-										String bizModule,
-										String bizDocument,
-										String bizCustomer,
-										String bizDataGroupId,
-										String bizUserId,
-										String attributeName) {
+	public boolean canAccessContent(@Nonnull String bizId,
+										@Nonnull String bizModule,
+										@Nonnull String bizDocument,
+										@Nullable String bizCustomer,
+										@Nullable String bizDataGroupId,
+										@Nullable String bizUserId,
+										@Nonnull String attributeName) {
 		String modocAndAttr = new StringBuilder(192).append(bizModule).append('.').append(bizDocument).append('.').append(attributeName).toString();
 		boolean result = (! contentRestrictions.contains(modocAndAttr));
 		if (result) {
@@ -807,7 +808,7 @@ public class UserImpl implements User {
 	 * @return {@code true} when a document permission entry exists.
 	 */
 	@Override
-	public boolean canAccessDocument(Document document) {
+	public boolean canAccessDocument(@Nonnull Document document) {
 		String modoc = new StringBuilder(128).append(document.getOwningModuleName()).append('.').append(document.getName()).toString();
 		return (documentPermissions.get(modoc) != null);
 	}
@@ -819,7 +820,7 @@ public class UserImpl implements User {
 	 * @return {@code true} when create permission is granted.
 	 */
 	@Override
-	public boolean canCreateDocument(Document document) {
+	public boolean canCreateDocument(@Nonnull Document document) {
 		boolean result = false;
 		
 		String modoc = new StringBuilder(128).append(document.getOwningModuleName()).append('.').append(document.getName()).toString();
@@ -848,7 +849,7 @@ public class UserImpl implements User {
 	 * @return {@code true} when read permission is granted.
 	 */
 	@Override
-	public boolean canReadDocument(Document document) {
+	public boolean canReadDocument(@Nonnull Document document) {
 		boolean result = false;
 
 		String modoc = new StringBuilder(128).append(document.getOwningModuleName()).append('.').append(document.getName()).toString();
@@ -887,7 +888,7 @@ public class UserImpl implements User {
 	 * @return {@code true} when update permission is granted.
 	 */
 	@Override
-	public boolean canUpdateDocument(Document document) {
+	public boolean canUpdateDocument(@Nonnull Document document) {
 		boolean result = false;
 
 		String modoc = new StringBuilder(128).append(document.getOwningModuleName()).append('.').append(document.getName()).toString();
@@ -906,7 +907,7 @@ public class UserImpl implements User {
 	 * @return {@code true} when delete permission is granted.
 	 */
 	@Override
-	public boolean canDeleteDocument(Document document) {
+	public boolean canDeleteDocument(@Nonnull Document document) {
 		boolean result = false;
 
 		String modoc = new StringBuilder(128).append(document.getOwningModuleName()).append('.').append(document.getName()).toString();
@@ -926,7 +927,7 @@ public class UserImpl implements User {
 	 * @return {@code true} when the fully qualified action is present in the user's action set.
 	 */
 	@Override
-	public boolean canExecuteAction(Document document, String actionName) {
+	public boolean canExecuteAction(@Nonnull Document document, @Nonnull String actionName) {
 		StringBuilder sb = new StringBuilder(192);
 		sb.append(document.getOwningModuleName()).append('.').append(document.getName());
 		String fullyQualifiedActionName = sb.append('.').append(actionName).toString();
@@ -946,7 +947,7 @@ public class UserImpl implements User {
 	 * Otherwise, check access at UX/UI level.
 	 */
 	@Override
-	public boolean canAccess(UserAccess access, String uxui) {
+	public boolean canAccess(@Nonnull UserAccess access, @Nonnull String uxui) {
 		// If access control is switched off then everything is accessible
 		if (! UtilImpl.ACCESS_CONTROL) {
 			return true;
@@ -972,7 +973,7 @@ public class UserImpl implements User {
 	 * @param uxui the active UX/UI identifier.
 	 * @return {@code true} when access is allowed for the supplied UX/UI.
 	 */
-	private boolean canAccessWithDevMode(UserAccess access, String uxui) {
+	private boolean canAccessWithDevMode(@Nonnull UserAccess access, @Nonnull String uxui) {
 		// Create the ACL if not already created
 		if (accesses.isEmpty()) {
 			new AccessProcessor(this, moduleMenuMap, accesses).process();
@@ -1015,7 +1016,7 @@ public class UserImpl implements User {
 	 * 
 	 * @return a populated client user payload.
 	 */
-	public ClientUserData createClientUser() {
+	public @Nonnull ClientUserData createClientUser() {
 		ClientUserData result = new ClientUserData();
 
 		result.setId(id);
@@ -1066,7 +1067,7 @@ public class UserImpl implements User {
 	 * @return a string containing name, customer, and user identifier.
 	 */
 	@Override
-	public String toString() {
+	public @Nonnull String toString() {
 		return MoreObjects.toStringHelper(this)
 				.add("name", name)
 				.add("customerName", customerName)

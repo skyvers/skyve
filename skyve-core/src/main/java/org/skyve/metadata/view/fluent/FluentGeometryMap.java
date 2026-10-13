@@ -4,6 +4,7 @@ import org.skyve.impl.metadata.view.widget.bound.input.GeometryInputType;
 import org.skyve.impl.metadata.view.widget.bound.input.GeometryMap;
 
 import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 
 /**
  * Builds {@link GeometryMap} widget metadata using a fluent API.
@@ -23,7 +24,7 @@ public class FluentGeometryMap extends FluentInputWidget<FluentGeometryMap> impl
 	 *
 	 * @param map the metadata instance to mutate
 	 */
-	public FluentGeometryMap(GeometryMap map) {
+	public FluentGeometryMap(@Nonnull GeometryMap map) {
 		this.map = map;
 	}
 
@@ -34,7 +35,7 @@ public class FluentGeometryMap extends FluentInputWidget<FluentGeometryMap> impl
 	 *            the source metadata to copy
 	 * @return this builder
 	 */
-	public FluentGeometryMap from(@SuppressWarnings("hiding") GeometryMap map) {
+	public @Nonnull FluentGeometryMap from(@SuppressWarnings("hiding") @Nonnull GeometryMap map) {
 		type(map.getType());
 		relativeSize(map, this);
 		map.getChangedActions().forEach(c -> addAction(FluentEventAction.from(c)));
@@ -50,7 +51,7 @@ public class FluentGeometryMap extends FluentInputWidget<FluentGeometryMap> impl
 	 * @param type the geometry input type
 	 * @return this builder
 	 */
-	public FluentGeometryMap type(GeometryInputType type) {
+	public @Nonnull FluentGeometryMap type(@Nullable GeometryInputType type) {
 		map.setType(type);
 		return this;
 	}
@@ -62,7 +63,7 @@ public class FluentGeometryMap extends FluentInputWidget<FluentGeometryMap> impl
 	 * @return this builder
 	 */
 	@Override
-	public FluentGeometryMap pixelHeight(int height) {
+	public @Nonnull FluentGeometryMap pixelHeight(int height) {
 		map.setPixelHeight(Integer.valueOf(height));
 		return this;
 	}
@@ -74,7 +75,7 @@ public class FluentGeometryMap extends FluentInputWidget<FluentGeometryMap> impl
 	 * @return this builder
 	 */
 	@Override
-	public FluentGeometryMap pixelWidth(int width) {
+	public @Nonnull FluentGeometryMap pixelWidth(int width) {
 		map.setPixelWidth(Integer.valueOf(width));
 		return this;
 	}
@@ -86,7 +87,7 @@ public class FluentGeometryMap extends FluentInputWidget<FluentGeometryMap> impl
 	 * @return this builder
 	 */
 	@Override
-	public FluentGeometryMap minPixelWidth(int minPixelWidth) {
+	public @Nonnull FluentGeometryMap minPixelWidth(int minPixelWidth) {
 		map.setMinPixelWidth(Integer.valueOf(minPixelWidth));
 		return this;
 	}
@@ -98,7 +99,7 @@ public class FluentGeometryMap extends FluentInputWidget<FluentGeometryMap> impl
 	 * @return this builder
 	 */
 	@Override
-	public FluentGeometryMap maxPixelWidth(int maxPixelWidth) {
+	public @Nonnull FluentGeometryMap maxPixelWidth(int maxPixelWidth) {
 		map.setMaxPixelWidth(Integer.valueOf(maxPixelWidth));
 		return this;
 	}
@@ -110,7 +111,7 @@ public class FluentGeometryMap extends FluentInputWidget<FluentGeometryMap> impl
 	 * @return this builder
 	 */
 	@Override
-	public FluentGeometryMap maxPixelHeight(int maxPixelHeight) {
+	public @Nonnull FluentGeometryMap maxPixelHeight(int maxPixelHeight) {
 		map.setMaxPixelHeight(Integer.valueOf(maxPixelHeight));
 		return this;
 	}
@@ -122,7 +123,7 @@ public class FluentGeometryMap extends FluentInputWidget<FluentGeometryMap> impl
 	 * @return this builder
 	 */
 	@Override
-	public FluentGeometryMap minPixelHeight(int minPixelHeight) {
+	public @Nonnull FluentGeometryMap minPixelHeight(int minPixelHeight) {
 		map.setMinPixelHeight(Integer.valueOf(minPixelHeight));
 		return this;
 	}
@@ -134,7 +135,7 @@ public class FluentGeometryMap extends FluentInputWidget<FluentGeometryMap> impl
 	 * @return this builder
 	 */
 	@Override
-	public FluentGeometryMap percentageWidth(int percentageWidth) {
+	public @Nonnull FluentGeometryMap percentageWidth(int percentageWidth) {
 		map.setPercentageWidth(Integer.valueOf(percentageWidth));
 		return this;
 	}
@@ -146,7 +147,7 @@ public class FluentGeometryMap extends FluentInputWidget<FluentGeometryMap> impl
 	 * @return this builder
 	 */
 	@Override
-	public FluentGeometryMap percentageHeight(int percentageHeight) {
+	public @Nonnull FluentGeometryMap percentageHeight(int percentageHeight) {
 		map.setPercentageHeight(Integer.valueOf(percentageHeight));
 		return this;
 	}
@@ -158,7 +159,7 @@ public class FluentGeometryMap extends FluentInputWidget<FluentGeometryMap> impl
 	 * @return this builder
 	 */
 	@Override
-	public FluentGeometryMap responsiveWidth(int responsiveWidth) {
+	public @Nonnull FluentGeometryMap responsiveWidth(int responsiveWidth) {
 		map.setResponsiveWidth(Integer.valueOf(responsiveWidth));
 		return this;
 	}
@@ -170,7 +171,7 @@ public class FluentGeometryMap extends FluentInputWidget<FluentGeometryMap> impl
 	 * @return this builder
 	 */
 	@Override
-	public FluentGeometryMap sm(int sm) {
+	public @Nonnull FluentGeometryMap sm(int sm) {
 		map.setSm(Integer.valueOf(sm));
 		return this;
 	}
@@ -182,7 +183,7 @@ public class FluentGeometryMap extends FluentInputWidget<FluentGeometryMap> impl
 	 * @return this builder
 	 */
 	@Override
-	public FluentGeometryMap md(int md) {
+	public @Nonnull FluentGeometryMap md(int md) {
 		map.setMd(Integer.valueOf(md));
 		return this;
 	}
@@ -194,7 +195,7 @@ public class FluentGeometryMap extends FluentInputWidget<FluentGeometryMap> impl
 	 * @return this builder
 	 */
 	@Override
-	public FluentGeometryMap lg(int lg) {
+	public @Nonnull FluentGeometryMap lg(int lg) {
 		map.setLg(Integer.valueOf(lg));
 		return this;
 	}
@@ -206,7 +207,7 @@ public class FluentGeometryMap extends FluentInputWidget<FluentGeometryMap> impl
 	 * @return this builder
 	 */
 	@Override
-	public FluentGeometryMap xl(int xl) {
+	public @Nonnull FluentGeometryMap xl(int xl) {
 		map.setXl(Integer.valueOf(xl));
 		return this;
 	}
@@ -218,7 +219,7 @@ public class FluentGeometryMap extends FluentInputWidget<FluentGeometryMap> impl
 	 *            the changed-action definition to append
 	 * @return this builder
 	 */
-	public FluentGeometryMap addAction(FluentEventAction action) {
+	public @Nonnull FluentGeometryMap addAction(@Nonnull FluentEventAction action) {
 		map.getChangedActions().add(action.get());
 		return this;
 	}
@@ -242,7 +243,7 @@ public class FluentGeometryMap extends FluentInputWidget<FluentGeometryMap> impl
 	 * @return the mutable geometry-map metadata being configured
 	 */
 	@Override
-	public GeometryMap get() {
+	public @Nonnull GeometryMap get() {
 		return map;
 	}
 }

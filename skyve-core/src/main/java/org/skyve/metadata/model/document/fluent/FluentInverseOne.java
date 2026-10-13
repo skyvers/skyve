@@ -2,6 +2,8 @@ package org.skyve.metadata.model.document.fluent;
 
 import org.skyve.impl.metadata.model.document.InverseOne;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * Provides a fluent builder for FluentInverseOne metadata.
  */
@@ -18,7 +20,7 @@ public class FluentInverseOne extends FluentInverse<FluentInverseOne> {
 	/**
 	 * Creates a fluent builder instance.
 	 */
-	public FluentInverseOne(InverseOne inverse) {
+	public FluentInverseOne(@Nonnull InverseOne inverse) {
 		this.inverse = inverse;
 	}
 
@@ -26,7 +28,7 @@ public class FluentInverseOne extends FluentInverse<FluentInverseOne> {
 	 * Copies metadata values from an existing definition into this builder.
 	 */
 
-	public FluentInverseOne from(@SuppressWarnings("hiding") InverseOne inverse) {
+	public @Nonnull FluentInverseOne from(@SuppressWarnings("hiding") @Nonnull InverseOne inverse) {
 		super.from(inverse);
 		return this;
 	}
@@ -35,7 +37,7 @@ public class FluentInverseOne extends FluentInverse<FluentInverseOne> {
 	 * Returns the mutable metadata instance represented by this builder.
 	 */
 	@Override
-	public InverseOne get() {
+	public @Nonnull InverseOne get() {
 		return inverse;
 	}
 }

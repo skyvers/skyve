@@ -50,7 +50,7 @@ public class Persistent extends NamedMetaData {
 	/**
 	 * @return the explicitly configured schema, or {@code null} if not set
 	 */
-    public String getSchema() {
+    public @Nullable String getSchema() {
         return schema;
     }
 
@@ -58,14 +58,14 @@ public class Persistent extends NamedMetaData {
 	 * Set the schema name used to qualify the table identifier.
 	 */
     @XmlAttribute(required = false)
-    public void setSchema(String schema) {
+    public void setSchema(@Nullable String schema) {
         this.schema = UtilImpl.processStringValue(schema);
     }
 
 	/**
 	 * @return the explicitly configured catalog, or {@code null} if not set
 	 */
-    public String getCatalog() {
+    public @Nullable String getCatalog() {
         return catalog;
     }
 
@@ -73,14 +73,14 @@ public class Persistent extends NamedMetaData {
 	 * Set the catalog name used to qualify the table identifier.
 	 */
     @XmlAttribute(required = false)
-    public void setCatalog(String catalog) {
+    public void setCatalog(@Nullable String catalog) {
         this.catalog = UtilImpl.processStringValue(catalog);
     }
     
 	/**
 	 * @return the inheritance mapping strategy, or {@code null} if not set
 	 */
-	public ExtensionStrategy getStrategy() {
+	public @Nullable ExtensionStrategy getStrategy() {
 		return strategy;
 	}
 	
@@ -88,14 +88,14 @@ public class Persistent extends NamedMetaData {
 	 * Set the inheritance mapping strategy.
 	 */
 	@XmlAttribute
-	public void setStrategy(ExtensionStrategy strategy) {
+	public void setStrategy(@Nullable ExtensionStrategy strategy) {
 		this.strategy = strategy;
 	}
 
 	/**
 	 * @return the discriminator column/value used for inheritance, or {@code null} if not set
 	 */
-    public String getDiscriminator() {
+    public @Nullable String getDiscriminator() {
 		return discriminator;
 	}
 
@@ -103,14 +103,14 @@ public class Persistent extends NamedMetaData {
 	 * Set the discriminator column/value used for inheritance.
 	 */
     @XmlAttribute
-	public void setDiscriminator(String discriminator) {
+	public void setDiscriminator(@Nullable String discriminator) {
 		this.discriminator = UtilImpl.processStringValue(discriminator);
 	}
 
 	/**
 	 * @return the configured cache name, or {@code null} if not set
 	 */
-	public String getCacheName() {
+	public @Nullable String getCacheName() {
 		return cacheName;
 	}
 	
@@ -118,7 +118,7 @@ public class Persistent extends NamedMetaData {
 	 * Set the cache name for the persistence layer.
 	 */
 	@XmlElement(name = "cache", namespace = XMLMetaData.DOCUMENT_NAMESPACE)
-	public void setCacheName(String cacheName) {
+	public void setCacheName(@Nullable String cacheName) {
 		this.cacheName = cacheName;
 	}
 

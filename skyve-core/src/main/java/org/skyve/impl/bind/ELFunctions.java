@@ -19,6 +19,8 @@ import org.skyve.domain.types.OptimisticLock;
 import org.skyve.domain.types.TimeOnly;
 import org.skyve.domain.types.Timestamp;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * Provides static constructors exposed to Skyve EL expressions.
  *
@@ -35,7 +37,7 @@ public class ELFunctions {
 	 *
 	 * @return a new date-only value
 	 */
-	public static DateOnly newDateOnly() {
+	public static @Nonnull DateOnly newDateOnly() {
 		return new DateOnly();
 	}
 	
@@ -45,7 +47,7 @@ public class ELFunctions {
 	 * @param value epoch milliseconds
 	 * @return the converted date-only value
 	 */
-	public static DateOnly newDateOnlyFromMillis(long value) {
+	public static @Nonnull DateOnly newDateOnlyFromMillis(long value) {
 		return new DateOnly(value);
 	}
 	
@@ -55,7 +57,7 @@ public class ELFunctions {
 	 * @param value the source date
 	 * @return the converted date-only value
 	 */
-	public static DateOnly newDateOnlyFromDate(Date value) {
+	public static @Nonnull DateOnly newDateOnlyFromDate(@Nonnull Date value) {
 		return new DateOnly(value);
 	}
 	
@@ -66,7 +68,7 @@ public class ELFunctions {
 	 * @return the parsed date-only value
 	 * @throws ParseException if the input cannot be parsed
 	 */
-	public static DateOnly newDateOnlyFromSerializedForm(String value) throws ParseException {
+	public static @Nonnull DateOnly newDateOnlyFromSerializedForm(@Nonnull String value) throws ParseException {
 		return new DateOnly(value);
 	}
 	
@@ -76,7 +78,7 @@ public class ELFunctions {
 	 * @param value the source local date
 	 * @return the converted date-only value
 	 */
-	public static DateOnly newDateOnlyFromLocalDate(LocalDate value) {
+	public static @Nonnull DateOnly newDateOnlyFromLocalDate(@Nonnull LocalDate value) {
 		return new DateOnly(value);
 	}
 
@@ -86,7 +88,7 @@ public class ELFunctions {
 	 * @param value the source local date-time
 	 * @return the converted date-only value
 	 */
-	public static DateOnly newDateOnlyFromLocalDateTime(LocalDateTime value) {
+	public static @Nonnull DateOnly newDateOnlyFromLocalDateTime(@Nonnull LocalDateTime value) {
 		return new DateOnly(value);
 	}
 
@@ -95,7 +97,7 @@ public class ELFunctions {
 	 *
 	 * @return a new date-time value
 	 */
-	public static DateTime newDateTime() {
+	public static @Nonnull DateTime newDateTime() {
 		return new DateTime();
 	}
 	
@@ -105,7 +107,7 @@ public class ELFunctions {
 	 * @param value epoch milliseconds
 	 * @return the converted date-time value
 	 */
-	public static DateTime newDateTimeFromMillis(long value) {
+	public static @Nonnull DateTime newDateTimeFromMillis(long value) {
 		return new DateTime(value);
 	}
 	
@@ -115,7 +117,7 @@ public class ELFunctions {
 	 * @param value the source date
 	 * @return the converted date-time value
 	 */
-	public static DateTime newDateTimeFromDate(Date value) {
+	public static @Nonnull DateTime newDateTimeFromDate(@Nonnull Date value) {
 		return new DateTime(value);
 	}
 	
@@ -126,7 +128,7 @@ public class ELFunctions {
 	 * @return the parsed date-time value
 	 * @throws ParseException if the input cannot be parsed
 	 */
-	public static DateTime newDateTimeFromSerializedForm(String value) throws ParseException {
+	public static @Nonnull DateTime newDateTimeFromSerializedForm(@Nonnull String value) throws ParseException {
 		return new DateTime(value);
 	}
 	
@@ -136,7 +138,7 @@ public class ELFunctions {
 	 * @param value the source local date
 	 * @return the converted date-time value
 	 */
-	public static DateTime newDateTimeFromLocalDate(LocalDate value) {
+	public static @Nonnull DateTime newDateTimeFromLocalDate(@Nonnull LocalDate value) {
 		return new DateTime(value);
 	}
 
@@ -146,7 +148,7 @@ public class ELFunctions {
 	 * @param value the source local date-time
 	 * @return the converted date-time value
 	 */
-	public static DateTime newDateTimeFromLocalDateTime(LocalDateTime value) {
+	public static @Nonnull DateTime newDateTimeFromLocalDateTime(@Nonnull LocalDateTime value) {
 		return new DateTime(value);
 	}
 
@@ -155,7 +157,7 @@ public class ELFunctions {
 	 *
 	 * @return a new time-only value
 	 */
-	public static TimeOnly newTimeOnly() {
+	public static @Nonnull TimeOnly newTimeOnly() {
 		return new TimeOnly();
 	}
 	
@@ -165,7 +167,7 @@ public class ELFunctions {
 	 * @param value epoch milliseconds
 	 * @return the converted time-only value
 	 */
-	public static TimeOnly newTimeOnlyFromMillis(long value) {
+	public static @Nonnull TimeOnly newTimeOnlyFromMillis(long value) {
 		return new TimeOnly(value);
 	}
 	
@@ -175,7 +177,7 @@ public class ELFunctions {
 	 * @param value the source date
 	 * @return the converted time-only value
 	 */
-	public static TimeOnly newTimeOnlyFromDate(Date value) {
+	public static @Nonnull TimeOnly newTimeOnlyFromDate(@Nonnull Date value) {
 		return new TimeOnly(value);
 	}
 	
@@ -187,7 +189,7 @@ public class ELFunctions {
 	 * @param seconds second component
 	 * @return the constructed time-only value
 	 */
-	public static TimeOnly newTimeOnlyFromComponents(int hours24, int minutes, int seconds) {
+	public static @Nonnull TimeOnly newTimeOnlyFromComponents(int hours24, int minutes, int seconds) {
 		return new TimeOnly(hours24, minutes, seconds);
 	}
 	
@@ -198,7 +200,7 @@ public class ELFunctions {
 	 * @return the parsed time-only value
 	 * @throws ParseException if the input cannot be parsed
 	 */
-	public static TimeOnly newTimeOnlyFromSerializedForm(String value) throws ParseException {
+	public static @Nonnull TimeOnly newTimeOnlyFromSerializedForm(@Nonnull String value) throws ParseException {
 		return new TimeOnly(value);
 	}
 	
@@ -208,7 +210,7 @@ public class ELFunctions {
 	 * @param value the source local time
 	 * @return the converted time-only value
 	 */
-	public static TimeOnly newTimeOnlyFromLocalTime(LocalTime value) {
+	public static @Nonnull TimeOnly newTimeOnlyFromLocalTime(@Nonnull LocalTime value) {
 		return new TimeOnly(value);
 	}
 
@@ -218,7 +220,7 @@ public class ELFunctions {
 	 * @param value the source local date-time
 	 * @return the converted time-only value
 	 */
-	public static TimeOnly newTimeOnlyFromLocalDateTime(LocalDateTime value) {
+	public static @Nonnull TimeOnly newTimeOnlyFromLocalDateTime(@Nonnull LocalDateTime value) {
 		return new TimeOnly(value);
 	}
 	
@@ -227,7 +229,7 @@ public class ELFunctions {
 	 *
 	 * @return a new timestamp value
 	 */
-	public static Timestamp newTimestamp() {
+	public static @Nonnull Timestamp newTimestamp() {
 		return new Timestamp();
 	}
 	
@@ -237,7 +239,7 @@ public class ELFunctions {
 	 * @param value epoch milliseconds
 	 * @return the converted timestamp value
 	 */
-	public static Timestamp newTimestampFromMillis(long value) {
+	public static @Nonnull Timestamp newTimestampFromMillis(long value) {
 		return new Timestamp(value);
 	}
 	
@@ -247,7 +249,7 @@ public class ELFunctions {
 	 * @param value the source date
 	 * @return the converted timestamp value
 	 */
-	public static Timestamp newTimestampFromDate(Date value) {
+	public static @Nonnull Timestamp newTimestampFromDate(@Nonnull Date value) {
 		return new Timestamp(value);
 	}
 	
@@ -258,7 +260,7 @@ public class ELFunctions {
 	 * @return the parsed timestamp value
 	 * @throws ParseException if the input cannot be parsed
 	 */
-	public static Timestamp newTimestampFromSerializedForm(String value) throws ParseException {
+	public static @Nonnull Timestamp newTimestampFromSerializedForm(@Nonnull String value) throws ParseException {
 		return new Timestamp(value);
 	}
 	
@@ -268,7 +270,7 @@ public class ELFunctions {
 	 * @param value the source local date
 	 * @return the converted timestamp value
 	 */
-	public static Timestamp newTimestampFromLocalDate(LocalDate value) {
+	public static @Nonnull Timestamp newTimestampFromLocalDate(@Nonnull LocalDate value) {
 		return new Timestamp(value);
 	}
 
@@ -278,7 +280,7 @@ public class ELFunctions {
 	 * @param value the source local date-time
 	 * @return the converted timestamp value
 	 */
-	public static Timestamp newTimestampFromLocalDateTime(LocalDateTime value) {
+	public static @Nonnull Timestamp newTimestampFromLocalDateTime(@Nonnull LocalDateTime value) {
 		return new Timestamp(value);
 	}
 
@@ -288,7 +290,7 @@ public class ELFunctions {
 	 * @param value the source numeric value
 	 * @return the converted decimal value
 	 */
-	public static Decimal2 newDecimal2(double value) {
+	public static @Nonnull Decimal2 newDecimal2(double value) {
 		return new Decimal2(value);
 	}
 	
@@ -298,7 +300,7 @@ public class ELFunctions {
 	 * @param value the source decimal value
 	 * @return the converted decimal value
 	 */
-	public static Decimal2 newDecimal2FromBigDecimal(BigDecimal value) {
+	public static @Nonnull Decimal2 newDecimal2FromBigDecimal(@Nonnull BigDecimal value) {
 		return new Decimal2(value);
 	}
 
@@ -308,7 +310,7 @@ public class ELFunctions {
 	 * @param value the source decimal value
 	 * @return the converted decimal value
 	 */
-	public static Decimal2 newDecimal2FromDecimal(Decimal value) {
+	public static @Nonnull Decimal2 newDecimal2FromDecimal(@Nonnull Decimal value) {
 		return new Decimal2(value);
 	}
 
@@ -318,7 +320,7 @@ public class ELFunctions {
 	 * @param value the source text value
 	 * @return the converted decimal value
 	 */
-	public static Decimal2 newDecimal2FromString(String value) {
+	public static @Nonnull Decimal2 newDecimal2FromString(@Nonnull String value) {
 		return new Decimal2(value);
 	}
 
@@ -328,7 +330,7 @@ public class ELFunctions {
 	 * @param value the source numeric value
 	 * @return the converted decimal value
 	 */
-	public static Decimal5 newDecimal5(double value) {
+	public static @Nonnull Decimal5 newDecimal5(double value) {
 		return new Decimal5(value);
 	}
 	
@@ -338,7 +340,7 @@ public class ELFunctions {
 	 * @param value the source decimal value
 	 * @return the converted decimal value
 	 */
-	public static Decimal5 newDecimal5FromBigDecimal(BigDecimal value) {
+	public static @Nonnull Decimal5 newDecimal5FromBigDecimal(@Nonnull BigDecimal value) {
 		return new Decimal5(value);
 	}
 
@@ -348,7 +350,7 @@ public class ELFunctions {
 	 * @param value the source decimal value
 	 * @return the converted decimal value
 	 */
-	public static Decimal5 newDecimal5FromDecimal(Decimal value) {
+	public static @Nonnull Decimal5 newDecimal5FromDecimal(@Nonnull Decimal value) {
 		return new Decimal5(value);
 	}
 
@@ -358,7 +360,7 @@ public class ELFunctions {
 	 * @param value the source text value
 	 * @return the converted decimal value
 	 */
-	public static Decimal5 newDecimal5FromString(String value) {
+	public static @Nonnull Decimal5 newDecimal5FromString(@Nonnull String value) {
 		return new Decimal5(value);
 	}
 	
@@ -368,7 +370,7 @@ public class ELFunctions {
 	 * @param value the source numeric value
 	 * @return the converted decimal value
 	 */
-	public static Decimal10 newDecimal10(double value) {
+	public static @Nonnull Decimal10 newDecimal10(double value) {
 		return new Decimal10(value);
 	}
 	
@@ -378,7 +380,7 @@ public class ELFunctions {
 	 * @param value the source decimal value
 	 * @return the converted decimal value
 	 */
-	public static Decimal10 newDecimal10FromBigDecimal(BigDecimal value) {
+	public static @Nonnull Decimal10 newDecimal10FromBigDecimal(@Nonnull BigDecimal value) {
 		return new Decimal10(value);
 	}
 
@@ -388,7 +390,7 @@ public class ELFunctions {
 	 * @param value the source decimal value
 	 * @return the converted decimal value
 	 */
-	public static Decimal10 newDecimal10FromDecimal(Decimal value) {
+	public static @Nonnull Decimal10 newDecimal10FromDecimal(@Nonnull Decimal value) {
 		return new Decimal10(value);
 	}
 
@@ -398,7 +400,7 @@ public class ELFunctions {
 	 * @param value the source text value
 	 * @return the converted decimal value
 	 */
-	public static Decimal10 newDecimal10FromString(String value) {
+	public static @Nonnull Decimal10 newDecimal10FromString(@Nonnull String value) {
 		return new Decimal10(value);
 	}
 	
@@ -409,7 +411,7 @@ public class ELFunctions {
 	 * @param timestamp the timestamp component
 	 * @return the constructed optimistic lock value
 	 */
-	public static OptimisticLock newOptimisticLock(String username, Date timestamp) {
+	public static @Nonnull OptimisticLock newOptimisticLock(@Nonnull String username, @Nonnull Date timestamp) {
 		return new OptimisticLock(username, timestamp);
 	}
 
@@ -419,7 +421,7 @@ public class ELFunctions {
 	 * @param value the serialized value
 	 * @return the parsed optimistic lock value
 	 */
-	public static OptimisticLock newOptimisticLockFromString(String value) {
+	public static @Nonnull OptimisticLock newOptimisticLockFromString(@Nonnull String value) {
 		return new OptimisticLock(value);
 	}
 	
@@ -430,7 +432,7 @@ public class ELFunctions {
 	 * @return the parsed geometry
 	 * @throws org.locationtech.jts.io.ParseException if WKT is invalid
 	 */
-	public static Geometry newGeometry(String wkt) throws org.locationtech.jts.io.ParseException {
+	public static @Nonnull Geometry newGeometry(@Nonnull String wkt) throws org.locationtech.jts.io.ParseException {
 		return new WKTReader().read(wkt);
 	}
 }

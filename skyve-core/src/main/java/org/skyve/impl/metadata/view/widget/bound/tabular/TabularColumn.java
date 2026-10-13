@@ -4,6 +4,8 @@ import org.skyve.impl.metadata.view.HorizontalAlignment;
 import org.skyve.metadata.SerializableMetaData;
 import org.skyve.util.Util;
 
+import jakarta.annotation.Nullable;
+
 /**
  * Base interface for all column descriptors in tabular view widgets.
  *
@@ -11,11 +13,11 @@ import org.skyve.util.Util;
  * {@link DataGridColumn} and list-grid column types.
  */
 public interface TabularColumn extends SerializableMetaData {
-	public String getTitle();
-	public default String getLocalisedTitle() {
+	public @Nullable String getTitle();
+	public default @Nullable String getLocalisedTitle() {
 		return Util.i18n(getTitle());
 	}
-	public void setTitle(String title);
-	public HorizontalAlignment getAlignment();
-	public void setAlignment(HorizontalAlignment alignment);
+	public void setTitle(@Nullable String title);
+	public @Nullable HorizontalAlignment getAlignment();
+	public void setAlignment(@Nullable HorizontalAlignment alignment);
 }

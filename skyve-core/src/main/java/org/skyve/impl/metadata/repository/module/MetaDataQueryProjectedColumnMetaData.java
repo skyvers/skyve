@@ -7,6 +7,7 @@ import org.skyve.metadata.FormatterName;
 import org.skyve.metadata.view.FormattedText;
 import org.skyve.metadata.view.TextOutput;
 
+import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlRootElement;
@@ -65,89 +66,89 @@ public class MetaDataQueryProjectedColumnMetaData extends MetaDataQueryColumnMet
 	// A custom formatter for the Skyve project (added from Customisations class specified in JSON)
 	private String customFormatterName;
 	
-	public Boolean getProjected() {
+	public @Nullable Boolean getProjected() {
 		return projected;
 	}
 
 	@XmlElement(namespace = XMLMetaData.MODULE_NAMESPACE)
-	public void setProjected(Boolean projected) {
+	public void setProjected(@Nullable Boolean projected) {
 		this.projected = projected;
 	}
 
-	public String getExpression() {
+	public @Nullable String getExpression() {
 		return expression;
 	}
 
 	@XmlElement(namespace = XMLMetaData.MODULE_NAMESPACE)
 	@XmlJavaTypeAdapter(CDATAAdapter.class)
-	public void setExpression(String expression) {
+	public void setExpression(@Nullable String expression) {
 		this.expression = UtilImpl.processStringValue(expression);
 	}
 
-	public Boolean getFilterable() {
+	public @Nullable Boolean getFilterable() {
 		return filterable;
 	}
 
 	@XmlAttribute
-	public void setFilterable(Boolean filterable) {
+	public void setFilterable(@Nullable Boolean filterable) {
 		this.filterable = filterable;
 	}
 
-	public Boolean getSortable() {
+	public @Nullable Boolean getSortable() {
 		return sortable;
 	}
 
 	@XmlAttribute
-	public void setSortable(Boolean sortable) {
+	public void setSortable(@Nullable Boolean sortable) {
 		this.sortable = sortable;
 	}
 
-	public Boolean getEditable() {
+	public @Nullable Boolean getEditable() {
 		return editable;
 	}
 
 	@XmlAttribute
-	public void setEditable(Boolean editable) {
+	public void setEditable(@Nullable Boolean editable) {
 		this.editable = editable;
 	}
 	
 	@Override
-	public Boolean getEscape() {
+	public @Nullable Boolean getEscape() {
 		return escape;
 	}
 
 	@XmlAttribute
-	public void setEscape(Boolean escape) {
+	public void setEscape(@Nullable Boolean escape) {
 		this.escape = escape;
 	}
 
 	@Override
-	public Sanitisation getSanitise() {
+	public @Nullable Sanitisation getSanitise() {
 		return sanitise;
 	}
 
 	@XmlAttribute
-	public void setSanitise(Sanitisation sanitise) {
+	public void setSanitise(@Nullable Sanitisation sanitise) {
 		this.sanitise = sanitise;
 	}
 
 	@Override
-	public FormatterName getFormatterName() {
+	public @Nullable FormatterName getFormatterName() {
 		return formatterName;
 	}
 
 	@XmlAttribute(name = "formatter")
-	public void setFormatterName(FormatterName formatterName) {
+	public void setFormatterName(@Nullable FormatterName formatterName) {
 		this.formatterName = formatterName;
 	}
 
 	@Override
-	public String getCustomFormatterName() {
+	public @Nullable String getCustomFormatterName() {
 		return customFormatterName;
 	}
 
 	@XmlAttribute(name = "customFormatter")
-	public void setCustomFormatterName(String customFormatterName) {
+	public void setCustomFormatterName(@Nullable String customFormatterName) {
 		this.customFormatterName = UtilImpl.processStringValue(customFormatterName);
 	}
 }

@@ -156,7 +156,7 @@ public class LocalDesignRepository extends FileSystemRepository {
 	 * @throws UnsupportedOperationException always
 	 */
 	@Override
-	public UserImpl retrieveUser(String userPrincipal) {
+	public @Nullable UserImpl retrieveUser(@Nonnull String userPrincipal) {
 		throw new UnsupportedOperationException();
 	}
 
@@ -168,7 +168,7 @@ public class LocalDesignRepository extends FileSystemRepository {
 	 * @throws UnsupportedOperationException always
 	 */
 	@Override
-	public boolean populatePermissions(User user) {
+	public boolean populatePermissions(@Nonnull User user) {
 		throw new UnsupportedOperationException();
 	}
 
@@ -179,7 +179,7 @@ public class LocalDesignRepository extends FileSystemRepository {
 	 * @throws UnsupportedOperationException always
 	 */
 	@Override
-	public void resetUserPermissions(User user) {
+	public void resetUserPermissions(@Nonnull User user) {
 		throw new UnsupportedOperationException();
 	}
 
@@ -192,7 +192,7 @@ public class LocalDesignRepository extends FileSystemRepository {
 	 * @throws UnsupportedOperationException always
 	 */
 	@Override
-	public boolean populateUser(User user, Connection connection) {
+	public boolean populateUser(@Nonnull User user, @Nonnull Connection connection) {
 		throw new UnsupportedOperationException();
 	}
 
@@ -203,7 +203,7 @@ public class LocalDesignRepository extends FileSystemRepository {
 	 * @throws UnsupportedOperationException always
 	 */
 	@Override
-	public List<UserJobSchedule> retrieveAllScheduledJobsForAllCustomers() {
+	public @Nonnull List<UserJobSchedule> retrieveAllScheduledJobsForAllCustomers() {
 		throw new UnsupportedOperationException();
 	}
 
@@ -214,7 +214,7 @@ public class LocalDesignRepository extends FileSystemRepository {
 	 * @throws UnsupportedOperationException always
 	 */
 	@Override
-	public List<UserJobSchedule> retrieveAllScheduledReportsForAllCustomers() {
+	public @Nonnull List<UserJobSchedule> retrieveAllScheduledReportsForAllCustomers() {
 		throw new UnsupportedOperationException();
 	}
 
@@ -226,7 +226,7 @@ public class LocalDesignRepository extends FileSystemRepository {
 	 * @throws UnsupportedOperationException always
 	 */
 	@Override
-	public String retrievePublicUserName(String customerName) {
+	public @Nullable String retrievePublicUserName(@Nonnull String customerName) {
 		throw new UnsupportedOperationException();
 	}
 
@@ -236,7 +236,7 @@ public class LocalDesignRepository extends FileSystemRepository {
 	 * @param user the user whose module menus are recalculated
 	 */
 	@Override
-	public final void resetMenus(User user) {
+	public final void resetMenus(@Nonnull User user) {
 		UserImpl internalUser = (UserImpl) user;
 		for (Module module : user.getCustomer().getModules()) {
 			Menu menu = UtilImpl.cloneBySerialization(module.getMenu());
@@ -307,7 +307,7 @@ public class LocalDesignRepository extends FileSystemRepository {
 	 */
 	@Override
 	@SuppressWarnings("java:S3776") // Complexity OK
-	public void validateCustomerForGenerateDomain(Customer customer) {
+	public void validateCustomerForGenerateDomain(@Nonnull Customer customer) {
 		try {
 			Module homeModule = customer.getHomeModule();
 			if (homeModule == null) {
@@ -388,7 +388,7 @@ public class LocalDesignRepository extends FileSystemRepository {
 	 */
 	@Override
 	@SuppressWarnings({"java:S3776", "java:S6541"}) // complexity OK
-	public void validateModuleForGenerateDomain(Customer customer, Module module) {
+	public void validateModuleForGenerateDomain(@Nonnull Customer customer, @Nonnull Module module) {
 		// if home document is transient then home ref had better be edit
 		String homeDocumentName = module.getHomeDocumentName();
 		if (homeDocumentName != null) {
@@ -828,7 +828,7 @@ public class LocalDesignRepository extends FileSystemRepository {
 	 */
 	@Override
 	@SuppressWarnings({"java:S3776", "java:S6541"}) // complexity OK
-	public void validateDocumentForGenerateDomain(Customer customer, Document document) {
+	public void validateDocumentForGenerateDomain(@Nonnull Customer customer, @Nonnull Document document) {
 		String documentIdentifier = document.getOwningModuleName() + '.' + document.getName();
 		Module module = getModule(customer, document.getOwningModuleName());
 
@@ -1082,7 +1082,7 @@ public class LocalDesignRepository extends FileSystemRepository {
 	 */
 	@Override
 	@SuppressWarnings("java:S3776") // Complexity OK
-	public void validateViewForGenerateDomain(Customer customer, Document document, View view, String uxui) {
+	public void validateViewForGenerateDomain(@Nonnull Customer customer, @Nonnull Document document, @Nonnull View view, @Nonnull String uxui) {
 		CustomerImpl customerImpl = (CustomerImpl) customer;
 		ViewImpl viewImpl = (ViewImpl) view;
 		new ViewValidator(viewImpl, this, customerImpl, (DocumentImpl) document, uxui).visit();
@@ -1164,7 +1164,7 @@ public class LocalDesignRepository extends FileSystemRepository {
 	 * @param attribute the attribute whose implementing type is required
 	 * @return the implementing type, or {@code null} when enum class loading is not yet possible
 	 */
-	static @Nullable Class<?> getImplementingTypeForGenerateDomainValidation(Attribute attribute) {
+	static @Nullable Class<?> getImplementingTypeForGenerateDomainValidation(@Nonnull Attribute attribute) {
 		try {
 			return attribute.getImplementingType();
 		}
@@ -1185,7 +1185,7 @@ public class LocalDesignRepository extends FileSystemRepository {
 	 * @param customer the owning customer context
 	 * @param featureRoles module-qualified role names to validate
 	 */
-	private void validateFeatureRoles(Customer customer, Set<String> featureRoles) {
+	private void validateFeatureRoles(@Nonnull Customer customer, @Nonnull Set<String> featureRoles) {
 		for (String textSearchModuleRole : featureRoles) {
 			String[] moduleAndRoleName = textSearchModuleRole.split("\\.");
 			String moduleName = moduleAndRoleName[0];

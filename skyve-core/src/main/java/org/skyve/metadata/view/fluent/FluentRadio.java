@@ -23,14 +23,14 @@ public class FluentRadio extends FluentChangeableInputWidget<FluentRadio> implem
 	 *
 	 * @param radio the metadata instance to mutate
 	 */
-	public FluentRadio(Radio radio) {
+	public FluentRadio(@Nonnull Radio radio) {
 		this.radio = radio;
 	}
 
 	/**
 	 * Copies radio metadata into this fluent builder.
 	 */
-	public FluentRadio from(@SuppressWarnings("hiding") Radio radio) {
+	public @Nonnull FluentRadio from(@SuppressWarnings("hiding") @Nonnull Radio radio) {
 		Boolean b = radio.getVertical();
 		if (b != null) {
 			vertical(b.booleanValue());
@@ -48,7 +48,7 @@ public class FluentRadio extends FluentChangeableInputWidget<FluentRadio> implem
 	 * @param vertical {@code true} to display buttons vertically
 	 * @return this builder
 	 */
-	public FluentRadio vertical(boolean vertical) {
+	public @Nonnull FluentRadio vertical(boolean vertical) {
 		radio.setVertical(vertical ? Boolean.TRUE : Boolean.FALSE);
 		return this;
 	}
@@ -60,7 +60,7 @@ public class FluentRadio extends FluentChangeableInputWidget<FluentRadio> implem
 	 * @return this builder
 	 */
 	@Override
-	public FluentRadio pixelWidth(int width) {
+	public @Nonnull FluentRadio pixelWidth(int width) {
 		radio.setPixelWidth(Integer.valueOf(width));
 		return this;
 	}
@@ -84,7 +84,7 @@ public class FluentRadio extends FluentChangeableInputWidget<FluentRadio> implem
 	 * @return the mutable radio metadata being configured
 	 */
 	@Override
-	public Radio get() {
+	public @Nonnull Radio get() {
 		return radio;
 	}
 }

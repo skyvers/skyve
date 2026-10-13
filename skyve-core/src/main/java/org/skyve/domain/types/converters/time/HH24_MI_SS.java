@@ -4,6 +4,8 @@ import org.skyve.domain.messages.ConversionException;
 import org.skyve.domain.types.TimeOnly;
 import org.skyve.domain.types.converters.Format;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * Converts {@link TimeOnly} values using this class's configured
  * 24-hour time pattern with seconds.
@@ -17,7 +19,7 @@ public class HH24_MI_SS extends AbstractTimeConverter {
 	 * @return the result value
 	 */
 	@Override
-	public Format<TimeOnly> getFormat() {
+	public @Nonnull Format<TimeOnly> getFormat() {
 		return new Format<>("##:##:##", null);
 	}
 
@@ -26,7 +28,7 @@ public class HH24_MI_SS extends AbstractTimeConverter {
 	 * @return the result value
 	 */
 	@Override
-	public String getFormatPattern() {
+	public @Nonnull String getFormatPattern() {
 		return PATTERN;
 	}
 	
@@ -35,7 +37,7 @@ public class HH24_MI_SS extends AbstractTimeConverter {
 	 * @return the result value
 	 */
 	@Override
-	protected String getI18nKey() {
+	protected @Nonnull String getI18nKey() {
 		return ConversionException.HH24_MI_SS_KEY;
 	}
 }

@@ -3,6 +3,9 @@ package org.skyve.metadata.view.fluent;
 import org.skyve.impl.metadata.repository.view.actions.ReportAction;
 import org.skyve.report.ReportFormat;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Builds {@link ReportAction} metadata using a fluent API.
  */
@@ -22,7 +25,7 @@ public class FluentReportAction extends FluentParameterizableAction<FluentReport
 	 * @param action
 	 *            the action instance to wrap
 	 */
-	public FluentReportAction(ReportAction action) {
+	public FluentReportAction(@Nonnull ReportAction action) {
 		this.action = action;
 	}
 
@@ -33,7 +36,7 @@ public class FluentReportAction extends FluentParameterizableAction<FluentReport
 	 *            the source action metadata
 	 * @return this builder
 	 */
-	public FluentReportAction from(@SuppressWarnings("hiding") ReportAction action) {
+	public @Nonnull FluentReportAction from(@SuppressWarnings("hiding") @Nonnull ReportAction action) {
 		super.from(action);
 		return this;
 	}
@@ -45,7 +48,7 @@ public class FluentReportAction extends FluentParameterizableAction<FluentReport
 	 *            the owning module name
 	 * @return this builder
 	 */
-	public FluentReportAction moduleName(String moduleName) {
+	public @Nonnull FluentReportAction moduleName(@Nullable String moduleName) {
 		action.setModuleName(moduleName);
 		return this;
 	}
@@ -57,7 +60,7 @@ public class FluentReportAction extends FluentParameterizableAction<FluentReport
 	 *            the owning document name
 	 * @return this builder
 	 */
-	public FluentReportAction documentName(String documentName) {
+	public @Nonnull FluentReportAction documentName(@Nullable String documentName) {
 		action.setDocumentName(documentName);
 		return this;
 	}
@@ -69,7 +72,7 @@ public class FluentReportAction extends FluentParameterizableAction<FluentReport
 	 *            the report name
 	 * @return this builder
 	 */
-	public FluentReportAction reportName(String reportName) {
+	public @Nonnull FluentReportAction reportName(@Nullable String reportName) {
 		action.setReportName(reportName);
 		return this;
 	}
@@ -81,7 +84,7 @@ public class FluentReportAction extends FluentParameterizableAction<FluentReport
 	 *            the desired report format
 	 * @return this builder
 	 */
-	public FluentReportAction reportFormat(ReportFormat reportFormat) {
+	public @Nonnull FluentReportAction reportFormat(@Nullable ReportFormat reportFormat) {
 		action.setReportFormat(reportFormat);
 		return this;
 	}
@@ -93,7 +96,7 @@ public class FluentReportAction extends FluentParameterizableAction<FluentReport
 	 *            whether the report should run against list context
 	 * @return this builder
 	 */
-	public FluentReportAction listReport(boolean listReport) {
+	public @Nonnull FluentReportAction listReport(boolean listReport) {
 		action.setListReport(listReport ? Boolean.TRUE : Boolean.FALSE);
 		return this;
 	}
@@ -105,7 +108,7 @@ public class FluentReportAction extends FluentParameterizableAction<FluentReport
 	 *            the query metadata name
 	 * @return this builder
 	 */
-	public FluentReportAction queryName(String queryName) {
+	public @Nonnull FluentReportAction queryName(@Nullable String queryName) {
 		action.setQueryName(queryName);
 		return this;
 	}
@@ -117,7 +120,7 @@ public class FluentReportAction extends FluentParameterizableAction<FluentReport
 	 *            the model metadata name
 	 * @return this builder
 	 */
-	public FluentReportAction modelName(String modelName) {
+	public @Nonnull FluentReportAction modelName(@Nullable String modelName) {
 		action.setModelName(modelName);
 		return this;
 	}
@@ -126,7 +129,7 @@ public class FluentReportAction extends FluentParameterizableAction<FluentReport
 	 * Returns the wrapped repository action instance.
 	 */
 	@Override
-	public ReportAction get() {
+	public @Nonnull ReportAction get() {
 		return action;
 	}
 }

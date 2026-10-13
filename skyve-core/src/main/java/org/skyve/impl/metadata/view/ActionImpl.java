@@ -35,6 +35,7 @@ import org.skyve.metadata.view.Action;
 import org.skyve.metadata.view.widget.bound.Parameter;
 import org.skyve.report.ReportFormat;
 
+import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 
 /**
@@ -80,7 +81,7 @@ public class ActionImpl implements Action {
 	 * <p>The returned list is live and never {@code null}.
 	 */
 	@Override
-	public List<Parameter> getParameters() {
+	public @Nonnull List<Parameter> getParameters() {
 		return parameters;
 	}
 
@@ -93,7 +94,7 @@ public class ActionImpl implements Action {
 	 * @return the effective action name; never {@code null} for a valid action definition
 	 */
 	@Override
-	public String getName() {
+	public @Nonnull String getName() {
 		String result = name;
 		if (result == null) {
 			result = resourceName;
@@ -110,7 +111,7 @@ public class ActionImpl implements Action {
 	 *
 	 * @param name the action name; may be {@code null} to fall back to resource or implicit naming
 	 */
-	public void setName(String name) {
+	public void setName(@Nullable String name) {
 		this.name = name;
 	}
 
@@ -120,7 +121,7 @@ public class ActionImpl implements Action {
 	 * @return the implicit action name, or {@code null} for custom actions
 	 */
 	@Override
-	public ImplicitActionName getImplicitName() {
+	public @Nullable ImplicitActionName getImplicitName() {
 		return implicitName;
 	}
 
@@ -129,7 +130,7 @@ public class ActionImpl implements Action {
 	 *
 	 * @param implicitName the implicit action identifier, or {@code null} for custom actions
 	 */
-	public void setImplicitName(ImplicitActionName implicitName) {
+	public void setImplicitName(@Nullable ImplicitActionName implicitName) {
 		this.implicitName = implicitName;
 	}
 
@@ -139,7 +140,7 @@ public class ActionImpl implements Action {
 	 * @return the resource name, or {@code null} for implicit actions
 	 */
 	@Override
-	public String getResourceName() {
+	public @Nullable String getResourceName() {
 		return resourceName;
 	}
 
@@ -148,7 +149,7 @@ public class ActionImpl implements Action {
 	 *
 	 * @param resourceName the resource name used to resolve class/report/server-side action resources
 	 */
-	public void setResourceName(String resourceName) {
+	public void setResourceName(@Nullable String resourceName) {
 		this.resourceName = resourceName;
 	}
 
@@ -158,7 +159,7 @@ public class ActionImpl implements Action {
 	 * @return {@code true} by default, or the configured validation flag
 	 */
 	@Override
-	public Boolean getClientValidation() {
+	public @Nullable Boolean getClientValidation() {
 		return clientValidation;
 	}
 
@@ -167,7 +168,7 @@ public class ActionImpl implements Action {
 	 *
 	 * @param clientValidation the client-side validation flag
 	 */
-	public void setClientValidation(Boolean clientValidation) {
+	public void setClientValidation(@Nullable Boolean clientValidation) {
 		this.clientValidation = clientValidation;
 	}
 
@@ -177,7 +178,7 @@ public class ActionImpl implements Action {
 	 * @return the display name, or {@code null} when default rendering is used
 	 */
 	@Override
-	public String getDisplayName() {
+	public @Nullable String getDisplayName() {
 		return displayName;
 	}
 
@@ -187,7 +188,7 @@ public class ActionImpl implements Action {
 	 * @return {@code Boolean.FALSE} to allow trusted markup; {@code null} or {@code Boolean.TRUE} to escape at the renderer boundary
 	 */
 	@Override
-	public Boolean getEscapeDisplayName() {
+	public @Nullable Boolean getEscapeDisplayName() {
 		return escapeDisplayName;
 	}
 
@@ -196,7 +197,7 @@ public class ActionImpl implements Action {
 	 *
 	 * @param displayName the user-facing action label
 	 */
-	public void setDisplayName(String displayName) {
+	public void setDisplayName(@Nullable String displayName) {
 		this.displayName = displayName;
 	}
 
@@ -205,7 +206,7 @@ public class ActionImpl implements Action {
 	 *
 	 * @param escapeDisplayName {@code Boolean.FALSE} to allow trusted markup; {@code null} or {@code Boolean.TRUE} to escape at the renderer boundary
 	 */
-	public void setEscapeDisplayName(Boolean escapeDisplayName) {
+	public void setEscapeDisplayName(@Nullable Boolean escapeDisplayName) {
 		this.escapeDisplayName = escapeDisplayName;
 	}
 
@@ -215,7 +216,7 @@ public class ActionImpl implements Action {
 	 * @return the relative icon file name, or {@code null}
 	 */
 	@Override
-	public String getRelativeIconFileName() {
+	public @Nullable String getRelativeIconFileName() {
 		return relativeIconFileName;
 	}
 
@@ -224,7 +225,7 @@ public class ActionImpl implements Action {
 	 *
 	 * @param relativeIconFileName the icon file path relative to action resource roots
 	 */
-	public void setRelativeIconFileName(String relativeIconFileName) {
+	public void setRelativeIconFileName(@Nullable String relativeIconFileName) {
 		this.relativeIconFileName = relativeIconFileName;
 	}
 
@@ -234,7 +235,7 @@ public class ActionImpl implements Action {
 	 * @return the icon style class, or {@code null}
 	 */
 	@Override
-	public String getIconStyleClass() {
+	public @Nullable String getIconStyleClass() {
 		return iconStyleClass;
 	}
 
@@ -243,7 +244,7 @@ public class ActionImpl implements Action {
 	 *
 	 * @param iconStyleClass the icon style class name
 	 */
-	public void setIconStyleClass(String iconStyleClass) {
+	public void setIconStyleClass(@Nullable String iconStyleClass) {
 		this.iconStyleClass = iconStyleClass;
 	}
 
@@ -253,7 +254,7 @@ public class ActionImpl implements Action {
 	 * @return the confirmation text, or {@code null} if no confirmation is required
 	 */
 	@Override
-	public String getConfirmationText() {
+	public @Nullable String getConfirmationText() {
 		return confirmationText;
 	}
 
@@ -263,7 +264,7 @@ public class ActionImpl implements Action {
 	 * @return {@code Boolean.FALSE} to allow trusted markup; {@code null} or {@code Boolean.TRUE} to escape at the renderer boundary
 	 */
 	@Override
-	public Boolean getEscapeConfirm() {
+	public @Nullable Boolean getEscapeConfirm() {
 		return escapeConfirm;
 	}
 
@@ -272,7 +273,7 @@ public class ActionImpl implements Action {
 	 *
 	 * @param confirmationText the confirmation text
 	 */
-	public void setConfirmationText(String confirmationText) {
+	public void setConfirmationText(@Nullable String confirmationText) {
 		this.confirmationText = confirmationText;
 	}
 
@@ -281,7 +282,7 @@ public class ActionImpl implements Action {
 	 *
 	 * @param escapeConfirm {@code Boolean.FALSE} to allow trusted markup; {@code null} or {@code Boolean.TRUE} to escape at the renderer boundary
 	 */
-	public void setEscapeConfirm(Boolean escapeConfirm) {
+	public void setEscapeConfirm(@Nullable Boolean escapeConfirm) {
 		this.escapeConfirm = escapeConfirm;
 	}
 
@@ -291,7 +292,7 @@ public class ActionImpl implements Action {
 	 * @return the tooltip text, or {@code null}
 	 */
 	@Override
-	public String getToolTip() {
+	public @Nullable String getToolTip() {
 		return toolTip;
 	}
 
@@ -301,7 +302,7 @@ public class ActionImpl implements Action {
 	 * @return {@code Boolean.FALSE} to allow trusted markup; {@code null} or {@code Boolean.TRUE} to escape at the renderer boundary
 	 */
 	@Override
-	public Boolean getEscapeToolTip() {
+	public @Nullable Boolean getEscapeToolTip() {
 		return escapeToolTip;
 	}
 
@@ -310,7 +311,7 @@ public class ActionImpl implements Action {
 	 *
 	 * @param toolTip the tooltip text
 	 */
-	public void setToolTip(String toolTip) {
+	public void setToolTip(@Nullable String toolTip) {
 		this.toolTip = toolTip;
 	}
 
@@ -319,7 +320,7 @@ public class ActionImpl implements Action {
 	 *
 	 * @param escapeToolTip {@code Boolean.FALSE} to allow trusted markup; {@code null} or {@code Boolean.TRUE} to escape at the renderer boundary
 	 */
-	public void setEscapeToolTip(Boolean escapeToolTip) {
+	public void setEscapeToolTip(@Nullable Boolean escapeToolTip) {
 		this.escapeToolTip = escapeToolTip;
 	}
 
@@ -329,7 +330,7 @@ public class ActionImpl implements Action {
 	 * @return {@code true} by default; {@code false} to render outside the panel where supported
 	 */
 	@Override
-	public Boolean getInActionPanel() {
+	public @Nullable Boolean getInActionPanel() {
 		return inActionPanel;
 	}
 
@@ -338,7 +339,7 @@ public class ActionImpl implements Action {
 	 *
 	 * @param inActionPanel panel-rendering flag
 	 */
-	public void setInActionPanel(Boolean inActionPanel) {
+	public void setInActionPanel(@Nullable Boolean inActionPanel) {
 		this.inActionPanel = inActionPanel;
 	}
 
@@ -348,7 +349,7 @@ public class ActionImpl implements Action {
 	 * @return the action visibility target
 	 */
 	@Override
-	public ActionShow getShow() {
+	public @Nullable ActionShow getShow() {
 		return show;
 	}
 
@@ -357,7 +358,7 @@ public class ActionImpl implements Action {
 	 *
 	 * @param show the action visibility target
 	 */
-	public void setShow(ActionShow show) {
+	public void setShow(@Nullable ActionShow show) {
 		this.show = show;
 	}
 
@@ -374,7 +375,7 @@ public class ActionImpl implements Action {
 	 * @throws IllegalStateException if this action is implicit and has no resource name
 	 */
 	@Override
-	public ServerSideAction<?> getServerSideAction(Customer customer, Document document) {
+	public @Nonnull ServerSideAction<?> getServerSideAction(@Nonnull Customer customer, @Nonnull Document document) {
 		if (resourceName == null) {
 			throw new IllegalStateException("The ActionConfig " + getName() + " is an implicit action.");
 		}
@@ -509,7 +510,7 @@ public class ActionImpl implements Action {
 	 * @throws IllegalStateException if the implicit action name is unsupported
 	 */
 	@SuppressWarnings("java:S3776") // Complexity OK
-	public ActionMetaData toRepositoryAction() {
+	public @Nonnull ActionMetaData toRepositoryAction() {
 		ActionMetaData result = null;
 		if (implicitName == null) { // custom action
 			result = new CustomAction();
@@ -616,7 +617,7 @@ public class ActionImpl implements Action {
 	 * <p>Side effects: subsequent callers of {@link #getProperties()} observe the same
 	 * map instance supplied here.
 	 */
-	public void setProperties(Map<String, String> properties) {
+	public void setProperties(@Nonnull Map<String, String> properties) {
 		this.properties = properties;
 	}
 
@@ -624,7 +625,7 @@ public class ActionImpl implements Action {
 	 * Returns the mutable property map for metadata decorators.
 	 */
 	@Override
-	public Map<String, String> getProperties() {
+	public @Nonnull Map<String, String> getProperties() {
 		return properties;
 	}
 }

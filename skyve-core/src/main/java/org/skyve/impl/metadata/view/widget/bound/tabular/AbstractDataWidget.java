@@ -11,6 +11,7 @@ import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.view.Invisible;
 import org.skyve.util.Util;
 
+import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlTransient;
@@ -79,7 +80,7 @@ public abstract class AbstractDataWidget extends AbstractBound implements Relati
 	 *
 	 * @return ordered mutable column metadata
 	 */
-	public abstract List<? extends TabularColumn> getColumns();
+	public abstract @Nonnull List<? extends TabularColumn> getColumns();
 
 	/**
 	 * Returns the optional widget identifier used for client-side targeting.
@@ -87,7 +88,7 @@ public abstract class AbstractDataWidget extends AbstractBound implements Relati
 	 * @return the widget identifier, or {@code null} when not set
 	 */
 	@Override
-	public String getWidgetId() {
+	public @Nullable String getWidgetId() {
 		return widgetId;
 	}
 
@@ -97,7 +98,7 @@ public abstract class AbstractDataWidget extends AbstractBound implements Relati
 	 * @param widgetId the widget identifier
 	 */
 	@XmlAttribute(required = false)
-	public void setWidgetId(String widgetId) {
+	public void setWidgetId(@Nullable String widgetId) {
 		this.widgetId = UtilImpl.processStringValue(widgetId);
 	}
 
@@ -106,7 +107,7 @@ public abstract class AbstractDataWidget extends AbstractBound implements Relati
 	 *
 	 * @return the configured title text
 	 */
-	public String getTitle() {
+	public @Nullable String getTitle() {
 		return title;
 	}
 	
@@ -115,7 +116,7 @@ public abstract class AbstractDataWidget extends AbstractBound implements Relati
 	 *
 	 * @return the localised title text
 	 */
-	public String getLocalisedTitle() {
+	public @Nullable String getLocalisedTitle() {
 		return Util.i18n(title);
 	}
 
@@ -124,7 +125,7 @@ public abstract class AbstractDataWidget extends AbstractBound implements Relati
 	 *
 	 * @return {@code Boolean.FALSE} to allow trusted markup; {@code null} or {@code Boolean.TRUE} to escape at the renderer boundary
 	 */
-	public Boolean getEscapeTitle() {
+	public @Nullable Boolean getEscapeTitle() {
 		return escapeTitle;
 	}
 
@@ -134,7 +135,7 @@ public abstract class AbstractDataWidget extends AbstractBound implements Relati
 	 * @param title the title text to set
 	 */
 	@XmlAttribute(required = false)
-	public void setTitle(String title) {
+	public void setTitle(@Nullable String title) {
 		this.title = UtilImpl.processStringValue(title);
 	}
 
@@ -144,7 +145,7 @@ public abstract class AbstractDataWidget extends AbstractBound implements Relati
 	 * @param escapeTitle {@code Boolean.FALSE} to allow trusted markup; {@code null} or {@code Boolean.TRUE} to escape at the renderer boundary
 	 */
 	@XmlAttribute(required = false)
-	public void setEscapeTitle(Boolean escapeTitle) {
+	public void setEscapeTitle(@Nullable Boolean escapeTitle) {
 		this.escapeTitle = escapeTitle;
 	}
 
@@ -154,7 +155,7 @@ public abstract class AbstractDataWidget extends AbstractBound implements Relati
 	 * @return configured pixel width
 	 */
 	@Override
-	public Integer getPixelWidth() {
+	public @Nullable Integer getPixelWidth() {
 		return pixelWidth;
 	}
 
@@ -165,7 +166,7 @@ public abstract class AbstractDataWidget extends AbstractBound implements Relati
 	 */
 	@Override
 	@XmlAttribute(required = false)
-	public void setPixelWidth(Integer pixelWidth) {
+	public void setPixelWidth(@Nullable Integer pixelWidth) {
 		this.pixelWidth = pixelWidth;
 	}
 
@@ -175,7 +176,7 @@ public abstract class AbstractDataWidget extends AbstractBound implements Relati
 	 * @return responsive width units
 	 */
 	@Override
-	public Integer getResponsiveWidth() {
+	public @Nullable Integer getResponsiveWidth() {
 		return responsiveWidth;
 	}
 
@@ -186,7 +187,7 @@ public abstract class AbstractDataWidget extends AbstractBound implements Relati
 	 */
 	@Override
 	@XmlAttribute(required = false)
-	public void setResponsiveWidth(Integer responsiveWidth) {
+	public void setResponsiveWidth(@Nullable Integer responsiveWidth) {
 		this.responsiveWidth = responsiveWidth;
 	}
 
@@ -196,7 +197,7 @@ public abstract class AbstractDataWidget extends AbstractBound implements Relati
 	 * @return small-breakpoint width units
 	 */
 	@Override
-	public Integer getSm() {
+	public @Nullable Integer getSm() {
 		return sm;
 	}
 	
@@ -207,7 +208,7 @@ public abstract class AbstractDataWidget extends AbstractBound implements Relati
 	 */
 	@Override
 	@XmlAttribute(required = false)
-	public void setSm(Integer sm) {
+	public void setSm(@Nullable Integer sm) {
 		this.sm = sm;
 	}
 
@@ -217,7 +218,7 @@ public abstract class AbstractDataWidget extends AbstractBound implements Relati
 	 * @return medium-breakpoint width units
 	 */
 	@Override
-	public Integer getMd() {
+	public @Nullable Integer getMd() {
 		return md;
 	}
 	
@@ -228,7 +229,7 @@ public abstract class AbstractDataWidget extends AbstractBound implements Relati
 	 */
 	@Override
 	@XmlAttribute(required = false)
-	public void setMd(Integer md) {
+	public void setMd(@Nullable Integer md) {
 		this.md = md;
 	}
 	
@@ -238,7 +239,7 @@ public abstract class AbstractDataWidget extends AbstractBound implements Relati
 	 * @return large-breakpoint width units
 	 */
 	@Override
-	public Integer getLg() {
+	public @Nullable Integer getLg() {
 		return lg;
 	}
 	
@@ -249,7 +250,7 @@ public abstract class AbstractDataWidget extends AbstractBound implements Relati
 	 */
 	@Override
 	@XmlAttribute(required = false)
-	public void setLg(Integer lg) {
+	public void setLg(@Nullable Integer lg) {
 		this.lg = lg;
 	}
 
@@ -259,7 +260,7 @@ public abstract class AbstractDataWidget extends AbstractBound implements Relati
 	 * @return extra-large-breakpoint width units
 	 */
 	@Override
-	public Integer getXl() {
+	public @Nullable Integer getXl() {
 		return xl;
 	}
 	
@@ -270,7 +271,7 @@ public abstract class AbstractDataWidget extends AbstractBound implements Relati
 	 */
 	@Override
 	@XmlAttribute(required = false)
-	public void setXl(Integer xl) {
+	public void setXl(@Nullable Integer xl) {
 		this.xl = xl;
 	}
 
@@ -280,7 +281,7 @@ public abstract class AbstractDataWidget extends AbstractBound implements Relati
 	 * @return width percentage
 	 */
 	@Override
-	public Integer getPercentageWidth() {
+	public @Nullable Integer getPercentageWidth() {
 		return percentageWidth;
 	}
 
@@ -291,7 +292,7 @@ public abstract class AbstractDataWidget extends AbstractBound implements Relati
 	 */
 	@Override
 	@XmlAttribute(required = false)
-	public void setPercentageWidth(Integer percentageWidth) {
+	public void setPercentageWidth(@Nullable Integer percentageWidth) {
 		this.percentageWidth = percentageWidth;
 	}
 
@@ -301,7 +302,7 @@ public abstract class AbstractDataWidget extends AbstractBound implements Relati
 	 * @return minimum width in pixels
 	 */
 	@Override
-	public Integer getMinPixelWidth() {
+	public @Nullable Integer getMinPixelWidth() {
 		return minPixelWidth;
 	}
 
@@ -312,7 +313,7 @@ public abstract class AbstractDataWidget extends AbstractBound implements Relati
 	 */
 	@Override
 	@XmlAttribute(required = false)
-	public void setMinPixelWidth(Integer minPixelWidth) {
+	public void setMinPixelWidth(@Nullable Integer minPixelWidth) {
 		this.minPixelWidth = minPixelWidth;
 	}
 
@@ -322,7 +323,7 @@ public abstract class AbstractDataWidget extends AbstractBound implements Relati
 	 * @return maximum width in pixels
 	 */
 	@Override
-	public Integer getMaxPixelWidth() {
+	public @Nullable Integer getMaxPixelWidth() {
 		return maxPixelWidth;
 	}
 
@@ -333,7 +334,7 @@ public abstract class AbstractDataWidget extends AbstractBound implements Relati
 	 */
 	@Override
 	@XmlAttribute(required = false)
-	public void setMaxPixelWidth(Integer maxPixelWidth) {
+	public void setMaxPixelWidth(@Nullable Integer maxPixelWidth) {
 		this.maxPixelWidth = maxPixelWidth;
 	}
 
@@ -343,7 +344,7 @@ public abstract class AbstractDataWidget extends AbstractBound implements Relati
 	 * @return configured pixel height
 	 */
 	@Override
-	public Integer getPixelHeight() {
+	public @Nullable Integer getPixelHeight() {
 		return pixelHeight;
 	}
 
@@ -354,7 +355,7 @@ public abstract class AbstractDataWidget extends AbstractBound implements Relati
 	 */
 	@Override
 	@XmlAttribute(required = false)
-	public void setPixelHeight(Integer pixelHeight) {
+	public void setPixelHeight(@Nullable Integer pixelHeight) {
 		this.pixelHeight = pixelHeight;
 	}
 
@@ -364,7 +365,7 @@ public abstract class AbstractDataWidget extends AbstractBound implements Relati
 	 * @return height percentage
 	 */
 	@Override
-	public Integer getPercentageHeight() {
+	public @Nullable Integer getPercentageHeight() {
 		return percentageHeight;
 	}
 
@@ -375,7 +376,7 @@ public abstract class AbstractDataWidget extends AbstractBound implements Relati
 	 */
 	@Override
 	@XmlAttribute(required = false)
-	public void setPercentageHeight(Integer percentageHeight) {
+	public void setPercentageHeight(@Nullable Integer percentageHeight) {
 		this.percentageHeight = percentageHeight;
 	}
 
@@ -385,7 +386,7 @@ public abstract class AbstractDataWidget extends AbstractBound implements Relati
 	 * @return minimum height in pixels
 	 */
 	@Override
-	public Integer getMinPixelHeight() {
+	public @Nullable Integer getMinPixelHeight() {
 		return minPixelHeight;
 	}
 
@@ -396,7 +397,7 @@ public abstract class AbstractDataWidget extends AbstractBound implements Relati
 	 */
 	@Override
 	@XmlAttribute(required = false)
-	public void setMinPixelHeight(Integer minPixelHeight) {
+	public void setMinPixelHeight(@Nullable Integer minPixelHeight) {
 		this.minPixelHeight = minPixelHeight;
 	}
 
@@ -406,7 +407,7 @@ public abstract class AbstractDataWidget extends AbstractBound implements Relati
 	 * @return maximum height in pixels
 	 */
 	@Override
-	public Integer getMaxPixelHeight() {
+	public @Nullable Integer getMaxPixelHeight() {
 		return maxPixelHeight;
 	}
 
@@ -417,7 +418,7 @@ public abstract class AbstractDataWidget extends AbstractBound implements Relati
 	 */
 	@Override
 	@XmlAttribute(required = false)
-	public void setMaxPixelHeight(Integer maxPixelHeight) {
+	public void setMaxPixelHeight(@Nullable Integer maxPixelHeight) {
 		this.maxPixelHeight = maxPixelHeight;
 	}
 

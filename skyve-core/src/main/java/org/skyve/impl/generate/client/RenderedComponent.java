@@ -3,6 +3,9 @@ package org.skyve.impl.generate.client;
 import java.util.ArrayList;
 import java.util.List;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Value object holding rendered client component output fragments.
  *
@@ -21,44 +24,44 @@ public class RenderedComponent {
 		// nothing to see here
 	}
 	
-	public RenderedComponent(String indentation) {
+	public RenderedComponent(@Nonnull String indentation) {
 		this.indentation = indentation;
 	}
 	
-	public StringBuilder getOutput() {
+	public @Nonnull StringBuilder getOutput() {
 		return output;
 	}
 
-	public RenderedComponent setAfter(String after) {
+	public @Nonnull RenderedComponent setAfter(@Nullable String after) {
 		this.after = after;
 		return this;
 	}
 
-	public RenderedComponent setIndent(String indent) {
+	public @Nonnull RenderedComponent setIndent(@Nullable String indent) {
 		this.indent = indent;
 		return this;
 	}
 	
-	public RenderedComponent getParent() {
+	public @Nullable RenderedComponent getParent() {
 		return parent;
 	}
 
-	public void addChild(RenderedComponent component) {
+	public void addChild(@Nonnull RenderedComponent component) {
 		children.add(component);
 		component.parent = this;
 	}
 
-	public void addChild(int index, RenderedComponent component) {
+	public void addChild(int index, @Nonnull RenderedComponent component) {
 		children.add(index, component);
 		component.parent = this;
 	}
 
-	public void removeChild(RenderedComponent component) {
+	public void removeChild(@Nonnull RenderedComponent component) {
 		children.remove(component);
 		component.parent = null;
 	}
 	
-	public RenderedComponent getChild(int index) {
+	public @Nonnull RenderedComponent getChild(int index) {
 		return children.get(index);
 	}
 
@@ -67,7 +70,7 @@ public class RenderedComponent {
 	}
 	
 	@Override
-	public String toString() {
+	public @Nonnull String toString() {
 		StringBuilder result = new StringBuilder(2048);
 		if (indent != null) {
 			result.append(indent);

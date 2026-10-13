@@ -227,7 +227,7 @@ public class EXT {
 	 *            will automatically throw <code>e</code> if any errors are
 	 *            added to it.
 	 */
-	public static @Nonnull BizPortWorkbook newBizPortWorkbook(Customer customer, Workbook workbook, UploadException e) {
+	public static @Nonnull BizPortWorkbook newBizPortWorkbook(@Nonnull Customer customer, @Nonnull Workbook workbook, @Nonnull UploadException e) {
 		return new POIWorkbook(customer, workbook, e);
 	}
 
@@ -239,7 +239,7 @@ public class EXT {
 	 * @param title
 	 *            The title of the sheet, used to name the excel sheet tab.
 	 */
-	public static @Nonnull BizPortSheet newBizPortSheet(String title) {
+	public static @Nonnull BizPortSheet newBizPortSheet(@Nonnull String title) {
 		return new POISheet(title);
 	}
 

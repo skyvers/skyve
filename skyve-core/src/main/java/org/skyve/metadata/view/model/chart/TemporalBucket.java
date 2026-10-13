@@ -6,6 +6,8 @@ import java.time.format.TextStyle;
 import org.skyve.CORE;
 import org.skyve.impl.util.XMLMetaData;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlTransient;
 import jakarta.xml.bind.annotation.XmlType;
 
@@ -28,12 +30,12 @@ public class TemporalBucket implements Bucket {
 	
 	protected TemporalBucketType type = null;
 	
-	public TemporalBucket(TemporalBucketType type) {
+	public TemporalBucket(@Nonnull TemporalBucketType type) {
 		this.type = type;
 	}
 
 	@Override
-	public String bizQLExpression(String categoryBinding) {
+	public @Nonnull String bizQLExpression(@Nonnull String categoryBinding) {
 		StringBuilder result = new StringBuilder(128);
 		if (TemporalBucketType.quarter.equals(type)) {
 			result.append("case when month(bean.")
@@ -144,7 +146,7 @@ public class TemporalBucket implements Bucket {
 	}
 
 	@Override
-	public String label(Object category) {
+	public @Nullable String label(@Nullable Object category) {
 		if (category == null) {
 			return null;
 		}
@@ -185,7 +187,7 @@ public class TemporalBucket implements Bucket {
 		return result.toString();
 	}
 	
-	private static String day(int day) {
+	private static @Nonnull String day(int day) {
 		if ((day == 1) || (day == 21) || (day == 31)) {
 			return day + "st";
 		}
@@ -200,18 +202,18 @@ public class TemporalBucket implements Bucket {
 		}
 	}
 	
-	private static String month(int month) {
+	private static @Nonnull String month(int month) {
 		return Month.of(month).getDisplayName(TextStyle.SHORT, CORE.getUser().getLocale());
 	}
 	
-	private static void padZero(StringBuilder expression) {
+	private static void padZero(@Nonnull StringBuilder expression) {
 		String string = expression.toString();
 		expression.insert(0, "case when ");
 		expression.append(" < 10 then concat('0', cast(").append(string);
 		expression.append(" as string)) else concat('', cast(").append(string).append(" as string)) end");
 	}
 
-	private static String quarter(int quarter) {
+	private static @Nonnull String quarter(int quarter) {
 		return "Q" + quarter;
 	}
 }

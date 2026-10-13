@@ -2,6 +2,8 @@ package org.skyve.metadata.view.fluent;
 
 import org.skyve.impl.metadata.repository.view.actions.DefaultsAction;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * Builds {@link DefaultsAction} metadata using a fluent API.
  */
@@ -21,7 +23,7 @@ public class FluentDefaultsAction extends FluentAction<FluentDefaultsAction> {
 	 * @param action
 	 *            the action instance to wrap
 	 */
-	public FluentDefaultsAction(DefaultsAction action) {
+	public FluentDefaultsAction(@Nonnull DefaultsAction action) {
 		this.action = action;
 	}
 
@@ -32,7 +34,7 @@ public class FluentDefaultsAction extends FluentAction<FluentDefaultsAction> {
 	 *            the source action metadata
 	 * @return this builder
 	 */
-	public FluentDefaultsAction from(@SuppressWarnings("hiding") DefaultsAction action) {
+	public @Nonnull FluentDefaultsAction from(@SuppressWarnings("hiding") @Nonnull DefaultsAction action) {
 		super.fromBase(action);
 		return this;
 	}
@@ -41,7 +43,7 @@ public class FluentDefaultsAction extends FluentAction<FluentDefaultsAction> {
 	 * Returns the wrapped repository action instance.
 	 */
 	@Override
-	public DefaultsAction get() {
+	public @Nonnull DefaultsAction get() {
 		return action;
 	}
 }

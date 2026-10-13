@@ -5,12 +5,15 @@ import org.skyve.metadata.module.query.MetaDataQueryDefinition;
 import org.skyve.metadata.view.model.list.DocumentQueryListModel;
 import org.skyve.persistence.DocumentQuery;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 public class ListGridChartListModel extends DocumentQueryListModel<Bean> {
-	public ListGridChartListModel(MetaDataQueryDefinition query) {
+	public ListGridChartListModel(@Nonnull MetaDataQueryDefinition query) {
 		super(query);
 	}
 	
-	public DocumentQuery getDocumentQuery() {
+	public @Nullable DocumentQuery getDocumentQuery() {
 		return getDetailQuery();
 	}
 }

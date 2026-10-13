@@ -60,6 +60,7 @@ import org.slf4j.Logger;
 import com.google.common.base.MoreObjects;
 
 import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.servlet.http.HttpSession;
 
 /**
@@ -172,7 +173,7 @@ public class CustomerImpl implements Customer {
 	 * @return the customer name from metadata.
 	 */
 	@Override
-	public String getName() {
+	public @Nullable String getName() {
 		return name;
 	}
 
@@ -181,7 +182,7 @@ public class CustomerImpl implements Customer {
 	 *
 	 * @param name the metadata name for this customer.
 	 */
-	public void setName(String name) {
+	public void setName(@Nonnull String name) {
 		this.name = name;
 	}
 	
@@ -230,7 +231,7 @@ public class CustomerImpl implements Customer {
 	 * @return the IETF BCP 47 language tag, or {@code null} if none is configured.
 	 */
 	@Override
-	public String getLanguageTag() {
+	public @Nullable String getLanguageTag() {
 		return languageTag;
 	}
 
@@ -239,7 +240,7 @@ public class CustomerImpl implements Customer {
 	 *
 	 * @param languageTag the IETF BCP 47 language tag to persist with the customer metadata.
 	 */
-	public void setLanguageTag(String languageTag) {
+	public void setLanguageTag(@Nullable String languageTag) {
 		this.languageTag = languageTag;
 	}
 
@@ -249,7 +250,7 @@ public class CustomerImpl implements Customer {
 	 * @return the customer-level date converter, or {@code null} if the framework default applies.
 	 */
 	@Override
-	public Converter<DateOnly> getDefaultDateConverter() {
+	public @Nonnull Converter<DateOnly> getDefaultDateConverter() {
 		return defaultDateConverter;
 	}
 
@@ -258,7 +259,7 @@ public class CustomerImpl implements Customer {
 	 *
 	 * @param defaultDateConverter the converter to use for customer-level date formatting and parsing.
 	 */
-	public void setDefaultDateConverter(Converter<DateOnly> defaultDateConverter) {
+	public void setDefaultDateConverter(@Nonnull Converter<DateOnly> defaultDateConverter) {
 		this.defaultDateConverter = defaultDateConverter;
 	}
 
@@ -268,7 +269,7 @@ public class CustomerImpl implements Customer {
 	 * @return the customer-level date-time converter, or {@code null} if the framework default applies.
 	 */
 	@Override
-	public Converter<DateTime> getDefaultDateTimeConverter() {
+	public @Nonnull Converter<DateTime> getDefaultDateTimeConverter() {
 		return defaultDateTimeConverter;
 	}
 
@@ -277,7 +278,7 @@ public class CustomerImpl implements Customer {
 	 *
 	 * @param defaultDateTimeConverter the converter to use for customer-level date-time formatting and parsing.
 	 */
-	public void setDefaultDateTimeConverter(Converter<DateTime> defaultDateTimeConverter) {
+	public void setDefaultDateTimeConverter(@Nonnull Converter<DateTime> defaultDateTimeConverter) {
 		this.defaultDateTimeConverter = defaultDateTimeConverter;
 	}
 
@@ -287,7 +288,7 @@ public class CustomerImpl implements Customer {
 	 * @return the customer-level time converter, or {@code null} if the framework default applies.
 	 */
 	@Override
-	public Converter<TimeOnly> getDefaultTimeConverter() {
+	public @Nonnull Converter<TimeOnly> getDefaultTimeConverter() {
 		return defaultTimeConverter;
 	}
 
@@ -296,7 +297,7 @@ public class CustomerImpl implements Customer {
 	 *
 	 * @param defaultTimeConverter the converter to use for customer-level time formatting and parsing.
 	 */
-	public void setDefaultTimeConverter(Converter<TimeOnly> defaultTimeConverter) {
+	public void setDefaultTimeConverter(@Nonnull Converter<TimeOnly> defaultTimeConverter) {
 		this.defaultTimeConverter = defaultTimeConverter;
 	}
 
@@ -306,7 +307,7 @@ public class CustomerImpl implements Customer {
 	 * @return the customer-level timestamp converter, or {@code null} if the framework default applies.
 	 */
 	@Override
-	public Converter<Timestamp> getDefaultTimestampConverter() {
+	public @Nonnull Converter<Timestamp> getDefaultTimestampConverter() {
 		return defaultTimestampConverter;
 	}
 
@@ -315,7 +316,7 @@ public class CustomerImpl implements Customer {
 	 *
 	 * @param defaultTimestampConverter the converter to use for customer-level timestamp formatting and parsing.
 	 */
-	public void setDefaultTimestampConverter(Converter<Timestamp> defaultTimestampConverter) {
+	public void setDefaultTimestampConverter(@Nonnull Converter<Timestamp> defaultTimestampConverter) {
 		this.defaultTimestampConverter = defaultTimestampConverter;
 	}
 
@@ -327,7 +328,7 @@ public class CustomerImpl implements Customer {
 	 *
 	 * @return the mutable default action registry.
 	 */
-	public Map<String, Action> getDefaultActions() {
+	public @Nonnull Map<String, Action> getDefaultActions() {
 		return defaultActions;
 	}
 
@@ -339,7 +340,7 @@ public class CustomerImpl implements Customer {
 	 *
 	 * @return the live module-entry map.
 	 */
-	public Map<String, FormLabelLayout> getModuleEntries() {
+	public @Nonnull Map<String, FormLabelLayout> getModuleEntries() {
 		return moduleEntries;
 	}
 
@@ -349,7 +350,7 @@ public class CustomerImpl implements Customer {
 	 * @return the home module metadata, or {@code null} when no home module is configured.
 	 */
 	@Override
-	public Module getHomeModule() {
+	public @Nonnull Module getHomeModule() {
 		return getModule(homeModuleName);
 	}
 
@@ -360,7 +361,7 @@ public class CustomerImpl implements Customer {
 	 * @return the module metadata, or {@code null} if the repository does not expose it.
 	 */
 	@Override
-	public Module getModule(String moduleName) {
+	public @Nonnull Module getModule(@Nonnull String moduleName) {
 		Module result = ProvidedRepositoryFactory.get().getModule(this, moduleName);
 		if (result == null) {
 			throw new MetaDataException("No module named '" + moduleName + "' is available to customer '" + name + "'.");
@@ -377,7 +378,7 @@ public class CustomerImpl implements Customer {
 	 * @return the ordered list of enabled modules.
 	 */
 	@Override
-	public List<Module> getModules() {
+	public @Nonnull List<Module> getModules() {
 		List<Module> result = new ArrayList<>(moduleEntries.size());
 
 		// NB Keys are in insertion order
@@ -394,7 +395,7 @@ public class CustomerImpl implements Customer {
 	 * @param role the role metadata to register.
 	 * @return {@code true} if the role name was not already registered.
 	 */
-	public boolean putRole(CustomerRoleMetaData role) {
+	public boolean putRole(@Nonnull CustomerRoleMetaData role) {
 		return (roles.put(role.getName(), role) == null);
 	}
 
@@ -404,7 +405,7 @@ public class CustomerImpl implements Customer {
 	 * @return an unmodifiable view of the configured roles in registration order.
 	 */
 	@Override
-	public java.util.Collection<CustomerRole> getRoles() {
+	public @Nonnull java.util.Collection<CustomerRole> getRoles() {
 		return Collections.unmodifiableCollection(roles.values());
 	}
 
@@ -416,7 +417,7 @@ public class CustomerImpl implements Customer {
 	 */
 	
 	@Override
-	public CustomerRole getRole(String roleName) {
+	public @Nullable CustomerRole getRole(@Nonnull String roleName) {
 		return roles.get(roleName);
 	}
 	
@@ -446,7 +447,7 @@ public class CustomerImpl implements Customer {
 	 * @param interceptor interceptor metadata.
 	 * @return {@code true} when the interceptor class name was not already registered.
 	 */
-	public boolean putInterceptor(InterceptorMetaData interceptor) {
+	public boolean putInterceptor(@Nonnull InterceptorMetaData interceptor) {
 		boolean result = (interceptors.put(interceptor.getClassName(), interceptor) == null);
 		if (result) {
 			reversedInterceptors.add(0, interceptor);
@@ -461,7 +462,7 @@ public class CustomerImpl implements Customer {
 	 * @return an unmodifiable view of interceptors in registration order.
 	 */
 	@Override
-	public java.util.Collection<InterceptorMetaData> getInterceptors() {
+	public @Nonnull java.util.Collection<InterceptorMetaData> getInterceptors() {
 		return Collections.unmodifiableCollection(interceptors.values());
 	}
 
@@ -471,7 +472,7 @@ public class CustomerImpl implements Customer {
 	 * @param observer observer metadata.
 	 * @return {@code true} when the observer class name was not already registered.
 	 */
-	public boolean putObserver(ObserverMetaData observer) {
+	public boolean putObserver(@Nonnull ObserverMetaData observer) {
 		boolean result = (observers.put(observer.getClassName(), observer) == null);
 		if (result) {
 			reversedObservers.add(0, observer);
@@ -486,7 +487,7 @@ public class CustomerImpl implements Customer {
 	 * @return an unmodifiable view of observers in registration order.
 	 */
 	@Override
-	public java.util.Collection<ObserverMetaData> getObservers() {
+	public @Nonnull java.util.Collection<ObserverMetaData> getObservers() {
 		return Collections.unmodifiableCollection(observers.values());
 	}
 
@@ -496,7 +497,7 @@ public class CustomerImpl implements Customer {
 	 * @param homeModuleName the module name to use as the customer's landing module.
 	 */
 
-	public void setHomeModuleName(String homeModuleName) {
+	public void setHomeModuleName(@Nonnull String homeModuleName) {
 		this.homeModuleName = homeModuleName;
 	}
 
@@ -506,7 +507,7 @@ public class CustomerImpl implements Customer {
 	 * @return the UI resource bundle, or {@code null} when none has been configured.
 	 */
 	@Override
-	public UIResources getUiResources() {
+	public @Nullable UIResources getUiResources() {
 		return uiResources;
 	}
 
@@ -516,7 +517,7 @@ public class CustomerImpl implements Customer {
 	 * @param uiResources the UI resource metadata.
 	 */
 
-	public void setUiResources(UIResources uiResources) {
+	public void setUiResources(@Nullable UIResources uiResources) {
 		this.uiResources = uiResources;
 	}
 
@@ -526,7 +527,7 @@ public class CustomerImpl implements Customer {
 	 * @return the HTML resource bundle, or {@code null} when none has been configured.
 	 */
 	@Override
-	public HTMLResources getHtmlResources() {
+	public @Nullable HTMLResources getHtmlResources() {
 		return htmlResources;
 	}
 
@@ -536,7 +537,7 @@ public class CustomerImpl implements Customer {
 	 * @param htmlResources the HTML resource metadata.
 	 */
 
-	public void setHtmlResources(HTMLResources htmlResources) {
+	public void setHtmlResources(@Nullable HTMLResources htmlResources) {
 		this.htmlResources = htmlResources;
 	}
 
@@ -546,7 +547,7 @@ public class CustomerImpl implements Customer {
 	 * @return the login resource bundle, or {@code null} when none has been configured.
 	 */
 	@Override
-	public LoginResources getLoginResources() {
+	public @Nullable LoginResources getLoginResources() {
 		return loginResources;
 	}
 
@@ -556,7 +557,7 @@ public class CustomerImpl implements Customer {
 	 * @param loginResources the login resource metadata.
 	 */
 
-	public void setLoginResources(LoginResources loginResources) {
+	public void setLoginResources(@Nullable LoginResources loginResources) {
 		this.loginResources = loginResources;
 	}
 
@@ -566,7 +567,7 @@ public class CustomerImpl implements Customer {
 	 * @return the fully qualified class name, or {@code null} when no override is configured.
 	 */
 	@Override
-	public String getJFreeChartPostProcessorClassName() {
+	public @Nullable String getJFreeChartPostProcessorClassName() {
 		return jFreeChartPostProcessorClassName;
 	}
 	
@@ -578,7 +579,7 @@ public class CustomerImpl implements Customer {
 	 * @param jFreeChartPostProcessorClassName the fully qualified class name, or blank to clear it.
 	 */
 	
-	public void setJFreeChartPostProcessorClassName(String jFreeChartPostProcessorClassName) {
+	public void setJFreeChartPostProcessorClassName(@Nullable String jFreeChartPostProcessorClassName) {
 		this.jFreeChartPostProcessorClassName = UtilImpl.processStringValue(jFreeChartPostProcessorClassName);
 	}
 	
@@ -588,7 +589,7 @@ public class CustomerImpl implements Customer {
 	 * @return the fully qualified class name, or {@code null} when no override is configured.
 	 */
 	@Override
-	public String getPrimeFacesChartPostProcessorClassName() {
+	public @Nullable String getPrimeFacesChartPostProcessorClassName() {
 		return primeFacesChartPostProcessorClassName;
 	}
 	
@@ -599,7 +600,7 @@ public class CustomerImpl implements Customer {
 	 *
 	 * @param primeFacesChartPostProcessorClassName the fully qualified class name, or blank to clear it.
 	 */
-	public void setPrimeFacesChartPostProcessorClassName(String primeFacesChartPostProcessorClassName) {
+	public void setPrimeFacesChartPostProcessorClassName(@Nullable String primeFacesChartPostProcessorClassName) {
 		this.primeFacesChartPostProcessorClassName = UtilImpl.processStringValue(primeFacesChartPostProcessorClassName);
 	}
 
@@ -687,7 +688,7 @@ public class CustomerImpl implements Customer {
 	 * @param document the referenced target document.
 	 * @return the exported references targeting {@code document}, or {@code null} when none exist.
 	 */
-	public List<ExportedReference> getExportedReferences(Document document) {
+	public @Nullable List<ExportedReference> getExportedReferences(@Nonnull Document document) {
 		return exportedReferences.get(document.getOwningModuleName() + '.' + document.getName());
 	}
 
@@ -699,7 +700,7 @@ public class CustomerImpl implements Customer {
 	 * @param document
 	 * @return The base document name or <code>null</code>
 	 */
-	public String getBaseDocument(Document document) {
+	public @Nullable String getBaseDocument(@Nonnull Document document) {
 		return derivations.get(document.getOwningModuleName() + '.' + document.getName());
 	}
 
@@ -711,7 +712,7 @@ public class CustomerImpl implements Customer {
 	 * @param document
 	 * @return The list of derived documents (or an empty list if none exist).
 	 */
-	public @Nonnull List<String> getDerivedDocuments(Document document) {
+	public @Nonnull List<String> getDerivedDocuments(@Nonnull Document document) {
 		List<String> result = new ArrayList<>();
 
 		String value = document.getOwningModuleName() + '.' + document.getName();
@@ -741,10 +742,10 @@ public class CustomerImpl implements Customer {
 	 */
 	@Override
 	@SuppressWarnings({"unchecked", "java:S3776"}) // Complexity OK
-	public synchronized <T extends Bean> List<DomainValue> getConstantDomainValues(Bizlet<T> bizlet, 
-																					String moduleName,
-																					String documentName, 
-																					Attribute attribute)
+	public synchronized @Nonnull <T extends Bean> List<DomainValue> getConstantDomainValues(@Nullable Bizlet<T> bizlet, 
+																					@Nonnull String moduleName,
+																					@Nonnull String documentName, 
+																					@Nonnull Attribute attribute)
 	throws Exception {
 		List<DomainValue> result = null;
 		
@@ -868,7 +869,7 @@ public class CustomerImpl implements Customer {
 	 * @param user the authenticated user.
 	 * @param session the active HTTP session for the login.
 	 */
-	public void notifyLogin(User user, HttpSession session) {
+	public void notifyLogin(@Nonnull User user, @Nonnull HttpSession session) {
 		for (ObserverMetaData observer : observers.values()) {
 			observer.getObserver().login(user, session);
 		}
@@ -882,7 +883,7 @@ public class CustomerImpl implements Customer {
 	 * @param user the user being logged out.
 	 * @param session the associated HTTP session.
 	 */
-	public void notifyLogout(User user, HttpSession session) {
+	public void notifyLogout(@Nonnull User user, @Nonnull HttpSession session) {
 		for (ObserverMetaData observer : reversedObservers) {
 			observer.getObserver().logout(user, session);
 		}
@@ -895,7 +896,7 @@ public class CustomerImpl implements Customer {
 	 * @return {@code true} if any interceptor vetoes further processing.
 	 * @throws Exception if an interceptor fails.
 	 */
-	public boolean interceptBeforeNewInstance(Bean bean) throws Exception {
+	public boolean interceptBeforeNewInstance(@Nonnull Bean bean) throws Exception {
 		for (InterceptorMetaData interceptor : interceptors.values()) {
 			if (interceptor.getInterceptor().beforeNewInstance(bean)) {
 				return true;
@@ -912,7 +913,7 @@ public class CustomerImpl implements Customer {
 	 * @param bean the newly created bean instance.
 	 * @throws Exception if an interceptor fails.
 	 */
-	public void interceptAfterNewInstance(Bean bean) throws Exception {
+	public void interceptAfterNewInstance(@Nonnull Bean bean) throws Exception {
 		for (InterceptorMetaData interceptor : reversedInterceptors) {
 			interceptor.getInterceptor().afterNewInstance(bean);
 		}
@@ -926,7 +927,7 @@ public class CustomerImpl implements Customer {
 	 * @return {@code true} if any interceptor vetoes further processing.
 	 * @throws Exception if an interceptor fails.
 	 */
-	public boolean interceptBeforeValidate(Bean bean, ValidationException e) throws Exception {
+	public boolean interceptBeforeValidate(@Nonnull Bean bean, @Nonnull ValidationException e) throws Exception {
 		for (InterceptorMetaData interceptor : interceptors.values()) {
 			if (interceptor.getInterceptor().beforeValidate(bean, e)) {
 				return true;
@@ -942,7 +943,7 @@ public class CustomerImpl implements Customer {
 	 * @param e the validation result container.
 	 * @throws Exception if an interceptor fails.
 	 */
-	public void interceptAfterValidate(Bean bean, ValidationException e) throws Exception {
+	public void interceptAfterValidate(@Nonnull Bean bean, @Nonnull ValidationException e) throws Exception {
 		for (InterceptorMetaData interceptor : reversedInterceptors) {
 			interceptor.getInterceptor().afterValidate(bean, e);
 		}
@@ -955,7 +956,7 @@ public class CustomerImpl implements Customer {
 	 * @return {@code true} if any interceptor vetoes further processing.
 	 * @throws Exception if an interceptor fails.
 	 */
-	public boolean interceptBeforeGetConstantDomainValues(String attributeName) throws Exception {
+	public boolean interceptBeforeGetConstantDomainValues(@Nonnull String attributeName) throws Exception {
 		for (InterceptorMetaData interceptor : interceptors.values()) {
 			if (interceptor.getInterceptor().beforeGetConstantDomainValues(attributeName)) {
 				return true;
@@ -971,7 +972,7 @@ public class CustomerImpl implements Customer {
 	 * @param result the resolved domain values.
 	 * @throws Exception if an interceptor fails.
 	 */
-	public void interceptAfterGetConstantDomainValues(String attributeName, List<DomainValue> result) throws Exception {
+	public void interceptAfterGetConstantDomainValues(@Nonnull String attributeName, @Nullable List<DomainValue> result) throws Exception {
 		for (InterceptorMetaData interceptor : reversedInterceptors) {
 			interceptor.getInterceptor().afterGetConstantDomainValues(attributeName, result);
 		}
@@ -984,7 +985,7 @@ public class CustomerImpl implements Customer {
 	 * @return {@code true} if any interceptor vetoes further processing.
 	 * @throws Exception if an interceptor fails.
 	 */
-	public boolean interceptBeforeGetVariantDomainValues(String attributeName) throws Exception {
+	public boolean interceptBeforeGetVariantDomainValues(@Nonnull String attributeName) throws Exception {
 		for (InterceptorMetaData interceptor : interceptors.values()) {
 			if (interceptor.getInterceptor().beforeGetVariantDomainValues(attributeName)) {
 				return true;
@@ -1000,7 +1001,7 @@ public class CustomerImpl implements Customer {
 	 * @param result the resolved domain values.
 	 * @throws Exception if an interceptor fails.
 	 */
-	public void interceptAfterGetVariantDomainValues(String attributeName, List<DomainValue> result) throws Exception {
+	public void interceptAfterGetVariantDomainValues(@Nonnull String attributeName, @Nullable List<DomainValue> result) throws Exception {
 		for (InterceptorMetaData interceptor : reversedInterceptors) {
 			interceptor.getInterceptor().afterGetVariantDomainValues(attributeName, result);
 		}
@@ -1014,7 +1015,7 @@ public class CustomerImpl implements Customer {
 	 * @return {@code true} if any interceptor vetoes further processing.
 	 * @throws Exception if an interceptor fails.
 	 */
-	public boolean interceptBeforeGetDynamicDomainValues(String attributeName, Bean bean) throws Exception {
+	public boolean interceptBeforeGetDynamicDomainValues(@Nonnull String attributeName, @Nonnull Bean bean) throws Exception {
 		for (InterceptorMetaData interceptor : interceptors.values()) {
 			if (interceptor.getInterceptor().beforeGetDynamicDomainValues(attributeName, bean)) {
 				return true;
@@ -1031,7 +1032,7 @@ public class CustomerImpl implements Customer {
 	 * @param result the resolved domain values.
 	 * @throws Exception if an interceptor fails.
 	 */
-	public void interceptAfterGetDynamicDomainValues(String attributeName, Bean bean, List<DomainValue> result) throws Exception {
+	public void interceptAfterGetDynamicDomainValues(@Nonnull String attributeName, @Nonnull Bean bean, @Nullable List<DomainValue> result) throws Exception {
 		for (InterceptorMetaData interceptor : reversedInterceptors) {
 			interceptor.getInterceptor().afterGetDynamicDomainValues(attributeName, bean, result);
 		}
@@ -1046,7 +1047,7 @@ public class CustomerImpl implements Customer {
 	 * @return {@code true} if any interceptor vetoes further processing.
 	 * @throws Exception if an interceptor fails.
 	 */
-	public boolean interceptBeforeComplete(String attributeName, String value, Bean bean)
+	public boolean interceptBeforeComplete(@Nonnull String attributeName, @Nonnull String value, @Nullable Bean bean)
 	throws Exception {
 		for (InterceptorMetaData interceptor : interceptors.values()) {
 			if (interceptor.getInterceptor().beforeComplete(attributeName, value, bean)) {
@@ -1065,7 +1066,7 @@ public class CustomerImpl implements Customer {
 	 * @param result the completion candidates.
 	 * @throws Exception if an interceptor fails.
 	 */
-	public void interceptAfterComplete(String attributeName, String value, Bean bean, List<String> result)
+	public void interceptAfterComplete(@Nonnull String attributeName, @Nonnull String value, @Nullable Bean bean, @Nullable List<String> result)
 	throws Exception {
 		for (InterceptorMetaData interceptor : reversedInterceptors) {
 			interceptor.getInterceptor().afterComplete(attributeName, value, bean, result);
@@ -1080,7 +1081,7 @@ public class CustomerImpl implements Customer {
 	 * @return {@code true} if any interceptor vetoes further processing.
 	 * @throws Exception if an interceptor fails.
 	 */
-	public boolean interceptBeforeSave(Document document, PersistentBean bean) throws Exception {
+	public boolean interceptBeforeSave(@Nonnull Document document, @Nonnull PersistentBean bean) throws Exception {
 		for (InterceptorMetaData interceptor : interceptors.values()) {
 			if (interceptor.getInterceptor().beforeSave(document, bean)) {
 				return true;
@@ -1096,7 +1097,7 @@ public class CustomerImpl implements Customer {
 	 * @param result the saved bean instance.
 	 * @throws Exception if an interceptor fails.
 	 */
-	public void interceptAfterSave(Document document, PersistentBean result) throws Exception {
+	public void interceptAfterSave(@Nonnull Document document, @Nonnull PersistentBean result) throws Exception {
 		for (InterceptorMetaData interceptor : reversedInterceptors) {
 			interceptor.getInterceptor().afterSave(document, result);
 		}
@@ -1109,7 +1110,7 @@ public class CustomerImpl implements Customer {
 	 * @return {@code true} if any interceptor vetoes further processing.
 	 * @throws Exception if an interceptor fails.
 	 */
-	public boolean interceptBeforePreSave(Bean bean) throws Exception {
+	public boolean interceptBeforePreSave(@Nonnull Bean bean) throws Exception {
 		for (InterceptorMetaData interceptor : interceptors.values()) {
 			if (interceptor.getInterceptor().beforePreSave(bean)) {
 				return true;
@@ -1124,7 +1125,7 @@ public class CustomerImpl implements Customer {
 	 * @param bean the processed bean.
 	 * @throws Exception if an interceptor fails.
 	 */
-	public void interceptAfterPreSave(Bean bean) throws Exception {
+	public void interceptAfterPreSave(@Nonnull Bean bean) throws Exception {
 		for (InterceptorMetaData interceptor : reversedInterceptors) {
 			interceptor.getInterceptor().afterPreSave(bean);
 		}
@@ -1137,7 +1138,7 @@ public class CustomerImpl implements Customer {
 	 * @return {@code true} if any interceptor vetoes further processing.
 	 * @throws Exception if an interceptor fails.
 	 */
-	public boolean interceptBeforePostSave(Bean bean) throws Exception {
+	public boolean interceptBeforePostSave(@Nonnull Bean bean) throws Exception {
 		for (InterceptorMetaData interceptor : interceptors.values()) {
 			if (interceptor.getInterceptor().beforePostSave(bean)) {
 				return true;
@@ -1152,7 +1153,7 @@ public class CustomerImpl implements Customer {
 	 * @param bean the processed bean.
 	 * @throws Exception if an interceptor fails.
 	 */
-	public void interceptAfterPostSave(Bean bean) throws Exception {
+	public void interceptAfterPostSave(@Nonnull Bean bean) throws Exception {
 		for (InterceptorMetaData interceptor : reversedInterceptors) {
 			interceptor.getInterceptor().afterPostSave(bean);
 		}
@@ -1166,7 +1167,7 @@ public class CustomerImpl implements Customer {
 	 * @return {@code true} if any interceptor vetoes further processing.
 	 * @throws Exception if an interceptor fails.
 	 */
-	public boolean interceptBeforeDelete(Document document, PersistentBean bean) throws Exception {
+	public boolean interceptBeforeDelete(@Nonnull Document document, @Nonnull PersistentBean bean) throws Exception {
 		for (InterceptorMetaData interceptor : interceptors.values()) {
 			if (interceptor.getInterceptor().beforeDelete(document, bean)) {
 				return true;
@@ -1182,7 +1183,7 @@ public class CustomerImpl implements Customer {
 	 * @param bean the deleted bean instance.
 	 * @throws Exception if an interceptor fails.
 	 */
-	public void interceptAfterDelete(Document document, PersistentBean bean) throws Exception {
+	public void interceptAfterDelete(@Nonnull Document document, @Nonnull PersistentBean bean) throws Exception {
 		for (InterceptorMetaData interceptor : reversedInterceptors) {
 			interceptor.getInterceptor().afterDelete(document, bean);
 		}
@@ -1195,7 +1196,7 @@ public class CustomerImpl implements Customer {
 	 * @return {@code true} if any interceptor vetoes further processing.
 	 * @throws Exception if an interceptor fails.
 	 */
-	public boolean interceptBeforePreDelete(PersistentBean bean) throws Exception {
+	public boolean interceptBeforePreDelete(@Nonnull PersistentBean bean) throws Exception {
 		for (InterceptorMetaData interceptor : interceptors.values()) {
 			if (interceptor.getInterceptor().beforePreDelete(bean)) {
 				return true;
@@ -1210,7 +1211,7 @@ public class CustomerImpl implements Customer {
 	 * @param bean the processed bean.
 	 * @throws Exception if an interceptor fails.
 	 */
-	public void interceptAfterPreDelete(PersistentBean bean) throws Exception {
+	public void interceptAfterPreDelete(@Nonnull PersistentBean bean) throws Exception {
 		for (InterceptorMetaData interceptor : reversedInterceptors) {
 			interceptor.getInterceptor().afterPreDelete(bean);
 		}
@@ -1223,7 +1224,7 @@ public class CustomerImpl implements Customer {
 	 * @return {@code true} if any interceptor vetoes further processing.
 	 * @throws Exception if an interceptor fails.
 	 */
-	public boolean interceptBeforePostDelete(PersistentBean bean) throws Exception {
+	public boolean interceptBeforePostDelete(@Nonnull PersistentBean bean) throws Exception {
 		for (InterceptorMetaData interceptor : interceptors.values()) {
 			if (interceptor.getInterceptor().beforePostDelete(bean)) {
 				return true;
@@ -1238,7 +1239,7 @@ public class CustomerImpl implements Customer {
 	 * @param bean the processed bean.
 	 * @throws Exception if an interceptor fails.
 	 */
-	public void interceptAfterPostDelete(PersistentBean bean) throws Exception {
+	public void interceptAfterPostDelete(@Nonnull PersistentBean bean) throws Exception {
 		for (InterceptorMetaData interceptor : reversedInterceptors) {
 			interceptor.getInterceptor().afterPostDelete(bean);
 		}
@@ -1251,7 +1252,7 @@ public class CustomerImpl implements Customer {
 	 * @return {@code true} if any interceptor vetoes further processing.
 	 * @throws Exception if an interceptor fails.
 	 */
-	public boolean interceptBeforePostLoad(PersistentBean bean) throws Exception {
+	public boolean interceptBeforePostLoad(@Nonnull PersistentBean bean) throws Exception {
 		for (InterceptorMetaData interceptor : interceptors.values()) {
 			if (interceptor.getInterceptor().beforePostLoad(bean)) {
 				return true;
@@ -1266,7 +1267,7 @@ public class CustomerImpl implements Customer {
 	 * @param bean the loaded bean.
 	 * @throws Exception if an interceptor fails.
 	 */
-	public void interceptAfterPostLoad(PersistentBean bean) throws Exception {
+	public void interceptAfterPostLoad(@Nonnull PersistentBean bean) throws Exception {
 		for (InterceptorMetaData interceptor : reversedInterceptors) {
 			interceptor.getInterceptor().afterPostLoad(bean);
 		}
@@ -1282,7 +1283,7 @@ public class CustomerImpl implements Customer {
 	 * @return {@code true} if any interceptor vetoes further processing.
 	 * @throws Exception if an interceptor fails.
 	 */
-	public boolean interceptBeforePreExecute(ImplicitActionName actionName, Bean bean, Bean parentBean, WebContext webContext)
+	public boolean interceptBeforePreExecute(@Nonnull ImplicitActionName actionName, @Nonnull Bean bean, @Nullable Bean parentBean, @Nonnull WebContext webContext)
 	throws Exception {
 		for (InterceptorMetaData interceptor : interceptors.values()) {
 			if (interceptor.getInterceptor().beforePreExecute(actionName, bean, parentBean, webContext)) {
@@ -1301,10 +1302,10 @@ public class CustomerImpl implements Customer {
 	 * @param webContext the active web context.
 	 * @throws Exception if an interceptor fails.
 	 */
-	public void interceptAfterPreExecute(ImplicitActionName actionName,
-											Bean result,
-											Bean parentBean,
-											WebContext webContext)
+	public void interceptAfterPreExecute(@Nonnull ImplicitActionName actionName,
+											@Nonnull Bean result,
+											@Nullable Bean parentBean,
+											@Nonnull WebContext webContext)
 	throws Exception {
 		for (InterceptorMetaData interceptor : reversedInterceptors) {
 			interceptor.getInterceptor().afterPreExecute(actionName, result, parentBean, webContext);
@@ -1320,7 +1321,7 @@ public class CustomerImpl implements Customer {
 	 * @return {@code true} if any interceptor vetoes further processing.
 	 * @throws Exception if an interceptor fails.
 	 */
-	public boolean interceptBeforePreRerender(String source, Bean bean, WebContext webContext)
+	public boolean interceptBeforePreRerender(@Nonnull String source, @Nonnull Bean bean, @Nonnull WebContext webContext)
 	throws Exception {
 		for (InterceptorMetaData interceptor : interceptors.values()) {
 			if (interceptor.getInterceptor().beforePreRerender(source, bean, webContext)) {
@@ -1338,9 +1339,9 @@ public class CustomerImpl implements Customer {
 	 * @param webContext the active web context.
 	 * @throws Exception if an interceptor fails.
 	 */
-	public void interceptAfterPreRerender(String source,
-											Bean result,
-											WebContext webContext)
+	public void interceptAfterPreRerender(@Nonnull String source,
+											@Nonnull Bean result,
+											@Nonnull WebContext webContext)
 	throws Exception {
 		for (InterceptorMetaData interceptor : reversedInterceptors) {
 			interceptor.getInterceptor().afterPreRerender(source, result, webContext);
@@ -1357,10 +1358,10 @@ public class CustomerImpl implements Customer {
 	 * @return {@code true} if any interceptor vetoes further processing.
 	 * @throws Exception if an interceptor fails.
 	 */
-	public boolean interceptBeforeServerSideAction(Document document,
-													String actionName, 
-													Bean bean,
-													WebContext webContext)
+	public boolean interceptBeforeServerSideAction(@Nonnull Document document,
+													@Nonnull String actionName, 
+													@Nonnull Bean bean,
+													@Nullable WebContext webContext)
 	throws Exception {
 		for (InterceptorMetaData interceptor : interceptors.values()) {
 			if (interceptor.getInterceptor().beforeServerSideAction(document, actionName, bean, webContext)) {
@@ -1379,10 +1380,10 @@ public class CustomerImpl implements Customer {
 	 * @param webContext the active web context.
 	 * @throws Exception if an interceptor fails.
 	 */
-	public void interceptAfterServerSideAction(Document document, 
-												String actionName, 
-												ServerSideActionResult<Bean> result, 
-												WebContext webContext) 
+	public void interceptAfterServerSideAction(@Nonnull Document document, 
+												@Nonnull String actionName, 
+												@Nonnull ServerSideActionResult<Bean> result, 
+												@Nullable WebContext webContext) 
 	throws Exception {
 		for (InterceptorMetaData interceptor : reversedInterceptors) {
 			interceptor.getInterceptor().afterServerSideAction(document, actionName, result, webContext);
@@ -1399,10 +1400,10 @@ public class CustomerImpl implements Customer {
 	 * @return {@code true} if any interceptor vetoes further processing.
 	 * @throws Exception if an interceptor fails.
 	 */
-	public boolean interceptBeforeDownloadAction(Document document,
-													String actionName,
-													Bean bean,
-													WebContext webContext)
+	public boolean interceptBeforeDownloadAction(@Nonnull Document document,
+													@Nonnull String actionName,
+													@Nonnull Bean bean,
+													@Nonnull WebContext webContext)
 	throws Exception {
 		for (InterceptorMetaData interceptor : interceptors.values()) {
 			if (interceptor.getInterceptor().beforeDownloadAction(document, actionName, bean, webContext)) {
@@ -1422,11 +1423,11 @@ public class CustomerImpl implements Customer {
 	 * @param webContext the active web context.
 	 * @throws Exception if an interceptor fails.
 	 */
-	public void interceptAfterDownloadAction(Document document,
-												String actionName,
-												Bean bean,
-												Download download,
-												WebContext webContext)
+	public void interceptAfterDownloadAction(@Nonnull Document document,
+												@Nonnull String actionName,
+												@Nonnull Bean bean,
+												@Nonnull Download download,
+												@Nonnull WebContext webContext)
 	throws Exception {
 		for (InterceptorMetaData interceptor : reversedInterceptors) {
 			interceptor.getInterceptor().afterDownloadAction(document, actionName, bean, download, webContext);
@@ -1444,11 +1445,11 @@ public class CustomerImpl implements Customer {
 	 * @return {@code true} if any interceptor vetoes further processing.
 	 * @throws Exception if an interceptor fails.
 	 */
-	public boolean interceptBeforeUploadAction(Document document,
-												String actionName,
-												Bean bean,
-												Upload upload,
-												WebContext webContext)
+	public boolean interceptBeforeUploadAction(@Nonnull Document document,
+												@Nonnull String actionName,
+												@Nonnull Bean bean,
+												@Nonnull Upload upload,
+												@Nonnull WebContext webContext)
 	throws Exception {
 		for (InterceptorMetaData interceptor : interceptors.values()) {
 			if (interceptor.getInterceptor().beforeUploadAction(document, actionName, bean, upload, webContext)) {
@@ -1468,11 +1469,11 @@ public class CustomerImpl implements Customer {
 	 * @param webContext the active web context.
 	 * @throws Exception if an interceptor fails.
 	 */
-	public void interceptAfterUploadAction(Document document,
-											String actionName,
-											Bean bean,
-											Upload upload,
-											WebContext webContext)
+	public void interceptAfterUploadAction(@Nonnull Document document,
+											@Nonnull String actionName,
+											@Nonnull Bean bean,
+											@Nonnull Upload upload,
+											@Nonnull WebContext webContext)
 	throws Exception {
 		for (InterceptorMetaData interceptor : reversedInterceptors) {
 			interceptor.getInterceptor().afterUploadAction(document, actionName, bean, upload, webContext);
@@ -1489,10 +1490,10 @@ public class CustomerImpl implements Customer {
 	 * @return {@code true} if any interceptor vetoes further processing.
 	 * @throws Exception if an interceptor fails.
 	 */
-	public boolean interceptBeforeBizImportAction(Document document,
-													String actionName,
-													BizPortWorkbook bizPortable,
-													UploadException problems)
+	public boolean interceptBeforeBizImportAction(@Nonnull Document document,
+													@Nonnull String actionName,
+													@Nonnull BizPortWorkbook bizPortable,
+													@Nonnull UploadException problems)
 	throws Exception {
 		for (InterceptorMetaData interceptor : interceptors.values()) {
 			if (interceptor.getInterceptor().beforeBizImportAction(document, actionName, bizPortable, problems)) {
@@ -1511,10 +1512,10 @@ public class CustomerImpl implements Customer {
 	 * @param problems the accumulating import problems container.
 	 * @throws Exception if an interceptor fails.
 	 */
-	public void interceptAfterBizImportAction(Document document,
-												String actionName,
-												BizPortWorkbook bizPortable,
-												UploadException problems)
+	public void interceptAfterBizImportAction(@Nonnull Document document,
+												@Nonnull String actionName,
+												@Nonnull BizPortWorkbook bizPortable,
+												@Nonnull UploadException problems)
 	throws Exception {
 		for (InterceptorMetaData interceptor : reversedInterceptors) {
 			interceptor.getInterceptor().afterBizImportAction(document, actionName, bizPortable, problems);
@@ -1530,7 +1531,7 @@ public class CustomerImpl implements Customer {
 	 * @return {@code true} if any interceptor vetoes further processing.
 	 * @throws Exception if an interceptor fails.
 	 */
-	public boolean interceptBeforeBizExportAction(Document document, String actionName, WebContext webContext)
+	public boolean interceptBeforeBizExportAction(@Nonnull Document document, @Nonnull String actionName, @Nonnull WebContext webContext)
 	throws Exception {
 		for (InterceptorMetaData interceptor : interceptors.values()) {
 			if (interceptor.getInterceptor().beforeBizExportAction(document, actionName, webContext)) {
@@ -1549,10 +1550,10 @@ public class CustomerImpl implements Customer {
 	 * @param webContext the active web context.
 	 * @throws Exception if an interceptor fails.
 	 */
-	public void interceptAfterBizExportAction(Document document,
-												String actionName,
-												BizPortWorkbook result,
-												WebContext webContext)
+	public void interceptAfterBizExportAction(@Nonnull Document document,
+												@Nonnull String actionName,
+												@Nonnull BizPortWorkbook result,
+												@Nonnull WebContext webContext)
 	throws Exception {
 		for (InterceptorMetaData interceptor : reversedInterceptors) {
 			interceptor.getInterceptor().afterBizExportAction(document, actionName, result, webContext);
@@ -1567,7 +1568,7 @@ public class CustomerImpl implements Customer {
 	 * @return {@code true} if any interceptor vetoes further processing.
 	 * @throws Exception if an interceptor fails.
 	 */
-	public boolean interceptBeforePostRender(Bean bean, WebContext webContext) {
+	public boolean interceptBeforePostRender(@Nonnull Bean bean, @Nonnull WebContext webContext) {
 		for (InterceptorMetaData interceptor : interceptors.values()) {
 			if (interceptor.getInterceptor().beforePostRender(bean, webContext)) {
 				return true;
@@ -1582,7 +1583,7 @@ public class CustomerImpl implements Customer {
 	 * @param result the rendered bean result.
 	 * @param webContext the active web context.
 	 */
-	public void interceptAfterPostRender(Bean result, WebContext webContext) {
+	public void interceptAfterPostRender(@Nonnull Bean result, @Nonnull WebContext webContext) {
 		for (InterceptorMetaData interceptor : reversedInterceptors) {
 			interceptor.getInterceptor().afterPostRender(result, webContext);
 		}
@@ -1593,7 +1594,7 @@ public class CustomerImpl implements Customer {
 	 *
 	 * @return the live role-name set.
 	 */
-	public Set<String> getTextSearchRoles() {
+	public @Nonnull Set<String> getTextSearchRoles() {
 		return textSearchRoles;
 	}
 	
@@ -1602,7 +1603,7 @@ public class CustomerImpl implements Customer {
 	 *
 	 * @return the live role-name set.
 	 */
-	public Set<String> getFlagRoles() {
+	public @Nonnull Set<String> getFlagRoles() {
 		return flagRoles;
 	}
 
@@ -1611,7 +1612,7 @@ public class CustomerImpl implements Customer {
 	 *
 	 * @return the live role-name set.
 	 */
-	public Set<String> getSwitchModeRoles() {
+	public @Nonnull Set<String> getSwitchModeRoles() {
 		return switchModeRoles;
 	}
 
@@ -1619,7 +1620,7 @@ public class CustomerImpl implements Customer {
 	 * Returns a concise string representation containing the customer name.
 	 */
     @Override
-    public String toString() {
+    public @Nonnull String toString() {
         return MoreObjects.toStringHelper(this).add("name", name).toString();
     }
 }

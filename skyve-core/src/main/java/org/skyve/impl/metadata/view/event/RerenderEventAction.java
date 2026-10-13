@@ -5,6 +5,8 @@ import java.util.Map;
 
 import org.skyve.impl.util.XMLMetaData;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlRootElement;
@@ -34,17 +36,17 @@ public class RerenderEventAction implements EventAction {
 
 	private Boolean clientValidation;
 
-	public Boolean getClientValidation() {
+	public @Nullable Boolean getClientValidation() {
 		return clientValidation;
 	}
 	
 	@XmlAttribute(required = false)
-	public void setClientValidation(Boolean clientValidation) {
+	public void setClientValidation(@Nullable Boolean clientValidation) {
 		this.clientValidation = clientValidation;
 	}
 
 	@Override
-	public Map<String, String> getProperties() {
+	public @Nonnull Map<String, String> getProperties() {
 		return properties;
 	}
 }

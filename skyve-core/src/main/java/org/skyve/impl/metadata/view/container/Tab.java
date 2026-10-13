@@ -13,6 +13,7 @@ import org.skyve.metadata.view.Disableable;
 import org.skyve.metadata.view.Invisible;
 import org.skyve.util.Util;
 
+import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlElement;
@@ -63,7 +64,7 @@ public final class Tab extends Container implements Disableable, Invisible, Deco
 	 *
 	 * @return tab title, or {@code null} when not configured
 	 */
-	public String getTitle() {
+	public @Nullable String getTitle() {
 		return title;
 	}
 
@@ -72,7 +73,7 @@ public final class Tab extends Container implements Disableable, Invisible, Deco
 	 *
 	 * @return the localised title, or {@code null} when no title is configured
 	 */
-	public String getLocalisedTitle() {
+	public @Nullable String getLocalisedTitle() {
 		return Util.i18n(title);
 	}
 
@@ -81,7 +82,7 @@ public final class Tab extends Container implements Disableable, Invisible, Deco
 	 *
 	 * @return {@code Boolean.FALSE} to allow trusted markup; {@code null} or {@code Boolean.TRUE} to escape at the renderer boundary
 	 */
-	public Boolean getEscapeTitle() {
+	public @Nullable Boolean getEscapeTitle() {
 		return escapeTitle;
 	}
 	
@@ -93,7 +94,7 @@ public final class Tab extends Container implements Disableable, Invisible, Deco
 	 * @param title  tab title; may be {@code null} or blank
 	 */
 	@XmlAttribute(required = true)
-	public void setTitle(String title) {
+	public void setTitle(@Nullable String title) {
 		this.title = UtilImpl.processStringValue(title);
 	}
 
@@ -103,7 +104,7 @@ public final class Tab extends Container implements Disableable, Invisible, Deco
 	 * @param escapeTitle {@code Boolean.FALSE} to allow trusted markup; {@code null} or {@code Boolean.TRUE} to escape at the renderer boundary
 	 */
 	@XmlAttribute(required = false)
-	public void setEscapeTitle(Boolean escapeTitle) {
+	public void setEscapeTitle(@Nullable Boolean escapeTitle) {
 		this.escapeTitle = escapeTitle;
 	}
 
@@ -112,7 +113,7 @@ public final class Tab extends Container implements Disableable, Invisible, Deco
 	 *
 	 * @return icon path, or {@code null} when not configured
 	 */
-	public String getIcon16x16RelativeFileName() {
+	public @Nullable String getIcon16x16RelativeFileName() {
 		return icon16x16RelativeFileName;
 	}
 
@@ -124,7 +125,7 @@ public final class Tab extends Container implements Disableable, Invisible, Deco
 	 * @param icon16x16RelativeFileName  relative icon path; may be {@code null} or blank
 	 */
 	@XmlAttribute(name = "icon16x16RelativeFileName")
-	public void setIcon16x16RelativeFileName(String icon16x16RelativeFileName) {
+	public void setIcon16x16RelativeFileName(@Nullable String icon16x16RelativeFileName) {
 		this.icon16x16RelativeFileName = UtilImpl.processStringValue(icon16x16RelativeFileName);
 	}
 
@@ -133,7 +134,7 @@ public final class Tab extends Container implements Disableable, Invisible, Deco
 	 *
 	 * @return icon style class, or {@code null} when not configured
 	 */
-	public String getIconStyleClass() {
+	public @Nullable String getIconStyleClass() {
 		return iconStyleClass;
 	}
 
@@ -145,7 +146,7 @@ public final class Tab extends Container implements Disableable, Invisible, Deco
 	 * @param iconStyleClass  icon style class; may be {@code null} or blank
 	 */
 	@XmlAttribute(name = "iconStyleClass")
-	public void setIconStyleClass(String iconStyleClass) {
+	public void setIconStyleClass(@Nullable String iconStyleClass) {
 		this.iconStyleClass = UtilImpl.processStringValue(iconStyleClass);
 	}
 
@@ -277,7 +278,7 @@ public final class Tab extends Container implements Disableable, Invisible, Deco
 	 * @return a mutable property map; never {@code null}
 	 */
 	@Override
-	public Map<String, String> getProperties() {
+	public @Nonnull Map<String, String> getProperties() {
 		return properties;
 	}
 }

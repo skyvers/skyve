@@ -2,6 +2,8 @@ package org.skyve.metadata.customer;
 
 import org.skyve.metadata.SerializableMetaData;
 
+import jakarta.annotation.Nullable;
+
 /**
  * Customer-specific UI resource overrides.
  *
@@ -17,5 +19,5 @@ public interface UIResources extends SerializableMetaData {
 	 *
 	 * @return the logo file path; may be {@code null} if not configured
 	 */
-	public String getLogoRelativeFileName();
+	public @Nullable String getLogoRelativeFileName();
 }

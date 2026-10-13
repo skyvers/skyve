@@ -24,14 +24,14 @@ public class FluentColourPicker extends FluentChangeableInputWidget<FluentColour
 	 *
 	 * @param colour the metadata instance to mutate
 	 */
-	public FluentColourPicker(ColourPicker colour) {
+	public FluentColourPicker(@Nonnull ColourPicker colour) {
 		this.colour = colour;
 	}
 
 	/**
 	 * Copies colour-picker metadata into this fluent builder.
 	 */
-	public FluentColourPicker from(@SuppressWarnings("hiding") ColourPicker colour) {
+	public @Nonnull FluentColourPicker from(@SuppressWarnings("hiding") @Nonnull ColourPicker colour) {
 		absoluteWidth(colour, this);
 		super.from(colour);
 		colour.getProperties().entrySet().forEach(p -> putProperty(p.getKey(), p.getValue()));
@@ -45,7 +45,7 @@ public class FluentColourPicker extends FluentChangeableInputWidget<FluentColour
 	 * @return this builder
 	 */
 	@Override
-	public FluentColourPicker pixelWidth(int pixelWidth) {
+	public @Nonnull FluentColourPicker pixelWidth(int pixelWidth) {
 		colour.setPixelWidth(Integer.valueOf(pixelWidth));
 		return this;
 	}
@@ -69,7 +69,7 @@ public class FluentColourPicker extends FluentChangeableInputWidget<FluentColour
 	 * @return the mutable colour-picker metadata being configured
 	 */
 	@Override
-	public ColourPicker get() {
+	public @Nonnull ColourPicker get() {
 		return colour;
 	}
 }

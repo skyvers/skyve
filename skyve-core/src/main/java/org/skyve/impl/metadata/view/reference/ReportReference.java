@@ -10,6 +10,8 @@ import org.skyve.metadata.view.Parameterizable;
 import org.skyve.metadata.view.widget.bound.Parameter;
 import org.skyve.report.ReportFormat;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlElementWrapper;
@@ -32,39 +34,39 @@ public class ReportReference implements Reference, Parameterizable {
 	private ReportFormat format;
 	private List<Parameter> parameters = new ArrayList<>();
 	
-	public String getModuleName() {
+	public @Nullable String getModuleName() {
 		return moduleName;
 	}
 
 	@XmlAttribute(required = true)
-	public void setModuleName(String moduleName) {
+	public void setModuleName(@Nullable String moduleName) {
 		this.moduleName = UtilImpl.processStringValue(moduleName);
 	}
 
-	public String getDocumentName() {
+	public @Nullable String getDocumentName() {
 		return documentName;
 	}
 
 	@XmlAttribute(required = true)
-	public void setDocumentName(String documentName) {
+	public void setDocumentName(@Nullable String documentName) {
 		this.documentName = UtilImpl.processStringValue(documentName);
 	}
 
-	public String getReportName() {
+	public @Nullable String getReportName() {
 		return reportName;
 	}
 
 	@XmlAttribute(required = true)
-	public void setReportName(String reportName) {
+	public void setReportName(@Nullable String reportName) {
 		this.reportName = UtilImpl.processStringValue(reportName);
 	}
 
-	public ReportFormat getFormat() {
+	public @Nullable ReportFormat getFormat() {
 		return format;
 	}
 
 	@XmlAttribute
-	public void setFormat(ReportFormat format) {
+	public void setFormat(@Nullable ReportFormat format) {
 		this.format = format;
 	}
 
@@ -74,7 +76,7 @@ public class ReportReference implements Reference, Parameterizable {
 					name = "parameter",
 					type = ParameterImpl.class,
 					required = false)
-	public List<Parameter> getParameters() {
+	public @Nonnull List<Parameter> getParameters() {
 		return parameters;
 	}
 }

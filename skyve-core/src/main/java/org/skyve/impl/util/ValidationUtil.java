@@ -49,6 +49,9 @@ import org.skyve.util.logging.Category;
 import org.slf4j.Logger;
 import org.skyve.util.logging.SkyveLoggerFactory;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Validates domain object attributes, required fields, uniqueness constraints,
  * and field-level format rules, collecting violations into a
@@ -83,11 +86,11 @@ public class ValidationUtil {
 	 * @param bean The bean to validate.
 	 * @param e The exception to populate.
 	 */
-	public static void validateBeanAgainstDocument(Document document, Bean bean) {
+	public static void validateBeanAgainstDocument(@Nonnull Document document, @Nonnull Bean bean) {
 		validateBeanAgainstDocument(CORE.getUser(), document, bean);
 	}
 
-	private static void validateBeanAgainstDocument(User user, Document document, Bean bean) {
+	private static void validateBeanAgainstDocument(@Nonnull User user, @Nonnull Document document, @Nonnull Bean bean) {
 		Customer customer = user.getCustomer();
 		ValidationException e = new ValidationException();
 		for (Attribute attribute : document.getAttributes()) {
@@ -120,7 +123,7 @@ public class ValidationUtil {
 	 * @param e The exception to populate
 	 */
 	@SuppressWarnings({"unchecked", "java:S3776"}) // Complexity OK
-	public static void validateBeanPropertyAgainstAttribute(User user, Attribute attribute, Bean bean, ValidationException e) {
+	public static void validateBeanPropertyAgainstAttribute(@Nonnull User user, @Nonnull Attribute attribute, @Nonnull Bean bean, @Nonnull ValidationException e) {
 		String binding = attribute.getName();
 		AttributeType type = attribute.getAttributeType();
 		if (AttributeType.inverseOne.equals(type) || 
@@ -282,12 +285,12 @@ public class ValidationUtil {
 		}
 	}
 
-	private static void validateFormat(Format<?> format,
-											Object value,
-											String binding,
-											Bean bean,
-											String localisedDisplayName,
-											ValidationException e) {
+	private static void validateFormat(@Nullable Format<?> format,
+											@Nonnull Object value,
+											@Nonnull String binding,
+											@Nonnull Bean bean,
+											@Nullable String localisedDisplayName,
+											@Nonnull ValidationException e) {
 		if (format != null) {
 			try {
 				@SuppressWarnings({"rawtypes", "unchecked"})
@@ -310,7 +313,7 @@ public class ValidationUtil {
 		}
 	}
 	
-	private static Object getAttributeValue(Bean bean, String binding) {
+	private static @Nullable Object getAttributeValue(@Nonnull Bean bean, @Nonnull String binding) {
 		Object result = null;
 		try {
 			result = BindUtil.get(bean, binding);
@@ -333,7 +336,7 @@ public class ValidationUtil {
 	 * @param bizlet	To validate against
 	 * @param bean	To validate
 	 */
-	public static <T extends Bean> void validateBeanAgainstBizlet(Bizlet<T> bizlet, T bean) {
+	public static <T extends Bean> void validateBeanAgainstBizlet(@Nonnull Bizlet<T> bizlet, @Nonnull T bean) {
 		ValidationException e = new ValidationException();
 
 		try {
@@ -382,21 +385,21 @@ public class ValidationUtil {
 	 * @param masterBean
 	 * @param validatedBean
 	 */
-	public static void processMessageBindings(Customer customer,
-												final Message e,
-												Bean masterBean,
-												final Bean validatedBean) {
+	public static void processMessageBindings(@Nonnull Customer customer,
+												final @Nonnull Message e,
+												@Nonnull Bean masterBean,
+												final @Nonnull Bean validatedBean) {
 		Document masterDocument = customer.getModule(masterBean.getBizModule()).getDocument(customer, 
 																								masterBean.getBizDocument());
 
 		// find this object within the beanBeingSaved
 		new BeanVisitor(true, false) {
 			@Override
-			protected boolean accept(String binding,
-							Document document,
-							Document owningDocument,
-							Relation owningRelation,
-							Bean bean) {
+			protected boolean accept(@Nonnull String binding,
+							@Nonnull Document document,
+							@Nullable Document owningDocument,
+							@Nullable Relation owningRelation,
+							@Nonnull Bean bean) {
 				if (bean == validatedBean) {
 					if (! binding.isEmpty()) {
 						e.setBindingPrefix(binding + '.');
@@ -411,7 +414,7 @@ public class ValidationUtil {
 	}
 
 	@SuppressWarnings("java:S3776") // Complexity OK
-	public static void checkCollectionUniqueConstraints(Customer customer, Document document, Bean bean) {
+	public static void checkCollectionUniqueConstraints(@Nonnull Customer customer, @Nonnull Document document, @Nonnull Bean bean) {
 		try {
 			for (Attribute attribute : document.getAllAttributes(customer)) {
 				if (attribute instanceof Collection collection) {

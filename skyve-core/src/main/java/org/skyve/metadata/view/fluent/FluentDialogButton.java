@@ -25,7 +25,7 @@ public class FluentDialogButton extends FluentWidget {
 	 * @param button
 	 *            the metadata instance to mutate
 	 */
-	public FluentDialogButton(DialogButton button) {
+	public FluentDialogButton(@Nonnull DialogButton button) {
 		this.button = button;
 	}
 
@@ -36,7 +36,7 @@ public class FluentDialogButton extends FluentWidget {
 	 *            the source metadata to copy
 	 * @return this builder
 	 */
-	public FluentDialogButton from(@SuppressWarnings("hiding") DialogButton button) {
+	public @Nonnull FluentDialogButton from(@SuppressWarnings("hiding") @Nonnull DialogButton button) {
 
 		displayName(button.getDisplayName());
 		escapeDisplayName(button.getEscapeDisplayName());
@@ -70,7 +70,7 @@ public class FluentDialogButton extends FluentWidget {
 	 *            the button label
 	 * @return this builder
 	 */
-	public FluentDialogButton displayName(String displayName) {
+	public @Nonnull FluentDialogButton displayName(@Nullable String displayName) {
 		button.setDisplayName(displayName);
 		return this;
 	}
@@ -81,7 +81,7 @@ public class FluentDialogButton extends FluentWidget {
 	 * @param escapeDisplayName {@code false} to allow trusted markup; {@code true} to escape at the renderer boundary
 	 * @return this builder
 	 */
-	public FluentDialogButton escapeDisplayName(boolean escapeDisplayName) {
+	public @Nonnull FluentDialogButton escapeDisplayName(boolean escapeDisplayName) {
 		return escapeDisplayName(escapeDisplayName ? Boolean.TRUE : Boolean.FALSE);
 	}
 
@@ -91,7 +91,7 @@ public class FluentDialogButton extends FluentWidget {
 	 * @param escapeDisplayName {@code Boolean.FALSE} to allow trusted markup; {@code null} or {@code Boolean.TRUE} to escape at the renderer boundary
 	 * @return this builder
 	 */
-	public FluentDialogButton escapeDisplayName(Boolean escapeDisplayName) {
+	public @Nonnull FluentDialogButton escapeDisplayName(@Nullable Boolean escapeDisplayName) {
 		button.setEscapeDisplayName(escapeDisplayName);
 		return this;
 	}
@@ -103,7 +103,7 @@ public class FluentDialogButton extends FluentWidget {
 	 *            the dialog identifier
 	 * @return this builder
 	 */
-	public FluentDialogButton dialogName(String dialogName) {
+	public @Nonnull FluentDialogButton dialogName(@Nullable String dialogName) {
 		button.setDialogName(dialogName);
 		return this;
 	}
@@ -115,7 +115,7 @@ public class FluentDialogButton extends FluentWidget {
 	 *            the command identifier
 	 * @return this builder
 	 */
-	public FluentDialogButton command(String command) {
+	public @Nonnull FluentDialogButton command(@Nullable String command) {
 		button.setCommand(command);
 		return this;
 	}
@@ -128,7 +128,7 @@ public class FluentDialogButton extends FluentWidget {
 	 *            the dialog width
 	 * @return this builder
 	 */
-	public FluentDialogButton dialogWidth(int dialogWidth) {
+	public @Nonnull FluentDialogButton dialogWidth(int dialogWidth) {
 		button.setDialogWidth(Integer.valueOf(dialogWidth));
 		return this;
 	}
@@ -141,7 +141,7 @@ public class FluentDialogButton extends FluentWidget {
 	 *            the dialog height
 	 * @return this builder
 	 */
-	public FluentDialogButton dialogHeight(int dialogHeight) {
+	public @Nonnull FluentDialogButton dialogHeight(int dialogHeight) {
 		button.setDialogHeight(Integer.valueOf(dialogHeight));
 		return this;
 	}
@@ -153,7 +153,7 @@ public class FluentDialogButton extends FluentWidget {
 	 *            {@code true} to require modal interaction
 	 * @return this builder
 	 */
-	public FluentDialogButton modalDialog(boolean modalDialog) {
+	public @Nonnull FluentDialogButton modalDialog(boolean modalDialog) {
 		button.setModalDialog(modalDialog ? Boolean.TRUE : Boolean.FALSE);
 		return this;
 	}
@@ -213,7 +213,7 @@ public class FluentDialogButton extends FluentWidget {
 	 *            the parameter builder whose metadata is appended
 	 * @return this builder
 	 */
-	public FluentDialogButton addParameter(FluentParameter parameter) {
+	public @Nonnull FluentDialogButton addParameter(@Nonnull FluentParameter parameter) {
 		button.getParameters().add(parameter.get());
 		return this;
 	}
@@ -237,7 +237,7 @@ public class FluentDialogButton extends FluentWidget {
 	 * @return the wrapped dialog-button metadata
 	 */
 	@Override
-	public DialogButton get() {
+	public @Nonnull DialogButton get() {
 		return button;
 	}
 }

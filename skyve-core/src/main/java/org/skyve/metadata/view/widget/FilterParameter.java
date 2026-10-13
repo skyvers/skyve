@@ -3,6 +3,8 @@ package org.skyve.metadata.view.widget;
 import org.skyve.metadata.FilterOperator;
 import org.skyve.metadata.SerializableMetaData;
 
+import jakarta.annotation.Nullable;
+
 /**
  * A declarative filter constraint applied to a query-backed widget before it renders.
  *
@@ -22,14 +24,14 @@ public interface FilterParameter extends SerializableMetaData {
 	 *
 	 * @return the filter column binding; never {@code null}
 	 */
-	public String getFilterBinding();
+	public @Nullable String getFilterBinding();
 
 	/**
 	 * Returns the comparison operator applied between the column value and the filter value.
 	 *
 	 * @return the filter operator; never {@code null}
 	 */
-	public FilterOperator getOperator();
+	public @Nullable FilterOperator getOperator();
 
 	/**
 	 * Returns the literal string value to compare against, or {@code null} if a value
@@ -37,7 +39,7 @@ public interface FilterParameter extends SerializableMetaData {
 	 *
 	 * @return the literal filter value, or {@code null}
 	 */
-	public String getValue();
+	public @Nullable String getValue();
 
 	/**
 	 * Returns the binding path on the current bean whose value is used as the filter
@@ -45,5 +47,5 @@ public interface FilterParameter extends SerializableMetaData {
 	 *
 	 * @return the value binding path, or {@code null}
 	 */
-	public String getValueBinding();
+	public @Nullable String getValueBinding();
 }

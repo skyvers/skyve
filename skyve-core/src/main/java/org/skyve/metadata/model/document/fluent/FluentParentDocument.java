@@ -2,6 +2,9 @@ package org.skyve.metadata.model.document.fluent;
 
 import org.skyve.impl.metadata.repository.document.ParentDocument;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Provides a fluent builder for FluentParentDocument metadata.
  */
@@ -18,7 +21,7 @@ public class FluentParentDocument {
 	/**
 	 * Creates a fluent builder instance.
 	 */
-	public FluentParentDocument(ParentDocument parent) {
+	public FluentParentDocument(@Nonnull ParentDocument parent) {
 		this.parent = parent;
 	}
 
@@ -26,7 +29,7 @@ public class FluentParentDocument {
 	 * Copies metadata values from an existing definition into this builder.
 	 */
 
-	public FluentParentDocument from(@SuppressWarnings("hiding") ParentDocument parent) {
+	public @Nonnull FluentParentDocument from(@SuppressWarnings("hiding") @Nonnull ParentDocument parent) {
 		parentDocumentName(parent.getParentDocumentName());
 		databaseIndex(! Boolean.FALSE.equals(parent.getDatabaseIndex()));
 		return this;
@@ -35,7 +38,7 @@ public class FluentParentDocument {
 	/**
 	 * Updates metadata on this fluent builder.
 	 */
-	public FluentParentDocument parentDocumentName(String name) {
+	public @Nonnull FluentParentDocument parentDocumentName(@Nullable String name) {
 		parent.setParentDocumentName(name);
 		return this;
 	}
@@ -43,14 +46,14 @@ public class FluentParentDocument {
 	/**
 	 * Updates metadata on this fluent builder.
 	 */
-	public FluentParentDocument databaseIndex(boolean index) {
+	public @Nonnull FluentParentDocument databaseIndex(boolean index) {
 		parent.setDatabaseIndex(index ? Boolean.TRUE : Boolean.FALSE);
 		return this;
 	}
 	/**
 	 * Returns the mutable metadata instance represented by this builder.
 	 */
-	public ParentDocument get() {
+	public @Nonnull ParentDocument get() {
 		return parent;
 	}
 }

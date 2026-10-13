@@ -181,7 +181,7 @@ public abstract class AbstractDocumentQuery extends AbstractQuery implements Doc
 	 * @return this query for fluent chaining
 	 */
 	@Override
-	public AbstractDocumentQuery noTimeout() {
+	public @Nonnull AbstractDocumentQuery noTimeout() {
 		this.timeoutInSeconds = Integer.MIN_VALUE;
 		return this;
 	}
@@ -197,7 +197,7 @@ public abstract class AbstractDocumentQuery extends AbstractQuery implements Doc
 	 * @return this query for fluent chaining
 	 */
 	@Override
-	public AbstractDocumentQuery putParameter(String name, Object value) {
+	public @Nonnull AbstractDocumentQuery putParameter(@Nonnull String name, @Nullable Object value) {
 		parameters.put(name, value);
 		if (UtilImpl.QUERY_TRACE) {
 		    QUERY_LOGGER.info("    SET PARAM {} = {}", name, value);
@@ -211,7 +211,7 @@ public abstract class AbstractDocumentQuery extends AbstractQuery implements Doc
 	 * @return a new empty filter
 	 */
 	@Override
-	public DocumentFilter newDocumentFilter() {
+	public @Nonnull DocumentFilter newDocumentFilter() {
 		return new DocumentFilterImpl(this, rdbms);
 	}
 
@@ -231,7 +231,7 @@ public abstract class AbstractDocumentQuery extends AbstractQuery implements Doc
 	 * @return this query for fluent chaining
 	 */
 	@Override
-	public DocumentQuery setDistinct(boolean distinct) {
+	public @Nonnull DocumentQuery setDistinct(boolean distinct) {
 		this.distinct = distinct;
 		return this;
 	}
@@ -241,7 +241,7 @@ public abstract class AbstractDocumentQuery extends AbstractQuery implements Doc
 	 * @return the resulting value
 	 */
 	@Override
-	public DocumentQuery addThisProjection() {
+	public @Nonnull DocumentQuery addThisProjection() {
 		if (projectionClause.length() > 0) {
 			projectionClause.append(", ");
 		}
@@ -255,7 +255,7 @@ public abstract class AbstractDocumentQuery extends AbstractQuery implements Doc
 	 * @return the resulting value
 	 */
 	@Override
-	public DocumentQuery addBoundProjection(String binding) {
+	public @Nonnull DocumentQuery addBoundProjection(@Nonnull String binding) {
 		return addBoundProjection(binding, binding);
 	}
 
@@ -266,7 +266,7 @@ public abstract class AbstractDocumentQuery extends AbstractQuery implements Doc
 	 * @return the resulting value
 	 */
 	@Override
-	public DocumentQuery addBoundProjection(String binding, String projectedAlias) {
+	public @Nonnull DocumentQuery addBoundProjection(@Nonnull String binding, @Nonnull String projectedAlias) {
 		return addBoundProjection(THIS_ALIAS, binding, projectedAlias);
 	}
 
@@ -278,7 +278,7 @@ public abstract class AbstractDocumentQuery extends AbstractQuery implements Doc
 	 * @return the resulting value
 	 */
 	@Override
-	public DocumentQuery addBoundProjection(String entityAlias, String binding, String projectedAlias) {
+	public @Nonnull DocumentQuery addBoundProjection(@Nonnull String entityAlias, @Nonnull String binding, @Nonnull String projectedAlias) {
 		if (projectionClause.length() > 0) {
 			projectionClause.append(", ");
 		}
@@ -294,7 +294,7 @@ public abstract class AbstractDocumentQuery extends AbstractQuery implements Doc
 	 * @return the resulting value
 	 */
 	@Override
-	public DocumentQuery addExpressionProjection(String expression, String projectedAlias) {
+	public @Nonnull DocumentQuery addExpressionProjection(@Nonnull String expression, @Nonnull String projectedAlias) {
 		if (projectionClause.length() > 0) {
 			projectionClause.append(", ");
 		}
@@ -310,7 +310,7 @@ public abstract class AbstractDocumentQuery extends AbstractQuery implements Doc
 	 * @return the resulting value
 	 */
 	@Override
-	public DocumentQuery addAggregateProjection(AggregateFunction function, String binding, String projectedAlias) {
+	public @Nonnull DocumentQuery addAggregateProjection(@Nonnull AggregateFunction function, @Nonnull String binding, @Nonnull String projectedAlias) {
 		return addAggregateProjection(function, THIS_ALIAS, binding, projectedAlias);
 	}
 	
@@ -327,7 +327,7 @@ public abstract class AbstractDocumentQuery extends AbstractQuery implements Doc
 	 * @return this query for fluent chaining
 	 */
 	@Override
-	public DocumentQuery addAggregateProjection(AggregateFunction function, String entityAlias, String binding, String projectedAlias) {
+	public @Nonnull DocumentQuery addAggregateProjection(@Nonnull AggregateFunction function, @Nonnull String entityAlias, @Nonnull String binding, @Nonnull String projectedAlias) {
 		if (projectionClause.length() > 0) {
 			projectionClause.append(", ");
 		}
@@ -373,7 +373,7 @@ public abstract class AbstractDocumentQuery extends AbstractQuery implements Doc
 	 * @return the resulting value
 	 */
 	@Override
-	public DocumentFilter getFilter() {
+	public @Nonnull DocumentFilter getFilter() {
 		return filter;
 	}
 
@@ -383,7 +383,7 @@ public abstract class AbstractDocumentQuery extends AbstractQuery implements Doc
 	 * @return the resulting value
 	 */
 	@Override
-	public DocumentQuery addBoundOrdering(String binding) {
+	public @Nonnull DocumentQuery addBoundOrdering(@Nonnull String binding) {
 		return addBoundOrdering(THIS_ALIAS, binding);
 	}
 	
@@ -394,7 +394,7 @@ public abstract class AbstractDocumentQuery extends AbstractQuery implements Doc
 	 * @return the resulting value
 	 */
 	@Override
-	public DocumentQuery addBoundOrdering(String entityAlias, String binding) {
+	public @Nonnull DocumentQuery addBoundOrdering(@Nonnull String entityAlias, @Nonnull String binding) {
 		return addBoundOrdering(entityAlias, binding, SortDirection.ascending);
 	}
 
@@ -405,7 +405,7 @@ public abstract class AbstractDocumentQuery extends AbstractQuery implements Doc
 	 * @return the resulting value
 	 */
 	@Override
-	public DocumentQuery addBoundOrdering(String binding, SortDirection order) {
+	public @Nonnull DocumentQuery addBoundOrdering(@Nonnull String binding, @Nonnull SortDirection order) {
 		return addBoundOrdering(THIS_ALIAS, binding, order);
 	}
 	
@@ -417,7 +417,7 @@ public abstract class AbstractDocumentQuery extends AbstractQuery implements Doc
 	 * @return the resulting value
 	 */
 	@Override
-	public DocumentQuery addBoundOrdering(String entityAlias, String binding, SortDirection order) {
+	public @Nonnull DocumentQuery addBoundOrdering(@Nonnull String entityAlias, @Nonnull String binding, @Nonnull SortDirection order) {
 		appendedOrderings.put(String.format("%s.%s", entityAlias, binding), order);
 		return this;
 	}
@@ -429,7 +429,7 @@ public abstract class AbstractDocumentQuery extends AbstractQuery implements Doc
 	 * @return the resulting value
 	 */
 	@Override
-	public DocumentQuery insertBoundOrdering(String binding, SortDirection order) {
+	public @Nonnull DocumentQuery insertBoundOrdering(@Nonnull String binding, @Nonnull SortDirection order) {
 		return insertBoundOrdering(THIS_ALIAS, binding, order);
 	}
 	
@@ -441,7 +441,7 @@ public abstract class AbstractDocumentQuery extends AbstractQuery implements Doc
 	 * @return the resulting value
 	 */
 	@Override
-	public DocumentQuery insertBoundOrdering(String entityAlias, String binding, SortDirection order) {
+	public @Nonnull DocumentQuery insertBoundOrdering(@Nonnull String entityAlias, @Nonnull String binding, @Nonnull SortDirection order) {
 		insertedOrderings.put(String.format("%s.%s", entityAlias, binding), order);
 		return this;
 	}
@@ -452,7 +452,7 @@ public abstract class AbstractDocumentQuery extends AbstractQuery implements Doc
 	 * @return the resulting value
 	 */
 	@Override
-	public DocumentQuery addBoundGrouping(String binding) {
+	public @Nonnull DocumentQuery addBoundGrouping(@Nonnull String binding) {
 		return addBoundGrouping(THIS_ALIAS, binding);
 	}
 	
@@ -463,7 +463,7 @@ public abstract class AbstractDocumentQuery extends AbstractQuery implements Doc
 	 * @return the resulting value
 	 */
 	@Override
-	public DocumentQuery addBoundGrouping(String entityAlias, String binding) {
+	public @Nonnull DocumentQuery addBoundGrouping(@Nonnull String entityAlias, @Nonnull String binding) {
 		if (groupClause.length() > 0) {
 			groupClause.append(", ");
 		}
@@ -477,7 +477,7 @@ public abstract class AbstractDocumentQuery extends AbstractQuery implements Doc
 	 * @return the resulting value
 	 */
 	@Override
-	public DocumentQuery addExpressionOrdering(String expression) {
+	public @Nonnull DocumentQuery addExpressionOrdering(@Nonnull String expression) {
 		return addExpressionOrdering(expression, SortDirection.ascending);
 	}
 
@@ -488,7 +488,7 @@ public abstract class AbstractDocumentQuery extends AbstractQuery implements Doc
 	 * @return the resulting value
 	 */
 	@Override
-	public DocumentQuery addExpressionOrdering(String expression, SortDirection order) {
+	public @Nonnull DocumentQuery addExpressionOrdering(@Nonnull String expression, @Nonnull SortDirection order) {
 		appendedOrderings.put(expression, order);
 		return this;
 	}
@@ -500,7 +500,7 @@ public abstract class AbstractDocumentQuery extends AbstractQuery implements Doc
 	 * @return the resulting value
 	 */
 	@Override
-	public DocumentQuery insertExpressionOrdering(String expression, SortDirection order) {
+	public @Nonnull DocumentQuery insertExpressionOrdering(@Nonnull String expression, @Nonnull SortDirection order) {
 		insertedOrderings.put(expression, order);
 		return this;
 	}
@@ -511,7 +511,7 @@ public abstract class AbstractDocumentQuery extends AbstractQuery implements Doc
 	 * @return the resulting value
 	 */
 	@Override
-	public DocumentQuery addExpressionGrouping(String expression) {
+	public @Nonnull DocumentQuery addExpressionGrouping(@Nonnull String expression) {
 		if (groupClause.length() > 0) {
 			groupClause.append(", ");
 		}
@@ -525,7 +525,7 @@ public abstract class AbstractDocumentQuery extends AbstractQuery implements Doc
 	 * @return the resulting value
 	 */
 	@Override
-	public DocumentQuery addInnerJoin(String referenceBinding) {
+	public @Nonnull DocumentQuery addInnerJoin(@Nonnull String referenceBinding) {
 		return addInnerJoinFromEntity(THIS_ALIAS, referenceBinding);
 	}
 
@@ -536,7 +536,7 @@ public abstract class AbstractDocumentQuery extends AbstractQuery implements Doc
 	 * @return the resulting value
 	 */
 	@Override
-	public DocumentQuery addInnerJoinFromEntity(String entityAlias, String referenceBinding) {
+	public @Nonnull DocumentQuery addInnerJoinFromEntity(@Nonnull String entityAlias, @Nonnull String referenceBinding) {
 		fromClause.append(" INNER JOIN ").append(entityAlias).append('.').append(referenceBinding);
 		return this;
 	}
@@ -547,7 +547,7 @@ public abstract class AbstractDocumentQuery extends AbstractQuery implements Doc
 	 * @return the resulting value
 	 */
 	@Override
-	public DocumentQuery addLeftOuterJoin(String referenceBinding) {
+	public @Nonnull DocumentQuery addLeftOuterJoin(@Nonnull String referenceBinding) {
 		return addLeftOuterJoinFromEntity(THIS_ALIAS, referenceBinding);
 	}
 	
@@ -558,7 +558,7 @@ public abstract class AbstractDocumentQuery extends AbstractQuery implements Doc
 	 * @return the resulting value
 	 */
 	@Override
-	public DocumentQuery addLeftOuterJoinFromEntity(String entityAlias, String referenceBinding) {
+	public @Nonnull DocumentQuery addLeftOuterJoinFromEntity(@Nonnull String entityAlias, @Nonnull String referenceBinding) {
 		fromClause.append(" LEFT OUTER JOIN ").append(entityAlias).append('.').append(referenceBinding);
 		return this;
 	}
@@ -569,7 +569,7 @@ public abstract class AbstractDocumentQuery extends AbstractQuery implements Doc
 	 * @return the resulting value
 	 */
 	@Override
-	public DocumentQuery addRightOuterJoin(String referenceBinding) {
+	public @Nonnull DocumentQuery addRightOuterJoin(@Nonnull String referenceBinding) {
 		return addRightOuterJoinFromEntity(THIS_ALIAS, referenceBinding);
 	}
 	
@@ -580,7 +580,7 @@ public abstract class AbstractDocumentQuery extends AbstractQuery implements Doc
 	 * @return the resulting value
 	 */
 	@Override
-	public DocumentQuery addRightOuterJoinFromEntity(String entityAlias, String referenceBinding) {
+	public @Nonnull DocumentQuery addRightOuterJoinFromEntity(@Nonnull String entityAlias, @Nonnull String referenceBinding) {
 		fromClause.append(" RIGHT OUTER JOIN ").append(entityAlias).append('.').append(referenceBinding);
 		return this;
 	}
@@ -591,7 +591,7 @@ public abstract class AbstractDocumentQuery extends AbstractQuery implements Doc
 	 * @return the resulting value
 	 */
 	@Override
-	public DocumentQuery addFetchedInnerJoin(String referenceBinding) {
+	public @Nonnull DocumentQuery addFetchedInnerJoin(@Nonnull String referenceBinding) {
 		return addFetchedInnerJoinFromEntity(THIS_ALIAS, referenceBinding);
 	}
 	
@@ -602,7 +602,7 @@ public abstract class AbstractDocumentQuery extends AbstractQuery implements Doc
 	 * @return the resulting value
 	 */
 	@Override
-	public DocumentQuery addFetchedInnerJoinFromEntity(String entityAlias, String referenceBinding) {
+	public @Nonnull DocumentQuery addFetchedInnerJoinFromEntity(@Nonnull String entityAlias, @Nonnull String referenceBinding) {
 		fromClause.append(" INNER JOIN FETCH ").append(entityAlias).append('.').append(referenceBinding);
 		return this;
 	}
@@ -613,7 +613,7 @@ public abstract class AbstractDocumentQuery extends AbstractQuery implements Doc
 	 * @return the resulting value
 	 */
 	@Override
-	public DocumentQuery addFetchedLeftOuterJoin(String referenceBinding) {
+	public @Nonnull DocumentQuery addFetchedLeftOuterJoin(@Nonnull String referenceBinding) {
 		return addFetchedLeftOuterJoinFromEntity(THIS_ALIAS, referenceBinding);
 	}
 	
@@ -624,7 +624,7 @@ public abstract class AbstractDocumentQuery extends AbstractQuery implements Doc
 	 * @return the resulting value
 	 */
 	@Override
-	public DocumentQuery addFetchedLeftOuterJoinFromEntity(String entityAlias, String referenceBinding) {
+	public @Nonnull DocumentQuery addFetchedLeftOuterJoinFromEntity(@Nonnull String entityAlias, @Nonnull String referenceBinding) {
 		fromClause.append(" LEFT OUTER JOIN FETCH ").append(entityAlias).append('.').append(referenceBinding);
 		return this;
 	}
@@ -635,7 +635,7 @@ public abstract class AbstractDocumentQuery extends AbstractQuery implements Doc
 	 * @return the resulting value
 	 */
 	@Override
-	public DocumentQuery addFetchedRightOuterJoin(String referenceBinding) {
+	public @Nonnull DocumentQuery addFetchedRightOuterJoin(@Nonnull String referenceBinding) {
 		return addFetchedRightOuterJoinFromEntity(THIS_ALIAS, referenceBinding);
 	}
 	
@@ -646,7 +646,7 @@ public abstract class AbstractDocumentQuery extends AbstractQuery implements Doc
 	 * @return the resulting value
 	 */
 	@Override
-	public DocumentQuery addFetchedRightOuterJoinFromEntity(String entityAlias, String referenceBinding) {
+	public @Nonnull DocumentQuery addFetchedRightOuterJoinFromEntity(@Nonnull String entityAlias, @Nonnull String referenceBinding) {
 		fromClause.append(" RIGHT OUTER JOIN FETCH ").append(entityAlias).append('.').append(referenceBinding);
 		return this;
 	}
@@ -658,7 +658,7 @@ public abstract class AbstractDocumentQuery extends AbstractQuery implements Doc
 	 * @return the resulting value
 	 */
 	@Override
-	public DocumentQuery addInnerJoin(String referenceBinding, String joinAlias) {
+	public @Nonnull DocumentQuery addInnerJoin(@Nonnull String referenceBinding, @Nonnull String joinAlias) {
 		return addInnerJoinFromEntity(THIS_ALIAS, referenceBinding, joinAlias);
 	}
 	
@@ -670,7 +670,7 @@ public abstract class AbstractDocumentQuery extends AbstractQuery implements Doc
 	 * @return the resulting value
 	 */
 	@Override
-	public DocumentQuery addInnerJoinFromEntity(String entityAlias, String referenceBinding, String joinAlias) {
+	public @Nonnull DocumentQuery addInnerJoinFromEntity(@Nonnull String entityAlias, @Nonnull String referenceBinding, @Nonnull String joinAlias) {
 		fromClause.append(" INNER JOIN ").append(entityAlias).append('.').append(referenceBinding);
 		fromClause.append(AS_ALIAS).append(BindUtil.sanitiseBinding(joinAlias));
 		return this;
@@ -683,7 +683,7 @@ public abstract class AbstractDocumentQuery extends AbstractQuery implements Doc
 	 * @return the resulting value
 	 */
 	@Override
-	public DocumentQuery addLeftOuterJoin(String referenceBinding, String joinAlias) {
+	public @Nonnull DocumentQuery addLeftOuterJoin(@Nonnull String referenceBinding, @Nonnull String joinAlias) {
 		return addLeftOuterJoinFromEntity(THIS_ALIAS, referenceBinding, joinAlias);
 	}
 	
@@ -695,7 +695,7 @@ public abstract class AbstractDocumentQuery extends AbstractQuery implements Doc
 	 * @return the resulting value
 	 */
 	@Override
-	public DocumentQuery addLeftOuterJoinFromEntity(String entityAlias, String referenceBinding, String joinAlias) {
+	public @Nonnull DocumentQuery addLeftOuterJoinFromEntity(@Nonnull String entityAlias, @Nonnull String referenceBinding, @Nonnull String joinAlias) {
 		fromClause.append(" LEFT OUTER JOIN ").append(entityAlias).append('.').append(referenceBinding);
 		fromClause.append(AS_ALIAS).append(BindUtil.sanitiseBinding(joinAlias));
 		return this;
@@ -708,7 +708,7 @@ public abstract class AbstractDocumentQuery extends AbstractQuery implements Doc
 	 * @return the resulting value
 	 */
 	@Override
-	public DocumentQuery addRightOuterJoin(String referenceBinding, String joinAlias) {
+	public @Nonnull DocumentQuery addRightOuterJoin(@Nonnull String referenceBinding, @Nonnull String joinAlias) {
 		return addRightOuterJoinFromEntity(THIS_ALIAS, referenceBinding, joinAlias);
 	}
 	
@@ -720,7 +720,7 @@ public abstract class AbstractDocumentQuery extends AbstractQuery implements Doc
 	 * @return the resulting value
 	 */
 	@Override
-	public DocumentQuery addRightOuterJoinFromEntity(String entityAlias, String referenceBinding, String joinAlias) {
+	public @Nonnull DocumentQuery addRightOuterJoinFromEntity(@Nonnull String entityAlias, @Nonnull String referenceBinding, @Nonnull String joinAlias) {
 		fromClause.append(" RIGHT OUTER JOIN ").append(entityAlias).append('.').append(referenceBinding);
 		fromClause.append(AS_ALIAS).append(BindUtil.sanitiseBinding(joinAlias));
 		return this;
@@ -733,7 +733,7 @@ public abstract class AbstractDocumentQuery extends AbstractQuery implements Doc
 	 * @return the resulting value
 	 */
 	@Override
-	public DocumentQuery addFetchedInnerJoin(String referenceBinding, String joinAlias) {
+	public @Nonnull DocumentQuery addFetchedInnerJoin(@Nonnull String referenceBinding, @Nonnull String joinAlias) {
 		return addFetchedInnerJoinFromEntity(THIS_ALIAS, referenceBinding, joinAlias);
 	}
 	
@@ -745,7 +745,7 @@ public abstract class AbstractDocumentQuery extends AbstractQuery implements Doc
 	 * @return the resulting value
 	 */
 	@Override
-	public DocumentQuery addFetchedInnerJoinFromEntity(String entityAlias, String referenceBinding, String joinAlias) {
+	public @Nonnull DocumentQuery addFetchedInnerJoinFromEntity(@Nonnull String entityAlias, @Nonnull String referenceBinding, @Nonnull String joinAlias) {
 		fromClause.append(" INNER JOIN FETCH ").append(entityAlias).append('.').append(referenceBinding);
 		fromClause.append(AS_ALIAS).append(BindUtil.sanitiseBinding(joinAlias));
 		return this;
@@ -758,7 +758,7 @@ public abstract class AbstractDocumentQuery extends AbstractQuery implements Doc
 	 * @return the resulting value
 	 */
 	@Override
-	public DocumentQuery addFetchedLeftOuterJoin(String referenceBinding, String joinAlias) {
+	public @Nonnull DocumentQuery addFetchedLeftOuterJoin(@Nonnull String referenceBinding, @Nonnull String joinAlias) {
 		return addFetchedLeftOuterJoinFromEntity(THIS_ALIAS, referenceBinding, joinAlias);
 	}
 	
@@ -770,7 +770,7 @@ public abstract class AbstractDocumentQuery extends AbstractQuery implements Doc
 	 * @return the resulting value
 	 */
 	@Override
-	public DocumentQuery addFetchedLeftOuterJoinFromEntity(String entityAlias, String referenceBinding, String joinAlias) {
+	public @Nonnull DocumentQuery addFetchedLeftOuterJoinFromEntity(@Nonnull String entityAlias, @Nonnull String referenceBinding, @Nonnull String joinAlias) {
 		fromClause.append(" LEFT OUTER JOIN FETCH ").append(entityAlias).append('.').append(referenceBinding);
 		fromClause.append(AS_ALIAS).append(BindUtil.sanitiseBinding(joinAlias));
 		return this;
@@ -783,7 +783,7 @@ public abstract class AbstractDocumentQuery extends AbstractQuery implements Doc
 	 * @return the resulting value
 	 */
 	@Override
-	public DocumentQuery addFetchedRightOuterJoin(String referenceBinding, String joinAlias) {
+	public @Nonnull DocumentQuery addFetchedRightOuterJoin(@Nonnull String referenceBinding, @Nonnull String joinAlias) {
 		return addFetchedRightOuterJoinFromEntity(THIS_ALIAS, referenceBinding, joinAlias);
 	}
 	
@@ -795,7 +795,7 @@ public abstract class AbstractDocumentQuery extends AbstractQuery implements Doc
 	 * @return the resulting value
 	 */
 	@Override
-	public DocumentQuery addFetchedRightOuterJoinFromEntity(String entityAlias, String referenceBinding, String joinAlias) {
+	public @Nonnull DocumentQuery addFetchedRightOuterJoinFromEntity(@Nonnull String entityAlias, @Nonnull String referenceBinding, @Nonnull String joinAlias) {
 		fromClause.append(" RIGHT OUTER JOIN FETCH ").append(entityAlias).append('.').append(referenceBinding);
 		fromClause.append(AS_ALIAS).append(BindUtil.sanitiseBinding(joinAlias));
 		return this;
@@ -811,7 +811,7 @@ public abstract class AbstractDocumentQuery extends AbstractQuery implements Doc
 	 */
 	@Override
 	@SuppressWarnings("java:S3776") // Complexity OK
-	public String toQueryString() {
+	public @Nonnull String toQueryString() {
 		StringBuilder result = new StringBuilder(256);
 
 		result.append("SELECT ").append(distinct ? "DISTINCT " : "");
@@ -866,7 +866,7 @@ public abstract class AbstractDocumentQuery extends AbstractQuery implements Doc
 	 * @return the resulting value
 	 */
 	@Override
-	public final Document getDrivingDocument() {
+	public final @Nonnull Document getDrivingDocument() {
 		return drivingDocument;
 	}
 	
@@ -875,7 +875,7 @@ public abstract class AbstractDocumentQuery extends AbstractQuery implements Doc
 	 * @return the resulting value
 	 */
 	@Override
-	public final <T extends Bean> T beanResult() {
+	public final @Nullable <T extends Bean> T beanResult() {
 		List<T> results = beanResults();
 		return AbstractQuery.returnOneResult(results);
 	}
@@ -885,7 +885,7 @@ public abstract class AbstractDocumentQuery extends AbstractQuery implements Doc
 	 * @return the resulting value
 	 */
 	@Override
-	public final <T extends Bean> T retrieveBean() {
+	public final @Nonnull <T extends Bean> T retrieveBean() {
 		List<T> results = beanResults();
 		return AbstractQuery.assertOneResult(results);
 	}
@@ -895,7 +895,7 @@ public abstract class AbstractDocumentQuery extends AbstractQuery implements Doc
 	 * @return the resulting value
 	 */
 	@Override
-	public final <T extends Bean> T projectedResult() {
+	public final @Nullable <T extends Bean> T projectedResult() {
 		List<T> results = projectedResults();
 		return AbstractQuery.returnOneResult(results);
 	}
@@ -905,7 +905,7 @@ public abstract class AbstractDocumentQuery extends AbstractQuery implements Doc
 	 * @return the resulting value
 	 */
 	@Override
-	public final <T extends Bean> T retrieveProjected() {
+	public final @Nonnull <T extends Bean> T retrieveProjected() {
 		List<T> results = projectedResults();
 		return AbstractQuery.assertOneResult(results);
 	}
@@ -916,7 +916,7 @@ public abstract class AbstractDocumentQuery extends AbstractQuery implements Doc
 	 * @return the resulting value
 	 */
 	@Override
-	public final <T> T scalarResult(Class<T> type) {
+	public final @Nullable <T> T scalarResult(@Nonnull Class<T> type) {
 		List<T> results = scalarResults(type);
 		return AbstractQuery.returnOneResult(results);
 	}
@@ -927,7 +927,7 @@ public abstract class AbstractDocumentQuery extends AbstractQuery implements Doc
 	 * @return the resulting value
 	 */
 	@Override
-	public final <T> T retrieveScalar(Class<T> type) {
+	public final @Nonnull <T> T retrieveScalar(@Nonnull Class<T> type) {
 		List<T> results = scalarResults(type);
 		return AbstractQuery.assertOneResult(results);
 	}
@@ -937,7 +937,7 @@ public abstract class AbstractDocumentQuery extends AbstractQuery implements Doc
 	 * @return the resulting value
 	 */
 	@Override
-	public final Object[] tupleResult() {
+	public final @Nullable Object[] tupleResult() {
 		List<Object[]> results = tupleResults();
 		return AbstractQuery.returnOneResult(results);
 	}
@@ -947,7 +947,7 @@ public abstract class AbstractDocumentQuery extends AbstractQuery implements Doc
 	 * @return the resulting value
 	 */
 	@Override
-	public final Object[] retrieveTuple() {
+	public final @Nonnull Object[] retrieveTuple() {
 		List<Object[]> results = tupleResults();
 		return AbstractQuery.assertOneResult(results);
 	}

@@ -2,6 +2,9 @@ package org.skyve.metadata.module.fluent;
 
 import org.skyve.impl.metadata.repository.module.CalendarItemMetaData;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Builds calendar menu item metadata.
  */
@@ -20,7 +23,7 @@ public class FluentCalendarItem extends FluentMenuItem<FluentCalendarItem> {
 	 *
 	 * @param item The metadata to mutate.
 	 */
-	public FluentCalendarItem(CalendarItemMetaData item) {
+	public FluentCalendarItem(@Nonnull CalendarItemMetaData item) {
 		this.item = item;
 	}
 
@@ -30,7 +33,7 @@ public class FluentCalendarItem extends FluentMenuItem<FluentCalendarItem> {
 	 * @param item The source calendar menu item.
 	 * @return this fluent instance.
 	 */
-	public FluentCalendarItem from(@SuppressWarnings("hiding") org.skyve.impl.metadata.module.menu.CalendarItem item) {
+	public @Nonnull FluentCalendarItem from(@SuppressWarnings("hiding") @Nonnull org.skyve.impl.metadata.module.menu.CalendarItem item) {
 		super.from(item);
 		documentName(item.getDocumentName());
 		queryName(item.getQueryName());
@@ -46,7 +49,7 @@ public class FluentCalendarItem extends FluentMenuItem<FluentCalendarItem> {
 	 * @param documentName The document name.
 	 * @return this fluent instance.
 	 */
-	public FluentCalendarItem documentName(String documentName) {
+	public @Nonnull FluentCalendarItem documentName(@Nullable String documentName) {
 		item.setDocumentName(documentName);
 		return this;
 	}
@@ -57,7 +60,7 @@ public class FluentCalendarItem extends FluentMenuItem<FluentCalendarItem> {
 	 * @param queryName The query name.
 	 * @return this fluent instance.
 	 */
-	public FluentCalendarItem queryName(String queryName) {
+	public @Nonnull FluentCalendarItem queryName(@Nullable String queryName) {
 		item.setQueryName(queryName);
 		return this;
 	}
@@ -68,7 +71,7 @@ public class FluentCalendarItem extends FluentMenuItem<FluentCalendarItem> {
 	 * @param modelName The model name.
 	 * @return this fluent instance.
 	 */
-	public FluentCalendarItem modelName(String modelName) {
+	public @Nonnull FluentCalendarItem modelName(@Nullable String modelName) {
 		item.setModelName(modelName);
 		return this;
 	}
@@ -79,7 +82,7 @@ public class FluentCalendarItem extends FluentMenuItem<FluentCalendarItem> {
 	 * @param startBinding The start binding expression.
 	 * @return this fluent instance.
 	 */
-	public FluentCalendarItem startBinding(String startBinding) {
+	public @Nonnull FluentCalendarItem startBinding(@Nullable String startBinding) {
 		item.setStartBinding(startBinding);
 		return this;
 	}
@@ -90,7 +93,7 @@ public class FluentCalendarItem extends FluentMenuItem<FluentCalendarItem> {
 	 * @param endBinding The end binding expression.
 	 * @return this fluent instance.
 	 */
-	public FluentCalendarItem endBinding(String endBinding) {
+	public @Nonnull FluentCalendarItem endBinding(@Nullable String endBinding) {
 		item.setEndBinding(endBinding);
 		return this;
 	}
@@ -101,7 +104,7 @@ public class FluentCalendarItem extends FluentMenuItem<FluentCalendarItem> {
 	 * @return The calendar item metadata instance.
 	 */
 	@Override
-	public CalendarItemMetaData get() {
+	public @Nonnull CalendarItemMetaData get() {
 		return item;
 	}
 }

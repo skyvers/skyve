@@ -2,6 +2,7 @@ package org.skyve.metadata;
 
 import org.skyve.impl.util.XMLMetaData;
 
+import jakarta.annotation.Nonnull;
 import jakarta.xml.bind.annotation.XmlType;
 
 /**
@@ -23,7 +24,7 @@ public enum SortDirection {
 	 *
 	 * @return {@link #descending} if this is {@link #ascending}; {@link #ascending} otherwise
 	 */
-	public SortDirection reverse() {
+	public @Nonnull SortDirection reverse() {
 		SortDirection result = null;
 
 		if (this == ascending) {

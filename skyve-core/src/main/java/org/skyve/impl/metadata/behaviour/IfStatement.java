@@ -9,6 +9,8 @@ import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.util.ExpressionEvaluator;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlElementRef;
 import jakarta.xml.bind.annotation.XmlElementRefs;
@@ -56,25 +58,25 @@ public class IfStatement extends StatementMetaData {
 						@XmlElementRef(type = InvokeStaticStatement.class)})
 	private List<StatementMetaData> elseStatements = new ArrayList<>();
 
-	public String getCondition() {
+	public @Nullable String getCondition() {
 		return condition;
 	}
 	
 	@XmlAttribute(required = true)
-	public void setCondition(String condition) {
+	public void setCondition(@Nullable String condition) {
 		this.condition = UtilImpl.processStringValue(condition);
 	}
 
-	public List<StatementMetaData> getThenStatements() {
+	public @Nonnull List<StatementMetaData> getThenStatements() {
 		return thenStatements;
 	}
 
-	public List<StatementMetaData> getElseStatements() {
+	public @Nonnull List<StatementMetaData> getElseStatements() {
 		return elseStatements;
 	}
 
 	@Override
-	public void execute(Bean bean) {
+	public void execute(@Nonnull Bean bean) {
 		if (Boolean.TRUE.equals(ExpressionEvaluator.evaluate(condition, bean))) {
 			for (StatementMetaData statement : thenStatements) {
 				statement.execute(bean);

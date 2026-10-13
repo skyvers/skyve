@@ -2,6 +2,8 @@ package org.skyve.cache;
 
 import java.io.Serializable;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * Configures second-level Hibernate cache regions.
  *
@@ -18,9 +20,9 @@ public class HibernateCacheConfig extends JCacheConfig<Serializable, Serializabl
 	 * @param expiryPolicy expiry policy to apply
 	 * @param expiryInMinutes expiry duration in minutes
 	 */
-	public HibernateCacheConfig(String name,
+	public HibernateCacheConfig(@Nonnull String name,
 									long heapSizeEntries,
-									CacheExpiryPolicy expiryPolicy,
+									@Nonnull CacheExpiryPolicy expiryPolicy,
 									long expiryInMinutes) {
 		super(name, heapSizeEntries, expiryPolicy, expiryInMinutes, Serializable.class, Serializable.class);
 	}
@@ -34,10 +36,10 @@ public class HibernateCacheConfig extends JCacheConfig<Serializable, Serializabl
 	 * @param expiryPolicy expiry policy to apply
 	 * @param expiryInMinutes expiry duration in minutes
 	 */
-	public HibernateCacheConfig(String name,
+	public HibernateCacheConfig(@Nonnull String name,
 									long heapSizeEntries,
 									long offHeapSizeInMB,
-									CacheExpiryPolicy expiryPolicy,
+									@Nonnull CacheExpiryPolicy expiryPolicy,
 									long expiryInMinutes) {
 		super(name, heapSizeEntries, offHeapSizeInMB, expiryPolicy, expiryInMinutes, Serializable.class, Serializable.class);
 	}
@@ -48,7 +50,7 @@ public class HibernateCacheConfig extends JCacheConfig<Serializable, Serializabl
 	 * @param name cache region name
 	 * @param heapSizeEntries maximum heap entry count
 	 */
-	public HibernateCacheConfig(String name, long heapSizeEntries) {
+	public HibernateCacheConfig(@Nonnull String name, long heapSizeEntries) {
 		super(name, heapSizeEntries, Serializable.class, Serializable.class);
 	}
 
@@ -59,7 +61,7 @@ public class HibernateCacheConfig extends JCacheConfig<Serializable, Serializabl
 	 * @param heapSizeEntries maximum heap entry count
 	 * @param offHeapSizeInMB off-heap tier size in megabytes
 	 */
-	public HibernateCacheConfig(String name, long heapSizeEntries, long offHeapSizeInMB) {
+	public HibernateCacheConfig(@Nonnull String name, long heapSizeEntries, long offHeapSizeInMB) {
 		super(name, heapSizeEntries, offHeapSizeInMB, Serializable.class, Serializable.class);
 	}
 	
@@ -69,7 +71,7 @@ public class HibernateCacheConfig extends JCacheConfig<Serializable, Serializabl
 	 * @return config details in JSON-like form
 	 */
 	@Override
-	public String toString() {
+	public @Nonnull String toString() {
 		StringBuilder sb = new StringBuilder(128);
 		sb.append("{name:\"").append(getName());
 		sb.append("\",heapSizeEntries:").append(getHeapSizeEntries());

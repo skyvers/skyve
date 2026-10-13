@@ -7,6 +7,7 @@ import org.skyve.impl.metadata.OrderingImpl;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.Ordering;
 
+import jakarta.annotation.Nonnull;
 import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlElementWrapper;
 import jakarta.xml.bind.annotation.XmlRootElement;
@@ -49,14 +50,14 @@ public class InverseMany extends AbstractInverse implements OrderedAttribute {
 	}
 
 	@Override
-	public InverseCardinality getCardinality() {
+	public @Nonnull InverseCardinality getCardinality() {
 		return InverseCardinality.many;
 	}
 	
 	@Override
 	@XmlElementWrapper(namespace = XMLMetaData.DOCUMENT_NAMESPACE, name = "ordering")
 	@XmlElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE, name = "order", type = OrderingImpl.class, required = false)
-	public List<Ordering> getOrdering() {
+	public @Nonnull List<Ordering> getOrdering() {
 		return ordering;
 	}
 	

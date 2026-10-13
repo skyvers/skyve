@@ -6,6 +6,8 @@ import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.sail.execution.Executor;
 import org.skyve.metadata.sail.language.Step;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
@@ -33,7 +35,7 @@ public class TestDataEnter implements Step {
 	 * Returns the fixture.
 	 * @return the result
 	 */
-	public String getFixture() {
+	public @Nullable String getFixture() {
 		return fixture;
 	}
 
@@ -42,7 +44,7 @@ public class TestDataEnter implements Step {
 	 * @param fixture the fixture
 	 */
 	@XmlAttribute(name = "fixture")
-	public void setFixture(String fixture) {
+	public void setFixture(@Nullable String fixture) {
 		this.fixture = UtilImpl.processStringValue(fixture);
 	}
 
@@ -51,7 +53,7 @@ public class TestDataEnter implements Step {
 	 * @param executor the executor
 	 */
 	@Override
-	public void execute(Executor executor) {
+	public void execute(@Nonnull Executor executor) {
 		executor.executeTestDataEnter(this);
 	}
 	
@@ -61,7 +63,7 @@ public class TestDataEnter implements Step {
 	 * @return the result
 	 */
 	@Override
-	public String getIdentifier(AutomationContext context) {
+	public @Nullable String getIdentifier(@Nonnull AutomationContext context) {
 		return null;
 	}
 }

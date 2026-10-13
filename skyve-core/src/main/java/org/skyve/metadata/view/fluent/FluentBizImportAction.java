@@ -2,6 +2,8 @@ package org.skyve.metadata.view.fluent;
 
 import org.skyve.impl.metadata.repository.view.actions.BizImportAction;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * Builds {@link BizImportAction} metadata using a fluent API.
  */
@@ -21,7 +23,7 @@ public class FluentBizImportAction extends FluentClassAction<FluentBizImportActi
 	 * @param action
 	 *            the action instance to wrap
 	 */
-	public FluentBizImportAction(BizImportAction action) {
+	public FluentBizImportAction(@Nonnull BizImportAction action) {
 		this.action = action;
 	}
 	
@@ -32,7 +34,7 @@ public class FluentBizImportAction extends FluentClassAction<FluentBizImportActi
 	 *            the source action metadata
 	 * @return this builder
 	 */
-	public FluentBizImportAction from(@SuppressWarnings("hiding") BizImportAction action) {
+	public @Nonnull FluentBizImportAction from(@SuppressWarnings("hiding") @Nonnull BizImportAction action) {
 		super.from(action);
 		return this;
 	}
@@ -41,7 +43,7 @@ public class FluentBizImportAction extends FluentClassAction<FluentBizImportActi
 	 * Returns the wrapped repository action instance.
 	 */
 	@Override
-	public BizImportAction get() {
+	public @Nonnull BizImportAction get() {
 		return action;
 	}
 }

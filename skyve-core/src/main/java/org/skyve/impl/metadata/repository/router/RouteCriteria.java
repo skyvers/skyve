@@ -15,6 +15,8 @@ import org.skyve.metadata.view.View.ViewType;
 import org.skyve.util.Binder.TargetMetaData;
 import org.skyve.web.WebAction;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlType;
 
@@ -51,7 +53,7 @@ public class RouteCriteria implements SerializableMetaData {
 	 *
 	 * @return view type criterion, or {@code null}
 	 */
-	public ViewType getViewType() {
+	public @Nullable ViewType getViewType() {
 		return viewType;
 	}
 
@@ -61,7 +63,7 @@ public class RouteCriteria implements SerializableMetaData {
 	 * @param viewType view type criterion
 	 */
 	@XmlAttribute
-	public void setViewType(ViewType viewType) {
+	public void setViewType(@Nullable ViewType viewType) {
 		this.viewType = viewType;
 	}
 	
@@ -70,7 +72,7 @@ public class RouteCriteria implements SerializableMetaData {
 	 *
 	 * @return web action criterion, or {@code null}
 	 */
-	public WebAction getWebAction() {
+	public @Nullable WebAction getWebAction() {
 		return webAction;
 	}
 
@@ -80,7 +82,7 @@ public class RouteCriteria implements SerializableMetaData {
 	 * @param webAction web action criterion
 	 */
 	@XmlAttribute
-	public void setWebAction(WebAction webAction) {
+	public void setWebAction(@Nullable WebAction webAction) {
 		this.webAction = webAction;
 	}
 	
@@ -89,7 +91,7 @@ public class RouteCriteria implements SerializableMetaData {
 	 *
 	 * @return module name criterion, or {@code null}
 	 */
-	public String getModuleName() {
+	public @Nullable String getModuleName() {
 		return moduleName;
 	}
 
@@ -99,7 +101,7 @@ public class RouteCriteria implements SerializableMetaData {
 	 * @param moduleName module name criterion
 	 */
 	@XmlAttribute(name = "module")
-	public void setModuleName(String moduleName) {
+	public void setModuleName(@Nullable String moduleName) {
 		this.moduleName = UtilImpl.processStringValue(moduleName);
 	}
 
@@ -108,7 +110,7 @@ public class RouteCriteria implements SerializableMetaData {
 	 *
 	 * @return document name criterion, or {@code null}
 	 */
-	public String getDocumentName() {
+	public @Nullable String getDocumentName() {
 		return documentName;
 	}
 
@@ -118,7 +120,7 @@ public class RouteCriteria implements SerializableMetaData {
 	 * @param documentName document name criterion
 	 */
 	@XmlAttribute(name = "document")
-	public void setDocumentName(String documentName) {
+	public void setDocumentName(@Nullable String documentName) {
 		this.documentName = UtilImpl.processStringValue(documentName);
 	}
 
@@ -127,7 +129,7 @@ public class RouteCriteria implements SerializableMetaData {
 	 *
 	 * @return query name criterion, or {@code null}
 	 */
-	public String getQueryName() {
+	public @Nullable String getQueryName() {
 		return queryName;
 	}
 
@@ -137,7 +139,7 @@ public class RouteCriteria implements SerializableMetaData {
 	 * @param queryName query name criterion
 	 */
 	@XmlAttribute(name = "query")
-	public void setQueryName(String queryName) {
+	public void setQueryName(@Nullable String queryName) {
 		this.queryName = UtilImpl.processStringValue(queryName);
 	}
 
@@ -146,7 +148,7 @@ public class RouteCriteria implements SerializableMetaData {
 	 *
 	 * @return customer name criterion, or {@code null}
 	 */
-	public String getCustomerName() {
+	public @Nullable String getCustomerName() {
 		return customerName;
 	}
 
@@ -156,7 +158,7 @@ public class RouteCriteria implements SerializableMetaData {
 	 * @param customerName customer name criterion
 	 */
 	@XmlAttribute(name = "customer")
-	public void setCustomerName(String customerName) {
+	public void setCustomerName(@Nullable String customerName) {
 		this.customerName = UtilImpl.processStringValue(customerName);
 	}
 
@@ -165,7 +167,7 @@ public class RouteCriteria implements SerializableMetaData {
 	 *
 	 * @return data-group criterion, or {@code null}
 	 */
-	public String getDataGroupId() {
+	public @Nullable String getDataGroupId() {
 		return dataGroupId;
 	}
 
@@ -175,7 +177,7 @@ public class RouteCriteria implements SerializableMetaData {
 	 * @param dataGroupId data-group criterion
 	 */
 	@XmlAttribute
-	public void setDataGroupId(String dataGroupId) {
+	public void setDataGroupId(@Nullable String dataGroupId) {
 		this.dataGroupId = UtilImpl.processStringValue(dataGroupId);
 	}
 	
@@ -184,7 +186,7 @@ public class RouteCriteria implements SerializableMetaData {
 	 *
 	 * @return user identifier criterion, or {@code null}
 	 */
-	public String getUserId() {
+	public @Nullable String getUserId() {
 		return userId;
 	}
 
@@ -194,7 +196,7 @@ public class RouteCriteria implements SerializableMetaData {
 	 * @param userId user identifier criterion
 	 */
 	@XmlAttribute
-	public void setUserId(String userId) {
+	public void setUserId(@Nullable String userId) {
 		this.userId = UtilImpl.processStringValue(userId);
 	}
 
@@ -212,7 +214,7 @@ public class RouteCriteria implements SerializableMetaData {
 	 *         pre-set module or document names
 	 */
 	@SuppressWarnings("java:S3776") // Complexity OK
-	public void canonicalise(Customer customer, String binding) {
+	public void canonicalise(@Nullable Customer customer, @Nullable String binding) {
 		if (webAction != WebAction.m) { // exclude maps
 			String b = UtilImpl.processStringValue(binding);
 			if (b != null) {
@@ -253,7 +255,7 @@ public class RouteCriteria implements SerializableMetaData {
 	 * @return {@code true} if all constrained fields match, otherwise {@code false}
 	 */
 	@SuppressWarnings("java:S3776") // Complexity OK
-	public boolean matches(RouteCriteria criteria) {
+	public boolean matches(@Nonnull RouteCriteria criteria) {
 		if ((customerName != null) && (! customerName.equals(criteria.customerName))) {
 			return false;
 		}
@@ -288,7 +290,7 @@ public class RouteCriteria implements SerializableMetaData {
 	 * @return criteria summary string
 	 */
 	@Override
-	public String toString() {
+	public @Nonnull String toString() {
 		StringBuilder result = new StringBuilder(64);
 		result.append('{');
 		boolean something = false;

@@ -2,6 +2,8 @@ package org.skyve.metadata.model.document.fluent;
 
 import org.skyve.impl.metadata.model.document.field.Boolean;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * Provides a fluent builder for FluentBoolean metadata.
  */
@@ -18,7 +20,7 @@ public class FluentBoolean extends FluentConvertibleField<FluentBoolean> {
 	/**
 	 * Creates a fluent builder instance.
 	 */
-	public FluentBoolean(Boolean bool) {
+	public FluentBoolean(@Nonnull Boolean bool) {
 		this.bool = bool;
 	}
 
@@ -26,7 +28,7 @@ public class FluentBoolean extends FluentConvertibleField<FluentBoolean> {
 	 * Copies metadata values from an existing definition into this builder.
 	 */
 
-	public FluentBoolean from(@SuppressWarnings("hiding") Boolean bool) {
+	public @Nonnull FluentBoolean from(@SuppressWarnings("hiding") @Nonnull Boolean bool) {
 		super.from(bool);
 		return this;
 	}
@@ -35,7 +37,7 @@ public class FluentBoolean extends FluentConvertibleField<FluentBoolean> {
 	 * Returns the mutable metadata instance represented by this builder.
 	 */
 	@Override
-	public Boolean get() {
+	public @Nonnull Boolean get() {
 		return bool;
 	}
 }

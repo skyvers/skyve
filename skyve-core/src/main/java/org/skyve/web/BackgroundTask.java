@@ -2,6 +2,9 @@ package org.skyve.web;
 
 import org.skyve.domain.Bean;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Defines a short-lived asynchronous unit of work initiated from a web
  * conversation context.
@@ -23,7 +26,7 @@ public interface BackgroundTask<T extends Bean> {
 	 *
 	 * @return the task bean, never {@code null}
 	 */
-	T getBean();
+	@Nullable T getBean();
 
 	/**
 	 * Commits any active persistence transaction and places the backing conversation
@@ -45,5 +48,5 @@ public interface BackgroundTask<T extends Bean> {
 	 * @throws Exception if execution fails
 	 */
 	@SuppressWarnings("java:S112") // throwing Exception is part of the convenience API
-	void execute(T bean) throws Exception;
+	void execute(@Nonnull T bean) throws Exception;
 }

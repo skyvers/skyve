@@ -5,6 +5,7 @@ import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.controller.ImplicitActionName;
 import org.skyve.metadata.sail.execution.Executor;
 
+import jakarta.annotation.Nonnull;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
 
@@ -26,7 +27,7 @@ public class Remove extends AbstractAction {
 	 * @param executor the executor
 	 */
 	@Override
-	public void execute(Executor executor) {
+	public void execute(@Nonnull Executor executor) {
 		executor.executeRemove(this);
 	}
 	
@@ -36,7 +37,7 @@ public class Remove extends AbstractAction {
 	 * @return the result
 	 */
 	@Override
-	public String getIdentifier(AutomationContext context) {
+	public @Nonnull String getIdentifier(@Nonnull AutomationContext context) {
 		return ImplicitActionName.Remove.toString();
 	}
 }

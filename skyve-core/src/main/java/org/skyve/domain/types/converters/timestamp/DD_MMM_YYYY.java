@@ -2,6 +2,8 @@ package org.skyve.domain.types.converters.timestamp;
 
 import org.skyve.domain.messages.ConversionException;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * Converts {@link Timestamp} values using this class's configured
  * day-first, month-name date-only pattern.
@@ -15,7 +17,7 @@ public class DD_MMM_YYYY extends AbstractTimestampConverter {
 	 * @return the result value
 	 */
 	@Override
-	public String getFormatPattern() {
+	public @Nonnull String getFormatPattern() {
 		return PATTERN;
 	}
 	
@@ -24,7 +26,7 @@ public class DD_MMM_YYYY extends AbstractTimestampConverter {
 	 * @return the result value
 	 */
 	@Override
-	protected String getI18nKey() {
+	protected @Nonnull String getI18nKey() {
 		return ConversionException.DD_MMM_YYYY_TIMESTAMP_KEY;
 	}
 }

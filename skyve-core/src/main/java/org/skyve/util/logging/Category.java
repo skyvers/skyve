@@ -2,6 +2,8 @@ package org.skyve.util.logging;
 
 import org.slf4j.Logger;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * Logging categories for use within the Skyve framework. Typically associated with
  * the trace flags set through the Admin > Instrumentation UI, or the application
@@ -40,13 +42,13 @@ public enum Category {
 
     private final String name;
 
-    Category(String name) {
+    Category(@Nonnull String name) {
         this.name = new StringBuilder().append(CATEGORY_PREFIX)
                                        .append(name)
                                        .toString();
     }
 
-    public String getName() {
+    public @Nonnull String getName() {
         return name;
     }
 
@@ -59,7 +61,7 @@ public enum Category {
      *
      * @return a sanitising {@link Logger}; never {@code null}
      */
-    public Logger logger() {
+    public @Nonnull Logger logger() {
         return SkyveLoggerFactory.getLogger(this);
     }
 

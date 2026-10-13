@@ -3,6 +3,7 @@ package org.skyve.impl.metadata.repository.module;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
 
+import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
@@ -28,43 +29,43 @@ public class CalendarItemMetaData extends ItemMetaData {
 	private String startBinding;
 	private String endBinding;
 	
-	public String getDocumentName() {
+	public @Nullable String getDocumentName() {
 		return documentName;
 	}
 	@XmlAttribute(name = "document")
-	public void setDocumentName(String documentName) {
+	public void setDocumentName(@Nullable String documentName) {
 		this.documentName = UtilImpl.processStringValue(documentName);
 	}
 
-	public String getQueryName() {
+	public @Nullable String getQueryName() {
 		return queryName;
 	}
 	@XmlAttribute(name = "query")
-	public void setQueryName(String queryName) {
+	public void setQueryName(@Nullable String queryName) {
 		this.queryName = UtilImpl.processStringValue(queryName);
 	}
 
-	public String getModelName() {
+	public @Nullable String getModelName() {
 		return modelName;
 	}
 	@XmlAttribute(name = "model")
-	public void setModelName(String modelName) {
+	public void setModelName(@Nullable String modelName) {
 		this.modelName = UtilImpl.processStringValue(modelName);
 	}
 
-	public String getStartBinding() {
+	public @Nullable String getStartBinding() {
 		return startBinding;
 	}
 	@XmlAttribute(required = true)
-	public void setStartBinding(String startBinding) {
+	public void setStartBinding(@Nullable String startBinding) {
 		this.startBinding = UtilImpl.processStringValue(startBinding);
 	}
 
-	public String getEndBinding() {
+	public @Nullable String getEndBinding() {
 		return endBinding;
 	}
 	@XmlAttribute(required = true)
-	public void setEndBinding(String endBinding) {
+	public void setEndBinding(@Nullable String endBinding) {
 		this.endBinding = UtilImpl.processStringValue(endBinding);
 	}
 }

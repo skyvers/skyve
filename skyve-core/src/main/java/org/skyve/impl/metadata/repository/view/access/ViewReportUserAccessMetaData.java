@@ -6,6 +6,8 @@ import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.UserAccess;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
@@ -27,35 +29,35 @@ public class ViewReportUserAccessMetaData extends ViewUserAccessMetaData {
 	private String documentName;
 	private String reportName;
 
-	public String getModuleName() {
+	public @Nullable String getModuleName() {
 		return moduleName;
 	}
 
 	@XmlAttribute(name = "module", required = true)
-	public void setModuleName(String moduleName) {
+	public void setModuleName(@Nullable String moduleName) {
 		this.moduleName = UtilImpl.processStringValue(moduleName);
 	}
 
-	public String getDocumentName() {
+	public @Nullable String getDocumentName() {
 		return documentName;
 	}
 
 	@XmlAttribute(name = "document", required = true)
-	public void setDocumentName(String documentName) {
+	public void setDocumentName(@Nullable String documentName) {
 		this.documentName = UtilImpl.processStringValue(documentName);
 	}
 
-	public String getReportName() {
+	public @Nullable String getReportName() {
 		return reportName;
 	}
 
 	@XmlAttribute(name = "report", required = true)
-	public void setReportName(String reportName) {
+	public void setReportName(@Nullable String reportName) {
 		this.reportName = UtilImpl.processStringValue(reportName);
 	}
 	
 	@Override
-	public void validate(String metaDataName, Module module) {
+	public void validate(@Nonnull String metaDataName, @Nonnull Module module) {
 		if (moduleName == null) {
 			throw new MetaDataException(metaDataName + " : [module] is required for all report user accesses");
 		}
@@ -69,7 +71,7 @@ public class ViewReportUserAccessMetaData extends ViewUserAccessMetaData {
 	}
 	
 	@Override
-	public UserAccess toUserAccess(String unusedModuleName, String unusedDocumentName) {
+	public @Nonnull UserAccess toUserAccess(@Nonnull String unusedModuleName, @Nonnull String unusedDocumentName) {
 		return UserAccess.modelAggregate(moduleName, documentName, reportName);
 	}
 }

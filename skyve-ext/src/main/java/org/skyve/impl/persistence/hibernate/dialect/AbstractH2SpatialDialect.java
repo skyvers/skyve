@@ -10,6 +10,9 @@ import org.hibernate.spatial.dialect.h2geodb.GeoDbWkb;
 import org.hibernate.tool.schema.extract.spi.ColumnInformation;
 import org.locationtech.jts.geom.Geometry;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * H2 1.3 and above dialect based on GeoDB that supports spatial.
  * The unique delegate is set in the constructor of subclasses.
@@ -38,7 +41,7 @@ abstract class AbstractH2SpatialDialect extends GeoDBDialect implements SkyveDia
 	 * @return the geometry type descriptor bound to this dialect
 	 */
 	@Override
-	public final JTSGeometryType getGeometryType() {
+	public final @Nonnull JTSGeometryType getGeometryType() {
 		return geometryType;
 	}
 
@@ -50,7 +53,7 @@ abstract class AbstractH2SpatialDialect extends GeoDBDialect implements SkyveDia
 	 * @return the converted value suitable for JDBC persistence
 	 */
 	@Override
-	public Object convertToPersistedValue(Geometry geometry) {
+	public @Nullable Object convertToPersistedValue(@Nonnull Geometry geometry) {
 		return GeoDbWkb.to(JTS.from(geometry));
 	}
 
@@ -62,7 +65,7 @@ abstract class AbstractH2SpatialDialect extends GeoDBDialect implements SkyveDia
 	 * @return the converted JTS geometry value
 	 */
 	@Override
-	public Geometry convertFromPersistedValue(Object geometry) {
+	public @Nonnull Geometry convertFromPersistedValue(@Nonnull Object geometry) {
 		return JTS.to((org.geolatte.geom.Geometry<?>) GeoDbWkb.from(geometry));
 	}
 
@@ -74,7 +77,7 @@ abstract class AbstractH2SpatialDialect extends GeoDBDialect implements SkyveDia
 	 * @return true when column change DDL should be emitted, otherwise false
 	 */
 	@Override
-	public boolean isAlterTableColumnChangeRequired(Column column, ColumnInformation columnInfo) {
+	public boolean isAlterTableColumnChangeRequired(@Nonnull Column column, @Nullable ColumnInformation columnInfo) {
 		return DDLDelegate.isAlterTableColumnChangeRequired(column, columnInfo);
 	}
 
@@ -84,7 +87,7 @@ abstract class AbstractH2SpatialDialect extends GeoDBDialect implements SkyveDia
 	 * @return the SQL fragment used for alter-column statements
 	 */
 	@Override
-	public String getModifyColumnString() {
+	public @Nonnull String getModifyColumnString() {
 		return "alter column";
 	}
 
@@ -94,7 +97,7 @@ abstract class AbstractH2SpatialDialect extends GeoDBDialect implements SkyveDia
 	 * @return the unique delegate used for unique-key DDL generation
 	 */
 	@Override
-	public UniqueDelegate getUniqueDelegate() {
+	public @Nonnull UniqueDelegate getUniqueDelegate() {
 		return uniqueDelegate;
 	}
 
@@ -104,7 +107,7 @@ abstract class AbstractH2SpatialDialect extends GeoDBDialect implements SkyveDia
 	 * @return the Skyve RDBMS enum value for this dialect
 	 */
 	@Override
-	public RDBMS getRDBMS() {
+	public @Nonnull RDBMS getRDBMS() {
 		return RDBMS.h2;
 	}
 }

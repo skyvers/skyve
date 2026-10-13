@@ -5,6 +5,8 @@ import java.util.Map;
 
 import org.skyve.impl.util.XMLMetaData;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlRootElement;
@@ -34,17 +36,17 @@ public class ServerSideActionEventAction implements EventAction {
 	@XmlJavaTypeAdapter(PropertyMapAdapter.class)
 	private Map<String, String> properties = new LinkedHashMap<>();
 
-	public String getActionName() {
+	public @Nullable String getActionName() {
 		return actionName;
 	}
 	
 	@XmlAttribute(name = "action", required = true)
-	public void setActionName(String actionName) {
+	public void setActionName(@Nullable String actionName) {
 		this.actionName = actionName;
 	}
 
 	@Override
-	public Map<String, String> getProperties() {
+	public @Nonnull Map<String, String> getProperties() {
 		return properties;
 	}
 }

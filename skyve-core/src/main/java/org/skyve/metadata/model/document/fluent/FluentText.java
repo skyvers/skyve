@@ -4,6 +4,8 @@ import org.skyve.impl.metadata.model.document.field.Text;
 import org.skyve.impl.metadata.model.document.field.TextFormat;
 import org.skyve.impl.metadata.model.document.field.validator.TextValidator;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * Provides a fluent builder for FluentText metadata.
  */
@@ -20,7 +22,7 @@ public class FluentText extends FluentConvertibleField<FluentText> {
 	/**
 	 * Creates a fluent builder instance.
 	 */
-	public FluentText(Text text) {
+	public FluentText(@Nonnull Text text) {
 		this.text = text;
 	}
 
@@ -28,7 +30,7 @@ public class FluentText extends FluentConvertibleField<FluentText> {
 	 * Copies metadata values from an existing definition into this builder.
 	 */
 
-	public FluentText from(@SuppressWarnings("hiding") Text text) {
+	public @Nonnull FluentText from(@SuppressWarnings("hiding") @Nonnull Text text) {
 		super.from(text);
 		length(text.getLength());
 		TextFormat format = text.getFormat();
@@ -45,7 +47,7 @@ public class FluentText extends FluentConvertibleField<FluentText> {
 	/**
 	 * Updates metadata on this fluent builder.
 	 */
-	public FluentText length(int length) {
+	public @Nonnull FluentText length(int length) {
 		text.setLength(length);
 		return this;
 	}
@@ -53,14 +55,14 @@ public class FluentText extends FluentConvertibleField<FluentText> {
 	/**
 	 * Updates metadata on this fluent builder.
 	 */
-	public FluentText format(FluentTextFormat format) {
+	public @Nonnull FluentText format(@Nonnull FluentTextFormat format) {
 		text.setFormat(format.get());
 		return this;
 	}
 	/**
 	 * Sets validation metadata used by this field definition.
 	 */
-	public FluentText validator(FluentTextValidator validator) {
+	public @Nonnull FluentText validator(@Nonnull FluentTextValidator validator) {
 		text.setValidator(validator.get());
 		return this;
 	}
@@ -69,7 +71,7 @@ public class FluentText extends FluentConvertibleField<FluentText> {
 	 * Returns the mutable metadata instance represented by this builder.
 	 */
 	@Override
-	public Text get() {
+	public @Nonnull Text get() {
 		return text;
 	}
 }

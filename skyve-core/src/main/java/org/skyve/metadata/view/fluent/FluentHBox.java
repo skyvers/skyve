@@ -29,7 +29,7 @@ public class FluentHBox extends FluentContainer<FluentHBox> implements FluentBox
 	 * @param box
 	 *            the horizontal-box metadata to mutate
 	 */
-	public FluentHBox(HBox box) {
+	public FluentHBox(@Nonnull HBox box) {
 		this.box = box;
 	}
 	
@@ -42,7 +42,7 @@ public class FluentHBox extends FluentContainer<FluentHBox> implements FluentBox
 	 *            the source horizontal box metadata
 	 * @return this builder
 	 */
-	public FluentHBox from(@SuppressWarnings("hiding") HBox box) {
+	public @Nonnull FluentHBox from(@SuppressWarnings("hiding") @Nonnull HBox box) {
 		widgetId(box.getWidgetId());
 		border(Boolean.TRUE.equals(box.getBorder()));
 		borderTitle(box.getBorderTitle());
@@ -69,7 +69,7 @@ public class FluentHBox extends FluentContainer<FluentHBox> implements FluentBox
 	 *            the widget identifier
 	 * @return this builder
 	 */
-	public FluentHBox widgetId(String widgetId) {
+	public @Nonnull FluentHBox widgetId(@Nullable String widgetId) {
 		box.setWidgetId(widgetId);
 		return this;
 	}
@@ -81,7 +81,7 @@ public class FluentHBox extends FluentContainer<FluentHBox> implements FluentBox
 	 *            whether the border is shown
 	 * @return this builder
 	 */
-	public FluentHBox border(boolean border) {
+	public @Nonnull FluentHBox border(boolean border) {
 		box.setBorder(border ? Boolean.TRUE : Boolean.FALSE);
 		return this;
 	}
@@ -93,7 +93,7 @@ public class FluentHBox extends FluentContainer<FluentHBox> implements FluentBox
 	 *            border caption text
 	 * @return this builder
 	 */
-	public FluentHBox borderTitle(String borderTitle) {
+	public @Nonnull FluentHBox borderTitle(@Nullable String borderTitle) {
 		box.setBorderTitle(borderTitle);
 		return this;
 	}
@@ -104,7 +104,7 @@ public class FluentHBox extends FluentContainer<FluentHBox> implements FluentBox
 	 * @param escapeBorderTitle {@code false} to allow trusted markup; {@code true} to escape at the renderer boundary
 	 * @return this builder
 	 */
-	public FluentHBox escapeBorderTitle(boolean escapeBorderTitle) {
+	public @Nonnull FluentHBox escapeBorderTitle(boolean escapeBorderTitle) {
 		return escapeBorderTitle(escapeBorderTitle ? Boolean.TRUE : Boolean.FALSE);
 	}
 
@@ -114,7 +114,7 @@ public class FluentHBox extends FluentContainer<FluentHBox> implements FluentBox
 	 * @param escapeBorderTitle {@code Boolean.FALSE} to allow trusted markup; {@code null} or {@code Boolean.TRUE} to escape at the renderer boundary
 	 * @return this builder
 	 */
-	public FluentHBox escapeBorderTitle(Boolean escapeBorderTitle) {
+	public @Nonnull FluentHBox escapeBorderTitle(@Nullable Boolean escapeBorderTitle) {
 		box.setEscapeBorderTitle(escapeBorderTitle);
 		return this;
 	}
@@ -127,7 +127,7 @@ public class FluentHBox extends FluentContainer<FluentHBox> implements FluentBox
 	 * If collapsible is defined, the box must have a border, a border title and a pixel or percentage height
 	 * defined. If any of these are missing, an exception will be thrown at runtime.
 	 */
-	public FluentHBox collapsible(Collapsible collapsible) {
+	public @Nonnull FluentHBox collapsible(@Nullable Collapsible collapsible) {
 		box.setCollapsible(collapsible);
 		return this;
 	}
@@ -140,7 +140,7 @@ public class FluentHBox extends FluentContainer<FluentHBox> implements FluentBox
 	 * @return this builder
 	 */
 	@Override
-	public FluentHBox pixelWidth(int pixelWidth) {
+	public @Nonnull FluentHBox pixelWidth(int pixelWidth) {
 		box.setPixelWidth(Integer.valueOf(pixelWidth));
 		return this;
 	}
@@ -153,7 +153,7 @@ public class FluentHBox extends FluentContainer<FluentHBox> implements FluentBox
 	 * @return this builder
 	 */
 	@Override
-	public FluentHBox responsiveWidth(int responsiveWidth) {
+	public @Nonnull FluentHBox responsiveWidth(int responsiveWidth) {
 		box.setResponsiveWidth(Integer.valueOf(responsiveWidth));
 		return this;
 	}
@@ -166,7 +166,7 @@ public class FluentHBox extends FluentContainer<FluentHBox> implements FluentBox
 	 * @return this builder
 	 */
 	@Override
-	public FluentHBox sm(int sm) {
+	public @Nonnull FluentHBox sm(int sm) {
 		box.setSm(Integer.valueOf(sm));
 		return this;
 	}
@@ -179,7 +179,7 @@ public class FluentHBox extends FluentContainer<FluentHBox> implements FluentBox
 	 * @return this builder
 	 */
 	@Override
-	public FluentHBox md(int md) {
+	public @Nonnull FluentHBox md(int md) {
 		box.setMd(Integer.valueOf(md));
 		return this;
 	}
@@ -192,7 +192,7 @@ public class FluentHBox extends FluentContainer<FluentHBox> implements FluentBox
 	 * @return this builder
 	 */
 	@Override
-	public FluentHBox lg(int lg) {
+	public @Nonnull FluentHBox lg(int lg) {
 		box.setLg(Integer.valueOf(lg));
 		return this;
 	}
@@ -205,7 +205,7 @@ public class FluentHBox extends FluentContainer<FluentHBox> implements FluentBox
 	 * @return this builder
 	 */
 	@Override
-	public FluentHBox xl(int xl) {
+	public @Nonnull FluentHBox xl(int xl) {
 		box.setXl(Integer.valueOf(xl));
 		return this;
 	}
@@ -218,7 +218,7 @@ public class FluentHBox extends FluentContainer<FluentHBox> implements FluentBox
 	 * @return this builder
 	 */
 	@Override
-	public FluentHBox percentageWidth(int percentageWidth) {
+	public @Nonnull FluentHBox percentageWidth(int percentageWidth) {
 		box.setPercentageWidth(Integer.valueOf(percentageWidth));
 		return this;
 	}
@@ -231,7 +231,7 @@ public class FluentHBox extends FluentContainer<FluentHBox> implements FluentBox
 	 * @return this builder
 	 */
 	@Override
-	public FluentHBox minPixelWidth(int minPixelWidth) {
+	public @Nonnull FluentHBox minPixelWidth(int minPixelWidth) {
 		box.setMinPixelWidth(Integer.valueOf(minPixelWidth));
 		return this;
 	}
@@ -244,7 +244,7 @@ public class FluentHBox extends FluentContainer<FluentHBox> implements FluentBox
 	 * @return this builder
 	 */
 	@Override
-	public FluentHBox maxPixelWidth(int maxPixelWidth) {
+	public @Nonnull FluentHBox maxPixelWidth(int maxPixelWidth) {
 		box.setMaxPixelWidth(Integer.valueOf(maxPixelWidth));
 		return this;
 	}
@@ -257,7 +257,7 @@ public class FluentHBox extends FluentContainer<FluentHBox> implements FluentBox
 	 * @return this builder
 	 */
 	@Override
-	public FluentHBox pixelHeight(int pixelHeight) {
+	public @Nonnull FluentHBox pixelHeight(int pixelHeight) {
 		box.setPixelHeight(Integer.valueOf(pixelHeight));
 		return this;
 	}
@@ -270,7 +270,7 @@ public class FluentHBox extends FluentContainer<FluentHBox> implements FluentBox
 	 * @return this builder
 	 */
 	@Override
-	public FluentHBox percentageHeight(int percentageHeight) {
+	public @Nonnull FluentHBox percentageHeight(int percentageHeight) {
 		box.setPercentageHeight(Integer.valueOf(percentageHeight));
 		return this;
 	}
@@ -283,7 +283,7 @@ public class FluentHBox extends FluentContainer<FluentHBox> implements FluentBox
 	 * @return this builder
 	 */
 	@Override
-	public FluentHBox minPixelHeight(int minPixelHeight) {
+	public @Nonnull FluentHBox minPixelHeight(int minPixelHeight) {
 		box.setMinPixelHeight(Integer.valueOf(minPixelHeight));
 		return this;
 	}
@@ -296,7 +296,7 @@ public class FluentHBox extends FluentContainer<FluentHBox> implements FluentBox
 	 * @return this builder
 	 */
 	@Override
-	public FluentHBox maxPixelHeight(int maxPixelHeight) {
+	public @Nonnull FluentHBox maxPixelHeight(int maxPixelHeight) {
 		box.setMaxPixelHeight(Integer.valueOf(maxPixelHeight));
 		return this;
 	}
@@ -309,7 +309,7 @@ public class FluentHBox extends FluentContainer<FluentHBox> implements FluentBox
 	 * @return this builder
 	 */
 	@Override
-	public FluentHBox pixelPadding(int pixelPadding) {
+	public @Nonnull FluentHBox pixelPadding(int pixelPadding) {
 		box.setPixelPadding(Integer.valueOf(pixelPadding));
 		return this;
 	}
@@ -322,7 +322,7 @@ public class FluentHBox extends FluentContainer<FluentHBox> implements FluentBox
 	 * @return this builder
 	 */
 	@Override
-	public FluentHBox pixelMemberPadding(int pixelMemberPadding) {
+	public @Nonnull FluentHBox pixelMemberPadding(int pixelMemberPadding) {
 		box.setPixelMemberPadding(Integer.valueOf(pixelMemberPadding));
 		return this;
 	}
@@ -335,7 +335,7 @@ public class FluentHBox extends FluentContainer<FluentHBox> implements FluentBox
 	 * @return this builder
 	 */
 	@Override
-	public FluentHBox shrinkWrap(ShrinkWrap shrinkWrap) {
+	public @Nonnull FluentHBox shrinkWrap(@Nullable ShrinkWrap shrinkWrap) {
 		box.setShrinkWrap(shrinkWrap);
 		return this;
 	}
@@ -347,7 +347,7 @@ public class FluentHBox extends FluentContainer<FluentHBox> implements FluentBox
 	 *            horizontal alignment mode
 	 * @return this builder
 	 */
-	public FluentHBox horizontalAlignment(HorizontalAlignment horizontalAlignment) {
+	public @Nonnull FluentHBox horizontalAlignment(@Nullable HorizontalAlignment horizontalAlignment) {
 		box.setHorizontalAlignment(horizontalAlignment);
 		return this;
 	}
@@ -359,7 +359,7 @@ public class FluentHBox extends FluentContainer<FluentHBox> implements FluentBox
 	 *            vertical alignment mode
 	 * @return this builder
 	 */
-	public FluentHBox verticalAlignment(VerticalAlignment verticalAlignment) {
+	public @Nonnull FluentHBox verticalAlignment(@Nullable VerticalAlignment verticalAlignment) {
 		box.setVerticalAlignment(verticalAlignment);
 		return this;
 	}
@@ -407,7 +407,7 @@ public class FluentHBox extends FluentContainer<FluentHBox> implements FluentBox
 	 * @return the mutable horizontal box metadata
 	 */
 	@Override
-	public HBox get() {
+	public @Nonnull HBox get() {
 		return box;
 	}
 }

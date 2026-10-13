@@ -5,6 +5,7 @@ import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.FilterOperator;
 import org.skyve.metadata.view.widget.FilterParameter;
 
+import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlType;
 
@@ -44,42 +45,42 @@ public final class FilterParameterImpl implements FilterParameter {
 	private String valueBinding;
 
 	@Override
-	public String getFilterBinding() {
+	public @Nullable String getFilterBinding() {
 		return filterBinding;
 	}
 
 	@XmlAttribute(required = true)
-	public void setFilterBinding(String filterBinding) {
+	public void setFilterBinding(@Nullable String filterBinding) {
 		this.filterBinding = UtilImpl.processStringValue(filterBinding);
 	}
 
 	@Override
-	public FilterOperator getOperator() {
+	public @Nullable FilterOperator getOperator() {
 		return operator;
 	}
 
 	@XmlAttribute(required = true)
-	public void setOperator(FilterOperator operator) {
+	public void setOperator(@Nullable FilterOperator operator) {
 		this.operator = operator;
 	}
 
 	@Override
-	public String getValue() {
+	public @Nullable String getValue() {
 		return value;
 	}
 
 	@XmlAttribute(required = false)
-	public void setValue(String value) {
+	public void setValue(@Nullable String value) {
 		this.value = UtilImpl.processStringValue(value);
 	}
 	
 	@Override
-	public String getValueBinding() {
+	public @Nullable String getValueBinding() {
 		return valueBinding;
 	}
 
 	@XmlAttribute(required = false)
-	public void setValueBinding(String valueBinding) {
+	public void setValueBinding(@Nullable String valueBinding) {
 		this.valueBinding = UtilImpl.processStringValue(valueBinding);
 	}
 }

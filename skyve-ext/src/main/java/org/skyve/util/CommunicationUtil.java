@@ -38,6 +38,7 @@ import org.slf4j.Logger;
 import org.skyve.util.logging.SkyveLoggerFactory;
 
 import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 
 /**
  * Executes communication-template workflows for {@code admin.Communication} documents.
@@ -91,25 +92,25 @@ public class CommunicationUtil {
 		private String yahooCalendarLink;
 		private byte[] icsFileAttachment;
 		
-		public String getGoogleCalendarLink() {
+		public @Nullable String getGoogleCalendarLink() {
 			return googleCalendarLink;
 		}
-		public void setGoogleCalendarLink(String googleCalendarLink) {
+		public void setGoogleCalendarLink(@Nullable String googleCalendarLink) {
 			this.googleCalendarLink = googleCalendarLink;
 		}
-		public String getYahooCalendarLink() {
+		public @Nullable String getYahooCalendarLink() {
 			return yahooCalendarLink;
 		}
-		public void setYahooCalendarLink(String yahooCalendarLink) {
+		public void setYahooCalendarLink(@Nullable String yahooCalendarLink) {
 			this.yahooCalendarLink = yahooCalendarLink;
 		}
-		public byte[] getIcsFileAttachment() {
+		public @Nullable byte[] getIcsFileAttachment() {
 			return icsFileAttachment;
 		}
-		public void setIcsFileAttachment(byte[] icsFileAttachment) {
+		public void setIcsFileAttachment(@Nullable byte[] icsFileAttachment) {
 			this.icsFileAttachment = icsFileAttachment;
 		}
-		public CommunicationCalendarItem(String googleCalendarLink, String yahooCalendarLink, byte[] icsFileAttachment) {
+		public CommunicationCalendarItem(@Nullable String googleCalendarLink, @Nullable String yahooCalendarLink, @Nullable byte[] icsFileAttachment) {
 			this.googleCalendarLink = googleCalendarLink;
 			this.yahooCalendarLink = yahooCalendarLink;
 			this.icsFileAttachment = icsFileAttachment;
@@ -131,8 +132,8 @@ public class CommunicationUtil {
 	 * @throws Exception
 	 */
 	@SuppressWarnings("java:S3776") // Complexity OK
-	private static String actionCommunicationRequest(WebContext webContext, ActionType actionType, Communication communication, RunMode runMode, ResponseMode responseMode,
-			MailAttachment[] additionalAttachments, @Nonnull Bean... specificBeans) throws Exception {
+	private static @Nullable String actionCommunicationRequest(@Nullable WebContext webContext, @Nonnull ActionType actionType, @Nonnull Communication communication, @Nonnull RunMode runMode, @Nonnull ResponseMode responseMode,
+			@Nullable MailAttachment[] additionalAttachments, @Nonnull Bean... specificBeans) throws Exception {
 
 		String resultingFilePath = null;
 
@@ -302,8 +303,8 @@ public class CommunicationUtil {
 	 * @return
 	 */
 	@SuppressWarnings("java:S3776") // Complexity OK
-	private static List<String> resolveAndValidateEmailAddressList(String addressList, ResponseMode responseMode, Document communicationDoc,
-			Document subscriptionDoc) throws Exception {
+	private static @Nonnull List<String> resolveAndValidateEmailAddressList(@Nullable String addressList, @Nonnull ResponseMode responseMode, @Nonnull Document communicationDoc,
+			@Nonnull Document subscriptionDoc) throws Exception {
 
 		List<String> resolvedAndValidatedAddresses = new ArrayList<>();
 
@@ -364,8 +365,8 @@ public class CommunicationUtil {
 
 	}
 
-	private static String actionCommunicationRequest(ActionType actionType, Communication communication, RunMode runMode, ResponseMode responseMode,
-			MailAttachment[] additionalAttachments, Bean... specificBeans) throws Exception {
+	private static @Nullable String actionCommunicationRequest(@Nonnull ActionType actionType, @Nonnull Communication communication, @Nonnull RunMode runMode, @Nonnull ResponseMode responseMode,
+			@Nullable MailAttachment[] additionalAttachments, @Nonnull Bean... specificBeans) throws Exception {
 		return actionCommunicationRequest(null, actionType, communication, runMode, responseMode, additionalAttachments, specificBeans);
 	}
 
@@ -379,7 +380,7 @@ public class CommunicationUtil {
 	 * @param specificBeans
 	 * @throws Exception
 	 */
-	public static void send(Communication communication, RunMode runMode, ResponseMode responseMode, MailAttachment[] additionalAttachments, Bean... specificBeans)
+	public static void send(@Nonnull Communication communication, @Nonnull RunMode runMode, @Nonnull ResponseMode responseMode, @Nullable MailAttachment[] additionalAttachments, @Nonnull Bean... specificBeans)
 			throws Exception {
 		actionCommunicationRequest(ActionType.SMTP, communication, runMode, responseMode, additionalAttachments, specificBeans);
 	}
@@ -394,8 +395,8 @@ public class CommunicationUtil {
 	 * @param specificBeans
 	 * @throws Exception
 	 */
-	public static void send(WebContext webContext, Communication communication, RunMode runMode, ResponseMode responseMode, MailAttachment[] additionalAttachments,
-			Bean... specificBeans) throws Exception {
+	public static void send(@Nullable WebContext webContext, @Nonnull Communication communication, @Nonnull RunMode runMode, @Nonnull ResponseMode responseMode, @Nullable MailAttachment[] additionalAttachments,
+			@Nonnull Bean... specificBeans) throws Exception {
 		actionCommunicationRequest(ActionType.SMTP, communication, runMode, responseMode, additionalAttachments, specificBeans);
 		if (RunMode.ACTION.equals(runMode) && ResponseMode.EXPLICIT.equals(responseMode) && webContext != null) {
 			webContext.growl(MessageSeverity.info, SENT_SUCCESSFULLY_MESSAGE);
@@ -413,7 +414,7 @@ public class CommunicationUtil {
 	 * @return Generated output file path when generation occurs, otherwise {@code null}
 	 * @throws Exception If generation fails and explicit mode is used
 	 */
-	public static String generate(Communication communication, RunMode runMode, ResponseMode responseMode, MailAttachment[] additionalAttachments, Bean... specificBeans)
+	public static @Nullable String generate(@Nonnull Communication communication, @Nonnull RunMode runMode, @Nonnull ResponseMode responseMode, @Nullable MailAttachment[] additionalAttachments, @Nonnull Bean... specificBeans)
 			throws Exception {
 		return actionCommunicationRequest(ActionType.FILE, communication, runMode, responseMode, additionalAttachments, specificBeans);
 	}
@@ -424,7 +425,7 @@ public class CommunicationUtil {
 	 * @param description Communication description to search for
 	 * @return Matching system communication, or {@code null} when not found
 	 */
-	public static Communication getSystemCommunicationByDescription(String description) {
+	public static @Nullable Communication getSystemCommunicationByDescription(@Nonnull String description) {
 		return CORE.getPersistence().withDocumentPermissionScopes(DocumentPermissionScope.customer, p -> {
 			DocumentQuery query = p.newDocumentQuery(AppConstants.ADMIN_MODULE_NAME, AppConstants.COMMUNICATION_DOCUMENT_NAME);
 			query.getFilter().addEquals(AppConstants.DESCRIPTION_ATTRIBUTE_NAME, description);
@@ -447,7 +448,7 @@ public class CommunicationUtil {
 	 * @param formatType
 	 * @throws Exception
 	 */
-	public static void sendSimpleBeanCommunication(String sendTo, String subject, String body, ResponseMode responseMode, FormatType formatType, Bean... beans) throws Exception {
+	public static void sendSimpleBeanCommunication(@Nonnull String sendTo, @Nonnull String subject, @Nonnull String body, @Nonnull ResponseMode responseMode, @Nonnull FormatType formatType, @Nonnull Bean... beans) throws Exception {
 		User u = CORE.getUser();
 		Customer c = u.getCustomer();
 		Module m = c.getModule(AppConstants.ADMIN_MODULE_NAME);
@@ -475,7 +476,7 @@ public class CommunicationUtil {
 	 * @return Existing or newly created persisted communication
 	 * @throws Exception If initialisation fails
 	 */
-	public static Communication initialiseSystemCommunication(String description, String sendToExpression, String ccExpression, String defaultSubject, String defaultBody)
+	public static @Nonnull Communication initialiseSystemCommunication(@Nonnull String description, @Nonnull String sendToExpression, @Nullable String ccExpression, @Nonnull String defaultSubject, @Nonnull String defaultBody)
 			throws Exception {
 
 		// create a default communication
@@ -513,7 +514,7 @@ public class CommunicationUtil {
 	 * @return Existing or newly created persisted communication
 	 * @throws Exception If initialisation fails
 	 */
-	public static Communication initialiseSystemCommunication(String description, String defaultSubject, String defaultBody) throws Exception {
+	public static @Nonnull Communication initialiseSystemCommunication(@Nonnull String description, @Nonnull String defaultSubject, @Nonnull String defaultBody) throws Exception {
 
 		return initialiseSystemCommunication(description, "{contact.email1}", null, defaultSubject, defaultBody);
 	}
@@ -528,8 +529,8 @@ public class CommunicationUtil {
 	 * @param bean
 	 * @throws Exception
 	 */
-	public static void sendFailSafeSystemCommunication(WebContext webContext, String description, String defaultSubject, String defaultBody, ResponseMode responseMode,
-			MailAttachment[] additionalAttachments, Bean... beans) throws Exception {
+	public static void sendFailSafeSystemCommunication(@Nullable WebContext webContext, @Nonnull String description, @Nonnull String defaultSubject, @Nonnull String defaultBody, @Nonnull ResponseMode responseMode,
+			@Nullable MailAttachment[] additionalAttachments, @Nonnull Bean... beans) throws Exception {
 
 		String sendTo = "{contact.email1}"; // user contact email address
 		String ccTo = null;
@@ -548,8 +549,8 @@ public class CommunicationUtil {
 	 * @param beans Binding context beans
 	 * @throws Exception If initialisation or send fails in explicit mode
 	 */
-	public static void sendFailSafeSystemCommunication(String description, String defaultSubject, String defaultBody, ResponseMode responseMode,
-			MailAttachment[] additionalAttachments, Bean... beans) throws Exception {
+	public static void sendFailSafeSystemCommunication(@Nonnull String description, @Nonnull String defaultSubject, @Nonnull String defaultBody, @Nonnull ResponseMode responseMode,
+			@Nullable MailAttachment[] additionalAttachments, @Nonnull Bean... beans) throws Exception {
 		sendFailSafeSystemCommunication(null, description, defaultSubject, defaultBody, responseMode, additionalAttachments, beans);
 	}
 
@@ -566,8 +567,8 @@ public class CommunicationUtil {
 	 * @throws Exception
 	 */
 	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
-	public static void sendFailSafeSystemCommunication(WebContext webContext, String description, String sendTo, String ccTo, String defaultSubject, String defaultBody,
-			ResponseMode responseMode, MailAttachment[] additionalAttachments, Bean... beans) throws Exception {
+	public static void sendFailSafeSystemCommunication(@Nullable WebContext webContext, @Nonnull String description, @Nonnull String sendTo, @Nullable String ccTo, @Nonnull String defaultSubject, @Nonnull String defaultBody,
+			@Nonnull ResponseMode responseMode, @Nullable MailAttachment[] additionalAttachments, @Nonnull Bean... beans) throws Exception {
 		Communication c = initialiseSystemCommunication(description, sendTo, ccTo, defaultSubject, defaultBody);
 		actionCommunicationRequest(webContext, ActionType.SMTP, c, RunMode.ACTION, responseMode, additionalAttachments, beans);
 	}
@@ -586,8 +587,8 @@ public class CommunicationUtil {
 	 * @throws Exception If initialisation or send fails in explicit mode
 	 */
 	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
-	public static void sendFailSafeSystemCommunication(String description, String sendTo, String ccTo, String defaultSubject, String defaultBody, ResponseMode responseMode,
-			MailAttachment[] additionalAttachments, Bean... beans) throws Exception {
+	public static void sendFailSafeSystemCommunication(@Nonnull String description, @Nonnull String sendTo, @Nullable String ccTo, @Nonnull String defaultSubject, @Nonnull String defaultBody, @Nonnull ResponseMode responseMode,
+			@Nullable MailAttachment[] additionalAttachments, @Nonnull Bean... beans) throws Exception {
 		sendFailSafeSystemCommunication(null, description, sendTo, ccTo, defaultSubject, defaultBody, responseMode, additionalAttachments, beans);
 	}
 
@@ -602,7 +603,7 @@ public class CommunicationUtil {
 	 * @return Persisted communication instance with updated results text
 	 * @throws Exception If job kickoff cannot be scheduled
 	 */
-	public static <T extends Communication> T kickOffJob(T bean) throws Exception {
+	public static @Nonnull <T extends Communication> T kickOffJob(@Nonnull T bean) throws Exception {
 
 		T communication = bean;
 
@@ -630,7 +631,7 @@ public class CommunicationUtil {
 		return communication;
 	}
 
-	public static String getResults(Communication bean) throws Exception {
+	public static @Nonnull String getResults(@Nonnull Communication bean) throws Exception {
 
 		// validate required fields
 		if (bean.getModuleName() == null) {
@@ -684,7 +685,7 @@ public class CommunicationUtil {
 	 * @param beans
 	 * @throws Exception
 	 */
-	private static CommunicationCalendarItem generateCalendarAttachments(Customer customer, Communication communication, Bean... beans) throws Exception {
+	private static @Nonnull CommunicationCalendarItem generateCalendarAttachments(@Nonnull Customer customer, @Nonnull Communication communication, @Nonnull Bean... beans) throws Exception {
 		CommunicationCalendarItem result = new CommunicationCalendarItem();
 
 		String google = null;
@@ -754,7 +755,7 @@ public class CommunicationUtil {
 	 * @return
 	 * @throws Exception
 	 */
-	private static MailAttachment[] getDefinedAttachments(Communication communication) throws Exception {
+	private static @Nonnull MailAttachment[] getDefinedAttachments(@Nonnull Communication communication) throws Exception {
 
 		MailAttachment ma1 = null;
 		MailAttachment ma2 = null;
@@ -804,7 +805,7 @@ public class CommunicationUtil {
 	 * @return
 	 * @throws Exception
 	 */
-	public static String formatCommunicationMessage(Customer customer, String expression, Bean... beans) {
+	public static @Nullable String formatCommunicationMessage(@Nullable Customer customer, @Nullable String expression, @Nullable Bean... beans) {
 		String result = expression;
 		
 		if (result != null) {
@@ -831,7 +832,7 @@ public class CommunicationUtil {
 	 * @param html
 	 * @return
 	 */
-	private static String htmlEnclose(String html) {
+	private static @Nonnull String htmlEnclose(@Nonnull String html) {
 		StringBuilder sb = new StringBuilder();
 
 		// replace all \n with <br> when it is not at the end of a line

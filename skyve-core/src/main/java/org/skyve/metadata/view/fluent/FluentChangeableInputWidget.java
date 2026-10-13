@@ -2,6 +2,8 @@ package org.skyve.metadata.view.fluent;
 
 import org.skyve.impl.metadata.view.widget.bound.input.ChangeableInputWidget;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * Provides fluent operations shared by input widgets with change actions.
  *
@@ -19,7 +21,7 @@ public abstract class FluentChangeableInputWidget<T extends FluentChangeableInpu
 	 * Copies shared change action bindings from the source widget metadata.
 	 */
 	@SuppressWarnings("unchecked")
-	protected T from(ChangeableInputWidget input) {
+	protected @Nonnull T from(@Nonnull ChangeableInputWidget input) {
 		super.from(input);
 		input.getChangedActions().forEach(a -> addChangeAction(FluentEventAction.from(a)));
 		return (T) this;
@@ -29,7 +31,7 @@ public abstract class FluentChangeableInputWidget<T extends FluentChangeableInpu
 	 * Appends a change action to the wrapped widget metadata.
 	 */
 	@SuppressWarnings("unchecked")
-	public T addChangeAction(FluentEventAction action) {
+	public @Nonnull T addChangeAction(@Nonnull FluentEventAction action) {
 		get().getChangedActions().add(action.get());
 		return (T) this;
 	}
@@ -40,5 +42,5 @@ public abstract class FluentChangeableInputWidget<T extends FluentChangeableInpu
 	 * @return the mutable changeable-input-widget metadata being configured
 	 */
 	@Override
-	public abstract ChangeableInputWidget get();
+	public abstract @Nonnull ChangeableInputWidget get();
 }

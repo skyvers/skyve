@@ -5,6 +5,8 @@ import org.skyve.domain.messages.DomainException;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
@@ -22,17 +24,17 @@ public class InvokeStaticStatement extends InvokeStatement {
 	// The fully qualified Java class name of the class with the static method to call.
 	private String className;
 
-	public String getClassName() {
+	public @Nullable String getClassName() {
 		return className;
 	}
 	
 	@XmlAttribute(required = true)
-	public void setClassName(String className) {
+	public void setClassName(@Nullable String className) {
 		this.className = UtilImpl.processStringValue(className);
 	}
 
 	@Override
-	public void execute(Bean bean) {
+	public void execute(@Nonnull Bean bean) {
 		ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
 
 		try {

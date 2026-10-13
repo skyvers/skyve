@@ -2,6 +2,8 @@ package org.skyve.metadata.customer;
 
 import org.skyve.metadata.SerializableMetaData;
 
+import jakarta.annotation.Nullable;
+
 /**
  * Customer-specific login and logout page URL overrides.
  *
@@ -16,12 +18,12 @@ public interface LoginResources extends SerializableMetaData {
 	 *
 	 * @return the login page URL; may be {@code null} if using the default Skyve login page
 	 */
-	public String getLoginPageURL();
+	public @Nullable String getLoginPageURL();
 
 	/**
 	 * Returns the URL to redirect to after a successful logout.
 	 *
 	 * @return the logged-out redirect URL; may be {@code null} if using the Skyve default
 	 */
-	public String getLoggedOutPageURL();
+	public @Nullable String getLoggedOutPageURL();
 }

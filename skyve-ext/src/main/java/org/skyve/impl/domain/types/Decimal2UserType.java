@@ -15,6 +15,9 @@ import org.hibernate.usertype.UserType;
 import org.skyve.domain.types.Decimal;
 import org.skyve.domain.types.Decimal2;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Hibernate {@link org.hibernate.usertype.UserType} that maps the Skyve
  * {@link org.skyve.domain.types.Decimal2} type to a SQL {@code NUMERIC} column.
@@ -23,29 +26,29 @@ public class Decimal2UserType implements UserType, Serializable, LiteralType<Num
 	private static final long serialVersionUID = 7056962012110550357L;
 
 	@Override
-	public int[] sqlTypes() {
+	public @Nonnull int[] sqlTypes() {
 		return new int[] {Types.NUMERIC};
 	}
 
 	@Override
-	public Class<?> returnedClass() {
+	public @Nonnull Class<?> returnedClass() {
 		return Decimal2.class;
 	}
 
 	@Override
-	public boolean equals(Object x, Object y) 
+	public boolean equals(@Nullable Object x, @Nullable Object y) 
 	throws HibernateException {
 		return (x == y) || ((x != null) && (y != null) && ((Decimal2) x).equals(y));
 	}
 
 	@Override
-	public int hashCode(Object o) 
+	public int hashCode(@Nonnull Object o) 
 	throws HibernateException {
 		return ((Decimal2) o).intValue();
 	}
 
 	@Override
-	public Object nullSafeGet(ResultSet rs, String[] names, SharedSessionContractImplementor session, Object owner)
+	public @Nullable Object nullSafeGet(@Nonnull ResultSet rs, @Nonnull String[] names, @Nullable SharedSessionContractImplementor session, @Nullable Object owner)
 	throws HibernateException, SQLException {
 		BigDecimal value = rs.getBigDecimal(names[0]);
 		if (rs.wasNull()) {
@@ -56,7 +59,7 @@ public class Decimal2UserType implements UserType, Serializable, LiteralType<Num
 	}
 
 	@Override
-	public void nullSafeSet(PreparedStatement ps, Object value, int index, SharedSessionContractImplementor session)
+	public void nullSafeSet(@Nonnull PreparedStatement ps, @Nullable Object value, int index, @Nullable SharedSessionContractImplementor session)
 	throws HibernateException, SQLException {
 		if (value == null) {
 			ps.setNull(index, Types.NUMERIC);
@@ -76,7 +79,7 @@ public class Decimal2UserType implements UserType, Serializable, LiteralType<Num
 	}
 
 	@Override
-	public Object deepCopy(Object value) 
+	public @Nullable Object deepCopy(@Nullable Object value) 
 	throws HibernateException {
 		return (value == null) ? null : new Decimal2((Decimal) value);
 	}
@@ -87,25 +90,25 @@ public class Decimal2UserType implements UserType, Serializable, LiteralType<Num
 	}
 
 	@Override
-	public Serializable disassemble(Object value)
+	public @Nullable Serializable disassemble(@Nullable Object value)
 	throws HibernateException {
 		return (Serializable) value;
 	}
 
 	@Override
-	public Object assemble(Serializable cached, Object owner) 
+	public @Nullable Object assemble(@Nullable Serializable cached, @Nullable Object owner) 
 	throws HibernateException {
 		return cached;
 	}
 
 	@Override
-	public Object replace(Object original, Object target, Object owner) 
+	public @Nullable Object replace(@Nullable Object original, @Nullable Object target, @Nullable Object owner) 
 	throws HibernateException {
 		return original;
 	}
 
 	@Override
-	public String objectToSQLString(Number value, Dialect dialect) 
+	public @Nonnull String objectToSQLString(@Nullable Number value, @Nullable Dialect dialect) 
 	throws Exception {
 		return (value == null) ? "NULL" : value.toString();
 	}

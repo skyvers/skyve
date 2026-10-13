@@ -93,13 +93,13 @@ public class FlutterComponentRenderer extends ComponentRenderer {
 	private Set<String> imports;
 	private String startingIndent;
 
-	public FlutterComponentRenderer(Set<String> imports, String startingIndent) {
+	public FlutterComponentRenderer(@Nonnull Set<String> imports, @Nonnull String startingIndent) {
 		this.imports = imports;
 		this.startingIndent = startingIndent;
 	}
 	
 	@Override
-	public RenderedComponent view(RenderedComponent component, String invisibleCondition) {
+	public @Nonnull RenderedComponent view(@Nullable RenderedComponent component, @Nonnull String invisibleCondition) {
 		imports.add(FlutterLayoutRenderer.VBOX_IMPORT);
 		RenderedComponent result = new RenderedComponent(FlutterGenerator.INDENT).setAfter("]),").setIndent(startingIndent);
 		StringBuilder output = result.getOutput();
@@ -108,7 +108,7 @@ public class FlutterComponentRenderer extends ComponentRenderer {
 	}
 
 	@Override
-	public List<RenderedComponent> toolbars(List<RenderedComponent> components, String widgetId) {
+	public @Nonnull List<RenderedComponent> toolbars(@Nullable List<RenderedComponent> components, @Nullable String widgetId) {
 		imports.add(TOOLBAR_IMPORT);
 		RenderedComponent result = new RenderedComponent(FlutterGenerator.INDENT).setAfter("]),");
 		StringBuilder output = result.getOutput();
@@ -117,7 +117,7 @@ public class FlutterComponentRenderer extends ComponentRenderer {
 	}
 
 	@Override
-	public RenderedComponent tabPane(RenderedComponent component, TabPane tabPane) {
+	public @Nonnull RenderedComponent tabPane(@Nullable RenderedComponent component, @Nonnull TabPane tabPane) {
 		imports.add(TAB_PANE_IMPORT);
 		imports.add(TAB_IMPORT);
 		RenderedComponent result = new RenderedComponent(FlutterGenerator.INDENT).setAfter("]),");
@@ -127,7 +127,7 @@ public class FlutterComponentRenderer extends ComponentRenderer {
 	}
 
 	@Override
-	public RenderedComponent tab(RenderedComponent component, String title, Tab tab) {
+	public @Nonnull RenderedComponent tab(@Nullable RenderedComponent component, @Nullable String title, @Nonnull Tab tab) {
 		RenderedComponent result = new RenderedComponent(FlutterGenerator.INDENT).setAfter("]),");
 		StringBuilder output = result.getOutput();
 		output.append("SkyveTab(title: '").append(title).append("', children: [");
@@ -135,10 +135,10 @@ public class FlutterComponentRenderer extends ComponentRenderer {
 	}
 
 	@Override
-	public RenderedComponent border(RenderedComponent component,
-										String title,
-										String invisibleCondition,
-										Integer pixelWidth) {
+	public @Nonnull RenderedComponent border(@Nullable RenderedComponent component,
+										@Nullable String title,
+										@Nullable String invisibleCondition,
+										@Nullable Integer pixelWidth) {
 		imports.add(BORDER_IMPORT);
 		RenderedComponent result = new RenderedComponent(FlutterGenerator.INDENT);
 		StringBuilder output = result.getOutput();
@@ -152,7 +152,7 @@ public class FlutterComponentRenderer extends ComponentRenderer {
 	}
 
 	@Override
-	public RenderedComponent label(RenderedComponent component, String value) {
+	public @Nonnull RenderedComponent label(@Nullable RenderedComponent component, @Nonnull String value) {
 		imports.add(LABEL_IMPORT);
 		RenderedComponent result = new RenderedComponent(FlutterGenerator.INDENT);
 		StringBuilder output = result.getOutput();
@@ -161,7 +161,7 @@ public class FlutterComponentRenderer extends ComponentRenderer {
 	}
 
 	@Override
-	public RenderedComponent spacer(RenderedComponent component, Spacer spacer) {
+	public @Nonnull RenderedComponent spacer(@Nullable RenderedComponent component, @Nonnull Spacer spacer) {
 		imports.add(SPACER_IMPORT);
 		RenderedComponent result = new RenderedComponent(FlutterGenerator.INDENT);
 		StringBuilder output = result.getOutput();
@@ -170,11 +170,11 @@ public class FlutterComponentRenderer extends ComponentRenderer {
 	}
 
 	@Override
-	public RenderedComponent actionButton(RenderedComponent component,
-											String dataWidgetBinding,
-											String dataWidgetVar,
-											Button button,
-											Action action) {
+	public @Nonnull RenderedComponent actionButton(@Nullable RenderedComponent component,
+											@Nullable String dataWidgetBinding,
+											@Nullable String dataWidgetVar,
+											@Nonnull Button button,
+											@Nonnull Action action) {
         imports.add(BUTTON_IMPORT);
         RenderedComponent result = new RenderedComponent(FlutterGenerator.INDENT);
 
@@ -186,14 +186,14 @@ public class FlutterComponentRenderer extends ComponentRenderer {
         return result;
     }
 	
-    private static String deriveActionType(ImplicitActionName implicitName) {
+    private static @Nonnull String deriveActionType(@Nullable ImplicitActionName implicitName) {
         return Optional.ofNullable(implicitName)
                        .map(ImplicitActionName::name)
                        .orElse(" ");
     }
 
 	@Override
-	public RenderedComponent reportButton(RenderedComponent component, Button button, Action action) {
+	public @Nonnull RenderedComponent reportButton(@Nullable RenderedComponent component, @Nonnull Button button, @Nonnull Action action) {
 		imports.add(BUTTON_IMPORT);
         RenderedComponent result = new RenderedComponent(FlutterGenerator.INDENT);
         
@@ -204,11 +204,11 @@ public class FlutterComponentRenderer extends ComponentRenderer {
     }
 
 	@Override
-	public RenderedComponent downloadButton(RenderedComponent component,
-												Button button,
-												Action action,
-												String moduleName,
-												String documentName) {
+	public @Nonnull RenderedComponent downloadButton(@Nullable RenderedComponent component,
+												@Nonnull Button button,
+												@Nonnull Action action,
+												@Nonnull String moduleName,
+												@Nonnull String documentName) {
         imports.add(BUTTON_IMPORT);
         RenderedComponent result = new RenderedComponent(FlutterGenerator.INDENT);
 
@@ -220,7 +220,7 @@ public class FlutterComponentRenderer extends ComponentRenderer {
     }
 
 	@Override
-	public RenderedComponent staticImage(RenderedComponent component, String fileUrl, StaticImage image) {
+	public @Nonnull RenderedComponent staticImage(@Nullable RenderedComponent component, @Nonnull String fileUrl, @Nonnull StaticImage image) {
 		imports.add(STATICIMAGE_IMPORT);
 		RenderedComponent result = new RenderedComponent(FlutterGenerator.INDENT);
 		StringBuilder output = result.getOutput();
@@ -229,10 +229,10 @@ public class FlutterComponentRenderer extends ComponentRenderer {
 	}
 
 	@Override
-	public RenderedComponent dynamicImage(RenderedComponent component,
-											DynamicImage image,
-											String moduleName,
-											String documentName) {
+	public @Nonnull RenderedComponent dynamicImage(@Nullable RenderedComponent component,
+											@Nonnull DynamicImage image,
+											@Nonnull String moduleName,
+											@Nonnull String documentName) {
 		imports.add(DYNAMICIMAGE_IMPORT);
 		RenderedComponent result = new RenderedComponent(FlutterGenerator.INDENT);
 		StringBuilder output = result.getOutput();
@@ -241,11 +241,11 @@ public class FlutterComponentRenderer extends ComponentRenderer {
 	}
 
 	@Override
-	public RenderedComponent blurb(RenderedComponent component,
-									String dataWidgetVar,
-									String value,
-									String binding,
-									Blurb blurb) {
+	public @Nonnull RenderedComponent blurb(@Nullable RenderedComponent component,
+									@Nullable String dataWidgetVar,
+									@Nullable String value,
+									@Nullable String binding,
+									@Nonnull Blurb blurb) {
 		imports.add(BLURB_IMPORT);
 		RenderedComponent result = new RenderedComponent(FlutterGenerator.INDENT);
 		StringBuilder output = result.getOutput();
@@ -254,11 +254,11 @@ public class FlutterComponentRenderer extends ComponentRenderer {
 	}
 
 	@Override
-	public RenderedComponent label(RenderedComponent component,
-									String dataWidgetVar,
-									String value,
-									String binding,
-									Label label) {
+	public @Nonnull RenderedComponent label(@Nullable RenderedComponent component,
+									@Nullable String dataWidgetVar,
+									@Nullable String value,
+									@Nullable String binding,
+									@Nonnull Label label) {
 		RenderedComponent result = new RenderedComponent(FlutterGenerator.INDENT);
 		StringBuilder output = result.getOutput();
 		if (value != null) {
@@ -272,11 +272,11 @@ public class FlutterComponentRenderer extends ComponentRenderer {
 	}
 
 	@Override
-	public RenderedComponent dataGrid(RenderedComponent component,
-										String dataWidgetVar,
+	public @Nonnull RenderedComponent dataGrid(@Nullable RenderedComponent component,
+										@Nullable String dataWidgetVar,
 										boolean ordered,
-										String title,
-										DataGrid grid) {
+										@Nullable String title,
+										@Nonnull DataGrid grid) {
 		imports.add(DATA_GRID_IMPORT);
 		RenderedComponent result = new RenderedComponent(FlutterGenerator.INDENT).setAfter("]),").setIndent("");
 		StringBuilder output = result.getOutput();
@@ -286,10 +286,10 @@ public class FlutterComponentRenderer extends ComponentRenderer {
 	}
 
 	@Override
-	public RenderedComponent dataRepeater(RenderedComponent component,
-											String dataWidgetVar,
-											String title,
-											DataRepeater repeater) {
+	public @Nonnull RenderedComponent dataRepeater(@Nullable RenderedComponent component,
+											@Nullable String dataWidgetVar,
+											@Nullable String title,
+											@Nonnull DataRepeater repeater) {
 		imports.add(DATA_GRID_IMPORT);
 		RenderedComponent result = new RenderedComponent(FlutterGenerator.INDENT).setAfter("]),").setIndent("");
 		StringBuilder output = result.getOutput();
@@ -299,14 +299,14 @@ public class FlutterComponentRenderer extends ComponentRenderer {
 	}
 
 	@Override
-	public RenderedComponent addDataGridBoundColumn(RenderedComponent component,
-														RenderedComponent current,
-														AbstractDataWidget widget,
-														DataGridBoundColumn column,
-														String dataWidgetVar,
-														String columnTitle,
-														String columnBinding,
-														StringBuilder gridColumnExpression) {
+	public @Nonnull RenderedComponent addDataGridBoundColumn(@Nullable RenderedComponent component,
+														@Nonnull RenderedComponent current,
+														@Nonnull AbstractDataWidget widget,
+														@Nonnull DataGridBoundColumn column,
+														@Nullable String dataWidgetVar,
+														@Nullable String columnTitle,
+														@Nonnull String columnBinding,
+														@Nonnull StringBuilder gridColumnExpression) {
 /*
 		imports.add("{Column}");
 		RenderedComponent result = new RenderedComponent(FlutterGenerator.INDENT).setIndent("");
@@ -320,43 +320,43 @@ public class FlutterComponentRenderer extends ComponentRenderer {
 	}
 
 	@Override
-	public RenderedComponent addedDataGridBoundColumn(RenderedComponent component, RenderedComponent current) {
+	public @Nonnull RenderedComponent addedDataGridBoundColumn(@Nullable RenderedComponent component, @Nonnull RenderedComponent current) {
 //		return current.getParent();
 		return current;
 	}
 
 	@Override
-	public RenderedComponent addDataGridContainerColumn(RenderedComponent component,
-															RenderedComponent current,
-															AbstractDataWidget widget,
-															String columnTitle,
-															DataGridContainerColumn column) {
+	public @Nonnull RenderedComponent addDataGridContainerColumn(@Nullable RenderedComponent component,
+															@Nonnull RenderedComponent current,
+															@Nonnull AbstractDataWidget widget,
+															@Nullable String columnTitle,
+															@Nonnull DataGridContainerColumn column) {
 		return current;
 	}
 
 	@Override
-	public RenderedComponent addedDataGridContainerColumn(RenderedComponent component, RenderedComponent current) {
+	public @Nonnull RenderedComponent addedDataGridContainerColumn(@Nullable RenderedComponent component, @Nonnull RenderedComponent current) {
 		return current;
 	}
 
 	@Override
-	public RenderedComponent addDataGridActionColumn(RenderedComponent component,
-														RenderedComponent current,
-														DataGrid grid,
-														String dataWidgetVar,
-														String gridColumnExpression,
-														String singluarDocumentAlias,
+	public @Nonnull RenderedComponent addDataGridActionColumn(@Nullable RenderedComponent component,
+														@Nonnull RenderedComponent current,
+														@Nonnull DataGrid grid,
+														@Nullable String dataWidgetVar,
+														@Nonnull String gridColumnExpression,
+														@Nullable String singluarDocumentAlias,
 														boolean inline) {
 		return current;
 	}
 
 	@Override
-	public RenderedComponent listGrid(RenderedComponent component,
-										String modelDocumentName,
-										String modelName,
-										ListModel<Bean> model,
-										String title,
-										ListGrid listGrid,
+	public @Nonnull RenderedComponent listGrid(@Nullable RenderedComponent component,
+										@Nonnull String modelDocumentName,
+										@Nonnull String modelName,
+										@Nonnull ListModel<Bean> model,
+										@Nullable String title,
+										@Nonnull ListGrid listGrid,
 										boolean aggregateQuery) {
 		RenderedComponent result = new RenderedComponent(FlutterGenerator.INDENT);
 		StringBuilder output = result.getOutput();
@@ -365,13 +365,13 @@ public class FlutterComponentRenderer extends ComponentRenderer {
 	}
 
 	@Override
-	public RenderedComponent listRepeater(RenderedComponent component,
-											String modelDocumentName,
-											String modelName,
-											ListModel<Bean> model,
-											List<FilterParameter> filterParameters,
-											List<Parameter> parameters,
-											String title,
+	public @Nonnull RenderedComponent listRepeater(@Nullable RenderedComponent component,
+											@Nonnull String modelDocumentName,
+											@Nonnull String modelName,
+											@Nonnull ListModel<Bean> model,
+											@Nonnull List<FilterParameter> filterParameters,
+											@Nonnull List<Parameter> parameters,
+											@Nullable String title,
 											boolean showColumnHeaders,
 											boolean showGrid) {
 		RenderedComponent result = new RenderedComponent(FlutterGenerator.INDENT);
@@ -381,7 +381,7 @@ public class FlutterComponentRenderer extends ComponentRenderer {
 	}
 
 	@Override
-	public RenderedComponent listMembership(RenderedComponent component, ListMembership membership) {
+	public @Nonnull RenderedComponent listMembership(@Nullable RenderedComponent component, @Nonnull ListMembership membership) {
 		RenderedComponent result = new RenderedComponent(FlutterGenerator.INDENT);
 		StringBuilder output = result.getOutput();
 		output.append("const Text('ListMembership'),");
@@ -389,10 +389,10 @@ public class FlutterComponentRenderer extends ComponentRenderer {
 	}
 
 	@Override
-	public RenderedComponent checkBox(RenderedComponent component,
-										String dataWidgetVar,
-										CheckBox checkBox,
-										String title,
+	public @Nonnull RenderedComponent checkBox(@Nullable RenderedComponent component,
+										@Nullable String dataWidgetVar,
+										@Nonnull CheckBox checkBox,
+										@Nullable String title,
 										@Nullable String requiredMessage) {
 		imports.add(CHECKBOX_IMPORT);
 		RenderedComponent result = new RenderedComponent(FlutterGenerator.INDENT);
@@ -408,10 +408,10 @@ public class FlutterComponentRenderer extends ComponentRenderer {
 	}
 
 	@Override
-	public RenderedComponent colourPicker(RenderedComponent component,
-											String dataWidgetVar,
-											ColourPicker colour,
-											String title,
+	public @Nonnull RenderedComponent colourPicker(@Nullable RenderedComponent component,
+											@Nullable String dataWidgetVar,
+											@Nonnull ColourPicker colour,
+											@Nullable String title,
 											@Nullable String requiredMessage) {
 		imports.add(COLOURPICKER_IMPORT);
 		RenderedComponent result = new RenderedComponent(FlutterGenerator.INDENT);
@@ -422,10 +422,10 @@ public class FlutterComponentRenderer extends ComponentRenderer {
 	}
 
 	@Override
-	public RenderedComponent combo(RenderedComponent component,
-									String dataWidgetVar,
-									Combo combo,
-									String title,
+	public @Nonnull RenderedComponent combo(@Nullable RenderedComponent component,
+									@Nullable String dataWidgetVar,
+									@Nonnull Combo combo,
+									@Nullable String title,
 									@Nullable String requiredMessage) {
 		imports.add(COMBO_IMPORT);
 		RenderedComponent result = new RenderedComponent(FlutterGenerator.INDENT);
@@ -458,10 +458,10 @@ public class FlutterComponentRenderer extends ComponentRenderer {
 	}
 
 	@Override
-	public RenderedComponent contentSignature(RenderedComponent component,
-												String dataWidgetVar,
-												ContentSignature signature,
-												String title,
+	public @Nonnull RenderedComponent contentSignature(@Nullable RenderedComponent component,
+												@Nullable String dataWidgetVar,
+												@Nonnull ContentSignature signature,
+												@Nullable String title,
 												@Nullable String requiredMessage) {
 		imports.add(CONTENTSIGNATURE_IMPORT);
 		RenderedComponent result = new RenderedComponent(FlutterGenerator.INDENT);
@@ -473,10 +473,10 @@ public class FlutterComponentRenderer extends ComponentRenderer {
 	}
 
 	@Override
-	public RenderedComponent html(RenderedComponent component,
-									String dataWidgetVar,
-									HTML html,
-									String title,
+	public @Nonnull RenderedComponent html(@Nullable RenderedComponent component,
+									@Nullable String dataWidgetVar,
+									@Nonnull HTML html,
+									@Nullable String title,
 									@Nullable String requiredMessage) {
 		imports.add(HTML_IMPORT);
 		RenderedComponent result = new RenderedComponent(FlutterGenerator.INDENT);
@@ -487,13 +487,13 @@ public class FlutterComponentRenderer extends ComponentRenderer {
 	}
 
 	@Override
-	public RenderedComponent lookupDescription(RenderedComponent component,
-												String dataWidgetVar,
-												LookupDescription lookup,
-												String title,
+	public @Nonnull RenderedComponent lookupDescription(@Nullable RenderedComponent component,
+												@Nullable String dataWidgetVar,
+												@Nonnull LookupDescription lookup,
+												@Nullable String title,
 												@Nullable String requiredMessage,
-												String displayBinding,
-												QueryDefinition query) {
+												@Nullable String displayBinding,
+												@Nullable QueryDefinition query) {
 		imports.add(LOOKUP_IMPORT);
 		RenderedComponent result = new RenderedComponent(FlutterGenerator.INDENT);
 		StringBuilder output = result.getOutput();
@@ -504,10 +504,10 @@ public class FlutterComponentRenderer extends ComponentRenderer {
 	}
 
 	@Override
-	public RenderedComponent password(RenderedComponent component,
-										String dataWidgetVar,
-										Password password,
-										String title,
+	public @Nonnull RenderedComponent password(@Nullable RenderedComponent component,
+										@Nullable String dataWidgetVar,
+										@Nonnull Password password,
+										@Nullable String title,
 										@Nullable String requiredMessage) {
 		imports.add(PASSWORD_IMPORT);
 		RenderedComponent result = new RenderedComponent(FlutterGenerator.INDENT);
@@ -518,10 +518,10 @@ public class FlutterComponentRenderer extends ComponentRenderer {
 	}
 
 	@Override
-	public RenderedComponent radio(RenderedComponent component,
-									String dataWidgetVar,
-									Radio radio,
-									String title,
+	public @Nonnull RenderedComponent radio(@Nullable RenderedComponent component,
+									@Nullable String dataWidgetVar,
+									@Nonnull Radio radio,
+									@Nullable String title,
 									@Nullable String requiredMessage) {
 		imports.add(RADIO_IMPORT);
 		RenderedComponent result = new RenderedComponent(FlutterGenerator.INDENT);
@@ -532,10 +532,10 @@ public class FlutterComponentRenderer extends ComponentRenderer {
 	}
 
 	@Override
-	public RenderedComponent richText(RenderedComponent component,
-										String dataWidgetVar,
-										RichText text,
-										String title,
+	public @Nonnull RenderedComponent richText(@Nullable RenderedComponent component,
+										@Nullable String dataWidgetVar,
+										@Nonnull RichText text,
+										@Nullable String title,
 										@Nullable String requiredMessage) {
 		imports.add(RICHTEXT_IMPORT);
 		RenderedComponent result = new RenderedComponent(FlutterGenerator.INDENT);
@@ -546,10 +546,10 @@ public class FlutterComponentRenderer extends ComponentRenderer {
 	}
 
 	@Override
-	public RenderedComponent spinner(RenderedComponent component,
-										String dataWidgetVar,
-										Spinner spinner,
-										String title,
+	public @Nonnull RenderedComponent spinner(@Nullable RenderedComponent component,
+										@Nullable String dataWidgetVar,
+										@Nonnull Spinner spinner,
+										@Nullable String title,
 										@Nullable String requiredMessage) {
 		imports.add(SPINNER_IMPORT);
 		RenderedComponent result = new RenderedComponent(FlutterGenerator.INDENT);
@@ -560,14 +560,14 @@ public class FlutterComponentRenderer extends ComponentRenderer {
 	}
 
 	@Override
-	public RenderedComponent text(RenderedComponent component,
-									String dataWidgetVar,
-									TextField text,
-									String title,
+	public @Nonnull RenderedComponent text(@Nullable RenderedComponent component,
+									@Nullable String dataWidgetVar,
+									@Nonnull TextField text,
+									@Nullable String title,
 									@Nullable String requiredMessage,
-									Integer length,
-									Converter<?> converter,
-									Format<?> format) {
+									@Nullable Integer length,
+									@Nullable Converter<?> converter,
+									@Nullable Format<?> format) {
         imports.add(TEXTFIELD_IMPORT);
         RenderedComponent result = new RenderedComponent(FlutterGenerator.INDENT);
 
@@ -581,12 +581,12 @@ public class FlutterComponentRenderer extends ComponentRenderer {
     }
 
 	@Override
-	public RenderedComponent textArea(RenderedComponent component,
-										String dataWidgetVar,
-										TextArea text,
-										String title,
+	public @Nonnull RenderedComponent textArea(@Nullable RenderedComponent component,
+										@Nullable String dataWidgetVar,
+										@Nonnull TextArea text,
+										@Nullable String title,
 										@Nullable String requiredMessage,
-										Integer length) {
+										@Nullable Integer length) {
 		imports.add(TEXTAREA_IMPORT);
 		RenderedComponent result = new RenderedComponent(FlutterGenerator.INDENT);
 		StringBuilder output = result.getOutput();
@@ -595,11 +595,11 @@ public class FlutterComponentRenderer extends ComponentRenderer {
 	}
 
 	@Override
-	public RenderedComponent actionLink(RenderedComponent component,
-											String dataWidgetBinding,
-											String dataWidgetVar,
-											Link link,
-											Action action) {
+	public @Nonnull RenderedComponent actionLink(@Nullable RenderedComponent component,
+											@Nullable String dataWidgetBinding,
+											@Nullable String dataWidgetVar,
+											@Nonnull Link link,
+											@Nonnull Action action) {
 		imports.add(ACTIONLINK_IMPORT);
 		RenderedComponent result = new RenderedComponent(FlutterGenerator.INDENT);
 		StringBuilder output = result.getOutput();
@@ -608,7 +608,7 @@ public class FlutterComponentRenderer extends ComponentRenderer {
 	}
 
 	@Override
-	public RenderedComponent report(RenderedComponent component, Action action) {
+	public @Nonnull RenderedComponent report(@Nullable RenderedComponent component, @Nonnull Action action) {
 		imports.add(REPORT_IMPORT);
 		RenderedComponent result = new RenderedComponent(FlutterGenerator.INDENT);
 		StringBuilder output = result.getOutput();
@@ -617,10 +617,10 @@ public class FlutterComponentRenderer extends ComponentRenderer {
 	}
 
 	@Override
-	public RenderedComponent download(RenderedComponent component,
-										Action action,
-										String moduleName,
-										String documentName) {
+	public @Nonnull RenderedComponent download(@Nullable RenderedComponent component,
+										@Nonnull Action action,
+										@Nonnull String moduleName,
+										@Nonnull String documentName) {
 		imports.add(DOWNLOAD_IMPORT);
 		RenderedComponent result = new RenderedComponent(FlutterGenerator.INDENT);
 		StringBuilder output = result.getOutput();
@@ -629,7 +629,7 @@ public class FlutterComponentRenderer extends ComponentRenderer {
 	}
 
 	@Override
-	public RenderedComponent upload(RenderedComponent component, Action action) {
+	public @Nonnull RenderedComponent upload(@Nullable RenderedComponent component, @Nonnull Action action) {
 		imports.add(UPLOAD_IMPORT);
 		RenderedComponent result = new RenderedComponent(FlutterGenerator.INDENT);
 		StringBuilder output = result.getOutput();
@@ -638,12 +638,12 @@ public class FlutterComponentRenderer extends ComponentRenderer {
 	}
 
 	@Override
-	public RenderedComponent action(RenderedComponent component,
-										String dataWidgetBinding,
-										String dataWidgetVar,
-										Action action,
-										ImplicitActionName name,
-										String title) {
+	public @Nonnull RenderedComponent action(@Nullable RenderedComponent component,
+										@Nullable String dataWidgetBinding,
+										@Nullable String dataWidgetVar,
+										@Nonnull Action action,
+										@Nullable ImplicitActionName name,
+										@Nullable String title) {
         imports.add(BUTTON_IMPORT);
         RenderedComponent result = new RenderedComponent(FlutterGenerator.INDENT);
 
@@ -667,7 +667,7 @@ public class FlutterComponentRenderer extends ComponentRenderer {
         return result;
     }
 
-    private String createButton(String actionType, String actionName, String label) {
+    private @Nonnull String createButton(@Nonnull String actionType, @Nullable String actionName, @Nullable String label) {
         return String.format(btnTemplate, actionType, actionName, label);
     }
 }

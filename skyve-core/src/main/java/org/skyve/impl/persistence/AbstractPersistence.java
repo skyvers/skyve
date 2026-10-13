@@ -167,7 +167,7 @@ public abstract class AbstractPersistence implements Persistence {
 	 *
 	 * @return the replacement persistence bound to the current thread
 	 */
-	public static AbstractPersistence renewPersistence() {
+	public static @Nonnull AbstractPersistence renewPersistence() {
 		// Get old persistence and close
 		AbstractPersistence persistence = AbstractPersistence.get();
 		User user = persistence.getUser();
@@ -186,7 +186,7 @@ public abstract class AbstractPersistence implements Persistence {
 	 * Returns the current value for this property from the wrapped metadata.
 	 */
 	@Override
-	public User getUser() {
+	public @Nonnull User getUser() {
 		return user;
 	}
 
@@ -273,7 +273,7 @@ public abstract class AbstractPersistence implements Persistence {
 	 * @return the managed bean returned by the concrete persistence implementation
 	 */
 	@Override
-	public final <T extends PersistentBean> T save(T bean) {
+	public final @Nonnull <T extends PersistentBean> T save(@Nonnull T bean) {
 		Customer customer = user.getCustomer();
 		Module module = customer.getModule(bean.getBizModule());
 		Document document = module.getDocument(customer, bean.getBizDocument());
@@ -288,7 +288,7 @@ public abstract class AbstractPersistence implements Persistence {
 	 * @return the managed merged bean
 	 */
 	@Override
-	public final <T extends PersistentBean> T merge(T bean) {
+	public final @Nonnull <T extends PersistentBean> T merge(@Nonnull T bean) {
 		Customer customer = user.getCustomer();
 		Module module = customer.getModule(bean.getBizModule());
 		Document document = module.getDocument(customer, bean.getBizDocument());
@@ -302,7 +302,7 @@ public abstract class AbstractPersistence implements Persistence {
 	 * @param bean the bean to delete
 	 */
 	@Override
-	public final <T extends PersistentBean> void delete(T bean) {
+	public final <T extends PersistentBean> void delete(@Nonnull T bean) {
 		Customer customer = user.getCustomer();
 		Module module = customer.getModule(bean.getBizModule());
 		Document document = module.getDocument(customer, bean.getBizDocument());
@@ -319,9 +319,9 @@ public abstract class AbstractPersistence implements Persistence {
 	 * @return the retrieved bean, or {@code null} when no row exists
 	 */
 	@Override
-	public final <T extends Bean> T retrieve(String moduleName,
-												String documentName,
-												String id) {
+	public final @Nullable <T extends Bean> T retrieve(@Nonnull String moduleName,
+												@Nonnull String documentName,
+												@Nonnull String id) {
 		Customer customer = user.getCustomer();
 		Module module = customer.getModule(moduleName);
 		Document document = module.getDocument(customer, documentName);
@@ -338,9 +338,9 @@ public abstract class AbstractPersistence implements Persistence {
 	 * @return the locked bean, or {@code null} when no row exists
 	 */
 	@Override
-	public final <T extends Bean> T retrieveAndLock(String moduleName,
-														String documentName,
-														String id) {
+	public final @Nonnull <T extends Bean> T retrieveAndLock(@Nonnull String moduleName,
+														@Nonnull String documentName,
+														@Nonnull String id) {
 		Customer customer = user.getCustomer();
 		Module module = customer.getModule(moduleName);
 		Document document = module.getDocument(customer, documentName);

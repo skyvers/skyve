@@ -6,6 +6,8 @@ import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.sail.execution.Executor;
 import org.skyve.metadata.sail.language.Step;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
@@ -31,7 +33,7 @@ public class NavigateEdit implements Step {
 	 * Returns the moduleName.
 	 * @return the result
 	 */
-	public String getModuleName() {
+	public @Nullable String getModuleName() {
 		return moduleName;
 	}
 
@@ -40,7 +42,7 @@ public class NavigateEdit implements Step {
 	 * @param moduleName the moduleName
 	 */
 	@XmlAttribute(name = "module", required = true)
-	public void setModuleName(String moduleName) {
+	public void setModuleName(@Nullable String moduleName) {
 		this.moduleName = UtilImpl.processStringValue(moduleName);
 	}
 
@@ -48,7 +50,7 @@ public class NavigateEdit implements Step {
 	 * Returns the documentName.
 	 * @return the result
 	 */
-	public String getDocumentName() {
+	public @Nullable String getDocumentName() {
 		return documentName;
 	}
 
@@ -57,7 +59,7 @@ public class NavigateEdit implements Step {
 	 * @param documentName the documentName
 	 */
 	@XmlAttribute(name = "document", required = true)
-	public void setDocumentName(String documentName) {
+	public void setDocumentName(@Nullable String documentName) {
 		this.documentName = UtilImpl.processStringValue(documentName);
 	}
 
@@ -65,7 +67,7 @@ public class NavigateEdit implements Step {
 	 * Returns the bizId.
 	 * @return the result
 	 */
-	public String getBizId() {
+	public @Nullable String getBizId() {
 		return bizId;
 	}
 
@@ -74,7 +76,7 @@ public class NavigateEdit implements Step {
 	 * @param bizId the bizId
 	 */
 	@XmlAttribute(name = "bizId")
-	public void setBizId(String bizId) {
+	public void setBizId(@Nullable String bizId) {
 		this.bizId = UtilImpl.processStringValue(bizId);
 	}
 
@@ -83,7 +85,7 @@ public class NavigateEdit implements Step {
 	 * @param executor the executor
 	 */
 	@Override
-	public void execute(Executor executor) {
+	public void execute(@Nonnull Executor executor) {
 		executor.executeNavigateEdit(this);
 	}
 	
@@ -93,7 +95,7 @@ public class NavigateEdit implements Step {
 	 * @return the result
 	 */
 	@Override
-	public String getIdentifier(AutomationContext context) {
+	public @Nonnull String getIdentifier(@Nonnull AutomationContext context) {
 		return String.format("%s.%s", moduleName, documentName);
 	}
 }

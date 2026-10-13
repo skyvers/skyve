@@ -3,6 +3,7 @@ package org.skyve.metadata.view.fluent;
 import org.skyve.impl.metadata.view.event.ToggleVisibilityEventAction;
 
 import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 
 /**
  * Builds {@link ToggleVisibilityEventAction} metadata using a fluent API.
@@ -23,7 +24,7 @@ public class FluentToggleVisibilityEventAction extends FluentEventAction {
 	 * @param action
 	 *            the action instance to wrap
 	 */
-	public FluentToggleVisibilityEventAction(ToggleVisibilityEventAction action) {
+	public FluentToggleVisibilityEventAction(@Nonnull ToggleVisibilityEventAction action) {
 		this.action = action;
 	}
 
@@ -34,7 +35,7 @@ public class FluentToggleVisibilityEventAction extends FluentEventAction {
 	 *            the source action metadata
 	 * @return this builder
 	 */
-	public FluentToggleVisibilityEventAction from(@SuppressWarnings("hiding") ToggleVisibilityEventAction action) {
+	public @Nonnull FluentToggleVisibilityEventAction from(@SuppressWarnings("hiding") @Nonnull ToggleVisibilityEventAction action) {
 		binding(action.getBinding());
 		action.getProperties().entrySet().forEach(p -> putProperty(p.getKey(), p.getValue()));
 
@@ -48,7 +49,7 @@ public class FluentToggleVisibilityEventAction extends FluentEventAction {
 	 *            the target binding expression
 	 * @return this builder
 	 */
-	public FluentToggleVisibilityEventAction binding(String binding) {
+	public @Nonnull FluentToggleVisibilityEventAction binding(@Nullable String binding) {
 		action.setBinding(binding);
 		return this;
 	}
@@ -70,7 +71,7 @@ public class FluentToggleVisibilityEventAction extends FluentEventAction {
 	 * Returns the wrapped event action instance.
 	 */
 	@Override
-	public ToggleVisibilityEventAction get() {
+	public @Nonnull ToggleVisibilityEventAction get() {
 		return action;
 	}
 }

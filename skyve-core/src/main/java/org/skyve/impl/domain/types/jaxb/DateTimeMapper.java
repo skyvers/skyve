@@ -4,6 +4,7 @@ import java.util.Date;
 
 import org.skyve.domain.types.DateTime;
 
+import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.adapters.XmlAdapter;
 
 //@XmlSchemaType(name = "dateTime")
@@ -22,12 +23,12 @@ import jakarta.xml.bind.annotation.adapters.XmlAdapter;
  */
 public class DateTimeMapper extends XmlAdapter<Date, DateTime> {
 	@Override
-	public DateTime unmarshal(Date date) throws Exception {
+	public @Nullable DateTime unmarshal(@Nullable Date date) throws Exception {
 		return (date == null) ? null : new DateTime(date.getTime());
 	}
 
 	@Override
-	public Date marshal(DateTime dateTime) throws Exception {
+	public @Nullable Date marshal(@Nullable DateTime dateTime) throws Exception {
 		return dateTime;
 	}
 }

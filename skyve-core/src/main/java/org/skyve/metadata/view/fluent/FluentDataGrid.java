@@ -28,7 +28,7 @@ public class FluentDataGrid extends FluentDataWidget<FluentDataGrid> {
 	 * @param grid
 	 *            the metadata instance to mutate
 	 */
-	public FluentDataGrid(DataGrid grid) {
+	public FluentDataGrid(@Nonnull DataGrid grid) {
 		this.grid = grid;
 	}
 
@@ -39,7 +39,7 @@ public class FluentDataGrid extends FluentDataWidget<FluentDataGrid> {
 	 *            the source metadata to copy
 	 * @return this builder
 	 */
-	public FluentDataGrid from(@SuppressWarnings("hiding") DataGrid grid) {
+	public @Nonnull FluentDataGrid from(@SuppressWarnings("hiding") @Nonnull DataGrid grid) {
 
 		BindUtil.copyAuthoredCondition(grid.getXmlDisabledCondition(), grid.getXmlEnabledCondition(), this::disabledCondition, this::enabledCondition);
 		BindUtil.copyAuthoredCondition(grid.getXmlDisableAddCondition(), grid.getXmlEnableAddCondition(), this::disableAddCondition, this::enableAddCondition);
@@ -230,7 +230,7 @@ public class FluentDataGrid extends FluentDataWidget<FluentDataGrid> {
 	 * @param showAdd {@code true} to show the add button
 	 * @return this builder
 	 */
-	public FluentDataGrid showAdd(boolean showAdd) {
+	public @Nonnull FluentDataGrid showAdd(boolean showAdd) {
 		grid.setShowAdd(showAdd ? Boolean.TRUE : Boolean.FALSE);
 		return this;
 	}
@@ -241,7 +241,7 @@ public class FluentDataGrid extends FluentDataWidget<FluentDataGrid> {
 	 * @param showZoom {@code true} to show the zoom button
 	 * @return this builder
 	 */
-	public FluentDataGrid showZoom(boolean showZoom) {
+	public @Nonnull FluentDataGrid showZoom(boolean showZoom) {
 		grid.setShowZoom(showZoom ? Boolean.TRUE : Boolean.FALSE);
 		return this;
 	}
@@ -252,7 +252,7 @@ public class FluentDataGrid extends FluentDataWidget<FluentDataGrid> {
 	 * @param showEdit {@code true} to show the edit button
 	 * @return this builder
 	 */
-	public FluentDataGrid showEdit(boolean showEdit) {
+	public @Nonnull FluentDataGrid showEdit(boolean showEdit) {
 		grid.setShowEdit(showEdit ? Boolean.TRUE : Boolean.FALSE);
 		return this;
 	}
@@ -263,7 +263,7 @@ public class FluentDataGrid extends FluentDataWidget<FluentDataGrid> {
 	 * @param showRemove {@code true} to show the remove button
 	 * @return this builder
 	 */
-	public FluentDataGrid showRemove(boolean showRemove) {
+	public @Nonnull FluentDataGrid showRemove(boolean showRemove) {
 		grid.setShowRemove(showRemove ? Boolean.TRUE : Boolean.FALSE);
 		return this;
 	}
@@ -274,7 +274,7 @@ public class FluentDataGrid extends FluentDataWidget<FluentDataGrid> {
 	 * @param showDeselect {@code true} to show the deselect button
 	 * @return this builder
 	 */
-	public FluentDataGrid showDeselect(boolean showDeselect) {
+	public @Nonnull FluentDataGrid showDeselect(boolean showDeselect) {
 		grid.setShowDeselect(showDeselect ? Boolean.TRUE : Boolean.FALSE);
 		return this;
 	}
@@ -285,7 +285,7 @@ public class FluentDataGrid extends FluentDataWidget<FluentDataGrid> {
 	 * @param selectedIdBinding the binding expression
 	 * @return this builder
 	 */
-	public FluentDataGrid selectedIdBinding(String selectedIdBinding) {
+	public @Nonnull FluentDataGrid selectedIdBinding(@Nullable String selectedIdBinding) {
 		grid.setSelectedIdBinding(selectedIdBinding);
 		return this;
 	}
@@ -296,7 +296,7 @@ public class FluentDataGrid extends FluentDataWidget<FluentDataGrid> {
 	 * @param inline {@code true} to enable inline editing
 	 * @return this builder
 	 */
-	public FluentDataGrid inline(boolean inline) {
+	public @Nonnull FluentDataGrid inline(boolean inline) {
 		grid.setInline(inline ? Boolean.TRUE : Boolean.FALSE);
 		return this;
 	}
@@ -307,7 +307,7 @@ public class FluentDataGrid extends FluentDataWidget<FluentDataGrid> {
 	 * @param editable {@code true} to allow editing
 	 * @return this builder
 	 */
-	public FluentDataGrid editable(boolean editable) {
+	public @Nonnull FluentDataGrid editable(boolean editable) {
 		grid.setEditable(editable ? Boolean.TRUE : Boolean.FALSE);
 		return this;
 	}
@@ -318,7 +318,7 @@ public class FluentDataGrid extends FluentDataWidget<FluentDataGrid> {
 	 * @param wordWrap {@code true} to enable word wrap
 	 * @return this builder
 	 */
-	public FluentDataGrid wordWrap(boolean wordWrap) {
+	public @Nonnull FluentDataGrid wordWrap(boolean wordWrap) {
 		grid.setWordWrap(wordWrap ? Boolean.TRUE : Boolean.FALSE);
 		return this;
 	}
@@ -330,7 +330,7 @@ public class FluentDataGrid extends FluentDataWidget<FluentDataGrid> {
 	 *            the bound column to append
 	 * @return this builder
 	 */
-	public FluentDataGrid addBoundColumn(FluentDataGridBoundColumn column) {
+	public @Nonnull FluentDataGrid addBoundColumn(@Nonnull FluentDataGridBoundColumn column) {
 		grid.getColumns().add(column.get());
 		return this;
 	}
@@ -344,7 +344,7 @@ public class FluentDataGrid extends FluentDataWidget<FluentDataGrid> {
 	 *            the bound column to insert
 	 * @return this builder
 	 */
-	public FluentDataGrid addBoundColumn(int index, FluentDataGridBoundColumn column) {
+	public @Nonnull FluentDataGrid addBoundColumn(int index, @Nonnull FluentDataGridBoundColumn column) {
 		grid.getColumns().add(index, column.get());
 		return this;
 	}
@@ -356,7 +356,7 @@ public class FluentDataGrid extends FluentDataWidget<FluentDataGrid> {
 	 *            the column position
 	 * @return a fluent wrapper around the bound column
 	 */
-	public FluentDataGridBoundColumn getBoundColumn(int index) {
+	public @Nonnull FluentDataGridBoundColumn getBoundColumn(int index) {
 		return new FluentDataGridBoundColumn((DataGridBoundColumn) grid.getColumns().get(index));
 	}
 	
@@ -367,7 +367,7 @@ public class FluentDataGrid extends FluentDataWidget<FluentDataGrid> {
 	 *            the container column to append
 	 * @return this builder
 	 */
-	public FluentDataGrid addContainerColumn(FluentDataGridContainerColumn column) {
+	public @Nonnull FluentDataGrid addContainerColumn(@Nonnull FluentDataGridContainerColumn column) {
 		grid.getColumns().add(column.get());
 		return this;
 	}
@@ -381,7 +381,7 @@ public class FluentDataGrid extends FluentDataWidget<FluentDataGrid> {
 	 *            the container column to insert
 	 * @return this builder
 	 */
-	public FluentDataGrid addContainerColumn(int index, FluentDataGridContainerColumn column) {
+	public @Nonnull FluentDataGrid addContainerColumn(int index, @Nonnull FluentDataGridContainerColumn column) {
 		grid.getColumns().add(index, column.get());
 		return this;
 	}
@@ -393,7 +393,7 @@ public class FluentDataGrid extends FluentDataWidget<FluentDataGrid> {
 	 *            the column position
 	 * @return a fluent wrapper around the container column
 	 */
-	public FluentDataGridContainerColumn getContainerColumn(int index) {
+	public @Nonnull FluentDataGridContainerColumn getContainerColumn(int index) {
 		return new FluentDataGridContainerColumn((DataGridContainerColumn) grid.getColumns().get(index));
 	}
 
@@ -404,7 +404,7 @@ public class FluentDataGrid extends FluentDataWidget<FluentDataGrid> {
 	 *            the column position to remove
 	 * @return this builder
 	 */
-	public FluentDataGrid removeColumn(int index) {
+	public @Nonnull FluentDataGrid removeColumn(int index) {
 		grid.getColumns().remove(index);
 		return this;
 	}
@@ -414,7 +414,7 @@ public class FluentDataGrid extends FluentDataWidget<FluentDataGrid> {
 	 *
 	 * @return this builder
 	 */
-	public FluentDataGrid clearColumns() {
+	public @Nonnull FluentDataGrid clearColumns() {
 		grid.getColumns().clear();
 		return this;
 	}
@@ -426,7 +426,7 @@ public class FluentDataGrid extends FluentDataWidget<FluentDataGrid> {
 	 *            the action to append
 	 * @return this builder
 	 */
-	public FluentDataGrid addAddedAction(FluentEventAction action) {
+	public @Nonnull FluentDataGrid addAddedAction(@Nonnull FluentEventAction action) {
 		grid.getAddedActions().add(action.get());
 		return this;
 	}
@@ -436,7 +436,7 @@ public class FluentDataGrid extends FluentDataWidget<FluentDataGrid> {
 	 *
 	 * @return this builder
 	 */
-	public FluentDataGrid clearAddedActions() {
+	public @Nonnull FluentDataGrid clearAddedActions() {
 		grid.getAddedActions().clear();
 		return this;
 	}
@@ -447,7 +447,7 @@ public class FluentDataGrid extends FluentDataWidget<FluentDataGrid> {
 	 * @param action the action to append
 	 * @return this builder
 	 */
-	public FluentDataGrid addEditedAction(FluentEventAction action) {
+	public @Nonnull FluentDataGrid addEditedAction(@Nonnull FluentEventAction action) {
 		grid.getEditedActions().add(action.get());
 		return this;
 	}
@@ -457,7 +457,7 @@ public class FluentDataGrid extends FluentDataWidget<FluentDataGrid> {
 	 *
 	 * @return this builder
 	 */
-	public FluentDataGrid clearEditedActions() {
+	public @Nonnull FluentDataGrid clearEditedActions() {
 		grid.getEditedActions().clear();
 		return this;
 	}
@@ -468,7 +468,7 @@ public class FluentDataGrid extends FluentDataWidget<FluentDataGrid> {
 	 * @param action the action to append
 	 * @return this builder
 	 */
-	public FluentDataGrid addRemovedAction(FluentEventAction action) {
+	public @Nonnull FluentDataGrid addRemovedAction(@Nonnull FluentEventAction action) {
 		grid.getRemovedActions().add(action.get());
 		return this;
 	}
@@ -478,7 +478,7 @@ public class FluentDataGrid extends FluentDataWidget<FluentDataGrid> {
 	 *
 	 * @return this builder
 	 */
-	public FluentDataGrid clearRemovedActions() {
+	public @Nonnull FluentDataGrid clearRemovedActions() {
 		grid.getRemovedActions().clear();
 		return this;
 	}
@@ -489,7 +489,7 @@ public class FluentDataGrid extends FluentDataWidget<FluentDataGrid> {
 	 * @param action the action to append
 	 * @return this builder
 	 */
-	public FluentDataGrid addSelectedAction(FluentEventAction action) {
+	public @Nonnull FluentDataGrid addSelectedAction(@Nonnull FluentEventAction action) {
 		grid.getSelectedActions().add(action.get());
 		return this;
 	}
@@ -499,7 +499,7 @@ public class FluentDataGrid extends FluentDataWidget<FluentDataGrid> {
 	 *
 	 * @return this builder
 	 */
-	public FluentDataGrid clearSelectedActions() {
+	public @Nonnull FluentDataGrid clearSelectedActions() {
 		grid.getSelectedActions().clear();
 		return this;
 	}
@@ -523,7 +523,7 @@ public class FluentDataGrid extends FluentDataWidget<FluentDataGrid> {
 	 * @return the wrapped data-grid metadata
 	 */
 	@Override
-	public DataGrid get() {
+	public @Nonnull DataGrid get() {
 		return grid;
 	}
 }

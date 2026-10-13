@@ -15,6 +15,7 @@ import org.skyve.metadata.DecoratedMetaData;
 import org.skyve.metadata.view.Disableable;
 import org.skyve.metadata.view.Invisible;
 
+import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlElement;
@@ -94,7 +95,7 @@ public final class TabPane implements DecoratedMetaData, Identifiable, RelativeS
 	 * @return widget identifier, or {@code null} when not configured
 	 */
 	@Override
-	public String getWidgetId() {
+	public @Nullable String getWidgetId() {
 		return widgetId;
 	}
 
@@ -106,7 +107,7 @@ public final class TabPane implements DecoratedMetaData, Identifiable, RelativeS
 	 * @param widgetId  widget identifier; may be {@code null} or blank
 	 */
 	@XmlAttribute(required = false)
-	public void setWidgetId(String widgetId) {
+	public void setWidgetId(@Nullable String widgetId) {
 		this.widgetId = UtilImpl.processStringValue(widgetId);
 	}
 
@@ -118,7 +119,7 @@ public final class TabPane implements DecoratedMetaData, Identifiable, RelativeS
 	 * @return a mutable tab list; never {@code null}
 	 */
 	@XmlElement(namespace = XMLMetaData.VIEW_NAMESPACE, name = "tab", required = true)
-	public List<Tab> getTabs() {
+	public @Nonnull List<Tab> getTabs() {
 		return tabs;
 	}
 
@@ -128,7 +129,7 @@ public final class TabPane implements DecoratedMetaData, Identifiable, RelativeS
 	 * @return pixel width, or {@code null} when unset
 	 */
 	@Override
-	public Integer getPixelWidth() {
+	public @Nullable Integer getPixelWidth() {
 		return pixelWidth;
 	}
 
@@ -139,7 +140,7 @@ public final class TabPane implements DecoratedMetaData, Identifiable, RelativeS
 	 */
 	@Override
 	@XmlAttribute(required = false)
-	public void setPixelWidth(Integer pixelWidth) {
+	public void setPixelWidth(@Nullable Integer pixelWidth) {
 		this.pixelWidth = pixelWidth;
 	}
 
@@ -149,7 +150,7 @@ public final class TabPane implements DecoratedMetaData, Identifiable, RelativeS
 	 * @return responsive width value, or {@code null} when unset
 	 */
 	@Override
-	public Integer getResponsiveWidth() {
+	public @Nullable Integer getResponsiveWidth() {
 		return responsiveWidth;
 	}
 
@@ -160,7 +161,7 @@ public final class TabPane implements DecoratedMetaData, Identifiable, RelativeS
 	 */
 	@Override
 	@XmlAttribute(required = false)
-	public void setResponsiveWidth(Integer responsiveWidth) {
+	public void setResponsiveWidth(@Nullable Integer responsiveWidth) {
 		this.responsiveWidth = responsiveWidth;
 	}
 
@@ -170,7 +171,7 @@ public final class TabPane implements DecoratedMetaData, Identifiable, RelativeS
 	 * @return small-breakpoint width, or {@code null} when unset
 	 */
 	@Override
-	public Integer getSm() {
+	public @Nullable Integer getSm() {
 		return sm;
 	}
 	
@@ -181,7 +182,7 @@ public final class TabPane implements DecoratedMetaData, Identifiable, RelativeS
 	 */
 	@Override
 	@XmlAttribute(required = false)
-	public void setSm(Integer sm) {
+	public void setSm(@Nullable Integer sm) {
 		this.sm = sm;
 	}
 
@@ -191,7 +192,7 @@ public final class TabPane implements DecoratedMetaData, Identifiable, RelativeS
 	 * @return medium-breakpoint width, or {@code null} when unset
 	 */
 	@Override
-	public Integer getMd() {
+	public @Nullable Integer getMd() {
 		return md;
 	}
 	
@@ -202,7 +203,7 @@ public final class TabPane implements DecoratedMetaData, Identifiable, RelativeS
 	 */
 	@Override
 	@XmlAttribute(required = false)
-	public void setMd(Integer md) {
+	public void setMd(@Nullable Integer md) {
 		this.md = md;
 	}
 	
@@ -212,7 +213,7 @@ public final class TabPane implements DecoratedMetaData, Identifiable, RelativeS
 	 * @return large-breakpoint width, or {@code null} when unset
 	 */
 	@Override
-	public Integer getLg() {
+	public @Nullable Integer getLg() {
 		return lg;
 	}
 	
@@ -223,7 +224,7 @@ public final class TabPane implements DecoratedMetaData, Identifiable, RelativeS
 	 */
 	@Override
 	@XmlAttribute(required = false)
-	public void setLg(Integer lg) {
+	public void setLg(@Nullable Integer lg) {
 		this.lg = lg;
 	}
 
@@ -233,7 +234,7 @@ public final class TabPane implements DecoratedMetaData, Identifiable, RelativeS
 	 * @return extra-large-breakpoint width, or {@code null} when unset
 	 */
 	@Override
-	public Integer getXl() {
+	public @Nullable Integer getXl() {
 		return xl;
 	}
 	
@@ -244,7 +245,7 @@ public final class TabPane implements DecoratedMetaData, Identifiable, RelativeS
 	 */
 	@Override
 	@XmlAttribute(required = false)
-	public void setXl(Integer xl) {
+	public void setXl(@Nullable Integer xl) {
 		this.xl = xl;
 	}
 
@@ -254,7 +255,7 @@ public final class TabPane implements DecoratedMetaData, Identifiable, RelativeS
 	 * @return percentage width, or {@code null} when unset
 	 */
 	@Override
-	public Integer getPercentageWidth() {
+	public @Nullable Integer getPercentageWidth() {
 		return percentageWidth;
 	}
 
@@ -265,7 +266,7 @@ public final class TabPane implements DecoratedMetaData, Identifiable, RelativeS
 	 */
 	@Override
 	@XmlAttribute(required = false)
-	public void setPercentageWidth(Integer percentageWidth) {
+	public void setPercentageWidth(@Nullable Integer percentageWidth) {
 		this.percentageWidth = percentageWidth;
 	}
 
@@ -275,7 +276,7 @@ public final class TabPane implements DecoratedMetaData, Identifiable, RelativeS
 	 * @return minimum pixel width, or {@code null} when unset
 	 */
 	@Override
-	public Integer getMinPixelWidth() {
+	public @Nullable Integer getMinPixelWidth() {
 		return minPixelWidth;
 	}
 
@@ -286,7 +287,7 @@ public final class TabPane implements DecoratedMetaData, Identifiable, RelativeS
 	 */
 	@Override
 	@XmlAttribute(required = false)
-	public void setMinPixelWidth(Integer minPixelWidth) {
+	public void setMinPixelWidth(@Nullable Integer minPixelWidth) {
 		this.minPixelWidth = minPixelWidth;
 	}
 
@@ -296,7 +297,7 @@ public final class TabPane implements DecoratedMetaData, Identifiable, RelativeS
 	 * @return maximum pixel width, or {@code null} when unset
 	 */
 	@Override
-	public Integer getMaxPixelWidth() {
+	public @Nullable Integer getMaxPixelWidth() {
 		return maxPixelWidth;
 	}
 
@@ -307,7 +308,7 @@ public final class TabPane implements DecoratedMetaData, Identifiable, RelativeS
 	 */
 	@Override
 	@XmlAttribute(required = false)
-	public void setMaxPixelWidth(Integer maxPixelWidth) {
+	public void setMaxPixelWidth(@Nullable Integer maxPixelWidth) {
 		this.maxPixelWidth = maxPixelWidth;
 	}
 
@@ -317,7 +318,7 @@ public final class TabPane implements DecoratedMetaData, Identifiable, RelativeS
 	 * @return pixel height, or {@code null} when unset
 	 */
 	@Override
-	public Integer getPixelHeight() {
+	public @Nullable Integer getPixelHeight() {
 		return pixelHeight;
 	}
 
@@ -328,7 +329,7 @@ public final class TabPane implements DecoratedMetaData, Identifiable, RelativeS
 	 */
 	@Override
 	@XmlAttribute(required = false)
-	public void setPixelHeight(Integer pixelHeight) {
+	public void setPixelHeight(@Nullable Integer pixelHeight) {
 		this.pixelHeight = pixelHeight;
 	}
 
@@ -338,7 +339,7 @@ public final class TabPane implements DecoratedMetaData, Identifiable, RelativeS
 	 * @return percentage height, or {@code null} when unset
 	 */
 	@Override
-	public Integer getPercentageHeight() {
+	public @Nullable Integer getPercentageHeight() {
 		return percentageHeight;
 	}
 
@@ -349,7 +350,7 @@ public final class TabPane implements DecoratedMetaData, Identifiable, RelativeS
 	 */
 	@Override
 	@XmlAttribute(required = false)
-	public void setPercentageHeight(Integer percentageHeight) {
+	public void setPercentageHeight(@Nullable Integer percentageHeight) {
 		this.percentageHeight = percentageHeight;
 	}
 
@@ -359,7 +360,7 @@ public final class TabPane implements DecoratedMetaData, Identifiable, RelativeS
 	 * @return minimum pixel height, or {@code null} when unset
 	 */
 	@Override
-	public Integer getMinPixelHeight() {
+	public @Nullable Integer getMinPixelHeight() {
 		return minPixelHeight;
 	}
 
@@ -370,7 +371,7 @@ public final class TabPane implements DecoratedMetaData, Identifiable, RelativeS
 	 */
 	@Override
 	@XmlAttribute(required = false)
-	public void setMinPixelHeight(Integer minPixelHeight) {
+	public void setMinPixelHeight(@Nullable Integer minPixelHeight) {
 		this.minPixelHeight = minPixelHeight;
 	}
 
@@ -380,7 +381,7 @@ public final class TabPane implements DecoratedMetaData, Identifiable, RelativeS
 	 * @return maximum pixel height, or {@code null} when unset
 	 */
 	@Override
-	public Integer getMaxPixelHeight() {
+	public @Nullable Integer getMaxPixelHeight() {
 		return maxPixelHeight;
 	}
 
@@ -391,7 +392,7 @@ public final class TabPane implements DecoratedMetaData, Identifiable, RelativeS
 	 */
 	@Override
 	@XmlAttribute(required = false)
-	public void setMaxPixelHeight(Integer maxPixelHeight) {
+	public void setMaxPixelHeight(@Nullable Integer maxPixelHeight) {
 		this.maxPixelHeight = maxPixelHeight;
 	}
 
@@ -522,7 +523,7 @@ public final class TabPane implements DecoratedMetaData, Identifiable, RelativeS
 	 *
 	 * @return a binding expression, or {@code null} when no selection binding is configured
 	 */
-	public String getSelectedTabIndexBinding() {
+	public @Nullable String getSelectedTabIndexBinding() {
 		return selectedTabIndexBinding;
 	}
 
@@ -534,7 +535,7 @@ public final class TabPane implements DecoratedMetaData, Identifiable, RelativeS
 	 * @param selectedTabIndexBinding  binding expression to store; may be {@code null} or blank
 	 */
 	@XmlAttribute(required = false)
-	public void setSelectedTabIndexBinding(String selectedTabIndexBinding) {
+	public void setSelectedTabIndexBinding(@Nullable String selectedTabIndexBinding) {
 		this.selectedTabIndexBinding = UtilImpl.processStringValue(selectedTabIndexBinding);
 	}
 
@@ -544,7 +545,7 @@ public final class TabPane implements DecoratedMetaData, Identifiable, RelativeS
 	 * @return a mutable property map; never {@code null}
 	 */
 	@Override
-	public Map<String, String> getProperties() {
+	public @Nonnull Map<String, String> getProperties() {
 		return properties;
 	}
 }

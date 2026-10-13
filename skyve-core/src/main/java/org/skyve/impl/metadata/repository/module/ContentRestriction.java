@@ -8,6 +8,8 @@ import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.SerializableMetaData;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlTransient;
@@ -34,20 +36,20 @@ public class ContentRestriction implements SerializableMetaData {
 	@XmlJavaTypeAdapter(PropertyMapAdapter.class)
 	private Map<String, String> properties = new LinkedHashMap<>();
 
-	public String getAttributeName() {
+	public @Nullable String getAttributeName() {
 		return attributeName;
 	}
 
 	@XmlAttribute(name = "attribute", required = true)
-	public void setAttributeName(String attributeName) {
+	public void setAttributeName(@Nullable String attributeName) {
 		this.attributeName = UtilImpl.processStringValue(attributeName);
 	}
 
-	public String getDocumentName() {
+	public @Nullable String getDocumentName() {
 		return documentName;
 	}
 
-	public Map<String, String> getProperties() {
+	public @Nonnull Map<String, String> getProperties() {
 		return properties;
 	}
 	
@@ -55,7 +57,7 @@ public class ContentRestriction implements SerializableMetaData {
 	 * This is called by convert
 	 */
 	@XmlTransient
-	public void setDocumentName(String documentName) {
+	public void setDocumentName(@Nullable String documentName) {
 		this.documentName = UtilImpl.processStringValue(documentName);
 	}
 }

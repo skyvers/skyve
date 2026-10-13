@@ -4,6 +4,8 @@ import java.util.Date;
 
 import org.skyve.CORE;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * Format a java.util.Date into a temporal representation. 
  */
@@ -14,7 +16,7 @@ public class SimpleDateFormatter implements Formatter<Date> {
 	 * Creates a new SimpleDateFormatter instance.
 	 * @param simpleDateFormatPattern the simpleDateFormatPattern
 	 */
-	public SimpleDateFormatter(String simpleDateFormatPattern) {
+	public SimpleDateFormatter(@Nonnull String simpleDateFormatPattern) {
 		this.simpleDateFormatPattern = simpleDateFormatPattern;
 	}
 	
@@ -23,7 +25,7 @@ public class SimpleDateFormatter implements Formatter<Date> {
 	 * @return the result
 	 */
 	@Override
-	public Class<Date> getValueType() {
+	public @Nonnull Class<Date> getValueType() {
 		return Date.class;
 	}
 	
@@ -33,7 +35,7 @@ public class SimpleDateFormatter implements Formatter<Date> {
 	 * @return the result
 	 */
 	@Override
-	public String toDisplayValue(Date value) {
+	public @Nonnull String toDisplayValue(@Nonnull Date value) {
 		return CORE.getDateFormat(simpleDateFormatPattern).format(value);
 	}
 }

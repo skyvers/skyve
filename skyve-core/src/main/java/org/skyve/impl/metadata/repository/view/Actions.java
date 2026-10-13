@@ -24,6 +24,8 @@ import org.skyve.impl.metadata.view.Identifiable;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlElementRef;
 import jakarta.xml.bind.annotation.XmlElementRefs;
@@ -55,12 +57,12 @@ public class Actions implements Identifiable {
 	private List<ActionMetaData> actions = new ArrayList<>();
 
 	@Override
-	public String getWidgetId() {
+	public @Nullable String getWidgetId() {
 		return widgetId;
 	}
 
 	@XmlAttribute(required = false)
-	public void setWidgetId(String widgetId) {
+	public void setWidgetId(@Nullable String widgetId) {
 		this.widgetId = UtilImpl.processStringValue(widgetId);
 	}
 
@@ -80,7 +82,7 @@ public class Actions implements Identifiable {
 						@XmlElementRef(type = UploadAction.class),
 						@XmlElementRef(type = ZoomOutAction.class),
 						@XmlElementRef(type = PrintAction.class)})
-	public List<ActionMetaData> getActions() {
+	public @Nonnull List<ActionMetaData> getActions() {
 		return actions;
 	}
 }

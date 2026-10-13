@@ -3,6 +3,7 @@ package org.skyve.impl.metadata.model.document.field;
 import org.skyve.impl.metadata.model.document.field.validator.DecimalValidator;
 import org.skyve.impl.util.XMLMetaData;
 
+import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
@@ -32,12 +33,12 @@ public class Decimal2 extends ConvertibleField {
 		setAttributeType(AttributeType.decimal2);
 	}
 	
-	public DecimalValidator getValidator() {
+	public @Nullable DecimalValidator getValidator() {
 		return validator;
 	}
 
 	@XmlElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
-	public void setValidator(DecimalValidator validator) {
+	public void setValidator(@Nullable DecimalValidator validator) {
 		this.validator = validator;
 	}
 }

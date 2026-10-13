@@ -2,6 +2,9 @@ package org.skyve.nlp.cron.elementprovider.hour;
 
 import org.skyve.nlp.cron.ExpressionElementProvider;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Detects the {@code midnight} keyword and contributes fixed hour/minute cron values.
  */
@@ -19,7 +22,7 @@ public class Midnight implements ExpressionElementProvider {
 	 * @return {@code true} when midnight is referenced.
 	 */
 	@Override
-	public boolean matches(String value) {
+	public boolean matches(@Nullable String value) {
 		match = value != null && value.toLowerCase().indexOf("midnight") >= 0;
 		return match;
 	}
@@ -40,7 +43,7 @@ public class Midnight implements ExpressionElementProvider {
 	 * @return {@code "0"}.
 	 */
 	@Override
-	public String getMinuteElement() {
+	public @Nonnull String getMinuteElement() {
 		return "0";
 	}
 
@@ -60,7 +63,7 @@ public class Midnight implements ExpressionElementProvider {
 	 * @return {@code "0"}.
 	 */
 	@Override
-	public String getHourElement() {
+	public @Nonnull String getHourElement() {
 		return "0";
 	}
 
@@ -80,7 +83,7 @@ public class Midnight implements ExpressionElementProvider {
 	 * @return {@code null}, as this provider does not supply day-of-month values.
 	 */
 	@Override
-	public String getDayNumberElement() {
+	public @Nullable String getDayNumberElement() {
 		return null;
 	}
 
@@ -100,7 +103,7 @@ public class Midnight implements ExpressionElementProvider {
 	 * @return {@code null}, as this provider does not supply month values.
 	 */
 	@Override
-	public String getMonthElement() {
+	public @Nullable String getMonthElement() {
 		return null;
 	}
 
@@ -120,7 +123,7 @@ public class Midnight implements ExpressionElementProvider {
 	 * @return {@code null}, as this provider does not supply day-of-week values.
 	 */
 	@Override
-	public String getDayOfWeekElement() {
+	public @Nullable String getDayOfWeekElement() {
 		return null;
 	}
 

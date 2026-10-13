@@ -23,7 +23,7 @@ public class FluentFormColumn {
 	 * @param column
 	 *            the column metadata to mutate
 	 */
-	public FluentFormColumn(FormColumn column) {
+	public FluentFormColumn(@Nonnull FormColumn column) {
 		this.column = column;
 	}
 	
@@ -34,7 +34,7 @@ public class FluentFormColumn {
 	 *            the source column metadata
 	 * @return this builder
 	 */
-	public FluentFormColumn from(@SuppressWarnings("hiding") FormColumn column) {
+	public @Nonnull FluentFormColumn from(@SuppressWarnings("hiding") @Nonnull FormColumn column) {
 		Integer i = column.getPixelWidth();
 		if (i != null) {
 			pixelWidth(i.intValue());
@@ -74,7 +74,7 @@ public class FluentFormColumn {
 	 *            the column width in pixels
 	 * @return this builder
 	 */
-	public FluentFormColumn pixelWidth(int pixelWidth) {
+	public @Nonnull FluentFormColumn pixelWidth(int pixelWidth) {
 		column.setPixelWidth(Integer.valueOf(pixelWidth));
 		return this;
 	}
@@ -86,7 +86,7 @@ public class FluentFormColumn {
 	 *            the responsive width value
 	 * @return this builder
 	 */
-	public FluentFormColumn responsiveWidth(int responsiveWidth) {
+	public @Nonnull FluentFormColumn responsiveWidth(int responsiveWidth) {
 		column.setResponsiveWidth(Integer.valueOf(responsiveWidth));
 		return this;
 	}
@@ -98,7 +98,7 @@ public class FluentFormColumn {
 	 *            the small breakpoint width
 	 * @return this builder
 	 */
-	public FluentFormColumn sm(int sm) {
+	public @Nonnull FluentFormColumn sm(int sm) {
 		column.setSm(Integer.valueOf(sm));
 		return this;
 	}
@@ -110,7 +110,7 @@ public class FluentFormColumn {
 	 *            the medium breakpoint width
 	 * @return this builder
 	 */
-	public FluentFormColumn md(int md) {
+	public @Nonnull FluentFormColumn md(int md) {
 		column.setMd(Integer.valueOf(md));
 		return this;
 	}
@@ -122,7 +122,7 @@ public class FluentFormColumn {
 	 *            the large breakpoint width
 	 * @return this builder
 	 */
-	public FluentFormColumn lg(int lg) {
+	public @Nonnull FluentFormColumn lg(int lg) {
 		column.setLg(Integer.valueOf(lg));
 		return this;
 	}
@@ -134,7 +134,7 @@ public class FluentFormColumn {
 	 *            the extra-large breakpoint width
 	 * @return this builder
 	 */
-	public FluentFormColumn xl(int xl) {
+	public @Nonnull FluentFormColumn xl(int xl) {
 		column.setXl(Integer.valueOf(xl));
 		return this;
 	}
@@ -146,7 +146,7 @@ public class FluentFormColumn {
 	 *            the width percentage
 	 * @return this builder
 	 */
-	public FluentFormColumn percentageWidth(int percentageWidth) {
+	public @Nonnull FluentFormColumn percentageWidth(int percentageWidth) {
 		column.setPercentageWidth(Integer.valueOf(percentageWidth));
 		return this;
 	}
@@ -169,7 +169,7 @@ public class FluentFormColumn {
 	 *
 	 * @return the mutable column metadata
 	 */
-	public FormColumn get() {
+	public @Nonnull FormColumn get() {
 		return column;
 	}
 }

@@ -9,6 +9,8 @@ import org.skyve.domain.types.Enumeration;
 import org.skyve.metadata.model.document.Bizlet.DomainValue;
 import org.skyve.util.Util;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlEnum;
 
 /**
@@ -49,7 +51,7 @@ public interface ReportParameter extends PersistentBean {
 		/** @hidden */
 		private static List<DomainValue> domainValues = Stream.of(values()).map(Type::toDomainValue).collect(Collectors.toUnmodifiableList());
 
-		private Type(String code, String description) {
+		private Type(@Nonnull String code, @Nonnull String description) {
 			this.code = code;
 			this.description = description;
 			this.domainValue = new DomainValue(code, description);
@@ -61,7 +63,7 @@ public interface ReportParameter extends PersistentBean {
 		 * @return the persisted parameter type code
 		 */
 		@Override
-		public String toCode() {
+		public @Nonnull String toCode() {
 			return code;
 		}
 
@@ -71,7 +73,7 @@ public interface ReportParameter extends PersistentBean {
 		 * @return the localised description
 		 */
 		@Override
-		public String toLocalisedDescription() {
+		public @Nonnull String toLocalisedDescription() {
 			return Util.i18n(description);
 		}
 
@@ -81,7 +83,7 @@ public interface ReportParameter extends PersistentBean {
 		 * @return the corresponding domain value
 		 */
 		@Override
-		public DomainValue toDomainValue() {
+		public @Nonnull DomainValue toDomainValue() {
 			return domainValue;
 		}
 
@@ -91,7 +93,7 @@ public interface ReportParameter extends PersistentBean {
 		 * @param code the persisted code to match
 		 * @return the matching enum value, or {@code null} when no value matches
 		 */
-		public static Type fromCode(String code) {
+		public static @Nullable Type fromCode(@Nullable String code) {
 			Type result = null;
 
 			for (Type value : values()) {
@@ -110,7 +112,7 @@ public interface ReportParameter extends PersistentBean {
 		 * @param description the localised description to match
 		 * @return the matching enum value, or {@code null} when no value matches
 		 */
-		public static Type fromLocalisedDescription(String description) {
+		public static @Nullable Type fromLocalisedDescription(@Nullable String description) {
 			Type result = null;
 
 			for (Type value : values()) {
@@ -128,7 +130,7 @@ public interface ReportParameter extends PersistentBean {
 		 *
 		 * @return immutable domain values for this enum
 		 */
-		public static List<DomainValue> toDomainValues() {
+		public static @Nonnull List<DomainValue> toDomainValues() {
 			return domainValues;
 		}
 	}
@@ -138,19 +140,19 @@ public interface ReportParameter extends PersistentBean {
 	 *
 	 * @return the parameter name
 	 */
-	String getName();
+	@Nullable String getName();
 
 	/**
 	 * Returns the declared parameter data type.
 	 *
 	 * @return the parameter type
 	 */
-	Type getType();
+	@Nullable Type getType();
 	
 	/**
 	 * Applies an input value represented as text to this parameter.
 	 *
 	 * @param reportInputValue the input value supplied by report execution
 	 */
-	void setReportInputValue(String reportInputValue);
+	void setReportInputValue(@Nullable String reportInputValue);
 }

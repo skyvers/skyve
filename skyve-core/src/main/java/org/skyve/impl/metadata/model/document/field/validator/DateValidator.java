@@ -8,6 +8,8 @@ import org.skyve.domain.types.converters.Converter;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.user.User;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
 
@@ -27,12 +29,12 @@ public class DateValidator extends RangeValidator<Date> {
 	private static final long serialVersionUID = 2052940948388013357L;
 
 	@Override
-	public void validate(User user, 
-							Date value,
-							String binding,
-							String localisedDisplayName,
-							Converter<Date> converter,
-							ValidationException e) {
+	public void validate(@Nonnull User user, 
+							@Nullable Date value,
+							@Nonnull String binding,
+							@Nullable String localisedDisplayName,
+							@Nullable Converter<Date> converter,
+							@Nonnull ValidationException e) {
 		if (value != null) {
 			Date min = getMin();
 			Date max = getMax();

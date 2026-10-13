@@ -38,7 +38,7 @@ public abstract class QueryDefinitionImpl implements QueryDefinition {
 	private Map<String, String> properties = new LinkedHashMap<>();
 
 	@Override
-	public Module getOwningModule() {
+	public @Nonnull Module getOwningModule() {
 		return owningModule;
 	}
 	
@@ -47,7 +47,7 @@ public abstract class QueryDefinitionImpl implements QueryDefinition {
 	}
 
 	@Override
-	public String getName() {
+	public @Nullable String getName() {
 		return name;
 	}
 
@@ -56,7 +56,7 @@ public abstract class QueryDefinitionImpl implements QueryDefinition {
 	}
 
 	@Override
-	public String getDescription() {
+	public @Nonnull String getDescription() {
 		return description;
 	}
 
@@ -65,7 +65,7 @@ public abstract class QueryDefinitionImpl implements QueryDefinition {
 	}
 
 	@Override
-	public String getDocumentation() {
+	public @Nullable String getDocumentation() {
 		return documentation;
 	}
 
@@ -83,12 +83,12 @@ public abstract class QueryDefinitionImpl implements QueryDefinition {
 	}
 
 	@Override
-	public Map<String, String> getProperties() {
+	public @Nonnull Map<String, String> getProperties() {
 		return properties;
 	}
 	
 	@Override
-    public String toString() {
+    public @Nonnull String toString() {
 		return MoreObjects.toStringHelper(this).add("name", name).toString();
     }
 }

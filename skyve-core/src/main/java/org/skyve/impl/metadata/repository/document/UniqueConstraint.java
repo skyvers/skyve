@@ -12,6 +12,8 @@ import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.model.document.UniqueConstraint.DocumentScope;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlElementWrapper;
@@ -46,41 +48,41 @@ public class UniqueConstraint extends NamedMetaData {
 	@XmlJavaTypeAdapter(PropertyMapAdapter.class)
 	private Map<String, String> properties = new LinkedHashMap<>();
 	
-	public String getDescription() {
+	public @Nullable String getDescription() {
 		return description;
 	}
 
 	@XmlAttribute
-	public void setDescription(String description) {
+	public void setDescription(@Nullable String description) {
 		this.description = UtilImpl.processStringValue(description);
 	}
 
-	public DocumentScope getScope() {
+	public @Nullable DocumentScope getScope() {
 		return scope;
 	}
 
 	@XmlAttribute(required = true)
-	public void setScope(DocumentScope scope) {
+	public void setScope(@Nullable DocumentScope scope) {
 		this.scope = scope;
 	}
 
-	public String getMessage() {
+	public @Nullable String getMessage() {
 		return message;
 	}
 
 	@XmlElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE, required = true)
 	@XmlJavaTypeAdapter(CDATAAdapter.class)
-	public void setMessage(String message) {
+	public void setMessage(@Nullable String message) {
 		this.message = UtilImpl.processStringValue(message);
 	}
 
 	@XmlElementWrapper(namespace = XMLMetaData.DOCUMENT_NAMESPACE, name = "fieldReferences")
 	@XmlElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE, name = "ref", required = true)
-	public List<FieldReference> getFieldReferences() {
+	public @Nonnull List<FieldReference> getFieldReferences() {
 		return fieldReferences;
 	}
 	
-	public Map<String, String> getProperties() {
+	public @Nonnull Map<String, String> getProperties() {
 		return properties;
 	}
 }

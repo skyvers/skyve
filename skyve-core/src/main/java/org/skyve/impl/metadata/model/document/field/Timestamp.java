@@ -3,6 +3,7 @@ package org.skyve.impl.metadata.model.document.field;
 import org.skyve.impl.metadata.model.document.field.validator.DateValidator;
 import org.skyve.impl.util.XMLMetaData;
 
+import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
@@ -33,12 +34,12 @@ public class Timestamp extends ConvertibleField {
 		setAttributeType(AttributeType.timestamp);
 	}
 	
-	public DateValidator getValidator() {
+	public @Nullable DateValidator getValidator() {
 		return validator;
 	}
 
 	@XmlElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
-	public void setValidator(DateValidator validator) {
+	public void setValidator(@Nullable DateValidator validator) {
 		this.validator = validator;
 	}
 }

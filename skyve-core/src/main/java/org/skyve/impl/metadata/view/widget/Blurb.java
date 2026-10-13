@@ -15,6 +15,7 @@ import org.skyve.metadata.view.Invisible;
 import org.skyve.metadata.view.TextOutput;
 import org.skyve.util.Util;
 
+import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlRootElement;
@@ -83,14 +84,14 @@ public class Blurb implements Invisible, AbsoluteSize, ContentSpecifiedWidth, Fo
 	/**
 	 * Returns the configured markup content.
 	 */
-	public String getMarkup() {
+	public @Nullable String getMarkup() {
 		return markup;
 	}
 
 	/**
 	 * Returns the markup localised for the current user locale.
 	 */
-	public String getLocalisedMarkup() {
+	public @Nullable String getLocalisedMarkup() {
 		return Util.i18n(markup);
 	}
 	
@@ -99,7 +100,7 @@ public class Blurb implements Invisible, AbsoluteSize, ContentSpecifiedWidth, Fo
 	 */
 	@XmlValue
 	@XmlJavaTypeAdapter(CDATAAdapter.class)
-	public void setMarkup(String markup) {
+	public void setMarkup(@Nullable String markup) {
 		this.markup = UtilImpl.processStringValue(markup);
 	}
 
@@ -107,7 +108,7 @@ public class Blurb implements Invisible, AbsoluteSize, ContentSpecifiedWidth, Fo
 	 * Returns the absolute pixel width, or {@code null} when content-driven sizing is used.
 	 */
 	@Override
-	public Integer getPixelWidth() {
+	public @Nullable Integer getPixelWidth() {
 		return pixelWidth;
 	}
 
@@ -116,7 +117,7 @@ public class Blurb implements Invisible, AbsoluteSize, ContentSpecifiedWidth, Fo
 	 */
 	@Override
 	@XmlAttribute(required = false)
-	public void setPixelWidth(Integer pixelWidth) {
+	public void setPixelWidth(@Nullable Integer pixelWidth) {
 		this.pixelWidth = pixelWidth;
 	}
 
@@ -124,7 +125,7 @@ public class Blurb implements Invisible, AbsoluteSize, ContentSpecifiedWidth, Fo
 	 * Returns the absolute pixel height, or {@code null} when content-driven sizing is used.
 	 */
 	@Override
-	public Integer getPixelHeight() {
+	public @Nullable Integer getPixelHeight() {
 		return pixelHeight;
 	}
 
@@ -133,7 +134,7 @@ public class Blurb implements Invisible, AbsoluteSize, ContentSpecifiedWidth, Fo
 	 */
 	@Override
 	@XmlAttribute(required = false)
-	public void setPixelHeight(Integer pixelHeight) {
+	public void setPixelHeight(@Nullable Integer pixelHeight) {
 		this.pixelHeight = pixelHeight;
 	}
 
@@ -203,7 +204,7 @@ public class Blurb implements Invisible, AbsoluteSize, ContentSpecifiedWidth, Fo
 	 *
 	 * <p>When {@code null}, renderer defaults apply.
 	 */
-	public HorizontalAlignment getTextAlignment() {
+	public @Nullable HorizontalAlignment getTextAlignment() {
 		return textAlignment;
 	}
 
@@ -211,7 +212,7 @@ public class Blurb implements Invisible, AbsoluteSize, ContentSpecifiedWidth, Fo
 	 * Sets the text alignment override.
 	 */
 	@XmlAttribute(name = "textAlignment", required = false)
-	public void setTextAlignment(HorizontalAlignment textAlignment) {
+	public void setTextAlignment(@Nullable HorizontalAlignment textAlignment) {
 		this.textAlignment = textAlignment;
 	}
 
@@ -219,7 +220,7 @@ public class Blurb implements Invisible, AbsoluteSize, ContentSpecifiedWidth, Fo
 	 * Returns whether output escaping is explicitly configured.
 	 */
 	@Override
-	public Boolean getEscape() {
+	public @Nullable Boolean getEscape() {
 		return escape;
 	}
 
@@ -227,7 +228,7 @@ public class Blurb implements Invisible, AbsoluteSize, ContentSpecifiedWidth, Fo
 	 * Sets explicit output escaping behaviour.
 	 */
 	@XmlAttribute
-	public void setEscape(Boolean escape) {
+	public void setEscape(@Nullable Boolean escape) {
 		this.escape = escape;
 	}
 
@@ -235,7 +236,7 @@ public class Blurb implements Invisible, AbsoluteSize, ContentSpecifiedWidth, Fo
 	 * Returns the configured sanitisation mode.
 	 */
 	@Override
-	public Sanitisation getSanitise() {
+	public @Nullable Sanitisation getSanitise() {
 		return sanitise;
 	}
 
@@ -243,7 +244,7 @@ public class Blurb implements Invisible, AbsoluteSize, ContentSpecifiedWidth, Fo
 	 * Sets the sanitisation mode for markup rendering.
 	 */
 	@XmlAttribute
-	public void setSanitise(Sanitisation sanitise) {
+	public void setSanitise(@Nullable Sanitisation sanitise) {
 		this.sanitise = sanitise;
 	}
 	
@@ -251,7 +252,7 @@ public class Blurb implements Invisible, AbsoluteSize, ContentSpecifiedWidth, Fo
 	 * Returns the mutable decorator property map.
 	 */
 	@Override
-	public Map<String, String> getProperties() {
+	public @Nonnull Map<String, String> getProperties() {
 		return properties;
 	}
 }

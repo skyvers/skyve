@@ -115,7 +115,7 @@ public class JSONReader {
 	 * @return the reconstructed object, dynamic map/list, scalar value, or {@code null}
 	 * @throws Exception if the JSON is malformed or an identified object cannot be reconstructed
 	 */
-	public Object read(@Nonnull String string) throws Exception {
+	public @Nullable Object read(@Nonnull String string) throws Exception {
 		stringLength = string.length();
 		it = new StringCharacterIterator(string);
 		c = it.first();

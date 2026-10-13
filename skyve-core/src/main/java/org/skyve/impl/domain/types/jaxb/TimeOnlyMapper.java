@@ -4,6 +4,7 @@ import java.util.Date;
 
 import org.skyve.domain.types.TimeOnly;
 
+import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.adapters.XmlAdapter;
 
 //@XmlSchemaType(name = "time")
@@ -22,12 +23,12 @@ import jakarta.xml.bind.annotation.adapters.XmlAdapter;
  */
 public class TimeOnlyMapper extends XmlAdapter<Date, TimeOnly> {
 	@Override
-	public TimeOnly unmarshal(Date time) throws Exception {
+	public @Nullable TimeOnly unmarshal(@Nullable Date time) throws Exception {
 		return (time == null) ? null : new TimeOnly(time.getTime());
 	}
 
 	@Override
-	public Date marshal(TimeOnly timeOnly) throws Exception {
+	public @Nullable Date marshal(@Nullable TimeOnly timeOnly) throws Exception {
 		return timeOnly;
 	}
 }

@@ -9,6 +9,9 @@ import org.skyve.util.BeanVisitor;
 import org.skyve.util.logging.Category;
 import org.slf4j.Logger;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Recurse a bean to determine if anything has changed
  */
@@ -23,11 +26,11 @@ class ChangedBeanVisitor extends BeanVisitor {
 	}
 
 	@Override
-	protected boolean accept(String binding,
-								Document documentAccepted,
-								Document owningDocument,
-								Relation owningRelation,
-								Bean beanAccepted) {
+	protected boolean accept(@Nonnull String binding,
+								@Nonnull Document documentAccepted,
+								@Nullable Document owningDocument,
+								@Nullable Relation owningRelation,
+								@Nonnull Bean beanAccepted) {
 		// Process an inverse if the inverse is specified as cascading.
 		if ((owningRelation instanceof Inverse inverse) && 
 				(! Boolean.TRUE.equals(inverse.getCascade()))) {

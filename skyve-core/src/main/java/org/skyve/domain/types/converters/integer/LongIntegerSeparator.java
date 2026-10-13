@@ -7,6 +7,9 @@ import org.skyve.domain.types.converters.Validator;
 import org.skyve.metadata.model.Attribute.AttributeType;
 import org.skyve.util.BeanValidator;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Converts long values using grouped thousands separator formatting.
  */
@@ -16,7 +19,7 @@ public class LongIntegerSeparator implements Converter<Long> {
 	 * @return the result value
 	 */
 	@Override
-	public Class<Long> getValueType() {
+	public @Nonnull Class<Long> getValueType() {
 		return Long.class;
 	}
 	
@@ -26,7 +29,7 @@ public class LongIntegerSeparator implements Converter<Long> {
 	 * @return the result value
 	 */
 	@Override
-	public Long fromDisplayValue(String displayValue) throws ConversionException {
+	public @Nonnull Long fromDisplayValue(@Nonnull String displayValue) throws ConversionException {
 		try {
 			String result = displayValue.replace(",", "");
 			return Long.valueOf(result);
@@ -51,7 +54,7 @@ public class LongIntegerSeparator implements Converter<Long> {
 	 * @return the result value
 	 */
 	@Override
-	public String toDisplayValue(Long value) throws ConversionException {
+	public @Nonnull String toDisplayValue(@Nonnull Long value) throws ConversionException {
 		try {
 			return String.format("%,d",value);
 		}
@@ -65,7 +68,7 @@ public class LongIntegerSeparator implements Converter<Long> {
 	 * @return the result value
 	 */
 	@Override
-	public AttributeType getAttributeType() {
+	public @Nonnull AttributeType getAttributeType() {
 		return AttributeType.longInteger;
 	}
 
@@ -74,7 +77,7 @@ public class LongIntegerSeparator implements Converter<Long> {
 	 * @return the result value
 	 */
 	@Override
-	public Format<Long> getFormat() {
+	public @Nullable Format<Long> getFormat() {
 		return null;
 	}
 
@@ -83,7 +86,7 @@ public class LongIntegerSeparator implements Converter<Long> {
 	 * @return the result value
 	 */
 	@Override
-	public Validator<Long> getValidator() {
+	public @Nullable Validator<Long> getValidator() {
 		return null;
 	}
 	
@@ -92,7 +95,7 @@ public class LongIntegerSeparator implements Converter<Long> {
 	 * @return the result value
 	 */
 	@Override
-	public String getFormatPattern() {
+	public @Nullable String getFormatPattern() {
 		return null;
 	}
 }

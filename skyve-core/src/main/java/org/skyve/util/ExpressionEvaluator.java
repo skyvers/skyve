@@ -537,7 +537,7 @@ public abstract class ExpressionEvaluator {
 	 * @return The evaluated expression.
 	 */
 	@SuppressWarnings("java:S3776") // Complexity OK
-	private static Object process(String expression, Bean bean, boolean format) {
+	private static @Nullable Object process(@Nonnull String expression, @Nullable Bean bean, boolean format) {
 		String expressionWithoutSuffix = expression;
 		String formatName = null;
 		

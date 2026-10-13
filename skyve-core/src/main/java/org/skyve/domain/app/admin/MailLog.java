@@ -9,6 +9,7 @@ import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
 
 import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 
 /**
  * Persistent record of an outbound mail dispatch attempt.
@@ -38,49 +39,49 @@ public interface MailLog extends PersistentBean {
 		}
 	}
 
-	Timestamp getTimestamp();
-	Timestamp getArchiveTimestamp();
-	String getToRecipients();
-	String getCcRecipients();
-	String getBccRecipients();
-	String getArchiveFilename();
-	String getSubject();
-	String getBodyExcerpt();
-	String getAttachmentFileNames();
-	String getDispatchStatus();
-	String getProvider();
-	String getProviderMessageId();
-	String getRelayStatus();
-	String getRelayDetail();
-	String getErrorDetail();
-	Boolean getIsBulk();
-	Long getMailCount();
-	Long getRecipientCount();
-	Boolean getHasMultipleSubjects();
-	Long getSubjectVariantCount();
-	Boolean getHasMultipleBodies();
-	Long getBodyVariantCount();
+	@Nullable Timestamp getTimestamp();
+	@Nullable Timestamp getArchiveTimestamp();
+	@Nullable String getToRecipients();
+	@Nullable String getCcRecipients();
+	@Nullable String getBccRecipients();
+	@Nullable String getArchiveFilename();
+	@Nullable String getSubject();
+	@Nullable String getBodyExcerpt();
+	@Nullable String getAttachmentFileNames();
+	@Nullable String getDispatchStatus();
+	@Nullable String getProvider();
+	@Nullable String getProviderMessageId();
+	@Nullable String getRelayStatus();
+	@Nullable String getRelayDetail();
+	@Nullable String getErrorDetail();
+	@Nullable Boolean getIsBulk();
+	@Nullable Long getMailCount();
+	@Nullable Long getRecipientCount();
+	@Nullable Boolean getHasMultipleSubjects();
+	@Nullable Long getSubjectVariantCount();
+	@Nullable Boolean getHasMultipleBodies();
+	@Nullable Long getBodyVariantCount();
 
-	void setTimestamp(Timestamp timestamp);
-	void setArchiveTimestamp(Timestamp archiveTimestamp);
-	void setToRecipients(String toRecipients);
-	void setCcRecipients(String ccRecipients);
-	void setBccRecipients(String bccRecipients);
-	void setArchiveFilename(String archiveFilename);
-	void setSubject(String subject);
-	void setBodyExcerpt(String bodyExcerpt);
-	void setAttachmentFileNames(String attachmentFileNames);
-	void setDispatchStatus(String dispatchStatus);
-	void setProvider(String provider);
-	void setProviderMessageId(String providerMessageId);
-	void setRelayStatus(String relayStatus);
-	void setRelayDetail(String relayDetail);
-	void setErrorDetail(String errorDetail);
-	void setIsBulk(Boolean isBulk);
-	void setMailCount(Long mailCount);
-	void setRecipientCount(Long recipientCount);
-	void setHasMultipleSubjects(Boolean hasMultipleSubjects);
-	void setSubjectVariantCount(Long subjectVariantCount);
-	void setHasMultipleBodies(Boolean hasMultipleBodies);
-	void setBodyVariantCount(Long bodyVariantCount);
+	void setTimestamp(@Nullable Timestamp timestamp);
+	void setArchiveTimestamp(@Nullable Timestamp archiveTimestamp);
+	void setToRecipients(@Nullable String toRecipients);
+	void setCcRecipients(@Nullable String ccRecipients);
+	void setBccRecipients(@Nullable String bccRecipients);
+	void setArchiveFilename(@Nullable String archiveFilename);
+	void setSubject(@Nullable String subject);
+	void setBodyExcerpt(@Nullable String bodyExcerpt);
+	void setAttachmentFileNames(@Nullable String attachmentFileNames);
+	void setDispatchStatus(@Nullable String dispatchStatus);
+	void setProvider(@Nullable String provider);
+	void setProviderMessageId(@Nullable String providerMessageId);
+	void setRelayStatus(@Nullable String relayStatus);
+	void setRelayDetail(@Nullable String relayDetail);
+	void setErrorDetail(@Nullable String errorDetail);
+	void setIsBulk(@Nullable Boolean isBulk);
+	void setMailCount(@Nullable Long mailCount);
+	void setRecipientCount(@Nullable Long recipientCount);
+	void setHasMultipleSubjects(@Nullable Boolean hasMultipleSubjects);
+	void setSubjectVariantCount(@Nullable Long subjectVariantCount);
+	void setHasMultipleBodies(@Nullable Boolean hasMultipleBodies);
+	void setBodyVariantCount(@Nullable Long bodyVariantCount);
 }

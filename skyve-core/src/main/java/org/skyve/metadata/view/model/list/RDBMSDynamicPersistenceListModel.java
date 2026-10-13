@@ -34,6 +34,7 @@ import org.slf4j.Logger;
 import org.skyve.util.logging.SkyveLoggerFactory;
 
 import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 
 /**
  * An in-memory list model that can generate the appropriate select statement to join across static and dynamic references and fields
@@ -117,7 +118,7 @@ public class RDBMSDynamicPersistenceListModel<T extends Bean> extends InMemoryLi
 	 * Use this to drive the model off of a meta-data query programmatically to get Bean rows.
 	 * @param query	The meta-data query.
 	 */
-	public RDBMSDynamicPersistenceListModel(MetaDataQueryDefinition query) {
+	public RDBMSDynamicPersistenceListModel(@Nonnull MetaDataQueryDefinition query) {
 		this.query = query;
 	}
 	
@@ -128,7 +129,7 @@ public class RDBMSDynamicPersistenceListModel<T extends Bean> extends InMemoryLi
 	 * @param drivingDocument	The model driving document.
 	 * @param columns	The columns to project.
 	 */
-	public RDBMSDynamicPersistenceListModel(String description, Document drivingDocument, List<MetaDataQueryColumn> columns) {
+	public RDBMSDynamicPersistenceListModel(@Nullable String description, @Nonnull Document drivingDocument, @Nonnull List<MetaDataQueryColumn> columns) {
 		this.description = description;
 		this.document = drivingDocument;
 		this.columns = columns;
@@ -146,7 +147,7 @@ public class RDBMSDynamicPersistenceListModel<T extends Bean> extends InMemoryLi
 	 * Use this method in your extension to set the state of the list model based on a meta data query.
 	 * @param query	The query.
 	 */
-	protected void setQuery(Customer customer, MetaDataQueryDefinition query) {
+	protected void setQuery(@Nonnull Customer customer, @Nonnull MetaDataQueryDefinition query) {
 		this.customer = customer;
 		this.query = query;
 
@@ -157,7 +158,7 @@ public class RDBMSDynamicPersistenceListModel<T extends Bean> extends InMemoryLi
 		document = module.getDocument(customer, query.getDocumentName());
 	}
 
-	protected void setModel(Customer customer, String description, Document drivingDocument, List<MetaDataQueryColumn> columns) {
+	protected void setModel(@Nonnull Customer customer, @Nullable String description, @Nonnull Document drivingDocument, @Nonnull List<MetaDataQueryColumn> columns) {
 		this.customer = customer;
 		this.description = description;
 		this.document = drivingDocument;
@@ -172,7 +173,7 @@ public class RDBMSDynamicPersistenceListModel<T extends Bean> extends InMemoryLi
 	 * Override this to either set the query, or set the model
 	 */
 	@Override
-	public void postConstruct(@SuppressWarnings("hiding") Customer customer,
+	public void postConstruct(@SuppressWarnings("hiding") @Nonnull Customer customer,
 								@SuppressWarnings("hiding") boolean runtime) {
 		this.customer = customer;
 		this.runtime = runtime;
@@ -200,7 +201,7 @@ public class RDBMSDynamicPersistenceListModel<T extends Bean> extends InMemoryLi
 	
 	
 	@Override
-	public void setBean(T bean) {
+	public void setBean(@Nullable T bean) {
 		if (postConstructInSetBean) {
 			determinePersistenceIdentifiers();
 			setDrivingDocument(module, document);
@@ -215,22 +216,22 @@ public class RDBMSDynamicPersistenceListModel<T extends Bean> extends InMemoryLi
 	}
 	
 	@Override
-	public String getDescription() {
+	public @Nullable String getDescription() {
 		return description;
 	}
 
 	@Override
-	public List<MetaDataQueryColumn> getColumns() {
+	public @Nonnull List<MetaDataQueryColumn> getColumns() {
 		return columns;
 	}
 
 	@Override
-	public Bean update(String bizId, SortedMap<String, Object> properties) throws Exception {
+	public @Nullable Bean update(@Nonnull String bizId, @Nonnull SortedMap<String, Object> properties) throws Exception {
 		throw new UnsupportedOperationException("Update Not Supported");
 	}
 
 	@Override
-	public void remove(String bizId) throws Exception {
+	public void remove(@Nonnull String bizId) throws Exception {
 		throw new UnsupportedOperationException("Remove Not Supported");
 	}
 
@@ -247,7 +248,7 @@ public class RDBMSDynamicPersistenceListModel<T extends Bean> extends InMemoryLi
 		private int fieldIndex;
 		private Class<?> fieldType;
 		
-		private FieldInfo(int fieldIndex, Class<?> fieldType) {
+		private FieldInfo(int fieldIndex, @Nonnull Class<?> fieldType) {
 			this.fieldIndex = fieldIndex;
 			this.fieldType = fieldType;
 		}
@@ -271,7 +272,7 @@ public class RDBMSDynamicPersistenceListModel<T extends Bean> extends InMemoryLi
 	 * @param joinedTables
 	 * @return	the results.
 	 */
-	public AutoClosingIterable<Object[]> query(@SuppressWarnings("hiding") StringBuilder projectedColumns, @SuppressWarnings("hiding") StringBuilder joinedTables) {
+	public @Nonnull AutoClosingIterable<Object[]> query(@SuppressWarnings("hiding") @Nonnull StringBuilder projectedColumns, @SuppressWarnings("hiding") @Nonnull StringBuilder joinedTables) {
 		Persistence p = CORE.getPersistence();
 		StringBuilder sql = new StringBuilder(projectedColumns.length() + joinedTables.length() + 90);
 		sql.append("select ").append(projectedColumns).append(" from ").append(joinedTables);
@@ -285,7 +286,7 @@ public class RDBMSDynamicPersistenceListModel<T extends Bean> extends InMemoryLi
 	
 	@Override
 	@SuppressWarnings("java:S3776") // Complexity OK
-	public List<Bean> getRows() throws Exception {
+	public @Nonnull List<Bean> getRows() throws Exception {
 		// Populate the selectClause and fromClause and all the resulting table info
 		prepare();
 		
@@ -445,7 +446,7 @@ public class RDBMSDynamicPersistenceListModel<T extends Bean> extends InMemoryLi
 	 * @param simpleBindings
 	 */
 	@SuppressWarnings("java:S3776") // Complexity OK
-	private void prepareReferences(String[] simpleBindings) {
+	private void prepareReferences(@Nonnull String[] simpleBindings) {
 		Module simpleBindingModule = module;
 		Document simpleBindingDocument = document;
 		
@@ -548,7 +549,7 @@ public class RDBMSDynamicPersistenceListModel<T extends Bean> extends InMemoryLi
 	 * @param dynamicAttribute
 	 * @param relationAttribute
 	 */
-	private void processProjectionThroughReferences(TableInfo info, String projection, String simpleBinding, boolean dynamicAttribute, boolean relationAttribute, Attribute a) {
+	private void processProjectionThroughReferences(@Nonnull TableInfo info, @Nonnull String projection, @Nonnull String simpleBinding, boolean dynamicAttribute, boolean relationAttribute, @Nullable Attribute a) {
 		// Implicit static/dynamic attribute
 		if (BindUtil.isImplicit(simpleBinding)) {
 			projectedColumns.append(", t").append(info.relatedDocument.isDynamic() ? info.dynamicEntityTableAliasNumber : info.staticTableAliasNumber).append('.').append(simpleBinding).append(FIELD_ALIAS_PREFIX).append(fieldAliasNumber++);
@@ -575,7 +576,7 @@ public class RDBMSDynamicPersistenceListModel<T extends Bean> extends InMemoryLi
 		}
 	}
 	
-	private void addField(Attribute a, String projection, int index) {
+	private void addField(@Nullable Attribute a, @Nonnull String projection, int index) {
 		Class<?> type = String.class;
 		if (a != null) {
 			type = a.getImplementingType();
@@ -590,7 +591,7 @@ public class RDBMSDynamicPersistenceListModel<T extends Bean> extends InMemoryLi
 	 * @param info
 	 * @param dynamicAttribute
 	 */
-	private void addStaticDynamicCounterpart(TableInfo info, boolean dynamicAttribute) {
+	private void addStaticDynamicCounterpart(@Nonnull TableInfo info, boolean dynamicAttribute) {
 		// If the binding is dynamic then ensure that the penultimate relation has a dynamic entity table joined in 
 		if (dynamicAttribute) {
 			if ((info.staticTableAliasNumber != null) && (info.dynamicEntityTableAliasNumber == null)) {

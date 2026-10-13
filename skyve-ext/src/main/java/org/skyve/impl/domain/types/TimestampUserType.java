@@ -14,6 +14,9 @@ import org.hibernate.engine.spi.SharedSessionContractImplementor;
 import org.hibernate.type.LiteralType;
 import org.hibernate.usertype.UserType;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Hibernate {@link org.hibernate.usertype.UserType} that maps the Skyve
  * {@link org.skyve.domain.types.Timestamp} type to a SQL {@code TIMESTAMP} column.
@@ -22,17 +25,17 @@ public class TimestampUserType implements UserType, LiteralType<Date>, Serializa
 	private static final long serialVersionUID = 7498394614315784148L;
 
 	@Override
-	public int[] sqlTypes() {
+	public @Nonnull int[] sqlTypes() {
 		return new int[] {Types.TIMESTAMP};
 	}
 
 	@Override
-	public Class<?> returnedClass() {
+	public @Nonnull Class<?> returnedClass() {
 		return org.skyve.domain.types.Timestamp.class;
 	}
 
 	@Override
-	public boolean equals(Object x, Object y)
+	public boolean equals(@Nullable Object x, @Nullable Object y)
 	throws HibernateException {
 		if (x == y) {
 			return true;
@@ -63,14 +66,14 @@ public class TimestampUserType implements UserType, LiteralType<Date>, Serializa
 	}
 
 	@Override
-	public int hashCode(Object o) 
+	public int hashCode(@Nonnull Object o) 
 	throws HibernateException {
 		java.util.Date ts = (Date) o;
 		return Long.valueOf(ts.getTime() / 1000).hashCode();
 	}
 
 	@Override
-	public Object nullSafeGet(ResultSet rs, String[] names, SharedSessionContractImplementor session, Object owner)
+	public @Nullable Object nullSafeGet(@Nonnull ResultSet rs, @Nonnull String[] names, @Nullable SharedSessionContractImplementor session, @Nullable Object owner)
 	throws HibernateException, SQLException {
 		Timestamp value = rs.getTimestamp(names[0]);
 		if (rs.wasNull()) {
@@ -81,7 +84,7 @@ public class TimestampUserType implements UserType, LiteralType<Date>, Serializa
 	}
 
 	@Override
-	public void nullSafeSet(PreparedStatement ps, Object value, int index, SharedSessionContractImplementor session)
+	public void nullSafeSet(@Nonnull PreparedStatement ps, @Nullable Object value, int index, @Nullable SharedSessionContractImplementor session)
 	throws HibernateException, SQLException {
 		if (value == null) {
 			ps.setNull(index, Types.TIMESTAMP);
@@ -92,7 +95,7 @@ public class TimestampUserType implements UserType, LiteralType<Date>, Serializa
 	}
 
 	@Override
-	public Object deepCopy(Object value)
+	public @Nullable Object deepCopy(@Nullable Object value)
 	throws HibernateException {
 		return (value == null) ? null : new org.skyve.domain.types.Timestamp(((Date) value).getTime());
 	}
@@ -103,25 +106,25 @@ public class TimestampUserType implements UserType, LiteralType<Date>, Serializa
 	}
 
 	@Override
-	public Serializable disassemble(Object value)
+	public @Nullable Serializable disassemble(@Nullable Object value)
 	throws HibernateException {
 		return (Serializable) value;
 	}
 
 	@Override
-	public Object assemble(Serializable cached, Object owner)
+	public @Nullable Object assemble(@Nullable Serializable cached, @Nullable Object owner)
 	throws HibernateException {
 		return cached;
 	}
 
 	@Override
-	public Object replace(Object original, Object target, Object owner)
+	public @Nullable Object replace(@Nullable Object original, @Nullable Object target, @Nullable Object owner)
 	throws HibernateException {
 		return original;
 	}
 
 	@Override
-	public String objectToSQLString(Date value, Dialect dialect)
+	public @Nonnull String objectToSQLString(@Nullable Date value, @Nullable Dialect dialect)
 	throws Exception {
 		return (value == null) ? "NULL" : '\'' + new Timestamp(value.getTime()).toString() + '\'';
 	}

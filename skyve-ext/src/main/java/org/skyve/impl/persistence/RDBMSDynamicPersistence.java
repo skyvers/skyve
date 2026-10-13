@@ -49,6 +49,7 @@ import org.slf4j.Logger;
 import org.skyve.util.logging.SkyveLoggerFactory;
 
 import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 
 // TODO Need to replicate HibernateListener functions for dynamic beans
 // TODO Need to treat bizVersion and bizLock which requires change detection in DynamicBean.
@@ -86,7 +87,7 @@ public class RDBMSDynamicPersistence implements DynamicPersistence {
 	 * @param persistence the parent persistence that owns the JDBC connection and user context
 	 */
 	@Override
-	public void postConstruct(@SuppressWarnings("hiding") Persistence persistence) {
+	public void postConstruct(@SuppressWarnings("hiding") @Nonnull Persistence persistence) {
 		// Note that the persistence instance here has not had a user assigned
 		this.persistence = persistence;
 	}
@@ -113,7 +114,7 @@ public class RDBMSDynamicPersistence implements DynamicPersistence {
 	 */
 	@Override
 	@SuppressWarnings("java:S3776") // Complexity OK
-	public void persist(PersistentBean bean) {
+	public void persist(@Nonnull PersistentBean bean) {
 		Customer c = persistence.getUser().getCustomer();
 		populatePersistentIdentifiersIfNecessary(c);
 		Module m = c.getModule(bean.getBizModule());
@@ -135,11 +136,11 @@ public class RDBMSDynamicPersistence implements DynamicPersistence {
 			 * @throws Exception if traversal or persistence preparation fails
 			 */
 			@Override
-			protected boolean accept(String binding,
-										Document visitedDocument,
-										Document owningDocument,
-										Relation owningRelation,
-										Bean visitedBean)
+			protected boolean accept(@Nonnull String binding,
+										@Nonnull Document visitedDocument,
+										@Nullable Document owningDocument,
+										@Nullable Relation owningRelation,
+										@Nonnull Bean visitedBean)
 			throws Exception {
 //System.out.println("Visit " + binding + " = " + visitedBean.getBizId() + " / " + visitedBean.getClass());
 				// Use our own cascade rules for dynamic beans
@@ -353,7 +354,7 @@ public class RDBMSDynamicPersistence implements DynamicPersistence {
 	 * @param bean the root bean whose dynamic rows should be removed
 	 */
 	@Override
-	public void delete(PersistentBean bean) {
+	public void delete(@Nonnull PersistentBean bean) {
 		Customer c = persistence.getUser().getCustomer();
 		populatePersistentIdentifiersIfNecessary(c);
 		Module m = c.getModule(bean.getBizModule());
@@ -390,11 +391,11 @@ public class RDBMSDynamicPersistence implements DynamicPersistence {
 			 * @throws Exception if traversal fails
 			 */
 			@Override
-			protected boolean accept(String binding,
-										Document visitedDocument,
-										Document owningDocument,
-										Relation owningRelation,
-										Bean visitedBean)
+			protected boolean accept(@Nonnull String binding,
+										@Nonnull Document visitedDocument,
+										@Nullable Document owningDocument,
+										@Nullable Relation owningRelation,
+										@Nonnull Bean visitedBean)
 			throws Exception {
 				if (owningRelation == null) {
 					if (visitedBean.isPersisted()) {
@@ -575,7 +576,7 @@ public class RDBMSDynamicPersistence implements DynamicPersistence {
 	 * Called by Skyve Persistence for a static bean with some dynamic properties
 	 */
 	@Override
-	public void populate(PersistentBean bean) {
+	public void populate(@Nonnull PersistentBean bean) {
 		try {
 			User u = persistence.getUser();
 			Customer c = u.getCustomer();
@@ -605,7 +606,7 @@ public class RDBMSDynamicPersistence implements DynamicPersistence {
 	 * Called by Skyve Persistence for a totally dynamic bean.
 	 */
 	@Override
-	public DynamicPersistentBean populate(String bizId) {
+	public @Nonnull DynamicPersistentBean populate(@Nonnull String bizId) {
 		try {
 //System.out.println("populate entity with bizId " + bizId);
 			if (dynamicFirstLevelCache.containsKey(bizId)) {
@@ -773,7 +774,7 @@ public class RDBMSDynamicPersistence implements DynamicPersistence {
 	 * @param bean the bean whose cached instance should be evicted
 	 */
 	@Override
-	public void evictCached(Bean bean) {
+	public void evictCached(@Nonnull Bean bean) {
 		dynamicFirstLevelCache.remove(bean.getBizId());
 	}
 	
@@ -784,7 +785,7 @@ public class RDBMSDynamicPersistence implements DynamicPersistence {
 	 * @return {@code true} when the bean has already been populated into this instance's cache
 	 */
 	@Override
-	public boolean cached(Bean bean) {
+	public boolean cached(@Nonnull Bean bean) {
 		return dynamicFirstLevelCache.containsKey(bean.getBizId());
 	}
 

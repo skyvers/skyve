@@ -25,7 +25,7 @@ public class FluentSidebar extends FluentContainer<FluentSidebar> implements Flu
 	 * @param sidebar
 	 *            the sidebar metadata to mutate
 	 */
-	public FluentSidebar(Sidebar sidebar) {
+	public FluentSidebar(@Nonnull Sidebar sidebar) {
 		this.sidebar = sidebar;
 	}
 	
@@ -38,7 +38,7 @@ public class FluentSidebar extends FluentContainer<FluentSidebar> implements Flu
 	 *            the source sidebar metadata
 	 * @return this builder
 	 */
-	public FluentSidebar from(@SuppressWarnings("hiding") Sidebar sidebar) {
+	public @Nonnull FluentSidebar from(@SuppressWarnings("hiding") @Nonnull Sidebar sidebar) {
 		widgetId(sidebar.getWidgetId());
 		relativeWidth(sidebar, this);
 
@@ -67,7 +67,7 @@ public class FluentSidebar extends FluentContainer<FluentSidebar> implements Flu
 	 *            the widget identifier
 	 * @return this builder
 	 */
-	public FluentSidebar widgetId(String widgetId) {
+	public @Nonnull FluentSidebar widgetId(@Nullable String widgetId) {
 		sidebar.setWidgetId(widgetId);
 		return this;
 	}
@@ -80,7 +80,7 @@ public class FluentSidebar extends FluentContainer<FluentSidebar> implements Flu
 	 * @return this builder
 	 */
 	@Override
-	public FluentSidebar pixelWidth(int pixelWidth) {
+	public @Nonnull FluentSidebar pixelWidth(int pixelWidth) {
 		sidebar.setPixelWidth(Integer.valueOf(pixelWidth));
 		return this;
 	}
@@ -93,7 +93,7 @@ public class FluentSidebar extends FluentContainer<FluentSidebar> implements Flu
 	 * @return this builder
 	 */
 	@Override
-	public FluentSidebar responsiveWidth(int responsiveWidth) {
+	public @Nonnull FluentSidebar responsiveWidth(int responsiveWidth) {
 		sidebar.setResponsiveWidth(Integer.valueOf(responsiveWidth));
 		return this;
 	}
@@ -106,7 +106,7 @@ public class FluentSidebar extends FluentContainer<FluentSidebar> implements Flu
 	 * @return this builder
 	 */
 	@Override
-	public FluentSidebar percentageWidth(int percentageWidth) {
+	public @Nonnull FluentSidebar percentageWidth(int percentageWidth) {
 		sidebar.setPercentageWidth(Integer.valueOf(percentageWidth));
 		return this;
 	}
@@ -118,7 +118,7 @@ public class FluentSidebar extends FluentContainer<FluentSidebar> implements Flu
 	 *            the breakpoint width in pixels
 	 * @return this builder
 	 */
-	public FluentSidebar floatingPixelWidthBreakpoint(int pixelWidth) {
+	public @Nonnull FluentSidebar floatingPixelWidthBreakpoint(int pixelWidth) {
 		sidebar.setFloatingPixelWidthBreakpoint(Integer.valueOf(pixelWidth));
 		return this;
 	}
@@ -130,7 +130,7 @@ public class FluentSidebar extends FluentContainer<FluentSidebar> implements Flu
 	 *            the floating width in pixels
 	 * @return this builder
 	 */
-	public FluentSidebar floatingPixelWidth(int pixelWidth) {
+	public @Nonnull FluentSidebar floatingPixelWidth(int pixelWidth) {
 		sidebar.setFloatingPixelWidth(Integer.valueOf(pixelWidth));
 		return this;
 	}
@@ -178,7 +178,7 @@ public class FluentSidebar extends FluentContainer<FluentSidebar> implements Flu
 	 * @return the mutable sidebar metadata
 	 */
 	@Override
-	public Sidebar get() {
+	public @Nonnull Sidebar get() {
 		return sidebar;
 	}
 }

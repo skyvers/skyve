@@ -5,6 +5,8 @@ import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.sail.execution.Executor;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
@@ -30,7 +32,7 @@ public class Action extends AbstractAction {
 	 * Returns the actionName.
 	 * @return the result
 	 */
-	public String getActionName() {
+	public @Nullable String getActionName() {
 		return actionName;
 	}
 
@@ -39,7 +41,7 @@ public class Action extends AbstractAction {
 	 * @param actionName the actionName
 	 */
 	@XmlAttribute(name = "name", required = true)
-	public void setActionName(String actionName) {
+	public void setActionName(@Nullable String actionName) {
 		this.actionName = UtilImpl.processStringValue(actionName);
 	}
 
@@ -47,7 +49,7 @@ public class Action extends AbstractAction {
 	 * Returns the confirm.
 	 * @return the result
 	 */
-	public Boolean getConfirm() {
+	public @Nullable Boolean getConfirm() {
 		return confirm;
 	}
 
@@ -56,7 +58,7 @@ public class Action extends AbstractAction {
 	 * @param confirm the confirm
 	 */
 	@XmlAttribute(name = "confirm")
-	public void setConfirm(Boolean confirm) {
+	public void setConfirm(@Nullable Boolean confirm) {
 		this.confirm = confirm;
 	}
 
@@ -65,7 +67,7 @@ public class Action extends AbstractAction {
 	 * @param executor the executor
 	 */
 	@Override
-	public void execute(Executor executor) {
+	public void execute(@Nonnull Executor executor) {
 		executor.executeAction(this);
 	}
 
@@ -75,7 +77,7 @@ public class Action extends AbstractAction {
 	 * @return the result
 	 */
 	@Override
-	public String getIdentifier(AutomationContext context) {
+	public @Nullable String getIdentifier(@Nonnull AutomationContext context) {
 		return actionName;
 	}
 }

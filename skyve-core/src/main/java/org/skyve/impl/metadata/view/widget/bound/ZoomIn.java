@@ -16,6 +16,7 @@ import org.skyve.metadata.view.Disableable;
 import org.skyve.metadata.view.Invisible;
 import org.skyve.util.Util;
 
+import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlElement;
@@ -79,7 +80,7 @@ public class ZoomIn extends AbstractBound implements Disableable,
 	 *
 	 * @return the button label, or {@code null} to use the default label
 	 */
-	public String getDisplayName() {
+	public @Nullable String getDisplayName() {
 		return displayName;
 	}
 
@@ -90,7 +91,7 @@ public class ZoomIn extends AbstractBound implements Disableable,
 	 *
 	 * @return the localised button label
 	 */
-	public String getLocalisedDisplayName() {
+	public @Nonnull String getLocalisedDisplayName() {
 		return Util.nullSafeI18n((displayName == null) ? "Zoom In" : displayName);
 	}
 
@@ -99,7 +100,7 @@ public class ZoomIn extends AbstractBound implements Disableable,
 	 *
 	 * @return {@code Boolean.FALSE} to allow trusted markup; {@code null} or {@code Boolean.TRUE} to escape at the renderer boundary
 	 */
-	public Boolean getEscapeDisplayName() {
+	public @Nullable Boolean getEscapeDisplayName() {
 		return escapeDisplayName;
 	}
 	
@@ -109,7 +110,7 @@ public class ZoomIn extends AbstractBound implements Disableable,
 	 * @param displayName the button label, or {@code null} to use the default label
 	 */
 	@XmlAttribute
-	public void setDisplayName(String displayName) {
+	public void setDisplayName(@Nullable String displayName) {
 		this.displayName = UtilImpl.processStringValue(displayName);
 	}
 
@@ -119,7 +120,7 @@ public class ZoomIn extends AbstractBound implements Disableable,
 	 * @param escapeDisplayName {@code Boolean.FALSE} to allow trusted markup; {@code null} or {@code Boolean.TRUE} to escape at the renderer boundary
 	 */
 	@XmlAttribute(required = false)
-	public void setEscapeDisplayName(Boolean escapeDisplayName) {
+	public void setEscapeDisplayName(@Nullable Boolean escapeDisplayName) {
 		this.escapeDisplayName = escapeDisplayName;
 	}
 
@@ -128,7 +129,7 @@ public class ZoomIn extends AbstractBound implements Disableable,
 	 *
 	 * @return the project-relative icon file path, or {@code null} when not set
 	 */
-	public String getRelativeIconFileName() {
+	public @Nullable String getRelativeIconFileName() {
 		return relativeIconFileName;
 	}
 
@@ -138,7 +139,7 @@ public class ZoomIn extends AbstractBound implements Disableable,
 	 * @param relativeIconFileName the project-relative icon file path
 	 */
 	@XmlAttribute(required = false)
-	public void setRelativeIconFileName(String relativeIconFileName) {
+	public void setRelativeIconFileName(@Nullable String relativeIconFileName) {
 		this.relativeIconFileName = UtilImpl.processStringValue(relativeIconFileName);
 	}
 
@@ -147,7 +148,7 @@ public class ZoomIn extends AbstractBound implements Disableable,
 	 *
 	 * @return the icon CSS class, or {@code null} when not set
 	 */
-	public String getIconStyleClass() {
+	public @Nullable String getIconStyleClass() {
 		return iconStyleClass;
 	}
 
@@ -157,7 +158,7 @@ public class ZoomIn extends AbstractBound implements Disableable,
 	 * @param iconStyleClass the icon CSS class
 	 */
 	@XmlAttribute(required = false)
-	public void setIconStyleClass(String iconStyleClass) {
+	public void setIconStyleClass(@Nullable String iconStyleClass) {
 		this.iconStyleClass = UtilImpl.processStringValue(iconStyleClass);
 	}
 
@@ -166,7 +167,7 @@ public class ZoomIn extends AbstractBound implements Disableable,
 	 *
 	 * @return the tooltip text, or {@code null} when not set
 	 */
-	public String getToolTip() {
+	public @Nullable String getToolTip() {
 		return toolTip;
 	}
 
@@ -175,7 +176,7 @@ public class ZoomIn extends AbstractBound implements Disableable,
 	 *
 	 * @return the localised tooltip text, or {@code null} when no tooltip is configured
 	 */
-	public String getLocalisedToolTip() {
+	public @Nullable String getLocalisedToolTip() {
 		return Util.i18n(toolTip);
 	}
 
@@ -184,7 +185,7 @@ public class ZoomIn extends AbstractBound implements Disableable,
 	 *
 	 * @return {@code Boolean.FALSE} to allow trusted markup; {@code null} or {@code Boolean.TRUE} to escape at the renderer boundary
 	 */
-	public Boolean getEscapeToolTip() {
+	public @Nullable Boolean getEscapeToolTip() {
 		return escapeToolTip;
 	}
 	
@@ -194,7 +195,7 @@ public class ZoomIn extends AbstractBound implements Disableable,
 	 * @param toolTip the tooltip text
 	 */
 	@XmlAttribute(required = false)
-	public void setToolTip(String toolTip) {
+	public void setToolTip(@Nullable String toolTip) {
 		this.toolTip = UtilImpl.processStringValue(toolTip);
 	}
 
@@ -204,7 +205,7 @@ public class ZoomIn extends AbstractBound implements Disableable,
 	 * @param escapeToolTip {@code Boolean.FALSE} to allow trusted markup; {@code null} or {@code Boolean.TRUE} to escape at the renderer boundary
 	 */
 	@XmlAttribute(required = false)
-	public void setEscapeToolTip(Boolean escapeToolTip) {
+	public void setEscapeToolTip(@Nullable Boolean escapeToolTip) {
 		this.escapeToolTip = escapeToolTip;
 	}
 
@@ -214,7 +215,7 @@ public class ZoomIn extends AbstractBound implements Disableable,
 	 * @return the pixel width, or {@code null} when width is not fixed
 	 */
 	@Override
-	public Integer getPixelWidth() {
+	public @Nullable Integer getPixelWidth() {
 		return pixelWidth;
 	}
 
@@ -225,7 +226,7 @@ public class ZoomIn extends AbstractBound implements Disableable,
 	 */
 	@Override
 	@XmlAttribute(required = false)
-	public void setPixelWidth(Integer pixelWidth) {
+	public void setPixelWidth(@Nullable Integer pixelWidth) {
 		this.pixelWidth = pixelWidth;
 	}
 
@@ -235,7 +236,7 @@ public class ZoomIn extends AbstractBound implements Disableable,
 	 * @return the pixel height, or {@code null} when height is not fixed
 	 */
 	@Override
-	public Integer getPixelHeight() {
+	public @Nullable Integer getPixelHeight() {
 		return pixelHeight;
 	}
 
@@ -246,7 +247,7 @@ public class ZoomIn extends AbstractBound implements Disableable,
 	 */
 	@Override
 	@XmlAttribute(required = false)
-	public void setPixelHeight(Integer pixelHeight) {
+	public void setPixelHeight(@Nullable Integer pixelHeight) {
 		this.pixelHeight = pixelHeight;
 	}
 
@@ -256,7 +257,7 @@ public class ZoomIn extends AbstractBound implements Disableable,
 	 * @return the minimum pixel height, or {@code null} when no minimum is enforced
 	 */
 	@Override
-	public Integer getMinPixelHeight() {
+	public @Nullable Integer getMinPixelHeight() {
 		return minPixelHeight;
 	}
 
@@ -267,7 +268,7 @@ public class ZoomIn extends AbstractBound implements Disableable,
 	 */
 	@Override
 	@XmlAttribute(required = false)
-	public void setMinPixelHeight(Integer minPixelHeight) {
+	public void setMinPixelHeight(@Nullable Integer minPixelHeight) {
 		this.minPixelHeight = minPixelHeight;
 	}
 
@@ -277,7 +278,7 @@ public class ZoomIn extends AbstractBound implements Disableable,
 	 * @return the maximum pixel height, or {@code null} when no maximum is enforced
 	 */
 	@Override
-	public Integer getMaxPixelHeight() {
+	public @Nullable Integer getMaxPixelHeight() {
 		return maxPixelHeight;
 	}
 
@@ -288,7 +289,7 @@ public class ZoomIn extends AbstractBound implements Disableable,
 	 */
 	@Override
 	@XmlAttribute(required = false)
-	public void setMaxPixelHeight(Integer maxPixelHeight) {
+	public void setMaxPixelHeight(@Nullable Integer maxPixelHeight) {
 		this.maxPixelHeight = maxPixelHeight;
 	}
 
@@ -297,7 +298,7 @@ public class ZoomIn extends AbstractBound implements Disableable,
 	 *
 	 * @return the display policy for this action, or {@code null} when the default policy applies
 	 */
-	public ActionShow getShow() {
+	public @Nullable ActionShow getShow() {
 		return show;
 	}
 
@@ -307,7 +308,7 @@ public class ZoomIn extends AbstractBound implements Disableable,
 	 * @param show the display policy for this action
 	 */
 	@XmlAttribute
-	public void setShow(ActionShow show) {
+	public void setShow(@Nullable ActionShow show) {
 		this.show = show;
 	}
 
@@ -439,7 +440,7 @@ public class ZoomIn extends AbstractBound implements Disableable,
 	 * @return the mutable decorator property map keyed by property name
 	 */
 	@Override
-	public Map<String, String> getProperties() {
+	public @Nonnull Map<String, String> getProperties() {
 		return properties;
 	}
 }

@@ -2,6 +2,8 @@ package org.skyve.impl.domain.types.jaxb;
 
 import org.skyve.impl.util.XMLMetaData;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.adapters.XmlAdapter;
 
 /**
@@ -19,7 +21,7 @@ import jakarta.xml.bind.annotation.adapters.XmlAdapter;
  */
 public class CDATAAdapter extends XmlAdapter<String, String> {
 	@Override
-	public String marshal(String value) throws Exception {
+	public @Nonnull String marshal(@Nonnull String value) throws Exception {
 		return new StringBuilder(value.length() + XMLMetaData.CDATA_MIN_LENGTH)
 						.append(XMLMetaData.CDATA_START_TAG)
 						.append(value)
@@ -27,7 +29,7 @@ public class CDATAAdapter extends XmlAdapter<String, String> {
 	}
 
 	@Override
-	public String unmarshal(String value) throws Exception {
+	public @Nullable String unmarshal(@Nullable String value) throws Exception {
 		return value;
 	}
 }

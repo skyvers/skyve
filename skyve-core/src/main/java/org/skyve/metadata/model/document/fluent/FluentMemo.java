@@ -2,6 +2,8 @@ package org.skyve.metadata.model.document.fluent;
 
 import org.skyve.impl.metadata.model.document.field.Memo;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * Provides a fluent builder for FluentMemo metadata.
  */
@@ -18,7 +20,7 @@ public class FluentMemo extends FluentConstrainableField<FluentMemo> {
 	/**
 	 * Creates a fluent builder instance.
 	 */
-	public FluentMemo(Memo memo) {
+	public FluentMemo(@Nonnull Memo memo) {
 		this.memo = memo;
 	}
 
@@ -26,7 +28,7 @@ public class FluentMemo extends FluentConstrainableField<FluentMemo> {
 	 * Copies metadata values from an existing definition into this builder.
 	 */
 
-	public FluentMemo from(@SuppressWarnings("hiding") Memo memo) {
+	public @Nonnull FluentMemo from(@SuppressWarnings("hiding") @Nonnull Memo memo) {
 		super.from(memo);
 		return this;
 	}
@@ -35,7 +37,7 @@ public class FluentMemo extends FluentConstrainableField<FluentMemo> {
 	 * Returns the mutable metadata instance represented by this builder.
 	 */
 	@Override
-	public Memo get() {
+	public @Nonnull Memo get() {
 		return memo;
 	}
 }

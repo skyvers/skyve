@@ -6,6 +6,8 @@ import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.sail.execution.Executor;
 import org.skyve.metadata.sail.language.Step;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
@@ -33,7 +35,7 @@ public class DataEnter implements Step {
 	 * Returns the binding.
 	 * @return the result
 	 */
-	public String getBinding() {
+	public @Nullable String getBinding() {
 		return binding;
 	}
 
@@ -42,7 +44,7 @@ public class DataEnter implements Step {
 	 * @param binding the binding
 	 */
 	@XmlAttribute(name = "binding", required = true)
-	public void setBinding(String binding) {
+	public void setBinding(@Nullable String binding) {
 		this.binding = UtilImpl.processStringValue(binding);
 	}
 
@@ -50,7 +52,7 @@ public class DataEnter implements Step {
 	 * Returns the value.
 	 * @return the result
 	 */
-	public String getValue() {
+	public @Nullable String getValue() {
 		return value;
 	}
 
@@ -59,7 +61,7 @@ public class DataEnter implements Step {
 	 * @param value the value
 	 */
 	@XmlAttribute(name = "value", required = true)
-	public void setValue(String value) {
+	public void setValue(@Nullable String value) {
 		this.value = UtilImpl.processStringValue(value);
 	}
 
@@ -67,7 +69,7 @@ public class DataEnter implements Step {
 	 * Returns the navigateToWidget.
 	 * @return the result
 	 */
-	public Boolean getNavigateToWidget() {
+	public @Nullable Boolean getNavigateToWidget() {
 		return navigateToWidget;
 	}
 
@@ -76,7 +78,7 @@ public class DataEnter implements Step {
 	 * @param navigateToWidget the navigateToWidget
 	 */
 	@XmlAttribute(name = "navigateToWidget")
-	public void setNavigateToWidget(Boolean navigateToWidget) {
+	public void setNavigateToWidget(@Nullable Boolean navigateToWidget) {
 		this.navigateToWidget = navigateToWidget;
 	}
 
@@ -85,7 +87,7 @@ public class DataEnter implements Step {
 	 * @param executor the executor
 	 */
 	@Override
-	public void execute(Executor executor) {
+	public void execute(@Nonnull Executor executor) {
 		executor.executeDataEnter(this);
 	}
 	
@@ -95,7 +97,7 @@ public class DataEnter implements Step {
 	 * @return the result
 	 */
 	@Override
-	public String getIdentifier(AutomationContext context) {
+	public @Nullable String getIdentifier(@Nonnull AutomationContext context) {
 		return binding;
 	}
 }

@@ -8,6 +8,9 @@ import org.hibernate.tool.schema.spi.Exporter;
 import org.locationtech.jts.geom.Geometry;
 import org.skyve.impl.persistence.hibernate.dialect.mysqlbugfix.MySQL8SpatialDialect;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Skyve Hibernate dialect for MySQL 8 InnoDB with spatial type support.
  */
@@ -33,7 +36,7 @@ public class MySQL8InnoDBSpatialDialect extends MySQL8SpatialDialect implements 
 	 * @return the geometry type descriptor bound to this dialect
 	 */
 	@Override
-	public JTSGeometryType getGeometryType() {
+	public @Nonnull JTSGeometryType getGeometryType() {
 		return delegate.getGeometryType();
 	}
 
@@ -44,7 +47,7 @@ public class MySQL8InnoDBSpatialDialect extends MySQL8SpatialDialect implements 
 	 * @return the converted value suitable for JDBC persistence
 	 */
 	@Override
-	public Object convertToPersistedValue(Geometry geometry) {
+	public @Nullable Object convertToPersistedValue(@Nonnull Geometry geometry) {
 		return delegate.convertToPersistedValue(geometry);
 	}
 	
@@ -55,7 +58,7 @@ public class MySQL8InnoDBSpatialDialect extends MySQL8SpatialDialect implements 
 	 * @return the converted JTS geometry value
 	 */
 	@Override
-	public Geometry convertFromPersistedValue(Object geometry) {
+	public @Nonnull Geometry convertFromPersistedValue(@Nonnull Object geometry) {
 		return delegate.convertFromPersistedValue(geometry);
 	}
 
@@ -67,7 +70,7 @@ public class MySQL8InnoDBSpatialDialect extends MySQL8SpatialDialect implements 
 	 * @return true when column change DDL should be emitted, otherwise false
 	 */
 	@Override
-	public boolean isAlterTableColumnChangeRequired(Column column, ColumnInformation columnInfo) {
+	public boolean isAlterTableColumnChangeRequired(@Nonnull Column column, @Nullable ColumnInformation columnInfo) {
 		return delegate.isAlterTableColumnChangeRequired(column, columnInfo);
 	}
 	
@@ -77,7 +80,7 @@ public class MySQL8InnoDBSpatialDialect extends MySQL8SpatialDialect implements 
 	 * @return the SQL fragment used for alter-column statements
 	 */
 	@Override
-	public String getModifyColumnString() {
+	public @Nonnull String getModifyColumnString() {
 		return delegate.getModifyColumnString();
 	}
 	
@@ -87,7 +90,7 @@ public class MySQL8InnoDBSpatialDialect extends MySQL8SpatialDialect implements 
 	 * @return the Skyve RDBMS enum value for this dialect
 	 */
 	@Override
-	public RDBMS getRDBMS() {
+	public @Nonnull RDBMS getRDBMS() {
 		return delegate.getRDBMS();
 	}
 	
@@ -97,7 +100,7 @@ public class MySQL8InnoDBSpatialDialect extends MySQL8SpatialDialect implements 
 	 * @return the index exporter used by this dialect
 	 */
 	@Override
-	public Exporter<Index> getIndexExporter() {
+	public @Nonnull Exporter<Index> getIndexExporter() {
 		return delegate.getIndexExporter();
 	}
 }

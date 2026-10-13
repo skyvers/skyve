@@ -58,7 +58,7 @@ public class BizletMetaData implements ConvertibleMetaData<BizletMetaData>, Relo
 	 *
 	 * @return Bizlet documentation text, or {@code null}
 	 */
-	public String getDocumentation() {
+	public @Nullable String getDocumentation() {
 		return documentation;
 	}
 	
@@ -69,7 +69,7 @@ public class BizletMetaData implements ConvertibleMetaData<BizletMetaData>, Relo
 	 */
 	@XmlElement(namespace = XMLMetaData.BEHAVIOUR_NAMESPACE)
 	@XmlJavaTypeAdapter(CDATAAdapter.class)
-	public void setDocumentation(String documentation) {
+	public void setDocumentation(@Nullable String documentation) {
 		this.documentation = UtilImpl.processStringValue(documentation);
 	}
 
@@ -122,7 +122,7 @@ public class BizletMetaData implements ConvertibleMetaData<BizletMetaData>, Relo
 	 * @return this descriptor instance
 	 */
 	@Override
-	public BizletMetaData convert(String metaDataName) {
+	public @Nonnull BizletMetaData convert(@Nonnull String metaDataName) {
 		return this;
 	}
 	
@@ -132,7 +132,7 @@ public class BizletMetaData implements ConvertibleMetaData<BizletMetaData>, Relo
 	 * @return mutable descriptor property map
 	 */
 	@Override
-	public Map<String, String> getProperties() {
+	public @Nonnull Map<String, String> getProperties() {
 		return properties;
 	}
 	
@@ -141,7 +141,7 @@ public class BizletMetaData implements ConvertibleMetaData<BizletMetaData>, Relo
 	 *
 	 * @param bean the newly-created bean instance
 	 */
-	public void newInstance(Bean bean) {
+	public void newInstance(@Nonnull Bean bean) {
 		// TODO not implemented yet
 	}
 	
@@ -151,7 +151,7 @@ public class BizletMetaData implements ConvertibleMetaData<BizletMetaData>, Relo
 	 * @param bean the bean being validated
 	 * @param e validation collector to append messages to
 	 */
-	public void validate(Bean bean, ValidationException e) {
+	public void validate(@Nonnull Bean bean, @Nonnull ValidationException e) {
 		// TODO not implemented yet
 	}
 	
@@ -163,7 +163,7 @@ public class BizletMetaData implements ConvertibleMetaData<BizletMetaData>, Relo
 	 * @throws Exception if value generation fails
 	 */
 	@SuppressWarnings("static-method")
-	public List<DomainValue> getConstantDomainValues(String attributeName) throws Exception {
+	public @Nullable List<DomainValue> getConstantDomainValues(@Nonnull String attributeName) throws Exception {
 		// TODO not implemented yet
 		return null;
 	}
@@ -176,7 +176,7 @@ public class BizletMetaData implements ConvertibleMetaData<BizletMetaData>, Relo
 	 * @throws Exception if value generation fails
 	 */
 	@SuppressWarnings("static-method")
-	public List<DomainValue> getVariantDomainValues(String attributeName) throws Exception {
+	public @Nullable List<DomainValue> getVariantDomainValues(@Nonnull String attributeName) throws Exception {
 		// TODO not implemented yet
 		return null;
 	}
@@ -190,7 +190,7 @@ public class BizletMetaData implements ConvertibleMetaData<BizletMetaData>, Relo
 	 * @throws Exception if value generation fails
 	 */
 	@SuppressWarnings("static-method")
-	public List<DomainValue> getDynamicDomainValues(String attributeName, Bean bean) throws Exception {
+	public @Nullable List<DomainValue> getDynamicDomainValues(@Nonnull String attributeName, @Nonnull Bean bean) throws Exception {
 		// TODO not implemented yet
 		return null;
 	}
@@ -206,7 +206,7 @@ public class BizletMetaData implements ConvertibleMetaData<BizletMetaData>, Relo
 	 * @throws Exception if completion generation fails
 	 */
 	@SuppressWarnings({"static-method", "java:S112"}) // Exception thrown is part of Skyve's convenient API
-	public List<String> complete(String attributeName, String value, @Nullable Bean bean) throws Exception {
+	public @Nullable List<String> complete(@Nonnull String attributeName, @Nullable String value, @Nullable Bean bean) throws Exception {
 		// TODO not implemented yet
 		return null;
 	}
@@ -230,7 +230,7 @@ public class BizletMetaData implements ConvertibleMetaData<BizletMetaData>, Relo
 	 * @param bean bean about to be persisted
 	 * @throws Exception if save should be aborted
 	 */
-	public void preSave(Bean bean) throws Exception {
+	public void preSave(@Nonnull Bean bean) throws Exception {
 		// TODO not implemented yet
 	}
 	
@@ -240,7 +240,7 @@ public class BizletMetaData implements ConvertibleMetaData<BizletMetaData>, Relo
 	 * @param bean bean that has just been persisted
 	 * @throws Exception if post-save processing fails
 	 */
-	public void postSave(Bean bean) throws Exception {
+	public void postSave(@Nonnull Bean bean) throws Exception {
 		// TODO not implemented yet
 	}
 	
@@ -250,7 +250,7 @@ public class BizletMetaData implements ConvertibleMetaData<BizletMetaData>, Relo
 	 * @param bean bean about to be deleted
 	 * @throws Exception if deletion should be aborted
 	 */
-	public void preDelete(Bean bean) throws Exception {
+	public void preDelete(@Nonnull Bean bean) throws Exception {
 		// TODO not implemented yet
 	}
 	
@@ -260,7 +260,7 @@ public class BizletMetaData implements ConvertibleMetaData<BizletMetaData>, Relo
 	 * @param bean bean that was deleted
 	 * @throws Exception if post-delete processing fails
 	 */
-	public void postDelete(Bean bean) throws Exception {
+	public void postDelete(@Nonnull Bean bean) throws Exception {
 		// TODO not implemented yet
 	}
 	
@@ -270,7 +270,7 @@ public class BizletMetaData implements ConvertibleMetaData<BizletMetaData>, Relo
 	 * @param bean bean that has been loaded
 	 * @throws Exception if post-load processing fails
 	 */
-	public void postLoad(Bean bean) throws Exception {
+	public void postLoad(@Nonnull Bean bean) throws Exception {
 		// TODO not implemented yet
 	}
 	
@@ -281,7 +281,7 @@ public class BizletMetaData implements ConvertibleMetaData<BizletMetaData>, Relo
 	 * @param bean current bean instance
 	 * @throws Exception if pre-rerender processing fails
 	 */
-	public void preRerender(String source, Bean bean) throws Exception {
+	public void preRerender(@Nonnull String source, @Nonnull Bean bean) throws Exception {
 		// TODO not implemented yet
 	}
 	
@@ -290,7 +290,7 @@ public class BizletMetaData implements ConvertibleMetaData<BizletMetaData>, Relo
 	 *
 	 * @param bean rendered bean instance
 	 */
-	public void postRender(Bean bean) {
+	public void postRender(@Nonnull Bean bean) {
 		// TODO not implemented yet
 	}
 }

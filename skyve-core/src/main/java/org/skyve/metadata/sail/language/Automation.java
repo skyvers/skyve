@@ -8,6 +8,8 @@ import org.skyve.metadata.sail.execution.Executor;
 import org.skyve.util.Util;
 import org.skyve.web.UserAgentType;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlRootElement;
@@ -62,7 +64,7 @@ public class Automation implements Executable {
 	 * Returns the uxui.
 	 * @return the result
 	 */
-	public String getUxui() {
+	public @Nullable String getUxui() {
 		return uxui;
 	}
 
@@ -71,7 +73,7 @@ public class Automation implements Executable {
 	 * @param uxui the uxui
 	 */
 	@XmlAttribute(name = "uxui", required = true)
-	public void setUxui(String uxui) {
+	public void setUxui(@Nullable String uxui) {
 		this.uxui = Util.processStringValue(uxui);
 	}
 
@@ -79,7 +81,7 @@ public class Automation implements Executable {
 	 * Returns the userAgentType.
 	 * @return the result
 	 */
-	public UserAgentType getUserAgentType() {
+	public @Nullable UserAgentType getUserAgentType() {
 		return userAgentType;
 	}
 
@@ -88,7 +90,7 @@ public class Automation implements Executable {
 	 * @param userAgentType the userAgentType
 	 */
 	@XmlAttribute(name = "userAgentType", required = true)
-	public void setUserAgentType(UserAgentType userAgentType) {
+	public void setUserAgentType(@Nullable UserAgentType userAgentType) {
 		this.userAgentType = userAgentType;
 	}
 
@@ -97,7 +99,7 @@ public class Automation implements Executable {
 	 * Returns the testStrategy.
 	 * @return the result
 	 */
-	public TestStrategy getTestStrategy() {
+	public @Nullable TestStrategy getTestStrategy() {
 		return testStrategy;
 	}
 
@@ -106,7 +108,7 @@ public class Automation implements Executable {
 	 * @param testStrategy the testStrategy
 	 */
 	@XmlAttribute(name = "testStrategy")
-	public void setTestStrategy(TestStrategy testStrategy) {
+	public void setTestStrategy(@Nullable TestStrategy testStrategy) {
 		this.testStrategy = testStrategy;
 	}
 
@@ -114,7 +116,7 @@ public class Automation implements Executable {
 	 * Returns the before.
 	 * @return the result
 	 */
-	public Procedure getBefore() {
+	public @Nullable Procedure getBefore() {
 		return before;
 	}
 
@@ -123,7 +125,7 @@ public class Automation implements Executable {
 	 * @param before the before
 	 */
 	@XmlElement(namespace = XMLMetaData.SAIL_NAMESPACE, name = "before")
-	public void setBefore(Procedure before) {
+	public void setBefore(@Nullable Procedure before) {
 		this.before = before;
 	}
 
@@ -132,7 +134,7 @@ public class Automation implements Executable {
 	 * @return the result
 	 */
 	@XmlElement(namespace = XMLMetaData.SAIL_NAMESPACE, name = "interaction", required = true)
-	public List<Interaction> getInteractions() {
+	public @Nonnull List<Interaction> getInteractions() {
 		return interactions;
 	}
 
@@ -140,7 +142,7 @@ public class Automation implements Executable {
 	 * Returns the after.
 	 * @return the result
 	 */
-	public Procedure getAfter() {
+	public @Nullable Procedure getAfter() {
 		return after;
 	}
 
@@ -149,7 +151,7 @@ public class Automation implements Executable {
 	 * @param after the after
 	 */
 	@XmlElement(namespace = XMLMetaData.SAIL_NAMESPACE, name = "after")
-	public void setAfter(Procedure after) {
+	public void setAfter(@Nullable Procedure after) {
 		this.after = after;
 	}
 	
@@ -158,7 +160,7 @@ public class Automation implements Executable {
 	 * @param executor the executor
 	 */
 	@Override
-	public void execute(Executor executor) {
+	public void execute(@Nonnull Executor executor) {
 		executor.executeAutomation(this);
 	}
 }

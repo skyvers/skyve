@@ -2,6 +2,9 @@ package org.skyve.addin;
 
 import org.skyve.impl.util.SystemObserver;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Loads and vends PF4J-based Skyve add-in extension implementations.
  *
@@ -25,5 +28,5 @@ public interface AddInManager extends SystemObserver {
 	 * @param type the extension interface {@link Class}; must not be {@code null}
 	 * @return a new extension instance, or {@code null}
 	 */
-	<T extends Object> T getExtension(Class<T> type);
+	@Nullable <T extends Object> T getExtension(@Nonnull Class<T> type);
 }

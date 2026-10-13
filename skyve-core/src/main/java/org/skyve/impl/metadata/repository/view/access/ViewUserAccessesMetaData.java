@@ -6,6 +6,7 @@ import java.util.List;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.SerializableMetaData;
 
+import jakarta.annotation.Nonnull;
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlElementRef;
 import jakarta.xml.bind.annotation.XmlElementRefs;
@@ -37,7 +38,7 @@ public class ViewUserAccessesMetaData implements SerializableMetaData {
 						@XmlElementRef(type = ViewReportUserAccessMetaData.class),
 						@XmlElementRef(type = ViewDynamicImageUserAccessMetaData.class),
 						@XmlElementRef(type = ViewContentUserAccessMetaData.class)})
-	public List<ViewUserAccessMetaData> getAccesses() {
+	public @Nonnull List<ViewUserAccessMetaData> getAccesses() {
 		return accesses;
 	}
 	

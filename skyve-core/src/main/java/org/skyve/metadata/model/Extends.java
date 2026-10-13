@@ -4,6 +4,7 @@ import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.SerializableMetaData;
 
+import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
@@ -28,7 +29,7 @@ public class Extends implements SerializableMetaData {
  	 * Returns the documentName.
  	 * @return the result
  	 */
- 	public String getDocumentName() {
+ 	public @Nullable String getDocumentName() {
         return documentName;
     }
 
@@ -37,7 +38,7 @@ public class Extends implements SerializableMetaData {
      * @param documentName the documentName
      */
     @XmlAttribute(name="document", required = true)
-    public void setDocumentName(String documentName) {
+    public void setDocumentName(@Nullable String documentName) {
         this.documentName = UtilImpl.processStringValue(documentName);
     }
 }

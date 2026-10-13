@@ -9,6 +9,8 @@ import java.util.Date;
 import org.skyve.CORE;
 import org.skyve.impl.util.TimeUtil;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * A {@link java.util.Date} that carries only a wall-clock time (hours, minutes, seconds)
  * — the date component is reset to the epoch ({@code 1970-01-01}) and milliseconds are
@@ -53,7 +55,7 @@ public class TimeOnly extends Date {
 	 *
 	 * @param date the source date; must not be {@code null}
 	 */
-	public TimeOnly(Date date) {
+	public TimeOnly(@Nonnull Date date) {
 		this(date.getTime());
 	}
 	
@@ -76,7 +78,7 @@ public class TimeOnly extends Date {
 	 * @param serializedForm the time string; must not be {@code null}
 	 * @throws java.text.ParseException if {@code serializedForm} does not match the format
 	 */
-	public TimeOnly(String serializedForm) throws ParseException {
+	public TimeOnly(@Nonnull String serializedForm) throws ParseException {
 		this(CORE.getSerializableTimeFormat().parse(serializedForm).getTime());
 	}
 
@@ -85,7 +87,7 @@ public class TimeOnly extends Date {
 	 *
 	 * @param time the local time; must not be {@code null}
 	 */
-	public TimeOnly(LocalTime time) {
+	public TimeOnly(@Nonnull LocalTime time) {
 		this(time.getHour(), time.getMinute(), time.getSecond());
 	}
 
@@ -95,7 +97,7 @@ public class TimeOnly extends Date {
 	 *
 	 * @param date the local date-time; must not be {@code null}
 	 */
-	public TimeOnly(LocalDateTime date) {
+	public TimeOnly(@Nonnull LocalDateTime date) {
 		this(date.toLocalTime());
 	}
 
@@ -104,7 +106,7 @@ public class TimeOnly extends Date {
 	 * @return the result
 	 */
 	@Override
-	public String toString() {
+	public @Nonnull String toString() {
 		return CORE.getSerializableTimeFormat().format(this);
 	}
 	
@@ -112,7 +114,7 @@ public class TimeOnly extends Date {
 	 * Executes toLocalTime.
 	 * @return the result
 	 */
-	public LocalTime toLocalTime() {
+	public @Nonnull LocalTime toLocalTime() {
 		return toInstant().atZone(ZoneId.systemDefault()).toLocalTime();
 	}
 }

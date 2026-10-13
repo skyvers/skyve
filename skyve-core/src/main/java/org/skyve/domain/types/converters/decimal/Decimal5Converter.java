@@ -7,6 +7,9 @@ import org.skyve.domain.types.converters.Format;
 import org.skyve.domain.types.converters.Validator;
 import org.skyve.metadata.model.Attribute.AttributeType;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Converts {@link Decimal5} values using plain string formatting/parsing.
  */
@@ -16,7 +19,7 @@ public class Decimal5Converter implements Converter<Decimal5> {
 	 * @return the result value
 	 */
 	@Override
-	public Class<Decimal5> getValueType() {
+	public @Nonnull Class<Decimal5> getValueType() {
 		return Decimal5.class;
 	}
 	
@@ -26,7 +29,7 @@ public class Decimal5Converter implements Converter<Decimal5> {
 	 * @return the result value
 	 */
 	@Override
-	public Decimal5 fromDisplayValue(String displayValue) throws ConversionException {
+	public @Nonnull Decimal5 fromDisplayValue(@Nonnull String displayValue) throws ConversionException {
 		try {
 			return new Decimal5(displayValue);
 		}
@@ -41,7 +44,7 @@ public class Decimal5Converter implements Converter<Decimal5> {
 	 * @return the result value
 	 */
 	@Override
-	public String toDisplayValue(Decimal5 value) throws ConversionException {
+	public @Nonnull String toDisplayValue(@Nonnull Decimal5 value) throws ConversionException {
 		try {
 			return value.toString();
 		}
@@ -55,7 +58,7 @@ public class Decimal5Converter implements Converter<Decimal5> {
 	 * @return the result value
 	 */
 	@Override
-	public AttributeType getAttributeType() {
+	public @Nonnull AttributeType getAttributeType() {
 		return AttributeType.decimal5;
 	}
 
@@ -64,7 +67,7 @@ public class Decimal5Converter implements Converter<Decimal5> {
 	 * @return the result value
 	 */
 	@Override
-	public Format<Decimal5> getFormat() {
+	public @Nullable Format<Decimal5> getFormat() {
 		return null;
 	}
 
@@ -73,7 +76,7 @@ public class Decimal5Converter implements Converter<Decimal5> {
 	 * @return the result value
 	 */
 	@Override
-	public Validator<Decimal5> getValidator() {
+	public @Nullable Validator<Decimal5> getValidator() {
 		return null;
 	}
 	
@@ -82,7 +85,7 @@ public class Decimal5Converter implements Converter<Decimal5> {
 	 * @return the result value
 	 */
 	@Override
-	public String getFormatPattern() {
+	public @Nullable String getFormatPattern() {
 		return null;
 	}
 }

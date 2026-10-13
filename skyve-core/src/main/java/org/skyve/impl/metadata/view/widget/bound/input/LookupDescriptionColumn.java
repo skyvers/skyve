@@ -4,6 +4,7 @@ import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.NamedMetaData;
 
+import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
@@ -29,21 +30,21 @@ public class LookupDescriptionColumn implements NamedMetaData {
 	private Boolean filterable;
 	
 	@Override
-	public String getName() {
+	public @Nullable String getName() {
 		return name;
 	}
 	
 	@XmlValue
-	public void setName(String name) {
+	public void setName(@Nullable String name) {
 		this.name = UtilImpl.processStringValue(name);
 	}
 	
-	public Boolean getFilterable() {
+	public @Nullable Boolean getFilterable() {
 		return filterable;
 	}
 
 	@XmlAttribute(name = "filterable", required = false)
-	public void setFilterable(Boolean filterable) {
+	public void setFilterable(@Nullable Boolean filterable) {
 		this.filterable = filterable;
 	}
 }

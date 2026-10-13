@@ -7,6 +7,9 @@ import java.util.Map;
 import java.util.function.Predicate;
 import java.util.function.UnaryOperator;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * An ArrayList extension that places it's original state into it's owner bean's originalValues when a
  * method that mutates its state is invoked.
@@ -26,73 +29,73 @@ public class ChangeTrackingArrayList<E> extends ArrayList<E> {
 	private String propertyName; // used for placing in originalValues
 	private AbstractBean owner;	// Used to call preset()
 	
-	public ChangeTrackingArrayList(String propertyName, AbstractBean owner) {
+	public ChangeTrackingArrayList(@Nonnull String propertyName, @Nonnull AbstractBean owner) {
 		this.propertyName = propertyName;
 		this.owner = owner;
 	}
 	
 	@Override
-	public boolean add(E e) {
+	public boolean add(@Nullable E e) {
 		preset();
 		return super.add(e);
 	}
 	
 	@Override
-	public void add(int index, E element) {
+	public void add(int index, @Nullable E element) {
 		preset();
 		super.add(index, element);
 	}
 	
 	@Override
-	public boolean addAll(Collection<? extends E> c) {
+	public boolean addAll(@Nonnull Collection<? extends E> c) {
 		preset();
 		return super.addAll(c);
 	}
 	
 	@Override
-	public boolean addAll(int index, Collection<? extends E> c) {
+	public boolean addAll(int index, @Nonnull Collection<? extends E> c) {
 		preset();
 		return super.addAll(index, c);
 	}
 	
 	@Override
-	public E remove(int index) {
+	public @Nullable E remove(int index) {
 		preset();
 		return super.remove(index);
 	}
 	
 	@Override
-	public boolean remove(Object o) {
+	public boolean remove(@Nullable Object o) {
 		preset();
 		return super.remove(o);
 	}
 	
 	@Override
-	public boolean removeAll(Collection<?> c) {
+	public boolean removeAll(@Nonnull Collection<?> c) {
 		preset();
 		return super.removeAll(c);
 	}
 	
 	@Override
-	public boolean removeIf(Predicate<? super E> filter) {
+	public boolean removeIf(@Nonnull Predicate<? super E> filter) {
 		preset();
 		return super.removeIf(filter);
 	}
 	
 	@Override
-	public void replaceAll(UnaryOperator<E> operator) {
+	public void replaceAll(@Nonnull UnaryOperator<E> operator) {
 		preset();
 		super.replaceAll(operator);
 	}
 	
 	@Override
-	public boolean retainAll(Collection<?> c) {
+	public boolean retainAll(@Nonnull Collection<?> c) {
 		preset();
 		return super.retainAll(c);
 	}
 	
 	@Override
-	public E set(int index, E element) {
+	public @Nullable E set(int index, @Nullable E element) {
 		preset();
 		return super.set(index, element);
 	}
