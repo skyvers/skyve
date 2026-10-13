@@ -852,7 +852,7 @@ public class XMLMetaData {
 	 * schema locations keep their existing root placement.
 	 */
 	@SuppressWarnings("java:S1192") // Attribute names intentionally repeat across element-specific order lists.
-	private static final Map<String, List<String>> ATTRIBUTE_ORDER = Map.ofEntries(
+	private static final Map<String, List<String>> ATTRIBUTE_ORDER = Map.<String, List<String>>ofEntries(
 			Map.entry("behaviour:action", List.of("name")),
 			Map.entry("behaviour:set", List.of("binding", "expression")),
 			Map.entry("common:property", List.of("key")),
