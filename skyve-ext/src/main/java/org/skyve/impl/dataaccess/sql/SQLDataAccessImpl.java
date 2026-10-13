@@ -35,6 +35,7 @@ public class SQLDataAccessImpl implements SQLDataAccess {
 	protected DataStore dataStore; // to get a connection and construct SQL from
 	private SkyveDialect dialect = null; // this is only created when we come across a geometry
 
+	@SuppressWarnings("resource")
 	private Connection connection;
 	
 	/**
@@ -55,9 +56,10 @@ public class SQLDataAccessImpl implements SQLDataAccess {
 	 * 
 	 * @return the JDBC connection
 	 */
+	@SuppressWarnings("resource")
 	Connection getConnection() {
 		if (connection == null) {
-			connection = EXT.getDataStoreConnection(dataStore, true);
+			connection = EXT.getDataStoreConnection(dataStore);
 		}
 		
 		return connection;
@@ -73,7 +75,7 @@ public class SQLDataAccessImpl implements SQLDataAccess {
 	 * @return the Skyve dialect for the data store
 	 * @throws Exception if unable to instantiate the dialect
 	 */
-	SkyveDialect getDialect() throws Exception {
+	SkyveDialect getDialect() {
 		if (dialect == null) {
 			dialect = AbstractHibernatePersistence.getDialect(dataStore.getDialectClassName());
 		}

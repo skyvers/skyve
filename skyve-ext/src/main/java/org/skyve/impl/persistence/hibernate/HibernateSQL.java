@@ -7,6 +7,8 @@ import java.util.Date;
 import java.util.List;
 
 import org.apache.commons.beanutils.DynaBean;
+import org.hibernate.ScrollMode;
+import org.hibernate.ScrollableResults;
 import org.hibernate.Session;
 import org.hibernate.query.NativeQuery;
 import org.hibernate.type.BigDecimalType;
@@ -28,11 +30,11 @@ import org.skyve.domain.types.Enumeration;
 import org.skyve.domain.types.OptimisticLock;
 import org.skyve.domain.types.TimeOnly;
 import org.skyve.domain.types.Timestamp;
+import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.persistence.AbstractSQL;
 import org.skyve.impl.persistence.DynaIterable;
 import org.skyve.impl.persistence.NamedParameterPreparedStatement;
 import org.skyve.impl.persistence.hibernate.dialect.SkyveDialect;
-import org.skyve.impl.persistence.hibernate.dialect.SkyveDialect.RDBMS;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.model.Attribute.AttributeType;
 import org.skyve.metadata.model.document.Document;
@@ -106,7 +108,7 @@ class HibernateSQL extends AbstractSQL {
 		}
 		try {
 			String entityName = persistence.getDocumentEntityName(moduleName, documentName);
-			return new HibernateAutoClosingIterable<>(createQueryFromSQL().addEntity(entityName).scroll(), false, false);
+			return new HibernateAutoClosingIterable<>(scroll(createQueryFromSQL().addEntity(entityName)), false, false);
 		}
 		catch (QueryTimeoutException | org.hibernate.QueryTimeoutException e) {
 			throw new TimeoutException(e);
@@ -150,7 +152,7 @@ class HibernateSQL extends AbstractSQL {
 	@SuppressWarnings("resource")
 	public <T> AutoClosingIterable<T> scalarIterable(Class<T> type) {
 		try {
-			return new HibernateAutoClosingIterable<>(createQueryFromSQL().scroll(), true, false);
+			return new HibernateAutoClosingIterable<>(scroll(createQueryFromSQL()), true, false);
 		}
 		catch (QueryTimeoutException | org.hibernate.QueryTimeoutException e) {
 			throw new TimeoutException(e);
@@ -194,7 +196,7 @@ class HibernateSQL extends AbstractSQL {
 	@SuppressWarnings("resource")
 	public AutoClosingIterable<Object[]> tupleIterable() {
 		try {
-			return new HibernateAutoClosingIterable<>(createQueryFromSQL().scroll(), false, true);
+			return new HibernateAutoClosingIterable<>(scroll(createQueryFromSQL()), false, true);
 		}
 		catch (QueryTimeoutException | org.hibernate.QueryTimeoutException e) {
 			throw new TimeoutException(e);
@@ -265,6 +267,16 @@ class HibernateSQL extends AbstractSQL {
 		}
 	}
 	
+	/**
+	 * Scroll the query forward-only with a fetch size so the JDBC driver can fetch the rows in batches.
+	 * NB {@link NativeQuery#scroll()} defaults to scroll-insensitive, which makes the drivers buffer or materialise the entire result set.
+	 */
+	@SuppressWarnings("resource")
+	private static @Nonnull ScrollableResults scroll(@Nonnull NativeQuery<?> query) {
+		query.setFetchSize(AbstractPersistence.JDBC_FETCH_SIZE);
+		return query.scroll(ScrollMode.FORWARD_ONLY);
+	}
+
 	@SuppressWarnings({"resource", "java:S3776", "java:S6541"}) // complexity OK
 	private @Nonnull <T> NativeQuery<T> createQueryFromSQL() {
 		Session session = persistence.getSession();
@@ -276,9 +288,6 @@ class HibernateSQL extends AbstractSQL {
 		
 		HibernateQueryDelegate.timeoutQuery(result, timeoutInSeconds, persistence.isAsyncThread());
 		
-		// Always use streaming JDBC results to avoid out of memory errors on large result sets
-		result.setFetchSize(RDBMS.mysql.equals(AbstractHibernatePersistence.getDialect().getRDBMS()) ? Integer.MIN_VALUE : 1000);
-
 		for (String name : getParameterNames()) {
 			Object value = getParameter(name);
 			

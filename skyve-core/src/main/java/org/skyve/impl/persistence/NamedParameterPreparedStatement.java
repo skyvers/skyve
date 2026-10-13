@@ -355,6 +355,10 @@ public class NamedParameterPreparedStatement implements AutoCloseable {
 		statement.setQueryTimeout(seconds);
 	}
 	
+	public void setFetchSize(int rows) throws SQLException {
+		statement.setFetchSize(rows);
+	}
+	
 	public boolean isClosed() throws SQLException {
 		return statement.isClosed();
 	}

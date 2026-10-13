@@ -25,6 +25,7 @@ import org.junit.jupiter.api.Test;
 import org.skyve.domain.DynamicBean;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.messages.TimeoutException;
+import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.persistence.AbstractQuery;
 import org.skyve.persistence.DataStore;
 
@@ -176,6 +177,7 @@ class HibernateQueryDelegateTest {
 			assertEquals("row-1", iterator.next());
 			assertFalse(iterator.hasNext());
 			verify(scroll).close();
+			verify(query).setFetchSize(AbstractPersistence.JDBC_FETCH_SIZE);
 		}
 		finally {
 			persistence.close();
@@ -319,6 +321,7 @@ class HibernateQueryDelegateTest {
 			assertEquals("Alice", bean.get("name"));
 			assertEquals("A", bean.get("status"));
 			assertFalse(iterator.hasNext());
+			verify(query).setFetchSize(AbstractPersistence.JDBC_FETCH_SIZE);
 		}
 		finally {
 			persistence.close();

@@ -240,7 +240,7 @@ class EXTTest {
 				"sa",
 				"",
 				org.skyve.impl.persistence.hibernate.dialect.H2SpatialDialect.class.getName());
-		try (java.sql.Connection conn = EXT.getDataStoreConnection(ds, false)) {
+		try (java.sql.Connection conn = EXT.getDataStoreConnection(ds)) {
 			assertNotNull(conn);
 			assertFalse(conn.isClosed());
 		}

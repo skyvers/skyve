@@ -20,95 +20,91 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.Executor;
 
-import org.skyve.impl.persistence.hibernate.dialect.SkyveDialect.RDBMS;
+import org.skyve.impl.persistence.AbstractPersistence;
 
 /**
- * A Connection wrapper that tunes statements for forward-only, read-only, streaming ResultSets.
+ * A Connection wrapper that tunes statements for forward-only, read-only ResultSets fetched in batches.
  *
  * <p>Purpose:
  * <ul>
- *   <li>Set a sensible fetch size and forward-only fetch direction on created statements to
- *       enable streaming of large result sets and reduce memory usage.</li>
- *   <li>Apply MySQL-specific streaming behavior by using {@code Integer.MIN_VALUE} as fetch size
- *       which instructs the MySQL JDBC driver to stream results rather than buffer them fully.</li>
+ *   <li>Set a sensible fetch size and forward-only fetch direction on created statements so that
+ *       JDBC drivers can fetch large result sets in batches and reduce memory usage.</li>
  * </ul>
  *
  * <p>Behavior:
  * <ul>
- *   <li>For MySQL, fetch size = {@code Integer.MIN_VALUE}.</li>
- *   <li>For other RDBMS, a default fetch size of 1000 rows is used.</li>
+ *   <li>A fetch size of {@value org.skyve.impl.persistence.AbstractPersistence#JDBC_FETCH_SIZE} rows is used for every database.</li>
  *   <li>Fetch direction is always {@link ResultSet#FETCH_FORWARD}.</li>
  *   <li>All other {@link Connection} methods delegate to the underlying connection unchanged.</li>
  * </ul>
  *
  * <p>Notes:
  * <ul>
- *   <li>Only tuning is applied to statements created via {@code prepareStatement(...)} and
- *       {@code createStatement(...)} methods. Callable statements are delegated directly as many
- *       drivers do not support fetch-size tuning on them.</li>
- *   <li>This wrapper is intended for read-mostly access paths where forward-only streaming is
+ *   <li>MySQL only honours the fetch size when {@code useCursorFetch=true} is in the JDBC URL;
+ *       otherwise the driver buffers the entire result set.
+ *       MySQL row streaming (a fetch size of {@code Integer.MIN_VALUE}) is not used as it disallows
+ *       any other statement on the connection until the result set is closed.</li>
+ *   <li>Tuning is applied to statements created via the {@code prepareStatement(...)},
+ *       {@code createStatement(...)} and {@code prepareCall(...)} methods.</li>
+ *   <li>This wrapper is intended for read-mostly access paths where forward-only fetching is
  *       appropriate.</li>
  * </ul>
  */
-public class StreamableConnection implements Connection {
+public class TuneableConnection implements Connection {
 	// The underlying JDBC connection.
+	@SuppressWarnings("resource")
 	private final Connection delegate;
 	
-	// The fetch size applied to prepared and simple statements.
-	private final int fetchSize;
-
 	/**
-	 * Construct a streamable connection wrapper.
+	 * Construct a tuneable connection wrapper.
 	 *
 	 * @param delegate the underlying JDBC connection to wrap
-	 * @param rdbms the detected/target RDBMS, used to select an appropriate fetch-size policy
 	 */
-	public StreamableConnection(Connection delegate, RDBMS rdbms) {
+	public TuneableConnection(Connection delegate) {
 		this.delegate = delegate;
-		this.fetchSize = RDBMS.mysql.equals(rdbms) ? Integer.MIN_VALUE : 1000;
 	}
 
 	/**
-	 * Apply tuning parameters to a prepared statement for streaming reads.
+	 * Apply tuning parameters to a prepared statement for batched reads.
 	 *
 	 * @param ps the prepared statement to tune
 	 * @return the tuned prepared statement (same instance)
 	 * @throws SQLException if the driver rejects tuning options
 	 */
-	private PreparedStatement tune(PreparedStatement ps) throws SQLException {
-		ps.setFetchSize(fetchSize);
+	private static PreparedStatement tune(PreparedStatement ps) throws SQLException {
+		ps.setFetchSize(AbstractPersistence.JDBC_FETCH_SIZE);
 		ps.setFetchDirection(ResultSet.FETCH_FORWARD);
 		return ps;
 	}
 	
 	/**
-	 * Apply tuning parameters to a simple statement for streaming reads.
+	 * Apply tuning parameters to a simple statement for batched reads.
 	 *
 	 * @param s the statement to tune
 	 * @return the tuned statement (same instance)
 	 * @throws SQLException if the driver rejects tuning options
 	 */
-	private Statement tune(Statement s) throws SQLException {
-		s.setFetchSize(fetchSize);
+	private static Statement tune(Statement s) throws SQLException {
+		s.setFetchSize(AbstractPersistence.JDBC_FETCH_SIZE);
 		s.setFetchDirection(ResultSet.FETCH_FORWARD);
 		return s;
 	}
 
 	/**
-	 * Apply tuning parameters to a callable statement for streaming reads.
+	 * Apply tuning parameters to a callable statement for batched reads.
 	 *
 	 * @param s the statement to tune
 	 * @return the tuned statement (same instance)
 	 * @throws SQLException if the driver rejects tuning options
 	 */
-	private CallableStatement tune(CallableStatement cs) throws SQLException {
-		cs.setFetchSize(fetchSize);
+	private static CallableStatement tune(CallableStatement cs) throws SQLException {
+		cs.setFetchSize(AbstractPersistence.JDBC_FETCH_SIZE);
 		cs.setFetchDirection(ResultSet.FETCH_FORWARD);
 		return cs;
 	}
 
 	/**
-	 * Create a forward-only, read-only prepared statement tuned for streaming.
+	 * Create a forward-only, read-only prepared statement tuned for batched fetching.
 	 */
 	@Override
 	@SuppressWarnings("resource")
@@ -117,7 +113,7 @@ public class StreamableConnection implements Connection {
 	}
 
 	/**
-	 * Create a prepared statement tuned for streaming, returning auto-generated keys if requested.
+	 * Create a prepared statement tuned for batched fetching, returning auto-generated keys if requested.
 	 */
 	@Override
 	@SuppressWarnings("resource")
@@ -126,7 +122,7 @@ public class StreamableConnection implements Connection {
 	}
 
 	/**
-	 * Create a prepared statement tuned for streaming, targeting specified column indexes for keys.
+	 * Create a prepared statement tuned for batched fetching, targeting specified column indexes for keys.
 	 */
 	@Override
 	@SuppressWarnings("resource")
@@ -135,7 +131,7 @@ public class StreamableConnection implements Connection {
 	}
 
 	/**
-	 * Create a prepared statement tuned for streaming, targeting specified column names for keys.
+	 * Create a prepared statement tuned for batched fetching, targeting specified column names for keys.
 	 */
 	@Override
 	@SuppressWarnings("resource")
@@ -144,7 +140,7 @@ public class StreamableConnection implements Connection {
 	}
 
 	/**
-	 * Create a prepared statement tuned for streaming with explicit result set type/concurrency.
+	 * Create a prepared statement tuned for batched fetching with explicit result set type/concurrency.
 	 */
 	@Override
 	@SuppressWarnings("resource")
@@ -154,7 +150,7 @@ public class StreamableConnection implements Connection {
 	}
 
 	/**
-	 * Create a prepared statement tuned for streaming with explicit type/concurrency/holdability.
+	 * Create a prepared statement tuned for batched fetching with explicit type/concurrency/holdability.
 	 */
 	@Override
 	@SuppressWarnings("resource")
@@ -164,7 +160,7 @@ public class StreamableConnection implements Connection {
 	}
 
 	/**
-	 * Create a forward-only, read-only statement tuned for streaming.
+	 * Create a forward-only, read-only statement tuned for batched fetching.
 	 */
 	@Override
 	@SuppressWarnings("resource")
@@ -174,7 +170,7 @@ public class StreamableConnection implements Connection {
 	}
 
 	/**
-	 * Create a statement tuned for streaming with explicit result set type/concurrency.
+	 * Create a statement tuned for batched fetching with explicit result set type/concurrency.
 	 */
 	@Override
 	@SuppressWarnings("resource")
@@ -184,7 +180,7 @@ public class StreamableConnection implements Connection {
 	}
 
 	/**
-	 * Create a statement tuned for streaming with explicit type/concurrency/holdability.
+	 * Create a statement tuned for batched fetching with explicit type/concurrency/holdability.
 	 */
 	@Override
 	@SuppressWarnings("resource")

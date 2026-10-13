@@ -120,7 +120,7 @@ class EXTFacadeFactoryTest {
 												"jdbc:h2:mem:invalid_driver",
 												H2SpatialDialect.class.getName());
 
-		assertThrows(DomainException.class, () -> EXT.getDataStoreConnection(dataStore, false));
+		assertThrows(DomainException.class, () -> EXT.getDataStoreConnection(dataStore));
 	}
 
 	@Test
@@ -129,7 +129,7 @@ class EXTFacadeFactoryTest {
 												"jdbc:h2:mem:ext_no_credentials;DB_CLOSE_DELAY=-1",
 												H2SpatialDialect.class.getName());
 
-		try (Connection connection = EXT.getDataStoreConnection(dataStore, false)) {
+		try (Connection connection = EXT.getDataStoreConnection(dataStore)) {
 			assertNotNull(connection);
 		}
 	}
@@ -139,7 +139,7 @@ class EXTFacadeFactoryTest {
 		DataStore dataStore = new DataStore("java:comp/env/jdbc/doesNotExist",
 												H2SpatialDialect.class.getName());
 
-		assertThrows(DomainException.class, () -> EXT.getDataStoreConnection(dataStore, false));
+		assertThrows(DomainException.class, () -> EXT.getDataStoreConnection(dataStore));
 	}
 
 	@Test

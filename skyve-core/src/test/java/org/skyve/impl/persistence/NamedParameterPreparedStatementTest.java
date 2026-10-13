@@ -199,6 +199,14 @@ class NamedParameterPreparedStatementTest {
 	}
 
 	@Test
+	void setFetchSizeCallsDelegate() throws Exception {
+		try (NamedParameterPreparedStatement npps = new NamedParameterPreparedStatement(connection, "SELECT 1")) {
+			npps.setFetchSize(500);
+			Mockito.verify(preparedStatement).setFetchSize(500);
+		}
+	}
+
+	@Test
 	@SuppressWarnings("boxing")
 	void isClosedCallsDelegate() throws Exception {
 		Mockito.when(preparedStatement.isClosed()).thenReturn(Boolean.TRUE);

@@ -92,7 +92,7 @@ public class JDBCRemoteContentManagerServer {
 			
 			// register the database functions
 			LOGGER.info("REGISTER DATABASE FUNCTIONS FOR REMOTE CONTENT CALLS");
-			try (Connection c = EXT.getDataStoreConnection(UtilImpl.DATA_STORES.get(CONTENT_DATA_STORE_NAME), false)) {
+			try (Connection c = EXT.getDataStoreConnection(UtilImpl.DATA_STORES.get(CONTENT_DATA_STORE_NAME))) {
 				try (CallableStatement s = c.prepareCall(String.format(DROP_ALIAS_SQL,
 																		PUT_BEAN_FUNCTION_NAME))) {
 					s.execute();

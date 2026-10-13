@@ -96,7 +96,6 @@ import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.persistence.RDBMSDynamicPersistence;
 import org.skyve.impl.persistence.hibernate.dialect.DDLDelegate;
 import org.skyve.impl.persistence.hibernate.dialect.SkyveDialect;
-import org.skyve.impl.persistence.hibernate.dialect.SkyveDialect.RDBMS;
 import org.skyve.impl.util.CascadeDeleteBeanVisitor;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.ValidationUtil;
@@ -2349,8 +2348,8 @@ if (document.isDynamic()) return;
 						QUERY_LOGGER.info("TEST CONSTRAINT {}.{}.{} using {}", currentOwningModuleName, currentDocumentName, constraint.getName(), queryString);
 					}
 					
-					// Always use streaming JDBC results to avoid out of memory errors on large result sets
-					query.setFetchSize(RDBMS.mysql.equals(AbstractHibernatePersistence.getDialect().getRDBMS()) ? Integer.MIN_VALUE : 1000);
+					// Fetch the scrolled rows in batches to avoid out of memory errors on large result sets
+					query.setFetchSize(JDBC_FETCH_SIZE);
 
 					query.setLockMode("bean", LockMode.READ); // take a read lock on all referenced documents
 					
@@ -2735,8 +2734,8 @@ if (document.isDynamic()) return;
 
 			Query<?> query = session.createQuery(queryString.toString());
 
-			// Always use streaming JDBC results to avoid out of memory errors on large result sets
-			query.setFetchSize(RDBMS.mysql.equals(AbstractHibernatePersistence.getDialect().getRDBMS()) ? Integer.MIN_VALUE : 1000);
+			// Fetch the scrolled rows in batches to avoid out of memory errors on large result sets
+			query.setFetchSize(JDBC_FETCH_SIZE);
 
 			query.setLockMode("bean", LockMode.READ); // read lock required for referential integrity
 
@@ -2822,8 +2821,8 @@ if (document.isDynamic()) return;
 		
 				NativeQuery<?> query = session.createNativeQuery(queryString.toString());
 
-				// Always use streaming JDBC results to avoid out of memory errors on large result sets
-				query.setFetchSize(RDBMS.mysql.equals(AbstractHibernatePersistence.getDialect().getRDBMS()) ? Integer.MIN_VALUE : 1000);
+				// Fetch the scrolled rows in batches to avoid out of memory errors on large result sets
+				query.setFetchSize(JDBC_FETCH_SIZE);
 				
 				// Set timeout if applicable
 				int timeout = UtilImpl.DATA_STORE.getOltpConnectionTimeoutInSeconds();

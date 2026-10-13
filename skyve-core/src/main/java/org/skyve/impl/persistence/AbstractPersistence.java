@@ -39,6 +39,20 @@ public abstract class AbstractPersistence implements Persistence {
 	
 	protected static int bizKeyLength = Integer.MIN_VALUE;
 
+	/**
+	 * The JDBC fetch size used wherever a result set is scrolled or iterated, to avoid out of memory errors on large result sets.
+	 * This must be a positive number of rows so that other statements can execute on the same connection
+	 * whilst a result set is open (lazy loading in postLoad(), queries in the loop body etc).
+	 * <ul>
+	 * <li>PostgreSQL fetches from a server-side cursor in batches of this size.</li>
+	 * <li>MySQL does the same, but only when useCursorFetch=true is in the JDBC URL; otherwise it buffers the entire result set.
+	 *		NB Integer.MIN_VALUE (row streaming) must not be used as it disallows any other statement on the connection until the result set is closed.</li>
+	 * <li>SQL Server ignores this (unless selectMethod=cursor is in the JDBC URL) as its adaptive buffering already streams forward-only results.</li>
+	 * <li>H2 uses this as the batch size in server mode and ignores it when embedded.</li>
+	 * </ul>
+	 */
+	public static final int JDBC_FETCH_SIZE = 1000;
+
 	// Holds Persistence instances for each thread - removed by commit(true)
 	protected static final ThreadLocal<AbstractPersistence> threadLocalPersistence = new ThreadLocal<>();
 
