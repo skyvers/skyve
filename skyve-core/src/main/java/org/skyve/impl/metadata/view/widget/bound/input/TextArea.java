@@ -1,7 +1,7 @@
 package org.skyve.impl.metadata.view.widget.bound.input;
 
+import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.TreeMap;
 
 import org.skyve.impl.metadata.repository.PropertyMapAdapter;
 import org.skyve.impl.metadata.view.AbsoluteSize;
@@ -39,7 +39,7 @@ public class TextArea extends ChangeableInputWidget implements Editable, Absolut
 
 	@XmlElement(namespace = XMLMetaData.VIEW_NAMESPACE)
 	@XmlJavaTypeAdapter(PropertyMapAdapter.class)
-	private Map<String, String> properties = new TreeMap<>();
+	private Map<String, String> properties = new LinkedHashMap<>();
 
 	@Override
 	public boolean showsLabelByDefault() {

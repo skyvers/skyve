@@ -39,6 +39,8 @@ public class FluentSetInvisibleEventAction extends FluentEventAction {
 	public FluentSetInvisibleEventAction from(@SuppressWarnings("hiding") SetInvisibleEventAction action) {
 		binding(action.getBinding());
 		BindUtil.copyAuthoredCondition(action.getXmlInvisibleCondition(), action.getXmlVisibleCondition(), this::invisibleCondition, this::visibleCondition);
+		action.getProperties().entrySet().forEach(p -> putProperty(p.getKey(), p.getValue()));
+
 		return this;
 	}
 
@@ -75,6 +77,19 @@ public class FluentSetInvisibleEventAction extends FluentEventAction {
 	 */
 	public @Nonnull FluentSetInvisibleEventAction visibleCondition(@Nullable String visibleCondition) {
 		action.setXmlVisibleCondition(visibleCondition);
+		return this;
+	}
+
+	/**
+	 * Adds or replaces a custom property on the wrapped metadata.
+	 * Properties keep the order in which they were first added.
+	 *
+	 * @param k the property name
+	 * @param v the property value
+	 * @return this builder
+	 */
+	public @Nonnull FluentSetInvisibleEventAction putProperty(@Nonnull String k, @Nonnull String v) {
+		action.getProperties().put(k, v);
 		return this;
 	}
 

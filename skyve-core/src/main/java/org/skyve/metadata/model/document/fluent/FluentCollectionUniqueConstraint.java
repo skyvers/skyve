@@ -4,6 +4,8 @@ import org.skyve.impl.metadata.model.document.UniqueConstraintImpl;
 import org.skyve.metadata.model.document.UniqueConstraint;
 import org.skyve.metadata.model.document.UniqueConstraint.DocumentScope;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * Provides a fluent builder for FluentCollectionUniqueConstraint metadata.
  */
@@ -34,6 +36,8 @@ public class FluentCollectionUniqueConstraint {
 		scope(constraint.getScope());
 		message(constraint.getMessage());
 		constraint.getFieldNames().forEach(f -> addFieldName(f));
+		constraint.getProperties().entrySet().forEach(p -> putProperty(p.getKey(), p.getValue()));
+
 		return this;
 	}	
 
@@ -90,6 +94,19 @@ public class FluentCollectionUniqueConstraint {
 	 */
 	public FluentCollectionUniqueConstraint clearFieldNames() {
 		constraint.getFieldNames().clear();
+		return this;
+	}
+
+	/**
+	 * Adds or replaces a custom property on the wrapped metadata.
+	 * Properties keep the order in which they were first added.
+	 *
+	 * @param k the property name
+	 * @param v the property value
+	 * @return this builder
+	 */
+	public @Nonnull FluentCollectionUniqueConstraint putProperty(@Nonnull String k, @Nonnull String v) {
+		constraint.getProperties().put(k, v);
 		return this;
 	}
 

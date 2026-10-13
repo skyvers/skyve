@@ -4,6 +4,8 @@ import org.skyve.impl.metadata.repository.customer.CustomerModuleRoleMetaData;
 import org.skyve.impl.metadata.repository.customer.CustomerRoleMetaData;
 import org.skyve.metadata.customer.CustomerRole;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * Builds one customer role and its module-role grants.
  */
@@ -40,6 +42,8 @@ public class FluentCustomerRole {
 		for (CustomerModuleRoleMetaData moduleRole : ((CustomerRoleMetaData) role).getRoles()) {
 			addRole(new FluentCustomerModuleRole().from(moduleRole));
 		}
+		role.getProperties().entrySet().forEach(p -> putProperty(p.getKey(), p.getValue()));
+
 		return this;
 	}
 	
@@ -124,6 +128,19 @@ public class FluentCustomerRole {
 		return null;
 	}
 	
+	/**
+	 * Adds or replaces a custom property on the wrapped metadata.
+	 * Properties keep the order in which they were first added.
+	 *
+	 * @param k the property name
+	 * @param v the property value
+	 * @return this builder
+	 */
+	public @Nonnull FluentCustomerRole putProperty(@Nonnull String k, @Nonnull String v) {
+		role.getProperties().put(k, v);
+		return this;
+	}
+
 	/**
 	 * Returns the mutable metadata instance being built.
 	 *

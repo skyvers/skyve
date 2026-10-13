@@ -1,9 +1,9 @@
 package org.skyve.impl.metadata.view.component;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.TreeMap;
 
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.metadata.customer.CustomerImpl;
@@ -86,7 +86,7 @@ public class Component extends AbstractBound implements NamedMetaData, Decorated
 	
 	@XmlElement(namespace = XMLMetaData.VIEW_NAMESPACE)
 	@XmlJavaTypeAdapter(PropertyMapAdapter.class)
-	private Map<String, String> properties = new TreeMap<>();
+	private Map<String, String> properties = new LinkedHashMap<>();
 
 	@XmlElementWrapper(name = "actions", namespace = XMLMetaData.VIEW_NAMESPACE)
 	@XmlElement(name = "action", namespace = XMLMetaData.VIEW_NAMESPACE)

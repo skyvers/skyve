@@ -114,10 +114,10 @@ public class FluentListGrid extends FluentWidget implements FluentRelativeSize<F
 		selectedIdBinding(grid.getSelectedIdBinding());
 
 		grid.getEditedActions().forEach(e -> addEditedAction(FluentEventAction.from(e)));
-
 		grid.getRemovedActions().forEach(r -> addRemovedAction(FluentEventAction.from(r)));
-
 		grid.getSelectedActions().forEach(s -> addSelectedAction(FluentEventAction.from(s)));
+
+		grid.getProperties().entrySet().forEach(p -> putProperty(p.getKey(), p.getValue()));
 
 		return this;
 	}
@@ -741,6 +741,19 @@ public class FluentListGrid extends FluentWidget implements FluentRelativeSize<F
 	 */
 	public FluentListGrid addSelectedAction(FluentEventAction action) {
 		grid.getSelectedActions().add(action.get());
+		return this;
+	}
+
+	/**
+	 * Adds or replaces a custom property on the wrapped metadata.
+	 * Properties keep the order in which they were first added.
+	 *
+	 * @param k the property name
+	 * @param v the property value
+	 * @return this builder
+	 */
+	public @Nonnull FluentListGrid putProperty(@Nonnull String k, @Nonnull String v) {
+		grid.getProperties().put(k, v);
 		return this;
 	}
 

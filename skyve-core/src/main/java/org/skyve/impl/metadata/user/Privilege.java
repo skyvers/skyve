@@ -1,7 +1,7 @@
 package org.skyve.impl.metadata.user;
 
+import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.TreeMap;
 
 import org.skyve.metadata.DecoratedMetaData;
 
@@ -17,7 +17,7 @@ public abstract class Privilege implements DecoratedMetaData {
 	private static final long serialVersionUID = 7901164127754285622L;
 
 	private String name;
-	private Map<String, String> properties = new TreeMap<>();
+	private Map<String, String> properties = new LinkedHashMap<>();
 
 	public String getName() {
 		return name;

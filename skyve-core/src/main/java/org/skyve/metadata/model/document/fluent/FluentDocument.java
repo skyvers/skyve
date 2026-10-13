@@ -38,6 +38,8 @@ import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.model.document.Interface;
 import org.skyve.metadata.model.document.UniqueConstraint;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * Provides a fluent builder for FluentDocument metadata.
  */
@@ -198,6 +200,8 @@ public class FluentDocument {
 			addUniqueConstraint(new FluentDocumentUniqueConstraint().from(constraint));
 		}
 		
+		document.getProperties().entrySet().forEach(p -> putProperty(p.getKey(), p.getValue()));
+
 		return this;
 	}
 
@@ -830,6 +834,19 @@ public class FluentDocument {
 		return null;
 	}
 	
+	/**
+	 * Adds or replaces a custom property on the wrapped metadata.
+	 * Properties keep the order in which they were first added.
+	 *
+	 * @param k the property name
+	 * @param v the property value
+	 * @return this builder
+	 */
+	public @Nonnull FluentDocument putProperty(@Nonnull String k, @Nonnull String v) {
+		document.getProperties().put(k, v);
+		return this;
+	}
+
 	/**
 	 * Returns the mutable document metadata instance being built.
 	 */

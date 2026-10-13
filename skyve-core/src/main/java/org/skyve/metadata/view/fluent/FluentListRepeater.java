@@ -56,8 +56,9 @@ public class FluentListRepeater extends FluentWidget implements FluentRelativeSi
 		relativeSize(list, this);
 
 		list.getParameters().forEach(p -> addParameter(new FluentParameter().from(p)));
-
 		list.getFilterParameters().forEach(f -> addFilterParameter(new FluentFilterParameter().from(f)));
+
+		list.getProperties().entrySet().forEach(p -> putProperty(p.getKey(), p.getValue()));
 
 		return this;
 	}
@@ -369,6 +370,19 @@ public class FluentListRepeater extends FluentWidget implements FluentRelativeSi
 	@Override
 	public FluentListRepeater percentageHeight(int percentageHeight) {
 		list.setPercentageHeight(Integer.valueOf(percentageHeight));
+		return this;
+	}
+
+	/**
+	 * Adds or replaces a custom property on the wrapped metadata.
+	 * Properties keep the order in which they were first added.
+	 *
+	 * @param k the property name
+	 * @param v the property value
+	 * @return this builder
+	 */
+	public @Nonnull FluentListRepeater putProperty(@Nonnull String k, @Nonnull String v) {
+		list.getProperties().put(k, v);
 		return this;
 	}
 

@@ -8,6 +8,8 @@ import org.skyve.impl.metadata.repository.router.RouteCriteria;
 import org.skyve.metadata.view.View.ViewType;
 import org.skyve.web.WebAction;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * Builds one route outcome and its match criteria.
  */
@@ -39,6 +41,8 @@ public class FluentRoute {
 	public FluentRoute from(@SuppressWarnings("hiding") Route route) {
 		outcomeUrl(route.getOutcomeUrl());
 		route.getCriteria().forEach(c -> addCriteria(new FluentRouteCriteria().from(c)));
+		route.getProperties().entrySet().forEach(p -> putProperty(p.getKey(), p.getValue()));
+
 		return this;
 	}
 	
@@ -128,6 +132,19 @@ public class FluentRoute {
 	 */
 	public FluentRoute clearCriteria() {
 		route.getCriteria().clear();
+		return this;
+	}
+
+	/**
+	 * Adds or replaces a custom property on the wrapped metadata.
+	 * Properties keep the order in which they were first added.
+	 *
+	 * @param k the property name
+	 * @param v the property value
+	 * @return this builder
+	 */
+	public @Nonnull FluentRoute putProperty(@Nonnull String k, @Nonnull String v) {
+		route.getProperties().put(k, v);
 		return this;
 	}
 

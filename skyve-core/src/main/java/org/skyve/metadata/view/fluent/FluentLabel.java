@@ -57,6 +57,9 @@ public class FluentLabel extends FluentBoundWidget<FluentLabel> implements Fluen
 		sanitise(label.getSanitise());
 
 		super.from(label);
+		
+		label.getProperties().entrySet().forEach(p -> putProperty(p.getKey(), p.getValue()));
+		
 		return this;
 	}
 
@@ -171,6 +174,19 @@ public class FluentLabel extends FluentBoundWidget<FluentLabel> implements Fluen
 	@Override
 	public FluentLabel pixelHeight(int height) {
 		label.setPixelHeight(Integer.valueOf(height));
+		return this;
+	}
+
+	/**
+	 * Adds or replaces a custom property on the wrapped metadata.
+	 * Properties keep the order in which they were first added.
+	 *
+	 * @param k the property name
+	 * @param v the property value
+	 * @return this builder
+	 */
+	public @Nonnull FluentLabel putProperty(@Nonnull String k, @Nonnull String v) {
+		label.getProperties().put(k, v);
 		return this;
 	}
 

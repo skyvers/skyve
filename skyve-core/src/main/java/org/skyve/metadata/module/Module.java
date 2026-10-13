@@ -1,8 +1,8 @@
 package org.skyve.metadata.module;
 
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.TreeMap;
 
 import org.skyve.impl.metadata.view.container.form.FormLabelLayout;
 import org.skyve.metadata.DecoratedMetaData;
@@ -60,7 +60,7 @@ public interface Module extends NamedMetaData, PersistentMetaData, ReloadableMet
 
 		private String defaultQueryName;
 		
-		private Map<String, String> properties = new TreeMap<>();
+		private Map<String, String> properties = new LinkedHashMap<>();
 
 		/**
 		 * Returns the default query name for this document reference.

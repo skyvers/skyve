@@ -1,7 +1,7 @@
 package org.skyve.impl.metadata.view.event;
 
+import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.TreeMap;
 
 import org.skyve.impl.util.XMLMetaData;
 
@@ -32,7 +32,7 @@ public class ServerSideActionEventAction implements EventAction {
 	
 	@XmlElement(namespace = XMLMetaData.VIEW_NAMESPACE)
 	@XmlJavaTypeAdapter(PropertyMapAdapter.class)
-	private Map<String, String> properties = new TreeMap<>();
+	private Map<String, String> properties = new LinkedHashMap<>();
 
 	public String getActionName() {
 		return actionName;

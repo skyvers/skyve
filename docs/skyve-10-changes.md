@@ -13,6 +13,7 @@ These notes collect release-ready framework changes introduced for Skyve 10.
     `invisible` condition already was. It was evaluated against the view's bean.
 - [Lucene Content Identifiers and Garbage Collection](#lucene-content-identifiers-and-garbage-collection)
 - [Scheduled Backups and Azure Copies](#scheduled-backups-and-azure-copies)
+- [Custom Property Order and Fluent Builders](#custom-property-order-and-fluent-builders)
 
 ## Model-backed Lookup Descriptions
 
@@ -139,3 +140,17 @@ streaming them through the application server, and plain `YEARLY_` backups are n
 to `yearlyBackupRetention` (previously they were never culled, so check that retention
 before the first run after upgrading, and re-assemble the admin module to pick up the job
 change).
+
+## Custom Property Order and Fluent Builders
+
+Custom properties (the `<properties>` section of any metadata element) are now kept in
+declaration order instead of being sorted by key.
+
+- `DecoratedMetaData.getProperties()` iterates in the order the properties were declared
+  in XML or added through the fluent API. Replacing a property's value keeps its position.
+- Marshalled metadata XML and the `MetaDataServlet` JSON list properties in that order.
+- Fluent builders gain `putProperty(name, value)` wherever the metadata they build carries
+  custom properties, and each builder's `from(...)` now copies the source's properties.
+  For a module role this includes the properties on its document privileges, action
+  privileges, content permissions and content restrictions.
+- A `<property>` with no `key` is ignored when metadata is loaded.

@@ -1,7 +1,7 @@
 package org.skyve.impl.metadata.model;
 
+import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.TreeMap;
 
 import org.skyve.domain.Bean;
 import org.skyve.impl.domain.types.jaxb.CDATAAdapter;
@@ -75,7 +75,7 @@ public abstract class AbstractAttribute extends NamedMetaData implements Attribu
 	
 	@XmlElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
 	@XmlJavaTypeAdapter(PropertyMapAdapter.class)
-	private Map<String, String> properties = new TreeMap<>();
+	private Map<String, String> properties = new LinkedHashMap<>();
 	
 	@Override
 	public String getDisplayName() {

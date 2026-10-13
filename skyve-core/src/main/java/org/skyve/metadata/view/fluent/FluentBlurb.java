@@ -48,18 +48,7 @@ public class FluentBlurb extends FluentWidget implements FluentAbsoluteSize<Flue
 		sanitise(blurb.getSanitise());
 
 		blurb.getProperties().entrySet().forEach(p -> putProperty(p.getKey(), p.getValue()));
-		return this;
-	}
 
-	/**
-	 * Adds or replaces a custom property on the wrapped blurb metadata.
-	 *
-	 * @param k the property name
-	 * @param v the property value
-	 * @return this builder
-	 */
-	public FluentBlurb putProperty(String k, String v) {
-		blurb.getProperties().put(k, v);
 		return this;
 	}
 
@@ -152,6 +141,19 @@ public class FluentBlurb extends FluentWidget implements FluentAbsoluteSize<Flue
 	 */
 	public FluentBlurb sanitise(Sanitisation sanitise) {
 		blurb.setSanitise(sanitise);
+		return this;
+	}
+
+	/**
+	 * Adds or replaces a custom property on the wrapped blurb metadata.
+	 * Properties keep the order in which they were first added.
+	 *
+	 * @param k the property name
+	 * @param v the property value
+	 * @return this builder
+	 */
+	public @Nonnull FluentBlurb putProperty(@Nonnull String k, @Nonnull String v) {
+		blurb.getProperties().put(k, v);
 		return this;
 	}
 

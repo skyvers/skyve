@@ -20,6 +20,8 @@ import org.skyve.metadata.module.query.SQLDefinition;
 import org.skyve.metadata.user.Role;
 import org.skyve.metadata.view.View.ViewType;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * Builds module metadata including documents, queries, roles, jobs, and menu structure.
  */
@@ -91,6 +93,8 @@ public class FluentModule {
 		// Populate the menu
 		menu(new FluentMenu().from(module.getMenu()));
 		
+		module.getProperties().entrySet().forEach(p -> putProperty(p.getKey(), p.getValue()));
+
 		return this;
 	}
 	
@@ -417,6 +421,19 @@ public class FluentModule {
 		return this;
 	}
 	
+	/**
+	 * Adds or replaces a custom property on the wrapped metadata.
+	 * Properties keep the order in which they were first added.
+	 *
+	 * @param k the property name
+	 * @param v the property value
+	 * @return this builder
+	 */
+	public @Nonnull FluentModule putProperty(@Nonnull String k, @Nonnull String v) {
+		module.getProperties().put(k, v);
+		return this;
+	}
+
 	/**
 	 * Returns the mutable metadata backing this fluent wrapper.
 	 *

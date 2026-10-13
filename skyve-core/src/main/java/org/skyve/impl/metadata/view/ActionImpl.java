@@ -1,9 +1,9 @@
 package org.skyve.impl.metadata.view;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.TreeMap;
 
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.metadata.repository.view.actions.ActionMetaData;
@@ -72,7 +72,7 @@ public class ActionImpl implements Action {
 	private String invisibleCondition;
 	private String visibleCondition;
 	private List<Parameter> parameters = new ArrayList<>();
-	private Map<String, String> properties = new TreeMap<>();
+	private Map<String, String> properties = new LinkedHashMap<>();
 
 	/**
 	 * Returns the mutable parameter list supplied to parameterizable actions.

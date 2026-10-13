@@ -1,9 +1,9 @@
 package org.skyve.impl.metadata.view.widget.bound.tabular;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.TreeMap;
 
 import org.skyve.impl.metadata.repository.PropertyMapAdapter;
 import org.skyve.impl.util.XMLMetaData;
@@ -44,7 +44,7 @@ public class DataRepeater extends AbstractDataWidget implements DecoratedMetaDat
 
 	@XmlElement(namespace = XMLMetaData.VIEW_NAMESPACE)
 	@XmlJavaTypeAdapter(PropertyMapAdapter.class)
-	private Map<String, String> properties = new TreeMap<>();
+	private Map<String, String> properties = new LinkedHashMap<>();
 
 	@Override
 	@XmlElementRefs({@XmlElementRef(type = DataGridBoundColumn.class),

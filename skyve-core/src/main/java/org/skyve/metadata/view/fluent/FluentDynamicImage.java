@@ -2,6 +2,8 @@ package org.skyve.metadata.view.fluent;
 
 import org.skyve.impl.metadata.view.widget.DynamicImage;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * Builds {@link DynamicImage} widget metadata using a fluent API.
  */
@@ -41,6 +43,7 @@ public class FluentDynamicImage extends FluentWidget implements FluentRelativeSi
 		relativeSize(image, this);
 
 		image.getParameters().forEach(p -> addParameter(new FluentParameter().from(p)));
+		image.getProperties().entrySet().forEach(p -> putProperty(p.getKey(), p.getValue()));
 
 		return this;
 	}
@@ -239,6 +242,19 @@ public class FluentDynamicImage extends FluentWidget implements FluentRelativeSi
 	 */
 	public FluentDynamicImage addParameter(FluentParameter parameter) {
 		image.getParameters().add(parameter.get());
+		return this;
+	}
+
+	/**
+	 * Adds or replaces a custom property on the wrapped metadata.
+	 * Properties keep the order in which they were first added.
+	 *
+	 * @param k the property name
+	 * @param v the property value
+	 * @return this builder
+	 */
+	public @Nonnull FluentDynamicImage putProperty(@Nonnull String k, @Nonnull String v) {
+		image.getProperties().put(k, v);
 		return this;
 	}
 

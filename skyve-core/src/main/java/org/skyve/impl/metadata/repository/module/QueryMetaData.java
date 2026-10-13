@@ -1,7 +1,7 @@
 package org.skyve.impl.metadata.repository.module;
 
+import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.TreeMap;
 
 import org.skyve.impl.metadata.repository.NamedMetaData;
 import org.skyve.impl.metadata.repository.PropertyMapAdapter;
@@ -31,7 +31,7 @@ public abstract class QueryMetaData extends NamedMetaData implements DecoratedMe
 
 	@XmlElement(namespace = XMLMetaData.MODULE_NAMESPACE)
 	@XmlJavaTypeAdapter(PropertyMapAdapter.class)
-	private Map<String, String> properties = new TreeMap<>();
+	private Map<String, String> properties = new LinkedHashMap<>();
 
 	@Override
 	public Map<String, String> getProperties() {

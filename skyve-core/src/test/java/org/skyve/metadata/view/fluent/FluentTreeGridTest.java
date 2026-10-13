@@ -37,4 +37,19 @@ class FluentTreeGridTest {
 		FluentTreeGrid ftg = new FluentTreeGrid().from(source);
 		assertEquals("rootId", ftg.get().getRootIdBinding());
 	}
+
+	@Test
+	void inheritedListGridSettersMutateTheTreeGrid() {
+		FluentTreeGrid g = new FluentTreeGrid();
+		g.queryName("qTree");
+		assertEquals("qTree", g.get().getQueryName());
+	}
+
+	@Test
+	void fromCopiesInheritedListGridState() {
+		TreeGrid grid = new TreeGrid();
+		grid.setQueryName("qTree");
+		FluentTreeGrid g = new FluentTreeGrid().from(grid);
+		assertEquals("qTree", g.get().getQueryName());
+	}
 }

@@ -2,6 +2,8 @@ package org.skyve.metadata.view.fluent;
 
 import org.skyve.impl.metadata.view.container.form.FormColumn;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * Fluent builder for {@link FormColumn} metadata.
  */
@@ -61,6 +63,7 @@ public class FluentFormColumn {
 		if (i != null) {
 			percentageWidth(i.intValue());
 		}
+		column.getProperties().entrySet().forEach(p -> putProperty(p.getKey(), p.getValue()));
 		return this;
 	}
 	
@@ -145,6 +148,19 @@ public class FluentFormColumn {
 	 */
 	public FluentFormColumn percentageWidth(int percentageWidth) {
 		column.setPercentageWidth(Integer.valueOf(percentageWidth));
+		return this;
+	}
+
+	/**
+	 * Adds or replaces a custom property on the wrapped metadata.
+	 * Properties keep the order in which they were first added.
+	 *
+	 * @param k the property name
+	 * @param v the property value
+	 * @return this builder
+	 */
+	public @Nonnull FluentFormColumn putProperty(@Nonnull String k, @Nonnull String v) {
+		column.getProperties().put(k, v);
 		return this;
 	}
 

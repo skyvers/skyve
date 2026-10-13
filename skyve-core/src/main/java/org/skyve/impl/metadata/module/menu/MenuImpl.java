@@ -1,9 +1,9 @@
 package org.skyve.impl.metadata.module.menu;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.TreeMap;
 
 import org.skyve.metadata.module.menu.Menu;
 import org.skyve.metadata.module.menu.MenuItem;
@@ -15,7 +15,7 @@ public class MenuImpl implements Menu {
 	private static final long serialVersionUID = -8289343836260930093L;
 
 	private List<MenuItem> menuItemList = new ArrayList<>();
-	private Map<String, String> properties = new TreeMap<>();
+	private Map<String, String> properties = new LinkedHashMap<>();
 
 	@Override
 	public List<MenuItem> getItems() {

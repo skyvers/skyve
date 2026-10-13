@@ -1,7 +1,7 @@
 package org.skyve.impl.metadata.model.document;
 
+import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.TreeMap;
 
 import org.skyve.metadata.model.Attribute.UsageType;
 import org.skyve.metadata.model.document.Condition;
@@ -26,7 +26,7 @@ public class ConditionImpl implements Condition {
 	private String description;
 	private String expression;
 	private UsageType usage;
-	private Map<String, String> properties = new TreeMap<>();
+	private Map<String, String> properties = new LinkedHashMap<>();
 
 	@Override
 	public String getDocumentation() {

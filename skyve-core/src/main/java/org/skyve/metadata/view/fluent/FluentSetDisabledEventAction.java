@@ -39,6 +39,7 @@ public class FluentSetDisabledEventAction extends FluentEventAction {
 	public FluentSetDisabledEventAction from(@SuppressWarnings("hiding") SetDisabledEventAction action) {
 		binding(action.getBinding());
 		BindUtil.copyAuthoredCondition(action.getXmlDisabledCondition(), action.getXmlEnabledCondition(), this::disabledCondition, this::enabledCondition);
+		action.getProperties().entrySet().forEach(p -> putProperty(p.getKey(), p.getValue()));
 
 		return this;
 	}
@@ -76,6 +77,19 @@ public class FluentSetDisabledEventAction extends FluentEventAction {
 	 */
 	public @Nonnull FluentSetDisabledEventAction enabledCondition(@Nullable String enabledCondition) {
 		action.setXmlEnabledCondition(enabledCondition);
+		return this;
+	}
+
+	/**
+	 * Adds or replaces a custom property on the wrapped metadata.
+	 * Properties keep the order in which they were first added.
+	 *
+	 * @param k the property name
+	 * @param v the property value
+	 * @return this builder
+	 */
+	public @Nonnull FluentSetDisabledEventAction putProperty(@Nonnull String k, @Nonnull String v) {
+		action.getProperties().put(k, v);
 		return this;
 	}
 

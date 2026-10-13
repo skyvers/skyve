@@ -3,6 +3,8 @@ package org.skyve.metadata.view.fluent;
 import org.skyve.impl.metadata.view.widget.bound.input.HTML;
 import org.skyve.metadata.view.TextOutput.Sanitisation;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * Builds {@link HTML} widget metadata using a fluent API.
  */
@@ -33,12 +35,11 @@ public class FluentHTML extends FluentInputWidget<FluentHTML> implements FluentA
 	 * @return this builder
 	 */
 	public FluentHTML from(@SuppressWarnings("hiding") HTML html) {
-
 		sanitise(html.getSanitise());
-
 		absoluteSize(html, this);
-
 		super.from(html);
+		html.getProperties().entrySet().forEach(p -> putProperty(p.getKey(), p.getValue()));
+
 		return this;
 	}
 
@@ -74,6 +75,19 @@ public class FluentHTML extends FluentInputWidget<FluentHTML> implements FluentA
 	@Override
 	public FluentHTML pixelHeight(int height) {
 		html.setPixelHeight(Integer.valueOf(height));
+		return this;
+	}
+
+	/**
+	 * Adds or replaces a custom property on the wrapped metadata.
+	 * Properties keep the order in which they were first added.
+	 *
+	 * @param k the property name
+	 * @param v the property value
+	 * @return this builder
+	 */
+	public @Nonnull FluentHTML putProperty(@Nonnull String k, @Nonnull String v) {
+		html.getProperties().put(k, v);
 		return this;
 	}
 

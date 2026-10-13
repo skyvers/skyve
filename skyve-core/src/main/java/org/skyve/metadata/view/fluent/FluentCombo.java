@@ -2,6 +2,8 @@ package org.skyve.metadata.view.fluent;
 
 import org.skyve.impl.metadata.view.widget.bound.input.Combo;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * Builds {@link Combo} widget metadata using a fluent API.
  */
@@ -31,6 +33,8 @@ public class FluentCombo extends FluentChangeableInputWidget<FluentCombo> implem
 	public FluentCombo from(@SuppressWarnings("hiding") Combo combo) {
 		absoluteWidth(combo, this);
 		super.from(combo);
+		combo.getProperties().entrySet().forEach(p -> putProperty(p.getKey(), p.getValue()));
+
 		return this;
 	}
 
@@ -43,6 +47,19 @@ public class FluentCombo extends FluentChangeableInputWidget<FluentCombo> implem
 	@Override
 	public FluentCombo pixelWidth(int width) {
 		combo.setPixelWidth(Integer.valueOf(width));
+		return this;
+	}
+
+	/**
+	 * Adds or replaces a custom property on the wrapped metadata.
+	 * Properties keep the order in which they were first added.
+	 *
+	 * @param k the property name
+	 * @param v the property value
+	 * @return this builder
+	 */
+	public @Nonnull FluentCombo putProperty(@Nonnull String k, @Nonnull String v) {
+		combo.getProperties().put(k, v);
 		return this;
 	}
 

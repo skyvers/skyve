@@ -39,14 +39,13 @@ public class FluentLink extends FluentWidget implements FluentAbsoluteWidth<Flue
 	 * @return this builder
 	 */
 	public FluentLink from(@SuppressWarnings("hiding") Link link) {
-
 		reference(link.getReference());
 		target(link.getTarget());
 		value(link.getValue());
 		escapeValue(link.getEscapeValue());
 		BindUtil.copyAuthoredCondition(link.getXmlInvisibleCondition(), link.getXmlVisibleCondition(), this::invisibleCondition, this::visibleCondition);
-
 		absoluteWidth(link, this);
+		link.getProperties().entrySet().forEach(p -> putProperty(p.getKey(), p.getValue()));
 
 		return this;
 	}
@@ -142,6 +141,19 @@ public class FluentLink extends FluentWidget implements FluentAbsoluteWidth<Flue
 	@Override
 	public FluentLink pixelWidth(int width) {
 		link.setPixelWidth(Integer.valueOf(width));
+		return this;
+	}
+
+	/**
+	 * Adds or replaces a custom property on the wrapped metadata.
+	 * Properties keep the order in which they were first added.
+	 *
+	 * @param k the property name
+	 * @param v the property value
+	 * @return this builder
+	 */
+	public @Nonnull FluentLink putProperty(@Nonnull String k, @Nonnull String v) {
+		link.getProperties().put(k, v);
 		return this;
 	}
 

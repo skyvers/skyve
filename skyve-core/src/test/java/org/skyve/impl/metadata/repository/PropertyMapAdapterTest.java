@@ -5,6 +5,8 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -85,6 +87,53 @@ class PropertyMapAdapterTest {
 		PropertyMapType result = adapter.marshal(map);
 		assertNotNull(result);
 		assertEquals(2, result.properties.size());
+	}
+
+	@Test
+	void unmarshalPreservesDeclarationOrder() throws Exception {
+		PropertyMapAdapter adapter = new PropertyMapAdapter();
+		PropertyMapType type = new PropertyMapType();
+		for (String k : new String[]{"z", "a", "m"}) {
+			PropertyMapEntryType e = new PropertyMapEntryType();
+			e.key = k;
+			e.value = k.toUpperCase();
+			type.properties.add(e);
+		}
+
+		Map<String, String> result = adapter.unmarshal(type);
+		assertEquals(List.of("z", "a", "m"), List.copyOf(result.keySet()));
+	}
+
+	@Test
+	void unmarshalDropsEntryWithoutKey() throws Exception {
+		PropertyMapAdapter adapter = new PropertyMapAdapter();
+		PropertyMapType type = new PropertyMapType();
+		PropertyMapEntryType keyless = new PropertyMapEntryType();
+		keyless.value = "orphan";
+		type.properties.add(keyless);
+		PropertyMapEntryType keyed = new PropertyMapEntryType();
+		keyed.key = "colour";
+		keyed.value = "blue";
+		type.properties.add(keyed);
+
+		Map<String, String> result = adapter.unmarshal(type);
+		assertEquals(Map.of("colour", "blue"), result);
+	}
+
+	@Test
+	void marshalPreservesInsertionOrder() throws Exception {
+		PropertyMapAdapter adapter = new PropertyMapAdapter();
+		Map<String, String> map = new LinkedHashMap<>();
+		map.put("z", "1");
+		map.put("a", "2");
+		map.put("m", "3");
+
+		PropertyMapType result = adapter.marshal(map);
+		assertNotNull(result);
+		assertEquals(3, result.properties.size());
+		assertEquals("z", result.properties.get(0).key);
+		assertEquals("a", result.properties.get(1).key);
+		assertEquals("m", result.properties.get(2).key);
 	}
 
 	@Test

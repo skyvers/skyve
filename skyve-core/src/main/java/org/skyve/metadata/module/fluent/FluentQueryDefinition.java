@@ -25,6 +25,7 @@ public abstract class FluentQueryDefinition<T extends FluentQueryDefinition<T>> 
 		description(query.getDescription());
 		documentation(query.getDocumentation());
 		timeoutInSeconds(query.getTimeoutInSeconds());
+		query.getProperties().entrySet().forEach(p -> putProperty(p.getKey(), p.getValue()));
 	}
 
 	/**

@@ -1,9 +1,9 @@
 package org.skyve.impl.metadata.repository.router;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.TreeMap;
 
 import org.skyve.impl.metadata.repository.PropertyMapAdapter;
 import org.skyve.impl.util.UtilImpl;
@@ -43,7 +43,7 @@ public class Route implements DecoratedMetaData {
 
 	@XmlElement(namespace = XMLMetaData.ROUTER_NAMESPACE)
 	@XmlJavaTypeAdapter(PropertyMapAdapter.class)
-	private Map<String, String> properties = new TreeMap<>();
+	private Map<String, String> properties = new LinkedHashMap<>();
 
 	public String getOutcomeUrl() {
 		return outcomeUrl;

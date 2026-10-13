@@ -2,6 +2,8 @@ package org.skyve.metadata.behaviour.fluent;
 
 import org.skyve.impl.metadata.repository.behaviour.ActionMetaData;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * Builds and mutates {@link ActionMetaData} instances using a fluent API.
  *
@@ -37,6 +39,7 @@ public class FluentAction {
 		name(action.getName());
 		documentation(action.getDocumentation());
 		action.getStatements().forEach(a -> addStatement(FluentStatement.from(a)));
+		action.getProperties().entrySet().forEach(p -> putProperty(p.getKey(), p.getValue()));
 
 		return this;
 	}
@@ -93,6 +96,19 @@ public class FluentAction {
 	 */
 	public FluentAction clearStatements() {
 		action.getStatements().clear();
+		return this;
+	}
+
+	/**
+	 * Adds or replaces a custom property on the wrapped metadata.
+	 * Properties keep the order in which they were first added.
+	 *
+	 * @param k the property name
+	 * @param v the property value
+	 * @return this builder
+	 */
+	public @Nonnull FluentAction putProperty(@Nonnull String k, @Nonnull String v) {
+		action.getProperties().put(k, v);
 		return this;
 	}
 

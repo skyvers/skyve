@@ -4,6 +4,8 @@ import org.skyve.impl.metadata.behaviour.IfStatement;
 import org.skyve.impl.metadata.behaviour.SetStatement;
 import org.skyve.impl.metadata.repository.behaviour.statement.StatementMetaData;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * Base fluent wrapper for behaviour statements.
  *
@@ -56,13 +58,14 @@ public abstract class FluentStatement<T extends FluentStatement<T>> {
 
 	/**
 	 * Adds or replaces an implementation-specific statement property.
+	 * Properties keep the order in which they were first added.
 	 *
 	 * @param k property key
 	 * @param v property value
 	 * @return this fluent statement
 	 */
 	@SuppressWarnings("unchecked")
-	public T putProperty(String k, String v) {
+	public @Nonnull T putProperty(@Nonnull String k, @Nonnull String v) {
 		get().getProperties().put(k, v);
 		return (T) this;
 	}

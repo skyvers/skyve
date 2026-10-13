@@ -57,6 +57,9 @@ public class FluentContentUpload extends FluentInputWidget<FluentContentUpload> 
 		relativeSize(content, this);
 
 		super.from(content);
+		
+		content.getProperties().entrySet().forEach(p -> putProperty(p.getKey(), p.getValue()));
+		
 		return this;
 	}
 
@@ -261,6 +264,19 @@ public class FluentContentUpload extends FluentInputWidget<FluentContentUpload> 
 	@Override
 	public @Nonnull FluentContentUpload xl(int xl) {
 		content.setXl(Integer.valueOf(xl));
+		return this;
+	}
+
+	/**
+	 * Adds or replaces a custom property on the wrapped metadata.
+	 * Properties keep the order in which they were first added.
+	 *
+	 * @param k the property name
+	 * @param v the property value
+	 * @return this builder
+	 */
+	public @Nonnull FluentContentUpload putProperty(@Nonnull String k, @Nonnull String v) {
+		content.getProperties().put(k, v);
 		return this;
 	}
 

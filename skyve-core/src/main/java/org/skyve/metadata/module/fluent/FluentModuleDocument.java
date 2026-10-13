@@ -3,6 +3,8 @@ package org.skyve.metadata.module.fluent;
 import org.skyve.impl.metadata.repository.module.ModuleDocumentMetaData;
 import org.skyve.metadata.module.Module.DocumentRef;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * Builds module-to-document references.
  */
@@ -36,6 +38,8 @@ public class FluentModuleDocument {
 		moduleRef(ref.getReferencedModuleName());
 		ref(documentName);
 		defaultQueryName(ref.getDefaultQueryName());
+		ref.getProperties().entrySet().forEach(p -> putProperty(p.getKey(), p.getValue()));
+
 		return this;
 	}
 	
@@ -69,6 +73,19 @@ public class FluentModuleDocument {
 	 */
 	public FluentModuleDocument defaultQueryName(String queryName) {
 		document.setDefaultQueryName(queryName);
+		return this;
+	}
+
+	/**
+	 * Adds or replaces a custom property on the wrapped metadata.
+	 * Properties keep the order in which they were first added.
+	 *
+	 * @param k the property name
+	 * @param v the property value
+	 * @return this builder
+	 */
+	public @Nonnull FluentModuleDocument putProperty(@Nonnull String k, @Nonnull String v) {
+		document.getProperties().put(k, v);
 		return this;
 	}
 

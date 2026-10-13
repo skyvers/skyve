@@ -1,8 +1,8 @@
 package org.skyve.impl.metadata.module.menu;
 
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
-import java.util.TreeMap;
 import java.util.TreeSet;
 
 import org.skyve.metadata.module.menu.MenuItem;
@@ -23,7 +23,7 @@ public abstract class AbstractMenuItem implements MenuItem {
 
 	private Set<String> uxuis = new TreeSet<>();
 	
-	private Map<String, String> properties = new TreeMap<>();
+	private Map<String, String> properties = new LinkedHashMap<>();
 	
 	/**
 	 * From {@link MenuItem}.

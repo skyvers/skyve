@@ -2,6 +2,7 @@ package org.skyve.impl.metadata.module;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -95,7 +96,7 @@ public class ModuleImpl extends AbstractMetaDataMap implements Module {
 
 	private String documentation;
 	
-	private Map<String, String> properties = new TreeMap<>();
+	private Map<String, String> properties = new LinkedHashMap<>();
 
 	@Override
 	public String getName() {

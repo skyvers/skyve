@@ -3,6 +3,8 @@ package org.skyve.metadata.view.fluent;
 import org.skyve.impl.metadata.view.widget.bound.input.KeyboardType;
 import org.skyve.impl.metadata.view.widget.bound.input.TextArea;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * Builds {@link TextArea} widget metadata using a fluent API.
  */
@@ -54,6 +56,9 @@ public class FluentTextArea extends FluentChangeableInputWidget<FluentTextArea> 
 		absoluteSize(text, this);
 
 		super.from(text);
+		
+		text.getProperties().entrySet().forEach(p -> putProperty(p.getKey(), p.getValue()));
+		
 		return this;
 	}
 
@@ -128,6 +133,19 @@ public class FluentTextArea extends FluentChangeableInputWidget<FluentTextArea> 
 	@Override
 	public FluentTextArea pixelHeight(int height) {
 		text.setPixelHeight(Integer.valueOf(height));
+		return this;
+	}
+
+	/**
+	 * Adds or replaces a custom property on the wrapped metadata.
+	 * Properties keep the order in which they were first added.
+	 *
+	 * @param k the property name
+	 * @param v the property value
+	 * @return this builder
+	 */
+	public @Nonnull FluentTextArea putProperty(@Nonnull String k, @Nonnull String v) {
+		text.getProperties().put(k, v);
 		return this;
 	}
 

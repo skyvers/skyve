@@ -1,7 +1,7 @@
 package org.skyve.impl.metadata.module;
 
+import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.TreeMap;
 
 import org.skyve.impl.metadata.repository.NamedMetaData;
 import org.skyve.impl.metadata.repository.PropertyMapAdapter;
@@ -55,7 +55,7 @@ public class JobMetaDataImpl extends NamedMetaData implements JobMetaData {
 	
 	@XmlElement(namespace = XMLMetaData.MODULE_NAMESPACE)
 	@XmlJavaTypeAdapter(PropertyMapAdapter.class)
-	private Map<String, String> properties = new TreeMap<>();
+	private Map<String, String> properties = new LinkedHashMap<>();
 	
 	@Override
 	public String getDisplayName() {

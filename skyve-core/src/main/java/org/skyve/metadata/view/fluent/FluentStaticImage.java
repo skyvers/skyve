@@ -32,13 +32,11 @@ public class FluentStaticImage extends FluentWidget implements FluentRelativeSiz
 	 * Copies static-image metadata into this fluent builder.
 	 */
 	public FluentStaticImage from(@SuppressWarnings("hiding") StaticImage image) {
-
 		relativeFile(image.getRelativeFile());
-
 		relativeSize(image, this);
-
 		BindUtil.copyAuthoredCondition(image.getXmlInvisibleCondition(), image.getXmlVisibleCondition(), this::invisibleCondition, this::visibleCondition);
-		
+		image.getProperties().entrySet().forEach(p -> putProperty(p.getKey(), p.getValue()));
+
 		return this;
 	}
 	
@@ -230,6 +228,19 @@ public class FluentStaticImage extends FluentWidget implements FluentRelativeSiz
 	 */
 	public @Nonnull FluentStaticImage visibleCondition(@Nullable String visibleCondition) {
 		image.setXmlVisibleCondition(visibleCondition);
+		return this;
+	}
+
+	/**
+	 * Adds or replaces a custom property on the wrapped metadata.
+	 * Properties keep the order in which they were first added.
+	 *
+	 * @param k the property name
+	 * @param v the property value
+	 * @return this builder
+	 */
+	public @Nonnull FluentStaticImage putProperty(@Nonnull String k, @Nonnull String v) {
+		image.getProperties().put(k, v);
 		return this;
 	}
 

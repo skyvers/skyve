@@ -81,6 +81,8 @@ public class FluentView extends FluentContainer<FluentView> {
 
 		super.from(((ViewImpl) view));
 
+		view.getProperties().entrySet().forEach(p -> putProperty(p.getKey(), p.getValue()));
+
 		return this;
 	}
 
@@ -631,6 +633,19 @@ public class FluentView extends FluentContainer<FluentView> {
 			return new FluentViewParameter(result);
 		}
 		return null;
+	}
+
+	/**
+	 * Adds or replaces a custom property on the wrapped metadata.
+	 * Properties keep the order in which they were first added.
+	 *
+	 * @param k the property name
+	 * @param v the property value
+	 * @return this builder
+	 */
+	public @Nonnull FluentView putProperty(@Nonnull String k, @Nonnull String v) {
+		view.getProperties().put(k, v);
+		return this;
 	}
 
 	/**

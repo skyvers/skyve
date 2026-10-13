@@ -34,13 +34,12 @@ public class FluentChart extends FluentWidget implements FluentRelativeSize<Flue
 	 * Copies chart metadata into this fluent builder.
 	 */
 	public FluentChart from(@SuppressWarnings("hiding") Chart chart) {
-
 		type(chart.getType());
 		modelName(chart.getModelName());
 		model(chart.getModel());
 		BindUtil.copyAuthoredCondition(chart.getXmlInvisibleCondition(), chart.getXmlVisibleCondition(), this::invisibleCondition, this::visibleCondition);
-
 		relativeSize(chart, this);
+		chart.getProperties().entrySet().forEach(p -> putProperty(p.getKey(), p.getValue()));
 
 		return this;
 	}
@@ -255,6 +254,19 @@ public class FluentChart extends FluentWidget implements FluentRelativeSize<Flue
 	@Override
 	public FluentChart xl(int xl) {
 		chart.setXl(Integer.valueOf(xl));
+		return this;
+	}
+
+	/**
+	 * Adds or replaces a custom property on the wrapped metadata.
+	 * Properties keep the order in which they were first added.
+	 *
+	 * @param k the property name
+	 * @param v the property value
+	 * @return this builder
+	 */
+	public @Nonnull FluentChart putProperty(@Nonnull String k, @Nonnull String v) {
+		chart.getProperties().put(k, v);
 		return this;
 	}
 

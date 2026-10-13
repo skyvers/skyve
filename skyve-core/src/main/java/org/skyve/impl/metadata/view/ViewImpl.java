@@ -95,7 +95,7 @@ public class ViewImpl extends Container implements View {
 	private String documentation;
 	private String overriddenCustomerName;
 	private String overriddenUxUiName;
-	private Map<String, String> properties = new TreeMap<>();
+	private Map<String, String> properties = new LinkedHashMap<>();
 
 	// map of modelName -> model metadata used to instantiate models on the server-side
 	private transient Map<String, ModelMetaData> inlineModels = new TreeMap<>();
@@ -495,9 +495,9 @@ public class ViewImpl extends Container implements View {
 	}
 
 	/**
-	 * Returns the mutable property map for this view, sorted by key.
+	 * Returns the mutable property map for this view, in declaration order.
 	 *
-	 * @return the mutable, key-sorted property map; never {@code null}
+	 * @return the mutable, insertion-ordered property map; never {@code null}
 	 */
 	@Override
 	public Map<String, String> getProperties() {

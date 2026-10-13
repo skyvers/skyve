@@ -1,7 +1,7 @@
 package org.skyve.impl.metadata.module.query;
 
+import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.TreeMap;
 
 import org.skyve.impl.metadata.repository.module.MetaDataQueryContentColumnMetaData.DisplayType;
 import org.skyve.metadata.module.query.MetaDataQueryContentColumn;
@@ -27,7 +27,7 @@ public class MetaDataQueryContentColumnImpl extends AbstractMetaDataQueryColumn 
 	private DisplayType display;
 	private Integer pixelHeight;
 	private String emptyThumbnailRelativeFile;
-	private Map<String, String> properties = new TreeMap<>();
+	private Map<String, String> properties = new LinkedHashMap<>();
 	
 	@Override
 	public DisplayType getDisplay() {

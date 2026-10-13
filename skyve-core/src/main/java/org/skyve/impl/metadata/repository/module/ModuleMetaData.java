@@ -1,11 +1,11 @@
 package org.skyve.impl.metadata.repository.module;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.TreeMap;
 import java.util.TreeSet;
 
 import org.skyve.domain.types.formatters.Formatter;
@@ -118,7 +118,7 @@ public class ModuleMetaData extends NamedMetaData implements ConvertibleMetaData
 
 	@XmlElement(namespace = XMLMetaData.MODULE_NAMESPACE)
 	@XmlJavaTypeAdapter(PropertyMapAdapter.class)
-	private Map<String, String> properties = new TreeMap<>();
+	private Map<String, String> properties = new LinkedHashMap<>();
 
 	/**
 	 * Returns the module display title.

@@ -51,6 +51,8 @@ public class FluentZoomIn extends FluentBoundWidget<FluentZoomIn>
 		constrainableHeight(zoom, this);
 
 		super.from(zoom);
+		zoom.getProperties().entrySet().forEach(p -> putProperty(p.getKey(), p.getValue()));
+
 		return this;
 	}
 
@@ -244,6 +246,19 @@ public class FluentZoomIn extends FluentBoundWidget<FluentZoomIn>
 	@Override
 	public FluentZoomIn maxPixelHeight(int maxPixelHeight) {
 		zoom.setMaxPixelHeight(Integer.valueOf(maxPixelHeight));
+		return this;
+	}
+
+	/**
+	 * Adds or replaces a custom property on the wrapped metadata.
+	 * Properties keep the order in which they were first added.
+	 *
+	 * @param k the property name
+	 * @param v the property value
+	 * @return this builder
+	 */
+	public @Nonnull FluentZoomIn putProperty(@Nonnull String k, @Nonnull String v) {
+		zoom.getProperties().put(k, v);
 		return this;
 	}
 

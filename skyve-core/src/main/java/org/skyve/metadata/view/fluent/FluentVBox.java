@@ -57,6 +57,8 @@ public class FluentVBox extends FluentContainer<FluentVBox> implements FluentBox
 		
 		super.from(box);
 		
+		box.getProperties().entrySet().forEach(p -> putProperty(p.getKey(), p.getValue()));
+
 		return this;
 	}
 	
@@ -383,6 +385,19 @@ public class FluentVBox extends FluentContainer<FluentVBox> implements FluentBox
 	 */
 	public @Nonnull FluentVBox visibleCondition(@Nullable String visibleCondition) {
 		box.setXmlVisibleCondition(visibleCondition);
+		return this;
+	}
+
+	/**
+	 * Adds or replaces a custom property on the wrapped metadata.
+	 * Properties keep the order in which they were first added.
+	 *
+	 * @param k the property name
+	 * @param v the property value
+	 * @return this builder
+	 */
+	public @Nonnull FluentVBox putProperty(@Nonnull String k, @Nonnull String v) {
+		box.getProperties().put(k, v);
 		return this;
 	}
 

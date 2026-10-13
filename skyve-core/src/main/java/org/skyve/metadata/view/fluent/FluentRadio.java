@@ -2,6 +2,8 @@ package org.skyve.metadata.view.fluent;
 
 import org.skyve.impl.metadata.view.widget.bound.input.Radio;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * Builds {@link Radio} widget metadata using a fluent API.
  */
@@ -33,10 +35,10 @@ public class FluentRadio extends FluentChangeableInputWidget<FluentRadio> implem
 		if (b != null) {
 			vertical(b.booleanValue());
 		}
-
 		absoluteWidth(radio, this);
-
 		super.from(radio);
+		radio.getProperties().entrySet().forEach(p -> putProperty(p.getKey(), p.getValue()));
+
 		return this;
 	}
 
@@ -60,6 +62,19 @@ public class FluentRadio extends FluentChangeableInputWidget<FluentRadio> implem
 	@Override
 	public FluentRadio pixelWidth(int width) {
 		radio.setPixelWidth(Integer.valueOf(width));
+		return this;
+	}
+
+	/**
+	 * Adds or replaces a custom property on the wrapped metadata.
+	 * Properties keep the order in which they were first added.
+	 *
+	 * @param k the property name
+	 * @param v the property value
+	 * @return this builder
+	 */
+	public @Nonnull FluentRadio putProperty(@Nonnull String k, @Nonnull String v) {
+		radio.getProperties().put(k, v);
 		return this;
 	}
 

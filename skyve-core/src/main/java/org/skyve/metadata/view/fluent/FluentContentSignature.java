@@ -2,6 +2,8 @@ package org.skyve.metadata.view.fluent;
 
 import org.skyve.impl.metadata.view.widget.bound.input.ContentSignature;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * Builds {@link ContentSignature} widget metadata using a fluent API.
  */
@@ -33,13 +35,15 @@ public class FluentContentSignature extends FluentInputWidget<FluentContentSigna
 	 * @return this builder
 	 */
 	public FluentContentSignature from(@SuppressWarnings("hiding") ContentSignature signature) {
-
 		rgbHexBackgroundColour(signature.getRgbHexBackgroundColour());
 		rgbHexForegroundColour(signature.getRgbHexForegroundColour());
 
 		absoluteSize(signature, this);
 
 		super.from(signature);
+
+		signature.getProperties().entrySet().forEach(p -> putProperty(p.getKey(), p.getValue()));
+
 		return this;
 	}
 
@@ -86,6 +90,19 @@ public class FluentContentSignature extends FluentInputWidget<FluentContentSigna
 	@Override
 	public FluentContentSignature pixelHeight(int height) {
 		signature.setPixelHeight(Integer.valueOf(height));
+		return this;
+	}
+
+	/**
+	 * Adds or replaces a custom property on the wrapped metadata.
+	 * Properties keep the order in which they were first added.
+	 *
+	 * @param k the property name
+	 * @param v the property value
+	 * @return this builder
+	 */
+	public @Nonnull FluentContentSignature putProperty(@Nonnull String k, @Nonnull String v) {
+		signature.getProperties().put(k, v);
 		return this;
 	}
 

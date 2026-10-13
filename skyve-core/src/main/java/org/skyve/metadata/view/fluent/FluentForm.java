@@ -65,8 +65,9 @@ public class FluentForm extends FluentWidget implements FluentRelativeSize<Fluen
 		BindUtil.copyAuthoredCondition(form.getXmlInvisibleCondition(), form.getXmlVisibleCondition(), this::invisibleCondition, this::visibleCondition);
 
 		form.getColumns().forEach(c -> addColumn(new FluentFormColumn().from(c)));
-
 		form.getRows().forEach(r -> addRow(new FluentFormRow().from(r)));
+
+		form.getProperties().entrySet().forEach(p -> putProperty(p.getKey(), p.getValue()));
 
 		return this;
 	}
@@ -520,6 +521,19 @@ public class FluentForm extends FluentWidget implements FluentRelativeSize<Fluen
 			}
 		}
 		return result;
+	}
+
+	/**
+	 * Adds or replaces a custom property on the wrapped metadata.
+	 * Properties keep the order in which they were first added.
+	 *
+	 * @param k the property name
+	 * @param v the property value
+	 * @return this builder
+	 */
+	public @Nonnull FluentForm putProperty(@Nonnull String k, @Nonnull String v) {
+		form.getProperties().put(k, v);
+		return this;
 	}
 
 	/**

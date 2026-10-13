@@ -4,6 +4,8 @@ import org.skyve.impl.metadata.repository.module.ActionMetaData;
 import org.skyve.impl.metadata.repository.module.ApplicableTo;
 import org.skyve.metadata.module.menu.MenuItem;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * Base fluent builder for menu actions.
  */
@@ -25,6 +27,8 @@ public abstract class FluentMenuAction<T extends FluentMenuAction<T>> {
 	protected T from(MenuItem item) {
 		name(item.getName());
 		item.getUxUis().forEach(this::addUxUi);
+		item.getProperties().entrySet().forEach(p -> putProperty(p.getKey(), p.getValue()));
+
 		return (T) this;
 	}
 	
@@ -74,6 +78,20 @@ public abstract class FluentMenuAction<T extends FluentMenuAction<T>> {
 	@SuppressWarnings("unchecked")
 	public T clearUxUis() {
 		get().getUxuis().clear();
+		return (T) this;
+	}
+
+	/**
+	 * Adds or replaces a custom property on the wrapped metadata.
+	 * Properties keep the order in which they were first added.
+	 *
+	 * @param k the property name
+	 * @param v the property value
+	 * @return this builder
+	 */
+	@SuppressWarnings("unchecked")
+	public @Nonnull T putProperty(@Nonnull String k, @Nonnull String v) {
+		get().getProperties().put(k, v);
 		return (T) this;
 	}
 

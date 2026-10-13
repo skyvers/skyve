@@ -55,6 +55,8 @@ public class FluentSidebar extends FluentContainer<FluentSidebar> implements Flu
 		
 		super.from(sidebar);
 		
+		sidebar.getProperties().entrySet().forEach(p -> putProperty(p.getKey(), p.getValue()));
+
 		return this;
 	}
 	
@@ -154,6 +156,19 @@ public class FluentSidebar extends FluentContainer<FluentSidebar> implements Flu
 	 */
 	public @Nonnull FluentSidebar visibleCondition(@Nullable String visibleCondition) {
 		sidebar.setXmlVisibleCondition(visibleCondition);
+		return this;
+	}
+
+	/**
+	 * Adds or replaces a custom property on the wrapped metadata.
+	 * Properties keep the order in which they were first added.
+	 *
+	 * @param k the property name
+	 * @param v the property value
+	 * @return this builder
+	 */
+	public @Nonnull FluentSidebar putProperty(@Nonnull String k, @Nonnull String v) {
+		sidebar.getProperties().put(k, v);
 		return this;
 	}
 

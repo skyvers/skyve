@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.lang.reflect.Method;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -67,6 +68,7 @@ import org.skyve.metadata.model.document.Association.AssociationType;
 import org.skyve.metadata.model.document.Collection.CollectionType;
 import org.skyve.metadata.sail.language.Automation;
 import org.skyve.metadata.view.View.ViewType;
+import org.skyve.metadata.view.fluent.FluentButton;
 import org.skyve.metadata.view.fluent.FluentListGrid;
 import org.skyve.metadata.view.fluent.FluentView;
 import org.skyve.web.UserAgentType;
@@ -878,6 +880,22 @@ class XMLMetaDataTest {
 			}
 			assertEquals(xml, XMLMetaData.marshalView(XMLMetaData.unmarshalViewString(xml), false, false));
 		}
+	}
+
+	@Test
+	void testMarshalViewKeepsFluentPropertyOrder() {
+		FluentView v = new FluentView().name("edit").title("Test").putProperty("z", "1").putProperty("a", "2");
+		v.addButton(new FluentButton().actionName("Save").putProperty("y", "1").putProperty("b", "2"));
+
+		String xml = XMLMetaData.marshalView(v.get(), false, false);
+
+		int first = xml.indexOf("key=\"y\"");
+		assertTrue((first >= 0) && (first < xml.indexOf("key=\"b\"")));
+		first = xml.indexOf("key=\"z\"");
+		assertTrue((first >= 0) && (first < xml.indexOf("key=\"a\"")));
+		ViewMetaData roundTripped = XMLMetaData.unmarshalViewString(xml);
+		assertEquals(List.of("z", "a"), List.copyOf(roundTripped.getProperties().keySet()));
+		assertEquals(xml, XMLMetaData.marshalView(roundTripped, false, false));
 	}
 
 	@Test

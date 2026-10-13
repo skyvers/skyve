@@ -1,7 +1,7 @@
 package org.skyve.impl.metadata.repository.view.actions;
 
+import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.TreeMap;
 
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.metadata.repository.PropertyMapAdapter;
@@ -362,8 +362,8 @@ public abstract class ActionMetaData implements DecoratedMetaData {
 
 	@XmlElement(namespace = XMLMetaData.VIEW_NAMESPACE)
 	@XmlJavaTypeAdapter(PropertyMapAdapter.class)
-	@SuppressWarnings("java:S1948") // TreeMap is Serializable
-	public Map<String, String> properties = new TreeMap<>();
+	@SuppressWarnings("java:S1948") // LinkedHashMap is Serializable
+	public Map<String, String> properties = new LinkedHashMap<>();
 
 	/**
 	 * Returns decorator properties defined for this action descriptor.

@@ -1,7 +1,7 @@
 package org.skyve.impl.metadata.view.event;
 
+import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.TreeMap;
 
 import org.skyve.impl.metadata.view.widget.bound.AbstractBound;
 import org.skyve.impl.util.XMLMetaData;
@@ -29,7 +29,7 @@ public class ToggleVisibilityEventAction extends AbstractBound implements EventA
 
 	@XmlElement(namespace = XMLMetaData.VIEW_NAMESPACE)
 	@XmlJavaTypeAdapter(PropertyMapAdapter.class)
-	private Map<String, String> properties = new TreeMap<>();
+	private Map<String, String> properties = new LinkedHashMap<>();
 
 	@Override
 	public Map<String, String> getProperties() {

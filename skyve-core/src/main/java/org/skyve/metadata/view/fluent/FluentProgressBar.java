@@ -38,14 +38,12 @@ public class FluentProgressBar extends FluentBoundWidget<FluentProgressBar>
 	 * @return this builder
 	 */
 	public FluentProgressBar from(@SuppressWarnings("hiding") ProgressBar bar) {
-
 		BindUtil.copyAuthoredCondition(bar.getXmlInvisibleCondition(), bar.getXmlVisibleCondition(), this::invisibleCondition, this::visibleCondition);
-
 		absoluteSize(bar, this);
-
 		constrainableSize(bar, this);
-
 		super.from(bar);
+		bar.getProperties().entrySet().forEach(p -> putProperty(p.getKey(), p.getValue()));
+
 		return this;
 	}
 
@@ -142,6 +140,19 @@ public class FluentProgressBar extends FluentBoundWidget<FluentProgressBar>
 	@Override
 	public FluentProgressBar maxPixelWidth(int maxPixelWidth) {
 		bar.setMaxPixelWidth(Integer.valueOf(maxPixelWidth));
+		return this;
+	}
+
+	/**
+	 * Adds or replaces a custom property on the wrapped metadata.
+	 * Properties keep the order in which they were first added.
+	 *
+	 * @param k the property name
+	 * @param v the property value
+	 * @return this builder
+	 */
+	public @Nonnull FluentProgressBar putProperty(@Nonnull String k, @Nonnull String v) {
+		bar.getProperties().put(k, v);
 		return this;
 	}
 

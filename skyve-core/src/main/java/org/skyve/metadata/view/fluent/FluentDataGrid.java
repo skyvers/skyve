@@ -98,6 +98,9 @@ public class FluentDataGrid extends FluentDataWidget<FluentDataGrid> {
 		grid.getSelectedActions().forEach(s -> addSelectedAction(FluentEventAction.from(s)));
 
 		super.from(grid);
+		
+		grid.getProperties().entrySet().forEach(p -> putProperty(p.getKey(), p.getValue()));
+		
 		return this;
 	}
 
@@ -498,6 +501,19 @@ public class FluentDataGrid extends FluentDataWidget<FluentDataGrid> {
 	 */
 	public FluentDataGrid clearSelectedActions() {
 		grid.getSelectedActions().clear();
+		return this;
+	}
+
+	/**
+	 * Adds or replaces a custom property on the wrapped metadata.
+	 * Properties keep the order in which they were first added.
+	 *
+	 * @param k the property name
+	 * @param v the property value
+	 * @return this builder
+	 */
+	public @Nonnull FluentDataGrid putProperty(@Nonnull String k, @Nonnull String v) {
+		grid.getProperties().put(k, v);
 		return this;
 	}
 

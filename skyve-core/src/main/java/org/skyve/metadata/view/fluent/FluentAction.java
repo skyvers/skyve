@@ -338,6 +338,7 @@ public abstract class FluentAction<T extends FluentAction<T>> {
 
 	/**
 	 * Adds or replaces an action property entry.
+	 * Properties keep the order in which they were first added.
 	 *
 	 * @param k
 	 *            the property key
@@ -346,7 +347,7 @@ public abstract class FluentAction<T extends FluentAction<T>> {
 	 * @return this builder
 	 */
 	@SuppressWarnings("unchecked")
-	public T putProperty(String k, String v) {
+	public @Nonnull T putProperty(@Nonnull String k, @Nonnull String v) {
 		get().getProperties().put(k, v);
 		return (T) this;
 	}
