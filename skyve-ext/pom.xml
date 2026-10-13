@@ -9,7 +9,7 @@
 	<artifactId>skyve-ext</artifactId>
 	
 	<properties>
-		<azure-sdk.version>12.25.2</azure-sdk.version>
+		<azure-sdk.version>12.36.0</azure-sdk.version>
 	</properties>
 
 	<build>
