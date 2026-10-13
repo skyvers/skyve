@@ -1,8 +1,12 @@
 package org.skyve.metadata.view.fluent;
 
+import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.metadata.view.HorizontalAlignment;
 import org.skyve.impl.metadata.view.widget.Blurb;
 import org.skyve.metadata.view.TextOutput.Sanitisation;
+
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 
 /**
  * Builds {@link Blurb} widget metadata using a fluent API.
@@ -35,7 +39,7 @@ public class FluentBlurb extends FluentWidget implements FluentAbsoluteSize<Flue
 
 		absoluteSize(blurb, this);
 
-		invisibleConditionName(blurb.getInvisibleConditionName());
+		BindUtil.copyAuthoredCondition(blurb.getXmlInvisibleCondition(), blurb.getXmlVisibleCondition(), this::invisibleCondition, this::visibleCondition);
 		textAlignment(blurb.getTextAlignment());
 		Boolean b = blurb.getEscape();
 		if (b != null) {
@@ -44,18 +48,7 @@ public class FluentBlurb extends FluentWidget implements FluentAbsoluteSize<Flue
 		sanitise(blurb.getSanitise());
 
 		blurb.getProperties().entrySet().forEach(p -> putProperty(p.getKey(), p.getValue()));
-		return this;
-	}
 
-	/**
-	 * Adds or replaces a custom property on the wrapped blurb metadata.
-	 *
-	 * @param k the property name
-	 * @param v the property value
-	 * @return this builder
-	 */
-	public FluentBlurb putProperty(String k, String v) {
-		blurb.getProperties().put(k, v);
 		return this;
 	}
 
@@ -95,13 +88,26 @@ public class FluentBlurb extends FluentWidget implements FluentAbsoluteSize<Flue
 	}
 
 	/**
-	 * Sets the condition name used to hide this blurb when it evaluates to true.
+	 * Sets the {@code invisible} condition as authored; the opposite sense of {@link #visibleCondition(String)}.
 	 *
-	 * @param invisibleConditionName the invisibility condition name
+	 * @param invisibleCondition
+	 *            a condition name, an inline condition expression or a boolean literal
 	 * @return this builder
 	 */
-	public FluentBlurb invisibleConditionName(String invisibleConditionName) {
-		blurb.setInvisibleConditionName(invisibleConditionName);
+	public @Nonnull FluentBlurb invisibleCondition(@Nullable String invisibleCondition) {
+		blurb.setXmlInvisibleCondition(invisibleCondition);
+		return this;
+	}
+
+	/**
+	 * Sets the {@code visible} condition as authored; the opposite sense of {@link #invisibleCondition(String)}.
+	 *
+	 * @param visibleCondition
+	 *            a condition name, an inline condition expression or a boolean literal
+	 * @return this builder
+	 */
+	public @Nonnull FluentBlurb visibleCondition(@Nullable String visibleCondition) {
+		blurb.setXmlVisibleCondition(visibleCondition);
 		return this;
 	}
 
@@ -135,6 +141,19 @@ public class FluentBlurb extends FluentWidget implements FluentAbsoluteSize<Flue
 	 */
 	public FluentBlurb sanitise(Sanitisation sanitise) {
 		blurb.setSanitise(sanitise);
+		return this;
+	}
+
+	/**
+	 * Adds or replaces a custom property on the wrapped blurb metadata.
+	 * Properties keep the order in which they were first added.
+	 *
+	 * @param k the property name
+	 * @param v the property value
+	 * @return this builder
+	 */
+	public @Nonnull FluentBlurb putProperty(@Nonnull String k, @Nonnull String v) {
+		blurb.getProperties().put(k, v);
 		return this;
 	}
 

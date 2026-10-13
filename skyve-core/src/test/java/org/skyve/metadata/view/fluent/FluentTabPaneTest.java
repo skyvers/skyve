@@ -93,13 +93,13 @@ class FluentTabPaneTest {
 	}
 
 	@Test
-	void disabledConditionNameSetsValue() {
-		assertThat(new FluentTabPane().disabledConditionName("disabled").get().getDisabledConditionName(), is("disabled"));
+	void disabledConditionSetsValue() {
+		assertThat(new FluentTabPane().disabledCondition("disabled").get().getDisabledCondition(), is("disabled"));
 	}
 
 	@Test
-	void invisibleConditionNameSetsValue() {
-		assertThat(new FluentTabPane().invisibleConditionName("invisible").get().getInvisibleConditionName(), is("invisible"));
+	void invisibleConditionSetsValue() {
+		assertThat(new FluentTabPane().invisibleCondition("invisible").get().getInvisibleCondition(), is("invisible"));
 	}
 
 	@Test
@@ -150,10 +150,10 @@ class FluentTabPaneTest {
 	}
 
 	@Test
-	void fromCopiesDisabledConditionName() {
+	void fromCopiesDisabledCondition() {
 		TabPane src = new TabPane();
-		src.setDisabledConditionName("disabled");
-		assertThat(new FluentTabPane().from(src).get().getDisabledConditionName(), is("disabled"));
+		src.setXmlDisabledCondition("disabled");
+		assertThat(new FluentTabPane().from(src).get().getDisabledCondition(), is("disabled"));
 	}
 
 	@Test

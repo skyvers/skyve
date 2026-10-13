@@ -26,6 +26,8 @@ import org.skyve.impl.metadata.user.RoleImpl;
 import org.skyve.metadata.user.Role;
 import org.skyve.metadata.user.UserAccess;
 
+import jakarta.annotation.Nonnull;
+
 public class FluentModuleRole {
 	private ModuleRoleMetaData role = null;
 	
@@ -50,19 +52,20 @@ public class FluentModuleRole {
 		for (Privilege privilege : privileges) {
 			if (privilege instanceof DocumentPrivilege document) {
 				FluentDocumentPrivilege fluent = new FluentDocumentPrivilege().documentName(document.getName()).permission(document.getPermission());
+				document.getProperties().entrySet().forEach(p -> fluent.putProperty(p.getKey(), p.getValue()));
 				map.put(document.getName(), fluent);
 			}
 		}
 		for (Privilege privilege : privileges) {
 			if (privilege instanceof ActionPrivilege action) {
-				map.get(action.getDocumentName()).addActionPrivilege(action.getName());
+				map.get(action.getDocumentName()).addActionPrivilege(action.getName(), action.getProperties());
 			}
 		}
 		for (ContentPermission content : impl.getContentPermissions()) {
-			map.get(content.getDocumentName()).addContentPermission(content.getAttributeName());
+			map.get(content.getDocumentName()).addContentPermission(content.getAttributeName(), content.getProperties());
 		}
 		for (ContentRestriction content : impl.getContentRestrictions()) {
-			map.get(content.getDocumentName()).addContentRestriction(content.getAttributeName());
+			map.get(content.getDocumentName()).addContentRestriction(content.getAttributeName(), content.getProperties());
 		}
 		
 		map.values().forEach(this::addPrivilege);
@@ -105,6 +108,8 @@ public class FluentModuleRole {
 			}
 		}
 		
+		role.getProperties().entrySet().forEach(p -> putProperty(p.getKey(), p.getValue()));
+
 		return this;
 	}
 	
@@ -417,6 +422,19 @@ public class FluentModuleRole {
 		return null;
 	}
 	
+	/**
+	 * Adds or replaces a custom property on the wrapped metadata.
+	 * Properties keep the order in which they were first added.
+	 *
+	 * @param k the property name
+	 * @param v the property value
+	 * @return this builder
+	 */
+	public @Nonnull FluentModuleRole putProperty(@Nonnull String k, @Nonnull String v) {
+		role.getProperties().put(k, v);
+		return this;
+	}
+
 	public ModuleRoleMetaData get() {
 		return role;
 	}

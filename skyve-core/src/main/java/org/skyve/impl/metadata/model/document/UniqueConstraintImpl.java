@@ -1,9 +1,9 @@
 package org.skyve.impl.metadata.model.document;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.TreeMap;
 
 import org.skyve.impl.domain.types.jaxb.CDATAAdapter;
 import org.skyve.impl.util.UtilImpl;
@@ -32,7 +32,7 @@ public class UniqueConstraintImpl implements UniqueConstraint {
 	private String description;
 	private String message;
 	private List<String> fieldNames = new ArrayList<>();
-	private Map<String, String> properties = new TreeMap<>();
+	private Map<String, String> properties = new LinkedHashMap<>();
 	
 	/**
 	 * @return Returns the name.

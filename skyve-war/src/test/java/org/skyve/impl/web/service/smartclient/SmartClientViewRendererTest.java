@@ -3,8 +3,13 @@ package org.skyve.impl.web.service.smartclient;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.DynamicTest.dynamicTest;
 
+import java.util.stream.Stream;
+
+import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestFactory;
 import org.skyve.impl.metadata.view.ActionImpl;
 import org.skyve.impl.metadata.view.ViewImpl;
 import org.skyve.impl.metadata.view.container.HBox;
@@ -1246,7 +1251,7 @@ class SmartClientViewRendererTest extends AbstractSkyveTest {
 		tf.setBinding("text");
 		SetDisabledEventAction setDisabled = new SetDisabledEventAction();
 		setDisabled.setBinding("text");
-		setDisabled.setDisabledConditionName("false");
+		setDisabled.setXmlDisabledCondition("false");
 		tf.getChangedActions().add(setDisabled);
 		item.setWidget(tf);
 		row.getItems().add(item);
@@ -1273,7 +1278,7 @@ class SmartClientViewRendererTest extends AbstractSkyveTest {
 		tf.setBinding("text");
 		SetInvisibleEventAction setInvisible = new SetInvisibleEventAction();
 		setInvisible.setBinding("text");
-		setInvisible.setInvisibleConditionName("false");
+		setInvisible.setXmlInvisibleCondition("false");
 		tf.getChangedActions().add(setInvisible);
 		item.setWidget(tf);
 		row.getItems().add(item);
@@ -1692,34 +1697,22 @@ class SmartClientViewRendererTest extends AbstractSkyveTest {
 		assertTrue(code.contains("type:'DD_MMM_YYYY'") || code.contains("type:'DD_MMM_YYYY_HH_MM'") || code.contains("type:"));
 	}
 
-	@Test
-	void renderViewWithDecimal2TextField() {
-		TextField tf = new TextField();
-		tf.setBinding("decimal2");
+	@TestFactory
+	Stream<DynamicTest> renderViewWithDecimalTextField() {
+		// binding, then the SmartClient type its decimal renders as
+		String[][] cases = {
+			{"decimal2", "type:'bizDecimal2'"},
+			{"decimal5", "type:'bizDecimal5'"},
+			{"decimal10", "type:'bizDecimal10'"}
+		};
+		return Stream.of(cases).map(testCase -> dynamicTest(testCase[0], () -> {
+			TextField tf = new TextField();
+			tf.setBinding(testCase[0]);
 
-		String code = renderSingleFormWidget(tf);
-		assertFalse(code.isEmpty());
-		assertTrue(code.contains("type:'bizDecimal2'") || code.contains("type:'bizDollarsAndCents'"));
-	}
-
-	@Test
-	void renderViewWithDecimal5TextField() {
-		TextField tf = new TextField();
-		tf.setBinding("decimal5");
-
-		String code = renderSingleFormWidget(tf);
-		assertFalse(code.isEmpty());
-		assertTrue(code.contains("type:'bizDecimal5'") || code.contains("type:'bizDollarsAndCents'"));
-	}
-
-	@Test
-	void renderViewWithDecimal10TextField() {
-		TextField tf = new TextField();
-		tf.setBinding("decimal10");
-
-		String code = renderSingleFormWidget(tf);
-		assertFalse(code.isEmpty());
-		assertTrue(code.contains("type:'bizDecimal10'") || code.contains("type:'bizDollarsAndCents'"));
+			String code = renderSingleFormWidget(tf);
+			assertFalse(code.isEmpty());
+			assertTrue(code.contains(testCase[1]) || code.contains("type:'bizDollarsAndCents'"));
+		}));
 	}
 
 	@Test
@@ -1831,7 +1824,7 @@ class SmartClientViewRendererTest extends AbstractSkyveTest {
 		FormItem item = new FormItem();
 		ColourPicker cp = new ColourPicker();
 		cp.setBinding("colour");
-		cp.setDisabledConditionName("condition");
+		cp.setXmlDisabledCondition("condition");
 		item.setWidget(cp);
 		row.getItems().add(item);
 		view.getContained().add(form);
@@ -1965,7 +1958,7 @@ class SmartClientViewRendererTest extends AbstractSkyveTest {
 		FormItem item = new FormItem();
 		TextField tf = new TextField();
 		tf.setBinding("text");
-		tf.setEnabledConditionName("condition");
+		tf.setXmlEnabledCondition("condition");
 		item.setWidget(tf);
 		row.getItems().add(item);
 		view.getContained().add(form);
@@ -1989,7 +1982,7 @@ class SmartClientViewRendererTest extends AbstractSkyveTest {
 		FormItem item = new FormItem();
 		TextField tf = new TextField();
 		tf.setBinding("text");
-		tf.setInvisibleConditionName("condition");
+		tf.setXmlInvisibleCondition("condition");
 		item.setWidget(tf);
 		row.getItems().add(item);
 		view.getContained().add(form);
@@ -2013,7 +2006,7 @@ class SmartClientViewRendererTest extends AbstractSkyveTest {
 		FormItem item = new FormItem();
 		TextField tf = new TextField();
 		tf.setBinding("text");
-		tf.setDisabledConditionName("condition");
+		tf.setXmlDisabledCondition("condition");
 		item.setWidget(tf);
 		row.getItems().add(item);
 		view.getContained().add(form);

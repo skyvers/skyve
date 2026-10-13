@@ -4,6 +4,8 @@ import org.skyve.impl.metadata.view.widget.bound.input.CompleteType;
 import org.skyve.impl.metadata.view.widget.bound.input.KeyboardType;
 import org.skyve.impl.metadata.view.widget.bound.input.TextField;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * Builds {@link TextField} widget metadata using a fluent API.
  */
@@ -46,6 +48,9 @@ public class FluentTextField extends FluentChangeableInputWidget<FluentTextField
 		absoluteWidth(text, this);
 
 		super.from(text);
+		
+		text.getProperties().entrySet().forEach(p -> putProperty(p.getKey(), p.getValue()));
+		
 		return this;
 	}
 
@@ -95,6 +100,19 @@ public class FluentTextField extends FluentChangeableInputWidget<FluentTextField
 	@Override
 	public FluentTextField pixelWidth(int width) {
 		text.setPixelWidth(Integer.valueOf(width));
+		return this;
+	}
+
+	/**
+	 * Adds or replaces a custom property on the wrapped metadata.
+	 * Properties keep the order in which they were first added.
+	 *
+	 * @param k the property name
+	 * @param v the property value
+	 * @return this builder
+	 */
+	public @Nonnull FluentTextField putProperty(@Nonnull String k, @Nonnull String v) {
+		text.getProperties().put(k, v);
 		return this;
 	}
 

@@ -1,9 +1,9 @@
 package org.skyve.impl.metadata.view;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.TreeMap;
 
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.metadata.repository.view.actions.ActionMetaData;
@@ -25,6 +25,7 @@ import org.skyve.impl.metadata.repository.view.actions.SaveAction;
 import org.skyve.impl.metadata.repository.view.actions.UploadAction;
 import org.skyve.impl.metadata.repository.view.actions.ZoomOutAction;
 import org.skyve.impl.metadata.view.widget.bound.input.ContentCapture;
+import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.AbstractWebContext;
 import org.skyve.metadata.controller.ImplicitActionName;
 import org.skyve.metadata.controller.ServerSideAction;
@@ -33,6 +34,8 @@ import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.view.Action;
 import org.skyve.metadata.view.widget.bound.Parameter;
 import org.skyve.report.ReportFormat;
+
+import jakarta.annotation.Nullable;
 
 /**
  * Runtime implementation of the {@link Action} metadata interface.
@@ -63,10 +66,13 @@ public class ActionImpl implements Action {
 	private Boolean escapeConfirm;
 	private Boolean inActionPanel = Boolean.TRUE;
 	private ActionShow show = ActionShow.both;
-	private String disabledConditionName;
-	private String invisibleConditionName;
+	// Each condition pair is stored as authored; at most one field of a pair is non-null.
+	private String disabledCondition;
+	private String enabledCondition;
+	private String invisibleCondition;
+	private String visibleCondition;
 	private List<Parameter> parameters = new ArrayList<>();
-	private Map<String, String> properties = new TreeMap<>();
+	private Map<String, String> properties = new LinkedHashMap<>();
 
 	/**
 	 * Returns the mutable parameter list supplied to parameterizable actions.
@@ -377,79 +383,119 @@ public class ActionImpl implements Action {
 	}
 
 	/**
-	 * Returns the condition that hides this action when it evaluates to true.
+	 * Returns the derived {@code invisible} condition that renderers and other consumers read.
 	 *
-	 * @return invisible condition name, or {@code null}
+	 * @return the {@code invisible} attribute as authored, or else the negation of the authored
+	 * 			{@code visible} attribute; {@code null} when neither was authored
 	 */
 	@Override
-	public String getInvisibleConditionName() {
-		return invisibleConditionName;
+	public @Nullable String getInvisibleCondition() {
+		return (invisibleCondition != null) ? invisibleCondition : BindUtil.negateCondition(visibleCondition);
 	}
 
 	/**
-	 * Sets the condition that hides this action when it evaluates to true.
+	 * Returns the {@code invisible} attribute as authored.
 	 *
-	 * @param invisibleConditionName the invisible condition name
+	 * @return the authored condition, or {@code null} when {@code visible} or neither was authored
 	 */
 	@Override
-	public void setInvisibleConditionName(String invisibleConditionName) {
-		this.invisibleConditionName = invisibleConditionName;
-	}
-
-	// to enable JAXB XML marshaling
-	@SuppressWarnings("static-method")
-	String getVisibleConditionName() {
-		return null;
+	public @Nullable String getXmlInvisibleCondition() {
+		return invisibleCondition;
 	}
 
 	/**
-	 * Stores a visible-condition expression by translating it to the internal invisible-condition form.
+	 * Sets the {@code invisible} attribute as authored.
 	 *
-	 * <p>Side effects: updates {@link #invisibleConditionName} with the negated expression.
+	 * <p>Side effects: clears any authored {@code visible} attribute.
 	 *
-	 * @param visibleConditionName the condition that enables visibility semantics
+	 * @param invisibleCondition a condition name, an inline condition expression or a boolean literal; may be {@code null}
 	 */
 	@Override
-	public void setVisibleConditionName(String visibleConditionName) {
-		this.invisibleConditionName = BindUtil.negateCondition(visibleConditionName);
+	public void setXmlInvisibleCondition(@Nullable String invisibleCondition) {
+		this.invisibleCondition = UtilImpl.processStringValue(invisibleCondition);
+		this.visibleCondition = null;
 	}
 
 	/**
-	 * Returns the condition that disables this action when it evaluates to true.
+	 * Returns the {@code visible} attribute as authored.
 	 *
-	 * @return disabled condition name, or {@code null}
+	 * @return the authored condition, or {@code null} when {@code invisible} or neither was authored
 	 */
 	@Override
-	public String getDisabledConditionName() {
-		return disabledConditionName;
+	public @Nullable String getXmlVisibleCondition() {
+		return visibleCondition;
 	}
 
 	/**
-	 * Sets the condition that disables this action when it evaluates to true.
+	 * Sets the {@code visible} attribute as authored.
 	 *
-	 * @param disabledConditionName the disabled condition name
+	 * <p>Side effects: clears any authored {@code invisible} attribute, so that
+	 * {@link #getInvisibleCondition()} returns the negation of this condition.
+	 *
+	 * @param visibleCondition a condition name, an inline condition expression or a boolean literal; may be {@code null}
 	 */
 	@Override
-	public void setDisabledConditionName(String disabledConditionName) {
-		this.disabledConditionName = disabledConditionName;
-	}
-
-	// to enable JAXB XML marshaling
-	@SuppressWarnings("static-method")
-	String getEnabledConditionName() {
-		return null;
+	public void setXmlVisibleCondition(@Nullable String visibleCondition) {
+		this.visibleCondition = UtilImpl.processStringValue(visibleCondition);
+		this.invisibleCondition = null;
 	}
 
 	/**
-	 * Stores an enabled-condition expression by translating it to the internal disabled-condition form.
+	 * Returns the derived {@code disabled} condition that renderers and other consumers read.
 	 *
-	 * <p>Side effects: updates {@link #disabledConditionName} with the negated expression.
-	 *
-	 * @param enabledConditionName the condition that enables action interactivity
+	 * @return the {@code disabled} attribute as authored, or else the negation of the authored
+	 * 			{@code enabled} attribute; {@code null} when neither was authored
 	 */
 	@Override
-	public void setEnabledConditionName(String enabledConditionName) {
-		this.disabledConditionName = BindUtil.negateCondition(enabledConditionName);
+	public @Nullable String getDisabledCondition() {
+		return (disabledCondition != null) ? disabledCondition : BindUtil.negateCondition(enabledCondition);
+	}
+
+	/**
+	 * Returns the {@code disabled} attribute as authored.
+	 *
+	 * @return the authored condition, or {@code null} when {@code enabled} or neither was authored
+	 */
+	@Override
+	public @Nullable String getXmlDisabledCondition() {
+		return disabledCondition;
+	}
+
+	/**
+	 * Sets the {@code disabled} attribute as authored.
+	 *
+	 * <p>Side effects: clears any authored {@code enabled} attribute.
+	 *
+	 * @param disabledCondition a condition name, an inline condition expression or a boolean literal; may be {@code null}
+	 */
+	@Override
+	public void setXmlDisabledCondition(@Nullable String disabledCondition) {
+		this.disabledCondition = UtilImpl.processStringValue(disabledCondition);
+		this.enabledCondition = null;
+	}
+
+	/**
+	 * Returns the {@code enabled} attribute as authored.
+	 *
+	 * @return the authored condition, or {@code null} when {@code disabled} or neither was authored
+	 */
+	@Override
+	public @Nullable String getXmlEnabledCondition() {
+		return enabledCondition;
+	}
+
+	/**
+	 * Sets the {@code enabled} attribute as authored.
+	 *
+	 * <p>Side effects: clears any authored {@code disabled} attribute, so that
+	 * {@link #getDisabledCondition()} returns the negation of this condition.
+	 *
+	 * @param enabledCondition a condition name, an inline condition expression or a boolean literal; may be {@code null}
+	 */
+	@Override
+	public void setXmlEnabledCondition(@Nullable String enabledCondition) {
+		this.enabledCondition = UtilImpl.processStringValue(enabledCondition);
+		this.disabledCondition = null;
 	}
 
 	/**
@@ -540,10 +586,10 @@ public class ActionImpl implements Action {
 
 		result.setConfirmationText(getConfirmationText());
 		result.setEscapeConfirm(getEscapeConfirm());
-		result.setDisabledConditionName(getDisabledConditionName());
+		BindUtil.copyAuthoredCondition(getXmlDisabledCondition(), getXmlEnabledCondition(), result::setXmlDisabledCondition, result::setXmlEnabledCondition);
 		result.setDisplayName(getDisplayName());
 		result.setEscapeDisplayName(getEscapeDisplayName());
-		result.setInvisibleConditionName(getInvisibleConditionName());
+		BindUtil.copyAuthoredCondition(getXmlInvisibleCondition(), getXmlVisibleCondition(), result::setXmlInvisibleCondition, result::setXmlVisibleCondition);
 		result.setRelativeIconFileName(getRelativeIconFileName());
 		result.setIconStyleClass(getIconStyleClass());
 		result.setToolTip(getToolTip());

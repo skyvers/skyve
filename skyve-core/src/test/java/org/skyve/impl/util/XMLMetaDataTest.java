@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.lang.reflect.Method;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -51,6 +52,7 @@ import org.skyve.impl.metadata.repository.router.Direct;
 import org.skyve.impl.metadata.repository.router.Direct.DirectMatch;
 import org.skyve.impl.metadata.repository.router.Router;
 import org.skyve.impl.metadata.repository.view.ViewMetaData;
+import org.skyve.impl.metadata.view.container.VBox;
 import org.skyve.impl.metadata.view.container.form.Form;
 import org.skyve.impl.metadata.view.container.form.FormColumn;
 import org.skyve.impl.metadata.view.container.form.FormItem;
@@ -58,6 +60,7 @@ import org.skyve.impl.metadata.view.container.form.FormRow;
 import org.skyve.impl.metadata.view.event.RerenderEventAction;
 import org.skyve.impl.metadata.view.widget.bound.input.TextArea;
 import org.skyve.metadata.ConverterName;
+import org.skyve.impl.metadata.view.component.Component;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.SortDirection;
 import org.skyve.metadata.model.Persistent;
@@ -65,6 +68,7 @@ import org.skyve.metadata.model.document.Association.AssociationType;
 import org.skyve.metadata.model.document.Collection.CollectionType;
 import org.skyve.metadata.sail.language.Automation;
 import org.skyve.metadata.view.View.ViewType;
+import org.skyve.metadata.view.fluent.FluentButton;
 import org.skyve.metadata.view.fluent.FluentListGrid;
 import org.skyve.metadata.view.fluent.FluentView;
 import org.skyve.web.UserAgentType;
@@ -72,7 +76,7 @@ import org.skyve.web.UserAgentType;
 /**
  * This test depends on the schemas being up to date from skyve-war/src/main/java/schemas into skyve-core/src/test/resources/schemas.
  */
-@SuppressWarnings("static-method")
+@SuppressWarnings({"static-method", "java:S3011"})
 class XMLMetaDataTest {
 	@Test
 	void testMarshalDocumentAndModuleUseConsistentAttributeOrder() {
@@ -117,6 +121,85 @@ class XMLMetaDataTest {
 		assertTrue(xml.contains("<item required=\"true\" showLabel=\"false\">"));
 		assertTrue(xml.contains("<lookupDescription binding=\"owner\" descriptionBinding=\"description\" model=\"OwnerLookup\" disableEdit=\"true\" disabled=\"true\"/>"));
 		assertEquals(xml, XMLMetaData.marshalView(XMLMetaData.unmarshalViewString(xml), false, false));
+	}
+
+	/**
+	 * A view that uses the positive attribute of every condition pair, with condition names and inline expressions.
+	 */
+	private static final String POSITIVE_CONDITIONS_VIEW = "<view xmlns='" + XMLMetaData.VIEW_NAMESPACE + "' title='Test' name='edit'>"
+			+ "<vbox visible='v02'>"
+			+ "<hbox visible='{el:bean.flag}'>"
+			+ "<form visible='v03' enabled='e03'><column/><row>"
+			+ "<item><textField binding='t1' visible='v04' enabled='{role:admin.BasicUser}'>"
+			+ "<onChangedHandlers><setDisabled binding='t2' enabled='e05'/><setInvisible binding='t2' visible='v05'/></onChangedHandlers>"
+			+ "</textField></item>"
+			+ "<item><lookupDescription binding='l1' descriptionBinding='bizKey' enablePick='p06' enableEdit='e06' enableAdd='a06' enableClear='c06'/></item>"
+			+ "<item><spacer visible='v07'/></item>"
+			+ "<item><label value='x' visible='v08'/></item>"
+			+ "<item><blurb visible='v09'>text</blurb></item>"
+			+ "<item><link value='x' visible='v10'><actionReference action='A'/></link></item>"
+			+ "<item><staticImage relativeFile='a.png' visible='v11'/></item>"
+			+ "<item><progressBar binding='p1' visible='v13'/></item>"
+			+ "<item><zoomIn binding='z1' visible='v14' enabled='e14'/></item>"
+			+ "<item><dialogButton displayName='d' dialogName='edit' visible='v15' enabled='e15'/></item>"
+			+ "</row></form>"
+			+ "</hbox>"
+			+ "<tabPane visible='v16' enabled='e16'><tab title='t' visible='v17' enabled='e17'><spacer/></tab></tabPane>"
+			+ "<dataGrid binding='d1' visible='v18' enabled='e18' enableAdd='a18' enableZoom='z18' enableEdit='d18' enableRemove='r18'><boundColumn binding='x'/></dataGrid>"
+			+ "<dataRepeater binding='d2' visible='v19'><boundColumn binding='x'/></dataRepeater>"
+			+ "<listGrid continueConversation='true' query='q' visible='v20' enabled='e20' enableAdd='a20' enableZoom='z20' enableEdit='d20' enableRemove='r20'/>"
+			+ "<listRepeater query='q' visible='v21'/>"
+			+ "<treeGrid continueConversation='true' query='q' rootIdBinding='bizId' visible='v22'/>"
+			+ "<dynamicImage name='img' visible='v12'/>"
+			+ "<chart type='line' modelName='M' visible='v23'/>"
+			+ "<map modelName='M' visible='v24'/>"
+			+ "<component name='c' visible='v25'/>"
+			+ "</vbox>"
+			+ "<sidebar visible='v01' floatingPixelWidthBreakpoint='1024' pixelWidth='300'><spacer/></sidebar>"
+			+ "<actions><save visible='v26' enabled='e26'/><action className='X' displayName='x' visible='{el:bean.flag and bean.text eq &apos;a&apos;}' enabled='e27'/></actions>"
+			+ "</view>";
+
+	@Test
+	void testMarshalViewKeepsEachPositiveConditionAttributeAsAuthored() {
+		String xml = XMLMetaData.marshalView(XMLMetaData.unmarshalViewString(POSITIVE_CONDITIONS_VIEW), false, false);
+
+		// every authored attribute is written back with its value
+		Matcher authored = Pattern.compile(" ((?:visible|enabled|enable[A-Z][a-z]+)='[^']*')").matcher(POSITIVE_CONDITIONS_VIEW);
+		int count = 0;
+		while (authored.find()) {
+			// the marshaller double quotes attribute values, leaving an apostrophe within one as it is
+			String attribute = authored.group(1).replace('\'', '"').replace("&apos;", "'");
+			assertTrue(xml.contains(' ' + attribute), attribute + " missing from " + xml);
+			count++;
+		}
+		assertEquals(50, count);
+
+		// nothing is rewritten into the opposite attribute, for names or expressions
+		assertFalse(xml.contains("invisible="));
+		assertFalse(xml.contains("disabled="));
+		assertFalse(Pattern.compile(" disable[A-Z][a-z]+=").matcher(xml).find());
+		assertFalse(xml.contains("\"not"));
+	}
+
+	@Test
+	void testMarshalViewKeepsEachNegativeConditionAttributeAsAuthored() {
+		String input = POSITIVE_CONDITIONS_VIEW.replace(" visible=", " invisible=")
+												.replace(" enabled=", " disabled=")
+												.replace(" enable", " disable");
+		String xml = XMLMetaData.marshalView(XMLMetaData.unmarshalViewString(input), false, false);
+
+		assertFalse(Pattern.compile(" (visible|enabled|enable[A-Z][a-z]+)=").matcher(xml).find());
+		assertEquals(27, xml.split(" invisible=", -1).length - 1);
+		assertEquals(xml, XMLMetaData.marshalView(XMLMetaData.unmarshalViewString(xml), false, false));
+	}
+
+	@Test
+	void testUnmarshalViewDerivesTheOppositeSenseOfAnInlineCondition() {
+		ViewMetaData view = XMLMetaData.unmarshalViewString("<view xmlns='" + XMLMetaData.VIEW_NAMESPACE + "' title='Test' name='edit'>"
+																+ "<vbox visible='{el:bean.flag}'/></view>");
+		VBox vbox = (VBox) view.getContained().get(0);
+		assertEquals("{el:bean.flag}", vbox.getXmlVisibleCondition());
+		assertEquals("not{el:bean.flag}", vbox.getInvisibleCondition());
 	}
 
 	@Test
@@ -656,6 +739,112 @@ class XMLMetaDataTest {
 		assertEquals(1, restoredTextArea.getChangedActions().size());
 	}
 
+	private static final String COMPONENT_MAPPINGS_VIEW = "<view xmlns='" + XMLMetaData.VIEW_NAMESPACE + "' title='Test' name='edit'>"
+			+ "<component name='_shared' binding='contact'>"
+			+ "<actions>"
+			+ "<action fromComponent='Check' mappedTo='Verify'/>"
+			+ "<action fromComponent='New' mappedTo='New'/>"
+			+ "</actions>"
+			+ "<conditions>"
+			+ "<condition fromComponent='editable' mappedTo='canEditContact'/>"
+			+ "<condition fromComponent=\"{el:bean.status eq 'open' and bean.count lt 3}\" mappedTo='{el:bean.unlocked}'/>"
+			+ "</conditions>"
+			+ "</component>"
+			+ "<actions><save/></actions>"
+			+ "</view>";
+
+	private static Component onlyComponent(ViewMetaData view) {
+		return (Component) view.getContained().get(0);
+	}
+
+	@Test
+	void testUnmarshalViewReadsComponentActionAndConditionMappings() {
+		Component component = onlyComponent(XMLMetaData.unmarshalViewString(COMPONENT_MAPPINGS_VIEW));
+		assertEquals(2, component.getActions().size());
+		assertEquals("Check", component.getActions().get(0).getFromComponent());
+		assertEquals("Verify", component.getActions().get(0).getMappedTo());
+		assertEquals("New", component.getActions().get(1).getFromComponent());
+		assertEquals(2, component.getConditions().size());
+		assertEquals("editable", component.getConditions().get(0).getFromComponent());
+		assertEquals("canEditContact", component.getConditions().get(0).getMappedTo());
+		assertEquals("{el:bean.status eq 'open' and bean.count lt 3}", component.getConditions().get(1).getFromComponent());
+		assertEquals("{el:bean.unlocked}", component.getConditions().get(1).getMappedTo());
+	}
+
+	@Test
+	void testMarshalViewRoundTripsComponentActionAndConditionMappings() {
+		String xml = XMLMetaData.marshalView(XMLMetaData.unmarshalViewString(COMPONENT_MAPPINGS_VIEW), false, false);
+		assertTrue(xml.contains("<action fromComponent=\"Check\" mappedTo=\"Verify\"/>"), xml);
+		assertTrue(xml.contains("<condition fromComponent=\"editable\" mappedTo=\"canEditContact\"/>"), xml);
+		assertTrue(xml.contains("<condition fromComponent=\"{el:bean.status eq 'open' and bean.count lt 3}\" mappedTo=\"{el:bean.unlocked}\"/>"), xml);
+		// the action mappings come before the condition mappings, within the component
+		int component = xml.indexOf("<component");
+		int actions = xml.indexOf("<actions>", component);
+		int conditions = xml.indexOf("<conditions>", component);
+		int componentEnd = xml.indexOf("</component>");
+		assertTrue((component < actions) && (actions < conditions) && (conditions < componentEnd), xml);
+		assertFalse(xml.contains("names"), xml);
+		// stable
+		assertEquals(xml, XMLMetaData.marshalView(XMLMetaData.unmarshalViewString(xml), false, false));
+
+		Component component2 = onlyComponent(XMLMetaData.unmarshalViewString(xml));
+		assertEquals(2, component2.getActions().size());
+		assertEquals(2, component2.getConditions().size());
+	}
+
+	@Test
+	void testMarshalViewOmitsEmptyComponentMappingsButKeepsTheViewsActions() {
+		ViewMetaData view = XMLMetaData.unmarshalViewString("<view xmlns='" + XMLMetaData.VIEW_NAMESPACE + "' title='Test' name='edit'>"
+				+ "<component name='_shared'/>"
+				+ "<actions/>"
+				+ "</view>");
+		assertTrue(onlyComponent(view).getActions().isEmpty());
+		assertTrue(onlyComponent(view).getConditions().isEmpty());
+		String xml = XMLMetaData.marshalView(view, false, false);
+		assertTrue(xml.contains("<component name=\"_shared\"/>"), xml);
+		assertFalse(xml.contains("conditions"), xml);
+		// the only actions element left is the view's own
+		assertEquals(xml.indexOf("<actions"), xml.lastIndexOf("<actions"), xml);
+		assertTrue(xml.indexOf("<actions") > xml.indexOf("<component"), xml);
+		assertEquals(xml, XMLMetaData.marshalView(XMLMetaData.unmarshalViewString(xml), false, false));
+	}
+
+	@Test
+	void testMarshalViewKeepsOneKindOfComponentMappingWithoutTheOther() {
+		ViewMetaData view = XMLMetaData.unmarshalViewString("<view xmlns='" + XMLMetaData.VIEW_NAMESPACE + "' title='Test' name='edit'>"
+				+ "<component name='_shared'>"
+				+ "<conditions><condition fromComponent='{flag}' mappedTo='notLocked'/></conditions>"
+				+ "</component>"
+				+ "</view>");
+		assertTrue(onlyComponent(view).getActions().isEmpty());
+		String xml = XMLMetaData.marshalView(view, false, false);
+		assertTrue(xml.contains("<condition fromComponent=\"{flag}\" mappedTo=\"notLocked\"/>"), xml);
+		assertFalse(xml.contains("<actions"), xml);
+		assertEquals(xml, XMLMetaData.marshalView(XMLMetaData.unmarshalViewString(xml), false, false));
+	}
+
+	@Test
+	void testUnmarshalViewRejectsTheRemovedComponentNamesElement() {
+		String xml = "<view xmlns='" + XMLMetaData.VIEW_NAMESPACE + "' title='Test' name='edit'>"
+				+ "<component name='_shared'>"
+				+ "<names><name fromComponent='Check' mappedTo='Verify'/></names>"
+				+ "</component>"
+				+ "</view>";
+		assertThrows(MetaDataException.class, () -> XMLMetaData.unmarshalViewString(xml));
+	}
+
+	@Test
+	void testUnmarshalViewRejectsAComponentMappingWithoutBothSides() {
+		String prefix = "<view xmlns='" + XMLMetaData.VIEW_NAMESPACE + "' title='Test' name='edit'><component name='_shared'>";
+		String suffix = "</component></view>";
+		assertThrows(MetaDataException.class, () -> XMLMetaData.unmarshalViewString(prefix + "<conditions><condition fromComponent='a'/></conditions>" + suffix));
+		assertThrows(MetaDataException.class, () -> XMLMetaData.unmarshalViewString(prefix + "<actions><action mappedTo='a'/></actions>" + suffix));
+		// and the mappings have to be in the declared order
+		assertThrows(MetaDataException.class, () -> XMLMetaData.unmarshalViewString(prefix
+				+ "<conditions><condition fromComponent='a' mappedTo='b'/></conditions>"
+				+ "<actions><action fromComponent='a' mappedTo='b'/></actions>" + suffix));
+	}
+
 	@Test
 	void testMarshalViewFormatsAfterCleanupAndPreservesText() {
 		String text = "first line\n\n\tsecond line";
@@ -691,6 +880,22 @@ class XMLMetaDataTest {
 			}
 			assertEquals(xml, XMLMetaData.marshalView(XMLMetaData.unmarshalViewString(xml), false, false));
 		}
+	}
+
+	@Test
+	void testMarshalViewKeepsFluentPropertyOrder() {
+		FluentView v = new FluentView().name("edit").title("Test").putProperty("z", "1").putProperty("a", "2");
+		v.addButton(new FluentButton().actionName("Save").putProperty("y", "1").putProperty("b", "2"));
+
+		String xml = XMLMetaData.marshalView(v.get(), false, false);
+
+		int first = xml.indexOf("key=\"y\"");
+		assertTrue((first >= 0) && (first < xml.indexOf("key=\"b\"")));
+		first = xml.indexOf("key=\"z\"");
+		assertTrue((first >= 0) && (first < xml.indexOf("key=\"a\"")));
+		ViewMetaData roundTripped = XMLMetaData.unmarshalViewString(xml);
+		assertEquals(List.of("z", "a"), List.copyOf(roundTripped.getProperties().keySet()));
+		assertEquals(xml, XMLMetaData.marshalView(roundTripped, false, false));
 	}
 
 	@Test
@@ -790,25 +995,32 @@ class XMLMetaDataTest {
 		String xml = XMLMetaData.marshalView(view, false, false);
 		assertFalse(xml.contains("Handlers"));
 		assertFalse(xml.contains("<dropDown"));
-		assertFalse(xml.contains("<names"));
+		assertFalse(xml.contains("<actions"));
+		assertFalse(xml.contains("<conditions"));
 		assertEquals(xml, XMLMetaData.marshalView(XMLMetaData.unmarshalViewString(xml), false, false));
 	}
 
 	@Test
+	@SuppressWarnings("java:S9142") // regex compilation cost is irrelevant in a test
 	void testOptionalViewWrappersRoundTripEmptyAndPopulated() {
 		for (boolean populated : new boolean[] { false, true }) {
 			String parameters = populated ? "<parameters><parameter name='id' value='123'/></parameters>" : "";
-			String names = populated ? "<names><name fromComponent='old' mappedTo='new'/></names>" : "";
+			String mappings = populated ?
+								"<actions><action fromComponent='old' mappedTo='new'/></actions>"
+										+ "<conditions><condition fromComponent='old' mappedTo='new'/></conditions>" :
+								"";
 			String input = "<view xmlns='http://www.skyve.org/xml/view' name='edit' title='Test'>"
 					+ "<dialogButton displayName='Open'>" + parameters + "</dialogButton>"
 					+ "<dynamicImage name='photo'>" + parameters + "</dynamicImage>"
 					+ "<link><reportReference moduleName='test' documentName='Test' reportName='report'>"
 					+ parameters + "</reportReference></link>"
-					+ "<component name='details'>" + names + "</component>"
+					+ "<component name='details'>" + mappings + "</component>"
 					+ "<spacer/><actions><defaults/></actions></view>";
 			String xml = XMLMetaData.marshalView(XMLMetaData.unmarshalViewString(input), false, false);
 			assertEquals(Boolean.valueOf(populated), Boolean.valueOf(xml.contains("<parameters>")));
-			assertEquals(Boolean.valueOf(populated), Boolean.valueOf(xml.contains("<names>")));
+			assertEquals(Boolean.valueOf(populated), Boolean.valueOf(xml.contains("<conditions>")));
+			// the view's own actions are always there; the component's only when populated
+			assertEquals(populated ? 2 : 1, xml.split("<actions>", -1).length - 1);
 			assertTrue(xml.contains("<spacer/>"));
 			assertTrue(xml.contains("<defaults/>"));
 			if (populated) {

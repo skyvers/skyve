@@ -70,10 +70,10 @@ class FluentViewBuildersTest {
 	}
 
 	@Test
-	void textFieldInvisibleConditionNameSetsValue() {
+	void textFieldInvisibleConditionSetsValue() {
 		FluentTextField f = new FluentTextField();
-		f.invisibleConditionName("hidden");
-		assertThat(f.get().getInvisibleConditionName(), is("hidden"));
+		f.invisibleCondition("hidden");
+		assertThat(f.get().getInvisibleCondition(), is("hidden"));
 	}
 
 	// ---- FluentCheckBox ----
@@ -216,8 +216,8 @@ class FluentViewBuildersTest {
 	@Test
 	void labelInvisibleConditionSetsValue() {
 		FluentLabel l = new FluentLabel();
-		l.invisibleConditionName("hidden");
-		assertThat(l.get().getInvisibleConditionName(), is("hidden"));
+		l.invisibleCondition("hidden");
+		assertThat(l.get().getInvisibleCondition(), is("hidden"));
 	}
 
 	@Test
@@ -280,8 +280,8 @@ class FluentViewBuildersTest {
 	@Test
 	void blurbInvisibleConditionSetsValue() {
 		FluentBlurb b = new FluentBlurb();
-		b.invisibleConditionName("noShow");
-		assertThat(b.get().getInvisibleConditionName(), is("noShow"));
+		b.invisibleCondition("noShow");
+		assertThat(b.get().getInvisibleCondition(), is("noShow"));
 	}
 
 	@Test
@@ -337,8 +337,8 @@ class FluentViewBuildersTest {
 	@Test
 	void spacerInvisibleConditionSetsValue() {
 		FluentSpacer s = new FluentSpacer();
-		s.invisibleConditionName("hide");
-		assertThat(s.get().getInvisibleConditionName(), is("hide"));
+		s.invisibleCondition("hide");
+		assertThat(s.get().getInvisibleCondition(), is("hide"));
 	}
 
 	@Test
@@ -387,15 +387,15 @@ class FluentViewBuildersTest {
 	@Test
 	void tabDisabledConditionSetsValue() {
 		FluentTab t = new FluentTab();
-		t.disabledConditionName("isReadOnly");
-		assertThat(t.get().getDisabledConditionName(), is("isReadOnly"));
+		t.disabledCondition("isReadOnly");
+		assertThat(t.get().getDisabledCondition(), is("isReadOnly"));
 	}
 
 	@Test
 	void tabInvisibleConditionSetsValue() {
 		FluentTab t = new FluentTab();
-		t.invisibleConditionName("isHidden");
-		assertThat(t.get().getInvisibleConditionName(), is("isHidden"));
+		t.invisibleCondition("isHidden");
+		assertThat(t.get().getInvisibleCondition(), is("isHidden"));
 	}
 
 	// ---- FluentTabPane ----
@@ -423,15 +423,15 @@ class FluentViewBuildersTest {
 	@Test
 	void tabPaneDisabledConditionSetsValue() {
 		FluentTabPane tp = new FluentTabPane();
-		tp.disabledConditionName("disable");
-		assertThat(tp.get().getDisabledConditionName(), is("disable"));
+		tp.disabledCondition("disable");
+		assertThat(tp.get().getDisabledCondition(), is("disable"));
 	}
 
 	@Test
 	void tabPaneInvisibleConditionSetsValue() {
 		FluentTabPane tp = new FluentTabPane();
-		tp.invisibleConditionName("hide");
-		assertThat(tp.get().getInvisibleConditionName(), is("hide"));
+		tp.invisibleCondition("hide");
+		assertThat(tp.get().getInvisibleCondition(), is("hide"));
 	}
 
 	@Test
@@ -586,8 +586,8 @@ class FluentViewBuildersTest {
 	@Test
 	void hboxInvisibleConditionSetsValue() {
 		FluentHBox hb = new FluentHBox();
-		hb.invisibleConditionName("hidden");
-		assertThat(hb.get().getInvisibleConditionName(), is("hidden"));
+		hb.invisibleCondition("hidden");
+		assertThat(hb.get().getInvisibleCondition(), is("hidden"));
 	}
 
 	@Test
@@ -685,8 +685,8 @@ class FluentViewBuildersTest {
 	@Test
 	void vboxInvisibleConditionSetsValue() {
 		FluentVBox vb = new FluentVBox();
-		vb.invisibleConditionName("invisible");
-		assertThat(vb.get().getInvisibleConditionName(), is("invisible"));
+		vb.invisibleCondition("invisible");
+		assertThat(vb.get().getInvisibleCondition(), is("invisible"));
 	}
 
 	@Test
@@ -742,15 +742,15 @@ class FluentViewBuildersTest {
 	@Test
 	void formDisabledConditionSetsValue() {
 		FluentForm f = new FluentForm();
-		f.disabledConditionName("readOnly");
-		assertThat(f.get().getDisabledConditionName(), is("readOnly"));
+		f.disabledCondition("readOnly");
+		assertThat(f.get().getDisabledCondition(), is("readOnly"));
 	}
 
 	@Test
 	void formInvisibleConditionSetsValue() {
 		FluentForm f = new FluentForm();
-		f.invisibleConditionName("hideForm");
-		assertThat(f.get().getInvisibleConditionName(), is("hideForm"));
+		f.invisibleCondition("hideForm");
+		assertThat(f.get().getInvisibleCondition(), is("hideForm"));
 	}
 
 	@Test
@@ -859,8 +859,8 @@ class FluentViewBuildersTest {
 	@Test
 	void dataGridDisabledConditionSetsValue() {
 		FluentDataGrid dg = new FluentDataGrid();
-		dg.disabledConditionName("isReadOnly");
-		assertThat(dg.get().getDisabledConditionName(), is("isReadOnly"));
+		dg.disabledCondition("isReadOnly");
+		assertThat(dg.get().getDisabledCondition(), is("isReadOnly"));
 	}
 
 	@Test
@@ -1008,8 +1008,8 @@ class FluentViewBuildersTest {
 	@Test
 	void listGridDisabledConditionSetsValue() {
 		FluentListGrid lg = new FluentListGrid();
-		lg.disabledConditionName("noEdit");
-		assertThat(lg.get().getDisabledConditionName(), is("noEdit"));
+		lg.disabledCondition("noEdit");
+		assertThat(lg.get().getDisabledCondition(), is("noEdit"));
 	}
 
 	@Test
@@ -1077,10 +1077,10 @@ class FluentViewBuildersTest {
 	}
 
 	@Test
-	void viewRefreshConditionNameSetsValue() {
+	void viewRefreshIfConditionSetsValue() {
 		FluentView v = new FluentView();
-		v.refreshConditionName("needsRefresh");
-		assertThat(v.get().getRefreshConditionName(), is("needsRefresh"));
+		v.refreshIfCondition("needsRefresh");
+		assertThat(v.get().getRefreshIfCondition(), is("needsRefresh"));
 	}
 
 	@Test

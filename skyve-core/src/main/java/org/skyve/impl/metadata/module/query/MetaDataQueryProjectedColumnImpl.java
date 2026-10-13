@@ -1,7 +1,7 @@
 package org.skyve.impl.metadata.module.query;
 
+import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.TreeMap;
 
 import org.skyve.metadata.FormatterName;
 import org.skyve.metadata.module.query.MetaDataQueryProjectedColumn;
@@ -42,7 +42,7 @@ public class MetaDataQueryProjectedColumnImpl extends AbstractMetaDataQueryColum
 	
 	private String customFormatterName;
 	
-	private Map<String, String> properties = new TreeMap<>();
+	private Map<String, String> properties = new LinkedHashMap<>();
 
 	@Override
 	public String getExpression() {

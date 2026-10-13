@@ -144,8 +144,8 @@ class FluentVBoxTest {
 	}
 
 	@Test
-	void invisibleConditionNameSetsValue() {
-		assertThat(new FluentVBox().invisibleConditionName("invisible").get().getInvisibleConditionName(), is("invisible"));
+	void invisibleConditionSetsValue() {
+		assertThat(new FluentVBox().invisibleCondition("invisible").get().getInvisibleCondition(), is("invisible"));
 	}
 
 	@Test
@@ -170,10 +170,10 @@ class FluentVBoxTest {
 	}
 
 	@Test
-	void fromCopiesInvisibleConditionName() {
+	void fromCopiesInvisibleCondition() {
 		VBox src = new VBox();
-		src.setInvisibleConditionName("invisible");
-		assertThat(new FluentVBox().from(src).get().getInvisibleConditionName(), is("invisible"));
+		src.setXmlInvisibleCondition("invisible");
+		assertThat(new FluentVBox().from(src).get().getInvisibleCondition(), is("invisible"));
 	}
 
 	@Test

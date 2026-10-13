@@ -50,7 +50,7 @@ class FluentViewLowCoverageBuildersTest {
 		link.setReference(reference);
 		link.setTarget(target);
 		link.setValue("Open");
-		link.setInvisibleConditionName("hideLink");
+		link.setXmlInvisibleCondition("hideLink");
 		link.setPixelWidth(Integer.valueOf(140));
 		FluentLink fluentLink = new FluentLink().from(link).value("Updated").pixelWidth(180);
 		assertThat(fluentLink.get().getReference(), is(reference));
@@ -140,14 +140,14 @@ class FluentViewLowCoverageBuildersTest {
 	@Test
 	void eventActionBuildersMapFromAndDispatchByType() {
 		FluentSetDisabledEventAction setDisabled = new FluentSetDisabledEventAction().from(new SetDisabledEventAction())
-				.binding("a").disabledConditionName("cond");
+				.binding("a").disabledCondition("cond");
 		assertThat(setDisabled.get().getBinding(), is("a"));
-		assertThat(setDisabled.get().getDisabledConditionName(), is("cond"));
+		assertThat(setDisabled.get().getDisabledCondition(), is("cond"));
 
 		FluentSetInvisibleEventAction setInvisible = new FluentSetInvisibleEventAction().from(new SetInvisibleEventAction())
-				.binding("b").invisibleConditionName("hide");
+				.binding("b").invisibleCondition("hide");
 		assertThat(setInvisible.get().getBinding(), is("b"));
-		assertThat(setInvisible.get().getInvisibleConditionName(), is("hide"));
+		assertThat(setInvisible.get().getInvisibleCondition(), is("hide"));
 
 		FluentToggleDisabledEventAction toggleDisabled = new FluentToggleDisabledEventAction().from(new ToggleDisabledEventAction()).binding("c");
 		assertThat(toggleDisabled.get().getBinding(), is("c"));

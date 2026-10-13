@@ -155,12 +155,12 @@ public class DynamicBean extends LazyDynaMap implements Bean {
 	}
 
 	/**
-	 * Executes evaluateCondition.
-	 * @param conditionName the conditionName
-	 * @return the result
+	 * Conditions are not evaluated for a dynamic bean.
+	 * @param condition the condition name or inline condition expression
+	 * @return {@code false} always
 	 */
 	@Override
-	public boolean evaluateCondition(String conditionName) {
+	public boolean evaluateCondition(String condition) {
 		// TODO we could evaluate conditions here I suppose using bean shell
 		return false;
 	}

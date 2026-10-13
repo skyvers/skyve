@@ -44,7 +44,7 @@ import org.skyve.impl.metadata.view.widget.bound.tabular.DataRepeater;
 import org.skyve.impl.metadata.view.widget.bound.tabular.ListGrid;
 import org.skyve.impl.metadata.view.widget.bound.tabular.ListRepeater;
 
-@SuppressWarnings("boxing")
+@SuppressWarnings({"boxing", "java:S3011", "java:S112", "null"})
 class ReportViewVisitorLayoutTest {
 	private TestVisitor visitor;
 	private DesignSpecification design;
@@ -119,11 +119,11 @@ class ReportViewVisitorLayoutTest {
 		DynamicImage dynamicImage = new DynamicImage();
 		dynamicImage.setName("chart");
 		dynamicImage.setPixelWidth(Integer.valueOf(120));
-		dynamicImage.setInvisibleConditionName("hideChart");
+		dynamicImage.setXmlInvisibleCondition("hideChart");
 		StaticImage staticImage = new StaticImage();
 		staticImage.setRelativeFile("logo.png");
 		staticImage.setPixelWidth(Integer.valueOf(80));
-		staticImage.setInvisibleConditionName("hideLogo");
+		staticImage.setXmlInvisibleCondition("hideLogo");
 
 		visitor.visitDynamicImage(dynamicImage, true, true);
 		visitor.visitStaticImage(staticImage, true, true);
@@ -289,7 +289,7 @@ class ReportViewVisitorLayoutTest {
 
 		Tab tab = new Tab();
 		tab.setTitle("General");
-		tab.setInvisibleConditionName("hideTab");
+		tab.setXmlInvisibleCondition("hideTab");
 		visitor.visitTab(tab, true, true);
 		assertThat(visitor.currentContainer.getContainerType(), is(ContainerType.tab));
 		assertThat(visitor.currentContainer.getBorderTitle(), is("General"));

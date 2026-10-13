@@ -1,7 +1,7 @@
 package org.skyve.impl.web.faces.pipeline.component;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
@@ -10,8 +10,8 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.atLeastOnce;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -20,9 +20,9 @@ import java.util.List;
 import java.util.Map;
 
 import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.Assertions;
 import org.mockito.ArgumentCaptor;
 import org.primefaces.behavior.confirm.ConfirmBehavior;
 import org.primefaces.component.commandbutton.CommandButton;
@@ -31,10 +31,10 @@ import org.primefaces.component.inputtext.InputText;
 import org.primefaces.component.menubutton.MenuButton;
 import org.primefaces.component.menuitem.UIMenuItem;
 import org.primefaces.component.overlaypanel.OverlayPanel;
+import org.skyve.impl.metadata.view.HorizontalAlignment;
 import org.skyve.impl.metadata.view.widget.Button;
 import org.skyve.impl.metadata.view.widget.Spacer;
 import org.skyve.impl.metadata.view.widget.bound.input.ContentCapture;
-import org.skyve.impl.metadata.view.HorizontalAlignment;
 import org.skyve.impl.metadata.view.widget.bound.input.ContentDisplay;
 import org.skyve.impl.metadata.view.widget.bound.input.ContentUpload;
 import org.skyve.impl.metadata.view.widget.bound.input.Geometry;
@@ -114,8 +114,9 @@ class DeviceResponsiveComponentBuilderTest {
 		// Super call creates a Spacer component — mock the Application.createComponent call
 		org.primefaces.component.spacer.Spacer mockSpacer = mock(org.primefaces.component.spacer.Spacer.class);
 		when(mockApplication.createComponent(anyString())).thenReturn(mockSpacer);
-		when(mockExpressionFactory.createValueExpression(any(ELContext.class), anyString(), eq(String.class)))
-			.thenReturn(mock(jakarta.el.ValueExpression.class));		FacesView managedBean = mock(FacesView.class);
+		ValueExpression ve = mock(jakarta.el.ValueExpression.class);
+		when(mockExpressionFactory.createValueExpression(any(ELContext.class), anyString(), eq(String.class))).thenReturn(ve);
+		FacesView managedBean = mock(FacesView.class);
 		when(managedBean.nextId()).thenReturn("spacer1");
 		builder.setSAILManagedBean(managedBean);		UIComponent result = builder.spacer(null, new Spacer());
 		assertSame(mockSpacer, result);
@@ -176,8 +177,8 @@ class DeviceResponsiveComponentBuilderTest {
 		Action action = mock(Action.class);
 		when(action.getName()).thenReturn("save");
 		when(action.getClientValidation()).thenReturn(Boolean.TRUE);
-		when(action.getDisabledConditionName()).thenReturn(null);
-		when(action.getInvisibleConditionName()).thenReturn(null);
+		when(action.getDisabledCondition()).thenReturn(null);
+		when(action.getInvisibleCondition()).thenReturn(null);
 		when(action.getProperties()).thenReturn(Map.of());
 		builder.upload(null, "Upload", "icon", "tip", null, action);
 		assertTrue(capturedUseDialog[0], "Expected useDialog=true for phone");
@@ -210,8 +211,8 @@ class DeviceResponsiveComponentBuilderTest {
 		Action action = mock(Action.class);
 		when(action.getName()).thenReturn("save");
 		when(action.getClientValidation()).thenReturn(Boolean.FALSE);
-		when(action.getDisabledConditionName()).thenReturn(null);
-		when(action.getInvisibleConditionName()).thenReturn(null);
+		when(action.getDisabledCondition()).thenReturn(null);
+		when(action.getInvisibleCondition()).thenReturn(null);
 		when(action.getProperties()).thenReturn(Map.of());
 		builder.upload(null, "Upload", "icon", "tip", null, action);
 		assertFalse(capturedUseDialog[0], "Expected useDialog=false for desktop");
@@ -244,8 +245,8 @@ class DeviceResponsiveComponentBuilderTest {
 		Action action = mock(Action.class);
 		when(action.getName()).thenReturn("uploadCamera");
 		when(action.getClientValidation()).thenReturn(Boolean.FALSE);
-		when(action.getDisabledConditionName()).thenReturn(null);
-		when(action.getInvisibleConditionName()).thenReturn(null);
+		when(action.getDisabledCondition()).thenReturn(null);
+		when(action.getInvisibleCondition()).thenReturn(null);
 		when(action.getProperties()).thenReturn(Map.of("capture", "camera"));
 		builder.upload(null, "Upload camera", "icon", "tip", null, action);
 		assertTrue(capturedUseDialog[0], "Expected useDialog=true for desktop camera upload");
@@ -281,8 +282,8 @@ class DeviceResponsiveComponentBuilderTest {
 		Action action = mock(Action.class);
 		when(action.getName()).thenReturn("save");
 		when(action.getClientValidation()).thenReturn(null);
-		when(action.getDisabledConditionName()).thenReturn(null);
-		when(action.getInvisibleConditionName()).thenReturn(null);
+		when(action.getDisabledCondition()).thenReturn(null);
+		when(action.getInvisibleCondition()).thenReturn(null);
 		when(action.getProperties()).thenReturn(Map.of());
 		builder.uploadButton(null, "Upload", "icon", "tip", null, button, null, action);
 		assertTrue(capturedUseDialog[0], "Expected useDialog=true for phone");
@@ -316,8 +317,8 @@ class DeviceResponsiveComponentBuilderTest {
 		Action action = mock(Action.class);
 		when(action.getName()).thenReturn("save");
 		when(action.getClientValidation()).thenReturn(null);
-		when(action.getDisabledConditionName()).thenReturn(null);
-		when(action.getInvisibleConditionName()).thenReturn(null);
+		when(action.getDisabledCondition()).thenReturn(null);
+		when(action.getInvisibleCondition()).thenReturn(null);
 		when(action.getProperties()).thenReturn(Map.of());
 		builder.uploadButton(null, "Upload", "icon", "tip", null, button, null, action);
 		assertFalse(capturedUseDialog[0], "Expected useDialog=false for desktop");
@@ -351,8 +352,8 @@ class DeviceResponsiveComponentBuilderTest {
 		Action action = mock(Action.class);
 		when(action.getName()).thenReturn("uploadAll");
 		when(action.getClientValidation()).thenReturn(null);
-		when(action.getDisabledConditionName()).thenReturn(null);
-		when(action.getInvisibleConditionName()).thenReturn(null);
+		when(action.getDisabledCondition()).thenReturn(null);
+		when(action.getInvisibleCondition()).thenReturn(null);
 		when(action.getProperties()).thenReturn(Map.of("capture", "all"));
 		builder.uploadButton(null, "Upload all", "icon", "tip", null, button, null, action);
 		assertTrue(capturedUseDialog[0], "Expected useDialog=true for desktop all-capture upload button");
@@ -539,8 +540,8 @@ class DeviceResponsiveComponentBuilderTest {
 		Action action = mock(Action.class);
 		when(action.getName()).thenReturn("Save");
 		when(action.getImplicitName()).thenReturn(ImplicitActionName.Save);
-		when(action.getDisabledConditionName()).thenReturn(null);
-		when(action.getInvisibleConditionName()).thenReturn(null);
+		when(action.getDisabledCondition()).thenReturn(null);
+		when(action.getInvisibleCondition()).thenReturn(null);
 		CommandButton btn = mock(CommandButton.class);
 		when(mockApplication.createComponent(CommandButton.COMPONENT_TYPE)).thenReturn(btn);
 		ConfirmBehavior confirmBehavior = mock(ConfirmBehavior.class);
@@ -569,8 +570,8 @@ class DeviceResponsiveComponentBuilderTest {
 		Action action = mock(Action.class);
 		when(action.getName()).thenReturn("Save");
 		when(action.getImplicitName()).thenReturn(ImplicitActionName.Save);
-		when(action.getDisabledConditionName()).thenReturn(null);
-		when(action.getInvisibleConditionName()).thenReturn(null);
+		when(action.getDisabledCondition()).thenReturn(null);
+		when(action.getInvisibleCondition()).thenReturn(null);
 		CommandButton btn = mock(CommandButton.class);
 		when(mockApplication.createComponent(CommandButton.COMPONENT_TYPE)).thenReturn(btn);
 		ConfirmBehavior confirmBehavior = mock(ConfirmBehavior.class);

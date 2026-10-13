@@ -8,16 +8,16 @@ import org.junit.jupiter.api.Test;
 class AbstractDataWidgetTest {
 
 	@Test
-	void jaxbHelperGetVisibleConditionNameReturnsNull() {
+	void xmlVisibleConditionIsNullByDefault() {
 		// ListGrid extends AbstractDataWidget; use it as a concrete subclass
 		ListGrid grid = new ListGrid();
-		assertNull(grid.getVisibleConditionName());
+		assertNull(grid.getXmlVisibleCondition());
 	}
 
 	@Test
-	void abstractDataWidgetGetVisibleConditionNameReturnsNull() {
+	void abstractDataWidgetXmlVisibleConditionIsNullByDefault() {
 		// DataGrid directly extends AbstractDataWidget — tests the method on the target class
 		DataGrid grid = new DataGrid();
-		assertNull(grid.getVisibleConditionName());
+		assertNull(grid.getXmlVisibleCondition());
 	}
 }

@@ -131,13 +131,13 @@ class FluentFormTest {
 	}
 
 	@Test
-	void disabledConditionNameSetsValue() {
-		assertThat(new FluentForm().disabledConditionName("disabled").get().getDisabledConditionName(), is("disabled"));
+	void disabledConditionSetsValue() {
+		assertThat(new FluentForm().disabledCondition("disabled").get().getDisabledCondition(), is("disabled"));
 	}
 
 	@Test
-	void invisibleConditionNameSetsValue() {
-		assertThat(new FluentForm().invisibleConditionName("invisible").get().getInvisibleConditionName(), is("invisible"));
+	void invisibleConditionSetsValue() {
+		assertThat(new FluentForm().invisibleCondition("invisible").get().getInvisibleCondition(), is("invisible"));
 	}
 
 	@Test
@@ -245,17 +245,17 @@ class FluentFormTest {
 	}
 
 	@Test
-	void fromCopiesDisabledConditionName() {
+	void fromCopiesDisabledCondition() {
 		Form src = new Form();
-		src.setDisabledConditionName("disabled");
-		assertThat(new FluentForm().from(src).get().getDisabledConditionName(), is("disabled"));
+		src.setXmlDisabledCondition("disabled");
+		assertThat(new FluentForm().from(src).get().getDisabledCondition(), is("disabled"));
 	}
 
 	@Test
-	void fromCopiesInvisibleConditionName() {
+	void fromCopiesInvisibleCondition() {
 		Form src = new Form();
-		src.setInvisibleConditionName("invisible");
-		assertThat(new FluentForm().from(src).get().getInvisibleConditionName(), is("invisible"));
+		src.setXmlInvisibleCondition("invisible");
+		assertThat(new FluentForm().from(src).get().getInvisibleCondition(), is("invisible"));
 	}
 
 	@Test

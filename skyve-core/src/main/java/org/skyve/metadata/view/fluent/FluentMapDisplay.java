@@ -1,7 +1,11 @@
 package org.skyve.metadata.view.fluent;
 
+import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.metadata.view.LoadingType;
 import org.skyve.impl.metadata.view.widget.MapDisplay;
+
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 
 /**
  * Builds {@link MapDisplay} widget metadata using a fluent API.
@@ -44,9 +48,11 @@ public class FluentMapDisplay extends FluentWidget implements FluentRelativeSize
 		if (b != null) {
 			showRefreshControls(b.booleanValue());
 		}
-		invisibleConditionName(map.getInvisibleConditionName());
+		BindUtil.copyAuthoredCondition(map.getXmlInvisibleCondition(), map.getXmlVisibleCondition(), this::invisibleCondition, this::visibleCondition);
 
 		relativeSize(map, this);
+
+		map.getProperties().entrySet().forEach(p -> putProperty(p.getKey(), p.getValue()));
 
 		return this;
 	}
@@ -96,13 +102,26 @@ public class FluentMapDisplay extends FluentWidget implements FluentRelativeSize
 	}
 
 	/**
-	 * Sets the condition name that hides this map display widget.
+	 * Sets the {@code invisible} condition as authored; the opposite sense of {@link #visibleCondition(String)}.
 	 *
-	 * @param invisibleConditionName the condition name
+	 * @param invisibleCondition
+	 *            a condition name, an inline condition expression or a boolean literal
 	 * @return this builder
 	 */
-	public FluentMapDisplay invisibleConditionName(String invisibleConditionName) {
-		map.setInvisibleConditionName(invisibleConditionName);
+	public @Nonnull FluentMapDisplay invisibleCondition(@Nullable String invisibleCondition) {
+		map.setXmlInvisibleCondition(invisibleCondition);
+		return this;
+	}
+
+	/**
+	 * Sets the {@code visible} condition as authored; the opposite sense of {@link #invisibleCondition(String)}.
+	 *
+	 * @param visibleCondition
+	 *            a condition name, an inline condition expression or a boolean literal
+	 * @return this builder
+	 */
+	public @Nonnull FluentMapDisplay visibleCondition(@Nullable String visibleCondition) {
+		map.setXmlVisibleCondition(visibleCondition);
 		return this;
 	}
 
@@ -259,6 +278,19 @@ public class FluentMapDisplay extends FluentWidget implements FluentRelativeSize
 	@Override
 	public FluentMapDisplay percentageHeight(int percentageHeight) {
 		map.setPercentageHeight(Integer.valueOf(percentageHeight));
+		return this;
+	}
+
+	/**
+	 * Adds or replaces a custom property on the wrapped metadata.
+	 * Properties keep the order in which they were first added.
+	 *
+	 * @param k the property name
+	 * @param v the property value
+	 * @return this builder
+	 */
+	public @Nonnull FluentMapDisplay putProperty(@Nonnull String k, @Nonnull String v) {
+		map.getProperties().put(k, v);
 		return this;
 	}
 

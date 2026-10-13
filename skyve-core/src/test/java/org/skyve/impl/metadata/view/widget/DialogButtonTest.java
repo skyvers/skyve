@@ -23,13 +23,13 @@ class DialogButtonTest {
 	}
 
 	@Test
-	void jaxbHelperGetVisibleConditionNameReturnsNull() {
-		assertNull(new DialogButton().getVisibleConditionName());
+	void xmlVisibleConditionIsNullByDefault() {
+		assertNull(new DialogButton().getXmlVisibleCondition());
 	}
 
 	@Test
-	void jaxbHelperGetEnabledConditionNameReturnsNull() {
-		assertNull(new DialogButton().getEnabledConditionName());
+	void xmlEnabledConditionIsNullByDefault() {
+		assertNull(new DialogButton().getXmlEnabledCondition());
 	}
 
 	@Test
@@ -38,16 +38,16 @@ class DialogButtonTest {
 	}
 
 	@Test
-	void setVisibleConditionNameStoresNegatedCondition() {
+	void setVisibleConditionDerivesNegatedCondition() {
 		DialogButton button = new DialogButton();
-		button.setVisibleConditionName("myVisible");
-		assertNotNull(button.getInvisibleConditionName());
+		button.setXmlVisibleCondition("myVisible");
+		assertEquals("notMyVisible", button.getInvisibleCondition());
 	}
 
 	@Test
-	void setEnabledConditionNameStoresNegatedCondition() {
+	void setEnabledConditionDerivesNegatedCondition() {
 		DialogButton button = new DialogButton();
-		button.setEnabledConditionName("myEnabled");
-		assertNotNull(button.getDisabledConditionName());
+		button.setXmlEnabledCondition("myEnabled");
+		assertEquals("notMyEnabled", button.getDisabledCondition());
 	}
 }

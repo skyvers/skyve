@@ -205,10 +205,10 @@ class FluentViewTest {
 
         @Test
         @SuppressWarnings("static-method")
-        void refreshConditionNameSetterAndGet() {
+        void refreshIfConditionSetterAndGet() {
                 FluentView v = new FluentView();
-                assertSame(v, v.refreshConditionName("someCondition"));
-                assertEquals("someCondition", v.get().getRefreshConditionName());
+                assertSame(v, v.refreshIfCondition("someCondition"));
+                assertEquals("someCondition", v.get().getRefreshIfCondition());
         }
 
         @Test

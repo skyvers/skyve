@@ -176,9 +176,9 @@ public class ListGrid extends HtmlPanelGroup {
 
 		listGrid.setTitle(model.getDescription()); // no localisation here as listGrid.getLocalisedTitle() would be called
 		listGrid.setShowAdd(createRendered);
-		listGrid.setDisabledConditionName(String.valueOf(createDisabled));
+		listGrid.setXmlDisabledCondition(String.valueOf(createDisabled));
 		listGrid.setShowZoom(zoomRendered);
-		listGrid.setDisableZoomConditionName(String.valueOf(zoomDisabled));
+		listGrid.setXmlDisableZoomCondition(String.valueOf(zoomDisabled));
 		listGrid.setShowFilter(filterRendered);
 
 		List<UIComponent> result = new ArrayList<>(2);

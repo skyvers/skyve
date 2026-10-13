@@ -3,6 +3,8 @@ package org.skyve.metadata.view.fluent;
 import org.skyve.impl.metadata.view.widget.bound.input.GeometryInputType;
 import org.skyve.impl.metadata.view.widget.bound.input.GeometryMap;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * Builds {@link GeometryMap} widget metadata using a fluent API.
  */
@@ -33,14 +35,12 @@ public class FluentGeometryMap extends FluentInputWidget<FluentGeometryMap> impl
 	 * @return this builder
 	 */
 	public FluentGeometryMap from(@SuppressWarnings("hiding") GeometryMap map) {
-
 		type(map.getType());
-
 		relativeSize(map, this);
-
 		map.getChangedActions().forEach(c -> addAction(FluentEventAction.from(c)));
-
 		super.from(map);
+		map.getProperties().entrySet().forEach(p -> putProperty(p.getKey(), p.getValue()));
+
 		return this;
 	}
 
@@ -220,6 +220,19 @@ public class FluentGeometryMap extends FluentInputWidget<FluentGeometryMap> impl
 	 */
 	public FluentGeometryMap addAction(FluentEventAction action) {
 		map.getChangedActions().add(action.get());
+		return this;
+	}
+
+	/**
+	 * Adds or replaces a custom property on the wrapped metadata.
+	 * Properties keep the order in which they were first added.
+	 *
+	 * @param k the property name
+	 * @param v the property value
+	 * @return this builder
+	 */
+	public @Nonnull FluentGeometryMap putProperty(@Nonnull String k, @Nonnull String v) {
+		map.getProperties().put(k, v);
 		return this;
 	}
 

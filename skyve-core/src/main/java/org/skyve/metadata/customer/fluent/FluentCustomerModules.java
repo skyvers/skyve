@@ -7,6 +7,8 @@ import org.skyve.impl.metadata.repository.customer.CustomerModulesMetaData;
 import org.skyve.impl.metadata.view.container.form.FormLabelLayout;
 import org.skyve.metadata.module.Module;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * Builds customer module membership metadata and home-module selection.
  */
@@ -104,6 +106,19 @@ public class FluentCustomerModules {
 		return this;
 	}
 	
+	/**
+	 * Adds or replaces a custom property on the wrapped metadata.
+	 * Properties keep the order in which they were first added.
+	 *
+	 * @param k the property name
+	 * @param v the property value
+	 * @return this builder
+	 */
+	public @Nonnull FluentCustomerModules putProperty(@Nonnull String k, @Nonnull String v) {
+		modules.getProperties().put(k, v);
+		return this;
+	}
+
 	/**
 	 * Returns the mutable metadata instance being built.
 	 *

@@ -3,6 +3,8 @@ package org.skyve.metadata.view.fluent;
 import org.skyve.impl.metadata.view.widget.Button;
 import org.skyve.metadata.view.Action.ActionShow;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * Builds {@link Button} widget metadata using a fluent API.
  */
@@ -30,13 +32,12 @@ public class FluentButton extends FluentWidget implements FluentAbsoluteSize<Flu
 	 * Copies button metadata into this fluent builder.
 	 */
 	public FluentButton from(@SuppressWarnings("hiding") Button button) {
-
 		actionName(button.getActionName());
-
 		absoluteSize(button, this);
 		constrainableHeight(button, this);
-
 		show(button.getShow());
+		button.getProperties().entrySet().forEach(p -> putProperty(p.getKey(), p.getValue()));
+
 		return this;
 	}
 
@@ -107,6 +108,19 @@ public class FluentButton extends FluentWidget implements FluentAbsoluteSize<Flu
 	 */
 	public FluentButton show(ActionShow show) {
 		button.setShow(show);
+		return this;
+	}
+
+	/**
+	 * Adds or replaces a custom property on the wrapped metadata.
+	 * Properties keep the order in which they were first added.
+	 *
+	 * @param k the property name
+	 * @param v the property value
+	 * @return this builder
+	 */
+	public @Nonnull FluentButton putProperty(@Nonnull String k, @Nonnull String v) {
+		button.getProperties().put(k, v);
 		return this;
 	}
 

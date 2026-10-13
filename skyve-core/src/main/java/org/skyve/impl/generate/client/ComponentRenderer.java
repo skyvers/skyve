@@ -56,10 +56,10 @@ public abstract class ComponentRenderer extends AbstractRenderer {
 	 * Creates the root view component used to switch create and edit visibility states.
 	 *
 	 * @param component the parent render node
-	 * @param invisibleConditionName the visibility expression for the generated wrapper
+	 * @param invisibleCondition the visibility expression for the generated wrapper
 	 * @return the generated root view component
 	 */
-	public abstract RenderedComponent view(RenderedComponent component, String invisibleConditionName);
+	public abstract RenderedComponent view(RenderedComponent component, String invisibleCondition);
 
 	/**
 	 * Creates toolbar components for the current rendered view.
@@ -94,13 +94,13 @@ public abstract class ComponentRenderer extends AbstractRenderer {
 	 *
 	 * @param component the parent render node
 	 * @param title border caption
-	 * @param invisibileConditionName expression controlling wrapper visibility
+	 * @param invisibleCondition expression controlling wrapper visibility
 	 * @param pixelWidth explicit width for fixed-width borders, if any
 	 * @return the generated border wrapper component
 	 */
 	public abstract RenderedComponent border(RenderedComponent component,
 												String title,
-												String invisibileConditionName,
+												String invisibleCondition,
 												Integer pixelWidth);
 
 	/**

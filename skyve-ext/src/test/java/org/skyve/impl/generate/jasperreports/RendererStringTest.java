@@ -3,7 +3,6 @@ package org.skyve.impl.generate.jasperreports;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
-import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -151,10 +150,47 @@ class RendererStringTest {
 	}
 
 	@Test
-	void renderPrintWhenExpressionBeanModeUsesFieldThis() {
+	void renderPrintWhenExpressionBeanModeEvaluatesTheConditionOnFieldThis() {
 		String result = Renderer.renderPrintWhenExpression(parent, "condition");
-		assertThat(result, containsString("$F{THIS}"));
-		assertThat(result, containsString("printWhenExpression"));
+		assertThat(result, is("<printWhenExpression><![CDATA[!$F{THIS}.evaluateCondition(\"condition\")]]></printWhenExpression>"));
+	}
+
+	@Test
+	void renderPrintWhenExpressionBeanModeWithNotConditionOmitsNegation() {
+		String result = Renderer.renderPrintWhenExpression(parent, "notCondition");
+		assertThat(result, is("<printWhenExpression><![CDATA[$F{THIS}.evaluateCondition(\"condition\")]]></printWhenExpression>"));
+	}
+
+	@Test
+	void renderPrintWhenExpressionBeanModeEvaluatesAnInlineCondition() {
+		String result = Renderer.renderPrintWhenExpression(parent, "{el:bean.status eq 'rejected'}");
+		assertThat(result, containsString("[!$F{THIS}.evaluateCondition(\"{el:bean.status eq 'rejected'}\")]"));
+	}
+
+	@Test
+	void renderPrintWhenExpressionBeanModeWithNegatedInlineConditionOmitsNegation() {
+		String result = Renderer.renderPrintWhenExpression(parent, "not{el:bean.open}");
+		assertThat(result, containsString("[$F{THIS}.evaluateCondition(\"{el:bean.open}\")]"));
+	}
+
+	@Test
+	void renderPrintWhenExpressionSqlModeEvaluatesAnInlineCondition() {
+		parent.setMode(Mode.sql);
+		String result = Renderer.renderPrintWhenExpression(parent, "{el:bean.open}");
+		assertThat(result, containsString("[!org.skyve.impl.generate.jasperreports.BeanForReport.evaluateCondition("
+											+ "\"test\", \"AllAttributesPersistent\", $P{ID}, \"{el:bean.open}\")]"));
+	}
+
+	@Test
+	void printWhenExpressionEscapesAnInlineConditionForAJavaStringLiteral() {
+		String result = Renderer.printWhenExpression(parent, "{el:bean.text eq \"a\\b\"}");
+		assertThat(result, is("!$F{THIS}.evaluateCondition(\"{el:bean.text eq \\\"a\\\\b\\\"}\")"));
+	}
+
+	@Test
+	void renderPrintWhenExpressionSplitsACDataTerminatorInAnInlineCondition() {
+		String result = Renderer.renderPrintWhenExpression(parent, "{el:bean.a[bean.b[0]]>1}");
+		assertThat(result, containsString("{el:bean.a[bean.b[0]]]]><![CDATA[>1}"));
 	}
 
 	@Test
@@ -175,23 +211,6 @@ class RendererStringTest {
 		String result = Renderer.renderPrintWhenExpression(parent, "notCondition");
 		assertFalse(result.contains("CDATA[!"), "not-prefixed condition should not inject extra '!' negation");
 		assertThat(result, containsString("BeanForReport.evaluateCondition"));
-	}
-
-	// --- flipCondition ---
-
-	@Test
-	void flipConditionNonNotAddsNotPrefix() {
-		assertThat(Renderer.flipCondition("active"), is("notActive"));
-	}
-
-	@Test
-	void flipConditionNotPrefixedStripsNotAndAddsIs() {
-		assertThat(Renderer.flipCondition("notActive"), is("isActive"));
-	}
-
-	@Test
-	void flipConditionNullReturnsNull() {
-		assertThat(Renderer.flipCondition(null), is((String) null));
 	}
 
 	// --- rawConditionName ---
@@ -767,21 +786,6 @@ class RendererStringTest {
 	}
 
 	@Test
-	void flipConditionWithNotPrefixReturnsIs() {
-		assertThat(Renderer.flipCondition("notActive"), is("isActive"));
-	}
-
-	@Test
-	void flipConditionWithoutNotPrefixAddsNot() {
-		assertThat(Renderer.flipCondition("active"), is("notActive"));
-	}
-
-	@Test
-	void flipConditionWithNullReturnsNull() {
-		assertThat(Renderer.flipCondition(null), nullValue());
-	}
-
-	@Test
 	void rawConditionNameStripsNotPrefix() {
 		assertThat(Renderer.rawConditionName("notActive"), is("active"));
 	}
@@ -804,12 +808,11 @@ class RendererStringTest {
 	}
 
 	@Test
-	void renderPrintWhenExpressionBeanModeContainsFAndFlip() {
+	void renderPrintWhenExpressionBeanModeContainsFAndNegatedEvaluation() {
 		DesignSpecification spec = new DesignSpecification();
 		spec.setMode(DesignSpecification.Mode.bean);
 		String result = Renderer.renderPrintWhenExpression(spec, "active");
-		assertThat(result, containsString("$F{THIS}"));
-		assertThat(result, containsString("notActive"));
+		assertThat(result, containsString("!$F{THIS}.evaluateCondition(\"active\")"));
 	}
 
 	@Test

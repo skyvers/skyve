@@ -23,28 +23,28 @@ class FluentDataGridTest {
 	}
 
 	@Test
-	void disabledConditionNameSetsValue() {
-		assertThat(new FluentDataGrid().disabledConditionName("cond").get().getDisabledConditionName(), is("cond"));
+	void disabledConditionSetsValue() {
+		assertThat(new FluentDataGrid().disabledCondition("cond").get().getDisabledCondition(), is("cond"));
 	}
 
 	@Test
-	void disableAddConditionNameSetsValue() {
-		assertThat(new FluentDataGrid().disableAddConditionName("noAdd").get().getDisableAddConditionName(), is("noAdd"));
+	void disableAddConditionSetsValue() {
+		assertThat(new FluentDataGrid().disableAddCondition("noAdd").get().getDisableAddCondition(), is("noAdd"));
 	}
 
 	@Test
-	void disableZoomConditionNameSetsValue() {
-		assertThat(new FluentDataGrid().disableZoomConditionName("noZoom").get().getDisableZoomConditionName(), is("noZoom"));
+	void disableZoomConditionSetsValue() {
+		assertThat(new FluentDataGrid().disableZoomCondition("noZoom").get().getDisableZoomCondition(), is("noZoom"));
 	}
 
 	@Test
-	void disableEditConditionNameSetsValue() {
-		assertThat(new FluentDataGrid().disableEditConditionName("noEdit").get().getDisableEditConditionName(), is("noEdit"));
+	void disableEditConditionSetsValue() {
+		assertThat(new FluentDataGrid().disableEditCondition("noEdit").get().getDisableEditCondition(), is("noEdit"));
 	}
 
 	@Test
-	void disableRemoveConditionNameSetsValue() {
-		assertThat(new FluentDataGrid().disableRemoveConditionName("noRemove").get().getDisableRemoveConditionName(), is("noRemove"));
+	void disableRemoveConditionSetsValue() {
+		assertThat(new FluentDataGrid().disableRemoveCondition("noRemove").get().getDisableRemoveCondition(), is("noRemove"));
 	}
 
 	@Test
@@ -210,10 +210,10 @@ class FluentDataGridTest {
 	}
 
 	@Test
-	void fromCopiesDisabledConditionName() {
+	void fromCopiesDisabledCondition() {
 		DataGrid src = new DataGrid();
-		src.setDisabledConditionName("cond");
-		assertThat(new FluentDataGrid().from(src).get().getDisabledConditionName(), is("cond"));
+		src.setXmlDisabledCondition("cond");
+		assertThat(new FluentDataGrid().from(src).get().getDisabledCondition(), is("cond"));
 	}
 
 	@Test

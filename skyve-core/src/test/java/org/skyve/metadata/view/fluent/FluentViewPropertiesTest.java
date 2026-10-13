@@ -72,9 +72,9 @@ class FluentViewPropertiesTest {
 	}
 
 	@Test
-	void refreshConditionNameSetsValue() {
-		FluentView v = new FluentView().refreshConditionName("shouldRefresh");
-		assertEquals("shouldRefresh", v.get().getRefreshConditionName());
+	void refreshIfConditionSetsValue() {
+		FluentView v = new FluentView().refreshIfCondition("shouldRefresh");
+		assertEquals("shouldRefresh", v.get().getRefreshIfCondition());
 	}
 
 	@Test

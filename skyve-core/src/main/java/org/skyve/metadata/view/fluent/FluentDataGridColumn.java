@@ -4,6 +4,8 @@ package org.skyve.metadata.view.fluent;
 import org.skyve.impl.metadata.view.HorizontalAlignment;
 import org.skyve.impl.metadata.view.widget.bound.tabular.DataGridColumn;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * Provides shared fluent mutation for tabular column metadata.
  *
@@ -34,6 +36,8 @@ public abstract class FluentDataGridColumn<T extends FluentDataGridColumn<T>> {
 		if (i != null) {
 			pixelWidth(i.intValue());
 		}
+		column.getProperties().entrySet().forEach(p -> putProperty(p.getKey(), p.getValue()));
+
 		return (T) this;
 	}
 	
@@ -95,6 +99,20 @@ public abstract class FluentDataGridColumn<T extends FluentDataGridColumn<T>> {
 	 */
 	public T pixelWidth(int pixelWidth) {
 		get().setPixelWidth(Integer.valueOf(pixelWidth));
+		return (T) this;
+	}
+
+	/**
+	 * Adds or replaces a custom property on the wrapped metadata.
+	 * Properties keep the order in which they were first added.
+	 *
+	 * @param k the property name
+	 * @param v the property value
+	 * @return this builder
+	 */
+	@SuppressWarnings("unchecked")
+	public @Nonnull T putProperty(@Nonnull String k, @Nonnull String v) {
+		get().getProperties().put(k, v);
 		return (T) this;
 	}
 

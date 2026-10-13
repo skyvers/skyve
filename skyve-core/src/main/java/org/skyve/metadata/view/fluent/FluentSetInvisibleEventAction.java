@@ -1,6 +1,10 @@
 package org.skyve.metadata.view.fluent;
 
+import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.metadata.view.event.SetInvisibleEventAction;
+
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 
 /**
  * Builds {@link SetInvisibleEventAction} metadata using a fluent API.
@@ -34,7 +38,9 @@ public class FluentSetInvisibleEventAction extends FluentEventAction {
 	 */
 	public FluentSetInvisibleEventAction from(@SuppressWarnings("hiding") SetInvisibleEventAction action) {
 		binding(action.getBinding());
-		invisibleConditionName(action.getInvisibleConditionName());
+		BindUtil.copyAuthoredCondition(action.getXmlInvisibleCondition(), action.getXmlVisibleCondition(), this::invisibleCondition, this::visibleCondition);
+		action.getProperties().entrySet().forEach(p -> putProperty(p.getKey(), p.getValue()));
+
 		return this;
 	}
 
@@ -51,14 +57,39 @@ public class FluentSetInvisibleEventAction extends FluentEventAction {
 	}
 
 	/**
-	 * Sets the condition used to compute the invisible state.
+	 * Sets the {@code invisible} condition as authored; the opposite sense of {@link #visibleCondition(String)}.
 	 *
-	 * @param invisibleConditionName
-	 *            the condition name
+	 * @param invisibleCondition
+	 *            a condition name, an inline condition expression or a boolean literal
 	 * @return this builder
 	 */
-	public FluentSetInvisibleEventAction invisibleConditionName(String invisibleConditionName) {
-		action.setInvisibleConditionName(invisibleConditionName);
+	public @Nonnull FluentSetInvisibleEventAction invisibleCondition(@Nullable String invisibleCondition) {
+		action.setXmlInvisibleCondition(invisibleCondition);
+		return this;
+	}
+
+	/**
+	 * Sets the {@code visible} condition as authored; the opposite sense of {@link #invisibleCondition(String)}.
+	 *
+	 * @param visibleCondition
+	 *            a condition name, an inline condition expression or a boolean literal
+	 * @return this builder
+	 */
+	public @Nonnull FluentSetInvisibleEventAction visibleCondition(@Nullable String visibleCondition) {
+		action.setXmlVisibleCondition(visibleCondition);
+		return this;
+	}
+
+	/**
+	 * Adds or replaces a custom property on the wrapped metadata.
+	 * Properties keep the order in which they were first added.
+	 *
+	 * @param k the property name
+	 * @param v the property value
+	 * @return this builder
+	 */
+	public @Nonnull FluentSetInvisibleEventAction putProperty(@Nonnull String k, @Nonnull String v) {
+		action.getProperties().put(k, v);
 		return this;
 	}
 

@@ -1,8 +1,9 @@
 package org.skyve.impl.metadata.view.widget;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 import org.junit.jupiter.api.Test;
 
@@ -15,8 +16,8 @@ class BlurbTest {
 	}
 
 	@Test
-	void jaxbHelperGetVisibleConditionNameReturnsNull() {
-		assertNull(new Blurb().getVisibleConditionName());
+	void xmlVisibleConditionIsNullByDefault() {
+		assertNull(new Blurb().getXmlVisibleCondition());
 	}
 
 	@Test
@@ -27,9 +28,9 @@ class BlurbTest {
 	}
 
 	@Test
-	void setVisibleConditionNameSetsInvisibleNegation() {
+	void setVisibleConditionDerivesNegatedCondition() {
 		Blurb blurb = new Blurb();
-		blurb.setVisibleConditionName("active");
-		assertNotNull(blurb.getInvisibleConditionName());
+		blurb.setXmlVisibleCondition("active");
+		assertEquals("notActive", blurb.getInvisibleCondition());
 	}
 }

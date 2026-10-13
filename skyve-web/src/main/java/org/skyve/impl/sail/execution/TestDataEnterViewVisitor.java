@@ -432,36 +432,36 @@ public class TestDataEnterViewVisitor extends NoOpViewVisitor {
 	/**
 	 * Evaluates visibility by negating the configured invisible condition result.
 	 *
-	 * @param invisible metadata providing the invisible-condition name
+	 * @param invisible metadata providing the invisible condition
 	 * @return {@code true} when the widget is effectively visible
 	 */
 	@Override
 	protected boolean visible(Invisible invisible) {
-		return evaluateConditionInOppositeSense(invisible.getInvisibleConditionName());
+		return evaluateConditionInOppositeSense(invisible.getInvisibleCondition());
 	}
 
 	/**
 	 * Evaluates enabled-state by negating the configured disabled condition result.
 	 *
-	 * @param disableable metadata providing the disabled-condition name
+	 * @param disableable metadata providing the disabled condition
 	 * @return {@code true} when the widget is effectively enabled
 	 */
 	@Override
 	protected boolean enabled(Disableable disableable) {
-		return evaluateConditionInOppositeSense(disableable.getDisabledConditionName());
+		return evaluateConditionInOppositeSense(disableable.getDisabledCondition());
 	}
 	
 	/**
 	 * Evaluates a bean condition and returns the logical opposite of its value.
 	 *
-	 * @param conditionName the bean condition name to evaluate; may be {@code null}
+	 * @param condition the condition name or inline condition expression to evaluate; may be {@code null}
 	 * @return {@code true} when condition is absent or evaluates to {@code false}
 	 */
-	private boolean evaluateConditionInOppositeSense(String conditionName) {
+	private boolean evaluateConditionInOppositeSense(String condition) {
 		boolean result = true;
 
-		if (conditionName != null) {
-			result = !bean.evaluateCondition(conditionName);
+		if (condition != null) {
+			result = ! bean.evaluateCondition(condition);
 		}
 		
 		return result;

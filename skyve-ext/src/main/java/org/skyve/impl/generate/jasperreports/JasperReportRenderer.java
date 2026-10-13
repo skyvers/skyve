@@ -1074,29 +1074,15 @@ public class JasperReportRenderer {
 		return SplitTypeEnum.getByName(splitType.toString());
 	}
 
-	private JRExpression getPrintWhenExpressionFromInvisibleCondition(String invisibleConditionName) {
+	private JRExpression getPrintWhenExpressionFromInvisibleCondition(String invisibleCondition) {
 		final JRDesignExpression jrExpression = new JRDesignExpression();
 
 		final String expressionText;
-		if (StringUtils.isBlank(invisibleConditionName)) {
+		if (StringUtils.isBlank(invisibleCondition)) {
 			expressionText = "";
 		}
 		else {
-			if (Mode.bean.equals(designSpecification.getMode())) {
-				expressionText = String.format("$F{THIS}.%s()", flipCondition(invisibleConditionName));
-			}
-			else {
-				final String subExpression = String.format("org.skyve.impl.generate.jasperreports.BeanForReport.evaluateCondition(\"%s\", \"%s\", $P{ID}, \"%s\")",
-															designSpecification.getModuleName(),
-															designSpecification.getDocumentName(),
-															rawConditionName(invisibleConditionName));
-				if (! invisibleConditionName.startsWith("not")) {
-					expressionText = "!" + subExpression;
-				}
-				else {
-					expressionText = subExpression;
-				}
-			}
+			expressionText = Renderer.printWhenExpression(designSpecification, invisibleCondition);
 		}
 
 		jrExpression.setText(expressionText);
@@ -1393,39 +1379,6 @@ public class JasperReportRenderer {
 
 		jrExpression.setText(expression);
 		return jrExpression;
-	}
-
-	/**
-	 * Converts a condition method name to its logical inverse form.
-	 *
-	 * @param conditionName The source condition name.
-	 * @return The inverse condition name, or {@code null} when input is {@code null}.
-	 */
-	public static String flipCondition(String conditionName) {
-		String result = null;
-		if (conditionName != null) {
-			if (conditionName.startsWith("not")) {
-				result = "is" + rawConditionName(conditionName).substring(0, 1).toUpperCase() + 
-							rawConditionName(conditionName).substring(1);
-			}
-			else {
-				result = "not" + conditionName.substring(0, 1).toUpperCase() + conditionName.substring(1);
-			}
-		}
-		return result;
-	}
-
-	/**
-	 * Normalises a condition name to its non-prefixed form.
-	 *
-	 * @param conditionName The condition name (possibly prefixed with {@code not}).
-	 * @return The normalised condition name.
-	 */
-	public static String rawConditionName(String conditionName) {
-		if (conditionName.startsWith("not")) {
-			return conditionName.substring(3, 4).toLowerCase() + conditionName.substring(4);
-		}
-		return conditionName.substring(0, 1).toLowerCase() + conditionName.substring(1);
 	}
 
 	private static ReportDesignParameters convertDesign(DesignSpecification designSpecification) {

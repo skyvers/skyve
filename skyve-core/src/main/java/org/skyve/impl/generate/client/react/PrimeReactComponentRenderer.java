@@ -63,7 +63,7 @@ public class PrimeReactComponentRenderer extends ComponentRenderer {
 	}
 	
 	@Override
-	public RenderedComponent view(RenderedComponent component, String invisibleConditionName) {
+	public RenderedComponent view(RenderedComponent component, String invisibleCondition) {
 		imports.put("{VBox}", PrimeReactViewRenderer.PRIME_REACT_VIEW_FILE);
 		RenderedComponent result = new RenderedComponent().setAfter("</VBox>").setIndent(startingIndent);
 		StringBuilder output = result.getOutput();
@@ -100,7 +100,7 @@ public class PrimeReactComponentRenderer extends ComponentRenderer {
 	@Override
 	public RenderedComponent border(RenderedComponent component,
 										String title,
-										String invisibileConditionName,
+										String invisibleCondition,
 										Integer pixelWidth) {
 		imports.put("{Card}", "primereact/card");
 		RenderedComponent result = new RenderedComponent();

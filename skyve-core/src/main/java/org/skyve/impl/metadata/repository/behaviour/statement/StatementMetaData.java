@@ -1,7 +1,7 @@
 package org.skyve.impl.metadata.repository.behaviour.statement;
 
+import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.TreeMap;
 
 import org.skyve.domain.Bean;
 import org.skyve.impl.metadata.repository.PropertyMapAdapter;
@@ -32,7 +32,7 @@ public abstract class StatementMetaData implements DecoratedMetaData {
 	
 	@XmlElement(namespace = XMLMetaData.BEHAVIOUR_NAMESPACE)
 	@XmlJavaTypeAdapter(PropertyMapAdapter.class)
-	private Map<String, String> properties = new TreeMap<>();
+	private Map<String, String> properties = new LinkedHashMap<>();
 
 	/**
 	 * Returns decorator properties attached to this statement metadata.

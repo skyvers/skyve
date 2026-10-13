@@ -6,6 +6,8 @@ import org.skyve.metadata.FilterOperator;
 import org.skyve.metadata.SortDirection;
 import org.skyve.metadata.module.query.MetaDataQueryColumn;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * Base fluent builder for metadata query column definitions.
  */
@@ -37,6 +39,8 @@ public abstract class FluentMetaDataQueryColumn<T extends FluentMetaDataQueryCol
 			pixelWidth(i.intValue());
 		}
 		alignment(column.getAlignment());
+		column.getProperties().entrySet().forEach(p -> putProperty(p.getKey(), p.getValue()));
+
 		return (T) this;
 	}
 	
@@ -145,6 +149,20 @@ public abstract class FluentMetaDataQueryColumn<T extends FluentMetaDataQueryCol
 	@SuppressWarnings("unchecked")
 	public T alignment(HorizontalAlignment alignment) {
 		get().setAlignment(alignment);
+		return (T) this;
+	}
+
+	/**
+	 * Adds or replaces a custom property on the wrapped metadata.
+	 * Properties keep the order in which they were first added.
+	 *
+	 * @param k the property name
+	 * @param v the property value
+	 * @return this builder
+	 */
+	@SuppressWarnings("unchecked")
+	public @Nonnull T putProperty(@Nonnull String k, @Nonnull String v) {
+		get().getProperties().put(k, v);
 		return (T) this;
 	}
 

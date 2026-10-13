@@ -100,6 +100,38 @@ class ViewValidatorTest extends AbstractSkyveTest {
 		return form;
 	}
 
+	private static ViewImpl editViewWithSpacerVisibleWhen(String condition) {
+		ViewImpl view = editView();
+		Spacer spacer = new Spacer();
+		spacer.setXmlVisibleCondition(condition);
+		view.getContained().add(spacer);
+		return view;
+	}
+
+	@Test
+	void validateViewWithInlineConditionOnABooleanAttribute() {
+		ViewImpl view = editViewWithSpacerVisibleWhen("{el:bean.booleanFlag}");
+		assertDoesNotThrow(() -> newValidator(view).visit());
+	}
+
+	@Test
+	void validateViewWithInlineConditionComparingAttributes() {
+		ViewImpl view = editViewWithSpacerVisibleWhen("{el:bean.booleanFlag and bean.text eq 'a'}");
+		assertDoesNotThrow(() -> newValidator(view).visit());
+	}
+
+	@Test
+	void validateViewWithInlineConditionThatIsNotBooleanThrows() {
+		ViewImpl view = editViewWithSpacerVisibleWhen("{el:bean.text}");
+		assertThrows(MetaDataException.class, () -> newValidator(view).visit());
+	}
+
+	@Test
+	void validateViewWithInlineConditionOnAnUnknownAttributeThrows() {
+		ViewImpl view = editViewWithSpacerVisibleWhen("{el:bean.noSuchAttribute}");
+		assertThrows(MetaDataException.class, () -> newValidator(view).visit());
+	}
+
 	@Test
 	void validateViewWithTextField() {
 		ViewImpl view = editView();
@@ -478,8 +510,8 @@ class ViewValidatorTest extends AbstractSkyveTest {
 		FormItem item = new FormItem();
 		TextField tf = new TextField();
 		tf.setBinding("text");
-		tf.setDisabledConditionName("condition");
-		tf.setInvisibleConditionName("notCondition");
+		tf.setXmlDisabledCondition("condition");
+		tf.setXmlInvisibleCondition("notCondition");
 		item.setWidget(tf);
 		row.getItems().add(item);
 		view.getContained().add(form);
@@ -578,7 +610,7 @@ class ViewValidatorTest extends AbstractSkyveTest {
 		tf.setBinding("text");
 		SetDisabledEventAction setDisabled = new SetDisabledEventAction();
 		setDisabled.setBinding("booleanFlag");
-		setDisabled.setDisabledConditionName("condition");
+		setDisabled.setXmlDisabledCondition("condition");
 		tf.getChangedActions().add(setDisabled);
 		item.setWidget(tf);
 		row.getItems().add(item);
@@ -1076,7 +1108,7 @@ class ViewValidatorTest extends AbstractSkyveTest {
 		FormItem item = new FormItem();
 		TextField tf = new TextField();
 		tf.setBinding("text");
-		tf.setInvisibleConditionName("notcondition");
+		tf.setXmlInvisibleCondition("notcondition");
 		item.setWidget(tf);
 		row.getItems().add(item);
 		view.getContained().add(form);
@@ -1213,7 +1245,7 @@ class ViewValidatorTest extends AbstractSkyveTest {
 		tf.setBinding("text");
 		SetInvisibleEventAction setInvisible = new SetInvisibleEventAction();
 		setInvisible.setBinding("booleanFlag");
-		setInvisible.setInvisibleConditionName("condition");
+		setInvisible.setXmlInvisibleCondition("condition");
 		tf.getChangedActions().add(setInvisible);
 		item.setWidget(tf);
 		row.getItems().add(item);

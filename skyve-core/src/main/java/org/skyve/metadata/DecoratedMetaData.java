@@ -14,7 +14,14 @@ import java.util.Map;
  */
 public interface DecoratedMetaData extends SerializableMetaData {
 	/**
-	 * Returns a read-only map of custom properties associated with this metadata element.
+	 * Returns the custom properties associated with this metadata element.
+	 *
+	 * <p>The returned map is the live backing map, not a copy. It is populated while
+	 * metadata is loaded, converted or built through the fluent API; consumers of
+	 * loaded metadata must treat it as read-only.
+	 *
+	 * <p>Iteration order is the order in which the properties were declared in XML or
+	 * added through the fluent API; replacing a property keeps its original position.
 	 *
 	 * @return a map of property name to value; never {@code null}, may be empty
 	 */

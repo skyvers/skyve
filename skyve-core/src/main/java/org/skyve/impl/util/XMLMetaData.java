@@ -1230,7 +1230,7 @@ public class XMLMetaData {
 						removeEmptyChildElements(node, new String[] { "parameters" });
 						break;
 					case "component":
-						removeEmptyChildElements(node, new String[] { "names" });
+						removeEmptyChildElements(node, new String[] { "actions", "conditions" });
 						break;
 					case "lookupDescription":
 						removeEmptyChildElements(node, new String[] { "dropDown" });

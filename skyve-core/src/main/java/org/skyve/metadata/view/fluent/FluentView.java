@@ -17,6 +17,7 @@ import org.skyve.metadata.view.View;
 import org.skyve.metadata.view.View.ViewParameter;
 
 import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 
 /**
  * Fluent builder for top-level {@link View} metadata.
@@ -64,7 +65,7 @@ public class FluentView extends FluentContainer<FluentView> {
 		if (i != null) {
 			refreshTimeInSeconds(i.intValue());
 		}
-		refreshConditionName(view.getRefreshConditionName());
+		refreshIfCondition(view.getRefreshIfCondition());
 		refreshActionName(view.getRefreshActionName());
 
 		Sidebar sidebar = view.getSidebar();
@@ -79,6 +80,8 @@ public class FluentView extends FluentContainer<FluentView> {
 		// So we can't generate access definitions from this object.
 
 		super.from(((ViewImpl) view));
+
+		view.getProperties().entrySet().forEach(p -> putProperty(p.getKey(), p.getValue()));
 
 		return this;
 	}
@@ -532,14 +535,14 @@ public class FluentView extends FluentContainer<FluentView> {
 	}
 
 	/**
-	 * Sets the condition name controlling automatic refresh.
+	 * Sets the {@code refreshIf} condition as authored.
 	 *
-	 * @param refreshConditionName
-	 *            refresh condition identifier
+	 * @param refreshIfCondition
+	 *            a condition name, an inline condition expression or a boolean literal
 	 * @return this builder
 	 */
-	public FluentView refreshConditionName(String refreshConditionName) {
-		view.setRefreshConditionName(refreshConditionName);
+	public @Nonnull FluentView refreshIfCondition(@Nullable String refreshIfCondition) {
+		view.setRefreshIfCondition(refreshIfCondition);
 		return this;
 	}
 
@@ -630,6 +633,19 @@ public class FluentView extends FluentContainer<FluentView> {
 			return new FluentViewParameter(result);
 		}
 		return null;
+	}
+
+	/**
+	 * Adds or replaces a custom property on the wrapped metadata.
+	 * Properties keep the order in which they were first added.
+	 *
+	 * @param k the property name
+	 * @param v the property value
+	 * @return this builder
+	 */
+	public @Nonnull FluentView putProperty(@Nonnull String k, @Nonnull String v) {
+		view.getProperties().put(k, v);
+		return this;
 	}
 
 	/**

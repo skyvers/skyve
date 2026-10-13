@@ -5,6 +5,8 @@ import org.skyve.impl.metadata.view.widget.bound.tabular.DataGridColumn;
 import org.skyve.impl.metadata.view.widget.bound.tabular.DataGridContainerColumn;
 import org.skyve.impl.metadata.view.widget.bound.tabular.DataRepeater;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * Builds {@link DataRepeater} metadata for repeated tabular content.
  */
@@ -50,6 +52,9 @@ public class FluentDataRepeater extends FluentDataWidget<FluentDataRepeater> {
 		}
 
 		super.from(data);
+
+		data.getProperties().entrySet().forEach(p -> putProperty(p.getKey(), p.getValue()));
+		
 		return this;
 	}
 
@@ -173,6 +178,19 @@ public class FluentDataRepeater extends FluentDataWidget<FluentDataRepeater> {
 		return this;
 	}
 	
+	/**
+	 * Adds or replaces a custom property on the wrapped metadata.
+	 * Properties keep the order in which they were first added.
+	 *
+	 * @param k the property name
+	 * @param v the property value
+	 * @return this builder
+	 */
+	public @Nonnull FluentDataRepeater putProperty(@Nonnull String k, @Nonnull String v) {
+		data.getProperties().put(k, v);
+		return this;
+	}
+
 	/**
 	 * Returns the underlying mutable metadata.
 	 *

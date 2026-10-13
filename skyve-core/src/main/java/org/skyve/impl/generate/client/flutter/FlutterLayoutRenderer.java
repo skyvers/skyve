@@ -194,7 +194,7 @@ RenderedComponent col = new RenderedComponent(FlutterGenerator.INDENT).setAfter(
 												Integer pixelWidth,
 												Integer responsiveWidth,
 												Integer percentageWidth,
-												String invisibleConditionName) {
+												String invisibleCondition) {
 		if (component != null) {
 			return component;
 		}

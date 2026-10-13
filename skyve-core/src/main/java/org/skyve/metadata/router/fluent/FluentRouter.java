@@ -59,6 +59,8 @@ public class FluentRouter {
 		for (String unsecuredUrlPrefix : router.getUnsecuredUrlPrefixes()) {
 			addUnsecuredUrlPrefix(unsecuredUrlPrefix);
 		}
+		router.getProperties().entrySet().forEach(p -> putProperty(p.getKey(), p.getValue()));
+
 		return this;
 	}
 	
@@ -218,6 +220,19 @@ public class FluentRouter {
 	 */
 	public FluentRouter clearUnsecuredUrlPrefixes() {
 		router.getUnsecuredUrlPrefixes().clear();
+		return this;
+	}
+
+	/**
+	 * Adds or replaces a custom property on the wrapped metadata.
+	 * Properties keep the order in which they were first added.
+	 *
+	 * @param k the property name
+	 * @param v the property value
+	 * @return this builder
+	 */
+	public @Nonnull FluentRouter putProperty(@Nonnull String k, @Nonnull String v) {
+		router.getProperties().put(k, v);
 		return this;
 	}
 

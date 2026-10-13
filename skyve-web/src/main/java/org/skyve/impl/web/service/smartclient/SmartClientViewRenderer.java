@@ -220,7 +220,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		}
 		else if (ViewType.edit.toString().equals(view.getName())) {
 			if (sidebar == null) {
-				code.append("var edit=isc.BizContainer.create({width:'100%',height:'100%',invisibleConditionName:'");
+				code.append("var edit=isc.BizContainer.create({width:'100%',height:'100%',invisibleCondition:'");
 				code.append(Bean.NOT_CREATED_KEY);
 				code.append("'});");
 				containerVariables.push("edit");
@@ -231,7 +231,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		}
 		else if (ViewType.create.toString().equals(view.getName())) {
 			if (sidebar == null) {
-				code.append("var create=isc.BizContainer.create({width:'100%',height:'100%',invisibleConditionName:'");
+				code.append("var create=isc.BizContainer.create({width:'100%',height:'100%',invisibleCondition:'");
 				code.append(Bean.CREATED_KEY);
 				code.append("'});");
 				containerVariables.push("create");
@@ -246,13 +246,13 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 * Rearranges the top-level layout to include a sidebar alongside the main view pane.
 	 *
 	 * @param sidebar The sidebar metadata to apply.
-	 * @param invisibleConditionName The optional invisible condition for the wrapper container.
+	 * @param invisibleCondition The optional invisible condition for the wrapper container.
 	 * @param variableName The JavaScript variable name to assign to the wrapper container.
 	 */
-	private void rearrangeForSidebar(Sidebar sidebar, String invisibleConditionName, String variableName) {
+	private void rearrangeForSidebar(Sidebar sidebar, String invisibleCondition, String variableName) {
 		code.append("var sidebarPane=isc.BizContainer.create({");
 		size(sidebar, null, code);
-		invisible(sidebar.getInvisibleConditionName(), code);
+		invisible(sidebar.getInvisibleCondition(), code);
 		// Override hide/show to switch on and off the resize bar in the viewPane.
 		// Skyve calls Canvas.hide()/Canvas.show() directly when processing the widget tree on scatter, whereas the Snapbar collapse function calls BizHBox.hideMember()
 		// We set the _hiding variable so we know when we are collapsing in the UI versus programmatically hiding on invisible condition
@@ -264,7 +264,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		containerVariables.push("viewPane");
 
 		code.append("var ").append(variableName).append("=isc.BizHBox.create({width:'100%',height:'100%',padding:10,");
-		invisible(invisibleConditionName, code);
+		invisible(invisibleCondition, code);
 		// Override hideMember to indicate that we are using the Snapbar collapse function
 		// Skyve calls Canvas.hide()/Canvas.show() directly when processing the widget tree on scatter, whereas the Snapbar collapse function calls BizHBox.hideMember()
 		// We set the _hiding variable so we know when we are collapsing in the UI versus programmatically hiding on invisible condition
@@ -300,7 +300,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		}
 		if (! viewHasAtLeastOneForm) {
 			String var = "v" + variableCounter++;
-			code.append("var ").append(var).append("=isc.DynamicForm.create({invisibleConditionName:'true'});");
+			code.append("var ").append(var).append("=isc.DynamicForm.create({invisibleCondition:'true'});");
 			code.append("view._vm.addMember(").append(var).append(");");
 			code.append("view.addContained(").append(var).append(");\n");
 		}
@@ -320,8 +320,8 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		String variable = "v" + variableCounter++;
 		code.append("var ").append(variable).append("=isc.BizTabPane.create({");
 		size(tabPane, DEFAULT_TAB_MIN_HEIGHT_IN_PIXELS, code);
-		disabled(tabPane.getDisabledConditionName(), code);
-		invisible(tabPane.getInvisibleConditionName(), code);
+		disabled(tabPane.getDisabledCondition(), code);
+		invisible(tabPane.getInvisibleCondition(), code);
 		String selected = tabPane.getSelectedTabIndexBinding();
 		if (selected != null) {
 			code.append("selectedTabIndexBinding:'").append(BindUtil.sanitiseBinding(selected)).append("',");
@@ -386,8 +386,8 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		code.append(escapeSmartClientText(title, shouldEscape(tab.getEscapeTitle())));
 		code.append("',pane:").append(paneVariable).append(',');
 		tabNumbers.push(Integer.valueOf(tabNumber.intValue() + 1));
-		disabled(tab.getDisabledConditionName(), code);
-		invisible(tab.getInvisibleConditionName(), code);
+		disabled(tab.getDisabledCondition(), code);
+		invisible(tab.getInvisibleCondition(), code);
 		removeTrailingComma(code);
 		code.append("});\n");
 	}
@@ -461,7 +461,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 				throw new MetaDataException("VBox HorizontalAlignment of " + h + " is not supported");
 			}
 		}
-		invisible(vbox.getInvisibleConditionName(), code);
+		invisible(vbox.getInvisibleCondition(), code);
 		removeTrailingComma(code);
 		code.append("});\n");
 
@@ -540,7 +540,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 			}
 		}
 		box(hbox);
-		invisible(hbox.getInvisibleConditionName(), code);
+		invisible(hbox.getInvisibleCondition(), code);
 		removeTrailingComma(code);
 
 		code.append("});\n");
@@ -596,7 +596,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 			code.append("var ").append(result).append("=isc.BizCollapsible.create({title:'").append(borderTitle);
 			code.append("',minimized:").append(collapsible.equals(Collapsible.closed) ? "true," : "false,");
 			size(box, null, code);
-			invisible(box.getInvisibleConditionName(), code);
+			invisible(box.getInvisibleCondition(), code);
 			code.append("_view:view});\n");
 			code.append(result).append(".addContained(").append(itemVariable).append(");\n");
 		}
@@ -631,7 +631,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 			borderBox.setBorderTitle(form.getLocalisedBorderTitle());
 			borderBox.setEscapeBorderTitle(form.getEscapeBorderTitle());
 			borderBox.setCollapsible(collapsible);
-			borderBox.setInvisibleConditionName(form.getInvisibleConditionName());
+			BindUtil.copyAuthoredCondition(form.getXmlInvisibleCondition(), form.getXmlVisibleCondition(), borderBox::setXmlInvisibleCondition, borderBox::setXmlVisibleCondition);
 			borderBox.setPixelWidth(form.getPixelWidth());
 			borderBox.setResponsiveWidth(form.getResponsiveWidth());
 			borderBox.setPercentageWidth(form.getPercentageWidth());
@@ -663,13 +663,13 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		// in some views which doesn't work.
 		code.append("_view:view,");
 		code.append("ID:").append(IDExpression()).append(',');
-		disabled(form.getDisabledConditionName(), code);
+		disabled(form.getDisabledCondition(), code);
 //code.append("cellBorder:1,");
 
 		// only size the form if its not in a border VBox
 		if (! Boolean.TRUE.equals(border)) { // false or null
 			size(form, null, code);
-			invisible(form.getInvisibleConditionName(), code);
+			invisible(form.getInvisibleCondition(), code);
 		}
 
 		HorizontalAlignment alignment = form.getLabelDefaultHorizontalAlignment();
@@ -867,8 +867,8 @@ public class SmartClientViewRenderer extends ViewRenderer {
 											confirmationText,
 											getActionEscapeConfirm(),
 											action.getParameters(),
-											action.getDisabledConditionName(),
-											action.getInvisibleConditionName(),
+											action.getDisabledCondition(),
+											action.getInvisibleCondition(),
 											button,
 											null);
 		if (ImplicitActionName.Upload.equals(action.getImplicitName())) {
@@ -876,8 +876,8 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		}
 		code.append("type:'canvas',showTitle:false,width:1,canvas:isc.HLayout.create({height:22,members:[");
 		code.append(buttonCode).append("]}),");
-		disabled(action.getDisabledConditionName(), code);
-		invisible(action.getInvisibleConditionName(), code);
+		disabled(action.getDisabledCondition(), code);
+		invisible(action.getInvisibleCondition(), code);
 	}
 
 	/**
@@ -913,8 +913,8 @@ public class SmartClientViewRenderer extends ViewRenderer {
 											confirmationText,
 											getActionEscapeConfirm(),
 											action.getParameters(),
-											action.getDisabledConditionName(),
-											action.getInvisibleConditionName(),
+											action.getDisabledCondition(),
+											action.getInvisibleCondition(),
 											button,
 											null);
 		if (ImplicitActionName.Upload.equals(action.getImplicitName())) {
@@ -943,8 +943,8 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		String zoomInCode = generateZoomIn(label, iconUrl, iconStyleClass, toolTip, zoomIn);
 		code.append("type:'canvas',showTitle:false,width:1,canvas:");
 		code.append(zoomInCode).append(',');
-		disabled(zoomIn.getDisabledConditionName(), code);
-		invisible(zoomIn.getInvisibleConditionName(), code);
+		disabled(zoomIn.getDisabledCondition(), code);
+		invisible(zoomIn.getInvisibleCondition(), code);
 	}
 
 	/**
@@ -1035,8 +1035,8 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	public void renderFormGeometry(Geometry geometry) {
 		preProcessFormItem(geometry, "geometry");
 		size(geometry, null, code);
-		disabled(geometry.getDisabledConditionName(), code);
-		invisible(geometry.getInvisibleConditionName(), code);
+		disabled(geometry.getDisabledCondition(), code);
+		invisible(geometry.getInvisibleCondition(), code);
 
 		// Highlight text on focus
 		code.append("selectOnFocus:true,");
@@ -1080,8 +1080,8 @@ public class SmartClientViewRenderer extends ViewRenderer {
 			geometry.setMinPixelHeight(null);
 		}
 
-		disabled(geometry.getDisabledConditionName(), code);
-		invisible(geometry.getInvisibleConditionName(), code);
+		disabled(geometry.getDisabledCondition(), code);
+		invisible(geometry.getInvisibleCondition(), code);
 
 		GeometryInputType type = geometry.getType();
 		if (type != null) {
@@ -1109,8 +1109,8 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	public void renderFormDialogButton(String label, DialogButton button) {
 		code.append("type:'blurb',defaultValue:'dialog button ");
 		code.append(escapeSmartClientText(label, shouldEscape(button.getEscapeDisplayName()))).append("',");
-		disabled(button.getDisabledConditionName(), code);
-		invisible(button.getInvisibleConditionName(), code);
+		disabled(button.getDisabledCondition(), code);
+		invisible(button.getInvisibleCondition(), code);
 	}
 
 	/**
@@ -1137,7 +1137,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	public void renderFormSpacer(Spacer spacer) {
 		code.append("type:'spacer',");
 		size(spacer, null, code);
-		invisible(spacer.getInvisibleConditionName(), code);
+		invisible(spacer.getInvisibleCondition(), code);
 	}
 
 	/**
@@ -1151,10 +1151,10 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		code.append("var ").append(variable).append("=isc.LayoutSpacer.create(");
         if ((spacer.getPixelWidth() != null) ||
         		(spacer.getPixelHeight() != null) ||
-        		(spacer.getInvisibleConditionName() != null)) {
+        		(spacer.getInvisibleCondition() != null)) {
 			code.append('{');
 			size(spacer, null, code);
-			invisible(spacer.getInvisibleConditionName(), code);
+			invisible(spacer.getInvisibleCondition(), code);
 			code.setLength(code.length() - 1); // remove trailing comma
 			code.append('}');
 		}
@@ -1264,7 +1264,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		ImageFormat format = document.getDynamicImage(customer, image.getName()).getFormat();
 		code.append((format != null) ? format : ImageFormat.png).append("',");
 		size(image, null, code);
-		invisible(image.getInvisibleConditionName(), code);
+		invisible(image.getInvisibleCondition(), code);
 		Integer initialWidth = image.getImageInitialPixelWidth();
 		if (initialWidth != null) {
 			code.append("imageWidth:").append(initialWidth).append(',');
@@ -1293,7 +1293,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		code.append("type:'blurb',name:'_");
 		code.append(formatCounter++).append("',"); // _1, _2 and so on
 		size(link, null, code);
-		invisible(link.getInvisibleConditionName(), code);
+		invisible(link.getInvisibleCondition(), code);
 	}
 
 	/**
@@ -1330,7 +1330,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		result.setPixelWidth(blurb.getPixelWidth());
 		result.setPixelHeight(blurb.getPixelHeight());
 		result.setTextAlignment(blurb.getTextAlignment());
-		result.setInvisibleConditionName(blurb.getInvisibleConditionName());
+		BindUtil.copyAuthoredCondition(blurb.getXmlInvisibleCondition(), blurb.getXmlVisibleCondition(), result::setXmlInvisibleCondition, result::setXmlVisibleCondition);
 		return result;
 	}
 
@@ -1416,7 +1416,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 			code.append("textAlign:'").append(alignment.toTextAlignmentString()).append("',");
 		}
 		size(label, null, code);
-		invisible(label.getInvisibleConditionName(), code);
+		invisible(label.getInvisibleCondition(), code);
 	}
 
 	/**
@@ -1458,7 +1458,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 			code.append("textAlign:'").append(alignment.toTextAlignmentString()).append("',");
 		}
 
-		invisible(label.getInvisibleConditionName(), code);
+		invisible(label.getInvisibleCondition(), code);
 
 		String binding = label.getBinding();
 		if (binding == null) {
@@ -1689,12 +1689,12 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		if (title != null) {
 			border(escapeSmartClientText(title, shouldEscape(widget.getEscapeTitle())), null, code);
 		}
-		String postRefreshConditionName = widget.getPostRefreshConditionName();
-		if (postRefreshConditionName != null) {
-			code.append("postRefreshConditionName:'").append(postRefreshConditionName).append("',");
+		String postRefreshCondition = widget.getPostRefreshCondition();
+		if (postRefreshCondition != null) {
+			code.append("postRefreshCondition:'").append(BindUtil.conditionIdentifier(postRefreshCondition)).append("',");
 		}
 		size(widget, DEFAULT_MIN_HEIGHT_IN_PIXELS, code);
-		invisible(widget.getInvisibleConditionName(), code);
+		invisible(widget.getInvisibleCondition(), code);
 	}
 
 	/**
@@ -1711,7 +1711,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 			Attribute attribute = target.getAttribute();
 			code.append("selectedIdTrackChanges:").append(((attribute != null) && attribute.isTrackChanges())).append(',');
 		}
-		disabled(grid.getDisabledConditionName(), code);
+		disabled(grid.getDisabledCondition(), code);
 		disableCRUD(grid, code);
 		if (Boolean.FALSE.equals(grid.getShowAdd())) {
 			code.append("showAdd:false,");
@@ -1808,7 +1808,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 			Attribute attribute = target.getAttribute();
 			code.append("selectedIdTrackChanges:").append((attribute != null) && attribute.isTrackChanges()).append(',');
 		}
-		disabled(grid.getDisabledConditionName(), code);
+		disabled(grid.getDisabledCondition(), code);
 		editable(grid.getEditable(), code);
 		code.append("_fields:[");
 	}
@@ -1882,7 +1882,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 			code.append("_ordinal:'").append(Bean.ORDINAL_NAME).append("',");
 		}
 		size(widget, DEFAULT_MIN_HEIGHT_IN_PIXELS, code);
-		invisible(widget.getInvisibleConditionName(), code);
+		invisible(widget.getInvisibleCondition(), code);
 		dataWidgetFieldsIncomplete = true;
 	}
 
@@ -2087,8 +2087,8 @@ public class SmartClientViewRenderer extends ViewRenderer {
 			code.append("allowEmptyValue:true,");
 		}
 		code.append("labelAsTitle:true,");
-		disabled(checkBox.getDisabledConditionName(), code);
-		invisible(checkBox.getInvisibleConditionName(), code);
+		disabled(checkBox.getDisabledCondition(), code);
+		invisible(checkBox.getInvisibleCondition(), code);
 	}
 
 	/**
@@ -2155,8 +2155,8 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	public void renderFormColourPicker(ColourPicker colour) {
 		preProcessFormItem(colour, "color");
 		size(colour, null, code);
-		disabled(colour.getDisabledConditionName(), code);
-		invisible(colour.getInvisibleConditionName(), code);
+		disabled(colour.getDisabledCondition(), code);
+		invisible(colour.getInvisibleCondition(), code);
 	}
 
 	/**
@@ -2198,8 +2198,8 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	public void renderFormCombo(Combo combo) {
 		preProcessFormItem(combo, "select");
 		size(combo, null, code);
-		disabled(combo.getDisabledConditionName(), code);
-		invisible(combo.getInvisibleConditionName(), code);
+		disabled(combo.getDisabledCondition(), code);
+		invisible(combo.getInvisibleCondition(), code);
 	}
 
 	/**
@@ -2252,8 +2252,8 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		ContentDisplay display = content.getResolvedDisplay();
 		preProcessFormItem(content, "bizContent");
 		size(content, null, code);
-		disabled(content.getDisabledConditionName(), code);
-		invisible(content.getInvisibleConditionName(), code);
+		disabled(content.getDisabledCondition(), code);
+		invisible(content.getInvisibleCondition(), code);
 		editable(content.getEditable(), code);
 		appendContentProperties(content, display, code);
 	}
@@ -2268,8 +2268,8 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		// TODO not implemented for SC yet - use the content-image SmartClient item for now
 		preProcessFormItem(signature, "bizContentImage");
 		size(signature, null, code);
-		disabled(signature.getDisabledConditionName(), code);
-		invisible(signature.getInvisibleConditionName(), code);
+		disabled(signature.getDisabledCondition(), code);
+		invisible(signature.getInvisibleCondition(), code);
 		editable(Boolean.TRUE, code);
 	}
 
@@ -2400,8 +2400,8 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		if (mentionMarkers != null) {
 			code.append("mentionMarkers:'").append(OWASP.escapeJsStringWithHtmlFormatting(mentionMarkers)).append("',");
 		}
-		disabled(html.getDisabledConditionName(), code);
-		invisible(html.getInvisibleConditionName(), code);
+		disabled(html.getDisabledCondition(), code);
+		invisible(html.getInvisibleCondition(), code);
 	}
 
 	/**
@@ -2432,8 +2432,8 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		}
 		code.append(",_view:view,");
 		size(membership, DEFAULT_MIN_HEIGHT_IN_PIXELS, code);
-		disabled(membership.getDisabledConditionName(), code);
-		invisible(membership.getInvisibleConditionName(), code);
+		disabled(membership.getDisabledCondition(), code);
+		invisible(membership.getInvisibleCondition(), code);
 
 		containerVariables.push(variable);
 	}
@@ -2466,8 +2466,8 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		code.append(BindUtil.sanitiseBinding(comparison.getBinding()));
 		code.append("',_view:view,");
 		editable(comparison.getEditable(), code);
-		disabled(comparison.getDisabledConditionName(), code);
-		invisible(comparison.getInvisibleConditionName(), code);
+		disabled(comparison.getDisabledCondition(), code);
+		invisible(comparison.getInvisibleCondition(), code);
 		size(comparison, DEFAULT_MIN_HEIGHT_IN_PIXELS, code);
 		removeTrailingComma(code);
 		code.append("});\n");
@@ -2509,8 +2509,8 @@ public class SmartClientViewRenderer extends ViewRenderer {
 												LookupDescription lookup) {
 		SmartClientFieldDefinition def = preProcessFormItem(lookup, "bizLookupDescription");
 		size(lookup, null, code);
-		disabled(lookup.getDisabledConditionName(), code);
-		invisible(lookup.getInvisibleConditionName(), code);
+		disabled(lookup.getDisabledCondition(), code);
+		invisible(lookup.getInvisibleCondition(), code);
 		editable(lookup.getEditable(), code);
 		disableLookupComponents(lookup, code);
 		code.append("canCreate:").append(def.getLookup().getCanCreate());
@@ -2605,8 +2605,8 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		size(password, null, code);
 		// Security settings
 		code.append("autoComplete:'none',browserAutoCapitalize:false,browserAutoCorrect:false,browserSpellCheck:false,");
-		disabled(password.getDisabledConditionName(), code);
-		invisible(password.getInvisibleConditionName(), code);
+		disabled(password.getDisabledCondition(), code);
+		invisible(password.getInvisibleCondition(), code);
 	}
 
 	/**
@@ -2651,8 +2651,8 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		if (Boolean.FALSE.equals(radio.getVertical())) {
 			code.append("vertical:false,");
 		}
-		disabled(radio.getDisabledConditionName(), code);
-		invisible(radio.getInvisibleConditionName(), code);
+		disabled(radio.getDisabledCondition(), code);
+		invisible(radio.getInvisibleCondition(), code);
 	}
 
 	/**
@@ -2694,8 +2694,8 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	public void renderFormRichText(RichText text) {
 		preProcessFormItem(text, "richText");
 		size(text, DEFAULT_MIN_HEIGHT_IN_PIXELS, code);
-		disabled(text.getDisabledConditionName(), code);
-		invisible(text.getInvisibleConditionName(), code);
+		disabled(text.getDisabledCondition(), code);
+		invisible(text.getInvisibleCondition(), code);
 	}
 
 	/**
@@ -2756,8 +2756,8 @@ public class SmartClientViewRenderer extends ViewRenderer {
 			code.append("vertical:true,");
 		}
 		size(slider, null, code);
-		disabled(slider.getDisabledConditionName(), code);
-		invisible(slider.getInvisibleConditionName(), code);
+		disabled(slider.getDisabledCondition(), code);
+		invisible(slider.getInvisibleCondition(), code);
 	}
 
 	/**
@@ -2811,8 +2811,8 @@ public class SmartClientViewRenderer extends ViewRenderer {
 			code.append("step:").append(step).append(',');
 		}
 		size(spinner, null, code);
-		disabled(spinner.getDisabledConditionName(), code);
-		invisible(spinner.getInvisibleConditionName(), code);
+		disabled(spinner.getDisabledCondition(), code);
+		invisible(spinner.getInvisibleCondition(), code);
 	}
 
 	/**
@@ -2854,8 +2854,8 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	public void renderFormTextArea(TextArea text) {
 		preProcessFormItem(text, "textArea");
 		size(text, null, code);
-		disabled(text.getDisabledConditionName(), code);
-		invisible(text.getInvisibleConditionName(), code);
+		disabled(text.getDisabledCondition(), code);
+		invisible(text.getInvisibleCondition(), code);
 
 		if (Boolean.FALSE.equals(text.getEditable())) {
 			code.append("canEdit:false,");
@@ -2913,8 +2913,8 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		}
 
 		size(text, null, code);
-		disabled(text.getDisabledConditionName(), code);
-		invisible(text.getInvisibleConditionName(), code);
+		disabled(text.getDisabledCondition(), code);
+		invisible(text.getInvisibleCondition(), code);
 
 		if (Boolean.FALSE.equals(text.getEditable())) {
 			code.append("canEdit:false,");
@@ -3003,8 +3003,8 @@ public class SmartClientViewRenderer extends ViewRenderer {
 					toolTip,
 					confirmationText,
 					action.getParameters(),
-					action.getDisabledConditionName(),
-					action.getInvisibleConditionName(),
+					action.getDisabledCondition(),
+					action.getInvisibleCondition(),
 					null);
 	}
 
@@ -3037,8 +3037,8 @@ public class SmartClientViewRenderer extends ViewRenderer {
 					toolTip,
 					confirmationText,
 					action.getParameters(),
-					action.getDisabledConditionName(),
-					action.getInvisibleConditionName(),
+					action.getDisabledCondition(),
+					action.getInvisibleCondition(),
 					null);
 	}
 
@@ -3073,8 +3073,8 @@ public class SmartClientViewRenderer extends ViewRenderer {
 					toolTip,
 					confirmationText,
 					action.getParameters(),
-					action.getDisabledConditionName(),
-					action.getInvisibleConditionName(),
+					action.getDisabledCondition(),
+					action.getInvisibleCondition(),
 					Boolean.valueOf(canDelete));
 	}
 
@@ -3107,8 +3107,8 @@ public class SmartClientViewRenderer extends ViewRenderer {
 					toolTip,
 					confirmationText,
 					action.getParameters(),
-					action.getDisabledConditionName(),
-					action.getInvisibleConditionName(),
+					action.getDisabledCondition(),
+					action.getInvisibleCondition(),
 					null);
 	}
 
@@ -3141,8 +3141,8 @@ public class SmartClientViewRenderer extends ViewRenderer {
 					toolTip,
 					confirmationText,
 					action.getParameters(),
-					action.getDisabledConditionName(),
-					action.getInvisibleConditionName(),
+					action.getDisabledCondition(),
+					action.getInvisibleCondition(),
 					null);
 	}
 
@@ -3175,8 +3175,8 @@ public class SmartClientViewRenderer extends ViewRenderer {
 					toolTip,
 					confirmationText,
 					action.getParameters(),
-					action.getDisabledConditionName(),
-					action.getInvisibleConditionName(),
+					action.getDisabledCondition(),
+					action.getInvisibleCondition(),
 					null);
 	}
 
@@ -3209,8 +3209,8 @@ public class SmartClientViewRenderer extends ViewRenderer {
 					toolTip,
 					confirmationText,
 					action.getParameters(),
-					action.getDisabledConditionName(),
-					action.getInvisibleConditionName(),
+					action.getDisabledCondition(),
+					action.getInvisibleCondition(),
 					null);
 	}
 
@@ -3243,8 +3243,8 @@ public class SmartClientViewRenderer extends ViewRenderer {
 					toolTip,
 					confirmationText,
 					action.getParameters(),
-					action.getDisabledConditionName(),
-					action.getInvisibleConditionName(),
+					action.getDisabledCondition(),
+					action.getInvisibleCondition(),
 					null);
 	}
 
@@ -3277,8 +3277,8 @@ public class SmartClientViewRenderer extends ViewRenderer {
 					toolTip,
 					confirmationText,
 					action.getParameters(),
-					action.getDisabledConditionName(),
-					action.getInvisibleConditionName(),
+					action.getDisabledCondition(),
+					action.getInvisibleCondition(),
 					null);
 	}
 
@@ -3311,8 +3311,8 @@ public class SmartClientViewRenderer extends ViewRenderer {
 					toolTip,
 					confirmationText,
 					action.getParameters(),
-					action.getDisabledConditionName(),
-					action.getInvisibleConditionName(),
+					action.getDisabledCondition(),
+					action.getInvisibleCondition(),
 					null);
 	}
 
@@ -3345,8 +3345,8 @@ public class SmartClientViewRenderer extends ViewRenderer {
 					toolTip,
 					confirmationText,
 					action.getParameters(),
-					action.getDisabledConditionName(),
-					action.getInvisibleConditionName(),
+					action.getDisabledCondition(),
+					action.getInvisibleCondition(),
 					null);
 	}
 
@@ -3379,8 +3379,8 @@ public class SmartClientViewRenderer extends ViewRenderer {
 					toolTip,
 					confirmationText,
 					action.getParameters(),
-					action.getDisabledConditionName(),
-					action.getInvisibleConditionName(),
+					action.getDisabledCondition(),
+					action.getInvisibleCondition(),
 					null);
 	}
 
@@ -3413,8 +3413,8 @@ public class SmartClientViewRenderer extends ViewRenderer {
 					toolTip,
 					confirmationText,
 					action.getParameters(),
-					action.getDisabledConditionName(),
-					action.getInvisibleConditionName(),
+					action.getDisabledCondition(),
+					action.getInvisibleCondition(),
 					null);
 	}
 
@@ -3447,8 +3447,8 @@ public class SmartClientViewRenderer extends ViewRenderer {
 					toolTip,
 					confirmationText,
 					action.getParameters(),
-					action.getDisabledConditionName(),
-					action.getInvisibleConditionName(),
+					action.getDisabledCondition(),
+					action.getInvisibleCondition(),
 					null,
 					resolveActionUploadCapture(action).name());
 	}
@@ -3482,8 +3482,8 @@ public class SmartClientViewRenderer extends ViewRenderer {
 					toolTip,
 					confirmationText,
 					action.getParameters(),
-					action.getDisabledConditionName(),
-					action.getInvisibleConditionName(),
+					action.getDisabledCondition(),
+					action.getInvisibleCondition(),
 					null);
 	}
 
@@ -3516,8 +3516,8 @@ public class SmartClientViewRenderer extends ViewRenderer {
 					toolTip,
 					confirmationText,
 					action.getParameters(),
-					action.getDisabledConditionName(),
-					action.getInvisibleConditionName(),
+					action.getDisabledCondition(),
+					action.getInvisibleCondition(),
 					null);
 	}
 
@@ -3550,8 +3550,8 @@ public class SmartClientViewRenderer extends ViewRenderer {
 					toolTip,
 					confirmationText,
 					action.getParameters(),
-					action.getDisabledConditionName(),
-					action.getInvisibleConditionName(),
+					action.getDisabledCondition(),
+					action.getInvisibleCondition(),
 					null);
 	}
 
@@ -3915,7 +3915,9 @@ public class SmartClientViewRenderer extends ViewRenderer {
 												boolean parentVisible,
 												boolean parentEnabled) {
 		code.append("view.setDisabled('").append(BindUtil.sanitiseBinding(setDisabled.getBinding()));
-		code.append("','").append(setDisabled.getDisabledConditionName()).append("');");
+		// NB the condition is mandatory but that is only enforced by view validation
+		String disabledCondition = setDisabled.getDisabledCondition();
+		code.append("','").append((disabledCondition == null) ? null : BindUtil.conditionIdentifier(disabledCondition)).append("');");
 	}
 
 	/**
@@ -3930,7 +3932,9 @@ public class SmartClientViewRenderer extends ViewRenderer {
 												boolean parentVisible,
 												boolean parentEnabled) {
 		code.append("view.setInvisible('").append(BindUtil.sanitiseBinding(setInvisible.getBinding()));
-		code.append("','").append(setInvisible.getInvisibleConditionName()).append("');");
+		// NB the condition is mandatory but that is only enforced by view validation
+		String invisibleCondition = setInvisible.getInvisibleCondition();
+		code.append("','").append((invisibleCondition == null) ? null : BindUtil.conditionIdentifier(invisibleCondition)).append("');");
 	}
 
 	/**
@@ -4130,21 +4134,21 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 * @param builder JavaScript buffer receiving action-disable properties
 	 */
 	private static void disableCRUD(DisableableCRUDGrid grid, StringBuilder builder) {
-		String disabledCRUDCondition = grid.getDisableAddConditionName();
+		String disabledCRUDCondition = grid.getDisableAddCondition();
 		if (disabledCRUDCondition != null) {
-			builder.append("disableAddConditionName:'").append(disabledCRUDCondition).append("',");
+			builder.append("disableAddCondition:'").append(BindUtil.conditionIdentifier(disabledCRUDCondition)).append("',");
 		}
-		disabledCRUDCondition = grid.getDisableZoomConditionName();
+		disabledCRUDCondition = grid.getDisableZoomCondition();
 		if (disabledCRUDCondition != null) {
-			builder.append("disableZoomConditionName:'").append(disabledCRUDCondition).append("',");
+			builder.append("disableZoomCondition:'").append(BindUtil.conditionIdentifier(disabledCRUDCondition)).append("',");
 		}
-		disabledCRUDCondition = grid.getDisableEditConditionName();
+		disabledCRUDCondition = grid.getDisableEditCondition();
 		if (disabledCRUDCondition != null) {
-			builder.append("disableEditConditionName:'").append(disabledCRUDCondition).append("',");
+			builder.append("disableEditCondition:'").append(BindUtil.conditionIdentifier(disabledCRUDCondition)).append("',");
 		}
-		disabledCRUDCondition = grid.getDisableRemoveConditionName();
+		disabledCRUDCondition = grid.getDisableRemoveCondition();
 		if (disabledCRUDCondition != null) {
-			builder.append("disableRemoveConditionName:'").append(disabledCRUDCondition).append("',");
+			builder.append("disableRemoveCondition:'").append(BindUtil.conditionIdentifier(disabledCRUDCondition)).append("',");
 		}
 	}
 
@@ -4155,21 +4159,21 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 * @param builder JavaScript buffer receiving action-disable properties
 	 */
 	private static void disableLookupComponents(LookupDescription lookup, StringBuilder builder) {
-		String disabledCondition = lookup.getDisablePickConditionName();
+		String disabledCondition = lookup.getDisablePickCondition();
 		if (disabledCondition != null) {
-			builder.append("disablePickConditionName:'").append(disabledCondition).append("',");
+			builder.append("disablePickCondition:'").append(BindUtil.conditionIdentifier(disabledCondition)).append("',");
 		}
-		disabledCondition = lookup.getDisableEditConditionName();
+		disabledCondition = lookup.getDisableEditCondition();
 		if (disabledCondition != null) {
-			builder.append("disableEditConditionName:'").append(disabledCondition).append("',");
+			builder.append("disableEditCondition:'").append(BindUtil.conditionIdentifier(disabledCondition)).append("',");
 		}
-		disabledCondition = lookup.getDisableAddConditionName();
+		disabledCondition = lookup.getDisableAddCondition();
 		if (disabledCondition != null) {
-			builder.append("disableAddConditionName:'").append(disabledCondition).append("',");
+			builder.append("disableAddCondition:'").append(BindUtil.conditionIdentifier(disabledCondition)).append("',");
 		}
-		disabledCondition = lookup.getDisableClearConditionName();
+		disabledCondition = lookup.getDisableClearCondition();
 		if (disabledCondition != null) {
-			builder.append("disableClearConditionName:'").append(disabledCondition).append("',");
+			builder.append("disableClearCondition:'").append(BindUtil.conditionIdentifier(disabledCondition)).append("',");
 		}
 	}
 
@@ -4206,26 +4210,32 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	}
 
 	/**
-	 * Appends a disabled-condition binding when configured.
+	 * Appends the {@code disabledCondition} property when a condition is configured.
 	 *
-	 * @param disabledConditionName condition binding name, or null
+	 * <p>A condition name is written as it is; an inline condition expression is written as its identifier
+	 * (see {@link BindUtil#conditionIdentifier(String)}), which is the key its value has in the instance data.
+	 *
+	 * @param disabledCondition the derived disabled condition, or null
 	 * @param builder JavaScript buffer receiving the property
 	 */
-	private static void disabled(String disabledConditionName, StringBuilder builder) {
-		if (disabledConditionName != null) {
-			builder.append("disabledConditionName:'").append(disabledConditionName).append("',");
+	private static void disabled(String disabledCondition, StringBuilder builder) {
+		if (disabledCondition != null) {
+			builder.append("disabledCondition:'").append(BindUtil.conditionIdentifier(disabledCondition)).append("',");
 		}
 	}
 
 	/**
-	 * Appends an invisible-condition binding when configured.
+	 * Appends the {@code invisibleCondition} property when a condition is configured.
 	 *
-	 * @param invisibleConditionName condition binding name, or null
+	 * <p>A condition name is written as it is; an inline condition expression is written as its identifier
+	 * (see {@link BindUtil#conditionIdentifier(String)}), which is the key its value has in the instance data.
+	 *
+	 * @param invisibleCondition the derived invisible condition, or null
 	 * @param builder JavaScript buffer receiving the property
 	 */
-	private static void invisible(String invisibleConditionName, StringBuilder builder) {
-		if (invisibleConditionName != null) {
-			builder.append("invisibleConditionName:'").append(invisibleConditionName).append("',");
+	private static void invisible(String invisibleCondition, StringBuilder builder) {
+		if (invisibleCondition != null) {
+			builder.append("invisibleCondition:'").append(BindUtil.conditionIdentifier(invisibleCondition)).append("',");
 		}
 	}
 
@@ -4264,8 +4274,8 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 * @param tooltip optional tooltip text
 	 * @param confirmationText optional confirmation message
 	 * @param parameters action parameters
-	 * @param disabledConditionName optional disabled condition binding
-	 * @param invisibleConditionName optional invisible condition binding
+	 * @param disabledCondition optional disabled condition binding
+	 * @param invisibleCondition optional invisible condition binding
 	 * @param canDelete delete permission used for remove actions
 	 */
 	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
@@ -4279,8 +4289,8 @@ public class SmartClientViewRenderer extends ViewRenderer {
 							String tooltip,
 							String confirmationText,
 							List<Parameter> parameters,
-							String disabledConditionName,
-							String invisibleConditionName,
+							String disabledCondition,
+							String invisibleCondition,
 							Boolean canDelete) { // null unless its a remove button
 		addAction(actionName,
 					implicitName,
@@ -4292,8 +4302,8 @@ public class SmartClientViewRenderer extends ViewRenderer {
 					tooltip,
 					confirmationText,
 					parameters,
-					disabledConditionName,
-					invisibleConditionName,
+					disabledCondition,
+					invisibleCondition,
 					canDelete,
 					null);
 	}
@@ -4312,8 +4322,8 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 * @param tooltip optional tooltip text
 	 * @param confirmationText optional confirmation message
 	 * @param parameters action parameters
-	 * @param disabledConditionName optional disabled condition binding
-	 * @param invisibleConditionName optional invisible condition binding
+	 * @param disabledCondition optional disabled condition binding
+	 * @param invisibleCondition optional invisible condition binding
 	 * @param canDelete delete permission used for remove actions
 	 * @param uploadCapture optional upload capture enum name; {@code null} for non-upload actions
 	 */
@@ -4328,8 +4338,8 @@ public class SmartClientViewRenderer extends ViewRenderer {
 							String tooltip,
 							String confirmationText,
 							List<Parameter> parameters,
-							String disabledConditionName,
-							String invisibleConditionName,
+							String disabledCondition,
+							String invisibleCondition,
 							Boolean canDelete,
 							String uploadCapture) { // null unless its an upload button
 		if (! Boolean.FALSE.equals(inActionPanel) &&
@@ -4347,8 +4357,8 @@ public class SmartClientViewRenderer extends ViewRenderer {
 												confirmationText,
 												getActionEscapeConfirm(),
 												parameters,
-												disabledConditionName,
-												invisibleConditionName,
+												disabledCondition,
+												invisibleCondition,
 												null,
 												canDelete);
 			if (uploadCapture != null) {
@@ -4438,8 +4448,8 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		}
 
 		size(zoomIn, null, result);
-		disabled(zoomIn.getDisabledConditionName(), result);
-		invisible(zoomIn.getInvisibleConditionName(), result);
+		disabled(zoomIn.getDisabledCondition(), result);
+		invisible(zoomIn.getInvisibleCondition(), result);
 
 		if (toolTip != null) {
 			result.append("tooltip:'")
@@ -4467,8 +4477,8 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 * @param confirmationText optional confirmation message
 	 * @param escapeConfirm whether the confirmation message should be escaped
 	 * @param parameters action parameters
-	 * @param disabledConditionName optional disabled condition binding
-	 * @param invisibleConditionName optional invisible condition binding
+	 * @param disabledCondition optional disabled condition binding
+	 * @param invisibleCondition optional invisible condition binding
 	 * @param button source button metadata when rendering declared buttons
 	 * @param canDelete delete permission used for remove actions
 	 * @return JavaScript constructor expression for the button
@@ -4486,8 +4496,8 @@ public class SmartClientViewRenderer extends ViewRenderer {
 									String confirmationText,
 									boolean escapeConfirm,
 									List<Parameter> parameters,
-									String disabledConditionName,
-									String invisibleConditionName,
+									String disabledCondition,
+									String invisibleCondition,
 									Button button, // null if called from an action defn
 									Boolean canDelete) { // null for anything but remove button
 		StringBuilder result = new StringBuilder(128);
@@ -4517,8 +4527,8 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		if (button != null) {
 			size(button, null, result);
 		}
-		disabled(disabledConditionName, result);
-		invisible(invisibleConditionName, result);
+		disabled(disabledCondition, result);
+		invisible(invisibleCondition, result);
 		if (toolTip != null) {
 			result.append("tooltip:'").append(escapeSmartClientText(toolTip, escapeToolTip)).append("',");
 		}
@@ -5119,7 +5129,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	public void renderSidebar(Sidebar sidebar) {
 		String variable = "v" + variableCounter++;
 		code.append("var ").append(variable).append("=isc.BizVBox.create({width:'100%',height:'100%',");
-		invisible(sidebar.getInvisibleConditionName(), code);
+		invisible(sidebar.getInvisibleCondition(), code);
 		removeTrailingComma(code);
 		code.append("});\n");
 

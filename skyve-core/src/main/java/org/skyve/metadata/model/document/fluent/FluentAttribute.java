@@ -117,6 +117,8 @@ public abstract class FluentAttribute<T extends FluentAttribute<T>> {
 			}
 		}
 
+		attribute.getProperties().entrySet().forEach(p -> putProperty(p.getKey(), p.getValue()));
+
 		return (T) this;
 	}
 	
@@ -319,6 +321,20 @@ public abstract class FluentAttribute<T extends FluentAttribute<T>> {
 			reference.setWidget(widget.get());
 		}
 		get().setDefaultWidgetReference(reference);
+		return (T) this;
+	}
+
+	/**
+	 * Adds or replaces a custom property on the wrapped metadata.
+	 * Properties keep the order in which they were first added.
+	 *
+	 * @param k the property name
+	 * @param v the property value
+	 * @return this builder
+	 */
+	@SuppressWarnings("unchecked")
+	public @Nonnull T putProperty(@Nonnull String k, @Nonnull String v) {
+		get().getProperties().put(k, v);
 		return (T) this;
 	}
 

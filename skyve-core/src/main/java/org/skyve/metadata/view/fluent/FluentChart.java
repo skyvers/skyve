@@ -1,8 +1,12 @@
 package org.skyve.metadata.view.fluent;
 
+import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.metadata.view.model.chart.ChartBuilderMetaData;
 import org.skyve.impl.metadata.view.widget.Chart;
 import org.skyve.impl.metadata.view.widget.Chart.ChartType;
+
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 
 /**
  * Builds {@link Chart} widget metadata using a fluent API.
@@ -30,13 +34,12 @@ public class FluentChart extends FluentWidget implements FluentRelativeSize<Flue
 	 * Copies chart metadata into this fluent builder.
 	 */
 	public FluentChart from(@SuppressWarnings("hiding") Chart chart) {
-
 		type(chart.getType());
 		modelName(chart.getModelName());
 		model(chart.getModel());
-		invisibleConditionName(chart.getInvisibleConditionName());
-
+		BindUtil.copyAuthoredCondition(chart.getXmlInvisibleCondition(), chart.getXmlVisibleCondition(), this::invisibleCondition, this::visibleCondition);
 		relativeSize(chart, this);
+		chart.getProperties().entrySet().forEach(p -> putProperty(p.getKey(), p.getValue()));
 
 		return this;
 	}
@@ -64,13 +67,26 @@ public class FluentChart extends FluentWidget implements FluentRelativeSize<Flue
 	}
 
 	/**
-	 * Sets the condition name used to hide this chart when it evaluates to true.
+	 * Sets the {@code invisible} condition as authored; the opposite sense of {@link #visibleCondition(String)}.
 	 *
-	 * @param invisibleConditionName the invisibility condition name
+	 * @param invisibleCondition
+	 *            a condition name, an inline condition expression or a boolean literal
 	 * @return this builder
 	 */
-	public FluentChart invisibleConditionName(String invisibleConditionName) {
-		chart.setInvisibleConditionName(invisibleConditionName);
+	public @Nonnull FluentChart invisibleCondition(@Nullable String invisibleCondition) {
+		chart.setXmlInvisibleCondition(invisibleCondition);
+		return this;
+	}
+
+	/**
+	 * Sets the {@code visible} condition as authored; the opposite sense of {@link #invisibleCondition(String)}.
+	 *
+	 * @param visibleCondition
+	 *            a condition name, an inline condition expression or a boolean literal
+	 * @return this builder
+	 */
+	public @Nonnull FluentChart visibleCondition(@Nullable String visibleCondition) {
+		chart.setXmlVisibleCondition(visibleCondition);
 		return this;
 	}
 
@@ -238,6 +254,19 @@ public class FluentChart extends FluentWidget implements FluentRelativeSize<Flue
 	@Override
 	public FluentChart xl(int xl) {
 		chart.setXl(Integer.valueOf(xl));
+		return this;
+	}
+
+	/**
+	 * Adds or replaces a custom property on the wrapped metadata.
+	 * Properties keep the order in which they were first added.
+	 *
+	 * @param k the property name
+	 * @param v the property value
+	 * @return this builder
+	 */
+	public @Nonnull FluentChart putProperty(@Nonnull String k, @Nonnull String v) {
+		chart.getProperties().put(k, v);
 		return this;
 	}
 

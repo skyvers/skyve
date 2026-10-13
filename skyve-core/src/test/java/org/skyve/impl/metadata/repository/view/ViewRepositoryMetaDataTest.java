@@ -67,10 +67,10 @@ class ViewRepositoryMetaDataTest {
 	}
 
 	@Test
-	void viewRefreshConditionRoundTrips() {
+	void viewRefreshIfConditionRoundTrips() {
 		ViewMetaData v = new ViewMetaData();
-		v.setRefreshConditionName("needsRefresh");
-		assertThat(v.getRefreshConditionName(), is("needsRefresh"));
+		v.setRefreshIfCondition("needsRefresh");
+		assertThat(v.getRefreshIfCondition(), is("needsRefresh"));
 	}
 
 	@Test
@@ -160,15 +160,15 @@ class ViewRepositoryMetaDataTest {
 	@Test
 	void customActionInvisibleConditionRoundTrips() {
 		CustomAction a = new CustomAction();
-		a.setInvisibleConditionName("notVisible");
-		assertThat(a.getInvisibleConditionName(), is("notVisible"));
+		a.setXmlInvisibleCondition("notVisible");
+		assertThat(a.getInvisibleCondition(), is("notVisible"));
 	}
 
 	@Test
 	void customActionDisabledConditionRoundTrips() {
 		CustomAction a = new CustomAction();
-		a.setDisabledConditionName("isDisabled");
-		assertThat(a.getDisabledConditionName(), is("isDisabled"));
+		a.setXmlDisabledCondition("isDisabled");
+		assertThat(a.getDisabledCondition(), is("isDisabled"));
 	}
 
 	@Test

@@ -2,6 +2,8 @@ package org.skyve.metadata.view.fluent;
 
 import org.skyve.impl.metadata.view.widget.bound.input.ListMembership;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * Builds {@link ListMembership} input widget metadata.
  */
@@ -41,6 +43,9 @@ public class FluentListMembership extends FluentInputWidget<FluentListMembership
 		list.getChangedActions().forEach(c -> addChangedAction(FluentEventAction.from(c)));
 
 		super.from(list);
+		
+		list.getProperties().entrySet().forEach(p -> putProperty(p.getKey(), p.getValue()));
+		
 		return this;
 	}
 
@@ -117,6 +122,19 @@ public class FluentListMembership extends FluentInputWidget<FluentListMembership
 	 */
 	public FluentListMembership addChangedAction(FluentEventAction action) {
 		list.getChangedActions().add(action.get());
+		return this;
+	}
+
+	/**
+	 * Adds or replaces a custom property on the wrapped metadata.
+	 * Properties keep the order in which they were first added.
+	 *
+	 * @param k the property name
+	 * @param v the property value
+	 * @return this builder
+	 */
+	public @Nonnull FluentListMembership putProperty(@Nonnull String k, @Nonnull String v) {
+		list.getProperties().put(k, v);
 		return this;
 	}
 

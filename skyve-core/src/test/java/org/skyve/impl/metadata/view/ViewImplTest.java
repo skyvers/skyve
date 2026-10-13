@@ -30,10 +30,10 @@ class ViewImplTest {
 	}
 
 	@Test
-	void setRefreshConditionNameRoundtrips() {
+	void setRefreshIfConditionRoundtrips() {
 		ViewImpl v = new ViewImpl();
-		v.setRefreshConditionName("myCondition");
-		assertEquals("myCondition", v.getRefreshConditionName());
+		v.setRefreshIfCondition("myCondition");
+		assertEquals("myCondition", v.getRefreshIfCondition());
 	}
 
 	@Test

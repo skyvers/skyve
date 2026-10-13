@@ -13,7 +13,7 @@ public class FluentSpinner extends FluentTextField {
 	 * Creates a builder backed by a new {@link Spinner}.
 	 */
 	public FluentSpinner() {
-		spinner = new Spinner();
+		this(new Spinner());
 	}
 
 	/**
@@ -23,6 +23,7 @@ public class FluentSpinner extends FluentTextField {
 	 *            the metadata instance to mutate
 	 */
 	public FluentSpinner(Spinner spinner) {
+		super(spinner);
 		this.spinner = spinner;
 	}
 

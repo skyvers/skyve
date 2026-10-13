@@ -1,10 +1,14 @@
 package org.skyve.metadata.view.fluent;
 
+import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.metadata.view.HorizontalAlignment;
 import org.skyve.impl.metadata.view.ShrinkWrap;
 import org.skyve.impl.metadata.view.VerticalAlignment;
 import org.skyve.impl.metadata.view.container.Collapsible;
 import org.skyve.impl.metadata.view.container.VBox;
+
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 
 /**
  * Fluent builder for vertical box container metadata.
@@ -49,10 +53,12 @@ public class FluentVBox extends FluentContainer<FluentVBox> implements FluentBox
 		horizontalAlignment(box.getHorizontalAlignment());
 		verticalAlignment(box.getVerticalAlignment());
 
-		invisibleConditionName(box.getInvisibleConditionName());
+		BindUtil.copyAuthoredCondition(box.getXmlInvisibleCondition(), box.getXmlVisibleCondition(), this::invisibleCondition, this::visibleCondition);
 		
 		super.from(box);
 		
+		box.getProperties().entrySet().forEach(p -> putProperty(p.getKey(), p.getValue()));
+
 		return this;
 	}
 	
@@ -359,14 +365,39 @@ public class FluentVBox extends FluentContainer<FluentVBox> implements FluentBox
 	}
 	
 	/**
-	 * Sets the condition name that hides this box when true.
+	 * Sets the {@code invisible} condition as authored; the opposite sense of {@link #visibleCondition(String)}.
 	 *
-	 * @param invisibleConditionName
-	 *            invisibility condition identifier
+	 * @param invisibleCondition
+	 *            a condition name, an inline condition expression or a boolean literal
 	 * @return this builder
 	 */
-	public FluentVBox invisibleConditionName(String invisibleConditionName) {
-		box.setInvisibleConditionName(invisibleConditionName);
+	public @Nonnull FluentVBox invisibleCondition(@Nullable String invisibleCondition) {
+		box.setXmlInvisibleCondition(invisibleCondition);
+		return this;
+	}
+
+	/**
+	 * Sets the {@code visible} condition as authored; the opposite sense of {@link #invisibleCondition(String)}.
+	 *
+	 * @param visibleCondition
+	 *            a condition name, an inline condition expression or a boolean literal
+	 * @return this builder
+	 */
+	public @Nonnull FluentVBox visibleCondition(@Nullable String visibleCondition) {
+		box.setXmlVisibleCondition(visibleCondition);
+		return this;
+	}
+
+	/**
+	 * Adds or replaces a custom property on the wrapped metadata.
+	 * Properties keep the order in which they were first added.
+	 *
+	 * @param k the property name
+	 * @param v the property value
+	 * @return this builder
+	 */
+	public @Nonnull FluentVBox putProperty(@Nonnull String k, @Nonnull String v) {
+		box.getProperties().put(k, v);
 		return this;
 	}
 

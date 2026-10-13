@@ -205,7 +205,7 @@ public class TabularLayoutBuilder extends LayoutBuilder {
 										null, // the parent container sets the percentage width
 										vbox.getPixelHeight(),
 										vbox.getPercentageHeight(),
-										vbox.getInvisibleConditionName(),
+										vbox.getInvisibleCondition(),
 										vbox.getWidgetId());
 		result.setColumns(1);
 		return result;
@@ -230,7 +230,7 @@ public class TabularLayoutBuilder extends LayoutBuilder {
 							null, // the parent container sets the percentage width
 							hbox.getPixelHeight(),
 							hbox.getPercentageHeight(),
-							hbox.getInvisibleConditionName(),
+							hbox.getInvisibleCondition(),
 							hbox.getWidgetId());
 	}
 
@@ -248,7 +248,7 @@ public class TabularLayoutBuilder extends LayoutBuilder {
 			return component;
 		}
 
-		HtmlPanelGroup result = panelGroup(false, false, true, sidebar.getInvisibleConditionName(), sidebar.getWidgetId());
+		HtmlPanelGroup result = panelGroup(false, false, true, sidebar.getInvisibleCondition(), sidebar.getWidgetId());
 		result.setStyleClass("sidebar" + (createView ? "Create" : "Edit"));
 		result.setStyle("display:none"); // shown by JS in SKYVE.PF.sidebar()
 		HtmlPanelGroup inner = panelGroup(false, false, true, null, null);
@@ -261,10 +261,9 @@ public class TabularLayoutBuilder extends LayoutBuilder {
 		rendered.append('(').append(managedBeanName).append(".currentBean ne null) and (");
 		rendered.append(managedBeanName).append(".currentBean.getBean() ne null) and (not ");
 		rendered.append(managedBeanName).append(".currentBean['").append(createView  ? "created" : "notCreated").append("'])");
-		String invisibleConditionName = sidebar.getInvisibleConditionName();
-		if (invisibleConditionName != null) {
-			rendered.append(" and (not ").append(managedBeanName).append(".currentBean['");
-			rendered.append(invisibleConditionName).append("'])");
+		String invisibleCondition = sidebar.getInvisibleCondition();
+		if (invisibleCondition != null) {
+			rendered.append(" and (not ").append(createConditionFragment(managedBeanName + ".currentBean", invisibleCondition)).append(')');
 		}
 		result.setValueExpression("rendered",
 									createValueExpressionFromFragment(null,
@@ -298,7 +297,7 @@ public class TabularLayoutBuilder extends LayoutBuilder {
 							null, // the parent container sets the percentage width
 							form.getPixelHeight(), 
 							form.getPercentageHeight(),
-							form.getInvisibleConditionName(),
+							form.getInvisibleCondition(),
 							form.getWidgetId());
 	}
 	
@@ -472,7 +471,7 @@ public class TabularLayoutBuilder extends LayoutBuilder {
 		HtmlPanelGrid result = (HtmlPanelGrid) a.createComponent(HtmlPanelGrid.COMPONENT_TYPE);
 		setId(result, null);
 		result.setColumns(1);
-		setInvisible(result, signature.getInvisibleConditionName(), null);
+		setInvisible(result, signature.getInvisibleCondition(), null);
 		return result;
 	}
 
@@ -602,7 +601,7 @@ public class TabularLayoutBuilder extends LayoutBuilder {
 	 * @param percentageWidth optional percentage width
 	 * @param pixelHeight optional pixel height
 	 * @param percentageHeight optional percentage height
-	 * @param invisibleConditionName invisible condition name
+	 * @param invisibleCondition invisible condition name
 	 * @param widgetId widget id
 	 * @return configured panel grid
 	 */
@@ -611,10 +610,10 @@ public class TabularLayoutBuilder extends LayoutBuilder {
 									Integer percentageWidth, 
 									Integer pixelHeight,
 									Integer percentageHeight,
-									String invisibleConditionName,
+									String invisibleCondition,
 									String widgetId) {
 		PanelGrid result = (PanelGrid) a.createComponent(PanelGrid.COMPONENT_TYPE);
-		setInvisible(result, invisibleConditionName, null);
+		setInvisible(result, invisibleCondition, null);
 		setSizeAndTextAlignStyle(result, 
 									null, 
 									pixelWidth, 
@@ -636,7 +635,7 @@ public class TabularLayoutBuilder extends LayoutBuilder {
 	 * @param percentageWidth optional percentage width
 	 * @param pixelHeight optional pixel height
 	 * @param percentageHeight optional percentage height
-	 * @param invisibleConditionName invisible condition name
+	 * @param invisibleCondition invisible condition name
 	 * @param widgetId widget id
 	 * @return configured panel
 	 */
@@ -645,10 +644,10 @@ public class TabularLayoutBuilder extends LayoutBuilder {
 							Integer percentageWidth, 
 							Integer pixelHeight,
 							Integer percentageHeight,
-							String invisibleConditionName,
+							String invisibleCondition,
 							String widgetId) {
 		Panel result = (Panel) a.createComponent(Panel.COMPONENT_TYPE);
-		setInvisible(result, invisibleConditionName, null);
+		setInvisible(result, invisibleCondition, null);
 		setSizeAndTextAlignStyle(result, 
 									null, 
 									pixelWidth, 

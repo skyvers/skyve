@@ -2,6 +2,8 @@ package org.skyve.metadata.view.fluent;
 
 import org.skyve.impl.metadata.view.widget.bound.input.Slider;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * Builds {@link Slider} widget metadata using a fluent API.
  */
@@ -56,10 +58,12 @@ public class FluentSlider extends FluentChangeableInputWidget<FluentSlider>
 		}
 
 		absoluteSize(slider, this);
-
 		constrainableHeight(slider, this);
 
 		super.from(slider);
+
+		slider.getProperties().entrySet().forEach(p -> putProperty(p.getKey(), p.getValue()));
+		
 		return this;
 	}
 
@@ -163,6 +167,19 @@ public class FluentSlider extends FluentChangeableInputWidget<FluentSlider>
 	@Override
 	public FluentSlider maxPixelHeight(int maxPixelHeight) {
 		slider.setMaxPixelHeight(Integer.valueOf(maxPixelHeight));
+		return this;
+	}
+
+	/**
+	 * Adds or replaces a custom property on the wrapped metadata.
+	 * Properties keep the order in which they were first added.
+	 *
+	 * @param k the property name
+	 * @param v the property value
+	 * @return this builder
+	 */
+	public @Nonnull FluentSlider putProperty(@Nonnull String k, @Nonnull String v) {
+		slider.getProperties().put(k, v);
 		return this;
 	}
 

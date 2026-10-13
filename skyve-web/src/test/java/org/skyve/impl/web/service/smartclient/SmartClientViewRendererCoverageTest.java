@@ -16,6 +16,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.skyve.domain.Bean;
+import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.generate.ViewRenderer;
 import org.skyve.impl.metadata.MetadataIconResolver.ResolvedIcon;
 import org.skyve.impl.metadata.controller.CustomisationsStaticSingleton;
@@ -179,7 +180,7 @@ class SmartClientViewRendererCoverageTest {
 		renderer.renderedView(NO_ICON);
 
 		String code = renderer.getCode().toString();
-		assertTrue(code.contains("var v0=isc.DynamicForm.create({invisibleConditionName:'true'});"));
+		assertTrue(code.contains("var v0=isc.DynamicForm.create({invisibleCondition:'true'});"));
 		assertTrue(code.contains("view._vm.addMember(v0);"));
 		assertTrue(code.contains("view.addContained(v0);"));
 	}
@@ -283,6 +284,32 @@ class SmartClientViewRendererCoverageTest {
 	}
 
 	@Test
+	void renderTabWithInlineConditionsWritesIdentifiersAndNeverTheExpressions() {
+		when(view.getName()).thenReturn("edit");
+		when(view.getSidebar()).thenReturn(null);
+
+		SmartClientViewRenderer renderer = new SmartClientViewRenderer(user, module, document, view, "desktop", false);
+		renderer.renderView(NO_ICON);
+
+		TabPane tabPane = new TabPane();
+		renderer.renderTabPane(tabPane);
+
+		Tab tab = new Tab();
+		tab.setXmlDisabledCondition("{el:bean.text eq 'a'}");
+		tab.setXmlVisibleCondition("{role:admin.BasicUser}");
+
+		renderer.renderTab("Overview", null, tab);
+		renderer.renderedTab("Overview", null, tab);
+		renderer.renderedTabPane(tabPane);
+
+		String code = renderer.getCode().toString();
+		assertTrue(code.contains("disabledCondition:'" + BindUtil.conditionIdentifier("{el:bean.text eq 'a'}") + "'"), code);
+		assertTrue(code.contains("invisibleCondition:'not" + BindUtil.conditionIdentifier("{role:admin.BasicUser}") + "'"), code);
+		assertFalse(code.contains("{el:"), code);
+		assertFalse(code.contains("{role:"), code);
+	}
+
+	@Test
 	void renderTabPaneAndTabWithIconStyleWritesSelectedBindingAndTabMetadata() {
 		when(view.getName()).thenReturn("edit");
 		when(view.getSidebar()).thenReturn(null);
@@ -296,8 +323,8 @@ class SmartClientViewRendererCoverageTest {
 
 		Tab tab = new Tab();
 		tab.setIconStyleClass("fa-solid fa-star");
-		tab.setDisabledConditionName("bean.tabDisabled");
-		tab.setInvisibleConditionName("bean.tabHidden");
+		tab.setXmlDisabledCondition("bean.tabDisabled");
+		tab.setXmlInvisibleCondition("bean.tabHidden");
 
 		renderer.renderTab("Overview", null, tab);
 		renderer.renderedTab("Overview", null, tab);
@@ -307,8 +334,8 @@ class SmartClientViewRendererCoverageTest {
 		assertTrue(code.contains("selectedTabIndexBinding:'bean_currentTab'"), code);
 		assertTrue(code.contains(".addBizTab({name:'0'"), code);
 		assertTrue(code.contains("<i class=\"bizhubFontIcon fa-solid fa-star\"></i><span> &nbsp;</span>Overview"), code);
-		assertTrue(code.contains("disabledConditionName:'bean.tabDisabled'"), code);
-		assertTrue(code.contains("invisibleConditionName:'bean.tabHidden'"), code);
+		assertTrue(code.contains("disabledCondition:'bean.tabDisabled'"), code);
+		assertTrue(code.contains("invisibleCondition:'bean.tabHidden'"), code);
 	}
 
 	@Test
@@ -433,14 +460,14 @@ class SmartClientViewRendererCoverageTest {
 		renderer.renderView(NO_ICON);
 
 		TabPane tabPane = new TabPane();
-		tabPane.setDisabledConditionName("bean.tabPaneDisabled");
-		tabPane.setInvisibleConditionName("bean.tabPaneHidden");
+		tabPane.setXmlDisabledCondition("bean.tabPaneDisabled");
+		tabPane.setXmlInvisibleCondition("bean.tabPaneHidden");
 		renderer.renderTabPane(tabPane);
 		renderer.renderedTabPane(tabPane);
 
 		String code = renderer.getCode().toString();
-		assertTrue(code.contains("disabledConditionName:'bean.tabPaneDisabled'"), code);
-		assertTrue(code.contains("invisibleConditionName:'bean.tabPaneHidden'"), code);
+		assertTrue(code.contains("disabledCondition:'bean.tabPaneDisabled'"), code);
+		assertTrue(code.contains("invisibleCondition:'bean.tabPaneHidden'"), code);
 	}
 
 	@Test
@@ -538,7 +565,7 @@ class SmartClientViewRendererCoverageTest {
 		Spacer spacer = new Spacer();
 		spacer.setPixelWidth(Integer.valueOf(12));
 		spacer.setPixelHeight(Integer.valueOf(8));
-		spacer.setInvisibleConditionName("bean.hideSpacer");
+		spacer.setXmlInvisibleCondition("bean.hideSpacer");
 		renderer.renderSpacer(spacer);
 
 		StaticImage image = new StaticImage();
@@ -551,7 +578,7 @@ class SmartClientViewRendererCoverageTest {
 		renderer.renderLabel("Contact summary", false, label);
 
 		String code = renderer.getCode().toString();
-		assertTrue(code.contains("isc.LayoutSpacer.create({width:12,height:8,invisibleConditionName:'bean.hideSpacer'})"), code);
+		assertTrue(code.contains("isc.LayoutSpacer.create({width:12,height:8,invisibleCondition:'bean.hideSpacer'})"), code);
 		assertTrue(code.contains("isc.BizImage.create({modoc:'admin.Contact',file:'images/contact.png',width:64})"), code);
 		assertTrue(code.contains("isc.BizLabel.create({width:'100%',textAlign:'right',value:'Contact summary'});"), code);
 	}
@@ -584,8 +611,8 @@ class SmartClientViewRendererCoverageTest {
 		Geometry geometry = new Geometry();
 		geometry.setBinding("area");
 		geometry.setType(GeometryInputType.polygon);
-		geometry.setDisabledConditionName("areaDisabled");
-		geometry.setInvisibleConditionName("areaHidden");
+		geometry.setXmlDisabledCondition("areaDisabled");
+		geometry.setXmlInvisibleCondition("areaHidden");
 		renderer.visitGeometry(geometry, true, true);
 		renderer.visitedGeometry(geometry, true, true);
 		renderer.visitedFormItem(geometryItem, true, true);
@@ -601,8 +628,8 @@ class SmartClientViewRendererCoverageTest {
 		String code = renderer.getCode().toString();
 		assertTrue(code.contains("type:'geometry'"), code);
 		assertTrue(code.contains("drawingTools:'polygon'"), code);
-		assertTrue(code.contains("disabledConditionName:'areaDisabled'"), code);
-		assertTrue(code.contains("invisibleConditionName:'areaHidden'"), code);
+		assertTrue(code.contains("disabledCondition:'areaDisabled'"), code);
+		assertTrue(code.contains("invisibleCondition:'areaHidden'"), code);
 		assertTrue(code.contains("type:'geometryMap'"), code);
 		assertTrue(code.contains("height:'100%'"), code);
 		assertTrue(code.contains("minHeight:170"), code);
@@ -992,8 +1019,8 @@ class SmartClientViewRendererCoverageTest {
 
 		ActionImpl custom = action("customAction");
 		custom.setClientValidation(Boolean.FALSE);
-		custom.setDisabledConditionName("customDisabled");
-		custom.setInvisibleConditionName("customHidden");
+		custom.setXmlDisabledCondition("customDisabled");
+		custom.setXmlInvisibleCondition("customHidden");
 		ParameterImpl literal = new ParameterImpl();
 		literal.setName("literal.param");
 		literal.setValue("fixed");
@@ -1011,8 +1038,8 @@ class SmartClientViewRendererCoverageTest {
 		String code = renderer.getCode().toString();
 		assertTrue(code.contains("view.addEditAction(isc.BizButton.create({validate:false,type:null,actionName:'customAction'"), code);
 		assertTrue(code.contains("<i class=\"bizhubFontIcon fa-solid fa-play\"></i><span> &nbsp;</span>Do It"), code);
-		assertTrue(code.contains("disabledConditionName:'customDisabled'"), code);
-		assertTrue(code.contains("invisibleConditionName:'customHidden'"), code);
+		assertTrue(code.contains("disabledCondition:'customDisabled'"), code);
+		assertTrue(code.contains("invisibleCondition:'customHidden'"), code);
 		assertTrue(code.contains("tooltip:'Run it'"), code);
 		assertTrue(code.contains("confirm:'Sure?'"), code);
 		assertTrue(code.contains("params:{'literal_param':'fixed','bound_param':'{contact.name}'}"), code);
@@ -1102,12 +1129,12 @@ class SmartClientViewRendererCoverageTest {
 
 		SetDisabledEventAction setDisabled = new SetDisabledEventAction();
 		setDisabled.setBinding("contact.name");
-		setDisabled.setDisabledConditionName("nameDisabled");
+		setDisabled.setXmlDisabledCondition("nameDisabled");
 		renderer.visitSetDisabledEventAction(setDisabled, true, true);
 
 		SetInvisibleEventAction setInvisible = new SetInvisibleEventAction();
 		setInvisible.setBinding("contact.secret");
-		setInvisible.setInvisibleConditionName("secretHidden");
+		setInvisible.setXmlInvisibleCondition("secretHidden");
 		renderer.visitSetInvisibleEventAction(setInvisible, true, true);
 
 		ToggleDisabledEventAction toggleDisabled = new ToggleDisabledEventAction();

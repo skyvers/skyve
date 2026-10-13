@@ -58,17 +58,17 @@ class FluentZoomInTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void disabledConditionNameReturnsSelf() {
+	void disabledConditionReturnsSelf() {
 		FluentZoomIn z = new FluentZoomIn();
-		FluentZoomIn result = z.disabledConditionName("isReadOnly");
+		FluentZoomIn result = z.disabledCondition("isReadOnly");
 		assertSame(z, result);
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	void invisibleConditionNameReturnsSelf() {
+	void invisibleConditionReturnsSelf() {
 		FluentZoomIn z = new FluentZoomIn();
-		FluentZoomIn result = z.invisibleConditionName("hiddenCond");
+		FluentZoomIn result = z.invisibleCondition("hiddenCond");
 		assertSame(z, result);
 	}
 

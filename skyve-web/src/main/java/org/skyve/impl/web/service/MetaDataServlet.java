@@ -14,6 +14,7 @@ import org.skyve.EXT;
 import org.skyve.content.MimeType;
 import org.skyve.domain.messages.SessionEndedException;
 import org.skyve.domain.types.converters.Format.TextCase;
+import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.generate.ViewRenderer;
 import org.skyve.impl.metadata.Container;
 import org.skyve.impl.metadata.MetadataIconResolver;
@@ -853,9 +854,9 @@ public class MetaDataServlet extends HttpServlet {
 				if (integer != null) {
 					result.append(",\"refreshTimeInSeconds\":").append(integer);
 				}
-				value = view.getRefreshConditionName();
+				value = view.getRefreshIfCondition();
 				if (value != null) {
-					result.append(",\"refreshConditionName\":\"").append(value).append('"');
+					appendCondition(result, "refreshIf", value);
 				}
 				value = view.getRefreshActionName();
 				if (value != null) {
@@ -1403,21 +1404,21 @@ public class MetaDataServlet extends HttpServlet {
 				result.append(",\"canCreate\":").append(canCreate);
 				result.append(",\"canUpdate\":").append(canUpdate);
 				processEditable(lookup);
-				String name = lookup.getDisableEditConditionName();
+				String name = lookup.getDisableEditCondition();
 				if (name != null) {
-					result.append(",\"disableEditConditionName\":\"").append(name).append('"');
+					appendCondition(result, "disableEdit", name);
 				}
-				name = lookup.getDisableAddConditionName();
+				name = lookup.getDisableAddCondition();
 				if (name != null) {
-					result.append(",\"disableAddConditionName\":\"").append(name).append('"');
+					appendCondition(result, "disableAdd", name);
 				}
-				name = lookup.getDisableClearConditionName();
+				name = lookup.getDisableClearCondition();
 				if (name != null) {
-					result.append(",\"disableClearConditionName\":\"").append(name).append('"');
+					appendCondition(result, "disableClear", name);
 				}
-				name = lookup.getDisablePickConditionName();
+				name = lookup.getDisablePickCondition();
 				if (name != null) {
-					result.append(",\"disablePickConditionName\":\"").append(name).append('"');
+					appendCondition(result, "disablePick", name);
 				}
 				processSize(lookup);
 				List<LookupDescriptionColumn> dropDownColumns = lookup.getDropDownColumns();
@@ -3571,21 +3572,21 @@ public class MetaDataServlet extends HttpServlet {
 			}
 			
 			private void processDisableableCRUDGrid(DisableableCRUDGrid grid) {
-				String condish = grid.getDisableAddConditionName();
+				String condish = grid.getDisableAddCondition();
 				if (condish != null) {
-					result.append(",\"disableAddConditionName\":\"").append(condish).append('"');
+					appendCondition(result, "disableAdd", condish);
 				}
-				condish = grid.getDisableEditConditionName();
+				condish = grid.getDisableEditCondition();
 				if (condish != null) {
-					result.append(",\"disableEditConditionName\":\"").append(condish).append('"');
+					appendCondition(result, "disableEdit", condish);
 				}
-				condish = grid.getDisableRemoveConditionName();
+				condish = grid.getDisableRemoveCondition();
 				if (condish != null) {
-					result.append(",\"disableRemoveConditionName\":\"").append(condish).append('"');
+					appendCondition(result, "disableRemove", condish);
 				}
-				condish = grid.getDisableZoomConditionName();
+				condish = grid.getDisableZoomCondition();
 				if (condish != null) {
-					result.append(",\"disableZoomConditionName\":\"").append(condish).append('"');
+					appendCondition(result, "disableZoom", condish);
 				}
 			}
 			
@@ -3598,9 +3599,9 @@ public class MetaDataServlet extends HttpServlet {
 				if (string != null) {
 					result.append(",\"modelName\":\"").append(string).append('"');
 				}
-				string = list.getPostRefreshConditionName();
+				string = list.getPostRefreshCondition();
 				if (string != null) {
-					result.append(",\"postRefreshConditionName\":\"").append(string).append('"');
+					appendCondition(result, "postRefresh", string);
 				}
 				processSize(list);
 				processInvisible(list);
@@ -3770,17 +3771,38 @@ public class MetaDataServlet extends HttpServlet {
 		}
 	}
 
+	/**
+	 * Appends a view condition as a JSON property named {@code <stem>Condition}.
+	 *
+	 * <p>A condition name or boolean literal is written as it is.
+	 * An inline condition expression has no name, so the property carries its identifier
+	 * (see {@link BindUtil#conditionIdentifier(String)}), prefixed with {@code not} for the opposite sense,
+	 * and a sibling {@code <stem>ConditionExpression} property carries the expression itself.
+	 *
+	 * @param json	The JSON being built, positioned after a preceding property.
+	 * @param stem	The property name without its {@code Condition} suffix.
+	 * @param condition	The condition as held by view metadata.
+	 */
+	private static void appendCondition(@Nonnull StringBuilder json, @Nonnull String stem, @Nonnull String condition) {
+		json.append(",\"").append(stem).append("Condition\":\"").append(BindUtil.conditionIdentifier(condition)).append('"');
+		boolean negatedExpression = BindUtil.isNegatedSkyveExpression(condition);
+		if (negatedExpression || BindUtil.isSkyveExpression(condition)) {
+			String expression = negatedExpression ? condition.substring(3) : condition;
+			json.append(",\"").append(stem).append("ConditionExpression\":\"").append(OWASP.escapeJsonString(expression)).append('"');
+		}
+	}
+
 	private static void processInvisible(Invisible invisible, StringBuilder json) {
-		String name = invisible.getInvisibleConditionName();
+		String name = invisible.getInvisibleCondition();
 		if (name != null) {
-			json.append(",\"invisibleConditionName\":\"").append(name).append('"');
+			appendCondition(json, "invisible", name);
 		}
 	}
 	
 	private static void processDisableable(Disableable disableable, StringBuilder json) {
-		String name = disableable.getDisabledConditionName();
+		String name = disableable.getDisabledCondition();
 		if (name != null) {
-			json.append(",\"disabledConditionName\":\"").append(name).append('"');
+			appendCondition(json, "disabled", name);
 		}
 	}
 	

@@ -63,16 +63,16 @@ public class BeanForReport {
 	}
 
 	/**
-	 * Evaluates a named bean condition for the supplied document row.
+	 * Evaluates a bean condition for the supplied document row.
 	 *
 	 * @param moduleName The owning module name.
 	 * @param documentName The document name within the module.
 	 * @param bizId The business identifier of the row being rendered.
-	 * @param conditionName The condition method name to evaluate.
+	 * @param condition The condition name or inline condition expression to evaluate.
 	 * @return {@code true} when the condition evaluates to true for the bean.
 	 */
-	public static boolean evaluateCondition(String moduleName, String documentName, String bizId, String conditionName) {
+	public static boolean evaluateCondition(String moduleName, String documentName, String bizId, String condition) {
 		Bean bean = getBean(moduleName, documentName, bizId);
-		return bean.evaluateCondition(conditionName);
+		return bean.evaluateCondition(condition);
 	}
 }

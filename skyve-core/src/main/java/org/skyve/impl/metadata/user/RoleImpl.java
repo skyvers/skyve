@@ -1,6 +1,7 @@
 package org.skyve.impl.metadata.user;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -30,7 +31,7 @@ public class RoleImpl implements Role {
 	private List<ContentPermission> contentPermissions = new ArrayList<>();
 	private Map<UserAccess, Set<String>> accesses = new TreeMap<>();
 	private String documentation;
-	private Map<String, String> properties = new TreeMap<>();
+	private Map<String, String> properties = new LinkedHashMap<>();
 	
 	@Override
 	public String getDescription() {

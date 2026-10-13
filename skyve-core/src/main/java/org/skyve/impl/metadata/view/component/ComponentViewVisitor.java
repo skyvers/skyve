@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.function.Consumer;
 
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.metadata.customer.CustomerImpl;
@@ -87,21 +88,34 @@ import org.skyve.metadata.view.Invisible;
 import org.skyve.metadata.view.widget.FilterParameter;
 import org.skyve.metadata.view.widget.bound.Bound;
 import org.skyve.metadata.view.widget.bound.Parameter;
+import org.skyve.util.ExpressionEvaluator;
 
 import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 
 /**
  * Rewrites component metadata so it can be embedded safely in an owning view context.
  *
- * <p>This visitor prefixes bindings, remaps action and condition names through the
- * supplied component-name map, and optionally narrows traversal output to a targeted
- * widget id.
+ * <p>This visitor prefixes bindings, remaps action names and conditions through the
+ * supplied action and condition mappings, and optionally narrows traversal output to a
+ * targeted widget id.
+ *
+ * <p>Conditions are rewritten so that the owning view can evaluate them, since that is
+ * where they are evaluated. A condition that has a mapping - a condition name, or an inline
+ * condition expression exactly as the component view writes it - becomes what it is mapped
+ * to, which is already in the owning view's terms. Without a mapping, a condition name is
+ * kept as it is, and an inline condition expression has its bindings prefixed with the
+ * binding prefix when there is one. Either way the result must be a condition of the owning
+ * view's document, which is checked when the owning view is validated, not here.
+ * Each condition pair keeps the attribute that was authored, unless that would mean storing
+ * the inverse of an inline condition expression, in which case the opposite attribute is used.
  *
  * <p>Threading: not thread-safe; intended for one traversal instance per conversion.
  */
 public class ComponentViewVisitor extends ViewVisitor {
 	private String bindingPrefix;
-	private Map<String, String> names;
+	private Map<String, String> actionMappings;
+	private Map<String, String> conditionMappings;
 	private String widgetId;
 	
 	/**
@@ -113,7 +127,8 @@ public class ComponentViewVisitor extends ViewVisitor {
 	 * @param view the destination view receiving converted metadata
 	 * @param currentUxUi the active UX/UI profile
 	 * @param bindingPrefix optional binding prefix applied to bound expressions
-	 * @param names mapping from component-local names to owning-view names
+	 * @param actions mappings from component-view action names to owning-view action names
+	 * @param conditions mappings from component-view conditions to owning-view conditions
 	 * @param widgetId optional widget id used to extract a single targeted fragment
 	 */
 	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
@@ -123,16 +138,31 @@ public class ComponentViewVisitor extends ViewVisitor {
 									ViewImpl view,
 									String currentUxUi,
 									String bindingPrefix,
-									List<ComponentNameMap> names,
+									List<ComponentTranslation> actions,
+									List<ComponentTranslation> conditions,
 									String widgetId) {
 		super(customer, module, document, view, currentUxUi);
 		setUseMetaData(false);
 		this.bindingPrefix = bindingPrefix;
-		this.names = new TreeMap<>();
-		for (ComponentNameMap name : names) {
-			this.names.put(name.getFromComponent(), name.getMappedTo());
-		}
+		actionMappings = toMap(actions);
+		conditionMappings = toMap(conditions);
 		this.widgetId = widgetId;
+	}
+
+	/**
+	 * Indexes translations by what the component view calls a thing.
+	 * A translation with a blank side translates nothing and is left out.
+	 */
+	private static @Nonnull Map<String, String> toMap(@Nonnull List<ComponentTranslation> translations) {
+		Map<String, String> result = new TreeMap<>();
+		for (ComponentTranslation translation : translations) {
+			String fromComponent = translation.getFromComponent();
+			String mappedTo = translation.getMappedTo();
+			if ((fromComponent != null) && (mappedTo != null)) {
+				result.put(fromComponent, mappedTo);
+			}
+		}
+		return result;
 	}
 	
 	private Identifiable identifiable;
@@ -178,7 +208,7 @@ public class ComponentViewVisitor extends ViewVisitor {
 
 	/**
 	 * Prefixes the selected-tab-index binding, translates disable and invisible
-	 * condition names, and captures the tab pane if it matches the target widget id.
+	 * conditions, and captures the tab pane if it matches the target widget id.
 	 *
 	 * @param tabPane the tab pane being visited
 	 * @param parentVisible whether the parent container is visible
@@ -205,7 +235,7 @@ public class ComponentViewVisitor extends ViewVisitor {
 	}
 
 	/**
-	 * Translates the disable and invisible condition names of the tab.
+	 * Translates the disable and invisible conditions of the tab.
 	 *
 	 * @param tab the tab being visited
 	 * @param parentVisible whether the parent container is visible
@@ -226,7 +256,7 @@ public class ComponentViewVisitor extends ViewVisitor {
 	}
 
 	/**
-	 * Translates the invisible condition name and captures the vbox if it matches
+	 * Translates the invisible condition and captures the vbox if it matches
 	 * the target widget id.
 	 *
 	 * @param vbox the vbox being visited
@@ -252,7 +282,7 @@ public class ComponentViewVisitor extends ViewVisitor {
 	}
 
 	/**
-	 * Translates the invisible condition name and captures the hbox if it matches
+	 * Translates the invisible condition and captures the hbox if it matches
 	 * the target widget id.
 	 *
 	 * @param hbox the hbox being visited
@@ -278,7 +308,7 @@ public class ComponentViewVisitor extends ViewVisitor {
 	}
 
 	/**
-	 * Translates the disable and invisible condition names, normalises the label layout
+	 * Translates the disable and invisible conditions, normalises the label layout
 	 * when the owning module declares top-defined forms, and captures the form if it
 	 * matches the target widget id.
 	 *
@@ -356,7 +386,7 @@ public class ComponentViewVisitor extends ViewVisitor {
 	}
 
 	/**
-	 * Translates the button's action name through the component name map.
+	 * Translates the button's action name through the action mappings.
 	 *
 	 * @param button the button being visited
 	 * @param parentVisible whether the parent container is visible
@@ -364,11 +394,11 @@ public class ComponentViewVisitor extends ViewVisitor {
 	 */
 	@Override
 	public void visitButton(Button button, boolean parentVisible, boolean parentEnabled) {
-		button.setActionName(translate(button.getActionName()));
+		button.setActionName(translateAction(button.getActionName()));
 	}
 
 	/**
-	 * Prefixes the binding and translates the disable and invisible condition names.
+	 * Prefixes the binding and translates the disable and invisible conditions.
 	 *
 	 * @param zoomIn the zoom-in widget being visited
 	 * @param parentVisible whether the parent container is visible
@@ -382,7 +412,7 @@ public class ComponentViewVisitor extends ViewVisitor {
 	}
 
 	/**
-	 * Prefixes the binding and translates the disable and invisible condition names.
+	 * Prefixes the binding and translates the disable and invisible conditions.
 	 *
 	 * @param geometry the geometry widget being visited
 	 * @param parentVisible whether the parent container is visible
@@ -404,7 +434,7 @@ public class ComponentViewVisitor extends ViewVisitor {
 	}
 
 	/**
-	 * Prefixes the binding and translates the disable and invisible condition names.
+	 * Prefixes the binding and translates the disable and invisible conditions.
 	 *
 	 * @param geometry the geometry map widget being visited
 	 * @param parentVisible whether the parent container is visible
@@ -426,7 +456,7 @@ public class ComponentViewVisitor extends ViewVisitor {
 	}
 	
 	/**
-	 * Translates the invisible condition name.
+	 * Translates the invisible condition.
 	 *
 	 * @param map the map display widget being visited
 	 * @param parentVisible whether the parent container is visible
@@ -438,7 +468,7 @@ public class ComponentViewVisitor extends ViewVisitor {
 	}
 
 	/**
-	 * Translates the invisible condition name.
+	 * Translates the invisible condition.
 	 *
 	 * @param chart the chart widget being visited
 	 * @param parentVisible whether the parent container is visible
@@ -450,7 +480,7 @@ public class ComponentViewVisitor extends ViewVisitor {
 	}
 
 	/**
-	 * Translates the disable and invisible condition names.
+	 * Translates the disable and invisible conditions.
 	 *
 	 * @param button the dialog button being visited
 	 * @param parentVisible whether the parent container is visible
@@ -463,7 +493,7 @@ public class ComponentViewVisitor extends ViewVisitor {
 	}
 
 	/**
-	 * Translates the invisible condition name.
+	 * Translates the invisible condition.
 	 *
 	 * @param image the dynamic image widget being visited
 	 * @param parentVisible whether the parent container is visible
@@ -475,7 +505,7 @@ public class ComponentViewVisitor extends ViewVisitor {
 	}
 
 	/**
-	 * Translates the invisible condition name.
+	 * Translates the invisible condition.
 	 *
 	 * @param spacer the spacer widget being visited
 	 */
@@ -485,7 +515,7 @@ public class ComponentViewVisitor extends ViewVisitor {
 	}
 
 	/**
-	 * Translates the invisible condition name.
+	 * Translates the invisible condition.
 	 *
 	 * @param image the static image widget being visited
 	 * @param parentVisible whether the parent container is visible
@@ -497,7 +527,7 @@ public class ComponentViewVisitor extends ViewVisitor {
 	}
 
 	/**
-	 * Translates the invisible condition name and prefixes binding expressions
+	 * Translates the invisible condition and prefixes binding expressions
 	 * within the link value.
 	 *
 	 * @param link the link widget being visited
@@ -511,7 +541,7 @@ public class ComponentViewVisitor extends ViewVisitor {
 	}
 
 	/**
-	 * Translates the invisible condition name and prefixes binding expressions
+	 * Translates the invisible condition and prefixes binding expressions
 	 * within the blurb markup.
 	 *
 	 * @param blurb the blurb widget being visited
@@ -525,7 +555,7 @@ public class ComponentViewVisitor extends ViewVisitor {
 	}
 
 	/**
-	 * Prefixes the binding, translates the invisible condition name, prefixes the
+	 * Prefixes the binding, translates the invisible condition, prefixes the
 	 * {@code for} target binding and any binding expressions within the label value.
 	 *
 	 * @param label the label widget being visited
@@ -541,7 +571,7 @@ public class ComponentViewVisitor extends ViewVisitor {
 	}
 
 	/**
-	 * Prefixes the binding and translates the invisible condition name.
+	 * Prefixes the binding and translates the invisible condition.
 	 *
 	 * @param progressBar the progress bar widget being visited
 	 * @param parentVisible whether the parent container is visible
@@ -554,8 +584,8 @@ public class ComponentViewVisitor extends ViewVisitor {
 	}
 
 	/**
-	 * Translates the disable and invisible condition names, translates all
-	 * condition names used for row-level actions, and prefixes the selected-id binding.
+	 * Translates the disable and invisible conditions, translates all
+	 * conditions used for row-level actions, and prefixes the selected-id binding.
 	 *
 	 * @param grid the list grid being visited
 	 * @param parentVisible whether the parent container is visible
@@ -565,11 +595,11 @@ public class ComponentViewVisitor extends ViewVisitor {
 	public void visitListGrid(ListGrid grid, boolean parentVisible, boolean parentEnabled) {
 		disable(grid);
 		invisible(grid);
-		grid.setDisableAddConditionName(translate(grid.getDisableAddConditionName()));
-		grid.setDisableEditConditionName(translate(grid.getDisableEditConditionName()));
-		grid.setDisableRemoveConditionName(translate(grid.getDisableRemoveConditionName()));
-		grid.setDisableZoomConditionName(translate(grid.getDisableZoomConditionName()));
-		grid.setPostRefreshConditionName(translate(grid.getPostRefreshConditionName()));
+		translate(grid.getDisableAddCondition(), grid.getXmlEnableAddCondition(), grid::setXmlDisableAddCondition, grid::setXmlEnableAddCondition);
+		translate(grid.getDisableEditCondition(), grid.getXmlEnableEditCondition(), grid::setXmlDisableEditCondition, grid::setXmlEnableEditCondition);
+		translate(grid.getDisableRemoveCondition(), grid.getXmlEnableRemoveCondition(), grid::setXmlDisableRemoveCondition, grid::setXmlEnableRemoveCondition);
+		translate(grid.getDisableZoomCondition(), grid.getXmlEnableZoomCondition(), grid::setXmlDisableZoomCondition, grid::setXmlEnableZoomCondition);
+		grid.setPostRefreshCondition(translateCondition(grid.getPostRefreshCondition()));
 		grid.setSelectedIdBinding(prefixBinding(grid.getSelectedIdBinding()));
 	}
 
@@ -604,7 +634,7 @@ public class ComponentViewVisitor extends ViewVisitor {
 	}
 
 	/**
-	 * Translates the invisible condition name and the post-refresh condition name.
+	 * Translates the invisible condition and the post-refresh condition.
 	 *
 	 * @param repeater the list repeater being visited
 	 * @param parentVisible whether the parent container is visible
@@ -613,7 +643,7 @@ public class ComponentViewVisitor extends ViewVisitor {
 	@Override
 	public void visitListRepeater(ListRepeater repeater, boolean parentVisible, boolean parentEnabled) {
 		invisible(repeater);
-		repeater.setPostRefreshConditionName(translate(repeater.getPostRefreshConditionName()));
+		repeater.setPostRefreshCondition(translateCondition(repeater.getPostRefreshCondition()));
 	}
 
 	/**
@@ -625,8 +655,8 @@ public class ComponentViewVisitor extends ViewVisitor {
 	}
 
 	/**
-	 * Prefixes the binding, translates the disable and invisible condition names,
-	 * translates row-level action condition names and the selected-id binding,
+	 * Prefixes the binding, translates the disable and invisible conditions,
+	 * translates row-level action conditions and the selected-id binding,
 	 * and captures the data grid if it matches the target widget id.
 	 *
 	 * @param grid the data grid being visited
@@ -638,10 +668,10 @@ public class ComponentViewVisitor extends ViewVisitor {
 		bound(grid);
 		disable(grid);
 		invisible(grid);
-		grid.setDisableAddConditionName(translate(grid.getDisableAddConditionName()));
-		grid.setDisableEditConditionName(translate(grid.getDisableEditConditionName()));
-		grid.setDisableRemoveConditionName(translate(grid.getDisableRemoveConditionName()));
-		grid.setDisableZoomConditionName(translate(grid.getDisableZoomConditionName()));
+		translate(grid.getDisableAddCondition(), grid.getXmlEnableAddCondition(), grid::setXmlDisableAddCondition, grid::setXmlEnableAddCondition);
+		translate(grid.getDisableEditCondition(), grid.getXmlEnableEditCondition(), grid::setXmlDisableEditCondition, grid::setXmlEnableEditCondition);
+		translate(grid.getDisableRemoveCondition(), grid.getXmlEnableRemoveCondition(), grid::setXmlDisableRemoveCondition, grid::setXmlEnableRemoveCondition);
+		translate(grid.getDisableZoomCondition(), grid.getXmlEnableZoomCondition(), grid::setXmlDisableZoomCondition, grid::setXmlEnableZoomCondition);
 		grid.setSelectedIdBinding(prefixBinding(grid.getSelectedIdBinding()));
 
 		// capture the targeted widget, if applicable
@@ -659,7 +689,7 @@ public class ComponentViewVisitor extends ViewVisitor {
 	}
 
 	/**
-	 * Prefixes the binding, translates the invisible condition name, and captures
+	 * Prefixes the binding, translates the invisible condition, and captures
 	 * the data repeater if it matches the target widget id.
 	 *
 	 * @param repeater the data repeater being visited
@@ -718,7 +748,7 @@ public class ComponentViewVisitor extends ViewVisitor {
 	}
 
 	/**
-	 * Prefixes the binding and translates the disable and invisible condition names.
+	 * Prefixes the binding and translates the disable and invisible conditions.
 	 *
 	 * @param checkBox the check box widget being visited
 	 * @param parentVisible whether the parent container is visible
@@ -740,7 +770,7 @@ public class ComponentViewVisitor extends ViewVisitor {
 	}
 
 	/**
-	 * Prefixes the binding and translates the disable and invisible condition names.
+	 * Prefixes the binding and translates the disable and invisible conditions.
 	 *
 	 * @param membership the check membership widget being visited
 	 * @param parentVisible whether the parent container is visible
@@ -762,7 +792,7 @@ public class ComponentViewVisitor extends ViewVisitor {
 	}
 
 	/**
-	 * Prefixes the binding and translates the disable and invisible condition names.
+	 * Prefixes the binding and translates the disable and invisible conditions.
 	 *
 	 * @param colour the colour picker widget being visited
 	 * @param parentVisible whether the parent container is visible
@@ -784,7 +814,7 @@ public class ComponentViewVisitor extends ViewVisitor {
 	}
 
 	/**
-	 * Prefixes the binding and translates the disable and invisible condition names.
+	 * Prefixes the binding and translates the disable and invisible conditions.
 	 *
 	 * @param combo the combo widget being visited
 	 * @param parentVisible whether the parent container is visible
@@ -820,7 +850,7 @@ public class ComponentViewVisitor extends ViewVisitor {
 	}
 
 	/**
-	 * Prefixes the binding and translates the disable and invisible condition names.
+	 * Prefixes the binding and translates the disable and invisible conditions.
 	 *
 	 * @param signature the content signature widget being visited
 	 * @param parentVisible whether the parent container is visible
@@ -834,7 +864,7 @@ public class ComponentViewVisitor extends ViewVisitor {
 	}
 
 	/**
-	 * Prefixes the binding and translates the disable and invisible condition names.
+	 * Prefixes the binding and translates the disable and invisible conditions.
 	 *
 	 * @param html the HTML widget being visited
 	 * @param parentVisible whether the parent container is visible
@@ -848,7 +878,7 @@ public class ComponentViewVisitor extends ViewVisitor {
 	}
 
 	/**
-	 * Prefixes the binding and translates the disable and invisible condition names.
+	 * Prefixes the binding and translates the disable and invisible conditions.
 	 *
 	 * @param membership the list membership widget being visited
 	 * @param parentVisible whether the parent container is visible
@@ -870,7 +900,7 @@ public class ComponentViewVisitor extends ViewVisitor {
 	}
 
 	/**
-	 * Prefixes the binding and translates the disable and invisible condition names.
+	 * Prefixes the binding and translates the disable and invisible conditions.
 	 *
 	 * @param comparison the comparison widget being visited
 	 * @param parentVisible whether the parent container is visible
@@ -884,8 +914,8 @@ public class ComponentViewVisitor extends ViewVisitor {
 	}
 
 	/**
-	 * Prefixes the binding, translates the disable and invisible condition names,
-	 * and translates action-level condition names (add, clear, edit, pick).
+	 * Prefixes the binding, translates the disable and invisible conditions,
+	 * and translates action-level conditions (add, clear, edit, pick).
 	 *
 	 * @param lookup the lookup description widget being visited
 	 * @param parentVisible whether the parent container is visible
@@ -896,10 +926,10 @@ public class ComponentViewVisitor extends ViewVisitor {
 		bound(lookup);
 		disable(lookup);
 		invisible(lookup);
-		lookup.setDisableAddConditionName(translate(lookup.getDisableAddConditionName()));
-		lookup.setDisableClearConditionName(translate(lookup.getDisableClearConditionName()));
-		lookup.setDisableEditConditionName(translate(lookup.getDisableEditConditionName()));
-		lookup.setDisablePickConditionName(translate(lookup.getDisablePickConditionName()));
+		translate(lookup.getDisableAddCondition(), lookup.getXmlEnableAddCondition(), lookup::setXmlDisableAddCondition, lookup::setXmlEnableAddCondition);
+		translate(lookup.getDisableClearCondition(), lookup.getXmlEnableClearCondition(), lookup::setXmlDisableClearCondition, lookup::setXmlEnableClearCondition);
+		translate(lookup.getDisableEditCondition(), lookup.getXmlEnableEditCondition(), lookup::setXmlDisableEditCondition, lookup::setXmlEnableEditCondition);
+		translate(lookup.getDisablePickCondition(), lookup.getXmlEnablePickCondition(), lookup::setXmlDisablePickCondition, lookup::setXmlEnablePickCondition);
 	}
 
 	/**
@@ -911,7 +941,7 @@ public class ComponentViewVisitor extends ViewVisitor {
 	}
 
 	/**
-	 * Prefixes the binding and translates the disable and invisible condition names.
+	 * Prefixes the binding and translates the disable and invisible conditions.
 	 *
 	 * @param password the password widget being visited
 	 * @param parentVisible whether the parent container is visible
@@ -933,7 +963,7 @@ public class ComponentViewVisitor extends ViewVisitor {
 	}
 
 	/**
-	 * Prefixes the binding and translates the disable and invisible condition names.
+	 * Prefixes the binding and translates the disable and invisible conditions.
 	 *
 	 * @param radio the radio widget being visited
 	 * @param parentVisible whether the parent container is visible
@@ -955,7 +985,7 @@ public class ComponentViewVisitor extends ViewVisitor {
 	}
 
 	/**
-	 * Prefixes the binding and translates the disable and invisible condition names.
+	 * Prefixes the binding and translates the disable and invisible conditions.
 	 *
 	 * @param richText the rich text widget being visited
 	 * @param parentVisible whether the parent container is visible
@@ -977,7 +1007,7 @@ public class ComponentViewVisitor extends ViewVisitor {
 	}
 
 	/**
-	 * Prefixes the binding and translates the disable and invisible condition names.
+	 * Prefixes the binding and translates the disable and invisible conditions.
 	 *
 	 * @param slider the slider widget being visited
 	 * @param parentVisible whether the parent container is visible
@@ -999,7 +1029,7 @@ public class ComponentViewVisitor extends ViewVisitor {
 	}
 
 	/**
-	 * Prefixes the binding and translates the disable and invisible condition names.
+	 * Prefixes the binding and translates the disable and invisible conditions.
 	 *
 	 * @param spinner the spinner widget being visited
 	 * @param parentVisible whether the parent container is visible
@@ -1021,7 +1051,7 @@ public class ComponentViewVisitor extends ViewVisitor {
 	}
 
 	/**
-	 * Prefixes the binding and translates the disable and invisible condition names.
+	 * Prefixes the binding and translates the disable and invisible conditions.
 	 *
 	 * @param text the text area widget being visited
 	 * @param parentVisible whether the parent container is visible
@@ -1043,7 +1073,7 @@ public class ComponentViewVisitor extends ViewVisitor {
 	}
 
 	/**
-	 * Prefixes the binding and translates the disable and invisible condition names.
+	 * Prefixes the binding and translates the disable and invisible conditions.
 	 *
 	 * @param text the text field widget being visited
 	 * @param parentVisible whether the parent container is visible
@@ -1267,7 +1297,7 @@ public class ComponentViewVisitor extends ViewVisitor {
 	}
 
 	/**
-	 * Translates the server-side action name through the component name map.
+	 * Translates the server-side action name through the action mappings.
 	 *
 	 * @param server the server-side action event action being visited
 	 * @param parentVisible whether the parent container is visible
@@ -1275,11 +1305,11 @@ public class ComponentViewVisitor extends ViewVisitor {
 	 */
 	@Override
 	public void visitServerSideActionEventAction(ServerSideActionEventAction server, boolean parentVisible, boolean parentEnabled) {
-		server.setActionName(translate(server.getActionName()));
+		server.setActionName(translateAction(server.getActionName()));
 	}
 
 	/**
-	 * Prefixes the binding and translates the disable condition name.
+	 * Prefixes the binding and translates the disable condition.
 	 *
 	 * @param setDisabled the set-disabled event action being visited
 	 * @param parentVisible whether the parent container is visible
@@ -1292,7 +1322,7 @@ public class ComponentViewVisitor extends ViewVisitor {
 	}
 
 	/**
-	 * Prefixes the binding and translates the invisible condition name.
+	 * Prefixes the binding and translates the invisible condition.
 	 *
 	 * @param setInvisible the set-invisible event action being visited
 	 * @param parentVisible whether the parent container is visible
@@ -1507,35 +1537,76 @@ public class ComponentViewVisitor extends ViewVisitor {
 	}
 
 	/**
-	 * Translates the disabled condition name of a disableable element through
-	 * the component name map.
+	 * Translates the disabled/enabled condition pair of a disableable element for the owning view,
+	 * keeping the attribute that was authored.
 	 *
-	 * @param disableable the element whose disabled condition name is to be translated
+	 * @param disableable the element whose condition pair is to be translated
 	 */
 	private void disable(Disableable disableable) {
-		disableable.setDisabledConditionName(translate(disableable.getDisabledConditionName()));
+		translate(disableable.getDisabledCondition(),
+					disableable.getXmlEnabledCondition(),
+					disableable::setXmlDisabledCondition,
+					disableable::setXmlEnabledCondition);
 	}
 	
 	/**
-	 * Translates the invisible condition name of an invisible element through
-	 * the component name map.
+	 * Translates the invisible/visible condition pair of an invisible element for the owning view,
+	 * keeping the attribute that was authored.
 	 *
-	 * @param invisible the element whose invisible condition name is to be translated
+	 * @param invisible the element whose condition pair is to be translated
 	 */
 	private void invisible(Invisible invisible) {
-		invisible.setInvisibleConditionName(translate(invisible.getInvisibleConditionName()));
+		translate(invisible.getInvisibleCondition(),
+					invisible.getXmlVisibleCondition(),
+					invisible::setXmlInvisibleCondition,
+					invisible::setXmlVisibleCondition);
 	}
 
 	/**
-	 * Translates action names in a list of event actions through the component
-	 * name map. Only {@link ServerSideActionEventAction} entries carry translatable names.
+	 * Translates a condition pair, keeping the attribute that was authored.
+	 *
+	 * <p>The derived (negative sense) condition is translated, as it always has been.
+	 * The result is stored through the negative attribute when that is the one authored,
+	 * or negated back and stored through the positive attribute when that is.
+	 *
+	 * <p>The inverse of an inline condition expression is never stored. Where a mapping turns
+	 * a condition into an expression of the opposite sense to the attribute that was authored,
+	 * the expression is stored through the other attribute of the pair instead.
+	 *
+	 * @param derivedCondition the derived condition of the pair, may be {@code null}
+	 * @param authoredPositiveCondition the positive attribute as authored, {@code null} when it was not authored
+	 * @param negativeSetter sets the negative attribute as authored
+	 * @param positiveSetter sets the positive attribute as authored
+	 */
+	private void translate(@Nullable String derivedCondition,
+							@Nullable String authoredPositiveCondition,
+							@Nonnull Consumer<String> negativeSetter,
+							@Nonnull Consumer<String> positiveSetter) {
+		String negative = translateCondition(derivedCondition);
+		String positive = BindUtil.negateCondition(negative);
+		boolean storePositive = (authoredPositiveCondition != null);
+		String toStore = storePositive ? positive : negative;
+		if ((toStore != null) && BindUtil.isNegatedSkyveExpression(toStore)) {
+			storePositive = (! storePositive);
+		}
+		if (storePositive) {
+			positiveSetter.accept(positive);
+		}
+		else {
+			negativeSetter.accept(negative);
+		}
+	}
+
+	/**
+	 * Translates action names in a list of event actions through the action
+	 * mappings. Only {@link ServerSideActionEventAction} entries carry translatable names.
 	 *
 	 * @param actions the event actions to translate
 	 */
 	private void event(List<EventAction> actions) {
 		for (EventAction action : actions) {
 			if (action instanceof ServerSideActionEventAction server) {
-				server.setActionName(translate(server.getActionName()));
+				server.setActionName(translateAction(server.getActionName()));
 			}
 		}
 	}
@@ -1556,37 +1627,82 @@ public class ComponentViewVisitor extends ViewVisitor {
 	}
 
 	/**
-	 * Maps a component-local condition or action name to the corresponding
-	 * owning-view name via the component name map. When the name is not found
-	 * directly, the negated form is tried and the negation of its mapped value
-	 * is returned. Returns the original name unchanged when no mapping exists.
+	 * Maps a component-view action name to the owning-view action name through the action mappings.
 	 *
-	 * @param name the condition or action name to translate, may be {@code null}
-	 * @return the translated name, or {@code null} if the input was {@code null}
+	 * @param name the action name to translate, may be {@code null}
+	 * @return the mapped action name, or the name unchanged when it has no mapping
 	 */
-	private String translate(String name) {
+	private @Nullable String translateAction(@Nullable String name) {
 		if (name == null) {
 			return null;
 		}
-		String result = names.get(name);
+		String result = actionMappings.get(name);
+		return (result == null) ? name : result;
+	}
+
+	/**
+	 * Translates a component-view condition into the owning view's terms.
+	 *
+	 * <p>A condition with a mapping becomes what it is mapped to. The condition may be a
+	 * condition name or an inline condition expression as the component view writes it, and
+	 * what it is mapped to may be either as well. When the condition itself has no mapping
+	 * but is the inverse of one that does ({@code notFoo}, or the inverse of an expression),
+	 * it becomes the inverse of what that is mapped to. What a condition is mapped to is
+	 * already in the owning view's terms, so it never takes the binding prefix.
+	 *
+	 * <p>Without a mapping, a condition name is returned unchanged and an inline condition
+	 * expression, or the inverse of one, has its bindings prefixed with the component binding
+	 * prefix, when there is one.
+	 *
+	 * @param condition the condition name, inline condition expression or inverse of either to translate; may be {@code null}
+	 * @return the translated condition, or {@code null} if the input was {@code null}
+	 */
+	private @Nullable String translateCondition(@Nullable String condition) {
+		if (condition == null) {
+			return null;
+		}
+
+		String result = mappedCondition(condition);
 		if (result == null) {
-			// if we have a not condition, lookup the negation of it
-			// and use the negation of the mapping.
-			if (name.startsWith("not")) {
-				String condish = BindUtil.negateCondition(name);
-				result = names.get(condish);
-				if (result == null) { // not a mapped negated condition - not found
-					result = name;
-				}
-				else { // negate the mapped negated condition
-					result = BindUtil.negateCondition(result);
-				}
-			}
-			else { // not found
-				result = name;
-			}
+			result = (bindingPrefix == null) ? condition : prefixCondition(condition, bindingPrefix);
 		}
 		return result;
+	}
+
+	/**
+	 * Looks a condition up in the condition mappings, in the sense it is given or in the opposite sense.
+	 *
+	 * @param condition the condition name, inline condition expression or inverse of either to look up
+	 * @return what the condition is mapped to, or {@code null} when neither it nor its inverse has a mapping
+	 */
+	private @Nullable String mappedCondition(@Nonnull String condition) {
+		String result = conditionMappings.get(condition);
+		// if we have a not condition, lookup the negation of it
+		// and use the negation of the mapping.
+		if ((result == null) &&
+				(BindUtil.isNegatedSkyveExpression(condition) ||
+					((! BindUtil.isSkyveExpression(condition)) && condition.startsWith("not")))) {
+			result = BindUtil.negateCondition(conditionMappings.get(BindUtil.negateCondition(condition)));
+		}
+		return result;
+	}
+
+	/**
+	 * Prefixes the bindings of an inline condition expression, or of the inverse of one.
+	 * An expression is relative to the component, so its bindings take the component binding prefix.
+	 *
+	 * @param condition the condition to prefix
+	 * @param prefix the component binding prefix
+	 * @return the prefixed condition, or the condition unchanged when it is a condition name
+	 */
+	private static @Nullable String prefixCondition(@Nonnull String condition, @Nonnull String prefix) {
+		if (BindUtil.isNegatedSkyveExpression(condition)) {
+			return BindUtil.negateCondition(ExpressionEvaluator.prefixBinding(condition.substring(3), prefix));
+		}
+		if (BindUtil.isSkyveExpression(condition)) {
+			return ExpressionEvaluator.prefixBinding(condition, prefix);
+		}
+		return condition;
 	}
 	
 	/**
@@ -1608,7 +1724,7 @@ public class ComponentViewVisitor extends ViewVisitor {
 	}
 
 	/**
-	 * Translates the invisible condition name and captures the sidebar if it matches
+	 * Translates the invisible condition and captures the sidebar if it matches
 	 * the target widget id.
 	 *
 	 * @param sidebar the sidebar being visited

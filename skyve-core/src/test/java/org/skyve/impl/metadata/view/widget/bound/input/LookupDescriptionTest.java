@@ -44,59 +44,59 @@ class LookupDescriptionTest {
 	}
 
 	@Test
-	void disableEditConditionNameRoundTrip() {
+	void disableEditConditionRoundTrip() {
 		LookupDescription ld = new LookupDescription();
-		ld.setDisableEditConditionName("noEdit");
-		assertEquals("noEdit", ld.getDisableEditConditionName());
+		ld.setXmlDisableEditCondition("noEdit");
+		assertEquals("noEdit", ld.getDisableEditCondition());
 	}
 
 	@Test
-	void enableEditConditionNameNegatesAndStoresAsDisableEdit() {
+	void enableEditConditionNegatesToDisableEditCondition() {
 		LookupDescription ld = new LookupDescription();
-		ld.setEnableEditConditionName("canEdit");
-		assertEquals("notCanEdit", ld.getDisableEditConditionName());
+		ld.setXmlEnableEditCondition("canEdit");
+		assertEquals("notCanEdit", ld.getDisableEditCondition());
 	}
 
 	@Test
-	void disableAddConditionNameRoundTrip() {
+	void disableAddConditionRoundTrip() {
 		LookupDescription ld = new LookupDescription();
-		ld.setDisableAddConditionName("noAdd");
-		assertEquals("noAdd", ld.getDisableAddConditionName());
+		ld.setXmlDisableAddCondition("noAdd");
+		assertEquals("noAdd", ld.getDisableAddCondition());
 	}
 
 	@Test
-	void enableAddConditionNameNegatesAndStoresAsDisableAdd() {
+	void enableAddConditionNegatesToDisableAddCondition() {
 		LookupDescription ld = new LookupDescription();
-		ld.setEnableAddConditionName("canAdd");
-		assertEquals("notCanAdd", ld.getDisableAddConditionName());
+		ld.setXmlEnableAddCondition("canAdd");
+		assertEquals("notCanAdd", ld.getDisableAddCondition());
 	}
 
 	@Test
-	void disableClearConditionNameRoundTrip() {
+	void disableClearConditionRoundTrip() {
 		LookupDescription ld = new LookupDescription();
-		ld.setDisableClearConditionName("noClear");
-		assertEquals("noClear", ld.getDisableClearConditionName());
+		ld.setXmlDisableClearCondition("noClear");
+		assertEquals("noClear", ld.getDisableClearCondition());
 	}
 
 	@Test
-	void enableClearConditionNameNegatesAndStoresAsDisableClear() {
+	void enableClearConditionNegatesToDisableClearCondition() {
 		LookupDescription ld = new LookupDescription();
-		ld.setEnableClearConditionName("canClear");
-		assertEquals("notCanClear", ld.getDisableClearConditionName());
+		ld.setXmlEnableClearCondition("canClear");
+		assertEquals("notCanClear", ld.getDisableClearCondition());
 	}
 
 	@Test
-	void disablePickConditionNameRoundTrip() {
+	void disablePickConditionRoundTrip() {
 		LookupDescription ld = new LookupDescription();
-		ld.setDisablePickConditionName("noPick");
-		assertEquals("noPick", ld.getDisablePickConditionName());
+		ld.setXmlDisablePickCondition("noPick");
+		assertEquals("noPick", ld.getDisablePickCondition());
 	}
 
 	@Test
-	void enablePickConditionNameNegatesAndStoresAsDisablePick() {
+	void enablePickConditionNegatesToDisablePickCondition() {
 		LookupDescription ld = new LookupDescription();
-		ld.setEnablePickConditionName("canPick");
-		assertEquals("notCanPick", ld.getDisablePickConditionName());
+		ld.setXmlEnablePickCondition("canPick");
+		assertEquals("notCanPick", ld.getDisablePickCondition());
 	}
 
 	@Test
@@ -154,23 +154,23 @@ class LookupDescriptionTest {
 	}
 
 	@Test
-	void jaxbHelperGetEnableEditConditionNameReturnsNull() {
-		assertNull(new LookupDescription().getEnableEditConditionName());
+	void xmlEnableEditConditionIsNullByDefault() {
+		assertNull(new LookupDescription().getXmlEnableEditCondition());
 	}
 
 	@Test
-	void jaxbHelperGetEnableAddConditionNameReturnsNull() {
-		assertNull(new LookupDescription().getEnableAddConditionName());
+	void xmlEnableAddConditionIsNullByDefault() {
+		assertNull(new LookupDescription().getXmlEnableAddCondition());
 	}
 
 	@Test
-	void jaxbHelperGetEnableClearConditionNameReturnsNull() {
-		assertNull(new LookupDescription().getEnableClearConditionName());
+	void xmlEnableClearConditionIsNullByDefault() {
+		assertNull(new LookupDescription().getXmlEnableClearCondition());
 	}
 
 	@Test
-	void jaxbHelperGetEnablePickConditionNameReturnsNull() {
-		assertNull(new LookupDescription().getEnablePickConditionName());
+	void xmlEnablePickConditionIsNullByDefault() {
+		assertNull(new LookupDescription().getXmlEnablePickCondition());
 	}
 	@Test
 	void modelAttributeSurvivesXmlRoundTrip() throws JAXBException {

@@ -81,7 +81,7 @@ import jakarta.faces.component.UIComponentBase;
 import jakarta.faces.component.html.HtmlPanelGroup;
 import jakarta.faces.context.FacesContext;
 
-@SuppressWarnings({"static-method", "java:S5960"}) // Assertions belong in this test class.
+@SuppressWarnings({"static-method", "java:S5960", "java:S3011"}) // Assertions belong in this test class.
 class FacesViewRendererTest {
 	private static final ResolvedIcon NO_ICON = new ResolvedIcon(null, null);
 
@@ -486,7 +486,7 @@ class FacesViewRendererTest {
 		FacesViewRenderer renderer = newRenderer(createView(null), null, cb, lb);
 		DataGrid grid = new DataGrid();
 		grid.setInline(Boolean.TRUE);
-		grid.setDisabledConditionName("gridLocked");
+		grid.setXmlDisabledCondition("gridLocked");
 		CheckBox checkBox = new CheckBox();
 		TestComponent component = new TestComponent("checkbox");
 		when(cb.checkBox(any(), isNull(), same(checkBox), eq("gridLocked"), isNull(), isNull()))
@@ -506,7 +506,7 @@ class FacesViewRendererTest {
 		LayoutBuilder lb = mock(LayoutBuilder.class);
 		FacesViewRenderer renderer = newRenderer(createView(null), null, cb, lb);
 		Form form = new Form();
-		form.setDisabledConditionName("formLocked");
+		form.setXmlDisabledCondition("formLocked");
 		form.getColumns().add(new FormColumn());
 		CheckBox checkBox = new CheckBox();
 		TestComponent component = new TestComponent("checkbox");
@@ -527,7 +527,7 @@ class FacesViewRendererTest {
 		FacesViewRenderer renderer = newRenderer(createView(null), null, cb, lb);
 		DataGrid grid = new DataGrid();
 		grid.setInline(Boolean.FALSE);
-		grid.setDisabledConditionName("gridLocked");
+		grid.setXmlDisabledCondition("gridLocked");
 		CheckBox checkBox = new CheckBox();
 		TestComponent component = new TestComponent("checkbox");
 		when(cb.checkBox(any(), isNull(), same(checkBox), isNull(), isNull(), isNull()))

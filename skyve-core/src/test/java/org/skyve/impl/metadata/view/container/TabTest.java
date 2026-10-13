@@ -8,12 +8,12 @@ import org.junit.jupiter.api.Test;
 class TabTest {
 
 	@Test
-	void jaxbHelperGetEnabledConditionNameReturnsNull() {
-		assertNull(new Tab().getEnabledConditionName());
+	void xmlEnabledConditionIsNullByDefault() {
+		assertNull(new Tab().getXmlEnabledCondition());
 	}
 
 	@Test
-	void jaxbHelperGetVisibleConditionNameReturnsNull() {
-		assertNull(new Tab().getVisibleConditionName());
+	void xmlVisibleConditionIsNullByDefault() {
+		assertNull(new Tab().getXmlVisibleCondition());
 	}
 }

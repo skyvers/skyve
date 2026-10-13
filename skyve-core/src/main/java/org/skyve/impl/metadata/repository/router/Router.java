@@ -1,6 +1,7 @@
 package org.skyve.impl.metadata.repository.router;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -53,7 +54,7 @@ public class Router implements ConvertibleMetaData<Router>, DecoratedMetaData, R
 	
 	@XmlElement(namespace = XMLMetaData.ROUTER_NAMESPACE)
 	@XmlJavaTypeAdapter(PropertyMapAdapter.class)
-	private Map<String, String> properties = new TreeMap<>();
+	private Map<String, String> properties = new LinkedHashMap<>();
 
 	/**
 	 * Returns the source metadata last-modified timestamp used for reload checks.

@@ -1,6 +1,10 @@
 package org.skyve.metadata.view.fluent;
 
+import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.metadata.view.widget.bound.tabular.ListRepeater;
+
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 
 /**
  * Builds {@link ListRepeater} metadata for repeated list-query rendering.
@@ -46,14 +50,15 @@ public class FluentListRepeater extends FluentWidget implements FluentRelativeSi
 		escapeTitle(list.getEscapeTitle());
 		queryName(list.getQueryName());
 		modelName(list.getModelName());
-		postRefreshConditionName(list.getPostRefreshConditionName());
-		invisibleConditionName(list.getInvisibleConditionName());
+		postRefreshCondition(list.getPostRefreshCondition());
+		BindUtil.copyAuthoredCondition(list.getXmlInvisibleCondition(), list.getXmlVisibleCondition(), this::invisibleCondition, this::visibleCondition);
 
 		relativeSize(list, this);
 
 		list.getParameters().forEach(p -> addParameter(new FluentParameter().from(p)));
-
 		list.getFilterParameters().forEach(f -> addFilterParameter(new FluentFilterParameter().from(f)));
+
+		list.getProperties().entrySet().forEach(p -> putProperty(p.getKey(), p.getValue()));
 
 		return this;
 	}
@@ -140,14 +145,14 @@ public class FluentListRepeater extends FluentWidget implements FluentRelativeSi
 	}
 
 	/**
-	 * Sets the condition name evaluated after refresh.
+	 * Sets the {@code postRefresh} condition as authored.
 	 *
-	 * @param postRefreshConditionName
-	 *            the post-refresh condition name
+	 * @param postRefreshCondition
+	 *            a condition name, an inline condition expression or a boolean literal
 	 * @return this builder
 	 */
-	public FluentListRepeater postRefreshConditionName(String postRefreshConditionName) {
-		list.setPostRefreshConditionName(postRefreshConditionName);
+	public @Nonnull FluentListRepeater postRefreshCondition(@Nullable String postRefreshCondition) {
+		list.setPostRefreshCondition(postRefreshCondition);
 		return this;
 	}
 
@@ -176,14 +181,26 @@ public class FluentListRepeater extends FluentWidget implements FluentRelativeSi
 	}
 
 	/**
-	 * Sets the condition name controlling repeater visibility.
+	 * Sets the {@code invisible} condition as authored; the opposite sense of {@link #visibleCondition(String)}.
 	 *
-	 * @param invisibleConditionName
-	 *            the visibility condition name
+	 * @param invisibleCondition
+	 *            a condition name, an inline condition expression or a boolean literal
 	 * @return this builder
 	 */
-	public FluentListRepeater invisibleConditionName(String invisibleConditionName) {
-		list.setInvisibleConditionName(invisibleConditionName);
+	public @Nonnull FluentListRepeater invisibleCondition(@Nullable String invisibleCondition) {
+		list.setXmlInvisibleCondition(invisibleCondition);
+		return this;
+	}
+
+	/**
+	 * Sets the {@code visible} condition as authored; the opposite sense of {@link #invisibleCondition(String)}.
+	 *
+	 * @param visibleCondition
+	 *            a condition name, an inline condition expression or a boolean literal
+	 * @return this builder
+	 */
+	public @Nonnull FluentListRepeater visibleCondition(@Nullable String visibleCondition) {
+		list.setXmlVisibleCondition(visibleCondition);
 		return this;
 	}
 
@@ -353,6 +370,19 @@ public class FluentListRepeater extends FluentWidget implements FluentRelativeSi
 	@Override
 	public FluentListRepeater percentageHeight(int percentageHeight) {
 		list.setPercentageHeight(Integer.valueOf(percentageHeight));
+		return this;
+	}
+
+	/**
+	 * Adds or replaces a custom property on the wrapped metadata.
+	 * Properties keep the order in which they were first added.
+	 *
+	 * @param k the property name
+	 * @param v the property value
+	 * @return this builder
+	 */
+	public @Nonnull FluentListRepeater putProperty(@Nonnull String k, @Nonnull String v) {
+		list.getProperties().put(k, v);
 		return this;
 	}
 

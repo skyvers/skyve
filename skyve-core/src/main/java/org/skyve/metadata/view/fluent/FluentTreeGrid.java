@@ -12,7 +12,7 @@ public class FluentTreeGrid extends FluentListGrid {
 	 * Creates a builder backed by a new {@link TreeGrid}.
 	 */
 	public FluentTreeGrid() {
-		grid = new TreeGrid();
+		this(new TreeGrid());
 	}
 
 	/**
@@ -22,6 +22,7 @@ public class FluentTreeGrid extends FluentListGrid {
 	 *            the metadata instance to mutate
 	 */
 	public FluentTreeGrid(TreeGrid grid) {
+		super(grid);
 		this.grid = grid;
 	}
 

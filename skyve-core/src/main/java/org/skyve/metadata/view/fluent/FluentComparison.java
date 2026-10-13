@@ -2,6 +2,8 @@ package org.skyve.metadata.view.fluent;
 
 import org.skyve.impl.metadata.view.widget.bound.input.Comparison;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * Builds {@link Comparison} widget metadata using a fluent API.
  */
@@ -28,7 +30,6 @@ public class FluentComparison extends FluentInputWidget<FluentComparison> implem
 	 * Copies comparison metadata into this fluent builder.
 	 */
 	public FluentComparison from(@SuppressWarnings("hiding") Comparison comparison) {
-
 		relativeSize(comparison, this);
 
 		modelName(comparison.getModelName());
@@ -38,6 +39,9 @@ public class FluentComparison extends FluentInputWidget<FluentComparison> implem
 		}
 
 		super.from(comparison);
+
+		comparison.getProperties().entrySet().forEach(p -> putProperty(p.getKey(), p.getValue()));
+		
 		return this;
 	}
 
@@ -216,6 +220,19 @@ public class FluentComparison extends FluentInputWidget<FluentComparison> implem
 	@Override
 	public FluentComparison xl(int xl) {
 		comparison.setXl(Integer.valueOf(xl));
+		return this;
+	}
+
+	/**
+	 * Adds or replaces a custom property on the wrapped metadata.
+	 * Properties keep the order in which they were first added.
+	 *
+	 * @param k the property name
+	 * @param v the property value
+	 * @return this builder
+	 */
+	public @Nonnull FluentComparison putProperty(@Nonnull String k, @Nonnull String v) {
+		comparison.getProperties().put(k, v);
 		return this;
 	}
 

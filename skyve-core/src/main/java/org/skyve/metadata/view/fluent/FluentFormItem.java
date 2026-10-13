@@ -186,6 +186,8 @@ public class FluentFormItem {
 			throw new IllegalStateException(widget + " is not catered for");
 		}
 
+		item.getProperties().entrySet().forEach(p -> putProperty(p.getKey(), p.getValue()));
+		
 		return this;
 	}
 
@@ -694,6 +696,19 @@ public class FluentFormItem {
 		return this;
 	}
 	
+	/**
+	 * Adds or replaces a custom property on the wrapped metadata.
+	 * Properties keep the order in which they were first added.
+	 *
+	 * @param k the property name
+	 * @param v the property value
+	 * @return this builder
+	 */
+	public @Nonnull FluentFormItem putProperty(@Nonnull String k, @Nonnull String v) {
+		item.getProperties().put(k, v);
+		return this;
+	}
+
 	/**
 	 * Returns the backing metadata instance.
 	 *

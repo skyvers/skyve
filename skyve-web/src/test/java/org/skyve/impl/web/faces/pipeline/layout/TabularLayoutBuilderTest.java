@@ -7,12 +7,15 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -57,7 +60,6 @@ class TabularLayoutBuilderTest {
 
 	private static Application mockApplication;
 	private static ExpressionFactory mockExpressionFactory;
-	private static int idCounter;
 
 	// Per-test component mocks (configured in @BeforeEach)
 	private PanelGrid mockPanelGrid;
@@ -68,7 +70,6 @@ class TabularLayoutBuilderTest {
 	private Column mockColumn;
 	private OutputLabel mockOutputLabel;
 	private Message mockMessage;
-	private Panel mockPanel;
 
 	@BeforeAll
 	static void setUpFacesContext() {
@@ -84,7 +85,6 @@ class TabularLayoutBuilderTest {
 		when(mockExpressionFactory.createValueExpression(any(ELContext.class), anyString(), any(Class.class))).thenReturn(mockValueExpr);
 		when(mockExpressionFactory.createValueExpression(anyString(), any(Class.class))).thenReturn(mockValueExpr);
 
-		idCounter = 0;
 		FacesContextBridge.setCurrent(facesContext);
 	}
 
@@ -94,7 +94,6 @@ class TabularLayoutBuilderTest {
 	}
 
 	private TabularLayoutBuilder builder;
-	private FacesView managedBean;
 
 	@BeforeEach
 	void setUp() {
@@ -107,7 +106,7 @@ class TabularLayoutBuilderTest {
 		mockColumn = mock(Column.class);
 		mockOutputLabel = mock(OutputLabel.class);
 		mockMessage = mock(Message.class);
-		mockPanel = mock(Panel.class);
+		Panel mockPanel = mock(Panel.class);
 
 		when(mockPanelGrid.getChildren()).thenReturn(new ArrayList<>());
 		when(mockHtmlPanelGroup.getChildren()).thenReturn(new ArrayList<>());
@@ -129,8 +128,9 @@ class TabularLayoutBuilderTest {
 		when(mockApplication.createComponent(HtmlOutputText.COMPONENT_TYPE)).thenAnswer(invocation -> new HtmlOutputText());
 
 		builder = new TabularLayoutBuilder();
-		managedBean = mock(FacesView.class);
-		when(managedBean.nextId()).thenAnswer(inv -> "id" + (++idCounter));
+		FacesView managedBean = mock(FacesView.class);
+		AtomicInteger idCounter = new AtomicInteger();
+		when(managedBean.nextId()).thenAnswer(inv -> "id" + idCounter.incrementAndGet());
 		builder.setSAILManagedBean(managedBean);
 	}
 
@@ -365,6 +365,37 @@ class TabularLayoutBuilderTest {
 		UIComponent result = builder.sidebarLayout(null, sidebar, false);
 		assertSame(mockHtmlPanelGroup, result);
 		verify(mockHtmlPanelGroup).setStyleClass("sidebarEdit");
+	}
+
+	@Test
+	void sidebarLayoutWithConditionNameRendersItAsAMapLookup() {
+		Sidebar sidebar = new Sidebar();
+		sidebar.setXmlInvisibleCondition("hidden");
+		builder.sidebarLayout(null, sidebar, false);
+		verify(mockExpressionFactory, atLeastOnce()).createValueExpression(any(ELContext.class),
+																			eq("#{skyve.currentBean['notHidden']}"),
+																			eq(Boolean.class));
+		verify(mockExpressionFactory, atLeastOnce()).createValueExpression(any(ELContext.class),
+																			eq("#{(skyve.currentBean ne null) and (skyve.currentBean.getBean() ne null) and " +
+																					"(not skyve.currentBean['notCreated']) and (not skyve.currentBean['hidden'])}"),
+																			eq(Boolean.class));
+	}
+
+	@Test
+	void sidebarLayoutWithInlineConditionRendersItAsAnEvaluation() {
+		Sidebar sidebar = new Sidebar();
+		sidebar.setXmlVisibleCondition("{el:bean.text eq 'a'}");
+		builder.sidebarLayout(null, sidebar, false);
+		// rendered when the authored visible expression is true
+		verify(mockExpressionFactory, atLeastOnce()).createValueExpression(any(ELContext.class),
+																			eq("#{skyve.currentBean.evaluateCondition('{el:bean.text eq \\'a\\'}')}"),
+																			eq(Boolean.class));
+		// and not rendered when its inverse (the invisible condition) is true
+		verify(mockExpressionFactory, atLeastOnce()).createValueExpression(any(ELContext.class),
+																			eq("#{(skyve.currentBean ne null) and (skyve.currentBean.getBean() ne null) and " +
+																					"(not skyve.currentBean['notCreated']) and " +
+																					"(not skyve.currentBean.evaluateCondition('not{el:bean.text eq \\'a\\'}'))}"),
+																			eq(Boolean.class));
 	}
 
 	@Test

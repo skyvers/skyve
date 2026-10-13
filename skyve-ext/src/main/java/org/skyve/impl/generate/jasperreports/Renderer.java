@@ -29,6 +29,8 @@ import org.skyve.metadata.module.Module;
 import org.skyve.util.logging.SkyveLoggerFactory;
 import org.slf4j.Logger;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * Drives the complete JasperReports rendering pipeline: load or compile the
  * {@code .jrxml}, fill with data, and export to the target format.
@@ -816,35 +818,53 @@ public class Renderer {
 	}
 
 	/**
-	 * Renders a Jasper {@code printWhenExpression} from a Skyve invisible-condition name.
-	 *
-	 * <p>Skyve condition names model invisibility, so the generated Jasper expression
-	 * inverts polarity to produce a print-when condition.
+	 * Renders a Jasper {@code printWhenExpression} from a Skyve invisible condition.
 	 *
 	 * @param design The report design context.
-	 * @param invisibleConditionName The Skyve invisible condition name.
+	 * @param invisibleCondition The Skyve invisible condition - a condition name or an inline condition expression.
 	 * @return A Jasper print-when expression fragment, or an empty string when no condition is provided.
+	 * @see #printWhenExpression(DesignSpecification, String)
 	 */
-	public static String renderPrintWhenExpression(DesignSpecification design, String invisibleConditionName) {
-		if (invisibleConditionName == null || StringUtils.isBlank(invisibleConditionName)) {
+	public static String renderPrintWhenExpression(DesignSpecification design, String invisibleCondition) {
+		if (StringUtils.isBlank(invisibleCondition)) {
 			return "";
 		}
-		StringBuilder sb = new StringBuilder(64);
+		StringBuilder sb = new StringBuilder(128);
 		sb.append("<printWhenExpression><![CDATA[");
-		if (Mode.bean.equals(design.getMode())) {
-			sb.append("$F{THIS}.").append(flipCondition(invisibleConditionName)).append("()");
-		} else {
-			if (!invisibleConditionName.startsWith("not")) {
-				sb.append("!");
-			}
-			sb.append("org.skyve.impl.generate.jasperreports.BeanForReport.evaluateCondition(");
-			sb.append("\"").append(design.getModuleName()).append("\",");
-			sb.append("\"").append(design.getDocumentName()).append("\",");
-			sb.append("$P{ID},");
-			sb.append("\"").append(rawConditionName(invisibleConditionName)).append("\"");
-			sb.append(")");
-		}
+		// an inline condition expression could contain the CDATA terminator
+		sb.append(printWhenExpression(design, invisibleCondition).replace("]]>", "]]]]><![CDATA[>"));
 		sb.append("]]></printWhenExpression>");
+		return sb.toString();
+	}
+
+	/**
+	 * Builds the text of a Jasper print-when expression from a Skyve invisible condition.
+	 *
+	 * <p>Skyve conditions model invisibility, so the generated Jasper expression
+	 * inverts polarity to produce a print-when condition.
+	 * The condition is evaluated through {@link org.skyve.domain.Bean#evaluateCondition(String)},
+	 * so it can be a condition name or an inline condition expression, in either sense.
+	 *
+	 * @param design The report design context.
+	 * @param invisibleCondition The Skyve invisible condition; must not be blank.
+	 * @return The Jasper expression text.
+	 */
+	public static @Nonnull String printWhenExpression(@Nonnull DesignSpecification design, @Nonnull String invisibleCondition) {
+		StringBuilder sb = new StringBuilder(128);
+		if (! invisibleCondition.startsWith("not")) {
+			sb.append('!');
+		}
+		if (Mode.bean.equals(design.getMode())) {
+			sb.append("$F{THIS}.evaluateCondition(");
+		} else {
+			sb.append("org.skyve.impl.generate.jasperreports.BeanForReport.evaluateCondition(");
+			sb.append('"').append(design.getModuleName()).append("\", ");
+			sb.append('"').append(design.getDocumentName()).append("\", ");
+			sb.append("$P{ID}, ");
+		}
+		// escape for a java string literal as an inline condition expression can contain quotes
+		String condition = rawConditionName(invisibleCondition).replace("\\", "\\\\").replace("\"", "\\\"");
+		sb.append('"').append(condition).append("\")");
 		return sb.toString();
 	}
 
@@ -1038,35 +1058,17 @@ public class Renderer {
 	}
 
 	/**
-	 * Converts a condition method name to its logical inverse form.
+	 * Normalises a condition to its non-prefixed form.
 	 *
-	 * @param conditionName The source condition name.
-	 * @return The inverse condition name, or {@code null} when input is {@code null}.
+	 * @param condition The condition name or inline condition expression (possibly prefixed with {@code not}).
+	 * @return The normalised condition.
 	 */
-	public static String flipCondition(String conditionName) {
-		String result = null;
-		if (conditionName != null) {
-			if (conditionName.startsWith("not")) {
-				result = "is" + rawConditionName(conditionName).substring(0, 1).toUpperCase() + rawConditionName(conditionName).substring(1);
-			} else {
-				result = "not" + conditionName.substring(0, 1).toUpperCase() + conditionName.substring(1);
-			}
-		}
-		return result;
-	}
-
-	/**
-	 * Normalises a condition name to its non-prefixed form.
-	 *
-	 * @param conditionName The condition name (possibly prefixed with {@code not}).
-	 * @return The normalised condition name.
-	 */
-	public static String rawConditionName(String conditionName) {
-		String result = conditionName;
-		if (conditionName.startsWith("not")) {
-			result = conditionName.substring(3, 4).toLowerCase() + conditionName.substring(4);
+	public static String rawConditionName(String condition) {
+		String result;
+		if (condition.startsWith("not")) {
+			result = condition.substring(3, 4).toLowerCase() + condition.substring(4);
 		} else {
-			result = conditionName.substring(0, 1).toLowerCase() + conditionName.substring(1);
+			result = condition.substring(0, 1).toLowerCase() + condition.substring(1);
 		}
 		return result;
 	}

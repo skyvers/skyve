@@ -1,5 +1,6 @@
 package org.skyve.impl.metadata.view.component;
 
+import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.SerializableMetaData;
 
@@ -8,18 +9,21 @@ import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
 
 /**
- * JAXB-annotated mapping entry that renames a widget component during view
- * composition.
+ * JAXB-annotated mapping entry that renames an action or a condition of a
+ * component view during view composition.
  *
- * <p>Declares that a component referenced as {@code fromComponent} in the
- * parent view should be resolved as {@code mappedTo} in the composed view,
- * enabling component reuse with different bindings or identifiers.
+ * <p>Declares that what the component view calls {@code fromComponent} is
+ * {@code mappedTo} in the containing view, enabling component reuse across
+ * documents that name things differently. Authored as an {@code <action/>}
+ * within a component's {@code <actions>}, or a {@code <condition/>} within its
+ * {@code <conditions>}. For a condition, either side may be an inline
+ * condition expression as well as a condition name.
  *
  * <p>Threading: not thread-safe.  Read-only after JAXB unmarshalling.
  */
 @XmlRootElement(namespace = XMLMetaData.VIEW_NAMESPACE)
 @XmlType(namespace = XMLMetaData.VIEW_NAMESPACE, propOrder = {"fromComponent", "mappedTo"})
-public class ComponentNameMap implements SerializableMetaData {
+public class ComponentTranslation implements SerializableMetaData {
 	private static final long serialVersionUID = -1586157078585007880L;
 
 	private String fromComponent;
@@ -31,7 +35,7 @@ public class ComponentNameMap implements SerializableMetaData {
 
 	@XmlAttribute(required = true)
 	public void setFromComponent(String fromComponent) {
-		this.fromComponent = fromComponent;
+		this.fromComponent = UtilImpl.processStringValue(fromComponent);
 	}
 
 	public String getMappedTo() {
@@ -40,6 +44,6 @@ public class ComponentNameMap implements SerializableMetaData {
 
 	@XmlAttribute(required = true)
 	public void setMappedTo(String mappedTo) {
-		this.mappedTo = mappedTo;
+		this.mappedTo = UtilImpl.processStringValue(mappedTo);
 	}
 }

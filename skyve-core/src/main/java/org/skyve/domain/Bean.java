@@ -235,18 +235,23 @@ public interface Bean extends Serializable, Comparable<Bean> {
 	public String getBizKey();
 	
 	/**
-	 * Evaluates a named condition defined on this bean's document metadata.
+	 * Evaluates a condition against this bean.
 	 *
-	 * <p>Conditions are declared in the document XML as boolean expressions over the
-	 * bean's attributes. The framework evaluates them using BeanShell and caches the
-	 * result in the bean. Condition names starting with {@code "not"} are automatically
-	 * negated (e.g. {@code "notActive"} evaluates the inverse of the {@code "active"}
-	 * condition).
+	 * <p>A condition is one of
+	 * <ul>
+	 * <li>the name of a condition declared on this bean's document metadata,
+	 * <li>an inline condition expression - a Skyve expression such as
+	 * <code>{el:bean.status eq 'rejected'}</code> that yields a boolean, or
+	 * <li>the literal {@code "true"} or {@code "false"}.
+	 * </ul>
+	 * A condition name or inline condition expression prefixed with {@code "not"} is negated
+	 * (e.g. {@code "notActive"} evaluates the inverse of the {@code "active"} condition).
+	 * An inline condition expression that yields {@code null} is false.
 	 *
-	 * @param conditionName the unqualified condition name as declared in document metadata; must not be {@code null}
+	 * @param condition the condition name or inline condition expression; must not be {@code null}
 	 * @return {@code true} if the condition is satisfied, {@code false} otherwise
 	 */
-	public boolean evaluateCondition(String conditionName);
+	public boolean evaluateCondition(String condition);
 
 	/**
 	 * Returns a map of property names to their original (pre-modification) values.

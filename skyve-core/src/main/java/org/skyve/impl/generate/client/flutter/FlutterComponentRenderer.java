@@ -99,7 +99,7 @@ public class FlutterComponentRenderer extends ComponentRenderer {
 	}
 	
 	@Override
-	public RenderedComponent view(RenderedComponent component, String invisibleConditionName) {
+	public RenderedComponent view(RenderedComponent component, String invisibleCondition) {
 		imports.add(FlutterLayoutRenderer.VBOX_IMPORT);
 		RenderedComponent result = new RenderedComponent(FlutterGenerator.INDENT).setAfter("]),").setIndent(startingIndent);
 		StringBuilder output = result.getOutput();
@@ -137,7 +137,7 @@ public class FlutterComponentRenderer extends ComponentRenderer {
 	@Override
 	public RenderedComponent border(RenderedComponent component,
 										String title,
-										String invisibileConditionName,
+										String invisibleCondition,
 										Integer pixelWidth) {
 		imports.add(BORDER_IMPORT);
 		RenderedComponent result = new RenderedComponent(FlutterGenerator.INDENT);

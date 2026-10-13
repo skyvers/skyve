@@ -1,8 +1,12 @@
 package org.skyve.metadata.view.fluent;
 
+import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.metadata.view.HorizontalAlignment;
 import org.skyve.impl.metadata.view.widget.bound.Label;
 import org.skyve.metadata.view.TextOutput.Sanitisation;
+
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 
 /**
  * Builds {@link Label} widget metadata using a fluent API.
@@ -40,7 +44,7 @@ public class FluentLabel extends FluentBoundWidget<FluentLabel> implements Fluen
 
 		absoluteSize(label, this);
 
-		invisibleConditionName(label.getInvisibleConditionName());
+		BindUtil.copyAuthoredCondition(label.getXmlInvisibleCondition(), label.getXmlVisibleCondition(), this::invisibleCondition, this::visibleCondition);
 		Boolean b = label.getFormatted();
 		if (b != null) {
 			formatted(b.booleanValue());
@@ -53,6 +57,9 @@ public class FluentLabel extends FluentBoundWidget<FluentLabel> implements Fluen
 		sanitise(label.getSanitise());
 
 		super.from(label);
+		
+		label.getProperties().entrySet().forEach(p -> putProperty(p.getKey(), p.getValue()));
+		
 		return this;
 	}
 
@@ -79,13 +86,26 @@ public class FluentLabel extends FluentBoundWidget<FluentLabel> implements Fluen
 	}
 
 	/**
-	 * Sets the condition name that hides this label.
+	 * Sets the {@code invisible} condition as authored; the opposite sense of {@link #visibleCondition(String)}.
 	 *
-	 * @param invisibleConditionName the condition name
+	 * @param invisibleCondition
+	 *            a condition name, an inline condition expression or a boolean literal
 	 * @return this builder
 	 */
-	public FluentLabel invisibleConditionName(String invisibleConditionName) {
-		label.setInvisibleConditionName(invisibleConditionName);
+	public @Nonnull FluentLabel invisibleCondition(@Nullable String invisibleCondition) {
+		label.setXmlInvisibleCondition(invisibleCondition);
+		return this;
+	}
+
+	/**
+	 * Sets the {@code visible} condition as authored; the opposite sense of {@link #invisibleCondition(String)}.
+	 *
+	 * @param visibleCondition
+	 *            a condition name, an inline condition expression or a boolean literal
+	 * @return this builder
+	 */
+	public @Nonnull FluentLabel visibleCondition(@Nullable String visibleCondition) {
+		label.setXmlVisibleCondition(visibleCondition);
 		return this;
 	}
 
@@ -154,6 +174,19 @@ public class FluentLabel extends FluentBoundWidget<FluentLabel> implements Fluen
 	@Override
 	public FluentLabel pixelHeight(int height) {
 		label.setPixelHeight(Integer.valueOf(height));
+		return this;
+	}
+
+	/**
+	 * Adds or replaces a custom property on the wrapped metadata.
+	 * Properties keep the order in which they were first added.
+	 *
+	 * @param k the property name
+	 * @param v the property value
+	 * @return this builder
+	 */
+	public @Nonnull FluentLabel putProperty(@Nonnull String k, @Nonnull String v) {
+		label.getProperties().put(k, v);
 		return this;
 	}
 

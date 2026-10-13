@@ -190,7 +190,7 @@ public class NoOpLayoutBuilder extends LayoutBuilder {
 										Integer md,
 										Integer lg,
 										Integer xl,
-										String invisibleConditionName) {
+										String invisibleCondition) {
 		return component;
 	}
 

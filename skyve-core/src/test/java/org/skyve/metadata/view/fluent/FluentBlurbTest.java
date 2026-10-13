@@ -50,9 +50,9 @@ class FluentBlurbTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void invisibleConditionNameReturnsSelf() {
+	void invisibleConditionReturnsSelf() {
 		FluentBlurb b = new FluentBlurb();
-		FluentBlurb result = b.invisibleConditionName("hiddenCond");
+		FluentBlurb result = b.invisibleCondition("hiddenCond");
 		assertSame(b, result);
 	}
 

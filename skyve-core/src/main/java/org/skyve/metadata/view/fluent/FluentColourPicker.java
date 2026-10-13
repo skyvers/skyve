@@ -2,6 +2,8 @@ package org.skyve.metadata.view.fluent;
 
 import org.skyve.impl.metadata.view.widget.bound.input.ColourPicker;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * Builds {@link ColourPicker} widget metadata using a fluent API.
  */
@@ -30,10 +32,9 @@ public class FluentColourPicker extends FluentChangeableInputWidget<FluentColour
 	 * Copies colour-picker metadata into this fluent builder.
 	 */
 	public FluentColourPicker from(@SuppressWarnings("hiding") ColourPicker colour) {
-
 		absoluteWidth(colour, this);
-
 		super.from(colour);
+		colour.getProperties().entrySet().forEach(p -> putProperty(p.getKey(), p.getValue()));
 		return this;
 	}
 
@@ -50,6 +51,19 @@ public class FluentColourPicker extends FluentChangeableInputWidget<FluentColour
 	}
 
 	/**
+	 * Adds or replaces a custom property on the wrapped metadata.
+	 * Properties keep the order in which they were first added.
+	 *
+	 * @param k the property name
+	 * @param v the property value
+	 * @return this builder
+	 */
+	public @Nonnull FluentColourPicker putProperty(@Nonnull String k, @Nonnull String v) {
+		colour.getProperties().put(k, v);
+		return this;
+	}
+
+	/**
 	 * Returns the wrapped colour-picker metadata instance.
 	 *
 	 * @return the mutable colour-picker metadata being configured
@@ -58,5 +72,4 @@ public class FluentColourPicker extends FluentChangeableInputWidget<FluentColour
 	public ColourPicker get() {
 		return colour;
 	}
-
 }

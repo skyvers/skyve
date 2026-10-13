@@ -81,10 +81,10 @@ public class EnabledVisibleTest {
 		LookupDescription lookup = new LookupDescription();
 		testVisible(lookup);
 		testEnabled(lookup);
-		testCondition(lookup, "disableEditConditionName", "enableEditConditionName");
-		testCondition(lookup, "disableAddConditionName", "enableAddConditionName");
-		testCondition(lookup, "disableClearConditionName", "enableClearConditionName");
-		testCondition(lookup, "disablePickConditionName", "enablePickConditionName");
+		testCondition(lookup, "disableEdit", "enableEdit");
+		testCondition(lookup, "disableAdd", "enableAdd");
+		testCondition(lookup, "disableClear", "enableClear");
+		testCondition(lookup, "disablePick", "enablePick");
 	}
 
 	@Test
@@ -178,24 +178,34 @@ public class EnabledVisibleTest {
 	}
 	
 	private static void testVisible(Invisible metaData) {
-		testCondition(metaData, "invisibleConditionName", "visibleConditionName");
+		testCondition(metaData, "invisible", "visible");
 	}
 
 	private static void testEnabled(Disableable metaData) {
-		testCondition(metaData, "disabledConditionName", "enabledConditionName");
+		testCondition(metaData, "disabled", "enabled");
 	}
 	
 	private static void testDisableableCRUDGrid(DisableableCRUDGrid metaData) {
-		testCondition(metaData, "disableAddConditionName", "enableAddConditionName");
-		testCondition(metaData, "disableZoomConditionName", "enableZoomConditionName");
-		testCondition(metaData, "disableEditConditionName", "enableEditConditionName");
-		testCondition(metaData, "disableRemoveConditionName", "enableRemoveConditionName");
+		testCondition(metaData, "disableAdd", "enableAdd");
+		testCondition(metaData, "disableZoom", "enableZoom");
+		testCondition(metaData, "disableEdit", "enableEdit");
+		testCondition(metaData, "disableRemove", "enableRemove");
 	}
 	
+	/**
+	 * @param metaData	The view metadata under test.
+	 * @param condition	The attribute behind the derived property renderers read, such as {@code invisible} for {@code invisibleCondition}.
+	 * @param negatedCondition	The opposite attribute of the pair, such as {@code visible}.
+	 */
 	private static void testCondition(Object metaData,
-										String conditionName, 
-										String negatedConditionName) {
-		Binder.set(metaData, conditionName, CONDITION);
+										String condition, 
+										String negatedCondition) {
+		// the attributes as authored are the xml prefixed properties
+		String conditionName = condition + "Condition";
+		String authoredConditionName = "xml" + Character.toUpperCase(condition.charAt(0)) + condition.substring(1) + "Condition";
+		String negatedConditionName = "xml" + Character.toUpperCase(negatedCondition.charAt(0)) + negatedCondition.substring(1) + "Condition";
+
+		Binder.set(metaData, authoredConditionName, CONDITION);
 		Assert.assertEquals(CONDITION, Binder.get(metaData, conditionName));
 
 		Binder.set(metaData, negatedConditionName, CONDITION);

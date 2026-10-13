@@ -87,8 +87,8 @@ class TestDataEnterViewVisitorTest {
 																				true));
 		CheckBox checkBox = new CheckBox();
 		checkBox.setBinding("active");
-		checkBox.setInvisibleConditionName("hideActive");
-		checkBox.setDisabledConditionName("disableActive");
+		checkBox.setXmlInvisibleCondition("hideActive");
+		checkBox.setXmlDisabledCondition("disableActive");
 
 		visitor.visitCheckBox(checkBox, true, true);
 

@@ -2,7 +2,6 @@ package org.skyve.impl.metadata.view.widget.bound.input;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.startsWith;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -19,31 +18,31 @@ class InputWidgetPojoTest {
 	// ---- InputWidget (via TextField) - visible/enabled conditions ----
 
 	@Test
-	void inputWidgetSetDisabledConditionNameRoundtrip() {
+	void inputWidgetSetDisabledConditionRoundtrip() {
 		TextField tf = new TextField();
-		tf.setDisabledConditionName("isReadonly");
-		assertThat(tf.getDisabledConditionName(), is("isReadonly"));
+		tf.setXmlDisabledCondition("isReadonly");
+		assertThat(tf.getDisabledCondition(), is("isReadonly"));
 	}
 
 	@Test
-	void inputWidgetSetEnabledConditionNameNegatesCondition() {
+	void inputWidgetSetEnabledConditionNegatesCondition() {
 		TextField tf = new TextField();
-		tf.setEnabledConditionName("isEditable");
-		assertThat(tf.getDisabledConditionName(), startsWith("not"));
+		tf.setXmlEnabledCondition("isEditable");
+		assertThat(tf.getDisabledCondition(), is("notIsEditable"));
 	}
 
 	@Test
-	void inputWidgetSetInvisibleConditionNameRoundtrip() {
+	void inputWidgetSetInvisibleConditionRoundtrip() {
 		TextField tf = new TextField();
-		tf.setInvisibleConditionName("hiddenWhen");
-		assertThat(tf.getInvisibleConditionName(), is("hiddenWhen"));
+		tf.setXmlInvisibleCondition("hiddenWhen");
+		assertThat(tf.getInvisibleCondition(), is("hiddenWhen"));
 	}
 
 	@Test
-	void inputWidgetSetVisibleConditionNameNegatesCondition() {
+	void inputWidgetSetVisibleConditionNegatesCondition() {
 		TextField tf = new TextField();
-		tf.setVisibleConditionName("showWhen");
-		assertThat(tf.getInvisibleConditionName(), startsWith("not"));
+		tf.setXmlVisibleCondition("showWhen");
+		assertThat(tf.getInvisibleCondition(), is("notShowWhen"));
 	}
 
 	// ---- TextField ----

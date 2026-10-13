@@ -121,9 +121,9 @@ public class DeviceResponsiveComponentBuilder extends ResponsiveComponentBuilder
 								null,
 								action.getClientValidation(),
 								EscapableText.of(confirmationText, ViewRenderer.shouldEscape(action.getEscapeConfirm())),
-								action.getDisabledConditionName(),
+								action.getDisabledCondition(),
 								null,
-								action.getInvisibleConditionName(),
+								action.getInvisibleCondition(),
 								capture,
 								UserAgentType.phone.equals(userAgentType) || useActionUploadDialog(capture));
 	}
@@ -142,7 +142,7 @@ public class DeviceResponsiveComponentBuilder extends ResponsiveComponentBuilder
 									String toolTip,
 									String confirmationText, 
 									Button button, 
-									String formDisabledConditionName, 
+									String formDisabledCondition, 
 									Action action) {
 		if (component != null) {
 			return component;
@@ -157,9 +157,9 @@ public class DeviceResponsiveComponentBuilder extends ResponsiveComponentBuilder
 								button.getPixelHeight(),
 								action.getClientValidation(),
 								EscapableText.of(confirmationText, ViewRenderer.shouldEscape(action.getEscapeConfirm())),
-								action.getDisabledConditionName(),
-								formDisabledConditionName,
-								action.getInvisibleConditionName(),
+								action.getDisabledCondition(),
+								formDisabledCondition,
+								action.getInvisibleCondition(),
 								capture,
 								UserAgentType.phone.equals(userAgentType) || useActionUploadDialog(capture));
 	}

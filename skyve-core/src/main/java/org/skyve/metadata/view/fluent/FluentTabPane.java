@@ -1,6 +1,10 @@
 package org.skyve.metadata.view.fluent;
 
+import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.metadata.view.container.TabPane;
+
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 
 /**
  * Fluent builder for tab-pane metadata.
@@ -40,12 +44,14 @@ public class FluentTabPane extends FluentWidget implements FluentRelativeSize<Fl
 		
 		relativeSize(tabPane, this);
 		
-		disabledConditionName(tabPane.getDisabledConditionName());
-		invisibleConditionName(tabPane.getInvisibleConditionName());
+		BindUtil.copyAuthoredCondition(tabPane.getXmlDisabledCondition(), tabPane.getXmlEnabledCondition(), this::disabledCondition, this::enabledCondition);
+		BindUtil.copyAuthoredCondition(tabPane.getXmlInvisibleCondition(), tabPane.getXmlVisibleCondition(), this::invisibleCondition, this::visibleCondition);
 		
 		selectedTabIndexBinding(tabPane.getSelectedTabIndexBinding());
 		
 		tabPane.getTabs().forEach(t -> addTab(new FluentTab().from(t)));
+		
+		tabPane.getProperties().entrySet().forEach(p -> putProperty(p.getKey(), p.getValue()));
 		
 		return this;
 	}
@@ -232,26 +238,50 @@ public class FluentTabPane extends FluentWidget implements FluentRelativeSize<Fl
 	}
 	
 	/**
-	 * Sets the condition name that disables this tab pane when true.
+	 * Sets the {@code disabled} condition as authored; the opposite sense of {@link #enabledCondition(String)}.
 	 *
-	 * @param disabledConditionName
-	 *            disabled condition identifier
+	 * @param disabledCondition
+	 *            a condition name, an inline condition expression or a boolean literal
 	 * @return this builder
 	 */
-	public FluentTabPane disabledConditionName(String disabledConditionName) {
-		pane.setDisabledConditionName(disabledConditionName);
+	public @Nonnull FluentTabPane disabledCondition(@Nullable String disabledCondition) {
+		pane.setXmlDisabledCondition(disabledCondition);
 		return this;
 	}
 
 	/**
-	 * Sets the condition name that hides this tab pane when true.
+	 * Sets the {@code enabled} condition as authored; the opposite sense of {@link #disabledCondition(String)}.
 	 *
-	 * @param invisibleConditionName
-	 *            invisibility condition identifier
+	 * @param enabledCondition
+	 *            a condition name, an inline condition expression or a boolean literal
 	 * @return this builder
 	 */
-	public FluentTabPane invisibleConditionName(String invisibleConditionName) {
-		pane.setInvisibleConditionName(invisibleConditionName);
+	public @Nonnull FluentTabPane enabledCondition(@Nullable String enabledCondition) {
+		pane.setXmlEnabledCondition(enabledCondition);
+		return this;
+	}
+
+	/**
+	 * Sets the {@code invisible} condition as authored; the opposite sense of {@link #visibleCondition(String)}.
+	 *
+	 * @param invisibleCondition
+	 *            a condition name, an inline condition expression or a boolean literal
+	 * @return this builder
+	 */
+	public @Nonnull FluentTabPane invisibleCondition(@Nullable String invisibleCondition) {
+		pane.setXmlInvisibleCondition(invisibleCondition);
+		return this;
+	}
+
+	/**
+	 * Sets the {@code visible} condition as authored; the opposite sense of {@link #invisibleCondition(String)}.
+	 *
+	 * @param visibleCondition
+	 *            a condition name, an inline condition expression or a boolean literal
+	 * @return this builder
+	 */
+	public @Nonnull FluentTabPane visibleCondition(@Nullable String visibleCondition) {
+		pane.setXmlVisibleCondition(visibleCondition);
 		return this;
 	}
 	
@@ -326,6 +356,19 @@ public class FluentTabPane extends FluentWidget implements FluentRelativeSize<Fl
 		return this;
 	}
 	
+	/**
+	 * Adds or replaces a custom property on the wrapped metadata.
+	 * Properties keep the order in which they were first added.
+	 *
+	 * @param k the property name
+	 * @param v the property value
+	 * @return this builder
+	 */
+	public @Nonnull FluentTabPane putProperty(@Nonnull String k, @Nonnull String v) {
+		pane.getProperties().put(k, v);
+		return this;
+	}
+
 	/**
 	 * Returns the backing metadata instance.
 	 *

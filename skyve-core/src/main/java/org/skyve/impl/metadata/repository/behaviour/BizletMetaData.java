@@ -1,8 +1,8 @@
 package org.skyve.impl.metadata.repository.behaviour;
 
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.TreeMap;
 
 import org.skyve.domain.Bean;
 import org.skyve.domain.messages.ValidationException;
@@ -51,7 +51,7 @@ public class BizletMetaData implements ConvertibleMetaData<BizletMetaData>, Relo
 	
 	@XmlElement(namespace = XMLMetaData.BEHAVIOUR_NAMESPACE)
 	@XmlJavaTypeAdapter(PropertyMapAdapter.class)
-	private Map<String, String> properties = new TreeMap<>();
+	private Map<String, String> properties = new LinkedHashMap<>();
 
 	/**
 	 * Returns descriptive Bizlet documentation loaded from metadata.

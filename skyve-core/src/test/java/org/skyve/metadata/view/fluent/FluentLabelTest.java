@@ -41,9 +41,9 @@ class FluentLabelTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void invisibleConditionNameReturnsSelf() {
+	void invisibleConditionReturnsSelf() {
 		FluentLabel l = new FluentLabel();
-		FluentLabel result = l.invisibleConditionName("hiddenCond");
+		FluentLabel result = l.invisibleCondition("hiddenCond");
 		assertSame(l, result);
 	}
 

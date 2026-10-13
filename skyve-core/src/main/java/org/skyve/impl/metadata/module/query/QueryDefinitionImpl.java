@@ -1,7 +1,7 @@
 package org.skyve.impl.metadata.module.query;
 
+import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.TreeMap;
 
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.query.QueryDefinition;
@@ -35,7 +35,7 @@ public abstract class QueryDefinitionImpl implements QueryDefinition {
 	private String documentation;
 	private int timeoutInSeconds = 0;
 
-	private Map<String, String> properties = new TreeMap<>();
+	private Map<String, String> properties = new LinkedHashMap<>();
 
 	@Override
 	public Module getOwningModule() {

@@ -47,44 +47,44 @@ class FluentListGridTest {
 	}
 
 	@Test
-	void postRefreshConditionNameSetsValue() {
-		assertThat(new FluentListGrid().postRefreshConditionName("afterRefresh").get().getPostRefreshConditionName(),
+	void postRefreshConditionSetsValue() {
+		assertThat(new FluentListGrid().postRefreshCondition("afterRefresh").get().getPostRefreshCondition(),
 				is("afterRefresh"));
 	}
 
 	@Test
-	void invisibleConditionNameSetsValue() {
-		assertThat(new FluentListGrid().invisibleConditionName("notAdmin").get().getInvisibleConditionName(),
+	void invisibleConditionSetsValue() {
+		assertThat(new FluentListGrid().invisibleCondition("notAdmin").get().getInvisibleCondition(),
 				is("notAdmin"));
 	}
 
 	@Test
-	void disabledConditionNameSetsValue() {
-		assertThat(new FluentListGrid().disabledConditionName("readOnly").get().getDisabledConditionName(),
+	void disabledConditionSetsValue() {
+		assertThat(new FluentListGrid().disabledCondition("readOnly").get().getDisabledCondition(),
 				is("readOnly"));
 	}
 
 	@Test
-	void disableAddConditionNameSetsValue() {
-		assertThat(new FluentListGrid().disableAddConditionName("noAdd").get().getDisableAddConditionName(),
+	void disableAddConditionSetsValue() {
+		assertThat(new FluentListGrid().disableAddCondition("noAdd").get().getDisableAddCondition(),
 				is("noAdd"));
 	}
 
 	@Test
-	void disableZoomConditionNameSetsValue() {
-		assertThat(new FluentListGrid().disableZoomConditionName("noZoom").get().getDisableZoomConditionName(),
+	void disableZoomConditionSetsValue() {
+		assertThat(new FluentListGrid().disableZoomCondition("noZoom").get().getDisableZoomCondition(),
 				is("noZoom"));
 	}
 
 	@Test
-	void disableEditConditionNameSetsValue() {
-		assertThat(new FluentListGrid().disableEditConditionName("noEdit").get().getDisableEditConditionName(),
+	void disableEditConditionSetsValue() {
+		assertThat(new FluentListGrid().disableEditCondition("noEdit").get().getDisableEditCondition(),
 				is("noEdit"));
 	}
 
 	@Test
-	void disableRemoveConditionNameSetsValue() {
-		assertThat(new FluentListGrid().disableRemoveConditionName("noRemove").get().getDisableRemoveConditionName(),
+	void disableRemoveConditionSetsValue() {
+		assertThat(new FluentListGrid().disableRemoveCondition("noRemove").get().getDisableRemoveCondition(),
 				is("noRemove"));
 	}
 

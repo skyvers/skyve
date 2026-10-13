@@ -18,7 +18,7 @@ import org.skyve.persistence.AutoClosingIterable;
 public class HibernateAutoClosingIterable<T> implements AutoClosingIterable<T> {
 	private String moduleName = null;
 	private String documentName = null;
-	@SuppressWarnings("resource") // Ownership is transferred to iterator() or released by close().
+	@SuppressWarnings("resource") // Closed by the iterator on exhaustion, otherwise by close().
 	private ScrollableResults results = null;
 	private String[] aliases = null;
 	boolean closed = false;
@@ -72,7 +72,7 @@ public class HibernateAutoClosingIterable<T> implements AutoClosingIterable<T> {
 		@SuppressWarnings("hiding")
 		private String documentName = null;
 
-		@SuppressWarnings({"hiding", "resource"}) // The iterator owns and closes these scroll results on exhaustion.
+		@SuppressWarnings({"hiding", "resource"}) // Closed here on exhaustion, otherwise by the enclosing iterable's close().
 		private ScrollableResults results = null;
 
 		@SuppressWarnings("hiding")
@@ -165,17 +165,15 @@ public class HibernateAutoClosingIterable<T> implements AutoClosingIterable<T> {
 	/**
 	 * Returns an iterator that closes the underlying scroll results once exhausted.
 	 *
-	 * <p>Side effects: transfers ownership of the current {@link ScrollableResults}
-	 * instance to the returned iterator.
+	 * <p>If iteration stops early (a break or an exception), {@link #close()} must
+	 * still be called to release the {@link ScrollableResults}, so this iterable
+	 * keeps its reference to them.
 	 *
 	 * @return an auto-closing iterator over the current results
 	 */
 	@Override
 	public Iterator<T> iterator() {
 		Iterator<T> i = new HibernateIterator<>(moduleName, documentName, results, aliases);
-
-		results = null; // dereference the results
-
 		return new LoggingIteratorAdapter<>(i);
 	}
 

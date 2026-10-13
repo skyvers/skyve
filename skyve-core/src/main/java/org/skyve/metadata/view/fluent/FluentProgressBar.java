@@ -1,6 +1,10 @@
 package org.skyve.metadata.view.fluent;
 
+import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.metadata.view.widget.bound.ProgressBar;
+
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 
 /**
  * Builds {@link ProgressBar} metadata.
@@ -34,25 +38,36 @@ public class FluentProgressBar extends FluentBoundWidget<FluentProgressBar>
 	 * @return this builder
 	 */
 	public FluentProgressBar from(@SuppressWarnings("hiding") ProgressBar bar) {
-
-		invisibleConditionName(bar.getInvisibleConditionName());
-
+		BindUtil.copyAuthoredCondition(bar.getXmlInvisibleCondition(), bar.getXmlVisibleCondition(), this::invisibleCondition, this::visibleCondition);
 		absoluteSize(bar, this);
-
 		constrainableSize(bar, this);
-
 		super.from(bar);
+		bar.getProperties().entrySet().forEach(p -> putProperty(p.getKey(), p.getValue()));
+
 		return this;
 	}
 
 	/**
-	 * Sets the condition name that hides this progress bar.
+	 * Sets the {@code invisible} condition as authored; the opposite sense of {@link #visibleCondition(String)}.
 	 *
-	 * @param invisibleConditionName the condition name
+	 * @param invisibleCondition
+	 *            a condition name, an inline condition expression or a boolean literal
 	 * @return this builder
 	 */
-	public FluentProgressBar invisibleConditionName(String invisibleConditionName) {
-		bar.setInvisibleConditionName(invisibleConditionName);
+	public @Nonnull FluentProgressBar invisibleCondition(@Nullable String invisibleCondition) {
+		bar.setXmlInvisibleCondition(invisibleCondition);
+		return this;
+	}
+
+	/**
+	 * Sets the {@code visible} condition as authored; the opposite sense of {@link #invisibleCondition(String)}.
+	 *
+	 * @param visibleCondition
+	 *            a condition name, an inline condition expression or a boolean literal
+	 * @return this builder
+	 */
+	public @Nonnull FluentProgressBar visibleCondition(@Nullable String visibleCondition) {
+		bar.setXmlVisibleCondition(visibleCondition);
 		return this;
 	}
 
@@ -125,6 +140,19 @@ public class FluentProgressBar extends FluentBoundWidget<FluentProgressBar>
 	@Override
 	public FluentProgressBar maxPixelWidth(int maxPixelWidth) {
 		bar.setMaxPixelWidth(Integer.valueOf(maxPixelWidth));
+		return this;
+	}
+
+	/**
+	 * Adds or replaces a custom property on the wrapped metadata.
+	 * Properties keep the order in which they were first added.
+	 *
+	 * @param k the property name
+	 * @param v the property value
+	 * @return this builder
+	 */
+	public @Nonnull FluentProgressBar putProperty(@Nonnull String k, @Nonnull String v) {
+		bar.getProperties().put(k, v);
 		return this;
 	}
 

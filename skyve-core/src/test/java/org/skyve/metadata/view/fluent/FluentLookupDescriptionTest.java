@@ -34,23 +34,23 @@ class FluentLookupDescriptionTest {
 	}
 
 	@Test
-	void disableEditConditionNameSetsValue() {
-		assertThat(new FluentLookupDescription().disableEditConditionName("noEdit").get().getDisableEditConditionName(), is("noEdit"));
+	void disableEditConditionSetsValue() {
+		assertThat(new FluentLookupDescription().disableEditCondition("noEdit").get().getDisableEditCondition(), is("noEdit"));
 	}
 
 	@Test
-	void disableAddConditionNameSetsValue() {
-		assertThat(new FluentLookupDescription().disableAddConditionName("noAdd").get().getDisableAddConditionName(), is("noAdd"));
+	void disableAddConditionSetsValue() {
+		assertThat(new FluentLookupDescription().disableAddCondition("noAdd").get().getDisableAddCondition(), is("noAdd"));
 	}
 
 	@Test
-	void disableClearConditionNameSetsValue() {
-		assertThat(new FluentLookupDescription().disableClearConditionName("noClear").get().getDisableClearConditionName(), is("noClear"));
+	void disableClearConditionSetsValue() {
+		assertThat(new FluentLookupDescription().disableClearCondition("noClear").get().getDisableClearCondition(), is("noClear"));
 	}
 
 	@Test
-	void disablePickConditionNameSetsValue() {
-		assertThat(new FluentLookupDescription().disablePickConditionName("noPick").get().getDisablePickConditionName(), is("noPick"));
+	void disablePickConditionSetsValue() {
+		assertThat(new FluentLookupDescription().disablePickCondition("noPick").get().getDisablePickCondition(), is("noPick"));
 	}
 
 	@Test

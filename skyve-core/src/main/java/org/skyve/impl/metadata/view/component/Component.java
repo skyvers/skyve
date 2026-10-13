@@ -1,9 +1,9 @@
 package org.skyve.impl.metadata.view.component;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.TreeMap;
 
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.metadata.customer.CustomerImpl;
@@ -21,10 +21,13 @@ import org.skyve.metadata.model.document.Association;
 import org.skyve.metadata.view.Invisible;
 import org.skyve.util.Binder.TargetMetaData;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlElementWrapper;
 import jakarta.xml.bind.annotation.XmlRootElement;
+import jakarta.xml.bind.annotation.XmlTransient;
 import jakarta.xml.bind.annotation.XmlType;
 import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
@@ -34,8 +37,26 @@ import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  * directly via a view name, a document name and view name, or a module name, document name and view name or
  * indirectly via a binding (can be compound)
  * A component can refer to a part of a view via a widgetId.
- * 
- * Note that equals and hash code are left as default - ie based on heap memory location.
+ *
+ * <p>A component is expanded into the view that contains it, and the conditions in the component view
+ * are evaluated there, against the containing view's bean.
+ * Every condition in a component view must therefore be one its containing view can evaluate,
+ * whether or not the component has a binding:
+ * <ul>
+ * <li>A condition name is never changed by the binding. It must exist on the containing view's document,
+ * under the same name or through the component's condition mappings (see {@link #getConditions()}).
+ * <li>An inline condition expression must be valid, and yield a boolean, for the containing view's document.
+ * When the component has a binding, the references to the bean in the expression are prefixed with it first,
+ * as the widget bindings in the component are - {@code {el:bean.flag}} becomes {@code {el:bean.startup.flag}};
+ * when it has none, the expression is used as written.
+ * An expression that has a condition mapping takes what it is mapped to instead.
+ * </ul>
+ * A component view that is used from several views has to satisfy this for each of them.
+ *
+ * <p>The action names in a component view are mapped separately (see {@link #getActions()}).
+ * The rewriting is done by {@link ComponentViewVisitor} and the result is checked when the containing view is validated.
+ *
+ * <p>Note that equals and hash code are left as default - ie based on heap memory location.
  * This component is potentially used as a key in ComponentFragments (a concurrent WeakHashMap) on ViewImpl.
  * When the ViewImpl containing this component is evicted from the repository cache (in dev mode),
  * a new component is reloaded and the WeakHashMap entry in the component's target ViewImpl will be garbage collected.
@@ -49,7 +70,8 @@ import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 							"documentName", 
 							"name",
 							"widgetId",
-							"names",
+							"actions",
+							"conditions",
 							"properties"})
 public class Component extends AbstractBound implements NamedMetaData, DecoratedMetaData, Invisible {
 	private static final long serialVersionUID = 7882200042806155928L;
@@ -59,15 +81,20 @@ public class Component extends AbstractBound implements NamedMetaData, Decorated
 	private String name;
 	private String widgetId;
 
-	private String invisibleConditionName;
+	private String invisibleCondition;
+	private String visibleCondition;
 	
 	@XmlElement(namespace = XMLMetaData.VIEW_NAMESPACE)
 	@XmlJavaTypeAdapter(PropertyMapAdapter.class)
-	private Map<String, String> properties = new TreeMap<>();
+	private Map<String, String> properties = new LinkedHashMap<>();
 
-	@XmlElementWrapper(name = "names", namespace = XMLMetaData.VIEW_NAMESPACE)
-	@XmlElement(name = "name", namespace = XMLMetaData.VIEW_NAMESPACE)
-	private List<ComponentNameMap> names = new ArrayList<>();
+	@XmlElementWrapper(name = "actions", namespace = XMLMetaData.VIEW_NAMESPACE)
+	@XmlElement(name = "action", namespace = XMLMetaData.VIEW_NAMESPACE)
+	private List<ComponentTranslation> actions = new ArrayList<>();
+
+	@XmlElementWrapper(name = "conditions", namespace = XMLMetaData.VIEW_NAMESPACE)
+	@XmlElement(name = "condition", namespace = XMLMetaData.VIEW_NAMESPACE)
+	private List<ComponentTranslation> conditions = new ArrayList<>();
 
 	public String getModuleName() {
 		return moduleName;
@@ -106,27 +133,65 @@ public class Component extends AbstractBound implements NamedMetaData, Decorated
 		this.widgetId = widgetId;
 	}
 
+	/**
+	 * Returns the derived {@code invisible} condition that renderers and other consumers read.
+	 *
+	 * @return the {@code invisible} attribute as authored, or else the negation of the authored
+	 * 			{@code visible} attribute; {@code null} when neither was authored
+	 */
 	@Override
-	public String getInvisibleConditionName() {
-		return invisibleConditionName;
+	@XmlTransient
+	public @Nullable String getInvisibleCondition() {
+		return (invisibleCondition != null) ? invisibleCondition : BindUtil.negateCondition(visibleCondition);
 	}
 
+	/**
+	 * Sets the {@code invisible} attribute as authored.
+	 *
+	 * <p>Side effects: clears any authored {@code visible} attribute.
+	 *
+	 * @param invisibleCondition a condition name, an inline condition expression or a boolean literal; may be {@code null}
+	 */
 	@Override
 	@XmlAttribute(name = "invisible")
-	public void setInvisibleConditionName(String invisibleConditionName) {
-		this.invisibleConditionName = UtilImpl.processStringValue(invisibleConditionName);
+	public void setXmlInvisibleCondition(@Nullable String invisibleCondition) {
+		this.invisibleCondition = UtilImpl.processStringValue(invisibleCondition);
+		this.visibleCondition = null;
 	}
 
-	// to enable JAXB XML marshaling
-	@SuppressWarnings("static-method")
-	String getVisibleConditionName() {
-		return null;
+	/**
+	 * Returns the {@code invisible} attribute as authored.
+	 *
+	 * @return the authored condition, or {@code null} when {@code visible} or neither was authored
+	 */
+	@Override
+	public @Nullable String getXmlInvisibleCondition() {
+		return invisibleCondition;
 	}
 
+	/**
+	 * Returns the {@code visible} attribute as authored.
+	 *
+	 * @return the authored condition, or {@code null} when {@code invisible} or neither was authored
+	 */
+	@Override
+	public @Nullable String getXmlVisibleCondition() {
+		return visibleCondition;
+	}
+
+	/**
+	 * Sets the {@code visible} attribute as authored.
+	 *
+	 * <p>Side effects: clears any authored {@code invisible} attribute, so that
+	 * {@link #getInvisibleCondition()} returns the negation of this condition.
+	 *
+	 * @param visibleCondition a condition name, an inline condition expression or a boolean literal; may be {@code null}
+	 */
 	@Override
 	@XmlAttribute(name = "visible")
-	public void setVisibleConditionName(String visibleConditionName) {
-		this.invisibleConditionName = BindUtil.negateCondition(UtilImpl.processStringValue(visibleConditionName));
+	public void setXmlVisibleCondition(@Nullable String visibleCondition) {
+		this.visibleCondition = UtilImpl.processStringValue(visibleCondition);
+		this.invisibleCondition = null;
 	}
 
 	@Override
@@ -134,8 +199,31 @@ public class Component extends AbstractBound implements NamedMetaData, Decorated
 		return properties;
 	}
 
-	public List<ComponentNameMap> getNames() {
-		return names;
+	/**
+	 * Returns the action mappings, authored as {@code <actions><action/></actions>}.
+	 *
+	 * <p>Each maps an action name used in the component view to the action name to use in the containing view.
+	 * An action name without a mapping is used unchanged.
+	 *
+	 * @return the mutable list of action mappings; never {@code null}
+	 */
+	public @Nonnull List<ComponentTranslation> getActions() {
+		return actions;
+	}
+
+	/**
+	 * Returns the condition mappings, authored as {@code <conditions><condition/></conditions>}.
+	 *
+	 * <p>Each maps a condition used in the component view - a condition name, or an inline condition
+	 * expression exactly as it is written there - to the condition to use in the containing view,
+	 * which may be a condition name or an inline condition expression of the containing view's document.
+	 * The opposite sense follows the mapping: mapping {@code foo} also maps {@code notFoo}.
+	 * A condition without a mapping is used unchanged, apart from an inline expression taking the binding prefix.
+	 *
+	 * @return the mutable list of condition mappings; never {@code null}
+	 */
+	public @Nonnull List<ComponentTranslation> getConditions() {
+		return conditions;
 	}
 
 	// target module/document/view that this component points at

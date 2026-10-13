@@ -1,10 +1,10 @@
 package org.skyve.impl.metadata.repository.document;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.TreeMap;
 import java.util.TreeSet;
 
 import org.skyve.domain.types.Decimal;
@@ -191,7 +191,7 @@ public class DocumentMetaData extends NamedMetaData implements ConvertibleMetaDa
 
 	@XmlElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
 	@XmlJavaTypeAdapter(PropertyMapAdapter.class)
-	private Map<String, String> properties = new TreeMap<>();
+	private Map<String, String> properties = new LinkedHashMap<>();
 
 	/**
 	 * Returns the document inheritance mode.

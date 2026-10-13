@@ -11,8 +11,8 @@ import org.junit.jupiter.api.Test;
 class ChartTest {
 
 	@Test
-	void jaxbHelperGetVisibleConditionNameReturnsNull() {
-		assertNull(new Chart().getVisibleConditionName());
+	void xmlVisibleConditionIsNullByDefault() {
+		assertNull(new Chart().getXmlVisibleCondition());
 	}
 
 	@Test
@@ -21,9 +21,9 @@ class ChartTest {
 	}
 
 	@Test
-	void setVisibleConditionNameNegatesCondition() {
+	void setVisibleConditionNegatesCondition() {
 		Chart chart = new Chart();
-		chart.setVisibleConditionName("showChart");
-		assertThat(chart.getInvisibleConditionName(), is("notShowChart"));
+		chart.setXmlVisibleCondition("showChart");
+		assertThat(chart.getInvisibleCondition(), is("notShowChart"));
 	}
 }

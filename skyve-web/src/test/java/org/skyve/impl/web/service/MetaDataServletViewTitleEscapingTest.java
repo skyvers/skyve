@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.junit.jupiter.api.Test;
+import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.metadata.view.ViewImpl;
 import org.skyve.metadata.DecoratedMetaData;
 import org.skyve.metadata.view.Disableable;
@@ -15,7 +16,7 @@ import org.skyve.metadata.view.Invisible;
 import org.skyve.metadata.view.Parameterizable;
 import org.skyve.metadata.view.widget.bound.Parameter;
 
-@SuppressWarnings("static-method")
+@SuppressWarnings({"static-method", "java:S3011", "java:S112"})
 class MetaDataServletViewTitleEscapingTest {
 	@Test
 	void jsonViewTitleEscapesJsonSyntaxButLeavesHtmlTextRaw() {
@@ -82,14 +83,29 @@ class MetaDataServletViewTitleEscapingTest {
 	}
 
 	@Test
+	void processInvisibleAndDisableableAppendInlineConditionIdentifierAndExpression() throws Exception {
+		StringBuilder json = new StringBuilder();
+
+		invokeStaticAppender("processInvisible", Invisible.class, invisible("not{el:bean.text eq \"a\"}"), json);
+		invokeStaticAppender("processDisableable", Disableable.class, disableable("{role:admin.BasicUser}"), json);
+
+		// The name is the identifier ("not" prefixed for the opposite sense) and the expression is always the positive one
+		assertEquals(",\"invisibleCondition\":\"not" + BindUtil.conditionIdentifier("{el:bean.text eq \"a\"}") + "\","
+						+ "\"invisibleConditionExpression\":\"{el:bean.text eq \\\"a\\\"}\","
+						+ "\"disabledCondition\":\"" + BindUtil.conditionIdentifier("{role:admin.BasicUser}") + "\","
+						+ "\"disabledConditionExpression\":\"{role:admin.BasicUser}\"",
+						json.toString());
+	}
+
+	@Test
 	void processInvisibleAndDisableableAppendConditionNames() throws Exception {
 		StringBuilder json = new StringBuilder();
 
 		invokeStaticAppender("processInvisible", Invisible.class, invisible("hideWhenArchived"), json);
 		invokeStaticAppender("processDisableable", Disableable.class, disableable("disableWhenLocked"), json);
 
-		assertEquals(",\"invisibleConditionName\":\"hideWhenArchived\","
-						+ "\"disabledConditionName\":\"disableWhenLocked\"",
+		assertEquals(",\"invisibleCondition\":\"hideWhenArchived\","
+						+ "\"disabledCondition\":\"disableWhenLocked\"",
 						json.toString());
 	}
 
@@ -100,7 +116,7 @@ class MetaDataServletViewTitleEscapingTest {
 
 		assertEquals("{\"type\":\"view\",\"name\":\"edit\",\"contained\":[],\"title\":\"Missing\"}",
 						emptyResponse.invoke(null, "Missing"));
-		assertEquals("{\"menus\":[],\"dataSources\":[]}", emptyResponse.invoke(null, new Object[] { null }));
+		assertEquals("{\"menus\":[],\"dataSources\":[]}", emptyResponse.invoke(null, (Object) null));
 	}
 
 	@Test
@@ -141,17 +157,27 @@ class MetaDataServletViewTitleEscapingTest {
 	private static Invisible invisible(String conditionName) {
 		return new Invisible() {
 			@Override
-			public String getInvisibleConditionName() {
+			public String getInvisibleCondition() {
 				return conditionName;
 			}
 
 			@Override
-			public void setInvisibleConditionName(String invisibleConditionName) {
+			public String getXmlInvisibleCondition() {
+				return conditionName;
+			}
+
+			@Override
+			public String getXmlVisibleCondition() {
+				return null;
+			}
+
+			@Override
+			public void setXmlInvisibleCondition(String invisibleCondition) {
 				throw new UnsupportedOperationException();
 			}
 
 			@Override
-			public void setVisibleConditionName(String visibleConditionName) {
+			public void setXmlVisibleCondition(String visibleCondition) {
 				throw new UnsupportedOperationException();
 			}
 		};
@@ -160,17 +186,27 @@ class MetaDataServletViewTitleEscapingTest {
 	private static Disableable disableable(String conditionName) {
 		return new Disableable() {
 			@Override
-			public String getDisabledConditionName() {
+			public String getDisabledCondition() {
 				return conditionName;
 			}
 
 			@Override
-			public void setDisabledConditionName(String disabledConditionName) {
+			public String getXmlDisabledCondition() {
+				return conditionName;
+			}
+
+			@Override
+			public String getXmlEnabledCondition() {
+				return null;
+			}
+
+			@Override
+			public void setXmlDisabledCondition(String disabledCondition) {
 				throw new UnsupportedOperationException();
 			}
 
 			@Override
-			public void setEnabledConditionName(String disabledConditionName) {
+			public void setXmlEnabledCondition(String disabledCondition) {
 				throw new UnsupportedOperationException();
 			}
 		};

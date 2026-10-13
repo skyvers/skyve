@@ -83,7 +83,7 @@ public class ResponsiveLayoutBuilder extends TabularLayoutBuilder {
 
 		HtmlPanelGroup result = responsiveContainer(vbox.getVerticalAlignment(),
 									vbox.getHorizontalAlignment(),
-									vbox.getInvisibleConditionName(),
+									vbox.getInvisibleCondition(),
 									vbox.getWidgetId());
 		Integer responsiveWidth = vbox.getResponsiveWidth();
 		if ((responsiveWidth == null) || (responsiveWidth.intValue() == LayoutUtil.MAX_RESPONSIVE_WIDTH_COLUMNS)) {
@@ -105,7 +105,7 @@ public class ResponsiveLayoutBuilder extends TabularLayoutBuilder {
 
 		return responsiveContainer(hbox.getVerticalAlignment(),
 									hbox.getHorizontalAlignment(),
-									hbox.getInvisibleConditionName(),
+									hbox.getInvisibleCondition(),
 									hbox.getWidgetId());
 	}
 
@@ -202,7 +202,7 @@ public class ResponsiveLayoutBuilder extends TabularLayoutBuilder {
 		ResponsiveFormGrid grid = new ResponsiveFormGrid(formColumnStyles);
 		addResponsiveStyles(grid);
 		
-		HtmlPanelGroup result = panelGroup(false, false, true, form.getInvisibleConditionName(), form.getWidgetId());
+		HtmlPanelGroup result = panelGroup(false, false, true, form.getInvisibleCondition(), form.getWidgetId());
 		result.setStyleClass(UtilImpl.PRIMEFLEX ? "p-grid p-nogutter ui-fluid" : "ui-g ui-g-nopad ui-fluid");
 		return result;
 	}
@@ -469,10 +469,10 @@ public class ResponsiveLayoutBuilder extends TabularLayoutBuilder {
 	
 	private HtmlPanelGroup responsiveContainer(VerticalAlignment vertical,
 												HorizontalAlignment horizontal,
-												String invisibleConditionName,
+												String invisibleCondition,
 												String widgetId) {
 		HtmlPanelGroup result = panelGroup(false, false, true, null, widgetId);
-		setInvisible(result, invisibleConditionName, null);
+		setInvisible(result, invisibleCondition, null);
 		if (UtilImpl.PRIMEFLEX) {
 			String styleClass = "p-grid";
 			if (vertical == VerticalAlignment.top) {
