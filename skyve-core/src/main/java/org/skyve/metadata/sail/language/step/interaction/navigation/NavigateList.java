@@ -132,10 +132,10 @@ public class NavigateList implements Step {
 	 * @return the result
 	 */
 	public static @Nonnull String listGridIdentifier(@Nonnull AutomationContext context,
-												@Nullable String moduleName,
-												@Nullable String queryName,
-												@Nullable String documentName,
-												@Nullable String modelName) {
+														@Nullable String moduleName,
+														@Nullable String queryName,
+														@Nullable String documentName,
+														@Nullable String modelName) {
 		String result = null;
 		
 		String keyModuleName = (moduleName == null) ? context.getModuleName() : moduleName;

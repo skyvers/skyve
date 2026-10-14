@@ -135,17 +135,17 @@ public class ListGrid extends HtmlPanelGroup {
 	 */
 	@SuppressWarnings("java:S107") // allow long parameter list for clarity and extensibility
 	public static @Nonnull List<UIComponent> generate(@Nonnull String moduleName,
-												@Nonnull String documentName,
-												@Nullable String queryName,
-												@Nullable String modelName,
-												@Nonnull String uxui,
-												@Nullable Boolean createRendered,
-												boolean createDisabled,
-												@Nullable Boolean zoomRendered,
-												boolean zoomDisabled,
-												@Nullable Boolean filterRendered,
-												@Nullable String stickyHeaderAnchorSelector,
-												@Nonnull ComponentBuilder componentBuilder) {
+														@Nonnull String documentName,
+														@Nullable String queryName,
+														@Nullable String modelName,
+														@Nonnull String uxui,
+														@Nullable Boolean createRendered,
+														boolean createDisabled,
+														@Nullable Boolean zoomRendered,
+														boolean zoomDisabled,
+														@Nullable Boolean filterRendered,
+														@Nullable String stickyHeaderAnchorSelector,
+														@Nonnull ComponentBuilder componentBuilder) {
 		ListModel<Bean> model = null;
 		org.skyve.impl.metadata.view.widget.bound.tabular.ListGrid listGrid = new org.skyve.impl.metadata.view.widget.bound.tabular.ListGrid();
 		String name = null;

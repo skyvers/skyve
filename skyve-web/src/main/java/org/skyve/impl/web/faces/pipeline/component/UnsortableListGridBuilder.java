@@ -13,15 +13,15 @@ import jakarta.faces.component.UIComponent;
 public class UnsortableListGridBuilder extends NoOpComponentBuilder {
 	@Override
 	public @Nullable UIComponent listGrid(@Nullable UIComponent component,
-									@Nonnull String moduleName,
-									@Nullable String modelDocumentName,
-									@Nullable String modelName,
-									@Nonnull String uxui,
-									@Nonnull ListModel<Bean> model,
-									@Nullable Document owningDocument,
-									@Nonnull ListGrid listGrid,
-									@Nullable String stickyHeaderAnchorSelector,
-									boolean aggregateQuery) {
+												@Nonnull String moduleName,
+												@Nullable String modelDocumentName,
+												@Nullable String modelName,
+												@Nonnull String uxui,
+												@Nonnull ListModel<Bean> model,
+												@Nullable Document owningDocument,
+												@Nonnull ListGrid listGrid,
+												@Nullable String stickyHeaderAnchorSelector,
+												boolean aggregateQuery) {
 		if (component != null) {
 			for (UIComponent child : component.getChildren()) {
 				if (child instanceof Column column) {

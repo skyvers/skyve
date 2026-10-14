@@ -31,8 +31,8 @@ public class FluentModuleRolePreviousCompleteAccess extends
 	 * Returns a FluentModuleRolePreviousCompleteAccess from a runtime metadata.
 	 */
 	protected @Nonnull FluentModuleRolePreviousCompleteAccess from(@Nonnull String documentName,
-															@Nonnull String binding,
-															@Nonnull Set<String> uxuis) {
+																	@Nonnull String binding,
+																	@Nonnull Set<String> uxuis) {
 		documentName(documentName);
 		binding(binding);
 		uxuis.forEach(u -> addUxUi(u));

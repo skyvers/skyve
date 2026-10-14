@@ -218,10 +218,10 @@ public class DocumentQueryListModel <T extends Bean> extends ListModel<T> {
 	}
 
 	public static @Nullable Bean update(@Nonnull String bizId, 
-								@Nonnull SortedMap<String, Object> properties, 
-								@Nonnull Document drivingDocument,
-								@Nonnull MetaDataQueryDefinition query,
-								@Nullable String selectedTagId) {
+											@Nonnull SortedMap<String, Object> properties, 
+											@Nonnull Document drivingDocument,
+											@Nonnull MetaDataQueryDefinition query,
+											@Nullable String selectedTagId) {
 		Persistence p = CORE.getPersistence();
 		PersistentBean bean = p.retrieveAndLock(drivingDocument, bizId);
 		BindUtil.populateProperties(p.getUser(), bean, properties, true);

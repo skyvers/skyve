@@ -40,22 +40,22 @@ public class DeviceResponsiveComponentBuilder extends ResponsiveComponentBuilder
 	 */
 	@Override
 	protected @Nonnull CommandButton actionButton(@Nullable EscapableText title,
-											@Nullable String iconStyleClass,
-											@Nullable String tooltip, 
-											@Nullable ImplicitActionName implicitActionName,
-											@Nullable String actionName, 
-											boolean inline, 
-											@Nullable String dataWidgetBinding, 
-											@Nullable String dataWidgetVar,
-											@Nullable Integer pixelWidth, 
-											@Nullable Integer pixelHeight,
-											@Nullable EscapableText confirmationText,
-											@Nullable String disabled, 
-											@Nullable String formDisabled,
-											@Nullable String invisible,
-											@Nullable String processOverride,
-											@Nullable String updateOverride,
-											boolean canDelete) {
+													@Nullable String iconStyleClass,
+													@Nullable String tooltip, 
+													@Nullable ImplicitActionName implicitActionName,
+													@Nullable String actionName, 
+													boolean inline, 
+													@Nullable String dataWidgetBinding, 
+													@Nullable String dataWidgetVar,
+													@Nullable Integer pixelWidth, 
+													@Nullable Integer pixelHeight,
+													@Nullable EscapableText confirmationText,
+													@Nullable String disabled, 
+													@Nullable String formDisabled,
+													@Nullable String invisible,
+													@Nullable String processOverride,
+													@Nullable String updateOverride,
+													boolean canDelete) {
 		if (UserAgentType.phone.equals(userAgentType)) {
 			return super.actionButton(title, 
 										iconStyleClass,
@@ -104,11 +104,11 @@ public class DeviceResponsiveComponentBuilder extends ResponsiveComponentBuilder
 	 */
 	@Override
 	public @Nonnull UIComponent upload(@Nullable UIComponent component, 
-								@Nullable String label,
-								@Nullable String iconStyleClass,
-								@Nullable String toolTip,
-								@Nullable String confirmationText,
-								@Nonnull Action action) {
+										@Nullable String label,
+										@Nullable String iconStyleClass,
+										@Nullable String toolTip,
+										@Nullable String confirmationText,
+										@Nonnull Action action) {
 		if (component != null) {
 			return component;
 		}
@@ -138,13 +138,13 @@ public class DeviceResponsiveComponentBuilder extends ResponsiveComponentBuilder
 	 */
 	@Override
 	public @Nonnull UIComponent uploadButton(@Nullable UIComponent component,
-									@Nullable String label, 
-									@Nullable String iconStyleClass, 
-									@Nullable String toolTip,
-									@Nullable String confirmationText, 
-									@Nonnull Button button, 
-									@Nullable String formDisabledCondition, 
-									@Nonnull Action action) {
+											@Nullable String label, 
+											@Nullable String iconStyleClass, 
+											@Nullable String toolTip,
+											@Nullable String confirmationText, 
+											@Nonnull Button button, 
+											@Nullable String formDisabledCondition, 
+											@Nonnull Action action) {
 		if (component != null) {
 			return component;
 		}

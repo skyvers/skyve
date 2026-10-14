@@ -590,11 +590,11 @@ public class SmartClientListServlet extends HttpServlet {
 	// Returns the projections required from JSON.marshall()
 	@SuppressWarnings("java:S3776") // Complexity OK
 	private static @Nonnull Set<String> processRows(@Nonnull List<Bean> beans,
-											@Nonnull ListModel<Bean> model,
-											@Nonnull User user,
-											@Nonnull Customer customer,
-											@Nonnull Module module,
-											@Nonnull Document document) {
+													@Nonnull ListModel<Bean> model,
+													@Nonnull User user,
+													@Nonnull Customer customer,
+													@Nonnull Module module,
+													@Nonnull Document document) {
 		// Determine if any display bindings are required for dynamic or variant domain attributes
 		// or for formats defined on the columns.
 		// Map of binding to synthesized display binding for SC.
@@ -1320,11 +1320,11 @@ public class SmartClientListServlet extends HttpServlet {
 	}
 
 	private static @Nullable Object fromString(@Nullable String valueBinding,
-										@Nonnull String valueDescription,
-										@Nullable String valueString,
-										@Nonnull Customer customer,
-										@Nullable Converter<?> converter,
-										@Nonnull Class<?> type) {
+													@Nonnull String valueDescription,
+													@Nullable String valueString,
+													@Nonnull Customer customer,
+													@Nullable Converter<?> converter,
+													@Nonnull Class<?> type) {
 		Object result = null;
 
 		if (valueString != null) {
@@ -1751,12 +1751,12 @@ public class SmartClientListServlet extends HttpServlet {
 	}
 
 	private static @Nonnull StringBuilder returnUpdatedMessage(@Nonnull User user,
-														@Nonnull Customer customer,
-														@Nonnull Module module,
-														@Nonnull Document document,
-														@Nonnull ListModel<Bean> model, 
-														@Nonnull Bean bean,
-														boolean rowIstagged) {
+																@Nonnull Customer customer,
+																@Nonnull Module module,
+																@Nonnull Document document,
+																@Nonnull ListModel<Bean> model, 
+																@Nonnull Bean bean,
+																boolean rowIstagged) {
 		StringBuilder message = new StringBuilder(256);
 		message.append("{\"response\":{\"status\":0,\"data\":");
 
@@ -1780,11 +1780,11 @@ public class SmartClientListServlet extends HttpServlet {
 	}
 
 	private static @Nonnull StringBuilder returnTagUpdateMessage(@Nonnull User user,
-															@Nonnull Customer customer,
-															@Nonnull Map<String, Object> parameters,
-															@Nonnull Module module,
-															@Nonnull ListModel<Bean> model,
-															boolean tagging) {
+																	@Nonnull Customer customer,
+																	@Nonnull Map<String, Object> parameters,
+																	@Nonnull Module module,
+																	@Nonnull ListModel<Bean> model,
+																	boolean tagging) {
 		StringBuilder message = new StringBuilder(256);
 		message.append("{\"response\":{\"status\":0,\"data\":[");
 

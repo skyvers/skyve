@@ -495,17 +495,17 @@ public class TabularLayoutBuilder extends LayoutBuilder {
 	 */
 	@Override
 	public @Nullable UIComponent addToContainer(@Nullable UIComponent component,
-										@Nonnull Container viewContainer,
-										@Nonnull UIComponent container, 
-										@Nonnull UIComponent componentToAdd, 
-										@Nullable Integer pixelWidth, 
-										@Nullable Integer responsiveWidth,
-										@Nullable Integer percentageWidth,
-										@Nullable Integer sm,
-										@Nullable Integer md,
-										@Nullable Integer lg,
-										@Nullable Integer xl,
-										@Nullable String widgetInvisible) {
+													@Nonnull Container viewContainer,
+													@Nonnull UIComponent container, 
+													@Nonnull UIComponent componentToAdd, 
+													@Nullable Integer pixelWidth, 
+													@Nullable Integer responsiveWidth,
+													@Nullable Integer percentageWidth,
+													@Nullable Integer sm,
+													@Nullable Integer md,
+													@Nullable Integer lg,
+													@Nullable Integer xl,
+													@Nullable String widgetInvisible) {
 		if (component != null) {
 			return component;
 		}
@@ -607,12 +607,12 @@ public class TabularLayoutBuilder extends LayoutBuilder {
 	 * @return configured panel grid
 	 */
 	protected @Nonnull PanelGrid panelGrid(@Nullable Integer pixelWidth, 
-									@Nullable Integer responsiveWidth,
-									@Nullable Integer percentageWidth, 
-									@Nullable Integer pixelHeight,
-									@Nullable Integer percentageHeight,
-									@Nullable String invisibleCondition,
-									@Nullable String widgetId) {
+											@Nullable Integer responsiveWidth,
+											@Nullable Integer percentageWidth, 
+											@Nullable Integer pixelHeight,
+											@Nullable Integer percentageHeight,
+											@Nullable String invisibleCondition,
+											@Nullable String widgetId) {
 		PanelGrid result = (PanelGrid) a.createComponent(PanelGrid.COMPONENT_TYPE);
 		setInvisible(result, invisibleCondition, null);
 		setSizeAndTextAlignStyle(result, 
@@ -641,12 +641,12 @@ public class TabularLayoutBuilder extends LayoutBuilder {
 	 * @return configured panel
 	 */
 	protected @Nonnull Panel panel(@Nullable Integer pixelWidth, 
-							@Nullable Integer responsiveWidth,
-							@Nullable Integer percentageWidth, 
-							@Nullable Integer pixelHeight,
-							@Nullable Integer percentageHeight,
-							@Nullable String invisibleCondition,
-							@Nullable String widgetId) {
+									@Nullable Integer responsiveWidth,
+									@Nullable Integer percentageWidth, 
+									@Nullable Integer pixelHeight,
+									@Nullable Integer percentageHeight,
+									@Nullable String invisibleCondition,
+									@Nullable String widgetId) {
 		Panel result = (Panel) a.createComponent(Panel.COMPONENT_TYPE);
 		setInvisible(result, invisibleCondition, null);
 		setSizeAndTextAlignStyle(result, 

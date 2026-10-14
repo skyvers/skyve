@@ -88,12 +88,12 @@ public final class JasperReportUtil {
 	 */
 
 	public static @Nullable JasperPrint runBeanReport(@Nonnull User user,
-												@Nonnull Document document,
-												@Nonnull String reportName,
-												@Nonnull Map<String, Object> parameters,
-												@Nullable Bean bean,
-												@Nonnull ReportFormat format,
-												@Nonnull OutputStream out)
+															@Nonnull Document document,
+															@Nonnull String reportName,
+															@Nonnull Map<String, Object> parameters,
+															@Nullable Bean bean,
+															@Nonnull ReportFormat format,
+															@Nonnull OutputStream out)
 	throws Exception {
 		return runReport(user, document, reportName, parameters, bean, format, out);
 	}
@@ -105,11 +105,11 @@ public final class JasperReportUtil {
 	 */
 
 	public static @Nullable JasperPrint runSQLReport(@Nonnull User user,
-											@Nonnull Document document,
-											@Nonnull String reportName,
-											@Nonnull Map<String, Object> parameters,
-											@Nonnull ReportFormat format,
-											@Nonnull OutputStream out)
+														@Nonnull Document document,
+														@Nonnull String reportName,
+														@Nonnull Map<String, Object> parameters,
+														@Nonnull ReportFormat format,
+														@Nonnull OutputStream out)
 	throws Exception {
 		// Cast to null to remove method call ambiguity, this does not throw an NPE.
 		return runReport(user, document, reportName, parameters, (Bean) null, format, out);
@@ -122,12 +122,12 @@ public final class JasperReportUtil {
 	 */
 
 	public static @Nullable JasperPrint runReport(@Nonnull User user,
-											@Nonnull Document document,
-											@Nonnull String reportName,
-											@Nonnull Map<String, Object> parameters,
-											@Nullable Bean bean,
-											@Nonnull ReportFormat format,
-											@Nonnull OutputStream out)
+														@Nonnull Document document,
+														@Nonnull String reportName,
+														@Nonnull Map<String, Object> parameters,
+														@Nullable Bean bean,
+														@Nonnull ReportFormat format,
+														@Nonnull OutputStream out)
 	throws Exception {
 		final Customer customer = user.getCustomer();
 		final String reportFileName = preProcess(customer, document, reportName, parameters);
@@ -142,12 +142,12 @@ public final class JasperReportUtil {
 	 */
 
 	public static @Nonnull JasperPrint runReport(@Nonnull User user,
-											@Nonnull Document document,
-											@Nonnull String reportName,
-											@Nonnull Map<String, Object> parameters,
-											@Nonnull ListModel<Bean> listModel,
-											@Nonnull ReportFormat format,
-											@Nonnull OutputStream out)
+													@Nonnull Document document,
+													@Nonnull String reportName,
+													@Nonnull Map<String, Object> parameters,
+													@Nonnull ListModel<Bean> listModel,
+													@Nonnull ReportFormat format,
+													@Nonnull OutputStream out)
 	throws Exception {
 		final Customer customer = user.getCustomer();
 		final String reportFileName = preProcess(customer, document, reportName, parameters);
@@ -162,12 +162,12 @@ public final class JasperReportUtil {
 	 */
 
 	public static @Nullable JasperPrint runReport(@Nonnull JasperReport jasperReport,
-											@Nonnull User user,
-											@Nullable Document document,
-											@Nonnull Map<String, Object> parameters,
-											@Nullable Bean bean,
-											@Nonnull ReportFormat format,
-											@Nonnull OutputStream out)
+														@Nonnull User user,
+														@Nullable Document document,
+														@Nonnull Map<String, Object> parameters,
+														@Nullable Bean bean,
+														@Nonnull ReportFormat format,
+														@Nonnull OutputStream out)
 	throws Exception {
 		String queryLanguage = jasperReport.getQuery().getLanguage();
 		LOGGER.info("QUERY LNG = {}", queryLanguage);
@@ -209,11 +209,11 @@ public final class JasperReportUtil {
 	 */
 
 	public static @Nonnull JasperPrint runReport(@Nonnull JasperReport jasperReport,
-											@Nonnull User user,
-											@Nonnull Map<String, Object> parameters,
-											@Nonnull ListModel<Bean> listModel,
-											@Nonnull ReportFormat format,
-											@Nonnull OutputStream out)
+													@Nonnull User user,
+													@Nonnull Map<String, Object> parameters,
+													@Nonnull ListModel<Bean> listModel,
+													@Nonnull ReportFormat format,
+													@Nonnull OutputStream out)
 	throws Exception {
 		LOGGER.info(FILL_REPORT);
 		JasperPrint result;
@@ -252,9 +252,9 @@ public final class JasperReportUtil {
 
 	@SuppressWarnings("java:S3776") // Complexity OK
 	public static @Nonnull List<JasperPrint> runReport(@Nonnull User user,
-												@Nonnull List<ReportParameters> reportParameters,
-												@Nonnull ReportFormat format,
-												@Nonnull OutputStream out)
+														@Nonnull List<ReportParameters> reportParameters,
+														@Nonnull ReportFormat format,
+														@Nonnull OutputStream out)
 	throws Exception {
 		final Customer customer = user.getCustomer();
 

@@ -342,7 +342,7 @@ public class ViewJSONManipulator extends ViewVisitor {
 	}
 	
 	protected @Nonnull String toJSON(@Nonnull AbstractWebContext webContextToReference,
-								@Nullable String redirectUrl) // to redirect the browser location when the response is processed
+										@Nullable String redirectUrl) // to redirect the browser location when the response is processed
 	throws Exception {
 		Map<String, Object> result = new TreeMap<>();
 

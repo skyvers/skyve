@@ -39,7 +39,7 @@ public class FluentCustomerRoles {
 	 * @return this builder
 	 */
 	public @Nonnull FluentCustomerRoles from(@SuppressWarnings("hiding") @Nonnull Collection<CustomerRole> roles,
-										boolean allowModuleRoles) {
+												boolean allowModuleRoles) {
 		allowModuleRoles(allowModuleRoles);
 		for (CustomerRole role : roles) {
 			addRole(new FluentCustomerRole().from(role));

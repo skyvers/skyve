@@ -196,10 +196,10 @@ public class DDLDelegate {
 	// from org.hibernate.mapping.Table
 	@SuppressWarnings("java:S3776") // Complexity OK
 	private static @Nonnull Iterable<String> sqlAlterTableDDL(@Nonnull SkyveDialect skyveDialect, 
-														@Nonnull Table table, 
-														@Nonnull TableInformation tableInfo,
-														@Nonnull SqlStringGenerationContext sqlStringGenerationContext,
-														@Nonnull Metadata metadata) {
+																@Nonnull Table table, 
+																@Nonnull TableInformation tableInfo,
+																@Nonnull SqlStringGenerationContext sqlStringGenerationContext,
+																@Nonnull Metadata metadata) {
 		List<String> result = new ArrayList<>();
 		
 		final Dialect dialect = (Dialect) skyveDialect;

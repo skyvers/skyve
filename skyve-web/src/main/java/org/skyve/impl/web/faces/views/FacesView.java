@@ -713,10 +713,10 @@ public class FacesView extends HarnessView {
 	 */
 	@SuppressWarnings("java:S3776") // complexity OK
 	public @Nonnull SkyveLazyDataModel getLazyDataModel(@Nonnull String moduleName,
-												@Nullable String documentName,
-												@Nullable String queryName,
-												@SuppressWarnings("hiding") @Nullable String modelName,
-												@Nullable List<List<String>> filterCriteria) {
+														@Nullable String documentName,
+														@Nullable String queryName,
+														@SuppressWarnings("hiding") @Nullable String modelName,
+														@Nullable List<List<String>> filterCriteria) {
 		String key = null;
 		if ((moduleName != null) && (queryName != null)) {
 			key = String.format("%s.%s", moduleName, queryName);
@@ -1166,9 +1166,9 @@ public class FacesView extends HarnessView {
 	 */
 	@SuppressWarnings("static-method")
 	public @Nullable List<SelectItem> getSelectItems(@Nonnull String moduleName,
-											@Nonnull String documentName,
-											@Nonnull String binding,
-											boolean includeEmptyItem) {
+														@Nonnull String documentName,
+														@Nonnull String binding,
+														boolean includeEmptyItem) {
 		final String key = new StringBuilder(64).append(moduleName).append('.').append(documentName).append('.').append(binding).toString();
 		if (UtilImpl.FACES_TRACE) FACES_LOGGER.trace("BeanMapAdapter.getSelectItems - key = {}", key);
 		return new GetSelectItemsAction(moduleName, documentName, binding, includeEmptyItem).execute();
@@ -1293,16 +1293,16 @@ public class FacesView extends HarnessView {
  	 */
 	@SuppressWarnings("java:S107") // lots of parameters
 	public @Nonnull String getMapScript(@Nonnull String elementId,
-								@Nullable String moduleName,
-								@Nullable String queryName,
-								@Nullable String geometryBinding,
-								@Nullable String mapModelName,
-								@Nonnull String loading,
-								@Nullable Integer refreshTimeInSeconds,
-								@Nullable Boolean showRefresh,
-								@Nullable String geometryInputTypeString,
-								boolean disabled,
-								boolean includeScriptTag) {
+										@Nullable String moduleName,
+										@Nullable String queryName,
+										@Nullable String geometryBinding,
+										@Nullable String mapModelName,
+										@Nonnull String loading,
+										@Nullable Integer refreshTimeInSeconds,
+										@Nullable Boolean showRefresh,
+										@Nullable String geometryInputTypeString,
+										boolean disabled,
+										boolean includeScriptTag) {
 		StringBuilder result = new StringBuilder(512);
 
 		if (includeScriptTag) {

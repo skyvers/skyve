@@ -183,13 +183,13 @@ class ViewValidator extends ViewVisitor {
 
 	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
 	private @Nullable Class<?> validateBinding(@Nullable String bindingPrefix,
-										@Nullable String binding,
-										boolean bindingRequired,
-										boolean compoundBindingInvalid,
-										boolean domainValuesRequired,
-										boolean scalarBindingOnly,
-										@Nonnull String widgetIdentifier,
-										@Nullable AttributeType... assertTypes) {
+													@Nullable String binding,
+													boolean bindingRequired,
+													boolean compoundBindingInvalid,
+													boolean domainValuesRequired,
+													boolean scalarBindingOnly,
+													@Nonnull String widgetIdentifier,
+													@Nullable AttributeType... assertTypes) {
 		return validateBinding(module,
 								document,
 								bindingPrefix,
@@ -204,15 +204,15 @@ class ViewValidator extends ViewVisitor {
 
 	@SuppressWarnings({"java:S107", "java:S3776"}) // Long parameter list preserves the existing framework/API contract; complexity OK.
 	private @Nullable Class<?> validateBinding(@Nonnull Module contextModule,
-										@Nonnull Document contextDocument,
-										@Nullable String bindingPrefix,
-										@Nullable String binding,
-										boolean bindingRequired,
-										boolean compoundBindingInvalid,
-										boolean domainValuesRequired,
-										boolean scalarBindingOnly,
-										@Nonnull String widgetIdentifier,
-										@Nullable AttributeType... assertTypes) {
+													@Nonnull Document contextDocument,
+													@Nullable String bindingPrefix,
+													@Nullable String binding,
+													boolean bindingRequired,
+													boolean compoundBindingInvalid,
+													boolean domainValuesRequired,
+													boolean scalarBindingOnly,
+													@Nonnull String widgetIdentifier,
+													@Nullable AttributeType... assertTypes) {
 		if (bindingRequired && (binding == null)) {
 			throw new MetaDataException(widgetIdentifier + IN + viewIdentifier + " - binding is required.");
 		}
@@ -1728,7 +1728,7 @@ class ViewValidator extends ViewVisitor {
 		new ReferenceProcessor() {
 			@SuppressWarnings("synthetic-access")
 			private @Nullable ModuleImpl validateReferenceModuleName(@Nonnull String referenceModuleName,
-															@Nonnull String referenceDescription) {
+																		@Nonnull String referenceDescription) {
 				ModuleImpl result = null;
 
 				if (referenceModuleName.indexOf('{') < 0) {
@@ -1751,8 +1751,8 @@ class ViewValidator extends ViewVisitor {
 
 			@SuppressWarnings("synthetic-access")
 			private @Nullable DocumentImpl validateReferenceDocumentName(@Nonnull ModuleImpl referenceModule,
-															@Nonnull String referenceDocumentName,
-															@Nonnull String referenceDescription) {
+																		@Nonnull String referenceDocumentName,
+																		@Nonnull String referenceDescription) {
 				DocumentImpl result = null;
 
 				if (referenceDocumentName.indexOf('{') < 0) {
@@ -1772,7 +1772,7 @@ class ViewValidator extends ViewVisitor {
 
 			@SuppressWarnings("synthetic-access")
 			private @Nullable TargetMetaData validateReferenceBinding(@Nullable String referenceBinding,
-																@Nonnull String referenceDescription) {
+																			@Nonnull String referenceDescription) {
 				String bindingToTest = referenceBinding;
 				if (dataWidgetBinding != null) {
 					if (referenceBinding == null) {

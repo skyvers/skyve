@@ -59,26 +59,26 @@ System.out.println(visitModules(args[0]));
 	}
 */
 	public static @Nonnull List<Automation> visitMenus(@Nonnull User user,
-												@Nonnull String uxui,
-												@Nonnull UserAgentType userAgentType,
-												@Nullable TestStrategy testStrategy) {
+														@Nonnull String uxui,
+														@Nonnull UserAgentType userAgentType,
+														@Nullable TestStrategy testStrategy) {
 		return visitMenus(user, null, null, uxui, userAgentType, testStrategy);
 	}
 
 	public static @Nonnull List<Automation> visitMenus(@Nonnull User user,
-												@Nullable String loginPassword,
-												@Nonnull String uxui,
-												@Nonnull UserAgentType userAgentType,
-												@Nullable TestStrategy testStrategy) {
+														@Nullable String loginPassword,
+														@Nonnull String uxui,
+														@Nonnull UserAgentType userAgentType,
+														@Nullable TestStrategy testStrategy) {
 		return visitMenus(user, null, loginPassword, uxui, userAgentType, testStrategy);
 	}
 
 	public static @Nonnull List<Automation> visitMenus(@Nonnull User user,
-												@Nullable String loginCustomer,
-												@Nullable String loginPassword,
-												@Nonnull String uxui,
-												@Nonnull UserAgentType userAgentType,
-												@Nullable TestStrategy testStrategy) {
+														@Nullable String loginCustomer,
+														@Nullable String loginPassword,
+														@Nonnull String uxui,
+														@Nonnull UserAgentType userAgentType,
+														@Nullable TestStrategy testStrategy) {
 		ProvidedRepositoryFactory.get().resetMenus(user);
 		UserImpl u = (UserImpl) user;
 		Customer c = user.getCustomer();
@@ -108,29 +108,29 @@ System.out.println(visitModules(args[0]));
 	}
 
 	public static @Nonnull Automation visitMenu(@Nonnull User user,
-										@Nonnull String moduleName,
-										@Nonnull String uxui,
-										@Nonnull UserAgentType userAgentType,
-										@Nullable TestStrategy testStrategy) {
+												@Nonnull String moduleName,
+												@Nonnull String uxui,
+												@Nonnull UserAgentType userAgentType,
+												@Nullable TestStrategy testStrategy) {
 		return visitMenu(user, null, null, moduleName, uxui, userAgentType, testStrategy);
 	}	
 
 	public static @Nonnull Automation visitMenu(@Nonnull User user,
-										@Nullable String loginPassword,
-										@Nonnull String moduleName,
-										@Nonnull String uxui,
-										@Nonnull UserAgentType userAgentType,
-										@Nullable TestStrategy testStrategy) {
+												@Nullable String loginPassword,
+												@Nonnull String moduleName,
+												@Nonnull String uxui,
+												@Nonnull UserAgentType userAgentType,
+												@Nullable TestStrategy testStrategy) {
 		return visitMenu(user, null, loginPassword, moduleName, uxui, userAgentType, testStrategy);
 	}
 	
 	public static @Nonnull Automation visitMenu(@Nonnull User user,
-										@Nullable String loginCustomer,
-										@Nullable String loginPassword,
-										@Nonnull String moduleName,
-										@Nonnull String uxui,
-										@Nonnull UserAgentType userAgentType,
-										@Nullable TestStrategy testStrategy) {
+												@Nullable String loginCustomer,
+												@Nullable String loginPassword,
+												@Nonnull String moduleName,
+												@Nonnull String uxui,
+												@Nonnull UserAgentType userAgentType,
+												@Nullable TestStrategy testStrategy) {
 		ProvidedRepositoryFactory.get().resetMenus(user);
 		UserImpl u = (UserImpl) user;
 		Customer c = user.getCustomer();
@@ -227,28 +227,28 @@ System.out.println(visitModules(args[0]));
 	}
 	
 	public static @Nonnull List<Automation> visitModules(@Nonnull User user,
-													@Nonnull String uxui,
-													@Nonnull UserAgentType userAgentType,
-													@Nullable TestStrategy testStrategy)
+															@Nonnull String uxui,
+															@Nonnull UserAgentType userAgentType,
+															@Nullable TestStrategy testStrategy)
 	throws Exception {
 		return visitModules(user, null, null, uxui, userAgentType, testStrategy);
 	}
 	
 	public static @Nonnull List<Automation> visitModules(@Nonnull User user,
-													@Nullable String loginPassword,
-													@Nonnull String uxui,
-													@Nonnull UserAgentType userAgentType,
-													@Nullable TestStrategy testStrategy)
+															@Nullable String loginPassword,
+															@Nonnull String uxui,
+															@Nonnull UserAgentType userAgentType,
+															@Nullable TestStrategy testStrategy)
 	throws Exception {
 		return visitModules(user, null, loginPassword, uxui, userAgentType, testStrategy);
 	}
 	
 	public static @Nonnull List<Automation> visitModules(@Nonnull User user,
-													@Nullable String loginCustomer,
-													@Nullable String loginPassword,
-													@Nonnull String uxui,
-													@Nonnull UserAgentType userAgentType,
-													@Nullable TestStrategy testStrategy)
+															@Nullable String loginCustomer,
+															@Nullable String loginPassword,
+															@Nonnull String uxui,
+															@Nonnull UserAgentType userAgentType,
+															@Nullable TestStrategy testStrategy)
 	throws Exception {
 		List<Automation> result = new ArrayList<>();
 		
@@ -275,31 +275,31 @@ System.out.println(visitModules(args[0]));
 	}
 
 	public static @Nonnull Automation visitModule(@Nonnull User user,
-											@Nonnull String moduleName,
-											@Nonnull String uxui,
-											@Nonnull UserAgentType userAgentType,
-											@Nullable TestStrategy testStrategy)
+													@Nonnull String moduleName,
+													@Nonnull String uxui,
+													@Nonnull UserAgentType userAgentType,
+													@Nullable TestStrategy testStrategy)
 	throws Exception {
 		return visitModule(user, null, null, moduleName, uxui, userAgentType, testStrategy);
 	}
 	
 	public static @Nonnull Automation visitModule(@Nonnull User user,
-											@Nullable String loginPassword,
-											@Nonnull String moduleName,
-											@Nonnull String uxui,
-											@Nonnull UserAgentType userAgentType,
-											@Nullable TestStrategy testStrategy)
+													@Nullable String loginPassword,
+													@Nonnull String moduleName,
+													@Nonnull String uxui,
+													@Nonnull UserAgentType userAgentType,
+													@Nullable TestStrategy testStrategy)
 	throws Exception {
 		return visitModule(user, null, loginPassword, moduleName, uxui, userAgentType, testStrategy);
 	}
 	
 	public static @Nonnull Automation visitModule(@Nonnull User user,
-											@Nullable String loginCustomer,
-											@Nullable String loginPassword,
-											@Nonnull String moduleName,
-											@Nonnull String uxui,
-											@Nonnull UserAgentType userAgentType,
-											@Nullable TestStrategy testStrategy) {
+													@Nullable String loginCustomer,
+													@Nullable String loginPassword,
+													@Nonnull String moduleName,
+													@Nonnull String uxui,
+													@Nonnull UserAgentType userAgentType,
+													@Nullable TestStrategy testStrategy) {
 		Customer c = user.getCustomer();
 		Module m = c.getModule(moduleName);
 		

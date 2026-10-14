@@ -1745,11 +1745,11 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 	
 	// generate the appropriate column name and check it is unique
 	private static @Nonnull String columnName(@Nonnull String moduleName,
-										@Nullable String owningDocumentName,
-										@Nonnull String attributeName,
-										@Nullable String columnPrefixWithoutUnderscore,
-										@Nullable String columnSuffixStartingWithUnderscore,
-										@Nonnull Set<String> columnNames) {
+												@Nullable String owningDocumentName,
+												@Nonnull String attributeName,
+												@Nullable String columnPrefixWithoutUnderscore,
+												@Nullable String columnSuffixStartingWithUnderscore,
+												@Nonnull Set<String> columnNames) {
 		String result;
 		if (columnPrefixWithoutUnderscore == null) {
 			result = attributeName;

@@ -36,10 +36,10 @@ abstract class MetaDataExpressionEvaluator extends ExpressionEvaluator {
 
 	@Override
 	public @Nullable String validateWithoutPrefixOrSuffix(@Nonnull String expression,
-													@Nullable Class<?> returnType,
-													@Nullable Customer customer,
-													@Nullable Module module,
-													@Nullable Document document) {
+																@Nullable Class<?> returnType,
+																@Nullable Customer customer,
+																@Nullable Module module,
+																@Nullable Document document) {
 		if (customer == null) {
 			throw new IllegalArgumentException("customer can't be null for a binding expression");
 		}
@@ -76,9 +76,9 @@ abstract class MetaDataExpressionEvaluator extends ExpressionEvaluator {
 	@Override
 	@SuppressWarnings("java:S3776") // Complexity OK
 	public @Nonnull List<String> completeWithoutPrefixOrSuffix(@Nullable String fragment,
-														@Nonnull Customer customer,
-														@Nonnull Module module,
-														@Nonnull Document document) {
+																@Nonnull Customer customer,
+																@Nonnull Module module,
+																@Nonnull Document document) {
 		List<String> result = new ArrayList<>();
 
 		Document targetDocument = null;

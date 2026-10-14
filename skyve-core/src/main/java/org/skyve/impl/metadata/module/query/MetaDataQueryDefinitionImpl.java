@@ -167,7 +167,7 @@ public class MetaDataQueryDefinitionImpl extends QueryDefinitionImpl implements 
 	@Override
 	@SuppressWarnings({"incomplete-switch", "java:S3776", "java:S6541"}) // complexity OK
 	public @Nonnull DocumentQuery constructDocumentQuery(@Nullable AggregateFunction summaryType,
-													@Nullable String tagId) {
+															@Nullable String tagId) {
 		AbstractPersistence persistence = AbstractPersistence.get();
 		User user = persistence.getUser();
 		Customer customer = user.getCustomer();

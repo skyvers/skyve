@@ -31,9 +31,9 @@ public class FluentModuleRoleReportAccess extends
 	 * Returns a FluentModuleRoleReportAccess from a runtime metadata.
 	 */
 	protected @Nonnull FluentModuleRoleReportAccess from(@Nonnull String moduleName, 
-													@Nonnull String documentName,
-													@Nonnull String reportName,
-													@Nonnull Set<String> uxuis) {
+															@Nonnull String documentName,
+															@Nonnull String reportName,
+															@Nonnull Set<String> uxuis) {
 		moduleName(moduleName);
 		documentName(documentName);
 		reportName(reportName);

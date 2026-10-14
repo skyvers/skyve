@@ -79,14 +79,14 @@ class ComponentCollectingComponentBuilder extends NoOpComponentBuilder {
 	 */
 	@Override
 	public @Nullable UIComponent action(@Nullable UIComponent component,
-								@Nullable String dataWidgetBinding,
-								@Nullable String dataWidgetVar,
-								@Nullable String label,
-								@Nullable String iconStyleClass,
-								@Nullable String toolTip,
-								@Nullable String confirmationText, 
-								@Nullable ImplicitActionName name,
-								@Nonnull Action action) {
+											@Nullable String dataWidgetBinding,
+											@Nullable String dataWidgetVar,
+											@Nullable String label,
+											@Nullable String iconStyleClass,
+											@Nullable String toolTip,
+											@Nullable String confirmationText, 
+											@Nullable ImplicitActionName name,
+											@Nonnull Action action) {
 		if (component != null) {
 			if (name != null) {
 				context.put(name.toString(), component, name);
@@ -115,15 +115,15 @@ class ComponentCollectingComponentBuilder extends NoOpComponentBuilder {
 	 */
 	@Override
 	public @Nullable UIComponent actionButton(@Nullable UIComponent component,
-										@Nullable String dataWidgetBinding,
-										@Nullable String dataWidgetVar,
-										@Nullable String label,
-										@Nullable String iconStyleClass,
-										@Nullable String toolTip,
-										@Nullable String confirmationText, 
-										@Nonnull org.skyve.impl.metadata.view.widget.Button button,
-										@Nullable String formDisabledCondition,
-										@Nonnull Action action) {
+													@Nullable String dataWidgetBinding,
+													@Nullable String dataWidgetVar,
+													@Nullable String label,
+													@Nullable String iconStyleClass,
+													@Nullable String toolTip,
+													@Nullable String confirmationText, 
+													@Nonnull org.skyve.impl.metadata.view.widget.Button button,
+													@Nullable String formDisabledCondition,
+													@Nonnull Action action) {
 		if (component != null) {
 			context.put(button.getActionName(), component, button);
 		}
@@ -145,13 +145,13 @@ class ComponentCollectingComponentBuilder extends NoOpComponentBuilder {
 	 */
 	@Override
 	public @Nullable UIComponent download(@Nullable UIComponent component,
-									@Nullable String dataWidgetBinding,
-									@Nullable String dataWidgetVar,
-									@Nullable String label,
-									@Nullable String iconStyleClass,
-									@Nullable String toolTip,
-									@Nullable String confirmationText, 
-									@Nonnull Action action) {
+												@Nullable String dataWidgetBinding,
+												@Nullable String dataWidgetVar,
+												@Nullable String label,
+												@Nullable String iconStyleClass,
+												@Nullable String toolTip,
+												@Nullable String confirmationText, 
+												@Nonnull Action action) {
 		if (component != null) {
 			context.put(action.getName(), component, action);
 		}
@@ -176,15 +176,15 @@ class ComponentCollectingComponentBuilder extends NoOpComponentBuilder {
 	 */
 	@Override
 	public @Nullable UIComponent downloadButton(@Nullable UIComponent component,
-										@Nullable String dataWidgetBinding,
-										@Nullable String dataWidgetVar,
-										@Nullable String label,
-										@Nullable String iconStyleClass,
-										@Nullable String toolTip,
-										@Nullable String confirmationText, 
-										@Nonnull org.skyve.impl.metadata.view.widget.Button button,
-										@Nullable String formDisabledCondition,
-										@Nonnull Action action) {
+													@Nullable String dataWidgetBinding,
+													@Nullable String dataWidgetVar,
+													@Nullable String label,
+													@Nullable String iconStyleClass,
+													@Nullable String toolTip,
+													@Nullable String confirmationText, 
+													@Nonnull org.skyve.impl.metadata.view.widget.Button button,
+													@Nullable String formDisabledCondition,
+													@Nonnull Action action) {
 		if (component != null) {
 			context.put(action.getName(), component, action);
 		}
@@ -205,11 +205,11 @@ class ComponentCollectingComponentBuilder extends NoOpComponentBuilder {
 	 */
 	@Override
 	public @Nullable UIComponent report(@Nullable UIComponent component,
-								@Nullable String label,
-								@Nullable String iconStyleClass,
-								@Nullable String toolTip,
-								@Nullable String confirmationText, 
-								@Nonnull Action action) {
+											@Nullable String label,
+											@Nullable String iconStyleClass,
+											@Nullable String toolTip,
+											@Nullable String confirmationText, 
+											@Nonnull Action action) {
 		if (component != null) {
 			context.put(action.getName(), component, action);
 		}
@@ -232,13 +232,13 @@ class ComponentCollectingComponentBuilder extends NoOpComponentBuilder {
 	 */
 	@Override
 	public @Nullable UIComponent reportButton(@Nullable UIComponent component,
-										@Nullable String label,
-										@Nullable String iconStyleClass,
-										@Nullable String toolTip,
-										@Nullable String confirmationText, 
-										@Nonnull org.skyve.impl.metadata.view.widget.Button button,
-										@Nullable String formDisabledCondition,
-										@Nonnull Action action) {
+													@Nullable String label,
+													@Nullable String iconStyleClass,
+													@Nullable String toolTip,
+													@Nullable String confirmationText, 
+													@Nonnull org.skyve.impl.metadata.view.widget.Button button,
+													@Nullable String formDisabledCondition,
+													@Nonnull Action action) {
 		if (component != null) {
 			context.put(action.getName(), component, action);
 		}
@@ -259,11 +259,11 @@ class ComponentCollectingComponentBuilder extends NoOpComponentBuilder {
 	 */
 	@Override
 	public @Nullable UIComponent upload(@Nullable UIComponent component,
-								@Nullable String label,
-								@Nullable String iconStyleClass,
-								@Nullable String toolTip,
-								@Nullable String confirmationText, 
-								@Nonnull Action action) {
+											@Nullable String label,
+											@Nullable String iconStyleClass,
+											@Nullable String toolTip,
+											@Nullable String confirmationText, 
+											@Nonnull Action action) {
 		if (component != null) {
 			context.put(action.getName(), component, action);
 		}
@@ -286,13 +286,13 @@ class ComponentCollectingComponentBuilder extends NoOpComponentBuilder {
 	 */
 	@Override
 	public @Nullable UIComponent uploadButton(@Nullable UIComponent component,
-										@Nullable String label,
-										@Nullable String iconStyleClass,
-										@Nullable String toolTip,
-										@Nullable String confirmationText, 
-										@Nonnull org.skyve.impl.metadata.view.widget.Button button,
-										@Nullable String formDisabledCondition,
-										@Nonnull Action action) {
+													@Nullable String label,
+													@Nullable String iconStyleClass,
+													@Nullable String toolTip,
+													@Nullable String confirmationText, 
+													@Nonnull org.skyve.impl.metadata.view.widget.Button button,
+													@Nullable String formDisabledCondition,
+													@Nonnull Action action) {
 		if (component != null) {
 			context.put(action.getName(), component, action);
 		}
@@ -317,15 +317,15 @@ class ComponentCollectingComponentBuilder extends NoOpComponentBuilder {
 	 */
 	@Override
 	public @Nullable UIComponent listGrid(@Nullable UIComponent component,
-									@Nonnull String moduleName,
-									@Nullable String modelDocumentName,
-									@Nullable String modelName,
-									@Nonnull String uxui,
-									@Nullable ListModel<Bean> model,
-									@Nullable Document owningDocument,
-									@Nonnull ListGrid listGrid,
-									@Nullable String stickyHeaderAnchorSelector,
-									boolean aggregateQuery) {
+												@Nonnull String moduleName,
+												@Nullable String modelDocumentName,
+												@Nullable String modelName,
+												@Nonnull String uxui,
+												@Nullable ListModel<Bean> model,
+												@Nullable Document owningDocument,
+												@Nonnull ListGrid listGrid,
+												@Nullable String stickyHeaderAnchorSelector,
+												boolean aggregateQuery) {
 		if (component != null) {
 			addedViewComponent = listGrid;
 			if (step instanceof PushEditContext pushEditContext) { // an edit view
@@ -401,14 +401,14 @@ class ComponentCollectingComponentBuilder extends NoOpComponentBuilder {
 	@Override
 	@SuppressWarnings("java:S3776") // Complexity OK
 	public @Nullable UIComponent addDataGridActionColumn(@Nullable UIComponent component,
-												@Nonnull UIComponent current,
-												@Nonnull DataGrid grid,
-												@Nullable String dataWidgetVar,
-												@Nonnull String gridColumnExpression,
-												@Nullable String singluarDocumentAlias,
-												boolean inline,
-												boolean canCreate,
-												boolean canDelete) {
+															@Nonnull UIComponent current,
+															@Nonnull DataGrid grid,
+															@Nullable String dataWidgetVar,
+															@Nonnull String gridColumnExpression,
+															@Nullable String singluarDocumentAlias,
+															boolean inline,
+															boolean canCreate,
+															boolean canDelete) {
 		// component = current as it was set in the previous builder in the chain
 		if (component != null) {
 			String dataGridIdentifier = grid.getBinding();
@@ -459,11 +459,11 @@ class ComponentCollectingComponentBuilder extends NoOpComponentBuilder {
 	 */
 	@Override
 	public @Nullable EventSourceComponent checkBox(@Nullable EventSourceComponent component,
-											@Nullable String dataWidgetVar,
-											@Nonnull CheckBox checkBox,
-											@Nullable String formDisabledCondition,
-											@Nullable String title,
-											@Nullable String requiredMessage) {
+														@Nullable String dataWidgetVar,
+														@Nonnull CheckBox checkBox,
+														@Nullable String formDisabledCondition,
+														@Nullable String title,
+														@Nullable String requiredMessage) {
 		return putByBinding(checkBox, component);
 	}
 	
@@ -481,12 +481,12 @@ class ComponentCollectingComponentBuilder extends NoOpComponentBuilder {
 	 */
 	@Override
 	public @Nullable EventSourceComponent colourPicker(@Nullable EventSourceComponent component,
-												@Nullable String dataWidgetVar,
-												@Nonnull ColourPicker colour,
-												@Nullable String formDisabledCondition,
-												@Nullable String title,
-												@Nullable String requiredMessage,
-												@Nullable HorizontalAlignment textAlignment) {
+															@Nullable String dataWidgetVar,
+															@Nonnull ColourPicker colour,
+															@Nullable String formDisabledCondition,
+															@Nullable String title,
+															@Nullable String requiredMessage,
+															@Nullable HorizontalAlignment textAlignment) {
 		return putByBinding(colour, component);
 	}
 	
@@ -503,11 +503,11 @@ class ComponentCollectingComponentBuilder extends NoOpComponentBuilder {
 	 */
 	@Override
 	public @Nullable EventSourceComponent combo(@Nullable EventSourceComponent component,
-										@Nullable String dataWidgetVar,
-										@Nonnull Combo combo,
-										@Nullable String formDisabledCondition,
-										@Nullable String title,
-										@Nullable String requiredMessage) {
+													@Nullable String dataWidgetVar,
+													@Nonnull Combo combo,
+													@Nullable String formDisabledCondition,
+													@Nullable String title,
+													@Nullable String requiredMessage) {
 		return putByBinding(combo, component);
 	}
 	
@@ -551,11 +551,11 @@ class ComponentCollectingComponentBuilder extends NoOpComponentBuilder {
 	 */
 	@Override
 	public @Nullable UIComponent html(@Nullable UIComponent component,
-								@Nullable String dataWidgetVar,
-								@Nonnull HTML html,
-								@Nullable String formDisabledCondition,
-								@Nullable String title,
-								@Nullable String requiredMessage) {
+											@Nullable String dataWidgetVar,
+											@Nonnull HTML html,
+											@Nullable String formDisabledCondition,
+											@Nullable String title,
+											@Nullable String requiredMessage) {
 		return putByBinding(html, component);
 	}
 	
@@ -576,15 +576,15 @@ class ComponentCollectingComponentBuilder extends NoOpComponentBuilder {
 	 */
 	@Override
 	public @Nullable EventSourceComponent lookupDescription(@Nullable EventSourceComponent component,
-													@Nullable String dataWidgetVar,
-													@Nonnull LookupDescription lookup,
-													@Nullable String formDisabledCondition,
-													@Nullable String title,
-													@Nullable String requiredMessage,
-													@Nullable HorizontalAlignment textAlignment,
-													@Nonnull String displayBinding,
-													@Nullable QueryDefinition query,
-													@Nonnull Document owningDocument) {
+																@Nullable String dataWidgetVar,
+																@Nonnull LookupDescription lookup,
+																@Nullable String formDisabledCondition,
+																@Nullable String title,
+																@Nullable String requiredMessage,
+																@Nullable HorizontalAlignment textAlignment,
+																@Nonnull String displayBinding,
+																@Nullable QueryDefinition query,
+																@Nonnull Document owningDocument) {
 		return putByBinding(lookup, component);
 	}
 	
@@ -601,11 +601,11 @@ class ComponentCollectingComponentBuilder extends NoOpComponentBuilder {
 	 */
 	@Override
 	public @Nullable UIComponent zoomIn(@Nullable UIComponent component,
-								@Nullable String label,
-								@Nullable String iconStyleClass,
-								@Nullable String toolTip,
-								@Nonnull ZoomIn zoomIn,
-								@Nullable String formDisabledCondition) {
+											@Nullable String label,
+											@Nullable String iconStyleClass,
+											@Nullable String toolTip,
+											@Nonnull ZoomIn zoomIn,
+											@Nullable String formDisabledCondition) {
 		if (component != null) {
 			context.put(zoomIn.getBinding() + ".zoomIn", component, zoomIn);
 		}
@@ -627,12 +627,12 @@ class ComponentCollectingComponentBuilder extends NoOpComponentBuilder {
 	 */
 	@Override
 	public @Nullable EventSourceComponent password(@Nullable EventSourceComponent component,
-											@Nullable String dataWidgetVar,
-											@Nonnull Password password,
-											@Nullable String formDisabledCondition,
-											@Nullable String title,
-											@Nullable String requiredMessage,
-											@Nullable HorizontalAlignment textAlignment) {
+														@Nullable String dataWidgetVar,
+														@Nonnull Password password,
+														@Nullable String formDisabledCondition,
+														@Nullable String title,
+														@Nullable String requiredMessage,
+														@Nullable HorizontalAlignment textAlignment) {
 		return putByBinding(password, component);
 	}
 	
@@ -649,11 +649,11 @@ class ComponentCollectingComponentBuilder extends NoOpComponentBuilder {
 	 */
 	@Override
 	public @Nullable EventSourceComponent radio(@Nullable EventSourceComponent component,
-										@Nullable String dataWidgetVar,
-										@Nonnull Radio radio,
-										@Nullable String formDisabledCondition,
-										@Nullable String title,
-										@Nullable String requiredMessage) {
+													@Nullable String dataWidgetVar,
+													@Nonnull Radio radio,
+													@Nullable String formDisabledCondition,
+													@Nullable String title,
+													@Nullable String requiredMessage) {
 		return putByBinding(radio, component);
 	}
 	
@@ -670,11 +670,11 @@ class ComponentCollectingComponentBuilder extends NoOpComponentBuilder {
 	 */
 	@Override
 	public @Nullable EventSourceComponent richText(@Nullable EventSourceComponent component,
-											@Nullable String dataWidgetVar,
-											@Nonnull RichText text,
-											@Nullable String formDisabledCondition,
-											@Nullable String title,
-											@Nullable String requiredMessage) {
+														@Nullable String dataWidgetVar,
+														@Nonnull RichText text,
+														@Nullable String formDisabledCondition,
+														@Nullable String title,
+														@Nullable String requiredMessage) {
 		return putByBinding(text, component);
 	}
 	
@@ -693,13 +693,13 @@ class ComponentCollectingComponentBuilder extends NoOpComponentBuilder {
 	 */
 	@Override
 	public @Nullable EventSourceComponent spinner(@Nullable EventSourceComponent component,
-											@Nullable String dataWidgetVar,
-											@Nonnull Spinner spinner,
-											@Nullable String formDisabledCondition,
-											@Nullable String title,
-											@Nullable String requiredMessage,
-											@Nullable HorizontalAlignment textAlignment,
-											@Nullable jakarta.faces.convert.Converter<?> facesConverter) {
+														@Nullable String dataWidgetVar,
+														@Nonnull Spinner spinner,
+														@Nullable String formDisabledCondition,
+														@Nullable String title,
+														@Nullable String requiredMessage,
+														@Nullable HorizontalAlignment textAlignment,
+														@Nullable jakarta.faces.convert.Converter<?> facesConverter) {
 		return putByBinding(spinner, component);
 	}
 	
@@ -717,12 +717,12 @@ class ComponentCollectingComponentBuilder extends NoOpComponentBuilder {
 	 */
 	@Override
 	public @Nullable EventSourceComponent slider(@Nullable EventSourceComponent component,
-										@Nullable String dataWidgetVar,
-										@Nonnull Slider spinner,
-										@Nullable String formDisabledCondition,
-										@Nullable String title,
-										@Nullable String requiredMessage,
-										@Nullable jakarta.faces.convert.Converter<?> facesConverter) {
+													@Nullable String dataWidgetVar,
+													@Nonnull Slider spinner,
+													@Nullable String formDisabledCondition,
+													@Nullable String title,
+													@Nullable String requiredMessage,
+													@Nullable jakarta.faces.convert.Converter<?> facesConverter) {
 		return putByBinding(spinner, component);
 	}
 	
@@ -761,16 +761,16 @@ class ComponentCollectingComponentBuilder extends NoOpComponentBuilder {
 	 */
 	@Override
 	public @Nullable EventSourceComponent text(@Nullable EventSourceComponent component,
-										@Nullable String dataWidgetVar,
-										@Nonnull TextField text,
-										@Nullable String formDisabledCondition,
-										@Nullable String title,
-										@Nullable String requiredMessage,
-										@Nullable HorizontalAlignment textAlignment,
-										@Nullable Integer length,
-										@Nullable Converter<?> converter,
-										@Nullable Format<?> format,
-										@Nullable jakarta.faces.convert.Converter<?> facesConverter) {
+													@Nullable String dataWidgetVar,
+													@Nonnull TextField text,
+													@Nullable String formDisabledCondition,
+													@Nullable String title,
+													@Nullable String requiredMessage,
+													@Nullable HorizontalAlignment textAlignment,
+													@Nullable Integer length,
+													@Nullable Converter<?> converter,
+													@Nullable Format<?> format,
+													@Nullable jakarta.faces.convert.Converter<?> facesConverter) {
 		return putByBinding(text, component);
 	}
 
@@ -789,13 +789,13 @@ class ComponentCollectingComponentBuilder extends NoOpComponentBuilder {
 	 */
 	@Override
 	public @Nullable EventSourceComponent textArea(@Nullable EventSourceComponent component,
-											@Nullable String dataWidgetVar,
-											@Nonnull TextArea text,
-											@Nullable String formDisabledCondition,
-											@Nullable String title,
-											@Nullable String requiredMessage,
-											@Nullable HorizontalAlignment textAlignment,
-											@Nullable Integer length) {
+														@Nullable String dataWidgetVar,
+														@Nonnull TextArea text,
+														@Nullable String formDisabledCondition,
+														@Nullable String title,
+														@Nullable String requiredMessage,
+														@Nullable HorizontalAlignment textAlignment,
+														@Nullable Integer length) {
 		return putByBinding(text, component);
 	}
 	

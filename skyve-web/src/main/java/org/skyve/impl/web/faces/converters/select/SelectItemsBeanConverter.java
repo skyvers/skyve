@@ -90,10 +90,10 @@ public class SelectItemsBeanConverter implements Converter<Object> {
 	 * @return the matching item value, or {@code null} when no item matches
 	 */
 	private static @Nullable Object findValueByStringConversion(@Nonnull FacesContext context,
-														@Nonnull UIComponent component,
-														@Nonnull Iterator<SelectItem> items,
-														@Nonnull String value,
-														@Nonnull Converter<Object> converter) {
+																	@Nonnull UIComponent component,
+																	@Nonnull Iterator<SelectItem> items,
+																	@Nonnull String value,
+																	@Nonnull Converter<Object> converter) {
 		while (items.hasNext()) {
 			SelectItem item = items.next();
 			Object itemValue = item.getValue();

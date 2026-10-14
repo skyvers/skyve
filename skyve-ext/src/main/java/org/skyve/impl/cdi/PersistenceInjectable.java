@@ -506,10 +506,10 @@ public class PersistenceInjectable implements Persistence {
 
 	@Override
 	public @Nonnull DocumentQuery newDocumentQuery(@Nonnull Document document,
-											@Nullable String fromClause,
-											@Nullable String filterClause,
-											@Nullable String groupClause,
-											@Nullable String orderClause) {
+													@Nullable String fromClause,
+													@Nullable String filterClause,
+													@Nullable String groupClause,
+													@Nullable String orderClause) {
 		return CORE.getPersistence().newDocumentQuery(document, fromClause, filterClause, groupClause, orderClause);
 	}
 

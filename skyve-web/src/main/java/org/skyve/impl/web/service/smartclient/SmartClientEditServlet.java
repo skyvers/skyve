@@ -129,14 +129,14 @@ public class SmartClientEditServlet extends HttpServlet {
 	 */
 	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
 	private static @Nonnull ViewJSONManipulator newManipulator(@Nonnull User user,
-														@Nonnull Module module, 
-														@Nonnull Document document, 
-														@Nonnull View view,
-														@Nonnull String uxui,
-														@Nonnull Bean bean,
-														int editIdCounter, // the base number which is incremented for view component IDs for uniqueness
-														int createIdCounter, // the base number which is incremented for view component IDs for uniqueness
-														boolean forApply) {
+																@Nonnull Module module, 
+																@Nonnull Document document, 
+																@Nonnull View view,
+																@Nonnull String uxui,
+																@Nonnull Bean bean,
+																int editIdCounter, // the base number which is incremented for view component IDs for uniqueness
+																int createIdCounter, // the base number which is incremented for view component IDs for uniqueness
+																boolean forApply) {
 		if (MANIPULATOR_CLASS == null) {
 			return new ViewJSONManipulator(user, module, document, view, uxui, bean, editIdCounter, createIdCounter, forApply);
 		}

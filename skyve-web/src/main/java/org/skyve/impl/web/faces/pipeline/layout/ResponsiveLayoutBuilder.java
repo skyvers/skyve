@@ -113,17 +113,17 @@ public class ResponsiveLayoutBuilder extends TabularLayoutBuilder {
 	@Override
 	@SuppressWarnings("java:S3776") // Complexity OK
 	public @Nullable UIComponent addToContainer(@Nullable UIComponent component,
-										@Nonnull Container viewContainer, 
-										@Nonnull UIComponent container, 
-										@Nonnull UIComponent componentToAdd,
-										@Nullable Integer pixelWidth, 
-										@Nullable Integer responsiveWidth,
-										@Nullable Integer percentageWidth,
-										@Nullable Integer sm,
-										@Nullable Integer md,
-										@Nullable Integer lg,
-										@Nullable Integer xl,
-										@Nullable String widgetInvisible) {
+													@Nonnull Container viewContainer, 
+													@Nonnull UIComponent container, 
+													@Nonnull UIComponent componentToAdd,
+													@Nullable Integer pixelWidth, 
+													@Nullable Integer responsiveWidth,
+													@Nullable Integer percentageWidth,
+													@Nullable Integer sm,
+													@Nullable Integer md,
+													@Nullable Integer lg,
+													@Nullable Integer xl,
+													@Nullable String widgetInvisible) {
 		if (component != null) {
 			return component;
 		}
@@ -469,9 +469,9 @@ public class ResponsiveLayoutBuilder extends TabularLayoutBuilder {
 	}
 	
 	private @Nonnull HtmlPanelGroup responsiveContainer(@Nullable VerticalAlignment vertical,
-												@Nullable HorizontalAlignment horizontal,
-												@Nullable String invisibleCondition,
-												@Nullable String widgetId) {
+														@Nullable HorizontalAlignment horizontal,
+														@Nullable String invisibleCondition,
+														@Nullable String widgetId) {
 		HtmlPanelGroup result = panelGroup(false, false, true, null, widgetId);
 		setInvisible(result, invisibleCondition, null);
 		if (UtilImpl.PRIMEFLEX) {
@@ -504,14 +504,14 @@ public class ResponsiveLayoutBuilder extends TabularLayoutBuilder {
 
 	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
 	private @Nonnull HtmlPanelGroup responsiveColumn(@Nullable Integer pixelWidth, 
-												@Nullable Integer responsiveWidth, 
-												@Nullable Integer percentageWidth,
-												@Nullable Integer sm,
-												@Nullable Integer md,
-												@Nullable Integer lg,
-												@Nullable Integer xl,
-												@Nullable String widgetInvisible,
-												boolean nopad) {
+														@Nullable Integer responsiveWidth, 
+														@Nullable Integer percentageWidth,
+														@Nullable Integer sm,
+														@Nullable Integer md,
+														@Nullable Integer lg,
+														@Nullable Integer xl,
+														@Nullable String widgetInvisible,
+														boolean nopad) {
 		HtmlPanelGroup result = panelGroup(false, false, true, null, null);
 		
 		String styleClasses = null;
@@ -536,12 +536,12 @@ public class ResponsiveLayoutBuilder extends TabularLayoutBuilder {
 	}
 
 	private static @Nonnull String responsiveGridStyleClasses(@Nullable Integer pixelWidth,
-														@Nullable Integer responsiveWidth,
-														@Nullable Integer percentageWidth,
-														@Nullable Integer sm,
-														@Nullable Integer md,
-														@Nullable Integer lg,
-														@Nullable Integer xl) {
+																@Nullable Integer responsiveWidth,
+																@Nullable Integer percentageWidth,
+																@Nullable Integer sm,
+																@Nullable Integer md,
+																@Nullable Integer lg,
+																@Nullable Integer xl) {
 		int small = 12;
 		int medium = 12;
 		int large = 12;

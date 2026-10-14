@@ -140,9 +140,9 @@ public class SkyveLazyDataModel extends LazyDataModel<BeanMapAdapter> {
 	@Override
 	@SuppressWarnings("java:S3776") // complexity OK
 	public @Nonnull List<BeanMapAdapter> load(int first,
-										int pageSize,
-										@Nullable Map<String, SortMeta> multiSortMeta,
-										@Nullable Map<String, FilterMeta> filters) {
+												int pageSize,
+												@Nullable Map<String, SortMeta> multiSortMeta,
+												@Nullable Map<String, FilterMeta> filters) {
 		User u = CORE.getUser();
 		Customer c = u.getCustomer();
 		Module m = c.getModule(moduleName);

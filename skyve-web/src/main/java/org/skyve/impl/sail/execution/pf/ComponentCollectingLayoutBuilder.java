@@ -45,17 +45,17 @@ public class ComponentCollectingLayoutBuilder extends NoOpLayoutBuilder {
 	 */
 	@Override
 	public @Nullable UIComponent addToContainer(@Nullable UIComponent component,
-										@Nullable Container viewContainer,
-										@Nullable UIComponent container,
-										@Nonnull UIComponent componentToAdd,
-										@Nullable Integer pixelWidth,
-										@Nullable Integer responsiveWidth,
-										@Nullable Integer percentageWidth,
-										@Nullable Integer sm,
-										@Nullable Integer md,
-										@Nullable Integer lg,
-										@Nullable Integer xl,
-										@Nullable String invisibleCondition) {
+													@Nullable Container viewContainer,
+													@Nullable UIComponent container,
+													@Nonnull UIComponent componentToAdd,
+													@Nullable Integer pixelWidth,
+													@Nullable Integer responsiveWidth,
+													@Nullable Integer percentageWidth,
+													@Nullable Integer sm,
+													@Nullable Integer md,
+													@Nullable Integer lg,
+													@Nullable Integer xl,
+													@Nullable String invisibleCondition) {
 		cccb.addToContainer(componentToAdd);
 		return component;
 	}

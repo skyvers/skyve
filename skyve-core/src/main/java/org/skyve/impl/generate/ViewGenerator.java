@@ -473,11 +473,11 @@ public class ViewGenerator {
 
 	@SuppressWarnings("java:S3776") // Complexity OK
 	private static @Nonnull DataGrid generateDataGrid(@Nonnull CollectionType collectionType,
-												@Nonnull Customer customer,
-												@Nonnull Module module,
-												@Nonnull Document document,
-												@Nullable String dataGridBinding,
-												@Nonnull List<String> propertyNames) {
+														@Nonnull Customer customer,
+														@Nonnull Module module,
+														@Nonnull Document document,
+														@Nullable String dataGridBinding,
+														@Nonnull List<String> propertyNames) {
 		DataGrid result = new DataGrid();
 		if (dataGridBinding != null) {
 			result.setBinding(dataGridBinding);
@@ -564,9 +564,9 @@ public class ViewGenerator {
 	}	
 
 	public @Nonnull String generateEditViewXML(@Nonnull Customer customer,
-										@Nonnull Document document,
-										boolean customerOverridden,
-										boolean uxuiOverridden) {
+												@Nonnull Document document,
+												boolean customerOverridden,
+												boolean uxuiOverridden) {
 		return XMLMetaData.marshalView(generateEditView(customer, document), customerOverridden, uxuiOverridden);
 	}
 

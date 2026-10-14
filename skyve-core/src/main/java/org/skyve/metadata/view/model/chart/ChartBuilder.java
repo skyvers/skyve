@@ -182,9 +182,9 @@ public class ChartBuilder {
 	 * @param includeOthers
 	 */
 	public @Nonnull ChartBuilder top(@SuppressWarnings("hiding") int top,
-								@SuppressWarnings("hiding") @Nonnull OrderBy orderBy,
-								@Nonnull SortDirection sort,
-								boolean includeOthers) {
+										@SuppressWarnings("hiding") @Nonnull OrderBy orderBy,
+										@Nonnull SortDirection sort,
+										boolean includeOthers) {
 		this.top = top;
 		topOrderBy = orderBy;
 		topSort = sort;
@@ -237,8 +237,8 @@ public class ChartBuilder {
 	 * @return	The ChartData.
 	 */
 	public @Nonnull ChartData build(@Nonnull ColourSeries backgroundColours,
-							@Nonnull ColourSeries borderColours,
-							@Nullable String label) {
+									@Nonnull ColourSeries borderColours,
+									@Nullable String label) {
 		return build(backgroundColours, borderColours, null, label);
 	}
 	
@@ -251,9 +251,9 @@ public class ChartBuilder {
 	 * @return	The ChartData.
 	 */
 	public @Nonnull ChartData build(@Nonnull ColourSeries backgroundColours,
-							@Nonnull ColourSeries borderColours,
-							@Nullable String title,
-							@Nullable String label) {
+									@Nonnull ColourSeries borderColours,
+									@Nullable String title,
+									@Nullable String label) {
 		List<Bean> data = query();
 		backgroundColours.setSize(data.size());
 		borderColours.setSize(data.size());

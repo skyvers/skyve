@@ -29,15 +29,15 @@ public class VueListGridComponentBuilder extends NoOpComponentBuilder {
 	@Override
 	@SuppressWarnings("java:S3776") // Complexity OK
 	public @Nonnull UIComponent listGrid(@Nullable UIComponent component,
-									@Nonnull String moduleName,
-									@Nullable String documentName,
-									@Nullable String modelName,
-									@Nonnull String uxui,
-									@Nonnull ListModel<Bean> model,
-									@Nullable Document owningDocument,
-									@Nonnull ListGrid grid,
-									@Nullable String stickyHeaderAnchorSelector,
-									boolean aggregateQuery) {
+											@Nonnull String moduleName,
+											@Nullable String documentName,
+											@Nullable String modelName,
+											@Nonnull String uxui,
+											@Nonnull ListModel<Bean> model,
+											@Nullable Document owningDocument,
+											@Nonnull ListGrid grid,
+											@Nullable String stickyHeaderAnchorSelector,
+											boolean aggregateQuery) {
 		if (component != null) {
 			return component;
 		}

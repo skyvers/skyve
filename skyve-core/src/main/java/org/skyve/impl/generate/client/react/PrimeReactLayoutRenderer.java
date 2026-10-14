@@ -65,8 +65,8 @@ public class PrimeReactLayoutRenderer extends LayoutRenderer {
 
 	@Override
 	public @Nonnull RenderedComponent addTabLayout(@Nullable RenderedComponent component,
-											@Nonnull RenderedComponent tab,
-											@Nonnull RenderedComponent tabLayout) {
+													@Nonnull RenderedComponent tab,
+													@Nonnull RenderedComponent tabLayout) {
 		tab.addChild(tabLayout);
 		return tabLayout;
 	}
@@ -129,8 +129,8 @@ public class PrimeReactLayoutRenderer extends LayoutRenderer {
 
 	@Override
 	public @Nonnull RenderedComponent addFormRowLayout(@Nullable RenderedComponent component,
-												@Nonnull RenderedComponent formLayout,
-												@Nonnull RenderedComponent rowLayout) {
+														@Nonnull RenderedComponent formLayout,
+														@Nonnull RenderedComponent rowLayout) {
 		formLayout.addChild(rowLayout);
 		return rowLayout;
 	}
@@ -177,13 +177,13 @@ public class PrimeReactLayoutRenderer extends LayoutRenderer {
 
 	@Override
 	public @Nonnull RenderedComponent addToContainer(@Nullable RenderedComponent component,
-												@Nonnull Container viewContainer,
-												@Nonnull RenderedComponent container,
-												@Nonnull RenderedComponent componentToAdd,
-												@Nullable Integer pixelWidth,
-												@Nullable Integer responsiveWidth,
-												@Nullable Integer percentageWidth,
-												@Nullable String invisibleCondition) {
+														@Nonnull Container viewContainer,
+														@Nonnull RenderedComponent container,
+														@Nonnull RenderedComponent componentToAdd,
+														@Nullable Integer pixelWidth,
+														@Nullable Integer responsiveWidth,
+														@Nullable Integer percentageWidth,
+														@Nullable String invisibleCondition) {
 		if (component != null) {
 			return component;
 		}
@@ -201,8 +201,8 @@ public class PrimeReactLayoutRenderer extends LayoutRenderer {
 
 	@Override
 	public @Nonnull RenderedComponent addedToContainer(@Nullable RenderedComponent component,
-												@Nonnull Container viewContainer,
-												@Nonnull RenderedComponent container) {
+														@Nonnull Container viewContainer,
+														@Nonnull RenderedComponent container) {
 		return container.getParent().getParent();
 	}
 }

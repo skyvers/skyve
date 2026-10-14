@@ -547,9 +547,9 @@ public class SystemDocumentationMojo extends AbstractSkyveMojo {
 	 * @return the full PlantUML diagram text
 	 */
 	private static @Nonnull String outputDiagram(@Nonnull Document document,
-											boolean child,
-											@Nonnull Set<String> relatedNames,
-											@Nonnull String relations) {
+													boolean child,
+													@Nonnull Set<String> relatedNames,
+													@Nonnull String relations) {
 		StringBuilder result = new StringBuilder(512);
 
 		result.append("!pragma layout smetana\n");

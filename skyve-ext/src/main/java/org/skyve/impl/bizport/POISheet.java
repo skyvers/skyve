@@ -723,8 +723,8 @@ public final class POISheet implements BizPortSheet {
 	@Override
 	@SuppressWarnings({"unchecked", "java:S3776"}) // Complexity OK
 	public @Nullable <T> T getValue(@Nonnull String columnBinding,
-							@Nullable AttributeType attributeType,
-							@Nonnull UploadException problems) {
+										@Nullable AttributeType attributeType,
+										@Nonnull UploadException problems) {
 		T result = null;
 
 		if (sheet == null) {

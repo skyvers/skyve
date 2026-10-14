@@ -824,10 +824,10 @@ public class MetaDataServlet extends HttpServlet {
 	
 	@SuppressWarnings("java:S3776") // Complexity OK
 	private static @Nonnull StringBuilder view(@Nonnull User user,
-										@Nonnull String uxui,
-										@Nonnull String moduleName,
-										@Nonnull String documentName,
-										boolean topFormLabelAlignemnt) {
+												@Nonnull String uxui,
+												@Nonnull String moduleName,
+												@Nonnull String documentName,
+												boolean topFormLabelAlignemnt) {
 		final StringBuilder result = new StringBuilder(5120);
 		final StringBuilder actionsJSON = new StringBuilder(2048);
 		Customer c = user.getCustomer();

@@ -1005,10 +1005,10 @@ public class DocumentImpl extends ModelImpl implements Document {
 	 */
 	@SuppressWarnings("java:S3776") // Complexity OK
 	public @Nonnull <T extends Bean> List<DomainValue> getDomainValues(@Nonnull CustomerImpl customer,
-																@Nullable DomainType domainType,
-																@Nonnull Attribute attribute,
-																@Nullable T owningBean,
-																boolean runtime) {
+																		@Nullable DomainType domainType,
+																		@Nonnull Attribute attribute,
+																		@Nullable T owningBean,
+																		boolean runtime) {
 		List<DomainValue> result = null;
 		
 		if (domainType != null) {

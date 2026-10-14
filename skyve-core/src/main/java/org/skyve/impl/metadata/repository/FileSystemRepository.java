@@ -1069,9 +1069,9 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 	 */
 	@Override
 	public @Nonnull <T extends Bean, C extends Bean> ComparisonModel<T, C> getComparisonModel(@Nullable Customer customer, 
-																						@Nonnull Document document, 
-																						@Nonnull String modelName,
-																						boolean runtime) {
+																								@Nonnull Document document, 
+																								@Nonnull String modelName,
+																								boolean runtime) {
 		ComparisonModel<T, C> result = getModel(customer, document, modelName, runtime);
 		result.postConstruct(customer, runtime);
 		return result;
@@ -1106,9 +1106,9 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 	 */
 	@Override
 	public @Nonnull <T extends Bean> ChartModel<T> getChartModel(@Nullable Customer customer,
-															@Nonnull Document document,
-															@Nonnull String modelName,
-															boolean runtime) {
+																	@Nonnull Document document,
+																	@Nonnull String modelName,
+																	boolean runtime) {
 		ChartModel<T> result = getModel(customer, document, modelName, runtime);
 		result.postConstruct(customer, runtime);
 		return result;

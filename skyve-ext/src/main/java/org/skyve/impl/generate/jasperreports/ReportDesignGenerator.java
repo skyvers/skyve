@@ -424,7 +424,7 @@ public abstract class ReportDesignGenerator {
     }
 
     protected static @Nonnull StringBuilder addJoinForAssociation(@Nonnull StringBuilder sJoin, @Nonnull Customer customer, @Nonnull DesignSpecification bean,
-                                                         @Nonnull Document document, @Nonnull Attribute a, @Nonnull String uniqueJoinIdentifier) {
+                                                                  @Nonnull Document document, @Nonnull Attribute a, @Nonnull String uniqueJoinIdentifier) {
 
         if (!bean.getJoins().containsKey(document.getName())) {
             // get the next alias

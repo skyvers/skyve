@@ -113,10 +113,10 @@ public class DefaultBindingComparisonModel <T extends Bean, C extends Bean> exte
 	}
 	
 	private @Nonnull ComparisonComposite createNode(@Nonnull String binding,
-											@Nullable Relation owningRelation,
-											@Nonnull Document currentDocument,
-											@Nonnull Bean bean,
-											boolean newNode) {
+													@Nullable Relation owningRelation,
+													@Nonnull Document currentDocument,
+													@Nonnull Bean bean,
+													boolean newNode) {
 		ComparisonComposite result = new ComparisonComposite();
 		result.setBizId(bean.getBizId());
 		result.setBusinessKeyDescription((bean instanceof PersistentBean persistentBean) ? 

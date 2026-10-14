@@ -1097,14 +1097,14 @@ public class DocumentFilterImpl implements DocumentFilter {
 	 */
 	@SuppressWarnings({"java:S107", "java:S3776"}) // Long parameter list preserves the existing framework/API contract; complexity OK.
 	private @Nonnull DocumentFilter appendRestriction(@Nonnull String entityAlias,
-												@Nonnull String binding,
-												@Nullable String operator,
-												@Nonnull Object operand,
-												boolean addNullTest,
-												boolean useStr,
-												@Nullable String functionPrefix,
-												@Nullable String functionSuffix,
-												boolean reversed) {
+														@Nonnull String binding,
+														@Nullable String operator,
+														@Nonnull Object operand,
+														boolean addNullTest,
+														boolean useStr,
+														@Nullable String functionPrefix,
+														@Nullable String functionSuffix,
+														boolean reversed) {
 		String parameterName = PARAMETER_PREFIX + owningQuery.parameterNumber++;
 		owningQuery.putParameter(parameterName, operand);
 

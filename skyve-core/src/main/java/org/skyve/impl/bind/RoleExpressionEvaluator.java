@@ -67,10 +67,10 @@ public class RoleExpressionEvaluator extends ExpressionEvaluator {
 	 */
 	@Override
 	public @Nullable String validateWithoutPrefixOrSuffix(@Nonnull String expression,
-													@Nullable Class<?> returnType,
-													@Nullable Customer customer,
-													@Nullable Module module,
-													@Nullable Document document) {
+																@Nullable Class<?> returnType,
+																@Nullable Customer customer,
+																@Nullable Module module,
+																@Nullable Document document) {
 		if (expression.indexOf('.') <= 0) {
 			return "Role " + expression + " needs to be in the format <module>.<role>";
 		}
@@ -88,9 +88,9 @@ public class RoleExpressionEvaluator extends ExpressionEvaluator {
 	 */
 	@Override
 	public @Nonnull List<String> completeWithoutPrefixOrSuffix(@Nullable String fragment,
-														@Nonnull Customer customer,
-														@Nonnull Module module,
-														@Nonnull Document document) {
+																@Nonnull Customer customer,
+																@Nonnull Module module,
+																@Nonnull Document document) {
 		List<String> result = new ArrayList<>();
 		
 		for (Module m : customer.getModules()) {

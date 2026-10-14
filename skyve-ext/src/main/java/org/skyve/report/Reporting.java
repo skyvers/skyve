@@ -141,9 +141,9 @@ public interface Reporting extends SystemObserver {
 	 * @throws Exception if report execution or attachment creation fails
 	 */
 	@Nonnull MailAttachment getMailAttachmentFromJasperReport(@Nonnull String reportModuleName,
-														@Nonnull String reportDocumentName,
-														@Nonnull String reportName,
-														@Nonnull Map<String, Object> parameters)
+																@Nonnull String reportDocumentName,
+																@Nonnull String reportName,
+																@Nonnull Map<String, Object> parameters)
 	throws Exception;
 
 	/**
@@ -245,9 +245,9 @@ public interface Reporting extends SystemObserver {
 	 * @throws Exception if template lookup, merge, or PDF generation fails
 	 */
 	@Nonnull File createFreemarkerBeanReportPDF(final @Nonnull Bean bean,
-										final @Nonnull String reportName,
-										final @Nullable Map<String, Object> reportParameters,
-										final @Nonnull String reportFilename)
+												final @Nonnull String reportName,
+												final @Nullable Map<String, Object> reportParameters,
+												final @Nonnull String reportFilename)
 	throws Exception;
 	
 	/**
@@ -290,9 +290,9 @@ public interface Reporting extends SystemObserver {
 	 * @throws Exception if template execution or output generation fails
 	 */
 	@Nonnull Download downloadFreemarkerReport(final @Nonnull String reportName,
-										final @Nullable Map<String, Object> reportParameters,
-										final @Nonnull ReportFormat format,
-										final @Nonnull String downloadFilename)
+												final @Nullable Map<String, Object> reportParameters,
+												final @Nonnull ReportFormat format,
+												final @Nonnull String downloadFilename)
 	throws Exception;
 
 	/**

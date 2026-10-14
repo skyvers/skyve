@@ -192,9 +192,9 @@ public class DefaultReporting implements Reporting {
 	 */
 	@Override
 	public @Nonnull File createFreemarkerBeanReportPDF(final @Nonnull Bean bean,
-												final @Nonnull String reportName,
-												final @Nullable Map<String, Object> reportParameters,
-												final @Nonnull String reportFilename)
+														final @Nonnull String reportName,
+														final @Nullable Map<String, Object> reportParameters,
+														final @Nonnull String reportFilename)
 	throws Exception {
 		return FreemarkerReportUtil.createBeanReportPDF(bean, reportName, reportParameters, reportFilename);
 	}
@@ -222,9 +222,9 @@ public class DefaultReporting implements Reporting {
 	 */
 	@Override
 	public @Nonnull Download downloadFreemarkerReport(final @Nonnull String reportName,
-												final @Nullable Map<String, Object> reportParameters,
-												final @Nonnull ReportFormat format,
-												final @Nonnull String downloadFilename)
+														final @Nullable Map<String, Object> reportParameters,
+														final @Nonnull ReportFormat format,
+														final @Nonnull String downloadFilename)
 	throws Exception {
 		return FreemarkerReportUtil.downloadReport(reportName, reportParameters, format, downloadFilename);
 	}
@@ -251,9 +251,9 @@ public class DefaultReporting implements Reporting {
 	 */
 	@Override
 	public @Nonnull MailAttachment getMailAttachmentFromJasperReport(@Nonnull String reportModuleName,
-																@Nonnull String reportDocumentName,
-																@Nonnull String reportName,
-																@Nonnull Map<String, Object> parameters)
+																		@Nonnull String reportDocumentName,
+																		@Nonnull String reportName,
+																		@Nonnull Map<String, Object> parameters)
 	throws Exception {
 		MailAttachment result = new MailAttachment();
 

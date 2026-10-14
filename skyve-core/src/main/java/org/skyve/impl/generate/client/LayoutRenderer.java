@@ -127,8 +127,8 @@ public abstract class LayoutRenderer extends AbstractRenderer {
 	 * Adds a form-row layout into an existing form layout.
 	 */
 	public abstract @Nonnull RenderedComponent addFormRowLayout(@Nullable RenderedComponent component,
-														@Nonnull RenderedComponent formLayout,
-														@Nonnull RenderedComponent rowLayout);
+																@Nonnull RenderedComponent formLayout,
+																@Nonnull RenderedComponent rowLayout);
 
 	/**
 	 * Finalises form-row insertion and returns the active render node.
@@ -185,13 +185,13 @@ public abstract class LayoutRenderer extends AbstractRenderer {
 	 */
 	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
 	public abstract @Nonnull RenderedComponent addToContainer(@Nullable RenderedComponent component,
-														@Nonnull Container viewContainer,
-														@Nonnull RenderedComponent container, 
-														@Nonnull RenderedComponent componentToAdd, 
-														@Nullable Integer pixelWidth, 
-														@Nullable Integer responsiveWidth,
-														@Nullable Integer percentageWidth,
-														@Nullable String invisibleCondition);
+																@Nonnull Container viewContainer,
+																@Nonnull RenderedComponent container, 
+																@Nonnull RenderedComponent componentToAdd, 
+																@Nullable Integer pixelWidth, 
+																@Nullable Integer responsiveWidth,
+																@Nullable Integer percentageWidth,
+																@Nullable String invisibleCondition);
 	
 	/**
 	 * Finalises insertion into a generated container.

@@ -31,8 +31,8 @@ public class FluentModuleRoleContentAccess extends
 	 * Returns a FluentModuleRoleContentAccess from a runtime metadata.
 	 */
 	protected @Nonnull FluentModuleRoleContentAccess from(@Nonnull String documentName,
-													@Nonnull String binding,
-													@Nonnull Set<String> uxuis) {
+															@Nonnull String binding,
+															@Nonnull Set<String> uxuis) {
 		documentName(documentName);
 		binding(binding);
 		uxuis.forEach(u -> addUxUi(u));

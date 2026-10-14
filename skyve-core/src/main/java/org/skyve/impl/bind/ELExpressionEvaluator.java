@@ -279,10 +279,10 @@ public class ELExpressionEvaluator extends ExpressionEvaluator {
 	@Override
 	@SuppressWarnings("java:S3776") // Complexity OK
 	public @Nullable String validateWithoutPrefixOrSuffix(@Nonnull String expression,
-													@Nullable Class<?> returnType,
-													@Nullable Customer customer,
-													@Nullable Module module,
-													@Nullable Document document) {
+																@Nullable Class<?> returnType,
+																@Nullable Customer customer,
+																@Nullable Module module,
+																@Nullable Document document) {
 		String result = null;
 
 		if (typesafe) {
@@ -335,9 +335,9 @@ public class ELExpressionEvaluator extends ExpressionEvaluator {
 	@Override
 	@SuppressWarnings({"java:S3776", "java:S6541"}) // complexity OK
 	public @Nonnull List<String> completeWithoutPrefixOrSuffix(@Nullable String fragment,
-														@Nonnull Customer customer,
-														@Nonnull Module module,
-														@Nonnull Document document) {
+																@Nonnull Customer customer,
+																@Nonnull Module module,
+																@Nonnull Document document) {
 		List<String> result = new ArrayList<>();
 		
 		String input = (fragment == null) ? "" : fragment;

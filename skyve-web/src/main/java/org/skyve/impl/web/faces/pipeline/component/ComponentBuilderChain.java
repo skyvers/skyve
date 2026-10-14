@@ -191,9 +191,9 @@ public class ComponentBuilderChain extends ComponentBuilder {
 	 */
 	@Override
 	public @Nullable UIComponent tabPane(@Nullable UIComponent component,
-								@Nonnull TabPane tabPane,
-								@Nonnull String moduleName,
-								@Nonnull String documentName) {
+											@Nonnull TabPane tabPane,
+											@Nonnull String moduleName,
+											@Nonnull String documentName) {
 		UIComponent result = component;
 		for (ComponentBuilder builder : builders) {
 			result = builder.tabPane(result, tabPane, moduleName, documentName);
@@ -243,10 +243,10 @@ public class ComponentBuilderChain extends ComponentBuilder {
 	 */
 	@Override
 	public @Nullable UIComponent tabPaneScript(@Nullable UIComponent component,
-										@Nonnull TabPane tabPane,
-										@Nonnull String moduleName,
-										@Nonnull String documentName,
-										@Nonnull String tabPaneComponentId) {
+													@Nonnull TabPane tabPane,
+													@Nonnull String moduleName,
+													@Nonnull String documentName,
+													@Nonnull String tabPaneComponentId) {
 		UIComponent result = component;
 		for (ComponentBuilder builder : builders) {
 			result = builder.tabPaneScript(result, tabPane, moduleName, documentName, tabPaneComponentId);
@@ -265,9 +265,9 @@ public class ComponentBuilderChain extends ComponentBuilder {
 	 */
 	@Override
 	public @Nullable UIComponent sidebarScript(@Nullable UIComponent component,
-										@Nonnull Sidebar sidebar,
-										boolean createView,
-										@Nonnull String sidebarComponentId) {
+													@Nonnull Sidebar sidebar,
+													boolean createView,
+													@Nonnull String sidebarComponentId) {
 		UIComponent result = component;
 		for (ComponentBuilder builder : builders) {
 			result = builder.sidebarScript(result, sidebar, createView, sidebarComponentId);
@@ -287,10 +287,10 @@ public class ComponentBuilderChain extends ComponentBuilder {
 	 */
 	@Override
 	public @Nullable UIComponent border(@Nullable UIComponent component,
-								@Nullable String title,
-								@Nullable String invisibleCondition,
-								@Nullable Integer pixelWidth,
-								@Nullable Collapsible collapsible) {
+											@Nullable String title,
+											@Nullable String invisibleCondition,
+											@Nullable Integer pixelWidth,
+											@Nullable Collapsible collapsible) {
 		UIComponent result = component;
 		for (ComponentBuilder builder : builders) {
 			result = builder.border(result, title, invisibleCondition, pixelWidth, collapsible);
@@ -325,9 +325,9 @@ public class ComponentBuilderChain extends ComponentBuilder {
 	 */
 	@Override
 	public @Nullable UIComponent dialogButton(@Nullable UIComponent component,
-										@Nullable EscapableText label,
-										@Nonnull DialogButton button,
-										@Nullable String formDisabledCondition) {
+													@Nullable EscapableText label,
+													@Nonnull DialogButton button,
+													@Nullable String formDisabledCondition) {
 		UIComponent result = component;
 		for (ComponentBuilder builder : builders) {
 			result = builder.dialogButton(result, label, button, formDisabledCondition);
@@ -364,11 +364,11 @@ public class ComponentBuilderChain extends ComponentBuilder {
 	 */
 	@Override
 	public @Nullable UIComponent zoomIn(@Nullable UIComponent component, 
-										@Nullable String label,
-										@Nullable String iconStyleClass,
-										@Nullable String toolTip,
-										@Nonnull ZoomIn zoomIn,
-										@Nullable String formDisabledCondition) {
+													@Nullable String label,
+													@Nullable String iconStyleClass,
+													@Nullable String toolTip,
+													@Nonnull ZoomIn zoomIn,
+													@Nullable String formDisabledCondition) {
 		UIComponent result = component;
 		for (ComponentBuilder builder : builders) {
 			result = builder.zoomIn(result, 
@@ -398,15 +398,15 @@ public class ComponentBuilderChain extends ComponentBuilder {
 	 */
 	@Override
 	public @Nullable UIComponent actionButton(@Nullable UIComponent component, 
-										@Nullable String dataWidgetBinding,
-										@Nullable String dataWidgetVar,
-										@Nullable String label,
-										@Nullable String iconStyleClass,
-										@Nullable String toolTip,
-										@Nullable String confirmationText, 
-										@Nonnull Button button,
-										@Nullable String formDisabledCondition,
-										@Nonnull Action action) {
+													@Nullable String dataWidgetBinding,
+													@Nullable String dataWidgetVar,
+													@Nullable String label,
+													@Nullable String iconStyleClass,
+													@Nullable String toolTip,
+													@Nullable String confirmationText, 
+													@Nonnull Button button,
+													@Nullable String formDisabledCondition,
+													@Nonnull Action action) {
 		UIComponent result = component;
 		for (ComponentBuilder builder : builders) {
 			result = builder.actionButton(result, 
@@ -438,13 +438,13 @@ public class ComponentBuilderChain extends ComponentBuilder {
 	 */
 	@Override
 	public @Nullable UIComponent reportButton(@Nullable UIComponent component,
-										@Nullable String label,
-										@Nullable String iconStyleClass,
-										@Nullable String toolTip,
-										@Nullable String confirmationText, 
-										@Nonnull Button button,
-										@Nullable String formDisabledCondition,
-										@Nonnull Action action) {
+													@Nullable String label,
+													@Nullable String iconStyleClass,
+													@Nullable String toolTip,
+													@Nullable String confirmationText, 
+													@Nonnull Button button,
+													@Nullable String formDisabledCondition,
+													@Nonnull Action action) {
 		UIComponent result = component;
 		for (ComponentBuilder builder : builders) {
 			result = builder.reportButton(result,
@@ -476,15 +476,15 @@ public class ComponentBuilderChain extends ComponentBuilder {
 	 */
 	@Override
 	public @Nullable UIComponent downloadButton(@Nullable UIComponent component,
-										@Nullable String dataWidgetBinding,
-										@Nullable String dataWidgetVar,
-										@Nullable String label,
-										@Nullable String iconStyleClass,
-										@Nullable String toolTip,
-										@Nullable String confirmationText, 
-										@Nonnull Button button,
-										@Nullable String formDisabledCondition,
-										@Nonnull Action action) {
+													@Nullable String dataWidgetBinding,
+													@Nullable String dataWidgetVar,
+													@Nullable String label,
+													@Nullable String iconStyleClass,
+													@Nullable String toolTip,
+													@Nullable String confirmationText, 
+													@Nonnull Button button,
+													@Nullable String formDisabledCondition,
+													@Nonnull Action action) {
 		UIComponent result = component;
 		for (ComponentBuilder builder : builders) {
 			result = builder.downloadButton(result,
@@ -516,13 +516,13 @@ public class ComponentBuilderChain extends ComponentBuilder {
 	 */
 	@Override
 	public @Nullable UIComponent uploadButton(@Nullable UIComponent component,
-										@Nullable String label,
-										@Nullable String iconStyleClass,
-										@Nullable String toolTip,
-										@Nullable String confirmationText, 
-										@Nonnull Button button,
-										@Nullable String formDisabledCondition,
-										@Nonnull Action action) {
+													@Nullable String label,
+													@Nullable String iconStyleClass,
+													@Nullable String toolTip,
+													@Nullable String confirmationText, 
+													@Nonnull Button button,
+													@Nullable String formDisabledCondition,
+													@Nonnull Action action) {
 		UIComponent result = component;
 		for (ComponentBuilder builder : builders) {
 			result = builder.uploadButton(result,
@@ -662,15 +662,15 @@ public class ComponentBuilderChain extends ComponentBuilder {
 	 */
 	@Override
 	public @Nullable UIComponent addDataGridBoundColumn(@Nullable UIComponent component,
-												@Nonnull UIComponent current,
-												@Nonnull AbstractDataWidget widget,
-												@Nonnull DataGridBoundColumn column,
-												@Nullable String dataWidgetVar,
-												@Nullable String columnTitle,
-												@Nonnull String columnBinding,
-												@Nonnull StringBuilder gridColumnExpression,
-												@Nullable HorizontalAlignment alignment,
-												@Nullable Integer pixelWidth) {
+															@Nonnull UIComponent current,
+															@Nonnull AbstractDataWidget widget,
+															@Nonnull DataGridBoundColumn column,
+															@Nullable String dataWidgetVar,
+															@Nullable String columnTitle,
+															@Nonnull String columnBinding,
+															@Nonnull StringBuilder gridColumnExpression,
+															@Nullable HorizontalAlignment alignment,
+															@Nullable Integer pixelWidth) {
 		UIComponent result = component;
 		for (ComponentBuilder builder : builders) {
 			result = builder.addDataGridBoundColumn(result, 
@@ -697,8 +697,8 @@ public class ComponentBuilderChain extends ComponentBuilder {
 	 */
 	@Override
 	public @Nullable UIComponent addedDataGridBoundColumn(@Nullable UIComponent component,
-													@Nonnull UIComponent current,
-													@Nonnull HorizontalAlignment alignment) {
+																@Nonnull UIComponent current,
+																@Nonnull HorizontalAlignment alignment) {
 		UIComponent result = component;
 		for (ComponentBuilder builder : builders) {
 			result = builder.addedDataGridBoundColumn(result, current, alignment);
@@ -719,11 +719,11 @@ public class ComponentBuilderChain extends ComponentBuilder {
 	 */
 	@Override
 	public @Nullable UIComponent addDataGridContainerColumn(@Nullable UIComponent component,
-													@Nonnull UIComponent current,
-													@Nonnull AbstractDataWidget widget,
-													@Nullable String title,
-													@Nonnull DataGridContainerColumn column,
-													@Nullable HorizontalAlignment alignment) {
+																@Nonnull UIComponent current,
+																@Nonnull AbstractDataWidget widget,
+																@Nullable String title,
+																@Nonnull DataGridContainerColumn column,
+																@Nullable HorizontalAlignment alignment) {
 		UIComponent result = component;
 		for (ComponentBuilder builder : builders) {
 			result = builder.addDataGridContainerColumn(result, current, widget, title, column,alignment);
@@ -763,14 +763,14 @@ public class ComponentBuilderChain extends ComponentBuilder {
 	 */
 	@Override
 	public @Nullable UIComponent addDataGridActionColumn(@Nullable UIComponent component,
-												@Nonnull UIComponent current,
-												@Nonnull DataGrid grid,
-												@Nullable String dataWidgetVar,
-												@Nonnull String gridColumnExpression,
-												@Nullable String singluarDocumentAlias,
-												boolean inline,
-												boolean canCreate,
-												boolean canDelete) {
+															@Nonnull UIComponent current,
+															@Nonnull DataGrid grid,
+															@Nullable String dataWidgetVar,
+															@Nonnull String gridColumnExpression,
+															@Nullable String singluarDocumentAlias,
+															boolean inline,
+															boolean canCreate,
+															boolean canDelete) {
 		UIComponent result = component;
 		for (ComponentBuilder builder : builders) {
 			result = builder.addDataGridActionColumn(result,
@@ -798,10 +798,10 @@ public class ComponentBuilderChain extends ComponentBuilder {
 	 */
 	@Override
 	public @Nullable UIComponent map(@Nullable UIComponent component,
-							@Nonnull MapDisplay map,
-							@Nonnull String moduleName,
-							@Nonnull String queryName,
-							@Nonnull String geometryBinding) {
+										@Nonnull MapDisplay map,
+										@Nonnull String moduleName,
+										@Nonnull String queryName,
+										@Nonnull String geometryBinding) {
 		UIComponent result = component;
 		for (ComponentBuilder builder : builders) {
 			result = builder.map(result, map, moduleName, queryName, geometryBinding);
@@ -840,12 +840,12 @@ public class ComponentBuilderChain extends ComponentBuilder {
 	 */
 	@Override
 	public @Nullable EventSourceComponent geometry(@Nullable EventSourceComponent component,
-											@Nullable String dataWidgetVar,
-											@Nonnull Geometry geometry,
-											@Nullable String formDisabledCondition,
-											@Nullable String title,
-											@Nullable String requiredMessage,
-											@Nullable HorizontalAlignment textAlignment) {
+														@Nullable String dataWidgetVar,
+														@Nonnull Geometry geometry,
+														@Nullable String formDisabledCondition,
+														@Nullable String title,
+														@Nullable String requiredMessage,
+														@Nullable HorizontalAlignment textAlignment) {
 		EventSourceComponent result = component;
 		for (ComponentBuilder builder : builders) {
 			result = builder.geometry(result, dataWidgetVar, geometry, formDisabledCondition, title, requiredMessage, textAlignment);
@@ -865,10 +865,10 @@ public class ComponentBuilderChain extends ComponentBuilder {
 	 */
 	@Override
 	public @Nullable EventSourceComponent geometryMap(@Nullable EventSourceComponent component,
-												@Nonnull GeometryMap geometry,
-												@Nullable String formDisabledCondition,
-												@Nullable String title,
-												@Nullable String requiredMessage) {
+															@Nonnull GeometryMap geometry,
+															@Nullable String formDisabledCondition,
+															@Nullable String title,
+															@Nullable String requiredMessage) {
 		EventSourceComponent result = component;
 		for (ComponentBuilder builder : builders) {
 			result = builder.geometryMap(result, geometry, formDisabledCondition, title, requiredMessage);
@@ -909,15 +909,15 @@ public class ComponentBuilderChain extends ComponentBuilder {
 	 */
 	@Override
 	public @Nullable UIComponent listGrid(@Nullable UIComponent component,
-									@Nonnull String moduleName,
-									@Nullable String modelDocumentName,
-									@Nullable String modelName,
-									@Nonnull String uxui,
-									@Nonnull ListModel<Bean> model,
-									@Nullable Document owningDocument,
-									@Nonnull ListGrid listGrid,
-									@Nullable String stickyHeaderAnchorSelector,
-									boolean aggregateQuery) {
+												@Nonnull String moduleName,
+												@Nullable String modelDocumentName,
+												@Nullable String modelName,
+												@Nonnull String uxui,
+												@Nonnull ListModel<Bean> model,
+												@Nullable Document owningDocument,
+												@Nonnull ListGrid listGrid,
+												@Nullable String stickyHeaderAnchorSelector,
+												boolean aggregateQuery) {
 		UIComponent result = component;
 		for (ComponentBuilder builder : builders) {
 			result = builder.listGrid(result,
@@ -944,8 +944,8 @@ public class ComponentBuilderChain extends ComponentBuilder {
 	 */
 	@Override
 	public @Nullable UIComponent listGridContextMenu(@Nullable UIComponent component,
-												@Nonnull String listGridId,
-												@Nonnull ListGrid listGrid) {
+															@Nonnull String listGridId,
+															@Nonnull ListGrid listGrid) {
 		UIComponent result = component;
 		for (ComponentBuilder builder : builders) {
 			result = builder.listGridContextMenu(result, listGridId, listGrid);
@@ -969,14 +969,14 @@ public class ComponentBuilderChain extends ComponentBuilder {
 	 */
 	@Override
 	public @Nullable UIComponent listRepeater(@Nullable UIComponent component,
-										@Nullable String modelDocumentName,
-										@Nullable String modelName,
-										@Nonnull String uxui,
-										@Nonnull ListModel<Bean> model,
-										@Nullable List<FilterParameter> filterParameters,
-										@Nullable List<Parameter> parameters,
-										boolean showColumnHeaders,
-										boolean showGrid) {
+													@Nullable String modelDocumentName,
+													@Nullable String modelName,
+													@Nonnull String uxui,
+													@Nonnull ListModel<Bean> model,
+													@Nullable List<FilterParameter> filterParameters,
+													@Nullable List<Parameter> parameters,
+													boolean showColumnHeaders,
+													boolean showGrid) {
 		UIComponent result = component;
 		for (ComponentBuilder builder : builders) {
 			result = builder.listRepeater(result,
@@ -1007,9 +1007,9 @@ public class ComponentBuilderChain extends ComponentBuilder {
 	 */
 	@Override
 	public @Nullable EventSourceComponent listMembership(@Nullable EventSourceComponent component,
-												@Nullable EscapableText candidatesHeading,
-												@Nullable EscapableText membersHeading,
-												@Nonnull ListMembership membership) {
+															@Nullable EscapableText candidatesHeading,
+															@Nullable EscapableText membersHeading,
+															@Nonnull ListMembership membership) {
 		EventSourceComponent result = component;
 		for (ComponentBuilder builder : builders) {
 			result = builder.listMembership(result, candidatesHeading, membersHeading, membership);
@@ -1030,11 +1030,11 @@ public class ComponentBuilderChain extends ComponentBuilder {
 	 */
 	@Override
 	public @Nullable EventSourceComponent checkBox(@Nullable EventSourceComponent component,
-											@Nullable String dataWidgetVar,
-											@Nonnull CheckBox checkBox,
-											@Nullable String formDisabledCondition,
-											@Nullable String title,
-											@Nullable String requiredMessage) {
+														@Nullable String dataWidgetVar,
+														@Nonnull CheckBox checkBox,
+														@Nullable String formDisabledCondition,
+														@Nullable String title,
+														@Nullable String requiredMessage) {
 		EventSourceComponent result = component;
 		for (ComponentBuilder builder : builders) {
 			result = builder.checkBox(result,
@@ -1061,12 +1061,12 @@ public class ComponentBuilderChain extends ComponentBuilder {
 	 */
 	@Override
 	public @Nullable EventSourceComponent colourPicker(@Nullable EventSourceComponent component,
-												@Nullable String dataWidgetVar,
-												@Nonnull ColourPicker colour,
-												@Nullable String formDisabledCondition,
-												@Nullable String title,
-												@Nullable String requiredMessage,
-												@Nullable HorizontalAlignment textAlignment) {
+															@Nullable String dataWidgetVar,
+															@Nonnull ColourPicker colour,
+															@Nullable String formDisabledCondition,
+															@Nullable String title,
+															@Nullable String requiredMessage,
+															@Nullable HorizontalAlignment textAlignment) {
 		EventSourceComponent result = component;
 		for (ComponentBuilder builder : builders) {
 			result = builder.colourPicker(result,
@@ -1093,11 +1093,11 @@ public class ComponentBuilderChain extends ComponentBuilder {
 	 */
 	@Override
 	public @Nullable EventSourceComponent combo(@Nullable EventSourceComponent component,
-										@Nullable String dataWidgetVar,
-										@Nonnull Combo combo,
-										@Nullable String formDisabledCondition,
-										@Nullable String title,
-										@Nullable String requiredMessage) {
+													@Nullable String dataWidgetVar,
+													@Nonnull Combo combo,
+													@Nullable String formDisabledCondition,
+													@Nullable String title,
+													@Nullable String requiredMessage) {
 		EventSourceComponent result = component;
 		for (ComponentBuilder builder : builders) {
 			result = builder.combo(result, dataWidgetVar, combo, formDisabledCondition,  title, requiredMessage);
@@ -1150,11 +1150,11 @@ public class ComponentBuilderChain extends ComponentBuilder {
 	 */
 	@Override
 	public @Nullable UIComponent addContentSignature(@Nullable UIComponent component,
-											@Nonnull UIComponent layout,
-											@Nonnull ContentSignature signature,
-											@Nullable String formDisabledCondition,
-											@Nullable String title,
-											@Nullable String requiredMessage) {
+														@Nonnull UIComponent layout,
+														@Nonnull ContentSignature signature,
+														@Nullable String formDisabledCondition,
+														@Nullable String title,
+														@Nullable String requiredMessage) {
 		UIComponent result = component;
 		for (ComponentBuilder builder : builders) {
 			result = builder.addContentSignature(result, layout, signature, formDisabledCondition, title, requiredMessage);
@@ -1175,11 +1175,11 @@ public class ComponentBuilderChain extends ComponentBuilder {
 	 */
 	@Override
 	public @Nullable UIComponent html(@Nullable UIComponent component,
-								@Nullable String dataWidgetVar,
-								@Nonnull HTML html,
-								@Nullable String formDisabledCondition,
-								@Nullable String title,
-								@Nullable String requiredMessage) {
+											@Nullable String dataWidgetVar,
+											@Nonnull HTML html,
+											@Nullable String formDisabledCondition,
+											@Nullable String title,
+											@Nullable String requiredMessage) {
 		UIComponent result = component;
 		for (ComponentBuilder builder : builders) {
 			result = builder.html(result, dataWidgetVar, html, formDisabledCondition, title, requiredMessage);
@@ -1204,15 +1204,15 @@ public class ComponentBuilderChain extends ComponentBuilder {
 	 */
 	@Override
 	public @Nullable EventSourceComponent lookupDescription(@Nullable EventSourceComponent component,
-													@Nullable String dataWidgetVar,
-													@Nonnull LookupDescription lookup,
-													@Nullable String formDisabledCondition,
-													@Nullable String title,
-													@Nullable String requiredMessage,
-													@Nullable HorizontalAlignment textAlignment,
-													@Nonnull String displayBinding,
-													@Nullable QueryDefinition query,
-													@Nonnull Document owningDocument) {
+																@Nullable String dataWidgetVar,
+																@Nonnull LookupDescription lookup,
+																@Nullable String formDisabledCondition,
+																@Nullable String title,
+																@Nullable String requiredMessage,
+																@Nullable HorizontalAlignment textAlignment,
+																@Nonnull String displayBinding,
+																@Nullable QueryDefinition query,
+																@Nonnull Document owningDocument) {
 		EventSourceComponent result = component;
 		for (ComponentBuilder builder : builders) {
 			result = builder.lookupDescription(result,
@@ -1243,12 +1243,12 @@ public class ComponentBuilderChain extends ComponentBuilder {
 	 */
 	@Override
 	public @Nullable EventSourceComponent password(@Nullable EventSourceComponent component,
-											@Nullable String dataWidgetVar,
-											@Nonnull Password password,
-											@Nullable String formDisabledCondition,
-											@Nullable String title,
-											@Nullable String requiredMessage,
-											@Nullable HorizontalAlignment textAlignment) {
+														@Nullable String dataWidgetVar,
+														@Nonnull Password password,
+														@Nullable String formDisabledCondition,
+														@Nullable String title,
+														@Nullable String requiredMessage,
+														@Nullable HorizontalAlignment textAlignment) {
 		EventSourceComponent result = component;
 		for (ComponentBuilder builder : builders) {
 			result = builder.password(result, dataWidgetVar, password, formDisabledCondition, title, requiredMessage, textAlignment);
@@ -1269,11 +1269,11 @@ public class ComponentBuilderChain extends ComponentBuilder {
 	 */
 	@Override
 	public @Nullable EventSourceComponent radio(@Nullable EventSourceComponent component,
-										@Nullable String dataWidgetVar,
-										@Nonnull Radio radio,
-										@Nullable String formDisabledCondition,
-										@Nullable String title,
-										@Nullable String requiredMessage) {
+													@Nullable String dataWidgetVar,
+													@Nonnull Radio radio,
+													@Nullable String formDisabledCondition,
+													@Nullable String title,
+													@Nullable String requiredMessage) {
 		EventSourceComponent result = component;
 		for (ComponentBuilder builder : builders) {
 			result = builder.radio(result, dataWidgetVar, radio, formDisabledCondition, title, requiredMessage);
@@ -1294,11 +1294,11 @@ public class ComponentBuilderChain extends ComponentBuilder {
 	 */
 	@Override
 	public @Nullable EventSourceComponent richText(@Nullable EventSourceComponent component,
-											@Nullable String dataWidgetVar,
-											@Nonnull RichText text,
-											@Nullable String formDisabledCondition,
-											@Nullable String title,
-											@Nullable String requiredMessage) {
+														@Nullable String dataWidgetVar,
+														@Nonnull RichText text,
+														@Nullable String formDisabledCondition,
+														@Nullable String title,
+														@Nullable String requiredMessage) {
 		EventSourceComponent result = component;
 		for (ComponentBuilder builder : builders) {
 			result = builder.richText(result, dataWidgetVar, text, formDisabledCondition, title, requiredMessage);
@@ -1321,13 +1321,13 @@ public class ComponentBuilderChain extends ComponentBuilder {
 	 */
 	@Override
 	public @Nullable EventSourceComponent spinner(@Nullable EventSourceComponent component,
-											@Nullable String dataWidgetVar,
-											@Nonnull Spinner spinner,
-											@Nullable String formDisabledCondition,
-											@Nullable String title,
-											@Nullable String requiredMessage,
-											@Nullable HorizontalAlignment textAlignment,
-											@Nullable jakarta.faces.convert.Converter<?> facesConverter) {
+														@Nullable String dataWidgetVar,
+														@Nonnull Spinner spinner,
+														@Nullable String formDisabledCondition,
+														@Nullable String title,
+														@Nullable String requiredMessage,
+														@Nullable HorizontalAlignment textAlignment,
+														@Nullable jakarta.faces.convert.Converter<?> facesConverter) {
 		EventSourceComponent result = component;
 		for (ComponentBuilder builder : builders) {
 			result = builder.spinner(result, dataWidgetVar, spinner, formDisabledCondition, title, requiredMessage, textAlignment, facesConverter);
@@ -1349,12 +1349,12 @@ public class ComponentBuilderChain extends ComponentBuilder {
 	 */
 	@Override
 	public @Nullable EventSourceComponent slider(@Nullable EventSourceComponent component,
-											@Nullable String dataWidgetVar,
-											@Nonnull Slider slider,
-											@Nullable String formDisabledCondition,
-											@Nullable String title,
-											@Nullable String requiredMessage,
-											@Nullable jakarta.faces.convert.Converter<?> facesConverter) {
+														@Nullable String dataWidgetVar,
+														@Nonnull Slider slider,
+														@Nullable String formDisabledCondition,
+														@Nullable String title,
+														@Nullable String requiredMessage,
+														@Nullable jakarta.faces.convert.Converter<?> facesConverter) {
 		EventSourceComponent result = component;
 		for (ComponentBuilder builder : builders) {
 			result = builder.slider(result, dataWidgetVar, slider, formDisabledCondition, title, requiredMessage, facesConverter);
@@ -1377,13 +1377,13 @@ public class ComponentBuilderChain extends ComponentBuilder {
 	 */
 	@Override
 	public @Nullable EventSourceComponent textArea(@Nullable EventSourceComponent component,
-											@Nullable String dataWidgetVar,
-											@Nonnull TextArea text,
-											@Nullable String formDisabledCondition,
-											@Nullable String title,
-											@Nullable String requiredMessage,
-											@Nullable HorizontalAlignment textAlignment,
-											@Nullable Integer length) {
+														@Nullable String dataWidgetVar,
+														@Nonnull TextArea text,
+														@Nullable String formDisabledCondition,
+														@Nullable String title,
+														@Nullable String requiredMessage,
+														@Nullable HorizontalAlignment textAlignment,
+														@Nullable Integer length) {
 		EventSourceComponent result = component;
 		for (ComponentBuilder builder : builders) {
 			result = builder.textArea(result, dataWidgetVar, text, formDisabledCondition, title, requiredMessage, textAlignment, length);
@@ -1409,16 +1409,16 @@ public class ComponentBuilderChain extends ComponentBuilder {
 	 */
 	@Override
 	public @Nullable EventSourceComponent text(@Nullable EventSourceComponent component,
-										@Nullable String dataWidgetVar,
-										@Nonnull TextField text,
-										@Nullable String formDisabledCondition,
-										@Nullable String title,
-										@Nullable String requiredMessage,
-										@Nullable HorizontalAlignment textAlignment,
-										@Nullable Integer length,
-										@Nullable Converter<?> converter,
-										@Nullable Format<?> format,
-										@Nullable jakarta.faces.convert.Converter<?> facesConverter) {
+													@Nullable String dataWidgetVar,
+													@Nonnull TextField text,
+													@Nullable String formDisabledCondition,
+													@Nullable String title,
+													@Nullable String requiredMessage,
+													@Nullable HorizontalAlignment textAlignment,
+													@Nullable Integer length,
+													@Nullable Converter<?> converter,
+													@Nullable Format<?> format,
+													@Nullable jakarta.faces.convert.Converter<?> facesConverter) {
 		EventSourceComponent result = component;
 		for (ComponentBuilder builder : builders) {
 			result = builder.text(result,
@@ -1452,14 +1452,14 @@ public class ComponentBuilderChain extends ComponentBuilder {
 	 */
 	@Override
 	public @Nullable UIComponent actionLink(@Nullable UIComponent component,
-									@Nullable String dataWidgetBinding,
-									@Nullable String dataWidgetVar,
-									@Nullable String value,
-									@Nullable String iconStyleClass,
-									@Nullable String toolTip,
-									@Nullable String confirmationText, 
-									@Nonnull Link link,
-									@Nonnull Action action) {
+												@Nullable String dataWidgetBinding,
+												@Nullable String dataWidgetVar,
+												@Nullable String value,
+												@Nullable String iconStyleClass,
+												@Nullable String toolTip,
+												@Nullable String confirmationText, 
+												@Nonnull Link link,
+												@Nonnull Action action) {
 		UIComponent result = component;
 		for (ComponentBuilder builder : builders) {
 			result = builder.actionLink(result, dataWidgetBinding, dataWidgetVar, value, iconStyleClass, toolTip, confirmationText, link, action);
@@ -1480,11 +1480,11 @@ public class ComponentBuilderChain extends ComponentBuilder {
 	 */
 	@Override
 	public @Nullable UIComponent report(@Nullable UIComponent component,
-								@Nullable String label,
-								@Nullable String iconStyleClass,
-								@Nullable String toolTip,
-								@Nullable String confirmationText, 
-								@Nonnull Action action) {
+											@Nullable String label,
+											@Nullable String iconStyleClass,
+											@Nullable String toolTip,
+											@Nullable String confirmationText, 
+											@Nonnull Action action) {
 		UIComponent result = component;
 		for (ComponentBuilder builder : builders) {
 			result = builder.report(result, label, iconStyleClass, toolTip, confirmationText, action);
@@ -1507,13 +1507,13 @@ public class ComponentBuilderChain extends ComponentBuilder {
 	 */
 	@Override
 	public @Nullable UIComponent download(@Nullable UIComponent component,
-									@Nullable String dataWidgetBinding,
-									@Nullable String dataWidgetVar,
-									@Nullable String label,
-									@Nullable String iconStyleClass,
-									@Nullable String toolTip,
-									@Nullable String confirmationText, 
-									@Nonnull Action action) {
+												@Nullable String dataWidgetBinding,
+												@Nullable String dataWidgetVar,
+												@Nullable String label,
+												@Nullable String iconStyleClass,
+												@Nullable String toolTip,
+												@Nullable String confirmationText, 
+												@Nonnull Action action) {
 		UIComponent result = component;
 		for (ComponentBuilder builder : builders) {
 			result = builder.download(result, dataWidgetBinding, dataWidgetVar, label, iconStyleClass, toolTip, confirmationText, action);
@@ -1534,11 +1534,11 @@ public class ComponentBuilderChain extends ComponentBuilder {
 	 */
 	@Override
 	public @Nullable UIComponent upload(@Nullable UIComponent component, 
-								@Nullable String label,
-								@Nullable String iconStyleClass,
-								@Nullable String toolTip,
-								@Nullable String confirmationText, 
-								@Nonnull Action action) {
+											@Nullable String label,
+											@Nullable String iconStyleClass,
+											@Nullable String toolTip,
+											@Nullable String confirmationText, 
+											@Nonnull Action action) {
 		UIComponent result = component;
 		for (ComponentBuilder builder : builders) {
 			result = builder.upload(result, label, iconStyleClass, toolTip, confirmationText, action);
@@ -1560,12 +1560,12 @@ public class ComponentBuilderChain extends ComponentBuilder {
 	 */
 	@Override
 	public @Nullable UIComponent remove(@Nullable UIComponent component, 
-								@Nullable String label,
-								@Nullable String iconStyleClass,
-								@Nullable String toolTip,
-								@Nullable String confirmationText, 
-								@Nonnull Action action,
-								boolean canDelete) {
+											@Nullable String label,
+											@Nullable String iconStyleClass,
+											@Nullable String toolTip,
+											@Nullable String confirmationText, 
+											@Nonnull Action action,
+											boolean canDelete) {
 		UIComponent result = component;
 		for (ComponentBuilder builder : builders) {
 			result = builder.remove(result, label, iconStyleClass, toolTip, confirmationText, action, canDelete);
@@ -1589,14 +1589,14 @@ public class ComponentBuilderChain extends ComponentBuilder {
 	 */
 	@Override
 	public @Nullable UIComponent action(@Nullable UIComponent component,
-								@Nullable String dataWidgetBinding,
-								@Nullable String dataWidgetVar,
-								@Nullable String label,
-								@Nullable String iconStyleClass,
-								@Nullable String toolTip,
-								@Nullable String confirmationText, 
-								@Nullable ImplicitActionName name,
-								@Nonnull Action action) {
+											@Nullable String dataWidgetBinding,
+											@Nullable String dataWidgetVar,
+											@Nullable String label,
+											@Nullable String iconStyleClass,
+											@Nullable String toolTip,
+											@Nullable String confirmationText, 
+											@Nullable ImplicitActionName name,
+											@Nonnull Action action) {
 		UIComponent result = component;
 		for (ComponentBuilder builder : builders) {
 			result = builder.action(result,

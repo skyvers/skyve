@@ -55,7 +55,7 @@ public class ActionUtil {
 	 * @return the resolved target bean, or {@code null} when the view has no root bean
 	 */
 	public static @Nullable Bean getTargetBeanForViewAndReferenceBinding(@Nonnull FacesView facesView,
-																@Nullable String referenceBinding) {
+																			@Nullable String referenceBinding) {
 		return getTargetBeanForViewAndReferenceBinding(facesView, referenceBinding, null);
 	}
 
@@ -68,8 +68,8 @@ public class ActionUtil {
 	 * @return the resolved target bean, or {@code null} when the view has no root bean
 	 */
 	public static @Nullable Bean getTargetBeanForViewAndReferenceBinding(@Nonnull FacesView facesView,
-																@Nullable String referenceBinding,
-																@Nullable String elementBizId) {
+																			@Nullable String referenceBinding,
+																			@Nullable String elementBizId) {
 		Bean result = facesView.getBean();
 
 		if (result != null) { // hopefully always

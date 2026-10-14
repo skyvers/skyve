@@ -64,12 +64,12 @@ public class ReportingInjectable implements Reporting, Serializable {
 	 */
 	@Override
 	public @Nullable JasperPrint runJasperBeanReport(@Nonnull User user,
-											@Nonnull Document document,
-											@Nonnull String reportName,
-											@Nonnull Map<String, Object> parameters,
-											@Nullable Bean bean,
-											@Nonnull ReportFormat format,
-											@Nonnull OutputStream out)
+														@Nonnull Document document,
+														@Nonnull String reportName,
+														@Nonnull Map<String, Object> parameters,
+														@Nullable Bean bean,
+														@Nonnull ReportFormat format,
+														@Nonnull OutputStream out)
 	throws Exception {
 		return EXT.getReporting().runJasperBeanReport(user, document, reportName, parameters, bean, format, out);
 	}
@@ -88,11 +88,11 @@ public class ReportingInjectable implements Reporting, Serializable {
 	 */
 	@Override
 	public @Nullable JasperPrint runJasperSQLReport(@Nonnull User user,
-											@Nonnull Document document,
-											@Nonnull String reportName,
-											@Nonnull Map<String, Object> parameters,
-											@Nonnull ReportFormat format,
-											@Nonnull OutputStream out)
+														@Nonnull Document document,
+														@Nonnull String reportName,
+														@Nonnull Map<String, Object> parameters,
+														@Nonnull ReportFormat format,
+														@Nonnull OutputStream out)
 	throws Exception {
 		return EXT.getReporting().runJasperSQLReport(user, document, reportName, parameters, format, out);
 	}
@@ -112,12 +112,12 @@ public class ReportingInjectable implements Reporting, Serializable {
 	 */
 	@Override
 	public @Nullable JasperPrint runJasperReport(@Nonnull User user,
-										@Nonnull Document document,
-										@Nonnull String reportName,
-										@Nonnull Map<String, Object> parameters,
-										@Nullable Bean bean,
-										@Nonnull ReportFormat format,
-										@Nonnull OutputStream out)
+													@Nonnull Document document,
+													@Nonnull String reportName,
+													@Nonnull Map<String, Object> parameters,
+													@Nullable Bean bean,
+													@Nonnull ReportFormat format,
+													@Nonnull OutputStream out)
 	throws Exception {
 		return EXT.getReporting().runJasperBeanReport(user, document, reportName, parameters, bean, format, out);
 	}
@@ -134,9 +134,9 @@ public class ReportingInjectable implements Reporting, Serializable {
 	 */
 	@Override
 	public @Nonnull List<JasperPrint> runJasperReport(@Nonnull User user,
-												@Nonnull List<ReportParameters> reportParameters,
-												@Nonnull ReportFormat format,
-												@Nonnull OutputStream out)
+														@Nonnull List<ReportParameters> reportParameters,
+														@Nonnull ReportFormat format,
+														@Nonnull OutputStream out)
 	throws Exception {
 		return EXT.getReporting().runJasperReport(user, reportParameters, format, out);
 	}
@@ -180,9 +180,9 @@ public class ReportingInjectable implements Reporting, Serializable {
 	 */
 	@Override
 	public @Nonnull MailAttachment getMailAttachmentFromJasperReport(@Nonnull String reportModuleName,
-																@Nonnull String reportDocumentName,
-																@Nonnull String reportName,
-																@Nonnull Map<String, Object> parameters)
+																		@Nonnull String reportDocumentName,
+																		@Nonnull String reportName,
+																		@Nonnull Map<String, Object> parameters)
 	throws Exception {
 		return EXT.getReporting().getMailAttachmentFromJasperReport(reportModuleName, reportDocumentName, reportName, parameters);
 	}
@@ -310,9 +310,9 @@ public class ReportingInjectable implements Reporting, Serializable {
 	 */
 	@Override
 	public @Nonnull File createFreemarkerBeanReportPDF(@Nonnull Bean bean,
-												@Nonnull String reportName,
-												@Nullable Map<String, Object> reportParameters,
-												@Nonnull String reportFilename)
+														@Nonnull String reportName,
+														@Nullable Map<String, Object> reportParameters,
+														@Nonnull String reportFilename)
 	throws Exception {
 		return EXT.getReporting().createFreemarkerBeanReportPDF(bean, reportName, reportParameters, reportFilename);
 	}
@@ -341,8 +341,8 @@ public class ReportingInjectable implements Reporting, Serializable {
 	 */
 	@Override
 	public @Nonnull File createFreemarkerReportPDF(@Nonnull String templateName,
-											@Nullable Map<String, Object> reportParameters,
-											@Nonnull String reportFilename)
+													@Nullable Map<String, Object> reportParameters,
+													@Nonnull String reportFilename)
 	throws Exception {
 		return EXT.getReporting().createFreemarkerReportPDF(templateName, reportParameters, reportFilename);
 	}
@@ -359,9 +359,9 @@ public class ReportingInjectable implements Reporting, Serializable {
 	 */
 	@Override
 	public @Nonnull Download downloadFreemarkerReport(@Nonnull String reportName,
-												@Nullable Map<String, Object> reportParameters,
-												@Nonnull ReportFormat format,
-												@Nonnull String downloadFilename)
+														@Nullable Map<String, Object> reportParameters,
+														@Nonnull ReportFormat format,
+														@Nonnull String downloadFilename)
 	throws Exception {
 		return EXT.getReporting().downloadFreemarkerReport(reportName, reportParameters, format, downloadFilename);
 	}

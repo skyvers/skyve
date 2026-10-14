@@ -84,8 +84,8 @@ public class SQLServer2008NullTolerantUniqueDelegate extends DefaultUniqueDelega
 	 */
 	@Override
 	public @Nonnull String getAlterTableToAddUniqueKeyCommand(@Nonnull UniqueKey uniqueKey,
-														@Nonnull Metadata metadata,
-														@Nonnull SqlStringGenerationContext context) {
+																@Nonnull Metadata metadata,
+																@Nonnull SqlStringGenerationContext context) {
 		return getAlterTableToAddUniqueKeyCommand(uniqueKey, metadata);
 	}
 	
@@ -120,8 +120,8 @@ public class SQLServer2008NullTolerantUniqueDelegate extends DefaultUniqueDelega
 	 */
 	@Override
 	public @Nonnull String getAlterTableToDropUniqueKeyCommand(@Nonnull UniqueKey uniqueKey,
-														@Nonnull Metadata metadata,
-														@Nonnull SqlStringGenerationContext context) {
+																@Nonnull Metadata metadata,
+																@Nonnull SqlStringGenerationContext context) {
 		return getAlterTableToDropUniqueKeyCommand(uniqueKey, metadata);
 	}
 }

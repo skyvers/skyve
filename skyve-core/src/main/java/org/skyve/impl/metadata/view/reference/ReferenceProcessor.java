@@ -70,11 +70,11 @@ public abstract class ReferenceProcessor {
 	public abstract void processResourceReference(@Nonnull ResourceReference reference);
 	
 	public static final @Nullable Action obtainActionForActionReference(@Nonnull ActionReference reference,
-																@Nullable Customer customer,
-																@Nonnull Module module,
-																@Nonnull Document document,
-																@Nonnull String dataWidgetBinding,
-																@Nonnull UserAgentType userAgentType) {
+																			@Nullable Customer customer,
+																			@Nonnull Module module,
+																			@Nonnull Document document,
+																			@Nonnull String dataWidgetBinding,
+																			@Nonnull UserAgentType userAgentType) {
 		final TargetMetaData listTarget = BindUtil.getMetaDataForBinding(customer, module, document, dataWidgetBinding);
 
 		final Document listDocument;

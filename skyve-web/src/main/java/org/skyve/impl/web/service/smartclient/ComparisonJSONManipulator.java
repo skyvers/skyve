@@ -190,7 +190,7 @@ public final class ComparisonJSONManipulator {
 	 */
 	@SuppressWarnings("java:S3776") // Complexity OK
 	private @Nonnull List<Map<String, Object>> listOfMapOfProperties(@Nonnull List<ComparisonProperty> properties,
-																@Nullable Document nodeDocument)
+																		@Nullable Document nodeDocument)
 	throws Exception {
 		List<Map<String, Object>> result = new ArrayList<>(properties.size());
 
@@ -297,9 +297,9 @@ public final class ComparisonJSONManipulator {
 	 * @return escaped code-to-description map
 	 */
 	private static @Nonnull Map<String, String> getConstantDomainValueMap(@Nonnull CustomerImpl customer,
-																	@Nonnull Document document,
-																	@Nonnull Attribute attribute,
-																	boolean runtime) {
+																			@Nonnull Document document,
+																			@Nonnull Attribute attribute,
+																			boolean runtime) {
 		List<DomainValue> values = ((DocumentImpl) document).getDomainValues(customer, 
 																				DomainType.constant, 
 																				attribute, 

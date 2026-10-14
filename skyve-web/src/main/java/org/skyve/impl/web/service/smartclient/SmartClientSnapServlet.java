@@ -232,8 +232,8 @@ public class SmartClientSnapServlet extends HttpServlet {
 	 * @return JSON array payload of snapshots
 	 */
 	private static @Nonnull StringBuilder list(@Nonnull String moduleName,
-										@Nonnull String queryName,
-										boolean smartClientRequest) {
+												@Nonnull String queryName,
+												boolean smartClientRequest) {
 		Persistence p = CORE.getPersistence();
 		DocumentQuery q = p.newDocumentQuery(AppConstants.ADMIN_MODULE_NAME, AppConstants.SNAPSHOT_DOCUMENT_NAME)
 							.addBoundProjection(Bean.DOCUMENT_ID)
@@ -294,10 +294,10 @@ public class SmartClientSnapServlet extends HttpServlet {
 	 * @throws Exception when validation or persistence fails
 	 */
 	private static @Nonnull String create(@Nonnull String snapModuleName,
-									@Nonnull String snapQueryName,
-									@Nonnull String snapName,
-									@Nonnull String snapshot,
-									boolean smartClientRequest)
+											@Nonnull String snapQueryName,
+											@Nonnull String snapName,
+											@Nonnull String snapshot,
+											boolean smartClientRequest)
 	throws Exception {
 		// Validate snapshot definition
 		SnapshotAdapter snapshotAdapater = smartClientRequest ? SnapshotAdapter.SMART_CLIENT : SnapshotAdapter.VUE;

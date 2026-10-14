@@ -298,14 +298,14 @@ public abstract class DomainGenerator {
 
 	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
 	public static final @Nonnull DomainGenerator newDomainGenerator(boolean write,
-															boolean debug,
-															boolean multiTenant,
-															@Nonnull DialectOptions dialectOptions,
-															@Nonnull String srcPath,
-															@Nonnull String generatedSrcPath,
-															@Nonnull String testPath,
-															@Nonnull String generatedTestPath,
-															@Nullable String... excludedModules) {
+																	boolean debug,
+																	boolean multiTenant,
+																	@Nonnull DialectOptions dialectOptions,
+																	@Nonnull String srcPath,
+																	@Nonnull String generatedSrcPath,
+																	@Nonnull String testPath,
+																	@Nonnull String generatedTestPath,
+																	@Nullable String... excludedModules) {
 		return new OverridableDomainGenerator(write,
 												debug,
 												multiTenant,

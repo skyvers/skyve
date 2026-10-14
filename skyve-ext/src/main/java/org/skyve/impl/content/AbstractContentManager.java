@@ -299,8 +299,8 @@ public abstract class AbstractContentManager implements ContentManager {
 	 * @throws Exception if reading or parsing the metadata fails.
 	 */
 	public static @Nullable AttachmentContent getFromFileSystem(@Nonnull StringBuilder absoluteContentStoreFolderPath,
-														@Nonnull String contentId,
-														boolean noSuffix) throws Exception {
+																	@Nonnull String contentId,
+																	boolean noSuffix) throws Exception {
 		AbstractContentManager.appendBalancedFolderPathFromContentId(contentId, absoluteContentStoreFolderPath);
 		String path = absoluteContentStoreFolderPath.toString();
 

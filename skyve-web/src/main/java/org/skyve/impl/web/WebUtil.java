@@ -90,7 +90,7 @@ public class WebUtil {
 	 */
 	@SuppressWarnings({"java:S3776", "java:S1871"}) // complexity OK
 	public static @Nullable User processUserPrincipalForRequest(@Nonnull HttpServletRequest request,
-														@Nullable String userPrincipal) {
+																	@Nullable String userPrincipal) {
 		HttpSession session = request.getSession(false);
 		UserImpl user = null;
 		if (session != null) {

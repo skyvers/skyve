@@ -275,12 +275,12 @@ public abstract class ListModel<T extends Bean> implements ViewModel {
 	
 	@SuppressWarnings("java:S3776") // Complexity OK
 	private @Nonnull Pair<String, Object> processParameter(@Nonnull Customer customer,
-													@Nonnull Module module,
-													@Nonnull Document document,
-													@Nonnull String name,
-													@Nullable String binding,
-													@Nullable String value,
-													boolean filter) {
+															@Nonnull Module module,
+															@Nonnull Document document,
+															@Nonnull String name,
+															@Nullable String binding,
+															@Nullable String value,
+															boolean filter) {
 		String newBinding = binding;
 
 		// The resulting parameter contents

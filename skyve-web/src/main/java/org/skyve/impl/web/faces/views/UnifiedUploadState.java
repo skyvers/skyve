@@ -448,9 +448,9 @@ public final class UnifiedUploadState implements Serializable{
 	 * @return parsed enum value or the supplied default
 	 */
 	private static @Nonnull <T extends Enum<T>> T parseEnum(@Nonnull Class<T> enumType,
-													@Nullable String value,
-													@Nonnull T defaultValue,
-													@Nonnull String name) {
+															@Nullable String value,
+															@Nonnull T defaultValue,
+															@Nonnull String name) {
 		String cleanValue = clean(value);
 		if (cleanValue == null) {
 			return defaultValue;
@@ -467,8 +467,8 @@ public final class UnifiedUploadState implements Serializable{
 	 * @return parsed enum value
 	 */
 	private static @Nonnull <T extends Enum<T>> T parseRequiredEnum(@Nonnull Class<T> enumType,
-															@Nullable String value,
-															@Nonnull String name) {
+																	@Nullable String value,
+																	@Nonnull String name) {
 		String cleanValue = clean(value);
 		if (cleanValue == null) {
 			throw new IllegalArgumentException(name + " is required.");
@@ -485,8 +485,8 @@ public final class UnifiedUploadState implements Serializable{
 	 * @return parsed enum value
 	 */
 	private static @Nonnull <T extends Enum<T>> T parseEnumValue(@Nonnull Class<T> enumType,
-															@Nonnull String cleanValue,
-															@Nonnull String name) {
+																	@Nonnull String cleanValue,
+																	@Nonnull String name) {
 		try {
 			return Enum.valueOf(enumType, cleanValue);
 		}

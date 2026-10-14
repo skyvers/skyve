@@ -43,11 +43,11 @@ public abstract class AbstractDocumentNumberGenerator implements NumberGenerator
 
 	@SuppressWarnings({"static-method", "java:S3776"}) // Complexity OK
 	protected @Nonnull String getNextNumber(@Nonnull Persistence pers,
-									@Nullable String prefix,
-									@Nonnull String moduleName,
-									@Nonnull String documentName,
-									@Nonnull String fieldName,
-									int numberLength) {
+											@Nullable String prefix,
+											@Nonnull String moduleName,
+											@Nonnull String documentName,
+											@Nonnull String fieldName,
+											int numberLength) {
 		User user = pers.getUser();
 		Customer customer = user.getCustomer();
 		Module module = customer.getModule(AppConstants.ADMIN_MODULE_NAME);

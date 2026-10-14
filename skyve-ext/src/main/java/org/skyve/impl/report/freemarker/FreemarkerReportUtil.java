@@ -222,9 +222,9 @@ public final class FreemarkerReportUtil {
 	 * @throws Exception
 	 */
 	public static @Nonnull File createBeanReportPDF(final @Nonnull Bean bean,
-											final @Nonnull String reportName,
-											final @Nullable Map<String, Object> reportParameters,
-											final @Nonnull String reportFilename) throws Exception {
+													final @Nonnull String reportName,
+													final @Nullable Map<String, Object> reportParameters,
+													final @Nonnull String reportFilename) throws Exception {
 		// retrieve the report template
 		Template template = getBeanReport(bean, reportName);
 
@@ -290,9 +290,9 @@ public final class FreemarkerReportUtil {
 	 * @throws Exception
 	 */
 	public static @Nonnull Download downloadReport(final @Nonnull String reportName,
-											final @Nullable Map<String, Object> reportParameters,
-											final @Nonnull ReportFormat format,
-											final @Nonnull String downloadFilename)
+													final @Nullable Map<String, Object> reportParameters,
+													final @Nonnull ReportFormat format,
+													final @Nonnull String downloadFilename)
 	throws Exception {
 		final String reportOutput = runReport(reportName, reportParameters);
 

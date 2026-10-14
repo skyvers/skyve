@@ -62,10 +62,10 @@ public class StashExpressionEvaluator extends ExpressionEvaluator {
 	 */
 	@Override
 	public @Nullable String validateWithoutPrefixOrSuffix(@Nonnull String expression,
-													@Nullable Class<?> returnType,
-													@Nullable Customer customer,
-													@Nullable Module module,
-													@Nullable Document document) {
+																@Nullable Class<?> returnType,
+																@Nullable Customer customer,
+																@Nullable Module module,
+																@Nullable Document document) {
 		return null; // any key is valid
 	}
 	
@@ -80,9 +80,9 @@ public class StashExpressionEvaluator extends ExpressionEvaluator {
 	 */
 	@Override
 	public @Nonnull List<String> completeWithoutPrefixOrSuffix(@Nullable String fragment,
-														@Nonnull Customer customer, 
-														@Nonnull Module module,
-														@Nonnull Document document) {
+																@Nonnull Customer customer, 
+																@Nonnull Module module,
+																@Nonnull Document document) {
 		return Collections.emptyList(); // any key is valid
 	}
 

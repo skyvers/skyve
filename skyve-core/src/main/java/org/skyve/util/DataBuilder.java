@@ -440,10 +440,10 @@ public class DataBuilder {
 	 */
 	@SuppressWarnings({"java:S3776", "java:S6541", "java:S1066", "java:S135"}) // Complexity OK, "for" and "if" OK
 	private synchronized @Nonnull <T extends Bean> T build(@Nonnull Module module,
-													@Nonnull Document document,
-													@Nonnull String binding,
-													int currentDepth,
-													boolean allowFactoryRecursion) {
+															@Nonnull Document document,
+															@Nonnull String binding,
+															int currentDepth,
+															boolean allowFactoryRecursion) {
 		T result = null;
 		try {
 			// call the data factory if top level factory invocation is on or we have recursed already

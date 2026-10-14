@@ -108,8 +108,8 @@ public interface NumberGenerator {
 	 * @return the next sequence number
 	 */
 	@Nonnull String next(@Nullable String prefix,
-					@Nonnull String moduleName,
-					@Nonnull String documentName,
-					@Nonnull String fieldName,
-					int minimumLength);
+							@Nonnull String moduleName,
+							@Nonnull String documentName,
+							@Nonnull String fieldName,
+							int minimumLength);
 }

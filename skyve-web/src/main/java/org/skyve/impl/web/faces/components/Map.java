@@ -98,10 +98,10 @@ public class Map extends HtmlPanelGroup {
 	 * @return the generated map component
 	 */
 	public static @Nullable UIComponent generate(@Nullable String moduleName,
-										@Nullable String queryName,
-										@Nullable String geometryBinding,
-										@Nullable String modelName,
-										@Nonnull ComponentBuilder componentBuilder) {
+													@Nullable String queryName,
+													@Nullable String geometryBinding,
+													@Nullable String modelName,
+													@Nonnull ComponentBuilder componentBuilder) {
 
     	if (modelName != null) {
 			return componentBuilder.map(null, new MapDisplay(), modelName);

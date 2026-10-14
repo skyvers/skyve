@@ -320,8 +320,8 @@ public abstract class AbstractPersistence implements Persistence {
 	 */
 	@Override
 	public final @Nullable <T extends Bean> T retrieve(@Nonnull String moduleName,
-												@Nonnull String documentName,
-												@Nonnull String id) {
+															@Nonnull String documentName,
+															@Nonnull String id) {
 		Customer customer = user.getCustomer();
 		Module module = customer.getModule(moduleName);
 		Document document = module.getDocument(customer, documentName);
@@ -339,8 +339,8 @@ public abstract class AbstractPersistence implements Persistence {
 	 */
 	@Override
 	public final @Nonnull <T extends Bean> T retrieveAndLock(@Nonnull String moduleName,
-														@Nonnull String documentName,
-														@Nonnull String id) {
+																@Nonnull String documentName,
+																@Nonnull String id) {
 		Customer customer = user.getCustomer();
 		Module module = customer.getModule(moduleName);
 		Document document = module.getDocument(customer, documentName);

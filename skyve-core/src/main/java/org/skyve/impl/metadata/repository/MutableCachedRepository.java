@@ -567,9 +567,9 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryFactory 
 	@Override
 	@SuppressWarnings({"java:S2789", "java:S3776"}) // Complexity OK
 	public @Nullable View getView(@Nullable String uxui,
-							@Nullable Customer customer, 
-							@Nonnull Document document, 
-							@Nonnull String name) {
+										@Nullable Customer customer, 
+										@Nonnull Document document, 
+										@Nonnull String name) {
 		View result = null;
 		String owningModuleName = document.getOwningModuleName();
 		Module owningModule = requireModule(ProvidedRepositoryFactory.get().getModule(customer, owningModuleName), owningModuleName);
@@ -716,10 +716,10 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryFactory 
 	}
 	
 	private @Nullable View scaffoldView(@Nullable Customer customer,
-								@Nonnull Module module,
-								@Nonnull Document document,
-								@Nonnull String viewName,
-								@Nullable String uxui) {
+											@Nonnull Module module,
+											@Nonnull Document document,
+											@Nonnull String viewName,
+											@Nullable String uxui) {
 		if (ViewType.edit.toString().equals(viewName) || 
 				ViewType.pick.toString().equals(viewName) || 
 				ViewType.params.toString().equals(viewName)) {

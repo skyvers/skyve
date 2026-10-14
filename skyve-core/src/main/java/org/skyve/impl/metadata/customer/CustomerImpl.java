@@ -743,9 +743,9 @@ public class CustomerImpl implements Customer {
 	@Override
 	@SuppressWarnings({"unchecked", "java:S3776"}) // Complexity OK
 	public synchronized @Nonnull <T extends Bean> List<DomainValue> getConstantDomainValues(@Nullable Bizlet<T> bizlet, 
-																					@Nonnull String moduleName,
-																					@Nonnull String documentName, 
-																					@Nonnull Attribute attribute)
+																							@Nonnull String moduleName,
+																							@Nonnull String documentName, 
+																							@Nonnull Attribute attribute)
 	throws Exception {
 		List<DomainValue> result = null;
 		

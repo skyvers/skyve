@@ -4485,21 +4485,21 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 */
 	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
 	private @Nonnull String generateButton(@Nullable String actionName,
-									@Nullable ImplicitActionName implicitName,
-									@Nullable String label,
-									boolean escapeDisplayName,
-									@Nullable Boolean clientValidation,
-									@Nullable String iconUrl,
-									@Nullable String iconStyleClass,
-									@Nullable String toolTip,
-									boolean escapeToolTip,
-									@Nullable String confirmationText,
-									boolean escapeConfirm,
-									@Nonnull List<Parameter> parameters,
-									@Nullable String disabledCondition,
-									@Nullable String invisibleCondition,
-									@Nullable Button button, // null if called from an action defn
-									@Nullable Boolean canDelete) { // null for anything but remove button
+											@Nullable ImplicitActionName implicitName,
+											@Nullable String label,
+											boolean escapeDisplayName,
+											@Nullable Boolean clientValidation,
+											@Nullable String iconUrl,
+											@Nullable String iconStyleClass,
+											@Nullable String toolTip,
+											boolean escapeToolTip,
+											@Nullable String confirmationText,
+											boolean escapeConfirm,
+											@Nonnull List<Parameter> parameters,
+											@Nullable String disabledCondition,
+											@Nullable String invisibleCondition,
+											@Nullable Button button, // null if called from an action defn
+											@Nullable Boolean canDelete) { // null for anything but remove button
 		StringBuilder result = new StringBuilder(128);
 		result.append("isc.BizButton.create({validate:");
 		result.append(! Boolean.FALSE.equals(clientValidation));
@@ -4641,7 +4641,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 * @return prepared field definition
 	 */
 	private @Nonnull SmartClientFieldDefinition preProcessFormItem(@Nonnull InputWidget widget,
-															@Nullable String typeOverride) {
+																	@Nullable String typeOverride) {
 		SmartClientFieldDefinition def = getField(document, widget, true);
 		if (typeOverride != null) {
 			def.setType(typeOverride);
@@ -4678,12 +4678,12 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 * @return the generated query-column definition
 	 */
 	public static @Nonnull SmartClientQueryColumnDefinition getQueryColumn(@Nullable User user,
-																	@Nonnull Customer customer,
-																	@Nonnull Module module,
-																	@Nonnull Document document,
-																	@Nonnull MetaDataQueryColumn column,
-																	boolean runtime,
-																	@Nonnull String uxui) {
+																			@Nonnull Customer customer,
+																			@Nonnull Module module,
+																			@Nonnull Document document,
+																			@Nonnull MetaDataQueryColumn column,
+																			boolean runtime,
+																			@Nonnull String uxui) {
 		return new SmartClientQueryColumnDefinition(user, customer, module, document, column, runtime, uxui);
 	}
 
@@ -4696,8 +4696,8 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 * @return The SmartClient field definition for the widget.
 	 */
 	public @Nonnull SmartClientFieldDefinition getField(@SuppressWarnings("hiding") @Nonnull Document document,
-												@Nonnull InputWidget widget,
-												boolean runtime) {
+														@Nonnull InputWidget widget,
+														boolean runtime) {
 		return new SmartClientFieldDefinition(user, customer, module, document, widget, runtime, currentUxUi);
 	}
 
@@ -4738,14 +4738,14 @@ public class SmartClientViewRenderer extends ViewRenderer {
      */
 	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
 	public static @Nullable String appendDataSourceDefinition(@Nonnull User user,
-														@Nonnull Customer customer,
-														@Nonnull Module owningModule,
-														@Nonnull Document owningDocument,
-														@Nonnull String modelName,
-														@Nonnull String uxui,
-														boolean config,
-														@Nonnull StringBuilder toAppendTo,
-														@Nonnull Set<String> visitedQueryNames) {
+																	@Nonnull Customer customer,
+																	@Nonnull Module owningModule,
+																	@Nonnull Document owningDocument,
+																	@Nonnull String modelName,
+																	@Nonnull String uxui,
+																	boolean config,
+																	@Nonnull StringBuilder toAppendTo,
+																	@Nonnull Set<String> visitedQueryNames) {
 		return appendDataSourceDefinition(user,
 											customer,
 											owningModule,
@@ -4777,16 +4777,16 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 */
 	@SuppressWarnings("java:S107") // Matches the query data-source overload with model ownership.
 	public static @Nullable String appendDataSourceDefinition(@Nonnull User user,
-														@Nonnull Customer customer,
-														@Nonnull Module owningModule,
-														@Nonnull Document owningDocument,
-														@Nonnull String modelName,
-														@Nullable String dataSourceIDOverride,
-														@Nullable LookupDescription forLookup,
-														@Nonnull String uxui,
-														boolean config,
-														@Nonnull StringBuilder toAppendTo,
-														@Nonnull Set<String> visitedQueryNames) {
+																	@Nonnull Customer customer,
+																	@Nonnull Module owningModule,
+																	@Nonnull Document owningDocument,
+																	@Nonnull String modelName,
+																	@Nullable String dataSourceIDOverride,
+																	@Nullable LookupDescription forLookup,
+																	@Nonnull String uxui,
+																	boolean config,
+																	@Nonnull StringBuilder toAppendTo,
+																	@Nonnull Set<String> visitedQueryNames) {
 		ListModel<Bean> model = owningDocument.getListModel(customer, modelName, true);
 		// Note we cannot set the bean on the model here as we are only generating out the UI.
 		Document drivingDocument = model.getDrivingDocument();
@@ -4833,14 +4833,14 @@ public class SmartClientViewRenderer extends ViewRenderer {
      */
 	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
 	public static @Nullable String appendDataSourceDefinition(@Nonnull User user,
-														@Nonnull Customer customer,
-														@Nonnull MetaDataQueryDefinition query,
-														@Nullable String dataSourceIDOverride,
-														@Nullable LookupDescription forLookup,
-														@Nonnull String uxui,
-														boolean config,
-														@Nonnull StringBuilder toAppendTo,
-														@Nonnull Set<String> visitedQueryNames) {
+																	@Nonnull Customer customer,
+																	@Nonnull MetaDataQueryDefinition query,
+																	@Nullable String dataSourceIDOverride,
+																	@Nullable LookupDescription forLookup,
+																	@Nonnull String uxui,
+																	boolean config,
+																	@Nonnull StringBuilder toAppendTo,
+																	@Nonnull Set<String> visitedQueryNames) {
 		String documentName = query.getDocumentName();
 		Module documentModule = query.getDocumentModule(customer);
 		Module owningModule = query.getOwningModule();
@@ -4888,23 +4888,23 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 */
 	@SuppressWarnings({"java:S107", "null", "java:S3776"}) // Long parameter list preserves the existing framework/API contract; complexity OK.
 	private static @Nullable String appendDataSourceDefinition(@Nonnull User user,
-														@Nonnull Customer customer,
-														@Nullable String owningModuleName,
-														@Nonnull Document owningDocument,
-														@Nonnull Module drivingDocumentModule,
-														@Nonnull Document drivingDocument,
-														@Nullable String queryName,
-														boolean aggregateQuery,
-														@Nullable String modelName,
-														@Nullable String description,
-														@Nonnull List<MetaDataQueryColumn> columns,
-														@Nullable String dataSourceIDOverride,
-														@Nullable LookupDescription forLookup,
-														@Nonnull String uxui,
-														// indicates that this is for configuration in the harness page
-														boolean config,
-														@Nonnull StringBuilder toAppendTo,
-														@Nonnull Set<String> visitedQueryNames) {
+																	@Nonnull Customer customer,
+																	@Nullable String owningModuleName,
+																	@Nonnull Document owningDocument,
+																	@Nonnull Module drivingDocumentModule,
+																	@Nonnull Document drivingDocument,
+																	@Nullable String queryName,
+																	boolean aggregateQuery,
+																	@Nullable String modelName,
+																	@Nullable String description,
+																	@Nonnull List<MetaDataQueryColumn> columns,
+																	@Nullable String dataSourceIDOverride,
+																	@Nullable LookupDescription forLookup,
+																	@Nonnull String uxui,
+																	// indicates that this is for configuration in the harness page
+																	boolean config,
+																	@Nonnull StringBuilder toAppendTo,
+																	@Nonnull Set<String> visitedQueryNames) {
 		// dataSourceId -> defn
 		Map<String, String> childDataSources = new TreeMap<>();
 

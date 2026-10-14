@@ -314,8 +314,8 @@ public class SkyveSpringSecurity {
 			// return the user just queried (with all the expiration details queried too)
 			@Override
 			protected @Nonnull UserDetails createUserDetails(@Nonnull String username,
-														@Nonnull UserDetails userFromUserQuery,
-														@Nonnull List<GrantedAuthority> combinedAuthorities) {
+																@Nonnull UserDetails userFromUserQuery,
+																@Nonnull List<GrantedAuthority> combinedAuthorities) {
 				return userFromUserQuery;
 			}
 			
