@@ -9,7 +9,7 @@ import org.skyve.metadata.repository.ProvidedRepository;
 import org.slf4j.Logger;
 import org.skyve.util.logging.SkyveLoggerFactory;
 
-import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 
 /**
  * This job visits all the metadata for each customer after app deployment.
@@ -22,7 +22,7 @@ public class ValidateMetaDataJob implements Job {
     private static final Logger LOGGER = SkyveLoggerFactory.getLogger(ValidateMetaDataJob.class);
 
 	@Override
-	public void execute(@Nonnull JobExecutionContext context)
+	public void execute(@Nullable JobExecutionContext context)
 	throws JobExecutionException {
 		try {
 			LOGGER.info("Validate metadata");

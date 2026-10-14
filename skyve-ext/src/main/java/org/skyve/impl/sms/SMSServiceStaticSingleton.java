@@ -2,7 +2,7 @@ package org.skyve.impl.sms;
 
 import org.skyve.util.SMSService;
 
-import jakarta.annotation.Nullable;
+import jakarta.annotation.Nonnull;
 
 /**
  * A singleton for the SMS service to use.
@@ -15,11 +15,11 @@ public class SMSServiceStaticSingleton {
 		// nothing to see here
 	}
 	
-	public static @Nullable SMSService get() {
+	public static @Nonnull SMSService get() {
 		return instance;
 	}
 	
-	public static void set(@Nullable SMSService instance) {
+	public static void set(@Nonnull SMSService instance) {
 		SMSServiceStaticSingleton.instance = instance;
 	}
 

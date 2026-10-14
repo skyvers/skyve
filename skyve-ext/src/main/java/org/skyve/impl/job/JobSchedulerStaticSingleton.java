@@ -2,7 +2,7 @@ package org.skyve.impl.job;
 
 import org.skyve.job.JobScheduler;
 
-import jakarta.annotation.Nullable;
+import jakarta.annotation.Nonnull;
 
 /**
  * A singleton for the Job Scheduler to use.
@@ -15,11 +15,11 @@ public class JobSchedulerStaticSingleton {
 		// nothing to see here
 	}
 	
-	public static @Nullable JobScheduler get() {
+	public static @Nonnull JobScheduler get() {
 		return instance;
 	}
 	
-	public static void set(@Nullable JobScheduler instance) {
+	public static void set(@Nonnull JobScheduler instance) {
 		JobSchedulerStaticSingleton.instance = instance;
 	}
 

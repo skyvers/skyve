@@ -52,7 +52,7 @@ public class LayoutBuilderChain extends LayoutBuilder {
 	 * @param managedBean the managed bean instance
 	 */
 	@Override
-	public void setSAILManagedBean(@Nonnull FacesView managedBean) {
+	public void setSAILManagedBean(@Nullable FacesView managedBean) {
 		// Set the state of the chain too so that utility methods in AbstractFacesBuilder can work
 		super.setSAILManagedBean(managedBean);
 		// Now set the state on all builders in the chain
@@ -97,7 +97,7 @@ public class LayoutBuilderChain extends LayoutBuilder {
 	 * @param userAgentType user-agent type
 	 */
 	@Override
-	public void setUserAgentType(@Nonnull UserAgentType userAgentType) {
+	public void setUserAgentType(@Nullable UserAgentType userAgentType) {
 		// Set the state of the chain too so that utility methods in AbstractFacesBuilder can work
 		super.setUserAgentType(userAgentType);
 		// Now set the state on all builders in the chain

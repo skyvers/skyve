@@ -105,7 +105,7 @@ public abstract class AbstractFacesBuilder {
 	 *
 	 * @param managedBean the SAIL managed bean
 	 */
-	public void setSAILManagedBean(@Nonnull FacesView managedBean) {
+	public void setSAILManagedBean(@Nullable FacesView managedBean) {
 		this.managedBean = managedBean;
 	}
 	
@@ -134,7 +134,7 @@ public abstract class AbstractFacesBuilder {
 	 *
 	 * @param userAgentType the current user agent type
 	 */
-	public void setUserAgentType(@Nonnull UserAgentType userAgentType) {
+	public void setUserAgentType(@Nullable UserAgentType userAgentType) {
 		this.userAgentType = userAgentType;
 	}
 

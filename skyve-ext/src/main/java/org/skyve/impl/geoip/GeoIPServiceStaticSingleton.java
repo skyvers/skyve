@@ -3,7 +3,7 @@ package org.skyve.impl.geoip;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.util.GeoIPService;
 
-import jakarta.annotation.Nullable;
+import jakarta.annotation.Nonnull;
 
 /**
  * A singleton for the geo IP service to use.
@@ -16,11 +16,11 @@ public class GeoIPServiceStaticSingleton {
 		// nothing to see here
 	}
 	
-	public static @Nullable GeoIPService get() {
+	public static @Nonnull GeoIPService get() {
 		return instance;
 	}
 	
-	public static void set(@Nullable GeoIPService instance) {
+	public static void set(@Nonnull GeoIPService instance) {
 		GeoIPServiceStaticSingleton.instance = instance;
 	}
 
