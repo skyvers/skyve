@@ -53,7 +53,7 @@ public interface SkyveDialect {
 	/**
 	 * Converts a JTS geometry into the database-specific value expected by Hibernate.
 	 *
-	 * @param geometry the geometry to persist; may be {@code null} when the caller is binding a nullable column
+	 * @param geometry the geometry to persist
 	 * @return the dialect-specific persisted representation
 	 */
 	public @Nullable Object convertToPersistedValue(@Nonnull Geometry geometry);

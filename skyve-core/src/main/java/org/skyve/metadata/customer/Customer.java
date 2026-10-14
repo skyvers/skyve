@@ -35,6 +35,14 @@ import jakarta.annotation.Nullable;
  */
 public interface Customer extends NamedMetaData, PersistentMetaData, ReloadableMetaData {
 	/**
+	 * Returns the name of this customer, which customer conversion requires.
+	 *
+	 * @return the customer name; never {@code null}
+	 */
+	@Override
+	public @Nonnull String getName();
+
+	/**
 	 * Returns the BCP 47 language tag that governs locale-sensitive behaviour for this customer.
 	 *
 	 * @return a BCP 47 language tag (e.g. {@code "en-AU"}); may be {@code null} if not configured

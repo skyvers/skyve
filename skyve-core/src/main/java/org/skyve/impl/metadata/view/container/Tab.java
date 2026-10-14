@@ -62,7 +62,7 @@ public final class Tab extends Container implements Disableable, Invisible, Deco
 	/**
 	 * Returns the configured tab title.
 	 *
-	 * @return tab title, or {@code null} when not configured
+	 * @return tab title
 	 */
 	public @Nonnull String getTitle() {
 		return title;
@@ -91,7 +91,7 @@ public final class Tab extends Container implements Disableable, Invisible, Deco
 	 *
 	 * <p>Side effects: trims and normalises the supplied value before storage.
 	 *
-	 * @param title  tab title; may be {@code null} or blank
+	 * @param title  tab title; may be blank
 	 */
 	@XmlAttribute(required = true)
 	public void setTitle(@Nonnull String title) {

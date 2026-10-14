@@ -517,7 +517,8 @@ public class DocumentImpl extends ModelImpl implements Document {
 	 *
 	 * @param customer the customer context used for repository lookup.
 	 * @param name the dynamic-image name.
-	 * @return the resolved dynamic image, or {@code null} if none is defined.
+	 * @return the resolved dynamic image.
+	 * @throws MetaDataException if none is defined.
 	 */
 	@Override
 	public @Nonnull <T extends Bean> DynamicImage<T> getDynamicImage(@Nullable Customer customer, @Nonnull String name) {
@@ -832,7 +833,8 @@ public class DocumentImpl extends ModelImpl implements Document {
 	 * @param customer the customer context used for repository lookup.
 	 * @param modelName the comparison-model name.
 	 * @param runtime whether runtime overrides should be consulted.
-	 * @return the resolved comparison model, or {@code null} if none is defined.
+	 * @return the resolved comparison model.
+	 * @throws MetaDataException if none is defined.
 	 */
 	@Override
 	public @Nonnull <T extends Bean, C extends Bean> ComparisonModel<T, C> getComparisonModel(@Nullable Customer customer, @Nonnull String modelName, boolean runtime) {
@@ -849,7 +851,8 @@ public class DocumentImpl extends ModelImpl implements Document {
 	 * @param customer the customer context used for repository lookup.
 	 * @param modelName the map-model name.
 	 * @param runtime whether runtime overrides should be consulted.
-	 * @return the resolved map model, or {@code null} if none is defined.
+	 * @return the resolved map model.
+	 * @throws MetaDataException if none is defined.
 	 */
 	@Override
 	public @Nonnull <T extends Bean> MapModel<T> getMapModel(@Nullable Customer customer, @Nonnull String modelName, boolean runtime) {
@@ -866,7 +869,8 @@ public class DocumentImpl extends ModelImpl implements Document {
 	 * @param customer the customer context used for repository lookup.
 	 * @param modelName the chart-model name.
 	 * @param runtime whether runtime overrides should be consulted.
-	 * @return the resolved chart model, or {@code null} if none is defined.
+	 * @return the resolved chart model.
+	 * @throws MetaDataException if none is defined.
 	 */
 	@Override
 	public @Nonnull <T extends Bean> ChartModel<T> getChartModel(@Nullable Customer customer, @Nonnull String modelName, boolean runtime) {
@@ -883,7 +887,8 @@ public class DocumentImpl extends ModelImpl implements Document {
 	 * @param customer the customer context used for repository lookup.
 	 * @param modelName the list-model name.
 	 * @param runtime whether runtime overrides should be consulted.
-	 * @return the resolved list model, or {@code null} if none is defined.
+	 * @return the resolved list model.
+	 * @throws MetaDataException if none is defined.
 	 */
 	@Override
 	public @Nonnull <T extends Bean> ListModel<T> getListModel(@Nullable Customer customer, @Nonnull String modelName, boolean runtime) {
@@ -903,7 +908,8 @@ public class DocumentImpl extends ModelImpl implements Document {
 	 * @param customer the customer context used for repository lookup.
 	 * @param className the action class or metadata action name.
 	 * @param runtime whether runtime overrides should be consulted.
-	 * @return the resolved server-side action, or {@code null} if none is defined.
+	 * @return the resolved server-side action.
+	 * @throws MetaDataException if none is defined.
 	 */
 	@Override
 	public @Nonnull ServerSideAction<Bean> getServerSideAction(@Nullable Customer customer, @Nonnull String className, boolean runtime) {
@@ -926,7 +932,8 @@ public class DocumentImpl extends ModelImpl implements Document {
 	 * @param customer the customer context used for repository lookup.
 	 * @param className the export action class name.
 	 * @param runtime whether runtime overrides should be consulted.
-	 * @return the resolved export action, or {@code null} if none is defined.
+	 * @return the resolved export action.
+	 * @throws MetaDataException if none is defined.
 	 */
 	@Override
 	public @Nonnull BizExportAction getBizExportAction(@Nullable Customer customer, @Nonnull String className, boolean runtime) {
@@ -943,7 +950,8 @@ public class DocumentImpl extends ModelImpl implements Document {
 	 * @param customer the customer context used for repository lookup.
 	 * @param className the import action class name.
 	 * @param runtime whether runtime overrides should be consulted.
-	 * @return the resolved import action, or {@code null} if none is defined.
+	 * @return the resolved import action.
+	 * @throws MetaDataException if none is defined.
 	 */
 	@Override
 	public @Nonnull BizImportAction getBizImportAction(@Nullable Customer customer, @Nonnull String className, boolean runtime) {
@@ -960,7 +968,8 @@ public class DocumentImpl extends ModelImpl implements Document {
 	 * @param customer the customer context used for repository lookup.
 	 * @param className the download action class name.
 	 * @param runtime whether runtime overrides should be consulted.
-	 * @return the resolved download action, or {@code null} if none is defined.
+	 * @return the resolved download action.
+	 * @throws MetaDataException if none is defined.
 	 */
 	@Override
 	public @Nonnull DownloadAction<Bean> getDownloadAction(@Nullable Customer customer, @Nonnull String className, boolean runtime) {
@@ -977,7 +986,8 @@ public class DocumentImpl extends ModelImpl implements Document {
 	 * @param customer the customer context used for repository lookup.
 	 * @param className the upload action class name.
 	 * @param runtime whether runtime overrides should be consulted.
-	 * @return the resolved upload action, or {@code null} if none is defined.
+	 * @return the resolved upload action.
+	 * @throws MetaDataException if none is defined.
 	 */
 	@Override
 	public @Nonnull UploadAction<Bean> getUploadAction(@Nullable Customer customer, @Nonnull String className, boolean runtime) {
@@ -1161,7 +1171,8 @@ public class DocumentImpl extends ModelImpl implements Document {
 	 * @param uxui the UX/UI profile.
 	 * @param customer the customer context used for repository lookup.
 	 * @param name the view name.
-	 * @return the resolved view, or {@code null} if no suitable view exists.
+	 * @return the resolved view.
+	 * @throws MetaDataException if no suitable view exists.
 	 */
 	@Override
 	public @Nonnull View getView(@Nullable String uxui, @Nullable Customer customer, @Nonnull String name) {

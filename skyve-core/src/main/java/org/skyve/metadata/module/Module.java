@@ -147,6 +147,14 @@ public interface Module extends NamedMetaData, PersistentMetaData, ReloadableMet
 	}
 	
 	/**
+	 * Returns the name of this module, which module conversion requires.
+	 *
+	 * @return The module name
+	 */
+	@Override
+	@Nonnull String getName();
+
+	/**
 	 * Returns the title of this module.
 	 * 
 	 * @return The module title
@@ -328,7 +336,7 @@ public interface Module extends NamedMetaData, PersistentMetaData, ReloadableMet
 	/**
 	 * Returns the home document name for this module.
 	 * 
-	 * @return The home document name or null if not defined
+	 * @return The home document name
 	 */
 	@Nonnull String getHomeDocumentName();
 	

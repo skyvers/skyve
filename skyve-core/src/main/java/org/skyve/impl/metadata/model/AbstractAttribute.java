@@ -80,6 +80,12 @@ public abstract class AbstractAttribute extends NamedMetaData implements Attribu
 	private Map<String, String> properties = new LinkedHashMap<>();
 	
 	@Override
+	@SuppressWarnings("null") // conversion rejects a null name
+	public @Nonnull String getName() {
+		return super.getName();
+	}
+
+	@Override
 	public @Nonnull String getDisplayName() {
 		return displayName;
 	}

@@ -59,7 +59,7 @@ public class FluentDirect {
 	/**
 	 * Sets the normalized declaration path through the metadata setter.
 	 *
-	 * @param path context-relative target path, or {@code null} until metadata conversion
+	 * @param path context-relative target path
 	 * @return this builder
 	 * @since 10.0
 	 */
@@ -71,7 +71,7 @@ public class FluentDirect {
 	/**
 	 * Sets the target UX/UI name through the metadata setter.
 	 *
-	 * @param uxui effective router UX/UI name, or {@code null} until metadata conversion
+	 * @param uxui effective router UX/UI name
 	 * @return this builder
 	 * @since 10.0
 	 */

@@ -82,7 +82,7 @@ public class FluentCalendarItem extends FluentMenuItem<FluentCalendarItem> {
 	 * @param startBinding The start binding expression.
 	 * @return this fluent instance.
 	 */
-	public @Nonnull FluentCalendarItem startBinding(@Nonnull String startBinding) {
+	public @Nonnull FluentCalendarItem startBinding(@Nullable String startBinding) {
 		item.setStartBinding(startBinding);
 		return this;
 	}
@@ -93,7 +93,7 @@ public class FluentCalendarItem extends FluentMenuItem<FluentCalendarItem> {
 	 * @param endBinding The end binding expression.
 	 * @return this fluent instance.
 	 */
-	public @Nonnull FluentCalendarItem endBinding(@Nonnull String endBinding) {
+	public @Nonnull FluentCalendarItem endBinding(@Nullable String endBinding) {
 		item.setEndBinding(endBinding);
 		return this;
 	}

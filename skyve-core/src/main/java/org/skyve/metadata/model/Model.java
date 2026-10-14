@@ -30,6 +30,14 @@ import jakarta.annotation.Nullable;
  */
 public interface Model extends NamedMetaData {
 	/**
+	 * Returns the name of this model, which document conversion requires.
+	 *
+	 * @return the model name; never {@code null}
+	 */
+	@Override
+	@Nonnull String getName();
+
+	/**
 	 * Returns the name of the module that owns this model.
 	 *
 	 * @return the owning module name; never {@code null}
@@ -78,7 +86,7 @@ public interface Model extends NamedMetaData {
 	/**
 	 * Returns the i18n resource key (or literal string) for the plural display name of this model.
 	 *
-	 * @return the plural alias; may be {@code null}
+	 * @return the plural alias
 	 * @see #getLocalisedPluralAlias()
 	 */
 	@Nonnull String getPluralAlias();
@@ -90,7 +98,7 @@ public interface Model extends NamedMetaData {
 	/**
 	 * Returns the i18n resource key (or literal string) for the singular display name of this model.
 	 *
-	 * @return the singular alias; may be {@code null}
+	 * @return the singular alias
 	 * @see #getLocalisedSingularAlias()
 	 */
 	@Nonnull String getSingularAlias();

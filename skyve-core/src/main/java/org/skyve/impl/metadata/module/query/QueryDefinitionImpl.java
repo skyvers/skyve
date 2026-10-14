@@ -47,7 +47,7 @@ public abstract class QueryDefinitionImpl implements QueryDefinition {
 	}
 
 	@Override
-	public @Nullable String getName() {
+	public @Nonnull String getName() {
 		return name;
 	}
 

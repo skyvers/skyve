@@ -3,7 +3,6 @@ package org.skyve.impl.metadata.repository.module;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
 
-import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlRootElement;
@@ -54,19 +53,19 @@ public class CalendarItemMetaData extends ItemMetaData {
 		this.modelName = UtilImpl.processStringValue(modelName);
 	}
 
-	public @Nonnull String getStartBinding() {
+	public @Nullable String getStartBinding() {
 		return startBinding;
 	}
-	@XmlAttribute(required = true)
-	public void setStartBinding(@Nonnull String startBinding) {
+	@XmlAttribute
+	public void setStartBinding(@Nullable String startBinding) {
 		this.startBinding = UtilImpl.processStringValue(startBinding);
 	}
 
-	public @Nonnull String getEndBinding() {
+	public @Nullable String getEndBinding() {
 		return endBinding;
 	}
-	@XmlAttribute(required = true)
-	public void setEndBinding(@Nonnull String endBinding) {
+	@XmlAttribute
+	public void setEndBinding(@Nullable String endBinding) {
 		this.endBinding = UtilImpl.processStringValue(endBinding);
 	}
 }

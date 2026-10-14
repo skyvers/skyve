@@ -53,7 +53,7 @@ public class Direct implements SerializableMetaData {
 	/**
 	 * Returns the normalized context-relative target path.
 	 *
-	 * @return the trimmed path, or {@code null} before a required value is supplied
+	 * @return the trimmed path
 	 * @since 10.0
 	 */
 	public @Nonnull String getPath() {
@@ -63,7 +63,7 @@ public class Direct implements SerializableMetaData {
 	/**
 	 * Sets the context-relative target path after trimming blank input to {@code null}.
 	 *
-	 * @param path the path to store; may be {@code null} until conversion validates the declaration
+	 * @param path the path to store
 	 * @since 10.0
 	 */
 	@XmlAttribute(required = true)
@@ -74,7 +74,7 @@ public class Direct implements SerializableMetaData {
 	/**
 	 * Returns the name of the effective router UX/UI selected by this declaration.
 	 *
-	 * @return the trimmed UX/UI name, or {@code null} before a required value is supplied
+	 * @return the trimmed UX/UI name
 	 * @since 10.0
 	 */
 	public @Nonnull String getUxui() {
@@ -84,8 +84,7 @@ public class Direct implements SerializableMetaData {
 	/**
 	 * Sets the target UX/UI name after trimming blank input to {@code null}.
 	 *
-	 * @param uxui the effective router UX/UI name; may be {@code null} until conversion validates
-	 *             the declaration
+	 * @param uxui the effective router UX/UI name
 	 * @since 10.0
 	 */
 	@XmlAttribute(required = true)

@@ -35,7 +35,7 @@ public class InterceptorMetaDataImpl implements InterceptorMetaData {
 	/**
 	 * Returns the fully-qualified interceptor implementation class name.
 	 *
-	 * @return interceptor implementation class name, or {@code null}
+	 * @return interceptor implementation class name
 	 */
 	@Override
 	public @Nonnull String getClassName() {

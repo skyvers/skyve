@@ -46,7 +46,7 @@ public class RoleImpl implements Role {
 	}
 
 	@Override
-	public @Nullable String getName() {
+	public @Nonnull String getName() {
 		return name;
 	}
 

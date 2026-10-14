@@ -308,9 +308,9 @@ public class ViewImpl extends Container implements View {
 	}
 	
 	/**
-	 * Returns the display title of this view, or {@code null} if not explicitly set.
+	 * Returns the display title of this view.
 	 *
-	 * @return the display title, or {@code null} if not explicitly set
+	 * @return the display title
 	 */
 	@Override
 	public @Nonnull String getTitle() {

@@ -248,11 +248,11 @@ public abstract class ModelImpl extends AbstractMetaDataMap implements Model {
 	}
 
 	@Override
-	public @Nullable String getName() {
+	public @Nonnull String getName() {
 		return name;
 	}
 
-	public void setName(@Nullable String name) {
+	public void setName(@Nonnull String name) {
 		this.name = name;
 	}
 

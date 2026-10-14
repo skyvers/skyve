@@ -1626,7 +1626,7 @@ public abstract class ViewRenderer extends ViewVisitor {
 	 *
 	 * @param value the resolved or authored value, or null when absent
 	 * @param boundValue whether the value contains a Skyve binding expression
-	 * @param label the localised label, or null when no label is rendered
+	 * @param label the label metadata; must not be null
 	 */
 	public abstract void renderFormLabel(@Nullable String value, boolean boundValue, @Nonnull Label label);
 
@@ -1634,7 +1634,7 @@ public abstract class ViewRenderer extends ViewVisitor {
 	 * Renders the container column label for the active traversal context.
 	 *
 	 * @param value the resolved or authored value, or null when absent
-	 * @param label the localised label, or null when no label is rendered
+	 * @param label the label metadata; must not be null
 	 */
 	public abstract void renderContainerColumnLabel(@Nullable String value, @Nonnull Label label);
 
@@ -1643,7 +1643,7 @@ public abstract class ViewRenderer extends ViewVisitor {
 	 *
 	 * @param value the resolved or authored value, or null when absent
 	 * @param boundValue whether the value contains a Skyve binding expression
-	 * @param label the localised label, or null when no label is rendered
+	 * @param label the label metadata; must not be null
 	 */
 	public abstract void renderLabel(@Nullable String value, boolean boundValue, @Nonnull Label label);
 

@@ -42,7 +42,7 @@ public class CustomerInjectable implements Customer {
 	 * @return the configured customer name.
 	 */
 	@Override
-	public @Nullable String getName() {
+	public @Nonnull String getName() {
 		return CORE.getCustomer().getName();
 	}
 
@@ -140,7 +140,7 @@ public class CustomerInjectable implements Customer {
 	 * Resolves a module by name.
 	 *
 	 * @param moduleName the module name.
-	 * @return the module if found, otherwise null.
+	 * @return the module.
 	 */
 	@Override
 	public @Nonnull Module getModule(@Nonnull String moduleName) {

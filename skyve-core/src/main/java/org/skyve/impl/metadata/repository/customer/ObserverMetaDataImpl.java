@@ -35,7 +35,7 @@ public class ObserverMetaDataImpl implements ObserverMetaData {
 	/**
 	 * Returns the fully-qualified observer implementation class name.
 	 *
-	 * @return observer implementation class name, or {@code null}
+	 * @return observer implementation class name
 	 */
 	@Override
 	public @Nonnull String getClassName() {

@@ -8,7 +8,6 @@ import java.util.TreeSet;
 import org.skyve.metadata.module.menu.MenuItem;
 
 import jakarta.annotation.Nonnull;
-import jakarta.annotation.Nullable;
 
 /**
  * Represents a menu item leaf node that can be used for navigation. 
@@ -32,7 +31,7 @@ public abstract class AbstractMenuItem implements MenuItem {
 	 * From {@link MenuItem}.
 	 */
 	@Override
-	public final @Nullable String getName() {
+	public final @Nonnull String getName() {
 		return name;
 	}
 

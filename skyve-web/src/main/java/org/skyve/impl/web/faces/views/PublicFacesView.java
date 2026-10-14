@@ -7,7 +7,7 @@ import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.util.Util;
 
-import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.faces.context.ExternalContext;
 import jakarta.faces.context.FacesContext;
 import jakarta.faces.view.ViewScoped;
@@ -33,7 +33,7 @@ public class PublicFacesView extends FacesView {
 	 *
 	 * @return customer name parameter value, or {@code null}
 	 */
-	public @Nonnull String getBizCustomerParameter() {
+	public @Nullable String getBizCustomerParameter() {
 		return bizCustomerParameter;
 	}
 	
@@ -42,7 +42,7 @@ public class PublicFacesView extends FacesView {
 	 *
 	 * @param bizCustomerParameter the customer name parameter value
 	 */
-	public void setBizCustomerParameter(@Nonnull String bizCustomerParameter) {
+	public void setBizCustomerParameter(@Nullable String bizCustomerParameter) {
 		this.bizCustomerParameter = bizCustomerParameter;
 	}
 	

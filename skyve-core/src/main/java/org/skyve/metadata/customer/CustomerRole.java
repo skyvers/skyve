@@ -16,10 +16,18 @@ import jakarta.annotation.Nullable;
  * @see Customer#getRoles()
  */
 public interface CustomerRole extends NamedMetaData, DecoratedMetaData {
+		/**
+	 * Returns the name of this role, which customer conversion requires.
+	 *
+	 * @return The role name
+	 */
+	@Override
+	@Nonnull String getName();
+
 	/**
 	 * Returns a short human-readable description of this role.
 	 *
-	 * @return the description; may be {@code null}
+	 * @return the description
 	 */
 	public @Nonnull String getDescription();
 

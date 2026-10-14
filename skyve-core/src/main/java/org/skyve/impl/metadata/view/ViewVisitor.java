@@ -527,7 +527,7 @@ public abstract class ViewVisitor extends ActionVisitor {
 	/**
 	 * Visits the label in the current traversal context.
 	 *
-	 * @param label the localised label, or null when no label is rendered
+	 * @param label the label metadata; must not be null
 	 * @param parentVisible whether all ancestor metadata is visible
 	 * @param parentEnabled whether all ancestor metadata is enabled
 	 */

@@ -65,7 +65,7 @@ public class Download {
 	 * @param fileName the suggested browser file name
 	 * @param bytes the file content
 	 * @param mimeType the content MIME type
-	 * @param disposition the content disposition, or {@code null} to use the response writer's default
+	 * @param disposition the content disposition
 	 */
 	public Download(@Nonnull String fileName,
 						@Nonnull byte[] bytes,
@@ -91,7 +91,7 @@ public class Download {
 	 * @param fileName the suggested browser file name
 	 * @param content the text content to encode as UTF-8
 	 * @param mimeType the content MIME type
-	 * @param disposition the content disposition, or {@code null} to use the response writer's default
+	 * @param disposition the content disposition
 	 */
 	public Download(@Nonnull String fileName,
 						@Nonnull String content,
@@ -117,7 +117,7 @@ public class Download {
 	 * @param fileName the suggested browser file name
 	 * @param file the file to stream
 	 * @param mimeType the content MIME type
-	 * @param disposition the content disposition, or {@code null} to use the response writer's default
+	 * @param disposition the content disposition
 	 */
 	public Download(@Nonnull String fileName,
 						@Nonnull File file,
@@ -145,7 +145,7 @@ public class Download {
 	 * @param fileName the suggested browser file name
 	 * @param stream the stream containing the file content
 	 * @param mimeType the content MIME type
-	 * @param disposition the content disposition, or {@code null} to use the response writer's default
+	 * @param disposition the content disposition
 	 */
 	public Download(@Nonnull String fileName,
 						@Nonnull WebFileInputStream stream,

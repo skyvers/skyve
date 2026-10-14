@@ -99,7 +99,7 @@ public interface UniqueConstraint extends NamedMetaData, DecoratedMetaData {
 	/**
 	 * Returns the user-facing message displayed when this constraint is violated.
 	 *
-	 * @return the validation message; may be {@code null}
+	 * @return the validation message
 	 */
 	public @Nonnull String getMessage();
 	

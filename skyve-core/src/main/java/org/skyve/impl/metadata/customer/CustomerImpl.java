@@ -173,7 +173,7 @@ public class CustomerImpl implements Customer {
 	 * @return the customer name from metadata.
 	 */
 	@Override
-	public @Nullable String getName() {
+	public @Nonnull String getName() {
 		return name;
 	}
 
@@ -247,7 +247,7 @@ public class CustomerImpl implements Customer {
 	/**
 	 * Returns the default converter for {@link DateOnly} values.
 	 *
-	 * @return the customer-level date converter, or {@code null} if the framework default applies.
+	 * @return the customer-level date converter.
 	 */
 	@Override
 	public @Nonnull Converter<DateOnly> getDefaultDateConverter() {
@@ -266,7 +266,7 @@ public class CustomerImpl implements Customer {
 	/**
 	 * Returns the default converter for {@link DateTime} values.
 	 *
-	 * @return the customer-level date-time converter, or {@code null} if the framework default applies.
+	 * @return the customer-level date-time converter.
 	 */
 	@Override
 	public @Nonnull Converter<DateTime> getDefaultDateTimeConverter() {
@@ -285,7 +285,7 @@ public class CustomerImpl implements Customer {
 	/**
 	 * Returns the default converter for {@link TimeOnly} values.
 	 *
-	 * @return the customer-level time converter, or {@code null} if the framework default applies.
+	 * @return the customer-level time converter.
 	 */
 	@Override
 	public @Nonnull Converter<TimeOnly> getDefaultTimeConverter() {
@@ -304,7 +304,7 @@ public class CustomerImpl implements Customer {
 	/**
 	 * Returns the default converter for {@link Timestamp} values.
 	 *
-	 * @return the customer-level timestamp converter, or {@code null} if the framework default applies.
+	 * @return the customer-level timestamp converter.
 	 */
 	@Override
 	public @Nonnull Converter<Timestamp> getDefaultTimestampConverter() {
@@ -347,7 +347,8 @@ public class CustomerImpl implements Customer {
 	/**
 	 * Resolves the configured home module for this customer.
 	 *
-	 * @return the home module metadata, or {@code null} when no home module is configured.
+	 * @return the home module metadata.
+	 * @throws MetaDataException if the repository does not expose the home module.
 	 */
 	@Override
 	public @Nonnull Module getHomeModule() {
@@ -358,7 +359,8 @@ public class CustomerImpl implements Customer {
 	 * Resolves a module by name for this customer.
 	 *
 	 * @param moduleName the module name to resolve.
-	 * @return the module metadata, or {@code null} if the repository does not expose it.
+	 * @return the module metadata.
+	 * @throws MetaDataException if the repository does not expose the module.
 	 */
 	@Override
 	public @Nonnull Module getModule(@Nonnull String moduleName) {

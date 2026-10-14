@@ -30,7 +30,7 @@ public abstract class AbstractCachingGeoIPService implements GeoIPService {
 	 * This is to be implemented by an extending class.
 	 * 
 	 * @param ipAddress The ip address to look up the country for
-	 * @return The 2-letter country-code, or null if one could not be returned
+	 * @return The geolocation details (including the 2-letter country-code), or {@link IPGeolocation#EMPTY} if they could not be determined
 	 */
 	protected abstract @Nonnull IPGeolocation doGeolocation(@Nonnull String ipAddress);
 }

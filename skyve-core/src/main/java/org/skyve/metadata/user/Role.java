@@ -23,11 +23,19 @@ import jakarta.annotation.Nullable;
  */
 public interface Role extends NamedMetaData, DecoratedMetaData {
 	/**
+	 * Returns the name of this role, unique within its owning module.
+	 *
+	 * @return the role name; never {@code null}
+	 */
+	@Override
+	public @Nonnull String getName();
+
+	/**
 	 * Returns the human-readable description of this role.
 	 *
 	 * <p>For a localised version use {@link #getLocalisedDescription()}.
 	 *
-	 * @return the role description; may be {@code null} if none is specified
+	 * @return the role description
 	 */
 	public @Nonnull String getDescription();
 	

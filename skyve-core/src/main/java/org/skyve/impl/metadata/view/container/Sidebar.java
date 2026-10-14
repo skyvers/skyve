@@ -163,7 +163,7 @@ public class Sidebar extends Container implements Identifiable, Invisible, Relat
 	/**
 	 * Returns the responsive breakpoint that activates floating sidebar behavior.
 	 *
-	 * @return a breakpoint width in pixels, or {@code null} when not configured
+	 * @return a breakpoint width in pixels
 	 */
 	public @Nonnull Integer getFloatingPixelWidthBreakpoint() {
 		return floatingPixelWidthBreakpoint;

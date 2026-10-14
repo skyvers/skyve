@@ -102,7 +102,7 @@ public class ModuleImpl extends AbstractMetaDataMap implements Module {
 	private Map<String, String> properties = new LinkedHashMap<>();
 
 	@Override
-	public @Nullable String getName() {
+	public @Nonnull String getName() {
 		return name;
 	}
 

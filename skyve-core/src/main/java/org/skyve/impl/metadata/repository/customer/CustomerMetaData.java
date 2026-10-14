@@ -253,7 +253,7 @@ public class CustomerMetaData extends NamedMetaData implements ConvertibleMetaDa
 	/**
 	 * Returns module configuration metadata for the customer.
 	 *
-	 * @return customer module metadata, or {@code null}
+	 * @return customer module metadata
 	 */
 	public @Nonnull CustomerModulesMetaData getModules() {
 		return modules;

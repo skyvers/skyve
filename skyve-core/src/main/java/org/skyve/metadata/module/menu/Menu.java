@@ -42,7 +42,7 @@ public interface Menu extends DecoratedMetaData {
 	 * <p>A menu is applicable when its UX/UI restriction list is empty (all variants
 	 * permitted) or contains {@code uxui}.
 	 *
-	 * @param uxui  the UX/UI name to test; may be {@code null} to indicate no variant filter
+	 * @param uxui  the UX/UI name to test
 	 * @return {@code true} if this menu is visible under the given UX/UI
 	 */
 	public boolean isApplicable(@Nonnull String uxui);

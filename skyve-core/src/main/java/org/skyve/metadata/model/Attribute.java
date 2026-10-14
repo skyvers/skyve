@@ -157,10 +157,18 @@ public interface Attribute extends NamedMetaData, DecoratedMetaData {
 		secret
 	}
 	
+		/**
+	 * Returns the name of this attribute, which document conversion requires.
+	 *
+	 * @return The attribute name
+	 */
+	@Override
+	@Nonnull String getName();
+
 	/**
 	 * Returns the i18n resource key (or literal string) for the human-readable attribute label.
 	 *
-	 * @return the display name key; may be {@code null}
+	 * @return the display name key
 	 * @see #getLocalisedDisplayName()
 	 */
 	@Nonnull String getDisplayName();
@@ -280,7 +288,7 @@ public interface Attribute extends NamedMetaData, DecoratedMetaData {
 	/**
 	 * Returns the default widget to use when this attribute is rendered in a generated view.
 	 *
-	 * @return the default input widget; may be {@code null} if not configured
+	 * @return the default input widget, derived from the attribute type if not configured
 	 */
 	@Nonnull InputWidget getDefaultInputWidget();
 	

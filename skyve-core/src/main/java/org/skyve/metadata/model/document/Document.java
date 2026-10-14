@@ -81,7 +81,7 @@ public interface Document extends Model, PersistentMetaData, ReloadableMetaData,
 	 * @param <T> The bean type
 	 * @param customer The customer context
 	 * @param name The name of the dynamic image
-	 * @return The dynamic image definition or null if not found
+	 * @return The dynamic image definition
 	 */
 	public @Nonnull <T extends Bean> DynamicImage<T> getDynamicImage(@Nullable Customer customer, @Nonnull String name);
 
@@ -105,7 +105,7 @@ public interface Document extends Model, PersistentMetaData, ReloadableMetaData,
 	 * 
 	 * @param customer The customer context
 	 * @param relationName The name of the relation
-	 * @return The related document or null if not found
+	 * @return The related document
 	 */
 	public @Nonnull Document getRelatedDocument(@Nonnull Customer customer, @Nonnull String relationName);
 	

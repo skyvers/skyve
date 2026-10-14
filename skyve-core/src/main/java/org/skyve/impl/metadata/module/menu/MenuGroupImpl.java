@@ -30,7 +30,7 @@ public final class MenuGroupImpl extends MenuImpl implements MenuGroup {
 	 * Javadoc from revsa.revnet.menu.MenuItem
 	 */
 	@Override
-	public final @Nullable String getName() {
+	public final @Nonnull String getName() {
 		return name;
 	}
 

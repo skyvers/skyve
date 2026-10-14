@@ -49,10 +49,16 @@ public class CustomerRoleMetaData extends NamedMetaData implements CustomerRole 
 	@XmlJavaTypeAdapter(PropertyMapAdapter.class)
 	private Map<String, String> properties = new LinkedHashMap<>();
 	
+	@Override
+	@SuppressWarnings("null") // conversion rejects a null name
+	public @Nonnull String getName() {
+		return super.getName();
+	}
+
 	/**
 	 * Returns the human-readable role description.
 	 *
-	 * @return role description text, or {@code null}
+	 * @return role description text
 	 */
 	@Override
 	public @Nonnull String getDescription() {

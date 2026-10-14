@@ -34,6 +34,14 @@ import jakarta.annotation.Nullable;
  */
 public interface MenuItem extends NamedMetaData, DecoratedMetaData {
 	/**
+	 * Returns the programmatic name of this menu item, which module menu conversion requires.
+	 *
+	 * @return the menu item name; never {@code null}
+	 */
+	@Override
+	public @Nonnull String getName();
+
+	/**
 	 * Returns the display name of this menu item, localised for the current user locale.
 	 *
 	 * <p>Delegates to {@link Util#i18n(String)} using {@link #getName()} as the
@@ -71,7 +79,7 @@ public interface MenuItem extends NamedMetaData, DecoratedMetaData {
 	 * <p>Returns {@code true} when the UX/UI set is empty (unrestricted) or contains
 	 * {@code uxui}.
 	 *
-	 * @param uxui  the UX/UI name to test; may be {@code null} to bypass UX/UI filtering
+	 * @param uxui  the UX/UI name to test
 	 * @return {@code true} if this item is applicable for the given UX/UI
 	 */
 	public boolean isApplicable(@Nonnull String uxui);

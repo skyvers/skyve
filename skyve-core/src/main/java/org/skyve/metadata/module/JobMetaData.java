@@ -19,6 +19,14 @@ import jakarta.annotation.Nullable;
  * @see org.skyve.metadata.module.Module#getJobs()
  */
 public interface JobMetaData extends NamedMetaData, DecoratedMetaData {
+		/**
+	 * Returns the name of this job, which module conversion requires.
+	 *
+	 * @return The job name
+	 */
+	@Override
+	@Nonnull String getName();
+
 	/**
 	 * Returns the i18n resource key (or literal string) for the human-readable job name.
 	 *

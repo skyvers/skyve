@@ -335,7 +335,8 @@ public abstract class AbstractPersistence implements Persistence {
 	 * @param moduleName the owning module name
 	 * @param documentName the document name within the module
 	 * @param id the bean identifier
-	 * @return the locked bean, or {@code null} when no row exists
+	 * @return the locked bean
+	 * @throws org.skyve.domain.messages.NoResultsException when no row exists
 	 */
 	@Override
 	public final @Nonnull <T extends Bean> T retrieveAndLock(@Nonnull String moduleName,

@@ -143,7 +143,7 @@ public interface View extends NamedMetaData, PersistentMetaData, ReloadableMetaD
 	 *
 	 * <p>For a localised version use {@link #getLocalisedTitle()}.
 	 *
-	 * @return the view title; may be {@code null}
+	 * @return the view title
 	 */
 	public @Nonnull String getTitle();
 

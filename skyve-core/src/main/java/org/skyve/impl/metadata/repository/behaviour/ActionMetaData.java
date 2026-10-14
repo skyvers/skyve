@@ -74,7 +74,7 @@ public class ActionMetaData implements NamedMetaData, ConvertibleMetaData<Action
 	/**
 	 * Returns the logical action name declared in metadata.
 	 *
-	 * @return action name, or {@code null} when unspecified
+	 * @return action name
 	 */
 	@Override
 	public @Nonnull String getName() {
