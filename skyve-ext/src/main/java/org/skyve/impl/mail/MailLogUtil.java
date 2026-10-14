@@ -52,7 +52,7 @@ public class MailLogUtil {
 
 	@FunctionalInterface
 	interface Recorder {
-		void record(MailLogEntry entry);
+		void record(@Nonnull MailLogEntry entry);
 	}
 
 	private static final AtomicReference<Recorder> recorder = new AtomicReference<>();
@@ -77,7 +77,7 @@ public class MailLogUtil {
 		persist(entry);
 	}
 
-	static void setRecorderForTesting(Recorder recorder) {
+	static void setRecorderForTesting(@Nonnull Recorder recorder) {
 		MailLogUtil.recorder.set(recorder);
 	}
 
@@ -114,7 +114,7 @@ public class MailLogUtil {
 		return maskSensitiveCodes(cleaned);
 	}
 
-	private static String normaliseHtmlLineBreaks(String input) {
+	private static @Nonnull String normaliseHtmlLineBreaks(@Nonnull String input) {
 		StringBuilder result = new StringBuilder(input.length());
 		int i = 0;
 		int length = input.length();
@@ -146,7 +146,7 @@ public class MailLogUtil {
 		return result.toString();
 	}
 
-	private static boolean isLineBreakTag(String input, int start, int endExclusive) {
+	private static boolean isLineBreakTag(@Nonnull String input, int start, int endExclusive) {
 		int i = skipWhitespace(input, start, endExclusive);
 		if (!isTagNameAt(input, i, endExclusive, "br")) {
 			return false;
@@ -160,7 +160,7 @@ public class MailLogUtil {
 		return i == endExclusive;
 	}
 
-	private static boolean isBlockClosingTag(String input, int start, int endExclusive) {
+	private static boolean isBlockClosingTag(@Nonnull String input, int start, int endExclusive) {
 		int i = skipWhitespace(input, start, endExclusive);
 		if ((i >= endExclusive) || (input.charAt(i) != '/')) {
 			return false;
@@ -185,7 +185,7 @@ public class MailLogUtil {
 		return i == endExclusive;
 	}
 
-	private static int skipWhitespace(String input, int start, int endExclusive) {
+	private static int skipWhitespace(@Nonnull String input, int start, int endExclusive) {
 		int i = start;
 		while ((i < endExclusive) && Character.isWhitespace(input.charAt(i))) {
 			i++;
@@ -193,7 +193,7 @@ public class MailLogUtil {
 		return i;
 	}
 
-	private static boolean isTagNameAt(String input, int start, int endExclusive, String name) {
+	private static boolean isTagNameAt(@Nonnull String input, int start, int endExclusive, @Nonnull String name) {
 		if ((start + name.length()) > endExclusive) {
 			return false;
 		}
@@ -204,7 +204,7 @@ public class MailLogUtil {
 		return Character.isLetterOrDigit(c);
 	}
 
-	private static boolean isBlockClosingTagName(String name) {
+	private static boolean isBlockClosingTagName(@Nonnull String name) {
 		switch (name) {
 		case "p":
 		case "div":
@@ -225,7 +225,7 @@ public class MailLogUtil {
 		}
 	}
 
-	private static String collapseHorizontalWhitespace(String input) {
+	private static @Nonnull String collapseHorizontalWhitespace(@Nonnull String input) {
 		StringBuilder result = new StringBuilder(input.length());
 		boolean inHorizontalWhitespace = false;
 		for (int i = 0, length = input.length(); i < length; i++) {
@@ -248,7 +248,7 @@ public class MailLogUtil {
 		return (c == ' ') || (c == '\t') || (c == '\f') || (c == '\u000B');
 	}
 
-	private static String trimSpacesAroundNewlines(String input) {
+	private static @Nonnull String trimSpacesAroundNewlines(@Nonnull String input) {
 		StringBuilder result = new StringBuilder(input.length());
 		for (int i = 0, length = input.length(); i < length; i++) {
 			char c = input.charAt(i);
@@ -266,7 +266,7 @@ public class MailLogUtil {
 		return result.toString();
 	}
 
-	private static String collapseExcessNewlines(String input) {
+	private static @Nonnull String collapseExcessNewlines(@Nonnull String input) {
 		StringBuilder result = new StringBuilder(input.length());
 		int consecutiveNewlines = 0;
 		for (int i = 0, length = input.length(); i < length; i++) {
@@ -286,7 +286,7 @@ public class MailLogUtil {
 	}
 
 	@SuppressWarnings("java:S3776") // Complexity OK
-	private static String maskSensitiveCodes(String body) {
+	private static @Nonnull String maskSensitiveCodes(@Nonnull String body) {
 		String lower = body.toLowerCase(Locale.ROOT);
 		StringBuilder result = new StringBuilder(body);
 		int length = body.length();
@@ -344,7 +344,7 @@ public class MailLogUtil {
 		return result.toString();
 	}
 
-	private static boolean startsWithWord(String lower, int start, String word) {
+	private static boolean startsWithWord(@Nonnull String lower, int start, @Nonnull String word) {
 		int end = start + word.length();
 		if (end > lower.length()) {
 			return false;
@@ -362,16 +362,16 @@ public class MailLogUtil {
 		return Character.isLetterOrDigit(c) || (c == '_');
 	}
 
-	private static MailLogEntry createSingleEntry(Mail mail, MailDispatchOutcome outcome) {
+	private static @Nonnull MailLogEntry createSingleEntry(@Nonnull Mail mail, @Nonnull MailDispatchOutcome outcome) {
 		return createEntry(List.of(mail), outcome, false);
 	}
 
-	private static MailLogEntry createBulkEntry(List<Mail> mails, MailDispatchOutcome outcome) {
+	private static @Nonnull MailLogEntry createBulkEntry(@Nonnull List<Mail> mails, @Nonnull MailDispatchOutcome outcome) {
 		return createEntry(mails, outcome, true);
 	}
 
 	@SuppressWarnings("java:S3776") // Complexity OK
-	private static MailLogEntry createEntry(List<Mail> mails, MailDispatchOutcome outcome, boolean bulk) {
+	private static @Nonnull MailLogEntry createEntry(@Nonnull List<Mail> mails, @Nonnull MailDispatchOutcome outcome, boolean bulk) {
 		// TreeSet values are persisted/displayed, so keep deterministic ordering.
 		TreeSet<String> toRecipients = new TreeSet<>();
 		TreeSet<String> ccRecipients = new TreeSet<>();
@@ -438,7 +438,7 @@ public class MailLogUtil {
 								Long.valueOf(bodyVariants.size()));
 	}
 
-	private static @Nullable String join(TreeSet<String> values) {
+	private static @Nullable String join(@Nonnull TreeSet<String> values) {
 		if (values.isEmpty()) {
 			return null;
 		}
@@ -453,7 +453,7 @@ public class MailLogUtil {
 	 * Using a fresh persistence instance keeps mail logging best-effort: failures here do not poison the
 	 * caller's unit of work, and the dispatch audit record can still commit independently of caller rollback.
 	 */
-	private static void persist(MailLogEntry entry) {
+	private static void persist(@Nonnull MailLogEntry entry) {
 		Recorder r = recorder.get();
 		if (r != null) {
 			r.record(entry);
@@ -591,26 +591,26 @@ public class MailLogUtil {
 		private final Long bodyVariantCount;
 
 		@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
-		private MailLogEntry(Timestamp timestamp,
-							String toRecipients,
-							String ccRecipients,
-							String bccRecipients,
-							String subject,
-							String bodyExcerpt,
-							String attachmentFileNames,
-							String dispatchStatus,
-							String provider,
-							String providerMessageId,
-							String relayStatus,
-							String relayDetail,
-							String errorDetail,
-							Boolean isBulk,
-							Long mailCount,
-							Long recipientCount,
-							Boolean hasMultipleSubjects,
-							Long subjectVariantCount,
-							Boolean hasMultipleBodies,
-							Long bodyVariantCount) {
+		private MailLogEntry(@Nonnull Timestamp timestamp,
+							@Nullable String toRecipients,
+							@Nullable String ccRecipients,
+							@Nullable String bccRecipients,
+							@Nullable String subject,
+							@Nullable String bodyExcerpt,
+							@Nullable String attachmentFileNames,
+							@Nonnull String dispatchStatus,
+							@Nullable String provider,
+							@Nullable String providerMessageId,
+							@Nullable String relayStatus,
+							@Nullable String relayDetail,
+							@Nullable String errorDetail,
+							@Nonnull Boolean isBulk,
+							@Nonnull Long mailCount,
+							@Nonnull Long recipientCount,
+							@Nonnull Boolean hasMultipleSubjects,
+							@Nonnull Long subjectVariantCount,
+							@Nonnull Boolean hasMultipleBodies,
+							@Nonnull Long bodyVariantCount) {
 			this.timestamp = timestamp;
 			this.toRecipients = toRecipients;
 			this.ccRecipients = ccRecipients;
@@ -633,83 +633,83 @@ public class MailLogUtil {
 			this.bodyVariantCount = bodyVariantCount;
 		}
 
-		Timestamp getTimestamp() {
+		@Nonnull Timestamp getTimestamp() {
 			return timestamp;
 		}
 
-		String getToRecipients() {
+		@Nullable String getToRecipients() {
 			return toRecipients;
 		}
 
-		String getCcRecipients() {
+		@Nullable String getCcRecipients() {
 			return ccRecipients;
 		}
 
-		String getBccRecipients() {
+		@Nullable String getBccRecipients() {
 			return bccRecipients;
 		}
 
-		String getSubject() {
+		@Nullable String getSubject() {
 			return subject;
 		}
 
-		String getBodyExcerpt() {
+		@Nullable String getBodyExcerpt() {
 			return bodyExcerpt;
 		}
 
-		String getAttachmentFileNames() {
+		@Nullable String getAttachmentFileNames() {
 			return attachmentFileNames;
 		}
 
-		String getDispatchStatus() {
+		@Nonnull String getDispatchStatus() {
 			return dispatchStatus;
 		}
 
-		String getProvider() {
+		@Nullable String getProvider() {
 			return provider;
 		}
 
-		String getProviderMessageId() {
+		@Nullable String getProviderMessageId() {
 			return providerMessageId;
 		}
 
-		String getRelayStatus() {
+		@Nullable String getRelayStatus() {
 			return relayStatus;
 		}
 
-		String getRelayDetail() {
+		@Nullable String getRelayDetail() {
 			return relayDetail;
 		}
 
-		String getErrorDetail() {
+		@Nullable String getErrorDetail() {
 			return errorDetail;
 		}
 
-		Boolean getIsBulk() {
+		@Nonnull Boolean getIsBulk() {
 			return isBulk;
 		}
 
-		Long getMailCount() {
+		@Nonnull Long getMailCount() {
 			return mailCount;
 		}
 
-		Long getRecipientCount() {
+		@Nonnull Long getRecipientCount() {
 			return recipientCount;
 		}
 
-		Boolean getHasMultipleSubjects() {
+		@Nonnull Boolean getHasMultipleSubjects() {
 			return hasMultipleSubjects;
 		}
 
-		Long getSubjectVariantCount() {
+		@Nonnull Long getSubjectVariantCount() {
 			return subjectVariantCount;
 		}
 
-		Boolean getHasMultipleBodies() {
+		@Nonnull Boolean getHasMultipleBodies() {
 			return hasMultipleBodies;
 		}
 
-		Long getBodyVariantCount() {
+		@Nonnull Long getBodyVariantCount() {
 			return bodyVariantCount;
 		}
 	}

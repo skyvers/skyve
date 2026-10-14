@@ -20,6 +20,9 @@ import freemarker.template.TemplateModelException;
 import freemarker.template.TemplateNumberModel;
 import freemarker.template.TemplateScalarModel;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * FreeMarker user-defined directive which loads a specified resource using Skyve's fall-through resource handling
  * and outputs a HTML img with a data URL set to the loaded image.
@@ -62,7 +65,7 @@ public class ImageDirective implements TemplateDirectiveModel {
 
 	@Override
 	@SuppressWarnings("java:S3776") // Complexity OK
-	public void execute(Environment env, Map params, TemplateModel[] loopVars, TemplateDirectiveBody body)
+	public void execute(@Nonnull Environment env, @Nonnull Map params, @Nonnull TemplateModel[] loopVars, @Nullable TemplateDirectiveBody body)
 	throws TemplateException, IOException {
 		if (params.isEmpty()) {
 			throw new TemplateModelException("This directive requires parameters.");

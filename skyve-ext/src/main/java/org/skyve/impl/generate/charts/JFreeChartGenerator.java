@@ -33,6 +33,8 @@ import org.skyve.impl.metadata.view.widget.Chart.ChartType;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.view.model.chart.ChartData;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * Generates JFreeChart chart images from Skyve chart model data.
  *
@@ -55,7 +57,7 @@ public class JFreeChartGenerator {
 	private int pixelWidth = 0;
 	private int pixelHeight = 0;
 
-	public JFreeChartGenerator(ChartData data, int pixelWidth, int pixelHeight) {
+	public JFreeChartGenerator(@Nonnull ChartData data, int pixelWidth, int pixelHeight) {
 		this.data = data;
 		this.pixelWidth = pixelWidth;
 		this.pixelHeight = pixelHeight;
@@ -64,7 +66,7 @@ public class JFreeChartGenerator {
 	/**
 	 * Performs chart.
 	 */
-	public JFreeChart chart(ChartType type) {
+	public @Nonnull JFreeChart chart(@Nonnull ChartType type) {
 		JFreeChart result = null;
 		
 		if (ChartType.bar.equals(type)) {
@@ -101,21 +103,21 @@ public class JFreeChartGenerator {
 	/**
 	 * Performs image.
 	 */
-	public BufferedImage image(JFreeChart chart) {
+	public @Nonnull BufferedImage image(@Nonnull JFreeChart chart) {
 		return chart.createBufferedImage(pixelWidth, pixelHeight);
 	}
 
 	/**
 	 * Performs image.
 	 */
-	public BufferedImage image(ChartType type) {
+	public @Nonnull BufferedImage image(@Nonnull ChartType type) {
 		return image(chart(type));
 	}
 
 	/**
 	 * Performs bar.
 	 */
-	public JFreeChart bar() {
+	public @Nonnull JFreeChart bar() {
 		CategoryDataset dataSet = dataSet();
 		JFreeChart result = ChartFactory.createBarChart(data.getTitle(),
 															"",
@@ -136,7 +138,7 @@ public class JFreeChartGenerator {
 	/**
 	 * Performs horizontalBar.
 	 */
-	public JFreeChart horizontalBar() {
+	public @Nonnull JFreeChart horizontalBar() {
 		CategoryDataset dataSet = dataSet();
 		JFreeChart result = ChartFactory.createBarChart(data.getTitle(),
 															"",
@@ -157,7 +159,7 @@ public class JFreeChartGenerator {
 	/**
 	 * Performs lineArea.
 	 */
-	public JFreeChart lineArea() {
+	public @Nonnull JFreeChart lineArea() {
 		CategoryDataset dataSet = dataSet();
 		JFreeChart result = ChartFactory.createAreaChart(data.getTitle(),
 															"",
@@ -176,7 +178,7 @@ public class JFreeChartGenerator {
 	/**
 	 * Performs line.
 	 */
-	public JFreeChart line() {
+	public @Nonnull JFreeChart line() {
 		CategoryDataset dataSet = dataSet();
 		JFreeChart result = ChartFactory.createLineChart(data.getTitle(),
 															"",
@@ -198,7 +200,7 @@ public class JFreeChartGenerator {
 	/**
 	 * Performs pie.
 	 */
-	public JFreeChart pie() {
+	public @Nonnull JFreeChart pie() {
 		PieDataset<?> dataSet = pieDataSet();
 		JFreeChart result = ChartFactory.createPieChart(data.getTitle(), dataSet, true, false, false);
 		configurePieChart(result);
@@ -210,7 +212,7 @@ public class JFreeChartGenerator {
 	/**
 	 * Performs doughnut.
 	 */
-	public JFreeChart doughnut() {
+	public @Nonnull JFreeChart doughnut() {
 		PieDataset<?> dataSet = pieDataSet();
 		JFreeChart result = ChartFactory.createRingChart(data.getTitle(), dataSet, true, false, false);
 		configurePieChart(result);
@@ -222,7 +224,7 @@ public class JFreeChartGenerator {
 	/**
 	 * Performs polarArea.
 	 */
-	public JFreeChart polarArea() {
+	public @Nonnull JFreeChart polarArea() {
 		XYSeriesCollection dataSet = new XYSeriesCollection();
 		dataSet.setNotify(false);
 		
@@ -276,7 +278,7 @@ public class JFreeChartGenerator {
 	/**
 	 * Performs radar.
 	 */
-	public JFreeChart radar() {
+	public @Nonnull JFreeChart radar() {
 		CategoryDataset dataSet = dataSet();
 	    SpiderWebPlot plot = new SpiderWebPlot(dataSet);
 		plot.setBackgroundPaint(null);
@@ -295,7 +297,7 @@ public class JFreeChartGenerator {
 		return result;
 	}
 
-	private CategoryDataset dataSet() {
+	private @Nonnull CategoryDataset dataSet() {
 		DefaultCategoryDataset result = new DefaultCategoryDataset();
 		
 		result.setNotify(false);
@@ -310,11 +312,11 @@ public class JFreeChartGenerator {
 		return result;
 	}
 	
-	private PieDataset<?> pieDataSet() {
+	private @Nonnull PieDataset<?> pieDataSet() {
 		return new CategoryToPieDataset(dataSet(), TableOrder.BY_ROW, 0);
 	}
 	
-	private void configureCategoryChart(JFreeChart chart) {
+	private void configureCategoryChart(@Nonnull JFreeChart chart) {
 		chart.setBackgroundPaint(null);
 	    chart.setBorderVisible(false);
 		
@@ -347,7 +349,7 @@ public class JFreeChartGenerator {
 		plot.getRangeAxis().setLabelFont(THEME_RANGE_FONT);
 	}
 	
-	private void configurePieChart(JFreeChart chart) {
+	private void configurePieChart(@Nonnull JFreeChart chart) {
 		chart.setBackgroundPaint(null);
 	    chart.setBorderVisible(false);
 
@@ -381,7 +383,7 @@ public class JFreeChartGenerator {
 		}
 	}
 	
-	private void postProcess(JFreeChart chart) {
+	private void postProcess(@Nonnull JFreeChart chart) {
 		String postProcessor = data.getJFreeChartPostProcessorClassName();
 		if (postProcessor == null) {
 			Customer c = CORE.getCustomer();

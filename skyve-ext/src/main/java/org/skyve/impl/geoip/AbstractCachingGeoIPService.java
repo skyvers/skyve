@@ -15,7 +15,7 @@ public abstract class AbstractCachingGeoIPService implements GeoIPService {
 	 * Overridden to hit the cache first, and call doGeolocation() if its a miss.
 	 */
 	@Override
-	public final IPGeolocation geolocate(String ipAddress) {
+	public final @Nonnull IPGeolocation geolocate(@Nonnull String ipAddress) {
 		Cache<String, IPGeolocation> cache = StateUtil.getGeoIPs();
 		IPGeolocation result = cache.get(ipAddress);
 		if (result == null) {

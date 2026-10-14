@@ -28,6 +28,8 @@ import org.skyve.persistence.Persistence;
 import org.skyve.persistence.SQL;
 import org.skyve.util.Util;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.inject.Inject;
 
 /**
@@ -83,7 +85,7 @@ public class RecoverArchiveJob extends CancellableJob {
         getLog().add("Recovery done");
     }
 
-    private void attemptRecovery(CorruptArchiveError error) throws IOException, InterruptedException {
+    private void attemptRecovery(@Nonnull CorruptArchiveError error) throws IOException, InterruptedException {
         LOGGER.debug("Attempting recovery of: {}", error.getBizKey());
 
         // safety check on age of error?
@@ -117,7 +119,7 @@ public class RecoverArchiveJob extends CancellableJob {
         return;
     }
 
-    private void log(String msg) {
+    private void log(@Nonnull String msg) {
         getLog().add(msg);
         LOGGER.debug(msg);
     }
@@ -129,7 +131,7 @@ public class RecoverArchiveJob extends CancellableJob {
      * @param archivePath
      * @param config
      */
-    private void doRecovery(CorruptArchiveError error, Path archivePath, ArchiveDocConfig config) {
+    private void doRecovery(@Nonnull CorruptArchiveError error, @Nonnull Path archivePath, @Nonnull ArchiveDocConfig config) {
         persistence.begin();
 
         // Update error resolution
@@ -160,7 +162,7 @@ public class RecoverArchiveJob extends CancellableJob {
     /**
      * Try to move the corrupt archive to a new path.
      */
-    private void renameArchive(final Path archivePath) {
+    private void renameArchive(final @Nonnull Path archivePath) {
         Path destination = chooseDestinationPath(archivePath);
         log("Renaming corrupted archive file from " + archivePath + " to " + destination);
 
@@ -179,7 +181,7 @@ public class RecoverArchiveJob extends CancellableJob {
      * @param archivePath
      * @return
      */
-    private Path chooseDestinationPath(final Path archivePath) {
+    private @Nonnull Path chooseDestinationPath(final @Nonnull Path archivePath) {
         for (int i = 0; i < 100; ++i) {
             Path destination = archivePath.resolveSibling(archivePath.getFileName() + "." + i + CORRUPT_FILE_SUFFIX);
             if (Files.notExists(destination)) {
@@ -197,7 +199,7 @@ public class RecoverArchiveJob extends CancellableJob {
      * @param error
      * @return
      */
-    private int revertSoftDeletes(CorruptArchiveError error) {
+    private int revertSoftDeletes(@Nonnull CorruptArchiveError error) {
         Document doc = getDocument(error.getArchiveTypeModule(), error.getArchiveTypeDocument());
         @SuppressWarnings("null")
 		String tableName = doc.getPersistent()
@@ -211,7 +213,7 @@ public class RecoverArchiveJob extends CancellableJob {
         return undoDelete.execute();
     }
 
-    private String undoSoftDeleteSQL(String tableName) {
+    private @Nonnull String undoSoftDeleteSQL(@Nonnull String tableName) {
         final String undoSoftDeleteSQL = """
                 update %s
                   set  %s = null
@@ -223,7 +225,7 @@ public class RecoverArchiveJob extends CancellableJob {
                 archiveTimestampPropertyName, archiveFilenamePropertyName, archiveFilenamePropertyName);
     }
 
-    private Document getDocument(String module, String document) {
+    private @Nonnull Document getDocument(@Nonnull String module, @Nonnull String document) {
         Customer customer = CORE.getUser()
                                 .getCustomer();
 
@@ -235,7 +237,7 @@ public class RecoverArchiveJob extends CancellableJob {
      * Delete references in the lucene index. Both the progress entry, and
      * any document references which refer to the given filename.
      */
-    private void deleteIndexReferences(ArchiveDocConfig config, String filename) {
+    private void deleteIndexReferences(@Nonnull ArchiveDocConfig config, @Nonnull String filename) {
         Query archiveContents = new TermQuery(new Term(IndexArchivesJob.FILENAME_FIELD, filename));
         Query progressContents = new TermQuery(new Term(IndexArchivesJob.PROGRESS_FILENAME_FIELD, filename));
 
@@ -256,7 +258,7 @@ public class RecoverArchiveJob extends CancellableJob {
     /**
      * Blow up if the .archive file doesn't exist, or isn't file.
      */
-    private void assertFileExists(ArchiveDocConfig config, Path archivePath) {
+    private void assertFileExists(@Nonnull ArchiveDocConfig config, @Nonnull Path archivePath) {
         if (!Files.isRegularFile(archivePath)) {
 
             String msg = String.format("Corrupt archive path '%s' is invalid, unable to continue; doc config: %s",
@@ -268,7 +270,7 @@ public class RecoverArchiveJob extends CancellableJob {
         }
     }
 
-    private ArchiveDocConfig findConfig(CorruptArchiveError error) {
+    private @Nonnull ArchiveDocConfig findConfig(@Nonnull CorruptArchiveError error) {
         String module = error.getArchiveTypeModule();
         String document = error.getArchiveTypeDocument();
         return Util.getArchiveConfig()
@@ -276,7 +278,7 @@ public class RecoverArchiveJob extends CancellableJob {
                    .orElseThrow(() -> new RecoveryException("Unable to find archive config for " + module + "." + document));
     }
 
-    private List<CorruptArchiveError> listUnresolvedErrors() {
+    private @Nonnull List<CorruptArchiveError> listUnresolvedErrors() {
         DocumentQuery errorQuery = persistence.newDocumentQuery(CorruptArchiveError.MODULE_NAME, CorruptArchiveError.DOCUMENT_NAME);
         errorQuery.getFilter()
                   .addEquals(CorruptArchiveError.resolutionPropertyName, Resolution.unresolved);
@@ -293,7 +295,7 @@ public class RecoverArchiveJob extends CancellableJob {
          *
          * @param msg Failure description.
          */
-        public RecoveryException(String msg) {
+        public RecoveryException(@Nullable String msg) {
             super(msg);
         }
 
@@ -304,7 +306,7 @@ public class RecoverArchiveJob extends CancellableJob {
          * @param cause Underlying cause.
          */
 
-        public RecoveryException(String msg, Throwable cause) {
+        public RecoveryException(@Nullable String msg, @Nullable Throwable cause) {
             super(msg, cause);
         }
     }

@@ -207,6 +207,7 @@ import org.skyve.util.OWASP;
 import org.skyve.util.Util;
 
 import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
@@ -237,7 +238,7 @@ public class MetaDataServlet extends HttpServlet {
 	 */
 	@Override
 	@SuppressWarnings("java:S1989") // there exists JavaEE error pages
-	protected void doGet(HttpServletRequest request, HttpServletResponse response)
+	protected void doGet(@Nonnull HttpServletRequest request, @Nonnull HttpServletResponse response)
 	throws ServletException, IOException {
     	response.setContentType(MimeType.json.toString());
         response.setCharacterEncoding(StandardCharsets.UTF_8.name());
@@ -290,11 +291,11 @@ public class MetaDataServlet extends HttpServlet {
 	 */
 	@Override
 	@SuppressWarnings("java:S1989") // there exists JavaEE error pages
-	protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+	protected void doPost(@Nonnull HttpServletRequest req, @Nonnull HttpServletResponse resp) throws ServletException, IOException {
 		doGet(req, resp);
 	}
 
-	private static void metadata(User user, String uxui, String chosenModuleName, PrintWriter pw) throws IOException {
+	private static void metadata(@Nonnull User user, @Nonnull String uxui, @Nullable String chosenModuleName, @Nonnull PrintWriter pw) throws IOException {
 		StringBuilder menus = new StringBuilder(2048);
 		StringBuilder dataSources = new StringBuilder(2048);
 		processModules(uxui, user, chosenModuleName, menus, dataSources);
@@ -316,11 +317,11 @@ public class MetaDataServlet extends HttpServlet {
 	}
 	
 	@SuppressWarnings("java:S3776") // Complexity OK
-	private static void processModules(final String uxui, 
-										final User user,
-										final String chosenModuleName,
-										final StringBuilder menuJson,
-										final StringBuilder dataSourceJson) {
+	private static void processModules(final @Nonnull String uxui, 
+										final @Nonnull User user,
+										final @Nullable String chosenModuleName,
+										final @Nonnull StringBuilder menuJson,
+										final @Nonnull StringBuilder dataSourceJson) {
 		final Customer customer = user.getCustomer();
 		
 		menuJson.append("[");
@@ -329,7 +330,7 @@ public class MetaDataServlet extends HttpServlet {
 		new MenuRenderer(uxui, chosenModuleName) {
 			/** {@inheritDoc} */
 			@Override
-			public void renderModuleMenu(Menu menu, Module menuModule, boolean open) {
+			public void renderModuleMenu(@Nonnull Menu menu, @Nonnull Module menuModule, boolean open) {
 				menuJson.append("{\"module\":\"").append(OWASP.escapeJsonString(menuModule.getName()));
 				menuJson.append("\",\"title\":\"").append(OWASP.escapeJsonString(menuModule.getLocalisedTitle()));
 				menuJson.append("\",\"open\":").append(open).append(",\"menu\":[");
@@ -337,19 +338,19 @@ public class MetaDataServlet extends HttpServlet {
 
 			/** {@inheritDoc} */
 			@Override
-			public void renderMenuGroup(MenuGroup group, Module menuModule) {
+			public void renderMenuGroup(@Nonnull MenuGroup group, @Nonnull Module menuModule) {
 				menuJson.append("{\"group\":\"").append(OWASP.escapeJsonString(group.getLocalisedName())).append("\",\"items\":[");
 			}
 			
 			/** {@inheritDoc} */
 			@Override
-			public void renderCalendarItem(CalendarItem item,
-											Module menuModule,
-											Module itemModule,
-											Document itemDocument,
-											String itemQueryName,
-											String icon16,
-											String iconStyleClass) {
+			public void renderCalendarItem(@Nonnull CalendarItem item,
+											@Nonnull Module menuModule,
+											@Nonnull Module itemModule,
+											@Nonnull Document itemDocument,
+											@Nullable String itemQueryName,
+											@Nullable String icon16,
+											@Nullable String iconStyleClass) {
 				menuJson.append("{\"calendar\":\"").append(OWASP.escapeJsonString(item.getLocalisedName()));
 				if (iconStyleClass != null) {
 					menuJson.append("\",\"fontIcon\":\"").append(OWASP.escapeJsonString(iconStyleClass));
@@ -374,12 +375,12 @@ public class MetaDataServlet extends HttpServlet {
 			
 			/** {@inheritDoc} */
 			@Override
-			public void renderEditItem(EditItem item,
-										Module menuModule,
-										Module itemModule,
-										Document itemDocument,
-										String icon16,
-										String iconStyleClass) {
+			public void renderEditItem(@Nonnull EditItem item,
+										@Nonnull Module menuModule,
+										@Nonnull Module itemModule,
+										@Nonnull Document itemDocument,
+										@Nullable String icon16,
+										@Nullable String iconStyleClass) {
 				menuJson.append("{\"edit\":\"").append(OWASP.escapeJsonString(item.getLocalisedName()));
 				if (iconStyleClass != null) {
 					menuJson.append("\",\"fontIcon\":\"").append(OWASP.escapeJsonString(iconStyleClass));
@@ -392,20 +393,20 @@ public class MetaDataServlet extends HttpServlet {
 
 			/** {@inheritDoc} */
 			@Override
-			public void renderLinkItem(LinkItem item, Module menuModule, boolean relative, String absoluteHref) {
+			public void renderLinkItem(@Nonnull LinkItem item, @Nonnull Module menuModule, boolean relative, @Nonnull String absoluteHref) {
 				menuJson.append("{\"link\":\"").append(OWASP.escapeJsonString(item.getLocalisedName()));
 				menuJson.append("\",\"href\":\"").append(OWASP.escapeJsonString(absoluteHref)).append("\"},");
 			}
 			
 			/** {@inheritDoc} */
 			@Override
-			public void renderListItem(ListItem item,
-										Module menuModule,
-										Module itemModule,
-										Document itemDocument,
-										String itemQueryName,
-										String icon16,
-										String iconStyleClass) {
+			public void renderListItem(@Nonnull ListItem item,
+										@Nonnull Module menuModule,
+										@Nonnull Module itemModule,
+										@Nonnull Document itemDocument,
+										@Nullable String itemQueryName,
+										@Nullable String icon16,
+										@Nullable String iconStyleClass) {
 				menuJson.append("{\"list\":\"").append(OWASP.escapeJsonString(item.getLocalisedName()));
 				if (iconStyleClass != null) {
 					menuJson.append("\",\"fontIcon\":\"").append(OWASP.escapeJsonString(iconStyleClass));
@@ -428,13 +429,13 @@ public class MetaDataServlet extends HttpServlet {
 			
 			/** {@inheritDoc} */
 			@Override
-			public void renderMapItem(MapItem item,
-										Module menuModule,
-										Module itemModule,
-										Document itemDocument,
-										String itemQueryName,
-										String icon16,
-										String iconStyleClass) {
+			public void renderMapItem(@Nonnull MapItem item,
+										@Nonnull Module menuModule,
+										@Nonnull Module itemModule,
+										@Nonnull Document itemDocument,
+										@Nullable String itemQueryName,
+										@Nullable String icon16,
+										@Nullable String iconStyleClass) {
 				menuJson.append("{\"map\":\"").append(OWASP.escapeJsonString(item.getLocalisedName()));
 				if (iconStyleClass != null) {
 					menuJson.append("\",\"fontIcon\":\"").append(OWASP.escapeJsonString(iconStyleClass));
@@ -458,13 +459,13 @@ public class MetaDataServlet extends HttpServlet {
 			
 			/** {@inheritDoc} */
 			@Override
-			public void renderTreeItem(TreeItem item,
-										Module menuModule,
-										Module itemModule,
-										Document itemDocument,
-										String itemQueryName,
-										String icon16,
-										String iconStyleClass) {
+			public void renderTreeItem(@Nonnull TreeItem item,
+										@Nonnull Module menuModule,
+										@Nonnull Module itemModule,
+										@Nonnull Document itemDocument,
+										@Nullable String itemQueryName,
+										@Nullable String icon16,
+										@Nullable String iconStyleClass) {
 				menuJson.append("{\"tree\":\"").append(OWASP.escapeJsonString(item.getLocalisedName()));
 				if (iconStyleClass != null) {
 					menuJson.append("\",\"fontIcon\":\"").append(OWASP.escapeJsonString(iconStyleClass));
@@ -487,23 +488,23 @@ public class MetaDataServlet extends HttpServlet {
 			
 			/** {@inheritDoc} */
 			@Override
-			public void renderedMenuGroup(MenuGroup group, Module menuModule) {
+			public void renderedMenuGroup(@Nonnull MenuGroup group, @Nonnull Module menuModule) {
 				menuJson.setLength(menuJson.length() - 1); // remove trailing comma
 				menuJson.append("]},");
 			}
 			
 			/** {@inheritDoc} */
 			@Override
-			public void renderedModuleMenu(Menu menu, Module menuModule, boolean open) {
+			public void renderedModuleMenu(@Nonnull Menu menu, @Nonnull Module menuModule, boolean open) {
 				menuJson.setLength(menuJson.length() - 1); // remove trailing comma
 				menuJson.append("]},");
 			}
 
 			private Set<String> visitedDataSourceNames = new TreeSet<>();
 			
-			private void addDataSource(Module menuModule,
-										Document itemDocument,
-										AbstractDocumentOrQueryOrModelMenuItem item) {
+			private void addDataSource(@Nonnull Module menuModule,
+										@Nonnull Document itemDocument,
+										@Nonnull AbstractDocumentOrQueryOrModelMenuItem item) {
 				String queryName = item.getQueryName();
 				String modelName = item.getModelName();
 				String documentName = item.getDocumentName();
@@ -531,7 +532,7 @@ public class MetaDataServlet extends HttpServlet {
 				}
 			}
 			
-			private void addQueryDataSource(MetaDataQueryDefinition query) {
+			private void addQueryDataSource(@Nonnull MetaDataQueryDefinition query) {
 				String documentName = query.getDocumentName();
 				Module documentModule = query.getDocumentModule(customer);
 				Module owningModule = query.getOwningModule();
@@ -822,10 +823,10 @@ public class MetaDataServlet extends HttpServlet {
 	}
 	
 	@SuppressWarnings("java:S3776") // Complexity OK
-	private static StringBuilder view(User user,
-										String uxui,
-										String moduleName,
-										String documentName,
+	private static @Nonnull StringBuilder view(@Nonnull User user,
+										@Nonnull String uxui,
+										@Nonnull String moduleName,
+										@Nonnull String documentName,
 										boolean topFormLabelAlignemnt) {
 		final StringBuilder result = new StringBuilder(5120);
 		final StringBuilder actionsJSON = new StringBuilder(2048);
@@ -897,7 +898,7 @@ public class MetaDataServlet extends HttpServlet {
 
 			/** {@inheritDoc} */
 			@Override
-			public void renderVBox(String borderTitle, VBox vbox) {
+			public void renderVBox(@Nullable String borderTitle, @Nonnull VBox vbox) {
 				result.append("{\"type\":\"vbox\"");
 				processIdentifiable(vbox);
 				processBorder(vbox, borderTitle);
@@ -918,7 +919,7 @@ public class MetaDataServlet extends HttpServlet {
 			
 			/** {@inheritDoc} */
 			@Override
-			public void renderedVBox(String borderTitle, VBox vbox) {
+			public void renderedVBox(@Nullable String borderTitle, @Nonnull VBox vbox) {
 				processedContainer(vbox);
 				result.setLength(result.length() - 1); // remove last comma
 				result.append("},");
@@ -926,7 +927,7 @@ public class MetaDataServlet extends HttpServlet {
 			
 			/** {@inheritDoc} */
 			@Override
-			public void renderHBox(String borderTitle, HBox hbox) {
+			public void renderHBox(@Nullable String borderTitle, @Nonnull HBox hbox) {
 				result.append("{\"type\":\"hbox\"");
 				processIdentifiable(hbox);
 				processBorder(hbox, borderTitle);
@@ -947,7 +948,7 @@ public class MetaDataServlet extends HttpServlet {
 			
 			/** {@inheritDoc} */
 			@Override
-			public void renderedHBox(String title, HBox hbox) {
+			public void renderedHBox(@Nullable String title, @Nonnull HBox hbox) {
 				processedContainer(hbox);
 				result.setLength(result.length() - 1); // remove last comma
 				result.append("},");
@@ -955,7 +956,7 @@ public class MetaDataServlet extends HttpServlet {
 			
 			/** {@inheritDoc} */
 			@Override
-			public void renderTabPane(TabPane tabPane) {
+			public void renderTabPane(@Nonnull TabPane tabPane) {
 				result.append("{\"type\":\"tabPane\"");
 				processIdentifiable(tabPane);
 				String binding = tabPane.getSelectedTabIndexBinding();
@@ -971,14 +972,14 @@ public class MetaDataServlet extends HttpServlet {
 			
 			/** {@inheritDoc} */
 			@Override
-			public void renderedTabPane(TabPane tabPane) {
+			public void renderedTabPane(@Nonnull TabPane tabPane) {
 				result.setLength(result.length() - 1); // remove last comma
 				result.append("]},");
 			}
 			
 			/** {@inheritDoc} */
 			@Override
-			public void renderTab(String title, String icon16x16Url, Tab tab) {
+			public void renderTab(@Nullable String title, @Nullable String icon16x16Url, @Nonnull Tab tab) {
 				result.append("{\"type\":\"tab\",\"title\":\"");
 				result.append(OWASP.escapeJsonString(title)).append('"');
 				result.append(",\"escapeTitle\":").append(ViewRenderer.shouldEscape(tab.getEscapeTitle()));
@@ -997,7 +998,7 @@ public class MetaDataServlet extends HttpServlet {
 			
 			/** {@inheritDoc} */
 			@Override
-			public void renderedTab(String title, String icon16x16Url, Tab tab) {
+			public void renderedTab(@Nullable String title, @Nullable String icon16x16Url, @Nonnull Tab tab) {
 				processedContainer(tab);
 				result.setLength(result.length() - 1); // remove last comma
 				result.append("},");
@@ -1005,7 +1006,7 @@ public class MetaDataServlet extends HttpServlet {
 			
 			/** {@inheritDoc} */
 			@Override
-			public void renderForm(String borderTitle, Form form) {
+			public void renderForm(@Nullable String borderTitle, @Nonnull Form form) {
 				result.append("{\"type\":\"form\"");
 				processIdentifiable(form);
 				processBorder(form, borderTitle);
@@ -1061,20 +1062,20 @@ public class MetaDataServlet extends HttpServlet {
 			
 			/** {@inheritDoc} */
 			@Override
-			public void renderedForm(String borderTitle, Form form) {
+			public void renderedForm(@Nullable String borderTitle, @Nonnull Form form) {
 				result.setLength(result.length() - 1); // remove last comma
 				result.append("]},");
 			}
 			
 			/** {@inheritDoc} */
 			@Override
-			public void renderFormColumn(FormColumn column) {
+			public void renderFormColumn(@Nonnull FormColumn column) {
 				// handled in renderForm()
 			}
 			
 			/** {@inheritDoc} */
 			@Override
-			public void renderFormRow(FormRow row) {
+			public void renderFormRow(@Nonnull FormRow row) {
 				result.append("{\"type\":\"row\"");
 				processDecorated(row);
 				result.append(",\"items\":[");
@@ -1082,19 +1083,19 @@ public class MetaDataServlet extends HttpServlet {
 			
 			/** {@inheritDoc} */
 			@Override
-			public void renderedFormRow(FormRow row) {
+			public void renderedFormRow(@Nonnull FormRow row) {
 				result.setLength(result.length() - 1); // remove last comma
 				result.append("]},");
 			}
 			
 			/** {@inheritDoc} */
 			@Override
-			public void renderFormItem(String label,
-										String requiredMessage,
-										String help,
+			public void renderFormItem(@Nullable String label,
+										@Nullable String requiredMessage,
+										@Nullable String help,
 										boolean showsLabel,
 										int colspan,
-										FormItem item) {
+										@Nonnull FormItem item) {
 				result.append("{\"type\":\"item\"");
 				if (colspan > 1) {
 					result.append(",\"colspan\":").append(colspan);
@@ -1134,24 +1135,24 @@ public class MetaDataServlet extends HttpServlet {
 			
 			/** {@inheritDoc} */
 			@Override
-			public void renderedFormItem(String label,
-											String requiredMessage,
-											String help,
+			public void renderedFormItem(@Nullable String label,
+											@Nullable String requiredMessage,
+											@Nullable String help,
 											boolean showLabel,
 											int colspan,
-											FormItem item) {
+											@Nonnull FormItem item) {
 				result.append("},");
 			}
 			
 			/** {@inheritDoc} */
 			@Override
-			public void renderFormTextField(TextField text) {
+			public void renderFormTextField(@Nonnull TextField text) {
 				result.append("{\"type\":\"textField\"");
 				renderTextFieldGuts(text);
 				result.append('}');
 			}
 
-			private void renderTextFieldGuts(TextField text) {
+			private void renderTextFieldGuts(@Nonnull TextField text) {
 				processInputWidget(text);
 				processEditable(text);
 				KeyboardType keyboardType = text.getKeyboardType();
@@ -1168,13 +1169,13 @@ public class MetaDataServlet extends HttpServlet {
 
 			/** {@inheritDoc} */
 			@Override
-			public void renderedFormTextField(TextField text) {
+			public void renderedFormTextField(@Nonnull TextField text) {
 				// nothing to see here
 			}
 			
 			/** {@inheritDoc} */
 			@Override
-			public void renderFormTextArea(TextArea text) {
+			public void renderFormTextArea(@Nonnull TextArea text) {
 				result.append("{\"type\":\"textArea\"");
 				processInputWidget(text);
 				processEditable(text);
@@ -1194,17 +1195,17 @@ public class MetaDataServlet extends HttpServlet {
 			
 			/** {@inheritDoc} */
 			@Override
-			public void renderedFormTextArea(TextArea text) {
+			public void renderedFormTextArea(@Nonnull TextArea text) {
 				// nothing to see here
 			}
 			
 			/** {@inheritDoc} */
 			@Override
-			public void renderFormZoomIn(String label,
-											String iconUrl,
-											String iconStyleClass,
-											String toolTip,
-											ZoomIn zoomIn) {
+			public void renderFormZoomIn(@Nullable String label,
+											@Nullable String iconUrl,
+											@Nullable String iconStyleClass,
+											@Nullable String toolTip,
+											@Nonnull ZoomIn zoomIn) {
 				result.append("{\"type\":\"zoomIn\"");
 				if (label != null) {
 					result.append(",\"label\":\"").append(OWASP.escapeJsonString(label)).append('"');
@@ -1234,7 +1235,7 @@ public class MetaDataServlet extends HttpServlet {
 			
 			/** {@inheritDoc} */
 			@Override
-			public void renderFormStaticImage(String fileUrl, StaticImage image) {
+			public void renderFormStaticImage(@Nonnull String fileUrl, @Nonnull StaticImage image) {
 				result.append("{\"type\":\"staticImage\",\"fileUrl\":\"");
 				result.append(OWASP.escapeJsonString(fileUrl)).append('"');
 				processSize(image);
@@ -1245,7 +1246,7 @@ public class MetaDataServlet extends HttpServlet {
 			
 			/** {@inheritDoc} */
 			@Override
-			public void renderFormSpinner(Spinner spinner) {
+			public void renderFormSpinner(@Nonnull Spinner spinner) {
 				result.append("{\"type\":\"spinner\"");
 				Double value = spinner.getMin();
 				if (value != null) {
@@ -1265,13 +1266,13 @@ public class MetaDataServlet extends HttpServlet {
 			
 			/** {@inheritDoc} */
 			@Override
-			public void renderedFormSpinner(Spinner spinner) {
+			public void renderedFormSpinner(@Nonnull Spinner spinner) {
 				// nothing to see here
 			}
 			
 			/** {@inheritDoc} */
 			@Override
-			public void renderFormSpacer(Spacer spacer) {
+			public void renderFormSpacer(@Nonnull Spacer spacer) {
 				result.append("{\"type\":\"spacer\"");
 				processSize(spacer);
 				processInvisible(spacer);
@@ -1281,7 +1282,7 @@ public class MetaDataServlet extends HttpServlet {
 			
 			/** {@inheritDoc} */
 			@Override
-			public void renderFormSlider(Slider slider) {
+			public void renderFormSlider(@Nonnull Slider slider) {
 				result.append("{\"type\":\"slider\"");
 				processInputWidget(slider);
 				Double dubs = slider.getMin();
@@ -1311,13 +1312,13 @@ public class MetaDataServlet extends HttpServlet {
 			
 			/** {@inheritDoc} */
 			@Override
-			public void renderedFormSlider(Slider slider) {
+			public void renderedFormSlider(@Nonnull Slider slider) {
 				// nothing to see here
 			}
 			
 			/** {@inheritDoc} */
 			@Override
-			public void renderFormRichText(RichText text) {
+			public void renderFormRichText(@Nonnull RichText text) {
 				result.append("{\"type\":\"richText\"");
 				processInputWidget(text);
 				Sanitisation sanitise = text.getSanitise();
@@ -1331,13 +1332,13 @@ public class MetaDataServlet extends HttpServlet {
 			
 			/** {@inheritDoc} */
 			@Override
-			public void renderedFormRichText(RichText text) {
+			public void renderedFormRichText(@Nonnull RichText text) {
 				// nothing to see here
 			}
 			
 			/** {@inheritDoc} */
 			@Override
-			public void renderFormRadio(Radio radio) {
+			public void renderFormRadio(@Nonnull Radio radio) {
 				result.append("{\"type\":\"radio\"");
 				processInputWidget(radio);
 				Boolean vertical = radio.getVertical();
@@ -1351,13 +1352,13 @@ public class MetaDataServlet extends HttpServlet {
 			
 			/** {@inheritDoc} */
 			@Override
-			public void renderedFormRadio(Radio radio) {
+			public void renderedFormRadio(@Nonnull Radio radio) {
 				// nothing to see here
 			}
 			
 			/** {@inheritDoc} */
 			@Override
-			public void renderFormProgressBar(ProgressBar progressBar) {
+			public void renderFormProgressBar(@Nonnull ProgressBar progressBar) {
 				result.append("{\"type\":\"progressBar\"");
 				processBound(progressBar);
 				processSize(progressBar);
@@ -1368,7 +1369,7 @@ public class MetaDataServlet extends HttpServlet {
 			
 			/** {@inheritDoc} */
 			@Override
-			public void renderFormPassword(Password password) {
+			public void renderFormPassword(@Nonnull Password password) {
 				result.append("{\"type\":\"password\"");
 				processInputWidget(password);
 				processSize(password);
@@ -1378,17 +1379,17 @@ public class MetaDataServlet extends HttpServlet {
 			
 			/** {@inheritDoc} */
 			@Override
-			public void renderedFormPassword(Password password) {
+			public void renderedFormPassword(@Nonnull Password password) {
 				// nothing to see here
 			}
 			
 			/** {@inheritDoc} */
 			@Override
-			public void renderFormLookupDescription(MetaDataQueryDefinition query,
+			public void renderFormLookupDescription(@Nullable MetaDataQueryDefinition query,
 														boolean canCreate,
 														boolean canUpdate,
-														String descriptionBinding,
-														LookupDescription lookup) {
+														@Nonnull String descriptionBinding,
+														@Nonnull LookupDescription lookup) {
 				result.append("{\"type\":\"lookupDescription\"");
 				processInputWidget(lookup);
 				result.append(",\"descriptionBinding\":\"").append(descriptionBinding).append('"');
@@ -1443,17 +1444,17 @@ public class MetaDataServlet extends HttpServlet {
 			
 			/** {@inheritDoc} */
 			@Override
-			public void renderedFormLookupDescription(MetaDataQueryDefinition query,
+			public void renderedFormLookupDescription(@Nullable MetaDataQueryDefinition query,
 														boolean canCreate,
 														boolean canUpdate,
-														String descriptionBinding,
-														LookupDescription lookup) {
+														@Nonnull String descriptionBinding,
+														@Nonnull LookupDescription lookup) {
 				// nothing to see here
 			}
 			
 			/** {@inheritDoc} */
 			@Override
-			public void renderFormLink(String value, Link link) {
+			public void renderFormLink(@Nullable String value, @Nonnull Link link) {
 				result.append("{\"type\":\"link\"");
 				if (value != null) {
 					result.append(",\"value\":\"").append(OWASP.escapeJsonString(value)).append('"');
@@ -1465,14 +1466,14 @@ public class MetaDataServlet extends HttpServlet {
 					new ReferenceProcessor() {
 						/** {@inheritDoc} */
 						@Override
-						public void processResourceReference(ResourceReference reference) {
+						public void processResourceReference(@Nonnull ResourceReference reference) {
 							result.append("\"type\":\"resourceRef\",\"relativeFile\":\"");
 							result.append(OWASP.escapeJsonString(reference.getRelativeFile())).append('"');
 						}
 						
 						/** {@inheritDoc} */
 						@Override
-						public void processReportReference(ReportReference reference) {
+						public void processReportReference(@Nonnull ReportReference reference) {
 							result.append("\"type\":\"reportRef\"");
 							String name = reference.getModuleName();
 							if (name != null) {
@@ -1495,28 +1496,28 @@ public class MetaDataServlet extends HttpServlet {
 						
 						/** {@inheritDoc} */
 						@Override
-						public void processQueryListViewReference(QueryListViewReference reference) {
+						public void processQueryListViewReference(@Nonnull QueryListViewReference reference) {
 							result.append("\"type\":\"queryListViewRef\",\"queryName\":\"");
 							result.append(reference.getQueryName()).append('"');
 						}
 						
 						/** {@inheritDoc} */
 						@Override
-						public void processImplicitActionReference(ImplicitActionReference reference) {
+						public void processImplicitActionReference(@Nonnull ImplicitActionReference reference) {
 							result.append("\"type\":\"implicitActionRef\",\"implicitActionname\":\"");
 							result.append(reference.getImplicitActionName()).append('"');
 						}
 						
 						/** {@inheritDoc} */
 						@Override
-						public void processExternalReference(ExternalReference reference) {
+						public void processExternalReference(@Nonnull ExternalReference reference) {
 							result.append("\"type\":\"externalRef\",\"href\":\"");
 							result.append(OWASP.escapeJsonString(reference.getHref())).append('"');
 						}
 						
 						/** {@inheritDoc} */
 						@Override
-						public void processEditViewReference(EditViewReference reference) {
+						public void processEditViewReference(@Nonnull EditViewReference reference) {
 							result.append("\"type\":\"editViewRef\"");
 							String string = reference.getModuleName();
 							if (string != null) {
@@ -1534,7 +1535,7 @@ public class MetaDataServlet extends HttpServlet {
 						
 						/** {@inheritDoc} */
 						@Override
-						public void processDefaultListViewReference(DefaultListViewReference reference) {
+						public void processDefaultListViewReference(@Nonnull DefaultListViewReference reference) {
 							result.append("\"type\":\"listViewRef\",\"moduleName\":\"");
 							result.append(reference.getModuleName()).append("\",\"documentName\":\"");
 							result.append(reference.getDocumentName()).append('"');
@@ -1542,14 +1543,14 @@ public class MetaDataServlet extends HttpServlet {
 						
 						/** {@inheritDoc} */
 						@Override
-						public void processContentReference(ContentReference reference) {
+						public void processContentReference(@Nonnull ContentReference reference) {
 							result.append("\"type\":\"contentRef\",\"binding\":\"");
 							result.append(reference.getBinding()).append('"');
 						}
 						
 						/** {@inheritDoc} */
 						@Override
-						public void processActionReference(ActionReference reference) {
+						public void processActionReference(@Nonnull ActionReference reference) {
 							result.append("\"type\":\"actionRef\",\"actionName\":\"");
 							result.append(reference.getActionName()).append('"');
 						}
@@ -1568,7 +1569,7 @@ public class MetaDataServlet extends HttpServlet {
 			
 			/** {@inheritDoc} */
 			@Override
-			public void renderFormLabel(String value, boolean boundValue, Label label) {
+			public void renderFormLabel(@Nullable String value, boolean boundValue, @Nonnull Label label) {
 				result.append("{\"type\":\"label\"");
 				processBound(label);
 				if (value != null) {
@@ -1591,14 +1592,14 @@ public class MetaDataServlet extends HttpServlet {
 			
 			/** {@inheritDoc} */
 			@Override
-			public void renderFormInject(Inject inject) {
+			public void renderFormInject(@Nonnull Inject inject) {
 				// Unused so just stub
 				result.append("{\"type\":\"inject\"}");
 			}
 			
 			/** {@inheritDoc} */
 			@Override
-			public void renderFormHTML(HTML html) {
+			public void renderFormHTML(@Nonnull HTML html) {
 				result.append("{\"type\":\"html\"");
 				processInputWidget(html);
 				Sanitisation sanitise = html.getSanitise();
@@ -1612,7 +1613,7 @@ public class MetaDataServlet extends HttpServlet {
 			
 			/** {@inheritDoc} */
 			@Override
-			public void renderFormGeometryMap(GeometryMap geometry) {
+			public void renderFormGeometryMap(@Nonnull GeometryMap geometry) {
 				result.append("{\"type\":\"geometryMap\"");
 				processInputWidget(geometry);
 				processSize(geometry);
@@ -1626,13 +1627,13 @@ public class MetaDataServlet extends HttpServlet {
 			
 			/** {@inheritDoc} */
 			@Override
-			public void renderedFormGeometryMap(GeometryMap geometry) {
+			public void renderedFormGeometryMap(@Nonnull GeometryMap geometry) {
 				// nothing to see here
 			}
 			
 			/** {@inheritDoc} */
 			@Override
-			public void renderFormGeometry(Geometry geometry) {
+			public void renderFormGeometry(@Nonnull Geometry geometry) {
 				result.append("{\"type\":\"geometry\"");
 				processInputWidget(geometry);
 				processSize(geometry);
@@ -1646,13 +1647,13 @@ public class MetaDataServlet extends HttpServlet {
 			
 			/** {@inheritDoc} */
 			@Override
-			public void renderedFormGeometry(Geometry geometry) {
+			public void renderedFormGeometry(@Nonnull Geometry geometry) {
 				// nothing to see here
 			}
 
 			/** {@inheritDoc} */
 			@Override
-			public void renderFormDialogButton(String label, DialogButton button) {
+			public void renderFormDialogButton(@Nullable String label, @Nonnull DialogButton button) {
 				result.append("{\"type\":\"dialogButton\"");
 				if (label != null) {
 					result.append(",\"label\":\"").append(OWASP.escapeJsonString(label)).append('"');
@@ -1678,7 +1679,7 @@ public class MetaDataServlet extends HttpServlet {
 			
 			/** {@inheritDoc} */
 			@Override
-			public void renderFormContentSignature(ContentSignature signature) {
+			public void renderFormContentSignature(@Nonnull ContentSignature signature) {
 				result.append("{\"type\":\"contentSignature\"");
 				processInputWidget(signature);
 				String colour = signature.getRgbHexBackgroundColour();
@@ -1736,7 +1737,7 @@ public class MetaDataServlet extends HttpServlet {
 			
 			/** {@inheritDoc} */
 			@Override
-			public void renderFormCombo(Combo combo) {
+			public void renderFormCombo(@Nonnull Combo combo) {
 				result.append("{\"type\":\"combo\"");
 				processInputWidget(combo);
 				processSize(combo);
@@ -1746,13 +1747,13 @@ public class MetaDataServlet extends HttpServlet {
 			
 			/** {@inheritDoc} */
 			@Override
-			public void renderedFormCombo(Combo combo) {
+			public void renderedFormCombo(@Nonnull Combo combo) {
 				// nothing to see here
 			}
 			
 			/** {@inheritDoc} */
 			@Override
-			public void renderFormColourPicker(ColourPicker colour) {
+			public void renderFormColourPicker(@Nonnull ColourPicker colour) {
 				result.append("{\"type\":\"colour\"");
 				processInputWidget(colour);
 				processSize(colour);
@@ -1762,13 +1763,13 @@ public class MetaDataServlet extends HttpServlet {
 			
 			/** {@inheritDoc} */
 			@Override
-			public void renderedFormColourPicker(ColourPicker colour) {
+			public void renderedFormColourPicker(@Nonnull ColourPicker colour) {
 				// nothing to see here
 			}
 			
 			/** {@inheritDoc} */
 			@Override
-			public void renderFormCheckBox(CheckBox checkBox) {
+			public void renderFormCheckBox(@Nonnull CheckBox checkBox) {
 				result.append("{\"type\":\"checkBox\"");
 				processInputWidget(checkBox);
 				Boolean triState = checkBox.getTriState();
@@ -1782,20 +1783,20 @@ public class MetaDataServlet extends HttpServlet {
 			
 			/** {@inheritDoc} */
 			@Override
-			public void renderedFormCheckBox(CheckBox checkBox) {
+			public void renderedFormCheckBox(@Nonnull CheckBox checkBox) {
 				// nothing to see here
 			}
 			
 			/** {@inheritDoc} */
 			@Override
-			public void renderFormButton(String name,
-											String label,
-											String iconUrl,
-											String iconStyleClass,
-											String toolTip,
-											String confirmationText,
-											Action action,
-											Button button) {
+			public void renderFormButton(@Nullable String name,
+											@Nullable String label,
+											@Nullable String iconUrl,
+											@Nullable String iconStyleClass,
+											@Nullable String toolTip,
+											@Nullable String confirmationText,
+											@Nonnull Action action,
+											@Nonnull Button button) {
 				result.append("{\"type\":\"button\",\"actionType\":");
 				ImplicitActionName type = action.getImplicitName();
 				if (type == null) {
@@ -1834,7 +1835,7 @@ public class MetaDataServlet extends HttpServlet {
 			
 			/** {@inheritDoc} */
 			@Override
-			public void renderFormBlurb(String markup, Blurb blurb) {
+			public void renderFormBlurb(@Nullable String markup, @Nonnull Blurb blurb) {
 				result.append("{\"type\":\"blurb\"");
 				if (markup != null) {
 					result.append(",\"markup\":\"").append(OWASP.escapeJsonString(markup)).append('"');
@@ -1852,7 +1853,7 @@ public class MetaDataServlet extends HttpServlet {
 			
 			/** {@inheritDoc} */
 			@Override
-			public void renderDataGrid(String title, DataGrid grid) {
+			public void renderDataGrid(@Nullable String title, @Nonnull DataGrid grid) {
 				result.append("{\"type\":\"dataGrid\"");
 				if (title != null) {
 					result.append(",\"title\":\"").append(OWASP.escapeJsonString(title)).append('"');
@@ -1899,7 +1900,7 @@ public class MetaDataServlet extends HttpServlet {
 
 			/** {@inheritDoc} */
 			@Override
-			public void renderDataGridContainerColumn(String title, DataGridContainerColumn column) {
+			public void renderDataGridContainerColumn(@Nullable String title, @Nonnull DataGridContainerColumn column) {
 				result.append("{\"type\":\"containerColumn\"");
 				if (title != null) {
 					result.append(",\"title\":\"").append(OWASP.escapeJsonString(title)).append('"');
@@ -1916,37 +1917,37 @@ public class MetaDataServlet extends HttpServlet {
 			
 			/** {@inheritDoc} */
 			@Override
-			public void renderContainerColumnStaticImage(String fileUrl, StaticImage image) {
+			public void renderContainerColumnStaticImage(@Nonnull String fileUrl, @Nonnull StaticImage image) {
 				renderStaticImage(fileUrl, image);
 			}
 			
 			/** {@inheritDoc} */
 			@Override
-			public void renderContainerColumnLink(String value, Link link) {
+			public void renderContainerColumnLink(@Nullable String value, @Nonnull Link link) {
 				renderLink(value, link);
 			}
 			
 			/** {@inheritDoc} */
 			@Override
-			public void renderContainerColumnLabel(String value, Label label) {
+			public void renderContainerColumnLabel(@Nullable String value, @Nonnull Label label) {
 				renderLabel(value, false, label);
 			}
 			
 			/** {@inheritDoc} */
 			@Override
-			public void renderContainerColumnDynamicImage(DynamicImage image) {
+			public void renderContainerColumnDynamicImage(@Nonnull DynamicImage image) {
 				renderDynamicImage(image);
 			}
 			
 			/** {@inheritDoc} */
 			@Override
-			public void renderContainerColumnBlurb(String markup, Blurb blurb) {
+			public void renderContainerColumnBlurb(@Nullable String markup, @Nonnull Blurb blurb) {
 				renderBlurb(markup, blurb);
 			}
 			
 			/** {@inheritDoc} */
 			@Override
-			public void renderedDataGridContainerColumn(String title, DataGridContainerColumn column) {
+			public void renderedDataGridContainerColumn(@Nullable String title, @Nonnull DataGridContainerColumn column) {
 				result.setLength(result.length() - 1); // remove last comma
 				result.append("]},");
 			}
@@ -1955,7 +1956,7 @@ public class MetaDataServlet extends HttpServlet {
 
 			/** {@inheritDoc} */
 			@Override
-			public void renderDataGridBoundColumn(String title, DataGridBoundColumn column) {
+			public void renderDataGridBoundColumn(@Nullable String title, @Nonnull DataGridBoundColumn column) {
 				result.append("{\"type\":\"boundColumn\"");
 				if (title != null) {
 					result.append(",\"title\":\"").append(OWASP.escapeJsonString(title)).append('"');
@@ -1975,7 +1976,7 @@ public class MetaDataServlet extends HttpServlet {
 			
 			/** {@inheritDoc} */
 			@Override
-			public void renderBoundColumnTextField(TextField text) {
+			public void renderBoundColumnTextField(@Nonnull TextField text) {
 				if (input != null) {
 					renderFormTextField(text);
 				}
@@ -1983,7 +1984,7 @@ public class MetaDataServlet extends HttpServlet {
 			
 			/** {@inheritDoc} */
 			@Override
-			public void renderedBoundColumnTextField(TextField text) {
+			public void renderedBoundColumnTextField(@Nonnull TextField text) {
 				if (input != null) {
 					renderedFormTextField(text);
 				}
@@ -1991,7 +1992,7 @@ public class MetaDataServlet extends HttpServlet {
 			
 			/** {@inheritDoc} */
 			@Override
-			public void renderBoundColumnTextArea(TextArea text) {
+			public void renderBoundColumnTextArea(@Nonnull TextArea text) {
 				if (input != null) {
 					renderFormTextArea(text);
 				}
@@ -1999,7 +2000,7 @@ public class MetaDataServlet extends HttpServlet {
 			
 			/** {@inheritDoc} */
 			@Override
-			public void renderedBoundColumnTextArea(TextArea text) {
+			public void renderedBoundColumnTextArea(@Nonnull TextArea text) {
 				if (input != null) {
 					renderedFormTextArea(text);
 				}
@@ -2007,7 +2008,7 @@ public class MetaDataServlet extends HttpServlet {
 			
 			/** {@inheritDoc} */
 			@Override
-			public void renderBoundColumnSpinner(Spinner spinner) {
+			public void renderBoundColumnSpinner(@Nonnull Spinner spinner) {
 				if (input != null) {
 					renderFormSpinner(spinner);
 				}
@@ -2015,7 +2016,7 @@ public class MetaDataServlet extends HttpServlet {
 			
 			/** {@inheritDoc} */
 			@Override
-			public void renderedBoundColumnSpinner(Spinner spinner) {
+			public void renderedBoundColumnSpinner(@Nonnull Spinner spinner) {
 				if (input != null) {
 					renderedFormSpinner(spinner);
 				}
@@ -2023,7 +2024,7 @@ public class MetaDataServlet extends HttpServlet {
 			
 			/** {@inheritDoc} */
 			@Override
-			public void renderBoundColumnSlider(Slider slider) {
+			public void renderBoundColumnSlider(@Nonnull Slider slider) {
 				if (input != null) {
 					renderFormSlider(slider);
 				}
@@ -2031,7 +2032,7 @@ public class MetaDataServlet extends HttpServlet {
 			
 			/** {@inheritDoc} */
 			@Override
-			public void renderedBoundColumnSlider(Slider slider) {
+			public void renderedBoundColumnSlider(@Nonnull Slider slider) {
 				if (input != null) {
 					renderedFormSlider(slider);
 				}
@@ -2039,7 +2040,7 @@ public class MetaDataServlet extends HttpServlet {
 			
 			/** {@inheritDoc} */
 			@Override
-			public void renderBoundColumnRichText(RichText text) {
+			public void renderBoundColumnRichText(@Nonnull RichText text) {
 				if (input != null) {
 					renderFormRichText(text);
 				}
@@ -2047,7 +2048,7 @@ public class MetaDataServlet extends HttpServlet {
 			
 			/** {@inheritDoc} */
 			@Override
-			public void renderedBoundColumnRichText(RichText text) {
+			public void renderedBoundColumnRichText(@Nonnull RichText text) {
 				if (input != null) {
 					renderedFormRichText(text);
 				}
@@ -2055,7 +2056,7 @@ public class MetaDataServlet extends HttpServlet {
 			
 			/** {@inheritDoc} */
 			@Override
-			public void renderBoundColumnRadio(Radio radio) {
+			public void renderBoundColumnRadio(@Nonnull Radio radio) {
 				if (input != null) {
 					renderFormRadio(radio);
 				}
@@ -2063,7 +2064,7 @@ public class MetaDataServlet extends HttpServlet {
 			
 			/** {@inheritDoc} */
 			@Override
-			public void renderedBoundColumnRadio(Radio radio) {
+			public void renderedBoundColumnRadio(@Nonnull Radio radio) {
 				if (input != null) {
 					renderedFormRadio(radio);
 				}
@@ -2071,7 +2072,7 @@ public class MetaDataServlet extends HttpServlet {
 			
 			/** {@inheritDoc} */
 			@Override
-			public void renderBoundColumnPassword(Password password) {
+			public void renderBoundColumnPassword(@Nonnull Password password) {
 				if (input != null) {
 					renderFormPassword(password);
 				}
@@ -2079,7 +2080,7 @@ public class MetaDataServlet extends HttpServlet {
 			
 			/** {@inheritDoc} */
 			@Override
-			public void renderedBoundColumnPassword(Password password) {
+			public void renderedBoundColumnPassword(@Nonnull Password password) {
 				if (input != null) {
 					renderedFormPassword(password);
 				}
@@ -2087,11 +2088,11 @@ public class MetaDataServlet extends HttpServlet {
 			
 			/** {@inheritDoc} */
 			@Override
-			public void renderBoundColumnLookupDescription(MetaDataQueryDefinition query,
+			public void renderBoundColumnLookupDescription(@Nullable MetaDataQueryDefinition query,
 															boolean canCreate,
 															boolean canUpdate,
-															String descriptionBinding,
-															LookupDescription lookup) {
+															@Nonnull String descriptionBinding,
+															@Nonnull LookupDescription lookup) {
 				if (input != null) {
 					renderFormLookupDescription(query, canCreate, canUpdate, descriptionBinding, lookup);
 				}
@@ -2099,11 +2100,11 @@ public class MetaDataServlet extends HttpServlet {
 			
 			/** {@inheritDoc} */
 			@Override
-			public void renderedBoundColumnLookupDescription(MetaDataQueryDefinition query,
+			public void renderedBoundColumnLookupDescription(@Nullable MetaDataQueryDefinition query,
 																boolean canCreate,
 																boolean canUpdate,
-																String descriptionBinding,
-																LookupDescription lookup) {
+																@Nonnull String descriptionBinding,
+																@Nonnull LookupDescription lookup) {
 				if (input != null) {
 					renderedFormLookupDescription(query, canCreate, canUpdate, descriptionBinding, lookup);
 				}
@@ -2111,7 +2112,7 @@ public class MetaDataServlet extends HttpServlet {
 			
 			/** {@inheritDoc} */
 			@Override
-			public void renderBoundColumnHTML(HTML html) {
+			public void renderBoundColumnHTML(@Nonnull HTML html) {
 				if (input != null) {
 					renderFormHTML(html);
 				}
@@ -2119,7 +2120,7 @@ public class MetaDataServlet extends HttpServlet {
 			
 			/** {@inheritDoc} */
 			@Override
-			public void renderBoundColumnGeometry(Geometry geometry) {
+			public void renderBoundColumnGeometry(@Nonnull Geometry geometry) {
 				if (input != null) {
 					renderFormGeometry(geometry);
 				}
@@ -2127,7 +2128,7 @@ public class MetaDataServlet extends HttpServlet {
 			
 			/** {@inheritDoc} */
 			@Override
-			public void renderedBoundColumnGeometry(Geometry geometry) {
+			public void renderedBoundColumnGeometry(@Nonnull Geometry geometry) {
 				if (input != null) {
 					renderedFormGeometry(geometry);
 				}
@@ -2135,7 +2136,7 @@ public class MetaDataServlet extends HttpServlet {
 			
 			/** {@inheritDoc} */
 			@Override
-			public void renderBoundColumnCombo(Combo combo) {
+			public void renderBoundColumnCombo(@Nonnull Combo combo) {
 				if (input != null) {
 					renderFormCombo(combo);
 				}
@@ -2143,7 +2144,7 @@ public class MetaDataServlet extends HttpServlet {
 			
 			/** {@inheritDoc} */
 			@Override
-			public void renderedBoundColumnCombo(Combo combo) {
+			public void renderedBoundColumnCombo(@Nonnull Combo combo) {
 				if (input != null) {
 					renderedFormCombo(combo);
 				}
@@ -2151,7 +2152,7 @@ public class MetaDataServlet extends HttpServlet {
 			
 			/** {@inheritDoc} */
 			@Override
-			public void renderBoundColumnColourPicker(ColourPicker colour) {
+			public void renderBoundColumnColourPicker(@Nonnull ColourPicker colour) {
 				if (input != null) {
 					renderFormColourPicker(colour);
 				}
@@ -2159,7 +2160,7 @@ public class MetaDataServlet extends HttpServlet {
 			
 			/** {@inheritDoc} */
 			@Override
-			public void renderedBoundColumnColourPicker(ColourPicker colour) {
+			public void renderedBoundColumnColourPicker(@Nonnull ColourPicker colour) {
 				if (input != null) {
 					renderedFormColourPicker(colour);
 				}
@@ -2167,7 +2168,7 @@ public class MetaDataServlet extends HttpServlet {
 			
 			/** {@inheritDoc} */
 			@Override
-			public void renderBoundColumnCheckBox(CheckBox checkBox) {
+			public void renderBoundColumnCheckBox(@Nonnull CheckBox checkBox) {
 				if (input != null) {
 					renderFormCheckBox(checkBox);
 				}
@@ -2175,7 +2176,7 @@ public class MetaDataServlet extends HttpServlet {
 
 			/** {@inheritDoc} */
 			@Override
-			public void renderedBoundColumnCheckBox(CheckBox checkBox) {
+			public void renderedBoundColumnCheckBox(@Nonnull CheckBox checkBox) {
 				if (input != null) {
 					renderedFormCheckBox(checkBox);
 				}
@@ -2183,21 +2184,21 @@ public class MetaDataServlet extends HttpServlet {
 
 			/** {@inheritDoc} */
 			@Override
-			public void renderedDataGridBoundColumn(String title, DataGridBoundColumn column) {
+			public void renderedDataGridBoundColumn(@Nullable String title, @Nonnull DataGridBoundColumn column) {
 				result.append("},");
 				input = null;
 			}
 			
 			/** {@inheritDoc} */
 			@Override
-			public void renderedDataGrid(String title, DataGrid grid) {
+			public void renderedDataGrid(@Nullable String title, @Nonnull DataGrid grid) {
 				result.setLength(result.length() - 1); // remove last comma
 				result.append("]},");
 			}
 			
 			/** {@inheritDoc} */
 			@Override
-			public void renderDataRepeater(String title, DataRepeater repeater) {
+			public void renderDataRepeater(@Nullable String title, @Nonnull DataRepeater repeater) {
 				result.append("{\"type\":\"dataRepeater\"");
 				if (title != null) {
 					result.append(",\"title\":\"").append(OWASP.escapeJsonString(title)).append('"');
@@ -2221,44 +2222,44 @@ public class MetaDataServlet extends HttpServlet {
 			
 			/** {@inheritDoc} */
 			@Override
-			public void renderDataRepeaterContainerColumn(String title, DataGridContainerColumn column) {
+			public void renderDataRepeaterContainerColumn(@Nullable String title, @Nonnull DataGridContainerColumn column) {
 				renderDataGridContainerColumn(title, column);
 			}
 			
 			/** {@inheritDoc} */
 			@Override
-			public void renderedDataRepeaterContainerColumn(String title, DataGridContainerColumn column) {
+			public void renderedDataRepeaterContainerColumn(@Nullable String title, @Nonnull DataGridContainerColumn column) {
 				renderedDataGridContainerColumn(title, column);
 			}
 
 			/** {@inheritDoc} */
 			@Override
-			public void renderDataRepeaterBoundColumn(String title, DataGridBoundColumn column) {
+			public void renderDataRepeaterBoundColumn(@Nullable String title, @Nonnull DataGridBoundColumn column) {
 				renderDataGridBoundColumn(title, column);
 			}
 			
 			/** {@inheritDoc} */
 			@Override
-			public void renderedDataRepeaterBoundColumn(String title, DataGridBoundColumn column) {
+			public void renderedDataRepeaterBoundColumn(@Nullable String title, @Nonnull DataGridBoundColumn column) {
 				renderedDataGridBoundColumn(title, column);
 			}
 			
 			/** {@inheritDoc} */
 			@Override
-			public void renderedDataRepeater(String title, DataRepeater repeater) {
+			public void renderedDataRepeater(@Nullable String title, @Nonnull DataRepeater repeater) {
 				result.setLength(result.length() - 1); // remove last comma
 				result.append("]},");
 			}
 			
 			/** {@inheritDoc} */
 			@Override
-			public void renderListGrid(String title, boolean aggregateQuery, ListGrid grid) {
+			public void renderListGrid(@Nullable String title, boolean aggregateQuery, @Nonnull ListGrid grid) {
 				result.append("{\"type\":\"listGrid\"");
 				renderListGridGuts(title, aggregateQuery, grid);
 				result.append(",\"columns\":[");
 			}
 			
-			private void renderListGridGuts(String title, boolean aggregateQuery, ListGrid grid) {
+			private void renderListGridGuts(@Nullable String title, boolean aggregateQuery, @Nonnull ListGrid grid) {
 				if (title != null) {
 					result.append(",\"title\":\"").append(OWASP.escapeJsonString(title)).append('"');
 					result.append(",\"escapeTitle\":").append(ViewRenderer.shouldEscape(grid.getEscapeTitle()));
@@ -2328,7 +2329,7 @@ public class MetaDataServlet extends HttpServlet {
 			
 			/** {@inheritDoc} */
 			@Override
-			public void renderListGridProjectedColumn(MetaDataQueryProjectedColumn column) {
+			public void renderListGridProjectedColumn(@Nonnull MetaDataQueryProjectedColumn column) {
 				result.append("{\"type\":\"column\"");
 				processMetaDataQueryColumn(column);
 				String expression = column.getExpression();
@@ -2344,7 +2345,7 @@ public class MetaDataServlet extends HttpServlet {
 			
 			/** {@inheritDoc} */
 			@Override
-			public void renderListGridContentColumn(MetaDataQueryContentColumn column) {
+			public void renderListGridContentColumn(@Nonnull MetaDataQueryContentColumn column) {
 				result.append("{\"type\":\"contentColumn\"");
 				processMetaDataQueryColumn(column);
 				DisplayType display = column.getDisplay();
@@ -2364,14 +2365,14 @@ public class MetaDataServlet extends HttpServlet {
 			
 			/** {@inheritDoc} */
 			@Override
-			public void renderedListGrid(String title, boolean aggregateQuery, ListGrid grid) {
+			public void renderedListGrid(@Nullable String title, boolean aggregateQuery, @Nonnull ListGrid grid) {
 				result.setLength(result.length() - 1); // remove last comma
 				result.append("]},");
 			}
 			
 			/** {@inheritDoc} */
 			@Override
-			public void renderListRepeater(String title, ListRepeater repeater) {
+			public void renderListRepeater(@Nullable String title, @Nonnull ListRepeater repeater) {
 				result.append("{\"type\":\"listRepeater\"");
 				if (title != null) {
 					result.append(",\"title\":\"").append(OWASP.escapeJsonString(title)).append('"');
@@ -2392,26 +2393,26 @@ public class MetaDataServlet extends HttpServlet {
 			
 			/** {@inheritDoc} */
 			@Override
-			public void renderListRepeaterProjectedColumn(MetaDataQueryProjectedColumn column) {
+			public void renderListRepeaterProjectedColumn(@Nonnull MetaDataQueryProjectedColumn column) {
 				renderListGridProjectedColumn(column);
 			}
 			
 			/** {@inheritDoc} */
 			@Override
-			public void renderListRepeaterContentColumn(MetaDataQueryContentColumn column) {
+			public void renderListRepeaterContentColumn(@Nonnull MetaDataQueryContentColumn column) {
 				renderListGridContentColumn(column);
 			}
 			
 			/** {@inheritDoc} */
 			@Override
-			public void renderedListRepeater(String title, ListRepeater repeater) {
+			public void renderedListRepeater(@Nullable String title, @Nonnull ListRepeater repeater) {
 				result.setLength(result.length() - 1); // remove last comma
 				result.append("]},");
 			}
 			
 			/** {@inheritDoc} */
 			@Override
-			public void renderTreeGrid(String title, TreeGrid grid) {
+			public void renderTreeGrid(@Nullable String title, @Nonnull TreeGrid grid) {
 				result.append("{\"type\":\"treeGrid\"");
 				renderListGridGuts(title, false, grid);
 				String rootIdBinding = grid.getRootIdBinding();
@@ -2423,26 +2424,26 @@ public class MetaDataServlet extends HttpServlet {
 			
 			/** {@inheritDoc} */
 			@Override
-			public void renderTreeGridProjectedColumn(MetaDataQueryProjectedColumn column) {
+			public void renderTreeGridProjectedColumn(@Nonnull MetaDataQueryProjectedColumn column) {
 				renderListGridProjectedColumn(column);
 			}
 			
 			/** {@inheritDoc} */
 			@Override
-			public void renderTreeGridContentColumn(MetaDataQueryContentColumn column) {
+			public void renderTreeGridContentColumn(@Nonnull MetaDataQueryContentColumn column) {
 				renderListGridContentColumn(column);
 			}
 			
 			/** {@inheritDoc} */
 			@Override
-			public void renderedTreeGrid(String title, TreeGrid grid) {
+			public void renderedTreeGrid(@Nullable String title, @Nonnull TreeGrid grid) {
 				result.setLength(result.length() - 1); // remove last comma
 				result.append("]},");
 			}
 			
 			/** {@inheritDoc} */
 			@Override
-			public void renderListMembership(String candidatesHeading, String membersHeading, ListMembership membership) {
+			public void renderListMembership(@Nullable String candidatesHeading, @Nullable String membersHeading, @Nonnull ListMembership membership) {
 				result.append("{\"type\":\"listMembership\"");
 				processInputWidget(membership);
 				result.append(",\"candidatesHeading\":\"").append(OWASP.escapeJsonString(candidatesHeading)).append('"');
@@ -2456,13 +2457,13 @@ public class MetaDataServlet extends HttpServlet {
 			
 			/** {@inheritDoc} */
 			@Override
-			public void renderedListMembership(String candidatesHeading, String membersHeading, ListMembership membership) {
+			public void renderedListMembership(@Nullable String candidatesHeading, @Nullable String membersHeading, @Nonnull ListMembership membership) {
 				// nothing to see here
 			}
 			
 			/** {@inheritDoc} */
 			@Override
-			public void renderCheckMembership(CheckMembership membership) {
+			public void renderCheckMembership(@Nonnull CheckMembership membership) {
 				result.append("{\"type\":\"checkMembership\"");
 				processInputWidget(membership);
 				processDecorated(membership);
@@ -2471,34 +2472,34 @@ public class MetaDataServlet extends HttpServlet {
 			
 			/** {@inheritDoc} */
 			@Override
-			public void renderedCheckMembership(CheckMembership membership) {
+			public void renderedCheckMembership(@Nonnull CheckMembership membership) {
 				// nothing to see here
 			}
 			
 			/** {@inheritDoc} */
 			@Override
-			public void renderStaticImage(String fileUrl, StaticImage image) {
+			public void renderStaticImage(@Nonnull String fileUrl, @Nonnull StaticImage image) {
 				renderFormStaticImage(fileUrl, image);
 				result.append(',');
 			}
 			
 			/** {@inheritDoc} */
 			@Override
-			public void renderSpacer(Spacer spacer) {
+			public void renderSpacer(@Nonnull Spacer spacer) {
 				renderFormSpacer(spacer);
 				result.append(',');
 			}
 			
 			/** {@inheritDoc} */
 			@Override
-			public void renderZoomIn(String label, String iconUrl, String iconStyleClass, String toolTip, ZoomIn zoomIn) {
+			public void renderZoomIn(@Nullable String label, @Nullable String iconUrl, @Nullable String iconStyleClass, @Nullable String toolTip, @Nonnull ZoomIn zoomIn) {
 				renderFormZoomIn(label, iconUrl, iconStyleClass, toolTip, zoomIn);
 				result.append(',');
 			}
 						
 			/** {@inheritDoc} */
 			@Override
-			public void renderMap(MapDisplay map) {
+			public void renderMap(@Nonnull MapDisplay map) {
 				result.append("{\"type\":\"map\"");
 				String modelName = map.getModelName();
 				if (modelName != null) {
@@ -2524,28 +2525,28 @@ public class MetaDataServlet extends HttpServlet {
 			
 			/** {@inheritDoc} */
 			@Override
-			public void renderLink(String value, Link link) {
+			public void renderLink(@Nullable String value, @Nonnull Link link) {
 				renderFormLink(value, link);
 				result.append(',');
 			}
 			
 			/** {@inheritDoc} */
 			@Override
-			public void renderLabel(String value, boolean boundValue, Label label) {
+			public void renderLabel(@Nullable String value, boolean boundValue, @Nonnull Label label) {
 				renderFormLabel(value, boundValue, label);
 				result.append(',');
 			}
 			
 			/** {@inheritDoc} */
 			@Override
-			public void renderInject(Inject inject) {
+			public void renderInject(@Nonnull Inject inject) {
 				renderFormInject(inject);
 				result.append(',');
 			}
 
 			/** {@inheritDoc} */
 			@Override
-			public void renderDynamicImage(DynamicImage image) {
+			public void renderDynamicImage(@Nonnull DynamicImage image) {
 				result.append("{\"type\":\"dynamicImage\"");
 				String name = image.getName();
 				if (name != null) {
@@ -2568,14 +2569,14 @@ public class MetaDataServlet extends HttpServlet {
 			
 			/** {@inheritDoc} */
 			@Override
-			public void renderDialogButton(String label, DialogButton button) {
+			public void renderDialogButton(@Nullable String label, @Nonnull DialogButton button) {
 				renderFormDialogButton(label, button);
 				result.append(',');
 			}
 			
 			/** {@inheritDoc} */
 			@Override
-			public void renderComparison(Comparison comparison) {
+			public void renderComparison(@Nonnull Comparison comparison) {
 				result.append("{\"type\":\"comparison\"");
 				String modelName = comparison.getModelName();
 				if (modelName != null) {
@@ -2589,7 +2590,7 @@ public class MetaDataServlet extends HttpServlet {
 			
 			/** {@inheritDoc} */
 			@Override
-			public void renderChart(Chart chart) {
+			public void renderChart(@Nonnull Chart chart) {
 				result.append("{\"type\":\"chart\",\"chartType\":\"").append(chart.getType()).append('"');
 				String modelName = chart.getModelName();
 				if (modelName != null) {
@@ -2697,34 +2698,34 @@ public class MetaDataServlet extends HttpServlet {
 			
 			/** {@inheritDoc} */
 			@Override
-			public void renderButton(String name,
-										String label,
-										String iconUrl,
-										String iconStyleClass,
-										String toolTip,
-										String confirmationText,
-										Action action,
-										Button button) {
+			public void renderButton(@Nullable String name,
+										@Nullable String label,
+										@Nullable String iconUrl,
+										@Nullable String iconStyleClass,
+										@Nullable String toolTip,
+										@Nullable String confirmationText,
+										@Nonnull Action action,
+										@Nonnull Button button) {
 				renderFormButton(name, label, iconUrl, iconStyleClass, toolTip, confirmationText, action, button);
 				result.append(',');
 			}
 			
 			/** {@inheritDoc} */
 			@Override
-			public void renderBlurb(String markup, Blurb blurb) {
+			public void renderBlurb(@Nullable String markup, @Nonnull Blurb blurb) {
 				renderFormBlurb(markup, blurb);
 				result.append(',');
 			}
 			
 			/** {@inheritDoc} */
 			@Override
-			public void renderZoomOutAction(String name,
-												String label,
-												String iconUrl,
-												String iconStyleClass,
-												String toolTip,
-												String confirmationText,
-												ActionImpl action) {
+			public void renderZoomOutAction(@Nullable String name,
+												@Nullable String label,
+												@Nullable String iconUrl,
+												@Nullable String iconStyleClass,
+												@Nullable String toolTip,
+												@Nullable String confirmationText,
+												@Nonnull ActionImpl action) {
 				actionsJSON.append("{\"type\":\"zoomOutAction\"");
 				processAction(name, ImplicitActionName.ZoomOut, label, iconUrl, iconStyleClass, toolTip, confirmationText, action);
 				actionsJSON.append("},");
@@ -2732,13 +2733,13 @@ public class MetaDataServlet extends HttpServlet {
 			
 			/** {@inheritDoc} */
 			@Override
-			public void renderUploadAction(String name,
-											String label,
-											String iconUrl,
-											String iconStyleClass,
-											String toolTip,
-											String confirmationText,
-											ActionImpl action) {
+			public void renderUploadAction(@Nullable String name,
+											@Nullable String label,
+											@Nullable String iconUrl,
+											@Nullable String iconStyleClass,
+											@Nullable String toolTip,
+											@Nullable String confirmationText,
+											@Nonnull ActionImpl action) {
 				actionsJSON.append("{\"type\":\"uploadAction\"");
 				processAction(name, ImplicitActionName.Upload, label, iconUrl, iconStyleClass, toolTip, confirmationText, action);
 				actionsJSON.append("},");
@@ -2746,13 +2747,13 @@ public class MetaDataServlet extends HttpServlet {
 			
 			/** {@inheritDoc} */
 			@Override
-			public void renderSaveAction(String name,
-											String label,
-											String iconUrl,
-											String iconStyleClass,
-											String toolTip,
-											String confirmationText,
-											ActionImpl action) {
+			public void renderSaveAction(@Nullable String name,
+											@Nullable String label,
+											@Nullable String iconUrl,
+											@Nullable String iconStyleClass,
+											@Nullable String toolTip,
+											@Nullable String confirmationText,
+											@Nonnull ActionImpl action) {
 				actionsJSON.append("{\"type\":\"saveAction\"");
 				processAction(name, ImplicitActionName.Save, label, iconUrl, iconStyleClass, toolTip, confirmationText, action);
 				actionsJSON.append("},");
@@ -2760,13 +2761,13 @@ public class MetaDataServlet extends HttpServlet {
 			
 			/** {@inheritDoc} */
 			@Override
-			public void renderReportAction(String name,
-											String label,
-											String iconUrl,
-											String iconStyleClass,
-											String toolTip,
-											String confirmationText,
-											ActionImpl action) {
+			public void renderReportAction(@Nullable String name,
+											@Nullable String label,
+											@Nullable String iconUrl,
+											@Nullable String iconStyleClass,
+											@Nullable String toolTip,
+											@Nullable String confirmationText,
+											@Nonnull ActionImpl action) {
 				actionsJSON.append("{\"type\":\"reportAction\"");
 				processAction(name, ImplicitActionName.Report, label, iconUrl, iconStyleClass, toolTip, confirmationText, action);
 				actionsJSON.append("},");
@@ -2774,13 +2775,13 @@ public class MetaDataServlet extends HttpServlet {
 			
 			/** {@inheritDoc} */
 			@Override
-			public void renderRemoveAction(String name,
-											String label,
-											String iconUrl,
-											String iconStyleClass,
-											String toolTip,
-											String confirmationText,
-											ActionImpl action,
+			public void renderRemoveAction(@Nullable String name,
+											@Nullable String label,
+											@Nullable String iconUrl,
+											@Nullable String iconStyleClass,
+											@Nullable String toolTip,
+											@Nullable String confirmationText,
+											@Nonnull ActionImpl action,
 											boolean canDelete) {
 				actionsJSON.append("{\"type\":\"removeAction\"");
 				processAction(name, ImplicitActionName.Remove, label, iconUrl, iconStyleClass, toolTip, confirmationText, action);
@@ -2789,13 +2790,13 @@ public class MetaDataServlet extends HttpServlet {
 			
 			/** {@inheritDoc} */
 			@Override
-			public void renderPrintAction(String name,
-											String label,
-											String iconUrl,
-											String iconStyleClass,
-											String toolTip,
-											String confirmationText,
-											ActionImpl action) {
+			public void renderPrintAction(@Nullable String name,
+											@Nullable String label,
+											@Nullable String iconUrl,
+											@Nullable String iconStyleClass,
+											@Nullable String toolTip,
+											@Nullable String confirmationText,
+											@Nonnull ActionImpl action) {
 				actionsJSON.append("{\"type\":\"printAction\"");
 				processAction(name, ImplicitActionName.Print, label, iconUrl, iconStyleClass, toolTip, confirmationText, action);
 				actionsJSON.append("},");
@@ -2803,13 +2804,13 @@ public class MetaDataServlet extends HttpServlet {
 			
 			/** {@inheritDoc} */
 			@Override
-			public void renderOKAction(String name,
-										String label,
-										String iconUrl,
-										String iconStyleClass,
-										String toolTip,
-										String confirmationText,
-										ActionImpl action) {
+			public void renderOKAction(@Nullable String name,
+										@Nullable String label,
+										@Nullable String iconUrl,
+										@Nullable String iconStyleClass,
+										@Nullable String toolTip,
+										@Nullable String confirmationText,
+										@Nonnull ActionImpl action) {
 				actionsJSON.append("{\"type\":\"okAction\"");
 				processAction(name, ImplicitActionName.OK, label, iconUrl, iconStyleClass, toolTip, confirmationText, action);
 				actionsJSON.append("},");
@@ -2817,13 +2818,13 @@ public class MetaDataServlet extends HttpServlet {
 			
 			/** {@inheritDoc} */
 			@Override
-			public void renderNewAction(String name,
-											String label,
-											String iconUrl,
-											String iconStyleClass,
-											String toolTip,
-											String confirmationText,
-											ActionImpl action) {
+			public void renderNewAction(@Nullable String name,
+											@Nullable String label,
+											@Nullable String iconUrl,
+											@Nullable String iconStyleClass,
+											@Nullable String toolTip,
+											@Nullable String confirmationText,
+											@Nonnull ActionImpl action) {
 				actionsJSON.append("{\"type\":\"newAction\"");
 				processAction(name, ImplicitActionName.New, label, iconUrl, iconStyleClass, toolTip, confirmationText, action);
 				actionsJSON.append("},");
@@ -2831,13 +2832,13 @@ public class MetaDataServlet extends HttpServlet {
 			
 			/** {@inheritDoc} */
 			@Override
-			public void renderNavigateAction(String name,
-												String label,
-												String iconUrl,
-												String iconStyleClass,
-												String toolTip,
-												String confirmationText,
-												ActionImpl action) {
+			public void renderNavigateAction(@Nullable String name,
+												@Nullable String label,
+												@Nullable String iconUrl,
+												@Nullable String iconStyleClass,
+												@Nullable String toolTip,
+												@Nullable String confirmationText,
+												@Nonnull ActionImpl action) {
 				actionsJSON.append("{\"type\":\"navigateAction\"");
 				processAction(name, ImplicitActionName.Navigate, label, iconUrl, iconStyleClass, toolTip, confirmationText, action);
 				actionsJSON.append("},");
@@ -2845,13 +2846,13 @@ public class MetaDataServlet extends HttpServlet {
 			
 			/** {@inheritDoc} */
 			@Override
-			public void renderEditAction(String name,
-											String label,
-											String iconUrl,
-											String iconStyleClass,
-											String toolTip,
-											String confirmationText,
-											ActionImpl action) {
+			public void renderEditAction(@Nullable String name,
+											@Nullable String label,
+											@Nullable String iconUrl,
+											@Nullable String iconStyleClass,
+											@Nullable String toolTip,
+											@Nullable String confirmationText,
+											@Nonnull ActionImpl action) {
 				actionsJSON.append("{\"type\":\"editAction\"");
 				processAction(name, ImplicitActionName.Edit, label, iconUrl, iconStyleClass, toolTip, confirmationText, action);
 				actionsJSON.append("},");
@@ -2859,13 +2860,13 @@ public class MetaDataServlet extends HttpServlet {
 			
 			/** {@inheritDoc} */
 			@Override
-			public void renderDownloadAction(String name,
-												String label,
-												String iconUrl,
-												String iconStyleClass,
-												String toolTip,
-												String confirmationText,
-												ActionImpl action) {
+			public void renderDownloadAction(@Nullable String name,
+												@Nullable String label,
+												@Nullable String iconUrl,
+												@Nullable String iconStyleClass,
+												@Nullable String toolTip,
+												@Nullable String confirmationText,
+												@Nonnull ActionImpl action) {
 				actionsJSON.append("{\"type\":\"downloadAction\"");
 				processAction(name, ImplicitActionName.Download, label, iconUrl, iconStyleClass, toolTip, confirmationText, action);
 				actionsJSON.append("},");
@@ -2873,13 +2874,13 @@ public class MetaDataServlet extends HttpServlet {
 			
 			/** {@inheritDoc} */
 			@Override
-			public void renderDeleteAction(String name,
-											String label,
-											String iconUrl,
-											String iconStyleClass,
-											String toolTip,
-											String confirmationText,
-											ActionImpl action) {
+			public void renderDeleteAction(@Nullable String name,
+											@Nullable String label,
+											@Nullable String iconUrl,
+											@Nullable String iconStyleClass,
+											@Nullable String toolTip,
+											@Nullable String confirmationText,
+											@Nonnull ActionImpl action) {
 				actionsJSON.append("{\"type\":\"deleteAction\"");
 				processAction(name, ImplicitActionName.Delete, label, iconUrl, iconStyleClass, toolTip, confirmationText, action);
 				actionsJSON.append("},");
@@ -2887,13 +2888,13 @@ public class MetaDataServlet extends HttpServlet {
 			
 			/** {@inheritDoc} */
 			@Override
-			public void renderCustomAction(String name,
-											String label,
-											String iconUrl,
-											String iconStyleClass,
-											String toolTip,
-											String confirmationText,
-											ActionImpl action) {
+			public void renderCustomAction(@Nullable String name,
+											@Nullable String label,
+											@Nullable String iconUrl,
+											@Nullable String iconStyleClass,
+											@Nullable String toolTip,
+											@Nullable String confirmationText,
+											@Nonnull ActionImpl action) {
 				actionsJSON.append("{\"type\":\"serverAction\"");
 				processAction(name, null, label, iconUrl, iconStyleClass, toolTip, confirmationText, action);
 				actionsJSON.append("},");
@@ -2901,13 +2902,13 @@ public class MetaDataServlet extends HttpServlet {
 			
 			/** {@inheritDoc} */
 			@Override
-			public void renderCancelAction(String name,
-											String label,
-											String iconUrl,
-											String iconStyleClass,
-											String toolTip,
-											String confirmationText,
-											ActionImpl action) {
+			public void renderCancelAction(@Nullable String name,
+											@Nullable String label,
+											@Nullable String iconUrl,
+											@Nullable String iconStyleClass,
+											@Nullable String toolTip,
+											@Nullable String confirmationText,
+											@Nonnull ActionImpl action) {
 				actionsJSON.append("{\"type\":\"cancelAction\"");
 				processAction(name, ImplicitActionName.Cancel, label, iconUrl, iconStyleClass, toolTip, confirmationText, action);
 				actionsJSON.append("},");
@@ -2915,13 +2916,13 @@ public class MetaDataServlet extends HttpServlet {
 			
 			/** {@inheritDoc} */
 			@Override
-			public void renderBizImportAction(String name,
-												String label,
-												String iconUrl,
-												String iconStyleClass,
-												String toolTip,
-												String confirmationText,
-												ActionImpl action) {
+			public void renderBizImportAction(@Nullable String name,
+												@Nullable String label,
+												@Nullable String iconUrl,
+												@Nullable String iconStyleClass,
+												@Nullable String toolTip,
+												@Nullable String confirmationText,
+												@Nonnull ActionImpl action) {
 				actionsJSON.append("{\"type\":\"importAction\"");
 				processAction(name, ImplicitActionName.BizImport, label, iconUrl, iconStyleClass, toolTip, confirmationText, action);
 				actionsJSON.append("},");
@@ -2929,13 +2930,13 @@ public class MetaDataServlet extends HttpServlet {
 			
 			/** {@inheritDoc} */
 			@Override
-			public void renderBizExportAction(String name,
-												String label,
-												String iconUrl,
-												String iconStyleClass,
-												String toolTip,
-												String confirmationText,
-												ActionImpl action) {
+			public void renderBizExportAction(@Nullable String name,
+												@Nullable String label,
+												@Nullable String iconUrl,
+												@Nullable String iconStyleClass,
+												@Nullable String toolTip,
+												@Nullable String confirmationText,
+												@Nonnull ActionImpl action) {
 				actionsJSON.append("{\"type\":\"exportAction\"");
 				processAction(name, ImplicitActionName.BizExport, label, iconUrl, iconStyleClass, toolTip, confirmationText, action);
 				actionsJSON.append("},");
@@ -2943,13 +2944,13 @@ public class MetaDataServlet extends HttpServlet {
 			
 			/** {@inheritDoc} */
 			@Override
-			public void renderAddAction(String name,
-											String label,
-											String iconUrl,
-											String iconStyleClass,
-											String toolTip,
-											String confirmationText,
-											ActionImpl action) {
+			public void renderAddAction(@Nullable String name,
+											@Nullable String label,
+											@Nullable String iconUrl,
+											@Nullable String iconStyleClass,
+											@Nullable String toolTip,
+											@Nullable String confirmationText,
+											@Nonnull ActionImpl action) {
 				actionsJSON.append("{\"type\":\"addAction\"");
 				processAction(name, ImplicitActionName.Add, label, iconUrl, iconStyleClass, toolTip, confirmationText, action);
 				actionsJSON.append("},");
@@ -2957,13 +2958,13 @@ public class MetaDataServlet extends HttpServlet {
 			
 			/** {@inheritDoc} */
 			@Override
-			public void visitParameter(Parameter parameter, boolean parentVisible, boolean parentEnabled) {
+			public void visitParameter(@Nonnull Parameter parameter, boolean parentVisible, boolean parentEnabled) {
 				// handled in processParameterizable()
 			}
 			
 			/** {@inheritDoc} */
 			@Override
-			public void visitFilterParameter(FilterParameter parameter, boolean parentVisible, boolean parentEnabled) {
+			public void visitFilterParameter(@Nonnull FilterParameter parameter, boolean parentVisible, boolean parentEnabled) {
 				// handled in processFilterable()
 			}
 			
@@ -2976,7 +2977,7 @@ public class MetaDataServlet extends HttpServlet {
 			
 			/** {@inheritDoc} */
 			@Override
-			public void visitOnSelectedEventHandler(Selectable selectable, boolean parentVisible, boolean parentEnabled) {
+			public void visitOnSelectedEventHandler(@Nonnull Selectable selectable, boolean parentVisible, boolean parentEnabled) {
 				postProcessListColumns();
 				String selectedIdBinding = selectable.getSelectedIdBinding();
 				if (selectedIdBinding != null) {
@@ -2990,7 +2991,7 @@ public class MetaDataServlet extends HttpServlet {
 			
 			/** {@inheritDoc} */
 			@Override
-			public void visitedOnSelectedEventHandler(Selectable selectable, boolean parentVisible, boolean parentEnabled) {
+			public void visitedOnSelectedEventHandler(@Nonnull Selectable selectable, boolean parentVisible, boolean parentEnabled) {
 				List<EventAction> actions = selectable.getSelectedActions();
 				if ((actions != null) && (! actions.isEmpty())) {
 					result.setLength(result.length() - 1); // remove last comma
@@ -3000,7 +3001,7 @@ public class MetaDataServlet extends HttpServlet {
 
 			/** {@inheritDoc} */
 			@Override
-			public void visitOnRemovedEventHandler(Removable removable, boolean parentVisible, boolean parentEnabled) {
+			public void visitOnRemovedEventHandler(@Nonnull Removable removable, boolean parentVisible, boolean parentEnabled) {
 				postProcessListColumns();
 				List<EventAction> actions = removable.getRemovedActions();
 				if ((actions != null) && (! actions.isEmpty())) {
@@ -3010,7 +3011,7 @@ public class MetaDataServlet extends HttpServlet {
 			
 			/** {@inheritDoc} */
 			@Override
-			public void visitedOnRemovedEventHandler(Removable removable, boolean parentVisible, boolean parentEnabled) {
+			public void visitedOnRemovedEventHandler(@Nonnull Removable removable, boolean parentVisible, boolean parentEnabled) {
 				List<EventAction> actions = removable.getRemovedActions();
 				if ((actions != null) && (! actions.isEmpty())) {
 					result.setLength(result.length() - 1); // remove last comma
@@ -3020,7 +3021,7 @@ public class MetaDataServlet extends HttpServlet {
 			
 			/** {@inheritDoc} */
 			@Override
-			public void visitOnFocusEventHandler(Focusable blurable, boolean parentVisible, boolean parentEnabled) {
+			public void visitOnFocusEventHandler(@Nonnull Focusable blurable, boolean parentVisible, boolean parentEnabled) {
 				List<EventAction> actions = blurable.getFocusActions();
 				if ((actions != null) && (! actions.isEmpty())) {
 					result.append(",\"focusActions\":[");
@@ -3029,7 +3030,7 @@ public class MetaDataServlet extends HttpServlet {
 			
 			/** {@inheritDoc} */
 			@Override
-			public void visitedOnFocusEventHandler(Focusable blurable, boolean parentVisible, boolean parentEnabled) {
+			public void visitedOnFocusEventHandler(@Nonnull Focusable blurable, boolean parentVisible, boolean parentEnabled) {
 				List<EventAction> actions = blurable.getFocusActions();
 				if ((actions != null) && (! actions.isEmpty())) {
 					result.setLength(result.length() - 1); // remove last comma
@@ -3039,7 +3040,7 @@ public class MetaDataServlet extends HttpServlet {
 			
 			/** {@inheritDoc} */
 			@Override
-			public void visitOnBlurEventHandler(Focusable blurable, boolean parentVisible, boolean parentEnabled) {
+			public void visitOnBlurEventHandler(@Nonnull Focusable blurable, boolean parentVisible, boolean parentEnabled) {
 				List<EventAction> actions = blurable.getBlurActions();
 				if ((actions != null) && (! actions.isEmpty())) {
 					result.append(",\"blurActions\":[");
@@ -3048,7 +3049,7 @@ public class MetaDataServlet extends HttpServlet {
 			
 			/** {@inheritDoc} */
 			@Override
-			public void visitedOnBlurEventHandler(Focusable blurable, boolean parentVisible, boolean parentEnabled) {
+			public void visitedOnBlurEventHandler(@Nonnull Focusable blurable, boolean parentVisible, boolean parentEnabled) {
 				List<EventAction> actions = blurable.getBlurActions();
 				if ((actions != null) && (! actions.isEmpty())) {
 					result.setLength(result.length() - 1); // remove last comma
@@ -3058,7 +3059,7 @@ public class MetaDataServlet extends HttpServlet {
 			
 			/** {@inheritDoc} */
 			@Override
-			public void visitOnEditedEventHandler(Editable editable, boolean parentVisible, boolean parentEnabled) {
+			public void visitOnEditedEventHandler(@Nonnull Editable editable, boolean parentVisible, boolean parentEnabled) {
 				postProcessListColumns();
 				List<EventAction> actions = editable.getEditedActions();
 				if ((actions != null) && (! actions.isEmpty())) {
@@ -3068,7 +3069,7 @@ public class MetaDataServlet extends HttpServlet {
 			
 			/** {@inheritDoc} */
 			@Override
-			public void visitedOnEditedEventHandler(Editable editable, boolean parentVisible, boolean parentEnabled) {
+			public void visitedOnEditedEventHandler(@Nonnull Editable editable, boolean parentVisible, boolean parentEnabled) {
 				List<EventAction> actions = editable.getEditedActions();
 				if ((actions != null) && (! actions.isEmpty())) {
 					result.setLength(result.length() - 1); // remove last comma
@@ -3078,7 +3079,7 @@ public class MetaDataServlet extends HttpServlet {
 			
 			/** {@inheritDoc} */
 			@Override
-			public void visitOnChangedEventHandler(Changeable changeable, boolean parentVisible, boolean parentEnabled) {
+			public void visitOnChangedEventHandler(@Nonnull Changeable changeable, boolean parentVisible, boolean parentEnabled) {
 				List<EventAction> actions = changeable.getChangedActions();
 				if ((actions != null) && (! actions.isEmpty())) {
 					result.append(",\"changedActions\":[");
@@ -3087,7 +3088,7 @@ public class MetaDataServlet extends HttpServlet {
 			
 			/** {@inheritDoc} */
 			@Override
-			public void visitedOnChangedEventHandler(Changeable changeable, boolean parentVisible, boolean parentEnabled) {
+			public void visitedOnChangedEventHandler(@Nonnull Changeable changeable, boolean parentVisible, boolean parentEnabled) {
 				List<EventAction> actions = changeable.getChangedActions();
 				if ((actions != null) && (! actions.isEmpty())) {
 					result.setLength(result.length() - 1); // remove last comma
@@ -3097,7 +3098,7 @@ public class MetaDataServlet extends HttpServlet {
 			
 			/** {@inheritDoc} */
 			@Override
-			public void visitOnAddedEventHandler(Addable addable, boolean parentVisible, boolean parentEnabled) {
+			public void visitOnAddedEventHandler(@Nonnull Addable addable, boolean parentVisible, boolean parentEnabled) {
 				List<EventAction> actions = addable.getAddedActions();
 				if ((actions != null) && (! actions.isEmpty())) {
 					result.append(",\"addedActions\":[");
@@ -3106,7 +3107,7 @@ public class MetaDataServlet extends HttpServlet {
 			
 			/** {@inheritDoc} */
 			@Override
-			public void visitedOnAddedEventHandler(Addable addable, boolean parentVisible, boolean parentEnabled) {
+			public void visitedOnAddedEventHandler(@Nonnull Addable addable, boolean parentVisible, boolean parentEnabled) {
 				List<EventAction> actions = addable.getAddedActions();
 				if ((actions != null) && (! actions.isEmpty())) {
 					result.setLength(result.length() - 1); // remove last comma
@@ -3116,7 +3117,7 @@ public class MetaDataServlet extends HttpServlet {
 
 			/** {@inheritDoc} */
 			@Override
-			public void visitOnPickedEventHandler(LookupDescription lookup, boolean parentVisible, boolean parentEnabled) {
+			public void visitOnPickedEventHandler(@Nonnull LookupDescription lookup, boolean parentVisible, boolean parentEnabled) {
 				List<EventAction> actions = lookup.getPickedActions();
 				if ((actions != null) && (! actions.isEmpty())) {
 					result.append(",\"pickedActions\":[");
@@ -3125,7 +3126,7 @@ public class MetaDataServlet extends HttpServlet {
 			
 			/** {@inheritDoc} */
 			@Override
-			public void visitedOnPickedEventHandler(LookupDescription lookup, boolean parentVisible, boolean parentEnabled) {
+			public void visitedOnPickedEventHandler(@Nonnull LookupDescription lookup, boolean parentVisible, boolean parentEnabled) {
 				List<EventAction> actions = lookup.getPickedActions();
 				if ((actions != null) && (! actions.isEmpty())) {
 					result.setLength(result.length() - 1); // remove last comma
@@ -3135,7 +3136,7 @@ public class MetaDataServlet extends HttpServlet {
 			
 			/** {@inheritDoc} */
 			@Override
-			public void visitOnClearedEventHandler(LookupDescription lookup, boolean parentVisible, boolean parentEnabled) {
+			public void visitOnClearedEventHandler(@Nonnull LookupDescription lookup, boolean parentVisible, boolean parentEnabled) {
 				List<EventAction> actions = lookup.getClearedActions();
 				if ((actions != null) && (! actions.isEmpty())) {
 					result.append(",\"clearedActions\":[");
@@ -3144,7 +3145,7 @@ public class MetaDataServlet extends HttpServlet {
 			
 			/** {@inheritDoc} */
 			@Override
-			public void visitedOnClearedEventHandler(LookupDescription lookup, boolean parentVisible, boolean parentEnabled) {
+			public void visitedOnClearedEventHandler(@Nonnull LookupDescription lookup, boolean parentVisible, boolean parentEnabled) {
 				List<EventAction> actions = lookup.getClearedActions();
 				if ((actions != null) && (! actions.isEmpty())) {
 					result.setLength(result.length() - 1); // remove last comma
@@ -3154,7 +3155,7 @@ public class MetaDataServlet extends HttpServlet {
 			
 			/** {@inheritDoc} */
 			@Override
-			public void visitToggleVisibilityEventAction(ToggleVisibilityEventAction toggleVisibility,
+			public void visitToggleVisibilityEventAction(@Nonnull ToggleVisibilityEventAction toggleVisibility,
 															boolean parentVisible,
 															boolean parentEnabled) {
 				result.append("{\"type\":\"toggleVisibility\"},");
@@ -3162,7 +3163,7 @@ public class MetaDataServlet extends HttpServlet {
 			
 			/** {@inheritDoc} */
 			@Override
-			public void visitToggleDisabledEventAction(ToggleDisabledEventAction toggleDisabled,
+			public void visitToggleDisabledEventAction(@Nonnull ToggleDisabledEventAction toggleDisabled,
 														boolean parentVisible,
 														boolean parentEnabled) {
 				result.append("{\"type\":\"toggleDisabled\"},");
@@ -3170,7 +3171,7 @@ public class MetaDataServlet extends HttpServlet {
 			
 			/** {@inheritDoc} */
 			@Override
-			public void visitSetInvisibleEventAction(SetInvisibleEventAction setInvisible,
+			public void visitSetInvisibleEventAction(@Nonnull SetInvisibleEventAction setInvisible,
 														boolean parentVisible,
 														boolean parentEnabled) {
 				result.append("{\"type\":\"setInvisible\"},");
@@ -3178,7 +3179,7 @@ public class MetaDataServlet extends HttpServlet {
 			
 			/** {@inheritDoc} */
 			@Override
-			public void visitSetDisabledEventAction(SetDisabledEventAction setDisabled,
+			public void visitSetDisabledEventAction(@Nonnull SetDisabledEventAction setDisabled,
 														boolean parentVisible,
 														boolean parentEnabled) {
 				result.append("{\"type\":\"setDisabled\"},");
@@ -3186,8 +3187,8 @@ public class MetaDataServlet extends HttpServlet {
 			
 			/** {@inheritDoc} */
 			@Override
-			public void visitRerenderEventAction(RerenderEventAction rerender,
-													EventSource source,
+			public void visitRerenderEventAction(@Nonnull RerenderEventAction rerender,
+													@Nonnull EventSource source,
 													boolean parentVisible,
 													boolean parentEnabled) {
 				result.append("{\"type\":\"rerender\"},");
@@ -3196,7 +3197,7 @@ public class MetaDataServlet extends HttpServlet {
 			
 			/** {@inheritDoc} */
 			@Override
-			public void visitServerSideActionEventAction(Action action, ServerSideActionEventAction server) {
+			public void visitServerSideActionEventAction(@Nonnull Action action, @Nonnull ServerSideActionEventAction server) {
 				result.append("{\"type\":\"server\"},");
 			}
 			
@@ -3204,14 +3205,14 @@ public class MetaDataServlet extends HttpServlet {
 				result.append(",\"contained\":[");
 			}
 
-			private void processedContainer(Container container) {
+			private void processedContainer(@Nonnull Container container) {
 				if (! container.getContained().isEmpty()) {
 					result.setLength(result.length() - 1); // remove last comma
 				}
 				result.append("],");
 			}
 			
-			private void processSize(AbsoluteWidth size) {
+			private void processSize(@Nonnull AbsoluteWidth size) {
 				Integer value = size.getPixelWidth();
 				if (value != null) {
 					result.append(",\"pixelWidth\":").append(value);
@@ -3291,7 +3292,7 @@ public class MetaDataServlet extends HttpServlet {
 				}
 			}
 			
-			private void processBorder(Bordered bordered, String borderTitle) {
+			private void processBorder(@Nonnull Bordered bordered, @Nullable String borderTitle) {
 				Boolean border = bordered.getBorder();
 				if (Boolean.TRUE.equals(border)) {
 					result.append(",\"border\":true");
@@ -3302,7 +3303,7 @@ public class MetaDataServlet extends HttpServlet {
 				}
 			}
 			
-			private void processBox(Box box) {
+			private void processBox(@Nonnull Box box) {
 				Integer value = box.getPixelPadding();
 				if (value != null) {
 					result.append(",\"pixelPadding\":").append(value);
@@ -3313,32 +3314,32 @@ public class MetaDataServlet extends HttpServlet {
 				}
 			}
 			
-			private void processIdentifiable(Identifiable identifiable) {
+			private void processIdentifiable(@Nonnull Identifiable identifiable) {
 				String widgetId = identifiable.getWidgetId();
 				if (widgetId != null) {
 					result.append(",\"widgetId\":\"").append(OWASP.escapeJsonString(widgetId)).append('"');
 				}
 			}
 
-			private void processInvisible(Invisible invisible) {
+			private void processInvisible(@Nonnull Invisible invisible) {
 				MetaDataServlet.processInvisible(invisible, result);
 			}
 			
-			private void processDisableable(Disableable disableable) {
+			private void processDisableable(@Nonnull Disableable disableable) {
 				MetaDataServlet.processDisableable(disableable, result);
 			}
 			
-			private void processDecorated(DecoratedMetaData decorated) {
+			private void processDecorated(@Nonnull DecoratedMetaData decorated) {
 				MetaDataServlet.processDecorated(decorated, result);
 			}
 			
-			private void processInputWidget(InputWidget widget) {
+			private void processInputWidget(@Nonnull InputWidget widget) {
 				processBound(widget);
 				processDisableable(widget);
 				processInvisible(widget);
 			}
 
-			private void processBound(Bound bound) {
+			private void processBound(@Nonnull Bound bound) {
 				String binding = bound.getBinding();
 				if (binding != null) {
 					result.append(",\"binding\":\"").append(binding).append("\",\"target\":{");
@@ -3490,7 +3491,7 @@ public class MetaDataServlet extends HttpServlet {
 				}
 			}
 			
-			private void processDateValidator(DateValidator validator) {
+			private void processDateValidator(@Nullable DateValidator validator) {
 				if (validator != null) {
 					processRangeValidator(validator);
 					result.setLength(result.length() - 1); // remove last comma
@@ -3498,7 +3499,7 @@ public class MetaDataServlet extends HttpServlet {
 				}
 			}
 
-			private void processDecimalValidator(DecimalValidator validator) {
+			private void processDecimalValidator(@Nullable DecimalValidator validator) {
 				if (validator != null) {
 					processRangeValidator(validator);
 					Integer precision = validator.getPrecision();
@@ -3510,7 +3511,7 @@ public class MetaDataServlet extends HttpServlet {
 				}
 			}
 
-			private void processRangeValidator(RangeValidator<?> validator) {
+			private void processRangeValidator(@Nonnull RangeValidator<?> validator) {
 				result.append("\"validator\":{");
 				String message = validator.getLocalisedValidationMessage();
 				if (message != null) {
@@ -3526,14 +3527,14 @@ public class MetaDataServlet extends HttpServlet {
 				}
 			}
 
-			private void processEditable(org.skyve.metadata.view.Editable editable) {
+			private void processEditable(@Nonnull org.skyve.metadata.view.Editable editable) {
 				Boolean value = editable.getEditable();
 				if (value != null) {
 					result.append(",\"editable\":").append(value);
 				}
 			}
 			
-			private void processFilterable(Filterable filterable) {
+			private void processFilterable(@Nonnull Filterable filterable) {
 				processParameterizable(filterable);
 				List<FilterParameter> filters = filterable.getFilterParameters();
 				if ((filters != null) && (! filters.isEmpty())) {
@@ -3556,11 +3557,11 @@ public class MetaDataServlet extends HttpServlet {
 				}
 			}
 			
-			private void processParameterizable(Parameterizable parameterizable) {
+			private void processParameterizable(@Nonnull Parameterizable parameterizable) {
 				MetaDataServlet.processParameterizable(parameterizable, result);
 			}
 			
-			private void processTextOutput(TextOutput output) {
+			private void processTextOutput(@Nonnull TextOutput output) {
 				Boolean escape = output.getEscape();
 				if (escape != null) {
 					result.append(",\"escape\":").append(escape);
@@ -3571,7 +3572,7 @@ public class MetaDataServlet extends HttpServlet {
 				}
 			}
 			
-			private void processDisableableCRUDGrid(DisableableCRUDGrid grid) {
+			private void processDisableableCRUDGrid(@Nonnull DisableableCRUDGrid grid) {
 				String condish = grid.getDisableAddCondition();
 				if (condish != null) {
 					appendCondition(result, "disableAdd", condish);
@@ -3590,7 +3591,7 @@ public class MetaDataServlet extends HttpServlet {
 				}
 			}
 			
-			private void processAbstractListWidget(AbstractListWidget list) {
+			private void processAbstractListWidget(@Nonnull AbstractListWidget list) {
 				String string = list.getQueryName();
 				if (string != null) {
 					result.append(",\"queryName\":\"").append(string).append('"');
@@ -3608,7 +3609,7 @@ public class MetaDataServlet extends HttpServlet {
 				processFilterable(list);
 			}
 			
-			private void processMetaDataQueryColumn(MetaDataQueryColumn column) {
+			private void processMetaDataQueryColumn(@Nonnull MetaDataQueryColumn column) {
 				String string = column.getLocalisedDisplayName();
 				if (string != null) {
 					result.append(",\"label\":\"").append(OWASP.escapeJsonString(string)).append('"');
@@ -3644,20 +3645,20 @@ public class MetaDataServlet extends HttpServlet {
 				}
 			}
 			
-			private void processChartBuilderOrderMetaData(ChartBuilderOrderMetaData order) {
+			private void processChartBuilderOrderMetaData(@Nonnull ChartBuilderOrderMetaData order) {
 				result.append("\"by\":\"").append(order.getBy());
 				result.append("\",\"sort\":\"").append(order.getSort()).append('"');
 			}
 			
 			@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
-			private void processAction(String name,
-										ImplicitActionName type,
-										String label,
-										String iconUrl,
-										String iconStyleClass,
-										String toolTip,
-										String confirmationText,
-										ActionImpl action) {
+			private void processAction(@Nullable String name,
+										@Nullable ImplicitActionName type,
+										@Nullable String label,
+										@Nullable String iconUrl,
+										@Nullable String iconStyleClass,
+										@Nullable String toolTip,
+										@Nullable String confirmationText,
+										@Nonnull ActionImpl action) {
 				actionsJSON.append(",\"actionType\":");
 				if (type == null) {
 					actionsJSON.append("null");
@@ -3702,7 +3703,7 @@ public class MetaDataServlet extends HttpServlet {
 
 			/** {@inheritDoc} */
 			@Override
-			public void renderSidebar(Sidebar sidebar) {
+			public void renderSidebar(@Nonnull Sidebar sidebar) {
 				result.setLength(result.length() - 1); // remove last comma from view.getContained() processing
 				result.append("],\"sidebar\":{\"type\":\"sidebar\"");
 				processIdentifiable(sidebar);
@@ -3714,7 +3715,7 @@ public class MetaDataServlet extends HttpServlet {
 
 			/** {@inheritDoc} */
 			@Override
-			public void renderedSidebar(Sidebar sidebar) {
+			public void renderedSidebar(@Nonnull Sidebar sidebar) {
 				processedContainer(sidebar);
 				result.setLength(result.length() - 1); // remove last comma
 				result.append("},");
@@ -3733,11 +3734,11 @@ public class MetaDataServlet extends HttpServlet {
 	 *
 	 * <p>Package-visible for testing.
 	 */
-	static String jsonViewTitle(View view) {
+	static @Nullable String jsonViewTitle(@Nonnull View view) {
 		return OWASP.escapeJsonString(view.getLocalisedTitle());
 	}
 	
-	private static void processParameterizable(Parameterizable parameterizable, StringBuilder json) {
+	private static void processParameterizable(@Nonnull Parameterizable parameterizable, @Nonnull StringBuilder json) {
 		List<Parameter> parameters = parameterizable.getParameters();
 		if ((parameters != null) && (! parameters.isEmpty())) {
 			json.append(",\"parameters\":[");
@@ -3758,7 +3759,7 @@ public class MetaDataServlet extends HttpServlet {
 		}
 	}
 	
-	private static void processDecorated(DecoratedMetaData decorated, StringBuilder json) {
+	private static void processDecorated(@Nonnull DecoratedMetaData decorated, @Nonnull StringBuilder json) {
 		Map<String, String> properties = decorated.getProperties();
 		if ((properties != null) && (! properties.isEmpty())) {
 			json.append(",\"properties\":{");
@@ -3792,21 +3793,21 @@ public class MetaDataServlet extends HttpServlet {
 		}
 	}
 
-	private static void processInvisible(Invisible invisible, StringBuilder json) {
+	private static void processInvisible(@Nonnull Invisible invisible, @Nonnull StringBuilder json) {
 		String name = invisible.getInvisibleCondition();
 		if (name != null) {
 			appendCondition(json, "invisible", name);
 		}
 	}
 	
-	private static void processDisableable(Disableable disableable, StringBuilder json) {
+	private static void processDisableable(@Nonnull Disableable disableable, @Nonnull StringBuilder json) {
 		String name = disableable.getDisabledCondition();
 		if (name != null) {
 			appendCondition(json, "disabled", name);
 		}
 	}
 	
-	private static String emptyResponse(String documentName) {
+	private static @Nonnull String emptyResponse(@Nullable String documentName) {
 		if (documentName != null) { // request was for a view
 			return "{\"type\":\"view\",\"name\":\"edit\",\"contained\":[],\"title\":\"" + OWASP.escapeJsonString(documentName) + "\"}";
 		}

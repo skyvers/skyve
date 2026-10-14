@@ -29,6 +29,9 @@ import org.skyve.util.JSON;
 import org.skyve.util.logging.Category;
 import org.slf4j.Logger;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Represents backup table metadata derived from Skyve documents, including
  * persistent identifiers, fields, and indexes used for backup/restore.
@@ -73,7 +76,7 @@ class Table {
 	 * @param agnosticIdentifier schema-agnostic table identifier
 	 * @param persistentIdentifier fully qualified persistent identifier
 	 */
-	Table(String agnosticIdentifier, String persistentIdentifier) {
+	Table(@Nonnull String agnosticIdentifier, @Nonnull String persistentIdentifier) {
 		this.agnosticIdentifier = agnosticIdentifier;
 		this.persistentIdentifier = persistentIdentifier;
 	}
@@ -82,7 +85,7 @@ class Table {
 	 * Equality is based on the schema-agnostic identifier.
 	 */
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(@Nullable Object obj) {
 		return ((obj instanceof Table table) && (agnosticIdentifier != null) && agnosticIdentifier.equals(table.agnosticIdentifier));
 	}
 
@@ -105,7 +108,7 @@ class Table {
 	 * @param document the document whose metadata drives the backup schema
 	 */
 	@SuppressWarnings("java:S3776") // Complexity OK
-	void addFieldsFromDocument(Customer customer, Document document) {
+	void addFieldsFromDocument(@Nonnull Customer customer, @Nonnull Document document) {
 		boolean joinedExtension = false;
 		Persistent persistent = document.getPersistent();
 		if (persistent != null) {
@@ -167,7 +170,7 @@ class Table {
 	 * @param document the document whose attributes are being processed
 	 */
 	@SuppressWarnings("java:S3776") // Complexity OK
-	private void processAttributes(boolean joinedExtension, String embeddedColumnsPrefix, Customer customer, Document document) {
+	private void processAttributes(boolean joinedExtension, @Nullable String embeddedColumnsPrefix, @Nonnull Customer customer, @Nonnull Document document) {
 		for (Attribute attribute : joinedExtension ? document.getAttributes() : document.getAllAttributes(customer)) {
 			if (attribute.isPersistent()) {
 				String attributeName = attribute.getName();
@@ -244,7 +247,7 @@ class Table {
 	 * @return JSON representation of this table definition
 	 * @throws Exception if JSON marshalling fails
 	 */
-	public String toJSON() throws Exception {
+	public @Nonnull String toJSON() throws Exception {
 		Map<String, Object> result = new TreeMap<>();
 		result.put("name", agnosticIdentifier);
 		List<Map<String, Object>> fieldList = new ArrayList<>(fields.size());
@@ -273,7 +276,7 @@ class Table {
 	 * @return the reconstructed table definition
 	 * @throws Exception if JSON parsing or conversion fails
 	 */
-	public static Table fromJSON(String json) throws Exception {
+	public static @Nonnull Table fromJSON(@Nonnull String json) throws Exception {
 		Map<String, Object> map = (Map<String, Object>) JSON.unmarshall(json);
 
 		String agnosticIdentifier = (String) map.get("name");

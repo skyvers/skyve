@@ -2,6 +2,8 @@ package org.skyve.impl.sms;
 
 import org.skyve.util.SMSService;
 
+import jakarta.annotation.Nullable;
+
 /**
  * A singleton for the SMS service to use.
  * NB This doesn't need to be thread safe as it is set at startup only.
@@ -13,11 +15,11 @@ public class SMSServiceStaticSingleton {
 		// nothing to see here
 	}
 	
-	public static SMSService get() {
+	public static @Nullable SMSService get() {
 		return instance;
 	}
 	
-	public static void set(SMSService instance) {
+	public static void set(@Nullable SMSService instance) {
 		SMSServiceStaticSingleton.instance = instance;
 	}
 

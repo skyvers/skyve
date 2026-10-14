@@ -25,6 +25,9 @@ import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
 import freemarker.template.utility.DeepUnwrap;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Freemarker user-defined directive that performs a Skyve display format on the specified value
  * based on the Java class.
@@ -51,7 +54,7 @@ public class SqlFormatDirective implements TemplateDirectiveModel {
 	private static final String PARAM_NAME_VALUE = "value";
 
 	@Override
-	public void execute(Environment env, Map params, TemplateModel[] loopVars, TemplateDirectiveBody body)
+	public void execute(@Nonnull Environment env, @Nonnull Map params, @Nonnull TemplateModel[] loopVars, @Nullable TemplateDirectiveBody body)
 	throws TemplateException, IOException {
 		if (params.isEmpty()) {
 			throw new TemplateModelException("This directive requires parameters.");
@@ -94,7 +97,7 @@ public class SqlFormatDirective implements TemplateDirectiveModel {
 	}
 	
 	@SuppressWarnings({"static-method", "java:S3776", "null", "unused"}) // complexity OK - allow customer to be validated
-	private String toDisplay(final Object value) {
+	private @Nonnull String toDisplay(final @Nullable Object value) {
 		String result = "";
 		try {
 			Customer customer = CORE.getCustomer();

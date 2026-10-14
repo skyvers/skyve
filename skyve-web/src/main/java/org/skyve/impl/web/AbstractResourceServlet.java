@@ -292,7 +292,7 @@ public abstract class AbstractResourceServlet extends HttpServlet {
 	 * @throws IOException      if an I/O error occurs
 	 */
 	@Override
-	protected void service(HttpServletRequest request, HttpServletResponse response)
+	protected void service(@Nonnull HttpServletRequest request, @Nonnull HttpServletResponse response)
 	throws ServletException, IOException {
 		try {
 			super.service(request, response);
@@ -325,7 +325,7 @@ public abstract class AbstractResourceServlet extends HttpServlet {
 	 * @return milliseconds since the epoch, or {@code -1} if unknown or on error
 	 */
 	@Override
-	protected long getLastModified(HttpServletRequest request) {
+	protected long getLastModified(@Nonnull HttpServletRequest request) {
 		try {
 			Resource resource = RESOURCES.get();
 			if (resource == null) {
@@ -364,7 +364,7 @@ public abstract class AbstractResourceServlet extends HttpServlet {
 	 * @param response the current HTTP response
 	 */
 	@Override
-	public void doGet(HttpServletRequest request, HttpServletResponse response) {
+	public void doGet(@Nonnull HttpServletRequest request, @Nonnull HttpServletResponse response) {
 		doResourceRequest(request, response, false);
 	}
 
@@ -377,11 +377,11 @@ public abstract class AbstractResourceServlet extends HttpServlet {
 	 * @param response the current HTTP response
 	 */
 	@Override
-	protected void doHead(HttpServletRequest request, HttpServletResponse response) {
+	protected void doHead(@Nonnull HttpServletRequest request, @Nonnull HttpServletResponse response) {
 		doResourceRequest(request, response, true);
 	}
 
-	private void doResourceRequest(HttpServletRequest request, HttpServletResponse response, boolean headOnly) {
+	private void doResourceRequest(@Nonnull HttpServletRequest request, @Nonnull HttpServletResponse response, boolean headOnly) {
 		try {
 			RequestParams params = parseRequestParams(request);
 			Resource resource = RESOURCES.get();

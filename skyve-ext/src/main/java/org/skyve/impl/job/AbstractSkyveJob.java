@@ -27,6 +27,9 @@ import org.skyve.metadata.user.User;
 import org.skyve.util.logging.SkyveLoggerFactory;
 import org.slf4j.Logger;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Base implementation for all Skyve background jobs.
  *
@@ -60,14 +63,14 @@ public abstract class AbstractSkyveJob implements InterruptableJob, MetaData {
 	/**
 	 * Returns the displayName.
 	 */
-	public String getDisplayName() {
+	public @Nullable String getDisplayName() {
 		return displayName;
 	}
 
 	/**
 	 * Sets the displayName.
 	 */
-	public void setDisplayName(String displayName) {
+	public void setDisplayName(@Nullable String displayName) {
 		this.displayName = displayName;
 	}
 
@@ -95,42 +98,42 @@ public abstract class AbstractSkyveJob implements InterruptableJob, MetaData {
 	/**
 	 * Returns the startTime.
 	 */
-	public final Timestamp getStartTime() {
+	public final @Nonnull Timestamp getStartTime() {
 		return startTime;
 	}
 
 	/**
 	 * Returns the endTime.
 	 */
-	public final Timestamp getEndTime() {
+	public final @Nullable Timestamp getEndTime() {
 		return endTime;
 	}
 
 	/**
 	 * Returns the status.
 	 */
-	public final JobStatus getStatus() {
+	public final @Nullable JobStatus getStatus() {
 		return status;
 	}
 
 	/**
 	 * Returns the log.
 	 */
-	public final List<String> getLog() {
+	public final @Nonnull List<String> getLog() {
 		return log;
 	}
 
 	/**
 	 * Sets the log.
 	 */
-	protected final void setLog(List<String> log) {
+	protected final void setLog(@Nonnull List<String> log) {
 		this.log = log;
 	}
 
 	/**
 	 * Creates the logDescriptionString.
 	 */
-	public final String createLogDescriptionString() {
+	public final @Nonnull String createLogDescriptionString() {
 		StringBuilder sb = new StringBuilder(256);
 		synchronized (log) {
 			for (String logEntry : log) {
@@ -144,22 +147,22 @@ public abstract class AbstractSkyveJob implements InterruptableJob, MetaData {
 	/**
 	 * Returns the bean.
 	 */
-	public final Bean getBean() {
+	public final @Nullable Bean getBean() {
 		return bean;
 	}
 
 	/**
 	 * Sets the bean.
 	 */
-	public final void setBean(Bean bean) {
+	public final void setBean(@Nullable Bean bean) {
 		this.bean = bean;
 	}
 
 	public abstract void execute() throws Exception;
 
-	public abstract void execute(Job job) throws Exception;
+	public abstract void execute(@Nonnull Job job) throws Exception;
 
-	public abstract String cancel();
+	public abstract @Nullable String cancel();
 	
 	public abstract boolean shouldRollbackOnCancel();
 	
@@ -187,7 +190,7 @@ public abstract class AbstractSkyveJob implements InterruptableJob, MetaData {
 
 	@Override
 	@SuppressWarnings({"java:S1143", "java:S1163", "java:S3776"}) // OK to throw in the finally block here as it stops deployment; Complexity OK
-	public final void execute(JobExecutionContext context)
+	public final void execute(@Nonnull JobExecutionContext context)
 	throws JobExecutionException {
 		AbstractPersistence persistence = AbstractPersistence.get();
 		User user = null;

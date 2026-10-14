@@ -35,6 +35,9 @@ import org.skyve.util.logging.Category;
 import org.slf4j.Logger;
 import org.skyve.util.logging.SkyveLoggerFactory;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Adds security integration to LocalDesignRepository.
  * 
@@ -53,12 +56,12 @@ public class LocalDataStoreRepository extends LocalDesignRepository {
 	/**
 	 * Creates a repository rooted at a specific metadata path for tests.
 	 */
-	LocalDataStoreRepository(String absolutePath) {
+	LocalDataStoreRepository(@Nonnull String absolutePath) {
 		super(absolutePath);
 	}
 
 	@Override
-	public UserImpl retrieveUser(String userPrincipal) {
+	public @Nullable UserImpl retrieveUser(@Nonnull String userPrincipal) {
 		if (userPrincipal == null) {
 			throw new IllegalStateException("No-one is logged in - cannot retrieve the skyve user.");
 		}
@@ -76,7 +79,7 @@ public class LocalDataStoreRepository extends LocalDesignRepository {
 	}
 	
 	@Override
-	public boolean populatePermissions(User user) {
+	public boolean populatePermissions(@Nonnull User user) {
 		try (Connection connection = EXT.getDataStoreConnection()) {
 			return populateUser(user, connection);
 		}
@@ -86,7 +89,7 @@ public class LocalDataStoreRepository extends LocalDesignRepository {
 	}
 	
 	@Override
-	public void resetUserPermissions(User user) {
+	public void resetUserPermissions(@Nonnull User user) {
 		UserImpl impl = (UserImpl) user;
 		impl.clearAllPermissionsAndMenus();
 
@@ -99,7 +102,7 @@ public class LocalDataStoreRepository extends LocalDesignRepository {
 	
 	@Override
 	@SuppressWarnings({"java:S3776", "java:S6541"}) // complexity OK
-	public boolean populateUser(User user, Connection connection) {
+	public boolean populateUser(@Nonnull User user, @Nonnull Connection connection) {
 		UserImpl internalUser = (UserImpl) user;
 		try {
 			Customer customer = user.getCustomer();
@@ -267,7 +270,7 @@ public class LocalDataStoreRepository extends LocalDesignRepository {
 	}
 	
 	@Override
-	public List<UserJobSchedule> retrieveAllScheduledJobsForAllCustomers() {
+	public @Nonnull List<UserJobSchedule> retrieveAllScheduledJobsForAllCustomers() {
 		List<UserJobSchedule> result = new ArrayList<>();
 		
 		// Principal -> User
@@ -326,7 +329,7 @@ public class LocalDataStoreRepository extends LocalDesignRepository {
 	}
 	
 	@Override
-	public List<UserJobSchedule> retrieveAllScheduledReportsForAllCustomers() {
+	public @Nonnull List<UserJobSchedule> retrieveAllScheduledReportsForAllCustomers() {
 		List<UserJobSchedule> result = new ArrayList<>();
 
 		// Principal -> User
@@ -385,7 +388,7 @@ public class LocalDataStoreRepository extends LocalDesignRepository {
 	}
 
 	@Override
-	public String retrievePublicUserName(String customerName) {
+	public @Nullable String retrievePublicUserName(@Nonnull String customerName) {
 		String result = null;
 		
 		String sql = "select u.userName from ADM_Configuration c " +

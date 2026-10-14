@@ -9,6 +9,8 @@ import org.skyve.metadata.repository.ProvidedRepository;
 import org.slf4j.Logger;
 import org.skyve.util.logging.SkyveLoggerFactory;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * This job visits all the metadata for each customer after app deployment.
  * This job is executed only if access control is on so that the metadata is loaded and ready.
@@ -20,7 +22,7 @@ public class ValidateMetaDataJob implements Job {
     private static final Logger LOGGER = SkyveLoggerFactory.getLogger(ValidateMetaDataJob.class);
 
 	@Override
-	public void execute(JobExecutionContext context)
+	public void execute(@Nonnull JobExecutionContext context)
 	throws JobExecutionException {
 		try {
 			LOGGER.info("Validate metadata");

@@ -7,6 +7,8 @@ import org.skyve.impl.cache.StateUtil;
 import org.slf4j.Logger;
 import org.skyve.util.logging.SkyveLoggerFactory;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * This job evicts expired conversations from the conversations cache.
  * 
@@ -17,7 +19,7 @@ public class EvictStateJob implements Job {
     private static final Logger LOGGER = SkyveLoggerFactory.getLogger(EvictStateJob.class);
 
 	@Override
-	public void execute(JobExecutionContext context)
+	public void execute(@Nonnull JobExecutionContext context)
 	throws JobExecutionException {
 		try {
 			LOGGER.info("Evict expired conversations");

@@ -64,7 +64,7 @@ public abstract class AbstractContentManager implements ContentManager {
 	 * @throws IllegalArgumentException if the configured implementation cannot be instantiated.
 	 */
 	@SuppressWarnings("resource") // handled by caller
-	public static AbstractContentManager get() {
+	public static @Nonnull AbstractContentManager get() {
 		try {
 			return IMPLEMENTATION_CLASS.getDeclaredConstructor().newInstance();
 		}
@@ -81,7 +81,7 @@ public abstract class AbstractContentManager implements ContentManager {
 	 * @throws Exception if the reindex operation fails.
 	 */
 	@SuppressWarnings("java:S112") // allow throws Exception for implementations
-	public abstract void reindex(AttachmentContent attachment, boolean index) throws Exception;
+	public abstract void reindex(@Nonnull AttachmentContent attachment, boolean index) throws Exception;
 	
 	/**
 	 * Append a balanced folder structure for storing a content file based on it's content ID.
@@ -89,7 +89,7 @@ public abstract class AbstractContentManager implements ContentManager {
 	 * @param id The content ID
 	 * @param pathToAppendTo	The path to append to.
 	 */
-	public static void appendBalancedFolderPathFromContentId(String id, StringBuilder pathToAppendTo) {
+	public static void appendBalancedFolderPathFromContentId(@Nonnull String id, @Nonnull StringBuilder pathToAppendTo) {
 		pathToAppendTo.append(id.substring(5, 7).toLowerCase()).append('/');
 		pathToAppendTo.append(id.substring(10, 12).toLowerCase()).append('/');
 		pathToAppendTo.append(id.substring(15, 17).toLowerCase()).append('/');
@@ -100,7 +100,7 @@ public abstract class AbstractContentManager implements ContentManager {
 	 * Call this to get the folder structure of a content where args[0] is the contentId.
 	 */
 	@SuppressWarnings("java:S106") // allow System.out.println for this utility method
-	public static void main(String[] args) {
+	public static void main(@Nonnull String[] args) {
 		if (args.length != 1) {
 			throw new IllegalArgumentException("Add the contentId as an argument to the command line");
 		}
@@ -121,13 +121,13 @@ public abstract class AbstractContentManager implements ContentManager {
 	 * @param attributeName
 	 * @return true if the content can be read and accessed, otherwise false.
 	 */
-	public static boolean canAccessContent(String bizCustomer,
-											String bizModule,
-											String bizDocument,
-											String bizDataGroupId,
-											String bizUserId,
-											String bizId,
-											String attributeName) {
+	public static boolean canAccessContent(@Nullable String bizCustomer,
+											@Nonnull String bizModule,
+											@Nonnull String bizDocument,
+											@Nullable String bizDataGroupId,
+											@Nullable String bizUserId,
+											@Nonnull String bizId,
+											@Nullable String attributeName) {
 		User user = CORE.getUser();
 		if (user instanceof SuperUser) {
 			return true;
@@ -229,7 +229,7 @@ public abstract class AbstractContentManager implements ContentManager {
 	 * @param attachment The attachment metadata to serialize.
 	 * @throws IOException if an IO error occurs while writing the metadata file.
 	 */
-	protected static void writeContentMeta(String absoluteBalancedFolderPath, AttachmentContent attachment) 
+	protected static void writeContentMeta(@Nonnull String absoluteBalancedFolderPath, @Nonnull AttachmentContent attachment) 
 	throws IOException {
 		Map<String, Object> meta = new TreeMap<>();
 		String fileName = attachment.getFileName();
@@ -298,8 +298,8 @@ public abstract class AbstractContentManager implements ContentManager {
 	 * @return The resolved {@link AttachmentContent}, or null if not found.
 	 * @throws Exception if reading or parsing the metadata fails.
 	 */
-	public static AttachmentContent getFromFileSystem(StringBuilder absoluteContentStoreFolderPath,
-														String contentId,
+	public static @Nullable AttachmentContent getFromFileSystem(@Nonnull StringBuilder absoluteContentStoreFolderPath,
+														@Nonnull String contentId,
 														boolean noSuffix) throws Exception {
 		AbstractContentManager.appendBalancedFolderPathFromContentId(contentId, absoluteContentStoreFolderPath);
 		String path = absoluteContentStoreFolderPath.toString();

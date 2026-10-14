@@ -96,7 +96,7 @@ public class MockExternalContext extends ExternalContext {
 	 * @throws FacesException if the servlet dispatcher reports a {@link ServletException}
 	 */
 	@Override
-	public void dispatch(String path) throws IOException {
+	public void dispatch(@Nonnull String path) throws IOException {
 		if ((request != null) && (response != null)) {
 			RequestDispatcher dispatcher = request.getRequestDispatcher(path);
 			if (dispatcher != null) {
@@ -114,7 +114,7 @@ public class MockExternalContext extends ExternalContext {
 	 * Encodes the action URL through the configured servlet response, or returns it unchanged without one.
 	 */
 	@Override
-	public @Nonnull String encodeActionURL(String url) {
+	public @Nonnull String encodeActionURL(@Nonnull String url) {
 		return response == null ? url : response.encodeURL(url);
 	}
 
@@ -122,7 +122,7 @@ public class MockExternalContext extends ExternalContext {
 	 * Returns the supplied name unchanged because the mock has no portlet namespace.
 	 */
 	@Override
-	public @Nonnull String encodeNamespace(String name) {
+	public @Nonnull String encodeNamespace(@Nonnull String name) {
 		return name;
 	}
 
@@ -130,7 +130,7 @@ public class MockExternalContext extends ExternalContext {
 	 * Encodes the resource URL through the configured servlet response, or returns it unchanged without one.
 	 */
 	@Override
-	public @Nonnull String encodeResourceURL(String url) {
+	public @Nonnull String encodeResourceURL(@Nonnull String url) {
 		return response == null ? url : response.encodeURL(url);
 	}
 
@@ -138,7 +138,7 @@ public class MockExternalContext extends ExternalContext {
 	 * Encodes the WebSocket URL through the configured servlet response, or returns it unchanged without one.
 	 */
 	@Override
-	public @Nonnull String encodeWebsocketURL(String url) {
+	public @Nonnull String encodeWebsocketURL(@Nonnull String url) {
 		return response == null ? url : response.encodeURL(url);
 	}
 
@@ -146,7 +146,7 @@ public class MockExternalContext extends ExternalContext {
 	 * Encodes a partial-action URL through the configured servlet response, or returns it unchanged without one.
 	 */
 	@Override
-	public @Nonnull String encodePartialActionURL(String url) {
+	public @Nonnull String encodePartialActionURL(@Nonnull String url) {
 		return response == null ? url : response.encodeURL(url);
 	}
 
@@ -161,8 +161,8 @@ public class MockExternalContext extends ExternalContext {
 	 * @param properties optional cookie properties; may be {@code null}
 	 */
 	@Override
-	public void addResponseCookie(String name,
-									String value,
+	public void addResponseCookie(@Nonnull String name,
+									@Nonnull String value,
 									@Nullable Map<String, Object> properties) {
 		HttpServletResponse currentResponse = response;
 		if (currentResponse == null) {
@@ -242,7 +242,7 @@ public class MockExternalContext extends ExternalContext {
 	 * Resolves a MIME type through the configured servlet context, or returns {@code null} without one.
 	 */
 	@Override
-	public @Nullable String getMimeType(String file) {
+	public @Nullable String getMimeType(@Nonnull String file) {
 		ServletContext servletContext = servletContext();
 		return servletContext == null ? null : servletContext.getMimeType(file);
 	}
@@ -251,7 +251,7 @@ public class MockExternalContext extends ExternalContext {
 	 * Resolves a real path through the configured servlet context, or returns {@code null} without one.
 	 */
 	@Override
-	public @Nullable String getRealPath(String path) {
+	public @Nullable String getRealPath(@Nonnull String path) {
 		ServletContext servletContext = servletContext();
 		return servletContext == null ? null : servletContext.getRealPath(path);
 	}
@@ -260,7 +260,7 @@ public class MockExternalContext extends ExternalContext {
 	 * Returns a configured initialisation parameter.
 	 */
 	@Override
-	public @Nullable String getInitParameter(String name) {
+	public @Nullable String getInitParameter(@Nonnull String name) {
 		ServletContext servletContext = servletContext();
 		return servletContext == null ? initParameterMap.get(name) : servletContext.getInitParameter(name);
 	}
@@ -337,7 +337,7 @@ public class MockExternalContext extends ExternalContext {
 	 * @throws UnsupportedEncodingException if the request does not support {@code encoding}
 	 */
 	@Override
-	public void setRequestCharacterEncoding(String encoding) throws UnsupportedEncodingException {
+	public void setRequestCharacterEncoding(@Nonnull String encoding) throws UnsupportedEncodingException {
 		if (request != null) {
 			request.setCharacterEncoding(encoding);
 		}
@@ -520,7 +520,7 @@ public class MockExternalContext extends ExternalContext {
 	 * @throws MalformedURLException if the servlet context cannot form a URL for {@code path}
 	 */
 	@Override
-	public @Nullable URL getResource(String path) throws MalformedURLException {
+	public @Nullable URL getResource(@Nonnull String path) throws MalformedURLException {
 		ServletContext servletContext = servletContext();
 		return servletContext == null ? null : servletContext.getResource(path);
 	}
@@ -535,7 +535,7 @@ public class MockExternalContext extends ExternalContext {
 	 */
 	@Override
 	@SuppressWarnings("resource") // ExternalContext transfers ownership of the returned stream to its caller.
-	public @Nullable InputStream getResourceAsStream(String path) {
+	public @Nullable InputStream getResourceAsStream(@Nonnull String path) {
 		ServletContext servletContext = servletContext();
 		return servletContext == null ? null : servletContext.getResourceAsStream(path);
 	}
@@ -547,7 +547,7 @@ public class MockExternalContext extends ExternalContext {
 	 * @return the resource paths supplied by the servlet context, or an empty set when unavailable; never {@code null}
 	 */
 	@Override
-	public @Nonnull Set<String> getResourcePaths(String path) {
+	public @Nonnull Set<String> getResourcePaths(@Nonnull String path) {
 		ServletContext servletContext = servletContext();
 		Set<String> result = servletContext == null ? null : servletContext.getResourcePaths(path);
 		return result == null ? Collections.emptySet() : result;
@@ -622,7 +622,7 @@ public class MockExternalContext extends ExternalContext {
 	 * Sets character encoding on the configured servlet response, or does nothing without one.
 	 */
 	@Override
-	public void setResponseCharacterEncoding(String encoding) {
+	public void setResponseCharacterEncoding(@Nullable String encoding) {
 		if (response != null) {
 			response.setCharacterEncoding(encoding);
 		}
@@ -632,7 +632,7 @@ public class MockExternalContext extends ExternalContext {
 	 * Sets content type on the configured servlet response, or does nothing without one.
 	 */
 	@Override
-	public void setResponseContentType(String contentType) {
+	public void setResponseContentType(@Nullable String contentType) {
 		if (response != null) {
 			response.setContentType(contentType);
 		}
@@ -723,7 +723,7 @@ public class MockExternalContext extends ExternalContext {
 	 * Returns whether the configured servlet request grants the supplied role.
 	 */
 	@Override
-	public boolean isUserInRole(String role) {
+	public boolean isUserInRole(@Nonnull String role) {
 		return request != null && request.isUserInRole(role);
 	}
 
@@ -739,7 +739,7 @@ public class MockExternalContext extends ExternalContext {
 	 * Delegates a log message to the servlet context, or ignores it without one.
 	 */
 	@Override
-	public void log(String message) {
+	public void log(@Nonnull String message) {
 		ServletContext servletContext = servletContext();
 		if (servletContext != null) {
 			servletContext.log(message);
@@ -750,7 +750,7 @@ public class MockExternalContext extends ExternalContext {
 	 * Delegates a log message and exception to the servlet context, or ignores them without one.
 	 */
 	@Override
-	public void log(String message, Throwable exception) {
+	public void log(@Nonnull String message, @Nonnull Throwable exception) {
 		ServletContext servletContext = servletContext();
 		if (servletContext != null) {
 			servletContext.log(message, exception);
@@ -764,7 +764,7 @@ public class MockExternalContext extends ExternalContext {
 	 * @throws IOException if the configured response cannot send the redirect
 	 */
 	@Override
-	public void redirect(String url) throws IOException {
+	public void redirect(@Nonnull String url) throws IOException {
 		if (response != null) {
 			response.sendRedirect(url);
 		}
@@ -777,7 +777,7 @@ public class MockExternalContext extends ExternalContext {
 	 * @param value the header value; must not be {@code null}
 	 */
 	@Override
-	public void setResponseHeader(String name, String value) {
+	public void setResponseHeader(@Nonnull String name, @Nonnull String value) {
 		if (response != null) {
 			response.setHeader(name, value);
 		}
@@ -790,7 +790,7 @@ public class MockExternalContext extends ExternalContext {
 	 * @param value the header value; must not be {@code null}
 	 */
 	@Override
-	public void addResponseHeader(String name, String value) {
+	public void addResponseHeader(@Nonnull String name, @Nonnull String value) {
 		if (response != null) {
 			response.addHeader(name, value);
 		}
@@ -905,15 +905,15 @@ public class MockExternalContext extends ExternalContext {
 		return request == null ? null : request.getServletContext();
 	}
 
-	private static <V> Map<String, V> readOnlyMap(Supplier<Enumeration<String>> names,
-													Function<String, V> getter) {
+	private static @Nonnull <V> Map<String, V> readOnlyMap(@Nonnull Supplier<Enumeration<String>> names,
+													@Nonnull Function<String, V> getter) {
 		return Collections.unmodifiableMap(new DelegatingMap<>(names, getter, null, null));
 	}
 
-	private static Map<String, Object> attributeMap(Supplier<Enumeration<String>> names,
-														Function<String, Object> getter,
-														BiConsumer<String, Object> setter,
-														Consumer<String> remover) {
+	private static @Nonnull Map<String, Object> attributeMap(@Nonnull Supplier<Enumeration<String>> names,
+														@Nonnull Function<String, Object> getter,
+														@Nonnull BiConsumer<String, Object> setter,
+														@Nonnull Consumer<String> remover) {
 		return new DelegatingMap<>(names, getter, setter, remover);
 	}
 
@@ -923,10 +923,10 @@ public class MockExternalContext extends ExternalContext {
 		private final BiConsumer<String, V> setter;
 		private final Consumer<String> remover;
 
-		private DelegatingMap(Supplier<Enumeration<String>> names,
-								Function<String, V> getter,
-								BiConsumer<String, V> setter,
-								Consumer<String> remover) {
+		private DelegatingMap(@Nonnull Supplier<Enumeration<String>> names,
+								@Nonnull Function<String, V> getter,
+								@Nullable BiConsumer<String, V> setter,
+								@Nullable Consumer<String> remover) {
 			this.names = names;
 			this.getter = getter;
 			this.setter = setter;
@@ -944,12 +944,12 @@ public class MockExternalContext extends ExternalContext {
 		}
 
 		@Override
-		public V get(Object key) {
+		public @Nullable V get(@Nullable Object key) {
 			return key instanceof String name ? getter.apply(name) : null;
 		}
 
 		@Override
-		public V put(String key, V value) {
+		public @Nullable V put(@Nonnull String key, @Nullable V value) {
 			if (setter == null) {
 				throw new UnsupportedOperationException();
 			}
@@ -959,7 +959,7 @@ public class MockExternalContext extends ExternalContext {
 		}
 
 		@Override
-		public V remove(Object key) {
+		public @Nullable V remove(@Nullable Object key) {
 			if (remover == null) {
 				throw new UnsupportedOperationException();
 			}
@@ -972,10 +972,10 @@ public class MockExternalContext extends ExternalContext {
 		}
 
 		@Override
-		public Set<Entry<String, V>> entrySet() {
+		public @Nonnull Set<Entry<String, V>> entrySet() {
 			return new AbstractSet<>() {
 				@Override
-				public Iterator<Entry<String, V>> iterator() {
+				public @Nonnull Iterator<Entry<String, V>> iterator() {
 					Enumeration<String> enumeration = names.get();
 					return new Iterator<>() {
 						private String current;
@@ -986,7 +986,7 @@ public class MockExternalContext extends ExternalContext {
 						}
 
 						@Override
-						public Entry<String, V> next() {
+						public @Nonnull Entry<String, V> next() {
 							if (! hasNext()) {
 								throw new NoSuchElementException();
 							}

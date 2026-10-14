@@ -28,13 +28,16 @@ import org.skyve.util.MailAttachment;
 import freemarker.template.Template;
 import net.sf.jasperreports.engine.JasperPrint;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Default implementation of Skyve reporting facade backed by JasperReports and FreeMarker utilities.
  */
 public class DefaultReporting implements Reporting {
 	private static final DefaultReporting INSTANCE = new DefaultReporting();
 	
-	public static DefaultReporting get() {
+	public static @Nonnull DefaultReporting get() {
 		return INSTANCE;
 	}
 	
@@ -65,7 +68,7 @@ public class DefaultReporting implements Reporting {
 	 * Runs a Jasper bean report for a single bean instance.
 	 */
 	@Override
-	public JasperPrint runJasperBeanReport(User user, Document document, String reportName, Map<String, Object> parameters, Bean bean, ReportFormat format, OutputStream out)
+	public @Nullable JasperPrint runJasperBeanReport(@Nonnull User user, @Nonnull Document document, @Nonnull String reportName, @Nonnull Map<String, Object> parameters, @Nullable Bean bean, @Nonnull ReportFormat format, @Nonnull OutputStream out)
 	throws Exception {
 		return JasperReportUtil.runBeanReport(user, document, reportName, parameters, bean, format, out);
 	}
@@ -74,7 +77,7 @@ public class DefaultReporting implements Reporting {
 	 * Runs a Jasper SQL report and writes the rendered output.
 	 */
 	@Override
-	public JasperPrint runJasperSQLReport(User user, Document document, String reportName, Map<String, Object> parameters, ReportFormat format, OutputStream out)
+	public @Nullable JasperPrint runJasperSQLReport(@Nonnull User user, @Nonnull Document document, @Nonnull String reportName, @Nonnull Map<String, Object> parameters, @Nonnull ReportFormat format, @Nonnull OutputStream out)
 	throws Exception {
 		return JasperReportUtil.runSQLReport(user, document, reportName, parameters, format, out);
 	}
@@ -83,7 +86,7 @@ public class DefaultReporting implements Reporting {
 	 * Runs a Jasper report using the supplied document context and bean.
 	 */
 	@Override
-	public JasperPrint runJasperReport(User user, Document document, String reportName, Map<String, Object> parameters, Bean bean, ReportFormat format, OutputStream out)
+	public @Nullable JasperPrint runJasperReport(@Nonnull User user, @Nonnull Document document, @Nonnull String reportName, @Nonnull Map<String, Object> parameters, @Nullable Bean bean, @Nonnull ReportFormat format, @Nonnull OutputStream out)
 	throws Exception {
 		return JasperReportUtil.runReport(user, document, reportName, parameters, bean, format, out);
 	}
@@ -92,7 +95,7 @@ public class DefaultReporting implements Reporting {
 	 * Runs and merges multiple Jasper report parameter sets.
 	 */
 	@Override
-	public List<JasperPrint> runJasperReport(User user, List<ReportParameters> reportParameters, ReportFormat format, OutputStream out)
+	public @Nonnull List<JasperPrint> runJasperReport(@Nonnull User user, @Nonnull List<ReportParameters> reportParameters, @Nonnull ReportFormat format, @Nonnull OutputStream out)
 	throws Exception {
 		return JasperReportUtil.runReport(user, reportParameters, format, out);
 	}
@@ -101,7 +104,7 @@ public class DefaultReporting implements Reporting {
 	 * Renders a previously generated Jasper print to the requested format.
 	 */
 	@Override
-	public void runJasperReport(JasperPrint jasperPrint, ReportFormat format, OutputStream out)
+	public void runJasperReport(@Nonnull JasperPrint jasperPrint, @Nonnull ReportFormat format, @Nonnull OutputStream out)
 	throws Exception {
 		JasperReportUtil.runReport(jasperPrint, format, out);
 	}
@@ -110,7 +113,7 @@ public class DefaultReporting implements Reporting {
 	 * Renders a list of Jasper prints to the requested format.
 	 */
 	@Override
-	public void runJasperReport(List<JasperPrint> jasperPrintList, ReportFormat format, OutputStream out)
+	public void runJasperReport(@Nonnull List<JasperPrint> jasperPrintList, @Nonnull ReportFormat format, @Nonnull OutputStream out)
 	throws Exception {
 		JasperReportUtil.runReport(jasperPrintList, format, out);
 	}
@@ -119,7 +122,7 @@ public class DefaultReporting implements Reporting {
 	 * Registers an in-memory FreeMarker template.
 	 */
 	@Override
-	public void addTemplate(String templateName, String templateMarkup) {
+	public void addTemplate(@Nonnull String templateName, @Nonnull String templateMarkup) {
 		FreemarkerReportUtil.addTemplate(templateName, templateMarkup);
 	}
 
@@ -127,7 +130,7 @@ public class DefaultReporting implements Reporting {
 	 * Resolves a FreeMarker template by name.
 	 */
 	@Override
-	public Template getFreemarkerTemplate(String templateName) throws Exception {
+	public @Nonnull Template getFreemarkerTemplate(@Nonnull String templateName) throws Exception {
 		return FreemarkerReportUtil.getTemplate(templateName);
 	}
 	
@@ -135,7 +138,7 @@ public class DefaultReporting implements Reporting {
 	 * Generates a PDF from HTML content read from an input stream.
 	 */
 	@Override
-	public void generateFreemarkerPDFFromHTML(InputStream in, File outputFile) throws Exception {
+	public void generateFreemarkerPDFFromHTML(@Nonnull InputStream in, @Nonnull File outputFile) throws Exception {
 		FreemarkerReportUtil.generatePDFFromHTML(in, outputFile);
 	}
 
@@ -143,7 +146,7 @@ public class DefaultReporting implements Reporting {
 	 * Generates a PDF from an HTML string and writes it to a file.
 	 */
 	@Override
-	public void generateFreemarkerPDFFromHTML(String html, File outputFile) throws Exception {
+	public void generateFreemarkerPDFFromHTML(@Nonnull String html, @Nonnull File outputFile) throws Exception {
 		try (ByteArrayInputStream in = new ByteArrayInputStream(html.getBytes(StandardCharsets.UTF_8))) {
 			FreemarkerReportUtil.generatePDFFromHTML(in, outputFile);
 		}
@@ -153,7 +156,7 @@ public class DefaultReporting implements Reporting {
 	 * Generates a PDF from HTML located at a URL.
 	 */
 	@Override
-	public void generateFreemarkerPDFFromHTMLURL(String url, File outputFile) throws Exception {
+	public void generateFreemarkerPDFFromHTMLURL(@Nonnull String url, @Nonnull File outputFile) throws Exception {
 		FreemarkerReportUtil.generatePDFFromHTML(url, outputFile);
 	}
 
@@ -161,7 +164,7 @@ public class DefaultReporting implements Reporting {
 	 * Generates a PDF from stream-based HTML and writes to an output stream.
 	 */
 	@Override
-	public final void generateFreemarkerPDFFromHTML(InputStream in, OutputStream out) throws Exception {
+	public final void generateFreemarkerPDFFromHTML(@Nonnull InputStream in, @Nonnull OutputStream out) throws Exception {
 		FreemarkerReportUtil.generatePDFFromHTML(in, out);
 	}
 
@@ -169,7 +172,7 @@ public class DefaultReporting implements Reporting {
 	 * Generates a PDF from an HTML string and writes to an output stream.
 	 */
 	@Override
-	public final void generateFreemarkerPDFFromHTML(String html, OutputStream out) throws Exception {
+	public final void generateFreemarkerPDFFromHTML(@Nonnull String html, @Nonnull OutputStream out) throws Exception {
 		try (ByteArrayInputStream in = new ByteArrayInputStream(html.getBytes(StandardCharsets.UTF_8))) {
 			FreemarkerReportUtil.generatePDFFromHTML(in, out);
 		}
@@ -179,7 +182,7 @@ public class DefaultReporting implements Reporting {
 	 * Creates a FreeMarker bean report and returns rendered markup.
 	 */
 	@Override
-	public String createFreemarkerBeanReport(final Bean bean, final String reportName, final Map<String, Object> reportParameters)
+	public @Nonnull String createFreemarkerBeanReport(final @Nonnull Bean bean, final @Nonnull String reportName, final @Nullable Map<String, Object> reportParameters)
 	throws Exception {
 		return FreemarkerReportUtil.createBeanReport(bean, reportName, reportParameters);
 	}
@@ -188,10 +191,10 @@ public class DefaultReporting implements Reporting {
 	 * Creates and saves a FreeMarker bean report as a PDF file.
 	 */
 	@Override
-	public File createFreemarkerBeanReportPDF(final Bean bean,
-												final String reportName,
-												final Map<String, Object> reportParameters,
-												final String reportFilename)
+	public @Nonnull File createFreemarkerBeanReportPDF(final @Nonnull Bean bean,
+												final @Nonnull String reportName,
+												final @Nullable Map<String, Object> reportParameters,
+												final @Nonnull String reportFilename)
 	throws Exception {
 		return FreemarkerReportUtil.createBeanReportPDF(bean, reportName, reportParameters, reportFilename);
 	}
@@ -200,7 +203,7 @@ public class DefaultReporting implements Reporting {
 	 * Creates a FreeMarker report from a named template.
 	 */
 	@Override
-	public String createFreemarkerReport(final String templateName, final Map<String, Object> reportParameters)
+	public @Nonnull String createFreemarkerReport(final @Nonnull String templateName, final @Nullable Map<String, Object> reportParameters)
 	throws Exception {
 		return FreemarkerReportUtil.createReport(templateName, reportParameters);
 	}
@@ -209,7 +212,7 @@ public class DefaultReporting implements Reporting {
 	 * Creates and saves a FreeMarker template report as PDF.
 	 */
 	@Override
-	public File createFreemarkerReportPDF(final String templateName, final Map<String, Object> reportParameters, final String reportFilename)
+	public @Nonnull File createFreemarkerReportPDF(final @Nonnull String templateName, final @Nullable Map<String, Object> reportParameters, final @Nonnull String reportFilename)
 	throws Exception {
 		return FreemarkerReportUtil.createReportPDF(templateName, reportParameters, reportFilename);
 	}
@@ -218,10 +221,10 @@ public class DefaultReporting implements Reporting {
 	 * Produces a downloadable report from a FreeMarker template.
 	 */
 	@Override
-	public Download downloadFreemarkerReport(final String reportName,
-												final Map<String, Object> reportParameters,
-												final ReportFormat format,
-												final String downloadFilename)
+	public @Nonnull Download downloadFreemarkerReport(final @Nonnull String reportName,
+												final @Nullable Map<String, Object> reportParameters,
+												final @Nonnull ReportFormat format,
+												final @Nonnull String downloadFilename)
 	throws Exception {
 		return FreemarkerReportUtil.downloadReport(reportName, reportParameters, format, downloadFilename);
 	}
@@ -230,7 +233,7 @@ public class DefaultReporting implements Reporting {
 	 * Runs a FreeMarker report and returns the rendered output.
 	 */
 	@Override
-	public String runFreemarkerReport(String reportName, Map<String, Object> reportParameters) throws Exception {
+	public @Nonnull String runFreemarkerReport(@Nonnull String reportName, @Nullable Map<String, Object> reportParameters) throws Exception {
 		return FreemarkerReportUtil.runReport(reportName, reportParameters);
 	}
 	
@@ -238,7 +241,7 @@ public class DefaultReporting implements Reporting {
 	 * Resolves the bean-specific FreeMarker template for the given report name.
 	 */
 	@Override
-	public Template getBeanReport(final Bean bean, final String reportName)
+	public @Nonnull Template getBeanReport(final @Nonnull Bean bean, final @Nonnull String reportName)
 	throws Exception {
 		return FreemarkerReportUtil.getBeanReport(bean, reportName);
 	}
@@ -247,10 +250,10 @@ public class DefaultReporting implements Reporting {
 	 * Generates a PDF attachment from a Jasper SQL report.
 	 */
 	@Override
-	public MailAttachment getMailAttachmentFromJasperReport(String reportModuleName,
-																String reportDocumentName,
-																String reportName,
-																Map<String, Object> parameters)
+	public @Nonnull MailAttachment getMailAttachmentFromJasperReport(@Nonnull String reportModuleName,
+																@Nonnull String reportDocumentName,
+																@Nonnull String reportName,
+																@Nonnull Map<String, Object> parameters)
 	throws Exception {
 		MailAttachment result = new MailAttachment();
 
@@ -276,7 +279,7 @@ public class DefaultReporting implements Reporting {
 	 * Generates a PDF attachment by running a sequence of Jasper reports.
 	 */
 	@Override
-	public MailAttachment getMailAttachmentFromJasperReport(List<ReportParameters> reportParameters)
+	public @Nonnull MailAttachment getMailAttachmentFromJasperReport(@Nonnull List<ReportParameters> reportParameters)
 	throws Exception {
 		if (reportParameters.isEmpty()) {
 			throw new IllegalArgumentException("There must be at least 1 report to generate.");

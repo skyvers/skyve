@@ -29,6 +29,8 @@ import org.skyve.util.logging.Category;
 import org.slf4j.Logger;
 import org.skyve.util.logging.SkyveLoggerFactory;
 
+import jakarta.annotation.Nullable;
+
 /**
  * This job removes orphaned uploads and any textually indexed data left from delete/truncate SQL statements issued.
  * 
@@ -46,7 +48,7 @@ public class ContentGarbageCollectionJob implements Job {
 	
 	@Override
 	@SuppressWarnings({"java:S3776", "java:S6541"}) // complexity OK
-	public void execute(JobExecutionContext context)
+	public void execute(@Nullable JobExecutionContext context)
 	throws JobExecutionException {
 		LOGGER.info("Start Content Garbage Collection");
 		try {

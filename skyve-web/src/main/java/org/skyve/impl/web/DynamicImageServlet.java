@@ -30,6 +30,7 @@ import org.skyve.util.monitoring.Monitoring;
 import org.skyve.util.monitoring.RequestKey;
 import org.slf4j.Logger;
 
+import jakarta.annotation.Nonnull;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
@@ -71,7 +72,7 @@ public class DynamicImageServlet extends HttpServlet {
 	 */
 	@Override
 	@SuppressWarnings({"java:S1989", "java:S3776"}) // there exists JavaEE error pages; Complexity OK
-	public void doGet(HttpServletRequest request, HttpServletResponse response)
+	public void doGet(@Nonnull HttpServletRequest request, @Nonnull HttpServletResponse response)
 	throws ServletException, IOException {
 		// State required for rendering the image
 		Exception exception = null;

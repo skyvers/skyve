@@ -17,6 +17,9 @@ import org.skyve.content.TextExtractor;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.util.FileUtil;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * A content manager class that implements a file system storage but can't be searched or iterated.
  */
@@ -28,7 +31,7 @@ public class FileSystemContentManager extends AbstractContentManager {
 	 * @throws Exception Not thrown by this implementation.
 	 */
 	@Override
-	public void put(BeanContent content) throws Exception {
+	public void put(@Nonnull BeanContent content) throws Exception {
 		// nothing to do here
 	}
 
@@ -40,7 +43,7 @@ public class FileSystemContentManager extends AbstractContentManager {
 	 * @throws Exception If storage fails.
 	 */
 	@Override
-	public void put(AttachmentContent attachment, boolean index) throws Exception {
+	public void put(@Nonnull AttachmentContent attachment, boolean index) throws Exception {
 		TextExtractor extractor = EXT.getAddInManager().getExtension(TextExtractor.class);
 		if (extractor != null) {
 			extractor.sniffContentType(attachment);
@@ -73,7 +76,7 @@ public class FileSystemContentManager extends AbstractContentManager {
 	 * @throws Exception If the metadata update fails.
 	 */
 	@Override
-	public void update(AttachmentContent attachment) throws Exception {
+	public void update(@Nonnull AttachmentContent attachment) throws Exception {
 		attachment.setLastModified(new Date());
 
 		if (UtilImpl.CONTENT_FILE_STORAGE) {
@@ -93,7 +96,7 @@ public class FileSystemContentManager extends AbstractContentManager {
 	 * @throws Exception If loading fails.
 	 */
 	@Override
-	public AttachmentContent getAttachment(String contentId) throws Exception {
+	public @Nullable AttachmentContent getAttachment(@Nonnull String contentId) throws Exception {
 		if (UtilImpl.CONTENT_FILE_STORAGE) {
 			StringBuilder absoluteContentStoreFolderPath = new StringBuilder(128);
 			absoluteContentStoreFolderPath.append(UtilImpl.CONTENT_DIRECTORY).append(FILE_STORE_NAME).append('/');
@@ -109,7 +112,7 @@ public class FileSystemContentManager extends AbstractContentManager {
 	 * @throws Exception Not thrown by this implementation.
 	 */
 	@Override
-	public void removeBean(String bizId) throws Exception {
+	public void removeBean(@Nonnull String bizId) throws Exception {
 		// nothing to do here
 	}
 
@@ -121,7 +124,7 @@ public class FileSystemContentManager extends AbstractContentManager {
 	 */
 	@Override
 	@SuppressWarnings({"java:S3776", "java:S4042", "java:S1066"}) // complexity OK
-	public void removeAttachment(String contentId) throws Exception {
+	public void removeAttachment(@Nonnull String contentId) throws Exception {
 		if (UtilImpl.CONTENT_FILE_STORAGE) {
 			StringBuilder path = new StringBuilder(128);
 			path.append(UtilImpl.CONTENT_DIRECTORY).append(FILE_STORE_NAME).append('/');
@@ -150,7 +153,7 @@ public class FileSystemContentManager extends AbstractContentManager {
 			}
 		}
 
-	private static boolean deleteIfEmpty(File directory) throws IOException {
+	private static boolean deleteIfEmpty(@Nonnull File directory) throws IOException {
 		String[] children = directory.list();
 		if ((children != null) && (children.length == 0)) {
 			Files.delete(directory.toPath());
@@ -168,7 +171,7 @@ public class FileSystemContentManager extends AbstractContentManager {
 	 * @throws Exception Not thrown by this implementation.
 	 */
 	@Override
-	public SearchResults google(String search, int maxResults) throws Exception {
+	public @Nonnull SearchResults google(@Nullable String search, int maxResults) throws Exception {
 		return new SearchResults();
 	}
 
@@ -189,7 +192,7 @@ public class FileSystemContentManager extends AbstractContentManager {
 	 * @throws Exception Not thrown by this implementation.
 	 */
 	@Override
-	public void truncateIndexing(String customerName) throws Exception {
+	public void truncateIndexing(@Nonnull String customerName) throws Exception {
 		// do nothing
 	}
 
@@ -200,7 +203,7 @@ public class FileSystemContentManager extends AbstractContentManager {
 	 * @throws Exception Not thrown by this implementation.
 	 */
 	@Override
-	public void truncateAttachmentIndexing(String customerName) throws Exception {
+	public void truncateAttachmentIndexing(@Nonnull String customerName) throws Exception {
 		// do nothing
 	}
 
@@ -211,7 +214,7 @@ public class FileSystemContentManager extends AbstractContentManager {
 	 * @throws Exception Not thrown by this implementation.
 	 */
 	@Override
-	public void truncateBeanIndexing(String customerName) throws Exception {
+	public void truncateBeanIndexing(@Nonnull String customerName) throws Exception {
 		// do nothing
 	}
 
@@ -223,20 +226,20 @@ public class FileSystemContentManager extends AbstractContentManager {
 	 */
 	@Override
 	@SuppressWarnings("java:S1604") // Not a functional interface, but extends a functional interface
-	public ContentIterable all() throws Exception {
+	public @Nonnull ContentIterable all() throws Exception {
 		return new ContentIterable() {
 			/**
 			 * {@inheritDoc}
 			 */
 			@Override
-			public ContentIterator iterator() {
+			public @Nonnull ContentIterator iterator() {
 				return new ContentIterator() {
 					@Override
 					@SuppressWarnings("java:S2272") // No-op
 					/**
 					 * Performs next.
 					 */
-					public SearchResult next() {
+					public @Nullable SearchResult next() {
 						return null;
 					}
 					
@@ -294,7 +297,7 @@ public class FileSystemContentManager extends AbstractContentManager {
 	 * @throws Exception Not thrown by this implementation.
 	 */
 	@Override
-	public void reindex(AttachmentContent attachment, boolean index) throws Exception {
+	public void reindex(@Nonnull AttachmentContent attachment, boolean index) throws Exception {
 		// nothing to do here
 	}
 }

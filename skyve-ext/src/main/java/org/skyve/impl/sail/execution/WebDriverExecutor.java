@@ -7,6 +7,9 @@ import org.skyve.impl.bind.BindUtil;
 import org.skyve.metadata.sail.language.step.Comment;
 import org.skyve.metadata.sail.language.step.Pause;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Base executor that generates WebDriver-style Java test methods from SAIL scripts.
  */
@@ -21,7 +24,7 @@ public abstract class WebDriverExecutor<T extends AutomationContext> extends Scr
 	 *
 	 * @param comment Comment text.
 	 */
-	protected void comment(String comment) {
+	protected void comment(@Nullable String comment) {
 		indent().append("trace(\"").append(comment).append("\");").newline();
 	}
 	
@@ -31,7 +34,7 @@ public abstract class WebDriverExecutor<T extends AutomationContext> extends Scr
 	 * @param heading Test heading used to derive a Java-safe method name.
 	 */
 	@Override
-	protected void startTest(String heading) {
+	protected void startTest(@Nonnull String heading) {
 		String testMethodName = BindUtil.toJavaTypeIdentifier(heading);
 		testMethodNames.add(testMethodName);
 		
@@ -55,7 +58,7 @@ public abstract class WebDriverExecutor<T extends AutomationContext> extends Scr
 	 * @param comment The comment step to render.
 	 */
 	@Override
-	public void executeComment(Comment comment) {
+	public void executeComment(@Nonnull Comment comment) {
 		comment(comment.getComment());
 	}
 	
@@ -65,7 +68,7 @@ public abstract class WebDriverExecutor<T extends AutomationContext> extends Scr
 	 * @param pause The pause step containing delay duration.
 	 */
 	@Override
-	public void executePause(Pause pause) {
+	public void executePause(@Nonnull Pause pause) {
 		indent().append("pause(\"").append(Long.toString(pause.getMillis())).append("\");").newline();
 	}
 	
@@ -76,7 +79,7 @@ public abstract class WebDriverExecutor<T extends AutomationContext> extends Scr
 	 * @return Generated source text.
 	 */
 	@Override
-	public String toString() {
+	public @Nonnull String toString() {
 		indent().append("/**").newline();
 		indent().append(" * Test Harness").newline();
 		indent().append(" */").newline();

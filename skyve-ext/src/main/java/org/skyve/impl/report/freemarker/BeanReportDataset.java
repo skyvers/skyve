@@ -5,6 +5,9 @@ import java.util.List;
 import org.apache.commons.beanutils.DynaBean;
 import org.skyve.domain.app.admin.ReportParameter;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Supplies dynamic bean rows for a configured FreeMarker report dataset.
  */
@@ -18,5 +21,5 @@ public interface BeanReportDataset {
 	 *        parameters.
 	 * @return List of beans
 	 */
-	public List<DynaBean> getResults(final List<? extends ReportParameter> list);
+	public @Nullable List<DynaBean> getResults(final @Nonnull List<? extends ReportParameter> list);
 }

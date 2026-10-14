@@ -17,6 +17,7 @@ import org.skyve.metadata.user.User;
 import org.skyve.persistence.DocumentQuery.AggregateFunction;
 import org.skyve.util.JSON;
 
+import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 
 class VueSnapshotAdapter extends SnapshotAdapter {
@@ -50,7 +51,7 @@ class VueSnapshotAdapter extends SnapshotAdapter {
 	
 	@Override
 	@SuppressWarnings({"java:S3776", "java:S6541"}) // complexity OK
-	public Snapshot fromClientPayload(String payload) {
+	public @Nullable Snapshot fromClientPayload(@Nonnull String payload) {
 		User u = CORE.getUser();
 		
 		Snapshot result = null;
@@ -231,7 +232,7 @@ class VueSnapshotAdapter extends SnapshotAdapter {
 		return result;
 	}
 
-	private static SnapshotCriterion criterion(String column, Map<String, Object> constraint) {
+	private static @Nonnull SnapshotCriterion criterion(@Nonnull String column, @Nonnull Map<String, Object> constraint) {
 		SnapshotCriterion result = null;
 
 		Object value = constraint.get(VUE_MATCH_MODE);
@@ -250,7 +251,7 @@ class VueSnapshotAdapter extends SnapshotAdapter {
 	
 	@Override
 	@SuppressWarnings("java:S3776") // Complexity OK
-	public String toClientPayload(Snapshot snapshot) {
+	public @Nullable String toClientPayload(@Nonnull Snapshot snapshot) {
 		try {
 			Map<String, Object> result = new LinkedHashMap<>(6);
 			result.put(VUE_OPERATOR, CompoundFilterOperator.and); // Default operator
@@ -340,7 +341,7 @@ class VueSnapshotAdapter extends SnapshotAdapter {
 	 * @param filter	The filter to restructure and create Vue JSON filter criteria for.
 	 * @return	The filter criteria map or null if restructuring is not possible.
 	 */
-	private static @Nullable Map<String, Object> filters(SnapshotFilter filter) {
+	private static @Nullable Map<String, Object> filters(@Nonnull SnapshotFilter filter) {
 		Map<String, Object> result = null;
 
 		// A Criteria
@@ -393,7 +394,7 @@ class VueSnapshotAdapter extends SnapshotAdapter {
 	 * @return	Restructured 3-tier and criteria -> and/or criteria -> criterion(s) or null if impossible.
 	 */
 	@SuppressWarnings("java:S3776") // Complexity OK
-	private static @Nullable Map<String, SnapshotCriteria> restructure(SnapshotCriteria topCriteria) {
+	private static @Nullable Map<String, SnapshotCriteria> restructure(@Nonnull SnapshotCriteria topCriteria) {
 		CompoundFilterOperator operator = topCriteria.getOperator();
 		// Check the operator - Not is not supported
 		if ((operator == null) || CompoundFilterOperator.not.equals(operator)) {
@@ -485,7 +486,7 @@ class VueSnapshotAdapter extends SnapshotAdapter {
 		return result;
 	}
 
-	private static Map<String, Object> constraint(SnapshotCriterion criterion) {
+	private static @Nonnull Map<String, Object> constraint(@Nonnull SnapshotCriterion criterion) {
 		// Cannot convert start and end (at this stage)
 		Object start = criterion.getStart();
 		Object end = criterion.getEnd();

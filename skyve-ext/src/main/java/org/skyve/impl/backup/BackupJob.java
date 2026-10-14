@@ -99,7 +99,7 @@ public class BackupJob extends CancellableJob {
 	 *
 	 * @return the backup zip file or null if not generated yet
 	 */
-	public File getBackupZip() {
+	public @Nullable File getBackupZip() {
 		return backupZip;
 	}
 
@@ -718,7 +718,7 @@ public class BackupJob extends CancellableJob {
 	 * @param noun the singular noun
 	 * @return the count and noun, e.g. "1 row" or "1,234 rows"
 	 */
-	private static String countOf(int count, @Nonnull String noun) {
+	private static @Nonnull String countOf(int count, @Nonnull String noun) {
 		return String.format("%,d %s%s", Integer.valueOf(count), noun, (count == 1) ? "" : "s");
 	}
 
@@ -728,7 +728,7 @@ public class BackupJob extends CancellableJob {
 	 * @param bytes the number of bytes
 	 * @return the size in GB or MB to 1 decimal place
 	 */
-	private static String formatSize(long bytes) {
+	private static @Nonnull String formatSize(long bytes) {
 		if (bytes < GIGABYTE) {
 			return String.format("%,.1f MB", Double.valueOf((double) bytes / Util.MEGABYTE));
 		}
@@ -741,7 +741,7 @@ public class BackupJob extends CancellableJob {
 	 * @param startMillis the start time in epoch milliseconds
 	 * @return the elapsed time in seconds to 1 decimal place
 	 */
-	private static String elapsed(long startMillis) {
+	private static @Nonnull String elapsed(long startMillis) {
 		return String.format("%,.1f s", Double.valueOf((System.currentTimeMillis() - startMillis) / 1000.0));
 	}
 
@@ -753,7 +753,7 @@ public class BackupJob extends CancellableJob {
 	 * @param bean DataMaintenance bean
 	 * @return the sensitivity level ordinal
 	 */
-	private static int getSensitivityLevel(Bean bean) {
+	private static int getSensitivityLevel(@Nullable Bean bean) {
 		if (bean instanceof DataMaintenance dataMaintenance) {
 			DataSensitivity sensitivityInput = dataMaintenance.getDataSensitivity();
 			if (sensitivityInput != null) {
@@ -770,7 +770,7 @@ public class BackupJob extends CancellableJob {
 	 * @param bean DataMaintenance bean
 	 * @return true if content should be included
 	 */
-	private static boolean getIncludeContent(Bean bean) {
+	private static boolean getIncludeContent(@Nullable Bean bean) {
 		if (bean instanceof DataMaintenance dataMaintenance) {
 			Boolean includeContent = dataMaintenance.getIncludeContent();
 			return Boolean.TRUE.equals(includeContent);
@@ -785,7 +785,7 @@ public class BackupJob extends CancellableJob {
 	 * @param bean DataMaintenance bean
 	 * @return true if audit log should be included
 	 */
-	private static boolean getIncludeAuditLog(Bean bean) {
+	private static boolean getIncludeAuditLog(@Nullable Bean bean) {
 		if (bean instanceof DataMaintenance dataMaintenance) {
 			Boolean includeAudits = dataMaintenance.getIncludeAuditLog();
 			return Boolean.TRUE.equals(includeAudits);

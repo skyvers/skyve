@@ -2,6 +2,8 @@ package org.skyve.impl.job;
 
 import org.skyve.job.JobScheduler;
 
+import jakarta.annotation.Nullable;
+
 /**
  * A singleton for the Job Scheduler to use.
  * NB This doesn't need to be thread safe as it is set at startup only.
@@ -13,11 +15,11 @@ public class JobSchedulerStaticSingleton {
 		// nothing to see here
 	}
 	
-	public static JobScheduler get() {
+	public static @Nullable JobScheduler get() {
 		return instance;
 	}
 	
-	public static void set(JobScheduler instance) {
+	public static void set(@Nullable JobScheduler instance) {
 		JobSchedulerStaticSingleton.instance = instance;
 	}
 

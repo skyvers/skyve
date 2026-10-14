@@ -1,5 +1,7 @@
 package org.skyve.impl.generate.jasperreports;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * Factory that selects and instantiates the appropriate {@link ReportDesignGenerator}
  * subclass based on the report parameters supplied.
@@ -12,7 +14,7 @@ public class ReportDesignGeneratorFactory {
      * @return A generator implementation compatible with the definition source.
      * @throws IllegalStateException If the definition source is not supported.
      */
-    public static ReportDesignGenerator getGeneratorForDesign(DesignSpecification designSpecification) {
+    public static @Nonnull ReportDesignGenerator getGeneratorForDesign(@Nonnull DesignSpecification designSpecification) {
         assert(designSpecification.getDefinitionSource() != null);
 
         switch (designSpecification.getDefinitionSource()) {

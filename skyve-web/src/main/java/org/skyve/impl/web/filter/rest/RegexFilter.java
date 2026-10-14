@@ -10,6 +10,8 @@ import java.util.TreeMap;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.util.Util;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.FilterConfig;
 import jakarta.servlet.ServletException;
@@ -26,7 +28,7 @@ public class RegexFilter extends AbstractRestFilter {
 	private Map<String, String> initParameters = new TreeMap<>();
 	
 	@Override
-	public void init(FilterConfig config) throws ServletException {
+	public void init(@Nonnull FilterConfig config) throws ServletException {
 		super.init(config);
 		
 		Enumeration<String> e = config.getInitParameterNames();
@@ -46,12 +48,12 @@ public class RegexFilter extends AbstractRestFilter {
 	 * Exposed to perform initialisation programmatically if required.
 	 * @return	The init parameters.
 	 */
-	protected Map<String, String> getInitParameters() {
+	protected @Nonnull Map<String, String> getInitParameters() {
 		return initParameters;
 	}
 	
 	@Override
-	public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
+	public void doFilter(@Nonnull ServletRequest request, @Nonnull ServletResponse response, @Nonnull FilterChain chain)
 	throws IOException, ServletException {
 		HttpServletRequest httpRequest = (HttpServletRequest) request;
 		HttpServletResponse httpResponse = (HttpServletResponse) response;
@@ -69,7 +71,7 @@ public class RegexFilter extends AbstractRestFilter {
         chain.doFilter(request, response);
 	}
 
-	private static boolean passes(HttpServletRequest request, String name, String regex) {
+	private static boolean passes(@Nonnull HttpServletRequest request, @Nonnull String name, @Nullable String regex) {
 		String value = requestValue(request, name);
 		if ((value != null) || isRequestPropertyName(name)) {
 			return !fails(value, regex);
@@ -88,7 +90,7 @@ public class RegexFilter extends AbstractRestFilter {
 		return parametersPass(request.getParameterValues(name), regex);
 	}
 
-	private static boolean parametersPass(String[] parameters, String regex) {
+	private static boolean parametersPass(@Nullable String[] parameters, @Nullable String regex) {
 		if ((parameters != null) && (parameters.length > 0)) {
 			for (String parameter : parameters) {
 				if (fails(parameter, regex)) {
@@ -100,7 +102,7 @@ public class RegexFilter extends AbstractRestFilter {
 		return false;
 	}
 
-	private static boolean isRequestPropertyName(String name) {
+	private static boolean isRequestPropertyName(@Nonnull String name) {
 		// NB Don't test requestedSessionId as it is doctorable by the user
 		return switch (name) {
 			case "ContextPath", "LocalAddr", "LocalName", "LocalPort", "Method", "PathInfo", "PathTranslated", "Protocol",
@@ -110,7 +112,7 @@ public class RegexFilter extends AbstractRestFilter {
 		};
 	}
 
-	private static String requestValue(HttpServletRequest request, String name) {
+	private static @Nullable String requestValue(@Nonnull HttpServletRequest request, @Nonnull String name) {
 		return switch (name) {
 			case "ContextPath" -> request.getContextPath();
 			case "LocalAddr" -> request.getLocalAddr();
@@ -139,7 +141,7 @@ public class RegexFilter extends AbstractRestFilter {
 		};
 	}
 
-	private static boolean fails(String value, String regex) {
+	private static boolean fails(@Nullable String value, @Nullable String regex) {
 		if (regex != null) {
 			return ((value == null) || (! value.matches(regex)));
 		}

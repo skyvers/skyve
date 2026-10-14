@@ -11,6 +11,7 @@ import org.skyve.metadata.MetaDataException;
 import org.slf4j.Logger;
 import org.skyve.util.logging.SkyveLoggerFactory;
 
+import jakarta.annotation.Nonnull;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.FilterConfig;
 import jakarta.servlet.ServletException;
@@ -73,7 +74,7 @@ public class RestUserPersistenceFilter extends AbstractRestFilter {
 	 * @throws ServletException when initialization fails
 	 */
 	@Override
-	public void init(FilterConfig config) throws ServletException {
+	public void init(@Nonnull FilterConfig config) throws ServletException {
 		persistenceUser = config.getInitParameter("PersistenceUser");
 
 		super.init(config);
@@ -93,7 +94,7 @@ public class RestUserPersistenceFilter extends AbstractRestFilter {
 	 * @throws ServletException if downstream filter processing fails
 	 */
 	@Override
-	public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
+	public void doFilter(@Nonnull ServletRequest request, @Nonnull ServletResponse response, @Nonnull FilterChain chain)
 	throws IOException, ServletException {
 		LOGGER.debug("RestUserPersistenceFilter intercepted request");
 

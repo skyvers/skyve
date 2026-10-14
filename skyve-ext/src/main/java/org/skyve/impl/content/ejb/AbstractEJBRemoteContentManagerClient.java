@@ -8,6 +8,9 @@ import org.skyve.impl.content.AbstractContentManager;
 import org.slf4j.Logger;
 import org.skyve.util.logging.SkyveLoggerFactory;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * This class is used to talk to another skyve server's EJB content server.
  * Implement the server EJB lookup in obtainServer()
@@ -58,52 +61,52 @@ public abstract class AbstractEJBRemoteContentManagerClient extends AbstractCont
 		// nothing to do here
 	}
 
-	public abstract EJBRemoteContentManagerServer obtainServer() throws Exception;
+	public abstract @Nonnull EJBRemoteContentManagerServer obtainServer() throws Exception;
 	
 	@Override
-	public void put(BeanContent content) throws Exception {
+	public void put(@Nonnull BeanContent content) throws Exception {
 		LOGGER.info("Remote call to EJBRemoteContentManagerServer.put() sent for {}", content.getBizId());
 		EJBRemoteContentManagerServer server = obtainServer();
 		server.put(content);
 	}
 
 	@Override
-	public void put(AttachmentContent content, boolean index) throws Exception {
+	public void put(@Nonnull AttachmentContent content, boolean index) throws Exception {
 		LOGGER.info("Remote call to EJBRemoteContentManagerServer.put() sent for {} attribute {}", content.getBizId(), content.getAttributeName());
 		EJBRemoteContentManagerServer server = obtainServer();
 		content.setContentId(server.put(content, index));
 	}
 
 	@Override
-	public void update(AttachmentContent content) throws Exception {
+	public void update(@Nonnull AttachmentContent content) throws Exception {
 		LOGGER.info("Remote call to EJBRemoteContentManagerServer.update() sent for {}", content.getContentId());
 		EJBRemoteContentManagerServer server = obtainServer();
 		server.update(content.cloneForRemoteUpdate());
 	}
 	
 	@Override
-	public AttachmentContent getAttachment(String contentId) throws Exception {
+	public @Nullable AttachmentContent getAttachment(@Nonnull String contentId) throws Exception {
 		LOGGER.info("Remote call to EJBRemoteContentManagerServer.getAttachment() sent for {}", contentId);
 		EJBRemoteContentManagerServer server = obtainServer();
 		return server.getAttachment(contentId);
 	}
 
 	@Override
-	public void removeBean(String bizId) throws Exception {
+	public void removeBean(@Nonnull String bizId) throws Exception {
 		LOGGER.info("Remote call to EJBRemoteContentManagerServer.removeBean() sent for {}", bizId);
 		EJBRemoteContentManagerServer server = obtainServer();
 		server.removeBean(bizId);
 	}
 
 	@Override
-	public void removeAttachment(String contentId) throws Exception {
+	public void removeAttachment(@Nonnull String contentId) throws Exception {
 		LOGGER.info("Remote call to EJBRemoteContentManagerServer.removeAttachment() sent for {}", contentId);
 		EJBRemoteContentManagerServer server = obtainServer();
 		server.removeAttachment(contentId);
 	}
 
 	@Override
-	public SearchResults google(String search, int maxResults) throws Exception {
+	public @Nonnull SearchResults google(@Nullable String search, int maxResults) throws Exception {
 		LOGGER.info("Remote call to EJBRemoteContentManagerServer.google() sent for '" + search + '\'');
 		EJBRemoteContentManagerServer server = obtainServer();
 		return server.google(search, maxResults);
@@ -115,27 +118,27 @@ public abstract class AbstractEJBRemoteContentManagerClient extends AbstractCont
 	}
 
 	@Override
-	public void truncateIndexing(String customerName) throws Exception {
+	public void truncateIndexing(@Nonnull String customerName) throws Exception {
 		throw new UnsupportedOperationException(TRUNCATE_INDEXING_UNSUPPORTED);
 	}
 
 	@Override
-	public void truncateAttachmentIndexing(String customerName) throws Exception {
+	public void truncateAttachmentIndexing(@Nonnull String customerName) throws Exception {
 		throw new UnsupportedOperationException(TRUNCATE_INDEXING_UNSUPPORTED);
 	}
 
 	@Override
-	public void truncateBeanIndexing(String customerName) throws Exception {
+	public void truncateBeanIndexing(@Nonnull String customerName) throws Exception {
 		throw new UnsupportedOperationException(TRUNCATE_INDEXING_UNSUPPORTED);
 	}
 
 	@Override
-	public ContentIterable all() throws Exception {
+	public @Nonnull ContentIterable all() throws Exception {
 		throw new UnsupportedOperationException("Iterating over a remote content repository is not supported");
 	}
 	
 	@Override
-	public void reindex(AttachmentContent attachment, boolean index) throws Exception {
+	public void reindex(@Nonnull AttachmentContent attachment, boolean index) throws Exception {
 		throw new UnsupportedOperationException("Reindexing a remote content repository is not supported");
 	}
 }

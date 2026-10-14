@@ -22,6 +22,9 @@ import org.skyve.persistence.DocumentFilter;
 import org.skyve.persistence.DocumentQuery;
 import org.skyve.tag.TagManager;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Implements tag lifecycle operations for the current user using admin tag documents.
  *
@@ -38,7 +41,7 @@ public class DefaultTagManager implements TagManager {
 	/**
 	 * Returns the singleton instance.
 	 */
-	public static DefaultTagManager get() {
+	public static @Nonnull DefaultTagManager get() {
 		return INSTANCE;
 	}
 	
@@ -57,7 +60,7 @@ public class DefaultTagManager implements TagManager {
 	 * @throws Exception If tagging fails.
 	 */
 	@Override
-	public void tag(String tagId, Bean bean) throws Exception {
+	public void tag(@Nonnull String tagId, @Nonnull Bean bean) throws Exception {
 		tag(tagId, bean.getBizModule(), bean.getBizDocument(), bean.getBizId());
 	}
 
@@ -71,7 +74,7 @@ public class DefaultTagManager implements TagManager {
 	 * @throws Exception If persistence or validation fails.
 	 */
 	@Override
-	public void tag(String tagId, String taggedModuleName, String taggedDocumentName, String taggedBizId) throws Exception {
+	public void tag(@Nonnull String tagId, @Nonnull String taggedModuleName, @Nonnull String taggedDocumentName, @Nonnull String taggedBizId) throws Exception {
 		AbstractPersistence persistence = AbstractPersistence.get();
 		User user = persistence.getUser();
 		Customer customer = user.getCustomer();
@@ -108,7 +111,7 @@ public class DefaultTagManager implements TagManager {
 	 * @throws Exception If untagging fails.
 	 */
 	@Override
-	public void untag(String tagId, Bean bean) throws Exception {
+	public void untag(@Nonnull String tagId, @Nonnull Bean bean) throws Exception {
 		untag(tagId, bean.getBizModule(), bean.getBizDocument(), bean.getBizId());
 	}
 
@@ -122,7 +125,7 @@ public class DefaultTagManager implements TagManager {
 	 * @throws Exception If persistence operations fail.
 	 */
 	@Override
-	public void untag(String tagId, String taggedModuleName, String taggedDocumentName, String taggedBizId) throws Exception {
+	public void untag(@Nonnull String tagId, @Nonnull String taggedModuleName, @Nonnull String taggedDocumentName, @Nonnull String taggedBizId) throws Exception {
 		AbstractPersistence persistence = AbstractPersistence.get();
 		User user = persistence.getUser();
 
@@ -163,7 +166,7 @@ public class DefaultTagManager implements TagManager {
 	 * @throws Exception If creation fails.
 	 */
 	@Override
-	public String create(String tagName, boolean visible) throws Exception {
+	public @Nonnull String create(@Nonnull String tagName, boolean visible) throws Exception {
 	    AbstractPersistence persistence = AbstractPersistence.get();
         User user = persistence.getUser();
         Customer customer = user.getCustomer();
@@ -186,7 +189,7 @@ public class DefaultTagManager implements TagManager {
 	 * @throws Exception If lookup fails.
 	 */
 	@Override
-	public String getTagId(String tagName) throws Exception {
+	public @Nullable String getTagId(@Nonnull String tagName) throws Exception {
 	    AbstractPersistence persistence = AbstractPersistence.get();
         User user = persistence.getUser();
 
@@ -212,7 +215,7 @@ public class DefaultTagManager implements TagManager {
 	 * @throws Exception If retrieval fails.
 	 */
 	@Override
-	public List<DomainValue> getTags() throws Exception {
+	public @Nonnull List<DomainValue> getTags() throws Exception {
 	    AbstractPersistence persistence = AbstractPersistence.get();
         User user = persistence.getUser();
         
@@ -238,7 +241,7 @@ public class DefaultTagManager implements TagManager {
 	 * @throws Exception If delete validation or persistence fails.
 	 */
 	@Override
-	public void delete(String tagId) throws Exception {
+	public void delete(@Nonnull String tagId) throws Exception {
 		clear(tagId);
 
 		// Ensure that proper validation is fired - especially reference constraints.
@@ -263,7 +266,7 @@ public class DefaultTagManager implements TagManager {
 	 * @throws Exception If tagging fails for any bean.
 	 */
 	@Override
-	public void tag(String tagId, Iterable<Bean> beans) throws Exception {
+	public void tag(@Nonnull String tagId, @Nonnull Iterable<Bean> beans) throws Exception {
 		for (Bean bean : beans) {
 			tag(tagId, bean.getBizModule(), bean.getBizDocument(), bean.getBizId());
 		}
@@ -277,7 +280,7 @@ public class DefaultTagManager implements TagManager {
 	 * @throws Exception If untagging fails for any bean.
 	 */
 	@Override
-	public void untag(String tagId, Iterable<Bean> beans) throws Exception {
+	public void untag(@Nonnull String tagId, @Nonnull Iterable<Bean> beans) throws Exception {
 		for (Bean bean : beans) {
 			untag(tagId, bean.getBizModule(), bean.getBizDocument(), bean.getBizId());
 		}
@@ -290,7 +293,7 @@ public class DefaultTagManager implements TagManager {
 	 * @throws Exception If deletion fails.
 	 */
 	@Override
-	public void clear(String tagId) throws Exception {
+	public void clear(@Nonnull String tagId) throws Exception {
 		AbstractPersistence persistence = AbstractPersistence.get();
 		User user = persistence.getUser();
 		BizQL deleteStatement = persistence.newBizQL(String.format("delete from {%s.%s} as bean " +
@@ -318,7 +321,7 @@ public class DefaultTagManager implements TagManager {
 	 */
 	@Override
 	@SuppressWarnings("resource")
-	public AutoClosingIterable<Bean> iterate(String tagId) throws Exception {
+	public @Nonnull AutoClosingIterable<Bean> iterate(@Nonnull String tagId) throws Exception {
 		AbstractPersistence persistence = AbstractPersistence.get();
 		User user = persistence.getUser();
 		BizQL query = persistence.newBizQL(String.format("select bean.%s as %s, " + 

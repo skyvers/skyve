@@ -71,6 +71,7 @@ import org.skyve.util.logging.SkyveLoggerFactory;
 import org.slf4j.Logger;
 
 import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.servlet.FilterRegistration;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.ServletContextEvent;
@@ -84,14 +85,14 @@ import jakarta.servlet.SessionCookieConfig;
 public class SkyveContextListener implements ServletContextListener {
 	static final String SHUTTING_DOWN_ATTRIBUTE_NAME = SkyveContextListener.class.getName() + ".shuttingDown";
 
-	private static record AppCacheSettings(String cacheName,
-									 String type,
+	private static record AppCacheSettings(@Nonnull String cacheName,
+									 @Nonnull String type,
 									 int heapSizeEntries,
 									 long offHeapSize,
-									 CacheExpiryPolicy expiryPolicy,
+									 @Nonnull CacheExpiryPolicy expiryPolicy,
 									 long expiry,
-									 Class<? extends Serializable> keyClass,
-									 Class<? extends Serializable> valueClass,
+									 @Nonnull Class<? extends Serializable> keyClass,
+									 @Nonnull Class<? extends Serializable> valueClass,
 									 long diskSize,
 									 boolean persistent) {
 	}
@@ -140,7 +141,7 @@ public class SkyveContextListener implements ServletContextListener {
 	 * @param evt The servlet context event.
 	 */
 	@Override
-	public void contextInitialized(ServletContextEvent evt) {
+	public void contextInitialized(@Nonnull ServletContextEvent evt) {
 		ServletContext ctx = evt.getServletContext();
 		populateUtilImpl(ctx);
 
@@ -286,7 +287,7 @@ public class SkyveContextListener implements ServletContextListener {
 		}
 	}
 
-	private static void validateRequiredFilters(ServletContext ctx) {
+	private static void validateRequiredFilters(@Nonnull ServletContext ctx) {
 		boolean securityHeadersFilterExists = false;
 		for (Entry<String, ? extends FilterRegistration> entry : ctx.getFilterRegistrations().entrySet()) {
 			FilterRegistration reg = entry.getValue();
@@ -308,7 +309,7 @@ public class SkyveContextListener implements ServletContextListener {
 		}
 	}
 
-	private static Map<String, Object> readExpandedConfiguration(File file) {
+	private static @Nonnull Map<String, Object> readExpandedConfiguration(@Nonnull File file) {
 		try (FileInputStream fis = new FileInputStream(file)) {
 			VariableExpander variableExpander = new VariableExpander();
 			return variableExpander.expand(UtilImpl.readJSONConfig(fis), System.getenv());
@@ -324,7 +325,7 @@ public class SkyveContextListener implements ServletContextListener {
 	 *
 	 * @param properties The root configuration map.
 	 */
-	private static void configureArchiveProperties(Map<String, Object> properties) {
+	private static void configureArchiveProperties(@Nonnull Map<String, Object> properties) {
         String archKey = "archive";
 
         Map<String, Object> archiveProps = getObject(null, archKey, properties, false);
@@ -402,7 +403,7 @@ public class SkyveContextListener implements ServletContextListener {
 	 * @param properties the root configuration properties
 	 * @param factories the configured factory class names
 	 */
-	static void configureMailServiceAndSmtp(Map<String, Object> properties, Map<String, Object> factories) {
+	static void configureMailServiceAndSmtp(@Nonnull Map<String, Object> properties, @Nonnull Map<String, Object> factories) {
 		boolean smtpRequired = configureMailService(factories);
 
 		Map<String, Object> smtp = getObject(null, SMTP_KEY, properties, smtpRequired);
@@ -426,7 +427,7 @@ public class SkyveContextListener implements ServletContextListener {
 		UtilImpl.SMTP_TEST_BOGUS_SEND = Boolean.TRUE.equals(smtpTestBogusSend);
 	}
 
-	private static boolean configureMailService(Map<String, Object> factories) {
+	private static boolean configureMailService(@Nonnull Map<String, Object> factories) {
 		UtilImpl.SKYVE_MAIL_SERVICE_CLASS = getString(FACTORIES_KEY, "mailServiceClass", factories, false);
 		if (UtilImpl.SKYVE_MAIL_SERVICE_CLASS == null) {
 			MailServiceStaticSingleton.setDefault();
@@ -444,7 +445,7 @@ public class SkyveContextListener implements ServletContextListener {
 		}
 	}
 
-	private static TreeMap<String, String> toStringMap(Map<String, Object> values) {
+	private static @Nonnull TreeMap<String, String> toStringMap(@Nullable Map<String, Object> values) {
 		TreeMap<String, String> result = new TreeMap<>();
 		if (values == null) {
 			return result;
@@ -460,7 +461,7 @@ public class SkyveContextListener implements ServletContextListener {
 		return result;
 	}
 
-	private static void configureTraceSettings(Map<String, Object> properties) {
+	private static void configureTraceSettings(@Nonnull Map<String, Object> properties) {
 		Map<String, Object> trace = getObject(null, TRACE_KEY, properties, true);
 		UtilImpl.XML_TRACE = getBoolean(TRACE_KEY, "xml", trace);
 		UtilImpl.HTTP_TRACE = getBoolean(TRACE_KEY, "http", trace);
@@ -474,7 +475,7 @@ public class SkyveContextListener implements ServletContextListener {
 		UtilImpl.DIRTY_TRACE = getBoolean(TRACE_KEY, "dirty", trace);
 	}
 
-	private static void configureContentSettings(Map<String, Object> content) {
+	private static void configureContentSettings(@Nonnull Map<String, Object> content) {
 		UtilImpl.CONTENT_GC_CRON = getString(CONTENT_KEY, "gcCron", content, true);
 		Number gcEligibleAgeMinutes = getNumber(CONTENT_KEY, "gcEligibleAgeMinutes", content, false);
 		if (gcEligibleAgeMinutes != null) {
@@ -486,7 +487,7 @@ public class SkyveContextListener implements ServletContextListener {
 		UtilImpl.CONTENT_FILE_SUFFIXES = getBoolean(CONTENT_KEY, "fileSuffixes", content);
 	}
 
-	private static void configureBackupSettings(Map<String, Object> properties) {
+	private static void configureBackupSettings(@Nonnull Map<String, Object> properties) {
 		Map<String, Object> backup = getObject(null, BACKUP_KEY, properties, false);
 		if (backup == null) {
 			return;
@@ -509,7 +510,7 @@ public class SkyveContextListener implements ServletContextListener {
 		}
 	}
 
-	private static void configureUploadsSettings(Map<String, Object> properties) {
+	private static void configureUploadsSettings(@Nonnull Map<String, Object> properties) {
 		Map<String, Object> uploads = getObject(null, UPLOADS_KEY, properties, false);
 		if (uploads == null) {
 			return;
@@ -539,7 +540,7 @@ public class SkyveContextListener implements ServletContextListener {
 		// Multipart upload limits are therefore applied through container configuration instead.
 	}
 
-	private static void configurePushSettings(Map<String, Object> properties) {
+	private static void configurePushSettings(@Nonnull Map<String, Object> properties) {
 		Map<String, Object> push = getObject(null, PUSH_KEY, properties, false);
 		if (push == null) {
 			return;
@@ -576,7 +577,7 @@ public class SkyveContextListener implements ServletContextListener {
 		});
 	}
 
-	private static void configureAddinsSettings(Map<String, Object> properties) {
+	private static void configureAddinsSettings(@Nonnull Map<String, Object> properties) {
 		Map<String, Object> addins = getObject(null, "addins", properties, false);
 		if (addins == null) {
 			return;
@@ -589,7 +590,7 @@ public class SkyveContextListener implements ServletContextListener {
 		}
 	}
 
-	private static void configureThumbnailSettings(Map<String, Object> properties) {
+	private static void configureThumbnailSettings(@Nonnull Map<String, Object> properties) {
 		Map<String, Object> thumbnail = getObject(null, THUMBNAIL_KEY, properties, false);
 		if (thumbnail == null) {
 			return;
@@ -605,14 +606,14 @@ public class SkyveContextListener implements ServletContextListener {
 		}
 	}
 
-	private static void configureUrlSettings(Map<String, Object> properties) {
+	private static void configureUrlSettings(@Nonnull Map<String, Object> properties) {
 		Map<String, Object> url = getObject(null, URL_KEY, properties, true);
 		UtilImpl.SERVER_URL = getString(URL_KEY, "server", url, true);
 		UtilImpl.SKYVE_CONTEXT = getString(URL_KEY, "context", url, true);
 		UtilImpl.HOME_URI = getString(URL_KEY, "home", url, true);
 	}
 
-	private static void configureStateSettings(Map<String, Object> properties) {
+	private static void configureStateSettings(@Nonnull Map<String, Object> properties) {
 		Map<String, Object> state = getObject(null, STATE_KEY, properties, true);
 		UtilImpl.CACHE_DIRECTORY = getString(STATE_KEY, DIRECTORY_KEY, state, false);
 		if (UtilImpl.CACHE_DIRECTORY != null) {
@@ -644,10 +645,10 @@ public class SkyveContextListener implements ServletContextListener {
 		UtilImpl.STATE_EVICT_CRON = getString(STATE_KEY, "evictCron", state, false);
 	}
 
-	private static void configureUploadCategory(Map<String, Object> uploads,
-									 String category,
-									 Consumer<String> regexSetter,
-									 IntConsumer maximumSizeSetter) {
+	private static void configureUploadCategory(@Nonnull Map<String, Object> uploads,
+									 @Nonnull String category,
+									 @Nonnull Consumer<String> regexSetter,
+									 @Nonnull IntConsumer maximumSizeSetter) {
 		Map<String, Object> values = getObject(UPLOADS_KEY, category, uploads, false);
 		if (values == null) {
 			return;
@@ -666,11 +667,11 @@ public class SkyveContextListener implements ServletContextListener {
 		}
 	}
 
-	private static long toDiskSizeMb(String key, Map<String, Object> values) {
+	private static long toDiskSizeMb(@Nonnull String key, @Nonnull Map<String, Object> values) {
 		return getInt(key, DISK_SIZE_GB_KEY, values) * 1024L;
 	}
 
-	private static void validateRegex(String key, String regex) {
+	private static void validateRegex(@Nonnull String key, @Nonnull String regex) {
 		try {
 			Pattern.compile(regex);
 		}
@@ -679,7 +680,7 @@ public class SkyveContextListener implements ServletContextListener {
 		}
 	}
 
-	private static void configureMapSettings(Map<String, Object> properties) {
+	private static void configureMapSettings(@Nonnull Map<String, Object> properties) {
 		Map<String, Object> map = getObject(null, MAP_KEY, properties, true);
 		String value = getString(MAP_KEY, "type", map, true);
 		UtilImpl.MAP_TYPE = MapType.valueOf(value);
@@ -691,7 +692,7 @@ public class SkyveContextListener implements ServletContextListener {
 		}
 	}
 
-	private static void configureAccountSettings(Map<String, Object> properties) {
+	private static void configureAccountSettings(@Nonnull Map<String, Object> properties) {
 		Map<String, Object> account = getObject(null, ACCOUNT_KEY, properties, true);
 		UtilImpl.PASSWORD_HASHING_ALGORITHM = getString(ACCOUNT_KEY, "passwordHashingAlgorithm", account, true);
 		applyOptionalInt(account, ACCOUNT_KEY, "passwordExpiryInDays", value -> UtilImpl.PASSWORD_EXPIRY_IN_DAYS = value);
@@ -738,7 +739,7 @@ public class SkyveContextListener implements ServletContextListener {
 		});
 	}
 
-	private static void configureEnvironmentSettings(Map<String, Object> properties) {
+	private static void configureEnvironmentSettings(@Nonnull Map<String, Object> properties) {
 		Map<String, Object> environment = getObject(null, ENVIRONMENT_KEY, properties, true);
 		UtilImpl.ENVIRONMENT_IDENTIFIER = getString(ENVIRONMENT_KEY, "identifier", environment, false);
 
@@ -776,7 +777,7 @@ public class SkyveContextListener implements ServletContextListener {
 		UtilImpl.SHOW_SETUP = getBoolean(ENVIRONMENT_KEY, "showSetup", environment);
 	}
 
-	private static void configureHealthSettings(Map<String, Object> properties) {
+	private static void configureHealthSettings(@Nonnull Map<String, Object> properties) {
 		Map<String, Object> health = getObject(null, HEALTH_KEY, properties, false);
 		if (health == null) {
 			return;
@@ -786,7 +787,7 @@ public class SkyveContextListener implements ServletContextListener {
 		UtilImpl.HEALTH_CACHE_TIME_IN_SECONDS = getInt(HEALTH_KEY, "cacheTimeInSeconds", health);
 	}
 
-	private static void configureApiSettings(Map<String, Object> properties) {
+	private static void configureApiSettings(@Nonnull Map<String, Object> properties) {
 		Map<String, Object> api = getObject(null, API_KEY, properties, true);
 		UtilImpl.CHECK_FOR_BREACHED_PASSWORD = Boolean.TRUE.equals(get(API_KEY, "checkForBreachedPassword", api, false));
 		UtilImpl.GOOGLE_MAPS_V3_API_KEY = getString(API_KEY, "googleMapsV3Key", api, false);
@@ -813,7 +814,7 @@ public class SkyveContextListener implements ServletContextListener {
 		}
 	}
 
-	private static void configureApplicationCaches(Map<String, Object> properties) {
+	private static void configureApplicationCaches(@Nonnull Map<String, Object> properties) {
 		Map<String, Object> caches = getObject(null, CACHES_KEY, properties, false);
 		if (caches != null) {
 			for (String cacheName : caches.keySet()) {
@@ -849,7 +850,7 @@ public class SkyveContextListener implements ServletContextListener {
 		}
 	}
 
-	private static void addApplicationCache(AppCacheSettings settings) {
+	private static void addApplicationCache(@Nonnull AppCacheSettings settings) {
 		if ("jcache".equals(settings.type())) {
 			UtilImpl.APP_CACHES.add(new JCacheConfig<>(settings.cacheName(),
 						settings.heapSizeEntries(),
@@ -875,7 +876,7 @@ public class SkyveContextListener implements ServletContextListener {
 		throw new IllegalStateException("Cache type " + settings.type() + " is not a known type");
 	}
 
-	private static void configureDataStores(Map<String, Object> properties) {
+	private static void configureDataStores(@Nonnull Map<String, Object> properties) {
 		Map<String, Object> dataStores = getObject(null, "dataStores", properties, true);
 		for (String dataStoreName : dataStores.keySet()) {
 			Map<String, Object> dataStore = getObject("dataStores", dataStoreName, dataStores, true);
@@ -902,7 +903,7 @@ public class SkyveContextListener implements ServletContextListener {
 		}
 	}
 
-	private static void configureHibernateSettings(Map<String, Object> properties) {
+	private static void configureHibernateSettings(@Nonnull Map<String, Object> properties) {
 		Map<String, Object> hibernate = getObject(null, HIBERNATE_KEY, properties, true);
 		String dataStoreName = getString(HIBERNATE_KEY, "dataStore", hibernate, true);
 		UtilImpl.DATA_STORE = UtilImpl.DATA_STORES.get(dataStoreName);
@@ -934,7 +935,7 @@ public class SkyveContextListener implements ServletContextListener {
 		UtilImpl.HIBERNATE_FAIL_ON_MISSING_CACHE = true;
 	}
 
-	private static void configureFactorySettings(Map<String, Object> properties) {
+	private static void configureFactorySettings(@Nonnull Map<String, Object> properties) {
 		Map<String, Object> factories = getObject(null, FACTORIES_KEY, properties, true);
 		configureRepositoryFactory(factories);
 		configurePersistenceFactories(factories);
@@ -948,7 +949,7 @@ public class SkyveContextListener implements ServletContextListener {
 		configureServiceFactories(factories);
 	}
 
-	private static void configureRepositoryFactory(Map<String, Object> factories) {
+	private static void configureRepositoryFactory(@Nonnull Map<String, Object> factories) {
 		UtilImpl.SKYVE_REPOSITORY_CLASS = getString(FACTORIES_KEY, "repositoryClass", factories, false);
 		if (! ProvidedRepositoryFactory.isConfigured()) {
 			if (UtilImpl.SKYVE_REPOSITORY_CLASS == null) {
@@ -965,7 +966,7 @@ public class SkyveContextListener implements ServletContextListener {
 	}
 
 	@SuppressWarnings("unchecked")
-	private static void configurePersistenceFactories(Map<String, Object> factories) {
+	private static void configurePersistenceFactories(@Nonnull Map<String, Object> factories) {
 		UtilImpl.SKYVE_PERSISTENCE_CLASS = getString(FACTORIES_KEY, "persistenceClass", factories, false);
 		if (AbstractPersistence.IMPLEMENTATION_CLASS == null) {
 			if (UtilImpl.SKYVE_PERSISTENCE_CLASS == null) {
@@ -994,7 +995,7 @@ public class SkyveContextListener implements ServletContextListener {
 		}
 	}
 
-	private static void configureSingletonFactories(Map<String, Object> factories) {
+	private static void configureSingletonFactories(@Nonnull Map<String, Object> factories) {
 		UtilImpl.SKYVE_CONTENT_MANAGER_CLASS = getString(FACTORIES_KEY, "contentManagerClass", factories, false);
 
 		UtilImpl.SKYVE_NUMBER_GENERATOR_CLASS = getString(FACTORIES_KEY, "numberGeneratorClass", factories, false);
@@ -1020,7 +1021,7 @@ public class SkyveContextListener implements ServletContextListener {
 		}
 	}
 
-	private static void configureServiceFactories(Map<String, Object> factories) {
+	private static void configureServiceFactories(@Nonnull Map<String, Object> factories) {
 		UtilImpl.SKYVE_GEOIP_SERVICE_CLASS = getString(FACTORIES_KEY, "geoIPServiceClass", factories, false);
 		if (UtilImpl.SKYVE_GEOIP_SERVICE_CLASS == null) {
 			GeoIPServiceStaticSingleton.setDefault();
@@ -1044,7 +1045,7 @@ public class SkyveContextListener implements ServletContextListener {
 		}
 	}
 
-	private static void configureBootstrapSettings(Map<String, Object> properties) {
+	private static void configureBootstrapSettings(@Nonnull Map<String, Object> properties) {
 		Map<String, Object> bootstrap = getObject(null, BOOTSTRAP_KEY, properties, false);
 		if (bootstrap == null) {
 			return;
@@ -1059,14 +1060,14 @@ public class SkyveContextListener implements ServletContextListener {
 		UtilImpl.BOOTSTRAP_PASSWORD = getString(BOOTSTRAP_KEY, "password", bootstrap, true);
 	}
 
-	private static void configurePrimeFlex(ServletContext ctx) {
+	private static void configurePrimeFlex(@Nonnull ServletContext ctx) {
 		String primeFlex = UtilImpl.processStringValue(ctx.getInitParameter("org.skyve.web.faces.PRIMEFLEX"));
 		if (primeFlex != null) {
 			UtilImpl.PRIMEFLEX = Boolean.parseBoolean(primeFlex);
 		}
 	}
 
-	private static void configureSecuritySettings(Map<String, Object> properties) {
+	private static void configureSecuritySettings(@Nonnull Map<String, Object> properties) {
 		Map<String, Object> security = getObject(null, SECURITY_KEY, properties, false);
 		if (security == null) {
 			return;
@@ -1094,7 +1095,7 @@ public class SkyveContextListener implements ServletContextListener {
 		}
 	}
 
-	private static Class<?> loadFactoryClass(String className, String propertyKey) {
+	private static @Nonnull Class<?> loadFactoryClass(@Nonnull String className, @Nonnull String propertyKey) {
 		try {
 			return Thread.currentThread().getContextClassLoader().loadClass(className);
 		}
@@ -1104,11 +1105,11 @@ public class SkyveContextListener implements ServletContextListener {
 	}
 
 	@SuppressWarnings("unchecked")
-	private static Class<? extends Serializable> loadSerializableClass(String className, String propertyKey) {
+	private static @Nonnull Class<? extends Serializable> loadSerializableClass(@Nonnull String className, @Nonnull String propertyKey) {
 		return (Class<? extends Serializable>) loadFactoryClass(className, propertyKey);
 	}
 
-	private static <T> T instantiateFactory(Class<T> expectedType, String className, String propertyKey) {
+	private static @Nonnull <T> T instantiateFactory(@Nonnull Class<T> expectedType, @Nonnull String className, @Nonnull String propertyKey) {
 		try {
 			Class<?> loadedClass = loadFactoryClass(className, propertyKey);
 			Object instance = loadedClass.getDeclaredConstructor().newInstance();
@@ -1122,7 +1123,7 @@ public class SkyveContextListener implements ServletContextListener {
 		}
 	}
 
-	private static void applyOptionalInt(Map<String, Object> properties, String key, String name, IntConsumer setter) {
+	private static void applyOptionalInt(@Nonnull Map<String, Object> properties, @Nonnull String key, @Nonnull String name, @Nonnull IntConsumer setter) {
 		Number number = getNumber(key, name, properties, false);
 		if (number != null) {
 			setter.accept(number.intValue());
@@ -1135,7 +1136,7 @@ public class SkyveContextListener implements ServletContextListener {
 	 * @param overrides the overriding values
 	 * @param properties the destination properties to update
 	 */
-	private static void merge(Map<String, Object> overrides, Map<String, Object> properties) {
+	private static void merge(@Nonnull Map<String, Object> overrides, @Nonnull Map<String, Object> properties) {
 		for (Entry<String, Object> entry : overrides.entrySet()) {
 			String key = entry.getKey();
 			Object override = entry.getValue();
@@ -1174,7 +1175,7 @@ public class SkyveContextListener implements ServletContextListener {
 	 * @param required Whether the key must exist.
 	 * @return The raw configuration value (may be null when not required).
 	 */
-	private static Object get(String prefix, String key, Map<String, Object> properties, boolean required) {
+	private static @Nullable Object get(@Nullable String prefix, @Nonnull String key, @Nonnull Map<String, Object> properties, boolean required) {
 		Object result = properties.get(key);
 		if (required && (result == null)) {
 			if (prefix != null) {
@@ -1193,7 +1194,7 @@ public class SkyveContextListener implements ServletContextListener {
 	 * @param properties The configuration map.
 	 * @return The boolean value.
 	 */
-	private static boolean getBoolean(String prefix, String key, Map<String, Object> properties) {
+	private static boolean getBoolean(@Nullable String prefix, @Nonnull String key, @Nonnull Map<String, Object> properties) {
 		Boolean result = (Boolean) get(prefix, key, properties, true);
 		return result.booleanValue();
 	}
@@ -1206,7 +1207,7 @@ public class SkyveContextListener implements ServletContextListener {
 	 * @param properties The configuration map.
 	 * @return The integer value.
 	 */
-	private static int getInt(String prefix, String key, Map<String, Object> properties) {
+	private static int getInt(@Nullable String prefix, @Nonnull String key, @Nonnull Map<String, Object> properties) {
 		return getNumber(prefix, key, properties, true).intValue();
 	}
 
@@ -1219,7 +1220,7 @@ public class SkyveContextListener implements ServletContextListener {
 	 * @param required Whether the key must exist.
 	 * @return The numeric value (may be null when not required).
 	 */
-	private static Number getNumber(String prefix, String key, Map<String, Object> properties, boolean required) {
+	private static @Nullable Number getNumber(@Nullable String prefix, @Nonnull String key, @Nonnull Map<String, Object> properties, boolean required) {
 		return (Number) get(prefix, key, properties, required);
 	}
 
@@ -1232,7 +1233,7 @@ public class SkyveContextListener implements ServletContextListener {
 	 * @param required Whether the key must exist.
 	 * @return The string value (may be null when not required).
 	 */
-	private static String getString(String prefix, String key, Map<String, Object> properties, boolean required) {
+	private static @Nullable String getString(@Nullable String prefix, @Nonnull String key, @Nonnull Map<String, Object> properties, boolean required) {
 		return (String) get(prefix, key, properties, required);
 	}
 
@@ -1246,7 +1247,7 @@ public class SkyveContextListener implements ServletContextListener {
 	 * @return The nested map (may be null when not required).
 	 */
 	@SuppressWarnings("unchecked")
-	private static Map<String, Object> getObject(String prefix, String key, Map<String, Object> properties, boolean required) {
+	private static @Nullable Map<String, Object> getObject(@Nullable String prefix, @Nonnull String key, @Nonnull Map<String, Object> properties, boolean required) {
 		return (Map<String, Object>) get(prefix, key, properties, required);
 	}
 	
@@ -1260,7 +1261,7 @@ public class SkyveContextListener implements ServletContextListener {
 	 * @return The list value (may be null when not required).
 	 */
 	@SuppressWarnings("unchecked")
-	private static List<String> getList(String prefix, String key, Map<String, Object> properties, boolean required) {
+	private static @Nullable List<String> getList(@Nullable String prefix, @Nonnull String key, @Nonnull Map<String, Object> properties, boolean required) {
 		return (List<String>) get(prefix, key, properties, required);
 	}
 	
@@ -1271,7 +1272,7 @@ public class SkyveContextListener implements ServletContextListener {
 	 * @param evt The servlet context event.
 	 */
 	@Override
-	public void contextDestroyed(ServletContextEvent evt) {
+	public void contextDestroyed(@Nonnull ServletContextEvent evt) {
 		evt.getServletContext().setAttribute(SHUTTING_DOWN_ATTRIBUTE_NAME, Boolean.TRUE);
 
 		try {
@@ -1346,7 +1347,7 @@ public class SkyveContextListener implements ServletContextListener {
 	 * @return The updated path if any slashes need to be added
 	 */
 	@SuppressWarnings("java:S1075")
-	static String cleanupDirectory(final String path) {
+	static @Nullable String cleanupDirectory(final @Nullable String path) {
 		if ((path != null) && (! path.isEmpty())) {
 			String updatedPath = path.replace("\\", "/");
 
@@ -1365,7 +1366,7 @@ public class SkyveContextListener implements ServletContextListener {
 	 * @param propertyName	The property name to report in exceptions.
 	 * @param directoryPath	The property value to test.
 	 */
-	private static void testWritableDirectory(String propertyName, String directoryPath) {
+	private static void testWritableDirectory(@Nonnull String propertyName, @Nonnull String directoryPath) {
 		File directory = new File(directoryPath);
 		
 		if (! directory.exists()) {

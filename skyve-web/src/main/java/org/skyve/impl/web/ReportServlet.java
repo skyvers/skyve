@@ -88,7 +88,7 @@ public class ReportServlet extends HttpServlet {
 	 */
 	@Override
 	@SuppressWarnings("java:S1989") // there exists JavaEE error pages
-	public void doPost(HttpServletRequest request, HttpServletResponse response)
+	public void doPost(@Nonnull HttpServletRequest request, @Nonnull HttpServletResponse response)
 	throws ServletException, IOException {
 		doGet(request, response);
 	}
@@ -101,7 +101,7 @@ public class ReportServlet extends HttpServlet {
 	 */
 	@Override
 	@SuppressWarnings("java:S1989") // there exists JavaEE error pages
-	public void doGet(HttpServletRequest request, HttpServletResponse response)
+	public void doGet(@Nonnull HttpServletRequest request, @Nonnull HttpServletResponse response)
 	throws ServletException, IOException {
 		AbstractPersistence persistence = AbstractPersistence.get();
 		try {
@@ -164,7 +164,7 @@ public class ReportServlet extends HttpServlet {
 	 * executes JasperReports rendering, and writes either report bytes or a generic HTML error response.
 	 */
 	@SuppressWarnings("java:S3776") // Complexity OK
-	private static void doReport(HttpServletRequest request, HttpServletResponse response) {
+	private static void doReport(@Nonnull HttpServletRequest request, @Nonnull HttpServletResponse response) {
 		try {
 			String moduleName = OWASP.sanitise(Sanitisation.text, Util.processStringValue(request.getParameter(AbstractWebContext.MODULE_NAME)));
 			if (moduleName == null) {

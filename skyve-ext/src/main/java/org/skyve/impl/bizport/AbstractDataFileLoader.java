@@ -263,13 +263,13 @@ public abstract class AbstractDataFileLoader {
 	 * @param required
 	 * @param converter
 	 */
-	public void addField(@Nonnull String binding, LoadAction loadAction, boolean required, Converter<?> converter) {
+	public void addField(@Nonnull String binding, @Nullable LoadAction loadAction, boolean required, @Nullable Converter<?> converter) {
 		DataFileField field = new DataFileField(binding, loadAction, required, fields.size(), converter);
 		fields.add(finaliseField(field));
 	}
 
 	@SuppressWarnings({"java:S2629", "java:S3776"}) // logging log.toString() fine, complexity OK
-	private DataFileField finaliseField(@Nonnull DataFileField field) {
+	private @Nonnull DataFileField finaliseField(@Nonnull DataFileField field) {
 		if (field.getBinding() != null) {
 			// default inferred load action
 			if (field.getBinding().indexOf('.') >= 0 && LoaderActivityType.CREATE_FIND.equals(activityType)) {
@@ -390,7 +390,7 @@ public abstract class AbstractDataFileLoader {
 	 * @param emptyAsNull
 	 * @return
 	 */
-	abstract String getStringFieldValue(int index, boolean emptyAsNull);
+	abstract @Nullable String getStringFieldValue(int index, boolean emptyAsNull);
 
 	/**
 	 * Get a numeric value from the field at index
@@ -399,7 +399,7 @@ public abstract class AbstractDataFileLoader {
 	 * @param emptyAsZero
 	 * @return
 	 */
-	abstract Double getNumericFieldValue(int index, boolean emptyAsZero);
+	abstract @Nullable Double getNumericFieldValue(int index, boolean emptyAsZero);
 
 	/**
 	 * Get a date value from the field at index
@@ -407,7 +407,7 @@ public abstract class AbstractDataFileLoader {
 	 * @param index
 	 * @return
 	 */
-	abstract Date getDateFieldValue(int index);
+	abstract @Nullable Date getDateFieldValue(int index);
 
 	/**
 	 * Describes the value location
@@ -415,7 +415,7 @@ public abstract class AbstractDataFileLoader {
 	 * @param fieldIndex
 	 * @return
 	 */
-	private String getWhere(@Nullable Integer index) {
+	private @Nonnull String getWhere(@Nullable Integer index) {
 		StringBuilder where = new StringBuilder(128);
 		where.append("Row ").append((dataIndex + 1));
 		if (index != null) {
@@ -431,7 +431,7 @@ public abstract class AbstractDataFileLoader {
 	 * @param index
 	 * @return
 	 */
-	public String getWhere(int index) {
+	public @Nonnull String getWhere(int index) {
 		return getWhere(Integer.valueOf(index));
 	}
 
@@ -593,7 +593,7 @@ public abstract class AbstractDataFileLoader {
 	 * @return
 	 */
 	@SuppressWarnings({"java:S3776", "java:S6541"}) // complexity OK
-	public <T extends Bean> T beanResult() {
+	public @Nullable <T extends Bean> T beanResult() {
 
 		if (debugMode) {
 			LOGGER.info(debugData());
@@ -960,7 +960,7 @@ public abstract class AbstractDataFileLoader {
 	 * 
 	 * @return
 	 */
-	public <T extends Bean> List<T> beanResults() {
+	public @Nonnull <T extends Bean> List<T> beanResults() {
 		while (hasNextData()) {
 			nextData();
 			if (isNoData()) {

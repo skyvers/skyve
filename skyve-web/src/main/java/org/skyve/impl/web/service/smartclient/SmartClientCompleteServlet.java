@@ -42,6 +42,7 @@ import org.skyve.util.monitoring.RequestKey;
 import org.slf4j.Logger;
 import org.skyve.util.logging.SkyveLoggerFactory;
 
+import jakarta.annotation.Nonnull;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
@@ -69,7 +70,7 @@ public class SmartClientCompleteServlet extends HttpServlet {
 	 */
 	@Override
 	@SuppressWarnings("java:S1989") // there exists JavaEE error pages
-	protected void doGet(HttpServletRequest request, HttpServletResponse response)
+	protected void doGet(@Nonnull HttpServletRequest request, @Nonnull HttpServletResponse response)
 	throws ServletException, IOException {
 		LOGGER.info("SmartClientComplete - get....");
 		processRequest(request, response);
@@ -85,7 +86,7 @@ public class SmartClientCompleteServlet extends HttpServlet {
 	 */
 	@Override
 	@SuppressWarnings("java:S1989") // there exists JavaEE error pages
-	protected void doPost(HttpServletRequest request, HttpServletResponse response)
+	protected void doPost(@Nonnull HttpServletRequest request, @Nonnull HttpServletResponse response)
 	throws ServletException, IOException {
 		LOGGER.info("SmartClientComplete - post....");
 		processRequest(request, response);
@@ -93,7 +94,7 @@ public class SmartClientCompleteServlet extends HttpServlet {
 
 	// NB - Never throw ServletException as this will halt the SmartClient Relogin flow.
 	@SuppressWarnings({"java:S3776", "java:S6541"}) // complexity OK
-	private static void processRequest(HttpServletRequest request, HttpServletResponse response)
+	private static void processRequest(@Nonnull HttpServletRequest request, @Nonnull HttpServletResponse response)
 	throws IOException {
 		response.setContentType(MimeType.json.toString());
 		response.setCharacterEncoding(StandardCharsets.UTF_8.name());

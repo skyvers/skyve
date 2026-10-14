@@ -1,5 +1,6 @@
 package org.skyve.impl.sail.mock;
 
+import jakarta.annotation.Nullable;
 import jakarta.el.ELContext;
 import jakarta.el.ExpressionFactory;
 import jakarta.el.MethodExpression;
@@ -13,7 +14,7 @@ public class MockExpressionFactory extends ExpressionFactory {
 	 * Returns no value expression because EL parsing is not required in these tests.
 	 */
 	@Override
-	public ValueExpression createValueExpression(ELContext context, String expression, Class<?> expectedType) {
+	public @Nullable ValueExpression createValueExpression(@Nullable ELContext context, @Nullable String expression, @Nullable Class<?> expectedType) {
 		return null;
 	}
 
@@ -21,7 +22,7 @@ public class MockExpressionFactory extends ExpressionFactory {
 	 * Returns no value expression because EL parsing is not required in these tests.
 	 */
 	@Override
-	public ValueExpression createValueExpression(Object instance, Class<?> expectedType) {
+	public @Nullable ValueExpression createValueExpression(@Nullable Object instance, @Nullable Class<?> expectedType) {
 		return null;
 	}
 
@@ -29,10 +30,10 @@ public class MockExpressionFactory extends ExpressionFactory {
 	 * Returns no method expression because EL method binding is not required in these tests.
 	 */
 	@Override
-	public MethodExpression createMethodExpression(ELContext context,
-													String expression,
-													Class<?> expectedReturnType,
-													Class<?>[] expectedParamTypes) {
+	public @Nullable MethodExpression createMethodExpression(@Nullable ELContext context,
+													@Nullable String expression,
+													@Nullable Class<?> expectedReturnType,
+													@Nullable Class<?>[] expectedParamTypes) {
 		return null;
 	}
 
@@ -40,7 +41,7 @@ public class MockExpressionFactory extends ExpressionFactory {
 	 * Returns no coerced value because type coercion is not required in these tests.
 	 */
 	@Override
-	public <T> T coerceToType(Object obj, Class<T> targetType) {
+	public @Nullable <T> T coerceToType(@Nullable Object obj, @Nullable Class<T> targetType) {
 		return null;
 	}
 }

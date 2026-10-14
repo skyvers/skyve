@@ -6,6 +6,9 @@ import org.apache.commons.text.StringEscapeUtils;
 import org.skyve.util.OWASP;
 import org.slf4j.Logger;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Centralises client-safe web error messages.
  * <p>
@@ -28,7 +31,7 @@ public final class WebErrorUtil {
 	 *
 	 * @return A random UUID string suitable for display to a user.
 	 */
-	public static String newErrorReference() {
+	public static @Nonnull String newErrorReference() {
 		return UUID.randomUUID().toString();
 	}
 
@@ -38,7 +41,7 @@ public final class WebErrorUtil {
 	 * @param reference The support reference already written to the server log.
 	 * @return A generic error message containing the supplied reference.
 	 */
-	public static String genericMessage(String reference) {
+	public static @Nonnull String genericMessage(@Nonnull String reference) {
 		return new StringBuilder(GENERIC_ERROR_MESSAGE.length() + reference.length() + 12)
 				.append(GENERIC_ERROR_MESSAGE)
 				.append(" Reference: ")
@@ -53,7 +56,7 @@ public final class WebErrorUtil {
 	 * @param reference The support reference to include in the query string.
 	 * @return The URI with the error reference parameter appended.
 	 */
-	public static String appendErrorReference(String uri, String reference) {
+	public static @Nonnull String appendErrorReference(@Nonnull String uri, @Nonnull String reference) {
 		StringBuilder result = new StringBuilder(uri);
 		result.append(uri.indexOf('?') >= 0 ? '&' : '?');
 		result.append(ERROR_REFERENCE_PARAMETER).append('=').append(reference);
@@ -71,7 +74,7 @@ public final class WebErrorUtil {
 	 * @param context Non-sensitive context describing the failing operation.
 	 * @param t The unexpected exception or error.
 	 */
-	public static void logUnexpected(Logger logger, String reference, String context, Throwable t) {
+	public static void logUnexpected(@Nonnull Logger logger, @Nonnull String reference, @Nonnull String context, @Nonnull Throwable t) {
 		logger.error("{} Reference: {}", context, reference, t);
 	}
 
@@ -86,7 +89,7 @@ public final class WebErrorUtil {
 	 * @param t The unexpected exception or error.
 	 * @return The generated support reference.
 	 */
-	public static String logUnexpectedAndGetReference(Logger logger, String context, Throwable t) {
+	public static @Nonnull String logUnexpectedAndGetReference(@Nonnull Logger logger, @Nonnull String context, @Nonnull Throwable t) {
 		String reference = newErrorReference();
 		logUnexpected(logger, reference, context, t);
 		return reference;
@@ -98,7 +101,7 @@ public final class WebErrorUtil {
 	 * @param value The value to escape.
 	 * @return The escaped value.
 	 */
-	public static String escapeJsStringWithHtmlFormatting(String value) {
+	public static @Nullable String escapeJsStringWithHtmlFormatting(@Nullable String value) {
 		return OWASP.escapeJsStringWithHtmlFormatting(value);
 	}
 
@@ -108,7 +111,7 @@ public final class WebErrorUtil {
 	 * @param value The value to escape.
 	 * @return The escaped value.
 	 */
-	public static String escapeXmlText(String value) {
+	public static @Nullable String escapeXmlText(@Nullable String value) {
 		return StringEscapeUtils.escapeXml10(value);
 	}
 }

@@ -57,6 +57,8 @@ import org.skyve.persistence.Persistence;
 import org.skyve.util.JSON;
 import org.skyve.util.Util;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
@@ -145,7 +147,7 @@ public class IndexArchivesJob extends CancellableJob {
         }
     }
 
-    private void recordIndexingError(IndexingException ie) throws Exception {
+    private void recordIndexingError(@Nonnull IndexingException ie) throws Exception {
         persistence.begin();
 
         Customer customer = CORE.getUser()
@@ -175,7 +177,7 @@ public class IndexArchivesJob extends CancellableJob {
      * 
      * @return An optional containing a suitable DocumentConverter, or an empty option if no suitable converter is found.
      */
-    public Optional<DocumentConverter> lookupConverter(String module, String document) {
+    public @Nonnull Optional<DocumentConverter> lookupConverter(@Nonnull String module, @Nonnull String document) {
         Optional<DocumentConverter> converter = documentConverters.stream()
                                                                   .filter(dc -> dc.handles(module, document))
                                                                   .findFirst();
@@ -218,7 +220,7 @@ public class IndexArchivesJob extends CancellableJob {
          * @param converter Converter used to map archived beans to Lucene documents.
          * @param docConfig Archive document configuration.
          */
-        public IndexDocumentsProcess(Path archiveDir, Path indexDir, DocumentConverter converter, ArchiveDocConfig docConfig) {
+        public IndexDocumentsProcess(@Nonnull Path archiveDir, @Nonnull Path indexDir, @Nonnull DocumentConverter converter, @Nonnull ArchiveDocConfig docConfig) {
             this.archiveDir = archiveDir;
             this.indexDir = indexDir;
             this.converter = converter;
@@ -268,7 +270,7 @@ public class IndexArchivesJob extends CancellableJob {
             }
         }
 
-		private void processFile(IndexableFile indexableFile, IndexWriter indexWriter) throws IOException, IndexingException {
+		private void processFile(@Nonnull IndexableFile indexableFile, @Nonnull IndexWriter indexWriter) throws IOException, IndexingException {
 			File file = indexableFile.file();
 			long startOffset = indexableFile.startOffset();
             String msg = String.format("Indexing %s starting at %d", file.getName(), startOffset);
@@ -300,7 +302,7 @@ public class IndexArchivesJob extends CancellableJob {
          * 
          * @return
          */
-        private Analyzer newAnalyzer() {
+        private @Nonnull Analyzer newAnalyzer() {
             try {
                 return CustomAnalyzer.builder()
                                      .addTokenFilter(LowerCaseFilterFactory.NAME)
@@ -311,7 +313,7 @@ public class IndexArchivesJob extends CancellableJob {
             }
         }
 
-        private void indexLine(String fileName, Line lineRecord, IndexWriter iwriter) throws IOException {
+        private void indexLine(@Nonnull String fileName, @Nonnull Line lineRecord, @Nonnull IndexWriter iwriter) throws IOException {
             long offset = lineRecord.offset();
 
             logger.trace("Indexing line in {} at {}-{}", fileName, offset, lineRecord.end());
@@ -335,7 +337,7 @@ public class IndexArchivesJob extends CancellableJob {
             updateProgress(fileName, lineRecord.end(), iwriter);
         }
 
-        private Term bizIdTerm(Bean bean) {
+        private @Nonnull Term bizIdTerm(@Nonnull Bean bean) {
             return new Term(Bean.DOCUMENT_ID, bean.getBizId());
         }
 
@@ -347,7 +349,7 @@ public class IndexArchivesJob extends CancellableJob {
          * @param line
          * @return
          */
-        public Bean unmarshallBean(String line) {
+        public @Nonnull Bean unmarshallBean(@Nonnull String line) {
             try {
                 Bean bean = (Bean) JSON.unmarshall(CORE.getUser(), line);
                 logger.trace("Unmarshalled {}", bean);
@@ -360,7 +362,7 @@ public class IndexArchivesJob extends CancellableJob {
             }
         }
 
-        private void updateProgress(String fileName, Long offset, IndexWriter iwriter) throws IOException {
+        private void updateProgress(@Nonnull String fileName, @Nonnull Long offset, @Nonnull IndexWriter iwriter) throws IOException {
             Document progressDoc = new Document();
             progressDoc.add(new StringField(PROGRESS_FILENAME_FIELD, fileName, Store.YES));
             progressDoc.add(new LongField(PROGRESS_OFFSET_FIELD, offset, Store.YES));
@@ -376,7 +378,7 @@ public class IndexArchivesJob extends CancellableJob {
          * @throws IOException
          * @throws ParseException
          */
-        private List<IndexableFile> identifyUnindexed() throws IOException {
+        private @Nonnull List<IndexableFile> identifyUnindexed() throws IOException {
             List<File> archives = listArchiveFiles(archiveDir);
             logger.debug("{} archive files found in {}", archives.size(), archiveDir);
 
@@ -443,7 +445,7 @@ public class IndexArchivesJob extends CancellableJob {
      * @return
      * @throws IOException
      */
-    private static List<File> listArchiveFiles(Path dir) throws IOException {
+    private static @Nonnull List<File> listArchiveFiles(@Nonnull Path dir) throws IOException {
         try (Stream<Path> s = Files.list(dir)) {
             return s.map(Path::toFile)
                     .filter(File::isFile)
@@ -456,7 +458,7 @@ public class IndexArchivesJob extends CancellableJob {
     /**
      * Tuple record for tracking where to start indexing .archive files
      */
-    private static record IndexableFile(File file, long startOffset) {
+    private static record IndexableFile(@Nonnull File file, long startOffset) {
     }
 
     /**
@@ -476,17 +478,17 @@ public class IndexArchivesJob extends CancellableJob {
          * @param filename Archive file name being processed.
          * @param documentType Archive document configuration.
          */
-        public IndexingException(String message, Throwable cause, String filename, ArchiveDocConfig documentType) {
+        public IndexingException(@Nullable String message, @Nullable Throwable cause, @Nonnull String filename, @Nonnull ArchiveDocConfig documentType) {
             super(message, cause);
             this.filename = filename;
             this.documentType = documentType;
         }
 
-        public String getFilename() {
+        public @Nonnull String getFilename() {
             return filename;
         }
 
-        public ArchiveDocConfig getDocumentType() {
+        public @Nonnull ArchiveDocConfig getDocumentType() {
             return documentType;
         }
     }

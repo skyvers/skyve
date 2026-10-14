@@ -27,6 +27,9 @@ import org.skyve.util.Binder;
 import org.skyve.util.Binder.TargetMetaData;
 import org.skyve.util.OWASP;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Builds a SmartClient comparison tree for a composite mutation graph.
  *
@@ -88,7 +91,7 @@ public final class ComparisonJSONManipulator {
 	 * @param customer active customer metadata
 	 * @param root comparison root to serialise; must not be {@code null}
 	 */
-	public ComparisonJSONManipulator(User user, CustomerImpl customer, ComparisonComposite root) {
+	public ComparisonJSONManipulator(@Nonnull User user, @Nonnull CustomerImpl customer, @Nonnull ComparisonComposite root) {
 		this.user = user;
 		this.customer = customer;
 		this.root = root;
@@ -102,7 +105,7 @@ public final class ComparisonJSONManipulator {
 	 * @return ordered JSON-ready node maps; never {@code null}
 	 * @throws Exception if mutation discovery or property resolution fails
 	 */
-	public Iterable<Map<String, Object>> toJSONStructure() throws Exception {
+	public @Nonnull Iterable<Map<String, Object>> toJSONStructure() throws Exception {
 		List<Map<String, Object>> result = new ArrayList<>();
 		root.determineMutations();
 		processNode(root, "", null, result);
@@ -122,10 +125,10 @@ public final class ComparisonJSONManipulator {
 	 * @throws Exception if node metadata resolution fails
 	 */
 	@SuppressWarnings("incomplete-switch")
-	private void processNode(ComparisonComposite node,
-								String referenceType,
-								ComparisonComposite parent,
-								List<Map<String, Object>> json)
+	private void processNode(@Nonnull ComparisonComposite node,
+								@Nonnull String referenceType,
+								@Nullable ComparisonComposite parent,
+								@Nonnull List<Map<String, Object>> json)
 	throws Exception {
 		Document nodeDocument = node.getDocument();
 		
@@ -186,8 +189,8 @@ public final class ComparisonJSONManipulator {
 	 * @throws Exception if a property cannot be mapped to SmartClient metadata
 	 */
 	@SuppressWarnings("java:S3776") // Complexity OK
-	private List<Map<String, Object>> listOfMapOfProperties(List<ComparisonProperty> properties,
-																Document nodeDocument)
+	private @Nonnull List<Map<String, Object>> listOfMapOfProperties(@Nonnull List<ComparisonProperty> properties,
+																@Nullable Document nodeDocument)
 	throws Exception {
 		List<Map<String, Object>> result = new ArrayList<>(properties.size());
 
@@ -293,9 +296,9 @@ public final class ComparisonJSONManipulator {
 	 * @param runtime whether runtime domain values should be used
 	 * @return escaped code-to-description map
 	 */
-	private static Map<String, String> getConstantDomainValueMap(CustomerImpl customer,
-																	Document document,
-																	Attribute attribute,
+	private static @Nonnull Map<String, String> getConstantDomainValueMap(@Nonnull CustomerImpl customer,
+																	@Nonnull Document document,
+																	@Nonnull Attribute attribute,
 																	boolean runtime) {
 		List<DomainValue> values = ((DocumentImpl) document).getDomainValues(customer, 
 																				DomainType.constant, 
@@ -316,7 +319,7 @@ public final class ComparisonJSONManipulator {
 	 * @param label plain label text
 	 * @return label wrapped in the dirty-value span markup
 	 */
-	private static String showDirty(String label) {
+	private static @Nonnull String showDirty(@Nonnull String label) {
 		StringBuilder result = new StringBuilder(label);
 		result.insert(0, "<span style='color:red'>");
 		result.append(" *</span>");

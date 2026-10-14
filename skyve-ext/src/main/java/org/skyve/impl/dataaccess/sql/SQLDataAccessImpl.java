@@ -15,6 +15,8 @@ import org.skyve.metadata.module.query.SQLDefinition;
 import org.skyve.persistence.DataStore;
 import org.skyve.persistence.SQL;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * Implementation of {@link SQLDataAccess} that provides direct SQL data access
  * using JDBC connections to a specified {@link DataStore}.
@@ -42,7 +44,7 @@ public class SQLDataAccessImpl implements SQLDataAccess {
 	 * 
 	 * @param dataStore the data store to connect to for SQL operations
 	 */
-	public SQLDataAccessImpl(DataStore dataStore) {
+	public SQLDataAccessImpl(@Nonnull DataStore dataStore) {
 		this.dataStore = dataStore;
 	}
 	
@@ -55,7 +57,7 @@ public class SQLDataAccessImpl implements SQLDataAccess {
 	 * 
 	 * @return the JDBC connection
 	 */
-	Connection getConnection() {
+	@Nonnull Connection getConnection() {
 		if (connection == null) {
 			connection = EXT.getDataStoreConnection(dataStore, true);
 		}
@@ -73,7 +75,7 @@ public class SQLDataAccessImpl implements SQLDataAccess {
 	 * @return the Skyve dialect for the data store
 	 * @throws Exception if unable to instantiate the dialect
 	 */
-	SkyveDialect getDialect() throws Exception {
+	@Nonnull SkyveDialect getDialect() throws Exception {
 		if (dialect == null) {
 			dialect = AbstractHibernatePersistence.getDialect(dataStore.getDialectClassName());
 		}
@@ -89,12 +91,12 @@ public class SQLDataAccessImpl implements SQLDataAccess {
 	}
 	
 	@Override
-	public SQL newSQL(String moduleName, String documentName, String query) {
+	public @Nonnull SQL newSQL(@Nonnull String moduleName, @Nonnull String documentName, @Nonnull String query) {
 		return new SQLDataAccessSQL(moduleName, documentName, query, this);
 	}
 	
 	@Override
-	public SQL newNamedSQL(String moduleName, String documentName, String queryName) {
+	public @Nonnull SQL newNamedSQL(@Nonnull String moduleName, @Nonnull String documentName, @Nonnull String queryName) {
 		Module module = CORE.getUser().getCustomer().getModule(moduleName);
 		SQLDefinition sql = module.getSQL(queryName);
 		SQLDataAccessSQL result = new SQLDataAccessSQL(moduleName, documentName, sql.getQuery(), this);
@@ -103,12 +105,12 @@ public class SQLDataAccessImpl implements SQLDataAccess {
 	}
 	
 	@Override
-	public SQL newSQL(Document document, String query) {
+	public @Nonnull SQL newSQL(@Nonnull Document document, @Nonnull String query) {
 		return new SQLDataAccessSQL(document, query, this);
 	}
 
 	@Override
-	public SQL newNamedSQL(Document document, String queryName) {
+	public @Nonnull SQL newNamedSQL(@Nonnull Document document, @Nonnull String queryName) {
 		Module module = CORE.getUser().getCustomer().getModule(document.getOwningModuleName());
 		SQLDefinition sql = module.getSQL(queryName);
 		SQLDataAccessSQL result = new SQLDataAccessSQL(document, sql.getQuery(), this);
@@ -117,12 +119,12 @@ public class SQLDataAccessImpl implements SQLDataAccess {
 	}
 
 	@Override
-	public SQL newSQL(String query) {
+	public @Nonnull SQL newSQL(@Nonnull String query) {
 		return new SQLDataAccessSQL(query, this);
 	}
 
 	@Override
-	public SQL newNamedSQL(String moduleName, String queryName) {
+	public @Nonnull SQL newNamedSQL(@Nonnull String moduleName, @Nonnull String queryName) {
 		Module module = CORE.getUser().getCustomer().getModule(moduleName);
 		SQLDefinition sql = module.getSQL(queryName);
 		SQLDataAccessSQL result = new SQLDataAccessSQL(sql.getQuery(), this);

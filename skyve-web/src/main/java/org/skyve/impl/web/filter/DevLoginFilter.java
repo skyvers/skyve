@@ -5,6 +5,7 @@ import java.security.Principal;
 
 import org.skyve.util.Util;
 
+import jakarta.annotation.Nonnull;
 import jakarta.servlet.Filter;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.FilterConfig;
@@ -32,7 +33,7 @@ public class DevLoginFilter implements Filter {
 	 * @throws ServletException when any required parameter is missing
 	 */
 	@Override
-	public void init(FilterConfig config) throws ServletException {
+	public void init(@Nonnull FilterConfig config) throws ServletException {
 		String customerName = Util.processStringValue(config.getInitParameter(CUSTOMER_NAME));
 		if (customerName == null) {
 			throw new ServletException(CUSTOMER_NAME + INIT_PARAMETER_REQUIRED);
@@ -67,7 +68,7 @@ public class DevLoginFilter implements Filter {
 	 * @throws ServletException when authentication or downstream processing fails
 	 */
 	@Override
-	public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
+	public void doFilter(@Nonnull ServletRequest request, @Nonnull ServletResponse response, @Nonnull FilterChain chain)
 	throws IOException, ServletException {
 		HttpServletRequest hsr = (HttpServletRequest) request;
 		Principal userPrincipal = hsr.getUserPrincipal();

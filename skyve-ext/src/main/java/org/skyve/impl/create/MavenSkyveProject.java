@@ -22,6 +22,9 @@ import org.skyve.impl.script.SkyveScriptInterpreter;
 import org.skyve.util.logging.SkyveLoggerFactory;
 import org.slf4j.Logger;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Utility class for creating a new Skyve Maven project from template artefacts.
  *
@@ -85,7 +88,7 @@ public class MavenSkyveProject {
 	 *
 	 * @param builder contains resolved paths, project identity, and assembly options.
 	 */
-	protected MavenSkyveProject(MavenSkyveProjectCreator builder) {
+	protected MavenSkyveProject(@Nonnull MavenSkyveProjectCreator builder) {
 		this.projectName = builder.projectName;
 		this.projectDescription = (builder.projectDescription != null) ? builder.projectDescription : builder.projectName;
 		this.projectDirectory = Paths.get(builder.projectDirectory);
@@ -106,7 +109,7 @@ public class MavenSkyveProject {
 	 *
 	 * @return the project description.
 	 */
-	public String getProjectDescription() {
+	public @Nullable String getProjectDescription() {
 		return projectDescription;
 	}
 
@@ -115,7 +118,7 @@ public class MavenSkyveProject {
 	 *
 	 * @return the project name.
 	 */
-	public String getProjectName() {
+	public @Nullable String getProjectName() {
 		return projectName;
 	}
 
@@ -124,7 +127,7 @@ public class MavenSkyveProject {
 	 *
 	 * @return the absolute project directory.
 	 */
-	public Path getAbsoluteProjectPath() {
+	public @Nonnull Path getAbsoluteProjectPath() {
 		return projectDirectory;
 	}
 
@@ -133,7 +136,7 @@ public class MavenSkyveProject {
 	 *
 	 * @return the customer name.
 	 */
-	public String getCustomerName() {
+	public @Nullable String getCustomerName() {
 		return customerName;
 	}
 
@@ -142,7 +145,7 @@ public class MavenSkyveProject {
 	 *
 	 * @return the absolute Skyve directory.
 	 */
-	public Path getAbsoluteSkyvePath() {
+	public @Nullable Path getAbsoluteSkyvePath() {
 		return skyveDirectory;
 	}
 
@@ -151,7 +154,7 @@ public class MavenSkyveProject {
 	 *
 	 * @return the relative source directory.
 	 */
-	public Path getRelativeSrcPath() {
+	public @Nonnull Path getRelativeSrcPath() {
 		return srcDirectory;
 	}
 
@@ -160,7 +163,7 @@ public class MavenSkyveProject {
 	 *
 	 * @return the absolute source directory.
 	 */
-	public Path getAbsoluteSrcPath() {
+	public @Nonnull Path getAbsoluteSrcPath() {
 		return projectDirectory.resolve(srcDirectory);
 	}
 
@@ -169,7 +172,7 @@ public class MavenSkyveProject {
 	 *
 	 * @return the absolute customer source directory.
 	 */
-	public Path getAbsoluteCustomerPath() {
+	public @Nonnull Path getAbsoluteCustomerPath() {
 		return getAbsoluteSrcPath().resolve("customers").resolve(customerName);
 	}
 
@@ -178,7 +181,7 @@ public class MavenSkyveProject {
 	 *
 	 * @return the absolute customer resources directory.
 	 */
-	public Path getAbsoluteCustomerResourcesPath() {
+	public @Nonnull Path getAbsoluteCustomerResourcesPath() {
 		return getAbsoluteCustomerPath().resolve("resources");
 	}
 
@@ -187,7 +190,7 @@ public class MavenSkyveProject {
 	 *
 	 * @return the relative generated-source directory.
 	 */
-	public Path getRelativeGeneratedPath() {
+	public @Nonnull Path getRelativeGeneratedPath() {
 		return generatedDirectory;
 	}
 
@@ -196,7 +199,7 @@ public class MavenSkyveProject {
 	 *
 	 * @return the absolute generated-source directory.
 	 */
-	public Path getAbsoluteGeneratedPath() {
+	public @Nonnull Path getAbsoluteGeneratedPath() {
 		return projectDirectory.resolve(generatedDirectory);
 	}
 
@@ -205,7 +208,7 @@ public class MavenSkyveProject {
 	 *
 	 * @return the relative resources directory.
 	 */
-	public Path getRelativeResourcePath() {
+	public @Nonnull Path getRelativeResourcePath() {
 		return resourceDirectory;
 	}
 
@@ -214,7 +217,7 @@ public class MavenSkyveProject {
 	 *
 	 * @return the absolute resources directory.
 	 */
-	public Path getAbsoluteResourcePath() {
+	public @Nonnull Path getAbsoluteResourcePath() {
 		return projectDirectory.resolve(resourceDirectory);
 	}
 
@@ -223,7 +226,7 @@ public class MavenSkyveProject {
 	 *
 	 * @return the relative web directory.
 	 */
-	public Path getRelativeWebPath() {
+	public @Nonnull Path getRelativeWebPath() {
 		return webDirectory;
 	}
 
@@ -232,7 +235,7 @@ public class MavenSkyveProject {
 	 *
 	 * @return the absolute web directory.
 	 */
-	public Path getAbsoluteWebPath() {
+	public @Nonnull Path getAbsoluteWebPath() {
 		return projectDirectory.resolve(webDirectory);
 	}
 
@@ -242,7 +245,7 @@ public class MavenSkyveProject {
 	 * @return the relative test directory.
 	 */
 
-	public Path getRelativeTestPath() {
+	public @Nonnull Path getRelativeTestPath() {
 		return testDirectory;
 	}
 
@@ -251,7 +254,7 @@ public class MavenSkyveProject {
 	 *
 	 * @return the absolute test directory.
 	 */
-	public Path getAbsoluteTestPath() {
+	public @Nonnull Path getAbsoluteTestPath() {
 		return projectDirectory.resolve(testDirectory);
 	}
 
@@ -260,7 +263,7 @@ public class MavenSkyveProject {
 	 *
 	 * @return the relative generated-test directory.
 	 */
-	public Path getRelativeGeneratedTestPath() {
+	public @Nonnull Path getRelativeGeneratedTestPath() {
 		return generatedTestDirectory;
 	}
 
@@ -269,7 +272,7 @@ public class MavenSkyveProject {
 	 *
 	 * @return the absolute generated-test directory.
 	 */
-	public Path getAbsoluteGeneratedTestPath() {
+	public @Nonnull Path getAbsoluteGeneratedTestPath() {
 		return projectDirectory.resolve(generatedTestDirectory);
 	}
 
@@ -278,7 +281,7 @@ public class MavenSkyveProject {
 	 *
 	 * @return the absolute docker directory.
 	 */
-	public Path getAbsoluteDockerPath() {
+	public @Nonnull Path getAbsoluteDockerPath() {
 		return projectDirectory.resolve("docker");
 	}
 
@@ -287,7 +290,7 @@ public class MavenSkyveProject {
 	 *
 	 * @return the absolute deployments directory.
 	 */
-	public Path getAbsoluteDeploymentsPath() {
+	public @Nonnull Path getAbsoluteDeploymentsPath() {
 		return projectDirectory.resolve("deployments");
 	}
 
@@ -296,7 +299,7 @@ public class MavenSkyveProject {
 	 *
 	 * @return the absolute Skyve base path.
 	 */
-	public Path getSkyveBasePath() {
+	public @Nonnull Path getSkyveBasePath() {
 		return skyveDirectory.toAbsolutePath();
 	}
 
@@ -305,7 +308,7 @@ public class MavenSkyveProject {
 	 *
 	 * @return the absolute Skyve WAR webapp path.
 	 */
-	public Path getSkyveAbsoluteWarPath() {
+	public @Nonnull Path getSkyveAbsoluteWarPath() {
 		return skyveDirectory.resolve(SKYVE_WEBAPP_PATH);
 	}
 
@@ -314,7 +317,7 @@ public class MavenSkyveProject {
 	 *
 	 * @return the configured Skyve script content.
 	 */
-	public String getSkyveScript() {
+	public @Nullable String getSkyveScript() {
 		return skyveScript;
 	}
 
@@ -323,7 +326,7 @@ public class MavenSkyveProject {
 	 *
 	 * @return the target script path.
 	 */
-	public Path getSkyveScriptPath() {
+	public @Nonnull Path getSkyveScriptPath() {
 		return projectDirectory.resolve("scripts").resolve("skyve.md");
 	}
 
@@ -332,7 +335,7 @@ public class MavenSkyveProject {
 	 *
 	 * @return module/document metadata map.
 	 */
-	protected Map<String, Pair<ModuleMetaData, List<DocumentMetaData>>> getMetaData() {
+	protected @Nonnull Map<String, Pair<ModuleMetaData, List<DocumentMetaData>>> getMetaData() {
 		return metaData;
 	}
 	
@@ -353,7 +356,7 @@ public class MavenSkyveProject {
 	 * @param files the files to copy.
 	 * @throws IOException if directory creation or file copy fails.
 	 */
-	private static void copyFiles(File projectDirectory, Path skyveBasePath, List<File> files) throws IOException {
+	private static void copyFiles(@Nonnull File projectDirectory, @Nonnull Path skyveBasePath, @Nonnull List<File> files) throws IOException {
 		for (File file : files) {
 			final File target = new File(projectDirectory, skyveBasePath.relativize(file.toPath()).toString());
 			if (! target.getParentFile().exists()) {
@@ -425,7 +428,7 @@ public class MavenSkyveProject {
 	 * @param script the script content to apply.
 	 * @throws SkyveProjectCreationException if preprocessing or validation reports errors.
 	 */
-	public void applyScript(String script) throws SkyveProjectCreationException {
+	public void applyScript(@Nonnull String script) throws SkyveProjectCreationException {
 		applyScript(script, true);
 	}
 
@@ -439,7 +442,7 @@ public class MavenSkyveProject {
 	 * @param writeToFile whether to write the script into the project directory.
 	 * @throws SkyveProjectCreationException if the script contains processing errors.
 	 */
-	public void applyScript(String script, boolean writeToFile) throws SkyveProjectCreationException {
+	public void applyScript(@Nonnull String script, boolean writeToFile) throws SkyveProjectCreationException {
 		final SkyveScriptInterpreter i = new SkyveScriptInterpreter(skyveScript);
 		i.preProcess();
 		i.process();
@@ -474,7 +477,7 @@ public class MavenSkyveProject {
 	 * @param basePath the project base path to inspect.
 	 * @return existing historic files targeted for cleanup.
 	 */
-	private List<File> getHistoricFiles(Path basePath) {
+	private @Nonnull List<File> getHistoricFiles(@Nonnull Path basePath) {
 		final List<File> historicFiles = new ArrayList<>();
 		final List<File> historicFolders = new ArrayList<>();
 
@@ -503,7 +506,7 @@ public class MavenSkyveProject {
 	 * @return webapp files to copy.
 	 */
 	@SuppressWarnings("static-method")
-	private List<File> getSkyveWebAppFiles(Path basePath) {
+	private @Nonnull List<File> getSkyveWebAppFiles(@Nonnull Path basePath) {
 		final List<File> skyveWebAppFiles = new ArrayList<>();
 
 		skyveWebAppFiles.addAll(FileUtils.listFiles(basePath.toFile(), new String[] {"xhtml", "jsp"}, false));
@@ -544,7 +547,7 @@ public class MavenSkyveProject {
 	 * @param basePath the template source base path.
 	 * @return application files to copy.
 	 */
-	private List<File> getSkyveAppFiles(Path basePath) {
+	private @Nonnull List<File> getSkyveAppFiles(@Nonnull Path basePath) {
 		final List<File> skyveAppFiles = new ArrayList<>();
 
 		// If we are copying from a project, we should copy the entire modules directory
@@ -601,7 +604,7 @@ public class MavenSkyveProject {
 	 * @param basePath the template generated-source base path.
 	 * @return generated source files to copy.
 	 */
-	private List<File> getSkyveGeneratedFiles(Path basePath) {
+	private @Nonnull List<File> getSkyveGeneratedFiles(@Nonnull Path basePath) {
 		final List<File> skyveGeneratedFiles = new ArrayList<>();
 
 		// If we are copying from a project, we should copy the entire modules directory
@@ -636,7 +639,7 @@ public class MavenSkyveProject {
 	 * @param basePath the template test-source base path.
 	 * @return test files to copy.
 	 */
-	private static List<File> getSkyveTestFiles(Path basePath) {
+	private static @Nonnull List<File> getSkyveTestFiles(@Nonnull Path basePath) {
 		final List<File> skyveTestFiles = new ArrayList<>();
 
 		skyveTestFiles.addAll(FileUtils.listFiles(basePath.resolve("util").toFile(), null, true));
@@ -674,7 +677,7 @@ public class MavenSkyveProject {
 	 * @param basePath the template generated-test base path.
 	 * @return generated test files to copy.
 	 */
-    private List<File> getSkyveGeneratedTestFiles(Path basePath) {
+    private @Nonnull List<File> getSkyveGeneratedTestFiles(@Nonnull Path basePath) {
         final List<File> skyveGeneratedTestFiles = new ArrayList<>();
 
         // If we are copying from a project, we should copy the entire modules directory
@@ -717,7 +720,7 @@ public class MavenSkyveProject {
 	 *
 	 * @param script the script content to write.
 	 */
-	private void writeScriptToFile(String script) {
+	private void writeScriptToFile(@Nonnull String script) {
 		// write the script to file.
 		final File scriptFile = getSkyveScriptPath().toFile();
 		if (scriptFile.getParentFile().mkdirs()) {
@@ -788,7 +791,7 @@ public class MavenSkyveProject {
 		 *
 		 * @param projectName the project name.
 		 */
-		public MavenSkyveProjectCreator(String projectName) {
+		public MavenSkyveProjectCreator(@Nonnull String projectName) {
 			this.projectName = projectName;
 		}
 
@@ -799,7 +802,7 @@ public class MavenSkyveProject {
 		 * @return this builder.
 		 */
 		@SuppressWarnings("hiding")
-		public MavenSkyveProjectCreator projectName(final String projectName) {
+		public @Nonnull MavenSkyveProjectCreator projectName(final @Nonnull String projectName) {
 			this.projectName = projectName;
 			return this;
 		}
@@ -811,7 +814,7 @@ public class MavenSkyveProject {
 		 * @return this builder.
 		 */
 		@SuppressWarnings("hiding")
-		public MavenSkyveProjectCreator projectDescription(final String projectDescription) {
+		public @Nonnull MavenSkyveProjectCreator projectDescription(final @Nullable String projectDescription) {
 			this.projectDescription = projectDescription;
 			return this;
 		}
@@ -823,7 +826,7 @@ public class MavenSkyveProject {
 		 * @return this builder.
 		 */
 		@SuppressWarnings("hiding")
-		public MavenSkyveProjectCreator projectDirectory(final String projectDirectory) {
+		public @Nonnull MavenSkyveProjectCreator projectDirectory(final @Nonnull String projectDirectory) {
 			this.projectDirectory = projectDirectory;
 			return this;
 		}
@@ -835,7 +838,7 @@ public class MavenSkyveProject {
 		 * @return this builder.
 		 */
 		@SuppressWarnings("hiding")
-		public MavenSkyveProjectCreator customerName(final String customerName) {
+		public @Nonnull MavenSkyveProjectCreator customerName(final @Nonnull String customerName) {
 			this.customerName = customerName;
 			return this;
 		}
@@ -847,7 +850,7 @@ public class MavenSkyveProject {
 		 * @return this builder.
 		 */
 		@SuppressWarnings("hiding")
-		public MavenSkyveProjectCreator skyveDirectory(final String skyveDirectory) {
+		public @Nonnull MavenSkyveProjectCreator skyveDirectory(final @Nullable String skyveDirectory) {
 			this.skyveDirectory = skyveDirectory;
 			return this;
 		}
@@ -859,7 +862,7 @@ public class MavenSkyveProject {
 		 * @return this builder.
 		 */
 		@SuppressWarnings("hiding")
-		public MavenSkyveProjectCreator srcDirectory(final String srcDirectory) {
+		public @Nonnull MavenSkyveProjectCreator srcDirectory(final @Nonnull String srcDirectory) {
 			this.srcDirectory = srcDirectory;
 			return this;
 		}
@@ -871,7 +874,7 @@ public class MavenSkyveProject {
 		 * @return this builder.
 		 */
 		@SuppressWarnings("hiding")
-		public MavenSkyveProjectCreator generatedDirectory(final String generatedDirectory) {
+		public @Nonnull MavenSkyveProjectCreator generatedDirectory(final @Nonnull String generatedDirectory) {
 			this.generatedDirectory = generatedDirectory;
 			return this;
 		}
@@ -883,7 +886,7 @@ public class MavenSkyveProject {
 		 * @return this builder.
 		 */
 		@SuppressWarnings("hiding")
-		public MavenSkyveProjectCreator resourceDirectory(final String resourceDirectory) {
+		public @Nonnull MavenSkyveProjectCreator resourceDirectory(final @Nonnull String resourceDirectory) {
 			this.resourceDirectory = resourceDirectory;
 			return this;
 		}
@@ -895,7 +898,7 @@ public class MavenSkyveProject {
 		 * @return this builder.
 		 */
 		@SuppressWarnings("hiding")
-		public MavenSkyveProjectCreator webDirectory(final String webDirectory) {
+		public @Nonnull MavenSkyveProjectCreator webDirectory(final @Nonnull String webDirectory) {
 			this.webDirectory = webDirectory;
 			return this;
 		}
@@ -907,7 +910,7 @@ public class MavenSkyveProject {
 		 * @return this builder.
 		 */
 		@SuppressWarnings("hiding")
-		public MavenSkyveProjectCreator testDirectory(final String testDirectory) {
+		public @Nonnull MavenSkyveProjectCreator testDirectory(final @Nonnull String testDirectory) {
 			this.testDirectory = testDirectory;
 			return this;
 		}
@@ -919,7 +922,7 @@ public class MavenSkyveProject {
 		 * @return this builder.
 		 */
 		@SuppressWarnings("hiding")
-		public MavenSkyveProjectCreator generatedTestDirectory(final String generatedTestDirectory) {
+		public @Nonnull MavenSkyveProjectCreator generatedTestDirectory(final @Nonnull String generatedTestDirectory) {
 			this.generatedTestDirectory = generatedTestDirectory;
 			return this;
 		}
@@ -931,7 +934,7 @@ public class MavenSkyveProject {
 		 * @return this builder.
 		 */
 		@SuppressWarnings("hiding")
-		public MavenSkyveProjectCreator skyveScript(final String skyveScript) {
+		public @Nonnull MavenSkyveProjectCreator skyveScript(final @Nonnull String skyveScript) {
 			this.skyveScript = skyveScript;
 			return this;
 		}
@@ -943,7 +946,7 @@ public class MavenSkyveProject {
 		 * @return this builder.
 		 */
 		@SuppressWarnings("hiding")
-		public MavenSkyveProjectCreator copyFromProject(final boolean copyFromProject) {
+		public @Nonnull MavenSkyveProjectCreator copyFromProject(final boolean copyFromProject) {
 			this.copyFromProject = copyFromProject;
 			return this;
 		}
@@ -953,7 +956,7 @@ public class MavenSkyveProject {
 		 *
 		 * @return a configured MavenSkyveProject.
 		 */
-		public MavenSkyveProject initialise() {
+		public @Nonnull MavenSkyveProject initialise() {
 			return new MavenSkyveProject(this);
 		}
 	}

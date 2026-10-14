@@ -9,6 +9,7 @@ import org.skyve.metadata.repository.Repository;
 import org.skyve.metadata.user.User;
 import org.skyve.web.WebContext;
 
+import jakarta.annotation.Nonnull;
 import jakarta.servlet.RequestDispatcher;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
@@ -43,7 +44,7 @@ public class LoginServlet extends HttpServlet {
 	 */
 	@Override
 	@SuppressWarnings("java:S1989") // there exists JavaEE error pages
-	protected void doGet(HttpServletRequest request, HttpServletResponse response)
+	protected void doGet(@Nonnull HttpServletRequest request, @Nonnull HttpServletResponse response)
 	throws ServletException, IOException {
 		processRequest(request, response);
 	}
@@ -58,7 +59,7 @@ public class LoginServlet extends HttpServlet {
 	 */
 	@Override
 	@SuppressWarnings("java:S1989") // there exists JavaEE error pages
-	protected void doPost(HttpServletRequest request, HttpServletResponse response)
+	protected void doPost(@Nonnull HttpServletRequest request, @Nonnull HttpServletResponse response)
 	throws ServletException, IOException {
 		processRequest(request, response);
 	}
@@ -72,7 +73,7 @@ public class LoginServlet extends HttpServlet {
 	 * @throws IOException when request forwarding fails
 	 */
 	@SuppressWarnings("java:S3776") // Readability and cohesiveness over cyclomatic complexity
-	private static void processRequest(HttpServletRequest request, HttpServletResponse response)
+	private static void processRequest(@Nonnull HttpServletRequest request, @Nonnull HttpServletResponse response)
 	throws ServletException, IOException {
 		String customerName = null;
 		HttpSession session = request.getSession(false);

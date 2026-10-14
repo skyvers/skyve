@@ -67,6 +67,8 @@ import org.skyve.util.monitoring.Monitoring;
 import org.skyve.util.monitoring.RequestKey;
 import org.slf4j.Logger;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.servlet.ServletConfig;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
@@ -97,7 +99,7 @@ public class SmartClientEditServlet extends HttpServlet {
 	 */
 	@Override
 	@SuppressWarnings("unchecked")
-	public void init(ServletConfig config) throws ServletException {
+	public void init(@Nonnull ServletConfig config) throws ServletException {
 		super.init(config);
 		
 		String rendererParam = Util.processStringValue(config.getInitParameter("manipulator"));
@@ -126,12 +128,12 @@ public class SmartClientEditServlet extends HttpServlet {
 	 * @return configured JSON manipulator
 	 */
 	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
-	private static ViewJSONManipulator newManipulator(User user,
-														Module module, 
-														Document document, 
-														View view,
-														String uxui,
-														Bean bean,
+	private static @Nonnull ViewJSONManipulator newManipulator(@Nonnull User user,
+														@Nonnull Module module, 
+														@Nonnull Document document, 
+														@Nonnull View view,
+														@Nonnull String uxui,
+														@Nonnull Bean bean,
 														int editIdCounter, // the base number which is incremented for view component IDs for uniqueness
 														int createIdCounter, // the base number which is incremented for view component IDs for uniqueness
 														boolean forApply) {
@@ -152,7 +154,7 @@ public class SmartClientEditServlet extends HttpServlet {
 	 */
 	@Override
 	@SuppressWarnings("java:S1989") // there exists JavaEE error pages
-	protected void doGet(HttpServletRequest request, HttpServletResponse response) 
+	protected void doGet(@Nonnull HttpServletRequest request, @Nonnull HttpServletResponse response) 
 	throws ServletException, IOException {
 		LOGGER.info("SmartClientEdit - get....");
 		processRequest(request, response);
@@ -163,7 +165,7 @@ public class SmartClientEditServlet extends HttpServlet {
 	 */
 	@Override
 	@SuppressWarnings("java:S1989") // there exists JavaEE error pages
-    protected void doPost(HttpServletRequest request, HttpServletResponse response) 
+    protected void doPost(@Nonnull HttpServletRequest request, @Nonnull HttpServletResponse response) 
 	throws ServletException, IOException  {
 		LOGGER.info("SmartClientEdit - post....");
 		processRequest(request, response);
@@ -178,7 +180,7 @@ public class SmartClientEditServlet extends HttpServlet {
 	 * @throws IOException when writing the response fails
 	 */
 	@SuppressWarnings({"java:S3776", "java:S6541"}) // complexity OK
-	private static void processRequest(HttpServletRequest request, HttpServletResponse response) 
+	private static void processRequest(@Nonnull HttpServletRequest request, @Nonnull HttpServletResponse response) 
 	throws IOException {
 		response.setContentType(MimeType.json.toString());
         response.setCharacterEncoding(StandardCharsets.UTF_8.name());
@@ -461,7 +463,7 @@ public class SmartClientEditServlet extends HttpServlet {
 	 *        If bindings are included for errors generated from listgrids operations, no errors are shown
 	 * @param pw To append to.
 	 */
-	static void produceErrorResponse(Throwable t, Operation operation, boolean includeBindings, PrintWriter pw) {
+	static void produceErrorResponse(@Nonnull Throwable t, @Nonnull Operation operation, boolean includeBindings, @Nonnull PrintWriter pw) {
 		String reference = null;
 		if (! (t instanceof MessageException)) {
 			reference = WebErrorUtil.logUnexpectedAndGetReference(LOGGER, "SmartClient error response generated without catch context", t);
@@ -481,7 +483,7 @@ public class SmartClientEditServlet extends HttpServlet {
 	 *        This will be null for expected errors (ie MessageExceptions) as these are already logged at the
 	 *        point they are thrown.
 	 */
-	static void produceErrorResponse(Throwable t, Operation operation, boolean includeBindings, PrintWriter pw, String reference) {
+	static void produceErrorResponse(@Nonnull Throwable t, @Nonnull Operation operation, boolean includeBindings, @Nonnull PrintWriter pw, @Nullable String reference) {
 		if (t instanceof MessageException me) {
 			List<Message> ms = me.getMessages();
 			
@@ -522,7 +524,7 @@ public class SmartClientEditServlet extends HttpServlet {
 	 * @param ms messages to render
 	 * @param pw response writer
 	 */
-	static void appendErrorText(String synopsis, List<Message> ms, PrintWriter pw) {
+	static void appendErrorText(@Nonnull String synopsis, @Nonnull List<Message> ms, @Nonnull PrintWriter pw) {
     	pw.append(synopsis).append("<br/><ul>");
     	for (Message m : ms) {
 	    	pw.append("<li>");
@@ -539,7 +541,7 @@ public class SmartClientEditServlet extends HttpServlet {
 	 * @param sb JSON fragment builder receiving errors
 	 * @return {@code true} when at least one bound validation error exists
      */
-    private static boolean pumpOutValidationErrors(List<Message> ms, StringBuilder sb) {
+    private static boolean pumpOutValidationErrors(@Nonnull List<Message> ms, @Nonnull StringBuilder sb) {
     	boolean result = false;
 
     	for (Message m : ms) {
@@ -577,22 +579,22 @@ public class SmartClientEditServlet extends HttpServlet {
 	 * @throws Exception when fetch processing fails
 	 */
 	@SuppressWarnings({"java:S107", "java:S3776", "java:S6541"}) // Long parameter list preserves the existing framework/API contract; complexity OK
-	private static void fetch(AbstractWebContext webContext,
-			                    User user,
-		    					Customer customer,
-								Bean contextBean,
-								Module processModule,
-								Document processDocument,
-								String formBinding,
-								String source, // the source of a rerender event
-								String bizId,
+	private static void fetch(@Nonnull AbstractWebContext webContext,
+			                    @Nonnull User user,
+		    					@Nonnull Customer customer,
+								@Nullable Bean contextBean,
+								@Nonnull Module processModule,
+								@Nonnull Document processDocument,
+								@Nullable String formBinding,
+								@Nullable String source, // the source of a rerender event
+								@Nullable String bizId,
 								int editIdCounter, // the base number which is incremented to view component IDs for uniqueness
 								int createIdCounter, // the base number which is incremented to view component IDs for uniqueness
-								ImplicitActionName action,
-								SortedMap<String, Object> parameters, 
-								AbstractPersistence persistence,
-								String uxui,
-								PrintWriter pw)
+								@Nullable ImplicitActionName action,
+								@Nonnull SortedMap<String, Object> parameters, 
+								@Nonnull AbstractPersistence persistence,
+								@Nonnull String uxui,
+								@Nonnull PrintWriter pw)
 	throws Exception {
 		final CustomerImpl internalCustomer = (CustomerImpl) customer;
 		final Bizlet<Bean> processBizlet = ((DocumentImpl) processDocument).getBizlet(customer);
@@ -867,7 +869,7 @@ public class SmartClientEditServlet extends HttpServlet {
 	 * @param request inbound HTTP request
 	 * @return sorted map of normalised parameters
 	 */
-    public static SortedMap<String, Object> collectRequestParameters(HttpServletRequest request) {
+    public static @Nonnull SortedMap<String, Object> collectRequestParameters(@Nonnull HttpServletRequest request) {
     	SortedMap<String, Object> result = new TreeMap<>();
 		java.util.Enumeration<String> names = request.getParameterNames();
 		while (names.hasMoreElements()) {
@@ -907,14 +909,14 @@ public class SmartClientEditServlet extends HttpServlet {
 	 * @throws Exception when parameter conversion or binding fails
 	 */
     @SuppressWarnings({"java:S107", "java:S3776"}) // Long parameter list preserves the existing framework/API contract; complexity OK.
-    public static void applyNewParameters(Customer customer, 
-	    									User user, 
-	    									AbstractPersistence persistence, 
-	    									Module processModule,
-	    									Document processDocument, 
-	    									Bean processBean,
-	    									SortedMap<String, Object> parameters,
-	    									String uxui)
+    public static void applyNewParameters(@Nonnull Customer customer, 
+	    									@Nonnull User user, 
+	    									@Nonnull AbstractPersistence persistence, 
+	    									@Nonnull Module processModule,
+	    									@Nonnull Document processDocument, 
+	    									@Nonnull Bean processBean,
+	    									@Nonnull SortedMap<String, Object> parameters,
+	    									@Nonnull String uxui)
     throws Exception {
 		View view = processDocument.getView(uxui, 
 												customer, 
@@ -1010,25 +1012,25 @@ public class SmartClientEditServlet extends HttpServlet {
 	 * @throws Exception when apply processing fails
 	 */
 	@SuppressWarnings({"java:S107", "java:S3776", "java:S6541"}) // Long parameter list preserves the existing framework/API contract; complexity OK
-	private static void apply(AbstractWebContext webContext,
-		                        User user,
-		    					Customer customer,
-								Module formModule,
-								Document formDocument,
-								Bean formBean,
-								Document processDocument,
-								Bean processBean,
-								String formBinding, // the response is in terms of this binding
-								String gridBinding, // the processing may be in terms of this binding
-								String source, // the source of a rerender event (if applicable)
-								ImplicitActionName implicitAction,
-								String customActionName,
+	private static void apply(@Nonnull AbstractWebContext webContext,
+		                        @Nonnull User user,
+		    					@Nonnull Customer customer,
+								@Nonnull Module formModule,
+								@Nonnull Document formDocument,
+								@Nonnull Bean formBean,
+								@Nonnull Document processDocument,
+								@Nonnull Bean processBean,
+								@Nullable String formBinding, // the response is in terms of this binding
+								@Nullable String gridBinding, // the processing may be in terms of this binding
+								@Nullable String source, // the source of a rerender event (if applicable)
+								@Nullable ImplicitActionName implicitAction,
+								@Nullable String customActionName,
 								int editIdCounter, // the base number which is incremented to view component IDs for uniqueness
 								int createIdCounter, // the base number which is incremented to view component IDs for uniqueness
-								SortedMap<String, Object> parameters, 
-								AbstractPersistence persistence,
-								String uxui,
-								PrintWriter pw)
+								@Nonnull SortedMap<String, Object> parameters, 
+								@Nonnull AbstractPersistence persistence,
+								@Nonnull String uxui,
+								@Nonnull PrintWriter pw)
 	throws Exception {
 		String mutableCustomActionName = customActionName;
 		if (! ServletConstants.PUSH_ACTION_NAME.equals(mutableCustomActionName)) {
@@ -1243,19 +1245,19 @@ public class SmartClientEditServlet extends HttpServlet {
 	 * @throws Exception when response rendering fails
 	 */
 	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
-	private static void pumpOutResponse(AbstractWebContext webContext,
-		                                    User user,
-		                                    CustomerImpl internalCustomer,
-											Module formModule,
-											Document formDocument,
-											View formView,
-											String uxui,
-											Bean formBean,
-											Bizlet<Bean> formBizlet,
+	private static void pumpOutResponse(@Nonnull AbstractWebContext webContext,
+		                                    @Nonnull User user,
+		                                    @Nonnull CustomerImpl internalCustomer,
+											@Nonnull Module formModule,
+											@Nonnull Document formDocument,
+											@Nonnull View formView,
+											@Nonnull String uxui,
+											@Nonnull Bean formBean,
+											@Nullable Bizlet<Bean> formBizlet,
 											int editIdCounter, // the base number which is incremented to view component IDs for uniqueness
 											int createIdCounter, // the base number which is incremented to view component IDs for uniqueness
-											String redirectUrl,
-											PrintWriter pw) 
+											@Nullable String redirectUrl,
+											@Nonnull PrintWriter pw) 
 	throws Exception  {
 		StringBuilder result = new StringBuilder(256);
 		// Need to make a new JSON manipulator here to visit the view for the response
@@ -1305,14 +1307,14 @@ public class SmartClientEditServlet extends HttpServlet {
 	 * @throws Exception when delete processing fails
 	 */
 	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
-	private static void remove(AbstractWebContext webContext,
-								User user,
-		                        Customer customer,
-								Document processDocument,
-								PersistentBean beanToDelete,
-								Bizlet<PersistentBean> bizlet,
-								AbstractPersistence persistence,
-								PrintWriter pw)
+	private static void remove(@Nonnull AbstractWebContext webContext,
+								@Nonnull User user,
+		                        @Nonnull Customer customer,
+								@Nonnull Document processDocument,
+								@Nonnull PersistentBean beanToDelete,
+								@Nullable Bizlet<PersistentBean> bizlet,
+								@Nonnull AbstractPersistence persistence,
+								@Nonnull PrintWriter pw)
 	throws Exception {
 		if (! user.canDeleteDocument(processDocument)) {
 			throw new SecurityException("delete this data", user.getName());
@@ -1386,7 +1388,7 @@ public class SmartClientEditServlet extends HttpServlet {
 	 * @param webContext active web conversation context
 	 * @param <T> rendered bean type
 	 */
-	private static <T extends Bean> void postRender(CustomerImpl internalCustomer, Bizlet<T> bizlet, T bean, AbstractWebContext webContext) {
+	private static <T extends Bean> void postRender(@Nonnull CustomerImpl internalCustomer, @Nullable Bizlet<T> bizlet, @Nonnull T bean, @Nonnull AbstractWebContext webContext) {
 		boolean vetoed = internalCustomer.interceptBeforePostRender(bean, webContext);
 		if (! vetoed) {
 			if (bizlet != null) {

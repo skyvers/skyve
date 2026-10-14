@@ -5,6 +5,9 @@ import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Describes a JasperReports report band (title, column header, detail, summary,
  * etc.) used during programmatic {@code .jrxml} generation.
@@ -31,7 +34,7 @@ public class ReportBand {
 		stretch;
 
 		@Override
-		public String toString() {
+		public @Nonnull String toString() {
 			return StringUtils.capitalize(super.toString());
 		}
 	}
@@ -59,19 +62,19 @@ public class ReportBand {
 	private String invisibleConditionName;
 	private DesignSpecification parent;	
 	
-	public String getName() {
+	public @Nullable String getName() {
 		return name;
 	}
-	public void setName(String name) {
+	public void setName(@Nullable String name) {
 		this.name = name;
 	}
-	public BandType getBandType() {
+	public @Nullable BandType getBandType() {
 		return type;
 	}
-	public void setBandType(BandType type) {
+	public void setBandType(@Nullable BandType type) {
 		this.type = type;
 	}
-	public Integer getHeight() {
+	public @Nonnull Integer getHeight() {
 		int maxHeight = this.getParent().getDefaultElementHeight().intValue();
 		for (ReportElement e : this.getElements()) {
 			if (e.getElementTop() != null && e.getElementHeight() != null) {
@@ -88,37 +91,37 @@ public class ReportBand {
 		
 		return height;
 	}
-	public void setHeight(Integer height) {
+	public void setHeight(@Nullable Integer height) {
 		this.height = height;
 	}
-	public List<ReportElement> getElements() {
+	public @Nonnull List<ReportElement> getElements() {
 		return elements;
 	}
-	public void setElements(List<ReportElement> elements) {
+	public void setElements(@Nonnull List<ReportElement> elements) {
 		this.elements = elements;
 	}
-	public SplitType getSplitType() {
+	public @Nullable SplitType getSplitType() {
 		return splitType;
 	}
-	public void setSplitType(SplitType splitType) {
+	public void setSplitType(@Nullable SplitType splitType) {
 		this.splitType = splitType;
 	}
-	public String getJrxml() {
+	public @Nonnull String getJrxml() {
 		return Renderer.renderBand(this);
 	}
-	public DesignSpecification getParent() {
+	public @Nullable DesignSpecification getParent() {
 		return parent;
 	}
-	public void setParent(DesignSpecification parent) {
+	public void setParent(@Nullable DesignSpecification parent) {
 		this.parent = parent;
 	}
 
-	public String getInvisibleConditionName() {
+	public @Nullable String getInvisibleConditionName() {
 		return invisibleConditionName;
 	}
 
 
-	public void setInvisibleConditionName(String invisibleConditionName) {
+	public void setInvisibleConditionName(@Nullable String invisibleConditionName) {
 		this.invisibleConditionName = invisibleConditionName;
 	}
 
@@ -127,7 +130,7 @@ public class ReportBand {
 	 * 
 	 * @param tE
 	 */
-	public void addElement(ReportElement tE) {
+	public void addElement(@Nonnull ReportElement tE) {
 
 		this.getElements().add(tE);
 		tE.setParent(this);
@@ -206,7 +209,7 @@ public class ReportBand {
 	 * @param band
 	 * @param container
 	 */
-	public void addContainer(Container container) {
+	public void addContainer(@Nonnull Container container) {
 
 		// and add all elements of the top level child
 		for (ReportElement e : container.getElements()) {

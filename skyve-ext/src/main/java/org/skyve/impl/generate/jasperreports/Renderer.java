@@ -30,6 +30,7 @@ import org.skyve.util.logging.SkyveLoggerFactory;
 import org.slf4j.Logger;
 
 import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 
 /**
  * Drives the complete JasperReports rendering pipeline: load or compile the
@@ -51,7 +52,7 @@ public class Renderer {
 	 * @param withTerminator Whether to render as a self-closing tag.
 	 * @return The rendered tag fragment prefixed with a newline.
 	 */
-	public static String eS(String string, Map<String, String> attributes, boolean withTerminator) {
+	public static @Nonnull String eS(@Nonnull String string, @Nullable Map<String, String> attributes, boolean withTerminator) {
 		StringBuilder sb = new StringBuilder();
 		sb.append("\n");
 		sb.append("<").append(string);
@@ -78,7 +79,7 @@ public class Renderer {
 	 * @param withTerminator Whether to render as a self-closing tag.
 	 * @return The rendered tag fragment.
 	 */
-	public static String eS(String string, String key, String value, boolean withTerminator) {
+	public static @Nonnull String eS(@Nonnull String string, @Nullable String key, @Nullable String value, boolean withTerminator) {
 		StringBuilder sb = new StringBuilder();
 		sb.append("\n");
 		sb.append("<").append(string);
@@ -102,7 +103,7 @@ public class Renderer {
 	 * @param value Attribute value.
 	 * @return The rendered tag fragment.
 	 */
-	public static String eS(String string, String key, String value) {
+	public static @Nonnull String eS(@Nonnull String string, @Nullable String key, @Nullable String value) {
 		return eS(string, key, value, true);
 	}
 
@@ -116,7 +117,7 @@ public class Renderer {
 	 * @param value2 Second attribute value.
 	 * @return The rendered tag fragment.
 	 */
-	public static String eS(String string, String key1, String value1, String key2, String value2) {
+	public static @Nonnull String eS(@Nonnull String string, @Nullable String key1, @Nullable String value1, @Nullable String key2, @Nullable String value2) {
 		StringBuilder sb = new StringBuilder();
 		sb.append("\n");
 		sb.append("<").append(string);
@@ -144,7 +145,7 @@ public class Renderer {
 	 * @param value3 Third attribute value.
 	 * @return The rendered tag fragment.
 	 */
-	public static String eS(String string, String key1, String value1, String key2, String value2, String key3, String value3) {
+	public static @Nonnull String eS(@Nonnull String string, @Nullable String key1, @Nullable String value1, @Nullable String key2, @Nullable String value2, @Nullable String key3, @Nullable String value3) {
 		StringBuilder sb = new StringBuilder();
 		sb.append("\n");
 		sb.append("<").append(string);
@@ -170,7 +171,7 @@ public class Renderer {
 	 * @param string The XML element name.
 	 * @return The rendered closing tag prefixed with a newline.
 	 */
-	public static String eF(String string) {
+	public static @Nonnull String eF(@Nonnull String string) {
 		return "\n</" + string + ">";
 	}
 
@@ -178,7 +179,7 @@ public class Renderer {
 	 * Renders the element.
 	 */
 	@SuppressWarnings("java:S3776") // Complexity OK
-	public static String renderElement(ReportElement elem) {
+	public static @Nonnull String renderElement(@Nonnull ReportElement elem) {
 
 		StringBuilder sb = new StringBuilder();
 
@@ -471,7 +472,7 @@ public class Renderer {
 	 * Renders the box.
 	 */
 	@SuppressWarnings("java:S3776") // Complexity OK
-	public static String renderBox(ReportElement e) throws Exception {
+	public static @Nonnull String renderBox(@Nonnull ReportElement e) throws Exception {
 		StringBuilder sb = new StringBuilder();
 
 		Map<String, String> a = new LinkedHashMap<>();
@@ -524,7 +525,7 @@ public class Renderer {
 	/**
 	 * Renders the band.
 	 */
-	public static String renderBand(ReportBand band) {
+	public static @Nonnull String renderBand(@Nonnull ReportBand band) {
 
 		StringBuilder sb = new StringBuilder();
 
@@ -565,7 +566,7 @@ public class Renderer {
 	/**
 	 * Renders the field.
 	 */
-	public static String renderField(ReportField field) {
+	public static @Nonnull String renderField(@Nonnull ReportField field) {
 
 		StringBuilder sb = new StringBuilder();
 
@@ -600,7 +601,7 @@ public class Renderer {
 	/**
 	 * Renders the parameter.
 	 */
-	public static String renderParameter(ReportParameter param) {
+	public static @Nonnull String renderParameter(@Nonnull ReportParameter param) {
 
 		StringBuilder sb = new StringBuilder();
 
@@ -621,7 +622,7 @@ public class Renderer {
 	/**
 	 * Renders the variable.
 	 */
-	public static String renderVariable(ReportVariable variable) {
+	public static @Nonnull String renderVariable(@Nonnull ReportVariable variable) {
 
 		StringBuilder sb = new StringBuilder();
 
@@ -650,7 +651,7 @@ public class Renderer {
 	 * Renders the design.
 	 */
 	@SuppressWarnings("java:S3776") // Complexity OK
-	public static String renderDesign(DesignSpecification design) {
+	public static @Nonnull String renderDesign(@Nonnull DesignSpecification design) {
 		StringBuilder sb = new StringBuilder();
 
 		if (design.getModuleName() != null && design.getDocumentName() != null) {
@@ -825,7 +826,7 @@ public class Renderer {
 	 * @return A Jasper print-when expression fragment, or an empty string when no condition is provided.
 	 * @see #printWhenExpression(DesignSpecification, String)
 	 */
-	public static String renderPrintWhenExpression(DesignSpecification design, String invisibleCondition) {
+	public static @Nonnull String renderPrintWhenExpression(@Nonnull DesignSpecification design, @Nullable String invisibleCondition) {
 		if (StringUtils.isBlank(invisibleCondition)) {
 			return "";
 		}
@@ -876,7 +877,7 @@ public class Renderer {
 	 * @param enquote Whether to wrap the path in quotes.
 	 * @return The resolved path string.
 	 */
-	public static String pathToReport(String moduleName, String documentName, boolean enquote) {
+	public static @Nonnull String pathToReport(@Nonnull String moduleName, @Nonnull String documentName, boolean enquote) {
 
 		String sep = System.getProperty("file.separator");
 
@@ -916,7 +917,7 @@ public class Renderer {
 	 * @param document The document metadata.
 	 * @return The persistent identifier, or {@code UnknownTable} when unavailable.
 	 */
-	public static String getPersistentIdentifierForDocument(Document document) {
+	public static @Nullable String getPersistentIdentifierForDocument(@Nonnull Document document) {
 		String result = "UnknownTable";
 		Persistent persistent = document.getPersistent();
 		if (persistent != null) {
@@ -931,7 +932,7 @@ public class Renderer {
 	 * @param aType The Skyve attribute type.
 	 * @return The fully qualified Java class name.
 	 */
-	public static String getSqlEquivalentClass(AttributeType aType) {
+	public static @Nonnull String getSqlEquivalentClass(@Nonnull AttributeType aType) {
 
 		String result = null;
 
@@ -986,10 +987,10 @@ public class Renderer {
 	 * @return The same band instance after element insertion.
 	 */
 	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
-	public static ReportBand addElement(ReportBand band, ReportElement.ElementType type, String name, String valueExpression, String fontName, Integer fontSize, Integer top,
-			Integer left,
-			Integer width, Integer height, Boolean border, ReportElement.ElementAlignment alignment, Boolean bold, Boolean italic, String foreColour, String backColour,
-			String printWhenExpression) {
+	public static @Nonnull ReportBand addElement(@Nonnull ReportBand band, @Nonnull ReportElement.ElementType type, @Nullable String name, @Nullable String valueExpression, @Nullable String fontName, @Nullable Integer fontSize, @Nullable Integer top,
+			@Nullable Integer left,
+			@Nullable Integer width, @Nullable Integer height, @Nullable Boolean border, @Nullable ReportElement.ElementAlignment alignment, @Nullable Boolean bold, @Nullable Boolean italic, @Nullable String foreColour, @Nullable String backColour,
+			@Nullable String printWhenExpression) {
 		try {
 
 			ReportElement tE = new ReportElement(type, name, valueExpression, fontName, fontSize, top, left, width, height, border, alignment, bold, italic, printWhenExpression);
@@ -1063,7 +1064,7 @@ public class Renderer {
 	 * @param condition The condition name or inline condition expression (possibly prefixed with {@code not}).
 	 * @return The normalised condition.
 	 */
-	public static String rawConditionName(String condition) {
+	public static @Nonnull String rawConditionName(@Nonnull String condition) {
 		String result;
 		if (condition.startsWith("not")) {
 			result = condition.substring(3, 4).toLowerCase() + condition.substring(4);
@@ -1078,7 +1079,7 @@ public class Renderer {
 	 * 
 	 * @param design
 	 */
-	public static void saveJrxml(DesignSpecification design, JasperReportRenderer reportRenderer) throws Exception {
+	public static void saveJrxml(@Nonnull DesignSpecification design, @Nonnull JasperReportRenderer reportRenderer) throws Exception {
 
 		if (!design.getSubReports().isEmpty()) {
 			for (DesignSpecification ds : design.getSubReports()) {
@@ -1128,7 +1129,7 @@ public class Renderer {
 	 * 
 	 * @param design
 	 */
-	public static void saveJrxml(DesignSpecification design) throws Exception {
+	public static void saveJrxml(@Nonnull DesignSpecification design) throws Exception {
 		Path filePath = Paths.get(design.getRepositoryPath());
 		if (design.getRepositoryPath() != null) {
 			if (Boolean.TRUE.equals(design.getSaveToDocumentPackage())) {
@@ -1159,7 +1160,7 @@ public class Renderer {
 	 * 
 	 * @param design
 	 */
-	public static void saveJrxml(DesignSpecification design, Path filePath) throws Exception {
+	public static void saveJrxml(@Nonnull DesignSpecification design, @Nonnull Path filePath) throws Exception {
 
 		if (!design.getSubReports().isEmpty()) {
 			for (DesignSpecification ds : design.getSubReports()) {
@@ -1194,7 +1195,7 @@ public class Renderer {
 	 * @param msg The message expression text.
 	 * @return A Jasper expression string that calls {@code BeanForReport.getMessage(...)}.
 	 */
-	public static String renderBoundMessage(DesignSpecification design, String msg) {
+	public static @Nonnull String renderBoundMessage(@Nonnull DesignSpecification design, @Nonnull String msg) {
 		StringBuilder exp = new StringBuilder(64);
 		exp.append("org.skyve.impl.generate.jasperreports.BeanForReport.getMessage(");
 		if (Mode.bean.equals(design.getMode())) {

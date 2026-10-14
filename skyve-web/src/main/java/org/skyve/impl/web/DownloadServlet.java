@@ -59,7 +59,7 @@ public class DownloadServlet extends HttpServlet {
 	 */
 	@Override
 	@SuppressWarnings({"java:S1989", "java:S3776", "java:S6541"}) // there exists JavaEE error pages; complexity OK
-	public void doGet(HttpServletRequest request, HttpServletResponse response)
+	public void doGet(@Nonnull HttpServletRequest request, @Nonnull HttpServletResponse response)
 	throws ServletException, IOException {
 		processDownload(request, response, false);
 	}
@@ -75,7 +75,7 @@ public class DownloadServlet extends HttpServlet {
 	 */
 	@Override
 	@SuppressWarnings({"java:S1989", "java:S3776", "java:S6541"}) // there exists JavaEE error pages; complexity OK
-	protected void doHead(HttpServletRequest request, HttpServletResponse response)
+	protected void doHead(@Nonnull HttpServletRequest request, @Nonnull HttpServletResponse response)
 	throws ServletException, IOException {
 		processDownload(request, response, true);
 	}

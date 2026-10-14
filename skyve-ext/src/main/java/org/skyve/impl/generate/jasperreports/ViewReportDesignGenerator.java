@@ -7,6 +7,9 @@ import org.skyve.impl.metadata.module.ModuleImpl;
 import org.skyve.impl.metadata.view.ViewImpl;
 import org.skyve.metadata.view.View;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Generates a JasperReports design from a Skyve view definition, producing a
  * layout that mirrors the view's sections and widget arrangement.
@@ -24,7 +27,7 @@ public class ViewReportDesignGenerator extends ReportDesignGenerator {
      *
      * @param visitor The visitor used to extract fields and layout bands.
      */
-    public ViewReportDesignGenerator(ReportViewVisitor visitor) {
+    public ViewReportDesignGenerator(@Nullable ReportViewVisitor visitor) {
         this.visitor = visitor;
     }
 
@@ -33,7 +36,7 @@ public class ViewReportDesignGenerator extends ReportDesignGenerator {
      *
      * @return The configured visitor, or {@code null} when not initialised.
      */
-    public ReportViewVisitor getVisitor() {
+    public @Nullable ReportViewVisitor getVisitor() {
         return visitor;
     }
 
@@ -42,7 +45,7 @@ public class ViewReportDesignGenerator extends ReportDesignGenerator {
      *
      * @param visitor The visitor to use for subsequent generation calls.
      */
-    public void setVisitor(ReportViewVisitor visitor) {
+    public void setVisitor(@Nullable ReportViewVisitor visitor) {
         this.visitor = visitor;
     }
 
@@ -52,7 +55,7 @@ public class ViewReportDesignGenerator extends ReportDesignGenerator {
      * @return A new view-based generator instance.
      */
     @Override
-    protected ViewReportDesignGenerator getSubreportGenerator() {
+    protected @Nonnull ViewReportDesignGenerator getSubreportGenerator() {
         return new ViewReportDesignGenerator();
     }
 
@@ -62,7 +65,7 @@ public class ViewReportDesignGenerator extends ReportDesignGenerator {
      * @param design The design to populate.
      */
     @Override
-    protected void addFields(DesignSpecification design) {
+    protected void addFields(@Nonnull DesignSpecification design) {
         super.addFields(design);
 
         initialiseVisitorIfNull(design);
@@ -78,7 +81,7 @@ public class ViewReportDesignGenerator extends ReportDesignGenerator {
      * @param design The design to populate.
      */
     @Override
-    protected void addBands(DesignSpecification design) {
+    protected void addBands(@Nonnull DesignSpecification design) {
         super.addBands(design);
 
         initialiseVisitorIfNull(design);
@@ -97,7 +100,7 @@ public class ViewReportDesignGenerator extends ReportDesignGenerator {
      * @return The title band.
      */
     @Override
-    protected ReportBand createTitleBand(DesignSpecification design) {
+    protected @Nonnull ReportBand createTitleBand(@Nonnull DesignSpecification design) {
         ReportBand title = super.createTitleBand(design);
 
         // construct title band
@@ -121,7 +124,7 @@ public class ViewReportDesignGenerator extends ReportDesignGenerator {
         return title;
     }
 
-    private void initialiseVisitorIfNull(DesignSpecification design) {
+    private void initialiseVisitorIfNull(@Nonnull DesignSpecification design) {
         if (visitor == null) {
             final View view = design.getDocument().getView(design.getUxui(), CORE.getCustomer(), View.ViewType.edit.toString());
             visitor = new ReportViewVisitor(this, (CustomerImpl) CORE.getCustomer(), (ModuleImpl) design.getModule(), (DocumentImpl) design.getDocument(), (ViewImpl) view, design.getUxui());

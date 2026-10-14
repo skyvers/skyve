@@ -42,6 +42,8 @@ import org.skyve.util.Util;
 
 import com.google.common.base.MoreObjects;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.inject.Inject;
 
 /**
@@ -146,7 +148,7 @@ public class ExportDocumentsToArchiveJob extends CancellableJob {
      * 
      * @param doc
      */
-    protected void validateExportedType(Document doc) {
+    protected void validateExportedType(@Nonnull Document doc) {
         boolean hasInterface = doc.getInterfaces()
                                   .stream()
                                   .map(Interface::getInterfaceName)
@@ -176,7 +178,7 @@ public class ExportDocumentsToArchiveJob extends CancellableJob {
         return now().isAfter(targetEndTime);
     }
 
-    private Document getDocument(String module, String document) {
+    private @Nonnull Document getDocument(@Nonnull String module, @Nonnull String document) {
         Customer customer = CORE.getUser()
                                 .getCustomer();
 
@@ -195,7 +197,7 @@ public class ExportDocumentsToArchiveJob extends CancellableJob {
          * @param doc The document type being archived.
          * @param config Archive configuration for the document type.
          */
-        public JobSubstance(Document doc, ArchiveDocConfig config) {
+        public JobSubstance(@Nonnull Document doc, @Nonnull ArchiveDocConfig config) {
             this.document = doc;
             this.config = config;
             this.updateStatement = createUpdateStatement();
@@ -253,7 +255,7 @@ public class ExportDocumentsToArchiveJob extends CancellableJob {
          * 
          * @return a List of bizIds
          */
-        private List<String> getDeletableBeans() {
+        private @Nonnull List<String> getDeletableBeans() {
             Instant cutoff = now().minus(Duration.ofDays(config.retainDeletedDocumentsDays()));
             logger.debug("Deleting {} documents archived prior to {}", document, cutoff);
             Timestamp t = new Timestamp(Date.from(cutoff));
@@ -319,7 +321,7 @@ public class ExportDocumentsToArchiveJob extends CancellableJob {
          * 
          * @param msg
          */
-        private void logOnce(String msg) {
+        private void logOnce(@Nonnull String msg) {
             List<String> log = getLog();
             if (log.isEmpty()) {
                 log.add(msg);
@@ -362,7 +364,7 @@ public class ExportDocumentsToArchiveJob extends CancellableJob {
             return LOCK_FAILURE;
         }
 
-        private int writeBatch(File file) throws IOException {
+        private int writeBatch(@Nonnull File file) throws IOException {
             List<DynamicBean> documents = getDocumentsToExport(batchSize);
             if (documents.isEmpty()) {
                 return 0;
@@ -407,7 +409,7 @@ public class ExportDocumentsToArchiveJob extends CancellableJob {
          * @param archiveTimestamp The timestamp the row was archived.
          * @param archiveFilename The archive file name containing the row.
          */
-        public void softDeleteDocument(DynamicBean currDocument, Timestamp archiveTimestamp, String archiveFilename) {
+        public void softDeleteDocument(@Nonnull DynamicBean currDocument, @Nonnull Timestamp archiveTimestamp, @Nonnull String archiveFilename) {
             persistence.newSQL(updateStatement)
                        .putParameter("time", archiveTimestamp)
                        .putParameter("file", archiveFilename, false)
@@ -420,7 +422,7 @@ public class ExportDocumentsToArchiveJob extends CancellableJob {
          *
          * @return The SQL update statement.
          */
-        public String createUpdateStatement() {
+        public @Nonnull String createUpdateStatement() {
             @SuppressWarnings("null")
             String table = document.getPersistent()
                                    .getPersistentIdentifier();
@@ -435,7 +437,7 @@ public class ExportDocumentsToArchiveJob extends CancellableJob {
             return sql;
         }
 
-        private File getArchiveFile() {
+        private @Nonnull File getArchiveFile() {
             Path dir = config.getArchiveDirectory();
             dir.toFile()
                .mkdirs();
@@ -449,11 +451,11 @@ public class ExportDocumentsToArchiveJob extends CancellableJob {
                       .toFile();
         }
 
-        private String archiveFileNamePrefix() {
+        private @Nullable String archiveFileNamePrefix() {
             return toRootLowerCase(document.getName());
         }
 
-        private List<DynamicBean> getDocumentsToExport(int howMany) {
+        private @Nonnull List<DynamicBean> getDocumentsToExport(int howMany) {
             DocumentQuery query = persistence.newDocumentQuery(document)
                                              .setMaxResults(howMany);
 
@@ -464,7 +466,7 @@ public class ExportDocumentsToArchiveJob extends CancellableJob {
         }
 
         @Override
-        public String toString() {
+        public @Nonnull String toString() {
             return MoreObjects.toStringHelper(this)
                               .add("document", document)
                               .add("config", config)

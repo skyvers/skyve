@@ -78,7 +78,7 @@ public class HIBPPasswordValidator {
 	 * @return hashed password
 	 * @throws NoSuchAlgorithmException
 	 */
-	public static String hashPassword(String password) throws NoSuchAlgorithmException {
+	public static @Nonnull String hashPassword(@Nonnull String password) throws NoSuchAlgorithmException {
     	@SuppressWarnings("java:S4790") // Only for legacy use
 		MessageDigest digest = MessageDigest.getInstance("SHA-1");
 		byte[] hashBytes = digest.digest(password.getBytes(StandardCharsets.UTF_8));
@@ -100,7 +100,7 @@ public class HIBPPasswordValidator {
 	 * @param suffix Suffix to match
 	 * @return true if there is a match
 	 */
-	private static boolean isHashSuffixPresent(String response, String suffix) {
+	private static boolean isHashSuffixPresent(@Nonnull String response, @Nonnull String suffix) {
 		String[] lines = response.split("\r\n");
 		for (String line : lines) {
 			if (line.startsWith(suffix)) {

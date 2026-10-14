@@ -18,6 +18,9 @@ import org.skyve.metadata.user.User;
 import org.skyve.util.BeanValidator;
 import org.skyve.util.Util;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Encapsulates SmartClient query-column metadata for list-grid and repeater rendering.
  *
@@ -51,13 +54,13 @@ public class SmartClientQueryColumnDefinition extends SmartClientAttributeDefini
 	 * @param uxui active UX/UI profile name
 	 */
 	@SuppressWarnings("java:S3776") // Complexity OK
-	protected SmartClientQueryColumnDefinition(User user,
-												Customer customer, 
-												Module module, 
-												Document document, 
-												MetaDataQueryColumn column,
+	protected SmartClientQueryColumnDefinition(@Nullable User user,
+												@Nonnull Customer customer, 
+												@Nonnull Module module, 
+												@Nonnull Document document, 
+												@Nonnull MetaDataQueryColumn column,
 												boolean runtime,
-												String uxui) {
+												@Nonnull String uxui) {
 		super(user,
 				customer, 
 				module,
@@ -251,7 +254,7 @@ public class SmartClientQueryColumnDefinition extends SmartClientAttributeDefini
 	 *
 	 * @return configured pixel height, or {@code null}
 	 */
-	public Integer getPixelHeight() {
+	public @Nullable Integer getPixelHeight() {
 		return pixelHeight;
 	}
 
@@ -260,7 +263,7 @@ public class SmartClientQueryColumnDefinition extends SmartClientAttributeDefini
 	 *
 	 * @param pixelHeight configured pixel height
 	 */
-	public void setPixelHeight(Integer pixelHeight) {
+	public void setPixelHeight(@Nullable Integer pixelHeight) {
 		this.pixelHeight = pixelHeight;
 	}
 
@@ -269,7 +272,7 @@ public class SmartClientQueryColumnDefinition extends SmartClientAttributeDefini
 	 *
 	 * @return relative file path for empty thumbnails, or {@code null}
 	 */
-	public String getEmptyThumbnailRelativeFile() {
+	public @Nullable String getEmptyThumbnailRelativeFile() {
 		return emptyThumbnailRelativeFile;
 	}
 
@@ -278,7 +281,7 @@ public class SmartClientQueryColumnDefinition extends SmartClientAttributeDefini
 	 *
 	 * @param emptyThumbnailRelativeFile relative file path for empty thumbnails
 	 */
-	public void setEmptyThumbnailRelativeFile(String emptyThumbnailRelativeFile) {
+	public void setEmptyThumbnailRelativeFile(@Nullable String emptyThumbnailRelativeFile) {
 		this.emptyThumbnailRelativeFile = emptyThumbnailRelativeFile;
 	}
 
@@ -287,7 +290,7 @@ public class SmartClientQueryColumnDefinition extends SmartClientAttributeDefini
 	 *
 	 * @return mask expression, or {@code null}
 	 */
-	public String getMask() {
+	public @Nullable String getMask() {
 		return mask;
 	}
 
@@ -306,7 +309,7 @@ public class SmartClientQueryColumnDefinition extends SmartClientAttributeDefini
 	 * @return SmartClient JavaScript field definition payload
 	 */
 	@SuppressWarnings("java:S3776") // Complexity OK
-	public String toJavascript() {
+	public @Nonnull String toJavascript() {
 		StringBuilder result = new StringBuilder(64);
 
 		result.append("name:'");

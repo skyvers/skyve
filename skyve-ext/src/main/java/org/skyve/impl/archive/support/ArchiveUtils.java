@@ -10,6 +10,9 @@ import org.skyve.CORE;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Static utility methods for the Skyve document archiving subsystem.
  *
@@ -36,7 +39,7 @@ public class ArchiveUtils {
      * @param line Line/String to excerpt
      * @return
      */
-    public static String excerptLine(String line) {
+    public static @Nonnull String excerptLine(@Nullable String line) {
         if (line == null || line.length() <= (2 * EXCERPT_LENGTH) + 20) {
             return String.valueOf(line);
         }
@@ -45,7 +48,7 @@ public class ArchiveUtils {
     }
 
 
-    public static Document getDocument(String module, String document) {
+    public static @Nonnull Document getDocument(@Nonnull String module, @Nonnull String document) {
         Customer customer = CORE.getUser()
                                 .getCustomer();
 

@@ -20,6 +20,9 @@ import freemarker.template.TemplateModelException;
 import freemarker.template.TemplateScalarModel;
 import freemarker.template.utility.DeepUnwrap;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * FreeMarker user-defined directive that performs a Skyve display format on the specified value.
  *
@@ -53,7 +56,7 @@ public class FormatDirective implements TemplateDirectiveModel {
 
 	@SuppressWarnings({"rawtypes", "java:S3776"}) // Complexity OK
 	@Override
-	public void execute(Environment env, Map params, TemplateModel[] loopVars, TemplateDirectiveBody body)
+	public void execute(@Nonnull Environment env, @Nonnull Map params, @Nonnull TemplateModel[] loopVars, @Nullable TemplateDirectiveBody body)
 			throws TemplateException, IOException {
 		if (params.isEmpty()) {
 			throw new TemplateModelException("This directive requires parameters.");

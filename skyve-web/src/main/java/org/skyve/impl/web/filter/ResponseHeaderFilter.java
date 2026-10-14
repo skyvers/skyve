@@ -5,6 +5,7 @@ import java.util.Enumeration;
 
 import org.skyve.util.Util;
 
+import jakarta.annotation.Nonnull;
 import jakarta.servlet.Filter;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.FilterConfig;
@@ -28,7 +29,7 @@ public class ResponseHeaderFilter implements Filter {
 	 * @throws ServletException when filter initialization fails
 	 */
 	@Override
-	public void init(FilterConfig config) throws ServletException {
+	public void init(@Nonnull FilterConfig config) throws ServletException {
 		fc = config;
 	}
 
@@ -41,7 +42,7 @@ public class ResponseHeaderFilter implements Filter {
 	}
 
 	@Override
-	public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
+	public void doFilter(@Nonnull ServletRequest request, @Nonnull ServletResponse response, @Nonnull FilterChain chain)
 	throws IOException, ServletException {
 		applyHeaders(fc, (HttpServletResponse) response);
 
@@ -50,7 +51,7 @@ public class ResponseHeaderFilter implements Filter {
 	}
 	
 	// set the provided HTTP response parameters
-	private static void applyHeaders(FilterConfig fc, HttpServletResponse httpResponse) {
+	private static void applyHeaders(@Nonnull FilterConfig fc, @Nonnull HttpServletResponse httpResponse) {
 		for (Enumeration<String> e = fc.getInitParameterNames(); e.hasMoreElements();) {
 			String headerName = e.nextElement();
 			if ("Expires".equals(headerName)) {

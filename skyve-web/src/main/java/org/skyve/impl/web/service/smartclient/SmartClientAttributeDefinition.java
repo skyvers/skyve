@@ -66,6 +66,9 @@ import org.skyve.util.Binder;
 import org.skyve.util.Binder.TargetMetaData;
 import org.skyve.util.OWASP;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Implements internal web-module behavior for this Skyve runtime concern.
  */
@@ -106,16 +109,16 @@ abstract class SmartClientAttributeDefinition {
 	 * @param uxui the active UX/UI profile name
 	 */
 	@SuppressWarnings({"java:S107", "java:S3776"}) // Long parameter list preserves the existing framework/API contract; complexity OK.
-	protected SmartClientAttributeDefinition(User user,
-												Customer customer, 
-												Module module,
-												Document document,
-												String binding,
-												String name,
+	protected SmartClientAttributeDefinition(@Nullable User user,
+												@Nonnull Customer customer, 
+												@Nonnull Module module,
+												@Nonnull Document document,
+												@Nullable String binding,
+												@Nullable String name,
 												boolean runtime,
 												boolean isQueryColumn,
 												boolean isField,
-												String uxui) {
+												@Nonnull String uxui) {
 		this.name = (name != null) ? name : BindUtil.sanitiseBinding(binding);
 		title = this.name;
 
@@ -443,7 +446,7 @@ abstract class SmartClientAttributeDefinition {
 	 *
 	 * @return target binding metadata, or {@code null}
 	 */
-	public TargetMetaData getTarget() {
+	public @Nullable TargetMetaData getTarget() {
 	    return target;
 	}
 	
@@ -452,7 +455,7 @@ abstract class SmartClientAttributeDefinition {
 	 *
 	 * @return editor type name, or {@code null}
 	 */
-	public String getEditorType() {
+	public @Nullable String getEditorType() {
 		return editorType;
 	}
 
@@ -461,7 +464,7 @@ abstract class SmartClientAttributeDefinition {
 	 *
 	 * @param editorType editor type name
 	 */
-	public void setEditorType(String editorType) {
+	public void setEditorType(@Nullable String editorType) {
 		this.editorType = editorType;
 	}
 
@@ -470,7 +473,7 @@ abstract class SmartClientAttributeDefinition {
 	 *
 	 * @return lookup metadata, or {@code null}
 	 */
-    public SmartClientLookupDefinition getLookup() {
+    public @Nullable SmartClientLookupDefinition getLookup() {
         return lookup;
     }
 
@@ -479,7 +482,7 @@ abstract class SmartClientAttributeDefinition {
 	 *
 	 * @return maximum display/input length, or {@code null}
 	 */
-	public Integer getLength() {
+	public @Nullable Integer getLength() {
 		return length;
 	}
 
@@ -488,7 +491,7 @@ abstract class SmartClientAttributeDefinition {
 	 *
 	 * @param length maximum display/input length
 	 */
-	public void setLength(Integer length) {
+	public void setLength(@Nullable Integer length) {
 		this.length = length;
 	}
 
@@ -497,7 +500,7 @@ abstract class SmartClientAttributeDefinition {
 	 *
 	 * @return attribute name
 	 */
-	public String getName() {
+	public @Nullable String getName() {
 		return name;
 	}
 
@@ -506,7 +509,7 @@ abstract class SmartClientAttributeDefinition {
 	 *
 	 * @param name attribute name
 	 */
-	public void setName(String name) {
+	public void setName(@Nonnull String name) {
 		this.name = name;
 	}
 
@@ -515,7 +518,7 @@ abstract class SmartClientAttributeDefinition {
 	 *
 	 * @return required-message text, or {@code null}
 	 */
-	public String getRequiredMessage() {
+	public @Nullable String getRequiredMessage() {
 		return requiredMessage;
 	}
 
@@ -524,7 +527,7 @@ abstract class SmartClientAttributeDefinition {
 	 *
 	 * @param requiredMessage required-message text
 	 */
-	public void setRequiredMessage(String requiredMessage) {
+	public void setRequiredMessage(@Nullable String requiredMessage) {
 		this.requiredMessage = requiredMessage;
 		required = (requiredMessage != null);
 	}
@@ -534,7 +537,7 @@ abstract class SmartClientAttributeDefinition {
 	 *
 	 * @return display title
 	 */
-	public String getTitle() {
+	public @Nullable String getTitle() {
 		return title;
 	}
 
@@ -543,7 +546,7 @@ abstract class SmartClientAttributeDefinition {
 	 *
 	 * @param title display title
 	 */
-	public void setTitle(String title) {
+	public void setTitle(@Nullable String title) {
 		this.title = title;
 	}
 
@@ -552,7 +555,7 @@ abstract class SmartClientAttributeDefinition {
 	 *
 	 * @return SmartClient logical type identifier
 	 */
-	public String getType() {
+	public @Nonnull String getType() {
 		return type;
 	}
 
@@ -561,7 +564,7 @@ abstract class SmartClientAttributeDefinition {
 	 *
 	 * @param type SmartClient logical type identifier
 	 */
-	public void setType(String type) {
+	public void setType(@Nonnull String type) {
 		this.type = type;
 	}
 
@@ -606,7 +609,7 @@ abstract class SmartClientAttributeDefinition {
 	 *
 	 * @return domain value-map entries, or {@code null}
 	 */
-	public Map<String, String> getValueMap() {
+	public @Nullable Map<String, String> getValueMap() {
 		return valueMap;
 	}
 
@@ -617,7 +620,7 @@ abstract class SmartClientAttributeDefinition {
 	 *
 	 * @return value-map JavaScript literal string
 	 */
-	protected String getValueMapAsString() {
+	protected @Nonnull String getValueMapAsString() {
 		if (valueMap.isEmpty()) {
 			// this valueMap will be replaced in client logic but this defn ensures that the
 			// select widget doesn't try to use the form's data source to get values when opened
@@ -630,11 +633,11 @@ abstract class SmartClientAttributeDefinition {
 						.collect(joining(", ", "{", "}"));
 	}
 
-	void setMask(String mask) {
+	void setMask(@Nullable String mask) {
 		this.mask = mask;
 	}
 
-	void setTextBoxStyle(String textBoxStyle) {
+	void setTextBoxStyle(@Nullable String textBoxStyle) {
 		this.textBoxStyle = textBoxStyle;
 	}
 	
@@ -643,7 +646,7 @@ abstract class SmartClientAttributeDefinition {
 	 *
 	 * @return preferred pixel width, or {@code null}
 	 */
-	public Integer getPixelWidth() {
+	public @Nullable Integer getPixelWidth() {
 		return pixelWidth;
 	}
 
@@ -652,7 +655,7 @@ abstract class SmartClientAttributeDefinition {
 	 *
 	 * @param pixelWidth preferred pixel width
 	 */
-	public void setPixelWidth(Integer pixelWidth) {
+	public void setPixelWidth(@Nullable Integer pixelWidth) {
 		this.pixelWidth = pixelWidth;
 	}
 
@@ -661,7 +664,7 @@ abstract class SmartClientAttributeDefinition {
 	 *
 	 * @return text/content alignment preference, or {@code null}
 	 */
-	public HorizontalAlignment getAlign() {
+	public @Nullable HorizontalAlignment getAlign() {
 		return align;
 	}
 
@@ -670,7 +673,7 @@ abstract class SmartClientAttributeDefinition {
 	 *
 	 * @param align text/content alignment preference
 	 */
-	public void setAlign(HorizontalAlignment align) {
+	public void setAlign(@Nullable HorizontalAlignment align) {
 		this.align = align;
 	}
 
@@ -700,7 +703,7 @@ abstract class SmartClientAttributeDefinition {
 	 * @param text text attribute metadata whose format determines mask and text style
 	 */
 	@SuppressWarnings("java:S3776") // Complexity OK
-	public void setMaskAndStyle(Text text) {
+	public void setMaskAndStyle(@Nonnull Text text) {
 		String result = null;
 		
 		TextFormat format = text.getFormat();
@@ -766,10 +769,10 @@ abstract class SmartClientAttributeDefinition {
 	 * @param emptyThumbnailRelativeFile fallback thumbnail resource path, or {@code null}
 	 */
 	@SuppressWarnings("java:S3776") // Complexity OK
-	void appendEditorProperties(StringBuilder result,
+	void appendEditorProperties(@Nonnull StringBuilder result,
 									boolean forDataGrid,
-									Integer pixelHeight,
-									String emptyThumbnailRelativeFile) {
+									@Nullable Integer pixelHeight,
+									@Nullable String emptyThumbnailRelativeFile) {
 		if (lookup == null) {
 			if (triStateCheckBox) {
 				result.append(",editorProperties:{allowEmptyValue:true}");
@@ -930,9 +933,9 @@ abstract class SmartClientAttributeDefinition {
 	 * @param runtime whether runtime domain values should be resolved
 	 * @return ordered map of escaped domain codes to escaped localised descriptions
 	 */
-	private static Map<String, String> getConstantDomainValueMap(Customer customer,
-															Document document,
-															Attribute attribute,
+	private static @Nonnull Map<String, String> getConstantDomainValueMap(@Nonnull Customer customer,
+															@Nonnull Document document,
+															@Nonnull Attribute attribute,
 															boolean runtime) {
 		List<DomainValue> values = ((DocumentImpl) document).getDomainValues((CustomerImpl) customer, 
 																				DomainType.constant, 

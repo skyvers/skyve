@@ -32,6 +32,7 @@ import org.skyve.util.Util;
 import org.slf4j.Logger;
 import org.skyve.util.logging.SkyveLoggerFactory;
 
+import jakarta.annotation.Nonnull;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
@@ -58,7 +59,7 @@ public class SmartClientTextSearchServlet extends HttpServlet {
 	 */
 	@Override
 	@SuppressWarnings({"java:S1989", "java:S3776"}) // there exists JavaEE error pages; Complexity OK
-    protected void doGet(HttpServletRequest request, HttpServletResponse response) 
+    protected void doGet(@Nonnull HttpServletRequest request, @Nonnull HttpServletResponse response) 
 	throws ServletException, IOException {
 		Enumeration<String> parameterNames = request.getParameterNames();
 		while (parameterNames.hasMoreElements()) {

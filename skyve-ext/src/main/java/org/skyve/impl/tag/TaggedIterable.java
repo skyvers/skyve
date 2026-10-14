@@ -14,6 +14,9 @@ import org.skyve.persistence.AutoClosingIterable;
 import org.skyve.util.logging.SkyveLoggerFactory;
 import org.slf4j.Logger;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 
 @SuppressWarnings("resource")
 class TaggedIterable implements AutoClosingIterable<Bean> {
@@ -21,7 +24,7 @@ class TaggedIterable implements AutoClosingIterable<Bean> {
 
 	private AutoClosingIterable<Bean> tagIterable;
 	
-	TaggedIterable(AutoClosingIterable<Bean> tagIterable) {
+	TaggedIterable(@Nonnull AutoClosingIterable<Bean> tagIterable) {
 		this.tagIterable = tagIterable;
 	}
 
@@ -30,7 +33,7 @@ class TaggedIterable implements AutoClosingIterable<Bean> {
 		
 		private Bean nextBean;
 		
-		private TaggedIterator(Iterator<Bean> tagIterator) {
+		private TaggedIterator(@Nonnull Iterator<Bean> tagIterator) {
 			this.tagIterator = tagIterator;
 		}
 		
@@ -75,7 +78,7 @@ class TaggedIterable implements AutoClosingIterable<Bean> {
 
 		@Override
 		@SuppressWarnings("java:S2272") // hasNext() has side-effects
-		public Bean next() {
+		public @Nullable Bean next() {
 			Bean result = nextBean;
 			nextBean = null;
 			
@@ -89,7 +92,7 @@ class TaggedIterable implements AutoClosingIterable<Bean> {
 	}
 	
 	@Override
-	public Iterator<Bean> iterator() {
+	public @Nonnull Iterator<Bean> iterator() {
 		return new LoggingIteratorAdapter<>(new TaggedIterator(tagIterable.iterator()));
 	}
 	

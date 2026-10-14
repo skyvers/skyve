@@ -6,6 +6,9 @@ import org.skyve.metadata.user.User;
 import org.skyve.persistence.Persistence;
 import org.skyve.util.Binder;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Allows bean method calls from SQL type reports 
  * 
@@ -22,7 +25,7 @@ public class BeanForReport {
 	 * @param bizId The business identifier of the row being rendered.
 	 * @return The resolved bean, or {@code null} when no matching row exists.
 	 */
-	public static Bean getBean(String moduleName, String documentName, String bizId) {
+	public static @Nullable Bean getBean(@Nonnull String moduleName, @Nonnull String documentName, @Nonnull String bizId) {
 		Persistence pers = CORE.getPersistence();
 		return pers.retrieve(moduleName, documentName, bizId);
 	}
@@ -32,7 +35,7 @@ public class BeanForReport {
 	 *
 	 * @return The current persistence user.
 	 */
-	public static User getUser() {
+	public static @Nonnull User getUser() {
 		return CORE.getPersistence().getUser();
 	}
 
@@ -45,7 +48,7 @@ public class BeanForReport {
 	 * @param message The message pattern containing Skyve bindings.
 	 * @return The formatted message text.
 	 */
-	public static String getMessage(String moduleName, String documentName, String bizId, String message) {
+	public static @Nonnull String getMessage(@Nonnull String moduleName, @Nonnull String documentName, @Nonnull String bizId, @Nonnull String message) {
 		Bean bean = getBean(moduleName, documentName, bizId);
 
 		return getMessage(bean, message);
@@ -58,7 +61,7 @@ public class BeanForReport {
 	 * @param message The message pattern containing Skyve bindings.
 	 * @return The formatted message text.
 	 */
-	public static String getMessage(Bean bean, String message) {
+	public static @Nonnull String getMessage(@Nullable Bean bean, @Nonnull String message) {
 		return Binder.formatMessage(message, bean);
 	}
 
@@ -71,7 +74,7 @@ public class BeanForReport {
 	 * @param condition The condition name or inline condition expression to evaluate.
 	 * @return {@code true} when the condition evaluates to true for the bean.
 	 */
-	public static boolean evaluateCondition(String moduleName, String documentName, String bizId, String condition) {
+	public static boolean evaluateCondition(@Nonnull String moduleName, @Nonnull String documentName, @Nonnull String bizId, @Nonnull String condition) {
 		Bean bean = getBean(moduleName, documentName, bizId);
 		return bean.evaluateCondition(condition);
 	}

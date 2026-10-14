@@ -20,6 +20,9 @@ import org.skyve.metadata.user.User;
 import org.skyve.persistence.SQL;
 import org.skyve.web.UserAgentType;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Writes login and web-hit telemetry records to admin statistics tables.
  *
@@ -41,7 +44,7 @@ public class WebStatsUtil {
 	 * @param userIPAddress Source IP address string
 	 * @throws Exception If record creation fails
 	 */
-	public static void recordLogin(User user, String userIPAddress) {
+	public static void recordLogin(@Nonnull User user, @Nonnull String userIPAddress) {
 		Customer customer = user.getCustomer();
 		Module module = customer.getModule(AppConstants.ADMIN_MODULE_NAME);
 		Document loginRecordDocument = module.getDocument(customer, AppConstants.USER_LOGIN_RECORD_DOCUMENT_NAME);
@@ -79,7 +82,7 @@ public class WebStatsUtil {
 	 * @param userAgentType Parsed user-agent category
 	 * @throws Exception If hit recording fails
 	 */
-	public static synchronized void recordHit(User user, String userAgentHeader, UserAgentType userAgentType)
+	public static synchronized void recordHit(@Nonnull User user, @Nullable String userAgentHeader, @Nonnull UserAgentType userAgentType)
 	throws Exception {
 		AbstractPersistence persistence = AbstractPersistence.get();
 		persistence.setUser(user); // user has not been set as the servlet for this filter have not fired yet

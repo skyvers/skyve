@@ -14,6 +14,9 @@ import org.skyve.metadata.module.Module;
 import org.slf4j.Logger;
 import org.skyve.util.logging.SkyveLoggerFactory;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Abstract base for all JasperReports design generators.
  *
@@ -29,7 +32,7 @@ public abstract class ReportDesignGenerator {
      *
      * @return A populated design ready for rendering.
      */
-    public DesignSpecification generateDesign() {
+    public @Nonnull DesignSpecification generateDesign() {
         return populateDesign(new DesignSpecification());
     }
 
@@ -42,7 +45,7 @@ public abstract class ReportDesignGenerator {
      * @param design The mutable design to populate.
      * @return The same design instance after population.
      */
-    public DesignSpecification populateDesign(DesignSpecification design) {
+    public @Nonnull DesignSpecification populateDesign(@Nonnull DesignSpecification design) {
         assert(design.getModuleName() != null);
         assert(design.getDocumentName() != null);
 
@@ -61,9 +64,9 @@ public abstract class ReportDesignGenerator {
         return design;
     }
 
-    protected abstract ReportDesignGenerator getSubreportGenerator();
+    protected abstract @Nonnull ReportDesignGenerator getSubreportGenerator();
 
-    private static void clearDesign(DesignSpecification design) {
+    private static void clearDesign(@Nonnull DesignSpecification design) {
         design.getBands().clear();
         design.getFields().clear();
         design.getParameters().clear();
@@ -76,7 +79,7 @@ public abstract class ReportDesignGenerator {
      *
      * @param design The design receiving parameters.
      */
-    protected static void addParameters(DesignSpecification design) {
+    protected static void addParameters(@Nonnull DesignSpecification design) {
         ReportParameter p1 = new ReportParameter();
         p1.setName("SUBREPORT_DIR");
         p1.setTypeClass("java.lang.String");
@@ -103,7 +106,7 @@ public abstract class ReportDesignGenerator {
      * @param design The design receiving fields.
      */
     @SuppressWarnings("static-method") // overridable
-	protected void addFields(DesignSpecification design) {
+	protected void addFields(@Nonnull DesignSpecification design) {
         final Customer customer = CORE.getCustomer();
         final Module module = design.getModule();
         final Document document = design.getDocument();
@@ -159,7 +162,7 @@ public abstract class ReportDesignGenerator {
      *
      * @param design The design receiving variables.
      */
-    protected static void addVariables(DesignSpecification design) {
+    protected static void addVariables(@Nonnull DesignSpecification design) {
         if (DesignSpecification.ReportType.subreport.equals(design.getReportType())) {
             for (ReportField a : design.getFields()) {
                 if (!Attribute.AttributeType.collection.name().equals(a.getSkyveType()) && !Boolean.TRUE.equals(a.getImplicit())) {
@@ -181,7 +184,7 @@ public abstract class ReportDesignGenerator {
      *
      * @param design The parent design receiving subreport specifications.
      */
-    protected void addSubreports(DesignSpecification design) {
+    protected void addSubreports(@Nonnull DesignSpecification design) {
         //only generate default reports if subreports is empty (allows for manual creation of subreports instead of default)
         if (design.getSubReports().isEmpty()) {
 
@@ -201,7 +204,7 @@ public abstract class ReportDesignGenerator {
      *
      * @param design The design receiving generated bands.
      */
-	protected void addBands(DesignSpecification design) {
+	protected void addBands(@Nonnull DesignSpecification design) {
         ReportBand background = new ReportBand();
         background.setBandType(ReportBand.BandType.background);
         background.setParent(design);
@@ -278,7 +281,7 @@ public abstract class ReportDesignGenerator {
      * @return A title band bound to the supplied design.
      */
 	   @SuppressWarnings("static-method") // overridable
-	protected ReportBand createTitleBand(DesignSpecification design) {
+	protected @Nonnull ReportBand createTitleBand(@Nonnull DesignSpecification design) {
         final ReportBand title = new ReportBand();
         title.setName("Title");
         title.setBandType(ReportBand.BandType.title);
@@ -298,7 +301,7 @@ public abstract class ReportDesignGenerator {
      * @param fieldPrefix Field-name prefix accumulated for nested bindings.
      * @return The generated report field descriptor.
      */
-    protected static ReportField fieldFromAttribute(DesignSpecification bean, Customer customer, Document document, Attribute a, StringBuilder sJoin, StringBuilder fieldPrefix) {
+    protected static @Nonnull ReportField fieldFromAttribute(@Nonnull DesignSpecification bean, @Nonnull Customer customer, @Nonnull Document document, @Nonnull Attribute a, @Nonnull StringBuilder sJoin, @Nonnull StringBuilder fieldPrefix) {
     	StringBuilder mutableSJoin = sJoin;
     	ReportField f = new ReportField();
         f.setParent(bean);
@@ -369,7 +372,7 @@ public abstract class ReportDesignGenerator {
      * @return A resolved report field, or {@code null} when the binding cannot be represented.
      */
     @SuppressWarnings("java:S3776") // Complexity OK
-    protected static ReportField fieldFromBinding(DesignSpecification design, Customer customer, Document document, String binding) {
+    protected static @Nullable ReportField fieldFromBinding(@Nonnull DesignSpecification design, @Nonnull Customer customer, @Nonnull Document document, @Nonnull String binding) {
 
         ReportField result = null;
         StringBuilder sJoin = new StringBuilder();
@@ -420,8 +423,8 @@ public abstract class ReportDesignGenerator {
         return result;
     }
 
-    protected static StringBuilder addJoinForAssociation(StringBuilder sJoin, Customer customer, DesignSpecification bean,
-                                                         Document document, Attribute a, String uniqueJoinIdentifier) {
+    protected static @Nonnull StringBuilder addJoinForAssociation(@Nonnull StringBuilder sJoin, @Nonnull Customer customer, @Nonnull DesignSpecification bean,
+                                                         @Nonnull Document document, @Nonnull Attribute a, @Nonnull String uniqueJoinIdentifier) {
 
         if (!bean.getJoins().containsKey(document.getName())) {
             // get the next alias
@@ -456,7 +459,7 @@ public abstract class ReportDesignGenerator {
      * @param colWidth The available column width for the subreport.
      */
 	@SuppressWarnings("boxing")
-	public void constructSubreportFromField(DesignSpecification design, ReportField fld, Integer colWidth) {
+	public void constructSubreportFromField(@Nonnull DesignSpecification design, @Nonnull ReportField fld, @Nullable Integer colWidth) {
         final Document document = design.getDocument();
 
         DesignSpecification subreport = new DesignSpecification();

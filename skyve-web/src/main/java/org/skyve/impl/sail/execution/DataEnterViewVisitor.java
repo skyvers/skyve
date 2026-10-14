@@ -27,6 +27,8 @@ import org.skyve.impl.metadata.view.widget.bound.input.TextField;
 import org.skyve.impl.metadata.view.widget.bound.tabular.DataGrid;
 import org.skyve.metadata.view.widget.bound.Bound;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * Traverses an edit view and records tab paths that lead to a specific bound input.
  */
@@ -58,12 +60,12 @@ public class DataEnterViewVisitor extends NoOpViewVisitor {
 	 * @param uxui the selected UX/UI profile
 	 * @param bindingToFind the fully qualified binding to match
 	 */
-	protected DataEnterViewVisitor(CustomerImpl customer, 
-									ModuleImpl module,
-									DocumentImpl document,
-									ViewImpl view,
-									String uxui,
-									String bindingToFind) {
+	protected DataEnterViewVisitor(@Nonnull CustomerImpl customer, 
+									@Nonnull ModuleImpl module,
+									@Nonnull DocumentImpl document,
+									@Nonnull ViewImpl view,
+									@Nonnull String uxui,
+									@Nonnull String bindingToFind) {
 		super(customer, module, document, view, uxui);
 // TODO account for indexed & mapped bindings and ElementById() on the way in
 		this.bindingToFind = bindingToFind;
@@ -77,7 +79,7 @@ public class DataEnterViewVisitor extends NoOpViewVisitor {
 	 * @param parentEnabled whether ancestor containers are enabled
 	 */
 	@Override
-	public void visitTab(Tab tab, boolean parentVisible, boolean parentEnabled) {
+	public void visitTab(@Nonnull Tab tab, boolean parentVisible, boolean parentEnabled) {
 		tabs.push(tab);
 	}
 	
@@ -89,7 +91,7 @@ public class DataEnterViewVisitor extends NoOpViewVisitor {
 	 * @param parentEnabled whether ancestor containers are enabled
 	 */
 	@Override
-	public void visitedTab(Tab tab, boolean parentVisible, boolean parentEnabled) {
+	public void visitedTab(@Nonnull Tab tab, boolean parentVisible, boolean parentEnabled) {
 		tabs.pop();
 	}
 
@@ -101,7 +103,7 @@ public class DataEnterViewVisitor extends NoOpViewVisitor {
 	 * @param parentEnabled whether ancestor containers are enabled
 	 */
 	@Override
-	public void visitDataGrid(DataGrid grid, boolean parentVisible, boolean parentEnabled) {
+	public void visitDataGrid(@Nonnull DataGrid grid, boolean parentVisible, boolean parentEnabled) {
 		bindingPrefix = grid.getBinding();
 	}
 
@@ -113,7 +115,7 @@ public class DataEnterViewVisitor extends NoOpViewVisitor {
 	 * @param parentEnabled whether ancestor containers are enabled
 	 */
 	@Override
-	public void visitedDataGrid(DataGrid grid, boolean parentVisible, boolean parentEnabled) {
+	public void visitedDataGrid(@Nonnull DataGrid grid, boolean parentVisible, boolean parentEnabled) {
 		bindingPrefix = null;
 	}
 
@@ -122,7 +124,7 @@ public class DataEnterViewVisitor extends NoOpViewVisitor {
 	 *
 	 * @param bound the bound widget metadata to evaluate
 	 */
-	private void match(Bound bound) {
+	private void match(@Nonnull Bound bound) {
 		String binding = bound.getBinding();
 		if (bindingPrefix != null) {
 			binding = bindingPrefix = '.' +  binding;
@@ -143,7 +145,7 @@ public class DataEnterViewVisitor extends NoOpViewVisitor {
 	 * @param parentEnabled whether ancestor containers are enabled
 	 */
 	@Override
-	public void visitCheckBox(CheckBox checkBox, boolean parentVisible, boolean parentEnabled) {
+	public void visitCheckBox(@Nonnull CheckBox checkBox, boolean parentVisible, boolean parentEnabled) {
 		match(checkBox);
 	}
 	
@@ -155,7 +157,7 @@ public class DataEnterViewVisitor extends NoOpViewVisitor {
 	 * @param parentEnabled whether ancestor containers are enabled
 	 */
 	@Override
-	public void visitColourPicker(ColourPicker colour, boolean parentVisible, boolean parentEnabled) {
+	public void visitColourPicker(@Nonnull ColourPicker colour, boolean parentVisible, boolean parentEnabled) {
 		match(colour);
 	}
 	
@@ -167,7 +169,7 @@ public class DataEnterViewVisitor extends NoOpViewVisitor {
 	 * @param parentEnabled whether ancestor containers are enabled
 	 */
 	@Override
-	public void visitCombo(Combo combo, boolean parentVisible, boolean parentEnabled) {
+	public void visitCombo(@Nonnull Combo combo, boolean parentVisible, boolean parentEnabled) {
 		match(combo);
 	}
 	
@@ -179,7 +181,7 @@ public class DataEnterViewVisitor extends NoOpViewVisitor {
 	 * @param parentEnabled whether ancestor containers are enabled
 	 */
 	@Override
-	public void visitGeometry(Geometry geometry, boolean parentVisible, boolean parentEnabled) {
+	public void visitGeometry(@Nonnull Geometry geometry, boolean parentVisible, boolean parentEnabled) {
 		match(geometry);
 	}
 	
@@ -191,7 +193,7 @@ public class DataEnterViewVisitor extends NoOpViewVisitor {
 	 * @param parentEnabled whether ancestor containers are enabled
 	 */
 	@Override
-	public void visitHTML(HTML html, boolean parentVisible, boolean parentEnabled) {
+	public void visitHTML(@Nonnull HTML html, boolean parentVisible, boolean parentEnabled) {
 		match(html);
 	}
 	
@@ -203,7 +205,7 @@ public class DataEnterViewVisitor extends NoOpViewVisitor {
 	 * @param parentEnabled whether ancestor containers are enabled
 	 */
 	@Override
-	public void visitLookupDescription(LookupDescription lookup, boolean parentVisible, boolean parentEnabled) {
+	public void visitLookupDescription(@Nonnull LookupDescription lookup, boolean parentVisible, boolean parentEnabled) {
 		match(lookup);
 	}
 	
@@ -215,7 +217,7 @@ public class DataEnterViewVisitor extends NoOpViewVisitor {
 	 * @param parentEnabled whether ancestor containers are enabled
 	 */
 	@Override
-	public void visitPassword(Password password, boolean parentVisible, boolean parentEnabled) {
+	public void visitPassword(@Nonnull Password password, boolean parentVisible, boolean parentEnabled) {
 		match(password);
 	}
 	
@@ -227,7 +229,7 @@ public class DataEnterViewVisitor extends NoOpViewVisitor {
 	 * @param parentEnabled whether ancestor containers are enabled
 	 */
 	@Override
-	public void visitRadio(Radio radio, boolean parentVisible, boolean parentEnabled) {
+	public void visitRadio(@Nonnull Radio radio, boolean parentVisible, boolean parentEnabled) {
 		match(radio);
 	}
 	
@@ -239,7 +241,7 @@ public class DataEnterViewVisitor extends NoOpViewVisitor {
 	 * @param parentEnabled whether ancestor containers are enabled
 	 */
 	@Override
-	public void visitRichText(RichText richText, boolean parentVisible, boolean parentEnabled) {
+	public void visitRichText(@Nonnull RichText richText, boolean parentVisible, boolean parentEnabled) {
 		match(richText);
 	}
 	
@@ -251,7 +253,7 @@ public class DataEnterViewVisitor extends NoOpViewVisitor {
 	 * @param parentEnabled whether ancestor containers are enabled
 	 */
 	@Override
-	public void visitSlider(Slider slider, boolean parentVisible, boolean parentEnabled) {
+	public void visitSlider(@Nonnull Slider slider, boolean parentVisible, boolean parentEnabled) {
 		match(slider);
 	}
 	
@@ -263,7 +265,7 @@ public class DataEnterViewVisitor extends NoOpViewVisitor {
 	 * @param parentEnabled whether ancestor containers are enabled
 	 */
 	@Override
-	public void visitSpinner(Spinner spinner, boolean parentVisible, boolean parentEnabled) {
+	public void visitSpinner(@Nonnull Spinner spinner, boolean parentVisible, boolean parentEnabled) {
 		match(spinner);
 	}
 	
@@ -275,7 +277,7 @@ public class DataEnterViewVisitor extends NoOpViewVisitor {
 	 * @param parentEnabled whether ancestor containers are enabled
 	 */
 	@Override
-	public void visitTextArea(TextArea text, boolean parentVisible, boolean parentEnabled) {
+	public void visitTextArea(@Nonnull TextArea text, boolean parentVisible, boolean parentEnabled) {
 		match(text);
 	}
 	
@@ -287,7 +289,7 @@ public class DataEnterViewVisitor extends NoOpViewVisitor {
 	 * @param parentEnabled whether ancestor containers are enabled
 	 */
 	@Override
-	public void visitTextField(TextField text, boolean parentVisible, boolean parentEnabled) {
+	public void visitTextField(@Nonnull TextField text, boolean parentVisible, boolean parentEnabled) {
 		match(text);
 	}
 }

@@ -2,6 +2,8 @@ package org.skyve.impl.web.service.smartclient;
 
 import org.skyve.metadata.view.TextOutput.Sanitisation;
 
+import jakarta.annotation.Nullable;
+
 /**
  * Implements internal web-module behavior for this Skyve runtime concern.
  */
@@ -19,7 +21,7 @@ public class ViewBinding {
 	 * @param sanitise The sanitisation level to apply, if any.
 	 * @param instantiate Whether missing binding paths should be instantiated.
 	 */
-	ViewBinding(boolean mutable, boolean escape, Sanitisation sanitise, boolean instantiate) {
+	ViewBinding(boolean mutable, boolean escape, @Nullable Sanitisation sanitise, boolean instantiate) {
 		this.mutable = mutable;
 		this.escape = escape;
 		this.sanitise = sanitise;
@@ -39,7 +41,7 @@ public class ViewBinding {
 	 */
 	void merge(@SuppressWarnings("hiding") boolean mutable,
 				@SuppressWarnings("hiding") boolean escape,
-				@SuppressWarnings("hiding") Sanitisation sanitise,
+				@SuppressWarnings("hiding") @Nullable Sanitisation sanitise,
 				@SuppressWarnings("hiding") boolean instantiate) {
 		// Set mutable - true trumps false
 		if (mutable && (! this.mutable)) {
@@ -84,7 +86,7 @@ public class ViewBinding {
 	/**
 	 * Returns the configured sanitisation policy for this binding.
 	 */
-	public Sanitisation getSanitise() {
+	public @Nullable Sanitisation getSanitise() {
 		return sanitise;
 	}
 

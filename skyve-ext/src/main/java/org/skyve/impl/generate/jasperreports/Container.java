@@ -3,6 +3,9 @@ package org.skyve.impl.generate.jasperreports;
 import java.util.ArrayList;
 import java.util.List;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Recursive generic layout concept (for Skyve view containers)
  * 
@@ -72,7 +75,7 @@ public class Container {
 	 * @param horizontal Whether child layout should flow horizontally.
 	 * @param containerType The logical container type.
 	 */
-	public Container(Integer top, Integer left, Integer width, boolean horizontal, ContainerType containerType) {
+	public Container(@Nullable Integer top, @Nullable Integer left, @Nullable Integer width, boolean horizontal, @Nonnull ContainerType containerType) {
 		this.horizontal = Boolean.valueOf(horizontal);
 		this.left = left;
 		this.top = top;
@@ -92,7 +95,7 @@ public class Container {
 	 *
 	 * @return {@code true} when a border should be rendered.
 	 */
-	public Boolean getBorder() {
+	public @Nullable Boolean getBorder() {
 		return border;
 	}
 
@@ -101,7 +104,7 @@ public class Container {
 	 *
 	 * @param border The border flag.
 	 */
-	public void setBorder(Boolean border) {
+	public void setBorder(@Nullable Boolean border) {
 		this.border = border;
 	}
 
@@ -110,7 +113,7 @@ public class Container {
 	 *
 	 * @return The border title text, or {@code null}.
 	 */
-	public String getBorderTitle() {
+	public @Nullable String getBorderTitle() {
 		return borderTitle;
 	}
 
@@ -119,7 +122,7 @@ public class Container {
 	 *
 	 * @param borderTitle The border title text.
 	 */
-	public void setBorderTitle(String borderTitle) {
+	public void setBorderTitle(@Nullable String borderTitle) {
 		this.borderTitle = borderTitle;
 	}
 
@@ -146,7 +149,7 @@ public class Container {
 	 *
 	 * @return The pixel width hint, or {@code null}.
 	 */
-	public Integer getPixelWidth() {
+	public @Nullable Integer getPixelWidth() {
 		return pixelWidth;
 	}
 
@@ -155,7 +158,7 @@ public class Container {
 	 *
 	 * @param pixelWidth The pixel width hint.
 	 */
-	public void setPixelWidth(Integer pixelWidth) {
+	public void setPixelWidth(@Nullable Integer pixelWidth) {
 		this.pixelWidth = pixelWidth;
 	}
 
@@ -164,7 +167,7 @@ public class Container {
 	 *
 	 * @return The percentage width hint, or {@code null}.
 	 */
-	public Integer getPercentageWidth() {
+	public @Nullable Integer getPercentageWidth() {
 		return percentageWidth;
 	}
 
@@ -173,7 +176,7 @@ public class Container {
 	 *
 	 * @param percentageWidth The percentage width hint.
 	 */
-	public void setPercentageWidth(Integer percentageWidth) {
+	public void setPercentageWidth(@Nullable Integer percentageWidth) {
 		this.percentageWidth = percentageWidth;
 	}
 
@@ -182,7 +185,7 @@ public class Container {
 	 *
 	 * @return The responsive width hint, or {@code null}.
 	 */
-	public Integer getResponsiveWidth() {
+	public @Nullable Integer getResponsiveWidth() {
 		return responsiveWidth;
 	}
 
@@ -191,7 +194,7 @@ public class Container {
 	 *
 	 * @param responsiveWidth The responsive width hint.
 	 */
-	public void setResponsiveWidth(Integer responsiveWidth) {
+	public void setResponsiveWidth(@Nullable Integer responsiveWidth) {
 		this.responsiveWidth = responsiveWidth;
 	}
 
@@ -236,7 +239,7 @@ public class Container {
 	 *
 	 * @return The computed height, or {@code null} when not yet sized.
 	 */
-	public Integer getHeight() {
+	public @Nullable Integer getHeight() {
 		return height;
 	}
 
@@ -245,7 +248,7 @@ public class Container {
 	 *
 	 * @param height The container height.
 	 */
-	public void setHeight(Integer height) {
+	public void setHeight(@Nullable Integer height) {
 		this.height = height;
 	}
 
@@ -254,7 +257,7 @@ public class Container {
 	 *
 	 * @param height The height delta to add.
 	 */
-	public void addHeight(@SuppressWarnings("hiding") Integer height){
+	public void addHeight(@SuppressWarnings("hiding") @Nullable Integer height){
 		if(this.height==null){
 			this.height = height;
 		} 
@@ -268,7 +271,7 @@ public class Container {
 	 *
 	 * @param width The width delta to add.
 	 */
-	public void addWidth(@SuppressWarnings("hiding") Integer width){
+	public void addWidth(@SuppressWarnings("hiding") @Nullable Integer width){
 		if(this.width==null){
 			this.width = width;
 		} 
@@ -282,7 +285,7 @@ public class Container {
 	 *
 	 * @return The container type.
 	 */
-	public ContainerType  getContainerType() {
+	public @Nullable ContainerType  getContainerType() {
 		return containerType;
 	}
 
@@ -291,7 +294,7 @@ public class Container {
 	 *
 	 * @param containerType The container type.
 	 */
-	public void setContainerType(ContainerType containerType) {
+	public void setContainerType(@Nullable ContainerType containerType) {
 		this.containerType = containerType;
 	}
 
@@ -300,7 +303,7 @@ public class Container {
 	 *
 	 * @return {@code true} when children are laid out left-to-right.
 	 */
-	public Boolean getHorizontal() {
+	public @Nullable Boolean getHorizontal() {
 		return horizontal;
 	}
 
@@ -309,7 +312,7 @@ public class Container {
 	 *
 	 * @param horizontal The layout direction flag.
 	 */
-	public void setHorizontal(Boolean horizontal) {
+	public void setHorizontal(@Nullable Boolean horizontal) {
 		this.horizontal = horizontal;
 	}
 
@@ -318,7 +321,7 @@ public class Container {
 	 *
 	 * @return The left offset.
 	 */
-	public Integer getLeft() {
+	public @Nullable Integer getLeft() {
 		return left;
 	}
 
@@ -327,7 +330,7 @@ public class Container {
 	 *
 	 * @param left The left offset.
 	 */
-	public void setLeft(Integer left) {
+	public void setLeft(@Nullable Integer left) {
 		this.left = left;
 	}
 	/**
@@ -335,7 +338,7 @@ public class Container {
 	 *
 	 * @return The print-when expression, or {@code null}.
 	 */
-	public String getPrintWhenExpression() {
+	public @Nullable String getPrintWhenExpression() {
 		return printWhenExpression;
 	}
 
@@ -344,7 +347,7 @@ public class Container {
 	 *
 	 * @param printWhenExpression The print-when expression.
 	 */
-	public void setPrintWhenExpression(String printWhenExpression) {
+	public void setPrintWhenExpression(@Nullable String printWhenExpression) {
 		this.printWhenExpression = printWhenExpression;
 	}
 
@@ -354,7 +357,7 @@ public class Container {
 	 *
 	 * @param left The offset delta to add.
 	 */
-	public void addLeft(@SuppressWarnings("hiding") Integer left){
+	public void addLeft(@SuppressWarnings("hiding") @Nullable Integer left){
 		if(this.left==null){
 			this.left = left;
 		} 
@@ -368,7 +371,7 @@ public class Container {
 	 *
 	 * @return The top offset.
 	 */
-	public Integer getTop() {
+	public @Nullable Integer getTop() {
 		return top;
 	}
 
@@ -377,7 +380,7 @@ public class Container {
 	 *
 	 * @param top The top offset.
 	 */
-	public void setTop(Integer top) {
+	public void setTop(@Nullable Integer top) {
 		this.top = top;
 	}
 
@@ -386,7 +389,7 @@ public class Container {
 	 *
 	 * @return The width, or {@code null} when not yet sized.
 	 */
-	public Integer getWidth() {
+	public @Nullable Integer getWidth() {
 		return width;
 	}
 
@@ -395,7 +398,7 @@ public class Container {
 	 *
 	 * @param width The container width.
 	 */
-	public void setWidth(Integer width) {
+	public void setWidth(@Nullable Integer width) {
 		this.width = width;
 	}
 
@@ -404,7 +407,7 @@ public class Container {
 	 *
 	 * @return Mutable list of direct child elements.
 	 */
-	public List<ReportElement> getElements() {
+	public @Nonnull List<ReportElement> getElements() {
 		return elements;
 	}
 
@@ -413,7 +416,7 @@ public class Container {
 	 *
 	 * @param elements New direct child elements list.
 	 */
-	public void setElements(List<ReportElement> elements) {
+	public void setElements(@Nonnull List<ReportElement> elements) {
 		this.elements = elements;
 	}
 
@@ -422,7 +425,7 @@ public class Container {
 	 *
 	 * @return Mutable list of child containers.
 	 */
-	public List<Container> getContainers() {
+	public @Nonnull List<Container> getContainers() {
 		return containers;
 	}
 
@@ -431,7 +434,7 @@ public class Container {
 	 *
 	 * @param containers New child containers list.
 	 */
-	public void setContainers(List<Container> containers) {
+	public void setContainers(@Nonnull List<Container> containers) {
 		this.containers = containers;
 	}
 	
@@ -458,7 +461,7 @@ public class Container {
 	 *
 	 * @param c The parent container.
 	 */
-	public void setParent(Container c){
+	public void setParent(@Nonnull Container c){
 		this.parent = c;
 		this.depth = c.getDepth()+1;
 	}
@@ -468,7 +471,7 @@ public class Container {
 	 *
 	 * @return The parent container, or {@code null} when this is a root.
 	 */
-	public Container getParent(){
+	public @Nullable Container getParent(){
 		return parent;
 	}
 	
@@ -477,7 +480,7 @@ public class Container {
 	 *
 	 * @param c The child container to add.
 	 */
-	public void addContainer(Container c){
+	public void addContainer(@Nonnull Container c){
 		c.setDepth(depth+1);
 		c.setParent(this);
 		this.containers.add(c);

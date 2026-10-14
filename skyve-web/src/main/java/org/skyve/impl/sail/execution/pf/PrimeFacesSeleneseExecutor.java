@@ -79,6 +79,8 @@ import org.skyve.util.Binder.TargetMetaData;
 import org.skyve.util.DataBuilder;
 import org.skyve.util.test.SkyveFixture.FixtureType;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.faces.component.UIComponent;
 
 /**
@@ -95,8 +97,8 @@ public class PrimeFacesSeleneseExecutor extends SeleneseExecutor<PrimeFacesAutom
 	 * @param componentBuilder the component builder used to generate PrimeFaces components
 	 * @param layoutBuilder the layout builder used to assemble PrimeFaces layouts
 	 */
-	public PrimeFacesSeleneseExecutor(ComponentBuilder componentBuilder,
-												LayoutBuilder layoutBuilder) {
+	public PrimeFacesSeleneseExecutor(@Nonnull ComponentBuilder componentBuilder,
+												@Nonnull LayoutBuilder layoutBuilder) {
 		this.componentBuilder = componentBuilder;
 		this.layoutBuilder = layoutBuilder;
 	}
@@ -107,7 +109,7 @@ public class PrimeFacesSeleneseExecutor extends SeleneseExecutor<PrimeFacesAutom
 	 * @param push the list-context metadata to push
 	 */
 	@Override
-	public void executePushListContext(PushListContext push) {
+	public void executePushListContext(@Nonnull PushListContext push) {
 		PrimeFacesAutomationContext newContext = new PrimeFacesAutomationContext();
 		newContext(push, newContext);
 
@@ -121,7 +123,7 @@ public class PrimeFacesSeleneseExecutor extends SeleneseExecutor<PrimeFacesAutom
 	 * @param push the edit-context metadata to push
 	 */
 	@Override
-	public void executePushEditContext(PushEditContext push) {
+	public void executePushEditContext(@Nonnull PushEditContext push) {
 		PrimeFacesAutomationContext newContext = new PrimeFacesAutomationContext();
 		newContext(push, newContext);
 
@@ -135,7 +137,7 @@ public class PrimeFacesSeleneseExecutor extends SeleneseExecutor<PrimeFacesAutom
 	 * @param clear the clear-context step being executed
 	 */
 	@Override
-	public void executeClearContext(ClearContext clear) {
+	public void executeClearContext(@Nonnull ClearContext clear) {
 		clear();
 	}
 	
@@ -145,7 +147,7 @@ public class PrimeFacesSeleneseExecutor extends SeleneseExecutor<PrimeFacesAutom
 	 * @param pop the pop-context step being executed
 	 */
 	@Override
-	public void executePopContext(PopContext pop) {
+	public void executePopContext(@Nonnull PopContext pop) {
 		pop();
 	}
 	
@@ -155,7 +157,7 @@ public class PrimeFacesSeleneseExecutor extends SeleneseExecutor<PrimeFacesAutom
 	 * @param login the login step containing authentication credentials
 	 */
 	@Override
-	public void executeLogin(Login login) {
+	public void executeLogin(@Nonnull Login login) {
 		String customer = login.getCustomer();
 		String user = login.getUser();
 		
@@ -180,7 +182,7 @@ public class PrimeFacesSeleneseExecutor extends SeleneseExecutor<PrimeFacesAutom
 	 * @param logout the logout step being executed
 	 */
 	@Override
-	public void executeLogout(Logout logout) {
+	public void executeLogout(@Nonnull Logout logout) {
 		comment("Logout");
 		command("open", "loggedOut");
 	}
@@ -191,7 +193,7 @@ public class PrimeFacesSeleneseExecutor extends SeleneseExecutor<PrimeFacesAutom
 	 * @param list the list-navigation step to execute
 	 */
 	@Override
-	public void executeNavigateList(NavigateList list) {
+	public void executeNavigateList(@Nonnull NavigateList list) {
 		String moduleName = list.getModuleName();
 		String documentName = list.getDocumentName();
 		String queryName = list.getQueryName();
@@ -226,7 +228,7 @@ public class PrimeFacesSeleneseExecutor extends SeleneseExecutor<PrimeFacesAutom
 	 * @param edit the edit-navigation step to execute
 	 */
 	@Override
-	public void executeNavigateEdit(NavigateEdit edit) {
+	public void executeNavigateEdit(@Nonnull NavigateEdit edit) {
 		String moduleName = edit.getModuleName();
 		String documentName = edit.getDocumentName();
 		
@@ -255,7 +257,7 @@ public class PrimeFacesSeleneseExecutor extends SeleneseExecutor<PrimeFacesAutom
 	 * @param tree the tree-navigation step to resolve
 	 */
 	@Override
-	public void executeNavigateTree(NavigateTree tree) {
+	public void executeNavigateTree(@Nonnull NavigateTree tree) {
 		super.executeNavigateTree(tree); // determine driving document
 		// TODO Auto-generated method stub
 	}
@@ -269,7 +271,7 @@ public class PrimeFacesSeleneseExecutor extends SeleneseExecutor<PrimeFacesAutom
 	 * @param map the map-navigation step to resolve
 	 */
 	@Override
-	public void executeNavigateMap(NavigateMap map) {
+	public void executeNavigateMap(@Nonnull NavigateMap map) {
 		super.executeNavigateMap(map); // determine driving document
 		// TODO Auto-generated method stub
 	}
@@ -283,7 +285,7 @@ public class PrimeFacesSeleneseExecutor extends SeleneseExecutor<PrimeFacesAutom
 	 * @param calendar the calendar-navigation step to resolve
 	 */
 	@Override
-	public void executeNavigateCalendar(NavigateCalendar calendar) {
+	public void executeNavigateCalendar(@Nonnull NavigateCalendar calendar) {
 		super.executeNavigateCalendar(calendar); // determine driving document
 		// TODO Auto-generated method stub
 	}
@@ -297,7 +299,7 @@ public class PrimeFacesSeleneseExecutor extends SeleneseExecutor<PrimeFacesAutom
 	 * @param link the link-navigation step to resolve
 	 */
 	@Override
-	public void executeNavigateLink(NavigateLink link) {
+	public void executeNavigateLink(@Nonnull NavigateLink link) {
 		super.executeNavigateLink(link); // null driving document
 		// TODO Auto-generated method stub
 	}
@@ -308,7 +310,7 @@ public class PrimeFacesSeleneseExecutor extends SeleneseExecutor<PrimeFacesAutom
 	 * @param tabSelect the tab-selection step to execute
 	 */
 	@Override
-	public void executeTabSelect(TabSelect tabSelect) {
+	public void executeTabSelect(@Nonnull TabSelect tabSelect) {
 		PrimeFacesAutomationContext context = peek();
 		String identifier = tabSelect.getIdentifier(context);
 		List<UIComponent> components = context.getFacesComponents(identifier);
@@ -341,7 +343,7 @@ public class PrimeFacesSeleneseExecutor extends SeleneseExecutor<PrimeFacesAutom
 	 * @param testDataEnter the test-data-enter step describing fixture selection
 	 */
 	@Override
-	public void executeTestDataEnter(TestDataEnter testDataEnter) {
+	public void executeTestDataEnter(@Nonnull TestDataEnter testDataEnter) {
 		PrimeFacesAutomationContext context = peek();
 
 		User u = CORE.getUser();
@@ -386,7 +388,7 @@ public class PrimeFacesSeleneseExecutor extends SeleneseExecutor<PrimeFacesAutom
 	 */
 	@Override
 	@SuppressWarnings("java:S3776") // Complexity OK
-	public void executeDataEnter(DataEnter dataEnter) {
+	public void executeDataEnter(@Nonnull DataEnter dataEnter) {
 		PrimeFacesAutomationContext context = peek();
 		String identifier = dataEnter.getIdentifier(context);
 		List<UIComponent> components = context.getFacesComponents(identifier);
@@ -475,7 +477,7 @@ public class PrimeFacesSeleneseExecutor extends SeleneseExecutor<PrimeFacesAutom
 	 * @param confirm whether a confirmation dialog is expected
 	 * @param testSuccess optional success-assertion override
 	 */
-	private void button(Step button, String tagName, boolean ajax, boolean confirm, Boolean testSuccess) {
+	private void button(@Nonnull Step button, @Nonnull String tagName, boolean ajax, boolean confirm, @Nullable Boolean testSuccess) {
 		PrimeFacesAutomationContext context = peek();
 		String identifier = button.getIdentifier(context);
 		List<UIComponent> components = context.getFacesComponents(identifier);
@@ -523,7 +525,7 @@ public class PrimeFacesSeleneseExecutor extends SeleneseExecutor<PrimeFacesAutom
 	 * @param ok the OK action step to execute
 	 */
 	@Override
-	public void executeOk(Ok ok) {
+	public void executeOk(@Nonnull Ok ok) {
 		button(ok, "ok", false, false, ok.getTestSuccess());
 		pop();
 	}
@@ -534,7 +536,7 @@ public class PrimeFacesSeleneseExecutor extends SeleneseExecutor<PrimeFacesAutom
 	 * @param save the save action step to execute
 	 */
 	@Override
-	public void executeSave(Save save) {
+	public void executeSave(@Nonnull Save save) {
 		button(save, "save", true, false, save.getTestSuccess());
 		Boolean createView = save.getCreateView(); // NB could be null
 		if (Boolean.TRUE.equals(createView)) {
@@ -553,7 +555,7 @@ public class PrimeFacesSeleneseExecutor extends SeleneseExecutor<PrimeFacesAutom
 	 * @param cancel the cancel action step to execute
 	 */
 	@Override
-	public void executeCancel(Cancel cancel) {
+	public void executeCancel(@Nonnull Cancel cancel) {
 		button(cancel, "cancel", false, false, cancel.getTestSuccess());
 		pop();
 	}
@@ -564,7 +566,7 @@ public class PrimeFacesSeleneseExecutor extends SeleneseExecutor<PrimeFacesAutom
 	 * @param delete the delete action step to execute
 	 */
 	@Override
-	public void executeDelete(Delete delete) {
+	public void executeDelete(@Nonnull Delete delete) {
 		button(delete, "delete", false, true, delete.getTestSuccess());
 		pop();
 	}
@@ -575,7 +577,7 @@ public class PrimeFacesSeleneseExecutor extends SeleneseExecutor<PrimeFacesAutom
 	 * @param zoomOut the zoom-out action step to execute
 	 */
 	@Override
-	public void executeZoomOut(ZoomOut zoomOut) {
+	public void executeZoomOut(@Nonnull ZoomOut zoomOut) {
 		button(zoomOut, "zoom out", false, false, zoomOut.getTestSuccess());
 		pop();
 	}
@@ -586,7 +588,7 @@ public class PrimeFacesSeleneseExecutor extends SeleneseExecutor<PrimeFacesAutom
 	 * @param remove the remove action step to execute
 	 */
 	@Override
-	public void executeRemove(Remove remove) {
+	public void executeRemove(@Nonnull Remove remove) {
 		button(remove, "remove", false, true, remove.getTestSuccess());
 		pop();
 	}
@@ -597,7 +599,7 @@ public class PrimeFacesSeleneseExecutor extends SeleneseExecutor<PrimeFacesAutom
 	 * @param action the custom action step to execute
 	 */
 	@Override
-	public void executeAction(Action action) {
+	public void executeAction(@Nonnull Action action) {
 		button(action, 
 				action.getActionName(),
 				true,
@@ -611,7 +613,7 @@ public class PrimeFacesSeleneseExecutor extends SeleneseExecutor<PrimeFacesAutom
 	 * @param complete the lookup auto-complete step to execute
 	 */
 	@Override
-	public void executeLookupDescriptionAutoComplete(LookupDescriptionAutoComplete complete) {
+	public void executeLookupDescriptionAutoComplete(@Nonnull LookupDescriptionAutoComplete complete) {
 		lookupDescription(complete, complete.getBinding(), null, complete.getSearch());
 	}
 
@@ -621,7 +623,7 @@ public class PrimeFacesSeleneseExecutor extends SeleneseExecutor<PrimeFacesAutom
 	 * @param pick the lookup pick step to execute
 	 */
 	@Override
-	public void executeLookupDescriptionPick(LookupDescriptionPick pick) {
+	public void executeLookupDescriptionPick(@Nonnull LookupDescriptionPick pick) {
 		lookupDescription(pick, pick.getBinding(), pick.getRow(), null);
 	}
 
@@ -633,7 +635,7 @@ public class PrimeFacesSeleneseExecutor extends SeleneseExecutor<PrimeFacesAutom
 	 * @param row optional row index for pick-list selection
 	 * @param search optional search string for auto-complete selection
 	 */
-	private void lookupDescription(Step step, String binding, Integer row, String search) {
+	private void lookupDescription(@Nonnull Step step, @Nonnull String binding, @Nullable Integer row, @Nullable String search) {
 		PrimeFacesAutomationContext context = peek();
 		
 		List<UIComponent> lookupComponents = context.getFacesComponents(binding);
@@ -688,7 +690,7 @@ public class PrimeFacesSeleneseExecutor extends SeleneseExecutor<PrimeFacesAutom
 	 * @param nu the lookup-description-new step being ignored
 	 */
 	@Override
-	public void executeLookupDescriptionNew(LookupDescriptionNew nu) {
+	public void executeLookupDescriptionNew(@Nonnull LookupDescriptionNew nu) {
 		// Nothing to do here as PF doesn't allow new off of lookup descriptions
 	}
 
@@ -698,7 +700,7 @@ public class PrimeFacesSeleneseExecutor extends SeleneseExecutor<PrimeFacesAutom
 	 * @param edit the lookup-description-edit step being ignored
 	 */
 	@Override
-	public void executeLookupDescriptionEdit(LookupDescriptionEdit edit) {
+	public void executeLookupDescriptionEdit(@Nonnull LookupDescriptionEdit edit) {
 		// Nothing to do here as PF doesn't allow edit off of lookup descriptions
 	}
 
@@ -708,7 +710,7 @@ public class PrimeFacesSeleneseExecutor extends SeleneseExecutor<PrimeFacesAutom
 	 * @param zoom the zoom-in action step to execute
 	 */
 	@Override
-	public void executeZoomIn(ZoomIn zoom) {
+	public void executeZoomIn(@Nonnull ZoomIn zoom) {
 		button(zoom, "zoomIn", false, false, zoom.getTestSuccess());
 		
 		// Determine the Document of the edit view to push
@@ -738,7 +740,7 @@ public class PrimeFacesSeleneseExecutor extends SeleneseExecutor<PrimeFacesAutom
 	 * @param nu the data-grid-new step to execute
 	 */
 	@Override
-	public void executeDataGridNew(DataGridNew nu) {
+	public void executeDataGridNew(@Nonnull DataGridNew nu) {
 		dataGridGesture(nu, nu.getBinding(), null);
 	}
 	
@@ -748,7 +750,7 @@ public class PrimeFacesSeleneseExecutor extends SeleneseExecutor<PrimeFacesAutom
 	 * @param zoom the data-grid-zoom step to execute
 	 */
 	@Override
-	public void executeDataGridZoom(DataGridZoom zoom) {
+	public void executeDataGridZoom(@Nonnull DataGridZoom zoom) {
 		dataGridGesture(zoom, zoom.getBinding(), zoom.getRow());
 	}
 	
@@ -758,7 +760,7 @@ public class PrimeFacesSeleneseExecutor extends SeleneseExecutor<PrimeFacesAutom
 	 * @param remove the data-grid-remove step to execute
 	 */
 	@Override
-	public void executeDataGridRemove(DataGridRemove remove) {
+	public void executeDataGridRemove(@Nonnull DataGridRemove remove) {
 		dataGridGesture(remove, remove.getBinding(), remove.getRow());
 	}
 
@@ -768,7 +770,7 @@ public class PrimeFacesSeleneseExecutor extends SeleneseExecutor<PrimeFacesAutom
 	 * @param select the data-grid-select step to execute
 	 */
 	@Override
-	public void executeDataGridSelect(DataGridSelect select) {
+	public void executeDataGridSelect(@Nonnull DataGridSelect select) {
 		dataGridGesture(select, select.getBinding(), select.getRow());
 	}
 
@@ -778,7 +780,7 @@ public class PrimeFacesSeleneseExecutor extends SeleneseExecutor<PrimeFacesAutom
 	 * @param edit the data-grid-edit step being ignored
 	 */
 	@Override
-	public void executeDataGridEdit(DataGridEdit edit) {
+	public void executeDataGridEdit(@Nonnull DataGridEdit edit) {
 		// cannot edit a grid row in PF
 	}
 
@@ -790,7 +792,7 @@ public class PrimeFacesSeleneseExecutor extends SeleneseExecutor<PrimeFacesAutom
 	 * @param row optional row index for row-scoped interactions
 	 */
 	@SuppressWarnings("java:S3776") // Complexity OK
-	private void dataGridGesture(Step step, String binding, Integer row) {
+	private void dataGridGesture(@Nonnull Step step, @Nonnull String binding, @Nullable Integer row) {
 		PrimeFacesAutomationContext context = peek();
 		String buttonIdentifier = step.getIdentifier(context);
 		
@@ -882,7 +884,7 @@ public class PrimeFacesSeleneseExecutor extends SeleneseExecutor<PrimeFacesAutom
 	 * @param nu the list-grid-new step to execute
 	 */
 	@Override
-	public void executeListGridNew(ListGridNew nu) {
+	public void executeListGridNew(@Nonnull ListGridNew nu) {
 		listGridGesture(nu, null);
 		
 		PushEditContext push = listGridContext(nu.getQueryName(), nu.getDocumentName(), nu.getModelName(), nu);
@@ -896,7 +898,7 @@ public class PrimeFacesSeleneseExecutor extends SeleneseExecutor<PrimeFacesAutom
 	 * @param zoom the list-grid-zoom step to execute
 	 */
 	@Override
-	public void executeListGridZoom(ListGridZoom zoom) {
+	public void executeListGridZoom(@Nonnull ListGridZoom zoom) {
 		listGridGesture(zoom, zoom.getRow());
 		
 		PushEditContext push = listGridContext(zoom.getQueryName(), zoom.getDocumentName(), zoom.getModelName(), zoom);
@@ -909,7 +911,7 @@ public class PrimeFacesSeleneseExecutor extends SeleneseExecutor<PrimeFacesAutom
 	 * @param select the list-grid-select step to execute
 	 */
 	@Override
-	public void executeListGridSelect(ListGridSelect select) {
+	public void executeListGridSelect(@Nonnull ListGridSelect select) {
 		listGridGesture(select, select.getRow());
 	}
 
@@ -920,7 +922,7 @@ public class PrimeFacesSeleneseExecutor extends SeleneseExecutor<PrimeFacesAutom
 	 * @param row optional row index for row-scoped interactions
 	 */
 	@SuppressWarnings("java:S3776") // Complexity OK
-	private void listGridGesture(Step step, Integer row) {
+	private void listGridGesture(@Nonnull Step step, @Nullable Integer row) {
 		PrimeFacesAutomationContext context = peek();
 		String buttonIdentifier = step.getIdentifier(context);
 		String listGridIdentifier = buttonIdentifier.substring(0, buttonIdentifier.lastIndexOf('.'));
@@ -990,7 +992,7 @@ public class PrimeFacesSeleneseExecutor extends SeleneseExecutor<PrimeFacesAutom
 	 * @return a populated push-edit context for the target document
 	 */
 	@SuppressWarnings("java:S3776") // complexity OK
-	private PushEditContext listGridContext(String queryName, String documentName, String modelName, Step step) {
+	private @Nonnull PushEditContext listGridContext(@Nullable String queryName, @Nullable String documentName, @Nullable String modelName, @Nonnull Step step) {
 		PushEditContext result = new PushEditContext();
 
 		PrimeFacesAutomationContext context = peek();
@@ -1045,7 +1047,7 @@ public class PrimeFacesSeleneseExecutor extends SeleneseExecutor<PrimeFacesAutom
 	 * @param test the value-assertion step being ignored until implemented
 	 */
 	@Override
-	public void executeTestValue(TestValue test) {
+	public void executeTestValue(@Nonnull TestValue test) {
 		// TODO Auto-generated method stub
 		
 	}
@@ -1056,7 +1058,7 @@ public class PrimeFacesSeleneseExecutor extends SeleneseExecutor<PrimeFacesAutom
 	 * @param test the success-assertion step to execute
 	 */
 	@Override
-	public void executeTestSuccess(TestSuccess test) {
+	public void executeTestSuccess(@Nonnull TestSuccess test) {
 		TestStrategy strategy = getTestStrategy();
 		if (TestStrategy.Verify.equals(strategy)) {
 			comment("Test Success");
@@ -1079,7 +1081,7 @@ public class PrimeFacesSeleneseExecutor extends SeleneseExecutor<PrimeFacesAutom
 	 * @param test the failure-assertion step to execute
 	 */
 	@Override
-	public void executeTestFailure(TestFailure test) {
+	public void executeTestFailure(@Nonnull TestFailure test) {
 		TestStrategy strategy = getTestStrategy();
 		if (! TestStrategy.None.equals(strategy)) {
 			String message = test.getMessage();

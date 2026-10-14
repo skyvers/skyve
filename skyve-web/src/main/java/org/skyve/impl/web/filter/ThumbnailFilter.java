@@ -13,6 +13,8 @@ import org.skyve.util.Thumbnail;
 import org.slf4j.Logger;
 import org.skyve.util.logging.SkyveLoggerFactory;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.servlet.Filter;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.FilterConfig;
@@ -82,7 +84,7 @@ public class ThumbnailFilter implements Filter {
 	 * @throws ServletException if {@code nonImageResponse} is set to an unrecognised value
 	 */
 	@Override
-	public void init(FilterConfig config) throws ServletException {
+	public void init(@Nonnull FilterConfig config) throws ServletException {
 		String wp = UtilImpl.processStringValue(config.getInitParameter("widthParam"));
 		widthParam = (wp != null) ? wp : DynamicImageServlet.IMAGE_WIDTH_NAME;
 
@@ -124,7 +126,7 @@ public class ThumbnailFilter implements Filter {
 	 */
 	@Override
 	@SuppressWarnings("java:S3776") // Complexity OK
-	public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
+	public void doFilter(@Nonnull ServletRequest request, @Nonnull ServletResponse response, @Nonnull FilterChain chain)
 	throws IOException, ServletException {
 		// Parse width and height; if absent or invalid pass straight through
 		int width = 0;
@@ -220,7 +222,7 @@ public class ThumbnailFilter implements Filter {
 	 * @throws IOException if an I/O error occurs writing the response
 	 */
 	@SuppressWarnings("resource")
-	private static void writeThrough(ServletResponse response, byte[] bytes, String contentType)
+	private static void writeThrough(@Nonnull ServletResponse response, @Nonnull byte[] bytes, @Nullable String contentType)
 	throws IOException {
 		if (contentType != null) {
 			response.setContentType(contentType);
@@ -242,17 +244,17 @@ public class ThumbnailFilter implements Filter {
 		private PrintWriter capturingWriter;
 		private String capturedContentType;
 
-		CapturingResponseWrapper(HttpServletResponse response) {
+		CapturingResponseWrapper(@Nonnull HttpServletResponse response) {
 			super(response);
 		}
 
 		@Override
-		public ServletOutputStream getOutputStream() {
+		public @Nonnull ServletOutputStream getOutputStream() {
 			return capturingStream;
 		}
 
 		@Override
-		public PrintWriter getWriter() throws IOException {
+		public @Nonnull PrintWriter getWriter() throws IOException {
 			if (capturingWriter == null) {
 				String encoding = getCharacterEncoding();
 				capturingWriter = (encoding != null)
@@ -263,13 +265,13 @@ public class ThumbnailFilter implements Filter {
 		}
 
 		@Override
-		public void setContentType(String type) {
+		public void setContentType(@Nullable String type) {
 			capturedContentType = type;
 			super.setContentType(type);
 		}
 
 		@Override
-		public void setHeader(String name, String value) {
+		public void setHeader(@Nonnull String name, @Nullable String value) {
 			if ("Content-Type".equalsIgnoreCase(name)) {
 				capturedContentType = value;
 			}
@@ -277,7 +279,7 @@ public class ThumbnailFilter implements Filter {
 		}
 
 		@Override
-		public void addHeader(String name, String value) {
+		public void addHeader(@Nonnull String name, @Nonnull String value) {
 			if ("Content-Type".equalsIgnoreCase(name)) {
 				capturedContentType = value;
 			}
@@ -293,12 +295,12 @@ public class ThumbnailFilter implements Filter {
 		}
 
 		/** @return the full response body written to this wrapper */
-		byte[] toByteArray() {
+		@Nonnull byte[] toByteArray() {
 			return buffer.toByteArray();
 		}
 
 		/** @return the {@code Content-Type} intercepted from the downstream response, or {@code null} if none was set */
-		String getCapturedContentType() {
+		@Nullable String getCapturedContentType() {
 			return capturedContentType;
 		}
 	}
@@ -314,7 +316,7 @@ public class ThumbnailFilter implements Filter {
 		/**
 		 * @param buffer the buffer to which all writes will be directed
 		 */
-		CapturingOutputStream(ByteArrayOutputStream buffer) {
+		CapturingOutputStream(@Nonnull ByteArrayOutputStream buffer) {
 			this.buffer = buffer;
 		}
 
@@ -324,7 +326,7 @@ public class ThumbnailFilter implements Filter {
 		}
 
 		@Override
-		public void write(byte[] b, int off, int len) {
+		public void write(@Nonnull byte[] b, int off, int len) {
 			buffer.write(b, off, len);
 		}
 
@@ -334,7 +336,7 @@ public class ThumbnailFilter implements Filter {
 		}
 
 		@Override
-		public void setWriteListener(WriteListener writeListener) {
+		public void setWriteListener(@Nonnull WriteListener writeListener) {
 			// not needed for synchronous capture
 		}
 	}

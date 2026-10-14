@@ -19,6 +19,9 @@ import org.skyve.util.BeanValidator;
 import org.skyve.util.OWASP;
 import org.skyve.util.Util;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * SmartClient data-grid field definition.
  */
@@ -48,17 +51,17 @@ public class SmartClientDataGridFieldDefinition extends SmartClientAttributeDefi
 	 * @param uxui active UX/UI
 	 */
 	@SuppressWarnings({"java:S107", "java:S3776"}) // Binding and model ownership are distinct in nested grids.
-	protected SmartClientDataGridFieldDefinition(User user,
-													Customer customer,
-													Module module,
-													Document document,
-													Document owningDocument,
-													InputWidget widget,
-													String dataGridBindingOverride,
+	protected SmartClientDataGridFieldDefinition(@Nullable User user,
+													@Nonnull Customer customer,
+													@Nonnull Module module,
+													@Nonnull Document document,
+													@Nonnull Document owningDocument,
+													@Nonnull InputWidget widget,
+													@Nullable String dataGridBindingOverride,
 													boolean hasFormatter,
 													boolean runtime,
 													boolean isField,
-													String uxui) {
+													@Nonnull String uxui) {
 		super(user,
 				customer,
 				module,
@@ -160,7 +163,7 @@ public class SmartClientDataGridFieldDefinition extends SmartClientAttributeDefi
 	 *
 	 * @return SmartClient JavaScript field definition payload
 	 */
-	public String toJavascript() {
+	public @Nonnull String toJavascript() {
 		StringBuilder result = new StringBuilder(128);
 
 		result.append("name:'");
@@ -213,7 +216,7 @@ public class SmartClientDataGridFieldDefinition extends SmartClientAttributeDefi
 		return result.toString();
 	}
 	
-	private String createContentUploadFormatter(ContentUpload content) {
+	private @Nonnull String createContentUploadFormatter(@Nonnull ContentUpload content) {
 		StringBuilder result = new StringBuilder(512);
 		ContentDisplay display = content.getResolvedDisplay();
 		Integer imageWidth = content.getPixelWidth();
@@ -253,7 +256,7 @@ public class SmartClientDataGridFieldDefinition extends SmartClientAttributeDefi
 		return result.toString();
 	}
 
-	private static void appendMediaStyle(StringBuilder result, Integer width, Integer height, String aspectRatio) {
+	private static void appendMediaStyle(@Nonnull StringBuilder result, @Nullable Integer width, @Nullable Integer height, @Nonnull String aspectRatio) {
 		if (width == null) {
 			result.append("width:100%;");
 		}
@@ -268,7 +271,7 @@ public class SmartClientDataGridFieldDefinition extends SmartClientAttributeDefi
 		}
 	}
 
-	private static String contentEmptyText(ContentDisplay display) {
+	private static @Nonnull String contentEmptyText(@Nonnull ContentDisplay display) {
 		if (ContentDisplay.image.equals(display)) {
 			return "No image";
 		}
@@ -281,7 +284,7 @@ public class SmartClientDataGridFieldDefinition extends SmartClientAttributeDefi
 		return "No content";
 	}
 
-	private static boolean isContentMarkupAllowed(ContentUpload content, ContentDisplay display) {
+	private static boolean isContentMarkupAllowed(@Nonnull ContentUpload content, @Nonnull ContentDisplay display) {
 		if (Boolean.FALSE.equals(content.getShowMarkup())) {
 			return false;
 		}

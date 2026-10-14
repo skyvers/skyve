@@ -48,6 +48,8 @@ import org.skyve.util.Util;
 import org.supercsv.io.CsvMapReader;
 import org.supercsv.prefs.CsvPreference;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * Restores a Skyve application from a backup ZIP, re-creating table data and
  * binary content according to the {@link RestoreOptions} provided.
@@ -77,7 +79,7 @@ public class RestoreJob extends CancellableJob {
 	 * data restore, indexing, and cleanup.
 	 */
 	@SuppressWarnings("java:S3776") // Complexity OK
-	private void restore(RestoreOptions options) throws Exception {
+	private void restore(@Nonnull RestoreOptions options) throws Exception {
 		CustomerImpl customer = (CustomerImpl) CORE.getCustomer();
 		String customerName = customer.getName();
 
@@ -272,10 +274,10 @@ public class RestoreJob extends CancellableJob {
 	 * @param contentRestoreOption How to handle missing content on restore.
 	 * @param indexingOption Which content/text indexes to rebuild.
 	 */
-	private void restore(File backupDirectory,
+	private void restore(@Nonnull File backupDirectory,
 							boolean createUsingBackup,
-							ContentOption contentRestoreOption,
-							IndexingOption indexingOption)
+							@Nonnull ContentOption contentRestoreOption,
+							@Nonnull IndexingOption indexingOption)
 	throws Exception {
 		Collection<Table> tables = createUsingBackup ?
 									BackupUtil.readTables(new File(backupDirectory, "tables.txt")) :
@@ -309,13 +311,13 @@ public class RestoreJob extends CancellableJob {
 	 * and content attachments according to restore options.
 	 */
 	@SuppressWarnings({"java:S3776", "java:S6541"}) // complexity OK
-	private void restoreData(File backupDirectory,
-								Collection<Table> tables,
-								Connection connection,
+	private void restoreData(@Nonnull File backupDirectory,
+								@Nonnull Collection<Table> tables,
+								@Nonnull Connection connection,
 								boolean joinTables,
 								boolean extensionTables,
-								ContentOption contentRestoreOption,
-								IndexingOption indexingOption)
+								@Nonnull ContentOption contentRestoreOption,
+								@Nonnull IndexingOption indexingOption)
 			throws Exception {
 		try (ContentManager cm = EXT.newContentManager()) {
 			for (Table table : tables) {
@@ -558,9 +560,9 @@ public class RestoreJob extends CancellableJob {
 	 * Restores foreign keys for non-join tables after base data is loaded.
 	 */
 	@SuppressWarnings("java:S3776") // Complexity OK
-	private void restoreForeignKeys(File backupDirectory,
-										Collection<Table> tables,
-										Connection connection)
+	private void restoreForeignKeys(@Nonnull File backupDirectory,
+										@Nonnull Collection<Table> tables,
+										@Nonnull Connection connection)
 			throws Exception {
 		Collection<String> log = getLog();
 		String trace;

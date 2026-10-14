@@ -83,6 +83,8 @@ import org.skyve.web.SortParameter;
 import org.slf4j.Logger;
 import org.skyve.util.logging.SkyveLoggerFactory;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
@@ -120,7 +122,7 @@ public class SmartClientListServlet extends HttpServlet {
 	 */
 	@Override
 	@SuppressWarnings("java:S1989") // there exists JavaEE error pages
-	protected void doGet(HttpServletRequest request, HttpServletResponse response)
+	protected void doGet(@Nonnull HttpServletRequest request, @Nonnull HttpServletResponse response)
 	throws ServletException, IOException {
 		LOGGER.info("SmartClientList - get....");
 		processRequest(request, response);
@@ -136,14 +138,14 @@ public class SmartClientListServlet extends HttpServlet {
 	 */
 	@Override
 	@SuppressWarnings("java:S1989") // there exists JavaEE error pages
-	protected void doPost(HttpServletRequest request, HttpServletResponse response)
+	protected void doPost(@Nonnull HttpServletRequest request, @Nonnull HttpServletResponse response)
 	throws ServletException, IOException {
 		LOGGER.info("SmartClientList - post....");
 		processRequest(request, response);
 	}
 
 	@SuppressWarnings({"java:S3776", "java:S6541"}) // complexity OK
-	private static void processRequest(HttpServletRequest request, HttpServletResponse response)
+	private static void processRequest(@Nonnull HttpServletRequest request, @Nonnull HttpServletResponse response)
 	throws IOException {
 		response.setContentType(MimeType.json.toString());
 		response.setCharacterEncoding(StandardCharsets.UTF_8.name());
@@ -466,20 +468,20 @@ public class SmartClientListServlet extends HttpServlet {
 	}
 
 	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
-	private static void fetch(Module module,
-								Document queryDocument,
+	private static void fetch(@Nonnull Module module,
+								@Nonnull Document queryDocument,
 								int startRow,
 								int endRow,
-								SmartClientFilterOperator operator,
-								String[] criteria,
-								SortParameter[] sortParameters,
-								AggregateFunction summaryType,
+								@Nullable SmartClientFilterOperator operator,
+								@Nullable String[] criteria,
+								@Nullable SortParameter[] sortParameters,
+								@Nullable AggregateFunction summaryType,
 								boolean includeExtraSummaryRow,
-								String tagId,
-								SortedMap<String, Object> parameters,
-								AbstractPersistence persistence,
-								PrintWriter pw,
-								ListModel<Bean> model)
+								@Nullable String tagId,
+								@Nonnull SortedMap<String, Object> parameters,
+								@Nonnull AbstractPersistence persistence,
+								@Nonnull PrintWriter pw,
+								@Nonnull ListModel<Bean> model)
 	throws Exception {
 		StringBuilder message = new StringBuilder(256);
 
@@ -526,14 +528,14 @@ public class SmartClientListServlet extends HttpServlet {
 	}
 
 	@SuppressWarnings({"java:S107", "java:S3776"}) // Long parameter list preserves the existing framework/API contract; complexity OK.
-	private static void addFilterCriteriaToQuery(Module module,
-													Document document,
-													User user,
-													SmartClientFilterOperator filterOperator,
-													String[] criteria,
-													SortedMap<String, Object> parameters,
-													String tagId,
-													ListModel<Bean> model)
+	private static void addFilterCriteriaToQuery(@Nonnull Module module,
+													@Nonnull Document document,
+													@Nonnull User user,
+													@Nullable SmartClientFilterOperator filterOperator,
+													@Nullable String[] criteria,
+													@Nonnull SortedMap<String, Object> parameters,
+													@Nullable String tagId,
+													@Nonnull ListModel<Bean> model)
 	throws Exception {
 		SortedMap<String, Object> mutableParameters = new TreeMap<>(parameters);
 		CompoundFilterOperator compoundFilterOperator = CompoundFilterOperator.and;
@@ -587,12 +589,12 @@ public class SmartClientListServlet extends HttpServlet {
 	// Add display values and sanitise
 	// Returns the projections required from JSON.marshall()
 	@SuppressWarnings("java:S3776") // Complexity OK
-	private static Set<String> processRows(List<Bean> beans,
-											ListModel<Bean> model,
-											User user,
-											Customer customer,
-											Module module,
-											Document document) {
+	private static @Nonnull Set<String> processRows(@Nonnull List<Bean> beans,
+											@Nonnull ListModel<Bean> model,
+											@Nonnull User user,
+											@Nonnull Customer customer,
+											@Nonnull Module module,
+											@Nonnull Document document) {
 		// Determine if any display bindings are required for dynamic or variant domain attributes
 		// or for formats defined on the columns.
 		// Map of binding to synthesized display binding for SC.
@@ -719,10 +721,10 @@ public class SmartClientListServlet extends HttpServlet {
 	}
 
 	@SuppressWarnings("unused")
-	static void checkCsrfToken(HttpSession session,
-								HttpServletRequest request,
-								HttpServletResponse response,
-								Integer currentCsrfToken) {
+	static void checkCsrfToken(@Nonnull HttpSession session,
+								@Nonnull HttpServletRequest request,
+								@Nonnull HttpServletResponse response,
+								@Nullable Integer currentCsrfToken) {
 /* TODO Commented out until I can work out the async problems in SC
 		if (! StateUtil.checkToken(session, currentCsrfToken)) {
 			WebUtil.logout(request, response);
@@ -747,13 +749,13 @@ public class SmartClientListServlet extends HttpServlet {
 	 * @throws Exception if metadata resolution or value conversion fails
 	 */
 	@SuppressWarnings("java:S3776") // Complexity OK
-	public static void addSimpleFilterCriteriaToQuery(Module module,
-														Document document,
-														Customer customer,
-														SmartClientFilterOperator filterOperator,
-														Map<String, Object> criteria,
-														String tagId,
-														ListModel<Bean> model)
+	public static void addSimpleFilterCriteriaToQuery(@Nonnull Module module,
+														@Nonnull Document document,
+														@Nonnull Customer customer,
+														@Nullable SmartClientFilterOperator filterOperator,
+														@Nonnull Map<String, Object> criteria,
+														@Nullable String tagId,
+														@Nonnull ListModel<Bean> model)
 	throws Exception {
 		Filter filter = model.getFilter();
 
@@ -899,13 +901,13 @@ public class SmartClientListServlet extends HttpServlet {
 	 * @param model list model receiving the filter criteria
 	 * @throws Exception if metadata resolution or value conversion fails
 	 */
-	public static void addAdvancedFilterCriteriaToQuery(Module module,
-															Document document,
-															User user,
-															CompoundFilterOperator compoundFilterOperator,
-															List<Map<String, Object>> criteria,
-															String tagId,
-															ListModel<?> model)
+	public static void addAdvancedFilterCriteriaToQuery(@Nonnull Module module,
+															@Nonnull Document document,
+															@Nonnull User user,
+															@Nonnull CompoundFilterOperator compoundFilterOperator,
+															@Nullable List<Map<String, Object>> criteria,
+															@Nullable String tagId,
+															@Nonnull ListModel<?> model)
 	throws Exception {
 		// We have to unconditionally add a new filter here as the metadata query might have a filter stanza
 		// in it which we can't detect and we need to ensure any filtering done here is 
@@ -921,14 +923,14 @@ public class SmartClientListServlet extends HttpServlet {
 	private static final String HIERARCHICAL_PARENT_ID_SUFFIX = "." + HierarchicalBean.PARENT_ID;
 
 	@SuppressWarnings({"java:S107", "java:S3776", "java:S6541"}) // Long parameter list preserves the existing framework/API contract; complexity OK
-	private static void addAdvancedFilterCriteriaToQueryInternal(Module module,
-																	Document document,
-																	User user,
-																	CompoundFilterOperator compoundFilterOperator,
-																	List<Map<String, Object>> criteria,
-																	String tagId,
-																	ListModel<?> model,
-																	Filter filter)
+	private static void addAdvancedFilterCriteriaToQueryInternal(@Nonnull Module module,
+																	@Nonnull Document document,
+																	@Nonnull User user,
+																	@Nonnull CompoundFilterOperator compoundFilterOperator,
+																	@Nullable List<Map<String, Object>> criteria,
+																	@Nullable String tagId,
+																	@Nonnull ListModel<?> model,
+																	@Nonnull Filter filter)
 	throws Exception {
 		if (criteria == null) {
 			return;
@@ -1317,12 +1319,12 @@ public class SmartClientListServlet extends HttpServlet {
 		}
 	}
 
-	private static Object fromString(String valueBinding,
-										String valueDescription,
-										String valueString,
-										Customer customer,
-										Converter<?> converter,
-										Class<?> type) {
+	private static @Nullable Object fromString(@Nullable String valueBinding,
+										@Nonnull String valueDescription,
+										@Nullable String valueString,
+										@Nonnull Customer customer,
+										@Nullable Converter<?> converter,
+										@Nonnull Class<?> type) {
 		Object result = null;
 
 		if (valueString != null) {
@@ -1357,7 +1359,7 @@ public class SmartClientListServlet extends HttpServlet {
 		return result;
 	}
 
-	private static SmartClientFilterOperator transformWildcardFilterOperator(SmartClientFilterOperator filterOperator) {
+	private static @Nonnull SmartClientFilterOperator transformWildcardFilterOperator(@Nonnull SmartClientFilterOperator filterOperator) {
 		if (SmartClientFilterOperator.iContains.equals(filterOperator) ||
 				SmartClientFilterOperator.iEndsWith.equals(filterOperator) ||
 				SmartClientFilterOperator.iEquals.equals(filterOperator) ||
@@ -1380,13 +1382,13 @@ public class SmartClientListServlet extends HttpServlet {
 	}
 
 	@SuppressWarnings({"java:S3776", "java:S6541"}) // complexity OK
-	private static void addCriterionToFilter(String binding,
-												SmartClientFilterOperator filterOperator,
-												Object value,
-												Object start,
-												Object end,
-												String tagId,
-												Filter filter) {
+	private static void addCriterionToFilter(@Nonnull String binding,
+												@Nullable SmartClientFilterOperator filterOperator,
+												@Nullable Object value,
+												@Nullable Object start,
+												@Nullable Object end,
+												@Nullable String tagId,
+												@Nonnull Filter filter) {
 		if (PersistentBean.TAGGED_NAME.equals(binding)) {
 			if ("true".equals(value)) {
 				filter.addTagged(tagId, true);
@@ -1639,12 +1641,12 @@ public class SmartClientListServlet extends HttpServlet {
 	}
 */
     
-	private static void update(Module module,
-								ListModel<Bean> model,
+	private static void update(@Nonnull Module module,
+								@Nonnull ListModel<Bean> model,
 								boolean rowIsTagged,
-								SortedMap<String, Object> properties,
-								AbstractPersistence persistence,
-								PrintWriter pw)
+								@Nonnull SortedMap<String, Object> properties,
+								@Nonnull AbstractPersistence persistence,
+								@Nonnull PrintWriter pw)
 	throws Exception {
 		User user = persistence.getUser();
 		Customer customer = user.getCustomer();
@@ -1695,13 +1697,13 @@ public class SmartClientListServlet extends HttpServlet {
 		Util.chunkCharsToWriter(returnUpdatedMessage(user, customer, module, document, model, bean, rowIsTagged), pw);
 	}
 
-	private static void tag(User user,
-								Customer customer,
-								Module module,
-								ListModel<Bean> model,
-								String tagId,
-								Map<String, Object> parameters,
-								PrintWriter pw)
+	private static void tag(@Nonnull User user,
+								@Nonnull Customer customer,
+								@Nonnull Module module,
+								@Nonnull ListModel<Bean> model,
+								@Nonnull String tagId,
+								@Nonnull Map<String, Object> parameters,
+								@Nonnull PrintWriter pw)
 	throws Exception {
 		String bizId = (String) parameters.get(Bean.DOCUMENT_ID);
 		EXT.getTagManager().tag(tagId, module.getName(), model.getDrivingDocument().getName(), bizId);
@@ -1710,13 +1712,13 @@ public class SmartClientListServlet extends HttpServlet {
 		Util.chunkCharsToWriter(returnTagUpdateMessage(user, customer, parameters, module, model, true), pw);
 	}
 
-	private static void untag(User user,
-								Customer customer,
-								Module module,
-								ListModel<Bean> model,
-								String tagId,
-								Map<String, Object> parameters,
-								PrintWriter pw)
+	private static void untag(@Nonnull User user,
+								@Nonnull Customer customer,
+								@Nonnull Module module,
+								@Nonnull ListModel<Bean> model,
+								@Nonnull String tagId,
+								@Nonnull Map<String, Object> parameters,
+								@Nonnull PrintWriter pw)
 	throws Exception {
 		String bizId = (String) parameters.get(Bean.DOCUMENT_ID);
 		EXT.getTagManager().untag(tagId, module.getName(), model.getDrivingDocument().getName(), bizId);
@@ -1726,16 +1728,16 @@ public class SmartClientListServlet extends HttpServlet {
 	}
 
 	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
-	private static void flag(HttpServletRequest request,
-								PrintWriter pw,
-								AbstractPersistence persistence,
-								User user,
-								Customer customer,
-								Module module,
-								Document drivingDocument,
-								ListModel<Bean> model,
-								SortedMap<String, Object> parameters,
-								String bizFlagComment)
+	private static void flag(@Nonnull HttpServletRequest request,
+								@Nonnull PrintWriter pw,
+								@Nonnull AbstractPersistence persistence,
+								@Nonnull User user,
+								@Nonnull Customer customer,
+								@Nonnull Module module,
+								@Nonnull Document drivingDocument,
+								@Nonnull ListModel<Bean> model,
+								@Nonnull SortedMap<String, Object> parameters,
+								@Nullable String bizFlagComment)
 	throws Exception {
 		String bizId = (String) parameters.get(Bean.DOCUMENT_ID);
 		Bean bean = persistence.retrieve(drivingDocument, bizId);
@@ -1748,12 +1750,12 @@ public class SmartClientListServlet extends HttpServlet {
 		Util.chunkCharsToWriter(returnUpdatedMessage(user, customer, module, drivingDocument, model, bean, isRowTagged(request)), pw);
 	}
 
-	private static StringBuilder returnUpdatedMessage(User user,
-														Customer customer,
-														Module module,
-														Document document,
-														ListModel<Bean> model, 
-														Bean bean,
+	private static @Nonnull StringBuilder returnUpdatedMessage(@Nonnull User user,
+														@Nonnull Customer customer,
+														@Nonnull Module module,
+														@Nonnull Document document,
+														@Nonnull ListModel<Bean> model, 
+														@Nonnull Bean bean,
 														boolean rowIstagged) {
 		StringBuilder message = new StringBuilder(256);
 		message.append("{\"response\":{\"status\":0,\"data\":");
@@ -1777,11 +1779,11 @@ public class SmartClientListServlet extends HttpServlet {
 		return message;
 	}
 
-	private static StringBuilder returnTagUpdateMessage(User user,
-															Customer customer,
-															Map<String, Object> parameters,
-															Module module,
-															ListModel<Bean> model,
+	private static @Nonnull StringBuilder returnTagUpdateMessage(@Nonnull User user,
+															@Nonnull Customer customer,
+															@Nonnull Map<String, Object> parameters,
+															@Nonnull Module module,
+															@Nonnull ListModel<Bean> model,
 															boolean tagging) {
 		StringBuilder message = new StringBuilder(256);
 		message.append("{\"response\":{\"status\":0,\"data\":[");
@@ -1813,15 +1815,15 @@ public class SmartClientListServlet extends HttpServlet {
 		return message;
 	}
 
-	private static void remove(ListModel<Bean> model,
-								Map<String, Object> parameters, 
-								PrintWriter pw)
+	private static void remove(@Nonnull ListModel<Bean> model,
+								@Nonnull Map<String, Object> parameters, 
+								@Nonnull PrintWriter pw)
 	throws Exception {
 		model.remove((String) parameters.get(Bean.DOCUMENT_ID));
 		pw.append("{\"response\":{\"status\":0}}");
 	}
 
-	private static void upsertFlag(Document drivingDocument, Bean bean, String flag) {
+	private static void upsertFlag(@Nonnull Document drivingDocument, @Nonnull Bean bean, @Nullable String flag) {
 		StringBuilder sql = new StringBuilder(64);
 		@SuppressWarnings("null")
 		String persistentIdentifier = drivingDocument.getPersistent().getPersistentIdentifier();
@@ -1833,7 +1835,7 @@ public class SmartClientListServlet extends HttpServlet {
 				.putParameter(Bean.DOCUMENT_ID, bean.getBizId(), false).execute();
 	}
 
-	private static boolean isRowTagged(HttpServletRequest request) {
+	private static boolean isRowTagged(@Nonnull HttpServletRequest request) {
 		boolean rowIsTagged = false;
 		String oldValuesJSON = request.getParameter(OLD_VALUES);
 		if (oldValuesJSON != null) {

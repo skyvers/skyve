@@ -16,6 +16,9 @@ import org.skyve.util.logging.SkyveLoggerFactory;
 
 import net.coobird.thumbnailator.Thumbnails;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * A class used to generate a dynamic image of a content image.
  */
@@ -26,7 +29,7 @@ public class ContentImageForReport {
 		// do nothing
 	}
 	
-	private static BufferedImage smallBlankImage() {
+	private static @Nonnull BufferedImage smallBlankImage() {
 		return new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB);
 	}
 
@@ -42,7 +45,7 @@ public class ContentImageForReport {
 	 * @return A scaled image suitable for Jasper image fields.
 	 * @throws Exception If the attachment stream cannot be read.
 	 */
-	public static BufferedImage image(String contentId, int imageWidth, int imageHeight) throws Exception {
+	public static @Nonnull BufferedImage image(@Nullable String contentId, int imageWidth, int imageHeight) throws Exception {
 		if (StringUtils.isBlank(contentId)) {
 			LOGGER.error("Attempted to generate image from null content id, returning blank image.");
 			return smallBlankImage();
@@ -74,7 +77,7 @@ public class ContentImageForReport {
 	 * @return The scaled customer logo image.
 	 * @throws IOException If the logo resource cannot be read.
 	 */
-	public static BufferedImage customerLogo(int imageWidth, int imageHeight) throws IOException {
+	public static @Nonnull BufferedImage customerLogo(int imageWidth, int imageHeight) throws IOException {
 		final Customer customer = CORE.getCustomer();
 		final File logo = CORE.getRepository().findResourceFile(customer.getUiResources().getLogoRelativeFileName(),
 																	customer.getName(),

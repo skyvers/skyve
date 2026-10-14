@@ -89,7 +89,7 @@ public class WebUtil {
 	 * @return resolved user, or {@code null} when no authenticated user is available
 	 */
 	@SuppressWarnings({"java:S3776", "java:S1871"}) // complexity OK
-	public static User processUserPrincipalForRequest(@Nonnull HttpServletRequest request,
+	public static @Nullable User processUserPrincipalForRequest(@Nonnull HttpServletRequest request,
 														@Nullable String userPrincipal) {
 		HttpSession session = request.getSession(false);
 		UserImpl user = null;

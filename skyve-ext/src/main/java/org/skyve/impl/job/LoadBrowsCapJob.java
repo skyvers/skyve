@@ -5,6 +5,8 @@ import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.skyve.impl.web.UserAgent;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * This job loads the BrowsCap csv.
  * Skyve Request processing can't start until this is loaded. 
@@ -14,7 +16,7 @@ import org.skyve.impl.web.UserAgent;
  */
 public class LoadBrowsCapJob implements Job {
 	@Override
-	public void execute(JobExecutionContext context)
+	public void execute(@Nonnull JobExecutionContext context)
 	throws JobExecutionException {
 		UserAgent.init();
 	}

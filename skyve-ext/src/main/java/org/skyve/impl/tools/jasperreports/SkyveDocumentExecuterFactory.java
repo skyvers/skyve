@@ -20,6 +20,9 @@ import net.sf.jasperreports.engine.JasperReportsContext;
 import net.sf.jasperreports.engine.query.JRQueryExecuter;
 import net.sf.jasperreports.engine.query.QueryExecuterFactory;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Factory that creates Jasper query executers for Skyve document query language.
  */
@@ -34,7 +37,7 @@ public class SkyveDocumentExecuterFactory implements QueryExecuterFactory {
 	 * @throws JRException If executer creation fails.
 	 */
 	@Override
-	public JRQueryExecuter createQueryExecuter(JasperReportsContext jasperReportsContext, JRDataset dataset, Map<String, ? extends JRValueParameter> parameters)
+	public @Nullable JRQueryExecuter createQueryExecuter(@Nullable JasperReportsContext jasperReportsContext, @Nullable JRDataset dataset, @Nullable Map<String, ? extends JRValueParameter> parameters)
 	throws JRException {
 		if (dataset != null) {
 			JRQuery query = dataset.getQuery();
@@ -52,7 +55,7 @@ public class SkyveDocumentExecuterFactory implements QueryExecuterFactory {
 	 * @return An empty array, as no additional built-in parameters are defined.
 	 */
 	@Override
-	public Object[] getBuiltinParameters() {
+	public @Nonnull Object[] getBuiltinParameters() {
 		return new Object[0];
 	}
 
@@ -63,7 +66,7 @@ public class SkyveDocumentExecuterFactory implements QueryExecuterFactory {
 	 * @return {@code true}, as all parameter types are accepted.
 	 */
 	@Override
-	public boolean supportsQueryParameterType(String className) {
+	public boolean supportsQueryParameterType(@Nonnull String className) {
 		return true;
 	}
 	
@@ -79,7 +82,7 @@ public class SkyveDocumentExecuterFactory implements QueryExecuterFactory {
 			ProvidedRepository repository = new LocalDesignRepository() {
 				// Don't use bizlets for reporting
 				@Override
-				public <T extends Bean> Bizlet<T> getBizlet(Customer customer, Document document, boolean runtime) {
+				public @Nullable <T extends Bean> Bizlet<T> getBizlet(@Nullable Customer customer, @Nonnull Document document, boolean runtime) {
 					return null;
 				}
 			};
@@ -97,7 +100,7 @@ public class SkyveDocumentExecuterFactory implements QueryExecuterFactory {
 	 *
 	 * @return The singleton design-time user.
 	 */
-	public static org.skyve.metadata.user.User getUser() {
+	public static @Nonnull org.skyve.metadata.user.User getUser() {
 		return UserSingleton.user;
 	}
 }

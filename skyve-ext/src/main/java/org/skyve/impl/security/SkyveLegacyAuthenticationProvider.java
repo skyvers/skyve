@@ -20,6 +20,9 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Authenticates users against legacy hashed-password storage using direct SQL lookup.
  */
@@ -40,7 +43,7 @@ public class SkyveLegacyAuthenticationProvider implements AuthenticationProvider
 	 * @throws AuthenticationException If the credentials are invalid or authentication cannot be completed.
 	 */
 	@Override
-	public Authentication authenticate(Authentication authentication) throws AuthenticationException {
+	public @Nonnull Authentication authenticate(@Nonnull Authentication authentication) throws AuthenticationException {
 		String name = authentication.getName();
 		String password = authentication.getCredentials().toString();
 
@@ -104,7 +107,7 @@ public class SkyveLegacyAuthenticationProvider implements AuthenticationProvider
 	 * @return {@code true}, as this provider accepts all authentication types.
 	 */
 	@Override
-	public boolean supports(Class<?> authentication) {
+	public boolean supports(@Nonnull Class<?> authentication) {
 		// NB - will implement all authentication mechanisms over time but for now
 		// org.springframework.security.authentication.UsernamePasswordAuthenticationToken is supported
 		return true;
@@ -115,7 +118,7 @@ public class SkyveLegacyAuthenticationProvider implements AuthenticationProvider
 	 *
 	 * @return The configured password-hash lookup SQL.
 	 */
-	public String getHashedPasswordSql() {
+	public @Nullable String getHashedPasswordSql() {
 		return hashedPasswordSql;
 	}
 	
@@ -124,7 +127,7 @@ public class SkyveLegacyAuthenticationProvider implements AuthenticationProvider
 	 *
 	 * @param hashedPasswordSql The password-hash lookup SQL.
 	 */
-	public void setHashedPasswordSql(String hashedPasswordSql) {
+	public void setHashedPasswordSql(@Nonnull String hashedPasswordSql) {
 		this.hashedPasswordSql = hashedPasswordSql;
 	}
 }

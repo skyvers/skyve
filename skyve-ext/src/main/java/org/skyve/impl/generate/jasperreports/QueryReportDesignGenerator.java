@@ -7,6 +7,8 @@ import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.module.query.MetaDataQueryColumn;
 import org.skyve.metadata.module.query.MetaDataQueryDefinition;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * Generates a JasperReports design from a Skyve named document query,
  * mapping query columns to report fields.
@@ -19,7 +21,7 @@ public class QueryReportDesignGenerator extends ReportDesignGenerator {
      * @throws UnsupportedOperationException Always.
      */
     @Override
-    protected QueryReportDesignGenerator getSubreportGenerator() {
+    protected @Nonnull QueryReportDesignGenerator getSubreportGenerator() {
         throw new UnsupportedOperationException("Subreports are not supported in query reports.");
     }
 
@@ -29,7 +31,7 @@ public class QueryReportDesignGenerator extends ReportDesignGenerator {
      * @param design The design being populated.
      */
     @Override
-    protected void addFields(DesignSpecification design) {
+    protected void addFields(@Nonnull DesignSpecification design) {
         super.addFields(design);
 
         final MetaDataQueryDefinition queryDefinition = design.getModule().getNullSafeMetaDataQuery(design.getQueryName());
@@ -53,7 +55,7 @@ public class QueryReportDesignGenerator extends ReportDesignGenerator {
      * @param design The design being populated.
      */
     @Override
-    protected void addBands(DesignSpecification design) {
+    protected void addBands(@Nonnull DesignSpecification design) {
         super.addBands(design);
 
         for (ReportField a : design.getFields()) {

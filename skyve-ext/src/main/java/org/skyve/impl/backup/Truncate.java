@@ -20,6 +20,9 @@ import org.skyve.persistence.Persistence;
 import org.skyve.util.logging.Category;
 import org.slf4j.Logger;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Utility class for emptying all Skyve customer tables in the correct order
  * (observing foreign-key constraints) prior to a restore operation.
@@ -29,15 +32,15 @@ public class Truncate {
 
     private static final String DELETE_FROM = "delete from ";
 
-	public static void truncate(String schemaName, boolean database, boolean content) 
+	public static void truncate(@Nullable String schemaName, boolean database, boolean content) 
 	throws Exception {
 		Collection<Table> tables = getTables(schemaName);
 		truncate(tables, CORE.getUser().getCustomerName(), database, content);
 	}
 	
 	@SuppressWarnings("java:S3776") // Complexity OK
-	private static void truncate(Collection<Table> tables, 
-									String customerName, 
+	private static void truncate(@Nonnull Collection<Table> tables, 
+									@Nonnull String customerName, 
 									boolean database,
 									boolean content)
 	throws Exception {
@@ -127,7 +130,7 @@ public class Truncate {
 	private static final String[] TABLE_TYPES = new String[] {"TABLE"};
 	
 	@SuppressWarnings({"resource", "java:S3776"}) // Complexity OK
-	private static Collection<Table> getTables(String schema)
+	private static @Nonnull Collection<Table> getTables(@Nullable String schema)
 	throws SQLException {
 		Collection<Table> result = new ArrayList<>();
 
@@ -239,7 +242,7 @@ public class Truncate {
 		return result;
 	}
 	
-	public static void main(String[] args) throws Exception {
+	public static void main(@Nonnull String[] args) throws Exception {
 		if (args.length != 9) {
 			System.err.println("args are <customerName> <content directory> <content file storage?> <DB dialect> <DB driver> <DB URL> <DB username> <DB password> <DB schema>");
 			System.exit(1);

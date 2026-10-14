@@ -35,6 +35,8 @@ import org.skyve.impl.util.UtilImpl.ArchiveConfig.ArchiveDocConfig;
 import org.skyve.util.JSON;
 import org.skyve.util.Util;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * Utility class for retrieving Beans archived to file.
  */
@@ -62,7 +64,7 @@ public class ArchiveRetriever {
 
     }
 
-    public static ArchiveRetriever getInstance() {
+    public static @Nonnull ArchiveRetriever getInstance() {
         return SingletonHolder.INSTANCE;
     }
 
@@ -76,7 +78,7 @@ public class ArchiveRetriever {
      * @return an Optional containing the requested Bean, or an empty optional
      *         if it could not be found.
      */
-    public <T extends Bean> Optional<T> retrieveByBizId(ArchiveDocConfig docConfig, String bizId) {
+    public @Nonnull <T extends Bean> Optional<T> retrieveByBizId(@Nonnull ArchiveDocConfig docConfig, @Nonnull String bizId) {
 
         try {
             LuceneFilter filter = new LuceneFilter();
@@ -103,7 +105,7 @@ public class ArchiveRetriever {
      * @param filter Filter to use to search the index
      * @return a list of results (empty if none are found)
      */
-    public <T extends Bean> List<T> retrieveAll(ArchiveDocConfig docConfig, LuceneFilter filter, int maxResults) {
+    public @Nonnull <T extends Bean> List<T> retrieveAll(@Nonnull ArchiveDocConfig docConfig, @Nonnull LuceneFilter filter, int maxResults) {
 
         try {
             List<ArchiveEntry> entries = searchIndex(docConfig, filter, maxResults);
@@ -133,7 +135,7 @@ public class ArchiveRetriever {
      * @return
      * @throws IOException
      */
-    private List<ArchiveEntry> searchIndex(ArchiveDocConfig docConfig, LuceneFilter filter, int maxResults) throws IOException {
+    private @Nonnull List<ArchiveEntry> searchIndex(@Nonnull ArchiveDocConfig docConfig, @Nonnull LuceneFilter filter, int maxResults) throws IOException {
 
         Path indexPath = docConfig.getIndexDirectory();
         logger.debug("Searching for {}; using index at {}", filter, indexPath);
@@ -177,7 +179,7 @@ public class ArchiveRetriever {
     }
 
     @SuppressWarnings("unchecked")
-    private <T extends Bean> T retrieveBean(ArchiveEntry entry) {
+    private @Nonnull <T extends Bean> T retrieveBean(@Nonnull ArchiveEntry entry) {
 
         Cache<Serializable, Bean> cache = getCache();
 
@@ -193,7 +195,7 @@ public class ArchiveRetriever {
         return (T) bean;
     }
 
-    private synchronized Cache<Serializable, Bean> getCache() {
+    private synchronized @Nonnull Cache<Serializable, Bean> getCache() {
         Caching caching = EXT.getCaching();
         if (caching.isEHCache(ArchivedDocumentCacheConfig.CACHE_NAME)) {
             return caching.getEHCache(ArchivedDocumentCacheConfig.CACHE_NAME, Serializable.class, Bean.class);
@@ -206,7 +208,7 @@ public class ArchiveRetriever {
     }
 
     @SuppressWarnings("unchecked")
-    private <T extends Bean> T loadBeanFromFile(ArchiveEntry entry) {
+    private @Nonnull <T extends Bean> T loadBeanFromFile(@Nonnull ArchiveEntry entry) {
         try {
             Path archiveFilePath = getArchiveFilePath(entry);
             String line = readLine(archiveFilePath, entry.offset(), entry.length());
@@ -226,7 +228,7 @@ public class ArchiveRetriever {
      * Read from the given file, starting at the provided offset, reading in the given
      * number of bytes. Converting the results to a String (utf8) for returning.
      */
-    private String readLine(Path filePath, long offset, long length) throws IOException {
+    private @Nonnull String readLine(@Nonnull Path filePath, long offset, long length) throws IOException {
 
         logger.trace("Retrieving {} bytes from {} at {}", length, filePath, offset);
 
@@ -247,7 +249,7 @@ public class ArchiveRetriever {
         }
     }
 
-    private Path getArchiveFilePath(ArchiveEntry entry) {
+    private @Nonnull Path getArchiveFilePath(@Nonnull ArchiveEntry entry) {
 
         Path p = entry.docConfig()
                       .getArchiveDirectory()
@@ -260,9 +262,9 @@ public class ArchiveRetriever {
         throw new IllegalArgumentException("Archive file path '" + p + "' is not valid");
     }
 
-    private record ArchiveEntry(ArchiveDocConfig docConfig, String fileName, long offset, long length) {
+    private record ArchiveEntry(@Nonnull ArchiveDocConfig docConfig, @Nonnull String fileName, long offset, long length) {
 
-        public String cacheKey() {
+        public @Nonnull String cacheKey() {
 
             return Stream.of(docConfig.module(), docConfig.document(), fileName, offset, length)
                          .map(String::valueOf)

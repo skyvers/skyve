@@ -54,7 +54,7 @@ public class DisplayNameDirective implements TemplateDirectiveModel {
 
 	@Override
 	@SuppressWarnings("java:S3776") // Complexity OK
-	public void execute(Environment env, Map params, TemplateModel[] loopVars, TemplateDirectiveBody body)
+	public void execute(@Nonnull Environment env, @Nonnull Map params, @Nonnull TemplateModel[] loopVars, @Nullable TemplateDirectiveBody body)
 	throws TemplateException, IOException {
 		if (params.isEmpty()) {
 			throw new TemplateModelException("This directive requires parameters.");

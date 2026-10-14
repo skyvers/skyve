@@ -48,6 +48,9 @@ import org.skyve.util.Binder;
 import org.slf4j.Logger;
 import org.skyve.util.logging.SkyveLoggerFactory;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Parses and interprets Skyve Markdown script into module and document metadata models.
  */
@@ -123,7 +126,7 @@ public class SkyveScriptInterpreter {
 	 * 
 	 * @param script The initial skyve script String to be processed
 	 */
-	public SkyveScriptInterpreter(String script) {
+	public SkyveScriptInterpreter(@Nonnull String script) {
 		super();
 		parser = Parser.builder().build();
 
@@ -140,7 +143,7 @@ public class SkyveScriptInterpreter {
 	 * @param script The initial skyve script String to be processed
 	 * @param defaultModule The default module name to use if no module is specified
 	 */
-	public SkyveScriptInterpreter(String script, String defaultModule) {
+	public SkyveScriptInterpreter(@Nonnull String script, @Nullable String defaultModule) {
 		this(script);
 
 		this.defaultModule = defaultModule;
@@ -151,7 +154,7 @@ public class SkyveScriptInterpreter {
 	 *
 	 * @return Parsed document metadata.
 	 */
-	public List<DocumentMetaData> getDocuments() {
+	public @Nonnull List<DocumentMetaData> getDocuments() {
 		return documents;
 	}
 
@@ -160,7 +163,7 @@ public class SkyveScriptInterpreter {
 	 *
 	 * @return Script errors and warnings.
 	 */
-	public List<SkyveScriptException> getErrors() {
+	public @Nonnull List<SkyveScriptException> getErrors() {
 		return errors;
 	}
 
@@ -169,7 +172,7 @@ public class SkyveScriptInterpreter {
 	 *
 	 * @return Parsed module metadata.
 	 */
-	public List<ModuleMetaData> getModules() {
+	public @Nonnull List<ModuleMetaData> getModules() {
 		return modules;
 	}
 
@@ -187,7 +190,7 @@ public class SkyveScriptInterpreter {
 	 *
 	 * @return The parsed root node.
 	 */
-	public Node parse() {
+	public @Nonnull Node parse() {
 		if (script != null && (! script.isEmpty())) {
 			this.document = parser.parse(script);
 			return this.document;
@@ -209,7 +212,7 @@ public class SkyveScriptInterpreter {
 	 * @return the cleansed markdown ready to be processed
 	 */
 	@SuppressWarnings("java:S3776") // Complexity OK
-	public String preProcess() {
+	public @Nonnull String preProcess() {
 		if (script != null && (! script.isEmpty())) {
 			String[] lines = script.split("\n");
 			StringBuilder newScript = new StringBuilder();
@@ -331,7 +334,7 @@ public class SkyveScriptInterpreter {
 	 * @param node The current node to process.
 	 */
 	@SuppressWarnings({"boxing", "java:S3776"}) // Complexity OK
-	private void process(Node node) {
+	private void process(@Nullable Node node) {
 		if (isHeading(node)) {
 			Heading heading = (Heading) node;
 			if (isHeading1(heading)) {
@@ -469,7 +472,7 @@ public class SkyveScriptInterpreter {
 	/**
 	 * Adds a new critical error to the list of errors for this script.
 	 */
-	private void addCritical(String message) {
+	private void addCritical(@Nonnull String message) {
 		LOGGER.warn(message);
 		getErrors().add(new SkyveScriptException(ExceptionType.critical, message, currentLine));
 
@@ -480,7 +483,7 @@ public class SkyveScriptInterpreter {
 	 *
 	 * @param message Error message.
 	 */
-	private void addError(String message) {
+	private void addError(@Nonnull String message) {
 		LOGGER.warn(message);
 		getErrors().add(new SkyveScriptException(ExceptionType.error, message, currentLine));
 	}
@@ -492,7 +495,7 @@ public class SkyveScriptInterpreter {
 	 * @param module The module the related document is in, e.g. admin
 	 * @param document The name of the related document, e.g. User
 	 */
-	private static void addModuleRef(String module, String document) {
+	private static void addModuleRef(@Nonnull String module, @Nonnull String document) {
 		// don't add if this has already been added to the module
 		for (ModuleDocumentMetaData md : currentModule.getDocuments()) {
 			if (md.getModuleRef() != null && md.getModuleRef().equals(module) && md.getRef().equals(document)) {
@@ -512,7 +515,7 @@ public class SkyveScriptInterpreter {
 	 *
 	 * @param message Warning message.
 	 */
-	private void addWarning(String message) {
+	private void addWarning(@Nonnull String message) {
 		LOGGER.info(message);
 		getErrors().add(new SkyveScriptException(ExceptionType.warning, message, currentLine));
 	}
@@ -520,7 +523,7 @@ public class SkyveScriptInterpreter {
 	/**
 	 * Appends a new list menu item to the module for the specified document.
 	 */
-	private static void appendMenu(ModuleMetaData module, DocumentMetaData document) {
+	private static void appendMenu(@Nonnull ModuleMetaData module, @Nonnull DocumentMetaData document) {
 		MenuMetaData menu = module.getMenu();
 
 	/**
@@ -565,7 +568,7 @@ public class SkyveScriptInterpreter {
 	/**
 	 * Appends a viewer and manager role permission for the document to the specified module.
 	 */
-	private static void appendRole(ModuleMetaData module, DocumentMetaData document) {
+	private static void appendRole(@Nonnull ModuleMetaData module, @Nonnull DocumentMetaData document) {
 		ModuleRoleMetaData viewer = null, maintainer = null;
 		if (module.getRoles().size() == 0) {
 			viewer = new ModuleRoleMetaData();
@@ -607,7 +610,7 @@ public class SkyveScriptInterpreter {
 	/**
 	 * Creates a new Association ready to be added to the current Document.
 	 */
-	private static Association createAssociation(boolean required, String type, String name, String displayName, Node line) {
+	private static @Nonnull Association createAssociation(boolean required, @Nonnull String type, @Nonnull String name, @Nonnull String displayName, @Nonnull Node line) {
 		// check if this association definition includes the AssociationType
 		AssociationType assocType = extractAssociationType(line);
 
@@ -632,7 +635,7 @@ public class SkyveScriptInterpreter {
 		return association;
 	}
 
-	private void createAttribute(String[] parts, Node line) {
+	private void createAttribute(@Nullable String[] parts, @Nonnull Node line) {
 		// first we have to get the attribute name
 		if (parts != null && parts.length > 1) {
 			String attributeName = parts[0];
@@ -646,7 +649,7 @@ public class SkyveScriptInterpreter {
 	}
 
 	@SuppressWarnings("java:S3776") // Complexity OK
-	private void createAttribute(String attributeName, String[] parts, boolean required, Node line) {
+	private void createAttribute(@Nonnull String attributeName, @Nonnull String[] parts, boolean required, @Nonnull Node line) {
 		// identify the type from the parts
 		String type = null;
 		if (parts.length >= 1) {
@@ -785,7 +788,7 @@ public class SkyveScriptInterpreter {
 	/**
 	 * Creates a new Collection ready to be added to the current document.
 	 */
-	private static CollectionImpl createCollection(boolean required, String type, String name, String displayName, Node line) {
+	private static @Nonnull CollectionImpl createCollection(boolean required, @Nonnull String type, @Nonnull String name, @Nonnull String displayName, @Nonnull Node line) {
 		CollectionType collectionType = extractCollectionType(line);
 
 		// if the collection type is child, store it for processing the parent at the end
@@ -814,47 +817,47 @@ public class SkyveScriptInterpreter {
 		return collection;
 	}
 
-	private static Field createFieldBoolean(boolean required, String name, String displayName) {
+	private static @Nonnull Field createFieldBoolean(boolean required, @Nonnull String name, @Nonnull String displayName) {
 		Field field = new org.skyve.impl.metadata.model.document.field.Boolean();
 		return setCommonFieldAttributes(field, required, name, displayName);
 	}
 
-	private static Field createFieldColour(boolean required, String name, String displayName) {
+	private static @Nonnull Field createFieldColour(boolean required, @Nonnull String name, @Nonnull String displayName) {
 		Field field = new org.skyve.impl.metadata.model.document.field.Colour();
 		return setCommonFieldAttributes(field, required, name, displayName);
 	}
 
-	private static Field createFieldContent(boolean required, String name, String displayName) {
+	private static @Nonnull Field createFieldContent(boolean required, @Nonnull String name, @Nonnull String displayName) {
 		Field field = new org.skyve.impl.metadata.model.document.field.Content();
 		return setCommonFieldAttributes(field, required, name, displayName);
 	}
 
-	private static Field createFieldDate(boolean required, String name, String displayName) {
+	private static @Nonnull Field createFieldDate(boolean required, @Nonnull String name, @Nonnull String displayName) {
 		Field field = new org.skyve.impl.metadata.model.document.field.Date();
 		return setCommonFieldAttributes(field, required, name, displayName);
 	}
 
-	private static Field createFieldDateTime(boolean required, String name, String displayName) {
+	private static @Nonnull Field createFieldDateTime(boolean required, @Nonnull String name, @Nonnull String displayName) {
 		Field field = new org.skyve.impl.metadata.model.document.field.DateTime();
 		return setCommonFieldAttributes(field, required, name, displayName);
 	}
 
-	private static Field createFieldDecimal2(boolean required, String name, String displayName) {
+	private static @Nonnull Field createFieldDecimal2(boolean required, @Nonnull String name, @Nonnull String displayName) {
 		Field field = new org.skyve.impl.metadata.model.document.field.Decimal2();
 		return setCommonFieldAttributes(field, required, name, displayName);
 	}
 
-	private static Field createFieldDecimal5(boolean required, String name, String displayName) {
+	private static @Nonnull Field createFieldDecimal5(boolean required, @Nonnull String name, @Nonnull String displayName) {
 		Field field = new org.skyve.impl.metadata.model.document.field.Decimal5();
 		return setCommonFieldAttributes(field, required, name, displayName);
 	}
 
-	private static Field createFieldDecimal10(boolean required, String name, String displayName) {
+	private static @Nonnull Field createFieldDecimal10(boolean required, @Nonnull String name, @Nonnull String displayName) {
 		Field field = new org.skyve.impl.metadata.model.document.field.Decimal10();
 		return setCommonFieldAttributes(field, required, name, displayName);
 	}
 
-	private static Enumeration createFieldEnum(boolean required, String name, String displayName, String brackets) {
+	private static @Nonnull Enumeration createFieldEnum(boolean required, @Nonnull String name, @Nonnull String displayName, @Nonnull String brackets) {
 		org.skyve.impl.metadata.model.document.field.Enumeration e = new org.skyve.impl.metadata.model.document.field.Enumeration();
 		setCommonFieldAttributes(e, required, name, displayName);
 
@@ -880,50 +883,50 @@ public class SkyveScriptInterpreter {
 		return e;
 	}
 
-	private static Field createFieldGeometry(boolean required, String name, String displayName) {
+	private static @Nonnull Field createFieldGeometry(boolean required, @Nonnull String name, @Nonnull String displayName) {
 		Field field = new org.skyve.impl.metadata.model.document.field.Geometry();
 		return setCommonFieldAttributes(field, required, name, displayName);
 	}
 
-	private static Field createFieldId(boolean required, String name, String displayName) {
+	private static @Nonnull Field createFieldId(boolean required, @Nonnull String name, @Nonnull String displayName) {
 		Field field = new org.skyve.impl.metadata.model.document.field.Id();
 		return setCommonFieldAttributes(field, required, name, displayName);
 	}
 
-	private static Field createFieldInteger(boolean required, String name, String displayName) {
+	private static @Nonnull Field createFieldInteger(boolean required, @Nonnull String name, @Nonnull String displayName) {
 		Field field = new org.skyve.impl.metadata.model.document.field.Integer();
 		return setCommonFieldAttributes(field, required, name, displayName);
 	}
 
-	private static Field createFieldLongInteger(boolean required, String name, String displayName) {
+	private static @Nonnull Field createFieldLongInteger(boolean required, @Nonnull String name, @Nonnull String displayName) {
 		Field field = new org.skyve.impl.metadata.model.document.field.LongInteger();
 		return setCommonFieldAttributes(field, required, name, displayName);
 	}
 
-	private static Field createFieldMemo(boolean required, String name, String displayName) {
+	private static @Nonnull Field createFieldMemo(boolean required, @Nonnull String name, @Nonnull String displayName) {
 		Field field = new org.skyve.impl.metadata.model.document.field.Memo();
 		return setCommonFieldAttributes(field, required, name, displayName);
 	}
 
-	private static Field createFieldMarkup(boolean required, String name, String displayName) {
+	private static @Nonnull Field createFieldMarkup(boolean required, @Nonnull String name, @Nonnull String displayName) {
 		Field field = new org.skyve.impl.metadata.model.document.field.Markup();
 		return setCommonFieldAttributes(field, required, name, displayName);
 	}
 
-	private static org.skyve.impl.metadata.model.document.field.Text createFieldText(boolean required, String name,
-			String displayName, int length) {
+	private static @Nonnull org.skyve.impl.metadata.model.document.field.Text createFieldText(boolean required, @Nonnull String name,
+			@Nonnull String displayName, int length) {
 		org.skyve.impl.metadata.model.document.field.Text text = new org.skyve.impl.metadata.model.document.field.Text();
 		setCommonFieldAttributes(text, required, name, displayName);
 		text.setLength(length);
 		return text;
 	}
 
-	private static Field createFieldTime(boolean required, String name, String displayName) {
+	private static @Nonnull Field createFieldTime(boolean required, @Nonnull String name, @Nonnull String displayName) {
 		Field field = new org.skyve.impl.metadata.model.document.field.Time();
 		return setCommonFieldAttributes(field, required, name, displayName);
 	}
 
-	private static Field createFieldTimestamp(boolean required, String name, String displayName) {
+	private static @Nonnull Field createFieldTimestamp(boolean required, @Nonnull String name, @Nonnull String displayName) {
 		Field field = new org.skyve.impl.metadata.model.document.field.Timestamp();
 		return setCommonFieldAttributes(field, required, name, displayName);
 	}
@@ -932,7 +935,7 @@ public class SkyveScriptInterpreter {
 	 * Returns the AssociationType for the supplied node, or defaults
 	 * to Aggregation if none was found.
 	 */
-	private static AssociationType extractAssociationType(final Node line) {
+	private static @Nonnull AssociationType extractAssociationType(final @Nonnull Node line) {
 		Node node = line;
 		while (node.getNext() != null) {
 			node = node.getNext();
@@ -948,7 +951,7 @@ public class SkyveScriptInterpreter {
 	 * Returns the CollectionType for the supplied node, or defaults
 	 * to Aggregation if none was found.
 	 */
-	private static CollectionType extractCollectionType(final Node line) {
+	private static @Nonnull CollectionType extractCollectionType(final @Nonnull Node line) {
 		Node node = line;
 		while (node.getNext() != null) {
 			node = node.getNext();
@@ -963,7 +966,7 @@ public class SkyveScriptInterpreter {
 	/**
 	 * Returns the display name for the supplied text.
 	 */
-	private static String extractDisplayName(String text) {
+	private static @Nullable String extractDisplayName(@Nonnull String text) {
 		final Pattern p = Pattern.compile(DISPLAY_NAME_PATTERN);
 		final Matcher m = p.matcher(text);
 
@@ -983,7 +986,7 @@ public class SkyveScriptInterpreter {
 	 * @param node The node to check for text
 	 * @return The text
 	 */
-	private static String getTextFromNode(Node node) {
+	private static @Nullable String getTextFromNode(@Nullable Node node) {
 		if (node instanceof Text text) {
 			return text.getLiteral();
 		}
@@ -1025,7 +1028,7 @@ public class SkyveScriptInterpreter {
 	 * @param parts The remaining tokens for the line
 	 * @return true if an association, false otherwise
 	 */
-	private static boolean isAssociationDefinition(Node line, String type, String[] parts) {
+	private static boolean isAssociationDefinition(@Nonnull Node line, @Nullable String type, @Nonnull String[] parts) {
 		if (isChildOfDashMarkerList(line)) {
 			// if (isChildOfBulletList(line)) {
 			if (type != null && parts.length == 1 && (Character.isUpperCase(type.charAt(0)) || type.contains("."))) {
@@ -1039,7 +1042,7 @@ public class SkyveScriptInterpreter {
 	/**
 	 * Returns true if the specified node is a {@link BulletList}.
 	 */
-	private static boolean isBulletList(Node node) {
+	private static boolean isBulletList(@Nullable Node node) {
 		if (node instanceof BulletList) {
 			return true;
 		}
@@ -1052,7 +1055,7 @@ public class SkyveScriptInterpreter {
 	 * <ul>
 	 * ) specified with a -.
 	 */
-	private static boolean isChildOfDashMarkerList(Node node) {
+	private static boolean isChildOfDashMarkerList(@Nonnull Node node) {
 		if (node.getParent() != null) {
 			if (node.getParent() instanceof BulletList) {
 				BulletList list = (BulletList) node.getParent();
@@ -1069,7 +1072,7 @@ public class SkyveScriptInterpreter {
 	 * <ul>
 	 * ) specified with a +.
 	 */
-	private static boolean isChildOfPlusMarkerList(Node node) {
+	private static boolean isChildOfPlusMarkerList(@Nonnull Node node) {
 		if (node.getParent() != null) {
 			if (node.getParent() instanceof BulletList) {
 				BulletList list = (BulletList) node.getParent();
@@ -1090,7 +1093,7 @@ public class SkyveScriptInterpreter {
 	 * 
 	 * @return true if a collection, false otherwise
 	 */
-	private static boolean isCollectionDefinition(Node line, String type, String[] parts) {
+	private static boolean isCollectionDefinition(@Nonnull Node line, @Nullable String type, @Nonnull String[] parts) {
 		if (isChildOfPlusMarkerList(line)) {
 			if (type != null && parts.length == 1 && (Character.isUpperCase(type.charAt(0)) || type.contains("."))) {
 				return true;
@@ -1104,7 +1107,7 @@ public class SkyveScriptInterpreter {
 	 * Returns true if the supplied text matches the expression for a display name
 	 * (text surrounded by single or double quotes).
 	 */
-	private static boolean isDisplayName(String text) {
+	private static boolean isDisplayName(@Nonnull String text) {
 		final Pattern p = Pattern.compile(DISPLAY_NAME_PATTERN);
 		final Matcher m = p.matcher(text);
 
@@ -1114,7 +1117,7 @@ public class SkyveScriptInterpreter {
 	/**
 	 * Returns true if the specified node is a Heading.
 	 */
-	private static boolean isHeading(Node node) {
+	private static boolean isHeading(@Nullable Node node) {
 		if (node instanceof Heading) {
 			return true;
 		}
@@ -1126,7 +1129,7 @@ public class SkyveScriptInterpreter {
 	 * indicating a module definition.
 	 */
 	@SuppressWarnings("unused")
-	private static boolean isHeading1(Node node) {
+	private static boolean isHeading1(@Nonnull Node node) {
 		if (node instanceof Heading heading) {
 			return isHeading1(heading);
 		}
@@ -1137,7 +1140,7 @@ public class SkyveScriptInterpreter {
 	 * Returns true if the specified node is a Heading with level 1,
 	 * indicating a module definition.
 	 */
-	private static boolean isHeading1(Heading heading) {
+	private static boolean isHeading1(@Nonnull Heading heading) {
 		return heading.getLevel() == 1 ? true : false;
 	}
 
@@ -1146,7 +1149,7 @@ public class SkyveScriptInterpreter {
 	 * indicating a document definition.
 	 */
 	@SuppressWarnings("unused")
-	private static boolean isHeading2(Node node) {
+	private static boolean isHeading2(@Nonnull Node node) {
 		if (node instanceof Heading heading) {
 			return isHeading2(heading);
 		}
@@ -1157,21 +1160,21 @@ public class SkyveScriptInterpreter {
 	 * Returns true if the specified node is a Heading with level 2,
 	 * indicating a document definition.
 	 */
-	private static boolean isHeading2(Heading heading) {
+	private static boolean isHeading2(@Nonnull Heading heading) {
 		return heading.getLevel() == 2 ? true : false;
 	}
 
 	/**
 	 * Returns true if the specified node is a {@link ListItem}.
 	 */
-	private static boolean isListItem(Node node) {
+	private static boolean isListItem(@Nullable Node node) {
 		if (node instanceof ListItem) {
 			return true;
 		}
 		return false;
 	}
 
-	private void parseAttribute(Node node) {
+	private void parseAttribute(@Nonnull Node node) {
 		if (node.getFirstChild() != null && node.getFirstChild() instanceof Emphasis) {
 			// required attribute
 			Emphasis em = (Emphasis) node.getFirstChild();
@@ -1198,7 +1201,7 @@ public class SkyveScriptInterpreter {
 	 *
 	 * @param item The list item node.
 	 */
-	private void processListItem(Node item) {
+	private void processListItem(@Nonnull Node item) {
 		if (item.getFirstChild() != null
 				&& (item.getFirstChild() instanceof Text || item.getFirstChild() instanceof Paragraph)) {
 			if (item.getFirstChild() instanceof Paragraph) {
@@ -1229,7 +1232,7 @@ public class SkyveScriptInterpreter {
 	/**
 	 * Sets the common field attributes (name, displayName, required) for a base scalar field.
 	 */
-	private static Field setCommonFieldAttributes(Field field, boolean required, String name, String displayName) {
+	private static @Nonnull Field setCommonFieldAttributes(@Nonnull Field field, boolean required, @Nonnull String name, @Nonnull String displayName) {
 		field.setName(name);
 		field.setRequired(required);
 		field.setDisplayName(displayName);
@@ -1243,7 +1246,7 @@ public class SkyveScriptInterpreter {
 	 * @param line The attribute line to be parsed
 	 * @return A String array of line parts
 	 */
-	static String[] splitAttribute(final String line) {
+	static @Nonnull String[] splitAttribute(final @Nonnull String line) {
 		String matchDN = null, matchE = null, line2 = line;
 
 		// if this is a display name, treat that separately as a single part

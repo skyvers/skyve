@@ -55,6 +55,9 @@ import org.skyve.metadata.view.widget.bound.Bound;
 import org.skyve.util.Binder.TargetMetaData;
 import org.skyve.util.Util;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Responsible for traversing a SmartClient (SC) view definition and
  * generating locators for all supported user interactions.
@@ -93,13 +96,13 @@ public class SmartClientSAILViewVisitor {
 	 * @param windowPrefix the SmartClient window locator prefix
 	 */
 	public SmartClientSAILViewVisitor(
-			User user,
-			Module module,
-			Document document,
-			View view,
-			String uxui,
-			SmartClientAutomationContext automationContext,
-			String windowPrefix) {
+			@Nonnull User user,
+			@Nonnull Module module,
+			@Nonnull Document document,
+			@Nonnull View view,
+			@Nonnull String uxui,
+			@Nonnull SmartClientAutomationContext automationContext,
+			@Nonnull String windowPrefix) {
 		this.customer = (CustomerImpl) user.getCustomer();
 		this.module = (ModuleImpl) module;
 		this.document = (DocumentImpl) document;
@@ -121,7 +124,7 @@ public class SmartClientSAILViewVisitor {
 	 *
 	 * @param container the container metadata to traverse
 	 */
-	private void visitContainer(Container container) {
+	private void visitContainer(@Nonnull Container container) {
 		if (container == view) {
 			for (MetaData widget : container.getContained()) {
 				visitWidget(widget);
@@ -175,7 +178,7 @@ public class SmartClientSAILViewVisitor {
 	 * @param widget the metadata widget to visit
 	 */
 	@SuppressWarnings("java:S3776") // Complexity OK
-	private void visitWidget(MetaData widget) {
+	private void visitWidget(@Nullable MetaData widget) {
 		if (widget instanceof Container container) {
 			visitContainer(container);
 		}
@@ -289,7 +292,7 @@ public class SmartClientSAILViewVisitor {
 	 *
 	 * @param widget the default widget metadata
 	 */
-	private void visitDefaultWidget(DefaultWidget widget) {
+	private void visitDefaultWidget(@Nonnull DefaultWidget widget) {
 		String binding = widget.getBinding();
 
 		TargetMetaData target = BindUtil.getMetaDataForBinding(customer, module, document, binding);
@@ -313,7 +316,7 @@ public class SmartClientSAILViewVisitor {
 	 *
 	 * @param button the button metadata
 	 */
-	private final void visitButton(Button button) {
+	private final void visitButton(@Nonnull Button button) {
 		String actionName = button.getActionName();
 
 		automationContext.put(actionName,
@@ -330,7 +333,7 @@ public class SmartClientSAILViewVisitor {
 	 *
 	 * @param zoomIn the zoom-in metadata
 	 */
-	private final void visitZoomIn(ZoomIn zoomIn) {
+	private final void visitZoomIn(@Nonnull ZoomIn zoomIn) {
 		String binding = zoomIn.getBinding();
 		String identifier = String.format("%s.zoomIn", binding.replaceAll("\\.", "_"));
 
@@ -353,7 +356,7 @@ public class SmartClientSAILViewVisitor {
 	 * @param map the map metadata
 	 */
 	@SuppressWarnings("java:S1172")
-	private final void visitMap(MapDisplay map) {
+	private final void visitMap(@Nonnull MapDisplay map) {
 		// TODO
 	}
 
@@ -362,7 +365,7 @@ public class SmartClientSAILViewVisitor {
 	 *
 	 * @param geometry the geometry metadata
 	 */
-	private final void visitGeometry(Geometry geometry) {
+	private final void visitGeometry(@Nonnull Geometry geometry) {
 		String binding = geometry.getBinding();
 
 		automationContext.put(binding,
@@ -380,7 +383,7 @@ public class SmartClientSAILViewVisitor {
 	 * @param grid the tree-grid metadata
 	 */
 	@SuppressWarnings("java:S1172")
-	private final void visitTreeGrid(TreeGrid grid) {
+	private final void visitTreeGrid(@Nonnull TreeGrid grid) {
 		// TODO
 	}
 
@@ -390,7 +393,7 @@ public class SmartClientSAILViewVisitor {
 	 * @param link the link metadata
 	 */
 	@SuppressWarnings("java:S1172")
-	private final void visitLink(Link link) {
+	private final void visitLink(@Nonnull Link link) {
 		// TODO
 	}
 
@@ -399,7 +402,7 @@ public class SmartClientSAILViewVisitor {
 	 *
 	 * @param grid the list-grid metadata
 	 */
-	private final void visitListGrid(ListGrid grid) {
+	private final void visitListGrid(@Nonnull ListGrid grid) {
 		String key = NavigateList.listGridIdentifier(
 				automationContext,
 				module.getName(),
@@ -431,7 +434,7 @@ public class SmartClientSAILViewVisitor {
 	 *
 	 * @param key the list-grid automation key
 	 */
-	private final void visitListGridNew(String key) {
+	private final void visitListGridNew(@Nonnull String key) {
 		automationContext.put(String.format("%s.new", key),
 				new Locator(String.format(
 						"//:VLayout[ID=\"%s_%s_edit_%d\"]/member[Class=Toolstrip||classIndex=0]/member[Class=ToolstripButton||name=new]/icon",
@@ -445,7 +448,7 @@ public class SmartClientSAILViewVisitor {
 	 *
 	 * @param key the list-grid automation key
 	 */
-	private final void visitListGridZoom(String key) {
+	private final void visitListGridZoom(@Nonnull String key) {
 		automationContext.put(String.format("%s.zoom", key),
 				new Locator(String.format(
 						"//:VLayout[ID=\"%s_%s_edit_%d\"]/member[Class=Toolstrip||classIndex=0]/member[Class=ToolstripButton||name=zoom]/icon",
@@ -459,7 +462,7 @@ public class SmartClientSAILViewVisitor {
 	 *
 	 * @param key the list-grid automation key
 	 */
-	private final void visitListGridSelect(String key) {
+	private final void visitListGridSelect(@Nonnull String key) {
 		automationContext.put(String.format("%s.select", key),
 				new Locator(String.format(
 						"//BizListGrid[ID=\"%s_%s_edit_%d\"]/member[Class=ListGrid||classIndex=0]/body/row[%%d]/col[%%d]",
@@ -473,7 +476,7 @@ public class SmartClientSAILViewVisitor {
 	 *
 	 * @param grid the data-grid metadata to visit
 	 */
-	private final void visitDataGrid(DataGrid grid) {
+	private final void visitDataGrid(@Nonnull DataGrid grid) {
 		String binding = grid.getBinding();
 
 		visitDataGridNew(binding);
@@ -495,7 +498,7 @@ public class SmartClientSAILViewVisitor {
 	 *
 	 * @param binding the data-grid binding
 	 */
-	private final void visitDataGridNew(String binding) {
+	private final void visitDataGridNew(@Nonnull String binding) {
 		automationContext.put(String.format("%s.new", binding),
 				new Locator(String.format(
 						"//:VLayout[ID=\"%s_%s_edit_%d\"]/member[Class=Toolstrip]/member[Class=ToolstripButton||name=new]/icon",
@@ -509,7 +512,7 @@ public class SmartClientSAILViewVisitor {
 	 *
 	 * @param binding the data-grid binding
 	 */
-	private final void visitDataGridZoom(String binding) {
+	private final void visitDataGridZoom(@Nonnull String binding) {
 		automationContext.put(String.format("%s.zoom", binding),
 				new Locator(String.format(
 						"//:VLayout[ID=\"%s_%s_edit_%d\"]/member[Class=Toolstrip]/member[Class=ToolstripButton||name=zoom]/icon",
@@ -523,7 +526,7 @@ public class SmartClientSAILViewVisitor {
 	 *
 	 * @param binding the data-grid binding
 	 */
-	private final void visitDataGridEdit(String binding) {
+	private final void visitDataGridEdit(@Nonnull String binding) {
 		automationContext.put(String.format("%s.edit", binding),
 				new Locator(String.format(
 						"//:VLayout[ID=\"%s_%s_edit_%d\"]/member[Class=Toolstrip]/member[Class=ToolstripButton||name=edit]/icon",
@@ -537,7 +540,7 @@ public class SmartClientSAILViewVisitor {
 	 *
 	 * @param binding the data-grid binding
 	 */
-	private final void visitDataGridRemove(String binding) {
+	private final void visitDataGridRemove(@Nonnull String binding) {
 		automationContext.put(String.format("%s.remove", binding),
 				new Locator(String.format(
 						"//:VLayout[ID=\"%s_%s_edit_%d\"]/member[Class=Toolstrip]/member[Class=ToolstripButton||name=deleteRemoveSelected]/icon",
@@ -551,7 +554,7 @@ public class SmartClientSAILViewVisitor {
 	 *
 	 * @param binding the data-grid binding
 	 */
-	private final void visitDataGridSelect(String binding) {
+	private final void visitDataGridSelect(@Nonnull String binding) {
 		automationContext.put(String.format("%s.select", binding),
 				new Locator(String.format(
 						"//BizDataGrid[ID=\"%s_%s_edit_%d\"]/member[Class=ListGrid||classIndex=0]/body/row[%%d]/col[%%d]",
@@ -565,7 +568,7 @@ public class SmartClientSAILViewVisitor {
 	 *
 	 * @param checkBox the checkbox metadata
 	 */
-	private final void visitCheckBox(CheckBox checkBox) {
+	private final void visitCheckBox(@Nonnull CheckBox checkBox) {
 		String binding = checkBox.getBinding();
 
 		automationContext.put(binding,
@@ -581,7 +584,7 @@ public class SmartClientSAILViewVisitor {
 	 *
 	 * @param colour the colour-picker metadata
 	 */
-	private final void visitColourPicker(ColourPicker colour) {
+	private final void visitColourPicker(@Nonnull ColourPicker colour) {
 		String binding = colour.getBinding();
 
 		automationContext.put(binding,
@@ -597,7 +600,7 @@ public class SmartClientSAILViewVisitor {
 	 *
 	 * @param combo the combo metadata
 	 */
-	private final void visitCombo(Combo combo) {
+	private final void visitCombo(@Nonnull Combo combo) {
 		String binding = combo.getBinding();
 
 		automationContext.put(binding,
@@ -614,7 +617,7 @@ public class SmartClientSAILViewVisitor {
 	 * @param contentSignature the content-signature metadata
 	 */
 	@SuppressWarnings("java:S1172")
-	private final void visitContentSignature(ContentSignature contentSignature) {
+	private final void visitContentSignature(@Nonnull ContentSignature contentSignature) {
 		// TODO
 	}
 
@@ -624,7 +627,7 @@ public class SmartClientSAILViewVisitor {
 	 * @param html the HTML metadata
 	 */
 	@SuppressWarnings("java:S1172")
-	private final void visitHTML(HTML html) {
+	private final void visitHTML(@Nonnull HTML html) {
 		// TODO
 	}
 
@@ -633,7 +636,7 @@ public class SmartClientSAILViewVisitor {
 	 *
 	 * @param lookup the lookup-description metadata
 	 */
-	private final void visitLookupDescription(LookupDescription lookup) {
+	private final void visitLookupDescription(@Nonnull LookupDescription lookup) {
 		String binding = lookup.getBinding();
 
 		automationContext.put(binding,
@@ -650,7 +653,7 @@ public class SmartClientSAILViewVisitor {
 	 *
 	 * @param password the password metadata
 	 */
-	private final void visitPassword(Password password) {
+	private final void visitPassword(@Nonnull Password password) {
 		String binding = password.getBinding();
 
 		automationContext.put(binding,
@@ -666,7 +669,7 @@ public class SmartClientSAILViewVisitor {
 	 *
 	 * @param radio the radio metadata
 	 */
-	private final void visitRadio(Radio radio) {
+	private final void visitRadio(@Nonnull Radio radio) {
 		String binding = radio.getBinding();
 
 		automationContext.put(binding,
@@ -683,7 +686,7 @@ public class SmartClientSAILViewVisitor {
 	 *
 	 * @param text the rich-text metadata
 	 */
-	private final void visitRichText(RichText text) {
+	private final void visitRichText(@Nonnull RichText text) {
 		String binding = text.getBinding();
 
 		automationContext.put(binding,
@@ -701,7 +704,7 @@ public class SmartClientSAILViewVisitor {
 	 * @param slider the slider metadata
 	 */
 	@SuppressWarnings("java:S1172")
-	private final void visitSlider(Slider slider) {
+	private final void visitSlider(@Nonnull Slider slider) {
 		// TODO
 	}
 
@@ -710,7 +713,7 @@ public class SmartClientSAILViewVisitor {
 	 *
 	 * @param spinner the spinner metadata
 	 */
-	private final void visitSpinner(Spinner spinner) {
+	private final void visitSpinner(@Nonnull Spinner spinner) {
 		String binding = spinner.getBinding();
 
 		automationContext.put(binding,
@@ -727,7 +730,7 @@ public class SmartClientSAILViewVisitor {
 	 *
 	 * @param text the text-area metadata
 	 */
-	private final void visitTextArea(TextArea text) {
+	private final void visitTextArea(@Nonnull TextArea text) {
 		String binding = text.getBinding();
 
 		automationContext.put(binding,
@@ -744,7 +747,7 @@ public class SmartClientSAILViewVisitor {
 	 *
 	 * @param text the text-field metadata to visit
 	 */
-	private final void visitTextField(TextField text) {
+	private final void visitTextField(@Nonnull TextField text) {
 		String binding = text.getBinding();
 
 		Attribute attribute = BindUtil.getMetaDataForBinding(customer, module, document, binding).getAttribute();
@@ -792,7 +795,7 @@ public class SmartClientSAILViewVisitor {
 	 *
 	 * @param component the component metadata defining the fragment
 	 */
-	private void visitComponent(Component component) {
+	private void visitComponent(@Nonnull Component component) {
 		for (MetaData widget : component.getFragment(customer, currentUxUi).getContained()) {
 			visitWidget(widget);
 		}
@@ -815,7 +818,7 @@ public class SmartClientSAILViewVisitor {
 	 * @param viewName the current view name
 	 * @param action the action metadata definition
 	 */
-	private void visit(String viewName, ActionImpl action) {
+	private void visit(@Nullable String viewName, @Nonnull ActionImpl action) {
 		ImplicitActionName implicitName = action.getImplicitName();
 		if (implicitName != null) {
 			visit(viewName, implicitName, action);
@@ -832,7 +835,7 @@ public class SmartClientSAILViewVisitor {
 	 * @param action the action metadata definition
 	 */
 	@SuppressWarnings("java:S3776") // Complexity OK
-	private void visit(String viewName, ImplicitActionName implicitName, ActionImpl action) {
+	private void visit(@Nullable String viewName, @Nonnull ImplicitActionName implicitName, @Nonnull ActionImpl action) {
 		if (ImplicitActionName.DEFAULTS.equals(implicitName)) {
 			if (ViewType.list.toString().equals(viewName)) {
 				visit(viewName, ImplicitActionName.New, action);
@@ -939,7 +942,7 @@ public class SmartClientSAILViewVisitor {
 	 *
 	 * @param action the custom action metadata definition
 	 */
-	private final void visitCustomAction(ActionImpl action) {
+	private final void visitCustomAction(@Nonnull ActionImpl action) {
 		String actionName = action.getName();
 
 		automationContext.put(actionName, new Locator(String.format("%s//IButton[actionName=\"%s\"]", windowPrefix, actionName)));
@@ -950,7 +953,7 @@ public class SmartClientSAILViewVisitor {
 	 *
 	 * @param tab the tab metadata definition
 	 */
-	private final void visitTab(Tab tab) {
+	private final void visitTab(@Nonnull Tab tab) {
 		String path = tab.getTitle();
 
 		// Check if this tab path represents an internationalised value

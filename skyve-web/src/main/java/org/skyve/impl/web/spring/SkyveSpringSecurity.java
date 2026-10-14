@@ -52,6 +52,8 @@ import org.springframework.security.provisioning.UserDetailsManager;
 import org.springframework.security.web.authentication.WebAuthenticationDetails;
 import org.springframework.security.web.authentication.rememberme.PersistentTokenRepository;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 
@@ -73,7 +75,7 @@ public class SkyveSpringSecurity {
 	 * Provides the password encoder used for Skyve Spring Security authentication.
 	 */
 	@SuppressWarnings("static-method")
-	public PasswordEncoder passwordEncoder() {
+	public @Nonnull PasswordEncoder passwordEncoder() {
 		return SecurityUtil.createDelegatingPasswordEncoder();
 	}
 
@@ -86,7 +88,7 @@ public class SkyveSpringSecurity {
 	 * @return an authentication details source that preserves the current session ID when available
 	 */
 	@SuppressWarnings("static-method")
-	public AuthenticationDetailsSource<HttpServletRequest, WebAuthenticationDetails> authenticationDetailsSource() {
+	public @Nonnull AuthenticationDetailsSource<HttpServletRequest, WebAuthenticationDetails> authenticationDetailsSource() {
 		return request -> {
 			HttpSession session = request.getSession(false);
 			return new WebAuthenticationDetails(SecurityUtil.getSourceIpAddress(request),
@@ -97,7 +99,7 @@ public class SkyveSpringSecurity {
 	/**
 	 * Provides the remember-me token repository bound to the configured data source.
 	 */
-	public PersistentTokenRepository tokenRepository() {
+	public @Nonnull PersistentTokenRepository tokenRepository() {
 		SkyveRememberMeTokenRepository result = new SkyveRememberMeTokenRepository();
 		result.setDataSource(dataSource());
 		return result;
@@ -118,17 +120,17 @@ public class SkyveSpringSecurity {
 					// Assign a no-op DataSource that dishes out EXT.getDataStoreConnection()s.
 					dataSource = new DataSource() {
 						@Override
-						public <T> T unwrap(Class<T> iface) throws SQLException {
+						public @Nullable <T> T unwrap(@Nonnull Class<T> iface) throws SQLException {
 							return null;
 						}
 						
 						@Override
-						public boolean isWrapperFor(Class<?> iface) throws SQLException {
+						public boolean isWrapperFor(@Nonnull Class<?> iface) throws SQLException {
 							return false;
 						}
 						
 						@Override
-						public java.util.logging.Logger getParentLogger() throws SQLFeatureNotSupportedException {
+						public @Nullable java.util.logging.Logger getParentLogger() throws SQLFeatureNotSupportedException {
 							return null;
 						}
 						
@@ -138,7 +140,7 @@ public class SkyveSpringSecurity {
 						}
 						
 						@Override
-						public void setLogWriter(PrintWriter out) throws SQLException {
+						public void setLogWriter(@Nullable PrintWriter out) throws SQLException {
 							// nothing to see here
 						}
 						
@@ -148,19 +150,19 @@ public class SkyveSpringSecurity {
 						}
 						
 						@Override
-						public PrintWriter getLogWriter() throws SQLException {
+						public @Nullable PrintWriter getLogWriter() throws SQLException {
 							return null;
 						}
 						
 						@Override
 						@SuppressWarnings("resource")
-						public Connection getConnection(String username, String password) throws SQLException {
+						public @Nonnull Connection getConnection(@Nonnull String username, @Nonnull String password) throws SQLException {
 							return getConnection();
 						}
 						
 						@Override
 						@SuppressWarnings("resource")
-						public Connection getConnection() throws SQLException {
+						public @Nonnull Connection getConnection() throws SQLException {
 							Connection result = EXT.getDataStoreConnection();
 							// Override to be non transactional
 							result.setAutoCommit(true);
@@ -181,7 +183,7 @@ public class SkyveSpringSecurity {
 	 * @return	The appropriate DataSource
 	 */
 	@SuppressWarnings("static-method")
-	public DataSource dataSource() {
+	public @Nonnull DataSource dataSource() {
 		return ThreadSafeSingleton.dataSource;
 	}
 	
@@ -189,7 +191,7 @@ public class SkyveSpringSecurity {
 	 * Provides an in-memory test user-details service for integration and local testing scenarios.
 	 */
 	@SuppressWarnings("static-method")
-	public UserDetailsService testUserDetailsService(String customerName, String userName, String password) {
+	public @Nonnull UserDetailsService testUserDetailsService(@Nonnull String customerName, @Nonnull String userName, @Nonnull String password) {
 		@SuppressWarnings("deprecation")
 		UserDetails user = User.withDefaultPasswordEncoder()
 								.username(customerName + '/' + userName)
@@ -208,7 +210,7 @@ public class SkyveSpringSecurity {
 	 * @param createdTimestamp
 	 * @return
 	 */
-	private static boolean useTFAPushCodeAsPassword(Timestamp createdTimestamp, String customerName) {
+	private static boolean useTFAPushCodeAsPassword(@Nullable Timestamp createdTimestamp, @Nonnull String customerName) {
 		TwoFactorAuthCustomerConfiguration config = TwoFactorAuthConfigurationSingleton.getInstance().getConfig(customerName);
 		if ((config == null) || (createdTimestamp == null) || (! TwoFactorAuthConfigurationSingleton.isPushTfa(config))) {
 			return false;
@@ -224,7 +226,7 @@ public class SkyveSpringSecurity {
 	/**
 	 * Determines whether the user is currently within an active lockout window.
 	 */
-	static boolean hasActiveLockout(int authenticationFailures, Timestamp lastAuthenticationFailure, long currentTimeMillis) {
+	static boolean hasActiveLockout(int authenticationFailures, @Nullable Timestamp lastAuthenticationFailure, long currentTimeMillis) {
 		if (lastAuthenticationFailure == null) {
 			return false;
 		}
@@ -258,7 +260,7 @@ public class SkyveSpringSecurity {
 	 * Creates a JDBC-backed user-details manager configured for Skyve credential and authority queries.
 	 */
 	@SuppressWarnings("java:S3776") // Complexity OK
-	public UserDetailsManager jdbcUserDetailsManager() {
+	public @Nonnull UserDetailsManager jdbcUserDetailsManager() {
 		JdbcUserDetailsManager result = new JdbcUserDetailsManager() {
 			private String skyveUserQuery;
 			
@@ -311,14 +313,14 @@ public class SkyveSpringSecurity {
 			
 			// return the user just queried (with all the expiration details queried too)
 			@Override
-			protected UserDetails createUserDetails(String username,
-														UserDetails userFromUserQuery,
-														List<GrantedAuthority> combinedAuthorities) {
+			protected @Nonnull UserDetails createUserDetails(@Nonnull String username,
+														@Nonnull UserDetails userFromUserQuery,
+														@Nonnull List<GrantedAuthority> combinedAuthorities) {
 				return userFromUserQuery;
 			}
 			
 			@Override
-			protected List<UserDetails> loadUsersByUsername(String springUsername) {
+			protected @Nonnull List<UserDetails> loadUsersByUsername(@Nonnull String springUsername) {
 				String tempCustomerName = null;
 				String tempUserName = springUsername;
 				int slashIndex = tempUserName.indexOf('/');
@@ -337,7 +339,7 @@ public class SkyveSpringSecurity {
 						skyveUserQuery,
 						new RowMapper<UserDetails>() {
 							@Override
-							public UserDetails mapRow(ResultSet rs, int rowNum)
+							public @Nonnull UserDetails mapRow(@Nonnull ResultSet rs, int rowNum)
 							throws SQLException {
 								String user = rs.getString(1);
 								String userPassword = rs.getString(2);
@@ -398,17 +400,17 @@ public class SkyveSpringSecurity {
 			}
 			
 			@Override
-			protected List<GrantedAuthority> loadUserAuthorities(String username) {
+			protected @Nonnull List<GrantedAuthority> loadUserAuthorities(@Nonnull String username) {
 				return Collections.singletonList(new SimpleGrantedAuthority("NoAuth"));
 			}
 
 			@Override
-			protected List<GrantedAuthority> loadGroupAuthorities(String username) {
+			protected @Nonnull List<GrantedAuthority> loadGroupAuthorities(@Nonnull String username) {
 				return Collections.singletonList(new SimpleGrantedAuthority("NoAuth"));
 			}
 
 			@Override
-			public void updateUser(UserDetails user) {
+			public void updateUser(@Nonnull UserDetails user) {
 				TwoFactorAuthUser tfa = (TwoFactorAuthUser) user;
 				
 				Timestamp codeGenTS = tfa.getTfaCodeGeneratedTimestamp() == null ? null : new Timestamp(tfa.getTfaCodeGeneratedTimestamp().getTime());
@@ -445,7 +447,7 @@ public class SkyveSpringSecurity {
 	/**
 	 * Builds the OAuth client registration repository for enabled identity providers.
 	 */
-	public ClientRegistrationRepository clientRegistrationRepository() {
+	public @Nonnull ClientRegistrationRepository clientRegistrationRepository() {
 		List<ClientRegistration> registrations = new ArrayList<>(3);
 		if (UtilImpl.AUTHENTICATION_GOOGLE_CLIENT_ID != null) {
 			registrations.add(googleClientRegistration());
@@ -475,7 +477,7 @@ public class SkyveSpringSecurity {
 	 * Builds the OAuth client registration for Google sign-in.
 	 */
 	@SuppressWarnings("static-method")
-	public ClientRegistration googleClientRegistration() {
+	public @Nonnull ClientRegistration googleClientRegistration() {
 		return ClientRegistration.withRegistrationId("google")
 									.clientId(UtilImpl.AUTHENTICATION_GOOGLE_CLIENT_ID)
 									.clientSecret(UtilImpl.AUTHENTICATION_GOOGLE_SECRET)
@@ -499,7 +501,7 @@ public class SkyveSpringSecurity {
 	 * Builds the OAuth client registration for Facebook sign-in.
 	 */
 	@SuppressWarnings("static-method")
-    public ClientRegistration facebookClientRegistration() {
+    public @Nonnull ClientRegistration facebookClientRegistration() {
 		return ClientRegistration.withRegistrationId("facebook")
 									.clientId(UtilImpl.AUTHENTICATION_FACEBOOK_CLIENT_ID)
 									.clientSecret(UtilImpl.AUTHENTICATION_FACEBOOK_SECRET)
@@ -522,7 +524,7 @@ public class SkyveSpringSecurity {
 	 * Builds the OAuth client registration for GitHub sign-in.
 	 */
 	@SuppressWarnings("static-method")
-    public ClientRegistration githubClientRegistration() {
+    public @Nonnull ClientRegistration githubClientRegistration() {
 		return ClientRegistration.withRegistrationId("github")
 									.clientId(UtilImpl.AUTHENTICATION_GITHUB_CLIENT_ID)
 									.clientSecret(UtilImpl.AUTHENTICATION_GITHUB_SECRET)
@@ -544,7 +546,7 @@ public class SkyveSpringSecurity {
 	 * Builds the OAuth client registration for Microsoft Entra ID sign-in.
 	 */
 	@SuppressWarnings("static-method")
-	public ClientRegistration azureAdClientRegistration() {
+	public @Nonnull ClientRegistration azureAdClientRegistration() {
 
 		String tenantId = UtilImpl.AUTHENTICATION_AZUREAD_TENANT_ID;
 
@@ -578,7 +580,7 @@ public class SkyveSpringSecurity {
 	 * @param principal	The principal (anything could come through here)
 	 * @return	The user name of the principal.
 	 */
-	public static String userNameFromPrincipal(Object principal) {
+	public static @Nullable String userNameFromPrincipal(@Nullable Object principal) {
 		String result = null;
 		if (principal instanceof UserDetails user) {
 			result = user.getUsername();

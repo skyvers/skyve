@@ -87,11 +87,11 @@ public final class StandardGenerator {
 		new NullableBeanVisitor(false, false) {
 			// processBean can be null as we are visiting ALL
 			@Override
-			protected boolean acceptNulls(String binding,
-											Document processDocument,
-											Document owningDocument,
-											Relation owningRelation,
-											Bean processBean) throws Exception {
+			protected boolean acceptNulls(@Nonnull String binding,
+											@Nonnull Document processDocument,
+											@Nullable Document owningDocument,
+											@Nullable Relation owningRelation,
+											@Nullable Bean processBean) throws Exception {
 				LOGGER.info("B = {}", binding);
 
 				// stop recursive processing if we have matched an exclusion
@@ -182,11 +182,11 @@ public final class StandardGenerator {
 			private Bean topBean;
 
 			@Override
-			protected boolean accept(String binding,
-										Document currentDocument,
-										Document owningDocument,
-										Relation owningRelation,
-										Bean bean) throws Exception {
+			protected boolean accept(@Nonnull String binding,
+										@Nonnull Document currentDocument,
+										@Nullable Document owningDocument,
+										@Nullable Relation owningRelation,
+										@Nonnull Bean bean) throws Exception {
 				if ("".equals(binding)) { // top level
 					topBean = bean;
 				}

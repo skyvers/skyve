@@ -19,6 +19,7 @@ import org.springframework.security.web.authentication.RememberMeServices;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 
+import jakarta.annotation.Nonnull;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -56,7 +57,7 @@ public class SingleCustomerBasicAuthenticationFilter extends BasicAuthentication
 	 *
 	 * @param authenticationManager authentication manager used for BASIC credential validation
 	 */
-	public SingleCustomerBasicAuthenticationFilter(AuthenticationManager authenticationManager) {
+	public SingleCustomerBasicAuthenticationFilter(@Nonnull AuthenticationManager authenticationManager) {
 		super(authenticationManager);
 	}
 
@@ -66,13 +67,13 @@ public class SingleCustomerBasicAuthenticationFilter extends BasicAuthentication
 	 * @param authenticationManager authentication manager used for BASIC credential validation
 	 * @param authenticationEntryPoint entry point used when authentication fails
 	 */
-	public SingleCustomerBasicAuthenticationFilter(AuthenticationManager authenticationManager,
-										AuthenticationEntryPoint authenticationEntryPoint) {
+	public SingleCustomerBasicAuthenticationFilter(@Nonnull AuthenticationManager authenticationManager,
+										@Nonnull AuthenticationEntryPoint authenticationEntryPoint) {
 		super(authenticationManager, authenticationEntryPoint);
 	}
 	
 	@Override
-	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
+	protected void doFilterInternal(@Nonnull HttpServletRequest request, @Nonnull HttpServletResponse response, @Nonnull FilterChain chain)
 	throws IOException, ServletException {
 		final boolean debug = this.logger.isDebugEnabled();
 
@@ -138,7 +139,7 @@ public class SingleCustomerBasicAuthenticationFilter extends BasicAuthentication
 		chain.doFilter(request, response);
 	}
 
-	private String[] extractAndDecodeHeader(String header, HttpServletRequest request)
+	private @Nonnull String[] extractAndDecodeHeader(@Nonnull String header, @Nonnull HttpServletRequest request)
 	throws IOException {
 		byte[] base64Token = header.substring(6).getBytes(StandardCharsets.UTF_8);
 		byte[] decoded;
@@ -160,7 +161,7 @@ public class SingleCustomerBasicAuthenticationFilter extends BasicAuthentication
 		// THIS IS THE ONLY REAL CHANGE TO THE BASE CLASS
 	}
 
-	private static boolean authenticationRequired(String username) {
+	private static boolean authenticationRequired(@Nonnull String username) {
 		Authentication existingAuth = SecurityContextHolder.getContext().getAuthentication();
 		if ((existingAuth == null) || (! existingAuth.isAuthenticated())) {
 			return true;
@@ -179,7 +180,7 @@ public class SingleCustomerBasicAuthenticationFilter extends BasicAuthentication
 	 * @param authenticationDetailsSource details source for request-derived authentication metadata
 	 */
 	@Override
-	public void setAuthenticationDetailsSource(AuthenticationDetailsSource<HttpServletRequest, ?> authenticationDetailsSource) {
+	public void setAuthenticationDetailsSource(@Nonnull AuthenticationDetailsSource<HttpServletRequest, ?> authenticationDetailsSource) {
 		this.authenticationDetailsSource = authenticationDetailsSource;
 		super.setAuthenticationDetailsSource(authenticationDetailsSource);
 	}
@@ -192,7 +193,7 @@ public class SingleCustomerBasicAuthenticationFilter extends BasicAuthentication
 	 * @param rememberMeServices remember-me service implementation
 	 */
 	@Override
-	public void setRememberMeServices(RememberMeServices rememberMeServices) {
+	public void setRememberMeServices(@Nonnull RememberMeServices rememberMeServices) {
 		this.rememberMeServices = rememberMeServices;
 		super.setRememberMeServices(rememberMeServices);
 	}

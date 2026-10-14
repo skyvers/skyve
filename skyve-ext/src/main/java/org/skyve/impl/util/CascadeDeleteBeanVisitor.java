@@ -10,6 +10,9 @@ import org.skyve.metadata.model.document.Reference.ReferenceType;
 import org.skyve.metadata.model.document.Relation;
 import org.skyve.util.BeanVisitor;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Bean visitor base class for cascade-delete pre-processing.
  *
@@ -30,11 +33,11 @@ public abstract class CascadeDeleteBeanVisitor extends BeanVisitor {
 	 * Filters traversal to references that should participate in cascade-delete checks.
 	 */
 	@Override
-	protected final boolean accept(String binding,
-									Document visitedDocument,
-									Document owningDocument,
-									Relation owningRelation,
-									Bean visitedBean)
+	protected final boolean accept(@Nonnull String binding,
+									@Nonnull Document visitedDocument,
+									@Nullable Document owningDocument,
+									@Nullable Relation owningRelation,
+									@Nonnull Bean visitedBean)
 	throws Exception {
 		// No use checking referential integrity on a bean that is not persisted as nothing will have referenced it yet.
 		if (visitedBean.isPersisted()) {
@@ -72,5 +75,5 @@ public abstract class CascadeDeleteBeanVisitor extends BeanVisitor {
 	 * @param beanToCascade Visited bean participating in cascade delete
 	 * @throws Exception If pre-delete processing fails
 	 */
-	public abstract void preDeleteProcessing(Document documentToCascade, Bean beanToCascade) throws Exception;
+	public abstract void preDeleteProcessing(@Nonnull Document documentToCascade, @Nonnull Bean beanToCascade) throws Exception;
 }

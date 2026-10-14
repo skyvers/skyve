@@ -3,6 +3,7 @@ package org.skyve.impl.web.filter;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
+import jakarta.annotation.Nonnull;
 import jakarta.servlet.Filter;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.FilterConfig;
@@ -21,12 +22,12 @@ public class UTF8CharacterEncodingFilter implements Filter {
 	 * @throws ServletException when initialization fails
 	 */
 	@Override
-	public void init(FilterConfig filterConfig) throws ServletException {
+	public void init(@Nonnull FilterConfig filterConfig) throws ServletException {
 		// nothing to see here
 	}
 	
 	@Override
-	public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
+	public void doFilter(@Nonnull ServletRequest request, @Nonnull ServletResponse response, @Nonnull FilterChain chain)
 	throws IOException, ServletException {
 		if (request.getCharacterEncoding() == null) {
 			request.setCharacterEncoding(StandardCharsets.UTF_8.name());

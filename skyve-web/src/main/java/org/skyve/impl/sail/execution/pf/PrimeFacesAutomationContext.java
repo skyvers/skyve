@@ -16,6 +16,8 @@ import org.skyve.impl.web.faces.views.FacesView;
 import org.skyve.metadata.sail.language.step.context.PushEditContext;
 import org.skyve.metadata.sail.language.step.context.PushListContext;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.faces.component.NamingContainer;
 import jakarta.faces.component.UIComponent;
 
@@ -35,7 +37,7 @@ public class PrimeFacesAutomationContext extends AutomationContext<PrimeFacesGen
 	 * @param listContext the list generation context
 	 */
 	@Override
-	public void generate(PrimeFacesGenerateListContext listContext) {
+	public void generate(@Nonnull PrimeFacesGenerateListContext listContext) {
 		PushListContext push = listContext.pushListContext();
 		ComponentBuilder componentBuilder = listContext.componentBuilder();
 
@@ -71,7 +73,7 @@ public class PrimeFacesAutomationContext extends AutomationContext<PrimeFacesGen
 	 * @param editContext the edit generation context
 	 */
 	@Override
-	public void generate(PrimeFacesGenerateEditContext editContext) {
+	public void generate(@Nonnull PrimeFacesGenerateEditContext editContext) {
 		PushEditContext push = editContext.pushEditContext();
 		ComponentBuilder componentBuilder = editContext.componentBuilder();
 		LayoutBuilder layoutBuilder = editContext.layoutBuilder();
@@ -105,7 +107,7 @@ public class PrimeFacesAutomationContext extends AutomationContext<PrimeFacesGen
 	 * @param component the Faces component associated with the identifier
 	 * @param widget the Skyve widget associated with the identifier
 	 */
-	void put(String identifier, UIComponent component, Object widget) {
+	void put(@Nonnull String identifier, @Nonnull UIComponent component, @Nonnull Object widget) {
 		List<UIComponent> componentList = components.computeIfAbsent(identifier, key -> new ArrayList<>());
 		componentList.add(component);
 
@@ -119,7 +121,7 @@ public class PrimeFacesAutomationContext extends AutomationContext<PrimeFacesGen
 	 * @param identifier the logical identifier to resolve
 	 * @return the collected Faces components, or {@code null} when none are recorded
 	 */
-	public List<UIComponent> getFacesComponents(String identifier) {
+	public @Nullable List<UIComponent> getFacesComponents(@Nonnull String identifier) {
 		return components.get(identifier);
 	}
 
@@ -129,7 +131,7 @@ public class PrimeFacesAutomationContext extends AutomationContext<PrimeFacesGen
 	 * @param identifier the logical identifier to resolve
 	 * @return the collected widgets, or {@code null} when none are recorded
 	 */
-	public List<Object> getSkyveWidgets(String identifier) {
+	public @Nullable List<Object> getSkyveWidgets(@Nonnull String identifier) {
 		return widgets.get(identifier);
 	}
 
@@ -140,7 +142,7 @@ public class PrimeFacesAutomationContext extends AutomationContext<PrimeFacesGen
 	 * @param row the row index to inject before the terminal client-ID segment
 	 * @return the row-aware client ID
 	 */
-	public static String clientId(UIComponent component, Integer row) {
+	public static @Nonnull String clientId(@Nonnull UIComponent component, @Nonnull Integer row) {
 		String id = clientId(component);
 
 		int lastColonIndex = id.lastIndexOf(':');
@@ -159,7 +161,7 @@ public class PrimeFacesAutomationContext extends AutomationContext<PrimeFacesGen
 	 * @param component the component whose client ID is required
 	 * @return the resolved client ID
 	 */
-	public static String clientId(UIComponent component) {
+	public static @Nonnull String clientId(@Nonnull UIComponent component) {
 		StringBuilder result = new StringBuilder(32);
 		clientId(component, result);
 
@@ -181,7 +183,7 @@ public class PrimeFacesAutomationContext extends AutomationContext<PrimeFacesGen
 	 * @param component the component providing the ID segment
 	 * @param clientId the client-ID accumulator
 	 */
-	private static void clientId(UIComponent component, StringBuilder clientId) {
+	private static void clientId(@Nonnull UIComponent component, @Nonnull StringBuilder clientId) {
 		if (clientId.isEmpty()) {
 			clientId.append(component.getId());
 		} else {

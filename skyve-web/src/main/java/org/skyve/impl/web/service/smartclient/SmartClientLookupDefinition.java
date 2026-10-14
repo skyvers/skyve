@@ -19,6 +19,9 @@ import org.skyve.metadata.module.query.MetaDataQueryProjectedColumn;
 import org.skyve.metadata.user.User;
 import org.skyve.metadata.view.model.list.ListModel;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * SmartClient lookup definition encapsulates metadata used to render SmartClient option data sources and pick lists for lookup fields.
  * This includes the backing metadata query, display field, pick list fields, and filter fields.
@@ -51,14 +54,14 @@ public class SmartClientLookupDefinition {
 	 */
 	@SuppressWarnings({"java:S107", "java:S3776"}) // Long parameter list preserves the existing framework/API contract; complexity OK.
 	protected SmartClientLookupDefinition(boolean bindingToDataGrid,
-											User user,
-											Customer customer,
-											Module module,
-											Document document,
-											Relation relation,
-											LookupDescription lookup,
+											@Nullable User user,
+											@Nonnull Customer customer,
+											@Nonnull Module module,
+											@Nonnull Document document,
+											@Nonnull Relation relation,
+											@Nullable LookupDescription lookup,
 											boolean runtime,
-											String uxui) {
+											@Nonnull String uxui) {
 		this.bindingToDataGrid = bindingToDataGrid;
 		String modelName = (lookup == null) ? null : lookup.getModelName();
 		Document queryDocument;
@@ -141,7 +144,7 @@ public class SmartClientLookupDefinition {
 	 *
 	 * @return display field name
 	 */
-	public String getDisplayField() {
+	public @Nonnull String getDisplayField() {
         return displayField;
     }
 
@@ -150,7 +153,7 @@ public class SmartClientLookupDefinition {
 	 *
 	 * @param displayField display field name
 	 */
-    public void setDisplayField(String displayField) {
+    public void setDisplayField(@Nonnull String displayField) {
         this.displayField = displayField;
     }
 
@@ -159,7 +162,7 @@ public class SmartClientLookupDefinition {
 	 *
 	 * @return option data source identifier
 	 */
-    public String getOptionDataSource() {
+    public @Nonnull String getOptionDataSource() {
         return optionDataSource;
     }
 
@@ -168,7 +171,7 @@ public class SmartClientLookupDefinition {
 	 *
 	 * @param optionDataSource option data source identifier
 	 */
-    public void setOptionDataSource(String optionDataSource) {
+    public void setOptionDataSource(@Nonnull String optionDataSource) {
         this.optionDataSource = optionDataSource;
     }
 
@@ -177,7 +180,7 @@ public class SmartClientLookupDefinition {
 	 *
 	 * @return configured pick-list fields
 	 */
-    public List<String> getPickListFields() {
+    public @Nonnull List<String> getPickListFields() {
         return pickListFields;
     }
 
@@ -186,7 +189,7 @@ public class SmartClientLookupDefinition {
 	 *
 	 * @return lookup filter fields
 	 */
-    public List<String> getFilterFields() {
+    public @Nonnull List<String> getFilterFields() {
         return filterFields;
     }
 
@@ -195,7 +198,7 @@ public class SmartClientLookupDefinition {
 	 *
 	 * @return backing metadata query
 	 */
-    public MetaDataQueryDefinition getQuery() {
+    public @Nullable MetaDataQueryDefinition getQuery() {
         return query;
     }
 
@@ -204,7 +207,7 @@ public class SmartClientLookupDefinition {
 	 *
 	 * @param query backing metadata query
 	 */
-    public void setQuery(MetaDataQueryDefinition query) {
+    public void setQuery(@Nullable MetaDataQueryDefinition query) {
         this.query = query;
     }
 

@@ -45,6 +45,9 @@ import org.skyve.util.logging.SkyveLoggerFactory;
 
 import com.google.common.base.Stopwatch;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Abstract Lucene-backed list model for archived Skyve documents.
  * <p>
@@ -66,31 +69,31 @@ public abstract class ArchivedDocumentListModel<U extends Bean> extends ListMode
     private static final ArchiveLuceneIndexerSingleton archiveLuceneIndexerSingleton = ArchiveLuceneIndexerSingleton.getInstance();
 
     @Override
-    public void postConstruct(Customer customer, boolean runtime) {
+    public void postConstruct(@Nonnull Customer customer, boolean runtime) {
 
         drivingDocument = customer.getModule(getModule())
                                   .getDocument(customer, getDocument());
     }
 
     @Override
-    public Filter getFilter() {
+    public @Nonnull Filter getFilter() {
 
         return filter;
     }
 
     @Override
-    public Filter newFilter() {
+    public @Nonnull Filter newFilter() {
         return new LuceneFilter();
     }
 
     @Override
-    public void putParameter(String name, Object value) {
+    public void putParameter(@Nonnull String name, @Nullable Object value) {
 
         // unused?
     }
 
     @Override
-    public Page fetch() throws Exception {
+    public @Nonnull Page fetch() throws Exception {
 
         if (logger.isDebugEnabled()) {
             logger.debug("Executing fetch, filter={}, start={}, end={}", filter, Integer.toString(getStartRow()), Integer.toString(getEndRow()));
@@ -119,14 +122,14 @@ public abstract class ArchivedDocumentListModel<U extends Bean> extends ListMode
         }
     }
 
-    private Page emptyPage() {
+    private @Nonnull Page emptyPage() {
         Page p = new Page();
         p.setRows(new ArrayList<>());
         p.setSummary(createSummary(0));
         return p;
     }
 
-    private DynamicBean createSummary(long rowCount) {
+    private @Nonnull DynamicBean createSummary(long rowCount) {
         HashMap<String, Object> props = new HashMap<>();
         props.put(Bean.DOCUMENT_ID, UUID.randomUUID().toString());
         if (getSummary() != null) {
@@ -146,7 +149,7 @@ public abstract class ArchivedDocumentListModel<U extends Bean> extends ListMode
         return new DynamicBean(getModule(), getDocument(), props);
     }
 
-    private Result executeQuery() throws IOException {
+    private @Nonnull Result executeQuery() throws IOException {
 
         Stopwatch t = Stopwatch.createStarted();
 
@@ -167,7 +170,7 @@ public abstract class ArchivedDocumentListModel<U extends Bean> extends ListMode
         }
     }
 
-    protected Sort getSort() {
+    protected @Nonnull Sort getSort() {
 
         SortParameter[] params = getSortParameters();
         if (params == null || params.length == 0) {
@@ -205,7 +208,7 @@ public abstract class ArchivedDocumentListModel<U extends Bean> extends ListMode
      * @return the default sort strategy, never {@code null}
      */
 	@SuppressWarnings("static-method")
-    protected Sort getDefaultSort() {
+    protected @Nonnull Sort getDefaultSort() {
         return Sort.RELEVANCE;
     }
 
@@ -218,7 +221,7 @@ public abstract class ArchivedDocumentListModel<U extends Bean> extends ListMode
      * @param binding the Skyve binding used in list metadata
      * @return the Lucene field name used for sorting
      */
-    protected abstract String toSortBinding(String binding);
+    protected abstract @Nonnull String toSortBinding(@Nonnull String binding);
 
     /**
      * Converts a Lucene document into the row bean returned by this list model.
@@ -229,7 +232,7 @@ public abstract class ArchivedDocumentListModel<U extends Bean> extends ListMode
      * @param luceneDoc the Lucene document read from the archive index
      * @return the converted bean row to include in list results
      */
-    protected abstract Bean convertToBean(Document luceneDoc);
+    protected abstract @Nonnull Bean convertToBean(@Nonnull Document luceneDoc);
 
     /**
 	 * Reads a stored Lucene document by id.
@@ -239,34 +242,34 @@ public abstract class ArchivedDocumentListModel<U extends Bean> extends ListMode
 	 * </p>
 	 */
 	@SuppressWarnings("static-method")
-	protected Document readStoredDocument(DirectoryReader reader, int docId) throws IOException {
+	protected @Nonnull Document readStoredDocument(@Nonnull DirectoryReader reader, int docId) throws IOException {
 		return reader.storedFields().document(docId);
 	}
 
 	/**
      * Tuple record for ferrying query results around
      */
-    private static record Result(List<Bean> rows, long totalRowCount) {
+    private static record Result(@Nonnull List<Bean> rows, long totalRowCount) {
     }
 
 	@Override
     @SuppressWarnings("resource")
-    public AutoClosingIterable<Bean> iterate() throws Exception {
+    public @Nonnull AutoClosingIterable<Bean> iterate() throws Exception {
         return this.new LuceneResultsIterable(0, Integer.MAX_VALUE);
     }
 
     @Override
-    public Bean update(String bizId, SortedMap<String, Object> properties) throws Exception {
+    public @Nullable Bean update(@Nonnull String bizId, @Nonnull SortedMap<String, Object> properties) throws Exception {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public void remove(String bizId) throws Exception {
+    public void remove(@Nonnull String bizId) throws Exception {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public org.skyve.metadata.model.document.Document getDrivingDocument() {
+    public @Nullable org.skyve.metadata.model.document.Document getDrivingDocument() {
         return drivingDocument;
     }
 
@@ -277,7 +280,7 @@ public abstract class ArchivedDocumentListModel<U extends Bean> extends ListMode
      *
      * @return the module name used by this model
      */
-    protected abstract String getModule();
+    protected abstract @Nonnull String getModule();
 
     /**
      * Returns the document name for the driving archived document.
@@ -286,7 +289,7 @@ public abstract class ArchivedDocumentListModel<U extends Bean> extends ListMode
      *
      * @return the document name used by this model
      */
-    protected abstract String getDocument();
+    protected abstract @Nonnull String getDocument();
 
     /**
      * Resolves the Lucene index directory configured for this model's module and document.
@@ -295,7 +298,7 @@ public abstract class ArchivedDocumentListModel<U extends Bean> extends ListMode
      * @throws NoSuchElementException if no archive configuration exists for the
      *         module and document combination
      */
-    protected Path getIndexDirectory() {
+    protected @Nonnull Path getIndexDirectory() {
         return Util.getArchiveConfig()
                    .findArchiveDocConfig(getModule(), getDocument())
 				   .orElseThrow(() -> new NoSuchElementException(getModule() + '.' + getDocument() + " is not configured for archive indexing."))
@@ -308,7 +311,7 @@ public abstract class ArchivedDocumentListModel<U extends Bean> extends ListMode
      * @return the matching archive configuration, or empty when archiving is not
      *         configured for this document type
      */
-    protected Optional<ArchiveDocConfig> findArchiveDocumentConfig() {
+    protected @Nonnull Optional<ArchiveDocConfig> findArchiveDocumentConfig() {
 
         return Util.getArchiveConfig()
                    .findArchiveDocConfig(getModule(), getDocument());
@@ -373,7 +376,7 @@ public abstract class ArchivedDocumentListModel<U extends Bean> extends ListMode
          * @return a stateful iterator over converted bean rows
          */
         @Override
-        public Iterator<Bean> iterator() {
+        public @Nonnull Iterator<Bean> iterator() {
             return this.new LuceneResultsIterator();
         }
 
@@ -383,7 +386,7 @@ public abstract class ArchivedDocumentListModel<U extends Bean> extends ListMode
             tryClose(dirReader);
         }
 
-        private void tryClose(AutoCloseable ac) {
+        private void tryClose(@Nonnull AutoCloseable ac) {
 
             try {
                 ac.close();
@@ -394,7 +397,7 @@ public abstract class ArchivedDocumentListModel<U extends Bean> extends ListMode
             }
         }
 
-        public TotalHits totalHits() {
+        public @Nonnull TotalHits totalHits() {
             return topDocs.totalHits;
         }
 
@@ -409,7 +412,7 @@ public abstract class ArchivedDocumentListModel<U extends Bean> extends ListMode
             }
 
             @Override
-            public Bean next() {
+            public @Nonnull Bean next() {
 				if (! hasNext()) {
 					throw new NoSuchElementException();
 				}

@@ -6,6 +6,9 @@ import java.util.List;
 import org.skyve.metadata.model.Attribute.AttributeType;
 import org.skyve.report.ReportFormat;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Captures layout, grouping, and export options used when generating ad hoc report designs.
  */
@@ -45,7 +48,7 @@ public final class ReportDesignParameters {
 		 *
 		 * @return The column binding name.
 		 */
-		public String getName() {
+		public @Nullable String getName() {
 			return name;
 		}
 
@@ -54,7 +57,7 @@ public final class ReportDesignParameters {
 		 *
 		 * @param name The column binding name.
 		 */
-		public void setName(String name) {
+		public void setName(@Nullable String name) {
 			this.name = name;
 		}
 		
@@ -63,7 +66,7 @@ public final class ReportDesignParameters {
 		 *
 		 * @return The display title.
 		 */
-		public String getTitle() {
+		public @Nullable String getTitle() {
 			return title;
 		}
 		
@@ -72,7 +75,7 @@ public final class ReportDesignParameters {
 		 *
 		 * @param title The display title.
 		 */
-		public void setTitle(String title) {
+		public void setTitle(@Nullable String title) {
 			this.title = title;
 		}
 		
@@ -117,7 +120,7 @@ public final class ReportDesignParameters {
 		 *
 		 * @return The configured alignment.
 		 */
-		public ColumnAlignment getAlignment() {
+		public @Nullable ColumnAlignment getAlignment() {
 			return alignment;
 		}
 		
@@ -126,7 +129,7 @@ public final class ReportDesignParameters {
 		 *
 		 * @param alignment The alignment to apply.
 		 */
-		public void setAlignment(ColumnAlignment alignment) {
+		public void setAlignment(@Nullable ColumnAlignment alignment) {
 			this.alignment = alignment;
 		}
 		
@@ -135,7 +138,7 @@ public final class ReportDesignParameters {
 		 *
 		 * @return The attribute type.
 		 */
-		public AttributeType getAttributeType() {
+		public @Nullable AttributeType getAttributeType() {
 			return attributeType;
 		}
 		
@@ -144,7 +147,7 @@ public final class ReportDesignParameters {
 		 *
 		 * @param attributeType The attribute type.
 		 */
-		public void setAttributeType(AttributeType attributeType) {
+		public void setAttributeType(@Nullable AttributeType attributeType) {
 			this.attributeType = attributeType;
 		}
 		
@@ -153,7 +156,7 @@ public final class ReportDesignParameters {
 		 *
 		 * @return The format pattern, or {@code null}.
 		 */
-		public String getFormatPattern() {
+		public @Nullable String getFormatPattern() {
 			return formatPattern;
 		}
 		
@@ -162,7 +165,7 @@ public final class ReportDesignParameters {
 		 *
 		 * @param formatPattern The format pattern.
 		 */
-		public void setFormatPattern(String formatPattern) {
+		public void setFormatPattern(@Nullable String formatPattern) {
 			this.formatPattern = formatPattern;
 		}
 	}
@@ -191,7 +194,7 @@ public final class ReportDesignParameters {
 	 *
 	 * @return The report format.
 	 */
-	public ReportFormat getReportFormat() {
+	public @Nullable ReportFormat getReportFormat() {
 		return reportFormat;
 	}
 	
@@ -200,7 +203,7 @@ public final class ReportDesignParameters {
 	 *
 	 * @param reportFormat The report format.
 	 */
-	public void setReportFormat(ReportFormat reportFormat) {
+	public void setReportFormat(@Nullable ReportFormat reportFormat) {
 		this.reportFormat = reportFormat;
 	}
 	
@@ -227,7 +230,7 @@ public final class ReportDesignParameters {
 	 *
 	 * @return The report style.
 	 */
-	public ReportStyle getReportStyle() {
+	public @Nullable ReportStyle getReportStyle() {
 		return reportStyle;
 	}
 	
@@ -272,7 +275,7 @@ public final class ReportDesignParameters {
 	 *
 	 * @param reportStyle The report style.
 	 */
-	public void setReportStyle(ReportStyle reportStyle) {
+	public void setReportStyle(@Nullable ReportStyle reportStyle) {
 		this.reportStyle = reportStyle;
 	}
 	
@@ -389,7 +392,7 @@ public final class ReportDesignParameters {
 	 *
 	 * @return The report column definitions.
 	 */
-	public List<ReportColumn> getColumns() {
+	public @Nonnull List<ReportColumn> getColumns() {
 		return columns;
 	}
 	
@@ -398,7 +401,7 @@ public final class ReportDesignParameters {
 	 *
 	 * @return The grouping column names.
 	 */
-	public List<String> getGroupColumns() {
+	public @Nonnull List<String> getGroupColumns() {
 		return groupColumns;
 	}
 	

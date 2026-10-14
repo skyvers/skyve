@@ -2,6 +2,9 @@ package org.skyve.impl.snapshot;
 
 import org.skyve.metadata.FilterOperator;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Enumerates SmartClient-compatible filter operators used by snapshot serialization.
  */
@@ -87,7 +90,7 @@ public enum SmartClientFilterOperator {
 	 * @param operator The framework operator.
 	 * @return The mapped SmartClient operator, or {@code null} when no mapping exists.
 	 */
-	public static SmartClientFilterOperator fromFilterOperator(FilterOperator operator) {
+	public static @Nullable SmartClientFilterOperator fromFilterOperator(@Nonnull FilterOperator operator) {
 		SmartClientFilterOperator result = null;
 		
 		switch (operator) {

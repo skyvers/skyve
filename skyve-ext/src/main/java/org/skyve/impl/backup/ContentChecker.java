@@ -79,7 +79,7 @@ public class ContentChecker {
 	 * @throws Exception if validation fails
 	 */
 	@SuppressWarnings({ "java:S3776", "resource" }) // complexity OK; cm is managed by caller
-	private void checkStaticContent(Connection connection, ContentManager cm, Customer customer, String customerName) throws Exception {
+	private void checkStaticContent(@Nonnull Connection connection, @Nonnull ContentManager cm, @Nonnull Customer customer, @Nonnull String customerName) throws Exception {
 		for (Table table : BackupUtil.getTables()) {
 			if (! hasContent(table)) {
 				continue;
@@ -124,11 +124,11 @@ public class ContentChecker {
 	 * @throws Exception if validation fails
 	 */
 	@SuppressWarnings("java:S3776") // complexity OK
-	private void checkDynamicContent(Connection connection,
-										ContentManager cm,
-										Customer customer,
-										String customerName,
-										String dynamicEntityPersistentIdentifier)
+	private void checkDynamicContent(@Nonnull Connection connection,
+										@Nonnull ContentManager cm,
+										@Nonnull Customer customer,
+										@Nonnull String customerName,
+										@Nonnull String dynamicEntityPersistentIdentifier)
 	throws Exception {
 		try (Statement statement = connection.createStatement()) {
 			// Iterate through all DynamicEntities looking for content/image attribute values
@@ -178,12 +178,12 @@ public class ContentChecker {
 	 * @param dynamicDocument true if the reference comes from a dynamic entity
 	 */
 	@SuppressWarnings({"java:S3776", "java:S1141"}) // complexity OK
-	private void checkContent(String contentId,
-								ContentManager cm,
-								String fieldName,
-								String persistentIdentifier,
-								AttributeType attributeType,
-								Customer customer,
+	private void checkContent(@Nonnull String contentId,
+								@Nonnull ContentManager cm,
+								@Nonnull String fieldName,
+								@Nonnull String persistentIdentifier,
+								@Nonnull AttributeType attributeType,
+								@Nonnull Customer customer,
 								boolean dynamicDocument) {
 		AttachmentContent content;
 		try {

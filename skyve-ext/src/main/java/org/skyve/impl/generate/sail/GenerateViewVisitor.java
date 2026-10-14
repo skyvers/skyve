@@ -28,6 +28,8 @@ import org.skyve.metadata.sail.language.step.interaction.grids.DataGridNew;
 import org.skyve.metadata.view.View.ViewType;
 import org.skyve.util.Binder.TargetMetaData;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * View visitor that traverses a Skyve view model and emits a SAIL
  * (Skyve Automated Integration Language) test script.
@@ -44,10 +46,10 @@ public class GenerateViewVisitor extends NoOpViewVisitor {
 	// list of module.document.view.binding visit in data grids to stop infinite recursion
 	private Set<String> breadcrumbs;
 	
-	protected GenerateViewVisitor(Customer customer, 
-										Module module,
-										Document document,
-										String uxui) {
+	protected GenerateViewVisitor(@Nonnull Customer customer, 
+										@Nonnull Module module,
+										@Nonnull Document document,
+										@Nonnull String uxui) {
 		super((CustomerImpl) customer, 
 				(ModuleImpl) module,
 				(DocumentImpl) document,
@@ -57,11 +59,11 @@ public class GenerateViewVisitor extends NoOpViewVisitor {
 		populateSteps.add(new TestDataEnter());
 	}
 	
-	private GenerateViewVisitor(Customer customer, 
-									Module module,
-									Document document,
-									String uxui,
-									Set<String> breadcrumbs) {
+	private GenerateViewVisitor(@Nonnull Customer customer, 
+									@Nonnull Module module,
+									@Nonnull Document document,
+									@Nonnull String uxui,
+									@Nonnull Set<String> breadcrumbs) {
 		super((CustomerImpl) customer, 
 				(ModuleImpl) module,
 				(DocumentImpl) document,
@@ -71,7 +73,7 @@ public class GenerateViewVisitor extends NoOpViewVisitor {
 		populateSteps.add(new TestDataEnter());
 	}
 
-	private static ViewImpl determineView(Customer c, Document d, String uxui) {
+	private static @Nonnull ViewImpl determineView(@Nonnull Customer c, @Nonnull Document d, @Nonnull String uxui) {
 		ViewImpl createView = (ViewImpl) d.getView(uxui, c, ViewType.create.toString());
 		ViewImpl editView = (ViewImpl) d.getView(uxui, c, ViewType.edit.toString());
 		
@@ -79,7 +81,7 @@ public class GenerateViewVisitor extends NoOpViewVisitor {
 	}
 
 	@Override
-	public void visitTab(Tab tab, boolean parentVisible, boolean parentEnabled) {
+	public void visitTab(@Nonnull Tab tab, boolean parentVisible, boolean parentEnabled) {
 		TabSelect select = new TabSelect();
 		select.setTabPath(tab.getLocalisedTitle());
 		populateSteps.add(select);
@@ -87,7 +89,7 @@ public class GenerateViewVisitor extends NoOpViewVisitor {
 	}
 	
 	@Override
-	public void visitDataGrid(DataGrid grid, boolean parentVisible, boolean parentEnabled) {
+	public void visitDataGrid(@Nonnull DataGrid grid, boolean parentVisible, boolean parentEnabled) {
 		// Do nothing if we can't add a row
 		if (Boolean.FALSE.equals(grid.getEditable()) || Boolean.FALSE.equals(grid.getShowAdd())) {
 			return;
@@ -119,39 +121,39 @@ public class GenerateViewVisitor extends NoOpViewVisitor {
 	}
 	
 	@Override
-	public void visitSaveAction(ActionImpl action) {
+	public void visitSaveAction(@Nonnull ActionImpl action) {
 		hasSave = true;
 	}
 	
 	@Override
-	public void visitOKAction(ActionImpl action) {
+	public void visitOKAction(@Nonnull ActionImpl action) {
 		hasOk = true;
 	}
 
 	@Override
-	public void visitCancelAction(ActionImpl action) {
+	public void visitCancelAction(@Nonnull ActionImpl action) {
 		hasCancel = true;
 	}
 
 	@Override
-	public void visitDeleteAction(ActionImpl action) {
+	public void visitDeleteAction(@Nonnull ActionImpl action) {
 		hasDelete = true;
 	}
 	
 	@Override
-	public void visitCustomAction(ActionImpl action) {
+	public void visitCustomAction(@Nonnull ActionImpl action) {
 		if (! Boolean.FALSE.equals(action.getInActionPanel())) {
 			addCustomAction(action);
 		}
 	}
 	
 	@Override
-	public void visitButton(Button button, boolean parentVisible, boolean parentEnabled) {
+	public void visitButton(@Nonnull Button button, boolean parentVisible, boolean parentEnabled) {
 		ActionImpl action = (ActionImpl) view.getAction(button.getActionName());
 		addCustomAction(action);
 	}
 	
-	private void addCustomAction(ActionImpl action) {
+	private void addCustomAction(@Nonnull ActionImpl action) {
 		Action step = new Action();
 		step.setActionName(action.getName());
 		if (action.getConfirmationText() != null) {
@@ -160,11 +162,11 @@ public class GenerateViewVisitor extends NoOpViewVisitor {
 		actionSteps.add(step);
 	}
 	
-	List<Step> getPopulateSteps() {
+	@Nonnull List<Step> getPopulateSteps() {
 		return populateSteps;
 	}
 	
-	List<Step> getActionSteps() {
+	@Nonnull List<Step> getActionSteps() {
 		return actionSteps;
 	}
 	

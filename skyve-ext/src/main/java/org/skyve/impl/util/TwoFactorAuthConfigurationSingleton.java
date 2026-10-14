@@ -10,6 +10,9 @@ import org.skyve.CORE;
 import org.skyve.EXT;
 import org.skyve.domain.messages.DomainException;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Caches and serves customer-level two-factor-authentication configuration.
  *
@@ -36,7 +39,7 @@ public class TwoFactorAuthConfigurationSingleton implements SystemObserver {
 	 *
 	 * @return Global two-factor-auth configuration singleton
 	 */
-	public static TwoFactorAuthConfigurationSingleton getInstance() {
+	public static @Nonnull TwoFactorAuthConfigurationSingleton getInstance() {
 		return instance;
 	}
 	
@@ -46,7 +49,7 @@ public class TwoFactorAuthConfigurationSingleton implements SystemObserver {
 	 * @param tfaConfig Customer configuration to test
 	 * @return {@code true} when the configuration resolves to email TFA
 	 */
-	public static boolean isPushTfa(TwoFactorAuthCustomerConfiguration tfaConfig) {
+	public static boolean isPushTfa(@Nullable TwoFactorAuthCustomerConfiguration tfaConfig) {
 		if (tfaConfig == null) {
 			return false;
 		}
@@ -59,7 +62,7 @@ public class TwoFactorAuthConfigurationSingleton implements SystemObserver {
 	 * @param customerName Customer name key
 	 * @return {@code true} when the customer has email TFA configured
 	 */
-	public boolean isPushTfa(String customerName) {
+	public boolean isPushTfa(@Nullable String customerName) {
 		if (customerName == null) {
 			return false;
 		}
@@ -73,7 +76,7 @@ public class TwoFactorAuthConfigurationSingleton implements SystemObserver {
 	 * @param customerName Customer name key
 	 * @return Cached configuration, or {@code null} when absent
 	 */
-	public TwoFactorAuthCustomerConfiguration getConfig(String customerName) {
+	public @Nullable TwoFactorAuthCustomerConfiguration getConfig(@Nonnull String customerName) {
 		return configuration.get(customerName);
 	}
 	
@@ -82,7 +85,7 @@ public class TwoFactorAuthConfigurationSingleton implements SystemObserver {
 	 *
 	 * @param customerName Customer name key
 	 */
-	public void clearConfig(String customerName) {
+	public void clearConfig(@Nonnull String customerName) {
 		configuration.remove(customerName);
 	}
 	
@@ -91,7 +94,7 @@ public class TwoFactorAuthConfigurationSingleton implements SystemObserver {
 	 *
 	 * @param config Customer configuration to cache
 	 */
-	public void add(TwoFactorAuthCustomerConfiguration config) {
+	public void add(@Nullable TwoFactorAuthCustomerConfiguration config) {
 		String customerName = CORE.getCustomer().getName();
 		if (customerName != null && config != null) {
 			configuration.put(customerName, config);
@@ -130,7 +133,7 @@ public class TwoFactorAuthConfigurationSingleton implements SystemObserver {
 		}
 	}
 
-	private static String buildStartupFailureMessage() {
+	private static @Nonnull String buildStartupFailureMessage() {
 		boolean tfaCustomersConfigured = (UtilImpl.TWO_FACTOR_AUTH_CUSTOMERS != null) &&
 											(! UtilImpl.TWO_FACTOR_AUTH_CUSTOMERS.isEmpty());
 		StringBuilder message = new StringBuilder(512);

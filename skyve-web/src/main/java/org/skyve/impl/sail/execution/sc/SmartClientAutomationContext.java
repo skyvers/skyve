@@ -17,6 +17,9 @@ import org.skyve.metadata.user.User;
 import org.skyve.metadata.view.View;
 import org.skyve.metadata.view.View.ViewType;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Automation context implementation for SmartClient client, handling list and edit contexts specific to SmartClient UI components.
  * 
@@ -35,7 +38,7 @@ public class SmartClientAutomationContext extends AutomationContext<SmartClientG
 	 * @param listContext the list generation context
 	 */
 	@Override
-	public void generate(SmartClientGenerateListContext listContext) {
+	public void generate(@Nonnull SmartClientGenerateListContext listContext) {
 		PushListContext push = listContext.pushListContext();
 
 		String listGridIdentifier = push.getIdentifier(this);
@@ -60,7 +63,7 @@ public class SmartClientAutomationContext extends AutomationContext<SmartClientG
 	 * @param editContext the edit generation context
 	 */
 	@Override
-	public void generate(SmartClientGenerateEditContext editContext) {
+	public void generate(@Nonnull SmartClientGenerateEditContext editContext) {
 		PushEditContext push = editContext.pushEditContext();
 		
 		User user = CORE.getUser();
@@ -96,7 +99,7 @@ public class SmartClientAutomationContext extends AutomationContext<SmartClientG
 	 * @param identifier the logical identifier for the UI element
 	 * @param locator the locator to associate with the identifier
 	 */
-	void put(String identifier, Locator locator) {
+	void put(@Nonnull String identifier, @Nonnull Locator locator) {
 		List<Locator> locatorList = locators.computeIfAbsent(identifier, key -> new ArrayList<>());
 		locatorList.add(locator);
 	}
@@ -107,7 +110,7 @@ public class SmartClientAutomationContext extends AutomationContext<SmartClientG
 	 * @param identifier the logical identifier for the UI element
 	 * @return the list of locators, or {@code null} if none exist
 	 */
-	public List<Locator> getLocators(String identifier) {
+	public @Nullable List<Locator> getLocators(@Nonnull String identifier) {
 		return locators.get(identifier);
 	}
 

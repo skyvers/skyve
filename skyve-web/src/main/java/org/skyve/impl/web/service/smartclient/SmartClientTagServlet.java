@@ -38,6 +38,8 @@ import org.skyve.util.Util;
 import org.skyve.util.logging.SkyveLoggerFactory;
 import org.slf4j.Logger;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
@@ -66,7 +68,7 @@ public class SmartClientTagServlet extends HttpServlet {
 	 */
 	@Override
 	@SuppressWarnings("java:S1989") // there exists JavaEE error pages
-	protected void doGet(HttpServletRequest request, HttpServletResponse response)
+	protected void doGet(@Nonnull HttpServletRequest request, @Nonnull HttpServletResponse response)
 	throws ServletException, IOException {
 		processRequest(request, response);
 	}
@@ -76,7 +78,7 @@ public class SmartClientTagServlet extends HttpServlet {
 	 */
 	@Override
 	@SuppressWarnings("java:S1989") // there exists JavaEE error pages
-	protected void doPost(HttpServletRequest request, HttpServletResponse response)
+	protected void doPost(@Nonnull HttpServletRequest request, @Nonnull HttpServletResponse response)
 	throws ServletException, IOException {
 		processRequest(request, response);
 	}
@@ -90,8 +92,8 @@ public class SmartClientTagServlet extends HttpServlet {
 	 * @throws IOException when response writing fails
 	 */
 	@SuppressWarnings("java:S3776") // Complexity OK
-	private static void processRequest(HttpServletRequest request, 
-										HttpServletResponse response)
+	private static void processRequest(@Nonnull HttpServletRequest request, 
+										@Nonnull HttpServletResponse response)
 	throws IOException {
 		StringBuilder sb = new StringBuilder(256);
 
@@ -232,7 +234,7 @@ public class SmartClientTagServlet extends HttpServlet {
 	 * @param reference support reference token
 	 * @param pw response writer
 	 */
-	static void appendUnexpectedWarning(String reference, PrintWriter pw) {
+	static void appendUnexpectedWarning(@Nonnull String reference, @Nonnull PrintWriter pw) {
 		pw.append("The tag operation was unsuccessful. ");
 		pw.append(WebErrorUtil.escapeJsStringWithHtmlFormatting(WebErrorUtil.genericMessage(reference)));
 	}
@@ -245,7 +247,7 @@ public class SmartClientTagServlet extends HttpServlet {
 	 * @param sb response builder receiving menu JSON
 	 * @throws Exception when tag listing fails
 	 */
-	private static void list(String tagId, String menuButtonId, StringBuilder sb)
+	private static void list(@Nullable String tagId, @Nonnull String menuButtonId, @Nonnull StringBuilder sb)
 	throws Exception {
 	    sb.append("[{title:'New Tag',icon:'icons/tag_add.png',click:'");
 	    sb.append(menuButtonId).append(".newTag()'},");
@@ -309,13 +311,13 @@ public class SmartClientTagServlet extends HttpServlet {
 	 * @return auto-closing iterable of beans matching the criteria
 	 * @throws Exception when model/query resolution or criteria parsing fails
 	 */
-	private static AutoClosingIterable<Bean> iterate(String tagId,
-														String dataSourceName,
-														String criteriaJSON,
-														Bean bean,
-														User user,
-														Customer customer,
-														UxUi uxui)
+	private static @Nonnull AutoClosingIterable<Bean> iterate(@Nullable String tagId,
+														@Nonnull String dataSourceName,
+														@Nonnull String criteriaJSON,
+														@Nullable Bean bean,
+														@Nonnull User user,
+														@Nonnull Customer customer,
+														@Nonnull UxUi uxui)
 	throws Exception {
 		// Determine
 		int _Index = dataSourceName.indexOf('_');

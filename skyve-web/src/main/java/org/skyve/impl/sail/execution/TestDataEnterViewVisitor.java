@@ -39,6 +39,8 @@ import org.skyve.metadata.view.Invisible;
 import org.skyve.metadata.view.widget.bound.Bound;
 import org.skyve.util.Binder.TargetMetaData;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.faces.model.SelectItem;
 
 /**
@@ -64,12 +66,12 @@ public class TestDataEnterViewVisitor extends NoOpViewVisitor {
 	 * @param bean the bean supplying source values and condition evaluation
 	 */
 	public TestDataEnterViewVisitor(
-			CustomerImpl customer,
-			ModuleImpl module,
-			DocumentImpl document,
-			ViewImpl view,
-			String uxui,
-			Bean bean) {
+			@Nonnull CustomerImpl customer,
+			@Nonnull ModuleImpl module,
+			@Nonnull DocumentImpl document,
+			@Nonnull ViewImpl view,
+			@Nonnull String uxui,
+			@Nonnull Bean bean) {
 		super(customer, module, document, view, uxui);
 
 		this.bean = bean;
@@ -83,7 +85,7 @@ public class TestDataEnterViewVisitor extends NoOpViewVisitor {
 	 * @param parentEnabled whether ancestor containers are currently enabled
 	 */
 	@Override
-	public void visitTab(Tab tab, boolean parentVisible, boolean parentEnabled) {
+	public void visitTab(@Nonnull Tab tab, boolean parentVisible, boolean parentEnabled) {
 		if (parentVisible && parentEnabled && visible(tab) && enabled(tab)) {
 			TabSelect select = new TabSelect();
 			select.setTabPath(tab.getLocalisedTitle());
@@ -100,7 +102,7 @@ public class TestDataEnterViewVisitor extends NoOpViewVisitor {
 	 * @param parentEnabled whether ancestor containers are currently enabled
 	 */
 	@Override
-	public void visitFormItem(FormItem item, boolean parentVisible, boolean parentEnabled) {
+	public void visitFormItem(@Nonnull FormItem item, boolean parentVisible, boolean parentEnabled) {
 		requiredWidget = item.getRequired();
 	}
 	
@@ -112,7 +114,7 @@ public class TestDataEnterViewVisitor extends NoOpViewVisitor {
 	 * @param parentEnabled whether ancestor containers are currently enabled
 	 */
 	@Override
-	public void visitedFormItem(FormItem item, boolean parentVisible, boolean parentEnabled) {
+	public void visitedFormItem(@Nonnull FormItem item, boolean parentVisible, boolean parentEnabled) {
 		requiredWidget = null;
 	}
 	
@@ -124,7 +126,7 @@ public class TestDataEnterViewVisitor extends NoOpViewVisitor {
 	 * @param parentEnabled whether ancestor containers are currently enabled
 	 */
 	@Override
-	public void visitCheckBox(CheckBox checkBox, boolean parentVisible, boolean parentEnabled) {
+	public void visitCheckBox(@Nonnull CheckBox checkBox, boolean parentVisible, boolean parentEnabled) {
 		addDataEnter(checkBox, parentVisible, parentEnabled, visible(checkBox), enabled(checkBox));
 	}
 
@@ -136,7 +138,7 @@ public class TestDataEnterViewVisitor extends NoOpViewVisitor {
 	 * @param parentEnabled whether parent containers are enabled
 	 */
 	@Override
-	public void visitCheckMembership(CheckMembership membership, boolean parentVisible, boolean parentEnabled) {
+	public void visitCheckMembership(@Nonnull CheckMembership membership, boolean parentVisible, boolean parentEnabled) {
 		// TODO Auto-generated method stub
 	}
 	
@@ -148,7 +150,7 @@ public class TestDataEnterViewVisitor extends NoOpViewVisitor {
 	 * @param parentEnabled whether ancestor containers are currently enabled
 	 */
 	@Override
-	public void visitColourPicker(ColourPicker colour, boolean parentVisible, boolean parentEnabled) {
+	public void visitColourPicker(@Nonnull ColourPicker colour, boolean parentVisible, boolean parentEnabled) {
 		addDataEnter(colour, parentVisible, parentEnabled, visible(colour), enabled(colour));
 	}
 
@@ -160,7 +162,7 @@ public class TestDataEnterViewVisitor extends NoOpViewVisitor {
 	 * @param parentEnabled whether ancestor containers are currently enabled
 	 */
 	@Override
-	public void visitCombo(Combo combo, boolean parentVisible, boolean parentEnabled) {
+	public void visitCombo(@Nonnull Combo combo, boolean parentVisible, boolean parentEnabled) {
 		addDataEnter(combo, parentVisible, parentEnabled, visible(combo), enabled(combo));
 	}
 	
@@ -172,7 +174,7 @@ public class TestDataEnterViewVisitor extends NoOpViewVisitor {
 	 * @param parentEnabled whether ancestor containers are currently enabled
 	 */
 	@Override
-	public void visitDataGrid(DataGrid grid, boolean parentVisible, boolean parentEnabled) {
+	public void visitDataGrid(@Nonnull DataGrid grid, boolean parentVisible, boolean parentEnabled) {
 		inDataWidget = true;
 	}
 
@@ -184,7 +186,7 @@ public class TestDataEnterViewVisitor extends NoOpViewVisitor {
 	 * @param parentEnabled whether ancestor containers are currently enabled
 	 */
 	@Override
-	public void visitedDataGrid(DataGrid grid, boolean parentVisible, boolean parentEnabled) {
+	public void visitedDataGrid(@Nonnull DataGrid grid, boolean parentVisible, boolean parentEnabled) {
 		inDataWidget = false;
 	}
 
@@ -196,7 +198,7 @@ public class TestDataEnterViewVisitor extends NoOpViewVisitor {
 	 * @param parentEnabled whether ancestor containers are currently enabled
 	 */
 	@Override
-	public void visitDataRepeater(DataRepeater repeater, boolean parentVisible, boolean parentEnabled) {
+	public void visitDataRepeater(@Nonnull DataRepeater repeater, boolean parentVisible, boolean parentEnabled) {
 		inDataWidget = true;
 	}
 	
@@ -208,7 +210,7 @@ public class TestDataEnterViewVisitor extends NoOpViewVisitor {
 	 * @param parentEnabled whether ancestor containers are currently enabled
 	 */
 	@Override
-	public void visitedDataRepeater(DataRepeater repeater, boolean parentVisible, boolean parentEnabled) {
+	public void visitedDataRepeater(@Nonnull DataRepeater repeater, boolean parentVisible, boolean parentEnabled) {
 		inDataWidget = false;
 	}
 	
@@ -220,7 +222,7 @@ public class TestDataEnterViewVisitor extends NoOpViewVisitor {
 	 * @param parentEnabled whether parent containers are enabled
 	 */
 	@Override
-	public void visitGeometry(Geometry geometry, boolean parentVisible, boolean parentEnabled) {
+	public void visitGeometry(@Nonnull Geometry geometry, boolean parentVisible, boolean parentEnabled) {
 		// TODO Auto-generated method stub
 	}
 	
@@ -232,7 +234,7 @@ public class TestDataEnterViewVisitor extends NoOpViewVisitor {
 	 * @param parentEnabled whether parent containers are enabled
 	 */
 	@Override
-	public void visitLookupDescription(LookupDescription lookup, boolean parentVisible, boolean parentEnabled) {
+	public void visitLookupDescription(@Nonnull LookupDescription lookup, boolean parentVisible, boolean parentEnabled) {
 		// TODO Auto-generated method stub
 	}
 
@@ -244,7 +246,7 @@ public class TestDataEnterViewVisitor extends NoOpViewVisitor {
 	 * @param parentEnabled whether ancestor containers are currently enabled
 	 */
 	@Override
-	public void visitPassword(Password password, boolean parentVisible, boolean parentEnabled) {
+	public void visitPassword(@Nonnull Password password, boolean parentVisible, boolean parentEnabled) {
 		addDataEnter(password, parentVisible, parentEnabled, visible(password), enabled(password));
 	}
 	
@@ -256,7 +258,7 @@ public class TestDataEnterViewVisitor extends NoOpViewVisitor {
 	 * @param parentEnabled whether ancestor containers are currently enabled
 	 */
 	@Override
-	public void visitRadio(Radio radio, boolean parentVisible, boolean parentEnabled) {
+	public void visitRadio(@Nonnull Radio radio, boolean parentVisible, boolean parentEnabled) {
 		addDataEnter(radio, parentVisible, parentEnabled, visible(radio), enabled(radio));
 	}
 	
@@ -268,7 +270,7 @@ public class TestDataEnterViewVisitor extends NoOpViewVisitor {
 	 * @param parentEnabled whether ancestor containers are currently enabled
 	 */
 	@Override
-	public void visitRichText(RichText richText, boolean parentVisible, boolean parentEnabled) {
+	public void visitRichText(@Nonnull RichText richText, boolean parentVisible, boolean parentEnabled) {
 		addDataEnter(richText, parentVisible, parentEnabled, visible(richText), enabled(richText));
 	}
 	
@@ -280,7 +282,7 @@ public class TestDataEnterViewVisitor extends NoOpViewVisitor {
 	 * @param parentEnabled whether ancestor containers are currently enabled
 	 */
 	@Override
-	public void visitSlider(Slider slider, boolean parentVisible, boolean parentEnabled) {
+	public void visitSlider(@Nonnull Slider slider, boolean parentVisible, boolean parentEnabled) {
 		addDataEnter(slider, parentVisible, parentEnabled, visible(slider), enabled(slider));
 	}
 	
@@ -292,7 +294,7 @@ public class TestDataEnterViewVisitor extends NoOpViewVisitor {
 	 * @param parentEnabled whether ancestor containers are currently enabled
 	 */
 	@Override
-	public void visitSpinner(Spinner spinner, boolean parentVisible, boolean parentEnabled) {
+	public void visitSpinner(@Nonnull Spinner spinner, boolean parentVisible, boolean parentEnabled) {
 		addDataEnter(spinner, parentVisible, parentEnabled, visible(spinner), enabled(spinner));
 	}
 
@@ -304,7 +306,7 @@ public class TestDataEnterViewVisitor extends NoOpViewVisitor {
 	 * @param parentEnabled whether ancestor containers are currently enabled
 	 */
 	@Override
-	public void visitTextArea(TextArea text, boolean parentVisible, boolean parentEnabled) {
+	public void visitTextArea(@Nonnull TextArea text, boolean parentVisible, boolean parentEnabled) {
 		addDataEnter(text, parentVisible, parentEnabled, visible(text), enabled(text));
 	}
 	
@@ -316,7 +318,7 @@ public class TestDataEnterViewVisitor extends NoOpViewVisitor {
 	 * @param parentEnabled whether ancestor containers are currently enabled
 	 */
 	@Override
-	public void visitTextField(TextField text, boolean parentVisible, boolean parentEnabled) {
+	public void visitTextField(@Nonnull TextField text, boolean parentVisible, boolean parentEnabled) {
 		addDataEnter(text, parentVisible, parentEnabled, visible(text), enabled(text));
 	}
 	
@@ -330,7 +332,7 @@ public class TestDataEnterViewVisitor extends NoOpViewVisitor {
 	 * @param enabled the effective enabled-state for the current widget
 	 */
 	@SuppressWarnings("java:S3776") // Complexity OK
-	private void addDataEnter(Bound bound, boolean parentVisible, boolean parentEnabled, boolean visible, boolean enabled) {
+	private void addDataEnter(@Nonnull Bound bound, boolean parentVisible, boolean parentEnabled, boolean visible, boolean enabled) {
 		if (parentVisible && parentEnabled && visible && enabled && !inDataWidget) {
 			String binding = bound.getBinding();
 
@@ -436,7 +438,7 @@ public class TestDataEnterViewVisitor extends NoOpViewVisitor {
 	 * @return {@code true} when the widget is effectively visible
 	 */
 	@Override
-	protected boolean visible(Invisible invisible) {
+	protected boolean visible(@Nonnull Invisible invisible) {
 		return evaluateConditionInOppositeSense(invisible.getInvisibleCondition());
 	}
 
@@ -447,7 +449,7 @@ public class TestDataEnterViewVisitor extends NoOpViewVisitor {
 	 * @return {@code true} when the widget is effectively enabled
 	 */
 	@Override
-	protected boolean enabled(Disableable disableable) {
+	protected boolean enabled(@Nonnull Disableable disableable) {
 		return evaluateConditionInOppositeSense(disableable.getDisabledCondition());
 	}
 	
@@ -457,7 +459,7 @@ public class TestDataEnterViewVisitor extends NoOpViewVisitor {
 	 * @param condition the condition name or inline condition expression to evaluate; may be {@code null}
 	 * @return {@code true} when condition is absent or evaluates to {@code false}
 	 */
-	private boolean evaluateConditionInOppositeSense(String condition) {
+	private boolean evaluateConditionInOppositeSense(@Nullable String condition) {
 		boolean result = true;
 
 		if (condition != null) {
@@ -472,7 +474,7 @@ public class TestDataEnterViewVisitor extends NoOpViewVisitor {
 	 *
 	 * @return mutable list of generated scalar SAIL steps
 	 */
-	public List<Step> getScalarSteps() {
+	public @Nonnull List<Step> getScalarSteps() {
 		return scalarSteps;
 	}
 }

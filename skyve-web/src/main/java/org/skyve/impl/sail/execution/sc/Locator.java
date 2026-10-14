@@ -1,5 +1,8 @@
 package org.skyve.impl.sail.execution.sc;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Represents a UI element locator used in SmartClient SAIL automation.
  * <p>
@@ -27,7 +30,7 @@ public class Locator {
 	/**
 	 * Creates a locator without input type hints.
 	 */
-	public Locator(String locator) {
+	public Locator(@Nonnull String locator) {
 		this.locator = locator;
 		this.inputType = null;
 	}
@@ -35,7 +38,7 @@ public class Locator {
 	/**
 	 * Creates a locator with optional input type metadata.
 	 */
-	public Locator(String locator, InputType inputType) {
+	public Locator(@Nonnull String locator, @Nullable InputType inputType) {
 		this.locator = locator;
 		this.inputType = inputType;
 	}
@@ -43,14 +46,14 @@ public class Locator {
 	/**
 	 * Returns the concrete selector string used by automation steps.
 	 */
-	public String getLocator() {
+	public @Nonnull String getLocator() {
 		return locator;
 	}
 
 	/**
 	 * Returns the optional input type hint for this locator.
 	 */
-	public InputType getInputType() {
+	public @Nullable InputType getInputType() {
 		return inputType;
 	}
 }

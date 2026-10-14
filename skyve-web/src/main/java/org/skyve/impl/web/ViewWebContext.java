@@ -7,6 +7,7 @@ import org.skyve.impl.cache.StateUtil;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.web.BackgroundTask;
 
+import jakarta.annotation.Nonnull;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 
@@ -23,7 +24,7 @@ public abstract class ViewWebContext extends AbstractWebContext {
 	 * @param key the web-context cache key
 	 * @param request the request used to resolve the active session
 	 */
-	protected ViewWebContext(String key, HttpServletRequest request) {
+	protected ViewWebContext(@Nonnull String key, @Nonnull HttpServletRequest request) {
 		super(key);
 		// Set the sessionId
 		HttpSession session = request.getSession(false);
@@ -50,7 +51,7 @@ public abstract class ViewWebContext extends AbstractWebContext {
 	 * @param <T> the bean type used by the background task
 	 */
 	@Override
-	public <T extends Bean> void background(Class<? extends BackgroundTask<T>> taskClass) {
+	public <T extends Bean> void background(@Nonnull Class<? extends BackgroundTask<T>> taskClass) {
 		cacheConversationAndCycleTransaction();
 		EXT.getJobScheduler().runBackgroundTask(taskClass, getConversation().getUser(), getWebId());
 	}
@@ -62,7 +63,7 @@ public abstract class ViewWebContext extends AbstractWebContext {
 	 * @param <T> the bean type used by the background task
 	 */
 	@Override
-	public <T extends Bean> void backgroundWithoutCachingConversation(Class<? extends BackgroundTask<T>> taskClass) {
+	public <T extends Bean> void backgroundWithoutCachingConversation(@Nonnull Class<? extends BackgroundTask<T>> taskClass) {
 		EXT.getJobScheduler().runBackgroundTask(taskClass, getConversation().getUser(), getWebId());
 	}
 }
