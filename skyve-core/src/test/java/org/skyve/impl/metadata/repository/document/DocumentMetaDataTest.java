@@ -30,12 +30,14 @@ import org.skyve.impl.metadata.model.document.field.validator.IntegerValidator;
 import org.skyve.impl.metadata.model.document.field.validator.LongValidator;
 import org.skyve.impl.metadata.model.document.field.validator.TextValidator;
 import org.skyve.metadata.MetaDataException;
+import org.skyve.metadata.SortDirection;
 import org.skyve.metadata.model.Dynamic;
 import org.skyve.metadata.model.Extends;
 import org.skyve.impl.metadata.OrderingImpl;
 import org.skyve.metadata.model.Persistent;
 import org.skyve.metadata.model.document.Association.AssociationType;
 import org.skyve.metadata.model.document.Collection.CollectionType;
+import org.skyve.metadata.model.document.UniqueConstraint.DocumentScope;
 
 class DocumentMetaDataTest {
 
@@ -466,6 +468,7 @@ class DocumentMetaDataTest {
 	void convertThrowsWhenUniqueConstraintOnTransientDocument() {
 		DocumentMetaData d = minimalTransientDoc();
 		UniqueConstraint constraint = new UniqueConstraint();
+		constraint.setScope(DocumentScope.customer);
 		constraint.setName("uq1");
 		constraint.setMessage("Must be unique");
 		d.getUniqueConstraints().add(constraint);
@@ -483,6 +486,7 @@ class DocumentMetaDataTest {
 		bk.setExpression("{name}");
 		d.setBizKey(bk);
 		UniqueConstraint constraint = new UniqueConstraint();
+		constraint.setScope(DocumentScope.customer);
 		// name is null
 		constraint.setMessage("Must be unique");
 		d.getUniqueConstraints().add(constraint);
@@ -500,6 +504,7 @@ class DocumentMetaDataTest {
 		bk.setExpression("{name}");
 		d.setBizKey(bk);
 		UniqueConstraint constraint = new UniqueConstraint();
+		constraint.setScope(DocumentScope.customer);
 		constraint.setName("uq1");
 		// message is null
 		d.getUniqueConstraints().add(constraint);
@@ -517,6 +522,7 @@ class DocumentMetaDataTest {
 		bk.setExpression("{name}");
 		d.setBizKey(bk);
 		UniqueConstraint constraint = new UniqueConstraint();
+		constraint.setScope(DocumentScope.customer);
 		constraint.setName("uq1");
 		constraint.setMessage("Must be unique");
 		FieldReference ref = new FieldReference();
@@ -537,9 +543,11 @@ class DocumentMetaDataTest {
 		bk.setExpression("{name}");
 		d.setBizKey(bk);
 		UniqueConstraint constraint1 = new UniqueConstraint();
+		constraint1.setScope(DocumentScope.customer);
 		constraint1.setName("uq1");
 		constraint1.setMessage("Must be unique");
 		UniqueConstraint constraint2 = new UniqueConstraint();
+		constraint2.setScope(DocumentScope.customer);
 		constraint2.setName("uq1"); // duplicate
 		constraint2.setMessage("Also must be unique");
 		d.getUniqueConstraints().add(constraint1);
@@ -974,6 +982,7 @@ class DocumentMetaDataTest {
 		coll.setOrdered(Boolean.TRUE);
 		OrderingImpl ordering = new OrderingImpl();
 		ordering.setBy("name");
+		ordering.setSort(SortDirection.ascending);
 		coll.getOrdering().add(ordering);
 		d.getAttributes().add(coll);
 		assertThrows(MetaDataException.class, () -> d.convert("test"));
@@ -990,6 +999,7 @@ class DocumentMetaDataTest {
 		coll.setType(CollectionType.aggregation);
 		OrderingImpl ordering = new OrderingImpl();
 		ordering.setBy("related.name");
+		ordering.setSort(SortDirection.ascending);
 		coll.getOrdering().add(ordering);
 		d.getAttributes().add(coll);
 		assertNotNull(d.convert("test"));
@@ -1005,6 +1015,7 @@ class DocumentMetaDataTest {
 		inv.setName("myInverse");
 		inv.setDisplayName("My Inverse");
 		inv.setDocumentName("OtherDoc");
+		inv.setReferenceName("testDoc");
 		d.getAttributes().add(inv);
 		assertNotNull(d.convert("test"));
 	}
@@ -1017,8 +1028,10 @@ class DocumentMetaDataTest {
 		inv.setName("myInverse");
 		inv.setDisplayName("My Inverse");
 		inv.setDocumentName("OtherDoc");
+		inv.setReferenceName("testDoc");
 		OrderingImpl ordering = new OrderingImpl();
 		ordering.setBy("related.name");
+		ordering.setSort(SortDirection.ascending);
 		inv.getOrdering().add(ordering);
 		d.getAttributes().add(inv);
 		assertNotNull(d.convert("test"));

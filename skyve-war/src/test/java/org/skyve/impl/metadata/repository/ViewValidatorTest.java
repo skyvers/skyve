@@ -229,6 +229,8 @@ class ViewValidatorTest extends AbstractSkyveTest {
 		FormItem item = new FormItem();
 		HTML html = new HTML();
 		html.setBinding("markup");
+		html.setPixelWidth(Integer.valueOf(400));
+		html.setPixelHeight(Integer.valueOf(200));
 		item.setWidget(html);
 		row.getItems().add(item);
 		view.getContained().add(form);
@@ -716,6 +718,7 @@ class ViewValidatorTest extends AbstractSkyveTest {
 		ViewImpl view = editView();
 		DialogButton btn = new DialogButton();
 		btn.setDialogName("someDialog");
+		btn.setDisplayName("Open Dialog");
 		view.getContained().add(btn);
 		assertDoesNotThrow(() -> newValidator(view).visit());
 	}
@@ -889,12 +892,12 @@ class ViewValidatorTest extends AbstractSkyveTest {
 	}
 
 	@Test
-	void validateViewWithMap() {
+	void validateViewWithMapMissingModelNameThrowsException() {
 		ViewImpl view = editView();
 		org.skyve.impl.metadata.view.widget.MapDisplay map = new org.skyve.impl.metadata.view.widget.MapDisplay();
-		// no model name - null model is allowed
+		// the map modelName is required by view.xsd
 		view.getContained().add(map);
-		assertDoesNotThrow(() -> newValidator(view).visit());
+		assertThrows(MetaDataException.class, () -> newValidator(view).visit());
 	}
 
 	@Test
@@ -902,6 +905,7 @@ class ViewValidatorTest extends AbstractSkyveTest {
 		ViewImpl view = editView();
 		org.skyve.impl.metadata.view.container.Sidebar sidebar = new org.skyve.impl.metadata.view.container.Sidebar();
 		sidebar.setPixelWidth(Integer.valueOf(200));
+		sidebar.setFloatingPixelWidthBreakpoint(Integer.valueOf(800));
 		view.setSidebar(sidebar);
 		assertDoesNotThrow(() -> newValidator(view).visit());
 	}
@@ -1169,6 +1173,7 @@ class ViewValidatorTest extends AbstractSkyveTest {
 	void validateViewWithInjectWidget() {
 		ViewImpl view = editView();
 		org.skyve.impl.metadata.view.Inject inject = new org.skyve.impl.metadata.view.Inject();
+		inject.setScript("console.log('injected');");
 		view.getContained().add(inject);
 		assertDoesNotThrow(() -> newValidator(view).visit());
 	}

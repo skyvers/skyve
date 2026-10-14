@@ -209,6 +209,7 @@ class ModuleMetaDataTest {
 		JobMetaDataImpl job = new JobMetaDataImpl();
 		// name is null
 		job.setDisplayName("My Job");
+		job.setClassName("modules.testModule.jobs.TestJob");
 		module.getJobs().add(job);
 		assertThrows(MetaDataException.class, () -> module.convert("test"));
 	}
@@ -219,6 +220,7 @@ class ModuleMetaDataTest {
 		JobMetaDataImpl job = new JobMetaDataImpl();
 		job.setName("myJob");
 		// displayName is null
+		job.setClassName("modules.testModule.jobs.TestJob");
 		module.getJobs().add(job);
 		assertThrows(MetaDataException.class, () -> module.convert("test"));
 	}
@@ -229,9 +231,11 @@ class ModuleMetaDataTest {
 		JobMetaDataImpl job1 = new JobMetaDataImpl();
 		job1.setName("myJob");
 		job1.setDisplayName("My Job");
+		job1.setClassName("modules.testModule.jobs.TestJob");
 		JobMetaDataImpl job2 = new JobMetaDataImpl();
 		job2.setName("myJob");
 		job2.setDisplayName("My Job Again");
+		job2.setClassName("modules.testModule.jobs.TestJob");
 		module.getJobs().add(job1);
 		module.getJobs().add(job2);
 		assertThrows(MetaDataException.class, () -> module.convert("test"));
@@ -251,8 +255,10 @@ class ModuleMetaDataTest {
 		ModuleMetaData module = createMinimalModuleMetaData();
 		ModuleRoleMetaData role1 = new ModuleRoleMetaData();
 		role1.setName("viewer");
+		role1.setDescription("Can view test documents");
 		ModuleRoleMetaData role2 = new ModuleRoleMetaData();
 		role2.setName("viewer");
+		role2.setDescription("Can view test documents");
 		module.getRoles().add(role1);
 		module.getRoles().add(role2);
 		assertThrows(MetaDataException.class, () -> module.convert("test"));
@@ -263,6 +269,7 @@ class ModuleMetaDataTest {
 		ModuleMetaData module = createMinimalModuleMetaData();
 		ModuleRoleMetaData role = new ModuleRoleMetaData();
 		role.setName("TestDocument"); // clashes with the document ref
+		role.setDescription("Role named after a module document");
 		module.getRoles().add(role);
 		assertThrows(MetaDataException.class, () -> module.convert("test"));
 	}
@@ -273,6 +280,7 @@ class ModuleMetaDataTest {
 		JobMetaDataImpl job = new JobMetaDataImpl();
 		job.setName("TestDocument"); // clashes with the document ref
 		job.setDisplayName("Test Document Job");
+		job.setClassName("modules.testModule.jobs.TestJob");
 		module.getJobs().add(job);
 		assertThrows(MetaDataException.class, () -> module.convert("test"));
 	}
@@ -282,6 +290,7 @@ class ModuleMetaDataTest {
 		ModuleMetaData module = createMinimalModuleMetaData();
 		ModuleRoleMetaData role = new ModuleRoleMetaData();
 		role.setName("viewer");
+		role.setDescription("Can view test documents");
 		DocumentPrivilegeMetaData privilege = new DocumentPrivilegeMetaData();
 		// documentName is null
 		privilege.setPermission(DocumentPermission.CRUDG);
@@ -295,6 +304,7 @@ class ModuleMetaDataTest {
 		ModuleMetaData module = createMinimalModuleMetaData();
 		ModuleRoleMetaData role = new ModuleRoleMetaData();
 		role.setName("viewer");
+		role.setDescription("Can view test documents");
 		DocumentPrivilegeMetaData privilege1 = new DocumentPrivilegeMetaData();
 		privilege1.setDocumentName("TestDocument");
 		privilege1.setPermission(DocumentPermission.CRUDG);
@@ -312,6 +322,7 @@ class ModuleMetaDataTest {
 		ModuleMetaData module = createMinimalModuleMetaData();
 		ModuleRoleMetaData role = new ModuleRoleMetaData();
 		role.setName("viewer");
+		role.setDescription("Can view test documents");
 		DocumentPrivilegeMetaData privilege = new DocumentPrivilegeMetaData();
 		privilege.setDocumentName("NonExistentDocument");
 		privilege.setPermission(DocumentPermission.CRUDG);
@@ -325,6 +336,7 @@ class ModuleMetaDataTest {
 		ModuleMetaData module = createMinimalModuleMetaData();
 		ModuleRoleMetaData role = new ModuleRoleMetaData();
 		role.setName("viewer");
+		role.setDescription("Can view test documents");
 		DocumentPrivilegeMetaData privilege = new DocumentPrivilegeMetaData();
 		privilege.setDocumentName("TestDocument");
 		// permission is null
@@ -338,6 +350,7 @@ class ModuleMetaDataTest {
 		ModuleMetaData module = createMinimalModuleMetaData();
 		ModuleRoleMetaData role = new ModuleRoleMetaData();
 		role.setName("viewer");
+		role.setDescription("Can view test documents");
 		DocumentPrivilegeMetaData privilege = new DocumentPrivilegeMetaData();
 		privilege.setDocumentName("TestDocument");
 		privilege.setPermission(DocumentPermission.CRUDG);
@@ -354,6 +367,7 @@ class ModuleMetaDataTest {
 		ModuleMetaData module = createMinimalModuleMetaData();
 		ModuleRoleMetaData role = new ModuleRoleMetaData();
 		role.setName("viewer");
+		role.setDescription("Can view test documents");
 		DocumentPrivilegeMetaData privilege = new DocumentPrivilegeMetaData();
 		privilege.setDocumentName("TestDocument");
 		privilege.setPermission(DocumentPermission._R__G);
@@ -533,6 +547,7 @@ class ModuleMetaDataTest {
 		MetaDataQueryReferenceMetaData ref = new MetaDataQueryReferenceMetaData();
 		ref.setName("queryRef");
 		ref.setRef("sourceQuery");
+		ref.setModuleRef("testModule");
 		module.getQueries().add(ref);
 		assertNotNull(module.convert("test"));
 	}
@@ -544,6 +559,7 @@ class ModuleMetaDataTest {
 		SQLReferenceMetaData ref = new SQLReferenceMetaData();
 		ref.setName("sqlRef");
 		ref.setRef("baseSQL");
+		ref.setModuleRef("testModule");
 		module.getQueries().add(ref);
 		assertNotNull(module.convert("test"));
 	}
@@ -555,6 +571,7 @@ class ModuleMetaDataTest {
 		BizQLReferenceMetaData ref = new BizQLReferenceMetaData();
 		ref.setName("bizqlRef");
 		ref.setRef("baseBizQL");
+		ref.setModuleRef("testModule");
 		module.getQueries().add(ref);
 		assertNotNull(module.convert("test"));
 	}
@@ -566,6 +583,7 @@ class ModuleMetaDataTest {
 		ModuleMetaData module = createMinimalModuleMetaData();
 		ModuleRoleMetaData role = new ModuleRoleMetaData();
 		role.setName("viewer");
+		role.setDescription("Can view test documents");
 		module.getRoles().add(role);
 		return module;
 	}
@@ -697,6 +715,7 @@ class ModuleMetaDataTest {
 		ModuleMetaData module = createMinimalModuleMetaData();
 		ModuleRoleMetaData role = new ModuleRoleMetaData();
 		role.setName("viewer");
+		role.setDescription("Can view test documents");
 		DocumentPrivilegeMetaData privilege = new DocumentPrivilegeMetaData();
 		privilege.setDocumentName("TestDocument");
 		privilege.setPermission(DocumentPermission._R__G);
@@ -713,6 +732,7 @@ class ModuleMetaDataTest {
 		ModuleMetaData module = createMinimalModuleMetaData();
 		ModuleRoleMetaData role = new ModuleRoleMetaData();
 		role.setName("viewer");
+		role.setDescription("Can view test documents");
 		DocumentPrivilegeMetaData privilege = new DocumentPrivilegeMetaData();
 		privilege.setDocumentName("TestDocument");
 		privilege.setPermission(DocumentPermission._R__G);
@@ -729,6 +749,7 @@ class ModuleMetaDataTest {
 		ModuleMetaData module = createMinimalModuleMetaData();
 		ModuleRoleMetaData role = new ModuleRoleMetaData();
 		role.setName("viewer");
+		role.setDescription("Can view test documents");
 		DocumentPrivilegeMetaData privilege = new DocumentPrivilegeMetaData();
 		privilege.setDocumentName("TestDocument");
 		privilege.setPermission(DocumentPermission._R__G);
@@ -745,6 +766,7 @@ class ModuleMetaDataTest {
 		ModuleMetaData module = createMinimalModuleMetaData();
 		ModuleRoleMetaData role = new ModuleRoleMetaData();
 		role.setName("viewer");
+		role.setDescription("Can view test documents");
 		DocumentPrivilegeMetaData privilege = new DocumentPrivilegeMetaData();
 		privilege.setDocumentName("TestDocument");
 		privilege.setPermission(DocumentPermission._R__G);
@@ -761,6 +783,7 @@ class ModuleMetaDataTest {
 		ModuleMetaData module = createMinimalModuleMetaData();
 		ModuleRoleMetaData role = new ModuleRoleMetaData();
 		role.setName("viewer");
+		role.setDescription("Can view test documents");
 		DocumentPrivilegeMetaData privilege = new DocumentPrivilegeMetaData();
 		privilege.setDocumentName("TestDocument");
 		privilege.setPermission(DocumentPermission._R__G);
@@ -782,6 +805,7 @@ class ModuleMetaDataTest {
 
 		ModuleRoleMetaData role = new ModuleRoleMetaData();
 		role.setName("viewer");
+		role.setDescription("Can view test documents");
 		DocumentPrivilegeMetaData privilege = new DocumentPrivilegeMetaData();
 		privilege.setDocumentName("CrossDoc");
 		privilege.setPermission(DocumentPermission._R__G);
@@ -1114,6 +1138,7 @@ class ModuleMetaDataTest {
 		ModuleMetaData module = createMinimalModuleMetaData();
 		ModuleRoleMetaData role = new ModuleRoleMetaData();
 		role.setName("viewer");
+		role.setDescription("Can view test documents");
 		ModuleRoleDocumentAggregateUserAccessMetaData access = new ModuleRoleDocumentAggregateUserAccessMetaData();
 		access.setDocumentName("TestDocument");
 		role.getAccesses().add(access);
@@ -1126,6 +1151,7 @@ class ModuleMetaDataTest {
 		ModuleMetaData module = createMinimalModuleMetaData();
 		ModuleRoleMetaData role = new ModuleRoleMetaData();
 		role.setName("viewer");
+		role.setDescription("Can view test documents");
 		ModuleRoleDocumentAggregateUserAccessMetaData access = new ModuleRoleDocumentAggregateUserAccessMetaData();
 		access.setDocumentName("TestDocument");
 		ModuleRoleUserAccessUxUiMetadata uxui = new ModuleRoleUserAccessUxUiMetadata();
@@ -1141,6 +1167,7 @@ class ModuleMetaDataTest {
 		ModuleMetaData module = createMinimalModuleMetaData();
 		ModuleRoleMetaData role = new ModuleRoleMetaData();
 		role.setName("viewer");
+		role.setDescription("Can view test documents");
 		ModuleRoleDocumentAggregateUserAccessMetaData access = new ModuleRoleDocumentAggregateUserAccessMetaData();
 		access.setDocumentName("TestDocument");
 		ModuleRoleUserAccessUxUiMetadata uxui = new ModuleRoleUserAccessUxUiMetadata();
@@ -1156,6 +1183,7 @@ class ModuleMetaDataTest {
 		ModuleMetaData module = createMinimalModuleMetaData();
 		ModuleRoleMetaData role = new ModuleRoleMetaData();
 		role.setName("viewer");
+		role.setDescription("Can view test documents");
 		ModuleRoleDocumentAggregateUserAccessMetaData access = new ModuleRoleDocumentAggregateUserAccessMetaData();
 		access.setDocumentName("TestDocument");
 		ModuleRoleUserAccessUxUiMetadata uxui1 = new ModuleRoleUserAccessUxUiMetadata();
@@ -1174,6 +1202,7 @@ class ModuleMetaDataTest {
 		ModuleMetaData module = createMinimalModuleMetaData();
 		ModuleRoleMetaData role = new ModuleRoleMetaData();
 		role.setName("viewer");
+		role.setDescription("Can view test documents");
 		ModuleRoleDocumentAggregateUserAccessMetaData access1 = new ModuleRoleDocumentAggregateUserAccessMetaData();
 		access1.setDocumentName("TestDocument");
 		ModuleRoleDocumentAggregateUserAccessMetaData access2 = new ModuleRoleDocumentAggregateUserAccessMetaData();

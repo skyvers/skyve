@@ -301,8 +301,10 @@ class CustomerMetaDataTest {
 		CustomerRolesMetaData roles = new CustomerRolesMetaData();
 		CustomerRoleMetaData role1 = new CustomerRoleMetaData();
 		role1.setName("admin");
+		role1.setDescription("Customer administrator");
 		CustomerRoleMetaData role2 = new CustomerRoleMetaData();
 		role2.setName("admin"); // duplicate
+		role2.setDescription("Customer administrator");
 		roles.getRoles().add(role1);
 		roles.getRoles().add(role2);
 		customer.setRoles(roles);
@@ -363,6 +365,7 @@ class CustomerMetaDataTest {
 		CustomerRolesMetaData rolesMetaData = new CustomerRolesMetaData();
 		CustomerRoleMetaData role = new CustomerRoleMetaData();
 		role.setName("AdminRole");
+		role.setDescription("Administers the customer");
 		CustomerModuleRoleMetaData moduleRole = new CustomerModuleRoleMetaData();
 		moduleRole.setName("BasicUser");
 		moduleRole.setModuleName("admin");
@@ -378,6 +381,7 @@ class CustomerMetaDataTest {
 		CustomerRolesMetaData rolesMetaData = new CustomerRolesMetaData();
 		CustomerRoleMetaData role = new CustomerRoleMetaData();
 		role.setName("AdminRole");
+		role.setDescription("Administers the customer");
 		CustomerModuleRoleMetaData moduleRole = new CustomerModuleRoleMetaData();
 		moduleRole.setName(null); // null name - should throw
 		moduleRole.setModuleName("admin");
@@ -393,6 +397,7 @@ class CustomerMetaDataTest {
 		CustomerRolesMetaData rolesMetaData = new CustomerRolesMetaData();
 		CustomerRoleMetaData role = new CustomerRoleMetaData();
 		role.setName("AdminRole");
+		role.setDescription("Administers the customer");
 		CustomerModuleRoleMetaData moduleRole = new CustomerModuleRoleMetaData();
 		moduleRole.setName("SomeRole");
 		moduleRole.setModuleName("nonExistentModule"); // not a valid module
@@ -409,6 +414,7 @@ class CustomerMetaDataTest {
 		CustomerRolesMetaData rolesMetaData = new CustomerRolesMetaData();
 		CustomerRoleMetaData role = new CustomerRoleMetaData();
 		role.setName("SearchRole");
+		role.setDescription("Can use text search");
 		CustomerModuleRoleMetaData moduleRole = new CustomerModuleRoleMetaData();
 		moduleRole.setName("BasicUser");
 		moduleRole.setModuleName("admin");

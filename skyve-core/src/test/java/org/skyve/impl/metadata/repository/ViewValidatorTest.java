@@ -70,6 +70,7 @@ import org.skyve.impl.metadata.view.widget.FilterParameterImpl;
 import org.skyve.impl.metadata.view.widget.bound.input.LookupDescriptionColumn;
 import org.skyve.impl.metadata.view.widget.Blurb;
 import org.skyve.impl.metadata.view.widget.Chart;
+import org.skyve.impl.metadata.view.widget.Chart.ChartType;
 import org.skyve.impl.metadata.view.widget.DialogButton;
 import org.skyve.impl.metadata.view.widget.MapDisplay;
 import org.skyve.impl.metadata.view.widget.StaticImage;
@@ -846,12 +847,12 @@ class ViewValidatorTest {
 	// ---- visitButton ----
 
 	@Test
-	void button_nullActionName_noException() {
-		// null action name → validateActionName does nothing
+	void button_nullActionName_throws() {
+		// the button action is required by view.xsd
 		Button btn = new Button();
 		view.getContained().add(btn);
 		ViewValidator v = newValidator();
-		assertDoesNotThrow(v::visit);
+		assertThrows(MetaDataException.class, v::visit);
 	}
 
 	@Test
@@ -986,6 +987,7 @@ class ViewValidatorTest {
 	@Test
 	void tab_withSpacerInside_noException() {
 		Tab tab = new Tab();
+		tab.setTitle("Details");
 		Spacer s = new Spacer();
 		tab.getContained().add(s);
 		TabPane tabPane = new TabPane();
@@ -998,6 +1000,7 @@ class ViewValidatorTest {
 	@Test
 	void tab_unknownDisabledCondition_throws() {
 		Tab tab = new Tab();
+		tab.setTitle("Details");
 		tab.setXmlDisabledCondition("badCond");
 		TabPane tabPane = new TabPane();
 		tabPane.getTabs().add(tab);
@@ -1258,6 +1261,7 @@ class ViewValidatorTest {
 	void hboxInsideTabWithCondition_noException() {
 		document.getConditions().put("isVisible", new ConditionImpl());
 		Tab tab = new Tab();
+		tab.setTitle("Details");
 		HBox hbox = new HBox();
 		hbox.setXmlInvisibleCondition("isVisible");
 		tab.getContained().add(hbox);
@@ -1360,6 +1364,7 @@ class ViewValidatorTest {
 	@Test
 	void parameter_withValue_noException() {
 		Parameter parameter = mock(Parameter.class);
+		when(parameter.getName()).thenReturn("p");
 		when(parameter.getValue()).thenReturn("v");
 
 		ViewValidator v = newValidator();
@@ -1381,6 +1386,7 @@ class ViewValidatorTest {
 	@Test
 	void filterParameter_operatorIsNullWithoutValueOrBinding_noException() {
 		FilterParameter parameter = mock(FilterParameter.class);
+		when(parameter.getFilterBinding()).thenReturn("name");
 		when(parameter.getOperator()).thenReturn(FilterOperator.isNull);
 
 		ViewValidator v = newValidator();
@@ -1651,6 +1657,7 @@ class ViewValidatorTest {
 		when(repository.getChartModel(any(), any(), eq("existingChartModel"), eq(false))).thenReturn(mock(ChartModel.class));
 
 		Chart chart = new Chart();
+		chart.setType(ChartType.pie);
 		chart.setModelName("existingChartModel");
 		view.getContained().add(chart);
 
@@ -1947,6 +1954,7 @@ class ViewValidatorTest {
 	void sidebar_withWidth_noException() {
 		Sidebar sidebar = new Sidebar();
 		sidebar.setPixelWidth(Integer.valueOf(300));
+		sidebar.setFloatingPixelWidthBreakpoint(Integer.valueOf(800));
 
 		ViewValidator v = newValidator();
 		assertDoesNotThrow(() -> v.visitSidebar(sidebar, true, true));
@@ -2061,6 +2069,7 @@ class ViewValidatorTest {
 	void sidebar_unknownInvisibleCondition_throws() {
 		Sidebar sidebar = new Sidebar();
 		sidebar.setPixelWidth(Integer.valueOf(300));
+		sidebar.setFloatingPixelWidthBreakpoint(Integer.valueOf(800));
 		sidebar.setXmlInvisibleCondition("missingCondition");
 
 		ViewValidator v = newValidator();
@@ -2112,6 +2121,7 @@ class ViewValidatorTest {
 		document.getConditions().put("flag", new ConditionImpl());
 		Sidebar sidebar = new Sidebar();
 		sidebar.setPixelWidth(Integer.valueOf(300));
+		sidebar.setFloatingPixelWidthBreakpoint(Integer.valueOf(800));
 		sidebar.setXmlInvisibleCondition("flag");
 
 		ViewValidator v = newValidator();
@@ -2199,6 +2209,7 @@ class ViewValidatorTest {
 		stat.setRelativeFile("images/logo.png");
 		DialogButton dialog = new DialogButton();
 		dialog.setDialogName("myDialog");
+		dialog.setDisplayName("Open Dialog");
 
 		ViewValidator v = newValidator();
 		assertDoesNotThrow(() -> v.visitDynamicImage(dynamic, true, true));
@@ -2340,6 +2351,7 @@ class ViewValidatorTest {
 	void visitNoOpWidgets_noException() {
 		DataGridContainerColumn containerColumn = new DataGridContainerColumn();
 		Inject inject = new Inject();
+		inject.setScript("console.log('injected');");
 
 		ViewValidator v = newValidator();
 		assertDoesNotThrow(() -> v.visitDataGridContainerColumn(containerColumn, true, true));
@@ -2576,6 +2588,8 @@ class ViewValidatorTest {
 		addChildDoc("ItemDoc", markupAttr);
 		HTML html = new HTML();
 		html.setBinding("body");
+		html.setPixelWidth(Integer.valueOf(400));
+		html.setPixelHeight(Integer.valueOf(200));
 		addDataGrid("items", html);
 		ViewValidator v = newValidator();
 		assertDoesNotThrow(v::visit);
@@ -2701,7 +2715,9 @@ class ViewValidatorTest {
 	void link_resourceReference_noException() {
 		Link link = new Link();
 		link.setValue("Download");
-		link.setReference(new org.skyve.impl.metadata.view.reference.ResourceReference());
+		org.skyve.impl.metadata.view.reference.ResourceReference reference = new org.skyve.impl.metadata.view.reference.ResourceReference();
+		reference.setRelativeFile("docs/guide.pdf");
+		link.setReference(reference);
 		view.getContained().add(link);
 		ViewValidator v = newValidator();
 		assertDoesNotThrow(v::visit);
@@ -2711,7 +2727,9 @@ class ViewValidatorTest {
 	void link_implicitActionReference_noException() {
 		Link link = new Link();
 		link.setValue("Go");
-		link.setReference(new org.skyve.impl.metadata.view.reference.ImplicitActionReference());
+		org.skyve.impl.metadata.view.reference.ImplicitActionReference reference = new org.skyve.impl.metadata.view.reference.ImplicitActionReference();
+		reference.setImplicitActionName(ImplicitActionName.Save);
+		link.setReference(reference);
 		view.getContained().add(link);
 		ViewValidator v = newValidator();
 		assertDoesNotThrow(v::visit);
@@ -2721,7 +2739,9 @@ class ViewValidatorTest {
 	void link_externalReference_noException() {
 		Link link = new Link();
 		link.setValue("Visit");
-		link.setReference(new org.skyve.impl.metadata.view.reference.ExternalReference());
+		org.skyve.impl.metadata.view.reference.ExternalReference reference = new org.skyve.impl.metadata.view.reference.ExternalReference();
+		reference.setHref("https://example.com");
+		link.setReference(reference);
 		view.getContained().add(link);
 		ViewValidator v = newValidator();
 		assertDoesNotThrow(v::visit);
@@ -2878,6 +2898,7 @@ class ViewValidatorTest {
 	void sidebar_responsiveWidth_noException() {
 		Sidebar sidebar = new Sidebar();
 		sidebar.setResponsiveWidth(Integer.valueOf(6));
+		sidebar.setFloatingPixelWidthBreakpoint(Integer.valueOf(800));
 		ViewValidator v = newValidator();
 		assertDoesNotThrow(() -> v.visitSidebar(sidebar, true, true));
 	}
@@ -2886,6 +2907,7 @@ class ViewValidatorTest {
 	void sidebar_percentageWidth_noException() {
 		Sidebar sidebar = new Sidebar();
 		sidebar.setPercentageWidth(Integer.valueOf(50));
+		sidebar.setFloatingPixelWidthBreakpoint(Integer.valueOf(800));
 		ViewValidator v = newValidator();
 		assertDoesNotThrow(() -> v.visitSidebar(sidebar, true, true));
 	}
@@ -2924,6 +2946,7 @@ class ViewValidatorTest {
 	void dialogButton_unknownDisabledCondition_throws() {
 		DialogButton button = new DialogButton();
 		button.setDialogName("confirmDelete");
+		button.setDisplayName("Delete");
 		button.setXmlDisabledCondition("noSuchCond");
 		ViewValidator v = newValidator();
 		assertThrows(MetaDataException.class, () -> v.visitDialogButton(button, true, true));
@@ -3197,6 +3220,7 @@ class ViewValidatorTest {
 		model.setCategoryBinding(Bean.DOCUMENT_ID);
 		model.setValueBinding("amount");
 		Chart chart = new Chart();
+		chart.setType(ChartType.bar);
 		chart.setModel(model);
 		view.getContained().add(chart);
 		ViewValidator v = newValidator();
@@ -3225,6 +3249,7 @@ class ViewValidatorTest {
 		model.setCategoryBinding(Bean.DOCUMENT_ID);
 		model.setValueBinding("amount");
 		Chart chart = new Chart();
+		chart.setType(ChartType.bar);
 		chart.setModel(model);
 		view.getContained().add(chart);
 		ViewValidator v = newValidator();
@@ -3649,6 +3674,7 @@ class ViewValidatorTest {
 		model.setValueBinding("name");
 		model.setValueFunction(AggregateFunction.Count);
 		Chart chart = new Chart();
+		chart.setType(ChartType.bar);
 		chart.setModel(model);
 		view.getContained().add(chart);
 		ViewValidator v = newValidator();
