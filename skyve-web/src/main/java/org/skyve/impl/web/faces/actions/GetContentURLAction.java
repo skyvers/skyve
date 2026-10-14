@@ -8,6 +8,8 @@ import org.skyve.util.Binder;
 import org.skyve.util.logging.Category;
 import org.slf4j.Logger;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * Executes a Faces callback action within the current Skyve web context.
  */
@@ -26,7 +28,7 @@ public class GetContentURLAction extends FacesAction<String> {
 	 * @param binding the binding path to the content id field
 	 * @param image whether the URL is for an image resource fallback
 	 */
-	public GetContentURLAction(Bean bean, String binding, boolean image) {
+	public GetContentURLAction(@Nonnull Bean bean, @Nonnull String binding, boolean image) {
 		this.bean = bean;
 		this.binding = binding;
 		this.image = image;
@@ -42,7 +44,7 @@ public class GetContentURLAction extends FacesAction<String> {
 	 * @throws Exception if binding resolution fails
 	 */
 	@Override
-	public String callback() throws Exception {
+	public @Nonnull String callback() throws Exception {
 		if (UtilImpl.FACES_TRACE) FACES_LOGGER.info("GetContentURLAction - binding={}", binding);
 
 		String contentId = (String) Binder.get(bean, binding);

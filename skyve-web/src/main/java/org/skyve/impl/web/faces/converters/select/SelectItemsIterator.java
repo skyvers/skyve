@@ -50,6 +50,8 @@ import java.util.ListIterator;
 import java.util.Map;
 import java.util.NoSuchElementException;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.faces.component.UIComponent;
 import jakarta.faces.component.UISelectItem;
 import jakarta.faces.component.UISelectItems;
@@ -77,7 +79,7 @@ final class SelectItemsIterator implements Iterator<SelectItem> {
      * @param parent The parent {@link UIComponent} whose children will be
      *  processed
      */
-    SelectItemsIterator(FacesContext ctx, UIComponent parent) {
+    SelectItemsIterator(@Nonnull FacesContext ctx, @Nonnull UIComponent parent) {
 
         kids = parent.getChildren().listIterator();
         this.ctx = ctx;
@@ -148,7 +150,7 @@ final class SelectItemsIterator implements Iterator<SelectItem> {
      * @throws NoSuchElementException if there are no more elements
      */
     @Override
-	public SelectItem next() {
+	public @Nonnull SelectItem next() {
 
         if (!hasNext()) {
             throw new NoSuchElementException();
@@ -182,7 +184,7 @@ final class SelectItemsIterator implements Iterator<SelectItem> {
      * </p>
      */
 	@SuppressWarnings("java:S3776") // Complexity OK
-	private void initializeItems(Object kid) {
+	private void initializeItems(@Nonnull Object kid) {
 
         if (kid instanceof UISelectItem ui) {
             SelectItem item = (SelectItem) ui.getValue();
@@ -223,7 +225,7 @@ final class SelectItemsIterator implements Iterator<SelectItem> {
     /**
      * @return the next valid child for processing
      */
-    private Object findNextValidChild() {
+    private @Nullable Object findNextValidChild() {
 
         if (kids.hasNext()) {
             Object next = kids.next();
@@ -244,7 +246,7 @@ final class SelectItemsIterator implements Iterator<SelectItem> {
      * <code>item</code>
      * @param item the {@link SelectItem} to expose as an Iterator
      */
-	private void updateSingeItemIterator(SelectItem item) {
+	private void updateSingeItemIterator(@Nonnull SelectItem item) {
 
         if (singleItemIterator == null) {
             singleItemIterator = new SingleElementIterator();
@@ -278,7 +280,7 @@ final class SelectItemsIterator implements Iterator<SelectItem> {
 
 
         @Override
-		public SelectItem next() {
+		public @Nonnull SelectItem next() {
 
             if (nextCalled) {
                 throw new NoSuchElementException();
@@ -300,7 +302,7 @@ final class SelectItemsIterator implements Iterator<SelectItem> {
         // ----------------------------------------------------- Private Methods
 
 
-        private void updateItem(@SuppressWarnings("hiding") SelectItem item) {
+        private void updateItem(@SuppressWarnings("hiding") @Nonnull SelectItem item) {
 
             this.item = item;
             nextCalled = false;
@@ -324,7 +326,7 @@ final class SelectItemsIterator implements Iterator<SelectItem> {
         // -------------------------------------------------------- Constructors
 
 
-        private MapIterator(Map<?, ?> map) {
+        private MapIterator(@Nonnull Map<?, ?> map) {
 
             this.iterator = map.entrySet().iterator();
 
@@ -343,7 +345,7 @@ final class SelectItemsIterator implements Iterator<SelectItem> {
 
 
         @Override
-		public SelectItem next() {
+		public @Nonnull SelectItem next() {
 
             Map.Entry<?, ?> entry = (Map.Entry<?, ?>) iterator.next();
             Object key = entry.getKey();
@@ -388,7 +390,7 @@ final class SelectItemsIterator implements Iterator<SelectItem> {
         // -------------------------------------------------------- Constructors
 
 
-        protected GenericObjectSelectItemIterator(UISelectItems sourceComponent) {
+        protected GenericObjectSelectItemIterator(@Nonnull UISelectItems sourceComponent) {
 
             this.sourceComponent = sourceComponent;
 
@@ -398,7 +400,7 @@ final class SelectItemsIterator implements Iterator<SelectItem> {
         // --------------------------------------------------- Protected Methods
 
 
-		protected SelectItem getSelectItemFor(FacesContext ctx, Object value) {
+		protected @Nonnull SelectItem getSelectItemFor(@Nonnull FacesContext ctx, @Nullable Object value) {
 
             if (genericObjectSI == null) {
                 genericObjectSI = new GenericObjectSelectItem(sourceComponent);
@@ -441,7 +443,7 @@ final class SelectItemsIterator implements Iterator<SelectItem> {
             // -------------------------------------------------------- Constructors
 
 
-            private GenericObjectSelectItem(UISelectItems sourceComponent) {
+            private GenericObjectSelectItem(@Nonnull UISelectItems sourceComponent) {
 
                 requestVar = (String) sourceComponent.getAttributes().get(VAR);
                 this.sourceComponent = sourceComponent;
@@ -458,7 +460,7 @@ final class SelectItemsIterator implements Iterator<SelectItem> {
              * @param ctx the {@link FacesContext} for the current request
              * @param value the value to build the updated values from
              */
-            private void updateItem(FacesContext ctx, Object value) {
+            private void updateItem(@Nonnull FacesContext ctx, @Nullable Object value) {
 
                 Map<String, Object> reqMap =
                       ctx.getExternalContext().getRequestMap();
@@ -510,7 +512,7 @@ final class SelectItemsIterator implements Iterator<SelectItem> {
 
 
             @SuppressWarnings("static-method")
-			private void writeObject(@SuppressWarnings("unused") ObjectOutputStream out) throws IOException {
+			private void writeObject(@SuppressWarnings("unused") @Nonnull ObjectOutputStream out) throws IOException {
 
                 throw new NotSerializableException();
 
@@ -518,7 +520,7 @@ final class SelectItemsIterator implements Iterator<SelectItem> {
 
 
             @SuppressWarnings("static-method")
-			private void readObject(@SuppressWarnings("unused") ObjectInputStream in) throws IOException {
+			private void readObject(@SuppressWarnings("unused") @Nonnull ObjectInputStream in) throws IOException {
 
                 throw new NotSerializableException();
 
@@ -548,9 +550,9 @@ final class SelectItemsIterator implements Iterator<SelectItem> {
         // -------------------------------------------------------- Constructors
 
 
-        private ArrayIterator(FacesContext ctx,
-                              UISelectItems sourceComponent,
-                              Object array) {
+        private ArrayIterator(@Nonnull FacesContext ctx,
+                              @Nonnull UISelectItems sourceComponent,
+                              @Nonnull Object array) {
 
             super(sourceComponent);
             this.ctx = ctx;
@@ -571,7 +573,7 @@ final class SelectItemsIterator implements Iterator<SelectItem> {
         }
 
         @Override
-		public SelectItem next() {
+		public @Nonnull SelectItem next() {
 
             if (index >= count) {
                 throw new NoSuchElementException();
@@ -611,9 +613,9 @@ final class SelectItemsIterator implements Iterator<SelectItem> {
         // -------------------------------------------------------- Constructors
 
 
-        private IterableItemIterator(FacesContext ctx,
-                                     UISelectItems sourceComponent,
-                                     Iterable<?> iterable) {
+        private IterableItemIterator(@Nonnull FacesContext ctx,
+                                     @Nonnull UISelectItems sourceComponent,
+                                     @Nonnull Iterable<?> iterable) {
 
             super(sourceComponent);
             this.ctx = ctx;
@@ -634,7 +636,7 @@ final class SelectItemsIterator implements Iterator<SelectItem> {
 
 
         @Override
-		public SelectItem next() {
+		public @Nonnull SelectItem next() {
 
             Object item = iterator.next();
             if (item instanceof SelectItem selectItem) {

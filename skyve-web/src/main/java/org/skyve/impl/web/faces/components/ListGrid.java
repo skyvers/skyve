@@ -55,7 +55,7 @@ public class ListGrid extends HtmlPanelGroup {
 	 * @throws IOException if component rendering fails
 	 */
 	@Override
-	public void encodeBegin(FacesContext context) throws IOException {
+	public void encodeBegin(@Nonnull FacesContext context) throws IOException {
 		Map<String, Object> attributes = getAttributes();
 
 		if (Boolean.TRUE.toString().equals(attributes.get("dynamic"))) {
@@ -83,7 +83,7 @@ public class ListGrid extends HtmlPanelGroup {
 
 			new FacesAction<Void>() {
 				@Override
-				public Void callback() throws Exception {
+				public @Nullable Void callback() throws Exception {
 					componentBuilder.setManagedBeanName(managedBeanName);
 					HttpServletRequest request = (HttpServletRequest) FacesContext.getCurrentInstance().getExternalContext().getRequest();
 					RequestUxUiSelection selection = UserAgent.getSelection(request);
@@ -134,7 +134,7 @@ public class ListGrid extends HtmlPanelGroup {
 	 * @return the generated component list, typically containing the grid and optional context menu
 	 */
 	@SuppressWarnings("java:S107") // allow long parameter list for clarity and extensibility
-	public static List<UIComponent> generate(@Nonnull String moduleName,
+	public static @Nonnull List<UIComponent> generate(@Nonnull String moduleName,
 												@Nonnull String documentName,
 												@Nullable String queryName,
 												@Nullable String modelName,
@@ -206,7 +206,7 @@ public class ListGrid extends HtmlPanelGroup {
 	 * @return the instantiated component builder
 	 * @throws DomainException if the builder cannot be created
 	 */
-	public static ComponentBuilder newComponentBuilder(@Nullable String componentBuilderClassString) {
+	public static @Nonnull ComponentBuilder newComponentBuilder(@Nullable String componentBuilderClassString) {
 		try {
 			ComponentBuilder result = null;
 			if (componentBuilderClassString == null) {
@@ -237,7 +237,7 @@ public class ListGrid extends HtmlPanelGroup {
 	 * @param renderedAttributeValue the raw attribute value
 	 * @return {@code true} when the attribute is null, literal true, or evaluated true
 	 */
-	public static Boolean getBooleanObjectAttribute(Object renderedAttributeValue) {
+	public static @Nonnull Boolean getBooleanObjectAttribute(@Nullable Object renderedAttributeValue) {
 		return Boolean.valueOf((renderedAttributeValue == null) || 
 														String.valueOf(true).equals(renderedAttributeValue) || // literal "true"
 														Boolean.TRUE.equals(renderedAttributeValue)); // evaluated EL expression
@@ -249,7 +249,7 @@ public class ListGrid extends HtmlPanelGroup {
 	 * @param disabledAttributeValue the raw attribute value
 	 * @return {@code true} when the attribute is literal true or evaluated true
 	 */
-	public static boolean getBooleanAttribute(Object disabledAttributeValue) {
+	public static boolean getBooleanAttribute(@Nullable Object disabledAttributeValue) {
 		return String.valueOf(true).equals(disabledAttributeValue) || // literal "true"
 				Boolean.TRUE.equals(disabledAttributeValue); // evaluated EL Expression
 	}

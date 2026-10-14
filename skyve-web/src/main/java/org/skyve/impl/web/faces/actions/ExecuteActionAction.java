@@ -24,6 +24,8 @@ import org.skyve.util.monitoring.RequestKey;
 import org.skyve.web.WebContext;
 import org.slf4j.Logger;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.faces.context.FacesContext;
 import jakarta.servlet.http.HttpServletRequest;
 
@@ -47,10 +49,10 @@ public class ExecuteActionAction extends FacesAction<Void> {
 	 * @param collectionName optional collection binding when targeting a row action
 	 * @param elementBizId optional row bizId when targeting a collection element
 	 */
-	public ExecuteActionAction(FacesView facesView,
-								String actionName,
-								String collectionName,
-								String elementBizId) {
+	public ExecuteActionAction(@Nonnull FacesView facesView,
+								@Nonnull String actionName,
+								@Nullable String collectionName,
+								@Nullable String elementBizId) {
 		this.facesView = facesView;
 		this.actionName = actionName;
 		this.collectionName = collectionName;
@@ -65,7 +67,7 @@ public class ExecuteActionAction extends FacesAction<Void> {
 	 */
 	@Override
 	@SuppressWarnings({"unchecked", "java:S3776"}) // Complexity OK
-	public Void callback() throws Exception {
+	public @Nullable Void callback() throws Exception {
 		if (UtilImpl.FACES_TRACE) {
 			if (collectionName != null) {
 				FACES_LOGGER.info("ExecuteActionAction - EXECUTE ACTION {} for grid {} with selected row {}", actionName, collectionName, elementBizId);

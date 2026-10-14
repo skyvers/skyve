@@ -16,6 +16,8 @@ import net.sf.jasperreports.engine.JRDataSource;
 import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.query.JRQueryExecuter;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * Executes JasperReports queries using Skyve metadata queries.
  *
@@ -31,7 +33,7 @@ public class SkyveQueryExecuter implements JRQueryExecuter {
 	 *
 	 * @param queryString query selector in {@code module.query} format
 	 */
-	public SkyveQueryExecuter(String queryString) {
+	public SkyveQueryExecuter(@Nonnull String queryString) {
 		moduleDotQuery = queryString;
 	}
 	
@@ -66,7 +68,7 @@ public class SkyveQueryExecuter implements JRQueryExecuter {
 	 */
 	@Override
 	@SuppressWarnings("resource")
-	public JRDataSource createDatasource() 
+	public @Nonnull JRDataSource createDatasource() 
 	throws JRException {
 		try {
 			MetaDataQueryDefinition query = getQuery(moduleDotQuery);
@@ -86,7 +88,7 @@ public class SkyveQueryExecuter implements JRQueryExecuter {
 	 * @param moduleDotQuery query selector in {@code module.query} format
 	 * @return resolved metadata query definition
 	 */
-	public static MetaDataQueryDefinition getQuery(String moduleDotQuery) {
+	public static @Nonnull MetaDataQueryDefinition getQuery(@Nonnull String moduleDotQuery) {
 		AbstractPersistence.IMPLEMENTATION_CLASS = HibernateContentPersistence.class;
 		AbstractPersistence.DYNAMIC_IMPLEMENTATION_CLASS = RDBMSDynamicPersistence.class;
 		UserImpl user = new UserImpl();
@@ -112,7 +114,7 @@ public class SkyveQueryExecuter implements JRQueryExecuter {
 	 * @param args not used
 	 * @throws Exception if data-source creation fails
 	 */
-	public static void main(String[] args)
+	public static void main(@Nonnull String[] args)
 	throws Exception {
 		new SkyveQueryExecuter("admin.Contact").createDatasource();
 	}

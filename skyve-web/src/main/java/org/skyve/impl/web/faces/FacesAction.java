@@ -23,6 +23,8 @@ import org.skyve.util.Util;
 import org.slf4j.Logger;
 import org.skyve.util.logging.SkyveLoggerFactory;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.el.ValueExpression;
 import jakarta.faces.application.FacesMessage;
 import jakarta.faces.application.FacesMessage.Severity;
@@ -59,7 +61,7 @@ public abstract class FacesAction<T> {
 	 * @throws SessionEndedException when the user session has ended
 	 * @throws ConversationEndedException when the conversation has ended
 	 */
-	public final T execute() {
+	public final @Nullable T execute() {
 		T result = null;
 		
 		FacesContext fc = FacesContext.getCurrentInstance();
@@ -140,10 +142,10 @@ public abstract class FacesAction<T> {
 	 * @param globalMessageSet	Used to add only unique/distinct messages across calls
 	 */
 	@SuppressWarnings("java:S3776") // Complexity OK
-	public static void processFacesMessages(FacesContext context,
-												Severity severity,
-												Message message,
-												Set<String> globalMessageSet) {
+	public static void processFacesMessages(@Nonnull FacesContext context,
+												@Nonnull Severity severity,
+												@Nonnull Message message,
+												@Nonnull Set<String> globalMessageSet) {
 		String text = message.getText();
 		FacesMessage msg = new FacesMessage(severity, text, text);
 		for (String binding : message.getBindings()) {
@@ -196,7 +198,7 @@ public abstract class FacesAction<T> {
 	 * @return the callback result value
 	 * @throws Exception when callback execution fails
 	 */
-	public abstract T callback() throws Exception;
+	public abstract @Nullable T callback() throws Exception;
 	
 	/**
 	 * Validates required inputs in the current view and publishes field/global messages for failures.
@@ -227,9 +229,9 @@ public abstract class FacesAction<T> {
 	 * @return {@code true} when no required-field validation failures are found, otherwise {@code false}
 	 */
 	@SuppressWarnings("java:S3776") // Complexity OK
-	private static boolean validateRequiredFields(final FacesContext fc, 
-													UIComponent component, 
-													final TreeSet<String> globalMessages) {
+	private static boolean validateRequiredFields(final @Nonnull FacesContext fc, 
+													@Nonnull UIComponent component, 
+													final @Nonnull TreeSet<String> globalMessages) {
 		boolean result = true;
 		
 		// only process this component (and it's children) if it was rendered
@@ -239,7 +241,7 @@ public abstract class FacesAction<T> {
 				final MutableBoolean assignedResult = new MutableBoolean(result);
 				data.visitTree(VisitContext.createVisitContext(fc), new VisitCallback() {
 					@Override
-				    public VisitResult visit(VisitContext context, UIComponent target) {
+				    public @Nonnull VisitResult visit(@Nonnull VisitContext context, @Nonnull UIComponent target) {
 				    	if (target instanceof UIInput input) {
 							// NB ensure && operator doesn't short circuit by putting the function call as the first argument
 							// This way we'll get all validation error messages
@@ -278,9 +280,9 @@ public abstract class FacesAction<T> {
 	 * @param globalMessages set used to deduplicate global validation messages
 	 * @return {@code true} when validation passes for the input, otherwise {@code false}
 	 */
-	private static boolean checkRequiredInput(FacesContext fc,
-												UIInput input,
-												TreeSet<String> globalMessages) {
+	private static boolean checkRequiredInput(@Nonnull FacesContext fc,
+												@Nonnull UIInput input,
+												@Nonnull TreeSet<String> globalMessages) {
 		String message = input.getRequiredMessage();
 		if (Util.processStringValue(message) != null) {
 			Object value = input.getValue();
@@ -317,7 +319,7 @@ public abstract class FacesAction<T> {
 	 * @param id the component id to find
 	 * @return the matching component, or {@code null} when no match exists
 	 */
-	public static UIComponent findComponentById(UIComponent base, String id) {
+	public static @Nullable UIComponent findComponentById(@Nonnull UIComponent base, @Nonnull String id) {
 		if (id.equals(base.getId())) {
 			return base;
 		}
@@ -347,7 +349,7 @@ public abstract class FacesAction<T> {
 	 * @param binding the binding expression to match
 	 * @return matching components in traversal order
 	 */
-	private static List<UIComponent> findComponentsByBinding(UIComponent base, String binding) {
+	private static @Nonnull List<UIComponent> findComponentsByBinding(@Nonnull UIComponent base, @Nonnull String binding) {
 		List<UIComponent> result = new ArrayList<>();
 		findComponentsByBinding(base, binding, result);
 
@@ -372,7 +374,7 @@ public abstract class FacesAction<T> {
 	 * @param binding the binding expression to match
 	 * @param result accumulator for matching components
 	 */
-	private static void findComponentsByBinding(UIComponent base, String binding, List<UIComponent> result) {
+	private static void findComponentsByBinding(@Nonnull UIComponent base, @Nonnull String binding, @Nonnull List<UIComponent> result) {
 		ValueExpression ve = base.getValueExpression("value");
 		if (ve != null) {
 			String expression = ve.getExpressionString();
@@ -402,7 +404,7 @@ public abstract class FacesAction<T> {
 	 * @param messageClientIds accumulator for discovered client ids
 	 */
 	@SuppressWarnings("java:S3776") // Complexity OK
-	private static void findAllMessageComponentClientIds(UIComponent component, List<String> messageClientIds) {
+	private static void findAllMessageComponentClientIds(@Nonnull UIComponent component, @Nonnull List<String> messageClientIds) {
 		if (component.isRendered()) {
 			if (component instanceof org.primefaces.component.message.Message) {
 				// Determine if this Message is in a data grid

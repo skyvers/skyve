@@ -10,6 +10,8 @@ import org.skyve.util.Binder;
 import modules.whosin.domain.MyStatus;
 import modules.whosin.domain.Staff;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * Initialises {@link MyStatus} records for the currently logged-in staff member.
  */
@@ -22,7 +24,7 @@ public class MyStatusBizlet extends Bizlet<MyStatus> {
 	 * @throws Exception if staff lookup fails
 	 */
 	@Override
-	public MyStatus newInstance(MyStatus bean) throws Exception {
+	public @Nonnull MyStatus newInstance(@Nonnull MyStatus bean) throws Exception {
 		
 		//get the contact corresponding to the currently logged in user
 		Persistence pers = CORE.getPersistence();

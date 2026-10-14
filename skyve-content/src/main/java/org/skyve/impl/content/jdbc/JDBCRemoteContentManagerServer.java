@@ -14,6 +14,9 @@ import org.skyve.impl.util.UtilImpl;
 import org.slf4j.Logger;
 import org.skyve.util.logging.SkyveLoggerFactory;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Exposes content-manager operations as JDBC aliases for remote Skyve instances.
  *
@@ -185,7 +188,7 @@ public class JDBCRemoteContentManagerServer {
 	 * @param content base64 encoded serialized {@link BeanContent}
 	 * @throws Exception if decoding or storage fails
 	 */
-	public static void putBeanFunction(String content) throws Exception {
+	public static void putBeanFunction(@Nonnull String content) throws Exception {
 		try (ContentManager cm = EXT.newContentManager()) {
 			cm.put((BeanContent) StateUtil.decode64(content));
 		}
@@ -199,7 +202,7 @@ public class JDBCRemoteContentManagerServer {
 	 * @return the assigned content identifier
 	 * @throws Exception if decoding or storage fails
 	 */
-	public static String putAttachmentFunction(String content, boolean index) throws Exception {
+	public static @Nullable String putAttachmentFunction(@Nonnull String content, boolean index) throws Exception {
 		try (ContentManager cm = EXT.newContentManager()) {
 			AttachmentContent attachment = (AttachmentContent) StateUtil.decode64(content);
 			cm.put(attachment, index);
@@ -213,7 +216,7 @@ public class JDBCRemoteContentManagerServer {
 	 * @param content base64 encoded serialized {@link AttachmentContent} update
 	 * @throws Exception if decoding or update fails
 	 */
-	public static void updateAttachmentFunction(String content) throws Exception {
+	public static void updateAttachmentFunction(@Nonnull String content) throws Exception {
 		try (ContentManager cm = EXT.newContentManager()) {
 			AttachmentContent attachment = (AttachmentContent) StateUtil.decode64(content);
 			cm.update(attachment);
@@ -227,7 +230,7 @@ public class JDBCRemoteContentManagerServer {
 	 * @return base64 encoded serialized {@link AttachmentContent}, or {@code null} when absent
 	 * @throws Exception if retrieval or serialization fails
 	 */
-	public static String getAttachmentFunction(String contentId) throws Exception {
+	public static @Nullable String getAttachmentFunction(@Nonnull String contentId) throws Exception {
 		String result = null;
 		
 		try (ContentManager cm = EXT.newContentManager()) {
@@ -246,7 +249,7 @@ public class JDBCRemoteContentManagerServer {
 	 * @param bizId the business identifier
 	 * @throws Exception if removal fails
 	 */
-	public static void removeBeanFunction(String bizId) throws Exception {
+	public static void removeBeanFunction(@Nonnull String bizId) throws Exception {
 		try (ContentManager cm = EXT.newContentManager()) {
 			cm.removeBean(bizId);
 		}
@@ -258,7 +261,7 @@ public class JDBCRemoteContentManagerServer {
 	 * @param contentId the content identifier
 	 * @throws Exception if removal fails
 	 */
-	public static void removeAttachmentFunction(String contentId) throws Exception {
+	public static void removeAttachmentFunction(@Nonnull String contentId) throws Exception {
 		try (ContentManager cm = EXT.newContentManager()) {
 			cm.removeAttachment(contentId);
 		}
@@ -272,7 +275,7 @@ public class JDBCRemoteContentManagerServer {
 	 * @return base64 encoded serialized search results
 	 * @throws Exception if query execution or serialization fails
 	 */
-	public static String googleSearchFunction(String search, int maxResults) throws Exception {
+	public static @Nonnull String googleSearchFunction(@Nullable String search, int maxResults) throws Exception {
 		try (ContentManager cm = EXT.newContentManager()) {
 			return StateUtil.encode64(cm.google(search, maxResults));
 		}

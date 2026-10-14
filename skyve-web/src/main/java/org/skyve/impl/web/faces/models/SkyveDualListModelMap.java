@@ -27,6 +27,8 @@ import org.skyve.persistence.Persistence;
 import org.skyve.util.Binder;
 import org.skyve.util.Binder.TargetMetaData;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.faces.FacesException;
 
 /**
@@ -43,7 +45,7 @@ public class SkyveDualListModelMap extends TreeMap<String, DualListModel<DomainV
 	/**
 	 * Creates a dual-list model map backed by the supplied Faces view.
 	 */
-	public SkyveDualListModelMap(FacesView view) {
+	public SkyveDualListModelMap(@Nullable FacesView view) {
 		this.view = view;
 	}
 
@@ -53,7 +55,7 @@ public class SkyveDualListModelMap extends TreeMap<String, DualListModel<DomainV
 	 * @param key	The lookup description binding.
 	 */
 	@Override
-	public DualListModel<DomainValue> get(Object key) {
+	public @Nonnull DualListModel<DomainValue> get(@Nonnull Object key) {
 		if (! containsKey(key)) {
 			scatter((String) key);
 		}
@@ -66,7 +68,7 @@ public class SkyveDualListModelMap extends TreeMap<String, DualListModel<DomainV
 	 * 
 	 * @param binding
 	 */
-	private void scatter(String binding) {
+	private void scatter(@Nonnull String binding) {
 		try {
 			if (view == null) {
 				put(binding, new DualListModel<>(Collections.emptyList(), Collections.emptyList()));

@@ -12,6 +12,8 @@ import org.skyve.impl.web.faces.pipeline.component.SkyveComponentBuilderChain;
 import org.skyve.util.logging.Category;
 import org.slf4j.Logger;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.faces.component.FacesComponent;
 import jakarta.faces.component.UIComponent;
 import jakarta.faces.component.html.HtmlPanelGroup;
@@ -35,7 +37,7 @@ public class Map extends HtmlPanelGroup {
 	 * @throws IOException if the component builder cannot be created or invoked
 	 */
 	@Override
-	public void encodeBegin(FacesContext context) throws IOException {
+	public void encodeBegin(@Nonnull FacesContext context) throws IOException {
 		if (getChildCount() == 0) {
 			java.util.Map<String, Object> attributes = getAttributes();
 			final String moduleName = (String) attributes.get("module");
@@ -62,7 +64,7 @@ public class Map extends HtmlPanelGroup {
 
 			new FacesAction<Void>() {
 				@Override
-				public Void callback() throws Exception {
+				public @Nullable Void callback() throws Exception {
 					componentBuilder.setManagedBeanName(managedBeanName);
 					HttpServletRequest request = (HttpServletRequest) FacesContext.getCurrentInstance().getExternalContext().getRequest();
 					componentBuilder.setUserAgentType(UserAgent.getSelection(request).getUserAgentType());
@@ -95,11 +97,11 @@ public class Map extends HtmlPanelGroup {
 	 * @param componentBuilder the builder used to generate the component
 	 * @return the generated map component
 	 */
-	public static UIComponent generate(String moduleName,
-										String queryName,
-										String geometryBinding,
-										String modelName,
-										ComponentBuilder componentBuilder) {
+	public static @Nullable UIComponent generate(@Nullable String moduleName,
+										@Nullable String queryName,
+										@Nullable String geometryBinding,
+										@Nullable String modelName,
+										@Nonnull ComponentBuilder componentBuilder) {
 
     	if (modelName != null) {
 			return componentBuilder.map(null, new MapDisplay(), modelName);

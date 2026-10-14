@@ -23,6 +23,9 @@ import org.skyve.util.monitoring.RequestKey;
 import org.skyve.web.WebContext;
 import org.slf4j.Logger;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Strip the last term off the view binding
  */
@@ -37,7 +40,7 @@ public class ZoomOutAction extends FacesAction<Void> {
 	 *
 	 * @param facesView the current Faces view context
 	 */
-	public ZoomOutAction(FacesView facesView) {
+	public ZoomOutAction(@Nonnull FacesView facesView) {
 		this.facesView = facesView;
 	}
 	
@@ -49,7 +52,7 @@ public class ZoomOutAction extends FacesAction<Void> {
 	 */
 	@Override
 	@SuppressWarnings("java:S3776") // Complexity OK
-	public Void callback() throws Exception {
+	public @Nullable Void callback() throws Exception {
 		Deque<String> zoomInBindings = facesView.getZoomInBindings();
 		if (UtilImpl.FACES_TRACE) FACES_LOGGER.info("ZoomOutAction by zoom in binding of {} with view binding of {}",
 																	zoomInBindings.isEmpty() ? "null" : zoomInBindings.peek(),
@@ -114,7 +117,7 @@ public class ZoomOutAction extends FacesAction<Void> {
 	 * @throws Exception if target bean resolution or redirect handling fails
 	 */
 	@SuppressWarnings("java:S3776") // Complexity OK
-	static void zoomOut(FacesView facesView, CustomerImpl internalCustomer) throws Exception {
+	static void zoomOut(@Nonnull FacesView facesView, @Nonnull CustomerImpl internalCustomer) throws Exception {
 		String viewBinding = facesView.getViewBinding();
 		Deque<String> zoomInBindings = facesView.getZoomInBindings();
 		String zoomInBinding = zoomInBindings.isEmpty() ? null : zoomInBindings.pop();

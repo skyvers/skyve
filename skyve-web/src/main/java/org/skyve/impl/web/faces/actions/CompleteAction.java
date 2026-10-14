@@ -32,6 +32,8 @@ import org.skyve.util.monitoring.Monitoring;
 import org.skyve.util.monitoring.RequestKey;
 import org.slf4j.Logger;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.faces.context.FacesContext;
 import jakarta.servlet.http.HttpServletRequest;
 
@@ -55,10 +57,10 @@ public class CompleteAction extends FacesAction<List<String>> {
 	 * @param binding the target binding to complete against
 	 * @param complete the completion strategy to execute
 	 */
-	public CompleteAction(FacesView facesView,
-							String query,
-							String binding,
-							CompleteType complete) {
+	public CompleteAction(@Nonnull FacesView facesView,
+							@Nullable String query,
+							@Nonnull String binding,
+							@Nonnull CompleteType complete) {
 		this.facesView = facesView;
 		this.query = Util.processStringValue(query);
 		this.binding = binding;
@@ -73,7 +75,7 @@ public class CompleteAction extends FacesAction<List<String>> {
 	 */
 	@Override
 	@SuppressWarnings({"java:S3776", "java:S6541"}) // Complexity OK
-	public List<String> callback() throws Exception {
+	public @Nullable List<String> callback() throws Exception {
 		if (UtilImpl.FACES_TRACE) FACES_LOGGER.info("CompleteAction - EXECUTE complete {} for binding {}", query, binding);
 		AbstractPersistence persistence = AbstractPersistence.get();
 		Bean bean = ActionUtil.getTargetBeanForView(facesView);

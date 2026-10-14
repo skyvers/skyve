@@ -1,5 +1,8 @@
 package org.skyve.impl.tools.javadoc.doctor;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 
 /**
  * Builds the visual header block for generated documentation pages.
@@ -10,7 +13,7 @@ public class DocHeader {
 	 *
 	 * @param title header title text
 	 */
-	public DocHeader(String title) {
+	public DocHeader(@Nonnull String title) {
 		super();
 		this.title = title;
 	}	
@@ -26,7 +29,7 @@ public class DocHeader {
 	 *
 	 * @return header title
 	 */
-	public String getTitle() {
+	public @Nullable String getTitle() {
 		return title;
 	}
 
@@ -35,7 +38,7 @@ public class DocHeader {
 	 *
 	 * @param title header title
 	 */
-	public void setTitle(String title) {
+	public void setTitle(@Nullable String title) {
 		this.title = title;
 	}
 
@@ -44,7 +47,7 @@ public class DocHeader {
 	 *
 	 * @return logo location, or {@code null} when unset
 	 */
-	public String getLogoLocation() {
+	public @Nullable String getLogoLocation() {
 		return logoLocation;
 	}
 
@@ -53,7 +56,7 @@ public class DocHeader {
 	 *
 	 * @param logoLocation logo image URL or path
 	 */
-	public void setLogoLocation(String logoLocation) {
+	public void setLogoLocation(@Nullable String logoLocation) {
 		this.logoLocation = logoLocation;
 	}
 
@@ -62,7 +65,7 @@ public class DocHeader {
 	 *
 	 * @return ribbon-bar location, or {@code null} when unset
 	 */
-	public String getRibbonBarLocation() {
+	public @Nullable String getRibbonBarLocation() {
 		return ribbonBarLocation;
 	}
 
@@ -71,7 +74,7 @@ public class DocHeader {
 	 *
 	 * @param ribbonBarLocation ribbon-bar image URL or path
 	 */
-	public void setRibbonBarLocation(String ribbonBarLocation) {
+	public void setRibbonBarLocation(@Nullable String ribbonBarLocation) {
 		this.ribbonBarLocation = ribbonBarLocation;
 	}
 	
@@ -80,7 +83,7 @@ public class DocHeader {
 	 *
 	 * @return HTML string representation
 	 */
-	public String toHTML(){
+	public @Nonnull String toHTML(){
 		StringBuilder html =new StringBuilder();
 		
 		html.append("<table class=\"pageHeader\" width=\"100%\">");

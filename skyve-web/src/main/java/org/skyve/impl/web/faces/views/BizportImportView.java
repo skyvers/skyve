@@ -32,6 +32,8 @@ import org.skyve.metadata.view.TextOutput.Sanitisation;
 import org.skyve.persistence.Persistence;
 import org.skyve.util.OWASP;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.RequestScoped;
 import jakarta.faces.annotation.ManagedProperty;
@@ -81,7 +83,7 @@ public class BizportImportView extends AbstractUploadView {
 	public void preRender() {
 		new FacesAction<Void>() {
 			@Override
-			public Void callback() throws Exception {
+			public @Nullable Void callback() throws Exception {
 				initialise();
 				return null;
 			}
@@ -93,7 +95,7 @@ public class BizportImportView extends AbstractUploadView {
 	 *
 	 * @return import action name
 	 */
-	public String getAction() {
+	public @Nullable String getAction() {
 		return action;
 	}
 
@@ -107,7 +109,7 @@ public class BizportImportView extends AbstractUploadView {
 	 *
 	 * @return mutable list of import problems
 	 */
-	public List<Problem> getProblems() {
+	public @Nonnull List<Problem> getProblems() {
 		return problems;
 	}
 
@@ -122,7 +124,7 @@ public class BizportImportView extends AbstractUploadView {
 	 *         to user-facing messages
 	 */
 	@SuppressWarnings("java:S3776") // Complexity OK
-	public void handleFileUpload(FileUploadEvent event) throws Exception {
+	public void handleFileUpload(@Nonnull FileUploadEvent event) throws Exception {
 		FacesContext fc = FacesContext.getCurrentInstance();
 
 		UploadedFile file = event.getFile();

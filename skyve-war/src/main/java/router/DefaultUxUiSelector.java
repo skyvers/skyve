@@ -62,7 +62,7 @@ public class DefaultUxUiSelector implements UxUiSelector {
 	 * @return the selected UX/UI profile
 	 */
 	@Override
-	public UxUi select(UserAgentType userAgentType, HttpServletRequest request) {
+	public @Nonnull UxUi select(@Nonnull UserAgentType userAgentType, @Nonnull HttpServletRequest request) {
 		// public pages are destined for external UX/UI always
 		if (request.getUserPrincipal() == null) {
 			return UxUis.EXTERNAL;
@@ -111,7 +111,7 @@ public class DefaultUxUiSelector implements UxUiSelector {
 	 * @return the emulated UX/UI profile
 	 */
 	@Override
-	public UxUi emulate(UserAgentType userAgentType, HttpServletRequest request) {
+	public @Nonnull UxUi emulate(@Nonnull UserAgentType userAgentType, @Nonnull HttpServletRequest request) {
 		switch (userAgentType) {
 			case phone:
 				return UxUis.PHONE;

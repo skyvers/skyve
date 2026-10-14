@@ -25,6 +25,9 @@ import org.skyve.util.logging.Category;
 import org.skyve.web.WebContext;
 import org.slf4j.Logger;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Adds an element to an array.
  * The onAddedHandlers event actions is not implemented since the grid cannot be inlined.
@@ -40,7 +43,7 @@ public class AddAction extends FacesAction<Void> {
 	/**
 	 * Creates an add action for the given collection binding.
 	 */
-	public AddAction(FacesView facesView, String dataWidgetBinding, boolean inline) {
+	public AddAction(@Nonnull FacesView facesView, @Nonnull String dataWidgetBinding, boolean inline) {
 		this.facesView = facesView;
 		this.dataWidgetBinding = dataWidgetBinding;
 		this.inline = inline;
@@ -51,7 +54,7 @@ public class AddAction extends FacesAction<Void> {
 	 */
 	@Override
 	@SuppressWarnings("java:S3776") // Complexity OK
-	public Void callback() throws Exception {
+	public @Nullable Void callback() throws Exception {
 		String viewBinding = facesView.getViewBinding();
 		if (UtilImpl.FACES_TRACE) FACES_LOGGER.info("AddAction - dataWidgetBinding={} : facesView.viewBinding={} : facesView.inline={}", 
 													dataWidgetBinding, viewBinding, inline);

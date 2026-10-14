@@ -6,6 +6,8 @@ import org.primefaces.component.message.MessageRenderer;
 import org.skyve.metadata.view.TextOutput.Sanitisation;
 import org.skyve.util.OWASP;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.faces.context.ResponseWriter;
 
 /**
@@ -19,7 +21,7 @@ import jakarta.faces.context.ResponseWriter;
  */
 public class SkyveMessageRenderer extends MessageRenderer {
 	@Override
-	protected void encodeIcon(ResponseWriter writer, String severity, String title, boolean iconOnly) throws IOException {
+	protected void encodeIcon(@Nonnull ResponseWriter writer, @Nonnull String severity, @Nullable String title, boolean iconOnly) throws IOException {
 		super.encodeIcon(writer, severity, iconOnly ? OWASP.sanitise(Sanitisation.text, title) : title, iconOnly);
 	}
 }

@@ -21,6 +21,9 @@ import freemarker.template.TemplateScalarModel;
 import freemarker.template.utility.DeepUnwrap;
 import net.sourceforge.plantuml.SourceStringReader;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * FreeMarker user-defined directive which generates a PlantUML image for the specified PlantUML
  * markup and outputs a HTML img with a data URL set to the generated diagram image.
@@ -71,7 +74,7 @@ public class PlantUMLDirective implements TemplateDirectiveModel {
 	 */
 	@Override
 	@SuppressWarnings("java:S3776") // Complexity OK
-	public void execute(Environment env, Map params, TemplateModel[] loopVars, TemplateDirectiveBody body)
+	public void execute(@Nonnull Environment env, @Nonnull Map params, @Nonnull TemplateModel[] loopVars, @Nullable TemplateDirectiveBody body)
 	throws TemplateException, IOException {
 		if (params.isEmpty()) {
 			throw new TemplateModelException("This directive requires parameters.");
@@ -143,7 +146,7 @@ public class PlantUMLDirective implements TemplateDirectiveModel {
 	 * @param uml the PlantUML markup to render
 	 * @return the HTML image tag containing the rendered diagram
 	 */
-	private static String generateImage(final String uml) {
+	private static @Nonnull String generateImage(final @Nonnull String uml) {
 		try {
 			SourceStringReader reader = new SourceStringReader(uml);
 			// System.out.println("Converting markup into image: " + uml);

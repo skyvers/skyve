@@ -47,8 +47,8 @@ public class SkyveFacesPhaseListener implements PhaseListener {
 	 * Records the request selection that determines Faces view compatibility.
 	 */
 	static record FacesViewSelectionMarker(boolean emulated,
-											UserAgentType userAgentType,
-											String uxuiName) implements Serializable {
+											@Nonnull UserAgentType userAgentType,
+											@Nonnull String uxuiName) implements Serializable {
 		private static final long serialVersionUID = -4691985235216910666L;
 	}
 
@@ -60,7 +60,7 @@ public class SkyveFacesPhaseListener implements PhaseListener {
 	 * @param event the current JSF phase event
 	 */
 	@Override
-	public void beforePhase(PhaseEvent event) {
+	public void beforePhase(@Nonnull PhaseEvent event) {
 		if (UtilImpl.FACES_TRACE) {
 			PhaseId phaseId = event.getPhaseId();
 			FACES_LOGGER.info("SkyveFacesPhaseListener - BEFORE {} : responseComplete={}", phaseId, Boolean.valueOf(event.getFacesContext().getResponseComplete()));
@@ -73,7 +73,7 @@ public class SkyveFacesPhaseListener implements PhaseListener {
 	 * @param event the current JSF phase event
 	 */
 	@Override
-	public void afterPhase(PhaseEvent event) {
+	public void afterPhase(@Nonnull PhaseEvent event) {
 		PhaseId phaseId = event.getPhaseId();
 		if (UtilImpl.FACES_TRACE) FACES_LOGGER.info("SkyveFacesPhaseListener - AFTER {} : responseComplete={}", phaseId, Boolean.valueOf(event.getFacesContext().getResponseComplete()));
 		try {
@@ -104,7 +104,7 @@ public class SkyveFacesPhaseListener implements PhaseListener {
 	 * @return {@link PhaseId#ANY_PHASE}
 	 */
 	@Override
-	public PhaseId getPhaseId() {
+	public @Nonnull PhaseId getPhaseId() {
 		return PhaseId.ANY_PHASE;
 	}
 	
@@ -114,7 +114,7 @@ public class SkyveFacesPhaseListener implements PhaseListener {
 	 * @param event the current RESTORE_VIEW phase event
 	 * @throws Exception when cached conversation restoration fails
 	 */
-	private static void afterRestoreView(PhaseEvent event)
+	private static void afterRestoreView(@Nonnull PhaseEvent event)
 	throws Exception {
 		FacesContext fc = event.getFacesContext();
 		ExternalContext ec = fc.getExternalContext();
@@ -197,7 +197,7 @@ public class SkyveFacesPhaseListener implements PhaseListener {
 	 * @param view the faces view to hydrate
 	 * @param ec the external context associated with the current request
 	 */
-	private static void restore(FacesView view, ExternalContext ec) {
+	private static void restore(@Nonnull FacesView view, @Nonnull ExternalContext ec) {
 		// restore the context
 		AbstractWebContext webContext = StateUtil.getCachedConversation(view.getDehydratedWebId(),
 																			(HttpServletRequest) ec.getRequest());
@@ -217,7 +217,7 @@ public class SkyveFacesPhaseListener implements PhaseListener {
 	 * @param ec the external context associated with the current request
 	 * @throws Exception when conversation restoration fails
 	 */
-	private static void restore(String webId, ExternalContext ec) {
+	private static void restore(@Nonnull String webId, @Nonnull ExternalContext ec) {
 		// restore the context
 		AbstractWebContext webContext = StateUtil.getCachedConversation(webId, (HttpServletRequest) ec.getRequest());
 		if (webContext != null) { // should always be the case
@@ -232,7 +232,7 @@ public class SkyveFacesPhaseListener implements PhaseListener {
 	 *
 	 * @param event the current UPDATE_MODEL_VALUES phase event
 	 */
-	private static void afterUpdateModelValues(PhaseEvent event) {
+	private static void afterUpdateModelValues(@Nonnull PhaseEvent event) {
 		UIViewRoot vr = event.getFacesContext().getViewRoot();
 		if (vr != null) {
 			// Gather an dual list models in the view.
@@ -252,7 +252,7 @@ public class SkyveFacesPhaseListener implements PhaseListener {
 	 * @throws Exception when post-render lifecycle processing fails
 	 */
 	@SuppressWarnings("java:S3776") // Complexity OK
-	private static void afterResponseRendered(PhaseEvent event) {
+	private static void afterResponseRendered(@Nonnull PhaseEvent event) {
 		try {
 			UIViewRoot vr = event.getFacesContext().getViewRoot();
 			if (vr != null) {

@@ -6,19 +6,21 @@ import org.skyve.impl.metadata.view.widget.bound.tabular.ListGrid;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.view.model.list.ListModel;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.faces.component.UIComponent;
 
 public class UnfilterableListGridBuilder extends NoOpComponentBuilder {
 	@Override
-	public UIComponent listGrid(UIComponent component,
-									String moduleName,
-									String modelDocumentName,
-									String modelName,
-									String uxui,
-									ListModel<Bean> model,
-									Document owningDocument,
-									ListGrid listGrid,
-									String stickyHeaderAnchorSelector,
+	public @Nullable UIComponent listGrid(@Nullable UIComponent component,
+									@Nonnull String moduleName,
+									@Nullable String modelDocumentName,
+									@Nullable String modelName,
+									@Nonnull String uxui,
+									@Nonnull ListModel<Bean> model,
+									@Nullable Document owningDocument,
+									@Nonnull ListGrid listGrid,
+									@Nullable String stickyHeaderAnchorSelector,
 									boolean aggregateQuery) {
 		if (component != null) {
 			for (UIComponent child : component.getChildren()) {

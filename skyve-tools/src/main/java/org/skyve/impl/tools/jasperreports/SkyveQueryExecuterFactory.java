@@ -10,6 +10,9 @@ import net.sf.jasperreports.engine.JasperReportsContext;
 import net.sf.jasperreports.engine.query.JRQueryExecuter;
 import net.sf.jasperreports.engine.query.QueryExecuterFactory;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Creates {@link SkyveQueryExecuter} instances for JasperReports datasets.
  */
@@ -24,7 +27,7 @@ public class SkyveQueryExecuterFactory implements QueryExecuterFactory {
 	 * @throws JRException if JasperReports reports an executer creation error
 	 */
 	@Override
-	public JRQueryExecuter createQueryExecuter(JasperReportsContext jasperReportsContext, JRDataset dataset, Map<String, ? extends JRValueParameter> parameters) 
+	public @Nullable JRQueryExecuter createQueryExecuter(@Nullable JasperReportsContext jasperReportsContext, @Nullable JRDataset dataset, @Nullable Map<String, ? extends JRValueParameter> parameters) 
 	throws JRException {
 		if (dataset != null) {
 			JRQuery query = dataset.getQuery();
@@ -42,7 +45,7 @@ public class SkyveQueryExecuterFactory implements QueryExecuterFactory {
 	 * @return always an empty array
 	 */
 	@Override
-	public Object[] getBuiltinParameters() {
+	public @Nonnull Object[] getBuiltinParameters() {
 		return new Object[0];
 	}
 
@@ -53,7 +56,7 @@ public class SkyveQueryExecuterFactory implements QueryExecuterFactory {
 	 * @return always {@code true}
 	 */
 	@Override
-	public boolean supportsQueryParameterType(String className) {
+	public boolean supportsQueryParameterType(@Nullable String className) {
 		return true;
 	}
 }

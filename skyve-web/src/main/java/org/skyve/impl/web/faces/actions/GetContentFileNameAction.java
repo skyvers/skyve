@@ -10,6 +10,9 @@ import org.skyve.util.Binder;
 import org.skyve.util.logging.Category;
 import org.slf4j.Logger;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Executes a Faces callback action within the current Skyve web context.
  */
@@ -26,7 +29,7 @@ public class GetContentFileNameAction extends FacesAction<String> {
 	 * @param bean the source bean containing the content binding
 	 * @param binding the binding that resolves to a content id
 	 */
-	public GetContentFileNameAction(Bean bean, String binding) {
+	public GetContentFileNameAction(@Nonnull Bean bean, @Nonnull String binding) {
 		this.bean = bean;
 		this.binding = binding;
 	}
@@ -38,7 +41,7 @@ public class GetContentFileNameAction extends FacesAction<String> {
 	 * @throws Exception when content lookup fails unexpectedly
 	 */
 	@Override
-	public String callback() throws Exception {
+	public @Nullable String callback() throws Exception {
 		if (UtilImpl.FACES_TRACE) FACES_LOGGER.info("GetContentFileNameAction - binding={}", binding);
 
 		String contentId = (String) Binder.get(bean, binding);

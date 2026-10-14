@@ -26,6 +26,7 @@ import org.skyve.impl.web.faces.pipeline.ResponsiveFormGrid.ResponsiveGridStyle;
 import org.skyve.metadata.MetaData;
 import org.skyve.util.Icons;
 
+import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import jakarta.faces.component.UIComponent;
 import jakarta.faces.component.html.HtmlOutputLabel;
@@ -46,7 +47,7 @@ public class ResponsiveLayoutBuilder extends TabularLayoutBuilder {
 	 * There's only 1 toolbar for this layout and its at the top.
 	 */
 	@Override
-	public void addToolbarsOrLayouts(UIComponent view, List<UIComponent> toolbarsOrLayouts) {
+	public void addToolbarsOrLayouts(@Nonnull UIComponent view, @Nonnull List<UIComponent> toolbarsOrLayouts) {
 		HtmlPanelGroup div = panelGroup(false, false, true, null, null);
 		div.setStyleClass((UtilImpl.PRIMEFLEX ? "p-col-12 " : "ui-g-12 ") + ACTION_BAR_WRAPPER_STYLE_CLASS);
 		div.getChildren().add(toolbarsOrLayouts.get(0));
@@ -54,7 +55,7 @@ public class ResponsiveLayoutBuilder extends TabularLayoutBuilder {
 	}
 
 	@Override
-	public UIComponent viewLayout(UIComponent component) {
+	public @Nullable UIComponent viewLayout(@Nullable UIComponent component) {
 		if (component != null) {
 			return component;
 		}
@@ -67,7 +68,7 @@ public class ResponsiveLayoutBuilder extends TabularLayoutBuilder {
 	}
 	
 	@Override
-	public UIComponent tabLayout(UIComponent component) {
+	public @Nullable UIComponent tabLayout(@Nullable UIComponent component) {
 		if (component != null) {
 			return component;
 		}
@@ -76,7 +77,7 @@ public class ResponsiveLayoutBuilder extends TabularLayoutBuilder {
 	}
 	
 	@Override
-	public UIComponent vboxLayout(UIComponent component, VBox vbox) {
+	public @Nullable UIComponent vboxLayout(@Nullable UIComponent component, @Nonnull VBox vbox) {
 		if (component != null) {
 			return component;
 		}
@@ -98,7 +99,7 @@ public class ResponsiveLayoutBuilder extends TabularLayoutBuilder {
 	}
 	
 	@Override
-	public UIComponent hboxLayout(UIComponent component, HBox hbox) {
+	public @Nullable UIComponent hboxLayout(@Nullable UIComponent component, @Nonnull HBox hbox) {
 		if (component != null) {
 			return component;
 		}
@@ -111,18 +112,18 @@ public class ResponsiveLayoutBuilder extends TabularLayoutBuilder {
 
 	@Override
 	@SuppressWarnings("java:S3776") // Complexity OK
-	public UIComponent addToContainer(UIComponent component,
-										Container viewContainer, 
-										UIComponent container, 
-										UIComponent componentToAdd,
-										Integer pixelWidth, 
-										Integer responsiveWidth,
-										Integer percentageWidth,
-										Integer sm,
-										Integer md,
-										Integer lg,
-										Integer xl,
-										String widgetInvisible) {
+	public @Nullable UIComponent addToContainer(@Nullable UIComponent component,
+										@Nonnull Container viewContainer, 
+										@Nonnull UIComponent container, 
+										@Nonnull UIComponent componentToAdd,
+										@Nullable Integer pixelWidth, 
+										@Nullable Integer responsiveWidth,
+										@Nullable Integer percentageWidth,
+										@Nullable Integer sm,
+										@Nullable Integer md,
+										@Nullable Integer lg,
+										@Nullable Integer xl,
+										@Nullable String widgetInvisible) {
 		if (component != null) {
 			return component;
 		}
@@ -183,7 +184,7 @@ public class ResponsiveLayoutBuilder extends TabularLayoutBuilder {
 	}
 	
 	@Override
-	public UIComponent addedToContainer(UIComponent component, Container viewContainer, UIComponent container) {
+	public @Nullable UIComponent addedToContainer(@Nullable UIComponent component, @Nonnull Container viewContainer, @Nonnull UIComponent container) {
 		if (component != null) {
 			return component;
 		}
@@ -192,7 +193,7 @@ public class ResponsiveLayoutBuilder extends TabularLayoutBuilder {
 	}
 	
 	@Override
-	public UIComponent formLayout(UIComponent component, Form form) {
+	public @Nullable UIComponent formLayout(@Nullable UIComponent component, @Nonnull Form form) {
 		if (component != null) {
 			return component;
 		}
@@ -216,7 +217,7 @@ public class ResponsiveLayoutBuilder extends TabularLayoutBuilder {
 	 * in the EL expressions in the ensuing form markup.
 	 * @param grid	The responsive form layout grid definition
 	 */
-	public void addResponsiveStyles(ResponsiveFormGrid grid) {
+	public void addResponsiveStyles(@Nonnull ResponsiveFormGrid grid) {
 		Map<String, Object> attributes = fc.getViewRoot().getAttributes();
 		@SuppressWarnings("unchecked")
 		List<ResponsiveFormGrid> formStyles = (List<ResponsiveFormGrid>) attributes.get(FacesUtil.FORM_STYLES_KEY);
@@ -229,7 +230,7 @@ public class ResponsiveLayoutBuilder extends TabularLayoutBuilder {
 	}
 
 	@Override
-	public UIComponent formRowLayout(UIComponent component, FormRow row) {
+	public @Nullable UIComponent formRowLayout(@Nullable UIComponent component, @Nonnull FormRow row) {
 		if (component != null) {
 			return component;
 		}
@@ -248,7 +249,7 @@ public class ResponsiveLayoutBuilder extends TabularLayoutBuilder {
 	 * Overridden to add an extra <div class="ui-g or p-grid" /> to support responsive nesting.
 	 */
 	@Override
-	public UIComponent addFormRowLayout(UIComponent component, UIComponent formLayout, UIComponent rowLayout) {
+	public @Nullable UIComponent addFormRowLayout(@Nullable UIComponent component, @Nonnull UIComponent formLayout, @Nonnull UIComponent rowLayout) {
 		if (component != null) {
 			return component;
 		}
@@ -263,17 +264,17 @@ public class ResponsiveLayoutBuilder extends TabularLayoutBuilder {
 
 	// respect responsive width if it is defined in this renderer
 	@Override
-	protected void setSizeAndTextAlignStyle(UIComponent component, 
-												String existingStyle, 
-												Integer pixelWidth, 
-												Integer responsiveWidth,
-												Integer percentageWidth, 
-												Integer pixelHeight, 
-												Integer percentageHeight, 
-												Integer defaultPercentageWidth,
-												HorizontalAlignment textAlign,
-												String styleAttributeNameOverride, // if null, "style" is used
-												String rightPaddingIfNecessary) {
+	protected void setSizeAndTextAlignStyle(@Nonnull UIComponent component, 
+												@Nullable String existingStyle, 
+												@Nullable Integer pixelWidth, 
+												@Nullable Integer responsiveWidth,
+												@Nullable Integer percentageWidth, 
+												@Nullable Integer pixelHeight, 
+												@Nullable Integer percentageHeight, 
+												@Nullable Integer defaultPercentageWidth,
+												@Nullable HorizontalAlignment textAlign,
+												@Nullable String styleAttributeNameOverride, // if null, "style" is used
+												@Nullable String rightPaddingIfNecessary) {
 		if (responsiveWidth != null) {
 			super.setSizeAndTextAlignStyle(component, existingStyle, null, responsiveWidth, null, pixelHeight, percentageHeight, null, textAlign, styleAttributeNameOverride, rightPaddingIfNecessary);
 		}
@@ -305,17 +306,17 @@ public class ResponsiveLayoutBuilder extends TabularLayoutBuilder {
 	 * @param widgetHelpText help text
 	 */
 	@Override
-	public void layoutFormItemLabel(UIComponent formOrRowLayout, 
-										UIComponent formItemComponent, 
-										Form currentForm,
-										FormItem currentFormItem, 
-										FormColumn currentFormColumn,
-										String widgetLabel, 
+	public void layoutFormItemLabel(@Nonnull UIComponent formOrRowLayout, 
+										@Nonnull UIComponent formItemComponent, 
+										@Nonnull Form currentForm,
+										@Nonnull FormItem currentFormItem, 
+										@Nonnull FormColumn currentFormColumn,
+										@Nullable String widgetLabel, 
 										boolean widgetEscapeLabel,
 										@Nullable String widgetRequiredMessage,
 										boolean widgetEscapeRequiredMessage,
-										String widgetInvisible,
-										String widgetHelpText) {
+										@Nullable String widgetInvisible,
+										@Nullable String widgetHelpText) {
 		String label = currentFormItem.getLocalisedLabel();
 		if (label == null) {
 			label = widgetLabel;
@@ -361,20 +362,20 @@ public class ResponsiveLayoutBuilder extends TabularLayoutBuilder {
 	 * @param topLabel whether labels render above widgets
 	 */
 	@Override
-	public void layoutFormItemWidget(UIComponent formOrRowLayout, 
-										UIComponent formItemComponent, 
-										Form currentForm,
-										FormItem currentFormItem, 
-										FormColumn currentFormColumn,
-										String widgetLabel,
+	public void layoutFormItemWidget(@Nonnull UIComponent formOrRowLayout, 
+										@Nonnull UIComponent formItemComponent, 
+										@Nonnull Form currentForm,
+										@Nonnull FormItem currentFormItem, 
+										@Nonnull FormColumn currentFormColumn,
+										@Nullable String widgetLabel,
 										boolean widgetEscapeLabel,
 										int widgetColspan,
 										@Nullable String widgetRequiredMessage,
 										boolean widgetEscapeRequiredMessage,
-										String widgetInvisible,
-										String widgetHelpText,
+										@Nullable String widgetInvisible,
+										@Nullable String widgetHelpText,
 										boolean widgetEscapeHelp,
-										Integer widgetPixelWidth,
+										@Nullable Integer widgetPixelWidth,
 										boolean showLabel,
 										boolean topLabel) {
 		HtmlPanelGroup flex = panelGroup(false, false, true, null, null);
@@ -453,7 +454,7 @@ public class ResponsiveLayoutBuilder extends TabularLayoutBuilder {
 		formOrRowLayout.getChildren().add(flex);
 	}
 	
-	private static String alignment(HorizontalAlignment alignment, boolean forFormLabel) {
+	private static @Nonnull String alignment(@Nullable HorizontalAlignment alignment, boolean forFormLabel) {
 		String result = null;
 		if (alignment == null) {
 			result = forFormLabel ? 
@@ -467,10 +468,10 @@ public class ResponsiveLayoutBuilder extends TabularLayoutBuilder {
 		return result + (UtilImpl.PRIMEFLEX ? "FormFlex" : "Form");
 	}
 	
-	private HtmlPanelGroup responsiveContainer(VerticalAlignment vertical,
-												HorizontalAlignment horizontal,
-												String invisibleCondition,
-												String widgetId) {
+	private @Nonnull HtmlPanelGroup responsiveContainer(@Nullable VerticalAlignment vertical,
+												@Nullable HorizontalAlignment horizontal,
+												@Nullable String invisibleCondition,
+												@Nullable String widgetId) {
 		HtmlPanelGroup result = panelGroup(false, false, true, null, widgetId);
 		setInvisible(result, invisibleCondition, null);
 		if (UtilImpl.PRIMEFLEX) {
@@ -502,14 +503,14 @@ public class ResponsiveLayoutBuilder extends TabularLayoutBuilder {
 	}
 
 	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
-	private HtmlPanelGroup responsiveColumn(Integer pixelWidth, 
-												Integer responsiveWidth, 
-												Integer percentageWidth,
-												Integer sm,
-												Integer md,
-												Integer lg,
-												Integer xl,
-												String widgetInvisible,
+	private @Nonnull HtmlPanelGroup responsiveColumn(@Nullable Integer pixelWidth, 
+												@Nullable Integer responsiveWidth, 
+												@Nullable Integer percentageWidth,
+												@Nullable Integer sm,
+												@Nullable Integer md,
+												@Nullable Integer lg,
+												@Nullable Integer xl,
+												@Nullable String widgetInvisible,
 												boolean nopad) {
 		HtmlPanelGroup result = panelGroup(false, false, true, null, null);
 		
@@ -534,13 +535,13 @@ public class ResponsiveLayoutBuilder extends TabularLayoutBuilder {
 		return result;
 	}
 
-	private static String responsiveGridStyleClasses(Integer pixelWidth,
-														Integer responsiveWidth,
-														Integer percentageWidth,
-														Integer sm,
-														Integer md,
-														Integer lg,
-														Integer xl) {
+	private static @Nonnull String responsiveGridStyleClasses(@Nullable Integer pixelWidth,
+														@Nullable Integer responsiveWidth,
+														@Nullable Integer percentageWidth,
+														@Nullable Integer sm,
+														@Nullable Integer md,
+														@Nullable Integer lg,
+														@Nullable Integer xl) {
 		int small = 12;
 		int medium = 12;
 		int large = 12;
@@ -580,7 +581,7 @@ public class ResponsiveLayoutBuilder extends TabularLayoutBuilder {
 	}
 	
 	@SuppressWarnings("java:S3776") // Complexity OK
-	private static ResponsiveGridStyle[] responsiveFormStyleClasses(List<FormColumn> formColumns) {
+	private static @Nonnull ResponsiveGridStyle[] responsiveFormStyleClasses(@Nonnull List<FormColumn> formColumns) {
 		ResponsiveGridStyle[] result = new ResponsiveGridStyle[formColumns.size()];
 		
 		// max number of columns

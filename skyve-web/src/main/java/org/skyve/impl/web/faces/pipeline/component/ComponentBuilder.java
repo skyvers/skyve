@@ -93,7 +93,7 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 		 * @param component the rendered component
 		 * @param eventSource the component that receives JSF client behaviors
 		 */
-		public EventSourceComponent(UIComponent component, UIComponentBase eventSource) {
+		public EventSourceComponent(@Nonnull UIComponent component, @Nonnull UIComponentBase eventSource) {
 			super();
 			this.component = component;
 			this.eventSource = eventSource;
@@ -104,7 +104,7 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 		 *
 		 * @return the rendered component
 		 */
-		public UIComponent getComponent() {
+		public @Nonnull UIComponent getComponent() {
 			return component;
 		}
 
@@ -113,7 +113,7 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 		 *
 		 * @return the event source component
 		 */
-		public UIComponentBase getEventSource() {
+		public @Nonnull UIComponentBase getEventSource() {
 			return eventSource;
 		}
 	}
@@ -125,7 +125,7 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 	 * @param createView whether create-view mode is active
 	 * @return the resulting view component
 	 */
-	public abstract UIComponent view(UIComponent component, boolean createView);
+	public abstract @Nullable UIComponent view(@Nullable UIComponent component, boolean createView);
 
 	/**
 	 * Creates toolbar components for the current view.
@@ -134,7 +134,7 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 	 * @param widgetId the optional widget identifier
 	 * @return the resulting toolbar components, or {@code null} when no toolbar is required
 	 */
-	public abstract List<UIComponent> toolbars(List<UIComponent> components, String widgetId);
+	public abstract @Nullable List<UIComponent> toolbars(@Nullable List<UIComponent> components, @Nullable String widgetId);
 	
 	/**
 	 * Creates a tab pane component.
@@ -145,10 +145,10 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 	 * @param documentName the document name
 	 * @return the resulting tab-pane component
 	 */
-	public abstract UIComponent tabPane(UIComponent component,
-											TabPane tabPane,
-											String moduleName,
-											String documentName);
+	public abstract @Nullable UIComponent tabPane(@Nullable UIComponent component,
+											@Nonnull TabPane tabPane,
+											@Nonnull String moduleName,
+											@Nonnull String documentName);
 	
 	/**
 	 * Creates a single tab component.
@@ -158,7 +158,7 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 	 * @param tab the tab metadata
 	 * @return the resulting tab component
 	 */
-	public abstract UIComponent tab(UIComponent component, String title, Tab tab);
+	public abstract @Nullable UIComponent tab(@Nullable UIComponent component, @Nullable String title, @Nonnull Tab tab);
 
 	/**
 	 * Sets the resolved escape decision for subsequently rendered input title attributes.
@@ -190,7 +190,7 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 	 * @param text raw metadata text and nullable escape flag; must not be {@code null}
 	 * @return configured output-text component; never {@code null}
 	 */
-	protected HtmlOutputText outputText(EscapableText text) {
+	protected @Nonnull HtmlOutputText outputText(@Nonnull EscapableText text) {
 		HtmlOutputText result = EscapableComponentSupport.outputText(a, text);
 		setId(result, null);
 		return result;
@@ -207,7 +207,7 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 	 * @param forId optional target component ID for the label
 	 * @return configured output-label component; never {@code null}
 	 */
-	protected OutputLabel outputLabel(EscapableText text, String forId) {
+	protected @Nonnull OutputLabel outputLabel(@Nonnull EscapableText text, @Nullable String forId) {
 		OutputLabel result = EscapableComponentSupport.outputLabel(a, text, forId);
 		setId(result, null);
 		return result;
@@ -226,7 +226,7 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 	 * @param text raw metadata text and nullable escape flag; may be {@code null}
 	 * @return the added output-text facet, or {@code null} when no text value is present
 	 */
-	protected HtmlOutputText putOutputTextFacet(UIComponent component, String facetName, EscapableText text) {
+	protected @Nullable HtmlOutputText putOutputTextFacet(@Nonnull UIComponent component, @Nonnull String facetName, @Nullable EscapableText text) {
 		HtmlOutputText result = EscapableComponentSupport.putOutputTextFacet(a, component, facetName, text);
 		if (result != null) {
 			setId(result, null);
@@ -245,7 +245,7 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 	 * @param component component receiving the confirmation behaviour; must not be {@code null}
 	 * @param confirmation raw confirmation text and nullable escape flag; may be {@code null}
 	 */
-	protected void addConfirmBehavior(UIComponentBase component, EscapableText confirmation) {
+	protected void addConfirmBehavior(@Nonnull UIComponentBase component, @Nullable EscapableText confirmation) {
 		EscapableComponentSupport.addConfirmBehavior(a, component, confirmation);
 	}
 	
@@ -259,11 +259,11 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 	 * @param tabPaneComponentId the tab-pane component id
 	 * @return the resulting script component
 	 */
-	public abstract UIComponent tabPaneScript(UIComponent component,
-												TabPane tabPane,
-												String moduleName,
-												String documentName,
-												String tabPaneComponentId);
+	public abstract @Nullable UIComponent tabPaneScript(@Nullable UIComponent component,
+												@Nonnull TabPane tabPane,
+												@Nonnull String moduleName,
+												@Nonnull String documentName,
+												@Nonnull String tabPaneComponentId);
 
 	/**
 	 * Creates sidebar script support markup.
@@ -274,10 +274,10 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 	 * @param sidebarComponentId the sidebar component id
 	 * @return the resulting script component
 	 */
-	public abstract UIComponent sidebarScript(UIComponent component,
-												Sidebar sidebar,
+	public abstract @Nullable UIComponent sidebarScript(@Nullable UIComponent component,
+												@Nonnull Sidebar sidebar,
 												boolean createView,
-												String sidebarComponentId);
+												@Nonnull String sidebarComponentId);
 	
 	/**
 	 * Creates a bordered container.
@@ -289,11 +289,11 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 	 * @param collapsible collapsible metadata
 	 * @return the resulting border component
 	 */
-	public abstract UIComponent border(UIComponent component,
-										String title,
-										String invisibleCondition,
-										Integer pixelWidth,
-										Collapsible collapsible);
+	public abstract @Nullable UIComponent border(@Nullable UIComponent component,
+										@Nullable String title,
+										@Nullable String invisibleCondition,
+										@Nullable Integer pixelWidth,
+										@Nullable Collapsible collapsible);
 
 	/**
 	 * Creates a static label component.
@@ -302,7 +302,7 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 	 * @param value the label text value
 	 * @return the resulting label component
 	 */
-	public abstract UIComponent label(UIComponent component, String value);
+	public abstract @Nullable UIComponent label(@Nullable UIComponent component, @Nonnull String value);
 
 	/**
 	 * Creates a dialog-button component.
@@ -313,10 +313,10 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 	 * @param formDisabledCondition optional form-level disabled condition
 	 * @return the resulting dialog-button component
 	 */
-	public abstract UIComponent dialogButton(UIComponent component,
-												EscapableText label,
-												DialogButton button,
-												String formDisabledCondition);
+	public abstract @Nullable UIComponent dialogButton(@Nullable UIComponent component,
+												@Nullable EscapableText label,
+												@Nonnull DialogButton button,
+												@Nullable String formDisabledCondition);
 	
 	/**
 	 * Creates a spacer component.
@@ -325,7 +325,7 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 	 * @param spacer the spacer metadata
 	 * @return the resulting spacer component
 	 */
-	public abstract UIComponent spacer(UIComponent component, Spacer spacer);
+	public abstract @Nullable UIComponent spacer(@Nullable UIComponent component, @Nonnull Spacer spacer);
 	
 	/**
 	 * Creates a zoom-in control component.
@@ -338,12 +338,12 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 	 * @param formDisabledCondition form disabled condition
 	 * @return the resulting component
 	 */
-	public abstract UIComponent zoomIn(UIComponent component,
-											String label,
-											String iconStyleClass,
-											String toolTip,
-											ZoomIn zoomIn, 
-											String formDisabledCondition);
+	public abstract @Nullable UIComponent zoomIn(@Nullable UIComponent component,
+											@Nullable String label,
+											@Nullable String iconStyleClass,
+											@Nullable String toolTip,
+											@Nonnull ZoomIn zoomIn, 
+											@Nullable String formDisabledCondition);
 
 	/**
 	 * Creates a generic action button component.
@@ -361,16 +361,16 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 	 * @return the resulting component
 	 */
 	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
-	public abstract UIComponent actionButton(UIComponent component,
-												String dataWidgetBinding, 
-												String dataWidgetVar, 
-												String label,
-												String iconStyleClass,
-												String toolTip,
-												String confirmationText, 
-												Button button, 
-												String formDisabledCondition,
-												Action action);
+	public abstract @Nullable UIComponent actionButton(@Nullable UIComponent component,
+												@Nullable String dataWidgetBinding, 
+												@Nullable String dataWidgetVar, 
+												@Nullable String label,
+												@Nullable String iconStyleClass,
+												@Nullable String toolTip,
+												@Nullable String confirmationText, 
+												@Nonnull Button button, 
+												@Nullable String formDisabledCondition,
+												@Nonnull Action action);
 
 	/**
 	 * Creates a report button component.
@@ -386,14 +386,14 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 	 * @return the resulting component
 	 */
 	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
-	public abstract UIComponent reportButton(UIComponent component, 
-												String label,
-												String iconStyleClass,
-												String toolTip,
-												String confirmationText, 
-												Button button, 
-												String formDisabledCondition,
-												Action action);
+	public abstract @Nullable UIComponent reportButton(@Nullable UIComponent component, 
+												@Nullable String label,
+												@Nullable String iconStyleClass,
+												@Nullable String toolTip,
+												@Nullable String confirmationText, 
+												@Nonnull Button button, 
+												@Nullable String formDisabledCondition,
+												@Nonnull Action action);
 												
 	/**
 	 * Creates a download button component.
@@ -411,16 +411,16 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 	 * @return the resulting component
 	 */
 	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
-	public abstract UIComponent downloadButton(UIComponent component,
-												String dataWidgetBinding, 
-												String dataWidgetVar, 
-												String label,
-												String iconStyleClass,
-												String toolTip,
-												String confirmationText, 
-												Button button, 
-												String formDisabledCondition,
-												Action action);
+	public abstract @Nullable UIComponent downloadButton(@Nullable UIComponent component,
+												@Nullable String dataWidgetBinding, 
+												@Nullable String dataWidgetVar, 
+												@Nullable String label,
+												@Nullable String iconStyleClass,
+												@Nullable String toolTip,
+												@Nullable String confirmationText, 
+												@Nonnull Button button, 
+												@Nullable String formDisabledCondition,
+												@Nonnull Action action);
 
 	/**
 	 * Creates an upload button component.
@@ -436,14 +436,14 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 	 * @return the resulting component
 	 */
 	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
-	public abstract UIComponent uploadButton(UIComponent component, 
-												String label,
-												String iconStyleClass,
-												String toolTip,
-												String confirmationText, 
-												Button button, 
-												String formDisabledCondition,
-												Action action);
+	public abstract @Nullable UIComponent uploadButton(@Nullable UIComponent component, 
+												@Nullable String label,
+												@Nullable String iconStyleClass,
+												@Nullable String toolTip,
+												@Nullable String confirmationText, 
+												@Nonnull Button button, 
+												@Nullable String formDisabledCondition,
+												@Nonnull Action action);
 
 	/**
 	 * Creates a static image component.
@@ -453,7 +453,7 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 	 * @param image the static image metadata
 	 * @return the resulting image component
 	 */
-	public abstract UIComponent staticImage(UIComponent component, String fileUrl, StaticImage image);
+	public abstract @Nullable UIComponent staticImage(@Nullable UIComponent component, @Nonnull String fileUrl, @Nonnull StaticImage image);
 	
 	/**
 	 * Creates a dynamic image component.
@@ -464,10 +464,10 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 	 * @param documentName the document name
 	 * @return the resulting image component
 	 */
-	public abstract UIComponent dynamicImage(UIComponent component, 
-												DynamicImage image, 
-												String moduleName, 
-												String documentName);
+	public abstract @Nullable UIComponent dynamicImage(@Nullable UIComponent component, 
+												@Nonnull DynamicImage image, 
+												@Nonnull String moduleName, 
+												@Nonnull String documentName);
 	
 	/**
 	 * Creates a blurb component.
@@ -479,11 +479,11 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 	 * @param blurb the blurb metadata
 	 * @return the resulting blurb component
 	 */
-	public abstract UIComponent blurb(UIComponent component, 
-										String dataWidgetVar, 
-										String value, 
-										String binding, 
-										Blurb blurb);
+	public abstract @Nullable UIComponent blurb(@Nullable UIComponent component, 
+										@Nullable String dataWidgetVar, 
+										@Nullable String value, 
+										@Nullable String binding, 
+										@Nonnull Blurb blurb);
 										
 	/**
 	 * Creates a bound label component.
@@ -495,11 +495,11 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 	 * @param label the label metadata
 	 * @return the resulting label component
 	 */
-	public abstract UIComponent label(UIComponent component,
-										String dataWidgetVar,
-										String value,
-										String binding,
-										Label label);
+	public abstract @Nullable UIComponent label(@Nullable UIComponent component,
+										@Nullable String dataWidgetVar,
+										@Nullable String value,
+										@Nullable String binding,
+										@Nonnull Label label);
 
 	/**
 	 * Creates a data-grid component.
@@ -510,10 +510,10 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 	 * @param grid the data-grid metadata
 	 * @return the resulting data-grid component
 	 */
-	public abstract UIComponent dataGrid(UIComponent component,
-											String dataWidgetVar,
+	public abstract @Nullable UIComponent dataGrid(@Nullable UIComponent component,
+											@Nonnull String dataWidgetVar,
 											boolean ordered,
-											DataGrid grid);
+											@Nonnull DataGrid grid);
 
 	/**
 	 * Creates a data repeater component.
@@ -529,9 +529,9 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 	 * @param repeater the data-repeater metadata
 	 * @return the resulting data-repeater component
 	 */
-	public abstract UIComponent dataRepeater(UIComponent component,
-												String dataWidgetVar,
-												DataRepeater repeater);
+	public abstract @Nullable UIComponent dataRepeater(@Nullable UIComponent component,
+												@Nonnull String dataWidgetVar,
+												@Nonnull DataRepeater repeater);
 
 	/**
 	 * Adds a bound column to a data grid.
@@ -549,16 +549,16 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 	 * @return the resulting component after adding the column
 	 */
 	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
-	public abstract UIComponent addDataGridBoundColumn(UIComponent component,
-														UIComponent current, 
-														AbstractDataWidget widget,
-														DataGridBoundColumn column,
-														String dataWidgetVar,
-														String columnTitle,
-														String columnBinding,
-														StringBuilder gridColumnExpression,
-														HorizontalAlignment horizontalAlignment,
-														Integer pixelWidth);
+	public abstract @Nullable UIComponent addDataGridBoundColumn(@Nullable UIComponent component,
+														@Nonnull UIComponent current, 
+														@Nonnull AbstractDataWidget widget,
+														@Nonnull DataGridBoundColumn column,
+														@Nullable String dataWidgetVar,
+														@Nullable String columnTitle,
+														@Nonnull String columnBinding,
+														@Nonnull StringBuilder gridColumnExpression,
+														@Nullable HorizontalAlignment horizontalAlignment,
+														@Nullable Integer pixelWidth);
 
 	/**
 	 * Finalises a bound data-grid column after insertion.
@@ -568,9 +568,9 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 	 * @param alignment alignment to apply
 	 * @return the resulting component
 	 */
-	public abstract UIComponent addedDataGridBoundColumn(UIComponent component,
-															UIComponent current,
-															HorizontalAlignment alignment);
+	public abstract @Nullable UIComponent addedDataGridBoundColumn(@Nullable UIComponent component,
+															@Nonnull UIComponent current,
+															@Nonnull HorizontalAlignment alignment);
 
 	/**
 	 * Adds a container column to a data grid.
@@ -583,12 +583,12 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 	 * @param horizontalAlignment column alignment
 	 * @return the resulting component after adding the column
 	 */
-	public abstract UIComponent addDataGridContainerColumn(UIComponent component,
-															UIComponent current,
-															AbstractDataWidget widget,
-															String title,
-															DataGridContainerColumn column,
-															HorizontalAlignment horizontalAlignment);
+	public abstract @Nullable UIComponent addDataGridContainerColumn(@Nullable UIComponent component,
+															@Nonnull UIComponent current,
+															@Nonnull AbstractDataWidget widget,
+															@Nullable String title,
+															@Nonnull DataGridContainerColumn column,
+															@Nullable HorizontalAlignment horizontalAlignment);
 
 	/**
 	 * Finalises a container data-grid column after insertion.
@@ -597,7 +597,7 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 	 * @param current the current column component
 	 * @return the resulting component
 	 */
-	public abstract UIComponent addedDataGridContainerColumn(UIComponent component, UIComponent current);
+	public abstract @Nullable UIComponent addedDataGridContainerColumn(@Nullable UIComponent component, @Nonnull UIComponent current);
 
 	/**
 	 * Adds an action column to a data grid.
@@ -614,12 +614,12 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 	 * @return the resulting component after adding the column
 	 */
 	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
-	public abstract UIComponent addDataGridActionColumn(UIComponent component,
-															UIComponent current, 
-															DataGrid grid,
-															String dataWidgetVar,
-															String gridColumnExpression,
-															String singluarDocumentAlias,
+	public abstract @Nullable UIComponent addDataGridActionColumn(@Nullable UIComponent component,
+															@Nonnull UIComponent current, 
+															@Nonnull DataGrid grid,
+															@Nullable String dataWidgetVar,
+															@Nonnull String gridColumnExpression,
+															@Nullable String singluarDocumentAlias,
 															boolean inline,
 															boolean canCreate,
 															boolean canDelete);
@@ -640,14 +640,14 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 	 * @return the resulting list-grid component
 	 */
 	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
-	public abstract UIComponent listGrid(UIComponent component,
-											String moduleName,
-											String modelDocumentName,
-											String modelName,
-											String uxui,
-											ListModel<Bean> model,
-											Document owningDocument,
-											ListGrid listGrid,
+	public abstract @Nullable UIComponent listGrid(@Nullable UIComponent component,
+											@Nonnull String moduleName,
+											@Nullable String modelDocumentName,
+											@Nullable String modelName,
+											@Nonnull String uxui,
+											@Nonnull ListModel<Bean> model,
+											@Nullable Document owningDocument,
+											@Nonnull ListGrid listGrid,
 											@Nullable String stickyHeaderAnchorSelector,
 											boolean aggregateQuery);
 
@@ -659,9 +659,9 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 	 * @param listGrid the list-grid metadata
 	 * @return the resulting context-menu component
 	 */
-	public abstract UIComponent listGridContextMenu(UIComponent component,
-														String listGridId,
-														ListGrid listGrid);
+	public abstract @Nullable UIComponent listGridContextMenu(@Nullable UIComponent component,
+														@Nonnull String listGridId,
+														@Nonnull ListGrid listGrid);
 
 	/**
 	 * Creates a list repeater component.
@@ -686,13 +686,13 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 	 * @return the resulting list-repeater component
 	 */
 	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
-	public abstract UIComponent listRepeater(UIComponent component,
-												String modelDocumentName,
-												String modelName,
-												String uxui,
-												ListModel<Bean> model, 
-												List<FilterParameter> filterParameters,
-												List<Parameter> parameters,
+	public abstract @Nullable UIComponent listRepeater(@Nullable UIComponent component,
+												@Nullable String modelDocumentName,
+												@Nullable String modelName,
+												@Nonnull String uxui,
+												@Nonnull ListModel<Bean> model, 
+												@Nullable List<FilterParameter> filterParameters,
+												@Nullable List<Parameter> parameters,
 												boolean showColumnHeaders,
 												boolean showGrid);
 
@@ -706,11 +706,11 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 	 * @param geometryBinding the geometry binding
 	 * @return the resulting map component
 	 */
-	public abstract UIComponent map(UIComponent component, 
-										MapDisplay map,
-										String moduleName,
-										String queryName,
-										String geometryBinding);
+	public abstract @Nullable UIComponent map(@Nullable UIComponent component, 
+										@Nonnull MapDisplay map,
+										@Nonnull String moduleName,
+										@Nonnull String queryName,
+										@Nonnull String geometryBinding);
 
 	/**
 	 * Creates a model-backed map component.
@@ -720,7 +720,7 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 	 * @param modelName the model name
 	 * @return the resulting map component
 	 */
-	public abstract UIComponent map(UIComponent component, MapDisplay map, String modelName);
+	public abstract @Nullable UIComponent map(@Nullable UIComponent component, @Nonnull MapDisplay map, @Nonnull String modelName);
 	
 	/**
 	 * Creates a geometry input component wrapper.
@@ -734,13 +734,13 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 	 * @param textAlignment text alignment
 	 * @return the resulting wrapper component
 	 */
-	public abstract EventSourceComponent geometry(EventSourceComponent component, 
-													String dataWidgetVar, 
-													Geometry geometry, 
-													String formDisabledCondition,
-													String title, 
+	public abstract @Nullable EventSourceComponent geometry(@Nullable EventSourceComponent component, 
+													@Nullable String dataWidgetVar, 
+													@Nonnull Geometry geometry, 
+													@Nullable String formDisabledCondition,
+													@Nullable String title, 
 													@Nullable String requiredMessage,
-													HorizontalAlignment textAlignment);
+													@Nullable HorizontalAlignment textAlignment);
 
 	/**
 	 * Creates a geometry-map input component wrapper.
@@ -752,10 +752,10 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 	 * @param requiredMessage optional required-message text
 	 * @return the resulting wrapper component
 	 */
-	public abstract EventSourceComponent geometryMap(EventSourceComponent component, 
-														GeometryMap geometry, 
-														String formDisabledCondition,
-														String title, 
+	public abstract @Nullable EventSourceComponent geometryMap(@Nullable EventSourceComponent component, 
+														@Nonnull GeometryMap geometry, 
+														@Nullable String formDisabledCondition,
+														@Nullable String title, 
 														@Nullable String requiredMessage);
 
 	/**
@@ -765,7 +765,7 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 	 * @param chart the chart metadata
 	 * @return the resulting chart component
 	 */
-	public abstract UIComponent chart(UIComponent component, Chart chart);
+	public abstract @Nullable UIComponent chart(@Nullable UIComponent component, @Nonnull Chart chart);
 
 	/**
 	 * Creates a list-membership component wrapper.
@@ -780,10 +780,10 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 	 * @param membership the membership metadata
 	 * @return the resulting wrapper component
 	 */
-	public abstract EventSourceComponent listMembership(EventSourceComponent component,
-															EscapableText candidatesHeading,
-															EscapableText membersHeading,
-															ListMembership membership);
+	public abstract @Nullable EventSourceComponent listMembership(@Nullable EventSourceComponent component,
+															@Nullable EscapableText candidatesHeading,
+															@Nullable EscapableText membersHeading,
+															@Nonnull ListMembership membership);
 	
 	/**
 	 * Creates a checkbox component wrapper.
@@ -796,11 +796,11 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 	 * @param requiredMessage optional required-message text
 	 * @return the resulting wrapper component
 	 */
-	public abstract EventSourceComponent checkBox(EventSourceComponent component, 
-													String dataWidgetVar, 
-													CheckBox checkBox, 
-													String formDisabledCondition,
-													String title, 
+	public abstract @Nullable EventSourceComponent checkBox(@Nullable EventSourceComponent component, 
+													@Nullable String dataWidgetVar, 
+													@Nonnull CheckBox checkBox, 
+													@Nullable String formDisabledCondition,
+													@Nullable String title, 
 													@Nullable String requiredMessage);
 
 	/**
@@ -815,13 +815,13 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 	 * @param textAlignment text alignment
 	 * @return the resulting wrapper component
 	 */
-	public abstract EventSourceComponent colourPicker(EventSourceComponent component, 
-														String dataWidgetVar, 
-														ColourPicker colour, 
-														String formDisabledCondition,
-														String title, 
+	public abstract @Nullable EventSourceComponent colourPicker(@Nullable EventSourceComponent component, 
+														@Nullable String dataWidgetVar, 
+														@Nonnull ColourPicker colour, 
+														@Nullable String formDisabledCondition,
+														@Nullable String title, 
 														@Nullable String requiredMessage,
-														HorizontalAlignment textAlignment);
+														@Nullable HorizontalAlignment textAlignment);
 	
 	/**
 	 * Creates a combo component wrapper.
@@ -836,11 +836,11 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 	 * @param requiredMessage optional required-message text
 	 * @return the resulting wrapper component
 	 */
-	public abstract EventSourceComponent combo(EventSourceComponent component, 
-												String dataWidgetVar, 
-												Combo combo, 
-												String formDisabledCondition,
-												String title, 
+	public abstract @Nullable EventSourceComponent combo(@Nullable EventSourceComponent component, 
+												@Nullable String dataWidgetVar, 
+												@Nonnull Combo combo, 
+												@Nullable String formDisabledCondition,
+												@Nullable String title, 
 												@Nullable String requiredMessage);
 
 	/**
@@ -883,11 +883,11 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 	 * @param requiredMessage optional required-message text
 	 * @return the resulting layout component
 	 */
-	public abstract UIComponent addContentSignature(UIComponent component,
-														UIComponent layout, 
-														ContentSignature signature, 
-														String formDisabledCondition,
-														String title, 
+	public abstract @Nullable UIComponent addContentSignature(@Nullable UIComponent component,
+														@Nonnull UIComponent layout, 
+														@Nonnull ContentSignature signature, 
+														@Nullable String formDisabledCondition,
+														@Nullable String title, 
 														@Nullable String requiredMessage);
 
 	/**
@@ -901,11 +901,11 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 	 * @param requiredMessage optional required-message text
 	 * @return the resulting HTML editor component
 	 */
-	public abstract UIComponent html(UIComponent component, 
-										String dataWidgetVar, 
-										HTML html, 
-										String formDisabledCondition,
-										String title, 
+	public abstract @Nullable UIComponent html(@Nullable UIComponent component, 
+										@Nullable String dataWidgetVar, 
+										@Nonnull HTML html, 
+										@Nullable String formDisabledCondition,
+										@Nullable String title, 
 										@Nullable String requiredMessage);
 
 	/**
@@ -924,16 +924,16 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 	 * @return the resulting wrapper component
 	 */
 	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
-	public abstract EventSourceComponent lookupDescription(EventSourceComponent component, 
-															String dataWidgetVar,
-															LookupDescription lookup,
-															String formDisabledCondition,
-															String title,
+	public abstract @Nullable EventSourceComponent lookupDescription(@Nullable EventSourceComponent component, 
+															@Nullable String dataWidgetVar,
+															@Nonnull LookupDescription lookup,
+															@Nullable String formDisabledCondition,
+															@Nullable String title,
 															@Nullable String requiredMessage,
-															HorizontalAlignment textAlignment,
-															String displayBinding,
-															QueryDefinition query,
-															Document owningDocument);
+															@Nullable HorizontalAlignment textAlignment,
+															@Nonnull String displayBinding,
+															@Nullable QueryDefinition query,
+															@Nonnull Document owningDocument);
 	
 	/**
 	 * Creates a password input component wrapper.
@@ -947,13 +947,13 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 	 * @param textAlignment text alignment
 	 * @return the resulting wrapper component
 	 */
-	public abstract EventSourceComponent password(EventSourceComponent component, 
-													String dataWidgetVar,
-													Password password,
-													String formDisabledCondition,
-													String title,
+	public abstract @Nullable EventSourceComponent password(@Nullable EventSourceComponent component, 
+													@Nullable String dataWidgetVar,
+													@Nonnull Password password,
+													@Nullable String formDisabledCondition,
+													@Nullable String title,
 													@Nullable String requiredMessage,
-													HorizontalAlignment textAlignment);
+													@Nullable HorizontalAlignment textAlignment);
 
 	/**
 	 * Creates a radio input component wrapper.
@@ -966,11 +966,11 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 	 * @param requiredMessage optional required-message text
 	 * @return the resulting wrapper component
 	 */
-	public abstract EventSourceComponent radio(EventSourceComponent component, 
-												String dataWidgetVar,
-												Radio radio,
-												String formDisabledCondition,
-												String title,
+	public abstract @Nullable EventSourceComponent radio(@Nullable EventSourceComponent component, 
+												@Nullable String dataWidgetVar,
+												@Nonnull Radio radio,
+												@Nullable String formDisabledCondition,
+												@Nullable String title,
 												@Nullable String requiredMessage);
 	
 	/**
@@ -984,11 +984,11 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 	 * @param requiredMessage optional required-message text
 	 * @return the resulting wrapper component
 	 */
-	public abstract EventSourceComponent richText(EventSourceComponent component, 
-													String dataWidgetVar,
-													RichText text,
-													String formDisabledCondition,
-													String title,
+	public abstract @Nullable EventSourceComponent richText(@Nullable EventSourceComponent component, 
+													@Nullable String dataWidgetVar,
+													@Nonnull RichText text,
+													@Nullable String formDisabledCondition,
+													@Nullable String title,
 													@Nullable String requiredMessage);
 	
 	/**
@@ -1005,14 +1005,14 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 	 * @return the resulting wrapper component
 	 */
 	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
-	public abstract EventSourceComponent spinner(EventSourceComponent component, 
-													String dataWidgetVar,
-													Spinner spinner,
-													String formDisabledCondition,
-													String title,
+	public abstract @Nullable EventSourceComponent spinner(@Nullable EventSourceComponent component, 
+													@Nullable String dataWidgetVar,
+													@Nonnull Spinner spinner,
+													@Nullable String formDisabledCondition,
+													@Nullable String title,
 													@Nullable String requiredMessage,
-													HorizontalAlignment textAlignment,
-													jakarta.faces.convert.Converter<?> facesConverter);
+													@Nullable HorizontalAlignment textAlignment,
+													@Nullable jakarta.faces.convert.Converter<?> facesConverter);
 	
 	/**
 	 * Creates a slider input component wrapper.
@@ -1026,13 +1026,13 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 	 * @param facesConverter JSF converter instance
 	 * @return the resulting wrapper component
 	 */
-	public abstract EventSourceComponent slider(EventSourceComponent component, 
-													String dataWidgetVar,
-													Slider slider,
-													String formDisabledCondition,
-													String title,
+	public abstract @Nullable EventSourceComponent slider(@Nullable EventSourceComponent component, 
+													@Nullable String dataWidgetVar,
+													@Nonnull Slider slider,
+													@Nullable String formDisabledCondition,
+													@Nullable String title,
 													@Nullable String requiredMessage,
-													jakarta.faces.convert.Converter<?> facesConverter);
+													@Nullable jakarta.faces.convert.Converter<?> facesConverter);
 
 	/**
 	 * Creates a text input component wrapper.
@@ -1051,17 +1051,17 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 	 * @return the resulting wrapper component
 	 */
 	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
-	public abstract EventSourceComponent text(EventSourceComponent component, 
-												String dataWidgetVar, 
-												TextField text, 
-												String formDisabledCondition,
-												String title, 
+	public abstract @Nullable EventSourceComponent text(@Nullable EventSourceComponent component, 
+												@Nullable String dataWidgetVar, 
+												@Nonnull TextField text, 
+												@Nullable String formDisabledCondition,
+												@Nullable String title, 
 												@Nullable String requiredMessage,
-												HorizontalAlignment textAlignment,
-												Integer length,
-												Converter<?> converter,
-												Format<?> format,
-												jakarta.faces.convert.Converter<?> facesConverter);
+												@Nullable HorizontalAlignment textAlignment,
+												@Nullable Integer length,
+												@Nullable Converter<?> converter,
+												@Nullable Format<?> format,
+												@Nullable jakarta.faces.convert.Converter<?> facesConverter);
 
 	/**
 	 * Creates a text-area input component wrapper.
@@ -1077,14 +1077,14 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 	 * @return the resulting wrapper component
 	 */
 	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
-	public abstract EventSourceComponent textArea(EventSourceComponent component, 
-													String dataWidgetVar,
-													TextArea text,
-													String formDisabledCondition,
-													String title,
+	public abstract @Nullable EventSourceComponent textArea(@Nullable EventSourceComponent component, 
+													@Nullable String dataWidgetVar,
+													@Nonnull TextArea text,
+													@Nullable String formDisabledCondition,
+													@Nullable String title,
 													@Nullable String requiredMessage,
-													HorizontalAlignment textAlignment,
-													Integer length);
+													@Nullable HorizontalAlignment textAlignment,
+													@Nullable Integer length);
 	
 	/**
 	 * Creates an output link component for reference fields.
@@ -1102,11 +1102,11 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 	 * @param target optional reference target metadata
 	 * @return the configured output link component
 	 */
-	public HtmlOutputLink outputLink(String dataWidgetVar, 
-										EscapableText value,
-										String href, 
-										String invisible,
-										ReferenceTarget target) {
+	public @Nonnull HtmlOutputLink outputLink(@Nullable String dataWidgetVar, 
+										@Nullable EscapableText value,
+										@Nonnull String href, 
+										@Nullable String invisible,
+										@Nullable ReferenceTarget target) {
 		HtmlOutputLink result = (HtmlOutputLink) a.createComponent(HtmlOutputLink.COMPONENT_TYPE);
 		if (dataWidgetVar != null) {
 			result.setValueExpression("value", createValueExpressionFromFragment(dataWidgetVar, true, href, true, null, String.class, false, Sanitisation.relaxed));
@@ -1146,7 +1146,7 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 	 * @param actions event action metadata
 	 * @return derived faces action attributes
 	 */
-	protected static ActionFacesAttributes determineActionFacesAttributes(List<EventAction> actions) {
+	protected static @Nonnull ActionFacesAttributes determineActionFacesAttributes(@Nonnull List<EventAction> actions) {
 		ActionFacesAttributes result = new ActionFacesAttributes();
 		boolean rerenderValidate = true;
 		for (EventAction action : actions) {
@@ -1183,12 +1183,12 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 	 * @param rerenderSource rerender source identifier
 	 * @param actions event actions to wire
 	 */
-	public void addAjaxBehavior(UIComponentBase component, 
-									String eventName,
-									String collectionBinding,
-									String dataWidgetVar,
-									String rerenderSource, 
-									List<EventAction> actions) {
+	public void addAjaxBehavior(@Nonnull UIComponentBase component, 
+									@Nonnull String eventName,
+									@Nullable String collectionBinding,
+									@Nullable String dataWidgetVar,
+									@Nullable String rerenderSource, 
+									@Nonnull List<EventAction> actions) {
 		ActionFacesAttributes attributes = determineActionFacesAttributes(actions);
 		AjaxBehavior ajax = (AjaxBehavior) a.createBehavior(AjaxBehavior.BEHAVIOR_ID);
 		ajax.setProcess((attributes.process == null) ? process : attributes.process);
@@ -1229,15 +1229,15 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 	 * @return the resulting action-link component
 	 */
 	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
-	public abstract UIComponent actionLink(UIComponent component,
-											String dataWidgetBinding,
-											String dataWidgetVar,
-											String label,
-											String iconStyleClass,
-											String toolTip,
-											String confirmationText,
-											Link link,
-											Action action);
+	public abstract @Nullable UIComponent actionLink(@Nullable UIComponent component,
+											@Nullable String dataWidgetBinding,
+											@Nullable String dataWidgetVar,
+											@Nullable String label,
+											@Nullable String iconStyleClass,
+											@Nullable String toolTip,
+											@Nullable String confirmationText,
+											@Nonnull Link link,
+											@Nonnull Action action);
 
 	/**
 	 * Creates a report action component.
@@ -1250,12 +1250,12 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 	 * @param action action metadata
 	 * @return the resulting report component
 	 */
-	public abstract UIComponent report(UIComponent component,
-										String label,
-										String iconStyleClass,
-										String toolTip,
-										String confirmationText,
-										Action action);
+	public abstract @Nullable UIComponent report(@Nullable UIComponent component,
+										@Nullable String label,
+										@Nullable String iconStyleClass,
+										@Nullable String toolTip,
+										@Nullable String confirmationText,
+										@Nonnull Action action);
 	
 	/**
 	 * Creates a download action component.
@@ -1271,14 +1271,14 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 	 * @return the resulting download component
 	 */
 	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
-	public abstract UIComponent download(UIComponent component, 
-											String dataWidgetBinding,
-											String dataWidgetVar,
-											String label,
-											String iconStyleClass,
-											String toolTip,
-											String confirmationText,
-											Action action);
+	public abstract @Nullable UIComponent download(@Nullable UIComponent component, 
+											@Nullable String dataWidgetBinding,
+											@Nullable String dataWidgetVar,
+											@Nullable String label,
+											@Nullable String iconStyleClass,
+											@Nullable String toolTip,
+											@Nullable String confirmationText,
+											@Nonnull Action action);
 	
 	/**
 	 * Creates an upload action component.
@@ -1291,12 +1291,12 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 	 * @param action action metadata
 	 * @return the resulting upload component
 	 */
-	public abstract UIComponent upload(UIComponent component,
-										String label,
-										String iconStyleClass,
-										String toolTip,
-										String confirmationText,
-										Action action);
+	public abstract @Nullable UIComponent upload(@Nullable UIComponent component,
+										@Nullable String label,
+										@Nullable String iconStyleClass,
+										@Nullable String toolTip,
+										@Nullable String confirmationText,
+										@Nonnull Action action);
 
 	/**
 	 * Creates a remove action component.
@@ -1310,12 +1310,12 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 	 * @param canDelete whether delete is permitted
 	 * @return the resulting remove component
 	 */
-	public abstract UIComponent remove(UIComponent component,
-										String label,
-										String iconStyleClass,
-										String toolTip,
-										String confirmationText,
-										Action action,
+	public abstract @Nullable UIComponent remove(@Nullable UIComponent component,
+										@Nullable String label,
+										@Nullable String iconStyleClass,
+										@Nullable String toolTip,
+										@Nullable String confirmationText,
+										@Nonnull Action action,
 										boolean canDelete);
 
 	/**
@@ -1333,15 +1333,15 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 	 * @return the resulting action component
 	 */
 	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
-	public abstract UIComponent action(UIComponent component, 
-										String dataWidgetBinding, 
-										String dataWidgetVar,
-										String label,
-										String iconStyleClass,
-										String toolTip,
-										String confirmationText,
-										ImplicitActionName name, 
-										Action action);
+	public abstract @Nullable UIComponent action(@Nullable UIComponent component, 
+										@Nullable String dataWidgetBinding, 
+										@Nullable String dataWidgetVar,
+										@Nullable String label,
+										@Nullable String iconStyleClass,
+										@Nullable String toolTip,
+										@Nullable String confirmationText,
+										@Nullable ImplicitActionName name, 
+										@Nonnull Action action);
 	
 	static final Class<?>[] STRING = new Class<?>[] {String.class};
 	static final Class<?>[] STRING_STRING = new Class<?>[] {String.class, String.class};
@@ -1357,7 +1357,7 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 	 * @param validate whether client validation should run
 	 * @return the JSF method expression
 	 */
-	protected MethodExpression methodExpressionForRerender(String source, boolean validate) {
+	protected @Nonnull MethodExpression methodExpressionForRerender(@Nullable String source, boolean validate) {
 		StringBuilder expression = new StringBuilder(64);
 		expression.append("#{").append(managedBeanName).append(".rerender(");
 		if (source == null) {
@@ -1379,10 +1379,10 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 	 * @param dataWidgetVar optional data-widget variable
 	 * @param command the target UI command
 	 */
-	protected void downloadActionExpression(String downloadActionName,
-											String dataWidgetBinding,
-											String dataWidgetVar,
-											UICommand command) {
+	protected void downloadActionExpression(@Nonnull String downloadActionName,
+											@Nullable String dataWidgetBinding,
+											@Nullable String dataWidgetVar,
+											@Nonnull UICommand command) {
 		if (dataWidgetBinding != null) {
 			StringBuilder expression = new StringBuilder(64);
 			expression.append("#{").append(managedBeanName).append(".download('");
@@ -1413,12 +1413,12 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 	 * @return the JSF method expression
 	 */
 	@SuppressWarnings("java:S3776") // Complexity OK
-	protected MethodExpression methodExpressionForAction(ImplicitActionName implicitActionName, 
-															String actionName,
-															String collectionBinding, 
-															String dataWidgetVar,
+	protected @Nonnull MethodExpression methodExpressionForAction(@Nullable ImplicitActionName implicitActionName, 
+															@Nullable String actionName,
+															@Nullable String collectionBinding, 
+															@Nullable String dataWidgetVar,
 															boolean inline,
-															List<String> eventHandlerActionNames) {
+															@Nullable List<String> eventHandlerActionNames) {
 		StringBuilder expression = new StringBuilder(64);
 		expression.append("#{").append(managedBeanName).append('.');
 		Class<?>[] parameterTypes = null;

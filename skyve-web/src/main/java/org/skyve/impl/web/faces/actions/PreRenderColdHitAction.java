@@ -10,6 +10,9 @@ import org.skyve.util.logging.SkyveLoggerFactory;
 import org.skyve.web.WebAction;
 import org.slf4j.Logger;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 
 /**
  * Executes a Faces callback action within the current Skyve web context.
@@ -20,13 +23,13 @@ public class PreRenderColdHitAction extends FacesAction<Void> {
     private static final Logger FACES_LOGGER = Category.FACES.logger();
 
 	private FacesView facesView;
-	public PreRenderColdHitAction(FacesView facesView) {
+	public PreRenderColdHitAction(@Nonnull FacesView facesView) {
 		this.facesView = facesView;
 	}
 
 	@Override
 	@SuppressWarnings({ "unused", "null" }) // test there is a user here
-	public Void callback() throws Exception {
+	public @Nullable Void callback() throws Exception {
 		if (UtilImpl.FACES_TRACE) FACES_LOGGER.info("PreRenderColdHitAction");
 
 		User user = CORE.getUser();

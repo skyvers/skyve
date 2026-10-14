@@ -50,7 +50,7 @@ public abstract class AbstractFacesBuilder {
 	 *        {@code false} to allow trusted markup
 	 * @return escaped text, or {@code null} when {@code value} is {@code null}
 	 */
-	protected static String escapeFacesText(String value, boolean escape) {
+	protected static @Nullable String escapeFacesText(@Nullable String value, boolean escape) {
 		if (value == null) {
 			return null;
 		}
@@ -69,7 +69,7 @@ public abstract class AbstractFacesBuilder {
 	 *        trusted markup in the attribute value
 	 * @return escaped attribute content, or {@code null} when {@code value} is {@code null}
 	 */
-	protected static String escapeFacesAttribute(String value, boolean escape) {
+	protected static @Nullable String escapeFacesAttribute(@Nullable String value, boolean escape) {
 		String htmlDecision = escapeFacesText(value, escape);
 		return (htmlDecision == null) ? null : Encode.forHtmlAttribute(htmlDecision);
 	}
@@ -81,7 +81,7 @@ public abstract class AbstractFacesBuilder {
 	 * @param value metadata text after localisation and expression resolution
 	 * @return sanitised plain text, or {@code null} when {@code value} is {@code null}
 	 */
-	protected static String sanitiseFacesText(String value) {
+	protected static @Nullable String sanitiseFacesText(@Nullable String value) {
 		return OWASP.sanitise(Sanitisation.text, value);
 	}
 	
@@ -90,7 +90,7 @@ public abstract class AbstractFacesBuilder {
 	 *
 	 * @param managedBeanName the managed bean name
 	 */
-	public void setManagedBeanName(String managedBeanName) {
+	public void setManagedBeanName(@Nullable String managedBeanName) {
 		if (managedBeanName != null) {
 			this.managedBeanName = managedBeanName;
 		}
@@ -105,7 +105,7 @@ public abstract class AbstractFacesBuilder {
 	 *
 	 * @param managedBean the SAIL managed bean
 	 */
-	public void setSAILManagedBean(FacesView managedBean) {
+	public void setSAILManagedBean(@Nonnull FacesView managedBean) {
 		this.managedBean = managedBean;
 	}
 	
@@ -114,7 +114,7 @@ public abstract class AbstractFacesBuilder {
 	 *
 	 * @param process the process expression
 	 */
-	public void setProcess(String process) {
+	public void setProcess(@Nullable String process) {
 		if (process != null) {
 			this.process = process;
 		}
@@ -124,7 +124,7 @@ public abstract class AbstractFacesBuilder {
 	 *
 	 * @param update the update expression
 	 */
-	public void setUpdate(String update) {
+	public void setUpdate(@Nullable String update) {
 		if (update != null) {
 			this.update = update;
 		}
@@ -134,7 +134,7 @@ public abstract class AbstractFacesBuilder {
 	 *
 	 * @param userAgentType the current user agent type
 	 */
-	public void setUserAgentType(UserAgentType userAgentType) {
+	public void setUserAgentType(@Nonnull UserAgentType userAgentType) {
 		this.userAgentType = userAgentType;
 	}
 
@@ -144,7 +144,7 @@ public abstract class AbstractFacesBuilder {
 	 * @param component the component to assign an ID to
 	 * @param widgetId the optional widget ID
 	 */
-	protected void setId(UIComponent component, String widgetId) {
+	protected void setId(@Nonnull UIComponent component, @Nullable String widgetId) {
 		component.setId((widgetId == null) ? managedBean.nextId() : widgetId);
 	}
 	
@@ -155,7 +155,7 @@ public abstract class AbstractFacesBuilder {
 	 * @param disabledCondition the optional widget disabled condition
 	 * @param formDisabledCondition the optional form disabled condition
 	 */
-	protected void setDisabled(UIComponent component, String disabledCondition, String formDisabledCondition) {
+	protected void setDisabled(@Nonnull UIComponent component, @Nullable String disabledCondition, @Nullable String formDisabledCondition) {
 		if (disabledCondition != null) {
 			if (formDisabledCondition == null) {
 				component.setValueExpression("disabled", createValueExpressionFromCondition(disabledCondition, null));
@@ -178,7 +178,7 @@ public abstract class AbstractFacesBuilder {
 	 * @param disabledCondition the optional widget disabled condition
 	 * @param formDisabledCondition the optional form disabled condition, always evaluated against the current bean
 	 */
-	protected void setDisabled(UIComponent component, String dataWidgetVar, String disabledCondition, String formDisabledCondition) {
+	protected void setDisabled(@Nonnull UIComponent component, @Nullable String dataWidgetVar, @Nullable String disabledCondition, @Nullable String formDisabledCondition) {
 		if ((dataWidgetVar == null) || (disabledCondition == null)) {
 			// not in a data widget, or only a form condition, so the conditions apply to the current bean
 			setDisabled(component, disabledCondition, formDisabledCondition);
@@ -215,7 +215,7 @@ public abstract class AbstractFacesBuilder {
 	 * @param invisibleCondition the optional invisible condition
 	 * @param extraELToAnd extra EL condition appended using logical AND
 	 */
-	protected void setInvisible(UIComponent component, String invisibleCondition, String extraELToAnd) {
+	protected void setInvisible(@Nonnull UIComponent component, @Nullable String invisibleCondition, @Nullable String extraELToAnd) {
 		if (invisibleCondition != null) {
 			String visible = BindUtil.negateCondition(invisibleCondition);
 			component.setValueExpression("rendered", createValueExpressionFromCondition(visible, extraELToAnd));
@@ -231,7 +231,7 @@ public abstract class AbstractFacesBuilder {
 	 * @param invisibleCondition the optional invisible condition
 	 * @param extraELToAnd extra EL condition appended using logical AND
 	 */
-	protected void setInvisible(UIComponent component, String dataWidgetVar, String invisibleCondition, String extraELToAnd) {
+	protected void setInvisible(@Nonnull UIComponent component, @Nullable String dataWidgetVar, @Nullable String invisibleCondition, @Nullable String extraELToAnd) {
 		if ((dataWidgetVar == null) ||
 				String.valueOf(true).equals(invisibleCondition) ||
 				String.valueOf(false).equals(invisibleCondition)) {
@@ -272,7 +272,7 @@ public abstract class AbstractFacesBuilder {
 	 * @param component the component to update
 	 * @param textAlignment the requested alignment
 	 */
-	protected void setTextAlign(UIComponent component, HorizontalAlignment textAlignment) {
+	protected void setTextAlign(@Nonnull UIComponent component, @Nullable HorizontalAlignment textAlignment) {
 		if (textAlignment != null) {
 			component.setValueExpression("styleClass", ef.createValueExpression(textAlignment.toTextAlignmentString(), String.class));
 		}
@@ -291,14 +291,14 @@ public abstract class AbstractFacesBuilder {
 	 * @param defaultPercentageWidth default percentage width when no width is specified
 	 */
 	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
-	protected final void setSizeAndTextAlignStyle(UIComponent component,
-													String existingStyle, 
-													Integer pixelWidth, 
-													Integer responsiveWidth,
-													Integer percentageWidth,
-													Integer pixelHeight, 
-													Integer percentageHeight, 
-													Integer defaultPercentageWidth) {
+	protected final void setSizeAndTextAlignStyle(@Nonnull UIComponent component,
+													@Nullable String existingStyle, 
+													@Nullable Integer pixelWidth, 
+													@Nullable Integer responsiveWidth,
+													@Nullable Integer percentageWidth,
+													@Nullable Integer pixelHeight, 
+													@Nullable Integer percentageHeight, 
+													@Nullable Integer defaultPercentageWidth) {
 		setSizeAndTextAlignStyle(component, existingStyle, pixelWidth, responsiveWidth, percentageWidth, pixelHeight, percentageHeight, defaultPercentageWidth, null, null, null);
 	}
 	
@@ -318,17 +318,17 @@ public abstract class AbstractFacesBuilder {
 	 * @param rightPaddingIfNecessary optional right padding applied for right alignment
 	 */
 	@SuppressWarnings({"java:S107", "java:S3776"}) // Long parameter list preserves the existing framework/API contract; complexity OK.
-	protected void setSizeAndTextAlignStyle(UIComponent component,
-												String existingStyle, 
-												Integer pixelWidth, 
-												Integer responsiveWidth,
-												Integer percentageWidth,
-												Integer pixelHeight, 
-												Integer percentageHeight, 
-												Integer defaultPercentageWidth,
-												HorizontalAlignment textAlign,
-												String specialTextAlignStyleAttributeName, // if null, "style" is used.
-												String rightPaddingIfNecessary) {
+	protected void setSizeAndTextAlignStyle(@Nonnull UIComponent component,
+												@Nullable String existingStyle, 
+												@Nullable Integer pixelWidth, 
+												@Nullable Integer responsiveWidth,
+												@Nullable Integer percentageWidth,
+												@Nullable Integer pixelHeight, 
+												@Nullable Integer percentageHeight, 
+												@Nullable Integer defaultPercentageWidth,
+												@Nullable HorizontalAlignment textAlign,
+												@Nullable String specialTextAlignStyleAttributeName, // if null, "style" is used.
+												@Nullable String rightPaddingIfNecessary) {
 		StringBuilder style = new StringBuilder(64);
 		boolean noWidth = true;
 		if (existingStyle != null) {
@@ -396,12 +396,12 @@ public abstract class AbstractFacesBuilder {
 	 * @param sanitise sanitisation mode
 	 * @return the created value expression
 	 */
-	protected ValueExpression createValueExpressionFromFragment(String fragment, 
+	protected @Nonnull ValueExpression createValueExpressionFromFragment(@Nonnull String fragment, 
 																	boolean map,
-																	String extraELConditionToAnd, 
-																	Class<?> typeReturned,
+																	@Nullable String extraELConditionToAnd, 
+																	@Nonnull Class<?> typeReturned,
 																	boolean escape,
-																	Sanitisation sanitise) {
+																	@Nullable Sanitisation sanitise) {
 		return createValueExpressionFromFragment(managedBeanName + ".currentBean",
 													false,
 													fragment, 
@@ -426,14 +426,14 @@ public abstract class AbstractFacesBuilder {
 	 * @return the created value expression
 	 */
 	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
-	protected ValueExpression createValueExpressionFromFragment(String expressionPrefix, 
+	protected @Nonnull ValueExpression createValueExpressionFromFragment(@Nullable String expressionPrefix, 
 																	boolean dataWidgetVar,
-																	String fragment, 
+																	@Nonnull String fragment, 
 																	boolean map,
-																	String extraELConditionToAnd, 
-																	Class<?> typeReturned,
+																	@Nullable String extraELConditionToAnd, 
+																	@Nonnull Class<?> typeReturned,
 																	boolean escape,
-																	Sanitisation sanitise) {
+																	@Nullable Sanitisation sanitise) {
 		// default sanitisation is relaxed, for widgets that have no sanitisation set
 		Sanitisation finalSanitise = (sanitise == null) ? Sanitisation.relaxed : sanitise;
 		boolean escapeOrSanitise = escape || (! Sanitisation.none.equals(finalSanitise));
@@ -467,7 +467,7 @@ public abstract class AbstractFacesBuilder {
 	 * @param extraELConditionToAnd optional trailing EL condition to AND
 	 * @return the created value expression
 	 */
-	protected ValueExpression createValueExpressionFromCondition(String condition, String extraELConditionToAnd) {
+	protected @Nonnull ValueExpression createValueExpressionFromCondition(@Nonnull String condition, @Nullable String extraELConditionToAnd) {
 		if (String.valueOf(false).equals(condition)) {
 			return ef.createValueExpression(condition, Boolean.class);
 		}
@@ -535,7 +535,7 @@ public abstract class AbstractFacesBuilder {
 	 * @param conditions the conditions to join with OR
 	 * @return the OR expression fragment
 	 */
-	protected String createOredValueExpressionFragmentFromConditions(String[] conditions) {
+	protected @Nonnull String createOredValueExpressionFragmentFromConditions(@Nullable String[] conditions) {
 		StringBuilder result = new StringBuilder(64);
 		
 		if ((conditions != null) && (conditions.length > 0)) {
@@ -560,7 +560,7 @@ public abstract class AbstractFacesBuilder {
 	 * @param conditions the conditions to combine
 	 * @return the combined value expression, or {@code null} when no conditions exist
 	 */
-	protected ValueExpression createOredValueExpressionFromConditions(String[] conditions) {
+	protected @Nullable ValueExpression createOredValueExpressionFromConditions(@Nullable String[] conditions) {
 		if (conditions == null) {
 			return null;
 		}
@@ -590,11 +590,11 @@ public abstract class AbstractFacesBuilder {
 	 * @param widgetId optional widget ID
 	 * @return the configured panel group
 	 */
-	protected HtmlPanelGroup panelGroup(boolean nowrap, 
+	protected @Nonnull HtmlPanelGroup panelGroup(boolean nowrap, 
 											boolean middle, 
 											boolean blockLayout,
-											String invisibleCondition,
-											String widgetId) {
+											@Nullable String invisibleCondition,
+											@Nullable String widgetId) {
 		HtmlPanelGroup result = (HtmlPanelGroup) a.createComponent(HtmlPanelGroup.COMPONENT_TYPE);
 		StringBuilder style = new StringBuilder(32);
 		if (nowrap) {
@@ -628,12 +628,12 @@ public abstract class AbstractFacesBuilder {
 	 * @return the configured column
 	 */
 	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
-	protected Column column(String invisible, 
+	protected @Nonnull Column column(@Nullable String invisible, 
 								boolean noWrap, 
 								boolean top, 
-								Integer pixelWidth, 
-								Integer responsiveWidth,
-								Integer percentageWidth,
+								@Nullable Integer pixelWidth, 
+								@Nullable Integer responsiveWidth,
+								@Nullable Integer percentageWidth,
 								int colspan, 
 								int rowspan) {
 		Column result = (Column) a.createComponent(Column.COMPONENT_TYPE);
@@ -664,7 +664,7 @@ public abstract class AbstractFacesBuilder {
 	 * @param forId the target component ID
 	 * @return the configured message component
 	 */
-	protected Message message(String forId) {
+	protected @Nonnull Message message(@Nonnull String forId) {
 		return message(forId, true);
 	}
 
@@ -680,7 +680,7 @@ public abstract class AbstractFacesBuilder {
 	 *        must normalise message text before component creation
 	 * @return the configured message component
 	 */
-	protected Message message(String forId, boolean escapeRequiredMessage) {
+	protected @Nonnull Message message(@Nonnull String forId, boolean escapeRequiredMessage) {
 		Message message = (Message) a.createComponent(Message.COMPONENT_TYPE);
 		setId(message, null);
 		message.setFor(forId);

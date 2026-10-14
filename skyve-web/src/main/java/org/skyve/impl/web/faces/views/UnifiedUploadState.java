@@ -447,7 +447,7 @@ public final class UnifiedUploadState implements Serializable{
 	 * @param name route value name used in exception text
 	 * @return parsed enum value or the supplied default
 	 */
-	private static <T extends Enum<T>> T parseEnum(@Nonnull Class<T> enumType,
+	private static @Nonnull <T extends Enum<T>> T parseEnum(@Nonnull Class<T> enumType,
 													@Nullable String value,
 													@Nonnull T defaultValue,
 													@Nonnull String name) {
@@ -466,7 +466,7 @@ public final class UnifiedUploadState implements Serializable{
 	 * @param name route value name used in exception text
 	 * @return parsed enum value
 	 */
-	private static <T extends Enum<T>> T parseRequiredEnum(@Nonnull Class<T> enumType,
+	private static @Nonnull <T extends Enum<T>> T parseRequiredEnum(@Nonnull Class<T> enumType,
 															@Nullable String value,
 															@Nonnull String name) {
 		String cleanValue = clean(value);
@@ -484,7 +484,7 @@ public final class UnifiedUploadState implements Serializable{
 	 * @param name route value name used in exception text
 	 * @return parsed enum value
 	 */
-	private static <T extends Enum<T>> T parseEnumValue(@Nonnull Class<T> enumType,
+	private static @Nonnull <T extends Enum<T>> T parseEnumValue(@Nonnull Class<T> enumType,
 															@Nonnull String cleanValue,
 															@Nonnull String name) {
 		try {

@@ -18,6 +18,7 @@ import org.skyve.util.logging.Category;
 import org.slf4j.Logger;
 import org.skyve.util.logging.SkyveLoggerFactory;
 
+import jakarta.annotation.Nonnull;
 import jakarta.faces.application.ViewExpiredException;
 import jakarta.servlet.Filter;
 import jakarta.servlet.FilterChain;
@@ -52,7 +53,7 @@ public class SkyveFacesFilter implements Filter {
 	 * Initialises configured routing and security parameters used by the Faces filter.
 	 */
 	@Override
-	public void init(FilterConfig config) throws ServletException {
+	public void init(@Nonnull FilterConfig config) throws ServletException {
 		forwardURI = Util.processStringValue(config.getInitParameter("forward"));
 		errorURI = Util.processStringValue(config.getInitParameter("error"));
 		expiredURI = Util.processStringValue(config.getInitParameter("expired"));
@@ -85,7 +86,7 @@ public class SkyveFacesFilter implements Filter {
 	 */
 	@Override
 	@SuppressWarnings({"javasecurity:S5146", "java:S3776"}) // false positive: see below; Complexity OK
-	public void doFilter(ServletRequest req, ServletResponse resp, FilterChain chain)
+	public void doFilter(@Nonnull ServletRequest req, @Nonnull ServletResponse resp, @Nonnull FilterChain chain)
 	throws IOException, ServletException {
 		HttpServletRequest request = (HttpServletRequest) req;
 		HttpServletResponse response = (HttpServletResponse) resp;

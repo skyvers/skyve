@@ -24,6 +24,9 @@ import org.skyve.util.monitoring.RequestKey;
 import org.skyve.web.WebContext;
 import org.slf4j.Logger;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Executes a Faces callback action within the current Skyve web context.
  */
@@ -38,7 +41,7 @@ public class DeleteAction extends FacesAction<Void> {
 	 *
 	 * @param facesView the active Faces view state
 	 */
-	public DeleteAction(FacesView facesView) {
+	public DeleteAction(@Nonnull FacesView facesView) {
 		this.facesView = facesView;
 	}
 
@@ -49,7 +52,7 @@ public class DeleteAction extends FacesAction<Void> {
 	 * @throws Exception when deletion cannot be completed
 	 */
 	@Override
-	public Void callback() throws Exception {
+	public @Nullable Void callback() throws Exception {
 		if (UtilImpl.FACES_TRACE) FACES_LOGGER.info("DeleteAction");
 
 		AbstractPersistence persistence = AbstractPersistence.get();

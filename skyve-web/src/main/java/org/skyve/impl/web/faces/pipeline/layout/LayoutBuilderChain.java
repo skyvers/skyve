@@ -14,6 +14,7 @@ import org.skyve.impl.metadata.view.widget.bound.input.ContentSignature;
 import org.skyve.impl.web.faces.views.FacesView;
 import org.skyve.web.UserAgentType;
 
+import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import jakarta.faces.component.UIComponent;
 
@@ -26,7 +27,7 @@ public class LayoutBuilderChain extends LayoutBuilder {
 	/**
 	 * Creates a layout builder chain that delegates to the supplied builders in order.
 	 */
-	public LayoutBuilderChain(LayoutBuilder... builders) {
+	public LayoutBuilderChain(@Nonnull LayoutBuilder... builders) {
 		this.builders = builders;
 	}
 	
@@ -36,7 +37,7 @@ public class LayoutBuilderChain extends LayoutBuilder {
 	 * @param managedBeanName the managed bean name
 	 */
 	@Override
-	public void setManagedBeanName(String managedBeanName) {
+	public void setManagedBeanName(@Nullable String managedBeanName) {
 		// Set the state of the chain too so that utility methods in AbstractFacesBuilder can work
 		super.setManagedBeanName(managedBeanName);
 		// Now set the state on all builders in the chain
@@ -51,7 +52,7 @@ public class LayoutBuilderChain extends LayoutBuilder {
 	 * @param managedBean the managed bean instance
 	 */
 	@Override
-	public void setSAILManagedBean(FacesView managedBean) {
+	public void setSAILManagedBean(@Nonnull FacesView managedBean) {
 		// Set the state of the chain too so that utility methods in AbstractFacesBuilder can work
 		super.setSAILManagedBean(managedBean);
 		// Now set the state on all builders in the chain
@@ -66,7 +67,7 @@ public class LayoutBuilderChain extends LayoutBuilder {
 	 * @param process process expression
 	 */
 	@Override
-	public void setProcess(String process) {
+	public void setProcess(@Nullable String process) {
 		// Set the state of the chain too so that utility methods in AbstractFacesBuilder can work
 		super.setProcess(process);
 		// Now set the state on all builders in the chain
@@ -81,7 +82,7 @@ public class LayoutBuilderChain extends LayoutBuilder {
 	 * @param update update expression
 	 */
 	@Override
-	public void setUpdate(String update) {
+	public void setUpdate(@Nullable String update) {
 		// Set the state of the chain too so that utility methods in AbstractFacesBuilder can work
 		super.setUpdate(update);
 		// Now set the state on all builders in the chain
@@ -96,7 +97,7 @@ public class LayoutBuilderChain extends LayoutBuilder {
 	 * @param userAgentType user-agent type
 	 */
 	@Override
-	public void setUserAgentType(UserAgentType userAgentType) {
+	public void setUserAgentType(@Nonnull UserAgentType userAgentType) {
 		// Set the state of the chain too so that utility methods in AbstractFacesBuilder can work
 		super.setUserAgentType(userAgentType);
 		// Now set the state on all builders in the chain
@@ -112,7 +113,7 @@ public class LayoutBuilderChain extends LayoutBuilder {
 	 * @return resulting component
 	 */
 	@Override
-	public UIComponent viewLayout(UIComponent component) {
+	public @Nullable UIComponent viewLayout(@Nullable UIComponent component) {
 		UIComponent result = component;
 		for (LayoutBuilder builder : builders) {
 			result = builder.viewLayout(result);
@@ -127,7 +128,7 @@ public class LayoutBuilderChain extends LayoutBuilder {
 	 * @return resulting toolbar components
 	 */
 	@Override
-	public List<UIComponent> toolbarLayouts(List<UIComponent> components) {
+	public @Nullable List<UIComponent> toolbarLayouts(@Nullable List<UIComponent> components) {
 		List<UIComponent> result = components;
 		for (LayoutBuilder builder : builders) {
 			result = builder.toolbarLayouts(result);
@@ -142,7 +143,7 @@ public class LayoutBuilderChain extends LayoutBuilder {
 	 * @return resulting component
 	 */
 	@Override
-	public UIComponent tabLayout(UIComponent component) {
+	public @Nullable UIComponent tabLayout(@Nullable UIComponent component) {
 		UIComponent result = component;
 		for (LayoutBuilder builder : builders) {
 			result = builder.tabLayout(result);
@@ -158,7 +159,7 @@ public class LayoutBuilderChain extends LayoutBuilder {
 	 * @return resulting component
 	 */
 	@Override
-	public UIComponent vboxLayout(UIComponent component, VBox vbox) {
+	public @Nullable UIComponent vboxLayout(@Nullable UIComponent component, @Nonnull VBox vbox) {
 		UIComponent result = component;
 		for (LayoutBuilder builder : builders) {
 			result = builder.vboxLayout(result, vbox);
@@ -174,7 +175,7 @@ public class LayoutBuilderChain extends LayoutBuilder {
 	 * @return resulting component
 	 */
 	@Override
-	public UIComponent hboxLayout(UIComponent component, HBox hbox) {
+	public @Nullable UIComponent hboxLayout(@Nullable UIComponent component, @Nonnull HBox hbox) {
 		UIComponent result = component;
 		for (LayoutBuilder builder : builders) {
 			result = builder.hboxLayout(result, hbox);
@@ -191,7 +192,7 @@ public class LayoutBuilderChain extends LayoutBuilder {
 	 * @return resulting component
 	 */
 	@Override
-	public UIComponent sidebarLayout(UIComponent component, Sidebar sidebar, boolean createView) {
+	public @Nullable UIComponent sidebarLayout(@Nullable UIComponent component, @Nonnull Sidebar sidebar, boolean createView) {
 		UIComponent result = component;
 		for (LayoutBuilder builder : builders) {
 			result = builder.sidebarLayout(result, sidebar, createView);
@@ -207,7 +208,7 @@ public class LayoutBuilderChain extends LayoutBuilder {
 	 * @return resulting component
 	 */
 	@Override
-	public UIComponent formLayout(UIComponent component, Form form) {
+	public @Nullable UIComponent formLayout(@Nullable UIComponent component, @Nonnull Form form) {
 		UIComponent result = component;
 		for (LayoutBuilder builder : builders) {
 			result = builder.formLayout(result, form);
@@ -223,7 +224,7 @@ public class LayoutBuilderChain extends LayoutBuilder {
 	 * @return resulting component
 	 */
 	@Override
-	public UIComponent formRowLayout(UIComponent component, FormRow row) {
+	public @Nullable UIComponent formRowLayout(@Nullable UIComponent component, @Nonnull FormRow row) {
 		UIComponent result = component;
 		for (LayoutBuilder builder : builders) {
 			result = builder.formRowLayout(result, row);
@@ -238,7 +239,7 @@ public class LayoutBuilderChain extends LayoutBuilder {
 	 * @param toolbarLayouts toolbar layout components
 	 */
 	@Override
-	public void addToolbarLayouts(List<UIComponent> toolbars, List<UIComponent> toolbarLayouts) {
+	public void addToolbarLayouts(@Nonnull List<UIComponent> toolbars, @Nonnull List<UIComponent> toolbarLayouts) {
 		for (LayoutBuilder builder : builders) {
 			builder.addToolbarLayouts(toolbars, toolbarLayouts);
 		}
@@ -251,7 +252,7 @@ public class LayoutBuilderChain extends LayoutBuilder {
 	 * @param toolbarsOrLayouts toolbar or layout components
 	 */
 	@Override
-	public void addToolbarsOrLayouts(UIComponent view, List<UIComponent> toolbarsOrLayouts) {
+	public void addToolbarsOrLayouts(@Nonnull UIComponent view, @Nonnull List<UIComponent> toolbarsOrLayouts) {
 		for (LayoutBuilder builder : builders) {
 			builder.addToolbarsOrLayouts(view, toolbarsOrLayouts);
 		}
@@ -266,7 +267,7 @@ public class LayoutBuilderChain extends LayoutBuilder {
 	 * @return resulting component
 	 */
 	@Override
-	public UIComponent addTabLayout(UIComponent component, UIComponent tab, UIComponent tabLayout) {
+	public @Nullable UIComponent addTabLayout(@Nullable UIComponent component, @Nonnull UIComponent tab, @Nonnull UIComponent tabLayout) {
 		UIComponent result = component;
 		for (LayoutBuilder builder : builders) {
 			result = builder.addTabLayout(result, tab, tabLayout);
@@ -281,7 +282,7 @@ public class LayoutBuilderChain extends LayoutBuilder {
 	 * @param tab tab component
 	 */
 	@Override
-	public void addTab(UIComponent tabPane, UIComponent tab) {
+	public void addTab(@Nonnull UIComponent tabPane, @Nonnull UIComponent tab) {
 		for (LayoutBuilder builder : builders) {
 			builder.addTab(tabPane, tab);
 		}
@@ -295,7 +296,7 @@ public class LayoutBuilderChain extends LayoutBuilder {
 	 * @return resulting component
 	 */
 	@Override
-	public UIComponent addedTab(UIComponent component, UIComponent tab) {
+	public @Nullable UIComponent addedTab(@Nullable UIComponent component, @Nonnull UIComponent tab) {
 		UIComponent result = component;
 		for (LayoutBuilder builder : builders) {
 			result = builder.addedTab(result, tab);
@@ -310,7 +311,7 @@ public class LayoutBuilderChain extends LayoutBuilder {
 	 * @param borderLayout border layout component
 	 */
 	@Override
-	public void addBorderLayout(UIComponent border, UIComponent borderLayout) {
+	public void addBorderLayout(@Nonnull UIComponent border, @Nonnull UIComponent borderLayout) {
 		for (LayoutBuilder builder : builders) {
 			builder.addBorderLayout(border, borderLayout);
 		}
@@ -324,7 +325,7 @@ public class LayoutBuilderChain extends LayoutBuilder {
 	 * @return resulting component
 	 */
 	@Override
-	public UIComponent addedBorderLayout(UIComponent component, UIComponent borderLayout) {
+	public @Nullable UIComponent addedBorderLayout(@Nullable UIComponent component, @Nonnull UIComponent borderLayout) {
 		UIComponent result = component;
 		for (LayoutBuilder builder : builders) {
 			result = builder.addedBorderLayout(result, borderLayout);
@@ -341,7 +342,7 @@ public class LayoutBuilderChain extends LayoutBuilder {
 	 * @return resulting component
 	 */
 	@Override
-	public UIComponent addFormRowLayout(UIComponent component, UIComponent formLayout, UIComponent rowLayout) {
+	public @Nullable UIComponent addFormRowLayout(@Nullable UIComponent component, @Nonnull UIComponent formLayout, @Nonnull UIComponent rowLayout) {
 		UIComponent result = component;
 		for (LayoutBuilder builder : builders) {
 			result = builder.addFormRowLayout(result, formLayout, rowLayout);
@@ -357,7 +358,7 @@ public class LayoutBuilderChain extends LayoutBuilder {
 	 * @return resulting component
 	 */
 	@Override
-	public UIComponent addedFormRowLayout(UIComponent component, UIComponent rowLayout) {
+	public @Nullable UIComponent addedFormRowLayout(@Nullable UIComponent component, @Nonnull UIComponent rowLayout) {
 		UIComponent result = component;
 		for (LayoutBuilder builder : builders) {
 			result = builder.addedFormRowLayout(result, rowLayout);
@@ -383,17 +384,17 @@ public class LayoutBuilderChain extends LayoutBuilder {
 	 * @param widgetHelpText widget help text
 	 */
 	@Override
-	public void layoutFormItemLabel(UIComponent formOrRowLayout,
-										UIComponent formItemComponent,
-										Form currentForm,
-										FormItem currentFormItem,
-										FormColumn currentFormColumn,
-										String widgetLabel,
+	public void layoutFormItemLabel(@Nonnull UIComponent formOrRowLayout,
+										@Nonnull UIComponent formItemComponent,
+										@Nonnull Form currentForm,
+										@Nonnull FormItem currentFormItem,
+										@Nonnull FormColumn currentFormColumn,
+										@Nullable String widgetLabel,
 										boolean widgetEscapeLabel,
 										@Nullable String widgetRequiredMessage,
 										boolean widgetEscapeRequiredMessage,
-										String widgetInvisible,
-										String widgetHelpText) {
+										@Nullable String widgetInvisible,
+										@Nullable String widgetHelpText) {
 		for (LayoutBuilder builder : builders) {
 			builder.layoutFormItemLabel(formOrRowLayout,
 											formItemComponent,
@@ -432,20 +433,20 @@ public class LayoutBuilderChain extends LayoutBuilder {
 	 * @param topLabel whether top-label mode is enabled
 	 */
 	@Override
-	public void layoutFormItemWidget(UIComponent formOrRowLayout,
-										UIComponent formItemComponent,
-										Form currentForm,
-										FormItem currentFormItem,
-										FormColumn currentFormColumn,
-										String widgetLabel,
+	public void layoutFormItemWidget(@Nonnull UIComponent formOrRowLayout,
+										@Nonnull UIComponent formItemComponent,
+										@Nonnull Form currentForm,
+										@Nonnull FormItem currentFormItem,
+										@Nonnull FormColumn currentFormColumn,
+										@Nullable String widgetLabel,
 										boolean widgetEscapeLabel,
 										int widgetColspan,
 										@Nullable String widgetRequiredMessage,
 										boolean widgetEscapeRequiredMessage,
-										String widgetInvisible,
-										String widgetHelpText,
+										@Nullable String widgetInvisible,
+										@Nullable String widgetHelpText,
 										boolean widgetEscapeHelp,
-										Integer widgetPixelWidth,
+										@Nullable Integer widgetPixelWidth,
 										boolean showLabel,
 										boolean topLabel) {
 		for (LayoutBuilder builder : builders) {
@@ -476,7 +477,7 @@ public class LayoutBuilderChain extends LayoutBuilder {
 	 * @return resulting component
 	 */
 	@Override
-	public UIComponent contentSignatureLayout(UIComponent component, ContentSignature signature) {
+	public @Nullable UIComponent contentSignatureLayout(@Nullable UIComponent component, @Nonnull ContentSignature signature) {
 		UIComponent result = component;
 		for (LayoutBuilder builder : builders) {
 			result = builder.contentSignatureLayout(result, signature);
@@ -502,18 +503,18 @@ public class LayoutBuilderChain extends LayoutBuilder {
 	 * @return resulting component
 	 */
 	@Override
-	public UIComponent addToContainer(UIComponent component,
-										Container viewContainer,
-										UIComponent container,
-										UIComponent componentToAdd,
-										Integer pixelWidth,
-										Integer responsiveWidth,
-										Integer percentageWidth,
-										Integer sm,
-										Integer md,
-										Integer lg,
-										Integer xl,
-										String invisibleCondition) {
+	public @Nullable UIComponent addToContainer(@Nullable UIComponent component,
+										@Nonnull Container viewContainer,
+										@Nonnull UIComponent container,
+										@Nonnull UIComponent componentToAdd,
+										@Nullable Integer pixelWidth,
+										@Nullable Integer responsiveWidth,
+										@Nullable Integer percentageWidth,
+										@Nullable Integer sm,
+										@Nullable Integer md,
+										@Nullable Integer lg,
+										@Nullable Integer xl,
+										@Nullable String invisibleCondition) {
 		UIComponent result = component;
 		for (LayoutBuilder builder : builders) {
 			result = builder.addToContainer(result,
@@ -541,7 +542,7 @@ public class LayoutBuilderChain extends LayoutBuilder {
 	 * @return resulting component
 	 */
 	@Override
-	public UIComponent addedToContainer(UIComponent component, Container viewContainer, UIComponent container) {
+	public @Nullable UIComponent addedToContainer(@Nullable UIComponent component, @Nonnull Container viewContainer, @Nonnull UIComponent container) {
 		UIComponent result = component;
 		for (LayoutBuilder builder : builders) {
 			result = builder.addedToContainer(result, viewContainer, container);

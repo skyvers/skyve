@@ -26,6 +26,8 @@ import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * Creates a new server-side action class for an existing Skyve document.
  *
@@ -104,7 +106,7 @@ public class NewActionMojo extends AbstractSkyveMojo {
 	 * @return the modules directory
 	 * @throws FileNotFoundException if the directory cannot be found
 	 */
-	private static Path getModulesDirectory(MavenProject project) throws FileNotFoundException {
+	private static @Nonnull Path getModulesDirectory(@Nonnull MavenProject project) throws FileNotFoundException {
 		for (final String sourceRoot : project.getCompileSourceRoots()) {
 			final Path modules = Paths.get(sourceRoot, "modules");
 			if (modules.toFile().exists()) {

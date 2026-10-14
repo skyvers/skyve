@@ -16,6 +16,8 @@ import modules.whosin.domain.Office;
 import modules.whosin.domain.Staff;
 import modules.whosin.domain.Staff.Status;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * Produces map features for an office and its staff members.
  */
@@ -28,7 +30,7 @@ public class OfficeMap extends MapModel<Office> {
 	 * @throws Exception if data retrieval fails
 	 */
 	@Override
-	public MapResult getResult(Geometry mapBounds) throws Exception {
+	public @Nonnull MapResult getResult(@Nonnull Geometry mapBounds) throws Exception {
 		Office office = getBean();		
 		
 		List<MapItem> items = new ArrayList<>();

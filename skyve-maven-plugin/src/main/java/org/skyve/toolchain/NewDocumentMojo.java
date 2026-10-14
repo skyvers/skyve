@@ -25,6 +25,7 @@ import org.skyve.toolchain.config.NewDocumentConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 
 /**
@@ -130,7 +131,7 @@ public class NewDocumentMojo extends AbstractSkyveMojo {
 	 * @return the modules directory
 	 * @throws FileNotFoundException if the directory cannot be found
 	 */
-	private static Path getModulesDirectory(MavenProject project) throws FileNotFoundException {
+	private static @Nonnull Path getModulesDirectory(@Nonnull MavenProject project) throws FileNotFoundException {
 		for (final String sourceRoot : project.getCompileSourceRoots()) {
 			final Path modules = Paths.get(sourceRoot, "modules");
 			if (modules.toFile().exists()) {
@@ -147,7 +148,7 @@ public class NewDocumentMojo extends AbstractSkyveMojo {
 	 * @return the module name
 	 * @throws PrompterException if prompting fails
 	 */
-	private String getModuleName() throws PrompterException {
+	private @Nullable String getModuleName() throws PrompterException {
 		if ((newDocumentConfig != null) && StringUtils.isNotBlank(newDocumentConfig.getDefaultModule())) {
 			return newDocumentConfig.getDefaultModule();
 		}
@@ -163,7 +164,7 @@ public class NewDocumentMojo extends AbstractSkyveMojo {
 	 * @param documentName the document name to append
 	 * @return the derived persistent name, or {@code null}
 	 */
-	private static @Nullable String generatePersistentName(String moduleName, final String documentName) {
+	private static @Nullable String generatePersistentName(@Nullable String moduleName, final @Nullable String documentName) {
 		if ((moduleName != null) && (documentName != null)) {
 			// remove any non-word characters and whitespace from the module name
 			String prefix = StringUtils.deleteWhitespace(moduleName.replaceAll("\\W", ""));
@@ -189,7 +190,7 @@ public class NewDocumentMojo extends AbstractSkyveMojo {
 		 * @param directoryPath the existing directory path
 		 * @param newDocumentName the requested document name
 		 */
-		DocumentDirectoryAlreadyExistsException(String directoryPath, String newDocumentName) {
+		DocumentDirectoryAlreadyExistsException(@Nonnull String directoryPath, @Nonnull String newDocumentName) {
 			super(String.format("Directory %s for new document %s already exists.", directoryPath, newDocumentName));
 		}
 	}

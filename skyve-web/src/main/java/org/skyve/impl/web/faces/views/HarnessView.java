@@ -25,6 +25,7 @@ import org.skyve.util.Util;
 import org.skyve.web.WebAction;
 import org.skyve.web.WebContext;
 
+import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import jakarta.faces.FacesException;
 import jakarta.faces.context.ExternalContext;
@@ -47,7 +48,7 @@ public abstract class HarnessView extends LocalisableView {
 	 *
 	 * @return logo resource URL, or {@code null}
 	 */
-	public String getLogoRelativeFileNameUrl() {
+	public @Nullable String getLogoRelativeFileNameUrl() {
 		return logoRelativeFileNameUrl;
 	}
 
@@ -60,7 +61,7 @@ public abstract class HarnessView extends LocalisableView {
 	 *
 	 * @return dark logo resource URL, or {@code null} when no dark variant exists
 	 */
-	public String getLogoDarkRelativeFileNameUrl() {
+	public @Nullable String getLogoDarkRelativeFileNameUrl() {
 		return logoDarkRelativeFileNameUrl;
 	}
 
@@ -71,7 +72,7 @@ public abstract class HarnessView extends LocalisableView {
 	 *
 	 * @return CSS resource URL, or {@code null}
 	 */
-	public String getCssRelativeFileNameUrl() {
+	public @Nullable String getCssRelativeFileNameUrl() {
 		return cssRelativeFileNameUrl;
 	}
 
@@ -82,7 +83,7 @@ public abstract class HarnessView extends LocalisableView {
 	 *
 	 * @return module parameter, or {@code null}
 	 */
-	public String getBizModuleParameter() {
+	public @Nullable String getBizModuleParameter() {
 		return bizModuleParameter;
 	}
 
@@ -91,7 +92,7 @@ public abstract class HarnessView extends LocalisableView {
 	 *
 	 * @param bizModuleParameter the module name parameter
 	 */
-	public void setBizModuleParameter(String bizModuleParameter) {
+	public void setBizModuleParameter(@Nullable String bizModuleParameter) {
 		this.bizModuleParameter = OWASP.sanitise(Sanitisation.text, Util.processStringValue(bizModuleParameter));
 	}
 
@@ -102,7 +103,7 @@ public abstract class HarnessView extends LocalisableView {
 	 *
 	 * @return document parameter, or {@code null}
 	 */
-	public String getBizDocumentParameter() {
+	public @Nullable String getBizDocumentParameter() {
 		return bizDocumentParameter;
 	}
 
@@ -111,7 +112,7 @@ public abstract class HarnessView extends LocalisableView {
 	 *
 	 * @param bizDocumentParameter the document name parameter
 	 */
-	public void setBizDocumentParameter(String bizDocumentParameter) {
+	public void setBizDocumentParameter(@Nullable String bizDocumentParameter) {
 		this.bizDocumentParameter = OWASP.sanitise(Sanitisation.text, Util.processStringValue(bizDocumentParameter));
 	}
 
@@ -122,7 +123,7 @@ public abstract class HarnessView extends LocalisableView {
 	 *
 	 * @return query or model parameter, or {@code null}
 	 */
-	public String getQueryNameParameter() {
+	public @Nullable String getQueryNameParameter() {
 		return queryNameParameter;
 	}
 
@@ -131,7 +132,7 @@ public abstract class HarnessView extends LocalisableView {
 	 *
 	 * @param queryNameParameter the query or model name parameter
 	 */
-	public void setQueryNameParameter(String queryNameParameter) {
+	public void setQueryNameParameter(@Nullable String queryNameParameter) {
 		this.queryNameParameter = OWASP.sanitise(Sanitisation.text, Util.processStringValue(queryNameParameter));
 	}
 
@@ -142,7 +143,7 @@ public abstract class HarnessView extends LocalisableView {
 	 *
 	 * @return business ID parameter, or {@code null}
 	 */
-	public String getBizIdParameter() {
+	public @Nullable String getBizIdParameter() {
 		return bizIdParameter;
 	}
 
@@ -151,7 +152,7 @@ public abstract class HarnessView extends LocalisableView {
 	 *
 	 * @param bizIdParameter the target business ID
 	 */
-	public void setBizIdParameter(String bizIdParameter) {
+	public void setBizIdParameter(@Nullable String bizIdParameter) {
 		this.bizIdParameter = OWASP.sanitise(Sanitisation.text, Util.processStringValue(bizIdParameter));
 	}
 
@@ -162,7 +163,7 @@ public abstract class HarnessView extends LocalisableView {
 	 *
 	 * @return selected web action, or {@code null}
 	 */
-	public WebAction getWebActionParameter() {
+	public @Nullable WebAction getWebActionParameter() {
 		return webActionParameter;
 	}
 
@@ -171,7 +172,7 @@ public abstract class HarnessView extends LocalisableView {
 	 *
 	 * @param webActionParameter the requested web action
 	 */
-	public void setWebActionParameter(WebAction webActionParameter) {
+	public void setWebActionParameter(@Nullable WebAction webActionParameter) {
 		this.webActionParameter = webActionParameter;
 	}
 
@@ -182,7 +183,7 @@ public abstract class HarnessView extends LocalisableView {
 	 *
 	 * @return resolved home view type, or {@code null}
 	 */
-	public ViewType getViewType() {
+	public @Nullable ViewType getViewType() {
 		return viewType;
 	}
 
@@ -192,7 +193,7 @@ public abstract class HarnessView extends LocalisableView {
 	 * @return HTML version comment
 	 */
 	@SuppressWarnings("static-method")
-	public String getSkyveVersionComment() {
+	public @Nonnull String getSkyveVersionComment() {
 		StringBuilder result = new StringBuilder(64);
 		result.append("<!-- SKYVE FRAMEWORK version is ").append(UtilImpl.SKYVE_VERSION).append(" -->");
 		return result.toString();
@@ -205,7 +206,7 @@ public abstract class HarnessView extends LocalisableView {
 	 *
 	 * @return API bootstrap script, or {@code null}
 	 */
-	public String getApiScript() {
+	public @Nullable String getApiScript() {
 		return apiScript;
 	}
 
@@ -215,7 +216,7 @@ public abstract class HarnessView extends LocalisableView {
 	 * @return base URL
 	 */
 	@SuppressWarnings("static-method")
-	public String getBaseHref() {
+	public @Nonnull String getBaseHref() {
 		return Util.getBaseUrl();
 	}
 
@@ -225,7 +226,7 @@ public abstract class HarnessView extends LocalisableView {
 	 * @return map provider type name
 	 */
 	@SuppressWarnings("static-method")
-	public String getMapType() {
+	public @Nonnull String getMapType() {
 		return UtilImpl.MAP_TYPE.toString();
 	}
 
@@ -236,7 +237,7 @@ public abstract class HarnessView extends LocalisableView {
 	 *
 	 * @return user contact initials, or {@code null}
 	 */
-	public String getUserContactInitials() {
+	public @Nullable String getUserContactInitials() {
 		return userContactInitials;
 	}
 
@@ -247,7 +248,7 @@ public abstract class HarnessView extends LocalisableView {
 	 *
 	 * @return contact avatar image URL, or {@code null}
 	 */
-	public String getUserContactImageUrl() {
+	public @Nullable String getUserContactImageUrl() {
 		return userContactImageUrl;
 	}
 
@@ -258,7 +259,7 @@ public abstract class HarnessView extends LocalisableView {
 	 *
 	 * @return user contact display name, or {@code null}
 	 */
-	public String getUserContactName() {
+	public @Nullable String getUserContactName() {
 		return userContactName;
 	}
 
@@ -269,7 +270,7 @@ public abstract class HarnessView extends LocalisableView {
 	 *
 	 * @return escaped user principal name, or {@code null}
 	 */
-	public String getUserName() {
+	public @Nullable String getUserName() {
 		return userName;
 	}
 
@@ -443,7 +444,7 @@ public abstract class HarnessView extends LocalisableView {
 	 * @param userName the user name
 	 */
 	@SuppressWarnings("static-method")
-	public void setUser(String customerName, String userName) {
+	public void setUser(@Nonnull String customerName, @Nonnull String userName) {
 		UserImpl user = null;
 		ProvidedRepository repository = ProvidedRepositoryFactory.get();
 		ExternalContext ec = FacesContext.getCurrentInstance().getExternalContext();
@@ -495,7 +496,7 @@ public abstract class HarnessView extends LocalisableView {
 	 *
 	 * @param uxui the UX/UI name
 	 */
-	public void setUxUi(String uxui) {
+	public void setUxUi(@Nullable String uxui) {
 		if (! isCanSwitchMode()) {
 			User u = getUser();
 			throw new SecurityException("switch modes", (u == null) ? "anonymous" : u.getName());

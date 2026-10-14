@@ -49,6 +49,8 @@ import org.primefaces.component.texteditor.TextEditor;
 import org.primefaces.component.toolbar.Toolbar;
 import org.primefaces.component.tristatecheckbox.TriStateCheckbox;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.el.MethodExpression;
 import jakarta.el.ValueExpression;
 import jakarta.faces.component.UICommand;
@@ -90,7 +92,7 @@ public class ComponentRenderer {
 	 *
 	 * @param root root component to render; must be a {@link UIComponentBase}
 	 */
-	public ComponentRenderer(UIComponent root) {
+	public ComponentRenderer(@Nonnull UIComponent root) {
 		renderComponent((UIComponentBase) root);
 	}
 	
@@ -100,7 +102,7 @@ public class ComponentRenderer {
 	 * @return generated component markup; never {@code null}
 	 */
 	@Override
-	public String toString() {
+	public @Nonnull String toString() {
 		return out.toString();
 	}
 
@@ -114,7 +116,7 @@ public class ComponentRenderer {
 	 * @param component component to render; must not be {@code null}
 	 */
 	@SuppressWarnings({"java:S3776", "java:S6541"}) // complexity OK
-	private void renderComponent(UIComponentBase component) {
+	private void renderComponent(@Nonnull UIComponentBase component) {
 		String tagName = null;
 		Map<String, Object> attributes = new LinkedHashMap<>();
 		Set<String> excludedAttributeNames = new LinkedHashSet<>();
@@ -676,7 +678,7 @@ public class ComponentRenderer {
 	 * @param name attribute name; must not be {@code null}
 	 * @param component component that may hold the value expression; must not be {@code null}
 	 */
-	private static void putValueExpression(Map<String, Object> attributes, String name, UIComponentBase component) {
+	private static void putValueExpression(@Nonnull Map<String, Object> attributes, @Nonnull String name, @Nonnull UIComponentBase component) {
 		ValueExpression ve = component.getValueExpression(name);
 		if (ve != null) {
 			Object value = ve.getExpressionString();
@@ -694,7 +696,7 @@ public class ComponentRenderer {
 	 * @param name attribute name; must not be {@code null}
 	 * @param me method expression to render; may be {@code null}
 	 */
-	private static void putMethodExpression(Map<String, Object> attributes, String name, MethodExpression me) {
+	private static void putMethodExpression(@Nonnull Map<String, Object> attributes, @Nonnull String name, @Nullable MethodExpression me) {
 		if (me != null) {
 			attributes.put(name, me.getExpressionString());
 		}
@@ -707,7 +709,7 @@ public class ComponentRenderer {
 	 * @param name attribute name; must not be {@code null}
 	 * @param value attribute value; {@code null} and empty strings are omitted
 	 */
-	private static void putValue(Map<String, Object> attributes, String name, Object value) {
+	private static void putValue(@Nonnull Map<String, Object> attributes, @Nonnull String name, @Nullable Object value) {
 		if ((value != null) && (! "".equals(value))) {
 			attributes.put(name, value);
 		}
@@ -723,7 +725,7 @@ public class ComponentRenderer {
 	 * @param name attribute name; must not be {@code null}
 	 * @param value attribute value; may be {@code null}
 	 */
-	private void appendAttribute(String name, Object value) {
+	private void appendAttribute(@Nonnull String name, @Nullable Object value) {
 		out.append(' ').append(name).append("=\"").append(toAttributeValue(value)).append('"');
 	}
 
@@ -733,7 +735,7 @@ public class ComponentRenderer {
 	 * @param value attribute value; may be {@code null}
 	 * @return escaped attribute content; never {@code null}
 	 */
-	private static String toAttributeValue(Object value) {
+	private static @Nonnull String toAttributeValue(@Nullable Object value) {
 		return (value == null) ? "" : Encode.forHtmlAttribute(String.valueOf(value));
 	}
 
@@ -747,7 +749,7 @@ public class ComponentRenderer {
 	 * @param facetName facet key; must not be {@code null}
 	 * @param facet facet component to render; must not be {@code null}
 	 */
-	private void renderFacet(String facetName, UIComponentBase facet) {
+	private void renderFacet(@Nonnull String facetName, @Nonnull UIComponentBase facet) {
 		out.append(indentation).append("<f:facet");
 		appendAttribute("name", facetName);
 		out.append(">\n");
@@ -765,7 +767,7 @@ public class ComponentRenderer {
 	 * @param name attribute name; must not be {@code null}
 	 * @param value attribute value; may be {@code null}
 	 */
-	private void renderAttribute(String name, Object value) {
+	private void renderAttribute(@Nonnull String name, @Nullable Object value) {
 		out.append(indentation).append("<f:attribute");
 		appendAttribute("name", name);
 		appendAttribute("value", value);
@@ -782,7 +784,7 @@ public class ComponentRenderer {
 	 * @param eventName client event name; must not be {@code null}
 	 * @param behaviour behaviour to render; must not be {@code null}
 	 */
-	private void renderAjaxBehaviour(String eventName, AjaxBehavior behaviour) {
+	private void renderAjaxBehaviour(@Nonnull String eventName, @Nonnull AjaxBehavior behaviour) {
 		out.append(indentation).append("<p:ajax");
 		appendAttribute("event", eventName);
 		appendAttribute("listener", "<cant obtain AjaxBehaviourListener(s) from primefaces>");
@@ -807,7 +809,7 @@ public class ComponentRenderer {
 	 *
 	 * @param behaviour confirmation behaviour to render; must not be {@code null}
 	 */
-	private void renderConfirmBehaviour(ConfirmBehavior behaviour) {
+	private void renderConfirmBehaviour(@Nonnull ConfirmBehavior behaviour) {
 		out.append(indentation).append("<p:confirm");
 		appendAttribute("message", behaviour.getMessage());
 		if (! behaviour.isEscape()) {

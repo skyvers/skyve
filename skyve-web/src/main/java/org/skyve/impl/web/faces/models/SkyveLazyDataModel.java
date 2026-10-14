@@ -53,6 +53,7 @@ import org.skyve.web.SortParameter;
 import org.slf4j.Logger;
 
 import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 
 /**
  * Implements internal web-module behavior for this Skyve runtime concern.
@@ -88,12 +89,12 @@ public class SkyveLazyDataModel extends LazyDataModel<BeanMapAdapter> {
 	 */
 	@SuppressWarnings("java:S107") // too many params OK
 	public SkyveLazyDataModel(@Nonnull FacesView view,
-								String moduleName, 
-								String documentName, 
-								String queryName,
-								String modelName,
-								List<FilterParameter> filterParameters,
-								List<Parameter> parameters,
+								@Nonnull String moduleName, 
+								@Nullable String documentName, 
+								@Nullable String queryName,
+								@Nullable String modelName,
+								@Nullable List<FilterParameter> filterParameters,
+								@Nullable List<Parameter> parameters,
 								boolean escape) {
 		this.view = view;
 		this.moduleName = moduleName;
@@ -111,7 +112,7 @@ public class SkyveLazyDataModel extends LazyDataModel<BeanMapAdapter> {
 	 * @param fields query column names or bindings to search
 	 * @param search typed text; blank text leaves the model unfiltered
 	 */
-	public void setLookupFilter(List<String> fields, String search) {
+	public void setLookupFilter(@Nullable List<String> fields, @Nullable String search) {
 		lookupFilterFields = fields;
 		lookupSearch = Util.processStringValue(search);
 	}
@@ -123,7 +124,7 @@ public class SkyveLazyDataModel extends LazyDataModel<BeanMapAdapter> {
 	 * @return always {@code 0}; row count is set inside {@link #load(int, int, Map, Map)}
 	 */
 	@Override
-	public int count(Map<String, FilterMeta> filterBy) {
+	public int count(@Nonnull Map<String, FilterMeta> filterBy) {
 		return 0;
 	}
 	
@@ -138,10 +139,10 @@ public class SkyveLazyDataModel extends LazyDataModel<BeanMapAdapter> {
 	 */
 	@Override
 	@SuppressWarnings("java:S3776") // complexity OK
-	public List<BeanMapAdapter> load(int first,
+	public @Nonnull List<BeanMapAdapter> load(int first,
 										int pageSize,
-										Map<String, SortMeta> multiSortMeta,
-										Map<String, FilterMeta> filters) {
+										@Nullable Map<String, SortMeta> multiSortMeta,
+										@Nullable Map<String, FilterMeta> filters) {
 		User u = CORE.getUser();
 		Customer c = u.getCustomer();
 		Module m = c.getModule(moduleName);
@@ -242,7 +243,7 @@ public class SkyveLazyDataModel extends LazyDataModel<BeanMapAdapter> {
 	 * @return a stable row key composed of biz id, document, and module
 	 */
 	@Override
-	public String getRowKey(BeanMapAdapter bean) {
+	public @Nonnull String getRowKey(@Nonnull BeanMapAdapter bean) {
 		Bean row = bean.getBean();
 		return new StringBuilder(128).append(row.getBizId()).append('#').append(row.getBizDocument()).append('.').append(row.getBizModule()).toString();
 	}
@@ -254,7 +255,7 @@ public class SkyveLazyDataModel extends LazyDataModel<BeanMapAdapter> {
 	 * @return a bean adapter created from the row key components
 	 */
 	@Override
-	public BeanMapAdapter getRowData(String rowKey) {
+	public @Nonnull BeanMapAdapter getRowData(@Nonnull String rowKey) {
 		Map<String, Object> properties = new TreeMap<>();
 		int hashIndex = rowKey.lastIndexOf('#');
 		int dotIndex = rowKey.lastIndexOf('.');
@@ -271,7 +272,7 @@ public class SkyveLazyDataModel extends LazyDataModel<BeanMapAdapter> {
 	 * @param multiSortMeta sort metadata entries
 	 * @param model the target list model
 	 */
-	private static void sort(Map<String, SortMeta> multiSortMeta, ListModel<Bean> model) {
+	private static void sort(@Nonnull Map<String, SortMeta> multiSortMeta, @Nonnull ListModel<Bean> model) {
 		int l = multiSortMeta.size();
 		SortParameter[] sortParameters = new SortParameter[l];
 		int i = 0;
@@ -346,7 +347,7 @@ public class SkyveLazyDataModel extends LazyDataModel<BeanMapAdapter> {
 	 * @throws Exception if metadata resolution or conversion fails
 	 */
 	@SuppressWarnings({"java:S3776", "java:S6541", "java:S112", "java:S135"}) // complex method OK
-	private static void filter(Map<String, FilterMeta> filters, ListModel<Bean> model, Customer customer)
+	private static void filter(@Nonnull Map<String, FilterMeta> filters, @Nonnull ListModel<Bean> model, @Nonnull Customer customer)
 	throws Exception {
 		Document drivingDocument = model.getDrivingDocument();
 		Module drivingModule = customer.getModule(drivingDocument.getOwningModuleName());

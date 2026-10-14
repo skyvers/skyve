@@ -33,6 +33,8 @@ import org.skyve.util.JSON;
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.ImmutableMap;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.faces.component.UIOutput;
 import jakarta.faces.context.FacesContext;
 
@@ -88,20 +90,20 @@ public class VueListGridScript extends UIOutput {
 	 * @param selectedRemoteCommand the optional remote command for selected row callbacks
 	 */
 	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
-	public VueListGridScript(String containerId,
-								String owningModuleName,
-								String owningDocumentName,
-								String drivingModuleName,
-								String drivingDocumentName,
-								String queryName,
-								String modelName,
-								String contextId,
+	public VueListGridScript(@Nonnull String containerId,
+								@Nonnull String owningModuleName,
+								@Nonnull String owningDocumentName,
+								@Nonnull String drivingModuleName,
+								@Nonnull String drivingDocumentName,
+								@Nullable String queryName,
+								@Nullable String modelName,
+								@Nullable String contextId,
 								boolean showAdd,
 								boolean showZoom,
 								boolean showFilter,
 								boolean showSummary,
 								boolean showSnap,
-								String selectedRemoteCommand) {
+								@Nullable String selectedRemoteCommand) {
 		this(containerId,
 				owningModuleName,
 				owningDocumentName,
@@ -139,21 +141,21 @@ public class VueListGridScript extends UIOutput {
 	 * @param stickyHeaderAnchorSelector optional selector used to anchor the sticky header
 	 */
 	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
-	public VueListGridScript(String containerId,
-								String owningModuleName,
-								String owningDocumentName,
-								String drivingModuleName,
-								String drivingDocumentName,
-								String queryName,
-								String modelName,
-								String contextId,
+	public VueListGridScript(@Nonnull String containerId,
+								@Nonnull String owningModuleName,
+								@Nonnull String owningDocumentName,
+								@Nonnull String drivingModuleName,
+								@Nonnull String drivingDocumentName,
+								@Nullable String queryName,
+								@Nullable String modelName,
+								@Nullable String contextId,
 								boolean showAdd,
 								boolean showZoom,
 								boolean showFilter,
 								boolean showSummary,
 								boolean showSnap,
-								String selectedRemoteCommand,
-								String stickyHeaderAnchorSelector) {
+								@Nullable String selectedRemoteCommand,
+								@Nullable String stickyHeaderAnchorSelector) {
 		Map<String, Object> attributes = getAttributes();
 
 		this.containerId = containerId;
@@ -210,7 +212,7 @@ public class VueListGridScript extends UIOutput {
 	 * @throws IOException if script output cannot be written
 	 */
 	@Override
-	public void encodeBegin(FacesContext context) throws IOException {
+	public void encodeBegin(@Nonnull FacesContext context) throws IOException {
 		Map<String, Object> attributes = getAttributes();
 		if (Boolean.TRUE.toString().equals(attributes.get("dynamic")) || (getValue() == null)) {
 			grabAttributes(attributes);
@@ -225,7 +227,7 @@ public class VueListGridScript extends UIOutput {
 	 *
 	 * @param attributes the component attributes map
 	 */
-	private void grabAttributes(Map<String, Object> attributes) {
+	private void grabAttributes(@Nonnull Map<String, Object> attributes) {
 		this.containerId = (String) attributes.get("containerId");
 
 		this.owningModuleName = (String) attributes.get("owningModuleName");
@@ -384,25 +386,25 @@ public class VueListGridScript extends UIOutput {
 		 * @param targetMetaData the resolved target metadata for the column binding
 		 * @param customer the current customer
 		 */
-		private ColumnMetaData(MetaDataQueryColumn mdQueryColumn,
-								SmartClientQueryColumnDefinition scQueryColumnDefn,
-								TargetMetaData targetMetaData,
-								Customer customer) {
+		private ColumnMetaData(@Nonnull MetaDataQueryColumn mdQueryColumn,
+								@Nonnull SmartClientQueryColumnDefinition scQueryColumnDefn,
+								@Nonnull TargetMetaData targetMetaData,
+								@Nonnull Customer customer) {
 			this.mdQueryColumn = mdQueryColumn;
 			this.scQueryColumnDefn = scQueryColumnDefn;
 			this.targetMetaData = targetMetaData;
 			this.customer = customer;
 		}
 
-		private String getBinding() {
+		private @Nullable String getBinding() {
 			return scQueryColumnDefn.getName();
 		}
 
-		private String getTitle() {
+		private @Nullable String getTitle() {
 			return scQueryColumnDefn.getTitle();
 		}
 
-		private String getType() {
+		private @Nonnull String getType() {
 			Attribute attribute = targetMetaData.getAttribute();
 			if (attribute == null) {
 				// Defaulting to text for unhandled implicit type attributes
@@ -424,7 +426,7 @@ public class VueListGridScript extends UIOutput {
 		 * @param inType the source attribute type
 		 * @return the flattened field type
 		 */
-		private static String flattenType(String inType) {
+		private static @Nonnull String flattenType(@Nonnull String inType) {
 			String resultType = attributeTypeConversions.get(inType);
 			if (resultType != null) {
 				return resultType;
@@ -433,7 +435,7 @@ public class VueListGridScript extends UIOutput {
 			return inType;
 		}
 
-		private String getConverterName() {
+		private @Nullable String getConverterName() {
 			return Optional.ofNullable(targetMetaData.getAttribute()).filter(ConvertibleField.class::isInstance)
 					.map(ConvertibleField.class::cast).map(cf -> cf.getConverterForCustomer(customer))
 					.map(ConverterName::valueOf).map(ConverterName::name).orElse(null);
@@ -451,7 +453,7 @@ public class VueListGridScript extends UIOutput {
 			return scQueryColumnDefn.isCanFilter();
 		}
 
-		private Map<String, String> getValueMap() {
+		private @Nullable Map<String, String> getValueMap() {
 			return scQueryColumnDefn.getValueMap();
 		}
 		
@@ -460,13 +462,13 @@ public class VueListGridScript extends UIOutput {
 		}
 
 		@Override
-		public String toString() {
+		public @Nonnull String toString() {
 			return MoreObjects.toStringHelper(this).omitNullValues().add("binding", getBinding())
 					.add("title", getTitle()).add("type", getType()).add("converterName", getConverterName())
 					.add("sortable", isSortable()).add("filterable", isFilterable()).toString();
 		}
 		
-		private Map<String, Object> toMap() {
+		private @Nonnull Map<String, Object> toMap() {
 			Map<String, Object> result = new TreeMap<>();
 			
 			result.put("field", getBinding());
@@ -497,7 +499,7 @@ public class VueListGridScript extends UIOutput {
 	}
 
 	@Override
-	public String toString() {
+	public @Nonnull String toString() {
 		return MoreObjects.toStringHelper(this).omitNullValues().add("owningModuleName", owningModuleName)
 				.add("owningDocumentName", owningDocumentName).add("queryName", queryName).add("modelName", modelName)
 				.add("contextId", contextId).add("containerId", containerId).toString();

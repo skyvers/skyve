@@ -18,6 +18,9 @@ import org.skyve.util.logging.Category;
 import org.skyve.web.WebContext;
 import org.slf4j.Logger;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Executes a Faces callback action within the current Skyve web context.
  */
@@ -36,7 +39,7 @@ public class ZoomInAction extends FacesAction<Void> {
 	 * @param dataWidgetBinding the binding path to the collection or association
 	 * @param bizId the business identifier of the selected collection element
 	 */
-	public ZoomInAction(FacesView facesView, String dataWidgetBinding, String bizId) {
+	public ZoomInAction(@Nonnull FacesView facesView, @Nonnull String dataWidgetBinding, @Nullable String bizId) {
 		this.facesView = facesView;
 		this.binding = dataWidgetBinding;
 		this.bizId = bizId;
@@ -48,7 +51,7 @@ public class ZoomInAction extends FacesAction<Void> {
 	 * @param facesView the active faces view
 	 * @param referenceBinding the binding path to the referenced bean
 	 */
-	public ZoomInAction(FacesView facesView, String referenceBinding) {
+	public ZoomInAction(@Nonnull FacesView facesView, @Nonnull String referenceBinding) {
 		this.facesView = facesView;
 		this.binding = referenceBinding;
 	}
@@ -61,7 +64,7 @@ public class ZoomInAction extends FacesAction<Void> {
 	 */
 	@Override
 	@SuppressWarnings("java:S3776") // Complexity OK
-	public Void callback() throws Exception {
+	public @Nullable Void callback() throws Exception {
 		StringBuilder sb = new StringBuilder(64);
 		sb.append("ZoomInAction - binding=").append(binding).append(" : bizId=").append(bizId);
 		if (UtilImpl.FACES_TRACE) {

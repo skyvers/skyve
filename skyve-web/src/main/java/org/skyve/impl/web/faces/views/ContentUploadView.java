@@ -174,7 +174,7 @@ public class ContentUploadView extends AbstractUploadView {
 	public void preRender() {
 		new FacesAction<Void>() {
 			@Override
-			public Void callback() throws Exception {
+			public @Nullable Void callback() throws Exception {
 				initialise();
 				return null;
 			}

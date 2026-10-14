@@ -1,5 +1,6 @@
 package org.skyve.jar;
 
+import jakarta.annotation.Nonnull;
 import jakarta.enterprise.context.RequestScoped;
 import jakarta.enterprise.inject.spi.BeanManager;
 import jakarta.inject.Inject;
@@ -30,7 +31,7 @@ public class MyResource {
      */
     @Path("/")
     @GET
-    public String getManager() {
+    public @Nonnull String getManager() {
         return manager.toString();
     }
 }

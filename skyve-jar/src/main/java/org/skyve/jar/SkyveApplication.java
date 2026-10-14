@@ -18,6 +18,8 @@ import io.undertow.server.handlers.resource.ResourceManager;
 import io.undertow.servlet.Servlets;
 import io.undertow.servlet.api.DeploymentInfo;
 import io.undertow.servlet.api.ServletInfo;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.ws.rs.ApplicationPath;
 import jakarta.ws.rs.core.Application;
 
@@ -41,7 +43,7 @@ public class SkyveApplication extends Application {
 	 *         {@code null}
 	 */
 	@Override
-	public Set<Class<?>> getClasses() {
+	public @Nonnull Set<Class<?>> getClasses() {
 		Set<Class<?>> classes = new HashSet<>();
 		classes.add(MyResource.class); // Resource implemented in the previous section
 		return classes;
@@ -58,7 +60,7 @@ public class SkyveApplication extends Application {
 	 * @throws InterruptedException if the blocking sleep at the end of startup is
 	 *         interrupted
 	 */
-	public static void main(String[] args) throws InterruptedException {
+	public static void main(@Nonnull String[] args) throws InterruptedException {
 		UndertowJaxrsServer server = new UndertowJaxrsServer();
 
 		ResteasyDeployment deployment = new ResteasyDeploymentImpl();
@@ -85,7 +87,7 @@ public class SkyveApplication extends Application {
 		Undertow.Builder builder = Undertow.builder().addHttpListener(8080, "localhost");
 		builder.setHandler(new HttpHandler() {
 			@Override
-			public void handleRequest(HttpServerExchange exchange) throws Exception {
+			public void handleRequest(@Nullable HttpServerExchange exchange) throws Exception {
 				Handlers.resource(resourceManager);
 			}
 		});

@@ -6,6 +6,8 @@ import org.skyve.impl.web.faces.views.FacesView;
 import org.skyve.util.Util;
 import org.skyve.web.WebAction;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.faces.context.ExternalContext;
 import jakarta.faces.context.FacesContext;
 import jakarta.faces.view.ViewScoped;
@@ -42,7 +44,7 @@ public class StartupView extends FacesView {
 	 * @param bizId the business id in context
 	 */
 	@Override
-	public void action(String actionName, String dataWidgetBinding, String bizId) {
+	public void action(@Nonnull String actionName, @Nullable String dataWidgetBinding, @Nullable String bizId) {
 		super.action(actionName, dataWidgetBinding, bizId);
 		try {
 			// put an attribute on the user's session so this screen isn't shown again for this session

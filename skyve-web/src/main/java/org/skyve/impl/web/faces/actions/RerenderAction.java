@@ -18,6 +18,9 @@ import org.skyve.web.WebContext;
 import org.slf4j.Logger;
 import org.skyve.util.logging.SkyveLoggerFactory;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Executes a Faces callback action within the current Skyve web context.
  */
@@ -37,7 +40,7 @@ public class RerenderAction extends FacesAction<Void> {
 	 * @param source the rerender source identifier
 	 * @param validate whether required-field validation should run before rerender hooks
 	 */
-	public RerenderAction(FacesView facesView, String source, boolean validate) {
+	public RerenderAction(@Nonnull FacesView facesView, @Nullable String source, boolean validate) {
 		this.facesView = facesView;
 		this.source = source;
 		this.validate = validate;
@@ -51,7 +54,7 @@ public class RerenderAction extends FacesAction<Void> {
 	 */
 	@Override
 	@SuppressWarnings("java:S3776") // Complexity OK
-	public Void callback() throws Exception {
+	public @Nullable Void callback() throws Exception {
 		if (UtilImpl.FACES_TRACE) FACES_LOGGER.info("RerenderAction - EXECUTE RERENDER with source {} {} validation", source, (validate ? "with" : "without"));
 
 		AbstractPersistence persistence = AbstractPersistence.get();

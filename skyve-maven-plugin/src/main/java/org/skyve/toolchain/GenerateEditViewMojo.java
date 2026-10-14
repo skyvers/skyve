@@ -13,6 +13,8 @@ import org.skyve.toolchain.config.GenerateEditViewConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * Generates the XML edit view for a Skyve document.
  *
@@ -81,7 +83,7 @@ public class GenerateEditViewMojo extends AbstractSkyveMojo {
 	}
 
 	@SuppressWarnings("static-method") // test seam
-	void generateEditView(String[] arguments) throws Exception {
+	void generateEditView(@Nonnull String[] arguments) throws Exception {
 		ViewGenerator.main(arguments);
 	}
 }

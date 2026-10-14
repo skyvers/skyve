@@ -12,92 +12,93 @@ import org.skyve.impl.metadata.view.container.form.FormItem;
 import org.skyve.impl.metadata.view.container.form.FormRow;
 import org.skyve.impl.metadata.view.widget.bound.input.ContentSignature;
 
+import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import jakarta.faces.component.UIComponent;
 
 public class NoOpLayoutBuilder extends LayoutBuilder {
 	@Override
-	public UIComponent viewLayout(UIComponent component) {
+	public @Nullable UIComponent viewLayout(@Nullable UIComponent component) {
 		return component;
 	}
 
 	@Override
-	public List<UIComponent> toolbarLayouts(List<UIComponent> components) {
+	public @Nullable List<UIComponent> toolbarLayouts(@Nullable List<UIComponent> components) {
 		return components;
 	}
 
 	@Override
-	public UIComponent tabLayout(UIComponent component) {
+	public @Nullable UIComponent tabLayout(@Nullable UIComponent component) {
 		return component;
 	}
 
 	@Override
-	public UIComponent vboxLayout(UIComponent component, VBox vbox) {
+	public @Nullable UIComponent vboxLayout(@Nullable UIComponent component, @Nonnull VBox vbox) {
 		return component;
 	}
 
 	@Override
-	public UIComponent hboxLayout(UIComponent component, HBox hbox) {
+	public @Nullable UIComponent hboxLayout(@Nullable UIComponent component, @Nonnull HBox hbox) {
 		return component;
 	}
 	
 	@Override
-	public UIComponent sidebarLayout(UIComponent component, Sidebar sidebar, boolean createView) {
+	public @Nullable UIComponent sidebarLayout(@Nullable UIComponent component, @Nonnull Sidebar sidebar, boolean createView) {
 		return component;
 	}
 
 	@Override
-	public UIComponent formLayout(UIComponent component, Form form) {
+	public @Nullable UIComponent formLayout(@Nullable UIComponent component, @Nonnull Form form) {
 		return component;
 	}
 
 	@Override
-	public UIComponent formRowLayout(UIComponent component, FormRow row) {
+	public @Nullable UIComponent formRowLayout(@Nullable UIComponent component, @Nonnull FormRow row) {
 		return component;
 	}
 
 	@Override
-	public void addToolbarLayouts(List<UIComponent> toolbars, List<UIComponent> toolbarLayouts) {
+	public void addToolbarLayouts(@Nonnull List<UIComponent> toolbars, @Nonnull List<UIComponent> toolbarLayouts) {
 		// do nothing
 	}
 
 	@Override
-	public void addToolbarsOrLayouts(UIComponent view, List<UIComponent> toolbarsOrLayouts) {
+	public void addToolbarsOrLayouts(@Nonnull UIComponent view, @Nonnull List<UIComponent> toolbarsOrLayouts) {
 		// do nothing
 	}
 
 	@Override
-	public UIComponent addTabLayout(UIComponent component, UIComponent tab, UIComponent tabLayout) {
+	public @Nullable UIComponent addTabLayout(@Nullable UIComponent component, @Nonnull UIComponent tab, @Nonnull UIComponent tabLayout) {
 		return component;
 	}
 
 	@Override
-	public void addTab(UIComponent tabPane, UIComponent tab) {
+	public void addTab(@Nonnull UIComponent tabPane, @Nonnull UIComponent tab) {
 		// do nothing
 	}
 
 	@Override
-	public UIComponent addedTab(UIComponent component, UIComponent tab) {
+	public @Nullable UIComponent addedTab(@Nullable UIComponent component, @Nonnull UIComponent tab) {
 		return component;
 	}
 
 	@Override
-	public void addBorderLayout(UIComponent border, UIComponent borderLayout) {
+	public void addBorderLayout(@Nonnull UIComponent border, @Nonnull UIComponent borderLayout) {
 		// do nothing
 	}
 
 	@Override
-	public UIComponent addedBorderLayout(UIComponent component, UIComponent borderLayout) {
+	public @Nullable UIComponent addedBorderLayout(@Nullable UIComponent component, @Nonnull UIComponent borderLayout) {
 		return component;
 	}
 
 	@Override
-	public UIComponent addFormRowLayout(UIComponent component, UIComponent formLayout, UIComponent rowLayout) {
+	public @Nullable UIComponent addFormRowLayout(@Nullable UIComponent component, @Nonnull UIComponent formLayout, @Nonnull UIComponent rowLayout) {
 		return component;
 	}
 
 	@Override
-	public UIComponent addedFormRowLayout(UIComponent component, UIComponent rowLayout) {
+	public @Nullable UIComponent addedFormRowLayout(@Nullable UIComponent component, @Nonnull UIComponent rowLayout) {
 		return component;
 	}
 
@@ -118,17 +119,17 @@ public class NoOpLayoutBuilder extends LayoutBuilder {
 	 * @param widgetHelpText help text
 	 */
 	@Override
-	public void layoutFormItemLabel(UIComponent formOrRowLayout,
-										UIComponent formItemComponent,
-										Form currentForm,
-										FormItem currentFormItem,
-										FormColumn currentFormColumn,
-										String widgetLabel,
+	public void layoutFormItemLabel(@Nonnull UIComponent formOrRowLayout,
+										@Nonnull UIComponent formItemComponent,
+										@Nonnull Form currentForm,
+										@Nonnull FormItem currentFormItem,
+										@Nonnull FormColumn currentFormColumn,
+										@Nullable String widgetLabel,
 										boolean widgetEscapeLabel,
 										@Nullable String widgetRequiredMessage,
 										boolean widgetEscapeRequiredMessage,
-										String widgetInvisible,
-										String widgetHelpText) {
+										@Nullable String widgetInvisible,
+										@Nullable String widgetHelpText) {
 		// do nothing
 	}
 
@@ -154,48 +155,48 @@ public class NoOpLayoutBuilder extends LayoutBuilder {
 	 * @param topLabel whether labels render above widgets
 	 */
 	@Override
-	public void layoutFormItemWidget(UIComponent formOrRowLayout,
-										UIComponent formItemComponent,
-										Form currentForm,
-										FormItem currentFormItem,
-										FormColumn currentFormColumn,
-										String widgetLabel,
+	public void layoutFormItemWidget(@Nonnull UIComponent formOrRowLayout,
+										@Nonnull UIComponent formItemComponent,
+										@Nonnull Form currentForm,
+										@Nonnull FormItem currentFormItem,
+										@Nonnull FormColumn currentFormColumn,
+										@Nullable String widgetLabel,
 										boolean widgetEscapeLabel,
 										int widgetColspan,
 										@Nullable String widgetRequiredMessage,
 										boolean widgetEscapeRequiredMessage,
-										String widgetInvisible,
-										String widgetHelpText,
+										@Nullable String widgetInvisible,
+										@Nullable String widgetHelpText,
 										boolean widgetEscapeHelp,
-										Integer widgetPixelWidth,
+										@Nullable Integer widgetPixelWidth,
 										boolean showLabel,
 										boolean topLabel) {
 		// do nothing
 	}
 
 	@Override
-	public UIComponent contentSignatureLayout(UIComponent component, ContentSignature signature) {
+	public @Nullable UIComponent contentSignatureLayout(@Nullable UIComponent component, @Nonnull ContentSignature signature) {
 		return component;
 	}
 	
 	@Override
-	public UIComponent addToContainer(UIComponent component, 
-										Container viewContainer,
-										UIComponent container,
-										UIComponent componentToAdd,
-										Integer pixelWidth,
-										Integer responsiveWidth,
-										Integer percentageWidth,
-										Integer sm,
-										Integer md,
-										Integer lg,
-										Integer xl,
-										String invisibleCondition) {
+	public @Nullable UIComponent addToContainer(@Nullable UIComponent component, 
+										@Nonnull Container viewContainer,
+										@Nonnull UIComponent container,
+										@Nonnull UIComponent componentToAdd,
+										@Nullable Integer pixelWidth,
+										@Nullable Integer responsiveWidth,
+										@Nullable Integer percentageWidth,
+										@Nullable Integer sm,
+										@Nullable Integer md,
+										@Nullable Integer lg,
+										@Nullable Integer xl,
+										@Nullable String invisibleCondition) {
 		return component;
 	}
 
 	@Override
-	public UIComponent addedToContainer(UIComponent component, Container viewContainer, UIComponent container) {
+	public @Nullable UIComponent addedToContainer(@Nullable UIComponent component, @Nonnull Container viewContainer, @Nonnull UIComponent container) {
 		return component;
 	}
 }

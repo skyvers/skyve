@@ -5,6 +5,8 @@ import java.io.IOException;
 import org.primefaces.model.charts.ChartModel;
 import org.skyve.impl.metadata.view.widget.Chart.ChartType;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * Renders Skyve metadata into JSF or PrimeFaces output for this concern.
  */
@@ -24,7 +26,7 @@ public class ChartConfigRenderer {
 	 * @return the encoded chart configuration JSON
 	 * @throws IOException if the chart model cannot be written
 	 */
-	public static String config(ChartType type, ChartModel model) throws IOException {
+	public static @Nonnull String config(@Nonnull ChartType type, @Nonnull ChartModel model) throws IOException {
 		switch (type) {
 		case bar, horizontalBar:
 			return new SkyveBarChartRenderer().encodeConfig(model);
@@ -49,7 +51,7 @@ public class ChartConfigRenderer {
 	 * @param writer the chart response writer containing the JSON buffer
 	 * @return the rendered JSON string
 	 */
-	static String spruce(ChartResponseWriter writer) {
+	static @Nonnull String spruce(@Nonnull ChartResponseWriter writer) {
 		StringBuffer result = writer.getStringWriter().getBuffer();
 		result.replace(0, 1, "{"); // replace the starting comma with a curly brace
 		result.append('}'); // end the JSON

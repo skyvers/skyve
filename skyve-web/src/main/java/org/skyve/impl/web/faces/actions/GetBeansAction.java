@@ -12,6 +12,9 @@ import org.skyve.metadata.view.widget.bound.Parameter;
 import org.skyve.util.logging.Category;
 import org.slf4j.Logger;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Executes a Faces callback action within the current Skyve web context.
  */
@@ -43,13 +46,13 @@ public class GetBeansAction extends FacesAction<List<BeanMapAdapter>> {
 	 * @param escape whether output values should be escaped
 	 */
 	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
-	public GetBeansAction(FacesView facesView,
-							String bizModule,
-							String bizDocument,
-							String queryName,
-							String modelName,
-							List<FilterParameter> filterParameters,
-							List<Parameter> parameters,
+	public GetBeansAction(@Nonnull FacesView facesView,
+							@Nonnull String bizModule,
+							@Nullable String bizDocument,
+							@Nullable String queryName,
+							@Nullable String modelName,
+							@Nullable List<FilterParameter> filterParameters,
+							@Nullable List<Parameter> parameters,
 							boolean escape) {
 		this.facesView = facesView;
 		this.bizModule = bizModule;
@@ -67,7 +70,7 @@ public class GetBeansAction extends FacesAction<List<BeanMapAdapter>> {
 	 * @param fields query column names or bindings to search with OR semantics
 	 * @param search typed search text
 	 */
-	public void setLookupFilter(List<String> fields, String search) {
+	public void setLookupFilter(@Nonnull List<String> fields, @Nullable String search) {
 		lookupFilterFields = fields;
 		lookupSearch = search;
 	}
@@ -79,7 +82,7 @@ public class GetBeansAction extends FacesAction<List<BeanMapAdapter>> {
 	 * @throws Exception if list model creation or loading fails
 	 */
 	@Override
-	public List<BeanMapAdapter> callback() throws Exception {
+	public @Nonnull List<BeanMapAdapter> callback() throws Exception {
 		if (UtilImpl.FACES_TRACE) FACES_LOGGER.info("GetBeansAction - bizModule={} : bizDocument={} : queryName={} : modelName={}", bizModule, bizDocument, queryName, modelName);
 
 		SkyveLazyDataModel model = new SkyveLazyDataModel(facesView, bizModule, bizDocument, queryName, modelName, filterParameters, parameters, escape);

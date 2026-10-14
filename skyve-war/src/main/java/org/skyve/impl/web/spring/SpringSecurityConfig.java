@@ -25,6 +25,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 //import org.springframework.security.saml2.provider.service.registration.RelyingPartyRegistrations;
 import org.springframework.security.web.authentication.rememberme.PersistentTokenRepository;
 
+import jakarta.annotation.Nonnull;
 import jakarta.servlet.http.HttpServletRequest;
 
 /**
@@ -60,7 +61,7 @@ public class SpringSecurityConfig {
 	 *
 	 * @param skyve the Spring Security adapter to delegate to
 	 */
-	SpringSecurityConfig(SkyveSpringSecurity skyve) {
+	SpringSecurityConfig(@Nonnull SkyveSpringSecurity skyve) {
 		this.skyve = skyve;
 	}
 	
@@ -75,7 +76,7 @@ public class SpringSecurityConfig {
 	 */
 	@Bean
 	@SuppressWarnings("java:S4502") // Suppress CSRF turned off as Skyve implements its own
-	public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+	public @Nonnull SecurityFilterChain filterChain(@Nonnull HttpSecurity http) throws Exception {
 		AuthenticationDetailsSource<HttpServletRequest, WebAuthenticationDetails> authenticationDetailsSource = skyve.authenticationDetailsSource();
 
 		http.authorizeHttpRequests(c -> {
@@ -238,7 +239,7 @@ public class SpringSecurityConfig {
 	 * @return the configured password encoder
 	 */
 	@Bean
-	public PasswordEncoder passwordEncoder() {
+	public @Nonnull PasswordEncoder passwordEncoder() {
 		return skyve.passwordEncoder();
 	}
 	
@@ -248,7 +249,7 @@ public class SpringSecurityConfig {
 	 * @return the configured persistent token repository
 	 */
 	@Bean
-	public PersistentTokenRepository tokenRepository() {
+	public @Nonnull PersistentTokenRepository tokenRepository() {
 		return skyve.tokenRepository();
 	}
 	
@@ -258,7 +259,7 @@ public class SpringSecurityConfig {
 	 * @return the configured user-details manager
 	 */
 	@Bean
-	public UserDetailsManager userDetailsManager() {
+	public @Nonnull UserDetailsManager userDetailsManager() {
 		return skyve.jdbcUserDetailsManager();
 	}
 	
@@ -268,7 +269,7 @@ public class SpringSecurityConfig {
 	 * @return the configured client registration repository
 	 */
  	@Bean
-    public ClientRegistrationRepository clientRegistrationRepository() {
+    public @Nonnull ClientRegistrationRepository clientRegistrationRepository() {
  		return skyve.clientRegistrationRepository();
     }
 

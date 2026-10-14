@@ -140,7 +140,7 @@ public class FacesView extends HarnessView {
 	 *
 	 * @return the aggregate model name, or {@code null}
 	 */
-	public String getModelName() {
+	public @Nullable String getModelName() {
 		return modelName;
 	}
 	/**
@@ -148,7 +148,7 @@ public class FacesView extends HarnessView {
 	 *
 	 * @param modelName aggregate model name
 	 */
-	public void setModelName(String modelName) {
+	public void setModelName(@Nullable String modelName) {
 		this.modelName = modelName;
 	}
 
@@ -161,7 +161,7 @@ public class FacesView extends HarnessView {
 	 *
 	 * @return the binding parameter, or {@code null}
 	 */
-	public String getBindingParameter() {
+	public @Nullable String getBindingParameter() {
 		return bindingParameter;
 	}
 	/**
@@ -169,7 +169,7 @@ public class FacesView extends HarnessView {
 	 *
 	 * @param bindingParameter binding parameter from the request
 	 */
-	public void setBindingParameter(String bindingParameter) {
+	public void setBindingParameter(@Nullable String bindingParameter) {
 		this.bindingParameter = OWASP.sanitise(Sanitisation.text, Util.processStringValue(bindingParameter));
 	}
 
@@ -184,7 +184,7 @@ public class FacesView extends HarnessView {
 	 *
 	 * @return the current CSRF token
 	 */
-	public String getCsrfToken() {
+	public @Nonnull String getCsrfToken() {
 		if (csrfToken == null) {
 			csrfToken = StateUtil.createToken().toString();
 			csrfTokenChecked = false;
@@ -200,7 +200,7 @@ public class FacesView extends HarnessView {
 	 *
 	 * @param csrfToken value from the web request
 	 */
-	public void setCsrfToken(String csrfToken) {
+	public void setCsrfToken(@Nullable String csrfToken) {
 		// We can't do CSRF processing as
 		if (FacesUtil.isIgnoreAutoUpdate()) {
 			return;
@@ -280,7 +280,7 @@ public class FacesView extends HarnessView {
 	 *
 	 * @return the current view-binding path, or {@code null}
 	 */
-	public String getViewBinding() {
+	public @Nullable String getViewBinding() {
 		return viewBinding;
 	}
 
@@ -289,7 +289,7 @@ public class FacesView extends HarnessView {
 	 *
 	 * @param viewBinding current view-binding path
 	 */
-	public void setViewBinding(String viewBinding) {
+	public void setViewBinding(@Nullable String viewBinding) {
 		this.viewBinding = viewBinding;
 	}
 
@@ -298,7 +298,7 @@ public class FacesView extends HarnessView {
 	 *
 	 * @return the zoom-in binding stack
 	 */
-	public Deque<String> getZoomInBindings() {
+	public @Nonnull Deque<String> getZoomInBindings() {
 		return zoomInBindings;
 	}
 
@@ -307,7 +307,7 @@ public class FacesView extends HarnessView {
 	 *
 	 * @return current title, or {@code null}
 	 */
-	public String getTitle() {
+	public @Nullable String getTitle() {
 		return title;
 	}
 
@@ -316,7 +316,7 @@ public class FacesView extends HarnessView {
 	 *
 	 * @param title page title
 	 */
-	public void setTitle(String title) {
+	public void setTitle(@Nullable String title) {
 		this.title = title;
 	}
 
@@ -325,7 +325,7 @@ public class FacesView extends HarnessView {
 	 *
 	 * @return CSS classes from view or document metadata, or {@code null} when an image or no icon is used
 	 */
-	public String getTitleIconStyleClass() {
+	public @Nullable String getTitleIconStyleClass() {
 		return titleIconStyleClass;
 	}
 
@@ -334,7 +334,7 @@ public class FacesView extends HarnessView {
 	 *
 	 * @return metadata resource URL, or {@code null} when a font or no icon is used
 	 */
-	public String getTitleIconUrl() {
+	public @Nullable String getTitleIconUrl() {
 		return titleIconUrl;
 	}
 
@@ -347,7 +347,7 @@ public class FacesView extends HarnessView {
 	 * @param document document supplying the fallback icon metadata; must not be {@code null}
 	 * @param view optional create or edit view supplying icon metadata
 	 */
-	public void setTitleIcon(Document document, @Nullable View view) {
+	public void setTitleIcon(@Nonnull Document document, @Nullable View view) {
 		ResolvedIcon icon = MetadataIconResolver.resolve(document, view);
 		String iconStyleClass = icon.iconStyleClass();
 		String iconUrl = null;
@@ -370,7 +370,7 @@ public class FacesView extends HarnessView {
 	 *
 	 * @return current conversation bean, or {@code null}
 	 */
-	public Bean getBean() {
+	public @Nullable Bean getBean() {
         return ((webContext == null) ? null : webContext.getNullableCurrentBean());
     }
 
@@ -380,7 +380,7 @@ public class FacesView extends HarnessView {
 	 * @param bean conversation bean to set
 	 * @throws Exception when adapter refresh fails
 	 */
-	public void setBean(Bean bean) {
+	public void setBean(@Nullable Bean bean) {
 		if (webContext != null) {
 			webContext.setCurrentBean(bean);
 		}
@@ -393,7 +393,7 @@ public class FacesView extends HarnessView {
 	 *
 	 * @return current bean adapter, or {@code null}
 	 */
-	public BeanMapAdapter getCurrentBean() {
+	public @Nullable BeanMapAdapter getCurrentBean() {
 		return currentBean;
 	}
 
@@ -404,7 +404,7 @@ public class FacesView extends HarnessView {
 	 *
 	 * @return next generated id token
 	 */
-	public String nextId() {
+	public @Nonnull String nextId() {
 		return new StringBuilder(10).append('s').append(id++).toString();
 	}
 
@@ -413,7 +413,7 @@ public class FacesView extends HarnessView {
 	 *
 	 * @return active web context, or {@code null}
 	 */
-	public AbstractWebContext getWebContext() {
+	public @Nullable AbstractWebContext getWebContext() {
 		return webContext;
 	}
 
@@ -422,7 +422,7 @@ public class FacesView extends HarnessView {
 	 *
 	 * @param webContext web context to set
 	 */
-	public void setWebContext(AbstractWebContext webContext) {
+	public void setWebContext(@Nullable AbstractWebContext webContext) {
 		this.webContext = webContext;
 	}
 
@@ -481,7 +481,7 @@ public class FacesView extends HarnessView {
 	/**
 	 * Navigates into a referenced bean from a data-widget binding and selected biz id.
 	 */
-	public void navigate(String dataWidgetBinding, String bizId) {
+	public void navigate(@Nonnull String dataWidgetBinding, @Nullable String bizId) {
 		LOGGER.info("FacesView - zoom in to {}({})", dataWidgetBinding, bizId);
 		new ZoomInAction(this, dataWidgetBinding, bizId).execute();
 		if (UtilImpl.FACES_TRACE) FACES_LOGGER.info("FacesView - view binding now {}", viewBinding);
@@ -491,7 +491,7 @@ public class FacesView extends HarnessView {
 	/**
 	 * Navigates into the bean selected from a data-grid selection event.
 	 */
-	public void navigate(SelectEvent<?> evt) {
+	public void navigate(@Nonnull SelectEvent<?> evt) {
 		String bizId = ((BeanMapAdapter) evt.getObject()).getBean().getBizId();
 		String dataWidgetBinding = ((DataTable) evt.getComponent()).getVar();
 		// change list var back to Data Widget binding - '_' to '.' and remove "Row" from the end.
@@ -506,7 +506,7 @@ public class FacesView extends HarnessView {
 	/**
 	 * Navigates into a reference binding from a zoom-in widget action.
 	 */
-	public void navigate(String referenceBinding) {
+	public void navigate(@Nonnull String referenceBinding) {
 		LOGGER.info("FacesView - zoom in to {}", referenceBinding);
 		new ZoomInAction(this, referenceBinding).execute();
 		if (UtilImpl.FACES_TRACE) FACES_LOGGER.info("FacesView - view binding now {}", viewBinding);
@@ -515,7 +515,7 @@ public class FacesView extends HarnessView {
 	/**
 	 * Adds a new child row for the supplied data-widget binding.
 	 */
-	public void add(String dataWidgetBinding, boolean inline) {
+	public void add(@Nonnull String dataWidgetBinding, boolean inline) {
 		LOGGER.info("FacesView - add to {}{}", dataWidgetBinding, inline ? " inline" : " with zoom");
 		new AddAction(this, dataWidgetBinding, inline).execute();
 		if (inline && UtilImpl.FACES_TRACE) LOGGER.info("FacesView - view binding now {}", viewBinding);
@@ -533,7 +533,7 @@ public class FacesView extends HarnessView {
 	 * This method only removes elements from collections, it doesn't null out associations.
 	 * removedHandlerActionNames uses "true/false" to indicate rerender action with/without client validation.
 	 */
-	public void remove(String dataWidgetBinding, String bizId, List<String> removedHandlerActionNames) {
+	public void remove(@Nullable String dataWidgetBinding, @Nullable String bizId, @Nullable List<String> removedHandlerActionNames) {
 		LOGGER.info("FacesView - remove {}", viewBinding);
 		new RemoveAction(this, dataWidgetBinding, bizId, removedHandlerActionNames).execute();
 	}
@@ -542,7 +542,7 @@ public class FacesView extends HarnessView {
 	 * Executes a named server-side action with optional row-selection context.
 	 */
 	@SuppressWarnings("java:S2629") // log.toString() is efficient here
-	public void action(String actionName, String dataWidgetBinding, String bizId) {
+	public void action(@Nonnull String actionName, @Nullable String dataWidgetBinding, @Nullable String bizId) {
 		String collectionBinding = UtilImpl.processStringValue(dataWidgetBinding);
 		String elementBizId = UtilImpl.processStringValue(bizId);
 		StringBuilder log = new StringBuilder(128);
@@ -559,7 +559,7 @@ public class FacesView extends HarnessView {
 	/**
 	 * Executes a named server-side action without row-selection context.
 	 */
-	public void action(String actionName) {
+	public void action(@Nonnull String actionName) {
 		action(actionName, null, null);
 	}
 
@@ -567,7 +567,7 @@ public class FacesView extends HarnessView {
 	 * Triggers rerender processing for a source component with optional validation.
 	 */
 	@SuppressWarnings("java:S2629") // log.toString() is efficient here
-	public void rerender(String source, boolean validate) {
+	public void rerender(@Nullable String source, boolean validate) {
 		StringBuilder log = new StringBuilder(128);
 		log.append("FacesView - rerender from source ").append(source);
 		log.append(validate ? " with" : " without").append(" validation");
@@ -585,7 +585,7 @@ public class FacesView extends HarnessView {
 	 * else run the action.
 	 */
 	@SuppressWarnings("java:S3776") // complexity OK
-	public void selectGridRow(SelectEvent<?> evt) {
+	public void selectGridRow(@Nonnull SelectEvent<?> evt) {
 		UIComponent component = evt.getComponent();
 		Map<String, Object> attributes = component.getAttributes();
 		String selectedIdBinding = (String) attributes.get("selectedIdBinding");
@@ -593,7 +593,7 @@ public class FacesView extends HarnessView {
 
 		new FacesAction<Void>() {
 			@Override
-			public Void callback() throws Exception {
+			public @Nullable Void callback() throws Exception {
 				BeanMapAdapter adapter = (BeanMapAdapter) evt.getObject();
 				if (adapter != null) {
 					Bean bean = adapter.getBean();
@@ -639,11 +639,11 @@ public class FacesView extends HarnessView {
 	 * else if actionName is "false" - rerender with no validation.
 	 * else run the action.
 	 */
-	public void selectGridRow(String bizId, String selectedIdBinding, String actionName, String source) {
+	public void selectGridRow(@Nullable String bizId, @Nullable String selectedIdBinding, @Nullable String actionName, @Nullable String source) {
 		if ((bizId != null) && (selectedIdBinding != null)) {
 			new FacesAction<Void>() {
 				@Override
-				public Void callback() throws Exception {
+				public @Nullable Void callback() throws Exception {
 					Bean bean = getCurrentBean().getBean();
 					BindUtil.set(bean, selectedIdBinding, bizId);
 					return null;
@@ -669,14 +669,14 @@ public class FacesView extends HarnessView {
 	/**
 	 * Returns the row adapter selected in UI table components.
 	 */
-	public BeanMapAdapter getSelectedRow() {
+	public @Nullable BeanMapAdapter getSelectedRow() {
 		return selectedRow;
 	}
 
 	/**
 	 * Sets the row adapter selected in UI table components.
 	 */
-	public void setSelectedRow(BeanMapAdapter selectedRow) {
+	public void setSelectedRow(@Nullable BeanMapAdapter selectedRow) {
 		this.selectedRow = selectedRow;
 	}
 
@@ -684,7 +684,7 @@ public class FacesView extends HarnessView {
 	 * Ajax call from DataTable (data grid implementation) when rows are drag reordered in the UI.
 	 * @param event
 	 */
-	public void onRowReorder(ReorderEvent event) {
+	public void onRowReorder(@Nullable ReorderEvent event) {
 		if (event != null) {
 			final String collectionBinding = (String) event.getComponent().getAttributes().get(ComponentBuilder.COLLECTION_BINDING_ATTRIBUTE_KEY);
 			final int fromIndex = event.getFromIndex();
@@ -712,11 +712,11 @@ public class FacesView extends HarnessView {
 	 * Returns (and lazily creates) a cached lazy data model for the supplied query/model key.
 	 */
 	@SuppressWarnings("java:S3776") // complexity OK
-	public SkyveLazyDataModel getLazyDataModel(String moduleName,
-												String documentName,
-												String queryName,
-												@SuppressWarnings("hiding") String modelName,
-												List<List<String>> filterCriteria) {
+	public @Nonnull SkyveLazyDataModel getLazyDataModel(@Nonnull String moduleName,
+												@Nullable String documentName,
+												@Nullable String queryName,
+												@SuppressWarnings("hiding") @Nullable String modelName,
+												@Nullable List<List<String>> filterCriteria) {
 		String key = null;
 		if ((moduleName != null) && (queryName != null)) {
 			key = String.format("%s.%s", moduleName, queryName);
@@ -767,7 +767,7 @@ public class FacesView extends HarnessView {
 	/**
 	 * Returns dual-list models cache bound to this view.
 	 */
-	public SkyveDualListModelMap getDualListModels() {
+	public @Nonnull SkyveDualListModelMap getDualListModels() {
 		return dualListModels;
  	}
 
@@ -775,7 +775,7 @@ public class FacesView extends HarnessView {
 	 * Executes a download action against an optional selected grid row context.
 	 */
 	@SuppressWarnings("java:S3776") // complexity OK
-	public void download(String actionName, String dataWidgetBinding, String bizId) {
+	public void download(@Nonnull String actionName, @Nullable String dataWidgetBinding, @Nullable String bizId) {
 		String collectionBinding = UtilImpl.processStringValue(dataWidgetBinding);
 		String elementBizId = UtilImpl.processStringValue(bizId);
 		if (collectionBinding != null) {
@@ -797,7 +797,7 @@ public class FacesView extends HarnessView {
 	 *
 	 * @param actionName action name to invoke
 	 */
-	public void download(String actionName) {
+	public void download(@Nonnull String actionName) {
 		action(actionName, null, null);
 	}
 
@@ -914,7 +914,7 @@ public class FacesView extends HarnessView {
 	 * @return markup editor URL
 	 */
 	// /skyve/imageMarkup.xhtml?_n=<binding>&_c=<webId> and optionally &_b=<view binding>
-	public String getContentMarkupUrl(String sanitisedBinding) {
+	public @Nonnull String getContentMarkupUrl(@Nonnull String sanitisedBinding) {
 		StringBuilder result = new StringBuilder(128);
 		result.append(Util.getSkyveContextUrl()).append("/imageMarkup.xhtml?");
 		result.append(AbstractWebContext.RESOURCE_FILE_NAME).append('=').append(sanitisedBinding);
@@ -980,7 +980,7 @@ public class FacesView extends HarnessView {
 	 * @param image whether the content is an image
 	 * @return resolved content URL
 	 */
-	public String getContentUrl(final String binding, final boolean image) {
+	public @Nullable String getContentUrl(final @Nonnull String binding, final boolean image) {
 		return new GetContentURLAction(getCurrentBean().getBean(), binding, image).execute();
  	}
 
@@ -993,7 +993,7 @@ public class FacesView extends HarnessView {
 	 * @return resolved content URL
 	 */
 	@SuppressWarnings("static-method") // JSF EL invokes this on the skyve managed bean.
-	public String getContentUrl(final Object bean, final String binding, final boolean image) {
+	public @Nullable String getContentUrl(final @Nonnull Object bean, final @Nonnull String binding, final boolean image) {
 		return new GetContentURLAction(resolveContentBean(bean), binding, image).execute();
 	}
 
@@ -1003,7 +1003,7 @@ public class FacesView extends HarnessView {
 	 * @param binding content binding to resolve
 	 * @return resolved file name
 	 */
- 	public String getContentFileName(final String binding) {
+ 	public @Nullable String getContentFileName(final @Nonnull String binding) {
  		return new GetContentFileNameAction(getCurrentBean().getBean(), binding).execute();
  	}
 
@@ -1015,7 +1015,7 @@ public class FacesView extends HarnessView {
 	 * @return resolved file name
 	 */
 	@SuppressWarnings("static-method") // JSF EL invokes this on the skyve managed bean.
-	public String getContentFileName(final Object bean, final String binding) {
+	public @Nullable String getContentFileName(final @Nonnull Object bean, final @Nonnull String binding) {
 		return new GetContentFileNameAction(resolveContentBean(bean), binding).execute();
 	}
 
@@ -1055,7 +1055,7 @@ public class FacesView extends HarnessView {
 	 * @param binding content binding to resolve; must not be {@code null}
 	 * @return media kind name, or {@code null} when the binding has no content id
 	 */
-	public @Nullable String getContentMediaKind(final Object bean, final @Nonnull String binding) {
+	public @Nullable String getContentMediaKind(final @Nonnull Object bean, final @Nonnull String binding) {
 		return getContentMediaKind(resolveContentBean(bean), binding);
 	}
 
@@ -1077,7 +1077,7 @@ public class FacesView extends HarnessView {
 		return null;
  	}
 
-	private static @Nonnull Bean resolveContentBean(final Object bean) {
+	private static @Nonnull Bean resolveContentBean(final @Nonnull Object bean) {
 		if (bean instanceof BeanMapAdapter adapter) {
 			return adapter.getBean();
 		}
@@ -1115,13 +1115,13 @@ public class FacesView extends HarnessView {
 	 * @param initialPixelHeight initial height fallback, or {@code null}
 	 * @return dynamic image URL
 	 */
- 	public String getDynamicImageUrl(String name,
- 										String moduleName,
- 										String documentName,
- 										Integer pixelWidth,
- 										Integer pixelHeight,
- 										Integer initialPixelWidth,
- 										Integer initialPixelHeight) {
+ 	public @Nonnull String getDynamicImageUrl(@Nonnull String name,
+ 										@Nonnull String moduleName,
+ 										@Nonnull String documentName,
+ 										@Nullable Integer pixelWidth,
+ 										@Nullable Integer pixelHeight,
+ 										@Nullable Integer initialPixelWidth,
+ 										@Nullable Integer initialPixelHeight) {
 		StringBuilder result = new StringBuilder(128);
 		result.append("./dynamic.png?").append(AbstractWebContext.DOCUMENT_NAME).append('=');
 		result.append(moduleName).append('.').append(documentName);
@@ -1165,9 +1165,9 @@ public class FacesView extends HarnessView {
 	 * @return resolved select items
 	 */
 	@SuppressWarnings("static-method")
-	public List<SelectItem> getSelectItems(String moduleName,
-											String documentName,
-											String binding,
+	public @Nullable List<SelectItem> getSelectItems(@Nonnull String moduleName,
+											@Nonnull String documentName,
+											@Nonnull String binding,
 											boolean includeEmptyItem) {
 		final String key = new StringBuilder(64).append(moduleName).append('.').append(documentName).append('.').append(binding).toString();
 		if (UtilImpl.FACES_TRACE) FACES_LOGGER.trace("BeanMapAdapter.getSelectItems - key = {}", key);
@@ -1180,7 +1180,7 @@ public class FacesView extends HarnessView {
 	 * @param query user-entered query text
 	 * @return matched completion values
 	 */
-	public List<String> complete(String query) {
+	public @Nullable List<String> complete(@Nullable String query) {
 		UIComponent currentComponent = UIComponent.getCurrentComponent(FacesContext.getCurrentInstance());
 		Map<String, Object> attributes = currentComponent.getAttributes();
 		String binding = (String) attributes.get("binding");
@@ -1197,7 +1197,7 @@ public class FacesView extends HarnessView {
 	 * @return matching bean adapters
 	 */
 		@SuppressWarnings("java:S3776") // Complexity OK
-		public List<BeanMapAdapter> lookup(String query) {
+		public @Nullable List<BeanMapAdapter> lookup(@Nullable String query) {
 		UIComponent currentComponent = UIComponent.getCurrentComponent(FacesContext.getCurrentInstance());
 		Map<String, Object> attributes = currentComponent.getAttributes();
 		String completeModule = (String) attributes.get("module");
@@ -1292,15 +1292,15 @@ public class FacesView extends HarnessView {
 	 * @return generated map script
  	 */
 	@SuppressWarnings("java:S107") // lots of parameters
-	public String getMapScript(String elementId,
-								String moduleName,
-								String queryName,
-								String geometryBinding,
-								String mapModelName,
-								String loading,
-								Integer refreshTimeInSeconds,
-								Boolean showRefresh,
-								String geometryInputTypeString,
+	public @Nonnull String getMapScript(@Nonnull String elementId,
+								@Nullable String moduleName,
+								@Nullable String queryName,
+								@Nullable String geometryBinding,
+								@Nullable String mapModelName,
+								@Nonnull String loading,
+								@Nullable Integer refreshTimeInSeconds,
+								@Nullable Boolean showRefresh,
+								@Nullable String geometryInputTypeString,
 								boolean disabled,
 								boolean includeScriptTag) {
 		StringBuilder result = new StringBuilder(512);
@@ -1344,7 +1344,7 @@ public class FacesView extends HarnessView {
 	 *
 	 * @return chart model
 	 */
-	public ChartModel getChartModel() {
+	public @Nullable ChartModel getChartModel() {
 		UIComponent currentComponent = UIComponent.getCurrentComponent(FacesContext.getCurrentInstance());
 		Map<String, Object> attributes = currentComponent.getAttributes();
 		ChartType type = (ChartType) attributes.get("skyveType");
@@ -1358,7 +1358,7 @@ public class FacesView extends HarnessView {
 	 *
 	 * @param event panel toggle event
 	 */
-	public void toggleCollapsible(ToggleEvent event) {
+	public void toggleCollapsible(@Nonnull ToggleEvent event) {
 		String bizModule = getBizModuleParameter();
 		String bizDocument	= getBizDocumentParameter();
 		if ((bizModule != null) && (bizDocument != null)) {
@@ -1376,7 +1376,7 @@ public class FacesView extends HarnessView {
 	 *
 	 * @param panel panel to set collapsed state on
 	 */
-	public void setCollapsedFromSession(Panel panel) {
+	public void setCollapsedFromSession(@Nonnull Panel panel) {
 		String bizModule = getBizModuleParameter();
 		String bizDocument = getBizDocumentParameter();
 		if ((bizModule != null) && (bizDocument != null)) {
@@ -1398,16 +1398,16 @@ public class FacesView extends HarnessView {
 	 * @param rgbHexBackgroundColour background colour
 	 * @param rgbHexForegroundColour foreground colour
 	 */
-	public void sign(String signatureClientId,
-						String binding,
+	public void sign(@Nonnull String signatureClientId,
+						@Nonnull String binding,
 						int width,
 						int height,
-						String rgbHexBackgroundColour,
-						String rgbHexForegroundColour) {
+						@Nullable String rgbHexBackgroundColour,
+						@Nullable String rgbHexForegroundColour) {
 		LOGGER.info("FacesView - sign for binding {}", binding);
 		new FacesAction<Void>() {
 			@Override
-			public Void callback() throws Exception {
+			public @Nullable Void callback() throws Exception {
 				String json = Util.processStringValue(FacesContext.getCurrentInstance().getExternalContext().getRequestParameterMap().get(signatureClientId + "_signature_value"));
 				if (json == null) {
 					throw new ValidationException("Signature was not found");
@@ -1452,7 +1452,7 @@ public class FacesView extends HarnessView {
 	 *
 	 * @param binding content binding to clear
 	 */
-	public void clear(String binding) {
+	public void clear(@Nonnull String binding) {
 		LOGGER.info("FacesView - clear signnature for binding {}", binding);
 		BindUtil.set(getCurrentBean().getBean(), binding, null);
 	}
@@ -1466,7 +1466,7 @@ public class FacesView extends HarnessView {
 	 *
 	 * @return dehydrated web id, or {@code null}
 	 */
-	public String getDehydratedWebId() {
+	public @Nullable String getDehydratedWebId() {
 		return dehydratedWebId;
 	}
 
@@ -1477,7 +1477,7 @@ public class FacesView extends HarnessView {
 	 * @throws Exception if bean restoration fails
 	 */
  	// restore the webContext and current bean etc
-	public void hydrate(AbstractWebContext newWebContext) {
+	public void hydrate(@Nonnull AbstractWebContext newWebContext) {
 		if (UtilImpl.FACES_TRACE) FACES_LOGGER.info("FacesView - hydrate");
 		webContext = newWebContext;
 		dehydratedWebId = null;
@@ -1515,7 +1515,7 @@ public class FacesView extends HarnessView {
 	 * @return bizlet used for post-render callbacks, or {@code null}
 	 */
 	@SuppressWarnings("java:S1452") // Preserves subtype-specific bizlets; Bizlet<T> is not assignable to Bizlet<Bean>.
-	public Bizlet<? extends Bean> getPostRenderBizlet() {
+	public @Nullable Bizlet<? extends Bean> getPostRenderBizlet() {
 		return postRenderBizlet;
 	}
 
@@ -1528,7 +1528,7 @@ public class FacesView extends HarnessView {
 	 *
 	 * @return bean used for post-render callbacks, or {@code null}
 	 */
-	public Bean getPostRenderBean() {
+	public @Nullable Bean getPostRenderBean() {
 		return postRenderBean;
 	}
 
@@ -1538,7 +1538,7 @@ public class FacesView extends HarnessView {
 	 * @param bizlet bizlet to use for post-render callbacks
 	 * @param bean bean to use for post-render callbacks
 	 */
-	public void setPostRender(Bizlet<? extends Bean> bizlet, Bean bean) {
+	public void setPostRender(@Nullable Bizlet<? extends Bean> bizlet, @Nullable Bean bean) {
 		this.postRenderBizlet = bizlet;
 		this.postRenderBean = bean;
 	}
@@ -1555,7 +1555,7 @@ public class FacesView extends HarnessView {
 	 * @return responsive grid style classes
 	 */
 	@SuppressWarnings({"unchecked", "static-method"})
-	public String getResponsiveFormStyle(int formIndex, String alignment, int colspan) {
+	public @Nonnull String getResponsiveFormStyle(int formIndex, @Nullable String alignment, int colspan) {
 		List<ResponsiveFormGrid> formStyles = (List<ResponsiveFormGrid>) FacesContext.getCurrentInstance().getViewRoot().getAttributes().get(FacesUtil.FORM_STYLES_KEY);
 		String result = formStyles.get(formIndex).getStyle(colspan);
 		if (alignment != null) {
@@ -1575,7 +1575,7 @@ public class FacesView extends HarnessView {
 	 * @return {@code ui-g-12 ui-g-nopad} for GridCSS or {@code p-col-12 p-col-nogutter} for PrimeFlex
 	 */
 	@SuppressWarnings({"unchecked", "static-method"})
-	public String resetResponsiveFormStyle(int formIndex) {
+	public @Nonnull String resetResponsiveFormStyle(int formIndex) {
 		List<ResponsiveFormGrid> formStyles = (List<ResponsiveFormGrid>) FacesContext.getCurrentInstance().getViewRoot().getAttributes().get(FacesUtil.FORM_STYLES_KEY);
 		formStyles.get(formIndex).reset();
 		return UtilImpl.PRIMEFLEX ? "p-col-12 p-col-nogutter" : "ui-g-12 ui-g-nopad";

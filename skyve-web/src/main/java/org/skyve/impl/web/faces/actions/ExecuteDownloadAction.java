@@ -22,6 +22,8 @@ import org.skyve.util.logging.Category;
 import org.skyve.web.WebContext;
 import org.slf4j.Logger;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.faces.context.FacesContext;
 import jakarta.servlet.http.HttpServletRequest;
 
@@ -45,10 +47,10 @@ public class ExecuteDownloadAction extends FacesAction<Void> {
 	 * @param dataWidgetBinding the optional binding for inline list actions
 	 * @param elementBizId the optional selected element business ID
 	 */
-	public ExecuteDownloadAction(FacesView facesView,
-									String actionName,
-									String dataWidgetBinding,
-									String elementBizId) {
+	public ExecuteDownloadAction(@Nonnull FacesView facesView,
+									@Nonnull String actionName,
+									@Nullable String dataWidgetBinding,
+									@Nullable String elementBizId) {
 		this.facesView = facesView;
 		this.actionName = actionName;
 		this.dataWidgetBinding = dataWidgetBinding;
@@ -56,7 +58,7 @@ public class ExecuteDownloadAction extends FacesAction<Void> {
 	}
 
 	@Override
-	public Void callback() throws Exception {
+	public @Nullable Void callback() throws Exception {
 		if (UtilImpl.FACES_TRACE) FACES_LOGGER.info("ExecuteDownloadAction - EXECUTE ACTION {} {}", actionName, ((dataWidgetBinding != null) ? ("for data widget " + dataWidgetBinding + " with selected row " + elementBizId) : ""));
 
 		AbstractPersistence persistence = AbstractPersistence.get();

@@ -19,6 +19,8 @@ import org.skyve.util.Binder;
 import org.skyve.util.logging.SkyveLoggerFactory;
 import org.slf4j.Logger;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.faces.context.ExternalContext;
 import jakarta.faces.context.FacesContext;
 
@@ -41,7 +43,7 @@ public class ActionUtil {
 	 * @param facesView the active faces view
 	 * @return the resolved target bean, or {@code null} when the view has no root bean
 	 */
-	public static Bean getTargetBeanForView(FacesView facesView) {
+	public static @Nullable Bean getTargetBeanForView(@Nonnull FacesView facesView) {
 		return getTargetBeanForViewAndReferenceBinding(facesView, null);
 	}
 
@@ -52,8 +54,8 @@ public class ActionUtil {
 	 * @param referenceBinding the optional reference binding path
 	 * @return the resolved target bean, or {@code null} when the view has no root bean
 	 */
-	public static Bean getTargetBeanForViewAndReferenceBinding(FacesView facesView,
-																String referenceBinding) {
+	public static @Nullable Bean getTargetBeanForViewAndReferenceBinding(@Nonnull FacesView facesView,
+																@Nullable String referenceBinding) {
 		return getTargetBeanForViewAndReferenceBinding(facesView, referenceBinding, null);
 	}
 
@@ -65,9 +67,9 @@ public class ActionUtil {
 	 * @param elementBizId the optional collection element biz id for collection dereferencing
 	 * @return the resolved target bean, or {@code null} when the view has no root bean
 	 */
-	public static Bean getTargetBeanForViewAndReferenceBinding(FacesView facesView,
-																String referenceBinding,
-																String elementBizId) {
+	public static @Nullable Bean getTargetBeanForViewAndReferenceBinding(@Nonnull FacesView facesView,
+																@Nullable String referenceBinding,
+																@Nullable String elementBizId) {
 		Bean result = facesView.getBean();
 
 		if (result != null) { // hopefully always
@@ -104,7 +106,7 @@ public class ActionUtil {
 	 * @param collectionName the optional collection binding name
 	 * @param newValue the replacement bean value
 	 */
-    static <T extends Bean> void setTargetBeanForViewAndCollectionBinding(FacesView facesView, String collectionName, T newValue) {
+    static <T extends Bean> void setTargetBeanForViewAndCollectionBinding(@Nonnull FacesView facesView, @Nullable String collectionName, @Nonnull T newValue) {
     	Bean bean = facesView.getBean();
     	if (bean != null) { // hopefully never
 	    	String viewBinding = facesView.getViewBinding();
@@ -138,7 +140,7 @@ public class ActionUtil {
 	 * @param zoomIn whether the navigation event is a zoom-in transition
 	 * @throws Exception if state caching, history scripting, or redirect handling fails
 	 */
-    static final void redirectViewScopedConversation(FacesView facesView, boolean zoomIn)
+    static final void redirectViewScopedConversation(@Nonnull FacesView facesView, boolean zoomIn)
     throws Exception {
 		// ensure that the proper conversation is stashed in the webContext object
 		AbstractWebContext webContext = facesView.getWebContext();
@@ -183,7 +185,7 @@ public class ActionUtil {
 	 * @param queryName the metadata query name
 	 * @return the resolved metadata query definition
 	 */
-    public static MetaDataQueryDefinition getMetaDataQuery(final String bizModule, final String queryName) {
+    public static @Nonnull MetaDataQueryDefinition getMetaDataQuery(final @Nonnull String bizModule, final @Nonnull String queryName) {
 		User user = CORE.getUser();
 		Customer customer = user.getCustomer();
 		Module module = customer.getModule(bizModule);

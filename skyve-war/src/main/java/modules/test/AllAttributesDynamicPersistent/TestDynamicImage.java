@@ -5,6 +5,9 @@ import java.awt.image.BufferedImage;
 import org.skyve.domain.DynamicPersistentBean;
 import org.skyve.metadata.user.User;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Produces a deterministic placeholder image for dynamic-image integration tests.
  */
@@ -20,7 +23,7 @@ public class TestDynamicImage implements org.skyve.metadata.model.document.Dynam
 	 * @throws Exception if generation fails
 	 */
 	@Override
-	public BufferedImage getImage(DynamicPersistentBean bean, int width, int height, User user) throws Exception {
+	public @Nonnull BufferedImage getImage(@Nonnull DynamicPersistentBean bean, int width, int height, @Nonnull User user) throws Exception {
 		return new BufferedImage(100, 100, BufferedImage.TYPE_INT_ARGB);
 	}
 
@@ -30,7 +33,7 @@ public class TestDynamicImage implements org.skyve.metadata.model.document.Dynam
 	 * @return {@code null} to use the framework default format
 	 */
 	@Override
-	public ImageFormat getFormat() {
+	public @Nullable ImageFormat getFormat() {
 		return null;
 	}
 
@@ -40,7 +43,7 @@ public class TestDynamicImage implements org.skyve.metadata.model.document.Dynam
 	 * @return {@code null} to use default compression behaviour
 	 */
 	@Override
-	public Float getCompressionQuality() {
+	public @Nullable Float getCompressionQuality() {
 		return null;
 	}
 }

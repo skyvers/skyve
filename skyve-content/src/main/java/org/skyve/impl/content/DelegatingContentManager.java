@@ -9,6 +9,9 @@ import org.skyve.content.SearchResults;
 import org.skyve.impl.content.lucene.LuceneContentManager;
 import org.skyve.impl.util.UtilImpl;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Forwards content-management operations to the configured concrete implementation.
  *
@@ -27,7 +30,7 @@ public class DelegatingContentManager extends AbstractContentManager {
 	 *
 	 * @return the resolved content manager implementation
 	 */
-	private AbstractContentManager delegate() {
+	private @Nonnull AbstractContentManager delegate() {
 		if (delegate == null) {
 			if (AbstractContentManager.IMPLEMENTATION_CLASS == null) {
 				AbstractContentManager.IMPLEMENTATION_CLASS = LuceneContentManager.class;
@@ -55,7 +58,7 @@ public class DelegatingContentManager extends AbstractContentManager {
 	 */
 	@Override
 	@SuppressWarnings("resource")
-	public void put(BeanContent content) throws Exception {
+	public void put(@Nonnull BeanContent content) throws Exception {
 		delegate().put(content);
 	}
 
@@ -68,7 +71,7 @@ public class DelegatingContentManager extends AbstractContentManager {
 	 */
 	@Override
 	@SuppressWarnings("resource")
-	public void put(AttachmentContent content, boolean index) throws Exception {
+	public void put(@Nonnull AttachmentContent content, boolean index) throws Exception {
 		delegate().put(content, index);
 	}
 
@@ -80,7 +83,7 @@ public class DelegatingContentManager extends AbstractContentManager {
 	 */
 	@Override
 	@SuppressWarnings("resource")
-	public void update(AttachmentContent content) throws Exception {
+	public void update(@Nonnull AttachmentContent content) throws Exception {
 		delegate().update(content);
 	}
 	
@@ -93,7 +96,7 @@ public class DelegatingContentManager extends AbstractContentManager {
 	 */
 	@Override
 	@SuppressWarnings("resource")
-	public AttachmentContent getAttachment(String contentId) throws Exception {
+	public @Nullable AttachmentContent getAttachment(@Nonnull String contentId) throws Exception {
 		return delegate().getAttachment(contentId);
 	}
 
@@ -105,7 +108,7 @@ public class DelegatingContentManager extends AbstractContentManager {
 	 */
 	@Override
 	@SuppressWarnings("resource")
-	public void removeBean(String bizId) throws Exception {
+	public void removeBean(@Nonnull String bizId) throws Exception {
 		delegate().removeBean(bizId);
 	}
 
@@ -117,7 +120,7 @@ public class DelegatingContentManager extends AbstractContentManager {
 	 */
 	@Override
 	@SuppressWarnings("resource")
-	public void removeAttachment(String contentId) throws Exception {
+	public void removeAttachment(@Nonnull String contentId) throws Exception {
 		delegate().removeAttachment(contentId);
 	}
 
@@ -131,7 +134,7 @@ public class DelegatingContentManager extends AbstractContentManager {
 	 */
 	@Override
 	@SuppressWarnings("resource")
-	public SearchResults google(String search, int maxResults) throws Exception {
+	public @Nonnull SearchResults google(@Nullable String search, int maxResults) throws Exception {
 		return delegate().google(search, maxResults);
 	}
 
@@ -154,7 +157,7 @@ public class DelegatingContentManager extends AbstractContentManager {
 	 */
 	@Override
 	@SuppressWarnings("resource")
-	public void truncateIndexing(String customerName) throws Exception {
+	public void truncateIndexing(@Nonnull String customerName) throws Exception {
 		delegate().truncateIndexing(customerName);
 	}
 
@@ -166,7 +169,7 @@ public class DelegatingContentManager extends AbstractContentManager {
 	 */
 	@Override
 	@SuppressWarnings("resource")
-	public void truncateAttachmentIndexing(String customerName) throws Exception {
+	public void truncateAttachmentIndexing(@Nonnull String customerName) throws Exception {
 		delegate().truncateAttachmentIndexing(customerName);
 	}
 
@@ -178,7 +181,7 @@ public class DelegatingContentManager extends AbstractContentManager {
 	 */
 	@Override
 	@SuppressWarnings("resource")
-	public void truncateBeanIndexing(String customerName) throws Exception {
+	public void truncateBeanIndexing(@Nonnull String customerName) throws Exception {
 		delegate().truncateBeanIndexing(customerName);
 	}
 
@@ -190,7 +193,7 @@ public class DelegatingContentManager extends AbstractContentManager {
 	 */
 	@Override
 	@SuppressWarnings("resource")
-	public ContentIterable all() throws Exception {
+	public @Nonnull ContentIterable all() throws Exception {
 		return delegate().all();
 	}
 
@@ -236,7 +239,7 @@ public class DelegatingContentManager extends AbstractContentManager {
 	 */
 	@Override
 	@SuppressWarnings("resource")
-	public void reindex(AttachmentContent attachment, boolean index) throws Exception {
+	public void reindex(@Nonnull AttachmentContent attachment, boolean index) throws Exception {
 		delegate().reindex(attachment, index);
 	}
 }

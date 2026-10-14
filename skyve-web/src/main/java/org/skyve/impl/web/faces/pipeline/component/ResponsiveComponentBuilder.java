@@ -29,7 +29,7 @@ import jakarta.faces.component.html.HtmlPanelGroup;
 public class ResponsiveComponentBuilder extends TabularComponentBuilder {
 	// Overridden to set the grid styling
 	@Override
-	public UIComponent view(UIComponent component, boolean createView) {
+	public @Nonnull UIComponent view(@Nullable UIComponent component, boolean createView) {
 		if (component != null) {
 			return component;
 		}
@@ -47,7 +47,7 @@ public class ResponsiveComponentBuilder extends TabularComponentBuilder {
 	// Overridden to not set the toolbar style width to 100% since it's wrapped in a ui-g-12 or p-col-12
 	// for the responsive renderer.
 	@Override
-	public List<UIComponent> toolbars(List<UIComponent> components, String widgetId) {
+	public @Nonnull List<UIComponent> toolbars(@Nullable List<UIComponent> components, @Nullable String widgetId) {
 		if (components != null) {
 			return components;
 		}
@@ -62,11 +62,11 @@ public class ResponsiveComponentBuilder extends TabularComponentBuilder {
 	}
 
 	@Override
-	public UIComponent border(UIComponent component, 
-								String borderTitle,
-								String invisibleCondition,
-								Integer pixelWidth,
-								Collapsible collapsible) {
+	public @Nonnull UIComponent border(@Nullable UIComponent component, 
+								@Nullable String borderTitle,
+								@Nullable String invisibleCondition,
+								@Nullable Integer pixelWidth,
+								@Nullable Collapsible collapsible) {
 		Panel result = (Panel) super.border(component, borderTitle, invisibleCondition, pixelWidth, collapsible);
 		// reset percentage width styles
 		result.setStyle(null);
@@ -77,18 +77,18 @@ public class ResponsiveComponentBuilder extends TabularComponentBuilder {
 	// Add floating label support to other input widgets
 	
 	@Override
-	public UIComponent blurb(UIComponent component, String dataWidgetVar, String value, String binding, Blurb blurb) {
+	public @Nonnull UIComponent blurb(@Nullable UIComponent component, @Nullable String dataWidgetVar, @Nullable String value, @Nullable String binding, @Nonnull Blurb blurb) {
 		UIComponent result = super.blurb(component, dataWidgetVar, value, binding, blurb);
 		addFloatLabelClass(result);
 		return result;
 	}
 	
 	@Override
-	public EventSourceComponent checkBox(EventSourceComponent component,
-											String dataWidgetVar,
-											CheckBox checkBox,
-											String formDisabledCondition,
-											String title,
+	public @Nonnull EventSourceComponent checkBox(@Nullable EventSourceComponent component,
+											@Nullable String dataWidgetVar,
+											@Nonnull CheckBox checkBox,
+											@Nullable String formDisabledCondition,
+											@Nullable String title,
 											@Nullable String requiredMessage) {
 		EventSourceComponent result = super.checkBox(component, dataWidgetVar, checkBox, formDisabledCondition, title, requiredMessage);
 		addFloatLabelClass(result.getComponent());
@@ -96,13 +96,13 @@ public class ResponsiveComponentBuilder extends TabularComponentBuilder {
 	}
 	
 	@Override
-	public EventSourceComponent colourPicker(EventSourceComponent component,
-												String dataWidgetVar,
-												ColourPicker colour,
-												String formDisabledCondition,
-												String title,
+	public @Nonnull EventSourceComponent colourPicker(@Nullable EventSourceComponent component,
+												@Nullable String dataWidgetVar,
+												@Nonnull ColourPicker colour,
+												@Nullable String formDisabledCondition,
+												@Nullable String title,
 												@Nullable String requiredMessage,
-												HorizontalAlignment textAlignment) {
+												@Nullable HorizontalAlignment textAlignment) {
 		EventSourceComponent result = super.colourPicker(component, dataWidgetVar, colour, formDisabledCondition, title, requiredMessage, textAlignment);
 		addFloatLabelClass(result.getComponent());
 		return result;
@@ -124,34 +124,34 @@ public class ResponsiveComponentBuilder extends TabularComponentBuilder {
 	}
 	
 	@Override
-	public UIComponent addContentSignature(UIComponent component,
-											UIComponent layout,
-											ContentSignature signature,
-											String formDisabledCondition,
-											String title,
+	public @Nonnull UIComponent addContentSignature(@Nullable UIComponent component,
+											@Nonnull UIComponent layout,
+											@Nonnull ContentSignature signature,
+											@Nullable String formDisabledCondition,
+											@Nullable String title,
 											@Nullable String requiredMessage) {
 		addFloatLabelClass(layout);
 		return super.addContentSignature(component, layout, signature, formDisabledCondition, title, requiredMessage);
 	}
 
 	@Override
-	public EventSourceComponent geometry(EventSourceComponent component,
-											String dataWidgetVar,
-											Geometry geometry,
-											String formDisabledCondition,
-											String title,
+	public @Nonnull EventSourceComponent geometry(@Nullable EventSourceComponent component,
+											@Nullable String dataWidgetVar,
+											@Nonnull Geometry geometry,
+											@Nullable String formDisabledCondition,
+											@Nullable String title,
 											@Nullable String requiredMessage,
-											HorizontalAlignment textAlignment) {
+											@Nullable HorizontalAlignment textAlignment) {
 		EventSourceComponent result = super.geometry(component, dataWidgetVar, geometry, formDisabledCondition, title, requiredMessage, textAlignment);
 		addFloatLabelClass(result.getComponent());
 		return result;
 	}
 	
 	@Override
-	public EventSourceComponent geometryMap(EventSourceComponent component,
-												GeometryMap geometry,
-												String formDisabledCondition,
-												String title,
+	public @Nonnull EventSourceComponent geometryMap(@Nullable EventSourceComponent component,
+												@Nonnull GeometryMap geometry,
+												@Nullable String formDisabledCondition,
+												@Nullable String title,
 												@Nullable String requiredMessage) {
 		EventSourceComponent result = super.geometryMap(component, geometry, formDisabledCondition, title, requiredMessage);
 		addFloatLabelClass(result.getComponent());
@@ -166,11 +166,11 @@ public class ResponsiveComponentBuilder extends TabularComponentBuilder {
 	}
 	
 	@Override
-	public UIComponent html(UIComponent component,
-								String dataWidgetVar,
-								HTML html,
-								String formDisabledCondition,
-								String title,
+	public @Nonnull UIComponent html(@Nullable UIComponent component,
+								@Nullable String dataWidgetVar,
+								@Nonnull HTML html,
+								@Nullable String formDisabledCondition,
+								@Nullable String title,
 								@Nullable String requiredMessage) {
 		UIComponent result = super.html(component, dataWidgetVar, html, formDisabledCondition, title, requiredMessage);
 		addFloatLabelClass(result);
@@ -178,25 +178,25 @@ public class ResponsiveComponentBuilder extends TabularComponentBuilder {
 	}
 	
 	@Override
-	public UIComponent label(UIComponent component, String dataWidgetVar, String value, String binding, Label label) {
+	public @Nonnull UIComponent label(@Nullable UIComponent component, @Nullable String dataWidgetVar, @Nullable String value, @Nullable String binding, @Nullable Label label) {
 		UIComponent result = super.label(component, dataWidgetVar, value, binding, label);
 		addFloatLabelClass(result);
 		return result;
 	}
 	
 	@Override
-	public UIComponent label(UIComponent component, String value) {
+	public @Nonnull UIComponent label(@Nullable UIComponent component, @Nonnull String value) {
 		UIComponent result =  super.label(component, value);
 		addFloatLabelClass(result);
 		return result;
 	}
 	
 	@Override
-	public EventSourceComponent radio(EventSourceComponent component,
-										String dataWidgetVar,
-										Radio radio,
-										String formDisabledCondition,
-										String title,
+	public @Nonnull EventSourceComponent radio(@Nullable EventSourceComponent component,
+										@Nullable String dataWidgetVar,
+										@Nonnull Radio radio,
+										@Nullable String formDisabledCondition,
+										@Nullable String title,
 										@Nullable String requiredMessage) {
 		EventSourceComponent result = super.radio(component, dataWidgetVar, radio, formDisabledCondition, title, requiredMessage);
 		addFloatLabelClass(result.getComponent());
@@ -204,18 +204,18 @@ public class ResponsiveComponentBuilder extends TabularComponentBuilder {
 	}
 	
 	@Override
-	public EventSourceComponent richText(EventSourceComponent component,
-											String dataWidgetVar,
-											RichText text,
-											String formDisabledCondition,
-											String title,
+	public @Nonnull EventSourceComponent richText(@Nullable EventSourceComponent component,
+											@Nullable String dataWidgetVar,
+											@Nonnull RichText text,
+											@Nullable String formDisabledCondition,
+											@Nullable String title,
 											@Nullable String requiredMessage) {
 		EventSourceComponent result = super.richText(component, dataWidgetVar, text, formDisabledCondition, title, requiredMessage);
 		addFloatLabelClass(result.getComponent());
 		return result;
 	}
 	
-	private static void addFloatLabelClass(UIComponent component) {
+	private static void addFloatLabelClass(@Nonnull UIComponent component) {
 		Map<String, Object> attributes = component.getAttributes();
 		String styleClass = (String) attributes.get("styleClass");
 		attributes.put("styleClass", ((styleClass == null) || styleClass.isBlank()) ? "ui-inputwrapper-focus" : styleClass + " ui-inputwrapper-focus");

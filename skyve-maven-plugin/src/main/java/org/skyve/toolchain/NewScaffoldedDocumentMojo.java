@@ -32,6 +32,9 @@ import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeSpec;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * <p>
  * This mojo creates the Skyve scaffolding for a new Document.
@@ -205,7 +208,7 @@ public class NewScaffoldedDocumentMojo extends NewDocumentMojo {
 	 * 
 	 * @return The extension class name (document name + "Extension")
 	 */
-	private String getExtensionName() {
+	private @Nonnull String getExtensionName() {
 		return documentName + "Extension";
 	}
 
@@ -275,7 +278,7 @@ public class NewScaffoldedDocumentMojo extends NewDocumentMojo {
 	}
 
 	@SuppressWarnings("static-method") // test seam
-	void registerCustomisations(String customisationsClassName) throws Exception {
+	void registerCustomisations(@Nullable String customisationsClassName) throws Exception {
 		DomainGenerator.registerCustomisations(customisationsClassName);
 	}
 
@@ -288,12 +291,12 @@ public class NewScaffoldedDocumentMojo extends NewDocumentMojo {
 	void generateDomain(boolean generateDomainClasses,
 							boolean debug,
 							boolean multiTenant,
-							DialectOptions dialect,
-							String sourceDirectory,
-							String generatedDirectory,
-							String testDirectory,
-							String generatedTestDirectory,
-							String[] excludedModules)
+							@Nonnull DialectOptions dialect,
+							@Nonnull String sourceDirectory,
+							@Nonnull String generatedDirectory,
+							@Nonnull String testDirectory,
+							@Nonnull String generatedTestDirectory,
+							@Nullable String[] excludedModules)
 	throws Exception {
 		DomainGenerator.newDomainGenerator(generateDomainClasses,
 											debug,
@@ -307,12 +310,12 @@ public class NewScaffoldedDocumentMojo extends NewDocumentMojo {
 	}
 
 	@SuppressWarnings("static-method") // test seam
-	void generateEditView(String[] arguments) throws Exception {
+	void generateEditView(@Nonnull String[] arguments) throws Exception {
 		ViewGenerator.main(arguments);
 	}
 
 	@SuppressWarnings("static-method") // test seam
-	void move(Path source, Path destination) throws IOException {
+	void move(@Nonnull Path source, @Nonnull Path destination) throws IOException {
 		Files.move(source, destination);
 	}
 }

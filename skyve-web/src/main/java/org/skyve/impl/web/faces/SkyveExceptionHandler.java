@@ -2,6 +2,7 @@ package org.skyve.impl.web.faces;
 
 import java.util.Iterator;
 
+import jakarta.annotation.Nonnull;
 import jakarta.faces.FacesException;
 import jakarta.faces.context.ExceptionHandler;
 import jakarta.faces.context.ExceptionHandlerWrapper;
@@ -21,7 +22,7 @@ public class SkyveExceptionHandler extends ExceptionHandlerWrapper {
 	 *
 	 * @param wrapped the underlying JSF exception handler
 	 */
-	public SkyveExceptionHandler(ExceptionHandler wrapped) {
+	public SkyveExceptionHandler(@Nonnull ExceptionHandler wrapped) {
 		super(wrapped);
 	}
 

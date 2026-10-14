@@ -226,7 +226,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 	 * @param header dialog header text; must not be {@code null}
 	 * @return configured full-screen dialog; never {@code null}
 	 */
-	private Dialog createFullScreenDialog(@Nonnull String header) {
+	private @Nonnull Dialog createFullScreenDialog(@Nonnull String header) {
 		Dialog result = (Dialog) a.createComponent(Dialog.COMPONENT_TYPE);
 		setId(result, null);
 		result.setModal(true);
@@ -252,7 +252,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 	 * @param iframeAttributes raw iframe attributes including any leading space; must not be {@code null}
 	 * @return output text component containing the iframe markup; never {@code null}
 	 */
-	private HtmlOutputText createIframe(@Nonnull String iframeId, @Nonnull String iframeAttributes) {
+	private @Nonnull HtmlOutputText createIframe(@Nonnull String iframeId, @Nonnull String iframeAttributes) {
 		HtmlOutputText result = (HtmlOutputText) a.createComponent(HtmlOutputText.COMPONENT_TYPE);
 		result.setEscape(false);
 		result.setValue(String.format("<iframe id=\"%s\" src=\"\"%s></iframe>", iframeId, iframeAttributes));
@@ -320,7 +320,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 	}
 
 	@Override
-	public UIComponent view(UIComponent component, boolean createView) {
+	public @Nonnull UIComponent view(@Nullable UIComponent component, boolean createView) {
 		if (component != null) {
 			return component;
 		}
@@ -346,7 +346,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 	}
 
 	@Override
-	public List<UIComponent> toolbars(List<UIComponent> components, String widgetId) {
+	public @Nonnull List<UIComponent> toolbars(@Nullable List<UIComponent> components, @Nullable String widgetId) {
 		if (components != null) {
 			return components;
 		}
@@ -362,10 +362,10 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 	}
 
 	@Override
-	public UIComponent tabPane(UIComponent component,
-								TabPane tabPane,
-								String moduleName,
-								String documentName) {
+	public @Nonnull UIComponent tabPane(@Nullable UIComponent component,
+								@Nonnull TabPane tabPane,
+								@Nonnull String moduleName,
+								@Nonnull String documentName) {
 		if (component != null) {
 			return component;
 		}
@@ -412,7 +412,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 	 * @return existing component or configured tab; never {@code null} when a new tab is created
 	 */
 	@Override
-	public UIComponent tab(UIComponent component, String title, org.skyve.impl.metadata.view.container.Tab tab) {
+	public @Nonnull UIComponent tab(@Nullable UIComponent component, @Nullable String title, @Nonnull org.skyve.impl.metadata.view.container.Tab tab) {
 		if (component != null) {
 			return component;
 		}
@@ -426,7 +426,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 	}
 
 	@Override
-	public UIComponent tabPaneScript(UIComponent component, TabPane tabPane, String moduleName, String documentName, String tabPaneComponentId) {
+	public @Nonnull UIComponent tabPaneScript(@Nullable UIComponent component, @Nonnull TabPane tabPane, @Nonnull String moduleName, @Nonnull String documentName, @Nonnull String tabPaneComponentId) {
 		UIOutput result = new UIOutput();
 
 		StringBuilder expr = new StringBuilder(128);
@@ -455,10 +455,10 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 	}
 
 	@Override
-	public UIComponent sidebarScript(UIComponent component,
-										Sidebar sidebar,
+	public @Nonnull UIComponent sidebarScript(@Nullable UIComponent component,
+										@Nonnull Sidebar sidebar,
 										boolean createView,
-										String sidebarComponentId) {
+										@Nonnull String sidebarComponentId) {
 		String width = "360px";
 
 		Integer pixel = sidebar.getPixelWidth();
@@ -495,11 +495,11 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 	}
 
 	@Override
-	public UIComponent border(UIComponent component,
-								String borderTitle,
-								String invisibleCondition,
-								Integer pixelWidth,
-								Collapsible collapsible) {
+	public @Nonnull UIComponent border(@Nullable UIComponent component,
+								@Nullable String borderTitle,
+								@Nullable String invisibleCondition,
+								@Nullable Integer pixelWidth,
+								@Nullable Collapsible collapsible) {
 		if (component != null) {
 			return component;
 		}
@@ -508,7 +508,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 	}
 
 	@Override
-	public UIComponent label(UIComponent component, String value) {
+	public @Nonnull UIComponent label(@Nullable UIComponent component, @Nonnull String value) {
 		if (component != null) {
 			return component;
 		}
@@ -520,12 +520,12 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 	}
 
 	@Override
-	public UIComponent zoomIn(UIComponent component,
-								String label,
-								String iconStyleClass,
-								String toolTip,
-								ZoomIn zoomIn,
-								String formDisabledCondition) {
+	public @Nonnull UIComponent zoomIn(@Nullable UIComponent component,
+								@Nullable String label,
+								@Nullable String iconStyleClass,
+								@Nullable String toolTip,
+								@Nonnull ZoomIn zoomIn,
+								@Nullable String formDisabledCondition) {
 		if (component != null) {
 			return component;
 		}
@@ -553,7 +553,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		return result;
 	}
 
-	protected void zoomInActionExpression(String referenceBinding, UICommand command) {
+	protected void zoomInActionExpression(@Nullable String referenceBinding, @Nonnull UICommand command) {
 		StringBuilder expression = new StringBuilder(64);
 		expression.append("#{").append(managedBeanName).append(".navigate('").append(referenceBinding).append("')}");
 		MethodExpression method = ef.createMethodExpression(elc, expression.toString(), null, STRING);
@@ -561,16 +561,16 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 	}
 
 	@Override
-	public UIComponent actionButton(UIComponent component,
-										String dataWidgetBinding,
-										String dataWidgetVar,
-										String label,
-										String iconStyleClass,
-										String toolTip,
-										String confirmationText,
-										org.skyve.impl.metadata.view.widget.Button button,
-										String formDisabledCondition,
-										Action action) {
+	public @Nonnull UIComponent actionButton(@Nullable UIComponent component,
+										@Nullable String dataWidgetBinding,
+										@Nullable String dataWidgetVar,
+										@Nullable String label,
+										@Nullable String iconStyleClass,
+										@Nullable String toolTip,
+										@Nullable String confirmationText,
+										@Nonnull org.skyve.impl.metadata.view.widget.Button button,
+										@Nullable String formDisabledCondition,
+										@Nonnull Action action) {
 		if (component != null) {
 			return component;
 		}
@@ -596,14 +596,14 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 	}
 
 	@Override
-	public UIComponent reportButton(UIComponent component,
-										String label,
-										String iconStyleClass,
-										String toolTip,
-										String confirmationText,
-										org.skyve.impl.metadata.view.widget.Button button,
-										String formDisabledCondition,
-										Action action) {
+	public @Nonnull UIComponent reportButton(@Nullable UIComponent component,
+										@Nullable String label,
+										@Nullable String iconStyleClass,
+										@Nullable String toolTip,
+										@Nullable String confirmationText,
+										@Nonnull org.skyve.impl.metadata.view.widget.Button button,
+										@Nullable String formDisabledCondition,
+										@Nonnull Action action) {
 		if (component != null) {
 			return component;
 		}
@@ -622,16 +622,16 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 	}
 
 	@Override
-	public UIComponent downloadButton(UIComponent component,
-										String dataWidgetBinding,
-										String dataWidgetVar,
-										String label,
-										String iconStyleClass,
-										String toolTip,
-										String confirmationText,
-										org.skyve.impl.metadata.view.widget.Button button,
-										String formDisabledCondition,
-										Action action) {
+	public @Nonnull UIComponent downloadButton(@Nullable UIComponent component,
+										@Nullable String dataWidgetBinding,
+										@Nullable String dataWidgetVar,
+										@Nullable String label,
+										@Nullable String iconStyleClass,
+										@Nullable String toolTip,
+										@Nullable String confirmationText,
+										@Nonnull org.skyve.impl.metadata.view.widget.Button button,
+										@Nullable String formDisabledCondition,
+										@Nonnull Action action) {
 		if (component != null) {
 			return component;
 		}
@@ -655,14 +655,14 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 	}
 
 	@Override
-	public UIComponent uploadButton(UIComponent component,
-										String label,
-										String iconStyleClass,
-										String toolTip,
-										String confirmationText,
-										org.skyve.impl.metadata.view.widget.Button button,
-										String formDisabledCondition,
-										Action action) {
+	public @Nonnull UIComponent uploadButton(@Nullable UIComponent component,
+										@Nullable String label,
+										@Nullable String iconStyleClass,
+										@Nullable String toolTip,
+										@Nullable String confirmationText,
+										@Nonnull org.skyve.impl.metadata.view.widget.Button button,
+										@Nullable String formDisabledCondition,
+										@Nonnull Action action) {
 		if (component != null) {
 			return component;
 		}
@@ -684,11 +684,11 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 	}
 
 	@Override
-	public UIComponent blurb(UIComponent component,
-								String dataWidgetVar,
-								String value,
-								String binding,
-								Blurb blurb) {
+	public @Nonnull UIComponent blurb(@Nullable UIComponent component,
+								@Nullable String dataWidgetVar,
+								@Nullable String value,
+								@Nullable String binding,
+								@Nonnull Blurb blurb) {
 		if (component != null) {
 			return component;
 		}
@@ -720,10 +720,10 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 	 * @return existing component or configured command button; never {@code null} when newly created
 	 */
 	@Override
-	public UIComponent dialogButton(UIComponent component,
-										EscapableText label,
-										DialogButton button,
-										String formDisabledCondition) {
+	public @Nonnull UIComponent dialogButton(@Nullable UIComponent component,
+										@Nullable EscapableText label,
+										@Nonnull DialogButton button,
+										@Nullable String formDisabledCondition) {
 		if (component != null) {
 			return component;
 		}
@@ -744,7 +744,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 	 * @param action action metadata supplying the nullable escape flag; must not be {@code null}
 	 * @return raw display text paired with its escape decision; never {@code null}
 	 */
-	private static EscapableText actionDisplayName(String value, Action action) {
+	private static @Nonnull EscapableText actionDisplayName(@Nullable String value, @Nonnull Action action) {
 		return EscapableText.of(value, ViewRenderer.shouldEscape(action.getEscapeDisplayName()));
 	}
 
@@ -755,7 +755,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 	 * @param value resolved action tooltip text; may be {@code null}
 	 * @return markup-stripped tooltip text, or {@code null}
 	 */
-	private static String actionToolTip(String value) {
+	private static @Nullable String actionToolTip(@Nullable String value) {
 		return sanitiseFacesText(value);
 	}
 
@@ -766,16 +766,16 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 	 * @param action action metadata supplying the nullable escape flag; must not be {@code null}
 	 * @return raw confirmation text paired with its escape decision; never {@code null}
 	 */
-	private static EscapableText actionConfirmation(String value, Action action) {
+	private static @Nonnull EscapableText actionConfirmation(@Nullable String value, @Nonnull Action action) {
 		return EscapableText.of(value, ViewRenderer.shouldEscape(action.getEscapeConfirm()));
 	}
 
 	@Override
-	public UIComponent label(UIComponent component,
-								String dataWidgetVar,
-								String value,
-								String binding,
-								Label label) {
+	public @Nonnull UIComponent label(@Nullable UIComponent component,
+								@Nullable String dataWidgetVar,
+								@Nullable String value,
+								@Nullable String binding,
+								@Nonnull Label label) {
 		if (component != null) {
 			return component;
 		}
@@ -793,15 +793,15 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 	}
 
 	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
-	private HtmlOutputText outputText(String dataWidgetVar,
-										String value,
-										String binding,
-										HorizontalAlignment alignment,
-										Integer pixelWidth,
-										Integer pixelHeight,
-										String invisibleCondition,
+	private @Nonnull HtmlOutputText outputText(@Nullable String dataWidgetVar,
+										@Nullable String value,
+										@Nullable String binding,
+										@Nullable HorizontalAlignment alignment,
+										@Nullable Integer pixelWidth,
+										@Nullable Integer pixelHeight,
+										@Nullable String invisibleCondition,
 										boolean escape,
-										Sanitisation sanitise,
+										@Nullable Sanitisation sanitise,
 										boolean blurb) {
 		HtmlOutputText result = (HtmlOutputText) a.createComponent(HtmlOutputText.COMPONENT_TYPE);
 		setId(result, null);
@@ -836,7 +836,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 	private int dataGridMinimumWidth;
 
 	@Override
-	public UIComponent dataGrid(UIComponent component, String dataWidgetVar, boolean ordered, DataGrid grid) {
+	public @Nonnull UIComponent dataGrid(@Nullable UIComponent component, @Nonnull String dataWidgetVar, boolean ordered, @Nonnull DataGrid grid) {
 		if (component != null) {
 			return component;
 		}
@@ -892,7 +892,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 	 * Any bound columns are editable inline.
 	 */
 	@Override
-	public UIComponent dataRepeater(UIComponent component, String dataWidgetVar, DataRepeater repeater) {
+	public @Nonnull UIComponent dataRepeater(@Nullable UIComponent component, @Nonnull String dataWidgetVar, @Nonnull DataRepeater repeater) {
 		if (component != null) {
 			return component;
 		}
@@ -917,16 +917,16 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 
 	@Override
 	@SuppressWarnings("java:S3776") // complexity OK
-	public UIComponent addDataGridBoundColumn(UIComponent component,
-												UIComponent current,
-												AbstractDataWidget widget,
-												DataGridBoundColumn column,
-												String dataWidgetVar,
-												String columnTitle,
-												String columnBinding,
-												StringBuilder gridColumnExpression,
-												HorizontalAlignment alignment,
-												Integer pixelWidth) {
+	public @Nonnull UIComponent addDataGridBoundColumn(@Nullable UIComponent component,
+												@Nonnull UIComponent current,
+												@Nonnull AbstractDataWidget widget,
+												@Nonnull DataGridBoundColumn column,
+												@Nullable String dataWidgetVar,
+												@Nullable String columnTitle,
+												@Nonnull String columnBinding,
+												@Nonnull StringBuilder gridColumnExpression,
+												@Nullable HorizontalAlignment alignment,
+												@Nullable Integer pixelWidth) {
 		if (component != null) {
 			return component;
 		}
@@ -987,9 +987,9 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 	}
 
 	@Override
-	public UIComponent addedDataGridBoundColumn(UIComponent component,
-													UIComponent current,
-													HorizontalAlignment alignment) {
+	public @Nullable UIComponent addedDataGridBoundColumn(@Nullable UIComponent component,
+													@Nonnull UIComponent current,
+													@Nonnull HorizontalAlignment alignment) {
 		if (component != null) {
 			return component;
 		}
@@ -1049,12 +1049,12 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 	}
 
 	@Override
-	public UIComponent addDataGridContainerColumn(UIComponent component,
-													UIComponent current,
-													AbstractDataWidget widget,
-													String title,
-													DataGridContainerColumn column,
-													HorizontalAlignment alignment) {
+	public @Nonnull UIComponent addDataGridContainerColumn(@Nullable UIComponent component,
+													@Nonnull UIComponent current,
+													@Nonnull AbstractDataWidget widget,
+													@Nullable String title,
+													@Nonnull DataGridContainerColumn column,
+													@Nullable HorizontalAlignment alignment) {
 		if (component != null) {
 			return component;
 		}
@@ -1087,7 +1087,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 	}
 
 	@Override
-	public UIComponent addedDataGridContainerColumn(UIComponent component, UIComponent current) {
+	public @Nullable UIComponent addedDataGridContainerColumn(@Nullable UIComponent component, @Nonnull UIComponent current) {
 		if (component != null) {
 			return component;
 		}
@@ -1097,7 +1097,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 	}
 
 	/** Adds the resolved column header as a visible label in card layout. */
-	private void addDataGridCardLabel(UIComponent current, String inputId) {
+	private void addDataGridCardLabel(@Nonnull UIComponent current, @Nullable String inputId) {
 		if (! (current instanceof Column column)) {
 			return;
 		}
@@ -1135,12 +1135,12 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 
 	@Override
 	@SuppressWarnings("java:S3776") // Complexity OK
-	public UIComponent addDataGridActionColumn(UIComponent component,
-												UIComponent current,
-												DataGrid grid,
-												String dataWidgetVar,
-												String gridColumnExpression,
-												String singularDocumentAlias,
+	public @Nonnull UIComponent addDataGridActionColumn(@Nullable UIComponent component,
+												@Nonnull UIComponent current,
+												@Nonnull DataGrid grid,
+												@Nullable String dataWidgetVar,
+												@Nonnull String gridColumnExpression,
+												@Nullable String singularDocumentAlias,
 												boolean inline,
 												boolean canCreate,
 												boolean canDelete) {
@@ -1213,7 +1213,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		return current;
 	}
 
-	protected UIComponent createDataTableFilterToggle(String dataTableId) {
+	protected @Nonnull UIComponent createDataTableFilterToggle(@Nonnull String dataTableId) {
 		final Button button = (Button) a.createComponent(Button.COMPONENT_TYPE);
 		setId(button, null);
 		button.setValue(null);
@@ -1223,12 +1223,12 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		return button;
 	}
 
-	protected CommandButton createDataGridAddButton(DataGrid grid,
-														String dataWidgetVar,
-														String singularDocumentAlias,
+	protected @Nonnull CommandButton createDataGridAddButton(@Nonnull DataGrid grid,
+														@Nullable String dataWidgetVar,
+														@Nullable String singularDocumentAlias,
 														boolean inline,
-														String dataWidgetBinding,
-														String disabledCondition) {
+														@Nullable String dataWidgetBinding,
+														@Nullable String disabledCondition) {
 		CommandButton result = (CommandButton) a.createComponent(CommandButton.COMPONENT_TYPE);
 		setId(result, null);
 		result.setValue(null);
@@ -1260,7 +1260,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		return result;
 	}
 
-	protected CommandButton createDataGridRemoveButton(DataGrid grid, String dataWidgetVar, String singularDocumentAlias, String dataWidgetBinding, String disabledCondition) {
+	protected @Nonnull CommandButton createDataGridRemoveButton(@Nonnull DataGrid grid, @Nullable String dataWidgetVar, @Nullable String singularDocumentAlias, @Nullable String dataWidgetBinding, @Nullable String disabledCondition) {
 		CommandButton result = (CommandButton) a.createComponent(CommandButton.COMPONENT_TYPE);
 		setId(result, null);
 		result.setValue(null);
@@ -1289,7 +1289,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		return result;
 	}
 
-	protected CommandButton createDataGridZoomButton(DataGrid grid, String dataWidgetVar, String singularDocumentAlias, boolean inline, String dataWidgetBinding, String disabledCondition) {
+	protected @Nonnull CommandButton createDataGridZoomButton(@Nonnull DataGrid grid, @Nullable String dataWidgetVar, @Nullable String singularDocumentAlias, boolean inline, @Nullable String dataWidgetBinding, @Nullable String disabledCondition) {
 		CommandButton result = (CommandButton) a.createComponent(CommandButton.COMPONENT_TYPE);
 		setId(result, null);
 		result.setValue(null);
@@ -1315,11 +1315,11 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 	}
 
 	@Override
-	public UIComponent map(UIComponent component,
-							MapDisplay map,
-							String moduleName,
-							String queryName,
-							String geometryBinding) {
+	public @Nonnull UIComponent map(@Nullable UIComponent component,
+							@Nonnull MapDisplay map,
+							@Nonnull String moduleName,
+							@Nonnull String queryName,
+							@Nonnull String geometryBinding) {
 		if (component != null) {
 			return component;
 		}
@@ -1327,18 +1327,18 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 	}
 
 	@Override
-	public UIComponent map(UIComponent component, MapDisplay map, String modelName) {
+	public @Nonnull UIComponent map(@Nullable UIComponent component, @Nonnull MapDisplay map, @Nonnull String modelName) {
 		if (component != null) {
 			return component;
 		}
 		return map(map, null, null, null, modelName);
 	}
 
-	private UIComponent map(MapDisplay map,
-								String moduleName,
-								String queryName,
-								String geometryBinding,
-								String modelName) {
+	private @Nonnull UIComponent map(@Nonnull MapDisplay map,
+								@Nullable String moduleName,
+								@Nullable String queryName,
+								@Nullable String geometryBinding,
+								@Nullable String modelName) {
 		HtmlPanelGroup result = mapDiv(map);
 
 		UIOutput script = (UIOutput) a.createComponent(UIOutput.COMPONENT_TYPE);
@@ -1364,7 +1364,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		return result;
 	}
 
-	private HtmlPanelGroup mapDiv(RelativeSize widget) {
+	private @Nonnull HtmlPanelGroup mapDiv(@Nonnull RelativeSize widget) {
 		HtmlPanelGroup result = (HtmlPanelGroup) a.createComponent(HtmlPanelGroup.COMPONENT_TYPE);
 		result.setLayout("block");
 		setId(result, null);
@@ -1393,13 +1393,13 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 	}
 
 	@Override
-	public EventSourceComponent geometry(EventSourceComponent component,
-											String dataWidgetVar,
-											Geometry geometry,
-											String formDisabledCondition,
-											String title,
+	public @Nonnull EventSourceComponent geometry(@Nullable EventSourceComponent component,
+											@Nullable String dataWidgetVar,
+											@Nonnull Geometry geometry,
+											@Nullable String formDisabledCondition,
+											@Nullable String title,
 											@Nullable String requiredMessage,
-											HorizontalAlignment textAlignment) {
+											@Nullable HorizontalAlignment textAlignment) {
 		if (component != null) {
 			return component;
 		}
@@ -1458,12 +1458,12 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 	 *			    </p:overlayPanel>
 	 *			</h:panelGrid>
 	 */
-	private void editableGeometry(List<UIComponent> toAddTo,
-									String id,
-									String binding,
-									GeometryInputType type,
-									String disabledCondition,
-									String formDisabledCondition) {
+	private void editableGeometry(@Nonnull List<UIComponent> toAddTo,
+									@Nonnull String id,
+									@Nullable String binding,
+									@Nullable GeometryInputType type,
+									@Nullable String disabledCondition,
+									@Nullable String formDisabledCondition) {
 		CommandButton mapButton = (CommandButton) a.createComponent(CommandButton.COMPONENT_TYPE);
 		setId(mapButton, null);
 		String mapButtonId = mapButton.getId();
@@ -1533,10 +1533,10 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 	}
 
 	@Override
-	public EventSourceComponent geometryMap(EventSourceComponent component,
-												GeometryMap geometry,
-												String formDisabledCondition,
-												String title,
+	public @Nonnull EventSourceComponent geometryMap(@Nullable EventSourceComponent component,
+												@Nonnull GeometryMap geometry,
+												@Nullable String formDisabledCondition,
+												@Nullable String title,
 												@Nullable String requiredMessage) {
 		if (component != null) {
 			return component;
@@ -1565,11 +1565,11 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		return new EventSourceComponent(result, hidden);
 	}
 
-	private ValueExpression generateMapScriptExpression(String mapDivClientId,
-															String geometryBinding,
-															GeometryInputType type,
-															String disabledCondition,
-															String formDisabledCondition,
+	private @Nonnull ValueExpression generateMapScriptExpression(@Nonnull String mapDivClientId,
+															@Nullable String geometryBinding,
+															@Nullable GeometryInputType type,
+															@Nullable String disabledCondition,
+															@Nullable String formDisabledCondition,
 															boolean includeScriptTag) {
 		return generateMapScriptExpression(mapDivClientId,
 											geometryBinding,
@@ -1580,11 +1580,11 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 											false);
 	}
 
-	private ValueExpression generateMapScriptExpression(String mapDivClientId,
-															String geometryBinding,
-															GeometryInputType type,
-															String disabledCondition,
-															String formDisabledCondition,
+	private @Nonnull ValueExpression generateMapScriptExpression(@Nonnull String mapDivClientId,
+															@Nullable String geometryBinding,
+															@Nullable GeometryInputType type,
+															@Nullable String disabledCondition,
+															@Nullable String formDisabledCondition,
 															boolean includeScriptTag,
 															boolean lockScroll) {
 		StringBuilder value = new StringBuilder(128);
@@ -1624,7 +1624,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 	}
 
 	@Override
-	public UIComponent chart(UIComponent component, Chart chart) {
+	public @Nonnull UIComponent chart(@Nullable UIComponent component, @Nonnull Chart chart) {
 		if (component != null) {
 			return component;
 		}
@@ -1715,15 +1715,15 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 	*/
 	@Override
 	@SuppressWarnings({"java:S3776", "java:S6541"}) // complexity OK
-	public UIComponent listGrid(UIComponent component,
-									String moduleName,
-									String modelDocumentName,
-									String modelName,
-									String uxui,
-									ListModel<Bean> model,
-									Document owningDocument,
-									ListGrid grid,
-									String stickyHeaderAnchorSelector,
+	public @Nonnull UIComponent listGrid(@Nullable UIComponent component,
+									@Nonnull String moduleName,
+									@Nullable String modelDocumentName,
+									@Nullable String modelName,
+									@Nonnull String uxui,
+									@Nonnull ListModel<Bean> model,
+									@Nullable Document owningDocument,
+									@Nonnull ListGrid grid,
+									@Nullable String stickyHeaderAnchorSelector,
 									boolean aggregateQuery) {
 		if (component != null) {
 			return component;
@@ -1930,10 +1930,10 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 	}
 
 	@SuppressWarnings("java:S3776") // Complexity OK
-	protected void addDataTableSelection(DataTable table,
-										String selectedIdBinding,
-										List<EventAction> selectedActions,
-										String source,
+	protected void addDataTableSelection(@Nonnull DataTable table,
+										@Nonnull String selectedIdBinding,
+										@Nullable List<EventAction> selectedActions,
+										@Nullable String source,
 										boolean rowKeyFromModel) {
 		table.setSelectionMode("single");
 		if (! rowKeyFromModel) {
@@ -1972,11 +1972,11 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 	}
 
 	@SuppressWarnings("java:S3776") // Complexity OK
-	protected void addListGridDataColumns(ListModel<? extends Bean> model,
-											List<UIComponent> componentChildrenToAddTo,
+	protected void addListGridDataColumns(@Nonnull ListModel<? extends Bean> model,
+											@Nonnull List<UIComponent> componentChildrenToAddTo,
 											boolean showFilter,
-											String tableVar,
-											String uxui) {
+											@Nonnull String tableVar,
+											@Nonnull String uxui) {
 		Customer customer = CORE.getUser().getCustomer();
 		Document document = model.getDrivingDocument();
 		Module module = customer.getModule(document.getOwningModuleName());
@@ -2160,10 +2160,10 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		}
 	}
 
-	protected UIComponent createSpecialColumnFilterFacetComponent(Document modelDrivingDocument,
-																	String columnBinding,
-																	Attribute columnAttribute,
-																	String tableVar) {
+	protected @Nullable UIComponent createSpecialColumnFilterFacetComponent(@Nonnull Document modelDrivingDocument,
+																	@Nonnull String columnBinding,
+																	@Nonnull Attribute columnAttribute,
+																	@Nonnull String tableVar) {
 		// To keep the appropriate length of the filter input components inside the data table columns,
 		// A <div style="display:flex" /> should be used, but nesting the control in a div breaks
 		// the filtering processing of faces...so instead, the <div class=".ui-column-customfilter" />
@@ -2195,17 +2195,17 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 	}
 
 	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
-	protected UIComponent createListGridActionColumn(String moduleName,
-													   String documentName,
+	protected @Nonnull UIComponent createListGridActionColumn(@Nonnull String moduleName,
+													   @Nonnull String documentName,
 													   boolean canCreateDocument,
 													   boolean createRendered,
-													   String[] createDisabledConditions,
-													   String createUrlParams,
+													   @Nullable String[] createDisabledConditions,
+													   @Nullable String createUrlParams,
 													   boolean zoomRendered,
-													   String zoomDisabledCondition,
+													   @Nullable String zoomDisabledCondition,
 													   boolean showFilter,
-													   String parentId,
-													   Map<String, String> properties) {
+													   @Nonnull String parentId,
+													   @Nonnull Map<String, String> properties) {
 		Column column = (Column) a.createComponent(Column.COMPONENT_TYPE);
 		column.setResponsivePriority(1);
 		column.setWidth(SINGLE_ACTION_COLUMN_WIDTH);
@@ -2265,8 +2265,8 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		return column;
 	}
 
-	protected UIComponent createListGridZoomButton(String zoomDisabledCondition,
-													@SuppressWarnings({"unused", "java:S1172"}) Map<String, String> properties) {
+	protected @Nonnull UIComponent createListGridZoomButton(@Nullable String zoomDisabledCondition,
+													@SuppressWarnings({"unused", "java:S1172"}) @Nonnull Map<String, String> properties) {
 		final CommandButton button = (CommandButton) a.createComponent(CommandButton.COMPONENT_TYPE);
 		setId(button, null);
 		button.setValue(null);
@@ -2286,9 +2286,9 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 	}
 
 	@Override
-	public UIComponent listGridContextMenu(UIComponent component,
-												String listGridId,
-												ListGrid grid) {
+	public @Nonnull UIComponent listGridContextMenu(@Nullable UIComponent component,
+												@Nonnull String listGridId,
+												@Nonnull ListGrid grid) {
 		if (component != null) {
 			return component;
 		}
@@ -2351,13 +2351,13 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 	 */
 	@Override
 	@SuppressWarnings("java:S3776") // Complexity OK
-	public UIComponent listRepeater(UIComponent component,
-										String modelDocumentName,
-										String modelName,
-										String uxui,
-										ListModel<Bean> model,
-										List<FilterParameter> filterParameters,
-										List<Parameter> parameters,
+	public @Nonnull UIComponent listRepeater(@Nullable UIComponent component,
+										@Nullable String modelDocumentName,
+										@Nullable String modelName,
+										@Nonnull String uxui,
+										@Nonnull ListModel<Bean> model,
+										@Nullable List<FilterParameter> filterParameters,
+										@Nullable List<Parameter> parameters,
 										boolean showColumnHeaders,
 										boolean showGrid) {
 		if (component != null) {
@@ -2448,7 +2448,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
         return result;
 	}
 
-	private static String repeaterStyleClass(boolean showColumnHeaders, boolean showGrid) {
+	private static @Nonnull String repeaterStyleClass(boolean showColumnHeaders, boolean showGrid) {
         StringBuilder result = new StringBuilder(64);
         result.append("repeater");
         if (! showColumnHeaders) {
@@ -2475,10 +2475,10 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 	 * @return existing wrapper or configured pick-list wrapper; never {@code null} when newly created
 	 */
 	@Override
-	public EventSourceComponent listMembership(EventSourceComponent component,
-												EscapableText candidatesHeading,
-												EscapableText membersHeading,
-												ListMembership membership) {
+	public @Nonnull EventSourceComponent listMembership(@Nullable EventSourceComponent component,
+												@Nullable EscapableText candidatesHeading,
+												@Nullable EscapableText membersHeading,
+												@Nonnull ListMembership membership) {
 		if (component != null) {
 			return component;
 		}
@@ -2510,11 +2510,11 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 	}
 
 	@Override
-	public EventSourceComponent checkBox(EventSourceComponent component,
-											String dataWidgetVar,
-											CheckBox checkBox,
-											String formDisabledCondition,
-											String title,
+	public @Nonnull EventSourceComponent checkBox(@Nullable EventSourceComponent component,
+											@Nullable String dataWidgetVar,
+											@Nonnull CheckBox checkBox,
+											@Nullable String formDisabledCondition,
+											@Nullable String title,
 											@Nullable String requiredMessage) {
 		if (component != null) {
 			return component;
@@ -2531,13 +2531,13 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 	}
 
 	@Override
-	public EventSourceComponent colourPicker(EventSourceComponent component,
-												String dataWidgetVar,
-												ColourPicker colour,
-												String formDisabledCondition,
-												String title,
+	public @Nonnull EventSourceComponent colourPicker(@Nullable EventSourceComponent component,
+												@Nullable String dataWidgetVar,
+												@Nonnull ColourPicker colour,
+												@Nullable String formDisabledCondition,
+												@Nullable String title,
 												@Nullable String requiredMessage,
-												HorizontalAlignment textAlignment) {
+												@Nullable HorizontalAlignment textAlignment) {
 		if (component != null) {
 			return component;
 		}
@@ -2554,11 +2554,11 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 	}
 
 	@Override
-	public EventSourceComponent combo(EventSourceComponent component,
-										String dataWidgetVar,
-										Combo combo,
-										String formDisabledCondition,
-										String title,
+	public @Nonnull EventSourceComponent combo(@Nullable EventSourceComponent component,
+										@Nullable String dataWidgetVar,
+										@Nonnull Combo combo,
+										@Nullable String formDisabledCondition,
+										@Nullable String title,
 										@Nullable String requiredMessage) {
 		if (component != null) {
 			return component;
@@ -2867,11 +2867,11 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 	 * See LayoutBuilder.contentSignatureLayout() for the outer panel grid.
 	 */
 	@Override
-	public UIComponent addContentSignature(UIComponent component,
-											UIComponent layout,
-											ContentSignature signature,
-											String formDisabledCondition,
-											String title,
+	public @Nonnull UIComponent addContentSignature(@Nullable UIComponent component,
+											@Nonnull UIComponent layout,
+											@Nonnull ContentSignature signature,
+											@Nullable String formDisabledCondition,
+											@Nullable String title,
 											@Nullable String requiredMessage) {
 		if (component != null) {
 			return component;
@@ -3046,19 +3046,19 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 	 * @param binding
 	 */
 	@SuppressWarnings({"java:S107", "java:S3776"}) // Long parameter list and cognitive compleity OK
-	private void editableContent(List<UIComponent> toAddTo,
-									String id,
+	private void editableContent(@Nonnull List<UIComponent> toAddTo,
+									@Nonnull String id,
 									@Nullable String dataWidgetVar,
 									@Nonnull String binding,
-									String sanitisedBinding,
+									@Nonnull String sanitisedBinding,
 									@Nullable String requiredMessage,
-									String disabledCondition,
-									String formDisabledCondition,
+									@Nullable String disabledCondition,
+									@Nullable String formDisabledCondition,
 									boolean image,
 									boolean showMarkup,
 									boolean auto,
-									ContentDisplay display,
-									ContentCapture capture) {
+									@Nonnull ContentDisplay display,
+									@Nonnull ContentCapture capture) {
 		HtmlInputHidden hidden = (HtmlInputHidden) input(HtmlInputHidden.COMPONENT_TYPE, dataWidgetVar, binding, null, requiredMessage, null, null);
 		setId(hidden, String.format("%s_%s_hidden", id, sanitisedBinding));
 
@@ -3228,11 +3228,11 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		}
 	}
 
-	private UIMenuItem createContentMenuItem(String value,
-												String icon,
+	private @Nonnull UIMenuItem createContentMenuItem(@Nonnull String value,
+												@Nonnull String icon,
 												@Nullable String onclick,
-												String disabledCondition,
-												String formDisabledCondition) {
+												@Nullable String disabledCondition,
+												@Nullable String formDisabledCondition) {
 		UIMenuItem result = (UIMenuItem) a.createComponent(UIMenuItem.COMPONENT_TYPE);
 		setId(result, null);
 		result.setValue(value);
@@ -3416,11 +3416,11 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 	}
 
 	@Override
-	public UIComponent html(UIComponent component,
-								String dataWidgetVar,
-								HTML html,
-								String formDisabledCondition,
-								String title,
+	public @Nonnull UIComponent html(@Nullable UIComponent component,
+								@Nullable String dataWidgetVar,
+								@Nonnull HTML html,
+								@Nullable String formDisabledCondition,
+								@Nullable String title,
 								@Nullable String requiredMessage) {
 		if (component != null) {
 			return component;
@@ -3436,16 +3436,16 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 	}
 
 	@Override
-	public EventSourceComponent lookupDescription(EventSourceComponent component,
-													String dataWidgetVar,
-													LookupDescription lookup,
-													String formDisabledCondition,
-													String title,
+	public @Nonnull EventSourceComponent lookupDescription(@Nullable EventSourceComponent component,
+													@Nullable String dataWidgetVar,
+													@Nonnull LookupDescription lookup,
+													@Nullable String formDisabledCondition,
+													@Nullable String title,
 													@Nullable String requiredMessage,
-													HorizontalAlignment textAlignment,
-													String displayBinding,
-													QueryDefinition query,
-													Document owningDocument) {
+													@Nullable HorizontalAlignment textAlignment,
+													@Nonnull String displayBinding,
+													@Nullable QueryDefinition query,
+													@Nonnull Document owningDocument) {
 		if (component != null) {
 			return component;
 		}
@@ -3470,13 +3470,13 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 	}
 
 	@Override
-	public EventSourceComponent password(EventSourceComponent component,
-											String dataWidgetVar,
-											org.skyve.impl.metadata.view.widget.bound.input.Password password,
-											String formDisabledCondition,
-											String title,
+	public @Nonnull EventSourceComponent password(@Nullable EventSourceComponent component,
+											@Nullable String dataWidgetVar,
+											@Nonnull org.skyve.impl.metadata.view.widget.bound.input.Password password,
+											@Nullable String formDisabledCondition,
+											@Nullable String title,
 											@Nullable String requiredMessage,
-											HorizontalAlignment textAlignment) {
+											@Nullable HorizontalAlignment textAlignment) {
 		if (component != null) {
 			return component;
 		}
@@ -3494,11 +3494,11 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 	}
 
 	@Override
-	public EventSourceComponent radio(EventSourceComponent component,
-										String dataWidgetVar,
-										Radio radio,
-										String formDisabledCondition,
-										String title,
+	public @Nonnull EventSourceComponent radio(@Nullable EventSourceComponent component,
+										@Nullable String dataWidgetVar,
+										@Nonnull Radio radio,
+										@Nullable String formDisabledCondition,
+										@Nullable String title,
 										@Nullable String requiredMessage) {
 		if (component != null) {
 			return component;
@@ -3519,11 +3519,11 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 	}
 
 	@Override
-	public EventSourceComponent richText(EventSourceComponent component,
-											String dataWidgetVar,
-											RichText text,
-											String formDisabledCondition,
-											String title,
+	public @Nonnull EventSourceComponent richText(@Nullable EventSourceComponent component,
+											@Nullable String dataWidgetVar,
+											@Nonnull RichText text,
+											@Nullable String formDisabledCondition,
+											@Nullable String title,
 											@Nullable String requiredMessage) {
 		if (component != null) {
 			return component;
@@ -3540,14 +3540,14 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 	}
 
 	@Override
-	public EventSourceComponent spinner(EventSourceComponent component,
-											String dataWidgetVar,
-											org.skyve.impl.metadata.view.widget.bound.input.Spinner spinner,
-											String formDisabledCondition,
-											String title,
+	public @Nonnull EventSourceComponent spinner(@Nullable EventSourceComponent component,
+											@Nullable String dataWidgetVar,
+											@Nonnull org.skyve.impl.metadata.view.widget.bound.input.Spinner spinner,
+											@Nullable String formDisabledCondition,
+											@Nullable String title,
 											@Nullable String requiredMessage,
-											HorizontalAlignment textAlignment,
-											Converter<?> facesConverter) {
+											@Nullable HorizontalAlignment textAlignment,
+											@Nullable Converter<?> facesConverter) {
 		if (component != null) {
 			return component;
 		}
@@ -3569,13 +3569,13 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 	}
 
 	@Override
-	public EventSourceComponent slider(EventSourceComponent component,
-											String dataWidgetVar,
-											org.skyve.impl.metadata.view.widget.bound.input.Slider slider,
-											String formDisabledCondition,
-											String title,
+	public @Nonnull EventSourceComponent slider(@Nullable EventSourceComponent component,
+											@Nullable String dataWidgetVar,
+											@Nonnull org.skyve.impl.metadata.view.widget.bound.input.Slider slider,
+											@Nullable String formDisabledCondition,
+											@Nullable String title,
 											@Nullable String requiredMessage,
-											Converter<?> facesConverter) {
+											@Nullable Converter<?> facesConverter) {
 		if (component != null) {
 			return component;
 		}
@@ -3666,14 +3666,14 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 	}
 
 	@Override
-	public EventSourceComponent textArea(EventSourceComponent component,
-											String dataWidgetVar,
-											TextArea text,
-											String formDisabledCondition,
-											String title,
+	public @Nonnull EventSourceComponent textArea(@Nullable EventSourceComponent component,
+											@Nullable String dataWidgetVar,
+											@Nonnull TextArea text,
+											@Nullable String formDisabledCondition,
+											@Nullable String title,
 											@Nullable String requiredMessage,
-											HorizontalAlignment textAlignment,
-											Integer length) {
+											@Nullable HorizontalAlignment textAlignment,
+											@Nullable Integer length) {
 		if (component != null) {
 			return component;
 		}
@@ -3698,17 +3698,17 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 	}
 
 	@Override
-	public EventSourceComponent text(EventSourceComponent component,
-										String dataWidgetVar,
-										TextField text,
-										String formDisabledCondition,
-										String title,
+	public @Nonnull EventSourceComponent text(@Nullable EventSourceComponent component,
+										@Nullable String dataWidgetVar,
+										@Nonnull TextField text,
+										@Nullable String formDisabledCondition,
+										@Nullable String title,
 										@Nullable String requiredMessage,
-										HorizontalAlignment textAlignment,
-										Integer length,
-										org.skyve.domain.types.converters.Converter<?> converter,
-										Format<?> format,
-										Converter<?> facesConverter) {
+										@Nullable HorizontalAlignment textAlignment,
+										@Nullable Integer length,
+										@Nullable org.skyve.domain.types.converters.Converter<?> converter,
+										@Nullable Format<?> format,
+										@Nullable Converter<?> facesConverter) {
 		if (component != null) {
 			return component;
 		}
@@ -3790,15 +3790,15 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 	}
 
 	@Override
-	public UIComponent actionLink(UIComponent component,
-									String dataWidgetBinding,
-									String dataWidgetVar,
-									String value,
-									String iconStyleClass,
-									String toolTip,
-									String confirmationText,
-									Link link,
-									Action action) {
+	public @Nonnull UIComponent actionLink(@Nullable UIComponent component,
+									@Nullable String dataWidgetBinding,
+									@Nullable String dataWidgetVar,
+									@Nullable String value,
+									@Nullable String iconStyleClass,
+									@Nullable String toolTip,
+									@Nullable String confirmationText,
+									@Nonnull Link link,
+									@Nonnull Action action) {
 		if (component != null) {
 			return component;
 		}
@@ -3840,12 +3840,12 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 	}
 
 	@Override
-	public UIComponent report(UIComponent component,
-								String label,
-								String iconStyleClass,
-								String toolTip,
-								String confirmationText,
-								Action action) {
+	public @Nonnull UIComponent report(@Nullable UIComponent component,
+								@Nullable String label,
+								@Nullable String iconStyleClass,
+								@Nullable String toolTip,
+								@Nullable String confirmationText,
+								@Nonnull Action action) {
 		if (component != null) {
 			return component;
 		}
@@ -3864,14 +3864,14 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 	}
 
 	@Override
-	public UIComponent download(UIComponent component,
-									String dataWidgetBinding,
-									String dataWidgetVar,
-									String label,
-									String iconStyleClass,
-									String toolTip,
-									String confirmationText,
-									Action action) {
+	public @Nonnull UIComponent download(@Nullable UIComponent component,
+									@Nullable String dataWidgetBinding,
+									@Nullable String dataWidgetVar,
+									@Nullable String label,
+									@Nullable String iconStyleClass,
+									@Nullable String toolTip,
+									@Nullable String confirmationText,
+									@Nonnull Action action) {
 		if (component != null) {
 			return component;
 		}
@@ -3895,12 +3895,12 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 	}
 
 	@Override
-	public UIComponent upload(UIComponent component,
-								String label,
-								String iconStyleClass,
-								String toolTip,
-								String confirmationText,
-								Action action) {
+	public @Nonnull UIComponent upload(@Nullable UIComponent component,
+								@Nullable String label,
+								@Nullable String iconStyleClass,
+								@Nullable String toolTip,
+								@Nullable String confirmationText,
+								@Nonnull Action action) {
 		if (component != null) {
 			return component;
 		}
@@ -3922,12 +3922,12 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 	}
 
 	@Override
-	public UIComponent remove(UIComponent component,
-								String label,
-								String iconStyleClass,
-								String toolTip,
-								String confirmationText,
-								Action action,
+	public @Nonnull UIComponent remove(@Nullable UIComponent component,
+								@Nullable String label,
+								@Nullable String iconStyleClass,
+								@Nullable String toolTip,
+								@Nullable String confirmationText,
+								@Nonnull Action action,
 								boolean canDelete) {
 		if (component != null) {
 			return component;
@@ -3954,15 +3954,15 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 	}
 
 	@Override
-	public UIComponent action(UIComponent component,
-								String dataWidgetBinding,
-								String dataWidgetVar,
-								String label,
-								String iconStyleClass,
-								String toolTip,
-								String confirmationText,
-								ImplicitActionName name,
-								Action action) {
+	public @Nonnull UIComponent action(@Nullable UIComponent component,
+								@Nullable String dataWidgetBinding,
+								@Nullable String dataWidgetVar,
+								@Nullable String label,
+								@Nullable String iconStyleClass,
+								@Nullable String toolTip,
+								@Nullable String confirmationText,
+								@Nullable ImplicitActionName name,
+								@Nonnull Action action) {
 		if (component != null) {
 			return component;
 		}
@@ -4003,7 +4003,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 	 * @param widgetId optional component id
 	 * @return configured panel; never {@code null}
 	 */
-	protected Panel panel(String title, String invisible, Integer pixelWidth, Collapsible collapsible, String widgetId) {
+	protected @Nonnull Panel panel(@Nullable String title, @Nullable String invisible, @Nullable Integer pixelWidth, @Nullable Collapsible collapsible, @Nullable String widgetId) {
 		Panel result = (Panel) a.createComponent(Panel.COMPONENT_TYPE);
 		putOutputTextFacetValueOrValueExpression(result, "header", title, getCurrentInputTitleEscape());
 		setInvisible(result, invisible, null);
@@ -4026,14 +4026,14 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 	}
 
 	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
-	protected Password password(String dataWidgetVar,
-									String binding,
-									String title,
+	protected @Nonnull Password password(@Nullable String dataWidgetVar,
+									@Nullable String binding,
+									@Nullable String title,
 									@Nullable String requiredMessage,
-									HorizontalAlignment textAlignment,
-									String disabled,
-									String formDisabled,
-									Integer pixelWidth) {
+									@Nullable HorizontalAlignment textAlignment,
+									@Nullable String disabled,
+									@Nullable String formDisabled,
+									@Nullable Integer pixelWidth) {
 		Password result = (Password) input(Password.COMPONENT_TYPE, dataWidgetVar, binding, title, requiredMessage, disabled, formDisabled);
 		result.setId(result.getId() + "password"); // ensures that the password field value is not logged in the request parameters on the server
 
@@ -4049,19 +4049,19 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 	}
 
 	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
-	protected InputText textField(String dataWidgetVar,
-									String binding,
-									String title,
+	protected @Nonnull InputText textField(@Nullable String dataWidgetVar,
+									@Nullable String binding,
+									@Nullable String title,
 									@Nullable String requiredMessage,
-									HorizontalAlignment textAlignment,
+									@Nullable HorizontalAlignment textAlignment,
 									boolean readonly,
-									String disabled,
-									String formDisabled,
-									Integer maxLength,
-									TextCase textCase,
-									Converter<?> converter,
-									KeyboardType keyboardType,
-									Integer pixelWidth) {
+									@Nullable String disabled,
+									@Nullable String formDisabled,
+									@Nullable Integer maxLength,
+									@Nullable TextCase textCase,
+									@Nullable Converter<?> converter,
+									@Nullable KeyboardType keyboardType,
+									@Nullable Integer pixelWidth) {
 		InputText result = (InputText) input(InputText.COMPONENT_TYPE,
 												dataWidgetVar,
 												binding,
@@ -4088,19 +4088,19 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 	}
 
 	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
-	private InputMask maskField(String dataWidgetVar,
-									String binding,
-									String title,
+	private @Nonnull InputMask maskField(@Nullable String dataWidgetVar,
+									@Nullable String binding,
+									@Nullable String title,
 									@Nullable String requiredMessage,
-									HorizontalAlignment textAlignment,
+									@Nullable HorizontalAlignment textAlignment,
 									boolean readonly,
-									String disabled,
-									String formDisabled,
-									Integer maxLength,
-									Format<?> format,
-									Converter<?> converter,
-									KeyboardType keyboardType,
-									Integer pixelWidth) {
+									@Nullable String disabled,
+									@Nullable String formDisabled,
+									@Nullable Integer maxLength,
+									@Nonnull Format<?> format,
+									@Nullable Converter<?> converter,
+									@Nullable KeyboardType keyboardType,
+									@Nullable Integer pixelWidth) {
 		InputMask result = (InputMask) input(InputMask.COMPONENT_TYPE,
 												dataWidgetVar,
 												binding,
@@ -4127,7 +4127,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		return result;
 	}
 
-	private static String determineTextTransformStyle(TextCase textCase) {
+	private static @Nullable String determineTextTransformStyle(@Nullable TextCase textCase) {
 		String result = null;
 		if (textCase != null) {
 			switch (textCase) {
@@ -4162,7 +4162,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 	 * @param format
 	 * @return
 	 */
-	private static String determineMask(Format<?> format) {
+	private static @Nullable String determineMask(@Nullable Format<?> format) {
 		String result = null;
 
 		if (format != null) {
@@ -4185,19 +4185,19 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 	}
 
 	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
-	private Spinner spinner(String dataWidgetVar,
-								String binding,
-								String title,
+	private @Nonnull Spinner spinner(@Nullable String dataWidgetVar,
+								@Nullable String binding,
+								@Nullable String title,
 								@Nullable String requiredMessage,
-								HorizontalAlignment textAlignment,
-								KeyboardType keyboardType,
-								Double min,
-								Double max,
-								Double step,
-								String disabled,
-								String formDisabled,
-								Converter<?> converter,
-								Integer pixelWidth) {
+								@Nullable HorizontalAlignment textAlignment,
+								@Nullable KeyboardType keyboardType,
+								@Nullable Double min,
+								@Nullable Double max,
+								@Nullable Double step,
+								@Nullable String disabled,
+								@Nullable String formDisabled,
+								@Nullable Converter<?> converter,
+								@Nullable Integer pixelWidth) {
 		Spinner result = (Spinner) input(Spinner.COMPONENT_TYPE, dataWidgetVar, binding, title, requiredMessage, disabled, formDisabled);
 
 		if (keyboardType != null) {
@@ -4225,16 +4225,16 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 	}
 
 	@SuppressWarnings({"java:S107", "java:S3776"}) // Long parameter list preserves the existing framework/API contract; complexity OK.
-	private DatePicker datePicker(String dataWidgetVar,
-									String binding,
-									String title,
+	private @Nonnull DatePicker datePicker(@Nullable String dataWidgetVar,
+									@Nullable String binding,
+									@Nullable String title,
 									@Nullable String requiredMessage,
-									HorizontalAlignment textAlignment,
-									Integer pixelWidth,
+									@Nullable HorizontalAlignment textAlignment,
+									@Nullable Integer pixelWidth,
 									boolean mobile,
-									String disabled,
-									String formDisabled,
-									Converter<?> converter) {
+									@Nullable String disabled,
+									@Nullable String formDisabled,
+									@Nonnull Converter<?> converter) {
 		DatePicker result = (DatePicker) input(DatePicker.COMPONENT_TYPE, dataWidgetVar, binding, title, requiredMessage, disabled, formDisabled);
 		if (! mobile) {
 			result.setShowIcon(true);
@@ -4476,17 +4476,17 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 	}
 
 	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
-	protected InputTextarea textArea(String dataWidgetVar,
-										String binding,
-										String title,
+	protected @Nonnull InputTextarea textArea(@Nullable String dataWidgetVar,
+										@Nullable String binding,
+										@Nullable String title,
 										@Nullable String requiredMessage,
-										HorizontalAlignment textAlignment,
+										@Nullable HorizontalAlignment textAlignment,
 										boolean readonly,
-										String disabled,
-										String formDisabled,
-										Integer maxLength,
-										Integer pixelWidth,
-										Integer pixelHeight) {
+										@Nullable String disabled,
+										@Nullable String formDisabled,
+										@Nullable Integer maxLength,
+										@Nullable Integer pixelWidth,
+										@Nullable Integer pixelHeight) {
 		InputTextarea result = (InputTextarea) input(InputTextarea.COMPONENT_TYPE,
 														dataWidgetVar,
 														binding,
@@ -4535,22 +4535,22 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 	 * @return configured command button; never {@code null}
 	 */
 	@SuppressWarnings({"java:S107", "java:S3776"}) // Long parameter list preserves the existing framework/API contract; complexity OK.
-	protected CommandButton actionButton(EscapableText title,
-											String iconStyleClass,
-											String tooltip,
-											ImplicitActionName implicitActionName,
-											String actionName,
+	protected @Nonnull CommandButton actionButton(@Nullable EscapableText title,
+											@Nullable String iconStyleClass,
+											@Nullable String tooltip,
+											@Nullable ImplicitActionName implicitActionName,
+											@Nullable String actionName,
 											boolean inline,
-											String dataWidgetBinding,
-											String dataWidgetVar,
-											Integer pixelWidth,
-											Integer pixelHeight,
-											EscapableText confirmationText,
-											String disabled,
-											String formDisabled,
-											String invisible,
-											String processOverride,
-											String updateOverride,
+											@Nullable String dataWidgetBinding,
+											@Nullable String dataWidgetVar,
+											@Nullable Integer pixelWidth,
+											@Nullable Integer pixelHeight,
+											@Nullable EscapableText confirmationText,
+											@Nullable String disabled,
+											@Nullable String formDisabled,
+											@Nullable String invisible,
+											@Nullable String processOverride,
+											@Nullable String updateOverride,
 											boolean canDelete) {
 		CommandButton result = (CommandButton) a.createComponent(CommandButton.COMPONENT_TYPE);
 
@@ -4680,18 +4680,18 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 	 * @return configured report link button; never {@code null}
 	 */
 	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
-	private Button reportButton(EscapableText title,
-									String iconStyleClass,
-									String tooltip,
-									List<Parameter> parameters,
-									Integer pixelWidth,
-									Integer pixelHeight,
-									Boolean clientValidation, // TODO not implemented
+	private @Nonnull Button reportButton(@Nullable EscapableText title,
+									@Nullable String iconStyleClass,
+									@Nullable String tooltip,
+									@Nonnull List<Parameter> parameters,
+									@Nullable Integer pixelWidth,
+									@Nullable Integer pixelHeight,
+									@Nullable Boolean clientValidation, // TODO not implemented
 									// TODO LinkButton is not a Confirmable. ConfirmBehavior can only be attached to components that implement org.primefaces.component.api.Confirmable interface
-									EscapableText confirmationText,
-									String disabled,
-									String formDisabled,
-									String invisible) {
+									@Nullable EscapableText confirmationText,
+									@Nullable String disabled,
+									@Nullable String formDisabled,
+									@Nullable String invisible) {
 		StringBuilder href = new StringBuilder(128);
 		String reportName = null;
 		ReportFormat reportFormat = null;
@@ -4772,20 +4772,20 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 	 * @return configured command button; never {@code null}
 	 */
 	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
-	private CommandButton downloadButton(EscapableText title,
-											String iconStyleClass,
-											String tooltip,
-											String dataWidgetBinding,
-											String dataWidgetVar,
-											String downloadActionName,
-											Integer pixelWidth,
-											Integer pixelHeight,
-											EscapableText confirmationText,
-											String disabled,
-											String formDisabled,
-											String invisible,
-											String processOverride,
-											String updateOverride) {
+	private @Nonnull CommandButton downloadButton(@Nullable EscapableText title,
+											@Nullable String iconStyleClass,
+											@Nullable String tooltip,
+											@Nullable String dataWidgetBinding,
+											@Nullable String dataWidgetVar,
+											@Nonnull String downloadActionName,
+											@Nullable Integer pixelWidth,
+											@Nullable Integer pixelHeight,
+											@Nullable EscapableText confirmationText,
+											@Nullable String disabled,
+											@Nullable String formDisabled,
+											@Nullable String invisible,
+											@Nullable String processOverride,
+											@Nullable String updateOverride) {
 		CommandButton result = (CommandButton) a.createComponent(CommandButton.COMPONENT_TYPE);
 
 		setCommandButtonText(result, title);
@@ -4834,18 +4834,18 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 	 * @return upload button component; never {@code null}
 	 */
 	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
-	protected UIComponent uploadButton(EscapableText title,
-										String iconStyleClass,
-										String tooltip,
-										String actionName,
-										Integer pixelWidth,
-										Integer pixelHeight,
-										Boolean clientValidation, // TODO not implemented
-										EscapableText confirmationText,
-										String disabled,
-										String formDisabled,
-										String invisible,
-										ContentCapture capture,
+	protected @Nonnull UIComponent uploadButton(@Nullable EscapableText title,
+										@Nullable String iconStyleClass,
+										@Nullable String tooltip,
+										@Nonnull String actionName,
+										@Nullable Integer pixelWidth,
+										@Nullable Integer pixelHeight,
+										@Nullable Boolean clientValidation, // TODO not implemented
+										@Nullable EscapableText confirmationText,
+										@Nullable String disabled,
+										@Nullable String formDisabled,
+										@Nullable String invisible,
+										@Nonnull ContentCapture capture,
 										boolean useDialog) {
 		// A span as the top item so it can flow correctly in the action panel
 		HtmlPanelGroup result = panelGroup(false, false, false, invisible, null);
@@ -4945,17 +4945,17 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 	 * @return upload button component; never {@code null}
 	 */
 	@SuppressWarnings("java:S107") // Backward-compatible helper for existing builder specialisations and tests.
-	protected UIComponent uploadButton(EscapableText title,
-										String iconStyleClass,
-										String tooltip,
-										String actionName,
-										Integer pixelWidth,
-										Integer pixelHeight,
-										Boolean clientValidation,
-										EscapableText confirmationText,
-										String disabled,
-										String formDisabled,
-										String invisible,
+	protected @Nonnull UIComponent uploadButton(@Nullable EscapableText title,
+										@Nullable String iconStyleClass,
+										@Nullable String tooltip,
+										@Nonnull String actionName,
+										@Nullable Integer pixelWidth,
+										@Nullable Integer pixelHeight,
+										@Nullable Boolean clientValidation,
+										@Nullable EscapableText confirmationText,
+										@Nullable String disabled,
+										@Nullable String formDisabled,
+										@Nullable String invisible,
 										boolean useDialog) {
 		return uploadButton(title,
 								iconStyleClass,
@@ -5022,18 +5022,18 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 	 * @return configured command link; never {@code null}
 	 */
 	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
-	protected CommandLink downloadLink(EscapableText title,
-										String tooltip,
-										String actionName,
-										String dataWidgetBinding,
-										String dataWidgetVar,
-										Integer pixelWidth,
-										EscapableText confirmationText,
-										String disabled,
-										String formDisabled,
-										String invisible,
-										String processOverride,
-										String updateOverride) {
+	protected @Nonnull CommandLink downloadLink(@Nullable EscapableText title,
+										@Nullable String tooltip,
+										@Nonnull String actionName,
+										@Nullable String dataWidgetBinding,
+										@Nullable String dataWidgetVar,
+										@Nullable Integer pixelWidth,
+										@Nullable EscapableText confirmationText,
+										@Nullable String disabled,
+										@Nullable String formDisabled,
+										@Nullable String invisible,
+										@Nullable String processOverride,
+										@Nullable String updateOverride) {
 		CommandLink result = (CommandLink) a.createComponent(CommandLink.COMPONENT_TYPE);
 
 		addCommandLinkText(result, title);
@@ -5083,22 +5083,22 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 	 * @return configured command link; never {@code null}
 	 */
 	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
-	protected CommandLink actionLink(EscapableText title,
-										String tooltip,
-										ImplicitActionName implicitActionName,
-										String actionName,
+	protected @Nonnull CommandLink actionLink(@Nullable EscapableText title,
+										@Nullable String tooltip,
+										@Nullable ImplicitActionName implicitActionName,
+										@Nullable String actionName,
 										boolean inline,
-										String dataWidgetBinding,
-										String dataWidgetVar,
-										Integer pixelWidth,
-										Integer pixelHeight,
-										Boolean clientValidation,
-										EscapableText confirmationText,
-										String disabled,
-										String formDisabled,
-										String invisible,
-										String processOverride,
-										String updateOverride) {
+										@Nullable String dataWidgetBinding,
+										@Nullable String dataWidgetVar,
+										@Nullable Integer pixelWidth,
+										@Nullable Integer pixelHeight,
+										@Nullable Boolean clientValidation,
+										@Nullable EscapableText confirmationText,
+										@Nullable String disabled,
+										@Nullable String formDisabled,
+										@Nullable String invisible,
+										@Nullable String processOverride,
+										@Nullable String updateOverride) {
 		CommandLink result = (CommandLink) a.createComponent(CommandLink.COMPONENT_TYPE);
 
 		addCommandLinkText(result, title);
@@ -5123,13 +5123,13 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		return result;
 	}
 
-	private void action(UICommand command,
-							ImplicitActionName implicitActionName,
-							String actionName,
-							String collectionBinding,
-							String dataWidgetVar,
+	private void action(@Nonnull UICommand command,
+							@Nullable ImplicitActionName implicitActionName,
+							@Nullable String actionName,
+							@Nullable String collectionBinding,
+							@Nullable String dataWidgetVar,
 							boolean inline,
-							List<EventAction> eventHandlerActions) {
+							@Nullable List<EventAction> eventHandlerActions) {
 		// Marshall the event actions into strings for the remove EL
 		// NB rerender action represented as true/false for client validation true/false
 		List<String> eventHandlerActionNames = null;
@@ -5177,18 +5177,18 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 	 * @return configured link button; never {@code null}
 	 */
 	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
-	private Button linkButton(String icon,
-								String styleClass,
-								String style,
-								EscapableText value,
-								String title,
-								String href,
-								Integer pixelWidth,
-								Integer pixelHeight,
-								String disabled,
-								String formDisabled,
-								String invisible,
-								String target) {
+	private @Nonnull Button linkButton(@Nullable String icon,
+								@Nullable String styleClass,
+								@Nullable String style,
+								@Nullable EscapableText value,
+								@Nullable String title,
+								@Nonnull String href,
+								@Nullable Integer pixelWidth,
+								@Nullable Integer pixelHeight,
+								@Nullable String disabled,
+								@Nullable String formDisabled,
+								@Nullable String invisible,
+								@Nullable String target) {
 		Button result = button(icon, styleClass, style);
 		result.setValue((value == null) ? null : value.getValue());
 		result.setEscape((value == null) || value.shouldEscape());
@@ -5204,7 +5204,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		return result;
 	}
 
-	private UIOutput columnOutputText(String dataWidgetVar, String binding, boolean escape, Sanitisation sanitise) {
+	private @Nonnull UIOutput columnOutputText(@Nullable String dataWidgetVar, @Nonnull String binding, boolean escape, @Nullable Sanitisation sanitise) {
 		// escape bindings with ' as \' as the binding could be for blurb expressions
 		String sanitisedBinding = ((binding.indexOf('\'') >= 0) ? binding.replace("'", "\\'") : binding);
 		ValueExpression ve = createValueExpressionFromFragment(dataWidgetVar, true, sanitisedBinding, true, null, String.class, escape, sanitise);
@@ -5215,7 +5215,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 	}
 
 	@Override
-	public UIComponent spacer(UIComponent component, org.skyve.impl.metadata.view.widget.Spacer spacer) {
+	public @Nullable UIComponent spacer(@Nullable UIComponent component, @Nonnull org.skyve.impl.metadata.view.widget.Spacer spacer) {
 		if (component != null) {
 			return component;
 		}
@@ -5229,7 +5229,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 	}
 
 	@Override
-	public UIComponent staticImage(UIComponent component, String fileUrl, StaticImage image) {
+	public @Nonnull UIComponent staticImage(@Nullable UIComponent component, @Nonnull String fileUrl, @Nonnull StaticImage image) {
 		if (component != null) {
 			return component;
 		}
@@ -5250,10 +5250,10 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 	}
 
 	@Override
-	public UIComponent dynamicImage(UIComponent component,
-										DynamicImage image,
-										String moduleName,
-										String documentName) {
+	public @Nonnull UIComponent dynamicImage(@Nullable UIComponent component,
+										@Nonnull DynamicImage image,
+										@Nonnull String moduleName,
+										@Nonnull String documentName) {
 		if (component != null) {
 			return component;
 		}
@@ -5294,14 +5294,14 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 	// <div><img/></div> & set the size of the div to what is required
 	// and set the image as width:100%;height:100%;object-fit:contain;
 	@SuppressWarnings("java:S107") // parameter number ok
-	private HtmlPanelGroup contentGraphicImage(Integer pixelWidth,
-												Integer responsiveWidth,
-												Integer percentageWidth,
-												Integer pixelHeight,
-												Integer percentageHeight,
-												String binding,
+	private @Nonnull HtmlPanelGroup contentGraphicImage(@Nullable Integer pixelWidth,
+												@Nullable Integer responsiveWidth,
+												@Nullable Integer percentageWidth,
+												@Nullable Integer pixelHeight,
+												@Nullable Integer percentageHeight,
+												@Nonnull String binding,
 												@Nullable String dataWidgetVar,
-												String phoneResponsiveClass,
+												@Nullable String phoneResponsiveClass,
 												@Nullable String placeholderUploadOnclick) {
 		HtmlPanelGroup result = panelGroup(true, true, true, null, null);
 		setId(result, null);
@@ -5332,10 +5332,10 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		return result;
 	}
 
-	private HtmlOutputLink contentLink(Integer pixelWidth,
-										HorizontalAlignment textAlignment,
+	private @Nonnull HtmlOutputLink contentLink(@Nullable Integer pixelWidth,
+										@Nullable HorizontalAlignment textAlignment,
 										@Nullable String dataWidgetVar,
-										String binding,
+										@Nonnull String binding,
 										@Nullable String emptyOnclick) {
 		HtmlOutputLink result = (HtmlOutputLink) a.createComponent(HtmlOutputLink.COMPONENT_TYPE);
 
@@ -5400,12 +5400,12 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 
 	// TODO do the grids
 
-	protected UIInput checkBoxInput(String dataWidgetVar,
-								String binding,
-								String title,
+	protected @Nonnull UIInput checkBoxInput(@Nullable String dataWidgetVar,
+								@Nullable String binding,
+								@Nullable String title,
 								@Nullable String requiredMessage,
-								String disabled,
-								String formDisabled,
+								@Nullable String disabled,
+								@Nullable String formDisabled,
 								boolean triState) {
 		if (triState) {
 			TriStateCheckbox result = (TriStateCheckbox) input(TriStateCheckbox.COMPONENT_TYPE,
@@ -5423,14 +5423,14 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 	}
 
 	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
-	protected ColorPicker colourPicker(String dataWidgetVar,
-										String binding,
-										String title,
+	protected @Nonnull ColorPicker colourPicker(@Nullable String dataWidgetVar,
+										@Nullable String binding,
+										@Nullable String title,
 										@Nullable String requiredMessage,
-										HorizontalAlignment textAlignment,
-										String disabled,
-										String formDisabled,
-										Integer pixelWidth) {
+										@Nullable HorizontalAlignment textAlignment,
+										@Nullable String disabled,
+										@Nullable String formDisabled,
+										@Nullable Integer pixelWidth) {
 		ColorPicker result = (ColorPicker) input(ColorPicker.COMPONENT_TYPE,
 													dataWidgetVar,
 													binding,
@@ -5443,13 +5443,13 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		return result;
 	}
 
-	private SelectOneMenu selectOneMenu(String dataWidgetVar,
-											String binding,
-											String title,
+	private @Nonnull SelectOneMenu selectOneMenu(@Nullable String dataWidgetVar,
+											@Nullable String binding,
+											@Nullable String title,
 											@Nullable String requiredMessage,
-											String disabled,
-											String formDisabled,
-											Integer pixelWidth) {
+											@Nullable String disabled,
+											@Nullable String formDisabled,
+											@Nullable Integer pixelWidth) {
 		SelectOneMenu result = (SelectOneMenu) input(SelectOneMenu.COMPONENT_TYPE,
 														dataWidgetVar,
 														binding,
@@ -5468,12 +5468,12 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		return result;
 	}
 
-	private SelectOneRadio selectOneRadio(String dataWidgetVar,
-											String binding,
-											String title,
+	private @Nonnull SelectOneRadio selectOneRadio(@Nullable String dataWidgetVar,
+											@Nullable String binding,
+											@Nullable String title,
 											@Nullable String requiredMessage,
-											String disabled,
-											String formDisabled,
+											@Nullable String disabled,
+											@Nullable String formDisabled,
 											boolean horizontal) {
 		SelectOneRadio result = (SelectOneRadio) input(SelectOneRadio.COMPONENT_TYPE,
 														dataWidgetVar,
@@ -5493,22 +5493,22 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 	}
 
 	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
-	protected AutoComplete lookupDescription(String dataWidgetVar,
-												String binding,
-												String title,
+	protected @Nonnull AutoComplete lookupDescription(@Nullable String dataWidgetVar,
+												@Nullable String binding,
+												@Nullable String title,
 												@Nullable String requiredMessage,
-												HorizontalAlignment textAlignment,
-												String disabled,
-												String formDisabled,
-												String displayBinding,
-												QueryDefinition query,
-												List<FilterParameter> filterParameters,
-												List<Parameter> parameters,
-												Integer pixelWidth,
+												@Nullable HorizontalAlignment textAlignment,
+												@Nullable String disabled,
+												@Nullable String formDisabled,
+												@Nonnull String displayBinding,
+												@Nullable QueryDefinition query,
+												@Nonnull List<FilterParameter> filterParameters,
+												@Nonnull List<Parameter> parameters,
+												@Nullable Integer pixelWidth,
 												boolean dontDisplay,
-												Document owningDocument,
-												String modelName,
-												List<LookupDescriptionColumn> dropDownColumns) {
+												@Nonnull Document owningDocument,
+												@Nullable String modelName,
+												@Nonnull List<LookupDescriptionColumn> dropDownColumns) {
 		AutoComplete result = (AutoComplete) input(AutoComplete.COMPONENT_TYPE,
 													dataWidgetVar,
 													binding,
@@ -5588,10 +5588,10 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 	 * Adds projected lookup columns and records the fields eligible for typed searches. 
 	 */
 	@SuppressWarnings({"java:S3776", "java:S135"}) // complexity and multiple loop exits OK here
-	protected void addLookupDropDownColumns(AutoComplete result,
-												List<LookupDescriptionColumn> dropDownColumns,
-												ListModel<Bean> model,
-												Customer customer) {
+	protected void addLookupDropDownColumns(@Nonnull AutoComplete result,
+												@Nonnull List<LookupDescriptionColumn> dropDownColumns,
+												@Nonnull ListModel<Bean> model,
+												@Nonnull Customer customer) {
 		Document document = model.getDrivingDocument();
 		Module module = customer.getModule(document.getOwningModuleName());
 		List<String> filterFields = new ArrayList<>();
@@ -5645,17 +5645,17 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 	}
 
 	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
-	protected AutoComplete complete(String dataWidgetVar,
-										String binding,
-										String title,
+	protected @Nonnull AutoComplete complete(@Nullable String dataWidgetVar,
+										@Nullable String binding,
+										@Nullable String title,
 										@Nullable String requiredMessage,
-										HorizontalAlignment textAlignment,
-										String disabled,
-										Integer length,
-										String formDisabled,
-										CompleteType complete,
-										KeyboardType keyboardType,
-										Integer pixelWidth) {
+										@Nullable HorizontalAlignment textAlignment,
+										@Nullable String disabled,
+										@Nullable Integer length,
+										@Nullable String formDisabled,
+										@Nonnull CompleteType complete,
+										@Nullable KeyboardType keyboardType,
+										@Nullable Integer pixelWidth) {
 		AutoComplete result = (AutoComplete) input(AutoComplete.COMPONENT_TYPE,
 													dataWidgetVar,
 													binding,
@@ -5697,7 +5697,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		return result;
 	}
 
-	protected Button button(String icon, String styleClass, String style) {
+	protected @Nonnull Button button(@Nullable String icon, @Nullable String styleClass, @Nullable String style) {
 		Button result = (Button) a.createComponent(Button.COMPONENT_TYPE);
 		if (icon != null) {
 			result.setIcon(icon);
@@ -5714,13 +5714,13 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 	}
 
 	// this has a customisable toolbar for rich and html skyve editors.
-	private TextEditor editor(String dataWidgetVar,
-							String binding,
-							String title,
+	private @Nonnull TextEditor editor(@Nullable String dataWidgetVar,
+							@Nullable String binding,
+							@Nullable String title,
 							@Nullable String requiredMessage,
-							String disabled,
-							String formDisabled,
-							Sanitisation sanitise) {
+							@Nullable String disabled,
+							@Nullable String formDisabled,
+							@Nullable Sanitisation sanitise) {
 		TextEditor result = (TextEditor) input(TextEditor.COMPONENT_TYPE, dataWidgetVar, binding, title, requiredMessage, disabled, formDisabled);
 		if (sanitise == Sanitisation.none) {
 			result.setSecure(false);
@@ -5750,15 +5750,15 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 	}
 
 	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
-	private DataTable dataTable(String binding,
-									String dataWidgetVar,
-									String invisible,
+	private @Nonnull DataTable dataTable(@Nonnull String binding,
+									@Nullable String dataWidgetVar,
+									@Nullable String invisible,
 									boolean clickToZoom,
-									String[] clickToZoomDisabledConditions,
-									String selectedIdBinding,
-									List<EventAction> selectedActions,
+									@Nullable String[] clickToZoomDisabledConditions,
+									@Nullable String selectedIdBinding,
+									@Nullable List<EventAction> selectedActions,
 									boolean ordered,
-									String widgetId) {
+									@Nullable String widgetId) {
 		DataTable result = (DataTable) a.createComponent(DataTable.COMPONENT_TYPE);
 		setId(result, widgetId);
 		setInvisible(result, invisible, null);
@@ -5820,7 +5820,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		return result;
 	}
 
-	protected DataList dataList(String binding, String dataWidgetVar, String invisible, String widgetId) {
+	protected @Nonnull DataList dataList(@Nonnull String binding, @Nullable String dataWidgetVar, @Nullable String invisible, @Nullable String widgetId) {
 		DataList result = (DataList) a.createComponent(DataList.COMPONENT_TYPE);
 		setId(result, widgetId);
 		setInvisible(result, invisible, null);
@@ -5831,7 +5831,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		return result;
 	}
 
-	protected AccordionPanel accordionPanel(String invisible, String widgetId) {
+	protected @Nonnull AccordionPanel accordionPanel(@Nullable String invisible, @Nullable String widgetId) {
 		AccordionPanel result = (AccordionPanel) a.createComponent(AccordionPanel.COMPONENT_TYPE);
 		setId(result, widgetId);
 		setInvisible(result, invisible, null);
@@ -5857,13 +5857,13 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 	 * @param pixelWidth optional fixed width in pixels
 	 * @return configured column; never {@code null}
 	 */
-	private Column column(String dataWidgetVar,
-							String sortBinding,
-							String title,
+	private @Nonnull Column column(@Nullable String dataWidgetVar,
+							@Nullable String sortBinding,
+							@Nullable String title,
 							boolean escapeTitle,
-							HorizontalAlignment alignment,
+							@Nullable HorizontalAlignment alignment,
 							boolean noWrap,
-							Integer pixelWidth) {
+							@Nullable Integer pixelWidth) {
 		Column result = (Column) a.createComponent(Column.COMPONENT_TYPE);
 		setId(result, null);
 
@@ -5898,10 +5898,10 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		return result;
 	}
 
-	private UISelectItems selectItems(String moduleName,
-										String documentName,
-										String dataWidgetVar,
-										String binding,
+	private @Nonnull UISelectItems selectItems(@Nullable String moduleName,
+										@Nullable String documentName,
+										@Nullable String dataWidgetVar,
+										@Nullable String binding,
 										boolean includeEmptyItems) {
 		UISelectItems result = (UISelectItems) a.createComponent(UISelectItems.COMPONENT_TYPE);
 		setId(result, null);
@@ -5929,13 +5929,13 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		return result;
 	}
 
-	private UIInput input(String componentType,
-							String dataWidgetVar,
-							String binding,
-							String title,
+	private @Nonnull UIInput input(@Nonnull String componentType,
+							@Nullable String dataWidgetVar,
+							@Nullable String binding,
+							@Nullable String title,
 							@Nullable String requiredMessage,
-							String disabled,
-							String formDisabled) {
+							@Nullable String disabled,
+							@Nullable String formDisabled) {
 		boolean required = (requiredMessage != null);
 		UIInput result = (UIInput) a.createComponent(componentType);
 		setId(result, null);
@@ -5975,7 +5975,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 	 * @param button command button receiving visible text; must not be {@code null}
 	 * @param text raw metadata text and resolved escape decision; may be {@code null}
 	 */
-	private static void setCommandButtonText(CommandButton button, EscapableText text) {
+	private static void setCommandButtonText(@Nonnull CommandButton button, @Nullable EscapableText text) {
 		button.setValue((text == null) ? null : text.getValue());
 		button.setEscape((text == null) || text.shouldEscape());
 	}
@@ -5989,7 +5989,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 	 * @param link command link receiving visible child text; must not be {@code null}
 	 * @param text raw metadata text and resolved escape decision; may be {@code null}
 	 */
-	private void addCommandLinkText(CommandLink link, EscapableText text) {
+	private void addCommandLinkText(@Nonnull CommandLink link, @Nullable EscapableText text) {
 		if ((text != null) && (text.getValue() != null)) {
 			link.getChildren().add(outputText(text));
 		}
@@ -6006,11 +6006,11 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 	 * @param component component receiving the behaviour; must not be {@code null}
 	 * @param confirmationText raw confirmation text and resolved escape decision; may be {@code null}
 	 */
-	private void setConfirmation(UIComponentBase component, EscapableText confirmationText) {
+	private void setConfirmation(@Nonnull UIComponentBase component, @Nullable EscapableText confirmationText) {
 		addConfirmBehavior(component, confirmationText);
 	}
 
-	protected void setValueOrValueExpression(String value, Consumer<String> valueSetter, String valueExpressionName, UIComponent component) {
+	protected void setValueOrValueExpression(@Nullable String value, @Nonnull Consumer<String> valueSetter, @Nonnull String valueExpressionName, @Nonnull UIComponent component) {
 		setValueOrValueExpression(value, false, valueSetter, valueExpressionName, component);
 	}
 
@@ -6030,7 +6030,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 	 *        to allow trusted markup
 	 * @return the added output-text facet, or {@code null} when no text value is present
 	 */
-	protected HtmlOutputText putOutputTextFacetValueOrValueExpression(UIComponent component, String facetName, String value, boolean escape) {
+	protected @Nullable HtmlOutputText putOutputTextFacetValueOrValueExpression(@Nonnull UIComponent component, @Nonnull String facetName, @Nullable String value, boolean escape) {
 		if (value == null) {
 			return null;
 		}
@@ -6058,7 +6058,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 	 * @param fallback renderer-owned caption text used when the metadata value is {@code null}
 	 * @return caption text and escape decision; never {@code null}
 	 */
-	private static EscapableText defaultedCaption(EscapableText caption, String fallback) {
+	private static @Nonnull EscapableText defaultedCaption(@Nullable EscapableText caption, @Nonnull String fallback) {
 		if ((caption == null) || (caption.getValue() == null)) {
 			return EscapableText.of(fallback, true);
 		}
@@ -6076,7 +6076,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 	 * @param valueExpressionName component property name for expression values
 	 * @param component component receiving expression values
 	 */
-	protected void setValueOrValueExpression(String value, boolean escape, Consumer<String> valueSetter, String valueExpressionName, UIComponent component) {
+	protected void setValueOrValueExpression(@Nullable String value, boolean escape, @Nonnull Consumer<String> valueSetter, @Nonnull String valueExpressionName, @Nonnull UIComponent component) {
 		if (value != null && value.indexOf('{') > -1) {
 			final String sanitisedBinding = ((value.indexOf('\'') >= 0) ? value.replace("'", "\\'") : value);
 			final ValueExpression ve = createValueExpressionFromFragment(sanitisedBinding,

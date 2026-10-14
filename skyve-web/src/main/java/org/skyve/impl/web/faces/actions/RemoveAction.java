@@ -21,6 +21,9 @@ import org.skyve.util.monitoring.RequestKey;
 import org.skyve.web.WebContext;
 import org.slf4j.Logger;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Remove an element from an array.
  * The onRemovedHandlers event actions are processed here also.
@@ -42,10 +45,10 @@ public class RemoveAction extends FacesAction<Void> {
 	 * @param elementBizId the selected element business ID for inline removal
 	 * @param removedHandlerActionNames post-remove handler actions to execute
 	 */
-	public RemoveAction(FacesView facesView,
-							String collectionName,
-							String elementBizId,
-							List<String> removedHandlerActionNames) {
+	public RemoveAction(@Nonnull FacesView facesView,
+							@Nullable String collectionName,
+							@Nullable String elementBizId,
+							@Nullable List<String> removedHandlerActionNames) {
 		this.facesView = facesView;
 		this.collectionName = collectionName;
 		this.elementBizId = elementBizId;
@@ -64,7 +67,7 @@ public class RemoveAction extends FacesAction<Void> {
 	 */
 	@Override
 	@SuppressWarnings("java:S3776") // Complexity OK
-	public Void callback() throws Exception {
+	public @Nullable Void callback() throws Exception {
 		if (UtilImpl.FACES_TRACE) FACES_LOGGER.info("RemoveAction - collectionName={} : elementBizId={}", collectionName, elementBizId);
 
 		Bean bean = facesView.getBean();

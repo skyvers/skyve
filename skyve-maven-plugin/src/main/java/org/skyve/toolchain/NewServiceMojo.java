@@ -25,6 +25,7 @@ import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeSpec;
 
+import jakarta.annotation.Nonnull;
 import jakarta.enterprise.inject.Default;
 import jakarta.inject.Inject;
 
@@ -136,7 +137,7 @@ public class NewServiceMojo extends NewDocumentMojo {
 	 *
 	 * @return the extension class name
 	 */
-	private String getExtensionName() {
+	private @Nonnull String getExtensionName() {
 		return documentName + "Extension";
 	}
 
@@ -145,7 +146,7 @@ public class NewServiceMojo extends NewDocumentMojo {
 	 *
 	 * @return the service source file path
 	 */
-	private Path getServiceClassPath() {
+	private @Nonnull Path getServiceClassPath() {
 		return Paths.get(srcDir, "modules", moduleName, documentName, documentName + "Service.java");
 	}
 }

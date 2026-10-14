@@ -71,7 +71,7 @@ public class DesktopView extends HarnessView {
 	 *
 	 * @return locale bootstrap script markup, or {@code null}
 	 */
-	public String getLocaleScript() {
+	public @Nullable String getLocaleScript() {
 		return localeScript;
 	}
 	
@@ -82,7 +82,7 @@ public class DesktopView extends HarnessView {
 	 *
 	 * @return generated desktop menu bootstrap script, or {@code null}
 	 */
-	public String getMenuScript() {
+	public @Nullable String getMenuScript() {
 		return menuScript;
 	}
 	
@@ -93,7 +93,7 @@ public class DesktopView extends HarnessView {
 	 *
 	 * @return generated SmartClient datasource bootstrap script, or {@code null}
 	 */
-	public String getDataSourceScript() {
+	public @Nullable String getDataSourceScript() {
 		return dataSourceScript;
 	}
 	
@@ -104,7 +104,7 @@ public class DesktopView extends HarnessView {
 	 *
 	 * @return generated initial UI action script, or {@code null}
 	 */
-	public String getUiScript() {
+	public @Nullable String getUiScript() {
 		return uiScript;
 	}
 	
@@ -115,7 +115,7 @@ public class DesktopView extends HarnessView {
 	 *
 	 * @return generated environment banner script, or {@code null}
 	 */
-	public String getBannerScript() {
+	public @Nullable String getBannerScript() {
 		return bannerScript;
 	}
 
@@ -125,7 +125,7 @@ public class DesktopView extends HarnessView {
 	 * @return SmartClient base directory
 	 */
 	@SuppressWarnings("static-method")
-	public String getSmartClientDir() {
+	public @Nonnull String getSmartClientDir() {
 		return UtilImpl.SMART_CLIENT_DIR;
 	}
 
@@ -136,7 +136,7 @@ public class DesktopView extends HarnessView {
 	 *
 	 * @return SmartClient skin name, or {@code null}
 	 */
-	public String getSkin() {
+	public @Nullable String getSkin() {
 		return skin;
 	}
 	
@@ -149,7 +149,7 @@ public class DesktopView extends HarnessView {
         if (! fc.isPostback()) {
         	new FacesAction<Void>() {
 				@Override
-				public Void callback() throws Exception {
+				public @Nullable Void callback() throws Exception {
 			    	UserImpl user = (UserImpl) CORE.getUser();
 			    	Customer customer = user.getCustomer();
 			    	
@@ -241,7 +241,7 @@ public class DesktopView extends HarnessView {
 	 *
 	 * @return header template HTML
 	 */
-	public String getHeaderTemplate() {
+	public @Nonnull String getHeaderTemplate() {
 		StringBuilder result = new StringBuilder(256);
 		result.append("<table class=\"skyveHeaderTable\">");
 		result.append("<tr>");
@@ -478,9 +478,9 @@ public class DesktopView extends HarnessView {
 	 * @param result buffer that receives the generated script
 	 */
 	@SuppressWarnings("java:S3776") // Complexity OK
-	private void constructMenu(String chosenModuleName,
-								String uxui,
-								StringBuilder result) {
+	private void constructMenu(@Nullable String chosenModuleName,
+								@Nonnull String uxui,
+								@Nonnull StringBuilder result) {
 		result.append("isc.BizUtil.init('../").append(getLogoRelativeFileNameUrl());
 		result.append("',[");
 
@@ -490,7 +490,7 @@ public class DesktopView extends HarnessView {
 			 * Starts rendering a module menu descriptor.
 			 */
 			@Override
-			public void renderModuleMenu(Menu menu, Module menuModule, boolean open) {
+			public void renderModuleMenu(@Nonnull Menu menu, @Nonnull Module menuModule, boolean open) {
 				result.append("{name:'");
 				result.append(menuModule.getName());
 				result.append("',");
@@ -503,7 +503,7 @@ public class DesktopView extends HarnessView {
 			 * Starts rendering the root menu node for a module.
 			 */
 			@Override
-			public void renderMenuRoot(Menu menu, Module menuModule) {
+			public void renderMenuRoot(@Nonnull Menu menu, @Nonnull Module menuModule) {
 				result.append("root:{name:'");
 				result.append(OWASP.escapeJsStringWithHtmlFormatting(menuModule.getName()));
 				result.append("',sub:[");
@@ -513,31 +513,31 @@ public class DesktopView extends HarnessView {
 			 * Starts rendering a menu-group node.
 			 */
 			@Override
-			public void renderMenuGroup(MenuGroup group, Module menuModule) {
+			public void renderMenuGroup(@Nonnull MenuGroup group, @Nonnull Module menuModule) {
 				result.append("{desc:'");
 				result.append(OWASP.escapeJsStringWithHtmlFormatting(group.getLocalisedName()));
 				result.append("', sub:[");
 			}
 			
 			@Override
-			public void renderCalendarItem(CalendarItem item,
-											Module menuModule,
-											Module itemModule,
-											Document itemDocument,
-											String itemQueryName,
-											String icon16,
-											String iconStyleClass) {
+			public void renderCalendarItem(@Nonnull CalendarItem item,
+											@Nonnull Module menuModule,
+											@Nonnull Module itemModule,
+											@Nonnull Document itemDocument,
+											@Nullable String itemQueryName,
+											@Nullable String icon16,
+											@Nullable String iconStyleClass) {
 				result.append("{name:'").append(itemQueryName);
 				renderItem(item.getLocalisedName(), icon16, iconStyleClass, null, "cal", itemModule, itemDocument);
 			}
 			
 			@Override
-			public void renderEditItem(EditItem item,
-										Module menuModule,
-										Module itemModule,
-										Document itemDocument,
-										String icon16,
-										String iconStyleClass) {
+			public void renderEditItem(@Nonnull EditItem item,
+										@Nonnull Module menuModule,
+										@Nonnull Module itemModule,
+										@Nonnull Document itemDocument,
+										@Nullable String icon16,
+										@Nullable String iconStyleClass) {
 				result.append("{name:'").append(itemDocument.getName());
 				String menuModuleName = menuModule.getName();
 				String itemModuleName = itemModule.getName();
@@ -548,22 +548,22 @@ public class DesktopView extends HarnessView {
 			}
 			
 			@Override
-			public void renderLinkItem(LinkItem item,
-										Module menuModule,
+			public void renderLinkItem(@Nonnull LinkItem item,
+										@Nonnull Module menuModule,
 										boolean relative,
-										String absoluteHref) {
+										@Nonnull String absoluteHref) {
 				result.append("{name:'").append(absoluteHref);
 				renderItem(item.getLocalisedName(), null, null, null, "link", null, null);
 			}
 			
 			@Override
-			public void renderListItem(ListItem item,
-										Module menuModule,
-										Module itemModule,
-										Document itemDocument,
-										String itemQueryName,
-										String icon16,
-										String iconStyleClass) {
+			public void renderListItem(@Nonnull ListItem item,
+										@Nonnull Module menuModule,
+										@Nonnull Module itemModule,
+										@Nonnull Document itemDocument,
+										@Nullable String itemQueryName,
+										@Nullable String icon16,
+										@Nullable String iconStyleClass) {
 				result.append("{name:'");
 				String modelName = item.getModelName();
 				if (modelName != null) {
@@ -582,13 +582,13 @@ public class DesktopView extends HarnessView {
 			}
 			
 			@Override
-			public void renderMapItem(MapItem item,
-										Module menuModule,
-										Module itemModule,
-										Document itemDocument,
-										String itemQueryName, 
-										String icon16,
-										String iconStyleClass) {
+			public void renderMapItem(@Nonnull MapItem item,
+										@Nonnull Module menuModule,
+										@Nonnull Module itemModule,
+										@Nonnull Document itemDocument,
+										@Nullable String itemQueryName, 
+										@Nullable String icon16,
+										@Nullable String iconStyleClass) {
 				result.append("{name:'");
 				String modelName = item.getModelName();
 				if (modelName != null) {
@@ -602,13 +602,13 @@ public class DesktopView extends HarnessView {
 			}
 			
 			@Override
-			public void renderTreeItem(TreeItem item,
-										Module menuModule,
-										Module itemModule,
-										Document itemDocument,
-										String itemQueryName,
-										String icon16,
-										String iconStyleClass) {
+			public void renderTreeItem(@Nonnull TreeItem item,
+										@Nonnull Module menuModule,
+										@Nonnull Module itemModule,
+										@Nonnull Document itemDocument,
+										@Nullable String itemQueryName,
+										@Nullable String icon16,
+										@Nullable String iconStyleClass) {
 				result.append("{name:'");
 				String modelName = item.getModelName();
 				if (modelName != null) {
@@ -626,13 +626,13 @@ public class DesktopView extends HarnessView {
 							itemDocument);
 			}
 			
-			private void renderItem(String name,
-										String icon16,
-										String iconStyleClass,
-										String config,
-										String ref,
-										Module itemModule,
-										Document itemDocument) {
+			private void renderItem(@Nullable String name,
+										@Nullable String icon16,
+										@Nullable String iconStyleClass,
+										@Nullable String config,
+										@Nonnull String ref,
+										@Nullable Module itemModule,
+										@Nullable Document itemDocument) {
 				result.append("',desc:'");
 				if (iconStyleClass != null) {
 					result.append("<i class=\"bizhubFontIcon ").append(iconStyleClass).append("\"></i>");
@@ -661,7 +661,7 @@ public class DesktopView extends HarnessView {
 			 * Finalizes a rendered menu-group node.
 			 */
 			@Override
-			public void renderedMenuGroup(MenuGroup group, Module menuModule) {
+			public void renderedMenuGroup(@Nonnull MenuGroup group, @Nonnull Module menuModule) {
 				result.setLength(result.length() - 1);
 				result.append("]},");
 			}
@@ -670,7 +670,7 @@ public class DesktopView extends HarnessView {
 			 * Finalizes the rendered root menu node.
 			 */
 			@Override
-			public void renderedMenuRoot(Menu menu, Module menuModule) {
+			public void renderedMenuRoot(@Nonnull Menu menu, @Nonnull Module menuModule) {
 				result.setLength(result.length() -1); // remove the last comma
 				result.append("]}");
 			}
@@ -679,7 +679,7 @@ public class DesktopView extends HarnessView {
 			 * Finalizes a rendered module menu descriptor.
 			 */
 			@Override
-			public void renderedModuleMenu(Menu menu, Module menuModule, boolean open) {
+			public void renderedModuleMenu(@Nonnull Menu menu, @Nonnull Module menuModule, boolean open) {
 				result.append(",open:").append(open).append("},");
 			}
 		}.render(requireUser());
@@ -706,7 +706,7 @@ public class DesktopView extends HarnessView {
 	 * @param uxui UX/UI name used to resolve the menu structure
 	 * @param result buffer that receives the generated script
 	 */
-	private static void listDataSources(Customer customer, UserImpl user, String uxui, StringBuilder result) {
+	private static void listDataSources(@Nonnull Customer customer, @Nonnull UserImpl user, @Nonnull String uxui, @Nonnull StringBuilder result) {
 		StringBuilder dataSources = new StringBuilder(1024);
 
 		result.append(",[");
@@ -745,14 +745,14 @@ public class DesktopView extends HarnessView {
 	 * @param visitedQueryNames set used to avoid duplicate query definitions
 	 */
 	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
-	private static void listDataSourcesForMenuItems(UserImpl user,
-														Customer customer, 
-														String moduleName, 
-														Module module, 
-														List<MenuItem> items,
-														String uxui,
-														StringBuilder dataSources,
-														Set<String> visitedQueryNames) {
+	private static void listDataSourcesForMenuItems(@Nonnull UserImpl user,
+														@Nonnull Customer customer, 
+														@Nonnull String moduleName, 
+														@Nonnull Module module, 
+														@Nonnull List<MenuItem> items,
+														@Nonnull String uxui,
+														@Nonnull StringBuilder dataSources,
+														@Nonnull Set<String> visitedQueryNames) {
 		for (MenuItem item : items) {
 			if (item instanceof MenuGroup group) {
 				listDataSourcesForMenuItems(user, customer, moduleName, module, group.getItems(), uxui, dataSources, visitedQueryNames);

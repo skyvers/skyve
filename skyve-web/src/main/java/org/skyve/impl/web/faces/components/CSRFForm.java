@@ -7,6 +7,7 @@ import org.primefaces.component.autoupdate.AutoUpdateListener;
 import org.primefaces.component.outputpanel.OutputPanel;
 import org.skyve.util.Util;
 
+import jakarta.annotation.Nonnull;
 import jakarta.el.ELContext;
 import jakarta.el.ExpressionFactory;
 import jakarta.faces.FacesException;
@@ -31,7 +32,7 @@ public class CSRFForm extends HtmlForm {
 	}
 
 	@Override
-	public void encodeBegin(FacesContext context) throws IOException {
+	public void encodeBegin(@Nonnull FacesContext context) throws IOException {
 		List<UIComponent> children = getChildren();
 		if (children.isEmpty() || (! (children.get(0) instanceof OutputPanel))) {
 			FacesContext fc = FacesContext.getCurrentInstance();

@@ -5,6 +5,8 @@ import org.primefaces.model.DualListModel;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.model.document.Bizlet.DomainValue;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.faces.component.UIComponent;
 import jakarta.faces.context.FacesContext;
 import jakarta.faces.convert.Converter;
@@ -22,7 +24,7 @@ public class AssociationPickListConverter implements Converter<DomainValue> {
 	 * @return the matching domain value, or {@code null} when no match is found
 	 */
     @Override
-    public DomainValue getAsObject(FacesContext context, UIComponent component, String value) {
+    public @Nullable DomainValue getAsObject(@Nullable FacesContext context, @Nonnull UIComponent component, @Nullable String value) {
 		DomainValue result = null;
 
 		final String processedValue = UtilImpl.processStringValue(value);
@@ -59,7 +61,7 @@ public class AssociationPickListConverter implements Converter<DomainValue> {
 	 * @return the domain value code, or an empty string when the value is {@code null}
 	 */
     @Override
-    public String getAsString(FacesContext context, UIComponent component, DomainValue value) {
+    public @Nonnull String getAsString(@Nullable FacesContext context, @Nullable UIComponent component, @Nullable DomainValue value) {
     	return (value == null) ? "" : value.getCode();
     }
 }

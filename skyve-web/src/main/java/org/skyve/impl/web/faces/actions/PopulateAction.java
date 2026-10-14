@@ -13,6 +13,9 @@ import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.util.logging.Category;
 import org.slf4j.Logger;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Just set the state of the list bean up - but do not load any data
  */
@@ -26,7 +29,7 @@ public class PopulateAction extends FacesAction<Void> {
 	 *
 	 * @param facesView the current Faces view context
 	 */
-	public PopulateAction(FacesView facesView) {
+	public PopulateAction(@Nonnull FacesView facesView) {
 		this.facesView = facesView;
 	}
 	
@@ -42,7 +45,7 @@ public class PopulateAction extends FacesAction<Void> {
 	 * @throws Exception if metadata resolution fails while loading module, document, or query details
 	 */
 	@Override
-	public Void callback() throws Exception {
+	public @Nullable Void callback() throws Exception {
 		if (UtilImpl.FACES_TRACE) FACES_LOGGER.info("PopulateAction");
 
 		String bizModule = facesView.getBizModuleParameter();

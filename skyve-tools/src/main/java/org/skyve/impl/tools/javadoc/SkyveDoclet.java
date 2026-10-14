@@ -1,5 +1,7 @@
 package org.skyve.impl.tools.javadoc;
 
+import jakarta.annotation.Nullable;
+
 //import java.io.BufferedReader;
 //import java.io.BufferedWriter;
 //import java.io.File;
@@ -51,7 +53,7 @@ public class SkyveDoclet {
 	 * @return {@code 0} in Java 11+ compatibility mode
 	 */
 	@SuppressWarnings("unused")
-	public static int optionLength(String option) {
+	public static int optionLength(@Nullable String option) {
 //		int result = Standard.optionLength(option);
 //		if (result != 0) {
 //			return result;

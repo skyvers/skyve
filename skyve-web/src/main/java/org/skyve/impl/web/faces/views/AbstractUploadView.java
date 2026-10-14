@@ -82,7 +82,7 @@ public abstract class AbstractUploadView extends LocalisableView {
 	 *
 	 * @return the upload context identifier
 	 */
-	public String getContext() {
+	public @Nullable String getContext() {
 		return context;
 	}
 
@@ -91,7 +91,7 @@ public abstract class AbstractUploadView extends LocalisableView {
 	 *
 	 * @return the binding expression
 	 */
-	public String getBinding() {
+	public @Nullable String getBinding() {
 		return binding;
 	}
 
@@ -110,7 +110,7 @@ public abstract class AbstractUploadView extends LocalisableView {
 	 * @return the application base URL
 	 */
 	@SuppressWarnings("static-method")
-	public final String getBaseHref() {
+	public final @Nonnull String getBaseHref() {
 		return Util.getBaseUrl();
 	}
 
@@ -119,7 +119,7 @@ public abstract class AbstractUploadView extends LocalisableView {
 	 *
 	 * @return the whitelist regex, or {@code null} when unrestricted by regex
 	 */
-	public String getWhitelistRegex() {
+	public @Nullable String getWhitelistRegex() {
 		return whitelistRegex;
 	}
 

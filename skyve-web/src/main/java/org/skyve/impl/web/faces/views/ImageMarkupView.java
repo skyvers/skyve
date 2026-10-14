@@ -33,6 +33,7 @@ import org.skyve.util.Util;
 import org.skyve.web.WebContext;
 
 import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.RequestScoped;
 import jakarta.faces.application.FacesMessage;
@@ -74,7 +75,7 @@ public class ImageMarkupView extends LocalisableView {
 	 * @return base URL
 	 */
 	@SuppressWarnings("static-method")
-	public final String getBaseHref() {
+	public final @Nonnull String getBaseHref() {
 		return Util.getBaseUrl();
 	}
 
@@ -84,7 +85,7 @@ public class ImageMarkupView extends LocalisableView {
 	public void preRender() {
 		new FacesAction<Void>() {
 			@Override
-			public Void callback() throws Exception {
+			public @Nullable Void callback() throws Exception {
 				if (! FacesContext.getCurrentInstance().isPostback()) {
 					initialise();
 					process(false);
@@ -108,7 +109,7 @@ public class ImageMarkupView extends LocalisableView {
 	 *
 	 * @return conversation context parameter, or {@code null}
 	 */
-	public String getContextParameter() {
+	public @Nullable String getContextParameter() {
 		return contextParameter;
 	}
 
@@ -117,7 +118,7 @@ public class ImageMarkupView extends LocalisableView {
 	 *
 	 * @param contextParameter the conversation context key
 	 */
-	public void setContextParameter(String contextParameter) {
+	public void setContextParameter(@Nullable String contextParameter) {
 		this.contextParameter = OWASP.sanitise(Sanitisation.text, UtilImpl.processStringValue(contextParameter));
 	}
 
@@ -126,7 +127,7 @@ public class ImageMarkupView extends LocalisableView {
 	 *
 	 * @return bean binding parameter, or {@code null}
 	 */
-	public String getBindingParameter() {
+	public @Nullable String getBindingParameter() {
 		return bindingParameter;
 	}
 
@@ -135,7 +136,7 @@ public class ImageMarkupView extends LocalisableView {
 	 *
 	 * @param bindingParameter the binding path parameter
 	 */
-	public void setBindingParameter(String bindingParameter) {
+	public void setBindingParameter(@Nullable String bindingParameter) {
 		this.bindingParameter = OWASP.sanitise(Sanitisation.text, UtilImpl.processStringValue(bindingParameter));
 
 	}
@@ -145,7 +146,7 @@ public class ImageMarkupView extends LocalisableView {
 	 *
 	 * @return content binding parameter, or {@code null}
 	 */
-	public String getContentBindingParameter() {
+	public @Nullable String getContentBindingParameter() {
 		return contentBindingParameter;
 	}
 
@@ -154,7 +155,7 @@ public class ImageMarkupView extends LocalisableView {
 	 *
 	 * @param contentBindingParameter the content binding path
 	 */
-	public void setContentBindingParameter(String contentBindingParameter) {
+	public void setContentBindingParameter(@Nullable String contentBindingParameter) {
 		this.contentBindingParameter = OWASP.sanitise(Sanitisation.text, UtilImpl.processStringValue(contentBindingParameter));
 	}
 
@@ -163,7 +164,7 @@ public class ImageMarkupView extends LocalisableView {
 	 *
 	 * @return content ID parameter, or {@code null}
 	 */
-	public String getContentIdParameter() {
+	public @Nullable String getContentIdParameter() {
 		return contentIdParameter;
 	}
 
@@ -172,7 +173,7 @@ public class ImageMarkupView extends LocalisableView {
 	 *
 	 * @param contentIdParameter the content ID parameter
 	 */
-	public void setContentIdParameter(String contentIdParameter) {
+	public void setContentIdParameter(@Nullable String contentIdParameter) {
 		this.contentIdParameter = OWASP.sanitise(Sanitisation.text, UtilImpl.processStringValue(contentIdParameter));
 	}
 
@@ -183,7 +184,7 @@ public class ImageMarkupView extends LocalisableView {
 	 *
 	 * @return the module-document identifier for content retrieval
 	 */
-	public String getModuleDocument() {
+	public @Nullable String getModuleDocument() {
 		return moduleDocument;
 	}
 
@@ -214,7 +215,7 @@ public class ImageMarkupView extends LocalisableView {
 	 *
 	 * @return the content download URL used as the Excalidraw background
 	 */
-	public String getBackgroundUrl() {
+	public @Nonnull String getBackgroundUrl() {
 		StringBuilder result = new StringBuilder(64);
 		result.append(getBaseHref()).append("content?_nm&_n=").append(contentIdParameter);
 		result.append("&_doc=").append(moduleDocument);
@@ -230,7 +231,7 @@ public class ImageMarkupView extends LocalisableView {
 	 *
 	 * @return newly-created content ID, or {@code null}
 	 */
-	public String getNewContentId() {
+	public @Nullable String getNewContentId() {
 		return newContentId;
 	}
 
@@ -239,7 +240,7 @@ public class ImageMarkupView extends LocalisableView {
 	 *
 	 * @param newContentId the new persisted content ID
 	 */
-	public void setNewContentId(String newContentId) {
+	public void setNewContentId(@Nullable String newContentId) {
 		this.newContentId = newContentId;
 	}
 
@@ -251,7 +252,7 @@ public class ImageMarkupView extends LocalisableView {
 	 *
 	 * @return SVG payload, or {@code null}
 	 */
-	public String getSvg() {
+	public @Nullable String getSvg() {
 		return svg;
 	}
 
@@ -260,7 +261,7 @@ public class ImageMarkupView extends LocalisableView {
 	 *
 	 * @param svg the SVG markup payload
 	 */
-	public void setSvg(String svg) {
+	public void setSvg(@Nullable String svg) {
 		this.svg = svg;
 	}
 

@@ -18,6 +18,8 @@ import org.skyve.metadata.user.User;
 import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.web.WebContext;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.el.MethodExpression;
 import jakarta.faces.component.UIComponent;
 import jakarta.faces.component.UIOutput;
@@ -26,15 +28,15 @@ import jakarta.faces.component.html.HtmlPanelGroup;
 public class VueListGridComponentBuilder extends NoOpComponentBuilder {
 	@Override
 	@SuppressWarnings("java:S3776") // Complexity OK
-	public UIComponent listGrid(UIComponent component,
-									String moduleName,
-									String documentName,
-									String modelName,
-									String uxui,
-									ListModel<Bean> model,
-									Document owningDocument,
-									ListGrid grid,
-									String stickyHeaderAnchorSelector,
+	public @Nonnull UIComponent listGrid(@Nullable UIComponent component,
+									@Nonnull String moduleName,
+									@Nullable String documentName,
+									@Nullable String modelName,
+									@Nonnull String uxui,
+									@Nonnull ListModel<Bean> model,
+									@Nullable Document owningDocument,
+									@Nonnull ListGrid grid,
+									@Nullable String stickyHeaderAnchorSelector,
 									boolean aggregateQuery) {
 		if (component != null) {
 			return component;
@@ -134,7 +136,7 @@ public class VueListGridComponentBuilder extends NoOpComponentBuilder {
 	 * @param modelName
 	 * @return	The method expression
 	 */
-	private MethodExpression createSelectedExpression(String selectedIdBinding, String actionName, String modelName) {
+	private @Nonnull MethodExpression createSelectedExpression(@Nonnull String selectedIdBinding, @Nullable String actionName, @Nullable String modelName) {
 		// Note source should only be defined when this is a rerender
 		String source = null;
 		if (TRUE.toString().equals(actionName) || FALSE.toString().equals(actionName)) {
@@ -154,7 +156,7 @@ public class VueListGridComponentBuilder extends NoOpComponentBuilder {
 	}
 
 	@Override
-	public UIComponent listGridContextMenu(UIComponent component, String listGridId, ListGrid listGrid) {
+	public @Nonnull UIComponent listGridContextMenu(@Nullable UIComponent component, @Nonnull String listGridId, @Nonnull ListGrid listGrid) {
 
 		UIOutput empty = new UIOutput();
 		empty.setValue("");

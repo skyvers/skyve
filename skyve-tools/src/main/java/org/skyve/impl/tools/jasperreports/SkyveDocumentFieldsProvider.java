@@ -20,6 +20,9 @@ import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JRField;
 import net.sf.jasperreports.engine.design.JRDesignField;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Resolves JasperReports fields from a Skyve document identifier.
  *
@@ -38,7 +41,7 @@ public class SkyveDocumentFieldsProvider implements FieldsProvider {
 	 * @throws JRException if query design fails
      */
     @Override
-	public String designQuery(IReportConnection connection, String query, ReportQueryDialog dialog) 
+	public @Nullable String designQuery(@Nullable IReportConnection connection, @Nullable String query, @Nullable ReportQueryDialog dialog) 
 	throws JRException, UnsupportedOperationException {
 	    return null; // not used
     }
@@ -50,7 +53,7 @@ public class SkyveDocumentFieldsProvider implements FieldsProvider {
 	 * @return always {@code null}
 	 */
 	@Override
-    public FieldsProviderEditor getEditorComponent(ReportQueryDialog dialog) {
+    public @Nullable FieldsProviderEditor getEditorComponent(@Nullable ReportQueryDialog dialog) {
 	    return null; // not used
     }
 
@@ -64,7 +67,7 @@ public class SkyveDocumentFieldsProvider implements FieldsProvider {
 	 * @throws JRException if metadata cannot be resolved
 	 */
 	@Override
-    public JRField[] getFields(IReportConnection connection, JRDataset dataset, Map parameters) 
+    public @Nonnull JRField[] getFields(@Nullable IReportConnection connection, @Nonnull JRDataset dataset, @Nullable Map parameters) 
 	throws JRException, UnsupportedOperationException {
 		try {
     		String moduleDotDocument = dataset.getQuery().getText();
@@ -137,7 +140,7 @@ public class SkyveDocumentFieldsProvider implements FieldsProvider {
 	 * @param moduleDotDocument document selector in {@code module.document} format
 	 * @return the resolved document metadata
 	 */
-	public static Document getDocument(String moduleDotDocument) {
+	public static @Nonnull Document getDocument(@Nonnull String moduleDotDocument) {
 		User user = SkyveDocumentExecuterFactory.getUser();
 		
 		int dotIndex = moduleDotDocument.indexOf('.');

@@ -17,6 +17,8 @@ import org.skyve.util.logging.Category;
 import org.skyve.util.logging.SkyveLoggerFactory;
 import org.slf4j.Logger;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.faces.context.FacesContext;
 
 /**
@@ -39,7 +41,7 @@ public abstract class LocalisableView implements Serializable {
 		 *
 		 * @param locale the locale to use for key resolution
 		 */
-		public void setLocale(Locale locale) {
+		public void setLocale(@Nullable Locale locale) {
 			this.locale = locale;
 		}
 		
@@ -60,7 +62,7 @@ public abstract class LocalisableView implements Serializable {
 		 * @return never returns normally
 		 */
 		@Override
-		public boolean containsKey(Object key) {
+		public boolean containsKey(@Nullable Object key) {
 			throw new UnsupportedOperationException();
 		}
 
@@ -71,7 +73,7 @@ public abstract class LocalisableView implements Serializable {
 		 * @return never returns normally
 		 */
 		@Override
-		public boolean containsValue(Object value) {
+		public boolean containsValue(@Nullable Object value) {
 			throw new UnsupportedOperationException();
 		}
 
@@ -82,10 +84,10 @@ public abstract class LocalisableView implements Serializable {
 		 * @return the localised value
 		 */
 		@Override
-		public String get(final Object key) {
+		public @Nullable String get(final @Nonnull Object key) {
 			return new FacesAction<String>() {
 				@Override
-				public String callback() throws Exception {
+				public @Nonnull String callback() throws Exception {
 					String result = Util.nullSafeI18n((String) key, locale);
 					if (UtilImpl.FACES_TRACE) FACES_LOGGER.trace("I18nMapAdapter.get {} = {}", key, result);
 					return result;
@@ -101,7 +103,7 @@ public abstract class LocalisableView implements Serializable {
 		 * @return never returns normally
 		 */
 		@Override
-		public String put(String key, String value) {
+		public @Nonnull String put(@Nullable String key, @Nullable String value) {
 			throw new UnsupportedOperationException();
 		}
 
@@ -112,7 +114,7 @@ public abstract class LocalisableView implements Serializable {
 		 * @return never returns normally
 		 */
 		@Override
-		public String remove(Object key) {
+		public @Nonnull String remove(@Nullable Object key) {
 			throw new UnsupportedOperationException();
 		}
 
@@ -122,7 +124,7 @@ public abstract class LocalisableView implements Serializable {
 		 * @param m the entries to insert
 		 */
 		@Override
-		public void putAll(Map<? extends String, ? extends String> m) {
+		public void putAll(@Nullable Map<? extends String, ? extends String> m) {
 			throw new UnsupportedOperationException();
 		}
 
@@ -132,17 +134,17 @@ public abstract class LocalisableView implements Serializable {
 		}
 
 		@Override
-		public Set<String> keySet() {
+		public @Nonnull Set<String> keySet() {
 			throw new UnsupportedOperationException();
 		}
 
 		@Override
-		public Collection<String> values() {
+		public @Nonnull Collection<String> values() {
 			throw new UnsupportedOperationException();
 		}
 
 		@Override
-		public Set<Map.Entry<String, String>> entrySet() {
+		public @Nonnull Set<Map.Entry<String, String>> entrySet() {
 			throw new UnsupportedOperationException();
 		}
 	}
@@ -156,7 +158,7 @@ public abstract class LocalisableView implements Serializable {
 	 * Used in the faces html tag.
 	 * @return	The text direction - rtl or ltr.
 	 */
-	public String getDir() {
+	public @Nullable String getDir() {
 		return dir;
 	}
 
@@ -169,7 +171,7 @@ public abstract class LocalisableView implements Serializable {
 	 * @return the request or user locale as a BCP 47 language tag; defaults to {@code en}
 	 *         when no locale is available
 	 */
-	public String getLanguageTag() {
+	public @Nullable String getLanguageTag() {
 		return languageTag;
 	}
 
@@ -178,7 +180,7 @@ public abstract class LocalisableView implements Serializable {
 	 * @return UTF-8
 	 */
 	@SuppressWarnings("static-method")
-	public String getEncoding() {
+	public @Nonnull String getEncoding() {
 		return StandardCharsets.UTF_8.name();
 	}
 	
@@ -190,7 +192,7 @@ public abstract class LocalisableView implements Serializable {
 	 * @return a request-view adapter that resolves values from the locale set during
 	 *         {@link #initialise()}
 	 */
-	public Map<String, String> getI18n() {
+	public @Nonnull Map<String, String> getI18n() {
 		return i18n;
 	}
 	
@@ -226,7 +228,7 @@ public abstract class LocalisableView implements Serializable {
 	 * @return	The string as defined in the json configuration.
 	 */
 	@SuppressWarnings("static-method")
-	public String getEnvironmentIdentifier() {
+	public @Nullable String getEnvironmentIdentifier() {
 		return UtilImpl.ENVIRONMENT_IDENTIFIER;
 	}
 	
@@ -236,7 +238,7 @@ public abstract class LocalisableView implements Serializable {
 	 * @return the configured web resource file version
 	 */
 	@SuppressWarnings("static-method")
-	public String getWebResourceFileVersion() {
+	public @Nonnull String getWebResourceFileVersion() {
 		return UtilImpl.WEB_RESOURCE_FILE_VERSION;
 	}
 }

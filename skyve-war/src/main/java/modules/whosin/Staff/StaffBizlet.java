@@ -8,6 +8,9 @@ import org.skyve.web.WebContext;
 import modules.whosin.domain.Staff;
 import modules.whosin.domain.Staff.Status;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Applies hierarchy and location-driven status rules for {@link Staff} records.
  */
@@ -24,7 +27,7 @@ public class StaffBizlet extends Bizlet<Staff> {
 	 */
 	@Override
 	@SuppressWarnings("java:S3776") // Complexity OK
-	public Staff preExecute(ImplicitActionName actionName, Staff bean, Bean parentBean, WebContext webContext) throws Exception {
+	public @Nonnull Staff preExecute(@Nonnull ImplicitActionName actionName, @Nonnull Staff bean, @Nullable Bean parentBean, @Nonnull WebContext webContext) throws Exception {
 
 		if(ImplicitActionName.Edit.equals(actionName)) {
 			//load to the staff this person reports to
@@ -65,7 +68,7 @@ public class StaffBizlet extends Bizlet<Staff> {
 	 * @throws Exception if rerender preprocessing fails
 	 */
 	@Override
-	public void preRerender(String source, Staff bean, WebContext webContext) throws Exception {
+	public void preRerender(@Nonnull String source, @Nonnull Staff bean, @Nonnull WebContext webContext) throws Exception {
 
 		if (Staff.statusPropertyName.equals(source)) {
 			// if status is "in the office" then set the location to be the centroid of the office boundary

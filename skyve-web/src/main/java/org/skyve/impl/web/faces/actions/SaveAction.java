@@ -24,6 +24,8 @@ import org.skyve.util.monitoring.RequestKey;
 import org.skyve.web.WebContext;
 import org.slf4j.Logger;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.faces.context.FacesContext;
 import jakarta.servlet.http.HttpServletRequest;
 
@@ -37,14 +39,14 @@ public class SaveAction extends FacesAction<Void> {
 
 	private FacesView facesView; 
 	private boolean ok;
-	public SaveAction(FacesView facesView, boolean ok) {
+	public SaveAction(@Nonnull FacesView facesView, boolean ok) {
 		this.facesView = facesView;
 		this.ok = ok;
 	}
 
 	@Override
 	@SuppressWarnings("java:S3776") // Complexity OK
-	public Void callback() throws Exception {
+	public @Nullable Void callback() throws Exception {
 		if (UtilImpl.FACES_TRACE) FACES_LOGGER.info("SaveAction - ok={}", Boolean.valueOf(ok));
 
 		AbstractPersistence persistence = AbstractPersistence.get();

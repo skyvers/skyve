@@ -13,6 +13,9 @@ import org.skyve.impl.cache.StateUtil;
 import org.skyve.impl.content.AbstractContentManager;
 import org.skyve.impl.util.UtilImpl;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Calls a remote Skyve content server over JDBC stored-procedure style aliases.
  *
@@ -86,7 +89,7 @@ public class JDBCRemoteContentManagerClient extends AbstractContentManager {
 	 * @throws Exception if JDBC invocation fails
 	 */
 	@Override
-	public void put(BeanContent content) throws Exception {
+	public void put(@Nonnull BeanContent content) throws Exception {
 		try (Connection c = EXT.getDataStoreConnection(UtilImpl.DATA_STORES.get(JDBCRemoteContentManagerServer.CONTENT_DATA_STORE_NAME), false)) {
 			try (CallableStatement s = c.prepareCall(String.format(CALL_ONE_PARAMETER_FUNCTION, JDBCRemoteContentManagerServer.PUT_BEAN_FUNCTION_NAME))) {
 				s.setString(1, StateUtil.encode64(content));
@@ -103,7 +106,7 @@ public class JDBCRemoteContentManagerClient extends AbstractContentManager {
 	 * @throws Exception if JDBC invocation fails
 	 */
 	@Override
-	public void put(AttachmentContent content, boolean index) throws Exception {
+	public void put(@Nonnull AttachmentContent content, boolean index) throws Exception {
 		try (Connection c = EXT.getDataStoreConnection(UtilImpl.DATA_STORES.get(JDBCRemoteContentManagerServer.CONTENT_DATA_STORE_NAME), false)) {
 			try (CallableStatement s = c.prepareCall(String.format("? = CALL %s(?,?)", JDBCRemoteContentManagerServer.PUT_ATTACHMENT_FUNCTION_NAME))) {
 				s.registerOutParameter(1, Types.VARCHAR);
@@ -123,7 +126,7 @@ public class JDBCRemoteContentManagerClient extends AbstractContentManager {
 	 * @throws Exception if JDBC invocation fails
 	 */
 	@Override
-	public void update(AttachmentContent content) throws Exception {
+	public void update(@Nonnull AttachmentContent content) throws Exception {
 		try (Connection c = EXT.getDataStoreConnection(UtilImpl.DATA_STORES.get(JDBCRemoteContentManagerServer.CONTENT_DATA_STORE_NAME), false)) {
 			try (CallableStatement s = c.prepareCall(String.format(CALL_ONE_PARAMETER_FUNCTION, JDBCRemoteContentManagerServer.UPDATE_ATTACHMENT_FUNCTION_NAME))) {
 				s.setString(1, StateUtil.encode64(content.cloneForRemoteUpdate()));
@@ -140,7 +143,7 @@ public class JDBCRemoteContentManagerClient extends AbstractContentManager {
 	 * @throws Exception always via {@link UnsupportedOperationException}
 	 */
 	@Override
-	public void reindex(AttachmentContent attachment, boolean index) throws Exception {
+	public void reindex(@Nonnull AttachmentContent attachment, boolean index) throws Exception {
 		throw new UnsupportedOperationException("Reindex of a remote content repository is not supported");
 	}
 	
@@ -152,7 +155,7 @@ public class JDBCRemoteContentManagerClient extends AbstractContentManager {
 	 * @throws Exception if JDBC invocation fails
 	 */
 	@Override
-	public AttachmentContent getAttachment(String contentId) throws Exception {
+	public @Nullable AttachmentContent getAttachment(@Nonnull String contentId) throws Exception {
 		AttachmentContent result = null;
 
 		try (Connection c = EXT.getDataStoreConnection(UtilImpl.DATA_STORES.get(JDBCRemoteContentManagerServer.CONTENT_DATA_STORE_NAME), false)) {
@@ -178,7 +181,7 @@ public class JDBCRemoteContentManagerClient extends AbstractContentManager {
 	 * @throws Exception if JDBC invocation fails
 	 */
 	@Override
-	public void removeBean(String bizId) throws Exception {
+	public void removeBean(@Nonnull String bizId) throws Exception {
 		try (Connection c = EXT.getDataStoreConnection(UtilImpl.DATA_STORES.get(JDBCRemoteContentManagerServer.CONTENT_DATA_STORE_NAME), false)) {
 			try (CallableStatement s = c.prepareCall(String.format(CALL_ONE_PARAMETER_FUNCTION, JDBCRemoteContentManagerServer.REMOVE_BEAN_FUNCTION_NAME))) {
 				s.setString(1, bizId);
@@ -194,7 +197,7 @@ public class JDBCRemoteContentManagerClient extends AbstractContentManager {
 	 * @throws Exception if JDBC invocation fails
 	 */
 	@Override
-	public void removeAttachment(String contentId) throws Exception {
+	public void removeAttachment(@Nonnull String contentId) throws Exception {
 		try (Connection c = EXT.getDataStoreConnection(UtilImpl.DATA_STORES.get(JDBCRemoteContentManagerServer.CONTENT_DATA_STORE_NAME), false)) {
 			try (CallableStatement s = c.prepareCall(String.format(CALL_ONE_PARAMETER_FUNCTION, JDBCRemoteContentManagerServer.REMOVE_ATTACHMENT_FUNCTION_NAME))) {
 				s.setString(1, contentId);
@@ -212,7 +215,7 @@ public class JDBCRemoteContentManagerClient extends AbstractContentManager {
 	 * @throws Exception if JDBC invocation fails
 	 */
 	@Override
-	public SearchResults google(String search, int maxResults) throws Exception {
+	public @Nonnull SearchResults google(@Nullable String search, int maxResults) throws Exception {
 		SearchResults result = null;
 
 		try (Connection c = EXT.getDataStoreConnection(UtilImpl.DATA_STORES.get(JDBCRemoteContentManagerServer.CONTENT_DATA_STORE_NAME), false)) {
@@ -246,7 +249,7 @@ public class JDBCRemoteContentManagerClient extends AbstractContentManager {
 	 * @throws Exception always via {@link UnsupportedOperationException}
 	 */
 	@Override
-	public void truncateIndexing(String customerName) throws Exception {
+	public void truncateIndexing(@Nonnull String customerName) throws Exception {
 		throw new UnsupportedOperationException(TRUNCATE_INDEXING_UNSUPPORTED);
 	}
 
@@ -257,7 +260,7 @@ public class JDBCRemoteContentManagerClient extends AbstractContentManager {
 	 * @throws Exception always via {@link UnsupportedOperationException}
 	 */
 	@Override
-	public void truncateAttachmentIndexing(String customerName) throws Exception {
+	public void truncateAttachmentIndexing(@Nonnull String customerName) throws Exception {
 		throw new UnsupportedOperationException(TRUNCATE_INDEXING_UNSUPPORTED);
 	}
 
@@ -268,7 +271,7 @@ public class JDBCRemoteContentManagerClient extends AbstractContentManager {
 	 * @throws Exception always via {@link UnsupportedOperationException}
 	 */
 	@Override
-	public void truncateBeanIndexing(String customerName) throws Exception {
+	public void truncateBeanIndexing(@Nonnull String customerName) throws Exception {
 		throw new UnsupportedOperationException(TRUNCATE_INDEXING_UNSUPPORTED);
 	}
 
@@ -279,7 +282,7 @@ public class JDBCRemoteContentManagerClient extends AbstractContentManager {
 	 * @throws Exception always via {@link UnsupportedOperationException}
 	 */
 	@Override
-	public ContentIterable all() throws Exception {
+	public @Nonnull ContentIterable all() throws Exception {
 		throw new UnsupportedOperationException("Iterating over a remote content repository is not supported");
 	}
 }

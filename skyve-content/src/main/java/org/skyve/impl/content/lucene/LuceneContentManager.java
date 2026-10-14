@@ -62,6 +62,9 @@ import org.skyve.util.FileUtil;
 import org.skyve.util.logging.Category;
 import org.slf4j.Logger;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 // If we want to use multiple indices for beans and attachments like elastic we will need 
 // 2 dirs underneath CONTENT/SKYVE_CONTENT/ and 2 writer instances
 // Use a MultiReader instance to read from 2 indexes at once
@@ -172,7 +175,7 @@ public class LuceneContentManager extends FileSystemContentManager {
 	 * @throws Exception if indexing fails
 	 */
 	@Override
-	public void put(BeanContent content) throws Exception {
+	public void put(@Nonnull BeanContent content) throws Exception {
 		String bizContentId = content.getBizId() + BEAN_CONTENT_SUFFIX;
 		
 		StringBuilder text = new StringBuilder(256);
@@ -233,7 +236,7 @@ public class LuceneContentManager extends FileSystemContentManager {
 	 * @throws Exception if storage or indexing fails
 	 */
 	@Override
-	public void put(AttachmentContent attachment, boolean index) throws Exception {
+	public void put(@Nonnull AttachmentContent attachment, boolean index) throws Exception {
 		// NB Call super first coz this sets the content ID and last modified date.
 		super.put(attachment, index);
 		putIndex(attachment, index);
@@ -246,7 +249,7 @@ public class LuceneContentManager extends FileSystemContentManager {
 	 * @throws Exception if retrieval or update fails
 	 */
 	@Override
-	public void update(AttachmentContent attachment) throws Exception {
+	public void update(@Nonnull AttachmentContent attachment) throws Exception {
 		// NB Call super first coz this sets the last modified date.
 		super.update(attachment);
 
@@ -287,7 +290,7 @@ public class LuceneContentManager extends FileSystemContentManager {
 	 * @param index whether textual extraction should be performed
 	 * @throws Exception if indexing fails
 	 */
-	private static void putIndex(AttachmentContent attachment, boolean index) throws Exception {
+	private static void putIndex(@Nonnull AttachmentContent attachment, boolean index) throws Exception {
 		Document document = new Document();
 		if (index) {
 			TextExtractor extractor = new TikaTextExtractor();
@@ -317,7 +320,7 @@ public class LuceneContentManager extends FileSystemContentManager {
 	 * @param attachment the source attachment metadata
 	 * @throws Exception if Lucene write fails
 	 */
-	private static void putIndex(Document document, AttachmentContent attachment) throws Exception {
+	private static void putIndex(@Nonnull Document document, @Nonnull AttachmentContent attachment) throws Exception {
 		String bizId = attachment.getBizId();
 
 		// Add meta-data
@@ -368,7 +371,7 @@ public class LuceneContentManager extends FileSystemContentManager {
 	 * @throws Exception if reading from index or storage fails
 	 */
 	@Override
-	public AttachmentContent getAttachment(String contentId) throws Exception {
+	public @Nullable AttachmentContent getAttachment(@Nonnull String contentId) throws Exception {
 		if (UtilImpl.CONTENT_FILE_STORAGE) {
 			return super.getAttachment(contentId);
 		}
@@ -431,7 +434,7 @@ public class LuceneContentManager extends FileSystemContentManager {
 	 * @throws Exception if Lucene delete fails
 	 */
 	@Override
-	public void removeBean(String bizId) throws Exception {
+	public void removeBean(@Nonnull String bizId) throws Exception {
 		writer.deleteDocuments(new Term(Bean.DOCUMENT_ID, bizId + BEAN_CONTENT_SUFFIX));
 	}
 	
@@ -442,7 +445,7 @@ public class LuceneContentManager extends FileSystemContentManager {
 	 * @throws Exception if removal fails
 	 */
 	@Override
-	public void removeAttachment(String contentId) throws Exception {
+	public void removeAttachment(@Nonnull String contentId) throws Exception {
 		writer.deleteDocuments(new Term(CONTENT_ID, contentId));
 		super.removeAttachment(contentId);
 	}
@@ -454,7 +457,7 @@ public class LuceneContentManager extends FileSystemContentManager {
 	 * @throws Exception if iterable creation fails
 	 */
 	@Override
-	public ContentIterable all() throws Exception {
+	public @Nonnull ContentIterable all() throws Exception {
 		return new LuceneContentIterable(directory);
 	}
 	
@@ -471,7 +474,7 @@ public class LuceneContentManager extends FileSystemContentManager {
 	 */
 	@Override
 	@SuppressWarnings("java:S3776") // Complexity OK
-	public SearchResults google(String search, int maxResults) throws Exception {
+	public @Nonnull SearchResults google(@Nullable String search, int maxResults) throws Exception {
 		SearchResults results = new SearchResults();
 		
 		String term = UtilImpl.processStringValue(search);
@@ -592,7 +595,7 @@ public class LuceneContentManager extends FileSystemContentManager {
 	 * @throws Exception if Lucene delete fails
 	 */
 	@Override
-	public void truncateIndexing(String customerName) throws Exception {
+	public void truncateIndexing(@Nonnull String customerName) throws Exception {
 		writer.deleteDocuments(new Term(Bean.CUSTOMER_NAME, customerName));
 	}
 	
@@ -603,7 +606,7 @@ public class LuceneContentManager extends FileSystemContentManager {
 	 * @throws Exception if Lucene delete fails
 	 */
 	@Override
-	public void truncateAttachmentIndexing(String customerName) throws Exception {
+	public void truncateAttachmentIndexing(@Nonnull String customerName) throws Exception {
 		writer.deleteDocuments(new BooleanQuery.Builder()
 										.add(new TermQuery(new Term(Bean.CUSTOMER_NAME, customerName)), Occur.MUST)
 										.add(new FieldExistsQuery(CONTENT_ID), Occur.MUST)
@@ -617,7 +620,7 @@ public class LuceneContentManager extends FileSystemContentManager {
 	 * @throws Exception if Lucene delete fails
 	 */
 	@Override
-	public void truncateBeanIndexing(String customerName) throws Exception {
+	public void truncateBeanIndexing(@Nonnull String customerName) throws Exception {
 		writer.deleteDocuments(new BooleanQuery.Builder()
 										.add(new TermQuery(new Term(Bean.CUSTOMER_NAME, customerName)), Occur.MUST)
 										.add(new FieldExistsQuery(CONTENT_ID), Occur.MUST_NOT)
@@ -632,7 +635,7 @@ public class LuceneContentManager extends FileSystemContentManager {
 	 * @throws Exception if indexing fails
 	 */
 	@Override
-	public void reindex(AttachmentContent attachment, boolean index) throws Exception {
+	public void reindex(@Nonnull AttachmentContent attachment, boolean index) throws Exception {
 		putIndex(attachment, index);
 	}
 }
