@@ -61,7 +61,7 @@ public class FluentDocumentUniqueConstraint {
 	/**
 	 * Updates metadata on this fluent builder.
 	 */
-	public @Nonnull FluentDocumentUniqueConstraint scope(@Nullable DocumentScope scope) {
+	public @Nonnull FluentDocumentUniqueConstraint scope(@Nonnull DocumentScope scope) {
 		constraint.setScope(scope);
 		return this;
 	}
@@ -69,7 +69,7 @@ public class FluentDocumentUniqueConstraint {
 	/**
 	 * Updates metadata on this fluent builder.
 	 */
-	public @Nonnull FluentDocumentUniqueConstraint message(@Nullable String message) {
+	public @Nonnull FluentDocumentUniqueConstraint message(@Nonnull String message) {
 		constraint.setMessage(message);
 		return this;
 	}

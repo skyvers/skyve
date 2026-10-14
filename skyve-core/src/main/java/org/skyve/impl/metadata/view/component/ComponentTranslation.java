@@ -4,7 +4,7 @@ import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.SerializableMetaData;
 
-import jakarta.annotation.Nullable;
+import jakarta.annotation.Nonnull;
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
@@ -30,21 +30,21 @@ public class ComponentTranslation implements SerializableMetaData {
 	private String fromComponent;
 	private String mappedTo;
 
-	public @Nullable String getFromComponent() {
+	public @Nonnull String getFromComponent() {
 		return fromComponent;
 	}
 
 	@XmlAttribute(required = true)
-	public void setFromComponent(@Nullable String fromComponent) {
+	public void setFromComponent(@Nonnull String fromComponent) {
 		this.fromComponent = UtilImpl.processStringValue(fromComponent);
 	}
 
-	public @Nullable String getMappedTo() {
+	public @Nonnull String getMappedTo() {
 		return mappedTo;
 	}
 
 	@XmlAttribute(required = true)
-	public void setMappedTo(@Nullable String mappedTo) {
+	public void setMappedTo(@Nonnull String mappedTo) {
 		this.mappedTo = UtilImpl.processStringValue(mappedTo);
 	}
 }

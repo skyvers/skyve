@@ -6,7 +6,6 @@ import java.util.Map;
 import org.skyve.metadata.DecoratedMetaData;
 
 import jakarta.annotation.Nonnull;
-import jakarta.annotation.Nullable;
 
 /**
  * Abstract base for permission grants declared in a role.
@@ -22,7 +21,7 @@ public abstract class Privilege implements DecoratedMetaData {
 	private String name;
 	private Map<String, String> properties = new LinkedHashMap<>();
 
-	public @Nullable String getName() {
+	public @Nonnull String getName() {
 		return name;
 	}
 

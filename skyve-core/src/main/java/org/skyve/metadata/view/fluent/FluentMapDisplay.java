@@ -63,7 +63,7 @@ public class FluentMapDisplay extends FluentWidget implements FluentRelativeSize
 	 * @param modelName the model name
 	 * @return this builder
 	 */
-	public @Nonnull FluentMapDisplay modelName(@Nullable String modelName) {
+	public @Nonnull FluentMapDisplay modelName(@Nonnull String modelName) {
 		map.setModelName(modelName);
 		return this;
 	}

@@ -2,6 +2,7 @@ package org.skyve.metadata.view.widget.bound;
 
 import org.skyve.metadata.NamedMetaData;
 
+import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 
 /**
@@ -16,6 +17,14 @@ import jakarta.annotation.Nullable;
  * @see Bound
  */
 public interface Parameter extends NamedMetaData {
+	/**
+	 * Returns the destination binding name, which the view schema requires.
+	 *
+	 * @return the parameter name; never {@code null}
+	 */
+	@Override
+	public @Nonnull String getName();
+
 	/**
 	 * Returns the literal value to pass, or {@code null} if a value binding is used.
 	 *

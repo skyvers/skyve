@@ -102,7 +102,7 @@ public class DialogButton implements Parameterizable, Disableable, Invisible, Fo
 	 *
 	 * @return the button label
 	 */
-	public @Nullable String getDisplayName() {
+	public @Nonnull String getDisplayName() {
 		return displayName;
 	}
 
@@ -130,7 +130,7 @@ public class DialogButton implements Parameterizable, Disableable, Invisible, Fo
 	 * @param displayName the button label
 	 */
 	@XmlAttribute(required = true)
-	public void setDisplayName(@Nullable String displayName) {
+	public void setDisplayName(@Nonnull String displayName) {
 		this.displayName = UtilImpl.processStringValue(displayName);
 	}
 

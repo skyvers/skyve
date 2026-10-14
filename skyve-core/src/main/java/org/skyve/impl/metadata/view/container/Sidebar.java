@@ -165,7 +165,7 @@ public class Sidebar extends Container implements Identifiable, Invisible, Relat
 	 *
 	 * @return a breakpoint width in pixels, or {@code null} when not configured
 	 */
-	public @Nullable Integer getFloatingPixelWidthBreakpoint() {
+	public @Nonnull Integer getFloatingPixelWidthBreakpoint() {
 		return floatingPixelWidthBreakpoint;
 	}
 
@@ -175,7 +175,7 @@ public class Sidebar extends Container implements Identifiable, Invisible, Relat
 	 * @param floatingPixelWidthBreakpoint  breakpoint width in pixels
 	 */
 	@XmlAttribute(required = true)
-	public void setFloatingPixelWidthBreakpoint(@Nullable Integer floatingPixelWidthBreakpoint) {
+	public void setFloatingPixelWidthBreakpoint(@Nonnull Integer floatingPixelWidthBreakpoint) {
 		this.floatingPixelWidthBreakpoint = floatingPixelWidthBreakpoint;
 	}
 

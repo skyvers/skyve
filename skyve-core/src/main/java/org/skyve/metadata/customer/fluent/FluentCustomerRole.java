@@ -65,7 +65,7 @@ public class FluentCustomerRole {
 	 * @param description role description
 	 * @return this builder
 	 */
-	public @Nonnull FluentCustomerRole description(@Nullable String description) {
+	public @Nonnull FluentCustomerRole description(@Nonnull String description) {
 		role.setDescription(description);
 		return this;
 	}

@@ -8,7 +8,6 @@ import org.skyve.impl.util.XMLMetaData;
 import org.skyve.util.ExpressionEvaluator;
 
 import jakarta.annotation.Nonnull;
-import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
@@ -40,21 +39,21 @@ public class SetStatement extends StatementMetaData {
 	private String binding;
 	private String expression;
 
-	public @Nullable String getBinding() {
+	public @Nonnull String getBinding() {
 		return binding;
 	}
 	
 	@XmlAttribute(required = true)
-	public void setBinding(@Nullable String binding) {
+	public void setBinding(@Nonnull String binding) {
 		this.binding = UtilImpl.processStringValue(binding);
 	}
 	
-	public @Nullable String getExpression() {
+	public @Nonnull String getExpression() {
 		return expression;
 	}
 	
 	@XmlAttribute(required = true)
-	public void setExpression(@Nullable String expression) {
+	public void setExpression(@Nonnull String expression) {
 		this.expression = UtilImpl.processStringValue(expression);
 	}
 

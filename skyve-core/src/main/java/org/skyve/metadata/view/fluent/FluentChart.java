@@ -50,7 +50,7 @@ public class FluentChart extends FluentWidget implements FluentRelativeSize<Flue
 	 * @param type the chart type
 	 * @return this builder
 	 */
-	public @Nonnull FluentChart type(@Nullable ChartType type) {
+	public @Nonnull FluentChart type(@Nonnull ChartType type) {
 		chart.setType(type);
 		return this;
 	}

@@ -12,7 +12,6 @@ import org.skyve.metadata.DecoratedMetaData;
 import org.skyve.metadata.user.DocumentPermission;
 
 import jakarta.annotation.Nonnull;
-import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlType;
@@ -52,21 +51,21 @@ public class DocumentPrivilegeMetaData implements DecoratedMetaData {
 	@XmlJavaTypeAdapter(PropertyMapAdapter.class)
 	private Map<String, String> properties = new LinkedHashMap<>();
 
-	public @Nullable String getDocumentName() {
+	public @Nonnull String getDocumentName() {
 		return documentName;
 	}
 
 	@XmlAttribute(name = "name", required = true)
-	public void setDocumentName(@Nullable String documentName) {
+	public void setDocumentName(@Nonnull String documentName) {
 		this.documentName = UtilImpl.processStringValue(documentName);
 	}
 
-	public @Nullable DocumentPermission getPermission() {
+	public @Nonnull DocumentPermission getPermission() {
 		return permission;
 	}
 
 	@XmlAttribute(required = true)
-	public void setPermission(@Nullable DocumentPermission permission) {
+	public void setPermission(@Nonnull DocumentPermission permission) {
 		this.permission = permission;
 	}
 

@@ -45,7 +45,7 @@ public class FluentCustomerModuleRole {
 	 * @param moduleName module name
 	 * @return this builder
 	 */
-	public @Nonnull FluentCustomerModuleRole moduleName(@Nullable String moduleName) {
+	public @Nonnull FluentCustomerModuleRole moduleName(@Nonnull String moduleName) {
 		role.setModuleName(moduleName);
 		return this;
 	}

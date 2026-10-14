@@ -36,12 +36,12 @@ public class ContentRestriction implements SerializableMetaData {
 	@XmlJavaTypeAdapter(PropertyMapAdapter.class)
 	private Map<String, String> properties = new LinkedHashMap<>();
 
-	public @Nullable String getAttributeName() {
+	public @Nonnull String getAttributeName() {
 		return attributeName;
 	}
 
 	@XmlAttribute(name = "attribute", required = true)
-	public void setAttributeName(@Nullable String attributeName) {
+	public void setAttributeName(@Nonnull String attributeName) {
 		this.attributeName = UtilImpl.processStringValue(attributeName);
 	}
 

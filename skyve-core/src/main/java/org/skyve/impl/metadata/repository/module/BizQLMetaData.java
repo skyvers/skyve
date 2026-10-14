@@ -4,7 +4,7 @@ import org.skyve.impl.domain.types.jaxb.CDATAAdapter;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
 
-import jakarta.annotation.Nullable;
+import jakarta.annotation.Nonnull;
 import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
@@ -30,13 +30,13 @@ public class BizQLMetaData extends QueryDefinitionMetaData {
 
 	private String query;
 
-	public @Nullable String getQuery() {
+	public @Nonnull String getQuery() {
 		return query;
 	}
 
 	@XmlElement(namespace = XMLMetaData.MODULE_NAMESPACE, required = true)
 	@XmlJavaTypeAdapter(CDATAAdapter.class)
-	public void setQuery(@Nullable String query) {
+	public void setQuery(@Nonnull String query) {
 		this.query = UtilImpl.processStringValue(query);
 	}
 }

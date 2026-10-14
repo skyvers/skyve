@@ -5,6 +5,7 @@ import org.skyve.impl.metadata.repository.module.ApplicableTo;
 import org.skyve.metadata.module.menu.MenuItem;
 
 import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 
 /**
  * Base fluent builder for menu actions.
@@ -39,7 +40,7 @@ public abstract class FluentMenuAction<T extends FluentMenuAction<T>> {
 	 * @return this fluent instance.
 	 */
 	@SuppressWarnings("unchecked")
-	public @Nonnull T name(@Nonnull String name) {
+	public @Nonnull T name(@Nullable String name) {
 		get().setName(name);
 		return (T) this;
 	}

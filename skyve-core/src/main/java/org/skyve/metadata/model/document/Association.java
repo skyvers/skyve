@@ -2,6 +2,7 @@ package org.skyve.metadata.model.document;
 
 import org.skyve.impl.util.XMLMetaData;
 
+import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlType;
 
@@ -52,7 +53,7 @@ public interface Association extends Reference {
 	 * @return the association type; never {@code null}
 	 */
 	@Override
-	@Nullable AssociationType getType();
+	@Nonnull AssociationType getType();
 	
 	/**
 	 * Used only for embedded associations to introduce a column prefix for all embedded document attributes

@@ -5,7 +5,7 @@ import org.skyve.metadata.SerializableMetaData;
 import org.skyve.metadata.SortDirection;
 import org.skyve.metadata.view.model.chart.OrderBy;
 
-import jakarta.annotation.Nullable;
+import jakarta.annotation.Nonnull;
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
@@ -25,19 +25,19 @@ public class ChartBuilderOrderMetaData implements SerializableMetaData {
 	private OrderBy by;
 	private SortDirection sort;
 
-	public @Nullable OrderBy getBy() {
+	public @Nonnull OrderBy getBy() {
 		return by;
 	}
 	@XmlAttribute(required = true)
-	public void setBy(@Nullable OrderBy by) {
+	public void setBy(@Nonnull OrderBy by) {
 		this.by = by;
 	}
 	
-	public @Nullable SortDirection getSort() {
+	public @Nonnull SortDirection getSort() {
 		return sort;
 	}
 	@XmlAttribute(required = true)
-	public void setSort(@Nullable SortDirection sort) {
+	public void setSort(@Nonnull SortDirection sort) {
 		this.sort = sort;
 	}
 }

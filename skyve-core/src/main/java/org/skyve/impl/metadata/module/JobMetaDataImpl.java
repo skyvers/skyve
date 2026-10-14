@@ -60,22 +60,22 @@ public class JobMetaDataImpl extends NamedMetaData implements JobMetaData {
 	private Map<String, String> properties = new LinkedHashMap<>();
 	
 	@Override
-	public @Nullable String getDisplayName() {
+	public @Nonnull String getDisplayName() {
 		return displayName;
 	}
 
 	@XmlAttribute(required = true)
-	public void setDisplayName(@Nullable String displayName) {
+	public void setDisplayName(@Nonnull String displayName) {
 		this.displayName = displayName;
 	}
 
 	@Override
-	public @Nullable String getClassName() {
+	public @Nonnull String getClassName() {
 		return className;
 	}
 
 	@XmlAttribute(required = true)
-	public void setClassName(@Nullable String className) {
+	public void setClassName(@Nonnull String className) {
 		this.className = UtilImpl.processStringValue(className);
 	}
 	

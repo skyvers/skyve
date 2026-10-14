@@ -37,11 +37,11 @@ public class RoleImpl implements Role {
 	private Map<String, String> properties = new LinkedHashMap<>();
 	
 	@Override
-	public @Nullable String getDescription() {
+	public @Nonnull String getDescription() {
 		return description;
 	}
 
-	public void setDescription(@Nullable String description) {
+	public void setDescription(@Nonnull String description) {
 		this.description = description;
 	}
 

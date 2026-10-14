@@ -5,7 +5,6 @@ import java.util.Set;
 import org.skyve.impl.metadata.repository.view.access.ViewQueryAggregateUserAccessMetaData;
 
 import jakarta.annotation.Nonnull;
-import jakarta.annotation.Nullable;
 
 /**
  * A fluent helper builder class to construct and manipulate the {@link ViewQueryAggregateUserAccessMetaData} metadata.
@@ -39,7 +38,7 @@ public class FluentViewQueryAggregateAccess extends FluentViewUserAccess<FluentV
 	/**
 	 * Specifies the query name for this FluentViewQueryAggregateAccess.
 	 */
-	public @Nonnull FluentViewQueryAggregateAccess queryName(final @Nullable String queryName) {
+	public @Nonnull FluentViewQueryAggregateAccess queryName(final @Nonnull String queryName) {
 		access.setQueryName(queryName);
 		return this;
 	}

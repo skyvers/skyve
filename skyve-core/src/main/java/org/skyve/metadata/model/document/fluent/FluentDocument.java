@@ -235,7 +235,7 @@ public class FluentDocument {
 	 *
 	 * <p>Side effects: replaces any existing {@code extends} definition.
 	 */
-	public @Nonnull FluentDocument extendsDocument(@Nullable String baseDocumentName) {
+	public @Nonnull FluentDocument extendsDocument(@Nonnull String baseDocumentName) {
 		Extends inherits = new Extends();
 		inherits.setDocumentName(baseDocumentName);
 		document.setExtends(inherits);
@@ -269,7 +269,7 @@ public class FluentDocument {
 	/**
 	 * Updates metadata on this fluent builder.
 	 */
-	public @Nonnull FluentDocument singularAlias(@Nullable String singularAlias) {
+	public @Nonnull FluentDocument singularAlias(@Nonnull String singularAlias) {
 		document.setSingularAlias(singularAlias);
 		return this;
 	}
@@ -277,7 +277,7 @@ public class FluentDocument {
 	/**
 	 * Updates metadata on this fluent builder.
 	 */
-	public @Nonnull FluentDocument pluralAlias(@Nullable String pluralAlias) {
+	public @Nonnull FluentDocument pluralAlias(@Nonnull String pluralAlias) {
 		document.setPluralAlias(pluralAlias);
 		return this;
 	}

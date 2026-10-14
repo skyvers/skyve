@@ -1,5 +1,6 @@
 package org.skyve.metadata.model.document;
 
+import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 
 /**
@@ -35,5 +36,5 @@ public interface Reference extends Relation {
 	 *
 	 * @return the reference type; never {@code null}
 	 */
-	public @Nullable ReferenceType getType();
+	public @Nonnull ReferenceType getType();
 }

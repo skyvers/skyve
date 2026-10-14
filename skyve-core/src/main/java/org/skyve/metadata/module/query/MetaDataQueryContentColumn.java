@@ -2,6 +2,7 @@ package org.skyve.metadata.module.query;
 
 import org.skyve.impl.metadata.repository.module.MetaDataQueryContentColumnMetaData.DisplayType;
 
+import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 
 /**
@@ -21,7 +22,7 @@ public interface MetaDataQueryContentColumn extends MetaDataQueryColumn {
 	 *
 	 * @return the display type; never {@code null}
 	 */
-	public @Nullable DisplayType getDisplay();
+	public @Nonnull DisplayType getDisplay();
 
 	/**
 	 * Returns the explicit pixel height for thumbnail display, or {@code null} to use

@@ -80,12 +80,12 @@ public abstract class AbstractAttribute extends NamedMetaData implements Attribu
 	private Map<String, String> properties = new LinkedHashMap<>();
 	
 	@Override
-	public @Nullable String getDisplayName() {
+	public @Nonnull String getDisplayName() {
 		return displayName;
 	}
 
 	@XmlElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE, required = true)
-	public void setDisplayName(@Nullable String displayName) {
+	public void setDisplayName(@Nonnull String displayName) {
 		this.displayName = UtilImpl.processStringValue(displayName);
 	}
 

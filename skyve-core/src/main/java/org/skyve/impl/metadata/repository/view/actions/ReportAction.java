@@ -52,7 +52,7 @@ public class ReportAction extends ParameterizableAction {
 	 *
 	 * @return module name
 	 */
-	public @Nullable String getModuleName() {
+	public @Nonnull String getModuleName() {
 		return moduleName;
 	}
 
@@ -62,7 +62,7 @@ public class ReportAction extends ParameterizableAction {
 	 * @param moduleName module name
 	 */
 	@XmlAttribute(required = true)
-	public void setModuleName(@Nullable String moduleName) {
+	public void setModuleName(@Nonnull String moduleName) {
 		this.moduleName = moduleName;
 	}
 
@@ -71,7 +71,7 @@ public class ReportAction extends ParameterizableAction {
 	 *
 	 * @return document name
 	 */
-	public @Nullable String getDocumentName() {
+	public @Nonnull String getDocumentName() {
 		return documentName;
 	}
 
@@ -81,7 +81,7 @@ public class ReportAction extends ParameterizableAction {
 	 * @param documentName document name
 	 */
 	@XmlAttribute(required = true)
-	public void setDocumentName(@Nullable String documentName) {
+	public void setDocumentName(@Nonnull String documentName) {
 		this.documentName = documentName;
 	}
 
@@ -90,7 +90,7 @@ public class ReportAction extends ParameterizableAction {
 	 *
 	 * @return report name
 	 */
-	public @Nullable String getReportName() {
+	public @Nonnull String getReportName() {
 		return reportName;
 	}
 
@@ -100,7 +100,7 @@ public class ReportAction extends ParameterizableAction {
 	 * @param reportName report name
 	 */
 	@XmlAttribute(required = true)
-	public void setReportName(@Nullable String reportName) {
+	public void setReportName(@Nonnull String reportName) {
 		this.reportName = reportName;
 	}
 

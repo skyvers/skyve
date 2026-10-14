@@ -3,7 +3,7 @@ package org.skyve.impl.metadata.repository.module;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
 
-import jakarta.annotation.Nullable;
+import jakarta.annotation.Nonnull;
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlType;
 
@@ -29,21 +29,21 @@ public abstract class QueryReferenceMetaData extends QueryMetaData {
 	private String moduleRef;
 	private String ref;
 	
-	public @Nullable String getRef() {
+	public @Nonnull String getRef() {
 		return ref;
 	}
 
 	@XmlAttribute(required = true)
-	public void setRef(@Nullable String ref) {
+	public void setRef(@Nonnull String ref) {
 		this.ref = UtilImpl.processStringValue(ref);
 	}
 
-	public @Nullable String getModuleRef() {
+	public @Nonnull String getModuleRef() {
 		return moduleRef;
 	}
 
 	@XmlAttribute(required = true)
-	public void setModuleRef(@Nullable String moduleRef) {
+	public void setModuleRef(@Nonnull String moduleRef) {
 		this.moduleRef = UtilImpl.processStringValue(moduleRef);
 	}
 }

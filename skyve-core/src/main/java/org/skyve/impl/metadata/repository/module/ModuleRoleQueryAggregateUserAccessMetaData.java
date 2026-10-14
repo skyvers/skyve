@@ -7,7 +7,6 @@ import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.UserAccess;
 
 import jakarta.annotation.Nonnull;
-import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
@@ -35,7 +34,7 @@ public class ModuleRoleQueryAggregateUserAccessMetaData extends ModuleRoleUserAc
 	 *
 	 * @return the target query name
 	 */
-	public @Nullable String getQueryName() {
+	public @Nonnull String getQueryName() {
 		return queryName;
 	}
 
@@ -48,7 +47,7 @@ public class ModuleRoleQueryAggregateUserAccessMetaData extends ModuleRoleUserAc
 	 * @param queryName the target query name; blank values become {@code null}
 	 */
 	@XmlAttribute(name = "query", required = true)
-	public void setQueryName(@Nullable String queryName) {
+	public void setQueryName(@Nonnull String queryName) {
 		this.queryName = UtilImpl.processStringValue(queryName);
 	}
 	

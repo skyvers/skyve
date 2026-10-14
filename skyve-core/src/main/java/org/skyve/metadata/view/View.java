@@ -80,7 +80,7 @@ public interface View extends NamedMetaData, PersistentMetaData, ReloadableMetaD
 		 * Returns the fromBinding.
 		 * @return the result
 		 */
-		public @Nullable String getFromBinding() {
+		public @Nonnull String getFromBinding() {
 			return fromBinding;
 		}
 
@@ -89,7 +89,7 @@ public interface View extends NamedMetaData, PersistentMetaData, ReloadableMetaD
 		 * @param fromBinding the fromBinding
 		 */
 		@XmlAttribute(required = true)
-		public void setFromBinding(@Nullable String fromBinding) {
+		public void setFromBinding(@Nonnull String fromBinding) {
 			this.fromBinding = UtilImpl.processStringValue(fromBinding);
 		}
 		
@@ -97,7 +97,7 @@ public interface View extends NamedMetaData, PersistentMetaData, ReloadableMetaD
 		 * Returns the boundTo.
 		 * @return the result
 		 */
-		public @Nullable String getBoundTo() {
+		public @Nonnull String getBoundTo() {
 			return boundTo;
 		}
 
@@ -106,10 +106,16 @@ public interface View extends NamedMetaData, PersistentMetaData, ReloadableMetaD
 		 * @param boundTo the boundTo
 		 */
 		@XmlAttribute(required = true)
-		public void setBoundTo(@Nullable String boundTo) {
+		public void setBoundTo(@Nonnull String boundTo) {
 			this.boundTo = UtilImpl.processStringValue(boundTo);
 		}
 	}
+	
+	/**
+	 * Returns the view name (e.g. {@code edit} or {@code list}), which the view XML schema requires.
+	 */
+	@Override
+	public @Nonnull String getName();
 	
 	/**
 	 * Returns the {@code refreshIf} condition as authored, which controls whether the view auto-refreshes; it has no opposite attribute.
@@ -139,7 +145,7 @@ public interface View extends NamedMetaData, PersistentMetaData, ReloadableMetaD
 	 *
 	 * @return the view title; may be {@code null}
 	 */
-	public @Nullable String getTitle();
+	public @Nonnull String getTitle();
 
 	/**
 	 * Returns the localised view title for the current user locale.

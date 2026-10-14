@@ -4,6 +4,7 @@ import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.SerializableMetaData;
 
+import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlElement;
@@ -31,12 +32,12 @@ public class ReferenceTarget implements SerializableMetaData {
 	private ReferenceTargetType type;
 	private String name;
 
-	public @Nullable ReferenceTargetType getType() {
+	public @Nonnull ReferenceTargetType getType() {
 		return type;
 	}
 	
 	@XmlAttribute(required = true)
-	public void setType(@Nullable ReferenceTargetType type) {
+	public void setType(@Nonnull ReferenceTargetType type) {
 		this.type = type;
 	}
 

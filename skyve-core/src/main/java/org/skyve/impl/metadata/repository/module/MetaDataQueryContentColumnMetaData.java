@@ -3,6 +3,7 @@ package org.skyve.impl.metadata.repository.module;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
 
+import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlRootElement;
@@ -48,7 +49,7 @@ public class MetaDataQueryContentColumnMetaData extends MetaDataQueryColumnMetaD
 	 *
 	 * @return the display mode, never {@code null} once metadata validation has completed
 	 */
-	public @Nullable DisplayType getDisplay() {
+	public @Nonnull DisplayType getDisplay() {
 		return display;
 	}
 
@@ -58,7 +59,7 @@ public class MetaDataQueryContentColumnMetaData extends MetaDataQueryColumnMetaD
 	 * @param display the display mode to apply
 	 */
 	@XmlAttribute(required = true)
-	public void setDisplay(@Nullable DisplayType display) {
+	public void setDisplay(@Nonnull DisplayType display) {
 		this.display = display;
 	}
 

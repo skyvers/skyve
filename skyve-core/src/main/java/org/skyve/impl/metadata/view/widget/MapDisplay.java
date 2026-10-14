@@ -87,7 +87,7 @@ public class MapDisplay implements DecoratedMetaData, RelativeSize, Invisible {
 	 *
 	 * @return the map model name
 	 */
-	public @Nullable String getModelName() {
+	public @Nonnull String getModelName() {
 		return modelName;
 	}
 
@@ -97,7 +97,7 @@ public class MapDisplay implements DecoratedMetaData, RelativeSize, Invisible {
 	 * @param modelName the map model name
 	 */
 	@XmlAttribute(required = true)
-	public void setModelName(@Nullable String modelName) {
+	public void setModelName(@Nonnull String modelName) {
 		this.modelName = UtilImpl.processStringValue(modelName);
 	}
 

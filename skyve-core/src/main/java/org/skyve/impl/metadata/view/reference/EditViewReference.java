@@ -4,7 +4,7 @@ import org.skyve.impl.metadata.view.widget.bound.AbstractBound;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
 
-import jakarta.annotation.Nullable;
+import jakarta.annotation.Nonnull;
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
@@ -23,21 +23,21 @@ public class EditViewReference extends AbstractBound implements Reference {
 	private String moduleName;
 	private String documentName;
 	
-	public @Nullable String getModuleName() {
+	public @Nonnull String getModuleName() {
 		return moduleName;
 	}
 
 	@XmlAttribute(required = true)
-	public void setModuleName(@Nullable String moduleName) {
+	public void setModuleName(@Nonnull String moduleName) {
 		this.moduleName = UtilImpl.processStringValue(moduleName);
 	}
 
-	public @Nullable String getDocumentName() {
+	public @Nonnull String getDocumentName() {
 		return documentName;
 	}
 
 	@XmlAttribute(required = true)
-	public void setDocumentName(@Nullable String documentName) {
+	public void setDocumentName(@Nonnull String documentName) {
 		this.documentName = UtilImpl.processStringValue(documentName);
 	}
 }

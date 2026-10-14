@@ -12,7 +12,6 @@ import org.skyve.impl.util.XMLMetaData;
 import org.skyve.util.ExpressionEvaluator;
 
 import jakarta.annotation.Nonnull;
-import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlElementWrapper;
@@ -36,12 +35,12 @@ public class InvokeStatement extends StatementMetaData {
 	@XmlElement(namespace = XMLMetaData.BEHAVIOUR_NAMESPACE, name = "argument")
 	private List<MethodArgument> arguments = new ArrayList<>();
 
-	public @Nullable String getMethodName() {
+	public @Nonnull String getMethodName() {
 		return methodName;
 	}
 	
 	@XmlAttribute(name="method", required = true)
-	public void setMethodName(@Nullable String methodName) {
+	public void setMethodName(@Nonnull String methodName) {
 		this.methodName = UtilImpl.processStringValue(methodName);
 	}
 

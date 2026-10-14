@@ -99,19 +99,19 @@ public class ChartBuilderMetaData implements ModelMetaData {
 		this.title = UtilImpl.processStringValue(title);
 	}
 
-	public @Nullable String getLabel() {
+	public @Nonnull String getLabel() {
 		return label;
 	}
 	@XmlAttribute(required = true)
-	public void setLabel(@Nullable String label) {
+	public void setLabel(@Nonnull String label) {
 		this.label = UtilImpl.processStringValue(label);
 	}
 	
-	public @Nullable String getModuleName() {
+	public @Nonnull String getModuleName() {
 		return moduleName;
 	}
 	@XmlAttribute(required = true)
-	public void setModuleName(@Nullable String moduleName) {
+	public void setModuleName(@Nonnull String moduleName) {
 		this.moduleName = UtilImpl.processStringValue(moduleName);
 	}
 	
@@ -131,11 +131,11 @@ public class ChartBuilderMetaData implements ModelMetaData {
 		this.queryName = UtilImpl.processStringValue(queryName);
 	}
 
-	public @Nullable String getCategoryBinding() {
+	public @Nonnull String getCategoryBinding() {
 		return categoryBinding;
 	}
 	@XmlAttribute(required = true)
-	public void setCategoryBinding(@Nullable String categoryBinding) {
+	public void setCategoryBinding(@Nonnull String categoryBinding) {
 		this.categoryBinding = UtilImpl.processStringValue(categoryBinding);
 	}
 
@@ -156,11 +156,11 @@ public class ChartBuilderMetaData implements ModelMetaData {
 		}
 	}
 
-	public @Nullable String getValueBinding() {
+	public @Nonnull String getValueBinding() {
 		return valueBinding;
 	}
 	@XmlAttribute(required = true)
-	public void setValueBinding(@Nullable String valueBinding) {
+	public void setValueBinding(@Nonnull String valueBinding) {
 		this.valueBinding = UtilImpl.processStringValue(valueBinding);
 	}
 	

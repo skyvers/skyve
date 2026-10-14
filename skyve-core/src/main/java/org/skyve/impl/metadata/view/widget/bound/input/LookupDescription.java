@@ -120,7 +120,7 @@ public class LookupDescription extends InputWidget implements FormItemWidget, Ed
 	 *
 	 * @return the description binding expression
 	 */
-	public @Nullable String getDescriptionBinding() {
+	public @Nonnull String getDescriptionBinding() {
 		return descriptionBinding;
 	}
 
@@ -130,7 +130,7 @@ public class LookupDescription extends InputWidget implements FormItemWidget, Ed
 	 * @param descriptionBinding the description binding expression to apply
 	 */
 	@XmlAttribute(required = true)
-	public void setDescriptionBinding(@Nullable String descriptionBinding) {
+	public void setDescriptionBinding(@Nonnull String descriptionBinding) {
 		this.descriptionBinding = descriptionBinding;
 	}
 

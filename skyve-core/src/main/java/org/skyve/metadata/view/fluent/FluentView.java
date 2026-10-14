@@ -93,7 +93,7 @@ public class FluentView extends FluentContainer<FluentView> {
 	 *            the view identifier
 	 * @return this builder
 	 */
-	public @Nonnull FluentView name(@Nullable String name) {
+	public @Nonnull FluentView name(@Nonnull String name) {
 		view.setName(name);
 		return this;
 	}
@@ -105,7 +105,7 @@ public class FluentView extends FluentContainer<FluentView> {
 	 *            the display title
 	 * @return this builder
 	 */
-	public @Nonnull FluentView title(@Nullable String title) {
+	public @Nonnull FluentView title(@Nonnull String title) {
 		view.setTitle(title);
 		return this;
 	}

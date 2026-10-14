@@ -105,7 +105,7 @@ public class FluentModule {
 	 * @param name The module name.
 	 * @return this fluent instance.
 	 */
-	public @Nonnull FluentModule name(@Nonnull String name) {
+	public @Nonnull FluentModule name(@Nullable String name) {
 		module.setName(name);
 		return this;
 	}
@@ -171,7 +171,7 @@ public class FluentModule {
 	 * @param documentName The home document name.
 	 * @return this fluent instance.
 	 */
-	public @Nonnull FluentModule homeDocument(@Nullable String documentName) {
+	public @Nonnull FluentModule homeDocument(@Nonnull String documentName) {
 		module.setHomeDocument(documentName);
 		return this;
 	}

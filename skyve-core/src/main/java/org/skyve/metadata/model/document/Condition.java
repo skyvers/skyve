@@ -3,6 +3,7 @@ package org.skyve.metadata.model.document;
 import org.skyve.metadata.DecoratedMetaData;
 import org.skyve.metadata.model.Attribute.UsageType;
 
+import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 
 /**
@@ -40,7 +41,7 @@ public interface Condition extends DecoratedMetaData {
 	 *
 	 * @return the boolean expression; never {@code null}
 	 */
-	public @Nullable String getExpression();
+	public @Nonnull String getExpression();
 
 	/**
 	 * Informs the Skyve framework when to include and exclude the attributes.

@@ -11,7 +11,6 @@ import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.DecoratedMetaData;
 
 import jakarta.annotation.Nonnull;
-import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlType;
@@ -47,12 +46,12 @@ public class CustomerModulesMetaData implements DecoratedMetaData {
 		return modules;
 	}
 	
-	public @Nullable String getHomeModule() {
+	public @Nonnull String getHomeModule() {
 		return homeModule;
 	}
 
 	@XmlAttribute(required = true)
-	public void setHomeModule(@Nullable String homeModule) {
+	public void setHomeModule(@Nonnull String homeModule) {
 		this.homeModule = UtilImpl.processStringValue(homeModule);
 	}
 	

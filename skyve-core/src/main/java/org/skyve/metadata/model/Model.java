@@ -81,7 +81,7 @@ public interface Model extends NamedMetaData {
 	 * @return the plural alias; may be {@code null}
 	 * @see #getLocalisedPluralAlias()
 	 */
-	@Nullable String getPluralAlias();
+	@Nonnull String getPluralAlias();
 
 	default @Nullable String getLocalisedPluralAlias() {
 		return Util.i18n(getPluralAlias());
@@ -93,7 +93,7 @@ public interface Model extends NamedMetaData {
 	 * @return the singular alias; may be {@code null}
 	 * @see #getLocalisedSingularAlias()
 	 */
-	@Nullable String getSingularAlias();
+	@Nonnull String getSingularAlias();
 
 	default @Nullable String getLocalisedSingularAlias() {
 		return Util.i18n(getSingularAlias());

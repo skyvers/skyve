@@ -3,7 +3,6 @@ package org.skyve.metadata.behaviour.fluent;
 import org.skyve.impl.metadata.behaviour.SetStatement;
 
 import jakarta.annotation.Nonnull;
-import jakarta.annotation.Nullable;
 
 /**
  * Builds a behaviour {@code set} statement.
@@ -48,7 +47,7 @@ public class FluentSetStatement extends FluentStatement<FluentSetStatement> {
 	 * @param binding dot-path binding expression
 	 * @return this builder
 	 */
-	public @Nonnull FluentSetStatement binding(@Nullable String binding) {
+	public @Nonnull FluentSetStatement binding(@Nonnull String binding) {
 		setStatement.setBinding(binding);
 		return this;
 	}
@@ -59,7 +58,7 @@ public class FluentSetStatement extends FluentStatement<FluentSetStatement> {
 	 * @param expression Skyve expression string
 	 * @return this builder
 	 */
-	public @Nonnull FluentSetStatement expression(@Nullable String expression) {
+	public @Nonnull FluentSetStatement expression(@Nonnull String expression) {
 		setStatement.setExpression(expression);
 		return this;
 	}

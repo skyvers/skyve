@@ -90,7 +90,7 @@ public class Interaction implements Executable {
 	 * Returns the name.
 	 * @return the result
 	 */
-	public @Nullable String getName() {
+	public @Nonnull String getName() {
 		return name;
 	}
 
@@ -99,7 +99,7 @@ public class Interaction implements Executable {
 	 * @param name the name
 	 */
 	@XmlAttribute(required = true)
-	public void setName(@Nullable String name) {
+	public void setName(@Nonnull String name) {
 		this.name = UtilImpl.processStringValue(name);
 	}
 	

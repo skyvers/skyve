@@ -48,10 +48,10 @@ public class ConditionImpl implements Condition {
 	}
 
 	@Override
-	public @Nullable String getExpression() {
+	public @Nonnull String getExpression() {
 		return expression;
 	}
-	public void setExpression(@Nullable String expression) {
+	public void setExpression(@Nonnull String expression) {
 		this.expression = expression;
 	}
 

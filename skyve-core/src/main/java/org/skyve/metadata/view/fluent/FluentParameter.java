@@ -50,7 +50,7 @@ public class FluentParameter {
 	 *            the parameter name
 	 * @return this builder
 	 */
-	public @Nonnull FluentParameter name(@Nullable String name) {
+	public @Nonnull FluentParameter name(@Nonnull String name) {
 		parameter.setName(name);
 		return this;
 	}

@@ -5,7 +5,6 @@ import java.util.Set;
 import org.skyve.impl.metadata.repository.view.access.ViewPreviousCompleteUserAccessMetaData;
 
 import jakarta.annotation.Nonnull;
-import jakarta.annotation.Nullable;
 
 /**
  * A fluent helper builder class to construct and manipulate the {@link ViewPreviousCompleteUserAccessMetaData} metadata.
@@ -39,7 +38,7 @@ public class FluentViewPreviousCompleteAccess extends FluentViewUserAccess<Fluen
 	/**
 	 * Specifies the binding for this FluentViewPreviousCompleteAccess.
 	 */
-	public @Nonnull FluentViewPreviousCompleteAccess binding(final @Nullable String binding) {
+	public @Nonnull FluentViewPreviousCompleteAccess binding(final @Nonnull String binding) {
 		access.setBinding(binding);
 		return this;
 	}

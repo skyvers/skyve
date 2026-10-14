@@ -89,7 +89,7 @@ public class FluentMapItem extends FluentMenuItem<FluentMapItem> {
 	 * @param geometryBinding The geometry binding expression.
 	 * @return this fluent instance.
 	 */
-	public @Nonnull FluentMapItem geometryBinding(@Nonnull String geometryBinding) {
+	public @Nonnull FluentMapItem geometryBinding(@Nullable String geometryBinding) {
 		item.setGeometryBinding(geometryBinding);
 		return this;
 	}

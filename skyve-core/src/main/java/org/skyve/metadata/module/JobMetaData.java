@@ -4,6 +4,7 @@ import org.skyve.metadata.DecoratedMetaData;
 import org.skyve.metadata.NamedMetaData;
 import org.skyve.util.Util;
 
+import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 
 /**
@@ -24,7 +25,7 @@ public interface JobMetaData extends NamedMetaData, DecoratedMetaData {
 	 * @return the display name key; never {@code null}
 	 * @see #getLocalisedDisplayName()
 	 */
-	public @Nullable String getDisplayName();
+	public @Nonnull String getDisplayName();
 
 	/**
 	 * Returns the localised human-readable job name, resolved via the i18n resource bundle.
@@ -43,7 +44,7 @@ public interface JobMetaData extends NamedMetaData, DecoratedMetaData {
 	 *
 	 * @return the class name; never {@code null}
 	 */
-	public @Nullable String getClassName();
+	public @Nonnull String getClassName();
 
 	/**
 	 * Returns the i18n resource key (or literal string) for a longer description of this job.

@@ -29,7 +29,7 @@ public interface Role extends NamedMetaData, DecoratedMetaData {
 	 *
 	 * @return the role description; may be {@code null} if none is specified
 	 */
-	public @Nullable String getDescription();
+	public @Nonnull String getDescription();
 	
 	/**
 	 * Returns the localised description of this role for the current user locale.

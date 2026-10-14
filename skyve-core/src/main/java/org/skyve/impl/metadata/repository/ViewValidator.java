@@ -50,6 +50,9 @@ import org.skyve.impl.metadata.view.event.SetInvisibleEventAction;
 import org.skyve.impl.metadata.view.event.ToggleDisabledEventAction;
 import org.skyve.impl.metadata.view.event.ToggleVisibilityEventAction;
 import org.skyve.impl.metadata.view.model.chart.ChartBuilderMetaData;
+import org.skyve.impl.metadata.view.model.chart.ChartBuilderOrderMetaData;
+import org.skyve.impl.metadata.view.model.chart.ChartBuilderTopMetaData;
+import org.skyve.impl.metadata.view.model.chart.TemporalBucketMetaData;
 import org.skyve.impl.metadata.view.reference.ActionReference;
 import org.skyve.impl.metadata.view.reference.ContentReference;
 import org.skyve.impl.metadata.view.reference.DefaultListViewReference;
@@ -613,6 +616,9 @@ class ViewValidator extends ViewVisitor {
 	public void visitButton(@Nonnull Button button, boolean parentVisible, boolean parentEnabled) {
 		String actionName = button.getActionName();
 		String buttonIdentifier = "A button " + button.getActionName();
+		if (actionName == null) {
+			throw new MetaDataException(buttonIdentifier + IN + viewIdentifier + " - action is required.");
+		}
 		validateActionName(actionName, buttonIdentifier);
 		validateSize(button, buttonIdentifier);
 
@@ -652,6 +658,9 @@ class ViewValidator extends ViewVisitor {
 	@Override
 	public void visitDynamicImage(@Nonnull DynamicImage image, boolean parentVisible, boolean parentEnabled) {
 		String imageIdentifier = "Dynamic Image " + image.getName();
+		if (image.getName() == null) {
+			throw new MetaDataException(imageIdentifier + IN + viewIdentifier + " - name is required.");
+		}
 		validateCondition(image.getInvisibleCondition(), imageIdentifier);
 		validateParameterBindings(image.getParameters(), imageIdentifier);
 		validateSize(image, imageIdentifier);
@@ -978,6 +987,9 @@ class ViewValidator extends ViewVisitor {
 	@Override
 	public void visitDialogButton(@Nonnull DialogButton button, boolean parentVisible, boolean parentEnabled) {
 		String buttonIdentifier = "A Dialog Button" + button.getDialogName();
+		if (button.getDisplayName() == null) {
+			throw new MetaDataException(buttonIdentifier + IN + viewIdentifier + " - displayName is required.");
+		}
 		validateCondition(button.getDisabledCondition(), buttonIdentifier);
 		validateCondition(button.getInvisibleCondition(), buttonIdentifier);
 		validateParameterBindings(button.getParameters(), buttonIdentifier);
@@ -1072,6 +1084,9 @@ class ViewValidator extends ViewVisitor {
 	@Override
 	public void visitMap(@Nonnull MapDisplay map, boolean parentVisible, boolean parentEnabled) {
 		String geometryIdentifier = "Map with model " + map.getModelName();
+		if (map.getModelName() == null) {
+			throw new MetaDataException(geometryIdentifier + IN + viewIdentifier + " - modelName is required.");
+		}
 		validateSize(map, geometryIdentifier);
 		validateCondition(map.getInvisibleCondition(), geometryIdentifier);
 		validateMapModelName(map.getModelName(), geometryIdentifier);
@@ -1094,10 +1109,16 @@ class ViewValidator extends ViewVisitor {
 		else {
 			validateChartModel(model, chartIdentifier);
 		}
+		if (chart.getType() == null) {
+			throw new MetaDataException(chartIdentifier + IN + viewIdentifier + " - type is required.");
+		}
 	}
 
 	@SuppressWarnings("java:S3776") // Complexity OK
 	private void validateChartModel(@Nonnull ChartBuilderMetaData model, @Nonnull String chartIdentifier) {
+		if (model.getLabel() == null) {
+			throw new MetaDataException(chartIdentifier + IN + viewIdentifier + " - label is required.");
+		}
 		Module contextModule = null;
 		try {
 			contextModule = repository.getModule(customer, model.getModuleName());
@@ -1192,6 +1213,28 @@ class ViewValidator extends ViewVisitor {
 				}
 			}
 		}
+
+		if ((model.getCategoryBucket() instanceof TemporalBucketMetaData temporalBucket) && (temporalBucket.getType() == null)) {
+			throw new MetaDataException(chartIdentifier + IN + viewIdentifier + " - type is required for temporalBucket.");
+		}
+		ChartBuilderTopMetaData top = model.getTop();
+		if (top != null) {
+			if (top.getBy() == null) {
+				throw new MetaDataException(chartIdentifier + IN + viewIdentifier + " - by is required for top.");
+			}
+			if (top.getSort() == null) {
+				throw new MetaDataException(chartIdentifier + IN + viewIdentifier + " - sort is required for top.");
+			}
+		}
+		ChartBuilderOrderMetaData order = model.getOrder();
+		if (order != null) {
+			if (order.getBy() == null) {
+				throw new MetaDataException(chartIdentifier + IN + viewIdentifier + " - by is required for order.");
+			}
+			if (order.getSort() == null) {
+				throw new MetaDataException(chartIdentifier + IN + viewIdentifier + " - sort is required for order.");
+			}
+		}
 	}
 
 	@Override
@@ -1215,6 +1258,12 @@ class ViewValidator extends ViewVisitor {
 		String htmlIdentifier = "HTML " + html.getBinding();
 		if (dataWidgetBinding != null) {
 			htmlIdentifier += IN + dataWidgetIdentifier;
+		}
+		if (html.getPixelWidth() == null) {
+			throw new MetaDataException(htmlIdentifier + IN + viewIdentifier + " - pixelWidth is required.");
+		}
+		if (html.getPixelHeight() == null) {
+			throw new MetaDataException(htmlIdentifier + IN + viewIdentifier + " - pixelHeight is required.");
 		}
 		validateBinding(dataWidgetBinding,
 							binding,
@@ -1379,6 +1428,9 @@ class ViewValidator extends ViewVisitor {
 		String binding = lookup.getBinding();
 		String descriptionBinding = lookup.getDescriptionBinding();
 		String lookupIdentifier = "LookupDescription " + binding;
+		if (descriptionBinding == null) {
+			throw new MetaDataException(lookupIdentifier + IN + viewIdentifier + " - descriptionBinding is required.");
+		}
 		validateSize(lookup, lookupIdentifier);
 		// A lookupDescription in a data grid bound to an aggregated collection
 		// doesn't have to have a binding
@@ -1532,6 +1584,9 @@ class ViewValidator extends ViewVisitor {
 
 	@Override
 	public void visitParameter(@Nonnull Parameter parameter, boolean parentVisible, boolean parentEnabled) {
+		if (parameter.getName() == null) {
+			throw new MetaDataException(PARAMETER_PREFIX + parameter.getName() + IN + viewIdentifier + " - name is required.");
+		}
 		// Check that value or valueBinding is populated
 		if ((parameter.getValue() == null) && (parameter.getValueBinding() == null)) {
 			throw new MetaDataException(PARAMETER_PREFIX + parameter.getName() + " requires either a value or a valueBinding.");
@@ -1540,6 +1595,12 @@ class ViewValidator extends ViewVisitor {
 
 	@Override
 	public void visitFilterParameter(@Nonnull FilterParameter parameter, boolean parentVisible, boolean parentEnabled) {
+		if (parameter.getFilterBinding() == null) {
+			throw new MetaDataException("Filter Parameter " + parameter.getFilterBinding() + IN + viewIdentifier + " - filterBinding is required.");
+		}
+		if (parameter.getOperator() == null) {
+			throw new MetaDataException("Filter Parameter " + parameter.getFilterBinding() + IN + viewIdentifier + " - operator is required.");
+		}
 		// Check that value or valueBinding is populated for pertinent operators
 		FilterOperator operator = parameter.getOperator();
 		if ((! FilterOperator.isNull.equals(operator)) &&
@@ -1802,12 +1863,23 @@ class ViewValidator extends ViewVisitor {
 
 			@Override
 			public void processResourceReference(@Nonnull ResourceReference reference) {
-				// nothing to do here
+				if (reference.getRelativeFile() == null) {
+					throw new MetaDataException(linkIdentifier + IN + viewIdentifier + " - relativeFile is required for a resource reference.");
+				}
 			}
 
 			@Override
 			@SuppressWarnings("synthetic-access")
 			public void processReportReference(@Nonnull ReportReference reference) {
+				if (reference.getModuleName() == null) {
+					throw new MetaDataException(linkIdentifier + IN + viewIdentifier + " - moduleName is required for a report reference.");
+				}
+				if (reference.getDocumentName() == null) {
+					throw new MetaDataException(linkIdentifier + IN + viewIdentifier + " - documentName is required for a report reference.");
+				}
+				if (reference.getReportName() == null) {
+					throw new MetaDataException(linkIdentifier + IN + viewIdentifier + " - reportName is required for a report reference.");
+				}
 				ModuleImpl reportModule = validateReferenceModuleName(reference.getModuleName(),
 																	"a report");
 				if (reportModule != null) { // valid module name with no '{'
@@ -1849,16 +1921,26 @@ class ViewValidator extends ViewVisitor {
 
 			@Override
 			public void processImplicitActionReference(@Nonnull ImplicitActionReference reference) {
-				// nothing to do here
+				if (reference.getImplicitActionName() == null) {
+					throw new MetaDataException(linkIdentifier + IN + viewIdentifier + " - implicitActionName is required for an implicit action reference.");
+				}
 			}
 
 			@Override
 			public void processExternalReference(@Nonnull ExternalReference reference) {
-				// nothing to do here
+				if (reference.getHref() == null) {
+					throw new MetaDataException(linkIdentifier + IN + viewIdentifier + " - href is required for an external reference.");
+				}
 			}
 
 			@Override
 			public void processEditViewReference(@Nonnull EditViewReference reference) {
+				if (reference.getModuleName() == null) {
+					throw new MetaDataException(linkIdentifier + IN + viewIdentifier + " - moduleName is required for an edit view reference.");
+				}
+				if (reference.getDocumentName() == null) {
+					throw new MetaDataException(linkIdentifier + IN + viewIdentifier + " - documentName is required for an edit view reference.");
+				}
 				ModuleImpl viewModule = validateReferenceModuleName(reference.getModuleName(), EDIT_VIEW_DESCRIPTION);
 				if (viewModule != null) { // valid module name with no '{'
 					validateReferenceDocumentName(viewModule,
@@ -1870,6 +1952,12 @@ class ViewValidator extends ViewVisitor {
 
 			@Override
 			public void processDefaultListViewReference(@Nonnull DefaultListViewReference reference) {
+				if (reference.getModuleName() == null) {
+					throw new MetaDataException(linkIdentifier + IN + viewIdentifier + " - moduleName is required for a default list view reference.");
+				}
+				if (reference.getDocumentName() == null) {
+					throw new MetaDataException(linkIdentifier + IN + viewIdentifier + " - documentName is required for a default list view reference.");
+				}
 				ModuleImpl viewModule = validateReferenceModuleName(reference.getModuleName(), EDIT_VIEW_DESCRIPTION);
 				if (viewModule != null) { // valid module name with no '{'
 					validateReferenceDocumentName(viewModule,
@@ -1897,6 +1985,9 @@ class ViewValidator extends ViewVisitor {
 			@Override
 			@SuppressWarnings("synthetic-access")
 			public void processActionReference(@Nonnull ActionReference reference) {
+				if (reference.getActionName() == null) {
+					throw new MetaDataException(linkIdentifier + IN + viewIdentifier + " - action is required for an action reference.");
+				}
 				String widgetIdentifier = linkIdentifier + " with an action reference";
 				if (dataWidgetBinding != null) { // in a repeater or grid
 					widgetIdentifier += IN + dataWidgetBinding;
@@ -1936,6 +2027,9 @@ class ViewValidator extends ViewVisitor {
 	@Override
 	public void visitTab(@Nonnull Tab tab, boolean parentVisible, boolean parentEnabled) {
 		String tabIdentifier = "Tab " + tab.getTitle();
+		if (tab.getTitle() == null) {
+			throw new MetaDataException(tabIdentifier + IN + viewIdentifier + " - title is required.");
+		}
 		validateCondition(tab.getDisabledCondition(), tabIdentifier);
 		validateCondition(tab.getInvisibleCondition(), tabIdentifier);
 		validateMessageExpressions(tab.getLocalisedTitle(), tabIdentifier, "title");
@@ -2021,7 +2115,9 @@ class ViewValidator extends ViewVisitor {
 	public void visitInject(@Nonnull Inject inject,
 								boolean parentVisible,
 								boolean parentEnabled) {
-		// nothing to do here
+		if (inject.getScript() == null) {
+			throw new MetaDataException("Inject" + IN + viewIdentifier + " - script is required.");
+		}
 	}
 
 	@Override
@@ -2520,6 +2616,9 @@ class ViewValidator extends ViewVisitor {
 	public void visitServerSideActionEventAction(@Nonnull ServerSideActionEventAction server,
 													boolean parentVisible,
 													boolean parentEnabled) {
+		if (server.getActionName() == null) {
+			throw new MetaDataException("[server] event action in an event handler" + IN + viewIdentifier + " - action is required.");
+		}
 		validateActionName(server.getActionName(), "[server] event action in an event handler");
 	}
 
@@ -2602,6 +2701,9 @@ class ViewValidator extends ViewVisitor {
 				(sidebar.getPixelWidth() == null) &&
 				(sidebar.getResponsiveWidth() == null)) {
 			throw new MetaDataException(sidebarIdentifier + IN + viewIdentifier + " requires at least one of [percentageWidth, pixelWidth, responsiveWidth]");
+		}
+		if (sidebar.getFloatingPixelWidthBreakpoint() == null) {
+			throw new MetaDataException(sidebarIdentifier + IN + viewIdentifier + " - floatingPixelWidthBreakpoint is required.");
 		}
 		validateCondition(sidebar.getInvisibleCondition(), sidebarIdentifier);
 	}

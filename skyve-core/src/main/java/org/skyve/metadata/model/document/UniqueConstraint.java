@@ -67,6 +67,14 @@ public interface UniqueConstraint extends NamedMetaData, DecoratedMetaData {
 	}
 
 	/**
+	 * Returns the name of this constraint.
+	 *
+	 * @return the constraint name; never {@code null}
+	 */
+	@Override
+	@Nonnull String getName();
+
+	/**
 	 * Returns the tenancy scope within which this constraint enforces uniqueness.
 	 *
 	 * @return the document scope; never {@code null}
@@ -93,7 +101,7 @@ public interface UniqueConstraint extends NamedMetaData, DecoratedMetaData {
 	 *
 	 * @return the validation message; may be {@code null}
 	 */
-	public @Nullable String getMessage();
+	public @Nonnull String getMessage();
 	
 	/**
 	 * Returns the ordered list of document attribute names that together form the unique key.

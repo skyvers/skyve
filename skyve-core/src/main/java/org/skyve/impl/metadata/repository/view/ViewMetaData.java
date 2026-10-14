@@ -96,7 +96,7 @@ public class ViewMetaData extends Container implements NamedMetaData, Convertibl
 	 * @return view name
 	 */
 	@Override
-	public @Nullable String getName() {
+	public @Nonnull String getName() {
 		return name;
 	}
 
@@ -106,7 +106,7 @@ public class ViewMetaData extends Container implements NamedMetaData, Convertibl
 	 * @param name view name
 	 */
 	@XmlAttribute(required = true)
-	public void setName(@Nullable String name) {
+	public void setName(@Nonnull String name) {
 		this.name = UtilImpl.processStringValue(name);
 	}
 
@@ -115,7 +115,7 @@ public class ViewMetaData extends Container implements NamedMetaData, Convertibl
 	 *
 	 * @return view title
 	 */
-	public @Nullable String getTitle() {
+	public @Nonnull String getTitle() {
 		return title;
 	}
 
@@ -134,7 +134,7 @@ public class ViewMetaData extends Container implements NamedMetaData, Convertibl
 	 * @param title view title
 	 */
 	@XmlAttribute(required = true)
-	public void setTitle(@Nullable String title) {
+	public void setTitle(@Nonnull String title) {
 		this.title = UtilImpl.processStringValue(title);
 	}
 

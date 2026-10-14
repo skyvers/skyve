@@ -7,7 +7,6 @@ import org.skyve.metadata.sail.execution.Executor;
 import org.skyve.metadata.sail.language.Step;
 
 import jakarta.annotation.Nonnull;
-import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
@@ -36,7 +35,7 @@ public class DataGridEdit implements Step {
 	 * Returns the binding.
 	 * @return the result
 	 */
-	public @Nullable String getBinding() {
+	public @Nonnull String getBinding() {
 		return binding;
 	}
 
@@ -45,7 +44,7 @@ public class DataGridEdit implements Step {
 	 * @param binding the binding
 	 */
 	@XmlAttribute(name = "binding", required = true)
-	public void setBinding(@Nullable String binding) {
+	public void setBinding(@Nonnull String binding) {
 		this.binding = UtilImpl.processStringValue(binding);
 	}
 
@@ -53,7 +52,7 @@ public class DataGridEdit implements Step {
 	 * Returns the row.
 	 * @return the result
 	 */
-	public @Nullable Integer getRow() {
+	public @Nonnull Integer getRow() {
 		return row;
 	}
 
@@ -62,7 +61,7 @@ public class DataGridEdit implements Step {
 	 * @param row the row
 	 */
 	@XmlAttribute(name = "row", required = true)
-	public void setRow(@Nullable Integer row) {
+	public void setRow(@Nonnull Integer row) {
 		this.row = row;
 	}
 

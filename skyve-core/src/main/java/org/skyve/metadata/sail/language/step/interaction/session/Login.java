@@ -52,7 +52,7 @@ public class Login implements Step {
 	 * Returns the user.
 	 * @return the result
 	 */
-	public @Nullable String getUser() {
+	public @Nonnull String getUser() {
 		return user;
 	}
 
@@ -61,7 +61,7 @@ public class Login implements Step {
 	 * @param user the user
 	 */
 	@XmlAttribute(required = true)
-	public void setUser(@Nullable String user) {
+	public void setUser(@Nonnull String user) {
 		this.user = UtilImpl.processStringValue(user);
 	}
 
@@ -69,7 +69,7 @@ public class Login implements Step {
 	 * Returns the password.
 	 * @return the result
 	 */
-	public @Nullable String getPassword() {
+	public @Nonnull String getPassword() {
 		return password;
 	}
 
@@ -78,7 +78,7 @@ public class Login implements Step {
 	 * @param password the password
 	 */
 	@XmlAttribute(required = true)
-	public void setPassword(@Nullable String password) {
+	public void setPassword(@Nonnull String password) {
 		this.password = UtilImpl.processStringValue(password);
 	}
 

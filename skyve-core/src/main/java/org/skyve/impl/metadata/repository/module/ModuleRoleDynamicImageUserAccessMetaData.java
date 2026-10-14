@@ -7,7 +7,6 @@ import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.UserAccess;
 
 import jakarta.annotation.Nonnull;
-import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
@@ -36,7 +35,7 @@ public class ModuleRoleDynamicImageUserAccessMetaData extends ModuleRoleDocument
 	 *
 	 * @return the dynamic-image name
 	 */
-	public @Nullable String getImageName() {
+	public @Nonnull String getImageName() {
 		return imageName;
 	}
 
@@ -49,7 +48,7 @@ public class ModuleRoleDynamicImageUserAccessMetaData extends ModuleRoleDocument
 	 * @param imageName the dynamic-image name; blank values become {@code null}
 	 */
 	@XmlAttribute(name = "image", required = true)
-	public void setImageName(@Nullable String imageName) {
+	public void setImageName(@Nonnull String imageName) {
 		this.imageName = UtilImpl.processStringValue(imageName);
 	}
 	

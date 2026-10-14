@@ -70,6 +70,7 @@ import org.skyve.metadata.model.document.Collection.CollectionType;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.model.document.DomainType;
 import org.skyve.metadata.model.document.Interface;
+import org.skyve.metadata.model.document.Inverse;
 import org.skyve.metadata.model.document.Relation;
 import org.skyve.util.Icons;
 
@@ -276,7 +277,7 @@ public class DocumentMetaData extends NamedMetaData implements ConvertibleMetaDa
 	 *
 	 * @return singular alias
 	 */
-	public @Nullable String getSingularAlias() {
+	public @Nonnull String getSingularAlias() {
 		return singularAlias;
 	}
 
@@ -286,7 +287,7 @@ public class DocumentMetaData extends NamedMetaData implements ConvertibleMetaDa
 	 * @param singularAlias singular alias value
 	 */
 	@XmlElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE, required = true)
-	public void setSingularAlias(@Nullable String singularAlias) {
+	public void setSingularAlias(@Nonnull String singularAlias) {
 		this.singularAlias = UtilImpl.processStringValue(singularAlias);
 	}
 
@@ -295,7 +296,7 @@ public class DocumentMetaData extends NamedMetaData implements ConvertibleMetaDa
 	 *
 	 * @return plural alias
 	 */
-	public @Nullable String getPluralAlias() {
+	public @Nonnull String getPluralAlias() {
 		return pluralAlias;
 	}
 
@@ -305,7 +306,7 @@ public class DocumentMetaData extends NamedMetaData implements ConvertibleMetaDa
 	 * @param pluralAlias plural alias value
 	 */
 	@XmlElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE, required = true)
-	public void setPluralAlias(@Nullable String pluralAlias) {
+	public void setPluralAlias(@Nonnull String pluralAlias) {
 		this.pluralAlias = UtilImpl.processStringValue(pluralAlias);
 	}
 
@@ -586,6 +587,9 @@ public class DocumentMetaData extends NamedMetaData implements ConvertibleMetaDa
 			throw new MetaDataException(metaDataName + " : The document [name] is required");
 		}
 		result.setName(value);
+		if ((inherits != null) && (inherits.getDocumentName() == null)) {
+			throw new MetaDataException(metaDataName + " : The extends [document] is required");
+		}
 		result.setExtends(getExtends());
 		result.setAbstract(java.lang.Boolean.TRUE.equals(getAbstract()));
 		result.setPersistent(getPersistent());
@@ -1016,6 +1020,12 @@ public class DocumentMetaData extends NamedMetaData implements ConvertibleMetaDa
 								}
 							}
 						}
+						for (EnumeratedValue enumeratedValue : values) {
+							if (enumeratedValue.getCode() == null) {
+								throw new MetaDataException(metaDataName + ENUMERATION_PREFIX + attribute.getName() +
+																" has a value with no [code] defined.");
+							}
+						}
 						enumeration.setOwningDocument(result);
 
 						// check to see if there is an overridden domain type set,
@@ -1031,6 +1041,11 @@ public class DocumentMetaData extends NamedMetaData implements ConvertibleMetaDa
 					value = relation.getDocumentName();
 					if (value == null) {
 						throw new MetaDataException(metaDataName + " : The relation [documentName] is required for relation " + relation.getName());
+					}
+					if (relation instanceof Inverse inverseRelation) {
+						if (inverseRelation.getReferenceName() == null) {
+							throw new MetaDataException(metaDataName + " : The inverse [referenceName] is required for inverse " + relation.getName());
+						}
 					}
 
 					if (relation instanceof AssociationImpl association) {
@@ -1052,12 +1067,36 @@ public class DocumentMetaData extends NamedMetaData implements ConvertibleMetaDa
 						if (resultPersistent == null) {
 							collection.setPersistent(false);
 						}
+						if (collection.getType() == null) {
+							throw new MetaDataException(metaDataName + " : The collection [type] is required for collection " +
+															relation.getName());
+						}
 
 						// Ordered and Ordering are mutually exclusive
 						List<Ordering> orderings = collection.getOrdering();
 						if (java.lang.Boolean.TRUE.equals(collection.getOrdered()) && (! orderings.isEmpty())) {
 							throw new MetaDataException(metaDataName + " : The collection [ordered] and [orderings] are mutually exclusive for collection " +
 															relation.getName());
+						}
+						for (Ordering ordering : orderings) {
+							if (ordering.getBy() == null) {
+								throw new MetaDataException(metaDataName + " : The collection ordering [by] is required for collection " +
+																relation.getName());
+							}
+							if (ordering.getSort() == null) {
+								throw new MetaDataException(metaDataName + " : The collection ordering [sort] is required for collection " +
+																relation.getName());
+							}
+						}
+						for (org.skyve.metadata.model.document.UniqueConstraint unique : collection.getUniqueConstraints()) {
+							if (unique.getName() == null) {
+								throw new MetaDataException(metaDataName + " : The collection unique constraint [name] is required for collection " +
+																relation.getName());
+							}
+							if (unique.getMessage() == null) {
+								throw new MetaDataException(metaDataName + " : The collection unique constraint [message] is required for constraint " +
+																unique.getName() + " in collection " + relation.getName());
+							}
 						}
 
 						java.lang.Boolean ownerDatabaseIndex = collection.getOwnerDatabaseIndex();
@@ -1100,6 +1139,16 @@ public class DocumentMetaData extends NamedMetaData implements ConvertibleMetaDa
 					}
 					else if (relation instanceof InverseMany inverse) {
 						List<Ordering> orderings = inverse.getOrdering();
+						for (Ordering ordering : orderings) {
+							if (ordering.getBy() == null) {
+								throw new MetaDataException(metaDataName + " : The inverse ordering [by] is required for inverse " +
+																relation.getName());
+							}
+							if (ordering.getSort() == null) {
+								throw new MetaDataException(metaDataName + " : The inverse ordering [sort] is required for inverse " +
+																relation.getName());
+							}
+						}
 						for (Ordering ordering : orderings) {
 							String by = ordering.getBy();
 							if (by.indexOf('.') >= 0) {
@@ -1172,6 +1221,10 @@ public class DocumentMetaData extends NamedMetaData implements ConvertibleMetaDa
 					throw new MetaDataException(metaDataName + " : Duplicate unique constraint named " + value);
 				}
 				constraint.setName(value);
+				if (constraintMetaData.getScope() == null) {
+					throw new MetaDataException(metaDataName + " : The unique constraint [scope] is required for constraint " +
+													constraint.getName());
+				}
 				constraint.setScope(constraintMetaData.getScope());
 				constraint.setDescription(constraintMetaData.getDescription());
 				value = constraintMetaData.getMessage();

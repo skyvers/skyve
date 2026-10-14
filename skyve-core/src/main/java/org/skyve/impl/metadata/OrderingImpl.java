@@ -38,7 +38,7 @@ public class OrderingImpl implements Ordering {
 	 * @param by the field or binding to order by
 	 * @param sort the direction to apply
 	 */
-	public OrderingImpl(@Nullable String by, @Nullable SortDirection sort) {
+	public OrderingImpl(@Nonnull String by, @Nullable SortDirection sort) {
 		this.by = UtilImpl.processStringValue(by);
 		this.sort = sort;
 	}
@@ -58,7 +58,7 @@ public class OrderingImpl implements Ordering {
 	 *
 	 * @param by the field or binding name
 	 */
-	public void setBy(@Nullable String by) {
+	public void setBy(@Nonnull String by) {
 		this.by = UtilImpl.processStringValue(by);
 	}
 

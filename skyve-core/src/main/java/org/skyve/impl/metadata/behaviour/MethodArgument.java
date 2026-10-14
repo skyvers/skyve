@@ -3,7 +3,7 @@ package org.skyve.impl.metadata.behaviour;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
 
-import jakarta.annotation.Nullable;
+import jakarta.annotation.Nonnull;
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
@@ -23,21 +23,21 @@ public class MethodArgument {
 	// A Skyve expression to evaluate to get the argument value
 	private String expression;
 
-	public @Nullable String getTypeName() {
+	public @Nonnull String getTypeName() {
 		return typeName;
 	}
 	
 	@XmlAttribute(required = true)
-	public void setTypeName(@Nullable String typeName) {
+	public void setTypeName(@Nonnull String typeName) {
 		this.typeName = UtilImpl.processStringValue(typeName);
 	}
 	
-	public @Nullable String getExpression() {
+	public @Nonnull String getExpression() {
 		return expression;
 	}
 	
 	@XmlAttribute(required = true)
-	public void setExpression(@Nullable String expression) {
+	public void setExpression(@Nonnull String expression) {
 		this.expression = UtilImpl.processStringValue(expression);
 	}
 }

@@ -38,7 +38,7 @@ public abstract class FluentQueryDefinition<T extends FluentQueryDefinition<T>> 
 	 * @return this fluent instance.
 	 */
 	@SuppressWarnings("unchecked")
-	public @Nonnull T description(@Nonnull String description) {
+	public @Nonnull T description(@Nullable String description) {
 		get().setDescription(description);
 		return (T) this;
 	}

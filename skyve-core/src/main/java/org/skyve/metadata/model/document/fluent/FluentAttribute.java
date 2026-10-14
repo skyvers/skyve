@@ -154,7 +154,7 @@ public abstract class FluentAttribute<T extends FluentAttribute<T>> {
 	 * Updates metadata on this fluent builder.
 	 */
 	@SuppressWarnings("unchecked")
-	public @Nonnull T displayName(@Nullable String displayName) {
+	public @Nonnull T displayName(@Nonnull String displayName) {
 		get().setDisplayName(displayName);
 		return (T) this;
 	}

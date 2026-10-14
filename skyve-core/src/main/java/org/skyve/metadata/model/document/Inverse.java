@@ -27,7 +27,7 @@ public interface Inverse extends Relation {
 	 *
 	 * @return the reference name.
 	 */
-	public @Nullable String getReferenceName();
+	public @Nonnull String getReferenceName();
 
 	/**
 	 * The cardinality of this (inverse) side of the relationship.

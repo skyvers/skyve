@@ -52,7 +52,7 @@ public class FluentFilterParameter {
 	 *            the filter binding expression
 	 * @return this builder
 	 */
-	public @Nonnull FluentFilterParameter filterBinding(@Nullable String filterBinding) {
+	public @Nonnull FluentFilterParameter filterBinding(@Nonnull String filterBinding) {
 		filterParameter.setFilterBinding(filterBinding);
 		return this;
 	}
@@ -88,7 +88,7 @@ public class FluentFilterParameter {
 	 *            the filter operator
 	 * @return this builder
 	 */
-	public @Nonnull FluentFilterParameter operator(@Nullable FilterOperator operator) {
+	public @Nonnull FluentFilterParameter operator(@Nonnull FilterOperator operator) {
 		filterParameter.setOperator(operator);
 		return this;
 	}

@@ -163,7 +163,7 @@ public interface Attribute extends NamedMetaData, DecoratedMetaData {
 	 * @return the display name key; may be {@code null}
 	 * @see #getLocalisedDisplayName()
 	 */
-	@Nullable String getDisplayName();
+	@Nonnull String getDisplayName();
 	
 	default @Nullable String getLocalisedDisplayName() {
 		return Util.i18n(getDisplayName());

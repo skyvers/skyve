@@ -9,7 +9,6 @@ import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.DecoratedMetaData;
 
 import jakarta.annotation.Nonnull;
-import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlType;
@@ -37,12 +36,12 @@ public class ActionPrivilegeMetaData implements DecoratedMetaData {
 	@XmlJavaTypeAdapter(PropertyMapAdapter.class)
 	private Map<String, String> properties = new LinkedHashMap<>();
 	
-	public @Nullable String getActionName() {
+	public @Nonnull String getActionName() {
 		return actionName;
 	}
 
 	@XmlAttribute(name = "name", required = true)
-	public void setActionName(@Nullable String actionName) {
+	public void setActionName(@Nonnull String actionName) {
 		this.actionName = UtilImpl.processStringValue(actionName);
 	}
 	

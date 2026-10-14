@@ -7,7 +7,6 @@ import org.skyve.metadata.sail.execution.Executor;
 import org.skyve.metadata.sail.language.Step;
 
 import jakarta.annotation.Nonnull;
-import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
@@ -32,7 +31,7 @@ public class TestValue implements Step {
 	 * Returns the binding.
 	 * @return the result
 	 */
-	public @Nullable String getBinding() {
+	public @Nonnull String getBinding() {
 		return binding;
 	}
 
@@ -41,7 +40,7 @@ public class TestValue implements Step {
 	 * @param binding the binding
 	 */
 	@XmlAttribute(name = "binding", required = true)
-	public void setBinding(@Nullable String binding) {
+	public void setBinding(@Nonnull String binding) {
 		this.binding = UtilImpl.processStringValue(binding);
 	}
 
@@ -49,7 +48,7 @@ public class TestValue implements Step {
 	 * Returns the value.
 	 * @return the result
 	 */
-	public @Nullable String getValue() {
+	public @Nonnull String getValue() {
 		return value;
 	}
 
@@ -58,7 +57,7 @@ public class TestValue implements Step {
 	 * @param value the value
 	 */
 	@XmlAttribute(name = "value", required = true)
-	public void setValue(@Nullable String value) {
+	public void setValue(@Nonnull String value) {
 		this.value = UtilImpl.processStringValue(value);
 	}
 
@@ -77,7 +76,7 @@ public class TestValue implements Step {
 	 * @return the result
 	 */
 	@Override
-	public @Nullable String getIdentifier(@Nonnull AutomationContext context) {
+	public @Nonnull String getIdentifier(@Nonnull AutomationContext context) {
 		return binding;
 	}
 }

@@ -7,7 +7,6 @@ import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.UserAccess;
 
 import jakarta.annotation.Nonnull;
-import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
@@ -28,12 +27,12 @@ public class ViewDocumentAggregateUserAccessMetaData extends ViewUserAccessMetaD
 
 	private String documentName;
 
-	public @Nullable String getDocumentName() {
+	public @Nonnull String getDocumentName() {
 		return documentName;
 	}
 
 	@XmlAttribute(name = "document", required = true)
-	public void setDocumentName(@Nullable String documentName) {
+	public void setDocumentName(@Nonnull String documentName) {
 		this.documentName = UtilImpl.processStringValue(documentName);
 	}
 	

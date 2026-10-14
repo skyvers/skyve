@@ -33,7 +33,7 @@ public class NavigateEdit implements Step {
 	 * Returns the moduleName.
 	 * @return the result
 	 */
-	public @Nullable String getModuleName() {
+	public @Nonnull String getModuleName() {
 		return moduleName;
 	}
 
@@ -42,7 +42,7 @@ public class NavigateEdit implements Step {
 	 * @param moduleName the moduleName
 	 */
 	@XmlAttribute(name = "module", required = true)
-	public void setModuleName(@Nullable String moduleName) {
+	public void setModuleName(@Nonnull String moduleName) {
 		this.moduleName = UtilImpl.processStringValue(moduleName);
 	}
 
@@ -50,7 +50,7 @@ public class NavigateEdit implements Step {
 	 * Returns the documentName.
 	 * @return the result
 	 */
-	public @Nullable String getDocumentName() {
+	public @Nonnull String getDocumentName() {
 		return documentName;
 	}
 
@@ -59,7 +59,7 @@ public class NavigateEdit implements Step {
 	 * @param documentName the documentName
 	 */
 	@XmlAttribute(name = "document", required = true)
-	public void setDocumentName(@Nullable String documentName) {
+	public void setDocumentName(@Nonnull String documentName) {
 		this.documentName = UtilImpl.processStringValue(documentName);
 	}
 

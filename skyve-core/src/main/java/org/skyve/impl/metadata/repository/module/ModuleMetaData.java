@@ -127,7 +127,7 @@ public class ModuleMetaData extends NamedMetaData implements ConvertibleMetaData
 	 *
 	 * @return the module title
 	 */
-	public @Nullable String getTitle() {
+	public @Nonnull String getTitle() {
 		return title;
 	}
 
@@ -140,7 +140,7 @@ public class ModuleMetaData extends NamedMetaData implements ConvertibleMetaData
 	 * @param title the module title; blank values become {@code null}
 	 */
 	@XmlAttribute(required = true)
-	public void setTitle(@Nullable String title) {
+	public void setTitle(@Nonnull String title) {
 		this.title = UtilImpl.processStringValue(title);
 	}
 
@@ -168,7 +168,7 @@ public class ModuleMetaData extends NamedMetaData implements ConvertibleMetaData
 	 *
 	 * @return the home document name
 	 */
-	public @Nullable String getHomeDocument() {
+	public @Nonnull String getHomeDocument() {
 		return homeDocument;
 	}
 
@@ -200,7 +200,7 @@ public class ModuleMetaData extends NamedMetaData implements ConvertibleMetaData
 	 * @param homeDocument the home document name; blank values become {@code null}
 	 */
 	@XmlElement(namespace = XMLMetaData.MODULE_NAMESPACE, required = true)
-	public void setHomeDocument(@Nullable String homeDocument) {
+	public void setHomeDocument(@Nonnull String homeDocument) {
 		this.homeDocument = UtilImpl.processStringValue(homeDocument);
 	}
 
@@ -285,7 +285,7 @@ public class ModuleMetaData extends NamedMetaData implements ConvertibleMetaData
 	 *
 	 * @return the menu descriptor
 	 */
-	public @Nullable MenuMetaData getMenu() {
+	public @Nonnull MenuMetaData getMenu() {
 		return menu;
 	}
 
@@ -295,7 +295,7 @@ public class ModuleMetaData extends NamedMetaData implements ConvertibleMetaData
 	 * @param menu the menu descriptor
 	 */
 	@XmlElement(namespace = XMLMetaData.MODULE_NAMESPACE, required = true)
-	public void setMenu(@Nullable MenuMetaData menu) {
+	public void setMenu(@Nonnull MenuMetaData menu) {
 		this.menu = menu;
 	}
 
@@ -466,6 +466,11 @@ public class ModuleMetaData extends NamedMetaData implements ConvertibleMetaData
 				if (value == null) {
 					throw new MetaDataException(metaDataName + " : The [displayName] for job " + job.getName() + IS_REQUIRED);
 				}
+
+				value = job.getClassName();
+				if (value == null) {
+					throw new MetaDataException(metaDataName + " : The [className] for job " + job.getName() + IS_REQUIRED);
+				}
 				job.setOwningModuleName(result.getName());
 				result.putJob(job);
 			}
@@ -629,6 +634,11 @@ public class ModuleMetaData extends NamedMetaData implements ConvertibleMetaData
 							}
 							else if ((contentColumn != null) && (contentRepositoryColumn != null)) {
 								DisplayType display = contentRepositoryColumn.getDisplay();
+								if (display == null) {
+									throw new MetaDataException(metaDataName +
+																	" : The [display] for a content query column is missing in query " +
+																	defn.getName());
+								}
 								contentColumn.setDisplay(display);
 								contentColumn.setPixelHeight(contentRepositoryColumn.getPixelHeight());
 								String emptyThumbnailRelativeFile = contentRepositoryColumn.getEmptyThumbnailRelativeFile();
@@ -653,7 +663,11 @@ public class ModuleMetaData extends NamedMetaData implements ConvertibleMetaData
 												metaDataName,
 												queryNames,
 												documentNames);
-					defn.setQuery(sqlMetaData.getQuery());
+					value = sqlMetaData.getQuery();
+					if (value == null) {
+						throw new MetaDataException(metaDataName + " : The [query] for SQL query " + defn.getName() + IS_REQUIRED);
+					}
+					defn.setQuery(value);
 					defn.setOwningModule(result);
 					query = defn;
 				}
@@ -664,13 +678,23 @@ public class ModuleMetaData extends NamedMetaData implements ConvertibleMetaData
 												metaDataName,
 												queryNames,
 												documentNames);
-					defn.setQuery(bizQLMetaData.getQuery());
+					value = bizQLMetaData.getQuery();
+					if (value == null) {
+						throw new MetaDataException(metaDataName + " : The [query] for BizQL query " + defn.getName() + IS_REQUIRED);
+					}
+					defn.setQuery(value);
 					defn.setOwningModule(result);
 					query = defn;
 				}
 				else if (queryMetaData instanceof MetaDataQueryReferenceMetaData documentQueryReferenceMetaData) {
 					String name = documentQueryReferenceMetaData.getName();
 					String ref = documentQueryReferenceMetaData.getRef();
+					if (ref == null) {
+						throw new MetaDataException(metaDataName + " : The [ref] for a query import is required");
+					}
+					if (documentQueryReferenceMetaData.getModuleRef() == null) {
+						throw new MetaDataException(metaDataName + " : The [moduleRef] for query import " + ref + IS_REQUIRED);
+					}
 					validateQueryName((name != null) ? name : ref, metaDataName, queryNames, documentNames);
 
 					MetaDataQueryReferenceImpl reference = new MetaDataQueryReferenceImpl(name,
@@ -682,6 +706,12 @@ public class ModuleMetaData extends NamedMetaData implements ConvertibleMetaData
 				else if (queryMetaData instanceof SQLReferenceMetaData sqlReferenceMetaData) {
 					String name = sqlReferenceMetaData.getName();
 					String ref = sqlReferenceMetaData.getRef();
+					if (ref == null) {
+						throw new MetaDataException(metaDataName + " : The [ref] for an SQL import is required");
+					}
+					if (sqlReferenceMetaData.getModuleRef() == null) {
+						throw new MetaDataException(metaDataName + " : The [moduleRef] for SQL import " + ref + IS_REQUIRED);
+					}
 					validateQueryName((name != null) ? name : ref, metaDataName, queryNames, documentNames);
 
 					SQLReferenceImpl reference = new SQLReferenceImpl(sqlReferenceMetaData.getName(),
@@ -693,6 +723,12 @@ public class ModuleMetaData extends NamedMetaData implements ConvertibleMetaData
 				else if (queryMetaData instanceof BizQLReferenceMetaData bizQLReferenceMetaData) {
 					String name = bizQLReferenceMetaData.getName();
 					String ref = bizQLReferenceMetaData.getRef();
+					if (ref == null) {
+						throw new MetaDataException(metaDataName + " : The [ref] for a BizQL import is required");
+					}
+					if (bizQLReferenceMetaData.getModuleRef() == null) {
+						throw new MetaDataException(metaDataName + " : The [moduleRef] for BizQL import " + ref + IS_REQUIRED);
+					}
 					validateQueryName((name != null) ? name : ref, metaDataName, queryNames, documentNames);
 
 					BizQLReferenceImpl reference = new BizQLReferenceImpl(bizQLReferenceMetaData.getName(),
@@ -737,7 +773,11 @@ public class ModuleMetaData extends NamedMetaData implements ConvertibleMetaData
 					throw new MetaDataException(metaDataName + " : The role named " + roleName + IS_A_MODULE_DOCUMENT_NAME);
 				}
 				role.setName(roleName);
-				role.setDescription(roleMetaData.getDescription());
+				value = roleMetaData.getDescription();
+				if (value == null) {
+					throw new MetaDataException(metaDataName + " : The [description] for role " + roleName + IS_REQUIRED);
+				}
+				role.setDescription(value);
 				role.setDocumentation(roleMetaData.getDocumentation());
 				role.getProperties().putAll(roleMetaData.getProperties());
 
@@ -867,6 +907,9 @@ public class ModuleMetaData extends NamedMetaData implements ConvertibleMetaData
 
 		// Populate the menu
 
+		if (menu == null) {
+			throw new MetaDataException(metaDataName + " : The module [menu] is required");
+		}
 		MenuImpl resultMenu = new MenuImpl();
 		resultMenu.getProperties().putAll(menu.getProperties());
 

@@ -116,7 +116,7 @@ public class Chart implements DecoratedMetaData, RelativeSize, Invisible {
 	 *
 	 * @return the chart type
 	 */
-	public @Nullable ChartType getType() {
+	public @Nonnull ChartType getType() {
 		return type;
 	}
 
@@ -126,7 +126,7 @@ public class Chart implements DecoratedMetaData, RelativeSize, Invisible {
 	 * @param type the chart type
 	 */
 	@XmlAttribute(required = true)
-	public void setType(@Nullable ChartType type) {
+	public void setType(@Nonnull ChartType type) {
 		this.type = type;
 	}
 

@@ -5,7 +5,6 @@ import java.util.Set;
 import org.skyve.impl.metadata.repository.view.access.ViewReportUserAccessMetaData;
 
 import jakarta.annotation.Nonnull;
-import jakarta.annotation.Nullable;
 
 /**
  * A fluent helper builder class to construct and manipulate the {@link ViewReportUserAccessMetaData} metadata.
@@ -41,7 +40,7 @@ public class FluentViewReportAccess extends FluentViewUserAccess<FluentViewRepor
 	/**
 	 * Specifies the module name for this FluentViewReportAccess.
 	 */
-	public @Nonnull FluentViewReportAccess moduleName(final @Nullable String moduleName) {
+	public @Nonnull FluentViewReportAccess moduleName(final @Nonnull String moduleName) {
 		access.setModuleName(moduleName);
 		return this;
 	}
@@ -49,7 +48,7 @@ public class FluentViewReportAccess extends FluentViewUserAccess<FluentViewRepor
 	/**
 	 * Specifies the document name for this FluentViewReportAccess.
 	 */
-	public @Nonnull FluentViewReportAccess documentName(final @Nullable String documentName) {
+	public @Nonnull FluentViewReportAccess documentName(final @Nonnull String documentName) {
 		access.setDocumentName(documentName);
 		return this;
 	}
@@ -57,7 +56,7 @@ public class FluentViewReportAccess extends FluentViewUserAccess<FluentViewRepor
 	/**
 	 * Specifies the report name for this FluentViewReportAccess.
 	 */
-	public @Nonnull FluentViewReportAccess reportName(final @Nullable String reportName) {
+	public @Nonnull FluentViewReportAccess reportName(final @Nonnull String reportName) {
 		access.setReportName(reportName);
 		return this;
 	}

@@ -69,7 +69,7 @@ public class FluentCondition {
 	/**
 	 * Updates metadata on this fluent builder.
 	 */
-	public @Nonnull FluentCondition expression(@Nullable String expression) {
+	public @Nonnull FluentCondition expression(@Nonnull String expression) {
 		condition.setExpression(expression);
 		return this;
 	}

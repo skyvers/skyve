@@ -330,7 +330,7 @@ public interface Module extends NamedMetaData, PersistentMetaData, ReloadableMet
 	 * 
 	 * @return The home document name or null if not defined
 	 */
-	@Nullable String getHomeDocumentName();
+	@Nonnull String getHomeDocumentName();
 	
 	/**
 	 * Returns the menu definition for this module.

@@ -132,20 +132,20 @@ public abstract class ModelImpl extends AbstractMetaDataMap implements Model {
 	}
 	
 	@Override
-	public @Nullable String getPluralAlias() {
+	public @Nonnull String getPluralAlias() {
 		return pluralAlias;
 	}
 
-	public void setPluralAlias(@Nullable String pluralAlias) {
+	public void setPluralAlias(@Nonnull String pluralAlias) {
 		this.pluralAlias = pluralAlias;
 	}
 
 	@Override
-	public @Nullable String getSingularAlias() {
+	public @Nonnull String getSingularAlias() {
 		return singularAlias;
 	}
 
-	public void setSingularAlias(@Nullable String singularAlias) {
+	public void setSingularAlias(@Nonnull String singularAlias) {
 		this.singularAlias = singularAlias;
 	}
 

@@ -5,7 +5,6 @@ import java.util.Set;
 import org.skyve.impl.metadata.repository.view.access.ViewSingularUserAccessMetaData;
 
 import jakarta.annotation.Nonnull;
-import jakarta.annotation.Nullable;
 
 /**
  * A fluent helper builder class to construct and manipulate the {@link ViewSingularUserAccessMetaData} metadata.
@@ -39,7 +38,7 @@ public class FluentViewSingularAccess extends FluentViewUserAccess<FluentViewSin
 	/**
 	 * Specifies the document name for this FluentViewSingularAccess
 	 */
-	public @Nonnull FluentViewSingularAccess documentName(final @Nullable String documentName) {
+	public @Nonnull FluentViewSingularAccess documentName(final @Nonnull String documentName) {
 		access.setDocumentName(documentName);
 		return this;
 	}

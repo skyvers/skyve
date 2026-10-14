@@ -48,7 +48,7 @@ public class FluentReportAction extends FluentParameterizableAction<FluentReport
 	 *            the owning module name
 	 * @return this builder
 	 */
-	public @Nonnull FluentReportAction moduleName(@Nullable String moduleName) {
+	public @Nonnull FluentReportAction moduleName(@Nonnull String moduleName) {
 		action.setModuleName(moduleName);
 		return this;
 	}
@@ -60,7 +60,7 @@ public class FluentReportAction extends FluentParameterizableAction<FluentReport
 	 *            the owning document name
 	 * @return this builder
 	 */
-	public @Nonnull FluentReportAction documentName(@Nullable String documentName) {
+	public @Nonnull FluentReportAction documentName(@Nonnull String documentName) {
 		action.setDocumentName(documentName);
 		return this;
 	}
@@ -72,7 +72,7 @@ public class FluentReportAction extends FluentParameterizableAction<FluentReport
 	 *            the report name
 	 * @return this builder
 	 */
-	public @Nonnull FluentReportAction reportName(@Nullable String reportName) {
+	public @Nonnull FluentReportAction reportName(@Nonnull String reportName) {
 		action.setReportName(reportName);
 		return this;
 	}

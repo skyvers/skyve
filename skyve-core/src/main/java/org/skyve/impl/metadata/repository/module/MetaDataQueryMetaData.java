@@ -48,12 +48,12 @@ public class MetaDataQueryMetaData extends QueryDefinitionMetaData {
 	private String ordering;
 	private List<MetaDataQueryColumnMetaData> columns = new ArrayList<>();
 
-	public @Nullable String getDocumentName() {
+	public @Nonnull String getDocumentName() {
 		return documentName;
 	}
 
 	@XmlAttribute(required = true)
-	public void setDocumentName(@Nullable String documentName) {
+	public void setDocumentName(@Nonnull String documentName) {
 		this.documentName = UtilImpl.processStringValue(documentName);
 	}
 

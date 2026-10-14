@@ -3,6 +3,7 @@ package org.skyve.metadata.customer;
 import org.skyve.metadata.DecoratedMetaData;
 import org.skyve.metadata.NamedMetaData;
 
+import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 
 /**
@@ -20,7 +21,7 @@ public interface CustomerRole extends NamedMetaData, DecoratedMetaData {
 	 *
 	 * @return the description; may be {@code null}
 	 */
-	public @Nullable String getDescription();
+	public @Nonnull String getDescription();
 
 	/**
 	 * Returns extended documentation (HTML or plain text) describing the purpose and

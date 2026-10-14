@@ -7,7 +7,6 @@ import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.UserAccess;
 
 import jakarta.annotation.Nonnull;
-import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
@@ -28,12 +27,12 @@ public class ViewPreviousCompleteUserAccessMetaData extends ViewUserAccessMetaDa
 
 	private String binding;
 
-	public @Nullable String getBinding() {
+	public @Nonnull String getBinding() {
 		return binding;
 	}
 
 	@XmlAttribute(name = "binding", required = true)
-	public void setBinding(@Nullable String binding) {
+	public void setBinding(@Nonnull String binding) {
 		this.binding = UtilImpl.processStringValue(binding);
 	}
 	

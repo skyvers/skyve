@@ -11,7 +11,6 @@ import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.DecoratedMetaData;
 
 import jakarta.annotation.Nonnull;
-import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlRootElement;
@@ -47,11 +46,11 @@ public class Route implements DecoratedMetaData {
 	@XmlJavaTypeAdapter(PropertyMapAdapter.class)
 	private Map<String, String> properties = new LinkedHashMap<>();
 
-	public @Nullable String getOutcomeUrl() {
+	public @Nonnull String getOutcomeUrl() {
 		return outcomeUrl;
 	}
 	@XmlAttribute(name = "outcome", required = true)
-	public void setOutcomeUrl(@Nullable String outcomeUrl) {
+	public void setOutcomeUrl(@Nonnull String outcomeUrl) {
 		this.outcomeUrl = UtilImpl.processStringValue(outcomeUrl);
 	}
 	

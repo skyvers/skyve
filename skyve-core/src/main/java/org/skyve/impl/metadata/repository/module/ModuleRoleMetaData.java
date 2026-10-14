@@ -56,13 +56,13 @@ public class ModuleRoleMetaData extends NamedMetaData implements DecoratedMetaDa
 		this.documentation = UtilImpl.processStringValue(documentation);
 	}
 
-	public @Nullable String getDescription() {
+	public @Nonnull String getDescription() {
 		return description;
 	}
 
 	@XmlElement(namespace = XMLMetaData.MODULE_NAMESPACE, required = true)
 	@XmlJavaTypeAdapter(CDATAAdapter.class)
-	public void setDescription(@Nullable String description) {
+	public void setDescription(@Nonnull String description) {
 		this.description = UtilImpl.processStringValue(description);
 	}
 

@@ -7,7 +7,6 @@ import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.UserAccess;
 
 import jakarta.annotation.Nonnull;
-import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
@@ -37,7 +36,7 @@ public class ModuleRoleReportUserAccessMetaData extends ModuleRoleUserAccessMeta
 	 *
 	 * @return the target module name
 	 */
-	public @Nullable String getModuleName() {
+	public @Nonnull String getModuleName() {
 		return moduleName;
 	}
 
@@ -50,7 +49,7 @@ public class ModuleRoleReportUserAccessMetaData extends ModuleRoleUserAccessMeta
 	 * @param moduleName the target module name; blank values become {@code null}
 	 */
 	@XmlAttribute(name = "module", required = true)
-	public void setModuleName(@Nullable String moduleName) {
+	public void setModuleName(@Nonnull String moduleName) {
 		this.moduleName = UtilImpl.processStringValue(moduleName);
 	}
 
@@ -59,7 +58,7 @@ public class ModuleRoleReportUserAccessMetaData extends ModuleRoleUserAccessMeta
 	 *
 	 * @return the target document name
 	 */
-	public @Nullable String getDocumentName() {
+	public @Nonnull String getDocumentName() {
 		return documentName;
 	}
 
@@ -72,7 +71,7 @@ public class ModuleRoleReportUserAccessMetaData extends ModuleRoleUserAccessMeta
 	 * @param documentName the target document name; blank values become {@code null}
 	 */
 	@XmlAttribute(name = "document", required = true)
-	public void setDocumentName(@Nullable String documentName) {
+	public void setDocumentName(@Nonnull String documentName) {
 		this.documentName = UtilImpl.processStringValue(documentName);
 	}
 
@@ -81,7 +80,7 @@ public class ModuleRoleReportUserAccessMetaData extends ModuleRoleUserAccessMeta
 	 *
 	 * @return the target report name
 	 */
-	public @Nullable String getReportName() {
+	public @Nonnull String getReportName() {
 		return reportName;
 	}
 
@@ -94,7 +93,7 @@ public class ModuleRoleReportUserAccessMetaData extends ModuleRoleUserAccessMeta
 	 * @param reportName the target report name; blank values become {@code null}
 	 */
 	@XmlAttribute(name = "report", required = true)
-	public void setReportName(@Nullable String reportName) {
+	public void setReportName(@Nonnull String reportName) {
 		this.reportName = UtilImpl.processStringValue(reportName);
 	}
 	

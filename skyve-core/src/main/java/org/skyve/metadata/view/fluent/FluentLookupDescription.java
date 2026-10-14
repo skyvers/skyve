@@ -69,7 +69,7 @@ public class FluentLookupDescription extends FluentInputWidget<FluentLookupDescr
 	 * @param descriptionBinding the description binding expression
 	 * @return this builder
 	 */
-	public @Nonnull FluentLookupDescription descriptionBinding(@Nullable String descriptionBinding) {
+	public @Nonnull FluentLookupDescription descriptionBinding(@Nonnull String descriptionBinding) {
 		lookup.setDescriptionBinding(descriptionBinding);
 		return this;
 	}

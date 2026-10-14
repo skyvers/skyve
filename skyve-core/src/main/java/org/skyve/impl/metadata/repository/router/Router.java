@@ -336,6 +336,14 @@ public class Router implements ConvertibleMetaData<Router>, DecoratedMetaData, R
 			uxuiMap.put(uxui.getName(), uxui);
 		}
 
+		for (UxUiMetadata uxui : uxuis) {
+			for (Route route : uxui.getRoutes()) {
+				if (route.getOutcomeUrl() == null) {
+					throw new MetaDataException(metaDataName + " route outcome is required for UX/UI " + uxui.getName() + '.');
+				}
+			}
+		}
+
 		for (Direct direct : directs) {
 			String path = direct.getPath();
 			if (path == null) {

@@ -5,7 +5,6 @@ import java.util.Set;
 import org.skyve.impl.metadata.repository.view.access.ViewDynamicImageUserAccessMetaData;
 
 import jakarta.annotation.Nonnull;
-import jakarta.annotation.Nullable;
 
 /**
  * A fluent helper builder class to construct and manipulate the {@link ViewDynamicImageUserAccessMetaData} metadata.
@@ -39,7 +38,7 @@ public class FluentViewDynamicImageAccess extends FluentViewUserAccess<FluentVie
 	/**
 	 * Specifies the image name for this FluentViewDynamicImageAccess.
 	 */
-	public @Nonnull FluentViewDynamicImageAccess imageName(final @Nullable String imageName) {
+	public @Nonnull FluentViewDynamicImageAccess imageName(final @Nonnull String imageName) {
 		access.setImageName(imageName);
 		return this;
 	}

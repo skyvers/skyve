@@ -1,7 +1,6 @@
 package org.skyve.impl.metadata.module.menu;
 
 import jakarta.annotation.Nonnull;
-import jakarta.annotation.Nullable;
 
 /**
  * Menu item that navigates to an arbitrary hyperlink.
@@ -20,7 +19,7 @@ public final class LinkItem extends AbstractMenuItem {
 
 	private String href;
 
-	public @Nullable String getHref() {
+	public @Nonnull String getHref() {
 		return href;
 	}
 

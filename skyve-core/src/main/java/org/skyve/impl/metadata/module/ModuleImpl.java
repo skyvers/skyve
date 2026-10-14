@@ -386,11 +386,11 @@ ie Link from an external module to admin.User and domain generation will moan ab
 	}
 
 	@Override
-	public @Nullable String getHomeDocumentName() {
+	public @Nonnull String getHomeDocumentName() {
 		return homeDocumentName;
 	}
 
-	public void setHomeDocumentName(@Nullable String homeDocumentName) {
+	public void setHomeDocumentName(@Nonnull String homeDocumentName) {
 		this.homeDocumentName = homeDocumentName;
 	}
 

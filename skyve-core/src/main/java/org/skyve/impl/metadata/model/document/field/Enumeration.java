@@ -67,12 +67,12 @@ public class Enumeration extends ConstrainableField {
 			this.name = UtilImpl.processStringValue(name);
 		}
 
-		public @Nullable String getCode() {
+		public @Nonnull String getCode() {
 			return code;
 		}
 		
 		@XmlAttribute(required = true)
-		public void setCode(@Nullable String code) {
+		public void setCode(@Nonnull String code) {
 			this.code = UtilImpl.processStringValue(code);
 		}
 

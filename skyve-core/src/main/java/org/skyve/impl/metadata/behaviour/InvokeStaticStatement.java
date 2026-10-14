@@ -6,7 +6,6 @@ import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
 
 import jakarta.annotation.Nonnull;
-import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
@@ -24,12 +23,12 @@ public class InvokeStaticStatement extends InvokeStatement {
 	// The fully qualified Java class name of the class with the static method to call.
 	private String className;
 
-	public @Nullable String getClassName() {
+	public @Nonnull String getClassName() {
 		return className;
 	}
 	
 	@XmlAttribute(required = true)
-	public void setClassName(@Nullable String className) {
+	public void setClassName(@Nonnull String className) {
 		this.className = UtilImpl.processStringValue(className);
 	}
 

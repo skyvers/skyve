@@ -53,12 +53,12 @@ public class Button implements AbsoluteSize, ContentSpecifiedWidth, Constrainabl
 		return false;
 	}
 	
-	public @Nullable String getActionName() {
+	public @Nonnull String getActionName() {
 		return actionName;
 	}
 
 	@XmlAttribute(name = "action", required = true)
-	public void setActionName(@Nullable String actionName) {
+	public void setActionName(@Nonnull String actionName) {
 		this.actionName = UtilImpl.processStringValue(actionName);
 	}
 

@@ -64,7 +64,7 @@ public class Automation implements Executable {
 	 * Returns the uxui.
 	 * @return the result
 	 */
-	public @Nullable String getUxui() {
+	public @Nonnull String getUxui() {
 		return uxui;
 	}
 
@@ -73,7 +73,7 @@ public class Automation implements Executable {
 	 * @param uxui the uxui
 	 */
 	@XmlAttribute(name = "uxui", required = true)
-	public void setUxui(@Nullable String uxui) {
+	public void setUxui(@Nonnull String uxui) {
 		this.uxui = Util.processStringValue(uxui);
 	}
 
@@ -81,7 +81,7 @@ public class Automation implements Executable {
 	 * Returns the userAgentType.
 	 * @return the result
 	 */
-	public @Nullable UserAgentType getUserAgentType() {
+	public @Nonnull UserAgentType getUserAgentType() {
 		return userAgentType;
 	}
 
@@ -90,7 +90,7 @@ public class Automation implements Executable {
 	 * @param userAgentType the userAgentType
 	 */
 	@XmlAttribute(name = "userAgentType", required = true)
-	public void setUserAgentType(@Nullable UserAgentType userAgentType) {
+	public void setUserAgentType(@Nonnull UserAgentType userAgentType) {
 		this.userAgentType = userAgentType;
 	}
 

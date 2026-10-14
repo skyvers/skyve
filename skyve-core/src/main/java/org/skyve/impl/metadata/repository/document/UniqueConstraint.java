@@ -57,22 +57,22 @@ public class UniqueConstraint extends NamedMetaData {
 		this.description = UtilImpl.processStringValue(description);
 	}
 
-	public @Nullable DocumentScope getScope() {
+	public @Nonnull DocumentScope getScope() {
 		return scope;
 	}
 
 	@XmlAttribute(required = true)
-	public void setScope(@Nullable DocumentScope scope) {
+	public void setScope(@Nonnull DocumentScope scope) {
 		this.scope = scope;
 	}
 
-	public @Nullable String getMessage() {
+	public @Nonnull String getMessage() {
 		return message;
 	}
 
 	@XmlElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE, required = true)
 	@XmlJavaTypeAdapter(CDATAAdapter.class)
-	public void setMessage(@Nullable String message) {
+	public void setMessage(@Nonnull String message) {
 		this.message = UtilImpl.processStringValue(message);
 	}
 

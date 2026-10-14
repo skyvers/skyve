@@ -94,7 +94,7 @@ public class DynamicImage implements DecoratedMetaData, RelativeSize, Invisible,
 	 *
 	 * @return the provider name
 	 */
-	public @Nullable String getName() {
+	public @Nonnull String getName() {
 		return name;
 	}
 
@@ -104,7 +104,7 @@ public class DynamicImage implements DecoratedMetaData, RelativeSize, Invisible,
 	 * @param name the provider name
 	 */
 	@XmlAttribute(required = true)
-	public void setName(@Nullable String name) {
+	public void setName(@Nonnull String name) {
 		this.name = UtilImpl.processStringValue(name);
 	}
 

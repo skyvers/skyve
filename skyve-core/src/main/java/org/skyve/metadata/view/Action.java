@@ -55,6 +55,12 @@ public interface Action extends NamedMetaData, Disableable, Invisible, Parameter
 	}
 
 	/**
+	 * Returns the action name, which defaults to the resource name or else the implicit action name.
+	 */
+	@Override
+	public @Nonnull String getName();
+
+	/**
 	 * Returns the implicit (built-in) action name if this action is a framework action,
 	 * or {@code null} if this is a custom server-side action.
 	 *

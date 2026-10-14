@@ -58,7 +58,7 @@ public class FluentTab extends FluentContainer<FluentTab> {
 	 *            the caption displayed for this tab
 	 * @return this builder
 	 */
-	public @Nonnull FluentTab title(@Nullable String title) {
+	public @Nonnull FluentTab title(@Nonnull String title) {
 		tab.setTitle(title);
 		return this;
 	}

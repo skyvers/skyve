@@ -48,7 +48,7 @@ public class FluentButton extends FluentWidget implements FluentAbsoluteSize<Flu
 	 * @param actionName the action identifier
 	 * @return this builder
 	 */
-	public @Nonnull FluentButton actionName(@Nullable String actionName) {
+	public @Nonnull FluentButton actionName(@Nonnull String actionName) {
 		button.setActionName(actionName);
 		return this;
 	}

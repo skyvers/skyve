@@ -3,7 +3,6 @@ package org.skyve.metadata.view.fluent;
 import org.skyve.impl.metadata.view.widget.DynamicImage;
 
 import jakarta.annotation.Nonnull;
-import jakarta.annotation.Nullable;
 
 /**
  * Builds {@link DynamicImage} widget metadata using a fluent API.
@@ -55,7 +54,7 @@ public class FluentDynamicImage extends FluentWidget implements FluentRelativeSi
 	 * @param name the renderer name
 	 * @return this builder
 	 */
-	public @Nonnull FluentDynamicImage name(@Nullable String name) {
+	public @Nonnull FluentDynamicImage name(@Nonnull String name) {
 		image.setName(name);
 		return this;
 	}

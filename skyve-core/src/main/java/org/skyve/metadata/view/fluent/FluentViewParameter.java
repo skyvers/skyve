@@ -3,7 +3,6 @@ package org.skyve.metadata.view.fluent;
 import org.skyve.metadata.view.View.ViewParameter;
 
 import jakarta.annotation.Nonnull;
-import jakarta.annotation.Nullable;
 
 /**
  * Builds {@link ViewParameter} metadata used by view-level parameter binding.
@@ -48,7 +47,7 @@ public class FluentViewParameter {
 	 *            the binding expression evaluated to obtain the value
 	 * @return this builder
 	 */
-	public @Nonnull FluentViewParameter fromBinding(@Nullable String fromBinding) {
+	public @Nonnull FluentViewParameter fromBinding(@Nonnull String fromBinding) {
 		parameter.setFromBinding(fromBinding);
 		return this;
 	}
@@ -60,7 +59,7 @@ public class FluentViewParameter {
 	 *            the target parameter destination
 	 * @return this builder
 	 */
-	public @Nonnull FluentViewParameter boundTo(@Nullable String boundTo) {
+	public @Nonnull FluentViewParameter boundTo(@Nonnull String boundTo) {
 		parameter.setBoundTo(boundTo);
 		return this;
 	}

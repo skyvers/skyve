@@ -10,7 +10,6 @@ import org.skyve.impl.util.XMLMetaData;
 import org.skyve.util.ExpressionEvaluator;
 
 import jakarta.annotation.Nonnull;
-import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlElementRef;
 import jakarta.xml.bind.annotation.XmlElementRefs;
@@ -58,12 +57,12 @@ public class IfStatement extends StatementMetaData {
 						@XmlElementRef(type = InvokeStaticStatement.class)})
 	private List<StatementMetaData> elseStatements = new ArrayList<>();
 
-	public @Nullable String getCondition() {
+	public @Nonnull String getCondition() {
 		return condition;
 	}
 	
 	@XmlAttribute(required = true)
-	public void setCondition(@Nullable String condition) {
+	public void setCondition(@Nonnull String condition) {
 		this.condition = UtilImpl.processStringValue(condition);
 	}
 

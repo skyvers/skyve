@@ -33,11 +33,11 @@ public class MetaDataQueryContentColumnImpl extends AbstractMetaDataQueryColumn 
 	private Map<String, String> properties = new LinkedHashMap<>();
 	
 	@Override
-	public @Nullable DisplayType getDisplay() {
+	public @Nonnull DisplayType getDisplay() {
 		return display;
 	}
 	
-	public void setDisplay(@Nullable DisplayType display) {
+	public void setDisplay(@Nonnull DisplayType display) {
 		this.display = display;
 	}
 	

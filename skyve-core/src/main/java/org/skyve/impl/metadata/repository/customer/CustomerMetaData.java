@@ -179,7 +179,7 @@ public class CustomerMetaData extends NamedMetaData implements ConvertibleMetaDa
 	 *
 	 * @return configured date converter name
 	 */
-	public @Nullable ConverterName getDefaultDateConverter() {
+	public @Nonnull ConverterName getDefaultDateConverter() {
 		return defaultDateConverter;
 	}
 
@@ -189,7 +189,7 @@ public class CustomerMetaData extends NamedMetaData implements ConvertibleMetaDa
 	 * @param defaultDateConverter configured date converter name
 	 */
 	@XmlElement(namespace = XMLMetaData.CUSTOMER_NAMESPACE, required = true)
-	public void setDefaultDateConverter(@Nullable ConverterName defaultDateConverter) {
+	public void setDefaultDateConverter(@Nonnull ConverterName defaultDateConverter) {
 		this.defaultDateConverter = defaultDateConverter;
 	}
 
@@ -198,7 +198,7 @@ public class CustomerMetaData extends NamedMetaData implements ConvertibleMetaDa
 	 *
 	 * @return configured date-time converter name
 	 */
-	public @Nullable ConverterName getDefaultDateTimeConverter() {
+	public @Nonnull ConverterName getDefaultDateTimeConverter() {
 		return defaultDateTimeConverter;
 	}
 
@@ -208,7 +208,7 @@ public class CustomerMetaData extends NamedMetaData implements ConvertibleMetaDa
 	 * @param defaultDateTimeConverter configured date-time converter name
 	 */
 	@XmlElement(namespace = XMLMetaData.CUSTOMER_NAMESPACE, required = true)
-	public void setDefaultDateTimeConverter(@Nullable ConverterName defaultDateTimeConverter) {
+	public void setDefaultDateTimeConverter(@Nonnull ConverterName defaultDateTimeConverter) {
 		this.defaultDateTimeConverter = defaultDateTimeConverter;
 	}
 
@@ -217,7 +217,7 @@ public class CustomerMetaData extends NamedMetaData implements ConvertibleMetaDa
 	 *
 	 * @return configured time converter name
 	 */
-	public @Nullable ConverterName getDefaultTimeConverter() {
+	public @Nonnull ConverterName getDefaultTimeConverter() {
 		return defaultTimeConverter;
 	}
 
@@ -227,7 +227,7 @@ public class CustomerMetaData extends NamedMetaData implements ConvertibleMetaDa
 	 * @param defaultTimeConverter configured time converter name
 	 */
 	@XmlElement(namespace = XMLMetaData.CUSTOMER_NAMESPACE, required = true)
-	public void setDefaultTimeConverter(@Nullable ConverterName defaultTimeConverter) {
+	public void setDefaultTimeConverter(@Nonnull ConverterName defaultTimeConverter) {
 		this.defaultTimeConverter = defaultTimeConverter;
 	}
 
@@ -236,7 +236,7 @@ public class CustomerMetaData extends NamedMetaData implements ConvertibleMetaDa
 	 *
 	 * @return configured timestamp converter name
 	 */
-	public @Nullable ConverterName getDefaultTimestampConverter() {
+	public @Nonnull ConverterName getDefaultTimestampConverter() {
 		return defaultTimestampConverter;
 	}
 
@@ -246,7 +246,7 @@ public class CustomerMetaData extends NamedMetaData implements ConvertibleMetaDa
 	 * @param defaultTimestampConverter configured timestamp converter name
 	 */
 	@XmlElement(namespace = XMLMetaData.CUSTOMER_NAMESPACE, required = true)
-	public void setDefaultTimestampConverter(@Nullable ConverterName defaultTimestampConverter) {
+	public void setDefaultTimestampConverter(@Nonnull ConverterName defaultTimestampConverter) {
 		this.defaultTimestampConverter = defaultTimestampConverter;
 	}
 
@@ -255,7 +255,7 @@ public class CustomerMetaData extends NamedMetaData implements ConvertibleMetaDa
 	 *
 	 * @return customer module metadata, or {@code null}
 	 */
-	public @Nullable CustomerModulesMetaData getModules() {
+	public @Nonnull CustomerModulesMetaData getModules() {
 		return modules;
 	}
 
@@ -265,7 +265,7 @@ public class CustomerMetaData extends NamedMetaData implements ConvertibleMetaDa
 	 * @param modules customer module metadata
 	 */
 	@XmlElement(namespace = XMLMetaData.CUSTOMER_NAMESPACE, required = true)
-	public void setModules(@Nullable CustomerModulesMetaData modules) {
+	public void setModules(@Nonnull CustomerModulesMetaData modules) {
 		this.modules = modules;
 	}
 
@@ -486,6 +486,9 @@ public class CustomerMetaData extends NamedMetaData implements ConvertibleMetaDa
 
 		// NB Entries are in insertion order
 		Map<String, FormLabelLayout> moduleEntries = result.getModuleEntries();
+		if (modules == null) {
+			throw new MetaDataException(metaDataName + " : The customer [modules] is required");
+		}
 		if (modules != null) {
 			for (CustomerModuleMetaData module : modules.getModules()) {
 				if (module == null) {
@@ -513,11 +516,19 @@ public class CustomerMetaData extends NamedMetaData implements ConvertibleMetaDa
 					throw new MetaDataException(metaDataName + " : Duplicate role " + value);
 				}
 				String customerRoleName = value;
+				if (role.getDescription() == null) {
+					throw new MetaDataException(metaDataName + " : The [description] for customer role " +
+													customerRoleName + " is required");
+				}
 				for (CustomerModuleRoleMetaData moduleRole : role.getRoles()) {
 					value = moduleRole.getName();
 					if (value == null) {
 						throw new MetaDataException(metaDataName + " : The [name] of module role for customer role " + 
 														customerRoleName + " is required");
+					}
+					if (moduleRole.getModuleName() == null) {
+						throw new MetaDataException(metaDataName + " : The [module] of module role " + value +
+														" for customer role " + customerRoleName + " is required");
 					}
 					if (! moduleEntries.containsKey(moduleRole.getModuleName())) {
 						throw new MetaDataException(metaDataName + " : The [module] of module role " + moduleRole.getModuleName() + 

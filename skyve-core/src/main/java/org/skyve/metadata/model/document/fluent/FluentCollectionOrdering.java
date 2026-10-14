@@ -40,7 +40,7 @@ public class FluentCollectionOrdering {
 	/**
 	 * Updates metadata on this fluent builder.
 	 */
-	public @Nonnull FluentCollectionOrdering by(@Nullable String by) {
+	public @Nonnull FluentCollectionOrdering by(@Nonnull String by) {
 		ordering.setBy(by);
 		return this;
 	}

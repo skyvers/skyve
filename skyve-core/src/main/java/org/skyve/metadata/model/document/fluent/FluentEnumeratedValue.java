@@ -47,7 +47,7 @@ public class FluentEnumeratedValue {
 	/**
 	 * Updates metadata on this fluent builder.
 	 */
-	public @Nonnull FluentEnumeratedValue code(@Nullable String code) {
+	public @Nonnull FluentEnumeratedValue code(@Nonnull String code) {
 		value.setCode(code);
 		return this;
 	}

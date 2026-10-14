@@ -63,22 +63,22 @@ public abstract class AbstractInverse extends AbstractAttribute implements Inver
 	}
 
 	@Override
-	public @Nullable String getDocumentName() {
+	public @Nonnull String getDocumentName() {
 		return documentName;
 	}
 
 	@XmlElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE, required = true)
-	public void setDocumentName(@Nullable String documentName) {
+	public void setDocumentName(@Nonnull String documentName) {
 		this.documentName = UtilImpl.processStringValue(documentName);
 	}
 
 	@Override
-	public @Nullable String getReferenceName() {
+	public @Nonnull String getReferenceName() {
 		return referenceName;
 	}
 
 	@XmlElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE, required = true)
-	public void setReferenceName(@Nullable String referenceName) {
+	public void setReferenceName(@Nonnull String referenceName) {
 		this.referenceName = UtilImpl.processStringValue(referenceName);
 	}
 

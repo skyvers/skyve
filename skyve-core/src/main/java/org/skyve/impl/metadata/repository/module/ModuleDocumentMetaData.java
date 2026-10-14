@@ -50,12 +50,12 @@ public class ModuleDocumentMetaData implements DecoratedMetaData {
 		this.defaultQueryName = UtilImpl.processStringValue(defaultQueryName);
 	}
 
-	public @Nullable String getRef() {
+	public @Nonnull String getRef() {
 		return ref;
 	}
 
 	@XmlAttribute(required = true)
-	public void setRef(@Nullable String ref) {
+	public void setRef(@Nonnull String ref) {
 		this.ref = UtilImpl.processStringValue(ref);
 	}
 

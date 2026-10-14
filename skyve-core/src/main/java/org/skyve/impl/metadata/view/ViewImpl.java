@@ -177,7 +177,7 @@ public class ViewImpl extends Container implements View {
 	 * @return the logical view name
 	 */
 	@Override
-	public @Nullable String getName() {
+	public @Nonnull String getName() {
 		return name;
 	}
 
@@ -186,7 +186,7 @@ public class ViewImpl extends Container implements View {
 	 *
 	 * @param name the logical name to assign
 	 */
-	public void setName(@Nullable String name) {
+	public void setName(@Nonnull String name) {
 		this.name = name;
 	}
 
@@ -313,7 +313,7 @@ public class ViewImpl extends Container implements View {
 	 * @return the display title, or {@code null} if not explicitly set
 	 */
 	@Override
-	public @Nullable String getTitle() {
+	public @Nonnull String getTitle() {
 		return title;
 	}
 
@@ -331,7 +331,7 @@ public class ViewImpl extends Container implements View {
 	 *
 	 * @param title the display title
 	 */
-	public void setTitle(@Nullable String title) {
+	public void setTitle(@Nonnull String title) {
 		this.title = title;
 	}
 

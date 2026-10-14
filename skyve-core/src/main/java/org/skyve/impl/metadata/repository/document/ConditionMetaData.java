@@ -67,13 +67,13 @@ public class ConditionMetaData extends NamedMetaData implements Condition {
 	}
 	
 	@Override
-	public @Nullable String getExpression() {
+	public @Nonnull String getExpression() {
 		return expression;
 	}
 
 	@XmlElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE, required = true)
 	@XmlJavaTypeAdapter(CDATAAdapter.class)
-	public void setExpression(@Nullable String expression) {
+	public void setExpression(@Nonnull String expression) {
 		this.expression = UtilImpl.processStringValue(expression);
 	}
 

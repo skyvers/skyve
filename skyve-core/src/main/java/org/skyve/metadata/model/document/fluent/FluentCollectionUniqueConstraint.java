@@ -45,7 +45,7 @@ public class FluentCollectionUniqueConstraint {
 	/**
 	 * Updates metadata on this fluent builder.
 	 */
-	public @Nonnull FluentCollectionUniqueConstraint name(@Nullable String name) {
+	public @Nonnull FluentCollectionUniqueConstraint name(@Nonnull String name) {
 		constraint.setName(name);
 		return this;
 	}
@@ -69,7 +69,7 @@ public class FluentCollectionUniqueConstraint {
 	/**
 	 * Updates metadata on this fluent builder.
 	 */
-	public @Nonnull FluentCollectionUniqueConstraint message(@Nullable String message) {
+	public @Nonnull FluentCollectionUniqueConstraint message(@Nonnull String message) {
 		constraint.setMessage(message);
 		return this;
 	}

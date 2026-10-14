@@ -45,12 +45,12 @@ public class AssociationImpl extends ReferenceImpl implements Association {
 	}
 
 	@Override
-	public @Nullable AssociationType getType() {
+	public @Nonnull AssociationType getType() {
 		return type;
 	}
 
 	@XmlAttribute(required = true)
-	public void setType(@Nullable AssociationType type) {
+	public void setType(@Nonnull AssociationType type) {
 		this.type = type;
 	}
 	

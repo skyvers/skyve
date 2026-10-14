@@ -9,7 +9,6 @@ import org.skyve.metadata.view.View.ViewType;
 import org.skyve.web.WebAction;
 
 import jakarta.annotation.Nonnull;
-import jakarta.annotation.Nullable;
 
 /**
  * Builds one route outcome and its match criteria.
@@ -53,7 +52,7 @@ public class FluentRoute {
 	 * @param outcomeUrl outcome URL
 	 * @return this builder
 	 */
-	public @Nonnull FluentRoute outcomeUrl(@Nullable String outcomeUrl) {
+	public @Nonnull FluentRoute outcomeUrl(@Nonnull String outcomeUrl) {
 		route.setOutcomeUrl(outcomeUrl);
 		return this;
 	}

@@ -7,7 +7,6 @@ import org.skyve.metadata.controller.Observer;
 import org.skyve.metadata.customer.ObserverMetaData;
 
 import jakarta.annotation.Nonnull;
-import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlType;
 
@@ -39,7 +38,7 @@ public class ObserverMetaDataImpl implements ObserverMetaData {
 	 * @return observer implementation class name, or {@code null}
 	 */
 	@Override
-	public @Nullable String getClassName() {
+	public @Nonnull String getClassName() {
 		return className;
 	}
 
@@ -49,7 +48,7 @@ public class ObserverMetaDataImpl implements ObserverMetaData {
 	 * @param className observer implementation class name
 	 */
 	@XmlAttribute(required = true)
-	public void setClassName(@Nullable String className) {
+	public void setClassName(@Nonnull String className) {
 		this.className = UtilImpl.processStringValue(className);
 	}
 

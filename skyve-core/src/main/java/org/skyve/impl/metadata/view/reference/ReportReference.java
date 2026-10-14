@@ -34,30 +34,30 @@ public class ReportReference implements Reference, Parameterizable {
 	private ReportFormat format;
 	private List<Parameter> parameters = new ArrayList<>();
 	
-	public @Nullable String getModuleName() {
+	public @Nonnull String getModuleName() {
 		return moduleName;
 	}
 
 	@XmlAttribute(required = true)
-	public void setModuleName(@Nullable String moduleName) {
+	public void setModuleName(@Nonnull String moduleName) {
 		this.moduleName = UtilImpl.processStringValue(moduleName);
 	}
 
-	public @Nullable String getDocumentName() {
+	public @Nonnull String getDocumentName() {
 		return documentName;
 	}
 
 	@XmlAttribute(required = true)
-	public void setDocumentName(@Nullable String documentName) {
+	public void setDocumentName(@Nonnull String documentName) {
 		this.documentName = UtilImpl.processStringValue(documentName);
 	}
 
-	public @Nullable String getReportName() {
+	public @Nonnull String getReportName() {
 		return reportName;
 	}
 
 	@XmlAttribute(required = true)
-	public void setReportName(@Nullable String reportName) {
+	public void setReportName(@Nonnull String reportName) {
 		this.reportName = UtilImpl.processStringValue(reportName);
 	}
 

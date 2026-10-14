@@ -70,7 +70,7 @@ public class FluentDialogButton extends FluentWidget {
 	 *            the button label
 	 * @return this builder
 	 */
-	public @Nonnull FluentDialogButton displayName(@Nullable String displayName) {
+	public @Nonnull FluentDialogButton displayName(@Nonnull String displayName) {
 		button.setDisplayName(displayName);
 		return this;
 	}

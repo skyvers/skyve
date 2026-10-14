@@ -53,7 +53,7 @@ public class FluentCustomerModules {
 	 * @param moduleName home module name
 	 * @return this builder
 	 */
-	public @Nonnull FluentCustomerModules homeModule(@Nullable String moduleName) {
+	public @Nonnull FluentCustomerModules homeModule(@Nonnull String moduleName) {
 		modules.setHomeModule(moduleName);
 		return this;
 	}

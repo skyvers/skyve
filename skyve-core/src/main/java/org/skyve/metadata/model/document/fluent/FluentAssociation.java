@@ -63,7 +63,7 @@ public class FluentAssociation extends FluentReference<FluentAssociation> {
 	/**
 	 * Updates metadata on this fluent builder.
 	 */
-	public @Nonnull FluentAssociation type(@Nullable AssociationType type) {
+	public @Nonnull FluentAssociation type(@Nonnull AssociationType type) {
 		association.setType(type);
 		return this;
 	}

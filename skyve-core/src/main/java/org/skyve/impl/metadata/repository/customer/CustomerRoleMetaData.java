@@ -55,7 +55,7 @@ public class CustomerRoleMetaData extends NamedMetaData implements CustomerRole 
 	 * @return role description text, or {@code null}
 	 */
 	@Override
-	public @Nullable String getDescription() {
+	public @Nonnull String getDescription() {
 		return description;
 	}
 
@@ -66,7 +66,7 @@ public class CustomerRoleMetaData extends NamedMetaData implements CustomerRole 
 	 */
 	@XmlElement(namespace = XMLMetaData.CUSTOMER_NAMESPACE, required = true)
 	@XmlJavaTypeAdapter(CDATAAdapter.class)
-	public void setDescription(@Nullable String description) {
+	public void setDescription(@Nonnull String description) {
 		this.description = UtilImpl.processStringValue(description);
 	}
 

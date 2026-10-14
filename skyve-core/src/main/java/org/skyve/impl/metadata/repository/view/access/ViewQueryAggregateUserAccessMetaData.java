@@ -27,12 +27,12 @@ public class ViewQueryAggregateUserAccessMetaData extends ViewUserAccessMetaData
 
 	private String queryName;
 
-	public @Nullable String getQueryName() {
+	public @Nonnull String getQueryName() {
 		return queryName;
 	}
 
 	@XmlAttribute(name = "query", required = true)
-	public void setQueryName(@Nullable String queryName) {
+	public void setQueryName(@Nonnull String queryName) {
 		this.queryName = UtilImpl.processStringValue(queryName);
 	}
 	

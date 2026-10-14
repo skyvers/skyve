@@ -39,7 +39,7 @@ public class NavigateList implements Step {
 	 * Returns the moduleName.
 	 * @return the result
 	 */
-	public @Nullable String getModuleName() {
+	public @Nonnull String getModuleName() {
 		return moduleName;
 	}
 
@@ -48,7 +48,7 @@ public class NavigateList implements Step {
 	 * @param moduleName the moduleName
 	 */
 	@XmlAttribute(name = "module", required = true)
-	public void setModuleName(@Nullable String moduleName) {
+	public void setModuleName(@Nonnull String moduleName) {
 		this.moduleName = UtilImpl.processStringValue(moduleName);
 	}
 

@@ -3,7 +3,6 @@ package org.skyve.metadata.behaviour.fluent;
 import org.skyve.impl.metadata.behaviour.IfStatement;
 
 import jakarta.annotation.Nonnull;
-import jakarta.annotation.Nullable;
 
 /**
  * Builds a behaviour {@code if} statement with then/else branches.
@@ -48,7 +47,7 @@ public class FluentIfStatement extends FluentStatement<FluentIfStatement> {
 	 * @param condition Skyve condition expression
 	 * @return this builder
 	 */
-	public @Nonnull FluentIfStatement condition(@Nullable String condition) {
+	public @Nonnull FluentIfStatement condition(@Nonnull String condition) {
 		ifStatement.setCondition(condition);
 		return this;
 	}

@@ -4,7 +4,7 @@ import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.SerializableMetaData;
 
-import jakarta.annotation.Nullable;
+import jakarta.annotation.Nonnull;
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlType;
 
@@ -24,12 +24,12 @@ public class ApplicableTo implements SerializableMetaData {
 
 	private String uxui;
 
-	public @Nullable String getUxUi() {
+	public @Nonnull String getUxUi() {
 		return uxui;
 	}
 
 	@XmlAttribute(name = "name", required = true)
-	public void setUxUi(@Nullable String uxui) {
+	public void setUxUi(@Nonnull String uxui) {
 		this.uxui = UtilImpl.processStringValue(uxui);
 	}
 }

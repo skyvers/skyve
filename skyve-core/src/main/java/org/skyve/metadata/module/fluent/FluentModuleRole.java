@@ -114,12 +114,12 @@ public class FluentModuleRole {
 		return this;
 	}
 	
-	public @Nonnull FluentModuleRole name(@Nonnull String name) {
+	public @Nonnull FluentModuleRole name(@Nullable String name) {
 		role.setName(name);
 		return this;
 	}
 	
-	public @Nonnull FluentModuleRole description(@Nullable String description) {
+	public @Nonnull FluentModuleRole description(@Nonnull String description) {
 		role.setDescription(description);
 		return this;
 	}

@@ -51,7 +51,7 @@ public class FluentAction {
 	 * @param name action name
 	 * @return this builder
 	 */
-	public @Nonnull FluentAction name(@Nullable String name) {
+	public @Nonnull FluentAction name(@Nonnull String name) {
 		action.setName(name);
 		return this;
 	}

@@ -52,7 +52,7 @@ public class FluentMetaDataQueryContentColumn extends FluentMetaDataQueryColumn<
 	 * @param display The content display type.
 	 * @return this fluent instance.
 	 */
-	public @Nonnull FluentMetaDataQueryContentColumn display(@Nullable DisplayType display) {
+	public @Nonnull FluentMetaDataQueryContentColumn display(@Nonnull DisplayType display) {
 		column.setDisplay(display);
 		return this;
 	}

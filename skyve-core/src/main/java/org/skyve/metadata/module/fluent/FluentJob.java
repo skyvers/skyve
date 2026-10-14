@@ -50,7 +50,7 @@ public class FluentJob {
 	 * @param name The job name.
 	 * @return this fluent instance.
 	 */
-	public @Nonnull FluentJob name(@Nonnull String name) {
+	public @Nonnull FluentJob name(@Nullable String name) {
 		job.setName(name);
 		return this;
 	}
@@ -61,7 +61,7 @@ public class FluentJob {
 	 * @param displayName The display name.
 	 * @return this fluent instance.
 	 */
-	public @Nonnull FluentJob displayName(@Nullable String displayName) {
+	public @Nonnull FluentJob displayName(@Nonnull String displayName) {
 		job.setDisplayName(displayName);
 		return this;
 	}
@@ -83,7 +83,7 @@ public class FluentJob {
 	 * @param fullyQualifiedClassName The implementation class name.
 	 * @return this fluent instance.
 	 */
-	public @Nonnull FluentJob className(@Nullable String fullyQualifiedClassName) {
+	public @Nonnull FluentJob className(@Nonnull String fullyQualifiedClassName) {
 		job.setClassName(fullyQualifiedClassName);
 		return this;
 	}

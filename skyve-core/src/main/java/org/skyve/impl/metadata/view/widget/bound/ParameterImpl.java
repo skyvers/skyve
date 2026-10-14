@@ -4,6 +4,7 @@ import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.view.widget.bound.Parameter;
 
+import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlType;
@@ -39,12 +40,12 @@ public class ParameterImpl implements Parameter {
 	private String valueBinding;
 
 	@Override
-	public @Nullable String getName() {
+	public @Nonnull String getName() {
 		return name;
 	}
 
 	@XmlAttribute(required = true)
-	public void setName(@Nullable String name) {
+	public void setName(@Nonnull String name) {
 		this.name = UtilImpl.processStringValue(name);
 	}
 

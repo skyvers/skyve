@@ -47,7 +47,7 @@ public class HTML extends InputWidget implements AbsoluteSize, FormItemWidget {
 	}
 	
 	@Override
-	public @Nullable Integer getPixelWidth() {
+	public @Nonnull Integer getPixelWidth() {
 		return pixelWidth;
 	}
 
@@ -58,7 +58,7 @@ public class HTML extends InputWidget implements AbsoluteSize, FormItemWidget {
 	}
 
 	@Override
-	public @Nullable Integer getPixelHeight() {
+	public @Nonnull Integer getPixelHeight() {
 		return pixelHeight;
 	}
 

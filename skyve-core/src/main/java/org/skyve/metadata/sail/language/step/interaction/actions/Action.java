@@ -32,7 +32,7 @@ public class Action extends AbstractAction {
 	 * Returns the actionName.
 	 * @return the result
 	 */
-	public @Nullable String getActionName() {
+	public @Nonnull String getActionName() {
 		return actionName;
 	}
 
@@ -41,7 +41,7 @@ public class Action extends AbstractAction {
 	 * @param actionName the actionName
 	 */
 	@XmlAttribute(name = "name", required = true)
-	public void setActionName(@Nullable String actionName) {
+	public void setActionName(@Nonnull String actionName) {
 		this.actionName = UtilImpl.processStringValue(actionName);
 	}
 
@@ -77,7 +77,7 @@ public class Action extends AbstractAction {
 	 * @return the result
 	 */
 	@Override
-	public @Nullable String getIdentifier(@Nonnull AutomationContext context) {
+	public @Nonnull String getIdentifier(@Nonnull AutomationContext context) {
 		return actionName;
 	}
 }

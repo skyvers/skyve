@@ -40,7 +40,7 @@ public class UniqueConstraintImpl implements UniqueConstraint {
 	 * @return Returns the name.
 	 */
 	@Override
-	public @Nullable String getName() {
+	public @Nonnull String getName() {
 		return name;
 	}
 
@@ -48,7 +48,7 @@ public class UniqueConstraintImpl implements UniqueConstraint {
 	 * @param name The name to set.
 	 */
 	@XmlAttribute(name = "name", required = true)
-	public void setName(@Nullable String name) {
+	public void setName(@Nonnull String name) {
 		this.name = UtilImpl.processStringValue(name);
 	}
 
@@ -76,7 +76,7 @@ public class UniqueConstraintImpl implements UniqueConstraint {
 	 * @return Returns the message.
 	 */
 	@Override
-	public @Nullable String getMessage() {
+	public @Nonnull String getMessage() {
 		return message;
 	}
 
@@ -85,7 +85,7 @@ public class UniqueConstraintImpl implements UniqueConstraint {
 	 */
 	@XmlElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE, name = "message", required = true)
 	@XmlJavaTypeAdapter(CDATAAdapter.class)
-	public void setMessage(@Nullable String message) {
+	public void setMessage(@Nonnull String message) {
 		this.message = UtilImpl.processStringValue(message);
 	}
 

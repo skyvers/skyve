@@ -53,7 +53,7 @@ public abstract class FluentReference<T extends FluentReference<T>> extends Flue
 	 * Updates metadata on this fluent builder.
 	 */
 	@SuppressWarnings("unchecked")
-	public @Nonnull T documentName(@Nullable String documentName) {
+	public @Nonnull T documentName(@Nonnull String documentName) {
 		get().setDocumentName(documentName);
 		return (T) this;
 	}

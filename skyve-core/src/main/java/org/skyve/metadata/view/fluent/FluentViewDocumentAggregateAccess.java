@@ -5,7 +5,6 @@ import java.util.Set;
 import org.skyve.impl.metadata.repository.view.access.ViewDocumentAggregateUserAccessMetaData;
 
 import jakarta.annotation.Nonnull;
-import jakarta.annotation.Nullable;
 
 /**
  * A fluent helper builder class to construct and manipulate the {@link ViewDocumentAggregateUserAccessMetaData} metadata.
@@ -39,7 +38,7 @@ public class FluentViewDocumentAggregateAccess extends FluentViewUserAccess<Flue
 	/**
 	 * Specifies the document name for this FluentViewDocumentAggregateAccess.
 	 */
-	public @Nonnull FluentViewDocumentAggregateAccess documentName(final @Nullable String documentName) {
+	public @Nonnull FluentViewDocumentAggregateAccess documentName(final @Nonnull String documentName) {
 		access.setDocumentName(documentName);
 		return this;
 	}

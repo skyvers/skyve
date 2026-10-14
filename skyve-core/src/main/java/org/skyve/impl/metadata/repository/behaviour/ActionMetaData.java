@@ -10,6 +10,7 @@ import org.skyve.impl.domain.types.jaxb.CDATAAdapter;
 import org.skyve.impl.metadata.behaviour.IfStatement;
 import org.skyve.impl.metadata.behaviour.InvokeStatement;
 import org.skyve.impl.metadata.behaviour.InvokeStaticStatement;
+import org.skyve.impl.metadata.behaviour.MethodArgument;
 import org.skyve.impl.metadata.behaviour.SetStatement;
 import org.skyve.impl.metadata.repository.ConvertibleMetaData;
 import org.skyve.impl.metadata.repository.PropertyMapAdapter;
@@ -76,7 +77,7 @@ public class ActionMetaData implements NamedMetaData, ConvertibleMetaData<Action
 	 * @return action name, or {@code null} when unspecified
 	 */
 	@Override
-	public @Nullable String getName() {
+	public @Nonnull String getName() {
 		return name;
 	}
 
@@ -86,7 +87,7 @@ public class ActionMetaData implements NamedMetaData, ConvertibleMetaData<Action
 	 * @param name action name, trimmed to {@code null} when blank
 	 */
 	@XmlAttribute(required = true)
-	public void setName(@Nullable String name) {
+	public void setName(@Nonnull String name) {
 		this.name = UtilImpl.processStringValue(name);
 	}
 
@@ -174,7 +175,43 @@ public class ActionMetaData implements NamedMetaData, ConvertibleMetaData<Action
 			throw new MetaDataException(metaDataName + " : The action [name] is required for action " + metaDataName);
 		}
 
-		// TODO validate statements recursively
+		// validate statements recursively
+		List<StatementMetaData> statementsToValidate = new ArrayList<>(statements);
+		for (int i = 0; i < statementsToValidate.size(); i++) {
+			StatementMetaData statement = statementsToValidate.get(i);
+			if (statement instanceof IfStatement ifStatement) {
+				if (ifStatement.getCondition() == null) {
+					throw new MetaDataException(metaDataName + " : The if [condition] is required for action " + theName);
+				}
+				statementsToValidate.addAll(ifStatement.getThenStatements());
+				statementsToValidate.addAll(ifStatement.getElseStatements());
+			}
+			else if (statement instanceof SetStatement setStatement) {
+				if (setStatement.getBinding() == null) {
+					throw new MetaDataException(metaDataName + " : The set [binding] is required for action " + theName);
+				}
+				if (setStatement.getExpression() == null) {
+					throw new MetaDataException(metaDataName + " : The set [expression] is required for action " + theName);
+				}
+			}
+			else if (statement instanceof InvokeStatement invokeStatement) {
+				if ((invokeStatement instanceof InvokeStaticStatement invokeStaticStatement) &&
+						(invokeStaticStatement.getClassName() == null)) {
+					throw new MetaDataException(metaDataName + " : The invokeStatic [className] is required for action " + theName);
+				}
+				if (invokeStatement.getMethodName() == null) {
+					throw new MetaDataException(metaDataName + " : The invoke [method] is required for action " + theName);
+				}
+				for (MethodArgument argument : invokeStatement.getArguments()) {
+					if (argument.getTypeName() == null) {
+						throw new MetaDataException(metaDataName + " : The argument [typeName] is required for action " + theName);
+					}
+					if (argument.getExpression() == null) {
+						throw new MetaDataException(metaDataName + " : The argument [expression] is required for action " + theName);
+					}
+				}
+			}
+		}
 		
 		return this;
 	}

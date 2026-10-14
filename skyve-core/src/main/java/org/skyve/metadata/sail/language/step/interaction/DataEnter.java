@@ -35,7 +35,7 @@ public class DataEnter implements Step {
 	 * Returns the binding.
 	 * @return the result
 	 */
-	public @Nullable String getBinding() {
+	public @Nonnull String getBinding() {
 		return binding;
 	}
 
@@ -44,7 +44,7 @@ public class DataEnter implements Step {
 	 * @param binding the binding
 	 */
 	@XmlAttribute(name = "binding", required = true)
-	public void setBinding(@Nullable String binding) {
+	public void setBinding(@Nonnull String binding) {
 		this.binding = UtilImpl.processStringValue(binding);
 	}
 
@@ -52,7 +52,7 @@ public class DataEnter implements Step {
 	 * Returns the value.
 	 * @return the result
 	 */
-	public @Nullable String getValue() {
+	public @Nonnull String getValue() {
 		return value;
 	}
 
@@ -61,7 +61,7 @@ public class DataEnter implements Step {
 	 * @param value the value
 	 */
 	@XmlAttribute(name = "value", required = true)
-	public void setValue(@Nullable String value) {
+	public void setValue(@Nonnull String value) {
 		this.value = UtilImpl.processStringValue(value);
 	}
 
@@ -97,7 +97,7 @@ public class DataEnter implements Step {
 	 * @return the result
 	 */
 	@Override
-	public @Nullable String getIdentifier(@Nonnull AutomationContext context) {
+	public @Nonnull String getIdentifier(@Nonnull AutomationContext context) {
 		return binding;
 	}
 }

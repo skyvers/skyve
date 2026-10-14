@@ -3,7 +3,6 @@ package org.skyve.metadata.view.fluent;
 import org.skyve.impl.metadata.view.Inject;
 
 import jakarta.annotation.Nonnull;
-import jakarta.annotation.Nullable;
 
 /**
  * Builds {@link Inject} metadata for script-based client injection.
@@ -51,7 +50,7 @@ public class FluentInject extends FluentWidget {
 	 *            the script body or identifier
 	 * @return this builder
 	 */
-	public @Nonnull FluentInject script(@Nullable String script) {
+	public @Nonnull FluentInject script(@Nonnull String script) {
 		inject.setScript(script);
 		return this;
 	}
