@@ -1472,18 +1472,22 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	}
 
 	/**
-	 * Renders a progress bar placeholder inside a form.
+	 * Renders a progress bar inside a form as a read-only item showing its bound value.
+	 *
+	 * <p>This writes the properties of the current form item, so it must not write a statement.
 	 *
 	 * @param progressBar The progress bar metadata.
 	 */
 	@Override
 	public void renderFormProgressBar(ProgressBar progressBar) {
-		// TODO Make a value from CanvasItem.
-		String variable = "v" + variableCounter++;
-		code.append("var ").append(variable).append("=isc.BizLabel.create({value: '");
-		code.append(progressBar.getBinding());
-		code.append("'});\n");
-		code.append(containerVariables.peek()).append(".addContained(").append(variable).append(");\n");
+		// TODO Make a progress bar from a CanvasItem.
+		String title = getCurrentWidgetLabel();
+		if (title != null) {
+			code.append("title:'").append(escapeSmartClientText(title, getCurrentWidgetEscapeLabel())).append("',");
+		}
+		code.append("type:'blurb',name:'").append(BindUtil.sanitiseBinding(progressBar.getBinding())).append("',");
+		size(progressBar, null, code);
+		invisible(progressBar.getInvisibleCondition(), code);
 	}
 
 	private String listWidgetVariable = null;

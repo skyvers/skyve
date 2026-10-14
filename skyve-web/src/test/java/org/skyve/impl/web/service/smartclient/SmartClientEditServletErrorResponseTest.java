@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -357,7 +358,7 @@ class SmartClientEditServletErrorResponseTest {
 		org.skyve.domain.Bean processBean = mock(org.skyve.domain.Bean.class);
 		View view = mock(View.class);
 
-		org.mockito.Mockito.doReturn(Boolean.TRUE).when(processBean).isCreated();
+		doReturn(Boolean.TRUE).when(processBean).isCreated();
 		when(processDocument.getView("ux", customer, "edit")).thenReturn(view);
 		when(view.getParameters()).thenReturn(List.<View.ViewParameter>of());
 
@@ -384,7 +385,7 @@ class SmartClientEditServletErrorResponseTest {
 		org.skyve.domain.Bean processBean = mock(org.skyve.domain.Bean.class);
 		View view = mock(View.class);
 
-		org.mockito.Mockito.doReturn(Boolean.FALSE).when(processBean).isCreated();
+		doReturn(Boolean.FALSE).when(processBean).isCreated();
 		when(processDocument.getView("ux", customer, "create")).thenReturn(view);
 		when(view.getParameters()).thenReturn(List.<View.ViewParameter>of());
 
@@ -411,7 +412,7 @@ class SmartClientEditServletErrorResponseTest {
 		org.skyve.domain.Bean processBean = mock(org.skyve.domain.Bean.class);
 		View view = mock(View.class);
 
-		org.mockito.Mockito.doReturn(Boolean.TRUE).when(processBean).isCreated();
+		doReturn(Boolean.TRUE).when(processBean).isCreated();
 		when(processDocument.getView("ux", customer, "edit")).thenReturn(view);
 
 		View.ViewParameter declared = new View.ViewParameter();
@@ -762,7 +763,7 @@ class SmartClientEditServletErrorResponseTest {
 		User user = mock(User.class);
 		CustomerImpl customer = mock(CustomerImpl.class);
 		Document processDocument = mock(Document.class);
-		PersistentBean beanToDelete = mock(PersistentBean.class);
+		PersistentBean beanToDelete = persistedBean();
 		AbstractPersistence persistence = mock(AbstractPersistence.class);
 
 		doReturn(Boolean.FALSE).when(user).canDeleteDocument(processDocument);
@@ -780,12 +781,45 @@ class SmartClientEditServletErrorResponseTest {
 
 	@Test
 	@SuppressWarnings("static-method")
+	void removePrivateTakesANonPersistentBeanThroughPreExecuteWithoutChecksOrDeleting() throws Exception {
+		assertRemovedWithoutDeleting(mock(Bean.class));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void removePrivateTakesAnUnpersistedBeanThroughPreExecuteWithoutChecksOrDeleting() throws Exception {
+		assertRemovedWithoutDeleting(mock(PersistentBean.class));
+	}
+
+	private static void assertRemovedWithoutDeleting(Bean bean) throws Exception {
+		AbstractWebContext webContext = mock(AbstractWebContext.class);
+		User user = mock(User.class);
+		CustomerImpl customer = mock(CustomerImpl.class);
+		Bizlet<Bean> bizlet = mock(Bizlet.class);
+		AbstractPersistence persistence = mock(AbstractPersistence.class);
+		StringWriter sink = new StringWriter();
+		PrintWriter pw = new PrintWriter(sink);
+		when(bizlet.preExecute(org.skyve.metadata.controller.ImplicitActionName.Delete, bean, null, webContext)).thenReturn(bean);
+
+		assertThrows(NullPointerException.class,
+				() -> invokeRemovePrivate(webContext, user, customer, mock(Document.class), bean, bizlet, persistence, pw));
+		pw.flush();
+
+		verify(bizlet).preExecute(org.skyve.metadata.controller.ImplicitActionName.Delete, bean, null, webContext);
+		verify(bizlet).postRender(bean, webContext);
+		verify(user, never()).canDeleteDocument(any());
+		verify(persistence, never()).delete(any(Document.class), any(PersistentBean.class));
+		assertEquals("{\"response\":{\"status\":0}}", sink.toString());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
 	void removePrivateThrowsValidationWhenBeanAlreadyDeleted() throws Exception {
 		AbstractWebContext webContext = mock(AbstractWebContext.class);
 		User user = mock(User.class);
 		CustomerImpl customer = mock(CustomerImpl.class);
 		Document processDocument = mock(Document.class);
-		PersistentBean beanToDelete = mock(PersistentBean.class);
+		PersistentBean beanToDelete = persistedBean();
 		AbstractPersistence persistence = mock(AbstractPersistence.class);
 
 		doReturn(Boolean.TRUE).when(user).canDeleteDocument(processDocument);
@@ -810,7 +844,7 @@ class SmartClientEditServletErrorResponseTest {
 		User user = mock(User.class);
 		CustomerImpl customer = mock(CustomerImpl.class);
 		Document processDocument = mock(Document.class);
-		PersistentBean beanToDelete = mock(PersistentBean.class);
+		PersistentBean beanToDelete = persistedBean();
 		PersistentBean retrieved = mock(PersistentBean.class);
 		AbstractPersistence persistence = mock(AbstractPersistence.class);
 
@@ -843,7 +877,7 @@ class SmartClientEditServletErrorResponseTest {
 		User user = mock(User.class);
 		CustomerImpl customer = mock(CustomerImpl.class);
 		Document processDocument = mock(Document.class);
-		PersistentBean beanToDelete = mock(PersistentBean.class);
+		PersistentBean beanToDelete = persistedBean();
 		PersistentBean retrieved = mock(PersistentBean.class);
 		AbstractPersistence persistence = mock(AbstractPersistence.class);
 
@@ -878,7 +912,7 @@ class SmartClientEditServletErrorResponseTest {
 		User user = mock(User.class);
 		CustomerImpl customer = mock(CustomerImpl.class);
 		Document processDocument = mock(Document.class);
-		PersistentBean beanToDelete = mock(PersistentBean.class);
+		PersistentBean beanToDelete = persistedBean();
 		PersistentBean retrieved = mock(PersistentBean.class);
 		AbstractPersistence persistence = mock(AbstractPersistence.class);
 		StringWriter sink = new StringWriter();
@@ -918,7 +952,7 @@ class SmartClientEditServletErrorResponseTest {
 		User user = mock(User.class);
 		CustomerImpl customer = mock(CustomerImpl.class);
 		Document processDocument = mock(Document.class);
-		PersistentBean beanToDelete = mock(PersistentBean.class);
+		PersistentBean beanToDelete = persistedBean();
 		PersistentBean retrieved = mock(PersistentBean.class);
 		Bizlet<PersistentBean> bizlet = mock(Bizlet.class);
 		AbstractPersistence persistence = mock(AbstractPersistence.class);
@@ -967,7 +1001,7 @@ class SmartClientEditServletErrorResponseTest {
 		User user = mock(User.class);
 		CustomerImpl customer = mock(CustomerImpl.class);
 		Document processDocument = mock(Document.class);
-		PersistentBean beanToDelete = mock(PersistentBean.class);
+		PersistentBean beanToDelete = persistedBean();
 		PersistentBean retrieved = mock(PersistentBean.class);
 		AbstractPersistence persistence = mock(AbstractPersistence.class);
 		StringWriter sink = new StringWriter();
@@ -1011,7 +1045,7 @@ class SmartClientEditServletErrorResponseTest {
 		User user = mock(User.class);
 		CustomerImpl customer = mock(CustomerImpl.class);
 		Document processDocument = mock(Document.class);
-		PersistentBean beanToDelete = mock(PersistentBean.class);
+		PersistentBean beanToDelete = persistedBean();
 		PersistentBean retrieved = mock(PersistentBean.class);
 		Bizlet<PersistentBean> bizlet = mock(Bizlet.class);
 		AbstractPersistence persistence = mock(AbstractPersistence.class);
@@ -1101,12 +1135,19 @@ class SmartClientEditServletErrorResponseTest {
 		verify(customer).interceptAfterPostRender(bean, webContext);
 	}
 
+	/** A mocked bean that has been persisted, so there is something to delete. */
+	private static PersistentBean persistedBean() {
+		PersistentBean result = mock(PersistentBean.class);
+		doReturn(Boolean.TRUE).when(result).isPersisted();
+		return result;
+	}
+
 	private static void invokeRemovePrivate(AbstractWebContext webContext,
 										User user,
 										CustomerImpl customer,
 										Document processDocument,
-										PersistentBean beanToDelete,
-										Bizlet<PersistentBean> bizlet,
+										Bean beanToDelete,
+										Bizlet<?> bizlet,
 										AbstractPersistence persistence,
 										PrintWriter pw) throws Exception {
 		Method method = SmartClientEditServlet.class.getDeclaredMethod("remove",
@@ -1114,7 +1155,7 @@ class SmartClientEditServletErrorResponseTest {
 				User.class,
 				org.skyve.metadata.customer.Customer.class,
 				Document.class,
-				PersistentBean.class,
+				Bean.class,
 				Bizlet.class,
 				AbstractPersistence.class,
 				PrintWriter.class);

@@ -1,5 +1,6 @@
 package org.skyve.impl.web.faces.actions;
 
+import org.skyve.domain.Bean;
 import org.skyve.domain.PersistentBean;
 import org.skyve.domain.messages.SecurityException;
 import org.skyve.impl.metadata.customer.CustomerImpl;
@@ -29,6 +30,9 @@ import jakarta.servlet.http.HttpServletRequest;
 
 /**
  * Executes a Faces callback action within the current Skyve web context.
+ *
+ * <p>As in SmartClient, only a persistent bean is security checked and saved; a non-persistent bean
+ * is taken through pre-execute and post-render only.
  */
 public class SaveAction extends FacesAction<Void> {
 
@@ -48,7 +52,7 @@ public class SaveAction extends FacesAction<Void> {
 		if (UtilImpl.FACES_TRACE) FACES_LOGGER.info("SaveAction - ok={}", Boolean.valueOf(ok));
 
 		AbstractPersistence persistence = AbstractPersistence.get();
-		PersistentBean targetBean = (PersistentBean) ActionUtil.getTargetBeanForView(facesView);
+		Bean targetBean = ActionUtil.getTargetBeanForView(facesView);
     	User user = persistence.getUser();
     	Customer customer = user.getCustomer();
     	Module targetModule = customer.getModule(targetBean.getBizModule());
@@ -71,7 +75,7 @@ public class SaveAction extends FacesAction<Void> {
 			CustomerImpl internalCustomer = (CustomerImpl) customer;
 			boolean vetoed = internalCustomer.interceptBeforePreExecute(ian, targetBean, null, webContext);
 			if (! vetoed) {
-				Bizlet<PersistentBean> bizlet = ((DocumentImpl) targetDocument).getBizlet(customer);
+				Bizlet<Bean> bizlet = ((DocumentImpl) targetDocument).getBizlet(customer);
 				if (bizlet != null) {
 					if (UtilImpl.BIZLET_TRACE) BIZLET_LOGGER.info("Entering {}.preExecute: {}, {}, null, , {}", bizlet.getClass().getName(), ian, targetBean, webContext);
 					targetBean = bizlet.preExecute(ian, targetBean, null, webContext);
@@ -79,14 +83,16 @@ public class SaveAction extends FacesAction<Void> {
 				}
 				internalCustomer.interceptAfterPreExecute(ian, targetBean, null, webContext);
 
-				if (targetBean.isNotPersisted() && (! user.canCreateDocument(targetDocument))) {
-					throw new SecurityException("create this data", user.getName());
+				if (targetBean instanceof PersistentBean persistentBean) {
+					if (persistentBean.isNotPersisted() && (! user.canCreateDocument(targetDocument))) {
+						throw new SecurityException("create this data", user.getName());
+					}
+					else if (persistentBean.isPersisted() && (! user.canUpdateDocument(targetDocument))) {
+						throw new SecurityException("update this data", user.getName());
+					}
+			
+					targetBean = persistence.save(targetDocument, persistentBean);
 				}
-				else if (targetBean.isPersisted() && (! user.canUpdateDocument(targetDocument))) {
-					throw new SecurityException("update this data", user.getName());
-				}
-		
-				targetBean = persistence.save(targetDocument, targetBean);
 				ActionUtil.setTargetBeanForViewAndCollectionBinding(facesView, null, targetBean);
 				
 				// We want to call post render

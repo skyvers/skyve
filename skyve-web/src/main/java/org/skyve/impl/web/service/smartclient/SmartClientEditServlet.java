@@ -413,13 +413,12 @@ public class SmartClientEditServlet extends HttpServlet {
 	
 								SmartClientListServlet.checkCsrfToken(session, request, response, currentCsrfToken);
 	
-								PersistentBean beanToDelete = (PersistentBean) processBean;
-								Bizlet<PersistentBean> bizletToDelete = ((DocumentImpl) processDocument).getBizlet(customer);
+								Bizlet<Bean> bizletToDelete = ((DocumentImpl) processDocument).getBizlet(customer);
 								remove(webContext,
 										user,
-						                customer, 
-										processDocument, 
-										beanToDelete, 
+						                customer,
+										processDocument,
+										processBean,
 										bizletToDelete, 
 										persistence, 
 										pw);
@@ -1293,12 +1292,13 @@ public class SmartClientEditServlet extends HttpServlet {
 	
 	/**
 	 * Removes a persistent bean and writes a successful delete response.
+	 * As in save, a bean that is not persisted is only taken through pre-execute and post-render.
 	 *
 	 * @param webContext active web conversation context
 	 * @param user active user
 	 * @param customer active customer metadata
 	 * @param processDocument document from which the bean is deleted
-	 * @param beanToDelete bean requested for deletion
+	 * @param bean bean requested for deletion
 	 * @param bizlet document bizlet, or {@code null}
 	 * @param persistence active persistence context
 	 * @param pw response writer
@@ -1309,72 +1309,96 @@ public class SmartClientEditServlet extends HttpServlet {
 								User user,
 		                        Customer customer,
 								Document processDocument,
-								PersistentBean beanToDelete,
-								Bizlet<PersistentBean> bizlet,
+								Bean bean,
+								Bizlet<Bean> bizlet,
 								AbstractPersistence persistence,
 								PrintWriter pw)
 	throws Exception {
+		// Only a persisted bean is security checked and deleted
+		boolean persisted = (bean instanceof PersistentBean) && bean.isPersisted();
+		Bean beanToDelete = persisted ? retrieveForDelete(user, processDocument, (PersistentBean) bean, persistence) : bean;
+		
+		// Run preExecute after the copy is taken, in case we rollback
+		LOGGER.info("PRE-EXECUTE on {}", ImplicitActionName.Delete);
+		CustomerImpl internalCustomer = (CustomerImpl) customer;
+		boolean vetoed = internalCustomer.interceptBeforePreExecute(ImplicitActionName.Delete, 
+																		beanToDelete, 
+																		null,
+																		webContext);
+		if (! vetoed) {
+			if (bizlet != null) {
+				if (UtilImpl.BIZLET_TRACE) BIZLET_LOGGER.info(ENTERING_PRE_EXECUTE_WITH_NULL_PARENT, bizlet.getClass().getName(), ImplicitActionName.Delete, beanToDelete, webContext);
+				beanToDelete = bizlet.preExecute(ImplicitActionName.Delete, 
+													beanToDelete, 
+													null,
+													webContext);
+				if (UtilImpl.BIZLET_TRACE) BIZLET_LOGGER.info(EXITING_PRE_EXECUTE, bizlet.getClass().getName(), beanToDelete);
+			}
+			internalCustomer.interceptAfterPreExecute(ImplicitActionName.Delete, 
+														beanToDelete, 
+														null,
+														webContext);
+		}
+		
+		if (persisted) {
+			persistence.delete(processDocument, (PersistentBean) beanToDelete);
+		}
+
+		pw.append("{\"response\":{\"status\":0}}");
+
+		try {
+			postRender(internalCustomer, bizlet, beanToDelete, webContext);
+			Monitoring.measure(RequestKey.delete(processDocument));
+		}
+		finally {
+			StateUtil.commitAndCacheConversation(webContext);
+		}
+	}
+	
+	/**
+	 * Checks that the user can delete a persisted bean and retrieves the latest copy of it to delete.
+	 *
+	 * @param user active user
+	 * @param processDocument document from which the bean is deleted
+	 * @param beanToDelete bean requested for deletion
+	 * @param persistence active persistence context
+	 * @return the latest persisted copy of the bean
+	 * @throws SecurityException when the user cannot delete or read the bean
+	 * @throws ValidationException when the bean was deleted by someone else
+	 * @throws OptimisticLockException when the bean was changed by someone else
+	 */
+	private static PersistentBean retrieveForDelete(User user,
+														Document processDocument,
+														PersistentBean beanToDelete,
+														AbstractPersistence persistence) {
 		if (! user.canDeleteDocument(processDocument)) {
 			throw new SecurityException("delete this data", user.getName());
 		}
 		
 		// Ensure that we are working on the latest of everything and no related entities are pointing to old data
 		persistence.evictAllCached();
-		PersistentBean persistentBeanToDelete = persistence.retrieve(processDocument, 
-																		beanToDelete.getBizId());
+		PersistentBean result = persistence.retrieve(processDocument, beanToDelete.getBizId());
 
-		if (persistentBeanToDelete == null) { // deleted by another user
+		if (result == null) { // deleted by another user
 			throw new ValidationException(new Message("Failed to delete this information as it was already deleted by someone else after you looked at it."));
 		}
 
-		if (! user.canReadBean(persistentBeanToDelete.getBizId(), 
-								persistentBeanToDelete.getBizModule(), 
-								persistentBeanToDelete.getBizDocument(), 
-								persistentBeanToDelete.getBizCustomer(), 
-								persistentBeanToDelete.getBizDataGroupId(), 
-								persistentBeanToDelete.getBizUserId())) {
+		if (! user.canReadBean(result.getBizId(), 
+								result.getBizModule(), 
+								result.getBizDocument(), 
+								result.getBizCustomer(), 
+								result.getBizDataGroupId(), 
+								result.getBizUserId())) {
 			throw new SecurityException("read this data", user.getName());
 		}
 		
-		if (! persistentBeanToDelete.getBizLock().equals(beanToDelete.getBizLock())) {
+		if (! result.getBizLock().equals(beanToDelete.getBizLock())) {
 			throw new OptimisticLockException(user, 
 												OperationType.delete, 
-												persistentBeanToDelete.getBizLock());
+												result.getBizLock());
 		}
 		
-		// Run preExecute after the copy is taken, in case we rollback
-		LOGGER.info("PRE-EXECUTE on {}", ImplicitActionName.Delete);
-		CustomerImpl internalCustomer = (CustomerImpl) customer;
-		boolean vetoed = internalCustomer.interceptBeforePreExecute(ImplicitActionName.Delete, 
-																		persistentBeanToDelete, 
-																		null,
-																		webContext);
-		if (! vetoed) {
-			if (bizlet != null) {
-				if (UtilImpl.BIZLET_TRACE) BIZLET_LOGGER.info(ENTERING_PRE_EXECUTE_WITH_NULL_PARENT, bizlet.getClass().getName(), ImplicitActionName.Delete, persistentBeanToDelete, webContext);
-				persistentBeanToDelete = bizlet.preExecute(ImplicitActionName.Delete, 
-															persistentBeanToDelete, 
-															null,
-															webContext);
-				if (UtilImpl.BIZLET_TRACE) BIZLET_LOGGER.info(EXITING_PRE_EXECUTE, bizlet.getClass().getName(), persistentBeanToDelete);
-			}
-			internalCustomer.interceptAfterPreExecute(ImplicitActionName.Delete, 
-														persistentBeanToDelete, 
-														null,
-														webContext);
-		}
-		
-		persistence.delete(processDocument, persistentBeanToDelete);
-
-		pw.append("{\"response\":{\"status\":0}}");
-
-		try {
-			postRender(internalCustomer, bizlet, persistentBeanToDelete, webContext);
-			Monitoring.measure(RequestKey.delete(processDocument));
-		}
-		finally {
-			StateUtil.commitAndCacheConversation(webContext);
-		}
+		return result;
 	}
 	
 	/**

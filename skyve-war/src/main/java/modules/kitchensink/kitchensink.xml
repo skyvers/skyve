@@ -19,6 +19,9 @@
 		<document ref="LookupDescription" />
 		<document ref="ModelLookupFixture" />
 		<document ref="ModelLookupRow" />
+		<document ref="ConditionsFixture" />
+		<document ref="ConditionsFixtureRow" />
+		<document ref="ConditionsFixtureNode" />
 	</documents>
 	<roles>
 		<role name="dev">
@@ -68,6 +71,28 @@
 				<document name="LookupDescription" permission="CRUDD" />
 				<document name="ModelLookupFixture" permission="CRUDD" />
 				<document name="ModelLookupRow" permission="CRUDD" />
+				<document name="ConditionsFixture" permission="CRUDD">
+					<action name="ConditionsAction1" />
+					<action name="ConditionsAction2" />
+					<action name="ConditionsAction3" />
+					<action name="ConditionsAction4" />
+					<action name="ConditionsExport" />
+					<action name="ConditionsImport" />
+					<action name="ConditionsDownload" />
+					<action name="ConditionsUpload" />
+					<contentPermission attribute="content1" />
+					<contentPermission attribute="content2" />
+					<contentPermission attribute="content3" />
+					<contentPermission attribute="content4" />
+					<contentPermission attribute="contentSignature1" />
+					<contentPermission attribute="contentSignature2" />
+					<contentPermission attribute="contentSignature3" />
+					<contentPermission attribute="contentSignature4" />
+				</document>
+				<document name="ConditionsFixtureRow" permission="CRUDD">
+					<contentPermission attribute="content" />
+				</document>
+				<document name="ConditionsFixtureNode" permission="CRUDD" />
 			</privileges>
 		</role>
 	</roles>
@@ -99,6 +124,9 @@
 		<edit name="Model Lookup Fixture" document="ModelLookupFixture">
 			<role name="dev" />
 		</edit>
+		<edit name="Conditions Fixture" document="ConditionsFixture">
+			<role name="dev" />
+		</edit>
 	</menu>
 	<queries>
 		<query name="qEscapingFixture" documentName="ListAttributes">
@@ -121,6 +149,18 @@
 				<column binding="selection" displayName="Selected Lookup" />
 				<column binding="selection.description" displayName="Selected Description" />
 				<column binding="singleSelection.description" displayName="Single-column Selection" />
+			</columns>
+		</query>
+		<query name="qConditionsFixtureListAttributes" documentName="ListAttributes">
+			<description>List attributes listed by the list grids and list repeaters of the Kitchen Sink conditions fixture view.</description>
+			<columns>
+				<column binding="text" displayName="Text" />
+			</columns>
+		</query>
+		<query name="qConditionsFixtureNodes" documentName="ConditionsFixtureNode">
+			<description>Nodes listed by the tree grids of the Kitchen Sink conditions fixture view.</description>
+			<columns>
+				<column binding="text" displayName="Text" />
 			</columns>
 		</query>
 	</queries>

@@ -4743,23 +4743,6 @@ class BindUtilTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void evaluateResolvedConditionExpressionHonoursNegation() throws Exception {
-		Method method = BindUtil.class.getDeclaredMethod("evaluateResolvedConditionExpression",
-				Bean.class,
-				String.class,
-				boolean.class);
-		method.setAccessible(true);
-
-		Map<String, Object> properties = new HashMap<>();
-		properties.put("flag", Boolean.TRUE);
-		DynamicBean bean = new DynamicBean("sales", "Order", properties);
-
-		assertEquals(Boolean.FALSE, method.invoke(null, bean, "{flag}", Boolean.TRUE));
-		assertEquals(Boolean.TRUE, method.invoke(null, bean, "{flag}", Boolean.FALSE));
-	}
-
-	@Test
-	@SuppressWarnings("static-method")
 	void setDynamicIndexedBindingThroughPublicSetUpdatesListElement() {
 		List<Object> values = new ArrayList<>(Arrays.asList("before", "target"));
 		DynamicBean bean = new DynamicBean("sales", "Order", new HashMap<>(Map.of("items", values)));

@@ -323,7 +323,7 @@ class SmartClientEditServletH2Test extends AbstractSkyveTest {
 					org.skyve.metadata.user.User.class,
 					org.skyve.metadata.customer.Customer.class,
 					org.skyve.metadata.model.document.Document.class,
-					PersistentBean.class,
+					Bean.class,
 					Bizlet.class,
 					AbstractPersistence.class,
 					PrintWriter.class);

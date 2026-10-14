@@ -1,0 +1,495 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<document name="ConditionsFixture"
+			xmlns="http://www.skyve.org/xml/document"
+			xsi:schemaLocation="http://www.skyve.org/xml/document ../../../schemas/document.xsd"
+			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<documentation>
+		<![CDATA[
+			Non-persistent Kitchen Sink fixture whose edit view puts a condition on every view attribute that takes one.
+
+			Show drives every visible/invisible condition and Allow drives every other condition, so that each widget
+			on the first four tabs of the edit view is shown when Show is set and usable when Allow is set.
+			Those tabs author the same widgets four ways: positive attributes (visible, enabled, enableAdd...) and
+			negative attributes (invisible, disabled, disableAdd...), each holding condition names and then inline expressions.
+			An attribute ending in 1, 2, 3 or 4 is bound on the tab of that number.
+		]]>
+	</documentation>
+	<singularAlias>Conditions Fixture</singularAlias>
+	<pluralAlias>Conditions Fixtures</pluralAlias>
+	<bizKey expression="Conditions Fixture" />
+	<attributes>
+		<boolean name="show">
+			<displayName>Show</displayName>
+			<description>Drives every visible and invisible condition on the four attribute tabs: when it is ticked, every widget there is shown. Changing it refreshes the view.</description>
+			<defaultValue>true</defaultValue>
+		</boolean>
+		<boolean name="allow">
+			<displayName>Allow</displayName>
+			<description>Drives every other condition on the four attribute tabs (enabled and disabled, the add, edit, zoom, remove, pick and clear flags, and postRefresh): when it is ticked, every widget there can be used. Changing it refreshes the view.</description>
+			<defaultValue>true</defaultValue>
+		</boolean>
+		<text name="text">
+			<displayName>Text</displayName>
+			<description>Type x to flip the two el:bean.text eq 'x' labels on the Condition forms tab: the visible one appears and the invisible one disappears. Type mapped to show the component's el:bean.text eq 'mapped' label on the first three attribute tabs; on the fourth that condition is mapped to shownByExpression, so there it follows Show. Changing it does not refresh the view: tick Show or Allow, or save, to see the effect.</description>
+			<length>100</length>
+		</text>
+		<integer name="number">
+			<displayName>Number</displayName>
+			<description>Enter 6 or more to flip the two el:bean.number gt 5 labels on the Condition forms tab. Changing it does not refresh the view: tick Show or Allow, or save, to see the effect.</description>
+		</integer>
+		<enum name="choice">
+			<displayName>Choice</displayName>
+			<description>Choose one to flip the two el:bean.choice eq Choice.one labels on the Condition forms tab. Changing it does not refresh the view: tick Show or Allow, or save, to see the effect.</description>
+			<values>
+				<value code="one" />
+				<value code="two" />
+			</values>
+		</enum>
+		<association name="nested" type="aggregation" persistent="false" usage="view">
+			<displayName>Nested</displayName>
+			<documentName>ConditionsFixture</documentName>
+		</association>
+		<boolean name="eventTarget">
+			<displayName>Event Target</displayName>
+			<description>Nothing reads this. It is what every setDisabled and setInvisible event action disables and hides, according to its condition, in the handlers on the four attribute tabs: focus, blur and change of the text field; picked, cleared, edited and added of the lookup; added, edited, removed, selected and deleted of the grids; and change of the geometry map and list membership. It is a checkbox because only a boolean attribute can be their target. PrimeFaces does not apply these conditions, so only SmartClient changes it.</description>
+		</boolean>
+		<boolean name="checkBox1">
+			<displayName>checkBox 1</displayName>
+		</boolean>
+		<colour name="colourPicker1">
+			<displayName>colourPicker 1</displayName>
+		</colour>
+		<enum name="combo1">
+			<displayName>combo 1</displayName>
+			<values>
+				<value code="one" />
+				<value code="two" />
+			</values>
+		</enum>
+		<content name="content1">
+			<displayName>content 1</displayName>
+		</content>
+		<content name="contentSignature1">
+			<displayName>contentSignature 1</displayName>
+		</content>
+		<geometry name="geometry1">
+			<displayName>geometry 1</displayName>
+		</geometry>
+		<geometry name="geometryMap1">
+			<displayName>geometryMap 1</displayName>
+		</geometry>
+		<markup name="html1">
+			<displayName>html 1</displayName>
+		</markup>
+		<text name="password1">
+			<displayName>password 1</displayName>
+			<length>100</length>
+		</text>
+		<integer name="progressBar1">
+			<displayName>progressBar 1</displayName>
+		</integer>
+		<enum name="radio1">
+			<displayName>radio 1</displayName>
+			<values>
+				<value code="one" />
+				<value code="two" />
+			</values>
+		</enum>
+		<markup name="richText1">
+			<displayName>richText 1</displayName>
+		</markup>
+		<integer name="slider1">
+			<displayName>slider 1</displayName>
+		</integer>
+		<integer name="spinner1">
+			<displayName>spinner 1</displayName>
+		</integer>
+		<memo name="textArea1">
+			<displayName>textArea 1</displayName>
+		</memo>
+		<text name="textField1">
+			<displayName>textField 1</displayName>
+			<length>100</length>
+		</text>
+		<association name="lookupDescription1" type="aggregation" persistent="false" usage="view">
+			<displayName>lookupDescription 1</displayName>
+			<documentName>LookupDescription</documentName>
+		</association>
+		<association name="zoomIn1" type="aggregation" persistent="false" usage="view">
+			<displayName>zoomIn 1</displayName>
+			<documentName>LookupDescription</documentName>
+		</association>
+		<association name="zoomInContainer1" type="aggregation" persistent="false" usage="view">
+			<displayName>zoomInContainer 1</displayName>
+			<documentName>LookupDescription</documentName>
+		</association>
+		<association name="comparison1" type="aggregation" persistent="false" usage="view">
+			<displayName>comparison 1</displayName>
+			<documentName>LookupDescription</documentName>
+		</association>
+		<collection name="checkMembership1" type="aggregation" persistent="false" usage="view">
+			<displayName>checkMembership 1</displayName>
+			<domain>variant</domain>
+			<documentName>LookupDescription</documentName>
+			<minCardinality>0</minCardinality>
+		</collection>
+		<collection name="listMembership1" type="aggregation" persistent="false" usage="view">
+			<displayName>listMembership 1</displayName>
+			<domain>variant</domain>
+			<documentName>LookupDescription</documentName>
+			<minCardinality>0</minCardinality>
+		</collection>
+		<collection name="dataGrid1" type="aggregation" persistent="false" usage="view">
+			<displayName>dataGrid 1</displayName>
+			<documentName>ConditionsFixtureRow</documentName>
+			<minCardinality>0</minCardinality>
+		</collection>
+		<collection name="inlineGrid1" type="aggregation" persistent="false" usage="view">
+			<displayName>inlineGrid 1</displayName>
+			<documentName>ConditionsFixtureRow</documentName>
+			<minCardinality>0</minCardinality>
+		</collection>
+		<collection name="dataRepeater1" type="aggregation" persistent="false" usage="view">
+			<displayName>dataRepeater 1</displayName>
+			<documentName>ConditionsFixtureRow</documentName>
+			<minCardinality>0</minCardinality>
+		</collection>
+		<boolean name="checkBox2">
+			<displayName>checkBox 2</displayName>
+		</boolean>
+		<colour name="colourPicker2">
+			<displayName>colourPicker 2</displayName>
+		</colour>
+		<enum name="combo2">
+			<displayName>combo 2</displayName>
+			<values>
+				<value code="one" />
+				<value code="two" />
+			</values>
+		</enum>
+		<content name="content2">
+			<displayName>content 2</displayName>
+		</content>
+		<content name="contentSignature2">
+			<displayName>contentSignature 2</displayName>
+		</content>
+		<geometry name="geometry2">
+			<displayName>geometry 2</displayName>
+		</geometry>
+		<geometry name="geometryMap2">
+			<displayName>geometryMap 2</displayName>
+		</geometry>
+		<markup name="html2">
+			<displayName>html 2</displayName>
+		</markup>
+		<text name="password2">
+			<displayName>password 2</displayName>
+			<length>100</length>
+		</text>
+		<integer name="progressBar2">
+			<displayName>progressBar 2</displayName>
+		</integer>
+		<enum name="radio2">
+			<displayName>radio 2</displayName>
+			<values>
+				<value code="one" />
+				<value code="two" />
+			</values>
+		</enum>
+		<markup name="richText2">
+			<displayName>richText 2</displayName>
+		</markup>
+		<integer name="slider2">
+			<displayName>slider 2</displayName>
+		</integer>
+		<integer name="spinner2">
+			<displayName>spinner 2</displayName>
+		</integer>
+		<memo name="textArea2">
+			<displayName>textArea 2</displayName>
+		</memo>
+		<text name="textField2">
+			<displayName>textField 2</displayName>
+			<length>100</length>
+		</text>
+		<association name="lookupDescription2" type="aggregation" persistent="false" usage="view">
+			<displayName>lookupDescription 2</displayName>
+			<documentName>LookupDescription</documentName>
+		</association>
+		<association name="zoomIn2" type="aggregation" persistent="false" usage="view">
+			<displayName>zoomIn 2</displayName>
+			<documentName>LookupDescription</documentName>
+		</association>
+		<association name="zoomInContainer2" type="aggregation" persistent="false" usage="view">
+			<displayName>zoomInContainer 2</displayName>
+			<documentName>LookupDescription</documentName>
+		</association>
+		<association name="comparison2" type="aggregation" persistent="false" usage="view">
+			<displayName>comparison 2</displayName>
+			<documentName>LookupDescription</documentName>
+		</association>
+		<collection name="checkMembership2" type="aggregation" persistent="false" usage="view">
+			<displayName>checkMembership 2</displayName>
+			<domain>variant</domain>
+			<documentName>LookupDescription</documentName>
+			<minCardinality>0</minCardinality>
+		</collection>
+		<collection name="listMembership2" type="aggregation" persistent="false" usage="view">
+			<displayName>listMembership 2</displayName>
+			<domain>variant</domain>
+			<documentName>LookupDescription</documentName>
+			<minCardinality>0</minCardinality>
+		</collection>
+		<collection name="dataGrid2" type="aggregation" persistent="false" usage="view">
+			<displayName>dataGrid 2</displayName>
+			<documentName>ConditionsFixtureRow</documentName>
+			<minCardinality>0</minCardinality>
+		</collection>
+		<collection name="inlineGrid2" type="aggregation" persistent="false" usage="view">
+			<displayName>inlineGrid 2</displayName>
+			<documentName>ConditionsFixtureRow</documentName>
+			<minCardinality>0</minCardinality>
+		</collection>
+		<collection name="dataRepeater2" type="aggregation" persistent="false" usage="view">
+			<displayName>dataRepeater 2</displayName>
+			<documentName>ConditionsFixtureRow</documentName>
+			<minCardinality>0</minCardinality>
+		</collection>
+		<boolean name="checkBox3">
+			<displayName>checkBox 3</displayName>
+		</boolean>
+		<colour name="colourPicker3">
+			<displayName>colourPicker 3</displayName>
+		</colour>
+		<enum name="combo3">
+			<displayName>combo 3</displayName>
+			<values>
+				<value code="one" />
+				<value code="two" />
+			</values>
+		</enum>
+		<content name="content3">
+			<displayName>content 3</displayName>
+		</content>
+		<content name="contentSignature3">
+			<displayName>contentSignature 3</displayName>
+		</content>
+		<geometry name="geometry3">
+			<displayName>geometry 3</displayName>
+		</geometry>
+		<geometry name="geometryMap3">
+			<displayName>geometryMap 3</displayName>
+		</geometry>
+		<markup name="html3">
+			<displayName>html 3</displayName>
+		</markup>
+		<text name="password3">
+			<displayName>password 3</displayName>
+			<length>100</length>
+		</text>
+		<integer name="progressBar3">
+			<displayName>progressBar 3</displayName>
+		</integer>
+		<enum name="radio3">
+			<displayName>radio 3</displayName>
+			<values>
+				<value code="one" />
+				<value code="two" />
+			</values>
+		</enum>
+		<markup name="richText3">
+			<displayName>richText 3</displayName>
+		</markup>
+		<integer name="slider3">
+			<displayName>slider 3</displayName>
+		</integer>
+		<integer name="spinner3">
+			<displayName>spinner 3</displayName>
+		</integer>
+		<memo name="textArea3">
+			<displayName>textArea 3</displayName>
+		</memo>
+		<text name="textField3">
+			<displayName>textField 3</displayName>
+			<length>100</length>
+		</text>
+		<association name="lookupDescription3" type="aggregation" persistent="false" usage="view">
+			<displayName>lookupDescription 3</displayName>
+			<documentName>LookupDescription</documentName>
+		</association>
+		<association name="zoomIn3" type="aggregation" persistent="false" usage="view">
+			<displayName>zoomIn 3</displayName>
+			<documentName>LookupDescription</documentName>
+		</association>
+		<association name="zoomInContainer3" type="aggregation" persistent="false" usage="view">
+			<displayName>zoomInContainer 3</displayName>
+			<documentName>LookupDescription</documentName>
+		</association>
+		<association name="comparison3" type="aggregation" persistent="false" usage="view">
+			<displayName>comparison 3</displayName>
+			<documentName>LookupDescription</documentName>
+		</association>
+		<collection name="checkMembership3" type="aggregation" persistent="false" usage="view">
+			<displayName>checkMembership 3</displayName>
+			<domain>variant</domain>
+			<documentName>LookupDescription</documentName>
+			<minCardinality>0</minCardinality>
+		</collection>
+		<collection name="listMembership3" type="aggregation" persistent="false" usage="view">
+			<displayName>listMembership 3</displayName>
+			<domain>variant</domain>
+			<documentName>LookupDescription</documentName>
+			<minCardinality>0</minCardinality>
+		</collection>
+		<collection name="dataGrid3" type="aggregation" persistent="false" usage="view">
+			<displayName>dataGrid 3</displayName>
+			<documentName>ConditionsFixtureRow</documentName>
+			<minCardinality>0</minCardinality>
+		</collection>
+		<collection name="inlineGrid3" type="aggregation" persistent="false" usage="view">
+			<displayName>inlineGrid 3</displayName>
+			<documentName>ConditionsFixtureRow</documentName>
+			<minCardinality>0</minCardinality>
+		</collection>
+		<collection name="dataRepeater3" type="aggregation" persistent="false" usage="view">
+			<displayName>dataRepeater 3</displayName>
+			<documentName>ConditionsFixtureRow</documentName>
+			<minCardinality>0</minCardinality>
+		</collection>
+		<boolean name="checkBox4">
+			<displayName>checkBox 4</displayName>
+		</boolean>
+		<colour name="colourPicker4">
+			<displayName>colourPicker 4</displayName>
+		</colour>
+		<enum name="combo4">
+			<displayName>combo 4</displayName>
+			<values>
+				<value code="one" />
+				<value code="two" />
+			</values>
+		</enum>
+		<content name="content4">
+			<displayName>content 4</displayName>
+		</content>
+		<content name="contentSignature4">
+			<displayName>contentSignature 4</displayName>
+		</content>
+		<geometry name="geometry4">
+			<displayName>geometry 4</displayName>
+		</geometry>
+		<geometry name="geometryMap4">
+			<displayName>geometryMap 4</displayName>
+		</geometry>
+		<markup name="html4">
+			<displayName>html 4</displayName>
+		</markup>
+		<text name="password4">
+			<displayName>password 4</displayName>
+			<length>100</length>
+		</text>
+		<integer name="progressBar4">
+			<displayName>progressBar 4</displayName>
+		</integer>
+		<enum name="radio4">
+			<displayName>radio 4</displayName>
+			<values>
+				<value code="one" />
+				<value code="two" />
+			</values>
+		</enum>
+		<markup name="richText4">
+			<displayName>richText 4</displayName>
+		</markup>
+		<integer name="slider4">
+			<displayName>slider 4</displayName>
+		</integer>
+		<integer name="spinner4">
+			<displayName>spinner 4</displayName>
+		</integer>
+		<memo name="textArea4">
+			<displayName>textArea 4</displayName>
+		</memo>
+		<text name="textField4">
+			<displayName>textField 4</displayName>
+			<length>100</length>
+		</text>
+		<association name="lookupDescription4" type="aggregation" persistent="false" usage="view">
+			<displayName>lookupDescription 4</displayName>
+			<documentName>LookupDescription</documentName>
+		</association>
+		<association name="zoomIn4" type="aggregation" persistent="false" usage="view">
+			<displayName>zoomIn 4</displayName>
+			<documentName>LookupDescription</documentName>
+		</association>
+		<association name="zoomInContainer4" type="aggregation" persistent="false" usage="view">
+			<displayName>zoomInContainer 4</displayName>
+			<documentName>LookupDescription</documentName>
+		</association>
+		<association name="comparison4" type="aggregation" persistent="false" usage="view">
+			<displayName>comparison 4</displayName>
+			<documentName>LookupDescription</documentName>
+		</association>
+		<collection name="checkMembership4" type="aggregation" persistent="false" usage="view">
+			<displayName>checkMembership 4</displayName>
+			<domain>variant</domain>
+			<documentName>LookupDescription</documentName>
+			<minCardinality>0</minCardinality>
+		</collection>
+		<collection name="listMembership4" type="aggregation" persistent="false" usage="view">
+			<displayName>listMembership 4</displayName>
+			<domain>variant</domain>
+			<documentName>LookupDescription</documentName>
+			<minCardinality>0</minCardinality>
+		</collection>
+		<collection name="dataGrid4" type="aggregation" persistent="false" usage="view">
+			<displayName>dataGrid 4</displayName>
+			<documentName>ConditionsFixtureRow</documentName>
+			<minCardinality>0</minCardinality>
+		</collection>
+		<collection name="inlineGrid4" type="aggregation" persistent="false" usage="view">
+			<displayName>inlineGrid 4</displayName>
+			<documentName>ConditionsFixtureRow</documentName>
+			<minCardinality>0</minCardinality>
+		</collection>
+		<collection name="dataRepeater4" type="aggregation" persistent="false" usage="view">
+			<displayName>dataRepeater 4</displayName>
+			<documentName>ConditionsFixtureRow</documentName>
+			<minCardinality>0</minCardinality>
+		</collection>
+	</attributes>
+	<conditions>
+		<condition name="shown">
+			<description>Show is set; a Java expression.</description>
+			<expression>
+				<![CDATA[
+					Boolean.TRUE.equals(getShow())
+				]]>
+			</expression>
+		</condition>
+		<condition name="shownByExpression">
+			<description>Show is set; a Skyve expression.</description>
+			<expression>
+				<![CDATA[
+					{el:bean.show}
+				]]>
+			</expression>
+		</condition>
+		<condition name="allowed">
+			<description>Allow is set; a Java expression.</description>
+			<expression>
+				<![CDATA[
+					Boolean.TRUE.equals(getAllow())
+				]]>
+			</expression>
+		</condition>
+		<condition name="allowedByExpression">
+			<description>Allow is set; a Skyve expression.</description>
+			<expression>
+				<![CDATA[
+					{el:bean.allow}
+				]]>
+			</expression>
+		</condition>
+	</conditions>
+</document>

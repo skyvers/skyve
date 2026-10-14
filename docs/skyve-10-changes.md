@@ -11,6 +11,9 @@ These notes collect release-ready framework changes introduced for Skyve 10.
   - Behaviour change: in PrimeFaces, the `disabled` condition of a `link` to an action
     inside a `dataGrid` or `dataRepeater` is now evaluated against the row, as its
     `invisible` condition already was. It was evaluated against the view's bean.
+  - Behaviour change: `Bean.evaluateCondition("notX")` is now true when document condition
+    `x` has a Skyve expression that yields `null`, as the generated `isNotX()` is.
+    It was false, as `x` is, so neither sense was true.
 - [Lucene Content Identifiers and Garbage Collection](#lucene-content-identifiers-and-garbage-collection)
 - [Scheduled Backups and Azure Copies](#scheduled-backups-and-azure-copies)
 - [Custom Property Order and Fluent Builders](#custom-property-order-and-fluent-builders)

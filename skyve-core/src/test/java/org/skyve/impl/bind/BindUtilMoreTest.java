@@ -609,6 +609,33 @@ class BindUtilMoreTest {
 	}
 
 	@Test
+	void evaluateConditionWithSkyveExpressionDocumentConditionYieldingNullIsFalseAndItsNegationIsTrue() {
+		AbstractPersistence persistence = mock(AbstractPersistence.class,
+				Mockito.withSettings().defaultAnswer(Mockito.CALLS_REAL_METHODS));
+		User user = mock(User.class);
+		Customer customer = mock(Customer.class);
+		Module module = mock(Module.class);
+		Document document = mock(Document.class);
+		Condition condish = mock(Condition.class);
+		when(user.getCustomer()).thenReturn(customer);
+		when(customer.getModule("mod")).thenReturn(module);
+		when(module.getDocument(customer, "Doc")).thenReturn(document);
+		when(document.getCondition("myFlag")).thenReturn(condish);
+		when(condish.getExpression()).thenReturn("{el:null}");
+		persistence.setUser(user);
+		persistence.setForThread();
+		try {
+			DynamicBean bean = new DynamicBean("mod", "Doc", new HashMap<>());
+			assertFalse(BindUtil.evaluateCondition(bean, "myFlag"));
+			// the negated sense is the complement, as the generated accessor isNotMyFlag() is
+			assertTrue(BindUtil.evaluateCondition(bean, "notMyFlag"));
+		}
+		finally {
+			clearPersistenceThreadLocal();
+		}
+	}
+
+	@Test
 	void evaluateConditionInlineExpressionReturnsItsValue() {
 		withMockedUser(() -> {
 			DynamicBean bean = new DynamicBean("mod", "Doc", new HashMap<>());

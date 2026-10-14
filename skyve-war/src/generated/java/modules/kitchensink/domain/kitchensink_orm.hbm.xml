@@ -11,6 +11,23 @@
 	<typedef name="TimeOnly" class="org.skyve.impl.domain.types.TimeOnlyUserType" />
 	<typedef name="Timestamp" class="org.skyve.impl.domain.types.TimestampUserType" />
 	<typedef name="Enum" class="org.skyve.impl.domain.types.EnumUserType" />
+	<class name="modules.kitchensink.domain.ConditionsFixtureNode" table="KS_ConditionsFixtureNode" entity-name="kitchensinkConditionsFixtureNode">
+		<id name="bizId" length="36" />
+		<version name="bizVersion" unsaved-value="null" />
+		<property name="bizLock" type="OptimisticLock" length="271" not-null="true" />
+		<property name="bizKey" length="1024" not-null="true" />
+		<property name="bizCustomer" length="50" not-null="true" />
+		<property name="bizFlagComment" length="1024" />
+		<property name="bizDataGroupId" length="36" />
+		<property name="bizUserId" length="36" not-null="true" />
+		<property name="bizParentId" length="36" />
+		<property name="text" length="100" />
+		<filter name="kitchensinkConditionsFixtureNodeNoneFilter" condition="1=0"/>
+		<filter name="kitchensinkConditionsFixtureNodeCustomerFilter" condition="bizCustomer=:customerParam"/>
+		<filter name="kitchensinkConditionsFixtureNodeDataGroupIdFilter" condition="bizDataGroupId=:dataGroupIdParam"/>
+		<filter name="kitchensinkConditionsFixtureNodeUserIdFilter" condition="bizUserId=:userIdParam"/>
+	</class>
+
 	<class name="modules.kitchensink.domain.ListAttributes" table="KS_ListAttributes" entity-name="kitchensinkListAttributes">
 		<id name="bizId" length="36" />
 		<version name="bizVersion" unsaved-value="null" />
@@ -106,6 +123,16 @@
 		<filter name="kitchensinkModelLookupRowUserIdFilter" condition="bizUserId=:userIdParam"/>
 	</class>
 
+	<filter-def name="kitchensinkConditionsFixtureNodeNoneFilter" />
+	<filter-def name="kitchensinkConditionsFixtureNodeCustomerFilter">
+		<filter-param name="customerParam" type="string"/>
+	</filter-def>
+	<filter-def name="kitchensinkConditionsFixtureNodeDataGroupIdFilter">
+		<filter-param name="dataGroupIdParam" type="string"/>
+	</filter-def>
+	<filter-def name="kitchensinkConditionsFixtureNodeUserIdFilter">
+		<filter-param name="userIdParam" type="string"/>
+	</filter-def>
 	<filter-def name="kitchensinkListAttributesNoneFilter" />
 	<filter-def name="kitchensinkListAttributesCustomerFilter">
 		<filter-param name="customerParam" type="string"/>

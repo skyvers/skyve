@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<view name="_conditions"
+		title="Conditions component"
+		xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd"
+		xmlns="http://www.skyve.org/xml/view"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<vbox border="true" borderTitle="component">
+		<label value="visible = shown" visible="shown" />
+		<label value="invisible = allowed" invisible="allowed" />
+		<label value="visible = show" visible="{show}" />
+		<label value="invisible = el:not bean.show" invisible="{el:not bean.show}" />
+		<label value="visible = el:bean.text eq 'mapped'" visible="{el:bean.text eq 'mapped'}" />
+		<label value="invisible = role:kitchensink.dev" invisible="{role:kitchensink.dev}" />
+	</vbox>
+</view>

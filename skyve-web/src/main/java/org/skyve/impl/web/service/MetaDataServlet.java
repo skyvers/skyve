@@ -1712,6 +1712,7 @@ public class MetaDataServlet extends HttpServlet {
 			@Override
 			public void renderContainerColumnContent(@Nonnull ContentUpload content) {
 				renderContent(content);
+				result.append(',');
 			}
 
 			/**
@@ -1850,6 +1851,9 @@ public class MetaDataServlet extends HttpServlet {
 				result.append('}');
 			}
 			
+			// whether a data grid's columns array is still open, as its event actions follow it
+			private boolean dataGridColumnsOpen = false;
+
 			/** {@inheritDoc} */
 			@Override
 			public void renderDataGrid(String title, DataGrid grid) {
@@ -1895,6 +1899,7 @@ public class MetaDataServlet extends HttpServlet {
 				}
 				processDecorated(grid);
 				result.append(",\"columns\":[");
+				dataGridColumnsOpen = true;
 			}
 
 			/** {@inheritDoc} */
@@ -2191,8 +2196,9 @@ public class MetaDataServlet extends HttpServlet {
 			/** {@inheritDoc} */
 			@Override
 			public void renderedDataGrid(String title, DataGrid grid) {
-				result.setLength(result.length() - 1); // remove last comma
+				result.setLength(result.length() - 1); // remove last comma, or the ']' of the last event actions
 				result.append("]},");
+				dataGridColumnsOpen = false;
 			}
 			
 			/** {@inheritDoc} */
@@ -2451,13 +2457,13 @@ public class MetaDataServlet extends HttpServlet {
 				result.append(",\"escapeMembersHeading\":").append(ViewRenderer.shouldEscape(membership.getEscapeMembersHeading()));
 				processSize(membership);
 				processDecorated(membership);
-				result.append("},");
 			}
-			
+
 			/** {@inheritDoc} */
 			@Override
 			public void renderedListMembership(String candidatesHeading, String membersHeading, ListMembership membership) {
-				// nothing to see here
+				// closed here as the changed actions are written into the object after it is rendered
+				result.append("},");
 			}
 			
 			/** {@inheritDoc} */
@@ -2967,10 +2973,15 @@ public class MetaDataServlet extends HttpServlet {
 				// handled in processFilterable()
 			}
 			
+			/**
+			 * Closes the columns array of a list grid or data grid before its event actions are written.
+			 * Each handler calls this; once the array is closed the last character is ']', so it is a no-op.
+			 */
 			private void postProcessListColumns() {
-				if (getCurrentListWidgetModel() != null) {
+				if ((getCurrentListWidgetModel() != null) || dataGridColumnsOpen) {
 					result.setLength(result.length() - 1); // ,
 					result.append(']');
+					dataGridColumnsOpen = false;
 				}
 			}
 			
@@ -3098,6 +3109,7 @@ public class MetaDataServlet extends HttpServlet {
 			/** {@inheritDoc} */
 			@Override
 			public void visitOnAddedEventHandler(Addable addable, boolean parentVisible, boolean parentEnabled) {
+				postProcessListColumns();
 				List<EventAction> actions = addable.getAddedActions();
 				if ((actions != null) && (! actions.isEmpty())) {
 					result.append(",\"addedActions\":[");
