@@ -2,31 +2,34 @@ package org.skyve.impl.web.faces.converters.decimal;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.skyve.domain.messages.ConversionException;
+import org.skyve.util.Util;
 
 import jakarta.faces.convert.ConverterException;
-public class Decimal10Test {
+
+class Decimal10Test {
+	private static final String EXPECTED_MESSAGE = Util.nullSafeI18n(ConversionException.DECIMAL_10_CONVERTER_KEY);
+
 	private Decimal10Converter converter;
 
-	@Before
-	public void before() {
+	@BeforeEach
+	void before() {
 		converter = new Decimal10Converter();
 	}
 
-	@Test(expected = ConverterException.class)
-	public void testGetAsObjectInvalidStringValue() {
-		// call the method under test
-		converter.getAsObject(null, null, "not a Decimal10");
-
-		fail("Should throw exception before this line.");
+	@Test
+	void testGetAsObjectInvalidStringValue() {
+		ConverterException e = assertThrows(ConverterException.class, () -> converter.getAsObject(null, null, "not a Decimal10"));
+		assertThat(e.getFacesMessage().getSummary(), is(EXPECTED_MESSAGE));
 	}
 
 	@Test
-	public void testGetAsObjectLargeValues() {
+	void testGetAsObjectLargeValues() {
 		for (String stringValue : new String[] {"9999999999999999999", "+9999999999999999999", "-9999999999999999999"}) {
 			org.skyve.domain.types.Decimal10 decimalValue = new org.skyve.domain.types.Decimal10(stringValue);
 			assertThat(converter.getAsObject(null, null, stringValue), is(decimalValue));
@@ -34,7 +37,7 @@ public class Decimal10Test {
 	}
 
 	@Test
-	public void testGetAsObjectValidValue() {
+	void testGetAsObjectValidValue() {
 		// setup the test data
 		org.skyve.domain.types.Decimal10 testValue = org.skyve.domain.types.Decimal10.ONE_HUNDRED;
 
@@ -43,7 +46,7 @@ public class Decimal10Test {
 	}
 
 	@Test
-	public void testGetAsString() {
+	void testGetAsString() {
 		// setup the test data
 		org.skyve.domain.types.Decimal10 testValue = org.skyve.domain.types.Decimal10.ONE_HUNDRED;
 
@@ -52,7 +55,7 @@ public class Decimal10Test {
 	}
 
 	@Test
-	public void testGetAsStringPrecisionValue() {
+	void testGetAsStringPrecisionValue() {
 		// setup the test data
 		java.lang.String stringValue = "99.9999999999";
 		org.skyve.domain.types.Decimal10 decimalValue = new org.skyve.domain.types.Decimal10(stringValue);
@@ -62,7 +65,7 @@ public class Decimal10Test {
 	}
 
 	@Test
-	public void testGetAsStringLargePrecisionValue() {
+	void testGetAsStringLargePrecisionValue() {
 		// setup the test data
 		java.lang.String stringValue = "+99.99999999999999999";
 		org.skyve.domain.types.Decimal10 decimalValue = new org.skyve.domain.types.Decimal10(stringValue);
@@ -72,7 +75,7 @@ public class Decimal10Test {
 	}
 
 	@Test
-	public void testGetAsStringLargePositiveValue() {
+	void testGetAsStringLargePositiveValue() {
 		// setup the test data
 		java.lang.String stringValue = "9999999999999999999";
 		org.skyve.domain.types.Decimal10 decimalValue = new org.skyve.domain.types.Decimal10("+" + stringValue);
@@ -82,7 +85,7 @@ public class Decimal10Test {
 	}
 
 	@Test
-	public void testGetAsStringLargeNegativeValue() {
+	void testGetAsStringLargeNegativeValue() {
 		// setup the test data
 		java.lang.String stringValue = "-9999999999999999999";
 		org.skyve.domain.types.Decimal10 decimalValue = new org.skyve.domain.types.Decimal10(stringValue);
@@ -92,12 +95,12 @@ public class Decimal10Test {
 	}
 
 	@Test
-	public void testGetAsObjectNullValue() {
+	void testGetAsObjectNullValue() {
 		assertNull(converter.getAsObject(null, null, null));
 	}
 
 	@Test
-	public void testGetAsStringNullValue() {
+	void testGetAsStringNullValue() {
 		assertThat(converter.getAsString(null, null, null), is(""));
 	}
 }

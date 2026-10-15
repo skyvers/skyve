@@ -193,6 +193,238 @@ class DecimalConvertersTest {
 		assertThrows(ConversionException.class, () -> converter.fromDisplayValue("notanumber"));
 	}
 
+	// ---- Decimal10Integer ----
+
+	@Test
+	void decimal10IntegerGetValueTypeIsDecimal10() {
+		assertThat(new Decimal10Integer().getValueType().getSimpleName(), is("Decimal10"));
+	}
+
+	@Test
+	void decimal10IntegerGetAttributeTypeIsDecimal10() {
+		assertThat(new Decimal10Integer().getAttributeType(), is(AttributeType.decimal10));
+	}
+
+	@Test
+	void decimal10IntegerGetFormatIsNull() {
+		assertThat(new Decimal10Integer().getFormat(), is(nullValue()));
+	}
+
+	@Test
+	void decimal10IntegerGetValidatorIsNull() {
+		assertThat(new Decimal10Integer().getValidator(), is(nullValue()));
+	}
+
+	@Test
+	void decimal10IntegerGetFormatPatternReturnsPattern() {
+		assertThat(new Decimal10Integer().getFormatPattern(), is("###,###,###,##0"));
+	}
+
+	@Test
+	void decimal10IntegerToDisplayValueRoundsToPattern() throws ConversionException {
+		String result = new Decimal10Integer().toDisplayValue(new Decimal10("1234.5678901234"));
+		assertThat(result, is("1,235"));
+	}
+
+	@Test
+	void decimal10IntegerFromDisplayValueReturnsDecimal10() throws ConversionException {
+		Decimal10 result = new Decimal10Integer().fromDisplayValue("1,234");
+		assertThat(result, is(new Decimal10("1234")));
+	}
+
+	@Test
+	void decimal10IntegerFromDisplayValueInvalidThrows() {
+		Decimal10Integer converter = new Decimal10Integer();
+		assertThrows(ConversionException.class, () -> converter.fromDisplayValue("notanumber"));
+	}
+
+	@Test
+	@SuppressWarnings("null")
+	void decimal10IntegerToDisplayValueNullThrows() {
+		Decimal10Integer converter = new Decimal10Integer();
+		assertThrows(ConversionException.class, () -> converter.toDisplayValue(null));
+	}
+
+	// ---- Decimal10OneDecimalPlace ----
+
+	@Test
+	void decimal10OneDecimalPlaceGetValueTypeIsDecimal10() {
+		assertThat(new Decimal10OneDecimalPlace().getValueType().getSimpleName(), is("Decimal10"));
+	}
+
+	@Test
+	void decimal10OneDecimalPlaceGetAttributeTypeIsDecimal10() {
+		assertThat(new Decimal10OneDecimalPlace().getAttributeType(), is(AttributeType.decimal10));
+	}
+
+	@Test
+	void decimal10OneDecimalPlaceGetFormatIsNull() {
+		assertThat(new Decimal10OneDecimalPlace().getFormat(), is(nullValue()));
+	}
+
+	@Test
+	void decimal10OneDecimalPlaceGetValidatorIsNull() {
+		assertThat(new Decimal10OneDecimalPlace().getValidator(), is(nullValue()));
+	}
+
+	@Test
+	void decimal10OneDecimalPlaceGetFormatPatternReturnsPattern() {
+		assertThat(new Decimal10OneDecimalPlace().getFormatPattern(), is("###,###,###,##0.0"));
+	}
+
+	@Test
+	void decimal10OneDecimalPlaceToDisplayValueRoundsToPattern() throws ConversionException {
+		String result = new Decimal10OneDecimalPlace().toDisplayValue(new Decimal10("1234.5678901234"));
+		assertThat(result, is("1,234.6"));
+	}
+
+	@Test
+	void decimal10OneDecimalPlaceFromDisplayValueReturnsDecimal10() throws ConversionException {
+		Decimal10 result = new Decimal10OneDecimalPlace().fromDisplayValue("1,234.5");
+		assertThat(result, is(new Decimal10("1234.5")));
+	}
+
+	@Test
+	void decimal10OneDecimalPlaceFromDisplayValueInvalidThrows() {
+		Decimal10OneDecimalPlace converter = new Decimal10OneDecimalPlace();
+		assertThrows(ConversionException.class, () -> converter.fromDisplayValue("notanumber"));
+	}
+
+	@Test
+	@SuppressWarnings("null")
+	void decimal10OneDecimalPlaceToDisplayValueNullThrows() {
+		Decimal10OneDecimalPlace converter = new Decimal10OneDecimalPlace();
+		assertThrows(ConversionException.class, () -> converter.toDisplayValue(null));
+	}
+
+	// ---- Decimal10IntegerPercentage ----
+
+	@Test
+	void decimal10IntegerPercentageGetValueTypeIsDecimal10() {
+		assertThat(new Decimal10IntegerPercentage().getValueType().getSimpleName(), is("Decimal10"));
+	}
+
+	@Test
+	void decimal10IntegerPercentageGetAttributeTypeIsDecimal10() {
+		assertThat(new Decimal10IntegerPercentage().getAttributeType(), is(AttributeType.decimal10));
+	}
+
+	@Test
+	void decimal10IntegerPercentageGetFormatIsNull() {
+		assertThat(new Decimal10IntegerPercentage().getFormat(), is(nullValue()));
+	}
+
+	@Test
+	void decimal10IntegerPercentageGetValidatorIsNull() {
+		assertThat(new Decimal10IntegerPercentage().getValidator(), is(nullValue()));
+	}
+
+	@Test
+	void decimal10IntegerPercentageGetFormatPatternReturnsPattern() {
+		assertThat(new Decimal10IntegerPercentage().getFormatPattern(), is("###,###,###,##0"));
+	}
+
+	@Test
+	void decimal10IntegerPercentageToDisplayValueAddsPercent() throws ConversionException {
+		String result = new Decimal10IntegerPercentage().toDisplayValue(new Decimal10("0.5"));
+		assertThat(result, is("50%"));
+	}
+
+	@Test
+	void decimal10IntegerPercentageToDisplayValueRoundsHalfUp() throws ConversionException {
+		String result = new Decimal10IntegerPercentage().toDisplayValue(new Decimal10("0.1250000000"));
+		assertThat(result, is("13%"));
+	}
+
+	@Test
+	void decimal10IntegerPercentageFromDisplayValueStripsPercent() throws ConversionException {
+		Decimal10 result = new Decimal10IntegerPercentage().fromDisplayValue("50%");
+		assertThat(result, is(new Decimal10("0.5")));
+	}
+
+	@Test
+	void decimal10IntegerPercentageFromDisplayValueRoundsToWholePercentage() throws ConversionException {
+		Decimal10 result = new Decimal10IntegerPercentage().fromDisplayValue("12.5%");
+		assertThat(result, is(new Decimal10("0.13")));
+	}
+
+	@Test
+	void decimal10IntegerPercentageFromDisplayValueInvalidThrows() {
+		Decimal10IntegerPercentage converter = new Decimal10IntegerPercentage();
+		assertThrows(ConversionException.class, () -> converter.fromDisplayValue("notanumber%"));
+	}
+
+	@Test
+	@SuppressWarnings("null")
+	void decimal10IntegerPercentageToDisplayValueNullThrows() {
+		Decimal10IntegerPercentage converter = new Decimal10IntegerPercentage();
+		assertThrows(ConversionException.class, () -> converter.toDisplayValue(null));
+	}
+
+	// ---- Decimal10TwoDecimalPlacesPercentage ----
+
+	@Test
+	void decimal10TwoDecimalPlacesPercentageGetValueTypeIsDecimal10() {
+		assertThat(new Decimal10TwoDecimalPlacesPercentage().getValueType().getSimpleName(), is("Decimal10"));
+	}
+
+	@Test
+	void decimal10TwoDecimalPlacesPercentageGetAttributeTypeIsDecimal10() {
+		assertThat(new Decimal10TwoDecimalPlacesPercentage().getAttributeType(), is(AttributeType.decimal10));
+	}
+
+	@Test
+	void decimal10TwoDecimalPlacesPercentageGetFormatIsNull() {
+		assertThat(new Decimal10TwoDecimalPlacesPercentage().getFormat(), is(nullValue()));
+	}
+
+	@Test
+	void decimal10TwoDecimalPlacesPercentageGetValidatorIsNull() {
+		assertThat(new Decimal10TwoDecimalPlacesPercentage().getValidator(), is(nullValue()));
+	}
+
+	@Test
+	void decimal10TwoDecimalPlacesPercentageGetFormatPatternReturnsPattern() {
+		assertThat(new Decimal10TwoDecimalPlacesPercentage().getFormatPattern(), is("###,###,###,##0.00"));
+	}
+
+	@Test
+	void decimal10TwoDecimalPlacesPercentageToDisplayValueAddsPercent() throws ConversionException {
+		String result = new Decimal10TwoDecimalPlacesPercentage().toDisplayValue(new Decimal10("0.5"));
+		assertThat(result, is("50.00%"));
+	}
+
+	@Test
+	void decimal10TwoDecimalPlacesPercentageToDisplayValueRoundsFractionalPercentage() throws ConversionException {
+		String result = new Decimal10TwoDecimalPlacesPercentage().toDisplayValue(new Decimal10("0.1250000000"));
+		assertThat(result, is("12.50%"));
+	}
+
+	@Test
+	void decimal10TwoDecimalPlacesPercentageFromDisplayValueStripsPercent() throws ConversionException {
+		Decimal10 result = new Decimal10TwoDecimalPlacesPercentage().fromDisplayValue("50.00%");
+		assertThat(result, is(new Decimal10("0.5")));
+	}
+
+	@Test
+	void decimal10TwoDecimalPlacesPercentageFromDisplayValueKeepsFractionalPercentage() throws ConversionException {
+		Decimal10 result = new Decimal10TwoDecimalPlacesPercentage().fromDisplayValue("12.5%");
+		assertThat(result, is(new Decimal10("0.125")));
+	}
+
+	@Test
+	void decimal10TwoDecimalPlacesPercentageFromDisplayValueInvalidThrows() {
+		Decimal10TwoDecimalPlacesPercentage converter = new Decimal10TwoDecimalPlacesPercentage();
+		assertThrows(ConversionException.class, () -> converter.fromDisplayValue("notanumber%"));
+	}
+
+	@Test
+	@SuppressWarnings("null")
+	void decimal10TwoDecimalPlacesPercentageToDisplayValueNullThrows() {
+		Decimal10TwoDecimalPlacesPercentage converter = new Decimal10TwoDecimalPlacesPercentage();
+		assertThrows(ConversionException.class, () -> converter.toDisplayValue(null));
+	}
+
 	// ---- Decimal2Integer ----
 
 	@Test

@@ -124,8 +124,24 @@
 		<converter-class>org.skyve.impl.web.faces.converters.decimal.Decimal10Converter</converter-class>
 	</converter>
 	<converter>
+		<converter-id>Decimal10Integer</converter-id>
+		<converter-class>org.skyve.impl.web.faces.converters.decimal.Decimal10Integer</converter-class>
+	</converter>
+	<converter>
+		<converter-id>Decimal10IntegerPercentage</converter-id>
+		<converter-class>org.skyve.impl.web.faces.converters.decimal.Decimal10IntegerPercentage</converter-class>
+	</converter>
+	<converter>
+		<converter-id>Decimal10OneDecimalPlace</converter-id>
+		<converter-class>org.skyve.impl.web.faces.converters.decimal.Decimal10OneDecimalPlace</converter-class>
+	</converter>
+	<converter>
 		<converter-id>Decimal10TwoDecimalPlaces</converter-id>
 		<converter-class>org.skyve.impl.web.faces.converters.decimal.Decimal10TwoDecimalPlaces</converter-class>
+	</converter>
+	<converter>
+		<converter-id>Decimal10TwoDecimalPlacesPercentage</converter-id>
+		<converter-class>org.skyve.impl.web.faces.converters.decimal.Decimal10TwoDecimalPlacesPercentage</converter-class>
 	</converter>
 	<converter>
 		<converter-for-class>org.skyve.domain.types.Decimal2</converter-for-class>

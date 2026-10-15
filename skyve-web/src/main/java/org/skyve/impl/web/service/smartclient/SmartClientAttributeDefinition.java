@@ -12,7 +12,11 @@ import org.skyve.domain.Bean;
 import org.skyve.domain.types.Decimal;
 import org.skyve.domain.types.converters.Converter;
 import org.skyve.domain.types.converters.Format.TextCase;
+import org.skyve.domain.types.converters.decimal.Decimal10Integer;
+import org.skyve.domain.types.converters.decimal.Decimal10IntegerPercentage;
+import org.skyve.domain.types.converters.decimal.Decimal10OneDecimalPlace;
 import org.skyve.domain.types.converters.decimal.Decimal10TwoDecimalPlaces;
+import org.skyve.domain.types.converters.decimal.Decimal10TwoDecimalPlacesPercentage;
 import org.skyve.domain.types.converters.decimal.Decimal2Integer;
 import org.skyve.domain.types.converters.decimal.Decimal2IntegerPercentage;
 import org.skyve.domain.types.converters.decimal.Decimal2OneDecimalPlace;
@@ -22,6 +26,7 @@ import org.skyve.domain.types.converters.decimal.Decimal5OneDecimalPlace;
 import org.skyve.domain.types.converters.decimal.Decimal5TimeDuration;
 import org.skyve.domain.types.converters.decimal.Decimal5TwoDecimalPlaces;
 import org.skyve.domain.types.converters.decimal.Decimal5TwoDecimalPlacesPercentage;
+import org.skyve.domain.types.converters.decimal.currency.Decimal10DollarsAndCents;
 import org.skyve.domain.types.converters.decimal.currency.Decimal2DollarsAndCents;
 import org.skyve.domain.types.converters.decimal.currency.Decimal2DollarsAndCentsAbsolute;
 import org.skyve.domain.types.converters.decimal.currency.Decimal5DollarsAndCents;
@@ -395,7 +400,22 @@ abstract class SmartClientAttributeDefinition {
 				break;
 			case decimal10:
 				type = "bizDecimal10";
-				if (converter instanceof Decimal10TwoDecimalPlaces) {
+				if (converter instanceof Decimal10DollarsAndCents) {
+					type = "bizDollarsAndCents";
+				}
+				else if (converter instanceof Decimal10Integer) {
+					type = "bizDecimal0";
+				}
+				else if (converter instanceof Decimal10IntegerPercentage) {
+					type = "bizIntegerPercentage";
+				}
+				else if (converter instanceof Decimal10OneDecimalPlace) {
+					type = "bizDecimal1";
+				}
+				else if (converter instanceof Decimal10TwoDecimalPlacesPercentage) {
+					type = "bizTwoDecimalPlacesPercentage";
+				}
+				else if (converter instanceof Decimal10TwoDecimalPlaces) {
 					type = "bizDecimal2";
 				}
 				break;

@@ -19,7 +19,11 @@ import org.skyve.domain.types.converters.datetime.MM_DD_YYYY_HH_MI;
 import org.skyve.domain.types.converters.datetime.YYYY_MM_DD_HH24_MI;
 import org.skyve.domain.types.converters.datetime.YYYY_MM_DD_HH_MI;
 import org.skyve.domain.types.converters.decimal.Decimal10Converter;
+import org.skyve.domain.types.converters.decimal.Decimal10Integer;
+import org.skyve.domain.types.converters.decimal.Decimal10IntegerPercentage;
+import org.skyve.domain.types.converters.decimal.Decimal10OneDecimalPlace;
 import org.skyve.domain.types.converters.decimal.Decimal10TwoDecimalPlaces;
+import org.skyve.domain.types.converters.decimal.Decimal10TwoDecimalPlacesPercentage;
 import org.skyve.domain.types.converters.decimal.Decimal2Converter;
 import org.skyve.domain.types.converters.decimal.Decimal2Integer;
 import org.skyve.domain.types.converters.decimal.Decimal2IntegerPercentage;
@@ -195,10 +199,30 @@ public class ConversionException extends DomainException implements MessageExcep
 	 */
 	public static final String DECIMAL_10_CONVERTER_KEY = I18N_DECIMAL_PREFIX + Decimal10Converter.class.getSimpleName();
 	/**
+	 * Executes Decimal10Integer.class.getSimpleName.
+	 * @return the result
+	 */
+	public static final String DECIMAL_10_INTEGER_KEY = I18N_DECIMAL_PREFIX + Decimal10Integer.class.getSimpleName();
+	/**
+	 * Executes Decimal10IntegerPercentage.class.getSimpleName.
+	 * @return the result
+	 */
+	public static final String DECIMAL_10_INTEGER_PERCENTAGE_KEY = I18N_DECIMAL_PREFIX + Decimal10IntegerPercentage.class.getSimpleName();
+	/**
+	 * Executes Decimal10OneDecimalPlace.class.getSimpleName.
+	 * @return the result
+	 */
+	public static final String DECIMAL_10_ONE_DECIMAL_PLACE_KEY = I18N_DECIMAL_PREFIX + Decimal10OneDecimalPlace.class.getSimpleName();
+	/**
 	 * Executes Decimal10TwoDecimalPlaces.class.getSimpleName.
 	 * @return the result
 	 */
 	public static final String DECIMAL_10_TWO_DECIMAL_PLACES_KEY = I18N_DECIMAL_PREFIX + Decimal10TwoDecimalPlaces.class.getSimpleName();
+	/**
+	 * Executes Decimal10TwoDecimalPlacesPercentage.class.getSimpleName.
+	 * @return the result
+	 */
+	public static final String DECIMAL_10_TWO_DECIMAL_PLACES_PERCENTAGE_KEY = I18N_DECIMAL_PREFIX + Decimal10TwoDecimalPlacesPercentage.class.getSimpleName();
 	/**
 	 * Executes Decimal2Converter.class.getSimpleName.
 	 * @return the result

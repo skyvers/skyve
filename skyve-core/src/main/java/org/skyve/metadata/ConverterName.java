@@ -22,7 +22,11 @@ import org.skyve.domain.types.converters.datetime.MM_DD_YYYY_HH24_MI;
 import org.skyve.domain.types.converters.datetime.MM_DD_YYYY_HH_MI;
 import org.skyve.domain.types.converters.datetime.YYYY_MM_DD_HH24_MI;
 import org.skyve.domain.types.converters.datetime.YYYY_MM_DD_HH_MI;
+import org.skyve.domain.types.converters.decimal.Decimal10Integer;
+import org.skyve.domain.types.converters.decimal.Decimal10IntegerPercentage;
+import org.skyve.domain.types.converters.decimal.Decimal10OneDecimalPlace;
 import org.skyve.domain.types.converters.decimal.Decimal10TwoDecimalPlaces;
+import org.skyve.domain.types.converters.decimal.Decimal10TwoDecimalPlacesPercentage;
 import org.skyve.domain.types.converters.decimal.Decimal2Integer;
 import org.skyve.domain.types.converters.decimal.Decimal2IntegerPercentage;
 import org.skyve.domain.types.converters.decimal.Decimal2OneDecimalPlace;
@@ -32,6 +36,7 @@ import org.skyve.domain.types.converters.decimal.Decimal5OneDecimalPlace;
 import org.skyve.domain.types.converters.decimal.Decimal5TimeDuration;
 import org.skyve.domain.types.converters.decimal.Decimal5TwoDecimalPlaces;
 import org.skyve.domain.types.converters.decimal.Decimal5TwoDecimalPlacesPercentage;
+import org.skyve.domain.types.converters.decimal.currency.Decimal10DollarsAndCents;
 import org.skyve.domain.types.converters.decimal.currency.Decimal2DollarsAndCents;
 import org.skyve.domain.types.converters.decimal.currency.Decimal2DollarsAndCentsAbsolute;
 import org.skyve.domain.types.converters.decimal.currency.Decimal5DollarsAndCents;
@@ -82,7 +87,12 @@ public enum ConverterName {
 	YYYY_MM_DD_HH_MI(new YYYY_MM_DD_HH_MI()), 
 	YYYY_MM_DD_HH24_MI(new YYYY_MM_DD_HH24_MI()),
 	YYYY_MM_DD_DateTime(new org.skyve.domain.types.converters.datetime.YYYY_MM_DD()),
+	Decimal10Integer(new Decimal10Integer()),
+	Decimal10IntegerPercentage(new Decimal10IntegerPercentage()),
+	Decimal10DollarsAndCents(new Decimal10DollarsAndCents()),
+	Decimal10OneDecimalPlace(new Decimal10OneDecimalPlace()),
 	Decimal10TwoDecimalPlaces(new Decimal10TwoDecimalPlaces()),
+	Decimal10TwoDecimalPlacesPercentage(new Decimal10TwoDecimalPlacesPercentage()),
 	Decimal2DollarsAndCents(new Decimal2DollarsAndCents()),
 	Decimal2DollarsAndCentsAbsolute(new Decimal2DollarsAndCentsAbsolute()),
 	Decimal2Integer(new Decimal2Integer()),

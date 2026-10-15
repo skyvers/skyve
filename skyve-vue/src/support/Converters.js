@@ -128,7 +128,12 @@ const Converters = {
     HH24_MI_SS: _createDateFormatter('HH:mm:ss'),  // 23:59:12
 
     // decimal10
+    Decimal10Integer: COMMON.zeroDecimalPlaces,  // 9,510
+    Decimal10IntegerPercentage: _createNumberFormatter({ scale: 0, style: 'percent' }),  // 951,001%
+    Decimal10DollarsAndCents: COMMON.twoDecimalPlaces,  // 9,510.01
+    Decimal10OneDecimalPlace: COMMON.oneDecimalPlaces,  // 9,510.0
     Decimal10TwoDecimalPlaces: COMMON.twoDecimalPlaces,  // 10.01
+    Decimal10TwoDecimalPlacesPercentage: _createNumberFormatter({ scale: 2, style: 'percent' }),  // 951,001.23%
 
     // decimal5
     Decimal5Integer: COMMON.zeroDecimalPlaces,  // 9,510
@@ -145,7 +150,6 @@ const Converters = {
     Decimal2Integer: COMMON.zeroDecimalPlaces, // 9,510
     Decimal2IntegerPercentage: _createNumberFormatter({ scale: 0, style: 'percent' }), // 951,001%
     Decimal2OneDecimalPlace: COMMON.oneDecimalPlaces, // 9,510.0
-    Decimal2TwoDecimalPlacesPercentage: _createNumberFormatter({ scale: 2, style: 'percent' }), // 951,001.00%
 
     // integer
     SimplePercentage, // 14999%

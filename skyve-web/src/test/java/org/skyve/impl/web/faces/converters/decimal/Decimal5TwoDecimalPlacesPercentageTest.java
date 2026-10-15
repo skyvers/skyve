@@ -3,52 +3,69 @@ package org.skyve.impl.web.faces.converters.decimal;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import org.junit.Before;
-import org.junit.Test;
+import java.text.DecimalFormatSymbols;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.skyve.domain.messages.ConversionException;
+import org.skyve.util.Util;
 
 import jakarta.faces.convert.ConverterException;
-public class Decimal5TwoDecimalPlacesPercentageTest {
+
+class Decimal5TwoDecimalPlacesPercentageTest {
+	private static final String EXPECTED_MESSAGE = Util.nullSafeI18n(ConversionException.DECIMAL_5_TWO_DECIMAL_PLACES_PERCENTAGE_KEY);
+
 	private Decimal5TwoDecimalPlacesPercentage converter;
 
-	@Before
-	public void before() {
+	@BeforeEach
+	void before() {
 		converter = new Decimal5TwoDecimalPlacesPercentage();
 	}
 
 	@Test
-	public void testGetAsObjectNullValue() {
+	void testGetAsObjectNullValue() {
 		assertThat(converter.getAsObject(null, null, null), nullValue());
 	}
 
 	@Test
-	public void testGetAsObjectEmptyValue() {
+	void testGetAsObjectEmptyValue() {
 		assertThat(converter.getAsObject(null, null, ""), nullValue());
 	}
 
-	@Test(expected = ConverterException.class)
-	public void testGetAsObjectInvalidValue() {
-		converter.getAsObject(null, null, "not a decimal");
-		fail("Should throw exception before this line.");
+	@Test
+	void testGetAsObjectInvalidValue() {
+		ConverterException e = assertThrows(ConverterException.class, () -> converter.getAsObject(null, null, "not a decimal"));
+		assertThat(e.getFacesMessage().getSummary(), is(EXPECTED_MESSAGE));
 	}
 
 	@Test
-	public void testGetAsObjectValidValue() {
-		// "50%" represents 50% i.e. 0.50 as a Decimal5
-		org.skyve.domain.types.Decimal5 result = converter.getAsObject(null, null, "50%");
-		assertThat(converter.getAsString(null, null, result), is("50.00%"));
+	void testGetAsObjectValidValue() {
+		assertThat(converter.getAsObject(null, null, "50%"), is(new org.skyve.domain.types.Decimal5("0.5")));
 	}
 
 	@Test
-	public void testGetAsStringNullValue() {
+	void testGetAsStringNullValue() {
 		assertThat(converter.getAsString(null, null, null), is(""));
 	}
 
 	@Test
-	public void testGetAsStringValidValue() {
+	void testGetAsStringValidValue() {
 		// 0.5 Decimal5 → 50.00%
 		org.skyve.domain.types.Decimal5 value = new org.skyve.domain.types.Decimal5("0.5");
 		assertThat(converter.getAsString(null, null, value), is("50.00%"));
+	}
+
+	@Test
+	void testGetAsObjectNotANumber() {
+		String nan = DecimalFormatSymbols.getInstance().getNaN();
+		ConverterException e = assertThrows(ConverterException.class, () -> converter.getAsObject(null, null, nan));
+		assertThat(e.getFacesMessage().getSummary(), is(EXPECTED_MESSAGE));
+	}
+
+	@Test
+	void testGetAsObjectRoundsHalfUpToTheDisplayedPrecision() {
+		assertThat(converter.getAsObject(null, null, "12.345%"), is(new org.skyve.domain.types.Decimal5("0.1235")));
 	}
 }
