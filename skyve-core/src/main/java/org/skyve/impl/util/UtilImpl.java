@@ -341,6 +341,11 @@ public class UtilImpl {
 	public static boolean SMTP_TEST_BOGUS_SEND = false;
 	// used to switch whether MailLog stores a masked plain-text body excerpt - false to always redact
 	public static boolean SMTP_LOG_BODY_EXCERPT = false;
+	// used to switch whether MailLog stores the mail attachments as a zip - false to store attachment file names only
+	public static boolean SMTP_LOG_ATTACHMENTS = false;
+	// the maximum total size in bytes of the attachments stored against a single MailLog
+	public static final long DEFAULT_SMTP_LOG_ATTACHMENTS_MAX_BYTES = 5242880L;
+	public static long SMTP_LOG_ATTACHMENTS_MAX_BYTES = DEFAULT_SMTP_LOG_ATTACHMENTS_MAX_BYTES;
 
 	// Map Keys
 	@SuppressWarnings("java:S115") // Suppress "Constant names should comply with a naming convention" as these are not constants but enum values
@@ -888,6 +893,8 @@ public class UtilImpl {
     	SMTP_TEST_RECIPIENT = null;
     	SMTP_TEST_BOGUS_SEND = false;
     	SMTP_LOG_BODY_EXCERPT = false;
+    	SMTP_LOG_ATTACHMENTS = false;
+    	SMTP_LOG_ATTACHMENTS_MAX_BYTES = DEFAULT_SMTP_LOG_ATTACHMENTS_MAX_BYTES;
 
     	MAP_TYPE = MapType.leaflet;
     	MAP_LAYERS = null;

@@ -17,6 +17,7 @@ These notes collect release-ready framework changes introduced for Skyve 10.
 - [Lucene Content Identifiers and Garbage Collection](#lucene-content-identifiers-and-garbage-collection)
 - [Scheduled Backups and Azure Copies](#scheduled-backups-and-azure-copies)
 - [Custom Property Order and Fluent Builders](#custom-property-order-and-fluent-builders)
+- [Mail Log Body Excerpts and Attachments](#mail-log-body-excerpts-and-attachments)
 - Decimal10 converters `Decimal10Integer`, `Decimal10IntegerPercentage`, `Decimal10OneDecimalPlace` and `Decimal10TwoDecimalPlacesPercentage` are new, and `Decimal10DollarsAndCents` can now be named in metadata.
 
 ## Model-backed Lookup Descriptions
@@ -158,3 +159,20 @@ declaration order instead of being sorted by key.
   For a module role this includes the properties on its document privileges, action
   privileges, content permissions and content restrictions.
 - A `<property>` with no `key` is ignored when metadata is loaded.
+
+## Mail Log Body Excerpts and Attachments
+
+The Mail Log can now optionally store more of each outbound mail. Both settings are off by
+default, live in the `smtp` stanza of the JSON configuration, and can be changed at runtime
+from the Startup page, which writes them to the override configuration.
+
+- `smtp.logBodyExcerpt`: when `true`, `MailLog.bodyExcerpt` stores the first 500 characters
+  of the plain-text body with verification and one-time codes masked, instead of `[REDACTED]`.
+  `bodyExcerpt` is now 500 characters long (was 255); DDL sync widens the column.
+- `smtp.logAttachments` and `smtp.logAttachmentsMaxBytes`: when `true`, the attachments sent
+  are stored as a zip in the new `MailLog.attachments` content attribute, up to the given total
+  size (default 5 MB). The zip is not text-indexed. It is kept until the Mail Log is hard
+  deleted after archiving, when content garbage collection removes it, so archived Mail Logs
+  do not keep their attachments.
+- `org.skyve.domain.app.admin.MailLog` gains `getAttachments()` and `setAttachments(String)`.
+  Re-assemble the admin module so its generated `MailLog` implements them.

@@ -94,6 +94,12 @@ public abstract class Startup extends AbstractTransientBean {
 	public static final String mailTestRecipientPropertyName = "mailTestRecipient";
 
 	/** @hidden */
+	public static final String mailLogAttachmentsPropertyName = "mailLogAttachments";
+
+	/** @hidden */
+	public static final String mailLogAttachmentsMaxBytesPropertyName = "mailLogAttachmentsMaxBytes";
+
+	/** @hidden */
 	public static final String mailLogBodyExcerptPropertyName = "mailLogBodyExcerpt";
 
 	/** @hidden */
@@ -568,6 +574,20 @@ public abstract class Startup extends AbstractTransientBean {
 	 * All emails will only be sent to this email address if specified
 	 **/
 	private String mailTestRecipient;
+
+	/**
+	 * Log Attachments
+	 * <br/>
+	 * If true, the Mail Log stores the attachments sent as a zip (up to the maximum size below), otherwise only the attachment file names are stored. Attachments are stored unmasked and can be downloaded by anyone who can view the Mail Log.
+	 **/
+	private Boolean mailLogAttachments = Boolean.valueOf(false);
+
+	/**
+	 * Log Attachments Maximum Bytes
+	 * <br/>
+	 * The maximum total size in bytes of the attachments stored for a single Mail Log entry. Attachments over the limit are listed in SKIPPED.txt in the zip.
+	 **/
+	private Long mailLogAttachmentsMaxBytes = Long.valueOf(5242880);
 
 	/**
 	 * Log Body Excerpt
@@ -1057,6 +1077,42 @@ public abstract class Startup extends AbstractTransientBean {
 	public void setMailTestRecipient(String mailTestRecipient) {
 		preset(mailTestRecipientPropertyName, mailTestRecipient);
 		this.mailTestRecipient = mailTestRecipient;
+	}
+
+	/**
+	 * {@link #mailLogAttachments} accessor.
+	 * @return	The value.
+	 **/
+	public Boolean getMailLogAttachments() {
+		return mailLogAttachments;
+	}
+
+	/**
+	 * {@link #mailLogAttachments} mutator.
+	 * @param mailLogAttachments	The new value.
+	 **/
+	@XmlElement
+	public void setMailLogAttachments(Boolean mailLogAttachments) {
+		preset(mailLogAttachmentsPropertyName, mailLogAttachments);
+		this.mailLogAttachments = mailLogAttachments;
+	}
+
+	/**
+	 * {@link #mailLogAttachmentsMaxBytes} accessor.
+	 * @return	The value.
+	 **/
+	public Long getMailLogAttachmentsMaxBytes() {
+		return mailLogAttachmentsMaxBytes;
+	}
+
+	/**
+	 * {@link #mailLogAttachmentsMaxBytes} mutator.
+	 * @param mailLogAttachmentsMaxBytes	The new value.
+	 **/
+	@XmlElement
+	public void setMailLogAttachmentsMaxBytes(Long mailLogAttachmentsMaxBytes) {
+		preset(mailLogAttachmentsMaxBytesPropertyName, mailLogAttachmentsMaxBytes);
+		this.mailLogAttachmentsMaxBytes = mailLogAttachmentsMaxBytes;
 	}
 
 	/**

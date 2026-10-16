@@ -65,16 +65,16 @@ Out of scope: per-file child documents, inline preview, restoring attachments fr
 6. **Docs/config**: sample `skyve.json` entries (`"logAttachments": false`, `"logAttachmentsMaxBytes": 5242880`) in `skyve-war/config/skyve.json` and `skyve-core/src/test/resources/json/skyve.json`; `docs/smtp.md` table rows + a security note (attachments are stored unmasked and readable by any role with MailLog read access); `docs/skyve-10-changes.md` interface note.
 
 ## Acceptance checklist
-- [ ] Flag off (default): no zip is built, `attachments` is null, behaviour is unchanged.
-- [ ] Flag on, single mail with 2 attachments: zip has both files with the original names and bytes; `attachments` holds a content id that downloads from the MailLog view.
-- [ ] Bulk mail with the same attachment on every mail: zip holds it once.
-- [ ] Same name, different bytes: both are stored, the second with a `(2)` suffix.
-- [ ] Total over the cap: files that fit are stored; `SKIPPED.txt` lists the rest with sizes.
-- [ ] Mail with no attachments: no content is stored.
-- [ ] Content manager failure: MailLog row is still persisted without attachments; the mail send is unaffected.
-- [ ] Startup page loads and saves both settings, writes them to the override JSON only when changed, and updates `UtilImpl` at runtime.
-- [ ] `skyve:generateDomain` passes, and the regenerated domain matches the metadata (no hand edits left in `src/generated`).
-- [ ] Attachment contents are not full-text searchable.
+- [x] Flag off (default): no zip is built, `attachments` is null, behaviour is unchanged.
+- [x] Flag on, single mail with 2 attachments: zip has both files with the original names and bytes; `attachments` holds a content id that downloads from the MailLog view. (Checked in a local WildFly deploy: the zip downloads from the MailLog view.)
+- [x] Bulk mail with the same attachment on every mail: zip holds it once.
+- [x] Same name, different bytes: both are stored, the second with a `(2)` suffix.
+- [x] Total over the cap: files that fit are stored; `SKIPPED.txt` lists the rest with sizes.
+- [x] Mail with no attachments: no content is stored.
+- [x] Content manager failure: MailLog row is still persisted without attachments; the mail send is unaffected.
+- [x] Startup page loads and saves both settings, writes them to the override JSON only when changed, and updates `UtilImpl` at runtime.
+- [x] `skyve:generateDomain` passes, and the regenerated domain matches the metadata (no hand edits left in `src/generated`).
+- [x] Attachment contents are not full-text searchable. (Stored with `ContentManager.put(content, false)`, which is unit tested, and the attribute has `<index>none</index>`.)
 - [ ] Archive export + hard delete of a MailLog with attachments succeeds, and content GC later removes the orphaned zip.
 
 ## Better engineering notes
@@ -91,7 +91,12 @@ Out of scope: per-file child documents, inline preview, restoring attachments fr
 - Local deploy (skyve-local-deploy): turn on in Startup, send a test mail with attachments via `testBogusSend`, download the zip from the MailLog view.
 
 ## AI validation results
-<filled in during execution>
+- `skyve:generateDomain` passed (the kitchensink `ConditionsExport` error didn't come up). The regenerated `Startup.java` and `admin_orm.hbm.xml` matched the earlier hand edits; this run's diffs are purely additive.
+- `MailLogUtilTest` (37), `LoggingMailServiceTest` (19), `SkyveContextListenerTest` (61): pass.
+- skyve-war `StartupExtensionTest` (18), `StartupDomainTest` (26), `MailLog*Test` / `MailLogList*Test` (33), `ViewValidatorTest` (95): pass.
+- Local WildFly deploy (Eclipse), with Test Mode on: turned on Log Attachments and Log Body Excerpt in Startup, and the override JSON got `logAttachments`/`logBodyExcerpt` (`logAttachmentsMaxBytes` was unchanged, so not written). A Communication Test Send with `report.txt` (59 bytes) and `invoice.pdf` (2048 bytes) created a SKIPPED MailLog. Its Attachments link served `mail-attachments.zip` with both files byte-for-byte, and the body excerpt showed the verification code as `******`. No related server errors.
+- Not run yet: full `mvn -B package` (a local `package` run stopped on 383 `modules.test` errors: `target/classes/customers/demo/demo.xml` was missing from that build), and an archive + hard delete + content GC cycle.
+- Implementation notes: attachments are added in mail order (not `attachmentFileNames` order). The Startup max-bytes setting is a `longInteger` with a spinner. `MailLog` interface methods follow the interface's existing style (no per-method Javadoc).
 
 ## User validation suggestions
 - Turn on "Log Attachments" in Startup, send a mail with two attachments, and download the zip from the Mail Log.

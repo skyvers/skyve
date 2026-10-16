@@ -65,6 +65,16 @@
 	                <checkBox binding="mailLogBodyExcerpt" triState="false"/>
 	            </item>
 	        </row>
+	        <row>
+	            <item>
+	                <checkBox binding="mailLogAttachments" triState="false"/>
+	            </item>
+	        </row>
+	        <row>
+	            <item>
+	                <spinner binding="mailLogAttachmentsMaxBytes" min="0"/>
+	            </item>
+	        </row>
 		</form>
 	</vbox>
 

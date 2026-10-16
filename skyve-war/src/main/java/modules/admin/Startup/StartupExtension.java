@@ -79,6 +79,8 @@ public class StartupExtension extends Startup {
 	static final String SMTP_TEST_BOGUS_SEND_KEY = "testBogusSend";
 	static final String SMTP_TEST_RECIPIENT_KEY = "testRecipient";
 	static final String SMTP_LOG_BODY_EXCERPT_KEY = "logBodyExcerpt";
+	static final String SMTP_LOG_ATTACHMENTS_KEY = "logAttachments";
+	static final String SMTP_LOG_ATTACHMENTS_MAX_BYTES_KEY = "logAttachmentsMaxBytes";
 	static final String SMTP_SENDER_KEY = "sender";
 	static final String SMTP_PWD_KEY = "pwd";
 	static final String SMTP_UID_KEY = "uid";
@@ -134,6 +136,8 @@ public class StartupExtension extends Startup {
 		setMailTestRecipient(UtilImpl.SMTP_TEST_RECIPIENT);
 		setMailUsername(UtilImpl.SMTP_UID);
 		setMailLogBodyExcerpt(Boolean.valueOf(UtilImpl.SMTP_LOG_BODY_EXCERPT));
+		setMailLogAttachments(Boolean.valueOf(UtilImpl.SMTP_LOG_ATTACHMENTS));
+		setMailLogAttachmentsMaxBytes(Long.valueOf(UtilImpl.SMTP_LOG_ATTACHMENTS_MAX_BYTES));
 
 		String mapCentre = UtilImpl.MAP_CENTRE;
 		if (StringUtils.isBlank(mapCentre)) {
@@ -559,6 +563,18 @@ public class StartupExtension extends Startup {
 		if (UtilImpl.SMTP_LOG_BODY_EXCERPT != logBodyExcerpt) {
 			smtp.put(SMTP_LOG_BODY_EXCERPT_KEY, Boolean.valueOf(logBodyExcerpt));
 			UtilImpl.SMTP_LOG_BODY_EXCERPT = logBodyExcerpt;
+		}
+
+		boolean logAttachments = Boolean.TRUE.equals(getMailLogAttachments());
+		if (UtilImpl.SMTP_LOG_ATTACHMENTS != logAttachments) {
+			smtp.put(SMTP_LOG_ATTACHMENTS_KEY, Boolean.valueOf(logAttachments));
+			UtilImpl.SMTP_LOG_ATTACHMENTS = logAttachments;
+		}
+
+		Long logAttachmentsMaxBytes = getMailLogAttachmentsMaxBytes();
+		if ((logAttachmentsMaxBytes != null) && (UtilImpl.SMTP_LOG_ATTACHMENTS_MAX_BYTES != logAttachmentsMaxBytes.longValue())) {
+			smtp.put(SMTP_LOG_ATTACHMENTS_MAX_BYTES_KEY, logAttachmentsMaxBytes);
+			UtilImpl.SMTP_LOG_ATTACHMENTS_MAX_BYTES = logAttachmentsMaxBytes.longValue();
 		}
 
 		return smtp;

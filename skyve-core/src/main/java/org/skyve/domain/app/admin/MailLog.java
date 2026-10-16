@@ -47,6 +47,7 @@ public interface MailLog extends PersistentBean {
 	String getSubject();
 	String getBodyExcerpt();
 	String getAttachmentFileNames();
+	String getAttachments();
 	String getDispatchStatus();
 	String getProvider();
 	String getProviderMessageId();
@@ -70,6 +71,7 @@ public interface MailLog extends PersistentBean {
 	void setSubject(String subject);
 	void setBodyExcerpt(String bodyExcerpt);
 	void setAttachmentFileNames(String attachmentFileNames);
+	void setAttachments(String attachments);
 	void setDispatchStatus(String dispatchStatus);
 	void setProvider(String provider);
 	void setProviderMessageId(String providerMessageId);

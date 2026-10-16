@@ -426,6 +426,12 @@ public class SkyveContextListener implements ServletContextListener {
 		UtilImpl.SMTP_TEST_BOGUS_SEND = Boolean.TRUE.equals(smtpTestBogusSend);
 		Boolean smtpLogBodyExcerpt = (Boolean) get(SMTP_KEY, "logBodyExcerpt", smtp, false);
 		UtilImpl.SMTP_LOG_BODY_EXCERPT = Boolean.TRUE.equals(smtpLogBodyExcerpt);
+		Boolean smtpLogAttachments = (Boolean) get(SMTP_KEY, "logAttachments", smtp, false);
+		UtilImpl.SMTP_LOG_ATTACHMENTS = Boolean.TRUE.equals(smtpLogAttachments);
+		Number smtpLogAttachmentsMaxBytes = getNumber(SMTP_KEY, "logAttachmentsMaxBytes", smtp, false);
+		UtilImpl.SMTP_LOG_ATTACHMENTS_MAX_BYTES = (smtpLogAttachmentsMaxBytes == null) ?
+														UtilImpl.DEFAULT_SMTP_LOG_ATTACHMENTS_MAX_BYTES :
+														smtpLogAttachmentsMaxBytes.longValue();
 	}
 
 	private static boolean configureMailService(Map<String, Object> factories) {

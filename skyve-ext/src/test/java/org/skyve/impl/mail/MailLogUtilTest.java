@@ -9,16 +9,27 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.lang.reflect.Method;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+import org.skyve.content.AttachmentContent;
 import org.skyve.content.MimeType;
+import org.skyve.domain.app.admin.MailLog;
+import org.skyve.impl.content.AbstractContentManager;
+import org.skyve.impl.content.NoOpContentManager;
 import org.skyve.impl.metadata.user.SuperUser;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.persistence.hibernate.AbstractHibernatePersistence;
@@ -32,11 +43,20 @@ class MailLogUtilTest {
 	private final List<MailLogUtil.MailLogEntry> entries = new ArrayList<>();
 
 	private boolean originalLogBodyExcerpt;
+	private boolean originalLogAttachments;
+	private long originalLogAttachmentsMaxBytes;
+	private Class<? extends AbstractContentManager> originalContentManagerClass;
 
 	@BeforeEach
 	void beforeEach() {
 		originalLogBodyExcerpt = UtilImpl.SMTP_LOG_BODY_EXCERPT;
+		originalLogAttachments = UtilImpl.SMTP_LOG_ATTACHMENTS;
+		originalLogAttachmentsMaxBytes = UtilImpl.SMTP_LOG_ATTACHMENTS_MAX_BYTES;
+		originalContentManagerClass = AbstractContentManager.IMPLEMENTATION_CLASS;
 		UtilImpl.SMTP_LOG_BODY_EXCERPT = false;
+		UtilImpl.SMTP_LOG_ATTACHMENTS = false;
+		UtilImpl.SMTP_LOG_ATTACHMENTS_MAX_BYTES = UtilImpl.DEFAULT_SMTP_LOG_ATTACHMENTS_MAX_BYTES;
+		RecordingContentManager.puts.clear();
 		MailLogUtil.setRecorderForTesting(entries::add);
 	}
 
@@ -44,6 +64,9 @@ class MailLogUtilTest {
 	void afterEach() {
 		MailLogUtil.clearRecorderForTesting();
 		UtilImpl.SMTP_LOG_BODY_EXCERPT = originalLogBodyExcerpt;
+		UtilImpl.SMTP_LOG_ATTACHMENTS = originalLogAttachments;
+		UtilImpl.SMTP_LOG_ATTACHMENTS_MAX_BYTES = originalLogAttachmentsMaxBytes;
+		AbstractContentManager.IMPLEMENTATION_CLASS = originalContentManagerClass;
 	}
 
 	@Test
@@ -176,6 +199,142 @@ class MailLogUtilTest {
 	void testBodyExcerptIsRedactedByDefault() {
 		assertThat(MailLogUtil.bodyExcerpt("Hello"), is("[REDACTED]"));
 		assertThat(MailLogUtil.bodyExcerpt(null), is((String) null));
+	}
+
+	@Test
+	void testLogMailDoesNotZipAttachmentsByDefault() {
+		Mail mail = new Mail().subject("Subject").body("Body");
+		mail.attach(new MailAttachment("report.txt", bytes("report"), MimeType.plain));
+
+		MailLogUtil.logMail(mail, MailDispatchOutcome.sent("smtp", null, null, null));
+
+		assertEquals(1, entries.size());
+		assertThat(entries.get(0).getAttachmentsZip(), is((byte[]) null));
+		assertThat(entries.get(0).getAttachmentFileNames(), is("report.txt"));
+	}
+
+	@Test
+	void testLogMailZipsAttachmentsWhenEnabled() throws Exception {
+		UtilImpl.SMTP_LOG_ATTACHMENTS = true;
+		Mail mail = new Mail().subject("Subject").body("Body");
+		mail.attach(new MailAttachment("report.txt", bytes("report"), MimeType.plain));
+		mail.attach(new MailAttachment("invoice.pdf", bytes("invoice"), MimeType.pdf));
+
+		MailLogUtil.logMail(mail, MailDispatchOutcome.sent("smtp", null, null, null));
+
+		assertEquals(1, entries.size());
+		Map<String, String> zip = unzip(entries.get(0).getAttachmentsZip());
+		assertEquals(2, zip.size());
+		assertThat(zip.get("report.txt"), is("report"));
+		assertThat(zip.get("invoice.pdf"), is("invoice"));
+	}
+
+	@Test
+	void testLogBulkMailStoresIdenticalAttachmentOnceWhenEnabled() throws Exception {
+		UtilImpl.SMTP_LOG_ATTACHMENTS = true;
+		List<Mail> mails = new ArrayList<>();
+		for (int i = 0; i < 3; i++) {
+			Mail mail = new Mail().subject("Subject").body("Body");
+			mail.attach(new MailAttachment("terms.pdf", bytes("terms"), MimeType.pdf));
+			mails.add(mail);
+		}
+
+		MailLogUtil.logBulkMail(mails, MailDispatchOutcome.sent("smtp", null, null, null));
+
+		Map<String, String> zip = unzip(entries.get(0).getAttachmentsZip());
+		assertEquals(1, zip.size());
+		assertThat(zip.get("terms.pdf"), is("terms"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void testZipAttachmentsSuffixesNameClashWithDifferentBytes() throws Exception {
+		Mail first = new Mail();
+		first.attach(new MailAttachment("statement.pdf", bytes("one"), MimeType.pdf));
+		Mail second = new Mail();
+		second.attach(new MailAttachment("statement.pdf", bytes("two"), MimeType.pdf));
+		Mail third = new Mail();
+		third.attach(new MailAttachment("statement.pdf", bytes("three"), MimeType.pdf));
+
+		Map<String, String> zip = unzip(MailLogUtil.zipAttachments(List.of(first, second, third), Long.MAX_VALUE));
+
+		assertEquals(3, zip.size());
+		assertThat(zip.get("statement.pdf"), is("one"));
+		assertThat(zip.get("statement (2).pdf"), is("two"));
+		assertThat(zip.get("statement (3).pdf"), is("three"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void testZipAttachmentsSkipsAttachmentsOverLimitAndListsThem() throws Exception {
+		Mail mail = new Mail();
+		mail.attach(new MailAttachment("small.txt", bytes("1234"), MimeType.plain));
+		mail.attach(new MailAttachment("large.txt", bytes("1234567890"), MimeType.plain));
+		mail.attach(new MailAttachment("fits.txt", bytes("12"), MimeType.plain));
+
+		Map<String, String> zip = unzip(MailLogUtil.zipAttachments(List.of(mail), 6));
+
+		assertEquals(3, zip.size());
+		assertThat(zip.get("small.txt"), is("1234"));
+		assertThat(zip.get("fits.txt"), is("12"));
+		assertThat(zip.get(MailLogUtil.SKIPPED_ATTACHMENTS_FILE_NAME),
+					is("large.txt (10 bytes) exceeds the remaining limit of 2 bytes"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void testZipAttachmentsNamesUnnamedAndIgnoresEmptyAttachments() throws Exception {
+		Mail mail = new Mail();
+		mail.attach(new MailAttachment(null, bytes("first"), MimeType.plain));
+		mail.attach(new MailAttachment("  ", bytes("second"), MimeType.plain));
+		mail.attach(new MailAttachment("empty.txt", new byte[0], MimeType.plain));
+		mail.getAttachments().add(null);
+
+		Map<String, String> zip = unzip(MailLogUtil.zipAttachments(List.of(mail), Long.MAX_VALUE));
+
+		assertEquals(2, zip.size());
+		assertThat(zip.get("attachment-1"), is("first"));
+		assertThat(zip.get("attachment-2"), is("second"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void testZipAttachmentsReturnsNullWhenThereAreNoAttachments() {
+		Mail mail = new Mail();
+		mail.attach(new MailAttachment("empty.txt", new byte[0], MimeType.plain));
+
+		assertThat(MailLogUtil.zipAttachments(List.of(new Mail(), mail), Long.MAX_VALUE), is((byte[]) null));
+		assertThat(MailLogUtil.zipAttachments(List.of(), Long.MAX_VALUE), is((byte[]) null));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void testPutAttachmentsStoresZipWithoutIndexing() {
+		AbstractContentManager.IMPLEMENTATION_CLASS = RecordingContentManager.class;
+		MailLog log = mockMailLog();
+		byte[] zip = bytes("zip");
+
+		String contentId = MailLogUtil.putAttachments(log, zip);
+
+		assertThat(contentId, is("content-1"));
+		assertEquals(1, RecordingContentManager.puts.size());
+		AttachmentContent content = RecordingContentManager.puts.get(0);
+		assertThat(content.getBizCustomer(), is("demo"));
+		assertThat(content.getBizModule(), is("admin"));
+		assertThat(content.getBizDocument(), is("MailLog"));
+		assertThat(content.getBizId(), is("log-1"));
+		assertThat(content.getAttributeName(), is(MailLogUtil.ATTACHMENTS_ATTRIBUTE_NAME));
+		assertThat(content.getFileName(), is(MailLogUtil.ATTACHMENTS_FILE_NAME));
+		assertThat(content.getMimeType(), is(MimeType.zip));
+		assertFalse(RecordingContentManager.indexed);
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void testPutAttachmentsReturnsNullWhenContentManagerFails() {
+		AbstractContentManager.IMPLEMENTATION_CLASS = FailingContentManager.class;
+
+		assertThat(MailLogUtil.putAttachments(mockMailLog(), bytes("zip")), is((String) null));
 	}
 
 	@Test
@@ -449,5 +608,57 @@ class MailLogUtilTest {
 		assertDoesNotThrow(() -> invokePrivate("closeQuietly",
 				new Class<?>[] { AbstractHibernatePersistence.class },
 				new Object[] { null }));
+	}
+
+	private static byte[] bytes(String value) {
+		return value.getBytes(StandardCharsets.UTF_8);
+	}
+
+	private static Map<String, String> unzip(byte[] zip) throws IOException {
+		assertNotNull(zip);
+		Map<String, String> result = new LinkedHashMap<>();
+		try (ZipInputStream in = new ZipInputStream(new ByteArrayInputStream(zip))) {
+			ZipEntry entry = in.getNextEntry();
+			while (entry != null) {
+				result.put(entry.getName(), new String(in.readAllBytes(), StandardCharsets.UTF_8));
+				entry = in.getNextEntry();
+			}
+		}
+		return result;
+	}
+
+	private static MailLog mockMailLog() {
+		MailLog log = Mockito.mock(MailLog.class);
+		Mockito.when(log.getBizCustomer()).thenReturn("demo");
+		Mockito.when(log.getBizModule()).thenReturn("admin");
+		Mockito.when(log.getBizDocument()).thenReturn("MailLog");
+		Mockito.when(log.getBizUserId()).thenReturn("user-1");
+		Mockito.when(log.getBizId()).thenReturn("log-1");
+		return log;
+	}
+
+	/**
+	 * Records attachment puts and assigns a content ID, standing in for the configured content manager.
+	 */
+	public static class RecordingContentManager extends NoOpContentManager {
+		static final List<AttachmentContent> puts = new ArrayList<>();
+		static boolean indexed;
+
+		@Override
+		public void put(AttachmentContent content, boolean index) throws Exception {
+			puts.add(content);
+			indexed = index;
+			content.setContentId("content-" + puts.size());
+		}
+	}
+
+	/**
+	 * Fails every attachment put, standing in for an unavailable content store.
+	 */
+	public static class FailingContentManager extends NoOpContentManager {
+		@Override
+		public void put(AttachmentContent content, boolean index) throws Exception {
+			throw new IllegalStateException("content store unavailable");
+		}
 	}
 }

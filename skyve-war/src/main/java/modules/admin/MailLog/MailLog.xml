@@ -11,6 +11,7 @@
 		<![CDATA[
 			The Mail Log records outbound mail dispatch requests and relay outcomes across all configured mail providers.
 			For security, email body content is redacted by default. Set smtp.logBodyExcerpt to true to store a plain-text body excerpt (up to 500 characters) with verification and one-time codes masked.
+			Set smtp.logAttachments to true to also store the attachments sent (as a zip, up to smtp.logAttachmentsMaxBytes in total).
 		]]>
 	</description>
 	<bizKey expression="Mail Log - {timestamp}" />
@@ -47,6 +48,11 @@
 			<displayName>Attachment Filenames</displayName>
 			<index>none</index>
 		</memo>
+		<content name="attachments" required="false">
+			<displayName>Attachments</displayName>
+			<description>A zip of the attachments sent, stored when smtp.logAttachments is true.</description>
+			<index>none</index>
+		</content>
 		<text name="dispatchStatus" required="true">
 			<displayName>Dispatch Status</displayName>
 			<length>50</length>
@@ -109,4 +115,12 @@
 			<length>500</length>
 		</text>
 	</attributes>
+	<conditions>
+		<condition name="hasAttachments" usage="view">
+			<description>True when the attachments sent have been stored</description>
+			<expression>
+				<![CDATA[getAttachments() != null]]>
+			</expression>
+		</condition>
+	</conditions>
 </document>

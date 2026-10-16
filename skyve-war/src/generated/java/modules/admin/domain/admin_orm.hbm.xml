@@ -460,6 +460,7 @@
 		<property name="subject" length="500" />
 		<property name="bodyExcerpt" length="500" />
 		<property name="attachmentFileNames" type="text" />
+		<property name="attachments" length="36" />
 		<property name="dispatchStatus" length="50" />
 		<property name="provider" length="100" />
 		<property name="providerMessageId" length="255" />
