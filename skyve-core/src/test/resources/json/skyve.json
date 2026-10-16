@@ -325,6 +325,8 @@
 		"sender": "mailer@skyve.org", 
 		// Set true so emails are never sent, they are logged
 		"testBogusSend": false, 
+		// Set true to store a masked plain-text body excerpt in the Mail Log (default false redacts the body)
+		"logBodyExcerpt": false,
 		// Test Recipient (all emails only sent to this email address)
 		"testRecipient": "test@yourdomain.com"
 	},

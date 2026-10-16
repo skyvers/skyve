@@ -31,15 +31,19 @@ import org.skyve.util.MailDispatchOutcome;
 class MailLogUtilTest {
 	private final List<MailLogUtil.MailLogEntry> entries = new ArrayList<>();
 
+	private boolean originalLogBodyExcerpt;
+
 	@BeforeEach
 	void beforeEach() {
+		originalLogBodyExcerpt = UtilImpl.SMTP_LOG_BODY_EXCERPT;
+		UtilImpl.SMTP_LOG_BODY_EXCERPT = false;
 		MailLogUtil.setRecorderForTesting(entries::add);
 	}
 
-	@SuppressWarnings("static-method")
 	@AfterEach
 	void afterEach() {
 		MailLogUtil.clearRecorderForTesting();
+		UtilImpl.SMTP_LOG_BODY_EXCERPT = originalLogBodyExcerpt;
 	}
 
 	@Test
@@ -110,6 +114,68 @@ class MailLogUtilTest {
 		assertThat(entry.getSubjectVariantCount(), is(Long.valueOf(2)));
 		assertThat(entry.getHasMultipleBodies(), is(Boolean.TRUE));
 		assertThat(entry.getBodyVariantCount(), is(Long.valueOf(2)));
+	}
+
+	@Test
+	void testLogMailStoresMaskedPlainTextExcerptWhenEnabled() {
+		UtilImpl.SMTP_LOG_BODY_EXCERPT = true;
+		Mail mail = new Mail().subject("Subject").body("<p>Hello<br/>Your verification code is 123456</p>");
+
+		MailLogUtil.logMail(mail, MailDispatchOutcome.sent("smtp", "message-1", "accepted", "queued"));
+
+		assertEquals(1, entries.size());
+		assertThat(entries.get(0).getBodyExcerpt(), is("Hello\nYour verification code is ******"));
+	}
+
+	@Test
+	void testLogBulkMailStoresFirstMailExcerptWhenEnabled() {
+		UtilImpl.SMTP_LOG_BODY_EXCERPT = true;
+		Mail first = new Mail().subject("Subject 1").body("<div>One</div>");
+		Mail second = new Mail().subject("Subject 2").body("Two");
+
+		MailLogUtil.logBulkMail(Arrays.asList(first, second), MailDispatchOutcome.sent("smtp", null, null, null));
+
+		assertEquals(1, entries.size());
+		assertThat(entries.get(0).getBodyExcerpt(), is("One"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void testBodyExcerptTruncatesLongBodyWhenEnabled() {
+		UtilImpl.SMTP_LOG_BODY_EXCERPT = true;
+		String body = "a".repeat(300);
+
+		String excerpt = MailLogUtil.bodyExcerpt(body);
+
+		assertNotNull(excerpt);
+		assertEquals(255, excerpt.length());
+		assertThat(excerpt, is("a".repeat(252) + "..."));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void testBodyExcerptKeepsBodyAtMaxLengthWhenEnabled() {
+		UtilImpl.SMTP_LOG_BODY_EXCERPT = true;
+		String body = "b".repeat(255);
+
+		assertThat(MailLogUtil.bodyExcerpt(body), is(body));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void testBodyExcerptReturnsNullForBlankOrMarkupOnlyBodyWhenEnabled() {
+		UtilImpl.SMTP_LOG_BODY_EXCERPT = true;
+
+		assertThat(MailLogUtil.bodyExcerpt(null), is((String) null));
+		assertThat(MailLogUtil.bodyExcerpt("   "), is((String) null));
+		assertThat(MailLogUtil.bodyExcerpt("<br/>"), is((String) null));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void testBodyExcerptIsRedactedByDefault() {
+		assertThat(MailLogUtil.bodyExcerpt("Hello"), is("[REDACTED]"));
+		assertThat(MailLogUtil.bodyExcerpt(null), is((String) null));
 	}
 
 	@Test

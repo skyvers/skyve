@@ -424,6 +424,8 @@ public class SkyveContextListener implements ServletContextListener {
 		UtilImpl.SMTP_TEST_RECIPIENT = getString(SMTP_KEY, "testRecipient", smtp, false);
 		Boolean smtpTestBogusSend = (Boolean) get(SMTP_KEY, "testBogusSend", smtp, smtpRequired);
 		UtilImpl.SMTP_TEST_BOGUS_SEND = Boolean.TRUE.equals(smtpTestBogusSend);
+		Boolean smtpLogBodyExcerpt = (Boolean) get(SMTP_KEY, "logBodyExcerpt", smtp, false);
+		UtilImpl.SMTP_LOG_BODY_EXCERPT = Boolean.TRUE.equals(smtpLogBodyExcerpt);
 	}
 
 	private static boolean configureMailService(Map<String, Object> factories) {

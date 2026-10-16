@@ -339,6 +339,8 @@ public class UtilImpl {
 	public static String SMTP_TEST_RECIPIENT = null;
 	// used to switch whether to send an email or not - false to actually send the email
 	public static boolean SMTP_TEST_BOGUS_SEND = false;
+	// used to switch whether MailLog stores a masked plain-text body excerpt - false to always redact
+	public static boolean SMTP_LOG_BODY_EXCERPT = false;
 
 	// Map Keys
 	@SuppressWarnings("java:S115") // Suppress "Constant names should comply with a naming convention" as these are not constants but enum values
@@ -885,6 +887,7 @@ public class UtilImpl {
     	SMTP_SENDER = null;
     	SMTP_TEST_RECIPIENT = null;
     	SMTP_TEST_BOGUS_SEND = false;
+    	SMTP_LOG_BODY_EXCERPT = false;
 
     	MAP_TYPE = MapType.leaflet;
     	MAP_LAYERS = null;

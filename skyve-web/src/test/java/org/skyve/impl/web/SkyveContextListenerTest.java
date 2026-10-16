@@ -70,6 +70,7 @@ public class SkyveContextListenerTest {
 	private final String originalSmtpSender = UtilImpl.SMTP_SENDER;
 	private final String originalSmtpTestRecipient = UtilImpl.SMTP_TEST_RECIPIENT;
 	private final boolean originalSmtpTestBogusSend = UtilImpl.SMTP_TEST_BOGUS_SEND;
+	private final boolean originalSmtpLogBodyExcerpt = UtilImpl.SMTP_LOG_BODY_EXCERPT;
 	private final UtilImpl.ArchiveConfig originalArchiveConfig = UtilImpl.ARCHIVE_CONFIG;
 	private final String originalCustomer = UtilImpl.CUSTOMER;
 	private final String originalSkyveContextRealPath = UtilImpl.SKYVE_CONTEXT_REAL_PATH;
@@ -95,6 +96,7 @@ public class SkyveContextListenerTest {
 		UtilImpl.SMTP_SENDER = originalSmtpSender;
 		UtilImpl.SMTP_TEST_RECIPIENT = originalSmtpTestRecipient;
 		UtilImpl.SMTP_TEST_BOGUS_SEND = originalSmtpTestBogusSend;
+		UtilImpl.SMTP_LOG_BODY_EXCERPT = originalSmtpLogBodyExcerpt;
 		UtilImpl.ARCHIVE_CONFIG = originalArchiveConfig;
 		UtilImpl.CUSTOMER = originalCustomer;
 		UtilImpl.SKYVE_CONTEXT_REAL_PATH = originalSkyveContextRealPath;
@@ -276,11 +278,34 @@ public class SkyveContextListenerTest {
 		Map<String, Object> factories = new HashMap<>();
 		factories.put("mailServiceClass", NoOpMailService.class.getName());
 
+		UtilImpl.SMTP_LOG_BODY_EXCERPT = true;
+
 		SkyveContextListener.configureMailServiceAndSmtp(properties, factories);
 
 		assertThat(UtilImpl.SMTP, is("localhost"));
 		assertEquals(25, UtilImpl.SMTP_PORT);
 		assertThat(UtilImpl.SMTP_SENDER, is("mailer@skyve.org"));
+		assertFalse(UtilImpl.SMTP_LOG_BODY_EXCERPT);
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void testConfigureMailServiceAndSmtpReadsLogBodyExcerpt() {
+		Map<String, Object> properties = new HashMap<>();
+		Map<String, Object> smtp = new HashMap<>();
+		smtp.put("server", "localhost");
+		smtp.put("port", Integer.valueOf(25));
+		smtp.put("sender", "mailer@skyve.org");
+		smtp.put("testBogusSend", Boolean.FALSE);
+		smtp.put("logBodyExcerpt", Boolean.TRUE);
+		properties.put("smtp", smtp);
+
+		Map<String, Object> factories = new HashMap<>();
+		factories.put("mailServiceClass", NoOpMailService.class.getName());
+
+		SkyveContextListener.configureMailServiceAndSmtp(properties, factories);
+
+		assertTrue(UtilImpl.SMTP_LOG_BODY_EXCERPT);
 	}
 
 	@Test

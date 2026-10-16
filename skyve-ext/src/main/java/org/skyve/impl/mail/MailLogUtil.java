@@ -34,6 +34,9 @@ public class MailLogUtil {
 	private static final Logger LOGGER = SkyveLoggerFactory.getLogger(MailLogUtil.class);
 	private static final String ANONYMOUS_MAIL_LOG_USER = "mailLogUser";
 	private static final String REDACTED_BODY_EXCERPT = "[REDACTED]";
+	// Matches the MailLog.bodyExcerpt field length
+	private static final int BODY_EXCERPT_MAX_LENGTH = 255;
+	private static final String BODY_EXCERPT_ELLIPSIS = "...";
 	private static final String[] SENSITIVE_CODE_PREFIXES = {
 			"verification code",
 			"security code",
@@ -85,9 +88,27 @@ public class MailLogUtil {
 		recorder.set(null);
 	}
 
+	/**
+	 * Returns the body excerpt to persist - {@value #REDACTED_BODY_EXCERPT} unless <code>smtp.logBodyExcerpt</code>
+	 * is enabled, in which case a masked plain-text excerpt truncated to {@value #BODY_EXCERPT_MAX_LENGTH} characters.
+	 */
 	static @Nullable String bodyExcerpt(@Nullable String body) {
 		String cleaned = Util.processStringValue(body);
-		return (cleaned == null) ? null : REDACTED_BODY_EXCERPT;
+		if (cleaned == null) {
+			return null;
+		}
+		if (!UtilImpl.SMTP_LOG_BODY_EXCERPT) {
+			return REDACTED_BODY_EXCERPT;
+		}
+
+		String plainBody = plainTextBody(cleaned);
+		if (plainBody == null) {
+			return null;
+		}
+		if (plainBody.length() <= BODY_EXCERPT_MAX_LENGTH) {
+			return plainBody;
+		}
+		return plainBody.substring(0, BODY_EXCERPT_MAX_LENGTH - BODY_EXCERPT_ELLIPSIS.length()) + BODY_EXCERPT_ELLIPSIS;
 	}
 
 	private static @Nullable String plainTextBody(@Nullable String body) {
