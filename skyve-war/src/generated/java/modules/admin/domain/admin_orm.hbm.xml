@@ -458,7 +458,7 @@
 		<property name="ccRecipients" type="text" />
 		<property name="bccRecipients" type="text" />
 		<property name="subject" length="500" />
-		<property name="bodyExcerpt" length="255" />
+		<property name="bodyExcerpt" length="500" />
 		<property name="attachmentFileNames" type="text" />
 		<property name="dispatchStatus" length="50" />
 		<property name="provider" length="100" />

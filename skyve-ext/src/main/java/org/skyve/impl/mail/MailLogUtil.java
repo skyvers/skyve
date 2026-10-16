@@ -35,7 +35,7 @@ public class MailLogUtil {
 	private static final String ANONYMOUS_MAIL_LOG_USER = "mailLogUser";
 	private static final String REDACTED_BODY_EXCERPT = "[REDACTED]";
 	// Matches the MailLog.bodyExcerpt field length
-	private static final int BODY_EXCERPT_MAX_LENGTH = 255;
+	private static final int BODY_EXCERPT_MAX_LENGTH = 500;
 	private static final String BODY_EXCERPT_ELLIPSIS = "...";
 	private static final String[] SENSITIVE_CODE_PREFIXES = {
 			"verification code",

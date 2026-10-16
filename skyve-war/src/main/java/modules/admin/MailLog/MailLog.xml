@@ -10,7 +10,7 @@
 	<description>
 		<![CDATA[
 			The Mail Log records outbound mail dispatch requests and relay outcomes across all configured mail providers.
-			For security, email body content is redacted by default. Set smtp.logBodyExcerpt to true to store a plain-text body excerpt (up to 255 characters) with verification and one-time codes masked.
+			For security, email body content is redacted by default. Set smtp.logBodyExcerpt to true to store a plain-text body excerpt (up to 500 characters) with verification and one-time codes masked.
 		]]>
 	</description>
 	<bizKey expression="Mail Log - {timestamp}" />
@@ -41,7 +41,7 @@
 		</text>
 		<text name="bodyExcerpt" required="false">
 			<displayName>Body Excerpt</displayName>
-			<length>255</length>
+			<length>500</length>
 		</text>
 		<memo name="attachmentFileNames" required="false">
 			<displayName>Attachment Filenames</displayName>

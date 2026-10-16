@@ -94,6 +94,9 @@ public abstract class Startup extends AbstractTransientBean {
 	public static final String mailTestRecipientPropertyName = "mailTestRecipient";
 
 	/** @hidden */
+	public static final String mailLogBodyExcerptPropertyName = "mailLogBodyExcerpt";
+
+	/** @hidden */
 	public static final String apiGoogleMapsKeyPropertyName = "apiGoogleMapsKey";
 
 	/** @hidden */
@@ -565,6 +568,13 @@ public abstract class Startup extends AbstractTransientBean {
 	 * All emails will only be sent to this email address if specified
 	 **/
 	private String mailTestRecipient;
+
+	/**
+	 * Log Body Excerpt
+	 * <br/>
+	 * If true, the Mail Log stores a plain-text excerpt of the email body (up to 500 characters, with verification codes masked), otherwise the body is always redacted
+	 **/
+	private Boolean mailLogBodyExcerpt = Boolean.valueOf(false);
 
 	/**
 	 * Google Maps Key
@@ -1047,6 +1057,24 @@ public abstract class Startup extends AbstractTransientBean {
 	public void setMailTestRecipient(String mailTestRecipient) {
 		preset(mailTestRecipientPropertyName, mailTestRecipient);
 		this.mailTestRecipient = mailTestRecipient;
+	}
+
+	/**
+	 * {@link #mailLogBodyExcerpt} accessor.
+	 * @return	The value.
+	 **/
+	public Boolean getMailLogBodyExcerpt() {
+		return mailLogBodyExcerpt;
+	}
+
+	/**
+	 * {@link #mailLogBodyExcerpt} mutator.
+	 * @param mailLogBodyExcerpt	The new value.
+	 **/
+	@XmlElement
+	public void setMailLogBodyExcerpt(Boolean mailLogBodyExcerpt) {
+		preset(mailLogBodyExcerptPropertyName, mailLogBodyExcerpt);
+		this.mailLogBodyExcerpt = mailLogBodyExcerpt;
 	}
 
 	/**

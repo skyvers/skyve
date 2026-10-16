@@ -100,6 +100,11 @@
 			<length>200</length>
 			<validator type="email" />
 		</text>
+		<boolean name="mailLogBodyExcerpt">
+			<displayName>Log Body Excerpt</displayName>
+			<description>If true, the Mail Log stores a plain-text excerpt of the email body (up to 500 characters, with verification codes masked), otherwise the body is always redacted</description>
+			<defaultValue>false</defaultValue>
+		</boolean>
 
 		<!-- api settings -->
 		<text name="apiGoogleMapsKey">

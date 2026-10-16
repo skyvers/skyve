@@ -67,6 +67,7 @@ public class StartupExtensionTest {
 
 	@After
 	public void tearDown() throws Exception {
+		UtilImpl.SMTP_LOG_BODY_EXCERPT = false;
 		if (closeable != null) {
 			closeable.close();
 		}
@@ -146,6 +147,7 @@ public class StartupExtensionTest {
 	@Test
 	public void testSaveConfigurationUpdatesMailProperties() throws Exception {
 		UtilImpl.SMTP_TEST_BOGUS_SEND = true; // set to true to ensure it is overridden and included below
+		UtilImpl.SMTP_LOG_BODY_EXCERPT = false; // set to false to ensure it is overridden and included below
 		
 		// setup mocks
 		Mockito.when(bean.getMailServerUrl()).thenReturn("127.0.0.1");
@@ -155,6 +157,7 @@ public class StartupExtensionTest {
 		Mockito.when(bean.getMailPassword()).thenReturn("password");
 		Mockito.when(bean.getMailBogusSend()).thenReturn(Boolean.FALSE);
 		Mockito.when(bean.getMailTestRecipient()).thenReturn("test@test.com");
+		Mockito.when(bean.getMailLogBodyExcerpt()).thenReturn(Boolean.TRUE);
 
 		ArgumentCaptor<String> valueCapture = ArgumentCaptor.forClass(String.class);
 		Mockito.doNothing().when(bean).writeConfiguration(valueCapture.capture());
@@ -172,6 +175,8 @@ public class StartupExtensionTest {
 		assertThat(valueCapture.getValue(), containsString(StartupExtension.SMTP_TEST_BOGUS_SEND_KEY));
 		assertThat(valueCapture.getValue(), containsString(StartupExtension.SMTP_TEST_RECIPIENT_KEY));
 		assertThat(valueCapture.getValue(), containsString(StartupExtension.SMTP_UID_KEY));
+		assertThat(valueCapture.getValue(), containsString(StartupExtension.SMTP_LOG_BODY_EXCERPT_KEY));
+		assertThat(Boolean.valueOf(UtilImpl.SMTP_LOG_BODY_EXCERPT), org.hamcrest.CoreMatchers.is(Boolean.TRUE));
 	}
 
 	@Test

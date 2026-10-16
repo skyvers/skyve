@@ -158,6 +158,13 @@ class StartupDomainTest extends AbstractH2Test {
 	}
 
 	@Test
+	void mailLogBodyExcerptSetAndGet() {
+		Startup bean = Startup.newInstance();
+		bean.setMailLogBodyExcerpt(Boolean.TRUE);
+		assertEquals(Boolean.TRUE, bean.getMailLogBodyExcerpt());
+	}
+
+	@Test
 	void geoIPKeySetAndGet() {
 		Startup bean = Startup.newInstance();
 		bean.setGeoIPKey("geo-key-123");

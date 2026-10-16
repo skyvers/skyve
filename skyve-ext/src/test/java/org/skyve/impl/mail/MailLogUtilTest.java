@@ -143,20 +143,20 @@ class MailLogUtilTest {
 	@SuppressWarnings("static-method")
 	void testBodyExcerptTruncatesLongBodyWhenEnabled() {
 		UtilImpl.SMTP_LOG_BODY_EXCERPT = true;
-		String body = "a".repeat(300);
+		String body = "a".repeat(600);
 
 		String excerpt = MailLogUtil.bodyExcerpt(body);
 
 		assertNotNull(excerpt);
-		assertEquals(255, excerpt.length());
-		assertThat(excerpt, is("a".repeat(252) + "..."));
+		assertEquals(500, excerpt.length());
+		assertThat(excerpt, is("a".repeat(497) + "..."));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
 	void testBodyExcerptKeepsBodyAtMaxLengthWhenEnabled() {
 		UtilImpl.SMTP_LOG_BODY_EXCERPT = true;
-		String body = "b".repeat(255);
+		String body = "b".repeat(500);
 
 		assertThat(MailLogUtil.bodyExcerpt(body), is(body));
 	}
