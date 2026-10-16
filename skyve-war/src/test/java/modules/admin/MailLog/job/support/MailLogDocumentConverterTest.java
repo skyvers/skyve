@@ -6,10 +6,14 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.apache.lucene.document.Document;
 import org.junit.jupiter.api.Test;
 import org.skyve.archive.support.DocumentConverter;
 import org.skyve.domain.Bean;
+import org.skyve.domain.DynamicBean;
 import org.skyve.domain.types.Timestamp;
 
 import modules.admin.domain.MailLog;
@@ -64,5 +68,45 @@ class MailLogDocumentConverterTest {
 		assertThat(doc.getField(DocumentConverter.toSortBinding(MailLog.isBulkPropertyName)), notNullValue());
 		assertThat(doc.getField(DocumentConverter.toSortBinding(MailLog.mailCountPropertyName)), notNullValue());
 		assertThat(doc.getField(DocumentConverter.toSortBinding(MailLog.recipientCountPropertyName)), notNullValue());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void testPrepareForArchiveClearsAttachmentsOnProjectedBean() {
+		MailLogDocumentConverter converter = new MailLogDocumentConverter();
+		Map<String, Object> values = new HashMap<>();
+		values.put(MailLog.attachmentsPropertyName, "content-1");
+		values.put(MailLog.subjectPropertyName, "Subject");
+		DynamicBean bean = new DynamicBean(MailLog.MODULE_NAME, MailLog.DOCUMENT_NAME, values);
+
+		converter.prepareForArchive(bean);
+
+		assertThat(bean.get(MailLog.attachmentsPropertyName), is((Object) null));
+		assertThat(bean.get(MailLog.subjectPropertyName), is((Object) "Subject"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void testPrepareForArchiveIgnoresProjectionWithoutAttachments() {
+		MailLogDocumentConverter converter = new MailLogDocumentConverter();
+		Map<String, Object> values = new HashMap<>();
+		values.put(MailLog.subjectPropertyName, "Subject");
+		DynamicBean bean = new DynamicBean(MailLog.MODULE_NAME, MailLog.DOCUMENT_NAME, values);
+
+		converter.prepareForArchive(bean);
+
+		assertFalse(bean.isProperty(MailLog.attachmentsPropertyName));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void testPrepareForArchiveClearsAttachmentsOnMailLog() {
+		MailLogDocumentConverter converter = new MailLogDocumentConverter();
+		MailLog mailLog = new MailLog();
+		mailLog.setAttachments("content-1");
+
+		converter.prepareForArchive(mailLog);
+
+		assertThat(mailLog.getAttachments(), is((String) null));
 	}
 }

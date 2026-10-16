@@ -79,7 +79,7 @@ Out of scope: per-file child documents, inline preview, restoring attachments fr
 
 ## Better engineering notes
 - A single zip trades per-file preview for no child table, no FK in the raw-SQL purge, and one content object per log. If per-file access is wanted later, a `MailLogAttachment` child document needs the archive purge changed to delete children first.
-- Archived (soft-deleted) logs keep their content id until hard delete. After that the archived JSON references content that GC has removed. Attachments are therefore kept only for the live and retention windows. Document this; restoring attachments from archive is out of scope.
+- Archived logs don't keep attachments. The export job calls the new `DocumentConverter.prepareForArchive(Bean)` hook (a default no-op), and `MailLogDocumentConverter` uses it to null `attachments` in the archived JSON, so archived Mail Logs show no dead download link. The database row keeps its content ID until hard delete, after which content GC removes the zip. Only MailLog is affected; other archived documents are unchanged. Restoring attachments from the archive is out of scope.
 - Follow-up: fix the kitchensink `ConditionsExport` privilege so `generateDomain` works again (prerequisite, separate change).
 - Follow-up idea: a "Clear stored attachments" admin action, or a separate retention period shorter than the MailLog retention.
 

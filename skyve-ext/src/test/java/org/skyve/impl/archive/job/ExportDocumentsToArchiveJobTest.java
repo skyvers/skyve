@@ -7,6 +7,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -17,7 +18,10 @@ import java.io.File;
 import java.nio.file.Path;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Stream;
 
 import org.apache.logging.log4j.LogManager;
 import org.junit.jupiter.api.AfterEach;
@@ -25,6 +29,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.objenesis.ObjenesisStd;
 import org.skyve.archive.support.ArchiveableBean;
+import org.skyve.archive.support.DocumentConverter;
+import org.skyve.domain.Bean;
 import org.skyve.domain.DynamicBean;
 import org.skyve.domain.types.Timestamp;
 import org.skyve.impl.util.UtilImpl.ArchiveConfig.ArchiveDocConfig;
@@ -36,6 +42,8 @@ import org.skyve.persistence.DocumentFilter;
 import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.Persistence;
 import org.skyve.persistence.SQL;
+
+import jakarta.enterprise.inject.Instance;
 
 @SuppressWarnings("static-method")
 class ExportDocumentsToArchiveJobTest {
@@ -296,6 +304,47 @@ class ExportDocumentsToArchiveJobTest {
 						.get(0)
 						.endsWith(".archive"));
 		verify(filter).addNull(ArchiveableBean.archiveTimestampPropertyName);
+	}
+
+	@Test
+	@SuppressWarnings("unchecked")
+	void jobSubstancePrepareForArchiveUsesMatchingConverterOnly() throws Exception {
+		ExportDocumentsToArchiveJob job = newJob();
+		DocumentConverter other = mock(DocumentConverter.class);
+		DocumentConverter matching = mock(DocumentConverter.class);
+		when(Boolean.valueOf(other.handles("sales", "Order"))).thenReturn(Boolean.FALSE);
+		when(Boolean.valueOf(matching.handles("sales", "Order"))).thenReturn(Boolean.TRUE);
+		Instance<DocumentConverter> converters = mock(Instance.class);
+		when(converters.stream()).thenReturn(Stream.of(other, matching));
+		setField(job, "documentConverters", converters);
+		Object substance = newJobSubstance(job, persistentDocument("orders_table"), new ArchiveDocConfig("sales", "Order", "orders", 30));
+		Map<String, Object> values = new HashMap<>();
+		values.put("bizId", "order-1");
+		DynamicBean bean = new DynamicBean("sales", "Order", values);
+		Method method = substance.getClass()
+								.getDeclaredMethod("prepareForArchive", DynamicBean.class);
+		method.setAccessible(true);
+
+		method.invoke(substance, bean);
+
+		verify(matching).prepareForArchive(bean);
+		verify(other, never()).prepareForArchive(any(Bean.class));
+	}
+
+	@Test
+	void jobSubstancePrepareForArchiveIsNoOpWithoutConverters() throws Exception {
+		ExportDocumentsToArchiveJob job = newJob();
+		Object substance = newJobSubstance(job, persistentDocument("orders_table"), new ArchiveDocConfig("sales", "Order", "orders", 30));
+		Map<String, Object> values = new HashMap<>();
+		values.put("bizId", "order-1");
+		DynamicBean bean = new DynamicBean("sales", "Order", values);
+		Method method = substance.getClass()
+								.getDeclaredMethod("prepareForArchive", DynamicBean.class);
+		method.setAccessible(true);
+
+		method.invoke(substance, bean);
+
+		assertEquals("order-1", bean.get("bizId"));
 	}
 
 	private static ExportDocumentsToArchiveJob newJob() {

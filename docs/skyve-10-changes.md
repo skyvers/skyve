@@ -172,7 +172,10 @@ from the Startup page, which writes them to the override configuration.
 - `smtp.logAttachments` and `smtp.logAttachmentsMaxBytes`: when `true`, the attachments sent
   are stored as a zip in the new `MailLog.attachments` content attribute, up to the given total
   size (default 5 MB). The zip is not text-indexed. It is kept until the Mail Log is hard
-  deleted after archiving, when content garbage collection removes it, so archived Mail Logs
-  do not keep their attachments.
+  deleted after archiving, when content garbage collection removes it. Archived Mail Logs
+  do not keep their attachments: the content ID is cleared in the archived copy.
+- `org.skyve.archive.support.DocumentConverter` gains a default no-op
+  `prepareForArchive(Bean)`, called by the archive export job before each bean is written,
+  so a document's converter can clear values that should not be archived.
 - `org.skyve.domain.app.admin.MailLog` gains `getAttachments()` and `setAttachments(String)`.
   Re-assemble the admin module so its generated `MailLog` implements them.

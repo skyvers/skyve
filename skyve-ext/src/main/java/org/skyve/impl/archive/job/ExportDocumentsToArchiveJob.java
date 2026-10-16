@@ -16,6 +16,7 @@ import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 import java.util.StringJoiner;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
@@ -25,6 +26,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.skyve.CORE;
 import org.skyve.archive.support.ArchiveableBean;
+import org.skyve.archive.support.DocumentConverter;
 import org.skyve.domain.Bean;
 import org.skyve.domain.DynamicBean;
 import org.skyve.domain.types.Timestamp;
@@ -42,6 +44,8 @@ import org.skyve.util.Util;
 
 import com.google.common.base.MoreObjects;
 
+import jakarta.enterprise.inject.Any;
+import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 
 /**
@@ -55,6 +59,11 @@ public class ExportDocumentsToArchiveJob extends CancellableJob {
     @Inject
     @SuppressWarnings("java:S6813") // allow member injection
     private transient Persistence persistence;
+
+    @Inject
+    @Any
+    @SuppressWarnings("java:S6813") // allow member injection
+    private transient Instance<DocumentConverter> documentConverters;
 
     private transient FileLockRepo repo = FileLockRepo.getInstance();
 
@@ -188,6 +197,7 @@ public class ExportDocumentsToArchiveJob extends CancellableJob {
         private final Document document;
         private final ArchiveDocConfig config;
         private final String updateStatement;
+        private final Optional<DocumentConverter> converter;
 
         /**
          * Creates the export worker for a specific document configuration.
@@ -199,6 +209,20 @@ public class ExportDocumentsToArchiveJob extends CancellableJob {
             this.document = doc;
             this.config = config;
             this.updateStatement = createUpdateStatement();
+            this.converter = (documentConverters == null) ?
+                                Optional.empty() :
+                                documentConverters.stream()
+                                                  .filter(dc -> dc.handles(config.module(), config.document()))
+                                                  .findFirst();
+        }
+
+        /**
+         * Lets the document's converter (if any) clear values that should not be archived.
+         *
+         * @param bean The exported row about to be written to the archive.
+         */
+        private void prepareForArchive(DynamicBean bean) {
+            converter.ifPresent(c -> c.prepareForArchive(bean));
         }
 
         /**
@@ -380,6 +404,7 @@ public class ExportDocumentsToArchiveJob extends CancellableJob {
 
                     logger.trace("Archiving {}", currDoc.getBizId());
 
+                    prepareForArchive(currDoc);
                     String entry = JSON.marshall(c, currDoc);
 
                     writer.write(entry);
