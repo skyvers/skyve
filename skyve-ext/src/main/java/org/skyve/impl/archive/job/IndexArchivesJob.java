@@ -1,6 +1,5 @@
 package org.skyve.impl.archive.job;
 
-import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 import static org.skyve.impl.archive.support.ArchiveUtils.ARCHIVE_FILE_SUFFIX;
 import static org.skyve.impl.archive.support.ArchiveUtils.excerptLine;
@@ -176,20 +175,7 @@ public class IndexArchivesJob extends CancellableJob {
      * @return An optional containing a suitable DocumentConverter, or an empty option if no suitable converter is found.
      */
     public Optional<DocumentConverter> lookupConverter(String module, String document) {
-        Optional<DocumentConverter> converter = documentConverters.stream()
-                                                                  .filter(dc -> dc.handles(module, document))
-                                                                  .findFirst();
-
-        if (converter.isPresent()) {
-            logger.debug("Using converter: {} for {}.{}", converter, module, document);
-        } else {
-            logger.warn("No suitable document converter found for {}.{}; available converters: {}", module, document,
-                    documentConverters.stream()
-                                      .map(Object::toString)
-                                      .collect(joining(", ")));
-        }
-
-        return converter;
+        return DocumentConverterLookup.find(documentConverters, module, document);
     }
 
     private class IndexDocumentsProcess {

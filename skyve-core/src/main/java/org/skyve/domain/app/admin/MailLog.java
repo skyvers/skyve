@@ -14,6 +14,8 @@ import jakarta.annotation.Nonnull;
  * Persistent record of an outbound mail dispatch attempt.
  */
 public interface MailLog extends PersistentBean {
+	/** The name of the content attribute holding the zip of the attachments sent. */
+	public static final String ATTACHMENTS_ATTRIBUTE_NAME = "attachments";
 
 	/**
 	 * Create a {@link MailLog} instance using the current user context.

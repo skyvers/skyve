@@ -318,6 +318,26 @@ public class SkyveContextListenerTest {
 
 	@Test
 	@SuppressWarnings("static-method")
+	public void testConfigureMailServiceAndSmtpClampsNegativeLogAttachmentsMaxBytes() {
+		Map<String, Object> properties = new HashMap<>();
+		Map<String, Object> smtp = new HashMap<>();
+		smtp.put("server", "localhost");
+		smtp.put("port", Integer.valueOf(25));
+		smtp.put("sender", "mailer@skyve.org");
+		smtp.put("testBogusSend", Boolean.FALSE);
+		smtp.put("logAttachmentsMaxBytes", Integer.valueOf(-1));
+		properties.put("smtp", smtp);
+
+		Map<String, Object> factories = new HashMap<>();
+		factories.put("mailServiceClass", NoOpMailService.class.getName());
+
+		SkyveContextListener.configureMailServiceAndSmtp(properties, factories);
+
+		assertEquals(0L, UtilImpl.SMTP_LOG_ATTACHMENTS_MAX_BYTES);
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
 	public void testConfigureMailServiceAndSmtpReadsLogAttachments() {
 		Map<String, Object> properties = new HashMap<>();
 		Map<String, Object> smtp = new HashMap<>();

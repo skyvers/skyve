@@ -209,11 +209,7 @@ public class ExportDocumentsToArchiveJob extends CancellableJob {
             this.document = doc;
             this.config = config;
             this.updateStatement = createUpdateStatement();
-            this.converter = (documentConverters == null) ?
-                                Optional.empty() :
-                                documentConverters.stream()
-                                                  .filter(dc -> dc.handles(config.module(), config.document()))
-                                                  .findFirst();
+            this.converter = DocumentConverterLookup.find(documentConverters, config.module(), config.document());
         }
 
         /**

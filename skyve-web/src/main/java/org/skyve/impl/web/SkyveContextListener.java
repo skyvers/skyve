@@ -432,6 +432,10 @@ public class SkyveContextListener implements ServletContextListener {
 		UtilImpl.SMTP_LOG_ATTACHMENTS_MAX_BYTES = (smtpLogAttachmentsMaxBytes == null) ?
 														UtilImpl.DEFAULT_SMTP_LOG_ATTACHMENTS_MAX_BYTES :
 														smtpLogAttachmentsMaxBytes.longValue();
+		if (UtilImpl.SMTP_LOG_ATTACHMENTS_MAX_BYTES < 0L) {
+			LOGGER.warn("{}.logAttachmentsMaxBytes of {} is negative - using 0", SMTP_KEY, smtpLogAttachmentsMaxBytes);
+			UtilImpl.SMTP_LOG_ATTACHMENTS_MAX_BYTES = 0L;
+		}
 	}
 
 	private static boolean configureMailService(Map<String, Object> factories) {

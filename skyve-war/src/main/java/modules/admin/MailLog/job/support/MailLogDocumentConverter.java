@@ -93,17 +93,12 @@ public class MailLogDocumentConverter implements DocumentConverter {
 	 * The attachments zip is not archived - content garbage collection removes it once the archived row
 	 * is hard deleted - so an archived mail log would otherwise show a download link that stops working.
 	 *
-	 * @param bean the mail log being archived, usually a projected {@link DynamicBean}
+	 * @param bean the mail log being archived - the export job passes projected {@link DynamicBean}s
 	 */
 	@Override
 	public void prepareForArchive(Bean bean) {
-		if (bean instanceof DynamicBean dynamicBean) {
-			if (dynamicBean.isProperty(MailLog.attachmentsPropertyName)) {
-				dynamicBean.set(MailLog.attachmentsPropertyName, null);
-			}
-		}
-		else if (bean instanceof MailLog mailLog) {
-			mailLog.setAttachments(null);
+		if ((bean instanceof DynamicBean dynamicBean) && dynamicBean.isProperty(MailLog.attachmentsPropertyName)) {
+			dynamicBean.set(MailLog.attachmentsPropertyName, null);
 		}
 	}
 }

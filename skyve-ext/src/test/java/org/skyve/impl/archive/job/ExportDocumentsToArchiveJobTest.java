@@ -315,7 +315,7 @@ class ExportDocumentsToArchiveJobTest {
 		when(Boolean.valueOf(other.handles("sales", "Order"))).thenReturn(Boolean.FALSE);
 		when(Boolean.valueOf(matching.handles("sales", "Order"))).thenReturn(Boolean.TRUE);
 		Instance<DocumentConverter> converters = mock(Instance.class);
-		when(converters.stream()).thenReturn(Stream.of(other, matching));
+		when(converters.stream()).thenAnswer(invocation -> Stream.of(other, matching));
 		setField(job, "documentConverters", converters);
 		Object substance = newJobSubstance(job, persistentDocument("orders_table"), new ArchiveDocConfig("sales", "Order", "orders", 30));
 		Map<String, Object> values = new HashMap<>();
@@ -332,7 +332,7 @@ class ExportDocumentsToArchiveJobTest {
 	}
 
 	@Test
-	void jobSubstancePrepareForArchiveIsNoOpWithoutConverters() throws Exception {
+	void jobSubstancePrepareForArchiveIsNoOpWhenNoConverterMatches() throws Exception {
 		ExportDocumentsToArchiveJob job = newJob();
 		Object substance = newJobSubstance(job, persistentDocument("orders_table"), new ArchiveDocConfig("sales", "Order", "orders", 30));
 		Map<String, Object> values = new HashMap<>();
@@ -352,6 +352,10 @@ class ExportDocumentsToArchiveJobTest {
 		try {
 			setField(job, "logger", LogManager.getLogger(ExportDocumentsToArchiveJob.class));
 			setSuperclassField(job, "log", new ArrayList<>());
+			@SuppressWarnings("unchecked")
+			Instance<DocumentConverter> noConverters = mock(Instance.class);
+			when(noConverters.stream()).thenAnswer(invocation -> Stream.empty());
+			setField(job, "documentConverters", noConverters);
 		}
 		catch (Exception e) {
 			throw new IllegalStateException("Could not initialise allocated export job", e);

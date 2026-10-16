@@ -67,12 +67,20 @@
 	        </row>
 	        <row>
 	            <item>
-	                <checkBox binding="mailLogAttachments" triState="false"/>
+	                <checkBox binding="mailLogAttachments" triState="false">
+						<onChangedHandlers>
+							<rerender>
+								<properties>
+									<c:property key="update">formMail</c:property>
+								</properties>
+							</rerender>
+						</onChangedHandlers>
+					</checkBox>
 	            </item>
 	        </row>
 	        <row>
 	            <item>
-	                <spinner binding="mailLogAttachmentsMaxBytes" min="0"/>
+	                <spinner binding="mailLogAttachmentsMaxBytes" min="0" visible="{mailLogAttachments}"/>
 	            </item>
 	        </row>
 		</form>

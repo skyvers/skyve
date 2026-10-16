@@ -97,16 +97,4 @@ class MailLogDocumentConverterTest {
 
 		assertFalse(bean.isProperty(MailLog.attachmentsPropertyName));
 	}
-
-	@Test
-	@SuppressWarnings("static-method")
-	void testPrepareForArchiveClearsAttachmentsOnMailLog() {
-		MailLogDocumentConverter converter = new MailLogDocumentConverter();
-		MailLog mailLog = new MailLog();
-		mailLog.setAttachments("content-1");
-
-		converter.prepareForArchive(mailLog);
-
-		assertThat(mailLog.getAttachments(), is((String) null));
-	}
 }

@@ -48,8 +48,7 @@ public class MailLogUtil {
 	// Matches the MailLog.bodyExcerpt field length
 	private static final int BODY_EXCERPT_MAX_LENGTH = 500;
 	private static final String BODY_EXCERPT_ELLIPSIS = "...";
-	// Matches the MailLog.attachments content attribute name
-	static final String ATTACHMENTS_ATTRIBUTE_NAME = "attachments";
+	static final String ATTACHMENTS_ATTRIBUTE_NAME = MailLog.ATTACHMENTS_ATTRIBUTE_NAME;
 	static final String ATTACHMENTS_FILE_NAME = "mail-attachments.zip";
 	static final String SKIPPED_ATTACHMENTS_FILE_NAME = "SKIPPED.txt";
 	private static final String UNNAMED_ATTACHMENT_PREFIX = "attachment-";
@@ -496,6 +495,7 @@ public class MailLogUtil {
 			MessageDigest digest = MessageDigest.getInstance("SHA-256");
 			Set<String> storedKeys = new HashSet<>();
 			Set<String> entryNames = new HashSet<>();
+			entryNames.add(SKIPPED_ATTACHMENTS_FILE_NAME); // reserved for the skipped attachments list
 			List<String> skipped = new ArrayList<>();
 			ByteArrayOutputStream result = new ByteArrayOutputStream();
 			long totalBytes = 0;
@@ -510,13 +510,15 @@ public class MailLogUtil {
 							continue;
 						}
 
-						String name = Util.processStringValue(attachment.getAttachmentFileName());
+						String fileName = Util.processStringValue(attachment.getAttachmentFileName());
+						String hash = HexFormat.of().formatHex(digest.digest(bytes));
+						if (!storedKeys.add(((fileName == null) ? "" : fileName) + '\0' + hash)) {
+							continue; // identical attachment already stored or skipped
+						}
+
+						String name = safeEntryName(fileName);
 						if (name == null) {
 							name = UNNAMED_ATTACHMENT_PREFIX + (++unnamedCount);
-						}
-						String hash = HexFormat.of().formatHex(digest.digest(bytes));
-						if (!storedKeys.add(name + '\0' + hash)) {
-							continue; // identical attachment already stored or skipped
 						}
 
 						if ((totalBytes + bytes.length) > maxBytes) {
@@ -550,8 +552,31 @@ public class MailLogUtil {
 	}
 
 	/**
+	 * Reduces an attachment file name to a safe zip entry name - the base name only, without control
+	 * characters - so that extracting the zip cannot write outside the target directory.
+	 *
+	 * @param fileName	The attachment file name, which may come from user input.
+	 * @return	The safe name, or null if nothing usable remains.
+	 */
+	static @Nullable String safeEntryName(@Nullable String fileName) {
+		if (fileName == null) {
+			return null;
+		}
+		String result = fileName.substring(Math.max(fileName.lastIndexOf('/'), fileName.lastIndexOf('\\')) + 1);
+		StringBuilder printable = new StringBuilder(result.length());
+		result.codePoints()
+				.filter(c -> !Character.isISOControl(c))
+				.forEach(printable::appendCodePoint);
+		result = Util.processStringValue(printable.toString());
+		if ((result == null) || ".".equals(result) || "..".equals(result)) {
+			return null;
+		}
+		return result;
+	}
+
+	/**
 	 * Returns a zip entry name for the attachment, suffixing " (n)" before the extension when
-	 * the name is already used by an attachment with different bytes.
+	 * the name is already used by another entry (or reserved for the skipped attachments list).
 	 */
 	private static String uniqueEntryName(String name, Set<String> entryNames) {
 		String result = name;

@@ -167,11 +167,17 @@ default, live in the `smtp` stanza of the JSON configuration, and can be changed
 from the Startup page, which writes them to the override configuration.
 
 - `smtp.logBodyExcerpt`: when `true`, `MailLog.bodyExcerpt` stores the first 500 characters
-  of the plain-text body with verification and one-time codes masked, instead of `[REDACTED]`.
+  of the plain-text body instead of `[REDACTED]`. Only numeric codes that follow a known phrase
+  ("verification code", "one-time code", "security code", "2FA code" and similar) are masked.
+  Anything else in the body is stored as written, such as a temporary password or a plain-text
+  reset link in a custom template, so check your templates before turning this on.
   `bodyExcerpt` is now 500 characters long (was 255); DDL sync widens the column.
 - `smtp.logAttachments` and `smtp.logAttachmentsMaxBytes`: when `true`, the attachments sent
   are stored as a zip in the new `MailLog.attachments` content attribute, up to the given total
-  size (default 5 MB). The zip is not text-indexed. It is kept until the Mail Log is hard
+  size (default 5 MB). Attachments over the limit are left out and listed in `SKIPPED.txt`
+  inside the zip; a negative limit is treated as 0. The zip is not text-indexed, but it is
+  stored unmasked and can be downloaded by anyone who can read the Mail Log (by default the
+  SecurityAdministrator role). It is kept until the Mail Log is hard
   deleted after archiving, when content garbage collection removes it. Archived Mail Logs
   do not keep their attachments: the content ID is cleared in the archived copy.
 - `org.skyve.archive.support.DocumentConverter` gains a default no-op

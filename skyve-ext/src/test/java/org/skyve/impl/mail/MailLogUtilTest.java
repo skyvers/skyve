@@ -299,6 +299,61 @@ class MailLogUtilTest {
 
 	@Test
 	@SuppressWarnings("static-method")
+	void testZipAttachmentsStripsPathsFromEntryNames() throws Exception {
+		Mail mail = new Mail();
+		mail.attach(new MailAttachment("../../etc/passwd", bytes("one"), MimeType.plain));
+		mail.attach(new MailAttachment("C:\\temp\\evil.pdf", bytes("two"), MimeType.pdf));
+		mail.attach(new MailAttachment("..", bytes("three"), MimeType.plain));
+
+		Map<String, String> zip = unzip(MailLogUtil.zipAttachments(List.of(mail), Long.MAX_VALUE));
+
+		assertThat(zip.keySet(), is(java.util.Set.of("passwd", "evil.pdf", "attachment-1")));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void testSafeEntryNameRemovesPathsAndControlCharacters() {
+		assertThat(MailLogUtil.safeEntryName("a/b/c.txt"), is("c.txt"));
+		assertThat(MailLogUtil.safeEntryName("a\\b.txt"), is("b.txt"));
+		assertThat(MailLogUtil.safeEntryName("bad\0na\nme.txt"), is("badname.txt"));
+		assertThat(MailLogUtil.safeEntryName("dir/"), is((String) null));
+		assertThat(MailLogUtil.safeEntryName("."), is((String) null));
+		assertThat(MailLogUtil.safeEntryName(null), is((String) null));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void testZipAttachmentsKeepsSkippedListWhenAnAttachmentIsNamedSkipped() throws Exception {
+		Mail mail = new Mail();
+		mail.attach(new MailAttachment(MailLogUtil.SKIPPED_ATTACHMENTS_FILE_NAME, bytes("mine"), MimeType.plain));
+		mail.attach(new MailAttachment("large.txt", bytes("1234567890"), MimeType.plain));
+
+		Map<String, String> zip = unzip(MailLogUtil.zipAttachments(List.of(mail), 4));
+
+		assertEquals(2, zip.size());
+		assertThat(zip.get("SKIPPED (2).txt"), is("mine"));
+		assertThat(zip.get(MailLogUtil.SKIPPED_ATTACHMENTS_FILE_NAME),
+					is("large.txt (10 bytes) exceeds the remaining limit of 0 bytes"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void testZipAttachmentsStoresIdenticalUnnamedAttachmentOnce() throws Exception {
+		List<Mail> mails = new ArrayList<>();
+		for (int i = 0; i < 3; i++) {
+			Mail mail = new Mail();
+			mail.attach(new MailAttachment(null, bytes("same"), MimeType.plain));
+			mails.add(mail);
+		}
+
+		Map<String, String> zip = unzip(MailLogUtil.zipAttachments(mails, Long.MAX_VALUE));
+
+		assertEquals(1, zip.size());
+		assertThat(zip.get("attachment-1"), is("same"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
 	void testZipAttachmentsReturnsNullWhenThereAreNoAttachments() {
 		Mail mail = new Mail();
 		mail.attach(new MailAttachment("empty.txt", new byte[0], MimeType.plain));
