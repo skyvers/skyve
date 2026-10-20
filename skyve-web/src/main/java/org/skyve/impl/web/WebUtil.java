@@ -13,7 +13,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Timestamp;
 import java.time.Instant;
-import java.util.Base64;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Map;
@@ -82,7 +81,9 @@ public class WebUtil {
 	}
 	
 	/**
-	 * Resolves and binds the active user for a request from session, principal, or basic-auth fallback.
+	 * Resolves and binds the active user for a request from the session or the principal.
+	 * An {@code Authorization} header is never consulted; REST Basic authentication is handled by
+	 * {@link org.skyve.impl.web.filter.rest.BasicAuthFilter}, which validates the password.
 	 *
 	 * @param request active HTTP request
 	 * @param userPrincipal optional authenticated principal name
@@ -140,26 +141,6 @@ public class WebUtil {
 				if (customer instanceof CustomerImpl c) {
 					c.notifyLogin(user, session);
 				}
-			}
-			// TODO hack!
-			else { // check basic auth
-				final String authorization = request.getHeader("Authorization");
-				if ((authorization != null) && authorization.startsWith("Basic")) {
-					// Authorization: Basic base64credentials
-					final String base64Credentials = authorization.substring("Basic".length()).trim();
-					String credentials = new String(Base64.getMimeDecoder().decode(base64Credentials), StandardCharsets.UTF_8);
-	
-					// credentials = username:password or customer/username:password
-					final String[] values = credentials.split(":", 2);
-					final String username = UtilImpl.processStringValue(values[0]);
-//					final String password = UtilImpl.processStringValue(values[1]);
-					// TODO check password...
-					user = ProvidedRepositoryFactory.get().retrieveUser(username);
-					if (user != null) {
-						setSessionId(user, request);
-						AbstractPersistence.get().setUser(user);
-					}
-				}				
 			}
 		}
 		else {

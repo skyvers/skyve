@@ -25,33 +25,31 @@ import java.net.URLStreamHandlerFactory;
 import java.nio.charset.StandardCharsets;
 import java.security.Principal;
 import java.util.ArrayList;
-import java.util.Base64;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.skyve.domain.Bean;
 import org.skyve.domain.DynamicBean;
 import org.skyve.domain.app.AppConstants;
 import org.skyve.domain.messages.NoResultsException;
 import org.skyve.domain.messages.ValidationException;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
 import org.skyve.impl.metadata.user.UserImpl;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.sail.mock.MockWebContext;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.MetaDataException;
-import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.controller.ServerSideAction;
+import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Bizlet;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.repository.ProvidedRepository;
-import org.skyve.metadata.user.User;
 import org.skyve.persistence.Persistence;
 import org.skyve.web.WebContext;
 
@@ -268,42 +266,6 @@ class WebUtilTest {
 		when(request.getParameter(AbstractWebContext.BINDING_NAME)).thenReturn("child");
 
 		assertNull(WebUtil.getConversationBeanFromRequest(webContext, request));
-	}
-
-	// ===== processUserPrincipalForRequest =====
-
-	@SuppressWarnings("static-method")
-	@Test
-	void processUserPrincipalForRequestUsesBasicAuthWhenNoSessionOrPrincipal() {
-		HttpServletRequest request = mock(HttpServletRequest.class);
-		ProvidedRepository repository = mock(ProvidedRepository.class);
-		AbstractPersistence persistence = bindPersistenceMock();
-		UserImpl user = new UserImpl();
-		user.setName("basicUser");
-		when(request.getSession(false)).thenReturn(null);
-		when(request.getHeader("Authorization")).thenReturn(basicAuth("demo/basicUser:ignored"));
-		when(repository.retrieveUser("demo/basicUser")).thenReturn(user);
-		ProvidedRepositoryFactory.set(repository);
-
-		User result = WebUtil.processUserPrincipalForRequest(request, null);
-
-		assertSame(user, result);
-		verify(persistence).setUser(user);
-	}
-
-	@SuppressWarnings("static-method")
-	@Test
-	void processUserPrincipalForRequestReturnsNullWhenBasicAuthUserCannotBeResolved() {
-		HttpServletRequest request = mock(HttpServletRequest.class);
-		ProvidedRepository repository = mock(ProvidedRepository.class);
-		AbstractPersistence persistence = bindPersistenceMock();
-		when(request.getSession(false)).thenReturn(null);
-		when(request.getHeader("Authorization")).thenReturn(basicAuth("missing:ignored"));
-		when(repository.retrieveUser("missing")).thenReturn(null);
-		ProvidedRepositoryFactory.set(repository);
-
-		assertNull(WebUtil.processUserPrincipalForRequest(request, null));
-		verify(persistence, never()).setUser(any(User.class));
 	}
 
 	// ===== setSessionId =====
@@ -961,10 +923,6 @@ class WebUtilTest {
 		AbstractPersistence persistence = mock(AbstractPersistence.class);
 		setPersistenceThreadLocal(persistence);
 		return persistence;
-	}
-
-	private static String basicAuth(String credentials) {
-		return "Basic " + Base64.getMimeEncoder().encodeToString(credentials.getBytes(StandardCharsets.UTF_8));
 	}
 
 	@SuppressWarnings("unchecked")
