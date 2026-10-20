@@ -107,15 +107,8 @@ public class WebUtil {
 		
 		// If the user in the session is not the same as the security's user principal
 		// then the session user needs to be reset.
-		if ((user != null) && (userPrincipal != null)) {
-			UserImpl principalUser = ProvidedRepositoryFactory.setCustomerAndUserFromPrincipal(userPrincipal);
-			if (principalUser == null) {
-				user = null;
-			}
-			else if (! (user.getCustomerName().equals(principalUser.getCustomerName()) &&
-							user.getName().equals(principalUser.getName()))) {
-				user = null;
-			}
+		if ((user != null) && (userPrincipal != null) && (! isPrincipalUser(user, userPrincipal))) {
+			user = null;
 		}
 		
 		if (user == null) {
@@ -149,10 +142,57 @@ public class WebUtil {
 		if (user != null) {
 			user.setWebLocale(request.getLocale());
 		}
-		
+
 		return user;
 	}
-	
+
+	/**
+	 * Returns the user in the request's session if that session is still valid for them.
+	 *
+	 * <p>This is the check {@link #processUserPrincipalForRequest(HttpServletRequest, String)} makes,
+	 * for callers that cannot have its side effects. A session that is no longer registered for its user
+	 * (for example, after the user's password changed) is invalidated and {@code null} is returned.
+	 * {@code null} is also returned when the session user is not the request's principal.
+	 * Otherwise this never creates a session, never establishes a user from the principal,
+	 * never records a login and never binds the persistence user.
+	 *
+	 * @param request active HTTP request
+	 * @return the validated session user, or {@code null} when there is none
+	 */
+	public static @Nullable UserImpl getValidatedSessionUser(@Nonnull HttpServletRequest request) {
+		HttpSession session = request.getSession(false);
+		if (session == null) {
+			return null;
+		}
+		UserImpl user = (UserImpl) session.getAttribute(WebContext.USER_SESSION_ATTRIBUTE_NAME);
+		if (user == null) {
+			return null;
+		}
+		if (! StateUtil.checkSession(user.getId(), session)) {
+			session.invalidate();
+			return null;
+		}
+		Principal principal = request.getUserPrincipal();
+		if ((principal != null) && (! isPrincipalUser(user, principal.getName()))) {
+			return null;
+		}
+		return user;
+	}
+
+	/**
+	 * Determines whether a session user is the user named by a security principal.
+	 *
+	 * @param user the session user
+	 * @param userPrincipal the principal name, as {@code customer/user} or {@code user}
+	 * @return {@code true} when the customer and user names match
+	 */
+	private static boolean isPrincipalUser(@Nonnull UserImpl user, @Nonnull String userPrincipal) {
+		UserImpl principalUser = ProvidedRepositoryFactory.setCustomerAndUserFromPrincipal(userPrincipal);
+		return (principalUser != null) &&
+				user.getCustomerName().equals(principalUser.getCustomerName()) &&
+				user.getName().equals(principalUser.getName());
+	}
+
 	/**
 	 * Resolves the conversation bean targeted by the request binding and optional row identifier.
 	 *

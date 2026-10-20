@@ -286,6 +286,13 @@ class DownloadServletTest {
 			return webContext;
 		}
 
+		// Stands in for WebUtil, whose session registry check needs the real cache
+		@Override
+		User processUserPrincipalForRequest(HttpServletRequest request) {
+			HttpSession session = request.getSession(false);
+			return (session == null) ? null : (User) session.getAttribute(WebContext.USER_SESSION_ATTRIBUTE_NAME);
+		}
+
 		@Override
 		void writeDownloadResponse(Download result, String rangeHeader, String ifRangeHeader, HttpServletResponse response, boolean headOnly)
 		throws IOException {

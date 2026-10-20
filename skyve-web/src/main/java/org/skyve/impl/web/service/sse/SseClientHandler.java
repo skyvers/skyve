@@ -2,7 +2,6 @@ package org.skyve.impl.web.service.sse;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.LinkedBlockingDeque;
@@ -12,11 +11,11 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.skyve.impl.util.UtilImpl;
+import org.skyve.impl.web.WebUtil;
 import org.skyve.metadata.user.User;
 import org.skyve.util.JSON;
 import org.skyve.util.PushMessage;
 import org.skyve.util.PushMessage.PushMessageReceiver;
-import org.skyve.web.WebContext;
 import org.slf4j.Logger;
 import org.skyve.util.logging.SkyveLoggerFactory;
 
@@ -144,12 +143,7 @@ public class SseClientHandler implements PushMessageReceiver {
 		try (SseEventSink sink = eventSink) {
 			sinkRef = sink;
 
-			User user = Optional.of(request)
-					.map(HttpServletRequest::getSession)
-					.map(s -> s.getAttribute(WebContext.USER_SESSION_ATTRIBUTE_NAME))
-					.map(User.class::cast)
-					.orElse(null);
-
+			User user = WebUtil.getValidatedSessionUser(request);
 			if (user == null) {
 				LOGGER.warn("No user provided");
 				return;

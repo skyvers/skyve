@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.charset.StandardCharsets;
+import java.security.Principal;
 
 import org.skyve.content.MimeType;
 import org.skyve.domain.Bean;
@@ -20,7 +21,6 @@ import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
 import org.skyve.util.logging.SkyveLoggerFactory;
-import org.skyve.web.WebContext;
 import org.slf4j.Logger;
 
 import jakarta.annotation.Nonnull;
@@ -29,7 +29,6 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
 
 /**
  * Implements file downloads for Skyve.
@@ -95,8 +94,7 @@ public class DownloadServlet extends HttpServlet {
 				try {
 					try {
 						persistence.begin();
-						HttpSession session = request.getSession(false);
-						User user = (session == null) ? null : (User) session.getAttribute(WebContext.USER_SESSION_ATTRIBUTE_NAME);
+						User user = processUserPrincipalForRequest(request);
 						if (user == null) {
 							throw new SessionEndedException(request.getLocale());
 						}
@@ -174,6 +172,12 @@ public class DownloadServlet extends HttpServlet {
 	@Nullable AbstractWebContext getCachedConversation(@Nullable String contextKey, @Nonnull HttpServletRequest request)
 	throws Exception {
 		return StateUtil.getCachedConversation(contextKey, request);
+	}
+
+	@SuppressWarnings("static-method") // Test seam; subclasses override this to avoid the static StateUtil dependency.
+	@Nullable User processUserPrincipalForRequest(@Nonnull HttpServletRequest request) {
+		Principal userPrincipal = request.getUserPrincipal();
+		return WebUtil.processUserPrincipalForRequest(request, (userPrincipal == null) ? null : userPrincipal.getName());
 	}
 
 	@SuppressWarnings("static-method") // Test seam; subclasses override this to observe lifecycle delegation.
