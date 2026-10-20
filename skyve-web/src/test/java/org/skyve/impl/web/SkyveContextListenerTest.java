@@ -30,7 +30,11 @@ import org.skyve.cache.CacheConfig;
 import org.skyve.cache.EHCacheConfig;
 import org.skyve.cache.HibernateCacheConfig;
 import org.skyve.cache.JCacheConfig;
+import org.skyve.dialog.Dialogs;
+import org.skyve.dialog.Question;
 import org.skyve.domain.number.NumberGenerator;
+import org.skyve.impl.dialog.DefaultDialogs;
+import org.skyve.impl.dialog.DialogsStaticSingleton;
 import org.skyve.impl.domain.number.NumberGeneratorStaticSingleton;
 import org.skyve.impl.geoip.GeoIPServiceStaticSingleton;
 import org.skyve.impl.mail.MailServiceStaticSingleton;
@@ -396,6 +400,18 @@ public class SkyveContextListenerTest {
 		@Override
 		public IPGeolocation geolocate(String ipAddress) {
 			return mock(IPGeolocation.class);
+		}
+	}
+
+	public static class TestDialogs implements Dialogs {
+		@Override
+		public String ask(Question question) {
+			return question.getButtons().get(0).name();
+		}
+
+		@Override
+		public boolean canAsk() {
+			return true;
 		}
 	}
 
@@ -1749,7 +1765,8 @@ public class SkyveContextListenerTest {
 					"numberGeneratorClass", TestNumberGenerator.class.getName(),
 					"customisationsClass", TestCustomisations.class.getName(),
 					"geoIPServiceClass", TestGeoIPService.class.getName(),
-					"smsServiceClass", TestSMSService.class.getName());
+					"smsServiceClass", TestSMSService.class.getName(),
+					"dialogsClass", TestDialogs.class.getName());
 
 			invokePrivateStatic("configureSingletonFactories", new Class<?>[] {Map.class}, factories);
 			invokePrivateStatic("configureServiceFactories", new Class<?>[] {Map.class}, factories);
@@ -1758,6 +1775,7 @@ public class SkyveContextListenerTest {
 			assertThat(CustomisationsStaticSingleton.get(), instanceOf(TestCustomisations.class));
 			assertThat(GeoIPServiceStaticSingleton.get(), instanceOf(TestGeoIPService.class));
 			assertThat(SMSServiceStaticSingleton.get(), instanceOf(TestSMSService.class));
+			assertThat(DialogsStaticSingleton.get(), instanceOf(TestDialogs.class));
 		}
 		finally {
 			if (originalNumberGenerator == null) {
@@ -1774,6 +1792,25 @@ public class SkyveContextListenerTest {
 			}
 			GeoIPServiceStaticSingleton.set(originalGeoIpService);
 			SMSServiceStaticSingleton.set(originalSmsService);
+			DialogsStaticSingleton.setDefault();
+		}
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void testConfigureServiceFactoriesInstallsDefaultsWhenNoClassesAreConfigured() throws Exception {
+		GeoIPService originalGeoIpService = GeoIPServiceStaticSingleton.get();
+		SMSService originalSmsService = SMSServiceStaticSingleton.get();
+		try {
+			invokePrivateStatic("configureServiceFactories", new Class<?>[] {Map.class}, Map.of());
+
+			assertThat(DialogsStaticSingleton.get(), instanceOf(DefaultDialogs.class));
+			assertNull(UtilImpl.SKYVE_DIALOGS_CLASS);
+		}
+		finally {
+			GeoIPServiceStaticSingleton.set(originalGeoIpService);
+			SMSServiceStaticSingleton.set(originalSmsService);
+			DialogsStaticSingleton.setDefault();
 		}
 	}
 

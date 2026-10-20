@@ -38,12 +38,24 @@ isc.BizContainer.addMethods({
 isc.ClassFactory.defineClass("EditView", "BizContainer");
 
 isc.EditView.addClassProperties({
+	// The response status of a request that asks the user a question before it is resent
+	_QUESTION: -50,
 	_DATA_SOURCE: isc.RestDataSource.create({
 		dataFormat: "json",
 		jsonPrefix: "",
 		jsonSuffix: "",
 		dataURL: "smartedit",
 		sendExtraFields: false, // Ensure that only datasource defined fields are sent
+		// A server-side question (status -50) is sent beside the standard response properties,
+		// which RestDataSource does not copy to the DSResponse
+		transformResponse: function (dsResponse, dsRequest, data) {
+			const result = this.Super("transformResponse", arguments);
+			const question = data?.response?.question;
+			if (question) {
+				result.question = question;
+			}
+			return result;
+		},
 	}),
 });
 
@@ -548,7 +560,7 @@ isc.EditView.addMethods({
 
 		this._vm.disableValidation = true;
 		this._vm.saveData(
-			(dsResponse, data) => {
+			this._askable(params, completedCallback, (dsResponse, data) => {
 				let success = false;
 				if (dsResponse.status >= 0) {
 					this._csrf = dsResponse.httpHeaders["x-csrf-token"];
@@ -629,7 +641,7 @@ isc.EditView.addMethods({
 				if (completedCallback) {
 					completedCallback(data, success);
 				}
-			},
+			}),
 			{ params, willHandleError: true },
 		);
 		this._vm.disableValidation = false;
@@ -658,9 +670,13 @@ isc.EditView.addMethods({
 			params._csrf = this._csrf;
 		}
 
+		const resendRemove = (answered, callback) => {
+			isc.EditView._DATA_SOURCE.removeData(instance, callback, { params: answered, willHandleError: true });
+		};
+
 		isc.EditView._DATA_SOURCE.removeData(
 			instance,
-			(dsResponse, data) => {
+			this._askable(params, completedCallback, (dsResponse, data) => {
 				let success = false;
 				if (dsResponse.status >= 0) {
 					this._csrf = dsResponse.httpHeaders["x-csrf-token"];
@@ -674,7 +690,7 @@ isc.EditView.addMethods({
 				if (completedCallback) {
 					completedCallback(data, success);
 				}
-			},
+			}, resendRemove),
 			{ params, willHandleError: true },
 		);
 	},
@@ -731,7 +747,7 @@ isc.EditView.addMethods({
 
 		// Save data and handle the response
 		this._vm.saveData(
-			(dsResponse, data) => {
+			this._askable(params, completedCallback, (dsResponse, data) => {
 				if (dsResponse.status >= 0) {
 					// Update CSRF token from response header
 					this._csrf = dsResponse.httpHeaders["x-csrf-token"];
@@ -760,12 +776,94 @@ isc.EditView.addMethods({
 				}
 
 				return true;
-			},
+			}),
 			{ params, willHandleError: true },
 		);
 
 		// Re-enable validation immediately after the call
 		this._vm.disableValidation = false;
+	},
+
+	/**
+	 * Wraps a DataSource callback so that a question the server asks (response status -50) is shown before the
+	 * callback sees a response. A button that does not abort adds its answer to the answers given so far in this
+	 * gesture and resends the request with all of them in the _q parameter; the request parameters are otherwise
+	 * unchanged, so the CSRF token, source and action are those of the original request. A button that aborts,
+	 * Escape or the close box ends the gesture, calling completedCallback with success false.
+	 * Any other response goes to the callback.
+	 *
+	 * @param {Object} params - the parameters of the request; the answers are kept on it for the rest of the gesture.
+	 * @param {Function} completedCallback - the calling method's completion callback, or null.
+	 * @param {Function} callback - the DataSource callback to wrap.
+	 * @param {Function} resend - function(params, callback) that sends the same request again with the given
+	 *                            parameters and callback; by default, the values manager saves again.
+	 * @returns {Function} the wrapped DataSource callback.
+	 */
+	_askable: function (
+		params,
+		completedCallback,
+		callback,
+		resend = (answered, askable) => {
+			this._vm.disableValidation = true;
+			this._vm.saveData(askable, { params: answered, willHandleError: true });
+			this._vm.disableValidation = false;
+		},
+	) {
+		const askable = (dsResponse, data) => {
+			if (dsResponse.status !== isc.EditView._QUESTION) {
+				return callback(dsResponse, data);
+			}
+
+			const question = dsResponse.question;
+			let dialog = null;
+			let aborting = null;
+			let defaultIndex = 0;
+			const answer = (button) => {
+				dialog.destroy();
+				if (button.aborts) {
+					completedCallback?.(data, false);
+				} else {
+					const answers = params._q ? JSON.parse(params._q) : [];
+					answers.push({ id: question.id, code: button.code });
+					params._q = JSON.stringify(answers);
+					resend({ ...params }, askable);
+				}
+			};
+			const buttons = question.buttons.map((button, index) => {
+				if (button.aborts) {
+					aborting = button;
+				}
+				if (button.default) {
+					defaultIndex = index;
+				}
+				return isc.IButton.create({
+					title: isc.makeXMLSafe(button.label),
+					click: () => answer(button),
+				});
+			});
+			dialog = isc.Dialog.create({
+				title: isc.makeXMLSafe(question.title),
+				message: question.message.asHTML(),
+				icon: "[SKIN]ask.png",
+				isModal: true,
+				showModalMask: true,
+				autoCenter: true,
+				// Only a question with a button that aborts can be dismissed
+				showCloseButton: aborting !== null,
+				dismissOnEscape: aborting !== null,
+				closeClick: () => {
+					answer(aborting);
+					return false;
+				},
+				buttons,
+				autoFocusButton: defaultIndex,
+			});
+			dialog.show();
+			// Showing a modal window can move the focus to its first button, so focus the default button again
+			buttons[defaultIndex].focus();
+			return true;
+		};
+		return askable;
 	},
 
 	/**

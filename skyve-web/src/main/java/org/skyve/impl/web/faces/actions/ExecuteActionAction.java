@@ -3,6 +3,7 @@ package org.skyve.impl.web.faces.actions;
 import org.primefaces.PrimeFaces;
 import org.skyve.domain.Bean;
 import org.skyve.domain.messages.SecurityException;
+import org.skyve.impl.dialog.DialogsProtocol;
 import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.util.UtilImpl;
@@ -60,12 +61,17 @@ public class ExecuteActionAction extends FacesAction<Void> {
 	/**
 	 * Executes the configured server-side action and updates Faces view state with the returned bean.
 	 *
+	 * <p>Side effects: marks the current HTTP request, if there is one, as able to ask questions
+	 * (see {@link org.skyve.dialog.Dialogs}), as the client can resend it with the answers.
+	 *
 	 * @return {@code null}; the action applies updates to persistence and the current Faces view by side effect
 	 * @throws Exception when action execution fails
 	 */
 	@Override
 	@SuppressWarnings({"unchecked", "java:S3776"}) // Complexity OK
 	public Void callback() throws Exception {
+		// This action can ask questions, as the client can resend its request
+		DialogsProtocol.markAskable();
 		if (UtilImpl.FACES_TRACE) {
 			if (collectionName != null) {
 				FACES_LOGGER.info("ExecuteActionAction - EXECUTE ACTION {} for grid {} with selected row {}", actionName, collectionName, elementBizId);

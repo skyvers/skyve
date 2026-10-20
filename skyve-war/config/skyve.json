@@ -329,7 +329,9 @@
 		// Skyve mail service class
 		"mailServiceClass": null,
 		// Skyve SMS service class
-		"smsServiceClass": null
+		"smsServiceClass": null,
+		// Skyve dialogs class
+		"dialogsClass": null
 	},
 	// SMTP Settings
 	"smtp": {

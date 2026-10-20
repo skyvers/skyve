@@ -67,6 +67,7 @@ import org.hibernate.type.Type;
 import org.skyve.EXT;
 import org.skyve.content.BeanContent;
 import org.skyve.content.TextExtractor;
+import org.skyve.dialog.QuestionException;
 import org.skyve.domain.Bean;
 import org.skyve.domain.ChildBean;
 import org.skyve.domain.DynamicBean;
@@ -700,7 +701,8 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 	}
 
 	/**
-	 * Normalize and rethrow persistence exceptions as Skyve domain exceptions.
+	 * Normalise and rethrow persistence exceptions as Skyve domain exceptions.
+	 * A {@link QuestionException} is rethrown as it is, without being logged.
 	 *
 	 * @param t The throwable to interpret.
 	 * @param operationType The persistence operation being performed.
@@ -710,6 +712,10 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 	private void treatPersistenceThrowable(@Nonnull Throwable t,
 											@Nonnull OperationType operationType,
 											@Nullable PersistentBean bean) {
+		// A question asked from a Bizlet or interceptor is not an error - let it through as it is
+		if (t instanceof QuestionException question) {
+			throw question;
+		}
 		LOGGER.error(t.getMessage(), t);
 		if (t instanceof jakarta.persistence.OptimisticLockException) {
 			if (bean == null) {

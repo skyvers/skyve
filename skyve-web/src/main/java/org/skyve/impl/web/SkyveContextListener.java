@@ -32,9 +32,11 @@ import org.skyve.cache.GeoIPCacheConfig;
 import org.skyve.cache.HibernateCacheConfig;
 import org.skyve.cache.JCacheConfig;
 import org.skyve.cache.SessionCacheConfig;
+import org.skyve.dialog.Dialogs;
 import org.skyve.domain.number.NumberGenerator;
 import org.skyve.impl.archive.support.ArchiveLuceneIndexerSingleton;
 import org.skyve.impl.content.AbstractContentManager;
+import org.skyve.impl.dialog.DialogsStaticSingleton;
 import org.skyve.impl.domain.number.NumberGeneratorStaticSingleton;
 import org.skyve.impl.geoip.GeoIPServiceStaticSingleton;
 import org.skyve.impl.job.JobSchedulerStaticSingleton;
@@ -1020,15 +1022,31 @@ public class SkyveContextListener implements ServletContextListener {
 		}
 	}
 
+	/**
+	 * Installs the configured or default dialogs, GeoIP and SMS services.
+	 *
+	 * @param factories	The {@code factories} configuration; never {@code null}.
+	 */
 	private static void configureServiceFactories(Map<String, Object> factories) {
+		UtilImpl.SKYVE_DIALOGS_CLASS = getString(FACTORIES_KEY, "dialogsClass", factories, false);
+		if (UtilImpl.SKYVE_DIALOGS_CLASS == null) {
+			DialogsStaticSingleton.setDefault();
+		}
+		else {
+			Dialogs dialogs = instantiateFactory(Dialogs.class,
+													UtilImpl.SKYVE_DIALOGS_CLASS,
+													"factories.dialogsClass");
+			DialogsStaticSingleton.set(dialogs);
+		}
+
 		UtilImpl.SKYVE_GEOIP_SERVICE_CLASS = getString(FACTORIES_KEY, "geoIPServiceClass", factories, false);
 		if (UtilImpl.SKYVE_GEOIP_SERVICE_CLASS == null) {
 			GeoIPServiceStaticSingleton.setDefault();
 		}
 		else {
 			GeoIPService geoIpService = instantiateFactory(GeoIPService.class,
-					UtilImpl.SKYVE_GEOIP_SERVICE_CLASS,
-					"factories.geoIPServiceClass");
+															UtilImpl.SKYVE_GEOIP_SERVICE_CLASS,
+															"factories.geoIPServiceClass");
 			GeoIPServiceStaticSingleton.set(geoIpService);
 		}
 
@@ -1038,8 +1056,8 @@ public class SkyveContextListener implements ServletContextListener {
 		}
 		else {
 			SMSService smsService = instantiateFactory(SMSService.class,
-					UtilImpl.SKYVE_SMS_SERVICE_CLASS,
-					"factories.smsServiceClass");
+														UtilImpl.SKYVE_SMS_SERVICE_CLASS,
+														"factories.smsServiceClass");
 			SMSServiceStaticSingleton.set(smsService);
 		}
 	}

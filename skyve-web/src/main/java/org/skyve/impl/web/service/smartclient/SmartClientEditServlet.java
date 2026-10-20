@@ -10,8 +10,10 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.UUID;
 
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.skyve.EXT;
 import org.skyve.content.MimeType;
+import org.skyve.dialog.QuestionException;
 import org.skyve.domain.Bean;
 import org.skyve.domain.PersistentBean;
 import org.skyve.domain.messages.ConversationEndedException;
@@ -27,6 +29,7 @@ import org.skyve.domain.messages.ValidationException;
 import org.skyve.domain.types.converters.Converter;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.cache.StateUtil;
+import org.skyve.impl.dialog.DialogsProtocol;
 import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
 import org.skyve.impl.metadata.model.document.field.ConvertibleField;
@@ -67,6 +70,7 @@ import org.skyve.util.monitoring.Monitoring;
 import org.skyve.util.monitoring.RequestKey;
 import org.slf4j.Logger;
 
+import jakarta.annotation.Nonnull;
 import jakarta.servlet.ServletConfig;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
@@ -173,6 +177,10 @@ public class SmartClientEditServlet extends HttpServlet {
 	/**
 	 * Processes SmartClient edit requests and writes a JSON response.
 	 *
+	 * <p>Every operation but {@code fetch} marks the request as able to ask questions. A question asked in the
+	 * request rolls it back and is written as a status {@code -50} response; the conversation is not cached and
+	 * the CSRF token is not replaced, so the client can resend the request with the answer.
+	 *
 	 * @param request inbound HTTP request
 	 * @param response outbound HTTP response
 	 * @throws IOException when writing the response fails
@@ -207,6 +215,10 @@ public class SmartClientEditServlet extends HttpServlet {
 	        	return;
 	        }
 	        Operation operation = Operation.valueOf(operationType);
+	        // Every operation but a form load can ask a question, as the client can resend its request
+	        if (! Operation.fetch.equals(operation)) {
+	        	DialogsProtocol.markAskable();
+	        }
 
 	        AbstractPersistence persistence = null;
 	        try {
@@ -438,9 +450,16 @@ public class SmartClientEditServlet extends HttpServlet {
 		    	if (persistence != null) {
 		    		persistence.rollback();
 		    	}
-	
-				String reference = WebErrorUtil.logUnexpectedAndGetReference(LOGGER, "SmartClient edit request failed for operation " + operation, t);
-				produceErrorResponse(t, operation, true, pw, reference);
+
+		    	// A question is not an error - the conversation is not cached and the CSRF token is not replaced
+		    	QuestionException question = ExceptionUtils.throwableOfType(t, QuestionException.class);
+		    	if (question != null) {
+		    		produceQuestionResponse(question, pw);
+		    	}
+		    	else {
+		    		String reference = WebErrorUtil.logUnexpectedAndGetReference(LOGGER, "SmartClient edit request failed for operation " + operation, t);
+		    		produceErrorResponse(t, operation, true, pw, reference);
+		    	}
 			}
 		    finally {
 	    	    // commit and close (its already been serialized to the conversations cache if needed)
@@ -452,8 +471,26 @@ public class SmartClientEditServlet extends HttpServlet {
 	}
 
 	/**
+	 * Writes the response that asks the client a question, so that it can resend its request with the answer.
+	 *
+	 * <p>The response has status {@link DialogsProtocol#QUESTION_RESPONSE_STATUS}, which every client treats as a
+	 * failure because it is negative and which is outside SmartClient's own error codes. {@code question} holds the question for the client to
+	 * show (see {@link DialogsProtocol#toJSON(QuestionException)}). {@code data} holds plain text for a client
+	 * that cannot show questions.
+	 *
+	 * @param question	The question thrown by the request.
+	 * @param pw	The response writer.
+	 */
+	private static void produceQuestionResponse(@Nonnull QuestionException question, @Nonnull PrintWriter pw) {
+		String fallback = Util.nullSafeI18n("ui.dialog.unsupported", question.getQuestion().getMessage());
+		pw.append("{\"response\":{\"status\":").append(String.valueOf(DialogsProtocol.QUESTION_RESPONSE_STATUS));
+		pw.append(",\"data\":\"").append(OWASP.escapeJsonString(fallback));
+		pw.append("\",\"question\":").append(DialogsProtocol.toJSON(question)).append("}}");
+	}
+
+	/**
 	 * Pump out error text for smart client pages.
-	 * 
+	 *
 	 * @param t The exception.
 	 * @param operation fetch, add, remove or update.
 	 * @param includeBindings Only edit views can use the bindings available in the error messages.
@@ -1226,6 +1263,9 @@ public class SmartClientEditServlet extends HttpServlet {
 	/**
 	 * Writes a successful SmartClient response payload for the current form state.
 	 *
+	 * <p>The current request is first unmarked as able to ask, so a question asked while rendering
+	 * throws {@link IllegalStateException} (see {@link org.skyve.dialog.Dialogs#ask(org.skyve.dialog.Question)}).
+	 *
 	 * @param webContext active web conversation context
 	 * @param user active user
 	 * @param internalCustomer internal customer metadata implementation
@@ -1256,6 +1296,10 @@ public class SmartClientEditServlet extends HttpServlet {
 											String redirectUrl,
 											PrintWriter pw) 
 	throws Exception  {
+		// The operation is complete, so rendering the response cannot ask a question:
+		// the conversation is committed after rendering, so a rerun would apply the changes twice
+		DialogsProtocol.unmarkAskable();
+
 		StringBuilder result = new StringBuilder(256);
 		// Need to make a new JSON manipulator here to visit the view for the response
 		// as conditions may have changed since applying changes to the bean
@@ -1404,6 +1448,10 @@ public class SmartClientEditServlet extends HttpServlet {
 	/**
 	 * Executes post-render interceptors and bizlet callbacks.
 	 *
+	 * <p>The response has already been written, so a question cannot be asked: the current request is first unmarked
+	 * as able to ask, and {@link org.skyve.dialog.Dialogs#ask(org.skyve.dialog.Question)} throws
+	 * {@link IllegalStateException} instead.
+	 *
 	 * @param internalCustomer internal customer metadata implementation
 	 * @param bizlet bizlet instance, or {@code null}
 	 * @param bean rendered bean
@@ -1411,6 +1459,7 @@ public class SmartClientEditServlet extends HttpServlet {
 	 * @param <T> rendered bean type
 	 */
 	private static <T extends Bean> void postRender(CustomerImpl internalCustomer, Bizlet<T> bizlet, T bean, AbstractWebContext webContext) {
+		DialogsProtocol.unmarkAskable();
 		boolean vetoed = internalCustomer.interceptBeforePostRender(bean, webContext);
 		if (! vetoed) {
 			if (bizlet != null) {

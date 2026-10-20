@@ -3,6 +3,7 @@ package org.skyve.impl.web.faces.actions;
 import org.skyve.domain.Bean;
 import org.skyve.domain.PersistentBean;
 import org.skyve.domain.messages.SecurityException;
+import org.skyve.impl.dialog.DialogsProtocol;
 import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
 import org.skyve.impl.persistence.AbstractPersistence;
@@ -46,9 +47,20 @@ public class SaveAction extends FacesAction<Void> {
 		this.ok = ok;
 	}
 
+	/**
+	 * Runs pre-execute for OK or Save and saves the target bean when the view's required fields are valid.
+	 *
+	 * <p>Side effects: marks the current HTTP request, if there is one, as able to ask questions
+	 * (see {@link org.skyve.dialog.Dialogs}), as the client can resend it with the answers.
+	 *
+	 * @return {@code null}; this action mutates persistence and view state through side effects
+	 * @throws Exception when the save cannot be completed
+	 */
 	@Override
 	@SuppressWarnings("java:S3776") // Complexity OK
 	public Void callback() throws Exception {
+		// This action can ask questions, as the client can resend its request
+		DialogsProtocol.markAskable();
 		if (UtilImpl.FACES_TRACE) FACES_LOGGER.info("SaveAction - ok={}", Boolean.valueOf(ok));
 
 		AbstractPersistence persistence = AbstractPersistence.get();

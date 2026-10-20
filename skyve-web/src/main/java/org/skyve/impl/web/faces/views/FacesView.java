@@ -428,19 +428,21 @@ public class FacesView extends HarnessView {
 
 	/**
 	 * Executes save-and-close behavior for the current edit view.
+	 * The view is closed only when the save succeeds without messages and without asking a question.
 	 */
 	public void ok() {
 		LOGGER.info("FacesView - ok");
 		new SaveAction(this, true).execute();
 
 		FacesContext c = FacesContext.getCurrentInstance();
-		if (c.getMessageList().isEmpty()) {
+		if (c.getMessageList().isEmpty() && (! FacesAction.isQuestionAsked(c))) {
 			PrimeFaces.current().executeScript("SKYVE.PF.popHistory(true)");
 		}
 	}
 
 	/**
 	 * Executes save behavior and refreshes title/history state.
+	 * "Saved" is shown only when the save succeeds without messages and without asking a question.
 	 */
 	public void save() {
 		LOGGER.info("FacesView - save");
@@ -451,7 +453,7 @@ public class FacesView extends HarnessView {
 		new SetTitleAction(this).execute();
 
 		FacesContext c = FacesContext.getCurrentInstance();
-		if (c.getMessageList().isEmpty()) {
+		if (c.getMessageList().isEmpty() && (! FacesAction.isQuestionAsked(c))) {
 			c.addMessage(null, new FacesMessage("Saved", "Any changes have been saved"));
 			contextBean = getBean();
 			if (notPersistedBefore && (contextBean.isPersisted())) {
@@ -466,13 +468,14 @@ public class FacesView extends HarnessView {
 
 	/**
 	 * Executes delete behavior and closes the current edit view on success.
+	 * The view is closed only when the delete succeeds without messages and without asking a question.
 	 */
 	public void delete() {
 		LOGGER.info("FacesView - delete");
 		new DeleteAction(this).execute();
 
 		FacesContext c = FacesContext.getCurrentInstance();
-		if (c.getMessageList().isEmpty()) {
+		if (c.getMessageList().isEmpty() && (! FacesAction.isQuestionAsked(c))) {
 			PrimeFaces.current().executeScript("SKYVE.PF.popHistory(true)");
 		}
 	}

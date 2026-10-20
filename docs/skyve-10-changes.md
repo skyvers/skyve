@@ -18,6 +18,7 @@ These notes collect release-ready framework changes introduced for Skyve 10.
 - [Scheduled Backups and Azure Copies](#scheduled-backups-and-azure-copies)
 - [Custom Property Order and Fluent Builders](#custom-property-order-and-fluent-builders)
 - Decimal10 converters `Decimal10Integer`, `Decimal10IntegerPercentage`, `Decimal10OneDecimalPlace` and `Decimal10TwoDecimalPlacesPercentage` are new, and `Decimal10DollarsAndCents` can now be named in metadata.
+- [Server-side Questions](#server-side-questions): server code can ask the user an OK/Cancel or Yes/No question with `EXT.getDialogs()`, in SmartClient and PrimeFaces.
 
 ## Model-backed Lookup Descriptions
 
@@ -158,3 +159,27 @@ declaration order instead of being sorted by key.
   For a module role this includes the properties on its document privileges, action
   privileges, content permissions and content restrictions.
 - A `<property>` with no `key` is ignored when metadata is loaded.
+
+## Server-side Questions
+
+Server code can now ask the user a question part way through a request, where before
+the only option was an action's static `confirm` text. Questions work from custom
+actions, OK, Save, Delete, ZoomOut, rerenders and, in PrimeFaces, Remove, including
+their Bizlet callbacks (`preSave`, `preDelete`, `preRerender` and so on) and interceptors:
+
+```java
+boolean charge = EXT.getDialogs().confirm(
+		Question.yesNo("Invoice.lateFee", "Late fee", "Charge a late fee of " + fee + "?"));
+EXT.getDialogs().ask(Question.okCancel("Invoice.post", "Post", "Post this invoice?").cancelAborts());
+```
+
+When a question has no answer yet, `ask` throws, the request is rolled back and the client
+shows the question. The client then resends the same request with the answers so far, and
+`ask` returns the chosen button. The code runs again from the start on each resend, so do
+not ask after a commit or after a side effect outside the transaction, such as email,
+push or content writes (see the `Dialogs.ask` Javadoc). Questions cannot be asked on form
+load, while the response renders, from `postRender`, list grids, jobs or background tasks:
+`canAsk()` is false there and `ask` throws `IllegalStateException`.
+
+Try
+**Kitchen Sink → Dialogs Fixture**.

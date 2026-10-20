@@ -28,6 +28,47 @@
 		<filter name="kitchensinkConditionsFixtureNodeUserIdFilter" condition="bizUserId=:userIdParam"/>
 	</class>
 
+	<class name="modules.kitchensink.domain.DialogsFixture" table="KS_DialogsFixture" entity-name="kitchensinkDialogsFixture">
+		<id name="bizId" length="36" />
+		<version name="bizVersion" unsaved-value="null" />
+		<property name="bizLock" type="OptimisticLock" length="271" not-null="true" />
+		<property name="bizKey" length="1024" not-null="true" />
+		<property name="bizCustomer" length="50" not-null="true" />
+		<property name="bizFlagComment" length="1024" />
+		<property name="bizDataGroupId" length="36" />
+		<property name="bizUserId" length="36" not-null="true" />
+		<property name="text" length="100" />
+		<property name="actionText" length="100" />
+		<property name="askOnSave" />
+		<property name="askOnDelete" />
+		<property name="outcome" length="500" />
+		<bag name="rows" cascade="all-delete-orphan">
+			<key column="parent_id" />
+			<one-to-many entity-name="kitchensinkDialogsFixtureRow" />
+		</bag>
+		<filter name="kitchensinkDialogsFixtureNoneFilter" condition="1=0"/>
+		<filter name="kitchensinkDialogsFixtureCustomerFilter" condition="bizCustomer=:customerParam"/>
+		<filter name="kitchensinkDialogsFixtureDataGroupIdFilter" condition="bizDataGroupId=:dataGroupIdParam"/>
+		<filter name="kitchensinkDialogsFixtureUserIdFilter" condition="bizUserId=:userIdParam"/>
+	</class>
+
+	<class name="modules.kitchensink.domain.DialogsFixtureRow" table="KS_DialogsFixtureRow" entity-name="kitchensinkDialogsFixtureRow">
+		<id name="bizId" length="36" />
+		<version name="bizVersion" unsaved-value="null" />
+		<property name="bizLock" type="OptimisticLock" length="271" not-null="true" />
+		<property name="bizKey" length="1024" not-null="true" />
+		<property name="bizCustomer" length="50" not-null="true" />
+		<property name="bizFlagComment" length="1024" />
+		<property name="bizDataGroupId" length="36" />
+		<property name="bizUserId" length="36" not-null="true" />
+		<many-to-one name="parent" entity-name="kitchensinkDialogsFixture" column="parent_id" insert="false" update="false" foreign-key="FK_KS_DialogsFixtureRow_parent" />
+		<property name="name" length="100" />
+		<filter name="kitchensinkDialogsFixtureRowNoneFilter" condition="1=0"/>
+		<filter name="kitchensinkDialogsFixtureRowCustomerFilter" condition="bizCustomer=:customerParam"/>
+		<filter name="kitchensinkDialogsFixtureRowDataGroupIdFilter" condition="bizDataGroupId=:dataGroupIdParam"/>
+		<filter name="kitchensinkDialogsFixtureRowUserIdFilter" condition="bizUserId=:userIdParam"/>
+	</class>
+
 	<class name="modules.kitchensink.domain.ListAttributes" table="KS_ListAttributes" entity-name="kitchensinkListAttributes">
 		<id name="bizId" length="36" />
 		<version name="bizVersion" unsaved-value="null" />
@@ -131,6 +172,26 @@
 		<filter-param name="dataGroupIdParam" type="string"/>
 	</filter-def>
 	<filter-def name="kitchensinkConditionsFixtureNodeUserIdFilter">
+		<filter-param name="userIdParam" type="string"/>
+	</filter-def>
+	<filter-def name="kitchensinkDialogsFixtureNoneFilter" />
+	<filter-def name="kitchensinkDialogsFixtureCustomerFilter">
+		<filter-param name="customerParam" type="string"/>
+	</filter-def>
+	<filter-def name="kitchensinkDialogsFixtureDataGroupIdFilter">
+		<filter-param name="dataGroupIdParam" type="string"/>
+	</filter-def>
+	<filter-def name="kitchensinkDialogsFixtureUserIdFilter">
+		<filter-param name="userIdParam" type="string"/>
+	</filter-def>
+	<filter-def name="kitchensinkDialogsFixtureRowNoneFilter" />
+	<filter-def name="kitchensinkDialogsFixtureRowCustomerFilter">
+		<filter-param name="customerParam" type="string"/>
+	</filter-def>
+	<filter-def name="kitchensinkDialogsFixtureRowDataGroupIdFilter">
+		<filter-param name="dataGroupIdParam" type="string"/>
+	</filter-def>
+	<filter-def name="kitchensinkDialogsFixtureRowUserIdFilter">
 		<filter-param name="userIdParam" type="string"/>
 	</filter-def>
 	<filter-def name="kitchensinkListAttributesNoneFilter" />

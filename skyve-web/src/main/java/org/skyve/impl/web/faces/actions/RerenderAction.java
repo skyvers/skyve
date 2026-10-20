@@ -1,6 +1,7 @@
 package org.skyve.impl.web.faces.actions;
 
 import org.skyve.domain.Bean;
+import org.skyve.impl.dialog.DialogsProtocol;
 import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
 import org.skyve.impl.persistence.AbstractPersistence;
@@ -46,12 +47,17 @@ public class RerenderAction extends FacesAction<Void> {
 	/**
 	 * Executes rerender pre-hooks and schedules post-render processing for the active faces view.
 	 *
+	 * <p>Side effects: marks the current HTTP request, if there is one, as able to ask questions
+	 * (see {@link org.skyve.dialog.Dialogs}), as the client can resend it with the answers.
+	 *
 	 * @return always {@code null} because this action mutates view state only
 	 * @throws Exception if target bean resolution, interception, or bizlet processing fails
 	 */
 	@Override
 	@SuppressWarnings("java:S3776") // Complexity OK
 	public Void callback() throws Exception {
+		// This action can ask questions, as the client can resend its request
+		DialogsProtocol.markAskable();
 		if (UtilImpl.FACES_TRACE) FACES_LOGGER.info("RerenderAction - EXECUTE RERENDER with source {} {} validation", source, (validate ? "with" : "without"));
 
 		AbstractPersistence persistence = AbstractPersistence.get();

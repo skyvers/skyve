@@ -23,6 +23,7 @@ import org.skyve.bizport.BizPortWorkbook;
 import org.skyve.cache.Caching;
 import org.skyve.content.ContentManager;
 import org.skyve.dataaccess.sql.SQLDataAccess;
+import org.skyve.dialog.Dialogs;
 import org.skyve.domain.Bean;
 import org.skyve.domain.ChildBean;
 import org.skyve.domain.PersistentBean;
@@ -42,6 +43,7 @@ import org.skyve.impl.cache.DefaultCaching;
 import org.skyve.impl.content.AbstractContentManager;
 import org.skyve.impl.dataaccess.sql.SQLDataAccessImpl;
 import org.skyve.impl.dataaccess.sql.TuneableConnection;
+import org.skyve.impl.dialog.DialogsStaticSingleton;
 import org.skyve.impl.generate.charts.JFreeChartGenerator;
 import org.skyve.impl.geoip.GeoIPServiceStaticSingleton;
 import org.skyve.impl.job.JobSchedulerStaticSingleton;
@@ -194,6 +196,19 @@ public class EXT {
 	 */
 	public static @Nonnull MailService getMailService() {
 		return MailServiceStaticSingleton.getEffective();
+	}
+
+	/**
+	 * Get the service that asks the user questions from server code.
+	 *
+	 * <p>It can ask only during an HTTP request on a path that can rerun its request; see
+	 * {@link Dialogs#ask(org.skyve.dialog.Question)} for those paths and the limits that apply.
+	 *
+	 * @return The installed dialogs service; never {@code null}.
+	 * @since 10.0
+	 */
+	public static @Nonnull Dialogs getDialogs() {
+		return DialogsStaticSingleton.get();
 	}
 
 	/**

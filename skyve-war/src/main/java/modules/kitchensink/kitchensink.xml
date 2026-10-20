@@ -22,6 +22,8 @@
 		<document ref="ConditionsFixture" />
 		<document ref="ConditionsFixtureRow" />
 		<document ref="ConditionsFixtureNode" />
+		<document ref="DialogsFixture" />
+		<document ref="DialogsFixtureRow" />
 	</documents>
 	<roles>
 		<role name="dev">
@@ -93,6 +95,15 @@
 					<contentPermission attribute="content" />
 				</document>
 				<document name="ConditionsFixtureNode" permission="CRUDD" />
+				<document name="DialogsFixture" permission="CRUDD">
+					<action name="AskOnce" />
+					<action name="AskTwice" />
+					<action name="AskYesNo" />
+					<action name="AskEveryRun" />
+					<action name="SaveThenAsk" />
+					<action name="AskWrapped" />
+				</document>
+				<document name="DialogsFixtureRow" permission="CRUDD" />
 			</privileges>
 		</role>
 	</roles>
@@ -125,6 +136,9 @@
 			<role name="dev" />
 		</edit>
 		<edit name="Conditions Fixture" document="ConditionsFixture">
+			<role name="dev" />
+		</edit>
+		<edit name="Dialogs Fixture" document="DialogsFixture">
 			<role name="dev" />
 		</edit>
 	</menu>

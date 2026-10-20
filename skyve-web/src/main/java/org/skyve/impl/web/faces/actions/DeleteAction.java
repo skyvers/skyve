@@ -7,6 +7,7 @@ import org.skyve.domain.messages.OptimisticLockException;
 import org.skyve.domain.messages.OptimisticLockException.OperationType;
 import org.skyve.domain.messages.SecurityException;
 import org.skyve.domain.messages.ValidationException;
+import org.skyve.impl.dialog.DialogsProtocol;
 import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
 import org.skyve.impl.persistence.AbstractPersistence;
@@ -47,11 +48,16 @@ public class DeleteAction extends FacesAction<Void> {
 	 * Deletes the current bean after permission checks, optimistic-lock validation, and pre-execute interception.
 	 * As in Save, a bean that is not persisted is only taken through pre-execute and post-render.
 	 *
+	 * <p>Side effects: marks the current HTTP request, if there is one, as able to ask questions
+	 * (see {@link org.skyve.dialog.Dialogs}), as the client can resend it with the answers.
+	 *
 	 * @return {@code null}; this action mutates persistence and view state through side effects
 	 * @throws Exception when deletion cannot be completed
 	 */
 	@Override
 	public Void callback() throws Exception {
+		// This action can ask questions, as the client can resend its request
+		DialogsProtocol.markAskable();
 		if (UtilImpl.FACES_TRACE) FACES_LOGGER.info("DeleteAction");
 
 		AbstractPersistence persistence = AbstractPersistence.get();

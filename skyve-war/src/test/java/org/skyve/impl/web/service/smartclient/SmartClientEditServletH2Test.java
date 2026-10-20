@@ -1,7 +1,11 @@
 package org.skyve.impl.web.service.smartclient;
 
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -21,14 +25,19 @@ import java.util.TreeMap;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+import org.skyve.EXT;
+import org.skyve.dialog.Question;
 import org.skyve.domain.Bean;
 import org.skyve.domain.PersistentBean;
 import org.skyve.impl.cache.StateUtil;
+import org.skyve.impl.dialog.DialogsProtocol;
+import org.skyve.impl.dialog.DialogsStaticSingleton;
 import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.web.AbstractWebContext;
 import org.skyve.impl.web.ServletConstants;
+import org.skyve.impl.web.WebContainer;
 import org.skyve.metadata.controller.ImplicitActionName;
 import org.skyve.metadata.model.document.Bizlet;
 import org.skyve.metadata.user.User;
@@ -37,6 +46,8 @@ import org.skyve.metadata.view.View.ViewType;
 import org.skyve.util.DataBuilder;
 import org.skyve.util.test.SkyveFixture.FixtureType;
 import org.skyve.web.WebContext;
+import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.mock.web.MockHttpServletResponse;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -188,6 +199,50 @@ class SmartClientEditServletH2Test extends AbstractSkyveTest {
 		String body = sink.toString();
 		assertTrue(body.contains("\"status\":0"), body);
 		assertTrue(body.contains("\"data\":"), body);
+	}
+
+	@Test
+	void postRenderCannotAskAQuestion() throws Exception {
+		DialogsStaticSingleton.setDefault();
+		MockHttpServletRequest request = new MockHttpServletRequest();
+		request.setAttribute(DialogsProtocol.ASKABLE_ATTRIBUTE_NAME, Boolean.TRUE);
+		WebContainer.setHttpServletRequestResponse(request, new MockHttpServletResponse());
+		try (PrintWriter writer = new PrintWriter(new StringWriter())) {
+			Bizlet<Bean> bizlet = mock(Bizlet.class);
+			doAnswer(invocation -> EXT.getDialogs().ask(Question.okCancel("postRender", "Post render", "Can postRender ask?")))
+					.when(bizlet).postRender(any(), any());
+			AllAttributesPersistent bean = AllAttributesPersistent.newInstance();
+			AbstractWebContext webContext = mockWebContext();
+			webContext.setConversation((AbstractPersistence) p);
+			webContext.setCurrentBean(bean);
+			View view = aapd.getView(UXUI, c, ViewType.create.toString());
+			Method pumpOutResponse = SmartClientEditServlet.class.getDeclaredMethod("pumpOutResponse",
+					AbstractWebContext.class,
+					org.skyve.metadata.user.User.class,
+					CustomerImpl.class,
+					org.skyve.metadata.module.Module.class,
+					org.skyve.metadata.model.document.Document.class,
+					View.class,
+					String.class,
+					Bean.class,
+					Bizlet.class,
+					int.class,
+					int.class,
+					String.class,
+					PrintWriter.class);
+			pumpOutResponse.setAccessible(true);
+
+			InvocationTargetException e = assertThrows(InvocationTargetException.class,
+					() -> pumpOutResponse.invoke(null, webContext, u, c, m, aapd, view, UXUI, bean, bizlet,
+													Integer.valueOf(0), Integer.valueOf(0), null, writer));
+
+			IllegalStateException cause = assertInstanceOf(IllegalStateException.class, e.getCause());
+			assertTrue(cause.getMessage().contains("postRender"), cause.getMessage());
+			assertNull(request.getAttribute(DialogsProtocol.ASKABLE_ATTRIBUTE_NAME));
+		}
+		finally {
+			WebContainer.clear();
+		}
 	}
 
 	@Test

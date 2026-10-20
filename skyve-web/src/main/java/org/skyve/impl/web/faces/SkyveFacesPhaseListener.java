@@ -7,6 +7,7 @@ import java.util.Map;
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
 import org.skyve.impl.cache.StateUtil;
+import org.skyve.impl.dialog.DialogsProtocol;
 import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.util.UtilImpl;
@@ -57,13 +58,20 @@ public class SkyveFacesPhaseListener implements PhaseListener {
 	/**
 	 * Logs and prepares pre-phase diagnostics for the JSF lifecycle.
 	 *
+	 * <p>Before RENDER_RESPONSE, the request is unmarked as able to ask, as the actions are done and a question
+	 * asked while rendering cannot roll back what was rendered; {@link org.skyve.dialog.Dialogs#ask(org.skyve.dialog.Question)}
+	 * throws {@link IllegalStateException} instead.
+	 *
 	 * @param event the current JSF phase event
 	 */
 	@Override
 	public void beforePhase(PhaseEvent event) {
+		PhaseId phaseId = event.getPhaseId();
 		if (UtilImpl.FACES_TRACE) {
-			PhaseId phaseId = event.getPhaseId();
 			FACES_LOGGER.info("SkyveFacesPhaseListener - BEFORE {} : responseComplete={}", phaseId, Boolean.valueOf(event.getFacesContext().getResponseComplete()));
+		}
+		if (PhaseId.RENDER_RESPONSE.equals(phaseId)) {
+			DialogsProtocol.unmarkAskable();
 		}
 	}
 
@@ -248,23 +256,34 @@ public class SkyveFacesPhaseListener implements PhaseListener {
 	 * Performs post-render hooks, recaches the conversation when the response is error-free, dehydrates the view,
 	 * and finally commits and disconnects persistence for the completed Faces response.
 	 *
+	 * <p>When an action in the request asked a question, the request has been rolled back and the client will resend
+	 * it, so post-render hooks are not called and the conversation is not cached; the view is still dehydrated.
+	 * Post-render hooks run after the response has rendered, so they cannot ask: the request is first unmarked as able
+	 * to ask, and {@link org.skyve.dialog.Dialogs#ask(org.skyve.dialog.Question)} throws {@link IllegalStateException}.
+	 *
 	 * @param event the current rendering-complete phase event
 	 * @throws Exception when post-render lifecycle processing fails
 	 */
 	@SuppressWarnings("java:S3776") // Complexity OK
 	private static void afterResponseRendered(PhaseEvent event) {
 		try {
-			UIViewRoot vr = event.getFacesContext().getViewRoot();
+			FacesContext fc = event.getFacesContext();
+			UIViewRoot vr = fc.getViewRoot();
 			if (vr != null) {
 				// Call postRender, cache and dehydrate
 				String managedBeanName = (String) vr.getAttributes().get(FacesUtil.MANAGED_BEAN_NAME_KEY);
 				if (managedBeanName != null) {
 					FacesView view = (FacesView) FacesUtil.getNamed(managedBeanName);
 					AbstractWebContext webContext = view.getWebContext();
+					// A request that asked a question was rolled back and will be resent,
+					// so its state is neither post-rendered nor cached
+					boolean questionAsked = FacesAction.isQuestionAsked(fc);
 
 					// Call postRender() if applicable
 					Bean postRenderBean = view.getPostRenderBean();
-					if (postRenderBean != null) {
+					if ((postRenderBean != null) && (! questionAsked)) {
+						// The response has been rendered, so postRender cannot ask a question
+						DialogsProtocol.unmarkAskable();
 						CustomerImpl internalCustomer = (CustomerImpl) CORE.getCustomer();
 						boolean vetoed = internalCustomer.interceptBeforePostRender(postRenderBean, webContext);
 						if (! vetoed) {
@@ -282,9 +301,10 @@ public class SkyveFacesPhaseListener implements PhaseListener {
 					}
 
 					// Cache the conversation
-					Severity maximumSeverity = event.getFacesContext().getMaximumSeverity();
-					if ((maximumSeverity == null) ||
-							(maximumSeverity.getOrdinal() < FacesMessage.SEVERITY_ERROR.getOrdinal())) {
+					Severity maximumSeverity = fc.getMaximumSeverity();
+					if ((! questionAsked) &&
+							((maximumSeverity == null) ||
+								(maximumSeverity.getOrdinal() < FacesMessage.SEVERITY_ERROR.getOrdinal()))) {
 						// Conversation caching commits any active transaction without closing its
 						// persistence context, ensuring Hibernate has released its JDBC resources.
 						StateUtil.commitAndCacheConversation(webContext);
