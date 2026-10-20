@@ -19,6 +19,7 @@ import org.skyve.dialog.QuestionException;
 import org.skyve.domain.messages.ConversationEndedException;
 import org.skyve.domain.messages.Message;
 import org.skyve.domain.messages.MessageException;
+import org.skyve.domain.messages.SecurityException;
 import org.skyve.domain.messages.SessionEndedException;
 import org.skyve.impl.dialog.DialogsProtocol;
 import org.skyve.impl.persistence.AbstractPersistence;
