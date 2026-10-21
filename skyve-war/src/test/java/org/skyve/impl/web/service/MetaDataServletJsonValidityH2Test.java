@@ -222,6 +222,28 @@ class MetaDataServletJsonValidityH2Test extends AbstractSkyveTest {
 	}
 
 	@Test
+	void dataGridEventActionsAreMembersOfTheGrid() throws Exception {
+		JsonNode grid = widget(renderFixture("", "<dataGrid binding=\"inlineGrid\"><boundColumn binding=\"booleanFlag\" />"
+				+ "<onAddedHandlers><rerender /></onAddedHandlers>"
+				+ "<onEditedHandlers><rerender /></onEditedHandlers>"
+				+ "<onRemovedHandlers><rerender /></onRemovedHandlers>"
+				+ "<onSelectedHandlers><rerender /></onSelectedHandlers></dataGrid>", ""), "dataGrid");
+
+		assertEquals(1, array(grid, "columns").size());
+		for (String actions : new String[] {"addedActions", "editedActions", "removedActions", "selectedActions"}) {
+			assertEquals("rerender", text(array(grid, actions).get(0), "type"));
+		}
+	}
+
+	@Test
+	void listMembershipEventActionsAreMembersOfTheMembership() throws Exception {
+		JsonNode membership = widget(renderFixture("", "<listMembership binding=\"inlineGrid\">"
+				+ "<onChangedHandlers><rerender /></onChangedHandlers></listMembership>", ""), "listMembership");
+
+		assertEquals("rerender", text(array(membership, "changedActions").get(0), "type"));
+	}
+
+	@Test
 	void viewHelpLocationsAreEscaped() throws Exception {
 		JsonNode view = renderFixture("helpRelativeFileName=\"" + NASTY_XML + ".html\" helpURL=\"https://example.com/?q="
 				+ NASTY_XML + "\"", item("<textField binding=\"text\" />"), "");
@@ -484,6 +506,13 @@ class MetaDataServletJsonValidityH2Test extends AbstractSkyveTest {
 		assertNotNull(member, "No " + memberName + " in " + node);
 		assertTrue(member.isTextual(), memberName + " is not a string in " + node);
 		return member.textValue();
+	}
+
+	private static JsonNode array(JsonNode node, String memberName) {
+		JsonNode member = node.get(memberName);
+		assertNotNull(member, "No " + memberName + " in " + node);
+		assertTrue(member.isArray(), memberName + " is not an array in " + node);
+		return member;
 	}
 
 	private static JsonNode number(JsonNode node, String memberName) {

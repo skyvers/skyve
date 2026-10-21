@@ -1,7 +1,9 @@
 package org.skyve.impl.web.faces.actions;
 
+import org.skyve.domain.Bean;
 import org.skyve.domain.PersistentBean;
 import org.skyve.domain.messages.SecurityException;
+import org.skyve.impl.dialog.DialogsProtocol;
 import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
 import org.skyve.impl.persistence.AbstractPersistence;
@@ -31,6 +33,9 @@ import jakarta.servlet.http.HttpServletRequest;
 
 /**
  * Executes a Faces callback action within the current Skyve web context.
+ *
+ * <p>As in SmartClient, only a persistent bean is security checked and saved; a non-persistent bean
+ * is taken through pre-execute and post-render only.
  */
 public class SaveAction extends FacesAction<Void> {
 
@@ -44,13 +49,24 @@ public class SaveAction extends FacesAction<Void> {
 		this.ok = ok;
 	}
 
+	/**
+	 * Runs pre-execute for OK or Save and saves the target bean when the view's required fields are valid.
+	 *
+	 * <p>Side effects: marks the current HTTP request, if there is one, as able to ask questions
+	 * (see {@link org.skyve.dialog.Dialogs}), as the client can resend it with the answers.
+	 *
+	 * @return {@code null}; this action mutates persistence and view state through side effects
+	 * @throws Exception when the save cannot be completed
+	 */
 	@Override
 	@SuppressWarnings("java:S3776") // Complexity OK
 	public @Nullable Void callback() throws Exception {
+		// This action can ask questions, as the client can resend its request
+		DialogsProtocol.markAskable();
 		if (UtilImpl.FACES_TRACE) FACES_LOGGER.info("SaveAction - ok={}", Boolean.valueOf(ok));
 
 		AbstractPersistence persistence = AbstractPersistence.get();
-		PersistentBean targetBean = (PersistentBean) ActionUtil.getTargetBeanForView(facesView);
+		Bean targetBean = ActionUtil.getTargetBeanForView(facesView);
     	User user = persistence.getUser();
     	Customer customer = user.getCustomer();
     	Module targetModule = customer.getModule(targetBean.getBizModule());
@@ -73,7 +89,7 @@ public class SaveAction extends FacesAction<Void> {
 			CustomerImpl internalCustomer = (CustomerImpl) customer;
 			boolean vetoed = internalCustomer.interceptBeforePreExecute(ian, targetBean, null, webContext);
 			if (! vetoed) {
-				Bizlet<PersistentBean> bizlet = ((DocumentImpl) targetDocument).getBizlet(customer);
+				Bizlet<Bean> bizlet = ((DocumentImpl) targetDocument).getBizlet(customer);
 				if (bizlet != null) {
 					if (UtilImpl.BIZLET_TRACE) BIZLET_LOGGER.info("Entering {}.preExecute: {}, {}, null, , {}", bizlet.getClass().getName(), ian, targetBean, webContext);
 					targetBean = bizlet.preExecute(ian, targetBean, null, webContext);
@@ -81,14 +97,16 @@ public class SaveAction extends FacesAction<Void> {
 				}
 				internalCustomer.interceptAfterPreExecute(ian, targetBean, null, webContext);
 
-				if (targetBean.isNotPersisted() && (! user.canCreateDocument(targetDocument))) {
-					throw new SecurityException("create this data", user.getName());
+				if (targetBean instanceof PersistentBean persistentBean) {
+					if (persistentBean.isNotPersisted() && (! user.canCreateDocument(targetDocument))) {
+						throw new SecurityException("create this data", user.getName());
+					}
+					else if (persistentBean.isPersisted() && (! user.canUpdateDocument(targetDocument))) {
+						throw new SecurityException("update this data", user.getName());
+					}
+			
+					targetBean = persistence.save(targetDocument, persistentBean);
 				}
-				else if (targetBean.isPersisted() && (! user.canUpdateDocument(targetDocument))) {
-					throw new SecurityException("update this data", user.getName());
-				}
-		
-				targetBean = persistence.save(targetDocument, targetBean);
 				ActionUtil.setTargetBeanForViewAndCollectionBinding(facesView, null, targetBean);
 				
 				// We want to call post render

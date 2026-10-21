@@ -4595,6 +4595,10 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 				ImplicitActionName.Delete.equals(implicitActionName)) {
 			StringBuilder expression = new StringBuilder(128);
 			expression.append("empty ").append(managedBeanName).append(".viewBinding");
+			// As in SmartClient, there is nothing to delete until the bean has been persisted
+			if (ImplicitActionName.Delete.equals(implicitActionName)) {
+				expression.append(" and ").append(managedBeanName).append(".currentBean['").append(Bean.PERSISTED_KEY).append("']");
+			}
 
 /*
 			// TODO Add check for security privileges

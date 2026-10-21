@@ -10,10 +10,13 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.UUID;
 
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.skyve.EXT;
 import org.skyve.content.MimeType;
+import org.skyve.dialog.QuestionException;
 import org.skyve.domain.Bean;
 import org.skyve.domain.PersistentBean;
+import org.skyve.domain.messages.ActionUnavailableException;
 import org.skyve.domain.messages.ConversationEndedException;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.messages.Message;
@@ -27,17 +30,20 @@ import org.skyve.domain.messages.ValidationException;
 import org.skyve.domain.types.converters.Converter;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.cache.StateUtil;
+import org.skyve.impl.dialog.DialogsProtocol;
 import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
 import org.skyve.impl.metadata.model.document.field.ConvertibleField;
 import org.skyve.impl.metadata.model.document.field.Enumeration;
 import org.skyve.impl.metadata.model.document.field.Field;
+import org.skyve.impl.metadata.view.ActionAvailability;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.ValidationUtil;
 import org.skyve.impl.web.AbstractWebContext;
 import org.skyve.impl.web.ServletConstants;
 import org.skyve.impl.web.UserAgent;
+import org.skyve.impl.web.ViewWebContext;
 import org.skyve.impl.web.WebErrorUtil;
 import org.skyve.impl.web.WebUtil;
 import org.skyve.metadata.MetaDataException;
@@ -54,6 +60,7 @@ import org.skyve.metadata.module.Module;
 import org.skyve.metadata.router.UxUi;
 import org.skyve.metadata.user.User;
 import org.skyve.metadata.user.UserAccess;
+import org.skyve.metadata.view.Action;
 import org.skyve.metadata.view.TextOutput.Sanitisation;
 import org.skyve.metadata.view.View;
 import org.skyve.metadata.view.View.ViewParameter;
@@ -91,6 +98,8 @@ public class SmartClientEditServlet extends HttpServlet {
 	private static final String EXITING_PRE_EXECUTE = "Exiting {}.preExecute: {}";
 	private static final String ENTERING_PRE_RERENDER = "Entering {}.preRerender: {}, {}, {}";
 	private static final String EXITING_PRE_RERENDER = "Exiting {}.preRerender: {}";
+	/** The response status of a refused action, which is negative and outside SmartClient's own error codes. */
+	private static final int UNAVAILABLE_RESPONSE_STATUS = -51;
 
 	private static Class<? extends SmartClientViewRenderer> MANIPULATOR_CLASS = null;
 	
@@ -175,6 +184,17 @@ public class SmartClientEditServlet extends HttpServlet {
 	/**
 	 * Processes SmartClient edit requests and writes a JSON response.
 	 *
+	 * <p>Every operation but {@code fetch} marks the request as able to ask questions. A question asked in the
+	 * request rolls it back and is written as a status {@code -50} response; the conversation is not cached and
+	 * the CSRF token is not replaced, so the client can resend the request with the answer.
+	 *
+	 * <p>A custom action, a download, OK, Save or a delete is refused with {@link ActionUnavailableException}
+	 * unless the view, as last rendered, offers a reachable trigger for it (see {@link ActionAvailability}).
+	 * A push request, and a delete with no bean (no conversation), are not checked.
+	 * Side effects of a refusal: {@link ActionAvailability} logs a warning, and the request is rolled back and written as
+	 * a status {@value #UNAVAILABLE_RESPONSE_STATUS} response; as for a question, the conversation is not cached and
+	 * the CSRF token is not replaced.
+	 *
 	 * @param request inbound HTTP request
 	 * @param response outbound HTTP response
 	 * @throws IOException when writing the response fails
@@ -209,6 +229,10 @@ public class SmartClientEditServlet extends HttpServlet {
 	        	return;
 	        }
 	        Operation operation = Operation.valueOf(operationType);
+	        // Every operation but a form load can ask a question, as the client can resend its request
+	        if (! Operation.fetch.equals(operation)) {
+	        	DialogsProtocol.markAskable();
+	        }
 
 	        AbstractPersistence persistence = null;
 	        try {
@@ -415,13 +439,28 @@ public class SmartClientEditServlet extends HttpServlet {
 	
 								SmartClientListServlet.checkCsrfToken(session, request, response, currentCsrfToken);
 	
-								PersistentBean beanToDelete = (PersistentBean) processBean;
-								Bizlet<PersistentBean> bizletToDelete = ((DocumentImpl) processDocument).getBizlet(customer);
+								// With no bean (no conversation) there is nothing to delete, and remove() deletes nothing.
+								if (processBean != null) {
+									// The bean's own document, as _doc is not checked against the bean
+									Document beanDocument = customer.getModule(processBean.getBizModule()).getDocument(customer, processBean.getBizDocument());
+									ActionAvailability.check(user,
+																beanDocument,
+																beanDocument.getView(uxui.getName(),
+																								customer,
+																								processBean.isCreated() ?
+																									ViewType.edit.toString() :
+																									ViewType.create.toString()),
+																uxui.getName(),
+																processBean,
+																ImplicitActionName.Delete);
+								}
+
+								Bizlet<Bean> bizletToDelete = ((DocumentImpl) processDocument).getBizlet(customer);
 								remove(webContext,
 										user,
-						                customer, 
-										processDocument, 
-										beanToDelete, 
+						                customer,
+										processDocument,
+										processBean,
 										bizletToDelete, 
 										persistence, 
 										pw);
@@ -441,9 +480,21 @@ public class SmartClientEditServlet extends HttpServlet {
 		    	if (persistence != null) {
 		    		persistence.rollback();
 		    	}
-	
-				String reference = WebErrorUtil.logUnexpectedAndGetReference(LOGGER, "SmartClient edit request failed for operation " + operation, t);
-				produceErrorResponse(t, operation, true, pw, reference);
+
+		    	// A question is not an error - the conversation is not cached and the CSRF token is not replaced
+		    	QuestionException question = ExceptionUtils.throwableOfType(t, QuestionException.class);
+		    	// A refused action is expected - it was logged when refused, and as with a question the token is not replaced
+		    	ActionUnavailableException unavailable = ExceptionUtils.throwableOfType(t, ActionUnavailableException.class);
+		    	if (question != null) {
+		    		produceQuestionResponse(question, pw);
+		    	}
+		    	else if (unavailable != null) {
+		    		produceUnavailableResponse(unavailable, pw);
+		    	}
+		    	else {
+		    		String reference = WebErrorUtil.logUnexpectedAndGetReference(LOGGER, "SmartClient edit request failed for operation " + operation, t);
+		    		produceErrorResponse(t, operation, true, pw, reference);
+		    	}
 			}
 		    finally {
 	    	    // commit and close (its already been serialized to the conversations cache if needed)
@@ -455,8 +506,42 @@ public class SmartClientEditServlet extends HttpServlet {
 	}
 
 	/**
+	 * Writes the response that asks the client a question, so that it can resend its request with the answer.
+	 *
+	 * <p>The response has status {@link DialogsProtocol#QUESTION_RESPONSE_STATUS}, which every client treats as a
+	 * failure because it is negative and which is outside SmartClient's own error codes. {@code question} holds the question for the client to
+	 * show (see {@link DialogsProtocol#toJSON(QuestionException)}). {@code data} holds plain text for a client
+	 * that cannot show questions.
+	 *
+	 * @param question	The question thrown by the request.
+	 * @param pw	The response writer.
+	 */
+	private static void produceQuestionResponse(@Nonnull QuestionException question, @Nonnull PrintWriter pw) {
+		String fallback = Util.nullSafeI18n("ui.dialog.unsupported", question.getQuestion().getMessage());
+		pw.append("{\"response\":{\"status\":").append(String.valueOf(DialogsProtocol.QUESTION_RESPONSE_STATUS));
+		pw.append(",\"data\":\"").append(OWASP.escapeJsonString(fallback));
+		pw.append("\",\"question\":").append(DialogsProtocol.toJSON(question)).append("}}");
+	}
+
+	/**
+	 * Writes the response that refuses an action the view offered no reachable trigger for.
+	 *
+	 * <p>The response has status {@value #UNAVAILABLE_RESPONSE_STATUS}, which every client treats as a failure because
+	 * it is negative and which is outside SmartClient's own error codes. {@code data} holds the refusal's localised message, escaped
+	 * as HTML for the client to show.
+	 *
+	 * @param unavailable	The refusal thrown by the request.
+	 * @param pw	The response writer.
+	 */
+	private static void produceUnavailableResponse(@Nonnull ActionUnavailableException unavailable, @Nonnull PrintWriter pw) {
+		String message = unavailable.getMessages().get(0).getText();
+		pw.append("{\"response\":{\"status\":").append(String.valueOf(UNAVAILABLE_RESPONSE_STATUS));
+		pw.append(",\"data\":\"").append(OWASP.escapeJsonString(OWASP.escapeHtml(message))).append("\"}}");
+	}
+
+	/**
 	 * Pump out error text for smart client pages.
-	 * 
+	 *
 	 * @param t The exception.
 	 * @param operation fetch, add, remove or update.
 	 * @param includeBindings Only edit views can use the bindings available in the error messages.
@@ -990,6 +1075,13 @@ public class SmartClientEditServlet extends HttpServlet {
 	/**
 	 * Applies request changes and executes action/rerender/save flows.
 	 *
+	 * <p>Before the request's values are applied, a custom action or download is refused unless the form view, as
+	 * last rendered for the form bean, offers a reachable trigger for it; with a grid binding, unless a reachable link
+	 * in that data grid or repeater's row offers it. OK and Save are refused in the same way, by the triggers of a
+	 * custom action with that name or class when the form view declares one, and otherwise by the built-in action's.
+	 * A push request is not checked. Side effects of a refusal: {@link ActionAvailability} logs a warning, and nothing
+	 * is applied or run.
+	 *
 	 * @param webContext active web conversation context
 	 * @param user active user
 	 * @param customer active customer metadata
@@ -1009,6 +1101,7 @@ public class SmartClientEditServlet extends HttpServlet {
 	 * @param persistence active persistence context
 	 * @param uxui active UX/UI profile name
 	 * @param pw response writer
+	 * @throws ActionUnavailableException when the view offers no reachable trigger for the requested action
 	 * @throws Exception when apply processing fails
 	 */
 	@SuppressWarnings({"java:S107", "java:S3776", "java:S6541"}) // Long parameter list preserves the existing framework/API contract; complexity OK
@@ -1034,21 +1127,63 @@ public class SmartClientEditServlet extends HttpServlet {
 	throws Exception {
 		String mutableCustomActionName = customActionName;
 		if (! ServletConstants.PUSH_ACTION_NAME.equals(mutableCustomActionName)) {
+			View formView = formDocument.getView(uxui,
+															customer,
+															formBean.isCreated() ?
+																ViewType.edit.toString() :
+																ViewType.create.toString());
 			// Apply the JSON values
 	    	ViewJSONManipulator manipulator = newManipulator(user, 
 																formModule, 
 																formDocument, 
-																formDocument.getView(uxui, 
-																						customer, 
-																						formBean.isCreated() ? 
-																							ViewType.edit.toString() : 
-																							ViewType.create.toString()),
+																formView,
 																uxui,
 																formBean, 
 																editIdCounter,
 																createIdCounter,
 																true);
 			manipulator.visit();
+
+			if (mutableCustomActionName != null) {
+				if (gridBinding == null) {
+					ActionAvailability.check(user, formDocument, formView, uxui, formBean, mutableCustomActionName);
+				}
+				else { // a link in a data grid or repeater row, whose action is declared in the row bean's own document's view
+					Document rowDocument = customer.getModule(processBean.getBizModule()).getDocument(customer, processBean.getBizDocument());
+					// The edit view, where ViewValidator requires a container-column link's action to be declared
+					View rowView = rowDocument.getView(uxui, customer, ViewType.edit.toString());
+					ActionAvailability.checkRow(user,
+													formDocument,
+													formView,
+													uxui,
+													formBean,
+													gridBinding,
+													rowDocument,
+													rowView,
+													processBean,
+													mutableCustomActionName);
+				}
+			}
+			else if (ImplicitActionName.OK.equals(implicitAction) || ImplicitActionName.Save.equals(implicitAction)) {
+				// The client requests a custom action whose class is OK or Save by that class, and the request then runs
+				// the built-in action (as admin.MonitoringDashboard's Save does), so that custom action's triggers decide.
+				// Matches by class only, as ActionAvailability does, so an action merely named OK or Save does not collide
+				String implicitActionName = implicitAction.toString();
+				boolean custom = false;
+				for (Action action : formView.getActions()) {
+					if ((action.getImplicitName() == null) && implicitActionName.equals(action.getResourceName())) {
+						custom = true;
+						break;
+					}
+				}
+				if (custom) {
+					ActionAvailability.check(user, formDocument, formView, uxui, formBean, implicitActionName);
+				}
+				else {
+					ActionAvailability.check(user, formDocument, formView, uxui, formBean, implicitAction);
+				}
+			}
+
 			manipulator.applyJSON((String) parameters.get("bean"), persistence, webContext);
 		}
 		else {
@@ -1086,13 +1221,17 @@ public class SmartClientEditServlet extends HttpServlet {
 				}
 				if (downloadAction != null) { // download action
 					downloadAction.prepare(processedBean, webContext);
+					String processBizId = processBean.getBizId();
+					((ViewWebContext) webContext).recordPreparedDownload(mutableCustomActionName,
+															processDocument.getOwningModuleName(), processDocument.getName(),
+															formBinding, gridBinding, processBizId);
 					redirectUrl = WebUtil.getDownloadActionUrl(mutableCustomActionName,
 																processDocument.getOwningModuleName(),
 																processDocument.getName(),
 																webContext.getWebId(),
 																formBinding,
 																gridBinding,
-																processBean.getBizId());
+																processBizId);
 				}
 				else if (serverSideAction != null) { // server-side action
 					key = RequestKey.action(processDocument, mutableCustomActionName);
@@ -1229,6 +1368,9 @@ public class SmartClientEditServlet extends HttpServlet {
 	/**
 	 * Writes a successful SmartClient response payload for the current form state.
 	 *
+	 * <p>The current request is first unmarked as able to ask, so a question asked while rendering
+	 * throws {@link IllegalStateException} (see {@link org.skyve.dialog.Dialogs#ask(org.skyve.dialog.Question)}).
+	 *
 	 * @param webContext active web conversation context
 	 * @param user active user
 	 * @param internalCustomer internal customer metadata implementation
@@ -1259,6 +1401,10 @@ public class SmartClientEditServlet extends HttpServlet {
 											@Nullable String redirectUrl,
 											@Nonnull PrintWriter pw) 
 	throws Exception  {
+		// The operation is complete, so rendering the response cannot ask a question:
+		// the conversation is committed after rendering, so a rerun would apply the changes twice
+		DialogsProtocol.unmarkAskable();
+
 		StringBuilder result = new StringBuilder(256);
 		// Need to make a new JSON manipulator here to visit the view for the response
 		// as conditions may have changed since applying changes to the bean
@@ -1295,12 +1441,13 @@ public class SmartClientEditServlet extends HttpServlet {
 	
 	/**
 	 * Removes a persistent bean and writes a successful delete response.
+	 * As in save, a bean that is not persisted is only taken through pre-execute and post-render.
 	 *
 	 * @param webContext active web conversation context
 	 * @param user active user
 	 * @param customer active customer metadata
 	 * @param processDocument document from which the bean is deleted
-	 * @param beanToDelete bean requested for deletion
+	 * @param bean bean requested for deletion
 	 * @param bizlet document bizlet, or {@code null}
 	 * @param persistence active persistence context
 	 * @param pw response writer
@@ -1311,67 +1458,45 @@ public class SmartClientEditServlet extends HttpServlet {
 								@Nonnull User user,
 		                        @Nonnull Customer customer,
 								@Nonnull Document processDocument,
-								@Nonnull PersistentBean beanToDelete,
-								@Nullable Bizlet<PersistentBean> bizlet,
+								@Nonnull Bean bean,
+								@Nullable Bizlet<Bean> bizlet,
 								@Nonnull AbstractPersistence persistence,
 								@Nonnull PrintWriter pw)
 	throws Exception {
-		if (! user.canDeleteDocument(processDocument)) {
-			throw new SecurityException("delete this data", user.getName());
-		}
-		
-		// Ensure that we are working on the latest of everything and no related entities are pointing to old data
-		persistence.evictAllCached();
-		PersistentBean persistentBeanToDelete = persistence.retrieve(processDocument, 
-																		beanToDelete.getBizId());
-
-		if (persistentBeanToDelete == null) { // deleted by another user
-			throw new ValidationException(new Message("Failed to delete this information as it was already deleted by someone else after you looked at it."));
-		}
-
-		if (! user.canReadBean(persistentBeanToDelete.getBizId(), 
-								persistentBeanToDelete.getBizModule(), 
-								persistentBeanToDelete.getBizDocument(), 
-								persistentBeanToDelete.getBizCustomer(), 
-								persistentBeanToDelete.getBizDataGroupId(), 
-								persistentBeanToDelete.getBizUserId())) {
-			throw new SecurityException("read this data", user.getName());
-		}
-		
-		if (! persistentBeanToDelete.getBizLock().equals(beanToDelete.getBizLock())) {
-			throw new OptimisticLockException(user, 
-												OperationType.delete, 
-												persistentBeanToDelete.getBizLock());
-		}
+		// Only a persisted bean is security checked and deleted
+		boolean persisted = (bean instanceof PersistentBean) && bean.isPersisted();
+		Bean beanToDelete = persisted ? retrieveForDelete(user, processDocument, (PersistentBean) bean, persistence) : bean;
 		
 		// Run preExecute after the copy is taken, in case we rollback
 		LOGGER.info("PRE-EXECUTE on {}", ImplicitActionName.Delete);
 		CustomerImpl internalCustomer = (CustomerImpl) customer;
 		boolean vetoed = internalCustomer.interceptBeforePreExecute(ImplicitActionName.Delete, 
-																		persistentBeanToDelete, 
+																		beanToDelete, 
 																		null,
 																		webContext);
 		if (! vetoed) {
 			if (bizlet != null) {
-				if (UtilImpl.BIZLET_TRACE) BIZLET_LOGGER.info(ENTERING_PRE_EXECUTE_WITH_NULL_PARENT, bizlet.getClass().getName(), ImplicitActionName.Delete, persistentBeanToDelete, webContext);
-				persistentBeanToDelete = bizlet.preExecute(ImplicitActionName.Delete, 
-															persistentBeanToDelete, 
-															null,
-															webContext);
-				if (UtilImpl.BIZLET_TRACE) BIZLET_LOGGER.info(EXITING_PRE_EXECUTE, bizlet.getClass().getName(), persistentBeanToDelete);
+				if (UtilImpl.BIZLET_TRACE) BIZLET_LOGGER.info(ENTERING_PRE_EXECUTE_WITH_NULL_PARENT, bizlet.getClass().getName(), ImplicitActionName.Delete, beanToDelete, webContext);
+				beanToDelete = bizlet.preExecute(ImplicitActionName.Delete, 
+													beanToDelete, 
+													null,
+													webContext);
+				if (UtilImpl.BIZLET_TRACE) BIZLET_LOGGER.info(EXITING_PRE_EXECUTE, bizlet.getClass().getName(), beanToDelete);
 			}
 			internalCustomer.interceptAfterPreExecute(ImplicitActionName.Delete, 
-														persistentBeanToDelete, 
+														beanToDelete, 
 														null,
 														webContext);
 		}
 		
-		persistence.delete(processDocument, persistentBeanToDelete);
+		if (persisted) {
+			persistence.delete(processDocument, (PersistentBean) beanToDelete);
+		}
 
 		pw.append("{\"response\":{\"status\":0}}");
 
 		try {
-			postRender(internalCustomer, bizlet, persistentBeanToDelete, webContext);
+			postRender(internalCustomer, bizlet, beanToDelete, webContext);
 			Monitoring.measure(RequestKey.delete(processDocument));
 		}
 		finally {
@@ -1380,7 +1505,57 @@ public class SmartClientEditServlet extends HttpServlet {
 	}
 	
 	/**
+	 * Checks that the user can delete a persisted bean and retrieves the latest copy of it to delete.
+	 *
+	 * @param user active user
+	 * @param processDocument document from which the bean is deleted
+	 * @param beanToDelete bean requested for deletion
+	 * @param persistence active persistence context
+	 * @return the latest persisted copy of the bean
+	 * @throws SecurityException when the user cannot delete or read the bean
+	 * @throws ValidationException when the bean was deleted by someone else
+	 * @throws OptimisticLockException when the bean was changed by someone else
+	 */
+	private static PersistentBean retrieveForDelete(User user,
+														Document processDocument,
+														PersistentBean beanToDelete,
+														AbstractPersistence persistence) {
+		if (! user.canDeleteDocument(processDocument)) {
+			throw new SecurityException("delete this data", user.getName());
+		}
+		
+		// Ensure that we are working on the latest of everything and no related entities are pointing to old data
+		persistence.evictAllCached();
+		PersistentBean result = persistence.retrieve(processDocument, beanToDelete.getBizId());
+
+		if (result == null) { // deleted by another user
+			throw new ValidationException(new Message("Failed to delete this information as it was already deleted by someone else after you looked at it."));
+		}
+
+		if (! user.canReadBean(result.getBizId(), 
+								result.getBizModule(), 
+								result.getBizDocument(), 
+								result.getBizCustomer(), 
+								result.getBizDataGroupId(), 
+								result.getBizUserId())) {
+			throw new SecurityException("read this data", user.getName());
+		}
+		
+		if (! result.getBizLock().equals(beanToDelete.getBizLock())) {
+			throw new OptimisticLockException(user, 
+												OperationType.delete, 
+												result.getBizLock());
+		}
+		
+		return result;
+	}
+	
+	/**
 	 * Executes post-render interceptors and bizlet callbacks.
+	 *
+	 * <p>The response has already been written, so a question cannot be asked: the current request is first unmarked
+	 * as able to ask, and {@link org.skyve.dialog.Dialogs#ask(org.skyve.dialog.Question)} throws
+	 * {@link IllegalStateException} instead.
 	 *
 	 * @param internalCustomer internal customer metadata implementation
 	 * @param bizlet bizlet instance, or {@code null}
@@ -1389,6 +1564,7 @@ public class SmartClientEditServlet extends HttpServlet {
 	 * @param <T> rendered bean type
 	 */
 	private static <T extends Bean> void postRender(@Nonnull CustomerImpl internalCustomer, @Nullable Bizlet<T> bizlet, @Nonnull T bean, @Nonnull AbstractWebContext webContext) {
+		DialogsProtocol.unmarkAskable();
 		boolean vetoed = internalCustomer.interceptBeforePostRender(bean, webContext);
 		if (! vetoed) {
 			if (bizlet != null) {

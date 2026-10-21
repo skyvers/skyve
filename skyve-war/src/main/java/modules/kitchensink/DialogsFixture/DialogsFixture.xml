@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<document name="DialogsFixture"
+			xmlns="http://www.skyve.org/xml/document"
+			xsi:schemaLocation="http://www.skyve.org/xml/document ../../../schemas/document.xsd"
+			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<documentation>
+		<![CDATA[
+			Kitchen Sink fixture for server-side questions (EXT.getDialogs()).
+
+			Its actions, Bizlet and view ask a question from each kind of request that can ask:
+			custom actions, OK and Save (preSave), Delete (preDelete), a rerender from a field change,
+			a server action in a change handler, and ZoomOut (and, in PrimeFaces, Remove) of a row.
+			Outcome records what the code did after the questions were answered.
+		]]>
+	</documentation>
+	<persistent name="KS_DialogsFixture" />
+	<singularAlias>Dialogs Fixture</singularAlias>
+	<pluralAlias>Dialogs Fixtures</pluralAlias>
+	<bizKey expression="Dialogs Fixture" />
+	<attributes>
+		<text name="text">
+			<displayName>Text</displayName>
+			<description>Changing it rerenders the view, and the rerender asks whether to carry on with the change logic.</description>
+			<length>100</length>
+		</text>
+		<text name="actionText">
+			<displayName>Action Text</displayName>
+			<description>Changing it runs the Ask Once action from its change handler.</description>
+			<length>100</length>
+		</text>
+		<boolean name="askOnSave">
+			<displayName>Ask On Save</displayName>
+			<description>When ticked, preSave asks whether to save.</description>
+			<defaultValue>false</defaultValue>
+		</boolean>
+		<boolean name="askOnDelete">
+			<displayName>Ask On Delete</displayName>
+			<description>When ticked, preDelete asks whether to delete.</description>
+			<defaultValue>false</defaultValue>
+		</boolean>
+		<text name="outcome">
+			<displayName>Outcome</displayName>
+			<description>What the code did after its questions were answered.</description>
+			<length>500</length>
+		</text>
+		<collection name="rows" type="child">
+			<displayName>Rows</displayName>
+			<description>Zooming out of a row asks first, as does removing a row in PrimeFaces.</description>
+			<documentName>DialogsFixtureRow</documentName>
+			<minCardinality>0</minCardinality>
+		</collection>
+	</attributes>
+</document>

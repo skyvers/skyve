@@ -49,6 +49,7 @@ public class DynaIterable implements AutoClosingIterable<DynaBean> {
 	public DynaIterable(@Nonnull Connection c, @Nonnull AbstractSQL sql, @Nonnull DataStore ds, @Nonnull SkyveDialect dialect) {
 		try {
 			ps = new NamedParameterPreparedStatement(c, sql.toQueryString());
+			ps.setFetchSize(AbstractPersistence.JDBC_FETCH_SIZE);
 			sql.prepareStatement(ps, ds, dialect);
 			rs = ps.executeQuery();
 		}

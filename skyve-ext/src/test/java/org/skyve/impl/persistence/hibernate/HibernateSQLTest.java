@@ -4,10 +4,12 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -15,6 +17,8 @@ import java.util.Date;
 import java.util.Collections;
 import java.util.List;
 
+import org.hibernate.ScrollMode;
+import org.hibernate.ScrollableResults;
 import org.hibernate.Session;
 import org.hibernate.query.NativeQuery;
 import org.junit.jupiter.api.AfterAll;
@@ -29,6 +33,7 @@ import org.skyve.domain.types.Enumeration;
 import org.skyve.domain.types.OptimisticLock;
 import org.skyve.domain.types.TimeOnly;
 import org.skyve.domain.types.Timestamp;
+import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.metadata.model.Attribute.AttributeType;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.persistence.AutoClosingIterable;
@@ -183,6 +188,76 @@ class HibernateSQLTest {
 
 			assertNotNull(results);
 			assertEquals(1, results.size());
+			// A list is fully consumed, so no batched fetching is requested
+			verify(q, never()).setFetchSize(anyInt());
+		}
+		finally {
+			persistence.close();
+		}
+	}
+
+	@Test
+	@SuppressWarnings("boxing")
+	void testScalarIterableScrollsForwardOnlyWithFetchSize() {
+		AbstractHibernatePersistenceTest.TestHibernatePersistence persistence = new AbstractHibernatePersistenceTest.TestHibernatePersistence();
+		try {
+			Session session = mock(Session.class);
+			setSession(persistence, session);
+
+			NativeQuery q = mock(NativeQuery.class);
+			ScrollableResults scroll = mock(ScrollableResults.class);
+			when(session.createNativeQuery(anyString())).thenReturn(q);
+			when(q.addSynchronizedQuerySpace(anyString())).thenReturn(q);
+			when(q.scroll(ScrollMode.FORWARD_ONLY)).thenReturn(scroll);
+			when(scroll.next()).thenReturn(true, false);
+			when(scroll.get()).thenReturn(new Object[] {"id-1"});
+
+			HibernateSQL sql = new HibernateSQL("select bizId from ADM_Contact", persistence);
+			try (AutoClosingIterable<String> iterable = sql.scalarIterable(String.class)) {
+				var iterator = iterable.iterator();
+				assertTrue(iterator.hasNext());
+				assertEquals("id-1", iterator.next());
+			}
+
+			verify(q).setFetchSize(AbstractPersistence.JDBC_FETCH_SIZE);
+			// NB not scroll(), which defaults to scroll-insensitive and defeats batched fetching
+			verify(q, never()).scroll();
+			verify(scroll).close();
+		}
+		catch (Exception e) {
+			throw new IllegalStateException(e);
+		}
+		finally {
+			persistence.close();
+		}
+	}
+
+	@Test
+	void testBeanIterableScrollsForwardOnlyWithFetchSize() {
+		AbstractHibernatePersistenceTest.TestHibernatePersistence persistence = new AbstractHibernatePersistenceTest.TestHibernatePersistence();
+		try {
+			Session session = mock(Session.class);
+			setSession(persistence, session);
+			persistence.setUser(AbstractHibernatePersistenceTest.createTestUser());
+
+			NativeQuery q = mock(NativeQuery.class);
+			ScrollableResults scroll = mock(ScrollableResults.class);
+			when(session.createNativeQuery(anyString())).thenReturn(q);
+			when(q.addSynchronizedQuerySpace(anyString())).thenReturn(q);
+			when(q.addEntity(anyString())).thenReturn(q);
+			when(q.scroll(ScrollMode.FORWARD_ONLY)).thenReturn(scroll);
+
+			HibernateSQL sql = new HibernateSQL("admin", "Contact", "select * from ADM_Contact", persistence);
+			try (AutoClosingIterable<Bean> iterable = sql.beanIterable()) {
+				assertNotNull(iterable);
+			}
+
+			verify(q).setFetchSize(AbstractPersistence.JDBC_FETCH_SIZE);
+			verify(q, never()).scroll();
+			verify(scroll).close();
+		}
+		catch (Exception e) {
+			throw new IllegalStateException(e);
 		}
 		finally {
 			persistence.close();

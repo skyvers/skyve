@@ -15,6 +15,7 @@ import org.skyve.EXT;
 import org.skyve.content.AttachmentContent;
 import org.skyve.content.MimeType;
 import org.skyve.domain.Bean;
+import org.skyve.domain.messages.ActionUnavailableException;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.messages.SecurityException;
 import org.skyve.domain.messages.UploadException;
@@ -22,6 +23,7 @@ import org.skyve.domain.messages.UploadException.Problem;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.cache.StateUtil;
 import org.skyve.impl.metadata.customer.CustomerImpl;
+import org.skyve.impl.metadata.view.ActionAvailability;
 import org.skyve.impl.metadata.view.widget.bound.input.ContentCapture;
 import org.skyve.impl.metadata.view.widget.bound.input.ContentDisplay;
 import org.skyve.impl.util.UtilImpl;
@@ -44,6 +46,7 @@ import org.skyve.metadata.router.UxUi;
 import org.skyve.metadata.user.User;
 import org.skyve.metadata.user.UserAccess;
 import org.skyve.metadata.view.TextOutput.Sanitisation;
+import org.skyve.metadata.view.View.ViewType;
 import org.skyve.persistence.Persistence;
 import org.skyve.util.Binder;
 import org.skyve.util.OWASP;
@@ -562,9 +565,18 @@ public class ContentUploadView extends AbstractUploadView {
 	 * Processes an uploaded file for an action route while preserving
 	 * legacy action-upload semantics.
 	 *
+	 * <p>The upload is refused unless the view of the bean's own document, for the
+	 * request's UX/UI, offers a reachable trigger for the action in the bean's
+	 * current state (see {@link ActionAvailability}). SmartClient saves the form
+	 * before it opens the upload page, so a saved edit that changes the action's
+	 * conditions decides the check; PrimeFaces opens the upload page without
+	 * saving, so the state of the last postback decides.
+	 *
 	 * <p>Side effects: executes the configured upload action, updates the cached
 	 * conversation bean when the action returns one, rolls persistence back for
-	 * upload errors, and enqueues user-facing JSF messages.
+	 * upload errors, and enqueues user-facing JSF messages. A refusal's
+	 * {@link ActionUnavailableException} is caught, not thrown: it is logged as a
+	 * warning, rolled back, and enqueued as the refusal's localised message.
 	 *
 	 * @param event PrimeFaces upload event; must not be {@code null}
 	 * @throws Exception if upload preconditions or processing fail unexpectedly
@@ -623,6 +635,17 @@ public class ContentUploadView extends AbstractUploadView {
 			if (! user.canExecuteAction(document, actionName)) {
 				throw new SecurityException(actionName, user.getName());
 			}
+			String uxui = UserAgent.getSelection(request).getUxUi().getName();
+			ActionAvailability.check(user,
+										document,
+										document.getView(uxui,
+															customer,
+															bean.isCreated() ?
+																ViewType.edit.toString() :
+																ViewType.create.toString()),
+										uxui,
+										bean,
+										actionName);
 			UploadAction<Bean> uploadAction = document.getUploadAction(customer, actionName, true);
 			UploadException exception = new UploadException();
 			MimeType mimeType = null;
@@ -674,6 +697,12 @@ public class ContentUploadView extends AbstractUploadView {
 			else {
 				addActionUploadSuccess(file, fc);
 			}
+		}
+		catch (ActionUnavailableException e) {
+			// Logged as a warning when refused, so show the user the refusal's message rather than an error reference
+			persistence.rollback();
+			FacesMessage msg = new FacesMessage(FAILURE_MESSAGE_SUMMARY, OWASP.escapeHtml(e.getMessages().get(0).getText()));
+			fc.addMessage(null, msg);
 		}
 		catch (Exception e) {
 			persistence.rollback();

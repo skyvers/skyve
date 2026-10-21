@@ -14,6 +14,7 @@ import org.skyve.cache.SessionCacheConfig;
 import org.skyve.impl.cdi.SkyveCDIProducer;
 import org.skyve.impl.content.AbstractContentManager;
 import org.skyve.impl.content.NoOpContentManager;
+import org.skyve.impl.dialog.DialogsStaticSingleton;
 import org.skyve.impl.domain.number.NumberGeneratorStaticSingleton;
 import org.skyve.impl.geoip.GeoIPServiceStaticSingleton;
 import org.skyve.impl.job.JobSchedulerStaticSingleton;
@@ -125,6 +126,8 @@ abstract class InternalBaseH2Test {
 		NumberGeneratorStaticSingleton.setDefault();
 		GeoIPServiceStaticSingleton.setDefault();
 		CustomisationsStaticSingleton.setDefault();
+		// tests run without a request, so answer questions with their positive button; see TestDialogs
+		DialogsStaticSingleton.set(new TestDialogs());
 		JobSchedulerStaticSingleton.set(new MockJobScheduler());
 		// ignore mail in tests; tests that check mail install their own mail service
 		MailServiceStaticSingleton.set(new NoOpMailService());

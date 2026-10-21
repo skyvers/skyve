@@ -10,6 +10,7 @@ import java.util.stream.Stream;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestFactory;
+import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.metadata.view.ActionImpl;
 import org.skyve.impl.metadata.view.ViewImpl;
 import org.skyve.impl.metadata.view.container.HBox;
@@ -522,6 +523,7 @@ class SmartClientViewRendererTest extends AbstractSkyveTest {
 		FormItem item = new FormItem();
 		ProgressBar pb = new ProgressBar();
 		pb.setBinding("decimal2");
+		pb.setXmlInvisibleCondition("{el:bean.booleanFlag}");
 		item.setWidget(pb);
 		row.getItems().add(item);
 		view.getContained().add(form);
@@ -529,7 +531,11 @@ class SmartClientViewRendererTest extends AbstractSkyveTest {
 		SmartClientViewRenderer renderer = SmartClientGeneratorServlet.newRenderer(u, m, aapd, view, UXUI, false);
 		renderer.visit();
 		String code = renderer.getCode().toString();
-		assertFalse(code.isEmpty());
+		// the progress bar is a property list of a form item, not a statement inside one
+		assertTrue(code.contains("type:'blurb',name:'decimal2',"), code);
+		assertTrue(code.contains("invisibleCondition:'" + BindUtil.conditionIdentifier("{el:bean.booleanFlag}") + "'"), code);
+		assertFalse(code.contains("{var "), code);
+		assertFalse(code.contains(",var "), code);
 	}
 
 	@Test

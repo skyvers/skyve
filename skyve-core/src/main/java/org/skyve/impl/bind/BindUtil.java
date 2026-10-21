@@ -461,7 +461,9 @@ public final class BindUtil {
 		String conditionName = negated ? Introspector.decapitalize(condition.substring(3)) : condition;
 		Condition metadataCondition = getBeanCondition(bean, conditionName);
 		if ((metadataCondition != null) && isSkyveExpression(metadataCondition.getExpression())) {
-			return evaluateResolvedConditionExpression(bean, metadataCondition.getExpression(), negated);
+			// As the generated accessors do: anything but true is false, and the negated sense is the strict complement
+			boolean value = evaluateConditionExpression(bean, metadataCondition.getExpression());
+			return negated ? (! value) : value;
 		}
 
 		return Boolean.TRUE.equals(BindUtil.get(bean, condition));
@@ -472,13 +474,6 @@ public final class BindUtil {
 		Module module = customer.getModule(bean.getBizModule());
 		Document document = module.getDocument(customer, bean.getBizDocument());
 		return document.getCondition(conditionName);
-	}
-
-	private static boolean evaluateResolvedConditionExpression(@Nonnull Bean bean,
-													   @Nonnull String expression,
-													   boolean negated) {
-		Boolean value = (Boolean) ExpressionEvaluator.evaluate(expression, bean);
-		return negated ? Boolean.FALSE.equals(value) : Boolean.TRUE.equals(value);
 	}
 
 	/**

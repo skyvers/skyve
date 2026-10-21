@@ -67,6 +67,7 @@ import org.hibernate.type.Type;
 import org.skyve.EXT;
 import org.skyve.content.BeanContent;
 import org.skyve.content.TextExtractor;
+import org.skyve.dialog.QuestionException;
 import org.skyve.domain.Bean;
 import org.skyve.domain.ChildBean;
 import org.skyve.domain.DynamicBean;
@@ -96,7 +97,6 @@ import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.persistence.RDBMSDynamicPersistence;
 import org.skyve.impl.persistence.hibernate.dialect.DDLDelegate;
 import org.skyve.impl.persistence.hibernate.dialect.SkyveDialect;
-import org.skyve.impl.persistence.hibernate.dialect.SkyveDialect.RDBMS;
 import org.skyve.impl.util.CascadeDeleteBeanVisitor;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.ValidationUtil;
@@ -701,7 +701,8 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 	}
 
 	/**
-	 * Normalize and rethrow persistence exceptions as Skyve domain exceptions.
+	 * Normalise and rethrow persistence exceptions as Skyve domain exceptions.
+	 * A {@link QuestionException} is rethrown as it is, without being logged.
 	 *
 	 * @param t The throwable to interpret.
 	 * @param operationType The persistence operation being performed.
@@ -711,6 +712,10 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 	private void treatPersistenceThrowable(@Nonnull Throwable t,
 											@Nonnull OperationType operationType,
 											@Nullable PersistentBean bean) {
+		// A question asked from a Bizlet or interceptor is not an error - let it through as it is
+		if (t instanceof QuestionException question) {
+			throw question;
+		}
 		LOGGER.error(t.getMessage(), t);
 		if (t instanceof jakarta.persistence.OptimisticLockException) {
 			if (bean == null) {
@@ -2349,8 +2354,8 @@ if (document.isDynamic()) return;
 						QUERY_LOGGER.info("TEST CONSTRAINT {}.{}.{} using {}", currentOwningModuleName, currentDocumentName, constraint.getName(), queryString);
 					}
 					
-					// Always use streaming JDBC results to avoid out of memory errors on large result sets
-					query.setFetchSize(RDBMS.mysql.equals(AbstractHibernatePersistence.getDialect().getRDBMS()) ? Integer.MIN_VALUE : 1000);
+					// Fetch the scrolled rows in batches to avoid out of memory errors on large result sets
+					query.setFetchSize(JDBC_FETCH_SIZE);
 
 					query.setLockMode("bean", LockMode.READ); // take a read lock on all referenced documents
 					
@@ -2735,8 +2740,8 @@ if (document.isDynamic()) return;
 
 			Query<?> query = session.createQuery(queryString.toString());
 
-			// Always use streaming JDBC results to avoid out of memory errors on large result sets
-			query.setFetchSize(RDBMS.mysql.equals(AbstractHibernatePersistence.getDialect().getRDBMS()) ? Integer.MIN_VALUE : 1000);
+			// Fetch the scrolled rows in batches to avoid out of memory errors on large result sets
+			query.setFetchSize(JDBC_FETCH_SIZE);
 
 			query.setLockMode("bean", LockMode.READ); // read lock required for referential integrity
 
@@ -2822,8 +2827,8 @@ if (document.isDynamic()) return;
 		
 				NativeQuery<?> query = session.createNativeQuery(queryString.toString());
 
-				// Always use streaming JDBC results to avoid out of memory errors on large result sets
-				query.setFetchSize(RDBMS.mysql.equals(AbstractHibernatePersistence.getDialect().getRDBMS()) ? Integer.MIN_VALUE : 1000);
+				// Fetch the scrolled rows in batches to avoid out of memory errors on large result sets
+				query.setFetchSize(JDBC_FETCH_SIZE);
 				
 				// Set timeout if applicable
 				int timeout = UtilImpl.DATA_STORE.getOltpConnectionTimeoutInSeconds();

@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.CALLS_REAL_METHODS;
 import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -14,6 +15,7 @@ import static org.mockito.Mockito.when;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayDeque;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Collections;
 import java.util.Date;
@@ -23,21 +25,27 @@ import java.util.Set;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.function.Executable;
 import org.skyve.domain.Bean;
 import org.skyve.domain.DynamicBean;
 import org.skyve.domain.PersistentBean;
 import org.skyve.domain.messages.OptimisticLockException;
+import org.skyve.domain.messages.SecurityException;
 import org.skyve.domain.types.OptimisticLock;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.domain.messages.ValidationException;
 import org.skyve.impl.metadata.customer.CustomerImpl;
+import org.skyve.impl.metadata.model.document.DocumentImpl;
 import org.skyve.impl.metadata.view.ViewImpl;
 import org.skyve.impl.persistence.AbstractPersistence;
+import org.skyve.impl.web.AbstractWebContext;
 import org.skyve.impl.web.RequestUxUiSelectionTestUtil;
 import org.skyve.impl.web.WebContainer;
 import org.skyve.impl.web.faces.models.BeanMapAdapter;
 import org.skyve.impl.web.faces.views.FacesView;
+import org.skyve.metadata.controller.ImplicitActionName;
 import org.skyve.metadata.customer.Customer;
+import org.skyve.metadata.model.document.Bizlet;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.query.MetaDataQueryDefinition;
@@ -483,6 +491,7 @@ class FacesActionsCoverageTest {
 		when(bean.getBizModule()).thenReturn("admin");
 		when(bean.getBizDocument()).thenReturn("Contact");
 		when(bean.getBizId()).thenReturn("b1");
+		when(bean.isPersisted()).thenReturn(Boolean.TRUE);
 		when(customer.getModule("admin")).thenReturn(module);
 		when(module.getDocument(customer, "Contact")).thenReturn(document);
 		when(persistence.retrieve(document, "b1")).thenReturn(persisted);
@@ -510,6 +519,7 @@ class FacesActionsCoverageTest {
 		when(bean.getBizModule()).thenReturn("admin");
 		when(bean.getBizDocument()).thenReturn("Contact");
 		when(bean.getBizId()).thenReturn("b1");
+		when(bean.isPersisted()).thenReturn(Boolean.TRUE);
 		when(customer.getModule("admin")).thenReturn(module);
 		when(module.getDocument(customer, "Contact")).thenReturn(document);
 		when(persistence.retrieve(document, "b1")).thenReturn(null);
@@ -549,6 +559,175 @@ class FacesActionsCoverageTest {
 
 		SaveAction action = new SaveAction(facesView, false);
 		assertThrows(ClassCastException.class, action::callback);
+	}
+
+	@Test
+	void deleteActionTakesANonPersistentBeanThroughPreExecuteWithoutChecksOrDeleting() throws Exception {
+		assertDeletedWithoutPersistence(mock(Bean.class));
+	}
+
+	@Test
+	void deleteActionTakesAnUnpersistedBeanThroughPreExecuteWithoutChecksOrDeleting() throws Exception {
+		assertDeletedWithoutPersistence(mock(PersistentBean.class));
+	}
+
+	/**
+	 * Asserts that, as in Save, a bean that is not persisted is only taken through pre-execute and post-render.
+	 */
+	private void assertDeletedWithoutPersistence(Bean bean) throws Exception {
+		AbstractPersistence persistence = mockSaveContext(bean, Boolean.FALSE);
+		User user = persistence.getUser();
+		DocumentImpl document = saveDocument(persistence);
+		Customer customer = user.getCustomer();
+		Bizlet<Bean> bizlet = mock(Bizlet.class);
+		doReturn(bizlet).when(document).getBizlet(customer);
+		AbstractWebContext webContext = mock(AbstractWebContext.class);
+		when(currentFacesView.getWebContext()).thenReturn(webContext);
+		when(bizlet.preExecute(ImplicitActionName.Delete, bean, null, webContext)).thenReturn(bean);
+
+		new DeleteAction(currentFacesView).callback();
+
+		verify(bizlet).preExecute(ImplicitActionName.Delete, bean, null, webContext);
+		verify(user, never()).canDeleteDocument(any());
+		verify(persistence, never()).delete(any(Document.class), any(PersistentBean.class));
+		verify(currentFacesView).setPostRender(bizlet, bean);
+	}
+
+	@Test
+	void saveActionTakesANonPersistentBeanThroughPreExecuteWithoutSecurityChecksOrSaving() throws Exception {
+		Bean bean = mock(Bean.class);
+		AbstractPersistence persistence = mockSaveContext(bean, Boolean.FALSE);
+		User user = persistence.getUser();
+		FacesView facesView = currentFacesView;
+		DocumentImpl document = saveDocument(persistence);
+		Customer customer = user.getCustomer();
+		Bizlet<Bean> bizlet = mock(Bizlet.class);
+		doReturn(bizlet).when(document).getBizlet(customer);
+		AbstractWebContext webContext = mock(AbstractWebContext.class);
+		when(facesView.getWebContext()).thenReturn(webContext);
+		when(bizlet.preExecute(ImplicitActionName.Save, bean, null, webContext)).thenReturn(bean);
+
+		new SaveAction(facesView, false).callback();
+
+		verify(bizlet).preExecute(ImplicitActionName.Save, bean, null, webContext);
+		verify(user, never()).canCreateDocument(any());
+		verify(user, never()).canUpdateDocument(any());
+		verify(persistence, never()).save(any(Document.class), any(PersistentBean.class));
+		verify(facesView).setBean(currentBean);
+		verify(facesView).setPostRender(bizlet, currentBean);
+	}
+
+	@Test
+	void saveActionSecurityChecksAndSavesAPersistentBean() throws Exception {
+		PersistentBean bean = mock(PersistentBean.class);
+		when(bean.isNotPersisted()).thenReturn(Boolean.TRUE);
+		AbstractPersistence persistence = mockSaveContext(bean, Boolean.FALSE);
+		User user = persistence.getUser();
+		Document document = saveDocument(persistence);
+		when(user.canCreateDocument(document)).thenReturn(Boolean.TRUE);
+
+		new SaveAction(currentFacesView, false).callback();
+
+		verify(user).canCreateDocument(document);
+		verify(persistence).save(document, bean);
+	}
+
+	@Test
+	void saveActionSecurityChecksAndSavesAPersistedBean() throws Exception {
+		PersistentBean bean = mock(PersistentBean.class);
+		when(bean.isPersisted()).thenReturn(Boolean.TRUE);
+		AbstractPersistence persistence = mockSaveContext(bean, Boolean.FALSE);
+		User user = persistence.getUser();
+		Document document = saveDocument(persistence);
+		when(user.canUpdateDocument(document)).thenReturn(Boolean.TRUE);
+
+		new SaveAction(currentFacesView, false).callback();
+
+		verify(user, never()).canCreateDocument(any());
+		verify(user).canUpdateDocument(document);
+		verify(persistence).save(document, bean);
+	}
+
+	@Test
+	void saveActionRefusesToCreateAPersistentBeanWithoutCreatePermission() {
+		PersistentBean bean = mock(PersistentBean.class);
+		when(bean.isNotPersisted()).thenReturn(Boolean.TRUE);
+		AbstractPersistence persistence = mockSaveContext(bean, Boolean.FALSE);
+		User user = persistence.getUser();
+		Document document = saveDocument(persistence);
+
+		assertRefusedWithASecurityException(new SaveAction(currentFacesView, false)::callback);
+		verify(user).canCreateDocument(document);
+		verify(user, never()).canUpdateDocument(any());
+		verify(persistence, never()).save(any(Document.class), any(PersistentBean.class));
+	}
+
+	@Test
+	void saveActionRefusesToUpdateAPersistedBeanWithoutUpdatePermission() {
+		PersistentBean bean = mock(PersistentBean.class);
+		when(bean.isPersisted()).thenReturn(Boolean.TRUE);
+		AbstractPersistence persistence = mockSaveContext(bean, Boolean.FALSE);
+		User user = persistence.getUser();
+		Document document = saveDocument(persistence);
+
+		assertRefusedWithASecurityException(new SaveAction(currentFacesView, false)::callback);
+		verify(user, never()).canCreateDocument(any());
+		verify(user).canUpdateDocument(document);
+		verify(persistence, never()).save(any(Document.class), any(PersistentBean.class));
+	}
+
+	/**
+	 * Asserts that an action is refused with a security exception.
+	 * Constructing one logs it through a new persistence, which these mocks cannot provide,
+	 * so the refusal surfaces as the IllegalArgumentException thrown while the SecurityException is constructed.
+	 */
+	private static void assertRefusedWithASecurityException(Executable action) {
+		IllegalArgumentException e = assertThrows(IllegalArgumentException.class, action);
+		assertTrue(Arrays.stream(e.getStackTrace()).anyMatch(frame -> SecurityException.class.getName().equals(frame.getClassName())),
+					"Not thrown while constructing a SecurityException");
+	}
+
+	/**
+	 * The document that {@link #mockSaveContext(Bean, Boolean)} resolves the bean to.
+	 */
+	private static DocumentImpl saveDocument(AbstractPersistence persistence) {
+		Customer customer = persistence.getUser().getCustomer();
+		return (DocumentImpl) customer.getModule("kitchensink").getDocument(customer, "ConditionsFixture");
+	}
+
+	private FacesView currentFacesView;
+	private Bean currentBean;
+
+	/**
+	 * Mocks what a save needs to get past client validation and the internal customer:
+	 * a user, an internal customer and document with no Bizlet, and a faces view of the bean.
+	 */
+	private AbstractPersistence mockSaveContext(Bean bean, Boolean clientValidation) {
+		installRequestSelectionContext();
+		User user = mock(User.class);
+		CustomerImpl customer = mock(CustomerImpl.class);
+		Module module = mock(Module.class);
+		DocumentImpl document = mock(DocumentImpl.class);
+		View view = mock(View.class);
+		Action actionMeta = mock(Action.class);
+		AbstractPersistence persistence = mock(AbstractPersistence.class, CALLS_REAL_METHODS);
+		persistence.setUser(user);
+		persistence.setForThread();
+
+		when(user.getCustomer()).thenReturn(customer);
+		when(bean.getBizModule()).thenReturn("kitchensink");
+		when(bean.getBizDocument()).thenReturn("ConditionsFixture");
+		when(customer.getModule("kitchensink")).thenReturn(module);
+		when(module.getDocument(customer, "ConditionsFixture")).thenReturn(document);
+		when(document.getView("desktop", customer, "create")).thenReturn(view);
+		when(view.getAction("Save")).thenReturn(actionMeta);
+		when(actionMeta.getClientValidation()).thenReturn(clientValidation);
+
+		currentBean = bean;
+		currentFacesView = mock(FacesView.class);
+		when(currentFacesView.getBean()).thenReturn(bean);
+		when(currentFacesView.getWebContext()).thenReturn(null);
+		return persistence;
 	}
 
 	@Test
@@ -608,6 +787,7 @@ class FacesActionsCoverageTest {
 		when(bean.getBizModule()).thenReturn("admin");
 		when(bean.getBizDocument()).thenReturn("Contact");
 		when(bean.getBizId()).thenReturn("b1");
+		when(bean.isPersisted()).thenReturn(Boolean.TRUE);
 		when(bean.getBizLock()).thenReturn(lock1);
 		when(customer.getModule("admin")).thenReturn(module);
 		when(module.getDocument(customer, "Contact")).thenReturn(document);
@@ -644,10 +824,10 @@ class FacesActionsCoverageTest {
 	@Test
 	void addActionReturnsNullWhenRequiredValidationFailsForNonInlineAdd() throws Exception {
 		UIViewRoot root = mock(UIViewRoot.class);
-		org.mockito.Mockito.doReturn(Boolean.TRUE).when(root).isRendered();
+		doReturn(Boolean.TRUE).when(root).isRendered();
 
 		HtmlInputText requiredInput = mock(HtmlInputText.class);
-		org.mockito.Mockito.doReturn(Boolean.TRUE).when(requiredInput).isRendered();
+		doReturn(Boolean.TRUE).when(requiredInput).isRendered();
 		when(requiredInput.getRequiredMessage()).thenReturn("Required");
 		when(requiredInput.getValue()).thenReturn(null);
 		when(requiredInput.getStyle()).thenReturn("");
@@ -709,7 +889,7 @@ class FacesActionsCoverageTest {
 	@Test
 	void addActionNonInlineContinuesAfterValidationPassesThenThrowsWhenBeanMissing() {
 		UIViewRoot root = mock(UIViewRoot.class);
-		org.mockito.Mockito.doReturn(Boolean.TRUE).when(root).isRendered();
+		doReturn(Boolean.TRUE).when(root).isRendered();
 		when(root.getFacetsAndChildren()).thenAnswer(i -> java.util.Arrays.asList().iterator());
 
 		Set<String> renderIds = new LinkedHashSet<>();
@@ -916,10 +1096,10 @@ class FacesActionsCoverageTest {
 
 	private static void installFailingRequiredValidationContext() {
 		UIViewRoot root = mock(UIViewRoot.class);
-		org.mockito.Mockito.doReturn(Boolean.TRUE).when(root).isRendered();
+		doReturn(Boolean.TRUE).when(root).isRendered();
 
 		HtmlInputText requiredInput = mock(HtmlInputText.class);
-		org.mockito.Mockito.doReturn(Boolean.TRUE).when(requiredInput).isRendered();
+		doReturn(Boolean.TRUE).when(requiredInput).isRendered();
 		when(requiredInput.getRequiredMessage()).thenReturn("Required");
 		when(requiredInput.getValue()).thenReturn(null);
 		when(requiredInput.getStyle()).thenReturn("");

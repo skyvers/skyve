@@ -911,6 +911,35 @@ class ViewJSONManipulatorTest extends AbstractSkyveTest {
 	}
 
 	@Test
+	void testViewWithProgressBarEscapesItsValue() throws Exception {
+		ViewImpl view = new ViewImpl();
+		view.setTitle("TEST");
+
+		Form form = new Form();
+		form.getColumns().add(new FormColumn());
+		FormRow row = new FormRow();
+		form.getRows().add(row);
+		FormItem item = new FormItem();
+		ProgressBar pb = new ProgressBar();
+		pb.setBinding("text");
+		item.setWidget(pb);
+		row.getItems().add(item);
+		view.getContained().add(form);
+
+		AllAttributesPersistent bean = Util.constructRandomInstance(u, m, aapd, 0);
+		bean.setText("<img src=x onerror=alert(1)>");
+		ViewJSONManipulator vjm = new ViewJSONManipulator(u, m, aapd, view, TEST_UXUI, bean, 0, 0, false);
+		vjm.visit();
+		AbstractWebContext ctx = mockWebContext();
+		ctx.setCurrentBean(bean);
+		String json = vjm.toJSON(ctx, null);
+
+		// the client displays the value as HTML
+		assertFalse(json.contains("<img"), json);
+		assertTrue(json.contains("&lt;img"), json);
+	}
+
+	@Test
 	void testViewWithMapDisplay() throws Exception {
 		ViewImpl view = new ViewImpl();
 		view.setTitle("TEST");

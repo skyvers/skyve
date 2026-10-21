@@ -152,7 +152,7 @@ public class HealthServlet extends HttpServlet {
 		try {
 			for (DataStore ds : UtilImpl.DATA_STORES.values()) {
 				if (ds != UtilImpl.DATA_STORE) {
-					try (Connection c = EXT.getDataStoreConnection(ds, false)) {
+					try (Connection c = EXT.getDataStoreConnection(ds)) {
 						// Nothing to do with the connection once obtained but close it
 					}
 				}

@@ -13,7 +13,6 @@ import org.skyve.metadata.user.User;
 import org.skyve.util.Thumbnail;
 import org.skyve.util.Util;
 import org.skyve.util.logging.SkyveLoggerFactory;
-import org.skyve.web.WebContext;
 import org.slf4j.Logger;
 
 import jakarta.annotation.Nonnull;
@@ -23,7 +22,6 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
 
 /**
  * Base servlet for serving binary or text resources (files, content-managed blobs,
@@ -605,8 +603,8 @@ public abstract class AbstractResourceServlet extends HttpServlet {
 			LOGGER.error("Width/Height is malformed in the URL");
 		}
 
-		HttpSession session = request.getSession(false);
-		User user = (session == null) ? null : (User) session.getAttribute(WebContext.USER_SESSION_ATTRIBUTE_NAME);
+		// A revoked session falls back to no user so that public resources are still served
+		User user = WebUtil.getValidatedSessionUser(request);
 		Customer customer = null;
 		String customerName = null;
 		if (user != null) { // we are logged in

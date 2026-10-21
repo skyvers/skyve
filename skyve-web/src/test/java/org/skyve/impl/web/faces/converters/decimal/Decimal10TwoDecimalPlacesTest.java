@@ -3,50 +3,69 @@ package org.skyve.impl.web.faces.converters.decimal;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import org.junit.Before;
-import org.junit.Test;
+import java.text.DecimalFormatSymbols;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.skyve.domain.messages.ConversionException;
+import org.skyve.util.Util;
 
 import jakarta.faces.convert.ConverterException;
-public class Decimal10TwoDecimalPlacesTest {
+
+class Decimal10TwoDecimalPlacesTest {
+	private static final String EXPECTED_MESSAGE = Util.nullSafeI18n(ConversionException.DECIMAL_10_TWO_DECIMAL_PLACES_KEY);
+
 	private Decimal10TwoDecimalPlaces converter;
 
-	@Before
-	public void before() {
+	@BeforeEach
+	void before() {
 		converter = new Decimal10TwoDecimalPlaces();
 	}
 
 	@Test
-	public void testGetAsObjectNullValue() {
+	void testGetAsObjectNullValue() {
 		assertThat(converter.getAsObject(null, null, null), nullValue());
 	}
 
 	@Test
-	public void testGetAsObjectEmptyValue() {
+	void testGetAsObjectEmptyValue() {
 		assertThat(converter.getAsObject(null, null, ""), nullValue());
 	}
 
-	@Test(expected = ConverterException.class)
-	public void testGetAsObjectInvalidValue() {
-		converter.getAsObject(null, null, "not a decimal");
-		fail("Should throw exception before this line.");
+	@Test
+	void testGetAsObjectInvalidValue() {
+		ConverterException e = assertThrows(ConverterException.class, () -> converter.getAsObject(null, null, "not a decimal"));
+		assertThat(e.getFacesMessage().getSummary(), is(EXPECTED_MESSAGE));
 	}
 
 	@Test
-	public void testGetAsObjectValidValue() {
+	void testGetAsObjectValidValue() {
 		org.skyve.domain.types.Decimal10 expected = new org.skyve.domain.types.Decimal10("3.14");
 		assertThat(converter.getAsObject(null, null, "3.14"), is(expected));
 	}
 
 	@Test
-	public void testGetAsStringNullValue() {
+	void testGetAsStringNullValue() {
 		assertThat(converter.getAsString(null, null, null), is(""));
 	}
 
 	@Test
-	public void testGetAsStringValidValue() {
+	void testGetAsStringValidValue() {
 		org.skyve.domain.types.Decimal10 value = org.skyve.domain.types.Decimal10.ONE_HUNDRED;
 		assertThat(converter.getAsString(null, null, value), is("100.00"));
+	}
+
+	@Test
+	void testGetAsObjectNotANumber() {
+		String nan = DecimalFormatSymbols.getInstance().getNaN();
+		ConverterException e = assertThrows(ConverterException.class, () -> converter.getAsObject(null, null, nan));
+		assertThat(e.getFacesMessage().getSummary(), is(EXPECTED_MESSAGE));
+	}
+
+	@Test
+	void testGetAsObjectKeepsTenDecimalPlaces() {
+		assertThat(converter.getAsObject(null, null, "1.23456789012"), is(new org.skyve.domain.types.Decimal10("1.2345678901")));
 	}
 }

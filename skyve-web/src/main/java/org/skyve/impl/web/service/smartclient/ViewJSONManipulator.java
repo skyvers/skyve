@@ -1595,7 +1595,8 @@ public class ViewJSONManipulator extends ViewVisitor {
 		if (parentVisible && visible(progressBar)) {
 			if ((! forApply) || 
 					(forApply && parentEnabled)) {
-				addBinding(progressBar.getBinding(), false, false, Sanitisation.none);
+				// escaped as the value is displayed as HTML
+				addBinding(progressBar.getBinding(), false, true, Sanitisation.none);
 			}
 		}
 		addCondition(progressBar.getInvisibleCondition());
