@@ -12,6 +12,7 @@ import org.junit.jupiter.api.Test;
 import org.skyve.EXT;
 import org.skyve.content.AttachmentContent;
 import org.skyve.content.ContentManager;
+import org.skyve.impl.cache.StateUtil;
 import org.skyve.impl.content.AbstractContentManager;
 import org.skyve.impl.content.FileSystemContentManager;
 import org.skyve.impl.util.UtilImpl;
@@ -21,6 +22,7 @@ import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import modules.kitchensink.domain.KitchenSink;
 import modules.test.AbstractSkyveTest;
 
@@ -45,6 +47,7 @@ class ContentServletH2Test extends AbstractSkyveTest {
 		AbstractContentManager.IMPLEMENTATION_CLASS = previousContentManagerClass;
 		UtilImpl.CONTENT_FILE_STORAGE = previousContentFileStorage;
 		UtilImpl.CONTENT_FILE_SUFFIXES = previousContentFileSuffixes;
+		StateUtil.removeSessions(u.getId());
 	}
 
 	@Test
@@ -157,7 +160,10 @@ class ContentServletH2Test extends AbstractSkyveTest {
 		request.setParameter(AbstractWebContext.DOCUMENT_NAME, KitchenSink.MODULE_NAME + '.' + KitchenSink.DOCUMENT_NAME);
 		request.setParameter(AbstractWebContext.BINDING_NAME, KitchenSink.contentLinkPropertyName);
 		request.setParameter(AbstractWebContext.RESOURCE_FILE_NAME, contentId);
-		request.getSession(true).setAttribute(WebContext.USER_SESSION_ATTRIBUTE_NAME, u);
+		HttpSession session = request.getSession(true);
+		session.setAttribute(WebContext.USER_SESSION_ATTRIBUTE_NAME, u);
+		// Register the session as login does, otherwise the servlet treats it as revoked
+		StateUtil.addSession(u.getId(), session);
 		request.setAttribute(UserAgent.class.getName() + ".selection",
 				new RequestUxUiSelection(org.skyve.web.UserAgentType.desktop,
 						false,
