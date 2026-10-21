@@ -8,6 +8,7 @@ import java.security.Principal;
 
 import org.skyve.content.MimeType;
 import org.skyve.domain.Bean;
+import org.skyve.domain.messages.ActionUnavailableException;
 import org.skyve.domain.messages.ConversationEndedException;
 import org.skyve.domain.messages.SecurityException;
 import org.skyve.domain.messages.SessionEndedException;
@@ -20,6 +21,7 @@ import org.skyve.metadata.controller.WebFileInputStream;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
+import org.skyve.util.OWASP;
 import org.skyve.util.logging.SkyveLoggerFactory;
 import org.slf4j.Logger;
 
@@ -44,12 +46,13 @@ public class DownloadServlet extends HttpServlet {
 	 * Resolves and streams the result of a document download action for the current conversation bean.
 	 *
 	 * <p>This method restores the cached web conversation, binds its persistence context to the current
-	 * thread, re-establishes the authenticated user, enforces download-action security, executes document
-	 * interception hooks, and writes either in-memory bytes, a backing file, or a streamed payload to the
-	 * servlet response.
+	 * thread, re-establishes the authenticated user, enforces download-action security, serves only the download
+	 * the conversation prepared, executes document interception hooks, and writes either in-memory bytes, a backing
+	 * file, or a streamed payload to the servlet response.
 	 *
 	 * <p>Side effects: mutates response headers, may cache the conversation again after streaming completes,
-	 * and writes a minimal HTML error payload when download generation fails unexpectedly.
+	 * and writes a minimal HTML error payload when download generation fails unexpectedly, or a page with the
+	 * refusal's localised message when the download was not prepared.
 	 *
 	 * @param request the HTTP request containing conversation, document, and resource identifiers
 	 * @param response the HTTP response used to stream generated download content
@@ -79,6 +82,21 @@ public class DownloadServlet extends HttpServlet {
 		processDownload(request, response, true);
 	}
 
+	/**
+	 * Serves a GET or HEAD download request.
+	 *
+	 * <p>A request the user may not execute is refused with a {@link SecurityException}, and one that does not ask for
+	 * exactly the download the conversation prepared last (see {@link ViewWebContext#isPreparedDownload(String, String, String, String)})
+	 * with an {@link ActionUnavailableException}, before the download action is instantiated. Either is rolled back and
+	 * the conversation is not cached again. A security refusal, like any other failure, is logged as an error and
+	 * answered with the generic HTML error page; an unprepared download is logged as a warning and answered with an
+	 * HTML page showing the refusal's localised message. HEAD requests get the headers only.
+	 *
+	 * @param request the HTTP request containing conversation, document, and resource identifiers
+	 * @param response the HTTP response used to stream generated download content
+	 * @param headOnly whether to write the headers only, for a HEAD request
+	 * @throws IOException when writing the error page fails
+	 */
 	@SuppressWarnings({"java:S3776", "java:S6541"}) // Existing download lifecycle is intentionally kept together.
 	private void processDownload(@Nonnull HttpServletRequest request, @Nonnull HttpServletResponse response, boolean headOnly)
 	throws IOException {
@@ -111,6 +129,14 @@ public class DownloadServlet extends HttpServlet {
 						String resourceName = request.getParameter(AbstractWebContext.RESOURCE_FILE_NAME);
 						if (! user.canExecuteAction(document, resourceName)) {
 							throw new SecurityException(resourceName, user.getName());
+						}
+						// Serve only the download this conversation prepared, rather than check the view again,
+						// as preparing a download can disable the action that requested it
+						if (! ((webContext instanceof ViewWebContext viewContext) && viewContext.isPreparedDownload(
+																request.getParameter(AbstractWebContext.DOCUMENT_NAME), resourceName,
+																request.getParameter(AbstractWebContext.BINDING_NAME),
+																request.getParameter(Bean.DOCUMENT_ID)))) {
+							throw new ActionUnavailableException(user, document.getName(), resourceName);
 						}
 						DownloadAction<Bean> downloadAction = document.getDownloadAction(customer, resourceName, true);
 						Bean bean = WebUtil.getConversationBeanFromRequest(webContext, request);
@@ -152,6 +178,18 @@ public class DownloadServlet extends HttpServlet {
 				persistence.commit(true);
 			}
 		}
+		catch (ActionUnavailableException e) {
+			// The logger sanitises its arguments, and the message names no bean values.
+			// The refusal precedes any write, so the response is not committed yet.
+			LOGGER.warn("Refused the download: {}", e.getMessage());
+			response.setContentType(MimeType.html.toString());
+			response.setCharacterEncoding(StandardCharsets.UTF_8.name());
+			if (! headOnly) {
+				try (OutputStream out = response.getOutputStream()) {
+					out.write(("<html><head/><body><h3>" + OWASP.escapeHtml(e.getMessages().get(0).getText()) + "</h3></body></html>").getBytes(StandardCharsets.UTF_8));
+				}
+			}
+		}
 		catch (Throwable t) {
 			LOGGER.error("Problem generating the download", t);
 			if (! response.isCommitted()) {
@@ -169,8 +207,7 @@ public class DownloadServlet extends HttpServlet {
 	}
 
 	@SuppressWarnings("static-method") // Test seam; subclasses override this to avoid the static StateUtil dependency.
-	@Nullable AbstractWebContext getCachedConversation(@Nullable String contextKey, @Nonnull HttpServletRequest request)
-	throws Exception {
+	@Nullable AbstractWebContext getCachedConversation(@Nullable String contextKey, @Nonnull HttpServletRequest request) {
 		return StateUtil.getCachedConversation(contextKey, request);
 	}
 

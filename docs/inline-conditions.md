@@ -102,6 +102,22 @@ condition name and adds the expression beside it:
 The expression property always carries the expression as authored without
 `not`; the name carries the sense.
 
+## Enforcement on the Server
+
+Conditions that control actions are not only reflected in what the client
+shows. When SmartClient or Flutter requests a view action (including the
+request that prepares a download), or a BizPort export, BizPort import or
+upload action is requested, the server evaluates the view's conditions, inline
+expressions included, against the bean the view was last rendered for. It
+refuses the request unless one of the action's triggers in the view (a toolbar
+entry, button, link or `<server>` event handler) passes the rule for its kind.
+In particular, a `<server>` event handler counts whenever its widget is
+visible, whether or not the widget is enabled and whatever the action's own
+conditions, so a `disabled` condition does not protect an action fired by an
+event. See
+[What counts as a trigger](server-side-action-availability.md#what-counts-as-a-trigger)
+in Server-side Action Availability.
+
 ## Conditions in Components
 
 A `<component>` is expanded into the view that contains it, and its conditions

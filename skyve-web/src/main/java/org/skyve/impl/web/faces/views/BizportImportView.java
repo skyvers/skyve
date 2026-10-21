@@ -11,6 +11,7 @@ import org.primefaces.event.FileUploadEvent;
 import org.primefaces.model.file.UploadedFile;
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
+import org.skyve.domain.messages.ActionUnavailableException;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.messages.SecurityException;
 import org.skyve.domain.messages.UploadException;
@@ -19,8 +20,10 @@ import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.bizport.POIWorkbook;
 import org.skyve.impl.cache.StateUtil;
 import org.skyve.impl.metadata.customer.CustomerImpl;
+import org.skyve.impl.metadata.view.ActionAvailability;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.AbstractWebContext;
+import org.skyve.impl.web.UserAgent;
 import org.skyve.impl.web.WebErrorUtil;
 import org.skyve.impl.web.faces.FacesAction;
 import org.skyve.metadata.controller.BizImportAction;
@@ -29,6 +32,7 @@ import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
 import org.skyve.metadata.view.TextOutput.Sanitisation;
+import org.skyve.metadata.view.View.ViewType;
 import org.skyve.persistence.Persistence;
 import org.skyve.util.OWASP;
 
@@ -117,6 +121,13 @@ public class BizportImportView extends AbstractUploadView {
 	 * <p>This method intentionally does not use {@link FacesAction} so user-facing growl messages
 	 * are always available, including iframe-hosted upload pages.
 	 *
+	 * <p>The import is refused unless the view of the bean's own document, for the request's
+	 * UX/UI, offers a reachable trigger for the action in the bean's current state (see
+	 * {@link ActionAvailability}). SmartClient, the client that opens the import page, saves the
+	 * form first, so a saved edit that changes the action's conditions decides the check. A refusal's
+	 * {@link ActionUnavailableException} is caught, not thrown: it is logged as a warning,
+	 * rolled back, and enqueued as the refusal's localised message.
+	 *
 	 * @param event PrimeFaces upload event containing the uploaded file
 	 * @throws Exception when unexpected import processing failures occur before they are converted
 	 *         to user-facing messages
@@ -172,6 +183,17 @@ public class BizportImportView extends AbstractUploadView {
 			if (! user.canExecuteAction(document, action)) {
 				throw new SecurityException(action, user.getName());
 			}
+			String uxui = UserAgent.getSelection(request).getUxUi().getName();
+			ActionAvailability.check(user,
+										document,
+										document.getView(uxui,
+															customer,
+															bean.isCreated() ?
+																ViewType.edit.toString() :
+																ViewType.create.toString()),
+										uxui,
+										bean,
+										action);
 			BizImportAction bizPortAction = document.getBizImportAction(customer, action, true);
 
 			UploadException exception = new UploadException();
@@ -237,6 +259,12 @@ public class BizportImportView extends AbstractUploadView {
 				FacesMessage msg = new FacesMessage(FacesMessage.SEVERITY_INFO, "Successful", "The import completed successfully.");
 				fc.addMessage(null, msg);
 			}
+		}
+		catch (ActionUnavailableException e) {
+			// Logged as a warning when refused, so show the user the refusal's message rather than an error reference
+			persistence.rollback();
+			FacesMessage msg = new FacesMessage(FacesMessage.SEVERITY_ERROR, "Failure", OWASP.escapeHtml(e.getMessages().get(0).getText()));
+			fc.addMessage(null, msg);
 		}
 		catch (Throwable t) {
 			persistence.rollback();

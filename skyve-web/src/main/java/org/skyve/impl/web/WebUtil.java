@@ -655,18 +655,7 @@ public class WebUtil {
 		result.append(targetModuleName).append('.').append(targetDocumentName);
 		result.append('&').append(AbstractWebContext.CONTEXT_NAME).append('=').append(webId);
 		
-		String binding = null;
-		if (viewBinding != null) {
-			if (dataWidgetBinding != null) {
-				binding = BindUtil.createCompoundBinding(viewBinding, dataWidgetBinding);
-			}
-			else {
-				binding = viewBinding;
-			}
-		}
-		else if (dataWidgetBinding != null) {
-			binding = dataWidgetBinding;
-		}
+		String binding = getDownloadBinding(viewBinding, dataWidgetBinding);
 		if (binding != null) {
 			result.append('&').append(AbstractWebContext.BINDING_NAME).append('=').append(binding);
 		}
@@ -677,6 +666,13 @@ public class WebUtil {
 		result.append('&').append(AbstractWebContext.CURRENT_TIME_IN_MILLIS).append('=').append(System.currentTimeMillis());
 
 		return result.toString();
+	}
+
+	static @Nullable String getDownloadBinding(@Nullable String viewBinding, @Nullable String dataWidgetBinding) {
+		if (viewBinding == null) {
+			return dataWidgetBinding;
+		}
+		return (dataWidgetBinding == null) ? viewBinding : BindUtil.createCompoundBinding(viewBinding, dataWidgetBinding);
 	}
 	
 	/**

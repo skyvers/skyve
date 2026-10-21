@@ -1,5 +1,6 @@
 package org.skyve.impl.web;
 
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -28,11 +29,14 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Stream;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.function.Executable;
 import org.skyve.domain.Bean;
 import org.skyve.domain.DynamicBean;
 import org.skyve.domain.app.AppConstants;
@@ -42,6 +46,7 @@ import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
 import org.skyve.impl.metadata.user.UserImpl;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.sail.mock.MockWebContext;
+import org.skyve.impl.web.service.smartclient.SmartClientWebContext;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.controller.ServerSideAction;
@@ -578,6 +583,42 @@ class WebUtilTest {
 		String url = WebUtil.getDownloadActionUrl("ExportAction", "admin", "User", "webIdABC", "parent", "items", "elem2");
 		assertTrue(url.contains(AbstractWebContext.BINDING_NAME + "=parent.items"));
 		assertTrue(url.contains("bizId=elem2"));
+	}
+
+	/**
+	 * Ties the prepared download grant to the URL: a grant recorded with the values the URL is built from accepts the
+	 * request parameters of that URL, for each shape of binding. The bizId is given for every shape, as the SmartClient
+	 * edit servlet gives it.
+	 */
+	@SuppressWarnings("static-method")
+	@Test
+	void getDownloadActionUrlParametersMatchTheGrantRecordedWithTheSameValues() {
+		UtilImpl.SERVER_URL = "http://localhost:8080";
+		UtilImpl.SKYVE_CONTEXT = "/app";
+		assertAll(Stream.of(downloadUrlMatchesGrant("top level", null, null, "bean"),
+								downloadUrlMatchesGrant("form", "parent", null, "bean"),
+								downloadUrlMatchesGrant("grid", null, "items", "elem1"),
+								downloadUrlMatchesGrant("form and grid", "parent", "items", "elem2")));
+	}
+
+	private static Executable downloadUrlMatchesGrant(String name, String viewBinding, String dataWidgetBinding, String elementBizId) {
+		return () -> {
+			HttpServletRequest request = mock(HttpServletRequest.class);
+			when(request.getSession(false)).thenReturn(mock(HttpSession.class));
+			SmartClientWebContext webContext = new SmartClientWebContext("webId", request);
+			webContext.recordPreparedDownload("ExportAction", "admin", "User", viewBinding, dataWidgetBinding, elementBizId);
+			String url = WebUtil.getDownloadActionUrl("ExportAction", "admin", "User", "webId", viewBinding, dataWidgetBinding, elementBizId);
+			Map<String, String> parameters = new HashMap<>();
+			for (String parameter : url.substring(url.indexOf('?') + 1).split("&")) {
+				int equals = parameter.indexOf('=');
+				parameters.put(parameter.substring(0, equals), parameter.substring(equals + 1));
+			}
+			assertTrue(webContext.isPreparedDownload(parameters.get(AbstractWebContext.DOCUMENT_NAME),
+														parameters.get(AbstractWebContext.RESOURCE_FILE_NAME),
+														parameters.get(AbstractWebContext.BINDING_NAME),
+														parameters.get(Bean.DOCUMENT_ID)),
+						name + ": " + url);
+		};
 	}
 
 	// ===== getRefererHeader =====

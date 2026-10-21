@@ -40,6 +40,8 @@ isc.ClassFactory.defineClass("EditView", "BizContainer");
 isc.EditView.addClassProperties({
 	// The response status of a request that asks the user a question before it is resent
 	_QUESTION: -50,
+	// The response status of a request for an action that the view, as last rendered, offered no trigger for
+	_UNAVAILABLE: -51,
 	_DATA_SOURCE: isc.RestDataSource.create({
 		dataFormat: "json",
 		jsonPrefix: "",
@@ -634,7 +636,7 @@ isc.EditView.addMethods({
 					}
 
 					success = true;
-				} else if (dsResponse.status === -1) {
+				} else if (dsResponse.status === -1 || dsResponse.status === isc.EditView._UNAVAILABLE) {
 					isc.warn(data, null, { title: isc.i18nMessages.editView_Problems });
 				}
 
@@ -683,7 +685,7 @@ isc.EditView.addMethods({
 					isc.WindowStack.popoff(true);
 
 					success = true;
-				} else if (dsResponse.status === -1) {
+				} else if (dsResponse.status === -1 || dsResponse.status === isc.EditView._UNAVAILABLE) {
 					isc.warn(data, null, { title: isc.i18nMessages.editView_Problems });
 				}
 
@@ -765,7 +767,7 @@ isc.EditView.addMethods({
 					if (data._redirectUrl) {
 						window.location.assign(data._redirectUrl);
 					}
-				} else if (dsResponse.status === -1) {
+				} else if (dsResponse.status === -1 || dsResponse.status === isc.EditView._UNAVAILABLE) {
 					isc.warn(data, null, { title: isc.i18nMessages.editView_Problems });
 
 					if (completedCallback) {
@@ -1757,9 +1759,6 @@ isc.BizButton.addMethods({
 		this._action = function () {
 			const validate = this.validate === undefined ? true : this.validate;
 
-			// Declare variables outside the switch to avoid redefinition
-			let instance, opener, gridBinding, bizId, url;
-
 			// Handle different button types
 			switch (this.type) {
 				case "OK":
@@ -1785,12 +1784,12 @@ isc.BizButton.addMethods({
 
 				case "ZoomOut": {
 					// Handle ZoomOut action with changes validation
-					instance = this._view.gather(false);
+					const instance = this._view.gather(false);
 					const { _apply: apply, _changed: changedOnServer } = instance;
 					if (apply || changedOnServer || this._view._vm.valuesHaveChanged()) {
 						this._view.saveInstance(validate, this.actionName);
 					} else {
-						opener = isc.WindowStack.getOpener();
+						const opener = isc.WindowStack.getOpener();
 						isc.WindowStack.popoff(this._view._saved);
 						opener._source = null;
 					}
@@ -1799,9 +1798,9 @@ isc.BizButton.addMethods({
 
 				case "Cancel": {
 					// Cancel action with unsaved changes check
-					instance = this._view.gather(false);
+					const instance = this._view.gather(false);
 					const { _changed: changedOnServerCancel } = instance;
-					opener = isc.WindowStack.getOpener();
+					const opener = isc.WindowStack.getOpener();
 
 					if (changedOnServerCancel || this._view._vm.valuesHaveChanged()) {
 						isc.ask(
@@ -1826,15 +1825,15 @@ isc.BizButton.addMethods({
 					this._view.deleteInstance(validate);
 					break;
 
-				case "Remove":
+				case "Remove": {
 					// Remove action on child edit view
-					instance = this._view.gather(false);
-					bizId = instance.bizId;
-					gridBinding = this._view._b.substring(
+					const instance = this._view.gather(false);
+					const bizId = instance.bizId;
+					const gridBinding = this._view._b.substring(
 						this._view._b.lastIndexOf(".") + 1,
 						this._view._b.lastIndexOf("ElementById"),
 					);
-					opener = isc.WindowStack.getOpener();
+					const opener = isc.WindowStack.getOpener();
 
 					if (opener) {
 						const openerListGrids = opener._grids[gridBinding];
@@ -1851,35 +1850,40 @@ isc.BizButton.addMethods({
 					}
 					isc.WindowStack.popoff(false);
 					break;
+				}
 
 				case "Report":
 					// Report action
 					isc.ReportDialog.popupReport(this._view, this.params);
 					break;
 
-				case "BizExport":
+				case "BizExport": {
 					// BizExport action
-					instance = this._view.gather(false);
+					const instance = this._view.gather(false);
 					if (instance) {
 						this._view.saveInstance(validate, null, (data, success) => {
 							if (success) {
-								window.location.assign(
-									`bizexport.xls?_n=${this.actionName}&_doc=${this._view._mod}.${
-										this._view._doc
-									}&_c=${instance._c}&_ctim=${new Date().getTime()}`,
-								);
+								let url = `bizexport.xls?_n=${this.actionName}&_doc=${this._view._mod}.${
+									this._view._doc
+								}&_c=${instance._c}&_ctim=${new Date().getTime()}`;
+								// the servlet unsanitises the form binding, as for edit requests
+								if (this._view._b) {
+									url += `&_b=${this._view._b}`;
+								}
+								window.location.assign(url);
 							}
 						});
 					}
 					break;
+				}
 
-				case "BizImport":
+				case "BizImport": {
 					// BizImport action
-					instance = this._view.gather(false);
+					const instance = this._view.gather(false);
 					if (instance) {
 						this._view.saveInstance(validate, null, (data, success) => {
 							if (success) {
-								url = `bizImport.xhtml?_a=${this.actionName}&_c=${instance._c}`;
+								let url = `bizImport.xhtml?_a=${this.actionName}&_c=${instance._c}`;
 								if (this._view._b) {
 									url += `&_b=${this._view._b.replaceAll("_", ".")}`;
 								}
@@ -1895,19 +1899,20 @@ isc.BizButton.addMethods({
 						});
 					}
 					break;
+				}
 
 				case "Download":
 					// Download action
 					this._view.doAction(this.actionName, validate);
 					break;
 
-				case "Upload":
+				case "Upload": {
 					// Upload action
-					instance = this._view.gather(false);
+					const instance = this._view.gather(false);
 					if (instance) {
 						this._view.saveInstance(validate, null, (data, success) => {
 							if (success) {
-								url = `upload.xhtml?_u=action&_a=${this.actionName}&_c=${instance._c}&_cap=${this.capture || "none"}`;
+								let url = `upload.xhtml?_u=action&_a=${this.actionName}&_c=${instance._c}&_cap=${this.capture || "none"}`;
 								if (this._view._b) {
 									url += `&_b=${this._view._b.replaceAll("_", ".")}`;
 								}
@@ -1923,6 +1928,7 @@ isc.BizButton.addMethods({
 						});
 					}
 					break;
+				}
 
 				case "Navigate":
 					// Navigate to a binding within a conversation

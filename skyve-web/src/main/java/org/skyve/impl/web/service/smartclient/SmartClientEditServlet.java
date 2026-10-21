@@ -16,6 +16,7 @@ import org.skyve.content.MimeType;
 import org.skyve.dialog.QuestionException;
 import org.skyve.domain.Bean;
 import org.skyve.domain.PersistentBean;
+import org.skyve.domain.messages.ActionUnavailableException;
 import org.skyve.domain.messages.ConversationEndedException;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.messages.Message;
@@ -35,12 +36,14 @@ import org.skyve.impl.metadata.model.document.DocumentImpl;
 import org.skyve.impl.metadata.model.document.field.ConvertibleField;
 import org.skyve.impl.metadata.model.document.field.Enumeration;
 import org.skyve.impl.metadata.model.document.field.Field;
+import org.skyve.impl.metadata.view.ActionAvailability;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.ValidationUtil;
 import org.skyve.impl.web.AbstractWebContext;
 import org.skyve.impl.web.ServletConstants;
 import org.skyve.impl.web.UserAgent;
+import org.skyve.impl.web.ViewWebContext;
 import org.skyve.impl.web.WebErrorUtil;
 import org.skyve.impl.web.WebUtil;
 import org.skyve.metadata.MetaDataException;
@@ -57,6 +60,7 @@ import org.skyve.metadata.module.Module;
 import org.skyve.metadata.router.UxUi;
 import org.skyve.metadata.user.User;
 import org.skyve.metadata.user.UserAccess;
+import org.skyve.metadata.view.Action;
 import org.skyve.metadata.view.TextOutput.Sanitisation;
 import org.skyve.metadata.view.View;
 import org.skyve.metadata.view.View.ViewParameter;
@@ -93,6 +97,8 @@ public class SmartClientEditServlet extends HttpServlet {
 	private static final String EXITING_PRE_EXECUTE = "Exiting {}.preExecute: {}";
 	private static final String ENTERING_PRE_RERENDER = "Entering {}.preRerender: {}, {}, {}";
 	private static final String EXITING_PRE_RERENDER = "Exiting {}.preRerender: {}";
+	/** The response status of a refused action, which is negative and outside SmartClient's own error codes. */
+	private static final int UNAVAILABLE_RESPONSE_STATUS = -51;
 
 	private static Class<? extends SmartClientViewRenderer> MANIPULATOR_CLASS = null;
 	
@@ -180,6 +186,13 @@ public class SmartClientEditServlet extends HttpServlet {
 	 * <p>Every operation but {@code fetch} marks the request as able to ask questions. A question asked in the
 	 * request rolls it back and is written as a status {@code -50} response; the conversation is not cached and
 	 * the CSRF token is not replaced, so the client can resend the request with the answer.
+	 *
+	 * <p>A custom action, a download, OK, Save or a delete is refused with {@link ActionUnavailableException}
+	 * unless the view, as last rendered, offers a reachable trigger for it (see {@link ActionAvailability}).
+	 * A push request, and a delete with no bean (no conversation), are not checked.
+	 * Side effects of a refusal: {@link ActionAvailability} logs a warning, and the request is rolled back and written as
+	 * a status {@value #UNAVAILABLE_RESPONSE_STATUS} response; as for a question, the conversation is not cached and
+	 * the CSRF token is not replaced.
 	 *
 	 * @param request inbound HTTP request
 	 * @param response outbound HTTP response
@@ -425,6 +438,22 @@ public class SmartClientEditServlet extends HttpServlet {
 	
 								SmartClientListServlet.checkCsrfToken(session, request, response, currentCsrfToken);
 	
+								// With no bean (no conversation) there is nothing to delete, and remove() deletes nothing.
+								if (processBean != null) {
+									// The bean's own document, as _doc is not checked against the bean
+									Document beanDocument = customer.getModule(processBean.getBizModule()).getDocument(customer, processBean.getBizDocument());
+									ActionAvailability.check(user,
+																beanDocument,
+																beanDocument.getView(uxui.getName(),
+																								customer,
+																								processBean.isCreated() ?
+																									ViewType.edit.toString() :
+																									ViewType.create.toString()),
+																uxui.getName(),
+																processBean,
+																ImplicitActionName.Delete);
+								}
+
 								Bizlet<Bean> bizletToDelete = ((DocumentImpl) processDocument).getBizlet(customer);
 								remove(webContext,
 										user,
@@ -453,8 +482,13 @@ public class SmartClientEditServlet extends HttpServlet {
 
 		    	// A question is not an error - the conversation is not cached and the CSRF token is not replaced
 		    	QuestionException question = ExceptionUtils.throwableOfType(t, QuestionException.class);
+		    	// A refused action is expected - it was logged when refused, and as with a question the token is not replaced
+		    	ActionUnavailableException unavailable = ExceptionUtils.throwableOfType(t, ActionUnavailableException.class);
 		    	if (question != null) {
 		    		produceQuestionResponse(question, pw);
+		    	}
+		    	else if (unavailable != null) {
+		    		produceUnavailableResponse(unavailable, pw);
 		    	}
 		    	else {
 		    		String reference = WebErrorUtil.logUnexpectedAndGetReference(LOGGER, "SmartClient edit request failed for operation " + operation, t);
@@ -486,6 +520,22 @@ public class SmartClientEditServlet extends HttpServlet {
 		pw.append("{\"response\":{\"status\":").append(String.valueOf(DialogsProtocol.QUESTION_RESPONSE_STATUS));
 		pw.append(",\"data\":\"").append(OWASP.escapeJsonString(fallback));
 		pw.append("\",\"question\":").append(DialogsProtocol.toJSON(question)).append("}}");
+	}
+
+	/**
+	 * Writes the response that refuses an action the view offered no reachable trigger for.
+	 *
+	 * <p>The response has status {@value #UNAVAILABLE_RESPONSE_STATUS}, which every client treats as a failure because
+	 * it is negative and which is outside SmartClient's own error codes. {@code data} holds the refusal's localised message, escaped
+	 * as HTML for the client to show.
+	 *
+	 * @param unavailable	The refusal thrown by the request.
+	 * @param pw	The response writer.
+	 */
+	private static void produceUnavailableResponse(@Nonnull ActionUnavailableException unavailable, @Nonnull PrintWriter pw) {
+		String message = unavailable.getMessages().get(0).getText();
+		pw.append("{\"response\":{\"status\":").append(String.valueOf(UNAVAILABLE_RESPONSE_STATUS));
+		pw.append(",\"data\":\"").append(OWASP.escapeJsonString(OWASP.escapeHtml(message))).append("\"}}");
 	}
 
 	/**
@@ -1024,6 +1074,13 @@ public class SmartClientEditServlet extends HttpServlet {
 	/**
 	 * Applies request changes and executes action/rerender/save flows.
 	 *
+	 * <p>Before the request's values are applied, a custom action or download is refused unless the form view, as
+	 * last rendered for the form bean, offers a reachable trigger for it; with a grid binding, unless a reachable link
+	 * in that data grid or repeater's row offers it. OK and Save are refused in the same way, by the triggers of a
+	 * custom action with that name or class when the form view declares one, and otherwise by the built-in action's.
+	 * A push request is not checked. Side effects of a refusal: {@link ActionAvailability} logs a warning, and nothing
+	 * is applied or run.
+	 *
 	 * @param webContext active web conversation context
 	 * @param user active user
 	 * @param customer active customer metadata
@@ -1043,6 +1100,7 @@ public class SmartClientEditServlet extends HttpServlet {
 	 * @param persistence active persistence context
 	 * @param uxui active UX/UI profile name
 	 * @param pw response writer
+	 * @throws ActionUnavailableException when the view offers no reachable trigger for the requested action
 	 * @throws Exception when apply processing fails
 	 */
 	@SuppressWarnings({"java:S107", "java:S3776", "java:S6541"}) // Long parameter list preserves the existing framework/API contract; complexity OK
@@ -1068,21 +1126,63 @@ public class SmartClientEditServlet extends HttpServlet {
 	throws Exception {
 		String mutableCustomActionName = customActionName;
 		if (! ServletConstants.PUSH_ACTION_NAME.equals(mutableCustomActionName)) {
+			View formView = formDocument.getView(uxui,
+															customer,
+															formBean.isCreated() ?
+																ViewType.edit.toString() :
+																ViewType.create.toString());
 			// Apply the JSON values
 	    	ViewJSONManipulator manipulator = newManipulator(user, 
 																formModule, 
 																formDocument, 
-																formDocument.getView(uxui, 
-																						customer, 
-																						formBean.isCreated() ? 
-																							ViewType.edit.toString() : 
-																							ViewType.create.toString()),
+																formView,
 																uxui,
 																formBean, 
 																editIdCounter,
 																createIdCounter,
 																true);
 			manipulator.visit();
+
+			if (mutableCustomActionName != null) {
+				if (gridBinding == null) {
+					ActionAvailability.check(user, formDocument, formView, uxui, formBean, mutableCustomActionName);
+				}
+				else { // a link in a data grid or repeater row, whose action is declared in the row bean's own document's view
+					Document rowDocument = customer.getModule(processBean.getBizModule()).getDocument(customer, processBean.getBizDocument());
+					// The edit view, where ViewValidator requires a container-column link's action to be declared
+					View rowView = rowDocument.getView(uxui, customer, ViewType.edit.toString());
+					ActionAvailability.checkRow(user,
+													formDocument,
+													formView,
+													uxui,
+													formBean,
+													gridBinding,
+													rowDocument,
+													rowView,
+													processBean,
+													mutableCustomActionName);
+				}
+			}
+			else if (ImplicitActionName.OK.equals(implicitAction) || ImplicitActionName.Save.equals(implicitAction)) {
+				// The client requests a custom action whose class is OK or Save by that class, and the request then runs
+				// the built-in action (as admin.MonitoringDashboard's Save does), so that custom action's triggers decide.
+				// Matches by class only, as ActionAvailability does, so an action merely named OK or Save does not collide
+				String implicitActionName = implicitAction.toString();
+				boolean custom = false;
+				for (Action action : formView.getActions()) {
+					if ((action.getImplicitName() == null) && implicitActionName.equals(action.getResourceName())) {
+						custom = true;
+						break;
+					}
+				}
+				if (custom) {
+					ActionAvailability.check(user, formDocument, formView, uxui, formBean, implicitActionName);
+				}
+				else {
+					ActionAvailability.check(user, formDocument, formView, uxui, formBean, implicitAction);
+				}
+			}
+
 			manipulator.applyJSON((String) parameters.get("bean"), persistence, webContext);
 		}
 		else {
@@ -1120,13 +1220,17 @@ public class SmartClientEditServlet extends HttpServlet {
 				}
 				if (downloadAction != null) { // download action
 					downloadAction.prepare(processedBean, webContext);
+					String processBizId = processBean.getBizId();
+					((ViewWebContext) webContext).recordPreparedDownload(mutableCustomActionName,
+															processDocument.getOwningModuleName(), processDocument.getName(),
+															formBinding, gridBinding, processBizId);
 					redirectUrl = WebUtil.getDownloadActionUrl(mutableCustomActionName,
 																processDocument.getOwningModuleName(),
 																processDocument.getName(),
 																webContext.getWebId(),
 																formBinding,
 																gridBinding,
-																processBean.getBizId());
+																processBizId);
 				}
 				else if (serverSideAction != null) { // server-side action
 					key = RequestKey.action(processDocument, mutableCustomActionName);

@@ -1,0 +1,205 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<document name="ActionsFixture"
+			xmlns="http://www.skyve.org/xml/document"
+			xsi:schemaLocation="http://www.skyve.org/xml/document ../../../schemas/document.xsd"
+			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<documentation>
+		<![CDATA[
+			Kitchen Sink fixture for the server-side refusal of actions that the view offers no reachable trigger for.
+
+			Its edit view has one of each kind of trigger: a toolbar action, a server action in a change handler,
+			a button in a form, a button in a tab, two named actions sharing a class, OK, Save and Delete,
+			a link in a data grid row, and a Download, BizExport, BizImport and Upload action.
+			Each Disable or Hide checkbox makes one trigger unavailable, and an action with no trigger is never available.
+			Outcome records which action ran last.
+		]]>
+	</documentation>
+	<persistent name="KS_ActionsFixture" />
+	<singularAlias>Actions Fixture</singularAlias>
+	<pluralAlias>Actions Fixtures</pluralAlias>
+	<bizKey expression="Actions Fixture" />
+	<attributes>
+		<boolean name="disableToolbarAction">
+			<displayName>Disable Toolbar Action</displayName>
+			<description>Disables the Run From Toolbar action.</description>
+			<defaultValue>false</defaultValue>
+		</boolean>
+		<text name="eventText">
+			<displayName>Event Text</displayName>
+			<description>Changing it runs the Run From Event action from its change handler; nothing else triggers that action.</description>
+			<length>100</length>
+		</text>
+		<boolean name="hideEventText">
+			<displayName>Hide Event Text</displayName>
+			<description>Hides Event Text, and so the change handler that is the only trigger of Run From Event.</description>
+			<defaultValue>false</defaultValue>
+		</boolean>
+		<boolean name="disableForm">
+			<displayName>Disable Form</displayName>
+			<description>Disables the form holding the only button for Run From Form Button.</description>
+			<defaultValue>false</defaultValue>
+		</boolean>
+		<boolean name="disableTab">
+			<displayName>Disable Tab</displayName>
+			<description>Disables the tab holding the only button for Run From Tab Button.</description>
+			<defaultValue>false</defaultValue>
+		</boolean>
+		<boolean name="disableSharedFirst">
+			<displayName>Disable Shared First</displayName>
+			<description>Disables Run Shared First, one of the two actions with the class RunShared.</description>
+			<defaultValue>false</defaultValue>
+		</boolean>
+		<boolean name="disableSharedSecond">
+			<displayName>Disable Shared Second</displayName>
+			<description>Disables Run Shared Second, the other action with the class RunShared.</description>
+			<defaultValue>false</defaultValue>
+		</boolean>
+		<boolean name="disableSave">
+			<displayName>Disable Save</displayName>
+			<description>Disables OK and Save.</description>
+			<defaultValue>false</defaultValue>
+		</boolean>
+		<boolean name="disableDelete">
+			<displayName>Disable Delete</displayName>
+			<description>Disables Delete.</description>
+			<defaultValue>false</defaultValue>
+		</boolean>
+		<boolean name="downloaded">
+			<displayName>Downloaded</displayName>
+			<description>Set by Download Once as it prepares its download, which disables Download Once. Clear it to download again.</description>
+			<defaultValue>false</defaultValue>
+		</boolean>
+		<boolean name="disableExport">
+			<displayName>Disable Export</displayName>
+			<description>Disables the Export action.</description>
+			<defaultValue>false</defaultValue>
+		</boolean>
+		<boolean name="disableImport">
+			<displayName>Disable Import</displayName>
+			<description>Disables the Import action.</description>
+			<defaultValue>false</defaultValue>
+		</boolean>
+		<boolean name="disableUpload">
+			<displayName>Disable Upload</displayName>
+			<description>Disables the Upload action.</description>
+			<defaultValue>false</defaultValue>
+		</boolean>
+		<text name="outcome">
+			<displayName>Outcome</displayName>
+			<description>Which action ran last.</description>
+			<length>500</length>
+		</text>
+		<collection name="rows" type="child">
+			<displayName>Rows</displayName>
+			<description>Each row has a Run From Row link, which the row can hide.</description>
+			<documentName>ActionsFixtureRow</documentName>
+			<minCardinality>0</minCardinality>
+		</collection>
+	</attributes>
+	<conditions>
+		<condition name="toolbarActionDisabled">
+			<description>Disable Toolbar Action is set.</description>
+			<expression>
+				<![CDATA[
+					Boolean.TRUE.equals(getDisableToolbarAction())
+				]]>
+			</expression>
+		</condition>
+		<condition name="eventTextHidden">
+			<description>Hide Event Text is set.</description>
+			<expression>
+				<![CDATA[
+					Boolean.TRUE.equals(getHideEventText())
+				]]>
+			</expression>
+		</condition>
+		<condition name="formDisabled">
+			<description>Disable Form is set.</description>
+			<expression>
+				<![CDATA[
+					Boolean.TRUE.equals(getDisableForm())
+				]]>
+			</expression>
+		</condition>
+		<condition name="tabDisabled">
+			<description>Disable Tab is set.</description>
+			<expression>
+				<![CDATA[
+					Boolean.TRUE.equals(getDisableTab())
+				]]>
+			</expression>
+		</condition>
+		<condition name="sharedFirstDisabled">
+			<description>Disable Shared First is set.</description>
+			<expression>
+				<![CDATA[
+					Boolean.TRUE.equals(getDisableSharedFirst())
+				]]>
+			</expression>
+		</condition>
+		<condition name="sharedSecondDisabled">
+			<description>Disable Shared Second is set.</description>
+			<expression>
+				<![CDATA[
+					Boolean.TRUE.equals(getDisableSharedSecond())
+				]]>
+			</expression>
+		</condition>
+		<condition name="saveDisabled">
+			<description>Disable Save is set.</description>
+			<expression>
+				<![CDATA[
+					Boolean.TRUE.equals(getDisableSave())
+				]]>
+			</expression>
+		</condition>
+		<condition name="deleteDisabled">
+			<description>Disable Delete is set.</description>
+			<expression>
+				<![CDATA[
+					Boolean.TRUE.equals(getDisableDelete())
+				]]>
+			</expression>
+		</condition>
+		<condition name="alreadyDownloaded">
+			<description>Downloaded is set.</description>
+			<expression>
+				<![CDATA[
+					Boolean.TRUE.equals(getDownloaded())
+				]]>
+			</expression>
+		</condition>
+		<condition name="exportDisabled">
+			<description>Disable Export is set.</description>
+			<expression>
+				<![CDATA[
+					Boolean.TRUE.equals(getDisableExport())
+				]]>
+			</expression>
+		</condition>
+		<condition name="importDisabled">
+			<description>Disable Import is set.</description>
+			<expression>
+				<![CDATA[
+					Boolean.TRUE.equals(getDisableImport())
+				]]>
+			</expression>
+		</condition>
+		<condition name="uploadDisabled">
+			<description>Disable Upload is set.</description>
+			<expression>
+				<![CDATA[
+					Boolean.TRUE.equals(getDisableUpload())
+				]]>
+			</expression>
+		</condition>
+		<condition name="rowLinkHidden">
+			<description>Never true for the fixture itself. The Run From Row link in the rows grid is hidden by the row's rowLinkHidden condition, which the renderers evaluate against each row, but the view validator looks up a grid link's condition in this document.</description>
+			<expression>
+				<![CDATA[
+					false
+				]]>
+			</expression>
+		</condition>
+	</conditions>
+</document>
