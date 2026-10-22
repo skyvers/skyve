@@ -21,6 +21,7 @@ import org.skyve.metadata.module.query.MetaDataQueryDefinition;
 import org.skyve.metadata.sail.language.step.context.PushListContext;
 import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateEdit;
 import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateLink;
+import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateList;
 import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateTree;
 import org.skyve.metadata.user.User;
 import org.skyve.metadata.view.View.ViewType;
@@ -81,6 +82,50 @@ class ContextualExecutorTest {
 		assertEquals("admin", result.getModuleName());
 		assertEquals("Contact", result.getDocumentName());
 		assertEquals(ViewType.list, result.getViewType());
+	}
+
+	/**
+	 * Navigating to a list resolves an undefined query name the same way as pushing a list context.
+	 */
+	@Test
+	void navigateListForUndefinedQueryUsesDefaultQueryOfDocumentNamedByQuery() {
+		Customer customer = bindCustomer();
+		Module module = bindModule(customer);
+		when(module.getMetaDataQuery("Contact")).thenReturn(null);
+		MetaDataQueryDefinition defaultQuery = mock(MetaDataQueryDefinition.class);
+		when(defaultQuery.getDocumentName()).thenReturn("Contact");
+		when(module.getDocumentDefaultQuery(customer, "Contact")).thenReturn(defaultQuery);
+		Document document = mock(Document.class);
+		when(document.getOwningModuleName()).thenReturn("admin");
+		when(document.getName()).thenReturn("Contact");
+		when(module.getDocument(customer, "Contact")).thenReturn(document);
+		NavigateList list = new NavigateList();
+		list.setModuleName("sales");
+		list.setQueryName("Contact");
+		ContextualExecutor<AutomationContext<GenerateListContext, GenerateEditContext>> executor = newExecutor();
+		AutomationContext<GenerateListContext, GenerateEditContext> context = newContext();
+		executor.push(context);
+
+		executor.executeNavigateList(list);
+
+		assertEquals("admin", context.getModuleName());
+		assertEquals("Contact", context.getDocumentName());
+		assertEquals(ViewType.list, context.getViewType());
+	}
+
+	@Test
+	void navigateListForUndefinedQueryThatIsNotADocumentThrowsMetaDataException() {
+		Customer customer = bindCustomer();
+		Module module = bindModule(customer);
+		when(module.getMetaDataQuery("missing")).thenReturn(null);
+		when(module.getDocumentDefaultQuery(customer, "missing")).thenThrow(new MetaDataException("no document ref"));
+		NavigateList list = new NavigateList();
+		list.setModuleName("sales");
+		list.setQueryName("missing");
+		ContextualExecutor<AutomationContext<GenerateListContext, GenerateEditContext>> executor = newExecutor();
+		executor.push(newContext());
+
+		assertThrows(MetaDataException.class, () -> executor.executeNavigateList(list));
 	}
 
 	@Test

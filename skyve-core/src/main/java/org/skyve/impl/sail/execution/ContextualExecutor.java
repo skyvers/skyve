@@ -118,7 +118,12 @@ public abstract class ContextualExecutor<T extends AutomationContext> implements
 
 		Document drivingDocument = null;
 		if (queryName != null) {
-			drivingDocument = m.getDocument(c, m.getNullSafeMetaDataQuery(queryName).getDocumentName());
+			MetaDataQueryDefinition q = m.getMetaDataQuery(queryName);
+			if (q == null) {
+				// As the list grid does, an undefined query name is the name of a document to use the default query of
+				q = m.getDocumentDefaultQuery(c, queryName);
+			}
+			drivingDocument = m.getDocument(c, q.getDocumentName());
 		} else if (documentName != null) {
 			drivingDocument = m.getDocument(c, documentName);
 			if (modelName != null) {
