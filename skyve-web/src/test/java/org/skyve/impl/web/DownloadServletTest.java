@@ -107,6 +107,25 @@ class DownloadServletTest {
 	}
 
 	@Test
+	void missingConversationBeanIsReportedWithoutRunningTheDownload() throws Exception {
+		DownloadAction<Bean> action = actionReturning(new Download("result.txt", "download body", MimeType.plain));
+		Lifecycle lifecycle = lifecycle(action, false, true);
+		lifecycle.webContext.setCurrentBean(null);
+		TestableDownloadServlet servlet = new TestableDownloadServlet(lifecycle.webContext);
+		CapturingServletOutputStream output = new CapturingServletOutputStream();
+
+		servlet.doGet(request(lifecycle.user, "mod.Doc", "DownloadResult", null), response(output));
+
+		assertTrue(output.asString().contains("An error occured whilst processing your report."));
+		assertFalse(servlet.writeInvoked);
+		assertFalse(servlet.cacheInvoked);
+		verify(lifecycle.customer, never()).interceptBeforeDownloadAction(any(), any(), any(), any());
+		verify(action, never()).download(any(), any());
+		verify(lifecycle.persistence).rollback();
+		verify(lifecycle.persistence).commit(true);
+	}
+
+	@Test
 	void preparedActionOnAnotherDocumentIsRefused() throws Exception {
 		DownloadAction<Bean> action = actionReturning(new Download("result.txt", "download body", MimeType.plain));
 		Lifecycle lifecycle = lifecycle(action, false, true);

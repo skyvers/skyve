@@ -75,7 +75,11 @@ public class SmartClientAutomationContext extends AutomationContext<SmartClientG
 				? ViewType.create.toString()
 				: ViewType.edit.toString();
 
-		View view = document.getView(getUxui(), customer, viewType);
+		String uxui = getUxui();
+		if (uxui == null) {
+			throw new IllegalStateException("The automation context has no uxui - push it before generating");
+		}
+		View view = document.getView(uxui, customer, viewType);
 
 		String windowPrefix = windowNumber != null
 				? String.format("//:Window[ID=\"Window%d\"]", windowNumber)
@@ -86,7 +90,7 @@ public class SmartClientAutomationContext extends AutomationContext<SmartClientG
 				module,
 				document,
 				view,
-				getUxui(),
+				uxui,
 				this,
 				windowPrefix);
 

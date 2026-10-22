@@ -64,6 +64,9 @@ public class AssociationAutoCompleteConverter implements Converter<Object> {
 								}
 								
 								WebContext webContext = view.getWebContext();
+								if (webContext == null) { // the view has a conversation
+									throw new IllegalStateException("Cannot convert " + processedValue + " as FacesView " + managedBeanName + " has no web context");
+								}
 					            Customer c = CORE.getCustomer();
 					            Module m  = c.getModule(moduleName);
 					            Document d = m.getDocument(c, documentName);

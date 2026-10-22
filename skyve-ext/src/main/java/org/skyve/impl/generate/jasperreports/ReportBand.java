@@ -75,11 +75,13 @@ public class ReportBand {
 		this.type = type;
 	}
 	public @Nonnull Integer getHeight() {
-		int maxHeight = this.getParent().getDefaultElementHeight().intValue();
+		int maxHeight = getNullSafeParent().getDefaultElementHeight().intValue();
 		for (ReportElement e : this.getElements()) {
-			if (e.getElementTop() != null && e.getElementHeight() != null) {
-				if ((e.getElementTop().intValue() + e.getElementHeight().intValue()) > maxHeight) {
-					maxHeight = e.getElementTop().intValue() + e.getElementHeight().intValue();
+			final Integer elementTop = e.getElementTop();
+			final Integer elementHeight = e.getElementHeight();
+			if (elementTop != null && elementHeight != null) {
+				if ((elementTop.intValue() + elementHeight.intValue()) > maxHeight) {
+					maxHeight = elementTop.intValue() + elementHeight.intValue();
 				}
 			}
 		}
@@ -116,6 +118,20 @@ public class ReportBand {
 		this.parent = parent;
 	}
 
+	/**
+	 * Returns the design this band has been added to.
+	 *
+	 * @return The parent design.
+	 * @throws IllegalStateException If the band has not been added to a design.
+	 */
+	@Nonnull DesignSpecification getNullSafeParent() {
+		final DesignSpecification result = parent;
+		if (result == null) {
+			throw new IllegalStateException("Report band " + name + " has not been added to a design");
+		}
+		return result;
+	}
+
 	public @Nullable String getInvisibleConditionName() {
 		return invisibleConditionName;
 	}
@@ -135,44 +151,46 @@ public class ReportBand {
 		this.getElements().add(tE);
 		tE.setParent(this);
 
+		final DesignSpecification design = getNullSafeParent();
+
 		// inherit from band
 		if (tE.getElementFontName() == null) {
-			tE.setElementFontName(this.getParent().getDefaultFontName());
+			tE.setElementFontName(design.getDefaultFontName());
 		}
 
 		// font size
 		if (tE.getElementFontSize() == null) {
-			tE.setElementFontSize(this.getParent().getDefaultFontSize());
+			tE.setElementFontSize(design.getDefaultFontSize());
 		}
 
 		// height
 		if (tE.getElementHeight() == null) {
-			tE.setElementHeight(this.getParent().getDefaultElementHeight());
+			tE.setElementHeight(design.getDefaultElementHeight());
 		}
 
 		// dynamic flow
 		if (tE.getDynamicFlow() == null) {
-			tE.setDynamicFlow(this.getParent().getDynamicFlow());
+			tE.setDynamicFlow(design.getDynamicFlow());
 		}
 
 		// border
 		if (tE.getElementBorder() == null) {
-			tE.setElementBorder(this.getParent().getDefaultBorder());
+			tE.setElementBorder(design.getDefaultBorder());
 		}
 
-		tE.setBorderLineWidth(this.getParent().getDefaultLineWidth());
-		tE.setBorderColour(this.getParent().getDefaultLineColour());
+		tE.setBorderLineWidth(design.getDefaultLineWidth());
+		tE.setBorderColour(design.getDefaultLineColour());
 
-		tE.setBorderTop(this.getParent().getDefaultBorderTop());
-		tE.setBorderLeft(this.getParent().getDefaultBorderLeft());
-		tE.setBorderBottom(this.getParent().getDefaultBorderBottom());
-		tE.setBorderRight(this.getParent().getDefaultBorderRight());
+		tE.setBorderTop(design.getDefaultBorderTop());
+		tE.setBorderLeft(design.getDefaultBorderLeft());
+		tE.setBorderBottom(design.getDefaultBorderBottom());
+		tE.setBorderRight(design.getDefaultBorderRight());
 
 		// padding
-		tE.setTopPadding(this.getParent().getDefaultCellTopPadding());
-		tE.setLeftPadding(this.getParent().getDefaultCellLeftPadding());
-		tE.setBottomPadding(this.getParent().getDefaultCellBottomPadding());
-		tE.setRightPadding(this.getParent().getDefaultCellRightPadding());
+		tE.setTopPadding(design.getDefaultCellTopPadding());
+		tE.setLeftPadding(design.getDefaultCellLeftPadding());
+		tE.setBottomPadding(design.getDefaultCellBottomPadding());
+		tE.setRightPadding(design.getDefaultCellRightPadding());
 	}
 
 
@@ -182,20 +200,27 @@ public class ReportBand {
 	public void spreadElements() {
 		if (this.getElements().isEmpty()) {
 			return;
-		} else if (this.getParent().getWidth() != null) {
-			int width = this.getParent().getWidth().intValue() / this.getElements().size();
+		}
+		final DesignSpecification design = getNullSafeParent();
+		if (design.getWidth() != null) {
+			int width = design.getWidth().intValue() / this.getElements().size();
 			int left = 0;
 			for (ReportElement e : this.getElements()) {
 				e.setElementLeft(Integer.valueOf(left));
+				// an element without a height is sized as addElement() would size it - with the design default
+				Integer elementHeight = e.getElementHeight();
+				if (elementHeight == null) {
+					elementHeight = design.getDefaultElementHeight();
+				}
 				if (this.getElements().indexOf(e) == 0) {
 					// first
-					width = e.getElementHeight().intValue() * 5;
+					width = elementHeight.intValue() * 5;
 				} else if (this.getElements().indexOf(e) == this.getElements().size() - 1) {
 					// last
-					width = this.getParent().getColumnWidth().intValue() - left;
+					width = design.getColumnWidth().intValue() - left;
 				} else {
 					// other
-					width = e.getElementHeight().intValue() * 5;
+					width = elementHeight.intValue() * 5;
 				}
 				e.setElementWidth(Integer.valueOf(width));
 				left = left + width;

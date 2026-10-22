@@ -1713,6 +1713,16 @@ class ViewValidatorTest {
 	}
 
 	@Test
+	void customAction_missingResourceName_throws() {
+		ActionImpl action = new ActionImpl();
+		action.setName("NoClass");
+
+		ViewValidator v = newValidator();
+		MetaDataException e = assertThrows(MetaDataException.class, () -> v.visitCustomAction(action));
+		assertTrue(e.getMessage().contains("className is required"));
+	}
+
+	@Test
 	void customAction_missingClass_throws() {
 		ActionImpl action = new ActionImpl();
 		action.setResourceName("MissingCustomAction");

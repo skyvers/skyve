@@ -27,6 +27,9 @@ public class ReindexAttachmentsJob extends CancellableJob {
 	@SuppressWarnings("java:S3776") // Complexity OK
 	public void execute() throws Exception {
 		String customerName = getCustomerName();
+		if (customerName == null) { // the indexing is per customer
+			throw new IllegalStateException("Cannot reindex attachments as the user has no customer");
+		}
 		List<String> log = getLog();
 		String trace;
 		

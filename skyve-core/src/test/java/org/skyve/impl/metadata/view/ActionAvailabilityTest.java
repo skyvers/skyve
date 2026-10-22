@@ -321,6 +321,25 @@ class ActionAvailabilityTest {
 	}
 
 	@Test
+	void buttonAndEventActionWithoutAnActionTriggerNothing() {
+		ViewImpl view = editView();
+		ActionImpl action = customAction("act", "ActClass");
+		action.setInActionPanel(Boolean.FALSE);
+		view.putAction(action);
+		Form form = new Form();
+		addToForm(form, button("missing"));
+		TextField field = new TextField();
+		field.setBinding("text");
+		field.getChangedActions().add(server("missing"));
+		addToForm(form, field);
+		view.getContained().add(form);
+
+		assertAll(Stream.of(cases("missing action other", t -> false, t -> passes(view, t, "ActClass")),
+								cases("missing action itself", t -> false, t -> passes(view, t, "missing")))
+							.flatMap(Function.identity()));
+	}
+
+	@Test
 	void linkNeedsVisibleLinkAndVisibleActionWhetherEnabledOrNot() {
 		ViewImpl view = editView();
 		ActionImpl action = customAction("lnk", "LnkClass");

@@ -77,7 +77,10 @@ public class RerenderAction extends FacesAction<Void> {
 			Document targetDocument = targetModule.getDocument(customer, targetBean.getBizDocument());
 			Bizlet<Bean> targetBizlet = ((DocumentImpl) targetDocument).getBizlet(customer);
 			WebContext webContext = facesView.getWebContext();
-			
+			if (webContext == null) { // the target bean comes from the web context, so this should never happen
+				throw new IllegalStateException("Cannot rerender from " + source + " as the FacesView has no web context");
+			}
+
 		    if ((! validate) || FacesAction.validateRequiredFields()) {
 				boolean vetoed = customer.interceptBeforePreRerender(source, targetBean, webContext);
 				if (! vetoed) {

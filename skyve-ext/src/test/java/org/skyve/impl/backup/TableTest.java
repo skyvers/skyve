@@ -187,6 +187,25 @@ public class TableTest {
 		assertTrue(childTable.fields.containsKey(Bean.ORDINAL_NAME));
 	}
 
+	@Test
+	public void addFieldsFromDocumentUpgradesAnExistingFieldWithoutSensitivity() {
+		Customer customer = mock(Customer.class);
+		Document document = document("admin", "Invoice");
+		Text code = text("code", AttributeType.text, Sensitivity.personal, 20, null, false);
+		doReturn(List.<Attribute> of(code)).when(document).getAllAttributes(customer);
+		Table table = new Table("Invoice", "ADM_Invoice");
+		table.fields.put("code", new BackupField(AttributeType.text, null));
+
+		table.addFieldsFromDocument(customer, document);
+
+		assertEquals(Sensitivity.personal, table.fields.get("code").getSensitivity());
+	}
+
+	@Test
+	public void fromJSONThrowsWhenTheJsonDefinesNoTable() {
+		Assert.assertThrows(IllegalArgumentException.class, () -> Table.fromJSON("null"));
+	}
+
 	private static Document document(String moduleName, String name) {
 		Document document = mock(Document.class);
 		when(document.getOwningModuleName()).thenReturn(moduleName);

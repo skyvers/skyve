@@ -9,6 +9,7 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.io.PrintWriter;
@@ -236,6 +237,17 @@ class SmartClientEditServletErrorResponseTest {
 		assertTrue(response.contains("The action you requested cannot be performed because: "));
 		assertTrue(response.contains("Name is required"));
 		assertFalse(response.contains("\"status\":-4"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void technicalErrorWithoutReferenceIsGivenANewReference() {
+		String response = produce(new IllegalStateException("sensitive detail"), Operation.update, true, null);
+
+		assertTrue(response.contains("\"status\":-1"));
+		assertTrue(response.contains(WebErrorUtil.GENERIC_ERROR_MESSAGE));
+		assertTrue(response.contains("Reference: "));
+		assertFalse(response.contains("sensitive detail"));
 	}
 
 	@Test
@@ -810,6 +822,26 @@ class SmartClientEditServletErrorResponseTest {
 		verify(user, never()).canDeleteDocument(any());
 		verify(persistence, never()).delete(any(Document.class), any(PersistentBean.class));
 		assertEquals("{\"response\":{\"status\":0}}", sink.toString());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void removePrivateWithNoBeanWritesSuccessWithoutRunningCallbacks() throws Exception {
+		AbstractWebContext webContext = mock(AbstractWebContext.class);
+		User user = mock(User.class);
+		CustomerImpl customer = mock(CustomerImpl.class);
+		Bizlet<Bean> bizlet = mock(Bizlet.class);
+		AbstractPersistence persistence = mock(AbstractPersistence.class);
+		StringWriter sink = new StringWriter();
+		PrintWriter pw = new PrintWriter(sink);
+
+		// As above, caching the conversation fails last as there is no conversation cache here
+		assertThrows(NullPointerException.class,
+				() -> invokeRemovePrivate(webContext, user, customer, mock(Document.class), null, bizlet, persistence, pw));
+		pw.flush();
+
+		assertEquals("{\"response\":{\"status\":0}}", sink.toString());
+		verifyNoInteractions(user, customer, bizlet, persistence);
 	}
 
 	@Test

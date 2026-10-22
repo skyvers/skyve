@@ -127,7 +127,21 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 	 * Prevent external instantiation.
 	 */
 	protected FileSystemRepository() {
-		this(UtilImpl.getAbsoluteBasePath());
+		this(absoluteBasePath());
+	}
+
+	/**
+	 * Returns the absolute base path of the application, failing when it cannot be determined.
+	 *
+	 * @return the absolute base path; never {@code null}
+	 * @throws MetaDataException when the base path cannot be determined from the classpath
+	 */
+	private static @Nonnull String absoluteBasePath() {
+		String result = UtilImpl.getAbsoluteBasePath();
+		if (result == null) {
+			throw new MetaDataException("Cannot determine absolute base path. Where is schemas/common.xsd?");
+		}
+		return result;
 	}
 	
 	/**
@@ -149,6 +163,10 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 			CustomerMetaData customer = loadCustomer(customerName);
 			for (CustomerModuleMetaData module : customer.getModules().getModules()) {
 				String moduleName = module.getName();
+				// An unnamed module reference has no location to populate
+				if (moduleName == null) {
+					continue;
+				}
 				// populate the module XML file from the customer overridden area.
 				populateModuleLocation(customerName, moduleName);
 
@@ -418,7 +436,10 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 		catch (Exception e) {
 			throw new MetaDataException(e);
 		}
-		
+		if (result == null) { // cannot happen as there is at least 1 router file
+			throw new IllegalStateException("No router was loaded");
+		}
+
 		return result;
 	}
 
@@ -1009,7 +1030,7 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 				throw new MetaDataException(imageName + " is not defined under dynamic.images in document " + document.getName());
 			}
 			addKey(imageClassName);
-			return getJavaMetaData(customer, imageClassName, true, runtime);
+			return getRequiredJavaMetaData(customer, imageClassName, runtime);
 		}
 
 		// Otherwise load from the file system
@@ -1017,7 +1038,7 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 		key.append(ProvidedRepository.MODULES_NAMESPACE).append(document.getOwningModuleName()).append('/');
 		key.append(document.getName()).append('/');
 		key.append(ProvidedRepository.IMAGES_NAMESPACE).append(imageName);
-		return getJavaMetaData(customer, key.toString(), true, runtime);
+		return getRequiredJavaMetaData(customer, key.toString(), runtime);
 	}
 
 	/**
@@ -1045,7 +1066,7 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 				throw new MetaDataException(modelName + " is not defined under dynamic.models in document " + document.getName());
 			}
 			addKey(modelClassName);
-			return getJavaMetaData(customer, modelClassName, true, runtime);
+			return getRequiredJavaMetaData(customer, modelClassName, runtime);
 		}
 
 		// Otherwise load from the file system
@@ -1053,7 +1074,7 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 		key.append(ProvidedRepository.MODULES_NAMESPACE).append(document.getOwningModuleName()).append('/');
 		key.append(document.getName()).append('/');
 		key.append(ProvidedRepository.MODELS_NAMESPACE).append(modelName);
-		return getJavaMetaData(customer, key.toString(), true, runtime);
+		return getRequiredJavaMetaData(customer, key.toString(), runtime);
 	}
 
 	/**
@@ -1262,7 +1283,11 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 	 */
 	@Override
 	public @Nonnull UploadAction<Bean> getUploadAction(@Nullable Customer customer, @Nonnull Document document, @Nonnull String uploadActionName, boolean runtime) {
-		return getClassAction(customer, document, uploadActionName, true, runtime);
+		UploadAction<Bean> result = getClassAction(customer, document, uploadActionName, true, runtime);
+		if (result == null) { // cannot happen as existence is asserted
+			throw new IllegalStateException("Upload action " + uploadActionName + " was not resolved for document " + document.getName());
+		}
+		return result;
 	}
 
 	/**
@@ -1421,6 +1446,26 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 			catch (Exception e) {
 				throw new MetaDataException("A problem was encountered instantiating class " + type, e);
 			}
+		}
+		return result;
+	}
+
+	/**
+	 * Instantiates a Java-backed metadata class that must exist in the repository vtable.
+	 *
+	 * @param <T> the metadata type
+	 * @param customer the customer context for vtable lookup, or {@code null}
+	 * @param key repository key for the Java metadata class
+	 * @param runtime whether runtime dependency injection should be applied
+	 * @return a new metadata instance; never {@code null}
+	 * @throws MetaDataException when the class does not exist or cannot be instantiated
+	 */
+	private @Nonnull <T extends MetaData> T getRequiredJavaMetaData(@Nullable Customer customer,
+																		@Nonnull String key,
+																		boolean runtime) {
+		T result = getJavaMetaData(customer, key, true, runtime);
+		if (result == null) { // cannot happen as existence is asserted
+			throw new IllegalStateException(key + " was not instantiated from the repository vtable");
 		}
 		return result;
 	}

@@ -313,8 +313,12 @@ public class SkyveContextListener implements ServletContextListener {
 
 	private static @Nonnull Map<String, Object> readExpandedConfiguration(@Nonnull File file) {
 		try (FileInputStream fis = new FileInputStream(file)) {
+			Map<String, Object> configuration = UtilImpl.readJSONConfig(fis);
+			if (configuration == null) { // the JSON "null"
+				throw new IllegalStateException(file.getAbsolutePath() + " does not contain a JSON object");
+			}
 			VariableExpander variableExpander = new VariableExpander();
-			return variableExpander.expand(UtilImpl.readJSONConfig(fis), System.getenv());
+			return variableExpander.expand(configuration, System.getenv());
 		}
 		catch (Exception e) {
 			throw new IllegalStateException("Cannot open or read " + file.getAbsolutePath(), e);

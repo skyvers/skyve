@@ -516,6 +516,9 @@ public class ContentUploadView extends AbstractUploadView {
 			String bizDocument = bean.getBizDocument();
 			UxUi uxui = UserAgent.getSelection(request).getUxUi();
 			String unsanitisedContentBinding = BindUtil.unsanitiseBinding(contentBinding);
+			if (unsanitisedContentBinding == null) { // contentBinding was checked above
+				throw new IllegalStateException("contentBinding is null");
+			}
 			EXT.checkAccess(user, UserAccess.content(bizModule, bizDocument, unsanitisedContentBinding), uxui.getName());
 
 			// Check document access

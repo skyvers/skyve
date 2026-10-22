@@ -72,6 +72,7 @@ final class BackupUtil {
 
     private static final String TABLE_DEFINITION_CREATED = "Table definition created for {}";
 	private static final String PERSISTENT_METADATA_MISSING = " is persistable but has no persistent metadata.";
+	private static final String PERSISTENT_NAME_MISSING = " has persistent metadata with no table name.";
 	private static final String WHERE_SQL = " where ";
 
 	private BackupUtil() {
@@ -252,6 +253,9 @@ final class BackupUtil {
 			}
 			String persistentIdentifier = persistent.getPersistentIdentifier();
 			String agnosticIdentifier = persistent.getAgnosticIdentifier();
+			if ((persistentIdentifier == null) || (agnosticIdentifier == null)) { // persistable means the persistent has a name
+				throw new MetaDataException(document.getName() + PERSISTENT_NAME_MISSING);
+			}
 			Table table = tables.get(agnosticIdentifier);
 			if (table == null) {
 				table = new Table(agnosticIdentifier, persistentIdentifier);
@@ -267,12 +271,21 @@ final class BackupUtil {
 				for (ExportedReference reference : references) {
 					Persistent referencePersistent = reference.getPersistent();
 					if (referencePersistent != null) {
-						Document referencedDocument = customer.getModule(reference.getModuleName()).getDocument(customer, reference.getDocumentName());
+						// CustomerImpl populates every exported reference from the referencing document and its reference
+						String referenceModuleName = reference.getModuleName();
+						String referenceDocumentName = reference.getDocumentName();
+						if ((referenceModuleName == null) || (referenceDocumentName == null)) {
+							throw new IllegalStateException("An exported reference to " + document.getName() + " has no module or document name");
+						}
+						Document referencedDocument = customer.getModule(referenceModuleName).getDocument(customer, referenceDocumentName);
 						// Add joining table for collections pointing to static documents
 						if (reference.isCollection() && (! referencedDocument.isDynamic())) {
 							// child collections have no joining table
 							if (! CollectionType.child.equals(reference.getType())) {
 								String referenceFieldName = reference.getReferenceFieldName();
+								if (referenceFieldName == null) {
+									throw new IllegalStateException("The exported reference from " + referenceModuleName + '.' + referenceDocumentName + " to " + document.getName() + " has no reference field name");
+								}
 								org.skyve.metadata.model.document.Collection collection = (org.skyve.metadata.model.document.Collection) referencedDocument.getNullSafeReferenceByName(referenceFieldName);
 								if (collection.isPersistent()) {
 									String ownerAgnosticIdentifier = referencePersistent.getAgnosticIdentifier();
@@ -296,6 +309,9 @@ final class BackupUtil {
 												String ai = derivedPersistent.getAgnosticIdentifier();
 												ownerAgnosticIdentifier = ai;
 												ownerPersistentIdentifier = derivedPersistent.getPersistentIdentifier();
+												if ((ownerAgnosticIdentifier == null) || (ownerPersistentIdentifier == null)) { // persistable means the persistent has a name
+													throw new MetaDataException(derivedDocument.getName() + PERSISTENT_NAME_MISSING);
+												}
 												String joinAgnosticIdentifier = ownerAgnosticIdentifier + '_' + referenceFieldName;
 												String joinPersistentIdentifier = ownerPersistentIdentifier + '_' + referenceFieldName;
 												if (! tables.containsKey(joinAgnosticIdentifier)) {
@@ -343,6 +359,9 @@ final class BackupUtil {
 										String ai = ultimatePersistent.getAgnosticIdentifier();
 										ownerAgnosticIdentifier = ai;
 										ownerPersistentIdentifier = ultimatePersistent.getPersistentIdentifier();
+										if ((ownerAgnosticIdentifier == null) || (ownerPersistentIdentifier == null)) {
+											throw new MetaDataException(ultimateDocument.getName() + PERSISTENT_NAME_MISSING);
+										}
 										Persistent referencedPersistent = referencedDocument.getPersistent();
 										if (referencedPersistent == null) {
 											throw new MetaDataException(referencedDocument.getName() + PERSISTENT_METADATA_MISSING);
@@ -356,6 +375,10 @@ final class BackupUtil {
 										}
 									}
 									else {
+										// only a polymorphically mapped persistent has no name
+										if ((ownerAgnosticIdentifier == null) || (ownerPersistentIdentifier == null)) {
+											throw new MetaDataException(referenceDocumentName + PERSISTENT_NAME_MISSING);
+										}
 										String joinAgnosticIdentifier = ownerAgnosticIdentifier + '_' + referenceFieldName;
 										String joinPersistentIdentifier = ownerPersistentIdentifier + '_' + referenceFieldName;
 										if (! tables.containsKey(joinAgnosticIdentifier)) {
@@ -610,7 +633,7 @@ final class BackupUtil {
 	 * @return the redacted date.
 	 * @author simeonsolomou
 	 */
-	private static @Nonnull Date redactDate(@Nonnull Date data) {
+	static @Nonnull Date redactDate(@Nonnull Date data) {
 		return Date.valueOf(data.toLocalDate().withDayOfMonth(1));
 	}
 	
@@ -621,7 +644,7 @@ final class BackupUtil {
 	 * @return the redacted time.
 	 * @author simeonsolomou
 	 */
-	private static @Nonnull Time redactTime(@Nonnull Time data) {
+	static @Nonnull Time redactTime(@Nonnull Time data) {
 		return Time.valueOf(data.toLocalTime().withMinute(0).withSecond(0).withNano(0));
 	}
 	
@@ -632,7 +655,7 @@ final class BackupUtil {
 	 * @return The redacted date-time.
 	 * @author simeonsolomou
 	 */
-	private static @Nonnull java.sql.Timestamp redactTimestamp(@Nonnull java.sql.Timestamp data) {
+	static @Nonnull java.sql.Timestamp redactTimestamp(@Nonnull java.sql.Timestamp data) {
 		return java.sql.Timestamp.valueOf(data.toLocalDateTime()
 				.withDayOfMonth(1).withHour(0).withMinute(0));
 	}

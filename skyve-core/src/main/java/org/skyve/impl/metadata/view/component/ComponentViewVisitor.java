@@ -1629,10 +1629,10 @@ public class ComponentViewVisitor extends ViewVisitor {
 	/**
 	 * Maps a component-view action name to the owning-view action name through the action mappings.
 	 *
-	 * @param name the action name to translate, may be {@code null}
+	 * @param name the action name to translate, which buttons and server-side event actions always have
 	 * @return the mapped action name, or the name unchanged when it has no mapping
 	 */
-	private @Nullable String translateAction(@Nullable String name) {
+	private @Nonnull String translateAction(@Nonnull String name) {
 		if (name == null) {
 			return null;
 		}

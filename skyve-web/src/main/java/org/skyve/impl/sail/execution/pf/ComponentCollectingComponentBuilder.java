@@ -27,6 +27,7 @@ import org.skyve.impl.metadata.view.widget.bound.tabular.DataGrid;
 import org.skyve.impl.metadata.view.widget.bound.tabular.ListGrid;
 import org.skyve.impl.web.faces.pipeline.component.NoOpComponentBuilder;
 import org.skyve.metadata.MetaData;
+import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.controller.ImplicitActionName;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.query.QueryDefinition;
@@ -412,6 +413,9 @@ class ComponentCollectingComponentBuilder extends NoOpComponentBuilder {
 		// component = current as it was set in the previous builder in the chain
 		if (component != null) {
 			String dataGridIdentifier = grid.getBinding();
+			if (dataGridIdentifier == null) { // validated as required when the view is loaded
+				throw new MetaDataException("DataGrid " + grid.getTitle() + " has no binding");
+			}
 			context.put(dataGridIdentifier, component, grid);
 			UIComponent potentialActionColumn = component.getChildren().get(component.getChildCount() - 1);
 			UIComponent header = potentialActionColumn.getFacet("header");
@@ -807,8 +811,10 @@ class ComponentCollectingComponentBuilder extends NoOpComponentBuilder {
 	 * @return the supplied component
 	 */
 	private @Nullable UIComponent putByBinding(@Nonnull Bound bound, @Nullable UIComponent component) {
-		if (component != null) {
-			context.put(bound.getBinding(), component, bound);
+		String binding = bound.getBinding();
+		// A lookup description in a data grid column can have no binding - there is nothing to identify it by
+		if ((component != null) && (binding != null)) {
+			context.put(binding, component, bound);
 		}
 
 		return component;
@@ -822,8 +828,10 @@ class ComponentCollectingComponentBuilder extends NoOpComponentBuilder {
 	 * @return the supplied event-source wrapper
 	 */
 	private @Nullable EventSourceComponent putByBinding(@Nonnull Bound bound, @Nullable EventSourceComponent component) {
-		if (component != null) {
-			context.put(bound.getBinding(), component.getComponent(), bound);
+		String binding = bound.getBinding();
+		// A lookup description in a data grid column can have no binding - there is nothing to identify it by
+		if ((component != null) && (binding != null)) {
+			context.put(binding, component.getComponent(), bound);
 		}
 
 		return component;

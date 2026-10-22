@@ -296,8 +296,10 @@ public final class ActionAvailability extends NoOpViewVisitor {
 	private boolean isRowLinkReachable(@Nonnull View rowView, @Nonnull Bean rowBean) {
 		for (Link link : rowLinks) {
 			// Rule: a row link is a trigger when it is visible for the row; its row action's conditions are not applied
-			if (evaluateConditionInOppositeSense(rowBean, link.getInvisibleCondition())) {
-				Action action = rowView.getAction(((ActionReference) link.getReference()).getActionName());
+			// Only links with an action reference are collected
+			if (evaluateConditionInOppositeSense(rowBean, link.getInvisibleCondition()) &&
+					(link.getReference() instanceof ActionReference reference)) {
+				Action action = rowView.getAction(reference.getActionName());
 				if ((action != null) && requestedName.equals(action.getResourceName())) {
 					return true;
 				}
@@ -450,7 +452,9 @@ public final class ActionAvailability extends NoOpViewVisitor {
 	public void visitButton(@Nonnull Button button, boolean parentVisible, boolean parentEnabled) {
 		Action action = view.getAction(button.getActionName());
 		// Rule: a button is a trigger when its container is visible and enabled and its action is visible and enabled
-		if (isRequested(action, action.getImplicitName()) &&
+		// A button whose action does not exist triggers nothing, as for a link
+		if ((action != null) &&
+				isRequested(action, action.getImplicitName()) &&
 				parentVisible &&
 				parentEnabled &&
 				visible(action) &&
@@ -573,7 +577,9 @@ public final class ActionAvailability extends NoOpViewVisitor {
 	public void visitServerSideActionEventAction(@Nonnull ServerSideActionEventAction server, boolean parentVisible, boolean parentEnabled) {
 		Action action = view.getAction(server.getActionName());
 		// Rule: an event action is a trigger when its widget (in a grid column: the grid) is visible, whatever its action
-		if (isRequested(action, action.getImplicitName()) &&
+		// An event action whose action does not exist triggers nothing, as for a link
+		if ((action != null) &&
+				isRequested(action, action.getImplicitName()) &&
 				parentVisible &&
 				(inBoundColumn || (! (eventSource instanceof Invisible invisible)) || visible(invisible))) {
 			reachable = true;

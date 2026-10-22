@@ -56,6 +56,7 @@ import org.skyve.util.logging.Category;
 import org.slf4j.Logger;
 
 import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.ServletOutputStream;
 import jakarta.servlet.http.HttpServlet;
@@ -327,7 +328,7 @@ public class ReportServlet extends HttpServlet {
 	 * reports stores the {@link JasperPrint} in the session for JasperReports viewer integration.
 	 */
 	private static void pumpOutReportFormat(@Nonnull byte[] bytes,
-												@Nonnull JasperPrint jasperPrint,
+												@Nullable JasperPrint jasperPrint,
 												@Nonnull ReportFormat format,
 												@Nonnull String fileNameNoSuffix,
 												@Nonnull HttpSession session,
@@ -435,15 +436,15 @@ public class ReportServlet extends HttpServlet {
 					final String log = OWASP.sanitiseLog(valuesParam);
 					HTTP_LOGGER.info(log);
 				}
-				if (valuesParam == null) {
+				// A "null" JSON value carries no report parameters either
+				@SuppressWarnings("unchecked")
+				Map<String, Object> values = (valuesParam == null) ? null : (Map<String, Object>) JSON.unmarshall(user, valuesParam);
+				if (values == null) {
 					response.setContentType(MimeType.html.toString());
 					response.setCharacterEncoding(StandardCharsets.UTF_8.name());
 					out.write("<html><head><title>Missing Report Parameters</head><body><h1>There are no report parameters in this request</h1></body></html>".getBytes(StandardCharsets.UTF_8));
 					return;
 				}
-
-				@SuppressWarnings("unchecked")
-				Map<String, Object> values = (Map<String, Object>) JSON.unmarshall(user, valuesParam);
 				String module_QueryOrModel = (String) values.get("ds");
 				int _Index = module_QueryOrModel.indexOf('_');
 				String moduleName = module_QueryOrModel.substring(0, _Index);
@@ -469,6 +470,9 @@ public class ReportServlet extends HttpServlet {
 					model.setBean(WebUtil.getConversationBeanFromRequest(webContext, request));
 
 					drivingDocument = model.getDrivingDocument();
+					if (drivingDocument == null) {
+						throw new IllegalStateException("List model " + modelName + " in document " + documentName + " has no driving document");
+					}
 				}
 				else {
 					MetaDataQueryDefinition query = module.getMetaDataQuery(documentOrQueryOrModelName);
@@ -572,7 +576,7 @@ public class ReportServlet extends HttpServlet {
 							reportColumn.setAlignment(ColumnAlignment.left);
 						}
 						if ((drivingDocument != null) && (reportColumn.getName() != null)) {
-							final Attribute attribute = drivingDocument.getPolymorphicAttribute(customer, reportColumn.getName());
+							final Attribute attribute = drivingDocument.getPolymorphicAttribute(customer, binding);
 							if (attribute != null) {
 								reportColumn.setAttributeType(attribute.getAttributeType());
 								if (attribute instanceof ConvertibleField convertibleField) {

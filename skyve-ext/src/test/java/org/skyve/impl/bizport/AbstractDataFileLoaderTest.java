@@ -465,6 +465,25 @@ class AbstractDataFileLoaderTest {
 	}
 
 	@Test
+	void lookupBeanThrowsWhenFieldHasNoLoadAction() throws Exception {
+		Customer customer = customer();
+		stubCompanyLookupMetadata(customer);
+		AbstractPersistence persistence = persistence(customer, null, null);
+		DocumentQuery lookup = mock(DocumentQuery.class);
+		when(persistence.newDocumentQuery("sales", "Company")).thenReturn(lookup);
+		bindPersistence(persistence);
+		TestLoader loader = new TestLoader(LoaderActivityType.CREATE_FIND, new UploadException());
+		DataFileField field = field("company.name", AttributeType.text);
+		field.setLoadAction(null);
+		Bean order = new DynamicBean("sales", "Order", new TreeMap<>());
+
+		DomainException thrown = assertThrows(DomainException.class,
+				() -> loader.lookupBean(order, field, "Acme", new StringBuilder()));
+
+		assertThat(thrown.getMessage(), containsString("No load action"));
+	}
+
+	@Test
 	void lookupBeanUsesLikeLookupAndSetsFoundReferenceInDebugMode() throws Exception {
 		Customer customer = customer();
 		stubCompanyLookupMetadata(customer);

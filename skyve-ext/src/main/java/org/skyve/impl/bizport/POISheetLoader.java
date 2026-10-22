@@ -125,15 +125,17 @@ public class POISheetLoader extends AbstractDataFileLoader {
 
 		boolean foundNonEmpty = false;
 		for (DataFileField field : fields) {
-			if(field.getIndex()==null){
-				field.setIndex(Integer.valueOf(0));
+			Integer index = field.getIndex();
+			if(index==null){
+				index = Integer.valueOf(0);
+				field.setIndex(index);
 			}
-			String val = getStringFieldValue(field.getIndex().intValue(), true);
+			String val = getStringFieldValue(index.intValue(), true);
 			if (val != null && (! val.trim().isEmpty())) {
 				foundNonEmpty = true;
 				break;
 			} else if(debugMode){
-				LOGGER.info("{} No value was found at this location.", getWhere(field.getIndex().intValue()));
+				LOGGER.info("{} No value was found at this location.", getWhere(index.intValue()));
 			}
 		}
 
@@ -270,6 +272,9 @@ public class POISheetLoader extends AbstractDataFileLoader {
 			try {
 				//try again using the default converter
 				raw = getStringFieldValue(col, true);
+				if (raw == null) { // reported as not a valid date below
+					throw new IllegalArgumentException("No value to convert");
+				}
 				result = converter.fromDisplayValue(raw);
 			} catch (@SuppressWarnings("unused") Exception e) {
 				// do nothing

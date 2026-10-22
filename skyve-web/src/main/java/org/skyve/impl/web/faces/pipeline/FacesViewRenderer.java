@@ -175,6 +175,7 @@ import org.skyve.metadata.view.Action;
 import org.skyve.metadata.view.Action.ActionShow;
 import org.skyve.metadata.view.View;
 import org.skyve.metadata.view.View.ViewType;
+import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.metadata.view.widget.FilterParameter;
 import org.skyve.metadata.view.widget.bound.Bound;
 import org.skyve.metadata.view.widget.bound.Parameter;
@@ -383,6 +384,9 @@ public class FacesViewRenderer extends ViewRenderer {
 	@Override
 	public void renderTab(@Nullable String title, @Nullable String icon16x16Url, @Nonnull Tab tab) {
 		UIComponent component = cb.tab(null, title, tab);
+		if (component == null) {
+			throw new IllegalStateException("The component builder produced no tab component");
+		}
 		lb.addTab(current, component);
 		current = component;
 		UIComponent layout = lb.tabLayout(null);
@@ -620,6 +624,9 @@ public class FacesViewRenderer extends ViewRenderer {
 			else { // a form item
 				FormItem formItem = getCurrentFormItem();
 				FormColumn formColumn = getCurrentFormColumn();
+				if ((formItem == null) || (formColumn == null)) { // set while rendering a form item
+					throw new IllegalStateException("There is no current form item or form column to add a component to");
+				}
 				if (isCurrentWidgetShowLabel() && (! isCurrentFormRenderTopLabels())) {
 					lb.layoutFormItemLabel(current,
 											component,
@@ -970,6 +977,9 @@ public class FacesViewRenderer extends ViewRenderer {
 												title,
 												requiredMessage,
 												CORE.getCustomisations().determineDefaultWidgetTextAlignment(currentUxUi, AttributeType.geometry));
+		if (c == null) {
+			throw new IllegalStateException("The component builder produced no geometry component");
+		}
 		eventSource = c.getEventSource();
 		addComponent(title,
 						formColspan,
@@ -1020,6 +1030,9 @@ public class FacesViewRenderer extends ViewRenderer {
 													containingDisabledCondition(),
 													title,
 													requiredMessage);
+		if (c == null) {
+			throw new IllegalStateException("The component builder produced no geometryMap component");
+		}
 		eventSource = c.getEventSource();
 		addComponent(title,
 						getCurrentWidgetColspan(),
@@ -1405,7 +1418,10 @@ public class FacesViewRenderer extends ViewRenderer {
 	 * @param formColspan form colspan
 	 * @param blurb blurb metadata
 	 */
-	private void renderBlurb(@Nonnull String markup, int formColspan, @Nonnull Blurb blurb) {
+	private void renderBlurb(@Nullable String markup, int formColspan, @Nonnull Blurb blurb) {
+		if (markup == null) { // ViewValidator rejects a blurb with no markup
+			throw new MetaDataException("A Blurb in view " + view.getName() + " has no markup specified.");
+		}
 		String value = null;
 		String binding = null;
 		if (markup.indexOf('{') > -1) {
@@ -1543,16 +1559,23 @@ public class FacesViewRenderer extends ViewRenderer {
 		}
 		
 		String stickyHeaderAnchorSelector = listView ? DEFAULT_STICKY_HEADER_ANCHOR_SELECTOR : null;
+		ListModel<Bean> model = getCurrentListWidgetModel();
+		if (model == null) { // set while rendering a list widget
+			throw new IllegalStateException("There is no current list widget model to render a list grid with");
+		}
 		UIComponent component = componentBuilder.listGrid(null,
 															module.getName(),
 															getCurrentListWidgetModelDocumentName(),
 															getCurrentListWidgetModelName(),
 															currentUxUi,
-															getCurrentListWidgetModel(),
+															model,
 															document,
 															grid,
 															stickyHeaderAnchorSelector,
 															aggregateQuery);
+		if (component == null) {
+			throw new IllegalStateException("The component builder produced no listGrid component");
+		}
 
 		addToContainerWithPotentialBorder(component,
 											(title == null) ? Boolean.FALSE : Boolean.TRUE,
@@ -1608,11 +1631,15 @@ public class FacesViewRenderer extends ViewRenderer {
 	 */
 	@Override
 	public void renderListRepeater(@Nullable String title, @Nonnull ListRepeater repeater) {
+		ListModel<Bean> model = getCurrentListWidgetModel();
+		if (model == null) { // set while rendering a list widget
+			throw new IllegalStateException("There is no current list widget model to render a list repeater with");
+		}
 		UIComponent component = cb.listRepeater(null,
 													getCurrentListWidgetModelDocumentName(),
 													getCurrentListWidgetModelName(),
 													currentUxUi,
-													getCurrentListWidgetModel(),
+													model,
 													repeater.getFilterParameters(),
 													repeater.getParameters(),
 													Boolean.TRUE.equals(repeater.getShowColumnHeaders()),
@@ -1897,10 +1924,14 @@ public class FacesViewRenderer extends ViewRenderer {
 					customisations.determineDefaultColumnWidth(currentUxUi, attributeType);
 		}
 
+		AbstractDataWidget currentDataWidget = getCurrentDataWidget();
+		if (currentDataWidget == null) { // set while rendering a data grid or data repeater
+			throw new IllegalStateException("There is no current data widget to add a bound column to");
+		}
 		cb.setCurrentInputTitleEscape(shouldEscape(column.getEscapeTitle()));
 		current = cb.addDataGridBoundColumn(null,
 												current,
-												getCurrentDataWidget(),
+												currentDataWidget,
 												column,
 												dataWidgetVar,
 												title,
@@ -1965,8 +1996,12 @@ public class FacesViewRenderer extends ViewRenderer {
 			alignment = CORE.getCustomisations().determineDefaultColumnTextAlignment(currentUxUi, attributeType);
 		}
 
+		AbstractDataWidget currentDataWidget = getCurrentDataWidget();
+		if (currentDataWidget == null) { // set while rendering a data grid or data repeater
+			throw new IllegalStateException("There is no current data widget to add a container column to");
+		}
 		cb.setCurrentInputTitleEscape(shouldEscape(column.getEscapeTitle()));
-		current = cb.addDataGridContainerColumn(null, current, getCurrentDataWidget(), title, column, alignment);
+		current = cb.addDataGridContainerColumn(null, current, currentDataWidget, title, column, alignment);
 	}
 
 	/**
@@ -2027,6 +2062,9 @@ public class FacesViewRenderer extends ViewRenderer {
 												containingDisabledCondition(),
 												title,
 												requiredMessage);
+		if (c == null) {
+			throw new IllegalStateException("The component builder produced no checkBox component");
+		}
 		eventSource = c.getEventSource();
 		addComponent(title,
 						formColspan,
@@ -2125,6 +2163,9 @@ public class FacesViewRenderer extends ViewRenderer {
 													title,
 													requiredMessage,
 													CORE.getCustomisations().determineDefaultWidgetTextAlignment(currentUxUi, attributeType));
+		if (c == null) {
+			throw new IllegalStateException("The component builder produced no colourPicker component");
+		}
 		eventSource = c.getEventSource();
 		addComponent(title,
 						formColspan,
@@ -2196,6 +2237,9 @@ public class FacesViewRenderer extends ViewRenderer {
 											containingDisabledCondition(),
 											title,
 											requiredMessage);
+		if (c == null) {
+			throw new IllegalStateException("The component builder produced no combo component");
+		}
 		eventSource = c.getEventSource();
 		addComponent(title,
 						formColspan,
@@ -2311,6 +2355,9 @@ public class FacesViewRenderer extends ViewRenderer {
 		String title = getCurrentWidgetLabel();
 		String requiredMessage = getPrimeFacesRequiredMessage();
 		UIComponent c = lb.contentSignatureLayout(null, signature);
+		if (c == null) {
+			throw new IllegalStateException("The layout builder produced no contentSignatureLayout component");
+		}
 		addComponent(title,
 						getCurrentWidgetColspan(),
 						requiredMessage,
@@ -2399,6 +2446,9 @@ public class FacesViewRenderer extends ViewRenderer {
 													EscapableText.of(candidatesHeading, shouldEscape(membership.getEscapeCandidatesHeading())),
 													EscapableText.of(membersHeading, shouldEscape(membership.getEscapeMembersHeading())),
 													membership);
+		if (c == null) {
+			throw new IllegalStateException("The component builder produced no listMembership component");
+		}
 		eventSource = c.getEventSource();
 		Integer pixelWidth = membership.getPixelWidth();
 		addToContainer(c.getComponent(),
@@ -2510,6 +2560,9 @@ public class FacesViewRenderer extends ViewRenderer {
 														query,
 														document);
 
+		if (c == null) {
+			throw new IllegalStateException("The component builder produced no lookupDescription component");
+		}
 		eventSource = c.getEventSource();
 		addComponent(title,
 						formColspan,
@@ -2575,6 +2628,9 @@ public class FacesViewRenderer extends ViewRenderer {
 												(attribute != null) ?
 													CORE.getCustomisations().determineDefaultWidgetTextAlignment(currentUxUi, attributeType) :
 													null);
+		if (c == null) {
+			throw new IllegalStateException("The component builder produced no password component");
+		}
 		eventSource = c.getEventSource();
 		addComponent(title,
 						formColspan,
@@ -2620,6 +2676,9 @@ public class FacesViewRenderer extends ViewRenderer {
 											containingDisabledCondition(),
 											title,
 											requiredMessage);
+		if (c == null) {
+			throw new IllegalStateException("The component builder produced no radio component");
+		}
 		eventSource = c.getEventSource();
 		addComponent(title,
 						formColspan,
@@ -2665,6 +2724,9 @@ public class FacesViewRenderer extends ViewRenderer {
 												containingDisabledCondition(),
 												title,
 												requiredMessage);
+		if (c == null) {
+			throw new IllegalStateException("The component builder produced no richText component");
+		}
 		eventSource = c.getEventSource();
 		addComponent(title,
 						formColspan,
@@ -2719,6 +2781,9 @@ public class FacesViewRenderer extends ViewRenderer {
 												title,
 												requiredMessage,
 												convertConverter(converter, type));
+		if (c == null) {
+			throw new IllegalStateException("The component builder produced no slider component");
+		}
 		eventSource = c.getEventSource();
 		addComponent(title,
 						formColspan,
@@ -2774,6 +2839,9 @@ public class FacesViewRenderer extends ViewRenderer {
 												requiredMessage,
 												CORE.getCustomisations().determineDefaultWidgetTextAlignment(currentUxUi, attributeType),
 												convertConverter(converter, attributeType));
+		if (c == null) {
+			throw new IllegalStateException("The component builder produced no spinner component");
+		}
 		eventSource = c.getEventSource();
 		addComponent(title,
 						formColspan,
@@ -2829,6 +2897,9 @@ public class FacesViewRenderer extends ViewRenderer {
 												requiredMessage,
 												CORE.getCustomisations().determineDefaultWidgetTextAlignment(currentUxUi, attributeType),
 												length);
+		if (c == null) {
+			throw new IllegalStateException("The component builder produced no textArea component");
+		}
 		eventSource = c.getEventSource();
 		addComponent(title,
 						formColspan,
@@ -2914,6 +2985,9 @@ public class FacesViewRenderer extends ViewRenderer {
 											converter,
 											format,
 											convertConverter(converter, attributeType));
+		if (c == null) {
+			throw new IllegalStateException("The component builder produced no text component");
+		}
 		eventSource = c.getEventSource();
 		addComponent(title,
 						formColspan,

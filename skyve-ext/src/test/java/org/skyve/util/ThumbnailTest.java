@@ -184,6 +184,19 @@ class ThumbnailTest {
 	}
 
 	@Test
+	void contentConstructorWithDimensionsProducesPngThumbnailWithoutFileName() throws IOException {
+		AttachmentContent named = createPngContent();
+		AttachmentContent content = new AttachmentContent("testCustomer", "testModule", "testDocument", null, "testUser", "testId", "testAttr");
+		content.attachment(null, MimeType.png, named.getContentBytes());
+		content.setContentId("fedcba9876543210fedcba9876543210");
+
+		Thumbnail t = new Thumbnail(content, 4, 4);
+
+		assertNotNull(t.getBytes());
+		assertEquals(MimeType.png, t.getMimeType());
+	}
+
+	@Test
 	void contentConstructorProcessesMarkupPath() throws IOException {
 		AttachmentContent content = createPngContent().markup("<svg><not-valid");
 

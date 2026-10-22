@@ -105,6 +105,9 @@ public abstract class ContextualExecutor<T extends AutomationContext> implements
 	@Override
 	public void executeNavigateList(@Nonnull NavigateList list) {
 		T context = peek();
+		if (context == null) {
+			throw new MetaDataException("<" + list.getClass().getSimpleName() + " /> has no context to navigate in");
+		}
 		context.setViewType(ViewType.list);
 		
 		Customer c = CORE.getUser().getCustomer();
@@ -137,6 +140,9 @@ public abstract class ContextualExecutor<T extends AutomationContext> implements
 	@Override
 	public void executeNavigateEdit(@Nonnull NavigateEdit edit) {
 		T context = peek();
+		if (context == null) {
+			throw new MetaDataException("<NavigateEdit /> has no context to navigate in");
+		}
 		context.setViewType(ViewType.edit);
 		context.setModuleName(edit.getModuleName());
 		context.setDocumentName(edit.getDocumentName());
@@ -176,6 +182,9 @@ public abstract class ContextualExecutor<T extends AutomationContext> implements
 	@Override
 	public void executeNavigateLink(@Nonnull NavigateLink link) {
 		T context = peek();
+		if (context == null) {
+			throw new MetaDataException("<NavigateLink /> has no context to navigate in");
+		}
 		context.setDocumentName(null);
 		context.setViewType(null);
 	}
@@ -196,6 +205,10 @@ public abstract class ContextualExecutor<T extends AutomationContext> implements
 		if (queryName != null) {
 			MetaDataQueryDefinition q = m.getMetaDataQuery(queryName);
 			if (q == null) {
+				if (documentName == null) {
+					throw new MetaDataException("Query " + queryName + " does not exist in module " + moduleName +
+													" and there is no document to use the default query of");
+				}
 				q = m.getDocumentDefaultQuery(c, documentName);
 			}
 
@@ -205,7 +218,12 @@ public abstract class ContextualExecutor<T extends AutomationContext> implements
 		} else if (documentName != null) {
 			Document d = m.getDocument(c, documentName);
 			if (modelName != null) {
-				d = d.getListModel(c, modelName, false).getDrivingDocument();
+				Document drivingDocument = d.getListModel(c, modelName, false).getDrivingDocument();
+				if (drivingDocument == null) {
+					throw new IllegalStateException("List model " + modelName + " of document " + moduleName + '.' + documentName +
+														" has no driving document");
+				}
+				d = drivingDocument;
 			} else {
 				push.setQueryName(documentName);
 			}

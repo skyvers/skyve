@@ -385,6 +385,39 @@ class ActionImplTest {
 
 	@Test
 	@SuppressWarnings("static-method")
+	void toRepositoryActionReportIgnoresModuleAndDocumentParametersWithoutValues() {
+		ActionImpl act = new ActionImpl();
+		act.setImplicitName(ImplicitActionName.Report);
+		act.setResourceName("myReport");
+
+		ParameterImpl modParam = new ParameterImpl();
+		modParam.setName(AbstractWebContext.MODULE_NAME);
+		modParam.setValue("admin");
+		act.getParameters().add(modParam);
+
+		ParameterImpl docParam = new ParameterImpl();
+		docParam.setName(AbstractWebContext.DOCUMENT_NAME);
+		docParam.setValue("User");
+		act.getParameters().add(docParam);
+
+		ParameterImpl boundModParam = new ParameterImpl();
+		boundModParam.setName(AbstractWebContext.MODULE_NAME);
+		boundModParam.setValueBinding("moduleBinding");
+		act.getParameters().add(boundModParam);
+
+		ParameterImpl boundDocParam = new ParameterImpl();
+		boundDocParam.setName(AbstractWebContext.DOCUMENT_NAME);
+		boundDocParam.setValueBinding("documentBinding");
+		act.getParameters().add(boundDocParam);
+
+		org.skyve.impl.metadata.repository.view.actions.ActionMetaData result = act.toRepositoryAction();
+		assertTrue(result instanceof ReportAction);
+		assertEquals("admin", ((ReportAction) result).getModuleName());
+		assertEquals("User", ((ReportAction) result).getDocumentName());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
 	void getServerSideActionThrowsWhenResourceNameIsNull() {
 		ActionImpl act = new ActionImpl();
 		act.setImplicitName(ImplicitActionName.Save);

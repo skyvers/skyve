@@ -15,12 +15,15 @@ import org.skyve.domain.app.AppConstants;
 import org.skyve.domain.app.admin.Communication;
 import org.skyve.domain.app.admin.Communication.FormatType;
 import org.skyve.domain.app.admin.CommunicationTemplate;
+import org.skyve.domain.app.admin.Contact;
 import org.skyve.domain.app.admin.Subscription;
+import org.skyve.domain.app.admin.Tag;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.messages.Message;
 import org.skyve.domain.messages.MessageSeverity;
 import org.skyve.domain.messages.NoResultsException;
 import org.skyve.domain.messages.ValidationException;
+import org.skyve.domain.types.DateTime;
 import org.skyve.impl.metadata.model.document.field.validator.TextValidator;
 import org.skyve.impl.metadata.model.document.field.validator.TextValidator.ValidatorType;
 import org.skyve.impl.util.TimeUtil;
@@ -54,6 +57,11 @@ public class CommunicationUtil {
 	private static final String EMAIL_ADDRESS_DELIMETERS = "[,;]";
 	private static final String INVALID_RESOLVED_EMAIL_ADDRESS = "The sendTo address could not be resolved to a valid email address";
 	private static final String DEFAULT_ATTACHMENT_NAME = "attachment";
+	private static final String BODY_ATTRIBUTE_NAME = "body";
+	private static final String SEND_TO_ATTRIBUTE_NAME = "sendTo";
+	private static final String FORMAT_TYPE_ATTRIBUTE_NAME = "formatType";
+	private static final String CALENDAR_START_TIME_ATTRIBUTE_NAME = "calendarStartTime";
+	private static final String CALENDAR_END_TIME_ATTRIBUTE_NAME = "calendarEndTime";
 	public static final String SPECIAL_BEAN_URL = "{#url}";
 	public static final String SPECIAL_CONTEXT = "{#context}";
 	public static final String SPECIAL_LOGOUT_URL = "{#resetPasswordUrl}";
@@ -183,7 +191,11 @@ public class CommunicationUtil {
 		// add the current admin user to bcc if monitoring outgoing email
 		String[] bcc = null;
 		if (Boolean.TRUE.equals(communication.getMonitorBcc())) {
-			bcc = new String[] { adminUser.getContact().getEmail1() };
+			Contact adminContact = adminUser.getContact();
+			if (adminContact == null) {
+				throw new IllegalStateException("Admin user " + user.getId() + " has no contact");
+			}
+			bcc = new String[] { adminContact.getEmail1() };
 		}
 
 		String emailSubject = formatCommunicationMessage(customer, communication.getSubject(), beans);
@@ -192,12 +204,19 @@ public class CommunicationUtil {
 		String emailBodyMain = communication.getBody();
 		
 		emailBodyMain = formatCommunicationMessage(customer, emailBodyMain, beans);
+		if (emailBodyMain == null) {
+			throw new ValidationException(new Message(BODY_ATTRIBUTE_NAME, "A body is required for the communication."));
+		}
 
-		if (communication.getTemplate() != null) {
+		CommunicationTemplate template = communication.getTemplate();
+		if (template != null) {
 			// attempt to use the template if there is one
-			CommunicationTemplate template = communication.getTemplate();
-			if (template.getTemplate().indexOf("{body}") >= 0) {
-				emailBodyMain = template.getTemplate().replace("{body}", emailBodyMain);
+			String templateMarkup = template.getTemplate();
+			if (templateMarkup == null) { // required
+				throw new IllegalStateException("The communication template has no template");
+			}
+			if (templateMarkup.indexOf("{body}") >= 0) {
+				emailBodyMain = templateMarkup.replace("{body}", emailBodyMain);
 			}
 		} else {
 			// if not using a template, enclose the html
@@ -233,7 +252,9 @@ public class CommunicationUtil {
 
 		switch (actionType) {
 		case FILE:
-
+			if (sendTo == null) {
+				throw new ValidationException(new Message(SEND_TO_ATTRIBUTE_NAME, "A recipient is required to name the communication file."));
+			}
 			String fileName = sendTo.replace("@", "_").replace(".", "_");
 			String filePath = FileUtil.constructSafeFilePath(communication.getBasePath(), fileName, ".eml", true, communication.getBatch());
 
@@ -242,7 +263,7 @@ public class CommunicationUtil {
 				// add attachments
 
 				if (RunMode.ACTION.equals(runMode)) {
-					switch (communication.getFormatType()) {
+					switch (formatType(communication)) {
 					case email:
 						EXT.getMailService()
 								.writeMail(new Mail().addTo(sendToAddresses)
@@ -271,7 +292,7 @@ public class CommunicationUtil {
 			break;
 		default:
 			if (RunMode.ACTION.equals(runMode)) {
-				switch (communication.getFormatType()) {
+				switch (formatType(communication)) {
 				case email:
 					EXT.getMailService()
 							.sendMail(new Mail().addTo(sendToAddresses)
@@ -642,19 +663,21 @@ public class CommunicationUtil {
 			throw new ValidationException(
 					new Message(AppConstants.DOCUMENT_NAME_ATTRIBUTE_NAME, "A document must be selected for results."));
 		}
-		if (bean.getTag() == null) {
+		Tag tag = bean.getTag();
+		if (tag == null) {
 			throw new ValidationException(new Message(AppConstants.TAG_ATTRIBUTE_NAME, "A tag must be selected for results."));
 		}
 
-		long count = bean.getTag().countDocument(bean.getModuleName(), bean.getDocumentName());
+		long count = tag.countDocument(bean.getModuleName(), bean.getDocumentName());
 
 		StringBuilder results = new StringBuilder();
 		results.append(count).append(" communications for ");
 		results.append(bean.getDocumentName());
 
-		if (bean.getActionType() != null) {
+		Communication.ActionType actionType = bean.getActionType();
+		if (actionType != null) {
 			results.append(" will be ");
-			switch (bean.getActionType()) {
+			switch (actionType) {
 			case saveForBulkSend:
 				results.append("created as a batch for download.");
 				break;
@@ -697,8 +720,16 @@ public class CommunicationUtil {
 		String eventTitle = formatCommunicationMessage(customer, communication.getCalendarTitleExpression(), beans);
 		String eventDescription = formatCommunicationMessage(customer, communication.getCalendarDescriptionExpression(), beans);
 
-		String start = TimeUtil.formatISODate(communication.getCalendarStartTime(), true).replace(".000+00:00", "Z").replace("-", "").replace(":", "");
-		String end = TimeUtil.formatISODate(communication.getCalendarEndTime(), true).replace(".000+00:00", "Z").replace("-", "").replace(":", "");
+		DateTime startTime = communication.getCalendarStartTime();
+		if (startTime == null) {
+			throw new ValidationException(new Message(CALENDAR_START_TIME_ATTRIBUTE_NAME, "A calendar start time is required to include a calendar."));
+		}
+		DateTime endTime = communication.getCalendarEndTime();
+		if (endTime == null) {
+			throw new ValidationException(new Message(CALENDAR_END_TIME_ATTRIBUTE_NAME, "A calendar end time is required to include a calendar."));
+		}
+		String start = TimeUtil.formatISODate(startTime, true).replace(".000+00:00", "Z").replace("-", "").replace(":", "");
+		String end = TimeUtil.formatISODate(endTime, true).replace(".000+00:00", "Z").replace("-", "").replace(":", "");
 
 		sb.setLength(0);
 		sb.append("<a href=\"");
@@ -764,27 +795,21 @@ public class CommunicationUtil {
 		try (ContentManager cm = EXT.newContentManager()) {
 
 			// Attachment 1
-			if (communication.getAttachmentFileName1() != null && communication.getAttachment1() != null) {
-				AttachmentContent content1 = cm.getAttachment(communication.getAttachment1());
-				byte[] fileBytes1 = content1.getContentBytes();
-				String attachmentName1 = (communication.getAttachmentFileName1() == null ? DEFAULT_ATTACHMENT_NAME : communication.getAttachmentFileName1());
-				ma1 = new MailAttachment(attachmentName1, fileBytes1, content1.getMimeType());
+			String attachment1 = communication.getAttachment1();
+			if (communication.getAttachmentFileName1() != null && attachment1 != null) {
+				ma1 = newDefinedAttachment(cm, communication.getAttachmentFileName1(), attachment1);
 			}
 
 			// Attachment 2
-			if (communication.getAttachmentFileName2() != null && communication.getAttachment2() != null) {
-				AttachmentContent content2 = cm.getAttachment(communication.getAttachment2());
-				byte[] fileBytes2 = content2.getContentBytes();
-				String attachmentName2 = (communication.getAttachmentFileName2() == null ? DEFAULT_ATTACHMENT_NAME : communication.getAttachmentFileName2());
-				ma2 = new MailAttachment(attachmentName2, fileBytes2, content2.getMimeType());
+			String attachment2 = communication.getAttachment2();
+			if (communication.getAttachmentFileName2() != null && attachment2 != null) {
+				ma2 = newDefinedAttachment(cm, communication.getAttachmentFileName2(), attachment2);
 			}
 
 			// Attachment 3
-			if (communication.getAttachmentFileName3() != null && communication.getAttachment3() != null) {
-				AttachmentContent content3 = cm.getAttachment(communication.getAttachment3());
-				byte[] fileBytes3 = content3.getContentBytes();
-				String attachmentName3 = (communication.getAttachmentFileName3() == null ? DEFAULT_ATTACHMENT_NAME : communication.getAttachmentFileName3());
-				ma3 = new MailAttachment(attachmentName3, fileBytes3, content3.getMimeType());
+			String attachment3 = communication.getAttachment3();
+			if (communication.getAttachmentFileName3() != null && attachment3 != null) {
+				ma3 = newDefinedAttachment(cm, communication.getAttachmentFileName3(), attachment3);
 			}
 		}
 
@@ -792,6 +817,45 @@ public class CommunicationUtil {
 		MailAttachment[] attachments = { ma1, ma2, ma3 };
 
 		return attachments;
+	}
+
+	/**
+	 * Returns the mail attachment for a filled attachment slot of a communication.
+	 *
+	 * @param cm	The content manager to load the attachment content with.
+	 * @param attachmentFileName	The file name to attach the content as, or null for the default name.
+	 * @param contentId	The content ID of the attachment content.
+	 * @return	The mail attachment.
+	 * @throws DomainException	if the attachment content cannot be found.
+	 */
+	private static @Nonnull MailAttachment newDefinedAttachment(@Nonnull ContentManager cm,
+																	@Nullable String attachmentFileName,
+																	@Nonnull String contentId)
+	throws Exception {
+		AttachmentContent content = cm.getAttachment(contentId);
+		if (content == null) {
+			throw new DomainException("The content for the attachment can't be retrieved - re-attach the content and try again.");
+		}
+		byte[] fileBytes = content.getContentBytes();
+		String attachmentName = (attachmentFileName == null ? DEFAULT_ATTACHMENT_NAME : attachmentFileName);
+		// A content type that is not a known mime type is attached without a content type
+		MimeType mimeType = content.getMimeType();
+		return new MailAttachment(attachmentName, fileBytes, (mimeType == null) ? null : mimeType.toString());
+	}
+
+	/**
+	 * Returns the format type of the communication.
+	 *
+	 * @param communication	The communication.
+	 * @return	The format type.
+	 * @throws ValidationException	if the communication has no format type.
+	 */
+	private static @Nonnull FormatType formatType(@Nonnull Communication communication) {
+		FormatType result = communication.getFormatType();
+		if (result == null) {
+			throw new ValidationException(new Message(FORMAT_TYPE_ATTRIBUTE_NAME, "A format type is required for the communication."));
+		}
+		return result;
 	}
 
 	/**

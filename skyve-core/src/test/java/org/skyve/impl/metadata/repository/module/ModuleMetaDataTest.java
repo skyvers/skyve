@@ -1115,15 +1115,17 @@ class ModuleMetaDataTest {
 	}
 
 	@Test
-	void convertSucceedsWithCalendarMenuItemWithModelAndNoBindings() {
+	void convertSucceedsWithCalendarMenuItemWithDocumentModelAndNoBindings() {
 		ModuleMetaData module = createModuleWithRole();
 		CalendarItemMetaData item = new CalendarItemMetaData();
 		item.setName("calendarByModel");
+		item.setDocumentName("TestDocument");
 		item.setModelName("CalendarModel");
 		item.getRoles().add(grantedTo("viewer"));
 		module.getMenu().getActions().add(item);
 		Module result = module.convert("test");
 		CalendarItem converted = (CalendarItem) result.getMenu().getItems().get(0);
+		assertEquals("TestDocument", converted.getDocumentName());
 		assertEquals("CalendarModel", converted.getModelName());
 		assertNull(converted.getStartBinding());
 		assertNull(converted.getEndBinding());
@@ -1134,6 +1136,7 @@ class ModuleMetaDataTest {
 		ModuleMetaData module = createModuleWithRole();
 		CalendarItemMetaData item = new CalendarItemMetaData();
 		item.setName("calendarByModelWithStart");
+		item.setDocumentName("TestDocument");
 		item.setModelName("CalendarModel");
 		item.setStartBinding("startDate");
 		item.getRoles().add(grantedTo("viewer"));
@@ -1147,12 +1150,25 @@ class ModuleMetaDataTest {
 		ModuleMetaData module = createModuleWithRole();
 		CalendarItemMetaData item = new CalendarItemMetaData();
 		item.setName("calendarByModelWithEnd");
+		item.setDocumentName("TestDocument");
 		item.setModelName("CalendarModel");
 		item.setEndBinding("endDate");
 		item.getRoles().add(grantedTo("viewer"));
 		module.getMenu().getActions().add(item);
 		MetaDataException e = assertThrows(MetaDataException.class, () -> module.convert("test"));
 		assertTrue(e.getMessage().contains("[startBinding] and [endBinding] should be absent"), e.getMessage());
+	}
+
+	@Test
+	void convertThrowsWhenCalendarItemModelPresentWithoutDocument() {
+		ModuleMetaData module = createModuleWithRole();
+		CalendarItemMetaData item = new CalendarItemMetaData();
+		item.setName("calendarByModelOnly");
+		item.setModelName("CalendarModel");
+		item.getRoles().add(grantedTo("viewer"));
+		module.getMenu().getActions().add(item);
+		MetaDataException e = assertThrows(MetaDataException.class, () -> module.convert("test"));
+		assertTrue(e.getMessage().contains("If [model] is present, then [document] is required"), e.getMessage());
 	}
 
 	@Test

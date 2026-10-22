@@ -939,7 +939,7 @@ public abstract class ViewRenderer extends ViewVisitor {
 		String actionConfirmationParam = null;
 		
 		if (implicitName == null) {
-			if (! user.canExecuteAction(actionDocument, resourceName)) {
+			if (! user.canExecuteAction(actionDocument, getClassActionName(action, resourceName))) {
 				result = false;
 			}
 			actionName = resourceName;
@@ -959,7 +959,7 @@ public abstract class ViewRenderer extends ViewVisitor {
 					}
 					break;
 				case BizExport:
-					if (! user.canExecuteAction(actionDocument, resourceName)) {
+					if (! user.canExecuteAction(actionDocument, getClassActionName(action, resourceName))) {
 						result = false;
 					}
 					if (relativeIconFileName == null) {
@@ -971,7 +971,7 @@ public abstract class ViewRenderer extends ViewVisitor {
 					actionName = resourceName;
 					break;
 				case BizImport:
-					if (! user.canExecuteAction(actionDocument, resourceName)) {
+					if (! user.canExecuteAction(actionDocument, getClassActionName(action, resourceName))) {
 						result = false;
 					}
 					if (relativeIconFileName == null) {
@@ -983,7 +983,7 @@ public abstract class ViewRenderer extends ViewVisitor {
 					actionName = resourceName;
 					break;
 				case Download:
-					if (! user.canExecuteAction(actionDocument, resourceName)) {
+					if (! user.canExecuteAction(actionDocument, getClassActionName(action, resourceName))) {
 						result = false;
 					}
 					if (relativeIconFileName == null) {
@@ -995,7 +995,7 @@ public abstract class ViewRenderer extends ViewVisitor {
 					actionName = resourceName;
 					break;
 				case Upload:
-					if (! user.canExecuteAction(actionDocument, resourceName)) {
+					if (! user.canExecuteAction(actionDocument, getClassActionName(action, resourceName))) {
 						result = false;
 					}
 					if (relativeIconFileName == null) {
@@ -1147,7 +1147,7 @@ public abstract class ViewRenderer extends ViewVisitor {
 	@Override
 	public final void visitButton(@Nonnull Button button, boolean parentVisible, boolean parentEnabled) {
 		preProcessWidget(true, button.showsLabelByDefault());
-		Action action = view.getAction(button.getActionName());
+		Action action = getValidatedAction(button.getActionName());
 		if (preProcessAction(action.getImplicitName(), action, button.getShow())) {
 			if (currentFormItem != null) {
 				renderFormButton(actionName,
@@ -2522,11 +2522,12 @@ public abstract class ViewRenderer extends ViewVisitor {
 			currentLookupQuery = module.getMetaDataQuery(queryName);
 		}
 
-		if (currentLookupQuery == null) {
+		MetaDataQueryDefinition lookupQuery = currentLookupQuery;
+		if (lookupQuery == null) {
 			throw new MetaDataException("Lookup widget " + binding + " has no query to use.");
 		}
 		
-		Document queryDocument = module.getDocument(customer, currentLookupQuery.getDocumentName());
+		Document queryDocument = module.getDocument(customer, lookupQuery.getDocumentName());
 		currentLookupCanCreate = user.canCreateDocument(queryDocument);
 		currentLookupCanUpdate = user.canUpdateDocument(queryDocument);
 	}
@@ -3608,7 +3609,7 @@ public abstract class ViewRenderer extends ViewVisitor {
 	/** {@inheritDoc} */
 	@Override
 	public final void visitServerSideActionEventAction(@Nonnull ServerSideActionEventAction server, boolean parentVisible, boolean parentEnabled) {
-		Action action = view.getAction(server.getActionName());
+		Action action = getValidatedAction(server.getActionName());
 		visitServerSideActionEventAction(action, server);
 	}
 	
@@ -3666,7 +3667,37 @@ public abstract class ViewRenderer extends ViewVisitor {
 	 * @param imagePath the image-relative path; must not be null
 	 * @return the static-image URL; never null
 	 */
-	private static @Nonnull String staticImageToUrl(@Nonnull String imagePath) {
+	/**
+	 * Returns a view action referenced by a widget, which is validated to exist when the view is validated.
+	 *
+	 * @param referencedActionName the referenced action name
+	 * @return the action; never {@code null}
+	 * @throws MetaDataException when the view has no such action
+	 */
+	private @Nonnull Action getValidatedAction(@Nullable String referencedActionName) {
+		Action result = (referencedActionName == null) ? null : view.getAction(referencedActionName);
+		if (result == null) {
+			throw new MetaDataException("View " + view.getName() + " references a non-existent action " + referencedActionName);
+		}
+		return result;
+	}
+
+	/**
+	 * Returns the resource (class) name of a class-backed action, which is validated to exist when the view is validated.
+	 *
+	 * @param action the action
+	 * @param resourceName the action's resource name
+	 * @return the resource name; never {@code null}
+	 * @throws MetaDataException when the action has no resource name
+	 */
+	private static @Nonnull String getClassActionName(@Nonnull Action action, @Nullable String resourceName) {
+		if (resourceName == null) {
+			throw new MetaDataException("Action " + action.getName() + " has no class name");
+		}
+		return resourceName;
+	}
+
+	private static @Nonnull String staticImageToUrl(@Nullable String imagePath) {
 		return "images/" + imagePath;
 	}
 }

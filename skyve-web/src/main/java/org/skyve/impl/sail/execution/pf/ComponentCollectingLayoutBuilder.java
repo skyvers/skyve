@@ -47,7 +47,7 @@ public class ComponentCollectingLayoutBuilder extends NoOpLayoutBuilder {
 	public @Nullable UIComponent addToContainer(@Nullable UIComponent component,
 													@Nullable Container viewContainer,
 													@Nullable UIComponent container,
-													@Nonnull UIComponent componentToAdd,
+													@Nullable UIComponent componentToAdd,
 													@Nullable Integer pixelWidth,
 													@Nullable Integer responsiveWidth,
 													@Nullable Integer percentageWidth,
@@ -56,7 +56,9 @@ public class ComponentCollectingLayoutBuilder extends NoOpLayoutBuilder {
 													@Nullable Integer lg,
 													@Nullable Integer xl,
 													@Nullable String invisibleCondition) {
-		cccb.addToContainer(componentToAdd);
+		if (componentToAdd != null) {
+			cccb.addToContainer(componentToAdd);
+		}
 		return component;
 	}
 }

@@ -14,7 +14,7 @@ public class SQLDocumentQueryListModel <T extends Bean> extends DocumentQueryLis
 	private SQLFilter filter;
 	
 	protected SQLDocumentQueryListModel(@Nonnull SQL sql) {
-		super(null); // this is wrong
+		super(); // this is wrong - there is no query
 		this.inputSQL = sql;
 	}
 
@@ -75,14 +75,14 @@ public class SQLDocumentQueryListModel <T extends Bean> extends DocumentQueryLis
 		
 		return result;
 */
-		return null;
+		throw new UnsupportedOperationException("SQLDocumentQueryListModel.fetch() is not implemented");
 	}
 
 	@Override
 	public @Nonnull AutoClosingIterable<Bean> iterate() throws Exception {
 		establishQueries();
 //		return detailQuery.projectedIterable();
-		return null;
+		throw new UnsupportedOperationException("SQLDocumentQueryListModel.iterate() is not implemented");
 	}
 	
 	/**

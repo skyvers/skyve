@@ -188,9 +188,17 @@ public class WebUtil {
 	 */
 	private static boolean isPrincipalUser(@Nonnull UserImpl user, @Nonnull String userPrincipal) {
 		UserImpl principalUser = ProvidedRepositoryFactory.setCustomerAndUserFromPrincipal(userPrincipal);
-		return (principalUser != null) &&
-				user.getCustomerName().equals(principalUser.getCustomerName()) &&
-				user.getName().equals(principalUser.getName());
+		if (principalUser == null) {
+			return false;
+		}
+		// A session user is always retrieved by its customer and user name
+		String customerName = user.getCustomerName();
+		String userName = user.getName();
+		if ((customerName == null) || (userName == null)) {
+			throw new IllegalStateException("Session user " + user.getId() + " has no customer name or user name");
+		}
+		return customerName.equals(principalUser.getCustomerName()) &&
+				userName.equals(principalUser.getName());
 	}
 
 	/**
@@ -975,7 +983,7 @@ public class WebUtil {
 			
 							@SuppressWarnings("unchecked")
 							Map<String, Object> json = (Map<String, Object>) JSON.unmarshall(result.toString());
-							valid = Boolean.TRUE.equals(json.get("success"));
+							valid = (json != null) && Boolean.TRUE.equals(json.get("success"));
 						}
 					}
 				}

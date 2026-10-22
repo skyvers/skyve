@@ -67,6 +67,9 @@ public class SaveAction extends FacesAction<Void> {
 
 		AbstractPersistence persistence = AbstractPersistence.get();
 		Bean targetBean = ActionUtil.getTargetBeanForView(facesView);
+		if (targetBean == null) {
+			throw new IllegalStateException("Cannot save as the FacesView has no target bean");
+		}
     	User user = persistence.getUser();
     	Customer customer = user.getCustomer();
     	Module targetModule = customer.getModule(targetBean.getBizModule());
@@ -86,6 +89,9 @@ public class SaveAction extends FacesAction<Void> {
 		if (Boolean.FALSE.equals(clientValidation) || FacesAction.validateRequiredFields()) {
 			// Run the bizlet
 			WebContext webContext = facesView.getWebContext();
+			if (webContext == null) {
+				throw new IllegalStateException("Cannot save as the FacesView has no web context");
+			}
 			CustomerImpl internalCustomer = (CustomerImpl) customer;
 			boolean vetoed = internalCustomer.interceptBeforePreExecute(ian, targetBean, null, webContext);
 			if (! vetoed) {

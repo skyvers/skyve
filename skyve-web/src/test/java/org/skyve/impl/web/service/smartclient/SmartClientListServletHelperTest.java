@@ -20,6 +20,7 @@ import org.skyve.domain.Bean;
 import org.skyve.domain.DynamicBean;
 import org.skyve.domain.HierarchicalBean;
 import org.skyve.domain.PersistentBean;
+import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.messages.ValidationException;
 import org.skyve.impl.snapshot.SmartClientFilterOperator;
 import org.skyve.metadata.customer.Customer;
@@ -32,6 +33,7 @@ import org.locationtech.jts.geom.Geometry;
 import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.impl.metadata.model.document.field.Text;
 
+import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 
 @SuppressWarnings({"static-method", "boxing"})
@@ -82,6 +84,46 @@ class SmartClientListServletHelperTest {
 
 		verify(filter).addTagged("tag-1", true);
 		verify(filter).addTagged("tag-2", false);
+	}
+
+	@Test
+	void addCriterionToFilterRejectsTaggedCriterionWithoutTag() {
+		Filter filter = mock(Filter.class);
+
+		Assertions.assertThrows(DomainException.class,
+				() -> invokeAddCriterionToFilter(PersistentBean.TAGGED_NAME, SmartClientFilterOperator.equals, "true", null, null, null, filter));
+
+		verifyNoInteractions(filter);
+	}
+
+	@Test
+	void addAdvancedFilterCriteriaToQueryRejectsModelWithoutFilterSupport() {
+		// A model that does not support filtering returns null from newFilter()
+		ListModel<?> model = mock(ListModel.class);
+
+		IllegalStateException e = Assertions.assertThrows(IllegalStateException.class,
+				() -> invokeAddAdvancedFilterCriteriaToQuery(null,
+																null,
+																null,
+																compoundFilterOperator("and"),
+																null,
+																null,
+																model));
+
+		assertTrue(e.getMessage().contains("does not support filtering"), e.getMessage());
+	}
+
+	@Test
+	void addFilterCriteriaToQueryRejectsNullAdvancedCriterion() {
+		ListModel<?> model = mock(ListModel.class);
+		java.util.SortedMap<String, Object> parameters = new java.util.TreeMap<>();
+		parameters.put("operator", "and");
+
+		ServletException e = Assertions.assertThrows(ServletException.class,
+				() -> invokeAddFilterCriteriaToQuery(mock(User.class), new String[] {"null"}, parameters, model));
+
+		assertEquals("Null criterion in the request.", e.getMessage());
+		verifyNoInteractions(model);
 	}
 
 	@Test
@@ -1319,6 +1361,23 @@ class SmartClientListServletHelperTest {
 		Method method = SmartClientListServlet.class.getDeclaredMethod("remove", ListModel.class, Map.class, java.io.PrintWriter.class);
 		method.setAccessible(true);
 		invokeVoid(method, model, parameters, pw);
+	}
+
+	private static void invokeAddFilterCriteriaToQuery(User user,
+										String[] criteria,
+										java.util.SortedMap<String, Object> parameters,
+										ListModel<?> model) throws Exception {
+		Method method = SmartClientListServlet.class.getDeclaredMethod("addFilterCriteriaToQuery",
+				Module.class,
+				Document.class,
+				User.class,
+				SmartClientFilterOperator.class,
+				String[].class,
+				java.util.SortedMap.class,
+				String.class,
+				ListModel.class);
+		method.setAccessible(true);
+		invokeVoid(method, null, null, user, null, criteria, parameters, null, model);
 	}
 
 	private static void invokeAddAdvancedFilterCriteriaToQuery(Module module,

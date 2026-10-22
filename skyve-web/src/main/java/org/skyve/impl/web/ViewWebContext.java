@@ -8,6 +8,7 @@ import org.skyve.domain.Bean;
 import org.skyve.domain.messages.SessionEndedException;
 import org.skyve.impl.cache.StateUtil;
 import org.skyve.impl.persistence.AbstractPersistence;
+import org.skyve.metadata.user.User;
 import org.skyve.web.BackgroundTask;
 
 import jakarta.annotation.Nonnull;
@@ -85,7 +86,7 @@ public abstract class ViewWebContext extends AbstractWebContext {
 	@Override
 	public <T extends Bean> void background(@Nonnull Class<? extends BackgroundTask<T>> taskClass) {
 		cacheConversationAndCycleTransaction();
-		EXT.getJobScheduler().runBackgroundTask(taskClass, getConversation().getUser(), getWebId());
+		EXT.getJobScheduler().runBackgroundTask(taskClass, getConversationUser(), getWebId());
 	}
 
 	/**
@@ -96,6 +97,20 @@ public abstract class ViewWebContext extends AbstractWebContext {
 	 */
 	@Override
 	public <T extends Bean> void backgroundWithoutCachingConversation(@Nonnull Class<? extends BackgroundTask<T>> taskClass) {
-		EXT.getJobScheduler().runBackgroundTask(taskClass, getConversation().getUser(), getWebId());
+		EXT.getJobScheduler().runBackgroundTask(taskClass, getConversationUser(), getWebId());
+	}
+
+	/**
+	 * Returns the user of this context's conversation, which a background task runs as.
+	 *
+	 * @return the conversation user
+	 * @throws IllegalStateException if this context has no conversation
+	 */
+	private @Nonnull User getConversationUser() {
+		AbstractPersistence p = getConversation();
+		if (p == null) {
+			throw new IllegalStateException("Web context " + getWebId() + " has no conversation to run a background task as");
+		}
+		return p.getUser();
 	}
 }

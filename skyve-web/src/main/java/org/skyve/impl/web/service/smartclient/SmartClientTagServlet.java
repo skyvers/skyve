@@ -139,10 +139,16 @@ public class SmartClientTagServlet extends HttpServlet {
 					TagManager tm = EXT.getTagManager();
 
 					if ("L".equals(action)) {
+						if (menuButtonId == null) {
+							throw new ServletException("No menu button ID in the request.");
+						}
 						list(tagId, menuButtonId, sb);
 					}
 					else if ("T".equals(action)) {
 						SmartClientListServlet.checkCsrfToken(session, request, response, currentCsrfToken);
+						if ((tagId == null) || (dataSourceName == null) || (criteria == null)) {
+							throw new ServletException("No tag, data source or criteria in the request.");
+						}
 						
 						// Note - if there is no form in the view then there is no web context
 						String contextKey = OWASP.sanitise(Sanitisation.text, Util.processStringValue(request.getParameter(AbstractWebContext.CONTEXT_NAME)));
@@ -162,6 +168,9 @@ public class SmartClientTagServlet extends HttpServlet {
 					}
 					else if ("U".equals(action)) {
 						SmartClientListServlet.checkCsrfToken(session, request, response, currentCsrfToken);
+						if ((tagId == null) || (dataSourceName == null) || (criteria == null)) {
+							throw new ServletException("No tag, data source or criteria in the request.");
+						}
 						
 						// Note - if there is no form in the view then there is no web context
 						String contextKey = OWASP.sanitise(Sanitisation.text, Util.processStringValue(request.getParameter(AbstractWebContext.CONTEXT_NAME)));
@@ -181,11 +190,17 @@ public class SmartClientTagServlet extends HttpServlet {
 					}
 					else if ("C".equals(action)) {
 						SmartClientListServlet.checkCsrfToken(session, request, response, currentCsrfToken);
+						if (tagId == null) {
+							throw new ServletException("No tag in the request.");
+						}
 						
 						tm.clear(tagId);
 					}
 					else if ("N".equals(action)) {
 						SmartClientListServlet.checkCsrfToken(session, request, response, currentCsrfToken);
+						if (tagName == null) {
+							throw new ServletException("No tag name in the request.");
+						}
 						
 						tagId = tm.create(tagName, true);
 						sb.append("{bizId:'");
@@ -194,6 +209,9 @@ public class SmartClientTagServlet extends HttpServlet {
 					}
 					else if ("D".equals(action)) {
 						SmartClientListServlet.checkCsrfToken(session, request, response, currentCsrfToken);
+						if (tagId == null) {
+							throw new ServletException("No tag in the request.");
+						}
 						
 						tm.delete(tagId);
 					}
@@ -339,6 +357,9 @@ public class SmartClientTagServlet extends HttpServlet {
 			model = document.getListModel(customer, modelName, true);
 			model.setBean(bean);
 			drivingDocument = model.getDrivingDocument();
+			if (drivingDocument == null) {
+				throw new IllegalStateException("List model " + modelName + " in document " + documentName + " has no driving document");
+			}
 		}
 		// query type of request
 		else {

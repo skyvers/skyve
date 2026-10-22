@@ -88,7 +88,7 @@ public abstract class AbstractFacesBuilder {
 	/**
 	 * Sets the managed bean name used for generated EL expressions.
 	 *
-	 * @param managedBeanName the managed bean name
+	 * @param managedBeanName the managed bean name, or {@code null} to keep the current one
 	 */
 	public void setManagedBeanName(@Nullable String managedBeanName) {
 		if (managedBeanName != null) {
@@ -96,7 +96,7 @@ public abstract class AbstractFacesBuilder {
 		}
 		// Do nothing if this is being executed through SAIL
 		if (FacesUtil.isRealFacesContext()) {
-			managedBean = (FacesView) FacesUtil.getNamed(managedBeanName);
+			managedBean = (FacesView) FacesUtil.getNamed(this.managedBeanName);
 		}
 	}
 	
@@ -218,6 +218,9 @@ public abstract class AbstractFacesBuilder {
 	protected void setInvisible(@Nonnull UIComponent component, @Nullable String invisibleCondition, @Nullable String extraELToAnd) {
 		if (invisibleCondition != null) {
 			String visible = BindUtil.negateCondition(invisibleCondition);
+			if (visible == null) { // never null for a non-null condition
+				throw new IllegalStateException("Invisible condition " + invisibleCondition + " has no negation");
+			}
 			component.setValueExpression("rendered", createValueExpressionFromCondition(visible, extraELToAnd));
 		}
 	}

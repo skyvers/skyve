@@ -8,6 +8,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.withSettings;
 
 import java.io.ByteArrayInputStream;
 import java.lang.reflect.InvocationTargetException;
@@ -56,6 +57,18 @@ class RestoreJobTest {
 		job.execute();
 
 		assertEquals("Kick off the job with the appropriate options from the Data Maintenance page.", job.getLog().get(0));
+	}
+
+	@Test
+	void executeWithoutSelectedBackupLogsDataMaintenanceInstruction() throws Exception {
+		RestoreJob job = new RestoreJob();
+		Bean options = mock(Bean.class, withSettings().extraInterfaces(RestoreOptions.class));
+		when(((RestoreOptions) options).getSelectedBackupName()).thenReturn(null);
+		job.setBean(options);
+
+		job.execute();
+
+		assertEquals(List.of("Kick off the job with the appropriate options from the Data Maintenance page."), job.getLog());
 	}
 
 	@Test

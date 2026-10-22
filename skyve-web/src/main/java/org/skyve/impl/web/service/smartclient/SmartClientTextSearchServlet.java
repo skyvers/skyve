@@ -109,6 +109,11 @@ public class SmartClientTextSearchServlet extends HttpServlet {
 							String moduleName = result.getModuleName();
 							String documentName = result.getDocumentName();
 							String bizId = result.getBizId();
+							if ((moduleName == null) || (documentName == null) || (bizId == null)) { // can't be resolved
+								LOGGER.warn("Skipping content search result with no module, document or bizId.");
+								resultIterator.remove(); // remove the offending result
+								continue;
+							}
 							
 							Module module = customer.getModule(moduleName);
 							Document document = module.getDocument(customer, documentName);

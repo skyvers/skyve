@@ -171,7 +171,14 @@ public class DocumentQueryListModel <T extends Bean> extends ListModel<T> {
 		if (sorts != null) {
 			for (SortParameter sort : sorts) {
 				String by = sort.getBy();
+				if (by == null) {
+					throw new IllegalStateException("A sort parameter for query " + query.getName() + " has no binding to sort by");
+				}
+				// No direction means ascending - the query treats anything but descending as ascending
 				SortDirection direction = sort.getDirection();
+				if (direction == null) {
+					direction = SortDirection.ascending;
+				}
 				String expression = projections.get(by);
 				if (expression == null) {
 					detailQuery.insertBoundOrdering(by, direction);
@@ -193,7 +200,8 @@ public class DocumentQueryListModel <T extends Bean> extends ListModel<T> {
 		else {
 			summaryBean = summaryQuery.projectedResult();
 		}
-		Number totalRows = (Number) BindUtil.get(summaryBean, Bean.DOCUMENT_ID);
+		// No summary row means no rows were counted
+		Number totalRows = (summaryBean == null) ? null : (Number) BindUtil.get(summaryBean, Bean.DOCUMENT_ID);
 		result.setTotalRows((totalRows == null) ? 0L : totalRows.longValue());
 		result.setRows(rows);
 		result.setSummary(summaryBean);

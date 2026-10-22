@@ -225,7 +225,8 @@ public class BackupJob extends CancellableJob {
 															BackupField field = table.fields.get(name);
 															AttributeType attributeType = field.getAttributeType();
 															Sensitivity sensitivity = field.getSensitivity();
-															boolean redact = (sensitivityLevel > 0) && (sensitivity.ordinal() >= sensitivityLevel);
+															// A field without a sensitivity is treated as Sensitivity.none, which is never redacted
+														boolean redact = (sensitivityLevel > 0) && (sensitivity != null) && (sensitivity.ordinal() >= sensitivityLevel);
 															Object value = null;
 	
 															if (AttributeType.association.equals(attributeType) ||
@@ -314,7 +315,7 @@ public class BackupJob extends CancellableJob {
 																	// Respect sensitivity
 																	if (redact) {
 																		// Redact value
-																		date = (Date) BackupUtil.redactData(attributeType, date);
+																		date = BackupUtil.redactDate(date);
 																	}
 																	value = Long.valueOf(date.getTime());
 																}
@@ -328,7 +329,7 @@ public class BackupJob extends CancellableJob {
 																	// Respect sensitivity
 																	if (redact) {
 																		// Redact value
-																		time = (Time) BackupUtil.redactData(attributeType, time);
+																		time = BackupUtil.redactTime(time);
 																	}
 																	value = Long.valueOf(time.getTime());
 																}
@@ -343,7 +344,7 @@ public class BackupJob extends CancellableJob {
 																	// Respect sensitivity
 																	if (redact) {
 																		// Redact value
-																		timestamp = (Timestamp) BackupUtil.redactData(attributeType, timestamp);
+																		timestamp = BackupUtil.redactTimestamp(timestamp);
 																	}
 																	value = Long.valueOf(timestamp.getTime());
 																}

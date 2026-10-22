@@ -554,11 +554,17 @@ public class ActionImpl implements Action {
 				report.setReportName(reportName);
 				for (Parameter parameter : getParameters()) {
 					String parameterName = parameter.getName();
+					// A parameter without a value (one with a value binding) does not name the report's module or document
+					String parameterValue = parameter.getValue();
 					if (AbstractWebContext.MODULE_NAME.equals(parameterName)) {
-						report.setModuleName(parameter.getValue());
+						if (parameterValue != null) {
+							report.setModuleName(parameterValue);
+						}
 					}
 					else if (AbstractWebContext.DOCUMENT_NAME.equals(parameterName)) {
-						report.setDocumentName(parameter.getValue());
+						if (parameterValue != null) {
+							report.setDocumentName(parameterValue);
+						}
 					}
 					else if (AbstractWebContext.REPORT_FORMAT.equals(parameterName)) {
 						report.setReportFormat(ReportFormat.valueOf(parameter.getValue()));

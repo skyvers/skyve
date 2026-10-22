@@ -192,6 +192,9 @@ public class ListGrid extends HtmlPanelGroup {
 														listGrid,
 														stickyHeaderAnchorSelector,
 														aggregateQuery);
+		if (grid == null) {
+			throw new IllegalStateException("The component builder produced no list grid component for " + name);
+		}
 		result.add(grid);
 		if ((! aggregateQuery) && (! Boolean.FALSE.equals(zoomRendered))) {
 			result.add(componentBuilder.listGridContextMenu(null, grid.getId(), listGrid));

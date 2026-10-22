@@ -309,7 +309,11 @@ public class VueListGridScript extends UIOutput {
 		else {
 			ListModel<Bean> listModel = owningDocument.getListModel(customer, modelName, true);
 			columnDefns = listModel.getColumns();
-			drivingDocument = listModel.getDrivingDocument();
+			Document listModelDrivingDocument = listModel.getDrivingDocument();
+			if (listModelDrivingDocument == null) {
+				throw new IllegalStateException("List model " + modelName + " has no driving document");
+			}
+			drivingDocument = listModelDrivingDocument;
 			drivingDocumentName = drivingDocument.getName();
 			drivingModuleName  = drivingDocument.getOwningModuleName();
 			drivingModule = customer.getModule(drivingModuleName);

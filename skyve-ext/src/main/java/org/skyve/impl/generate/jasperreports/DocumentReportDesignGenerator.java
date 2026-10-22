@@ -154,8 +154,12 @@ public class DocumentReportDesignGenerator extends ReportDesignGenerator {
                     subBand.setParent(design);
                     subBand.setName(sub.getName());
 
+                    final ReportField subField = sub.getField();
+                    if (subField == null) {
+                        throw new IllegalStateException("Subreport design " + sub.getName() + " has no collection field");
+                    }
                     ReportElement eS = new ReportElement(ReportElement.ElementType.subreport,
-                            sub.getField().getName(),
+                            subField.getName(),
                             null,
                             Integer.valueOf(0),
                             Integer.valueOf(0),

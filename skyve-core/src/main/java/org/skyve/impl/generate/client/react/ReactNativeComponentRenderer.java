@@ -261,7 +261,7 @@ public class ReactNativeComponentRenderer extends ComponentRenderer {
 	@Override
 	public @Nonnull RenderedComponent addedDataGridBoundColumn(@Nullable RenderedComponent component, @Nonnull RenderedComponent current) {
 System.out.println("end column " + current);
-		return current.getParent();
+		return current.getNullSafeParent();
 	}
 
 	@Override
@@ -281,7 +281,7 @@ System.out.println("conatin column " + column.getTitle());
 	@Override
 	public @Nonnull RenderedComponent addedDataGridContainerColumn(@Nullable RenderedComponent component, @Nonnull RenderedComponent current) {
 System.out.println("end column " + current);
-		return current.getParent();
+		return current.getNullSafeParent();
 	}
 
 	@Override

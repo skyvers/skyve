@@ -4,11 +4,17 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.CALLS_REAL_METHODS;
+import static org.mockito.Mockito.mock;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.Locale;
 
 import org.junit.jupiter.api.Test;
+import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.util.UtilImpl;
+import org.skyve.metadata.user.User;
 import org.skyve.util.Icons;
 
 import jakarta.annotation.Nonnull;
@@ -41,6 +47,29 @@ class DesktopViewTest {
 		
 		view.createLocaleScripts(Locale.ENGLISH);
 		
+		assertEquals(script("isomorphic130/locales/frameworkMessages.properties") + "\n" + script("desktop/skyveMessages.js"),
+						view.getLocaleScript());
+	}
+	
+	@Test
+	@SuppressWarnings({"unchecked", "java:S3011"}) // Exercises the private user locale lookup and clears the framework-owned thread-local
+	void localeScriptUsesEnglishBundlesWhenUserHasNoLocale() throws ReflectiveOperationException {
+		DesktopView view = new ResourceAwareDesktopView(null);
+		User user = mock(User.class);
+		AbstractPersistence persistence = mock(AbstractPersistence.class, CALLS_REAL_METHODS);
+		persistence.setUser(user);
+		persistence.setForThread();
+		Field threadLocalPersistence = AbstractPersistence.class.getDeclaredField("threadLocalPersistence");
+		threadLocalPersistence.setAccessible(true);
+		try {
+			Method createLocaleScripts = DesktopView.class.getDeclaredMethod("createLocaleScripts");
+			createLocaleScripts.setAccessible(true);
+			createLocaleScripts.invoke(view);
+		}
+		finally {
+			((ThreadLocal<AbstractPersistence>) threadLocalPersistence.get(null)).remove();
+		}
+
 		assertEquals(script("isomorphic130/locales/frameworkMessages.properties") + "\n" + script("desktop/skyveMessages.js"),
 						view.getLocaleScript());
 	}

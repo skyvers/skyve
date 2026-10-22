@@ -241,6 +241,30 @@ public class ContentCheckerTest {
 
 	@Test
 	@SuppressWarnings("resource")
+	public void checkDynamicContentSkipsRowWithNullJsonFields() throws Exception {
+		ContentChecker checker = new ContentChecker();
+		Connection connection = mock(Connection.class);
+		Statement statement = mock(Statement.class);
+		ResultSet resultSet = mock(ResultSet.class);
+		ContentManager cm = mock(ContentManager.class);
+		Customer customer = mock(Customer.class);
+		document(customer, "OTHER_DYNAMIC_DOC", attribute("upload", AttributeType.content), attribute("photo", AttributeType.image));
+		when(connection.createStatement()).thenReturn(statement);
+		when(statement.getResultSet()).thenReturn(resultSet);
+		when(resultSet.next()).thenReturn(true, false);
+		when(resultSet.getString(2)).thenReturn("admin");
+		when(resultSet.getString(3)).thenReturn("Invoice");
+		when(resultSet.getString(4)).thenReturn("null");
+
+		invokeCheckDynamicContent(checker, connection, cm, customer, "demo", "DYN_ENTITY");
+
+		org.mockito.Mockito.verifyNoInteractions(cm);
+		assertThat(counter(checker, "missingContentCount"), is(0));
+		assertThat(counter(checker, "erroneousContentCount"), is(0));
+	}
+
+	@Test
+	@SuppressWarnings("resource")
 	public void checkDynamicContentOmitsCustomerFilterWhenSingleCustomerConfigured() throws Exception {
 		ContentChecker checker = new ContentChecker();
 		UtilImpl.CUSTOMER = "demo";

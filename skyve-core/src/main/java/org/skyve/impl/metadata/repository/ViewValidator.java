@@ -184,6 +184,23 @@ class ViewValidator extends ViewVisitor {
 		viewIdentifier = view.getName() + " view for UX/UI " + uxui + " for document " + module.getName() + '.' + document.getName();
 	}
 
+	/**
+	 * Returns the owning module of a document resolved by this validator, which must exist for the customer.
+	 *
+	 * @param owned the document whose owning module is required
+	 * @return the owning module; never {@code null}
+	 * @throws MetaDataException when the repository cannot resolve the owning module
+	 */
+	private @Nonnull Module getOwningModule(@Nonnull Document owned) {
+		String owningModuleName = owned.getOwningModuleName();
+		Module result = repository.getModule(customer, owningModuleName);
+		if (result == null) {
+			throw new MetaDataException("Module " + owningModuleName + " of document " + owned.getName() +
+											IN + viewIdentifier + " does not exist for customer " + customer.getName());
+		}
+		return result;
+	}
+
 	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
 	private @Nullable Class<?> validateBinding(@Nullable String bindingPrefix,
 													@Nullable String binding,
@@ -360,7 +377,7 @@ class ViewValidator extends ViewVisitor {
 			}
 
 			DocumentImpl baseDocument = (DocumentImpl) currentModule.getDocument(customer, extension.getDocumentName());
-			ModuleImpl baseModule = (ModuleImpl) repository.getModule(customer, baseDocument.getOwningModuleName());
+			ModuleImpl baseModule = (ModuleImpl) getOwningModule(baseDocument);
 			validateConditionExists(baseModule, baseDocument, testConditionName, widgetIdentifier);
 		}
 	}
@@ -383,7 +400,7 @@ class ViewValidator extends ViewVisitor {
 													@Nonnull String parentWidgetIdentifier,
 													@Nullable Document drivingDocument) {
 		if (parameters != null) {
-			Module drivingModule = (drivingDocument == null) ? null : repository.getModule(customer, drivingDocument.getOwningModuleName());
+			Module drivingModule = (drivingDocument == null) ? null : getOwningModule(drivingDocument);
 
 			for (FilterParameter parameter : parameters) {
 				String filterBinding = parameter.getFilterBinding();
@@ -395,7 +412,7 @@ class ViewValidator extends ViewVisitor {
 									false,
 									false,
 									widgetIdentifier);
-				if (drivingDocument != null) {
+				if ((drivingModule != null) && (drivingDocument != null)) {
 					validateBinding(drivingModule,
 										drivingDocument,
 										null,
@@ -625,6 +642,9 @@ class ViewValidator extends ViewVisitor {
 		ActionShow show = button.getShow();
 		if (ActionShow.icon == show) {
 			Action action = view.getAction(actionName); // validated to exist above
+			if (action == null) {
+				throw new IllegalStateException(buttonIdentifier + IN + viewIdentifier + " references a non-existent action " + actionName);
+			}
 			if ((action.getIconStyleClass() == null) && (action.getRelativeIconFileName() == null)) {
 				throw new MetaDataException(buttonIdentifier + IN + viewIdentifier + " is set to [show] an icon but " + actionName + " has no [iconStyleClass] or [relativeIconFileName] defined.");
 			}
@@ -1106,7 +1126,7 @@ class ViewValidator extends ViewVisitor {
 		if (modelName != null) {
 			validateChartModelName(chart.getModelName(), chartIdentifier);
 		}
-		else {
+		else if (model != null) { // either the modelName or the model is defined (validated above)
 			validateChartModel(model, chartIdentifier);
 		}
 		if (chart.getType() == null) {
@@ -2269,6 +2289,9 @@ class ViewValidator extends ViewVisitor {
 	@Override
 	public void visitCustomAction(@Nonnull ActionImpl action) {
 		String resourceName = action.getResourceName();
+		if (resourceName == null) {
+			throw new MetaDataException("Custom action " + action.getName() + IN + viewIdentifier + " - className is required.");
+		}
 		ActionMetaData metaDataAction = repository.getMetaDataAction(customer, document, resourceName);
 		if (metaDataAction == null) {
 			validateClassAction(resourceName);

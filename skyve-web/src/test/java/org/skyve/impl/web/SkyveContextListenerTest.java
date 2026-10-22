@@ -1298,6 +1298,27 @@ public class SkyveContextListenerTest {
 
 	@Test
 	@SuppressWarnings("static-method")
+	public void testReadExpandedConfigurationThrowsForJsonNull() throws Exception {
+		Path file = Files.createTempFile("skyve-context-listener-null", ".json");
+		try {
+			Files.writeString(file, "null");
+
+			InvocationTargetException thrown = assertThrows(InvocationTargetException.class,
+					() -> invokePrivateStatic("readExpandedConfiguration",
+							new Class<?>[] {java.io.File.class},
+							file.toFile()));
+
+			assertThat(thrown.getCause(), instanceOf(IllegalStateException.class));
+			assertTrue(thrown.getCause().getMessage().contains("Cannot open or read"));
+			assertTrue(thrown.getCause().getCause().getMessage().contains("does not contain a JSON object"));
+		}
+		finally {
+			Files.deleteIfExists(file);
+		}
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
 	public void testConfigureApplicationCachesAddsJCacheAndEhcache() throws Exception {
 		List<CacheConfig<? extends java.io.Serializable, ? extends java.io.Serializable>> originalCaches = UtilImpl.APP_CACHES;
 		try {

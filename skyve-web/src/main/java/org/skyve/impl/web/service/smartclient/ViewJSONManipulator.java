@@ -356,7 +356,11 @@ public class ViewJSONManipulator extends ViewVisitor {
 		result.put(AbstractWebContext.CONTEXT_NAME, webId);
 		
 		// put the view title in
-		String title = BindUtil.formatMessage(view.getLocalisedTitle(), bean);
+		String localisedTitle = view.getLocalisedTitle();
+		if (localisedTitle == null) { // a view title is required
+			throw new MetaDataException("View " + view.getName() + " has no title");
+		}
+		String title = BindUtil.formatMessage(localisedTitle, bean);
 		if (ViewRenderer.shouldEscape(view.getEscapeTitle())) {
 			title = OWASP.escapeHtml(title);
 		}
@@ -614,6 +618,9 @@ public class ViewJSONManipulator extends ViewVisitor {
 	protected void applyJSON(@Nonnull String json, @Nonnull AbstractPersistence persistence, @Nonnull WebContext webContext) throws Exception {
 		@SuppressWarnings("unchecked")
 		Map<String, Object> values = (Map<String, Object>) JSON.unmarshall(user, json);
+		if (values == null) { // the JSON "null"
+			throw new IllegalArgumentException("There are no values to apply");
+		}
 
 //		displayViewBindings(bindingTree);
 		applyJSON(bindingTree, document, values, bean, persistence, webContext);
@@ -961,7 +968,8 @@ public class ViewJSONManipulator extends ViewVisitor {
             // Keep the domain values ordered with a LinkedHashMap
             LinkedHashMap<String, String> values = new LinkedHashMap<>();
 
-            if (DomainType.variant.equals(domainType)) {
+            // domainType is only set when there is an attribute
+            if ((attribute != null) && DomainType.variant.equals(domainType)) {
             	DocumentImpl targetDocument = (DocumentImpl) target.getDocument();
                 for (DomainValue domainValue : targetDocument.getDomainValues(customer, 
     																			domainType, 
@@ -972,7 +980,7 @@ public class ViewJSONManipulator extends ViewVisitor {
                 }
                 valueMaps.put(safeBinding, values);
             }
-            else if (DomainType.dynamic.equals(domainType)) {
+            else if ((attribute != null) && DomainType.dynamic.equals(domainType)) {
             	List<DomainValue> domainValues = null;
             	
             	int lastDotIndex = binding.lastIndexOf('.');
@@ -1143,7 +1151,11 @@ public class ViewJSONManipulator extends ViewVisitor {
 	public void visitButton(@Nonnull Button button,
 								boolean parentVisible,
 								boolean parentEnabled) {
-		Action action = view.getAction(button.getActionName());
+		String actionName = button.getActionName();
+		Action action = view.getAction(actionName);
+		if (action == null) { // a button's action is validated against the view's actions at load
+			throw new MetaDataException("Button action " + actionName + " is not defined in view " + view.getName());
+		}
 		addCondition(action.getInvisibleCondition());
 		addCondition(action.getDisabledCondition());
 	}
@@ -1341,7 +1353,7 @@ public class ViewJSONManipulator extends ViewVisitor {
 		}
 		else {
 			String markup = blurb.getLocalisedMarkup();
-			if (BindUtil.containsSkyveExpressions(markup)) { // has a binding expression
+			if ((markup != null) && BindUtil.containsSkyveExpressions(markup)) { // has a binding expression
 				if (parentVisible && visible(blurb)) {
 					if ((! forApply) || 
 							(forApply && parentEnabled)) {
@@ -1722,6 +1734,9 @@ public class ViewJSONManipulator extends ViewVisitor {
 				addBinding(selectedIdBinding, true, false, Sanitisation.text, false, true);
 				
 				String gridBinding = widget.getBinding();
+				if (gridBinding == null) { // a data grid/repeater binding is required
+					throw new MetaDataException("A data grid/repeater in view " + view.getName() + " has no binding");
+				}
 			    TargetMetaData target = BindUtil.getMetaDataForBinding(customer, module, document, gridBinding);
 			    Relation targetRelation = (Relation) target.getAttribute();
 			    if (targetRelation == null) { // should never happen
@@ -1991,7 +2006,10 @@ public class ViewJSONManipulator extends ViewVisitor {
 				String binding = combo.getBinding();
 				addBinding(binding, true, false, Sanitisation.relaxed);
 				
-				putVariantAndDynamicDomainValuesInValueMaps(binding);
+				// As for addBinding(), there is nothing to add without a binding
+				if (binding != null) {
+					putVariantAndDynamicDomainValuesInValueMaps(binding);
+				}
 			}
 		}
 		addCondition(combo.getDisabledCondition());
@@ -2096,11 +2114,17 @@ public class ViewJSONManipulator extends ViewVisitor {
 
 		if (parentVisible && visible(comparison)) {
 			String referenceName = comparison.getBinding();
+			if (referenceName == null) { // a comparison binding is required
+				throw new MetaDataException("A comparison in view " + view.getName() + " has no binding");
+			}
 			Reference reference = document.getNullSafeReferenceByName(referenceName);
 			Document referenceDocument = module.getDocument(customer, reference.getDocumentName());
 
 			try {
 				String modelName = comparison.getModelName();
+				if (modelName == null) { // a comparison model name is required
+					throw new MetaDataException("The comparison [" + referenceName + "] has no model name");
+				}
 				RequestKey key = RequestKey.model(document, modelName);
 				ProvidedRepository repository = ProvidedRepositoryFactory.get();
 				ComparisonModel<Bean, Bean> model = repository.getComparisonModel(customer, document, modelName, true);
@@ -2109,6 +2133,9 @@ public class ViewJSONManipulator extends ViewVisitor {
 				}
 				model.setBean(bean);
 				ComparisonComposite root = model.getComparisonComposite((Bean) BindUtil.get(bean, referenceName));
+				if (root == null) {
+					throw new MetaDataException("Comparison model [" + modelName + "] produced no comparison");
+				}
 				if (! forApply) {
 					comparisons.put(referenceName, 
 										new ComparisonJSONManipulator(user, customer, root).toJSONStructure());
@@ -2136,14 +2163,22 @@ public class ViewJSONManipulator extends ViewVisitor {
         }
 
         for (ComparisonProperty property : node.getProperties()) {
-            currentBindings.putBinding(property.getName(), true, true, Sanitisation.none, false);
+        	// A property without a name is not a real property, so there is nothing to bind (see ComparisonJSONManipulator)
+        	String propertyName = property.getName();
+        	if (propertyName != null) {
+        		currentBindings.putBinding(propertyName, true, true, Sanitisation.none, false);
+        	}
         }
         
         for (ComparisonComposite child : node.getChildren()) {
-        	TargetMetaData target = Binder.getMetaDataForBinding(customer, module, nodeDocument, child.getReferenceName());
+        	String childReferenceName = child.getReferenceName();
+        	if (childReferenceName == null) { // a child is always reached through a relation
+        		throw new MetaDataException("A comparison child of document " + nodeDocument.getName() + " has no reference name");
+        	}
+        	TargetMetaData target = Binder.getMetaDataForBinding(customer, module, nodeDocument, childReferenceName);
         	Relation childRelation = (Relation) target.getAttribute();
 		    if (childRelation == null) { // should never happen
-		    	throw new MetaDataException("No target relation for comparison binding " + child.getReferenceName());
+		    	throw new MetaDataException("No target relation for comparison binding " + childReferenceName);
 		    }
             Document childDocument = module.getDocument(customer, childRelation.getDocumentName());
             addComparisonBindingsForApply(child, childDocument);

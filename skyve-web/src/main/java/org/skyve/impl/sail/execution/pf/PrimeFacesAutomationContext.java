@@ -15,6 +15,7 @@ import org.skyve.impl.web.faces.pipeline.layout.LayoutBuilderChain;
 import org.skyve.impl.web.faces.views.FacesView;
 import org.skyve.metadata.sail.language.step.context.PushEditContext;
 import org.skyve.metadata.sail.language.step.context.PushListContext;
+import org.skyve.web.UserAgentType;
 
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
@@ -45,6 +46,10 @@ public class PrimeFacesAutomationContext extends AutomationContext<PrimeFacesGen
 		String documentName = push.getDocumentName();
 		String queryName = push.getQueryName();
 		String modelName = push.getModelName();
+		String uxui = getUxui();
+		if (uxui == null) {
+			throw new IllegalStateException("The automation context has no uxui - push it before generating");
+		}
 
 		ComponentCollectingComponentBuilder cccb = new ComponentCollectingComponentBuilder(this, push);
 		ComponentBuilderChain cbc = new ComponentBuilderChain(componentBuilder, cccb);
@@ -57,7 +62,7 @@ public class PrimeFacesAutomationContext extends AutomationContext<PrimeFacesGen
 				documentName,
 				queryName,
 				modelName,
-				getUxui(),
+				uxui,
 				Boolean.TRUE,
 				false,
 				Boolean.TRUE,
@@ -77,6 +82,11 @@ public class PrimeFacesAutomationContext extends AutomationContext<PrimeFacesGen
 		PushEditContext push = editContext.pushEditContext();
 		ComponentBuilder componentBuilder = editContext.componentBuilder();
 		LayoutBuilder layoutBuilder = editContext.layoutBuilder();
+		String uxui = getUxui();
+		UserAgentType userAgentType = getUserAgentType();
+		if ((uxui == null) || (userAgentType == null)) {
+			throw new IllegalStateException("The automation context has no uxui or user agent type - push it before generating");
+		}
 
 		ComponentCollectingComponentBuilder cccb = new ComponentCollectingComponentBuilder(this, push);
 		ComponentBuilderChain cbc = new ComponentBuilderChain(componentBuilder, cccb);
@@ -92,8 +102,8 @@ public class PrimeFacesAutomationContext extends AutomationContext<PrimeFacesGen
 				push.getDocumentName(),
 				null,
 				"skyve",
-				getUxui(),
-				getUserAgentType(),
+				uxui,
+				userAgentType,
 				null,
 				null,
 				cbc,

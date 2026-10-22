@@ -89,9 +89,12 @@ public class EditAction extends FacesAction<Void> {
 				// Add session view zoom in bindings to view zoom in bindings in head first order first
 				facesView.getZoomInBindings().addAll(sessionView.getZoomInBindings());
 				webContext = sessionView.getWebContext();
+				if (webContext == null) { // hydrated in SkyveFacesPhaseListener
+					throw new IllegalStateException("Cannot edit as the session FacesView has no web context");
+				}
 				bean = webContext.getCurrentBean();
 
-				Bean current = (viewBinding == null) ? bean : (Bean) BindUtil.get(bean, facesView.getViewBinding());
+				Bean current = (viewBinding == null) ? bean : (Bean) BindUtil.get(bean, viewBinding);
 				if (current == null) { // should never happen
 					throw new IllegalStateException("current is null");
 				}

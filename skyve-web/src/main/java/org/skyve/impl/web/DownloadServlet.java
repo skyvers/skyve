@@ -109,6 +109,9 @@ public class DownloadServlet extends HttpServlet {
 			}
 
 			AbstractPersistence persistence = webContext.getConversation();
+			if (persistence == null) {
+				throw new IllegalStateException("Cached conversation " + contextKey + " has no persistence");
+			}
 			persistence.setForThread();
 				try {
 					try {
@@ -141,6 +144,9 @@ public class DownloadServlet extends HttpServlet {
 						}
 						DownloadAction<Bean> downloadAction = document.getDownloadAction(customer, resourceName, true);
 						Bean bean = WebUtil.getConversationBeanFromRequest(webContext, request);
+						if (bean == null) {
+							throw new ConversationEndedException(request.getLocale());
+						}
 
 					boolean vetoed = customer.interceptBeforeDownloadAction(document, resourceName, bean, webContext);
 					Download result = null;

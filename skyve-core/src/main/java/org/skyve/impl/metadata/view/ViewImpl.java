@@ -527,18 +527,21 @@ public class ViewImpl extends Container implements View {
 				String componentBinding = component.getBinding();
 				ViewImpl fragment = component.getFragment(customer, uxui);
 				Set<UserAccess> componentAccesses = fragment.getAccesses(customer, document, uxui);
+				if (componentAccesses == null) { // the fragment's accesses were neither declared nor generated so there are none to add
+					continue;
+				}
 				for (UserAccess componentAccess : componentAccesses) {
 					// Change the module name for query and document aggregates as the query or document 
 					// is imported into the referencing module.
 					if (componentAccess.isQueryAggregate()) {
 						if (! document.getOwningModuleName().equals(componentAccess.getModuleName())) {
-							result.add(UserAccess.queryAggregate(document.getOwningModuleName(), componentAccess.getComponent()));
+							result.add(UserAccess.queryAggregate(document.getOwningModuleName(), accessComponent(componentAccess)));
 							continue;
 						}
 					}
 					else if (componentAccess.isDocumentAggregate()) {
 						if (! document.getOwningModuleName().equals(componentAccess.getModuleName())) {
-							result.add(UserAccess.documentAggregate(document.getOwningModuleName(), componentAccess.getComponent()));
+							result.add(UserAccess.documentAggregate(document.getOwningModuleName(), accessComponent(componentAccess)));
 							continue;
 						}
 					}
@@ -547,7 +550,7 @@ public class ViewImpl extends Container implements View {
 					else if (componentAccess.isModelAggregate()) {
 						if (! (document.getOwningModuleName().equals(componentAccess.getModuleName()) &&
 								document.getName().equals(componentAccess.getDocumentName()))) {
-							result.add(UserAccess.modelAggregate(document.getOwningModuleName(), document.getName(), componentAccess.getComponent()));
+							result.add(UserAccess.modelAggregate(document.getOwningModuleName(), document.getName(), accessComponent(componentAccess)));
 							continue;
 						}
 					}
@@ -574,7 +577,7 @@ public class ViewImpl extends Container implements View {
 					else if (componentAccess.isDynamicImage()) {
 						if (! (document.getOwningModuleName().equals(componentAccess.getModuleName()) &&
 								document.getName().equals(componentAccess.getDocumentName()))) {
-							result.add(UserAccess.dynamicImage(document.getOwningModuleName(), document.getName(), componentAccess.getComponent()));
+							result.add(UserAccess.dynamicImage(document.getOwningModuleName(), document.getName(), accessComponent(componentAccess)));
 							continue;
 						}
 					}
@@ -586,6 +589,20 @@ public class ViewImpl extends Container implements View {
 			}
 		}
 
+		return result;
+	}
+
+	/**
+	 * Returns the component of an access that is not singular, as every other kind of access names one.
+	 *
+	 * @param access the non-singular access
+	 * @return the query, document, model, dynamic image, report name or binding of the access
+	 */
+	private static @Nonnull String accessComponent(@Nonnull UserAccess access) {
+		String result = access.getComponent();
+		if (result == null) {
+			throw new IllegalStateException("User access " + access + " has no component");
+		}
 		return result;
 	}
 
@@ -681,8 +698,23 @@ public class ViewImpl extends Container implements View {
 			@Override
 			public void visitContent(@Nonnull ContentUpload content, boolean parentVisible, boolean parentEnabled) {
 				if (determineAccesses) {
-					addContentAccess(moduleName, documentName, content.getBinding());
+					addContentAccess(moduleName, documentName, required(content.getBinding(), "A content binding"));
 				}
+			}
+
+			/**
+			 * Returns a widget's metadata value that the view metadata is validated to define.
+			 *
+			 * @param value the metadata value
+			 * @param description what the value is, for the exception message
+			 * @return the value
+			 * @throws MetaDataException if the value is null
+			 */
+			private @Nonnull String required(@Nullable String value, @Nonnull String description) {
+				if (value == null) {
+					throw new MetaDataException(description + " is required in view " + view.getName() + " for document " + moduleName + '.' + documentName);
+				}
+				return value;
 			}
 
 			/**
@@ -705,7 +737,7 @@ public class ViewImpl extends Container implements View {
 			@Override
 			public void visitContentSignature(@Nonnull ContentSignature signature, boolean parentVisible, boolean parentEnabled) {
 				if (determineAccesses) {
-					String binding = signature.getBinding();
+					String binding = required(signature.getBinding(), "A content signature binding");
 					if (dataGridBinding != null) {
 						StringBuilder sb = new StringBuilder(dataGridBinding.length() + 1 + binding.length());
 						sb.append(dataGridBinding).append('.').append(binding);
@@ -728,7 +760,7 @@ public class ViewImpl extends Container implements View {
 				else { // not inlined
 					 // determine access if required
 					 if (determineAccesses) {
-						accesses.add(UserAccess.modelAggregate(moduleName, documentName, modelName));
+						accesses.add(UserAccess.modelAggregate(moduleName, documentName, required(modelName, "A chart model name")));
 					}
 				}
 			}
@@ -771,7 +803,7 @@ public class ViewImpl extends Container implements View {
 						accesses.add(UserAccess.modelAggregate(moduleName, documentName, modelName));
 					}
 					else {
-						accesses.add(UserAccess.queryAggregate(moduleName, queryName));
+						accesses.add(UserAccess.queryAggregate(moduleName, required(queryName, "A list grid query or model name")));
 					}
 	
 					if (! (Boolean.FALSE.equals(grid.getShowAdd()) && Boolean.FALSE.equals(grid.getShowZoom()))) {
@@ -785,7 +817,7 @@ public class ViewImpl extends Container implements View {
 							}
 						}
 						else {
-							MetaDataQueryDefinition query = module.getNullSafeMetaDataQuery(queryName);
+							MetaDataQueryDefinition query = module.getNullSafeMetaDataQuery(required(queryName, "A list grid query or model name"));
 							String drivingDocumentName = query.getDocumentName();
 							Module drivingModule = query.getDocumentModule(customer);
 							String drivingModuleName = drivingModule.getName();
@@ -803,7 +835,7 @@ public class ViewImpl extends Container implements View {
 						accesses.add(UserAccess.modelAggregate(moduleName, documentName, modelName));
 					}
 					else {
-						String queryName = repeater.getQueryName();
+						String queryName = required(repeater.getQueryName(), "A list repeater query or model name");
 						accesses.add(UserAccess.queryAggregate(moduleName, queryName));
 					}
 					// NB ListRepeater cannot zoom in
@@ -825,6 +857,7 @@ public class ViewImpl extends Container implements View {
 						}
 					}
 					
+					binding = required(binding, "A lookup description binding outside of a data grid");
 					TargetMetaData target = BindUtil.getMetaDataForBinding(customer, module, document, binding);
 					Relation targetRelation = (Relation) target.getAttribute();
 					// This should never happen as the bindings should be validated by now
@@ -885,7 +918,7 @@ public class ViewImpl extends Container implements View {
 				if (determineAccesses) {
 					CompleteType type = text.getComplete();
 					if (type == CompleteType.previous) {
-						String binding = text.getBinding();
+						String binding = required(text.getBinding(), "A text field binding");
 						if (dataGridBinding != null) {
 							StringBuilder sb = new StringBuilder(dataGridBinding.length() + 1 + binding.length());
 							sb.append(dataGridBinding).append('.').append(binding);
@@ -908,7 +941,7 @@ public class ViewImpl extends Container implements View {
 			@Override
 			public void visitZoomIn(@Nonnull ZoomIn zoomIn, boolean parentVisible, boolean parentEnabled) {
 				if (determineAccesses) {
-					accessThroughBinding(zoomIn.getBinding());
+					accessThroughBinding(required(zoomIn.getBinding(), "A zoom in binding"));
 				}
 			}
 
@@ -966,7 +999,7 @@ public class ViewImpl extends Container implements View {
 				}
 				
 				if (determineAccesses) {
-					accesses.add(UserAccess.report(reportModuleName, reportDocumentName, reportName));
+					accesses.add(UserAccess.report(reportModuleName, reportDocumentName, required(reportName, "A report action report name")));
 				}
 			}
 		}.visit();

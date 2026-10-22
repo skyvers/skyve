@@ -1,5 +1,6 @@
 package org.skyve.impl.generate;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
@@ -104,6 +105,32 @@ class DomainGeneratorRouterValidationTest {
 				() -> new TestDomainGenerator(repository).validateCustomer("invalid"));
 
 		verify(repository, times(1)).getRouter();
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void rejectsUnnamedUxUiWhenValidatingDocumentViews() {
+		ProvidedRepository repository = mock(ProvidedRepository.class);
+		Customer customer = mock(Customer.class);
+		Module module = mock(Module.class);
+		Document document = mock(Document.class);
+		when(repository.getCustomer("unnamed")).thenReturn(customer);
+		when(customer.getModules()).thenReturn(List.of(module));
+		when(module.getName()).thenReturn("test");
+		when(module.getDocumentRefs()).thenReturn(Map.of("First", mock(DocumentRef.class)));
+		when(module.getDocument(customer, "First")).thenReturn(document);
+
+		Router global = globalRouter();
+		Router effective = globalRouter();
+		effective.getUxUis().add(new UxUiMetadata());
+		when(repository.getGlobalRouter()).thenReturn(global);
+		when(repository.getModuleRouters()).thenReturn(List.of());
+		when(repository.getRouter()).thenReturn(effective);
+
+		MetaDataException e = assertThrows(MetaDataException.class,
+				() -> new TestDomainGenerator(repository).validateCustomer("unnamed"));
+
+		assertEquals("The router defines a UX/UI with no name.", e.getMessage());
 	}
 
 	private static Router globalRouter() {

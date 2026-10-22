@@ -597,6 +597,97 @@ class CommunicationUtilTest {
 		assertThat(mailService.lastSend.getRecipientEmailAddresses(), is(java.util.Set.of("to@example.com")));
 	}
 
+	@Test
+	void testGenerateCalendarAttachmentsThrowsWhenStartTimeMissing() {
+		when(communication.getCalendarEndTime()).thenReturn(new DateTime(1_700_000_360_000L));
+
+		assertThrows(ValidationException.class, () -> invokePrivate("generateCalendarAttachments",
+				new Class<?>[] { Customer.class, Communication.class, Bean[].class },
+				null,
+				communication,
+				new Bean[0]));
+	}
+
+	@Test
+	void testGenerateCalendarAttachmentsThrowsWhenEndTimeMissing() {
+		when(communication.getCalendarStartTime()).thenReturn(new DateTime(1_700_000_000_000L));
+
+		assertThrows(ValidationException.class, () -> invokePrivate("generateCalendarAttachments",
+				new Class<?>[] { Customer.class, Communication.class, Bean[].class },
+				null,
+				communication,
+				new Bean[0]));
+	}
+
+	@Test
+	void testGetDefinedAttachmentsThrowsWhenAttachmentContentIsMissing() {
+		AbstractContentManager.IMPLEMENTATION_CLASS = CaptureContentManager.class;
+		CaptureContentManager.attachments.clear();
+		when(communication.getAttachmentFileName1()).thenReturn("first.txt");
+		when(communication.getAttachment1()).thenReturn("missing-content");
+
+		assertThrows(DomainException.class, () -> invokePrivate("getDefinedAttachments",
+				new Class<?>[] { Communication.class },
+				communication));
+	}
+
+	@Test
+	void testGetDefinedAttachmentsAttachesUnknownContentTypeWithoutContentType() throws Exception {
+		AbstractContentManager.IMPLEMENTATION_CLASS = CaptureContentManager.class;
+		CaptureContentManager.attachments.clear();
+		CaptureContentManager.attachments.put("content-1",
+				new AttachmentContent("demo", "admin", "Communication", null, "user", "biz", "attachment")
+						.attachment("first.unknown", "application/x-unknown-to-skyve", "one".getBytes(StandardCharsets.UTF_8)));
+		when(communication.getAttachmentFileName1()).thenReturn("first.unknown");
+		when(communication.getAttachment1()).thenReturn("content-1");
+
+		MailAttachment[] result = (MailAttachment[]) invokePrivate("getDefinedAttachments",
+				new Class<?>[] { Communication.class },
+				communication);
+
+		assertThat(result[0].getAttachmentFileName(), is("first.unknown"));
+		assertThat(new String(result[0].getAttachment(), StandardCharsets.UTF_8), is("one"));
+		assertThat(result[0].getAttachmentContentType(), is((String) null));
+	}
+
+	@Test
+	void testSendThrowsWhenBodyMissing() throws Exception {
+		MailServiceStaticSingleton.set(new CaptureMailService());
+		AbstractContentManager.IMPLEMENTATION_CLASS = NoOpContentManager.class;
+		configureExecutableCommunication("sender@example.com", "to@example.com", null, false);
+		when(communication.getBody()).thenReturn(null);
+
+		assertThrows(ValidationException.class,
+				() -> CommunicationUtil.send(communication, CommunicationUtil.RunMode.ACTION, ResponseMode.EXPLICIT, null));
+	}
+
+	@Test
+	void testSendThrowsWhenFormatTypeMissing() throws Exception {
+		CaptureMailService mailService = new CaptureMailService();
+		MailServiceStaticSingleton.set(mailService);
+		AbstractContentManager.IMPLEMENTATION_CLASS = NoOpContentManager.class;
+		configureExecutableCommunication("sender@example.com", "to@example.com", null, false);
+		when(communication.getFormatType()).thenReturn(null);
+
+		assertThrows(ValidationException.class,
+				() -> CommunicationUtil.send(communication, CommunicationUtil.RunMode.ACTION, ResponseMode.EXPLICIT, null));
+		assertThat(Integer.valueOf(mailService.sendCount), is(Integer.valueOf(0)));
+	}
+
+	@Test
+	void testGenerateThrowsWhenRecipientMissing() throws Exception {
+		CaptureMailService mailService = new CaptureMailService();
+		MailServiceStaticSingleton.set(mailService);
+		AbstractContentManager.IMPLEMENTATION_CLASS = NoOpContentManager.class;
+		configureExecutableCommunication("sender@example.com", null, null, false);
+		when(communication.getBasePath()).thenReturn(tempDir.toString());
+		when(communication.getBatch()).thenReturn("batch-one");
+
+		assertThrows(ValidationException.class,
+				() -> CommunicationUtil.generate(communication, CommunicationUtil.RunMode.ACTION, ResponseMode.EXPLICIT, null));
+		assertThat(Integer.valueOf(mailService.writeCount), is(Integer.valueOf(0)));
+	}
+
 	@SuppressWarnings("boxing")
 	private static Communication communicationForResults(ActionType actionType, long count) {
 		Communication communication = mock(Communication.class);

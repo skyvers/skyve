@@ -3,6 +3,7 @@ package org.skyve.impl.generate.jasperreports;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -43,6 +44,7 @@ import org.skyve.impl.metadata.view.widget.bound.tabular.DataGridContainerColumn
 import org.skyve.impl.metadata.view.widget.bound.tabular.DataRepeater;
 import org.skyve.impl.metadata.view.widget.bound.tabular.ListGrid;
 import org.skyve.impl.metadata.view.widget.bound.tabular.ListRepeater;
+import org.skyve.metadata.MetaDataException;
 
 @SuppressWarnings({"boxing", "java:S3011", "java:S112", "null"})
 class ReportViewVisitorLayoutTest {
@@ -338,6 +340,25 @@ class ReportViewVisitorLayoutTest {
 		assertThat(auto.getElementWidth(), is(Integer.valueOf(0)));
 		assertThat(hbox.getLeft(), is(Integer.valueOf(210)));
 		assertThat(hbox.getHeight(), is(Integer.valueOf(0)));
+	}
+
+	@Test
+	void layoutLeafContainerLeavesASizedElementWithoutASizeHintUnsized() {
+		Container hbox = new Container(Integer.valueOf(0), Integer.valueOf(10), Integer.valueOf(900), true, ContainerType.hbox);
+		// a width but no pixel, percentage or responsive width hint
+		ReportElement unhinted = new ReportElement(ElementType.staticImage, "unhinted", "unhinted.png", null, null, null, null, Integer.valueOf(200), null, null, null, null, null, null);
+		hbox.getElements().add(unhinted);
+
+		visitor.layout(hbox);
+
+		// treated as an unsized element and so stretched to fill the container
+		assertThat(unhinted.getElementWidth(), is(Integer.valueOf(900)));
+		assertThat(unhinted.getElementLeft(), is(Integer.valueOf(10)));
+	}
+
+	@Test
+	void visitDataGridWithAnUnresolvableBindingThrowsMetaDataException() {
+		assertThrows(MetaDataException.class, () -> visitor.visitDataGrid(new DataGrid(), true, true));
 	}
 
 	@Test

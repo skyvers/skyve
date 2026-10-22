@@ -52,6 +52,7 @@ import java.util.NoSuchElementException;
 
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
+import jakarta.faces.FacesException;
 import jakarta.faces.component.UIComponent;
 import jakarta.faces.component.UISelectItem;
 import jakarta.faces.component.UISelectItems;
@@ -478,9 +479,15 @@ final class SelectItemsIterator implements Iterator<SelectItem> {
                     Object noSelectionValueResult = attrs.get(NO_SELECTION_VALUE);
                     Object noSelectionOptionResult = attrs.get(NO_SELECTION_OPTION);
                     setValue(((itemValueResult != null) ? itemValueResult : value));
-                    setLabel(((itemLabelResult != null)
-                                  ? itemLabelResult.toString()
-                                  : value.toString()));
+                    if (itemLabelResult != null) {
+                        setLabel(itemLabelResult.toString());
+                    }
+                    else if (value != null) {
+                        setLabel(value.toString());
+                    }
+                    else {
+                        throw new FacesException("Select items " + sourceComponent.getId() + " has a null item and no itemLabel to label it with");
+                    }
                     setDescription(((itemDescriptionResult != null)
                                         ? itemDescriptionResult.toString()
                                         : null));

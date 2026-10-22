@@ -14,6 +14,8 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.lang.reflect.Field;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.LinkedHashMap;
@@ -24,6 +26,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.skyve.impl.generate.jasperreports.DesignSpecification.Mode;
 import org.skyve.impl.persistence.AbstractPersistence;
+import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.model.Attribute.AttributeType;
@@ -328,8 +331,30 @@ class RendererStringTest {
 			String plain = Renderer.pathToReport("myModule", "MyDoc", false);
 			// If basePath is configured, enquoted should differ from plain
 			assertNotEquals(enquoted, plain);
-		} catch (@SuppressWarnings("unused") NullPointerException npe) {
+		} catch (@SuppressWarnings("unused") IllegalStateException e) {
 			// UtilImpl not configured in standalone unit test — method is covered, skip assertion
+		}
+	}
+
+	@Test
+	void pathToReportWithoutAnAbsoluteBasePathThrowsIllegalState() throws Exception {
+		Field basePathField = UtilImpl.class.getDeclaredField("absoluteBasePath");
+		basePathField.setAccessible(true);
+		Object previousBasePath = basePathField.get(null);
+		String previousAppsJarDirectory = UtilImpl.APPS_JAR_DIRECTORY;
+		Thread thread = Thread.currentThread();
+		ClassLoader previousClassLoader = thread.getContextClassLoader();
+		// no schemas/common.xsd resource and no apps jar directory means no absolute base path
+		try (URLClassLoader emptyClassLoader = new URLClassLoader(new URL[0], null)) {
+			basePathField.set(null, null);
+			UtilImpl.APPS_JAR_DIRECTORY = null;
+			thread.setContextClassLoader(emptyClassLoader);
+			assertThrows(IllegalStateException.class, () -> Renderer.pathToReport("myModule", "MyDoc", false));
+		}
+		finally {
+			thread.setContextClassLoader(previousClassLoader);
+			UtilImpl.APPS_JAR_DIRECTORY = previousAppsJarDirectory;
+			basePathField.set(null, previousBasePath);
 		}
 	}
 
@@ -1072,6 +1097,45 @@ class RendererStringTest {
 		Files.createDirectories(outputPath);
 
 		assertThrows(org.skyve.metadata.MetaDataException.class, () -> Renderer.saveJrxml(design, outputPath));
+	}
+
+	// --- values that are not specified ---
+
+	@Test
+	void renderElementImageWithoutPositionOrSizeRendersZeroAsForTextFields() {
+		ReportElement e = new ReportElement(ReportElement.ElementType.staticImage, "logo", "/path/logo.png", null, null, null, null);
+		String result = Renderer.renderElement(e);
+		assertThat(result, containsString("x=\"0\""));
+		assertThat(result, containsString("y=\"0\""));
+		assertThat(result, containsString("width=\"0\""));
+		assertThat(result, containsString("height=\"0\""));
+	}
+
+	@Test
+	void renderElementLineWithoutPositionOrSizeRendersZero() {
+		ReportBand band = newBand(ReportBand.BandType.detail);
+		ReportElement e = new ReportElement(ReportElement.ElementType.line, "separator", null, null, null, null, null);
+		e.setParent(band);
+		String result = Renderer.renderElement(e);
+		assertThat(result, containsString("<line>"));
+		assertThat(result, containsString("x=\"0\""));
+		assertThat(result, containsString("height=\"0\""));
+	}
+
+	@Test
+	void renderBandWithoutABandTypeThrowsIllegalState() {
+		ReportBand band = new ReportBand();
+		band.setParent(parent);
+		assertThrows(IllegalStateException.class, () -> Renderer.renderBand(band));
+	}
+
+	@Test
+	void renderFieldCollectionNotInADesignReturnsEmpty() {
+		ReportField f = new ReportField();
+		f.setName("children");
+		f.setTypeClass("java.util.List");
+		f.setCollection(Boolean.TRUE);
+		assertThat(Renderer.renderField(f), is(""));
 	}
 
 	private static DesignSpecification newRenderableDesign() {

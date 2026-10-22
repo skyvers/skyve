@@ -21,8 +21,10 @@ import java.util.Map;
 import java.util.Set;
 
 import org.junit.jupiter.api.Test;
+import org.locationtech.jts.geom.Geometry;
 import org.mockito.ArgumentCaptor;
 import org.skyve.impl.metadata.customer.CustomerImpl;
+import org.skyve.impl.metadata.model.document.InverseOne;
 import org.skyve.impl.metadata.model.document.field.Enumeration;
 import org.skyve.impl.metadata.module.menu.EditItem;
 import org.skyve.impl.metadata.module.menu.ListItem;
@@ -43,10 +45,12 @@ import org.skyve.metadata.MetaData;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
+import org.skyve.metadata.model.Attribute.AttributeType;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.model.document.DynamicImage;
 import org.skyve.metadata.model.Persistent;
 import org.skyve.metadata.module.Module;
+import org.skyve.metadata.module.Module.DocumentRef;
 import org.skyve.metadata.module.menu.Menu;
 import org.skyve.metadata.module.menu.MenuItem;
 import org.skyve.metadata.module.query.MetaDataQueryDefinition;
@@ -554,14 +558,15 @@ class LocalDesignRepositoryTest {
 	}
 
 	@Test
-	@SuppressWarnings("null")
 	void validateModuleForGenerateDomainThrowsWhenMapModelCannotBeResolved() {
 		LocalDesignRepository repository = org.mockito.Mockito.spy(new LocalDesignRepository());
 		CustomerImpl customer = mock(CustomerImpl.class);
 		Module module = mock(Module.class);
+		Document document = mock(Document.class);
 
 		MapItem menuItem = new MapItem();
 		menuItem.setName("mapModelItem");
+		menuItem.setDocumentName("Doc");
 		menuItem.setModelName("MissingMapModel");
 		MenuImpl menu = new MenuImpl();
 		menu.getItems().add(menuItem);
@@ -572,8 +577,10 @@ class LocalDesignRepositoryTest {
 		when(module.getMetadataQueries()).thenReturn(List.of());
 		when(module.getMenu()).thenReturn(menu);
 		when(module.getRoles()).thenReturn(List.of());
+		when(module.getDocument(customer, "Doc")).thenReturn(document);
+		when(document.getPersistent()).thenReturn(mock(Persistent.class));
 
-		doThrow(new RuntimeException("missing map model")).when(repository).getMapModel(customer, null, "MissingMapModel", false);
+		doThrow(new RuntimeException("missing map model")).when(repository).getMapModel(customer, document, "MissingMapModel", false);
 
 		assertThrows(MetaDataException.class, () -> repository.validateModuleForGenerateDomain(customer, module));
 	}
@@ -876,12 +883,44 @@ class LocalDesignRepositoryTest {
 	}
 
 	@Test
-	@SuppressWarnings("null")
 	void validateModuleForGenerateDomainPassesWhenMapModelResolves() {
 		LocalDesignRepository repository = org.mockito.Mockito.spy(new LocalDesignRepository());
 		Customer customer = mock(Customer.class);
 		Module module = mock(Module.class);
+		Document document = mock(Document.class);
 		MapModel<org.skyve.domain.Bean> mapModel = mock(MapModel.class);
+
+		MapItem menuItem = new MapItem();
+		menuItem.setName("mapModelItem");
+		menuItem.setDocumentName("Doc");
+		menuItem.setModelName("ExistingMapModel");
+		menuItem.setGeometryBinding("location");
+		MenuImpl menu = new MenuImpl();
+		menu.getItems().add(menuItem);
+		Attribute location = mock(Attribute.class);
+
+		when(customer.getName()).thenReturn("testCustomer");
+		when(module.getName()).thenReturn("testModule");
+		when(module.getHomeDocumentName()).thenReturn(null);
+		when(module.getMetadataQueries()).thenReturn(List.of());
+		when(module.getMenu()).thenReturn(menu);
+		when(module.getRoles()).thenReturn(List.of());
+		when(module.getDocument(customer, "Doc")).thenReturn(document);
+		when(document.getPersistent()).thenReturn(mock(Persistent.class));
+		when(document.getAttribute("location")).thenReturn(location);
+		when(location.getAttributeType()).thenReturn(AttributeType.geometry);
+		doReturn(Geometry.class).when(location).getImplementingType();
+
+		doReturn(mapModel).when(repository).getMapModel(customer, document, "ExistingMapModel", false);
+
+		assertDoesNotThrow(() -> repository.validateModuleForGenerateDomain(customer, module));
+	}
+
+	@Test
+	void validateModuleForGenerateDomainThrowsWhenModelMenuItemHasNoDocument() {
+		LocalDesignRepository repository = org.mockito.Mockito.spy(new LocalDesignRepository());
+		Customer customer = mock(Customer.class);
+		Module module = mock(Module.class);
 
 		MapItem menuItem = new MapItem();
 		menuItem.setName("mapModelItem");
@@ -896,9 +935,9 @@ class LocalDesignRepositoryTest {
 		when(module.getMenu()).thenReturn(menu);
 		when(module.getRoles()).thenReturn(List.of());
 
-		doReturn(mapModel).when(repository).getMapModel(customer, null, "ExistingMapModel", false);
-
-		assertDoesNotThrow(() -> repository.validateModuleForGenerateDomain(customer, module));
+		MetaDataException e = assertThrows(MetaDataException.class, () -> repository.validateModuleForGenerateDomain(customer, module));
+		assertTrue(e.getMessage().contains("has no document"));
+		verify(repository, never()).getMapModel(any(), any(), any(), org.mockito.ArgumentMatchers.anyBoolean());
 	}
 
 	@Test
@@ -923,6 +962,105 @@ class LocalDesignRepositoryTest {
 		doReturn(importedModule).when(repository).getModule(customer, "external");
 
 		assertDoesNotThrow(() -> repository.validateModuleForGenerateDomain(customer, module));
+	}
+
+	@Test
+	void validateCustomerForGenerateDomainThrowsWhenFeatureRoleModuleCannotBeResolved() {
+		LocalDesignRepository repository = org.mockito.Mockito.spy(new LocalDesignRepository());
+		CustomerImpl customer = mock(CustomerImpl.class);
+		Module homeModule = mock(Module.class);
+
+		when(customer.getName()).thenReturn("testCustomer");
+		when(customer.getHomeModule()).thenReturn(homeModule);
+		when(customer.getModuleEntries()).thenReturn(Map.of());
+		when(customer.getRoles()).thenReturn(List.of());
+		when(customer.getTextSearchRoles()).thenReturn(Set.of("admin.someRole"));
+		when(customer.getFlagRoles()).thenReturn(Set.of());
+		when(customer.getSwitchModeRoles()).thenReturn(Set.of());
+
+		doReturn(null).when(repository).getModule(customer, "admin");
+
+		MetaDataException e = assertThrows(MetaDataException.class, () -> repository.validateCustomerForGenerateDomain(customer));
+		assertEquals("Repository returned null for module admin for customer testCustomer", e.getMessage());
+	}
+
+	@Test
+	void validateCustomerForGenerateDomainThrowsForUnnamedCustomerRoleModuleRole() {
+		LocalDesignRepository repository = org.mockito.Mockito.spy(new LocalDesignRepository());
+		CustomerImpl customer = mock(CustomerImpl.class);
+		Module homeModule = mock(Module.class);
+		Module moduleFromCustomer = mock(Module.class);
+
+		CustomerModuleRoleMetaData moduleRoleMetaData = new CustomerModuleRoleMetaData();
+		moduleRoleMetaData.setModuleName("admin");
+
+		CustomerRoleMetaData customerRoleMetaData = new CustomerRoleMetaData();
+		customerRoleMetaData.setName("testRole");
+		customerRoleMetaData.getRoles().add(moduleRoleMetaData);
+
+		when(customer.getName()).thenReturn("testCustomer");
+		when(customer.getHomeModule()).thenReturn(homeModule);
+		when(customer.getModuleEntries()).thenReturn(Map.of());
+		when(customer.getRoles()).thenReturn(List.of(customerRoleMetaData));
+
+		doReturn(moduleFromCustomer).when(repository).getModule(customer, "admin");
+
+		MetaDataException e = assertThrows(MetaDataException.class, () -> repository.validateCustomerForGenerateDomain(customer));
+		assertTrue(e.getMessage().contains("does not reference a valid module role"));
+	}
+
+	@Test
+	void validateDocumentForGenerateDomainThrowsWhenInverseTargetModuleCannotBeResolved() {
+		LocalDesignRepository repository = org.mockito.Mockito.spy(new LocalDesignRepository());
+		CustomerImpl customer = mock(CustomerImpl.class);
+		Module module = mock(Module.class);
+		Document document = inverseDocument(module);
+
+		when(customer.getName()).thenReturn("testCustomer");
+		doReturn(module).when(repository).getModule(customer, "admin");
+		doReturn(null).when(repository).getModule(customer, "other");
+
+		MetaDataException e = assertThrows(MetaDataException.class, () -> repository.validateDocumentForGenerateDomain(customer, document));
+		assertEquals("Repository returned null for module other for customer testCustomer", e.getMessage());
+	}
+
+	@Test
+	void validateDocumentForGenerateDomainThrowsWhenInverseTargetDocumentCannotBeFound() {
+		LocalDesignRepository repository = org.mockito.Mockito.spy(new LocalDesignRepository());
+		CustomerImpl customer = mock(CustomerImpl.class);
+		Module module = mock(Module.class);
+		Module otherModule = mock(Module.class);
+		Document document = inverseDocument(module);
+
+		when(customer.getName()).thenReturn("testCustomer");
+		doReturn(module).when(repository).getModule(customer, "admin");
+		doReturn(otherModule).when(repository).getModule(customer, "other");
+		doReturn(null).when(repository).getDocument(customer, otherModule, "Target");
+
+		MetaDataException e = assertThrows(MetaDataException.class, () -> repository.validateDocumentForGenerateDomain(customer, document));
+		assertEquals("The target [documentName] of Target in Inverse inverse in document admin.Owner cannot be found.", e.getMessage());
+	}
+
+	/**
+	 * Builds an admin.Owner document mock with a single inverse to other.Target (imported into the admin module).
+	 */
+	private static Document inverseDocument(Module module) {
+		InverseOne inverse = new InverseOne();
+		inverse.setName("inverse");
+		inverse.setDocumentName("Target");
+		inverse.setReferenceName("owner");
+
+		DocumentRef targetRef = mock(DocumentRef.class);
+		when(targetRef.getReferencedModuleName()).thenReturn("other");
+		when(module.getDocumentRefs()).thenReturn(Map.of("Target", targetRef));
+
+		Document document = mock(Document.class);
+		when(document.getOwningModuleName()).thenReturn("admin");
+		when(document.getName()).thenReturn("Owner");
+		when(document.getConditionNames()).thenReturn(Set.of());
+		doReturn(List.of(inverse)).when(document).getAttributes();
+		when(document.getUniqueConstraints()).thenReturn(List.of());
+		return document;
 	}
 
 	private static ListItem menuItem(String name, String roleName) {

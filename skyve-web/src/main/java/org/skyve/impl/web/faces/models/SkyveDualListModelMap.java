@@ -13,6 +13,7 @@ import org.skyve.domain.Bean;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
+import org.skyve.impl.web.AbstractWebContext;
 import org.skyve.impl.web.WebUtil;
 import org.skyve.impl.web.faces.views.FacesView;
 import org.skyve.metadata.MetaDataException;
@@ -184,7 +185,11 @@ public class SkyveDualListModelMap extends TreeMap<String, DualListModel<DomainV
 						String thisBizId = domainValue.getCode();
 						Bean thisBean = BindUtil.getElementInCollection(list, thisBizId);
 						if (thisBean == null) { // DNE in list
-							thisBean = WebUtil.findReferencedBean(rd, thisBizId, p, bean, view.getWebContext());
+							AbstractWebContext webContext = view.getWebContext();
+							if (webContext == null) { // the current bean comes from the web context
+								throw new IllegalStateException("Cannot gather list membership " + binding + " as the FacesView has no web context");
+							}
+							thisBean = WebUtil.findReferencedBean(rd, thisBizId, p, bean, webContext);
 							list.add(newIndex, thisBean);
 						}
 						else { // found in list

@@ -8,6 +8,7 @@ import org.skyve.domain.Bean;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.metadata.view.widget.bound.input.LookupDescription;
 import org.skyve.impl.metadata.view.widget.bound.input.LookupDescriptionColumn;
+import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.model.document.Reference;
@@ -69,6 +70,9 @@ public class SmartClientLookupDefinition {
 		if (modelName != null) {
 			ListModel<Bean> model = document.getListModel(customer, modelName, runtime);
 			queryDocument = model.getDrivingDocument();
+			if (queryDocument == null) {
+				throw new IllegalStateException("List model " + modelName + " in document " + document.getName() + " has no driving document");
+			}
 			columns = model.getColumns();
 			optionDataSource = new StringBuilder(128).append(document.getOwningModuleName()).append('_')
 														.append(document.getName()).append("__")
@@ -114,6 +118,9 @@ public class SmartClientLookupDefinition {
 				String alias = column.getName();
 				if (alias == null) {
 					alias = column.getBinding();
+					if (alias == null) { // validated when the query is loaded
+						throw new MetaDataException("A column in the lookup query for " + relation.getName() + " has no name or binding");
+					}
 				}
 				final String a = alias;
 				Optional<LookupDescriptionColumn> optional = dropDownColumns.stream().filter(c -> a.equals(c.getName())).findAny();

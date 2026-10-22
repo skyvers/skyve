@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.CALLS_REAL_METHODS;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -13,6 +14,7 @@ import static org.mockito.Mockito.when;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.nio.charset.StandardCharsets;
@@ -20,6 +22,9 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.junit.jupiter.api.Test;
+import org.skyve.content.MimeType;
+import org.skyve.impl.persistence.AbstractPersistence;
+import org.skyve.metadata.user.User;
 import org.skyve.report.ReportFormat;
 
 import jakarta.servlet.ServletOutputStream;
@@ -216,6 +221,37 @@ class ReportServletTest {
 		@SuppressWarnings("unchecked")
 		Map<String, Object> result = (Map<String, Object>) method.invoke(null, request);
 		return result;
+	}
+
+	@Test
+	@SuppressWarnings("resource")
+	void doExportReportsMissingParametersWhenValuesAreJsonNull() throws Exception {
+		AbstractPersistence persistence = mock(AbstractPersistence.class, CALLS_REAL_METHODS);
+		persistence.setUser(mock(User.class));
+		persistence.setForThread();
+		try (CapturingServletOutputStream out = new CapturingServletOutputStream()) {
+			HttpServletRequest request = mock(HttpServletRequest.class);
+			when(request.getParameter("values")).thenReturn("null");
+			HttpServletResponse response = mock(HttpServletResponse.class);
+			when(response.getOutputStream()).thenReturn(out);
+
+			Method method = ReportServlet.class.getDeclaredMethod("doExport", HttpServletRequest.class, HttpServletResponse.class);
+			method.setAccessible(true);
+			invokeVoid(method, request, response);
+
+			verify(response).setContentType(MimeType.html.toString());
+			assertTrue(out.asString().contains("There are no report parameters in this request"), out.asString());
+		}
+		finally {
+			clearThreadPersistence();
+		}
+	}
+
+	@SuppressWarnings("unchecked")
+	private static void clearThreadPersistence() throws Exception {
+		Field field = AbstractPersistence.class.getDeclaredField("threadLocalPersistence");
+		field.setAccessible(true);
+		((ThreadLocal<AbstractPersistence>) field.get(null)).remove();
 	}
 
 	private static void invokePumpOutReportFormat(byte[] bytes,

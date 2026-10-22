@@ -9,6 +9,7 @@ import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.faces.FacesAction;
+import org.skyve.impl.web.faces.models.BeanMapAdapter;
 import org.skyve.impl.web.faces.views.FacesView;
 import org.skyve.metadata.controller.ImplicitActionName;
 import org.skyve.metadata.customer.Customer;
@@ -71,6 +72,9 @@ public class AddAction extends FacesAction<Void> {
 		zoomInBinding.append(dataWidgetBinding);
 
 		Bean bean = facesView.getBean();
+		if (bean == null) {
+			throw new IllegalStateException("Cannot add to " + dataWidgetBinding + " as the FacesView has no bean");
+		}
 		String bizModule = bean.getBizModule();
     	String bizDocument = bean.getBizDocument();
 
@@ -78,8 +82,12 @@ public class AddAction extends FacesAction<Void> {
     	Customer customer = user.getCustomer();
     	Module module = customer.getModule(bizModule);
     	Document document = module.getDocument(customer, bizDocument);
-    	Bean parentBean = facesView.getCurrentBean().getBean();
-    	
+    	BeanMapAdapter currentBean = facesView.getCurrentBean();
+    	if (currentBean == null) {
+			throw new IllegalStateException("Cannot add to " + dataWidgetBinding + " as the FacesView has no current bean");
+    	}
+    	Bean parentBean = currentBean.getBean();
+
     	// Create a new element
     	TargetMetaData target = Binder.getMetaDataForBinding(customer, module, document, newViewBinding.toString());
 		Relation targetRelation = (Relation) target.getAttribute();
@@ -111,6 +119,9 @@ public class AddAction extends FacesAction<Void> {
 
 		// Call the bizlet and interceptors
 		WebContext webContext = facesView.getWebContext();
+		if (webContext == null) {
+			throw new IllegalStateException("Cannot add to " + dataWidgetBinding + " as the FacesView has no web context");
+		}
 		CustomerImpl internalCustomer = (CustomerImpl) customer;
 		boolean vetoed = internalCustomer.interceptBeforePreExecute(ImplicitActionName.Add, newBean, parentBean, webContext);
 		if (! vetoed) {

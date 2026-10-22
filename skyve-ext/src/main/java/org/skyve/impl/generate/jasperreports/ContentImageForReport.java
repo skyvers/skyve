@@ -5,12 +5,12 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 
-import org.apache.commons.lang3.StringUtils;
 import org.skyve.CORE;
 import org.skyve.EXT;
 import org.skyve.content.AttachmentContent;
 import org.skyve.content.ContentManager;
 import org.skyve.metadata.customer.Customer;
+import org.skyve.metadata.customer.UIResources;
 import org.slf4j.Logger;
 import org.skyve.util.logging.SkyveLoggerFactory;
 
@@ -46,7 +46,7 @@ public class ContentImageForReport {
 	 * @throws Exception If the attachment stream cannot be read.
 	 */
 	public static @Nonnull BufferedImage image(@Nullable String contentId, int imageWidth, int imageHeight) throws Exception {
-		if (StringUtils.isBlank(contentId)) {
+		if ((contentId == null) || contentId.isBlank()) {
 			LOGGER.error("Attempted to generate image from null content id, returning blank image.");
 			return smallBlankImage();
 		}
@@ -72,6 +72,9 @@ public class ContentImageForReport {
 	/**
 	 * Loads and scales the current customer's configured logo image.
 	 *
+	 * <p>When the customer has no logo configured, this method returns a 1x1
+	 * transparent image so report generation can proceed.
+	 *
 	 * @param imageWidth The target thumbnail width in pixels.
 	 * @param imageHeight The target thumbnail height in pixels.
 	 * @return The scaled customer logo image.
@@ -79,7 +82,13 @@ public class ContentImageForReport {
 	 */
 	public static @Nonnull BufferedImage customerLogo(int imageWidth, int imageHeight) throws IOException {
 		final Customer customer = CORE.getCustomer();
-		final File logo = CORE.getRepository().findResourceFile(customer.getUiResources().getLogoRelativeFileName(),
+		final UIResources uiResources = customer.getUiResources();
+		final String logoRelativeFileName = (uiResources == null) ? null : uiResources.getLogoRelativeFileName();
+		if (logoRelativeFileName == null) {
+			LOGGER.warn("Customer {} has no logo, returning blank image.", customer.getName());
+			return smallBlankImage();
+		}
+		final File logo = CORE.getRepository().findResourceFile(logoRelativeFileName,
 																	customer.getName(),
 																	null);
 

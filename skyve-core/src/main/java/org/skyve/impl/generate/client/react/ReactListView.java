@@ -6,6 +6,7 @@ import java.util.List;
 
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
+import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
@@ -75,8 +76,12 @@ class ReactListView extends ReactComponent {
 	private void renderComponentDidMount(@Nonnull FileWriter fw) throws IOException {
 		fw.write("\tcomponentDidMount() {\n");
 		if (model != null) {
+			Document drivingDocument = model.getDrivingDocument();
+			if (drivingDocument == null) {
+				throw new MetaDataException("List model " + modelName + " has no driving document.");
+			}
 			fw.write("\t\tthis.fetchModel('");
-			fw.write(model.getDrivingDocument().getOwningModuleName());
+			fw.write(drivingDocument.getOwningModuleName());
 			fw.write("', '");
 			fw.write(modelName);
 			fw.write("', 0, 75).then(data => this.setState({data: data}));\n");

@@ -2,9 +2,13 @@ package org.skyve.util;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.CALLS_REAL_METHODS;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.withSettings;
 
+import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -13,8 +17,13 @@ import org.skyve.domain.Bean;
 import org.skyve.domain.DynamicBean;
 import org.skyve.domain.messages.Message;
 import org.skyve.domain.messages.ValidationException;
+import org.skyve.impl.persistence.AbstractPersistence;
+import org.skyve.metadata.MetaDataException;
+import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.Attribute.AttributeType;
+import org.skyve.metadata.model.document.Document;
+import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
 
 @SuppressWarnings("static-method")
@@ -148,6 +157,46 @@ class BeanValidatorTest {
 
 		assertEquals("parent.field1", msg1.getBindings().iterator().next());
 		assertEquals("parent.field2", msg2.getBindings().iterator().next());
+	}
+
+	// ---- validateBeanPropertyAgainstAttribute(String, Bean, ValidationException) ----
+
+	@Test
+	void validateBeanPropertyByNameThrowsWhenAttributeDoesNotExist() {
+		Customer customer = mock(Customer.class);
+		Module module = mock(Module.class);
+		Document document = mock(Document.class);
+		User user = mock(User.class);
+		when(user.getCustomer()).thenReturn(customer);
+		when(customer.getModule("admin")).thenReturn(module);
+		when(module.getDocument(customer, "User")).thenReturn(document);
+		when(document.getOwningModuleName()).thenReturn("admin");
+		when(document.getName()).thenReturn("User");
+		DynamicBean bean = new DynamicBean("admin", "User", new HashMap<>());
+		ValidationException e = new ValidationException();
+
+		AbstractPersistence persistence = mock(AbstractPersistence.class, withSettings().defaultAnswer(CALLS_REAL_METHODS));
+		persistence.setUser(user);
+		persistence.setForThread();
+		try {
+			assertThrows(MetaDataException.class, () -> BeanValidator.validateBeanPropertyAgainstAttribute("noSuchAttribute", bean, e));
+		}
+		finally {
+			clearPersistenceThreadLocal();
+		}
+	}
+
+	private static void clearPersistenceThreadLocal() {
+		try {
+			Field field = AbstractPersistence.class.getDeclaredField("threadLocalPersistence");
+			field.setAccessible(true);
+			@SuppressWarnings("unchecked")
+			ThreadLocal<AbstractPersistence> tl = (ThreadLocal<AbstractPersistence>) field.get(null);
+			tl.remove();
+		}
+		catch (@SuppressWarnings("unused") Exception ignored) {
+			// ignore
+		}
 	}
 
 	// ---- validateBeanAgainstDocument(Document, Bean) constant string tests ---

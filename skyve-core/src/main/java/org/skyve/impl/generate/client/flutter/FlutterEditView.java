@@ -54,11 +54,14 @@ public class FlutterEditView extends FlutterView {
 //        String createDart = null;
 
         String uxui = generator.getConfig().getUxui();
+        if (uxui == null) { // validated when the generator is constructed
+            throw new IllegalStateException("No UX/UI is configured");
+        }
 
         if (editView != null) {
             FlutterViewRenderer v = new FlutterViewRenderer(user, module, document, editView, uxui, imports);
             v.visit();
-            editDart = v.getResult().toString();
+            editDart = v.getNullSafeResult().toString();
         }
 //        if (createView != null) {
 //            FlutterViewRenderer v = new FlutterViewRenderer(user, module, document, createView, uxui, imports);

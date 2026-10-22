@@ -53,7 +53,10 @@ public class SelectItemsBeanConverter implements Converter<Object> {
 		String result = "";
 		
 		if (value instanceof BeanMapAdapter beanMapAdapter) {
-			result = beanMapAdapter.getBean().getBizId();
+			Bean bean = beanMapAdapter.getBean();
+			if (bean != null) { // an adapter of no bean converts like a null value
+				result = bean.getBizId();
+			}
 		}
 		else if (value instanceof Bean bean) {
 			result = bean.getBizId();

@@ -57,21 +57,28 @@ import jakarta.annotation.Nonnull;
 public class RestoreJob extends CancellableJob {
 	private static final String CREATE_SQL = "create.sql";
 	private static final String ID_COLUMN_SUFFIX = "_id";
+	private static final String KICK_OFF_INSTRUCTION = "Kick off the job with the appropriate options from the Data Maintenance page.";
 
 	private Calendar gmt = Calendar.getInstance(TimeZone.getTimeZone("GMT"));
 
 	/**
 	 * Executes a restore job when invoked with {@link RestoreOptions}.
-	 * Logs a user-facing message if the job is triggered with the wrong bean type.
+	 * Logs a user-facing message if the job is triggered with the wrong bean type or without a selected backup.
 	 */
 	@Override
 	public void execute() throws Exception {
 		Bean bean = getBean();
 		if (! (bean instanceof RestoreOptions)) {
-			getLog().add("Kick off the job with the appropriate options from the Data Maintenance page.");
+			getLog().add(KICK_OFF_INSTRUCTION);
 			return;
 		}
-		restore((RestoreOptions) bean);
+		RestoreOptions options = (RestoreOptions) bean;
+		String selectedBackupName = options.getSelectedBackupName();
+		if (selectedBackupName == null) {
+			getLog().add(KICK_OFF_INSTRUCTION);
+			return;
+		}
+		restore(options, selectedBackupName);
 	}
 
 	/**
@@ -79,7 +86,7 @@ public class RestoreJob extends CancellableJob {
 	 * data restore, indexing, and cleanup.
 	 */
 	@SuppressWarnings("java:S3776") // Complexity OK
-	private void restore(@Nonnull RestoreOptions options) throws Exception {
+	private void restore(@Nonnull RestoreOptions options, @Nonnull String selectedBackupName) throws Exception {
 		CustomerImpl customer = (CustomerImpl) CORE.getCustomer();
 		String customerName = customer.getName();
 
@@ -89,7 +96,6 @@ public class RestoreJob extends CancellableJob {
 		Collection<String> log = getLog();
 		String trace;
 
-		String selectedBackupName = options.getSelectedBackupName();
 		Path backupDir = Paths.get(Util.getBackupDirectory(), "backup_" + customerName);
 		File backup = backupDir.resolve(selectedBackupName).toFile();
 		boolean deleteLocalBackup = false;

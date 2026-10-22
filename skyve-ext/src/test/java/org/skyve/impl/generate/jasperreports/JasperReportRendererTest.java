@@ -7,12 +7,20 @@ import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
+import java.lang.reflect.Field;
 
 import org.junit.jupiter.api.Test;
 import org.skyve.impl.generate.jasperreports.DesignSpecification.Mode;
 import org.skyve.impl.generate.jasperreports.ReportElement.ElementType;
+import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.report.jasperreports.ReportDesignParameters;
+import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute.AttributeType;
+import org.skyve.metadata.module.Module;
+import org.skyve.metadata.user.User;
 import org.skyve.report.ReportFormat;
 
 import net.sf.jasperreports.engine.JRExpression;
@@ -240,6 +248,63 @@ class JasperReportRendererTest {
 				() -> JasperReportRenderer.getSubReport(spec, "missing"));
 
 		assertThat(thrown.getMessage(), containsString("missing"));
+	}
+
+	@Test
+	void getSubReportSkipsUnnamedSubreports() {
+		DesignSpecification spec = beanModeSpec();
+		spec.getSubReports().add(new DesignSpecification());
+
+		assertThrows(IllegalArgumentException.class, () -> JasperReportRenderer.getSubReport(spec, "missing"));
+	}
+
+	@Test
+	void renderDesignWithUntitledTabularColumnWithoutAlignmentUsesEmptyHeadingAndLeftAlignment() throws Exception {
+		ReportDesignParameters rdp = minimalRdp();
+		rdp.getColumns().add(column("name", null, 100, null, AttributeType.text));
+		String jrxml = new JasperReportRenderer(rdp).renderDesign();
+		assertThat(jrxml, containsString("<![CDATA[\"\"]]>"));
+		assertThat(jrxml, containsString("hTextAlign=\"Left\""));
+	}
+
+	@Test
+	void renderDesignWithUntitledColumnarColumnUsesEmptyLabel() throws Exception {
+		ReportDesignParameters rdp = minimalRdp();
+		rdp.setReportStyle(ReportDesignParameters.ReportStyle.columnar);
+		rdp.setReportFormat(ReportFormat.pdf);
+		rdp.getColumns().add(column("name", null, 200, ReportDesignParameters.ColumnAlignment.left, AttributeType.text));
+		String jrxml = new JasperReportRenderer(rdp).renderDesign();
+		assertThat(jrxml, containsString("<![CDATA[\"\"]]>"));
+	}
+
+	@Test
+	void getListModelWithoutAQueryOrDocumentNameThrowsIllegalArgument() throws Exception {
+		Customer customer = mock(Customer.class);
+		when(customer.getModule("sales")).thenReturn(mock(Module.class));
+		AbstractPersistence persistence = mock(AbstractPersistence.class);
+		User user = mock(User.class);
+		when(persistence.getUser()).thenReturn(user);
+		when(user.getCustomer()).thenReturn(customer);
+		DesignSpecification spec = new DesignSpecification();
+		spec.setModuleName("sales");
+
+		Field field = AbstractPersistence.class.getDeclaredField("threadLocalPersistence");
+		field.setAccessible(true);
+		@SuppressWarnings("unchecked")
+		ThreadLocal<AbstractPersistence> threadLocal = (ThreadLocal<AbstractPersistence>) field.get(null);
+		AbstractPersistence previous = threadLocal.get();
+		try {
+			threadLocal.set(persistence);
+			assertThrows(IllegalArgumentException.class, () -> JasperReportRenderer.getListModel(spec));
+		}
+		finally {
+			if (previous == null) {
+				threadLocal.remove();
+			}
+			else {
+				threadLocal.set(previous);
+			}
+		}
 	}
 
 	@Test

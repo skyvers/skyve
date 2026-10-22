@@ -607,6 +607,18 @@ class AbstractResourceServletTest {
 	}
 
 	@Test
+	void abstractResourceReturnsNullThumbnailDetailsWhenThumbnailTypeIsUnknown() throws Exception {
+		SimpleAbstractResource resource = new SimpleAbstractResource();
+		resource.thumbnail = thumbnailForFile("thumbnail-test", ".unknownsuffix");
+		resource.imageWidth = 100;
+		resource.imageHeight = 50;
+
+		assertNull(resource.thumbnail.getMimeType());
+		assertNull(resource.getContentType());
+		assertNull(resource.getFileName());
+	}
+
+	@Test
 	void abstractResourceReturnsNullThumbnailDetailsWhenLoadReturnsNull() throws Exception {
 		SimpleAbstractResource resource = new SimpleAbstractResource();
 		resource.imageWidth = 10;

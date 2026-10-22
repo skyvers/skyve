@@ -166,8 +166,10 @@ public final class ComparisonJSONManipulator {
 		
 		for (ComparisonComposite child : node.getChildren()) {
 			String childReferenceType = "A";
-			if (nodeDocument != null) {
-				Reference childReference = nodeDocument.getReferenceByName(child.getReferenceName());
+			// A child without a reference name is taken as an association
+			String childReferenceName = child.getReferenceName();
+			if ((nodeDocument != null) && (childReferenceName != null)) {
+				Reference childReference = nodeDocument.getReferenceByName(childReferenceName);
 				if (childReference instanceof CollectionImpl) {
 					childReferenceType = "C";
 				}
@@ -201,7 +203,8 @@ public final class ComparisonJSONManipulator {
 			item.put(NAME_KEY, propertyName);
 			item.put(TITLE_KEY, property.isDirty() ? showDirty(property.getTitle()) : property.getTitle());
 			
-			if (nodeDocument != null) {
+			// A property without a name is not a real property either, so bake something
+			if ((nodeDocument != null) && (propertyName != null)) {
 				// NB Need to use getMetaDataFroBinding() to ensure we find any attributes in base documents inherited
 				Module nodeModule = customer.getModule(nodeDocument.getOwningModuleName());
 				try {
@@ -316,10 +319,13 @@ public final class ComparisonJSONManipulator {
 	/**
 	 * Wraps a changed comparison label in the SmartClient dirty-value markup.
 	 *
-	 * @param label plain label text
-	 * @return label wrapped in the dirty-value span markup
+	 * @param label plain label text, or {@code null} when there is no label
+	 * @return label wrapped in the dirty-value span markup, or {@code null} when there is no label to mark
 	 */
-	private static @Nonnull String showDirty(@Nonnull String label) {
+	private static @Nullable String showDirty(@Nullable String label) {
+		if (label == null) { // as for an unchanged node or property, a missing label is left out
+			return null;
+		}
 		StringBuilder result = new StringBuilder(label);
 		result.insert(0, "<span style='color:red'>");
 		result.append(" *</span>");

@@ -193,6 +193,9 @@ public final class POISheet implements BizPortSheet {
 		// Add ReferenceSheets to the columns now we can tell ChildDocument sheets (from the column bindings)
 		for (String binding : getColumnBindings()) {
 			final BizPortColumn column = getColumn(binding);
+			if (column == null) {
+				throw new IllegalStateException("Sheet " + title + " has no column for binding " + binding);
+			}
 			// if we are working with a document sheet, determine if we need to setup the column's "referencedSheet" property
 			if ((collectionBinding == null) || getColumnBindings().contains(ChildBean.PARENT_NAME)) { // have a document sheet (including ChildDocument)
 				if (ChildBean.PARENT_NAME.equals(binding)) { // cater for the parent binding
@@ -381,7 +384,11 @@ public final class POISheet implements BizPortSheet {
 				setRangeValues(rangeValues, i);
 			}
 			else {
-				setDataValidation(column.getType(), i);
+				// No type means no data validation, as for types without a validation
+				AttributeType type = column.getType();
+				if (type != null) {
+					setDataValidation(type, i);
+				}
 			}
 			i++;
 		}

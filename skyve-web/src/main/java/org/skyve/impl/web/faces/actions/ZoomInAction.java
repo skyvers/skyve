@@ -7,6 +7,7 @@ import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.faces.FacesAction;
+import org.skyve.impl.web.faces.models.BeanMapAdapter;
 import org.skyve.impl.web.faces.views.FacesView;
 import org.skyve.metadata.controller.ImplicitActionName;
 import org.skyve.metadata.customer.Customer;
@@ -75,7 +76,11 @@ public class ZoomInAction extends FacesAction<Void> {
 		// Its up to the app coder to disable the UI if appropriate.
 		if (FacesAction.validateRequiredFields()) {
 			String viewBinding = facesView.getViewBinding();
-			Bean parentBean = facesView.getCurrentBean().getBean();
+			BeanMapAdapter currentBeanAdapter = facesView.getCurrentBean();
+			if (currentBeanAdapter == null) {
+				throw new IllegalStateException("Cannot zoom in to " + binding + " as the FacesView has no current bean");
+			}
+			Bean parentBean = currentBeanAdapter.getBean();
 			
 			sb.setLength(0);
 			sb.append(binding);
@@ -98,6 +103,9 @@ public class ZoomInAction extends FacesAction<Void> {
 			if (currentBean == null) { // instantiate one
 				User u = facesView.getUser();
 				if (u != null) {
+					if (parentBean == null) {
+						throw new IllegalStateException("Cannot instantiate " + sb + " as the FacesView has no parent bean");
+					}
 					Customer c = u.getCustomer();
 					Module m = c.getModule(parentBean.getBizModule());
 					Document d = m.getDocument(c, parentBean.getBizDocument());
@@ -114,6 +122,9 @@ public class ZoomInAction extends FacesAction<Void> {
 			Document referenceDocument = referenceModule.getDocument(customer, currentBean.getBizDocument());
 
 			WebContext webContext = facesView.getWebContext();
+			if (webContext == null) {
+				throw new IllegalStateException("Cannot zoom in to " + binding + " as the FacesView has no web context");
+			}
 			CustomerImpl internalCustomer = (CustomerImpl) customer;
 			boolean vetoed = internalCustomer.interceptBeforePreExecute(ImplicitActionName.Edit, currentBean, parentBean, webContext);
 			if (! vetoed) {

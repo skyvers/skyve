@@ -8,6 +8,7 @@ import org.skyve.domain.messages.UniqueConstraintViolationException;
 import org.skyve.domain.messages.ValidationException;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
 import org.skyve.impl.util.ValidationUtil;
+import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.document.Bizlet;
@@ -124,6 +125,10 @@ public class BeanValidator {
 		Module m = c.getModule(bean.getBizModule());
 		Document d = m.getDocument(c, bean.getBizDocument());
 		Attribute a = d.getAttribute(attributeName);
+		if (a == null) {
+			throw new MetaDataException("Attribute " + attributeName + " does not exist in document " +
+											d.getOwningModuleName() + '.' + d.getName());
+		}
 		validateBeanPropertyAgainstAttribute(u, a, bean, e);
 	}
 	

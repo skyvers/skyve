@@ -141,7 +141,11 @@ public class Thumbnail {
 		}
 
 		// Lower case to suit all file systems
-		cacheKey = content.getContentId().toLowerCase();
+		String contentId = content.getContentId();
+		if (contentId == null) {
+			throw new IllegalStateException("Attachment content has no content ID to cache its thumb nail against");
+		}
+		cacheKey = contentId.toLowerCase();
 		
 		// This happens atomically and serves as a critical section for content requests
 		// Note that it is blocking ALL thumb nail requests to the attachment in case it needs to write the NOT_AN_IMAGE file
@@ -152,7 +156,9 @@ public class Thumbnail {
 		// Get the thumb nail and finally remove our lock on this file.
 		try {
 			try (InputStream is = content.getContentStream()) {
-				process(content.getFileName(), is, markup, width, height);
+				// No file name is treated as a file name without a suffix
+				String fileName = content.getFileName();
+				process((fileName == null) ? "" : fileName, is, markup, width, height);
 			}
 		}
 		finally {

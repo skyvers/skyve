@@ -29,6 +29,7 @@ import org.skyve.impl.metadata.view.widget.bound.tabular.DataGrid;
 import org.skyve.impl.metadata.view.widget.bound.tabular.DataRepeater;
 import org.skyve.impl.sail.mock.MockWebContext;
 import org.skyve.impl.web.faces.actions.GetSelectItemsAction;
+import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.sail.language.Step;
 import org.skyve.metadata.sail.language.step.Comment;
@@ -335,6 +336,10 @@ public class TestDataEnterViewVisitor extends NoOpViewVisitor {
 	private void addDataEnter(@Nonnull Bound bound, boolean parentVisible, boolean parentEnabled, boolean visible, boolean enabled) {
 		if (parentVisible && parentEnabled && visible && enabled && !inDataWidget) {
 			String binding = bound.getBinding();
+			if (binding == null) { // validated as required outside of data widgets when the view is loaded
+				throw new MetaDataException(bound.getClass().getSimpleName() + " in view " + view.getName() + " of document " +
+												document.getOwningModuleName() + '.' + document.getName() + " has no binding");
+			}
 
 			String value = null;
 
@@ -376,17 +381,13 @@ public class TestDataEnterViewVisitor extends NoOpViewVisitor {
 					boolean found = false;
 					int index = 0;
 
+					List<SelectItem> items = null;
 					try {
-						for (SelectItem item : get.execute()) {
-							if (value.equals(item.getLabel())) {
-								found = true;
-
-								break;
-							}
-
-							index++;
-						}
+						items = get.execute();
 					} catch (@SuppressWarnings("unused") Exception e) {
+						// items stays null
+					}
+					if (items == null) { // the action threw or failed (and returned null)
 						String message = String.format(
 								"WARNING: Can't set value for combo/radio [%s] in document %s.%s as there were no domain values.",
 								binding,
@@ -399,6 +400,15 @@ public class TestDataEnterViewVisitor extends NoOpViewVisitor {
 						scalarSteps.add(comment);
 
 						return;
+					}
+					for (SelectItem item : items) {
+						if (value.equals(item.getLabel())) {
+							found = true;
+
+							break;
+						}
+
+						index++;
 					}
 
 					if (found) {

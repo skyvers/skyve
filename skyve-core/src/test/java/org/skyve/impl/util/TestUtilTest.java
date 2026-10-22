@@ -29,6 +29,8 @@ import org.skyve.impl.metadata.model.document.field.LongInteger;
 import org.skyve.impl.metadata.model.document.field.Text;
 import org.skyve.impl.metadata.model.document.field.TextFormat;
 import org.skyve.impl.metadata.model.document.field.validator.TextValidator;
+import org.skyve.metadata.repository.ProvidedRepository;
+import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.impl.metadata.model.document.field.validator.IntegerValidator;
 import org.skyve.impl.metadata.model.document.field.validator.LongValidator;
@@ -298,6 +300,28 @@ void testHasExtensionAndAttributeKeyPrivateHelpers() throws Exception {
 		assertThat((String) attributeKey.invoke(null, module, document, "name"), is("utmod.UtDoc.name"));
 		assertThat((String) attributeKey.invoke(null, null, null, "name"), is("name"));
 		assertThat(attributeKey.invoke(null, module, document, null), is((Object) null));
+	}
+
+	@Test
+void testRandomTextWithoutRepositoryDataFiles() {
+		// The repository has no data files at all (findResourceFile() returns null)
+		Text text = new Text();
+		text.setName("noDataFileForThisAttribute");
+		text.setLength(20);
+
+		ProvidedRepository previousRepository = ProvidedRepositoryFactory.isConfigured() ? ProvidedRepositoryFactory.get() : null;
+		ProvidedRepositoryFactory.set(org.mockito.Mockito.mock(ProvidedRepository.class));
+		try {
+			Assertions.assertDoesNotThrow(() -> TestUtil.randomText("customer", null, null, text));
+		}
+		finally {
+			if (previousRepository == null) {
+				ProvidedRepositoryFactory.clear();
+			}
+			else {
+				ProvidedRepositoryFactory.set(previousRepository);
+			}
+		}
 	}
 
 	@Test

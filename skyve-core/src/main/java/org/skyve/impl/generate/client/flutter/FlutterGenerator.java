@@ -47,7 +47,7 @@ public class FlutterGenerator {
         Validate.notEmpty(config.getUxui());
         Validate.notEmpty(config.getProjectName());
         Validate.notEmpty(config.getProjectPath());
-        Validate.notEmpty(config.getCustomerName());
+        String customerName = Validate.notEmpty(config.getCustomerName());
 
         this.projectPath = new File(config.getProjectPath());
         if (!this.projectPath.exists()) {
@@ -56,7 +56,7 @@ public class FlutterGenerator {
         config.setLibViewsPath(new File(projectPath, "lib/views/"));
 
         config.setCustomer(ProvidedRepositoryFactory.get()
-                                                    .getCustomer(config.getCustomerName()));
+                                                    .getCustomer(customerName));
     }
 
     public @Nonnull GeneratorConfig getConfig() {
@@ -115,6 +115,9 @@ public class FlutterGenerator {
 
     public void generate() throws IOException {
         File libViewsPath = config.getLibViewsPath();
+        if (libViewsPath == null) { // set when the generator is constructed
+            throw new IllegalStateException("No lib/views path is configured");
+        }
         libViewsPath.mkdirs();
 
         Map<String, String> substitutions = singletonMap("##PROJECT##", config.getProjectName());

@@ -178,7 +178,7 @@ public class ResponsiveComponentBuilder extends TabularComponentBuilder {
 	}
 	
 	@Override
-	public @Nonnull UIComponent label(@Nullable UIComponent component, @Nullable String dataWidgetVar, @Nullable String value, @Nullable String binding, @Nullable Label label) {
+	public @Nonnull UIComponent label(@Nullable UIComponent component, @Nullable String dataWidgetVar, @Nullable String value, @Nullable String binding, @Nonnull Label label) {
 		UIComponent result = super.label(component, dataWidgetVar, value, binding, label);
 		addFloatLabelClass(result);
 		return result;

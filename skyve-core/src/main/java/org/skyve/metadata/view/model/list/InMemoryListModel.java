@@ -144,6 +144,9 @@ public abstract class InMemoryListModel<T extends Bean> extends ListModel<T> {
 			int i = 0;
 			for (SortParameter sort : sorts) {
 				String by = sort.getBy();
+				if (by == null) {
+					throw new IllegalStateException("A sort parameter for list model " + getClass().getName() + " has no binding to sort by");
+				}
 				SortDirection direction = sort.getDirection();
 				order[i++] = new OrderingImpl(by, direction);
 			}
@@ -205,16 +208,21 @@ public abstract class InMemoryListModel<T extends Bean> extends ListModel<T> {
 
 		if (AggregateFunction.Count.equals(summary)) {
 			// Set all the columns to zero, in case there are no rows
+			// Columns without a binding have no value to summarise
 			for (MetaDataQueryColumn column : getColumns()) {
 				String binding = column.getBinding();
-				summaryData.put(binding, Long.valueOf(0));
+				if (binding != null) {
+					summaryData.put(binding, Long.valueOf(0));
+				}
 			}
 			summaryData.put(PersistentBean.FLAG_COMMENT_NAME, Long.valueOf(0));
 			
 			for (Bean row : rows) {
 				for (MetaDataQueryColumn column : getColumns()) {
 					String binding = column.getBinding();
-					count(binding, row, summaryData);
+					if (binding != null) {
+						count(binding, row, summaryData);
+					}
 				}
 				count(PersistentBean.FLAG_COMMENT_NAME, row, summaryData);
 			}
@@ -234,7 +242,7 @@ public abstract class InMemoryListModel<T extends Bean> extends ListModel<T> {
 			// Now compute the average
 			for (MetaDataQueryColumn column : getColumns()) {
 				String binding = column.getBinding();
-				Number sum = (Number) summaryData.get(binding);
+				Number sum = (binding == null) ? null : (Number) summaryData.get(binding);
 				if (sum != null) {
 					// round to 5dp
 					summaryData.put(binding, Double.valueOf(Math.round(sum.doubleValue() / rows.size() * 100000d) / 100000d));
@@ -258,7 +266,9 @@ public abstract class InMemoryListModel<T extends Bean> extends ListModel<T> {
 		for (Bean row : rows) {
 			for (MetaDataQueryColumn column : getColumns()) {
 				String binding = column.getBinding();
-				minOrMax(binding, row, summaryData, max);
+				if (binding != null) {
+					minOrMax(binding, row, summaryData, max);
+				}
 			}
 			minOrMax(PersistentBean.FLAG_COMMENT_NAME, row, summaryData, max);
 		}
@@ -286,7 +296,7 @@ public abstract class InMemoryListModel<T extends Bean> extends ListModel<T> {
 		for (Bean row : rows) {
 			for (MetaDataQueryColumn column : getColumns()) {
 				String binding = column.getBinding();
-				Object value = Binder.get(row, binding);
+				Object value = (binding == null) ? null : Binder.get(row, binding);
 				if (value instanceof Number number) {
 					Number sum = (Number) summaryData.get(binding);
 					sum = (sum == null) ? Double.valueOf(number.doubleValue()) : Double.valueOf(sum.doubleValue() + number.doubleValue());
@@ -297,7 +307,7 @@ public abstract class InMemoryListModel<T extends Bean> extends ListModel<T> {
 		// Round to 5dp
 		for (MetaDataQueryColumn column : getColumns()) {
 			String binding = column.getBinding();
-			Object value = Binder.get(summaryData, binding);
+			Object value = (binding == null) ? null : Binder.get(summaryData, binding);
 			if (value instanceof Number number) {
 				summaryData.put(binding, Double.valueOf(Math.round(number.doubleValue() * 100000d) / 100000d));
 			}

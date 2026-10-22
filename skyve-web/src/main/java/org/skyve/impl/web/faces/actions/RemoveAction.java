@@ -79,9 +79,15 @@ public class RemoveAction extends FacesAction<Void> {
 		if (UtilImpl.FACES_TRACE) FACES_LOGGER.info("RemoveAction - collectionName={} : elementBizId={}", collectionName, elementBizId);
 
 		Bean bean = facesView.getBean();
+		if (bean == null) {
+			throw new IllegalStateException("Cannot remove as the FacesView has no bean");
+		}
 		String viewBinding = facesView.getViewBinding();
 		if ((collectionName != null) && (elementBizId != null)) { // inline remove
 			Bean beanToRemove = ActionUtil.getTargetBeanForViewAndReferenceBinding(facesView, collectionName, elementBizId);
+			if (beanToRemove == null) {
+				throw new IllegalStateException("Cannot remove element " + elementBizId + " from " + collectionName + " as it is not in the collection");
+			}
 
 			StringBuilder collectionBinding = new StringBuilder(32);
 			if (viewBinding != null) {
@@ -122,6 +128,9 @@ public class RemoveAction extends FacesAction<Void> {
 			Monitoring.measure(RequestKey.delete(d));
 		}
 		else { // Remove on zoomed view
+			if (viewBinding == null) {
+				throw new IllegalStateException("Cannot remove on a zoomed view as the FacesView has no view binding");
+			}
 			int lastCollectionindex = viewBinding.lastIndexOf("ElementById(");
 			Bean beanToRemove = (Bean) BindUtil.get(bean, viewBinding);
 			if (beanToRemove == null) { // should never happen
@@ -130,6 +139,9 @@ public class RemoveAction extends FacesAction<Void> {
 			
 			// Run preExecute after the copy is taken, in case we rollback
 			WebContext webContext = facesView.getWebContext();
+			if (webContext == null) {
+				throw new IllegalStateException("Cannot remove " + viewBinding + " as the FacesView has no web context");
+			}
 			CustomerImpl internalCustomer = (CustomerImpl) CORE.getPersistence().getUser().getCustomer();
 			Module module = internalCustomer.getModule(beanToRemove.getBizModule());
 			Document document = module.getDocument(internalCustomer, beanToRemove.getBizDocument());

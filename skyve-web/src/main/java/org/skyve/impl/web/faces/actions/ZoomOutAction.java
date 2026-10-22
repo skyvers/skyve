@@ -70,6 +70,9 @@ public class ZoomOutAction extends FacesAction<Void> {
 			// Call the bizlet
 			// Find the Collection/InverseMany element or association/inverseOne
 			Bean referenceBean = ActionUtil.getTargetBeanForView(facesView);
+			if (referenceBean == null) {
+				throw new IllegalStateException("Cannot zoom out as the FacesView has no target bean");
+			}
 			User user = CORE.getUser();
 			Customer customer = user.getCustomer();
 			Module referenceModule = customer.getModule(referenceBean.getBizModule());
@@ -77,6 +80,9 @@ public class ZoomOutAction extends FacesAction<Void> {
 			Bizlet<Bean> bizlet = ((DocumentImpl) referenceDocument).getBizlet(customer);
 
 			WebContext webContext = facesView.getWebContext();
+			if (webContext == null) {
+				throw new IllegalStateException("Cannot zoom out as the FacesView has no web context");
+			}
 			CustomerImpl internalCustomer = (CustomerImpl) customer;
 			boolean vetoed = internalCustomer.interceptBeforePreExecute(ImplicitActionName.ZoomOut, referenceBean, null, webContext);
 			if (! vetoed) {
@@ -96,13 +102,16 @@ public class ZoomOutAction extends FacesAction<Void> {
 
 				// Sort the owning collection/inverseMany (if this is a collection element binding)
 				String viewBinding = facesView.getViewBinding();
+				if (viewBinding == null) { // zoom out is only rendered when there is a view binding
+					throw new IllegalStateException("Cannot zoom out as the FacesView has no view binding");
+				}
 				// NB Is a collection/inverseMany element binding if the last "ElementById(" exists 
 				// and is further towards the end of the binding than the last '.' (if that exists)
 				int lastDotIndex = viewBinding.lastIndexOf('.');
 				int lastCollectionindex = viewBinding.lastIndexOf("ElementById(");
 				if ((lastCollectionindex >= 0) && (lastDotIndex < lastCollectionindex)) {
 					String collectionBinding = viewBinding.substring(0, lastCollectionindex);
-					Bean currentBean = facesView.getWebContext().getCurrentBean();
+					Bean currentBean = webContext.getCurrentBean();
 					BindUtil.orderByMetaData(currentBean, collectionBinding);
 				}
 				
@@ -162,6 +171,9 @@ public class ZoomOutAction extends FacesAction<Void> {
 		facesView.setViewBinding(newViewBinding);
 
 		Bean currentBean = ActionUtil.getTargetBeanForView(facesView);
+		if (currentBean == null) {
+			throw new IllegalStateException("Cannot zoom out to " + newViewBinding + " as the FacesView has no target bean");
+		}
 		Module m = internalCustomer.getModule(currentBean.getBizModule());
 		Document d = m.getDocument(internalCustomer, currentBean.getBizDocument());
 		Bizlet<? extends Bean> b = d.getBizlet(internalCustomer);

@@ -11,6 +11,7 @@ import org.skyve.impl.web.ViewWebContext;
 import org.skyve.impl.web.WebUtil;
 import org.skyve.impl.web.faces.FacesAction;
 import org.skyve.impl.web.faces.views.FacesView;
+import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.controller.DownloadAction;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
@@ -76,6 +77,9 @@ public class ExecuteDownloadAction extends FacesAction<Void> {
 
 		AbstractPersistence persistence = AbstractPersistence.get();
 		Bean targetBean = ActionUtil.getTargetBeanForViewAndReferenceBinding(facesView, dataWidgetBinding, elementBizId);
+		if (targetBean == null) {
+			throw new IllegalStateException("Cannot execute download action " + actionName + " as there is no target bean for data widget " + dataWidgetBinding + " with selected row " + elementBizId);
+		}
     	User user = persistence.getUser();
     	Customer customer = user.getCustomer();
     	Module targetModule = customer.getModule(targetBean.getBizModule());
@@ -85,6 +89,10 @@ public class ExecuteDownloadAction extends FacesAction<Void> {
 											customer, 
 											targetBean.isCreated() ? ViewType.edit.toString() : ViewType.create.toString());
     	Action action = view.getAction(actionName);
+    	if (action == null) {
+    		throw new MetaDataException("Action " + actionName + " is not defined in view " + view.getName() + " of document " +
+    										targetDocument.getOwningModuleName() + '.' + targetDocument.getName());
+    	}
     	Boolean clientValidation = action.getClientValidation();
 		boolean clientValidationEnabled = ! Boolean.FALSE.equals(clientValidation);
 		if (UtilImpl.FACES_TRACE) {
@@ -92,12 +100,16 @@ public class ExecuteDownloadAction extends FacesAction<Void> {
 		}
 	    String resourceName = action.getResourceName();
     	
-		if (! user.canExecuteAction(targetDocument, resourceName)) {
-			throw new SecurityException(resourceName, user.getName());
+		// An implicit action has no resource name and cannot be executed as a download action
+		if ((resourceName == null) || (! user.canExecuteAction(targetDocument, resourceName))) {
+			throw new SecurityException((resourceName == null) ? actionName : resourceName, user.getName());
 		}
 
 		if (! clientValidationEnabled || FacesAction.validateRequiredFields()) {
 			AbstractWebContext webContext = facesView.getWebContext();
+			if (webContext == null) {
+				throw new IllegalStateException("Cannot execute download action " + actionName + " as the FacesView has no web context");
+			}
 
 			DownloadAction<Bean> downloadAction = targetDocument.getDownloadAction(customer, resourceName, true);
 			downloadAction.prepare(targetBean, webContext);

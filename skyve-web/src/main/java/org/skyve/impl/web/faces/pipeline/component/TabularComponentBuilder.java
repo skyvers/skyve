@@ -814,6 +814,9 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 			result.setValue(preAlign + value + postAlign);
 		}
 		else {
+			if (binding == null) { // a label or blurb has a value or a binding
+				throw new IllegalStateException("An output text needs a value or a binding");
+			}
 			// escape bindings with ' as \' as the binding could be for blurb expressions
 			String sanitisedBinding = preAlign + ((binding.indexOf('\'') >= 0) ? binding.replace("'", "\\'") : binding) + postAlign;
 			if (dataWidgetVar != null) {
@@ -855,7 +858,11 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 															new String[] {disableZoomCondition} :
 															new String[] {disableZoomCondition, disabledCondition});
 
-		final DataTable dataTable = dataTable(grid.getBinding(),
+		String binding = grid.getBinding();
+		if (binding == null) { // ViewValidator rejects a data grid with no binding
+			throw new MetaDataException("A data grid has no binding");
+		}
+		final DataTable dataTable = dataTable(binding,
 												dataWidgetVar,
 												grid.getInvisibleCondition(),
 												((! Boolean.TRUE.equals(grid.getInline())) &&
@@ -899,7 +906,11 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 
 		columnPriority = 1;
 
-		DataTable result = dataTable(repeater.getBinding(),
+		String binding = repeater.getBinding();
+		if (binding == null) { // ViewValidator rejects a data repeater with no binding
+			throw new MetaDataException("A data repeater has no binding");
+		}
+		DataTable result = dataTable(binding,
 										dataWidgetVar,
 										repeater.getInvisibleCondition(),
 										false,
@@ -1737,6 +1748,9 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 			}
 		}
 		Document drivingDocument = model.getDrivingDocument();
+		if (drivingDocument == null) {
+			throw new IllegalStateException("List model " + model.getClass().getName() + " has no driving document");
+		}
 		User user = CORE.getUser();
 		boolean canCreateDocument = user.canCreateDocument(drivingDocument);
 		String owningModuleName = drivingDocument.getOwningModuleName();
@@ -1775,8 +1789,9 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
         setId(result, null);
     	result.setWidgetVar(result.getId());
 
-    	if (grid.getSelectedIdBinding() != null) {
-    		addDataTableSelection(result, grid.getSelectedIdBinding(), grid.getSelectedActions(), modelName, true);
+    	String selectedIdBinding = grid.getSelectedIdBinding();
+    	if (selectedIdBinding != null) {
+    		addDataTableSelection(result, selectedIdBinding, grid.getSelectedActions(), modelName, true);
     	}
     	else if (zoomRendered) {
     		if (grid.getDisableZoomCondition() == null) {
@@ -1979,6 +1994,9 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 											@Nonnull String uxui) {
 		Customer customer = CORE.getUser().getCustomer();
 		Document document = model.getDrivingDocument();
+		if (document == null) {
+			throw new IllegalStateException("List model " + model.getClass().getName() + " has no driving document");
+		}
 		Module module = customer.getModule(document.getOwningModuleName());
 		Customisations customisations = CORE.getCustomisations();
 
@@ -2372,6 +2390,9 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 			}
 		}
 		Document drivingDocument = model.getDrivingDocument();
+		if (drivingDocument == null) {
+			throw new IllegalStateException("List model " + model.getClass().getName() + " has no driving document");
+		}
 		String moduleName = drivingDocument.getOwningModuleName();
 		String drivingDocumentName = drivingDocument.getName();
 
@@ -2625,7 +2646,10 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		String id = result.getId();
 		List<UIComponent> toAddTo = result.getChildren();
 
-		@Nonnull String binding = content.getBinding();
+		String binding = content.getBinding();
+		if (binding == null) { // ViewValidator rejects a content widget with no binding
+			throw new MetaDataException("A content widget has no binding");
+		}
 		@Nonnull String sanitisedBinding = Objects.requireNonNull(BindUtil.sanitiseBinding(binding), "sanitised binding");
 		ContentDisplay display = content.getResolvedDisplay();
 		boolean auto = ContentDisplay.auto.equals(display);
@@ -2878,6 +2902,9 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		}
 
 		String binding = signature.getBinding();
+		if (binding == null) { // ViewValidator rejects a content signature with no binding
+			throw new MetaDataException("A content signature has no binding");
+		}
 		Integer pixelWidth = signature.getPixelWidth();
 		if (pixelWidth == null) {
 			pixelWidth = DEFAULT_SIGNATURE_PIXEL_WIDTH;
@@ -3731,6 +3758,9 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		CompleteType complete = text.getComplete();
         UIComponentBase result = null;
         if (useDatePicker) {
+        	if (facesConverter == null) { // a date picker needs a faces converter to determine its pattern
+        		throw new IllegalStateException("A date picker for " + text.getBinding() + " has no faces converter");
+        	}
             result = datePicker(dataWidgetVar,
 		            				text.getBinding(),
 		                            title,
@@ -5565,6 +5595,9 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 				model = owningDocument.getListModel(customer, modelName, true);
 			}
 			else {
+				if (query == null) { // a lookup description has a model or a query
+					throw new IllegalStateException("A lookup description of " + binding + " has neither a model nor a query");
+				}
 				model = new DocumentQueryListModel<>((MetaDataQueryDefinition) query);
 				model.postConstruct(customer, false);
 			}
@@ -5597,6 +5630,9 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 												@Nonnull ListModel<Bean> model,
 												@Nonnull Customer customer) {
 		Document document = model.getDrivingDocument();
+		if (document == null) {
+			throw new IllegalStateException("List model " + model.getClass().getName() + " has no driving document");
+		}
 		Module module = customer.getModule(document.getOwningModuleName());
 		List<String> filterFields = new ArrayList<>();
 		for (MetaDataQueryColumn queryColumn : model.getColumns()) {
@@ -5604,6 +5640,9 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 				continue;
 			}
 			String name = (queryColumn.getName() == null) ? queryColumn.getBinding() : queryColumn.getName();
+			if (name == null) { // a query column has a name or a binding
+				throw new IllegalStateException("A query column of list model " + model.getClass().getName() + " has no name or binding");
+			}
 			LookupDescriptionColumn dropDown = dropDownColumns.stream()
 					.filter(c -> name.equals(c.getName())).findFirst().orElse(null);
 			if (dropDown == null) {
@@ -5616,11 +5655,13 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 			if (queryColumn.getPixelWidth() != null) {
 				style.append("width:").append(queryColumn.getPixelWidth()).append("px;");
 			}
-			if (queryColumn.getAlignment() != null) {
-				style.append("text-align:").append(queryColumn.getAlignment().toTextAlignmentString()).append(';');
+			HorizontalAlignment alignment = queryColumn.getAlignment();
+			if (alignment != null) {
+				style.append("text-align:").append(alignment.toTextAlignmentString()).append(';');
 			}
 			column.setStyle(style.toString());
-			String formatter = (projected.getFormatterName() == null) ? projected.getCustomFormatterName() : projected.getFormatterName().name();
+			FormatterName formatterName = projected.getFormatterName();
+			String formatter = (formatterName == null) ? projected.getCustomFormatterName() : formatterName.name();
 			String value = "#{" + result.getVar() + "['{" + name + ((formatter == null) ? "" : "|" + formatter) + "}']}";
 			HtmlOutputText text = (HtmlOutputText) a.createComponent(HtmlOutputText.COMPONENT_TYPE);
 			text.setValueExpression("value", ef.createValueExpression(elc, value, Object.class));

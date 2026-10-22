@@ -32,6 +32,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentCaptor;
 import org.primefaces.component.datatable.DataTable;
 import org.primefaces.component.picklist.PickList;
+import org.skyve.domain.Bean;
 import org.skyve.domain.types.converters.Converter;
 import org.skyve.impl.generate.ViewRenderer;
 import org.skyve.impl.metadata.controller.CustomisationsStaticSingleton;
@@ -46,6 +47,7 @@ import org.skyve.impl.metadata.view.container.Collapsible;
 import org.skyve.impl.metadata.view.container.VBox;
 import org.skyve.impl.metadata.view.container.form.Form;
 import org.skyve.impl.metadata.view.container.form.FormColumn;
+import org.skyve.impl.metadata.view.container.form.FormItem;
 import org.skyve.impl.metadata.view.reference.EditViewReference;
 import org.skyve.impl.metadata.view.widget.Blurb;
 import org.skyve.impl.metadata.view.widget.Chart;
@@ -75,6 +77,7 @@ import org.skyve.metadata.controller.ImplicitActionName;
 import org.skyve.metadata.model.Attribute.AttributeType;
 import org.skyve.metadata.user.User;
 import org.skyve.metadata.view.View.ViewType;
+import org.skyve.metadata.view.model.list.ListModel;
 
 import jakarta.faces.component.UIComponent;
 import jakarta.faces.component.UIComponentBase;
@@ -189,11 +192,12 @@ class FacesViewRendererTest {
 	}
 
 	@Test
-	void renderListGridAppliesStickyHeaderForListViewsOnly() {
+	void renderListGridAppliesStickyHeaderForListViewsOnly() throws ReflectiveOperationException {
 		UIComponent root = new TestComponent("root");
 		DataTable dataTable = mock(DataTable.class);
 		ComponentBuilder cb = mock(ComponentBuilder.class);
 		LayoutBuilder lb = mock(LayoutBuilder.class);
+		ListModel<Bean> model = mock(ListModel.class);
 		ViewImpl view = createView(null);
 		view.setName(ViewType.list.toString());
 		ListGrid grid = new ListGrid();
@@ -207,7 +211,7 @@ class FacesViewRendererTest {
 							isNull(),
 							isNull(),
 							eq("external"),
-							isNull(),
+							same(model),
 							any(),
 							same(grid),
 							eq(FacesViewRenderer.DEFAULT_STICKY_HEADER_ANCHOR_SELECTOR),
@@ -217,6 +221,7 @@ class FacesViewRendererTest {
 		FacesViewRenderer renderer = newRenderer(view, null, cb, lb);
 		renderer.renderView(NO_ICON);
 		renderer.getCurrentContainers().push(view);
+		setViewRendererField(renderer, "currentListWidgetModel", model);
 		renderer.renderListGrid(null, false, grid);
 
 		ArgumentCaptor<String> stickyHeaderAnchorSelector = ArgumentCaptor.forClass(String.class);
@@ -225,7 +230,7 @@ class FacesViewRendererTest {
 								isNull(),
 								isNull(),
 								eq("external"),
-								isNull(),
+								same(model),
 								any(),
 								same(grid),
 								stickyHeaderAnchorSelector.capture(),
@@ -235,11 +240,12 @@ class FacesViewRendererTest {
 	}
 
 	@Test
-	void renderListGridLeavesEditViewListGridsNonSticky() {
+	void renderListGridLeavesEditViewListGridsNonSticky() throws ReflectiveOperationException {
 		UIComponent root = new TestComponent("root");
 		DataTable dataTable = mock(DataTable.class);
 		ComponentBuilder cb = mock(ComponentBuilder.class);
 		LayoutBuilder lb = mock(LayoutBuilder.class);
+		ListModel<Bean> model = mock(ListModel.class);
 		ViewImpl view = createView(null);
 		ListGrid grid = new ListGrid();
 		grid.setShowZoom(Boolean.FALSE);
@@ -252,7 +258,7 @@ class FacesViewRendererTest {
 							isNull(),
 							isNull(),
 							eq("external"),
-							isNull(),
+							same(model),
 							any(),
 							same(grid),
 							isNull(),
@@ -262,6 +268,7 @@ class FacesViewRendererTest {
 		FacesViewRenderer renderer = newRenderer(view, null, cb, lb);
 		renderer.renderView(NO_ICON);
 		renderer.getCurrentContainers().push(view);
+		setViewRendererField(renderer, "currentListWidgetModel", model);
 		renderer.renderListGrid(null, false, grid);
 
 		ArgumentCaptor<String> stickyHeaderAnchorSelector = ArgumentCaptor.forClass(String.class);
@@ -270,7 +277,7 @@ class FacesViewRendererTest {
 								isNull(),
 								isNull(),
 								eq("external"),
-								isNull(),
+								same(model),
 								any(),
 								same(grid),
 								stickyHeaderAnchorSelector.capture(),
@@ -279,7 +286,7 @@ class FacesViewRendererTest {
 	}
 
 	@Test
-	void renderListGridAppliesStickyHeaderToExplicitVueBuilderForListViewsOnly() {
+	void renderListGridAppliesStickyHeaderToExplicitVueBuilderForListViewsOnly() throws ReflectiveOperationException {
 		UIComponent root = new TestComponent("root");
 		ComponentBuilder cb = mock(ComponentBuilder.class);
 		LayoutBuilder lb = mock(LayoutBuilder.class);
@@ -297,6 +304,7 @@ class FacesViewRendererTest {
 		FacesViewRenderer listRenderer = newRenderer(listView, null, cb, lb);
 		listRenderer.renderView(NO_ICON);
 		listRenderer.getCurrentContainers().push(listView);
+		setViewRendererField(listRenderer, "currentListWidgetModel", mock(ListModel.class));
 		TestVueListGridBuilder.LAST_STICKY_HEADER_ANCHOR_SELECTOR.set(null);
 		listRenderer.renderListGrid(null, false, grid);
 
@@ -307,6 +315,7 @@ class FacesViewRendererTest {
 		FacesViewRenderer editRenderer = newRenderer(editView, null, cb, lb);
 		editRenderer.renderView(NO_ICON);
 		editRenderer.getCurrentContainers().push(editView);
+		setViewRendererField(editRenderer, "currentListWidgetModel", mock(ListModel.class));
 		TestVueListGridBuilder.LAST_STICKY_HEADER_ANCHOR_SELECTOR.set(
 				FacesViewRenderer.DEFAULT_STICKY_HEADER_ANCHOR_SELECTOR);
 		editRenderer.renderListGrid(null, false, grid);
@@ -513,6 +522,7 @@ class FacesViewRendererTest {
 		when(cb.checkBox(any(), isNull(), same(checkBox), eq("formLocked"), isNull(), isNull()))
 				.thenReturn(new EventSourceComponent(component, component));
 		setViewRendererField(renderer, "currentForm", form);
+		setViewRendererField(renderer, "currentFormItem", new FormItem());
 		setFacesRendererField(renderer, "current", new TestComponent("form"));
 
 		renderer.renderFormCheckBox(checkBox);

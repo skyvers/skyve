@@ -253,7 +253,7 @@ public class PrimeReactComponentRenderer extends ComponentRenderer {
 
 	@Override
 	public @Nonnull RenderedComponent addedDataGridBoundColumn(@Nullable RenderedComponent component, @Nonnull RenderedComponent current) {
-		return current.getParent();
+		return current.getNullSafeParent();
 	}
 
 	@Override
@@ -271,7 +271,7 @@ public class PrimeReactComponentRenderer extends ComponentRenderer {
 
 	@Override
 	public @Nonnull RenderedComponent addedDataGridContainerColumn(@Nullable RenderedComponent component, @Nonnull RenderedComponent current) {
-		return current.getParent();
+		return current.getNullSafeParent();
 	}
 
 	@Override

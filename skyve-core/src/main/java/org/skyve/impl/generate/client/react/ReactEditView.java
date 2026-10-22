@@ -50,12 +50,12 @@ public class ReactEditView extends ReactComponent {
 		if (editView != null) {
 			ReactViewRenderer v = new PrimeReactViewRenderer(u, module, document, editView, generator.uxui, imports, bothViews);
 			v.visit();
-			editJsx = v.getResult().toString();
+			editJsx = v.getNullSafeResult().toString();
 		}
 		if (createView != null) {
 			ReactViewRenderer v = new PrimeReactViewRenderer(u, module, document, createView, generator.uxui, imports, bothViews);
 			v.visit();
-			createJsx = v.getResult().toString();
+			createJsx = v.getNullSafeResult().toString();
 		}
 
 		fw.write("import React from 'react';\n");

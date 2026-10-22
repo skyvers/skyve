@@ -3,6 +3,7 @@ package org.skyve.impl.generate.jasperreports;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.skyve.domain.types.Decimal5;
 import org.skyve.impl.generate.jasperreports.Container.ContainerType;
 import org.skyve.impl.generate.jasperreports.DesignSpecification.DefinitionSource;
 import org.skyve.impl.generate.jasperreports.DesignSpecification.ReportType;
@@ -199,8 +200,9 @@ public class ReportViewVisitor extends ViewVisitor {
 	private @Nullable Integer calculateTwipSize(@Nonnull Integer containerSizeInTwips, @Nullable Integer pixels, @Nullable Integer percentage, @Nullable Integer responsive) {
 		Integer resultSizeInTwips = null; // auto set
 		if (pixels != null) {
-			if (design.getPixelToTwip() != null) {
-				resultSizeInTwips = Double.valueOf(pixels.doubleValue() * design.getPixelToTwip().doubleValue()).intValue();
+			final Decimal5 pixelToTwip = design.getPixelToTwip();
+			if (pixelToTwip != null) {
+				resultSizeInTwips = Double.valueOf(pixels.doubleValue() * pixelToTwip.doubleValue()).intValue();
 			} else {
 				resultSizeInTwips = Double.valueOf(pixels.doubleValue() * PIXEL_TO_TWIP).intValue();
 			}
@@ -350,10 +352,12 @@ public class ReportViewVisitor extends ViewVisitor {
 
 		// calculate a specified width if one is supplied, otherwise stretch to fill container width
 		Integer parentWidth;
-		if (container.getParent() == null || container.getParent().getWidth() == null) {
+		final Container parentContainer = container.getParent();
+		final Integer parentContainerWidth = (parentContainer == null) ? null : parentContainer.getWidth();
+		if (parentContainerWidth == null) {
 			parentWidth = design.getColumnWidth();
 		} else {
-			parentWidth = container.getParent().getWidth();
+			parentWidth = parentContainerWidth;
 		}
 		// in Verticalise mode - stretch horizontally
 		if (!Boolean.TRUE.equals(design.getVerticalise()) || inForm) {
@@ -362,13 +366,20 @@ public class ReportViewVisitor extends ViewVisitor {
 				container.setWidth(calcWidth);
 			}
 		}
-		if (container.getWidth() == null) {
-			container.setWidth(parentWidth);
+		Integer containerWidth = container.getWidth();
+		if (containerWidth == null) {
+			containerWidth = parentWidth;
+			container.setWidth(containerWidth);
 		}
-		int remainingWidth = container.getWidth();
+		int remainingWidth = containerWidth.intValue();
 
 		container.setHeight(Integer.valueOf(0));
-		container.setVerticalPosition(container.getTop());
+		// containers are created with a top and children are positioned before they are laid out
+		final Integer containerTop = container.getTop();
+		if (containerTop == null) {
+			throw new IllegalStateException("Container " + container.getContainerType() + " has no top to lay out from");
+		}
+		container.setVerticalPosition(containerTop.intValue());
 
 		// BORDER TITLE
 		// Border Title, (border done once height is calculated)
@@ -377,7 +388,12 @@ public class ReportViewVisitor extends ViewVisitor {
 			if (container.getBorderTitle() != null) {
 
 				borderTitleHeight = design.getDefaultElementHeight();
-				band = Renderer.addElement(band, ReportElement.ElementType.staticText, container.getContainerType().name() + "_title", container.getBorderTitle(), null, null,
+				// containers are always created with a type
+				final ContainerType containerType = container.getContainerType();
+				if (containerType == null) {
+					throw new IllegalStateException("Container has no type");
+				}
+				band = Renderer.addElement(band, ReportElement.ElementType.staticText, containerType.name() + "_title", container.getBorderTitle(), null, null,
 						container.getTop(),
 						container.getLeft(), container.getWidth(), borderTitleHeight, Boolean.TRUE, design.getLabelAlignmentOverride(), Boolean.TRUE, null,
 						design.getSectionTitleForeground(), design.getSectionTitleBackground(), null);
@@ -401,13 +417,13 @@ public class ReportViewVisitor extends ViewVisitor {
 					boolean found = false;
 					for (ReportElement e : container.getElements()) {
 
-						if (e.getRow().intValue() == currRow) {
+						if (rowOf(e) == currRow) {
 
 							// this container has something inside it
 							found = true;
 							container.setFilled(true);
 
-							e.setElementWidth(calculateTwipSize(container.getWidth(), e.getPixelWidth(), e.getPercentageWidth(), e.getResponsiveWidth()));
+							e.setElementWidth(calculateTwipSize(containerWidth, e.getPixelWidth(), e.getPercentageWidth(), e.getResponsiveWidth()));
 
 							// find absolute top
 							e.setElementTop(container.getVerticalPosition());
@@ -424,13 +440,15 @@ public class ReportViewVisitor extends ViewVisitor {
 
 							// set height if not already specified
 							// TODO - calculate height if specified
-							if (e.getElementHeight() == null) {
-								e.setElementHeight(design.getDefaultElementHeight());
+							Integer elementHeight = e.getElementHeight();
+							if (elementHeight == null) {
+								elementHeight = design.getDefaultElementHeight();
+								e.setElementHeight(elementHeight);
 							}
 
 							// update container height
-							container.setVerticalPosition(container.getVerticalPosition() + e.getElementHeight());
-							container.addHeight(e.getElementHeight());
+							container.setVerticalPosition(container.getVerticalPosition() + elementHeight.intValue());
+							container.addHeight(elementHeight);
 						}
 					}
 
@@ -449,9 +467,13 @@ public class ReportViewVisitor extends ViewVisitor {
 				// calculate remaining width when specifically sized elements are taken into account
 				for (ReportElement e : container.getElements()) {
 					if (e.getElementWidth() != null) {
-						e.setElementWidth(calculateTwipSize(container.getWidth(), e.getPixelWidth(), e.getPercentageWidth(), e.getResponsiveWidth()));
-						remainingWidth = remainingWidth - e.getElementWidth().intValue();
-						sizedElems++;
+						final Integer elementWidth = calculateTwipSize(containerWidth, e.getPixelWidth(), e.getPercentageWidth(), e.getResponsiveWidth());
+						e.setElementWidth(elementWidth);
+						// as for child containers, an element without a size hint is left unsized
+						if (elementWidth != null) {
+							remainingWidth = remainingWidth - elementWidth.intValue();
+							sizedElems++;
+						}
 					}
 				}
 				int blockSize = remainingWidth;
@@ -470,33 +492,43 @@ public class ReportViewVisitor extends ViewVisitor {
 					}
 
 					// stretch to fill container unless width is already set
-					if (e.getElementWidth() == null) {
+					Integer elementWidth = e.getElementWidth();
+					if (elementWidth == null) {
 						if (container.getElements().indexOf(e) == container.getElements().size() - 1) {
-							e.setElementWidth(remainingWidth);
+							elementWidth = Integer.valueOf(remainingWidth);
 						} else {
-							e.setElementWidth(blockSize);
+							elementWidth = Integer.valueOf(blockSize);
 						}
+						e.setElementWidth(elementWidth);
 					}
 
 					// set height if not already specified
 					// TODO - calculate height if specified - default to square shapes
+					Integer elementHeight;
 					if(ElementType.subreport.equals(e.getElementType())){
-						e.setElementHeight(design.getDefaultElementHeight());
+						elementHeight = design.getDefaultElementHeight();
+						e.setElementHeight(elementHeight);
 					} 
 					else {
-						if (e.getElementHeight() == null) {
-							e.setElementHeight(e.getElementWidth());
+						elementHeight = e.getElementHeight();
+						if (elementHeight == null) {
+							elementHeight = elementWidth;
+							e.setElementHeight(elementHeight);
 						}
 					}
 
 					if (Boolean.TRUE.equals(container.getHorizontal())) {
 						// update container width
-						container.setLeft(container.getLeft() + e.getElementWidth());
+						final Integer containerLeft = container.getLeft();
+						if (containerLeft == null) {
+							throw new IllegalStateException("Container " + container.getContainerType() + " has no left to lay out from");
+						}
+						container.setLeft(containerLeft.intValue() + elementWidth.intValue());
 						remainingWidth = remainingWidth - blockSize;
 					} else {
 						// update container height
-						container.setVerticalPosition(container.getVerticalPosition() + e.getElementHeight());
-						container.addHeight(e.getElementHeight());
+						container.setVerticalPosition(container.getVerticalPosition() + elementHeight.intValue());
+						container.addHeight(elementHeight);
 					}
 				}
 
@@ -509,7 +541,7 @@ public class ReportViewVisitor extends ViewVisitor {
 				for (Container c : container.getContainers()) {
 
 					// ignore unsized columns to calculate total of sized columns
-					Integer colW = calculateTwipSize(container.getWidth(), c.getPixelWidth(), c.getPercentageWidth(), c.getResponsiveWidth());
+					Integer colW = calculateTwipSize(containerWidth, c.getPixelWidth(), c.getPercentageWidth(), c.getResponsiveWidth());
 					c.setWidth(colW);
 					if (colW != null) {
 						remainingWidth = remainingWidth - colW;
@@ -547,14 +579,23 @@ public class ReportViewVisitor extends ViewVisitor {
 
 			// and recurse to autosize children
 			int index = 0;
-			int horizontalPosition = container.getLeft();
+			final Integer containerLeft = container.getLeft();
+			if (containerLeft == null) {
+				throw new IllegalStateException("Container " + container.getContainerType() + " has no left to lay out from");
+			}
+			int horizontalPosition = containerLeft.intValue();
 			int verticalPosition = container.getVerticalPosition();
 			int maxHeight = 0;
 			for (Container c : container.getContainers()) {
 
 				// set absolute position by calculating effect of previous containers
 				if (Boolean.TRUE.equals(container.getHorizontal()) && index > 0) {
-					horizontalPosition = horizontalPosition + container.getContainers().get(index - 1).getWidth();
+					// every child of a horizontal container has been sized above
+					final Integer previousWidth = container.getContainers().get(index - 1).getWidth();
+					if (previousWidth == null) {
+						throw new IllegalStateException("Container " + container.getContainerType() + " has an unsized child");
+					}
+					horizontalPosition = horizontalPosition + previousWidth.intValue();
 				} else if (index > 0) {
 					if (container.getContainers().get(index - 1).getHeight() != null) {
 						verticalPosition = verticalPosition + container.getContainers().get(index - 1).getVerticalPosition();
@@ -570,9 +611,7 @@ public class ReportViewVisitor extends ViewVisitor {
 				if (Boolean.TRUE.equals(container.getHorizontal())) {
 
 					// horizontal height = max height of all child containers
-					if (c.getHeight().intValue() > maxHeight) {
-						maxHeight = c.getHeight();
-					}
+					maxHeight = Math.max(maxHeight, laidOutHeight(c));
 				} else {
 					// size vertical
 					// Todo cleanup
@@ -580,7 +619,7 @@ public class ReportViewVisitor extends ViewVisitor {
 						c.setHeight(Integer.valueOf(0));
 					}
 					container.addHeight(c.getHeight());
-					container.setVerticalPosition(container.getHeight());
+					container.setVerticalPosition(laidOutHeight(container));
 				}
 
 				// keep track of whether children actually contain anything
@@ -593,7 +632,7 @@ public class ReportViewVisitor extends ViewVisitor {
 			// size vertical size for horizontal container is maximum height of containers
 			if (Boolean.TRUE.equals(container.getHorizontal())) {
 				container.addHeight(maxHeight);
-				container.setVerticalPosition(container.getHeight());
+				container.setVerticalPosition(laidOutHeight(container));
 			}
 
 		}
@@ -607,9 +646,10 @@ public class ReportViewVisitor extends ViewVisitor {
 				maxRowHeight[r] = 0;
 				for (Container child : container.getContainers()) {
 					for(ReportElement e: child.getElements()){
-						if(e.getRow().intValue()==r){
-							if(e.getElementHeight()!=null && e.getElementHeight().intValue()>maxRowHeight[r]){
-								maxRowHeight[r] = e.getElementHeight().intValue();
+						if(rowOf(e)==r){
+							final Integer elementHeight = e.getElementHeight();
+							if(elementHeight!=null && elementHeight.intValue()>maxRowHeight[r]){
+								maxRowHeight[r] = elementHeight.intValue();
 							}
 						}
 					}
@@ -629,8 +669,9 @@ public class ReportViewVisitor extends ViewVisitor {
 				
 				for(ReportElement e: child.getElements()){
 					//set element top to be the max height of the previous row
-					if(e.getRow().intValue()>0){
-						e.setElementTop(absoluteRowHeight[e.getRow().intValue()-1]);
+					final int elementRow = rowOf(e);
+					if(elementRow>0){
+						e.setElementTop(absoluteRowHeight[elementRow-1]);
 					}
 				}
 			}			
@@ -649,13 +690,42 @@ public class ReportViewVisitor extends ViewVisitor {
 				|| Boolean.TRUE.equals(design.getSectionBorderBottom())
 				|| Boolean.TRUE.equals(design.getSectionBorderRight())) {
 
-			if(container.getHeight()!=null && container.getHeight().intValue()>0){
+			final Integer containerHeight = container.getHeight();
+			if(containerHeight!=null && containerHeight.intValue()>0){
 				// TODO implement borders as lines
 				band = Renderer.addElement(band, ReportElement.ElementType.border, null, null, null, null, Integer.valueOf(0), container.getLeft(), container.getWidth(),
-					container.getHeight(), null, null, null, null, null, null, null);
+					containerHeight, null, null, null, null, null, null, null);
 			}
 		}
 
+	}
+
+	/**
+	 * Returns the form row of an element in a form column - these are always given a row when they are added.
+	 *
+	 * @param e The element.
+	 * @return The row.
+	 */
+	private static int rowOf(@Nonnull ReportElement e) {
+		final Integer result = e.getRow();
+		if (result == null) {
+			throw new IllegalStateException("Report element " + e.getName() + " in a form column has no row");
+		}
+		return result.intValue();
+	}
+
+	/**
+	 * Returns the height of a container that has been laid out - layout starts the height at 0.
+	 *
+	 * @param container The container.
+	 * @return The height.
+	 */
+	private static int laidOutHeight(@Nonnull Container container) {
+		final Integer result = container.getHeight();
+		if (result == null) {
+			throw new IllegalStateException("Container " + container.getContainerType() + " has no height after layout");
+		}
+		return result.intValue();
 	}
 
 	/**
@@ -856,7 +926,9 @@ public class ReportViewVisitor extends ViewVisitor {
 				break;
 			case line:
 			case subreport:
-				fld = ReportDesignGenerator.fieldFromBinding(design, customer, document, binding);
+				if (binding != null) {
+					fld = ReportDesignGenerator.fieldFromBinding(design, customer, document, binding);
+				}
 				design.getFields().add(fld);
 				ReportElement s = new ReportElement(elementType, binding , binding, null, null, null, invisibleConditionName);
 				s.setPixelWidth(pixelWidth);
@@ -1014,6 +1086,10 @@ public class ReportViewVisitor extends ViewVisitor {
 		//construct the subreport itself
 		ReportElement subE  = currentContainer.getElements().get(currentContainer.getElements().size()-1);
 		ReportField fld = subE.getField();
+		if (fld == null) {
+			throw new MetaDataException("The view definition for " + design.getModuleName() + '.' + design.getDocumentName() +
+											" has a data widget with binding {" + widget.getBinding() + "} that cannot be reported on.");
+		}
 		
 		sub = new DesignSpecification();
 		sub.setDefinitionSource(DefinitionSource.document);
@@ -1647,7 +1723,7 @@ public class ReportViewVisitor extends ViewVisitor {
 		boolean allEmpty = true;
 		for (Container container : currentContainer.getContainers()) {
 			for (ReportElement e : container.getElements()) {
-				if (e.getRow().equals(Integer.valueOf(row))) {
+				if (rowOf(e) == row) {
 					allEmpty = false;
 					break;
 				}

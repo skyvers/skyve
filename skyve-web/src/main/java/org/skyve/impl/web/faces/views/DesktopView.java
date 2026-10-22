@@ -19,6 +19,7 @@ import org.skyve.impl.web.UserAgent;
 import org.skyve.impl.web.faces.FacesAction;
 import org.skyve.impl.web.faces.actions.ActionUtil;
 import org.skyve.impl.web.service.smartclient.SmartClientViewRenderer;
+import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
@@ -38,6 +39,7 @@ import org.skyve.web.WebAction;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import jakarta.enterprise.context.RequestScoped;
+import jakarta.faces.FacesException;
 import jakarta.faces.context.FacesContext;
 import jakarta.inject.Named;
 import jakarta.servlet.http.HttpServletRequest;
@@ -215,7 +217,14 @@ public class DesktopView extends HarnessView {
 							sb.append("DataSource('").append(bizModule).append('_').append(bizDocument).append("__").append(getQueryNameParameter()).append("');");
 						}
 						else {
-							QueryDefinition query = ActionUtil.getMetaDataQuery(bizModule, getQueryNameParameter());
+							String queryName = getQueryNameParameter();
+							if (bizModule == null) { // initialise() defaults the module
+								throw new IllegalStateException("Cannot show a list as the DesktopView has no module parameter");
+							}
+							if (queryName == null) {
+								throw new FacesException("Malformed URL - a list of module " + bizModule + " requires a query name");
+							}
+							QueryDefinition query = ActionUtil.getMetaDataQuery(bizModule, queryName);
 							sb.append("DataSource('").append(bizModule).append('_').append(query.getName()).append("');");
 						}
 					}
@@ -269,7 +278,8 @@ public class DesktopView extends HarnessView {
 	 * Creates locale-specific script include markup for SmartClient and Skyve messages.
 	 */
 	private void createLocaleScripts() {
-		createLocaleScripts(CORE.getUser().getLocale());
+		Locale locale = CORE.getUser().getLocale();
+		createLocaleScripts((locale == null) ? Locale.ENGLISH : locale); // as for SuperUser
 	}
 	
 	/**
@@ -723,6 +733,9 @@ public class DesktopView extends HarnessView {
 			
 			String moduleName = module.getName();
 			Menu menu = user.getModuleMenu(moduleName);
+			if (menu == null) { // menus are reset for every customer module
+				throw new IllegalStateException("User " + user.getName() + " has no menu for module " + moduleName);
+			}
 			listDataSourcesForMenuItems(user, customer, moduleName, module, menu.getItems(), uxui, dataSources, visitedQueryNames);
 		}
 		if (! dataSources.isEmpty()) { // we have appended some data sources
@@ -764,10 +777,13 @@ public class DesktopView extends HarnessView {
 				String documentName = listOrTree.getDocumentName();
 				
 				if (queryName != null) { // its a query
-					query = module.getMetaDataQuery(queryName);
+					query = module.getNullSafeMetaDataQuery(queryName);
 					SmartClientViewRenderer.appendDataSourceDefinition(user, customer, query, null, null, uxui, true, dataSources, visitedQueryNames);
 				}
 				else {
+					if (documentName == null) { // a list item has a query or a document
+						throw new MetaDataException("Menu item " + listOrTree.getName() + " in module " + moduleName + " has no query or document name");
+					}
 					if (modelName != null) { // its a model
 						Document document = module.getDocument(customer, documentName);
 						SmartClientViewRenderer.appendDataSourceDefinition(user, 

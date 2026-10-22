@@ -294,6 +294,9 @@ public class SmartClientSAILViewVisitor {
 	 */
 	private void visitDefaultWidget(@Nonnull DefaultWidget widget) {
 		String binding = widget.getBinding();
+		if (binding == null) { // validated as required when the view is loaded
+			throw new MetaDataException("DefaultWidget in view " + view.getName() + " of document " + module.getName() + '.' + document.getName() + " has no binding");
+		}
 
 		TargetMetaData target = BindUtil.getMetaDataForBinding(customer, module, document, binding);
 
@@ -335,6 +338,9 @@ public class SmartClientSAILViewVisitor {
 	 */
 	private final void visitZoomIn(@Nonnull ZoomIn zoomIn) {
 		String binding = zoomIn.getBinding();
+		if (binding == null) { // validated as required when the view is loaded
+			throw new MetaDataException("ZoomIn in view " + view.getName() + " of document " + module.getName() + '.' + document.getName() + " has no binding");
+		}
 		String identifier = String.format("%s.zoomIn", binding.replaceAll("\\.", "_"));
 
 		if (visitingForm) {
@@ -367,6 +373,9 @@ public class SmartClientSAILViewVisitor {
 	 */
 	private final void visitGeometry(@Nonnull Geometry geometry) {
 		String binding = geometry.getBinding();
+		if (binding == null) { // validated as required when the view is loaded
+			throw new MetaDataException("Geometry in view " + view.getName() + " of document " + module.getName() + '.' + document.getName() + " has no binding");
+		}
 
 		automationContext.put(binding,
 				new Locator(String.format(
@@ -478,6 +487,9 @@ public class SmartClientSAILViewVisitor {
 	 */
 	private final void visitDataGrid(@Nonnull DataGrid grid) {
 		String binding = grid.getBinding();
+		if (binding == null) { // validated as required when the view is loaded
+			throw new MetaDataException("DataGrid in view " + view.getName() + " of document " + module.getName() + '.' + document.getName() + " has no binding");
+		}
 
 		visitDataGridNew(binding);
 		visitDataGridZoom(binding);
@@ -570,6 +582,9 @@ public class SmartClientSAILViewVisitor {
 	 */
 	private final void visitCheckBox(@Nonnull CheckBox checkBox) {
 		String binding = checkBox.getBinding();
+		if (binding == null) { // validated as required when the view is loaded
+			throw new MetaDataException("CheckBox in view " + view.getName() + " of document " + module.getName() + '.' + document.getName() + " has no binding");
+		}
 
 		automationContext.put(binding,
 				new Locator(String.format("//DynamicForm[ID=\"%s_%s_edit_%d\"]/item[index=%d||Class=CheckboxItem]",
@@ -586,6 +601,9 @@ public class SmartClientSAILViewVisitor {
 	 */
 	private final void visitColourPicker(@Nonnull ColourPicker colour) {
 		String binding = colour.getBinding();
+		if (binding == null) { // validated as required when the view is loaded
+			throw new MetaDataException("ColourPicker in view " + view.getName() + " of document " + module.getName() + '.' + document.getName() + " has no binding");
+		}
 
 		automationContext.put(binding,
 				new Locator(String.format("//DynamicForm[ID=\"%s_%s_edit_%d\"]/item[index=%d||Class=ColorItem]",
@@ -602,6 +620,9 @@ public class SmartClientSAILViewVisitor {
 	 */
 	private final void visitCombo(@Nonnull Combo combo) {
 		String binding = combo.getBinding();
+		if (binding == null) { // validated as required when the view is loaded
+			throw new MetaDataException("Combo in view " + view.getName() + " of document " + module.getName() + '.' + document.getName() + " has no binding");
+		}
 
 		automationContext.put(binding,
 				new Locator(String.format("//DynamicForm[ID=\"%s_%s_edit_%d\"]/item[index=%d||Class=SelectItem]",
@@ -638,6 +659,9 @@ public class SmartClientSAILViewVisitor {
 	 */
 	private final void visitLookupDescription(@Nonnull LookupDescription lookup) {
 		String binding = lookup.getBinding();
+		if (binding == null) { // validated as required when the view is loaded
+			throw new MetaDataException("LookupDescription in view " + view.getName() + " of document " + module.getName() + '.' + document.getName() + " has no binding");
+		}
 
 		automationContext.put(binding,
 				new Locator(String.format(
@@ -655,6 +679,9 @@ public class SmartClientSAILViewVisitor {
 	 */
 	private final void visitPassword(@Nonnull Password password) {
 		String binding = password.getBinding();
+		if (binding == null) { // validated as required when the view is loaded
+			throw new MetaDataException("Password in view " + view.getName() + " of document " + module.getName() + '.' + document.getName() + " has no binding");
+		}
 
 		automationContext.put(binding,
 				new Locator(String.format("//DynamicForm[ID=\"%s_%s_edit_%d\"]/item[index=%d||Class=PasswordItem]/element",
@@ -671,6 +698,9 @@ public class SmartClientSAILViewVisitor {
 	 */
 	private final void visitRadio(@Nonnull Radio radio) {
 		String binding = radio.getBinding();
+		if (binding == null) { // validated as required when the view is loaded
+			throw new MetaDataException("Radio in view " + view.getName() + " of document " + module.getName() + '.' + document.getName() + " has no binding");
+		}
 
 		automationContext.put(binding,
 				new Locator(String.format(
@@ -688,6 +718,9 @@ public class SmartClientSAILViewVisitor {
 	 */
 	private final void visitRichText(@Nonnull RichText text) {
 		String binding = text.getBinding();
+		if (binding == null) { // validated as required when the view is loaded
+			throw new MetaDataException("RichText in view " + view.getName() + " of document " + module.getName() + '.' + document.getName() + " has no binding");
+		}
 
 		automationContext.put(binding,
 				new Locator(String.format(
@@ -715,6 +748,9 @@ public class SmartClientSAILViewVisitor {
 	 */
 	private final void visitSpinner(@Nonnull Spinner spinner) {
 		String binding = spinner.getBinding();
+		if (binding == null) { // validated as required when the view is loaded
+			throw new MetaDataException("Spinner in view " + view.getName() + " of document " + module.getName() + '.' + document.getName() + " has no binding");
+		}
 
 		automationContext.put(binding,
 				new Locator(String.format(
@@ -732,6 +768,9 @@ public class SmartClientSAILViewVisitor {
 	 */
 	private final void visitTextArea(@Nonnull TextArea text) {
 		String binding = text.getBinding();
+		if (binding == null) { // validated as required when the view is loaded
+			throw new MetaDataException("TextArea in view " + view.getName() + " of document " + module.getName() + '.' + document.getName() + " has no binding");
+		}
 
 		automationContext.put(binding,
 				new Locator(String.format(
@@ -749,6 +788,9 @@ public class SmartClientSAILViewVisitor {
 	 */
 	private final void visitTextField(@Nonnull TextField text) {
 		String binding = text.getBinding();
+		if (binding == null) { // validated as required when the view is loaded
+			throw new MetaDataException("TextField in view " + view.getName() + " of document " + module.getName() + '.' + document.getName() + " has no binding");
+		}
 
 		Attribute attribute = BindUtil.getMetaDataForBinding(customer, module, document, binding).getAttribute();
 		if (attribute != null) {

@@ -154,6 +154,22 @@ public class POIWorkbookTest {
 	}
 
 	@Test
+	public void materialiseSkipsDataValidationForColumnWithoutType() throws Exception {
+		POIWorkbook wb = new POIWorkbook(true);
+		POISheet sheet = new POISheet("Orders");
+		sheet.addColumn("name", new BizPortColumn("Name", null));
+		wb.addSheet(new SheetKey("sales", "Order"), sheet);
+		wb.materialise();
+		ByteArrayOutputStream out = new ByteArrayOutputStream();
+		wb.write(out);
+		try (Workbook reopened = WorkbookFactory.create(new ByteArrayInputStream(out.toByteArray()))) {
+			XSSFSheet reopenedSheet = (XSSFSheet) reopened.getSheetAt(0);
+			assertEquals("name", reopenedSheet.getRow(1).getCell(0).getStringCellValue());
+			assertTrue(reopenedSheet.getDataValidations().isEmpty());
+		}
+	}
+
+	@Test
 	public void materialiseCreatesWorkbookXls() throws Exception {
 		POIWorkbook wb = new POIWorkbook(false);
 		wb.addSheet(new SheetKey("sales", "Order"), new POISheet("Orders"));

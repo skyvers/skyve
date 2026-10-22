@@ -46,6 +46,20 @@ public class RenderedComponent {
 		return parent;
 	}
 
+	/**
+	 * Returns the parent of a component that is known to have been added to another component,
+	 * such as a layout or column added by the renderer that is now being closed off.
+	 *
+	 * @return the parent; never {@code null}
+	 * @throws IllegalStateException when this component has not been added to a parent
+	 */
+	public @Nonnull RenderedComponent getNullSafeParent() {
+		if (parent == null) {
+			throw new IllegalStateException("Rendered component has not been added to a parent component");
+		}
+		return parent;
+	}
+
 	public void addChild(@Nonnull RenderedComponent component) {
 		children.add(component);
 		component.parent = this;

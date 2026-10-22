@@ -10,6 +10,7 @@ import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.UserAgent;
 import org.skyve.impl.web.faces.FacesAction;
 import org.skyve.impl.web.faces.views.FacesView;
+import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.controller.ServerSideAction;
 import org.skyve.metadata.controller.ServerSideActionResult;
 import org.skyve.metadata.customer.Customer;
@@ -84,6 +85,9 @@ public class ExecuteActionAction extends FacesAction<Void> {
 
 		AbstractPersistence persistence = AbstractPersistence.get();
 		Bean targetBean = ActionUtil.getTargetBeanForViewAndReferenceBinding(facesView, collectionName, elementBizId);
+		if (targetBean == null) {
+			throw new IllegalStateException("Cannot execute action " + actionName + " as there is no target bean for grid " + collectionName + " with selected row " + elementBizId);
+		}
     	User user = persistence.getUser();
     	Customer customer = user.getCustomer();
     	Module targetModule = customer.getModule(targetBean.getBizModule());
@@ -93,12 +97,17 @@ public class ExecuteActionAction extends FacesAction<Void> {
 											customer, 
 											targetBean.isCreated() ? ViewType.edit.toString() : ViewType.create.toString());
     	Action action = view.getAction(actionName);
+    	if (action == null) {
+    		throw new MetaDataException("Action " + actionName + " is not defined in view " + view.getName() + " of document " +
+    										targetDocument.getOwningModuleName() + '.' + targetDocument.getName());
+    	}
     	Boolean clientValidation = action.getClientValidation();
 		if (UtilImpl.FACES_TRACE) FACES_LOGGER.info("ExecuteActionAction - client validation = {}", clientValidation);
     	String resourceName = action.getResourceName();
     	
-		if (! user.canExecuteAction(targetDocument, resourceName)) {
-			throw new SecurityException(resourceName, user.getName());
+		// An implicit action has no resource name and cannot be executed as a server-side action
+		if ((resourceName == null) || (! user.canExecuteAction(targetDocument, resourceName))) {
+			throw new SecurityException((resourceName == null) ? actionName : resourceName, user.getName());
 		}
 
 		ServerSideAction<Bean> serverSideAction = (ServerSideAction<Bean>) action.getServerSideAction(customer, targetDocument);
@@ -107,7 +116,13 @@ public class ExecuteActionAction extends FacesAction<Void> {
 
 	    	CustomerImpl internalCustomer = (CustomerImpl) customer;
 			WebContext webContext = facesView.getWebContext();
+			if (webContext == null) {
+				throw new IllegalStateException("Cannot execute action " + actionName + " as the FacesView has no web context");
+			}
 			Bean contextBean = facesView.getBean();
+			if (contextBean == null) {
+				throw new IllegalStateException("Cannot execute action " + actionName + " as the FacesView has no bean");
+			}
 			boolean notPersistedBefore = contextBean.isNotPersisted();
 			boolean vetoed = internalCustomer.interceptBeforeServerSideAction(targetDocument,
 																				resourceName,
@@ -119,6 +134,9 @@ public class ExecuteActionAction extends FacesAction<Void> {
 				Bean resultBean = result.getBean();
 				ActionUtil.setTargetBeanForViewAndCollectionBinding(facesView, collectionName, resultBean);
 				contextBean = facesView.getBean();
+				if (contextBean == null) {
+					throw new IllegalStateException("The FacesView has no bean after executing action " + actionName);
+				}
 				if (notPersistedBefore) {
 					boolean persisted = contextBean.isPersisted();
 					if (! persisted) {

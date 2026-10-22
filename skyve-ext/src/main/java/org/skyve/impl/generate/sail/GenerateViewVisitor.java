@@ -15,6 +15,7 @@ import org.skyve.impl.metadata.view.ViewImpl;
 import org.skyve.impl.metadata.view.container.Tab;
 import org.skyve.impl.metadata.view.widget.Button;
 import org.skyve.impl.metadata.view.widget.bound.tabular.DataGrid;
+import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.model.document.Relation;
@@ -82,8 +83,13 @@ public class GenerateViewVisitor extends NoOpViewVisitor {
 
 	@Override
 	public void visitTab(@Nonnull Tab tab, boolean parentVisible, boolean parentEnabled) {
+		// A tab is selected by its title, which is null when the view metadata gives it a blank title
+		String title = tab.getLocalisedTitle();
+		if (title == null) {
+			throw new MetaDataException("A tab in view " + view.getName() + " of document " + document.getName() + " has no title to select it by");
+		}
 		TabSelect select = new TabSelect();
-		select.setTabPath(tab.getLocalisedTitle());
+		select.setTabPath(title);
 		populateSteps.add(select);
 		actionSteps.add(select);
 	}
@@ -96,6 +102,9 @@ public class GenerateViewVisitor extends NoOpViewVisitor {
 		}
 
 		String binding = grid.getBinding();
+		if (binding == null) { // validated when the view is loaded
+			throw new MetaDataException("A data grid in view " + view.getName() + " of document " + document.getName() + " has no binding");
+		}
 
 		// Do nothing if we've visited this grid on this view before
 		String breadcrumb = String.format("%s.%s.%s.%s", module.getName(), document.getName(), view.getName(), binding);
@@ -149,7 +158,11 @@ public class GenerateViewVisitor extends NoOpViewVisitor {
 	
 	@Override
 	public void visitButton(@Nonnull Button button, boolean parentVisible, boolean parentEnabled) {
-		ActionImpl action = (ActionImpl) view.getAction(button.getActionName());
+		String actionName = button.getActionName();
+		ActionImpl action = (ActionImpl) view.getAction(actionName);
+		if (action == null) { // validated when the view is loaded
+			throw new MetaDataException("Button action " + actionName + " does not exist in view " + view.getName() + " of document " + document.getName());
+		}
 		addCustomAction(action);
 	}
 	

@@ -4,11 +4,20 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
+import java.lang.reflect.Field;
 import java.util.Collection;
+import java.util.Set;
+import java.util.TreeSet;
 
 import org.junit.jupiter.api.Test;
+import org.skyve.impl.metadata.customer.CustomerImpl;
+import org.skyve.impl.metadata.view.component.Component;
 import org.skyve.impl.metadata.view.container.Sidebar;
+import org.skyve.metadata.model.document.Document;
+import org.skyve.metadata.user.UserAccess;
 
 /**
  * Tests for {@link ViewImpl}, covering the default method on the {@link org.skyve.metadata.view.View} interface.
@@ -190,5 +199,27 @@ class ViewImplTest {
 	void getAccessesReturnsNullWhenAccessesHaveNotBeenConverted() {
 		ViewImpl v = new ViewImpl();
 		assertNull(v.getAccesses(null, null, "desktop"));
+	}
+
+	@Test
+	void getAccessesSkipsAComponentFragmentWithoutAccesses() throws Exception {
+		ViewImpl v = new ViewImpl();
+		Set<UserAccess> accesses = new TreeSet<>();
+		accesses.add(UserAccess.singular("admin", "User"));
+		Field accessesField = ViewImpl.class.getDeclaredField("accesses");
+		accessesField.setAccessible(true);
+		accessesField.set(v, accesses);
+		CustomerImpl customer = mock(CustomerImpl.class);
+		Component component = mock(Component.class);
+		when(component.getFragment(customer, "desktop")).thenReturn(new ViewImpl()); // accesses neither declared nor generated
+		Field componentsField = ViewImpl.class.getDeclaredField("components");
+		componentsField.setAccessible(true);
+		@SuppressWarnings("unchecked")
+		Set<Component> components = (Set<Component>) componentsField.get(v);
+		components.add(component);
+
+		Set<UserAccess> result = v.getAccesses(customer, mock(Document.class), "desktop");
+
+		assertEquals(Set.of(UserAccess.singular("admin", "User")), result);
 	}
 }

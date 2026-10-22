@@ -260,7 +260,7 @@ public abstract class LayoutBuilder extends AbstractFacesBuilder {
 	 * @param component the current layout component
 	 * @param viewContainer the source view container metadata
 	 * @param container the target JSF container component
-	 * @param componentToAdd the component to add
+	 * @param componentToAdd the component to add, or null when the component builders produced none (e.g. a no-op layout chain)
 	 * @param pixelWidth optional fixed pixel width
 	 * @param responsiveWidth optional responsive width setting
 	 * @param percentageWidth optional percentage width
@@ -275,7 +275,7 @@ public abstract class LayoutBuilder extends AbstractFacesBuilder {
 	public abstract @Nullable UIComponent addToContainer(@Nullable UIComponent component,
 															@Nonnull Container viewContainer,
 															@Nonnull UIComponent container, 
-															@Nonnull UIComponent componentToAdd, 
+															@Nullable UIComponent componentToAdd, 
 															@Nullable Integer pixelWidth, 
 															@Nullable Integer responsiveWidth,
 															@Nullable Integer percentageWidth,

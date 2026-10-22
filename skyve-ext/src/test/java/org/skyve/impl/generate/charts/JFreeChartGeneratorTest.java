@@ -186,6 +186,47 @@ class JFreeChartGeneratorTest {
 		assertNotNull(gen.radar());
 	}
 
+	// ---- chart data without values, labels or colours ----
+
+	@Test
+	void chartsWithoutValuesOrLabelsHaveNoData() {
+		ChartData data = new ChartData();
+		data.setTitle("Empty Chart");
+		data.setJFreeChartPostProcessorClassName(NoOpPostProcessor.class.getName());
+		JFreeChartGenerator gen = new JFreeChartGenerator(data, 800, 600);
+
+		assertNotNull(gen.bar());
+		assertNotNull(gen.pie());
+		assertNotNull(gen.polarArea());
+		assertNotNull(gen.radar());
+	}
+
+	@Test
+	void chartsWithValuesButNoLabelsThrow() {
+		ChartData data = categoryData();
+		data.setLabels(null);
+		JFreeChartGenerator gen = new JFreeChartGenerator(data, 800, 600);
+
+		assertThrows(IllegalArgumentException.class, gen::bar);
+		assertThrows(IllegalArgumentException.class, gen::polarArea);
+	}
+
+	@Test
+	void pieAndPolarAreaWithoutColoursUseDefaultColours() {
+		ChartData pie = pieData();
+		pie.setBackgrounds(null);
+		pie.setBorders(null);
+		ChartData pieWithoutBorders = pieData();
+		pieWithoutBorders.setBorders(null);
+		ChartData polar = polarData();
+		polar.setBackgrounds(null);
+		polar.setBorders(null);
+
+		assertNotNull(new JFreeChartGenerator(pie, 800, 600).pie());
+		assertNotNull(new JFreeChartGenerator(pieWithoutBorders, 800, 600).doughnut());
+		assertNotNull(new JFreeChartGenerator(polar, 800, 600).polarArea());
+	}
+
 	// ---- image methods ----
 
 	@Test

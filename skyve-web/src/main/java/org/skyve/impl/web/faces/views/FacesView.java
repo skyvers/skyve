@@ -447,6 +447,9 @@ public class FacesView extends HarnessView {
 	public void save() {
 		LOGGER.info("FacesView - save");
 		Bean contextBean = getBean();
+		if (contextBean == null) {
+			throw new IllegalStateException("Cannot save as the FacesView has no bean");
+		}
 		boolean notPersistedBefore = contextBean.isNotPersisted();
 
 		new SaveAction(this, false).execute();
@@ -456,6 +459,9 @@ public class FacesView extends HarnessView {
 		if (c.getMessageList().isEmpty() && (! FacesAction.isQuestionAsked(c))) {
 			c.addMessage(null, new FacesMessage("Saved", "Any changes have been saved"));
 			contextBean = getBean();
+			if (contextBean == null) {
+				throw new IllegalStateException("The FacesView has no bean after saving");
+			}
 			if (notPersistedBefore && (contextBean.isPersisted())) {
 				StringBuilder script = new StringBuilder(256);
 				script.append("SKYVE.PF.saveHistory('").append(contextBean.getBizModule()).append("','");
@@ -495,7 +501,11 @@ public class FacesView extends HarnessView {
 	 * Navigates into the bean selected from a data-grid selection event.
 	 */
 	public void navigate(@Nonnull SelectEvent<?> evt) {
-		String bizId = ((BeanMapAdapter) evt.getObject()).getBean().getBizId();
+		Bean row = ((BeanMapAdapter) evt.getObject()).getBean();
+		if (row == null) { // should never happen
+			throw new FacesException("Cannot zoom in on data grid row selection as there is no row bean");
+		}
+		String bizId = row.getBizId();
 		String dataWidgetBinding = ((DataTable) evt.getComponent()).getVar();
 		// change list var back to Data Widget binding - '_' to '.' and remove "Row" from the end.
 		dataWidgetBinding = BindUtil.unsanitiseBinding(dataWidgetBinding);
@@ -613,7 +623,12 @@ public class FacesView extends HarnessView {
 						log.append("FacesView - selectGridRow set ").append(selectedIdBinding);
 						log.append(" to ").append(bizId);
 						LOGGER.info(log.toString());
-						BindUtil.set(getCurrentBean().getBean(), selectedIdBinding, bizId);
+						BeanMapAdapter current = getCurrentBean();
+						Bean viewBean = (current == null) ? null : current.getBean();
+						if (viewBean == null) {
+							throw new IllegalStateException("Cannot select a grid row as the FacesView has no current bean");
+						}
+						BindUtil.set(viewBean, selectedIdBinding, bizId);
 					}
 				}
 				return null;
@@ -647,7 +662,11 @@ public class FacesView extends HarnessView {
 			new FacesAction<Void>() {
 				@Override
 				public @Nullable Void callback() throws Exception {
-					Bean bean = getCurrentBean().getBean();
+					BeanMapAdapter current = getCurrentBean();
+					Bean bean = (current == null) ? null : current.getBean();
+					if (bean == null) {
+						throw new IllegalStateException("Cannot select a grid row as the FacesView has no current bean");
+					}
 					BindUtil.set(bean, selectedIdBinding, bizId);
 					return null;
 				}
@@ -694,8 +713,13 @@ public class FacesView extends HarnessView {
 			final int toIndex = event.getToIndex();
 			LOGGER.info("FacesView - reorderGridRow {} from {} to {}", collectionBinding, Integer.valueOf(fromIndex), Integer.valueOf(toIndex));
 			if (collectionBinding != null) {
+				BeanMapAdapter current = getCurrentBean();
+				Bean bean = (current == null) ? null : current.getBean();
+				if (bean == null) {
+					throw new IllegalStateException("Cannot reorder " + collectionBinding + " as the FacesView has no current bean");
+				}
 				@SuppressWarnings("unchecked")
-				final List<Bean> list = (List<Bean>) BindUtil.get(getCurrentBean().getBean(), collectionBinding);
+				final List<Bean> list = (List<Bean>) BindUtil.get(bean, collectionBinding);
 				if (list == null) { // should never occur
 					throw new FacesException(collectionBinding + " points to null value");
 				}
@@ -984,7 +1008,12 @@ public class FacesView extends HarnessView {
 	 * @return resolved content URL
 	 */
 	public @Nullable String getContentUrl(final @Nonnull String binding, final boolean image) {
-		return new GetContentURLAction(getCurrentBean().getBean(), binding, image).execute();
+		BeanMapAdapter current = getCurrentBean();
+		Bean bean = (current == null) ? null : current.getBean();
+		if (bean == null) {
+			throw new IllegalStateException("Cannot get the content URL for " + binding + " as the FacesView has no current bean");
+		}
+		return new GetContentURLAction(bean, binding, image).execute();
  	}
 
 	/**
@@ -1007,7 +1036,12 @@ public class FacesView extends HarnessView {
 	 * @return resolved file name
 	 */
  	public @Nullable String getContentFileName(final @Nonnull String binding) {
- 		return new GetContentFileNameAction(getCurrentBean().getBean(), binding).execute();
+		BeanMapAdapter current = getCurrentBean();
+		Bean bean = (current == null) ? null : current.getBean();
+		if (bean == null) {
+			throw new IllegalStateException("Cannot get the content file name for " + binding + " as the FacesView has no current bean");
+		}
+ 		return new GetContentFileNameAction(bean, binding).execute();
  	}
 
 	/**
@@ -1082,7 +1116,11 @@ public class FacesView extends HarnessView {
 
 	private static @Nonnull Bean resolveContentBean(final @Nonnull Object bean) {
 		if (bean instanceof BeanMapAdapter adapter) {
-			return adapter.getBean();
+			Bean result = adapter.getBean();
+			if (result == null) {
+				throw new IllegalStateException("Cannot resolve content for a bean map adapter with no bean");
+			}
+			return result;
 		}
 		return (Bean) Objects.requireNonNull(bean, "bean");
 	}
@@ -1149,7 +1187,11 @@ public class FacesView extends HarnessView {
 		}
 		result.append('&').append(DynamicImageServlet.IMAGE_WIDTH_ZOOM_NAME).append("=100");
 		result.append('&').append(DynamicImageServlet.IMAGE_HEIGHT_ZOOM_NAME).append("=100");
-		result.append('&').append(AbstractWebContext.CONTEXT_NAME).append('=').append(getWebContext().getWebId());
+		AbstractWebContext currentWebContext = getWebContext();
+		if (currentWebContext == null) {
+			throw new IllegalStateException("Cannot make an image URL as the FacesView has no web context");
+		}
+		result.append('&').append(AbstractWebContext.CONTEXT_NAME).append('=').append(currentWebContext.getWebId());
 		if (viewBinding != null) {
 			result.append('&').append(AbstractWebContext.BINDING_NAME).append('=').append(viewBinding);
 		}
@@ -1317,8 +1359,13 @@ public class FacesView extends HarnessView {
 		if (mapModelName != null) {
 			result.append("',refreshTime:").append((refreshTimeInSeconds == null) ? 0 : refreshTimeInSeconds.intValue());
 			result.append(",showRefresh:").append(Boolean.TRUE.equals(showRefresh));
-			result.append(",_c:'").append(getWebContext().getWebId());
-			Bean bean = getCurrentBean().getBean();
+			AbstractWebContext currentWebContext = getWebContext();
+			BeanMapAdapter current = getCurrentBean();
+			Bean bean = (current == null) ? null : current.getBean();
+			if ((currentWebContext == null) || (bean == null)) {
+				throw new IllegalStateException("Cannot make a map script for model " + mapModelName + " as the FacesView has no web context or current bean");
+			}
+			result.append(",_c:'").append(currentWebContext.getWebId());
 			result.append("',moduleName:'").append(bean.getBizModule());
 			result.append("',documentName:'").append(bean.getBizDocument());
 			result.append("',modelName:'").append(mapModelName);
@@ -1415,7 +1462,11 @@ public class FacesView extends HarnessView {
 				if (json == null) {
 					throw new ValidationException("Signature was not found");
 				}
-				Bean bean = getCurrentBean().getBean();
+				BeanMapAdapter current = getCurrentBean();
+				Bean bean = (current == null) ? null : current.getBean();
+				if (bean == null) {
+					throw new IllegalStateException("Cannot sign " + binding + " as the FacesView has no current bean");
+				}
 				String unsanitisedContentBinding = Objects.requireNonNull(BindUtil.unsanitiseBinding(binding), "unsanitisedContentBinding");
 
 				// Check content access
@@ -1457,7 +1508,12 @@ public class FacesView extends HarnessView {
 	 */
 	public void clear(@Nonnull String binding) {
 		LOGGER.info("FacesView - clear signnature for binding {}", binding);
-		BindUtil.set(getCurrentBean().getBean(), binding, null);
+		BeanMapAdapter current = getCurrentBean();
+		Bean bean = (current == null) ? null : current.getBean();
+		if (bean == null) {
+			throw new IllegalStateException("Cannot clear " + binding + " as the FacesView has no current bean");
+		}
+		BindUtil.set(bean, binding, null);
 	}
 
 	// Used to hydrate the state after dehydration in SkyveFacesPhaseListener.afterRestoreView()

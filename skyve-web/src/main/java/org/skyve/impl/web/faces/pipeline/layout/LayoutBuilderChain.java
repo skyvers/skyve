@@ -506,7 +506,7 @@ public class LayoutBuilderChain extends LayoutBuilder {
 	public @Nullable UIComponent addToContainer(@Nullable UIComponent component,
 													@Nonnull Container viewContainer,
 													@Nonnull UIComponent container,
-													@Nonnull UIComponent componentToAdd,
+													@Nullable UIComponent componentToAdd,
 													@Nullable Integer pixelWidth,
 													@Nullable Integer responsiveWidth,
 													@Nullable Integer percentageWidth,

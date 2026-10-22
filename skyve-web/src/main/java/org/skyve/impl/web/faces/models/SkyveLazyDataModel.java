@@ -193,6 +193,9 @@ public class SkyveLazyDataModel extends LazyDataModel<BeanMapAdapter> {
 			model.setBean(currentBean.getBean());
 		}
 		d = model.getDrivingDocument();
+		if (d == null) {
+			throw new IllegalStateException("List model " + model.getClass().getName() + " has no driving document");
+		}
 		
 		if (! u.canReadDocument(d)) {
 			LOGGER.info("User {} cannot read document {}.{}", u.getName(), d.getOwningModuleName(), d.getName());
@@ -227,6 +230,9 @@ public class SkyveLazyDataModel extends LazyDataModel<BeanMapAdapter> {
 		setRowCount((int) page.getTotalRows());
 		
 		List<Bean> beans = page.getRows();
+		if (beans == null) {
+			throw new IllegalStateException("List model " + model.getClass().getName() + " fetched a page with no rows list");
+		}
 		OWASP.sanitiseAndEscapeListModelRows(beans, model.getColumns(), escape);
 		List<BeanMapAdapter> result = new ArrayList<>(beans.size());
 		for (Bean bean : beans) {
@@ -245,6 +251,9 @@ public class SkyveLazyDataModel extends LazyDataModel<BeanMapAdapter> {
 	@Override
 	public @Nonnull String getRowKey(@SuppressWarnings("null") @Nonnull BeanMapAdapter bean) {
 		Bean row = bean.getBean();
+		if (row == null) { // load() adapts each fetched row bean
+			throw new IllegalStateException("Cannot make a row key for a row with no bean");
+		}
 		return new StringBuilder(128).append(row.getBizId()).append('#').append(row.getBizDocument()).append('.').append(row.getBizModule()).toString();
 	}
 	
@@ -319,6 +328,9 @@ public class SkyveLazyDataModel extends LazyDataModel<BeanMapAdapter> {
 				TargetMetaData target = expression ? null : BindUtil.getMetaDataForBinding(customer, drivingModule, drivingDocument, binding);
 				Attribute attribute = (target == null) ? null : target.getAttribute();
 				Filter fieldFilter = model.newFilter();
+				if (fieldFilter == null) {
+					throw new IllegalStateException("List model " + model.getClass().getName() + " does not support filtering");
+				}
 				if ((target != null) && (attribute != null) && (attribute.getDomainType() == DomainType.variant)) {
 					fieldFilter.addIn(binding, ListModel.getTop100VariantDomainValueCodesFromDescriptionFilter(target.getDocument(), attribute, lookupSearch));
 				}
@@ -333,7 +345,11 @@ public class SkyveLazyDataModel extends LazyDataModel<BeanMapAdapter> {
 				}
 			}
 			if (searchFilter != null) {
-				model.getFilter().addAnd(searchFilter);
+				Filter modelFilter = model.getFilter();
+				if (modelFilter == null) {
+					throw new IllegalStateException("List model " + model.getClass().getName() + " does not support filtering");
+				}
+				modelFilter.addAnd(searchFilter);
 			}
 		}
 	}
@@ -350,6 +366,9 @@ public class SkyveLazyDataModel extends LazyDataModel<BeanMapAdapter> {
 	private static void filter(@Nonnull Map<String, FilterMeta> filters, @Nonnull ListModel<Bean> model, @Nonnull Customer customer)
 	throws Exception {
 		Document drivingDocument = model.getDrivingDocument();
+		if (drivingDocument == null) {
+			throw new IllegalStateException("List model " + model.getClass().getName() + " has no driving document");
+		}
 		Module drivingModule = customer.getModule(drivingDocument.getOwningModuleName());
 		Filter modelFilter = model.getFilter();
 		for (Map.Entry<String, FilterMeta> filterEntry : filters.entrySet()) {
@@ -413,6 +432,9 @@ public class SkyveLazyDataModel extends LazyDataModel<BeanMapAdapter> {
 			}
 
 			if (UtilImpl.COMMAND_TRACE) COMMAND_LOGGER.info("    FILTER {} {} {}", key, contains ? "contains" : "=", value);
+			if (modelFilter == null) {
+				throw new IllegalStateException("List model " + model.getClass().getName() + " does not support filtering");
+			}
 			if (contains && (value instanceof String string)) {
 				modelFilter.addContains(key, string);
 			}

@@ -79,6 +79,9 @@ public class ChartAction extends FacesAction<ChartModel> {
 
 		AbstractPersistence persistence = AbstractPersistence.get();
 		Bean targetBean = ActionUtil.getTargetBeanForView(facesView);
+		if (targetBean == null) {
+			throw new IllegalStateException("Cannot chart " + model + " as the FacesView has no target bean");
+		}
     	User user = persistence.getUser();
     	Customer customer = user.getCustomer();
     	Module targetModule = customer.getModule(targetBean.getBizModule());

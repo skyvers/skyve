@@ -108,7 +108,11 @@ public class Util {
 	 * @return the resolved proxy or possibleProxy
 	 */
 	public static @Nonnull <T> T deproxy(@Nonnull T possibleProxy) throws ClassCastException {
-		return UtilImpl.deproxy(possibleProxy);
+		T result = UtilImpl.deproxy(possibleProxy);
+		if (result == null) {
+			throw new IllegalStateException("Proxy of " + possibleProxy.getClass().getName() + " has no implementation");
+		}
+		return result;
 	}
 
 	/**

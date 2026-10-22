@@ -19,6 +19,7 @@ import java.util.NoSuchElementException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import jakarta.faces.FacesException;
 import jakarta.faces.component.UIComponent;
 import jakarta.faces.component.UISelectItem;
 import jakarta.faces.component.UISelectItems;
@@ -241,6 +242,23 @@ class SelectItemsIteratorTest {
 		SelectItemsIterator it = new SelectItemsIterator(facesContext, mockParent(uiItems));
 		SelectItem item = it.next();
 		assertEquals("", item.getValue());
+	}
+
+	@Test
+	void nullGenericObjectWithoutItemLabelThrows() {
+		UISelectItems uiItems = mockSelectItemsWithValue(Arrays.asList("a", null));
+		SelectItemsIterator it = new SelectItemsIterator(facesContext, mockParent(uiItems));
+		assertEquals("a", it.next().getLabel());
+		assertThrows(FacesException.class, it::next);
+	}
+
+	@Test
+	void nullGenericObjectIsLabelledByItemLabel() {
+		Map<String, Object> attrs = new HashMap<>();
+		attrs.put("itemLabel", "None");
+		UISelectItems uiItems = mockSelectItemsWithValueAndAttrs(Arrays.asList((Object) null), attrs);
+		SelectItemsIterator it = new SelectItemsIterator(facesContext, mockParent(uiItems));
+		assertEquals("None", it.next().getLabel());
 	}
 
 	@Test

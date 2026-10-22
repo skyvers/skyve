@@ -336,10 +336,9 @@ public class RDBMSDynamicPersistenceListModel<T extends Bean> extends InMemoryLi
 							value = BindUtil.fromSerialised(fieldType, value.toString());
 						}
 						catch (Exception e) {
-							Document d = getDrivingDocument();
                             LOGGER.warn(
                                     "RDBMSDynamicPersistenceListModel: Schema evolution problem on projection of binding {} within document {}.{} :- [{}] cannot be coerced to type {}",
-                                    projection, d.getOwningModuleName(), d.getName(), value, fieldType, e);
+                                    projection, document.getOwningModuleName(), document.getName(), value, fieldType, e);
 						}
 					}
 					values.put(projection, value);
@@ -400,8 +399,12 @@ public class RDBMSDynamicPersistenceListModel<T extends Bean> extends InMemoryLi
 					
 					// Add implicit field projections
 					if (BindUtil.isImplicit(projection)) {
+						Class<?> implicitType = BindUtil.implicitAttributeType(projection);
+						if (implicitType == null) {
+							throw new IllegalStateException("Implicit attribute " + projection + " has no implicit attribute type");
+						}
 						projectedColumns.append(T0_COLUMN_PREFIX).append(projection).append(FIELD_ALIAS_PREFIX).append(fieldAliasNumber++);
-						projectionBindingToFieldInfo.put(projection, new FieldInfo(fieldIndex++, BindUtil.implicitAttributeType(projection)));
+						projectionBindingToFieldInfo.put(projection, new FieldInfo(fieldIndex++, implicitType));
 					}
 					else {
 						// Process simple references
@@ -552,8 +555,12 @@ public class RDBMSDynamicPersistenceListModel<T extends Bean> extends InMemoryLi
 	private void processProjectionThroughReferences(@Nonnull TableInfo info, @Nonnull String projection, @Nonnull String simpleBinding, boolean dynamicAttribute, boolean relationAttribute, @Nullable Attribute a) {
 		// Implicit static/dynamic attribute
 		if (BindUtil.isImplicit(simpleBinding)) {
+			Class<?> implicitType = BindUtil.implicitAttributeType(simpleBinding);
+			if (implicitType == null) {
+				throw new IllegalStateException("Implicit attribute " + simpleBinding + " has no implicit attribute type");
+			}
 			projectedColumns.append(", t").append(info.relatedDocument.isDynamic() ? info.dynamicEntityTableAliasNumber : info.staticTableAliasNumber).append('.').append(simpleBinding).append(FIELD_ALIAS_PREFIX).append(fieldAliasNumber++);
-			projectionBindingToFieldInfo.put(projection, new FieldInfo(fieldIndex++, BindUtil.implicitAttributeType(simpleBinding)));
+			projectionBindingToFieldInfo.put(projection, new FieldInfo(fieldIndex++, implicitType));
 		}
 		else {
 			// Select from the "fields" field on the dynamic table if a dynamic attribute or a dynamic document

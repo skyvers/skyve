@@ -7,6 +7,7 @@ import org.skyve.domain.messages.OptimisticLockException;
 import org.skyve.domain.messages.OptimisticLockException.OperationType;
 import org.skyve.domain.messages.SecurityException;
 import org.skyve.domain.messages.ValidationException;
+import org.skyve.domain.types.OptimisticLock;
 import org.skyve.impl.dialog.DialogsProtocol;
 import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
@@ -65,6 +66,9 @@ public class DeleteAction extends FacesAction<Void> {
 
 		AbstractPersistence persistence = AbstractPersistence.get();
 		Bean targetBean = ActionUtil.getTargetBeanForView(facesView);
+		if (targetBean == null) {
+			throw new IllegalStateException("Cannot delete as the FacesView has no target bean");
+		}
 		User user = persistence.getUser();
 		Customer customer = user.getCustomer();
 		Module module = customer.getModule(targetBean.getBizModule());
@@ -78,6 +82,9 @@ public class DeleteAction extends FacesAction<Void> {
 
 		// Run preExecute after the copy is taken, in case we rollback
 		WebContext webContext = facesView.getWebContext();
+		if (webContext == null) {
+			throw new IllegalStateException("Cannot delete as the FacesView has no web context");
+		}
 		CustomerImpl internalCustomer = (CustomerImpl) customer;
 		boolean vetoed = internalCustomer.interceptBeforePreExecute(ImplicitActionName.Delete, targetBean, null, webContext);
 		if (! vetoed) {
@@ -114,10 +121,10 @@ public class DeleteAction extends FacesAction<Void> {
 	 * @throws ValidationException when the bean was deleted by someone else
 	 * @throws OptimisticLockException when the bean was changed by someone else
 	 */
-	private static PersistentBean retrieveForDelete(AbstractPersistence persistence,
-														User user,
-														Document document,
-														PersistentBean beanToDelete) {
+	private static @Nonnull PersistentBean retrieveForDelete(@Nonnull AbstractPersistence persistence,
+																@Nonnull User user,
+																@Nonnull Document document,
+																@Nonnull PersistentBean beanToDelete) {
 		if (! user.canDeleteDocument(document)) {
 			throw new SecurityException("delete this data", user.getName());
 		}
@@ -139,10 +146,14 @@ public class DeleteAction extends FacesAction<Void> {
 			throw new SecurityException("read this data", user.getName());
 		}
 		
-		if (! result.getBizLock().equals(beanToDelete.getBizLock())) {
+		OptimisticLock lock = result.getBizLock();
+		if (lock == null) { // a persisted bean always has a lock
+			throw new IllegalStateException("Persisted bean " + result.getBizModule() + '.' + result.getBizDocument() + '#' + result.getBizId() + " has no optimistic lock");
+		}
+		if (! lock.equals(beanToDelete.getBizLock())) {
 			throw new OptimisticLockException(user, 
 												OperationType.delete, 
-												result.getBizLock());
+												lock);
 		}
 		
 		return result;

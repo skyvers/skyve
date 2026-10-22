@@ -3,6 +3,7 @@ package org.skyve.impl.generate.sail;
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -28,6 +29,7 @@ import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
 import org.skyve.impl.metadata.user.UserImpl;
 import org.skyve.impl.metadata.view.ActionImpl;
 import org.skyve.impl.metadata.view.ViewImpl;
+import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.controller.ImplicitActionName;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Persistent;
@@ -119,6 +121,7 @@ class GeneratorTest {
 		Document abstractDocument = mock(Document.class);
 		Document childDocument = mock(Document.class);
 		Document inaccessibleDocument = mock(Document.class);
+		when(user.getName()).thenReturn("admin");
 		when(user.getCustomer()).thenReturn(customer);
 		when(user.canAccessDocument(abstractDocument)).thenReturn(true);
 		when(user.canAccessDocument(childDocument)).thenReturn(true);
@@ -550,6 +553,32 @@ class GeneratorTest {
 		assertThat(navigate.getDocumentName(), is("Invoice"));
 		assertThat(navigate.getModelName(), is("overdue"));
 		verify(user).canCreateDocument(drivingDocument);
+	}
+
+	@Test
+	void visitMenuListItemWithModelWithoutDrivingDocumentThrows() throws Exception {
+		UserImpl user = mock(UserImpl.class);
+		Customer customer = mock(Customer.class);
+		Module module = mock(Module.class);
+		Document listDocument = mock(Document.class);
+		ListModel<Bean> model = mock(ListModel.class);
+		MenuImpl menu = new MenuImpl();
+		ListItem item = new ListItem();
+		item.setName("Invoice model");
+		item.setDocumentName("Invoice");
+		item.setModelName("overdue");
+		menu.getItems().add(item);
+		ProvidedRepository repository = mock(ProvidedRepository.class);
+		when(user.getCustomer()).thenReturn(customer);
+		when(user.getModuleMenu("sales")).thenReturn(menu);
+		when(customer.getModule("sales")).thenReturn(module);
+		when(module.getName()).thenReturn("sales");
+		when(module.getDocument(customer, "Invoice")).thenReturn(listDocument);
+		when(listDocument.getListModel(customer, "overdue", false)).thenReturn(model);
+		when(model.getDrivingDocument()).thenReturn(null);
+		ProvidedRepositoryFactory.set(repository);
+
+		assertThrows(MetaDataException.class, () -> Generator.visitMenu(user, "sales", "desktop", UserAgentType.desktop, TestStrategy.Assert));
 	}
 
 	@Test

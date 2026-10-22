@@ -6500,6 +6500,24 @@ class TabularComponentBuilderTest {
 	}
 
 	@Test
+	void testTextWithDateConverterAndNoFacesConverterThrowsIllegalState() {
+		// A date converter with no equivalent faces converter cannot determine a date picker pattern.
+		org.skyve.domain.types.converters.Converter<?> skyveDateConverter =
+				mock(org.skyve.domain.types.converters.Converter.class);
+		when(skyveDateConverter.getAttributeType()).thenReturn(org.skyve.metadata.model.Attribute.AttributeType.date);
+
+		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
+		builder.setManagedBeanForTest(mock(FacesView.class));
+
+		TextField textField = new TextField();
+		textField.setBinding("dateField3");
+
+		assertThrows(IllegalStateException.class, () ->
+				builder.text(null, "row", textField, null, "Date", null, null, null,
+						skyveDateConverter, null, null));
+	}
+
+	@Test
 	void testDetermineActionFacesAttributesEmptyList() {
 		ComponentBuilder.ActionFacesAttributes result =
 				ComponentBuilder.determineActionFacesAttributes(new ArrayList<>());

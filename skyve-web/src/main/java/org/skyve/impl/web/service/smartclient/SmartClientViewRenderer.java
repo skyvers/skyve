@@ -56,6 +56,7 @@ import org.skyve.impl.metadata.view.event.SetDisabledEventAction;
 import org.skyve.impl.metadata.view.event.SetInvisibleEventAction;
 import org.skyve.impl.metadata.view.event.ToggleDisabledEventAction;
 import org.skyve.impl.metadata.view.event.ToggleVisibilityEventAction;
+import org.skyve.impl.metadata.view.model.chart.ChartBuilderMetaData;
 import org.skyve.impl.metadata.view.widget.Blurb;
 import org.skyve.impl.metadata.view.widget.Button;
 import org.skyve.impl.metadata.view.widget.Chart;
@@ -1000,7 +1001,11 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		code.append("chartType:'").append(chart.getType()).append("'});");
 		String dataSource = chart.getModelName();
 		if (dataSource == null) {
-			dataSource = String.valueOf(chart.getModel().getModelName());
+			ChartBuilderMetaData model = chart.getModel();
+			if (model == null) { // validated when the view is loaded
+				throw new MetaDataException("Chart requires a modelName or a model");
+			}
+			dataSource = String.valueOf(model.getModelName());
 		}
 		code.append(variable).append(".setDataSource('").append(dataSource).append("');\n");
 		code.append(containerVariables.peek()).append(".addContained(").append(variable).append(");\n");
@@ -1971,12 +1976,13 @@ public class SmartClientViewRenderer extends ViewRenderer {
 				StringBuilder ds = new StringBuilder(64);
 				String optionDataSource = lookup.getOptionDataSource();
 				LookupDescription lookupWidget = (LookupDescription) dataWidgetColumnInputWidget;
-				if (lookupWidget.getModelName() != null) {
+				String lookupModelName = lookupWidget.getModelName();
+				if (lookupModelName != null) {
 					appendDataSourceDefinition(user,
 												customer,
 												module,
 												document,
-												lookupWidget.getModelName(),
+												lookupModelName,
 												optionDataSource,
 												lookupWidget,
 												currentUxUi,
@@ -1985,9 +1991,14 @@ public class SmartClientViewRenderer extends ViewRenderer {
 												new TreeSet<>());
 				}
 				else {
+					// A lookup definition without a model always has a query
+					MetaDataQueryDefinition lookupQuery = lookup.getQuery();
+					if (lookupQuery == null) {
+						throw new MetaDataException("Lookup description has no query to use.");
+					}
 					SmartClientViewRenderer.appendDataSourceDefinition(user,
 																		customer,
-																		lookup.getQuery(),
+																		lookupQuery,
 																		optionDataSource,
 																		(LookupDescription) dataWidgetColumnInputWidget,
 																		currentUxUi,
@@ -2374,10 +2385,10 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	/**
 	 * Returns the server-generated media-kind companion field name for an auto content binding.
 	 *
-	 * @param binding The unsanitised content binding from view metadata.
+	 * @param binding The unsanitised content binding from view metadata, or {@code null}.
 	 * @return The sanitised companion field name.
 	 */
-	private static @Nonnull String contentCompanionName(@Nonnull String binding) {
+	private static @Nonnull String contentCompanionName(@Nullable String binding) {
 		return '_' + BindUtil.sanitiseBinding(binding);
 	}
 
@@ -2517,20 +2528,26 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		invisible(lookup.getInvisibleCondition(), code);
 		editable(lookup.getEditable(), code);
 		disableLookupComponents(lookup, code);
-		code.append("canCreate:").append(def.getLookup().getCanCreate());
-		code.append(",canUpdate:").append(def.getLookup().getCanUpdate());
+		// A lookup description is bound to a relation, so its field definition has a lookup
+		SmartClientLookupDefinition lookupDefinition = def.getLookup();
+		if (lookupDefinition == null) {
+			throw new IllegalStateException("Lookup description " + lookup.getBinding() + " has no lookup definition");
+		}
+		code.append("canCreate:").append(lookupDefinition.getCanCreate());
+		code.append(",canUpdate:").append(lookupDefinition.getCanUpdate());
 
 		code.append(",_view:view,");
 		appendFilterParameters(lookup.getFilterParameters(), lookup.getParameters(), code);
 
 		StringBuilder ds = new StringBuilder(256);
-		String optionDataSource = def.getLookup().getOptionDataSource();
-		if (lookup.getModelName() != null) {
+		String optionDataSource = lookupDefinition.getOptionDataSource();
+		String lookupModelName = lookup.getModelName();
+		if (lookupModelName != null) {
 			appendDataSourceDefinition(user,
 										customer,
 										module,
 										document,
-										lookup.getModelName(),
+										lookupModelName,
 										optionDataSource,
 										lookup,
 										currentUxUi,
@@ -2539,6 +2556,10 @@ public class SmartClientViewRenderer extends ViewRenderer {
 										new TreeSet<>());
 		}
 		else {
+			// ViewRenderer.visitLookupDescription() ensures a query without a model
+			if (query == null) {
+				throw new MetaDataException("Lookup description has no query to use.");
+			}
 			SmartClientViewRenderer.appendDataSourceDefinition(user,
 																customer,
 																query,

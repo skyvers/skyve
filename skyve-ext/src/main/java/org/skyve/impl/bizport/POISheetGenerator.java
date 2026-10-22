@@ -156,12 +156,13 @@ public class POISheetGenerator {
 	
 							// attempt to find attribute with the binding
 							// if not assume it is a compound expression and use binder.formatMessage
-							String resolvedBinding = f.getBindingExpression();
+							String bindingExpression = f.getBindingExpression();
+							String resolvedBinding = bindingExpression;
 							if (resolvedBinding != null && resolvedBinding.startsWith("{") && resolvedBinding.endsWith("}")) {
-								resolvedBinding = f.getBindingExpression().substring(1, f.getBindingExpression().length() - 1);
+								resolvedBinding = resolvedBinding.substring(1, resolvedBinding.length() - 1);
 							}
 	
-							if (resolvedBinding != null) {
+							if ((bindingExpression != null) && (resolvedBinding != null)) {
 								try {
 									TargetMetaData tm = Binder.getMetaDataForBinding(customer, module, document, resolvedBinding);
 									Object value = null;
@@ -198,7 +199,7 @@ public class POISheetGenerator {
 									}
 								} catch (@SuppressWarnings("unused") Exception e) {
 //									Util.LOGGER.info("Putting compound expression {} with value {}", f.getBindingExpression(), Binder.formatMessage(customer, f.getBindingExpression(), b));
-									POIWorkbook.putPOICellValue(sheet, rowNum, colNum, CellType.STRING, Binder.formatMessage(f.getBindingExpression(), b));
+									POIWorkbook.putPOICellValue(sheet, rowNum, colNum, CellType.STRING, Binder.formatMessage(bindingExpression, b));
 								}
 							}
 	

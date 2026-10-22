@@ -246,6 +246,9 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryFactory 
 	@Override
 	public @Nonnull Customer putCustomer(@Nonnull CustomerMetaData customer) {
 		String customerName = customer.getName();
+		if (customerName == null) {
+			throw new MetaDataException("The customer [name] is required");
+		}
 		Customer result = customer.convert(customerName);
 		cache.put(CUSTOMERS_NAMESPACE + customerName, Optional.of(result));
 		return result;
@@ -344,7 +347,7 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryFactory 
 	@Override
 	public @Nonnull Module putModule(@Nonnull Customer customer, @Nonnull ModuleMetaData module) {
 		String customerName = customer.getName();
-		String moduleName = module.getName();
+		String moduleName = requireModuleName(module);
 		Module result = convertModule(customerName, moduleName, module);
 		
 		StringBuilder moduleKey = new StringBuilder(64);
@@ -362,7 +365,7 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryFactory 
 	 */
 	@Override
 	public @Nonnull Module putModule(@Nonnull ModuleMetaData module) {
-		String moduleName = module.getName();
+		String moduleName = requireModuleName(module);
 
 		Module result = convertModule(null, moduleName, module);
 		cache.put(MODULES_NAMESPACE + moduleName, Optional.of(result));
@@ -502,6 +505,22 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryFactory 
 		return result;
 	}
 
+	private static @Nonnull String requireModuleName(@Nonnull ModuleMetaData module) {
+		String result = module.getName();
+		if (result == null) {
+			throw new MetaDataException("The module [name] is required");
+		}
+		return result;
+	}
+
+	private static @Nonnull String requireDocumentName(@Nonnull String moduleName, @Nonnull DocumentMetaData document) {
+		String result = document.getName();
+		if (result == null) {
+			throw new MetaDataException("The document [name] is required in module " + moduleName);
+		}
+		return result;
+	}
+
 	private static @Nonnull Module requireModule(@Nullable Module module, @Nonnull String moduleName) {
 		if (module == null) {
 			throw new MetaDataException("Module " + moduleName + " does not exist.");
@@ -521,7 +540,7 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryFactory 
 	public @Nonnull Document putDocument(@Nonnull Customer customer, @Nonnull Module module, @Nonnull DocumentMetaData document) {
 		String customerName = customer.getName();
 		String moduleName = module.getName();
-		String documentName = document.getName();
+		String documentName = requireDocumentName(moduleName, document);
 		Document result = convertDocument(customerName, moduleName, module, documentName, document);
 		
 		StringBuilder documentKey = new StringBuilder(64);
@@ -541,7 +560,7 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryFactory 
 	@Override
 	public @Nonnull Document putDocument(@Nonnull Module module, @Nonnull DocumentMetaData document) {
 		String moduleName = module.getName();
-		String documentName = document.getName();
+		String documentName = requireDocumentName(moduleName, document);
 		Document result = convertDocument(null, moduleName, module, documentName, document);
 		
 		StringBuilder documentKey = new StringBuilder(64);
@@ -723,6 +742,10 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryFactory 
 		if (ViewType.edit.toString().equals(viewName) || 
 				ViewType.pick.toString().equals(viewName) || 
 				ViewType.params.toString().equals(viewName)) {
+			if (customer == null) {
+				throw new MetaDataException("Cannot scaffold view " + viewName + " for document " +
+												module.getName() + '.' + document.getName() + " without a customer");
+			}
 			ViewImpl result = new ViewGenerator(this).generate(customer, document, viewName);
 			result.resolve(uxui, customer, module, document, true);
 			return result;

@@ -312,6 +312,9 @@ public class PrimeFacesSeleneseExecutor extends SeleneseExecutor<PrimeFacesAutom
 	@Override
 	public void executeTabSelect(@Nonnull TabSelect tabSelect) {
 		PrimeFacesAutomationContext context = peek();
+		if (context == null) {
+			throw new MetaDataException("<tabSelect /> has no context to execute in.");
+		}
 		String identifier = tabSelect.getIdentifier(context);
 		List<UIComponent> components = context.getFacesComponents(identifier);
 		if (components == null) {
@@ -319,6 +322,9 @@ public class PrimeFacesSeleneseExecutor extends SeleneseExecutor<PrimeFacesAutom
 		}
 		boolean wizard = false;
 		List<Object> widgets = context.getSkyveWidgets(identifier);
+		if (widgets == null) { // components and widgets are put together
+			throw new IllegalStateException("<tabSelect /> with path [" + tabSelect.getTabPath() + "] has components but no widgets");
+		}
 		for (Object widget : widgets) {
 			if (widget instanceof TabPane tabPane) {
 				wizard = tabPane.getProperties().containsKey("wizard");
@@ -345,11 +351,20 @@ public class PrimeFacesSeleneseExecutor extends SeleneseExecutor<PrimeFacesAutom
 	@Override
 	public void executeTestDataEnter(@Nonnull TestDataEnter testDataEnter) {
 		PrimeFacesAutomationContext context = peek();
+		if (context == null) {
+			throw new MetaDataException("<testDataEnter /> has no context to execute in.");
+		}
+		String moduleName = context.getModuleName();
+		String documentName = context.getDocumentName();
+		ViewType viewType = context.getViewType();
+		if ((moduleName == null) || (documentName == null) || (viewType == null)) {
+			throw new MetaDataException("<testDataEnter /> is not in the context of a view.");
+		}
 
 		User u = CORE.getUser();
 		Customer c = u.getCustomer();
-		Module m = c.getModule(context.getModuleName());
-		Document d = m.getDocument(c, context.getDocumentName());
+		Module m = c.getModule(moduleName);
+		Document d = m.getDocument(c, documentName);
 
 		Bean bean = null;
 
@@ -363,8 +378,10 @@ public class PrimeFacesSeleneseExecutor extends SeleneseExecutor<PrimeFacesAutom
 		}
 
 		final String uxui = context.getUxui();
-		ViewImpl view = (ViewImpl) d.getView(uxui, c, context.getViewType()
-				.toString());
+		if (uxui == null) {
+			throw new IllegalStateException("The context of <testDataEnter /> has no uxui");
+		}
+		ViewImpl view = (ViewImpl) d.getView(uxui, c, viewType.toString());
 
 		TestDataEnterViewVisitor visitor = new TestDataEnterViewVisitor(
 				(CustomerImpl) c,
@@ -390,6 +407,9 @@ public class PrimeFacesSeleneseExecutor extends SeleneseExecutor<PrimeFacesAutom
 	@SuppressWarnings("java:S3776") // Complexity OK
 	public void executeDataEnter(@Nonnull DataEnter dataEnter) {
 		PrimeFacesAutomationContext context = peek();
+		if (context == null) {
+			throw new MetaDataException("<DataEnter /> has no context to execute in.");
+		}
 		String identifier = dataEnter.getIdentifier(context);
 		List<UIComponent> components = context.getFacesComponents(identifier);
 		if (components == null) {
@@ -479,7 +499,13 @@ public class PrimeFacesSeleneseExecutor extends SeleneseExecutor<PrimeFacesAutom
 	 */
 	private void button(@Nonnull Step button, @Nonnull String tagName, boolean ajax, boolean confirm, @Nullable Boolean testSuccess) {
 		PrimeFacesAutomationContext context = peek();
+		if (context == null) {
+			throw new MetaDataException(String.format("<%s /> has no context to execute in.", tagName));
+		}
 		String identifier = button.getIdentifier(context);
+		if (identifier == null) {
+			throw new IllegalStateException(String.format("<%s /> has no identifier", tagName));
+		}
 		List<UIComponent> components = context.getFacesComponents(identifier);
 		if (components == null) {
 			throw new MetaDataException(String.format("<%s /> is not on the view.", tagName));
@@ -541,10 +567,16 @@ public class PrimeFacesSeleneseExecutor extends SeleneseExecutor<PrimeFacesAutom
 		Boolean createView = save.getCreateView(); // NB could be null
 		if (Boolean.TRUE.equals(createView)) {
 			PrimeFacesAutomationContext context = peek();
+			if (context == null) {
+				throw new IllegalStateException("<save /> has no context to execute in");
+			}
 			context.setViewType(ViewType.create);
 		}
 		else if (Boolean.FALSE.equals(createView)) {
 			PrimeFacesAutomationContext context = peek();
+			if (context == null) {
+				throw new IllegalStateException("<save /> has no context to execute in");
+			}
 			context.setViewType(ViewType.edit);
 		}
 	}
@@ -637,6 +669,9 @@ public class PrimeFacesSeleneseExecutor extends SeleneseExecutor<PrimeFacesAutom
 	 */
 	private void lookupDescription(@Nonnull Step step, @Nonnull String binding, @Nullable Integer row, @Nullable String search) {
 		PrimeFacesAutomationContext context = peek();
+		if (context == null) {
+			throw new MetaDataException(String.format("<%s /> has no context to execute in.", step.getClass().getSimpleName()));
+		}
 		
 		List<UIComponent> lookupComponents = context.getFacesComponents(binding);
 		if (lookupComponents == null) {
@@ -669,6 +704,9 @@ public class PrimeFacesSeleneseExecutor extends SeleneseExecutor<PrimeFacesAutom
 				command("click", String.format("//div[@id='%s_panel']/ul/li[%d]", clientId, Integer.valueOf(row.intValue() + 1)));
 			}
 			else {
+				if (search == null) { // auto complete always has a search
+					throw new IllegalStateException(String.format("<%s /> with binding [%s] has no row or search", step.getClass().getSimpleName(), binding));
+				}
 				// Type in the input field (everything but the last char)
 				command("type", String.format("%s_input", clientId), search.substring(0, search.length() - 1));
 				command("sendKeys", String.format("%s_input", clientId), search.substring(search.length() - 1));
@@ -715,10 +753,18 @@ public class PrimeFacesSeleneseExecutor extends SeleneseExecutor<PrimeFacesAutom
 		
 		// Determine the Document of the edit view to push
 		PrimeFacesAutomationContext context = peek();
+		if (context == null) {
+			throw new IllegalStateException("<zoomIn /> has no context to execute in");
+		}
+		String moduleName = context.getModuleName();
+		String documentName = context.getDocumentName();
+		if ((moduleName == null) || (documentName == null)) {
+			throw new MetaDataException("<zoomIn /> is not in the context of a document.");
+		}
 		String binding = zoom.getBinding();
 		Customer c = CORE.getUser().getCustomer();
-		Module m = c.getModule(context.getModuleName());
-		Document d = m.getDocument(c, context.getDocumentName());
+		Module m = c.getModule(moduleName);
+		Document d = m.getDocument(c, documentName);
 		TargetMetaData target = BindUtil.getMetaDataForBinding(c, m, d, binding);
 		Relation relation = (Relation) target.getAttribute();
 		if (relation != null) { // should always be
@@ -794,7 +840,13 @@ public class PrimeFacesSeleneseExecutor extends SeleneseExecutor<PrimeFacesAutom
 	@SuppressWarnings("java:S3776") // Complexity OK
 	private void dataGridGesture(@Nonnull Step step, @Nonnull String binding, @Nullable Integer row) {
 		PrimeFacesAutomationContext context = peek();
+		if (context == null) {
+			throw new MetaDataException(String.format("<%s /> has no context to execute in.", step.getClass().getSimpleName()));
+		}
 		String buttonIdentifier = step.getIdentifier(context);
+		if (buttonIdentifier == null) {
+			throw new IllegalStateException(String.format("<%s /> has no identifier", step.getClass().getSimpleName()));
+		}
 		
 		List<UIComponent> dataGridComponents = context.getFacesComponents(binding);
 		if (dataGridComponents == null) {
@@ -842,7 +894,7 @@ public class PrimeFacesSeleneseExecutor extends SeleneseExecutor<PrimeFacesAutom
 							command("waitForNotVisible", "busy");
 						}
 						else if (step instanceof DataGridRemove) {
-							command("click", PrimeFacesAutomationContext.clientId(buttonComponent, row));
+							command("click", buttonClientId); // the row-aware client ID as remove always has a row
 							command("waitForNotVisible", "busy");
 						}
 						else {
@@ -859,9 +911,14 @@ public class PrimeFacesSeleneseExecutor extends SeleneseExecutor<PrimeFacesAutom
 		// Determine the Document of the edit view to push
 		// NB Don't push a new context for DataGridSelect - let them use DataGridZoom if they want that
 		if ((step instanceof DataGridNew) || (step instanceof DataGridZoom)) {
+			String moduleName = context.getModuleName();
+			String documentName = context.getDocumentName();
+			if ((moduleName == null) || (documentName == null)) {
+				throw new MetaDataException(String.format("<%s /> is not in the context of a document.", step.getClass().getSimpleName()));
+			}
 			Customer c = CORE.getUser().getCustomer();
-			Module m = c.getModule(context.getModuleName());
-			Document d = m.getDocument(c, context.getDocumentName());
+			Module m = c.getModule(moduleName);
+			Document d = m.getDocument(c, documentName);
 			TargetMetaData target = BindUtil.getMetaDataForBinding(c, m, d, binding);
 			Relation relation = (Relation) target.getAttribute();
 			if (relation != null) { // should always be
@@ -924,7 +981,13 @@ public class PrimeFacesSeleneseExecutor extends SeleneseExecutor<PrimeFacesAutom
 	@SuppressWarnings("java:S3776") // Complexity OK
 	private void listGridGesture(@Nonnull Step step, @Nullable Integer row) {
 		PrimeFacesAutomationContext context = peek();
+		if (context == null) {
+			throw new MetaDataException(String.format("<%s /> has no context to execute in.", step.getClass().getSimpleName()));
+		}
 		String buttonIdentifier = step.getIdentifier(context);
+		if (buttonIdentifier == null) {
+			throw new IllegalStateException(String.format("<%s /> has no identifier", step.getClass().getSimpleName()));
+		}
 		String listGridIdentifier = buttonIdentifier.substring(0, buttonIdentifier.lastIndexOf('.'));
 		
 		List<UIComponent> listGridComponents = context.getFacesComponents(listGridIdentifier);
@@ -996,9 +1059,20 @@ public class PrimeFacesSeleneseExecutor extends SeleneseExecutor<PrimeFacesAutom
 		PushEditContext result = new PushEditContext();
 
 		PrimeFacesAutomationContext context = peek();
+		if (context == null) {
+			throw new IllegalStateException(String.format("<%s /> has no context to execute in", step.getClass().getSimpleName()));
+		}
+		String contextModuleName = context.getModuleName();
+		if (contextModuleName == null) {
+			throw new MetaDataException(String.format("<%s /> is not in the context of a module.", step.getClass().getSimpleName()));
+		}
 		if (ViewType.list.equals(context.getViewType())) {
-			result.setModuleName(context.getModuleName());
-			result.setDocumentName(context.getDocumentName());
+			String contextDocumentName = context.getDocumentName();
+			if (contextDocumentName == null) {
+				throw new MetaDataException(String.format("<%s /> is not in the context of a document.", step.getClass().getSimpleName()));
+			}
+			result.setModuleName(contextModuleName);
+			result.setDocumentName(contextDocumentName);
 		}
 		else {
 			String key = queryName;
@@ -1008,8 +1082,13 @@ public class PrimeFacesSeleneseExecutor extends SeleneseExecutor<PrimeFacesAutom
 			if (key == null) {
 				key = modelName;
 			}
+			if (key == null) {
+				throw new MetaDataException(String.format("<%s /> with identifier [%s] requires queryName, documentName or modelName defined.",
+															step.getClass().getSimpleName(),
+															step.getIdentifier(context)));
+			}
 			Customer c = CORE.getUser().getCustomer();
-			Module m = c.getModule(context.getModuleName());
+			Module m = c.getModule(contextModuleName);
 			MetaDataQueryDefinition q = m.getMetaDataQuery(key);
 			if (q != null) {
 				result.setModuleName(q.getDocumentModule(c).getName());
@@ -1018,16 +1097,25 @@ public class PrimeFacesSeleneseExecutor extends SeleneseExecutor<PrimeFacesAutom
 			else {
 				DocumentRef r = m.getDocumentRefs().get(key);
 				if (r != null) {
-					result.setModuleName(r.getReferencedModuleName());
+					// the owning module is the referenced module, or this module when the document is not a module reference
+					result.setModuleName(r.getOwningModuleName());
 					result.setDocumentName(key);
 				}
 				else {
-					Document d = m.getDocument(c, context.getDocumentName());
+					String contextDocumentName = context.getDocumentName();
+					if (contextDocumentName == null) {
+						throw new MetaDataException(String.format("<%s /> is not in the context of a document.", step.getClass().getSimpleName()));
+					}
+					Document d = m.getDocument(c, contextDocumentName);
 					try {
 						ListModel<Bean> lm = d.getListModel(c, key, false);
-						d = lm.getDrivingDocument();
-						result.setModuleName(d.getOwningModuleName());
-						result.setDocumentName(d.getName());
+						Document drivingDocument = lm.getDrivingDocument();
+						if (drivingDocument == null) {
+							throw new IllegalStateException("List model " + key + " of document " + contextModuleName + '.' + contextDocumentName +
+																" has no driving document");
+						}
+						result.setModuleName(drivingDocument.getOwningModuleName());
+						result.setDocumentName(drivingDocument.getName());
 					}
 					catch (MetaDataException e) {
 						throw new MetaDataException(String.format("<%s /> with identifier [%s] requires queryName, documentName or modelName defined.",

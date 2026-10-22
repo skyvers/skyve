@@ -76,8 +76,11 @@ public class RelationTreeModelFilter<T extends Bean> extends InMemoryFilter {
 				rows.add(newOutlineFromBean(bean, null));
 			}
 			else {
+				// No children if the expanded node is no longer in the bean's object graph
 				Bean parent = findParent();
-				addChildren(rows, parent);
+				if (parent != null) {
+					addChildren(rows, parent);
+				}
 			}
 		}
 	}
@@ -154,11 +157,15 @@ public class RelationTreeModelFilter<T extends Bean> extends InMemoryFilter {
 	private static @Nonnull DynamicBean newOutlineFromBean(@Nonnull Bean bean, @Nullable String bizParentId) {
 		final User u = CORE.getUser();
 		final Customer c = u.getCustomer();
+		final String userName = u.getName();
+		if (userName == null) {
+			throw new IllegalStateException("The current user has no name");
+		}
 		
 		Map<String, Object> properties = new TreeMap<>();
 		// concat a random ID to handle cyclic object graphs
 		properties.put(Bean.DOCUMENT_ID, bean.getBizId() + UUIDv7.create().toString());
-		properties.put(PersistentBean.LOCK_NAME, new OptimisticLock(u.getName(), new Date()));
+		properties.put(PersistentBean.LOCK_NAME, new OptimisticLock(userName, new Date()));
 		properties.put(PersistentBean.TAGGED_NAME, null);
 		properties.put(PersistentBean.FLAG_COMMENT_NAME, null);
 		properties.put(HierarchicalBean.PARENT_ID, bizParentId);

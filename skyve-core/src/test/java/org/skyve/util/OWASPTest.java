@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -18,6 +19,7 @@ import org.mockito.Mockito;
 import org.skyve.domain.Bean;
 import org.skyve.domain.DynamicBean;
 import org.skyve.impl.metadata.module.query.MetaDataQueryProjectedColumnImpl;
+import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.module.query.MetaDataQueryColumn;
 import org.skyve.metadata.module.query.MetaDataQueryProjectedColumn;
 import org.skyve.metadata.view.TextOutput.Sanitisation;
@@ -349,6 +351,43 @@ class OWASPTest {
 		OWASP.sanitiseAndEscapeListModelRows(rows, columns, Boolean.FALSE.booleanValue());
 		// Verify that getName() was called as fallback
 		Mockito.verify(col).getName();
+	}
+
+	@Test
+	@SuppressWarnings({"static-method", "boxing"})
+	void testSanitiseAndEscapeListModelRowsThrowsWhenColumnToEscapeHasNoBindingOrName() {
+		Bean row = Mockito.mock(Bean.class);
+
+		MetaDataQueryColumn col = Mockito.mock(MetaDataQueryColumn.class);
+		Mockito.when(col.getBinding()).thenReturn(null);
+		Mockito.when(col.getName()).thenReturn(null);
+		Mockito.when(col.isEscape()).thenReturn(Boolean.TRUE);
+
+		List<Bean> rows = new ArrayList<>();
+		rows.add(row);
+		List<MetaDataQueryColumn> columns = new ArrayList<>();
+		columns.add(col);
+
+		assertThrows(MetaDataException.class, () -> OWASP.sanitiseAndEscapeListModelRows(rows, columns, true));
+	}
+
+	@Test
+	@SuppressWarnings({"static-method", "boxing"})
+	void testSanitiseAndEscapeListModelRowsIgnoresColumnWithNoBindingOrNameWhenNotEscaping() {
+		Bean row = Mockito.mock(Bean.class);
+
+		MetaDataQueryColumn col = Mockito.mock(MetaDataQueryColumn.class);
+		Mockito.when(col.getBinding()).thenReturn(null);
+		Mockito.when(col.getName()).thenReturn(null);
+		Mockito.when(col.isEscape()).thenReturn(Boolean.FALSE);
+		Mockito.when(col.getSanitise()).thenReturn(null);
+
+		List<Bean> rows = new ArrayList<>();
+		rows.add(row);
+		List<MetaDataQueryColumn> columns = new ArrayList<>();
+		columns.add(col);
+
+		assertDoesNotThrow(() -> OWASP.sanitiseAndEscapeListModelRows(rows, columns, true));
 	}
 
 	@Test

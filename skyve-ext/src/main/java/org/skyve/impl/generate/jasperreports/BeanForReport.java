@@ -73,9 +73,13 @@ public class BeanForReport {
 	 * @param bizId The business identifier of the row being rendered.
 	 * @param condition The condition name or inline condition expression to evaluate.
 	 * @return {@code true} when the condition evaluates to true for the bean.
+	 * @throws IllegalStateException When no matching row exists.
 	 */
 	public static boolean evaluateCondition(@Nonnull String moduleName, @Nonnull String documentName, @Nonnull String bizId, @Nonnull String condition) {
 		Bean bean = getBean(moduleName, documentName, bizId);
+		if (bean == null) {
+			throw new IllegalStateException("Cannot evaluate condition " + condition + " as " + moduleName + '.' + documentName + " with bizId " + bizId + " does not exist");
+		}
 		return bean.evaluateCondition(condition);
 	}
 }

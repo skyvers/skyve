@@ -17,7 +17,11 @@ public class ReportDesignGeneratorFactory {
     public static @Nonnull ReportDesignGenerator getGeneratorForDesign(@Nonnull DesignSpecification designSpecification) {
         assert(designSpecification.getDefinitionSource() != null);
 
-        switch (designSpecification.getDefinitionSource()) {
+        final DesignSpecification.DefinitionSource definitionSource = designSpecification.getDefinitionSource();
+        if (definitionSource == null) {
+            throw new IllegalStateException("Report design " + designSpecification.getName() + " has no definition source");
+        }
+        switch (definitionSource) {
             case document:
                 return new DocumentReportDesignGenerator();
             case view:
@@ -27,7 +31,7 @@ public class ReportDesignGeneratorFactory {
             case list:
                 return new ListReportDesignGenerator();
             default:
-            	throw new IllegalStateException(designSpecification.getDefinitionSource() + " is not catered for");
+            	throw new IllegalStateException(definitionSource + " is not catered for");
         }
     }
 }

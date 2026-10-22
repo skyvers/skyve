@@ -27,6 +27,7 @@ import org.skyve.domain.messages.OptimisticLockException.OperationType;
 import org.skyve.domain.messages.SecurityException;
 import org.skyve.domain.messages.SessionEndedException;
 import org.skyve.domain.messages.ValidationException;
+import org.skyve.domain.types.OptimisticLock;
 import org.skyve.domain.types.converters.Converter;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.cache.StateUtil;
@@ -249,6 +250,9 @@ public class SmartClientEditServlet extends HttpServlet {
 			        	}
 			        	LOGGER.info("USE OLD CONVERSATION!!!!");
 			            persistence = webContext.getConversation();
+			            if (persistence == null) {
+			            	throw new IllegalStateException("Cached conversation " + webId + " has no persistence");
+			            }
 			            persistence.setForThread();
 			        }
 			    	else {
@@ -300,6 +304,10 @@ public class SmartClientEditServlet extends HttpServlet {
 			    		formBean = contextBean;
 			    	}
 			    	else {
+			    		// A form binding is relative to the conversation's bean
+			    		if (contextBean == null) {
+			    			throw new ServletException(REQUEST_MALFORMED);
+			    		}
 				    	// NB if a new bean is being added to a datagrid, the binding points to the array,
 				    	// not the element, as the element isn't even created yet
 			    		// find the process bean
@@ -320,8 +328,13 @@ public class SmartClientEditServlet extends HttpServlet {
 			    		}
 			    	}
 	
-			    	Module processModule = customer.getModule(OWASP.sanitise(Sanitisation.text, Util.processStringValue(request.getParameter(AbstractWebContext.MODULE_NAME))));
-			    	Document processDocument = processModule.getDocument(customer, OWASP.sanitise(Sanitisation.text, Util.processStringValue(request.getParameter(AbstractWebContext.DOCUMENT_NAME))));
+			    	String processModuleName = OWASP.sanitise(Sanitisation.text, Util.processStringValue(request.getParameter(AbstractWebContext.MODULE_NAME)));
+			    	String processDocumentName = OWASP.sanitise(Sanitisation.text, Util.processStringValue(request.getParameter(AbstractWebContext.DOCUMENT_NAME)));
+			    	if ((processModuleName == null) || (processDocumentName == null)) {
+			    		throw new ServletException(REQUEST_MALFORMED);
+			    	}
+			    	Module processModule = customer.getModule(processModuleName);
+			    	Document processDocument = processModule.getDocument(customer, processDocumentName);
 	
 			    	Module formModule = processModule;
 			    	Document formDocument = processDocument;
@@ -334,6 +347,10 @@ public class SmartClientEditServlet extends HttpServlet {
 			    	Bean processBean = null;
 			    	
 		    		if ((formBean != null) && (gridBinding != null)) {
+		    			// A grid binding addresses a row by its bizId
+		    			if (bizId == null) {
+		    				throw new ServletException(REQUEST_MALFORMED);
+		    			}
 		    			processBean = BindUtil.getElementInCollection(formBean, gridBinding, bizId);
 			    	}
 		    		else {
@@ -356,7 +373,8 @@ public class SmartClientEditServlet extends HttpServlet {
 							(! ImplicitActionName.ZoomOut.toString().equals(actionName)) &&
 							(! ImplicitActionName.Print.toString().equals(actionName))) {
 						LOGGER.info("ACTION {} : {}", formBinding, gridBinding);
-						if ((editIdCounter == null) || (createIdCounter == null)) {
+						// An action is applied to the form bean and its process bean
+						if ((editIdCounter == null) || (createIdCounter == null) || (formBean == null) || (processBean == null)) {
 							throw new ServletException(REQUEST_MALFORMED);
 						}
 
@@ -410,7 +428,8 @@ public class SmartClientEditServlet extends HttpServlet {
 								break;
 							case add, update:
 								LOGGER.info("ADD/UPDATE with binding {} : {}", formBinding, gridBinding);
-								if ((editIdCounter == null) || (createIdCounter == null)) {
+								// An add or update is applied to the form bean and its process bean
+								if ((editIdCounter == null) || (createIdCounter == null) || (formBean == null) || (processBean == null)) {
 									throw new ServletException(REQUEST_MALFORMED);
 								}
 	
@@ -598,7 +617,11 @@ public class SmartClientEditServlet extends HttpServlet {
                 pw.append("\"startRow\":0,\"endRow\":0,\"totalRows\":0,");
             }
             pw.append("\"data\":\"");
-            pw.append(WebErrorUtil.escapeJsStringWithHtmlFormatting(WebErrorUtil.genericMessage(reference))).append('"');
+            // An unexpected error passed without a reference has not been logged yet
+            String errorReference = (reference == null) ?
+            							WebErrorUtil.logUnexpectedAndGetReference(LOGGER, "SmartClient error response generated without a reference", t) :
+            							reference;
+            pw.append(WebErrorUtil.escapeJsStringWithHtmlFormatting(WebErrorUtil.genericMessage(errorReference))).append('"');
     	}
 
     	pw.append("}}");
@@ -774,6 +797,10 @@ public class SmartClientEditServlet extends HttpServlet {
 	    	}
     	}
     	else { // sub form
+    		// processRequest() only resolves a form binding against the conversation's bean
+    		if (contextBean == null) {
+    			throw new IllegalStateException("No context bean for the sub form with binding " + formBinding);
+    		}
     		Object referenceValue = BindUtil.get(contextBean, formBinding);
 
 			// Find the parent bean
@@ -875,6 +902,9 @@ public class SmartClientEditServlet extends HttpServlet {
     			}
     			else {
     				processBean = (Bean) referenceValue;
+    			}
+    			if (processBean == null) { // should never happen
+    				throw new ServletException("processBean is null");
     			}
     			
 	    		if (action == null) { // callbacks not fired after a zoom out on the parent view post
@@ -1166,7 +1196,8 @@ public class SmartClientEditServlet extends HttpServlet {
 													mutableCustomActionName);
 				}
 			}
-			else if (ImplicitActionName.OK.equals(implicitAction) || ImplicitActionName.Save.equals(implicitAction)) {
+			else if ((implicitAction != null) &&
+						(ImplicitActionName.OK.equals(implicitAction) || ImplicitActionName.Save.equals(implicitAction))) {
 				// The client requests a custom action whose class is OK or Save by that class, and the request then runs
 				// the built-in action (as admin.MonitoringDashboard's Save does), so that custom action's triggers decide.
 				// Matches by class only, as ActionAvailability does, so an action merely named OK or Save does not collide
@@ -1449,7 +1480,7 @@ public class SmartClientEditServlet extends HttpServlet {
 	 * @param user active user
 	 * @param customer active customer metadata
 	 * @param processDocument document from which the bean is deleted
-	 * @param bean bean requested for deletion
+	 * @param bean bean requested for deletion, or {@code null} when there is no conversation bean, so nothing to delete
 	 * @param bizlet document bizlet, or {@code null}
 	 * @param persistence active persistence context
 	 * @param pw response writer
@@ -1460,11 +1491,23 @@ public class SmartClientEditServlet extends HttpServlet {
 								@Nonnull User user,
 		                        @Nonnull Customer customer,
 								@Nonnull Document processDocument,
-								@Nonnull Bean bean,
+								@Nullable Bean bean,
 								@Nullable Bizlet<Bean> bizlet,
 								@Nonnull AbstractPersistence persistence,
 								@Nonnull PrintWriter pw)
 	throws Exception {
+		// With no bean there is nothing to delete, nor to run the interceptors and bizlet callbacks on
+		if (bean == null) {
+			pw.append("{\"response\":{\"status\":0}}");
+			try {
+				Monitoring.measure(RequestKey.delete(processDocument));
+			}
+			finally {
+				StateUtil.commitAndCacheConversation(webContext);
+			}
+			return;
+		}
+
 		// Only a persisted bean is security checked and deleted
 		boolean persisted = (bean instanceof PersistentBean) && bean.isPersisted();
 		Bean beanToDelete = persisted ? retrieveForDelete(user, processDocument, (PersistentBean) bean, persistence) : bean;
@@ -1543,10 +1586,15 @@ public class SmartClientEditServlet extends HttpServlet {
 			throw new SecurityException("read this data", user.getName());
 		}
 		
-		if (! result.getBizLock().equals(beanToDelete.getBizLock())) {
+		// A persisted bean always has an optimistic lock
+		OptimisticLock lock = result.getBizLock();
+		if (lock == null) {
+			throw new IllegalStateException("Persisted bean " + result.getBizId() + " has no optimistic lock");
+		}
+		if (! lock.equals(beanToDelete.getBizLock())) {
 			throw new OptimisticLockException(user, 
 												OperationType.delete, 
-												result.getBizLock());
+												lock);
 		}
 		
 		return result;

@@ -14,6 +14,7 @@ import org.skyve.domain.ChildBean;
 import org.skyve.domain.HierarchicalBean;
 import org.skyve.domain.PersistentBean;
 import org.skyve.impl.bind.BindUtil;
+import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.Attribute.AttributeType;
@@ -104,6 +105,9 @@ public final class StandardGenerator {
 				// if its a collection, put in a joining sheet
 				if (owningRelation instanceof Collection owningCollection) {
 					if (! CollectionType.child.equals(owningCollection.getType())) {
+						if (owningDocument == null) {
+							throw new IllegalStateException("Collection " + binding + " has no owning document");
+						}
 						BizPortSheet collectionSheet = workbook.getSheet(new SheetKey(document.getOwningModuleName(),
 																						document.getName(),
 																						binding));
@@ -340,7 +344,11 @@ public final class StandardGenerator {
 												@Nullable Relation owningRelation,
 												@Nonnull BizPortWorkbook workbook)
 	throws Exception {
-		BizPortSheet sheet = new POISheet(currentDocument.getLocalisedSingularAlias());
+		String singularAlias = currentDocument.getLocalisedSingularAlias();
+		if (singularAlias == null) { // required metadata
+			throw new MetaDataException("Document " + currentDocument.getOwningModuleName() + '.' + currentDocument.getName() + " has no singular alias");
+		}
+		BizPortSheet sheet = new POISheet(singularAlias);
 
 		// ID column
 		BizPortColumn column = new BizPortColumn("ID",
@@ -496,7 +504,11 @@ public final class StandardGenerator {
 												@Nonnull Collection collection,
 												@Nonnull Document collectionDocument,
 												@Nonnull BizPortWorkbook workbook) {
-		BizPortSheet sheet = new POISheet(collection.getLocalisedDisplayName());
+		String displayName = collection.getLocalisedDisplayName();
+		if (displayName == null) { // required metadata
+			throw new MetaDataException("Collection " + binding + " has no display name");
+		}
+		BizPortSheet sheet = new POISheet(displayName);
 
 		// Owner ID column
 		String localisedSingularAlias = owningDocument.getLocalisedSingularAlias();

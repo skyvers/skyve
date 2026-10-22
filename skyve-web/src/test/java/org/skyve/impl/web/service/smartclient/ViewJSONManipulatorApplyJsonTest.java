@@ -3,6 +3,7 @@ package org.skyve.impl.web.service.smartclient;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
@@ -79,6 +80,16 @@ class ViewJSONManipulatorApplyJsonTest {
 				mock(Bean.class),
 				null,
 				null));
+	}
+
+	@Test
+	void applyJSONRejectsJsonNull() {
+		RecordingViewJSONManipulator manipulator = newManipulator();
+
+		assertThrows(IllegalArgumentException.class,
+				() -> manipulator.applyJSON("null", mock(AbstractPersistence.class), mock(WebContext.class)));
+
+		assertEquals(0, manipulator.appliedBindings.size());
 	}
 
 	@Test

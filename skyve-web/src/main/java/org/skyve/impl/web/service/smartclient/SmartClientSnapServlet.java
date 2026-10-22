@@ -162,15 +162,26 @@ public class SmartClientSnapServlet extends HttpServlet {
 					HttpSession session = request.getSession();
 
 					if ("L".equals(action)) {
-						StringBuilder result = list(moduleName, documentOrQueryOrModelName, smartClientRequest);
-						sb.append(result);
+						if ((moduleName == null) || (documentOrQueryOrModelName == null)) { // no data source means no snapshots
+							sb.append("[]");
+						}
+						else {
+							StringBuilder result = list(moduleName, documentOrQueryOrModelName, smartClientRequest);
+							sb.append(result);
+						}
 					}
 					else if ("U".equals(action)) {
 						SmartClientListServlet.checkCsrfToken(session, request, response, currentCsrfToken);
+						if ((snapId == null) || (snapshot == null)) {
+							throw new ServletException("No snapshot ID or snapshot in the request.");
+						}
 						update(snapId, snapshot, smartClientRequest);
 					}
 					else if ("N".equals(action)) {
 						SmartClientListServlet.checkCsrfToken(session, request, response, currentCsrfToken);
+						if ((moduleName == null) || (documentOrQueryOrModelName == null) || (snapName == null) || (snapshot == null)) {
+							throw new ServletException("No data source, snapshot name or snapshot in the request.");
+						}
 						snapId = create(moduleName, documentOrQueryOrModelName, snapName, snapshot, smartClientRequest);
 						sb.append("{\"bizId\":\"");
 						sb.append(snapId);
@@ -178,6 +189,9 @@ public class SmartClientSnapServlet extends HttpServlet {
 					}
 					else if ("D".equals(action)) {
 						SmartClientListServlet.checkCsrfToken(session, request, response, currentCsrfToken);
+						if (snapId == null) {
+							throw new ServletException("No snapshot ID in the request.");
+						}
 						delete(snapId);
 					}
 
@@ -256,8 +270,9 @@ public class SmartClientSnapServlet extends HttpServlet {
 			String escapedCode = OWASP.escapeJsStringWithHtmlFormatting((String) BindUtil.get(bean, Bean.DOCUMENT_ID));
 			String escapedDescription = OWASP.escapeJsStringWithHtmlFormatting((String) BindUtil.get(bean, AppConstants.NAME_ATTRIBUTE_NAME));
 			String snapshot = (String) BindUtil.get(bean, AppConstants.SNAPSHOT_ATTRIBUTE_NAME);
-
-			snapshot = smartClientRequest ? SnapshotAdapter.toSmartClient(snapshot) : SnapshotAdapter.toVue(snapshot);
+			if (snapshot != null) {
+				snapshot = smartClientRequest ? SnapshotAdapter.toSmartClient(snapshot) : SnapshotAdapter.toVue(snapshot);
+			}
 			if (snapshot == null) { // not a valid snapshot
 				continue;
 			}

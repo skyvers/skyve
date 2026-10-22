@@ -199,6 +199,10 @@ public class FacesContentUtil {
 			throw new SecurityException("upload this content", user.getName());
 		}
 
+		if ((contentOwnerBizCustomer == null) || (contentOwnerBizUserId == null)) { // a new instance has both
+			throw new IllegalStateException("Content owner " + contentOwnerBizModule + '.' + contentOwnerBizDocument + '#' + contentOwnerBizId + " has no bizCustomer or bizUserId");
+		}
+
 		// Always insert a new attachment content node into the content repository on upload.
 		// That way, if the change is discarded (not committed), it'll still point to the original attachment.
 		// Also, browser caching is simple as the URL is changed (as a consequence of the content id change)

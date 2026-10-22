@@ -15,6 +15,7 @@ import org.slf4j.Logger;
 
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
+import jakarta.faces.FacesException;
 
 /**
  * Just set the state of the list bean up - but do not load any data
@@ -51,13 +52,23 @@ public class PopulateAction extends FacesAction<Void> {
 		String bizModule = facesView.getBizModuleParameter();
 		String bizDocument = facesView.getBizDocumentParameter();
 		String queryName = facesView.getQueryNameParameter();
-		if ((bizDocument != null) && queryName != null) {
+		if (bizModule == null) { // HarnessView.initialise() defaults the module
+			throw new IllegalStateException("Cannot populate a list as the FacesView has no module parameter");
+		}
+		if (queryName == null) {
+			throw new FacesException("Malformed URL - a list of module " + bizModule + " requires a query name");
+		}
+		if (bizDocument != null) {
 			Customer c = CORE.getCustomer();
 			Module m = c.getModule(bizModule);
 			Document d = m.getDocument(c, bizDocument);
 			ListModel<Bean> lm = d.getListModel(c, queryName, true);
 			facesView.setTitle(lm.getLocalisedDescription());
-			facesView.setTitleIcon(lm.getDrivingDocument(), null);
+			Document drivingDocument = lm.getDrivingDocument();
+			if (drivingDocument == null) {
+				throw new IllegalStateException("List model " + queryName + " of document " + bizModule + '.' + bizDocument + " has no driving document");
+			}
+			facesView.setTitleIcon(drivingDocument, null);
 			facesView.setModelName(queryName);
 			facesView.setQueryNameParameter(null);
 		}

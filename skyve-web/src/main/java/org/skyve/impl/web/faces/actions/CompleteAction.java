@@ -79,6 +79,9 @@ public class CompleteAction extends FacesAction<List<String>> {
 		if (UtilImpl.FACES_TRACE) FACES_LOGGER.info("CompleteAction - EXECUTE complete {} for binding {}", query, binding);
 		AbstractPersistence persistence = AbstractPersistence.get();
 		Bean bean = ActionUtil.getTargetBeanForView(facesView);
+		if (bean == null) {
+			throw new IllegalStateException("Cannot complete " + binding + " as the FacesView has no target bean");
+		}
 		final String formModuleName = bean.getBizModule();
 		final String formDocumentName = bean.getBizDocument();
 		User user = persistence.getUser();

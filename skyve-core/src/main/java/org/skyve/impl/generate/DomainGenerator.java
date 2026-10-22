@@ -277,6 +277,9 @@ public abstract class DomainGenerator {
 				repository.validateDocumentForGenerateDomain(customer, document);
 				for (UxUiMetadata uxui : router.getUxUis()) {
 					String uxuiName = uxui.getName();
+					if (uxuiName == null) {
+						throw new MetaDataException("The router defines a UX/UI with no name.");
+					}
 					if (debug) System.out.println("Get edit view for document " + documentName + " and uxui " + uxuiName);
 					View view = repository.getView(uxuiName, customer, document, ViewType.edit.toString());
 					if (view != null) {

@@ -90,6 +90,7 @@ import org.skyve.impl.metadata.view.widget.bound.tabular.DataRepeater;
 import org.skyve.impl.metadata.view.widget.bound.tabular.ListGrid;
 import org.skyve.impl.metadata.view.widget.bound.tabular.ListRepeater;
 import org.skyve.impl.metadata.view.widget.bound.tabular.TreeGrid;
+import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.controller.ImplicitActionName;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.Attribute.AttributeType;
@@ -105,6 +106,7 @@ import org.skyve.metadata.user.User;
 import org.skyve.metadata.view.Action;
 import org.skyve.metadata.view.View;
 import org.skyve.metadata.view.View.ViewType;
+import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.metadata.view.widget.FilterParameter;
 import org.skyve.metadata.view.widget.bound.Bound;
 import org.skyve.metadata.view.widget.bound.Parameter;
@@ -165,6 +167,19 @@ public class ClientViewRenderer extends ViewRenderer {
 	 * @return rendered root component, or {@code null} before rendering starts
 	 */
 	public @Nullable RenderedComponent getResult() {
+		return result;
+	}
+
+	/**
+	 * Returns the rendered root component once the view has been visited.
+	 *
+	 * @return rendered root component; never {@code null}
+	 * @throws IllegalStateException when the view has not been rendered yet
+	 */
+	public @Nonnull RenderedComponent getNullSafeResult() {
+		if (result == null) {
+			throw new IllegalStateException("The view has not been rendered");
+		}
 		return result;
 	}
 
@@ -453,6 +468,20 @@ public class ClientViewRenderer extends ViewRenderer {
 		formRowLayout = null;
 	}
 
+	/**
+	 * Returns the data grid or data repeater whose columns are being rendered.
+	 *
+	 * @return the current data widget; never {@code null}
+	 * @throws IllegalStateException when no data widget is being rendered
+	 */
+	private @Nonnull AbstractDataWidget getNullSafeCurrentDataWidget() {
+		AbstractDataWidget dataWidget = getCurrentDataWidget();
+		if (dataWidget == null) { // cannot happen as data widget columns are only visited within a data widget
+			throw new IllegalStateException("Data widget column is rendered outside of a data widget");
+		}
+		return dataWidget;
+	}
+
 	@SuppressWarnings({"java:S107", "java:S3776"}) // Long parameter list preserves the existing framework/API contract; complexity OK.
 	private void addComponent(@Nullable String widgetLabel,
 								int formColspan,
@@ -500,6 +529,9 @@ public class ClientViewRenderer extends ViewRenderer {
 			else { // a form item
 				FormItem formItem = getCurrentFormItem();
 				FormColumn formColumn = getCurrentFormColumn();
+				if ((formItem == null) || (formColumn == null)) { // cannot happen as a form widget is always within a form item and column
+					throw new IllegalStateException("Form widget " + widgetLabel + " is not within a form item and column");
+				}
 				if (isCurrentWidgetShowLabel()) {
 					lr.layoutFormItemLabel(current,
 											component,
@@ -931,7 +963,10 @@ public class ClientViewRenderer extends ViewRenderer {
 	/**
 	 * Renders a blurb using either literal markup or a bound expression.
 	 */
-	private void renderBlurb(@Nonnull String markup, int formColspan, @Nonnull Blurb blurb) {
+	private void renderBlurb(@Nullable String markup, int formColspan, @Nonnull Blurb blurb) {
+		if (markup == null) { // validated when the view is validated
+			throw new MetaDataException("A Blurb has no markup specified.");
+		}
 		String value = null;
 		String binding = null;
 		if (markup.indexOf('{') > -1) {
@@ -1149,10 +1184,16 @@ public class ClientViewRenderer extends ViewRenderer {
 	 */
 	@Override
 	public void renderListGrid(@Nullable String title, boolean aggregateQuery, @Nonnull ListGrid grid) {
+		String modelDocumentName = getCurrentListWidgetModelDocumentName();
+		String modelName = getCurrentListWidgetModelName();
+		ListModel<Bean> model = getCurrentListWidgetModel();
+		if ((modelDocumentName == null) || (modelName == null) || (model == null)) { // cannot happen as the list widget is pre-processed
+			throw new IllegalStateException("List grid " + title + " is rendered without a list model");
+		}
 		RenderedComponent l = cr.listGrid(null,
-											getCurrentListWidgetModelDocumentName(),
-											getCurrentListWidgetModelName(),
-											getCurrentListWidgetModel(),
+											modelDocumentName,
+											modelName,
+											model,
 											title,
 											grid,
 											aggregateQuery);
@@ -1188,10 +1229,16 @@ public class ClientViewRenderer extends ViewRenderer {
 	 */
 	@Override
 	public void renderListRepeater(@Nullable String title, @Nonnull ListRepeater repeater) {
+		String modelDocumentName = getCurrentListWidgetModelDocumentName();
+		String modelName = getCurrentListWidgetModelName();
+		ListModel<Bean> model = getCurrentListWidgetModel();
+		if ((modelDocumentName == null) || (modelName == null) || (model == null)) { // cannot happen as the list widget is pre-processed
+			throw new IllegalStateException("List repeater " + title + " is rendered without a list model");
+		}
 		RenderedComponent r = cr.listRepeater(null,
-												getCurrentListWidgetModelDocumentName(), 
-												getCurrentListWidgetModelName(), 
-												getCurrentListWidgetModel(), 
+												modelDocumentName, 
+												modelName, 
+												model, 
 												repeater.getFilterParameters(),
 												repeater.getParameters(),
 												title,
@@ -1371,7 +1418,7 @@ public class ClientViewRenderer extends ViewRenderer {
 		}
 		current = cr.addDataGridBoundColumn(null,
 												current, 
-												getCurrentDataWidget(),
+												getNullSafeCurrentDataWidget(),
 												column, 
 												dataWidgetVar,
 												title, 
@@ -1408,7 +1455,7 @@ public class ClientViewRenderer extends ViewRenderer {
 	 */
 	@Override
 	public void renderDataGridContainerColumn(@Nullable String title, @Nonnull DataGridContainerColumn column) {
-		current = cr.addDataGridContainerColumn(null, current, getCurrentDataWidget(), title, column);
+		current = cr.addDataGridContainerColumn(null, current, getNullSafeCurrentDataWidget(), title, column);
 	}
 
 	/**

@@ -383,7 +383,7 @@ public class DesignSpecification {
 	 * Returns the configured reportType.
 	 * @return The configured value.
 	 */
-	public @Nullable ReportType getReportType() {
+	public @Nonnull ReportType getReportType() {
 		return reportType;
 	}
 	
@@ -391,7 +391,7 @@ public class DesignSpecification {
 	 * Sets the configured reportType.
 	 * @param reportType The reportType value.
 	 */
-	public void setReportType(@Nullable ReportType reportType) {
+	public void setReportType(@Nonnull ReportType reportType) {
 		this.reportType = reportType;
 	}
 	
@@ -494,7 +494,7 @@ public class DesignSpecification {
 	 * Returns the configured width.
 	 * @return The configured value.
 	 */
-	public @Nullable Integer getWidth() {
+	public @Nonnull Integer getWidth() {
 		return width;
 	}
 	
@@ -502,7 +502,7 @@ public class DesignSpecification {
 	 * Sets the configured width.
 	 * @param width The width value.
 	 */
-	public void setWidth(@Nullable Integer width) {
+	public void setWidth(@Nonnull Integer width) {
 		this.width = width;
 	}
 	
@@ -510,7 +510,7 @@ public class DesignSpecification {
 	 * Returns the configured height.
 	 * @return The configured value.
 	 */
-	public @Nullable Integer getHeight() {
+	public @Nonnull Integer getHeight() {
 		return height;
 	}
 	
@@ -518,7 +518,7 @@ public class DesignSpecification {
 	 * Sets the configured height.
 	 * @param height The height value.
 	 */
-	public void setHeight(@Nullable Integer height) {
+	public void setHeight(@Nonnull Integer height) {
 		this.height = height;
 	}
 	
@@ -526,7 +526,7 @@ public class DesignSpecification {
 	 * Returns the configured leftMargin.
 	 * @return The configured value.
 	 */
-	public @Nullable Integer getLeftMargin() {
+	public @Nonnull Integer getLeftMargin() {
 		return leftMargin;
 	}
 	
@@ -534,7 +534,7 @@ public class DesignSpecification {
 	 * Sets the configured leftMargin.
 	 * @param leftMargin The leftMargin value.
 	 */
-	public void setLeftMargin(@Nullable Integer leftMargin) {
+	public void setLeftMargin(@Nonnull Integer leftMargin) {
 		this.leftMargin = leftMargin;
 	}
 	
@@ -542,7 +542,7 @@ public class DesignSpecification {
 	 * Returns the configured rightMargin.
 	 * @return The configured value.
 	 */
-	public @Nullable Integer getRightMargin() {
+	public @Nonnull Integer getRightMargin() {
 		return rightMargin;
 	}
 	
@@ -550,7 +550,7 @@ public class DesignSpecification {
 	 * Sets the configured rightMargin.
 	 * @param rightMargin The rightMargin value.
 	 */
-	public void setRightMargin(@Nullable Integer rightMargin) {
+	public void setRightMargin(@Nonnull Integer rightMargin) {
 		this.rightMargin = rightMargin;
 	}
 	
@@ -558,7 +558,7 @@ public class DesignSpecification {
 	 * Returns the configured topMargin.
 	 * @return The configured value.
 	 */
-	public @Nullable Integer getTopMargin() {
+	public @Nonnull Integer getTopMargin() {
 		return topMargin;
 	}
 	
@@ -566,7 +566,7 @@ public class DesignSpecification {
 	 * Sets the configured topMargin.
 	 * @param topMargin The topMargin value.
 	 */
-	public void setTopMargin(@Nullable Integer topMargin) {
+	public void setTopMargin(@Nonnull Integer topMargin) {
 		this.topMargin = topMargin;
 	}
 	
@@ -574,7 +574,7 @@ public class DesignSpecification {
 	 * Returns the configured bottomMargin.
 	 * @return The configured value.
 	 */
-	public @Nullable Integer getBottomMargin() {
+	public @Nonnull Integer getBottomMargin() {
 		return bottomMargin;
 	}
 	
@@ -582,7 +582,7 @@ public class DesignSpecification {
 	 * Sets the configured bottomMargin.
 	 * @param bottomMargin The bottomMargin value.
 	 */
-	public void setBottomMargin(@Nullable Integer bottomMargin) {
+	public void setBottomMargin(@Nonnull Integer bottomMargin) {
 		this.bottomMargin = bottomMargin;
 	}
 	
@@ -590,7 +590,7 @@ public class DesignSpecification {
 	 * Returns the configured columnWidth.
 	 * @return The configured value.
 	 */
-	public @Nullable Integer getColumnWidth() {
+	public @Nonnull Integer getColumnWidth() {
 		return columnWidth;
 	}
 
@@ -598,7 +598,7 @@ public class DesignSpecification {
 	 * Sets the configured columnWidth.
 	 * @param columnWidth The columnWidth value.
 	 */
-	public void setColumnWidth(@Nullable Integer columnWidth) {
+	public void setColumnWidth(@Nonnull Integer columnWidth) {
 		this.columnWidth = columnWidth;
 	}
 	
@@ -781,7 +781,7 @@ public class DesignSpecification {
 	 * Returns the configured defaultElementHeight.
 	 * @return The configured value.
 	 */
-	public @Nullable Integer getDefaultElementHeight() {
+	public @Nonnull Integer getDefaultElementHeight() {
 		return defaultElementHeight;
 	}
 	
@@ -789,7 +789,7 @@ public class DesignSpecification {
 	 * Sets the configured defaultElementHeight.
 	 * @param defaultElementHeight The defaultElementHeight value.
 	 */
-	public void setDefaultElementHeight(@Nullable Integer defaultElementHeight) {
+	public void setDefaultElementHeight(@Nonnull Integer defaultElementHeight) {
 		this.defaultElementHeight = defaultElementHeight;
 	}
 	
@@ -941,7 +941,7 @@ public class DesignSpecification {
 	 * Returns the configured checkBoxDisplayExpression.
 	 * @return The configured value.
 	 */
-	public @Nullable String getCheckBoxDisplayExpression() {
+	public @Nonnull String getCheckBoxDisplayExpression() {
 		return checkBoxDisplayExpression;
 	}
 	
@@ -949,7 +949,7 @@ public class DesignSpecification {
 	 * Sets the configured checkBoxDisplayExpression.
 	 * @param checkBoxDisplayExpression The checkBoxDisplayExpression value.
 	 */
-	public void setCheckBoxDisplayExpression(@Nullable String checkBoxDisplayExpression) {
+	public void setCheckBoxDisplayExpression(@Nonnull String checkBoxDisplayExpression) {
 		this.checkBoxDisplayExpression = checkBoxDisplayExpression;
 	}
 	
@@ -1460,8 +1460,12 @@ public class DesignSpecification {
 	 * @return The resolved module metadata.
 	 */
 	public @Nonnull Module getModule() {
+		final String moduleNameToResolve = getModuleName();
+		if (moduleNameToResolve == null) {
+			throw new IllegalStateException("Report design " + name + " has no module name");
+		}
 		final Customer customer = CORE.getCustomer();
-		return customer.getModule(getModuleName());
+		return customer.getModule(moduleNameToResolve);
 	}
 
 	/**
@@ -1470,8 +1474,12 @@ public class DesignSpecification {
 	 * @return The resolved document metadata.
 	 */
 	public @Nonnull Document getDocument() {
+		final String documentNameToResolve = getDocumentName();
+		if (documentNameToResolve == null) {
+			throw new IllegalStateException("Report design " + name + " has no document name");
+		}
 		final Customer customer = CORE.getCustomer();
-		return getModule().getDocument(customer, getDocumentName());
+		return getModule().getDocument(customer, documentNameToResolve);
 	}
 
 	/**

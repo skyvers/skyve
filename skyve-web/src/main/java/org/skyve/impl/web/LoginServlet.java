@@ -5,6 +5,7 @@ import java.io.IOException;
 import org.skyve.CORE;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.customer.Customer;
+import org.skyve.metadata.customer.LoginResources;
 import org.skyve.metadata.repository.Repository;
 import org.skyve.metadata.user.User;
 import org.skyve.web.WebContext;
@@ -103,8 +104,9 @@ public class LoginServlet extends HttpServlet {
 				String url = "/pages/login.jsp";
 				if (customerName != null) {
 					Customer customer = repository.getCustomer(customerName);
-					if (customer != null) {
-						String value = customer.getLoginResources().getLoginPageURL();
+					LoginResources loginResources = (customer == null) ? null : customer.getLoginResources();
+					if (loginResources != null) {
+						String value = loginResources.getLoginPageURL();
 						if (value != null) {
 							url = value;
 						}
@@ -119,8 +121,9 @@ public class LoginServlet extends HttpServlet {
 				String url = "/pages/loggedOut.jsp";
 				if (customerName != null) {
 					Customer customer = repository.getCustomer(customerName);
-					if (customer != null) {
-						String value = customer.getLoginResources().getLoggedOutPageURL();
+					LoginResources loginResources = (customer == null) ? null : customer.getLoginResources();
+					if (loginResources != null) {
+						String value = loginResources.getLoggedOutPageURL();
 						if (value != null) {
 							url = value;
 						}

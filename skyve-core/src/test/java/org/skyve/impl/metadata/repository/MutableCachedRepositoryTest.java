@@ -19,6 +19,7 @@ import org.junit.jupiter.api.io.TempDir;
 import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.repository.behaviour.ActionMetaData;
 import org.skyve.impl.metadata.repository.behaviour.BizletMetaData;
+import org.skyve.impl.metadata.repository.customer.CustomerMetaData;
 import org.skyve.impl.metadata.repository.document.DocumentMetaData;
 import org.skyve.impl.metadata.repository.module.MenuMetaData;
 import org.skyve.impl.metadata.repository.module.ModuleDocumentMetaData;
@@ -340,6 +341,71 @@ class MutableCachedRepositoryTest {
 		org.skyve.metadata.view.View retrieved = repo.getView(null, null, document, "edit");
 
 		assertNull(retrieved);
+	}
+
+	@Test
+	void getViewThrowsWhenScaffoldingWithoutCustomer() {
+		LocalDesignRepository repo = new LocalDesignRepository(basePath);
+		repo.putModule(minimalModule("admin", "User"));
+		ProvidedRepositoryFactory.set(repo);
+		Document document = mockDocument("admin", "User");
+
+		MetaDataException e = assertThrows(MetaDataException.class, () -> repo.getView(null, null, document, "edit"));
+
+		assertEquals("Cannot scaffold view edit for document admin.User without a customer", e.getMessage());
+	}
+
+	// ---- unnamed metadata ----
+
+	@Test
+	void putCustomerThrowsWhenCustomerHasNoName() {
+		LocalDesignRepository repo = new LocalDesignRepository(basePath);
+
+		assertThrows(MetaDataException.class, () -> repo.putCustomer(new CustomerMetaData()));
+	}
+
+	@Test
+	void putModuleThrowsWhenModuleHasNoName() {
+		LocalDesignRepository repo = new LocalDesignRepository(basePath);
+		ModuleMetaData mmd = minimalModule("admin", "User");
+		mmd.setName(null);
+
+		assertThrows(MetaDataException.class, () -> repo.putModule(mmd));
+	}
+
+	@Test
+	void putModuleForCustomerThrowsWhenModuleHasNoName() {
+		LocalDesignRepository repo = new LocalDesignRepository(basePath);
+		CustomerImpl customer = mock(CustomerImpl.class);
+		when(customer.getName()).thenReturn("acme");
+		ModuleMetaData mmd = minimalModule("admin", "User");
+		mmd.setName(null);
+
+		assertThrows(MetaDataException.class, () -> repo.putModule(customer, mmd));
+	}
+
+	@Test
+	void putDocumentThrowsWhenDocumentHasNoName() {
+		LocalDesignRepository repo = new LocalDesignRepository(basePath);
+		Module module = repo.putModule(minimalModule("admin", "User"));
+		DocumentMetaData dmd = minimalDocument("User");
+		dmd.setName(null);
+
+		MetaDataException e = assertThrows(MetaDataException.class, () -> repo.putDocument(module, dmd));
+
+		assertEquals("The document [name] is required in module admin", e.getMessage());
+	}
+
+	@Test
+	void putDocumentForCustomerThrowsWhenDocumentHasNoName() {
+		LocalDesignRepository repo = new LocalDesignRepository(basePath);
+		Module module = repo.putModule(minimalModule("admin", "User"));
+		CustomerImpl customer = mock(CustomerImpl.class);
+		when(customer.getName()).thenReturn("acme");
+		DocumentMetaData dmd = minimalDocument("User");
+		dmd.setName(null);
+
+		assertThrows(MetaDataException.class, () -> repo.putDocument(customer, module, dmd));
 	}
 
 	// ---- vtable ----

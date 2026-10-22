@@ -76,6 +76,9 @@ public class BizportExportServlet extends HttpServlet {
 	        	}
 	
 	    		AbstractPersistence persistence = webContext.getConversation();
+	    		if (persistence == null) {
+	    			throw new IllegalStateException("Cached conversation " + contextKey + " has no persistence");
+	    		}
 	    		persistence.setForThread();
 				try {
 					try {

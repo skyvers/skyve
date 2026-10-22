@@ -24,6 +24,7 @@ import org.skyve.domain.Bean;
 import org.skyve.domain.PersistentBean;
 import org.skyve.domain.types.Decimal;
 import org.skyve.domain.types.Decimal2;
+import org.skyve.domain.types.converters.Format.TextCase;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.metadata.model.document.AssociationImpl;
 import org.skyve.impl.metadata.model.document.field.Decimal10;
@@ -33,6 +34,7 @@ import org.skyve.impl.metadata.model.document.field.TextFormat;
 import org.skyve.impl.metadata.model.document.field.validator.DecimalValidator;
 import org.skyve.impl.metadata.model.document.field.validator.IntegerValidator;
 import org.skyve.impl.metadata.model.document.field.validator.LongValidator;
+import org.skyve.impl.metadata.model.document.field.validator.TextValidator;
 import org.skyve.impl.metadata.model.document.field.validator.TextValidator.ValidatorType;
 import org.skyve.impl.persistence.AbstractDocumentQuery;
 import org.skyve.impl.util.TimeUtil;
@@ -383,11 +385,13 @@ public class TestUtil {
 		}
 
 		if (validator != null) {
-			if (validator.getMin() != null) {
-				min = validator.getMin();
+			Decimal validatorMin = validator.getMin();
+			if (validatorMin != null) {
+				min = validatorMin;
 			}
-			if (validator.getMax() != null) {
-				max = validator.getMax();
+			Decimal validatorMax = validator.getMax();
+			if (validatorMax != null) {
+				max = validatorMax;
 			}
 		}
 
@@ -465,6 +469,7 @@ public class TestUtil {
 	private static @Nonnull String randomFormat(@Nonnull TextFormat textFormat, int length) {
 
 		String mask = textFormat.getMask();
+		TextCase textCase = textFormat.getCase();
 		String out = new String();
 
 		if (mask != null) {
@@ -485,9 +490,9 @@ public class TestUtil {
 						break;
 				}
 			}
-		} else if (textFormat.getCase() != null) {
+		} else if (textCase != null) {
 			out = randomString(RANDOM.nextInt(length) + 1);
-			switch (textFormat.getCase()) {
+			switch (textCase) {
 				case capital:
 					out = StringUtils.capitalize(out);
 					break;
@@ -524,22 +529,26 @@ public class TestUtil {
 		if (attribute instanceof org.skyve.impl.metadata.model.document.field.Integer field) {
 			IntegerValidator validator = field.getValidator();
 			if (validator != null) {
-				if (validator.getMin() != null) {
-					min = validator.getMin().intValue();
+				Integer validatorMin = validator.getMin();
+				if (validatorMin != null) {
+					min = validatorMin.intValue();
 				}
-				if (validator.getMax() != null) {
-					max = validator.getMax().intValue();
+				Integer validatorMax = validator.getMax();
+				if (validatorMax != null) {
+					max = validatorMax.intValue();
 				}
 			}
 		}
 		else if (attribute instanceof org.skyve.impl.metadata.model.document.field.LongInteger field) {
 			LongValidator validator = field.getValidator();
 			if (validator != null) {
-				if (validator.getMin() != null) {
-					min = validator.getMin().intValue();
+				Long validatorMin = validator.getMin();
+				if (validatorMin != null) {
+					min = validatorMin.intValue();
 				}
-				if (validator.getMax() != null) {
-					max = validator.getMax().intValue();
+				Long validatorMax = validator.getMax();
+				if (validatorMax != null) {
+					max = validatorMax.intValue();
 				}
 			}
 		}
@@ -665,34 +674,36 @@ public class TestUtil {
 			// check if this string has a format mask
 			if (attribute instanceof Text text) {
 				length = Integer.valueOf(text.getLength());
+				TextFormat format = text.getFormat();
+				TextValidator validator = text.getValidator();
+				String regularExpression = (validator == null) ? null : validator.getRegularExpression();
+				ValidatorType validatorType = (validator == null) ? null : validator.getType();
 
-				if (text.getFormat() != null) {
+				if (format != null) {
 					// check if it has a format mask and a regex, if so, prefer the regex
-					if (text.getValidator() != null && text.getValidator().getRegularExpression() != null
-							&& text.getValidator().getType() == null) {
+					if (regularExpression != null && validatorType == null) {
 						// return text matching the regex
-						String xeger = randomRegex(text.getValidator().getRegularExpression(), length);
+						String xeger = randomRegex(regularExpression, length);
 						if (xeger != null) {
 							return xeger;
 						}
 					}
 
 					// return text matching the format mask
-					return randomFormat(text.getFormat(), length.intValue());
-				} else if (text.getValidator() != null && text.getValidator().getRegularExpression() != null
-						&& text.getValidator().getType() == null) {
+					return randomFormat(format, length.intValue());
+				} else if (regularExpression != null && validatorType == null) {
 					// check if this string has a regex and no validator type
-					String xeger = randomRegex(text.getValidator().getRegularExpression(), length);
+					String xeger = randomRegex(regularExpression, length);
 					if (xeger != null) {
 						return xeger;
 					}
 				} else {
 					// check if this is an email address
-					if (text.getValidator() != null && ValidatorType.email.equals(text.getValidator().getType())) {
+					if (ValidatorType.email.equals(validatorType)) {
 						return randomEmail(text.getLength());
-					} else if (text.getValidator() != null && text.getValidator().getRegularExpression() != null) {
+					} else if (regularExpression != null) {
 						// check if this string has a regex via a validator type
-						String xeger = randomRegex(text.getValidator().getRegularExpression(), length);
+						String xeger = randomRegex(regularExpression, length);
 						if (xeger != null) {
 							return xeger;
 						}
@@ -804,7 +815,8 @@ public class TestUtil {
 						fileToLoad),
 						customerName,
 						(module == null) ? null : module.getName());
-				if (file.exists()) {
+				// No file means no test data
+				if ((file != null) && file.exists()) {
 					try (InputStream inputStream = new FileInputStream(file)) {
 						values = readFromInputStream(inputStream);
 						DATA_CACHE.put(key, values);

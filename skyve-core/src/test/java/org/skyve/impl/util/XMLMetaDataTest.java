@@ -1682,6 +1682,7 @@ class XMLMetaDataTest {
 		MenuMetaData menu = new MenuMetaData();
 		CalendarItemMetaData calendar = new CalendarItemMetaData();
 		calendar.setName("Appointments");
+		calendar.setDocumentName("Dashboard");
 		calendar.setModelName("AppointmentModel");
 		GrantedTo grant = new GrantedTo();
 		grant.setRoleName("Administrator");

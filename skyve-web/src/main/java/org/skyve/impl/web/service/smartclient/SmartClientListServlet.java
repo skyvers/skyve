@@ -188,6 +188,9 @@ public class SmartClientListServlet extends HttpServlet {
 							(request.getParameter(AbstractWebContext.CONTINUE_CONVERSATION) != null)) {
 						LOGGER.info("USE VIEW CONVERSATION!!!!");
 						persistence = webContext.getConversation();
+						if (persistence == null) {
+							throw new IllegalStateException("Cached conversation " + webId + " has no persistence");
+						}
 						persistence.setForThread();
 					}
 					
@@ -236,7 +239,7 @@ public class SmartClientListServlet extends HttpServlet {
 							}
 							key = RequestKey.model(drivingDocument, modelName);
 							model.setBean(bean);
-							drivingDocument = model.getDrivingDocument();
+							drivingDocument = getDrivingDocument(model);
 						}
 						// query type of request
 						else {
@@ -334,6 +337,9 @@ public class SmartClientListServlet extends HttpServlet {
 								sortParameters = new SortParameter[sortBys.length];
 								for (int i = 0; i < sortBys.length; i++) {
 									String sortBy = OWASP.sanitise(Sanitisation.text, Util.processStringValue(sortBys[i]));
+									if (sortBy == null) {
+										throw new ServletException("Blank _sortBy parameter in the request.");
+									}
 	
 									SortParameter sortParameter = new SortParameterImpl();
 									if (sortBy.startsWith("-")) {
@@ -343,7 +349,11 @@ public class SmartClientListServlet extends HttpServlet {
 									else {
 										sortParameter.setDirection(SortDirection.ascending);
 									}
-									sortParameter.setBy(BindUtil.unsanitiseBinding(sortBy));
+									String sortBinding = BindUtil.unsanitiseBinding(sortBy);
+									if (sortBinding == null) { // only null for a null binding
+										throw new IllegalStateException("No binding for sort parameter " + sortBy);
+									}
+									sortParameter.setBy(sortBinding);
 	
 									sortParameters[i] = sortParameter;
 								}
@@ -382,9 +392,15 @@ public class SmartClientListServlet extends HttpServlet {
 							String bizTagged = (String) parameters.get(PersistentBean.TAGGED_NAME);
 							String bizFlagComment = request.getParameter(PersistentBean.FLAG_COMMENT_NAME);
 							if ("TAG".equals(bizTagged)) {
+								if (tagId == null) {
+									throw new ServletException("No _tagId in the request to tag with.");
+								}
 								tag(user, customer, module, model, tagId, parameters, pw);
 							}
 							else if ("UNTAG".equals(bizTagged)) {
+								if (tagId == null) {
+									throw new ServletException("No _tagId in the request to untag with.");
+								}
 								untag(user, customer, module, model, tagId, parameters, pw);
 							}
 							else if (bizFlagComment != null) {
@@ -501,6 +517,9 @@ public class SmartClientListServlet extends HttpServlet {
 
 		Page page = model.fetch();
 		List<Bean> beans = page.getRows();
+		if (beans == null) {
+			throw new IllegalStateException("List model " + model.getClass().getName() + " fetched a page with no rows list");
+		}
 
 		Bean summaryBean = page.getSummary();
 		if (includeExtraSummaryRow) {
@@ -509,7 +528,7 @@ public class SmartClientListServlet extends HttpServlet {
 		long totalRows = page.getTotalRows();
 		if (UtilImpl.COMMAND_TRACE) COMMAND_LOGGER.info("totalRows = {}, row size = {}",
 																		Long.valueOf(page.getTotalRows()),
-																		Integer.valueOf(page.getRows().size()));
+																		Integer.valueOf(beans.size()));
 
 		Set<String> projections = processRows(beans, model, user, customer, module, queryDocument);
 
@@ -562,6 +581,9 @@ public class SmartClientListServlet extends HttpServlet {
 					// Get each criterion name, operator and operands
 					@SuppressWarnings("unchecked")
 					Map<String, Object> criterion = (Map<String, Object>) JSON.unmarshall(user, jsonCriteria);
+					if (criterion == null) {
+						throw new ServletException("Null criterion in the request.");
+					}
 
 					// Check for filter by flag permissions
 					if (PersistentBean.FLAG_COMMENT_NAME.equals(criterion.get("fieldName"))) {
@@ -814,7 +836,7 @@ public class SmartClientListServlet extends HttpServlet {
 						if (! parameter) {
 							if (value != null) {
 								Object[] codes = ListModel.getTop100VariantDomainValueCodesFromDescriptionFilter(targetDocument, attribute, value.toString());
-								filter.addIn(binding, codes);
+								nonNullFilter(filter, model).addIn(binding, codes);
 								continue;
 							}
 						}
@@ -879,11 +901,11 @@ public class SmartClientListServlet extends HttpServlet {
 				}
 			}
 
-			if (parameter) {
+			if (parameterName != null) { // set for a parameter
 				model.putParameter(parameterName, value);
 			}
 			else {
-				addCriterionToFilter(binding, fo, value, null, null, tagId, filter);
+				addCriterionToFilter(binding, fo, value, null, null, tagId, nonNullFilter(filter, model));
 			}
 		}
 	}
@@ -915,10 +937,10 @@ public class SmartClientListServlet extends HttpServlet {
 		// in it which we can't detect and we need to ensure any filtering done here is 
 		// AND'd with any existing criteria (hard-coded in a filter stanza or not)
 		Filter filter = model.getFilter();
-		Filter newFilter = model.newFilter();
+		Filter newFilter = nonNullFilter(model.newFilter(), model);
 		addAdvancedFilterCriteriaToQueryInternal(module, document, user, compoundFilterOperator, criteria, tagId, model, newFilter);
 		if (! newFilter.isEmpty()) {
-			filter.addAnd(newFilter);
+			nonNullFilter(filter, model).addAnd(newFilter);
 		}
 	}
 
@@ -946,7 +968,7 @@ public class SmartClientListServlet extends HttpServlet {
 			SmartClientFilterOperator filterOperator = SmartClientFilterOperator.valueOf((String) criterion.get(OPERATOR_FIELD));
 
 			if (binding == null) { // advanced criteria
-				Filter subFilter = model.newFilter();
+				Filter subFilter = nonNullFilter(model.newFilter(), model);
 				CompoundFilterOperator subCompoundFilterOperator = CompoundFilterOperator.valueOf(filterOperator.toString());
 				@SuppressWarnings("unchecked")
 				List<Map<String, Object>> subCritiera = (List<Map<String, Object>>) criterion.get(CRITERIA_FIELD);
@@ -1074,7 +1096,7 @@ public class SmartClientListServlet extends HttpServlet {
 					}
 				}
 
-				if (parameter) {
+				if (parameterName != null) { // set for a parameter
 					model.putParameter(parameterName, value);
 					continue;
 				}
@@ -1122,7 +1144,7 @@ public class SmartClientListServlet extends HttpServlet {
 							addCriterionToFilter(binding, filterOperator, value, start, end, tagId, filter);
 						}
 						else {
-							Filter orFilter = model.newFilter();
+							Filter orFilter = nonNullFilter(model.newFilter(), model);
 							addCriterionToFilter(binding, filterOperator, value, start, end, tagId, orFilter);
 							if (! orFilter.isEmpty()) {
 								filter.addOr(orFilter);
@@ -1392,17 +1414,17 @@ public class SmartClientListServlet extends HttpServlet {
 												@Nullable String tagId,
 												@Nonnull Filter filter) {
 		if (PersistentBean.TAGGED_NAME.equals(binding)) {
-			if ("true".equals(value)) {
-				filter.addTagged(tagId, true);
-			}
-			else if ("false".equals(value)) {
-				filter.addTagged(tagId, false);
+			if ("true".equals(value) || "false".equals(value)) {
+				if (tagId == null) {
+					throw new DomainException("A " + PersistentBean.TAGGED_NAME + " criterion needs a tag to filter by");
+				}
+				filter.addTagged(tagId, "true".equals(value));
 			}
 		}
 		else if (filterOperator == null) {
 			if (HierarchicalBean.PARENT_ID.equals(binding)) {
 				String parentId = (String) value;
-				if (value == null) { // get all root nodes in the data
+				if (parentId == null) { // get all root nodes in the data
 					filter.addNull(binding);
 				}
 				else if (parentId.startsWith("_")) { // get a particular root node
@@ -1652,7 +1674,7 @@ public class SmartClientListServlet extends HttpServlet {
 	throws Exception {
 		User user = persistence.getUser();
 		Customer customer = user.getCustomer();
-		Document document = model.getDrivingDocument();
+		Document document = getDrivingDocument(model);
 
 		// remove read-only property parameters as they have no setters
 		properties.remove(Bean.MODULE_KEY);
@@ -1668,6 +1690,9 @@ public class SmartClientListServlet extends HttpServlet {
 			String columnBinding = column.getBinding();
 			if (columnBinding == null) {
 				columnBinding = column.getName();
+				if (columnBinding == null) {
+					throw new MetaDataException("A column in list model " + model.getClass().getName() + " has no binding or name");
+				}
 			}
 
 			if ((! (column instanceof MetaDataQueryProjectedColumn projected)) || (! projected.isEditable())) {
@@ -1694,6 +1719,9 @@ public class SmartClientListServlet extends HttpServlet {
 
 		String bizId = (String) properties.remove(Bean.DOCUMENT_ID);
 		Bean bean = model.update(bizId, properties);
+		if (bean == null) {
+			throw new IllegalStateException("List model " + model.getClass().getName() + " returned no bean from update of " + bizId);
+		}
 
 		// return the updated row
 		Util.chunkCharsToWriter(returnUpdatedMessage(user, customer, module, document, model, bean, rowIsTagged), pw);
@@ -1708,7 +1736,7 @@ public class SmartClientListServlet extends HttpServlet {
 								@Nonnull PrintWriter pw)
 	throws Exception {
 		String bizId = (String) parameters.get(Bean.DOCUMENT_ID);
-		EXT.getTagManager().tag(tagId, module.getName(), model.getDrivingDocument().getName(), bizId);
+		EXT.getTagManager().tag(tagId, module.getName(), getDrivingDocument(model).getName(), bizId);
 
 		// return the updated row
 		Util.chunkCharsToWriter(returnTagUpdateMessage(user, customer, parameters, module, model, true), pw);
@@ -1723,7 +1751,7 @@ public class SmartClientListServlet extends HttpServlet {
 								@Nonnull PrintWriter pw)
 	throws Exception {
 		String bizId = (String) parameters.get(Bean.DOCUMENT_ID);
-		EXT.getTagManager().untag(tagId, module.getName(), model.getDrivingDocument().getName(), bizId);
+		EXT.getTagManager().untag(tagId, module.getName(), getDrivingDocument(model).getName(), bizId);
 
 		// return the updated row
 		Util.chunkCharsToWriter(returnTagUpdateMessage(user, customer, parameters, module, model, false), pw);
@@ -1809,12 +1837,42 @@ public class SmartClientListServlet extends HttpServlet {
 
 		message.append(JSON.marshall(customer,
 										new DynamicBean(module.getName(),
-															model.getDrivingDocument().getName(),
+															getDrivingDocument(model).getName(),
 															properties),
 										projections));
 		message.append("]}}");
 
 		return message;
+	}
+
+	/**
+	 * Returns the driving document of a list model served by this servlet.
+	 *
+	 * @param model the list model
+	 * @return the model's driving document
+	 * @throws IllegalStateException if the model has no driving document
+	 */
+	private static @Nonnull Document getDrivingDocument(@Nonnull ListModel<?> model) {
+		Document result = model.getDrivingDocument();
+		if (result == null) {
+			throw new IllegalStateException("List model " + model.getClass().getName() + " has no driving document");
+		}
+		return result;
+	}
+
+	/**
+	 * Returns a filter obtained from a list model, to add criteria to.
+	 *
+	 * @param filter the filter from {@link ListModel#getFilter()} or {@link ListModel#newFilter()}
+	 * @param model the list model the filter came from
+	 * @return the filter
+	 * @throws IllegalStateException if the model does not support filtering (the filter is null)
+	 */
+	private static @Nonnull Filter nonNullFilter(@Nullable Filter filter, @Nonnull ListModel<?> model) {
+		if (filter == null) {
+			throw new IllegalStateException("List model " + model.getClass().getName() + " does not support filtering");
+		}
+		return filter;
 	}
 
 	private static void remove(@Nonnull ListModel<Bean> model,

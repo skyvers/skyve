@@ -219,6 +219,32 @@ class FileSystemRepositoryTest {
 		assertNotNull(key, "Document key should be registered");
 	}
 
+	@Test
+	void unnamedCustomerModuleReferenceIsSkippedWhenPopulatingKeys() throws Exception {
+		Path customerDir = tempDir.resolve("customers/acme");
+		Files.createDirectories(customerDir);
+		Files.writeString(customerDir.resolve("acme.xml"),
+				"<customer xmlns='http://www.skyve.org/xml/customer' name='acme'>"
+				+ "<defaultDateConverter>DD_MMM_YYYY</defaultDateConverter>"
+				+ "<defaultTimeConverter>HH24_MI</defaultTimeConverter>"
+				+ "<defaultDateTimeConverter>DD_MMM_YYYY_HH24_MI</defaultDateTimeConverter>"
+				+ "<defaultTimestampConverter>DD_MMM_YYYY_HH24_MI_SS</defaultTimestampConverter>"
+				+ "<modules homeModule='test'><module/><module name='test'/></modules>"
+				+ "</customer>");
+		Path namedModuleDir = customerDir.resolve("modules/test");
+		Files.createDirectories(namedModuleDir);
+		Files.createFile(namedModuleDir.resolve("test.xml"));
+		// A module literally named "null" must not be picked up for the unnamed reference
+		Path nullModuleDir = customerDir.resolve("modules/null");
+		Files.createDirectories(nullModuleDir);
+		Files.createFile(nullModuleDir.resolve("null.xml"));
+
+		LocalDesignRepository repo = new LocalDesignRepository(basePath);
+
+		assertEquals("customers/acme/modules/test", repo.vtable("acme", "modules/test"));
+		assertNull(repo.vtable("acme", "modules/null"));
+	}
+
 	// ---- getUseScaffoldedViews ----
 
 	@Test

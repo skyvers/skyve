@@ -144,11 +144,17 @@ public class ActionUtil {
     throws Exception {
 		// ensure that the proper conversation is stashed in the webContext object
 		AbstractWebContext webContext = facesView.getWebContext();
+		if (webContext == null) {
+			throw new IllegalStateException("Cannot redirect a view scoped conversation as the FacesView has no web context");
+		}
 		StateUtil.commitAndCacheConversation(webContext);
 
 		// Get the view's bean
 		Bean contextBean = facesView.getBean();
-		
+		if (contextBean == null) {
+			throw new IllegalStateException("Cannot redirect a view scoped conversation as the FacesView has no bean");
+		}
+
 		// Put the view in the session (keep post render state if required)
 		// NB The view will be dehydrated in the SkyveFacesPhaseListener (after Bizlet.postRender() is called - so it has a webContext)
 		Bizlet<? extends Bean> postRenderBizlet = facesView.getPostRenderBizlet();

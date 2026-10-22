@@ -961,9 +961,18 @@ public class ModuleMetaData extends NamedMetaData implements ConvertibleMetaData
 				String endBinding = item.getEndBinding();
 
 				if (documentName != null) {
-					if ((queryName != null) ||
-							(startBinding == null) ||
-							(endBinding == null)) {
+					if (modelName != null) {
+						// a model supplies its own events so it doesn't need the bindings
+						if ((queryName != null) ||
+								(startBinding != null) ||
+								(endBinding != null)) {
+							throw new MetaDataException(metaDataName + " : If [model] is present, then [query], " +
+															"[startBinding] and [endBinding] should be absent for menu item " + item.getName());
+						}
+					}
+					else if ((queryName != null) ||
+								(startBinding == null) ||
+								(endBinding == null)) {
 						throw new MetaDataException(metaDataName + MENU_DOCUMENT_QUERY_EXCLUSIVITY +
 														"and [startBinding] and [endBinding] are required for menu item " + item.getName());
 					}
@@ -977,10 +986,8 @@ public class ModuleMetaData extends NamedMetaData implements ConvertibleMetaData
 					}
 				}
 				else if (modelName != null) {
-					if ((startBinding != null) || (endBinding != null)) {
-						throw new MetaDataException(metaDataName + " : If [model] is present, then [document] is required and [query], " +
-														"[startBinding] and [endBinding] should be absent for menu item " + item.getName());
-					}
+					throw new MetaDataException(metaDataName + MENU_MODEL_DOCUMENT_REQUIRED +
+													FOR_MENU_ITEM + item.getName());
 				}
 				else {
 					throw new MetaDataException(metaDataName + MENU_TARGET_REQUIRED +

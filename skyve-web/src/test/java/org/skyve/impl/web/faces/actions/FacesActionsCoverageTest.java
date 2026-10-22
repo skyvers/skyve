@@ -57,6 +57,7 @@ import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.metadata.view.model.list.Page;
 import org.skyve.web.UserAgentType;
 
+import jakarta.faces.FacesException;
 import jakarta.faces.component.UIViewRoot;
 import jakarta.faces.component.html.HtmlInputText;
 import jakarta.faces.context.ExternalContext;
@@ -555,7 +556,7 @@ class FacesActionsCoverageTest {
 
 		FacesView facesView = mock(FacesView.class);
 		when(facesView.getBean()).thenReturn(bean);
-		when(facesView.getWebContext()).thenReturn(null);
+		when(facesView.getWebContext()).thenReturn(mock(AbstractWebContext.class));
 
 		SaveAction action = new SaveAction(facesView, false);
 		assertThrows(ClassCastException.class, action::callback);
@@ -726,7 +727,7 @@ class FacesActionsCoverageTest {
 		currentBean = bean;
 		currentFacesView = mock(FacesView.class);
 		when(currentFacesView.getBean()).thenReturn(bean);
-		when(currentFacesView.getWebContext()).thenReturn(null);
+		when(currentFacesView.getWebContext()).thenReturn(mock(AbstractWebContext.class));
 		return persistence;
 	}
 
@@ -754,7 +755,7 @@ class FacesActionsCoverageTest {
 
 		FacesView facesView = mock(FacesView.class);
 		when(facesView.getBean()).thenReturn(bean);
-		when(facesView.getWebContext()).thenReturn(null);
+		when(facesView.getWebContext()).thenReturn(mock(AbstractWebContext.class));
 
 		SaveAction action = new SaveAction(facesView, true);
 		assertThrows(ClassCastException.class, action::callback);
@@ -883,7 +884,7 @@ class FacesActionsCoverageTest {
 		when(facesView.getBean()).thenReturn(null);
 
 		AddAction action = new AddAction(facesView, "items", true);
-		assertThrows(NullPointerException.class, action::callback);
+		assertThrows(IllegalStateException.class, action::callback);
 	}
 
 	@Test
@@ -906,7 +907,7 @@ class FacesActionsCoverageTest {
 		when(facesView.getBean()).thenReturn(null);
 
 		AddAction action = new AddAction(facesView, "items", false);
-		assertThrows(NullPointerException.class, action::callback);
+		assertThrows(IllegalStateException.class, action::callback);
 	}
 
 	@Test
@@ -916,7 +917,7 @@ class FacesActionsCoverageTest {
 		when(facesView.getBean()).thenReturn(null);
 
 		AddAction action = new AddAction(facesView, "items", true);
-		assertThrows(NullPointerException.class, action::callback);
+		assertThrows(IllegalStateException.class, action::callback);
 	}
 
 	@Test
@@ -975,7 +976,7 @@ class FacesActionsCoverageTest {
 		when(facesView.getCurrentBean()).thenReturn(null);
 
 		AddAction action = new AddAction(facesView, "items", true);
-		assertThrows(NullPointerException.class, action::callback);
+		assertThrows(IllegalStateException.class, action::callback);
 	}
 
 	@Test
@@ -1023,7 +1024,7 @@ class FacesActionsCoverageTest {
 		FacesView facesView = mock(FacesView.class);
 		when(facesView.getBean()).thenReturn(rootBean);
 		when(facesView.getViewBinding()).thenReturn("child");
-		when(facesView.getWebContext()).thenReturn(null);
+		when(facesView.getWebContext()).thenReturn(mock(AbstractWebContext.class));
 
 		RemoveAction action = new RemoveAction(facesView, null, null, null);
 		assertThrows(ClassCastException.class, action::callback);
@@ -1036,7 +1037,7 @@ class FacesActionsCoverageTest {
 		when(facesView.getViewBinding()).thenReturn(null);
 
 		RemoveAction action = new RemoveAction(facesView, null, null, null);
-		assertThrows(NullPointerException.class, action::callback);
+		assertThrows(IllegalStateException.class, action::callback);
 	}
 
 	@Test
@@ -1060,10 +1061,134 @@ class FacesActionsCoverageTest {
 		FacesView facesView = mock(FacesView.class);
 		when(facesView.getBean()).thenReturn(rootBean);
 		when(facesView.getViewBinding()).thenReturn("child");
-		when(facesView.getWebContext()).thenReturn(null);
+		when(facesView.getWebContext()).thenReturn(mock(AbstractWebContext.class));
 
 		RemoveAction action = new RemoveAction(facesView, null, null, null);
 		assertThrows(NullPointerException.class, action::callback);
+	}
+
+	@Test
+	void setTitleActionReturnsWhenViewBindingYieldsNoTargetBean() {
+		bindPersistenceForUser(mock(User.class));
+		HashMap<String, Object> values = new HashMap<>();
+		values.put("child", null);
+		DynamicBean bean = new DynamicBean("admin", "Contact", values);
+
+		FacesView facesView = mock(FacesView.class);
+		when(facesView.getBean()).thenReturn(bean);
+		when(facesView.getViewBinding()).thenReturn("child");
+
+		SetTitleAction action = new SetTitleAction(facesView);
+
+		assertDoesNotThrow(action::callback);
+		verify(facesView, never()).setTitle(org.mockito.ArgumentMatchers.anyString());
+	}
+
+	@Test
+	void populateActionThrowsWhenQueryNameMissing() {
+		FacesView facesView = mock(FacesView.class);
+		when(facesView.getBizModuleParameter()).thenReturn("admin");
+		when(facesView.getBizDocumentParameter()).thenReturn("Contact");
+		when(facesView.getQueryNameParameter()).thenReturn(null);
+
+		PopulateAction action = new PopulateAction(facesView);
+
+		assertThrows(FacesException.class, action::callback);
+		verify(facesView, never()).setTitle(org.mockito.ArgumentMatchers.anyString());
+	}
+
+	@Test
+	void executeActionActionThrowsWhenSelectedRowIsNotInTheGrid() {
+		bindPersistenceForUser(mock(User.class));
+		HashMap<String, Object> values = new HashMap<>();
+		values.put("items", new java.util.ArrayList<>());
+		DynamicBean bean = new DynamicBean("admin", "Contact", values);
+
+		FacesView facesView = mock(FacesView.class);
+		when(facesView.getBean()).thenReturn(bean);
+
+		ExecuteActionAction action = new ExecuteActionAction(facesView, "myAction", "items", "missing");
+
+		assertThrows(IllegalStateException.class, action::callback);
+	}
+
+	@Test
+	void executeActionActionThrowsWhenActionIsNotInTheView() {
+		View view = mockActionView();
+		when(view.getAction("myAction")).thenReturn(null);
+
+		ExecuteActionAction action = new ExecuteActionAction(currentFacesView, "myAction", null, null);
+
+		assertThrows(MetaDataException.class, action::callback);
+	}
+
+	@Test
+	void executeActionActionRefusesAnImplicitAction() {
+		View view = mockActionView();
+		when(view.getAction("myAction")).thenReturn(mock(Action.class));
+
+		assertRefusedWithASecurityException(new ExecuteActionAction(currentFacesView, "myAction", null, null)::callback);
+	}
+
+	@Test
+	void executeDownloadActionThrowsWhenActionIsNotInTheView() {
+		View view = mockActionView();
+		when(view.getAction("myAction")).thenReturn(null);
+
+		ExecuteDownloadAction action = new ExecuteDownloadAction(currentFacesView, "myAction", null, null);
+
+		assertThrows(MetaDataException.class, action::callback);
+	}
+
+	@Test
+	void executeDownloadActionRefusesAnImplicitAction() {
+		View view = mockActionView();
+		when(view.getAction("myAction")).thenReturn(mock(Action.class));
+
+		assertRefusedWithASecurityException(new ExecuteDownloadAction(currentFacesView, "myAction", null, null)::callback);
+	}
+
+	/**
+	 * Mocks a user, customer, module and document for a faces view of a bean, returning the document's create view
+	 * for stubbing its actions.
+	 */
+	private View mockActionView() {
+		installRequestSelectionContext();
+		User user = mock(User.class);
+		Customer customer = mock(Customer.class);
+		Module module = mock(Module.class);
+		Document document = mock(Document.class);
+		View view = mock(View.class);
+		Bean bean = mock(Bean.class);
+		bindPersistenceForUser(user);
+
+		when(user.getCustomer()).thenReturn(customer);
+		when(bean.getBizModule()).thenReturn("admin");
+		when(bean.getBizDocument()).thenReturn("Contact");
+		when(customer.getModule("admin")).thenReturn(module);
+		when(module.getDocument(customer, "Contact")).thenReturn(document);
+		when(document.getView("desktop", customer, "create")).thenReturn(view);
+		when(view.getName()).thenReturn("create");
+
+		currentBean = bean;
+		currentFacesView = mock(FacesView.class);
+		when(currentFacesView.getBean()).thenReturn(bean);
+		return view;
+	}
+
+	@Test
+	void removeActionThrowsWhenInlineElementIsNotInTheCollection() {
+		HashMap<String, Object> values = new HashMap<>();
+		values.put("items", new java.util.ArrayList<>());
+		DynamicBean rootBean = new DynamicBean("admin", "Contact", values);
+
+		FacesView facesView = mock(FacesView.class);
+		when(facesView.getBean()).thenReturn(rootBean);
+		when(facesView.getViewBinding()).thenReturn(null);
+
+		RemoveAction action = new RemoveAction(facesView, "items", "missing", null);
+
+		assertThrows(IllegalStateException.class, action::callback);
 	}
 
 	private static void bindPersistenceForUser(User user) {

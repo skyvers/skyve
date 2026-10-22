@@ -133,6 +133,17 @@ class PrimeFacesAutomationContextTest {
 	}
 
 	@Test
+	void collectingBuilderSkipsBoundComponentsWithoutBinding() {
+		FacesContextBridge.setCurrent(new MockFacesContext());
+		PrimeFacesAutomationContext context = new PrimeFacesAutomationContext();
+		ComponentCollectingComponentBuilder builder = new ComponentCollectingComponentBuilder(context, mock(Step.class));
+		UIComponent checkBoxComponent = new TestComponent("checkBox");
+		EventSourceComponent checkBoxWrapper = new EventSourceComponent(checkBoxComponent, (UIComponentBase) checkBoxComponent);
+
+		assertSame(checkBoxWrapper, builder.checkBox(checkBoxWrapper, null, new CheckBox(), null, null, null));
+	}
+
+	@Test
 	void collectingLayoutBuilderRegistersDeferredEditListGridWhenAddedToContainer() {
 		FacesContextBridge.setCurrent(new MockFacesContext());
 		PrimeFacesAutomationContext context = new PrimeFacesAutomationContext();

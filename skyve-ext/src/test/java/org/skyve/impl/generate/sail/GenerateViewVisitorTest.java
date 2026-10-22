@@ -5,6 +5,7 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -21,6 +22,7 @@ import org.skyve.impl.metadata.view.ViewImpl;
 import org.skyve.impl.metadata.view.container.Tab;
 import org.skyve.impl.metadata.view.widget.Button;
 import org.skyve.impl.metadata.view.widget.bound.tabular.DataGrid;
+import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.model.Persistent;
 import org.skyve.metadata.repository.ProvidedRepository;
 import org.skyve.metadata.sail.language.Step;
@@ -66,6 +68,17 @@ class GenerateViewVisitorTest {
 		assertThat(((TabSelect) visitor.getPopulateSteps().get(1)).getTabPath(), is("Details"));
 		assertEquals(1, visitor.getActionSteps().size());
 		assertThat(((TabSelect) visitor.getActionSteps().get(0)).getTabPath(), is("Details"));
+	}
+
+	@Test
+	void visitTabThrowsForATabWithABlankTitle() {
+		GenerateViewVisitor visitor = visitor();
+		Tab tab = new Tab();
+		tab.setTitle(" ");
+
+		assertThrows(MetaDataException.class, () -> visitor.visitTab(tab, true, true));
+		assertEquals(1, visitor.getPopulateSteps().size());
+		assertTrue(visitor.getActionSteps().isEmpty());
 	}
 
 	@Test

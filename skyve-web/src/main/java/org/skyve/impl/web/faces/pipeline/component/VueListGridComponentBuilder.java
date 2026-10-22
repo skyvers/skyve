@@ -43,6 +43,9 @@ public class VueListGridComponentBuilder extends NoOpComponentBuilder {
 		}
 
 		Document drivingDocument = model.getDrivingDocument();
+		if (drivingDocument == null) {
+			throw new IllegalStateException("List model " + model.getClass().getName() + " has no driving document");
+		}
 		String drivingModuleName = drivingDocument.getOwningModuleName();
 		String drivingDocumentName = drivingDocument.getName();
 

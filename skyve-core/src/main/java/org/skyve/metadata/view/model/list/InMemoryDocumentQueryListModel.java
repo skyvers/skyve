@@ -1,5 +1,6 @@
 package org.skyve.metadata.view.model.list;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.SortedMap;
 
@@ -42,7 +43,7 @@ public class InMemoryDocumentQueryListModel<T extends Bean> extends InMemoryList
 	@Override
 	public @Nonnull List<MetaDataQueryColumn> getColumns() {
 		// TODO Auto-generated method stub
-		return null;
+		return Collections.emptyList();
 	}
 
 	@Override

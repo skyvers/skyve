@@ -226,11 +226,11 @@ public class ReportElement {
 		this.name = name;
 	}
 
-	public @Nullable ElementType getElementType() {
+	public @Nonnull ElementType getElementType() {
 		return elementType;
 	}
 
-	public void setElementType(@Nullable ElementType elementType) {
+	public void setElementType(@Nonnull ElementType elementType) {
 		this.elementType = elementType;
 	}
 
@@ -493,7 +493,21 @@ public class ReportElement {
 	public void setParent(@Nullable ReportBand parent) {
 		this.parent = parent;
 	}
-	
+
+	/**
+	 * Returns the band this element has been added to.
+	 *
+	 * @return The parent band.
+	 * @throws IllegalStateException If the element has not been added to a band.
+	 */
+	@Nonnull ReportBand getNullSafeParent() {
+		final ReportBand result = parent;
+		if (result == null) {
+			throw new IllegalStateException("Report element " + name + " has not been added to a band");
+		}
+		return result;
+	}
+
 	public @Nullable String getReportFileName() {
 		return reportFileName;
 	}

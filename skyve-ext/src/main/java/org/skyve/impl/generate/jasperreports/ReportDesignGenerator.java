@@ -1,6 +1,7 @@
 package org.skyve.impl.generate.jasperreports;
 
 import java.util.HashMap;
+import java.util.Map;
 
 import org.skyve.CORE;
 import org.skyve.metadata.customer.Customer;
@@ -84,7 +85,13 @@ public abstract class ReportDesignGenerator {
         p1.setName("SUBREPORT_DIR");
         p1.setTypeClass("java.lang.String");
 
-        String pathToReport = Renderer.pathToReport(design.getModuleName(), design.getDocumentName(), true);
+        // populateDesign() requires a module and document name
+        final String moduleName = design.getModuleName();
+        final String documentName = design.getDocumentName();
+        if ((moduleName == null) || (documentName == null)) {
+            throw new IllegalStateException("Report design " + design.getName() + " has no module or document name");
+        }
+        String pathToReport = Renderer.pathToReport(moduleName, documentName, true);
         p1.setDefaultValueExpression(pathToReport);
         design.getParameters().add(p1);
 
@@ -134,12 +141,13 @@ public abstract class ReportDesignGenerator {
 
             Document extDocument = null;
             Extends inherits = document.getExtends();
+            String extDocumentName = (inherits == null) ? null : inherits.getDocumentName();
             Persistent persistent = document.getPersistent();
             if (inherits != null && 
-	    			inherits.getDocumentName() != null && 
+	    			extDocumentName != null && 
 	    			persistent != null && 
 	    			Persistent.ExtensionStrategy.joined.equals(persistent.getStrategy())) {
-                extDocument = module.getDocument(customer, document.getExtends().getDocumentName());
+                extDocument = module.getDocument(customer, extDocumentName);
 
                 design.setAlias(design.getAlias() + 1);
                 StringBuilder sJoin = new StringBuilder();
@@ -147,8 +155,13 @@ public abstract class ReportDesignGenerator {
                 sJoin.append(" on ").append("a.bizId = ").append((char) design.getAlias()).append(".bizId");
 
                 design.addJoin(extDocument.getName(), Character.toString((char) design.getAlias()), sJoin.toString());
+                // addJoin() ensures the join aliases exist
+                final Map<String, String> joinAlias = design.getJoinAlias();
+                if (joinAlias == null) {
+                    throw new IllegalStateException("Report design " + design.getName() + " has no join aliases after adding a join");
+                }
                 fbK.setJoinSql(sJoin.toString());
-                fbK.setNameSql(design.getJoinAlias().get(sJoin.toString()) + ".bizKey ");
+                fbK.setNameSql(joinAlias.get(sJoin.toString()) + ".bizKey ");
             } else {
                 fbK.setNameSql("a.bizKey");
             }
@@ -336,8 +349,13 @@ public abstract class ReportDesignGenerator {
                 if (mutableSJoin.isEmpty()) {
                     f.setNameSql("a." + f.getName());
                 } else {
+                    // populateDesign() initialises the join aliases
+                    final Map<String, String> joinAlias = bean.getJoinAlias();
+                    if (joinAlias == null) {
+                        throw new IllegalStateException("Report design " + bean.getName() + " has no join aliases");
+                    }
                     f.setJoinSql(mutableSJoin.toString());
-                    f.setNameSql(bean.getJoinAlias().get(mutableSJoin.toString()) + "." + a.getName() + " as " + f.getName());
+                    f.setNameSql(joinAlias.get(mutableSJoin.toString()) + "." + a.getName() + " as " + f.getName());
                 }
 
                 if (DesignSpecification.Mode.bean.equals(bean.getMode())) {
@@ -426,12 +444,21 @@ public abstract class ReportDesignGenerator {
     protected static @Nonnull StringBuilder addJoinForAssociation(@Nonnull StringBuilder sJoin, @Nonnull Customer customer, @Nonnull DesignSpecification bean,
                                                                   @Nonnull Document document, @Nonnull Attribute a, @Nonnull String uniqueJoinIdentifier) {
 
-        if (!bean.getJoins().containsKey(document.getName())) {
+        // populateDesign() initialises the joins and requires a module name
+        final Map<String, String> joins = bean.getJoins();
+        if (joins == null) {
+            throw new IllegalStateException("Report design " + bean.getName() + " has no joins");
+        }
+        final String moduleName = bean.getModuleName();
+        if (moduleName == null) {
+            throw new IllegalStateException("Report design " + bean.getName() + " has no module name");
+        }
+        if (!joins.containsKey(document.getName())) {
             // get the next alias
             bean.setAlias(bean.getAlias() + 1);
         }
 
-        Module fMod = customer.getModule(bean.getModuleName());
+        Module fMod = customer.getModule(moduleName);
         Association assoc = (Association) a;
         Document fDoc = fMod.getDocument(customer, assoc.getDocumentName());
         if (!a.isRequired()) {
@@ -444,7 +471,7 @@ public abstract class ReportDesignGenerator {
         sJoin.append(" on ").append("a.bizId = ");
         sJoin.append(" ").append((char) bean.getAlias()).append(".").append(a.getName()).append("_id");
 
-        if (!bean.getJoins().containsKey(document.getName())) {
+        if (!joins.containsKey(document.getName())) {
             bean.addJoin(document.getName() + ":" + uniqueJoinIdentifier, Character.toString((char) bean.getAlias()), sJoin.toString());
         }
 
@@ -459,7 +486,7 @@ public abstract class ReportDesignGenerator {
      * @param colWidth The available column width for the subreport.
      */
 	@SuppressWarnings("boxing")
-	public void constructSubreportFromField(@Nonnull DesignSpecification design, @Nonnull ReportField fld, @Nullable Integer colWidth) {
+	public void constructSubreportFromField(@Nonnull DesignSpecification design, @Nonnull ReportField fld, @Nonnull Integer colWidth) {
         final Document document = design.getDocument();
 
         DesignSpecification subreport = new DesignSpecification();

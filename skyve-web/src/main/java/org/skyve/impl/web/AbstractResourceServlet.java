@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 
+import org.skyve.content.MimeType;
 import org.skyve.domain.messages.SecurityException;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.util.UtilImpl;
@@ -241,7 +242,9 @@ public abstract class AbstractResourceServlet extends HttpServlet {
 					image = load();
 				}
 				if (image != null) {
-					return image.getMimeType().toString();
+					// The thumbnail's type is unknown when its file name has no recognised suffix
+					MimeType mimeType = image.getMimeType();
+					return (mimeType == null) ? null : mimeType.toString();
 				}
 				return null;
 			}
@@ -266,7 +269,9 @@ public abstract class AbstractResourceServlet extends HttpServlet {
 					image = load();
 				}
 				if (image != null) {
-					return "thumbnail." + image.getMimeType().getStandardFileSuffix();
+					// The thumbnail's type is unknown when its file name has no recognised suffix
+					MimeType mimeType = image.getMimeType();
+					return (mimeType == null) ? null : "thumbnail." + mimeType.getStandardFileSuffix();
 				}
 				return null;
 			}

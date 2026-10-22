@@ -3,6 +3,7 @@ package org.skyve.impl.web.faces.pipeline;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -14,9 +15,11 @@ import java.util.function.BiConsumer;
 
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
+import org.skyve.impl.web.faces.views.FacesView;
 import org.skyve.util.OWASP;
 
 import jakarta.el.ELContext;
+import jakarta.el.ELResolver;
 import jakarta.el.ExpressionFactory;
 import jakarta.faces.application.Application;
 import jakarta.faces.component.UIComponent;
@@ -254,6 +257,22 @@ class AbstractFacesBuilderTest {
 	/**
 	 * Runs a test body against a builder constructed while a mocked faces context is current.
 	 */
+	@Test
+	void setManagedBeanNameWithNullResolvesTheCurrentManagedBean() {
+		withFacesBuilder((builder, expressionFactory) -> {
+			ELContext elc = FacesContext.getCurrentInstance().getELContext();
+			ELResolver resolver = mock(ELResolver.class);
+			when(elc.getELResolver()).thenReturn(resolver);
+			FacesView view = mock(FacesView.class);
+			when(resolver.getValue(elc, null, "skyve")).thenReturn(view);
+
+			builder.setManagedBeanName(null);
+
+			assertEquals("skyve", builder.managedBeanName);
+			assertSame(view, builder.managedBean);
+		});
+	}
+
 	private static void withFacesBuilder(BiConsumer<AbstractFacesBuilder, ExpressionFactory> test) {
 		FacesContext facesContext = mock(FacesContext.class);
 		Application application = mock(Application.class);

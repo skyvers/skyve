@@ -70,6 +70,19 @@ public class ReindexAttachmentsJobExecuteTest {
 	}
 
 	@Test
+	public void executeThrowsWithoutTruncatingWhenThereIsNoCustomer() throws Exception {
+		Connection connection = mock(Connection.class);
+		ContentManager truncateCm = mock(ContentManager.class);
+		ContentManager scanCm = mock(ContentManager.class);
+
+		TestableReindexAttachmentsJob job = new TestableReindexAttachmentsJob(null, connection, List.of(), truncateCm, scanCm);
+
+		org.junit.Assert.assertThrows(IllegalStateException.class, job::execute);
+		verify(truncateCm, never()).truncateAttachmentIndexing(org.mockito.ArgumentMatchers.anyString());
+		verify(connection, never()).setAutoCommit(false);
+	}
+
+	@Test
 	public void executeSkipsTableWithoutContentAndCompletes() throws Exception {
 		Connection connection = mock(Connection.class);
 		AbstractContentManager truncateCm = mock(AbstractContentManager.class);

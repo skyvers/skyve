@@ -1357,6 +1357,9 @@ public abstract class ViewVisitor extends ActionVisitor {
 				for (FormItem item : row.getItems()) {
 					visitFormItem(item, formVisible, formEnabled);
 					MetaData itemWidget = item.getWidget();
+					if (itemWidget == null) { // a form item is required to have a widget
+						throw new MetaDataException("A form item in view " + view.getName() + " has no widget.");
+					}
 					if (itemWidget instanceof DefaultWidget defaultWidget) {
 						visitDefaultWidget(defaultWidget, formVisible, formEnabled);
 					}
@@ -1615,6 +1618,9 @@ public abstract class ViewVisitor extends ActionVisitor {
 	 */
 	public void visitDefaultWidget(@Nonnull DefaultWidget widget, boolean parentVisible, boolean parentEnabled) {
 		String binding = widget.getBinding();
+		if (binding == null) { // a default widget is validated to be bound
+			throw new MetaDataException("A default widget in view " + view.getName() + " has no binding.");
+		}
 
 		// determine the widget to use
 		TargetMetaData target = BindUtil.getMetaDataForBinding(customer, module, document, binding);
@@ -1725,6 +1731,9 @@ public abstract class ViewVisitor extends ActionVisitor {
 					String fullyQualifiedColumnBinding = columnBinding;
 					if (fullyQualifiedColumnBinding == null) {
 						fullyQualifiedColumnBinding = widget.getBinding();
+						if (fullyQualifiedColumnBinding == null) { // a data widget is validated to be bound
+							throw new MetaDataException("A data widget in view " + view.getName() + " has no binding.");
+						}
 					}
 					else {
 						fullyQualifiedColumnBinding = widgetBindingPrefix + fullyQualifiedColumnBinding;

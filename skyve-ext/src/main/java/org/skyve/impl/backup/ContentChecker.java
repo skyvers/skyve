@@ -5,6 +5,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -15,6 +16,7 @@ import org.skyve.content.ContentManager;
 import org.skyve.domain.Bean;
 import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
 import org.skyve.impl.util.UtilImpl;
+import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.Attribute.AttributeType;
@@ -49,6 +51,9 @@ public class ContentChecker {
 		Customer customer = CORE.getCustomer();
 		String customerName = customer.getName();
 		String dynamicEntityPersistentIdentifier = RDBMSDynamicPersistenceListModel.getDynamicEntityPersistent(customer).getPersistentIdentifier();
+		if (dynamicEntityPersistentIdentifier == null) { // the dynamic entity document always defines its table
+			throw new MetaDataException("The dynamic entity document has persistent metadata with no table name.");
+		}
 		
 		try (Connection connection = EXT.getDataStoreConnection()) {
 			connection.setAutoCommit(false);
@@ -152,7 +157,8 @@ public class ContentChecker {
 							if (fieldsJSON == null) {
 								@SuppressWarnings("unchecked")
 								Map<String, Object> json = (Map<String, Object>) JSON.unmarshall(resultSet.getString(4));
-								fieldsJSON = json;
+								// null JSON fields hold no content to check
+								fieldsJSON = (json == null) ? Collections.emptyMap() : json;
 							}
 							String fieldName = a.getName();
 							String contentId = (String) fieldsJSON.get(fieldName);

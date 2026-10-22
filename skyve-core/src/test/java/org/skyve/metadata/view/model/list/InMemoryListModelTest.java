@@ -2,6 +2,7 @@ package org.skyve.metadata.view.model.list;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -551,6 +552,47 @@ class InMemoryListModelTest {
 		Bean summary = page.getSummary();
 		assertNotNull(summary);
 		assertEquals(Double.valueOf(5.0), summary.getDynamic("numericField"));
+	}
+
+	@Test
+	void fetchSummariesSkipColumnsWithoutBinding() throws Exception {
+		MetaDataQueryColumn unbound = columnWithBinding(null);
+		MetaDataQueryColumn bound = columnWithBinding(Bean.BIZ_KEY);
+		for (AggregateFunction function : AggregateFunction.values()) {
+			List<Bean> beans = new ArrayList<>(Arrays.asList(
+					new StubBeanWithBizKey("a"),
+					new StubBeanWithBizKey("b")));
+			TestListModelWithColumns model = new TestListModelWithColumns(beans, Arrays.asList(unbound, bound));
+			model.setSummary(function);
+			model.setStartRow(0);
+			model.setEndRow(10);
+			Page page = model.fetch();
+			Bean summary = page.getSummary();
+			assertNotNull(summary, function.toString());
+			assertEquals(Long.valueOf(2), summary.getDynamic(Bean.DOCUMENT_ID), function.toString());
+		}
+	}
+
+	@Test
+	void fetchCountSummarySkipsColumnsWithoutBindingWhenThereAreNoRows() throws Exception {
+		MetaDataQueryColumn unbound = columnWithBinding(null);
+		TestListModelWithColumns model = new TestListModelWithColumns(Collections.emptyList(), Arrays.asList(unbound));
+		model.setSummary(AggregateFunction.Count);
+		model.setStartRow(0);
+		model.setEndRow(10);
+		Page page = model.fetch();
+		Bean summary = page.getSummary();
+		assertNotNull(summary);
+		assertEquals(Long.valueOf(0), summary.getDynamic(Bean.DOCUMENT_ID));
+	}
+
+	@Test
+	void sortWithoutBindingThrows() {
+		TestListModel model = new TestListModel(mockModule, mockDocument, Collections.emptyList());
+		model.setSortParameters(new SortParameterImpl[] {new SortParameterImpl()});
+		model.setStartRow(0);
+		model.setEndRow(10);
+		assertThrows(IllegalStateException.class, model::fetch);
 	}
 
 	@Test

@@ -17,6 +17,7 @@ import org.skyve.impl.metadata.repository.module.ModuleMetaData;
 import org.skyve.impl.metadata.repository.module.QueryMetaData;
 import org.skyve.impl.metadata.repository.module.SQLMetaData;
 import org.skyve.impl.util.XMLMetaData;
+import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
@@ -148,12 +149,16 @@ public class QueryGenerator {
 		else {
 			System.err.println("Usage: org.skyve.impl.generate.QueryGenerator customerName moduleName");
 			System.exit(1);
+			return;
 		}
 
 		ProvidedRepositoryFactory.set(new LocalDesignRepository());
 		ProvidedRepository repository = ProvidedRepositoryFactory.get();
 		Customer customer = repository.getCustomer(customerName);
 		Module module = repository.getModule(customer, moduleName);
+		if (module == null) {
+			throw new MetaDataException("Module " + moduleName + " does not exist for customer " + customerName);
+		}
 		File file = new File("./generatedQueries.xml");
 		LOGGER.info("Output is written to {}", file.getCanonicalPath());
 		try (PrintWriter out = new PrintWriter(file)) {

@@ -10,19 +10,20 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import org.apache.commons.lang3.StringUtils;
 import org.skyve.CORE;
 import org.skyve.EXT;
 import org.skyve.domain.Bean;
 import org.skyve.domain.types.Decimal2;
 import org.skyve.impl.generate.jasperreports.DesignSpecification.Mode;
 import org.skyve.impl.generate.jasperreports.ReportBand.BandType;
+import org.skyve.impl.metadata.view.HorizontalAlignment;
 import org.skyve.impl.report.jasperreports.ReportDesignParameters;
 import org.skyve.impl.report.jasperreports.SkyveDataSource;
 import org.skyve.impl.tools.jasperreports.SkyveDocumentExecuterFactory;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.Attribute.AttributeType;
+import org.skyve.metadata.model.Extends;
 import org.skyve.metadata.model.Persistent;
 import org.skyve.metadata.model.document.Collection;
 import org.skyve.metadata.model.document.Document;
@@ -198,7 +199,7 @@ public class JasperReportRenderer {
 	public static @Nonnull JasperReport getSubReport(@Nonnull DesignSpecification designSpecification, @Nonnull String subReport)
 	throws Exception {
 		final DesignSpecification subReportSpec = designSpecification.getSubReports().stream()
-													.filter(r -> r.getName().equals(subReport))
+													.filter(r -> subReport.equals(r.getName()))
 													.findFirst()
 													.orElse(null);
 		if (subReportSpec == null) {
@@ -345,7 +346,11 @@ public class JasperReportRenderer {
 		// Determine the size of the labels (for columnar reports)
 		if (ReportDesignParameters.ReportStyle.columnar.equals(reportDesignParameters.getReportStyle())) {
 			for (ReportDesignParameters.ReportColumn column : reportDesignParameters.getColumns()) {
-				columnarLabelWidth = Math.max(columnarLabelWidth, column.getTitle().length() * 8);
+				final String title = column.getTitle();
+				// an untitled column has no label to size
+				if (title != null) {
+					columnarLabelWidth = Math.max(columnarLabelWidth, title.length() * 8);
+				}
 			}
 		}
 
@@ -418,7 +423,12 @@ public class JasperReportRenderer {
 			}
 
 			HorizontalTextAlignEnum alignment = null;
-			switch (column.getAlignment()) {
+			ReportDesignParameters.ColumnAlignment columnAlignment = column.getAlignment();
+			if (columnAlignment == null) {
+				// the same default as when the report columns are defined
+				columnAlignment = ReportDesignParameters.ColumnAlignment.left;
+			}
+			switch (columnAlignment) {
 				case left:
 					alignment = HorizontalTextAlignEnum.LEFT;
 					break;
@@ -449,6 +459,9 @@ public class JasperReportRenderer {
 				textField.setStretchType(StretchTypeEnum.ELEMENT_GROUP_HEIGHT);
 				expression = new JRDesignExpression();
 				String title = column.getTitle();
+				if (title == null) {
+					title = ""; // an untitled column has an empty heading
+				}
 				StringBuilder e = new StringBuilder(title.length() + 2);
 				expression.setText(e.append('"').append(title).append('"').toString());
 				textField.setExpression(expression);
@@ -527,6 +540,9 @@ public class JasperReportRenderer {
 				textField.setItalic(Boolean.TRUE);
 				expression = new JRDesignExpression();
 				String title = column.getTitle();
+				if (title == null) {
+					title = ""; // an untitled column has an empty heading
+				}
 				StringBuilder e = new StringBuilder(title.length() + 2);
 				expression.setText(e.append('"').append(title).append('"').toString());
 				textField.setExpression(expression);
@@ -824,18 +840,26 @@ public class JasperReportRenderer {
 			}
 		}
 		else {
+			// renderFromDesignSpecification() only renders a design with a module and document name
+			final String moduleName = designSpecification.getModuleName();
+			final String documentName = designSpecification.getDocumentName();
+			if ((moduleName == null) || (documentName == null)) {
+				throw new IllegalStateException("Report design " + designSpecification.getName() + " has no module or document name");
+			}
 			final Customer customer = CORE.getPersistence().getUser().getCustomer();
-			final Module module = customer.getModule(designSpecification.getModuleName());
-			final Document document = module.getDocument(customer, designSpecification.getDocumentName());
+			final Module module = customer.getModule(moduleName);
+			final Document document = module.getDocument(customer, documentName);
 
 			String sqlName = null;
-			if (document.getExtends() != null) {
+			final Extends inherits = document.getExtends();
+			if (inherits != null) {
 				Document extDocument = null;
 				Persistent persistent = document.getPersistent();
-				if ((document.getExtends().getDocumentName() != null) &&
+				final String extDocumentName = inherits.getDocumentName();
+				if ((extDocumentName != null) &&
 						(persistent != null) &&
 						Persistent.ExtensionStrategy.joined.equals(persistent.getStrategy())) {
-					extDocument = module.getDocument(customer, document.getExtends().getDocumentName());
+					extDocument = module.getDocument(customer, extDocumentName);
 					designSpecification.setAlias(designSpecification.getAlias() + 1);
 				}
 				if (extDocument != null) {
@@ -863,9 +887,10 @@ public class JasperReportRenderer {
 			query.addTextChunk("select " + sql.toString() + " from " + Renderer.getPersistentIdentifierForDocument(document) + " a");
 
 			// joins
-			if (designSpecification.getJoins() != null) {
-				for (String k : designSpecification.getJoins().keySet()) {
-					query.addTextChunk("\n" + designSpecification.getJoins().get(k));
+			final Map<String, String> joins = designSpecification.getJoins();
+			if (joins != null) {
+				for (String k : joins.keySet()) {
+					query.addTextChunk("\n" + joins.get(k));
 				}
 			}
 
@@ -873,7 +898,7 @@ public class JasperReportRenderer {
 				query.addTextChunk("\n where a.bizId = $P{ID}");
 			}
 			else if (DesignSpecification.ReportType.subreport.equals(designSpecification.getReportType())) {
-				LOGGER.info("SUBREPORT {} IS {}", designSpecification.getName(), designSpecification.getCollectionType().name());
+				LOGGER.info("SUBREPORT {} IS {}", designSpecification.getName(), designSpecification.getCollectionType());
 
 				// join to either parent or joiner table
 				if (Collection.CollectionType.child.equals(designSpecification.getCollectionType())) {
@@ -883,10 +908,14 @@ public class JasperReportRenderer {
 				else {
 					// joiner
 					// TODO - join correctly for aggregated collections - probably obviated by the getJoins() above
-					query.addTextChunk("\n join " + designSpecification.getParentReportPersistentName() + "_" + designSpecification.getField().getName());
-					query.addTextChunk(" " + designSpecification.getField().getName() + " on " + designSpecification.getField().getName() + ".element_id = ");
+					final ReportField field = designSpecification.getField();
+					if (field == null) {
+						throw new IllegalStateException("Subreport design " + designSpecification.getName() + " has no collection field");
+					}
+					query.addTextChunk("\n join " + designSpecification.getParentReportPersistentName() + "_" + field.getName());
+					query.addTextChunk(" " + field.getName() + " on " + field.getName() + ".element_id = ");
 					query.addTextChunk(" " + document.getName() + ".bizId");
-					query.addTextChunk("\n where " + designSpecification.getField().getName() + ".owner_id = $P{ID}");
+					query.addTextChunk("\n where " + field.getName() + ".owner_id = $P{ID}");
 				}
 			}
 		}
@@ -912,13 +941,14 @@ public class JasperReportRenderer {
 	protected static @Nullable JRField createField(@Nonnull ReportField reportField) {
 		final JRDesignField jrField = new JRDesignField();
 
-		if (reportField.getParent() != null) {
+		final DesignSpecification design = reportField.getParent();
+		if (design != null) {
 			if (! (Boolean.TRUE.equals(reportField.getCollection()) && 
-						Mode.sql.equals(reportField.getParent().getMode()))) {
+						Mode.sql.equals(design.getMode()))) {
 				jrField.setName(reportField.getName());
 				jrField.setValueClassName(reportField.getTypeClass());
 
-				if ((! Mode.sql.equals(reportField.getParent().getMode())) && 
+				if ((! Mode.sql.equals(design.getMode())) && 
 						String.class.getTypeName().equals(reportField.getTypeClass())) {
 					// Setting the field description will cause the SkyveDataSource to return the display value (String) for the field.
 					jrField.setDescription(reportField.getName());
@@ -1081,7 +1111,7 @@ public class JasperReportRenderer {
 		final JRDesignExpression jrExpression = new JRDesignExpression();
 
 		final String expressionText;
-		if (StringUtils.isBlank(invisibleCondition)) {
+		if ((invisibleCondition == null) || invisibleCondition.isBlank()) {
 			expressionText = "";
 		}
 		else {
@@ -1278,7 +1308,7 @@ public class JasperReportRenderer {
 
 		textElement.setFontName(reportElement.getElementFontName());
 
-		if (BandType.title.equals(reportElement.getParent().getBandType())) {
+		if (BandType.title.equals(reportElement.getNullSafeParent().getBandType())) {
 			Integer titleFontSize = designSpecification.getTitleFontSize();
 			textElement.setFontSize((titleFontSize == null) ? Float.valueOf(16f) : Float.valueOf(titleFontSize.floatValue()));
 		}
@@ -1341,33 +1371,36 @@ public class JasperReportRenderer {
 			contentExpressionBuilder.append("org.skyve.impl.generate.jasperreports.ContentImageForReport.image(");
 			contentExpressionBuilder.append("$F{").append(reportElement.getElementValue()).append("}, ");
 
-			if (reportElement.getElementWidth() != null) {
-				contentExpressionBuilder.append(reportElement.getElementWidth().toString()).append(", ");
-				contentExpressionBuilder.append(reportElement.getElementWidth().toString());
+			final Integer contentWidth = reportElement.getElementWidth();
+			if (contentWidth != null) {
+				contentExpressionBuilder.append(contentWidth.toString()).append(", ");
+				contentExpressionBuilder.append(contentWidth.toString());
 			}
 			contentExpressionBuilder.append(")");
 			expression = contentExpressionBuilder.toString();
 			break;
 		case dynamicImage:
 			final StringBuilder dynamicExpressionBuilder = new StringBuilder();
+			final DesignSpecification imageDesign = reportElement.getNullSafeParent().getNullSafeParent();
 			dynamicExpressionBuilder.append("new modules").append('.');
-			dynamicExpressionBuilder.append(reportElement.getParent().getParent().getModuleName()).append('.');
-			dynamicExpressionBuilder.append(reportElement.getParent().getParent().getDocumentName()).append('.');
+			dynamicExpressionBuilder.append(imageDesign.getModuleName()).append('.');
+			dynamicExpressionBuilder.append(imageDesign.getDocumentName()).append('.');
 			dynamicExpressionBuilder.append("images").append('.');
 			dynamicExpressionBuilder.append(reportElement.getElementValue()).append("().getImage(");
-			if (Mode.bean.equals(reportElement.getParent().getParent().getMode())) {
+			if (Mode.bean.equals(imageDesign.getMode())) {
 				dynamicExpressionBuilder.append("$F{THIS}, ");
 			}
 			else {
 				// sql
 				dynamicExpressionBuilder.append("org.skyve.impl.generate.jasperreports.BeanForReport.getBean(");
-				dynamicExpressionBuilder.append(reportElement.getParent().getParent().getModuleName()).append(", ");
-				dynamicExpressionBuilder.append(reportElement.getParent().getParent().getDocumentName()).append(", ");
+				dynamicExpressionBuilder.append(imageDesign.getModuleName()).append(", ");
+				dynamicExpressionBuilder.append(imageDesign.getDocumentName()).append(", ");
 				dynamicExpressionBuilder.append("$P{ID})");
 			}
-			if (reportElement.getElementWidth() != null) {
-				dynamicExpressionBuilder.append(reportElement.getElementWidth().toString()).append(", ");
-				dynamicExpressionBuilder.append(reportElement.getElementWidth().toString()).append(", ");
+			final Integer dynamicWidth = reportElement.getElementWidth();
+			if (dynamicWidth != null) {
+				dynamicExpressionBuilder.append(dynamicWidth.toString()).append(", ");
+				dynamicExpressionBuilder.append(dynamicWidth.toString()).append(", ");
 			}
 			// TODO vertical sizing - for now assume square based on pixelWidth
 			dynamicExpressionBuilder.append(" (org.skyve.impl.generate.jasperreports.BeanForReport.getUser())");
@@ -1405,16 +1438,19 @@ public class JasperReportRenderer {
 			reportColumn.setLine(1);
 			reportColumn.setName(queryColumn.getBinding());
 			reportColumn.setTitle(queryColumn.getBinding());
-			reportColumn.setWidth(queryColumn.getPixelWidth() != null ? queryColumn.getPixelWidth().intValue() : 100);
-			String align = queryColumn.getAlignment() != null ? queryColumn.getAlignment().toTextAlignmentString() : null;
+			final Integer pixelWidth = queryColumn.getPixelWidth();
+			reportColumn.setWidth(pixelWidth != null ? pixelWidth.intValue() : 100);
+			final HorizontalAlignment queryAlignment = queryColumn.getAlignment();
+			String align = queryAlignment != null ? queryAlignment.toTextAlignmentString() : null;
 			if (align != null) {
 				reportColumn.setAlignment(ReportDesignParameters.ColumnAlignment.valueOf(align));
 			}
 			else {
 				reportColumn.setAlignment(ReportDesignParameters.ColumnAlignment.left);
 			}
-			if (drivingDocument != null && reportColumn.getName() != null) {
-				final Attribute attribute = drivingDocument.getAttribute(reportColumn.getName());
+			final String columnName = reportColumn.getName();
+			if (drivingDocument != null && columnName != null) {
+				final Attribute attribute = drivingDocument.getAttribute(columnName);
 				if (attribute != null) {
 					reportColumn.setAttributeType(attribute.getAttributeType());
 				}
@@ -1437,11 +1473,16 @@ public class JasperReportRenderer {
 		final Module module = designSpecification.getModule();
 
 		MetaDataQueryDefinition query = null;
-		if (designSpecification.getQueryName() != null) {
-			query = module.getMetaDataQuery(designSpecification.getQueryName());
+		final String queryName = designSpecification.getQueryName();
+		if (queryName != null) {
+			query = module.getMetaDataQuery(queryName);
 		}
 		if (query == null) {
-			query = module.getDocumentDefaultQuery(customer, designSpecification.getDocumentName());
+			final String documentName = designSpecification.getDocumentName();
+			if (documentName == null) {
+				throw new IllegalArgumentException("Report design " + designSpecification.getName() + " has no query or document name");
+			}
+			query = module.getDocumentDefaultQuery(customer, documentName);
 		}
 
 		return EXT.newListModel(query);

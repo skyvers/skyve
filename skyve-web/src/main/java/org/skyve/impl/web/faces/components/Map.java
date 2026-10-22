@@ -2,6 +2,7 @@ package org.skyve.impl.web.faces.components;
 
 import java.io.IOException;
 
+import org.skyve.domain.messages.DomainException;
 import org.skyve.impl.metadata.view.widget.MapDisplay;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.UserAgent;
@@ -105,6 +106,9 @@ public class Map extends HtmlPanelGroup {
 
     	if (modelName != null) {
 			return componentBuilder.map(null, new MapDisplay(), modelName);
+		}
+		if ((moduleName == null) || (queryName == null) || (geometryBinding == null)) {
+			throw new DomainException("A module, query and geometry binding or a model name must be provided for a map");
 		}
 		return componentBuilder.map(null, new MapDisplay(), moduleName, queryName, geometryBinding);
 	}

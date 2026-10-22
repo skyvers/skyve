@@ -214,6 +214,9 @@ public class SkyveFacesPhaseListener implements PhaseListener {
 	
 			// place the conversation into the thread
 			AbstractPersistence persistence = webContext.getConversation();
+			if (persistence == null) { // a cached conversation always has its persistence
+				throw new IllegalStateException("Cached conversation " + webContext.getWebId() + " has no persistence");
+			}
 			persistence.setForThread();
 		}
 	}
@@ -231,6 +234,9 @@ public class SkyveFacesPhaseListener implements PhaseListener {
 		if (webContext != null) { // should always be the case
 			// place the conversation into the thread
 			AbstractPersistence persistence = webContext.getConversation();
+			if (persistence == null) { // a cached conversation always has its persistence
+				throw new IllegalStateException("Cached conversation " + webId + " has no persistence");
+			}
 			persistence.setForThread();
 		}
 	}
@@ -284,6 +290,9 @@ public class SkyveFacesPhaseListener implements PhaseListener {
 					if ((postRenderBean != null) && (! questionAsked)) {
 						// The response has been rendered, so postRender cannot ask a question
 						DialogsProtocol.unmarkAskable();
+						if (webContext == null) { // the post render bean was set by an action using the web context
+							throw new IllegalStateException("Cannot post render as FacesView " + managedBeanName + " has no web context");
+						}
 						CustomerImpl internalCustomer = (CustomerImpl) CORE.getCustomer();
 						boolean vetoed = internalCustomer.interceptBeforePostRender(postRenderBean, webContext);
 						if (! vetoed) {
@@ -307,6 +316,9 @@ public class SkyveFacesPhaseListener implements PhaseListener {
 								(maximumSeverity.getOrdinal() < FacesMessage.SEVERITY_ERROR.getOrdinal()))) {
 						// Conversation caching commits any active transaction without closing its
 						// persistence context, ensuring Hibernate has released its JDBC resources.
+						if (webContext == null) {
+							throw new IllegalStateException("Cannot cache the conversation as FacesView " + managedBeanName + " has no web context");
+						}
 						StateUtil.commitAndCacheConversation(webContext);
 					}
 					// Dehydrate the view

@@ -78,7 +78,7 @@ public class PrimeReactLayoutRenderer extends LayoutRenderer {
 
 	@Override
 	public @Nonnull RenderedComponent addedTab(@Nullable RenderedComponent component, @Nonnull RenderedComponent tab) {
-		return tab.getParent().getParent();
+		return tab.getNullSafeParent().getNullSafeParent();
 	}
 
 	@Override
@@ -88,7 +88,7 @@ public class PrimeReactLayoutRenderer extends LayoutRenderer {
 
 	@Override
 	public @Nonnull RenderedComponent addedBorderLayout(@Nullable RenderedComponent component, @Nonnull RenderedComponent borderLayout) {
-		return borderLayout.getParent();
+		return borderLayout.getNullSafeParent();
 	}
 
 	@Override
@@ -137,7 +137,7 @@ public class PrimeReactLayoutRenderer extends LayoutRenderer {
 
 	@Override
 	public @Nonnull RenderedComponent addedFormRowLayout(@Nullable RenderedComponent component, @Nonnull RenderedComponent rowLayout) {
-		return rowLayout.getParent();
+		return rowLayout.getNullSafeParent();
 	}
 
 	@Override
@@ -203,6 +203,6 @@ public class PrimeReactLayoutRenderer extends LayoutRenderer {
 	public @Nonnull RenderedComponent addedToContainer(@Nullable RenderedComponent component,
 														@Nonnull Container viewContainer,
 														@Nonnull RenderedComponent container) {
-		return container.getParent().getParent();
+		return container.getNullSafeParent().getNullSafeParent();
 	}
 }

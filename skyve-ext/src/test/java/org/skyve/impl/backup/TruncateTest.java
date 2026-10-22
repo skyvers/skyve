@@ -18,6 +18,7 @@ import java.util.Collection;
 import java.util.List;
 
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InOrder;
@@ -26,6 +27,7 @@ import org.skyve.impl.content.AbstractContentManager;
 import org.skyve.impl.content.NoOpContentManager;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.util.UtilImpl;
+import org.skyve.metadata.user.User;
 import org.skyve.persistence.SQL;
 
 @SuppressWarnings("static-method")
@@ -103,6 +105,18 @@ public class TruncateTest {
 		verify(persistence, times(0)).newSQL(anyString());
 		verify(persistence, times(0)).commit(false);
 		verify(persistence, times(0)).begin();
+	}
+
+	@Test
+	public void truncateThrowsWithoutTruncatingWhenTheUserHasNoCustomer() throws Exception {
+		AbstractPersistence persistence = bindMockPersistence();
+		User user = mock(User.class);
+		when(persistence.getUser()).thenReturn(user);
+		when(user.getCustomerName()).thenReturn(null);
+
+		Assert.assertThrows(IllegalStateException.class, () -> Truncate.truncate(null, true, true));
+
+		verify(persistence, times(0)).newSQL(anyString());
 	}
 
 	@Test

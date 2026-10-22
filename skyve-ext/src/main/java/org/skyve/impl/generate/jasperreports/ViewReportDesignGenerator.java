@@ -105,7 +105,12 @@ public class ViewReportDesignGenerator extends ReportDesignGenerator {
 
         // construct title band
         if (DesignSpecification.ReportType.report.equals(design.getReportType())) {
-            title = Renderer.addElement(title, ReportElement.ElementType.textField, "title", Renderer.renderBoundMessage(design, visitor.getViewTitle()), null, null,
+            // a view always has a title - View.getTitle() is mandatory
+            final String viewTitle = visitor.getViewTitle();
+            if (viewTitle == null) {
+                throw new IllegalStateException("The view for report design " + design.getName() + " has no title");
+            }
+            title = Renderer.addElement(title, ReportElement.ElementType.textField, "title", Renderer.renderBoundMessage(design, viewTitle), null, null,
             		Integer.valueOf(0), Integer.valueOf(0), design.getColumnWidth(), Integer.valueOf(design.getDefaultElementHeight().intValue() * 2),
                     null, ReportElement.ElementAlignment.center, Boolean.TRUE, null, null, null, null);
 

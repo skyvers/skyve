@@ -57,6 +57,9 @@ public class SetTitleAction extends FacesAction<Void> {
 			User user = CORE.getUser();
 			Customer customer = user.getCustomer();
 			Bean targetBean = ActionUtil.getTargetBeanForView(facesView);
+			if (targetBean == null) { // ActionUtil has logged the view binding that yields null
+				return null;
+			}
 	    	Module targetModule = customer.getModule(targetBean.getBizModule());
 			Document targetDocument = targetModule.getDocument(customer, targetBean.getBizDocument());
 			HttpServletRequest request = (HttpServletRequest) FacesContext.getCurrentInstance().getExternalContext().getRequest();

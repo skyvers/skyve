@@ -6,6 +6,7 @@ import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -430,4 +431,15 @@ class DesignSpecificationTest {
                 spec.setJoins(joins);
                 assertThat(spec.getJoins(), org.hamcrest.CoreMatchers.sameInstance(joins));
         }
+
+	@Test
+	void getModuleWithoutAModuleNameThrowsIllegalState() {
+		assertThrows(IllegalStateException.class, spec::getModule);
+	}
+
+	@Test
+	void getDocumentWithoutADocumentNameThrowsIllegalState() {
+		spec.setModuleName("admin");
+		assertThrows(IllegalStateException.class, spec::getDocument);
+	}
 }

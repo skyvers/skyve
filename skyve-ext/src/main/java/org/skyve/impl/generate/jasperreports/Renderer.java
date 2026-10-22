@@ -9,13 +9,15 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.UUID;
 
-import org.apache.commons.lang3.StringUtils;
 import org.skyve.CORE;
+import org.skyve.domain.types.Decimal2;
 import org.skyve.domain.types.converters.decimal.currency.Decimal2DollarsAndCents;
 import org.skyve.impl.generate.jasperreports.DesignSpecification.Mode;
 import org.skyve.impl.generate.jasperreports.DesignSpecification.ReportType;
 import org.skyve.impl.generate.jasperreports.ReportBand.BandType;
+import org.skyve.impl.generate.jasperreports.ReportElement.ElementAlignment;
 import org.skyve.impl.generate.jasperreports.ReportElement.ElementType;
+import org.skyve.impl.generate.jasperreports.ReportElement.EvaluationTime;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.customer.Customer;
@@ -176,6 +178,16 @@ public class Renderer {
 	}
 
 	/**
+	 * Renders an element position or size attribute value, treating a value that is not specified as 0.
+	 *
+	 * @param value The position or size.
+	 * @return The attribute value.
+	 */
+	private static @Nonnull String dimension(@Nullable Integer value) {
+		return (value == null) ? "0" : value.toString();
+	}
+
+	/**
 	 * Renders the element.
 	 */
 	@SuppressWarnings("java:S3776") // Complexity OK
@@ -188,8 +200,9 @@ public class Renderer {
 			if (Boolean.TRUE.equals(elem.getDynamicFlow())) {
 				attr.put("isStretchWithOverflow", "true");
 			}
-			if (elem.getEvaluationTime() != null) {
-				attr.put("evaluationTime", elem.getEvaluationTime().toString());
+			final EvaluationTime evaluationTime = elem.getEvaluationTime();
+			if (evaluationTime != null) {
+				attr.put("evaluationTime", evaluationTime.toString());
 			}
 			attr.put("pattern", "");
 			attr.put("isBlankWhenNull", "true");
@@ -202,6 +215,8 @@ public class Renderer {
 		case staticText:
 		case textField:
 
+			final ReportBand textBand = elem.getNullSafeParent();
+			final DesignSpecification textDesign = textBand.getNullSafeParent();
 			Map<String, String> rEa = new LinkedHashMap<>();
 			rEa.put("key", elem.getElementType().toString() + "_" + (elem.getOrdinal() == null ? "1" : elem.getOrdinal()));
 			rEa.put("stretchType", "RelativeToTallestObject");
@@ -218,13 +233,13 @@ public class Renderer {
 				rEa.put("backcolor", "#FFFFFF");
 			}
 
-			rEa.put("x", (elem.getElementLeft() == null ? "0" : elem.getElementLeft().toString()));
-			rEa.put("y", (elem.getElementTop() == null ? "0" : elem.getElementTop().toString()));
-			rEa.put("height", (elem.getElementHeight() == null ? "0" : elem.getElementHeight().toString()));
-			rEa.put("width", (elem.getElementWidth() == null ? "0" : elem.getElementWidth().toString()));
+			rEa.put("x", dimension(elem.getElementLeft()));
+			rEa.put("y", dimension(elem.getElementTop()));
+			rEa.put("height", dimension(elem.getElementHeight()));
+			rEa.put("width", dimension(elem.getElementWidth()));
 			rEa.put("uuid", UUID.randomUUID().toString());
 			sb.append(Renderer.eS("reportElement", rEa, false));
-			sb.append(renderPrintWhenExpression(elem.getParent().getParent(), elem.getInvisibleConditionName()));
+			sb.append(renderPrintWhenExpression(textDesign, elem.getInvisibleConditionName()));
 			sb.append("</reportElement>");
 
 			try {
@@ -235,8 +250,9 @@ public class Renderer {
 			}
 
 			Map<String, String> tEa = new LinkedHashMap<>();
-			if (elem.getElementAlignment() != null) {
-				tEa.put("textAlignment", elem.getElementAlignment().toString());
+			final ElementAlignment alignment = elem.getElementAlignment();
+			if (alignment != null) {
+				tEa.put("textAlignment", alignment.toString());
 			}
 			tEa.put("verticalAlignment", "Top");
 			tEa.put("rotation", "None");
@@ -244,9 +260,10 @@ public class Renderer {
 
 			Map<String, String> fEa = new LinkedHashMap<>();
 			fEa.put("fontName", elem.getElementFontName());
-			if (BandType.title.equals(elem.getParent().getBandType())) {
-				if (elem.getParent().getParent().getTitleFontSize() != null) {
-					fEa.put("size", elem.getParent().getParent().getTitleFontSize().toString());
+			if (BandType.title.equals(textBand.getBandType())) {
+				final Integer titleFontSize = textDesign.getTitleFontSize();
+				if (titleFontSize != null) {
+					fEa.put("size", titleFontSize.toString());
 				} else {
 					fEa.put("size", "16");
 				}
@@ -259,8 +276,9 @@ public class Renderer {
 				// fEa.put("isPdfEmbedded", "false");
 
 			} else {
-				if (elem.getElementFontSize() != null) {
-					fEa.put("size", elem.getElementFontSize().toString());
+				final Integer fontSize = elem.getElementFontSize();
+				if (fontSize != null) {
+					fEa.put("size", fontSize.toString());
 				} else {
 					fEa.put("size", "12");
 				}
@@ -308,24 +326,26 @@ public class Renderer {
 			// <reportElement x="354" y="14" width="100" height="50" uuid="3aec0b08-3306-46cb-a84a-bb500a34474e"/>
 			// </image>
 			StringBuilder iE = new StringBuilder(64);
+			final Integer imageWidth = elem.getElementWidth();
 			if (ElementType.dynamicImage.equals(elem.getElementType())) {
+				final DesignSpecification imageDesign = elem.getNullSafeParent().getNullSafeParent();
 				iE.append("new modules").append('.');
-				iE.append(elem.getParent().getParent().getModuleName()).append('.');
-				iE.append(elem.getParent().getParent().getDocumentName()).append('.');
+				iE.append(imageDesign.getModuleName()).append('.');
+				iE.append(imageDesign.getDocumentName()).append('.');
 				iE.append("images").append('.');
 				iE.append(elem.getElementValue()).append("().getImage(");
-				if (Mode.bean.equals(elem.getParent().getParent().getMode())) {
+				if (Mode.bean.equals(imageDesign.getMode())) {
 					iE.append("$F{THIS}, ");
 				} else {
 					// sql
 					iE.append("org.skyve.impl.generate.jasperreports.BeanForReport.getBean(");
-					iE.append(elem.getParent().getParent().getModuleName()).append(", ");
-					iE.append(elem.getParent().getParent().getDocumentName()).append(", ");
+					iE.append(imageDesign.getModuleName()).append(", ");
+					iE.append(imageDesign.getDocumentName()).append(", ");
 					iE.append("$P{ID})");
 				}
-				if (elem.getElementWidth() != null) {
-					iE.append(elem.getElementWidth().toString()).append(", ");
-					iE.append(elem.getElementWidth().toString()).append(", ");
+				if (imageWidth != null) {
+					iE.append(imageWidth.toString()).append(", ");
+					iE.append(imageWidth.toString()).append(", ");
 				}
 				// TODO vertical sizing - for now assume square based on pixelWidth
 				iE.append(" (org.skyve.metadata.user.User) org.skyve.impl.generate.jasperreports.BeanForReport.getUser())");
@@ -335,19 +355,19 @@ public class Renderer {
 				iE.append("org.skyve.impl.generate.jasperreports.ContentImageForReport.image(");
 				iE.append("$F{").append(elem.getElementValue()).append("}, ");
 
-				if (elem.getElementWidth() != null) {
-					iE.append(elem.getElementWidth().toString()).append(", ");
-					iE.append(elem.getElementWidth().toString());
+				if (imageWidth != null) {
+					iE.append(imageWidth.toString()).append(", ");
+					iE.append(imageWidth.toString());
 				}
 				iE.append(")");
 			}
 
 			sb.append("<image>");
 			Map<String, String> rEIm = new LinkedHashMap<>();
-			rEIm.put("x", elem.getElementLeft().toString());
-			rEIm.put("y", elem.getElementTop().toString());
-			rEIm.put("width", elem.getElementWidth().toString());
-			rEIm.put("height", elem.getElementHeight().toString());
+			rEIm.put("x", dimension(elem.getElementLeft()));
+			rEIm.put("y", dimension(elem.getElementTop()));
+			rEIm.put("width", dimension(elem.getElementWidth()));
+			rEIm.put("height", dimension(elem.getElementHeight()));
 			rEIm.put("uuid", UUID.randomUUID().toString());
 
 			sb.append(Renderer.eS("reportElement", rEIm, true));
@@ -371,10 +391,10 @@ public class Renderer {
 
 			Map<String, String> rEaL = new LinkedHashMap<>();
 			rEaL.put("key", elem.getElementType().toString() + elem.getOrdinal());
-			rEaL.put("x", elem.getElementLeft().toString());
-			rEaL.put("y", elem.getElementTop().toString());
-			rEaL.put("width", elem.getElementWidth().toString());
-			rEaL.put("height", elem.getElementHeight().toString());
+			rEaL.put("x", dimension(elem.getElementLeft()));
+			rEaL.put("y", dimension(elem.getElementTop()));
+			rEaL.put("width", dimension(elem.getElementWidth()));
+			rEaL.put("height", dimension(elem.getElementHeight()));
 			rEaL.put("forecolor", "#404040");
 			rEaL.put("uuid", UUID.randomUUID().toString());
 			sb.append(Renderer.eS("reportElement", rEaL, true));
@@ -382,9 +402,10 @@ public class Renderer {
 			sb.append(Renderer.eS("graphicElement", null, false));
 
 			Map<String, String> tEaL = new LinkedHashMap<>();
-			if (elem.getParent().getParent().getDefaultLineWidth() != null) {
+			final Decimal2 lineWidth = elem.getNullSafeParent().getNullSafeParent().getDefaultLineWidth();
+			if (lineWidth != null) {
 				tEaL.put("lineStyle", "Solid");
-				tEaL.put("lineWidth", elem.getParent().getParent().getDefaultLineWidth().toString());
+				tEaL.put("lineWidth", lineWidth.toString());
 			} else {
 				tEaL.put("lineStyle", "Solid");
 				tEaL.put("lineWidth", "1.0");
@@ -401,20 +422,22 @@ public class Renderer {
 
 			Map<String, String> rEB = new LinkedHashMap<>();
 
+			final DesignSpecification borderDesign = elem.getNullSafeParent().getNullSafeParent();
 			rEB.put("stretchType", "RelativeToBandHeight");
-			rEB.put("x", elem.getElementLeft().toString());
-			rEB.put("y", elem.getElementTop().toString());
-			rEB.put("width", elem.getElementWidth().toString());
-			rEB.put("height", elem.getElementHeight().toString());
-			if (elem.getParent().getParent().getDefaultLineColour() != null) {
-				rEB.put("forecolor", elem.getParent().getParent().getDefaultLineColour());
+			rEB.put("x", dimension(elem.getElementLeft()));
+			rEB.put("y", dimension(elem.getElementTop()));
+			rEB.put("width", dimension(elem.getElementWidth()));
+			rEB.put("height", dimension(elem.getElementHeight()));
+			if (borderDesign.getDefaultLineColour() != null) {
+				rEB.put("forecolor", borderDesign.getDefaultLineColour());
 			}
 			rEB.put("uuid", UUID.randomUUID().toString());
 			sb.append(Renderer.eS("reportElement", rEB, true));
 
-			if (elem.getParent().getParent().getDefaultLineWidth() != null) {
+			final Decimal2 borderLineWidth = borderDesign.getDefaultLineWidth();
+			if (borderLineWidth != null) {
 				sb.append(Renderer.eS("graphicElement", null, false));
-				sb.append(Renderer.eS("pen", "lineWidth", elem.getParent().getParent().getDefaultLineWidth().toString(), "lineStyle", "Solid"));
+				sb.append(Renderer.eS("pen", "lineWidth", borderLineWidth.toString(), "lineStyle", "Solid"));
 				sb.append(Renderer.eF("graphicElement"));
 			}
 
@@ -427,14 +450,14 @@ public class Renderer {
 			sb.append("<").append(elem.getElementType().name()).append(">");
 
 			Map<String, String> rSr = new LinkedHashMap<>();
-			rSr.put("x", elem.getElementLeft().toString());
-			rSr.put("y", elem.getElementTop().toString());
-			rSr.put("width", elem.getElementWidth().toString());
-			rSr.put("height", elem.getElementHeight().toString());
+			rSr.put("x", dimension(elem.getElementLeft()));
+			rSr.put("y", dimension(elem.getElementTop()));
+			rSr.put("width", dimension(elem.getElementWidth()));
+			rSr.put("height", dimension(elem.getElementHeight()));
 			rSr.put("uuid", UUID.randomUUID().toString());
 			sb.append(Renderer.eS("reportElement", rSr, true));
 
-			if (Mode.bean.equals(elem.getParent().getParent().getMode())) {
+			if (Mode.bean.equals(elem.getNullSafeParent().getNullSafeParent().getMode())) {
 				sb.append(eS("dataSourceExpression", null, false));
 				sb.append("<![CDATA[new net.sf.jasperreports.engine.data.JRBeanCollectionDataSource($F{");
 				sb.append(elem.getName());
@@ -476,24 +499,29 @@ public class Renderer {
 		StringBuilder sb = new StringBuilder();
 
 		Map<String, String> a = new LinkedHashMap<>();
-		if (e.getTopPadding() != null) {
-			a.put("topPadding", e.getTopPadding().toString());
+		final Integer topPadding = e.getTopPadding();
+		if (topPadding != null) {
+			a.put("topPadding", topPadding.toString());
 		}
-		if (e.getLeftPadding() != null) {
-			a.put("leftPadding", e.getLeftPadding().toString());
+		final Integer leftPadding = e.getLeftPadding();
+		if (leftPadding != null) {
+			a.put("leftPadding", leftPadding.toString());
 		}
-		if (e.getBottomPadding() != null) {
-			a.put("bottomPadding", e.getBottomPadding().toString());
+		final Integer bottomPadding = e.getBottomPadding();
+		if (bottomPadding != null) {
+			a.put("bottomPadding", bottomPadding.toString());
 		}
-		if (e.getRightPadding() != null) {
-			a.put("rightPadding", e.getRightPadding().toString());
+		final Integer rightPadding = e.getRightPadding();
+		if (rightPadding != null) {
+			a.put("rightPadding", rightPadding.toString());
 		}
 
 		sb.append(Renderer.eS("box", a, false));
 		Decimal2DollarsAndCents conv = new Decimal2DollarsAndCents();
 		String lineWidth = "1";
-		if (e.getBorderLineWidth() != null) {
-			lineWidth = conv.toDisplayValue(e.getBorderLineWidth());
+		final Decimal2 borderLineWidth = e.getBorderLineWidth();
+		if (borderLineWidth != null) {
+			lineWidth = conv.toDisplayValue(borderLineWidth);
 		}
 		if (Boolean.TRUE.equals(e.getElementBorder())) {
 			if (e.getBorderLineWidth() != null) {
@@ -529,9 +557,14 @@ public class Renderer {
 
 		StringBuilder sb = new StringBuilder();
 
+		final BandType bandType = band.getBandType();
+		if (bandType == null) {
+			throw new IllegalStateException("Report band " + band.getName() + " has no band type");
+		}
+
 		// don't do report section for detail
-		if (!BandType.detail.equals(band.getBandType())) {
-			sb.append(eS(band.getBandType().toString(), null, false));
+		if (!BandType.detail.equals(bandType)) {
+			sb.append(eS(bandType.toString(), null, false));
 		}
 
 		if (band.getElements().isEmpty()) {
@@ -540,13 +573,14 @@ public class Renderer {
 
 			Map<String, String> bandAttr = new HashMap<>();
 			bandAttr.put("height", band.getHeight().toString());
-			if (band.getSplitType() != null) {
-				bandAttr.put("splitType", band.getSplitType().toString());
+			final ReportBand.SplitType splitType = band.getSplitType();
+			if (splitType != null) {
+				bandAttr.put("splitType", splitType.toString());
 			}
 
 			sb.append(eS("band", bandAttr, false));
 			if (band.getInvisibleConditionName() != null) {
-				sb.append(renderPrintWhenExpression(band.getParent(), band.getInvisibleConditionName()));
+				sb.append(renderPrintWhenExpression(band.getNullSafeParent(), band.getInvisibleConditionName()));
 			}
 
 			for (ReportElement e : band.getElements()) {
@@ -556,8 +590,8 @@ public class Renderer {
 			sb.append(eF("band"));
 		}
 
-		if (!BandType.detail.equals(band.getBandType())) {
-			sb.append(eF(band.getBandType().toString()));
+		if (!BandType.detail.equals(bandType)) {
+			sb.append(eF(bandType.toString()));
 		}
 
 		return sb.toString();
@@ -570,9 +604,11 @@ public class Renderer {
 
 		StringBuilder sb = new StringBuilder();
 
-		if (!(Boolean.TRUE.equals(field.getCollection()) && Mode.sql.equals(field.getParent().getMode()))) {
-			if (field.getParent() != null) {
-				if (Mode.sql.equals(field.getParent().getMode())) {
+		// a field that is not in a design is not rendered
+		final DesignSpecification design = field.getParent();
+		if (design != null) {
+			if (!(Boolean.TRUE.equals(field.getCollection()) && Mode.sql.equals(design.getMode()))) {
+				if (Mode.sql.equals(design.getMode())) {
 					Map<String, String> attr = new LinkedHashMap<>();
 					attr.put("name", field.getName());
 					attr.put("class", field.getTypeClass());
@@ -654,7 +690,9 @@ public class Renderer {
 	public static @Nonnull String renderDesign(@Nonnull DesignSpecification design) {
 		StringBuilder sb = new StringBuilder();
 
-		if (design.getModuleName() != null && design.getDocumentName() != null) {
+		final String moduleName = design.getModuleName();
+		final String documentName = design.getDocumentName();
+		if (moduleName != null && documentName != null) {
 
 			sb.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
 
@@ -695,8 +733,8 @@ public class Renderer {
 
 			// get persistent name for document
 			Customer customer = CORE.getPersistence().getUser().getCustomer();
-			Module module = customer.getModule(design.getModuleName());
-			Document document = module.getDocument(customer, design.getDocumentName());
+			Module module = customer.getModule(moduleName);
+			Document document = module.getDocument(customer, documentName);
 
 			// queryString
 			if (Mode.bean.equals(design.getMode())) {
@@ -708,7 +746,7 @@ public class Renderer {
 
 			if (Mode.bean.equals(design.getMode())) {
 				if (ReportType.report.equals(design.getReportType())) {
-					sb.append(design.getModuleName()).append('.').append(design.getDocumentName());
+					sb.append(moduleName).append('.').append(documentName);
 				}
 				else {
 					// nothing
@@ -751,16 +789,17 @@ public class Renderer {
 				sb.append("select ").append(sql).append(" from ").append(getPersistentIdentifierForDocument(document)).append(" a");
 
 				// joins
-				if (design.getJoins() != null) {
-					for (String k : design.getJoins().keySet()) {
-						sb.append("\n").append(design.getJoins().get(k));
+				final Map<String, String> joins = design.getJoins();
+				if (joins != null) {
+					for (String k : joins.keySet()) {
+						sb.append("\n").append(joins.get(k));
 					}
 				}
 
 				if (ReportType.report.equals(design.getReportType())) {
 					sb.append("\n where ").append("a").append(".bizId = $P{ID}");
 				} else if (ReportType.subreport.equals(design.getReportType())) {
-					LOGGER.info("SUBREPORT {} IS {}", design.getName(), design.getCollectionType().name());
+					LOGGER.info("SUBREPORT {} IS {}", design.getName(), design.getCollectionType());
 
 					// join to either parent or joiner table
 					if (CollectionType.child.equals(design.getCollectionType())) {
@@ -769,10 +808,14 @@ public class Renderer {
 					} else {
 						// joiner
 						// TODO - join correctly for aggregated collections - probably obviated by the getJoins() above
-						sb.append("\n join ").append(design.getParentReportPersistentName()).append("_").append(design.getField().getName());
-						sb.append(" ").append(design.getField().getName()).append(" on ").append(design.getField().getName()).append(".element_id = ");
+						final ReportField field = design.getField();
+						if (field == null) {
+							throw new IllegalStateException("Subreport design " + design.getName() + " has no collection field");
+						}
+						sb.append("\n join ").append(design.getParentReportPersistentName()).append("_").append(field.getName());
+						sb.append(" ").append(field.getName()).append(" on ").append(field.getName()).append(".element_id = ");
 						sb.append(" ").append(document.getName()).append(".bizId");
-						sb.append("\n where ").append(design.getField().getName()).append(".owner_id = $P{ID}");
+						sb.append("\n where ").append(field.getName()).append(".owner_id = $P{ID}");
 					}
 				}
 			}
@@ -827,7 +870,7 @@ public class Renderer {
 	 * @see #printWhenExpression(DesignSpecification, String)
 	 */
 	public static @Nonnull String renderPrintWhenExpression(@Nonnull DesignSpecification design, @Nullable String invisibleCondition) {
-		if (StringUtils.isBlank(invisibleCondition)) {
+		if ((invisibleCondition == null) || invisibleCondition.isBlank()) {
 			return "";
 		}
 		StringBuilder sb = new StringBuilder(128);
@@ -883,6 +926,9 @@ public class Renderer {
 
 		String basePath = "";
 		basePath = UtilImpl.getAbsoluteBasePath();
+		if (basePath == null) {
+			throw new IllegalStateException("Cannot determine the absolute base path for the reports of " + moduleName + '.' + documentName);
+		}
 		if (basePath.startsWith("/")) {
 			basePath = basePath.substring(1);
 		}
@@ -996,33 +1042,34 @@ public class Renderer {
 			ReportElement tE = new ReportElement(type, name, valueExpression, fontName, fontSize, top, left, width, height, border, alignment, bold, italic, printWhenExpression);
 
 			tE.setParent(band);
+			final DesignSpecification design = band.getNullSafeParent();
 
 			// inherit from band
 			if (tE.getElementFontName() == null) {
-				tE.setElementFontName(band.getParent().getDefaultFontName());
+				tE.setElementFontName(design.getDefaultFontName());
 			}
 
 			// font size
 			if (tE.getElementFontSize() == null) {
-				tE.setElementFontSize(band.getParent().getDefaultFontSize());
+				tE.setElementFontSize(design.getDefaultFontSize());
 			}
 
 			// height
 			if (tE.getElementHeight() == null) {
-				tE.setElementHeight(band.getParent().getDefaultElementHeight());
+				tE.setElementHeight(design.getDefaultElementHeight());
 			}
 
 			// dynamic flow
 			if (tE.getDynamicFlow() == null) {
-				tE.setDynamicFlow(band.getParent().getDynamicFlow());
+				tE.setDynamicFlow(design.getDynamicFlow());
 			}
 
 			// border
 			if (tE.getElementBorder() == null) {
-				tE.setElementBorder(band.getParent().getDefaultBorder());
+				tE.setElementBorder(design.getDefaultBorder());
 			}
-			tE.setBorderLineWidth(band.getParent().getDefaultLineWidth());
-			tE.setBorderColour(band.getParent().getDefaultLineColour());
+			tE.setBorderLineWidth(design.getDefaultLineWidth());
+			tE.setBorderColour(design.getDefaultLineColour());
 
 			// colour
 			if (foreColour != null) {
@@ -1032,16 +1079,16 @@ public class Renderer {
 				tE.setElementBackColour(backColour);
 			}
 
-			tE.setBorderTop(band.getParent().getDefaultBorderTop());
-			tE.setBorderLeft(band.getParent().getDefaultBorderLeft());
-			tE.setBorderBottom(band.getParent().getDefaultBorderBottom());
-			tE.setBorderRight(band.getParent().getDefaultBorderRight());
+			tE.setBorderTop(design.getDefaultBorderTop());
+			tE.setBorderLeft(design.getDefaultBorderLeft());
+			tE.setBorderBottom(design.getDefaultBorderBottom());
+			tE.setBorderRight(design.getDefaultBorderRight());
 
 			// padding
-			tE.setTopPadding(band.getParent().getDefaultCellTopPadding());
-			tE.setLeftPadding(band.getParent().getDefaultCellLeftPadding());
-			tE.setBottomPadding(band.getParent().getDefaultCellBottomPadding());
-			tE.setRightPadding(band.getParent().getDefaultCellRightPadding());
+			tE.setTopPadding(design.getDefaultCellTopPadding());
+			tE.setLeftPadding(design.getDefaultCellLeftPadding());
+			tE.setBottomPadding(design.getDefaultCellBottomPadding());
+			tE.setRightPadding(design.getDefaultCellRightPadding());
 
 			// if element is a border, move to the first position in the collection
 			// it will have been created last, so that it could know the height of all previous items

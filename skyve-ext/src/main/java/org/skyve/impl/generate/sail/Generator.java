@@ -8,6 +8,7 @@ import org.skyve.impl.metadata.module.menu.EditItem;
 import org.skyve.impl.metadata.module.menu.ListItem;
 import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
 import org.skyve.impl.metadata.user.UserImpl;
+import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
@@ -92,7 +93,7 @@ System.out.println(visitModules(args[0]));
 			automation.setUxui(uxui);
 			automation.setTestStrategy(testStrategy);
 			List<Interaction> interactions = automation.getInteractions();
-			Menu menu = u.getModuleMenu(moduleName);
+			Menu menu = moduleMenu(u, moduleName);
 			menu(u, c, m, null, menu.getItems(), uxui, interactions);
 
 			// some modules may have no access at all for this user
@@ -141,7 +142,7 @@ System.out.println(visitModules(args[0]));
 		result.setUxui(uxui);
 		result.setTestStrategy(testStrategy);
 		List<Interaction> interactions = result.getInteractions();
-		Menu menu = u.getModuleMenu(moduleName);
+		Menu menu = moduleMenu(u, moduleName);
 		menu(u, c, m, null, menu.getItems(), uxui, interactions);
 
 		if (loginPassword != null) {
@@ -198,12 +199,19 @@ System.out.println(visitModules(args[0]));
 							d = query.getDocumentModule(c).getDocument(c, query.getDocumentName());
 						}
 						else {
+							if (documentName == null) { // validated when the menu is loaded
+								throw new MetaDataException("List menu item " + item.getName() + " in module " + moduleName + " has no query or document");
+							}
 							navigate.setDocumentName(documentName);
 							d = m.getDocument(c, documentName);
 							if (modelName != null) {
 								navigate.setModelName(modelName);
 								ListModel<?> model = d.getListModel(c, modelName, false);
-								d = model.getDrivingDocument();
+								Document drivingDocument = model.getDrivingDocument();
+								if (drivingDocument == null) {
+									throw new MetaDataException("List model " + modelName + " in document " + documentName + " has no driving document");
+								}
+								d = drivingDocument;
 							}
 						}
 						
@@ -213,6 +221,9 @@ System.out.println(visitModules(args[0]));
 						NavigateEdit navigate = new NavigateEdit();
 						navigate.setModuleName(moduleName);
 						String documentName = edit.getDocumentName();
+						if (documentName == null) { // validated when the menu is loaded
+							throw new MetaDataException("Edit menu item " + item.getName() + " in module " + moduleName + " has no document");
+						}
 						navigate.setDocumentName(documentName);
 						steps.add(navigate);
 
@@ -396,11 +407,30 @@ System.out.println(visitModules(args[0]));
 		}
 	}
 	
+	/**
+	 * Returns the user's menu for a module, which resetting the menus put in place for every module of the customer.
+	 *
+	 * @param u the user whose menus were reset
+	 * @param moduleName the name of a module of the user's customer
+	 * @return the module menu
+	 */
+	private static @Nonnull Menu moduleMenu(@Nonnull UserImpl u, @Nonnull String moduleName) {
+		Menu result = u.getModuleMenu(moduleName);
+		if (result == null) {
+			throw new IllegalStateException("User " + u.getName() + " has no menu for module " + moduleName);
+		}
+		return result;
+	}
+
 	private static void addLoginAndOut(@Nonnull Automation automation, @Nonnull User user, @Nullable String customer, @Nonnull String password) {
 		Procedure before = automation.getBefore();
+		String userName = user.getName();
+		if (userName == null) {
+			throw new IllegalStateException("Cannot log in to the automation as the user has no name");
+		}
 		Login login = new Login();
 		login.setCustomer(customer);
-		login.setUser(user.getName());
+		login.setUser(userName);
 		login.setPassword(password);
 		if (before == null) {
 			before = new Procedure();

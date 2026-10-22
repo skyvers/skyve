@@ -327,6 +327,9 @@ public class ImageMarkupView extends LocalisableView {
 			String bizDocument = bean.getBizDocument();
 			UxUi uxui = UserAgent.getSelection(request).getUxUi();
 			String unsanitisedContentBinding = BindUtil.unsanitiseBinding(contentBindingParameter);
+			if (unsanitisedContentBinding == null) { // contentBindingParameter was checked above
+				throw new IllegalStateException("contentBindingParameter is null");
+			}
 			EXT.checkAccess(user, UserAccess.content(bizModule, bizDocument, unsanitisedContentBinding), uxui.getName());
 			
 			// Check document access

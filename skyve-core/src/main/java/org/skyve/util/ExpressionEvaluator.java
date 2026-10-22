@@ -111,7 +111,12 @@ public abstract class ExpressionEvaluator {
 	 * @return	The evaluated formatted expression.
 	 */
 	public static @Nonnull String format(@Nonnull String expression, @Nullable Bean bean) {
-		return (String) process(expression, bean, true);
+		// Formatting always produces a String
+		String result = (String) process(expression, bean, true);
+		if (result == null) {
+			throw new IllegalStateException("Formatting expression " + expression + " produced null");
+		}
+		return result;
 	}
 	
 	/**

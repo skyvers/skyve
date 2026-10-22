@@ -236,6 +236,9 @@ public final class POIWorkbook implements BizPortWorkbook {
 			int i = 0;
 			for (String columnBinding : sheet.getColumnBindings()) {
 				BizPortColumn column = sheet.getColumn(columnBinding);
+				if (column == null) {
+					throw new IllegalStateException("Sheet " + sheet.getTitle() + " has no column for binding " + columnBinding);
+				}
 				if (column.getReferencedSheet() != null) {
 					sheet.sheet.autoSizeColumn(i);
 					i++;

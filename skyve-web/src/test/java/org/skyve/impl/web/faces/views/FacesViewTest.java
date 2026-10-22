@@ -524,8 +524,8 @@ class FacesViewTest {
 	void contentUrlHelpersRequireCurrentBean() {
 		FacesView view = new FacesView();
 
-		assertThrows(NullPointerException.class, () -> view.getContentUrl("attachment", true));
-		assertThrows(NullPointerException.class, () -> view.getContentFileName("attachment"));
+		assertThrows(IllegalStateException.class, () -> view.getContentUrl("attachment", true));
+		assertThrows(IllegalStateException.class, () -> view.getContentFileName("attachment"));
 	}
 
 	@Test
@@ -1469,7 +1469,7 @@ class FacesViewTest {
 	@Test
 	void getContentUrlThrowsWhenCurrentBeanUnavailable() {
 		FacesView view = new FacesView();
-		assertThrows(NullPointerException.class, () -> view.getContentUrl("img", true));
+		assertThrows(IllegalStateException.class, () -> view.getContentUrl("img", true));
 	}
 
 	@Test
@@ -1493,7 +1493,7 @@ class FacesViewTest {
 	@Test
 	void getContentFileNameThrowsWhenCurrentBeanUnavailable() {
 		FacesView view = new FacesView();
-		assertThrows(NullPointerException.class, () -> view.getContentFileName("file"));
+		assertThrows(IllegalStateException.class, () -> view.getContentFileName("file"));
 	}
 
 	@Test

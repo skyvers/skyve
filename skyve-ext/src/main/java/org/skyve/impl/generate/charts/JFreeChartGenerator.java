@@ -4,6 +4,7 @@ import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.image.BufferedImage;
+import java.util.Collections;
 import java.util.List;
 
 import org.jfree.chart.ChartFactory;
@@ -228,8 +229,8 @@ public class JFreeChartGenerator {
 		XYSeriesCollection dataSet = new XYSeriesCollection();
 		dataSet.setNotify(false);
 		
-		List<String> labels = data.getLabels();
-		List<Number> values = data.getValues();
+		List<Number> values = values();
+		List<String> labels = labels(values.size());
 		
 		for (int i = 0, l = values.size(); i < l; i++) {
 			XYSeries series = new XYSeries(labels.get(i));
@@ -261,8 +262,13 @@ public class JFreeChartGenerator {
 		for (int i = 0, l = values.size(); i < l; i++) {
 			renderer.setSeriesFilled(i, true);
 			renderer.setSeriesShape(i, null);
-			renderer.setSeriesFillPaint(i, backgrounds.get(i));
-			renderer.setSeriesOutlinePaint(i, borders.get(i));
+			// No colours leaves the renderer's defaults
+			if (backgrounds != null) {
+				renderer.setSeriesFillPaint(i, backgrounds.get(i));
+			}
+			if (borders != null) {
+				renderer.setSeriesOutlinePaint(i, borders.get(i));
+			}
 		}
 
 		LegendTitle legend = result.getLegend();
@@ -302,8 +308,8 @@ public class JFreeChartGenerator {
 		
 		result.setNotify(false);
 		String rowKey = data.getLabel();
-		List<String> labels = data.getLabels();
-		List<Number> values = data.getValues();
+		List<Number> values = values();
+		List<String> labels = labels(values.size());
 		for (int i = 0, l = values.size(); i < l; i++) {
 			String columnKey = labels.get(i);
 			result.addValue(values.get(i), rowKey, columnKey);
@@ -312,6 +318,34 @@ public class JFreeChartGenerator {
 		return result;
 	}
 	
+	/**
+	 * Returns the chart values, where no values is no data.
+	 *
+	 * @return the values, or an empty list when the chart data has none
+	 */
+	private @Nonnull List<Number> values() {
+		List<Number> result = data.getValues();
+		return (result == null) ? Collections.emptyList() : result;
+	}
+
+	/**
+	 * Returns the chart labels, which are required to label each of the values.
+	 *
+	 * @param valueCount the number of values to label
+	 * @return the labels, or an empty list when the chart data has no labels and no values
+	 * @throws IllegalArgumentException if the chart data has values but no labels
+	 */
+	private @Nonnull List<String> labels(int valueCount) {
+		List<String> result = data.getLabels();
+		if (result == null) {
+			if (valueCount > 0) {
+				throw new IllegalArgumentException("Chart data has " + valueCount + " values but no labels.");
+			}
+			return Collections.emptyList();
+		}
+		return result;
+	}
+
 	private @Nonnull PieDataset<?> pieDataSet() {
 		return new CategoryToPieDataset(dataSet(), TableOrder.BY_ROW, 0);
 	}
@@ -366,10 +400,15 @@ public class JFreeChartGenerator {
 		List<Color> backgrounds = data.getBackgrounds();
 		List<Color> borders = data.getBorders();
 		
-		for (int i = 0, l = backgrounds.size(); i < l; i++) {
-			String label = labels.get(i);
-			piePlot.setSectionPaint(label, backgrounds.get(i));
-			piePlot.setSectionOutlinePaint(label, borders.get(i));
+		// No labels means no values and so no sections, and no colours leaves the plot's defaults
+		if ((labels != null) && (backgrounds != null)) {
+			for (int i = 0, l = backgrounds.size(); i < l; i++) {
+				String label = labels.get(i);
+				piePlot.setSectionPaint(label, backgrounds.get(i));
+				if (borders != null) {
+					piePlot.setSectionOutlinePaint(label, borders.get(i));
+				}
+			}
 		}
 		
 		LegendTitle legend = chart.getLegend();

@@ -87,7 +87,7 @@ public class FlutterLayoutRenderer extends LayoutRenderer {
 
 	@Override
 	public @Nonnull RenderedComponent addedTab(@Nullable RenderedComponent component, @Nonnull RenderedComponent tab) {
-		return tab.getParent().getParent();
+		return tab.getNullSafeParent().getNullSafeParent();
 	}
 
 	@Override
@@ -97,7 +97,7 @@ public class FlutterLayoutRenderer extends LayoutRenderer {
 
 	@Override
 	public @Nonnull RenderedComponent addedBorderLayout(@Nullable RenderedComponent component, @Nonnull RenderedComponent borderLayout) {
-		return borderLayout.getParent();
+		return borderLayout.getNullSafeParent();
 	}
 
 	@Override
@@ -149,7 +149,7 @@ public class FlutterLayoutRenderer extends LayoutRenderer {
 
 	@Override
 	public @Nonnull RenderedComponent addedFormRowLayout(@Nullable RenderedComponent component, @Nonnull RenderedComponent rowLayout) {
-		return rowLayout.getParent();
+		return rowLayout.getNullSafeParent();
 	}
 
 	@Override
@@ -220,7 +220,7 @@ RenderedComponent col = new RenderedComponent(FlutterGenerator.INDENT).setAfter(
 														@Nonnull RenderedComponent container) {
 // NB add another getParent() if a Cell like intermediate layout object is added in above addToContainer method.
 //		return container.getParent().getParent();
-		return container.getParent();
+		return container.getNullSafeParent();
 	}
 
 }

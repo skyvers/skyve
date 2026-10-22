@@ -228,7 +228,8 @@ class Table {
 						}
 						else {
 							Sensitivity existing = field.getSensitivity();
-							if (sensitivity.ordinal() > existing.ordinal()) {
+							// No existing sensitivity is treated as Sensitivity.none, the lowest
+							if ((existing == null) || (sensitivity.ordinal() > existing.ordinal())) {
 								field.setSensitivity(sensitivity);
 							}
 						}
@@ -278,6 +279,9 @@ class Table {
 	 */
 	public static @Nonnull Table fromJSON(@Nonnull String json) throws Exception {
 		Map<String, Object> map = (Map<String, Object>) JSON.unmarshall(json);
+		if (map == null) {
+			throw new IllegalArgumentException("Table definition JSON " + json + " does not define a table");
+		}
 
 		String agnosticIdentifier = (String) map.get("name");
 		String persistentIdentifier = agnosticIdentifier;
@@ -286,10 +290,10 @@ class Table {
 
 		if ((UtilImpl.CATALOG != null) || (UtilImpl.SCHEMA != null)) {
 			if (agnosticIdentifier.indexOf('.') < 0) { // no schema or catalog
-				persistentIdentifier = Persistent.determinePersistentIdentifier(agnosticIdentifier, UtilImpl.CATALOG, UtilImpl.SCHEMA);
+				persistentIdentifier = qualify(agnosticIdentifier);
 			}
 			if ((ownerAgnosticIdentifier != null) && (ownerAgnosticIdentifier.indexOf('.') < 0)) { // no schema or catalog
-				ownerPersistentIdentifier = Persistent.determinePersistentIdentifier(ownerAgnosticIdentifier, UtilImpl.CATALOG, UtilImpl.SCHEMA);
+				ownerPersistentIdentifier = qualify(ownerAgnosticIdentifier);
 			}
 		}
 		
@@ -306,6 +310,20 @@ class Table {
 			}
 		}
 		
+		return result;
+	}
+
+	/**
+	 * Qualify a table identifier with the configured catalog and schema.
+	 *
+	 * @param identifier the table identifier to qualify
+	 * @return the qualified table identifier
+	 */
+	private static @Nonnull String qualify(@Nonnull String identifier) {
+		String result = Persistent.determinePersistentIdentifier(identifier, UtilImpl.CATALOG, UtilImpl.SCHEMA);
+		if (result == null) { // only null for a null table name
+			throw new IllegalStateException("Cannot qualify table identifier " + identifier);
+		}
 		return result;
 	}
 }

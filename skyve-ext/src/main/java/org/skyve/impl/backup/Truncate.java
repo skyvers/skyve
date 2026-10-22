@@ -34,8 +34,12 @@ public class Truncate {
 
 	public static void truncate(@Nullable String schemaName, boolean database, boolean content) 
 	throws Exception {
+		String customerName = CORE.getUser().getCustomerName();
+		if (customerName == null) { // truncation is scoped to the customer
+			throw new IllegalStateException("Cannot truncate as the user has no customer");
+		}
 		Collection<Table> tables = getTables(schemaName);
-		truncate(tables, CORE.getUser().getCustomerName(), database, content);
+		truncate(tables, customerName, database, content);
 	}
 	
 	@SuppressWarnings("java:S3776") // Complexity OK

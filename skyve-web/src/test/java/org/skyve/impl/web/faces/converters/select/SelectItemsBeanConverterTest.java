@@ -113,6 +113,12 @@ public class SelectItemsBeanConverterTest {
 		assertEquals("adapterBizId", converter.getAsString(null, null, adapter));
 	}
 
+	@Test
+	public void getAsStringReturnsEmptyStringForBeanMapAdapterOfNoBean() {
+		BeanMapAdapter adapter = new BeanMapAdapter(null, mock(WebContext.class));
+		assertEquals("", converter.getAsString(null, null, adapter));
+	}
+
 	// ---- getAsObject with component items ----
 
 	private static UIComponent mockMenuWithItems(UISelectItem... items) {

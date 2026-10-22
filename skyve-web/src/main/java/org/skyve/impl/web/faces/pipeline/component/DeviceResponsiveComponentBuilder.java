@@ -18,7 +18,7 @@ public class DeviceResponsiveComponentBuilder extends ResponsiveComponentBuilder
 	 * No spacers rendered for phones.
 	 */
 	@Override
-	public @Nonnull UIComponent spacer(@Nullable UIComponent component, @Nonnull org.skyve.impl.metadata.view.widget.Spacer spacer) {
+	public @Nullable UIComponent spacer(@Nullable UIComponent component, @Nonnull org.skyve.impl.metadata.view.widget.Spacer spacer) {
 		if (component != null) {
 			return component;
 		}
