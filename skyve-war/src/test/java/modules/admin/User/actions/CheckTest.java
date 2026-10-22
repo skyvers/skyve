@@ -31,6 +31,7 @@ class CheckTest extends AbstractH2Test {
 	private Check action;
 	private String searchToken;
 
+	@SuppressWarnings("null") // a null here fails the test
 	@BeforeEach
 	void setup() {
 		db = new DataBuilder().fixture(FixtureType.crud);
@@ -93,6 +94,7 @@ class CheckTest extends AbstractH2Test {
 		assertThat(result.getBean().getCandidateContacts().get(0).getContact(), is(user2.getContact()));
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void testExecuteEmailSearchExactMatch() throws Exception {
 		// create the test data
@@ -133,6 +135,7 @@ class CheckTest extends AbstractH2Test {
 		assertEquals(2, result.getBean().getCandidateContacts().size());
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void testExecuteEmailOnlyNoMatchesSeedsContactAndReportsInfo() throws Exception {
 		UserExtension searchUser = User.newInstance();

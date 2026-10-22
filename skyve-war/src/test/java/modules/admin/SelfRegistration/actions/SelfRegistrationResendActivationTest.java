@@ -15,6 +15,7 @@ class SelfRegistrationResendActivationTest {
 	void executeWithNullBeanReturnsNullBean() throws Exception {
 		ResendActivation action = new ResendActivation();
 		// bean == null → skips the if block, returns ServerSideActionResult with null bean
+		@SuppressWarnings("null") // passes null on purpose
 		ServerSideActionResult<SelfRegistrationExtension> result = action.execute(null, null);
 		assertNotNull(result);
 		assertNull(result.getBean());

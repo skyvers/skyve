@@ -24,11 +24,13 @@ class AssociationAutoCompleteConverterTest {
 		assertEquals("", converter.getAsString(null, null, null));
 	}
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
 	void getAsObjectReturnsNullForNull() {
 		assertNull(converter.getAsObject(null, null, null));
 	}
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
 	void getAsObjectReturnsNullForBlank() {
 		assertNull(converter.getAsObject(null, null, "  "));

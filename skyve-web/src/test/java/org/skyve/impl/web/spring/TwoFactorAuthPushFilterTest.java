@@ -556,6 +556,7 @@ class TwoFactorAuthPushFilterTest {
 		verify(chain, never()).doFilter(any(), any());
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void testResendInvalidatesOldCode() throws Exception {
 		configurationMap.put(CUSTOMER, new TwoFactorAuthCustomerConfiguration("EMAIL", 300, "subject", "body"));

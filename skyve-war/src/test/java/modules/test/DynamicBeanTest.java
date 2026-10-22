@@ -111,6 +111,7 @@ class DynamicBeanTest extends AbstractSkyveTest {
 		Assertions.assertEquals("#000000", Binder.get(bean, AllAttributesPersistent.colourPropertyName), "Colour default value");
 	}
 	
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void testJSON() throws Exception {
 		Bean bean = Util.constructRandomInstance(u, m, aadpd, 2);
@@ -245,6 +246,7 @@ class DynamicBeanTest extends AbstractSkyveTest {
 		Assertions.assertNotNull(model);
 	}
 	
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void testDynamicInverses() throws Exception {
 		// added to inverse collection assigns to other side (dynamic/static)

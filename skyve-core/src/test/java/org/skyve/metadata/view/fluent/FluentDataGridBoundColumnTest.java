@@ -111,78 +111,91 @@ class FluentDataGridBoundColumnTest {
 
 	// ---- inputWidget overloads ----
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void inputWidgetCheckBoxSetsWidget() {
 		FluentDataGridBoundColumn col = new FluentDataGridBoundColumn().inputWidget(new FluentCheckBox());
 		assertThat(col.get().getInputWidget().getWidget(), instanceOf(CheckBox.class));
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void inputWidgetColourPickerSetsWidget() {
 		FluentDataGridBoundColumn col = new FluentDataGridBoundColumn().inputWidget(new FluentColourPicker());
 		assertThat(col.get().getInputWidget().getWidget(), instanceOf(ColourPicker.class));
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void inputWidgetComboSetsWidget() {
 		FluentDataGridBoundColumn col = new FluentDataGridBoundColumn().inputWidget(new FluentCombo());
 		assertThat(col.get().getInputWidget().getWidget(), instanceOf(Combo.class));
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void inputWidgetGeometrySetsWidget() {
 		FluentDataGridBoundColumn col = new FluentDataGridBoundColumn().inputWidget(new FluentGeometry());
 		assertThat(col.get().getInputWidget().getWidget(), instanceOf(Geometry.class));
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void inputWidgetHTMLSetsWidget() {
 		FluentDataGridBoundColumn col = new FluentDataGridBoundColumn().inputWidget(new FluentHTML());
 		assertThat(col.get().getInputWidget().getWidget(), instanceOf(HTML.class));
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void inputWidgetLookupDescriptionSetsWidget() {
 		FluentDataGridBoundColumn col = new FluentDataGridBoundColumn().inputWidget(new FluentLookupDescription());
 		assertThat(col.get().getInputWidget().getWidget(), instanceOf(LookupDescription.class));
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void inputWidgetPasswordSetsWidget() {
 		FluentDataGridBoundColumn col = new FluentDataGridBoundColumn().inputWidget(new FluentPassword());
 		assertThat(col.get().getInputWidget().getWidget(), instanceOf(Password.class));
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void inputWidgetRadioSetsWidget() {
 		FluentDataGridBoundColumn col = new FluentDataGridBoundColumn().inputWidget(new FluentRadio());
 		assertThat(col.get().getInputWidget().getWidget(), instanceOf(Radio.class));
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void inputWidgetRichTextSetsWidget() {
 		FluentDataGridBoundColumn col = new FluentDataGridBoundColumn().inputWidget(new FluentRichText());
 		assertThat(col.get().getInputWidget().getWidget(), instanceOf(RichText.class));
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void inputWidgetSliderSetsWidget() {
 		FluentDataGridBoundColumn col = new FluentDataGridBoundColumn().inputWidget(new FluentSlider());
 		assertThat(col.get().getInputWidget().getWidget(), instanceOf(Slider.class));
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void inputWidgetSpinnerSetsWidget() {
 		FluentDataGridBoundColumn col = new FluentDataGridBoundColumn().inputWidget(new FluentSpinner());
 		assertThat(col.get().getInputWidget().getWidget(), instanceOf(Spinner.class));
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void inputWidgetTextAreaSetsWidget() {
 		FluentDataGridBoundColumn col = new FluentDataGridBoundColumn().inputWidget(new FluentTextArea());
 		assertThat(col.get().getInputWidget().getWidget(), instanceOf(TextArea.class));
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void inputWidgetTextFieldSetsWidget() {
 		FluentDataGridBoundColumn col = new FluentDataGridBoundColumn().inputWidget(new FluentTextField());
@@ -191,6 +204,7 @@ class FluentDataGridBoundColumnTest {
 
 	@Test
 	void inputWidgetNullClearsWidget() {
+		@SuppressWarnings("null") // passes null on purpose
 		FluentDataGridBoundColumn col = new FluentDataGridBoundColumn()
 				.inputWidget(new FluentTextField())
 				.inputWidget((FluentTextField) null);

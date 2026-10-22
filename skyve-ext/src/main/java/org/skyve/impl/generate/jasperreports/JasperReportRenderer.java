@@ -856,8 +856,7 @@ public class JasperReportRenderer {
 				Document extDocument = null;
 				Persistent persistent = document.getPersistent();
 				final String extDocumentName = inherits.getDocumentName();
-				if ((extDocumentName != null) &&
-						(persistent != null) &&
+				if ((persistent != null) &&
 						Persistent.ExtensionStrategy.joined.equals(persistent.getStrategy())) {
 					extDocument = module.getDocument(customer, extDocumentName);
 					designSpecification.setAlias(designSpecification.getAlias() + 1);
@@ -1087,8 +1086,7 @@ public class JasperReportRenderer {
 
 		final JRDesignBand jrBand = new JRDesignBand();
 
-		Integer height = reportBand.getHeight();
-		jrBand.setHeight((height == null) ? 0 : height.intValue());
+		jrBand.setHeight(reportBand.getHeight().intValue());
 
 		Optional.ofNullable(reportBand.getSplitType())
 					.map(this::getSplitType)

@@ -131,6 +131,7 @@ class POISheetGeneratorTest {
 		assertNull(new POISheetGenerator("module", null).getDownload());
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void getDownloadCanGenerateTitleOnlyWorkbook() throws Exception {
 		bindPersistenceWithCustomer(customer());
@@ -148,6 +149,7 @@ class POISheetGeneratorTest {
 		assertTrue(download.getBytes().length > 0);
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void getDownloadGeneratesRowsUsingFallbackBindingExpression() throws Exception {
 		Bean bean = new DynamicBean("sales", "Order",

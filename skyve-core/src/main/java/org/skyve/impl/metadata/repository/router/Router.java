@@ -338,7 +338,9 @@ public class Router implements ConvertibleMetaData<Router>, DecoratedMetaData, R
 
 		for (UxUiMetadata uxui : uxuis) {
 			for (Route route : uxui.getRoutes()) {
-				if (route.getOutcomeUrl() == null) {
+				@SuppressWarnings("null") // metadata built in code bypasses the XSD
+				boolean outcomeUrlMissing = (route.getOutcomeUrl() == null);
+				if (outcomeUrlMissing) {
 					throw new MetaDataException(metaDataName + " route outcome is required for UX/UI " + uxui.getName() + '.');
 				}
 			}
@@ -346,7 +348,9 @@ public class Router implements ConvertibleMetaData<Router>, DecoratedMetaData, R
 
 		for (Direct direct : directs) {
 			String path = direct.getPath();
-			if (path == null) {
+			@SuppressWarnings("null") // metadata built in code bypasses the XSD
+			boolean pathMissing = (path == null);
+			if (pathMissing) {
 				throw new MetaDataException(metaDataName + " direct path is required.");
 			}
 			if (! path.startsWith("/")) {
@@ -361,7 +365,9 @@ public class Router implements ConvertibleMetaData<Router>, DecoratedMetaData, R
 				throw new MetaDataException(metaDataName + " direct prefix path " + path
 												+ " must end with '/'.");
 			}
-			if (direct.getUxui() == null) {
+			@SuppressWarnings("null") // metadata built in code bypasses the XSD
+			boolean uxuiMissing = (direct.getUxui() == null);
+			if (uxuiMissing) {
 				throw new MetaDataException(metaDataName + " direct UX/UI target is required for path " + path + '.');
 			}
 		}

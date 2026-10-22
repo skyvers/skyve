@@ -764,7 +764,7 @@ public class DataBuilder {
 		DomainType domainType = attribute.getDomainType();
 		if (domainType != null) {
 			List<DomainValue> values = ((DocumentImpl) document).getDomainValues((CustomerImpl) customer, domainType, attribute, bean, true);
-			if ((values != null) && (! values.isEmpty())) {
+			if (! values.isEmpty()) {
 				result = values.get(RANDOM.nextInt(values.size())).getCode();
 			}
 			else {

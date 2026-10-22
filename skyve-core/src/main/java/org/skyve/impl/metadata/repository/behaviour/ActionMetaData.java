@@ -171,7 +171,9 @@ public class ActionMetaData implements NamedMetaData, ConvertibleMetaData<Action
 	@Override
 	public @Nonnull ActionMetaData convert(@Nonnull String metaDataName) {
 		String theName = getName();
-		if (theName == null) {
+		@SuppressWarnings("null") // metadata built in code bypasses the XSD
+		boolean nameMissing = (theName == null);
+		if (nameMissing) {
 			throw new MetaDataException(metaDataName + " : The action [name] is required for action " + metaDataName);
 		}
 
@@ -180,33 +182,47 @@ public class ActionMetaData implements NamedMetaData, ConvertibleMetaData<Action
 		for (int i = 0; i < statementsToValidate.size(); i++) {
 			StatementMetaData statement = statementsToValidate.get(i);
 			if (statement instanceof IfStatement ifStatement) {
-				if (ifStatement.getCondition() == null) {
+				@SuppressWarnings("null") // metadata built in code bypasses the XSD
+				boolean conditionMissing = (ifStatement.getCondition() == null);
+				if (conditionMissing) {
 					throw new MetaDataException(metaDataName + " : The if [condition] is required for action " + theName);
 				}
 				statementsToValidate.addAll(ifStatement.getThenStatements());
 				statementsToValidate.addAll(ifStatement.getElseStatements());
 			}
 			else if (statement instanceof SetStatement setStatement) {
-				if (setStatement.getBinding() == null) {
+				@SuppressWarnings("null") // metadata built in code bypasses the XSD
+				boolean bindingMissing = (setStatement.getBinding() == null);
+				if (bindingMissing) {
 					throw new MetaDataException(metaDataName + " : The set [binding] is required for action " + theName);
 				}
-				if (setStatement.getExpression() == null) {
+				@SuppressWarnings("null") // metadata built in code bypasses the XSD
+				boolean expressionMissing = (setStatement.getExpression() == null);
+				if (expressionMissing) {
 					throw new MetaDataException(metaDataName + " : The set [expression] is required for action " + theName);
 				}
 			}
 			else if (statement instanceof InvokeStatement invokeStatement) {
-				if ((invokeStatement instanceof InvokeStaticStatement invokeStaticStatement) &&
-						(invokeStaticStatement.getClassName() == null)) {
+				@SuppressWarnings("null") // metadata built in code bypasses the XSD
+				boolean classNameMissing = (invokeStatement instanceof InvokeStaticStatement invokeStaticStatement) &&
+												(invokeStaticStatement.getClassName() == null);
+				if (classNameMissing) {
 					throw new MetaDataException(metaDataName + " : The invokeStatic [className] is required for action " + theName);
 				}
-				if (invokeStatement.getMethodName() == null) {
+				@SuppressWarnings("null") // metadata built in code bypasses the XSD
+				boolean methodNameMissing = (invokeStatement.getMethodName() == null);
+				if (methodNameMissing) {
 					throw new MetaDataException(metaDataName + " : The invoke [method] is required for action " + theName);
 				}
 				for (MethodArgument argument : invokeStatement.getArguments()) {
-					if (argument.getTypeName() == null) {
+					@SuppressWarnings("null") // metadata built in code bypasses the XSD
+					boolean typeNameMissing = (argument.getTypeName() == null);
+					if (typeNameMissing) {
 						throw new MetaDataException(metaDataName + " : The argument [typeName] is required for action " + theName);
 					}
-					if (argument.getExpression() == null) {
+					@SuppressWarnings("null") // metadata built in code bypasses the XSD
+					boolean expressionMissing = (argument.getExpression() == null);
+					if (expressionMissing) {
 						throw new MetaDataException(metaDataName + " : The argument [expression] is required for action " + theName);
 					}
 				}

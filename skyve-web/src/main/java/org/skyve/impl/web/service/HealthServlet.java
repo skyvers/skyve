@@ -169,7 +169,9 @@ public class HealthServlet extends HttpServlet {
 		result.append("\",\"repository\":\"");
 		try {
 			// Obtain the repository
-			if (CORE.getRepository() == null) {
+			@SuppressWarnings("null") // the repository is unset until bootstrap completes
+			boolean repositoryMissing = (CORE.getRepository() == null);
+			if (repositoryMissing) {
 				result.append(STATUS_ERROR);
 			}
 			else {

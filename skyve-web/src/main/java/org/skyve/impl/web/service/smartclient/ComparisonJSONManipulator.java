@@ -218,7 +218,7 @@ public final class ComparisonJSONManipulator {
 						
 						propertyWidget = attribute.getDefaultInputWidget();
 					}
-					if ((propertyWidget != null) && (propertyWidget.getBinding() == null)) {
+					if (propertyWidget.getBinding() == null) {
 						propertyWidget.setBinding(propertyName);
 					}
 					
@@ -235,9 +235,7 @@ public final class ComparisonJSONManipulator {
 		            }
 		            if ((attribute != null) && DomainType.constant.equals(attribute.getDomainType())) {
 			            Map<String, String> valueMap = getConstantDomainValueMap(customer, nodeDocument, attribute, true);
-			            if (valueMap != null) {
-							item.put(VALUE_MAP_KEY, valueMap);
-			            }
+						item.put(VALUE_MAP_KEY, valueMap);
 		            }
 		            if (field.getRequiredMessage() != null) {
 		            	item.put(REQUIRED_KEY, Boolean.TRUE);

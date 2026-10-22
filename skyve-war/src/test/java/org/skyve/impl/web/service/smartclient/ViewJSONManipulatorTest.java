@@ -114,6 +114,7 @@ class ViewJSONManipulatorTest extends AbstractSkyveTest {
 				json.contains("_0") && json.contains("_1"), "There should be 2 formats in the payload - " + json);
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void testFirstFormatVisible()
 			throws Exception {
@@ -131,6 +132,7 @@ class ViewJSONManipulatorTest extends AbstractSkyveTest {
 				json.contains("_0") && (!json.contains("_1")), "There should be 2 formats in the payload - " + json);
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void testSecondFormatVisible()
 			throws Exception {
@@ -218,6 +220,7 @@ class ViewJSONManipulatorTest extends AbstractSkyveTest {
 		assertTrue(json.contains("booleanFlag"));
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void testViewWithInlineConditionsCorrelatesTheViewScriptWithThePayload() throws Exception {
 		final String expression = "{el:bean.booleanFlag}";
@@ -267,6 +270,7 @@ class ViewJSONManipulatorTest extends AbstractSkyveTest {
 		}
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void testViewWithInlineConditionsOnGridAndLookupFlags() throws Exception {
 		// one expression used only as authored, and one used only through an enable attribute (its inverse)
@@ -382,7 +386,7 @@ class ViewJSONManipulatorTest extends AbstractSkyveTest {
 		// each row's markup carries a display style resolved from that row
 		@SuppressWarnings("unchecked")
 		Map<String, Object> values = (Map<String, Object>) JSON.unmarshall(json);
-		@SuppressWarnings("unchecked")
+		@SuppressWarnings({"unchecked", "null"}) // a null here fails the test
 		List<Map<String, Object>> rowValues = (List<Map<String, Object>>) values.get("aggregatedCollection");
 		assertEquals(rows.size(), rowValues.size());
 		String shown = "<span style=\"\">a</span>";

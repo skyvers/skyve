@@ -479,7 +479,9 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		expr.append(sidebarComponentId).append("','").append(width).append("',");
 		// Get the breakpoint - default to 1280
 		Integer breakpoint = sidebar.getFloatingPixelWidthBreakpoint();
-		expr.append((breakpoint == null) ? "1280" : breakpoint.toString()).append(',');
+		@SuppressWarnings("null") // TabularComponentBuilderTest asserts the 1280 default for metadata built in code
+		boolean breakpointMissing = (breakpoint == null);
+		expr.append(breakpointMissing ? "1280" : breakpoint.toString()).append(',');
 		// Get the floating pixel width - default to pixel width or 360.
 		Integer floating = sidebar.getFloatingPixelWidth();
 		if ((floating == null) && (pixel != null)) {
@@ -1828,85 +1830,80 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		StringBuilder createUrlParams = null;
 		List<FilterParameter> filterParameters = grid.getFilterParameters();
 		List<Parameter> parameters = grid.getParameters();
-		if (((filterParameters != null) && (! filterParameters.isEmpty())) ||
-				((parameters != null) && (! parameters.isEmpty()))) {
+		if ((! filterParameters.isEmpty()) || (! parameters.isEmpty())) {
 			createUrlParams = new StringBuilder(64);
 			modelExpression.append('[');
-			if (filterParameters != null) {
-				for (FilterParameter param : filterParameters) {
-					String name = param.getFilterBinding();
-					String binding = param.getValueBinding();
-					String value = param.getValue();
+			for (FilterParameter param : filterParameters) {
+				String name = param.getFilterBinding();
+				String binding = param.getValueBinding();
+				String value = param.getValue();
 
-					createUrlParams.append('&').append(name).append('=');
-					modelExpression.append("['").append(name).append("','");
-					modelExpression.append(param.getOperator()).append("',");
-					if (binding != null) {
-						createUrlParams.append("#{").append(managedBeanName).append(".currentBean['");
-						Attribute targetAttribute = null;
-						try {
-							if (owningDocument != null) {
-								Module m = customer.getModule(owningDocument.getOwningModuleName());
-								TargetMetaData target = BindUtil.getMetaDataForBinding(customer, m, owningDocument, binding);
-								targetAttribute = target.getAttribute();
-							}
+				createUrlParams.append('&').append(name).append('=');
+				modelExpression.append("['").append(name).append("','");
+				modelExpression.append(param.getOperator()).append("',");
+				if (binding != null) {
+					createUrlParams.append("#{").append(managedBeanName).append(".currentBean['");
+					Attribute targetAttribute = null;
+					try {
+						if (owningDocument != null) {
+							Module m = customer.getModule(owningDocument.getOwningModuleName());
+							TargetMetaData target = BindUtil.getMetaDataForBinding(customer, m, owningDocument, binding);
+							targetAttribute = target.getAttribute();
 						}
-						catch (@SuppressWarnings("unused") MetaDataException e) {
-							// binding is not an attribute
-						}
-						if ((targetAttribute instanceof Association) || (targetAttribute instanceof InverseOne)) {
-							createUrlParams.append(binding).append(".bizId']}");
-						}
-						else {
-							createUrlParams.append('{').append(binding).append("}']}");
-						}
-						modelExpression.append("'{").append(binding).append("}'],");
+					}
+					catch (@SuppressWarnings("unused") MetaDataException e) {
+						// binding is not an attribute
+					}
+					if ((targetAttribute instanceof Association) || (targetAttribute instanceof InverseOne)) {
+						createUrlParams.append(binding).append(".bizId']}");
 					}
 					else {
-						if (value == null) {
-							modelExpression.append("null],");
-						}
-						else {
-							createUrlParams.append(value);
-							modelExpression.append("'").append(value).append("'],");
-						}
+						createUrlParams.append('{').append(binding).append("}']}");
+					}
+					modelExpression.append("'{").append(binding).append("}'],");
+				}
+				else {
+					if (value == null) {
+						modelExpression.append("null],");
+					}
+					else {
+						createUrlParams.append(value);
+						modelExpression.append("'").append(value).append("'],");
 					}
 				}
 			}
-			if (parameters != null) {
-				for (Parameter param : parameters) {
-					String name = param.getName();
-					String binding = param.getValueBinding();
-					String value = param.getValue();
+			for (Parameter param : parameters) {
+				String name = param.getName();
+				String binding = param.getValueBinding();
+				String value = param.getValue();
 
-					createUrlParams.append('&').append(name).append('=');
-					modelExpression.append("['").append(name).append("',");
-					if (binding != null) {
-						createUrlParams.append("#{").append(managedBeanName).append(".currentBean['");
-						Attribute targetAttribute = null;
-						try {
-							TargetMetaData target = BindUtil.getMetaDataForBinding(customer, owningModule, drivingDocument, binding);
-							targetAttribute = target.getAttribute();
-						}
-						catch (@SuppressWarnings("unused") MetaDataException e) {
-							// binding is not an attribute
-						}
-						if ((targetAttribute instanceof Association) || (targetAttribute instanceof InverseOne)) {
-							createUrlParams.append(binding).append(".bizId']}");
-						}
-						else {
-							createUrlParams.append('{').append(binding).append("}']}");
-						}
-						modelExpression.append("'{").append(binding).append("}'],");
+				createUrlParams.append('&').append(name).append('=');
+				modelExpression.append("['").append(name).append("',");
+				if (binding != null) {
+					createUrlParams.append("#{").append(managedBeanName).append(".currentBean['");
+					Attribute targetAttribute = null;
+					try {
+						TargetMetaData target = BindUtil.getMetaDataForBinding(customer, owningModule, drivingDocument, binding);
+						targetAttribute = target.getAttribute();
+					}
+					catch (@SuppressWarnings("unused") MetaDataException e) {
+						// binding is not an attribute
+					}
+					if ((targetAttribute instanceof Association) || (targetAttribute instanceof InverseOne)) {
+						createUrlParams.append(binding).append(".bizId']}");
 					}
 					else {
-						if (value == null) {
-							modelExpression.append("null],");
-						}
-						else {
-							createUrlParams.append(value);
-							modelExpression.append("'").append(value).append("'],");
-						}
+						createUrlParams.append('{').append(binding).append("}']}");
+					}
+					modelExpression.append("'{").append(binding).append("}'],");
+				}
+				else {
+					if (value == null) {
+						modelExpression.append("null],");
+					}
+					else {
+						createUrlParams.append(value);
+						modelExpression.append("'").append(value).append("'],");
 					}
 				}
 			}

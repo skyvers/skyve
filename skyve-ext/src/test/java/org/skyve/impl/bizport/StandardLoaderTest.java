@@ -343,6 +343,7 @@ public class StandardLoaderTest {
 		verify(sheet).addErrorAtCurrentRow(eq(problems), eq(elementColumn), contains("element cell is empty"));
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	public void populateCollectionFromRowAddsErrorWhenOwnerReferencedSheetIsMissing() throws Exception {
 		UploadException problems = new UploadException();
@@ -359,6 +360,7 @@ public class StandardLoaderTest {
 		verify(sheet).addErrorAtCurrentRow(eq(problems), eq(ownerColumn), contains("referenced sheet for owner_id does not exist"));
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	public void populateCollectionFromRowWarnsWhenElementReferencedSheetIsMissing() throws Exception {
 		UploadException problems = new UploadException();
@@ -383,6 +385,7 @@ public class StandardLoaderTest {
 		verify(sheet).addWarningAtCurrentRow(eq(problems), eq(elementColumn), contains("referenced sheet for element_id does not exist"));
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	public void populateCollectionFromRowAddsErrorWhenOwnerRowIsMissing() throws Exception {
 		UploadException problems = new UploadException();
@@ -406,6 +409,7 @@ public class StandardLoaderTest {
 		verify(sheet).addErrorAtCurrentRow(eq(problems), eq(ownerColumn), contains("collection owner does not exist"));
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	public void populateCollectionFromRowAddsErrorWhenElementRowIsMissing() throws Exception {
 		UploadException problems = new UploadException();
@@ -432,6 +436,7 @@ public class StandardLoaderTest {
 		verify(sheet).addErrorAtCurrentRow(eq(problems), eq(elementColumn), contains("collection element does not exist"));
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	public void populateCollectionFromRowAddsElementToLastBindingSegment() throws Exception {
 		UploadException problems = new UploadException();
@@ -459,7 +464,7 @@ public class StandardLoaderTest {
 	}
 
 	@Test
-	@SuppressWarnings("boxing")
+	@SuppressWarnings({"boxing", "null"}) // a null here fails the test
 	public void populateCollectionFromSheetProcessesEachRow() throws Exception {
 		UploadException problems = new UploadException();
 		BizPortWorkbook workbook = mockWorkbook();
@@ -522,6 +527,7 @@ public class StandardLoaderTest {
 		verify(sheet).addErrorAtCurrentRow(eq(problems), eq(childColumn), contains("No child ID value"));
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	public void linkParentFromRowWarnsWhenReferencedParentSheetMissing() throws Exception {
 		UploadException problems = new UploadException();
@@ -538,6 +544,7 @@ public class StandardLoaderTest {
 		verify(sheet).addWarningAtCurrentRow(eq(problems), eq(parentColumn), contains("parent sheet does not exist"));
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	public void linkParentFromRowAddsErrorWhenParentRowMissing() throws Exception {
 		UploadException problems = new UploadException();
@@ -558,6 +565,7 @@ public class StandardLoaderTest {
 		verify(sheet).addErrorAtCurrentRow(eq(problems), eq(parentColumn), contains("parent ID P1"));
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	public void linkParentFromRowAddsErrorWhenChildRowMissing() throws Exception {
 		UploadException problems = new UploadException();
@@ -580,6 +588,7 @@ public class StandardLoaderTest {
 		verify(sheet).addErrorAtCurrentRow(eq(problems), eq(childColumn), contains("child ID C1"));
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	public void linkParentFromRowAddsChildToParentCollection() throws Exception {
 		UploadException problems = new UploadException();
@@ -687,6 +696,7 @@ public class StandardLoaderTest {
 		assertNotNull(BindUtil.get(master, "customer"));
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	public void linkAssociationsFromRowWarnsWhenReferencedSheetMissing() throws Exception {
 		UploadException problems = new UploadException();
@@ -704,6 +714,7 @@ public class StandardLoaderTest {
 		verify(sheet).addWarningAtCurrentRow(eq(problems), eq(column), contains("referenced sheet for customer"));
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	public void linkAssociationsFromRowAddsErrorWhenReferencedRowMissing() throws Exception {
 		UploadException problems = new UploadException();
@@ -727,6 +738,7 @@ public class StandardLoaderTest {
 		verify(sheet).addErrorAtCurrentRow(eq(problems), eq(column), contains("referencedRowDoesNotExist"));
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	public void linkAssociationsFromRowSetsReferencedBeanWhenFound() throws Exception {
 		UploadException problems = new UploadException();
@@ -752,7 +764,7 @@ public class StandardLoaderTest {
 	}
 
 	@Test
-	@SuppressWarnings("boxing")
+	@SuppressWarnings({"boxing", "null"}) // a null here fails the test
 	public void linkAssociationsFromSheetLinksAssociationColumns() throws Exception {
 		UploadException problems = new UploadException();
 		BizPortWorkbook workbook = mockWorkbook();

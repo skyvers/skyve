@@ -127,7 +127,9 @@ public class BizportExportServlet extends HttpServlet {
 						if (! vetoed) {
 							result = bizPortAction.bizExport(webContext);
 							customer.interceptAfterBizExportAction(document, resourceName, result, webContext);
-							if (result != null) {
+							@SuppressWarnings("null") // the export action is application code
+							boolean resultPresent = (result != null);
+							if (resultPresent) {
 								result.write(baos);
 							}
 						}

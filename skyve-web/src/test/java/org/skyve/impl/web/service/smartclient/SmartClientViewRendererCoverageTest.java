@@ -1256,6 +1256,7 @@ class SmartClientViewRendererCoverageTest {
 		assertTrue(output.toString().contains("{name:'bizKey',type:'text',hidden:true}"));
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void nestedGridLookupUsesViewDocumentModel() {
 		document.setDynamism(new Dynamic());

@@ -117,6 +117,7 @@ class JobScheduleBizletH2Test extends AbstractH2Test {
 
 	// ---- getVariantDomainValues ----
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void getVariantDomainValuesForJobNameReturnsNonEmptyList() throws Exception {
 		List<DomainValue> result = bizlet.getVariantDomainValues(JobSchedule.jobNamePropertyName);
@@ -124,6 +125,7 @@ class JobScheduleBizletH2Test extends AbstractH2Test {
 		assertFalse(result.isEmpty(), "Expected at least one job in the admin module");
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void getVariantDomainValuesForUnknownAttributeReturnsEmptyList() throws Exception {
 		List<DomainValue> result = bizlet.getVariantDomainValues("unknownAttribute");

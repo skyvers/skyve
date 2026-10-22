@@ -395,6 +395,7 @@ class MojoExecutionSuccessTest {
 			return new RecordingCreator(this);
 		}
 
+		@SuppressWarnings("null") // passes null on purpose
 		@Override
 		MavenSkyveProject initialise(MavenSkyveProjectCreator creator) {
 			return null;

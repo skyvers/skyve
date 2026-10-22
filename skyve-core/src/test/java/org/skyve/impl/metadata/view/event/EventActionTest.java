@@ -33,6 +33,7 @@ class EventActionTest {
 	}
 
 	/** Verifies server-side action name state and properties round-trip correctly. */
+	@SuppressWarnings("unused") // asserts null where the annotations say non-null
 	@Test
 	void serverSideActionNameRoundTripAndProperties() {
 		ServerSideActionEventAction action = new ServerSideActionEventAction();
@@ -60,6 +61,7 @@ class EventActionTest {
 	}
 
 	/** Verifies rerender action client-validation and properties round-trip correctly. */
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void rerenderClientValidationRoundTripAndProperties() {
 		RerenderEventAction action = new RerenderEventAction();
@@ -121,6 +123,7 @@ class EventActionTest {
 	}
 
 	/** Verifies rerender action supports explicitly disabling client-side validation. */
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void rerenderSupportsFalseClientValidation() {
 		RerenderEventAction action = new RerenderEventAction();

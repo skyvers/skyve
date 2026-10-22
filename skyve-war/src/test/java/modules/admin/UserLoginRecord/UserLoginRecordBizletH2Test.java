@@ -17,6 +17,7 @@ class UserLoginRecordBizletH2Test extends AbstractH2Test {
 	void preExecuteEditWithNoIpLeavesLocationFieldsNull() throws Exception {
 		UserLoginRecordExtension bean = new UserLoginRecordExtension();
 
+		@SuppressWarnings("null") // passes null on purpose
 		UserLoginRecordExtension result = BIZLET.preExecute(ImplicitActionName.Edit, bean, null, null);
 
 		assertSame(bean, result);

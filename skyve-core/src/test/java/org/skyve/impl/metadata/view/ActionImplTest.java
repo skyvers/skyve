@@ -417,7 +417,7 @@ class ActionImplTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
+	@SuppressWarnings({"static-method", "null"}) // passes null on purpose
 	void getServerSideActionThrowsWhenResourceNameIsNull() {
 		ActionImpl act = new ActionImpl();
 		act.setImplicitName(ImplicitActionName.Save);

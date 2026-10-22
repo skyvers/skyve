@@ -62,6 +62,7 @@ class TikaTextExtractorTest {
 		testContent("test.doc", "REGISTRATION");
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	private static void testContent(String resourceName, String expected) throws IOException {
 		String resourcePath = "/org/skyve/impl/content/" + resourceName;
 		try (InputStream is = TikaTextExtractorTest.class.getResourceAsStream(resourcePath)) {
@@ -166,6 +167,7 @@ class TikaTextExtractorTest {
 		assertTrue(result.contains("Meta Subject") || result.contains("Meta Author"));
 	}
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
 	void testExtractTextFromContentHandlesNullAttachmentGracefully() {
 		assertNull(new TikaTextExtractor().extractTextFromContent(null));

@@ -12,12 +12,14 @@ import org.skyve.util.GeoIPService;
 @SuppressWarnings("static-method")
 public class GeoIPServiceStaticSingletonTest {
 
+        @SuppressWarnings("null") // passes null on purpose
         @Test
         public void getReturnsNullInitially() {
                 GeoIPServiceStaticSingleton.set(null);
                 assertNull(GeoIPServiceStaticSingleton.get());
         }
 
+        @SuppressWarnings("null") // passes null on purpose
         @Test
         public void setAndGetRoundtrip() {
                 GeoIPService svc = new NoOpGeoIPService();
@@ -30,6 +32,7 @@ public class GeoIPServiceStaticSingletonTest {
                 }
         }
 
+        @SuppressWarnings("null") // passes null on purpose
         @Test
         public void setDefaultWithNullKeyInstallsNoOpService() {
                 // UtilImpl.GEO_IP_KEY is null in test environment
@@ -42,6 +45,7 @@ public class GeoIPServiceStaticSingletonTest {
                 }
         }
 
+        @SuppressWarnings("null") // passes null on purpose
         @Test
         public void setDefaultWithNonNullKeyInstallsIPInfoIo() {
                 String savedKey = UtilImpl.GEO_IP_KEY;

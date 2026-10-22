@@ -238,6 +238,7 @@ class PrimeFacesSeleneseExecutorTest {
 	}
 
 	private static final class TestPrimeFacesSeleneseExecutor extends PrimeFacesSeleneseExecutor {
+		@SuppressWarnings("null") // passes null on purpose
 		private TestPrimeFacesSeleneseExecutor() {
 			super(null, null);
 		}

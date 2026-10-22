@@ -43,9 +43,7 @@ public class FluentSidebar extends FluentContainer<FluentSidebar> implements Flu
 		relativeWidth(sidebar, this);
 
 		Integer i = sidebar.getFloatingPixelWidthBreakpoint();
-		if (i != null) {
-			this.sidebar.setFloatingPixelWidthBreakpoint(i);
-		}
+		this.sidebar.setFloatingPixelWidthBreakpoint(i);
 		i = sidebar.getFloatingPixelWidth();
 		if (i != null) {
 			this.sidebar.setFloatingPixelWidth(i);

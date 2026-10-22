@@ -522,13 +522,11 @@ public class ResponsiveLayoutBuilder extends TabularLayoutBuilder {
 		else {
 			styleClasses = responsiveGridStyleClasses(pixelWidth, responsiveWidth, percentageWidth, sm, md, lg, xl);
 		}
-		if (styleClasses != null) {
-			if (nopad && (! UtilImpl.PRIMEFLEX)) {
-				result.setStyleClass(styleClasses + " ui-g-nopad");
-			}
-			else {
-				result.setStyleClass(styleClasses);
-			}
+		if (nopad && (! UtilImpl.PRIMEFLEX)) {
+			result.setStyleClass(styleClasses + " ui-g-nopad");
+		}
+		else {
+			result.setStyleClass(styleClasses);
 		}
 
 		setInvisible(result, widgetInvisible, null);

@@ -20,7 +20,7 @@ class ReportActionTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
+	@SuppressWarnings({"static-method", "unused"}) // asserts null where the annotations say non-null
 	void setModuleNameRoundtrip() {
 		ReportAction action = new ReportAction();
 		assertNull(action.getModuleName());

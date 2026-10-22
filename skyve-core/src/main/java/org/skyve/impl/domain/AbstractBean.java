@@ -121,12 +121,8 @@ public abstract class AbstractBean implements Bean {
 		Document document = null;
 		try {
 			customer = CORE.getUser().getCustomer();
-			if (customer != null) {
-				module = customer.getModule(getBizModule());
-				if (module != null) {
-					document = module.getDocument(customer, getBizDocument());
-				}
-			}
+			module = customer.getModule(getBizModule());
+			document = module.getDocument(customer, getBizDocument());
 		} 
 		catch (@SuppressWarnings("unused") MetaDataException e) {
 			// do nothing - we can continue

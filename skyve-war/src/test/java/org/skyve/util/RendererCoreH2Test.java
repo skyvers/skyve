@@ -181,6 +181,7 @@ class RendererCoreH2Test extends AbstractH2Test {
 
 	// --- Renderer.getPersistentIdentifierForDocument ---
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void getPersistentIdentifierForDocumentReturnsNonNullAndNonEmpty() {
 		org.skyve.metadata.customer.Customer customer = org.skyve.CORE.getPersistence().getUser().getCustomer();

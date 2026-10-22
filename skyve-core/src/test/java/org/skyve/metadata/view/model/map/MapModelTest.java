@@ -18,6 +18,7 @@ class MapModelTest {
 
 	/** Minimal concrete MapModel for testing the abstract class */
 	private static class TestMapModel extends MapModel<Bean> {
+		@SuppressWarnings("null") // passes null on purpose
 		@Override
 		public MapResult getResult(Geometry mapBounds) {
 			return null;

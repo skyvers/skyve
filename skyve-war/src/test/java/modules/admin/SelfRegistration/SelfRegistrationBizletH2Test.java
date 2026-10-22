@@ -53,6 +53,7 @@ class SelfRegistrationBizletH2Test extends AbstractH2Test {
 		assertThat(validation.getMessages().get(0).getText(), containsString("reset your password"));
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	private static SelfRegistrationExtension registration(String email) throws Exception {
 		SelfRegistrationExtension bean = new SelfRegistrationBizlet().newInstance(new SelfRegistrationExtension());
 		bean.getUser().setContact(Contact.newInstance());
@@ -60,6 +61,7 @@ class SelfRegistrationBizletH2Test extends AbstractH2Test {
 		return bean;
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	private static UserExtension savedUser(String prefix, Boolean activated) {
 		String unique = prefix + "-" + UUID.randomUUID();
 		UserExtension user = new DataBuilder().fixture(FixtureType.crud).build(User.MODULE_NAME, User.DOCUMENT_NAME);

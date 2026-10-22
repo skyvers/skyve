@@ -587,7 +587,9 @@ public class DocumentMetaData extends NamedMetaData implements ConvertibleMetaDa
 			throw new MetaDataException(metaDataName + " : The document [name] is required");
 		}
 		result.setName(value);
-		if ((inherits != null) && (inherits.getDocumentName() == null)) {
+		@SuppressWarnings("null") // metadata built in code bypasses the XSD
+		boolean extendsDocumentMissing = (inherits != null) && (inherits.getDocumentName() == null);
+		if (extendsDocumentMissing) {
 			throw new MetaDataException(metaDataName + " : The extends [document] is required");
 		}
 		result.setExtends(getExtends());
@@ -596,12 +598,16 @@ public class DocumentMetaData extends NamedMetaData implements ConvertibleMetaDa
 		Dynamic resultDynamic = getDynamic();
 		result.setDynamism(resultDynamic);
 		value = getSingularAlias();
-		if (value == null) {
+		@SuppressWarnings("null") // metadata built in code bypasses the XSD
+		boolean singularAliasMissing = (value == null);
+		if (singularAliasMissing) {
 			throw new MetaDataException(metaDataName + " : The document [singularAlias] is required");
 		}
 		result.setSingularAlias(value);
 		value = getPluralAlias();
-		if (value == null) {
+		@SuppressWarnings("null") // metadata built in code bypasses the XSD
+		boolean pluralAliasMissing = (value == null);
+		if (pluralAliasMissing) {
 			throw new MetaDataException(metaDataName + " : The document [pluralAlias] is required");
 		}
 		result.setPluralAlias(value);
@@ -726,7 +732,9 @@ public class DocumentMetaData extends NamedMetaData implements ConvertibleMetaDa
 		if (attributes != null) {
 			for (Attribute attribute : getAttributes()) {
 				value = attribute.getName();
-				if (value == null) {
+				@SuppressWarnings("null") // metadata built in code bypasses the XSD
+				boolean nameMissing = (value == null);
+				if (nameMissing) {
 					throw new MetaDataException(metaDataName + " : The attribute [name] is required");
 				}
 				if (BindUtil.isImplicit(value)) {
@@ -748,7 +756,9 @@ public class DocumentMetaData extends NamedMetaData implements ConvertibleMetaDa
 				}
 
 				value = attribute.getDisplayName();
-				if (value == null) {
+				@SuppressWarnings("null") // metadata built in code bypasses the XSD
+				boolean displayNameMissing = (value == null);
+				if (displayNameMissing) {
 					throw new MetaDataException(metaDataName + " : The attribute [displayName] is required for attribute " + attribute.getName());
 				}
 
@@ -1021,7 +1031,9 @@ public class DocumentMetaData extends NamedMetaData implements ConvertibleMetaDa
 							}
 						}
 						for (EnumeratedValue enumeratedValue : values) {
-							if (enumeratedValue.getCode() == null) {
+							@SuppressWarnings("null") // metadata built in code bypasses the XSD
+							boolean codeMissing = (enumeratedValue.getCode() == null);
+							if (codeMissing) {
 								throw new MetaDataException(metaDataName + ENUMERATION_PREFIX + attribute.getName() +
 																" has a value with no [code] defined.");
 							}
@@ -1039,11 +1051,15 @@ public class DocumentMetaData extends NamedMetaData implements ConvertibleMetaDa
 				}
 				else if (attribute instanceof Relation relation) {
 					value = relation.getDocumentName();
-					if (value == null) {
+					@SuppressWarnings("null") // metadata built in code bypasses the XSD
+					boolean documentNameMissing = (value == null);
+					if (documentNameMissing) {
 						throw new MetaDataException(metaDataName + " : The relation [documentName] is required for relation " + relation.getName());
 					}
 					if (relation instanceof Inverse inverseRelation) {
-						if (inverseRelation.getReferenceName() == null) {
+						@SuppressWarnings("null") // metadata built in code bypasses the XSD
+						boolean referenceNameMissing = (inverseRelation.getReferenceName() == null);
+						if (referenceNameMissing) {
 							throw new MetaDataException(metaDataName + " : The inverse [referenceName] is required for inverse " + relation.getName());
 						}
 					}
@@ -1053,7 +1069,9 @@ public class DocumentMetaData extends NamedMetaData implements ConvertibleMetaDa
 						if (resultPersistent == null) {
 							association.setPersistent(false);
 						}
-						if (association.getType() == null) {
+						@SuppressWarnings("null") // metadata built in code bypasses the XSD
+						boolean typeMissing = (association.getType() == null);
+						if (typeMissing) {
 							throw new MetaDataException(metaDataName + " : The association [type] is required for association " +
 															relation.getName());
 						}
@@ -1067,7 +1085,9 @@ public class DocumentMetaData extends NamedMetaData implements ConvertibleMetaDa
 						if (resultPersistent == null) {
 							collection.setPersistent(false);
 						}
-						if (collection.getType() == null) {
+						@SuppressWarnings("null") // metadata built in code bypasses the XSD
+						boolean typeMissing = (collection.getType() == null);
+						if (typeMissing) {
 							throw new MetaDataException(metaDataName + " : The collection [type] is required for collection " +
 															relation.getName());
 						}
@@ -1079,7 +1099,9 @@ public class DocumentMetaData extends NamedMetaData implements ConvertibleMetaDa
 															relation.getName());
 						}
 						for (Ordering ordering : orderings) {
-							if (ordering.getBy() == null) {
+							@SuppressWarnings("null") // metadata built in code bypasses the XSD
+							boolean byMissing = (ordering.getBy() == null);
+							if (byMissing) {
 								throw new MetaDataException(metaDataName + " : The collection ordering [by] is required for collection " +
 																relation.getName());
 							}
@@ -1089,11 +1111,15 @@ public class DocumentMetaData extends NamedMetaData implements ConvertibleMetaDa
 							}
 						}
 						for (org.skyve.metadata.model.document.UniqueConstraint unique : collection.getUniqueConstraints()) {
-							if (unique.getName() == null) {
+							@SuppressWarnings("null") // metadata built in code bypasses the XSD
+							boolean uniqueNameMissing = (unique.getName() == null);
+							if (uniqueNameMissing) {
 								throw new MetaDataException(metaDataName + " : The collection unique constraint [name] is required for collection " +
 																relation.getName());
 							}
-							if (unique.getMessage() == null) {
+							@SuppressWarnings("null") // metadata built in code bypasses the XSD
+							boolean messageMissing = (unique.getMessage() == null);
+							if (messageMissing) {
 								throw new MetaDataException(metaDataName + " : The collection unique constraint [message] is required for constraint " +
 																unique.getName() + " in collection " + relation.getName());
 							}
@@ -1140,7 +1166,9 @@ public class DocumentMetaData extends NamedMetaData implements ConvertibleMetaDa
 					else if (relation instanceof InverseMany inverse) {
 						List<Ordering> orderings = inverse.getOrdering();
 						for (Ordering ordering : orderings) {
-							if (ordering.getBy() == null) {
+							@SuppressWarnings("null") // metadata built in code bypasses the XSD
+							boolean byMissing = (ordering.getBy() == null);
+							if (byMissing) {
 								throw new MetaDataException(metaDataName + " : The inverse ordering [by] is required for inverse " +
 																relation.getName());
 							}
@@ -1184,7 +1212,9 @@ public class DocumentMetaData extends NamedMetaData implements ConvertibleMetaDa
 				}
 
 				String conditionExpression = conditionMetaData.getExpression();
-				if (conditionExpression == null) {
+				@SuppressWarnings("null") // metadata built in code bypasses the XSD
+				boolean conditionExpressionMissing = (conditionExpression == null);
+				if (conditionExpressionMissing) {
 					throw new MetaDataException(metaDataName + " : A condition [expression] is required.");
 				}
 
@@ -1221,14 +1251,18 @@ public class DocumentMetaData extends NamedMetaData implements ConvertibleMetaDa
 					throw new MetaDataException(metaDataName + " : Duplicate unique constraint named " + value);
 				}
 				constraint.setName(value);
-				if (constraintMetaData.getScope() == null) {
+				@SuppressWarnings("null") // metadata built in code bypasses the XSD
+				boolean scopeMissing = (constraintMetaData.getScope() == null);
+				if (scopeMissing) {
 					throw new MetaDataException(metaDataName + " : The unique constraint [scope] is required for constraint " +
 													constraint.getName());
 				}
 				constraint.setScope(constraintMetaData.getScope());
 				constraint.setDescription(constraintMetaData.getDescription());
 				value = constraintMetaData.getMessage();
-				if (value == null) {
+				@SuppressWarnings("null") // metadata built in code bypasses the XSD
+				boolean messageMissing = (value == null);
+				if (messageMissing) {
 					throw new MetaDataException(metaDataName + " : The unique constraint [message] is required for constraint " +
 													constraint.getName());
 				}
@@ -1236,19 +1270,17 @@ public class DocumentMetaData extends NamedMetaData implements ConvertibleMetaDa
 
 				Set<String> refNames = new TreeSet<>();
 				List<FieldReference> fieldReferences = constraintMetaData.getFieldReferences();
-				if (fieldReferences != null) {
-					for (FieldReference ref : fieldReferences) {
-						value = ref.getRef();
-						if (value == null) {
-							throw new MetaDataException(metaDataName + " : The unique constraint field reference [ref] is required for constraint " +
-															constraint.getName());
-						}
-						if ( !refNames.add(value)) {
-							throw new MetaDataException(metaDataName + " : Duplicate unique constraint reference [ref] of " +
-															value + " in constraint " + constraint.getName());
-						}
-						constraint.getFieldNames().add(value);
+				for (FieldReference ref : fieldReferences) {
+					value = ref.getRef();
+					if (value == null) {
+						throw new MetaDataException(metaDataName + " : The unique constraint field reference [ref] is required for constraint " +
+														constraint.getName());
 					}
+					if ( !refNames.add(value)) {
+						throw new MetaDataException(metaDataName + " : Duplicate unique constraint reference [ref] of " +
+														value + " in constraint " + constraint.getName());
+					}
+					constraint.getFieldNames().add(value);
 				}
 
 				constraint.getProperties().putAll(constraintMetaData.getProperties());

@@ -73,6 +73,7 @@ class SkyveDataSourceH2Test extends AbstractH2Test {
 		assertEquals(3, count);
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void getFieldValueResolvesRawBinding() throws JRException {
 		// name only (no description) -> raw BindUtil.get path
@@ -83,6 +84,7 @@ class SkyveDataSourceH2Test extends AbstractH2Test {
 		assertThat(result.toString(), is("first"));
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void getFieldValueResolvesFormattedBinding() throws JRException {
 		// description set -> BindUtil.getDisplay path (formatted string)

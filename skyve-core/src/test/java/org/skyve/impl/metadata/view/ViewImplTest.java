@@ -195,6 +195,7 @@ class ViewImplTest {
 		assertTrue(v.getProperties().isEmpty());
 	}
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
 	void getAccessesReturnsNullWhenAccessesHaveNotBeenConverted() {
 		ViewImpl v = new ViewImpl();

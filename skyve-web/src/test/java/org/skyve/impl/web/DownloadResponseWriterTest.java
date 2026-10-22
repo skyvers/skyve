@@ -66,6 +66,7 @@ class DownloadResponseWriterTest {
 	@Test
 	void nullDispositionDefaultsToAttachmentAndFilenameIsSanitised() throws Exception {
 		byte[] bytes = "safe".getBytes(StandardCharsets.UTF_8);
+		@SuppressWarnings("null") // passes null on purpose
 		Download download = new Download("../unsafe<name>.txt", bytes, MimeType.plain, null);
 		CapturingServletOutputStream out = new CapturingServletOutputStream();
 		HttpServletResponse response = responseWithOutput(out);

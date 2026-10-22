@@ -36,7 +36,7 @@ class UtilImplTest {
 	}
 	
 	@Test
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({"unchecked", "null"}) // a null here fails the test
 	void testReadJSONConfigNoComments() throws Exception {
 		// call the method under test
 		try (InputStream in = classLoader.getResourceAsStream("json/withoutComments.json")) {
@@ -53,7 +53,7 @@ class UtilImplTest {
 	}
 	
 	@Test
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({"unchecked", "null"}) // a null here fails the test
 	void testReadJSONConfigWithComments() throws Exception {
 		// call the method under test
 		try (InputStream in = classLoader.getResourceAsStream("json/withoutComments.json")) {
@@ -70,7 +70,7 @@ class UtilImplTest {
 	}
 	
 	@Test
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({"unchecked", "null"}) // a null here fails the test
 	void testReadJSONConfigBlockComments() throws Exception {
 		// call the method under test
 		try (InputStream in = classLoader.getResourceAsStream("json/blockComments.json")) {
@@ -94,6 +94,7 @@ class UtilImplTest {
 			Map<String, Object> json = UtilImpl.readJSONConfig(in);
 
 			// verify the result
+			@SuppressWarnings("null") // a null here fails the test
 			Map<String, Object> environment = (Map<String, Object>) json.get("environment");
 
 			assertThat(environment, is(notNullValue()));
@@ -186,7 +187,7 @@ class UtilImplTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
+	@SuppressWarnings({"static-method", "null"}) // a null here fails the test
 	void testCleanupModuleDirectoryAddsModulesWhenMissing() {
 		String result = UtilImpl.cleanupModuleDirectory("/apps");
 		assertTrue(result.contains("modules"), "Should add /modules");
@@ -194,7 +195,7 @@ class UtilImplTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
+	@SuppressWarnings({"static-method", "null"}) // a null here fails the test
 	void testCleanupModuleDirectoryStripsTrailingSlashThenAddsModules() {
 		// path with trailing slash but no modules
 		String result = UtilImpl.cleanupModuleDirectory("/apps/");

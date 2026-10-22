@@ -60,8 +60,6 @@ import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.xhtmlrenderer.pdf.ITextOutputDevice;
 import org.xhtmlrenderer.pdf.ITextRenderer;
 
-import freemarker.template.Template;
-
 @SuppressWarnings("static-method")
 class FreemarkerReportUtilTest {
 	@TempDir
@@ -121,16 +119,6 @@ class FreemarkerReportUtilTest {
 		FreemarkerReportUtil.addTemplate("ow", "v1");
 		FreemarkerReportUtil.addTemplate("ow", "v2");
 		assertTrue(FreemarkerReportUtil.removeTemplate("ow"));
-	}
-
-	@Test
-	void privateCreateReportReturnsNullForMissingTemplate() throws Exception {
-		Method method = FreemarkerReportUtil.class.getDeclaredMethod("createReport", Template.class, Map.class, String.class);
-		method.setAccessible(true);
-
-		File result = (File) method.invoke(null, null, Map.of(), "missing");
-
-		assertNull(result);
 	}
 
 	@Test
@@ -463,6 +451,7 @@ class FreemarkerReportUtilTest {
 		assertEquals("csv-content", new String(result.getBytes(), StandardCharsets.UTF_8));
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void downloadReportReturnsPdfDownloadForHtmlReport() throws Exception {
 		ReportDataset dataset = mock(ReportDataset.class);

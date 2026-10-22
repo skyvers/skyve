@@ -13,6 +13,7 @@ class SecurityLogBizletTest {
 	@Test
 	void preExecuteNewReturnsBean() throws Exception {
 		SecurityLogExtension bean = new SecurityLogExtension();
+		@SuppressWarnings("null") // passes null on purpose
 		SecurityLogExtension result = bizlet.preExecute(ImplicitActionName.New, bean, null, null);
 		assertNotNull(result);
 	}

@@ -43,6 +43,7 @@ class CopyTagToUserH2Test extends AbstractH2Test {
 		tagManager = EXT.getTagManager();
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void testExecuteCopiesTagToUser() throws Exception {
 		long suffix = System.nanoTime();
@@ -124,6 +125,7 @@ class CopyTagToUserH2Test extends AbstractH2Test {
 		assertEquals(2L, newTaggedCount);
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void testExecuteWithNullCopyToUserThrowsValidationException() throws Exception {
 		long suffix = System.nanoTime();
@@ -169,6 +171,7 @@ class CopyTagToUserH2Test extends AbstractH2Test {
 		assertEquals(1L, originalTag.count());
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void testExecuteWithEmptyTagCopiesEmptyTag() throws Exception {
 		long suffix = System.nanoTime();

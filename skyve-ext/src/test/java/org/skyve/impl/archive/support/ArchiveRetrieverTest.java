@@ -99,6 +99,7 @@ class ArchiveRetrieverTest {
 				() -> invokeGetArchiveFilePath(method, entry));
 	}
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
 	void searchIndexReturnsEmptyListWhenNoDocumentsMatch() throws Exception {
 		ArchiveDocConfig docConfig = new ArchiveDocConfig("sales", "Order", "orders", 30);
@@ -125,6 +126,7 @@ class ArchiveRetrieverTest {
 		}
 	}
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
 	void searchIndexReturnsArchiveEntriesForMatchedDocuments() throws Exception {
 		ArchiveDocConfig docConfig = new ArchiveDocConfig("sales", "Order", "orders", 30);
@@ -158,6 +160,7 @@ class ArchiveRetrieverTest {
 		}
 	}
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
 	void retrieveByBizIdReturnsEmptyWhenIndexHasNoMatchingDocument() throws Exception {
 		ArchiveDocConfig docConfig = new ArchiveDocConfig("sales", "Order", "orders", 30);
@@ -179,6 +182,7 @@ class ArchiveRetrieverTest {
 		}
 	}
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
 	void retrieveByBizIdReturnsEmptyWhenIndexIsMissing() throws Exception {
 		ArchiveDocConfig docConfig = new ArchiveDocConfig("sales", "Order", "orders", 30);
@@ -199,6 +203,7 @@ class ArchiveRetrieverTest {
 		}
 	}
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
 	void retrieveAllReturnsEmptyWhenIndexHasNoMatchingDocuments() throws Exception {
 		ArchiveDocConfig docConfig = new ArchiveDocConfig("sales", "Order", "orders", 30);
@@ -222,6 +227,7 @@ class ArchiveRetrieverTest {
 		}
 	}
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
 	void retrieveAllReturnsEmptyWhenIndexIsMissing() throws Exception {
 		ArchiveDocConfig docConfig = new ArchiveDocConfig("sales", "Order", "orders", 30);

@@ -44,7 +44,7 @@ class BackupsModelH2Test extends AbstractH2Test {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
+	@SuppressWarnings({"static-method", "null"}) // a null here fails the test
 	void postConstructPopulatesDrivingDocumentColumnsAndProjections() {
 		BackupsModel model = new BackupsModel();
 
@@ -62,6 +62,7 @@ class BackupsModelH2Test extends AbstractH2Test {
 		model.putParameter("ignored", "ignored");
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void fetchFoldersReturnsReverseSortedPagedFoldersWithFourteenCharacterNamesOnly() throws Exception {
 		Files.createDirectory(tempDir.resolve("20240101000000"));
@@ -82,6 +83,7 @@ class BackupsModelH2Test extends AbstractH2Test {
 		assertThat(page.getSummary().getBizDocument(), is(DownloadFolder.DOCUMENT_NAME));
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void fetchFoldersReturnsEmptyPageWhenDirectoryHasNoMatchingFolders() {
 		Page page = BackupsModel.fetchFolders(tempDir.toString(), 0, 10);
@@ -91,6 +93,7 @@ class BackupsModelH2Test extends AbstractH2Test {
 		assertThat(page.getSummary().getBizModule(), is(DownloadFolder.MODULE_NAME));
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void fetchBackupsReturnsZipFilesSortedByNameWithSizeInMegabytes() throws Exception {
 		Files.write(tempDir.resolve("alpha.zip"), new byte[1024 * 1024]);
@@ -109,6 +112,7 @@ class BackupsModelH2Test extends AbstractH2Test {
 		assertThat(second.get(DownloadFolder.sizePropertyName), is(Long.valueOf(2)));
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void fetchBackupsReturnsEmptyPageWhenNoZipFilesExist() throws Exception {
 		Files.writeString(tempDir.resolve("ignored.txt"), "ignored", StandardCharsets.UTF_8);

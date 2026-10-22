@@ -70,7 +70,9 @@ public class OptimisticLock implements Serializable {
 	 *         shorter than 18 characters, or contains an unparseable timestamp
 	 */
 	public OptimisticLock(@Nonnull String lockString) {
-		if ((lockString == null) || (lockString.length() < 18)) {
+		@SuppressWarnings("null") // lock strings arrive from JSON and request data; unit tests assert this
+		boolean lockStringInvalid = (lockString == null) || (lockString.length() < 18);
+		if (lockStringInvalid) {
 			throw new DomainException("bizLock " + lockString + " is invalid");
 		}
 		

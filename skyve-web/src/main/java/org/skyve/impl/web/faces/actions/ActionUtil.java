@@ -171,7 +171,7 @@ public class ActionUtil {
 			outcome.append("&i=").append(contextBean.getBizId());
 		}
 		Deque<String> zoomInBindings = facesView.getZoomInBindings();
-		if ((zoomInBindings != null) && (! zoomInBindings.isEmpty())) {
+		if (! zoomInBindings.isEmpty()) {
 			outcome.append("&b=").append(StringUtils.join(zoomInBindings.descendingIterator(), ',')); // append in tail first order
 		}
 

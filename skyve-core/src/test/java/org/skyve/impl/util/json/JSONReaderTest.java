@@ -547,6 +547,7 @@ class JSONReaderTest {
 	}
 
 	/** Verifies reconstruction of a self-described record assigned to a Java bean property. */
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void readObjectModeReconstructsRecordProperty() throws Exception {
 		String beanClass = "org.skyve.impl.util.json.JSONReaderTest$TestBean";
@@ -560,6 +561,7 @@ class JSONReaderTest {
 	}
 
 	/** Verifies object mode replaces existing mutable collection and map contents. */
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void readObjectModePopulatesCollectionAndMapProperties() throws Exception {
 		String beanClass = "org.skyve.impl.util.json.JSONReaderTest$TestBean";
@@ -596,6 +598,7 @@ class JSONReaderTest {
 	}
 
 	/** Verifies user-aware document reconstruction in both typed and untyped records. */
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void readDocumentNestedInTypedAndUntypedRecord() throws Exception {
 		DocumentContext context = documentContext();
@@ -628,6 +631,7 @@ class JSONReaderTest {
 	}
 
 	/** Verifies document reconstruction inside ordinary classes, maps, and lists. */
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void readDocumentsNestedInClassMapAndList() throws Exception {
 		DocumentContext context = documentContext();
@@ -902,6 +906,7 @@ class JSONReaderTest {
 		assertEquals(Long.valueOf(42L), map.get("key"));
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void readUnquotedKeyStartingWithFNotFalse() throws Exception {
 		// Exercise a key that starts with f without being the false literal.
@@ -910,6 +915,7 @@ class JSONReaderTest {
 		assertEquals(Long.valueOf(1L), map.get("fast"));
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void readUnquotedKeyStartingWithTNotTrue() throws Exception {
 		// Key starts with 't' but is not "true" — exercises the t-not-true else branch
@@ -918,6 +924,7 @@ class JSONReaderTest {
 		assertEquals(Long.valueOf(5L), map.get("timeout"));
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void readUnquotedKeyStartingWithNNotNull() throws Exception {
 		// Key starts with 'n' but is not "null" — exercises the n-not-null else branch

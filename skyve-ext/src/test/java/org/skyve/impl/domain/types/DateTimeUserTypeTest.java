@@ -118,6 +118,7 @@ public class DateTimeUserTypeTest {
 		assertNull(timeType.deepCopy(null));
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	public void testTimeOnlyDeepCopyNonNull() {
 		TimeOnly t = new TimeOnly(EPOCH);

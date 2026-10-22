@@ -45,6 +45,7 @@ public class AbstractH2SpatialDialectTest {
 		assertThat(dialect.getGeometryType(), notNullValue());
 	}
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
 	public void isAlterTableColumnChangeRequiredWithNullsReturnsFalse() {
 		H2SpatialDialect dialect = new H2SpatialDialect();
@@ -66,6 +67,7 @@ public class AbstractH2SpatialDialectTest {
 		GeometryFactory gf = new GeometryFactory();
 		Point point = gf.createPoint(new Coordinate(1.0, 2.0));
 		Object persisted = dialect.convertToPersistedValue(point);
+		@SuppressWarnings("null") // uses a nullable result where the API expects non-null
 		org.locationtech.jts.geom.Geometry restored = dialect.convertFromPersistedValue(persisted);
 		assertNotNull(restored);
 	}

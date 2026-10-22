@@ -236,6 +236,7 @@ class DialogsFixtureSmartClientH2Test extends AbstractSkyveTest {
 		assertEquals(before.getBizId(), after.getBizId());
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void aSaveThenAQuestionThenOKWritesOnceWithOneOptimisticLockIncrement() throws Exception {
 		DialogsFixture fixture = persistedFixture(Boolean.FALSE);
@@ -289,6 +290,7 @@ class DialogsFixtureSmartClientH2Test extends AbstractSkyveTest {
 		assertFalse(response.has("question"));
 	}
 
+	@SuppressWarnings("null") // uses a nullable result where the API expects non-null
 	@Test
 	void theResponseIsRenderedOnceTheRequestCannotAsk() throws Exception {
 		SmartClient client = new SmartClient(u);
@@ -512,6 +514,7 @@ class DialogsFixtureSmartClientH2Test extends AbstractSkyveTest {
 		/**
 		 * Replaces the bean in the cached conversation, as the servlet caches it at the end of a request.
 		 */
+		@SuppressWarnings("null") // a null here fails the test
 		private void cacheBean(Bean bean) {
 			AbstractWebContext webContext = StateUtil.getCachedConversation(webId, newRequest());
 			assertNotNull(webContext);

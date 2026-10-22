@@ -728,6 +728,7 @@ class XMLMetaDataTest {
 		assertFalse(result.contains("newParameters"));
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void testMarshalTextAreaRemovesEmptyHandlersAndPreservesActions() {
 		ViewMetaData view = new FluentView().title("Test").name(ViewType.edit.toString()).get();
@@ -1173,6 +1174,7 @@ class XMLMetaDataTest {
 		}
 	}
 
+	@SuppressWarnings("null") // uses a nullable result where the API expects non-null
 	@Test
 	void testMarshalModuleRemovesEmptyChildElements() {
 		// setup the test data

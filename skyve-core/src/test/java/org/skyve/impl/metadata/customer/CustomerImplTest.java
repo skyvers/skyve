@@ -45,6 +45,7 @@ class CustomerImplTest {
 	private static final String ADMIN_SPECIAL_USER_DOCUMENT = "admin.SpecialUser";
 	private static final String ADMIN_USER_DOCUMENT = "admin.User";
 
+	@SuppressWarnings("unused") // asserts null where the annotations say non-null
 	@Test
 	void testSetAndGetName() {
 		CustomerImpl customer = new CustomerImpl();

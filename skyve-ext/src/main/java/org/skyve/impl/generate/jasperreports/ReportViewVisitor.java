@@ -856,7 +856,7 @@ public class ReportViewVisitor extends ViewVisitor {
 					valueExpression = "$F{" + fld.getName() + "}";
 
 					// special case for checkboxes - allow override of representation
-					if (ReportElement.ElementType.checkBox.equals(elementType) && design.getCheckBoxDisplayExpression() != null) {
+					if (ReportElement.ElementType.checkBox.equals(elementType)) {
 						if (design.getCheckBoxDisplayExpression().contains("{")) {
 							valueExpression = design.getCheckBoxDisplayExpression().replace("<fieldName>", fld.getName());
 						} else {

@@ -89,7 +89,7 @@ class ConvertibleFieldTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
+	@SuppressWarnings({"static-method", "null"}) // passes null on purpose
 	void getConverterForCustomerWithNonTemporalTypeReturnsNull() {
 		ConvertibleField field = new org.skyve.impl.metadata.model.document.field.Text();
 		// Text type is not temporal, no converter default — returns null

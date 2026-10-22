@@ -142,7 +142,7 @@ class MetadataBoilerplateEscapingTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
+	@SuppressWarnings({"static-method", "null"}) // a null here fails the test
 	void fluentBuildersSetAndPreserveEscapeFlags() {
 		assertFalse(new FluentView().escapeTitle(false).get().getEscapeTitle().booleanValue());
 		assertFalse(new FluentTab().escapeTitle(false).get().getEscapeTitle().booleanValue());
@@ -361,6 +361,7 @@ class MetadataBoilerplateEscapingTest {
 			return Action.ActionShow.both;
 		}
 
+		@SuppressWarnings("null") // passes null on purpose
 		@Override
 		public ServerSideAction<?> getServerSideAction(Customer customer, Document document) {
 			return null;

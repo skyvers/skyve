@@ -22,6 +22,7 @@ import modules.admin.domain.User;
 public class GenerateSAILSuite extends Job {
 	private static String baseSailXMLPath = "C:/_/skyve/skyve-core/src/test/resources/schemas/";
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Override
 	public void execute() throws Exception {
 
@@ -72,6 +73,7 @@ public class GenerateSAILSuite extends Job {
 		}
 
 		// generate the SAIL XML to a named file
+		@SuppressWarnings("null") // uses a nullable result where the API expects non-null
 		Automation menuSail = Generator.visitMenu(user, moduleName, uxui.getName(), uat, testStrategy);
 		String xmlMenuSail = XMLMetaData.marshalSAIL(menuSail);
 		String menuFileName = String.format("sail_menu_%s_%s_%s.xml", uxui.getName(), uat.name(), user.getName());

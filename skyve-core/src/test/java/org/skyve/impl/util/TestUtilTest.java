@@ -43,6 +43,7 @@ import org.skyve.util.test.TestUtil;
 @SuppressWarnings({"static-method", "boxing"})
 class TestUtilTest {
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 void testRandomRegexAllowedDigitCount() {
 		// setup the test data
@@ -85,6 +86,7 @@ void testRandomRegexListOfAllowedValuesWithAnchors() {
 				Arrays.asList("ACT", "NSW", "NT", "QLD", "SA", "TAS", "VIC", "WA"), hasItem(result));
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 void testRandomRegexLowercaseDashSeparatedString() {
 		// setup the test data
@@ -98,6 +100,7 @@ void testRandomRegexLowercaseDashSeparatedString() {
 		assertTrue(result.matches("[a-z0-9]+(-[a-z0-9]+)*"));
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 void testRandomRegexLowercaseDashSeparatedStringWithAnchors() {
 		// setup the test data
@@ -324,6 +327,7 @@ void testRandomTextWithoutRepositoryDataFiles() {
 		}
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 void testRandomTextWithFormatMask() throws Exception {
 		Text text = new Text();
@@ -339,6 +343,7 @@ void testRandomTextWithFormatMask() throws Exception {
 		Assertions.assertTrue(result.matches("[a-z]{2}-\\d{3}"));
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 void testRandomTextWithValidatorTypeEmail() throws Exception {
 		Text text = new Text();
@@ -354,6 +359,7 @@ void testRandomTextWithValidatorTypeEmail() throws Exception {
 		Assertions.assertTrue(result.contains("@"));
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 void testRandomTextPrefersRegexOverFormatWhenValidatorTypeIsNull() throws Exception {
 		Text text = new Text();
@@ -371,6 +377,7 @@ void testRandomTextPrefersRegexOverFormatWhenValidatorTypeIsNull() throws Except
 		Assertions.assertTrue(result.matches("\\d{4}"));
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 void testRandomTextWithRegexAndNoFormatWhenValidatorTypeIsNull() throws Exception {
 		Text text = new Text();
@@ -385,6 +392,7 @@ void testRandomTextWithRegexAndNoFormatWhenValidatorTypeIsNull() throws Exceptio
 		Assertions.assertTrue(result.matches("[A-Z]{3}"));
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 void testRandomTextWithValidatorTypeAndRegex() throws Exception {
 		Text text = new Text();

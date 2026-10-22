@@ -36,6 +36,7 @@ class ContentAddInTest {
 
 	@Test
 	void testConstructWithNullWrapperThrows() {
+		@SuppressWarnings("null") // passes null on purpose
 		IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> new ContentAddIn(null));
 		assertTrue(ex.getMessage().contains("Wrapper cannot be null"));
 	}

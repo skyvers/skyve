@@ -34,6 +34,7 @@ class SkyveComponentBuilderChainTest {
 		assertThrows(NullPointerException.class, SkyveComponentBuilderChain::new);
 	}
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
 	void listGridAppliesPaginationOnly() {
 		FacesContext facesContext = mock(FacesContext.class);

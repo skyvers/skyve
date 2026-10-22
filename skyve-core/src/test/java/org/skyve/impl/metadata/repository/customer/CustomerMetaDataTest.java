@@ -49,6 +49,7 @@ class CustomerMetaDataTest {
 		assertEquals("en", customer.getLanguage());
 	}
 
+	@SuppressWarnings("unused") // asserts null where the annotations say non-null
 	@Test
 	void testSetAndGetDefaultDateConverter() {
 		CustomerMetaData customer = new CustomerMetaData();
@@ -57,6 +58,7 @@ class CustomerMetaDataTest {
 		assertEquals(ConverterName.DD_MMM_YYYY, customer.getDefaultDateConverter());
 	}
 
+	@SuppressWarnings("unused") // asserts null where the annotations say non-null
 	@Test
 	void testSetAndGetDefaultDateTimeConverter() {
 		CustomerMetaData customer = new CustomerMetaData();
@@ -65,6 +67,7 @@ class CustomerMetaDataTest {
 		assertEquals(ConverterName.DD_MMM_YYYY_HH_MI, customer.getDefaultDateTimeConverter());
 	}
 
+	@SuppressWarnings("unused") // asserts null where the annotations say non-null
 	@Test
 	void testSetAndGetDefaultTimeConverter() {
 		CustomerMetaData customer = new CustomerMetaData();
@@ -73,6 +76,7 @@ class CustomerMetaDataTest {
 		assertEquals(ConverterName.HH_MI, customer.getDefaultTimeConverter());
 	}
 
+	@SuppressWarnings("unused") // asserts null where the annotations say non-null
 	@Test
 	void testSetAndGetDefaultTimestampConverter() {
 		CustomerMetaData customer = new CustomerMetaData();
@@ -136,6 +140,7 @@ class CustomerMetaDataTest {
 	void testSetAndGetModules() {
 		CustomerMetaData customer = new CustomerMetaData();
 		assertNull(customer.getModules());
+		@SuppressWarnings("unused") // asserts null where the annotations say non-null
 		CustomerModulesMetaData modules = new CustomerModulesMetaData();
 		customer.setModules(modules);
 		assertEquals(modules, customer.getModules());
@@ -217,6 +222,7 @@ class CustomerMetaDataTest {
 		assertThrows(MetaDataException.class, () -> customer.convert("test"));
 	}
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
 	void convertThrowsWhenDefaultDateConverterIsNull() {
 		CustomerMetaData customer = createMinimalCustomerMetaData();
@@ -224,6 +230,7 @@ class CustomerMetaDataTest {
 		assertThrows(MetaDataException.class, () -> customer.convert("test"));
 	}
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
 	void convertThrowsWhenDefaultDateTimeConverterIsNull() {
 		CustomerMetaData customer = createMinimalCustomerMetaData();
@@ -231,6 +238,7 @@ class CustomerMetaDataTest {
 		assertThrows(MetaDataException.class, () -> customer.convert("test"));
 	}
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
 	void convertThrowsWhenDefaultTimeConverterIsNull() {
 		CustomerMetaData customer = createMinimalCustomerMetaData();
@@ -238,6 +246,7 @@ class CustomerMetaDataTest {
 		assertThrows(MetaDataException.class, () -> customer.convert("test"));
 	}
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
 	void convertThrowsWhenDefaultTimestampConverterIsNull() {
 		CustomerMetaData customer = createMinimalCustomerMetaData();
@@ -245,6 +254,7 @@ class CustomerMetaDataTest {
 		assertThrows(MetaDataException.class, () -> customer.convert("test"));
 	}
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
 	void convertThrowsWhenHomeModuleIsNull() {
 		CustomerMetaData customer = createMinimalCustomerMetaData();

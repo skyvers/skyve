@@ -83,12 +83,14 @@ class TestBizletTest {
 		bizlet.postLoad(bean);
 	}
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
 	void preExecuteReturnsBean() throws Exception {
 		DynamicPersistentBean bean = Assertions.assertDoesNotThrow(() -> newBean());
 		bizlet.preExecute(ImplicitActionName.Edit, bean, null, null);
 	}
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
 	void preRerenderDoesNotThrow() throws Exception {
 		DynamicPersistentBean bean = Assertions.assertDoesNotThrow(() -> newBean());

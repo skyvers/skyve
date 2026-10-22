@@ -20,11 +20,11 @@ abstract class Content implements Serializable {
 	protected String bizUserId;
 	protected String bizId;
 
-	protected Content(@Nonnull String bizCustomer, 
+	protected Content(@Nullable String bizCustomer, 
 						@Nonnull String bizModule,
 						@Nonnull String bizDocument,
 						@Nullable String bizDataGroupId,
-						@Nonnull String bizUserId,
+						@Nullable String bizUserId,
 						@Nonnull String bizId) {
 		this.bizCustomer = bizCustomer;
 		this.bizModule = bizModule;
@@ -39,7 +39,7 @@ abstract class Content implements Serializable {
 	 * This is used to restrict visibility of searched documents.
 	 * @return
 	 */
-	public final @Nonnull String getBizCustomer() {
+	public final @Nullable String getBizCustomer() {
 		return bizCustomer;
 	}
 
@@ -75,7 +75,7 @@ abstract class Content implements Serializable {
 	 * This is used to restrict visibility of searched documents.
 	 * @return
 	 */
-	public final @Nonnull String getBizUserId() {
+	public final @Nullable String getBizUserId() {
 		return bizUserId;
 	}
 

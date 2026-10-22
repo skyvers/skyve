@@ -759,7 +759,7 @@ public class Renderer {
 					String extDocumentName = e.getDocumentName();
 					Document extDocument = null;
 					Persistent persistent = document.getPersistent();
-					if ((extDocumentName != null) && (persistent != null) && ExtensionStrategy.joined.equals(persistent.getStrategy())) {
+					if ((persistent != null) && ExtensionStrategy.joined.equals(persistent.getStrategy())) {
 						extDocument = module.getDocument(customer, extDocumentName);
 						design.setAlias(design.getAlias() + 1);
 					}

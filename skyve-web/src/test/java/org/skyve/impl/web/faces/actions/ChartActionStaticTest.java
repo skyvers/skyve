@@ -182,6 +182,7 @@ class ChartActionStaticTest {
 		assertEquals("TEST.PROCESSED", result.getExtender());
 	}
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
 	void pfChartModelWithUnsupportedTypeThrows() {
 		ChartData data = minimalChartData();

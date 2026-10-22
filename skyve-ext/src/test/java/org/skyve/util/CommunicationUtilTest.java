@@ -155,7 +155,7 @@ class CommunicationUtilTest {
 		assertThat(CommunicationUtil.formatCommunicationMessage(null, null), is((String) null));
 	}
 
-	@SuppressWarnings("static-method")
+	@SuppressWarnings({"static-method", "null"}) // a null here fails the test
 	@Test
 	void testFormatCommunicationMessageReplacesResetPasswordPlaceholder() {
 		String expression = "Use this link: " + CommunicationUtil.SPECIAL_LOGOUT_URL;
@@ -166,7 +166,7 @@ class CommunicationUtilTest {
 		assertThat(result, containsString("resetPassword.jsp"));
 	}
 
-	@SuppressWarnings("static-method")
+	@SuppressWarnings({"static-method", "null"}) // a null here fails the test
 	@Test
 	void testFormatCommunicationMessageReplacesBeanUrlAndContextForFirstBean() {
 		Bean bean = mock(Bean.class);
@@ -193,7 +193,7 @@ class CommunicationUtilTest {
 		assertThat(result, is(expression));
 	}
 
-	@SuppressWarnings("static-method")
+	@SuppressWarnings({"static-method", "null"}) // a null here fails the test
 	@Test
 	void testFormatCommunicationMessageWithEmptyBeansOnlyReplacesResetPasswordPlaceholder() {
 		String expression = CommunicationUtil.SPECIAL_BEAN_URL + " " + CommunicationUtil.SPECIAL_CONTEXT + " " + CommunicationUtil.SPECIAL_LOGOUT_URL;

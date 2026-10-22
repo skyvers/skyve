@@ -53,6 +53,7 @@ class UserAccountSecurityH2Test extends AbstractH2Test {
 		assertOwnLoginHistory("ViewUser");
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	private static void assertOwnLoginHistory(String roleName) {
 		AbstractPersistence persistence = AbstractPersistence.get();
 		org.skyve.metadata.user.User originalUser = persistence.getUser();

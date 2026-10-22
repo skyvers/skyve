@@ -17,6 +17,7 @@ import util.AbstractH2Test;
 @SuppressWarnings("static-method")
 class ReportTemplateExtensionH2Test extends AbstractH2Test {
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void generateInitialFreemarkerTemplatePopulatesTemplate() {
 		ReportTemplateExtension bean = ReportTemplate.newInstance();

@@ -235,10 +235,8 @@ public class CommunicationUtil {
 		CommunicationCalendarItem calendarItem = null;
 		if (Boolean.TRUE.equals(communication.getIncludeCalendar())) {
 			calendarItem = generateCalendarAttachments(customer, communication, beans);
-			if (calendarItem != null) {
-				emailBody.append("\n").append(calendarItem.getGoogleCalendarLink());
-				emailBody.append("\n").append(calendarItem.getYahooCalendarLink());
-			}
+			emailBody.append("\n").append(calendarItem.getGoogleCalendarLink());
+			emailBody.append("\n").append(calendarItem.getYahooCalendarLink());
 		}
 		// Attachment calendar Items
 		if (calendarItem != null) {

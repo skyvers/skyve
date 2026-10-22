@@ -128,6 +128,7 @@ public class ConfigurationBizletTest extends AbstractH2TestForJUnit4 {
 
 	// ===== preRerender() — twoFactorType/email branch (no H2 needed for bean modifications) =====
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
 	public void testPreRerenderTwoFactorTypeEmailSetsDefaultsWhenNull() throws Exception {
 		configuration.setTwoFactorType(TwoFactorType.email);
@@ -143,6 +144,7 @@ public class ConfigurationBizletTest extends AbstractH2TestForJUnit4 {
 		assertEquals(Integer.valueOf(5 * 60), configuration.getTwofactorPushCodeTimeOutSeconds());
 	}
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
 	public void testPreRerenderTwoFactorTypeEmailDoesNotOverwriteExistingBody() throws Exception {
 		configuration.setTwoFactorType(TwoFactorType.email);
@@ -157,6 +159,7 @@ public class ConfigurationBizletTest extends AbstractH2TestForJUnit4 {
 		assertEquals(Integer.valueOf(120), configuration.getTwofactorPushCodeTimeOutSeconds());
 	}
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
 	public void testPreRerenderTwoFactorTypeOffDoesNotSetDefaults() throws Exception {
 		configuration.setTwoFactorType(TwoFactorType.off);
@@ -167,6 +170,7 @@ public class ConfigurationBizletTest extends AbstractH2TestForJUnit4 {
 		assertNull(configuration.getTwoFactorEmailBody());
 	}
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
 	public void testPreRerenderUnknownSourceDoesNotModifyBean() throws Exception {
 		configuration.setTwoFactorType(TwoFactorType.email);

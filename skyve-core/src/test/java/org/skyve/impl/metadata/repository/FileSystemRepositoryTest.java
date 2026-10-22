@@ -1278,6 +1278,7 @@ class FileSystemRepositoryTest {
 	}
 
 	static final class TestChartModel extends ChartModel<org.skyve.domain.Bean> {
+		@SuppressWarnings("null") // passes null on purpose
 		@Override
 		public ChartData getChartData() {
 			return null;
@@ -1325,11 +1326,13 @@ class FileSystemRepositoryTest {
 			// no-op
 		}
 
+		@SuppressWarnings("null") // passes null on purpose
 		@Override
 		public Page fetch() {
 			return null;
 		}
 
+		@SuppressWarnings("null") // passes null on purpose
 		@Override
 		public org.skyve.persistence.AutoClosingIterable<org.skyve.domain.Bean> iterate() {
 			return null;
@@ -1354,6 +1357,7 @@ class FileSystemRepositoryTest {
 	}
 
 	static final class TestBizExportAction extends BizExportAction {
+		@SuppressWarnings("null") // passes null on purpose
 		@Override
 		public org.skyve.bizport.BizPortWorkbook bizExport(WebContext webContext) {
 			return null;
@@ -1374,6 +1378,7 @@ class FileSystemRepositoryTest {
 			// no-op
 		}
 
+		@SuppressWarnings("null") // passes null on purpose
 		@Override
 		public Download download(org.skyve.domain.Bean bean, WebContext webContext) {
 			return null;

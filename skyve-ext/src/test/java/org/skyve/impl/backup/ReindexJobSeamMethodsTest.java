@@ -150,6 +150,7 @@ public class ReindexJobSeamMethodsTest {
 			return super.getPersistence();
 		}
 
+		@SuppressWarnings("null") // passes null on purpose
 		public String callGetDynamicEntityPersistenceIdentifier() {
 			return super.getDynamicEntityPersistenceIdentifier(null);
 		}

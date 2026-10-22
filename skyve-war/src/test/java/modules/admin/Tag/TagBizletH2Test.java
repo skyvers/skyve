@@ -44,6 +44,7 @@ class TagBizletH2Test extends AbstractH2Test {
 
 	// ---- getVariantDomainValues ----
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void getVariantDomainValuesForUploadModuleNameReturnsModules() throws Exception {
 		List<DomainValue> result = bizlet.getVariantDomainValues(Tag.uploadModuleNamePropertyName);
@@ -51,6 +52,7 @@ class TagBizletH2Test extends AbstractH2Test {
 		assertFalse(result.isEmpty(), "Expected at least one module");
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void getVariantDomainValuesForActionModuleNameReturnsModules() throws Exception {
 		List<DomainValue> result = bizlet.getVariantDomainValues(Tag.actionModuleNamePropertyName);
@@ -58,6 +60,7 @@ class TagBizletH2Test extends AbstractH2Test {
 		assertFalse(result.isEmpty(), "Expected at least one module");
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void getVariantDomainValuesForUnknownAttributeReturnsEmpty() throws Exception {
 		List<DomainValue> result = bizlet.getVariantDomainValues("unknownAttribute");
@@ -67,6 +70,7 @@ class TagBizletH2Test extends AbstractH2Test {
 
 	// ---- getDynamicDomainValues: actionDocumentName ----
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void getDynamicDomainValuesForActionDocumentNameWithModuleSetReturnsDocuments() throws Exception {
 		bean.setActionModuleName("admin");
@@ -76,6 +80,7 @@ class TagBizletH2Test extends AbstractH2Test {
 		assertFalse(result.isEmpty(), "Expected documents in admin module");
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void getDynamicDomainValuesForActionDocumentNameWithNullModuleReturnsEmpty() throws Exception {
 		bean.setActionModuleName(null);
@@ -87,6 +92,7 @@ class TagBizletH2Test extends AbstractH2Test {
 
 	// ---- getDynamicDomainValues: uploadDocumentName ----
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void getDynamicDomainValuesForUploadDocumentNameWithModuleSetReturnsDocuments() throws Exception {
 		bean.setUploadModuleName("admin");
@@ -96,6 +102,7 @@ class TagBizletH2Test extends AbstractH2Test {
 		assertFalse(result.isEmpty(), "Expected documents in admin module");
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void getDynamicDomainValuesForUploadDocumentNameWithNullModuleReturnsEmpty() throws Exception {
 		bean.setUploadModuleName(null);
@@ -107,6 +114,7 @@ class TagBizletH2Test extends AbstractH2Test {
 
 	// ---- getDynamicDomainValues: attributeName ----
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void getDynamicDomainValuesForAttributeNameWithBothModuleAndDocumentReturnsAttributes() throws Exception {
 		bean.setUploadModuleName("admin");
@@ -117,6 +125,7 @@ class TagBizletH2Test extends AbstractH2Test {
 		assertFalse(result.isEmpty(), "Expected attributes in User document");
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void getDynamicDomainValuesForAttributeNameWithNullModuleReturnsEmpty() throws Exception {
 		bean.setUploadModuleName(null);
@@ -138,6 +147,7 @@ class TagBizletH2Test extends AbstractH2Test {
 
 	// ---- getDynamicDomainValues: documentAction ----
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void getDynamicDomainValuesForDocumentActionWithModuleAndDocumentReturnsActions() throws Exception {
 		bean.setActionModuleName("admin");
@@ -148,6 +158,7 @@ class TagBizletH2Test extends AbstractH2Test {
 		assertFalse(result.isEmpty(), "Expected actions in User document");
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void getDynamicDomainValuesForDocumentActionWithNullDocumentReturnsEmpty() throws Exception {
 		bean.setActionModuleName("admin");
@@ -170,6 +181,7 @@ class TagBizletH2Test extends AbstractH2Test {
 		// User document may or may not have conditions - shouldn't throw
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void getDynamicDomainValuesForDocumentConditionWithNullDocumentReturnsEmpty() throws Exception {
 		bean.setActionModuleName("admin");

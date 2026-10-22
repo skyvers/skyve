@@ -577,7 +577,9 @@ public class DocumentImpl extends ModelImpl implements Document {
 		}
 
 		String relatedDocumentName = relation.getDocumentName();
-		if (relatedDocumentName == null) {
+		@SuppressWarnings("null") // relations built in code bypass the XSD; unit tests assert this
+		boolean relatedDocumentNameMissing = (relatedDocumentName == null);
+		if (relatedDocumentNameMissing) {
 			throw new IllegalStateException("Document has no related document defined for " + relationName);
 		}
 

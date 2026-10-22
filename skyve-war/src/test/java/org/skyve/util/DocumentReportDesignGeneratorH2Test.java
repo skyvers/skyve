@@ -66,8 +66,10 @@ class DocumentReportDesignGeneratorH2Test extends AbstractH2Test {
 		DocumentReportDesignGenerator gen = new DocumentReportDesignGenerator();
 		DesignSpecification result = gen.populateDesign(spec);
 
+		@SuppressWarnings("null") // a null here fails the test
 		boolean hasColumnHeader = result.getBands().stream()
 				.anyMatch(b -> b.getBandType() != null && b.getBandType().toString().equalsIgnoreCase("columnHeader"));
+		@SuppressWarnings("null") // a null here fails the test
 		boolean hasDetail = result.getBands().stream()
 				.anyMatch(b -> b.getBandType() != null && b.getBandType().toString().equalsIgnoreCase("detail"));
 
@@ -91,6 +93,7 @@ class DocumentReportDesignGeneratorH2Test extends AbstractH2Test {
 
 	// --- ReportDesignGenerator.addBands branch: includePageNumbers ---
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void populateDesignWithIncludePageNumbersAddsPageFooterBand() {
 		spec.setIncludePageNumbers(Boolean.TRUE);
@@ -106,6 +109,7 @@ class DocumentReportDesignGeneratorH2Test extends AbstractH2Test {
 		spec.setIncludePageNumbers(Boolean.TRUE);
 		DesignSpecification result = new DocumentReportDesignGenerator().populateDesign(spec);
 
+		@SuppressWarnings("null") // a null here fails the test
 		long pageFooterElements = result.getBands().stream()
 				.filter(b -> "pageFooter".equals(b.getBandType().toString()))
 				.flatMap(b -> b.getElements().stream())
@@ -120,6 +124,7 @@ class DocumentReportDesignGeneratorH2Test extends AbstractH2Test {
 		spec.setSectionBorderTop(Boolean.TRUE);
 		DesignSpecification result = new DocumentReportDesignGenerator().populateDesign(spec);
 
+		@SuppressWarnings("null") // a null here fails the test; checks values the annotations say are non-null
 		boolean hasBorderInNoData = result.getBands().stream()
 				.filter(b -> b.getBandType() != null && "noData".equals(b.getBandType().toString()))
 				.flatMap(b -> b.getElements().stream())

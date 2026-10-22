@@ -58,6 +58,7 @@ class AbstractFacesBuilderTest {
 		assertNull(AbstractFacesBuilder.escapeFacesAttribute(null, false));
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void escapeFacesAttributeEscapesHtmlByDefaultThenAttributeSyntax() {
 		String result = AbstractFacesBuilder.escapeFacesAttribute(UNSAFE_TEXT, true);
@@ -70,7 +71,7 @@ class AbstractFacesBuilderTest {
 	}
 
 	@Test
-	@SuppressWarnings("java:S4144") // deliberately the same as the test above - escaping is the default, so explicit true must behave identically
+	@SuppressWarnings({"java:S4144", "null"}) // deliberately the same as the test above - escaping is the default, so explicit true must behave identically
 	void escapeFacesAttributeEscapesHtmlWhenExplicitlyTrueThenAttributeSyntax() {
 		String result = AbstractFacesBuilder.escapeFacesAttribute(UNSAFE_TEXT, true);
 
@@ -81,6 +82,7 @@ class AbstractFacesBuilderTest {
 		assertFalse(result.contains(">"));
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void escapeFacesAttributeLeavesTrustedHtmlRawWhenFalseButEscapesAttributeSyntax() {
 		String result = AbstractFacesBuilder.escapeFacesAttribute(UNSAFE_TEXT, false);

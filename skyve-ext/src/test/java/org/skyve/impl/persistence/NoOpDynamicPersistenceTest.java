@@ -12,18 +12,21 @@ public class NoOpDynamicPersistenceTest {
 	@SuppressWarnings("resource")
 	private final NoOpDynamicPersistence noop = new NoOpDynamicPersistence();
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
 	public void postConstructDoesNotThrow() {
 		noop.postConstruct(null);
 		assertNotNull(noop);
 	}
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
 	public void persistDoesNotThrow() {
 		noop.persist(null);
 		assertNotNull(noop);
 	}
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
 	public void deleteDoesNotThrow() {
 		noop.delete(null);
@@ -35,6 +38,7 @@ public class NoOpDynamicPersistenceTest {
 		assertNull(noop.populate("any-biz-id"));
 	}
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
 	public void populateBeanDoesNotThrow() {
 		noop.populate((PersistentBean) null);
@@ -47,12 +51,14 @@ public class NoOpDynamicPersistenceTest {
 		assertNotNull(noop);
 	}
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
 	public void evictCachedDoesNotThrow() {
 		noop.evictCached(null);
 		assertNotNull(noop);
 	}
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
 	public void cachedReturnsFalse() {
 		assertFalse(noop.cached(null));

@@ -423,7 +423,9 @@ public class PrimeFacesInlineWebDriverExecutor extends WebDriverExecutor<PrimeFa
 			
 			//replace newlines
 			String value = dataEnter.getValue();
-			if (value != null) {
+			@SuppressWarnings("null") // SAIL XML turns a blank value into null
+			boolean valuePresent = (value != null);
+			if (valuePresent) {
 				// never replace with a new line as chrome under test will trip the default button on the form 
 				// from the enter key as represented by \n
 				value = value.replace("\n", " ");

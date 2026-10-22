@@ -212,6 +212,7 @@ class ChartBuilderMetaDataTest {
 
 	// ---- setTop ----
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void setTopRoundtrip() {
 		ChartBuilderTopMetaData top = new ChartBuilderTopMetaData();
@@ -225,6 +226,7 @@ class ChartBuilderMetaDataTest {
 
 	// ---- setOrder ----
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void setOrderRoundtrip() {
 		ChartBuilderOrderMetaData order = new ChartBuilderOrderMetaData();

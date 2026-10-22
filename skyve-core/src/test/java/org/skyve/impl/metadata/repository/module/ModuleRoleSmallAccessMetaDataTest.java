@@ -178,14 +178,14 @@ class ModuleRoleSmallAccessMetaDataTest {
 	// ---- validate null-check tests ----
 
 	@Test
-	@SuppressWarnings("static-method")
+	@SuppressWarnings({"static-method", "null"}) // passes null on purpose
 	void reportAccessValidateThrowsWhenModuleNameNull() {
 		ModuleRoleReportUserAccessMetaData md = new ModuleRoleReportUserAccessMetaData();
 		assertThrows(MetaDataException.class, () -> md.validate("test", "role", null));
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
+	@SuppressWarnings({"static-method", "null"}) // passes null on purpose
 	void reportAccessValidateThrowsWhenDocumentNameNull() {
 		ModuleRoleReportUserAccessMetaData md = new ModuleRoleReportUserAccessMetaData();
 		md.setModuleName("admin");
@@ -193,7 +193,7 @@ class ModuleRoleSmallAccessMetaDataTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
+	@SuppressWarnings({"static-method", "null"}) // passes null on purpose
 	void reportAccessValidateThrowsWhenReportNameNull() {
 		ModuleRoleReportUserAccessMetaData md = new ModuleRoleReportUserAccessMetaData();
 		md.setModuleName("admin");
@@ -202,14 +202,14 @@ class ModuleRoleSmallAccessMetaDataTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
+	@SuppressWarnings({"static-method", "null"}) // passes null on purpose
 	void queryAggregateAccessValidateThrowsWhenQueryNameNull() {
 		ModuleRoleQueryAggregateUserAccessMetaData md = new ModuleRoleQueryAggregateUserAccessMetaData();
 		assertThrows(MetaDataException.class, () -> md.validate("test", "role", null));
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
+	@SuppressWarnings({"static-method", "null"}) // passes null on purpose
 	void documentAggregateAccessValidateThrowsWhenDocumentNameNull() {
 		ModuleRoleDocumentAggregateUserAccessMetaData md = new ModuleRoleDocumentAggregateUserAccessMetaData();
 		assertThrows(MetaDataException.class, () -> md.validate("test", "role", null));
@@ -228,7 +228,7 @@ class ModuleRoleSmallAccessMetaDataTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
+	@SuppressWarnings({"static-method", "null"}) // passes null on purpose
 	void modelAggregateAccessValidateThrowsWhenModelNameNull() {
 		ModuleRoleModelAggregateUserAccessMetaData md = new ModuleRoleModelAggregateUserAccessMetaData();
 		assertThrows(MetaDataException.class, () -> md.validate("test", "role", null));
@@ -247,7 +247,7 @@ class ModuleRoleSmallAccessMetaDataTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
+	@SuppressWarnings({"static-method", "null"}) // passes null on purpose
 	void previousCompleteAccessValidateThrowsWhenBindingNull() {
 		ModuleRolePreviousCompleteUserAccessMetaData md = new ModuleRolePreviousCompleteUserAccessMetaData();
 		assertThrows(MetaDataException.class, () -> md.validate("test", "role", null));
@@ -266,7 +266,7 @@ class ModuleRoleSmallAccessMetaDataTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
+	@SuppressWarnings({"static-method", "null"}) // passes null on purpose
 	void dynamicImageAccessValidateThrowsWhenImageNameNull() {
 		ModuleRoleDynamicImageUserAccessMetaData md = new ModuleRoleDynamicImageUserAccessMetaData();
 		assertThrows(MetaDataException.class, () -> md.validate("test", "role", null));
@@ -285,7 +285,7 @@ class ModuleRoleSmallAccessMetaDataTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
+	@SuppressWarnings({"static-method", "null"}) // passes null on purpose
 	void contentAccessValidateThrowsWhenBindingNull() {
 		ModuleRoleContentUserAccessMetaData md = new ModuleRoleContentUserAccessMetaData();
 		assertThrows(MetaDataException.class, () -> md.validate("test", "role", null));
@@ -439,7 +439,7 @@ class ModuleRoleSmallAccessMetaDataTest {
 	// ---- ModuleRoleReportUserAccessMetaData.validate (happy path) ----
 
 	@Test
-	@SuppressWarnings("static-method")
+	@SuppressWarnings({"static-method", "null"}) // passes null on purpose
 	void reportUserAccessValidateWithAllFieldsSetDoesNotThrow() {
 		// Module param is not used when all fields are non-null, so pass null
 		ModuleRoleReportUserAccessMetaData access = new ModuleRoleReportUserAccessMetaData();
@@ -450,7 +450,7 @@ class ModuleRoleSmallAccessMetaDataTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
+	@SuppressWarnings({"static-method", "null"}) // passes null on purpose
 	void reportUserAccessValidateNullModuleNameThrows() {
 		ModuleRoleReportUserAccessMetaData access = new ModuleRoleReportUserAccessMetaData();
 		access.setDocumentName("Contact");

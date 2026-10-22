@@ -614,7 +614,9 @@ public abstract class ExpressionEvaluator {
 					return CORE.format(formatName, result);
 				}
 				if (format) {
-					return (result == null) ? "" : result;
+					@SuppressWarnings("null") // a unit test asserts "" for a customer without a name
+					boolean resultMissing = (result == null);
+					return resultMissing ? "" : result;
 				}
 				return result;
 			}

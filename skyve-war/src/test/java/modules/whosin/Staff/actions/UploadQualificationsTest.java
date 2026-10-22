@@ -36,6 +36,7 @@ class UploadQualificationsTest {
 		TestableUploadQualifications action = new TestableUploadQualifications(loader);
 		Staff staff = new Staff();
 
+		@SuppressWarnings("null") // passes null on purpose
 		Staff returned = action.upload(staff, upload("qualifications.xlsx"), new UploadException(), null);
 
 		assertSame(staff, returned);
@@ -54,6 +55,7 @@ class UploadQualificationsTest {
 		assertSame(staff, qualification.getParent());
 	}
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
 	void uploadCsvAddsQualificationsToStaff() throws Exception {
 		StaffQualification first = new StaffQualification();
@@ -78,6 +80,7 @@ class UploadQualificationsTest {
 		Upload upload = upload("qualifications.txt");
 		UploadException problems = new UploadException();
 
+		@SuppressWarnings("null") // passes null on purpose
 		ValidationException exception = assertThrows(ValidationException.class,
 				() -> action.upload(null, upload, problems, null));
 

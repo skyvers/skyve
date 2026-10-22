@@ -56,22 +56,20 @@ public class AssociationAutoCompleteConverter implements Converter<Object> {
 						String managedBeanName = (String) root.getAttributes().get(FacesUtil.MANAGED_BEAN_NAME_KEY);
 						if (managedBeanName != null) {
 							FacesView view = (FacesView) FacesUtil.getNamed(managedBeanName);
-							if (view != null) {
-								BeanMapAdapter adapter = view.getCurrentBean();
-								Bean bean = null;
-								if (adapter != null) {
-									bean = adapter.getBean();
-								}
-								
-								WebContext webContext = view.getWebContext();
-								if (webContext == null) { // the view has a conversation
-									throw new IllegalStateException("Cannot convert " + processedValue + " as FacesView " + managedBeanName + " has no web context");
-								}
-					            Customer c = CORE.getCustomer();
-					            Module m  = c.getModule(moduleName);
-					            Document d = m.getDocument(c, documentName);
-					        	return WebUtil.findReferencedBean(d, bizId, CORE.getPersistence(), bean, webContext);
+							BeanMapAdapter adapter = view.getCurrentBean();
+							Bean bean = null;
+							if (adapter != null) {
+								bean = adapter.getBean();
 							}
+
+							WebContext webContext = view.getWebContext();
+							if (webContext == null) { // the view has a conversation
+								throw new IllegalStateException("Cannot convert " + processedValue + " as FacesView " + managedBeanName + " has no web context");
+							}
+							Customer c = CORE.getCustomer();
+							Module m  = c.getModule(moduleName);
+							Document d = m.getDocument(c, documentName);
+							return WebUtil.findReferencedBean(d, bizId, CORE.getPersistence(), bean, webContext);
 						}
 					}
 					return null;

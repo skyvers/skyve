@@ -65,6 +65,7 @@ class ViewReportDesignGeneratorH2Test extends AbstractH2Test {
 				"expected ID parameter");
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void populateDesignForArcOneToOneAddsStandardBands() {
 		DesignSpecification spec = viewSpec(ArcOneToOne.MODULE_NAME, ArcOneToOne.DOCUMENT_NAME);
@@ -90,6 +91,7 @@ class ViewReportDesignGeneratorH2Test extends AbstractH2Test {
 	// --- Snapshot: view with combo and textArea, no component elements ---
 	// Exercises: visitCombo, visitTextArea (scalar widgets on a form)
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void populateDesignForSnapshotAddsDetailBandsFromForm() {
 		DesignSpecification spec = viewSpec(Snapshot.MODULE_NAME, Snapshot.DOCUMENT_NAME);
@@ -178,6 +180,7 @@ class ViewReportDesignGeneratorH2Test extends AbstractH2Test {
 		DesignSpecification result = new ViewReportDesignGenerator().populateDesign(spec);
 
 		// The title band should contain a border element when a section border flag is set
+		@SuppressWarnings("null") // a null here fails the test; checks values the annotations say are non-null
 		boolean hasBorderInTitle = result.getBands().stream()
 				.filter(b -> b.getBandType() != null && "title".equals(b.getBandType().toString()))
 				.flatMap(b -> b.getElements().stream())
@@ -186,6 +189,7 @@ class ViewReportDesignGeneratorH2Test extends AbstractH2Test {
 		assertTrue(hasBorderInTitle, "expected a border element in the title band");
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void populateDesignWithIncludePageNumbersAddsPageFooterBand() {
 		DesignSpecification spec = viewSpec(ArcOneToOne.MODULE_NAME, ArcOneToOne.DOCUMENT_NAME);

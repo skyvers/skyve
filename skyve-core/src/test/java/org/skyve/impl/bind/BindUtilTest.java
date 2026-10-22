@@ -926,21 +926,21 @@ class BindUtilTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
+	@SuppressWarnings({"static-method", "null"}) // uses a nullable result where the API expects non-null
 	void fromSerialisedDecimal2ReturnsDecimal2() {
 		Object result = BindUtil.fromSerialised(Decimal2.class, "9.99");
 		assertEquals(0, new Decimal2("9.99").compareTo((Decimal2) result));
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
+	@SuppressWarnings({"static-method", "null"}) // uses a nullable result where the API expects non-null
 	void fromSerialisedDecimal5ReturnsDecimal5() {
 		Object result = BindUtil.fromSerialised(Decimal5.class, "3.14159");
 		assertEquals(0, new Decimal5("3.14159").compareTo((Decimal5) result));
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
+	@SuppressWarnings({"static-method", "null"}) // uses a nullable result where the API expects non-null
 	void fromSerialisedDecimal10ReturnsDecimal10() {
 		Object result = BindUtil.fromSerialised(Decimal10.class, "0.0000000001");
 		assertEquals(0, new Decimal10("0.0000000001").compareTo((Decimal10) result));
@@ -2851,7 +2851,7 @@ class BindUtilTest {
 	}
 
 	@Test
-	@SuppressWarnings({ "static-method", "unchecked" })
+	@SuppressWarnings({"static-method", "unchecked", "null"}) // a null here fails the test
 	void copyCopiesScalarAndCollectionsAndReparentsChildElements() {
 		Customer customer = mock(Customer.class);
 		User user = mock(User.class);

@@ -43,6 +43,7 @@ class BeanForReportMessageTest {
 		assertThat(result, is(message));
 	}
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
 	void getMessageWithNullMessageThrowsNPE() {
 		// BindUtil.formatMessage(null, bean) does not guard against a null message string

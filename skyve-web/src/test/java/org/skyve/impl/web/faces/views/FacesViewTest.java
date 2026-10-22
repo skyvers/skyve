@@ -242,6 +242,7 @@ class FacesViewTest {
 		assertEquals("parent.child.property", view.getBindingParameter());
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void setBindingParameterStripsScriptTags() {
 		FacesView view = new FacesView();
@@ -288,6 +289,7 @@ class FacesViewTest {
 
 	// ----- HarnessView parameter setters (OWASP-sanitised) -----
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void setBizModuleParameterStripsHtmlTags() {
 		FacesView view = new FacesView();
@@ -1286,6 +1288,7 @@ class FacesViewTest {
 		assertSame(first, second);
 	}
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
 	void getLazyDataModelRejectsMissingModuleAndDocumentKeys() {
 		FacesView view = new FacesView();
@@ -1898,6 +1901,7 @@ class FacesViewTest {
 		assertSame(bean, view.getPostRenderBean());
 	}
 
+	@SuppressWarnings("null") // a null here fails the test; uses a nullable result where the API expects non-null
 	@Test
 	void postRenderStateAcceptsSubtypeSpecificBizlet() {
 		FacesView view = new FacesView();
@@ -1944,6 +1948,7 @@ class FacesViewTest {
 		assertNull(view.getPostRenderBean());
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void setBeanWithWebContextInitialisesCurrentBeanAdapter() {
 		FacesView view = new FacesView();
@@ -1959,6 +1964,7 @@ class FacesViewTest {
 		assertSame(bean, view.getCurrentBean().getBean());
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void setBeanWithoutWebContextExecutesNullWebContextBranch() {
 		FacesView view = new FacesView();
@@ -2024,6 +2030,7 @@ class FacesViewTest {
 		assertSame(bean, view.getBean());
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void hydrateRestoresWebContextAndClearsDehydratedWebId() {
 		FacesView view = new FacesView();
@@ -2046,7 +2053,7 @@ class FacesViewTest {
 	}
 
 	@Test
-	@SuppressWarnings("java:S2696") // JUnit instance test temporarily changes static configuration and restores it in finally.
+	@SuppressWarnings({"java:S2696", "null"}) // JUnit instance test temporarily changes static configuration and restores it in finally.
 	void hydrateWithFacesTraceEnabledRestoresWebContextAndClearsDehydratedWebId() {
 		FacesView view = new FacesView();
 		MockWebContext initialContext = new MockWebContext();

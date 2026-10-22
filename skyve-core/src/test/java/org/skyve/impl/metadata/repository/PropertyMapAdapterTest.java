@@ -144,6 +144,7 @@ class PropertyMapAdapterTest {
 		original.put("beta", "2");
 
 		PropertyMapType marshalled = adapter.marshal(original);
+		@SuppressWarnings("null") // uses a nullable result where the API expects non-null
 		Map<String, String> roundtripped = adapter.unmarshal(marshalled);
 
 		assertEquals(original, roundtripped);

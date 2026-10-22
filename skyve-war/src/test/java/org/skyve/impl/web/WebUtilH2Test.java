@@ -117,6 +117,7 @@ class WebUtilH2Test extends AbstractH2Test {
 		StateUtil.removeSessions("h2-concurrent-user");
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void testRequestPasswordResetUsesExtMailService() throws Exception {
 		UserExtension user = new DataBuilder().fixture(FixtureType.crud).build(modules.admin.domain.User.MODULE_NAME,
@@ -165,6 +166,7 @@ class WebUtilH2Test extends AbstractH2Test {
 		assertNotNull(result);
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void requestPasswordResetRollsBackWhenMailServiceFails() {
 		UserExtension user = new DataBuilder().fixture(FixtureType.crud).build(modules.admin.domain.User.MODULE_NAME,
@@ -474,6 +476,7 @@ class WebUtilH2Test extends AbstractH2Test {
 		assertTrue(StateUtil.checkSession(user.getId(), currentSession));
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void requestPasswordResetReturnsWithoutSendingMailWhenGeoIPBlocksRequest() throws Exception {
 		String email = "blocked-reset-" + System.nanoTime() + "@skyve.org";

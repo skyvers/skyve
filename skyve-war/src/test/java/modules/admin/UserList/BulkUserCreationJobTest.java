@@ -82,6 +82,7 @@ class BulkUserCreationJobTest extends AbstractH2Test {
 		assertEquals("'invalid-email' is not a valid Email Address", exception.getMessages().get(0).getText());
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void createUserFromContactReturnsNullAndLogsWhenUserAlreadyExists() {
 		String email = "bulk-existing-" + UUID.randomUUID() + "@example.com";

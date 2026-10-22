@@ -936,7 +936,9 @@ public class SmartClientEditServlet extends HttpServlet {
     		}
     	}
 
-		if (processBean == null) { // should never happen
+		@SuppressWarnings("null") // bizlet preExecute() is application code
+		boolean processBeanMissing = (processBean == null);
+		if (processBeanMissing) { // should never happen
 			throw new ServletException("processBean is null");
 		}
 

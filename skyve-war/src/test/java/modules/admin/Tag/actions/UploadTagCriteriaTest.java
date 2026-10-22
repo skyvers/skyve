@@ -39,6 +39,7 @@ class UploadTagCriteriaTest {
 		TagExtension bean = new TagExtension();
 		Upload upload = upload("criteria.csv");
 		UploadException uploadException = new UploadException();
+		@SuppressWarnings("null") // passes null on purpose
 		UploadException thrown = assertThrows(UploadException.class,
 				() -> action.upload(bean, upload, uploadException, null));
 
@@ -57,6 +58,7 @@ class UploadTagCriteriaTest {
 		tag.setFilterColumn(Integer.valueOf(3));
 		tag.setFileHasHeaders(Boolean.TRUE);
 
+		@SuppressWarnings("null") // passes null on purpose
 		TagExtension returned = action.upload(tag, upload("criteria.xlsx"), new UploadException(), null);
 
 		assertThat(returned, is(tag));
@@ -73,6 +75,7 @@ class UploadTagCriteriaTest {
 		assertEquals(Long.valueOf(9), tag.getUploadTagged());
 	}
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
 	void uploadUntagsMatchingRowsUsingLikeWithoutHeaders() throws Exception {
 		Bean result = mock(Bean.class);
@@ -91,6 +94,7 @@ class UploadTagCriteriaTest {
 		verify(tagManager).untag("tag-id", result);
 	}
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
 	void uploadUsesContainsLookupAndDoesNotTagWhenActionIsUnset() throws Exception {
 		FakeSheetLoader loader = new FakeSheetLoader(List.of(mock(Bean.class)), 4);

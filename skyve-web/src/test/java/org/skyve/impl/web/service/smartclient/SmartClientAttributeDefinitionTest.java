@@ -741,6 +741,7 @@ class SmartClientAttributeDefinitionTest {
 	}
 
 	private static final class TestDefinition extends SmartClientAttributeDefinition {
+		@SuppressWarnings("null") // passes null on purpose
 		private TestDefinition(String name) {
 			super(null, null, null, null, null, name, false, false, false, null);
 			this.valueMap = new LinkedHashMap<>();

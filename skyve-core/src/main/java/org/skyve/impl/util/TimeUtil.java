@@ -443,7 +443,9 @@ public class TimeUtil {
 	 */
 	public static @Nonnull DateOnly addDaysToNew(final @Nonnull Date date, final int numberOfDays) {
 
-		if (date == null) {
+		@SuppressWarnings("null") // public API guard; unit tests assert the exception for a null date
+		boolean dateMissing = (date == null);
+		if (dateMissing) {
 			throw new IllegalArgumentException(DATE_REQUIRED);
 		}
 
@@ -459,7 +461,9 @@ public class TimeUtil {
 	 */
 	public static @Nonnull DateOnly addMonthsToNew(final @Nonnull Date date, final int numberOfMonths) {
 
-		if (date == null) {
+		@SuppressWarnings("null") // public API guard; unit tests assert the exception for a null date
+		boolean dateMissing = (date == null);
+		if (dateMissing) {
 			throw new IllegalArgumentException(DATE_REQUIRED);
 		}
 
@@ -475,7 +479,9 @@ public class TimeUtil {
 	 */
 	public static @Nonnull DateOnly addYearsToNew(final @Nonnull Date date, final int numberOfYears) {
 
-		if (date == null) {
+		@SuppressWarnings("null") // public API guard; unit tests assert the exception for a null date
+		boolean dateMissing = (date == null);
+		if (dateMissing) {
 			throw new IllegalArgumentException(DATE_REQUIRED);
 		}
 
@@ -511,7 +517,7 @@ public class TimeUtil {
 	 * See {@link Time#min}
 	 */
 	public static @Nonnull DateOnly min(final @Nonnull DateOnly... dates) {
-		if (dates == null || dates.length == 0) {
+		if (dates.length == 0) {
 			throw new IllegalArgumentException("At least one date must be supplied");
 		}
 
@@ -523,7 +529,7 @@ public class TimeUtil {
 	 * See {@link Time#max}
 	 */
 	public static @Nonnull DateOnly max(final @Nonnull DateOnly... dates) {
-		if (dates == null || dates.length == 0) {
+		if (dates.length == 0) {
 			throw new IllegalArgumentException("At least one date must be supplied");
 		}
 

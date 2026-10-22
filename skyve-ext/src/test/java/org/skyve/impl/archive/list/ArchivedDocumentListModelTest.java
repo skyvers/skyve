@@ -43,7 +43,7 @@ import org.skyve.persistence.DocumentQuery.AggregateFunction;
 
 public class ArchivedDocumentListModelTest {
 	@Test
-	@SuppressWarnings("static-method")
+	@SuppressWarnings({"static-method", "null"}) // a null here fails the test
 	public void fetchReturnsEmptyPageWhenNoArchiveConfigExists() throws Exception {
 		TestArchivedDocumentListModel model = new TestArchivedDocumentListModel();
 		model.setStartRow(0);
@@ -56,7 +56,7 @@ public class ArchivedDocumentListModelTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
+	@SuppressWarnings({"static-method", "null"}) // a null here fails the test
 	public void fetchCreatesCountSummaryWhenSummaryIsCount() throws Exception {
 		ArchiveConfig previousConfig = UtilImpl.ARCHIVE_CONFIG;
 		String previousContentDirectory = UtilImpl.CONTENT_DIRECTORY;
@@ -93,7 +93,7 @@ public class ArchivedDocumentListModelTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
+	@SuppressWarnings({"static-method", "null"}) // a null here fails the test
 	public void fetchCreatesSummaryForUnsupportedAggregateWithoutThrowing() throws Exception {
 		ArchiveConfig previousConfig = UtilImpl.ARCHIVE_CONFIG;
 		String previousContentDirectory = UtilImpl.CONTENT_DIRECTORY;
@@ -197,7 +197,7 @@ public class ArchivedDocumentListModelTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
+	@SuppressWarnings({"static-method", "null"}) // passes null on purpose
 	public void updateAndRemoveAreUnsupported() {
 		TestArchivedDocumentListModel model = new TestArchivedDocumentListModel();
 
@@ -214,7 +214,7 @@ public class ArchivedDocumentListModelTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
+	@SuppressWarnings({"static-method", "null"}) // a null here fails the test
 	public void fetchUsesLucenePathWhenArchiveConfigExists() throws Exception {
 		ArchiveConfig previousConfig = UtilImpl.ARCHIVE_CONFIG;
 		String previousContentDirectory = UtilImpl.CONTENT_DIRECTORY;
@@ -250,7 +250,7 @@ public class ArchivedDocumentListModelTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
+	@SuppressWarnings({"static-method", "null"}) // a null here fails the test
 	public void fetchReturnsEmptyPageWhenIndexFilesMissing() throws Exception {
 		ArchiveConfig previousConfig = UtilImpl.ARCHIVE_CONFIG;
 		String previousContentDirectory = UtilImpl.CONTENT_DIRECTORY;
@@ -316,7 +316,7 @@ public class ArchivedDocumentListModelTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
+	@SuppressWarnings({"static-method", "null"}) // a null here fails the test
 	public void fetchWithNonEmptyFilterUsesConfiguredQueryPath() throws Exception {
 		ArchiveConfig previousConfig = UtilImpl.ARCHIVE_CONFIG;
 		String previousContentDirectory = UtilImpl.CONTENT_DIRECTORY;
@@ -468,6 +468,7 @@ public class ArchivedDocumentListModelTest {
 			return binding + "_sort";
 		}
 
+		@SuppressWarnings("null") // passes null on purpose
 		@Override
 		protected Bean convertToBean(Document luceneDoc) {
 			return null;
@@ -527,6 +528,7 @@ public class ArchivedDocumentListModelTest {
 			return binding + "_sort";
 		}
 
+		@SuppressWarnings("null") // passes null on purpose
 		@Override
 		protected Bean convertToBean(Document luceneDoc) {
 			return null;

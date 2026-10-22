@@ -108,7 +108,7 @@ class UserServiceH2Test extends AbstractH2Test {
 	}
 
 	@Test
-	@SuppressWarnings("java:S1854") // Persistence.save() may return a different instance; assignment captured intentionally
+	@SuppressWarnings({"java:S1854", "null"}) // Persistence.save() may return a different instance; assignment captured intentionally
 	void createAdminUserFromContactWithGroupShould() {
 		// given
 		contact = db.build(Contact.MODULE_NAME, Contact.DOCUMENT_NAME);

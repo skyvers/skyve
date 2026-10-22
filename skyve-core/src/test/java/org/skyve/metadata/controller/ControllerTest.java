@@ -133,6 +133,7 @@ class ControllerTest {
 
 	@Test
 	void bizExportActionCanBeInstantiated() {
+		@SuppressWarnings("null") // passes null on purpose
 		BizExportAction action = new BizExportAction() {
 			@Override
 			public BizPortWorkbook bizExport(WebContext webContext) {
@@ -155,6 +156,7 @@ class ControllerTest {
 
 	@Test
 	void downloadActionCanBeInstantiated() {
+		@SuppressWarnings("null") // passes null on purpose
 		DownloadAction<Bean> action = new DownloadAction<>() {
 			@Override
 			public void prepare(Bean bean, WebContext webContext) {
@@ -170,6 +172,7 @@ class ControllerTest {
 
 	@Test
 	void uploadActionCanBeInstantiated() {
+		@SuppressWarnings("null") // passes null on purpose
 		UploadAction<Bean> action = new UploadAction<>() {
 			@Override
 			public Bean upload(Bean bean, Upload upload, UploadException exception, WebContext webContext) {
@@ -183,6 +186,7 @@ class ControllerTest {
 
 	@Test
 	void roleGetLocalisedDescriptionWithNullDescriptionReturnsNull() {
+		@SuppressWarnings("null") // passes null on purpose
 		Role role = new Role() {
 			@Override
 			public String getName() {

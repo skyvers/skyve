@@ -396,6 +396,7 @@ class DocumentQueryTest extends AbstractSkyveTest {
 		q.beanResults();
 	}
 
+	@SuppressWarnings("null") // uses a nullable result where the API expects non-null
 	private static void postgresql() {
 		UtilImpl.DATA_STORE = new DataStore(UtilImpl.DATA_STORE.getJdbcDriverClassName(),
 												UtilImpl.DATA_STORE.getJdbcUrl(),

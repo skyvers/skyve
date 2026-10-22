@@ -40,6 +40,7 @@ class FileSystemContentManagerTest {
 		UtilImpl.CONTENT_DIRECTORY = previousContentDirectory;
 	}
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
 	void noOpLifecycleAndIndexingMethodsComplete() {
 		assertDoesNotThrow(() -> {
@@ -95,6 +96,7 @@ class FileSystemContentManagerTest {
 
 			assertNotNull(attachment.getContentId());
 			assertNotNull(attachment.getLastModified());
+			@SuppressWarnings("null") // uses a nullable result where the API expects non-null
 			AttachmentContent restored = manager.getAttachment(attachment.getContentId());
 			assertNotNull(restored);
 			assertEquals("avatar.txt", restored.getFileName());
@@ -122,6 +124,7 @@ class FileSystemContentManagerTest {
 		try (FileSystemContentManager manager = new FileSystemContentManager()) {
 			manager.put(attachment, false);
 
+			@SuppressWarnings("null") // uses a nullable result where the API expects non-null
 			AttachmentContent restored = manager.getAttachment(attachment.getContentId());
 			assertNotNull(restored);
 			assertEquals("external.txt", restored.getFileName());
@@ -142,12 +145,14 @@ class FileSystemContentManagerTest {
 			attachment.setMarkup("updated");
 			manager.update(attachment);
 
+			@SuppressWarnings("null") // uses a nullable result where the API expects non-null
 			AttachmentContent restored = manager.getAttachment(attachment.getContentId());
 			assertNotNull(restored);
 			assertEquals("updated", restored.getMarkup());
 		}
 	}
 
+	@SuppressWarnings("null") // uses a nullable result where the API expects non-null
 	@Test
 	void removeAttachmentDeletesStoredAttachment() throws Exception {
 		configureFileStorage();

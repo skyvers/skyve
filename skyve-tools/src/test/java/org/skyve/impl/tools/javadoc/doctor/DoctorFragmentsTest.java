@@ -105,6 +105,7 @@ class DoctorFragmentsTest {
 		assertTrue(section.toHTML().startsWith("<h4>Overview</h4>"));
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void docTableUsesListFallbackForSingleVisibleColumn() {
 		DocTable table = new DocTable("table-1");
@@ -123,6 +124,7 @@ class DoctorFragmentsTest {
 		assertTrue(html.contains("<li>Beta</li>"));
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void docTableRendersTableAndOmitsEmptyColumns() {
 		DocTable table = new DocTable("table-2");

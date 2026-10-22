@@ -34,6 +34,7 @@ public class GeometryConverterTest {
 		fail("Should throw exception before this line.");
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	public void testGetAsObjectValidWkt() {
 		Geometry result = converter.getAsObject(null, null, "POINT (1 2)");

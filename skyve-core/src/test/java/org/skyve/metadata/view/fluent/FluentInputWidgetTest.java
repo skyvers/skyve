@@ -63,11 +63,13 @@ class FluentInputWidgetTest {
 		assertNotEquals(Boolean.TRUE, new FluentCheckBox().triState(false).get().getTriState());
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void fluentCheckBoxPixelWidthSetsValue() {
 		assertEquals(40, new FluentCheckBox().pixelWidth(40).get().getPixelWidth().intValue());
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void fluentCheckBoxPixelHeightSetsValue() {
 		assertEquals(40, new FluentCheckBox().pixelHeight(40).get().getPixelHeight().intValue());
@@ -217,6 +219,7 @@ class FluentInputWidgetTest {
 		assertNotNull(new FluentCombo().get());
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void fluentComboPixelWidthSetsValue() {
 		assertEquals(300, new FluentCombo().pixelWidth(300).get().getPixelWidth().intValue());

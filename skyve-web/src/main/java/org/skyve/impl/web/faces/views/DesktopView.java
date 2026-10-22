@@ -551,7 +551,7 @@ public class DesktopView extends HarnessView {
 				result.append("{name:'").append(itemDocument.getName());
 				String menuModuleName = menuModule.getName();
 				String itemModuleName = itemModule.getName();
-				if ((menuModuleName != null) && (! menuModuleName.equals(itemModuleName))) {
+				if (! menuModuleName.equals(itemModuleName)) {
 					result.append("',module:'").append(itemModuleName);
 				}
 				renderItem(item.getLocalisedName(), icon16, iconStyleClass, null, "edit", itemModule, itemDocument);
@@ -725,10 +725,8 @@ public class DesktopView extends HarnessView {
 			
 			if (ViewType.list.equals(module.getHomeRef())) {
 				String homeDocumentName = module.getHomeDocumentName();
-				if (homeDocumentName != null) {
-					MetaDataQueryDefinition query = module.getDocumentDefaultQuery(customer, homeDocumentName);
-					SmartClientViewRenderer.appendDataSourceDefinition(user, customer, query, null, null, uxui, true, dataSources, visitedQueryNames);
-				}
+				MetaDataQueryDefinition query = module.getDocumentDefaultQuery(customer, homeDocumentName);
+				SmartClientViewRenderer.appendDataSourceDefinition(user, customer, query, null, null, uxui, true, dataSources, visitedQueryNames);
 			}
 			
 			String moduleName = module.getName();

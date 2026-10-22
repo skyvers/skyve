@@ -84,6 +84,7 @@ public class CronExpressionParameterisedTest {
 	/**
 	 * Tests that each input expression in the parameters list matches the expected result.
 	 */
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	public void testToNaturalLanguageWithParameters() {
 		// setup the test data

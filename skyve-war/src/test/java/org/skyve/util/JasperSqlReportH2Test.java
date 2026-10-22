@@ -26,6 +26,7 @@ import util.AbstractH2Test;
 
 @SuppressWarnings("static-method")
 class JasperSqlReportH2Test extends AbstractH2Test {
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void fillsSqlReportFromH2Connection() throws Exception {
 		JasperDesign design = new JasperDesign();

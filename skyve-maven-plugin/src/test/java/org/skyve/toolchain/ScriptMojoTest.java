@@ -210,6 +210,7 @@ class ScriptMojoTest {
 			return this;
 		}
 
+		@SuppressWarnings("null") // passes null on purpose
 		@Override
 		public MavenSkyveProject initialise() {
 			return null;

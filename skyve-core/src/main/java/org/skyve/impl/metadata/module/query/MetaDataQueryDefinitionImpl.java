@@ -453,44 +453,42 @@ public class MetaDataQueryDefinitionImpl extends QueryDefinitionImpl implements 
 				else {
 					if ((binding != null) && (attribute != null)) {
 						AttributeType type = attribute.getAttributeType();
-						if (type != null) {
-							switch (summaryType) {
-							case Sum:
-							case Avg:
-								switch (type) {
-								case integer:
-								case longInteger:
-								case decimal2:
-								case decimal5:
-								case decimal10:
-									result.addAggregateProjection(summaryType, binding, alias);
-									break;
-								}
-								break;
-							case Count:
+						switch (summaryType) {
+						case Sum:
+						case Avg:
+							switch (type) {
+							case integer:
+							case longInteger:
+							case decimal2:
+							case decimal5:
+							case decimal10:
 								result.addAggregateProjection(summaryType, binding, alias);
 								break;
-							case Max:
-							case Min:
-								switch (type) {
-								case integer:
-								case longInteger:
-								case decimal2:
-								case decimal5:
-								case decimal10:
-								case date:
-								case dateTime:
-								case time:
-								case timestamp:
-								case text:
-								case memo:
-								case markup:
-								case colour:
-									result.addAggregateProjection(summaryType, binding, alias);
-									break;
-								}
+							}
+							break;
+						case Count:
+							result.addAggregateProjection(summaryType, binding, alias);
+							break;
+						case Max:
+						case Min:
+							switch (type) {
+							case integer:
+							case longInteger:
+							case decimal2:
+							case decimal5:
+							case decimal10:
+							case date:
+							case dateTime:
+							case time:
+							case timestamp:
+							case text:
+							case memo:
+							case markup:
+							case colour:
+								result.addAggregateProjection(summaryType, binding, alias);
 								break;
 							}
+							break;
 						}
 					}
 				}

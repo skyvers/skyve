@@ -233,10 +233,7 @@ public class PluralUtil {
 	 */
 	public static @Nullable String article(@Nonnull String word) {
 		Data result = articleResults(word);
-		if (result != null) {
-			return result.getArticle();
-		}
-		return "a";
+		return result.getArticle();
 	}
 
 	/**

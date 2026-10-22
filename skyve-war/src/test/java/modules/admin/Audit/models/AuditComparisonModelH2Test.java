@@ -25,7 +25,7 @@ class AuditComparisonModelH2Test extends AbstractH2Test {
 	private static final String UNKNOWN_DOCUMENT = "missingDocument";
 
 	@Test
-	@SuppressWarnings("static-method")
+	@SuppressWarnings({"static-method", "null"}) // a null here fails the test
 	void sourceOnlyAuditBuildsAddedRootNodeWithoutMetadata() throws Exception {
 		AuditComparisonModel model = new AuditComparisonModel();
 		Audit audit = audit(Operation.insert, detail("source-id", "Source key", "\"name\":\"Alpha\""), null);
@@ -48,7 +48,7 @@ class AuditComparisonModelH2Test extends AbstractH2Test {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
+	@SuppressWarnings({"static-method", "null"}) // a null here fails the test
 	void deleteAuditBuildsDeletedRootNodeWithOldValues() throws Exception {
 		AuditComparisonModel model = new AuditComparisonModel();
 		Audit audit = audit(Operation.delete, detail("deleted-id", "Deleted key", "\"name\":\"Alpha\""), null);
@@ -62,7 +62,7 @@ class AuditComparisonModelH2Test extends AbstractH2Test {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
+	@SuppressWarnings({"static-method", "null"}) // a null here fails the test
 	void comparisonAuditUpdatesExistingNodeAndAddsComparisonOnlyProperties() throws Exception {
 		AuditComparisonModel model = new AuditComparisonModel();
 		Audit audit = audit(Operation.update,
@@ -84,7 +84,7 @@ class AuditComparisonModelH2Test extends AbstractH2Test {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
+	@SuppressWarnings({"static-method", "null"}) // a null here fails the test
 	void comparisonAuditWithSameValuesLeavesNodeUnchanged() throws Exception {
 		AuditComparisonModel model = new AuditComparisonModel();
 		Audit audit = audit(Operation.update,
@@ -100,7 +100,7 @@ class AuditComparisonModelH2Test extends AbstractH2Test {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
+	@SuppressWarnings({"static-method", "null"}) // a null here fails the test
 	void comparisonOnlyRootBindingCreatesDeletedNode() throws Exception {
 		AuditComparisonModel model = new AuditComparisonModel();
 		Audit audit = audit(Operation.update,
@@ -117,7 +117,7 @@ class AuditComparisonModelH2Test extends AbstractH2Test {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
+	@SuppressWarnings({"static-method", "null"}) // a null here fails the test
 	void nonRootBindingsAreLinkedAsChildrenWhenMetadataIsUnavailable() throws Exception {
 		AuditComparisonModel model = new AuditComparisonModel();
 		String sourceDetail = "{"
@@ -137,7 +137,7 @@ class AuditComparisonModelH2Test extends AbstractH2Test {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
+	@SuppressWarnings({"static-method", "null"}) // a null here fails the test
 	void rootBindingUsesDocumentMetadataWhenAvailable() throws Exception {
 		AuditComparisonModel model = new AuditComparisonModel();
 		Audit audit = metadataAudit(Operation.insert,
@@ -156,7 +156,7 @@ class AuditComparisonModelH2Test extends AbstractH2Test {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
+	@SuppressWarnings({"static-method", "null"}) // a null here fails the test
 	void childBindingUsesReferenceMetadataWhenAvailable() throws Exception {
 		AuditComparisonModel model = new AuditComparisonModel();
 		String sourceDetail = "{"
@@ -185,6 +185,7 @@ class AuditComparisonModelH2Test extends AbstractH2Test {
 
 		ComparisonComposite root = model.getComparisonComposite(audit);
 
+		@SuppressWarnings("null") // a null here fails the test
 		ComparisonProperty property = root.getProperties().get(0);
 		assertThat(property.getName(), is("wizardState"));
 		// The attribute still exists, so its localised title is retained; only the
@@ -204,6 +205,7 @@ class AuditComparisonModelH2Test extends AbstractH2Test {
 
 		ComparisonComposite root = model.getComparisonComposite(audit);
 
+		@SuppressWarnings("null") // a null here fails the test
 		ComparisonProperty property = root.getProperties().get(0);
 		assertThat(property.getName(), is("wizardState"));
 		assertThat(property.getWidget(), instanceOf(TextField.class));

@@ -344,7 +344,7 @@ public class BackupUtilTest {
 	}
 	
 	@Test
-	@SuppressWarnings("static-method")
+	@SuppressWarnings({"static-method", "null"}) // a null here fails the test
 	public void testRedactGeometry() {
 		// setup the test data
 		GeometryFactory geometryFactory = new GeometryFactory();

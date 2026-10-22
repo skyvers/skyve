@@ -208,13 +208,9 @@ public class LuceneContentManager extends FileSystemContentManager {
 			document.add(new StringField(Bean.USER_ID, bizUserId, Store.YES));
 		}
 		String bizModule = content.getBizModule();
-		if (bizModule != null) {
-			document.add(new StringField(Bean.MODULE_KEY, bizModule, Store.YES));
-		}
+		document.add(new StringField(Bean.MODULE_KEY, bizModule, Store.YES));
 		String bizDocument = content.getBizDocument();
-		if (bizDocument != null) {
-			document.add(new StringField(Bean.DOCUMENT_KEY, bizDocument, Store.YES));
-		}
+		document.add(new StringField(Bean.DOCUMENT_KEY, bizDocument, Store.YES));
 		document.add(new StringField(Bean.DOCUMENT_ID, bizContentId, Store.YES));
 
 		// Last modified
@@ -337,11 +333,15 @@ public class LuceneContentManager extends FileSystemContentManager {
 			document.add(new StringField(Bean.USER_ID, bizUserId, Store.YES));
 		}
 		String bizModule = attachment.getBizModule();
-		if (bizModule != null) {
+		@SuppressWarnings("null") // attachment metadata read back from stored JSON or the index can lack it
+		boolean bizModulePresent = (bizModule != null);
+		if (bizModulePresent) {
 			document.add(new StringField(Bean.MODULE_KEY, bizModule, Store.YES));
 		}
 		String bizDocument = attachment.getBizDocument();
-		if (bizDocument != null) {
+		@SuppressWarnings("null") // attachment metadata read back from stored JSON or the index can lack it
+		boolean bizDocumentPresent = (bizDocument != null);
+		if (bizDocumentPresent) {
 			document.add(new StringField(Bean.DOCUMENT_KEY, bizDocument, Store.YES));
 		}
 		document.add(new StringField(Bean.DOCUMENT_ID, bizId, Store.YES));

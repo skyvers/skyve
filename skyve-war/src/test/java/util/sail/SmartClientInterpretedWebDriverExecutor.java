@@ -132,8 +132,10 @@ public class SmartClientInterpretedWebDriverExecutor extends InterpretedWebDrive
 	@Override
 	public void executeTabSelect(TabSelect tabSelect) {
 		SmartClientAutomationContext context = peek();
+		@SuppressWarnings("null") // uses a nullable result where the API expects non-null
 		String identifier = tabSelect.getIdentifier(context);
 
+		@SuppressWarnings("null") // a null here fails the test
 		List<Locator> locators = context.getLocators(identifier);
 		if (locators == null) {
 			throw new MetaDataException(
@@ -169,7 +171,9 @@ public class SmartClientInterpretedWebDriverExecutor extends InterpretedWebDrive
 
 		User u = CORE.getUser();
 		Customer c = u.getCustomer();
+		@SuppressWarnings("null") // a null here fails the test; uses a nullable result where the API expects non-null
 		Module m = c.getModule(context.getModuleName());
+		@SuppressWarnings("null") // uses a nullable result where the API expects non-null
 		Document d = m.getDocument(c, context.getDocumentName());
 		
 		Bean bean = null;
@@ -182,8 +186,10 @@ public class SmartClientInterpretedWebDriverExecutor extends InterpretedWebDrive
 		}
 
 		final String uxui = context.getUxui();
+		@SuppressWarnings("null") // a null here fails the test
 		ViewImpl view = (ViewImpl) d.getView(uxui, c, context.getViewType().toString());
 
+		@SuppressWarnings("null") // uses a nullable result where the API expects non-null
 		TestDataEnterViewVisitor visitor = new TestDataEnterViewVisitor(
 				(CustomerImpl) c,
 				(ModuleImpl) m,
@@ -199,6 +205,7 @@ public class SmartClientInterpretedWebDriverExecutor extends InterpretedWebDrive
 		}
 	}
 
+	@SuppressWarnings("null") // checks values the annotations say are non-null
 	@Override
 	public void executeDataEnter(DataEnter dataEnter) {
 		SmartClientAutomationContext context = peek();
@@ -253,8 +260,11 @@ public class SmartClientInterpretedWebDriverExecutor extends InterpretedWebDrive
 
 		User u = CORE.getUser();
 		Customer c = u.getCustomer();
+		@SuppressWarnings("null") // a null here fails the test; uses a nullable result where the API expects non-null
 		Module m = c.getModule(context.getModuleName());
+		@SuppressWarnings("null") // uses a nullable result where the API expects non-null
 		Document d = m.getDocument(c, context.getDocumentName());
+		@SuppressWarnings("null") // a null here fails the test
 		View v = d.getView(context.getUxui(), c, context.getViewType().toString());
 		org.skyve.metadata.view.Action a = v.getAction(tagName);
 
@@ -265,6 +275,7 @@ public class SmartClientInterpretedWebDriverExecutor extends InterpretedWebDrive
 
 		String identifier = button.getIdentifier(context);
 
+		@SuppressWarnings("null") // uses a nullable result where the API expects non-null
 		List<Locator> locators = context.getLocators(identifier);
 		if (locators == null) {
 			throw new MetaDataException(String.format("<%s /> is not on the view", tagName));
@@ -303,6 +314,7 @@ public class SmartClientInterpretedWebDriverExecutor extends InterpretedWebDrive
 		selenide.waitForFullPageResponse();
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Override
 	public void executeSave(Save save) {
 		button(save, "save", false, save.getTestSuccess());
@@ -391,6 +403,7 @@ public class SmartClientInterpretedWebDriverExecutor extends InterpretedWebDrive
 	private void lookupDescription(Step step, String binding, Integer row, String search) {
 		SmartClientAutomationContext context = peek();
 		
+		@SuppressWarnings("null") // a null here fails the test
 		List<Locator> locators = context.getLocators(binding);
 		if (locators == null) {
 			throw new MetaDataException(String.format("<%s /> with binding [%s] is not on the view", step.getClass()
@@ -424,7 +437,9 @@ public class SmartClientInterpretedWebDriverExecutor extends InterpretedWebDrive
 
 		User u = CORE.getUser();
 		Customer c = u.getCustomer();
+		@SuppressWarnings("null") // a null here fails the test; uses a nullable result where the API expects non-null
 		Module m = c.getModule(context.getModuleName());
+		@SuppressWarnings("null") // uses a nullable result where the API expects non-null
 		Document d = m.getDocument(c, context.getDocumentName());
 		TargetMetaData target = BindUtil.getMetaDataForBinding(c, m, d, binding);
 		Relation relation = (Relation) target.getAttribute();
@@ -455,6 +470,7 @@ public class SmartClientInterpretedWebDriverExecutor extends InterpretedWebDrive
 	private void lookupDescriptionNew(Step step, String binding) {
 		SmartClientAutomationContext context = peek();
 
+		@SuppressWarnings("null") // a null here fails the test
 		List<Locator> locators = context.getLocators(binding);
 		if (locators == null) {
 			throw new MetaDataException(String.format("<%s /> with binding [%s] is not on the view",
@@ -487,7 +503,9 @@ public class SmartClientInterpretedWebDriverExecutor extends InterpretedWebDrive
 
 		User u = CORE.getUser();
 		Customer c = u.getCustomer();
+		@SuppressWarnings("null") // a null here fails the test; uses a nullable result where the API expects non-null
 		Module m = c.getModule(context.getModuleName());
+		@SuppressWarnings("null") // uses a nullable result where the API expects non-null
 		Document d = m.getDocument(c, context.getDocumentName());
 		TargetMetaData target = BindUtil.getMetaDataForBinding(c, m, d, binding);
 		Relation relation = (Relation) target.getAttribute();
@@ -518,6 +536,7 @@ public class SmartClientInterpretedWebDriverExecutor extends InterpretedWebDrive
 	private void lookupDescriptionEdit(Step step, String binding) {
 		SmartClientAutomationContext context = peek();
 
+		@SuppressWarnings("null") // a null here fails the test
 		List<Locator> locators = context.getLocators(binding);
 		if (locators == null) {
 			throw new MetaDataException(String.format("<%s /> with binding [%s] is not on the view",
@@ -549,7 +568,9 @@ public class SmartClientInterpretedWebDriverExecutor extends InterpretedWebDrive
 
 		String binding = zoom.getBinding();
 		Customer c = CORE.getUser().getCustomer();
+		@SuppressWarnings("null") // a null here fails the test; uses a nullable result where the API expects non-null
 		Module m = c.getModule(context.getModuleName());
+		@SuppressWarnings("null") // uses a nullable result where the API expects non-null
 		Document d = m.getDocument(c, context.getDocumentName());
 		TargetMetaData target = BindUtil.getMetaDataForBinding(c, m, d, binding);
 		Relation relation = (Relation) target.getAttribute();
@@ -614,8 +635,10 @@ public class SmartClientInterpretedWebDriverExecutor extends InterpretedWebDrive
 	 */
 	private void dataGridGesture(Step step, String binding, Integer row) {
 		SmartClientAutomationContext context = peek();
+		@SuppressWarnings("null") // uses a nullable result where the API expects non-null
 		String buttonIdentifier = step.getIdentifier(context);
 		
+		@SuppressWarnings("null") // a null here fails the test; uses a nullable result where the API expects non-null
 		List<Locator> locators = context.getLocators(buttonIdentifier);
 		if (locators == null) {
 			throw new MetaDataException(String.format("<%s /> with binding [%s] is not on the view", step.getClass()
@@ -675,7 +698,9 @@ public class SmartClientInterpretedWebDriverExecutor extends InterpretedWebDrive
 		if (step instanceof DataGridNew || step instanceof DataGridZoom) {
 			User u = CORE.getUser();
 			Customer c = u.getCustomer();
+			@SuppressWarnings("null") // uses a nullable result where the API expects non-null
 			Module m = c.getModule(context.getModuleName());
+			@SuppressWarnings("null") // uses a nullable result where the API expects non-null
 			Document d = m.getDocument(c, context.getDocumentName());
 			TargetMetaData target = BindUtil.getMetaDataForBinding(c, m, d, binding);
 			Relation relation = (Relation) target.getAttribute();
@@ -736,9 +761,12 @@ public class SmartClientInterpretedWebDriverExecutor extends InterpretedWebDrive
 	 */
 	private void listGridGesture(Step step, Integer row) {
 		SmartClientAutomationContext context = peek();
+		@SuppressWarnings("null") // uses a nullable result where the API expects non-null
 		String buttonIdentifier = step.getIdentifier(context);
+		@SuppressWarnings("null") // a null here fails the test
 		String listGridIdentifier = buttonIdentifier.substring(0, buttonIdentifier.lastIndexOf('.'));
 		
+		@SuppressWarnings("null") // a null here fails the test
 		List<Locator> locators = context.getLocators(buttonIdentifier);
 		if (locators == null) {
 			throw new MetaDataException(String.format("<%s /> with identifier [%s] is not defined", step.getClass()
@@ -788,6 +816,7 @@ public class SmartClientInterpretedWebDriverExecutor extends InterpretedWebDrive
 	 * @param step the Step object providing context for error reporting
 	 * @return a PushEditContext with module and document names set appropriately
 	 */
+	@SuppressWarnings("null") // a null here fails the test; uses a nullable result where the API expects non-null; checks values the annotations say are non-null
 	private PushEditContext listGridContext(String queryName, String documentName, String modelName, Step step) {
 		PushEditContext result = new PushEditContext();
 

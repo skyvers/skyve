@@ -202,29 +202,27 @@ public class ReportBand {
 			return;
 		}
 		final DesignSpecification design = getNullSafeParent();
-		if (design.getWidth() != null) {
-			int width = design.getWidth().intValue() / this.getElements().size();
-			int left = 0;
-			for (ReportElement e : this.getElements()) {
-				e.setElementLeft(Integer.valueOf(left));
-				// an element without a height is sized as addElement() would size it - with the design default
-				Integer elementHeight = e.getElementHeight();
-				if (elementHeight == null) {
-					elementHeight = design.getDefaultElementHeight();
-				}
-				if (this.getElements().indexOf(e) == 0) {
-					// first
-					width = elementHeight.intValue() * 5;
-				} else if (this.getElements().indexOf(e) == this.getElements().size() - 1) {
-					// last
-					width = design.getColumnWidth().intValue() - left;
-				} else {
-					// other
-					width = elementHeight.intValue() * 5;
-				}
-				e.setElementWidth(Integer.valueOf(width));
-				left = left + width;
+		int width = design.getWidth().intValue() / this.getElements().size();
+		int left = 0;
+		for (ReportElement e : this.getElements()) {
+			e.setElementLeft(Integer.valueOf(left));
+			// an element without a height is sized as addElement() would size it - with the design default
+			Integer elementHeight = e.getElementHeight();
+			if (elementHeight == null) {
+				elementHeight = design.getDefaultElementHeight();
 			}
+			if (this.getElements().indexOf(e) == 0) {
+				// first
+				width = elementHeight.intValue() * 5;
+			} else if (this.getElements().indexOf(e) == this.getElements().size() - 1) {
+				// last
+				width = design.getColumnWidth().intValue() - left;
+			} else {
+				// other
+				width = elementHeight.intValue() * 5;
+			}
+			e.setElementWidth(Integer.valueOf(width));
+			left = left + width;
 		}
 	}
 

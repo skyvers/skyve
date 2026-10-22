@@ -74,6 +74,7 @@ class DesktopViewTest {
 						view.getLocaleScript());
 	}
 	
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void localeScriptUsesLocalizedSkyveMessagesWhenWebappResourceExists() {
 		DesktopView view = new ResourceAwareDesktopView("/desktop/skyveMessages_de.js");
@@ -86,6 +87,7 @@ class DesktopViewTest {
 		assertFalse(localeScript.contains("skyveMessages_de.properties"));
 	}
 	
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void localeScriptFallsBackToEnglishSkyveMessagesWhenLocalizedWebappResourceDoesNotExist() {
 		DesktopView view = new ResourceAwareDesktopView(null);
@@ -98,6 +100,7 @@ class DesktopViewTest {
 		assertFalse(localeScript.contains("desktop/skyveMessages_de.js"));
 	}
 	
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void localeScriptUsesCorrectNorwegianFrameworkMessagesPath() {
 		DesktopView view = new ResourceAwareDesktopView(null);

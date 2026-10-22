@@ -192,20 +192,15 @@ public class ThumbnailFilter implements Filter {
 		try {
 			Thumbnail thumbnail = new Thumbnail(new ByteArrayInputStream(capturedBytes), resourceUrl, baseType != null ? baseType : "", width, height);
 			byte[] thumbnailBytes = thumbnail.getBytes();
-			if (thumbnailBytes == null) {
-				writeThrough(response, capturedBytes, capturedContentType);
+			MimeType thumbnailMimeType = thumbnail.getMimeType();
+			if (thumbnailMimeType != null) {
+				response.setContentType(thumbnailMimeType.toString());
 			}
-			else {
-				MimeType thumbnailMimeType = thumbnail.getMimeType();
-				if (thumbnailMimeType != null) {
-					response.setContentType(thumbnailMimeType.toString());
-				}
-				response.setContentLength(thumbnailBytes.length);
-				
-				@SuppressWarnings("resource")
-				ServletOutputStream sos = response.getOutputStream();
-				sos.write(thumbnailBytes);
-			}
+			response.setContentLength(thumbnailBytes.length);
+
+			@SuppressWarnings("resource")
+			ServletOutputStream sos = response.getOutputStream();
+			sos.write(thumbnailBytes);
 		}
 		catch (Exception e) {
 			LOGGER.error("ThumbnailFilter failed to generate thumbnail - falling back to original response", e);

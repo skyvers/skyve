@@ -254,6 +254,7 @@ class ReportElementTest {
 		assertThat(e.getReportFileName(), is("myReport.jasper"));
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void fieldRoundTrip() {
 		ReportElement e = simple();

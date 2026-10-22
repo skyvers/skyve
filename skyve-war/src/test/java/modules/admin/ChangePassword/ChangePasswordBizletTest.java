@@ -11,6 +11,7 @@ class ChangePasswordBizletTest {
 
 	private static final ChangePasswordBizlet bizlet = new ChangePasswordBizlet();
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
 	void preRerenderWithUnknownSourceDoesNotThrow() throws Exception {
 		ChangePassword bean = new ChangePassword();
@@ -18,6 +19,7 @@ class ChangePasswordBizletTest {
 		assertNotNull(bean);
 	}
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
 	void preRerenderWithNewPasswordSourceAndNullPasswordDoesNotThrow() throws Exception {
 		ChangePassword bean = new ChangePassword();
@@ -26,6 +28,7 @@ class ChangePasswordBizletTest {
 		assertNotNull(bean);
 	}
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
 	void postRenderWithPasswordNotChangedDoesNotCallExt() {
 		ChangePassword bean = new ChangePassword();

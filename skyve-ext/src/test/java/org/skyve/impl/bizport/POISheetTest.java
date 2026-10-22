@@ -118,6 +118,7 @@ public class POISheetTest {
 		new POISheet("TestSheet").nextRow();
 	}
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test(expected = IllegalStateException.class)
 	public void getValueThrowsWhenNotMaterialised() {
 		new POISheet("TestSheet").getValue("binding", null, null);
@@ -189,6 +190,7 @@ public class POISheetTest {
 		try (XSSFWorkbook wb = materialize(sheet)) {
 			sheet.addRow("r1");
 			sheet.setValue("name", "hello");
+			@SuppressWarnings("null") // passes null on purpose
 			String result = sheet.getValue("name", AttributeType.text, null);
 			assertEquals("hello", result);
 		}
@@ -202,6 +204,7 @@ public class POISheetTest {
 		try (XSSFWorkbook wb = materialize(sheet)) {
 			sheet.addRow("r1");
 			sheet.setValue("amount", Integer.valueOf(42));
+			@SuppressWarnings("null") // passes null on purpose
 			Integer result = sheet.getValue("amount", AttributeType.integer, null);
 			assertEquals(Integer.valueOf(42), result);
 		}
@@ -215,6 +218,7 @@ public class POISheetTest {
 		try (XSSFWorkbook wb = materialize(sheet)) {
 			sheet.addRow("r1");
 			sheet.setValue("flag", Boolean.TRUE);
+			@SuppressWarnings("null") // passes null on purpose
 			Boolean result = sheet.getValue("flag", AttributeType.bool, null);
 			assertEquals(Boolean.TRUE, result);
 		}
@@ -228,6 +232,7 @@ public class POISheetTest {
 		try (XSSFWorkbook wb = materialize(sheet)) {
 			sheet.addRow("r1");
 			sheet.setValue("price", new Decimal2("3.14"));
+			@SuppressWarnings("null") // passes null on purpose
 			Decimal2 result = sheet.getValue("price", AttributeType.decimal2, null);
 			assertNotNull(result);
 			assertEquals(new Decimal2("3.14"), result);
@@ -242,11 +247,13 @@ public class POISheetTest {
 		try (XSSFWorkbook wb = materialize(sheet)) {
 			sheet.addRow("r1");
 			// no cell has been created — getValue should return null
+			@SuppressWarnings("null") // passes null on purpose
 			String result = sheet.getValue("name", AttributeType.text, null);
 			assertNull(result);
 		}
 	}
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test(expected = IllegalArgumentException.class)
 	public void getValueMissingColumnThrowsIllegalArgument() throws Exception {
 		POISheet sheet = new POISheet("TestSheet");
@@ -256,6 +263,7 @@ public class POISheetTest {
 		}
 	}
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test(expected = IllegalStateException.class)
 	public void getValueNoCurrentRowThrowsIllegalState() throws Exception {
 		POISheet sheet = new POISheet("TestSheet");
@@ -389,6 +397,7 @@ public class POISheetTest {
 		try (XSSFWorkbook wb = materialize(sheet)) {
 			sheet.addRow("r1");
 			sheet.setValue("num", Long.valueOf(12345678L));
+			@SuppressWarnings("null") // passes null on purpose
 			Long result = sheet.getValue("num", AttributeType.longInteger, null);
 			assertEquals(Long.valueOf(12345678L), result);
 		}
@@ -402,6 +411,7 @@ public class POISheetTest {
 		try (XSSFWorkbook wb = materialize(sheet)) {
 			sheet.addRow("r1");
 			sheet.setValue("notes", "memo text");
+			@SuppressWarnings("null") // passes null on purpose
 			String result = sheet.getValue("notes", AttributeType.memo, null);
 			assertEquals("memo text", result);
 		}
@@ -433,6 +443,7 @@ public class POISheetTest {
 			sheet.addRow("r2");
 			sheet.setValue("name", "Bob");
 			// currentRow is still row2 after second addRow
+			@SuppressWarnings("null") // passes null on purpose
 			String second = sheet.getValue("name", AttributeType.text, null);
 			assertEquals("Bob", second);
 		}
@@ -447,6 +458,7 @@ public class POISheetTest {
 		wb.materialise();
 		sheet.addRow("r1");
 		sheet.setValue("price", new Decimal5("1.23456"));
+		@SuppressWarnings("null") // passes null on purpose
 		Decimal5 result = sheet.getValue("price", AttributeType.decimal5, null);
 		assertNotNull(result);
 	}
@@ -460,6 +472,7 @@ public class POISheetTest {
 		wb.materialise();
 		sheet.addRow("r1");
 		sheet.setValue("amount", new Decimal10("9.99"));
+		@SuppressWarnings("null") // passes null on purpose
 		Decimal10 result = sheet.getValue("amount", AttributeType.decimal10, null);
 		assertNotNull(result);
 	}
@@ -474,6 +487,7 @@ public class POISheetTest {
 		sheet.addRow("r1");
 		DateOnly today = new DateOnly();
 		sheet.setValue("date", today);
+		@SuppressWarnings("null") // passes null on purpose
 		Object result = sheet.getValue("date", AttributeType.date, null);
 		assertNotNull(result);
 	}
@@ -488,6 +502,7 @@ public class POISheetTest {
 		sheet.addRow("r1");
 		DateTime now = new DateTime();
 		sheet.setValue("dt", now);
+		@SuppressWarnings("null") // passes null on purpose
 		Object result = sheet.getValue("dt", AttributeType.dateTime, null);
 		assertNotNull(result);
 	}
@@ -502,6 +517,7 @@ public class POISheetTest {
 		sheet.addRow("r1");
 		Timestamp ts = new Timestamp();
 		sheet.setValue("ts", ts);
+		@SuppressWarnings("null") // passes null on purpose
 		Object result = sheet.getValue("ts", AttributeType.timestamp, null);
 		assertNotNull(result);
 	}
@@ -516,10 +532,12 @@ public class POISheetTest {
 		sheet.addRow("r1");
 		TimeOnly t = new TimeOnly();
 		sheet.setValue("time", t);
+		@SuppressWarnings("null") // passes null on purpose
 		Object result = sheet.getValue("time", AttributeType.time, null);
 		assertNotNull(result);
 	}
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
 	public void setValueEnumerationWritesCode() throws Exception {
 		POISheet sheet = new POISheet("TestSheet");
@@ -550,6 +568,7 @@ public class POISheetTest {
 		}
 	}
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
 	public void setValueGeometryWritesWkt() throws Exception {
 		POISheet sheet = new POISheet("TestSheet");
@@ -573,6 +592,7 @@ public class POISheetTest {
 		sheet.addRow("r1");
 		// set numeric value but ask for text — should convert to string via NumberToTextConverter
 		sheet.setValue("num", Integer.valueOf(99));
+		@SuppressWarnings("null") // passes null on purpose
 		String result = sheet.getValue("num", AttributeType.text, null);
 		assertNotNull(result);
 	}

@@ -48,9 +48,7 @@ public final class MenuGroupImpl extends MenuImpl implements MenuGroup {
 	public final @Nonnull String toString() {
 		StringBuilder menuStructure = new StringBuilder();
 
-		if (getName() != null) {
-			menuStructure.append(getName());
-		}
+		menuStructure.append(getName());
 
 		for (MenuItem item : getItems()) {
 			menuStructure.append("  ").append(item.toString());

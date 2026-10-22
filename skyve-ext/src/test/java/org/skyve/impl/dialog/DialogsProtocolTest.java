@@ -68,6 +68,7 @@ class DialogsProtocolTest {
 		assertNull(DialogsProtocol.getAskableRequest());
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void theJSONHoldsTheQuestionAndItsButtonsWithTheTextEscapedForJSON() throws Exception {
 		Question question = Question.yesNo("key", "A \"quoted\" title", "Line 1\nLine 2 \\ </script> <b>bold</b>")

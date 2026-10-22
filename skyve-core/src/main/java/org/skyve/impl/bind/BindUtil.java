@@ -1129,7 +1129,9 @@ public final class BindUtil {
 														   @Nonnull Bean bean,
 														   @Nonnull String binding) {
 		String documentName = bean.getBizDocument();
-		if (documentName == null) {
+		@SuppressWarnings("null") // beans built outside the repository can lack it; a unit test asserts this
+		boolean documentNameMissing = (documentName == null);
+		if (documentNameMissing) {
 			return DisplaySettings.EMPTY;
 		}
 
@@ -2564,20 +2566,18 @@ public final class BindUtil {
 		Object adjustedValue = value;
 		if (target instanceof Bean targetBean) {
 			String documentName = targetBean.getBizDocument();
-			if (documentName != null) {
-				Module module = customer.getModule(targetBean.getBizModule());
-				Document document = module.getDocument(customer, documentName);
-				TargetMetaData propertyTarget = BindUtil.getMetaDataForBinding(customer, module, document, propName);
-				Attribute attribute = propertyTarget.getAttribute();
-				if (attribute instanceof ConvertibleField cf) {
-					converter = cf.getConverterForCustomer(customer);
-				}
-				else if (attribute instanceof Collection) {
-					BindUtil.instantiateAndGet(user, beanModule, beanDocument, bean, bindingName);
-				}
-				else if ("".equals(adjustedValue)) {
-					adjustedValue = null;
-				}
+			Module module = customer.getModule(targetBean.getBizModule());
+			Document document = module.getDocument(customer, documentName);
+			TargetMetaData propertyTarget = BindUtil.getMetaDataForBinding(customer, module, document, propName);
+			Attribute attribute = propertyTarget.getAttribute();
+			if (attribute instanceof ConvertibleField cf) {
+				converter = cf.getConverterForCustomer(customer);
+			}
+			else if (attribute instanceof Collection) {
+				BindUtil.instantiateAndGet(user, beanModule, beanDocument, bean, bindingName);
+			}
+			else if ("".equals(adjustedValue)) {
+				adjustedValue = null;
 			}
 		}
 

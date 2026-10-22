@@ -10,7 +10,7 @@ import org.junit.jupiter.api.Test;
 
 class FlutterScaffoldViewTest {
 	@Test
-	@SuppressWarnings("static-method")
+	@SuppressWarnings({"static-method", "null"}) // passes null on purpose
 	void calendarCreateIsNoOpWithoutThrowing() throws Exception {
 		Path file = Files.createTempFile("flutter-calendar", ".dart");
 
@@ -22,7 +22,7 @@ class FlutterScaffoldViewTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
+	@SuppressWarnings({"static-method", "null"}) // passes null on purpose
 	void mapCreateIsNoOpWithoutThrowing() throws Exception {
 		Path file = Files.createTempFile("flutter-map", ".dart");
 
@@ -34,7 +34,7 @@ class FlutterScaffoldViewTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
+	@SuppressWarnings({"static-method", "null"}) // passes null on purpose
 	void treeCreateIsNoOpWithoutThrowing() throws Exception {
 		Path file = Files.createTempFile("flutter-tree", ".dart");
 

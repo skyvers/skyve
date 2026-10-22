@@ -38,6 +38,7 @@ public class BufferedLineReaderTest {
 		}
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	public void readMultipleLines() throws IOException {
 		Path path = writeFile("line1\nline2\nline3\n");

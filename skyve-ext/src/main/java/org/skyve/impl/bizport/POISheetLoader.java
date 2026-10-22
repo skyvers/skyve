@@ -279,9 +279,7 @@ public class POISheetLoader extends AbstractDataFileLoader {
 			} catch (@SuppressWarnings("unused") Exception e) {
 				// do nothing
 				problem.append("The value '").append(raw).append("' is not a valid date");
-				if(converter!=null){
-					problem.append(" (using customer default Converter " + converter.getClass().getSimpleName() + ").");
-				}
+				problem.append(" (using customer default Converter " + converter.getClass().getSimpleName() + ").");
 				throw new DomainException(problem.toString());
 			}
 		}

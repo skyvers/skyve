@@ -32,6 +32,7 @@ class BeanForReportH2Test extends AbstractH2Test {
 		savedBizId = bean.getBizId();
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void getBeanRetrievesPersistedBean() {
 		Bean result = BeanForReport.getBean(

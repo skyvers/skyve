@@ -13,6 +13,7 @@ class ChartModelTest {
 
 	/** Minimal concrete subclass for testing. */
 	private static class TestChartModel extends ChartModel<Bean> {
+		@SuppressWarnings("null") // passes null on purpose
 		@Override
 		public ChartData getChartData() {
 			return null;
@@ -33,6 +34,7 @@ class ChartModelTest {
 		assertSame(bean, model.getBean());
 	}
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
 	void postConstructDoesNotThrow() {
 		TestChartModel model = new TestChartModel();

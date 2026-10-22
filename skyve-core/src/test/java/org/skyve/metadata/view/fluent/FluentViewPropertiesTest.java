@@ -83,6 +83,7 @@ class FluentViewPropertiesTest {
 		assertEquals("RefreshAction", v.get().getRefreshActionName());
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void generateAccessesTrueSetsFlag() {
 		FluentView v = new FluentView();
@@ -91,6 +92,7 @@ class FluentViewPropertiesTest {
 		assertTrue(v.get().getAccesses().isGenerate());
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void generateAccessesFalseClearsFlag() {
 		FluentView v = new FluentView();
@@ -105,6 +107,7 @@ class FluentViewPropertiesTest {
 		assertNotNull(v.get().getSidebar());
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void actionsSetsActions() {
 		FluentView v = new FluentView().actions(new FluentActions().widgetId("act1"));

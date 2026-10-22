@@ -36,6 +36,7 @@ class DescriptionDirectiveTest {
 		unbindPersistenceFromThread();
 	}
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
 	void executeRejectsMissingParametersLoopVariablesAndNestedBody() {
 		DescriptionDirective directive = new DescriptionDirective();
@@ -49,6 +50,7 @@ class DescriptionDirectiveTest {
 		assertThrows(TemplateModelException.class, () -> directive.execute(null, params, new TemplateModel[0], body));
 	}
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
 	void executeRejectsInvalidParameterTypes() {
 		DescriptionDirective directive = new DescriptionDirective();
@@ -59,6 +61,7 @@ class DescriptionDirectiveTest {
 		assertThrows(TemplateModelException.class, () -> directive.execute(null, Map.of("other", scalar("value")), new TemplateModel[0], null));
 	}
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
 	void executeAcceptsEscapeParameterTypesBeforeRequiringEnvironment() {
 		DescriptionDirective directive = new DescriptionDirective();

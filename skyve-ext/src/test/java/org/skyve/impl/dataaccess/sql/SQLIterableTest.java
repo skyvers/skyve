@@ -354,6 +354,7 @@ class SQLIterableTest {
 		private Timestamp auditStamp;
 		private Integer optionalNumber;
 
+		@SuppressWarnings("null") // passes null on purpose
 		@Override
 		public String getBizId() {
 			return null;
@@ -457,6 +458,7 @@ class SQLIterableTest {
 		private final Connection connection;
 		private SkyveDialect dialect;
 
+		@SuppressWarnings("null") // passes null on purpose
 		private TestSQLDataAccessImpl(Connection connection) {
 			super(null);
 			this.connection = connection;

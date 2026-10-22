@@ -139,6 +139,7 @@ public class MockJobSchedulerTest {
 		assertNotNull(s);
 	}
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
 	public void testRunRestoreJob() {
 		MockJobScheduler s = scheduler();

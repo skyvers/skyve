@@ -62,10 +62,6 @@ public class LocalDataStoreRepository extends LocalDesignRepository {
 
 	@Override
 	public @Nullable UserImpl retrieveUser(@Nonnull String userPrincipal) {
-		if (userPrincipal == null) {
-			throw new IllegalStateException("No-one is logged in - cannot retrieve the skyve user.");
-		}
-
 		UserImpl result = ProvidedRepositoryFactory.setCustomerAndUserFromPrincipal(userPrincipal);
 		if (result != null) {
 			resetUserPermissions(result);

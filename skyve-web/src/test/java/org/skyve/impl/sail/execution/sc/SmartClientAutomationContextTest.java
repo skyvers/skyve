@@ -35,6 +35,7 @@ class SmartClientAutomationContextTest {
 		assertNull(context.getLocators("missing"));
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void generateListContextRegistersToolbarAndSelectionLocators() {
 		SmartClientAutomationContext context = new SmartClientAutomationContext();
@@ -53,6 +54,7 @@ class SmartClientAutomationContextTest {
 						context.getLocators("sales.activeCustomers.select").get(0).getLocator());
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void generateListContextUsesCurrentContextWhenPushOmitsModuleAndDocument() {
 		SmartClientAutomationContext context = new SmartClientAutomationContext();

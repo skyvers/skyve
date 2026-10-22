@@ -89,16 +89,19 @@ class ComponentViewVisitorTest {
 		return mock(ModuleImpl.class);
 	}
 
+	@SuppressWarnings("null") // passes null on purpose
 	private static ComponentViewVisitor visitor(ViewImpl view) {
 		return new ComponentViewVisitor(mockCustomer(), mockModule(), null, view, "desktop",
 				null, Collections.emptyList(), Collections.emptyList(), null);
 	}
 
+	@SuppressWarnings("null") // passes null on purpose
 	private static ComponentViewVisitor visitorWithPrefix(ViewImpl view, String prefix) {
 		return new ComponentViewVisitor(mockCustomer(), mockModule(), null, view, "desktop",
 				prefix, Collections.emptyList(), Collections.emptyList(), null);
 	}
 
+	@SuppressWarnings("null") // passes null on purpose
 	private static ComponentViewVisitor visitorWithWidgetId(ViewImpl view, String widgetId) {
 		return new ComponentViewVisitor(mockCustomer(), mockModule(), null, view, "desktop",
 				null, Collections.emptyList(), Collections.emptyList(), widgetId);
@@ -111,6 +114,7 @@ class ComponentViewVisitorTest {
 		return result;
 	}
 
+	@SuppressWarnings("null") // passes null on purpose
 	private static ComponentViewVisitor visitorWithActions(ViewImpl view, String from, String to) {
 		return new ComponentViewVisitor(mockCustomer(), mockModule(), null, view, "desktop",
 				null, List.of(mapping(from, to)), Collections.emptyList(), null);
@@ -120,6 +124,7 @@ class ComponentViewVisitorTest {
 		return visitorWithConditions(view, null, from, to);
 	}
 
+	@SuppressWarnings("null") // passes null on purpose
 	private static ComponentViewVisitor visitorWithConditions(ViewImpl view, String prefix, String from, String to) {
 		return new ComponentViewVisitor(mockCustomer(), mockModule(), null, view, "desktop",
 				prefix, Collections.emptyList(), List.of(mapping(from, to)), null);
@@ -679,6 +684,7 @@ class ComponentViewVisitorTest {
 		assertEquals("shown", text.getXmlVisibleCondition());
 	}
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
 	void conditionMappingsApplyToGridAndLookupFlags() {
 		ViewImpl view = new ViewImpl();
@@ -760,6 +766,7 @@ class ComponentViewVisitorTest {
 		}));
 	}
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
 	void conditionMappingsApplyToSetDisabledAndSetInvisibleEventActions() {
 		ViewImpl view = new ViewImpl();
@@ -783,6 +790,7 @@ class ComponentViewVisitorTest {
 		assertNull(setInvisible.getXmlInvisibleCondition());
 	}
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
 	void translationsWithABlankSideAreIgnored() {
 		ViewImpl view = new ViewImpl();
@@ -808,6 +816,7 @@ class ComponentViewVisitorTest {
 		assertEquals("enabled", vbox.getXmlInvisibleCondition());
 	}
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
 	void laterMappingOfTheSameConditionWins() {
 		ViewImpl view = new ViewImpl();

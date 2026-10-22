@@ -867,7 +867,7 @@ public class MetaDataServlet extends HttpServlet {
 				}
 				
 				List<ViewParameter> parameters = view.getParameters();
-				if ((parameters != null) && (! parameters.isEmpty())) {
+				if (! parameters.isEmpty()) {
 					result.append(",\"parameters\":[");
 					for (ViewParameter parameter : parameters) {
 						result.append("{\"fromBinding\":\"").append(parameter.getFromBinding());
@@ -1425,7 +1425,7 @@ public class MetaDataServlet extends HttpServlet {
 				}
 				processSize(lookup);
 				List<LookupDescriptionColumn> dropDownColumns = lookup.getDropDownColumns();
-				if ((dropDownColumns != null) && (! dropDownColumns.isEmpty())) {
+				if (! dropDownColumns.isEmpty()) {
 					result.append(",\"dropDownColumns\":[");
 					for (LookupDescriptionColumn column : dropDownColumns) {
 						result.append("{\"name\":\"").append(OWASP.escapeJsonString(column.getName())).append('"');
@@ -1478,17 +1478,11 @@ public class MetaDataServlet extends HttpServlet {
 						public void processReportReference(@Nonnull ReportReference reference) {
 							result.append("\"type\":\"reportRef\"");
 							String name = reference.getModuleName();
-							if (name != null) {
-								result.append(",\"moduleName\":\"").append(name).append('"');
-							}
+							result.append(",\"moduleName\":\"").append(name).append('"');
 							name = reference.getDocumentName();
-							if (name != null) {
-								result.append(",\"documentName\":\"").append(name).append('"');
-							}
+							result.append(",\"documentName\":\"").append(name).append('"');
 							name = reference.getReportName();
-							if (name != null) {
-								result.append(",\"reportName\":\"").append(name).append('"');
-							}
+							result.append(",\"reportName\":\"").append(name).append('"');
 							ReportFormat format = reference.getFormat();
 							if (format != null) {
 								result.append(",\"format\":\"").append(format).append('"');
@@ -1522,13 +1516,9 @@ public class MetaDataServlet extends HttpServlet {
 						public void processEditViewReference(@Nonnull EditViewReference reference) {
 							result.append("\"type\":\"editViewRef\"");
 							String string = reference.getModuleName();
-							if (string != null) {
-								result.append(",\"moduleName\":\"").append(string).append('"');
-							}
+							result.append(",\"moduleName\":\"").append(string).append('"');
 							string = reference.getDocumentName();
-							if (string != null) {
-								result.append(",\"documentName\":\"").append(string).append('"');
-							}
+							result.append(",\"documentName\":\"").append(string).append('"');
 							string = reference.getBinding();
 							if (string != null) {
 								result.append(",\"binding\":\"").append(string).append('"');
@@ -2357,9 +2347,7 @@ public class MetaDataServlet extends HttpServlet {
 				result.append("{\"type\":\"contentColumn\"");
 				processMetaDataQueryColumn(column);
 				DisplayType display = column.getDisplay();
-				if (display != null) {
-					result.append(",\"display\":\"").append(display).append('"');
-				}
+				result.append(",\"display\":\"").append(display).append('"');
 				Integer pixelHeight = column.getPixelHeight();
 				if (pixelHeight != null) {
 					result.append(",\"pixelHeight\":").append(pixelHeight);
@@ -2510,9 +2498,7 @@ public class MetaDataServlet extends HttpServlet {
 			public void renderMap(@Nonnull MapDisplay map) {
 				result.append("{\"type\":\"map\"");
 				String modelName = map.getModelName();
-				if (modelName != null) {
-					result.append(",\"modelName\":\"").append(modelName).append('"');
-				}
+				result.append(",\"modelName\":\"").append(modelName).append('"');
 				LoadingType loading = map.getLoading();
 				if (loading != null) {
 					result.append(",\"loading\":\"").append(loading).append('"');
@@ -2557,9 +2543,7 @@ public class MetaDataServlet extends HttpServlet {
 			public void renderDynamicImage(@Nonnull DynamicImage image) {
 				result.append("{\"type\":\"dynamicImage\"");
 				String name = image.getName();
-				if (name != null) {
-					result.append(",\"name\":\"").append(OWASP.escapeJsonString(name)).append('"');
-				}
+				result.append(",\"name\":\"").append(OWASP.escapeJsonString(name)).append('"');
 				Integer pixels = image.getImageInitialPixelWidth();
 				if (pixels != null) {
 					result.append(",\"imageInitialPixelWidth\":").append(pixels);
@@ -2612,13 +2596,9 @@ public class MetaDataServlet extends HttpServlet {
 						result.append(",\"title\":\"").append(OWASP.escapeJsonString(string)).append('"');
 					}
 					string = model.getLabel();
-					if (string != null) {
-						result.append(",\"label\":\"").append(OWASP.escapeJsonString(string)).append('"');
-					}
+					result.append(",\"label\":\"").append(OWASP.escapeJsonString(string)).append('"');
 					string = model.getModuleName();
-					if (string != null) {
-						result.append(",\"moduleName\":\"").append(string).append('"');
-					}
+					result.append(",\"moduleName\":\"").append(string).append('"');
 					string = model.getDocumentName();
 					if (string != null) {
 						result.append(",\"documentName\":\"").append(string).append('"');
@@ -2628,9 +2608,7 @@ public class MetaDataServlet extends HttpServlet {
 						result.append(",\"queryName\":\"").append(string).append('"');
 					}
 					string = model.getCategoryBinding();
-					if (string != null) {
-						result.append(",\"categoryBinding\":\"").append(string).append('"');
-					}
+					result.append(",\"categoryBinding\":\"").append(string).append('"');
 					Bucket bucket = model.getCategoryBucket();
 					if (bucket != null) {
 						result.append(",\"categoryBucket\":");
@@ -2668,9 +2646,7 @@ public class MetaDataServlet extends HttpServlet {
 						}
 					}
 					string = model.getValueBinding();
-					if (string != null) {
-						result.append(",\"valueBinding\":\"").append(string).append('"');
-					}
+					result.append(",\"valueBinding\":\"").append(string).append('"');
 					AggregateFunction valueFunction = model.getValueFunction();
 					if (valueFunction != null) {
 						result.append(",\"valueFunction\":\"").append(valueFunction).append('"');
@@ -2997,7 +2973,7 @@ public class MetaDataServlet extends HttpServlet {
 					result.append(",\"selectedIdBinding\":\"").append(selectedIdBinding).append('"');
 				}
 				List<EventAction> actions = selectable.getSelectedActions();
-				if ((actions != null) && (! actions.isEmpty())) {
+				if (! actions.isEmpty()) {
 					result.append(",\"selectedActions\":[");
 				}
 			}
@@ -3006,7 +2982,7 @@ public class MetaDataServlet extends HttpServlet {
 			@Override
 			public void visitedOnSelectedEventHandler(@Nonnull Selectable selectable, boolean parentVisible, boolean parentEnabled) {
 				List<EventAction> actions = selectable.getSelectedActions();
-				if ((actions != null) && (! actions.isEmpty())) {
+				if (! actions.isEmpty()) {
 					result.setLength(result.length() - 1); // remove last comma
 					result.append("]");
 				}
@@ -3017,7 +2993,7 @@ public class MetaDataServlet extends HttpServlet {
 			public void visitOnRemovedEventHandler(@Nonnull Removable removable, boolean parentVisible, boolean parentEnabled) {
 				postProcessListColumns();
 				List<EventAction> actions = removable.getRemovedActions();
-				if ((actions != null) && (! actions.isEmpty())) {
+				if (! actions.isEmpty()) {
 					result.append(",\"removedActions\":[");
 				}
 			}
@@ -3026,7 +3002,7 @@ public class MetaDataServlet extends HttpServlet {
 			@Override
 			public void visitedOnRemovedEventHandler(@Nonnull Removable removable, boolean parentVisible, boolean parentEnabled) {
 				List<EventAction> actions = removable.getRemovedActions();
-				if ((actions != null) && (! actions.isEmpty())) {
+				if (! actions.isEmpty()) {
 					result.setLength(result.length() - 1); // remove last comma
 					result.append("]");
 				}
@@ -3036,7 +3012,7 @@ public class MetaDataServlet extends HttpServlet {
 			@Override
 			public void visitOnFocusEventHandler(@Nonnull Focusable blurable, boolean parentVisible, boolean parentEnabled) {
 				List<EventAction> actions = blurable.getFocusActions();
-				if ((actions != null) && (! actions.isEmpty())) {
+				if (! actions.isEmpty()) {
 					result.append(",\"focusActions\":[");
 				}
 			}
@@ -3045,7 +3021,7 @@ public class MetaDataServlet extends HttpServlet {
 			@Override
 			public void visitedOnFocusEventHandler(@Nonnull Focusable blurable, boolean parentVisible, boolean parentEnabled) {
 				List<EventAction> actions = blurable.getFocusActions();
-				if ((actions != null) && (! actions.isEmpty())) {
+				if (! actions.isEmpty()) {
 					result.setLength(result.length() - 1); // remove last comma
 					result.append("]");
 				}
@@ -3055,7 +3031,7 @@ public class MetaDataServlet extends HttpServlet {
 			@Override
 			public void visitOnBlurEventHandler(@Nonnull Focusable blurable, boolean parentVisible, boolean parentEnabled) {
 				List<EventAction> actions = blurable.getBlurActions();
-				if ((actions != null) && (! actions.isEmpty())) {
+				if (! actions.isEmpty()) {
 					result.append(",\"blurActions\":[");
 				}
 			}
@@ -3064,7 +3040,7 @@ public class MetaDataServlet extends HttpServlet {
 			@Override
 			public void visitedOnBlurEventHandler(@Nonnull Focusable blurable, boolean parentVisible, boolean parentEnabled) {
 				List<EventAction> actions = blurable.getBlurActions();
-				if ((actions != null) && (! actions.isEmpty())) {
+				if (! actions.isEmpty()) {
 					result.setLength(result.length() - 1); // remove last comma
 					result.append("]");
 				}
@@ -3075,7 +3051,7 @@ public class MetaDataServlet extends HttpServlet {
 			public void visitOnEditedEventHandler(@Nonnull Editable editable, boolean parentVisible, boolean parentEnabled) {
 				postProcessListColumns();
 				List<EventAction> actions = editable.getEditedActions();
-				if ((actions != null) && (! actions.isEmpty())) {
+				if (! actions.isEmpty()) {
 					result.append(",\"editedActions\":[");
 				}
 			}
@@ -3084,7 +3060,7 @@ public class MetaDataServlet extends HttpServlet {
 			@Override
 			public void visitedOnEditedEventHandler(@Nonnull Editable editable, boolean parentVisible, boolean parentEnabled) {
 				List<EventAction> actions = editable.getEditedActions();
-				if ((actions != null) && (! actions.isEmpty())) {
+				if (! actions.isEmpty()) {
 					result.setLength(result.length() - 1); // remove last comma
 					result.append("]");
 				}
@@ -3094,7 +3070,7 @@ public class MetaDataServlet extends HttpServlet {
 			@Override
 			public void visitOnChangedEventHandler(@Nonnull Changeable changeable, boolean parentVisible, boolean parentEnabled) {
 				List<EventAction> actions = changeable.getChangedActions();
-				if ((actions != null) && (! actions.isEmpty())) {
+				if (! actions.isEmpty()) {
 					result.append(",\"changedActions\":[");
 				}
 			}
@@ -3103,7 +3079,7 @@ public class MetaDataServlet extends HttpServlet {
 			@Override
 			public void visitedOnChangedEventHandler(@Nonnull Changeable changeable, boolean parentVisible, boolean parentEnabled) {
 				List<EventAction> actions = changeable.getChangedActions();
-				if ((actions != null) && (! actions.isEmpty())) {
+				if (! actions.isEmpty()) {
 					result.setLength(result.length() - 1); // remove last comma
 					result.append("]");
 				}
@@ -3114,7 +3090,7 @@ public class MetaDataServlet extends HttpServlet {
 			public void visitOnAddedEventHandler(@Nonnull Addable addable, boolean parentVisible, boolean parentEnabled) {
 				postProcessListColumns();
 				List<EventAction> actions = addable.getAddedActions();
-				if ((actions != null) && (! actions.isEmpty())) {
+				if (! actions.isEmpty()) {
 					result.append(",\"addedActions\":[");
 				}
 			}
@@ -3123,7 +3099,7 @@ public class MetaDataServlet extends HttpServlet {
 			@Override
 			public void visitedOnAddedEventHandler(@Nonnull Addable addable, boolean parentVisible, boolean parentEnabled) {
 				List<EventAction> actions = addable.getAddedActions();
-				if ((actions != null) && (! actions.isEmpty())) {
+				if (! actions.isEmpty()) {
 					result.setLength(result.length() - 1); // remove last comma
 					result.append("]");
 				}
@@ -3133,7 +3109,7 @@ public class MetaDataServlet extends HttpServlet {
 			@Override
 			public void visitOnPickedEventHandler(@Nonnull LookupDescription lookup, boolean parentVisible, boolean parentEnabled) {
 				List<EventAction> actions = lookup.getPickedActions();
-				if ((actions != null) && (! actions.isEmpty())) {
+				if (! actions.isEmpty()) {
 					result.append(",\"pickedActions\":[");
 				}
 			}
@@ -3142,7 +3118,7 @@ public class MetaDataServlet extends HttpServlet {
 			@Override
 			public void visitedOnPickedEventHandler(@Nonnull LookupDescription lookup, boolean parentVisible, boolean parentEnabled) {
 				List<EventAction> actions = lookup.getPickedActions();
-				if ((actions != null) && (! actions.isEmpty())) {
+				if (! actions.isEmpty()) {
 					result.setLength(result.length() - 1); // remove last comma
 					result.append("]");
 				}
@@ -3152,7 +3128,7 @@ public class MetaDataServlet extends HttpServlet {
 			@Override
 			public void visitOnClearedEventHandler(@Nonnull LookupDescription lookup, boolean parentVisible, boolean parentEnabled) {
 				List<EventAction> actions = lookup.getClearedActions();
-				if ((actions != null) && (! actions.isEmpty())) {
+				if (! actions.isEmpty()) {
 					result.append(",\"clearedActions\":[");
 				}
 			}
@@ -3161,7 +3137,7 @@ public class MetaDataServlet extends HttpServlet {
 			@Override
 			public void visitedOnClearedEventHandler(@Nonnull LookupDescription lookup, boolean parentVisible, boolean parentEnabled) {
 				List<EventAction> actions = lookup.getClearedActions();
-				if ((actions != null) && (! actions.isEmpty())) {
+				if (! actions.isEmpty()) {
 					result.setLength(result.length() - 1); // remove last comma
 					result.append("]");
 				}
@@ -3375,19 +3351,17 @@ public class MetaDataServlet extends HttpServlet {
 							// NB this handles enumerations too.
 							if (DomainType.constant.equals(domainType)) {
 								List<DomainValue> values = document.getDomainValues(customer, domainType, attribute, null, true);
-								if (values != null) {
-									result.append("\"values\":{");
-									if (! values.isEmpty()) {
-										for (DomainValue value : values) {
-											String code = value.getCode();
-											result.append('"').append(OWASP.escapeJsonString(code)).append("\":\"");
-											String description = value.getLocalisedDescription();
-											result.append(OWASP.escapeJsonString(description)).append("\",");
-										}
-										result.setLength(result.length() - 1); // remove last comma
+								result.append("\"values\":{");
+								if (! values.isEmpty()) {
+									for (DomainValue value : values) {
+										String code = value.getCode();
+										result.append('"').append(OWASP.escapeJsonString(code)).append("\":\"");
+										String description = value.getLocalisedDescription();
+										result.append(OWASP.escapeJsonString(description)).append("\",");
 									}
-									result.append("},");
+									result.setLength(result.length() - 1); // remove last comma
 								}
+								result.append("},");
 							}
 						}
 						if (attribute instanceof Relation relation) {
@@ -3551,7 +3525,7 @@ public class MetaDataServlet extends HttpServlet {
 			private void processFilterable(@Nonnull Filterable filterable) {
 				processParameterizable(filterable);
 				List<FilterParameter> filters = filterable.getFilterParameters();
-				if ((filters != null) && (! filters.isEmpty())) {
+				if (! filters.isEmpty()) {
 					result.append(",\"filterParameters\":[");
 					for (FilterParameter filter : filters) {
 						result.append("{\"filterBinding\":\"").append(filter.getFilterBinding());
@@ -3754,7 +3728,7 @@ public class MetaDataServlet extends HttpServlet {
 	
 	private static void processParameterizable(@Nonnull Parameterizable parameterizable, @Nonnull StringBuilder json) {
 		List<Parameter> parameters = parameterizable.getParameters();
-		if ((parameters != null) && (! parameters.isEmpty())) {
+		if (! parameters.isEmpty()) {
 			json.append(",\"parameters\":[");
 			for (Parameter parameter : parameters) {
 				json.append("{\"name\":\"").append(parameter.getName()).append('"');
@@ -3775,7 +3749,7 @@ public class MetaDataServlet extends HttpServlet {
 	
 	private static void processDecorated(@Nonnull DecoratedMetaData decorated, @Nonnull StringBuilder json) {
 		Map<String, String> properties = decorated.getProperties();
-		if ((properties != null) && (! properties.isEmpty())) {
+		if (! properties.isEmpty()) {
 			json.append(",\"properties\":{");
 			for (Entry<String, String> entry : properties.entrySet()) {
 				json.append('"').append(OWASP.escapeJsonString(entry.getKey()));

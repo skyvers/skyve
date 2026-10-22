@@ -29,6 +29,7 @@ class ReportingInjectableTest {
 		injectable.shutdown();
 	}
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
 	void delegatesReportMethodsByPropagatingFailuresForInvalidInputs() {
 		ReportingInjectable injectable = new ReportingInjectable();

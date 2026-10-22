@@ -9,7 +9,7 @@ import org.skyve.domain.types.converters.integer.SimplePercentage;
 
 class ConverterNameTest {
 	@Test
-	@SuppressWarnings("static-method")
+	@SuppressWarnings({"static-method", "null"}) // passes null on purpose
 	void valueOfNullThrowsIllegalArgumentException() {
 		assertThrows(IllegalArgumentException.class, () -> ConverterName.valueOf((org.skyve.domain.types.converters.Converter<?>) null));
 	}

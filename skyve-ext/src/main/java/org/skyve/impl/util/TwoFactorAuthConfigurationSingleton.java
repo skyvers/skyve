@@ -96,7 +96,7 @@ public class TwoFactorAuthConfigurationSingleton implements SystemObserver {
 	 */
 	public void add(@Nullable TwoFactorAuthCustomerConfiguration config) {
 		String customerName = CORE.getCustomer().getName();
-		if (customerName != null && config != null) {
+		if (config != null) {
 			configuration.put(customerName, config);
 		}
 	}

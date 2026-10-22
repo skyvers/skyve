@@ -441,7 +441,9 @@ public class CustomerMetaData extends NamedMetaData implements ConvertibleMetaDa
 		result.setLoginResources((loginResources == null) ? new LoginResourcesMetaData() : loginResources);
 
 		ConverterName converterName = getDefaultDateConverter();
-		if (converterName == null) {
+		@SuppressWarnings("null") // metadata built in code bypasses the XSD
+		boolean defaultDateConverterMissing = (converterName == null);
+		if (defaultDateConverterMissing) {
 			throw new MetaDataException(metaDataName + " : The customer [defaultDateConverter] is required");
 		}
 		@SuppressWarnings("unchecked")
@@ -452,7 +454,9 @@ public class CustomerMetaData extends NamedMetaData implements ConvertibleMetaDa
 		result.setDefaultDateConverter(dateConverter);
 
 		converterName = getDefaultTimeConverter();
-		if (converterName == null) {
+		@SuppressWarnings("null") // metadata built in code bypasses the XSD
+		boolean defaultTimeConverterMissing = (converterName == null);
+		if (defaultTimeConverterMissing) {
 			throw new MetaDataException(metaDataName + " : The customer [defaultTimeConverter] is required");
 		}
 		@SuppressWarnings("unchecked")
@@ -463,7 +467,9 @@ public class CustomerMetaData extends NamedMetaData implements ConvertibleMetaDa
 		result.setDefaultTimeConverter(timeConverter);
 
 		converterName = getDefaultDateTimeConverter();
-		if (converterName == null) {
+		@SuppressWarnings("null") // metadata built in code bypasses the XSD
+		boolean defaultDateTimeConverterMissing = (converterName == null);
+		if (defaultDateTimeConverterMissing) {
 			throw new MetaDataException(metaDataName + " : The customer [defaultDateTimeConverter] is required");
 		}
 		@SuppressWarnings("unchecked")
@@ -474,7 +480,9 @@ public class CustomerMetaData extends NamedMetaData implements ConvertibleMetaDa
 		result.setDefaultDateTimeConverter(dateTimeConverter);
 
 		converterName = getDefaultTimestampConverter();
-		if (converterName == null) {
+		@SuppressWarnings("null") // metadata built in code bypasses the XSD
+		boolean defaultTimestampConverterMissing = (converterName == null);
+		if (defaultTimestampConverterMissing) {
 			throw new MetaDataException(metaDataName + " : The customer [defaultTimestampConverter] is required");
 		}
 		@SuppressWarnings("unchecked")
@@ -498,7 +506,9 @@ public class CustomerMetaData extends NamedMetaData implements ConvertibleMetaDa
 			}
 	
 			value = modules.getHomeModule();
-			if (value == null) {
+			@SuppressWarnings("null") // metadata built in code bypasses the XSD
+			boolean homeModuleMissing = (value == null);
+			if (homeModuleMissing) {
 				throw new MetaDataException(metaDataName + " : The customer modules [homeModule] is required");
 			}
 			result.setHomeModuleName(value);
@@ -509,14 +519,18 @@ public class CustomerMetaData extends NamedMetaData implements ConvertibleMetaDa
 			Set<String> roleNames = new TreeSet<>();
 			for (CustomerRoleMetaData role : roles.getRoles()) {
 				value = role.getName();
-				if (value == null) {
+				@SuppressWarnings("null") // metadata built in code bypasses the XSD
+				boolean nameMissing = (value == null);
+				if (nameMissing) {
 					throw new MetaDataException(metaDataName + " : The [name] for a role is required");
 				}
 				if (! roleNames.add(value)) {
 					throw new MetaDataException(metaDataName + " : Duplicate role " + value);
 				}
 				String customerRoleName = value;
-				if (role.getDescription() == null) {
+				@SuppressWarnings("null") // metadata built in code bypasses the XSD
+				boolean descriptionMissing = (role.getDescription() == null);
+				if (descriptionMissing) {
 					throw new MetaDataException(metaDataName + " : The [description] for customer role " +
 													customerRoleName + " is required");
 				}
@@ -526,7 +540,9 @@ public class CustomerMetaData extends NamedMetaData implements ConvertibleMetaDa
 						throw new MetaDataException(metaDataName + " : The [name] of module role for customer role " + 
 														customerRoleName + " is required");
 					}
-					if (moduleRole.getModuleName() == null) {
+					@SuppressWarnings("null") // metadata built in code bypasses the XSD
+					boolean moduleNameMissing = (moduleRole.getModuleName() == null);
+					if (moduleNameMissing) {
 						throw new MetaDataException(metaDataName + " : The [module] of module role " + value +
 														" for customer role " + customerRoleName + " is required");
 					}
@@ -560,29 +576,29 @@ public class CustomerMetaData extends NamedMetaData implements ConvertibleMetaDa
 		
 		// Populate Interceptors
 		List<InterceptorMetaDataImpl> repositoryInterceptors = getInterceptors();
-		if (repositoryInterceptors != null) {
-			for (InterceptorMetaDataImpl interceptor : repositoryInterceptors) {
-				value = interceptor.getClassName();
-				if (value == null) {
-					throw new MetaDataException(metaDataName + " : The [className] for an interceptor is required");
-				}
-				if (! result.putInterceptor(interceptor)) {
-					throw new MetaDataException(metaDataName + " : Duplicate interceptor " + value);
-				}
+		for (InterceptorMetaDataImpl interceptor : repositoryInterceptors) {
+			value = interceptor.getClassName();
+			@SuppressWarnings("null") // metadata built in code bypasses the XSD
+			boolean classNameMissing = (value == null);
+			if (classNameMissing) {
+				throw new MetaDataException(metaDataName + " : The [className] for an interceptor is required");
+			}
+			if (! result.putInterceptor(interceptor)) {
+				throw new MetaDataException(metaDataName + " : Duplicate interceptor " + value);
 			}
 		}
 
 		// Populate Observers
 		List<ObserverMetaDataImpl> repositoryObservers = getObservers();
-		if (repositoryObservers != null) {
-			for (ObserverMetaDataImpl observer : repositoryObservers) {
-				value = observer.getClassName();
-				if (value == null) {
-					throw new MetaDataException(metaDataName + " : The [className] for an observer is required");
-				}
-				if (! result.putObserver(observer)) {
-					throw new MetaDataException(metaDataName + " : Duplicate observer " + value);
-				}
+		for (ObserverMetaDataImpl observer : repositoryObservers) {
+			value = observer.getClassName();
+			@SuppressWarnings("null") // metadata built in code bypasses the XSD
+			boolean classNameMissing = (value == null);
+			if (classNameMissing) {
+				throw new MetaDataException(metaDataName + " : The [className] for an observer is required");
+			}
+			if (! result.putObserver(observer)) {
+				throw new MetaDataException(metaDataName + " : Duplicate observer " + value);
 			}
 		}
 

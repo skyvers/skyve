@@ -27,6 +27,7 @@ class ConfigurationBizletH2Test extends AbstractH2Test {
 
 	@Test
 	void preExecuteNewInitializesStartup() throws Exception {
+		@SuppressWarnings("null") // passes null on purpose
 		ConfigurationExtension result = bizlet.preExecute(ImplicitActionName.New, bean, null, null);
 		assertNotNull(result);
 		assertNotNull(result.getStartup());
@@ -34,6 +35,7 @@ class ConfigurationBizletH2Test extends AbstractH2Test {
 
 	@Test
 	void preExecuteEditDoesNotThrow() throws Exception {
+		@SuppressWarnings("null") // passes null on purpose
 		ConfigurationExtension result = bizlet.preExecute(ImplicitActionName.Edit, bean, null, null);
 		assertNotNull(result);
 	}

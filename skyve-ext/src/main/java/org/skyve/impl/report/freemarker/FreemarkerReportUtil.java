@@ -200,14 +200,10 @@ public final class FreemarkerReportUtil {
 		Template template = getBeanReport(bean, reportName);
 
 		// create the report
-		if (template != null) {
-			try (StringWriter sw = new StringWriter()) {
-				template.process(reportParameters, sw);
-				return sw.toString();
-			}
+		try (StringWriter sw = new StringWriter()) {
+			template.process(reportParameters, sw);
+			return sw.toString();
 		}
-
-		return null;
 	}
 
 	/**
@@ -246,14 +242,10 @@ public final class FreemarkerReportUtil {
 		Template template = getTemplate(templateName);
 
 		// create the report
-		if (template != null) {
-			try (StringWriter sw = new StringWriter()) {
-				template.process(reportParameters, sw);
-				return sw.toString();
-			}
+		try (StringWriter sw = new StringWriter()) {
+			template.process(reportParameters, sw);
+			return sw.toString();
 		}
-
-		return null;
 	}
 
 	/**
@@ -376,7 +368,9 @@ public final class FreemarkerReportUtil {
 	 * @throws IOException
 	 */
 	private static @Nonnull org.w3c.dom.Document html5ParseDocument(final @Nonnull InputStream in) throws IOException {
-		if (in == null) {
+		@SuppressWarnings("null") // FreemarkerReportUtilTest asserts that a null stream is rejected
+		boolean inMissing = (in == null);
+		if (inMissing) {
 			throw new IllegalArgumentException("InputStream cannot be null");
 		}
 		org.jsoup.nodes.Document doc;
@@ -520,26 +514,22 @@ public final class FreemarkerReportUtil {
 
 	private static @Nonnull File createReport(final @Nonnull Template template, final @Nullable Map<String, Object> reportParameters, final @Nonnull String reportFilename)
 	throws Exception {
-		if (template != null) {
-			try (StringWriter sw = new StringWriter()) {
-				template.process(reportParameters, sw);
+		try (StringWriter sw = new StringWriter()) {
+			template.process(reportParameters, sw);
 
-				// write the output string to an input stream
-				InputStream inputStream = new ByteArrayInputStream(sw.toString().getBytes(StandardCharsets.UTF_8));
+			// write the output string to an input stream
+			InputStream inputStream = new ByteArrayInputStream(sw.toString().getBytes(StandardCharsets.UTF_8));
 
-				Path tempDir = Paths.get(Util.getContentDirectory(), "temp");
-				tempDir.toFile().mkdirs();
+			Path tempDir = Paths.get(Util.getContentDirectory(), "temp");
+			tempDir.toFile().mkdirs();
 
-				File pdfFile = tempDir.resolve(String.format("%s.pdf", reportFilename)).toFile();
-				pdfFile.deleteOnExit();
+			File pdfFile = tempDir.resolve(String.format("%s.pdf", reportFilename)).toFile();
+			pdfFile.deleteOnExit();
 
-				generatePDFFromHTML(inputStream, pdfFile);
+			generatePDFFromHTML(inputStream, pdfFile);
 
-				return pdfFile;
-			}
+			return pdfFile;
 		}
-
-		return null;
 	}
 
 	/**

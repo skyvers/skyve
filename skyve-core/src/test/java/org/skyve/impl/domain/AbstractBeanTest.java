@@ -26,6 +26,7 @@ import org.junit.jupiter.api.Test;
 import org.skyve.domain.Bean;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.metadata.customer.Customer;
+import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
 
 /**
@@ -375,6 +376,7 @@ class AbstractBeanTest {
 		User mockUser = mock(User.class);
 		Customer mockCustomer = mock(Customer.class);
 		when(mockUser.getCustomer()).thenReturn(mockCustomer);
+		when(mockCustomer.getModule(bean.getBizModule())).thenReturn(mock(Module.class));
 		withMockPersistence(mockUser, () -> {
 			bean.callPreset("bizCustomer", "newValue");
 			assertTrue(bean.isChanged());
@@ -386,6 +388,7 @@ class AbstractBeanTest {
 		User mockUser = mock(User.class);
 		Customer mockCustomer = mock(Customer.class);
 		when(mockUser.getCustomer()).thenReturn(mockCustomer);
+		when(mockCustomer.getModule(bean.getBizModule())).thenReturn(mock(Module.class));
 		withMockPersistence(mockUser, () -> {
 			bean.callPreset("bizCustomer", "newValue");
 			assertFalse(bean.isNotChanged());

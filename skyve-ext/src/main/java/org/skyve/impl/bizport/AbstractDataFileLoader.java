@@ -536,7 +536,7 @@ public abstract class AbstractDataFileLoader {
 				if (debugMode) {
 					LOGGER.info("Matching bean found {}", foundBean.getBizId());
 				}
-				if (DataFileField.LoadAction.CONFIRM_VALUE.equals(field.getLoadAction()) && contextBean != null) {
+				if (DataFileField.LoadAction.CONFIRM_VALUE.equals(field.getLoadAction())) {
 					// check if the found bean matches the bean we have already found
 					Object resultValue = Binder.get(contextBean, searchBinding);
 					if (!foundBean.equals(resultValue)) {

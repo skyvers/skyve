@@ -122,6 +122,7 @@ class InMemoryListModelTest {
 		assertEquals(0, page.getTotalRows());
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void fetchReturnsEmptyRowsWhenNoData() throws Exception {
 		TestListModel model = new TestListModel(mockModule, mockDocument, Collections.emptyList());
@@ -132,6 +133,7 @@ class InMemoryListModelTest {
 		assertEquals(0, page.getRows().size());
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void fetchReturnsAllRowsWhenFewRows() throws Exception {
 		List<Bean> beans = new ArrayList<>();
@@ -145,6 +147,7 @@ class InMemoryListModelTest {
 		assertEquals(2, page.getRows().size());
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void fetchReturnsSubsetWhenPaged() throws Exception {
 		List<Bean> beans = new ArrayList<>();
@@ -159,6 +162,7 @@ class InMemoryListModelTest {
 		assertEquals(2, page.getRows().size());
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void fetchReturnsEmptyWhenStartRowExceedsTotal() throws Exception {
 		List<Bean> beans = new ArrayList<>();
@@ -282,6 +286,7 @@ class InMemoryListModelTest {
 		assertNotNull(page.getSummary());
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void sortAscendingOrdersRows() throws Exception {
 		// Create beans with distinct bizId values to verify sort order changes
@@ -301,6 +306,7 @@ class InMemoryListModelTest {
 		assertEquals("aaa", page.getRows().get(0).getBizKey());
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void sortDescendingOrdersRows() throws Exception {
 		StubBean b1 = new StubBeanWithKey("aaa");

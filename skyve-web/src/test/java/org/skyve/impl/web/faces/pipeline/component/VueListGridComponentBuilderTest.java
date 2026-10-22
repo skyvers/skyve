@@ -62,6 +62,7 @@ class VueListGridComponentBuilderTest {
 		clearThreadPersistence();
 	}
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
 	void listGridReturnsExistingComponentUnchanged() {
 		VueListGridComponentBuilder builder = new VueListGridComponentBuilder();

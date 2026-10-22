@@ -42,6 +42,7 @@ class WebFilterTest {
 
 	// ===== UTF8CharacterEncodingFilter =====
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
 	void testUtf8FilterSetsEncodingWhenNotSet() throws Exception {
 		UTF8CharacterEncodingFilter filter = new UTF8CharacterEncodingFilter();
@@ -60,6 +61,7 @@ class WebFilterTest {
 		filter.destroy();
 	}
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
 	void testUtf8FilterSkipsEncodingWhenAlreadySet() throws Exception {
 		UTF8CharacterEncodingFilter filter = new UTF8CharacterEncodingFilter();

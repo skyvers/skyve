@@ -593,7 +593,9 @@ public class DynamicBean extends LazyDynaMap implements Bean {
 		if (other instanceof DynamicBean otherDynamicBean) {
 			String thisBizId = this.getBizId();
 			String otherBizId = otherDynamicBean.getBizId();
-			return (thisBizId != null) && thisBizId.equals(otherBizId);
+			@SuppressWarnings("null") // projected query rows may have no bizId - see getBizId()
+			boolean thisBizIdPresent = (thisBizId != null);
+			return thisBizIdPresent && thisBizId.equals(otherBizId);
 		}
 		return false;
 	}
@@ -606,7 +608,9 @@ public class DynamicBean extends LazyDynaMap implements Bean {
 	public int hashCode() {
 		int result = 0;
 		String bizId = this.getBizId();
-		if (bizId != null) {
+		@SuppressWarnings("null") // projected query rows may have no bizId - see getBizId()
+		boolean bizIdPresent = (bizId != null);
+		if (bizIdPresent) {
 			result = bizId.hashCode();
 		}
 		return result;

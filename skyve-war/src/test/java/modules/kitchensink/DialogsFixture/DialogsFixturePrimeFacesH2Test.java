@@ -138,6 +138,7 @@ class DialogsFixturePrimeFacesH2Test extends AbstractSkyveTest {
 		assertEquals(0, count());
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void anAnsweredActionCarriesOnWithoutAQuestion() throws Exception {
 		DialogsFixture fixture = DialogsFixture.newInstance();
@@ -249,6 +250,7 @@ class DialogsFixturePrimeFacesH2Test extends AbstractSkyveTest {
 		assertEquals("Carry on with Ask once?", askedQuestion().get("message").asText());
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void onceARemovedHandlerAsksTheRemainingHandlersDoNotRun() throws Exception {
 		DialogsFixture fixture = persistedFixture(Boolean.FALSE);

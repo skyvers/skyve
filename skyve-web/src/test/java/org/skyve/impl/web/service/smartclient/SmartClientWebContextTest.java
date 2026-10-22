@@ -25,6 +25,7 @@ import jakarta.servlet.http.HttpSession;
 
 @SuppressWarnings("static-method")
 class SmartClientWebContextTest {
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void growlAndMessageInitialiseCollectionsAndStoreEntries() {
 		HttpServletRequest request = mock(HttpServletRequest.class);

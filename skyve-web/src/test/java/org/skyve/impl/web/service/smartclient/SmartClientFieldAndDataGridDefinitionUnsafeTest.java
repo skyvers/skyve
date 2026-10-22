@@ -170,6 +170,7 @@ class SmartClientFieldAndDataGridDefinitionUnsafeTest {
 		CustomisationsStaticSingleton.set(customisations);
 
 		try {
+			@SuppressWarnings("null") // passes null on purpose
 			SmartClientDataGridFieldDefinition def = new SmartClientDataGridFieldDefinition(null,
 																								new CustomerImpl(),
 																								null,

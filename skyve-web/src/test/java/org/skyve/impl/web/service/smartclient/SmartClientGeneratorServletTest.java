@@ -548,6 +548,7 @@ class SmartClientGeneratorServletTest {
 	}
 
 	public static final class BadCtorRenderer extends SmartClientViewRenderer {
+		@SuppressWarnings("null") // passes null on purpose
 		public BadCtorRenderer() {
 			super(null, new ModuleImpl(), new DocumentImpl(), new ViewImpl(), "desktop", false);
 		}

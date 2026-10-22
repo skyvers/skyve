@@ -322,7 +322,7 @@ class LocalDesignRepositoryTest {
 
 		when(customer.getName()).thenReturn("testCustomer");
 		when(module.getName()).thenReturn("testModule");
-		when(module.getHomeDocumentName()).thenReturn(null);
+		stubPersistentHomeDocument(customer, module);
 		when(module.getMetadataQueries()).thenReturn(List.of(query));
 		when(module.getMenu()).thenReturn(new MenuImpl());
 		when(module.getRoles()).thenReturn(List.of());
@@ -344,7 +344,7 @@ class LocalDesignRepositoryTest {
 
 		when(customer.getName()).thenReturn("testCustomer");
 		when(module.getName()).thenReturn("testModule");
-		when(module.getHomeDocumentName()).thenReturn(null);
+		stubPersistentHomeDocument(customer, module);
 		when(module.getMetadataQueries()).thenReturn(List.of(query));
 		when(module.getMenu()).thenReturn(new MenuImpl());
 		when(module.getRoles()).thenReturn(List.of());
@@ -367,7 +367,7 @@ class LocalDesignRepositoryTest {
 
 		when(customer.getName()).thenReturn("testCustomer");
 		when(module.getName()).thenReturn("testModule");
-		when(module.getHomeDocumentName()).thenReturn(null);
+		stubPersistentHomeDocument(customer, module);
 		when(module.getMetadataQueries()).thenReturn(List.of(query));
 		when(module.getMenu()).thenReturn(new MenuImpl());
 		when(module.getRoles()).thenReturn(List.of());
@@ -390,7 +390,7 @@ class LocalDesignRepositoryTest {
 
 		when(customer.getName()).thenReturn("testCustomer");
 		when(module.getName()).thenReturn("testModule");
-		when(module.getHomeDocumentName()).thenReturn(null);
+		stubPersistentHomeDocument(customer, module);
 		when(module.getMetadataQueries()).thenReturn(List.of(query));
 		when(module.getMenu()).thenReturn(new MenuImpl());
 		when(module.getRoles()).thenReturn(List.of());
@@ -414,7 +414,7 @@ class LocalDesignRepositoryTest {
 
 		when(customer.getName()).thenReturn("testCustomer");
 		when(module.getName()).thenReturn("testModule");
-		when(module.getHomeDocumentName()).thenReturn(null);
+		stubPersistentHomeDocument(customer, module);
 		when(module.getMetadataQueries()).thenReturn(List.of(query));
 		when(module.getMenu()).thenReturn(new MenuImpl());
 		when(module.getRoles()).thenReturn(List.of());
@@ -441,7 +441,7 @@ class LocalDesignRepositoryTest {
 
 		when(customer.getName()).thenReturn("testCustomer");
 		when(module.getName()).thenReturn("testModule");
-		when(module.getHomeDocumentName()).thenReturn(null);
+		stubPersistentHomeDocument(customer, module);
 		when(module.getMetadataQueries()).thenReturn(List.of());
 		when(module.getMenu()).thenReturn(menu);
 		when(module.getRoles()).thenReturn(List.of());
@@ -465,7 +465,7 @@ class LocalDesignRepositoryTest {
 
 		when(customer.getName()).thenReturn("testCustomer");
 		when(module.getName()).thenReturn("testModule");
-		when(module.getHomeDocumentName()).thenReturn(null);
+		stubPersistentHomeDocument(customer, module);
 		when(module.getMetadataQueries()).thenReturn(List.of());
 		when(module.getMenu()).thenReturn(menu);
 		when(module.getRoles()).thenReturn(List.of());
@@ -491,7 +491,7 @@ class LocalDesignRepositoryTest {
 
 		when(customer.getName()).thenReturn("testCustomer");
 		when(module.getName()).thenReturn("testModule");
-		when(module.getHomeDocumentName()).thenReturn(null);
+		stubPersistentHomeDocument(customer, module);
 		when(module.getMetadataQueries()).thenReturn(List.of());
 		when(module.getMenu()).thenReturn(menu);
 		when(module.getRoles()).thenReturn(List.of());
@@ -517,7 +517,7 @@ class LocalDesignRepositoryTest {
 
 		when(customer.getName()).thenReturn("testCustomer");
 		when(module.getName()).thenReturn("testModule");
-		when(module.getHomeDocumentName()).thenReturn(null);
+		stubPersistentHomeDocument(customer, module);
 		when(module.getMetadataQueries()).thenReturn(List.of());
 		when(module.getMenu()).thenReturn(menu);
 		when(module.getRoles()).thenReturn(List.of());
@@ -545,7 +545,7 @@ class LocalDesignRepositoryTest {
 
 		when(customer.getName()).thenReturn("testCustomer");
 		when(module.getName()).thenReturn("testModule");
-		when(module.getHomeDocumentName()).thenReturn(null);
+		stubPersistentHomeDocument(customer, module);
 		when(module.getMetadataQueries()).thenReturn(List.of());
 		when(module.getMenu()).thenReturn(menu);
 		when(module.getRoles()).thenReturn(List.of());
@@ -573,7 +573,7 @@ class LocalDesignRepositoryTest {
 
 		when(customer.getName()).thenReturn("testCustomer");
 		when(module.getName()).thenReturn("testModule");
-		when(module.getHomeDocumentName()).thenReturn(null);
+		stubPersistentHomeDocument(customer, module);
 		when(module.getMetadataQueries()).thenReturn(List.of());
 		when(module.getMenu()).thenReturn(menu);
 		when(module.getRoles()).thenReturn(List.of());
@@ -603,7 +603,7 @@ class LocalDesignRepositoryTest {
 
 		when(customer.getName()).thenReturn("testCustomer");
 		when(module.getName()).thenReturn("testModule");
-		when(module.getHomeDocumentName()).thenReturn(null);
+		stubPersistentHomeDocument(customer, module);
 		when(module.getMetadataQueries()).thenReturn(List.of());
 		when(module.getMenu()).thenReturn(menu);
 		when(module.getRoles()).thenReturn(List.of());
@@ -633,7 +633,7 @@ class LocalDesignRepositoryTest {
 
 		when(customer.getName()).thenReturn("testCustomer");
 		when(module.getName()).thenReturn("testModule");
-		when(module.getHomeDocumentName()).thenReturn(null);
+		stubPersistentHomeDocument(customer, module);
 		when(module.getMetadataQueries()).thenReturn(List.of());
 		when(module.getMenu()).thenReturn(new MenuImpl());
 		when(module.getRoles()).thenReturn(List.of(role));
@@ -659,7 +659,7 @@ class LocalDesignRepositoryTest {
 
 		when(customer.getName()).thenReturn("testCustomer");
 		when(module.getName()).thenReturn("testModule");
-		when(module.getHomeDocumentName()).thenReturn(null);
+		stubPersistentHomeDocument(customer, module);
 		when(module.getMetadataQueries()).thenReturn(List.of());
 		when(module.getMenu()).thenReturn(new MenuImpl());
 		when(module.getRoles()).thenReturn(List.of(role));
@@ -684,7 +684,7 @@ class LocalDesignRepositoryTest {
 
 		when(customer.getName()).thenReturn("testCustomer");
 		when(module.getName()).thenReturn("testModule");
-		when(module.getHomeDocumentName()).thenReturn(null);
+		stubPersistentHomeDocument(customer, module);
 		when(module.getMetadataQueries()).thenReturn(List.of());
 		when(module.getMenu()).thenReturn(new MenuImpl());
 		when(module.getRoles()).thenReturn(List.of(role));
@@ -716,7 +716,7 @@ class LocalDesignRepositoryTest {
 
 		when(customer.getName()).thenReturn("testCustomer");
 		when(module.getName()).thenReturn("testModule");
-		when(module.getHomeDocumentName()).thenReturn(null);
+		stubPersistentHomeDocument(customer, module);
 		when(module.getMetadataQueries()).thenReturn(List.of());
 		when(module.getMenu()).thenReturn(new MenuImpl());
 		when(module.getRoles()).thenReturn(List.of(role));
@@ -742,7 +742,7 @@ class LocalDesignRepositoryTest {
 
 		when(customer.getName()).thenReturn("testCustomer");
 		when(module.getName()).thenReturn("testModule");
-		when(module.getHomeDocumentName()).thenReturn(null);
+		stubPersistentHomeDocument(customer, module);
 		when(module.getMetadataQueries()).thenReturn(List.of());
 		when(module.getMenu()).thenReturn(new MenuImpl());
 		when(module.getRoles()).thenReturn(List.of(role));
@@ -767,7 +767,7 @@ class LocalDesignRepositoryTest {
 
 		when(customer.getName()).thenReturn("testCustomer");
 		when(module.getName()).thenReturn("testModule");
-		when(module.getHomeDocumentName()).thenReturn(null);
+		stubPersistentHomeDocument(customer, module);
 		when(module.getMetadataQueries()).thenReturn(List.of());
 		when(module.getMenu()).thenReturn(new MenuImpl());
 		when(module.getRoles()).thenReturn(List.of(role));
@@ -792,7 +792,7 @@ class LocalDesignRepositoryTest {
 
 		when(customer.getName()).thenReturn("testCustomer");
 		when(module.getName()).thenReturn("testModule");
-		when(module.getHomeDocumentName()).thenReturn(null);
+		stubPersistentHomeDocument(customer, module);
 		when(module.getMetadataQueries()).thenReturn(List.of());
 		when(module.getMenu()).thenReturn(new MenuImpl());
 		when(module.getRoles()).thenReturn(List.of(role));
@@ -817,7 +817,7 @@ class LocalDesignRepositoryTest {
 
 		when(customer.getName()).thenReturn("testCustomer");
 		when(module.getName()).thenReturn("testModule");
-		when(module.getHomeDocumentName()).thenReturn(null);
+		stubPersistentHomeDocument(customer, module);
 		when(module.getMetadataQueries()).thenReturn(List.of());
 		when(module.getMenu()).thenReturn(new MenuImpl());
 		when(module.getRoles()).thenReturn(List.of(role));
@@ -846,7 +846,7 @@ class LocalDesignRepositoryTest {
 
 		when(customer.getName()).thenReturn("testCustomer");
 		when(module.getName()).thenReturn("testModule");
-		when(module.getHomeDocumentName()).thenReturn(null);
+		stubPersistentHomeDocument(customer, module);
 		when(module.getMetadataQueries()).thenReturn(List.of());
 		when(module.getMenu()).thenReturn(new MenuImpl());
 		when(module.getRoles()).thenReturn(List.of(role));
@@ -872,7 +872,7 @@ class LocalDesignRepositoryTest {
 
 		when(customer.getName()).thenReturn("testCustomer");
 		when(module.getName()).thenReturn("testModule");
-		when(module.getHomeDocumentName()).thenReturn(null);
+		stubPersistentHomeDocument(customer, module);
 		when(module.getMetadataQueries()).thenReturn(List.of());
 		when(module.getMenu()).thenReturn(menu);
 		when(module.getRoles()).thenReturn(List.of());
@@ -901,7 +901,7 @@ class LocalDesignRepositoryTest {
 
 		when(customer.getName()).thenReturn("testCustomer");
 		when(module.getName()).thenReturn("testModule");
-		when(module.getHomeDocumentName()).thenReturn(null);
+		stubPersistentHomeDocument(customer, module);
 		when(module.getMetadataQueries()).thenReturn(List.of());
 		when(module.getMenu()).thenReturn(menu);
 		when(module.getRoles()).thenReturn(List.of());
@@ -930,7 +930,7 @@ class LocalDesignRepositoryTest {
 
 		when(customer.getName()).thenReturn("testCustomer");
 		when(module.getName()).thenReturn("testModule");
-		when(module.getHomeDocumentName()).thenReturn(null);
+		stubPersistentHomeDocument(customer, module);
 		when(module.getMetadataQueries()).thenReturn(List.of());
 		when(module.getMenu()).thenReturn(menu);
 		when(module.getRoles()).thenReturn(List.of());
@@ -953,7 +953,7 @@ class LocalDesignRepositoryTest {
 
 		when(customer.getName()).thenReturn("testCustomer");
 		when(module.getName()).thenReturn("testModule");
-		when(module.getHomeDocumentName()).thenReturn(null);
+		stubPersistentHomeDocument(customer, module);
 		when(module.getMetadataQueries()).thenReturn(List.of(query));
 		when(module.getMenu()).thenReturn(new MenuImpl());
 		when(module.getRoles()).thenReturn(List.of());
@@ -1039,6 +1039,16 @@ class LocalDesignRepositoryTest {
 
 		MetaDataException e = assertThrows(MetaDataException.class, () -> repository.validateDocumentForGenerateDomain(customer, document));
 		assertEquals("The target [documentName] of Target in Inverse inverse in document admin.Owner cannot be found.", e.getMessage());
+	}
+
+	/**
+	 * Stubs a persistent home document so the module home document check passes.
+	 */
+	private static void stubPersistentHomeDocument(Customer customer, Module module) {
+		Document homeDocument = mock(Document.class);
+		when(homeDocument.getPersistent()).thenReturn(mock(Persistent.class));
+		when(module.getHomeDocumentName()).thenReturn("PersistentHomeDocument");
+		when(module.getDocument(customer, "PersistentHomeDocument")).thenReturn(homeDocument);
 	}
 
 	/**

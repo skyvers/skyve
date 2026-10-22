@@ -25,7 +25,7 @@ class ComponentTranslationTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
+	@SuppressWarnings({"static-method", "unused"}) // asserts null where the annotations say non-null
 	void defaultsAreNull() {
 		ComponentTranslation map = new ComponentTranslation();
 		assertNull(map.getFromComponent());
@@ -43,7 +43,7 @@ class ComponentTranslationTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
+	@SuppressWarnings({"static-method", "unused"}) // asserts null where the annotations say non-null
 	void aBlankSideIsNull() {
 		ComponentTranslation translation = new ComponentTranslation();
 		for (String blank : new String[] {"", " ", " \t\n", null}) {

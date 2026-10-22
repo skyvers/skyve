@@ -641,7 +641,7 @@ public abstract class ListModel<T extends Bean> implements ViewModel {
 																				null,
 																				true);
 		
-		if ((values == null) || values.isEmpty()) {
+		if (values.isEmpty()) {
 			return new Object[0];
 		}
 		

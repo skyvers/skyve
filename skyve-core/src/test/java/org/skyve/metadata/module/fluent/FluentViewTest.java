@@ -30,6 +30,7 @@ class FluentViewTest {
 		fluent.get().setAccesses(new ViewUserAccessesMetaData());
 	}
 	
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void testAddSingularAccess() {
 		// setup the test data
@@ -46,6 +47,7 @@ class FluentViewTest {
 		assertEquals(1, fluent.get().getAccesses().getAccesses().size());
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void testAddDocumentAggregateAccess() {
 		// setup the test data
@@ -62,6 +64,7 @@ class FluentViewTest {
 		assertEquals(1, fluent.get().getAccesses().getAccesses().size());
 	}
 	
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void testAddQueryAggregateAccess() {
 		// setup the test data
@@ -78,6 +81,7 @@ class FluentViewTest {
 		assertEquals(1, fluent.get().getAccesses().getAccesses().size());
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void testAddModelAggregateAccess() {
 		// setup the test data
@@ -94,6 +98,7 @@ class FluentViewTest {
 		assertEquals(1, fluent.get().getAccesses().getAccesses().size());
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void testAddPreviousCompleteAccess() {
 		// setup the test data
@@ -110,6 +115,7 @@ class FluentViewTest {
 		assertEquals(1, fluent.get().getAccesses().getAccesses().size());
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void testAddReportAccess() {
 		// setup the test data
@@ -128,6 +134,7 @@ class FluentViewTest {
 		assertEquals(1, fluent.get().getAccesses().getAccesses().size());
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void testAddDynamicImageAccess() {
 		// setup the test data
@@ -144,6 +151,7 @@ class FluentViewTest {
 		assertEquals(1, fluent.get().getAccesses().getAccesses().size());
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void testAddContentAccess() {
 		// setup the test data
@@ -160,6 +168,7 @@ class FluentViewTest {
 		assertEquals(1, fluent.get().getAccesses().getAccesses().size());
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void testClearAccesses() {
 		// setup the test data
@@ -182,6 +191,7 @@ class FluentViewTest {
 		assertEquals(0, fluent.get().getAccesses().getAccesses().size());
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void testFindSingularAccess() {
 		// setup the test data
@@ -205,6 +215,7 @@ class FluentViewTest {
 		assertThat(result.get().getDocumentName(), is("TestDocument1"));
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void testFindDocumentAggregateAccess() {
 		// setup the test data
@@ -228,6 +239,7 @@ class FluentViewTest {
 		assertThat(result.get().getDocumentName(), is("TestDocument1"));
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void testFindQueryAggregateAccess() {
 		// setup the test data
@@ -251,6 +263,7 @@ class FluentViewTest {
 		assertThat(result.get().getQueryName(), is("TestQuery1"));
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void testFindModelAggregateAccess() {
 		// setup the test data
@@ -274,6 +287,7 @@ class FluentViewTest {
 		assertThat(result.get().getModelName(), is("TestModel1"));
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void testFindPreviousCompleteAccess() {
 		// setup the test data
@@ -297,6 +311,7 @@ class FluentViewTest {
 		assertThat(result.get().getBinding(), is("TestBinding1"));
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void testFindReportAccess() {
 		// setup the test data
@@ -326,6 +341,7 @@ class FluentViewTest {
 		assertThat(result.get().getReportName(), is("TestReport1"));
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void testFindDynamicImageAccess() {
 		// setup the test data
@@ -349,6 +365,7 @@ class FluentViewTest {
 		assertThat(result.get().getImageName(), is("TestImage1"));
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void testFindContentAccess() {
 		// setup the test data
@@ -372,6 +389,7 @@ class FluentViewTest {
 		assertThat(result.get().getBinding(), is("binding1"));
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void testRemoveSingularAccess() {
 		// setup the test data
@@ -396,6 +414,7 @@ class FluentViewTest {
 		assertThat(fluent.get().getAccesses().getAccesses(), hasItem(access2.get()));
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void testRemoveDocumentAggregateAccess() {
 		// setup the test data
@@ -420,6 +439,7 @@ class FluentViewTest {
 		assertThat(fluent.get().getAccesses().getAccesses(), hasItem(access2.get()));
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void testRemoveQueryAggregateAccess() {
 		// setup the test data
@@ -444,6 +464,7 @@ class FluentViewTest {
 		assertThat(fluent.get().getAccesses().getAccesses(), hasItem(access2.get()));
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void testRemoveModelAggregateAccess() {
 		// setup the test data
@@ -468,6 +489,7 @@ class FluentViewTest {
 		assertThat(fluent.get().getAccesses().getAccesses(), hasItem(access2.get()));
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void testRemovePreviousCompleteAccess() {
 		// setup the test data
@@ -492,6 +514,7 @@ class FluentViewTest {
 		assertThat(fluent.get().getAccesses().getAccesses(), hasItem(access2.get()));
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void testRemoveReportAccess() {
 		// setup the test data
@@ -520,6 +543,7 @@ class FluentViewTest {
 		assertThat(fluent.get().getAccesses().getAccesses(), hasItem(access2.get()));
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void testRemoveDynamicImageAccess() {
 		// setup the test data
@@ -544,6 +568,7 @@ class FluentViewTest {
 		assertThat(fluent.get().getAccesses().getAccesses(), hasItem(access2.get()));
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void testRemoveContentAccess() {
 		// setup the test data

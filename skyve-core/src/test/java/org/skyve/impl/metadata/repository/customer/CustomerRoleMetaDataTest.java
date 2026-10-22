@@ -20,6 +20,7 @@ import org.skyve.metadata.user.Role;
 @SuppressWarnings("static-method")
 class CustomerRoleMetaDataTest {
 
+	@SuppressWarnings("unused") // asserts null where the annotations say non-null
 	@Test
 	void getNameReturnsSetName() {
 		CustomerRoleMetaData role = new CustomerRoleMetaData();
@@ -36,6 +37,7 @@ class CustomerRoleMetaDataTest {
 		assertEquals("Admin Role", role.getDescription());
 	}
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
 	void setDescriptionNullStoresNull() {
 		CustomerRoleMetaData role = new CustomerRoleMetaData();

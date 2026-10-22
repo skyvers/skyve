@@ -167,6 +167,7 @@ class ViewJSONManipulatorCoreTest {
 		assertFalse(bindingTree.getBindings().contains("not{el:false}"));
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void toJSONIncludesInlineConditionValuesUnderTheirIdentifiersForEachSenseReferenced() throws Exception {
 		PersistentBean constructorBean = mock(PersistentBean.class);
@@ -916,6 +917,7 @@ class ViewJSONManipulatorCoreTest {
 		assertEquals("<span style=\"\">Named</span>&nbsp;<span style=\"width:10px;\">Inline</span>", values.get("markup"));
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void toJSONIncludesContextRedirectDirtyFlagAndMessages() throws Exception {
 		PersistentBean constructorBean = mock(PersistentBean.class);
@@ -941,6 +943,7 @@ class ViewJSONManipulatorCoreTest {
 		assertTrue(result.containsKey("_messages"));
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void toJSONEscapesViewTitleByDefault() throws Exception {
 		PersistentBean constructorBean = mock(PersistentBean.class);
@@ -955,6 +958,7 @@ class ViewJSONManipulatorCoreTest {
 		assertEquals("Escaped &lt;b&gt;view title&lt;/b&gt;", result.get("_title"));
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void toJSONLeavesTrustedViewTitleRaw() throws Exception {
 		PersistentBean constructorBean = mock(PersistentBean.class);
@@ -971,6 +975,7 @@ class ViewJSONManipulatorCoreTest {
 		assertEquals("Trusted <b>view title</b>", result.get("_title"));
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void toJSONIncludesChildBindingsValueMapsAndComparisons() throws Exception {
 		TestOwnerBean owner = new TestOwnerBean();

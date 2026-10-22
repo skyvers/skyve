@@ -97,6 +97,7 @@ class RelatedEnumerationTest {
 		return document(module, MODULE, name, attributes);
 	}
 
+	@SuppressWarnings("null") // checks values the annotations say are non-null
 	private DocumentImpl document(Module owningModule, String moduleName, String name, Attribute... attributes) {
 		DocumentImpl result = mock(DocumentImpl.class);
 		when(result.getOwningModuleName()).thenReturn(moduleName);

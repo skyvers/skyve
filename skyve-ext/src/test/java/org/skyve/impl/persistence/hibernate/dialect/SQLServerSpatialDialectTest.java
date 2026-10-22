@@ -43,6 +43,7 @@ public class SQLServerSpatialDialectTest {
 		assertThat(dialect.getModifyColumnString(), notNullValue());
 	}
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
 	public void sqlServer2008isAlterTableColumnChangeRequiredWithNullsReturnsFalse() {
 		SQLServer2008SpatialDialect dialect = new SQLServer2008SpatialDialect();
@@ -63,6 +64,7 @@ public class SQLServerSpatialDialectTest {
 		assertThat(dialect.getGeometryType(), notNullValue());
 	}
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
 	public void sqlServer2012isAlterTableColumnChangeRequiredWithNullsReturnsFalse() {
 		SQLServer2012SpatialDialect dialect = new SQLServer2012SpatialDialect();

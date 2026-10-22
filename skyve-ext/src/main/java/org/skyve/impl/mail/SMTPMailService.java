@@ -177,19 +177,15 @@ public class SMTPMailService implements MailService {
 				message.setHeader(entry.getKey(), entry.getValue());
 			}
 		}
-		if (headers != null) {
-			for (Entry<String, String> header : headers.entrySet()) {
-				message.setHeader(header.getKey(), header.getValue());
-			}
+		for (Entry<String, String> header : headers.entrySet()) {
+			message.setHeader(header.getKey(), header.getValue());
 		}
 
 		// add attachments
-		if (attachments != null) {
-			for (MailAttachment attachment : attachments) {
-				MimeBodyPart bodyPart = addAttachment(attachment);
-				if (bodyPart != null) {
-					multipart.addBodyPart(bodyPart);
-				}
+		for (MailAttachment attachment : attachments) {
+			MimeBodyPart bodyPart = addAttachment(attachment);
+			if (bodyPart != null) {
+				multipart.addBodyPart(bodyPart);
 			}
 		}
 		

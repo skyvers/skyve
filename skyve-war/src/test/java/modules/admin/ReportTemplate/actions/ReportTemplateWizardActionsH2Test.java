@@ -122,6 +122,7 @@ class ReportTemplateWizardActionsH2Test extends AbstractH2Test {
 				() -> action.execute(bean, webContext));
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void addUserToEmailAddsSelectedUserAndEmailEntry() throws Exception {
 		ReportTemplate bean = db.build(ReportTemplate.MODULE_NAME, ReportTemplate.DOCUMENT_NAME);

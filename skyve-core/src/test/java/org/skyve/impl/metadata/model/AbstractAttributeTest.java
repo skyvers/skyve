@@ -35,7 +35,7 @@ class AbstractAttributeTest {
 	// ---- name ----
 
 	@Test
-	@SuppressWarnings("static-method")
+	@SuppressWarnings({"static-method", "unused"}) // asserts null where the annotations say non-null
 	void getNameReturnsSetName() {
 		Text attr = new Text();
 		assertNull(attr.getName());

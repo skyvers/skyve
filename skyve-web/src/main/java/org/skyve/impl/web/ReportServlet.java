@@ -575,7 +575,7 @@ public class ReportServlet extends HttpServlet {
 						else {
 							reportColumn.setAlignment(ColumnAlignment.left);
 						}
-						if ((drivingDocument != null) && (reportColumn.getName() != null)) {
+						if (reportColumn.getName() != null) {
 							final Attribute attribute = drivingDocument.getPolymorphicAttribute(customer, binding);
 							if (attribute != null) {
 								reportColumn.setAttributeType(attribute.getAttributeType());

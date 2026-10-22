@@ -141,11 +141,13 @@ class BehaviourMetaDataTest {
 
 	// ---- BizletMetaData lifecycle no-op methods ----
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
 	void bizletNewInstanceDoesNotThrow() {
 		assertDoesNotThrow(() -> new BizletMetaData().newInstance(null));
 	}
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
 	void bizletValidateDoesNotThrow() {
 		assertDoesNotThrow(() -> new BizletMetaData().validate(null, null));
@@ -161,6 +163,7 @@ class BehaviourMetaDataTest {
 		assertNull(new BizletMetaData().getVariantDomainValues("attr"));
 	}
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
 	void bizletGetDynamicDomainValuesReturnsNull() throws Exception {
 		assertNull(new BizletMetaData().getDynamicDomainValues("attr", null));
@@ -176,36 +179,43 @@ class BehaviourMetaDataTest {
 		assertNull(new BizletMetaData().resolve("id", null));
 	}
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
 	void bizletPreSaveDoesNotThrow() {
 		assertDoesNotThrow(() -> new BizletMetaData().preSave(null));
 	}
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
 	void bizletPostSaveDoesNotThrow() {
 		assertDoesNotThrow(() -> new BizletMetaData().postSave(null));
 	}
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
 	void bizletPreDeleteDoesNotThrow() {
 		assertDoesNotThrow(() -> new BizletMetaData().preDelete(null));
 	}
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
 	void bizletPostDeleteDoesNotThrow() {
 		assertDoesNotThrow(() -> new BizletMetaData().postDelete(null));
 	}
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
 	void bizletPostLoadDoesNotThrow() {
 		assertDoesNotThrow(() -> new BizletMetaData().postLoad(null));
 	}
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
 	void bizletPreRerenderDoesNotThrow() {
 		assertDoesNotThrow(() -> new BizletMetaData().preRerender(null, null));
 	}
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
 	void bizletPostRenderDoesNotThrow() {
 		assertDoesNotThrow(() -> new BizletMetaData().postRender(null));
@@ -213,6 +223,7 @@ class BehaviourMetaDataTest {
 
 	// ---- ActionMetaData.execute ----
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
 	void actionExecuteWithEmptyStatementsDoesNotThrow() {
 		ActionMetaData a = new ActionMetaData();

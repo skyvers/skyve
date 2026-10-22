@@ -42,6 +42,7 @@ public class MySQLSpatialDialectTest {
 		assertThat(dialect.getModifyColumnString(), notNullValue());
 	}
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
 	public void mysql5isAlterTableColumnChangeRequiredWithNullsReturnsFalse() {
 		MySQL5InnoDBSpatialDialect dialect = new MySQL5InnoDBSpatialDialect();
@@ -68,6 +69,7 @@ public class MySQLSpatialDialectTest {
 		assertThat(dialect.getGeometryType(), notNullValue());
 	}
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
 	public void mysql56isAlterTableColumnChangeRequiredWithNullsReturnsFalse() {
 		MySQL56InnoDBSpatialDialect dialect = new MySQL56InnoDBSpatialDialect();
@@ -94,6 +96,7 @@ public class MySQLSpatialDialectTest {
 		assertThat(dialect.getGeometryType(), notNullValue());
 	}
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
 	public void mysql8isAlterTableColumnChangeRequiredWithNullsReturnsFalse() {
 		MySQL8InnoDBSpatialDialect dialect = new MySQL8InnoDBSpatialDialect();
@@ -164,6 +167,7 @@ public class MySQLSpatialDialectTest {
                 assertNotNull(result);
         }
 
+        @SuppressWarnings("null") // uses a nullable result where the API expects non-null
         @Test
         public void mysql56ConvertRoundTrip() {
                 MySQL56InnoDBSpatialDialect dialect = new MySQL56InnoDBSpatialDialect();
@@ -182,6 +186,7 @@ public class MySQLSpatialDialectTest {
                 assertNotNull(result);
         }
 
+        @SuppressWarnings("null") // uses a nullable result where the API expects non-null
         @Test
         public void mysql8ConvertRoundTrip() {
                 MySQL8InnoDBSpatialDialect dialect = new MySQL8InnoDBSpatialDialect();

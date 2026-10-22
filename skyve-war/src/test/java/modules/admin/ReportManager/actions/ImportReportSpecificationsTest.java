@@ -60,6 +60,7 @@ class ImportReportSpecificationsTest extends AbstractH2Test {
 		ReportManagerExtension bean = new ReportManagerExtension();
 		UploadException uploadException = new UploadException();
 
+		@SuppressWarnings("null") // passes null on purpose
 		ValidationException exception = assertThrows(ValidationException.class,
 				() -> action.upload(bean, upload, uploadException, null));
 
@@ -74,6 +75,7 @@ class ImportReportSpecificationsTest extends AbstractH2Test {
 		ReportManagerExtension bean = new ReportManagerExtension();
 		UploadException uploadException = new UploadException();
 
+		@SuppressWarnings("null") // passes null on purpose
 		ValidationException exception = assertThrows(ValidationException.class,
 				() -> action.upload(bean, upload, uploadException, null));
 
@@ -118,6 +120,7 @@ class ImportReportSpecificationsTest extends AbstractH2Test {
 		ReportManagerExtension bean = new ReportManagerExtension();
 		UploadException uploadException = new UploadException();
 
+		@SuppressWarnings("null") // passes null on purpose
 		ValidationException exception = assertThrows(ValidationException.class,
 				() -> action.upload(bean, upload, uploadException, null));
 

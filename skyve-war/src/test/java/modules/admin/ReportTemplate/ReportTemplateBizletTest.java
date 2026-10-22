@@ -233,6 +233,7 @@ class ReportTemplateBizletTest extends AbstractSkyveTest {
 		assertTrue(result.isEmpty());
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void getDynamicDomainValuesForDocumentNameReturnsDocumentsForSelectedModule() throws Exception {
 		ReportTemplateExtension bean = ReportTemplate.newInstance();
@@ -244,6 +245,7 @@ class ReportTemplateBizletTest extends AbstractSkyveTest {
 		assertTrue(result.stream().anyMatch(dv -> ReportTemplate.DOCUMENT_NAME.equals(dv.getCode())));
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void getDynamicDomainValuesForGenerateDocumentNameReturnsDocumentsForSelectedModule() throws Exception {
 		ReportTemplateExtension bean = ReportTemplate.newInstance();
@@ -257,6 +259,7 @@ class ReportTemplateBizletTest extends AbstractSkyveTest {
 
 	// ---- preRerender ----
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
 	void preRerenderWithReportTypeSourceClearsGenerateFields() throws Exception {
 		ReportTemplateExtension bean = ReportTemplate.newInstance();
@@ -270,6 +273,7 @@ class ReportTemplateBizletTest extends AbstractSkyveTest {
 		assertNull(bean.getGenerateDocumentName());
 	}
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
 	void preRerenderWithScheduledFalseDoesNotThrow() throws Exception {
 		ReportTemplateExtension bean = Assertions.assertDoesNotThrow(ReportTemplate::newInstance);
@@ -278,6 +282,7 @@ class ReportTemplateBizletTest extends AbstractSkyveTest {
 		bizlet.preRerender(ReportTemplate.scheduledPropertyName, bean, null);
 	}
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
 	void preRerenderWithUnknownSourceDoesNotThrow() throws Exception {
 		ReportTemplateExtension bean = Assertions.assertDoesNotThrow(ReportTemplate::newInstance);

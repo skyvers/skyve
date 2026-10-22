@@ -29,7 +29,7 @@ class HeapDumpsModelH2Test extends AbstractH2Test {
 	private Path tempDir;
 
 	@Test
-	@SuppressWarnings("static-method")
+	@SuppressWarnings({"static-method", "null"}) // a null here fails the test
 	void postConstructPopulatesDrivingDocumentColumnsAndProjections() {
 		HeapDumpsModel model = new HeapDumpsModel();
 
@@ -47,6 +47,7 @@ class HeapDumpsModelH2Test extends AbstractH2Test {
 		model.putParameter("ignored", "ignored");
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void fetchHeapDumpsReturnsDescendingPagedHprofFilesOnly() throws Exception {
 		Files.writeString(tempDir.resolve("alpha.hprof"), "alpha", StandardCharsets.UTF_8);
@@ -66,6 +67,7 @@ class HeapDumpsModelH2Test extends AbstractH2Test {
 		assertThat(page.getSummary().getBizDocument(), is(DownloadFolder.DOCUMENT_NAME));
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void fetchHeapDumpsReturnsEmptyPageWhenNoHprofFilesExist() throws Exception {
 		Files.writeString(tempDir.resolve("ignored.txt"), "ignored", StandardCharsets.UTF_8);

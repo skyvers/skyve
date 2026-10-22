@@ -65,7 +65,7 @@ public class CronExpressionTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
+	@SuppressWarnings({"static-method", "null"}) // a null here fails the test
 	public void testFromExpressionValidParameters() {
 		// setup the test data
 		String expression = "* * * * * *";
@@ -83,7 +83,7 @@ public class CronExpressionTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
+	@SuppressWarnings({"static-method", "null"}) // a null here fails the test
 	public void testFromExpressionValidParametersWithSteps() {
 		// setup the test data
 		String expression = "0 0 */6 * * *";
@@ -143,7 +143,7 @@ public class CronExpressionTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
+	@SuppressWarnings({"static-method", "null"}) // a null here fails the test
 	public void toNaturalLanguageFormatsExpressions() {
 		String[][] cases = {
 				{"0 0 0 1 1 *", "yearly"},
@@ -193,7 +193,7 @@ public class CronExpressionTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
+	@SuppressWarnings({"static-method", "null"}) // a null here fails the test
 	public void testToNaturalLanguageDayNumberSuffixes() {
 		String[][] cases = {
 				{"0 0 0 2 * *", "every 2nd"},
@@ -224,6 +224,7 @@ public class CronExpressionTest {
         public void testToNaturalLanguagePmHourWithStepMinute() {
                 // covers L229-230: timeStepSetPattern matches for minute, hour >= 12 (PM)
                 CronExpression c = CronExpression.fromExpression("0 */5 14 * * *");
+                @SuppressWarnings("null") // a null here fails the test
                 String result = c.toNaturalLanguage();
                 assertThat(result, is(org.hamcrest.CoreMatchers.notNullValue()));
         }
@@ -233,6 +234,7 @@ public class CronExpressionTest {
         public void testToNaturalLanguagePmHourWithZeroMinute() {
                 // covers L244-245: minute = "0", hour >= 12 (PM)
                 CronExpression c = CronExpression.fromExpression("0 0 15 * * *");
+                @SuppressWarnings("null") // a null here fails the test
                 String result = c.toNaturalLanguage();
                 assertThat(result, is(org.hamcrest.CoreMatchers.notNullValue()));
         }

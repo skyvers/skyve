@@ -159,7 +159,9 @@ public enum ConverterName {
      */
     public static @Nonnull ConverterName valueOf(@Nonnull Converter<?> converter) {
 
-        if (converter == null || !classToInstanceIndex.containsKey(converter.getClass())) {
+        @SuppressWarnings("null") // public API guard; a unit test asserts the exception for a null converter
+        boolean converterUnknown = (converter == null) || (! classToInstanceIndex.containsKey(converter.getClass()));
+        if (converterUnknown) {
 
             throw new IllegalArgumentException(converter + " is not catered for");
         }

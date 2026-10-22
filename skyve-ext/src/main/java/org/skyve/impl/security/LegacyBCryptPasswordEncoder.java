@@ -33,7 +33,9 @@ public class LegacyBCryptPasswordEncoder implements PasswordEncoder {
 	}
 
 	private static @Nonnull String normalizeRawPassword(@Nonnull CharSequence rawPassword) {
-		if (rawPassword == null) {
+		@SuppressWarnings("null") // Spring Security callers can pass null
+		boolean rawPasswordMissing = (rawPassword == null);
+		if (rawPasswordMissing) {
 			throw new IllegalArgumentException("rawPassword cannot be null");
 		}
 

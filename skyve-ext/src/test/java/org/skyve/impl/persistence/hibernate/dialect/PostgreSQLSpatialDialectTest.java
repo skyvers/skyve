@@ -43,6 +43,7 @@ public class PostgreSQLSpatialDialectTest {
 		assertThat(dialect.getModifyColumnString(), notNullValue());
 	}
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
 	public void pg9isAlterTableColumnChangeRequiredWithNullsReturnsFalse() {
 		PostgreSQL9SpatialDialect dialect = new PostgreSQL9SpatialDialect();
@@ -111,6 +112,7 @@ public class PostgreSQLSpatialDialectTest {
 		assertThat(dialect.getGeometryType(), notNullValue());
 	}
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
 	public void pg82isAlterTableColumnChangeRequiredWithNullsReturnsFalse() {
 		PostgreSQL82SpatialDialect dialect = new PostgreSQL82SpatialDialect();
@@ -137,6 +139,7 @@ public class PostgreSQLSpatialDialectTest {
 		assertThat(dialect.getGeometryType(), notNullValue());
 	}
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
 	public void pg93isAlterTableColumnChangeRequiredWithNullsReturnsFalse() {
 		PostgreSQL93SpatialDialect dialect = new PostgreSQL93SpatialDialect();
@@ -169,6 +172,7 @@ public class PostgreSQLSpatialDialectTest {
 		assertThat(dialect.getGeometryType(), notNullValue());
 	}
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
 	public void pg94isAlterTableColumnChangeRequiredWithNullsReturnsFalse() {
 		PostgreSQL94SpatialDialect dialect = new PostgreSQL94SpatialDialect();
@@ -201,6 +205,7 @@ public class PostgreSQLSpatialDialectTest {
 		assertThat(dialect.getGeometryType(), notNullValue());
 	}
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
 	public void pg95isAlterTableColumnChangeRequiredWithNullsReturnsFalse() {
 		PostgreSQL95SpatialDialect dialect = new PostgreSQL95SpatialDialect();
@@ -227,6 +232,7 @@ public class PostgreSQLSpatialDialectTest {
 		assertThat(dialect.getGeometryType(), notNullValue());
 	}
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
 	public void pg10isAlterTableColumnChangeRequiredWithNullsReturnsFalse() {
 		PostgreSQL10SpatialDialect dialect = new PostgreSQL10SpatialDialect();
@@ -241,6 +247,7 @@ public class PostgreSQLSpatialDialectTest {
 
 	// ---- PostgreSQL91SpatialDialect additional methods ----
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
 	public void pg91isAlterTableColumnChangeRequiredWithNullsReturnsFalse() {
 		PostgreSQL91SpatialDialect dialect = new PostgreSQL91SpatialDialect();
@@ -259,6 +266,7 @@ public class PostgreSQLSpatialDialectTest {
 	}
 	// ---- PostgreSQL92SpatialDialect additional methods ----
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
 	public void pg92isAlterTableColumnChangeRequiredWithNullsReturnsFalse() {
 		PostgreSQL92SpatialDialect dialect = new PostgreSQL92SpatialDialect();

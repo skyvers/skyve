@@ -35,7 +35,7 @@ import org.skyve.metadata.view.Action;
 
 class PrimeReactRendererTest {
 	@Test
-	@SuppressWarnings("static-method")
+	@SuppressWarnings({"static-method", "null"}) // passes null on purpose
 	void componentRendererRendersExpectedFragments() {
 		Map<String, String> imports = new HashMap<>();
 		PrimeReactComponentRenderer renderer = new PrimeReactComponentRenderer(imports, "\t\t");
@@ -115,7 +115,7 @@ class PrimeReactRendererTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
+	@SuppressWarnings({"static-method", "null"}) // a null here fails the test; passes null on purpose
 	void layoutRendererHandlesContainerHierarchy() {
 		Map<String, String> imports = new HashMap<>();
 		PrimeReactLayoutRenderer renderer = new PrimeReactLayoutRenderer(imports);

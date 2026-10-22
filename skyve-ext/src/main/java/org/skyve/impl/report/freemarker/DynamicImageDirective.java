@@ -191,14 +191,7 @@ public class DynamicImageDirective implements TemplateDirectiveModel {
 		// get the Skyve Document for the image
 		Customer customer = CORE.getCustomer();
 		Module module = customer.getModule(moduleParam);
-
-		if (module == null) {
-			throw new TemplateModelException("Module '" + moduleParam + "' could not be found. Please check the spelling and update the markup.");
-		}
 		Document document = module.getDocument(customer, documentParam);
-		if (document == null) {
-			throw new TemplateModelException("Document '" + documentParam + "' could not be found. Please check the spelling and update the markup.");
-		}
 
 		DynamicImage<Bean> dynamicImage = document.getDynamicImage(customer, imageParam);
 		try {

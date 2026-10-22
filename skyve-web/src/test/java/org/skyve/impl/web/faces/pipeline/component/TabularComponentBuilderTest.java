@@ -2331,6 +2331,7 @@ class TabularComponentBuilderTest {
 		lookup.setXmlDisabledCondition("lookupDisabled");
 		QueryDefinition query = mock(QueryDefinition.class);
 
+		@SuppressWarnings("null") // passes null on purpose
 		EventSourceComponent result = builder.lookupDescription(null,
 																	"row",
 																	lookup,
@@ -5142,6 +5143,7 @@ class TabularComponentBuilderTest {
 		when(current.getChildren()).thenReturn(new ArrayList<>());
 		when(current.getParent()).thenReturn(parent);
 
+		@SuppressWarnings("null") // passes null on purpose
 		UIComponent result = builder.addedDataGridBoundColumn(null, current, null);
 
 		assertSame(parent, result);
@@ -7009,6 +7011,7 @@ class TabularComponentBuilderTest {
 		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
 		UIComponent existing = mock(UIComponent.class);
 		MapDisplay mapDisplay = new MapDisplay();
+		@SuppressWarnings("null") // passes null on purpose
 		UIComponent result = builder.map(existing, mapDisplay, null, "widgets", null);
 		assertSame(existing, result);
 	}

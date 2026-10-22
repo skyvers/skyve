@@ -77,21 +77,15 @@ public class VueListGridComponentBuilder extends NoOpComponentBuilder {
 
 			String actionName = null;
 			List<EventAction> selectedActions = grid.getSelectedActions();
-			if (selectedActions != null) {
-				ActionFacesAttributes actionAttributes = determineActionFacesAttributes(selectedActions);
-				if (actionAttributes.actionName == null) { // when no selected action defined (collection is empty)
-					selectedCommand.setProcess((actionAttributes.process == null) ? "@this" : actionAttributes.process);
-					selectedCommand.setUpdate((actionAttributes.update == null) ? "@none" : actionAttributes.update);
-				}
-				else {
-					actionName = actionAttributes.actionName;
-					selectedCommand.setProcess((actionAttributes.process == null) ? process : actionAttributes.process);
-					selectedCommand.setUpdate((actionAttributes.update == null) ? update : actionAttributes.update);
-				}
+			ActionFacesAttributes actionAttributes = determineActionFacesAttributes(selectedActions);
+			if (actionAttributes.actionName == null) { // when no selected action defined (collection is empty)
+				selectedCommand.setProcess((actionAttributes.process == null) ? "@this" : actionAttributes.process);
+				selectedCommand.setUpdate((actionAttributes.update == null) ? "@none" : actionAttributes.update);
 			}
 			else {
-				selectedCommand.setProcess("@this");
-				selectedCommand.setUpdate("@none");
+				actionName = actionAttributes.actionName;
+				selectedCommand.setProcess((actionAttributes.process == null) ? process : actionAttributes.process);
+				selectedCommand.setUpdate((actionAttributes.update == null) ? update : actionAttributes.update);
 			}
 
 			MethodExpression expr = createSelectedExpression(selectedIdBinding, actionName, modelName);

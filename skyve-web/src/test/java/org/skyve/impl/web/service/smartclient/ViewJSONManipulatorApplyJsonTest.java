@@ -37,6 +37,7 @@ import org.skyve.web.WebContext;
 
 @SuppressWarnings("static-method")
 class ViewJSONManipulatorApplyJsonTest {
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
 	void applyJSONPropertiesInvokesOnlyMutableBindings() throws Exception {
 		RecordingViewJSONManipulator manipulator = newManipulator();
@@ -55,6 +56,7 @@ class ViewJSONManipulatorApplyJsonTest {
 		assertEquals("mutableBinding", manipulator.appliedBindings.get(2));
 	}
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
 	void applyJSONPropertyReturnsImmediatelyWhenValueIsAbsent() {
 		RecordingViewJSONManipulator manipulator = newManipulator();
@@ -68,6 +70,7 @@ class ViewJSONManipulatorApplyJsonTest {
 				null));
 	}
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
 	void applyJSONPropertySwallowsMetaDataExceptionForUnknownBinding() {
 		RecordingViewJSONManipulator manipulator = newManipulator();
@@ -92,6 +95,7 @@ class ViewJSONManipulatorApplyJsonTest {
 		assertEquals(0, manipulator.appliedBindings.size());
 	}
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
 	void applyJSONDelegatesToApplyJSONPropertiesWhenNoChildBindingsExist() {
 		ApplyJsonDelegatingManipulator manipulator = newDelegatingManipulator();
@@ -107,6 +111,7 @@ class ViewJSONManipulatorApplyJsonTest {
 		assertEquals(1, manipulator.applyJSONPropertiesCalls);
 	}
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
 	void applyJSONPropertyAndApplyJSONHandleAssociationAndCollectionMutation() throws Exception {
 		try (Fixture fixture = new Fixture()) {
@@ -186,6 +191,7 @@ class ViewJSONManipulatorApplyJsonTest {
 		private final DocumentImpl sourceDocument;
 		private final ViewBindings rootBindings;
 
+		@SuppressWarnings("null") // passes null on purpose
 		private Fixture() throws Exception {
 			previousRepository = ProvidedRepositoryFactory.get();
 			threadLocal = threadLocalPersistence();

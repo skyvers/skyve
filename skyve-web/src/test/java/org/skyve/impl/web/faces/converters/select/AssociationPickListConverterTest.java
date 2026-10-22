@@ -39,11 +39,13 @@ class AssociationPickListConverterTest {
 
 	// ---- getAsObject ----
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
 	void getAsObjectReturnsNullForNullValue() {
 		assertNull(converter.getAsObject(null, null, null));
 	}
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
 	void getAsObjectReturnsNullForEmptyValue() {
 		assertNull(converter.getAsObject(null, null, ""));

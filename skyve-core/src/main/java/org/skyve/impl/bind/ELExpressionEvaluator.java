@@ -401,35 +401,33 @@ public class ELExpressionEvaluator extends ExpressionEvaluator {
 								}
 								
 								// If we have a class from the penultimate expression evaluation
-								if (lastEvaluationClass != null) {
-									// Add any missing bean properties not covered by document attributes and conditions 
-									for (PropertyDescriptor d : PropertyUtils.getPropertyDescriptors(lastEvaluationClass)) {
-										String e = baseExpression + d.getName();
-										if (e.startsWith(input) && (! result.contains(e))) {
+								// Add any missing bean properties not covered by document attributes and conditions 
+								for (PropertyDescriptor d : PropertyUtils.getPropertyDescriptors(lastEvaluationClass)) {
+									String e = baseExpression + d.getName();
+									if (e.startsWith(input) && (! result.contains(e))) {
+										result.add(e);
+									}
+								}
+
+								// Add any methods found - close the round function braces if no arguments are required
+								for (Method m : lastEvaluationClass.getMethods()) {
+									String e = baseExpression + m.getName() + '(';
+									if (m.getParameterTypes().length == 0) {
+										e += ')';
+										if (e.startsWith(input)) {
 											result.add(e);
 										}
 									}
-	
-									// Add any methods found - close the round function braces if no arguments are required
-									for (Method m : lastEvaluationClass.getMethods()) {
-										String e = baseExpression + m.getName() + '(';
-										if (m.getParameterTypes().length == 0) {
-											e += ')';
-											if (e.startsWith(input)) {
-												result.add(e);
+									else {
+										// If we have a completed function with opening brace, complete with commencing EL,
+										if (e.equals(input)) {
+											for (String commencingComplete : COMMENCING_COMPLETES) {
+												result.add(e + commencingComplete);
 											}
 										}
-										else {
-											// If we have a completed function with opening brace, complete with commencing EL,
-											if (e.equals(input)) {
-												for (String commencingComplete : COMMENCING_COMPLETES) {
-													result.add(e + commencingComplete);
-												}
-											}
-											// otherwise complete the function expression
-											else if (e.startsWith(input)) {
-												result.add(e);
-											}
+										// otherwise complete the function expression
+										else if (e.startsWith(input)) {
+											result.add(e);
 										}
 									}
 								}
@@ -828,7 +826,9 @@ public class ELExpressionEvaluator extends ExpressionEvaluator {
 		@Nullable Object find(@Nonnull String name) {
 			String moduleName = bean.getBizModule();
 			String documentName = bean.getBizDocument();
-			if ((moduleName == null) || (documentName == null)) {
+			@SuppressWarnings("null") // EL can evaluate any bean, including ones that name no module or document
+			boolean documentUnnamed = (moduleName == null) || (documentName == null);
+			if (documentUnnamed) {
 				return null;
 			}
 			Customer customer = CORE.getCustomer();

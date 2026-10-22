@@ -398,14 +398,12 @@ public class LocalDesignRepository extends FileSystemRepository {
 	public void validateModuleForGenerateDomain(@Nonnull Customer customer, @Nonnull Module module) {
 		// if home document is transient then home ref had better be edit
 		String homeDocumentName = module.getHomeDocumentName();
-		if (homeDocumentName != null) {
-			Document homeDocument = module.getDocument(customer, homeDocumentName);
-			if ((homeDocument.getPersistent() == null) && (! ViewType.edit.equals(module.getHomeRef()))) { // is transient but not edit
-				throw new MetaDataException("Home document " + homeDocumentName +
-												FOR_CUSTOMER + customer.getName() +
-												IN_MODULE + module.getName() +
-												" is transient and therefore the module requires a homeRef of 'edit'.");
-			}
+		Document homeDocument = module.getDocument(customer, homeDocumentName);
+		if ((homeDocument.getPersistent() == null) && (! ViewType.edit.equals(module.getHomeRef()))) { // is transient but not edit
+			throw new MetaDataException("Home document " + homeDocumentName +
+											FOR_CUSTOMER + customer.getName() +
+											IN_MODULE + module.getName() +
+											" is transient and therefore the module requires a homeRef of 'edit'.");
 		}
 
 		// check query columns and query references
@@ -963,12 +961,6 @@ public class LocalDesignRepository extends FileSystemRepository {
 													documentIdentifier + " is not a valid document reference in this module.");
 				}
 				Document targetDocument = module.getDocument(customer, targetDocumentName);
-				if (targetDocument == null) {
-					throw new MetaDataException(TARGET_DOCUMENT_NAME_OF +
-													targetDocumentName + IN_REFERENCE +
-													reference.getName() + IN_DOCUMENT +
-													documentIdentifier + " cannot be found.");
-				}
 
 				// Check the query (if defined) points to a query of the required document type
 				String queryName = reference.getQueryName();

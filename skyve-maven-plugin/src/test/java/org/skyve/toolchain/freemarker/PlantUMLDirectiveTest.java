@@ -45,6 +45,7 @@ class PlantUMLDirectiveTest {
 	void executeRejectsMissingParameters() {
 		PlantUMLDirective directive = new PlantUMLDirective();
 
+		@SuppressWarnings("null") // passes null on purpose
 		TemplateModelException exception = assertThrows(TemplateModelException.class,
 				() -> directive.execute(null, Map.of(), new TemplateModel[0], null));
 
@@ -56,6 +57,7 @@ class PlantUMLDirectiveTest {
 		PlantUMLDirective directive = new PlantUMLDirective();
 		Map<String, TemplateModel> params = Map.of("markup", new SimpleScalar("@startuml\n@enduml"));
 
+		@SuppressWarnings("null") // passes null on purpose
 		TemplateModelException exception = assertThrows(TemplateModelException.class,
 				() -> directive.execute(null, params, new TemplateModel[] {mock(TemplateModel.class)}, null));
 
@@ -67,6 +69,7 @@ class PlantUMLDirectiveTest {
 		PlantUMLDirective directive = new PlantUMLDirective();
 		Map<String, TemplateModel> params = Map.of("markup", new SimpleScalar("@startuml\n@enduml"));
 
+		@SuppressWarnings("null") // passes null on purpose
 		TemplateModelException exception = assertThrows(TemplateModelException.class,
 				() -> directive.execute(null, params, new TemplateModel[0], mock(TemplateDirectiveBody.class)));
 
@@ -86,6 +89,7 @@ class PlantUMLDirectiveTest {
 		for (Object[] testCase : cases) {
 			@SuppressWarnings("unchecked")
 			Map<String, TemplateModel> params = (Map<String, TemplateModel>) testCase[0];
+			@SuppressWarnings("null") // passes null on purpose
 			TemplateModelException exception = assertThrows(TemplateModelException.class,
 					() -> directive.execute(null, params, new TemplateModel[0], null));
 			assertTrue(exception.getMessage().contains((String) testCase[1]));

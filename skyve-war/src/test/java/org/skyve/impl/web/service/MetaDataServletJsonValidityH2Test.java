@@ -412,6 +412,7 @@ class MetaDataServletJsonValidityH2Test extends AbstractSkyveTest {
 		return (DocumentImpl) module().getDocument(c, documentName);
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	private List<MenuItem> menuItems() {
 		return menuUser.getModuleMenu(MODULE_NAME).getItems();
 	}

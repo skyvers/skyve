@@ -315,6 +315,7 @@ class ReportDatasetExtensionTest extends AbstractH2Test {
 		assertThrows(IllegalArgumentException.class, () -> bean.executeTestSQLQuery());
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void testExecuteSQLQueryBindsInputAndDefaultValues() throws Exception {
 		ReportDatasetExtension dataset = ReportDataset.newInstance();
@@ -334,6 +335,7 @@ class ReportDatasetExtensionTest extends AbstractH2Test {
 		assertEquals(1, results.size());
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void testExecuteQueryBindsInputAndDefaultValues() throws Exception {
 		DateOnly savedDate = new DateOnly(LocalDate.of(2026, Month.FEBRUARY, 1));

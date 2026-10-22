@@ -112,6 +112,7 @@ public class SkyveScriptInterpreterTest {
 		assertThat(module.getPrototype(), is(Boolean.FALSE));
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	public void testDocumentHeading() {
 		// setup the test data
@@ -139,6 +140,7 @@ public class SkyveScriptInterpreterTest {
 		assertThat(module.getHomeRef(), is(notNullValue()));
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	public void testDocumentHeadingWithPersistentName() {
 		// setup the test data
@@ -182,6 +184,7 @@ public class SkyveScriptInterpreterTest {
 		assertThat(document.getPersistent(), is(nullValue()));
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	public void testDocumentHeadingWithDisplayNameAndPersistentName() {
 		// setup the test data
@@ -575,6 +578,7 @@ public class SkyveScriptInterpreterTest {
 		assertThat(collection.getType(), is(CollectionType.child));
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	public void testCollectionChildUpdatesParentAfter() {
 		// setup the test data
@@ -609,6 +613,7 @@ public class SkyveScriptInterpreterTest {
 		assertThat(parent.getParentDocumentName(), is("Address"));
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	public void testCollectionChildUpdatesParentBefore() {
 		// setup the test data
@@ -1109,6 +1114,7 @@ public class SkyveScriptInterpreterTest {
 		assertEquals(3, i.getErrors().get(0).getLineNumber());
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	public void testScalarMultipleReqiredAttributesSetsBizKey() {
 		// setup the test data
@@ -1129,6 +1135,7 @@ public class SkyveScriptInterpreterTest {
 		assertEquals(2, document.getAttributes().size());
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	public void testScalarRequiredAttribute() {
 		// setup the test data
@@ -1155,6 +1162,7 @@ public class SkyveScriptInterpreterTest {
 		assertTrue(document.getAttributes().get(0).isRequired());
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	public void testScalarRequiredAttributeDisplayName() {
 		// setup the test data
@@ -1206,6 +1214,7 @@ public class SkyveScriptInterpreterTest {
 		assertTrue(document.getAttributes().get(0).isRequired());
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	public void testScalarTextAttribute() {
 		// setup the test data
@@ -1470,6 +1479,7 @@ public class SkyveScriptInterpreterTest {
 		assertThat(document.getAttributes().get(0).getDisplayName(), is("Created At"));
 	}
 
+        @SuppressWarnings("null") // passes null on purpose
         @Test
         public void testPreProcessThrowsWhenScriptIsNull() {
                 i = new SkyveScriptInterpreter(null);
@@ -1525,6 +1535,7 @@ public class SkyveScriptInterpreterTest {
 		assertEquals(1, i.getModules().size());
 	}
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
 	public void testParseNullScriptThrowsIllegalArgument() {
 		// covers parse@163: the throw statement when script is null

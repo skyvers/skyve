@@ -307,7 +307,7 @@ public class ValidationUtil {
 			catch (@SuppressWarnings("unused") Exception e1) {
 				e.getMessages().add(new Message(binding, 
 													Util.nullSafeI18n(BeanValidator.VALIDATION_FORMAT_KEY,
-																		localisedDisplayName, (value == null) ? "" : value.toString(),
+																		localisedDisplayName, value.toString(),
 																		format.getMask())));
 			}
 		}

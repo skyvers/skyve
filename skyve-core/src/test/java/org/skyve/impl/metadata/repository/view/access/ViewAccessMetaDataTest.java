@@ -127,20 +127,21 @@ class ViewAccessMetaDataTest {
         void documentAggregateAccessToUserAccessReturnsDocumentAggregate() {
                 ViewDocumentAggregateUserAccessMetaData md = new ViewDocumentAggregateUserAccessMetaData();
                 md.setDocumentName("Contact");
+                @SuppressWarnings("null") // passes null on purpose
                 UserAccess ua = md.toUserAccess("admin", null);
                 assertEquals("admin", ua.getModuleName());
                 assertEquals("Contact", ua.getComponent());
         }
 
         @Test
-        @SuppressWarnings("static-method")
+        @SuppressWarnings({"static-method", "null"}) // passes null on purpose
         void reportAccessValidateThrowsWhenModuleNameNull() {
                 ViewReportUserAccessMetaData md = new ViewReportUserAccessMetaData();
                 assertThrows(MetaDataException.class, () -> md.validate("test", null));
         }
 
         @Test
-        @SuppressWarnings("static-method")
+        @SuppressWarnings({"static-method", "null"}) // passes null on purpose
         void reportAccessValidateThrowsWhenDocumentNameNull() {
                 ViewReportUserAccessMetaData md = new ViewReportUserAccessMetaData();
                 md.setModuleName("admin");
@@ -148,7 +149,7 @@ class ViewAccessMetaDataTest {
         }
 
         @Test
-        @SuppressWarnings("static-method")
+        @SuppressWarnings({"static-method", "null"}) // passes null on purpose
         void reportAccessValidateThrowsWhenReportNameNull() {
                 ViewReportUserAccessMetaData md = new ViewReportUserAccessMetaData();
                 md.setModuleName("admin");
@@ -157,14 +158,14 @@ class ViewAccessMetaDataTest {
         }
 
         @Test
-        @SuppressWarnings("static-method")
+        @SuppressWarnings({"static-method", "null"}) // passes null on purpose
         void queryAggregateAccessValidateThrowsWhenQueryNameNull() {
                 ViewQueryAggregateUserAccessMetaData md = new ViewQueryAggregateUserAccessMetaData();
                 assertThrows(MetaDataException.class, () -> md.validate("test", null));
         }
 
         @Test
-        @SuppressWarnings("static-method")
+        @SuppressWarnings({"static-method", "null"}) // passes null on purpose
         void documentAggregateAccessValidateThrowsWhenDocumentNameNull() {
                 ViewDocumentAggregateUserAccessMetaData md = new ViewDocumentAggregateUserAccessMetaData();
                 assertThrows(MetaDataException.class, () -> md.validate("test", null));
@@ -190,28 +191,28 @@ class ViewAccessMetaDataTest {
         }
 
         @Test
-        @SuppressWarnings("static-method")
+        @SuppressWarnings({"static-method", "null"}) // passes null on purpose
         void contentAccessValidateThrowsWhenBindingNull() {
                 ViewContentUserAccessMetaData md = new ViewContentUserAccessMetaData();
                 assertThrows(MetaDataException.class, () -> md.validate("test", null));
         }
 
         @Test
-        @SuppressWarnings("static-method")
+        @SuppressWarnings({"static-method", "null"}) // passes null on purpose
         void dynamicImageAccessValidateThrowsWhenImageNameNull() {
                 ViewDynamicImageUserAccessMetaData md = new ViewDynamicImageUserAccessMetaData();
                 assertThrows(MetaDataException.class, () -> md.validate("test", null));
         }
 
         @Test
-        @SuppressWarnings("static-method")
+        @SuppressWarnings({"static-method", "null"}) // passes null on purpose
         void modelAggregateAccessValidateThrowsWhenModelNameNull() {
                 ViewModelAggregateUserAccessMetaData md = new ViewModelAggregateUserAccessMetaData();
                 assertThrows(MetaDataException.class, () -> md.validate("test", null));
         }
 
         @Test
-        @SuppressWarnings("static-method")
+        @SuppressWarnings({"static-method", "null"}) // passes null on purpose
         void previousCompleteAccessValidateThrowsWhenBindingNull() {
                 ViewPreviousCompleteUserAccessMetaData md = new ViewPreviousCompleteUserAccessMetaData();
                 assertThrows(MetaDataException.class, () -> md.validate("test", null));
@@ -220,7 +221,7 @@ class ViewAccessMetaDataTest {
         // ---- Validate happy-path tests ----
 
         @Test
-        @SuppressWarnings("static-method")
+        @SuppressWarnings({"static-method", "null"}) // passes null on purpose
         void contentAccessValidatePassesWhenBindingSet() {
                 ViewContentUserAccessMetaData md = new ViewContentUserAccessMetaData();
                 md.setBinding("attachment");
@@ -228,7 +229,7 @@ class ViewAccessMetaDataTest {
         }
 
         @Test
-        @SuppressWarnings("static-method")
+        @SuppressWarnings({"static-method", "null"}) // passes null on purpose
         void dynamicImageAccessValidatePassesWhenImageNameSet() {
                 ViewDynamicImageUserAccessMetaData md = new ViewDynamicImageUserAccessMetaData();
                 md.setImageName("profilePhoto");
@@ -236,7 +237,7 @@ class ViewAccessMetaDataTest {
         }
 
         @Test
-        @SuppressWarnings("static-method")
+        @SuppressWarnings({"static-method", "null"}) // passes null on purpose
         void modelAggregateAccessValidatePassesWhenModelNameSet() {
                 ViewModelAggregateUserAccessMetaData md = new ViewModelAggregateUserAccessMetaData();
                 md.setModelName("ContactList");
@@ -244,7 +245,7 @@ class ViewAccessMetaDataTest {
         }
 
         @Test
-        @SuppressWarnings("static-method")
+        @SuppressWarnings({"static-method", "null"}) // passes null on purpose
         void previousCompleteAccessValidatePassesWhenBindingSet() {
                 ViewPreviousCompleteUserAccessMetaData md = new ViewPreviousCompleteUserAccessMetaData();
                 md.setBinding("approvalStep");
@@ -252,7 +253,7 @@ class ViewAccessMetaDataTest {
         }
 
         @Test
-        @SuppressWarnings("static-method")
+        @SuppressWarnings({"static-method", "null"}) // passes null on purpose
         void reportAccessValidatePassesWhenAllFieldsSet() {
                 ViewReportUserAccessMetaData md = new ViewReportUserAccessMetaData();
                 md.setModuleName("admin");

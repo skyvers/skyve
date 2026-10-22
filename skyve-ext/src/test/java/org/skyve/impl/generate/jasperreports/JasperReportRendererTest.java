@@ -155,6 +155,7 @@ class JasperReportRendererTest {
 		assertThat(JasperReportRenderer.isDateOrTimeAttribute(AttributeType.text), is(Boolean.FALSE));
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void createFieldWithBeanModeStringTypeHasDescription() {
 		DesignSpecification parent = new DesignSpecification();
@@ -191,6 +192,7 @@ class JasperReportRendererTest {
 		assertThat(JasperReportRenderer.createField(field), nullValue());
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void createFieldWithSqlStringDoesNotSetDescription() {
 		DesignSpecification parent = new DesignSpecification();
@@ -857,6 +859,7 @@ class JasperReportRendererTest {
 		title.getElements().add(element);
 
 		JRBand band = new JasperReportRenderer(spec).createBand(title);
+		@SuppressWarnings("null") // a null here fails the test
 		JRDesignTextField text = (JRDesignTextField) band.getElements()[0];
 
 		assertThat(text.getEvaluationTime(), is(EvaluationTimeEnum.REPORT));
@@ -884,6 +887,7 @@ class JasperReportRendererTest {
 		band.getElements().add(image);
 		band.getElements().add(subreport);
 
+		@SuppressWarnings("null") // a null here fails the test
 		JRElement[] elements = new JasperReportRenderer(spec).createBand(band).getElements();
 
 		assertThat(elements[0], org.hamcrest.Matchers.instanceOf(JRDesignImage.class));

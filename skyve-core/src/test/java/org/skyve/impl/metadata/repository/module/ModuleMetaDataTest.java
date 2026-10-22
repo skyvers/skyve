@@ -18,6 +18,7 @@ import org.skyve.metadata.view.View.ViewType;
 @SuppressWarnings("static-method")
 class ModuleMetaDataTest {
 
+	@SuppressWarnings("unused") // asserts null where the annotations say non-null
 	@Test
 	void testSetAndGetTitle() {
 		ModuleMetaData module = new ModuleMetaData();
@@ -34,6 +35,7 @@ class ModuleMetaDataTest {
 		assertEquals(Boolean.TRUE, module.getPrototype());
 	}
 
+	@SuppressWarnings("unused") // asserts null where the annotations say non-null
 	@Test
 	void testSetAndGetHomeDocument() {
 		ModuleMetaData module = new ModuleMetaData();
@@ -82,6 +84,7 @@ class ModuleMetaDataTest {
 	void testSetAndGetMenu() {
 		ModuleMetaData module = new ModuleMetaData();
 		assertNull(module.getMenu());
+		@SuppressWarnings("unused") // asserts null where the annotations say non-null
 		MenuMetaData menu = new MenuMetaData();
 		module.setMenu(menu);
 		assertEquals(menu, module.getMenu());
@@ -141,6 +144,7 @@ class ModuleMetaDataTest {
 		assertThrows(MetaDataException.class, () -> module.convert("test"));
 	}
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
 	void convertThrowsWhenTitleIsNull() {
 		ModuleMetaData module = createMinimalModuleMetaData();
@@ -148,6 +152,7 @@ class ModuleMetaDataTest {
 		assertThrows(MetaDataException.class, () -> module.convert("test"));
 	}
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
 	void convertThrowsWhenHomeDocumentIsNull() {
 		ModuleMetaData module = createMinimalModuleMetaData();

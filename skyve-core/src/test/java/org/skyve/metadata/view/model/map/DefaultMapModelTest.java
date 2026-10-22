@@ -67,6 +67,7 @@ class DefaultMapModelTest {
 	}
 
 	private static class TestDefaultMapModel extends DefaultMapModel<TestBean> {
+		@SuppressWarnings("null") // passes null on purpose
 		@Override
 		public MapResult getResult(Geometry mapBounds) {
 			return null;

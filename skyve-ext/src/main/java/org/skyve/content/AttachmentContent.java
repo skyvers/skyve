@@ -41,11 +41,11 @@ public class AttachmentContent extends Content {
 	// This is the full path including the file name
 	private String externalAbsoluteFilePath;
 
-	public AttachmentContent(@Nonnull String bizCustomer,
+	public AttachmentContent(@Nullable String bizCustomer,
 								@Nonnull String bizModule,
 								@Nonnull String bizDocument,
 								@Nullable String bizDataGroupId,
-								@Nonnull String bizUserId,
+								@Nullable String bizUserId,
 								@Nonnull String bizId,
 								@Nonnull String attributeName) {
 		super(bizCustomer, bizModule, bizDocument, bizDataGroupId, bizUserId, bizId);
@@ -360,7 +360,7 @@ public class AttachmentContent extends Content {
 	 *
 	 * @param bizCustomer Customer identifier
 	 */
-	public final void setBizCustomer(@Nonnull String bizCustomer) {
+	public final void setBizCustomer(@Nullable String bizCustomer) {
 		this.bizCustomer = bizCustomer;
 	}
 
@@ -396,7 +396,7 @@ public class AttachmentContent extends Content {
 	 *
 	 * @param bizUserId User identifier
 	 */
-	public final void setBizUserId(@Nonnull String bizUserId) {
+	public final void setBizUserId(@Nullable String bizUserId) {
 		this.bizUserId = bizUserId;
 	}
 

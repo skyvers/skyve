@@ -234,9 +234,6 @@ public class SmartClientListServlet extends HttpServlet {
 
 							drivingDocument = module.getDocument(customer, documentName);
 							model = drivingDocument.getListModel(customer, modelName, true);
-							if (model == null) {
-								throw new ServletException("DataSource does not reference a valid model " + tokens[3]);
-							}
 							key = RequestKey.model(drivingDocument, modelName);
 							model.setBean(bean);
 							drivingDocument = getDrivingDocument(model);
@@ -461,9 +458,7 @@ public class SmartClientListServlet extends HttpServlet {
 						StateUtil.commitAndCacheConversation(webContext);
 					}
 					
-					if (key != null) {
-						Monitoring.measure(key);
-					}
+					Monitoring.measure(key);
 				}
 				catch (InvocationTargetException e) {
 					throw e.getTargetException();
@@ -1079,8 +1074,7 @@ public class SmartClientListServlet extends HttpServlet {
 					// If we got an array and there is no operator (multi-select in filter header),
 					// or the operator is "exact" or "equals" (still multi-select in filter header but with other criteria)
 					// then set it to inSet
-					if ((filterOperator == null) ||
-							(filterOperator == SmartClientFilterOperator.equals) ||
+					if ((filterOperator == SmartClientFilterOperator.equals) ||
 							(filterOperator == SmartClientFilterOperator.exact)) {
 						filterOperator = SmartClientFilterOperator.inSet;
 					}

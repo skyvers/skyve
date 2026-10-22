@@ -34,6 +34,7 @@ class SkyveLazyDataModelTest {
 
 	@Test
 	void countAlwaysReturnsZero() {
+		@SuppressWarnings("null") // passes null on purpose
 		SkyveLazyDataModel model = new SkyveLazyDataModel(mock(FacesView.class), null, null, null, null, null, null, false);
 		assertEquals(0, model.count(Map.of()));
 	}
@@ -46,11 +47,13 @@ class SkyveLazyDataModelTest {
 		when(rowBean.getBizModule()).thenReturn("sales");
 
 		BeanMapAdapter adapter = new BeanMapAdapter(rowBean, null);
+		@SuppressWarnings("null") // passes null on purpose
 		SkyveLazyDataModel model = new SkyveLazyDataModel(mock(FacesView.class), null, null, null, null, null, null, false);
 
 		assertEquals("abc123#Order.sales", model.getRowKey(adapter));
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void getRowDataParsesRowKeyToDynamicBean() {
 		SkyveLazyDataModel model = new SkyveLazyDataModel(mock(FacesView.class), null, null, null, null, null, null, false);
@@ -163,6 +166,7 @@ class SkyveLazyDataModelTest {
 		verify(modelFilter).addContains(Bean.BIZ_KEY, "abc");
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void filterAddsContainsForTextAttributeWithoutDomainType() throws Exception {
 		FilterMeta filterMeta = mock(FilterMeta.class);
@@ -182,6 +186,7 @@ class SkyveLazyDataModelTest {
 		verify(modelFilter).addContains("description", "widget");
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void filterCoercesStringValueForIntegerAttribute() throws Exception {
 		FilterMeta filterMeta = mock(FilterMeta.class);
@@ -201,6 +206,7 @@ class SkyveLazyDataModelTest {
 		verify(modelFilter).addEquals("quantity", Integer.valueOf(42));
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void filterAddsContainsAgainstBizKeyForAssociationAttribute() throws Exception {
 		FilterMeta filterMeta = mock(FilterMeta.class);

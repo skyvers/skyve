@@ -130,6 +130,7 @@ class ViewJSONManipulatorHrefProcessorTest {
 		assertFalse(htmlGuts(manipulator).contains("{row.bizId}"));
 	}
 
+	@SuppressWarnings("null") // passes null on purpose
 	private static ViewJSONManipulator newManipulator(String viewName, int editIdCounter, int createIdCounter) {
 		User user = mock(User.class);
 		when(user.getCustomer()).thenReturn(new CustomerImpl());

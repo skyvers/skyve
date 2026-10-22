@@ -16,6 +16,7 @@ import util.AbstractH2Test;
 
 @SuppressWarnings("static-method")
 class ExportReportSpecificationH2Test extends AbstractH2Test {
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
 	void prepareDoesNotMutateBean() throws Exception {
 		ReportTemplate bean = ReportTemplate.newInstance();
@@ -32,6 +33,7 @@ class ExportReportSpecificationH2Test extends AbstractH2Test {
 		bean.setName("Specification");
 		bean.setTemplate("template body");
 
+		@SuppressWarnings("null") // passes null on purpose
 		Download download = new ExportReportSpecification().download(bean, null);
 
 		assertThat(download.getFileName(), is("Specification.json"));

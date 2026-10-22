@@ -157,6 +157,7 @@ class ValidationELResolverTest {
 		assertEquals(Object.class, objectValue);
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void mutableValidationValuesAreIsolatedBetweenEvaluations() {
 		ValidationELResolver resolver = newResolver();

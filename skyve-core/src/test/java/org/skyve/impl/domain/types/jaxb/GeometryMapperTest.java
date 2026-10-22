@@ -17,7 +17,7 @@ class GeometryMapperTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
+	@SuppressWarnings({"static-method", "null"}) // a null here fails the test
 	void unmarshalValidWKT() throws Exception {
 		GeometryMapper mapper = new GeometryMapper();
 		Geometry geom = mapper.unmarshal("POINT (1 2)");

@@ -192,6 +192,7 @@ abstract class InternalBaseH2Test {
 	 * Create a new {@link User} which corresponds to the metadata superuser running
 	 * as the current persistence user so that requests to currentAdminUser resolve.
 	 */
+	@SuppressWarnings("null") // a null here fails the test
 	private static UserExtension createAdminUser(SuperUser superUser) {
 		UserExtension adminUser = new DataBuilder().fixture(FixtureType.crud).build(User.MODULE_NAME,
 				User.DOCUMENT_NAME);

@@ -408,7 +408,9 @@ public class ViewMetaData extends Container implements NamedMetaData, Convertibl
 		result.setLastModifiedMillis(getLastModifiedMillis());
 		
 		String value = getTitle();
-		if (value == null) {
+		@SuppressWarnings("null") // metadata built in code bypasses the XSD
+		boolean titleMissing = (value == null);
+		if (titleMissing) {
 			throw new MetaDataException(metaDataName + " : The view [title] is required for view " + metaDataName);
 		}
 		result.setTitle(value);
@@ -421,7 +423,9 @@ public class ViewMetaData extends Container implements NamedMetaData, Convertibl
 		result.setHelpURL(getHelpURL());
 		
 		String theName = getName();
-		if (theName == null) {
+		@SuppressWarnings("null") // metadata built in code bypasses the XSD
+		boolean nameMissing = (theName == null);
+		if (nameMissing) {
 			throw new MetaDataException(metaDataName + " : The view [name] is required for view " + metaDataName);
 		}
 		result.setName(theName);
@@ -485,10 +489,14 @@ public class ViewMetaData extends Container implements NamedMetaData, Convertibl
 
 		if ((parameters != null) && (! parameters.isEmpty())) {
 			for (ViewParameter parameter : parameters) {
-				if (parameter.getFromBinding() == null) {
+				@SuppressWarnings("null") // metadata built in code bypasses the XSD
+				boolean fromBindingMissing = (parameter.getFromBinding() == null);
+				if (fromBindingMissing) {
 					throw new MetaDataException(metaDataName + " : The " + getName() + " view newParameter [fromBinding] is required in " + getName() + VIEW_NAME_SEPARATOR + metaDataName);
 				}
-				if (parameter.getBoundTo() == null) {
+				@SuppressWarnings("null") // metadata built in code bypasses the XSD
+				boolean boundToMissing = (parameter.getBoundTo() == null);
+				if (boundToMissing) {
 					throw new MetaDataException(metaDataName + " : The " + getName() + VIEW_NAME_SEPARATOR + parameter.getFromBinding() + " newParameter [boundTo] is required in " + getName() + VIEW_NAME_SEPARATOR + metaDataName);
 				}
 			}

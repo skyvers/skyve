@@ -189,6 +189,7 @@ class IndexArchivesJobTest {
 		}
 	}
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
 	void indexDocumentsProcessIdentifiesArchiveFilesWithoutProgress() throws Exception {
 		Path archiveDir = Files.createDirectories(tempDir.resolve("archive"));

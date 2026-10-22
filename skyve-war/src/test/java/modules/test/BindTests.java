@@ -412,7 +412,7 @@ class BindTests extends AbstractSkyveTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
+	@SuppressWarnings({"static-method", "null"}) // a null here fails the test
 	void testExtraDynamicPropertyWithMethodCall() {
 		TreeMap<String, Object> map = new TreeMap<>();
 		DynamicBean bean = new DynamicBean("admin", "Contact", map);

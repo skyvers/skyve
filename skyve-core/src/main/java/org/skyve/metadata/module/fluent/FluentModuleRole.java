@@ -73,39 +73,37 @@ public class FluentModuleRole {
 		
 		// Process accesses
 		Map<UserAccess, Set<String>> accesses = impl.getAccesses();
-		if (accesses != null) {
-			for (Entry<UserAccess, Set<String>> access : accesses.entrySet()) {
-				UserAccess key = access.getKey();
-				Set<String> value = access.getValue();
-				String documentName = key.getDocumentName();
-				String component = key.getComponent();
-				if (key.isSingular()) {
-					addSingularAccess(new FluentModuleRoleSingularAccess().from(documentName, value));
-				}
-				else if (key.isQueryAggregate()) {
-					addQueryAggregateAccess(new FluentModuleRoleQueryAggregateAccess().from(component, value));
-				}
-				else if (key.isDocumentAggregate()) {
-					addDocumentAggregateAccess(new FluentModuleRoleDocumentAggregateAccess().from(component, value));
-				}
-				else if (key.isModelAggregate()) {
-					addModelAggregateAccess(new FluentModuleRoleModelAggregateAccess().from(documentName, component, value));
-				}
-				else if (key.isPreviousComplete()) {
-					addPreviousCompleteAccess(new FluentModuleRolePreviousCompleteAccess().from(documentName, component, value));
-				}
-				else if (key.isReport()) {
-					addReportAccess(new FluentModuleRoleReportAccess().from(key.getModuleName(), documentName, component, value));
-				}
-				else if (key.isDynamicImage()) {
-					addDynamicImageAccess(new FluentModuleRoleDynamicImageAccess().from(documentName, component, value));
-				}
-				else if (key.isContent()) {
-					addContentAccess(new FluentModuleRoleContentAccess().from(documentName, component, value));
-				}
-				else {
-					throw new IllegalStateException(key + " is not catered for");
-				}
+		for (Entry<UserAccess, Set<String>> access : accesses.entrySet()) {
+			UserAccess key = access.getKey();
+			Set<String> value = access.getValue();
+			String documentName = key.getDocumentName();
+			String component = key.getComponent();
+			if (key.isSingular()) {
+				addSingularAccess(new FluentModuleRoleSingularAccess().from(documentName, value));
+			}
+			else if (key.isQueryAggregate()) {
+				addQueryAggregateAccess(new FluentModuleRoleQueryAggregateAccess().from(component, value));
+			}
+			else if (key.isDocumentAggregate()) {
+				addDocumentAggregateAccess(new FluentModuleRoleDocumentAggregateAccess().from(component, value));
+			}
+			else if (key.isModelAggregate()) {
+				addModelAggregateAccess(new FluentModuleRoleModelAggregateAccess().from(documentName, component, value));
+			}
+			else if (key.isPreviousComplete()) {
+				addPreviousCompleteAccess(new FluentModuleRolePreviousCompleteAccess().from(documentName, component, value));
+			}
+			else if (key.isReport()) {
+				addReportAccess(new FluentModuleRoleReportAccess().from(key.getModuleName(), documentName, component, value));
+			}
+			else if (key.isDynamicImage()) {
+				addDynamicImageAccess(new FluentModuleRoleDynamicImageAccess().from(documentName, component, value));
+			}
+			else if (key.isContent()) {
+				addContentAccess(new FluentModuleRoleContentAccess().from(documentName, component, value));
+			}
+			else {
+				throw new IllegalStateException(key + " is not catered for");
 			}
 		}
 		

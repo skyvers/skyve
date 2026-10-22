@@ -1809,7 +1809,7 @@ public class SkyveContextListenerTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
+	@SuppressWarnings({"static-method", "null"}) // checks values the annotations say are non-null
 	public void testConfigureCustomSingletonAndServiceFactories() throws Exception {
 		NumberGenerator originalNumberGenerator = NumberGeneratorStaticSingleton.get();
 		Customisations originalCustomisations = CustomisationsStaticSingleton.get();

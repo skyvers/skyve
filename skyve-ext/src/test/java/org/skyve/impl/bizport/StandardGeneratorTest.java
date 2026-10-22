@@ -189,6 +189,7 @@ class StandardGeneratorTest {
 		verify(workbook).addSheet(eq(new SheetKey("admin", "Tag")), any(BizPortSheet.class));
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void generateAndAddCollectionSheetAddsOwnerElementAndOrdinalColumns() throws Exception {
 		Customer customer = mock(Customer.class);
@@ -227,6 +228,7 @@ class StandardGeneratorTest {
 		assertThat(sheet.getColumn(PersistentBean.ELEMENT_COLUMN_NAME).getReferencedSheet(), is(new SheetKey("admin", "Child")));
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void generateAndAddDocumentSheetAddsScalarConstantAndAssociationColumns() throws Exception {
 		Customer customer = mock(Customer.class);
@@ -268,6 +270,7 @@ class StandardGeneratorTest {
 		assertThat(sheet.getColumn("owner").getReferencedSheet(), is(new SheetKey("admin", "User")));
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void generateAndAddDocumentSheetFlattensEmbeddedAssociationColumns() throws Exception {
 		Customer customer = mock(Customer.class);
@@ -301,6 +304,7 @@ class StandardGeneratorTest {
 		assertThat(sheet.getColumn("contact.email1").getTitle(), is("Contact Email"));
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void generateAndAddDocumentSheetAddsHierarchyParentColumn() throws Exception {
 		Customer customer = mock(Customer.class);

@@ -441,7 +441,9 @@ public class SkyveScriptInterpreter {
 				appendMenu(currentModule, currentDocument);
 
 				// set the module home document if not set
-				if ((currentModule.getHomeDocument() == null) && (currentDocument.getName() != null)) {
+				@SuppressWarnings("null") // metadata built in code bypasses the XSD
+				boolean homeDocumentMissing = (currentModule.getHomeDocument() == null);
+				if (homeDocumentMissing && (currentDocument.getName() != null)) {
 					currentModule.setHomeDocument(currentDocument.getName());
 					currentModule.setHomeRef(currentDocument.getPersistent() != null ? ViewType.list : ViewType.edit);
 				}
@@ -531,7 +533,9 @@ public class SkyveScriptInterpreter {
 	 *
 	 * @param node The node containing attribute declaration content.
 	 */
-		if (menu == null) {
+		@SuppressWarnings("null") // metadata built in code bypasses the XSD
+		boolean menuMissing = (menu == null);
+		if (menuMissing) {
 			menu = new MenuMetaData();
 			module.setMenu(menu);
 		}

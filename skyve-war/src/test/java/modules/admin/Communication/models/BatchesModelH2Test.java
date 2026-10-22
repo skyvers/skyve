@@ -29,7 +29,7 @@ class BatchesModelH2Test extends AbstractH2Test {
 	private Path tempDir;
 
 	@Test
-	@SuppressWarnings("static-method")
+	@SuppressWarnings({"static-method", "null"}) // a null here fails the test
 	void postConstructPopulatesDrivingDocumentColumnsAndProjections() {
 		BatchesModel model = new BatchesModel();
 
@@ -46,6 +46,7 @@ class BatchesModelH2Test extends AbstractH2Test {
 		model.putParameter("ignored", "ignored");
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void fetchReturnsReverseSortedPagedFoldersFromCommunicationBasePath() throws Exception {
 		Files.createDirectory(tempDir.resolve("20240101000000"));

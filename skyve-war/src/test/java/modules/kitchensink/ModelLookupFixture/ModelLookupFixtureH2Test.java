@@ -23,6 +23,7 @@ import util.AbstractH2Test;
 /** Exercises persisted selections and both list sources used by the SC/PF fixture. */
 @SuppressWarnings("static-method")
 class ModelLookupFixtureH2Test extends AbstractH2Test {
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void modelAndSavedSelectionsListFetchPersistedLookupValues() throws Exception {
 		Persistence persistence = CORE.getPersistence();

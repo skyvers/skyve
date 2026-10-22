@@ -130,8 +130,10 @@ public class PrimeFacesInterpretedWebDriverExecutor extends InterpretedWebDriver
 	@Override
 	public void executeTabSelect(TabSelect tabSelect) {
 		PrimeFacesAutomationContext context = peek();
+		@SuppressWarnings("null") // uses a nullable result where the API expects non-null
 		String identifier = tabSelect.getIdentifier(context);
 
+		@SuppressWarnings("null") // a null here fails the test
 		List<UIComponent> components = context.getFacesComponents(identifier);
 		if (components == null) {
 			throw new MetaDataException(
@@ -157,7 +159,9 @@ public class PrimeFacesInterpretedWebDriverExecutor extends InterpretedWebDriver
 		
 		User u = CORE.getUser();
 		Customer c = u.getCustomer();
+		@SuppressWarnings("null") // a null here fails the test; uses a nullable result where the API expects non-null
 		Module m = c.getModule(context.getModuleName());
+		@SuppressWarnings("null") // uses a nullable result where the API expects non-null
 		Document d = m.getDocument(c, context.getDocumentName());
 		
 		Bean bean = null;
@@ -170,8 +174,10 @@ public class PrimeFacesInterpretedWebDriverExecutor extends InterpretedWebDriver
 		}
 
 		final String uxui = context.getUxui();
+		@SuppressWarnings("null") // a null here fails the test
 		ViewImpl view = (ViewImpl) d.getView(uxui, c, context.getViewType().toString());
 
+		@SuppressWarnings("null") // uses a nullable result where the API expects non-null
 		TestDataEnterViewVisitor visitor = new TestDataEnterViewVisitor(
 				(CustomerImpl) c,
 				(ModuleImpl) m,
@@ -187,6 +193,7 @@ public class PrimeFacesInterpretedWebDriverExecutor extends InterpretedWebDriver
 		}
 	}
 
+	@SuppressWarnings("null") // checks values the annotations say are non-null
 	@Override
 	public void executeDataEnter(DataEnter dataEnter) {
 		PrimeFacesAutomationContext context = peek();
@@ -245,8 +252,10 @@ public class PrimeFacesInterpretedWebDriverExecutor extends InterpretedWebDriver
 
 	private void button(Step button, String tagName, boolean ajax, boolean confirm, Boolean testSuccess) {
 		PrimeFacesAutomationContext context = peek();
+		@SuppressWarnings("null") // uses a nullable result where the API expects non-null
 		String identifier = button.getIdentifier(context);
 
+		@SuppressWarnings("null") // a null here fails the test; uses a nullable result where the API expects non-null
 		List<UIComponent> components = context.getFacesComponents(identifier);
 		if (components == null) {
 			throw new MetaDataException(String.format("<%s /> is not on the view", tagName));
@@ -273,8 +282,10 @@ public class PrimeFacesInterpretedWebDriverExecutor extends InterpretedWebDriver
 
 	private void redirectButton(Step button, String tagName, boolean confirm, Boolean testSuccess) {
 		PrimeFacesAutomationContext context = peek();
+		@SuppressWarnings("null") // uses a nullable result where the API expects non-null
 		String identifier = button.getIdentifier(context);
 
+		@SuppressWarnings("null") // a null here fails the test; uses a nullable result where the API expects non-null
 		List<UIComponent> components = context.getFacesComponents(identifier);
 		if (components == null) {
 			throw new MetaDataException(String.format("<%s /> is not on the view", tagName));
@@ -305,6 +316,7 @@ public class PrimeFacesInterpretedWebDriverExecutor extends InterpretedWebDriver
 		pop();
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Override
 	public void executeSave(Save save) {
 		button(save, "save", true, false, save.getTestSuccess());
@@ -371,6 +383,7 @@ public class PrimeFacesInterpretedWebDriverExecutor extends InterpretedWebDriver
 	private void lookupDescription(Step step, String binding, Integer row, String search) {
 		PrimeFacesAutomationContext context = peek();
 		
+		@SuppressWarnings("null") // a null here fails the test
 		List<UIComponent> lookupComponents = context.getFacesComponents(binding);
 		if (lookupComponents == null) {
 			throw new MetaDataException(String.format("<%s /> with binding [%s] is not on the view.",
@@ -400,7 +413,9 @@ public class PrimeFacesInterpretedWebDriverExecutor extends InterpretedWebDriver
 
 		String binding = zoom.getBinding();
 		Customer c = CORE.getUser().getCustomer();
+		@SuppressWarnings("null") // a null here fails the test; uses a nullable result where the API expects non-null
 		Module m = c.getModule(context.getModuleName());
+		@SuppressWarnings("null") // uses a nullable result where the API expects non-null
 		Document d = m.getDocument(c, context.getDocumentName());
 		TargetMetaData target = BindUtil.getMetaDataForBinding(c, m, d, binding);
 		Relation relation = (Relation) target.getAttribute();
@@ -445,8 +460,10 @@ public class PrimeFacesInterpretedWebDriverExecutor extends InterpretedWebDriver
 
 	private void dataGridGesture(Step step, String binding, Integer row) {
 		PrimeFacesAutomationContext context = peek();
+		@SuppressWarnings("null") // uses a nullable result where the API expects non-null
 		String buttonIdentifier = step.getIdentifier(context);
 		
+		@SuppressWarnings("null") // a null here fails the test
 		List<UIComponent> dataGridComponents = context.getFacesComponents(binding);
 		if (dataGridComponents == null) {
 			throw new MetaDataException(String.format("<%s /> with binding [%s] is not on the view", step.getClass()
@@ -470,6 +487,7 @@ public class PrimeFacesInterpretedWebDriverExecutor extends InterpretedWebDriver
 				selenide.trace(String.format("New row on data grid [%s] (%s)", binding, dataGridClientId));
 			}
 
+			@SuppressWarnings("null") // uses a nullable result where the API expects non-null
 			List<UIComponent> buttonComponents = context.getFacesComponents(buttonIdentifier);
 			if (buttonComponents != null) {
 				for (UIComponent buttonComponent : buttonComponents) {
@@ -493,7 +511,9 @@ public class PrimeFacesInterpretedWebDriverExecutor extends InterpretedWebDriver
 		// Determine the document of the edit view to push
 		if (step instanceof DataGridNew || step instanceof DataGridZoom) {
 			Customer c = CORE.getUser().getCustomer();
+			@SuppressWarnings("null") // uses a nullable result where the API expects non-null
 			Module m = c.getModule(context.getModuleName());
+			@SuppressWarnings("null") // uses a nullable result where the API expects non-null
 			Document d = m.getDocument(c, context.getDocumentName());
 			TargetMetaData target = BindUtil.getMetaDataForBinding(c, m, d, binding);
 			Relation relation = (Relation) target.getAttribute();
@@ -536,9 +556,12 @@ public class PrimeFacesInterpretedWebDriverExecutor extends InterpretedWebDriver
 
 	private void listGridGesture(Step step, Integer row) {
 		PrimeFacesAutomationContext context = peek();
+		@SuppressWarnings("null") // uses a nullable result where the API expects non-null
 		String buttonIdentifier = step.getIdentifier(context);
+		@SuppressWarnings("null") // a null here fails the test
 		String listGridIdentifier = buttonIdentifier.substring(0, buttonIdentifier.lastIndexOf('.'));
 		
+		@SuppressWarnings("null") // a null here fails the test
 		List<UIComponent> listGridComponents = context.getFacesComponents(listGridIdentifier);
 		if (listGridComponents == null) {
 			throw new MetaDataException(String.format("<%s /> with identifier [%s] is not defined", step.getClass()
@@ -583,6 +606,7 @@ public class PrimeFacesInterpretedWebDriverExecutor extends InterpretedWebDriver
 		}
 	}
 	
+	@SuppressWarnings("null") // a null here fails the test; uses a nullable result where the API expects non-null; checks values the annotations say are non-null
 	private PushEditContext listGridContext(String queryName, String documentName, String modelName, Step step) {
 		PushEditContext result = new PushEditContext();
 

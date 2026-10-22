@@ -2544,7 +2544,9 @@ public abstract class ViewRenderer extends ViewVisitor {
 			throw new MetaDataException("Lookup description has no query to use.");
 		}
 		String descriptionBinding = lookup.getDescriptionBinding();
-		if (descriptionBinding == null) {
+		@SuppressWarnings("null") // views built in code (and tests) can omit it; the bizKey is the default
+		boolean descriptionBindingMissing = (descriptionBinding == null);
+		if (descriptionBindingMissing) {
 			descriptionBinding = Bean.BIZ_KEY;
 		}
 		currentLookupDescriptionBinding = descriptionBinding;

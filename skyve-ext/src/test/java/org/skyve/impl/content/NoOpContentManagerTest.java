@@ -32,6 +32,7 @@ public class NoOpContentManagerTest {
 				.attachment("file.pdf", "application/pdf", "bytes".getBytes());
 	}
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
 	public void testPutBeanContent() throws Exception {
 		// BeanContent requires a PersistentBean; pass null since the method is a no-op

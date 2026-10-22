@@ -102,7 +102,7 @@ class OptimisticLockTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
+	@SuppressWarnings({"static-method", "null"}) // passes null on purpose
 	void constructorWithNullStringThrowsDomainException() {
 		assertThrows(DomainException.class, () -> new OptimisticLock((String) null));
 	}

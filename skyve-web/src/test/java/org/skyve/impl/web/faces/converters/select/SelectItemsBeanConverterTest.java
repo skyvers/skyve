@@ -35,11 +35,13 @@ public class SelectItemsBeanConverterTest {
 
 	// ---- getAsObject ----
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
 	public void getAsObjectReturnsNullForNullValue() {
 		assertNull(converter.getAsObject(null, null, null));
 	}
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
 	public void getAsObjectReturnsNullForEmptyString() {
 		assertNull(converter.getAsObject(null, null, ""));
@@ -148,6 +150,7 @@ public class SelectItemsBeanConverterTest {
 	public void getAsObjectFindsMatchingSelectItem() {
 		UISelectItem uiItem = mockSelectItem("myValue", "My Label", false);
 		UIComponent menu = mockMenuWithItems(uiItem);
+		@SuppressWarnings("null") // passes null on purpose
 		Object result = converter.getAsObject(null, menu, "myValue");
 		assertEquals("myValue", result);
 	}
@@ -156,6 +159,7 @@ public class SelectItemsBeanConverterTest {
 	public void getAsObjectReturnsNullWhenNoMatchingSelectItem() {
 		UISelectItem uiItem = mockSelectItem("other", "Other", false);
 		UIComponent menu = mockMenuWithItems(uiItem);
+		@SuppressWarnings("null") // passes null on purpose
 		Object result = converter.getAsObject(null, menu, "notFound");
 		assertNull(result);
 	}
@@ -164,6 +168,7 @@ public class SelectItemsBeanConverterTest {
 	public void getAsObjectSkipsNoSelectionOption() {
 		UISelectItem uiItem = mockSelectItem("target", "Target", true);
 		UIComponent menu = mockMenuWithItems(uiItem);
+		@SuppressWarnings("null") // passes null on purpose
 		Object result = converter.getAsObject(null, menu, "target");
 		assertNull(result);
 	}
@@ -175,6 +180,7 @@ public class SelectItemsBeanConverterTest {
 		UISelectItem groupItem = mock(UISelectItem.class);
 		when(groupItem.getValue()).thenReturn(group);
 		UIComponent menu = mockMenuWithItems(groupItem);
+		@SuppressWarnings("null") // passes null on purpose
 		Object result = converter.getAsObject(null, menu, "grouped");
 		assertEquals("grouped", result);
 	}
@@ -186,6 +192,7 @@ public class SelectItemsBeanConverterTest {
 		UISelectItem groupItem = mock(UISelectItem.class);
 		when(groupItem.getValue()).thenReturn(group);
 		UIComponent menu = mockMenuWithItems(groupItem);
+		@SuppressWarnings("null") // passes null on purpose
 		Object result = converter.getAsObject(null, menu, "notFound");
 		assertNull(result);
 	}

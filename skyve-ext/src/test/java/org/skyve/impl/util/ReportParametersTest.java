@@ -46,6 +46,7 @@ public class ReportParametersTest {
 		assertSame(bean, rp.getBean());
 	}
 
+	@SuppressWarnings({"null", "unused"}) // checks values the annotations say are non-null
 	@Test
 	public void threeArgConstructorWithNullDocumentAndEmptyParams() {
 		Map<String, Object> params = new HashMap<>();
@@ -59,6 +60,7 @@ public class ReportParametersTest {
 
 	@Test
 	public void reportNameIsPreserved() {
+		@SuppressWarnings("null") // passes null on purpose
 		ReportParameters rp = new ReportParameters(null, "specificReportName", new HashMap<>());
 		assertEquals("specificReportName", rp.getReportName());
 	}

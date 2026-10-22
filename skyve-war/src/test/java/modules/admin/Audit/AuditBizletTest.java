@@ -14,6 +14,7 @@ class AuditBizletTest {
 	void preExecuteNewReturnsBean() {
 		AuditBizlet bizlet = new AuditBizlet();
 		Audit bean = new Audit();
+		@SuppressWarnings("null") // passes null on purpose
 		Audit result = bizlet.preExecute(ImplicitActionName.New, bean, null, null);
 		assertSame(bean, result);
 	}

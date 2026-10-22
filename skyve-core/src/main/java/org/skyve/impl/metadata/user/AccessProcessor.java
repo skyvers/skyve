@@ -88,21 +88,19 @@ class AccessProcessor {
 
 	private void processModuleHome(final @Nonnull Module module, final @Nonnull String moduleName) {
 		String homeDocumentName = module.getHomeDocumentName();
-		if (homeDocumentName != null) {
-			ViewType homeRef = module.getHomeRef();
-			if (homeRef == ViewType.list) {
-				DocumentRef ref = module.getDocumentRefs().get(homeDocumentName);
-				String queryName = ref.getDefaultQueryName();
-				if (queryName != null) {
-					addAccessForUxUis(UserAccess.queryAggregate(moduleName, queryName), Collections.emptySet());
-				}
-				addAccessForUxUis(UserAccess.documentAggregate(moduleName, homeDocumentName), Collections.emptySet());
+		ViewType homeRef = module.getHomeRef();
+		if (homeRef == ViewType.list) {
+			DocumentRef ref = module.getDocumentRefs().get(homeDocumentName);
+			String queryName = ref.getDefaultQueryName();
+			if (queryName != null) {
+				addAccessForUxUis(UserAccess.queryAggregate(moduleName, queryName), Collections.emptySet());
 			}
-			else if (homeRef == ViewType.edit) {
-				Document document = module.getDocument(customer, homeDocumentName);
-				addAccessForUxUis(UserAccess.singular(document.getOwningModuleName(), homeDocumentName), Collections.emptySet());
-				processViews(document);
-			}
+			addAccessForUxUis(UserAccess.documentAggregate(moduleName, homeDocumentName), Collections.emptySet());
+		}
+		else if (homeRef == ViewType.edit) {
+			Document document = module.getDocument(customer, homeDocumentName);
+			addAccessForUxUis(UserAccess.singular(document.getOwningModuleName(), homeDocumentName), Collections.emptySet());
+			processViews(document);
 		}
 	}
 	

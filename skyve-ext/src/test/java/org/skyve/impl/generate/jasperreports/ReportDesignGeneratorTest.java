@@ -105,6 +105,7 @@ class ReportDesignGeneratorTest {
 		assertThat(design.getParameters().get(2).getDefaultValueExpression(), is((String) null));
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void populateDesignClearsGeneratedCollectionsAndInitialisesBaseState() {
 		DesignSpecification design = new DesignSpecification();
@@ -165,6 +166,7 @@ class ReportDesignGeneratorTest {
 		assertThat(design.getFields().get(2).getNameSql(), is("a.bizKey"));
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void addFieldsForJoinedDocumentAddsBizKeyJoinToBaseDocument() throws Exception {
 		Customer customer = mock(Customer.class);
@@ -437,6 +439,7 @@ class ReportDesignGeneratorTest {
 		assertThat(result.getSkyveType(), is(AttributeType.decimal10.name()));
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void fieldFromBindingSimpleTextAttributeReturnsField() {
 		DesignSpecification spec = new DesignSpecification();
@@ -475,6 +478,7 @@ class ReportDesignGeneratorTest {
 		assertThat(result, org.hamcrest.CoreMatchers.nullValue());
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void fieldFromBindingDottedAssociationBuildsJoinAndPrefixedSqlField() {
 		DesignSpecification spec = designWithJoinState();
@@ -502,6 +506,7 @@ class ReportDesignGeneratorTest {
 		assertThat(result.getNameSql(), is("b.name as customer_name"));
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void fieldFromAttributeAssociationInBeanModeBuildsLeftJoinAndBizKeyField() {
 		DesignSpecification spec = designWithJoinState();
@@ -523,6 +528,7 @@ class ReportDesignGeneratorTest {
 		assertEquals("association", result.getSkyveType());
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void fieldFromAttributeAssociationInSqlModeBuildsInnerJoinAndAliasExpression() {
 		DesignSpecification spec = designWithJoinState();

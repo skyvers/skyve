@@ -24,6 +24,7 @@ import util.AbstractH2Test;
 @SuppressWarnings("static-method")
 class DownloadTemplateTest extends AbstractH2Test {
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
 	void prepareDoesNotThrow() {
 		DownloadTemplate action = new DownloadTemplate();
@@ -39,6 +40,7 @@ class DownloadTemplateTest extends AbstractH2Test {
 		bean.setName("MyReport");
 		bean.setTemplate("template content");
 
+		@SuppressWarnings("null") // passes null on purpose
 		Download result = action.download(bean, null);
 
 		assertNotNull(result);
@@ -53,6 +55,7 @@ class DownloadTemplateTest extends AbstractH2Test {
 		bean.setName("MyReport");
 		bean.setTemplate("template content");
 
+		@SuppressWarnings("null") // passes null on purpose
 		Download result = action.download(bean, null);
 
 		assertNotNull(result);
@@ -67,6 +70,7 @@ class DownloadTemplateTest extends AbstractH2Test {
 		bean.setName("MyReport");
 		bean.setTemplate("template content");
 
+		@SuppressWarnings("null") // passes null on purpose
 		Download result = action.download(bean, null);
 
 		assertNotNull(result);
@@ -79,6 +83,7 @@ class DownloadTemplateTest extends AbstractH2Test {
 		bean.setOutputFormat(OutputFormat.CSV);
 		bean.setResults("name,count\nAlpha,3");
 
+		@SuppressWarnings("null") // passes null on purpose
 		Download result = new DownloadReport().download(bean, null);
 
 		assertEquals("Usage Summary.csv", result.getFileName());
@@ -93,6 +98,7 @@ class DownloadTemplateTest extends AbstractH2Test {
 		bean.setOutputFormat(OutputFormat.CSV);
 		bean.setResults("preview");
 
+		@SuppressWarnings("null") // passes null on purpose
 		Download result = new TestReport().download(bean, null);
 
 		assertEquals("Preview.csv", result.getFileName());
@@ -100,6 +106,7 @@ class DownloadTemplateTest extends AbstractH2Test {
 		assertEquals("preview", new String(result.getBytes(), StandardCharsets.UTF_8));
 	}
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
 	void testReportPrepareRejectsUnsavedChanges() {
 		ReportTemplateExtension bean = new ReportTemplateExtension();
@@ -109,6 +116,7 @@ class DownloadTemplateTest extends AbstractH2Test {
 		assertThrows(DomainException.class, () -> action.prepare(bean, null));
 	}
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
 	void testJasperReportPrepareRejectsUnsavedChanges() {
 		ReportTemplateExtension bean = new ReportTemplateExtension();
@@ -118,6 +126,7 @@ class DownloadTemplateTest extends AbstractH2Test {
 		assertThrows(DomainException.class, () -> action.prepare(bean, null));
 	}
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
 	void downloadReportPrepareRejectsMissingRequiredRuntimeParameter() {
 		ReportTemplateExtension bean = unchangedTemplateWithRequiredParameter();
@@ -126,6 +135,7 @@ class DownloadTemplateTest extends AbstractH2Test {
 		assertThrows(ValidationException.class, () -> action.prepare(bean, null));
 	}
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
 	void testReportPrepareRejectsMissingRequiredTestParameter() {
 		ReportTemplateExtension bean = unchangedTemplateWithRequiredParameter();
@@ -134,6 +144,7 @@ class DownloadTemplateTest extends AbstractH2Test {
 		assertThrows(ValidationException.class, () -> action.prepare(bean, null));
 	}
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
 	void testJasperReportPrepareRejectsBeanModeWithoutIdParameter() {
 		ReportTemplateExtension bean = new ReportTemplateExtension();

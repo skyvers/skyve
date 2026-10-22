@@ -52,6 +52,7 @@ class SmartClientQueryColumnDefinitionTest {
 		when(column.isSortable()).thenReturn(false);
 		when(column.isEditable()).thenReturn(false);
 
+		@SuppressWarnings("null") // passes null on purpose
 		SmartClientQueryColumnDefinition definition = new SmartClientQueryColumnDefinition(null,
 				null,
 				null,
@@ -91,6 +92,7 @@ class SmartClientQueryColumnDefinitionTest {
 		when(column.getEmptyThumbnailRelativeFile()).thenReturn("images/empty.png");
 		when(column.getDisplay()).thenReturn(DisplayType.thumbnail);
 
+		@SuppressWarnings("null") // passes null on purpose
 		SmartClientQueryColumnDefinition definition = new SmartClientQueryColumnDefinition(null,
 				null,
 				null,
@@ -123,6 +125,7 @@ class SmartClientQueryColumnDefinitionTest {
 		when(column.getEmptyThumbnailRelativeFile()).thenReturn(null);
 		when(column.getDisplay()).thenReturn(DisplayType.link);
 
+		@SuppressWarnings("null") // passes null on purpose
 		SmartClientQueryColumnDefinition definition = new SmartClientQueryColumnDefinition(null,
 				null,
 				null,
@@ -151,6 +154,7 @@ class SmartClientQueryColumnDefinitionTest {
 		when(column.getEmptyThumbnailRelativeFile()).thenReturn(null);
 		when(column.getDisplay()).thenReturn(DisplayType.thumbnail);
 
+		@SuppressWarnings("null") // passes null on purpose
 		SmartClientQueryColumnDefinition definition = new SmartClientQueryColumnDefinition(null,
 				null,
 				null,
@@ -179,6 +183,7 @@ class SmartClientQueryColumnDefinitionTest {
 		when(column.isSortable()).thenReturn(true);
 		when(column.isEditable()).thenReturn(true);
 
+		@SuppressWarnings("null") // passes null on purpose
 		SmartClientQueryColumnDefinition definition = new SmartClientQueryColumnDefinition(null,
 				null,
 				null,
@@ -285,6 +290,7 @@ class SmartClientQueryColumnDefinitionTest {
 		when(column.isSortable()).thenReturn(true);
 		when(column.isEditable()).thenReturn(true);
 
+		@SuppressWarnings("null") // passes null on purpose
 		SmartClientQueryColumnDefinition definition = new SmartClientQueryColumnDefinition(null,
 				null,
 				null,
@@ -317,6 +323,7 @@ class SmartClientQueryColumnDefinitionTest {
 		when(column.isSortable()).thenReturn(true);
 		when(column.isEditable()).thenReturn(true);
 
+		@SuppressWarnings("null") // passes null on purpose
 		SmartClientQueryColumnDefinition definition = new SmartClientQueryColumnDefinition(null,
 				null,
 				null,

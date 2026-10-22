@@ -81,6 +81,7 @@ class ReportDatasetBizletTest {
 	void preExecuteReturnsBeanWhenZoomingOutWithoutParentParameters() throws Exception {
 		ReportDatasetExtension bean = new ReportDatasetExtension();
 
+		@SuppressWarnings("null") // passes null on purpose
 		ReportDatasetExtension result = bizlet.preExecute(ImplicitActionName.ZoomOut, bean, null, null);
 
 		assertSame(bean, result);
@@ -90,11 +91,13 @@ class ReportDatasetBizletTest {
 	void preExecuteReturnsBeanForNonZoomOutAction() throws Exception {
 		ReportDatasetExtension bean = new ReportDatasetExtension();
 
+		@SuppressWarnings("null") // passes null on purpose
 		ReportDatasetExtension result = bizlet.preExecute(ImplicitActionName.Save, bean, null, null);
 
 		assertSame(bean, result);
 	}
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
 	void preRerenderIgnoresSourcesOtherThanQuery() throws Exception {
 		ReportDatasetExtension bean = new ReportDatasetExtension();

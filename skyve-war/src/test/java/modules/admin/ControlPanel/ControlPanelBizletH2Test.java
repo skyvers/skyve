@@ -67,6 +67,7 @@ class ControlPanelBizletH2Test extends AbstractH2Test {
 
 	// ---- getConstantDomainValues: selectedCache ----
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void getConstantDomainValuesForSelectedCacheReturnsNonEmptyList() throws Exception {
 		List<DomainValue> result = bizlet.getConstantDomainValues(ControlPanel.selectedCachePropertyName);
@@ -76,6 +77,7 @@ class ControlPanelBizletH2Test extends AbstractH2Test {
 
 	// ---- getConstantDomainValues: testModuleName ----
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void getConstantDomainValuesForTestModuleNameReturnsModules() throws Exception {
 		List<DomainValue> result = bizlet.getConstantDomainValues(ControlPanel.testModuleNamePropertyName);
@@ -93,6 +95,7 @@ class ControlPanelBizletH2Test extends AbstractH2Test {
 
 	// ---- getDynamicDomainValues: testDocumentNames ----
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void getDynamicDomainValuesForTestDocumentNamesWithModuleSetReturnsDocuments() throws Exception {
 		bean.setTestModuleName("admin");
@@ -102,6 +105,7 @@ class ControlPanelBizletH2Test extends AbstractH2Test {
 		assertFalse(result.isEmpty(), "Expected persistable documents in admin module");
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void getDynamicDomainValuesForTestDocumentNamesWithNullModuleReturnsEmpty() throws Exception {
 		bean.setTestModuleName(null);
@@ -113,6 +117,7 @@ class ControlPanelBizletH2Test extends AbstractH2Test {
 
 	// ---- getVariantDomainValues: customerNameToSwapTo ----
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void getVariantDomainValuesForCustomerNameToSwapToReturnsCustomers() throws Exception {
 		List<DomainValue> result = bizlet.getVariantDomainValues(ControlPanel.customerNameToSwapToPropertyName);
@@ -122,6 +127,7 @@ class ControlPanelBizletH2Test extends AbstractH2Test {
 
 	// ---- getVariantDomainValues: sailModuleName ----
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void getVariantDomainValuesForSailModuleNameReturnsModules() throws Exception {
 		List<DomainValue> result = bizlet.getVariantDomainValues(ControlPanel.sailModuleNamePropertyName);
@@ -131,6 +137,7 @@ class ControlPanelBizletH2Test extends AbstractH2Test {
 
 	// ---- getVariantDomainValues: sailUxUi ----
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void getVariantDomainValuesForSailUxUiReturnsUxUis() throws Exception {
 		List<DomainValue> result = bizlet.getVariantDomainValues(ControlPanel.sailUxUiPropertyName);

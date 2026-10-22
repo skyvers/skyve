@@ -3507,78 +3507,76 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 
 		// Add conditions
 		Map<String, Condition> conditions = ((DocumentImpl) document).getConditions();
-		if (conditions != null) {
-			for (String conditionName : conditions.keySet()) {
-				Condition condition = conditions.get(conditionName);
+		for (String conditionName : conditions.keySet()) {
+			Condition condition = conditions.get(conditionName);
 
-				if ((! overridden) ||
-						(documentClass == null) ||
-						(!documentClass.attributes.containsKey(conditionName))) {
-					imports.add("jakarta.xml.bind.annotation.XmlTransient");
+			if ((! overridden) ||
+					(documentClass == null) ||
+					(!documentClass.attributes.containsKey(conditionName))) {
+				imports.add("jakarta.xml.bind.annotation.XmlTransient");
 
-					boolean overriddenCondition = "created".equals(conditionName);
+				boolean overriddenCondition = "created".equals(conditionName);
 
-					// Generate/Include UML doc
-					String description = condition.getDocumentation();
-					if (description == null) {
-						description = condition.getDescription();
-					}
-					if (description == null) {
-						description = conditionName;
-					}
-					methods.append("\t/**");
-					String doc = condition.getDescription();
-					boolean nothingDocumented = true;
-					if (doc != null) {
-						nothingDocumented = false;
-						methods.append("\n\t * ").append(doc);
-					}
-					doc = condition.getDocumentation();
-					if (doc != null) {
-						nothingDocumented = false;
-						methods.append("\n\t * ").append(doc);
-					}
-					if (nothingDocumented) {
-						methods.append("\n\t * ").append(conditionName);
-					}
-					methods.append("\n\t *")
-							.append("\n\t * @return The condition")
-							.append("\n\t */");
-
-					methods.append("\n\t@XmlTransient");
-					if (overriddenCondition) {
-						methods.append("\n\t@Override");
-					}
-					String methodName = new StringBuilder(64).append("is")
-																.append(Character.toUpperCase(conditionName.charAt(0)))
-																.append(conditionName.substring(1)).toString();
-					String expression = condition.getExpression();
-					methods.append("\n\tpublic boolean ").append(methodName).append("() {");
-					if (BindUtil.isSkyveExpression(expression)) {
-						imports.add("org.skyve.util.ExpressionEvaluator");
-						methods.append("\n\t\treturn Boolean.TRUE.equals(ExpressionEvaluator.evaluate(\"");
-						methods.append(expression);
-						methods.append("\", this));");
-					}
-					else {
-						methods.append("\n\t\treturn (").append(expression).append(");");
-					}
-					methods.append("\n\t}\n\n");
-
-					methods.append("\t/**")
-							.append("\n\t * {@link #").append(methodName).append("} negation.")
-							.append("\n\t *")
-							.append("\n\t * @return The negated condition")
-							.append("\n\t */");
-					if (overriddenCondition) {
-						methods.append("\n\t@Override");
-					}
-					methods.append("\n\tpublic boolean isNot").append(Character.toUpperCase(conditionName.charAt(0)))
-							.append(conditionName.substring(1)).append("() {")
-							.append("\n\t\treturn (! is").append(Character.toUpperCase(conditionName.charAt(0)))
-							.append(conditionName.substring(1)).append("());")
-							.append("\n\t}\n\n");
+				// Generate/Include UML doc
+				String description = condition.getDocumentation();
+				if (description == null) {
+					description = condition.getDescription();
 				}
+				if (description == null) {
+					description = conditionName;
+				}
+				methods.append("\t/**");
+				String doc = condition.getDescription();
+				boolean nothingDocumented = true;
+				if (doc != null) {
+					nothingDocumented = false;
+					methods.append("\n\t * ").append(doc);
+				}
+				doc = condition.getDocumentation();
+				if (doc != null) {
+					nothingDocumented = false;
+					methods.append("\n\t * ").append(doc);
+				}
+				if (nothingDocumented) {
+					methods.append("\n\t * ").append(conditionName);
+				}
+				methods.append("\n\t *")
+						.append("\n\t * @return The condition")
+						.append("\n\t */");
+
+				methods.append("\n\t@XmlTransient");
+				if (overriddenCondition) {
+					methods.append("\n\t@Override");
+				}
+				String methodName = new StringBuilder(64).append("is")
+															.append(Character.toUpperCase(conditionName.charAt(0)))
+															.append(conditionName.substring(1)).toString();
+				String expression = condition.getExpression();
+				methods.append("\n\tpublic boolean ").append(methodName).append("() {");
+				if (BindUtil.isSkyveExpression(expression)) {
+					imports.add("org.skyve.util.ExpressionEvaluator");
+					methods.append("\n\t\treturn Boolean.TRUE.equals(ExpressionEvaluator.evaluate(\"");
+					methods.append(expression);
+					methods.append("\", this));");
+				}
+				else {
+					methods.append("\n\t\treturn (").append(expression).append(");");
+				}
+				methods.append("\n\t}\n\n");
+
+				methods.append("\t/**")
+						.append("\n\t * {@link #").append(methodName).append("} negation.")
+						.append("\n\t *")
+						.append("\n\t * @return The negated condition")
+						.append("\n\t */");
+				if (overriddenCondition) {
+					methods.append("\n\t@Override");
+				}
+				methods.append("\n\tpublic boolean isNot").append(Character.toUpperCase(conditionName.charAt(0)))
+						.append(conditionName.substring(1)).append("() {")
+						.append("\n\t\treturn (! is").append(Character.toUpperCase(conditionName.charAt(0)))
+						.append(conditionName.substring(1)).append("());")
+						.append("\n\t}\n\n");
 			}
 		}
 

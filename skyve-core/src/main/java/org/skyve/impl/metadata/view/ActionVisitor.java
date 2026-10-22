@@ -60,10 +60,8 @@ public abstract class ActionVisitor {
 											boolean parentVisible,
 											boolean parentEnabled) {
 		List<Parameter> parameters = parameterizable.getParameters();
-		if (parameters != null) {
-			for (Parameter parameter : parameters) {
-				visitParameter(parameter, parentVisible, parentEnabled);
-			}
+		for (Parameter parameter : parameters) {
+			visitParameter(parameter, parentVisible, parentEnabled);
 		}
 	}
 
@@ -78,16 +76,12 @@ public abstract class ActionVisitor {
 									boolean parentVisible,
 									boolean parentEnabled) {
 		List<FilterParameter> filterParameters = filterable.getFilterParameters();
-		if (filterParameters != null) {
-			for (FilterParameter parameter : filterParameters) {
-				visitFilterParameter(parameter, parentVisible, parentEnabled);
-			}
+		for (FilterParameter parameter : filterParameters) {
+			visitFilterParameter(parameter, parentVisible, parentEnabled);
 		}
 		List<Parameter> parameters = filterable.getParameters();
-		if (parameters != null) {
-			for (Parameter parameter : parameters) {
-				visitParameter(parameter, parentVisible, parentEnabled);
-			}
+		for (Parameter parameter : parameters) {
+			visitParameter(parameter, parentVisible, parentEnabled);
 		}
 	}
 

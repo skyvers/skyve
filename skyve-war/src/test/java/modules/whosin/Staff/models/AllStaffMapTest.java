@@ -22,6 +22,7 @@ import modules.whosin.domain.Staff;
 class AllStaffMapTest {
 	private static final GeometryFactory GEOMETRY_FACTORY = new GeometryFactory();
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void getResultReturnsMapItemForStaffInsideBounds() throws Exception {
 		Staff staff = staff("staff-1", "Person Example", Staff.Status.inTheOffice, point(1.0, 1.0));
@@ -43,6 +44,7 @@ class AllStaffMapTest {
 		assertThat(feature.getIconAnchorY(), is(Integer.valueOf(8)));
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void getResultSkipsStaffOutsideBoundsAndOmitsNullStatus() throws Exception {
 		Staff outside = staff("outside", "Outside Person", Staff.Status.outOfTheOffice, point(10.0, 10.0));
@@ -56,6 +58,7 @@ class AllStaffMapTest {
 		assertThat(result.getItems().get(0).getInfoMarkup(), is("Inside Person"));
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void getResultReturnsNoItemsWhenNoStaffIntersectBounds() throws Exception {
 		TestableAllStaffMap model = new TestableAllStaffMap(List.of(staff("outside", "Outside Person", null, point(10.0, 10.0))));

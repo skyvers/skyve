@@ -63,6 +63,7 @@ class FluentLookupDescriptionTest {
 		assertThat(new FluentLookupDescription().editable(false).get().getEditable(), is(Boolean.FALSE));
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void pixelWidthSetsValue() {
 		assertEquals(300, new FluentLookupDescription().pixelWidth(300).get().getPixelWidth().intValue());

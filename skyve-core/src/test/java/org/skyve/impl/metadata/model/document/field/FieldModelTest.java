@@ -46,6 +46,7 @@ class FieldModelTest {
 		assertThat(text.getValidator(), is(validator));
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void textSetAndGetFormat() {
 		Text text = new Text();

@@ -44,6 +44,7 @@ class MailLogDocumentConverterTest {
 
 		Document doc = converter.convert(mailLog);
 
+		@SuppressWarnings("null") // uses a nullable result where the API expects non-null
 		String timestamp = DocumentConverter.dateToString(mailLog.getTimestamp());
 		assertThat(doc.get(MailLog.timestampPropertyName), is(timestamp));
 		assertThat(doc.get(Bean.DOCUMENT_ID), is("mail-log-1"));

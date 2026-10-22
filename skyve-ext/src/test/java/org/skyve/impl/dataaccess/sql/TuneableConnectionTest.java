@@ -453,7 +453,7 @@ public class TuneableConnectionTest {
 	}
 
 	@Test
-	@SuppressWarnings({"static-method", "java:S5961"}) // number of assertions OK
+	@SuppressWarnings({"static-method", "java:S5961", "null", "unused"}) // number of assertions OK
 	public void coverAllDelegatedMethods() throws Exception {
 		CapturingConnection base = new CapturingConnection();
 		TuneableConnection conn = new TuneableConnection(base);

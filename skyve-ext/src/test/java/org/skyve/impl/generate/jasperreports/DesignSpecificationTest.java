@@ -281,6 +281,7 @@ class DesignSpecificationTest {
 		assertThat(spec.getLabelAlignmentOverride(), is(ReportElement.ElementAlignment.right));
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void addJoinCreatesJoinMaps() {
 		spec.addJoin("MyDocument", "a1", "join MyDocument a1 on a1.parent_id = a.bizId");

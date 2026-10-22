@@ -70,6 +70,7 @@ class GeneratorTest {
 		}
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void addLoginAndOutCreatesBeforeAndAfterProcedures() throws Exception {
 		User user = mock(User.class);
@@ -89,6 +90,7 @@ class GeneratorTest {
 		assertThat(automation.getAfter().getSteps().get(0), instanceOf(Logout.class));
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void addLoginAndOutPrependsLoginToExistingBeforeAndAppendsLogoutToExistingAfter() throws Exception {
 		User user = mock(User.class);
@@ -113,6 +115,7 @@ class GeneratorTest {
 		assertThat(automation.getAfter().getSteps().get(1), instanceOf(Logout.class));
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void visitModuleSkipsAbstractChildInaccessibleAndForeignDocumentRefs() throws Exception {
 		User user = mock(User.class);
@@ -194,6 +197,7 @@ class GeneratorTest {
 		verify(repository, times(2)).resetMenus(user);
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void visitMenusPasswordOverloadAddsLoginForNonEmptyMenuAutomation() throws Exception {
 		UserImpl user = mock(UserImpl.class);
@@ -253,6 +257,7 @@ class GeneratorTest {
 		assertThat(navigate.getDocumentName(), is("Invoice"));
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void visitModulesPasswordOverloadKeepsNonEmptyAutomation() throws Exception {
 		User user = mock(User.class);
@@ -283,6 +288,7 @@ class GeneratorTest {
 		assertThat(automation.getAfter().getSteps().get(0), instanceOf(Logout.class));
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void visitModulePasswordOverloadAddsLoginForNonEmptyModule() throws Exception {
 		User user = mock(User.class);
@@ -651,6 +657,7 @@ class GeneratorTest {
 		assertThat(steps.get(5), instanceOf(Save.class));
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void visitMenuPasswordOverloadAddsLoginAndLogout() throws Exception {
 		UserImpl user = mock(UserImpl.class);

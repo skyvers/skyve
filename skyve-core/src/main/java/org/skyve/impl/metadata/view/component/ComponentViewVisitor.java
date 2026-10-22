@@ -158,7 +158,9 @@ public class ComponentViewVisitor extends ViewVisitor {
 		for (ComponentTranslation translation : translations) {
 			String fromComponent = translation.getFromComponent();
 			String mappedTo = translation.getMappedTo();
-			if ((fromComponent != null) && (mappedTo != null)) {
+			@SuppressWarnings("null") // a blank side in the XML is processed to null
+			boolean bothSidesPresent = (fromComponent != null) && (mappedTo != null);
+			if (bothSidesPresent) {
 				result.put(fromComponent, mappedTo);
 			}
 		}
@@ -1633,8 +1635,10 @@ public class ComponentViewVisitor extends ViewVisitor {
 	 * @return the mapped action name, or the name unchanged when it has no mapping
 	 */
 	private @Nonnull String translateAction(@Nonnull String name) {
-		if (name == null) {
-			return null;
+		@SuppressWarnings("null") // widgets built in code bypass the XSD; a unit test asserts a null name stays null
+		boolean nameMissing = (name == null);
+		if (nameMissing) {
+			return name;
 		}
 		String result = actionMappings.get(name);
 		return (result == null) ? name : result;

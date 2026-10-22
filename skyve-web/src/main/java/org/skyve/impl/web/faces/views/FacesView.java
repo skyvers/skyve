@@ -613,11 +613,9 @@ public class FacesView extends HarnessView {
 					if (bean != null) {
 						// bizId could be in data table rowid format <bizId>#<bizDocument>.<bizModule>
 						String bizId = bean.getBizId();
-						if (bizId != null) {
-							int hashIndex = bizId.indexOf('#');
-							if (hashIndex > -1) {
-								bizId = bizId.substring(0, hashIndex);
-							}
+						int hashIndex = bizId.indexOf('#');
+						if (hashIndex > -1) {
+							bizId = bizId.substring(0, hashIndex);
 						}
 						StringBuilder log = new StringBuilder(128);
 						log.append("FacesView - selectGridRow set ").append(selectedIdBinding);
@@ -745,10 +743,12 @@ public class FacesView extends HarnessView {
 														@SuppressWarnings("hiding") @Nullable String modelName,
 														@Nullable List<List<String>> filterCriteria) {
 		String key = null;
-		if ((moduleName != null) && (queryName != null)) {
+		@SuppressWarnings("null") // FacesViewTest asserts that a null module name is rejected
+		boolean moduleNamePresent = (moduleName != null);
+		if (moduleNamePresent && (queryName != null)) {
 			key = String.format("%s.%s", moduleName, queryName);
 		}
-		else if ((moduleName != null) && (documentName != null)) {
+		else if (moduleNamePresent && (documentName != null)) {
 			if (modelName != null) {
 				key = String.format("%s.%s.%s", moduleName, documentName, modelName);
 			}

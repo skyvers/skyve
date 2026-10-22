@@ -9,11 +9,13 @@ public class LegacyBCryptPasswordEncoderTest {
 
 	private final LegacyBCryptPasswordEncoder encoder = new LegacyBCryptPasswordEncoder();
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test(expected = IllegalArgumentException.class)
 	public void testEncodeNullRawPassword() {
 		encoder.encode(null);
 	}
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test(expected = IllegalArgumentException.class)
 	public void testMatchesNullRawPassword() {
 		encoder.matches(null, "$2a$10$9u8BUQ4U8D6Nq3OGk7zSOu3jb0AmmPud95PZwQ0ZfYvFuG0j0rL9S");

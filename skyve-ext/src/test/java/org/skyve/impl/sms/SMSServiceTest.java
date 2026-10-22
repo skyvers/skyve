@@ -13,12 +13,14 @@ public class SMSServiceTest {
 
 	// ---- SMSServiceStaticSingleton ----
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
 	public void singletonGetReturnsNullInitially() {
 		SMSServiceStaticSingleton.set(null);
 		assertNull(SMSServiceStaticSingleton.get());
 	}
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
 	public void singletonSetAndGetReturnsSetService() {
 		SMSService svc = new NoOpSMSService();
@@ -31,6 +33,7 @@ public class SMSServiceTest {
 		}
 	}
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
 	public void singletonSetDefaultSetsNoOpService() {
 		SMSServiceStaticSingleton.setDefault();

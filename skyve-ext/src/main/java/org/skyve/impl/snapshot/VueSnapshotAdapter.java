@@ -124,9 +124,7 @@ class VueSnapshotAdapter extends SnapshotAdapter {
 										if (size == 1) {
 											Map<String, Object> constraint = constraints.get(0);
 											SnapshotCriterion criterion = criterion(k, constraint);
-											if (criterion != null) {
-												topFilters.add(criterion);
-											}
+											topFilters.add(criterion);
 										}
 										// Advanced Criteria
 										else {
@@ -139,9 +137,7 @@ class VueSnapshotAdapter extends SnapshotAdapter {
 												List<SnapshotFilter> advancedFilters = advanced.getFilters();
 												constraints.forEach(e -> {
 													SnapshotCriterion criterion = criterion(k, e);
-													if (criterion != null) {
-														advancedFilters.add(criterion);
-													}
+													advancedFilters.add(criterion);
 												});
 												// Only add the advanced filter if it has filters defined
 												if (! advancedFilters.isEmpty()) {
@@ -372,16 +368,13 @@ class VueSnapshotAdapter extends SnapshotAdapter {
 		else {
 			SnapshotCriterion criterion = (SnapshotCriterion) filter;
 			Map<String, Object> constraint = constraint(criterion);
-			// Check for invalid constraint
-			if (constraint != null) {
-				Map<String, Object> filterObject = new LinkedHashMap<>(2);
-				filterObject.put(VUE_OPERATOR, CompoundFilterOperator.and.toString());
-				List<Map<String, Object>> constraints = new ArrayList<>(1);
-				constraints.add(constraint);
-				filterObject.put(VUE_CONSTRAINTS, constraints);
-				result = new LinkedHashMap<>();
-				result.put(criterion.getColumn(), filterObject);
-			}
+			Map<String, Object> filterObject = new LinkedHashMap<>(2);
+			filterObject.put(VUE_OPERATOR, CompoundFilterOperator.and.toString());
+			List<Map<String, Object>> constraints = new ArrayList<>(1);
+			constraints.add(constraint);
+			filterObject.put(VUE_CONSTRAINTS, constraints);
+			result = new LinkedHashMap<>();
+			result.put(criterion.getColumn(), filterObject);
 		}
 		
 		return result;

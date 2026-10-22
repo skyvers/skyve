@@ -88,6 +88,7 @@ public class NaturalCronExpressionParserTest {
 	/**
 	 * Tests that each input expression in the parameters list matches the expected result.
 	 */
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	public void testParseWithParameters() {
 		// call the method under test

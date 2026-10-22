@@ -14,6 +14,7 @@ public class JobSchedulerStaticSingletonTest {
 
 	private JobScheduler originalInstance;
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Before
 	public void setUp() {
 		// Save the current instance so tests are isolated

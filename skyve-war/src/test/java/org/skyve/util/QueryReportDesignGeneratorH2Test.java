@@ -71,6 +71,7 @@ class QueryReportDesignGeneratorH2Test extends AbstractH2Test {
 		DesignSpecification result = gen.populateDesign(spec);
 
 		assertFalse(result.getBands().isEmpty(), "expected at least one band");
+		@SuppressWarnings("null") // a null here fails the test
 		boolean hasDetail = result.getBands().stream()
 				.anyMatch(b -> b.getBandType() != null && b.getBandType().toString().equalsIgnoreCase("detail"));
 		assertTrue(hasDetail, "missing detail band");
