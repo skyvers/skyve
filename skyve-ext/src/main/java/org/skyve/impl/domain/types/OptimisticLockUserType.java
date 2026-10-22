@@ -42,13 +42,16 @@ public class OptimisticLockUserType implements UserType, Serializable, LiteralTy
 	}
 
 	@Override
-	public int hashCode(@Nonnull Object o)
+	public int hashCode(@SuppressWarnings("null") @Nonnull Object o)
 	throws HibernateException {
 		return ((OptimisticLock) o).hashCode();
 	}
 
 	@Override
-	public @Nullable Object nullSafeGet(@Nonnull ResultSet rs, @Nonnull String[] names, @Nullable SharedSessionContractImplementor session, @Nullable Object owner)
+	public @Nullable Object nullSafeGet(@SuppressWarnings("null") @Nonnull ResultSet rs,
+										@SuppressWarnings("null") @Nonnull String[] names,
+										@Nullable SharedSessionContractImplementor session,
+										@Nullable Object owner)
 	throws HibernateException, SQLException {
 		String value = rs.getString(names[0]);
 		if (rs.wasNull() || (value == null) || value.isEmpty()) {
@@ -64,7 +67,10 @@ public class OptimisticLockUserType implements UserType, Serializable, LiteralTy
 	}
 
 	@Override
-	public void nullSafeSet(@Nonnull PreparedStatement ps, @Nullable Object value, int index, @Nullable SharedSessionContractImplementor session)
+	public void nullSafeSet(@SuppressWarnings("null") @Nonnull PreparedStatement ps,
+							@Nullable Object value,
+							int index,
+							@Nullable SharedSessionContractImplementor session)
 	throws HibernateException, SQLException {
 		if (value == null) {
 			ps.setNull(index, Types.VARCHAR);

@@ -297,7 +297,8 @@ public abstract class FacesAction<T> {
 				final MutableBoolean assignedResult = new MutableBoolean(result);
 				data.visitTree(VisitContext.createVisitContext(fc), new VisitCallback() {
 					@Override
-				    public @Nonnull VisitResult visit(@Nonnull VisitContext context, @Nonnull UIComponent target) {
+				    public @Nonnull VisitResult visit(@SuppressWarnings("null") @Nonnull VisitContext context,
+														@SuppressWarnings("null") @Nonnull UIComponent target) {
 				    	if (target instanceof UIInput input) {
 							// NB ensure && operator doesn't short circuit by putting the function call as the first argument
 							// This way we'll get all validation error messages

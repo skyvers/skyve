@@ -55,7 +55,7 @@ public class SkyveDualListModelMap extends TreeMap<String, DualListModel<DomainV
 	 * @param key	The lookup description binding.
 	 */
 	@Override
-	public @Nonnull DualListModel<DomainValue> get(@Nonnull Object key) {
+	public @Nonnull DualListModel<DomainValue> get(@SuppressWarnings("null") @Nonnull Object key) {
 		if (! containsKey(key)) {
 			scatter((String) key);
 		}

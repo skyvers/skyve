@@ -33,7 +33,7 @@ public class DevLoginFilter implements Filter {
 	 * @throws ServletException when any required parameter is missing
 	 */
 	@Override
-	public void init(@Nonnull FilterConfig config) throws ServletException {
+	public void init(@SuppressWarnings("null") @Nonnull FilterConfig config) throws ServletException {
 		String customerName = Util.processStringValue(config.getInitParameter(CUSTOMER_NAME));
 		if (customerName == null) {
 			throw new ServletException(CUSTOMER_NAME + INIT_PARAMETER_REQUIRED);
@@ -68,7 +68,9 @@ public class DevLoginFilter implements Filter {
 	 * @throws ServletException when authentication or downstream processing fails
 	 */
 	@Override
-	public void doFilter(@Nonnull ServletRequest request, @Nonnull ServletResponse response, @Nonnull FilterChain chain)
+	public void doFilter(@SuppressWarnings("null") @Nonnull ServletRequest request,
+						@SuppressWarnings("null") @Nonnull ServletResponse response,
+						@SuppressWarnings("null") @Nonnull FilterChain chain)
 	throws IOException, ServletException {
 		HttpServletRequest hsr = (HttpServletRequest) request;
 		Principal userPrincipal = hsr.getUserPrincipal();

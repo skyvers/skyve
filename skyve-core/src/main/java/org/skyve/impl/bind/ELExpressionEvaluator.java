@@ -89,7 +89,7 @@ public class ELExpressionEvaluator extends ExpressionEvaluator {
 	 */
 	static final ClassValue<Map<String, ELClass>> ENUM_BEANS = new ClassValue<>() {
 		@Override
-		protected @Nonnull Map<String, ELClass> computeValue(@Nonnull Class<?> type) {
+		protected @Nonnull Map<String, ELClass> computeValue(@SuppressWarnings("null") @Nonnull Class<?> type) {
 			return new ConcurrentHashMap<>(enumBeans(type));
 		}
 	};
@@ -101,14 +101,17 @@ public class ELExpressionEvaluator extends ExpressionEvaluator {
 		private Map<String, Method> localFunctions;
 		private final FunctionMapper functions = new FunctionMapper() {
 			@Override
-			public @Nullable Method resolveFunction(@Nonnull String prefix, @Nonnull String localName) {
+			public @Nullable Method resolveFunction(@SuppressWarnings("null") @Nonnull String prefix,
+													@SuppressWarnings("null") @Nonnull String localName) {
 				String key = prefix + ':' + localName;
 				Method result = (localFunctions == null) ? null : localFunctions.get(key);
 				return (result == null) ? FIXED_FUNCTIONS.get(key) : result;
 			}
 
 			@Override
-			public void mapFunction(@Nonnull String prefix, @Nonnull String localName, @Nullable Method method) {
+			public void mapFunction(@SuppressWarnings("null") @Nonnull String prefix,
+									@SuppressWarnings("null") @Nonnull String localName,
+									@Nullable Method method) {
 				if (localFunctions == null) {
 					localFunctions = new HashMap<>();
 				}

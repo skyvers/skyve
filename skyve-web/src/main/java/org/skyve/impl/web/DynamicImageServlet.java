@@ -72,7 +72,7 @@ public class DynamicImageServlet extends HttpServlet {
 	 */
 	@Override
 	@SuppressWarnings({"java:S1989", "java:S3776"}) // there exists JavaEE error pages; Complexity OK
-	public void doGet(@Nonnull HttpServletRequest request, @Nonnull HttpServletResponse response)
+	public void doGet(@SuppressWarnings("null") @Nonnull HttpServletRequest request, @SuppressWarnings("null") @Nonnull HttpServletResponse response)
 	throws ServletException, IOException {
 		// State required for rendering the image
 		Exception exception = null;

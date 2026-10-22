@@ -85,7 +85,7 @@ public class ChartResponseWriter extends ResponseWriter {
 	 * @throws IOException never thrown
 	 */
 	@Override
-	public void startElement(@Nonnull String name, @Nullable UIComponent component) throws IOException {
+	public void startElement(@SuppressWarnings("null") @Nonnull String name, @Nullable UIComponent component) throws IOException {
 		// no-op
 	}
 
@@ -96,7 +96,7 @@ public class ChartResponseWriter extends ResponseWriter {
 	 * @throws IOException never thrown
 	 */
 	@Override
-	public void endElement(@Nonnull String name) throws IOException {
+	public void endElement(@SuppressWarnings("null") @Nonnull String name) throws IOException {
 		// no-op
 	}
 
@@ -109,7 +109,7 @@ public class ChartResponseWriter extends ResponseWriter {
 	 * @throws IOException never thrown
 	 */
 	@Override
-	public void writeAttribute(@Nonnull String name, @Nullable Object value, @Nullable String property) throws IOException {
+	public void writeAttribute(@SuppressWarnings("null") @Nonnull String name, @Nullable Object value, @Nullable String property) throws IOException {
 		// no-op
 	}
 
@@ -122,7 +122,9 @@ public class ChartResponseWriter extends ResponseWriter {
 	 * @throws IOException never thrown
 	 */
 	@Override
-	public void writeURIAttribute(@Nonnull String name, @Nullable Object value, @Nullable String property) throws IOException {
+	public void writeURIAttribute(@SuppressWarnings("null") @Nonnull String name,
+									@Nullable Object value,
+									@Nullable String property) throws IOException {
 		// no-op
 	}
 
@@ -133,7 +135,7 @@ public class ChartResponseWriter extends ResponseWriter {
 	 * @throws IOException never thrown
 	 */
 	@Override
-	public void writeComment(@Nonnull Object comment) throws IOException {
+	public void writeComment(@SuppressWarnings("null") @Nonnull Object comment) throws IOException {
 		// no-op
 	}
 
@@ -145,7 +147,7 @@ public class ChartResponseWriter extends ResponseWriter {
 	 * @throws IOException if an I/O error occurs
 	 */
 	@Override
-	public void writeText(@Nonnull Object text, @Nullable String property) throws IOException {
+	public void writeText(@SuppressWarnings("null") @Nonnull Object text, @Nullable String property) throws IOException {
 		writer.write(text.toString());
 	}
 
@@ -158,7 +160,7 @@ public class ChartResponseWriter extends ResponseWriter {
 	 * @throws IOException if an I/O error occurs
 	 */
 	@Override
-	public void writeText(@Nonnull char[] text, int off, int len) throws IOException {
+	public void writeText(@SuppressWarnings("null") @Nonnull char[] text, int off, int len) throws IOException {
 		writer.write(text, off, len);
 	}
 
@@ -169,7 +171,7 @@ public class ChartResponseWriter extends ResponseWriter {
 	 * @return always {@code null}
 	 */
 	@Override
-	public @Nullable jakarta.faces.context.ResponseWriter cloneWithWriter(@SuppressWarnings("hiding") @Nonnull Writer writer) {
+	public @Nullable jakarta.faces.context.ResponseWriter cloneWithWriter(@SuppressWarnings({"hiding", "null"}) @Nonnull Writer writer) {
 		return null;
 	}
 
@@ -182,7 +184,7 @@ public class ChartResponseWriter extends ResponseWriter {
 	 * @throws IOException if an I/O error occurs
 	 */
 	@Override
-	public void write(@Nonnull char[] cbuf, int off, int len) throws IOException {
+	public void write(@SuppressWarnings("null") @Nonnull char[] cbuf, int off, int len) throws IOException {
 		writer.write(cbuf, off, len);
 	}
 

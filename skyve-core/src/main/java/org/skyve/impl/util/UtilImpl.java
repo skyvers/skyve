@@ -601,7 +601,7 @@ public class UtilImpl {
 			Document document = module.getDocument(customer, bean.getBizDocument());
 
 			for (String referenceName : document.getReferenceNames()) {
-				Reference reference = document.getReferenceByName(referenceName);
+				Reference reference = document.getNullSafeReferenceByName(referenceName);
 				if (reference.isPersistent()) {
 					if (reference instanceof Association association) {
 						if (association.getType() != AssociationType.aggregation) {
@@ -635,7 +635,7 @@ public class UtilImpl {
 			Document document = module.getDocument(customer, bean.getBizDocument());
 
 			for (String referenceName : document.getReferenceNames()) {
-				Reference reference = document.getReferenceByName(referenceName);
+				Reference reference = document.getNullSafeReferenceByName(referenceName);
 				if (reference.isPersistent()) {
 					if (reference instanceof Association association) {
 						if (association.getType() != AssociationType.aggregation) {

@@ -28,7 +28,7 @@ public class Conversation extends UIComponentBase {
 	}
 
 	@Override
-	public void encodeBegin(@Nonnull FacesContext context) throws IOException {
+	public void encodeBegin(@SuppressWarnings("null") @Nonnull FacesContext context) throws IOException {
 		Map<String, Object> attributes = getAttributes();
 		final String managedBeanName = (String) attributes.get("managedBean");
 

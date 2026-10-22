@@ -21,7 +21,10 @@ import jakarta.faces.context.ResponseWriter;
  */
 public class SkyveMessageRenderer extends MessageRenderer {
 	@Override
-	protected void encodeIcon(@Nonnull ResponseWriter writer, @Nonnull String severity, @Nullable String title, boolean iconOnly) throws IOException {
+	protected void encodeIcon(@SuppressWarnings("null") @Nonnull ResponseWriter writer,
+								@SuppressWarnings("null") @Nonnull String severity,
+								@Nullable String title,
+								boolean iconOnly) throws IOException {
 		super.encodeIcon(writer, severity, iconOnly ? OWASP.sanitise(Sanitisation.text, title) : title, iconOnly);
 	}
 }

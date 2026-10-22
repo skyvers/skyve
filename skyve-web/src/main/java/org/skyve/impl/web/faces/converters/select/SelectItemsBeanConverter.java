@@ -28,7 +28,9 @@ public class SelectItemsBeanConverter implements Converter<Object> {
 	 * @return the resolved domain value or identifier object
 	 */
 	@Override
-	public @Nullable Object getAsObject(@Nonnull FacesContext context, @Nonnull UIComponent component, @Nullable String value) {
+	public @Nullable Object getAsObject(@SuppressWarnings("null") @Nonnull FacesContext context,
+										@SuppressWarnings("null") @Nonnull UIComponent component,
+										@Nullable String value) {
 		Object result = null;
 
 		if ((value != null) && (! value.isEmpty())) {

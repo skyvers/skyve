@@ -120,12 +120,12 @@ public class SkyveSpringSecurity {
 					// Assign a no-op DataSource that dishes out EXT.getDataStoreConnection()s.
 					dataSource = new DataSource() {
 						@Override
-						public @Nullable <T> T unwrap(@Nonnull Class<T> iface) throws SQLException {
+						public @Nullable <T> T unwrap(@SuppressWarnings("null") @Nonnull Class<T> iface) throws SQLException {
 							return null;
 						}
 						
 						@Override
-						public boolean isWrapperFor(@Nonnull Class<?> iface) throws SQLException {
+						public boolean isWrapperFor(@SuppressWarnings("null") @Nonnull Class<?> iface) throws SQLException {
 							return false;
 						}
 						
@@ -156,7 +156,8 @@ public class SkyveSpringSecurity {
 						
 						@Override
 						@SuppressWarnings("resource")
-						public @Nonnull Connection getConnection(@Nonnull String username, @Nonnull String password) throws SQLException {
+						public @Nonnull Connection getConnection(@SuppressWarnings("null") @Nonnull String username,
+																@SuppressWarnings("null") @Nonnull String password) throws SQLException {
 							return getConnection();
 						}
 						
@@ -313,14 +314,14 @@ public class SkyveSpringSecurity {
 			
 			// return the user just queried (with all the expiration details queried too)
 			@Override
-			protected @Nonnull UserDetails createUserDetails(@Nonnull String username,
-																@Nonnull UserDetails userFromUserQuery,
-																@Nonnull List<GrantedAuthority> combinedAuthorities) {
+			protected @Nonnull UserDetails createUserDetails(@SuppressWarnings("null") @Nonnull String username,
+																@SuppressWarnings("null") @Nonnull UserDetails userFromUserQuery,
+																@SuppressWarnings("null") @Nonnull List<GrantedAuthority> combinedAuthorities) {
 				return userFromUserQuery;
 			}
 			
 			@Override
-			protected @Nonnull List<UserDetails> loadUsersByUsername(@Nonnull String springUsername) {
+			protected @Nonnull List<UserDetails> loadUsersByUsername(@SuppressWarnings("null") @Nonnull String springUsername) {
 				String tempCustomerName = null;
 				String tempUserName = springUsername;
 				int slashIndex = tempUserName.indexOf('/');
@@ -339,7 +340,7 @@ public class SkyveSpringSecurity {
 						skyveUserQuery,
 						new RowMapper<UserDetails>() {
 							@Override
-							public @Nonnull UserDetails mapRow(@Nonnull ResultSet rs, int rowNum)
+							public @Nonnull UserDetails mapRow(@SuppressWarnings("null") @Nonnull ResultSet rs, int rowNum)
 							throws SQLException {
 								String user = rs.getString(1);
 								String userPassword = rs.getString(2);
@@ -400,17 +401,17 @@ public class SkyveSpringSecurity {
 			}
 			
 			@Override
-			protected @Nonnull List<GrantedAuthority> loadUserAuthorities(@Nonnull String username) {
+			protected @Nonnull List<GrantedAuthority> loadUserAuthorities(@SuppressWarnings("null") @Nonnull String username) {
 				return Collections.singletonList(new SimpleGrantedAuthority("NoAuth"));
 			}
 
 			@Override
-			protected @Nonnull List<GrantedAuthority> loadGroupAuthorities(@Nonnull String username) {
+			protected @Nonnull List<GrantedAuthority> loadGroupAuthorities(@SuppressWarnings("null") @Nonnull String username) {
 				return Collections.singletonList(new SimpleGrantedAuthority("NoAuth"));
 			}
 
 			@Override
-			public void updateUser(@Nonnull UserDetails user) {
+			public void updateUser(@SuppressWarnings("null") @Nonnull UserDetails user) {
 				TwoFactorAuthUser tfa = (TwoFactorAuthUser) user;
 				
 				Timestamp codeGenTS = tfa.getTfaCodeGeneratedTimestamp() == null ? null : new Timestamp(tfa.getTfaCodeGeneratedTimestamp().getTime());

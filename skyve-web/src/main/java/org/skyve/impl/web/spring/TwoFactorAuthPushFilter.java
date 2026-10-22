@@ -85,7 +85,9 @@ public abstract class TwoFactorAuthPushFilter extends UsernamePasswordAuthentica
 	}
 	
 	@Override
-	public void doFilter(@Nonnull ServletRequest iRequest, @Nonnull ServletResponse iResponse, @Nonnull FilterChain chain)
+	public void doFilter(@SuppressWarnings("null") @Nonnull ServletRequest iRequest,
+						@SuppressWarnings("null") @Nonnull ServletResponse iResponse,
+						@SuppressWarnings("null") @Nonnull FilterChain chain)
 	throws IOException, ServletException {
 		HttpServletRequest request = (HttpServletRequest) iRequest;
 		HttpServletResponse response = (HttpServletResponse) iResponse;
@@ -402,7 +404,7 @@ public abstract class TwoFactorAuthPushFilter extends UsernamePasswordAuthentica
 	}
 	
 	@Override
-	protected @Nullable String obtainUsername(@Nonnull HttpServletRequest request) {
+	protected @Nullable String obtainUsername(@SuppressWarnings("null") @Nonnull HttpServletRequest request) {
 		return UtilImpl.processStringValue(super.obtainUsername(request));
 	}
 	

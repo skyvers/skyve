@@ -25,22 +25,26 @@ public class NonPersistentCacheManager implements PersistentCacheManager {
 	}
 	
 	@Override
-	public @Nonnull <K, V> Cache<K, V> createCache(@Nonnull String alias, @Nonnull CacheConfiguration<K, V> config) {
+	public @Nonnull <K, V> Cache<K, V> createCache(@SuppressWarnings("null") @Nonnull String alias,
+													@SuppressWarnings("null") @Nonnull CacheConfiguration<K, V> config) {
 		return delegate.createCache(alias, config);
 	}
 
 	@Override
-	public @Nonnull <K, V> Cache<K, V> createCache(@Nonnull String alias, @Nonnull Builder<? extends CacheConfiguration<K, V>> configBuilder) {
+	public @Nonnull <K, V> Cache<K, V> createCache(@SuppressWarnings("null") @Nonnull String alias,
+													@SuppressWarnings("null") @Nonnull Builder<? extends CacheConfiguration<K, V>> configBuilder) {
 		return delegate.createCache(alias, configBuilder);
 	}
 
 	@Override
-	public @Nullable <K, V> Cache<K, V> getCache(@Nonnull String alias, @Nonnull Class<K> keyType, @Nonnull Class<V> valueType) {
+	public @Nullable <K, V> Cache<K, V> getCache(@SuppressWarnings("null") @Nonnull String alias,
+												@SuppressWarnings("null") @Nonnull Class<K> keyType,
+												@SuppressWarnings("null") @Nonnull Class<V> valueType) {
 		return delegate.getCache(alias, keyType, valueType);
 	}
 
 	@Override
-	public void removeCache(@Nonnull String alias) {
+	public void removeCache(@SuppressWarnings("null") @Nonnull String alias) {
 		delegate.removeCache(alias);
 	}
 
@@ -70,7 +74,7 @@ public class NonPersistentCacheManager implements PersistentCacheManager {
 	}
 
 	@Override
-	public void destroyCache(@Nonnull String alias) throws CachePersistenceException {
+	public void destroyCache(@SuppressWarnings("null") @Nonnull String alias) throws CachePersistenceException {
 		// no-op
 	}
 }

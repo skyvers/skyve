@@ -24,7 +24,9 @@ public class AssociationPickListConverter implements Converter<DomainValue> {
 	 * @return the matching domain value, or {@code null} when no match is found
 	 */
     @Override
-    public @Nullable DomainValue getAsObject(@Nullable FacesContext context, @Nonnull UIComponent component, @Nullable String value) {
+    public @Nullable DomainValue getAsObject(@Nullable FacesContext context,
+											@SuppressWarnings("null") @Nonnull UIComponent component,
+											@Nullable String value) {
 		DomainValue result = null;
 
 		final String processedValue = UtilImpl.processStringValue(value);

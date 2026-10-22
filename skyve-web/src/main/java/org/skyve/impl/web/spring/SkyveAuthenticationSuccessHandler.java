@@ -45,9 +45,9 @@ public class SkyveAuthenticationSuccessHandler extends SavedRequestAwareAuthenti
 	 */
 	@Override
 	@SuppressWarnings("java:S3776") // Complexity OK
-	public void onAuthenticationSuccess(@Nonnull HttpServletRequest request,
-										@Nonnull HttpServletResponse response,
-										@Nonnull Authentication authentication)
+	public void onAuthenticationSuccess(@SuppressWarnings("null") @Nonnull HttpServletRequest request,
+										@SuppressWarnings("null") @Nonnull HttpServletResponse response,
+										@SuppressWarnings("null") @Nonnull Authentication authentication)
 	throws ServletException, IOException {
 		String redirectUrl = null;
 		RequestCache requestCache = new HttpSessionRequestCache();

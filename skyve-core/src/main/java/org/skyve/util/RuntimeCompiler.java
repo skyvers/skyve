@@ -47,7 +47,7 @@ public class RuntimeCompiler {
 	 */
 	private static class ExceptionProducingDiagnosticListener implements DiagnosticListener<JavaFileObject> {
 		@Override
-		public void report(@Nonnull Diagnostic<? extends JavaFileObject> diagnostic) {
+		public void report(@SuppressWarnings("null") @Nonnull Diagnostic<? extends JavaFileObject> diagnostic) {
 			String message = String.format("%s at line %d, column %d\nCode %s\nMessage %s\nSource %s", 
 											diagnostic.getKind(),
 											Long.valueOf(diagnostic.getLineNumber()),
@@ -107,7 +107,7 @@ public class RuntimeCompiler {
 		}
 		
 		@Override
-		protected @Nonnull Class<?> findClass(@Nonnull String fullyQualifiedClassName) throws ClassNotFoundException {
+		protected @Nonnull Class<?> findClass(@SuppressWarnings("null") @Nonnull String fullyQualifiedClassName) throws ClassNotFoundException {
 			InMemoryJavaClassFileObject classFile = classes.get(fullyQualifiedClassName);
 			if (classFile == null) {
 				return super.findClass(fullyQualifiedClassName);
@@ -228,9 +228,9 @@ public class RuntimeCompiler {
 		try (StandardJavaFileManager fileManager = compiler.getStandardFileManager(diagnosticListener, null, null)) {
 			try (ForwardingJavaFileManager<JavaFileManager> forwardingFileManager = new ForwardingJavaFileManager<>(fileManager) {
 				@Override
-				public @Nonnull JavaFileObject getJavaFileForOutput(@Nonnull Location location,
-																	@Nonnull String className,
-																	@Nonnull Kind kind,
+				public @Nonnull JavaFileObject getJavaFileForOutput(@SuppressWarnings("null") @Nonnull Location location,
+																	@SuppressWarnings("null") @Nonnull String className,
+																	@SuppressWarnings("null") @Nonnull Kind kind,
 																	@Nullable FileObject sibling) throws IOException {
 					// Only for default package and module classes
 					if ((className.indexOf('.') < 0) || className.startsWith("modules.")) {

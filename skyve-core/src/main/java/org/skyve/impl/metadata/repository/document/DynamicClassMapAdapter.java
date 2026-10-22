@@ -27,7 +27,7 @@ public class DynamicClassMapAdapter extends XmlAdapter<DynamicClassMapType, Map<
 	 * @return a map keyed by entry name with class names as values
 	 */
 	@Override
-	public @Nonnull Map<String, String> unmarshal(@Nonnull DynamicClassMapType v) throws Exception {
+	public @Nonnull Map<String, String> unmarshal(@SuppressWarnings("null") @Nonnull DynamicClassMapType v) throws Exception {
 		Map<String, String> result = new TreeMap<>();
 		for (DynamicClassMapEntryType entry : v.classes) {
 			result.put(entry.name, entry.className);
@@ -42,7 +42,7 @@ public class DynamicClassMapAdapter extends XmlAdapter<DynamicClassMapType, Map<
 	 * @return JAXB wrapper, or {@code null} when the map is empty
 	 */
 	@Override
-	public @Nullable DynamicClassMapType marshal(@Nonnull Map<String, String> v) throws Exception {
+	public @Nullable DynamicClassMapType marshal(@SuppressWarnings("null") @Nonnull Map<String, String> v) throws Exception {
 		DynamicClassMapType result = null;
 		if (! v.isEmpty()) {
 			result = new DynamicClassMapType();

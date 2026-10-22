@@ -56,7 +56,7 @@ public class SmartClientGeneratorServlet extends HttpServlet {
 	 */
 	@Override
 	@SuppressWarnings("unchecked")
-	public void init(@Nonnull ServletConfig config) throws ServletException {
+	public void init(@SuppressWarnings("null") @Nonnull ServletConfig config) throws ServletException {
 		super.init(config);
 		
 		String rendererParam = Util.processStringValue(config.getInitParameter("renderer"));
@@ -105,8 +105,8 @@ public class SmartClientGeneratorServlet extends HttpServlet {
 	 */
 	@Override
 	@SuppressWarnings("java:S1989") // there exists JavaEE error pages
-	protected void doGet(@Nonnull HttpServletRequest request,
-							@Nonnull HttpServletResponse response)
+	protected void doGet(@SuppressWarnings("null") @Nonnull HttpServletRequest request,
+							@SuppressWarnings("null") @Nonnull HttpServletResponse response)
 	throws ServletException, IOException {
 		LOGGER.info("SmartClient Generate - get....");
 		processRequest(request, response);

@@ -56,7 +56,7 @@ public class SkyveRememberMeTokenRepository extends JdbcDaoSupport implements Pe
 	 * @param token The token to persist.
 	 */
 	@Override
-	public void createNewToken(@Nonnull PersistentRememberMeToken token) {
+	public void createNewToken(@SuppressWarnings("null") @Nonnull PersistentRememberMeToken token) {
 		String series = token.getSeries();
 		String customerAndUserName = token.getUsername();
 		String userName = customerAndUserName;
@@ -95,7 +95,9 @@ public class SkyveRememberMeTokenRepository extends JdbcDaoSupport implements Pe
 	 * @param lastUsed The timestamp of token usage.
 	 */
 	@Override
-	public void updateToken(@Nonnull String series, @Nonnull String tokenValue, @Nonnull Date lastUsed) {
+	public void updateToken(@SuppressWarnings("null") @Nonnull String series,
+							@SuppressWarnings("null") @Nonnull String tokenValue,
+							@SuppressWarnings("null") @Nonnull Date lastUsed) {
 		JdbcTemplate t = getJdbcTemplate();
 		if (t == null) {
 			throw new IllegalStateException(JDBC_TEMPLATE_REQUIRED);
@@ -109,7 +111,7 @@ public class SkyveRememberMeTokenRepository extends JdbcDaoSupport implements Pe
 	 * should just be a failed persistent login).
 	 */
 	@Override
-	public @Nullable PersistentRememberMeToken getTokenForSeries(@Nonnull String seriesId) {
+	public @Nullable PersistentRememberMeToken getTokenForSeries(@SuppressWarnings("null") @Nonnull String seriesId) {
 		try {
 			JdbcTemplate t = getJdbcTemplate();
 			if (t == null) {
@@ -127,7 +129,7 @@ public class SkyveRememberMeTokenRepository extends JdbcDaoSupport implements Pe
 							 * @throws SQLException If reading the row fails.
 							 */
 							@Override
-							public @Nonnull PersistentRememberMeToken mapRow(@Nonnull ResultSet rs, int rowNum)
+							public @Nonnull PersistentRememberMeToken mapRow(@SuppressWarnings("null") @Nonnull ResultSet rs, int rowNum)
 							throws SQLException {
 								return new PersistentRememberMeToken(rs.getString(1),
 																		rs.getString(2),
@@ -156,7 +158,7 @@ public class SkyveRememberMeTokenRepository extends JdbcDaoSupport implements Pe
 	 * @param username The principal name to purge token rows for.
 	 */
 	@Override
-	public void removeUserTokens(@Nonnull String username) {
+	public void removeUserTokens(@SuppressWarnings("null") @Nonnull String username) {
 		JdbcTemplate t = getJdbcTemplate();
 		if (t == null) {
 			throw new IllegalStateException(JDBC_TEMPLATE_REQUIRED);

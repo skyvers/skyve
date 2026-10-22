@@ -70,7 +70,8 @@ public class SmartClientCompleteServlet extends HttpServlet {
 	 */
 	@Override
 	@SuppressWarnings("java:S1989") // there exists JavaEE error pages
-	protected void doGet(@Nonnull HttpServletRequest request, @Nonnull HttpServletResponse response)
+	protected void doGet(@SuppressWarnings("null") @Nonnull HttpServletRequest request,
+						@SuppressWarnings("null") @Nonnull HttpServletResponse response)
 	throws ServletException, IOException {
 		LOGGER.info("SmartClientComplete - get....");
 		processRequest(request, response);
@@ -86,7 +87,8 @@ public class SmartClientCompleteServlet extends HttpServlet {
 	 */
 	@Override
 	@SuppressWarnings("java:S1989") // there exists JavaEE error pages
-	protected void doPost(@Nonnull HttpServletRequest request, @Nonnull HttpServletResponse response)
+	protected void doPost(@SuppressWarnings("null") @Nonnull HttpServletRequest request,
+							@SuppressWarnings("null") @Nonnull HttpServletResponse response)
 	throws ServletException, IOException {
 		LOGGER.info("SmartClientComplete - post....");
 		processRequest(request, response);

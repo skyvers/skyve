@@ -61,7 +61,7 @@ public class HibernateListener implements PostLoadEventListener,
 	 * Call Bizlet.postLoad()
 	 */
 	@Override
-	public void onPostLoad(@Nonnull PostLoadEvent event) {
+	public void onPostLoad(@SuppressWarnings("null") @Nonnull PostLoadEvent event) {
 		PersistentBean eventBean = (PersistentBean) event.getEntity();
 		try {
 			AbstractPersistence.get().postLoad(eventBean);
@@ -79,7 +79,7 @@ public class HibernateListener implements PostLoadEventListener,
 	 * Note this is also called when collection elements are removed.
 	 */
 	@Override
-	public boolean onPreDelete(@Nonnull PreDeleteEvent event) {
+	public boolean onPreDelete(@SuppressWarnings("null") @Nonnull PreDeleteEvent event) {
 		PersistentBean eventBean = (PersistentBean) event.getEntity();
 		try {
 			AbstractPersistence.get().preRemove(eventBean);
@@ -98,7 +98,7 @@ public class HibernateListener implements PostLoadEventListener,
 	 * Note this is called when collection elements are removed.
 	 */
 	@Override
-	public void onPostDelete(@Nonnull PostDeleteEvent event) {
+	public void onPostDelete(@SuppressWarnings("null") @Nonnull PostDeleteEvent event) {
 		PersistentBean eventBean = (PersistentBean) event.getEntity();
 		try {
 			AbstractPersistence.get().postRemove(eventBean);
@@ -115,7 +115,7 @@ public class HibernateListener implements PostLoadEventListener,
 	 * Inject new bizLock
 	 */
 	@Override
-	public boolean onPreUpdate(@Nonnull PreUpdateEvent event) {
+	public boolean onPreUpdate(@SuppressWarnings("null") @Nonnull PreUpdateEvent event) {
 		PersistentBean eventBean = (PersistentBean) event.getEntity();
 		EntityPersister ep = event.getPersister();
 		Object[] state = event.getState();
@@ -140,7 +140,7 @@ public class HibernateListener implements PostLoadEventListener,
 	 * Reindex any properties that have changed in the CMS.
 	 */
 	@Override
-	public void onPostInsert(@Nonnull PostInsertEvent event) {
+	public void onPostInsert(@SuppressWarnings("null") @Nonnull PostInsertEvent event) {
 		AbstractHibernatePersistence persistence = (AbstractHibernatePersistence) AbstractPersistence.get();
 		PersistentBean eventBean = (PersistentBean) event.getEntity();
 		EntityPersister ep = event.getPersister();
@@ -174,7 +174,7 @@ public class HibernateListener implements PostLoadEventListener,
 	 * Reindex any properties that have changed in the CMS.
 	 */
 	@Override
-	public void onPostUpdate(@Nonnull PostUpdateEvent event) {
+	public void onPostUpdate(@SuppressWarnings("null") @Nonnull PostUpdateEvent event) {
 		AbstractHibernatePersistence persistence = (AbstractHibernatePersistence) AbstractPersistence.get();
 		PersistentBean eventBean = (PersistentBean) event.getEntity();
 		EntityPersister ep = event.getPersister();
@@ -197,7 +197,7 @@ public class HibernateListener implements PostLoadEventListener,
 	 * Sort any collections which have compound bindings in the ordering element.
 	 */
 	@Override
-	public void onInitializeCollection(@Nonnull InitializeCollectionEvent event)
+	public void onInitializeCollection(@SuppressWarnings("null") @Nonnull InitializeCollectionEvent event)
 	throws HibernateException {
 		try {
 			AbstractPersistence persistence = AbstractPersistence.get();
@@ -230,7 +230,7 @@ public class HibernateListener implements PostLoadEventListener,
 	}
 
 	@Override
-	public boolean requiresPostCommitHanding(@Nonnull EntityPersister persister) {
+	public boolean requiresPostCommitHanding(@SuppressWarnings("null") @Nonnull EntityPersister persister) {
 		return false;
 	}
 }

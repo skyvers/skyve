@@ -67,9 +67,15 @@ public class DynamicBean extends LazyDynaMap implements Bean {
 
 	/**
 	 * Returns the bizId.
-	 * @return the result
+	 * <p>
+	 * Every document bean has a bizId, which is why {@link Bean#getBizId()} is non-null.
+	 * A DynamicBean holding a projected query row has no bizId unless the query selected one,
+	 * and this method then returns null. In a summary row the bizId value is the row count.
+	 *
+	 * @return the bizId, or null for a projected query row without one
 	 */
 	@Override
+	@SuppressWarnings("null") // projected query rows may have no bizId - see above
 	public @Nonnull String getBizId() {
 		// Cannot cast the actual value to a string as in the summary line its the count (a long value)
 		Object result = get(Bean.DOCUMENT_ID);
@@ -272,7 +278,7 @@ public class DynamicBean extends LazyDynaMap implements Bean {
 	 */
 	@Override
 	@SuppressWarnings("java:S3776") // Complexity OK
-	public @Nullable Object get(@Nonnull String binding) {
+	public @Nullable Object get(@SuppressWarnings("null") @Nonnull String binding) {
 		Object result = null;
 		Bean bean = (Bean) values.get(BEAN_PROPERTY_KEY);
 		
@@ -371,7 +377,7 @@ public class DynamicBean extends LazyDynaMap implements Bean {
 	 * @return the result
 	 */
 	@Override
-	public @Nullable Object get(@Nonnull String binding, int index) {
+	public @Nullable Object get(@SuppressWarnings("null") @Nonnull String binding, int index) {
 		Object result = null;
 		
 		if (isDynaProperty(binding)) {
@@ -400,7 +406,7 @@ public class DynamicBean extends LazyDynaMap implements Bean {
 	 * @return the result
 	 */
 	@Override
-	public @Nullable Object get(@Nonnull String binding, @Nullable String key) {
+	public @Nullable Object get(@SuppressWarnings("null") @Nonnull String binding, @Nullable String key) {
 		Object result = null;
 		
 		if (isDynaProperty(binding)) {
@@ -428,7 +434,7 @@ public class DynamicBean extends LazyDynaMap implements Bean {
 	 * @param value the value
 	 */
 	@Override
-	public void set(@Nonnull String binding, @Nullable Object value) {
+	public void set(@SuppressWarnings("null") @Nonnull String binding, @Nullable Object value) {
 		if (isDynaProperty(binding)) {
 			super.set(binding, value);
 		}
@@ -453,7 +459,7 @@ public class DynamicBean extends LazyDynaMap implements Bean {
 	 * @param value the value
 	 */
 	@Override
-	public void set(@Nonnull String binding, int index, @Nullable Object value) {
+	public void set(@SuppressWarnings("null") @Nonnull String binding, int index, @Nullable Object value) {
 		if (isDynaProperty(binding)) {
 			super.set(binding, index, value);
 		}
@@ -480,7 +486,7 @@ public class DynamicBean extends LazyDynaMap implements Bean {
 	 * @param value the value
 	 */
 	@Override
-	public void set(@Nonnull String binding, @Nullable String key, @Nullable Object value) {
+	public void set(@SuppressWarnings("null") @Nonnull String binding, @Nullable String key, @Nullable Object value) {
 		if (isDynaProperty(binding)) {
 			super.set(binding, key, value);
 		}

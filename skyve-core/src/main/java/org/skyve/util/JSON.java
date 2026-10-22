@@ -52,13 +52,12 @@ public class JSON {
 	 *
 	 * @param customer customer metadata used for Skyve documents, or {@code null} for plain values
 	 * @param beanOrBeans root value, collection, document, record, or Java bean; may be {@code null}
-	 * @param propertyNames projected query-result properties; callers may pass {@code null}
-	 *        for a complete value despite the legacy nullability annotation
+	 * @param propertyNames projected query-result properties, or {@code null} for a complete value
 	 * @return JSON text; never {@code null}
 	 */
 	public static final @Nonnull String marshall(@Nullable Customer customer,
 													@Nullable Object beanOrBeans,
-													@Nonnull Set<String> propertyNames) {
+													@Nullable Set<String> propertyNames) {
 		JSONWriter writer = new JSONWriter(customer);
 		return writer.write(beanOrBeans, propertyNames);
 	}
@@ -74,7 +73,6 @@ public class JSON {
 	 * @param beanOrBeans root value, collection, document, record, or Java bean; may be {@code null}
 	 * @return JSON text; never {@code null}
 	 */
-	@SuppressWarnings({"null", "java:S2637"}) // call-through with nulls
 	public static final @Nonnull String marshall(@Nonnull Customer customer,
 													@Nullable Object beanOrBeans) {
 		return marshall(customer, beanOrBeans, null);
@@ -90,7 +88,6 @@ public class JSON {
 	 * @return JSON text; never {@code null}
 	 * @throws IllegalStateException if the graph contains a Skyve document
 	 */
-	@SuppressWarnings({"null", "java:S2637"}) // call-through with nulls
 	public static final @Nonnull String marshall(@Nullable Object beanOrBeans) {
 		return marshall(null, beanOrBeans, null);
 	}
@@ -106,12 +103,12 @@ public class JSON {
 	 * <p>Side effects: may instantiate Skyve documents and payload-identified Java
 	 * objects anywhere in the value graph.
 	 *
-	 * @param user current Skyve user; must not be {@code null}
+	 * @param user current Skyve user, or {@code null} for no Skyve document reconstruction
 	 * @param json JSON text containing one value; must not be {@code null}
 	 * @return reconstructed object, dynamic map/list, scalar value, or {@code null}
 	 * @throws Exception if parsing or object reconstruction fails
 	 */
-	public static final @Nonnull Object unmarshall(@Nonnull User user, @Nonnull String json) 
+	public static final @Nullable Object unmarshall(@Nullable User user, @Nonnull String json) 
 	throws Exception {
 		JSONReader reader = new JSONReader(user);
 		return reader.read(json);
@@ -129,7 +126,6 @@ public class JSON {
 	 * @return reconstructed Java object, dynamic map/list, scalar value, or {@code null}
 	 * @throws Exception if parsing or Java object reconstruction fails
 	 */
-	@SuppressWarnings({"null", "java:S2637"}) // call-through with nulls
 	public static final @Nullable Object unmarshall(@Nonnull String json) 
 	throws Exception {
 		return unmarshall(null, json);

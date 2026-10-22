@@ -84,7 +84,7 @@ public interface Enumeration extends SerializableMetaData {
 		 * @return the result
 		 */
 		@Override
-		public int compare(@Nonnull DomainValue d1, @Nonnull DomainValue d2) {
+		public int compare(@SuppressWarnings("null") @Nonnull DomainValue d1, @SuppressWarnings("null") @Nonnull DomainValue d2) {
 			return d1.getCode().compareTo(d2.getCode());
 		}
 	}
@@ -101,7 +101,7 @@ public interface Enumeration extends SerializableMetaData {
 		 * @return the result
 		 */
 		@Override
-		public int compare(@Nonnull DomainValue d1, @Nonnull DomainValue d2) {
+		public int compare(@SuppressWarnings("null") @Nonnull DomainValue d1, @SuppressWarnings("null") @Nonnull DomainValue d2) {
 			return d1.getLocalisedDescription().compareTo(d2.getLocalisedDescription());
 		}
 	}

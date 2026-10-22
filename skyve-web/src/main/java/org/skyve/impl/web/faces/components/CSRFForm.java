@@ -32,7 +32,7 @@ public class CSRFForm extends HtmlForm {
 	}
 
 	@Override
-	public void encodeBegin(@Nonnull FacesContext context) throws IOException {
+	public void encodeBegin(@SuppressWarnings("null") @Nonnull FacesContext context) throws IOException {
 		List<UIComponent> children = getChildren();
 		if (children.isEmpty() || (! (children.get(0) instanceof OutputPanel))) {
 			FacesContext fc = FacesContext.getCurrentInstance();

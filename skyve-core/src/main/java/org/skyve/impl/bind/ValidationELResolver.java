@@ -95,7 +95,9 @@ class ValidationELResolver extends ELResolver {
 	}
 	
 	@Override
-	public @Nullable Class<?> getType(@Nonnull ELContext context, @Nullable Object base, @Nonnull Object property) {
+	public @Nullable Class<?> getType(@SuppressWarnings("null") @Nonnull ELContext context,
+										@Nullable Object base,
+										@SuppressWarnings("null") @Nonnull Object property) {
 		Class<?> type = getType(base, property);
 		if (type != null) {
 			context.setPropertyResolved(true);
@@ -104,7 +106,9 @@ class ValidationELResolver extends ELResolver {
 	}
 
 	@Override
-	public @Nullable Object getValue(@Nonnull ELContext context, @Nullable Object base, @Nonnull Object property) {
+	public @Nullable Object getValue(@SuppressWarnings("null") @Nonnull ELContext context,
+									@Nullable Object base,
+									@SuppressWarnings("null") @Nonnull Object property) {
 		Object value = getClassOrDocument(base, property);
 		if (value != null) {
 			context.setPropertyResolved(base, property);
@@ -113,7 +117,10 @@ class ValidationELResolver extends ELResolver {
 	}
 	
 	@Override
-	public void setValue(@Nonnull ELContext context, @Nullable Object base, @Nonnull Object property, @Nullable Object val) {
+	public void setValue(@SuppressWarnings("null") @Nonnull ELContext context,
+						@Nullable Object base,
+						@SuppressWarnings("null") @Nonnull Object property,
+						@Nullable Object val) {
 		Class<?> type = getType(base, property);
 		if (type != null) {
 			if (val == null) {
@@ -288,7 +295,11 @@ class ValidationELResolver extends ELResolver {
 	
 	@Override
 	@SuppressWarnings("java:S3776") // Cognitive Complexity not too high
-	public @Nullable Object invoke(@Nonnull ELContext context, @Nullable Object base, @Nonnull Object method, @Nullable Class<?>[] paramTypes, @Nullable Object[] params) {
+	public @Nullable Object invoke(@SuppressWarnings("null") @Nonnull ELContext context,
+									@Nullable Object base,
+									@SuppressWarnings("null") @Nonnull Object method,
+									@Nullable Class<?>[] paramTypes,
+									@Nullable Object[] params) {
 		Class<?> type = null;
 		if (Object.class.equals(base)) { // we are not in type-safe mode
 			context.setPropertyResolved(base, method);
@@ -339,7 +350,9 @@ class ValidationELResolver extends ELResolver {
 
 	@Override
 	@SuppressWarnings("java:S3776") // Complexity OK
-	public boolean isReadOnly(@Nonnull ELContext context, @Nullable Object base, @Nonnull Object property) {
+	public boolean isReadOnly(@SuppressWarnings("null") @Nonnull ELContext context,
+								@Nullable Object base,
+								@SuppressWarnings("null") @Nonnull Object property) {
 		if (Object.class.equals(base)) { // we are not in type-safe mode
 			context.setPropertyResolved(true);
 			return false;
@@ -416,7 +429,7 @@ class ValidationELResolver extends ELResolver {
 	}
 
 	@Override
-	public @Nullable Class<?> getCommonPropertyType(@Nonnull ELContext context, @Nullable Object base) {
+	public @Nullable Class<?> getCommonPropertyType(@SuppressWarnings("null") @Nonnull ELContext context, @Nullable Object base) {
 		if (base instanceof DocumentImpl) {
 			return Object.class;
 		}

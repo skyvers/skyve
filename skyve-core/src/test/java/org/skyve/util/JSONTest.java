@@ -2,6 +2,7 @@ package org.skyve.util;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -62,6 +63,21 @@ class JSONTest {
 		assertEquals("{\"class\":\"org.skyve.util.JSONTest$ExampleRecord\",\"name\":\"example\",\"count\":3}", json);
 		assertEquals(expected, typedResult);
 		assertEquals(expected, untypedResult);
+	}
+
+	@Test
+	void unmarshallWithoutUserReconstructsJavaValuesAndNull() throws Exception {
+		ExampleRecord expected = new ExampleRecord("example", 3);
+
+		assertEquals(expected, JSON.unmarshall(null, JSON.marshall(expected)));
+		assertNull(JSON.unmarshall(null, "null"));
+	}
+
+	@Test
+	void marshallWithNullPropertyNamesWritesCompleteValue() {
+		String json = JSON.marshall(null, new ExampleRecord("example", 3), null);
+
+		assertEquals("{\"class\":\"org.skyve.util.JSONTest$ExampleRecord\",\"name\":\"example\",\"count\":3}", json);
 	}
 
 	// ---- marshall(Customer, Object) -- exercises the 2-arg Customer overload ----

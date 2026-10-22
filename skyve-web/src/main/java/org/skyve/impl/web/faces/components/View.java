@@ -56,7 +56,7 @@ public class View extends HtmlPanelGroup {
 	// The method intentionally preserves the existing request-scoped generation flow.
     @Override
     @SuppressWarnings("java:S3776") // Complexity OK
-    public void encodeBegin(@Nonnull FacesContext context) throws IOException {
+    public void encodeBegin(@SuppressWarnings("null") @Nonnull FacesContext context) throws IOException {
 		Map<String, Object> attributes = getAttributes();
 
 		if (Boolean.TRUE.toString().equals(attributes.get("dynamic"))) {

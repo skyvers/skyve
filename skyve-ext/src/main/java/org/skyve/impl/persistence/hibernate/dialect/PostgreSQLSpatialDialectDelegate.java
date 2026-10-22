@@ -53,7 +53,8 @@ public final class PostgreSQLSpatialDialectDelegate implements SkyveDialect, Ser
 			 * @return SQL statements to create the index.
 			 */
 			@Override
-			public @Nonnull String[] getSqlCreateStrings(@Nonnull Index index, @Nonnull Metadata metadata) {
+			public @Nonnull String[] getSqlCreateStrings(@SuppressWarnings("null") @Nonnull Index index,
+														@SuppressWarnings("null") @Nonnull Metadata metadata) {
 				@SuppressWarnings("deprecation")
 				String[] result = super.getSqlCreateStrings(index, metadata);
 

@@ -332,6 +332,22 @@ class DocumentImplTest {
 	}
 
 	@Test
+	void getNullSafeReferenceByNameReturnsReference() {
+		AssociationImpl assoc = new AssociationImpl();
+		assoc.setName("contact");
+		doc.putRelation(assoc);
+		assertThat(doc.getNullSafeReferenceByName("contact"), is(assoc));
+	}
+
+	@Test
+	void getNullSafeReferenceByNameThrowsForUnknown() {
+		doc.setOwningModuleName("admin");
+		doc.setName("Contact");
+		MetaDataException e = assertThrows(MetaDataException.class, () -> doc.getNullSafeReferenceByName("unknown"));
+		assertEquals("Reference unknown does not exist in document admin.Contact", e.getMessage());
+	}
+
+	@Test
 	void getRelatedDocumentThrowsWhenRelationMissing() {
 		assertThrows(IllegalStateException.class, () -> doc.getRelatedDocument(mock(Customer.class), "missing"));
 	}

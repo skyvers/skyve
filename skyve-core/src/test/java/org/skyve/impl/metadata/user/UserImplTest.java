@@ -4,6 +4,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.ArrayList;
@@ -13,15 +15,66 @@ import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
 import org.skyve.impl.util.UtilImpl;
+import org.skyve.metadata.MetaDataException;
+import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.menu.Menu;
 import org.skyve.metadata.module.menu.MenuItem;
+import org.skyve.metadata.repository.ProvidedRepository;
 import org.skyve.metadata.user.DocumentPermission;
 import org.skyve.metadata.user.DocumentPermissionScope;
 
 class UserImplTest {
+
+	@Test
+	@SuppressWarnings("static-method")
+	void getCustomerThrowsWhenUserHasNoCustomerName() {
+		UserImpl user = new UserImpl();
+		user.setName("fred");
+
+		MetaDataException e = assertThrows(MetaDataException.class, user::getCustomer);
+		assertEquals("User fred has no customer", e.getMessage());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void getCustomerThrowsWhenCustomerDoesNotExist() {
+		ProvidedRepository previousRepository = ProvidedRepositoryFactory.get();
+		ProvidedRepositoryFactory.set(Mockito.mock(ProvidedRepository.class));
+		try {
+			UserImpl user = new UserImpl();
+			user.setName("fred");
+			user.setCustomerName("nowhere");
+
+			MetaDataException e = assertThrows(MetaDataException.class, user::getCustomer);
+			assertEquals("Customer nowhere for user fred does not exist", e.getMessage());
+		}
+		finally {
+			ProvidedRepositoryFactory.set(previousRepository);
+		}
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void getCustomerReturnsTheRepositoryCustomer() {
+		Customer customer = Mockito.mock(Customer.class);
+		ProvidedRepository repository = Mockito.mock(ProvidedRepository.class);
+		Mockito.when(repository.getCustomer("acme")).thenReturn(customer);
+		ProvidedRepository previousRepository = ProvidedRepositoryFactory.get();
+		ProvidedRepositoryFactory.set(repository);
+		try {
+			UserImpl user = new UserImpl();
+			user.setCustomerName("acme");
+
+			assertSame(customer, user.getCustomer());
+		}
+		finally {
+			ProvidedRepositoryFactory.set(previousRepository);
+		}
+	}
 	@Test
 	@SuppressWarnings("static-method")
 	void testSetLanguageTag() {

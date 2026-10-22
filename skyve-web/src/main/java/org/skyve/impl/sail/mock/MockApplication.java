@@ -113,7 +113,7 @@ public class MockApplication extends Application {
 	 */
 	@Override
 	@SuppressWarnings("java:S3776") // Complexity OK
-	public @Nonnull UIComponent createComponent(@Nonnull String componentType) throws FacesException {
+	public @Nonnull UIComponent createComponent(@SuppressWarnings("null") @Nonnull String componentType) throws FacesException {
 		if (AutoComplete.COMPONENT_TYPE.equals(componentType)) {
 			return new AutoComplete();
 		}
@@ -348,7 +348,7 @@ public class MockApplication extends Application {
 	 * @throws FacesException when the behavior ID is not mapped by this mock registry
 	 */
 	@Override
-	public @Nonnull Behavior createBehavior(@Nonnull String behaviorId) throws FacesException {
+	public @Nonnull Behavior createBehavior(@SuppressWarnings("null") @Nonnull String behaviorId) throws FacesException {
 		if (AjaxBehavior.BEHAVIOR_ID.equals(behaviorId)) {
 			return new AjaxBehavior();
 		}

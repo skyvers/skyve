@@ -66,14 +66,17 @@ public class TimestampUserType implements UserType, LiteralType<Date>, Serializa
 	}
 
 	@Override
-	public int hashCode(@Nonnull Object o) 
+	public int hashCode(@SuppressWarnings("null") @Nonnull Object o) 
 	throws HibernateException {
 		java.util.Date ts = (Date) o;
 		return Long.valueOf(ts.getTime() / 1000).hashCode();
 	}
 
 	@Override
-	public @Nullable Object nullSafeGet(@Nonnull ResultSet rs, @Nonnull String[] names, @Nullable SharedSessionContractImplementor session, @Nullable Object owner)
+	public @Nullable Object nullSafeGet(@SuppressWarnings("null") @Nonnull ResultSet rs,
+										@SuppressWarnings("null") @Nonnull String[] names,
+										@Nullable SharedSessionContractImplementor session,
+										@Nullable Object owner)
 	throws HibernateException, SQLException {
 		Timestamp value = rs.getTimestamp(names[0]);
 		if (rs.wasNull()) {
@@ -84,7 +87,10 @@ public class TimestampUserType implements UserType, LiteralType<Date>, Serializa
 	}
 
 	@Override
-	public void nullSafeSet(@Nonnull PreparedStatement ps, @Nullable Object value, int index, @Nullable SharedSessionContractImplementor session)
+	public void nullSafeSet(@SuppressWarnings("null") @Nonnull PreparedStatement ps,
+							@Nullable Object value,
+							int index,
+							@Nullable SharedSessionContractImplementor session)
 	throws HibernateException, SQLException {
 		if (value == null) {
 			ps.setNull(index, Types.TIMESTAMP);

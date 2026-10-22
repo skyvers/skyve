@@ -124,7 +124,7 @@ public class SkyveLazyDataModel extends LazyDataModel<BeanMapAdapter> {
 	 * @return always {@code 0}; row count is set inside {@link #load(int, int, Map, Map)}
 	 */
 	@Override
-	public int count(@Nonnull Map<String, FilterMeta> filterBy) {
+	public int count(@SuppressWarnings("null") @Nonnull Map<String, FilterMeta> filterBy) {
 		return 0;
 	}
 	
@@ -243,7 +243,7 @@ public class SkyveLazyDataModel extends LazyDataModel<BeanMapAdapter> {
 	 * @return a stable row key composed of biz id, document, and module
 	 */
 	@Override
-	public @Nonnull String getRowKey(@Nonnull BeanMapAdapter bean) {
+	public @Nonnull String getRowKey(@SuppressWarnings("null") @Nonnull BeanMapAdapter bean) {
 		Bean row = bean.getBean();
 		return new StringBuilder(128).append(row.getBizId()).append('#').append(row.getBizDocument()).append('.').append(row.getBizModule()).toString();
 	}
@@ -255,7 +255,7 @@ public class SkyveLazyDataModel extends LazyDataModel<BeanMapAdapter> {
 	 * @return a bean adapter created from the row key components
 	 */
 	@Override
-	public @Nonnull BeanMapAdapter getRowData(@Nonnull String rowKey) {
+	public @Nonnull BeanMapAdapter getRowData(@SuppressWarnings("null") @Nonnull String rowKey) {
 		Map<String, Object> properties = new TreeMap<>();
 		int hashIndex = rowKey.lastIndexOf('#');
 		int dotIndex = rowKey.lastIndexOf('.');

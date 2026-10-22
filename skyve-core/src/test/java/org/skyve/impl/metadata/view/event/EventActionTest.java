@@ -43,6 +43,22 @@ class EventActionTest {
 		assertEquals("v", action.getProperties().get("k"));
 	}
 
+	/** Verifies a blank server-side action name normalizes to null. */
+	@Test
+	void serverSideActionBlankActionNameBecomesNull() {
+		ServerSideActionEventAction action = new ServerSideActionEventAction();
+		action.setActionName("   ");
+		assertNull(action.getActionName());
+	}
+
+	/** Verifies a padded server-side action name is trimmed. */
+	@Test
+	void serverSideActionPaddedActionNameIsTrimmed() {
+		ServerSideActionEventAction action = new ServerSideActionEventAction();
+		action.setActionName("  doSomething  ");
+		assertEquals("doSomething", action.getActionName());
+	}
+
 	/** Verifies rerender action client-validation and properties round-trip correctly. */
 	@Test
 	void rerenderClientValidationRoundTripAndProperties() {

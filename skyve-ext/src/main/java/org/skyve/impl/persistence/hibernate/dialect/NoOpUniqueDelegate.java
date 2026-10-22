@@ -28,7 +28,8 @@ public class NoOpUniqueDelegate extends DefaultUniqueDelegate {
 	 * @return an empty string
 	 */
 	@Override
-	public @Nonnull String getAlterTableToAddUniqueKeyCommand(@Nonnull UniqueKey uniqueKey, @Nonnull Metadata metadata) {
+	public @Nonnull String getAlterTableToAddUniqueKeyCommand(@SuppressWarnings("null") @Nonnull UniqueKey uniqueKey,
+																@SuppressWarnings("null") @Nonnull Metadata metadata) {
 		return "";
 	}
 	
@@ -40,7 +41,8 @@ public class NoOpUniqueDelegate extends DefaultUniqueDelegate {
 	 * @return an empty string
 	 */
 	@Override
-	public @Nonnull String getAlterTableToDropUniqueKeyCommand(@Nonnull UniqueKey uniqueKey, @Nonnull Metadata metadata) {
+	public @Nonnull String getAlterTableToDropUniqueKeyCommand(@SuppressWarnings("null") @Nonnull UniqueKey uniqueKey,
+																@SuppressWarnings("null") @Nonnull Metadata metadata) {
 		return "";
 	}
 }

@@ -21,7 +21,7 @@ import jakarta.xml.bind.annotation.adapters.XmlAdapter;
  */
 public class CDATAAdapter extends XmlAdapter<String, String> {
 	@Override
-	public @Nonnull String marshal(@Nonnull String value) throws Exception {
+	public @Nonnull String marshal(@SuppressWarnings("null") @Nonnull String value) throws Exception {
 		return new StringBuilder(value.length() + XMLMetaData.CDATA_MIN_LENGTH)
 						.append(XMLMetaData.CDATA_START_TAG)
 						.append(value)

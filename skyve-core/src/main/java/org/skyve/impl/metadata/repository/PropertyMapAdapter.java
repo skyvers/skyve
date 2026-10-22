@@ -19,7 +19,7 @@ public class PropertyMapAdapter extends XmlAdapter<PropertyMapType, Map<String, 
 	private static final long serialVersionUID = 729761523390093996L;
 
 	@Override
-	public @Nonnull Map<String, String> unmarshal(@Nonnull PropertyMapType v) throws Exception {
+	public @Nonnull Map<String, String> unmarshal(@SuppressWarnings("null") @Nonnull PropertyMapType v) throws Exception {
 		Map<String, String> result = new LinkedHashMap<>();
 		for (PropertyMapEntryType property : v.properties) {
 			// The schema does not require a key, and a keyless property can never be looked up
@@ -31,7 +31,7 @@ public class PropertyMapAdapter extends XmlAdapter<PropertyMapType, Map<String, 
 	}
 
 	@Override
-	public @Nullable PropertyMapType marshal(@Nonnull Map<String, String> v) throws Exception {
+	public @Nullable PropertyMapType marshal(@SuppressWarnings("null") @Nonnull Map<String, String> v) throws Exception {
 		PropertyMapType result = null;
 		if (! v.isEmpty()) {
 			result = new PropertyMapType();

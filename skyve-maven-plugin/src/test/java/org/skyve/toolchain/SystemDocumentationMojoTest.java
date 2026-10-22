@@ -330,7 +330,7 @@ class SystemDocumentationMojoTest {
 
 		Reference reference = mock(Reference.class);
 		when(document.getReferenceNames()).thenReturn(Set.of("account"));
-		when(document.getReferenceByName("account")).thenReturn(reference);
+		when(document.getNullSafeReferenceByName("account")).thenReturn(reference);
 		when(reference.getType()).thenReturn(AssociationType.aggregation);
 		when(reference.getDocumentName()).thenReturn("Account");
 		when(reference.isRequired()).thenReturn(Boolean.TRUE);

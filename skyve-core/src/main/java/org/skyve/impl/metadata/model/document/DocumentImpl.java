@@ -546,7 +546,7 @@ public class DocumentImpl extends ModelImpl implements Document {
 	 * @return the matching reference, or {@code null} if the field is not a reference.
 	 */
 	@Override
-	public @Nonnull Reference getReferenceByName(@Nonnull String referenceName) {
+	public @Nullable Reference getReferenceByName(@Nonnull String referenceName) {
 		return referencesByFieldNames.get(referenceName);
 	}
 

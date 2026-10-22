@@ -99,7 +99,7 @@ public final class BeanMapAdapter implements Map<String, Object>, Serializable {
 	 * @return {@code true} when the key exists in the cache
 	 */
 	@Override
-	public boolean containsKey(@Nonnull Object key) {
+	public boolean containsKey(@SuppressWarnings("null") @Nonnull Object key) {
 		if (UtilImpl.FACES_TRACE) FACES_LOGGER.trace("BeanMapAdapter.containsKey {}", key);
 		return delegate.containsKey(key);
 	}
@@ -123,7 +123,7 @@ public final class BeanMapAdapter implements Map<String, Object>, Serializable {
 	 * @return the resolved value
 	 */
 	@Override
-	public @Nullable Object get(final @Nonnull Object key) {
+	public @Nullable Object get(@SuppressWarnings("null") final @Nonnull Object key) {
 		return get(key, false, Sanitisation.none);
 	}
 	
@@ -235,7 +235,7 @@ public final class BeanMapAdapter implements Map<String, Object>, Serializable {
 	 * @return the previous cached value for the key
 	 */
 	@Override
-	public @Nullable Object put(@Nonnull String key, @Nullable Object value) {
+	public @Nullable Object put(@SuppressWarnings("null") @Nonnull String key, @Nullable Object value) {
 		if (UtilImpl.FACES_TRACE) FACES_LOGGER.trace("BeanMapAdapter.put {} = {}", key, value);
 		set(key, value);
 		return delegate.put(key, value);
@@ -248,7 +248,7 @@ public final class BeanMapAdapter implements Map<String, Object>, Serializable {
 	 * @return the removed cached value, or {@code null}
 	 */
 	@Override
-	public @Nullable Object remove(@Nonnull Object key) {
+	public @Nullable Object remove(@SuppressWarnings("null") @Nonnull Object key) {
 		return delegate.remove(key);
 	}
 
@@ -258,7 +258,7 @@ public final class BeanMapAdapter implements Map<String, Object>, Serializable {
 	 * @param m the entries to add
 	 */
 	@Override
-	public void putAll(@Nonnull Map<? extends String, ? extends Object> m) {
+	public void putAll(@SuppressWarnings("null") @Nonnull Map<? extends String, ? extends Object> m) {
 		delegate.putAll(m);
 	}
 

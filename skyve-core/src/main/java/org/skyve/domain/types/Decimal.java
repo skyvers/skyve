@@ -231,7 +231,7 @@ public abstract class Decimal extends Number implements Comparable<Number> {
 	 * @throws IllegalArgumentException if {@code o} is not a {@link Decimal} or {@link BigDecimal}
 	 */
 	@Override
-	public int compareTo(@Nonnull Number o) {
+	public int compareTo(@SuppressWarnings("null") @Nonnull Number o) {
 		if (o instanceof Decimal decimal) {
 			return value.compareTo(decimal.value);
 		}

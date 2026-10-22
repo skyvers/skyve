@@ -22,12 +22,14 @@ public class UTF8CharacterEncodingFilter implements Filter {
 	 * @throws ServletException when initialization fails
 	 */
 	@Override
-	public void init(@Nonnull FilterConfig filterConfig) throws ServletException {
+	public void init(@SuppressWarnings("null") @Nonnull FilterConfig filterConfig) throws ServletException {
 		// nothing to see here
 	}
 	
 	@Override
-	public void doFilter(@Nonnull ServletRequest request, @Nonnull ServletResponse response, @Nonnull FilterChain chain)
+	public void doFilter(@SuppressWarnings("null") @Nonnull ServletRequest request,
+						@SuppressWarnings("null") @Nonnull ServletResponse response,
+						@SuppressWarnings("null") @Nonnull FilterChain chain)
 	throws IOException, ServletException {
 		if (request.getCharacterEncoding() == null) {
 			request.setCharacterEncoding(StandardCharsets.UTF_8.name());

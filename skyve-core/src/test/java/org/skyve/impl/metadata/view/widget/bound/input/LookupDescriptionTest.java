@@ -32,6 +32,20 @@ class LookupDescriptionTest {
 	}
 
 	@Test
+	void descriptionBindingBlankBecomesNull() {
+		LookupDescription ld = new LookupDescription();
+		ld.setDescriptionBinding("   ");
+		assertNull(ld.getDescriptionBinding());
+	}
+
+	@Test
+	void descriptionBindingPaddedValueIsTrimmed() {
+		LookupDescription ld = new LookupDescription();
+		ld.setDescriptionBinding("  description  ");
+		assertEquals("description", ld.getDescriptionBinding());
+	}
+
+	@Test
 	void queryRoundTrip() {
 		LookupDescription ld = new LookupDescription();
 		ld.setQuery("qContacts");

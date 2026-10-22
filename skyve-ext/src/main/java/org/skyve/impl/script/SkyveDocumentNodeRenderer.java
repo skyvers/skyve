@@ -104,7 +104,7 @@ public class SkyveDocumentNodeRenderer implements NodeRenderer {
 	 */
 	@Override
 	@SuppressWarnings({"boxing", "java:S3776"}) // Complexity OK
-	public void render(@Nonnull Node node) {
+	public void render(@SuppressWarnings("null") @Nonnull Node node) {
 		if (node instanceof Heading heading) {
 			if (heading.getLevel() == 2) {
 				if (heading.getFirstChild() instanceof Text text) {

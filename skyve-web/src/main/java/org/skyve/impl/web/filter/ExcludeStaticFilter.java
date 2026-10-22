@@ -24,7 +24,7 @@ public abstract class ExcludeStaticFilter implements Filter {
 	 * @throws ServletException when filter initialization fails
 	 */
 	@Override
-	public void init(@Nonnull FilterConfig config) throws ServletException {
+	public void init(@SuppressWarnings("null") @Nonnull FilterConfig config) throws ServletException {
 		String urls = Util.processStringValue(config.getServletContext().getInitParameter("staticURLPrefixes"));
 		if (urls != null) {
 			staticURLPrefixes = urls.split("\n");

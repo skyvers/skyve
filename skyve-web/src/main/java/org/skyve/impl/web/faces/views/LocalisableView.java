@@ -84,7 +84,7 @@ public abstract class LocalisableView implements Serializable {
 		 * @return the localised value
 		 */
 		@Override
-		public @Nullable String get(final @Nonnull Object key) {
+		public @Nullable String get(@SuppressWarnings("null") final @Nonnull Object key) {
 			return new FacesAction<String>() {
 				@Override
 				public @Nonnull String callback() throws Exception {

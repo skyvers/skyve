@@ -139,7 +139,7 @@ class DoctorUtilTest {
 		when(reference.getUsage()).thenReturn(UsageType.both);
 		when(reference.isDeprecated()).thenReturn(false);
 		when(document.getReferenceNames()).thenReturn(new LinkedHashSet<>(Collections.singleton("account")));
-		when(document.getReferenceByName("account")).thenReturn(reference);
+		when(document.getNullSafeReferenceByName("account")).thenReturn(reference);
 
 		Condition condition = mock(Condition.class);
 		when(condition.getDescription()).thenReturn("Condition description");

@@ -1,6 +1,7 @@
 package org.skyve.impl.metadata.user;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -172,6 +173,15 @@ class SuperUserTest {
 		SuperUser superUser = new TestSuperUser(customer);
 
 		assertThat(superUser.getAccessibleModuleNames(), is(new java.util.TreeSet<>(modules.keySet())));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void getAccessibleModuleNamesReturnsEmptySetWhenCustomerCannotBeResolved() {
+		// no customer name, so getCustomer() throws a MetaDataException
+		SuperUser superUser = new SuperUser();
+
+		assertThat(superUser.getAccessibleModuleNames(), is(empty()));
 	}
 
 	private static final class TestSuperUser extends SuperUser {

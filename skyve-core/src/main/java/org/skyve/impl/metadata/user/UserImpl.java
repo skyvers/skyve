@@ -18,6 +18,7 @@ import org.skyve.impl.metadata.repository.module.ContentPermission;
 import org.skyve.impl.metadata.repository.module.ContentRestriction;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.util.UtilImpl;
+import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Persistent;
 import org.skyve.metadata.model.document.Document;
@@ -386,11 +387,19 @@ public class UserImpl implements User {
 	/**
 	 * Resolves the customer's metadata object for this user context.
 	 *
-	 * @return the current customer metadata, or {@code null} if it cannot be resolved.
+	 * @return the current customer metadata
+	 * @throws MetaDataException if the user has no customer name or the customer does not exist
 	 */
 	@Override
 	public @Nonnull Customer getCustomer() {
-		return ProvidedRepositoryFactory.get().getCustomer(customerName);
+		if (customerName == null) {
+			throw new MetaDataException("User " + getName() + " has no customer");
+		}
+		Customer result = ProvidedRepositoryFactory.get().getCustomer(customerName);
+		if (result == null) {
+			throw new MetaDataException("Customer " + customerName + " for user " + getName() + " does not exist");
+		}
+		return result;
 	}
 
 	/**

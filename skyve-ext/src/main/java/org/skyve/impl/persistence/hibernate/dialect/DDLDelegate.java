@@ -120,7 +120,7 @@ public class DDLDelegate {
 					 * @return true to delegate all class loading requests to this factory
 					 */
 					@Override
-					public boolean match(@Nonnull String name) {
+					public boolean match(@SuppressWarnings("null") @Nonnull String name) {
 						return true;
 					}
 
@@ -132,7 +132,7 @@ public class DDLDelegate {
 					 * @throws ClassNotFoundException if the class cannot be loaded
 					 */
 					@Override
-					public @Nonnull Class<?> loadClass(@Nonnull String name) throws ClassNotFoundException {
+					public @Nonnull Class<?> loadClass(@SuppressWarnings("null") @Nonnull String name) throws ClassNotFoundException {
 						return Thread.currentThread().getContextClassLoader().loadClass(name);
 					}
 				});

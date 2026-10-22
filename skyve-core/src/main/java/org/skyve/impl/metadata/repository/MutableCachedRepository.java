@@ -471,7 +471,7 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryFactory 
 
 		// check each document reference query name links to a module query
 		for (String referenceName : result.getReferenceNames()) {
-			String queryName = result.getReferenceByName(referenceName).getQueryName();
+			String queryName = result.getNullSafeReferenceByName(referenceName).getQueryName();
 			if ((queryName != null) && (module.getMetaDataQuery(queryName) == null)) {
 				StringBuilder mde = new StringBuilder(documentName);
 				mde.append(" : The reference ");

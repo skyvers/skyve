@@ -35,7 +35,9 @@ public class RequestLoggingAndStatisticsFilter extends ExcludeStaticFilter {
     private static final Logger COMMAND_LOGGER = Category.COMMAND.logger();
 
     @Override
-	public void doFilter(@Nonnull ServletRequest request, @Nonnull ServletResponse response, @Nonnull FilterChain chain)
+	public void doFilter(@SuppressWarnings("null") @Nonnull ServletRequest request,
+						@SuppressWarnings("null") @Nonnull ServletResponse response,
+						@SuppressWarnings("null") @Nonnull FilterChain chain)
 	throws IOException, ServletException {
 		HttpServletRequest httpRequest = (HttpServletRequest) request;
     	if (staticURLPrefix(httpRequest)) {

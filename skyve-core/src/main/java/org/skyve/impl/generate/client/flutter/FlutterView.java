@@ -35,7 +35,7 @@ abstract class FlutterView implements Comparable<FlutterView> {
 	}
 
     @Override
-    public int compareTo(@Nonnull FlutterView o) {
+    public int compareTo(@SuppressWarnings("null") @Nonnull FlutterView o) {
         return className.compareTo(o.className);
     }
 

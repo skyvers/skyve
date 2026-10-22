@@ -53,7 +53,7 @@ public class SkyveFacesFilter implements Filter {
 	 * Initialises configured routing and security parameters used by the Faces filter.
 	 */
 	@Override
-	public void init(@Nonnull FilterConfig config) throws ServletException {
+	public void init(@SuppressWarnings("null") @Nonnull FilterConfig config) throws ServletException {
 		forwardURI = Util.processStringValue(config.getInitParameter("forward"));
 		errorURI = Util.processStringValue(config.getInitParameter("error"));
 		expiredURI = Util.processStringValue(config.getInitParameter("expired"));
@@ -86,7 +86,9 @@ public class SkyveFacesFilter implements Filter {
 	 */
 	@Override
 	@SuppressWarnings({"javasecurity:S5146", "java:S3776"}) // false positive: see below; Complexity OK
-	public void doFilter(@Nonnull ServletRequest req, @Nonnull ServletResponse resp, @Nonnull FilterChain chain)
+	public void doFilter(@SuppressWarnings("null") @Nonnull ServletRequest req,
+						@SuppressWarnings("null") @Nonnull ServletResponse resp,
+						@SuppressWarnings("null") @Nonnull FilterChain chain)
 	throws IOException, ServletException {
 		HttpServletRequest request = (HttpServletRequest) req;
 		HttpServletResponse response = (HttpServletResponse) resp;

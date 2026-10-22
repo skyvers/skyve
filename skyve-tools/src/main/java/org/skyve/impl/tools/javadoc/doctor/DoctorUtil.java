@@ -329,7 +329,7 @@ public class DoctorUtil {
 			table.getHtmlContent().add(document.getPluralAlias() + " have the following references to other documents:");
 			table.setHeaderValues("Reference", "Type", "Document", "Required", "Description", "Documentation", "Usage", "Deprecated");
 			for (String referenceName : document.getReferenceNames()) {
-				Reference reference = document.getReferenceByName(referenceName);
+				Reference reference = document.getNullSafeReferenceByName(referenceName);
 				UsageType usage = reference.getUsage();
 				table.setRowValues(reference.getLocalisedDisplayName(), 
 									reference.getAttributeType().toString(), 

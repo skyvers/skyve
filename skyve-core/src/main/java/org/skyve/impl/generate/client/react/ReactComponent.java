@@ -21,7 +21,7 @@ abstract class ReactComponent implements Comparable<ReactComponent> {
 	}
 	
 	@Override
-	public int compareTo(@Nonnull ReactComponent o) {
+	public int compareTo(@SuppressWarnings("null") @Nonnull ReactComponent o) {
 		return key.compareTo(o.key);
 	}
 	

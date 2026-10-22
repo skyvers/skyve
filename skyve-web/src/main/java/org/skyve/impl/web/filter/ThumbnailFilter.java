@@ -84,7 +84,7 @@ public class ThumbnailFilter implements Filter {
 	 * @throws ServletException if {@code nonImageResponse} is set to an unrecognised value
 	 */
 	@Override
-	public void init(@Nonnull FilterConfig config) throws ServletException {
+	public void init(@SuppressWarnings("null") @Nonnull FilterConfig config) throws ServletException {
 		String wp = UtilImpl.processStringValue(config.getInitParameter("widthParam"));
 		widthParam = (wp != null) ? wp : DynamicImageServlet.IMAGE_WIDTH_NAME;
 
@@ -126,7 +126,9 @@ public class ThumbnailFilter implements Filter {
 	 */
 	@Override
 	@SuppressWarnings("java:S3776") // Complexity OK
-	public void doFilter(@Nonnull ServletRequest request, @Nonnull ServletResponse response, @Nonnull FilterChain chain)
+	public void doFilter(@SuppressWarnings("null") @Nonnull ServletRequest request,
+						@SuppressWarnings("null") @Nonnull ServletResponse response,
+						@SuppressWarnings("null") @Nonnull FilterChain chain)
 	throws IOException, ServletException {
 		// Parse width and height; if absent or invalid pass straight through
 		int width = 0;
@@ -271,7 +273,7 @@ public class ThumbnailFilter implements Filter {
 		}
 
 		@Override
-		public void setHeader(@Nonnull String name, @Nullable String value) {
+		public void setHeader(@SuppressWarnings("null") @Nonnull String name, @Nullable String value) {
 			if ("Content-Type".equalsIgnoreCase(name)) {
 				capturedContentType = value;
 			}
@@ -279,7 +281,7 @@ public class ThumbnailFilter implements Filter {
 		}
 
 		@Override
-		public void addHeader(@Nonnull String name, @Nonnull String value) {
+		public void addHeader(@SuppressWarnings("null") @Nonnull String name, @SuppressWarnings("null") @Nonnull String value) {
 			if ("Content-Type".equalsIgnoreCase(name)) {
 				capturedContentType = value;
 			}
@@ -326,7 +328,7 @@ public class ThumbnailFilter implements Filter {
 		}
 
 		@Override
-		public void write(@Nonnull byte[] b, int off, int len) {
+		public void write(@SuppressWarnings("null") @Nonnull byte[] b, int off, int len) {
 			buffer.write(b, off, len);
 		}
 
@@ -336,7 +338,7 @@ public class ThumbnailFilter implements Filter {
 		}
 
 		@Override
-		public void setWriteListener(@Nonnull WriteListener writeListener) {
+		public void setWriteListener(@SuppressWarnings("null") @Nonnull WriteListener writeListener) {
 			// not needed for synchronous capture
 		}
 	}

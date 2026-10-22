@@ -65,7 +65,7 @@ public class SkyveFacesPhaseListener implements PhaseListener {
 	 * @param event the current JSF phase event
 	 */
 	@Override
-	public void beforePhase(@Nonnull PhaseEvent event) {
+	public void beforePhase(@SuppressWarnings("null") @Nonnull PhaseEvent event) {
 		PhaseId phaseId = event.getPhaseId();
 		if (UtilImpl.FACES_TRACE) {
 			FACES_LOGGER.info("SkyveFacesPhaseListener - BEFORE {} : responseComplete={}", phaseId, Boolean.valueOf(event.getFacesContext().getResponseComplete()));
@@ -81,7 +81,7 @@ public class SkyveFacesPhaseListener implements PhaseListener {
 	 * @param event the current JSF phase event
 	 */
 	@Override
-	public void afterPhase(@Nonnull PhaseEvent event) {
+	public void afterPhase(@SuppressWarnings("null") @Nonnull PhaseEvent event) {
 		PhaseId phaseId = event.getPhaseId();
 		if (UtilImpl.FACES_TRACE) FACES_LOGGER.info("SkyveFacesPhaseListener - AFTER {} : responseComplete={}", phaseId, Boolean.valueOf(event.getFacesContext().getResponseComplete()));
 		try {

@@ -21,6 +21,14 @@ import org.skyve.metadata.user.Role;
 class CustomerRoleMetaDataTest {
 
 	@Test
+	void getNameReturnsSetName() {
+		CustomerRoleMetaData role = new CustomerRoleMetaData();
+		assertNull(role.getName());
+		role.setName("Manager");
+		assertEquals("Manager", role.getName());
+	}
+
+	@Test
 	void setDescriptionStoredViaProcessStringValue() {
 		CustomerRoleMetaData role = new CustomerRoleMetaData();
 		role.setDescription("  Admin Role  ");

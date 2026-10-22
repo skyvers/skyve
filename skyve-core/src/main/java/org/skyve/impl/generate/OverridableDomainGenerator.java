@@ -1904,7 +1904,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 			// Propagate to child collections
 			// Note:- these are not in the list of exported references
 			for (String referenceName : document.getReferenceNames()) {
-				Reference reference = document.getReferenceByName(referenceName);
+				Reference reference = document.getNullSafeReferenceByName(referenceName);
 				if (CollectionType.child.equals(reference.getType())) {
 					Document refDocument = module.getDocument(customer, reference.getDocumentName());
 					Module refModule = customer.getModule(refDocument.getOwningModuleName());
@@ -3711,7 +3711,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 		}
 
 		for (String referenceName : document.getReferenceNames()) {
-			Reference reference = document.getReferenceByName(referenceName);
+			Reference reference = document.getNullSafeReferenceByName(referenceName);
 			ReferenceType type = reference.getType();
 			boolean required = reference.isRequired();
 			if (AssociationType.aggregation.equals(type)) {
@@ -4085,13 +4085,15 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 		if (Files.exists(directory)) {
 			Files.walkFileTree(directory, new SimpleFileVisitor<Path>() {
 				@Override
-				public @Nonnull FileVisitResult visitFile(@Nonnull Path path, @Nonnull BasicFileAttributes basicFileAttributes) throws IOException {
+				public @Nonnull FileVisitResult visitFile(@SuppressWarnings("null") @Nonnull Path path,
+															@SuppressWarnings("null") @Nonnull BasicFileAttributes basicFileAttributes) throws IOException {
 					Files.delete(path);
 					return FileVisitResult.CONTINUE;
 				}
 
 				@Override
-				public @Nonnull FileVisitResult postVisitDirectory(@Nonnull Path subDir, @Nullable IOException ioException) throws IOException {
+				public @Nonnull FileVisitResult postVisitDirectory(@SuppressWarnings("null") @Nonnull Path subDir,
+																	@Nullable IOException ioException) throws IOException {
 					Files.delete(subDir);
 					return FileVisitResult.CONTINUE;
 				}

@@ -38,7 +38,7 @@ public class InMemoryFilter implements Filter {
 		abstract boolean evaluate(@Nonnull Object bean, @Nonnull String binding, @Nullable T value, @Nullable T start, @Nullable T end) throws Exception;
 		
 		@Override
-		public final boolean evaluate(@Nonnull Object object) {
+		public final boolean evaluate(@SuppressWarnings("null") @Nonnull Object object) {
 			try {
 				return evaluate(object, binding, value, start, end);
 			}

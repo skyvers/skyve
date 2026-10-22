@@ -273,7 +273,7 @@ final class BackupUtil {
 							// child collections have no joining table
 							if (! CollectionType.child.equals(reference.getType())) {
 								String referenceFieldName = reference.getReferenceFieldName();
-								org.skyve.metadata.model.document.Collection collection = (org.skyve.metadata.model.document.Collection) referencedDocument.getReferenceByName(referenceFieldName);
+								org.skyve.metadata.model.document.Collection collection = (org.skyve.metadata.model.document.Collection) referencedDocument.getNullSafeReferenceByName(referenceFieldName);
 								if (collection.isPersistent()) {
 									String ownerAgnosticIdentifier = referencePersistent.getAgnosticIdentifier();
 									String ownerPersistentIdentifier = referencePersistent.getPersistentIdentifier();
@@ -691,7 +691,7 @@ final class BackupUtil {
 		// Validate that there is at least one CSV file in root
 		boolean hasCsvFile = backupDirectory.listFiles(new FilenameFilter() {
 			@Override
-			public boolean accept(@Nonnull File dir, @Nonnull String name) {
+			public boolean accept(@SuppressWarnings("null") @Nonnull File dir, @SuppressWarnings("null") @Nonnull String name) {
 				return name.toLowerCase().endsWith(".csv");
 			}
 		}).length > 0;

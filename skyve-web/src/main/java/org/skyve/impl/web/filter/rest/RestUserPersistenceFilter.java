@@ -94,7 +94,9 @@ public class RestUserPersistenceFilter extends AbstractRestFilter {
 	 * @throws ServletException if downstream filter processing fails
 	 */
 	@Override
-	public void doFilter(@Nonnull ServletRequest request, @Nonnull ServletResponse response, @Nonnull FilterChain chain)
+	public void doFilter(@SuppressWarnings("null") @Nonnull ServletRequest request,
+						@SuppressWarnings("null") @Nonnull ServletResponse response,
+						@SuppressWarnings("null") @Nonnull FilterChain chain)
 	throws IOException, ServletException {
 		LOGGER.debug("RestUserPersistenceFilter intercepted request");
 

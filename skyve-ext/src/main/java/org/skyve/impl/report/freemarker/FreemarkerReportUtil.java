@@ -636,7 +636,7 @@ public final class FreemarkerReportUtil {
 		}
 
 		@Override
-		protected @Nullable InputStream resolveAndOpenStream(@Nonnull String uri) {
+		protected @Nullable InputStream resolveAndOpenStream(@SuppressWarnings("null") @Nonnull String uri) {
 			InputStream is = super.resolveAndOpenStream(uri);
 			return is;
 		}

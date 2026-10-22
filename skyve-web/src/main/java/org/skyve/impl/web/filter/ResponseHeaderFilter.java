@@ -29,7 +29,7 @@ public class ResponseHeaderFilter implements Filter {
 	 * @throws ServletException when filter initialization fails
 	 */
 	@Override
-	public void init(@Nonnull FilterConfig config) throws ServletException {
+	public void init(@SuppressWarnings("null") @Nonnull FilterConfig config) throws ServletException {
 		fc = config;
 	}
 
@@ -42,7 +42,9 @@ public class ResponseHeaderFilter implements Filter {
 	}
 
 	@Override
-	public void doFilter(@Nonnull ServletRequest request, @Nonnull ServletResponse response, @Nonnull FilterChain chain)
+	public void doFilter(@SuppressWarnings("null") @Nonnull ServletRequest request,
+						@SuppressWarnings("null") @Nonnull ServletResponse response,
+						@SuppressWarnings("null") @Nonnull FilterChain chain)
 	throws IOException, ServletException {
 		applyHeaders(fc, (HttpServletResponse) response);
 

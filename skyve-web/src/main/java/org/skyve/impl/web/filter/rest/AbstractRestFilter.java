@@ -46,7 +46,7 @@ public abstract class AbstractRestFilter implements Filter {
 	 * @throws ServletException when initialization fails
 	 */
 	@Override
-	public void init(@Nonnull FilterConfig config) throws ServletException {
+	public void init(@SuppressWarnings("null") @Nonnull FilterConfig config) throws ServletException {
 		String param = Util.processStringValue(config.getInitParameter(REALM_INIT_PARAMETER));
 		if (param != null) {
 			realm = param;

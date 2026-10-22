@@ -68,7 +68,8 @@ public class SmartClientTagServlet extends HttpServlet {
 	 */
 	@Override
 	@SuppressWarnings("java:S1989") // there exists JavaEE error pages
-	protected void doGet(@Nonnull HttpServletRequest request, @Nonnull HttpServletResponse response)
+	protected void doGet(@SuppressWarnings("null") @Nonnull HttpServletRequest request,
+						@SuppressWarnings("null") @Nonnull HttpServletResponse response)
 	throws ServletException, IOException {
 		processRequest(request, response);
 	}
@@ -78,7 +79,8 @@ public class SmartClientTagServlet extends HttpServlet {
 	 */
 	@Override
 	@SuppressWarnings("java:S1989") // there exists JavaEE error pages
-	protected void doPost(@Nonnull HttpServletRequest request, @Nonnull HttpServletResponse response)
+	protected void doPost(@SuppressWarnings("null") @Nonnull HttpServletRequest request,
+							@SuppressWarnings("null") @Nonnull HttpServletResponse response)
 	throws ServletException, IOException {
 		processRequest(request, response);
 	}

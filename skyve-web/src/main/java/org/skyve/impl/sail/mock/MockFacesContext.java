@@ -125,7 +125,7 @@ public class MockFacesContext extends FacesContext implements AutoCloseable {
 	 * Sets the active mock view root.
 	 */
 	@Override
-	public void setViewRoot(@Nonnull UIViewRoot root) {
+	public void setViewRoot(@SuppressWarnings("null") @Nonnull UIViewRoot root) {
 		this.root = root;
 	}
 
@@ -251,7 +251,7 @@ public class MockFacesContext extends FacesContext implements AutoCloseable {
 	 * Retains a message for subsequent assertions.
 	 */
 	@Override
-	public void addMessage(@Nullable String clientId, @Nonnull FacesMessage message) {
+	public void addMessage(@Nullable String clientId, @SuppressWarnings("null") @Nonnull FacesMessage message) {
 		messages.computeIfAbsent(clientId, ignored -> new ArrayList<>()).add(Objects.requireNonNull(message, "message"));
 	}
 

@@ -67,7 +67,9 @@ public class SkyveDocumentFieldsProvider implements FieldsProvider {
 	 * @throws JRException if metadata cannot be resolved
 	 */
 	@Override
-    public @Nonnull JRField[] getFields(@Nullable IReportConnection connection, @Nonnull JRDataset dataset, @Nullable Map parameters) 
+    public @Nonnull JRField[] getFields(@Nullable IReportConnection connection,
+										@SuppressWarnings("null") @Nonnull JRDataset dataset,
+										@Nullable Map parameters) 
 	throws JRException, UnsupportedOperationException {
 		try {
     		String moduleDotDocument = dataset.getQuery().getText();

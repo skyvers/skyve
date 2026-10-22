@@ -47,13 +47,13 @@ public class ChangeTrackingArrayList<E> extends ArrayList<E> {
 	}
 	
 	@Override
-	public boolean addAll(@Nonnull Collection<? extends E> c) {
+	public boolean addAll(@SuppressWarnings("null") @Nonnull Collection<? extends E> c) {
 		preset();
 		return super.addAll(c);
 	}
 	
 	@Override
-	public boolean addAll(int index, @Nonnull Collection<? extends E> c) {
+	public boolean addAll(int index, @SuppressWarnings("null") @Nonnull Collection<? extends E> c) {
 		preset();
 		return super.addAll(index, c);
 	}
@@ -71,25 +71,25 @@ public class ChangeTrackingArrayList<E> extends ArrayList<E> {
 	}
 	
 	@Override
-	public boolean removeAll(@Nonnull Collection<?> c) {
+	public boolean removeAll(@SuppressWarnings("null") @Nonnull Collection<?> c) {
 		preset();
 		return super.removeAll(c);
 	}
 	
 	@Override
-	public boolean removeIf(@Nonnull Predicate<? super E> filter) {
+	public boolean removeIf(@SuppressWarnings("null") @Nonnull Predicate<? super E> filter) {
 		preset();
 		return super.removeIf(filter);
 	}
 	
 	@Override
-	public void replaceAll(@Nonnull UnaryOperator<E> operator) {
+	public void replaceAll(@SuppressWarnings("null") @Nonnull UnaryOperator<E> operator) {
 		preset();
 		super.replaceAll(operator);
 	}
 	
 	@Override
-	public boolean retainAll(@Nonnull Collection<?> c) {
+	public boolean retainAll(@SuppressWarnings("null") @Nonnull Collection<?> c) {
 		preset();
 		return super.retainAll(c);
 	}

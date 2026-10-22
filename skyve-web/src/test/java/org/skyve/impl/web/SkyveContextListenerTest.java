@@ -1036,32 +1036,26 @@ public class SkyveContextListenerTest {
 				"limits",
 				"number",
 				properties);
-		String name = (String) invokePrivateStatic("getString",
-				new Class<?>[] {String.class, String.class, Map.class, boolean.class},
+		String name = (String) invokePrivateStatic("getRequiredString",
+				new Class<?>[] {String.class, String.class, Map.class},
 				"environment",
 				"name",
-				properties,
-				Boolean.TRUE);
-		Number optionalMissingNumber = (Number) invokePrivateStatic("getNumber",
-				new Class<?>[] {String.class, String.class, Map.class, boolean.class},
-				null,
+				properties);
+		Number optionalMissingNumber = (Number) invokePrivateStatic("getOptionalNumber",
+				new Class<?>[] {String.class, Map.class},
 				"missing",
-				properties,
-				Boolean.FALSE);
+				properties);
 		@SuppressWarnings("unchecked")
-		Map<String, Object> object = (Map<String, Object>) invokePrivateStatic("getObject",
-				new Class<?>[] {String.class, String.class, Map.class, boolean.class},
+		Map<String, Object> object = (Map<String, Object>) invokePrivateStatic("getRequiredObject",
+				new Class<?>[] {String.class, String.class, Map.class},
 				"api",
 				"object",
-				properties,
-				Boolean.TRUE);
+				properties);
 		@SuppressWarnings("unchecked")
-		List<String> items = (List<String>) invokePrivateStatic("getList",
-				new Class<?>[] {String.class, String.class, Map.class, boolean.class},
-				"api",
+		List<String> items = (List<String>) invokePrivateStatic("getOptionalList",
+				new Class<?>[] {String.class, Map.class},
 				"items",
-				properties,
-				Boolean.TRUE);
+				properties);
 
 		assertTrue(flag.booleanValue());
 		assertEquals(Integer.valueOf(7), number);
@@ -1077,24 +1071,64 @@ public class SkyveContextListenerTest {
 		Map<String, Object> properties = new HashMap<>();
 
 		InvocationTargetException withPrefix = assertThrows(InvocationTargetException.class,
-				() -> invokePrivateStatic("get",
-						new Class<?>[] {String.class, String.class, Map.class, boolean.class},
+				() -> invokePrivateStatic("getRequired",
+						new Class<?>[] {String.class, String.class, Map.class},
 						"security",
 						"missing",
-						properties,
-						Boolean.TRUE));
+						properties));
 		assertThat(withPrefix.getCause(), instanceOf(IllegalStateException.class));
 		assertEquals("Property security.missing does not exist in the JSON configuration.", withPrefix.getCause().getMessage());
 
 		InvocationTargetException withoutPrefix = assertThrows(InvocationTargetException.class,
-				() -> invokePrivateStatic("get",
-						new Class<?>[] {String.class, String.class, Map.class, boolean.class},
+				() -> invokePrivateStatic("getRequired",
+						new Class<?>[] {String.class, String.class, Map.class},
 						null,
 						"missing",
-						properties,
-						Boolean.TRUE));
+						properties));
 		assertThat(withoutPrefix.getCause(), instanceOf(IllegalStateException.class));
 		assertEquals("Property missing does not exist in the JSON configuration.", withoutPrefix.getCause().getMessage());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void testTypedRequiredGettersThrowWhenValueMissing() {
+		Map<String, Object> properties = new HashMap<>();
+
+		for (String methodName : List.of("getRequiredNumber", "getRequiredString", "getRequiredObject")) {
+			InvocationTargetException thrown = assertThrows(InvocationTargetException.class,
+					() -> invokePrivateStatic(methodName,
+							new Class<?>[] {String.class, String.class, Map.class},
+							"api",
+							"missing",
+							properties),
+					methodName);
+			assertThat(methodName, thrown.getCause(), instanceOf(IllegalStateException.class));
+			assertEquals("Property api.missing does not exist in the JSON configuration.", thrown.getCause().getMessage(), methodName);
+		}
+	}
+
+	@Test
+	@SuppressWarnings({"static-method", "unchecked"})
+	public void testOptionalGettersReturnValueOrNull() throws Exception {
+		Map<String, Object> nested = new HashMap<>();
+		nested.put("sub", "value");
+
+		Map<String, Object> properties = new HashMap<>();
+		properties.put("number", Integer.valueOf(7));
+		properties.put("name", "demo");
+		properties.put("object", nested);
+		properties.put("items", List.of("a", "b"));
+		properties.put("raw", Boolean.TRUE);
+
+		assertEquals(Integer.valueOf(7), invokePrivateStatic("getOptionalNumber", new Class<?>[] {String.class, Map.class}, "number", properties));
+		assertEquals("demo", invokePrivateStatic("getOptionalString", new Class<?>[] {String.class, Map.class}, "name", properties));
+		assertEquals("value", ((Map<String, Object>) invokePrivateStatic("getOptionalObject", new Class<?>[] {String.class, Map.class}, "object", properties)).get("sub"));
+		assertEquals(List.of("a", "b"), invokePrivateStatic("getOptionalList", new Class<?>[] {String.class, Map.class}, "items", properties));
+		assertEquals(Boolean.TRUE, invokePrivateStatic("getOptional", new Class<?>[] {String.class, Map.class}, "raw", properties));
+
+		for (String methodName : List.of("getOptional", "getOptionalNumber", "getOptionalString", "getOptionalObject", "getOptionalList")) {
+			assertNull(invokePrivateStatic(methodName, new Class<?>[] {String.class, Map.class}, "missing", properties), methodName);
+		}
 	}
 
 	@Test

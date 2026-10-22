@@ -266,7 +266,8 @@ public class FileUtil {
 				Path root = directory.toPath();
 				Files.walkFileTree(root, new SimpleFileVisitor<Path>() {
 					@Override
-					public @Nonnull FileVisitResult visitFile(@Nonnull Path file, @Nonnull BasicFileAttributes attrs) throws IOException {
+					public @Nonnull FileVisitResult visitFile(@SuppressWarnings("null") @Nonnull Path file,
+																@SuppressWarnings("null") @Nonnull BasicFileAttributes attrs) throws IOException {
 						addPathToZip(root, file, zos);
 						return FileVisitResult.CONTINUE;
 					}

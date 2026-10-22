@@ -28,7 +28,7 @@ public class DeproxyingPropertyUtilsBean extends PropertyUtilsBean {
 	 * @throws NoSuchMethodException if the property does not exist
 	 */
 	@Override
-	public @Nullable Object getSimpleProperty(@Nonnull Object bean, @Nonnull String name)
+	public @Nullable Object getSimpleProperty(@SuppressWarnings("null") @Nonnull Object bean, @SuppressWarnings("null") @Nonnull String name)
 	throws IllegalAccessException, InvocationTargetException, NoSuchMethodException {
 		Object deproxiedBean = UtilImpl.deproxy(bean);
 		return super.getSimpleProperty(deproxiedBean, name);
@@ -45,7 +45,9 @@ public class DeproxyingPropertyUtilsBean extends PropertyUtilsBean {
 	 * @throws NoSuchMethodException if the property does not exist
 	 */
 	@Override
-	public void setSimpleProperty(@Nonnull Object bean, @Nonnull String name, @Nullable Object value)
+	public void setSimpleProperty(@SuppressWarnings("null") @Nonnull Object bean,
+									@SuppressWarnings("null") @Nonnull String name,
+									@Nullable Object value)
 	throws IllegalAccessException, InvocationTargetException, NoSuchMethodException {
 		Object deproxiedBean = UtilImpl.deproxy(bean);
 		Object deproxiedValue = UtilImpl.deproxy(value);
@@ -63,7 +65,7 @@ public class DeproxyingPropertyUtilsBean extends PropertyUtilsBean {
 	 * @throws NoSuchMethodException if the property does not exist
 	 */
 	@Override
-	public @Nullable Class<?> getPropertyType(@Nonnull Object bean, @Nonnull String name)
+	public @Nullable Class<?> getPropertyType(@SuppressWarnings("null") @Nonnull Object bean, @SuppressWarnings("null") @Nonnull String name)
 	throws IllegalAccessException, InvocationTargetException, NoSuchMethodException {
 		Object deproxiedBean = UtilImpl.deproxy(bean);
 		return super.getPropertyType(deproxiedBean, name);
@@ -80,7 +82,8 @@ public class DeproxyingPropertyUtilsBean extends PropertyUtilsBean {
 	 * @throws NoSuchMethodException if the property does not exist
 	 */
 	@Override
-	public @Nullable PropertyDescriptor getPropertyDescriptor(@Nonnull Object bean, @Nonnull String name)
+	public @Nullable PropertyDescriptor getPropertyDescriptor(@SuppressWarnings("null") @Nonnull Object bean,
+																@SuppressWarnings("null") @Nonnull String name)
 	throws IllegalAccessException, InvocationTargetException, NoSuchMethodException {
 		Object deproxiedBean = UtilImpl.deproxy(bean);
 		return super.getPropertyDescriptor(deproxiedBean, name);
@@ -98,7 +101,9 @@ public class DeproxyingPropertyUtilsBean extends PropertyUtilsBean {
 	 * @throws NoSuchMethodException if the property does not exist
 	 */
 	@Override
-	public @Nullable Object getIndexedProperty(@Nonnull Object bean, @Nonnull String name, int index)
+	public @Nullable Object getIndexedProperty(@SuppressWarnings("null") @Nonnull Object bean,
+												@SuppressWarnings("null") @Nonnull String name,
+												int index)
 	throws IllegalAccessException, InvocationTargetException, NoSuchMethodException {
 		Object deproxiedBean = UtilImpl.deproxy(bean);
 		return super.getIndexedProperty(deproxiedBean, name, index);
@@ -116,7 +121,10 @@ public class DeproxyingPropertyUtilsBean extends PropertyUtilsBean {
 	 * @throws NoSuchMethodException if the property does not exist
 	 */
 	@Override
-	public void setIndexedProperty(@Nonnull Object bean, @Nonnull String name, int index, @Nullable Object value)
+	public void setIndexedProperty(@SuppressWarnings("null") @Nonnull Object bean,
+									@SuppressWarnings("null") @Nonnull String name,
+									int index,
+									@Nullable Object value)
 	throws IllegalAccessException, InvocationTargetException, NoSuchMethodException {
 		Object deproxiedBean = UtilImpl.deproxy(bean);
 		Object deproxiedValue = UtilImpl.deproxy(value);
@@ -135,7 +143,9 @@ public class DeproxyingPropertyUtilsBean extends PropertyUtilsBean {
 	 * @throws NoSuchMethodException if the property does not exist
 	 */
 	@Override
-	public @Nullable Object getMappedProperty(@Nonnull Object bean, @Nonnull String name, @Nonnull String key)
+	public @Nullable Object getMappedProperty(@SuppressWarnings("null") @Nonnull Object bean,
+												@SuppressWarnings("null") @Nonnull String name,
+												@SuppressWarnings("null") @Nonnull String key)
 	throws IllegalAccessException, InvocationTargetException, NoSuchMethodException {
 		Object deproxiedBean = UtilImpl.deproxy(bean);
 		return super.getMappedProperty(deproxiedBean, name, key);
@@ -153,7 +163,10 @@ public class DeproxyingPropertyUtilsBean extends PropertyUtilsBean {
 	 * @throws NoSuchMethodException if the property does not exist
 	 */
 	@Override
-	public void setMappedProperty(@Nonnull Object bean, @Nonnull String name, @Nonnull String key, @Nullable Object value)
+	public void setMappedProperty(@SuppressWarnings("null") @Nonnull Object bean,
+									@SuppressWarnings("null") @Nonnull String name,
+									@SuppressWarnings("null") @Nonnull String key,
+									@Nullable Object value)
 	throws IllegalAccessException, InvocationTargetException, NoSuchMethodException {
 		Object deproxiedBean = UtilImpl.deproxy(bean);
 		Object deproxiedValue = UtilImpl.deproxy(value);

@@ -31,7 +31,7 @@ public class NullTolerantBeanComparator extends BeanComparator {
 	}
 
 	@Override
-	public int compare(@Nonnull Object o1, @Nonnull Object o2) {
+	public int compare(@SuppressWarnings("null") @Nonnull Object o1, @SuppressWarnings("null") @Nonnull Object o2) {
 		String property = getProperty();
 		if (property == null) {
 			return getComparator().compare(o1, o2);

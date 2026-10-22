@@ -55,7 +55,7 @@ public class ListGrid extends HtmlPanelGroup {
 	 * @throws IOException if component rendering fails
 	 */
 	@Override
-	public void encodeBegin(@Nonnull FacesContext context) throws IOException {
+	public void encodeBegin(@SuppressWarnings("null") @Nonnull FacesContext context) throws IOException {
 		Map<String, Object> attributes = getAttributes();
 
 		if (Boolean.TRUE.toString().equals(attributes.get("dynamic"))) {

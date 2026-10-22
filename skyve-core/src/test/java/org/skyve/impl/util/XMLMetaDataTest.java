@@ -43,7 +43,9 @@ import org.skyve.impl.metadata.repository.customer.HTMLResourcesMetaData;
 import org.skyve.impl.metadata.repository.document.BizKey;
 import org.skyve.impl.metadata.repository.document.DocumentMetaData;
 import org.skyve.impl.metadata.repository.document.ParentDocument;
+import org.skyve.impl.metadata.repository.module.CalendarItemMetaData;
 import org.skyve.impl.metadata.repository.module.EditItemMetaData;
+import org.skyve.impl.metadata.repository.module.GrantedTo;
 import org.skyve.impl.metadata.repository.module.ListItemMetaData;
 import org.skyve.impl.metadata.repository.module.MenuMetaData;
 import org.skyve.impl.metadata.repository.module.ModuleDocumentMetaData;
@@ -270,6 +272,27 @@ class XMLMetaDataTest {
 		assertEquals(SortDirection.ascending, restored.getOrdering().get(0).getSort());
 		assertEquals("createdDate", restored.getOrdering().get(1).getBy());
 		assertEquals(SortDirection.descending, restored.getOrdering().get(1).getSort());
+	}
+
+	@Test
+	void testUnmarshalCollectionOrderingBindsByThroughItsSetter() {
+		DocumentMetaData document = createDocument();
+		CollectionImpl collection = createCollection();
+		collection.setType(CollectionType.aggregation);
+		collection.setMinCardinality(0);
+		collection.getOrdering().add(new OrderingImpl("name", SortDirection.ascending));
+		document.getAttributes().add(collection);
+		String xml = XMLMetaData.marshalDocument(document, false);
+		assertTrue(xml.contains(" by=\"name\""), xml);
+
+		// a padded value is trimmed
+		CollectionImpl restored = (CollectionImpl) XMLMetaData.unmarshalDocumentString(xml.replace(" by=\"name\"", " by=\"  name  \"")).getAttributes().get(0);
+		assertEquals("name", restored.getOrdering().get(0).getBy());
+
+		// a blank value is null
+		restored = (CollectionImpl) XMLMetaData.unmarshalDocumentString(xml.replace(" by=\"name\"", " by=\"  \"")).getAttributes().get(0);
+		assertThat(restored.getOrdering().get(0).getBy(), is(nullValue()));
+		assertEquals(SortDirection.ascending, restored.getOrdering().get(0).getSort());
 	}
 
 	@Test
@@ -1643,6 +1666,39 @@ class XMLMetaDataTest {
 		ModuleMetaData roundTripped = XMLMetaData.unmarshalModuleString(xml);
 		assertThat(roundTripped, is(notNullValue()));
 		assertThat(roundTripped.getName(), is("test"));
+	}
+
+	@Test
+	void testUnmarshalModuleStringAcceptsModelCalendarItemWithoutBindings() {
+		ModuleMetaData module = createModule();
+		module.setHomeDocument("Dashboard");
+		ModuleDocumentMetaData docRef = new ModuleDocumentMetaData();
+		docRef.setRef("Dashboard");
+		module.getDocuments().add(docRef);
+		org.skyve.impl.metadata.repository.module.ModuleRoleMetaData role = new org.skyve.impl.metadata.repository.module.ModuleRoleMetaData();
+		role.setName("Administrator");
+		role.setDescription("Admin role");
+		module.getRoles().add(role);
+		MenuMetaData menu = new MenuMetaData();
+		CalendarItemMetaData calendar = new CalendarItemMetaData();
+		calendar.setName("Appointments");
+		calendar.setModelName("AppointmentModel");
+		GrantedTo grant = new GrantedTo();
+		grant.setRoleName("Administrator");
+		calendar.getRoles().add(grant);
+		menu.getActions().add(calendar);
+		module.setMenu(menu);
+
+		String xml = XMLMetaData.marshalModule(module, false);
+		assertFalse(xml.contains("startBinding"), xml);
+		assertFalse(xml.contains("endBinding"), xml);
+
+		// module.xsd no longer requires the calendar bindings
+		ModuleMetaData roundTripped = XMLMetaData.unmarshalModuleString(xml);
+		CalendarItemMetaData restored = (CalendarItemMetaData) roundTripped.getMenu().getActions().get(0);
+		assertEquals("AppointmentModel", restored.getModelName());
+		assertThat(restored.getStartBinding(), is(nullValue()));
+		assertThat(restored.getEndBinding(), is(nullValue()));
 	}
 
 	@Test

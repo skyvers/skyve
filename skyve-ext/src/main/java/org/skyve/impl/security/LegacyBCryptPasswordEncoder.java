@@ -18,12 +18,12 @@ public class LegacyBCryptPasswordEncoder implements PasswordEncoder {
 	private final BCryptPasswordEncoder delegate = new BCryptPasswordEncoder();
 
 	@Override
-	public @Nonnull String encode(@Nonnull CharSequence rawPassword) {
+	public @Nonnull String encode(@SuppressWarnings("null") @Nonnull CharSequence rawPassword) {
 		return delegate.encode(normalizeRawPassword(rawPassword));
 	}
 
 	@Override
-	public boolean matches(@Nonnull CharSequence rawPassword, @Nullable String encodedPassword) {
+	public boolean matches(@SuppressWarnings("null") @Nonnull CharSequence rawPassword, @Nullable String encodedPassword) {
 		return delegate.matches(normalizeRawPassword(rawPassword), encodedPassword);
 	}
 

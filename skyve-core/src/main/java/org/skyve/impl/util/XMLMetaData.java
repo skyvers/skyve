@@ -1019,7 +1019,7 @@ public class XMLMetaData {
 		// Keep this ordering next to the writer: JAXB property order does not define XML attribute order.
 		document.accept(new VisitorSupport() {
 			@Override
-			public void visit(@Nonnull Element element) {
+			public void visit(@SuppressWarnings("null") @Nonnull Element element) {
 				List<Attribute> attributes = new ArrayList<>(element.attributes());
 				if (attributes.size() < 2) {
 					return;
@@ -1044,7 +1044,7 @@ public class XMLMetaData {
 			private boolean rootAttributesPending = true;
 
 			@Override
-			protected void writeNamespace(@Nonnull Namespace namespace) throws IOException {
+			protected void writeNamespace(@SuppressWarnings("null") @Nonnull Namespace namespace) throws IOException {
 				if (rootAttributesPending) {
 					rootNamespaces.add(namespace);
 				}
@@ -1054,7 +1054,7 @@ public class XMLMetaData {
 			}
 
 			@Override
-			protected void writeAttributes(@Nonnull Element element) throws IOException {
+			protected void writeAttributes(@SuppressWarnings("null") @Nonnull Element element) throws IOException {
 				if (!rootAttributesPending) {
 					super.writeAttributes(element);
 					return;
@@ -1119,7 +1119,7 @@ public class XMLMetaData {
 
 		@Override
 		@SuppressWarnings("java:S3776") // Complexity OK
-		public void visit(@Nonnull Element node) {
+		public void visit(@SuppressWarnings("null") @Nonnull Element node) {
 			Namespace ns = node.getNamespace();
 
 			String uri = ns.getURI();
@@ -1365,7 +1365,8 @@ public class XMLMetaData {
 															Automation.class);
 		jaxbContext.generateSchema(new SchemaOutputResolver() {
 			@Override
-			public @Nonnull Result createOutput(@Nonnull String namespaceUri, @Nonnull String suggestedFileName) throws IOException {
+			public @Nonnull Result createOutput(@SuppressWarnings("null") @Nonnull String namespaceUri,
+												@SuppressWarnings("null") @Nonnull String suggestedFileName) throws IOException {
 				File file = null;
 				if (namespaceUri.endsWith("/common")) {
 					file = new File("common.xsd");

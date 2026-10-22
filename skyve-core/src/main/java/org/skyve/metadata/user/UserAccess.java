@@ -286,7 +286,7 @@ public class UserAccess implements Serializable, Comparable<UserAccess> {
 	 * @return the result
 	 */
 	@Override
-	public int compareTo(@Nonnull UserAccess other) {
+	public int compareTo(@SuppressWarnings("null") @Nonnull UserAccess other) {
 		return toString().compareTo(other.toString());
 	}
 }

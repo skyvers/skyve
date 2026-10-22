@@ -2096,7 +2096,7 @@ public class ViewJSONManipulator extends ViewVisitor {
 
 		if (parentVisible && visible(comparison)) {
 			String referenceName = comparison.getBinding();
-			Reference reference = document.getReferenceByName(referenceName);
+			Reference reference = document.getNullSafeReferenceByName(referenceName);
 			Document referenceDocument = module.getDocument(customer, reference.getDocumentName());
 
 			try {

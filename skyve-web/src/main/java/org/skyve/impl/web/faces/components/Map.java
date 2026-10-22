@@ -37,7 +37,7 @@ public class Map extends HtmlPanelGroup {
 	 * @throws IOException if the component builder cannot be created or invoked
 	 */
 	@Override
-	public void encodeBegin(@Nonnull FacesContext context) throws IOException {
+	public void encodeBegin(@SuppressWarnings("null") @Nonnull FacesContext context) throws IOException {
 		if (getChildCount() == 0) {
 			java.util.Map<String, Object> attributes = getAttributes();
 			final String moduleName = (String) attributes.get("module");

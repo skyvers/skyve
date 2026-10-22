@@ -32,6 +32,7 @@ import org.skyve.impl.metadata.view.widget.bound.ZoomIn;
 import org.skyve.impl.metadata.view.widget.bound.input.CheckBox;
 import org.skyve.impl.metadata.view.widget.bound.input.ColourPicker;
 import org.skyve.impl.metadata.view.widget.bound.input.Combo;
+import org.skyve.impl.metadata.view.widget.bound.input.DefaultWidget;
 import org.skyve.impl.metadata.view.widget.bound.input.Geometry;
 import org.skyve.impl.metadata.view.widget.bound.input.GeometryMap;
 import org.skyve.impl.metadata.view.widget.bound.input.HTML;
@@ -268,6 +269,38 @@ class ViewValidatorTest extends AbstractSkyveTest {
 		rt.setMinPixelHeight(Integer.valueOf(120));
 		rt.setMaxPixelHeight(Integer.valueOf(260));
 		item.setWidget(rt);
+		row.getItems().add(item);
+		view.getContained().add(form);
+		assertDoesNotThrow(() -> newValidator(view).visit());
+	}
+
+	@Test
+	void validateViewWithRichTextMissingSizeThrowsException() {
+		ViewImpl view = editView();
+		Form form = new Form();
+		form.getColumns().add(new FormColumn());
+		FormRow row = new FormRow();
+		form.getRows().add(row);
+		FormItem item = new FormItem();
+		RichText rt = new RichText();
+		rt.setBinding("markup");
+		item.setWidget(rt);
+		row.getItems().add(item);
+		view.getContained().add(form);
+		assertThrows(MetaDataException.class, () -> newValidator(view).visit());
+	}
+
+	@Test
+	void validateViewWithDefaultWidgetBoundToMarkup() {
+		ViewImpl view = editView();
+		Form form = new Form();
+		form.getColumns().add(new FormColumn());
+		FormRow row = new FormRow();
+		form.getRows().add(row);
+		FormItem item = new FormItem();
+		DefaultWidget dw = new DefaultWidget();
+		dw.setBinding("markup");
+		item.setWidget(dw);
 		row.getItems().add(item);
 		view.getContained().add(form);
 		assertDoesNotThrow(() -> newValidator(view).visit());

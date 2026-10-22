@@ -640,7 +640,7 @@ public class CustomerImpl implements Customer {
 				if ((persistent != null) && 
 						documentRef.getOwningModuleName().equals(module.getName())) {
 					for (String referenceName : document.getReferenceNames()) {
-						Reference reference = document.getReferenceByName(referenceName);
+						Reference reference = document.getNullSafeReferenceByName(referenceName);
 						Document targetDocument = module.getDocument(this, reference.getDocumentName());
 						if (reference.isPersistent()) {
 							// Ensure that the document is tagged as ordered, 

@@ -26,7 +26,7 @@ public class NullsDistinctUniqueDelegate extends DefaultUniqueDelegate {
 	 * @return the rewritten SQL fragment containing {@code unique nulls distinct}
 	 */
 	@Override
-	protected @Nonnull String uniqueConstraintSql(@Nonnull UniqueKey uniqueKey) {
+	protected @Nonnull String uniqueConstraintSql(@SuppressWarnings("null") @Nonnull UniqueKey uniqueKey) {
 		String result = super.uniqueConstraintSql(uniqueKey);
 		return result.replace("unique (", "unique nulls distinct (");
 	}

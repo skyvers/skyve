@@ -34,7 +34,9 @@ public class AssociationAutoCompleteConverter implements Converter<Object> {
 	 */
     @Override
     @SuppressWarnings("java:S3776") // Complexity OK
-    public @Nullable Object getAsObject(@Nonnull FacesContext context, @Nullable UIComponent component, @Nullable String value) {
+    public @Nullable Object getAsObject(@SuppressWarnings("null") @Nonnull FacesContext context,
+										@Nullable UIComponent component,
+										@Nullable String value) {
     	Bean result = null;
     	
     	final String processedValue = UtilImpl.processStringValue(value);

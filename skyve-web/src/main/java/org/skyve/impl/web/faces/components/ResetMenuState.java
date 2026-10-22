@@ -32,7 +32,7 @@ public class ResetMenuState extends UIComponentBase {
 	}
 
 	@Override
-	public void encodeBegin(@Nonnull FacesContext context) throws IOException {
+	public void encodeBegin(@SuppressWarnings("null") @Nonnull FacesContext context) throws IOException {
 		if (UtilImpl.FACES_TRACE) FACES_LOGGER.info("Menu State Cookies deleted...");
 
 		ELContext elc = context.getELContext();

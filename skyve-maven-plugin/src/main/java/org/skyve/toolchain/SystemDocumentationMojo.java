@@ -282,7 +282,7 @@ public class SystemDocumentationMojo extends AbstractSkyveMojo {
 				List<Map<String, Object>> references = new ArrayList<>();
 				for (String referenceName : document.getReferenceNames()) {
 					Map<String, Object> referenceData = new HashMap<>();
-					Reference reference = document.getReferenceByName(referenceName);
+					Reference reference = document.getNullSafeReferenceByName(referenceName);
 					referenceData.put("name", referenceName);
 					referenceData.put("type", reference.getType());
 					referenceData.put("document", reference.getDocumentName());

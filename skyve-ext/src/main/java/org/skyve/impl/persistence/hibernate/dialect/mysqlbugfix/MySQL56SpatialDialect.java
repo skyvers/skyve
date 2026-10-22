@@ -86,7 +86,7 @@ public class MySQL56SpatialDialect extends MySQL55Dialect implements SpatialDial
 	 */
 	@Override
 	public void contributeTypes(
-			@Nonnull TypeContributions typeContributions, @Nonnull ServiceRegistry serviceRegistry) {
+			@SuppressWarnings("null") @Nonnull TypeContributions typeContributions, @SuppressWarnings("null") @Nonnull ServiceRegistry serviceRegistry) {
 		super.contributeTypes( typeContributions, serviceRegistry );
 		dialectDelegate.contributeTypes( typeContributions, serviceRegistry );
 	}
@@ -95,7 +95,7 @@ public class MySQL56SpatialDialect extends MySQL55Dialect implements SpatialDial
 	 * Returns the SQL predicate for the requested spatial relation using MySQL 5.6 ST_* operators.
 	 */
 	@Override
-	public @Nonnull String getSpatialRelateSQL(@Nonnull String columnName, int spatialRelation) {
+	public @Nonnull String getSpatialRelateSQL(@SuppressWarnings("null") @Nonnull String columnName, int spatialRelation) {
 		switch ( spatialRelation ) {
 			case SpatialRelation.WITHIN:
 				return " ST_Within(" + columnName + ",?)";
@@ -124,7 +124,7 @@ public class MySQL56SpatialDialect extends MySQL55Dialect implements SpatialDial
 	 * Returns the spatial filter expression for the supplied geometry column.
 	 */
 	@Override
-	public @Nonnull String getSpatialFilterExpression(@Nonnull String columnName) {
+	public @Nonnull String getSpatialFilterExpression(@SuppressWarnings("null") @Nonnull String columnName) {
 		return dialectDelegate.getSpatialFilterExpression( columnName );
 	}
 
@@ -132,7 +132,7 @@ public class MySQL56SpatialDialect extends MySQL55Dialect implements SpatialDial
 	 * Returns SQL for the requested spatial aggregate operation.
 	 */
 	@Override
-	public @Nonnull String getSpatialAggregateSQL(@Nonnull String columnName, int aggregation) {
+	public @Nonnull String getSpatialAggregateSQL(@SuppressWarnings("null") @Nonnull String columnName, int aggregation) {
 		return dialectDelegate.getSpatialAggregateSQL( columnName, aggregation );
 	}
 
@@ -140,7 +140,7 @@ public class MySQL56SpatialDialect extends MySQL55Dialect implements SpatialDial
 	 * Returns SQL for distance-within comparisons against a geometry parameter.
 	 */
 	@Override
-	public @Nonnull String getDWithinSQL(@Nonnull String columnName) {
+	public @Nonnull String getDWithinSQL(@SuppressWarnings("null") @Nonnull String columnName) {
 		return dialectDelegate.getDWithinSQL( columnName );
 	}
 
@@ -148,7 +148,7 @@ public class MySQL56SpatialDialect extends MySQL55Dialect implements SpatialDial
 	 * Returns SQL that checks the SRID of the geometry column against a bind value.
 	 */
 	@Override
-	public @Nonnull String getHavingSridSQL(@Nonnull String columnName) {
+	public @Nonnull String getHavingSridSQL(@SuppressWarnings("null") @Nonnull String columnName) {
 		return dialectDelegate.getHavingSridSQL( columnName );
 	}
 
@@ -156,7 +156,7 @@ public class MySQL56SpatialDialect extends MySQL55Dialect implements SpatialDial
 	 * Returns SQL that tests whether the geometry column is empty or non-empty.
 	 */
 	@Override
-	public @Nonnull String getIsEmptySQL(@Nonnull String columnName, boolean isEmpty) {
+	public @Nonnull String getIsEmptySQL(@SuppressWarnings("null") @Nonnull String columnName, boolean isEmpty) {
 		return dialectDelegate.getIsEmptySQL( columnName, isEmpty );
 	}
 
@@ -172,7 +172,7 @@ public class MySQL56SpatialDialect extends MySQL55Dialect implements SpatialDial
 	 * Indicates whether the given spatial function is supported by this dialect.
 	 */
 	@Override
-	public boolean supports(@Nonnull SpatialFunction function) {
+	public boolean supports(@SuppressWarnings("null") @Nonnull SpatialFunction function) {
 		return dialectDelegate.supports( function );
 	}
 }

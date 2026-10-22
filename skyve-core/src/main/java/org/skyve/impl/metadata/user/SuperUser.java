@@ -202,7 +202,7 @@ public class SuperUser extends UserImpl {
 	/**
 	 * Returns all module names available to the active customer.
 	 *
-	 * @return module names, or {@code null} if customer metadata cannot be resolved.
+	 * @return module names, or an empty set if customer metadata cannot be resolved.
 	 */
 	@Override
 	public @Nonnull Set<String> getAccessibleModuleNames() {
@@ -213,6 +213,6 @@ public class SuperUser extends UserImpl {
 			LOGGER.error(e.getMessage(), e);
 		}
 
-		return null;
+		return new TreeSet<>();
 	}
 }

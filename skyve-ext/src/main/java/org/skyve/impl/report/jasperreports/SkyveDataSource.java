@@ -101,7 +101,7 @@ public class SkyveDataSource implements JRDataSource {
 	 * @throws JRException If binding resolution or formatting fails.
 	 */
 	@Override
-	public @Nullable Object getFieldValue(@Nonnull JRField field) 
+	public @Nullable Object getFieldValue(@SuppressWarnings("null") @Nonnull JRField field) 
 	throws JRException {
 		Object result = null;
 		try {

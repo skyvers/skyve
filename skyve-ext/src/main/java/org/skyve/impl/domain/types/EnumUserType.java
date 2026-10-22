@@ -30,7 +30,7 @@ public class EnumUserType implements UserType, Serializable, ParameterizedType {
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public void setParameterValues(@Nonnull Properties parameters) {
+	public void setParameterValues(@SuppressWarnings("null") @Nonnull Properties parameters) {
         String enumClassName = parameters.getProperty("enumClass");
         try {
             enumClass = (Class<? extends Enum<?>>) Thread.currentThread().getContextClassLoader().loadClass(enumClassName).asSubclass(Enum.class);
@@ -83,7 +83,7 @@ public class EnumUserType implements UserType, Serializable, ParameterizedType {
 	}
 
 	@Override
-	public int hashCode(@Nonnull Object o) throws HibernateException {
+	public int hashCode(@SuppressWarnings("null") @Nonnull Object o) throws HibernateException {
 		return o.hashCode();
 	}
 
@@ -93,7 +93,10 @@ public class EnumUserType implements UserType, Serializable, ParameterizedType {
 	}
 
 	@Override
-	public @Nullable Object nullSafeGet(@Nonnull ResultSet rs, @Nonnull String[] names, @Nullable SharedSessionContractImplementor session, @Nullable Object owner)
+	public @Nullable Object nullSafeGet(@SuppressWarnings("null") @Nonnull ResultSet rs,
+										@SuppressWarnings("null") @Nonnull String[] names,
+										@Nullable SharedSessionContractImplementor session,
+										@Nullable Object owner)
 	throws HibernateException, SQLException {
         String code = rs.getString(names[0]);
 		if ((rs.wasNull()) || (code == null) || code.isEmpty()) {
@@ -110,7 +113,10 @@ public class EnumUserType implements UserType, Serializable, ParameterizedType {
 	}
 
 	@Override
-	public void nullSafeSet(@Nonnull PreparedStatement ps, @Nullable Object value, int index, @Nullable SharedSessionContractImplementor session)
+	public void nullSafeSet(@SuppressWarnings("null") @Nonnull PreparedStatement ps,
+							@Nullable Object value,
+							int index,
+							@Nullable SharedSessionContractImplementor session)
 	throws HibernateException, SQLException {
         try {
             if (value == null) {

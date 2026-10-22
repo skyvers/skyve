@@ -137,9 +137,9 @@ public class CompressionFilter implements Filter {
 
     @Override
 	@SuppressWarnings("java:S3776") // Complexity OK
-	public void doFilter(@Nonnull ServletRequest request,
-							@Nonnull ServletResponse response,
-							@Nonnull FilterChain chain)
+	public void doFilter(@SuppressWarnings("null") @Nonnull ServletRequest request,
+							@SuppressWarnings("null") @Nonnull ServletResponse response,
+							@SuppressWarnings("null") @Nonnull FilterChain chain)
 	throws IOException, ServletException {
         if (debug > 0) {
         	LOGGER.info("@doFilter");

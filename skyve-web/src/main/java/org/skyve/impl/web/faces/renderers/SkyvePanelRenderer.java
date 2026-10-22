@@ -18,7 +18,8 @@ public class SkyvePanelRenderer extends PanelRenderer {
 	 */
 	@Override
 	@SuppressWarnings("unchecked")
-	public void encodeBegin(@Nonnull FacesContext context, @Nonnull UIComponent component) throws IOException {
+	public void encodeBegin(@SuppressWarnings("null") @Nonnull FacesContext context,
+							@SuppressWarnings("null") @Nonnull UIComponent component) throws IOException {
 		UIViewRoot uiViewRoot = context.getViewRoot();
 		if (uiViewRoot != null) {
 			String managedBeanName = (String) uiViewRoot.getAttributes().get(FacesUtil.MANAGED_BEAN_NAME_KEY);

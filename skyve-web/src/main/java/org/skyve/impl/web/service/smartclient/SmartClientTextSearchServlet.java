@@ -59,7 +59,8 @@ public class SmartClientTextSearchServlet extends HttpServlet {
 	 */
 	@Override
 	@SuppressWarnings({"java:S1989", "java:S3776"}) // there exists JavaEE error pages; Complexity OK
-    protected void doGet(@Nonnull HttpServletRequest request, @Nonnull HttpServletResponse response) 
+    protected void doGet(@SuppressWarnings("null") @Nonnull HttpServletRequest request,
+						@SuppressWarnings("null") @Nonnull HttpServletResponse response) 
 	throws ServletException, IOException {
 		Enumeration<String> parameterNames = request.getParameterNames();
 		while (parameterNames.hasMoreElements()) {

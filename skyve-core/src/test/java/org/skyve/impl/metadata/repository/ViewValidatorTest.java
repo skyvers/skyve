@@ -2136,7 +2136,7 @@ class ViewValidatorTest {
 		Combo combo = new Combo();
 		ContentUpload content = new ContentUpload();
 		Radio radio = new Radio();
-		RichText richText = new RichText();
+		RichText richText = sizedRichText(null); // sized so that only the missing binding throws
 		Slider slider = new Slider();
 		Spinner spinner = new Spinner();
 		TextArea textArea = new TextArea();
@@ -2147,6 +2147,70 @@ class ViewValidatorTest {
 		assertThrows(MetaDataException.class, () -> v.visitSpinner(spinner, true, true));
 		assertThrows(MetaDataException.class, () -> v.visitTextArea(textArea, true, true));
 		assertThrows(MetaDataException.class, () -> v.visitTextField(textField, true, true));
+	}
+
+	private static RichText sizedRichText(String binding) {
+		RichText richText = new RichText();
+		richText.setBinding(binding);
+		richText.setPixelWidth(Integer.valueOf(400));
+		richText.setPixelHeight(Integer.valueOf(160));
+		richText.setMinPixelHeight(Integer.valueOf(120));
+		richText.setMaxPixelHeight(Integer.valueOf(260));
+		return richText;
+	}
+
+	private void assertRichTextSizeRequired(RichText richText, String sizeAttributeName) {
+		ViewValidator v = newValidator();
+		MetaDataException e = assertThrows(MetaDataException.class, () -> v.visitRichText(richText, true, true));
+		assertTrue(e.getMessage().startsWith("RichText notes"), e.getMessage());
+		assertTrue(e.getMessage().endsWith(" - " + sizeAttributeName + " is required."), e.getMessage());
+	}
+
+	@Test
+	void richText_missingPixelWidth_throws() {
+		RichText richText = sizedRichText("notes");
+		richText.setPixelWidth(null);
+		assertRichTextSizeRequired(richText, "pixelWidth");
+	}
+
+	@Test
+	void richText_missingPixelHeight_throws() {
+		RichText richText = sizedRichText("notes");
+		richText.setPixelHeight(null);
+		assertRichTextSizeRequired(richText, "pixelHeight");
+	}
+
+	@Test
+	void richText_missingMinPixelHeight_throws() {
+		RichText richText = sizedRichText("notes");
+		richText.setMinPixelHeight(null);
+		assertRichTextSizeRequired(richText, "minPixelHeight");
+	}
+
+	@Test
+	void richText_missingMaxPixelHeight_throws() {
+		RichText richText = sizedRichText("notes");
+		richText.setMaxPixelHeight(null);
+		assertRichTextSizeRequired(richText, "maxPixelHeight");
+	}
+
+	@Test
+	void richText_allSizesOnMarkup_noException() {
+		org.skyve.impl.metadata.model.document.field.Markup notes = new org.skyve.impl.metadata.model.document.field.Markup();
+		notes.setName("notes");
+		document.putAttribute(notes);
+		ViewValidator v = newValidator();
+		assertDoesNotThrow(() -> v.visitRichText(sizedRichText("notes"), true, true));
+	}
+
+	@Test
+	void richText_defaultWidgetOfMarkup_noException() {
+		org.skyve.impl.metadata.model.document.field.Markup notes = new org.skyve.impl.metadata.model.document.field.Markup();
+		notes.setName("notes");
+		document.putAttribute(notes);
+		RichText richText = (RichText) notes.getDefaultInputWidget();
+		ViewValidator v = newValidator();
+		assertDoesNotThrow(() -> v.visitRichText(richText, true, true));
 	}
 
 	@Test
@@ -2807,6 +2871,47 @@ class ViewValidatorTest {
 		action.setResourceName("SomeReport");
 		ViewValidator v = newValidator();
 		assertThrows(MetaDataException.class, () -> v.visitReportAction(action));
+	}
+
+	@Test
+	void reportAction_missingReportName_throws() {
+		DocumentImpl reportDoc = new DocumentImpl();
+		reportDoc.setOwningModuleName("testMod");
+		reportDoc.setName("Invoice");
+		when(customer.getModule("testMod")).thenReturn(module);
+		when(module.getDocument(customer, "Invoice")).thenReturn(reportDoc);
+		ActionImpl action = new ActionImpl();
+		action.setImplicitName(ImplicitActionName.Report);
+		// no resource (report) name
+		ParameterImpl modP = new ParameterImpl();
+		modP.setName(AbstractWebContext.MODULE_NAME);
+		modP.setValue("testMod");
+		action.getParameters().add(modP);
+		ParameterImpl docP = new ParameterImpl();
+		docP.setName(AbstractWebContext.DOCUMENT_NAME);
+		docP.setValue("Invoice");
+		action.getParameters().add(docP);
+		ViewValidator v = newValidator();
+		MetaDataException e = assertThrows(MetaDataException.class, () -> v.visitReportAction(action));
+		assertTrue(e.getMessage().contains("is missing the reportName"), e.getMessage());
+		verify(repository, never()).getReportFileName(any(), any(), any());
+	}
+
+	@Test
+	void reportAction_blankReportNameFromXml_throws() {
+		DocumentImpl reportDoc = new DocumentImpl();
+		reportDoc.setOwningModuleName("testMod");
+		reportDoc.setName("Invoice");
+		when(customer.getModule("testMod")).thenReturn(module);
+		when(module.getDocument(customer, "Invoice")).thenReturn(reportDoc);
+		org.skyve.impl.metadata.repository.view.actions.ReportAction reportAction = new org.skyve.impl.metadata.repository.view.actions.ReportAction();
+		reportAction.setModuleName("testMod");
+		reportAction.setDocumentName("Invoice");
+		reportAction.setReportName("   ");
+		ActionImpl action = reportAction.toMetaDataAction();
+		ViewValidator v = newValidator();
+		MetaDataException e = assertThrows(MetaDataException.class, () -> v.visitReportAction(action));
+		assertTrue(e.getMessage().contains("is missing the reportName"), e.getMessage());
 	}
 
 	@Test

@@ -43,7 +43,7 @@ public class SkyveDatastoreTemplateLoader implements TemplateLoader {
 	 *         able to access the database.
 	 */
 	@Override
-	public @Nullable Object findTemplateSource(@Nonnull String name) throws IOException {
+	public @Nullable Object findTemplateSource(@SuppressWarnings("null") @Nonnull String name) throws IOException {
 		// find the template with the specified name
 		DocumentQuery q = CORE.getPersistence().newDocumentQuery(AppConstants.ADMIN_MODULE_NAME, AppConstants.REPORT_TEMPLATE_DOCUMENT_NAME);
 		q.getFilter().addEquals(AppConstants.TEMPLATE_NAME_ATTRIBUTE_NAME, name);
@@ -57,7 +57,7 @@ public class SkyveDatastoreTemplateLoader implements TemplateLoader {
 	 * Long's MAX_VALUE to avoid FreeMarker recompiling the one in its cache.
 	 */
 	@Override
-	public long getLastModified(@Nonnull Object templateSource) {
+	public long getLastModified(@SuppressWarnings("null") @Nonnull Object templateSource) {
 		// retrieve the bizlock
 		DocumentQuery q = CORE.getPersistence().newDocumentQuery(AppConstants.ADMIN_MODULE_NAME, AppConstants.REPORT_TEMPLATE_DOCUMENT_NAME);
 		q.getFilter().addEquals(Bean.DOCUMENT_ID, ((Bean) templateSource).getBizId());
@@ -74,7 +74,8 @@ public class SkyveDatastoreTemplateLoader implements TemplateLoader {
 	 * Returns a Reader from a template living in Freemarker's cache.
 	 */
 	@Override
-	public @Nonnull Reader getReader(@Nonnull Object templateSource, @Nonnull String encoding) throws IOException {
+	public @Nonnull Reader getReader(@SuppressWarnings("null") @Nonnull Object templateSource,
+									@SuppressWarnings("null") @Nonnull String encoding) throws IOException {
 		return new StringReader(((ReportTemplate) templateSource).getTemplate());
 	}
 

@@ -8,8 +8,10 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
 import org.skyve.impl.metadata.module.JobMetaDataImpl;
+import org.skyve.impl.metadata.module.menu.CalendarItem;
 import org.skyve.impl.metadata.view.container.form.FormLabelLayout;
 import org.skyve.metadata.MetaDataException;
+import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.DocumentPermission;
 import org.skyve.metadata.view.View.ViewType;
 
@@ -220,6 +222,17 @@ class ModuleMetaDataTest {
 		JobMetaDataImpl job = new JobMetaDataImpl();
 		job.setName("myJob");
 		// displayName is null
+		job.setClassName("modules.testModule.jobs.TestJob");
+		module.getJobs().add(job);
+		assertThrows(MetaDataException.class, () -> module.convert("test"));
+	}
+
+	@Test
+	void convertThrowsWhenJobDisplayNameIsBlank() {
+		ModuleMetaData module = createMinimalModuleMetaData();
+		JobMetaDataImpl job = new JobMetaDataImpl();
+		job.setName("myJob");
+		job.setDisplayName("   ");
 		job.setClassName("modules.testModule.jobs.TestJob");
 		module.getJobs().add(job);
 		assertThrows(MetaDataException.class, () -> module.convert("test"));
@@ -1055,6 +1068,91 @@ class ModuleMetaDataTest {
 		item.getRoles().add(grantedTo("viewer"));
 		module.getMenu().getActions().add(item);
 		assertThrows(MetaDataException.class, () -> module.convert("test"));
+	}
+
+	@Test
+	void convertThrowsWhenCalendarItemDocumentPresentWithoutEndBinding() {
+		ModuleMetaData module = createModuleWithRole();
+		CalendarItemMetaData item = new CalendarItemMetaData();
+		item.setName("calendarNoEnd");
+		item.setDocumentName("TestDocument");
+		item.setStartBinding("startDate");
+		// missing endBinding
+		item.getRoles().add(grantedTo("viewer"));
+		module.getMenu().getActions().add(item);
+		MetaDataException e = assertThrows(MetaDataException.class, () -> module.convert("test"));
+		assertTrue(e.getMessage().contains("[startBinding] and [endBinding] are required"), e.getMessage());
+	}
+
+	@Test
+	void convertThrowsWhenCalendarItemQueryPresentWithoutStartBinding() {
+		ModuleMetaData module = createModuleWithRole();
+		module.getQueries().add(createMetaDataQuery("myQuery", "TestDocument"));
+		CalendarItemMetaData item = new CalendarItemMetaData();
+		item.setName("calendarByQueryNoStart");
+		item.setQueryName("myQuery");
+		// missing startBinding
+		item.setEndBinding("endDate");
+		item.getRoles().add(grantedTo("viewer"));
+		module.getMenu().getActions().add(item);
+		MetaDataException e = assertThrows(MetaDataException.class, () -> module.convert("test"));
+		assertTrue(e.getMessage().contains("[startBinding] and [endBinding] are required"), e.getMessage());
+	}
+
+	@Test
+	void convertThrowsWhenCalendarItemQueryPresentWithoutEndBinding() {
+		ModuleMetaData module = createModuleWithRole();
+		module.getQueries().add(createMetaDataQuery("myQuery", "TestDocument"));
+		CalendarItemMetaData item = new CalendarItemMetaData();
+		item.setName("calendarByQueryNoEnd");
+		item.setQueryName("myQuery");
+		item.setStartBinding("startDate");
+		// missing endBinding
+		item.getRoles().add(grantedTo("viewer"));
+		module.getMenu().getActions().add(item);
+		MetaDataException e = assertThrows(MetaDataException.class, () -> module.convert("test"));
+		assertTrue(e.getMessage().contains("[startBinding] and [endBinding] are required"), e.getMessage());
+	}
+
+	@Test
+	void convertSucceedsWithCalendarMenuItemWithModelAndNoBindings() {
+		ModuleMetaData module = createModuleWithRole();
+		CalendarItemMetaData item = new CalendarItemMetaData();
+		item.setName("calendarByModel");
+		item.setModelName("CalendarModel");
+		item.getRoles().add(grantedTo("viewer"));
+		module.getMenu().getActions().add(item);
+		Module result = module.convert("test");
+		CalendarItem converted = (CalendarItem) result.getMenu().getItems().get(0);
+		assertEquals("CalendarModel", converted.getModelName());
+		assertNull(converted.getStartBinding());
+		assertNull(converted.getEndBinding());
+	}
+
+	@Test
+	void convertThrowsWhenCalendarItemModelPresentWithStartBinding() {
+		ModuleMetaData module = createModuleWithRole();
+		CalendarItemMetaData item = new CalendarItemMetaData();
+		item.setName("calendarByModelWithStart");
+		item.setModelName("CalendarModel");
+		item.setStartBinding("startDate");
+		item.getRoles().add(grantedTo("viewer"));
+		module.getMenu().getActions().add(item);
+		MetaDataException e = assertThrows(MetaDataException.class, () -> module.convert("test"));
+		assertTrue(e.getMessage().contains("[startBinding] and [endBinding] should be absent"), e.getMessage());
+	}
+
+	@Test
+	void convertThrowsWhenCalendarItemModelPresentWithEndBinding() {
+		ModuleMetaData module = createModuleWithRole();
+		CalendarItemMetaData item = new CalendarItemMetaData();
+		item.setName("calendarByModelWithEnd");
+		item.setModelName("CalendarModel");
+		item.setEndBinding("endDate");
+		item.getRoles().add(grantedTo("viewer"));
+		module.getMenu().getActions().add(item);
+		MetaDataException e = assertThrows(MetaDataException.class, () -> module.convert("test"));
+		assertTrue(e.getMessage().contains("[startBinding] and [endBinding] should be absent"), e.getMessage());
 	}
 
 	@Test

@@ -17,7 +17,7 @@ class BindingELResolver extends ELResolver {
 	}
 	
 	@Override
-	public @Nullable Class<?> getType(@Nonnull ELContext context, @Nullable Object base, @Nullable Object property) {
+	public @Nullable Class<?> getType(@SuppressWarnings("null") @Nonnull ELContext context, @Nullable Object base, @Nullable Object property) {
 		if ((base instanceof Bean bean) && (property instanceof String binding)) {
 			context.setPropertyResolved(true);
 			return BindUtil.getPropertyType(bean, binding);
@@ -26,7 +26,7 @@ class BindingELResolver extends ELResolver {
 	}
 
 	@Override
-	public @Nullable Object getValue(@Nonnull ELContext context, @Nullable Object base, @Nullable Object property) {
+	public @Nullable Object getValue(@SuppressWarnings("null") @Nonnull ELContext context, @Nullable Object base, @Nullable Object property) {
 		if ((base instanceof Bean bean) && (property instanceof String binding)) {
 			context.setPropertyResolved(base, property);
 			return BindUtil.get(bean, binding);
@@ -35,7 +35,10 @@ class BindingELResolver extends ELResolver {
 	}
 	
 	@Override
-	public void setValue(@Nonnull ELContext context, @Nullable Object base, @Nullable Object property, @Nullable Object val) {
+	public void setValue(@SuppressWarnings("null") @Nonnull ELContext context,
+						@Nullable Object base,
+						@Nullable Object property,
+						@Nullable Object val) {
 		if ((base instanceof Bean bean) && (property instanceof String binding)) {
 			context.setPropertyResolved(base, property);
 			BindUtil.set(bean, binding, val);
@@ -43,7 +46,7 @@ class BindingELResolver extends ELResolver {
 	}
 
 	@Override
-	public boolean isReadOnly(@Nonnull ELContext context, @Nullable Object base, @Nullable Object property) {
+	public boolean isReadOnly(@SuppressWarnings("null") @Nonnull ELContext context, @Nullable Object base, @Nullable Object property) {
 		if ((base instanceof Bean bean) && (property instanceof String simplePropertyName)) {
 			context.setPropertyResolved(true);
 			return BindUtil.isMutable(bean, simplePropertyName);
@@ -52,7 +55,7 @@ class BindingELResolver extends ELResolver {
 	}
 
 	@Override
-	public @Nonnull Class<?> getCommonPropertyType(@Nonnull ELContext context, @Nullable Object base) {
+	public @Nonnull Class<?> getCommonPropertyType(@SuppressWarnings("null") @Nonnull ELContext context, @Nullable Object base) {
 		return Object.class;
 	}
 }

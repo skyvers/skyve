@@ -108,7 +108,7 @@ public class SmartClientEditServlet extends HttpServlet {
 	 */
 	@Override
 	@SuppressWarnings("unchecked")
-	public void init(@Nonnull ServletConfig config) throws ServletException {
+	public void init(@SuppressWarnings("null") @Nonnull ServletConfig config) throws ServletException {
 		super.init(config);
 		
 		String rendererParam = Util.processStringValue(config.getInitParameter("manipulator"));
@@ -163,7 +163,8 @@ public class SmartClientEditServlet extends HttpServlet {
 	 */
 	@Override
 	@SuppressWarnings("java:S1989") // there exists JavaEE error pages
-	protected void doGet(@Nonnull HttpServletRequest request, @Nonnull HttpServletResponse response) 
+	protected void doGet(@SuppressWarnings("null") @Nonnull HttpServletRequest request,
+						@SuppressWarnings("null") @Nonnull HttpServletResponse response) 
 	throws ServletException, IOException {
 		LOGGER.info("SmartClientEdit - get....");
 		processRequest(request, response);
@@ -174,7 +175,8 @@ public class SmartClientEditServlet extends HttpServlet {
 	 */
 	@Override
 	@SuppressWarnings("java:S1989") // there exists JavaEE error pages
-    protected void doPost(@Nonnull HttpServletRequest request, @Nonnull HttpServletResponse response) 
+    protected void doPost(@SuppressWarnings("null") @Nonnull HttpServletRequest request,
+							@SuppressWarnings("null") @Nonnull HttpServletResponse response) 
 	throws ServletException, IOException  {
 		LOGGER.info("SmartClientEdit - post....");
 		processRequest(request, response);
@@ -1516,10 +1518,10 @@ public class SmartClientEditServlet extends HttpServlet {
 	 * @throws ValidationException when the bean was deleted by someone else
 	 * @throws OptimisticLockException when the bean was changed by someone else
 	 */
-	private static PersistentBean retrieveForDelete(User user,
-														Document processDocument,
-														PersistentBean beanToDelete,
-														AbstractPersistence persistence) {
+	private static @Nonnull PersistentBean retrieveForDelete(@Nonnull User user,
+																@Nonnull Document processDocument,
+																@Nonnull PersistentBean beanToDelete,
+																@Nonnull AbstractPersistence persistence) {
 		if (! user.canDeleteDocument(processDocument)) {
 			throw new SecurityException("delete this data", user.getName());
 		}

@@ -70,7 +70,9 @@ public class SkyveQueryFieldsProvider implements FieldsProvider {
 	 * @throws JRException if metadata lookup fails
 	 */
 	@Override
-    public @Nonnull JRField[] getFields(@Nullable IReportConnection connection, @Nonnull JRDataset dataset, @Nullable Map parameters) 
+    public @Nonnull JRField[] getFields(@Nullable IReportConnection connection,
+										@SuppressWarnings("null") @Nonnull JRDataset dataset,
+										@Nullable Map parameters) 
 	throws JRException, UnsupportedOperationException {
     	try {
     		String moduleDotQuery = dataset.getQuery().getText();

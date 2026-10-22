@@ -46,6 +46,54 @@ class ReportActionTest {
 
 	@Test
 	@SuppressWarnings("static-method")
+	void setModuleNameBlankBecomesNull() {
+		ReportAction action = new ReportAction();
+		action.setModuleName("   ");
+		assertNull(action.getModuleName());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void setModuleNameTrimsPaddedValue() {
+		ReportAction action = new ReportAction();
+		action.setModuleName("  admin  ");
+		assertThat(action.getModuleName(), is("admin"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void setDocumentNameBlankBecomesNull() {
+		ReportAction action = new ReportAction();
+		action.setDocumentName("   ");
+		assertNull(action.getDocumentName());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void setDocumentNameTrimsPaddedValue() {
+		ReportAction action = new ReportAction();
+		action.setDocumentName("  User  ");
+		assertThat(action.getDocumentName(), is("User"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void setReportNameBlankBecomesNull() {
+		ReportAction action = new ReportAction();
+		action.setReportName("   ");
+		assertNull(action.getReportName());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void setReportNameTrimsPaddedValue() {
+		ReportAction action = new ReportAction();
+		action.setReportName("  UserReport  ");
+		assertThat(action.getReportName(), is("UserReport"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
 	void setReportFormatRoundtrip() {
 		ReportAction action = new ReportAction();
 		assertNull(action.getReportFormat());

@@ -73,7 +73,9 @@ public class SingleCustomerBasicAuthenticationFilter extends BasicAuthentication
 	}
 	
 	@Override
-	protected void doFilterInternal(@Nonnull HttpServletRequest request, @Nonnull HttpServletResponse response, @Nonnull FilterChain chain)
+	protected void doFilterInternal(@SuppressWarnings("null") @Nonnull HttpServletRequest request,
+									@SuppressWarnings("null") @Nonnull HttpServletResponse response,
+									@SuppressWarnings("null") @Nonnull FilterChain chain)
 	throws IOException, ServletException {
 		final boolean debug = this.logger.isDebugEnabled();
 
@@ -180,7 +182,7 @@ public class SingleCustomerBasicAuthenticationFilter extends BasicAuthentication
 	 * @param authenticationDetailsSource details source for request-derived authentication metadata
 	 */
 	@Override
-	public void setAuthenticationDetailsSource(@Nonnull AuthenticationDetailsSource<HttpServletRequest, ?> authenticationDetailsSource) {
+	public void setAuthenticationDetailsSource(@SuppressWarnings("null") @Nonnull AuthenticationDetailsSource<HttpServletRequest, ?> authenticationDetailsSource) {
 		this.authenticationDetailsSource = authenticationDetailsSource;
 		super.setAuthenticationDetailsSource(authenticationDetailsSource);
 	}
@@ -193,7 +195,7 @@ public class SingleCustomerBasicAuthenticationFilter extends BasicAuthentication
 	 * @param rememberMeServices remember-me service implementation
 	 */
 	@Override
-	public void setRememberMeServices(@Nonnull RememberMeServices rememberMeServices) {
+	public void setRememberMeServices(@SuppressWarnings("null") @Nonnull RememberMeServices rememberMeServices) {
 		this.rememberMeServices = rememberMeServices;
 		super.setRememberMeServices(rememberMeServices);
 	}

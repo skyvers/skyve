@@ -33,7 +33,7 @@ public class SkyveSessionListener implements HttpSessionListener {
 	 * @param se the session event for the created session
 	 */
 	@Override
-	public void sessionCreated(@Nonnull HttpSessionEvent se) {
+	public void sessionCreated(@SuppressWarnings("null") @Nonnull HttpSessionEvent se) {
 		StateUtil.incrementSessionCount();
 	}
 
@@ -46,7 +46,7 @@ public class SkyveSessionListener implements HttpSessionListener {
 	 */
 	@Override
 	@SuppressWarnings("java:S3776") // Complexity OK
-	public void sessionDestroyed(@Nonnull HttpSessionEvent se) {
+	public void sessionDestroyed(@SuppressWarnings("null") @Nonnull HttpSessionEvent se) {
 		StateUtil.decrementSessionCount();
 		
 		HttpSession session = se.getSession();

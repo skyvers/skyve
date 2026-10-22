@@ -66,7 +66,7 @@ public class SkyveDocumentExecuterFactory implements QueryExecuterFactory {
 	 * @return {@code true}, as all parameter types are accepted.
 	 */
 	@Override
-	public boolean supportsQueryParameterType(@Nonnull String className) {
+	public boolean supportsQueryParameterType(@SuppressWarnings("null") @Nonnull String className) {
 		return true;
 	}
 	

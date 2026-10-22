@@ -38,9 +38,9 @@ public class TwoFactorAuthForwardHandler extends ForwardAuthenticationFailureHan
 	 * @throws ServletException when forwarding fails in the servlet container
 	 */
 	@Override
-	public void onAuthenticationFailure(@Nonnull HttpServletRequest request,
-											@Nonnull HttpServletResponse response,
-		@Nonnull AuthenticationException exception)
+	public void onAuthenticationFailure(@SuppressWarnings("null") @Nonnull HttpServletRequest request,
+											@SuppressWarnings("null") @Nonnull HttpServletResponse response,
+		@SuppressWarnings("null") @Nonnull AuthenticationException exception)
 	throws IOException, ServletException {
 		if ((exception instanceof TwoFactorAuthRequiredException tfaEx) && tfaEx.isInvalidTwoFactorCode()) {
 			request.setAttribute(TWO_FACTOR_AUTH_ERROR_ATTRIBUTE, "1");

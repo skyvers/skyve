@@ -398,9 +398,9 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 				
 				result.add(new Integrator() {
 					@Override
-					public void integrate(@SuppressWarnings("hiding") @Nonnull Metadata metadata,
-											@Nonnull SessionFactoryImplementor sessionFactory,
-											@Nonnull SessionFactoryServiceRegistry serviceRegistry) {
+					public void integrate(@SuppressWarnings({"hiding", "null"}) @Nonnull Metadata metadata,
+											@SuppressWarnings("null") @Nonnull SessionFactoryImplementor sessionFactory,
+											@SuppressWarnings("null") @Nonnull SessionFactoryServiceRegistry serviceRegistry) {
 						HibernateListener listener = new HibernateListener();
 						final EventListenerRegistry eventListenerRegistry = serviceRegistry.getService(EventListenerRegistry.class);
 
@@ -424,7 +424,8 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 					 * {@inheritDoc}
 					 */
 					@Override
-					public void disintegrate(@Nonnull SessionFactoryImplementor sessionFactory, @Nonnull SessionFactoryServiceRegistry serviceRegistry) {
+					public void disintegrate(@SuppressWarnings("null") @Nonnull SessionFactoryImplementor sessionFactory,
+											@SuppressWarnings("null") @Nonnull SessionFactoryServiceRegistry serviceRegistry) {
 						// nothing to clean up here
 					}
 				});

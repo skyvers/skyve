@@ -101,7 +101,8 @@ public class MapServlet extends HttpServlet {
 	 */
 	@Override
 	@SuppressWarnings("java:S1989") // there exists JavaEE error pages
-	protected void doGet(@Nonnull HttpServletRequest request, @Nonnull HttpServletResponse response)
+	protected void doGet(@SuppressWarnings("null") @Nonnull HttpServletRequest request,
+						@SuppressWarnings("null") @Nonnull HttpServletResponse response)
 	throws ServletException, IOException {
 		response.setContentType(MimeType.json.toString());
 		response.setCharacterEncoding(StandardCharsets.UTF_8.name());

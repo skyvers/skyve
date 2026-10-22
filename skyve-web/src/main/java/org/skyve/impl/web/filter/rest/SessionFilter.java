@@ -35,7 +35,9 @@ public class SessionFilter extends AbstractRestFilter {
 	 * @throws ServletException when downstream servlet processing fails
 	 */
 	@Override
-	public void doFilter(@Nonnull ServletRequest request, @Nonnull ServletResponse response, @Nonnull FilterChain chain)
+	public void doFilter(@SuppressWarnings("null") @Nonnull ServletRequest request,
+						@SuppressWarnings("null") @Nonnull ServletResponse response,
+						@SuppressWarnings("null") @Nonnull FilterChain chain)
 	throws IOException, ServletException {
 		if (super.doUnsecuredFilter(request, response, chain)) {
 			return;

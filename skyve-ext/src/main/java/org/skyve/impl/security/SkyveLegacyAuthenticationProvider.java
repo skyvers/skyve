@@ -43,7 +43,7 @@ public class SkyveLegacyAuthenticationProvider implements AuthenticationProvider
 	 * @throws AuthenticationException If the credentials are invalid or authentication cannot be completed.
 	 */
 	@Override
-	public @Nonnull Authentication authenticate(@Nonnull Authentication authentication) throws AuthenticationException {
+	public @Nonnull Authentication authenticate(@SuppressWarnings("null") @Nonnull Authentication authentication) throws AuthenticationException {
 		String name = authentication.getName();
 		String password = authentication.getCredentials().toString();
 
@@ -107,7 +107,7 @@ public class SkyveLegacyAuthenticationProvider implements AuthenticationProvider
 	 * @return {@code true}, as this provider accepts all authentication types.
 	 */
 	@Override
-	public boolean supports(@Nonnull Class<?> authentication) {
+	public boolean supports(@SuppressWarnings("null") @Nonnull Class<?> authentication) {
 		// NB - will implement all authentication mechanisms over time but for now
 		// org.springframework.security.authentication.UsernamePasswordAuthenticationToken is supported
 		return true;

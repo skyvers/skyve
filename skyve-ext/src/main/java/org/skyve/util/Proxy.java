@@ -63,7 +63,9 @@ public class Proxy {
 	private static class ProxyInvocationHandler <T extends Object> implements InvocationHandler {
 		@Override
 		@SuppressWarnings("unchecked")
-		public @Nullable Object invoke(@Nonnull Object proxy, @Nonnull Method method, @Nullable Object[] args) throws Throwable {
+		public @Nullable Object invoke(@SuppressWarnings("null") @Nonnull Object proxy,
+										@SuppressWarnings("null") @Nonnull Method method,
+										@Nullable Object[] args) throws Throwable {
 			Class<?> proxyClass = proxy.getClass();
 			T proxied = (T) proxyClass.getDeclaredField(PROXIED_FIELD_NAME).get(proxy);
 			ProxyDelegate<T> delegate = (ProxyDelegate<T>) proxyClass.getDeclaredField(DELEGATE_FIELD_NAME).get(proxy);

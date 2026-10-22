@@ -55,7 +55,7 @@ public abstract class ViewBackgroundTask<T extends Bean> implements BackgroundTa
 	 * Quartz integration point.
 	 */
 	@Override
-	public final void execute(@Nonnull JobExecutionContext context) 
+	public final void execute(@SuppressWarnings("null") @Nonnull JobExecutionContext context) 
 	throws JobExecutionException {
 		AbstractPersistence persistence = null;
 		try {

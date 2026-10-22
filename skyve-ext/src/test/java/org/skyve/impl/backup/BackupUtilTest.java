@@ -888,7 +888,7 @@ public class BackupUtilTest {
 			when(repository.findNearestPersistentSingleOrJoinedSuperDocument(customer, module, document)).thenReturn(document);
 
 			when(referencedDocument.isDynamic()).thenReturn(false);
-			when(referencedDocument.getReferenceByName("items")).thenReturn(collection);
+			when(referencedDocument.getNullSafeReferenceByName("items")).thenReturn(collection);
 			when(collection.isPersistent()).thenReturn(true);
 			when(collection.getOrdered()).thenReturn(Boolean.TRUE);
 
@@ -964,7 +964,7 @@ public class BackupUtilTest {
 			when(repository.findNearestPersistentSingleOrJoinedSuperDocument(customer, module, document)).thenReturn(document);
 
 			when(referencedDocument.isDynamic()).thenReturn(false);
-			when(referencedDocument.getReferenceByName("items")).thenReturn(collection);
+			when(referencedDocument.getNullSafeReferenceByName("items")).thenReturn(collection);
 			when(referencedDocument.getExtends()).thenReturn(null);
 			when(referencedDocument.getPersistent()).thenReturn(referencedPersistent);
 			when(collection.isPersistent()).thenReturn(true);
@@ -1283,7 +1283,7 @@ public class BackupUtilTest {
 			when(repository.findNearestPersistentSingleOrJoinedSuperDocument(customer, module, document)).thenReturn(document);
 
 			when(referencedDocument.isDynamic()).thenReturn(false);
-			when(referencedDocument.getReferenceByName("items")).thenReturn(collection);
+			when(referencedDocument.getNullSafeReferenceByName("items")).thenReturn(collection);
 			when(collection.isPersistent()).thenReturn(true);
 			when(collection.getOrdered()).thenReturn(Boolean.TRUE);
 

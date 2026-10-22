@@ -212,7 +212,7 @@ public class VueListGridScript extends UIOutput {
 	 * @throws IOException if script output cannot be written
 	 */
 	@Override
-	public void encodeBegin(@Nonnull FacesContext context) throws IOException {
+	public void encodeBegin(@SuppressWarnings("null") @Nonnull FacesContext context) throws IOException {
 		Map<String, Object> attributes = getAttributes();
 		if (Boolean.TRUE.toString().equals(attributes.get("dynamic")) || (getValue() == null)) {
 			grabAttributes(attributes);
