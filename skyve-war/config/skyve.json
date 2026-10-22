@@ -331,7 +331,9 @@
 		// Skyve SMS service class
 		"smsServiceClass": null,
 		// Skyve dialogs class
-		"dialogsClass": null
+		"dialogsClass": null,
+		// Skyve connection customiser class (customises each data store connection for the current user)
+		"connectionCustomiserClass": null
 	},
 	// SMTP Settings
 	"smtp": {

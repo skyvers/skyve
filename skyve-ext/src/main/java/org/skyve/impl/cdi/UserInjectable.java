@@ -218,6 +218,16 @@ public class UserInjectable implements User {
 	}
 
 	/**
+	 * Returns the user's legacy ID.
+	 *
+	 * @return the legacy ID, or {@code null} if the user has none.
+	 */
+	@Override
+	public @Nullable String getLegacyId() {
+		return CORE.getUser().getLegacyId();
+	}
+
+	/**
 	 * Returns the set of module names this user can access.
 	 *
 	 * @return accessible module names.

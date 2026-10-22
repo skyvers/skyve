@@ -127,6 +127,7 @@ public class LocalDataStoreRepository extends LocalDesignRepository {
 						"c.bizId as contactId, " +
 						"c.name as contactName, " +
 						"c.image as contactImageId, " +
+						"u.legacyId, " +
 						"u.dataGroup_id as dataGroupId, " +
 						"u.homeModule, " +
 						"r.roleName ");
@@ -151,6 +152,7 @@ public class LocalDataStoreRepository extends LocalDesignRepository {
 						"c.bizId as contactId, " +
 						"c.name as contactName, " +
 						"c.image as contactImageId, " +
+						"u.legacyId, " +
 						"u.dataGroup_id as dataGroupId, " +
 						"u.homeModule, " +
 						"r.roleName ");
@@ -222,13 +224,14 @@ public class LocalDataStoreRepository extends LocalDesignRepository {
 							internalUser.setContactId(rs.getString(7)); // contactId
 							internalUser.setContactName(rs.getString(8)); // contactName
 							internalUser.setContactImageId(rs.getString(9)); // contactImageId
-							internalUser.setDataGroupId(rs.getString(10)); // dataGroupId
-							internalUser.setHomeModuleName(rs.getString(11)); // homeModule
+							internalUser.setLegacyId(rs.getString(10)); // legacyId
+							internalUser.setDataGroupId(rs.getString(11)); // dataGroupId
+							internalUser.setHomeModuleName(rs.getString(12)); // homeModule
 							
 							firstRow = false;
 						}
 
-						String moduleDotRoleName = rs.getString(12); // roleName
+						String moduleDotRoleName = rs.getString(13); // roleName
 						int dotIndex = moduleDotRoleName.indexOf('.');
 						if (dotIndex > 0) {
 							String moduleName = moduleDotRoleName.substring(0, dotIndex);
