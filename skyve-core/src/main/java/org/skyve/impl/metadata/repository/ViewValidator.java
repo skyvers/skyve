@@ -1692,6 +1692,18 @@ class ViewValidator extends ViewVisitor {
 		if (dataWidgetBinding != null) {
 			richTextIdentifier += IN + dataWidgetIdentifier;
 		}
+		if (richText.getPixelWidth() == null) {
+			throw new MetaDataException(richTextIdentifier + IN + viewIdentifier + " - pixelWidth is required.");
+		}
+		if (richText.getPixelHeight() == null) {
+			throw new MetaDataException(richTextIdentifier + IN + viewIdentifier + " - pixelHeight is required.");
+		}
+		if (richText.getMinPixelHeight() == null) {
+			throw new MetaDataException(richTextIdentifier + IN + viewIdentifier + " - minPixelHeight is required.");
+		}
+		if (richText.getMaxPixelHeight() == null) {
+			throw new MetaDataException(richTextIdentifier + IN + viewIdentifier + " - maxPixelHeight is required.");
+		}
 		validateBinding(dataWidgetBinding,
 							binding,
 							true,
@@ -2374,7 +2386,11 @@ class ViewValidator extends ViewVisitor {
 											e);
 		}
 
-		String fileName = repository.getReportFileName(customer, reportDocument, action.getResourceName());
+		String reportName = action.getResourceName();
+		if (reportName == null) {
+			throw new MetaDataException("A Report Action" + IN_VIEW + viewIdentifier + " is missing the reportName");
+		}
+		String fileName = repository.getReportFileName(customer, reportDocument, reportName);
 		if (fileName == null) {
 			throw new MetaDataException(REPORT_ACTION_FOR_REPORT + action.getResourceName() +
 											IN_VIEW + viewIdentifier +

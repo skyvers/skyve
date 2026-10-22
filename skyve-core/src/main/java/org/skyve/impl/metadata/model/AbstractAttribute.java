@@ -60,6 +60,13 @@ import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 public abstract class AbstractAttribute extends NamedMetaData implements Attribute {
 	private static final long serialVersionUID = -6632233770237276819L;
 
+	// view.xsd requires all four sizes on a richText. These approximate how an unsized one rendered:
+	// the width of a single column form and the 170 pixel minimum height the SmartClient renderer applied.
+	private static final Integer DEFAULT_RICH_TEXT_PIXEL_WIDTH = Integer.valueOf(600);
+	private static final Integer DEFAULT_RICH_TEXT_PIXEL_HEIGHT = Integer.valueOf(170);
+	private static final Integer DEFAULT_RICH_TEXT_MIN_PIXEL_HEIGHT = Integer.valueOf(170);
+	private static final Integer DEFAULT_RICH_TEXT_MAX_PIXEL_HEIGHT = Integer.valueOf(340);
+
 	private String displayName;
 	private AttributeType attributeType;
 	private UsageType usage;
@@ -169,7 +176,12 @@ public abstract class AbstractAttribute extends NamedMetaData implements Attribu
 				defaultInputWidget.setBinding(getName());
 			}
 			else if (AttributeType.markup.equals(attributeType)) {
-				defaultInputWidget = new RichText();
+				RichText richText = new RichText();
+				richText.setPixelWidth(DEFAULT_RICH_TEXT_PIXEL_WIDTH);
+				richText.setPixelHeight(DEFAULT_RICH_TEXT_PIXEL_HEIGHT);
+				richText.setMinPixelHeight(DEFAULT_RICH_TEXT_MIN_PIXEL_HEIGHT);
+				richText.setMaxPixelHeight(DEFAULT_RICH_TEXT_MAX_PIXEL_HEIGHT);
+				defaultInputWidget = richText;
 				defaultInputWidget.setBinding(getName());
 			}
 			else if (AttributeType.colour.equals(attributeType)) {

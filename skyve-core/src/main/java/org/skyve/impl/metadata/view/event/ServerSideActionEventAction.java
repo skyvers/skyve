@@ -3,6 +3,7 @@ package org.skyve.impl.metadata.view.event;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
 
 import jakarta.annotation.Nonnull;
@@ -41,7 +42,7 @@ public class ServerSideActionEventAction implements EventAction {
 	
 	@XmlAttribute(name = "action", required = true)
 	public void setActionName(@Nonnull String actionName) {
-		this.actionName = actionName;
+		this.actionName = UtilImpl.processStringValue(actionName);
 	}
 
 	@Override

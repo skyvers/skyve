@@ -72,7 +72,7 @@ public class JobMetaDataImpl extends NamedMetaData implements JobMetaData {
 
 	@XmlAttribute(required = true)
 	public void setDisplayName(@Nonnull String displayName) {
-		this.displayName = displayName;
+		this.displayName = UtilImpl.processStringValue(displayName);
 	}
 
 	@Override

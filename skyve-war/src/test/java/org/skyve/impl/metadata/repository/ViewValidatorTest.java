@@ -263,6 +263,10 @@ class ViewValidatorTest extends AbstractSkyveTest {
 		FormItem item = new FormItem();
 		RichText rt = new RichText();
 		rt.setBinding("markup");
+		rt.setPixelWidth(Integer.valueOf(400));
+		rt.setPixelHeight(Integer.valueOf(160));
+		rt.setMinPixelHeight(Integer.valueOf(120));
+		rt.setMaxPixelHeight(Integer.valueOf(260));
 		item.setWidget(rt);
 		row.getItems().add(item);
 		view.getContained().add(form);

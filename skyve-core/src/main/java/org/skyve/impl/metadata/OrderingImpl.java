@@ -8,6 +8,7 @@ import org.skyve.metadata.SortDirection;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlAttribute;
+import jakarta.xml.bind.annotation.XmlTransient;
 import jakarta.xml.bind.annotation.XmlType;
 
 /**
@@ -20,7 +21,7 @@ import jakarta.xml.bind.annotation.XmlType;
 public class OrderingImpl implements Ordering {
 	private static final long serialVersionUID = 5816585894418535717L;
 
-	@XmlAttribute(required = true)
+	@XmlTransient // bound through setBy() so blank values become null
 	private String by;
 	@XmlAttribute(required = true)
 	private SortDirection sort;
@@ -58,6 +59,7 @@ public class OrderingImpl implements Ordering {
 	 *
 	 * @param by the field or binding name
 	 */
+	@XmlAttribute(required = true)
 	public void setBy(@Nonnull String by) {
 		this.by = UtilImpl.processStringValue(by);
 	}

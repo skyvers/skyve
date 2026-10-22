@@ -127,11 +127,11 @@ public class LookupDescription extends InputWidget implements FormItemWidget, Ed
 	/**
 	 * Sets the description binding path.
 	 *
-	 * @param descriptionBinding the description binding expression to apply
+	 * @param descriptionBinding the description binding expression to apply; blank values become {@code null}
 	 */
 	@XmlAttribute(required = true)
 	public void setDescriptionBinding(@Nonnull String descriptionBinding) {
-		this.descriptionBinding = descriptionBinding;
+		this.descriptionBinding = UtilImpl.processStringValue(descriptionBinding);
 	}
 
 	/**

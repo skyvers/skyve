@@ -51,7 +51,7 @@ public class RichText extends ChangeableInputWidget implements AbsoluteSize, Con
 	}
 	
 	@Override
-	public @Nullable Integer getPixelWidth() {
+	public @Nonnull Integer getPixelWidth() {
 		return pixelWidth;
 	}
 	
@@ -62,7 +62,7 @@ public class RichText extends ChangeableInputWidget implements AbsoluteSize, Con
 	}
 	
 	@Override
-	public @Nullable Integer getPixelHeight() {
+	public @Nonnull Integer getPixelHeight() {
 		return pixelHeight;
 	}
 	
@@ -73,7 +73,7 @@ public class RichText extends ChangeableInputWidget implements AbsoluteSize, Con
 	}
 
 	@Override
-	public @Nullable Integer getMinPixelHeight() {
+	public @Nonnull Integer getMinPixelHeight() {
 		return minPixelHeight;
 	}
 
@@ -84,7 +84,7 @@ public class RichText extends ChangeableInputWidget implements AbsoluteSize, Con
 	}
 
 	@Override
-	public @Nullable Integer getMaxPixelHeight() {
+	public @Nonnull Integer getMaxPixelHeight() {
 		return maxPixelHeight;
 	}
 

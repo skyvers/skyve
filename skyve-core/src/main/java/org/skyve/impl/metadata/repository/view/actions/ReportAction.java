@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.skyve.impl.metadata.view.ActionImpl;
 import org.skyve.impl.metadata.view.widget.bound.ParameterImpl;
+import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.impl.web.AbstractWebContext;
 import org.skyve.metadata.controller.ImplicitActionName;
@@ -59,11 +60,11 @@ public class ReportAction extends ParameterizableAction {
 	/**
 	 * Sets the module containing the report document.
 	 *
-	 * @param moduleName module name
+	 * @param moduleName module name; blank values become {@code null}
 	 */
 	@XmlAttribute(required = true)
 	public void setModuleName(@Nonnull String moduleName) {
-		this.moduleName = moduleName;
+		this.moduleName = UtilImpl.processStringValue(moduleName);
 	}
 
 	/**
@@ -78,11 +79,11 @@ public class ReportAction extends ParameterizableAction {
 	/**
 	 * Sets the document owning the report definition.
 	 *
-	 * @param documentName document name
+	 * @param documentName document name; blank values become {@code null}
 	 */
 	@XmlAttribute(required = true)
 	public void setDocumentName(@Nonnull String documentName) {
-		this.documentName = documentName;
+		this.documentName = UtilImpl.processStringValue(documentName);
 	}
 
 	/**
@@ -97,11 +98,11 @@ public class ReportAction extends ParameterizableAction {
 	/**
 	 * Sets the report resource name to execute.
 	 *
-	 * @param reportName report name
+	 * @param reportName report name; blank values become {@code null}
 	 */
 	@XmlAttribute(required = true)
 	public void setReportName(@Nonnull String reportName) {
-		this.reportName = reportName;
+		this.reportName = UtilImpl.processStringValue(reportName);
 	}
 
 	/**
