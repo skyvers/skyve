@@ -298,6 +298,8 @@ public class UtilImpl {
 	public static String SKYVE_SMS_SERVICE_CLASS = null;
 	/** The {@code factories.dialogsClass} setting: the dialogs service class, or {@code null} for the default. */
 	public static String SKYVE_DIALOGS_CLASS = null;
+	/** The {@code factories.connectionCustomiserClass} setting: the connection customiser class, or {@code null} for none. */
+	public static String SKYVE_CONNECTION_CUSTOMISER_CLASS = null;
 
 	// The directory used for temp files for file uploads etc
 	public static final String TEMP_DIRECTORY = System.getProperty("java.io.tmpdir");
@@ -861,6 +863,7 @@ public class UtilImpl {
     	SKYVE_MAIL_SERVICE_CLASS = null;
     	SKYVE_SMS_SERVICE_CLASS = null;
     	SKYVE_DIALOGS_CLASS = null;
+    	SKYVE_CONNECTION_CUSTOMISER_CLASS = null;
 
     	CACHE_DIRECTORY = null;
     	CACHE_MULTIPLE = false;

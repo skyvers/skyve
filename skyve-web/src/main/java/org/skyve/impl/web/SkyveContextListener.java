@@ -32,11 +32,13 @@ import org.skyve.cache.GeoIPCacheConfig;
 import org.skyve.cache.HibernateCacheConfig;
 import org.skyve.cache.JCacheConfig;
 import org.skyve.cache.SessionCacheConfig;
+import org.skyve.dataaccess.sql.ConnectionCustomiser;
 import org.skyve.dialog.Dialogs;
 import org.skyve.domain.number.NumberGenerator;
 import org.skyve.impl.archive.support.ArchiveLuceneIndexerSingleton;
 import org.skyve.impl.content.AbstractContentManager;
 import org.skyve.impl.dialog.DialogsStaticSingleton;
+import org.skyve.impl.dataaccess.sql.ConnectionCustomiserStaticSingleton;
 import org.skyve.impl.domain.number.NumberGeneratorStaticSingleton;
 import org.skyve.impl.geoip.GeoIPServiceStaticSingleton;
 import org.skyve.impl.job.JobSchedulerStaticSingleton;
@@ -1019,6 +1021,17 @@ public class SkyveContextListener implements ServletContextListener {
 					UtilImpl.SKYVE_CUSTOMISATIONS_CLASS,
 					"factories.customisationsClass");
 			CustomisationsStaticSingleton.set(customisations);
+		}
+
+		UtilImpl.SKYVE_CONNECTION_CUSTOMISER_CLASS = getString(FACTORIES_KEY, "connectionCustomiserClass", factories, false);
+		if (UtilImpl.SKYVE_CONNECTION_CUSTOMISER_CLASS == null) {
+			ConnectionCustomiserStaticSingleton.set(null);
+		}
+		else {
+			ConnectionCustomiser connectionCustomiser = instantiateFactory(ConnectionCustomiser.class,
+					UtilImpl.SKYVE_CONNECTION_CUSTOMISER_CLASS,
+					"factories.connectionCustomiserClass");
+			ConnectionCustomiserStaticSingleton.set(connectionCustomiser);
 		}
 	}
 

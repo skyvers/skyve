@@ -34,6 +34,7 @@ import org.slf4j.Logger;
 import com.google.common.base.MoreObjects;
 
 import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 
 /**
  * Runtime implementation of {@link org.skyve.metadata.user.User} carrying the
@@ -74,7 +75,8 @@ public class UserImpl implements User {
 	private String customerName;
 	private String dataGroupId;
 	private String homeModuleName;
-	
+	private String legacyId;
+
 	/**
 	 * Locale either derived from the language tag or from the Http Servlet Request.
 	 * Note that this is not serialized.
@@ -449,6 +451,25 @@ public class UserImpl implements User {
 	 */
 	public void setHomeModuleName(String homeModuleName) {
 		this.homeModuleName = homeModuleName;
+	}
+
+	/**
+	 * Returns the admin user's legacy ID, as loaded at login.
+	 *
+	 * @return the legacy ID, or {@code null} if the user has none.
+	 */
+	@Override
+	public @Nullable String getLegacyId() {
+		return legacyId;
+	}
+
+	/**
+	 * Sets the admin user's legacy ID.
+	 *
+	 * @param legacyId the legacy ID, or {@code null} if the user has none.
+	 */
+	public void setLegacyId(@Nullable String legacyId) {
+		this.legacyId = legacyId;
 	}
 
 	/**

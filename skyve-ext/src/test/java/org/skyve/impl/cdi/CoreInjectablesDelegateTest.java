@@ -65,6 +65,7 @@ public class CoreInjectablesDelegateTest {
 		when(user.getCustomerName()).thenReturn("bizhub");
 		when(user.getDataGroupId()).thenReturn("dg");
 		when(user.getHomeModuleName()).thenReturn("admin");
+		when(user.getLegacyId()).thenReturn("legacy");
 		when(user.getAccessibleModuleNames()).thenReturn(modules);
 		when(user.isInRole("admin", "RoleA")).thenReturn(Boolean.TRUE);
 		when(user.getScope("admin", "DocA")).thenReturn(scope);
@@ -104,6 +105,7 @@ public class CoreInjectablesDelegateTest {
 			assertSame("dg", injectable.getDataGroupId());
 			injectable.setDataGroupId("newDg");
 			assertSame("admin", injectable.getHomeModuleName());
+			assertSame("legacy", injectable.getLegacyId());
 			assertSame(modules, injectable.getAccessibleModuleNames());
 			assertTrue(injectable.isInRole("admin", "RoleA"));
 			assertSame(scope, injectable.getScope("admin", "DocA"));

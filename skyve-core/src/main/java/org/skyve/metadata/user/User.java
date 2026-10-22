@@ -164,6 +164,19 @@ public interface User extends NamedMetaData {
 	String getHomeModuleName();
 
 	/**
+	 * Returns the admin user's legacy ID, the identifier this user had in the system
+	 * their record was imported from.
+	 *
+	 * <p>The value is loaded with the user at login, as the roles are, and held for the
+	 * life of the session. A change to the admin user's legacy ID applies from the
+	 * user's next login.
+	 *
+	 * @return the legacy ID, or {@code null} if the user has none
+	 * @since 10.0
+	 */
+	@Nullable String getLegacyId();
+
+	/**
 	 * Returns the names of all modules accessible to this user based on their role
 	 * assignments.
 	 *

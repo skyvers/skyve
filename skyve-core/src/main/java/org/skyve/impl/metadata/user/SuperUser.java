@@ -47,6 +47,7 @@ public class SuperUser extends UserImpl {
     	setCustomerName(user.getCustomerName());
     	setDataGroupId(user.getDataGroupId());
     	setHomeModuleName(user.getHomeModuleName());
+    	setLegacyId(user.getLegacyId());
     	setId(user.getId());
     	setName(user.getName());
     	setPasswordHash(user.getPasswordHash());
