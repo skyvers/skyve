@@ -56,7 +56,6 @@ public class CommunicationUtil {
 
 	private static final String EMAIL_ADDRESS_DELIMETERS = "[,;]";
 	private static final String INVALID_RESOLVED_EMAIL_ADDRESS = "The sendTo address could not be resolved to a valid email address";
-	private static final String DEFAULT_ATTACHMENT_NAME = "attachment";
 	private static final String BODY_ATTRIBUTE_NAME = "body";
 	private static final String SEND_TO_ATTRIBUTE_NAME = "sendTo";
 	private static final String FORMAT_TYPE_ATTRIBUTE_NAME = "formatType";
@@ -775,59 +774,54 @@ public class CommunicationUtil {
 	}
 
 	/**
-	 * getAttachments - compile an array of all possible attachments for the
-	 * communication iem
-	 * 
-	 * @param cm
-	 * @param communication
-	 * @param calendarItem
-	 * @return
-	 * @throws Exception
+	 * Compiles the attachments defined in the attachment slots of a communication.
+	 * A slot is attached only when it has both a file name and content.
+	 *
+	 * @param communication	The communication.
+	 * @return	The attachments of the filled slots in slot order, which is empty when no slot is filled.
+	 * @throws DomainException	if the content of a filled slot cannot be found.
 	 */
 	private static @Nonnull MailAttachment[] getDefinedAttachments(@Nonnull Communication communication) throws Exception {
-
-		MailAttachment ma1 = null;
-		MailAttachment ma2 = null;
-		MailAttachment ma3 = null;
+		List<MailAttachment> result = new ArrayList<>(3);
 
 		try (ContentManager cm = EXT.newContentManager()) {
 
 			// Attachment 1
+			String attachmentFileName1 = communication.getAttachmentFileName1();
 			String attachment1 = communication.getAttachment1();
-			if (communication.getAttachmentFileName1() != null && attachment1 != null) {
-				ma1 = newDefinedAttachment(cm, communication.getAttachmentFileName1(), attachment1);
+			if (attachmentFileName1 != null && attachment1 != null) {
+				result.add(newDefinedAttachment(cm, attachmentFileName1, attachment1));
 			}
 
 			// Attachment 2
+			String attachmentFileName2 = communication.getAttachmentFileName2();
 			String attachment2 = communication.getAttachment2();
-			if (communication.getAttachmentFileName2() != null && attachment2 != null) {
-				ma2 = newDefinedAttachment(cm, communication.getAttachmentFileName2(), attachment2);
+			if (attachmentFileName2 != null && attachment2 != null) {
+				result.add(newDefinedAttachment(cm, attachmentFileName2, attachment2));
 			}
 
 			// Attachment 3
+			String attachmentFileName3 = communication.getAttachmentFileName3();
 			String attachment3 = communication.getAttachment3();
-			if (communication.getAttachmentFileName3() != null && attachment3 != null) {
-				ma3 = newDefinedAttachment(cm, communication.getAttachmentFileName3(), attachment3);
+			if (attachmentFileName3 != null && attachment3 != null) {
+				result.add(newDefinedAttachment(cm, attachmentFileName3, attachment3));
 			}
 		}
 
-		// construct array
-		MailAttachment[] attachments = { ma1, ma2, ma3 };
-
-		return attachments;
+		return result.toArray(new MailAttachment[result.size()]);
 	}
 
 	/**
 	 * Returns the mail attachment for a filled attachment slot of a communication.
 	 *
 	 * @param cm	The content manager to load the attachment content with.
-	 * @param attachmentFileName	The file name to attach the content as, or null for the default name.
+	 * @param attachmentFileName	The file name to attach the content as.
 	 * @param contentId	The content ID of the attachment content.
 	 * @return	The mail attachment.
 	 * @throws DomainException	if the attachment content cannot be found.
 	 */
 	private static @Nonnull MailAttachment newDefinedAttachment(@Nonnull ContentManager cm,
-																	@Nullable String attachmentFileName,
+																	@Nonnull String attachmentFileName,
 																	@Nonnull String contentId)
 	throws Exception {
 		AttachmentContent content = cm.getAttachment(contentId);
@@ -835,10 +829,9 @@ public class CommunicationUtil {
 			throw new DomainException("The content for the attachment can't be retrieved - re-attach the content and try again.");
 		}
 		byte[] fileBytes = content.getContentBytes();
-		String attachmentName = (attachmentFileName == null ? DEFAULT_ATTACHMENT_NAME : attachmentFileName);
 		// A content type that is not a known mime type is attached without a content type
 		MimeType mimeType = content.getMimeType();
-		return new MailAttachment(attachmentName, fileBytes, (mimeType == null) ? null : mimeType.toString());
+		return new MailAttachment(attachmentFileName, fileBytes, (mimeType == null) ? null : mimeType.toString());
 	}
 
 	/**

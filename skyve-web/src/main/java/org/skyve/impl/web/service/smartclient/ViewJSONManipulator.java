@@ -356,11 +356,7 @@ public class ViewJSONManipulator extends ViewVisitor {
 		result.put(AbstractWebContext.CONTEXT_NAME, webId);
 		
 		// put the view title in
-		String localisedTitle = view.getLocalisedTitle();
-		if (localisedTitle == null) { // a view title is required
-			throw new MetaDataException("View " + view.getName() + " has no title");
-		}
-		String title = BindUtil.formatMessage(localisedTitle, bean);
+		String title = BindUtil.formatMessage(view.getLocalisedTitle(), bean);
 		if (ViewRenderer.shouldEscape(view.getEscapeTitle())) {
 			title = OWASP.escapeHtml(title);
 		}
@@ -2126,7 +2122,7 @@ public class ViewJSONManipulator extends ViewVisitor {
 					throw new MetaDataException("The comparison [" + referenceName + "] has no model name");
 				}
 				RequestKey key = RequestKey.model(document, modelName);
-				ProvidedRepository repository = ProvidedRepositoryFactory.get();
+				ProvidedRepository repository = ProvidedRepositoryFactory.getNullSafe();
 				ComparisonModel<Bean, Bean> model = repository.getComparisonModel(customer, document, modelName, true);
 				if (model == null) {
 					throw new MetaDataException("Could not resolve comparison model [" + modelName + "]");

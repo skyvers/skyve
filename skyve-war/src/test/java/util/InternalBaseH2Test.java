@@ -148,7 +148,7 @@ abstract class InternalBaseH2Test {
 		// setUser is called, otherwise SuperUser.getAccessibleModuleNames()
 		// silently returns null when the customer metadata hasn't been loaded yet,
 		// which causes a NPE in AbstractHibernatePersistence.resetDocumentPermissionScopes().
-		ProvidedRepositoryFactory.get().getCustomer(CUSTOMER);
+		ProvidedRepositoryFactory.getNullSafe().getCustomer(CUSTOMER);
 
 		final SuperUser user = new SuperUser();
 		user.setCustomerName(CUSTOMER);

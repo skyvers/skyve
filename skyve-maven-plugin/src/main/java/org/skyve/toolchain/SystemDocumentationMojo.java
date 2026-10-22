@@ -422,7 +422,7 @@ public class SystemDocumentationMojo extends AbstractSkyveMojo {
 
 	@SuppressWarnings("static-method") // test seam
 	@Nullable Customer getCustomer(@Nonnull String customerName) {
-		return ProvidedRepositoryFactory.get().getCustomer(customerName);
+		return ProvidedRepositoryFactory.getNullSafe().getCustomer(customerName);
 	}
 
 	@SuppressWarnings("static-method") // test seam

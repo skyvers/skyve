@@ -425,11 +425,11 @@ public abstract class AbstractDocumentQuery extends AbstractQuery implements Doc
 	/**
 	 * Inserts a driving-document ordering ahead of appended orderings.
 	 * @param binding the binding value
-	 * @param order the order value
+	 * @param order the sort direction; {@code null} means ascending
 	 * @return the resulting value
 	 */
 	@Override
-	public @Nonnull DocumentQuery insertBoundOrdering(@Nonnull String binding, @Nonnull SortDirection order) {
+	public @Nonnull DocumentQuery insertBoundOrdering(@Nonnull String binding, @Nullable SortDirection order) {
 		return insertBoundOrdering(THIS_ALIAS, binding, order);
 	}
 	
@@ -437,11 +437,11 @@ public abstract class AbstractDocumentQuery extends AbstractQuery implements Doc
 	 * Inserts an ordering for the specified entity alias and binding ahead of appended orderings.
 	 * @param entityAlias the entityAlias value
 	 * @param binding the binding value
-	 * @param order the order value
+	 * @param order the sort direction; {@code null} means ascending
 	 * @return the resulting value
 	 */
 	@Override
-	public @Nonnull DocumentQuery insertBoundOrdering(@Nonnull String entityAlias, @Nonnull String binding, @Nonnull SortDirection order) {
+	public @Nonnull DocumentQuery insertBoundOrdering(@Nonnull String entityAlias, @Nonnull String binding, @Nullable SortDirection order) {
 		insertedOrderings.put(String.format("%s.%s", entityAlias, binding), order);
 		return this;
 	}
@@ -496,11 +496,11 @@ public abstract class AbstractDocumentQuery extends AbstractQuery implements Doc
 	/**
 	 * Inserts an ordering expression ahead of appended orderings.
 	 * @param expression the expression value
-	 * @param order the order value
+	 * @param order the sort direction; {@code null} means ascending
 	 * @return the resulting value
 	 */
 	@Override
-	public @Nonnull DocumentQuery insertExpressionOrdering(@Nonnull String expression, @Nonnull SortDirection order) {
+	public @Nonnull DocumentQuery insertExpressionOrdering(@Nonnull String expression, @Nullable SortDirection order) {
 		insertedOrderings.put(expression, order);
 		return this;
 	}

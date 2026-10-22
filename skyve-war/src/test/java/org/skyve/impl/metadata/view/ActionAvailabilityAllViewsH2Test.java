@@ -164,7 +164,7 @@ class ActionAvailabilityAllViewsH2Test extends AbstractSkyveTestDispose {
 		for (String section : List.of(EVENT_ONLY, SHARED_CLASS, BUILT_IN_COLLISION, NEVER_REACHABLE, ROW_LINK_REFUSED, REFRESH_ACTION, REVEALED, OTHER_REVEALS)) {
 			report.put(section, new TreeMap<>());
 		}
-		ProvidedRepository repository = ProvidedRepositoryFactory.get();
+		ProvidedRepository repository = ProvidedRepositoryFactory.getNullSafe();
 		Router router = repository.getRouter();
 		if (router == null) {
 			throw new IllegalStateException("The repository has no router");

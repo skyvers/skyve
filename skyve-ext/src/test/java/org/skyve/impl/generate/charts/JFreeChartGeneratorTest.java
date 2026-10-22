@@ -2,6 +2,7 @@ package org.skyve.impl.generate.charts;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.awt.Color;
@@ -225,6 +226,17 @@ class JFreeChartGeneratorTest {
 		assertNotNull(new JFreeChartGenerator(pie, 800, 600).pie());
 		assertNotNull(new JFreeChartGenerator(pieWithoutBorders, 800, 600).doughnut());
 		assertNotNull(new JFreeChartGenerator(polar, 800, 600).polarArea());
+	}
+
+	@Test
+	void polarAreaWithoutTitleHasNoTitle() {
+		ChartData data = polarData();
+		data.setTitle(null);
+
+		JFreeChart chart = new JFreeChartGenerator(data, 800, 600).polarArea();
+
+		assertNull(chart.getTitle());
+		assertNotNull(chart.getLegend());
 	}
 
 	// ---- image methods ----

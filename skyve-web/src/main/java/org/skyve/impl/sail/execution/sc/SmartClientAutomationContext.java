@@ -131,12 +131,14 @@ public class SmartClientAutomationContext extends AutomationContext<SmartClientG
 
 	/**
 	 * Decrements the global window number by 1, ensuring it never goes below 0.
+	 * Decrementing the first window (0), or when there is no window (null), leaves no window (null).
 	 */
 	public static void decrementWindowNumber() {
-		if (windowNumber.intValue() == 0) {
+		Integer current = windowNumber;
+		if ((current == null) || (current.intValue() == 0)) {
 			windowNumber = null;
 		} else {
-			windowNumber = Integer.valueOf(windowNumber.intValue() - 1);
+			windowNumber = Integer.valueOf(current.intValue() - 1);
 		}
 	}
 

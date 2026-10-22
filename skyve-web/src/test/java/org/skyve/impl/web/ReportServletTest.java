@@ -24,6 +24,7 @@ import java.util.Map;
 import org.junit.jupiter.api.Test;
 import org.skyve.content.MimeType;
 import org.skyve.impl.persistence.AbstractPersistence;
+import org.skyve.impl.report.jasperreports.ReportDesignParameters;
 import org.skyve.metadata.user.User;
 import org.skyve.report.ReportFormat;
 
@@ -324,5 +325,23 @@ class ReportServletTest {
 		public void write(int b) throws IOException {
 			throw new IOException("forced failure");
 		}
+	}
+
+	@Test
+	@SuppressWarnings("boxing")
+	void applyMarginsSetsEachMarginFromItsOwnValue() {
+		Map<String, Object> values = new LinkedHashMap<>();
+		values.put("top", 11);
+		values.put("bottom", 12);
+		values.put("left", 13);
+		values.put("right", 14);
+		ReportDesignParameters designParams = new ReportDesignParameters();
+
+		ReportServlet.applyMargins(designParams, values);
+
+		assertEquals(11, designParams.getTopMargin());
+		assertEquals(12, designParams.getBottomMargin());
+		assertEquals(13, designParams.getLeftMargin());
+		assertEquals(14, designParams.getRightMargin());
 	}
 }

@@ -320,7 +320,7 @@ public final class JasperReportUtil {
 												@Nonnull Document document,
 												@Nonnull String reportName,
 												@Nonnull Map<String, Object> parameters) {
-		ProvidedRepository repository = ProvidedRepositoryFactory.get();
+		ProvidedRepository repository = ProvidedRepositoryFactory.getNullSafe();
 		String result = repository.getReportFileName(customer, document, reportName);
 		if (result == null) {
 			throw new MetaDataException("Report " + reportName + " in document " + document.getOwningModuleName() + '.' + document.getName() + 

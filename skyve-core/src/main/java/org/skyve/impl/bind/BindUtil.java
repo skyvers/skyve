@@ -2913,7 +2913,7 @@ public final class BindUtil {
 	private static @Nonnull Module resolveNavigatingModule(@Nullable Customer customer,
 														 @Nonnull Document navigatingDocument) {
 		Module module = (customer == null)
-				? ProvidedRepositoryFactory.get().getModule(null, navigatingDocument.getOwningModuleName())
+				? ProvidedRepositoryFactory.getNullSafe().getModule(null, navigatingDocument.getOwningModuleName())
 				: customer.getModule(navigatingDocument.getOwningModuleName());
 		if (module == null) {
 			throw new MetaDataException("Module " + navigatingDocument.getOwningModuleName() +

@@ -624,7 +624,7 @@ public class DoctorUtil {
 	public static void main(@Nonnull String[] args)
 	throws Exception {
 		ProvidedRepositoryFactory.set(new LocalDesignRepository());
-		ProvidedRepository repository = ProvidedRepositoryFactory.get();
+		ProvidedRepository repository = ProvidedRepositoryFactory.getNullSafe();
 		
 		Customer customer = repository.getCustomer(args[1]);
 		if (customer == null) {

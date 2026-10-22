@@ -89,7 +89,7 @@ public class MetaDataQueryReferenceImpl extends QueryReferenceImpl implements Me
 	@SuppressWarnings("unchecked")
 	protected @Nonnull MetaDataQueryDefinition getTarget() {
 		// TODO this should use the current customer (can't get customer during generate domain)
-		MetaDataQueryDefinition result = ProvidedRepositoryFactory.get().getModule(null, moduleRef).getMetaDataQuery(ref);
+		MetaDataQueryDefinition result = ProvidedRepositoryFactory.getNullSafe().getModule(null, moduleRef).getMetaDataQuery(ref);
 		if (result == null) {
 			throw new MetaDataException("Imported query " + moduleRef + '.' + ref + " in module " + 
 											getOwningModule().getName() + " is not defined.");

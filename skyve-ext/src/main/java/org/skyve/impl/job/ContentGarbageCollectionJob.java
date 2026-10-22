@@ -53,7 +53,6 @@ public class ContentGarbageCollectionJob implements Job {
 		LOGGER.info("Start Content Garbage Collection");
 		try {
 			ContentChecker contentChecker = new ContentChecker();
-			ProvidedRepository r = ProvidedRepositoryFactory.get();
 			Persistence p = CORE.getPersistence();
 			try {
 				try (ContentManager cm = EXT.newContentManager()) {
@@ -92,6 +91,7 @@ public class ContentGarbageCollectionJob implements Job {
 								}
 							}
 							else if ((System.currentTimeMillis() - lastModified.getTime()) > CONTENT_GC_ELIGIBLE_AGE_MILLIS) { // of eligible age
+								ProvidedRepository r = ProvidedRepositoryFactory.getNullSafe();
 								Customer customer = r.getCustomer(customerName);
 								Module module = r.getModule(customer, moduleName);
 								Document document = module.getDocument(customer, documentName);

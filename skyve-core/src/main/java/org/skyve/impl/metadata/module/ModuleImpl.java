@@ -305,7 +305,7 @@ ie Link from an external module to admin.User and domain generation will moan ab
 	 */
 	@Override
 	public @Nonnull Document getDocument(@Nullable Customer customer, @Nonnull String documentName) {
-		Document result = ProvidedRepositoryFactory.get().getDocument(customer, this, documentName);
+		Document result = ProvidedRepositoryFactory.getNullSafe().getDocument(customer, this, documentName);
 		if (result == null) {
 			throw new MetaDataException("Document " + documentName + " does not exist in module " + getName());
 		}

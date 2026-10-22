@@ -511,7 +511,13 @@ class ReportViewVisitorLayoutTest {
 
 	private static final class TestVisitor extends ReportViewVisitor {
 		private TestVisitor() {
-			super(null, null, null, null, new ViewImpl(), "desktop");
+			super(null, null, null, null, newView(), "desktop");
+		}
+
+		private static ViewImpl newView() {
+			ViewImpl result = new ViewImpl();
+			result.setTitle("Test View");
+			return result;
 		}
 	}
 

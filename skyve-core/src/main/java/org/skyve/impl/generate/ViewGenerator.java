@@ -128,9 +128,7 @@ public class ViewGenerator {
 		if (finalDescription == null) {
 			finalDescription = document.getLocalisedPluralAlias();
 		}
-		if (finalDescription != null) {
-			title.append(finalDescription);
-		}
+		title.append(finalDescription);
 		result.setTitle(title.toString());
 
 		ActionImpl action = new ActionImpl();

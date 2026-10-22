@@ -115,7 +115,7 @@ class Table {
 			ExtensionStrategy strategy = persistent.getStrategy();
 			// Check there is actually a Document with a persistent name extended somewhere in the document hierarchy
 			Module module = customer.getModule(document.getOwningModuleName());
-			if (ProvidedRepositoryFactory.get().findNearestPersistentSingleOrJoinedSuperDocument(customer, module, document) != null) {
+			if (ProvidedRepositoryFactory.getNullSafe().findNearestPersistentSingleOrJoinedSuperDocument(customer, module, document) != null) {
 				if (ExtensionStrategy.single.equals(strategy)) {
 					fields.put(PersistentBean.DISCRIMINATOR_NAME, TEXT);
 				}

@@ -215,7 +215,7 @@ public class Enumeration extends ConstrainableField {
 			Document referencedDocument = owningDocument;
 			
 			if ((moduleRef != null) || (documentRef != null)) {
-				Module referencedModule = ProvidedRepositoryFactory.get().getModule(null, referencedModuleName);
+				Module referencedModule = ProvidedRepositoryFactory.getNullSafe().getModule(null, referencedModuleName);
 				referencedDocument = referencedModule.getDocument(null, referencedDocumentName);
 			}
 			

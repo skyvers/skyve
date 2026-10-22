@@ -72,7 +72,7 @@ class MetaDataServletJsonValidityH2Test extends AbstractSkyveTest {
 		menuUser.setCustomerName(c.getName());
 		menuUser.setName(u.getName());
 		menuUser.setId(u.getId());
-		ProvidedRepositoryFactory.get().resetMenus(menuUser);
+		ProvidedRepositoryFactory.getNullSafe().resetMenus(menuUser);
 	}
 
 	@Test

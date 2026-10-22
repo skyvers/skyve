@@ -227,7 +227,7 @@ public class RouteCriteria implements SerializableMetaData {
 				// Cater for FacesView.zoomInBindings stack written out as comma separated - convert to the view binding
 				b = b.replace(',', '.');
 	
-				ProvidedRepository r = ProvidedRepositoryFactory.get();
+				ProvidedRepository r = ProvidedRepositoryFactory.getNullSafe();
 				Customer c = (customer == null) ? ((customerName != null) ? r.getCustomer(customerName) : null) : customer;
 				Module m = r.getModule(c, moduleName);
 				Document d = r.getDocument(c, m, documentName);

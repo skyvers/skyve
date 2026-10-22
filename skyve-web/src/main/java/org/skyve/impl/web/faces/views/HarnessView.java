@@ -446,7 +446,7 @@ public abstract class HarnessView extends LocalisableView {
 	@SuppressWarnings("static-method")
 	public void setUser(@Nonnull String customerName, @Nonnull String userName) {
 		UserImpl user = null;
-		ProvidedRepository repository = ProvidedRepositoryFactory.get();
+		ProvidedRepository repository = ProvidedRepositoryFactory.getNullSafe();
 		ExternalContext ec = FacesContext.getCurrentInstance().getExternalContext();
 		String userPrincipal = null;
 		if (ec.getUserPrincipal() == null) { // not logged in

@@ -71,6 +71,16 @@ class OverridableDomainGeneratorMoreTest {
 		return path.toString() + '/';
 	}
 
+	/**
+	 * Creates a document with the aliases that the XSD requires of document metadata.
+	 */
+	private static DocumentImpl newDocument() {
+		DocumentImpl result = new DocumentImpl();
+		result.setSingularAlias("Test Document");
+		result.setPluralAlias("Test Documents");
+		return result;
+	}
+
 	// ----- columnName -------------------------------------------------------
 
 	@Test
@@ -402,7 +412,7 @@ class OverridableDomainGeneratorMoreTest {
 
 	@Test
 	void generateDocumentPropertyNamesWithTextAttributeAndCondition() throws Exception {
-		DocumentImpl doc = new DocumentImpl();
+		DocumentImpl doc = newDocument();
 		doc.setName("TestDoc");
 		doc.setOwningModuleName("testMod");
 
@@ -429,7 +439,7 @@ class OverridableDomainGeneratorMoreTest {
 
 	@Test
 	void generateDocumentPropertyNamesSkipsBizKey() throws Exception {
-		DocumentImpl doc = new DocumentImpl();
+		DocumentImpl doc = newDocument();
 		doc.setName("TestDoc");
 		doc.setOwningModuleName("testMod");
 
@@ -545,7 +555,7 @@ class OverridableDomainGeneratorMoreTest {
 	@Test
 	void validateDocumentAttributeNamesValidAttributeDoesNotThrow() throws Exception {
 		OverridableDomainGenerator gen = generator();
-		DocumentImpl doc = new DocumentImpl();
+		DocumentImpl doc = newDocument();
 		doc.setName("TestDoc");
 		doc.setOwningModuleName("testMod");
 		// Transient doc (no persistent) - transient attributes are skipped after underscore check
@@ -562,7 +572,7 @@ class OverridableDomainGeneratorMoreTest {
 	@Test
 	void validateDocumentAttributeNamesUnderscoreThrows() {
 		OverridableDomainGenerator gen = generator();
-		DocumentImpl doc = new DocumentImpl();
+		DocumentImpl doc = newDocument();
 		doc.setName("TestDoc");
 		doc.setOwningModuleName("testMod");
 		Text field = new Text();
@@ -677,7 +687,7 @@ class OverridableDomainGeneratorMoreTest {
 	void generateJavaForMinimalTransientDocument() throws Exception {
 		OverridableDomainGenerator gen = generator();
 
-		DocumentImpl doc = new DocumentImpl();
+		DocumentImpl doc = newDocument();
 		doc.setName("MinimalDoc");
 		doc.setOwningModuleName("testMod");
 		doc.setSingularAlias("Minimal Document");
@@ -715,7 +725,7 @@ class OverridableDomainGeneratorMoreTest {
 	void generateJavaForMinimalTransientDocumentWithCondition() throws Exception {
 		OverridableDomainGenerator gen = generator();
 
-		DocumentImpl doc = new DocumentImpl();
+		DocumentImpl doc = newDocument();
 		doc.setName("DocWithCondition");
 		doc.setOwningModuleName("testMod");
 		// Add a condition directly via getConditions().put()
@@ -975,7 +985,7 @@ class OverridableDomainGeneratorMoreTest {
 		vanillaCode.setName("code");
 		vanillaCode.setDisplayName("Code");
 
-		DocumentImpl vanillaDocument = new DocumentImpl();
+		DocumentImpl vanillaDocument = newDocument();
 		vanillaDocument.setName("Order");
 		vanillaDocument.setOwningModuleName("sales");
 		vanillaDocument.setPersistent(persistentOf("SALES_ORDER"));
@@ -985,7 +995,7 @@ class OverridableDomainGeneratorMoreTest {
 		overrideCode.setName("code");
 		overrideCode.setDisplayName("Code");
 
-		DocumentImpl overrideDocument = new DocumentImpl();
+		DocumentImpl overrideDocument = newDocument();
 		overrideDocument.setName("Order");
 		overrideDocument.setOwningModuleName("sales");
 		overrideDocument.setPersistent(persistentOf("SALES_ORDER"));
@@ -1053,7 +1063,7 @@ class OverridableDomainGeneratorMoreTest {
 		vanillaDescription.setName("description");
 		vanillaDescription.setDisplayName("Description");
 
-		DocumentImpl vanillaDocument = new DocumentImpl();
+		DocumentImpl vanillaDocument = newDocument();
 		vanillaDocument.setName("Order");
 		vanillaDocument.setOwningModuleName("sales");
 		vanillaDocument.setPersistent(persistentOf("SALES_ORDER"));
@@ -1064,7 +1074,7 @@ class OverridableDomainGeneratorMoreTest {
 		overrideCode.setName("code");
 		overrideCode.setDisplayName("Code");
 
-		DocumentImpl overrideDocument = new DocumentImpl();
+		DocumentImpl overrideDocument = newDocument();
 		overrideDocument.setName("Order");
 		overrideDocument.setOwningModuleName("sales");
 		overrideDocument.setPersistent(persistentOf("SALES_ORDER"));
@@ -1123,7 +1133,7 @@ class OverridableDomainGeneratorMoreTest {
 	void generateJavaWithDateTimeAndDecimalFields() throws Exception {
 		OverridableDomainGenerator gen = generator();
 
-		DocumentImpl doc = new DocumentImpl();
+		DocumentImpl doc = newDocument();
 		doc.setName("FieldDoc");
 		doc.setOwningModuleName("testMod");
 
@@ -1175,7 +1185,7 @@ class OverridableDomainGeneratorMoreTest {
 	void generateJavaWithDecimal10AndGeometryAndTimestamp() throws Exception {
 		OverridableDomainGenerator gen = generator();
 
-		DocumentImpl doc = new DocumentImpl();
+		DocumentImpl doc = newDocument();
 		doc.setName("MoreFieldDoc");
 		doc.setOwningModuleName("testMod");
 
@@ -1227,7 +1237,7 @@ class OverridableDomainGeneratorMoreTest {
 	void generateJavaWithBooleanIntegerLongIntegerFields() throws Exception {
 		OverridableDomainGenerator gen = generator();
 
-		DocumentImpl doc = new DocumentImpl();
+		DocumentImpl doc = newDocument();
 		doc.setName("NumericDoc");
 		doc.setOwningModuleName("testMod");
 
@@ -1273,7 +1283,7 @@ class OverridableDomainGeneratorMoreTest {
 	void generateJavaWithInlineEnumerationField() throws Exception {
 		OverridableDomainGenerator gen = generator();
 
-		DocumentImpl doc = new DocumentImpl();
+		DocumentImpl doc = newDocument();
 		doc.setName("EnumDoc");
 		doc.setOwningModuleName("testMod");
 
@@ -1320,7 +1330,7 @@ class OverridableDomainGeneratorMoreTest {
 	void generateJavaWithBizKeyAndDeprecatedField() throws Exception {
 		OverridableDomainGenerator gen = generator();
 
-		DocumentImpl doc = new DocumentImpl();
+		DocumentImpl doc = newDocument();
 		doc.setName("BizKeyDoc");
 		doc.setOwningModuleName("testMod");
 		doc.setBizKeyMethodCode("\t\treturn name;");
@@ -1358,7 +1368,7 @@ class OverridableDomainGeneratorMoreTest {
 	void generateJavaWithMarkupAndMemoFields() throws Exception {
 		OverridableDomainGenerator gen = generator();
 
-		DocumentImpl doc = new DocumentImpl();
+		DocumentImpl doc = newDocument();
 		doc.setName("TextDoc");
 		doc.setOwningModuleName("testMod");
 
@@ -1404,7 +1414,7 @@ class OverridableDomainGeneratorMoreTest {
 	void generateJavaWithStringDefaultValue() throws Exception {
 		OverridableDomainGenerator gen = generator();
 
-		DocumentImpl doc = new DocumentImpl();
+		DocumentImpl doc = newDocument();
 		doc.setName("DefaultDoc");
 		doc.setOwningModuleName("testMod");
 
@@ -1434,7 +1444,7 @@ class OverridableDomainGeneratorMoreTest {
 	void generateJavaWithStringExpressionDefaultValue() throws Exception {
 		OverridableDomainGenerator gen = generator();
 
-		DocumentImpl doc = new DocumentImpl();
+		DocumentImpl doc = newDocument();
 		doc.setName("ExprDefaultDoc");
 		doc.setOwningModuleName("testMod");
 
@@ -1465,7 +1475,7 @@ class OverridableDomainGeneratorMoreTest {
 	void generateJavaWithNonStringDefaultValue() throws Exception {
 		OverridableDomainGenerator gen = generator();
 
-		DocumentImpl doc = new DocumentImpl();
+		DocumentImpl doc = newDocument();
 		doc.setName("NumDefaultDoc");
 		doc.setOwningModuleName("testMod");
 
@@ -1505,7 +1515,7 @@ class OverridableDomainGeneratorMoreTest {
 	void generateJavaWithNonStringSkyveExpressionDefault() throws Exception {
 		OverridableDomainGenerator gen = generator();
 
-		DocumentImpl doc = new DocumentImpl();
+		DocumentImpl doc = newDocument();
 		doc.setName("SkyveExprDoc");
 		doc.setOwningModuleName("testMod");
 
@@ -1539,7 +1549,7 @@ class OverridableDomainGeneratorMoreTest {
 	void generateJavaWithTrackChanges() throws Exception {
 		OverridableDomainGenerator gen = generator();
 
-		DocumentImpl doc = new DocumentImpl();
+		DocumentImpl doc = newDocument();
 		doc.setName("TrackDoc");
 		doc.setOwningModuleName("testMod");
 
@@ -1572,7 +1582,7 @@ class OverridableDomainGeneratorMoreTest {
 	void generateJavaWithCreatedConditionGeneratesOverride() throws Exception {
 		OverridableDomainGenerator gen = generator();
 
-		DocumentImpl doc = new DocumentImpl();
+		DocumentImpl doc = newDocument();
 		doc.setName("CreatedCondDoc");
 		doc.setOwningModuleName("testMod");
 
@@ -1603,7 +1613,7 @@ class OverridableDomainGeneratorMoreTest {
 	void generateJavaWithSkyveExpressionCondition() throws Exception {
 		OverridableDomainGenerator gen = generator();
 
-		DocumentImpl doc = new DocumentImpl();
+		DocumentImpl doc = newDocument();
 		doc.setName("SkyveCondDoc");
 		doc.setOwningModuleName("testMod");
 
@@ -1633,7 +1643,7 @@ class OverridableDomainGeneratorMoreTest {
 	void generateJavaWithConditionDescriptionAndDocumentation() throws Exception {
 		OverridableDomainGenerator gen = generator();
 
-		DocumentImpl doc = new DocumentImpl();
+		DocumentImpl doc = newDocument();
 		doc.setName("CondDocDoc");
 		doc.setOwningModuleName("testMod");
 
@@ -1668,7 +1678,7 @@ class OverridableDomainGeneratorMoreTest {
 		OverridableDomainGenerator gen = generator();
 
 		// Parent document with a child collection referencing the child document
-		DocumentImpl parentDoc = new DocumentImpl();
+		DocumentImpl parentDoc = newDocument();
 		parentDoc.setName("ParentDoc");
 		parentDoc.setOwningModuleName("testMod");
 
@@ -1682,7 +1692,7 @@ class OverridableDomainGeneratorMoreTest {
 		parentDoc.putAttribute(childCollection);
 
 		// Child document
-		DocumentImpl childDoc = new DocumentImpl();
+		DocumentImpl childDoc = newDocument();
 		childDoc.setName("ChildDoc");
 		childDoc.setOwningModuleName("testMod");
 		childDoc.setParentDocumentName("ParentDoc");
@@ -1717,7 +1727,7 @@ class OverridableDomainGeneratorMoreTest {
 	void generateJavaForPersistentDocument() throws Exception {
 		OverridableDomainGenerator gen = generator();
 
-		DocumentImpl doc = new DocumentImpl();
+		DocumentImpl doc = newDocument();
 		doc.setName("PersistDoc");
 		doc.setOwningModuleName("testMod");
 		Persistent persistent = new Persistent();
@@ -1752,7 +1762,7 @@ class OverridableDomainGeneratorMoreTest {
 	void generateJavaWithBooleanDefaultValue() throws Exception {
 		OverridableDomainGenerator gen = generator();
 
-		DocumentImpl doc = new DocumentImpl();
+		DocumentImpl doc = newDocument();
 		doc.setName("BoolDefaultDoc");
 		doc.setOwningModuleName("testMod");
 
@@ -1784,7 +1794,7 @@ class OverridableDomainGeneratorMoreTest {
 	void generateJavaWithInterface() throws Exception {
 		OverridableDomainGenerator gen = generator();
 
-		DocumentImpl doc = new DocumentImpl();
+		DocumentImpl doc = newDocument();
 		doc.setName("InterfaceDoc");
 		doc.setOwningModuleName("testMod");
 
@@ -1814,7 +1824,7 @@ class OverridableDomainGeneratorMoreTest {
 	void generateJavaForAbstractDocument() throws Exception {
 		OverridableDomainGenerator gen = generator();
 
-		DocumentImpl doc = new DocumentImpl();
+		DocumentImpl doc = newDocument();
 		doc.setName("AbstractDoc");
 		doc.setOwningModuleName("testMod");
 		doc.setAbstract(true);
@@ -1842,7 +1852,7 @@ class OverridableDomainGeneratorMoreTest {
 		OverridableDomainGenerator gen = generator();
 
 		// A hierarchical document has parentDocumentName == its own name
-		DocumentImpl doc = new DocumentImpl();
+		DocumentImpl doc = newDocument();
 		doc.setName("TreeNode");
 		doc.setOwningModuleName("testMod");
 		doc.setParentDocumentName("TreeNode"); // hierarchical: parent == self
@@ -1879,7 +1889,7 @@ class OverridableDomainGeneratorMoreTest {
 		OverridableDomainGenerator gen = generator();
 
 		// Parent document with a child collection
-		DocumentImpl parentDoc = new DocumentImpl();
+		DocumentImpl parentDoc = newDocument();
 		parentDoc.setName("OwnerDoc");
 		parentDoc.setOwningModuleName("testMod");
 
@@ -1892,7 +1902,7 @@ class OverridableDomainGeneratorMoreTest {
 		parentDoc.putAttribute(childColl);
 
 		// Child document with an interface
-		DocumentImpl childDoc = new DocumentImpl();
+		DocumentImpl childDoc = newDocument();
 		childDoc.setName("ItemDoc");
 		childDoc.setOwningModuleName("testMod");
 		childDoc.setParentDocumentName("OwnerDoc");
@@ -1925,7 +1935,7 @@ class OverridableDomainGeneratorMoreTest {
 		// "exec" is SQL Server reserved but NOT H2 reserved
 		// The MSSQL check triggers first
 		OverridableDomainGenerator gen = generator(DialectOptions.MSSQL_2014);
-		DocumentImpl doc = new DocumentImpl();
+		DocumentImpl doc = newDocument();
 		doc.setName("MssqlDoc");
 		doc.setOwningModuleName("testMod");
 		doc.setPersistent(persistentOf("MssqlDocTable"));
@@ -1945,7 +1955,7 @@ class OverridableDomainGeneratorMoreTest {
 	void validateDocumentAttributeNamesMssql2016ReservedWordThrows() {
 		// Use MSSQL_2016 dialect as well to cover that branch
 		OverridableDomainGenerator gen = generator(DialectOptions.MSSQL_2016);
-		DocumentImpl doc = new DocumentImpl();
+		DocumentImpl doc = newDocument();
 		doc.setName("Mssql2016Doc");
 		doc.setOwningModuleName("testMod");
 		doc.setPersistent(persistentOf("Mssql2016DocTable"));
@@ -1964,7 +1974,7 @@ class OverridableDomainGeneratorMoreTest {
 	void validateDocumentAttributeNamesMysql5ReservedWordThrows() {
 		// "accessible" is MySQL 5 reserved but NOT H2 reserved
 		OverridableDomainGenerator gen = generator(DialectOptions.MYSQL_5);
-		DocumentImpl doc = new DocumentImpl();
+		DocumentImpl doc = newDocument();
 		doc.setName("Mysql5Doc");
 		doc.setOwningModuleName("testMod");
 		doc.setPersistent(persistentOf("Mysql5DocTable"));
@@ -1982,7 +1992,7 @@ class OverridableDomainGeneratorMoreTest {
 	@Test
 	void validateDocumentAttributeNamesMysql5ByteCharsetReservedWordThrows() {
 		OverridableDomainGenerator gen = generator(DialectOptions.MYSQL_5_4_BYTE_CHARSET);
-		DocumentImpl doc = new DocumentImpl();
+		DocumentImpl doc = newDocument();
 		doc.setName("Mysql5ByteDoc");
 		doc.setOwningModuleName("testMod");
 		doc.setPersistent(persistentOf("Mysql5ByteDocTable"));
@@ -2001,7 +2011,7 @@ class OverridableDomainGeneratorMoreTest {
 	void validateDocumentAttributeNamesMysql8ReservedWordThrows() {
 		// "lateral" is MySQL 8 reserved but NOT H2 reserved
 		OverridableDomainGenerator gen = generator(DialectOptions.MYSQL_8);
-		DocumentImpl doc = new DocumentImpl();
+		DocumentImpl doc = newDocument();
 		doc.setName("Mysql8Doc");
 		doc.setOwningModuleName("testMod");
 		doc.setPersistent(persistentOf("Mysql8DocTable"));
@@ -2019,7 +2029,7 @@ class OverridableDomainGeneratorMoreTest {
 	@Test
 	void validateDocumentAttributeNamesMysql8ByteReservedWordThrows() {
 		OverridableDomainGenerator gen = generator(DialectOptions.MYSQL_8_4_BYTE_CHARSET);
-		DocumentImpl doc = new DocumentImpl();
+		DocumentImpl doc = newDocument();
 		doc.setName("Mysql8ByteDoc");
 		doc.setOwningModuleName("testMod");
 		doc.setPersistent(persistentOf("Mysql8ByteDocTable"));
@@ -2038,7 +2048,7 @@ class OverridableDomainGeneratorMoreTest {
 	void validateDocumentAttributeNamesPostgresqlReservedWordThrows() {
 		// "verbose" is PostgreSQL reserved but NOT H2 reserved
 		OverridableDomainGenerator gen = generator(DialectOptions.POSTGRESQL);
-		DocumentImpl doc = new DocumentImpl();
+		DocumentImpl doc = newDocument();
 		doc.setName("PgDoc");
 		doc.setOwningModuleName("testMod");
 		doc.setPersistent(persistentOf("PgDocTable"));
@@ -2057,7 +2067,7 @@ class OverridableDomainGeneratorMoreTest {
 	void validateDocumentAttributeNamesH2ValidOnOtherDialect() {
 		// Test that a word reserved in H2 throws even on MSSQL dialect (H2 always checked)
 		OverridableDomainGenerator gen = generator(DialectOptions.MSSQL_2014);
-		DocumentImpl doc = new DocumentImpl();
+		DocumentImpl doc = newDocument();
 		doc.setName("H2ReservedOnMssql");
 		doc.setOwningModuleName("testMod");
 		doc.setPersistent(persistentOf("H2ReservedOnMssqlTable"));
@@ -2077,7 +2087,7 @@ class OverridableDomainGeneratorMoreTest {
 	void validateDocumentAttributeNamesTransientAttributeSkipped() throws Exception {
 		// Transient attributes (no persistent on doc) should be skipped
 		OverridableDomainGenerator gen = generator(DialectOptions.MSSQL_2014);
-		DocumentImpl doc = new DocumentImpl();
+		DocumentImpl doc = newDocument();
 		doc.setName("TransientDoc");
 		doc.setOwningModuleName("testMod");
 		// No persistent set - all attributes are transient
@@ -2098,7 +2108,7 @@ class OverridableDomainGeneratorMoreTest {
 	void generateJavaWithBizKey() throws Exception {
 		OverridableDomainGenerator gen = generator();
 
-		DocumentImpl doc = new DocumentImpl();
+		DocumentImpl doc = newDocument();
 		doc.setName("BizKeyDoc");
 		doc.setOwningModuleName("testMod");
 		doc.setBizKeyMethodCode("\t\treturn \"myBizKey\";");
@@ -2125,7 +2135,7 @@ class OverridableDomainGeneratorMoreTest {
 	void generateJavaWithDynamicField() throws Exception {
 		OverridableDomainGenerator gen = generator();
 
-		DocumentImpl doc = new DocumentImpl();
+		DocumentImpl doc = newDocument();
 		doc.setName("DynamicFieldDoc");
 		doc.setOwningModuleName("testMod");
 
@@ -2167,7 +2177,7 @@ class OverridableDomainGeneratorMoreTest {
 	void generateJavaWithDocumentDescription() throws Exception {
 		OverridableDomainGenerator gen = generator();
 
-		DocumentImpl doc = new DocumentImpl();
+		DocumentImpl doc = newDocument();
 		doc.setName("DescriptionDoc");
 		doc.setOwningModuleName("testMod");
 		doc.setSingularAlias("Description Document");
@@ -2197,12 +2207,12 @@ class OverridableDomainGeneratorMoreTest {
 		OverridableDomainGenerator gen = generator();
 
 		// Child/extension document
-		DocumentImpl doc = new DocumentImpl();
+		DocumentImpl doc = newDocument();
 		doc.setName("ExtendedDoc");
 		doc.setOwningModuleName("testMod");
 
 		// Base document
-		DocumentImpl baseDoc = new DocumentImpl();
+		DocumentImpl baseDoc = newDocument();
 		baseDoc.setName("BaseDoc");
 		baseDoc.setOwningModuleName("testMod");
 
@@ -2231,12 +2241,13 @@ class OverridableDomainGeneratorMoreTest {
 	void generateJavaWithDeprecatedAttribute() throws Exception {
 		OverridableDomainGenerator gen = generator();
 
-		DocumentImpl doc = new DocumentImpl();
+		DocumentImpl doc = newDocument();
 		doc.setName("DeprecatedDoc");
 		doc.setOwningModuleName("testMod");
 
 		Text field = new Text();
 		field.setName("oldField");
+		field.setDisplayName("Old Field");
 		field.setLength(100);
 		field.setDeprecated(true);
 		doc.putAttribute(field);
@@ -2262,7 +2273,7 @@ class OverridableDomainGeneratorMoreTest {
 	void generateJavaPersistentWithDescription() throws Exception {
 		OverridableDomainGenerator gen = generator();
 
-		DocumentImpl doc = new DocumentImpl();
+		DocumentImpl doc = newDocument();
 		doc.setName("PersistentDescDoc");
 		doc.setOwningModuleName("testMod");
 		doc.setSingularAlias("Persistent Description Document");
@@ -2292,7 +2303,7 @@ class OverridableDomainGeneratorMoreTest {
 		OverridableDomainGenerator gen = new OverridableDomainGenerator(false, true, false,
 				DialectOptions.H2_NO_INDEXES, "", "", "", "", null);
 
-		DocumentImpl doc = new DocumentImpl();
+		DocumentImpl doc = newDocument();
 		doc.setName("DebugDoc");
 		doc.setOwningModuleName("testMod");
 
@@ -2317,7 +2328,7 @@ class OverridableDomainGeneratorMoreTest {
 	void generateJavaWithTransientField() throws Exception {
 		OverridableDomainGenerator gen = generator();
 
-		DocumentImpl doc = new DocumentImpl();
+		DocumentImpl doc = newDocument();
 		doc.setName("TransientFieldDoc");
 		doc.setOwningModuleName("testMod");
 
@@ -2349,7 +2360,7 @@ class OverridableDomainGeneratorMoreTest {
 	void generateJavaWithDynamicDeprecatedField() throws Exception {
 		OverridableDomainGenerator gen = generator();
 
-		DocumentImpl doc = new DocumentImpl();
+		DocumentImpl doc = newDocument();
 		doc.setName("DynDeprecatedDoc");
 		doc.setOwningModuleName("testMod");
 
@@ -2385,12 +2396,12 @@ class OverridableDomainGeneratorMoreTest {
 		OverridableDomainGenerator gen = generator();
 
 		// Setup reference document
-		DocumentImpl refDoc = new DocumentImpl();
+		DocumentImpl refDoc = newDocument();
 		refDoc.setName("RefDoc");
 		refDoc.setOwningModuleName("testMod");
 
 		// Document with an association attribute
-		DocumentImpl doc = new DocumentImpl();
+		DocumentImpl doc = newDocument();
 		doc.setName("OwnerWithAssoc");
 		doc.setOwningModuleName("testMod");
 
@@ -2444,13 +2455,13 @@ class OverridableDomainGeneratorMoreTest {
 		OverridableDomainGenerator gen = generator();
 
 		// Child document that references parent
-		DocumentImpl childDoc = new DocumentImpl();
+		DocumentImpl childDoc = newDocument();
 		childDoc.setName("ChildItem");
 		childDoc.setOwningModuleName("testMod");
 		childDoc.setParentDocumentName("ParentContainer"); // required for child collection validation
 
 		// Parent document with a child collection
-		DocumentImpl parentDoc = new DocumentImpl();
+		DocumentImpl parentDoc = newDocument();
 		parentDoc.setName("ParentContainer");
 		parentDoc.setOwningModuleName("testMod");
 		parentDoc.setPersistent(persistentOf("PARENT_CONTAINER"));
@@ -2506,12 +2517,12 @@ class OverridableDomainGeneratorMoreTest {
 		OverridableDomainGenerator gen = generator();
 
 		// Member document for the composition
-		DocumentImpl memberDoc = new DocumentImpl();
+		DocumentImpl memberDoc = newDocument();
 		memberDoc.setName("MemberDoc");
 		memberDoc.setOwningModuleName("testMod");
 
 		// Owning document with a composition collection
-		DocumentImpl ownerDoc = new DocumentImpl();
+		DocumentImpl ownerDoc = newDocument();
 		ownerDoc.setName("OwnerDoc");
 		ownerDoc.setOwningModuleName("testMod");
 
@@ -2565,12 +2576,12 @@ class OverridableDomainGeneratorMoreTest {
 		OverridableDomainGenerator gen = generator();
 
 		// Target document
-		DocumentImpl targetDoc = new DocumentImpl();
+		DocumentImpl targetDoc = newDocument();
 		targetDoc.setName("TargetDoc");
 		targetDoc.setOwningModuleName("testMod");
 
 		// Document with a composition association
-		DocumentImpl ownerDoc = new DocumentImpl();
+		DocumentImpl ownerDoc = newDocument();
 		ownerDoc.setName("OwnerWithCompositionAssoc");
 		ownerDoc.setOwningModuleName("testMod");
 
@@ -2624,12 +2635,12 @@ class OverridableDomainGeneratorMoreTest {
 		OverridableDomainGenerator gen = generator();
 
 		// Property document (the one that has the forward reference)
-		DocumentImpl propDoc = new DocumentImpl();
+		DocumentImpl propDoc = newDocument();
 		propDoc.setName("PropDoc");
 		propDoc.setOwningModuleName("testMod");
 
 		// Document with an InverseOne attribute
-		DocumentImpl ownerDoc = new DocumentImpl();
+		DocumentImpl ownerDoc = newDocument();
 		ownerDoc.setName("InverseOwnerDoc");
 		ownerDoc.setOwningModuleName("testMod");
 
@@ -2682,12 +2693,12 @@ class OverridableDomainGeneratorMoreTest {
 		OverridableDomainGenerator gen = generator();
 
 		// Property document
-		DocumentImpl propDoc = new DocumentImpl();
+		DocumentImpl propDoc = newDocument();
 		propDoc.setName("PropManyDoc");
 		propDoc.setOwningModuleName("testMod");
 
 		// Document with an InverseMany attribute
-		DocumentImpl ownerDoc = new DocumentImpl();
+		DocumentImpl ownerDoc = newDocument();
 		ownerDoc.setName("InverseManyOwnerDoc");
 		ownerDoc.setOwningModuleName("testMod");
 
@@ -2742,12 +2753,12 @@ class OverridableDomainGeneratorMoreTest {
 		OverridableDomainGenerator gen = generator();
 
 		// Reference document
-		DocumentImpl refDoc = new DocumentImpl();
+		DocumentImpl refDoc = newDocument();
 		refDoc.setName("CustomerRefDoc");
 		refDoc.setOwningModuleName("custMod");
 
 		// Owning document with an aggregation association
-		DocumentImpl ownerDoc = new DocumentImpl();
+		DocumentImpl ownerDoc = newDocument();
 		ownerDoc.setName("CustomerOwner");
 		ownerDoc.setOwningModuleName("custMod");
 
@@ -2790,7 +2801,7 @@ class OverridableDomainGeneratorMoreTest {
 		OverridableDomainGenerator gen = generator();
 
 		// Create a document with a persistent table and a text attribute
-		DocumentImpl doc = new DocumentImpl();
+		DocumentImpl doc = newDocument();
 		doc.setName("PopPropDoc");
 		doc.setOwningModuleName("testMod");
 		doc.setPersistent(persistentOf("TestPropertyTable"));
@@ -2825,7 +2836,7 @@ class OverridableDomainGeneratorMoreTest {
 	void populatePropertyLengthsWithNoPeristentSkips() throws Exception {
 		OverridableDomainGenerator gen = generator();
 
-		DocumentImpl doc = new DocumentImpl();
+		DocumentImpl doc = newDocument();
 		doc.setName("TransientPopDoc");
 		doc.setOwningModuleName("testMod");
 		// No persistent - method should return immediately
@@ -2852,7 +2863,7 @@ class OverridableDomainGeneratorMoreTest {
 	void populatePropertyLengthsWithMappedStrategyAndNullDerivedId() throws Exception {
 		OverridableDomainGenerator gen = generator();
 
-		DocumentImpl doc = new DocumentImpl();
+		DocumentImpl doc = newDocument();
 		doc.setName("MappedPopDoc");
 		doc.setOwningModuleName("testMod");
 
@@ -2884,7 +2895,7 @@ class OverridableDomainGeneratorMoreTest {
 	void populatePropertyLengthsWithGeneratedEnumerationUsesLongestCode() throws Exception {
 		OverridableDomainGenerator gen = generator();
 
-		DocumentImpl doc = new DocumentImpl();
+		DocumentImpl doc = newDocument();
 		doc.setName("EnumDoc");
 		doc.setOwningModuleName("testMod");
 		doc.setPersistent(persistentOf("ENUM_TABLE"));
@@ -2923,7 +2934,7 @@ class OverridableDomainGeneratorMoreTest {
 	void populatePropertyLengthsWithHandCodedEnumerationUsesLongestCode() throws Exception {
 		OverridableDomainGenerator gen = generator();
 
-		DocumentImpl doc = new DocumentImpl();
+		DocumentImpl doc = newDocument();
 		doc.setName("HandEnumDoc");
 		doc.setOwningModuleName("testMod");
 		doc.setPersistent(persistentOf("HAND_ENUM_TABLE"));
@@ -2958,7 +2969,7 @@ class OverridableDomainGeneratorMoreTest {
 		ProvidedRepository repo = mock(ProvidedRepository.class);
 		gen.repository = repo;
 
-		DocumentImpl baseDoc = new DocumentImpl();
+		DocumentImpl baseDoc = newDocument();
 		baseDoc.setName("BaseDoc");
 		baseDoc.setOwningModuleName("testMod");
 		Persistent basePersistent = new Persistent();
@@ -2971,7 +2982,7 @@ class OverridableDomainGeneratorMoreTest {
 		baseField.setLength(50);
 		baseDoc.putAttribute(baseField);
 
-		DocumentImpl childDoc = new DocumentImpl();
+		DocumentImpl childDoc = newDocument();
 		childDoc.setName("ChildDoc");
 		childDoc.setOwningModuleName("testMod");
 		childDoc.setPersistent(persistentOf("CHILD_TABLE"));
@@ -3013,7 +3024,7 @@ class OverridableDomainGeneratorMoreTest {
 	void populateModocDerivationsNoExtendsNoPersistentSucceeds() throws Exception {
 		OverridableDomainGenerator gen = generator();
 
-		DocumentImpl doc = new DocumentImpl();
+		DocumentImpl doc = newDocument();
 		doc.setName("NoExtendsDoc");
 		doc.setOwningModuleName("testMod");
 		// No extends, no persistent
@@ -3033,13 +3044,13 @@ class OverridableDomainGeneratorMoreTest {
 		OverridableDomainGenerator gen = generator();
 
 		// Base doc is dynamic
-		DocumentImpl baseDoc = new DocumentImpl();
+		DocumentImpl baseDoc = newDocument();
 		baseDoc.setName("DynamicBase");
 		baseDoc.setOwningModuleName("testMod");
 		baseDoc.setDynamism(new Dynamic()); // makes isDynamic() return true
 
 		// Current doc is NOT dynamic - should throw MetaDataException
-		DocumentImpl doc = new DocumentImpl();
+		DocumentImpl doc = newDocument();
 		doc.setName("NonDynChild");
 		doc.setOwningModuleName("testMod");
 		// dynamic is null → isDynamic() returns false
@@ -3064,12 +3075,12 @@ class OverridableDomainGeneratorMoreTest {
 		OverridableDomainGenerator gen = generator();
 
 		// Base doc (non-dynamic, non-persistent)
-		DocumentImpl baseDoc = new DocumentImpl();
+		DocumentImpl baseDoc = newDocument();
 		baseDoc.setName("PlainBase");
 		baseDoc.setOwningModuleName("testMod");
 
 		// Derived doc with extends but NO persistent
-		DocumentImpl doc = new DocumentImpl();
+		DocumentImpl doc = newDocument();
 		doc.setName("DerivedNoPersist");
 		doc.setOwningModuleName("testMod");
 
@@ -3093,7 +3104,7 @@ class OverridableDomainGeneratorMoreTest {
 	void populateModocDerivationsWithConflictingStrategyThrows() throws Exception {
 		OverridableDomainGenerator gen = generator();
 
-		DocumentImpl doc = new DocumentImpl();
+		DocumentImpl doc = newDocument();
 		doc.setName("ConflictingDoc");
 		doc.setOwningModuleName("testMod");
 		Persistent persistent = new Persistent();
@@ -3117,7 +3128,7 @@ class OverridableDomainGeneratorMoreTest {
 	void populateModocDerivationsWithMissingBaseDocumentThrows() throws Exception {
 		OverridableDomainGenerator gen = generator();
 
-		DocumentImpl doc = new DocumentImpl();
+		DocumentImpl doc = newDocument();
 		doc.setName("DerivedMissingBase");
 		doc.setOwningModuleName("testMod");
 		doc.setPersistent(persistentOf("DERIVED_TABLE"));
@@ -3143,7 +3154,7 @@ class OverridableDomainGeneratorMoreTest {
 	void populateModocDerivationsWithJoinedStrategySameIdentifierThrows() throws Exception {
 		OverridableDomainGenerator gen = generator();
 
-		DocumentImpl baseDoc = new DocumentImpl();
+		DocumentImpl baseDoc = newDocument();
 		baseDoc.setName("BaseJoined");
 		baseDoc.setOwningModuleName("testMod");
 		Persistent basePersistent = new Persistent();
@@ -3151,7 +3162,7 @@ class OverridableDomainGeneratorMoreTest {
 		basePersistent.setName("SAME_TABLE");
 		baseDoc.setPersistent(basePersistent);
 
-		DocumentImpl doc = new DocumentImpl();
+		DocumentImpl doc = newDocument();
 		doc.setName("ChildJoined");
 		doc.setOwningModuleName("testMod");
 		Persistent persistent = new Persistent();
@@ -3180,7 +3191,7 @@ class OverridableDomainGeneratorMoreTest {
 	void populateModocDerivationsWithSingleStrategyDifferentIdentifierThrows() throws Exception {
 		OverridableDomainGenerator gen = generator();
 
-		DocumentImpl baseDoc = new DocumentImpl();
+		DocumentImpl baseDoc = newDocument();
 		baseDoc.setName("BaseSingle");
 		baseDoc.setOwningModuleName("testMod");
 		Persistent basePersistent = new Persistent();
@@ -3188,7 +3199,7 @@ class OverridableDomainGeneratorMoreTest {
 		basePersistent.setName("BASE_TABLE");
 		baseDoc.setPersistent(basePersistent);
 
-		DocumentImpl doc = new DocumentImpl();
+		DocumentImpl doc = newDocument();
 		doc.setName("ChildSingle");
 		doc.setOwningModuleName("testMod");
 		Persistent persistent = new Persistent();
@@ -3219,7 +3230,7 @@ class OverridableDomainGeneratorMoreTest {
 		ProvidedRepository repo = mock(ProvidedRepository.class);
 		gen.repository = repo;
 
-		DocumentImpl baseDoc = new DocumentImpl();
+		DocumentImpl baseDoc = newDocument();
 		baseDoc.setName("BaseSingle");
 		baseDoc.setOwningModuleName("testMod");
 		Persistent basePersistent = new Persistent();
@@ -3227,7 +3238,7 @@ class OverridableDomainGeneratorMoreTest {
 		basePersistent.setName("BASE_TABLE");
 		baseDoc.setPersistent(basePersistent);
 
-		DocumentImpl doc = new DocumentImpl();
+		DocumentImpl doc = newDocument();
 		doc.setName("ChildSingle");
 		doc.setOwningModuleName("testMod");
 		Persistent persistent = new Persistent();
@@ -3264,7 +3275,7 @@ class OverridableDomainGeneratorMoreTest {
 	void generateActionTestsWithUnresolvableActionSkipsGeneration() throws Exception {
 		OverridableDomainGenerator gen = generator();
 
-		DocumentImpl doc = new DocumentImpl();
+		DocumentImpl doc = newDocument();
 		doc.setName("ActionDoc");
 		doc.setOwningModuleName("testMod");
 
@@ -3292,7 +3303,7 @@ class OverridableDomainGeneratorMoreTest {
 		OverridableDomainGenerator gen = new OverridableDomainGenerator(false, true, false,
 				DialectOptions.H2_NO_INDEXES, "", "", "", "", null);
 
-		DocumentImpl doc = new DocumentImpl();
+		DocumentImpl doc = newDocument();
 		doc.setName("DebugActionDoc");
 		doc.setOwningModuleName("testMod");
 
@@ -3318,11 +3329,11 @@ class OverridableDomainGeneratorMoreTest {
 	void generateJavaWithDeprecatedAssociation() throws Exception {
 		OverridableDomainGenerator gen = generator();
 
-		DocumentImpl refDoc = new DocumentImpl();
+		DocumentImpl refDoc = newDocument();
 		refDoc.setName("DeprecatedRefDoc");
 		refDoc.setOwningModuleName("testMod");
 
-		DocumentImpl ownerDoc = new DocumentImpl();
+		DocumentImpl ownerDoc = newDocument();
 		ownerDoc.setName("DeprecatedAssocOwner");
 		ownerDoc.setOwningModuleName("testMod");
 
@@ -3374,11 +3385,11 @@ class OverridableDomainGeneratorMoreTest {
 	void generateJavaWithTransientAssociation() throws Exception {
 		OverridableDomainGenerator gen = generator();
 
-		DocumentImpl refDoc = new DocumentImpl();
+		DocumentImpl refDoc = newDocument();
 		refDoc.setName("TransientRefDoc");
 		refDoc.setOwningModuleName("testMod");
 
-		DocumentImpl ownerDoc = new DocumentImpl();
+		DocumentImpl ownerDoc = newDocument();
 		ownerDoc.setName("TransientAssocOwner");
 		ownerDoc.setOwningModuleName("testMod");
 
@@ -3430,11 +3441,11 @@ class OverridableDomainGeneratorMoreTest {
 	void generateJavaWithDeprecatedAssociationNew() throws Exception {
 		OverridableDomainGenerator gen = generator();
 
-		DocumentImpl refDoc = new DocumentImpl();
+		DocumentImpl refDoc = newDocument();
 		refDoc.setName("DepRefDoc");
 		refDoc.setOwningModuleName("testMod");
 
-		DocumentImpl ownerDoc = new DocumentImpl();
+		DocumentImpl ownerDoc = newDocument();
 		ownerDoc.setName("DepAssocOwner");
 		ownerDoc.setOwningModuleName("testMod");
 
@@ -3486,11 +3497,11 @@ class OverridableDomainGeneratorMoreTest {
 	void generateJavaWithAggregationCollection() throws Exception {
 		OverridableDomainGenerator gen = generator();
 
-		DocumentImpl itemDoc = new DocumentImpl();
+		DocumentImpl itemDoc = newDocument();
 		itemDoc.setName("LineItem");
 		itemDoc.setOwningModuleName("testMod");
 
-		DocumentImpl ownerDoc = new DocumentImpl();
+		DocumentImpl ownerDoc = newDocument();
 		ownerDoc.setName("OrderDoc");
 		ownerDoc.setOwningModuleName("testMod");
 
@@ -3543,11 +3554,11 @@ class OverridableDomainGeneratorMoreTest {
 	void generateJavaWithDeprecatedAggregationCollection() throws Exception {
 		OverridableDomainGenerator gen = generator();
 
-		DocumentImpl itemDoc = new DocumentImpl();
+		DocumentImpl itemDoc = newDocument();
 		itemDoc.setName("DepItem");
 		itemDoc.setOwningModuleName("testMod");
 
-		DocumentImpl ownerDoc = new DocumentImpl();
+		DocumentImpl ownerDoc = newDocument();
 		ownerDoc.setName("DepCollOwner");
 		ownerDoc.setOwningModuleName("testMod");
 
@@ -3600,7 +3611,7 @@ class OverridableDomainGeneratorMoreTest {
 		OverridableDomainGenerator gen = generator();
 
 		// refDoc has an InverseMany back to ownerDoc via "orders"
-		DocumentImpl refDoc = new DocumentImpl();
+		DocumentImpl refDoc = newDocument();
 		refDoc.setName("RefWithInverse");
 		refDoc.setOwningModuleName("testMod");
 
@@ -3613,7 +3624,7 @@ class OverridableDomainGeneratorMoreTest {
 		inverseMany.setRelationship(org.skyve.impl.metadata.model.document.AbstractInverse.InverseRelationship.oneToMany);
 		refDoc.putRelation(inverseMany);
 
-		DocumentImpl ownerDoc = new DocumentImpl();
+		DocumentImpl ownerDoc = newDocument();
 		ownerDoc.setName("AssocWithInverseOwner");
 		ownerDoc.setOwningModuleName("testMod");
 
@@ -3669,7 +3680,7 @@ class OverridableDomainGeneratorMoreTest {
 		OverridableDomainGenerator gen = generator();
 
 		// refDoc has an InverseOne back to ownerDoc via "owner"
-		DocumentImpl refDoc = new DocumentImpl();
+		DocumentImpl refDoc = newDocument();
 		refDoc.setName("RefWithOneToOneInverse");
 		refDoc.setOwningModuleName("testMod");
 
@@ -3682,7 +3693,7 @@ class OverridableDomainGeneratorMoreTest {
 		inverseOne.setRelationship(org.skyve.impl.metadata.model.document.AbstractInverse.InverseRelationship.oneToOne);
 		refDoc.putRelation(inverseOne);
 
-		DocumentImpl ownerDoc = new DocumentImpl();
+		DocumentImpl ownerDoc = newDocument();
 		ownerDoc.setName("OneToOneOwner");
 		ownerDoc.setOwningModuleName("testMod");
 
@@ -3736,11 +3747,11 @@ class OverridableDomainGeneratorMoreTest {
 	void generateJavaWithTrackChangesCompositionCollection() throws Exception {
 		OverridableDomainGenerator gen = generator();
 
-		DocumentImpl itemDoc = new DocumentImpl();
+		DocumentImpl itemDoc = newDocument();
 		itemDoc.setName("CompositionItem");
 		itemDoc.setOwningModuleName("testMod");
 
-		DocumentImpl ownerDoc = new DocumentImpl();
+		DocumentImpl ownerDoc = newDocument();
 		ownerDoc.setName("CompositionOwner");
 		ownerDoc.setOwningModuleName("testMod");
 
@@ -3792,7 +3803,7 @@ class OverridableDomainGeneratorMoreTest {
 	void generateJavaWithBizKeyMethodCode() throws Exception {
 		OverridableDomainGenerator gen = generator();
 
-		DocumentImpl doc = new DocumentImpl();
+		DocumentImpl doc = newDocument();
 		doc.setName("BizKeyDoc");
 		doc.setOwningModuleName("testMod");
 		doc.setBizKeyMethodCode("return getName();");
@@ -3819,11 +3830,11 @@ class OverridableDomainGeneratorMoreTest {
 	void generateJavaForOverriddenDocument() throws Exception {
 		OverridableDomainGenerator gen = generator();
 
-		DocumentImpl baseDoc = new DocumentImpl();
+		DocumentImpl baseDoc = newDocument();
 		baseDoc.setName("BaseDoc");
 		baseDoc.setOwningModuleName("testMod");
 
-		DocumentImpl doc = new DocumentImpl();
+		DocumentImpl doc = newDocument();
 		doc.setName("ExtDoc");
 		doc.setOwningModuleName("testMod");
 
@@ -3866,7 +3877,7 @@ class OverridableDomainGeneratorMoreTest {
 	void generateJavaWithOverriddenTrueExtensionClass() throws Exception {
 		OverridableDomainGenerator gen = generator();
 
-		DocumentImpl doc = new DocumentImpl();
+		DocumentImpl doc = newDocument();
 		doc.setName("CustExtDoc");
 		doc.setOwningModuleName("testMod");
 		// No persistent = transient
@@ -3954,7 +3965,7 @@ class OverridableDomainGeneratorMoreTest {
 		setupPersistentPropertyLengths(gen, "OWN_TABLE");
 
 		// Referenced doc with a concrete Persistent (non-null name → isPolymorphicallyMapped = false)
-		DocumentImpl refDoc = new DocumentImpl();
+		DocumentImpl refDoc = newDocument();
 		refDoc.setName("ItemDoc");
 		refDoc.setOwningModuleName("testMod");
 		Persistent refPersistent = new Persistent();
@@ -3968,7 +3979,7 @@ class OverridableDomainGeneratorMoreTest {
 		col.setType(CollectionType.child);
 
 		// Owner doc
-		DocumentImpl ownerDoc = new DocumentImpl();
+		DocumentImpl ownerDoc = newDocument();
 		ownerDoc.setName("OwnerDoc");
 		ownerDoc.setOwningModuleName("testMod");
 		ownerDoc.putRelation(col);
@@ -4001,7 +4012,7 @@ class OverridableDomainGeneratorMoreTest {
 		OverridableDomainGenerator gen = generator();
 		setupPersistentPropertyLengths(gen, "OWN_TABLE2");
 
-		DocumentImpl refDoc = new DocumentImpl();
+		DocumentImpl refDoc = newDocument();
 		refDoc.setName("TagDoc");
 		refDoc.setOwningModuleName("testMod");
 		Persistent refPersistent = new Persistent();
@@ -4013,7 +4024,7 @@ class OverridableDomainGeneratorMoreTest {
 		col.setDocumentName("TagDoc");
 		col.setType(CollectionType.aggregation);
 
-		DocumentImpl ownerDoc = new DocumentImpl();
+		DocumentImpl ownerDoc = newDocument();
 		ownerDoc.setName("OwnerDoc2");
 		ownerDoc.setOwningModuleName("testMod");
 		ownerDoc.putRelation(col);
@@ -4048,7 +4059,7 @@ class OverridableDomainGeneratorMoreTest {
 		OverridableDomainGenerator gen = generator();
 		setupPersistentPropertyLengths(gen, "OWN_TABLE3");
 
-		DocumentImpl refDoc = new DocumentImpl();
+		DocumentImpl refDoc = newDocument();
 		refDoc.setName("LineDoc");
 		refDoc.setOwningModuleName("testMod");
 		Persistent refPersistent = new Persistent();
@@ -4060,7 +4071,7 @@ class OverridableDomainGeneratorMoreTest {
 		col.setDocumentName("LineDoc");
 		col.setType(CollectionType.composition);
 
-		DocumentImpl ownerDoc = new DocumentImpl();
+		DocumentImpl ownerDoc = newDocument();
 		ownerDoc.setName("OwnerDoc3");
 		ownerDoc.setOwningModuleName("testMod");
 		ownerDoc.putRelation(col);
@@ -4092,7 +4103,7 @@ class OverridableDomainGeneratorMoreTest {
 		OverridableDomainGenerator gen = generator();
 		setupPersistentPropertyLengths(gen, "OWN_TABLE4");
 
-		DocumentImpl refDoc = new DocumentImpl();
+		DocumentImpl refDoc = newDocument();
 		refDoc.setName("OrderedItem");
 		refDoc.setOwningModuleName("testMod");
 		Persistent refPersistent = new Persistent();
@@ -4105,7 +4116,7 @@ class OverridableDomainGeneratorMoreTest {
 		col.setType(CollectionType.composition);
 		col.setOrdered(Boolean.TRUE);
 
-		DocumentImpl ownerDoc = new DocumentImpl();
+		DocumentImpl ownerDoc = newDocument();
 		ownerDoc.setName("OwnerDoc4");
 		ownerDoc.setOwningModuleName("testMod");
 		ownerDoc.putRelation(col);
@@ -4137,7 +4148,7 @@ class OverridableDomainGeneratorMoreTest {
 		OverridableDomainGenerator gen = generator();
 		setupPersistentPropertyLengths(gen, "OWN_TABLE5");
 
-		DocumentImpl refDoc = new DocumentImpl();
+		DocumentImpl refDoc = newDocument();
 		refDoc.setName("TransientItem");
 		refDoc.setOwningModuleName("testMod");
 
@@ -4147,7 +4158,7 @@ class OverridableDomainGeneratorMoreTest {
 		col.setType(CollectionType.aggregation);
 		col.setPersistent(false); // transient: isPersistent() = false
 
-		DocumentImpl ownerDoc = new DocumentImpl();
+		DocumentImpl ownerDoc = newDocument();
 		ownerDoc.setName("OwnerDoc5");
 		ownerDoc.setOwningModuleName("testMod");
 		ownerDoc.putRelation(col);
@@ -4180,7 +4191,7 @@ class OverridableDomainGeneratorMoreTest {
 		OverridableDomainGenerator gen = generator();
 		setupPersistentPropertyLengths(gen, "OWN_ASSOC_TABLE");
 
-		DocumentImpl refDoc = new DocumentImpl();
+		DocumentImpl refDoc = newDocument();
 		refDoc.setName("RefDoc");
 		refDoc.setOwningModuleName("testMod");
 		Persistent refPersistent = new Persistent();
@@ -4193,7 +4204,7 @@ class OverridableDomainGeneratorMoreTest {
 		assoc.setDocumentName("RefDoc");
 		assoc.setType(org.skyve.metadata.model.document.Association.AssociationType.aggregation);
 
-		DocumentImpl ownerDoc = new DocumentImpl();
+		DocumentImpl ownerDoc = newDocument();
 		ownerDoc.setName("OwnerAssocDoc");
 		ownerDoc.setOwningModuleName("testMod");
 		ownerDoc.putRelation(assoc);
@@ -4245,7 +4256,7 @@ class OverridableDomainGeneratorMoreTest {
 		ProvidedRepository repo = mock(ProvidedRepository.class);
 		injectRepository(gen, repo);
 
-		DocumentImpl doc = new DocumentImpl();
+		DocumentImpl doc = newDocument();
 		doc.setName("TransientDoc");
 		doc.setOwningModuleName("testMod");
 		// persistent is null by default → transient document
@@ -4281,7 +4292,7 @@ class OverridableDomainGeneratorMoreTest {
 		customer.setName("acme");
 		customer.getModuleEntries().put("sales", null);
 
-		DocumentImpl doc = new DocumentImpl();
+		DocumentImpl doc = newDocument();
 		doc.setName("CustomOnly");
 		doc.setOwningModuleName("sales");
 		doc.setPersistent(persistentOf("CUSTOM_TABLE"));
@@ -4327,7 +4338,7 @@ class OverridableDomainGeneratorMoreTest {
 		customer.setName("acme");
 		customer.getModuleEntries().put("sales", null);
 
-		DocumentImpl childDoc = new DocumentImpl();
+		DocumentImpl childDoc = newDocument();
 		childDoc.setName("ChildDoc");
 		childDoc.setOwningModuleName("sales");
 		childDoc.setPersistent(persistentOf("CHILD_TABLE"));
@@ -4337,7 +4348,7 @@ class OverridableDomainGeneratorMoreTest {
 		childCollection.setDocumentName("ChildDoc");
 		childCollection.setType(CollectionType.child);
 
-		DocumentImpl ownerDoc = new DocumentImpl();
+		DocumentImpl ownerDoc = newDocument();
 		ownerDoc.setName("OwnerDoc");
 		ownerDoc.setOwningModuleName("sales");
 		ownerDoc.setPersistent(persistentOf("OWNER_TABLE"));
@@ -4390,12 +4401,12 @@ class OverridableDomainGeneratorMoreTest {
 		customer.setName("acme");
 		customer.getModuleEntries().put("sales", null);
 
-		DocumentImpl ownerDoc = new DocumentImpl();
+		DocumentImpl ownerDoc = newDocument();
 		ownerDoc.setName("OwnerDoc");
 		ownerDoc.setOwningModuleName("sales");
 		ownerDoc.setPersistent(persistentOf("OWNER_TABLE_TRANSIENT_REF"));
 
-		DocumentImpl transientRefDoc = new DocumentImpl();
+		DocumentImpl transientRefDoc = newDocument();
 		transientRefDoc.setName("TransientRef");
 		transientRefDoc.setOwningModuleName("sales");
 
@@ -4451,7 +4462,7 @@ class OverridableDomainGeneratorMoreTest {
 		Persistent persistent = new Persistent();
 		persistent.setName("TEST_ORM_TABLE");
 
-		DocumentImpl doc = new DocumentImpl();
+		DocumentImpl doc = newDocument();
 		doc.setName("PersistDoc");
 		doc.setOwningModuleName("testMod");
 		doc.setPersistent(persistent);
@@ -4492,7 +4503,7 @@ class OverridableDomainGeneratorMoreTest {
 		OverridableDomainGenerator gen = generator();
 		setupPersistentPropertyLengths(gen, "OWN_CAT_TABLE");
 
-		DocumentImpl refDoc = new DocumentImpl();
+		DocumentImpl refDoc = newDocument();
 		refDoc.setName("CatRefDoc");
 		refDoc.setOwningModuleName("testMod");
 		Persistent refPersistent = new Persistent();
@@ -4504,7 +4515,7 @@ class OverridableDomainGeneratorMoreTest {
 		col.setDocumentName("CatRefDoc");
 		col.setType(CollectionType.aggregation);
 
-		DocumentImpl ownerDoc = new DocumentImpl();
+		DocumentImpl ownerDoc = newDocument();
 		ownerDoc.setName("CatOwnerDoc");
 		ownerDoc.setOwningModuleName("testMod");
 		ownerDoc.putRelation(col);
@@ -4536,7 +4547,7 @@ class OverridableDomainGeneratorMoreTest {
 		OverridableDomainGenerator gen = generator();
 		setupPersistentPropertyLengths(gen, "OWN_SCH_TABLE");
 
-		DocumentImpl refDoc = new DocumentImpl();
+		DocumentImpl refDoc = newDocument();
 		refDoc.setName("SchRefDoc");
 		refDoc.setOwningModuleName("testMod");
 		Persistent refPersistent = new Persistent();
@@ -4548,7 +4559,7 @@ class OverridableDomainGeneratorMoreTest {
 		col.setDocumentName("SchRefDoc");
 		col.setType(CollectionType.aggregation);
 
-		DocumentImpl ownerDoc = new DocumentImpl();
+		DocumentImpl ownerDoc = newDocument();
 		ownerDoc.setName("SchOwnerDoc");
 		ownerDoc.setOwningModuleName("testMod");
 		ownerDoc.putRelation(col);
@@ -4582,7 +4593,7 @@ class OverridableDomainGeneratorMoreTest {
 		OverridableDomainGenerator gen = generator();
 		setupPersistentPropertyLengths(gen, "OWN_CACHE_TABLE");
 
-		DocumentImpl refDoc = new DocumentImpl();
+		DocumentImpl refDoc = newDocument();
 		refDoc.setName("CacheRefDoc");
 		refDoc.setOwningModuleName("testMod");
 		Persistent refPersistent = new Persistent();
@@ -4595,7 +4606,7 @@ class OverridableDomainGeneratorMoreTest {
 		col.setType(CollectionType.aggregation);
 		col.setCacheName("myRegion");
 
-		DocumentImpl ownerDoc = new DocumentImpl();
+		DocumentImpl ownerDoc = newDocument();
 		ownerDoc.setName("CacheOwnerDoc");
 		ownerDoc.setOwningModuleName("testMod");
 		ownerDoc.putRelation(col);
@@ -4628,7 +4639,7 @@ class OverridableDomainGeneratorMoreTest {
 		OverridableDomainGenerator gen = generator();
 		setupPersistentPropertyLengths(gen, "OWN_IDX_TABLE");
 
-		DocumentImpl refDoc = new DocumentImpl();
+		DocumentImpl refDoc = newDocument();
 		refDoc.setName("IdxRefDoc");
 		refDoc.setOwningModuleName("testMod");
 		Persistent refPersistent = new Persistent();
@@ -4641,7 +4652,7 @@ class OverridableDomainGeneratorMoreTest {
 		col.setType(CollectionType.aggregation);
 		col.setOwnerDatabaseIndex(Boolean.TRUE);
 
-		DocumentImpl ownerDoc = new DocumentImpl();
+		DocumentImpl ownerDoc = newDocument();
 		ownerDoc.setName("IdxOwnerDoc");
 		ownerDoc.setOwningModuleName("testMod");
 		ownerDoc.putRelation(col);
@@ -4676,7 +4687,7 @@ class OverridableDomainGeneratorMoreTest {
 		OverridableDomainGenerator gen = generator();
 		setupPersistentPropertyLengths(gen, "OWN_EL_IDX_TABLE");
 
-		DocumentImpl refDoc = new DocumentImpl();
+		DocumentImpl refDoc = newDocument();
 		refDoc.setName("ElIdxRefDoc");
 		refDoc.setOwningModuleName("testMod");
 		Persistent refPersistent = new Persistent();
@@ -4689,7 +4700,7 @@ class OverridableDomainGeneratorMoreTest {
 		col.setType(CollectionType.aggregation);
 		col.setElementDatabaseIndex(Boolean.TRUE);
 
-		DocumentImpl ownerDoc = new DocumentImpl();
+		DocumentImpl ownerDoc = newDocument();
 		ownerDoc.setName("ElIdxOwnerDoc");
 		ownerDoc.setOwningModuleName("testMod");
 		ownerDoc.putRelation(col);
@@ -4725,7 +4736,7 @@ class OverridableDomainGeneratorMoreTest {
 		setupPersistentPropertyLengths(gen, "OWN_DYN_TABLE");
 
 		// Dynamic referenced doc (has a persistent but isDynamic() = true)
-		DocumentImpl refDoc = new DocumentImpl();
+		DocumentImpl refDoc = newDocument();
 		refDoc.setName("DynRefDoc");
 		refDoc.setOwningModuleName("testMod");
 		Persistent refPersistent = new Persistent();
@@ -4738,7 +4749,7 @@ class OverridableDomainGeneratorMoreTest {
 		col.setDocumentName("DynRefDoc");
 		col.setType(CollectionType.aggregation);
 
-		DocumentImpl ownerDoc = new DocumentImpl();
+		DocumentImpl ownerDoc = newDocument();
 		ownerDoc.setName("DynOwnerDoc");
 		ownerDoc.setOwningModuleName("testMod");
 		ownerDoc.putRelation(col);
@@ -4774,7 +4785,7 @@ class OverridableDomainGeneratorMoreTest {
 		setupPersistentPropertyLengths(gen, "OWN_POLY_TABLE");
 
 		// Polymorphically mapped: strategy=mapped, name=null
-		DocumentImpl refDoc = new DocumentImpl();
+		DocumentImpl refDoc = newDocument();
 		refDoc.setName("PolyRefDoc");
 		refDoc.setOwningModuleName("testMod");
 		Persistent refPersistent = new Persistent();
@@ -4787,7 +4798,7 @@ class OverridableDomainGeneratorMoreTest {
 		col.setDocumentName("PolyRefDoc");
 		col.setType(CollectionType.child);
 
-		DocumentImpl ownerDoc = new DocumentImpl();
+		DocumentImpl ownerDoc = newDocument();
 		ownerDoc.setName("PolyOwnerDoc");
 		ownerDoc.setOwningModuleName("testMod");
 		ownerDoc.putRelation(col);
@@ -4819,7 +4830,7 @@ class OverridableDomainGeneratorMoreTest {
 		OverridableDomainGenerator gen = generator();
 
 		// Dynamic ref doc
-		DocumentImpl refDoc = new DocumentImpl();
+		DocumentImpl refDoc = newDocument();
 		refDoc.setName("DynRefAssocDoc");
 		refDoc.setOwningModuleName("testMod");
 		refDoc.setDynamism(new org.skyve.metadata.model.Dynamic());
@@ -4860,7 +4871,7 @@ class OverridableDomainGeneratorMoreTest {
 	void addReferenceWithOverriddenReferenceFlagReturnsEarlyAndGeneratesNothing() throws Exception {
 		OverridableDomainGenerator gen = generator();
 
-		DocumentImpl refDoc = new DocumentImpl();
+		DocumentImpl refDoc = newDocument();
 		refDoc.setName("OvrRefDoc");
 		refDoc.setOwningModuleName("testMod");
 
@@ -4915,7 +4926,7 @@ class OverridableDomainGeneratorMoreTest {
 		OverridableDomainGenerator gen = generator();
 
 		// Dynamic property doc
-		DocumentImpl propDoc = new DocumentImpl();
+		DocumentImpl propDoc = newDocument();
 		propDoc.setName("DynPropDoc");
 		propDoc.setOwningModuleName("testMod");
 		propDoc.setDynamism(new org.skyve.metadata.model.Dynamic());
@@ -4956,7 +4967,7 @@ class OverridableDomainGeneratorMoreTest {
 	void addInverseDeprecatedInverseManyGeneratesDeprecatedAnnotation() throws Exception {
 		OverridableDomainGenerator gen = generator();
 
-		DocumentImpl propDoc = new DocumentImpl();
+		DocumentImpl propDoc = newDocument();
 		propDoc.setName("DepPropDoc");
 		propDoc.setOwningModuleName("testMod");
 
@@ -5011,7 +5022,7 @@ class OverridableDomainGeneratorMoreTest {
 	void addInverseManyToManyRelationshipGeneratesCorrectCollectionMethods() throws Exception {
 		OverridableDomainGenerator gen = generator();
 
-		DocumentImpl propDoc = new DocumentImpl();
+		DocumentImpl propDoc = newDocument();
 		propDoc.setName("MtmPropDoc");
 		propDoc.setOwningModuleName("testMod");
 

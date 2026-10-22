@@ -133,13 +133,6 @@ class ReportDesignGeneratorTest {
 	}
 
 	@Test
-	void generateDesignPopulatesAFreshDesignInstance() {
-		DesignSpecification result = new GenerateOnlyReportDesignGenerator().generateDesign();
-
-		assertThat(result.getName(), is("generated"));
-	}
-
-	@Test
 	void addFieldsForBeanModeReportAddsImplicitThisUserAndBizKeyFields() throws Exception {
 		Customer customer = mock(Customer.class);
 		Module module = mock(Module.class);
@@ -913,19 +906,6 @@ class ReportDesignGeneratorTest {
 	}
 
 	private static final class BaseFieldReportDesignGenerator extends ReportDesignGenerator {
-		@Override
-		protected ReportDesignGenerator getSubreportGenerator() {
-			return this;
-		}
-	}
-
-	private static final class GenerateOnlyReportDesignGenerator extends ReportDesignGenerator {
-		@Override
-		public DesignSpecification populateDesign(DesignSpecification design) {
-			design.setName("generated");
-			return design;
-		}
-
 		@Override
 		protected ReportDesignGenerator getSubreportGenerator() {
 			return this;

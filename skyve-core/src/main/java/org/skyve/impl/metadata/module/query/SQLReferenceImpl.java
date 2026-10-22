@@ -34,6 +34,6 @@ public class SQLReferenceImpl extends QueryReferenceImpl implements SQLDefinitio
 	@SuppressWarnings("unchecked")
 	protected @Nonnull SQLDefinition getTarget() {
 		// TODO this should use the current customer (can't get customer during generate domain)
-		return ProvidedRepositoryFactory.get().getModule(null, moduleRef).getSQL(ref);
+		return ProvidedRepositoryFactory.getNullSafe().getModule(null, moduleRef).getSQL(ref);
 	}
 }

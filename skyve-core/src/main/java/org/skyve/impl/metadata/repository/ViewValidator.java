@@ -2235,6 +2235,11 @@ class ViewValidator extends ViewVisitor {
 
 	@Override
 	public void visitView() {
+		@SuppressWarnings("null") // metadata built in code bypasses the XSD
+		boolean titleMissing = (view.getTitle() == null);
+		if (titleMissing) {
+			throw new MetaDataException("The " + viewIdentifier + " - title is required.");
+		}
 		validateMessageExpressions(view.getLocalisedTitle(), viewIdentifier, "a title");
 
 		List<ViewParameter> parameters = view.getParameters();

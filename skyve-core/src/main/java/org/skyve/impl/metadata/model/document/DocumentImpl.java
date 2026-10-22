@@ -274,7 +274,7 @@ public class DocumentImpl extends ModelImpl implements Document {
 		String customerName = customer.getName();
 		String documentName = getName();
 
-		ProvidedRepository repository = ProvidedRepositoryFactory.get();
+		ProvidedRepository repository = ProvidedRepositoryFactory.getNullSafe();
 		StringBuilder key = new StringBuilder(128).append(ProvidedRepository.MODULES_NAMESPACE).append(getOwningModuleName()).append('/').append(documentName);
 		String packagePath = repository.vtable(customerName, key.toString());
 		if (packagePath == null) {
@@ -522,7 +522,7 @@ public class DocumentImpl extends ModelImpl implements Document {
 	 */
 	@Override
 	public @Nonnull <T extends Bean> DynamicImage<T> getDynamicImage(@Nullable Customer customer, @Nonnull String name) {
-		DynamicImage<T> result = ProvidedRepositoryFactory.get().getDynamicImage(customer, this, name, true);
+		DynamicImage<T> result = ProvidedRepositoryFactory.getNullSafe().getDynamicImage(customer, this, name, true);
 		if (result == null) {
 			throw new MetaDataException(DOCUMENT_PREFIX + getName() + " has no dynamic image defined for " + name);
 		}
@@ -792,7 +792,7 @@ public class DocumentImpl extends ModelImpl implements Document {
 		if (parentDocumentName != null) {
 			String owningModuleName = getOwningModuleName();
 			if (customer == null) {
-				Module owningModule = ProvidedRepositoryFactory.get().getModule(null, owningModuleName);
+				Module owningModule = ProvidedRepositoryFactory.getNullSafe().getModule(null, owningModuleName);
 				if (owningModule != null) {
 					result = owningModule.getDocument(null, parentDocumentName);
 				}
@@ -816,7 +816,7 @@ public class DocumentImpl extends ModelImpl implements Document {
 	 */
 	@Override
 	public @Nullable <T extends Bean> Bizlet<T> getBizlet(@Nullable Customer customer) {
-		ProvidedRepository repository = ProvidedRepositoryFactory.get();
+		ProvidedRepository repository = ProvidedRepositoryFactory.getNullSafe();
 		Bizlet<T> result = repository.getBizlet(customer, this, true);
 		BizletMetaData metaDataBizlet = repository.getMetaDataBizlet(customer, this);
 		if (result != null) {
@@ -840,7 +840,7 @@ public class DocumentImpl extends ModelImpl implements Document {
 	 */
 	@Override
 	public @Nonnull <T extends Bean, C extends Bean> ComparisonModel<T, C> getComparisonModel(@Nullable Customer customer, @Nonnull String modelName, boolean runtime) {
-		ComparisonModel<T, C> result = ProvidedRepositoryFactory.get().getComparisonModel(customer, this, modelName, runtime);
+		ComparisonModel<T, C> result = ProvidedRepositoryFactory.getNullSafe().getComparisonModel(customer, this, modelName, runtime);
 		if (result == null) {
 			throw new MetaDataException(DOCUMENT_PREFIX + getName() + " has no comparison model defined for " + modelName);
 		}
@@ -858,7 +858,7 @@ public class DocumentImpl extends ModelImpl implements Document {
 	 */
 	@Override
 	public @Nonnull <T extends Bean> MapModel<T> getMapModel(@Nullable Customer customer, @Nonnull String modelName, boolean runtime) {
-		MapModel<T> result = ProvidedRepositoryFactory.get().getMapModel(customer, this, modelName, runtime);
+		MapModel<T> result = ProvidedRepositoryFactory.getNullSafe().getMapModel(customer, this, modelName, runtime);
 		if (result == null) {
 			throw new MetaDataException(DOCUMENT_PREFIX + getName() + " has no map model defined for " + modelName);
 		}
@@ -876,7 +876,7 @@ public class DocumentImpl extends ModelImpl implements Document {
 	 */
 	@Override
 	public @Nonnull <T extends Bean> ChartModel<T> getChartModel(@Nullable Customer customer, @Nonnull String modelName, boolean runtime) {
-		ChartModel<T> result = ProvidedRepositoryFactory.get().getChartModel(customer, this, modelName, runtime);
+		ChartModel<T> result = ProvidedRepositoryFactory.getNullSafe().getChartModel(customer, this, modelName, runtime);
 		if (result == null) {
 			throw new MetaDataException(DOCUMENT_PREFIX + getName() + " has no chart model defined for " + modelName);
 		}
@@ -894,7 +894,7 @@ public class DocumentImpl extends ModelImpl implements Document {
 	 */
 	@Override
 	public @Nonnull <T extends Bean> ListModel<T> getListModel(@Nullable Customer customer, @Nonnull String modelName, boolean runtime) {
-		ListModel<T> result = ProvidedRepositoryFactory.get().getListModel(customer, this, modelName, runtime);
+		ListModel<T> result = ProvidedRepositoryFactory.getNullSafe().getListModel(customer, this, modelName, runtime);
 		if (result == null) {
 			throw new MetaDataException(DOCUMENT_PREFIX + getName() + " has no list model defined for " + modelName);
 		}
@@ -915,7 +915,7 @@ public class DocumentImpl extends ModelImpl implements Document {
 	 */
 	@Override
 	public @Nonnull ServerSideAction<Bean> getServerSideAction(@Nullable Customer customer, @Nonnull String className, boolean runtime) {
-		ProvidedRepository repository = ProvidedRepositoryFactory.get();
+		ProvidedRepository repository = ProvidedRepositoryFactory.getNullSafe();
 		ActionMetaData metaDataAction = repository.getMetaDataAction(customer, this, className);
 		if (metaDataAction != null) {
 			return new ServerSideMetaDataAction(metaDataAction);
@@ -939,7 +939,7 @@ public class DocumentImpl extends ModelImpl implements Document {
 	 */
 	@Override
 	public @Nonnull BizExportAction getBizExportAction(@Nullable Customer customer, @Nonnull String className, boolean runtime) {
-		BizExportAction result = ProvidedRepositoryFactory.get().getBizExportAction(customer, this, className, runtime);
+		BizExportAction result = ProvidedRepositoryFactory.getNullSafe().getBizExportAction(customer, this, className, runtime);
 		if (result == null) {
 			throw new MetaDataException(DOCUMENT_PREFIX + getName() + " has no BizPort export action defined for " + className);
 		}
@@ -957,7 +957,7 @@ public class DocumentImpl extends ModelImpl implements Document {
 	 */
 	@Override
 	public @Nonnull BizImportAction getBizImportAction(@Nullable Customer customer, @Nonnull String className, boolean runtime) {
-		BizImportAction result = ProvidedRepositoryFactory.get().getBizImportAction(customer, this, className, runtime);
+		BizImportAction result = ProvidedRepositoryFactory.getNullSafe().getBizImportAction(customer, this, className, runtime);
 		if (result == null) {
 			throw new MetaDataException(DOCUMENT_PREFIX + getName() + " has no BizPort import action defined for " + className);
 		}
@@ -975,7 +975,7 @@ public class DocumentImpl extends ModelImpl implements Document {
 	 */
 	@Override
 	public @Nonnull DownloadAction<Bean> getDownloadAction(@Nullable Customer customer, @Nonnull String className, boolean runtime) {
-		DownloadAction<Bean> result = ProvidedRepositoryFactory.get().getDownloadAction(customer, this, className, runtime);
+		DownloadAction<Bean> result = ProvidedRepositoryFactory.getNullSafe().getDownloadAction(customer, this, className, runtime);
 		if (result == null) {
 			throw new MetaDataException(DOCUMENT_PREFIX + getName() + " has no download action defined for " + className);
 		}
@@ -993,7 +993,7 @@ public class DocumentImpl extends ModelImpl implements Document {
 	 */
 	@Override
 	public @Nonnull UploadAction<Bean> getUploadAction(@Nullable Customer customer, @Nonnull String className, boolean runtime) {
-		UploadAction<Bean> result = ProvidedRepositoryFactory.get().getUploadAction(customer, this, className, runtime);
+		UploadAction<Bean> result = ProvidedRepositoryFactory.getNullSafe().getUploadAction(customer, this, className, runtime);
 		if (result == null) {
 			throw new MetaDataException(DOCUMENT_PREFIX + getName() + " has no upload action defined for " + className);
 		}
@@ -1024,7 +1024,7 @@ public class DocumentImpl extends ModelImpl implements Document {
 		List<DomainValue> result = null;
 		
 		if (domainType != null) {
-			ProvidedRepository repository = ProvidedRepositoryFactory.get();
+			ProvidedRepository repository = ProvidedRepositoryFactory.getNullSafe();
 			// Note - Can't call this.getBizlet() here as it has no runtime parameter
 			Bizlet<T> bizlet = repository.getBizlet(customer, this, runtime);
 			BizletMetaData metaDataBizlet = repository.getMetaDataBizlet(customer, this);
@@ -1178,7 +1178,7 @@ public class DocumentImpl extends ModelImpl implements Document {
 	 */
 	@Override
 	public @Nonnull View getView(@Nullable String uxui, @Nullable Customer customer, @Nonnull String name) {
-		ProvidedRepository repository = ProvidedRepositoryFactory.get();
+		ProvidedRepository repository = ProvidedRepositoryFactory.getNullSafe();
 		View view = repository.getView(uxui, customer, this, name);
 		// if we want a create view and there isn't one, get the edit view instead
 		if ((view == null) && (ViewType.create.toString().equals(name))) {

@@ -441,7 +441,7 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 		sources.addAnnotatedClass(AbstractPersistentBean.class);
 		sources.addAnnotatedClass(UniquenessEntity.class);
 
-		ProvidedRepository repository = ProvidedRepositoryFactory.get();
+		ProvidedRepository repository = ProvidedRepositoryFactory.getNullSafe();
 		StringBuilder sb = new StringBuilder(64);
 
 		for (String moduleName : repository.getAllVanillaModuleNames()) {
@@ -854,7 +854,7 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 	 */
 	private void setDocumentPermissionScopes(@Nonnull DocumentPermissionScope scope) {
 		Set<String> accessibleModuleNames = ((UserImpl) user).getAccessibleModuleNames(); 
-		ProvidedRepository repository = ProvidedRepositoryFactory.get();
+		ProvidedRepository repository = ProvidedRepositoryFactory.getNullSafe();
 
 		// Enable all filters required for this user
 		for (String moduleName : repository.getAllVanillaModuleNames()) {
@@ -881,7 +881,7 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 	 */
 	private void resetDocumentPermissionScopes() {
 		Set<String> accessibleModuleNames = user.getAccessibleModuleNames(); 
-		ProvidedRepository repository = ProvidedRepositoryFactory.get();
+		ProvidedRepository repository = ProvidedRepositoryFactory.getNullSafe();
 
 		// Enable all filters required for this user
 		for (String moduleName : repository.getAllVanillaModuleNames()) {
@@ -910,7 +910,7 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 	@SuppressWarnings("java:S3776") // Complexity OK
 	private void setFilters(@Nonnull Document document, @Nonnull DocumentPermissionScope scope) {
 		Set<String> accessibleModuleNames = ((UserImpl) user).getAccessibleModuleNames(); 
-		ProvidedRepository repository = ProvidedRepositoryFactory.get();
+		ProvidedRepository repository = ProvidedRepositoryFactory.getNullSafe();
 		String userDataGroupId = user.getDataGroupId();
 		Customer customer = user.getCustomer();
 		String moduleName = document.getOwningModuleName();

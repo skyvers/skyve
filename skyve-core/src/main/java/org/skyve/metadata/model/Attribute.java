@@ -173,8 +173,8 @@ public interface Attribute extends NamedMetaData, DecoratedMetaData {
 	 */
 	@Nonnull String getDisplayName();
 	
-	default @Nullable String getLocalisedDisplayName() {
-		return Util.i18n(getDisplayName());
+	default @Nonnull String getLocalisedDisplayName() {
+		return Util.nullSafeI18n(getDisplayName());
 	}
 	
 	/**

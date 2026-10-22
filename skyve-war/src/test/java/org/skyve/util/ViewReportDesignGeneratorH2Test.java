@@ -35,6 +35,7 @@ class ViewReportDesignGeneratorH2Test extends AbstractH2Test {
 		DesignSpecification spec = new DesignSpecification();
 		spec.setModuleName(module);
 		spec.setDocumentName(document);
+		spec.setUxui("external");
 		spec.setMode(DesignSpecification.Mode.bean);
 		spec.setName("test");
 		spec.setWidth(Integer.valueOf(842));

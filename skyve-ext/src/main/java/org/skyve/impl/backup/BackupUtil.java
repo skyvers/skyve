@@ -145,7 +145,7 @@ final class BackupUtil {
 	static @Nonnull Collection<Table> getTablesForAllCustomers() throws Exception {
 		// A case insensitive keyed map of tables
 		Map<String, Table> result = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
-		ProvidedRepository repository = ProvidedRepositoryFactory.get();
+		ProvidedRepository repository = ProvidedRepositoryFactory.getNullSafe();
 		for (String customerName : repository.getAllCustomerNames()) {
 			Customer customer = repository.getCustomer(customerName);
 			if (customer == null) {

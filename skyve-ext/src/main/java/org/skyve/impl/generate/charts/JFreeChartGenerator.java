@@ -272,15 +272,19 @@ public class JFreeChartGenerator {
 		}
 
 		LegendTitle legend = result.getLegend();
-		legend.setItemFont(THEME_LEGEND_FONT);
+		if (legend != null) {
+			legend.setItemFont(THEME_LEGEND_FONT);
+		}
 
 		TextTitle title = result.getTitle();
-		title.setFont(THEME_TITLE_FONT);
+		if (title != null) {
+			title.setFont(THEME_TITLE_FONT);
+		}
 
 		postProcess(result);
 		return result;
 	}
-	
+
 	/**
 	 * Performs radar.
 	 */

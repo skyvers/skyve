@@ -153,7 +153,7 @@ public class QueryGenerator {
 		}
 
 		ProvidedRepositoryFactory.set(new LocalDesignRepository());
-		ProvidedRepository repository = ProvidedRepositoryFactory.get();
+		ProvidedRepository repository = ProvidedRepositoryFactory.getNullSafe();
 		Customer customer = repository.getCustomer(customerName);
 		Module module = repository.getModule(customer, moduleName);
 		if (module == null) {

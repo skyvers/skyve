@@ -93,7 +93,7 @@ public class QuartzJobScheduler implements JobScheduler {
 
 		try {
 			// Add metadata jobs
-			ProvidedRepository repository = ProvidedRepositoryFactory.get();
+			ProvidedRepository repository = ProvidedRepositoryFactory.getNullSafe();
 			for (String moduleName : repository.getAllVanillaModuleNames()) {
 				Module module = repository.getModule(null, moduleName);
 				addJobs(module);
@@ -162,7 +162,7 @@ public class QuartzJobScheduler implements JobScheduler {
 	}
 
 	private void scheduleJobsAndReports() {
-		ProvidedRepository repository = ProvidedRepositoryFactory.get();
+		ProvidedRepository repository = ProvidedRepositoryFactory.getNullSafe();
 
 		// Add job triggers
 		List<UserJobSchedule> jobSchedules = repository.retrieveAllScheduledJobsForAllCustomers();

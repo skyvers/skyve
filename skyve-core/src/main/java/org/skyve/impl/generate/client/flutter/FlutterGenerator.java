@@ -55,7 +55,7 @@ public class FlutterGenerator {
         }
         config.setLibViewsPath(new File(projectPath, "lib/views/"));
 
-        config.setCustomer(ProvidedRepositoryFactory.get()
+        config.setCustomer(ProvidedRepositoryFactory.getNullSafe()
                                                     .getCustomer(customerName));
     }
 

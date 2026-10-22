@@ -395,7 +395,7 @@ public class UserImpl implements User {
 		if (customerName == null) {
 			throw new MetaDataException("User " + getName() + " has no customer");
 		}
-		Customer result = ProvidedRepositoryFactory.get().getCustomer(customerName);
+		Customer result = ProvidedRepositoryFactory.getNullSafe().getCustomer(customerName);
 		if (result == null) {
 			throw new MetaDataException("Customer " + customerName + " for user " + getName() + " does not exist");
 		}

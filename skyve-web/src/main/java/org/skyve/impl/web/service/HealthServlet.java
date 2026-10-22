@@ -7,7 +7,6 @@ import java.sql.Connection;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 
-import org.skyve.CORE;
 import org.skyve.EXT;
 import org.skyve.content.ContentManager;
 import org.skyve.content.MimeType;
@@ -123,7 +122,7 @@ public class HealthServlet extends HttpServlet {
 				result.append("\",\"database\":\"");
 				p.begin();
 				try {
-					ProvidedRepository r = ProvidedRepositoryFactory.get();
+					ProvidedRepository r = ProvidedRepositoryFactory.getNullSafe();
 					Module m = r.getModule(null, AppConstants.ADMIN_MODULE_NAME);
 					Document d = m.getDocument(null, AppConstants.CONFIGURATION_DOCUMENT_NAME);
 					Persistent persistent = d.getPersistent();
@@ -168,10 +167,8 @@ public class HealthServlet extends HttpServlet {
 		// Repository
 		result.append("\",\"repository\":\"");
 		try {
-			// Obtain the repository
-			@SuppressWarnings("null") // the repository is unset until bootstrap completes
-			boolean repositoryMissing = (CORE.getRepository() == null);
-			if (repositoryMissing) {
+			// Check the repository is installed
+			if (! ProvidedRepositoryFactory.isConfigured()) {
 				result.append(STATUS_ERROR);
 			}
 			else {

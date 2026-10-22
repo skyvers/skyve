@@ -325,7 +325,6 @@ public class ContentChecker {
 	 */
 	@SuppressWarnings("java:S3776") // Complexity OK
 	private static @Nullable String bogusDynamicContentReference(@Nonnull String contentId, @Nonnull String dynamicEntityPersistentIdentifier) {
-		ProvidedRepository r = ProvidedRepositoryFactory.get();
 		Persistence p = CORE.getPersistence();
 		
 		// Find any DynamicEntity with the given contentId as a value in the fields JSON
@@ -342,6 +341,7 @@ public class ContentChecker {
 			int previousDoubleQuoteIndex = fields.lastIndexOf('"');
 			if (previousDoubleQuoteIndex >= 0) {
 				String attributeName = fields.substring(previousDoubleQuoteIndex + 1);
+				ProvidedRepository r = ProvidedRepositoryFactory.getNullSafe();
 				Customer c = r.getCustomer((String) row[1]);
 				Module m = r.getModule(c, (String) row[2]);
 				Document d = (m == null) ? null : m.getDocument(c, (String) row[3]);

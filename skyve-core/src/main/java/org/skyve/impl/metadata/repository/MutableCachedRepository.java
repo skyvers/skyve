@@ -410,7 +410,7 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryFactory 
 		}
 		else {
 			documentModuleName = referencedModuleName;
-			documentModule = requireModule(ProvidedRepositoryFactory.get().getModule(customer, documentModuleName), documentModuleName);
+			documentModule = requireModule(ProvidedRepositoryFactory.getNullSafe().getModule(customer, documentModuleName), documentModuleName);
 		}
 
 		final String customerName = (customer == null) ? null : customer.getName();
@@ -591,7 +591,7 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryFactory 
 										@Nonnull String name) {
 		View result = null;
 		String owningModuleName = document.getOwningModuleName();
-		Module owningModule = requireModule(ProvidedRepositoryFactory.get().getModule(customer, owningModuleName), owningModuleName);
+		Module owningModule = requireModule(ProvidedRepositoryFactory.getNullSafe().getModule(customer, owningModuleName), owningModuleName);
 		if (customer != null) {
 			String searchCustomerName = customer.getName();
 			// get customer overridden
@@ -767,7 +767,7 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryFactory 
 		String customerName = customer.getName();
 		String documentName = document.getName();
 		String owningModuleName = document.getOwningModuleName();
-		Module owningModule = requireModule(ProvidedRepositoryFactory.get().getModule(null, owningModuleName), owningModuleName);
+		Module owningModule = requireModule(ProvidedRepositoryFactory.getNullSafe().getModule(null, owningModuleName), owningModuleName);
 		View result = convertView(customerName, uxui, customer, owningModuleName, owningModule, documentName, document, uxui, view);
 		
 		StringBuilder viewKey = new StringBuilder(128);
@@ -792,7 +792,7 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryFactory 
 	public @Nonnull View putView(@Nonnull String uxui, @Nonnull Document document, @Nonnull ViewMetaData view) {
 		String documentName = document.getName();
 		String owningModuleName = document.getOwningModuleName();
-		Module owningModule = requireModule(ProvidedRepositoryFactory.get().getModule(null, owningModuleName), owningModuleName);
+		Module owningModule = requireModule(ProvidedRepositoryFactory.getNullSafe().getModule(null, owningModuleName), owningModuleName);
 		View result = convertView(null, uxui, null, owningModuleName, owningModule, documentName, document, uxui, view);
 		
 		StringBuilder viewKey = new StringBuilder(128);
@@ -817,7 +817,7 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryFactory 
 		String customerName = customer.getName();
 		String documentName = document.getName();
 		String owningModuleName = document.getOwningModuleName();
-		Module owningModule = requireModule(ProvidedRepositoryFactory.get().getModule(customer, owningModuleName), owningModuleName);
+		Module owningModule = requireModule(ProvidedRepositoryFactory.getNullSafe().getModule(customer, owningModuleName), owningModuleName);
 		View result = convertView(customerName, null, customer, owningModuleName, owningModule, documentName, document, null, view);
 		
 		StringBuilder viewKey = new StringBuilder(128);
@@ -841,7 +841,7 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryFactory 
 	public @Nonnull View putView(@Nonnull Document document, @Nonnull ViewMetaData view) {
 		String documentName = document.getName();
 		String owningModuleName = document.getOwningModuleName();
-		Module owningModule = requireModule(ProvidedRepositoryFactory.get().getModule(null, owningModuleName), owningModuleName);
+		Module owningModule = requireModule(ProvidedRepositoryFactory.getNullSafe().getModule(null, owningModuleName), owningModuleName);
 		View result = convertView(null, null, null, owningModuleName, owningModule, documentName, document, null, view);
 		
 		StringBuilder viewKey = new StringBuilder(128);

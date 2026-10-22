@@ -94,7 +94,7 @@ public class BasicAuthFilter extends AbstractRestFilter {
 			persistence.evictAllCached();
 			persistence.begin();
 
-			UserImpl user = ProvidedRepositoryFactory.get().retrieveUser(username);
+			UserImpl user = ProvidedRepositoryFactory.getNullSafe().retrieveUser(username);
 			if (user == null) {
 				error(persistence, httpRequest, httpResponse, HttpServletResponse.SC_FORBIDDEN, realm, AUTH_FAILURE_MESSAGE);
 				return;
@@ -137,7 +137,7 @@ public class BasicAuthFilter extends AbstractRestFilter {
 	}
 	
 	private static void validateUserCredentials(@Nonnull Persistence p, @Nonnull String username, @Nonnull String password) {
-		ProvidedRepository r = ProvidedRepositoryFactory.get();
+		ProvidedRepository r = ProvidedRepositoryFactory.getNullSafe();
 		Module admin = r.getModule(null, AppConstants.ADMIN_MODULE_NAME);
 		String admSecurityUser = admin.getDocument(null, AppConstants.USER_DOCUMENT_NAME).getPersistent().getPersistentIdentifier();
 		StringBuilder sql = new StringBuilder(128);

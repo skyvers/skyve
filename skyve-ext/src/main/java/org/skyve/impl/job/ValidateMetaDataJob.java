@@ -26,7 +26,7 @@ public class ValidateMetaDataJob implements Job {
 	throws JobExecutionException {
 		try {
 			LOGGER.info("Validate metadata");
-			ProvidedRepository repository = ProvidedRepositoryFactory.get();
+			ProvidedRepository repository = ProvidedRepositoryFactory.getNullSafe();
 			for (String customerName : repository.getAllCustomerNames()) {
 				DomainGenerator.validate(customerName);
 			}

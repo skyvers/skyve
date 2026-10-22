@@ -152,8 +152,8 @@ public interface View extends NamedMetaData, PersistentMetaData, ReloadableMetaD
 	 *
 	 * @return a non-{@code null} localised title
 	 */
-	public default @Nullable String getLocalisedTitle() {
-		return Util.i18n(getTitle());
+	public default @Nonnull String getLocalisedTitle() {
+		return Util.nullSafeI18n(getTitle());
 	}
 	
 	/**

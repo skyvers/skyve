@@ -215,7 +215,7 @@ public abstract class DomainGenerator {
 		this.write = write;
 		this.debug = debug;
 		this.multiTenant = multiTenant;
-		this.repository = ProvidedRepositoryFactory.get();
+		this.repository = ProvidedRepositoryFactory.get(); // tooling and tests can install the repository afterwards
 		this.dialectOptions = dialectOptions;
 		this.srcPath = srcPath;
 		this.generatedSrcPath = generatedSrcPath;

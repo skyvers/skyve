@@ -109,7 +109,7 @@ public class RestUserPersistenceFilter extends AbstractRestFilter {
 			persistence.evictAllCached();
 			persistence.begin();
 
-			UserImpl user = ProvidedRepositoryFactory.get().retrieveUser(persistenceUser);
+			UserImpl user = ProvidedRepositoryFactory.getNullSafe().retrieveUser(persistenceUser);
 			if (user != null) {
 				LOGGER.debug("Setting persistence user to: {}", persistenceUser);
 				WebUtil.setSessionId(user, httpRequest);

@@ -209,10 +209,10 @@ public interface DocumentQuery extends BeanQuery, ProjectedQuery, ScalarQuery, T
 	 * binding. Use this to prepend a sort ahead of any already-added orderings.
 	 *
 	 * @param binding the attribute binding path; must not be {@code null}
-	 * @param order   the sort direction; must not be {@code null}
+	 * @param order   the sort direction; {@code null} means ascending
 	 * @return this query for fluent chaining
 	 */
-	@Nonnull DocumentQuery insertBoundOrdering(@Nonnull String binding, @Nonnull SortDirection order);
+	@Nonnull DocumentQuery insertBoundOrdering(@Nonnull String binding, @Nullable SortDirection order);
 
 	/**
 	 * Inserts an ORDER BY clause at the beginning of the ORDER BY list for the given
@@ -220,10 +220,10 @@ public interface DocumentQuery extends BeanQuery, ProjectedQuery, ScalarQuery, T
 	 *
 	 * @param entityAlias the JPQL alias of the entity; must not be {@code null}
 	 * @param binding     the attribute binding path; must not be {@code null}
-	 * @param order       the sort direction; must not be {@code null}
+	 * @param order       the sort direction; {@code null} means ascending
 	 * @return this query for fluent chaining
 	 */
-	@Nonnull DocumentQuery insertBoundOrdering(@Nonnull String entityAlias, @Nonnull String binding, @Nonnull SortDirection order);
+	@Nonnull DocumentQuery insertBoundOrdering(@Nonnull String entityAlias, @Nonnull String binding, @Nullable SortDirection order);
 
 	/**
 	 * Appends a GROUP BY clause for the given binding.
@@ -264,10 +264,10 @@ public interface DocumentQuery extends BeanQuery, ProjectedQuery, ScalarQuery, T
 	 * expression.
 	 *
 	 * @param expression a JPQL expression; must not be {@code null}
-	 * @param order      the sort direction; must not be {@code null}
+	 * @param order      the sort direction; {@code null} means ascending
 	 * @return this query for fluent chaining
 	 */
-	@Nonnull DocumentQuery insertExpressionOrdering(@Nonnull String expression, @Nonnull SortDirection order);
+	@Nonnull DocumentQuery insertExpressionOrdering(@Nonnull String expression, @Nullable SortDirection order);
 	
 	/**
 	 * Appends a GROUP BY clause using a raw JPQL expression.

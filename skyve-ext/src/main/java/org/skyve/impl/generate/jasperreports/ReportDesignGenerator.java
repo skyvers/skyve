@@ -29,15 +29,6 @@ public abstract class ReportDesignGenerator {
     private static final Logger LOGGER = SkyveLoggerFactory.getLogger(ReportDesignGenerator.class);
 
     /**
-     * Creates a fresh design instance and populates it with derived report metadata.
-     *
-     * @return A populated design ready for rendering.
-     */
-    public @Nonnull DesignSpecification generateDesign() {
-        return populateDesign(new DesignSpecification());
-    }
-
-    /**
      * Populates a design with parameters, fields, variables, subreports and bands.
      *
      * <p>Side effects: clears any existing generated collections on {@code design}

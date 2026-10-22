@@ -3,6 +3,7 @@ package org.skyve.impl.sail.execution.sc;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
+import java.lang.reflect.Field;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
@@ -52,6 +53,25 @@ class SmartClientAutomationContextTest {
 						context.getLocators("sales.activeCustomers.zoom").get(0).getLocator());
 		assertEquals("//VLayout[ID=\"details\"]/member[Class=VLayout||classIndex=0]/member[Class=BizListGrid||classIndex=0]/member[Class=ListGrid||classIndex=0]/body/row[%%d]",
 						context.getLocators("sales.activeCustomers.select").get(0).getLocator());
+	}
+
+	@Test
+	void decrementWindowNumberWithNoWindowLeavesNoWindow() throws ReflectiveOperationException {
+		Field windowNumber = SmartClientAutomationContext.class.getDeclaredField("windowNumber");
+		windowNumber.setAccessible(true);
+		SmartClientAutomationContext.resetWindowNumber();
+		try {
+			SmartClientAutomationContext.decrementWindowNumber();
+			assertNull(windowNumber.get(null));
+
+			SmartClientAutomationContext.incrementWindowNumber();
+			assertEquals(Integer.valueOf(0), windowNumber.get(null));
+			SmartClientAutomationContext.decrementWindowNumber();
+			assertNull(windowNumber.get(null));
+		}
+		finally {
+			SmartClientAutomationContext.resetWindowNumber();
+		}
 	}
 
 	@SuppressWarnings("null") // a null here fails the test

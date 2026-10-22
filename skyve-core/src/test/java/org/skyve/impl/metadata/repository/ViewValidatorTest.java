@@ -159,6 +159,7 @@ class ViewValidatorTest {
 
 		view = new ViewImpl();
 		view.setName("edit");
+		view.setTitle("Test View");
 	}
 
 	private ViewValidator newValidator() {
@@ -244,6 +245,14 @@ class ViewValidatorTest {
 		view.setTitle("My Title");
 		ViewValidator v = newValidator();
 		assertDoesNotThrow(v::visit);
+	}
+
+	@Test
+	void viewWithoutTitle_throws() {
+		view.setTitle(null);
+		ViewValidator v = newValidator();
+		MetaDataException e = assertThrows(MetaDataException.class, v::visit);
+		assertTrue(e.getMessage().endsWith(" - title is required."), e.getMessage());
 	}
 
 	@Test

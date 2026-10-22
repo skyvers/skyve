@@ -151,7 +151,7 @@ public abstract class Interceptor implements MetaData {
 	 * @return the result
 	 */
 	@SuppressWarnings("static-method")
-	public boolean beforeComplete(@Nonnull String attributeName, @Nonnull String value, @Nullable Bean bean)
+	public boolean beforeComplete(@Nonnull String attributeName, @Nullable String value, @Nullable Bean bean)
 	throws Exception {
 		return false;
 	}
@@ -164,7 +164,7 @@ public abstract class Interceptor implements MetaData {
 	 * @param result the result
 	 */
 	public void afterComplete(@Nonnull String attributeName,
-								@Nonnull String value,
+								@Nullable String value,
 								@Nullable Bean bean,
 								@Nullable List<String> result)
 	throws Exception {

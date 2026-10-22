@@ -69,7 +69,7 @@ public class PublicFacesView extends FacesView {
 					throw new IllegalStateException("Malformed URL - this URL must have a 'c' parameter with a valid customer");
 				}
 				
-				String userName = ProvidedRepositoryFactory.get().retrievePublicUserName(customerName);
+				String userName = ProvidedRepositoryFactory.getNullSafe().retrievePublicUserName(customerName);
 				if (userName == null) {
 					HttpServletResponse response = (HttpServletResponse) ec.getResponse();
 					try {

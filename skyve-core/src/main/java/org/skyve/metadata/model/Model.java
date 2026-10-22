@@ -91,8 +91,8 @@ public interface Model extends NamedMetaData {
 	 */
 	@Nonnull String getPluralAlias();
 
-	default @Nullable String getLocalisedPluralAlias() {
-		return Util.i18n(getPluralAlias());
+	default @Nonnull String getLocalisedPluralAlias() {
+		return Util.nullSafeI18n(getPluralAlias());
 	}
 	
 	/**
@@ -103,8 +103,8 @@ public interface Model extends NamedMetaData {
 	 */
 	@Nonnull String getSingularAlias();
 
-	default @Nullable String getLocalisedSingularAlias() {
-		return Util.i18n(getSingularAlias());
+	default @Nonnull String getLocalisedSingularAlias() {
+		return Util.nullSafeI18n(getSingularAlias());
 	}
 	
 	/**

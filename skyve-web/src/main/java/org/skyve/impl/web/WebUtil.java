@@ -114,7 +114,7 @@ public class WebUtil {
 		if (user == null) {
 			// This can happen using SSO when the session expires as the servlets are not protected by normal Java EE security
 			if (userPrincipal != null) {
-				user = ProvidedRepositoryFactory.get().retrieveUser(userPrincipal);
+				user = ProvidedRepositoryFactory.getNullSafe().retrieveUser(userPrincipal);
 				if (user == null) {
 					throw new IllegalStateException("WebUtil: Cannot get the user " + userPrincipal);
 				}
@@ -356,7 +356,7 @@ public class WebUtil {
 	 * @return {@code true} when the session should be considered for concurrent-session warnings.
 	 */
 	public static boolean isConcurrentSessionWarningEligible(@Nonnull User user, @Nonnull HttpServletRequest request) {
-		return isConcurrentSessionWarningEligible(user, request.getUserPrincipal(), ProvidedRepositoryFactory.get());
+		return isConcurrentSessionWarningEligible(user, request.getUserPrincipal(), ProvidedRepositoryFactory.getNullSafe());
 	}
 
 	/**

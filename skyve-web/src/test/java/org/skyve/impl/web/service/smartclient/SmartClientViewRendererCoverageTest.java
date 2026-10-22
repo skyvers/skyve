@@ -1270,6 +1270,7 @@ class SmartClientViewRendererCoverageTest {
 		row.setDynamism(new Dynamic());
 		AssociationImpl association = new AssociationImpl();
 		association.setName("contact");
+		association.setDisplayName("Contact");
 		association.setDocumentName("Contact");
 		association.setType(AssociationType.aggregation);
 		row.putAttribute(association);

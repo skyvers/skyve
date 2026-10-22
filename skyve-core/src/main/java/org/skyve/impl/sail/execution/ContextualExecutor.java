@@ -205,11 +205,8 @@ public abstract class ContextualExecutor<T extends AutomationContext> implements
 		if (queryName != null) {
 			MetaDataQueryDefinition q = m.getMetaDataQuery(queryName);
 			if (q == null) {
-				if (documentName == null) {
-					throw new MetaDataException("Query " + queryName + " does not exist in module " + moduleName +
-													" and there is no document to use the default query of");
-				}
-				q = m.getDocumentDefaultQuery(c, documentName);
+				// As the list grid does, an undefined query name is the name of a document to use the default query of
+				q = m.getDocumentDefaultQuery(c, queryName);
 			}
 
 			m = q.getOwningModule();

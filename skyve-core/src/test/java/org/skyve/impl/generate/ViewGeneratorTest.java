@@ -46,6 +46,16 @@ class ViewGeneratorTest {
 		return new ViewGenerator(mock(ProvidedRepository.class));
 	}
 
+	/**
+	 * Creates a document with the aliases that the XSD requires of document metadata.
+	 */
+	private static DocumentImpl newDocument() {
+		DocumentImpl result = new DocumentImpl();
+		result.setSingularAlias("Test Document");
+		result.setPluralAlias("Test Documents");
+		return result;
+	}
+
 	// ----- generateListView -------------------------------------------------
 
 	@Test
@@ -84,14 +94,13 @@ class ViewGeneratorTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void generateListViewWithAllNullDescriptionsProducesEmptyTitle() {
-		Document document = mock(Document.class);
-		when(document.getLocalisedDescription()).thenReturn(null);
-		when(document.getLocalisedPluralAlias()).thenReturn(null);
+	void generateListViewWithNoDescriptionsFallsBackToDocumentPluralAlias() {
+		DocumentImpl document = newDocument();
+		document.setPluralAlias("Widgets");
 
 		ViewImpl view = ViewGenerator.generateListView(null, document, null, null);
 
-		assertEquals("", view.getTitle());
+		assertEquals("Widgets", view.getTitle());
 	}
 
 	@Test
@@ -129,7 +138,7 @@ class ViewGeneratorTest {
 		when(customer.getModule("testMod")).thenReturn(module);
 		when(module.getDocumentDefaultQuery(customer, "TestDoc")).thenReturn(null);
 
-		DocumentImpl document = new DocumentImpl();
+		DocumentImpl document = newDocument();
 		document.setOwningModuleName("testMod");
 		document.setName("TestDoc");
 
@@ -147,7 +156,7 @@ class ViewGeneratorTest {
 		when(customer.getModule("mod")).thenReturn(module);
 		when(module.getDocumentDefaultQuery(customer, "Doc")).thenReturn(mock(MetaDataQueryDefinition.class));
 
-		DocumentImpl document = new DocumentImpl();
+		DocumentImpl document = newDocument();
 		document.setOwningModuleName("mod");
 		document.setName("Doc");
 
@@ -167,7 +176,7 @@ class ViewGeneratorTest {
 		when(customer.getModule("testMod")).thenReturn(module);
 		when(module.getFormLabelLayout()).thenReturn(FormLabelLayout.top);
 
-		DocumentImpl document = new DocumentImpl();
+		DocumentImpl document = newDocument();
 		document.setOwningModuleName("testMod");
 		document.setName("EditDoc");
 		// no attributes, no actions, no extends
@@ -191,7 +200,7 @@ class ViewGeneratorTest {
 		// FormLabelLayout.side triggers the formLabelSideLayout=true path
 		when(module.getFormLabelLayout()).thenReturn(FormLabelLayout.side);
 
-		DocumentImpl document = new DocumentImpl();
+		DocumentImpl document = newDocument();
 		document.setOwningModuleName("testMod");
 		document.setName("SideDoc");
 
@@ -209,7 +218,7 @@ class ViewGeneratorTest {
 		Module module = mock(Module.class);
 		when(customer.getModule("mod")).thenReturn(module);
 
-		DocumentImpl document = new DocumentImpl();
+		DocumentImpl document = newDocument();
 		document.setOwningModuleName("mod");
 		document.setName("Doc");
 
@@ -228,7 +237,7 @@ class ViewGeneratorTest {
 		when(customer.getModule("testMod")).thenReturn(module);
 		when(module.getFormLabelLayout()).thenReturn(FormLabelLayout.top);
 
-		DocumentImpl document = new DocumentImpl();
+		DocumentImpl document = newDocument();
 		document.setOwningModuleName("testMod");
 		document.setName("FieldDoc");
 
@@ -236,6 +245,7 @@ class ViewGeneratorTest {
 		org.skyve.impl.metadata.model.document.field.Text textField =
 				new org.skyve.impl.metadata.model.document.field.Text();
 		textField.setName("myField");
+		textField.setDisplayName("My Field");
 		document.putAttribute(textField);
 
 		ViewImpl view = generator().generate(customer, document, ViewType.edit.toString());
@@ -265,12 +275,13 @@ class ViewGeneratorTest {
 		when(detailDoc.getLocalisedPluralAlias()).thenReturn("Items");
 		when(module.getDocument(customer, "ItemDoc")).thenReturn(detailDoc);
 
-		DocumentImpl document = new DocumentImpl();
+		DocumentImpl document = newDocument();
 		document.setOwningModuleName("testMod");
 		document.setName("Doc");
 
 		CollectionImpl col = new CollectionImpl();
 		col.setName("items");
+		col.setDisplayName("Items");
 		col.setDocumentName("ItemDoc");
 		col.setType(CollectionType.aggregation);
 		document.putAttribute(col);
@@ -297,12 +308,13 @@ class ViewGeneratorTest {
 		when(detailDoc.getLocalisedPluralAlias()).thenReturn("Parts");
 		when(module.getDocument(customer, "PartDoc")).thenReturn(detailDoc);
 
-		DocumentImpl document = new DocumentImpl();
+		DocumentImpl document = newDocument();
 		document.setOwningModuleName("testMod");
 		document.setName("Doc");
 
 		CollectionImpl col = new CollectionImpl();
 		col.setName("parts");
+		col.setDisplayName("Parts");
 		col.setDocumentName("PartDoc");
 		col.setType(CollectionType.composition);
 		document.putAttribute(col);
@@ -328,12 +340,13 @@ class ViewGeneratorTest {
 		when(detailDoc.getAttributes()).thenReturn(Collections.emptyList());
 		when(module.getDocument(customer, "RefDoc")).thenReturn(detailDoc);
 
-		DocumentImpl document = new DocumentImpl();
+		DocumentImpl document = newDocument();
 		document.setOwningModuleName("testMod");
 		document.setName("Doc");
 
 		CollectionImpl col = new CollectionImpl();
 		col.setName("refs");
+		col.setDisplayName("Refs");
 		col.setDocumentName("RefDoc");
 		col.setType(CollectionType.aggregation);
 		col.setDomainType(DomainType.constant);
@@ -361,12 +374,13 @@ class ViewGeneratorTest {
 		when(detailDoc.getLocalisedPluralAlias()).thenReturn("Dependants");
 		when(module.getDocument(customer, "ChildDoc")).thenReturn(detailDoc);
 
-		DocumentImpl document = new DocumentImpl();
+		DocumentImpl document = newDocument();
 		document.setOwningModuleName("testMod");
 		document.setName("Doc");
 
 		InverseMany inv = new InverseMany();
 		inv.setName("children");
+		inv.setDisplayName("Children");
 		inv.setDocumentName("ChildDoc");
 		inv.setReferenceName("parent");
 		document.putAttribute(inv);
@@ -391,12 +405,13 @@ class ViewGeneratorTest {
 		when(assocDoc.isPersistable()).thenReturn(Boolean.FALSE); // non-persistable → TextField
 		when(module.getDocument(customer, "RefDoc")).thenReturn(assocDoc);
 
-		DocumentImpl document = new DocumentImpl();
+		DocumentImpl document = newDocument();
 		document.setOwningModuleName("testMod");
 		document.setName("Doc");
 
 		AssociationImpl assoc = new AssociationImpl();
 		assoc.setName("ref");
+		assoc.setDisplayName("Ref");
 		assoc.setDocumentName("RefDoc");
 		assoc.setType(AssociationType.aggregation);
 		document.putAttribute(assoc);
@@ -421,12 +436,13 @@ class ViewGeneratorTest {
 		when(assocDoc.isPersistable()).thenReturn(Boolean.TRUE); // persistable → DefaultWidget
 		when(module.getDocument(customer, "AssocDoc")).thenReturn(assocDoc);
 
-		DocumentImpl document = new DocumentImpl();
+		DocumentImpl document = newDocument();
 		document.setOwningModuleName("testMod");
 		document.setName("Doc");
 
 		AssociationImpl assoc = new AssociationImpl();
 		assoc.setName("assoc");
+		assoc.setDisplayName("Assoc");
 		assoc.setDocumentName("AssocDoc");
 		assoc.setType(AssociationType.aggregation);
 		document.putAttribute(assoc);
@@ -448,12 +464,13 @@ class ViewGeneratorTest {
 		when(module.getFormLabelLayout()).thenReturn(FormLabelLayout.top);
 		when(module.isPrototype()).thenReturn(Boolean.TRUE);
 
-		DocumentImpl document = new DocumentImpl();
+		DocumentImpl document = newDocument();
 		document.setOwningModuleName("testMod");
 		document.setName("Doc");
 
 		Geometry geo = new Geometry();
 		geo.setName("location");
+		geo.setDisplayName("Location");
 		document.putAttribute(geo);
 
 		ViewImpl view = generator().generate(customer, document, ViewType.edit.toString());
@@ -473,12 +490,13 @@ class ViewGeneratorTest {
 		when(module.getFormLabelLayout()).thenReturn(FormLabelLayout.top);
 		when(module.isPrototype()).thenReturn(Boolean.TRUE);
 
-		DocumentImpl document = new DocumentImpl();
+		DocumentImpl document = newDocument();
 		document.setOwningModuleName("testMod");
 		document.setName("Doc");
 
 		Content content = new Content();
 		content.setName("attachment");
+		content.setDisplayName("Attachment");
 		document.putAttribute(content);
 
 		ViewImpl view = generator().generate(customer, document, ViewType.edit.toString());
@@ -509,18 +527,20 @@ class ViewGeneratorTest {
 		when(detailDoc2.getLocalisedPluralAlias()).thenReturn("Beta");
 		when(module.getDocument(customer, "BetaDoc")).thenReturn(detailDoc2);
 
-		DocumentImpl document = new DocumentImpl();
+		DocumentImpl document = newDocument();
 		document.setOwningModuleName("testMod");
 		document.setName("Doc");
 
 		CollectionImpl col1 = new CollectionImpl();
 		col1.setName("alphaItems");
+		col1.setDisplayName("Alpha Items");
 		col1.setDocumentName("AlphaDoc");
 		col1.setType(CollectionType.composition);
 		document.putAttribute(col1);
 
 		CollectionImpl col2 = new CollectionImpl();
 		col2.setName("betaItems");
+		col2.setDisplayName("Beta Items");
 		col2.setDocumentName("BetaDoc");
 		col2.setType(CollectionType.composition);
 		document.putAttribute(col2);
@@ -541,13 +561,14 @@ class ViewGeneratorTest {
 		when(customer.getModule("testMod")).thenReturn(module);
 		when(module.getFormLabelLayout()).thenReturn(FormLabelLayout.top);
 
-		DocumentImpl document = new DocumentImpl();
+		DocumentImpl document = newDocument();
 		document.setOwningModuleName("testMod");
 		document.setName("Doc");
 
 		org.skyve.impl.metadata.model.document.field.Text deprecated =
 				new org.skyve.impl.metadata.model.document.field.Text();
 		deprecated.setName("oldField");
+		deprecated.setDisplayName("Old Field");
 		deprecated.setDeprecated(true);
 		document.putAttribute(deprecated);
 
@@ -573,17 +594,18 @@ class ViewGeneratorTest {
 		when(module.getFormLabelLayout()).thenReturn(FormLabelLayout.top);
 
 		// Base document with one text field
-		DocumentImpl baseDocument = new DocumentImpl();
+		DocumentImpl baseDocument = newDocument();
 		baseDocument.setOwningModuleName("testMod");
 		baseDocument.setName("BaseDoc");
 		org.skyve.impl.metadata.model.document.field.Text baseField =
 				new org.skyve.impl.metadata.model.document.field.Text();
 		baseField.setName("baseField");
+		baseField.setDisplayName("Base Field");
 		baseDocument.putAttribute(baseField);
 		when(module.getDocument(customer, "BaseDoc")).thenReturn(baseDocument);
 
 		// Child document that extends the base
-		DocumentImpl document = new DocumentImpl();
+		DocumentImpl document = newDocument();
 		document.setOwningModuleName("testMod");
 		document.setName("ChildDoc");
 

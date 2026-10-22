@@ -364,7 +364,7 @@ public class CustomerImpl implements Customer {
 	 */
 	@Override
 	public @Nonnull Module getModule(@Nonnull String moduleName) {
-		Module result = ProvidedRepositoryFactory.get().getModule(this, moduleName);
+		Module result = ProvidedRepositoryFactory.getNullSafe().getModule(this, moduleName);
 		if (result == null) {
 			throw new MetaDataException("No module named '" + moduleName + "' is available to customer '" + name + "'.");
 		}
@@ -1049,7 +1049,7 @@ public class CustomerImpl implements Customer {
 	 * @return {@code true} if any interceptor vetoes further processing.
 	 * @throws Exception if an interceptor fails.
 	 */
-	public boolean interceptBeforeComplete(@Nonnull String attributeName, @Nonnull String value, @Nullable Bean bean)
+	public boolean interceptBeforeComplete(@Nonnull String attributeName, @Nullable String value, @Nullable Bean bean)
 	throws Exception {
 		for (InterceptorMetaData interceptor : interceptors.values()) {
 			if (interceptor.getInterceptor().beforeComplete(attributeName, value, bean)) {
@@ -1068,7 +1068,7 @@ public class CustomerImpl implements Customer {
 	 * @param result the completion candidates.
 	 * @throws Exception if an interceptor fails.
 	 */
-	public void interceptAfterComplete(@Nonnull String attributeName, @Nonnull String value, @Nullable Bean bean, @Nullable List<String> result)
+	public void interceptAfterComplete(@Nonnull String attributeName, @Nullable String value, @Nullable Bean bean, @Nullable List<String> result)
 	throws Exception {
 		for (InterceptorMetaData interceptor : reversedInterceptors) {
 			interceptor.getInterceptor().afterComplete(attributeName, value, bean, result);

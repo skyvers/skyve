@@ -80,7 +80,7 @@ System.out.println(visitModules(args[0]));
 														@Nonnull String uxui,
 														@Nonnull UserAgentType userAgentType,
 														@Nullable TestStrategy testStrategy) {
-		ProvidedRepositoryFactory.get().resetMenus(user);
+		ProvidedRepositoryFactory.getNullSafe().resetMenus(user);
 		UserImpl u = (UserImpl) user;
 		Customer c = user.getCustomer();
 		List<Automation> result = new ArrayList<>();
@@ -132,7 +132,7 @@ System.out.println(visitModules(args[0]));
 												@Nonnull String uxui,
 												@Nonnull UserAgentType userAgentType,
 												@Nullable TestStrategy testStrategy) {
-		ProvidedRepositoryFactory.get().resetMenus(user);
+		ProvidedRepositoryFactory.getNullSafe().resetMenus(user);
 		UserImpl u = (UserImpl) user;
 		Customer c = user.getCustomer();
 		

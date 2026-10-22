@@ -208,6 +208,7 @@ public class ReportServlet extends HttpServlet {
 				designSpecification.setName("EditView");
 				designSpecification.setModuleName(moduleName);
 				designSpecification.setDocumentName(documentName);
+				designSpecification.setUxui(uxui.getName());
 
 				final ReportDesignGenerator generator = ReportDesignGeneratorFactory.getGeneratorForDesign(designSpecification);
 				generator.populateDesign(designSpecification);
@@ -536,10 +537,7 @@ public class ReportServlet extends HttpServlet {
 					designParams.setPretty(Boolean.TRUE.equals(values.get("isPretty")));
 					designParams.setShowSummary(Boolean.TRUE.equals(values.get("showSummary")));
 
-					designParams.setTopMargin(((Number) values.get("top")).intValue());
-					designParams.setLeftMargin(((Number) values.get("bottom")).intValue());
-					designParams.setBottomMargin(((Number) values.get("left")).intValue());
-					designParams.setRightMargin(((Number) values.get("right")).intValue());
+					applyMargins(designParams, values);
 
 					@SuppressWarnings("unchecked")
 					List<Map<String, Object>> columns = (List<Map<String, Object>>) values.get("columns");
@@ -620,5 +618,18 @@ public class ReportServlet extends HttpServlet {
 				writeReportError(response, out, reference);
 			}
 		}
+	}
+
+	/**
+	 * Sets the page margins of an export from the export dialog's values.
+	 *
+	 * @param designParams the export design to set
+	 * @param values the export dialog values, with numeric "top", "left", "bottom" and "right" entries
+	 */
+	static void applyMargins(@Nonnull ReportDesignParameters designParams, @Nonnull Map<String, Object> values) {
+		designParams.setTopMargin(((Number) values.get("top")).intValue());
+		designParams.setLeftMargin(((Number) values.get("left")).intValue());
+		designParams.setBottomMargin(((Number) values.get("bottom")).intValue());
+		designParams.setRightMargin(((Number) values.get("right")).intValue());
 	}
 }

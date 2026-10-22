@@ -492,7 +492,7 @@ public interface ProvidedRepository extends CachedRepository {
 	 * @param notifier The customer notification to invoke.
 	 */
 	static void notifyAllCustomersObservers(@Nonnull Consumer<Customer> notifier) {
-		ProvidedRepository repository = ProvidedRepositoryFactory.get();
+		ProvidedRepository repository = ProvidedRepositoryFactory.getNullSafe();
 		if (UtilImpl.CUSTOMER != null) {
 			notifyObserver(repository, UtilImpl.CUSTOMER, "UtilImpl.CUSTOMER ", notifier);
 		}

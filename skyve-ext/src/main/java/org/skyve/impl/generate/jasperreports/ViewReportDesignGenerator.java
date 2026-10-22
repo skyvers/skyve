@@ -131,8 +131,13 @@ public class ViewReportDesignGenerator extends ReportDesignGenerator {
 
     private void initialiseVisitorIfNull(@Nonnull DesignSpecification design) {
         if (visitor == null) {
-            final View view = design.getDocument().getView(design.getUxui(), CORE.getCustomer(), View.ViewType.edit.toString());
-            visitor = new ReportViewVisitor(this, (CustomerImpl) CORE.getCustomer(), (ModuleImpl) design.getModule(), (DocumentImpl) design.getDocument(), (ViewImpl) view, design.getUxui());
+            final String uxui = design.getUxui();
+            if (uxui == null) {
+                throw new IllegalStateException("The view report design for " + design.getModuleName() + '.' + design.getDocumentName() +
+                                                    " has no UX/UI to choose the view with");
+            }
+            final View view = design.getDocument().getView(uxui, CORE.getCustomer(), View.ViewType.edit.toString());
+            visitor = new ReportViewVisitor(this, (CustomerImpl) CORE.getCustomer(), (ModuleImpl) design.getModule(), (DocumentImpl) design.getDocument(), (ViewImpl) view, uxui);
         }
     }
 }

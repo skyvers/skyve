@@ -14,7 +14,6 @@ import org.skyve.domain.ChildBean;
 import org.skyve.domain.HierarchicalBean;
 import org.skyve.domain.PersistentBean;
 import org.skyve.impl.bind.BindUtil;
-import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.Attribute.AttributeType;
@@ -344,11 +343,7 @@ public final class StandardGenerator {
 												@Nullable Relation owningRelation,
 												@Nonnull BizPortWorkbook workbook)
 	throws Exception {
-		String singularAlias = currentDocument.getLocalisedSingularAlias();
-		if (singularAlias == null) { // required metadata
-			throw new MetaDataException("Document " + currentDocument.getOwningModuleName() + '.' + currentDocument.getName() + " has no singular alias");
-		}
-		BizPortSheet sheet = new POISheet(singularAlias);
+		BizPortSheet sheet = new POISheet(currentDocument.getLocalisedSingularAlias());
 
 		// ID column
 		BizPortColumn column = new BizPortColumn("ID",
@@ -504,11 +499,7 @@ public final class StandardGenerator {
 												@Nonnull Collection collection,
 												@Nonnull Document collectionDocument,
 												@Nonnull BizPortWorkbook workbook) {
-		String displayName = collection.getLocalisedDisplayName();
-		if (displayName == null) { // required metadata
-			throw new MetaDataException("Collection " + binding + " has no display name");
-		}
-		BizPortSheet sheet = new POISheet(displayName);
+		BizPortSheet sheet = new POISheet(collection.getLocalisedDisplayName());
 
 		// Owner ID column
 		String localisedSingularAlias = owningDocument.getLocalisedSingularAlias();

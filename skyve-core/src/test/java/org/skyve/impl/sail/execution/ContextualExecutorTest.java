@@ -1,5 +1,6 @@
 package org.skyve.impl.sail.execution;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.CALLS_REAL_METHODS;
 import static org.mockito.Mockito.mock;
@@ -16,11 +17,13 @@ import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
+import org.skyve.metadata.module.query.MetaDataQueryDefinition;
 import org.skyve.metadata.sail.language.step.context.PushListContext;
 import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateEdit;
 import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateLink;
 import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateTree;
 import org.skyve.metadata.user.User;
+import org.skyve.metadata.view.View.ViewType;
 import org.skyve.metadata.view.model.list.ListModel;
 
 @SuppressWarnings("static-method")
@@ -40,15 +43,44 @@ class ContextualExecutorTest {
 	}
 
 	@Test
-	void newListContextForUndefinedQueryWithoutDocumentThrowsMetaDataException() {
-		Module module = bindModule(bindCustomer());
+	void newListContextForUndefinedQueryThatIsNotADocumentThrowsMetaDataException() {
+		Customer customer = bindCustomer();
+		Module module = bindModule(customer);
 		when(module.getMetaDataQuery("missing")).thenReturn(null);
+		when(module.getDocumentDefaultQuery(customer, "missing")).thenThrow(new MetaDataException("no document ref"));
 		PushListContext push = new PushListContext();
 		push.setModuleName("sales");
 		push.setQueryName("missing");
 		ContextualExecutor<AutomationContext<GenerateListContext, GenerateEditContext>> executor = newExecutor();
 
 		assertThrows(MetaDataException.class, () -> executor.newContext(push, newContext()));
+	}
+
+	/**
+	 * An undefined query name is the name of a document whose default query drives the list,
+	 * just as the list grid itself resolves it.
+	 */
+	@Test
+	void newListContextForUndefinedQueryUsesDefaultQueryOfDocumentNamedByQuery() {
+		Customer customer = bindCustomer();
+		Module module = bindModule(customer);
+		when(module.getMetaDataQuery("Contact")).thenReturn(null);
+		Module owningModule = mock(Module.class);
+		when(owningModule.getName()).thenReturn("admin");
+		MetaDataQueryDefinition defaultQuery = mock(MetaDataQueryDefinition.class);
+		when(defaultQuery.getOwningModule()).thenReturn(owningModule);
+		when(defaultQuery.getDocumentName()).thenReturn("Contact");
+		when(module.getDocumentDefaultQuery(customer, "Contact")).thenReturn(defaultQuery);
+		PushListContext push = new PushListContext();
+		push.setModuleName("sales");
+		push.setQueryName("Contact");
+		ContextualExecutor<AutomationContext<GenerateListContext, GenerateEditContext>> executor = newExecutor();
+
+		AutomationContext<GenerateListContext, GenerateEditContext> result = executor.newContext(push, newContext());
+
+		assertEquals("admin", result.getModuleName());
+		assertEquals("Contact", result.getDocumentName());
+		assertEquals(ViewType.list, result.getViewType());
 	}
 
 	@Test

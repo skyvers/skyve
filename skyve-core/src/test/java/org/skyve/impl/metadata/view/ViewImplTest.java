@@ -3,6 +3,7 @@ package org.skyve.impl.metadata.view;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -33,9 +34,10 @@ class ViewImplTest {
 	}
 
 	@Test
-	void localisedTitleReturnsNullWhenTitleNull() {
+	void localisedTitleThrowsWhenTitleNull() {
+		// a title is required metadata; the localised title is non-null
 		ViewImpl v = new ViewImpl();
-		assertNull(v.getLocalisedTitle());
+		assertThrows(NullPointerException.class, v::getLocalisedTitle);
 	}
 
 	@Test

@@ -619,6 +619,41 @@ class CommunicationUtilTest {
 				new Bean[0]));
 	}
 
+	@SuppressWarnings("boxing")
+	@Test
+	void testGetDefinedAttachmentsReturnsOnlyFilledSlotsInOrder() throws Exception {
+		AbstractContentManager.IMPLEMENTATION_CLASS = CaptureContentManager.class;
+		CaptureContentManager.attachments.clear();
+		CaptureContentManager.attachments.put("content-2", attachment("two.pdf", org.skyve.content.MimeType.pdf, "two"));
+		CaptureContentManager.attachments.put("content-3", attachment("three.csv", org.skyve.content.MimeType.csv, "three"));
+		// slot 1 has content but no file name, so it is skipped
+		when(communication.getAttachment1()).thenReturn("content-1");
+		when(communication.getAttachmentFileName2()).thenReturn("second.pdf");
+		when(communication.getAttachment2()).thenReturn("content-2");
+		when(communication.getAttachmentFileName3()).thenReturn("third.csv");
+		when(communication.getAttachment3()).thenReturn("content-3");
+
+		MailAttachment[] result = (MailAttachment[]) invokePrivate("getDefinedAttachments",
+				new Class<?>[] { Communication.class },
+				communication);
+
+		assertThat(result.length, is(2));
+		assertThat(result[0].getAttachmentFileName(), is("second.pdf"));
+		assertThat(result[1].getAttachmentFileName(), is("third.csv"));
+	}
+
+	@SuppressWarnings("boxing")
+	@Test
+	void testGetDefinedAttachmentsWithNoFilledSlotsIsEmpty() throws Exception {
+		AbstractContentManager.IMPLEMENTATION_CLASS = NoOpContentManager.class;
+
+		MailAttachment[] result = (MailAttachment[]) invokePrivate("getDefinedAttachments",
+				new Class<?>[] { Communication.class },
+				communication);
+
+		assertThat(result.length, is(0));
+	}
+
 	@Test
 	void testGetDefinedAttachmentsThrowsWhenAttachmentContentIsMissing() {
 		AbstractContentManager.IMPLEMENTATION_CLASS = CaptureContentManager.class;

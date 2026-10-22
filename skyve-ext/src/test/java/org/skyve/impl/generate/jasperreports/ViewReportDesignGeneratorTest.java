@@ -5,6 +5,7 @@ import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 
@@ -67,6 +68,20 @@ class ViewReportDesignGeneratorTest {
 
 		assertNotNull(design.getBands());
 		assertTrue(design.getBands().size() > 0);
+	}
+
+	@Test
+	void addBandsWithoutAUxUiThrows() {
+		DesignSpecification design = new DesignSpecification();
+		design.setModuleName("admin");
+		design.setDocumentName("Contact");
+		design.setReportType(DesignSpecification.ReportType.subreport);
+		design.setColumnWidth(java.lang.Integer.valueOf(400));
+		design.setDefaultElementHeight(java.lang.Integer.valueOf(20));
+
+		ViewReportDesignGenerator gen = new ViewReportDesignGenerator();
+		IllegalStateException e = assertThrows(IllegalStateException.class, () -> gen.addBands(design));
+		assertTrue(e.getMessage().contains("admin.Contact has no UX/UI"), e.getMessage());
 	}
 
 	@Test
