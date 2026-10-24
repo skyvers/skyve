@@ -6,6 +6,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.nio.charset.StandardCharsets;
 import java.security.Principal;
 import java.util.List;
+import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.UUID;
@@ -66,6 +67,7 @@ import org.skyve.metadata.view.View;
 import org.skyve.metadata.view.View.ViewParameter;
 import org.skyve.metadata.view.View.ViewType;
 import org.skyve.util.Binder.TargetMetaData;
+import org.skyve.util.JSON;
 import org.skyve.util.OWASP;
 import org.skyve.util.Util;
 import org.skyve.util.logging.Category;
@@ -75,6 +77,7 @@ import org.skyve.util.monitoring.RequestKey;
 import org.slf4j.Logger;
 
 import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.servlet.ServletConfig;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
@@ -234,10 +237,11 @@ public class SmartClientEditServlet extends HttpServlet {
 	        }
 
 	        AbstractPersistence persistence = null;
+	        // Declared here so that an error response can include the growls and messages raised before the error
+	        AbstractWebContext webContext = null;
 	        try {
 				try {
 					// Start or continue a smartclient conversation
-					AbstractWebContext webContext = null;
 			        String webId = OWASP.sanitise(Sanitisation.text, Util.processStringValue(request.getParameter(AbstractWebContext.CONTEXT_NAME)));
 			        if (webId != null) {
 						webContext = StateUtil.getCachedConversation(webId, request);
@@ -491,8 +495,8 @@ public class SmartClientEditServlet extends HttpServlet {
 		    		produceUnavailableResponse(unavailable, pw);
 		    	}
 		    	else {
-		    		String reference = WebErrorUtil.logUnexpectedAndGetReference(LOGGER, "SmartClient edit request failed for operation " + operation, t);
-		    		produceErrorResponse(t, operation, true, pw, reference);
+		    		String reference = WebErrorUtil.logFailureAndGetReference(LOGGER, "SmartClient edit request failed for operation " + operation, t);
+		    		produceErrorResponse(t, operation, true, pw, reference, webContext);
 		    	}
 			}
 		    finally {
@@ -568,6 +572,33 @@ public class SmartClientEditServlet extends HttpServlet {
 	 *        point they are thrown.
 	 */
 	static void produceErrorResponse(Throwable t, Operation operation, boolean includeBindings, PrintWriter pw, String reference) {
+		produceErrorResponse(t, operation, includeBindings, pw, reference, null);
+	}
+
+	/**
+	 * Pump out error text for smart client pages, with the growls and messages raised before the error.
+	 *
+	 * <p>The growls and messages are written beside {@code data} or {@code errors} as {@code _growls} and
+	 * {@code _messages}, in the same form as a successful response, so that the client shows them as Prime Faces
+	 * does. They are left out when {@code t} is a {@link SecurityException}, {@link SessionEndedException} or
+	 * {@link ConversationEndedException}, as Prime Faces redirects to the error page for these instead.
+	 *
+	 * @param t The exception.
+	 * @param operation fetch, add, remove or update.
+	 * @param includeBindings Only edit views can use the bindings available in the error messages. If bindings
+	 *        are included for errors generated from listgrids operations, no errors are shown
+	 * @param pw To append to.
+	 * @param reference If the error is unexpected, this is the reference logged against it, to help with support.
+	 *        This will be null for expected errors (ie MessageExceptions) as these are already logged at the
+	 *        point they are thrown.
+	 * @param webContext The conversation the growls and messages were added to, or null if there is none.
+	 */
+	static void produceErrorResponse(Throwable t,
+										Operation operation,
+										boolean includeBindings,
+										PrintWriter pw,
+										String reference,
+										@Nullable AbstractWebContext webContext) {
 		if (t instanceof MessageException me) {
 			List<Message> ms = me.getMessages();
 			
@@ -598,7 +629,30 @@ public class SmartClientEditServlet extends HttpServlet {
             pw.append(WebErrorUtil.escapeJsStringWithHtmlFormatting(WebErrorUtil.genericMessage(reference))).append('"');
     	}
 
+    	if ((webContext != null) &&
+    			(! (t instanceof SecurityException)) &&
+    			(! (t instanceof SessionEndedException)) &&
+    			(! (t instanceof ConversationEndedException))) {
+    		appendNotifications("_growls", webContext.getGrowls(), pw);
+    		appendNotifications("_messages", webContext.getMessages(), pw);
+    	}
+
     	pw.append("}}");
+	}
+
+	/**
+	 * Appends a property holding growls or messages to the response, if there are any.
+	 *
+	 * @param name The property name.
+	 * @param notifications The growls or messages, each with a severity and summary, or null if there are none.
+	 * @param pw To append to.
+	 */
+	private static void appendNotifications(@Nonnull String name,
+												@Nullable List<Map<String, String>> notifications,
+												@Nonnull PrintWriter pw) {
+		if ((notifications != null) && (! notifications.isEmpty())) {
+			pw.append(",\"").append(name).append("\":").append(JSON.marshall(notifications));
+		}
 	}
 	
 	/**

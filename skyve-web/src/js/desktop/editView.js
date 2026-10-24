@@ -48,13 +48,19 @@ isc.EditView.addClassProperties({
 		jsonSuffix: "",
 		dataURL: "smartedit",
 		sendExtraFields: false, // Ensure that only datasource defined fields are sent
-		// A server-side question (status -50) is sent beside the standard response properties,
-		// which RestDataSource does not copy to the DSResponse
+		// A server-side question (status -50), and the growls and messages raised before an error,
+		// are sent beside the standard response properties, which RestDataSource does not copy to the DSResponse
 		transformResponse: function (dsResponse, dsRequest, data) {
 			const result = this.Super("transformResponse", arguments);
-			const question = data?.response?.question;
-			if (question) {
-				result.question = question;
+			const response = data?.response;
+			if (response?.question) {
+				result.question = response.question;
+			}
+			if (response?._growls) {
+				result._growls = response._growls;
+			}
+			if (response?._messages) {
+				result._messages = response._messages;
 			}
 			return result;
 		},
@@ -320,8 +326,8 @@ isc.EditView.addMethods({
 					}
 
 					success = true;
-				} else if (dsResponse.status === -1) {
-					isc.warn(data, null, { title: isc.i18nMessages.editView_Problems });
+				} else {
+					this._displayFailure(dsResponse, data);
 				}
 
 				if (completedCallback) {
@@ -439,9 +445,9 @@ isc.EditView.addMethods({
 					this.scatter(values);
 
 					success = true;
-				} else if (dsResponse.status === -1) {
-					// Display a warning if there are issues
-					isc.warn(data, null, { title: isc.i18nMessages.editView_Problems });
+				} else {
+					// Display the problem, and any growls and messages raised before it
+					this._displayFailure(dsResponse, data);
 				}
 
 				// Execute the completed callback if provided
@@ -636,8 +642,8 @@ isc.EditView.addMethods({
 					}
 
 					success = true;
-				} else if (dsResponse.status === -1 || dsResponse.status === isc.EditView._UNAVAILABLE) {
-					isc.warn(data, null, { title: isc.i18nMessages.editView_Problems });
+				} else {
+					this._displayFailure(dsResponse, data);
 				}
 
 				if (completedCallback) {
@@ -685,8 +691,8 @@ isc.EditView.addMethods({
 					isc.WindowStack.popoff(true);
 
 					success = true;
-				} else if (dsResponse.status === -1 || dsResponse.status === isc.EditView._UNAVAILABLE) {
-					isc.warn(data, null, { title: isc.i18nMessages.editView_Problems });
+				} else {
+					this._displayFailure(dsResponse, data);
 				}
 
 				if (completedCallback) {
@@ -767,14 +773,12 @@ isc.EditView.addMethods({
 					if (data._redirectUrl) {
 						window.location.assign(data._redirectUrl);
 					}
-				} else if (dsResponse.status === -1 || dsResponse.status === isc.EditView._UNAVAILABLE) {
-					isc.warn(data, null, { title: isc.i18nMessages.editView_Problems });
+				} else {
+					this._displayFailure(dsResponse, data);
 
 					if (completedCallback) {
 						completedCallback(data, false);
 					}
-				} else if (completedCallback) {
-					completedCallback(data, false);
 				}
 
 				return true;
@@ -1198,13 +1202,45 @@ isc.EditView.addMethods({
 		}
 
 		if (messages) {
-			const markup =
-				messages.length > 1
-					? `<ul>${messages.map((message) => `<li>${message.summary}</li>`).join("")}</ul>`
-					: messages[0].summary;
+			const markup = this._messagesMarkup(messages);
 			const warn = messages.some((message) => message.severity !== "info");
 			warn ? isc.warn(markup) : isc.say(markup);
 		}
+	},
+
+	/**
+	 * Displays a failed response: the growls and messages raised before the failure, and the problem.
+	 * Status -1 and -51 responses hold the problem as markup in data; the messages are shown in the same
+	 * dialog so that only one dialog is shown. Other failures, such as validation errors (status -4), show
+	 * the messages on their own, as SmartClient shows the errors.
+	 *
+	 * @param {Object} dsResponse - the failed response, with any _growls and _messages copied from the server.
+	 * @param {Object} data - the response data.
+	 */
+	_displayFailure: function (dsResponse, data) {
+		const { _growls: growls, _messages: messages, status } = dsResponse;
+		if (status === -1 || status === isc.EditView._UNAVAILABLE) {
+			if (growls) {
+				isc.BizUtil.growl(growls);
+			}
+			// The margin separates the messages from the problem, whether or not the messages are a list
+			const markup = messages ? `<div style="margin-bottom:1em">${this._messagesMarkup(messages)}</div>${data}` : data;
+			isc.warn(markup, null, { title: isc.i18nMessages.editView_Problems });
+		} else {
+			this._displayGrowlsAndMessages(growls, messages);
+		}
+	},
+
+	/**
+	 * Returns the markup for messages: a list when there is more than one, otherwise the message.
+	 *
+	 * @param {Array} messages - the messages, each with a summary.
+	 * @returns {string} the markup.
+	 */
+	_messagesMarkup: function (messages) {
+		return messages.length > 1
+			? `<ul>${messages.map((message) => `<li>${message.summary}</li>`).join("")}</ul>`
+			: messages[0].summary;
 	},
 
 	/**

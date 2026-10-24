@@ -454,7 +454,7 @@ public class SmartClientListServlet extends HttpServlet {
 					persistence.rollback();
 				}
 
-				String reference = WebErrorUtil.logUnexpectedAndGetReference(LOGGER, "SmartClient list request failed for operation " + operation, t);
+				String reference = WebErrorUtil.logFailureAndGetReference(LOGGER, "SmartClient list request failed for operation " + operation, t);
 				SmartClientEditServlet.produceErrorResponse(t, operation, false, pw, reference);
 			}
 			finally {
