@@ -3195,6 +3195,12 @@ mark {
 			}
 		}
 
+		/* No menu (eg public pages) - collapse the space reserved for the fixed sidebar.
+		   NB 0px not 0 as a unitless zero is invalid inside calc() */
+		#wrapper.no-sidebar {
+			--skyve-editorial-sidebar-width: 0px;
+		}
+
 		@media screen and (max-width: 1280px) {
 
 			#main > .inner {
