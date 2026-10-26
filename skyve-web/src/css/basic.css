@@ -252,6 +252,11 @@ input[type=submit] {
 }
 
 /* SmartClient style overrides */
+/* Darken disabled field values only; the skin's grey background and border still show they're disabled */
+.textItemLiteDisabled, .textItemLiteDisabledRTL,
+.selectItemLiteTextDisabled, .selectItemLiteTextDisabledRTL,
+.textAreaItemLiteDisabled, .textAreaItemLiteDisabledRTL,
 .textItemDisabled, .selectItemTextDisabled {
-    color: #898989 !important;
+	color: #5f5f5f !important;
+	-webkit-text-fill-color: #5f5f5f !important;
 }
