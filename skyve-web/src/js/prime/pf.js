@@ -68,30 +68,90 @@ SKYVE.PF = function() {
 		}
 	};
 
+	var getStickyDataTableWrapper = function(dataTable) {
+		return dataTable.jq.children('.ui-datatable-tablewrapper').first();
+	};
+
+	// Keep the sticky header scrolled sideways by the same amount as the rows.
+	var syncStickyDataTableHeaderScroll = function(dataTable) {
+		var wrapper = getStickyDataTableWrapper(dataTable)[0];
+		var sticky = dataTable.stickyContainer && dataTable.stickyContainer[0];
+		if (wrapper && sticky && (sticky.scrollLeft !== wrapper.scrollLeft)) {
+			sticky.scrollLeft = wrapper.scrollLeft;
+		}
+	};
+
+	// PrimeFaces sizes the sticky header to the whole table and places it at the table's left edge.
+	// When the table is wider than its scrolling wrapper, that header overhangs the grid (and the page),
+	// and moves out of line with the rows once they scroll sideways.
+	// So clip the header to the wrapper's visible area and scroll its contents in step with the rows.
 	var alignStickyDataTableHeader = function(dataTable) {
 		if ((! dataTable) || (! dataTable.jq) || (! dataTable.stickyContainer)) {
 			return;
 		}
 
-		var sourceTable = dataTable.jq.children('.ui-datatable-tablewrapper').children('table');
-		if (sourceTable.length === 0) {
-			sourceTable = dataTable.jq.find('> .ui-datatable-tablewrapper table').first();
-		}
+		var wrapper = getStickyDataTableWrapper(dataTable);
+		var sourceTable = wrapper.children('table');
 		if (sourceTable.length === 0) {
 			return;
 		}
 
-		var offset = sourceTable.offset();
+		var offset = wrapper.offset();
 		if (! offset) {
 			return;
 		}
 
-		var width = sourceTable.outerWidth();
+		var wrapperElement = wrapper[0];
 		dataTable.stickyContainer.css({
-			left: offset.left + 'px',
-			width: width + 'px'
+			left: (offset.left + wrapperElement.clientLeft) + 'px',
+			width: wrapperElement.clientWidth + 'px',
+			overflow: 'hidden'
 		});
-		dataTable.stickyContainer.children('table').css('width', width + 'px');
+		dataTable.stickyContainer.children('table').css('width', sourceTable.outerWidth() + 'px');
+		syncStickyDataTableHeaderScroll(dataTable);
+	};
+
+	// The clipped header can't be scrolled by the user, so pass sideways wheel and trackpad scrolling
+	// over the header on to the rows, and follow any scrolling the browser does itself
+	// (eg focusing a filter input that is out of view).
+	var bindStickyDataTableHeaderScroll = function(dataTable, namespace) {
+		var wrapper = getStickyDataTableWrapper(dataTable);
+		var sticky = dataTable.stickyContainer;
+		if ((wrapper.length === 0) || (! sticky)) {
+			return;
+		}
+
+		wrapper.on('scroll' + namespace, function() {
+			syncStickyDataTableHeaderScroll(dataTable);
+		});
+		sticky.on('scroll' + namespace, function() {
+			var wrapperElement = wrapper[0];
+			if (wrapperElement.scrollLeft !== sticky[0].scrollLeft) {
+				wrapperElement.scrollLeft = sticky[0].scrollLeft;
+			}
+		});
+		// Native listener because the default action has to be cancellable (jQuery can't set passive: false)
+		sticky[0].addEventListener('wheel', function(event) {
+			var wrapperElement = wrapper[0];
+			var deltaX = event.deltaX;
+			var deltaY = event.deltaY;
+			if (event.shiftKey && (! deltaX)) { // shift + mouse wheel scrolls sideways
+				deltaX = deltaY;
+				deltaY = 0;
+			}
+			if ((Math.abs(deltaX) <= Math.abs(deltaY)) ||
+					(wrapperElement.scrollWidth <= wrapperElement.clientWidth)) {
+				return; // vertical scrolling - let the page scroll
+			}
+			if (event.deltaMode === 1) { // lines
+				deltaX *= 16;
+			}
+			else if (event.deltaMode === 2) { // pages
+				deltaX *= wrapperElement.clientWidth;
+			}
+			wrapperElement.scrollLeft += deltaX;
+			event.preventDefault();
+		}, {passive: false});
 	};
 
 	var refreshStickyDataTableHeader = function(dataTable) {
@@ -141,6 +201,7 @@ SKYVE.PF = function() {
 		};
 
 		$(window).on('resize' + namespace + ' orientationchange' + namespace, refresh);
+		bindStickyDataTableHeaderScroll(dataTable, namespace);
 		$(document).on('click' + namespace, '.layout-menu-button,.menu-button,#topbar-menu-button', function() {
 			refreshStickyDataTableHeader(dataTable);
 			window.setTimeout(function() {
@@ -155,6 +216,7 @@ SKYVE.PF = function() {
 			}
 			$(window).off(namespace);
 			$(document).off(namespace);
+			getStickyDataTableWrapper(dataTable).off(namespace);
 		});
 		dataTable.skyveStickyResizePatch = true;
 	};
