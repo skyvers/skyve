@@ -260,3 +260,15 @@ input[type=submit] {
 	color: #5f5f5f !important;
 	-webkit-text-fill-color: #5f5f5f !important;
 }
+/* Disabled field labels: halfway between the skin's enabled (#003168) and disabled (#ababab) colours */
+.formTitleDisabled, .formTitleDisabledRTL,
+.formTitleErrorDisabled, .formTitleErrorDisabledRTL,
+.formTitleDisabledError, .formTitleDisabledErrorRTL,
+.formTitlePendingDisabled, .formTitlePendingDisabledRTL,
+.formTitleVerticalDisabled, .formTitleVerticalDisabledRTL,
+.formTitleVerticalErrorDisabled, .formTitleVerticalErrorDisabledRTL,
+.formTitleVerticalDisabledError, .formTitleVerticalDisabledErrorRTL,
+.formTitleVerticalPendingDisabled, .formTitleVerticalPendingDisabledRTL {
+	color: #566e8a !important;
+	-webkit-text-fill-color: #566e8a !important;
+}
