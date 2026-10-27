@@ -76,6 +76,11 @@
 			</item>
 		</row>
 		<row>
+			<item showLabel="true" label="Attachments">
+				<content binding="attachments" display="link" editable="false" visible="hasAttachments" />
+			</item>
+		</row>
+		<row>
 			<item showLabel="true" label="Bulk">
 				<blurb>{isBulk}</blurb>
 			</item>

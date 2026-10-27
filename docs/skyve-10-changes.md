@@ -17,6 +17,7 @@ These notes collect release-ready framework changes introduced for Skyve 10.
 - [Lucene Content Identifiers and Garbage Collection](#lucene-content-identifiers-and-garbage-collection)
 - [Scheduled Backups and Azure Copies](#scheduled-backups-and-azure-copies)
 - [Custom Property Order and Fluent Builders](#custom-property-order-and-fluent-builders)
+- [Mail Log Body Excerpts and Attachments](#mail-log-body-excerpts-and-attachments)
 - Decimal10 converters `Decimal10Integer`, `Decimal10IntegerPercentage`, `Decimal10OneDecimalPlace` and `Decimal10TwoDecimalPlacesPercentage` are new, and `Decimal10DollarsAndCents` can now be named in metadata.
 - [Server-side Questions](#server-side-questions): server code can ask the user an OK/Cancel or Yes/No question with `EXT.getDialogs()`, in SmartClient and PrimeFaces.
 - [Server-side Action Availability](server-side-action-availability.md): the server refuses a request for a view action that the view, as last rendered, offers the user no way to trigger.
@@ -161,6 +162,31 @@ declaration order instead of being sorted by key.
   privileges, content permissions and content restrictions.
 - A `<property>` with no `key` is ignored when metadata is loaded.
 
+## Mail Log Body Excerpts and Attachments
+
+The Mail Log can now optionally store more of each outbound mail. Both settings are off by
+default, live in the `smtp` stanza of the JSON configuration, and can be changed at runtime
+from the Startup page, which writes them to the override configuration.
+
+- `smtp.logBodyExcerpt`: when `true`, `MailLog.bodyExcerpt` stores the first 500 characters
+  of the plain-text body instead of `[REDACTED]`. Only numeric codes that follow a known phrase
+  ("verification code", "one-time code", "security code", "2FA code" and similar) are masked.
+  Anything else in the body is stored as written, such as a temporary password or a plain-text
+  reset link in a custom template, so check your templates before turning this on.
+  `bodyExcerpt` is now 500 characters long (was 255); DDL sync widens the column.
+- `smtp.logAttachments` and `smtp.logAttachmentsMaxBytes`: when `true`, the attachments sent
+  are stored as a zip in the new `MailLog.attachments` content attribute, up to the given total
+  size (default 5 MB). Attachments over the limit are left out and listed in `SKIPPED.txt`
+  inside the zip; a negative limit is treated as 0. The zip is not text-indexed, but it is
+  stored unmasked and can be downloaded by anyone who can read the Mail Log (by default the
+  SecurityAdministrator role). It is kept until the Mail Log is hard
+  deleted after archiving, when content garbage collection removes it. Archived Mail Logs
+  do not keep their attachments: the content ID is cleared in the archived copy.
+- `org.skyve.archive.support.DocumentConverter` gains a default no-op
+  `prepareForArchive(Bean)`, called by the archive export job before each bean is written,
+  so a document's converter can clear values that should not be archived.
+- `org.skyve.domain.app.admin.MailLog` gains `getAttachments()` and `setAttachments(String)`.
+  Re-assemble the admin module so its generated `MailLog` implements them.
 ## Server-side Questions
 
 Server code can now ask the user a question part way through a request, where before
