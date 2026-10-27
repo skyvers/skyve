@@ -41,7 +41,7 @@
 			<h:panelGroup styleClass="skyveEnvBanner skyveTopEnvBanner" rendered="#{not empty bean.environmentIdentifier}">#{bean.environmentIdentifier}</h:panelGroup>
 			<h:panelGroup styleClass="skyveEnvBanner skyveBottomEnvBanner" rendered="#{not empty bean.environmentIdentifier}">#{bean.environmentIdentifier}</h:panelGroup>
 
-			<div id="wrapper">
+			<div id="wrapper" class="#{showMenu ? '' : 'no-sidebar'}">
 				<div id="main">
 					<div class="inner">
 						<header id="header" class="ui-panel">
