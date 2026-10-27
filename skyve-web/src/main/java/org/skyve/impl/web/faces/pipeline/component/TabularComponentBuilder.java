@@ -4901,6 +4901,8 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 			overlay.setDynamic(false);
 			overlay.setShowCloseIcon(true);
 			overlay.setModal(false); // modal on PF8 causes the opaque mask to sit over the top of the overlay panel
+			// append to <body/> so the overlay is not clipped by a fixed or scrolling action bar
+			overlay.setAppendTo("@(body)");
 			overlay.setStyle("width:50%;height:310px");
 			// clear the iframe src on hide so there is no flash next open, and call the refresh remote command
 			overlay.setOnHide(createContentOverlayOnHideScript(panelId) + ';' + refreshId + "()");

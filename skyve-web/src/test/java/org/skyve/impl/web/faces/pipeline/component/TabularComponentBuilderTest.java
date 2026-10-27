@@ -4515,6 +4515,9 @@ class TabularComponentBuilderTest {
 		verify(uploadButton).setValue("Upload");
 		verify(uploadButton).setEscape(true);
 		verify(uploadButton).setType("button");
+		// appended to the body so a fixed or scrolling action bar cannot clip it
+		verify(overlayPanel).setFor("uploadButtonId");
+		verify(overlayPanel).setAppendTo("@(body)");
 		assertEquals(1, overlayChildren.size());
 		assertSame(iframe, overlayChildren.get(0));
 		ArgumentCaptor<String> iframeMarkupCaptor = ArgumentCaptor.forClass(String.class);
