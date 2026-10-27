@@ -9,6 +9,7 @@ import org.apache.lucene.document.TextField;
 import org.apache.lucene.util.BytesRef;
 import org.skyve.archive.support.DocumentConverter;
 import org.skyve.domain.Bean;
+import org.skyve.domain.DynamicBean;
 
 import modules.admin.domain.MailLog;
 
@@ -84,5 +85,20 @@ public class MailLogDocumentConverter implements DocumentConverter {
 	@Override
 	public boolean handles(String module, String document) {
 		return MailLog.MODULE_NAME.equals(module) && MailLog.DOCUMENT_NAME.equals(document);
+	}
+
+	/**
+	 * Clears the stored attachments content ID before a mail log is archived.
+	 * <p>
+	 * The attachments zip is not archived - content garbage collection removes it once the archived row
+	 * is hard deleted - so an archived mail log would otherwise show a download link that stops working.
+	 *
+	 * @param bean the mail log being archived - the export job passes projected {@link DynamicBean}s
+	 */
+	@Override
+	public void prepareForArchive(Bean bean) {
+		if ((bean instanceof DynamicBean dynamicBean) && dynamicBean.isProperty(MailLog.attachmentsPropertyName)) {
+			dynamicBean.set(MailLog.attachmentsPropertyName, null);
+		}
 	}
 }

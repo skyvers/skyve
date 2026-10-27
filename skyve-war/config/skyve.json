@@ -353,6 +353,12 @@
 		"sender": "mailer@skyve.org", 
 		// Set true so emails are never sent, they are logged
 		"testBogusSend": false, 
+		// Set true to store a masked plain-text body excerpt in the Mail Log (default false redacts the body)
+		"logBodyExcerpt": false,
+		// Set true to store the mail attachments as a zip in the Mail Log (default false stores attachment file names only)
+		"logAttachments": false,
+		// Maximum total size in bytes of the attachments stored against a single Mail Log entry
+		"logAttachmentsMaxBytes": 5242880,
 		// Test Recipient (all emails only sent to this email address)
 		"testRecipient": "test@yourdomain.com"
 	},

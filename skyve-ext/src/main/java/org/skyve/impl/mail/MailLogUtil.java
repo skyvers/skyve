@@ -1,14 +1,25 @@
 package org.skyve.impl.mail;
 
+import java.io.ByteArrayOutputStream;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.HexFormat;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 import org.skyve.CORE;
+import org.skyve.EXT;
+import org.skyve.content.AttachmentContent;
+import org.skyve.content.ContentManager;
+import org.skyve.content.MimeType;
 import org.skyve.domain.app.admin.MailLog;
 import org.skyve.domain.types.Timestamp;
 import org.skyve.impl.metadata.user.SuperUser;
@@ -34,6 +45,13 @@ public class MailLogUtil {
 	private static final Logger LOGGER = SkyveLoggerFactory.getLogger(MailLogUtil.class);
 	private static final String ANONYMOUS_MAIL_LOG_USER = "mailLogUser";
 	private static final String REDACTED_BODY_EXCERPT = "[REDACTED]";
+	// Matches the MailLog.bodyExcerpt field length
+	private static final int BODY_EXCERPT_MAX_LENGTH = 500;
+	private static final String BODY_EXCERPT_ELLIPSIS = "...";
+	static final String ATTACHMENTS_ATTRIBUTE_NAME = MailLog.ATTACHMENTS_ATTRIBUTE_NAME;
+	static final String ATTACHMENTS_FILE_NAME = "mail-attachments.zip";
+	static final String SKIPPED_ATTACHMENTS_FILE_NAME = "SKIPPED.txt";
+	private static final String UNNAMED_ATTACHMENT_PREFIX = "attachment-";
 	private static final String[] SENSITIVE_CODE_PREFIXES = {
 			"verification code",
 			"security code",
@@ -85,9 +103,27 @@ public class MailLogUtil {
 		recorder.set(null);
 	}
 
+	/**
+	 * Returns the body excerpt to persist - {@value #REDACTED_BODY_EXCERPT} unless <code>smtp.logBodyExcerpt</code>
+	 * is enabled, in which case a masked plain-text excerpt truncated to {@value #BODY_EXCERPT_MAX_LENGTH} characters.
+	 */
 	static @Nullable String bodyExcerpt(@Nullable String body) {
 		String cleaned = Util.processStringValue(body);
-		return (cleaned == null) ? null : REDACTED_BODY_EXCERPT;
+		if (cleaned == null) {
+			return null;
+		}
+		if (!UtilImpl.SMTP_LOG_BODY_EXCERPT) {
+			return REDACTED_BODY_EXCERPT;
+		}
+
+		String plainBody = plainTextBody(cleaned);
+		if (plainBody == null) {
+			return null;
+		}
+		if (plainBody.length() <= BODY_EXCERPT_MAX_LENGTH) {
+			return plainBody;
+		}
+		return plainBody.substring(0, BODY_EXCERPT_MAX_LENGTH - BODY_EXCERPT_ELLIPSIS.length()) + BODY_EXCERPT_ELLIPSIS;
 	}
 
 	private static @Nullable String plainTextBody(@Nullable String body) {
@@ -415,6 +451,9 @@ public class MailLogUtil {
 		Mail firstMail = mails.isEmpty() ? null : mails.get(0);
 		String firstSubject = (firstMail == null) ? null : Util.processStringValue(firstMail.getSubject());
 		String firstBodyExcerpt = (firstMail == null) ? null : bodyExcerpt(firstMail.getBody());
+		byte[] attachmentsZip = UtilImpl.SMTP_LOG_ATTACHMENTS ?
+									zipAttachments(mails, UtilImpl.SMTP_LOG_ATTACHMENTS_MAX_BYTES) :
+									null;
 
 		return new MailLogEntry(new Timestamp(),
 								join(toRecipients),
@@ -423,6 +462,7 @@ public class MailLogUtil {
 								firstSubject,
 								firstBodyExcerpt,
 								join(attachmentNames),
+								attachmentsZip,
 								outcome.getStatus().name(),
 								outcome.getProvider(),
 								outcome.getProviderMessageId(),
@@ -436,6 +476,119 @@ public class MailLogUtil {
 								Long.valueOf(subjectVariants.size()),
 								Boolean.valueOf(bodyVariants.size() > 1),
 								Long.valueOf(bodyVariants.size()));
+	}
+
+	/**
+	 * Zips the attachments of the given mails for storage against a MailLog.
+	 * <p>
+	 * Attachments are added in mail order. Identical attachments (same name and bytes) are stored once,
+	 * a name clash with different bytes is stored with a " (n)" suffix, and attachments that would take the
+	 * total raw size over <code>maxBytes</code> are left out and listed in {@value #SKIPPED_ATTACHMENTS_FILE_NAME}.
+	 * Zipping is best-effort and never fails the caller's mail flow.
+	 *
+	 * @param mails	The mails whose attachments to zip.
+	 * @param maxBytes	The maximum total raw size of the attachments to store.
+	 * @return	The zip bytes, or null if there are no attachments to store or zipping failed.
+	 */
+	static @Nullable byte[] zipAttachments(@Nonnull List<Mail> mails, long maxBytes) {
+		try {
+			MessageDigest digest = MessageDigest.getInstance("SHA-256");
+			Set<String> storedKeys = new HashSet<>();
+			Set<String> entryNames = new HashSet<>();
+			entryNames.add(SKIPPED_ATTACHMENTS_FILE_NAME); // reserved for the skipped attachments list
+			List<String> skipped = new ArrayList<>();
+			ByteArrayOutputStream result = new ByteArrayOutputStream();
+			long totalBytes = 0;
+			int unnamedCount = 0;
+			boolean anyStored = false;
+
+			try (ZipOutputStream zip = new ZipOutputStream(result)) {
+				for (Mail mail : mails) {
+					for (MailAttachment attachment : mail.getAttachments()) {
+						byte[] bytes = (attachment == null) ? null : attachment.getAttachment();
+						if ((bytes == null) || (bytes.length == 0)) {
+							continue;
+						}
+
+						String fileName = Util.processStringValue(attachment.getAttachmentFileName());
+						String hash = HexFormat.of().formatHex(digest.digest(bytes));
+						if (!storedKeys.add(((fileName == null) ? "" : fileName) + '\0' + hash)) {
+							continue; // identical attachment already stored or skipped
+						}
+
+						String name = safeEntryName(fileName);
+						if (name == null) {
+							name = UNNAMED_ATTACHMENT_PREFIX + (++unnamedCount);
+						}
+
+						if ((totalBytes + bytes.length) > maxBytes) {
+							skipped.add(name + " (" + bytes.length + " bytes) exceeds the remaining limit of " +
+											(maxBytes - totalBytes) + " bytes");
+							continue;
+						}
+
+						String entryName = uniqueEntryName(name, entryNames);
+						zip.putNextEntry(new ZipEntry(entryName));
+						zip.write(bytes);
+						zip.closeEntry();
+						totalBytes += bytes.length;
+						anyStored = true;
+					}
+				}
+
+				if (!skipped.isEmpty()) {
+					zip.putNextEntry(new ZipEntry(SKIPPED_ATTACHMENTS_FILE_NAME));
+					zip.write(String.join("\n", skipped).getBytes(StandardCharsets.UTF_8));
+					zip.closeEntry();
+				}
+			}
+
+			return (anyStored || (!skipped.isEmpty())) ? result.toByteArray() : null;
+		}
+		catch (Exception e) {
+			LOGGER.warn("Failed to zip MailLog attachments", e);
+			return null;
+		}
+	}
+
+	/**
+	 * Reduces an attachment file name to a safe zip entry name - the base name only, without control
+	 * characters - so that extracting the zip cannot write outside the target directory.
+	 *
+	 * @param fileName	The attachment file name, which may come from user input.
+	 * @return	The safe name, or null if nothing usable remains.
+	 */
+	static @Nullable String safeEntryName(@Nullable String fileName) {
+		if (fileName == null) {
+			return null;
+		}
+		String result = fileName.substring(Math.max(fileName.lastIndexOf('/'), fileName.lastIndexOf('\\')) + 1);
+		StringBuilder printable = new StringBuilder(result.length());
+		result.codePoints()
+				.filter(c -> !Character.isISOControl(c))
+				.forEach(printable::appendCodePoint);
+		result = Util.processStringValue(printable.toString());
+		if ((result == null) || ".".equals(result) || "..".equals(result)) {
+			return null;
+		}
+		return result;
+	}
+
+	/**
+	 * Returns a zip entry name for the attachment, suffixing " (n)" before the extension when
+	 * the name is already used by another entry (or reserved for the skipped attachments list).
+	 */
+	private static String uniqueEntryName(String name, Set<String> entryNames) {
+		String result = name;
+		int dot = name.lastIndexOf('.');
+		String base = (dot > 0) ? name.substring(0, dot) : name;
+		String extension = (dot > 0) ? name.substring(dot) : "";
+		int suffix = 1;
+		while (entryNames.contains(result)) {
+			result = base + " (" + (++suffix) + ")" + extension;
+		}
+		entryNames.add(result);
+		return result;
 	}
 
 	private static @Nullable String join(TreeSet<String> values) {
@@ -482,6 +635,9 @@ public class MailLogUtil {
 			log.setSubject(entry.subject);
 			log.setBodyExcerpt(entry.bodyExcerpt);
 			log.setAttachmentFileNames(entry.attachmentFileNames);
+			if (entry.attachmentsZip != null) {
+				log.setAttachments(putAttachments(log, entry.attachmentsZip));
+			}
 			log.setDispatchStatus(entry.dispatchStatus);
 			log.setProvider(entry.provider);
 			log.setProviderMessageId(entry.providerMessageId);
@@ -504,6 +660,31 @@ public class MailLogUtil {
 		}
 		finally {
 			closeQuietly(tempP);
+		}
+	}
+
+	/**
+	 * Stores the attachments zip against the MailLog's attachments content attribute without textual indexing.
+	 * Storage is best-effort - if it fails, the MailLog is still persisted without attachments.
+	 *
+	 * @return	The content ID of the stored zip, or null if it could not be stored.
+	 */
+	static @Nullable String putAttachments(@Nonnull MailLog log, @Nonnull byte[] attachmentsZip) {
+		try (ContentManager cm = EXT.newContentManager()) {
+			AttachmentContent content = new AttachmentContent(log.getBizCustomer(),
+																log.getBizModule(),
+																log.getBizDocument(),
+																log.getBizDataGroupId(),
+																log.getBizUserId(),
+																log.getBizId(),
+																ATTACHMENTS_ATTRIBUTE_NAME);
+			content.attachment(ATTACHMENTS_FILE_NAME, MimeType.zip, attachmentsZip);
+			cm.put(content, false);
+			return content.getContentId();
+		}
+		catch (Exception e) {
+			LOGGER.warn("Failed to store MailLog attachments", e);
+			return null;
 		}
 	}
 
@@ -576,6 +757,7 @@ public class MailLogUtil {
 		private final String subject;
 		private final String bodyExcerpt;
 		private final String attachmentFileNames;
+		private final byte[] attachmentsZip;
 		private final String dispatchStatus;
 		private final String provider;
 		private final String providerMessageId;
@@ -598,6 +780,7 @@ public class MailLogUtil {
 							String subject,
 							String bodyExcerpt,
 							String attachmentFileNames,
+							byte[] attachmentsZip,
 							String dispatchStatus,
 							String provider,
 							String providerMessageId,
@@ -618,6 +801,7 @@ public class MailLogUtil {
 			this.subject = subject;
 			this.bodyExcerpt = bodyExcerpt;
 			this.attachmentFileNames = attachmentFileNames;
+			this.attachmentsZip = attachmentsZip;
 			this.dispatchStatus = dispatchStatus;
 			this.provider = provider;
 			this.providerMessageId = providerMessageId;
@@ -659,6 +843,10 @@ public class MailLogUtil {
 
 		String getAttachmentFileNames() {
 			return attachmentFileNames;
+		}
+
+		byte[] getAttachmentsZip() {
+			return attachmentsZip;
 		}
 
 		String getDispatchStatus() {

@@ -78,6 +78,9 @@ public class SkyveContextListenerTest {
 	private final String originalSmtpSender = UtilImpl.SMTP_SENDER;
 	private final String originalSmtpTestRecipient = UtilImpl.SMTP_TEST_RECIPIENT;
 	private final boolean originalSmtpTestBogusSend = UtilImpl.SMTP_TEST_BOGUS_SEND;
+	private final boolean originalSmtpLogBodyExcerpt = UtilImpl.SMTP_LOG_BODY_EXCERPT;
+	private final boolean originalSmtpLogAttachments = UtilImpl.SMTP_LOG_ATTACHMENTS;
+	private final long originalSmtpLogAttachmentsMaxBytes = UtilImpl.SMTP_LOG_ATTACHMENTS_MAX_BYTES;
 	private final UtilImpl.ArchiveConfig originalArchiveConfig = UtilImpl.ARCHIVE_CONFIG;
 	private final String originalCustomer = UtilImpl.CUSTOMER;
 	private final String originalSkyveContextRealPath = UtilImpl.SKYVE_CONTEXT_REAL_PATH;
@@ -103,6 +106,9 @@ public class SkyveContextListenerTest {
 		UtilImpl.SMTP_SENDER = originalSmtpSender;
 		UtilImpl.SMTP_TEST_RECIPIENT = originalSmtpTestRecipient;
 		UtilImpl.SMTP_TEST_BOGUS_SEND = originalSmtpTestBogusSend;
+		UtilImpl.SMTP_LOG_BODY_EXCERPT = originalSmtpLogBodyExcerpt;
+		UtilImpl.SMTP_LOG_ATTACHMENTS = originalSmtpLogAttachments;
+		UtilImpl.SMTP_LOG_ATTACHMENTS_MAX_BYTES = originalSmtpLogAttachmentsMaxBytes;
 		UtilImpl.ARCHIVE_CONFIG = originalArchiveConfig;
 		UtilImpl.CUSTOMER = originalCustomer;
 		UtilImpl.SKYVE_CONTEXT_REAL_PATH = originalSkyveContextRealPath;
@@ -284,11 +290,80 @@ public class SkyveContextListenerTest {
 		Map<String, Object> factories = new HashMap<>();
 		factories.put("mailServiceClass", NoOpMailService.class.getName());
 
+		UtilImpl.SMTP_LOG_BODY_EXCERPT = true;
+		UtilImpl.SMTP_LOG_ATTACHMENTS = true;
+		UtilImpl.SMTP_LOG_ATTACHMENTS_MAX_BYTES = 1L;
+
 		SkyveContextListener.configureMailServiceAndSmtp(properties, factories);
 
 		assertThat(UtilImpl.SMTP, is("localhost"));
 		assertEquals(25, UtilImpl.SMTP_PORT);
 		assertThat(UtilImpl.SMTP_SENDER, is("mailer@skyve.org"));
+		assertFalse(UtilImpl.SMTP_LOG_BODY_EXCERPT);
+		assertFalse(UtilImpl.SMTP_LOG_ATTACHMENTS);
+		assertEquals(UtilImpl.DEFAULT_SMTP_LOG_ATTACHMENTS_MAX_BYTES, UtilImpl.SMTP_LOG_ATTACHMENTS_MAX_BYTES);
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void testConfigureMailServiceAndSmtpReadsLogBodyExcerpt() {
+		Map<String, Object> properties = new HashMap<>();
+		Map<String, Object> smtp = new HashMap<>();
+		smtp.put("server", "localhost");
+		smtp.put("port", Integer.valueOf(25));
+		smtp.put("sender", "mailer@skyve.org");
+		smtp.put("testBogusSend", Boolean.FALSE);
+		smtp.put("logBodyExcerpt", Boolean.TRUE);
+		properties.put("smtp", smtp);
+
+		Map<String, Object> factories = new HashMap<>();
+		factories.put("mailServiceClass", NoOpMailService.class.getName());
+
+		SkyveContextListener.configureMailServiceAndSmtp(properties, factories);
+
+		assertTrue(UtilImpl.SMTP_LOG_BODY_EXCERPT);
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void testConfigureMailServiceAndSmtpClampsNegativeLogAttachmentsMaxBytes() {
+		Map<String, Object> properties = new HashMap<>();
+		Map<String, Object> smtp = new HashMap<>();
+		smtp.put("server", "localhost");
+		smtp.put("port", Integer.valueOf(25));
+		smtp.put("sender", "mailer@skyve.org");
+		smtp.put("testBogusSend", Boolean.FALSE);
+		smtp.put("logAttachmentsMaxBytes", Integer.valueOf(-1));
+		properties.put("smtp", smtp);
+
+		Map<String, Object> factories = new HashMap<>();
+		factories.put("mailServiceClass", NoOpMailService.class.getName());
+
+		SkyveContextListener.configureMailServiceAndSmtp(properties, factories);
+
+		assertEquals(0L, UtilImpl.SMTP_LOG_ATTACHMENTS_MAX_BYTES);
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void testConfigureMailServiceAndSmtpReadsLogAttachments() {
+		Map<String, Object> properties = new HashMap<>();
+		Map<String, Object> smtp = new HashMap<>();
+		smtp.put("server", "localhost");
+		smtp.put("port", Integer.valueOf(25));
+		smtp.put("sender", "mailer@skyve.org");
+		smtp.put("testBogusSend", Boolean.FALSE);
+		smtp.put("logAttachments", Boolean.TRUE);
+		smtp.put("logAttachmentsMaxBytes", Integer.valueOf(1024));
+		properties.put("smtp", smtp);
+
+		Map<String, Object> factories = new HashMap<>();
+		factories.put("mailServiceClass", NoOpMailService.class.getName());
+
+		SkyveContextListener.configureMailServiceAndSmtp(properties, factories);
+
+		assertTrue(UtilImpl.SMTP_LOG_ATTACHMENTS);
+		assertEquals(1024L, UtilImpl.SMTP_LOG_ATTACHMENTS_MAX_BYTES);
 	}
 
 	@Test
