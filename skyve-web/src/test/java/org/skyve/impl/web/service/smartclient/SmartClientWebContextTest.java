@@ -1,12 +1,18 @@
 package org.skyve.impl.web.service.smartclient;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.Locale;
 import java.util.Map;
 
@@ -64,5 +70,46 @@ class SmartClientWebContextTest {
 		when(request.getLocale()).thenReturn(Locale.ENGLISH);
 
 		assertThrows(SessionEndedException.class, () -> new SmartClientWebContext("ctx", request));
+	}
+
+	@Test
+	void preparedDownloadMatchesOnlyItsDocumentActionAndTarget() throws Exception {
+		SmartClientWebContext context = context();
+		assertFalse(context.isPreparedDownload("mod.Doc", "Download", null, null));
+		context.recordPreparedDownload("Download", "mod", "Doc", "child", "rows", "row1");
+
+		assertTrue(context.isPreparedDownload("mod.Doc", "Download", "child.rows", "row1"));
+		assertTrue(context.isPreparedDownload("mod.Doc", "Download", "child.rows", "row1"));
+		assertFalse(context.isPreparedDownload("mod.Other", "Download", "child.rows", "row1"));
+		assertFalse(context.isPreparedDownload("mod.Doc", "Other", "child.rows", "row1"));
+		assertFalse(context.isPreparedDownload("mod.Doc", "Download", "rows", "row1"));
+		assertFalse(context.isPreparedDownload("mod.Doc", "Download", "child.rows", "row2"));
+	}
+
+	@Test
+	void preparedDownloadSurvivesConversationSerializationAndIsReplaced() throws Exception {
+		SmartClientWebContext context = context();
+		context.recordPreparedDownload("First", "mod", "Doc", null, null, "ignored");
+		context.recordPreparedDownload("Second", "mod", "Doc", null, "rows", "row1");
+
+		ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+		try (ObjectOutputStream out = new ObjectOutputStream(bytes)) {
+			out.writeObject(context);
+		}
+		SmartClientWebContext restored;
+		try (ObjectInputStream in = new ObjectInputStream(new ByteArrayInputStream(bytes.toByteArray()))) {
+			restored = (SmartClientWebContext) in.readObject();
+		}
+
+		assertFalse(restored.isPreparedDownload("mod.Doc", "First", null, null));
+		assertTrue(restored.isPreparedDownload("mod.Doc", "Second", "rows", "row1"));
+	}
+
+	private static SmartClientWebContext context() {
+		HttpServletRequest request = mock(HttpServletRequest.class);
+		HttpSession session = mock(HttpSession.class);
+		when(request.getSession(false)).thenReturn(session);
+		when(session.getId()).thenReturn("session-1");
+		return new SmartClientWebContext("ctx", request);
 	}
 }

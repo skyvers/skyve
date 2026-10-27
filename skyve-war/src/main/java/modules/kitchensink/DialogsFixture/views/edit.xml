@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<view name="edit"
+		title="Dialogs Fixture"
+		xmlns="http://www.skyve.org/xml/view"
+		xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<blurb>
+		Each action asks one or more questions from the server. Changing Text asks from a rerender, changing Action Text runs Ask Once from its change handler,
+		the Ask On Save and Ask On Delete checkboxes make Save, OK and Delete ask, and zooming out of a row asks.
+		Outcome shows what the code did once its questions were answered.
+	</blurb>
+	<form border="true" borderTitle="Questions">
+		<column responsiveWidth="3" />
+		<column responsiveWidth="9" />
+		<row>
+			<item>
+				<textField binding="text">
+					<onChangedHandlers>
+						<rerender clientValidation="false" />
+					</onChangedHandlers>
+				</textField>
+			</item>
+		</row>
+		<row>
+			<item>
+				<textField binding="actionText">
+					<onChangedHandlers>
+						<server action="AskOnce" />
+					</onChangedHandlers>
+				</textField>
+			</item>
+		</row>
+		<row>
+			<item>
+				<checkBox binding="askOnSave" />
+			</item>
+		</row>
+		<row>
+			<item>
+				<checkBox binding="askOnDelete" />
+			</item>
+		</row>
+		<row>
+			<item>
+				<textField binding="outcome" enabled="false" />
+			</item>
+		</row>
+	</form>
+	<dataGrid binding="rows" title="Rows">
+		<boundColumn binding="name" />
+	</dataGrid>
+	<actions>
+		<defaults />
+		<action className="AskOnce" displayName="Ask Once" />
+		<action className="AskTwice" displayName="Ask Twice" confirm="Run Ask Twice?" />
+		<action className="AskYesNo" displayName="Ask Yes or No" />
+		<action className="AskEveryRun" displayName="Ask Every Run" />
+		<action className="SaveThenAsk" displayName="Save Then Ask" />
+		<action className="AskWrapped" displayName="Ask Wrapped" />
+	</actions>
+</view>

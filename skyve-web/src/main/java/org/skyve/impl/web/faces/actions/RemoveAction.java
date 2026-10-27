@@ -5,6 +5,7 @@ import java.util.List;
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
 import org.skyve.impl.bind.BindUtil;
+import org.skyve.impl.dialog.DialogsProtocol;
 import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
 import org.skyve.impl.util.UtilImpl;
@@ -20,6 +21,8 @@ import org.skyve.util.monitoring.Monitoring;
 import org.skyve.util.monitoring.RequestKey;
 import org.skyve.web.WebContext;
 import org.slf4j.Logger;
+
+import jakarta.faces.context.FacesContext;
 
 /**
  * Remove an element from an array.
@@ -59,12 +62,18 @@ public class RemoveAction extends FacesAction<Void> {
 	 * on-removed handlers. For zoomed removal, this executes remove pre-hooks, applies
 	 * the association/collection mutation, and then zooms out.
 	 *
+	 * <p>Side effects: marks the current HTTP request, if there is one, as able to ask questions
+	 * (see {@link org.skyve.dialog.Dialogs}), as the client can resend it with the answers.
+	 * Once an on-removed handler asks a question, the remaining handlers are not run.
+	 *
 	 * @return always {@code null} because this action mutates view and model state only
 	 * @throws Exception if target resolution, interceptors, bizlet hooks, or binding updates fail
 	 */
 	@Override
 	@SuppressWarnings("java:S3776") // Complexity OK
 	public Void callback() throws Exception {
+		// This action can ask questions, as the client can resend its request
+		DialogsProtocol.markAskable();
 		if (UtilImpl.FACES_TRACE) FACES_LOGGER.info("RemoveAction - collectionName={} : elementBizId={}", collectionName, elementBizId);
 
 		Bean bean = facesView.getBean();
@@ -81,7 +90,12 @@ public class RemoveAction extends FacesAction<Void> {
 			
 			// fire onRemovedHandlers after removal
 			if (removedHandlerActionNames != null) {
+				FacesContext fc = FacesContext.getCurrentInstance();
 				for (String removedHandlerActionName : removedHandlerActionNames) {
+					// A handler asked a question, so this run is rolled back and will be resent - stop here
+					if (FacesAction.isQuestionAsked(fc)) {
+						break;
+					}
 					if (Boolean.TRUE.toString().equals(removedHandlerActionName)) {
 						if (UtilImpl.FACES_TRACE) FACES_LOGGER.info("RemoveAction - execute removed handler rerender with client validation");
 						new RerenderAction(facesView, collectionName, true).execute();

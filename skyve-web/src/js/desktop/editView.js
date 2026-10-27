@@ -38,12 +38,32 @@ isc.BizContainer.addMethods({
 isc.ClassFactory.defineClass("EditView", "BizContainer");
 
 isc.EditView.addClassProperties({
+	// The response status of a request that asks the user a question before it is resent
+	_QUESTION: -50,
+	// The response status of a request for an action that the view, as last rendered, offered no trigger for
+	_UNAVAILABLE: -51,
 	_DATA_SOURCE: isc.RestDataSource.create({
 		dataFormat: "json",
 		jsonPrefix: "",
 		jsonSuffix: "",
 		dataURL: "smartedit",
 		sendExtraFields: false, // Ensure that only datasource defined fields are sent
+		// A server-side question (status -50), and the growls and messages raised before an error,
+		// are sent beside the standard response properties, which RestDataSource does not copy to the DSResponse
+		transformResponse: function (dsResponse, dsRequest, data) {
+			const result = this.Super("transformResponse", arguments);
+			const response = data?.response;
+			if (response?.question) {
+				result.question = response.question;
+			}
+			if (response?._growls) {
+				result._growls = response._growls;
+			}
+			if (response?._messages) {
+				result._messages = response._messages;
+			}
+			return result;
+		},
 	}),
 });
 
@@ -306,8 +326,8 @@ isc.EditView.addMethods({
 					}
 
 					success = true;
-				} else if (dsResponse.status === -1) {
-					isc.warn(data, null, { title: isc.i18nMessages.editView_Problems });
+				} else {
+					this._displayFailure(dsResponse, data);
 				}
 
 				if (completedCallback) {
@@ -425,9 +445,9 @@ isc.EditView.addMethods({
 					this.scatter(values);
 
 					success = true;
-				} else if (dsResponse.status === -1) {
-					// Display a warning if there are issues
-					isc.warn(data, null, { title: isc.i18nMessages.editView_Problems });
+				} else {
+					// Display the problem, and any growls and messages raised before it
+					this._displayFailure(dsResponse, data);
 				}
 
 				// Execute the completed callback if provided
@@ -548,7 +568,7 @@ isc.EditView.addMethods({
 
 		this._vm.disableValidation = true;
 		this._vm.saveData(
-			(dsResponse, data) => {
+			this._askable(params, completedCallback, (dsResponse, data) => {
 				let success = false;
 				if (dsResponse.status >= 0) {
 					this._csrf = dsResponse.httpHeaders["x-csrf-token"];
@@ -622,14 +642,14 @@ isc.EditView.addMethods({
 					}
 
 					success = true;
-				} else if (dsResponse.status === -1) {
-					isc.warn(data, null, { title: isc.i18nMessages.editView_Problems });
+				} else {
+					this._displayFailure(dsResponse, data);
 				}
 
 				if (completedCallback) {
 					completedCallback(data, success);
 				}
-			},
+			}),
 			{ params, willHandleError: true },
 		);
 		this._vm.disableValidation = false;
@@ -658,23 +678,27 @@ isc.EditView.addMethods({
 			params._csrf = this._csrf;
 		}
 
+		const resendRemove = (answered, callback) => {
+			isc.EditView._DATA_SOURCE.removeData(instance, callback, { params: answered, willHandleError: true });
+		};
+
 		isc.EditView._DATA_SOURCE.removeData(
 			instance,
-			(dsResponse, data) => {
+			this._askable(params, completedCallback, (dsResponse, data) => {
 				let success = false;
 				if (dsResponse.status >= 0) {
 					this._csrf = dsResponse.httpHeaders["x-csrf-token"];
 					isc.WindowStack.popoff(true);
 
 					success = true;
-				} else if (dsResponse.status === -1) {
-					isc.warn(data, null, { title: isc.i18nMessages.editView_Problems });
+				} else {
+					this._displayFailure(dsResponse, data);
 				}
 
 				if (completedCallback) {
 					completedCallback(data, success);
 				}
-			},
+			}, resendRemove),
 			{ params, willHandleError: true },
 		);
 	},
@@ -731,7 +755,7 @@ isc.EditView.addMethods({
 
 		// Save data and handle the response
 		this._vm.saveData(
-			(dsResponse, data) => {
+			this._askable(params, completedCallback, (dsResponse, data) => {
 				if (dsResponse.status >= 0) {
 					// Update CSRF token from response header
 					this._csrf = dsResponse.httpHeaders["x-csrf-token"];
@@ -749,23 +773,103 @@ isc.EditView.addMethods({
 					if (data._redirectUrl) {
 						window.location.assign(data._redirectUrl);
 					}
-				} else if (dsResponse.status === -1) {
-					isc.warn(data, null, { title: isc.i18nMessages.editView_Problems });
+				} else {
+					this._displayFailure(dsResponse, data);
 
 					if (completedCallback) {
 						completedCallback(data, false);
 					}
-				} else if (completedCallback) {
-					completedCallback(data, false);
 				}
 
 				return true;
-			},
+			}),
 			{ params, willHandleError: true },
 		);
 
 		// Re-enable validation immediately after the call
 		this._vm.disableValidation = false;
+	},
+
+	/**
+	 * Wraps a DataSource callback so that a question the server asks (response status -50) is shown before the
+	 * callback sees a response. A button that does not abort adds its answer to the answers given so far in this
+	 * gesture and resends the request with all of them in the _q parameter; the request parameters are otherwise
+	 * unchanged, so the CSRF token, source and action are those of the original request. A button that aborts,
+	 * Escape or the close box ends the gesture, calling completedCallback with success false.
+	 * Any other response goes to the callback.
+	 *
+	 * @param {Object} params - the parameters of the request; the answers are kept on it for the rest of the gesture.
+	 * @param {Function} completedCallback - the calling method's completion callback, or null.
+	 * @param {Function} callback - the DataSource callback to wrap.
+	 * @param {Function} resend - function(params, callback) that sends the same request again with the given
+	 *                            parameters and callback; by default, the values manager saves again.
+	 * @returns {Function} the wrapped DataSource callback.
+	 */
+	_askable: function (
+		params,
+		completedCallback,
+		callback,
+		resend = (answered, askable) => {
+			this._vm.disableValidation = true;
+			this._vm.saveData(askable, { params: answered, willHandleError: true });
+			this._vm.disableValidation = false;
+		},
+	) {
+		const askable = (dsResponse, data) => {
+			if (dsResponse.status !== isc.EditView._QUESTION) {
+				return callback(dsResponse, data);
+			}
+
+			const question = dsResponse.question;
+			let dialog = null;
+			let aborting = null;
+			let defaultIndex = 0;
+			const answer = (button) => {
+				dialog.destroy();
+				if (button.aborts) {
+					completedCallback?.(data, false);
+				} else {
+					const answers = params._q ? JSON.parse(params._q) : [];
+					answers.push({ id: question.id, code: button.code });
+					params._q = JSON.stringify(answers);
+					resend({ ...params }, askable);
+				}
+			};
+			const buttons = question.buttons.map((button, index) => {
+				if (button.aborts) {
+					aborting = button;
+				}
+				if (button.default) {
+					defaultIndex = index;
+				}
+				return isc.IButton.create({
+					title: isc.makeXMLSafe(button.label),
+					click: () => answer(button),
+				});
+			});
+			dialog = isc.Dialog.create({
+				title: isc.makeXMLSafe(question.title),
+				message: question.message.asHTML(),
+				icon: "[SKIN]ask.png",
+				isModal: true,
+				showModalMask: true,
+				autoCenter: true,
+				// Only a question with a button that aborts can be dismissed
+				showCloseButton: aborting !== null,
+				dismissOnEscape: aborting !== null,
+				closeClick: () => {
+					answer(aborting);
+					return false;
+				},
+				buttons,
+				autoFocusButton: defaultIndex,
+			});
+			dialog.show();
+			// Showing a modal window can move the focus to its first button, so focus the default button again
+			buttons[defaultIndex].focus();
+			return true;
+		};
+		return askable;
 	},
 
 	/**
@@ -1098,13 +1202,45 @@ isc.EditView.addMethods({
 		}
 
 		if (messages) {
-			const markup =
-				messages.length > 1
-					? `<ul>${messages.map((message) => `<li>${message.summary}</li>`).join("")}</ul>`
-					: messages[0].summary;
+			const markup = this._messagesMarkup(messages);
 			const warn = messages.some((message) => message.severity !== "info");
 			warn ? isc.warn(markup) : isc.say(markup);
 		}
+	},
+
+	/**
+	 * Displays a failed response: the growls and messages raised before the failure, and the problem.
+	 * Status -1 and -51 responses hold the problem as markup in data; the messages are shown in the same
+	 * dialog so that only one dialog is shown. Other failures, such as validation errors (status -4), show
+	 * the messages on their own, as SmartClient shows the errors.
+	 *
+	 * @param {Object} dsResponse - the failed response, with any _growls and _messages copied from the server.
+	 * @param {Object} data - the response data.
+	 */
+	_displayFailure: function (dsResponse, data) {
+		const { _growls: growls, _messages: messages, status } = dsResponse;
+		if (status === -1 || status === isc.EditView._UNAVAILABLE) {
+			if (growls) {
+				isc.BizUtil.growl(growls);
+			}
+			// The margin separates the messages from the problem, whether or not the messages are a list
+			const markup = messages ? `<div style="margin-bottom:1em">${this._messagesMarkup(messages)}</div>${data}` : data;
+			isc.warn(markup, null, { title: isc.i18nMessages.editView_Problems });
+		} else {
+			this._displayGrowlsAndMessages(growls, messages);
+		}
+	},
+
+	/**
+	 * Returns the markup for messages: a list when there is more than one, otherwise the message.
+	 *
+	 * @param {Array} messages - the messages, each with a summary.
+	 * @returns {string} the markup.
+	 */
+	_messagesMarkup: function (messages) {
+		return messages.length > 1
+			? `<ul>${messages.map((message) => `<li>${message.summary}</li>`).join("")}</ul>`
+			: messages[0].summary;
 	},
 
 	/**
@@ -1659,9 +1795,6 @@ isc.BizButton.addMethods({
 		this._action = function () {
 			const validate = this.validate === undefined ? true : this.validate;
 
-			// Declare variables outside the switch to avoid redefinition
-			let instance, opener, gridBinding, bizId, url;
-
 			// Handle different button types
 			switch (this.type) {
 				case "OK":
@@ -1687,12 +1820,12 @@ isc.BizButton.addMethods({
 
 				case "ZoomOut": {
 					// Handle ZoomOut action with changes validation
-					instance = this._view.gather(false);
+					const instance = this._view.gather(false);
 					const { _apply: apply, _changed: changedOnServer } = instance;
 					if (apply || changedOnServer || this._view._vm.valuesHaveChanged()) {
 						this._view.saveInstance(validate, this.actionName);
 					} else {
-						opener = isc.WindowStack.getOpener();
+						const opener = isc.WindowStack.getOpener();
 						isc.WindowStack.popoff(this._view._saved);
 						opener._source = null;
 					}
@@ -1701,9 +1834,9 @@ isc.BizButton.addMethods({
 
 				case "Cancel": {
 					// Cancel action with unsaved changes check
-					instance = this._view.gather(false);
+					const instance = this._view.gather(false);
 					const { _changed: changedOnServerCancel } = instance;
-					opener = isc.WindowStack.getOpener();
+					const opener = isc.WindowStack.getOpener();
 
 					if (changedOnServerCancel || this._view._vm.valuesHaveChanged()) {
 						isc.ask(
@@ -1728,15 +1861,15 @@ isc.BizButton.addMethods({
 					this._view.deleteInstance(validate);
 					break;
 
-				case "Remove":
+				case "Remove": {
 					// Remove action on child edit view
-					instance = this._view.gather(false);
-					bizId = instance.bizId;
-					gridBinding = this._view._b.substring(
+					const instance = this._view.gather(false);
+					const bizId = instance.bizId;
+					const gridBinding = this._view._b.substring(
 						this._view._b.lastIndexOf(".") + 1,
 						this._view._b.lastIndexOf("ElementById"),
 					);
-					opener = isc.WindowStack.getOpener();
+					const opener = isc.WindowStack.getOpener();
 
 					if (opener) {
 						const openerListGrids = opener._grids[gridBinding];
@@ -1753,35 +1886,40 @@ isc.BizButton.addMethods({
 					}
 					isc.WindowStack.popoff(false);
 					break;
+				}
 
 				case "Report":
 					// Report action
 					isc.ReportDialog.popupReport(this._view, this.params);
 					break;
 
-				case "BizExport":
+				case "BizExport": {
 					// BizExport action
-					instance = this._view.gather(false);
+					const instance = this._view.gather(false);
 					if (instance) {
 						this._view.saveInstance(validate, null, (data, success) => {
 							if (success) {
-								window.location.assign(
-									`bizexport.xls?_n=${this.actionName}&_doc=${this._view._mod}.${
-										this._view._doc
-									}&_c=${instance._c}&_ctim=${new Date().getTime()}`,
-								);
+								let url = `bizexport.xls?_n=${this.actionName}&_doc=${this._view._mod}.${
+									this._view._doc
+								}&_c=${instance._c}&_ctim=${new Date().getTime()}`;
+								// the servlet unsanitises the form binding, as for edit requests
+								if (this._view._b) {
+									url += `&_b=${this._view._b}`;
+								}
+								window.location.assign(url);
 							}
 						});
 					}
 					break;
+				}
 
-				case "BizImport":
+				case "BizImport": {
 					// BizImport action
-					instance = this._view.gather(false);
+					const instance = this._view.gather(false);
 					if (instance) {
 						this._view.saveInstance(validate, null, (data, success) => {
 							if (success) {
-								url = `bizImport.xhtml?_a=${this.actionName}&_c=${instance._c}`;
+								let url = `bizImport.xhtml?_a=${this.actionName}&_c=${instance._c}`;
 								if (this._view._b) {
 									url += `&_b=${this._view._b.replaceAll("_", ".")}`;
 								}
@@ -1797,19 +1935,20 @@ isc.BizButton.addMethods({
 						});
 					}
 					break;
+				}
 
 				case "Download":
 					// Download action
 					this._view.doAction(this.actionName, validate);
 					break;
 
-				case "Upload":
+				case "Upload": {
 					// Upload action
-					instance = this._view.gather(false);
+					const instance = this._view.gather(false);
 					if (instance) {
 						this._view.saveInstance(validate, null, (data, success) => {
 							if (success) {
-								url = `upload.xhtml?_u=action&_a=${this.actionName}&_c=${instance._c}&_cap=${this.capture || "none"}`;
+								let url = `upload.xhtml?_u=action&_a=${this.actionName}&_c=${instance._c}&_cap=${this.capture || "none"}`;
 								if (this._view._b) {
 									url += `&_b=${this._view._b.replaceAll("_", ".")}`;
 								}
@@ -1825,6 +1964,7 @@ isc.BizButton.addMethods({
 						});
 					}
 					break;
+				}
 
 				case "Navigate":
 					// Navigate to a binding within a conversation

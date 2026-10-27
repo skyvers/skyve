@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<document name="DialogsFixtureRow"
+			xmlns="http://www.skyve.org/xml/document"
+			xsi:schemaLocation="http://www.skyve.org/xml/document ../../../schemas/document.xsd"
+			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<documentation>
+		<![CDATA[
+			Row of the Kitchen Sink dialogs fixture. Its Bizlet asks before zooming out of the row and before removing it.
+		]]>
+	</documentation>
+	<persistent name="KS_DialogsFixtureRow" />
+	<singularAlias>Dialogs Fixture Row</singularAlias>
+	<pluralAlias>Dialogs Fixture Rows</pluralAlias>
+	<parentDocument>DialogsFixture</parentDocument>
+	<bizKey expression="Dialogs Fixture Row" />
+	<attributes>
+		<text name="name">
+			<displayName>Name</displayName>
+			<length>100</length>
+		</text>
+	</attributes>
+</document>

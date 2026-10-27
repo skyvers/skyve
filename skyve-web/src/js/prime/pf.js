@@ -490,10 +490,156 @@ SKYVE.PF = function() {
 		return widget || window.PF(binding + suffix);
 	};
 
+	// The last PrimeFaces AJAX request sent, and the answers given so far in its gesture,
+	// so that the request can be resent when the server asks a question.
+	var lastRequest = null;
+
+	// Remembers each PrimeFaces AJAX request as it is sent. Command buttons and p:ajax behaviours
+	// both send through PrimeFaces.ajax.Request.send, which sends one queued request at a time.
+	var recordRequests = function() {
+		var request = PrimeFaces.ajax.Request;
+		var send = request.send;
+		request.send = function(cfg) {
+			// A resend carries the answers of its gesture; any other request starts a new gesture
+			lastRequest = {cfg: cfg, answers: cfg.skyveAnswers || []};
+			return send.apply(this, arguments);
+		};
+	};
+	if (window.PrimeFaces?.ajax?.Request) {
+		recordRequests();
+	}
+	else {
+		document.addEventListener('DOMContentLoaded', recordRequests);
+	}
+
+	// Sends the last request again with the given answers in the _q request parameter.
+	// The copy keeps the original's source, form, process, update and parameters, but not the state
+	// PrimeFaces added when it handled the original (its promise, early post parameters and extension).
+	var resendLastRequest = function(answers) {
+		var cfg = $.extend({}, lastRequest.cfg);
+		var ext = cfg.ext;
+		delete cfg.ext;
+		delete cfg.promise;
+		delete cfg.earlyPostParams;
+		cfg.params = $.grep(cfg.params || [], function(param) {
+			return param.name !== '_q';
+		});
+		cfg.params.push({name: '_q', value: JSON.stringify(answers)});
+		cfg.skyveAnswers = answers;
+		PrimeFaces.ajax.Request.handle(cfg, ext);
+	};
+
+	// Shows a question as a modal dialog. Its text is set as text, never as markup.
+	// The default button has the focus, the focus stays within the dialog, and Escape and the close box
+	// choose the button that aborts; if no button aborts, the user must choose one.
+	var showQuestion = function(question, choose) {
+		var previousFocus = document.activeElement;
+		var zIndex = PrimeFaces.nextZindex();
+		var mask = $('<div class="ui-widget-overlay ui-dialog-mask"></div>')
+						.css({position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', zIndex: zIndex});
+		var titleId = 'skyveQuestionTitle';
+		var messageId = 'skyveQuestionMessage';
+		var dialog = $('<div class="ui-dialog ui-confirm-dialog ui-widget ui-widget-content ui-corner-all ui-shadow" role="alertdialog" aria-modal="true"></div>')
+						.attr({'aria-labelledby': titleId, 'aria-describedby': messageId})
+						.css({display: 'block', position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', zIndex: zIndex + 1, maxWidth: '90vw'});
+		var titleBar = $('<div class="ui-dialog-titlebar ui-widget-header ui-helper-clearfix ui-corner-top"></div>').appendTo(dialog);
+		$('<span class="ui-dialog-title"></span>').attr('id', titleId).text(question.title).appendTo(titleBar);
+		$('<div class="ui-dialog-content ui-widget-content"></div>')
+			.append($('<span class="ui-confirm-dialog-message"></span>').attr('id', messageId).css('white-space', 'pre-wrap').text(question.message))
+			.appendTo(dialog);
+		var buttonPane = $('<div class="ui-dialog-buttonpane ui-dialog-footer ui-widget-content ui-helper-clearfix"></div>').appendTo(dialog);
+
+		var aborting = null;
+		var defaultButton = null;
+		var close = function(button) {
+			$(document).off('focusin.skyveQuestion');
+			dialog.remove();
+			mask.remove();
+			if (previousFocus?.focus) {
+				previousFocus.focus();
+			}
+			choose(button);
+		};
+		$.each(question.buttons, function(index, button) {
+			var element = $('<button type="button" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only"></button>')
+							.append($('<span class="ui-button-text ui-c"></span>').text(button.label))
+							.on('click', function() {
+								close(button);
+							})
+							.appendTo(buttonPane);
+			if (button.aborts) {
+				aborting = button;
+			}
+			if (button.default) {
+				defaultButton = element;
+			}
+		});
+		if (aborting) {
+			$('<a href="#" class="ui-dialog-titlebar-icon ui-dialog-titlebar-close ui-corner-all" role="button"></a>')
+				.attr('aria-label', aborting.label)
+				.append('<span class="ui-icon ui-icon-closethick"></span>')
+				.on('click', function(event) {
+					event.preventDefault();
+					close(aborting);
+				})
+				.appendTo(titleBar);
+		}
+
+		dialog.on('keydown', function(event) {
+			if ((event.key === 'Escape') && aborting) {
+				event.preventDefault();
+				close(aborting);
+			}
+			else if (event.key === 'Tab') {
+				var focusable = dialog.find('button, a[href]');
+				var first = focusable.first()[0];
+				var last = focusable.last()[0];
+				if (event.shiftKey && (document.activeElement === first)) {
+					event.preventDefault();
+					last.focus();
+				}
+				else if ((! event.shiftKey) && (document.activeElement === last)) {
+					event.preventDefault();
+					first.focus();
+				}
+			}
+		});
+
+		$(document.body).append(mask).append(dialog);
+		var focusDefault = function() {
+			(defaultButton || buttonPane.children().first()).trigger('focus');
+		};
+		// Keep the focus in the dialog, even when another component returns focus elsewhere as it closes
+		$(document).on('focusin.skyveQuestion', function(event) {
+			if (! $.contains(dialog[0], event.target)) {
+				focusDefault();
+			}
+		});
+		focusDefault();
+	};
+
 	// public
 	return {
 		getById: function(id) {
 			return $(PrimeFaces.escapeClientId(id));
+		},
+
+		/**
+		 * Shows a question the server asked while handling the last AJAX request, and acts on the user's answer.
+		 * A button that does not abort adds its answer to the answers given so far in this gesture and resends
+		 * the request with all of them in the _q parameter; a button that aborts ends the gesture.
+		 *
+		 * @param question	The question: its id, title, message and buttons, each with a code, label,
+		 * 					whether it aborts and whether it is the default.
+		 */
+		ask: function(question) {
+			var request = lastRequest;
+			showQuestion(question, function(button) {
+				if (! button.aborts) {
+					lastRequest = request;
+					resendLastRequest(request.answers.concat([{id: question.id, code: button.code}]));
+				}
+			});
 		},
 
 		morphFrom: function(source, target, options) {

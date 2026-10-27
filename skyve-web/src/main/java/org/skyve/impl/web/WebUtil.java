@@ -13,7 +13,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Timestamp;
 import java.time.Instant;
-import java.util.Base64;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Map;
@@ -82,7 +81,9 @@ public class WebUtil {
 	}
 	
 	/**
-	 * Resolves and binds the active user for a request from session, principal, or basic-auth fallback.
+	 * Resolves and binds the active user for a request from the session or the principal.
+	 * An {@code Authorization} header is never consulted; REST Basic authentication is handled by
+	 * {@link org.skyve.impl.web.filter.rest.BasicAuthFilter}, which validates the password.
 	 *
 	 * @param request active HTTP request
 	 * @param userPrincipal optional authenticated principal name
@@ -106,15 +107,8 @@ public class WebUtil {
 		
 		// If the user in the session is not the same as the security's user principal
 		// then the session user needs to be reset.
-		if ((user != null) && (userPrincipal != null)) {
-			UserImpl principalUser = ProvidedRepositoryFactory.setCustomerAndUserFromPrincipal(userPrincipal);
-			if (principalUser == null) {
-				user = null;
-			}
-			else if (! (user.getCustomerName().equals(principalUser.getCustomerName()) &&
-							user.getName().equals(principalUser.getName()))) {
-				user = null;
-			}
+		if ((user != null) && (userPrincipal != null) && (! isPrincipalUser(user, userPrincipal))) {
+			user = null;
 		}
 		
 		if (user == null) {
@@ -141,26 +135,6 @@ public class WebUtil {
 					c.notifyLogin(user, session);
 				}
 			}
-			// TODO hack!
-			else { // check basic auth
-				final String authorization = request.getHeader("Authorization");
-				if ((authorization != null) && authorization.startsWith("Basic")) {
-					// Authorization: Basic base64credentials
-					final String base64Credentials = authorization.substring("Basic".length()).trim();
-					String credentials = new String(Base64.getMimeDecoder().decode(base64Credentials), StandardCharsets.UTF_8);
-	
-					// credentials = username:password or customer/username:password
-					final String[] values = credentials.split(":", 2);
-					final String username = UtilImpl.processStringValue(values[0]);
-//					final String password = UtilImpl.processStringValue(values[1]);
-					// TODO check password...
-					user = ProvidedRepositoryFactory.get().retrieveUser(username);
-					if (user != null) {
-						setSessionId(user, request);
-						AbstractPersistence.get().setUser(user);
-					}
-				}				
-			}
 		}
 		else {
 			AbstractPersistence.get().setUser(user);
@@ -168,10 +142,57 @@ public class WebUtil {
 		if (user != null) {
 			user.setWebLocale(request.getLocale());
 		}
-		
+
 		return user;
 	}
-	
+
+	/**
+	 * Returns the user in the request's session if that session is still valid for them.
+	 *
+	 * <p>This is the check {@link #processUserPrincipalForRequest(HttpServletRequest, String)} makes,
+	 * for callers that cannot have its side effects. A session that is no longer registered for its user
+	 * (for example, after the user's password changed) is invalidated and {@code null} is returned.
+	 * {@code null} is also returned when the session user is not the request's principal.
+	 * Otherwise this never creates a session, never establishes a user from the principal,
+	 * never records a login and never binds the persistence user.
+	 *
+	 * @param request active HTTP request
+	 * @return the validated session user, or {@code null} when there is none
+	 */
+	public static @Nullable UserImpl getValidatedSessionUser(@Nonnull HttpServletRequest request) {
+		HttpSession session = request.getSession(false);
+		if (session == null) {
+			return null;
+		}
+		UserImpl user = (UserImpl) session.getAttribute(WebContext.USER_SESSION_ATTRIBUTE_NAME);
+		if (user == null) {
+			return null;
+		}
+		if (! StateUtil.checkSession(user.getId(), session)) {
+			session.invalidate();
+			return null;
+		}
+		Principal principal = request.getUserPrincipal();
+		if ((principal != null) && (! isPrincipalUser(user, principal.getName()))) {
+			return null;
+		}
+		return user;
+	}
+
+	/**
+	 * Determines whether a session user is the user named by a security principal.
+	 *
+	 * @param user the session user
+	 * @param userPrincipal the principal name, as {@code customer/user} or {@code user}
+	 * @return {@code true} when the customer and user names match
+	 */
+	private static boolean isPrincipalUser(@Nonnull UserImpl user, @Nonnull String userPrincipal) {
+		UserImpl principalUser = ProvidedRepositoryFactory.setCustomerAndUserFromPrincipal(userPrincipal);
+		return (principalUser != null) &&
+				user.getCustomerName().equals(principalUser.getCustomerName()) &&
+				user.getName().equals(principalUser.getName());
+	}
+
 	/**
 	 * Resolves the conversation bean targeted by the request binding and optional row identifier.
 	 *
@@ -634,18 +655,7 @@ public class WebUtil {
 		result.append(targetModuleName).append('.').append(targetDocumentName);
 		result.append('&').append(AbstractWebContext.CONTEXT_NAME).append('=').append(webId);
 		
-		String binding = null;
-		if (viewBinding != null) {
-			if (dataWidgetBinding != null) {
-				binding = BindUtil.createCompoundBinding(viewBinding, dataWidgetBinding);
-			}
-			else {
-				binding = viewBinding;
-			}
-		}
-		else if (dataWidgetBinding != null) {
-			binding = dataWidgetBinding;
-		}
+		String binding = getDownloadBinding(viewBinding, dataWidgetBinding);
 		if (binding != null) {
 			result.append('&').append(AbstractWebContext.BINDING_NAME).append('=').append(binding);
 		}
@@ -656,6 +666,13 @@ public class WebUtil {
 		result.append('&').append(AbstractWebContext.CURRENT_TIME_IN_MILLIS).append('=').append(System.currentTimeMillis());
 
 		return result.toString();
+	}
+
+	static @Nullable String getDownloadBinding(@Nullable String viewBinding, @Nullable String dataWidgetBinding) {
+		if (viewBinding == null) {
+			return dataWidgetBinding;
+		}
+		return (dataWidgetBinding == null) ? viewBinding : BindUtil.createCompoundBinding(viewBinding, dataWidgetBinding);
 	}
 	
 	/**

@@ -4,6 +4,9 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.util.Locale;
 import java.util.Map;
@@ -12,7 +15,6 @@ import java.util.TreeMap;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.view.container.form.FormLabelLayout;
@@ -108,18 +110,18 @@ class SuperUserTest {
 	@Test
 	@SuppressWarnings("static-method")
 	void copyingConstructorCopiesContactId() {
-		User mockUser = Mockito.mock(User.class);
-		Mockito.when(mockUser.getContactId()).thenReturn("contact-123");
-		Mockito.when(mockUser.getContactName()).thenReturn("Test User");
-		Mockito.when(mockUser.getCustomerName()).thenReturn("test");
-		Mockito.when(mockUser.getDataGroupId()).thenReturn(null);
-		Mockito.when(mockUser.getHomeModuleName()).thenReturn("admin");
-		Mockito.when(mockUser.getId()).thenReturn("user-id-1");
-		Mockito.when(mockUser.getName()).thenReturn("testuser");
-		Mockito.when(mockUser.getPasswordHash()).thenReturn("hash");
-		Mockito.doReturn(Boolean.FALSE).when(mockUser).isPasswordChangeRequired();
-		Mockito.when(mockUser.getLocale()).thenReturn(Locale.ENGLISH);
-		Mockito.when(mockUser.getLanguageTag()).thenReturn("en");
+		User mockUser = mock(User.class);
+		when(mockUser.getContactId()).thenReturn("contact-123");
+		when(mockUser.getContactName()).thenReturn("Test User");
+		when(mockUser.getCustomerName()).thenReturn("test");
+		when(mockUser.getDataGroupId()).thenReturn(null);
+		when(mockUser.getHomeModuleName()).thenReturn("admin");
+		when(mockUser.getId()).thenReturn("user-id-1");
+		when(mockUser.getName()).thenReturn("testuser");
+		when(mockUser.getPasswordHash()).thenReturn("hash");
+		doReturn(Boolean.FALSE).when(mockUser).isPasswordChangeRequired();
+		when(mockUser.getLocale()).thenReturn(Locale.ENGLISH);
+		when(mockUser.getLanguageTag()).thenReturn("en");
 
 		SuperUser superUser = new SuperUser(mockUser);
 
@@ -131,24 +133,35 @@ class SuperUserTest {
 	@Test
 	@SuppressWarnings("static-method")
 	void copyingConstructorWithNullLocaleDefaultsToEnglish() {
-		User mockUser = Mockito.mock(User.class);
-		Mockito.when(mockUser.getLocale()).thenReturn(null);
+		User mockUser = mock(User.class);
+		when(mockUser.getLocale()).thenReturn(null);
 		// Must stub all properties called by copying constructor
-		Mockito.when(mockUser.getContactId()).thenReturn(null);
-		Mockito.when(mockUser.getContactName()).thenReturn(null);
-		Mockito.when(mockUser.getCustomerName()).thenReturn(null);
-		Mockito.when(mockUser.getDataGroupId()).thenReturn(null);
-		Mockito.when(mockUser.getHomeModuleName()).thenReturn(null);
-		Mockito.when(mockUser.getId()).thenReturn(null);
-		Mockito.when(mockUser.getName()).thenReturn(null);
-		Mockito.when(mockUser.getPasswordHash()).thenReturn(null);
-		Mockito.doReturn(Boolean.FALSE).when(mockUser).isPasswordChangeRequired();
-		Mockito.when(mockUser.getLanguageTag()).thenReturn(null);
+		when(mockUser.getContactId()).thenReturn(null);
+		when(mockUser.getContactName()).thenReturn(null);
+		when(mockUser.getCustomerName()).thenReturn(null);
+		when(mockUser.getDataGroupId()).thenReturn(null);
+		when(mockUser.getHomeModuleName()).thenReturn(null);
+		when(mockUser.getId()).thenReturn(null);
+		when(mockUser.getName()).thenReturn(null);
+		when(mockUser.getPasswordHash()).thenReturn(null);
+		doReturn(Boolean.FALSE).when(mockUser).isPasswordChangeRequired();
+		when(mockUser.getLanguageTag()).thenReturn(null);
 
 		SuperUser superUser = new SuperUser(mockUser);
 
 		// locale defaults to ENGLISH when null
 		assertThat(superUser.getLocale(), is(Locale.ENGLISH));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void copyingConstructorCopiesLegacyId() {
+		User mockUser = mock(User.class);
+		when(mockUser.getLegacyId()).thenReturn("BHM-42");
+
+		SuperUser superUser = new SuperUser(mockUser);
+
+		assertThat(superUser.getLegacyId(), is("BHM-42"));
 	}
 
 	@Test
@@ -163,11 +176,11 @@ class SuperUserTest {
 	@Test
 	@SuppressWarnings("static-method")
 	void getAccessibleModuleNamesReturnsSortedCustomerModuleNames() {
-		CustomerImpl customer = Mockito.mock(CustomerImpl.class);
+		CustomerImpl customer = mock(CustomerImpl.class);
 		Map<String, FormLabelLayout> modules = new TreeMap<>();
 		modules.put("sales", FormLabelLayout.top);
 		modules.put("admin", FormLabelLayout.side);
-		Mockito.when(customer.getModuleEntries()).thenReturn(modules);
+		when(customer.getModuleEntries()).thenReturn(modules);
 
 		SuperUser superUser = new TestSuperUser(customer);
 

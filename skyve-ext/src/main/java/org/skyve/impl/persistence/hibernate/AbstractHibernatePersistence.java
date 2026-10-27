@@ -67,6 +67,7 @@ import org.hibernate.type.Type;
 import org.skyve.EXT;
 import org.skyve.content.BeanContent;
 import org.skyve.content.TextExtractor;
+import org.skyve.dialog.QuestionException;
 import org.skyve.domain.Bean;
 import org.skyve.domain.ChildBean;
 import org.skyve.domain.DynamicBean;
@@ -83,6 +84,7 @@ import org.skyve.domain.messages.UniqueConstraintViolationException;
 import org.skyve.domain.messages.ValidationException;
 import org.skyve.domain.types.OptimisticLock;
 import org.skyve.impl.bind.BindUtil;
+import org.skyve.impl.dataaccess.sql.ConnectionCustomiserStaticSingleton;
 import org.skyve.impl.domain.AbstractPersistentBean;
 import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.customer.ExportedReference;
@@ -332,6 +334,11 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 		}
 		else {
 			cfg.put(AvailableSettings.DATASOURCE, dataSource);
+		}
+		if (ConnectionCustomiserStaticSingleton.get() != null) {
+			cfg.put(AvailableSettings.CONNECTION_PROVIDER, (dataSource == null) ?
+																CustomisingDriverManagerConnectionProvider.class.getName() :
+																CustomisingDatasourceConnectionProvider.class.getName());
 		}
 		cfg.put(AvailableSettings.DIALECT, UtilImpl.DATA_STORE.getDialectClassName());
 
@@ -700,7 +707,8 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 	}
 
 	/**
-	 * Normalize and rethrow persistence exceptions as Skyve domain exceptions.
+	 * Normalise and rethrow persistence exceptions as Skyve domain exceptions.
+	 * A {@link QuestionException} is rethrown as it is, without being logged.
 	 *
 	 * @param t The throwable to interpret.
 	 * @param operationType The persistence operation being performed.
@@ -710,6 +718,10 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 	private void treatPersistenceThrowable(@Nonnull Throwable t,
 											@Nonnull OperationType operationType,
 											@Nullable PersistentBean bean) {
+		// A question asked from a Bizlet or interceptor is not an error - let it through as it is
+		if (t instanceof QuestionException question) {
+			throw question;
+		}
 		LOGGER.error(t.getMessage(), t);
 		if (t instanceof jakarta.persistence.OptimisticLockException) {
 			if (bean == null) {
@@ -784,6 +796,7 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 	            // Earlier versions of Hibernate required explicit disconnection and reconnection of a Session. 
 	            // These methods are deprecated, as beginning and ending a transaction has the same effect.
 				et.begin();
+				customiseConnection();
 			}
 		}
 		finally {
@@ -802,6 +815,22 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 	public void setUser(User user) {
 		super.setUser(user);
 		resetDocumentPermissionScopes();
+		if ((em != null) && em.getTransaction().isActive()) {
+			customiseConnection();
+		}
+	}
+
+	/**
+	 * Customises the connection of the active transaction for this persistence's user, with the
+	 * {@code factories.connectionCustomiserClass} implementation if there is one.
+	 * Called when a transaction begins and when the user is set during one, because a persistence often
+	 * begins its transaction before its user is known.
+	 */
+	@SuppressWarnings("resource") // this method doesn't own this connection
+	private void customiseConnection() {
+		if (ConnectionCustomiserStaticSingleton.get() != null) {
+			ConnectionCustomiserStaticSingleton.customise(getConnection(), getUser(), UtilImpl.DATA_STORE);
+		}
 	}
 
 	/**

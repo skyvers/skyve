@@ -11,6 +11,7 @@ import org.skyve.metadata.user.DocumentPermissionScope;
 import org.skyve.metadata.user.User;
 import org.skyve.metadata.user.UserAccess;
 
+import jakarta.annotation.Nullable;
 import jakarta.enterprise.inject.Alternative;
 
 /**
@@ -213,6 +214,16 @@ public class UserInjectable implements User {
 	@Override
 	public String getHomeModuleName() {
 		return CORE.getUser().getHomeModuleName();
+	}
+
+	/**
+	 * Returns the user's legacy ID.
+	 *
+	 * @return the legacy ID, or {@code null} if the user has none.
+	 */
+	@Override
+	public @Nullable String getLegacyId() {
+		return CORE.getUser().getLegacyId();
 	}
 
 	/**

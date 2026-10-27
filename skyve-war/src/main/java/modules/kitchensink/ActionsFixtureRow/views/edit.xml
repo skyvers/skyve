@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<view name="edit"
+		title="Actions Fixture Row"
+		xmlns="http://www.skyve.org/xml/view"
+		xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<form border="true">
+		<column responsiveWidth="3" />
+		<column responsiveWidth="9" />
+		<row>
+			<item>
+				<textField binding="name" />
+			</item>
+		</row>
+		<row>
+			<item showHelp="true">
+				<checkBox binding="hideLink" triState="false" />
+			</item>
+		</row>
+		<row>
+			<item showHelp="true">
+				<checkBox binding="disableRowAction" triState="false" />
+			</item>
+		</row>
+		<row>
+			<item>
+				<textField binding="outcome" enabled="false" />
+			</item>
+		</row>
+	</form>
+	<actions>
+		<defaults />
+		<action className="RunFromRow" displayName="Run From Row" inActionPanel="false" disabled="rowActionDisabled" />
+		<export className="ExportFromRow" displayName="Export From Row" />
+	</actions>
+</view>

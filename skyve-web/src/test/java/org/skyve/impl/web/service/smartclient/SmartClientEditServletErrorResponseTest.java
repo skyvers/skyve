@@ -18,15 +18,20 @@ import java.lang.reflect.Method;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 import java.util.SortedMap;
+import java.util.TreeMap;
 
 import org.junit.jupiter.api.Test;
 import org.skyve.domain.Bean;
 import org.skyve.domain.DynamicBean;
 import org.skyve.domain.PersistentBean;
+import org.skyve.domain.messages.ConversationEndedException;
 import org.skyve.domain.messages.Message;
 import org.skyve.domain.messages.MessageException;
 import org.skyve.domain.messages.OptimisticLockException;
+import org.skyve.domain.messages.SessionEndedException;
 import org.skyve.domain.messages.ValidationException;
 import org.skyve.domain.types.OptimisticLock;
 import org.skyve.impl.metadata.customer.CustomerImpl;
@@ -39,6 +44,7 @@ import org.skyve.metadata.model.document.Bizlet;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.user.User;
 import org.skyve.metadata.view.View;
+import org.skyve.util.JSON;
 import org.skyve.util.OWASP;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -115,6 +121,74 @@ class SmartClientEditServletErrorResponseTest {
 		assertTrue(response.contains("\"status\":-1"));
 		assertTrue(response.contains("Cannot update this record"));
 		assertFalse(response.contains("startRow"));
+		assertFalse(response.contains("_growls"));
+		assertFalse(response.contains("_messages"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void unboundMessageExceptionIncludesGrowlsAndMessagesRaisedBeforeIt() throws Exception {
+		AbstractWebContext webContext = webContextWith(List.of(notification("info", "Email sent")),
+														List.of(notification("warn", "Check the address")));
+
+		Map<?, ?> response = parseResponse(produce(new TestMessageException(new Message("Cannot send")),
+															Operation.update,
+															true,
+															REFERENCE,
+															webContext));
+
+		assertEquals(-1, ((Number) response.get("status")).intValue());
+		assertTrue(((String) response.get("data")).contains("Cannot send"));
+		assertEquals(List.of(notification("info", "Email sent")), response.get("_growls"));
+		assertEquals(List.of(notification("warn", "Check the address")), response.get("_messages"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void boundMessageExceptionIncludesGrowlsBesideFieldErrors() throws Exception {
+		AbstractWebContext webContext = webContextWith(List.of(notification("info", "Email sent")), null);
+
+		Map<?, ?> response = parseResponse(produce(new TestMessageException(new Message("customer.name", "Name is required")),
+															Operation.update,
+															true,
+															REFERENCE,
+															webContext));
+
+		assertEquals(-4, ((Number) response.get("status")).intValue());
+		assertEquals("Name is required", ((Map<?, ?>) response.get("errors")).get("customer_name"));
+		assertEquals(List.of(notification("info", "Email sent")), response.get("_growls"));
+		assertFalse(response.containsKey("_messages"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void technicalErrorIncludesGrowlsRaisedBeforeIt() throws Exception {
+		AbstractWebContext webContext = webContextWith(List.of(notification("info", "Email sent")), List.of());
+
+		Map<?, ?> response = parseResponse(produce(new IllegalStateException("boom"),
+															Operation.update,
+															true,
+															REFERENCE,
+															webContext));
+
+		assertEquals(-1, ((Number) response.get("status")).intValue());
+		assertEquals(WebErrorUtil.genericMessage(REFERENCE), response.get("data"));
+		assertEquals(List.of(notification("info", "Email sent")), response.get("_growls"));
+		assertFalse(response.containsKey("_messages"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void endedSessionOrConversationLeavesOutGrowlsAndMessages() throws Exception {
+		AbstractWebContext webContext = webContextWith(List.of(notification("info", "Email sent")),
+														List.of(notification("info", "Done")));
+
+		for (Throwable t : List.of(new SessionEndedException(Locale.ENGLISH), new ConversationEndedException(Locale.ENGLISH))) {
+			Map<?, ?> response = parseResponse(produce(t, Operation.update, true, REFERENCE, webContext));
+
+			assertFalse(response.containsKey("_growls"), t.getClass().getSimpleName());
+			assertFalse(response.containsKey("_messages"), t.getClass().getSimpleName());
+		}
 	}
 
 	@Test
@@ -1200,6 +1274,39 @@ class SmartClientEditServletErrorResponseTest {
 			SmartClientEditServlet.produceErrorResponse(t, operation, includeBindings, printWriter, reference);
 		}
 		return writer.toString();
+	}
+
+	private static String produce(Throwable t,
+									Operation operation,
+									boolean includeBindings,
+									String reference,
+									AbstractWebContext webContext) {
+		StringWriter writer = new StringWriter();
+		try (PrintWriter printWriter = new PrintWriter(writer)) {
+			SmartClientEditServlet.produceErrorResponse(t, operation, includeBindings, printWriter, reference, webContext);
+		}
+		return writer.toString();
+	}
+
+	/**
+	 * Parses an error response, which also checks that it is well formed JSON, and returns its response object.
+	 */
+	private static Map<?, ?> parseResponse(String json) throws Exception {
+		return (Map<?, ?>) ((Map<?, ?>) JSON.unmarshall(json)).get("response");
+	}
+
+	private static AbstractWebContext webContextWith(List<Map<String, String>> growls, List<Map<String, String>> messages) {
+		AbstractWebContext result = mock(AbstractWebContext.class);
+		doReturn(growls).when(result).getGrowls();
+		doReturn(messages).when(result).getMessages();
+		return result;
+	}
+
+	private static Map<String, String> notification(String severity, String summary) {
+		Map<String, String> result = new TreeMap<>();
+		result.put("severity", severity);
+		result.put("summary", summary);
+		return result;
 	}
 
 	private static final class TestMessageException extends RuntimeException implements MessageException {

@@ -5,6 +5,7 @@ import java.util.Deque;
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
 import org.skyve.impl.bind.BindUtil;
+import org.skyve.impl.dialog.DialogsProtocol;
 import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
 import org.skyve.impl.util.UtilImpl;
@@ -44,12 +45,17 @@ public class ZoomOutAction extends FacesAction<Void> {
 	/**
 	 * Validates the current nested bean, runs zoom-out pre-execute hooks, and returns to the owning view.
 	 *
+	 * <p>Side effects: marks the current HTTP request, if there is one, as able to ask questions
+	 * (see {@link org.skyve.dialog.Dialogs}), as the client can resend it with the answers.
+	 *
 	 * @return always {@code null} because this action mutates view and model state only
 	 * @throws Exception if validation, bizlet hooks, binding updates, or redirect handling fails
 	 */
 	@Override
 	@SuppressWarnings("java:S3776") // Complexity OK
 	public Void callback() throws Exception {
+		// This action can ask questions, as the client can resend its request
+		DialogsProtocol.markAskable();
 		Deque<String> zoomInBindings = facesView.getZoomInBindings();
 		if (UtilImpl.FACES_TRACE) FACES_LOGGER.info("ZoomOutAction by zoom in binding of {} with view binding of {}",
 																	zoomInBindings.isEmpty() ? "null" : zoomInBindings.peek(),

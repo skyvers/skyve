@@ -23,6 +23,7 @@ import org.skyve.bizport.BizPortWorkbook;
 import org.skyve.cache.Caching;
 import org.skyve.content.ContentManager;
 import org.skyve.dataaccess.sql.SQLDataAccess;
+import org.skyve.dialog.Dialogs;
 import org.skyve.domain.Bean;
 import org.skyve.domain.ChildBean;
 import org.skyve.domain.PersistentBean;
@@ -41,7 +42,9 @@ import org.skyve.impl.bizport.StandardLoader;
 import org.skyve.impl.cache.DefaultCaching;
 import org.skyve.impl.content.AbstractContentManager;
 import org.skyve.impl.dataaccess.sql.SQLDataAccessImpl;
+import org.skyve.impl.dataaccess.sql.ConnectionCustomiserStaticSingleton;
 import org.skyve.impl.dataaccess.sql.TuneableConnection;
+import org.skyve.impl.dialog.DialogsStaticSingleton;
 import org.skyve.impl.generate.charts.JFreeChartGenerator;
 import org.skyve.impl.geoip.GeoIPServiceStaticSingleton;
 import org.skyve.impl.job.JobSchedulerStaticSingleton;
@@ -194,6 +197,19 @@ public class EXT {
 	 */
 	public static @Nonnull MailService getMailService() {
 		return MailServiceStaticSingleton.getEffective();
+	}
+
+	/**
+	 * Get the service that asks the user questions from server code.
+	 *
+	 * <p>It can ask only during an HTTP request on a path that can rerun its request; see
+	 * {@link Dialogs#ask(org.skyve.dialog.Question)} for those paths and the limits that apply.
+	 *
+	 * @return The installed dialogs service; never {@code null}.
+	 * @since 10.0
+	 */
+	public static @Nonnull Dialogs getDialogs() {
+		return DialogsStaticSingleton.get();
 	}
 
 	/**
@@ -543,6 +559,7 @@ public class EXT {
 			}
 
 			result.setAutoCommit(false);
+			customiseDataStoreConnection(result, dataStore);
 		}
 		catch (SQLException e) {
 			throw new DomainException("Could not get a database connection", e);
@@ -557,6 +574,42 @@ public class EXT {
 		return new TuneableConnection(result);
 	}
 	
+	/**
+	 * Customises a data store connection for the user of the thread's persistence, or for no user when the
+	 * thread has none, with the {@code factories.connectionCustomiserClass} implementation if there is one.
+	 * A connection that cannot be customised is closed.
+	 *
+	 * @param connection	The connection just taken from the data store.
+	 * @param dataStore	The data store it belongs to.
+	 */
+	private static void customiseDataStoreConnection(@Nonnull Connection connection, @Nonnull DataStore dataStore) {
+		if (ConnectionCustomiserStaticSingleton.get() != null) {
+			User user = AbstractPersistence.isPresent() ? AbstractPersistence.get().getUser() : null;
+			try {
+				ConnectionCustomiserStaticSingleton.customise(connection, user, dataStore);
+			}
+			catch (RuntimeException e) {
+				closeQuietly(connection, e);
+				throw e;
+			}
+		}
+	}
+
+	/**
+	 * Closes a connection that is not to be handed out, recording a failure to close on the original failure.
+	 *
+	 * @param connection	The connection.
+	 * @param failure	The failure that stops the connection being handed out.
+	 */
+	private static void closeQuietly(@Nonnull Connection connection, @Nonnull Exception failure) {
+		try {
+			connection.close();
+		}
+		catch (SQLException e) {
+			failure.addSuppressed(e);
+		}
+	}
+
 	/**
 	 * Get a connection to the default data store.
 	 * Note that this is not a CDI provider as it is auto-closeable.

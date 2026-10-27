@@ -167,6 +167,26 @@ class UserImplTest {
 
 	@Test
 	@SuppressWarnings("static-method")
+	void testSetAndGetLegacyId() {
+		UserImpl user = new UserImpl();
+		assertNull(user.getLegacyId());
+		user.setLegacyId("BHM-42");
+		assertEquals("BHM-42", user.getLegacyId());
+		user.setLegacyId(null);
+		assertNull(user.getLegacyId());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void testLegacyIdSurvivesSerialization() {
+		UserImpl user = new UserImpl();
+		user.setLegacyId("BHM-42");
+		user = UtilImpl.cloneBySerialization(user);
+		assertEquals("BHM-42", user.getLegacyId());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
 	void testGetAttributesReturnsEmptyMapByDefault() {
 		UserImpl user = new UserImpl();
 		Map<String, Object> attributes = user.getAttributes();

@@ -14,6 +14,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -592,6 +593,25 @@ class DomainMessagesTest {
 		OptimisticLockException ex = new OptimisticLockException(mockUser, OperationType.update, lock);
 		assertNotNull(ex);
 		assertFalse(ex.getMessages().isEmpty());
+	}
+
+	// ---- ActionUnavailableException ----
+
+	@Test
+	void actionUnavailableExceptionMessageNamesUserDocumentAndAction() {
+		when(mockUser.getName()).thenReturn("alice");
+		ActionUnavailableException ex = new ActionUnavailableException(mockUser, "Contact", "approve");
+		assertThat(ex.getMessage(), is("Action approve is not available to user alice on document Contact"));
+	}
+
+	@Test
+	void actionUnavailableExceptionHasOneUnboundLocalisedMessage() {
+		ActionUnavailableException ex = new ActionUnavailableException(mockUser, "Contact", "approve");
+		List<Message> messages = ex.getMessages();
+		assertEquals(1, messages.size());
+		Message message = messages.get(0);
+		assertThat(message.getText(), is("This action is no longer available."));
+		assertFalse(message.getBindings().iterator().hasNext());
 	}
 
 	// ---- ConversationEndedException getMessages ----

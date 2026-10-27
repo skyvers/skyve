@@ -301,7 +301,7 @@ public class SmartClientCompleteServlet extends HttpServlet {
 			catch (Throwable t) {
 				persistence.rollback();
 
-				String reference = WebErrorUtil.logUnexpectedAndGetReference(LOGGER, "SmartClient complete request failed", t);
+				String reference = WebErrorUtil.logFailureAndGetReference(LOGGER, "SmartClient complete request failed", t);
 				SmartClientEditServlet.produceErrorResponse(t, Operation.fetch, false, pw, reference);
 			}
 			finally {

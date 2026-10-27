@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -23,7 +24,7 @@ import org.skyve.content.MimeType;
 import org.skyve.domain.Bean;
 import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.persistence.AbstractPersistence;
-import org.skyve.impl.sail.mock.MockWebContext;
+import org.skyve.impl.web.service.smartclient.SmartClientWebContext;
 import org.skyve.metadata.controller.Download;
 import org.skyve.metadata.controller.DownloadAction;
 import org.skyve.metadata.controller.WebFileInputStream;
@@ -80,6 +81,45 @@ class DownloadServletTest {
 		assertTrue(output.asString().contains("An error occured whilst processing your report."));
 		verify(action, never()).download(any(), any());
 		verify(response, never()).setHeader("Accept-Ranges", "bytes");
+	}
+
+	@Test
+	void downloadTheConversationDidNotPrepareIsRefusedBeforeItRuns() throws Exception {
+		DownloadAction<Bean> action = actionReturning(new Download("result.txt", "download body", MimeType.plain));
+		Lifecycle lifecycle = lifecycle(action, false, true);
+		lifecycle.webContext.recordPreparedDownload("OtherDownload", "mod", "Doc", null, null, null);
+		TestableDownloadServlet servlet = new TestableDownloadServlet(lifecycle.webContext);
+		CapturingServletOutputStream output = new CapturingServletOutputStream();
+
+		servlet.doGet(request(lifecycle.user, "mod.Doc", "DownloadResult", null), response(output));
+
+		// The refusal's message, not the generic error
+		String body = output.asString();
+		assertTrue(body.startsWith("<html><head/><body><h3>"), body);
+		assertFalse(body.contains("An error occured whilst processing your report."), body);
+		assertFalse(servlet.writeInvoked);
+		assertFalse(servlet.cacheInvoked);
+		verify(lifecycle.document, never()).getDownloadAction(any(), any(), anyBoolean());
+		verify(action, never()).download(any(), any());
+		verify(lifecycle.customer, never()).interceptBeforeDownloadAction(any(), any(), any(), any());
+		verify(lifecycle.persistence).rollback();
+		verify(lifecycle.persistence).commit(true);
+	}
+
+	@Test
+	void preparedActionOnAnotherDocumentIsRefused() throws Exception {
+		DownloadAction<Bean> action = actionReturning(new Download("result.txt", "download body", MimeType.plain));
+		Lifecycle lifecycle = lifecycle(action, false, true);
+		when(lifecycle.module.getDocument(lifecycle.customer, "Other")).thenReturn(lifecycle.document);
+		TestableDownloadServlet servlet = new TestableDownloadServlet(lifecycle.webContext);
+		CapturingServletOutputStream output = new CapturingServletOutputStream();
+
+		servlet.doGet(request(lifecycle.user, "mod.Other", "DownloadResult", null), response(output));
+
+		assertFalse(servlet.writeInvoked);
+		assertFalse(servlet.cacheInvoked);
+		verify(action, never()).download(any(), any());
+		verify(lifecycle.persistence).rollback();
 	}
 
 	@Test
@@ -205,6 +245,7 @@ class DownloadServletTest {
 		when(result.bean.getBizId()).thenReturn("bean-id");
 		result.webContext.setConversation(result.persistence);
 		result.webContext.setCurrentBean(result.bean);
+		result.webContext.recordPreparedDownload("DownloadResult", "mod", "Doc", null, null, null);
 		when(result.user.getCustomer()).thenReturn(result.customer);
 		when(result.user.getName()).thenReturn("tester");
 		when(result.user.canExecuteAction(result.document, "DownloadResult")).thenReturn(Boolean.valueOf(canExecute));
@@ -255,13 +296,21 @@ class DownloadServletTest {
 	}
 
 	private static final class Lifecycle {
-		private final MockWebContext webContext = new MockWebContext();
+		private final SmartClientWebContext webContext = webContext();
 		private final AbstractPersistence persistence = mock(AbstractPersistence.class);
 		private final CustomerImpl customer = mock(CustomerImpl.class);
 		private final Module module = mock(Module.class);
 		private final Document document = mock(Document.class);
 		private final User user = mock(User.class);
 		private final Bean bean = mock(Bean.class);
+	}
+
+	private static SmartClientWebContext webContext() {
+		HttpServletRequest request = mock(HttpServletRequest.class);
+		HttpSession session = mock(HttpSession.class);
+		when(request.getSession(false)).thenReturn(session);
+		when(session.getId()).thenReturn("session-1");
+		return new SmartClientWebContext("context-key", request);
 	}
 
 	private static final class TestableDownloadServlet extends org.skyve.impl.web.DownloadServlet {
@@ -284,6 +333,13 @@ class DownloadServletTest {
 		@Override
 		AbstractWebContext getCachedConversation(String contextKey, HttpServletRequest request) {
 			return webContext;
+		}
+
+		// Stands in for WebUtil, whose session registry check needs the real cache
+		@Override
+		User processUserPrincipalForRequest(HttpServletRequest request) {
+			HttpSession session = request.getSession(false);
+			return (session == null) ? null : (User) session.getAttribute(WebContext.USER_SESSION_ATTRIBUTE_NAME);
 		}
 
 		@Override

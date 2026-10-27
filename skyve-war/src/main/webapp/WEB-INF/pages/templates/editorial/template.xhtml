@@ -41,7 +41,7 @@
 			<h:panelGroup styleClass="skyveEnvBanner skyveTopEnvBanner" rendered="#{not empty bean.environmentIdentifier}">#{bean.environmentIdentifier}</h:panelGroup>
 			<h:panelGroup styleClass="skyveEnvBanner skyveBottomEnvBanner" rendered="#{not empty bean.environmentIdentifier}">#{bean.environmentIdentifier}</h:panelGroup>
 
-			<div id="wrapper">
+			<div id="wrapper" class="#{showMenu ? '' : 'no-sidebar'}">
 				<div id="main">
 					<div class="inner">
 						<header id="header" class="ui-panel">
@@ -113,13 +113,13 @@
 							<p:tooltip id="help" widgetVar="help" globalSelector="i" escape="false" />
 							<p:confirmDialog id="confirm" global="true">
 								<p:commandButton id="confirmCancel" 
-													value="Cancel" 
+													value="#{bean.i18n['ui.dialog.cancel']}" 
 													type="button"
 													styleClass="ui-confirmdialog-no" 
 													style="float:right;"
 													icon="fa-solid fa-xmark" />
 								<p:commandButton id="confirmOK" 
-													value="OK" 
+													value="#{bean.i18n['ui.dialog.ok']}" 
 													type="button"
 													styleClass="ui-confirmdialog-yes" 
 													style="float:right;"

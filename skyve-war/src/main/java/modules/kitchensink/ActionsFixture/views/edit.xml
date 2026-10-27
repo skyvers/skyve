@@ -1,0 +1,190 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<view name="edit"
+		title="Actions Fixture"
+		xmlns="http://www.skyve.org/xml/view"
+		xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<blurb>
+		Each checkbox makes a trigger unavailable, and changing one refreshes the view: the server then refuses the action even when it is requested directly.
+		Changing Event Text runs Run From Event, the buttons run Run From Form Button and Run From Tab Button, each row's link runs Run From Row,
+		Run Without Trigger has no trigger at all, and Download Once disables itself when it prepares its download.
+		Outcome shows which action ran last.
+	</blurb>
+	<form border="true" borderTitle="Triggers">
+		<column responsiveWidth="3" />
+		<column responsiveWidth="9" />
+		<row>
+			<item showHelp="true">
+				<checkBox binding="disableToolbarAction" triState="false">
+					<onChangedHandlers>
+						<rerender clientValidation="false" />
+					</onChangedHandlers>
+				</checkBox>
+			</item>
+		</row>
+		<row>
+			<item showHelp="true">
+				<checkBox binding="hideEventText" triState="false">
+					<onChangedHandlers>
+						<rerender clientValidation="false" />
+					</onChangedHandlers>
+				</checkBox>
+			</item>
+		</row>
+		<row>
+			<item showHelp="true">
+				<checkBox binding="disableForm" triState="false">
+					<onChangedHandlers>
+						<rerender clientValidation="false" />
+					</onChangedHandlers>
+				</checkBox>
+			</item>
+		</row>
+		<row>
+			<item showHelp="true">
+				<checkBox binding="disableTab" triState="false">
+					<onChangedHandlers>
+						<rerender clientValidation="false" />
+					</onChangedHandlers>
+				</checkBox>
+			</item>
+		</row>
+		<row>
+			<item showHelp="true">
+				<checkBox binding="disableSharedFirst" triState="false">
+					<onChangedHandlers>
+						<rerender clientValidation="false" />
+					</onChangedHandlers>
+				</checkBox>
+			</item>
+		</row>
+		<row>
+			<item showHelp="true">
+				<checkBox binding="disableSharedSecond" triState="false">
+					<onChangedHandlers>
+						<rerender clientValidation="false" />
+					</onChangedHandlers>
+				</checkBox>
+			</item>
+		</row>
+		<row>
+			<item showHelp="true">
+				<checkBox binding="disableSave" triState="false">
+					<onChangedHandlers>
+						<rerender clientValidation="false" />
+					</onChangedHandlers>
+				</checkBox>
+			</item>
+		</row>
+		<row>
+			<item showHelp="true">
+				<checkBox binding="disableDelete" triState="false">
+					<onChangedHandlers>
+						<rerender clientValidation="false" />
+					</onChangedHandlers>
+				</checkBox>
+			</item>
+		</row>
+		<row>
+			<item showHelp="true">
+				<checkBox binding="downloaded" triState="false">
+					<onChangedHandlers>
+						<rerender clientValidation="false" />
+					</onChangedHandlers>
+				</checkBox>
+			</item>
+		</row>
+		<row>
+			<item showHelp="true">
+				<checkBox binding="disableExport" triState="false">
+					<onChangedHandlers>
+						<rerender clientValidation="false" />
+					</onChangedHandlers>
+				</checkBox>
+			</item>
+		</row>
+		<row>
+			<item showHelp="true">
+				<checkBox binding="disableImport" triState="false">
+					<onChangedHandlers>
+						<rerender clientValidation="false" />
+					</onChangedHandlers>
+				</checkBox>
+			</item>
+		</row>
+		<row>
+			<item showHelp="true">
+				<checkBox binding="disableUpload" triState="false">
+					<onChangedHandlers>
+						<rerender clientValidation="false" />
+					</onChangedHandlers>
+				</checkBox>
+			</item>
+		</row>
+		<row>
+			<item showHelp="true">
+				<textField binding="eventText" invisible="eventTextHidden">
+					<onChangedHandlers>
+						<server action="RunFromEvent" />
+					</onChangedHandlers>
+				</textField>
+			</item>
+		</row>
+		<row>
+			<item>
+				<textField binding="outcome" enabled="false" />
+			</item>
+		</row>
+	</form>
+	<form border="true" borderTitle="Form button" disabled="formDisabled">
+		<column />
+		<row>
+			<item>
+				<button action="RunFromFormButton" />
+			</item>
+		</row>
+	</form>
+	<tabPane>
+		<tab title="Tab button" disabled="tabDisabled">
+			<form>
+				<column />
+				<row>
+					<item>
+						<button action="RunFromTabButton" />
+					</item>
+				</row>
+			</form>
+		</tab>
+		<tab title="Rows">
+			<dataGrid binding="rows" title="Rows">
+				<boundColumn binding="name" />
+				<boundColumn binding="hideLink" />
+				<boundColumn binding="disableRowAction" />
+				<boundColumn binding="outcome" />
+				<containerColumn title="Row action">
+					<link value="Run From Row" invisible="rowLinkHidden">
+						<actionReference action="RunFromRow" />
+					</link>
+				</containerColumn>
+			</dataGrid>
+		</tab>
+	</tabPane>
+	<actions>
+		<!-- not <defaults />, which gives OK, Save and Delete one condition: Save and Delete must be refusable independently -->
+		<ok disabled="saveDisabled" />
+		<save disabled="saveDisabled" />
+		<delete disabled="deleteDisabled" />
+		<cancel />
+		<action className="RunFromToolbar" displayName="Run From Toolbar" disabled="toolbarActionDisabled" />
+		<action className="RunFromEvent" displayName="Run From Event" inActionPanel="false" />
+		<action className="RunWithoutTrigger" displayName="Run Without Trigger" invisible="true" />
+		<action className="RunFromFormButton" displayName="Run From Form Button" inActionPanel="false" />
+		<action className="RunFromTabButton" displayName="Run From Tab Button" inActionPanel="false" />
+		<action name="RunSharedFirst" className="RunShared" displayName="Run Shared First" disabled="sharedFirstDisabled" />
+		<action name="RunSharedSecond" className="RunShared" displayName="Run Shared Second" disabled="sharedSecondDisabled" />
+		<download className="DownloadOnce" displayName="Download Once" disabled="alreadyDownloaded" />
+		<export className="ActionsExport" displayName="Export" disabled="exportDisabled" />
+		<import className="ActionsImport" displayName="Import" disabled="importDisabled" />
+		<upload className="ActionsUpload" displayName="Upload" disabled="uploadDisabled" />
+	</actions>
+</view>

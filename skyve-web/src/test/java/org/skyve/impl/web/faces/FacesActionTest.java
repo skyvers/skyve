@@ -4,11 +4,15 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.lang.reflect.Field;
@@ -22,6 +26,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.primefaces.component.message.Message;
 import org.primefaces.component.tristatecheckbox.TriStateCheckbox;
+import org.skyve.domain.messages.SecurityException;
 import org.skyve.domain.messages.SessionEndedException;
 import org.skyve.impl.persistence.AbstractPersistence;
 
@@ -63,7 +68,8 @@ class FacesActionTest {
 	void executeRethrowsSecurityExceptionAndMarksRollback() {
 		FacesContext facesContext = mock(FacesContext.class);
 		ExternalContext externalContext = mock(ExternalContext.class);
-		when(externalContext.getRequest()).thenReturn(mock(HttpServletRequest.class));
+		HttpServletRequest request = mock(HttpServletRequest.class);
+		when(externalContext.getRequest()).thenReturn(request);
 		when(facesContext.getExternalContext()).thenReturn(externalContext);
 		FacesContextBridge.setCurrent(facesContext);
 		bindPersistenceToThread();
@@ -74,9 +80,28 @@ class FacesActionTest {
 	}
 
 	@Test
+	void executeRethrowsSkyveSecurityExceptionAndMarksRollback() {
+		FacesContext facesContext = mock(FacesContext.class);
+		ExternalContext externalContext = mock(ExternalContext.class);
+		HttpServletRequest request = mock(HttpServletRequest.class);
+		when(externalContext.getRequest()).thenReturn(request);
+		when(facesContext.getExternalContext()).thenReturn(externalContext);
+		FacesContextBridge.setCurrent(facesContext);
+		AbstractPersistence persistence = bindPersistenceToThread();
+
+		// Constructing a real SecurityException logs through a separate persistence instance, unavailable here.
+		SecurityException securityException = mock(SecurityException.class);
+		TestAction action = new TestAction(securityException);
+
+		assertSame(securityException, assertThrows(SecurityException.class, action::execute));
+		verify(persistence).setRollbackOnly();
+		verify(facesContext, never()).addMessage(any(), any(FacesMessage.class));
+	}
+
+	@Test
 	void executeHandlesUnexpectedThrowableAsGlobalMessage() {
 		UIViewRoot root = mock(UIViewRoot.class);
-		org.mockito.Mockito.doReturn(Boolean.TRUE).when(root).isRendered();
+		doReturn(Boolean.TRUE).when(root).isRendered();
 		PartialViewContext partialViewContext = mock(PartialViewContext.class);
 		Set<String> renderIds = new LinkedHashSet<>();
 		when(partialViewContext.getRenderIds()).thenReturn(renderIds);
@@ -117,13 +142,13 @@ class FacesActionTest {
 	@Test
 	void processFacesMessagesAddsFieldAndDistinctGlobalMessageOnce() {
 		UIViewRoot root = mock(UIViewRoot.class);
-		org.mockito.Mockito.doReturn(Boolean.TRUE).when(root).isRendered();
+		doReturn(Boolean.TRUE).when(root).isRendered();
 		HtmlInputText input = mock(HtmlInputText.class);
 		ValueExpression ve = mock(ValueExpression.class);
 		when(ve.getExpressionString()).thenReturn("#{beanMapAdapter['name']}");
 		when(input.getValueExpression("value")).thenReturn(ve);
 		when(input.getFacetsAndChildren()).thenAnswer(i -> iterator());
-		org.mockito.Mockito.doReturn(Boolean.TRUE).when(input).isRendered();
+		doReturn(Boolean.TRUE).when(input).isRendered();
 		when(input.getClientId()).thenReturn("form:nameInput");
 		when(root.getFacetsAndChildren()).thenAnswer(i -> iterator(input));
 
@@ -150,9 +175,9 @@ class FacesActionTest {
 	@Test
 	void validateRequiredFieldsReturnsFalseAndPopulatesRenderIds() {
 		UIViewRoot root = mock(UIViewRoot.class);
-		org.mockito.Mockito.doReturn(Boolean.TRUE).when(root).isRendered();
+		doReturn(Boolean.TRUE).when(root).isRendered();
 		HtmlInputText requiredInput = mock(HtmlInputText.class);
-		org.mockito.Mockito.doReturn(Boolean.TRUE).when(requiredInput).isRendered();
+		doReturn(Boolean.TRUE).when(requiredInput).isRendered();
 		when(requiredInput.getRequiredMessage()).thenReturn("Required");
 		when(requiredInput.getValue()).thenReturn(null);
 		when(requiredInput.getStyle()).thenReturn("");
@@ -160,7 +185,7 @@ class FacesActionTest {
 		when(requiredInput.getFacetsAndChildren()).thenAnswer(i -> iterator());
 
 		Message fieldMessage = mock(Message.class);
-		org.mockito.Mockito.doReturn(Boolean.TRUE).when(fieldMessage).isRendered();
+		doReturn(Boolean.TRUE).when(fieldMessage).isRendered();
 		when(fieldMessage.getClientId()).thenReturn("form:fieldMessage");
 		when(fieldMessage.getFacetsAndChildren()).thenAnswer(i -> iterator());
 		when(root.getFacetsAndChildren()).thenAnswer(i -> iterator(requiredInput, fieldMessage));
@@ -183,13 +208,13 @@ class FacesActionTest {
 	@Test
 	void validateRequiredFieldsForHiddenInputUsesParentClientId() {
 		UIViewRoot root = mock(UIViewRoot.class);
-		org.mockito.Mockito.doReturn(Boolean.TRUE).when(root).isRendered();
+		doReturn(Boolean.TRUE).when(root).isRendered();
 		UIComponent parent = mock(UIComponent.class);
-		org.mockito.Mockito.doReturn(Boolean.TRUE).when(parent).isRendered();
+		doReturn(Boolean.TRUE).when(parent).isRendered();
 		when(parent.getClientId()).thenReturn("form:parent");
 
 		HtmlInputHidden hidden = mock(HtmlInputHidden.class);
-		org.mockito.Mockito.doReturn(Boolean.TRUE).when(hidden).isRendered();
+		doReturn(Boolean.TRUE).when(hidden).isRendered();
 		when(hidden.getRequiredMessage()).thenReturn("Hidden required");
 		when(hidden.getValue()).thenReturn(null);
 		when(hidden.getParent()).thenReturn(parent);
@@ -222,13 +247,13 @@ class FacesActionTest {
 	@Test
 	void validateRequiredFieldsForDisplayNoneTextUsesParentClientId() {
 		UIViewRoot root = mock(UIViewRoot.class);
-		org.mockito.Mockito.doReturn(Boolean.TRUE).when(root).isRendered();
+		doReturn(Boolean.TRUE).when(root).isRendered();
 		UIComponent parent = mock(UIComponent.class);
-		org.mockito.Mockito.doReturn(Boolean.TRUE).when(parent).isRendered();
+		doReturn(Boolean.TRUE).when(parent).isRendered();
 		when(parent.getClientId()).thenReturn("form:parent");
 
 		HtmlInputText hiddenText = mock(HtmlInputText.class);
-		org.mockito.Mockito.doReturn(Boolean.TRUE).when(hiddenText).isRendered();
+		doReturn(Boolean.TRUE).when(hiddenText).isRendered();
 		when(hiddenText.getRequiredMessage()).thenReturn("Hidden text required");
 		when(hiddenText.getValue()).thenReturn(null);
 		when(hiddenText.getStyle()).thenReturn("display:none");
@@ -262,11 +287,11 @@ class FacesActionTest {
 	@Test
 	void validateRequiredFieldsForTextInputWithNullStyleUsesInputClientId() {
 		UIViewRoot root = mock(UIViewRoot.class);
-		org.mockito.Mockito.doReturn(Boolean.TRUE).when(root).isRendered();
+		doReturn(Boolean.TRUE).when(root).isRendered();
 
 		// TriStateCheckbox is an HtmlInputText with no style set
 		TriStateCheckbox triState = mock(TriStateCheckbox.class);
-		org.mockito.Mockito.doReturn(Boolean.TRUE).when(triState).isRendered();
+		doReturn(Boolean.TRUE).when(triState).isRendered();
 		when(triState.getRequiredMessage()).thenReturn("Tri-state required");
 		when(triState.getValue()).thenReturn(null);
 		when(triState.getStyle()).thenReturn(null);
@@ -305,13 +330,15 @@ class FacesActionTest {
 		return java.util.Arrays.asList(values).iterator();
 	}
 
-	private static void bindPersistenceToThread() {
+	private static AbstractPersistence bindPersistenceToThread() {
 		try {
 			Field field = AbstractPersistence.class.getDeclaredField("threadLocalPersistence");
 			field.setAccessible(true);
 			@SuppressWarnings("unchecked")
 			ThreadLocal<AbstractPersistence> threadLocal = (ThreadLocal<AbstractPersistence>) field.get(null);
-			threadLocal.set(mock(AbstractPersistence.class));
+			AbstractPersistence persistence = mock(AbstractPersistence.class);
+			threadLocal.set(persistence);
+			return persistence;
 		}
 		catch (Exception e) {
 			throw new IllegalStateException("Unable to bind thread local persistence", e);

@@ -3,6 +3,7 @@ package org.skyve.impl.web;
 import java.util.UUID;
 
 import org.apache.commons.text.StringEscapeUtils;
+import org.skyve.domain.messages.MessageException;
 import org.skyve.util.OWASP;
 import org.slf4j.Logger;
 
@@ -90,6 +91,27 @@ public final class WebErrorUtil {
 		String reference = newErrorReference();
 		logUnexpected(logger, reference, context, t);
 		return reference;
+	}
+
+	/**
+	 * Logs a failed request, generating a support reference only when the failure is unexpected.
+	 * <p>
+	 * A {@link MessageException}, such as a validation failure, is expected: its messages are shown to the
+	 * user, so it is logged at warn level, as {@code FacesAction} does, and no reference is generated.
+	 * Anything else is logged at error level with a new support reference, as
+	 * {@link #logUnexpectedAndGetReference(Logger, String, Throwable)} does.
+	 *
+	 * @param logger The logger to write to.
+	 * @param context Non-sensitive context describing the failing operation.
+	 * @param t The exception or error that failed the request.
+	 * @return The generated support reference, or null if {@code t} is a {@link MessageException}.
+	 */
+	public static String logFailureAndGetReference(Logger logger, String context, Throwable t) {
+		if (t instanceof MessageException) {
+			logger.warn(context, t);
+			return null;
+		}
+		return logUnexpectedAndGetReference(logger, context, t);
 	}
 
 	/**

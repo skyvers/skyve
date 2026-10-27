@@ -5,7 +5,9 @@ import org.skyve.domain.Bean;
 import org.skyve.domain.messages.SecurityException;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.util.UtilImpl;
+import org.skyve.impl.web.AbstractWebContext;
 import org.skyve.impl.web.UserAgent;
+import org.skyve.impl.web.ViewWebContext;
 import org.skyve.impl.web.WebUtil;
 import org.skyve.impl.web.faces.FacesAction;
 import org.skyve.impl.web.faces.views.FacesView;
@@ -19,7 +21,6 @@ import org.skyve.metadata.view.View;
 import org.skyve.metadata.view.View.ViewType;
 import org.skyve.util.OWASP;
 import org.skyve.util.logging.Category;
-import org.skyve.web.WebContext;
 import org.slf4j.Logger;
 
 import jakarta.faces.context.FacesContext;
@@ -55,6 +56,18 @@ public class ExecuteDownloadAction extends FacesAction<Void> {
 		this.elementBizId = elementBizId;
 	}
 
+	/**
+	 * Checks the user's privilege, then, when the required fields are valid or the action turns client validation off,
+	 * prepares the download and sends the browser to its URL.
+	 *
+	 * <p>Side effects: runs the action's {@code prepare()}, which may change the target bean; records the download on
+	 * the view's web context, so that {@code DownloadServlet} serves it even when preparing it disabled this action;
+	 * queues the script that requests the download; and schedules the bizlet's post render for the target bean.
+	 *
+	 * @return {@code null}
+	 * @throws SecurityException if the user may not execute the action
+	 * @throws Exception if preparing the download fails
+	 */
 	@Override
 	public Void callback() throws Exception {
 		if (UtilImpl.FACES_TRACE) FACES_LOGGER.info("ExecuteDownloadAction - EXECUTE ACTION {} {}", actionName, ((dataWidgetBinding != null) ? ("for data widget " + dataWidgetBinding + " with selected row " + elementBizId) : ""));
@@ -82,16 +95,20 @@ public class ExecuteDownloadAction extends FacesAction<Void> {
 		}
 
 		if (! clientValidationEnabled || FacesAction.validateRequiredFields()) {
-			WebContext webContext = facesView.getWebContext();
+			AbstractWebContext webContext = facesView.getWebContext();
 
 			DownloadAction<Bean> downloadAction = targetDocument.getDownloadAction(customer, resourceName, true);
 			downloadAction.prepare(targetBean, webContext);
+			String viewBinding = facesView.getViewBinding();
+			((ViewWebContext) webContext).recordPreparedDownload(actionName,
+														targetModule.getName(), targetDocument.getName(),
+														viewBinding, dataWidgetBinding, elementBizId);
 			
 			String url = WebUtil.getDownloadActionUrl(actionName,
 														targetModule.getName(),
 														targetDocument.getName(),
 														webContext.getWebId(),
-														facesView.getViewBinding(),
+														viewBinding,
 														dataWidgetBinding,
 														elementBizId);
 			PrimeFaces.current().executeScript("window.location.assign('" + OWASP.escapeJsStringWithHtmlFormatting(url) + "')");
