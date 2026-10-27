@@ -920,11 +920,13 @@ isc.EditView.addMethods({
 	 * @param {Array} values._growls - growl messages to be displayed.
 	 * @param {Array} values._messages - informational or warning messages to be displayed.
 	 * @param {string} values.bizId - business identifier associated with the values.
+	 * @param {string} values._c - the conversation (web context) identifier.
 	 */
 	scatter: function (values) {
-		// Clear any errors and reset values
+		// Clear any errors and reset values, keeping the conversation so that requests made
+		// while the fields are cleared and set (such as a lookup's pick list refetch) send it
 		this._vm.clearErrors(true);
-		this._vm.clearValues();
+		this._vm.setValues(values._c ? { _c: values._c } : {});
 
 		// Prepare link and header template
 		let link = "";

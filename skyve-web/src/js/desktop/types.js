@@ -3698,6 +3698,34 @@ isc.BizLookupDescriptionItem.addMethods({
 			},
 
 			/**
+			 * Sets the value map without refetching a hidden pick list.
+			 * SmartClient's setValueMap() sets an existing pick list up again, which fetches from the
+			 * server even while the pick list is hidden. The edit view sets the value map on every
+			 * response, and showing the pick list (by the picker or by typing) sets it up and filters
+			 * again, so that fetch is wasted. Instead the hidden pick list's rows are dropped, so the
+			 * next filter fetches rather than reusing rows from before the response.
+			 * A visible pick list keeps SmartClient's behaviour.
+			 *
+			 * @override
+			 * @returns {void}
+			 */
+			setValueMap: function () {
+				const pickList = this.pickList;
+				if (pickList && !pickList.isVisible()) {
+					pickList.setData([]);
+					delete pickList.formItem; // set up again when next shown, as SmartClient does
+					this.pickList = null;
+					try {
+						this.Super("setValueMap", arguments);
+					} finally {
+						this.pickList = pickList;
+					}
+				} else {
+					this.Super("setValueMap", arguments);
+				}
+			},
+
+			/**
 			 * Handles the change event of the combo box.
 			 * @param {DynamicForm} form - the form containing the combo box.
 			 * @param {Canvas} item - the combo box item.
