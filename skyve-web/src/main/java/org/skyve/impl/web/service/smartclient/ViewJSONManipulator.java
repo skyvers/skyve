@@ -8,6 +8,7 @@ import java.util.Objects;
 import java.util.TreeMap;
 import java.util.function.UnaryOperator;
 
+import org.owasp.encoder.Encode;
 import org.skyve.EXT;
 import org.skyve.content.AttachmentContent;
 import org.skyve.domain.Bean;
@@ -171,12 +172,15 @@ public class ViewJSONManipulator extends ViewVisitor {
 				actionName = action.getResourceName();
 				clientValidation = (! Boolean.FALSE.equals(action.getClientValidation()));
 				confirmationText = action.getLocalisedConfirmationText();
+				if ((confirmationText != null) && ViewRenderer.shouldEscape(action.getEscapeConfirm())) {
+					confirmationText = OWASP.escapeHtml(confirmationText);
+				}
 			}
 
 			htmlGuts.append("javascript:");
 			if (confirmationText != null) {
 				// NB braces are escaped as htmlGuts is formatted for {binding} expressions
-				htmlGuts.append("isc.ask('").append(OWASP.escapeJsString(confirmationText));
+				htmlGuts.append("isc.ask('").append(escapeConfirmationText(confirmationText));
 				htmlGuts.append("',function(b)\\{if(b)\\{");
 			}
 			htmlGuts.append(generateWidgetId());
@@ -184,8 +188,17 @@ public class ViewJSONManipulator extends ViewVisitor {
 			htmlGuts.append(currentBindings.getBindingPrefix());
 			htmlGuts.append("','{bizModule}','{bizDocument}','{bizId}')");
 			if (confirmationText != null) {
-				htmlGuts.append("\\}\\},\\{title:'Confirm'\\})");
+				htmlGuts.append("\\}\\},\\{title:isc.i18nMessages.editView_Confirm\\})");
 			}
+		}
+
+		/**
+		 * Escapes confirmation text for a JavaScript string in a double-quoted href attribute, as the href
+		 * becomes a format. The attribute encoding keeps quotes and ampersands from ending or changing the
+		 * attribute, and the escaped braces stop the format reading the text as {binding} expressions.
+		 */
+		private String escapeConfirmationText(String confirmationText) {
+			return Encode.forJavaScriptAttribute(confirmationText).replace("{", "\\{").replace("}", "\\}");
 		}
 
 		// The action is declared on the row document's edit or create view in a data widget,
@@ -197,7 +210,12 @@ public class ViewJSONManipulator extends ViewVisitor {
 			}
 			else {
 				for (ViewType viewType : new ViewType[] {ViewType.edit, ViewType.create}) {
-					result = dataWidgetDocument.getView(currentUxUi, customer, viewType.name()).getAction(actionName);
+					try {
+						result = dataWidgetDocument.getView(currentUxUi, customer, viewType.name()).getAction(actionName);
+					}
+					catch (@SuppressWarnings("unused") MetaDataException e) {
+						// No view of this type, try the next
+					}
 					if (result != null) {
 						break;
 					}

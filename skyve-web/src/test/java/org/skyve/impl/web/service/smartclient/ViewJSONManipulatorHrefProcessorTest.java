@@ -12,6 +12,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 
 import org.junit.jupiter.api.Test;
+import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
 import org.skyve.impl.metadata.module.ModuleImpl;
@@ -25,6 +26,7 @@ import org.skyve.impl.metadata.view.reference.ImplicitActionReference;
 import org.skyve.impl.metadata.view.reference.ReportReference;
 import org.skyve.impl.metadata.view.reference.ResourceReference;
 import org.skyve.impl.metadata.view.widget.bound.ParameterImpl;
+import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.controller.ImplicitActionName;
 import org.skyve.metadata.model.Persistent;
 import org.skyve.metadata.model.document.Document;
@@ -67,32 +69,80 @@ class ViewJSONManipulatorHrefProcessorTest {
 	void actionReferenceWithConfirmationAsksFirstWithEscapedBraces() throws Exception {
 		ViewJSONManipulator manipulator = newManipulator("edit", 5, 9);
 		setCurrentBindings(manipulator, "row");
-		ActionImpl action = new ActionImpl();
-		action.setName("doThing");
-		action.setResourceName("DoThingAction");
-		action.setConfirmationText("Isn't it?");
-		view(manipulator).putAction(action);
+		putFormAction(manipulator, "Isn't it?", null);
 
 		ActionReference ref = new ActionReference();
 		ref.setActionName("doThing");
 		invokeHrefProcessor(manipulator, "processActionReference", ActionReference.class, ref);
 
-		assertEquals("javascript:isc.ask('Isn\\'t it?',function(b)\\{if(b)\\{" +
+		// HTML escaped as a button's confirm is, then JavaScript escaped for the href attribute
+		assertEquals("javascript:isc.ask('Isn\\x26#39;t it?',function(b)\\{if(b)\\{" +
 						"testModule_TestDoc_edit_5._view.doAction('DoThingAction',true,'row'," +
-						"'{bizModule}','{bizDocument}','{bizId}')\\}\\},\\{title:'Confirm'\\})",
+						"'{bizModule}','{bizDocument}','{bizId}')\\}\\},\\{title:isc.i18nMessages.editView_Confirm\\})",
 						htmlGuts(manipulator));
+	}
+
+	@Test
+	void confirmationQuotesAndAmpersandsCannotEndOrChangeTheHrefAttribute() throws Exception {
+		ViewJSONManipulator manipulator = newManipulator("edit", 5, 9);
+		setCurrentBindings(manipulator, "row");
+		putFormAction(manipulator, "Say \"hi\" & 'bye'", Boolean.FALSE);
+
+		ActionReference ref = new ActionReference();
+		ref.setActionName("doThing");
+		invokeHrefProcessor(manipulator, "processActionReference", ActionReference.class, ref);
+
+		String guts = htmlGuts(manipulator);
+		assertTrue(guts.startsWith("javascript:isc.ask('Say \\x22hi\\x22 \\x26 \\x27bye\\x27',"), guts);
+		// The href is double-quoted and HTML decodes it, so neither may appear raw
+		assertFalse(guts.contains("\""), guts);
+		assertFalse(guts.contains("&"), guts);
+	}
+
+	@Test
+	void confirmationBracesAreLiteralTextNotBindings() throws Exception {
+		ViewJSONManipulator manipulator = newManipulator("edit", 5, 9);
+		setCurrentBindings(manipulator, "row");
+		// An unbalanced brace would make formatting the link throw if it were read as a binding
+		putFormAction(manipulator, "Keep {name} and \\{ { ?", Boolean.FALSE);
+
+		ActionReference ref = new ActionReference();
+		ref.setActionName("doThing");
+		invokeHrefProcessor(manipulator, "processActionReference", ActionReference.class, ref);
+
+		// Format the link as constructJSONObjectFromBinding() does, with the row placeholders already resolved
+		String guts = htmlGuts(manipulator).replace("'{bizModule}','{bizDocument}','{bizId}'", "'m','d','i'");
+		assertEquals("javascript:isc.ask('Keep {name} and \\\\{ { ?',function(b){if(b){" +
+						"testModule_TestDoc_edit_5._view.doAction('DoThingAction',true,'row','m','d','i')}}," +
+						"{title:isc.i18nMessages.editView_Confirm})",
+						BindUtil.formatMessage(guts));
+	}
+
+	@Test
+	void confirmationMarkupIsEscapedUnlessEscapeConfirmIsFalse() throws Exception {
+		ViewJSONManipulator escaped = newManipulator("edit", 5, 9);
+		setCurrentBindings(escaped, "row");
+		putFormAction(escaped, "<b>Sure</b>?", null);
+		ViewJSONManipulator unescaped = newManipulator("edit", 5, 9);
+		setCurrentBindings(unescaped, "row");
+		putFormAction(unescaped, "<b>Sure</b>?", Boolean.FALSE);
+
+		ActionReference ref = new ActionReference();
+		ref.setActionName("doThing");
+		invokeHrefProcessor(escaped, "processActionReference", ActionReference.class, ref);
+		invokeHrefProcessor(unescaped, "processActionReference", ActionReference.class, ref);
+
+		assertTrue(htmlGuts(escaped).startsWith("javascript:isc.ask('\\x26lt;b\\x26gt;Sure\\x26lt;/b\\x26gt;?',"),
+					htmlGuts(escaped));
+		assertTrue(htmlGuts(unescaped).startsWith("javascript:isc.ask('<b>Sure</b>?',"), htmlGuts(unescaped));
 	}
 
 	@Test
 	void actionReferenceInDataWidgetUsesRowDocumentEditViewAction() throws Exception {
 		ViewJSONManipulator manipulator = newManipulator("edit", 5, 9);
 		setCurrentBindings(manipulator, "row");
-		ActionImpl action = new ActionImpl();
-		action.setName("doThing");
-		action.setResourceName("DoRowThingAction");
-		action.setClientValidation(Boolean.FALSE);
 		ViewImpl rowEditView = new ViewImpl();
-		rowEditView.putAction(action);
+		rowEditView.putAction(rowAction());
 		Document rowDocument = mock(Document.class);
 		when(rowDocument.getView(eq("external"), any(), eq("edit"))).thenReturn(rowEditView);
 		setDataWidgetDocument(manipulator, rowDocument);
@@ -102,6 +152,61 @@ class ViewJSONManipulatorHrefProcessorTest {
 		invokeHrefProcessor(manipulator, "processActionReference", ActionReference.class, ref);
 
 		assertTrue(htmlGuts(manipulator).startsWith("javascript:testModule_TestDoc_edit_5._view.doAction('DoRowThingAction',false,'row'"));
+	}
+
+	@Test
+	void actionReferenceInDataWidgetFallsBackToRowDocumentCreateViewAction() throws Exception {
+		ViewJSONManipulator manipulator = newManipulator("edit", 5, 9);
+		setCurrentBindings(manipulator, "row");
+		ViewImpl rowCreateView = new ViewImpl();
+		rowCreateView.putAction(rowAction());
+		Document rowDocument = mock(Document.class);
+		when(rowDocument.getView(eq("external"), any(), eq("edit"))).thenReturn(new ViewImpl());
+		when(rowDocument.getView(eq("external"), any(), eq("create"))).thenReturn(rowCreateView);
+		setDataWidgetDocument(manipulator, rowDocument);
+
+		ActionReference ref = new ActionReference();
+		ref.setActionName("doThing");
+		invokeHrefProcessor(manipulator, "processActionReference", ActionReference.class, ref);
+
+		assertTrue(htmlGuts(manipulator).startsWith("javascript:testModule_TestDoc_edit_5._view.doAction('DoRowThingAction',false,'row'"));
+	}
+
+	@Test
+	void actionReferenceInDataWidgetSkipsAMissingRowDocumentView() throws Exception {
+		ViewJSONManipulator manipulator = newManipulator("edit", 5, 9);
+		setCurrentBindings(manipulator, "row");
+		ViewImpl rowCreateView = new ViewImpl();
+		rowCreateView.putAction(rowAction());
+		Document rowDocument = mock(Document.class);
+		when(rowDocument.getView(eq("external"), any(), eq("edit"))).thenThrow(new MetaDataException("No edit view"));
+		when(rowDocument.getView(eq("external"), any(), eq("create"))).thenReturn(rowCreateView);
+		setDataWidgetDocument(manipulator, rowDocument);
+
+		ActionReference ref = new ActionReference();
+		ref.setActionName("doThing");
+		invokeHrefProcessor(manipulator, "processActionReference", ActionReference.class, ref);
+
+		assertTrue(htmlGuts(manipulator).startsWith("javascript:testModule_TestDoc_edit_5._view.doAction('DoRowThingAction',false,'row'"));
+	}
+
+	@Test
+	void actionReferenceInDataWidgetWithNoRowActionSendsTheReferencedName() throws Exception {
+		ViewJSONManipulator manipulator = newManipulator("edit", 5, 9);
+		setCurrentBindings(manipulator, "row");
+		// The form view's action of the same name must not be used for a row link
+		putFormAction(manipulator, "Sure?", null);
+		Document rowDocument = mock(Document.class);
+		when(rowDocument.getView(eq("external"), any(), any())).thenThrow(new MetaDataException("No view"));
+		setDataWidgetDocument(manipulator, rowDocument);
+
+		ActionReference ref = new ActionReference();
+		ref.setActionName("doThing");
+		invokeHrefProcessor(manipulator, "processActionReference", ActionReference.class, ref);
+
+		assertEquals("javascript:testModule_TestDoc_edit_5._view.doAction('doThing',false,'row'," +
+						"'{bizModule}','{bizDocument}','{bizId}')",
+						htmlGuts(manipulator));
 	}
 
 	@Test
@@ -255,6 +360,30 @@ class ViewJSONManipulatorHrefProcessorTest {
 		Field field = org.skyve.impl.metadata.view.ViewVisitor.class.getDeclaredField("view");
 		field.setAccessible(true);
 		return (ViewImpl) field.get(manipulator);
+	}
+
+	/**
+	 * Declares a form view action named doThing, of class DoThingAction, with a confirmation.
+	 */
+	private static void putFormAction(ViewJSONManipulator manipulator, String confirmationText, Boolean escapeConfirm)
+	throws Exception {
+		ActionImpl action = new ActionImpl();
+		action.setName("doThing");
+		action.setResourceName("DoThingAction");
+		action.setConfirmationText(confirmationText);
+		action.setEscapeConfirm(escapeConfirm);
+		view(manipulator).putAction(action);
+	}
+
+	/**
+	 * Returns a row view action named doThing, of class DoRowThingAction, without client validation.
+	 */
+	private static ActionImpl rowAction() {
+		ActionImpl result = new ActionImpl();
+		result.setName("doThing");
+		result.setResourceName("DoRowThingAction");
+		result.setClientValidation(Boolean.FALSE);
+		return result;
 	}
 
 	private static void setDataWidgetDocument(ViewJSONManipulator manipulator, Document value) throws Exception {

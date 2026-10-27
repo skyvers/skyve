@@ -9,6 +9,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -226,6 +228,42 @@ class ActionsFixtureSmartClientH2Test extends AbstractSkyveTest {
 		assertRefused(refused);
 		ActionsFixture cached = (ActionsFixture) client.cachedBean();
 		assertNull(cached.getRowsElementById(hidden.getBizId()).getOutcome());
+	}
+
+	@Test
+	void aRowLinkRendersACallThatTheServerAccepts() throws Exception {
+		ActionsFixture fixture = persistedFixture(false, false);
+		ActionsFixtureRow shown = row(fixture, "shown");
+		SmartClient client = SmartClient.fixture(u);
+		client.fetch(fixture.getBizId());
+
+		// The rendered link, as SmartClient puts it in the row's grid cell
+		String link = rowLink(client.values, shown.getBizId());
+		assertTrue(link.startsWith("<a href=\""), link);
+		String href = link.substring("<a href=\"".length(), link.indexOf('"', "<a href=\"".length()));
+
+		// The confirmation's quotes and ampersand stay inside the href, and its braces are not read as bindings
+		assertTrue(href.startsWith("javascript:isc.ask('Run \\x26#34;Run From Row\\x26#34; \\x26amp; record {outcome}?',function(b){if(b){"), href);
+		assertTrue(href.endsWith("}},{title:isc.i18nMessages.editView_Confirm})"), href);
+
+		// The link calls doAction with the row action's class, not its name, validating first as the action does not say otherwise
+		Matcher call = Pattern.compile("\\._view\\.doAction\\('([^']*)',(true|false),'([^']*)','([^']*)','([^']*)','([^']*)'\\)").matcher(href);
+		assertTrue(call.find(), href);
+		assertEquals("RunFromRow", call.group(1));
+		assertEquals("true", call.group(2));
+		assertEquals(ActionsFixture.rowsPropertyName, call.group(3));
+		assertEquals(ActionsFixtureRow.MODULE_NAME, call.group(4));
+		assertEquals(ActionsFixtureRow.DOCUMENT_NAME, call.group(5));
+		assertEquals(shown.getBizId(), call.group(6));
+
+		// Sending what the link sends runs the row action
+		JsonNode ran = client.update(call.group(1), null, call.group(3), call.group(5), call.group(6));
+		assertEquals(0, status(ran), ran::toString);
+		assertEquals("Run From Row ran", row(ran, shown.getBizId()).get(ActionsFixtureRow.outcomePropertyName).asText());
+
+		// Sending the action's name, as the link did before, is refused as no action has that class
+		JsonNode byName = client.update("runFromRowLink", null, call.group(3), call.group(5), call.group(6));
+		assertRefused(byName);
 	}
 
 	@Test
@@ -527,6 +565,20 @@ class ActionsFixtureSmartClientH2Test extends AbstractSkyveTest {
 			}
 		}
 		throw new AssertionError("No row " + bizId + " in " + response);
+	}
+
+	/**
+	 * Returns the rendered markup of a row's action link from the fetched form values.
+	 */
+	private static String rowLink(JsonNode values, String bizId) {
+		JsonNode row = row(JSON_MAPPER.createObjectNode().set("data", values), bizId);
+		for (Map.Entry<String, JsonNode> field : row.properties()) {
+			String value = field.getValue().asText();
+			if (value.contains("._view.doAction(")) {
+				return value;
+			}
+		}
+		throw new AssertionError("No action link in row " + row);
 	}
 
 	private static int status(JsonNode response) {

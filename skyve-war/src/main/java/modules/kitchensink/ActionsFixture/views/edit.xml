@@ -163,7 +163,7 @@
 				<boundColumn binding="outcome" />
 				<containerColumn title="Row action">
 					<link value="Run From Row" invisible="rowLinkHidden">
-						<actionReference action="RunFromRow" />
+						<actionReference action="runFromRowLink" />
 					</link>
 				</containerColumn>
 			</dataGrid>

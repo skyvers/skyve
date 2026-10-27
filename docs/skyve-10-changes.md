@@ -21,6 +21,8 @@ These notes collect release-ready framework changes introduced for Skyve 10.
 - Decimal10 converters `Decimal10Integer`, `Decimal10IntegerPercentage`, `Decimal10OneDecimalPlace` and `Decimal10TwoDecimalPlacesPercentage` are new, and `Decimal10DollarsAndCents` can now be named in metadata.
 - [Server-side Questions](#server-side-questions): server code can ask the user an OK/Cancel or Yes/No question with `EXT.getDialogs()`, in SmartClient and PrimeFaces.
 - [Server-side Action Availability](server-side-action-availability.md): the server refuses a request for a view action that the view, as last rendered, offers the user no way to trigger.
+- SmartClient `link`s to an action now send the action's class name, as its buttons do, so a link whose action is named apart from its class is no longer refused. They also ask the action's `confirm` text first.
+  - Behaviour change: such a link now validates the form before it runs, as a button does, unless its action sets `clientValidation="false"`. It never validated before.
 
 ## Model-backed Lookup Descriptions
 
