@@ -3,6 +3,8 @@ package org.skyve.impl.web.service.smartclient;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -13,6 +15,7 @@ import org.junit.jupiter.api.Test;
 import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
 import org.skyve.impl.metadata.module.ModuleImpl;
+import org.skyve.impl.metadata.view.ActionImpl;
 import org.skyve.impl.metadata.view.ViewImpl;
 import org.skyve.impl.metadata.view.reference.ActionReference;
 import org.skyve.impl.metadata.view.reference.ContentReference;
@@ -24,6 +27,7 @@ import org.skyve.impl.metadata.view.reference.ResourceReference;
 import org.skyve.impl.metadata.view.widget.bound.ParameterImpl;
 import org.skyve.metadata.controller.ImplicitActionName;
 import org.skyve.metadata.model.Persistent;
+import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.user.User;
 import org.skyve.report.ReportFormat;
 
@@ -39,6 +43,65 @@ class ViewJSONManipulatorHrefProcessorTest {
 		invokeHrefProcessor(manipulator, "processActionReference", ActionReference.class, ref);
 
 		assertTrue(htmlGuts(manipulator).contains("javascript:testModule_TestDoc_edit_5._view.doAction('doThing',false,'row'"));
+	}
+
+	@Test
+	void actionReferenceSendsViewActionClassNameAndClientValidation() throws Exception {
+		ViewJSONManipulator manipulator = newManipulator("edit", 5, 9);
+		setCurrentBindings(manipulator, "row");
+		ActionImpl action = new ActionImpl();
+		action.setName("doThing");
+		action.setResourceName("DoThingAction");
+		view(manipulator).putAction(action);
+
+		ActionReference ref = new ActionReference();
+		ref.setActionName("doThing");
+		invokeHrefProcessor(manipulator, "processActionReference", ActionReference.class, ref);
+
+		assertEquals("javascript:testModule_TestDoc_edit_5._view.doAction('DoThingAction',true,'row'," +
+						"'{bizModule}','{bizDocument}','{bizId}')",
+						htmlGuts(manipulator));
+	}
+
+	@Test
+	void actionReferenceWithConfirmationAsksFirstWithEscapedBraces() throws Exception {
+		ViewJSONManipulator manipulator = newManipulator("edit", 5, 9);
+		setCurrentBindings(manipulator, "row");
+		ActionImpl action = new ActionImpl();
+		action.setName("doThing");
+		action.setResourceName("DoThingAction");
+		action.setConfirmationText("Isn't it?");
+		view(manipulator).putAction(action);
+
+		ActionReference ref = new ActionReference();
+		ref.setActionName("doThing");
+		invokeHrefProcessor(manipulator, "processActionReference", ActionReference.class, ref);
+
+		assertEquals("javascript:isc.ask('Isn\\'t it?',function(b)\\{if(b)\\{" +
+						"testModule_TestDoc_edit_5._view.doAction('DoThingAction',true,'row'," +
+						"'{bizModule}','{bizDocument}','{bizId}')\\}\\},\\{title:'Confirm'\\})",
+						htmlGuts(manipulator));
+	}
+
+	@Test
+	void actionReferenceInDataWidgetUsesRowDocumentEditViewAction() throws Exception {
+		ViewJSONManipulator manipulator = newManipulator("edit", 5, 9);
+		setCurrentBindings(manipulator, "row");
+		ActionImpl action = new ActionImpl();
+		action.setName("doThing");
+		action.setResourceName("DoRowThingAction");
+		action.setClientValidation(Boolean.FALSE);
+		ViewImpl rowEditView = new ViewImpl();
+		rowEditView.putAction(action);
+		Document rowDocument = mock(Document.class);
+		when(rowDocument.getView(eq("external"), any(), eq("edit"))).thenReturn(rowEditView);
+		setDataWidgetDocument(manipulator, rowDocument);
+
+		ActionReference ref = new ActionReference();
+		ref.setActionName("doThing");
+		invokeHrefProcessor(manipulator, "processActionReference", ActionReference.class, ref);
+
+		assertTrue(htmlGuts(manipulator).startsWith("javascript:testModule_TestDoc_edit_5._view.doAction('DoRowThingAction',false,'row'"));
 	}
 
 	@Test
@@ -186,6 +249,18 @@ class ViewJSONManipulatorHrefProcessorTest {
 		Field field = ViewJSONManipulator.class.getDeclaredField("processingDataWidget");
 		field.setAccessible(true);
 		field.setBoolean(manipulator, value);
+	}
+
+	private static ViewImpl view(ViewJSONManipulator manipulator) throws Exception {
+		Field field = org.skyve.impl.metadata.view.ViewVisitor.class.getDeclaredField("view");
+		field.setAccessible(true);
+		return (ViewImpl) field.get(manipulator);
+	}
+
+	private static void setDataWidgetDocument(ViewJSONManipulator manipulator, Document value) throws Exception {
+		Field field = ViewJSONManipulator.class.getDeclaredField("dataWidgetDocument");
+		field.setAccessible(true);
+		field.set(manipulator, value);
 	}
 
 	private static String htmlGuts(ViewJSONManipulator manipulator) throws Exception {

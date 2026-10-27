@@ -162,10 +162,48 @@ public class ViewJSONManipulator extends ViewVisitor {
 	private class HrefProcessor extends ReferenceProcessor {
 		@Override
 		public void processActionReference(ActionReference reference) {
-			htmlGuts.append("javascript:").append(generateWidgetId());
-			htmlGuts.append("._view.doAction('").append(reference.getActionName()).append("',false,'");
+			// Send the action's class name, client validation and confirm as an action button does
+			String actionName = reference.getActionName();
+			boolean clientValidation = false;
+			String confirmationText = null;
+			Action action = obtainAction(actionName);
+			if (action != null) {
+				actionName = action.getResourceName();
+				clientValidation = (! Boolean.FALSE.equals(action.getClientValidation()));
+				confirmationText = action.getLocalisedConfirmationText();
+			}
+
+			htmlGuts.append("javascript:");
+			if (confirmationText != null) {
+				// NB braces are escaped as htmlGuts is formatted for {binding} expressions
+				htmlGuts.append("isc.ask('").append(OWASP.escapeJsString(confirmationText));
+				htmlGuts.append("',function(b)\\{if(b)\\{");
+			}
+			htmlGuts.append(generateWidgetId());
+			htmlGuts.append("._view.doAction('").append(actionName).append("',").append(clientValidation).append(",'");
 			htmlGuts.append(currentBindings.getBindingPrefix());
 			htmlGuts.append("','{bizModule}','{bizDocument}','{bizId}')");
+			if (confirmationText != null) {
+				htmlGuts.append("\\}\\},\\{title:'Confirm'\\})");
+			}
+		}
+
+		// The action is declared on the row document's edit or create view in a data widget,
+		// as ReferenceProcessor.obtainActionForActionReference() finds it for faces
+		private Action obtainAction(String actionName) {
+			Action result = null;
+			if (dataWidgetDocument == null) {
+				result = view.getAction(actionName);
+			}
+			else {
+				for (ViewType viewType : new ViewType[] {ViewType.edit, ViewType.create}) {
+					result = dataWidgetDocument.getView(currentUxUi, customer, viewType.name()).getAction(actionName);
+					if (result != null) {
+						break;
+					}
+				}
+			}
+			return result;
 		}
 
 		@Override
@@ -1656,6 +1694,7 @@ public class ViewJSONManipulator extends ViewVisitor {
 
 	private boolean visitingDataWidget = false;
 	private boolean processingDataWidget = false;
+	private Document dataWidgetDocument = null; // the row document of the data widget being processed
 	private boolean visitedDataWidgetHasEditableColumns = false;
 
 	@Override
@@ -1729,7 +1768,8 @@ public class ViewJSONManipulator extends ViewVisitor {
 			    }
 			    Document relatedDocument = module.getDocument(customer, targetRelation.getDocumentName());
 		        currentBindings = currentBindings.putOrGetChild(gridBinding, relatedDocument);
-		        
+		        dataWidgetDocument = relatedDocument;
+
 		        // Add these for polymorphic zooming on data grids
 		        addBinding(Bean.MODULE_KEY, false, false, Sanitisation.text);
 		        addBinding(Bean.DOCUMENT_KEY, false, false, Sanitisation.text);
@@ -1823,6 +1863,7 @@ public class ViewJSONManipulator extends ViewVisitor {
 		}
 		processingDataWidget = false;
 		visitingDataWidget = false;
+		dataWidgetDocument = null;
 		htmlGuts.setLength(0);
 	}
 	
