@@ -148,6 +148,7 @@
 					/jakarta.faces.resource/
 					/device.xhtml
 					/upload.xhtml
+					/imageMarkup.xhtml
         		]]>
         	</param-value>
         </init-param>
