@@ -786,6 +786,20 @@ export default {
             return style;
         },
         /**
+         * Body cell styles - the column style with long text cut off by an ellipsis.
+         * Resizable columns don't wrap, so without a max width a column grows to fit its longest value.
+         * Columns without a pixel width share the space left over (max-width: 0) like the SmartClient list grid.
+         * Header cells keep their natural width so titles aren't cut off.
+         */
+        cellStyle(col) {
+            const style = this.columnStyle(col);
+            if (col.type != 'image') {
+                style.maxWidth = col.pixelWidth ? `${col.pixelWidth}px` : '0';
+                style.textOverflow = 'ellipsis';
+            }
+            return style;
+        },
+        /**
          * The URL of the content for the given row and column.
          */
         contentUrl(data, field) {
@@ -1308,7 +1322,7 @@ export default {
                 :footer="summaryRow[col.field]"
                 :filterMatchModeOptions="matchModes[col.type]"
                 :headerStyle="columnStyle(col)"
-                :bodyStyle="columnStyle(col)"
+                :bodyStyle="cellStyle(col)"
             >
                 <template
                     #filter="{ filterModel }"
@@ -1385,7 +1399,7 @@ export default {
                             target="_blank">Content</a>
                     </span>
                     <!-- Unescaped columns are sanitised on the server -->
-                    <span v-else-if="col.escape === false" v-html="data[field]" />
+                    <span v-else-if="col.escape === false" class="skyve-vue-list-grid-html" v-html="data[field]" />
                     <span v-else>
                         {{ data[field] }}
                     </span>
@@ -1439,7 +1453,7 @@ export default {
             </template>
             <!--
                 List views (with a sticky header) also have a floating New button that stays at the
-                bottom of the grid's visible area while scrolling and rests above the paginator.
+                bottom of the grid's visible area while scrolling and rests in its own strip above the paginator.
                 It is in the (otherwise unused) footer, between the rows and the paginator.
             -->
             <template #footer v-if="showAdd && stickyHeaderAnchorSelector">
@@ -1466,6 +1480,12 @@ export default {
 .skyve-vue-list-grid :deep(.p-datatable-tbody > tr > td),
 .skyve-vue-list-grid :deep(.p-datatable-tfoot > tr > td) {
     padding: 0.25rem 0.5rem;
+}
+
+/* Block elements (eg paragraphs) in unescaped cells cut their long lines off like plain text cells */
+.skyve-vue-list-grid :deep(.skyve-vue-list-grid-html > *) {
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .skyve-vue-list-grid :deep(.p-datatable .p-button.p-button-icon-only) {
@@ -1515,13 +1535,18 @@ export default {
 
 /*
  * Floating New button (list views) - in the footer, which is made a zero height sticky element so
- * it sticks to the bottom of the viewport while the grid fills it and rests above the paginator at
- * the end of the grid. It sits left of the zoom column so it doesn't cover the rows' zoom buttons.
+ * it sticks to the bottom of the viewport while the grid fills it. The button is lifted above the
+ * footer into the footer's top margin, so at the end of the grid it rests in its own strip above
+ * the paginator and never covers the last row. A margin rather than footer height keeps the strip
+ * transparent while scrolling (themes, eg editorial, give the footer an opaque background).
+ * It is centred on the zoom column so it only ever covers a zoom button, never the row's data.
  */
 .skyve-vue-list-grid :deep(.p-datatable-footer) {
     position: sticky;
     bottom: 1rem;
     height: 0;
+    /* the 3rem button and a 0.5rem gap above and below it */
+    margin-top: 4rem;
     padding: 0;
     border: 0;
     background: transparent;
@@ -1531,8 +1556,8 @@ export default {
 .skyve-vue-list-grid-fab {
     display: flex;
     justify-content: flex-end;
-    /* the zoom column's width (60px) and a gap - px so it holds whatever the theme's root font size */
-    padding-right: 68px;
+    /* centres the 48px button in the 60px zoom column - px so it holds whatever the theme's root font size */
+    padding-right: 6px;
     pointer-events: none;
 }
 
