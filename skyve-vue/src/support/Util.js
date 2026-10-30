@@ -6,11 +6,14 @@
  * @param {*} param0 
  * @returns 
  */
-function createEditUrl({ module, document, bizId = '' }) {
+function createEditUrl({ module, document, bizId = '', params = null }) {
 
     let url = `./?a=e&m=${module}&d=${document}`;
     if ((bizId ?? '').length > 0) {
         url += `&i=${bizId}`;
+    }
+    for (const [name, value] of Object.entries(params ?? {})) {
+        url += `&${encodeURIComponent(name)}=${encodeURIComponent(value)}`;
     }
 
     return url;
@@ -21,11 +24,12 @@ export const SNAP_KEY_PREFIX = 'dt-selected-snap-bizId-';
 /**
  * Open an edit view for the request document in this window.
  * 
- * @param {Object} obj Parameter object containing: module, document and bizId
+ * @param {Object} obj Parameter object containing: module, document, bizId and
+ * optional params (request parameters to populate a new document)
  */
-export function openDocInSameWindow({ module, document, bizId }) {
+export function openDocInSameWindow({ module, document, bizId, params }) {
 
-    const url = createEditUrl({ module, document, bizId });
+    const url = createEditUrl({ module, document, bizId, params });
 
     if (!!SKYVE && SKYVE?.PF?.pushHistory) {
         SKYVE.PF.pushHistory(url)

@@ -7,10 +7,21 @@ import vue from '@vitejs/plugin-vue'
 export default defineConfig({
     plugins: [vue()],
     build: {
+        // index.js is loaded by Faces as a classic <script>, not a module.
+        // Wrap it in an IIFE so its minified top-level names (eg L, $) stay private
+        // and other page scripts can't overwrite them (or vice versa).
+        modulePreload: { polyfill: false },
+        // Keep the CSS in its own index.css (an IIFE build would otherwise inline it into index.js)
+        cssCodeSplit: false,
         rollupOptions: {
             output: {
+                format: 'iife',
                 entryFileNames: 'assets/index.js',
-                assetFileNames: 'assets/[name].[ext]'
+                // the single CSS file comes out as style.css; build.xml expects index.css
+                assetFileNames: (assetInfo) => {
+                    const name = assetInfo.names?.[0] ?? assetInfo.name;
+                    return (name === 'style.css') ? 'assets/index.css' : 'assets/[name].[ext]';
+                }
             }
         },
     },

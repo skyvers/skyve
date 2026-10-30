@@ -93,10 +93,14 @@ body .ui-widget button,
 .ui-datatable-data > tr {
 	text-align: center !important;
 }
-.ui-datatable-data > tr > td {
+/* VueListGrid cells match the faces data table density */
+.ui-datatable-data > tr > td,
+.p-datatable .p-datatable-tbody > tr > td,
+.p-datatable .p-datatable-tfoot > tr > td {
 	padding: 4px !important;
 }
-.ui-datatable thead th {
+.ui-datatable thead th,
+.p-datatable .p-datatable-thead > tr > th {
 	padding: 4px !important;
 }
 
@@ -126,6 +130,20 @@ body .p-button:not(:disabled):active {
 body .p-button:focus-visible,
 body .p-button:focus {
     box-shadow: 0 0 0 0.2rem var(--skyve-editorial-focus-ring) !important;
+}
+/* VueListGrid floating New button - a round, solid accent button that floats above the rows */
+body .skyve-vue-list-grid-fab .p-button {
+    background: var(--skyve-editorial-accent) !important;
+    border-color: var(--skyve-editorial-accent) !important;
+    border-radius: 50% !important;
+    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.28) !important;
+    color: var(--skyve-editorial-button-hover-fg) !important;
+}
+body .skyve-vue-list-grid-fab .p-button:not(:disabled):hover,
+body .skyve-vue-list-grid-fab .p-button:not(:disabled):active {
+    background: var(--skyve-editorial-accent-hover) !important;
+    border-color: var(--skyve-editorial-accent-hover) !important;
+    box-shadow: 0 6px 16px rgba(15, 23, 42, 0.34) !important;
 }
 body .p-button.p-button-secondary,
 body .p-button.p-button-outlined,
@@ -602,9 +620,6 @@ body .sidebarCreate {
 	.p-component {
 		font-size: 0.875rem !important;
 	}
-	.p-datatable .p-datatable-tbody>tr>td {
-		padding: 1rem !important;
-	}
 }
 @media (min-width: 737px) {
 	body .ui-widget,
@@ -619,9 +634,6 @@ body .sidebarCreate {
 	.p-component {
 		font-size: 0.8125rem !important;
 	}
-	.p-datatable .p-datatable-tbody>tr>td {
-		padding: 0.8rem 1rem !important;
-	}
 }
 @media (min-width: 1281px) {
 	body .ui-widget,
@@ -635,9 +647,6 @@ body .sidebarCreate {
 */
 	.p-component {
 		font-size: 0.8125rem !important;
-	}
-	.p-datatable .p-datatable-tbody>tr>td {
-		padding: 0.6rem 1rem !important;
 	}
 }
 

@@ -3,6 +3,7 @@ package org.skyve.impl.web.faces.pipeline.component;
 import static java.lang.Boolean.FALSE;
 import static java.lang.Boolean.TRUE;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.function.UnaryOperator;
 
@@ -19,6 +20,7 @@ import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.web.WebContext;
 
 import jakarta.el.MethodExpression;
+import jakarta.el.ValueExpression;
 import jakarta.faces.component.UIComponent;
 import jakarta.faces.component.UIOutput;
 import jakarta.faces.component.html.HtmlPanelGroup;
@@ -122,6 +124,36 @@ public class VueListGridComponentBuilder extends NoOpComponentBuilder {
 															showSnap,
 															selectedRemoteCommand,
 															stickyHeaderAnchorSelector);
+		// Embedded list grids need the view's current state (bean, conversation, view binding) when rendered
+		script.setManagedBeanName(managedBeanName);
+		script.setParameters(grid.getFilterParameters(), grid.getParameters());
+		script.setUxUiName(uxui);
+		// As per FacesViewRenderer.renderListGrid(), no context menu for conversation grids
+		script.setShowContextMenu(showZoom && (! grid.getContinueConversation()));
+
+		// Disable conditions are evaluated against the current bean each time the grid is rendered
+		// The same as TabularComponentBuilder.listGrid()
+		String disableAddCondition = grid.getDisableAddCondition();
+		String disabledCondition = grid.getDisabledCondition();
+		List<String> addConditions = new ArrayList<>(2);
+		if (disableAddCondition != null) {
+			addConditions.add(disableAddCondition);
+		}
+		if (disabledCondition != null) {
+			addConditions.add(disabledCondition);
+		}
+		if (! addConditions.isEmpty()) {
+			ValueExpression disableAdd = createOredValueExpressionFromConditions(addConditions.toArray(new String[addConditions.size()]));
+			if (disableAdd != null) {
+				script.setValueExpression(VueListGridScript.DISABLE_ADD_VALUE_EXPRESSION, disableAdd);
+			}
+		}
+		String disableZoomCondition = grid.getDisableZoomCondition();
+		if (disableZoomCondition != null) {
+			script.setValueExpression(VueListGridScript.DISABLE_ZOOM_VALUE_EXPRESSION,
+										createValueExpressionFromCondition(disableZoomCondition, null));
+		}
+
 		children.add(script);
 
 		return result;

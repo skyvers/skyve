@@ -54,9 +54,6 @@
 					<onSelectedHandlers>
 						<server action="BackupSelected" />
 					</onSelectedHandlers>
-					<properties>
-						<c:property key="componentBuilderClass">faces</c:property>
-					</properties>
 				</listGrid>
 				<form>
 					<column responsiveWidth="2" />
