@@ -39,6 +39,13 @@ body,html {
 	transition: none !important;
 }
 
+/* An action bar whose actions are all hidden is an empty toolbar; don't show it or reserve its space.
+ * Theme rules that make room for the bar match only a bar with something in it. */
+.skyve-action-bar-wrapper:not(:has(.ui-toolbar-group-left > *, .ui-toolbar-group-right > *)),
+.action-bar-wrapper:not(:has(.ui-toolbar-group-left > *, .ui-toolbar-group-right > *)) {
+	display: none;
+}
+
 /* Metadata icon and title shared by all PrimeFaces layout themes. */
 .skyve-title {
 	display: inline-flex;
@@ -543,6 +550,15 @@ div.skyveContentPreview.skyveContentResponsiveImage {
 .skyveContentResponsiveVideo {
 	aspect-ratio: 16 / 9;
 	height: auto !important;
+}
+
+/* Pin the media to the box's edges. Safari (and every iOS browser) does not resolve
+   height:100% against a box sized by aspect-ratio, so the media takes its own height
+   and object-fit:contain centres it out of view. */
+div.skyveContentPreview.skyveContentResponsiveImage > img,
+.skyveContentResponsiveVideo > video {
+	position: absolute;
+	inset: 0;
 }
 
 /* PrimeFaces ui-g collapse breakpoint */
