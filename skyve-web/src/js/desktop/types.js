@@ -3233,6 +3233,8 @@ isc.BizContentImageItem.addMethods({
 		// Ensure the image is updated only if the canvas is initialized and the value is not user-set
 		if (this.canvas != null && !this.userSetValue) {
 			if (newValue) {
+				// A thumbnail sized to the box (-20 for the border), rounded up so few sizes are cached
+				const size = SKYVE.Util.contentPreviewSize(this._img.getWidth() - 20, this._img.getHeight() - 20);
 				// Construct the URL with required query parameters
 				const url =
 					SKYVE.Util.CONTEXT_URL +
@@ -3245,9 +3247,9 @@ isc.BizContentImageItem.addMethods({
 					"&_b=" +
 					SKYVE.Util.unsanitiseBinding(this.name) +
 					"&_w=" +
-					(this._img.getWidth() - 20) + // -20 for the border
+					size +
 					"&_h=" +
-					(this._img.getHeight() - 20); // -20 for the border
+					size;
 				// Update the image source
 				this._img.setSrc(url);
 			} else {
@@ -3534,13 +3536,9 @@ isc.BizContentItem.addMethods({
 				const kind = this._resolveMediaKind();
 				this._currentMediaKind = kind;
 				if (kind === "image") {
-					let imageUrl = url;
-					if (typeof this._previewWidth === "number") {
-						imageUrl += "&_w=" + this._previewWidth;
-					}
-					if (typeof this._previewHeight === "number") {
-						imageUrl += "&_h=" + this._previewHeight;
-					}
+					// A thumbnail sized to the box, rounded up so few sizes are cached; the link opens the original
+					const size = SKYVE.Util.contentPreviewSize(this._previewWidth, this._previewHeight);
+					const imageUrl = url + "&_w=" + size + "&_h=" + size;
 					this._preview.setContents(
 						`<a href="${url}" target="_blank"><img src="${imageUrl}" style="border:1px solid #bfbfbf;${this._previewMediaStyle("1 / 1")}object-fit:contain"/></a>`,
 					);

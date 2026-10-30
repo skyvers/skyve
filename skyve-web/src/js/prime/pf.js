@@ -490,6 +490,15 @@ SKYVE.PF = function() {
 		}
 	};
 	
+	// Show the image as a thumbnail at the size the server chose for the box (see data-skyve-preview-size)
+	var setContentImageSrc = function(root, id, binding, url) {
+		getContentElements(root, id, binding, '_image').each(function() {
+			var image = root.$(this);
+			var size = image.attr('data-skyve-preview-size');
+			image.attr('src', size ? url + '&_w=' + size + '&_h=' + size : url);
+		});
+	};
+
 	var clearContentAnchor = function(root, id, binding) {
 		getContentElements(root, id, binding, '_link').attr('href','javascript:void(0)').text('<Empty>').attr('onclick', 'return false').off('click.skyveContentClear').on('click.skyveContentClear', function() { return false; });
 	};
@@ -755,7 +764,7 @@ SKYVE.PF = function() {
 			}
 			var url = 'content?_n=' + contentId + '&_doc=' + modoc + '&_b=' + unsanitiseBinding(binding);
 			getContentElements(window, id, binding, '_link').off('click.skyveContentClear').attr('href', url).text('Content').attr('onclick', 'return true');
-			getContentElements(window, id, binding, '_image').attr('src', url);
+			setContentImageSrc(window, id, binding, url);
 			setContentImagePlaceholder(window, id, binding, false);
 			showContentVideo(window, id, binding, url);
 			if (companionBinding) {
@@ -826,7 +835,7 @@ SKYVE.PF = function() {
 			}
 			var url = 'content?_n=' + contentId + '&_doc=' + modoc + '&_b=' + unsanitiseBinding(binding);
 			getContentElements(window, id, binding, '_link').off('click.skyveContentClear').attr('href', url).text('Content').attr('onclick', 'return true');
-			getContentElements(window, id, binding, '_image').attr('src', url);
+			setContentImageSrc(window, id, binding, url);
 			setContentImagePlaceholder(window, id, binding, false);
 			if (companionBinding) {
 				setAutoContentVisibility(window, id, binding, 'image');

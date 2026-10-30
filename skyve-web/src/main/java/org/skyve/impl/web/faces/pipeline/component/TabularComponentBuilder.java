@@ -3122,7 +3122,7 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 			Dialog dialog = createFullScreenDialog(contentActionNoun + " Upload");
 			dialog.setWidgetVar(overlayVar);
 			// clear the iframe src on hide so there is no flash next open
-			dialog.setOnHide(createContentOverlayOnHideScript(id, true, true));
+			dialog.setOnHide(createContentOverlayOnHideScript(id, false, true));
 			panel = dialog;
 		}
 		else {
@@ -5296,6 +5296,33 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		return result;
 	}
 
+	/**
+	 * Returns the thumbnail size to request for an image preview box.
+	 * The box's larger side is rounded up to 256, 512, 1024 or 2048 (the most) so the
+	 * thumbnail cache holds at most four sizes per image, however boxes are sized.
+	 * The servlet fits the image inside this square, keeping its aspect ratio.
+	 * This matches {@code SKYVE.Util.contentPreviewSize()} used by SmartClient.
+	 *
+	 * @param pixelWidth box width in pixels, or {@code null} if not fixed
+	 * @param pixelHeight box height in pixels, or {@code null} if not fixed
+	 * @return 256, 512, 1024 or 2048; 1024 when neither side is fixed, as for responsive boxes
+	 */
+	static int contentPreviewSize(@Nullable Integer pixelWidth, @Nullable Integer pixelHeight) {
+		int side = Math.max((pixelWidth == null) ? 0 : pixelWidth.intValue(),
+								(pixelHeight == null) ? 0 : pixelHeight.intValue());
+		if (side <= 0) {
+			return 1024;
+		}
+		for (int step : CONTENT_PREVIEW_SIZES) {
+			if (side <= step) {
+				return step;
+			}
+		}
+		return CONTENT_PREVIEW_SIZES[CONTENT_PREVIEW_SIZES.length - 1];
+	}
+
+	private static final int[] CONTENT_PREVIEW_SIZES = {256, 512, 1024, 2048};
+
 	// To enable a scaled image to keep its aspect ratio, construct something like
 	// <div><img/></div> & set the size of the div to what is required
 	// and set the image as width:100%;height:100%;object-fit:contain;
@@ -5327,12 +5354,23 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 
 		GraphicImage image = (GraphicImage) a.createComponent(GraphicImage.COMPONENT_TYPE);
 		setId(image, null);
-		expression = String.format("#{%s}", contentUrlExpression(dataWidgetVar, binding, true));
+		// Request a thumbnail sized to the box, rounded up so few sizes are cached per image
+		String contentUrl = contentUrlExpression(dataWidgetVar, binding, true);
+		int previewSize = contentPreviewSize(pixelWidth, pixelHeight);
+		expression = String.format("#{(empty %s) ? %s : %s.concat('&_w=%d&_h=%d')}",
+									contentValueExpression(dataWidgetVar, binding),
+									contentUrl,
+									contentUrl,
+									Integer.valueOf(previewSize),
+									Integer.valueOf(previewSize));
 		image.setValueExpression("value", ef.createValueExpression(elc, expression, String.class));
+		// So SKYVE.PF asks for the same thumbnail size after an upload or mark up
+		image.getPassThroughAttributes().put("data-skyve-preview-size", String.valueOf(previewSize));
 		image.setStyle("width:100%;height:100%;object-fit:contain;cursor:pointer");
 		expression = String.format("#{(empty %s) ? 'skyveContentHidden' : ''}", contentValueExpression(dataWidgetVar, binding));
 		image.setValueExpression("styleClass", ef.createValueExpression(elc, expression, String.class));
-		image.setOnclick("window.open(this.src, '_blank');if(event){event.stopPropagation()}");
+		// Open the original image, not the thumbnail
+		image.setOnclick("window.open(this.src.replace(/&_[wh]=\\d*/g, ''), '_blank');if(event){event.stopPropagation()}");
 		result.getChildren().add(image);
 
 		return result;
