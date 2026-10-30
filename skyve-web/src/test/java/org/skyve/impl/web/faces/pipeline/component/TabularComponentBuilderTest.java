@@ -1,5 +1,6 @@
 package org.skyve.impl.web.faces.pipeline.component;
 
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -947,6 +948,19 @@ class TabularComponentBuilderTest {
 	@AfterAll
 	static void tearDownFacesContext() {
 		FacesContextBridge.setCurrent(null);
+	}
+
+	@Test
+	void contentPreviewSizeRoundsTheLargerSideUpToAFewFixedSteps() {
+		assertAll(
+			() -> assertEquals(1024, TabularComponentBuilder.contentPreviewSize(null, null), "responsive box"),
+			() -> assertEquals(1024, TabularComponentBuilder.contentPreviewSize(Integer.valueOf(0), Integer.valueOf(-5)), "no usable size"),
+			() -> assertEquals(256, TabularComponentBuilder.contentPreviewSize(Integer.valueOf(64), null), "small box"),
+			() -> assertEquals(256, TabularComponentBuilder.contentPreviewSize(Integer.valueOf(256), Integer.valueOf(100)), "exactly a step"),
+			() -> assertEquals(512, TabularComponentBuilder.contentPreviewSize(Integer.valueOf(200), Integer.valueOf(257)), "taller than wide"),
+			() -> assertEquals(1024, TabularComponentBuilder.contentPreviewSize(null, Integer.valueOf(600)), "height only"),
+			() -> assertEquals(2048, TabularComponentBuilder.contentPreviewSize(Integer.valueOf(1025), Integer.valueOf(10)), "large box"),
+			() -> assertEquals(2048, TabularComponentBuilder.contentPreviewSize(Integer.valueOf(5000), Integer.valueOf(4000)), "capped"));
 	}
 
 	@Test
@@ -2053,7 +2067,7 @@ class TabularComponentBuilderTest {
 		verify(dialog).setWidth("96vw");
 		verify(dialog).setHeight("96vh");
 		verify(dialog).setStyle("max-width:100vw;max-height:100vh;");
-		verify(dialog).setOnHide("SKYVE.PF.contentOverlayOnHide('contentGrid',true,true)");
+		verify(dialog).setOnHide("SKYVE.PF.contentOverlayOnHide('contentGrid',false,true)");
 		verify(uploadItem).setValueExpression(eq("onclick"), any(ValueExpression.class));
 		verify(uploadItem, never()).setOnclick(anyString());
 		verify(iframe).setValue("<iframe id=\"contentGrid_overlayiframe\" src=\"\" loading=\"eager\" scrolling=\"no\" style=\"display:block;width:100%;height:100%;border:none;overflow:hidden\"></iframe>");
@@ -2712,7 +2726,7 @@ class TabularComponentBuilderTest {
 			if ("variant".equals(name) || "dynamic".equals(name)) {
 				when(attribute.getDomainType()).thenReturn(org.skyve.metadata.model.document.DomainType.valueOf(name));
 			}
-			org.mockito.Mockito.doReturn(String.class).when(attribute).getImplementingType();
+			doReturn(String.class).when(attribute).getImplementingType();
 			when(document.getAttribute(name)).thenReturn(attribute);
 			org.skyve.impl.metadata.view.widget.bound.input.LookupDescriptionColumn dropdown = new org.skyve.impl.metadata.view.widget.bound.input.LookupDescriptionColumn();
 			dropdown.setName(name);

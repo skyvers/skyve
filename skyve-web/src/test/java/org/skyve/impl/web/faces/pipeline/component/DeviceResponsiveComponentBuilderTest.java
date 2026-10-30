@@ -518,7 +518,7 @@ class DeviceResponsiveComponentBuilderTest {
 		verify(dialog).setWidth("96vw");
 		verify(dialog).setHeight("96vh");
 		verify(dialog).setStyle("max-width:100vw;max-height:100vh;");
-		verify(dialog).setOnHide("SKYVE.PF.contentOverlayOnHide('contentGrid',true,true)");
+		verify(dialog).setOnHide("SKYVE.PF.contentOverlayOnHide('contentGrid',false,true)");
 		verify(uploadItem).setValueExpression(eq("onclick"), any(ValueExpression.class));
 		ArgumentCaptor<String> expressions = ArgumentCaptor.forClass(String.class);
 		verify(mockExpressionFactory, atLeastOnce()).createValueExpression(any(ELContext.class), expressions.capture(), eq(String.class));

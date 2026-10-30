@@ -1207,6 +1207,44 @@ class FacesViewTest {
 	}
 
 	@Test
+	@SuppressWarnings({ "java:S1143", "java:S1163" }) // Cleanup failure must fail this thread-local isolation test.
+	void selectGridRowStringWithoutBizIdClearsTheSelectedIdBinding() {
+		FacesView view = new FacesView();
+		Map<String, Object> values = new HashMap<>();
+		values.put("selectedId", "biz-100");
+		DynamicBean root = new DynamicBean("test", "RootDoc", values);
+		try {
+			setPrivateField(view, "currentBean", new BeanMapAdapter(root, null));
+			bindPersistenceToThread(mock(AbstractPersistence.class));
+			FacesContext facesContext = mock(FacesContext.class);
+			PartialViewContext partialViewContext = mock(PartialViewContext.class);
+			when(facesContext.getPartialViewContext()).thenReturn(partialViewContext);
+			when(partialViewContext.getRenderIds()).thenReturn(new ArrayList<>());
+			FacesContextBridge.setCurrent(facesContext);
+			// an unselected row sends no bizId (or a blank one)
+			invokeIgnoringThrowable(() -> view.selectGridRow(null, "selectedId", null, null));
+			assertNull(values.get("selectedId"));
+			values.put("selectedId", "biz-200");
+			invokeIgnoringThrowable(() -> view.selectGridRow(" ", "selectedId", null, null));
+			assertNull(values.get("selectedId"));
+			invokeIgnoringThrowable(() -> view.selectGridRow("biz-300", "selectedId", null, null));
+			assertEquals("biz-300", values.get("selectedId"));
+		}
+		catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+		finally {
+			try {
+				FacesContextBridge.setCurrent(null);
+				unbindPersistenceFromThread();
+			}
+			catch (Exception e) {
+				throw new RuntimeException(e);
+			}
+		}
+	}
+
+	@Test
 	void selectGridRowEventStripsHashSuffixFromBizIdBeforeBindingSet() throws Exception {
 		FacesView view = new FacesView();
 		Map<String, Object> values = new HashMap<>();

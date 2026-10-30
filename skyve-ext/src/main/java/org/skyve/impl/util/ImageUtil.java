@@ -2,13 +2,16 @@ package org.skyve.impl.util;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
+import java.awt.Font;
 import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.RenderingHints;
+import java.awt.font.FontRenderContext;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringReader;
@@ -35,6 +38,7 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
+import org.apache.batik.transcoder.SVGAbstractTranscoder;
 import org.apache.batik.transcoder.TranscoderException;
 import org.apache.batik.transcoder.TranscoderInput;
 import org.apache.batik.transcoder.TranscoderOutput;
@@ -45,6 +49,7 @@ import org.skyve.metadata.model.document.DynamicImage.ImageFormat;
 import org.skyve.metadata.repository.Repository;
 import org.skyve.util.FileUtil;
 import org.skyve.util.Util;
+import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -129,20 +134,21 @@ public class ImageUtil {
 	 * @throws IOException
 	 */
 	// See https://github.com/dmhendricks/file-icon-vectors/ for icons in /skyve-war/src/main/java/resources/files/
+	private static final String BLANK_SVG = "files/blank.svg";
+
 	public static @Nonnull byte[] svg(@Nonnull String fileName, int imageWidth, int imageHeight)
 	throws IOException {
 		String suffix = Util.processStringValue(FilenameUtils.getExtension(fileName));
 		Repository repository = CORE.getRepository();
 		File svgFile = null;
-		if (suffix == null) {
-			svgFile = repository.findResourceFile("files/blank.svg", null, null);
+		if (suffix != null) {
+			svgFile = repository.findResourceFile("files/" + suffix.toLowerCase() + ".svg", null, null);
 		}
-		else {
-			suffix = suffix.toLowerCase();
-			svgFile = repository.findResourceFile(String.format("files/%s.svg", suffix) , null, null);
-			if (! svgFile.exists()) {
-				svgFile = repository.findResourceFile("files/blank.svg", null, null);
-			}
+		if ((svgFile == null) || (! svgFile.exists())) {
+			svgFile = repository.findResourceFile(BLANK_SVG, null, null);
+		}
+		if (svgFile == null) {
+			throw new FileNotFoundException(BLANK_SVG);
 		}
 		// Add the requested width and height to the SVG so that it can be scaled 
 		// and keep its aspect ratio in the browser <img/>.
@@ -236,6 +242,79 @@ public class ImageUtil {
 		}
 	}
 
+	private static final String DOMINANT_BASELINE = "dominant-baseline";
+	private static final String TEXT_BEFORE_EDGE = "text-before-edge";
+	private static final float DEFAULT_FONT_SIZE = 16F;
+	private static final FontRenderContext FONT_RENDER_CONTEXT = new FontRenderContext(null, true, true);
+
+	/**
+	 * Batik ignores dominant-baseline="text-before-edge", which Excalidraw uses to hang text from its top edge,
+	 * and draws the text from its baseline at that point instead - a line too high.
+	 * Move each such text element down by its font's ascent and let it sit on its baseline.
+	 * 
+	 * @param nodes	The nodes to normalise, recursively.
+	 */
+	private static void normaliseTextBeforeEdgeForBatik(@Nonnull NodeList nodes) {
+		for (int i = 0; i < nodes.getLength(); i++) {
+			Node node = nodes.item(i);
+			if ((node instanceof Element element) &&
+					"text".equals(element.getLocalName()) &&
+					TEXT_BEFORE_EDGE.equals(element.getAttribute(DOMINANT_BASELINE).trim())) {
+				hangTextFromItsBaseline(element);
+			}
+			normaliseTextBeforeEdgeForBatik(node.getChildNodes());
+		}
+	}
+
+	/**
+	 * Moves a text element hung from its top edge down by its font's ascent, so it can be drawn from its baseline.
+	 * A text element positioned by a list of y values is left as it is.
+	 */
+	private static void hangTextFromItsBaseline(@Nonnull Element element) {
+		float y = 0F;
+		try {
+			String value = element.getAttribute("y").trim();
+			if (! value.isEmpty()) {
+				y = Float.parseFloat(value);
+			}
+		}
+		catch (@SuppressWarnings("unused") NumberFormatException e) {
+			return; // a list of positions - leave it be
+		}
+		float fontSize = inheritedFontSize(element);
+		String family = element.getAttribute("font-family");
+		int comma = family.indexOf(',');
+		family = ((comma < 0) ? family : family.substring(0, comma)).replace("\"", "").replace("'", "").trim();
+		// Unknown families fall back to Java's default font, as they do in Batik
+		Font font = new Font(family.isEmpty() ? Font.SANS_SERIF : family, Font.PLAIN, 1);
+		float ascent = font.getLineMetrics("Hg", FONT_RENDER_CONTEXT).getAscent() * fontSize;
+		element.setAttribute("y", Float.toString(y + ascent));
+		element.removeAttribute(DOMINANT_BASELINE);
+	}
+
+	/**
+	 * Returns the font size in pixels of the element given, from it or its nearest ancestor that sets one.
+	 */
+	private static float inheritedFontSize(@Nonnull Element element) {
+		Node node = element;
+		while (node instanceof Element ancestor) {
+			String value = ancestor.getAttribute("font-size").trim();
+			if (value.endsWith("px")) {
+				value = value.substring(0, value.length() - 2).trim();
+			}
+			if (! value.isEmpty()) {
+				try {
+					return Float.parseFloat(value);
+				}
+				catch (@SuppressWarnings("unused") NumberFormatException e) {
+					// try further up
+				}
+			}
+			node = ancestor.getParentNode();
+		}
+		return DEFAULT_FONT_SIZE;
+	}
+
 	/**
 	 * Batik Transcoder used in burnSvg().
 	 */
@@ -253,20 +332,34 @@ public class ImageUtil {
 		}
 
 		@Override
-		public void writeImage(@SuppressWarnings("hiding") @Nonnull BufferedImage image, @Nullable TranscoderOutput output) {
+		public void writeImage(@SuppressWarnings("hiding") BufferedImage image, @Nullable TranscoderOutput output) {
 			this.image = image;
 		}
 	}
 
 	/**
+	 * An image dimension as a Batik transcoding hint.
+	 */
+	@SuppressWarnings("java:S9395") // image dimensions are far below 2^24, which a float holds exactly
+	private static @Nonnull Float transcodingSize(int pixels) {
+		return Float.valueOf(pixels);
+	}
+
+	/**
 	 * Render the SVG given onto the background image given.
-	 * 
+	 * <p>
+	 * The SVG is scaled to cover the image, so markup drawn against the full resolution image
+	 * (with a matching viewBox) lines up on a sub-sampled copy of it too.
+	 * Markup whose width and height already match the image is drawn at its own size.
+	 *
 	 * @param image	The background image
 	 * @param svg	The SVG markup to burn in.
 	 */
 	public static void burnSvg(@Nonnull BufferedImage image, @Nonnull String svg)
 	throws ParserConfigurationException, SAXException, IOException, TransformerException, TranscoderException {
 		BufferedImageTranscoder imageTranscoder = new BufferedImageTranscoder(image);
+		imageTranscoder.addTranscodingHint(SVGAbstractTranscoder.KEY_WIDTH, transcodingSize(image.getWidth()));
+		imageTranscoder.addTranscodingHint(SVGAbstractTranscoder.KEY_HEIGHT, transcodingSize(image.getHeight()));
 
 		// Strip <style> elements before parsing - Batik requires xml-apis-ext to load
 		// SVGOMStyleElement, but font-face declarations embedded by Excalidraw are not
@@ -282,6 +375,7 @@ public class ImageUtil {
 		factory.setNamespaceAware(true);
 		org.w3c.dom.Document doc = factory.newDocumentBuilder().parse(new InputSource(new StringReader(svgForBatik)));
 		normaliseTransparentForBatik(doc.getChildNodes());
+		normaliseTextBeforeEdgeForBatik(doc.getChildNodes());
 		@SuppressWarnings("java:S2755") // fixed with feature secure processing below
 		Transformer transformer = TransformerFactory.newInstance().newTransformer();
 		factory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);

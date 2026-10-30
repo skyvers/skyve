@@ -14,6 +14,7 @@ import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.cache.StateUtil;
 import org.skyve.impl.metadata.model.document.field.Content;
 import org.skyve.impl.util.ImageUtil;
+import org.skyve.impl.util.SvgMarkupSanitiser;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.AbstractWebContext;
 import org.skyve.impl.web.UserAgent;
@@ -356,7 +357,7 @@ public class ImageMarkupView extends LocalisableView {
 						// Add a new content with the markup in it.
 						// This ensures that if cancel is pressed the old content will remain linked.
 						AttachmentContent newContent = content.cloneNewForPut();
-						newContent.setMarkup(svg);
+						newContent.setMarkup(SvgMarkupSanitiser.sanitise(svg));
 						// Determine whether we should index the new content by looking at the attribute
 						boolean index = false;
 						try {

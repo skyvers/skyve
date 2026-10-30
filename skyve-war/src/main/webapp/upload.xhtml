@@ -30,6 +30,20 @@
 				</h:outputScript>
 				<script type="text/javascript">
 					//<![CDATA[
+					// While a file uploads only its progress and a way to stop it are offered.
+					// PrimeFaces' own Cancel only clears the file list, so Stop reloads the page, which ends the request.
+					$(document).on('fileuploadsend', '#upload', function() {
+						$(document.body).addClass('skyve-uploading');
+					});
+					$(document).on('fileuploadalways', '#upload', function() {
+						$(document.body).removeClass('skyve-uploading');
+					});
+					$(function() {
+						var bar = $('#upload .ui-fileupload-buttonbar');
+						bar.append('<span class="skyve-upload-status" role="status">Uploading…</span>');
+						$('#stopUpload').appendTo(bar);
+					});
+
 					function skyveAfterActionUpload(uploadKind) {
 						var owner = SKYVE.Util.findSmartClientWindow();
 						if (owner && uploadKind === 'action') {
@@ -58,6 +72,8 @@
 					<h:inputHidden id="_m" value="#{_skyveContent.uploadState.companion}" />
 					<h:inputHidden id="_g" value="#{_skyveContent.dataWidgetBinding}" />
 					<h:inputHidden id="_id" value="#{_skyveContent.elementBizId}" />
+					<!-- SVG markup drawn over the photo in the image editor, set by upload-image.js -->
+					<input type="hidden" id="_mk" name="_mk" value="" />
 					<p:fileUpload id="upload"
 									listener="#{_skyveContent.handleFileUpload}"
 									styleClass="#{_skyveContent.genericUploadAllowed ? 'skyve-upload' : 'skyve-upload capture-only-upload'}"
@@ -98,6 +114,12 @@
 							</p:column>
 						</p:dataTable>
 					</h:panelGroup>
+					<p:button id="stopUpload"
+								type="button"
+								icon="fa-solid fa-ban"
+								value="Cancel"
+								title="Stop the upload"
+								onclick="location.reload();return false" />
 					<p:button id="camera"
 								type="button"
 								icon="fa-solid fa-camera"
@@ -114,51 +136,106 @@
 								style="display:none"
 								onclick="captureVideo();return false"
 								rendered="#{_skyveContent.videoUploadAllowed}" />
-					<p:button id="edit"
-								widgetVar="editButton"
-								type="button"
-								disabled="true"
-								icon="fa-solid fa-pencil"
-								value="Edit"
-								title="Crop &amp; rotate the uploaded image"
-								style="display:none"
-								onclick="editImage();return false"
-								rendered="#{_skyveContent.imageUpload}" />
 					<div id="cropperUpload" class="ui-fileupload ui-widget">
 						<div id="cropperBar" class="ui-fileupload-buttonbar ui-widget-header ui-corner-top">
-							<p:button id="crop"
-										type="button"
-										icon="fa-solid fa-upload"
-										value="Upload"
-										title="Upload Cropped Image"
-										onclick="cropAndUpload();return false"
-										rendered="#{_skyveContent.imageUpload or _skyveContent.cameraUploadAllowed}" />
-							<p:button id="cancel"
-										type="button"
-										icon="fa-solid fa-ban"
-										value="Cancel"
-										title="Cancel editing"
-										onclick="location.reload();return false"
-										rendered="#{_skyveContent.imageUpload or _skyveContent.cameraUploadAllowed}" />
+							<div class="scrawl-modes" role="group" aria-label="Editing tool">
+								<p:button id="cropMode"
+											type="button"
+											icon="fa-solid fa-crop-simple"
+											value="Crop"
+											title="Crop and rotate"
+											onclick="setEditorMode('crop');return false"
+											rendered="#{_skyveContent.imageUpload or _skyveContent.cameraUploadAllowed}" />
+								<p:button id="drawMode"
+											type="button"
+											icon="fa-solid fa-pen"
+											value="Draw"
+											title="Draw on the image"
+											onclick="setEditorMode('draw');return false"
+											rendered="#{_skyveContent.imageUpload or _skyveContent.cameraUploadAllowed}" />
+								<p:button id="textMode"
+											type="button"
+											icon="fa-solid fa-font"
+											value="Text"
+											title="Add a label"
+											onclick="setEditorMode('text');return false"
+											rendered="#{_skyveContent.imageUpload or _skyveContent.cameraUploadAllowed}" />
+							</div>
+							<div class="cropper-actions">
+								<p:button id="crop"
+											type="button"
+											icon="fa-solid fa-upload"
+											value="Upload"
+											title="Upload the image"
+											onclick="cropAndUpload();return false"
+											rendered="#{_skyveContent.imageUpload or _skyveContent.cameraUploadAllowed}" />
+								<p:button id="cancel"
+											type="button"
+											icon="fa-solid fa-ban"
+											value="Cancel"
+											title="Cancel editing"
+											onclick="location.reload();return false"
+											rendered="#{_skyveContent.imageUpload or _skyveContent.cameraUploadAllowed}" />
+							</div>
 						</div>
 					</div>
-					<div id="cropperContainer">
+					<!-- Images chosen for an image field open in the editor; for other fields only camera photos do -->
+					<!-- Typing a label: at the top so a phone's keyboard does not cover it.
+						 Placed with Done, Enter or by leaving the box; put back with the cross or Escape -->
+					<div id="scrawlTextEntry" class="scrawl-text-entry" hidden="hidden">
+						<input type="text" id="scrawlText" maxlength="200" autocomplete="off" autocapitalize="sentences"
+								enterkeyhint="done" placeholder="Type a label" aria-label="Label" />
+						<p:button id="scrawlTextDone"
+									type="button"
+									icon="fa-solid fa-check"
+									value="Done"
+									onclick="commitText();return false"
+									rendered="#{_skyveContent.imageUpload or _skyveContent.cameraUploadAllowed}" />
+						<p:button id="scrawlTextCancel"
+									type="button"
+									icon="fa-solid fa-xmark"
+									title="Cancel this label"
+									onclick="cancelText();return false"
+									rendered="#{_skyveContent.imageUpload or _skyveContent.cameraUploadAllowed}" />
+					</div>
+					<div id="cropperContainer" data-image-upload="#{_skyveContent.imageUpload}">
 						<div id="cropperFrame" class="cropperFrame">
 							<div id="cropperImageContainer">
 								<img id="cropperImage" alt="" />
 							</div>
+							<!-- Draw mode: the cropped photo, and the strokes over it (also shown over the cropper) -->
+							<canvas id="scrawlPhoto" class="scrawl-layer" aria-hidden="true"></canvas>
+							<canvas id="scrawlInk" class="scrawl-layer" role="img" aria-label="Drawing on the image"></canvas>
 						</div>
-						<div class="cropperControls">
-							<p:button type="button"
-										icon="fa-solid fa-rotate-left"
-										title="Rotate Left"
-										onclick="rotateImage(-90);return false"
-										rendered="#{_skyveContent.imageUpload or _skyveContent.cameraUploadAllowed}" />
-							<p:button type="button"
-										icon="fa-solid fa-rotate-right"
-										title="Rotate Right"
-										onclick="rotateImage(90);return false"
-										rendered="#{_skyveContent.imageUpload or _skyveContent.cameraUploadAllowed}" />
+						<div class="cropperControls" role="toolbar" aria-label="Image tools">
+							<div class="scrawl-crop-tools">
+								<p:button type="button"
+											icon="fa-solid fa-rotate-left"
+											title="Rotate Left"
+											onclick="rotateImage(-90);return false"
+											rendered="#{_skyveContent.imageUpload or _skyveContent.cameraUploadAllowed}" />
+								<p:button type="button"
+											icon="fa-solid fa-rotate-right"
+											title="Rotate Right"
+											onclick="rotateImage(90);return false"
+											rendered="#{_skyveContent.imageUpload or _skyveContent.cameraUploadAllowed}" />
+							</div>
+							<div class="scrawl-draw-tools">
+								<div class="scrawl-colours" role="radiogroup" aria-label="Pen colour">
+									<button type="button" class="scrawl-colour" role="radio" aria-checked="true" aria-label="Red" title="Red" data-colour="#e53935" style="--scrawl-colour:#e53935"></button>
+									<button type="button" class="scrawl-colour" role="radio" aria-checked="false" aria-label="Yellow" title="Yellow" data-colour="#fdd835" style="--scrawl-colour:#fdd835"></button>
+									<button type="button" class="scrawl-colour" role="radio" aria-checked="false" aria-label="Green" title="Green" data-colour="#43a047" style="--scrawl-colour:#43a047"></button>
+									<button type="button" class="scrawl-colour" role="radio" aria-checked="false" aria-label="Blue" title="Blue" data-colour="#1e88e5" style="--scrawl-colour:#1e88e5"></button>
+									<button type="button" class="scrawl-colour" role="radio" aria-checked="false" aria-label="White" title="White" data-colour="#ffffff" style="--scrawl-colour:#ffffff"></button>
+									<button type="button" class="scrawl-colour" role="radio" aria-checked="false" aria-label="Black" title="Black" data-colour="#000000" style="--scrawl-colour:#000000"></button>
+								</div>
+								<p:button id="scrawlUndo"
+											type="button"
+											icon="fa-solid fa-reply"
+											title="Undo (Ctrl+Z)"
+											onclick="undoStroke();return false"
+											rendered="#{_skyveContent.imageUpload or _skyveContent.cameraUploadAllowed}" />
+							</div>
 						</div>
 					</div>
 				</h:form>

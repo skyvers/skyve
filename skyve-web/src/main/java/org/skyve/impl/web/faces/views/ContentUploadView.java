@@ -26,6 +26,7 @@ import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.view.ActionAvailability;
 import org.skyve.impl.metadata.view.widget.bound.input.ContentCapture;
 import org.skyve.impl.metadata.view.widget.bound.input.ContentDisplay;
+import org.skyve.impl.util.SvgMarkupSanitiser;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.AbstractWebContext;
 import org.skyve.impl.web.UserAgent;
@@ -108,6 +109,14 @@ public class ContentUploadView extends AbstractUploadView {
 	@ManagedProperty(value = "#{param._af}")
 	@SuppressWarnings("java:S6813") // allow member injection
 	private @Nullable String uploadAffordance;
+
+	/**
+	 * SVG markup drawn over an image in the upload page's editor, posted with the image.
+	 */
+	@Inject
+	@ManagedProperty(value = "#{param._mk}")
+	@SuppressWarnings("java:S6813") // allow member injection
+	private @Nullable String markup;
 
 	@Inject
 	@ManagedProperty(value = "#{param." + AbstractWebContext.GRID_BINDING_NAME + "}")
@@ -529,20 +538,12 @@ public class ContentUploadView extends AbstractUploadView {
 			// NB This handles compound bindings and checks for content access on the content owning bean
 			String uploadedFileName = Objects.requireNonNull(fileName, "Uploaded file name");
 			byte[] uploadedFileContents = Objects.requireNonNull(fileContents, "Uploaded file content");
-			AttachmentContent content;
-			if (contentType == null) {
-				content = FacesContentUtil.handleFileUpload(uploadedFileName,
-																uploadedFileContents,
-																bean,
-																unsanitisedContentBinding);
-			}
-			else {
-				content = FacesContentUtil.handleFileUpload(uploadedFileName,
-																uploadedFileContents,
-																contentType,
-																bean,
-																unsanitisedContentBinding);
-			}
+			AttachmentContent content = FacesContentUtil.handleFileUpload(uploadedFileName,
+																			uploadedFileContents,
+																			contentType,
+																			sanitisedMarkup(contentType),
+																			bean,
+																			unsanitisedContentBinding);
 			String contentId = Objects.requireNonNull(content.getContentId(), "Uploaded content id");
 
 			// only put conversation in cache if we have been successful in executing
@@ -559,6 +560,31 @@ public class ContentUploadView extends AbstractUploadView {
 			fc.addMessage(null, msg);
 		}
 		// NB No need to disconnect Persistence as it is done in the SkyveFacesPhaseListener after the response is rendered.
+	}
+
+	/**
+	 * Returns the SVG markup posted with an image upload as {@code _mk}, sanitised for storage.
+	 *
+	 * <p>Markup is only kept for raster images, as that is what it is drawn over.
+	 * Markup that cannot be sanitised is logged and dropped, so the image still uploads.
+	 *
+	 * @param contentType the uploaded content type, or {@code null} when unknown
+	 * @return the sanitised markup, or {@code null} when there is none to store
+	 */
+	private @Nullable String sanitisedMarkup(@Nullable String contentType) {
+		if ((markup == null) ||
+				(contentType == null) ||
+				(! contentType.startsWith("image/")) ||
+				MimeType.svg.toString().equals(contentType)) {
+			return null;
+		}
+		try {
+			return SvgMarkupSanitiser.sanitise(markup);
+		}
+		catch (IllegalArgumentException e) {
+			LOGGER.warn("Image markup posted with an upload to {} was dropped: {}", OWASP.sanitiseLog(contentBinding), e.getMessage());
+			return null;
+		}
 	}
 
 	/**
