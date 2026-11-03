@@ -3,22 +3,28 @@ package org.skyve.impl.web.faces.components;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
+import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
 import org.junit.jupiter.api.Test;
 import org.skyve.domain.types.converters.integer.IntegerSeparator;
+import org.skyve.impl.metadata.customer.CustomerImpl;
+import org.skyve.impl.metadata.model.document.DocumentImpl;
 import org.skyve.impl.metadata.model.document.field.ConvertibleField;
 import org.skyve.impl.web.service.smartclient.SmartClientQueryColumnDefinition;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.Attribute.AttributeType;
+import org.skyve.metadata.model.document.Bizlet.DomainValue;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.model.document.DomainType;
 import org.skyve.metadata.module.query.MetaDataQueryColumn;
@@ -73,17 +79,22 @@ class VueListGridScriptColumnMetaDataTest {
 		when(scColumn.getName()).thenReturn("status");
 		when(scColumn.getTitle()).thenReturn("Status");
 		when(scColumn.isCanFilter()).thenReturn(true);
+		// SmartClient's value map is escaped for javascript - the Vue grid shouldn't use it
 		Map<String, String> values = new TreeMap<>();
 		values.put("A", "Active");
-		values.put("I", "Inactive");
+		values.put("I", "Isn\\'t active");
 		when(scColumn.getValueMap()).thenReturn(values);
 
 		Attribute attribute = mock(Attribute.class);
 		when(attribute.getAttributeType()).thenReturn(AttributeType.text);
 		when(attribute.getDomainType()).thenReturn(DomainType.constant);
-		TargetMetaData tmd = new TargetMetaData(mock(Document.class), attribute, String.class);
+		CustomerImpl customer = mock(CustomerImpl.class);
+		DocumentImpl document = mock(DocumentImpl.class);
+		when(document.getDomainValues(eq(customer), eq(DomainType.constant), eq(attribute), any(), eq(true)))
+				.thenReturn(List.of(new DomainValue("A", "Active"), new DomainValue("I", "Isn't \"active\"")));
+		TargetMetaData tmd = new TargetMetaData(document, attribute, String.class);
 
-		Map<String, Object> map = invokeToMap(mdColumn, scColumn, tmd, mock(Customer.class));
+		Map<String, Object> map = invokeToMap(mdColumn, scColumn, tmd, customer);
 
 		assertEquals("status", map.get("field"));
 		assertEquals("Status", map.get("header"));
@@ -98,7 +109,7 @@ class VueListGridScriptColumnMetaDataTest {
 		assertEquals("A", enumValues.get(0).get("value"));
 		assertEquals("Active", enumValues.get(0).get("label"));
 		assertEquals("I", enumValues.get(1).get("value"));
-		assertEquals("Inactive", enumValues.get(1).get("label"));
+		assertEquals("Isn't \"active\"", enumValues.get(1).get("label"));
 	}
 
 	@Test

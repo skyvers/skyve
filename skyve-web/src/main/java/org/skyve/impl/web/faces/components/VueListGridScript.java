@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.StringJoiner;
 import java.util.TreeMap;
@@ -13,6 +12,8 @@ import org.skyve.CORE;
 import org.skyve.domain.Bean;
 import org.skyve.domain.types.Enumeration;
 import org.skyve.impl.bind.BindUtil;
+import org.skyve.impl.metadata.customer.CustomerImpl;
+import org.skyve.impl.metadata.model.document.DocumentImpl;
 import org.skyve.impl.metadata.model.document.field.ConvertibleField;
 import org.skyve.impl.metadata.repository.module.MetaDataQueryContentColumnMetaData.DisplayType;
 import org.skyve.impl.metadata.view.HorizontalAlignment;
@@ -26,6 +27,7 @@ import org.skyve.metadata.ConverterName;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.Attribute.AttributeType;
+import org.skyve.metadata.model.document.Bizlet.DomainValue;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.model.document.DomainType;
 import org.skyve.metadata.module.Module;
@@ -51,7 +53,7 @@ import jakarta.faces.context.FacesContext;
 
 /**
  * This component isn't in the skyve.taglib.xml and has no @Component annotation and is not meant to be used on an XHTML page. 
- * The resources skyvevue/index.js and skyvevue/index.css are brought in view view.xhtml (if enabled)
+ * The resources skyve/vue/skyve.js and skyve/vue/skyve.css are brought in view view.xhtml (if enabled)
  */
 @SuppressWarnings("java:S1192") // Repeated literals are deliberate Vue list-grid script keys.
 public class VueListGridScript extends UIOutput {
@@ -725,8 +727,29 @@ public class VueListGridScript extends UIOutput {
 			return scQueryColumnDefn.isCanFilter();
 		}
 
-		private Map<String, String> getValueMap() {
-			return scQueryColumnDefn.getValueMap();
+		/**
+		 * The values of an enumeration or constant domain column (the columns with a SmartClient value map).
+		 * The descriptions come from the domain values as the value map is escaped for SmartClient's javascript.
+		 *
+		 * @return the code and description of each value, empty if this column has no constant values
+		 */
+		private List<Map<String, String>> getEnumValues() {
+			Attribute attribute = targetMetaData.getAttribute();
+			Map<String, String> valueMap = scQueryColumnDefn.getValueMap();
+			if ((attribute == null) || (valueMap == null) || valueMap.isEmpty()) {
+				return List.of();
+			}
+
+			DocumentImpl document = (DocumentImpl) targetMetaData.getDocument();
+			List<DomainValue> domainValues = document.getDomainValues((CustomerImpl) customer, DomainType.constant, attribute, null, true);
+			List<Map<String, String>> result = new ArrayList<>(domainValues.size());
+			for (DomainValue domainValue : domainValues) {
+				Map<String, String> enumValue = new TreeMap<>();
+				enumValue.put("value", domainValue.getCode());
+				enumValue.put("label", domainValue.getLocalisedDescription());
+				result.add(enumValue);
+			}
+			return result;
 		}
 		
 		private boolean isHidden() {
@@ -773,15 +796,8 @@ public class VueListGridScript extends UIOutput {
 				result.put("converter", converterName);
 			}
 
-			Map<String, String> values = getValueMap();
-			if (values != null) {
-				List<Map<String, String>> enumValues = new ArrayList<>(values.size());
-				for (Entry<String, String> entry : values.entrySet()) {
-					Map<String, String> enumValue = new TreeMap<>();
-					enumValue.put("value", entry.getKey());
-					enumValue.put("label", entry.getValue());
-					enumValues.add(enumValue);
-				}
+			List<Map<String, String>> enumValues = getEnumValues();
+			if (! enumValues.isEmpty()) {
 				result.put("enumValues", enumValues);
 			}
 			

@@ -175,7 +175,8 @@ export default {
 
             multiSortMeta: [],
 
-            selectedColumns: [],
+            // Start with the columns that aren't hidden by default checked in the column chooser
+            selectedColumns: this.defaultColumns(),
             columnOrder: [],
             columnWidths: [],
 
@@ -703,17 +704,15 @@ export default {
 
 				this.selectedTopLevelOperator = snapstate.operator ?? 'and';
 				
-                // Visible columns
+                // Visible columns (none means the default columns)
                 const visibleCols = snapstate.visibleColumns ?? [];
-                this.selectedColumns = [];
-                for (let col of this.columns) {
-                    if (visibleCols.includes(col.field)) {
-                        this.selectedColumns.push(col);
-                    }
+                this.selectedColumns = this.columns.filter(col => visibleCols.includes(col.field));
+                if (this.selectedColumns.length == 0) {
+                    this.selectedColumns = this.defaultColumns();
                 }
 
                 // Update the DataTable's column order directly
-                this.$refs.datatable.d_columnOrder = visibleCols;
+                this.$refs.datatable.d_columnOrder = (visibleCols.length > 0) ? visibleCols : null;
 
                 /*
                 // Update the column widths?
@@ -738,9 +737,15 @@ export default {
                 this.clearedSnapshot();
             }
         },
+        /**
+         * The columns shown when none have been chosen - those not hidden by default.
+         */
+        defaultColumns() {
+            return this.columns.filter(col => !col.hidden);
+        },
         clearedSnapshot() {
 
-            this.selectedColumns = [];
+            this.selectedColumns = this.defaultColumns();
             this.summarySelection = '';
             this.sortColumns = [];
 
@@ -1341,6 +1346,8 @@ export default {
                         :options="col.enumValues"
                         optionLabel="label"
                         optionValue="value"
+                        filter
+                        resetFilterOnHide
                     >
                     </Dropdown>
                     <DateOnlyCalendar
@@ -1582,6 +1589,9 @@ export default {
 /* The action (zoom) column is narrow and centred like the faces data table's */
 .skyve-vue-list-grid :deep(.skyve-vue-list-grid-action) {
     text-align: center;
+    /* Fit the zoom button (38px + padding) - restored column widths are positional, so after the
+       columns change a narrower saved width can land on this column (min-width beats its max-width) */
+    min-width: 46px !important;
 }
 
 .skyve-vue-list-grid :deep(.skyve-vue-list-grid-action .p-column-header-content) {

@@ -28,8 +28,8 @@
 				<h:outputStylesheet library="primefaces" name="signature/signature.css" />
 				<h:outputScript library="primefaces" name="signature/signature.js" />
 				<c:if test="#{vue}">
-					<h:outputScript library="skyvevue" name="index.js?v=#{bean.webResourceFileVersion}" />
-					<h:outputStylesheet library="skyvevue" name="index.css?v=#{bean.webResourceFileVersion}" />
+					<h:outputScript library="skyve" name="vue/skyve.js?v=#{bean.webResourceFileVersion}" />
+					<h:outputStylesheet library="skyve" name="vue/skyve.css?v=#{bean.webResourceFileVersion}" />
 				</c:if>
 				<ui:insert name="head" />
 			</ui:define>

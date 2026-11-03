@@ -106,7 +106,7 @@ body .ui-widget button,
 
 /* PrimeVue (VueListGrid) — same tonal signature as .ui-button above.
    Lara hard-codes #3b82f6 into .p-button / highlights; these !important rules live in
-   @layer main so they beat skyvevue's @layer primevue via important-cascade reversal.
+   @layer main so they beat skyve/vue/skyve.css's @layer primevue via important-cascade reversal.
    Filter-menu Clear/Apply buttons share the tonal family on purpose. */
 body .p-button {
     background: var(--skyve-editorial-button-bg) !important;
