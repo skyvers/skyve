@@ -1,0 +1,19 @@
+/* Thin red environment banners - see WebUtil.getEnvironmentBannersHtml() */
+.skyveEnvBanner {
+	background: red;
+	font-size: 8px;
+	color: white;
+	position: fixed;
+	text-align: center;
+	left: 0px;
+	z-index: 2147483646;
+	width: 100%;
+	height: 8px;
+	line-height: 8px;
+}
+.skyveTopEnvBanner {
+	top: 0px;
+}
+.skyveBottomEnvBanner {
+	bottom: 0px;
+}

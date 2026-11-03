@@ -14,6 +14,7 @@ import org.junit.jupiter.api.Test;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.sail.mock.MockFacesContext;
 import org.skyve.impl.util.UtilImpl;
+import org.skyve.impl.web.WebUtil;
 import org.skyve.metadata.user.User;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
@@ -45,6 +46,7 @@ class LocalisableViewTest {
 
 		assertEquals("UTF-8", view.getEncoding());
 		assertEquals(UtilImpl.ENVIRONMENT_IDENTIFIER, view.getEnvironmentIdentifier());
+		assertEquals(WebUtil.getEnvironmentBannersHtml(), view.getEnvironmentBanners());
 		assertEquals(UtilImpl.WEB_RESOURCE_FILE_VERSION, view.getWebResourceFileVersion());
 		assertNotNull(view.getI18n());
 	}

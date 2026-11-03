@@ -1,3 +1,6 @@
+/* Environment banners - inlined by the lightningcss --bundle step in build.xml */
+@import "env-banner.css";
+
 body,html {
 	margin: 0;
 	padding: 0;
@@ -426,26 +429,6 @@ span.right {
 	height: 32px;
 	right: 16px;
 	bottom: 16px
-}
-
-/* Red environment banner style */
-.skyveEnvBanner {
-	background: red;
-	font-size: 8px;
-	color: white;
-	position: fixed;
-	text-align: center;
-	left: 0px;
-	z-index: 2147483646;
-	width: 100%;
-	height: 8px;
-	line-height: 8px;
-}
-.skyveTopEnvBanner {
-	top: 0px;
-}
-.skyveBottomEnvBanner {
-	bottom: 0px;
 }
 
 /* Table style for those that combine an error message and input field */

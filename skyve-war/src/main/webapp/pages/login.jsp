@@ -208,6 +208,7 @@
 				</script>
 		</head>
 			<body onload="<%=initialFocusScript%>">
+		<%@include file="fragments/environmentBanners.jsp" %>
 		<SCRIPT>//'"]]>>isc_loginRequired
 		var isc = top.isc ? top.isc : window.opener ? window.opener.isc : null;
 		if (isc && isc.RPCManager) isc.RPCManager.delayCall("handleLoginRequired", [window]);

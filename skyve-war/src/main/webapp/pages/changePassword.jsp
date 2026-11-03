@@ -212,7 +212,7 @@
 	<% } else { %>
 	<body onload="document.forms['changeForm'].elements['<%=oldPasswordFieldName%>'].focus()">
 	<% } %>
-		
+		<%@include file="fragments/environmentBanners.jsp" %>
 		<div class="ui middle aligned center aligned grid">
 		    <div class="column">
 		    	<div style="text-align: center; margin: 0 auto; margin-bottom: 10px;">

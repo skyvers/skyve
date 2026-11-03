@@ -10,6 +10,7 @@ import java.util.Set;
 import org.skyve.CORE;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.util.UtilImpl;
+import org.skyve.impl.web.WebUtil;
 import org.skyve.impl.web.faces.FacesAction;
 import org.skyve.metadata.user.User;
 import org.skyve.util.Util;
@@ -17,6 +18,7 @@ import org.skyve.util.logging.Category;
 import org.skyve.util.logging.SkyveLoggerFactory;
 import org.slf4j.Logger;
 
+import jakarta.annotation.Nullable;
 import jakarta.faces.context.FacesContext;
 
 /**
@@ -228,6 +230,18 @@ public abstract class LocalisableView implements Serializable {
 	@SuppressWarnings("static-method")
 	public String getEnvironmentIdentifier() {
 		return UtilImpl.ENVIRONMENT_IDENTIFIER;
+	}
+
+	/**
+	 * Returns the environment banner markup shared with the JSPs and the SmartClient desktop.
+	 * Output it unescaped, e.g. {@code <h:outputText value="#{bean.environmentBanners}" escape="false" />}.
+	 *
+	 * @return the banner markup, or {@code null} when no environment identifier is configured
+	 * @see WebUtil#getEnvironmentBannersHtml()
+	 */
+	@SuppressWarnings("static-method")
+	public @Nullable String getEnvironmentBanners() {
+		return WebUtil.getEnvironmentBannersHtml();
 	}
 	
 	/**

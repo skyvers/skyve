@@ -988,4 +988,26 @@ public class WebUtil {
 		
 		return valid;
 	}
+
+	/**
+	 * Builds the thin top and bottom environment banners shown in non-production environments.
+	 *
+	 * <p>This is the single source of the banner markup for JSPs, Facelets templates and the SmartClient desktop.
+	 * The styles come from {@code src/css/env-banner.css}. The build bundles it into {@code basic-min.css} and
+	 * {@code prime-min.css} and also minifies it to {@code env-banner-min.css} for the JSPs, so the page must load
+	 * one of those.
+	 *
+	 * @return the banner markup, or {@code null} when no environment identifier is configured
+	 */
+	public static @Nullable String getEnvironmentBannersHtml() {
+		String identifier = OWASP.escapeHtml(UtilImpl.ENVIRONMENT_IDENTIFIER);
+		if ((identifier == null) || identifier.isBlank()) {
+			return null;
+		}
+
+		StringBuilder result = new StringBuilder(128);
+		result.append("<div class=\"skyveEnvBanner skyveTopEnvBanner\">").append(identifier).append("</div>");
+		result.append("<div class=\"skyveEnvBanner skyveBottomEnvBanner\">").append(identifier).append("</div>");
+		return result.toString();
+	}
 }

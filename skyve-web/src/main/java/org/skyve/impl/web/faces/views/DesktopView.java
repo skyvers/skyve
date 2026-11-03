@@ -16,6 +16,7 @@ import org.skyve.impl.metadata.module.menu.TreeItem;
 import org.skyve.impl.metadata.user.UserImpl;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.UserAgent;
+import org.skyve.impl.web.WebUtil;
 import org.skyve.impl.web.faces.FacesAction;
 import org.skyve.impl.web.faces.actions.ActionUtil;
 import org.skyve.impl.web.service.smartclient.SmartClientViewRenderer;
@@ -222,11 +223,10 @@ public class DesktopView extends HarnessView {
 					uiScript = sb.toString();
 					sb.setLength(0);
 					
-					if (UtilImpl.ENVIRONMENT_IDENTIFIER != null) {
-						sb.append("$('body').append('<div class=\"skyveEnvBanner skyveTopEnvBanner\">");
-						sb.append(UtilImpl.ENVIRONMENT_IDENTIFIER).append("</div>');");
-						sb.append("$('body').append('<div class=\"skyveEnvBanner skyveBottomEnvBanner\">");
-						sb.append(UtilImpl.ENVIRONMENT_IDENTIFIER).append("</div>');");
+					// Appended after SmartClient has drawn into the body
+					String banners = WebUtil.getEnvironmentBannersHtml();
+					if (banners != null) {
+						sb.append("$('body').append('").append(OWASP.escapeJsString(banners)).append("');");
 					}
 					bannerScript = sb.toString();
 					

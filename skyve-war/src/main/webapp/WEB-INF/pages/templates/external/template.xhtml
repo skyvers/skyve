@@ -38,9 +38,7 @@
 			<ui:insert name="templateHead" />
 		</h:head>
 		<h:body id="body" class="is-preload">
-			<h:panelGroup styleClass="skyveEnvBanner skyveTopEnvBanner" rendered="#{not empty bean.environmentIdentifier}">#{bean.environmentIdentifier}</h:panelGroup>
-			<h:panelGroup styleClass="skyveEnvBanner skyveBottomEnvBanner" rendered="#{not empty bean.environmentIdentifier}">#{bean.environmentIdentifier}</h:panelGroup>
-
+			<h:outputText value="#{bean.environmentBanners}" escape="false" />
 			<div id="wrapper">
 				<div id="main">
 					<div class="inner">

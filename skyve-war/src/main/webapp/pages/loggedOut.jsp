@@ -46,6 +46,7 @@
 		<%@include file="fragments/backgroundImage.html" %>
 	</head>
 	<body>
+		<%@include file="fragments/environmentBanners.jsp" %>
 		<%
 			WebUtil.logout(request, response);
 		%>
