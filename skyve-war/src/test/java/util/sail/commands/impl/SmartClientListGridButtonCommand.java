@@ -9,9 +9,9 @@ import util.sail.commands.ListGridButtonCommand;
  * Used by the SmartClient-specific implementation of the test framework.
  *
  * @param locator the component identifier
- * @param confirm whether confirmation is required after clicking
+ * @param confirm how to answer a confirmation after clicking: null or true answers yes if one shows, false answers no and one must show
  */
 public record SmartClientListGridButtonCommand(
 		String locator,
-		boolean confirm) implements ListGridButtonCommand {
+		Boolean confirm) implements ListGridButtonCommand {
 }

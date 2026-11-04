@@ -23,6 +23,9 @@ import org.skyve.impl.metadata.view.widget.bound.ZoomIn;
 import org.skyve.impl.metadata.view.widget.bound.input.CheckBox;
 import org.skyve.impl.metadata.view.widget.bound.input.ColourPicker;
 import org.skyve.impl.metadata.view.widget.bound.input.Combo;
+import org.skyve.impl.metadata.view.widget.bound.input.ContentSignature;
+import org.skyve.impl.metadata.view.widget.bound.input.ContentUpload;
+import org.skyve.impl.metadata.view.widget.bound.input.ListMembership;
 import org.skyve.impl.metadata.view.widget.bound.input.DefaultWidget;
 import org.skyve.impl.metadata.view.widget.bound.input.Geometry;
 import org.skyve.impl.metadata.view.widget.bound.input.HTML;
@@ -322,10 +325,21 @@ public class SmartClientSAILViewVisitor {
 			type = InputType.TEXT;
 			suffix = textSuffix(binding, grid);
 		}
-		else if (! (widget instanceof HTML)) {
-			// Not an input SAIL can address (content, signature, membership, comparison...)
+		else if (widget instanceof HTML) {
+			type = InputType.HTML;
+		}
+		else if (widget instanceof ListMembership) {
+			if (grid == null) {
+				automationContext.put(binding, new Locator(Locator.sail(viewName, Kind.membership, sanitise(binding), null, null, null, null),
+															InputType.MEMBERSHIP));
+			}
 			return;
 		}
+		else if (! ((widget instanceof ContentUpload) || (widget instanceof ContentSignature))) {
+			// Not an input SAIL can address (check membership, comparison...)
+			return;
+		}
+		// content widgets are registered without an input type: <upload> and testValue use them, dataEnter does not
 
 		if (grid == null) {
 			automationContext.put(binding, Locator.item(viewName, sanitise(binding), suffix, type));
@@ -390,8 +404,45 @@ public class SmartClientSAILViewVisitor {
 	private final void visitButton(@Nonnull Button button) {
 		String actionName = button.getActionName();
 		if (actionName != null) {
-			automationContext.put(actionName, Locator.widget(viewName, Kind.button, actionName, null, null, null));
+			automationContext.put(actionName, Locator.widget(viewName, Kind.button, buttonName(actionName), null, null, null));
 		}
+	}
+
+	/**
+	 * Returns whether buttons of this kind of implicit action are named after the action (its class), not the implicit action.
+	 *
+	 * @param implicitName the implicit action, or {@code null}
+	 * @return {@code true} for upload, download, import and export actions
+	 */
+	private static boolean classNamed(@Nullable ImplicitActionName implicitName) {
+		return ImplicitActionName.Upload.equals(implicitName) ||
+				ImplicitActionName.Download.equals(implicitName) ||
+				ImplicitActionName.BizImport.equals(implicitName) ||
+				ImplicitActionName.BizExport.equals(implicitName);
+	}
+
+	/**
+	 * The action name SmartClient gives an action's buttons: an implicit action's name, or a custom action's class
+	 * (such as {@code Save} for {@code <action name="Refresh" className="Save"/>}).
+	 *
+	 * @param actionName the action's name
+	 * @return the buttons' action name
+	 */
+	private @Nonnull String buttonName(@Nonnull String actionName) {
+		Action action = view.getAction(actionName);
+		if (action == null) {
+			return actionName;
+		}
+		ImplicitActionName implicitName = action.getImplicitName();
+		if (classNamed(implicitName)) {
+			return actionName;
+		}
+		if ((implicitName != null) && (! ImplicitActionName.DEFAULTS.equals(implicitName))) {
+			return implicitName.toString();
+		}
+		// a custom action's buttons carry its class (resource) name, which a named action can give differently
+		String resourceName = action.getResourceName();
+		return (resourceName == null) ? actionName : resourceName;
 	}
 
 	/**
@@ -425,6 +476,13 @@ public class SmartClientSAILViewVisitor {
 		automationContext.put(key + ".new", Locator.widget(viewName, Kind.listGrid, null, ordinal, "new", null));
 		automationContext.put(key + ".zoom", Locator.widget(viewName, Kind.listGrid, null, ordinal, "zoom", null));
 		automationContext.put(key + ".select", Locator.widget(viewName, Kind.listGrid, null, ordinal, "rows", ROW_CELL));
+		if ((queryName == null) && (modelName != null)) {
+			// also as module.model, as a script naming the model in query="" (as for a query) identifies it
+			String alias = module.getName() + '.' + modelName;
+			automationContext.put(alias + ".new", Locator.widget(viewName, Kind.listGrid, null, ordinal, "new", null));
+			automationContext.put(alias + ".zoom", Locator.widget(viewName, Kind.listGrid, null, ordinal, "zoom", null));
+			automationContext.put(alias + ".select", Locator.widget(viewName, Kind.listGrid, null, ordinal, "rows", ROW_CELL));
+		}
 	}
 
 	/**
@@ -500,10 +558,23 @@ public class SmartClientSAILViewVisitor {
 	 */
 	private void visit(@Nullable String viewType, @Nonnull ActionImpl action) {
 		ImplicitActionName implicitName = action.getImplicitName();
-		if (implicitName != null) {
+		if (classNamed(implicitName)) {
+			// an upload, download, import or export action's button carries the action's name (its class)
+			String name = action.getName();
+			if (name != null) {
+				visitAction(name);
+			}
+		}
+		else if (implicitName != null) {
 			visit(viewType, implicitName);
+			// a named action of an implicit kind is also addressed by its name
+			String name = action.getName();
+			if ((name != null) && (! name.equals(implicitName.toString())) && (! ImplicitActionName.DEFAULTS.equals(implicitName))) {
+				automationContext.put(name, Locator.widget(viewName, Kind.button, implicitName.toString(), null, null, null));
+			}
 		} else {
-			visitAction(action.getName());
+			String name = action.getName();
+			automationContext.put(name, Locator.widget(viewName, Kind.button, buttonName(name), null, null, null));
 		}
 	}
 

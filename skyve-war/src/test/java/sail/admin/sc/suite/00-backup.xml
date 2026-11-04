@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!--
+	SmartClient admin suite, step 0: back up the data before the suite changes it.
+	99-restore.xml restores this backup (the newest one), so the suite leaves the server as it found it and can be rerun.
+-->
+<automation uxui="desktop" userAgentType="desktop" testStrategy="Assert"
+			xsi:schemaLocation="http://www.skyve.org/xml/sail ../../../../../../main/java/schemas/sail.xsd"
+			xmlns="http://www.skyve.org/xml/sail"
+			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<before>
+		<login user="admin" password="admin" />
+		<testSuccess />
+		<switchMode />
+	</before>
+	<interaction name="Precondition: no stray backup or restore marker">
+		<method>
+			<comment>99-restore.xml restores the first backup listed (the oldest), so a stray backup (an interrupted run, a suite whose restore failed) would roll the database back to an unknown state. If this fails, delete the stray backups (Data Maintenance, Backup/Restore) and any SAIL restore marker data group, check the data, and run again. SmartClientAdminSuiteSailIT then does not restore.</comment>
+			<navigateEdit module="admin" document="DataMaintenance" />
+			<tabSelect path="Backup/Restore" />
+			<testGridRows module="admin" query="BackupsModel" maxRows="0" />
+			<navigateMenu module="admin" item="Security Admin/Data Groups" />
+			<testGridRows module="admin" document="DataGroup" rowContaining="SAIL restore marker" maxRows="0" />
+		</method>
+	</interaction>
+	<interaction name="Back up the data before the suite">
+		<method>
+			<navigateEdit module="admin" document="DataMaintenance" />
+			<tabSelect path="Backup/Restore" />
+			<dataEnter binding="includeContent" value="true" />
+			<dataEnter binding="includeAuditLog" value="true" />
+			<comment>No redaction, so a restore keeps admin's password</comment>
+			<dataEnter binding="dataSensitivity" value="1" />
+			<testValue binding="dataSensitivity" value="none" />
+			<action name="Backup" />
+			<!--
+				RUNTIME DIFFERENCE: SmartClient does not show the action's "Backup Job has been started" growl, only the
+				job's "Backup Completed" push message later, which arrives on its own schedule. The Jobs list below waits for
+				the job instead.
+			<testMessage contains="Backup Job has been started" type="info" />
+			-->
+			<comment>The backup is a job: wait for it to finish</comment>
+			<navigateMenu module="admin" item="Jobs" />
+			<testGridRows module="admin" query="qCompletedJobs" rowContaining="Backup" minRows="1" timeoutMillis="60000" />
+			<navigateMenu module="admin" item="DevOps/Data Maintenance" />
+			<tabSelect path="Backup/Restore" />
+			<comment>The SmartClient view has no Refresh Backup List button: testGridRows fetches the list again</comment>
+			<testGridRows module="admin" query="BackupsModel" minRows="1" timeoutMillis="60000" />
+		</method>
+	</interaction>
+	<interaction name="Leave a marker that the restore must remove">
+		<method>
+			<navigateMenu module="admin" item="Security Admin/Data Groups" />
+			<listGridNew module="admin" document="DataGroup" />
+			<dataEnter binding="name" value="SAIL restore marker" />
+			<save />
+			<ok />
+			<testGridRows module="admin" document="DataGroup" rowContaining="SAIL restore marker" minRows="1" />
+		</method>
+	</interaction>
+	<after>
+		<logout />
+	</after>
+</automation>

@@ -82,7 +82,7 @@ public abstract class AbstractSmartClientInterpretedSail extends AbstractH2Test 
 	private void sail(@Nonnull Automation automation) {
 		AbstractPersistence persistence = AbstractPersistence.get();
 		User testUser = persistence.getUser();
-		persistence.setUser(AbstractPrimeFacesInterpretedSail.bootstrapLikeUser(testUser));
+		persistence.setUser(util.sail.SailUsers.bootstrapLikeUser(testUser));
 		try (FacesUtil.SailFacesContextScope ignored = FacesUtil.withSailFacesContextIfNeeded()) {
 			automation.execute(new SmartClientInterpretedWebDriverExecutor(selenium));
 		}
