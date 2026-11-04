@@ -49,4 +49,15 @@ class SaveTest {
 	void testSuccessDefaultIsNull() {
 		assertThat(step.getTestSuccess(), is(nullValue()));
 	}
+
+	@Test
+	void defaultConfirmIsNull() {
+		assertThat(step.getConfirm(), is(nullValue()));
+	}
+
+	@Test
+	void setConfirmFalseRoundtrip() {
+		step.setConfirm(Boolean.FALSE);
+		assertThat(step.getConfirm(), is(Boolean.FALSE));
+	}
 }

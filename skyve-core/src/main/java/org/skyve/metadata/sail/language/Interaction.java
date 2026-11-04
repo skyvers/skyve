@@ -10,8 +10,11 @@ import org.skyve.metadata.sail.language.step.Comment;
 import org.skyve.metadata.sail.language.step.Execute;
 import org.skyve.metadata.sail.language.step.Pause;
 import org.skyve.metadata.sail.language.step.TestFailure;
+import org.skyve.metadata.sail.language.step.TestGridRows;
+import org.skyve.metadata.sail.language.step.TestMessage;
 import org.skyve.metadata.sail.language.step.TestSuccess;
 import org.skyve.metadata.sail.language.step.TestValue;
+import org.skyve.metadata.sail.language.step.TestWidget;
 import org.skyve.metadata.sail.language.step.context.ClearContext;
 import org.skyve.metadata.sail.language.step.context.PopContext;
 import org.skyve.metadata.sail.language.step.context.PushEditContext;
@@ -19,6 +22,7 @@ import org.skyve.metadata.sail.language.step.context.PushListContext;
 import org.skyve.metadata.sail.language.step.interaction.DataEnter;
 import org.skyve.metadata.sail.language.step.interaction.TabSelect;
 import org.skyve.metadata.sail.language.step.interaction.TestDataEnter;
+import org.skyve.metadata.sail.language.step.interaction.Upload;
 import org.skyve.metadata.sail.language.step.interaction.actions.Action;
 import org.skyve.metadata.sail.language.step.interaction.actions.Cancel;
 import org.skyve.metadata.sail.language.step.interaction.actions.Delete;
@@ -44,7 +48,9 @@ import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateEdit
 import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateLink;
 import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateList;
 import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateMap;
+import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateMenu;
 import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateTree;
+import org.skyve.metadata.sail.language.step.interaction.navigation.TestMenu;
 import org.skyve.metadata.sail.language.step.interaction.session.Login;
 import org.skyve.metadata.sail.language.step.interaction.session.Logout;
 
@@ -182,7 +188,13 @@ public class Interaction implements Executable {
 						@XmlElementRef(type = PushListContext.class),
 						@XmlElementRef(type = PushEditContext.class),
 						@XmlElementRef(type = PopContext.class),
-						@XmlElementRef(type = ClearContext.class)})
+						@XmlElementRef(type = ClearContext.class),
+						@XmlElementRef(type = Upload.class),
+						@XmlElementRef(type = TestMessage.class),
+						@XmlElementRef(type = TestGridRows.class),
+						@XmlElementRef(type = TestWidget.class),
+						@XmlElementRef(type = NavigateMenu.class),
+						@XmlElementRef(type = TestMenu.class)})
 	public @Nonnull List<Step> getSteps() {
 		return steps;
 	}

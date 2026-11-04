@@ -18,6 +18,8 @@ import jakarta.xml.bind.annotation.XmlType;
  * widget's current display value against {@code value} as a string and fails the
  * automation run if they do not match.
  *
+ * <p>{@code {run}} in {@code value} is replaced by the run token.
+ *
  * @see org.skyve.metadata.sail.execution.Executor#executeTestValue
  */
 @XmlType(namespace = XMLMetaData.SAIL_NAMESPACE)

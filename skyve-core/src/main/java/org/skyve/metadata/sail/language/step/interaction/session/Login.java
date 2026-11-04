@@ -20,6 +20,13 @@ import jakarta.xml.bind.annotation.XmlType;
  * user; all subsequent steps run in the context of that session until a
  * {@link Logout} step is reached or the procedure ends.
  *
+ * <p>When the next step is a {@link org.skyve.metadata.sail.language.step.TestFailure},
+ * the login is expected to fail: the executor must not throw when it is rejected, and the
+ * {@code testFailure} step asserts that it was.
+ *
+ * <p>{@code {run}} in {@code user} or {@code password} is replaced by the run token, so a script
+ * can log in as a user that it created earlier in the same run.
+ *
  * @see Logout
  * @see org.skyve.metadata.sail.execution.Executor#executeLogin
  */

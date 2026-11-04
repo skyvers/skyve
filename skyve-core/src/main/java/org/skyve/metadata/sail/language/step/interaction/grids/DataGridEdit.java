@@ -4,9 +4,9 @@ import org.skyve.impl.sail.execution.AutomationContext;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.sail.execution.Executor;
-import org.skyve.metadata.sail.language.Step;
 
 import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
@@ -19,6 +19,9 @@ import jakarta.xml.bind.annotation.XmlType;
  * editable, so that subsequent {@link org.skyve.metadata.sail.language.step.interaction.DataEnter}
  * steps can set values.
  *
+ * <p>The row can instead be located by the text of one of its cells with {@code rowContaining};
+ * exactly one of {@code row} and {@code rowContaining} is required (see {@link GridRowStep}).
+ *
  * @see DataGridNew
  * @see DataGridSelect
  * @see DataGridZoom
@@ -26,10 +29,11 @@ import jakarta.xml.bind.annotation.XmlType;
  */
 @XmlType(namespace = XMLMetaData.SAIL_NAMESPACE)
 @XmlRootElement(namespace = XMLMetaData.SAIL_NAMESPACE)
-public class DataGridEdit implements Step {
+public class DataGridEdit implements GridRowStep {
 
 	private String binding;
 	private Integer row;
+	private String rowContaining;
 	
 	/**
 	 * Returns the binding.
@@ -49,20 +53,42 @@ public class DataGridEdit implements Step {
 	}
 
 	/**
-	 * Returns the row.
-	 * @return the result
+	 * Returns the zero-based index of the target row.
+	 * @return the row index, or {@code null} when the row is located by {@link #getRowContaining()}
 	 */
-	public @Nonnull Integer getRow() {
+	@Override
+	public @Nullable Integer getRow() {
 		return row;
 	}
 
 	/**
-	 * Sets the row.
-	 * @param row the row
+	 * Sets the zero-based index of the target row.
+	 * Exactly one of {@code row} and {@code rowContaining} must be set.
+	 * @param row the row index, or {@code null} to locate the row by {@code rowContaining}
 	 */
-	@XmlAttribute(name = "row", required = true)
-	public void setRow(@Nonnull Integer row) {
+	@XmlAttribute(name = "row")
+	public void setRow(@Nullable Integer row) {
 		this.row = row;
+	}
+
+	/**
+	 * Returns the text that a cell of the target row contains.
+	 * @return the text, or {@code null} when the row is located by {@link #getRow()}
+	 */
+	@Override
+	public @Nullable String getRowContaining() {
+		return rowContaining;
+	}
+
+	/**
+	 * Sets the text that a cell of the target row contains; the first such row is the target.
+	 * Exactly one of {@code row} and {@code rowContaining} must be set.
+	 * {@code {run}} in the text is replaced by the run token.
+	 * @param rowContaining the text, or {@code null} to locate the row by {@code row}
+	 */
+	@XmlAttribute(name = "rowContaining")
+	public void setRowContaining(@Nullable String rowContaining) {
+		this.rowContaining = UtilImpl.processStringValue(rowContaining);
 	}
 
 	/**
@@ -71,6 +97,7 @@ public class DataGridEdit implements Step {
 	 */
 	@Override
 	public void execute(@Nonnull Executor executor) {
+		GridRowStep.validateRow(this);
 		executor.executeDataGridEdit(this);
 	}
 	
