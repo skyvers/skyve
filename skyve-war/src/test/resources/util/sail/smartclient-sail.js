@@ -32,9 +32,97 @@
 		return !!(window.isc && isc.AutoTest && isc.BizUtil && isc.WindowStack && isc.Canvas);
 	};
 
-	/** True when no RPC is pending and the system is done (see systemDone()). */
+	// ---------------------------------------------------------------- deferred work
+	//
+	// SmartClient and Skyve start some work from timers rather than straight from the event: a dialog's
+	// callback (Window.returnValue() delays it 50 ms), a blur's rerender and the click it swallowed
+	// (EditView._rerenderBlurryAction, BizButton action), a grid row selection's server call (bizSelected,
+	// after the double click delay), the refresh of a view's list grids, and SmartClient's redraw and reflow
+	// queues (0 ms) after any change. All of them go through isc.Timer.setTimeout(), so the helper counts the
+	// timers that have not fired yet, and the page is not settled until they have.
+	// Left out, because they do not follow from a step and could keep the page busy for ever: background repeat
+	// timers, timers of a second or more (hovers, view refreshes), mouse-still-down repeats, and maps, which
+	// retry build() every 100 ms while offline.
+
+	var deferred = {};
+	var timerTokens = {};
+	var sequence = 0;
+
+	function describeAction(action) {
+		if (isc.isA.Function(action)) {
+			return "function";
+		}
+		var target = action && action.target;
+		var owner = target && target.getClassName ? target.getClassName() : "isc";
+		return owner + "." + (action && action.methodName);
+	}
+
+	function ignored(action, delay, backgroundRepeatTimer) {
+		if (backgroundRepeatTimer || isc.isA.String(action) || (delay != null && delay >= 1000)) {
+			return true;
+		}
+		var target = action && action.target;
+		var method = action && action.methodName;
+		if (method === "$kq" || method === "_handleMouseStillDown") {
+			return true;
+		}
+		return !!(target && isc.isA.BizMap && isc.isA.BizMap(target));
+	}
+
+	function instrument() {
+		if (isc.Timer._sailSetTimeout) {
+			return;
+		}
+		var setTimeout = isc.Timer.setTimeout;
+		isc.Timer._sailSetTimeout = setTimeout;
+		isc.Timer.setTimeout = function (action, delay, units, frequentTimer, backgroundRepeatTimer) {
+			if (action && action.action != null) {
+				// the parameter object form
+				return isc.Timer.setTimeout(action.action, action.delay, action.units, frequentTimer, backgroundRepeatTimer);
+			}
+			if (action == null || ignored(action, delay, backgroundRepeatTimer)) {
+				return setTimeout.apply(this, arguments);
+			}
+			var token = ++sequence;
+			deferred[token] = describeAction(action);
+			var wrapped = function () {
+				delete deferred[token];
+				if (isc.isA.Function(action)) {
+					return action();
+				}
+				var target = action.target || window;
+				var method = isc.isA.Function(action.methodName) ? action.methodName : target[action.methodName];
+				return method.apply(target, action.args || []);
+			};
+			var id = setTimeout.call(this, wrapped, delay, units, frequentTimer, backgroundRepeatTimer);
+			timerTokens[id] = token;
+			return id;
+		};
+		var clear = isc.Timer.clear;
+		isc.Timer.clear = function (id) {
+			var token = timerTokens[id];
+			if (token) {
+				delete deferred[token];
+				delete timerTokens[id];
+			}
+			return clear.apply(this, arguments);
+		};
+	}
+
+	/** The deferred calls that have not fired yet. */
+	S.deferred = function () {
+		return Object.keys(deferred).map(function (k) {
+			return deferred[k];
+		});
+	};
+
+	/** True when no RPC is pending, no tracked deferred call is waiting to fire, and the system is done (see systemDone()). */
 	S.idle = function () {
-		return S.loaded() && !isc.RPCManager.requestsArePending() && systemDone() === true;
+		if (!S.loaded()) {
+			return false;
+		}
+		instrument();
+		return !isc.RPCManager.requestsArePending() && S.deferred().length === 0 && systemDone() === true;
 	};
 
 	var busyCanvas = null;
@@ -106,6 +194,11 @@
 		return mod ? mod + "." + doc : String(view.getID ? view.getID() : view);
 	};
 
+	/** True once SmartClient has loaded and settled: the condition the harness waits on after every step. */
+	S.settled = function () {
+		return document.readyState === "complete" && S.idle();
+	};
+
 	/** What the browser is showing, for error messages and waits. */
 	S.state = function () {
 		if (!S.loaded()) {
@@ -113,10 +206,11 @@
 		}
 		var rpc = isc.RPCManager.requestsArePending();
 		var done = systemDone();
+		var waiting = S.deferred();
 		return {
 			loaded: true,
-			idle: !rpc && done === true,
-			busy: rpc ? "requests are pending" : done !== true ? notDone() : null,
+			idle: !rpc && waiting.length === 0 && done === true,
+			busy: rpc ? "requests are pending" : waiting.length ? "deferred calls pending: " + waiting.join(", ") : done !== true ? notDone() : null,
 			view: S.describe(S.topView()),
 			windows: (isc.WindowStack._stack || []).length,
 			dialog: S.dialog()
@@ -359,6 +453,15 @@
 				found = pick(items(view, spec.name));
 				what = "form item named " + spec.name;
 				break;
+			case "membership":
+				var lists = ((view._grids && view._grids[spec.name]) ? Object.keys(view._grids[spec.name]).map(function (id) {
+					return view._grids[spec.name][id];
+				}) : []).filter(function (g) {
+					return g && !g.destroyed && isc.isA.BizListMembership(g);
+				});
+				found = pick(lists);
+				what = "list membership " + spec.name;
+				break;
 			case "cell":
 				found = pick(cells(view, spec.name, spec.field));
 				what = "inline editor for column " + spec.field + " of data grid " + spec.name + " (is a row being edited?)";
@@ -476,6 +579,21 @@
 	}
 
 	/**
+	 * True while SmartClient would read a click on the element as the second click of a double click: the same widget
+	 * was clicked less than EventHandler.DOUBLE_CLICK_DELAY ago. A button then fires doubleClick, not its action.
+	 */
+	S.clickWouldPair = function (element) {
+		var EH = isc.EH;
+		var canvas = canvasOf(element);
+		if (!canvas || !EH.lastClickTarget || EH.lastClickTime == null) {
+			return false;
+		}
+		var same = (EH.lastClickTarget === canvas) || (canvas.contains && canvas.contains(EH.lastClickTarget)) ||
+					(EH.lastClickTarget.contains && EH.lastClickTarget.contains(canvas));
+		return same && (isc.timeStamp() - EH.lastClickTime) < EH.DOUBLE_CLICK_DELAY;
+	};
+
+	/**
 	 * Scrolls an element into view the SmartClient way: Canvas.scrollIntoView() on the nearest
 	 * canvas, which also scrolls every ancestor's viewport (SmartClient's custom scrollbars do not
 	 * respond to DOM scrollIntoView()). Falls back to the DOM call.
@@ -545,6 +663,13 @@
 			return resolved;
 		}
 		var item = resolved.obj;
+		if (item && item._candidateList) {
+			// list membership: the members, in order, |-separated
+			var members = (item._memberList.getData() || []).map(function (r) {
+				return strip(r.bizKey);
+			});
+			return { value: members.join("|"), alternatives: [], type: item.getClassName() };
+		}
 		if (!isFormItem(item)) {
 			return { error: locator + " is not a form item" };
 		}
@@ -562,6 +687,12 @@
 			div.innerHTML = html;
 			result = strip(div.textContent || div.innerText || "");
 			alternatives.push(html);
+		} else if (isc.isA.BizHTMLItem && isc.isA.BizHTMLItem(item)) {
+			var markup = value == null ? "" : String(value);
+			var holder = document.createElement("div");
+			holder.innerHTML = markup;
+			result = strip(holder.textContent || holder.innerText || "");
+			alternatives.push(markup);
 		} else if (isc.isA.SliderItem(item)) {
 			result = value == null ? "" : String(value);
 		} else if (item.dateTextField || item.timeTextField) {
@@ -709,6 +840,318 @@
 			committed: !vm || same(stored, vm.getValue(item.name)),
 			focused: document.hasFocus()
 		};
+	};
+
+	// ---------------------------------------------------------------- grid rows
+
+	/** The grid (a ListGrid) a SAIL grid locator resolves to: list views, list grids and data grids give their inner grid. */
+	function gridOf(locator) {
+		var resolved = S.resolve(S.parse(locator).spec);
+		if (!resolved.obj) {
+			return { error: resolved.error || "no grid for " + locator };
+		}
+		var grid = resolved.obj;
+		if (grid.grid && isc.isA.ListGrid(grid.grid)) {
+			grid = grid.grid;
+		}
+		return isc.isA.ListGrid(grid) ? { grid: grid } : { error: locator + " is not a grid" };
+	}
+
+	/** The text a row shows, cell by cell, skipping list views' tag and flag columns. */
+	function rowTexts(grid, rowNum) {
+		var record = grid.getRecord(rowNum);
+		var fields = grid.getFields();
+		var texts = [];
+		for (var i = 0; i < fields.length; i++) {
+			var name = String(fields[i].name || "");
+			if (name === "bizTagged" || name === "bizFlagComment") {
+				continue;
+			}
+			var value = record ? grid.getCellValue(record, rowNum, i) : null;
+			texts.push(strip(value));
+		}
+		return texts;
+	}
+
+	function rowContains(grid, rowNum, text) {
+		var texts = rowTexts(grid, rowNum);
+		for (var i = 0; i < texts.length; i++) {
+			if (texts[i].indexOf(text) >= 0) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/** The rows a grid has loaded: { rows, loaded } or { error }. */
+	function loadedRows(grid) {
+		var total = grid.getTotalRows();
+		var data = grid.getData();
+		if (data && data.lengthIsKnown && !data.lengthIsKnown()) {
+			return { rows: 0, loaded: false };
+		}
+		var loaded = true;
+		if (data && data.rangeIsLoaded && total > 0 && !data.rangeIsLoaded(0, total)) {
+			loaded = false;
+		}
+		return { rows: total, loaded: loaded };
+	}
+
+	/** The zero-based index of the first row showing the text in one of its cells, or -1 (or { error }). */
+	S.rowIndex = function (locator, text) {
+		var g = gridOf(locator);
+		if (g.error) {
+			return { error: g.error, retry: true };
+		}
+		var state = loadedRows(g.grid);
+		if (!state.loaded) {
+			return { error: "the grid's rows are still loading", retry: true };
+		}
+		for (var i = 0; i < state.rows; i++) {
+			if (rowContains(g.grid, i, text)) {
+				return { row: i };
+			}
+		}
+		return { row: -1, rows: state.rows };
+	};
+
+	/** Counts a grid's rows, or only those showing the text: { count, loaded } or { error }. */
+	S.countRows = function (locator, text) {
+		var g = gridOf(locator);
+		if (g.error) {
+			return { error: g.error };
+		}
+		var state = loadedRows(g.grid);
+		if (!state.loaded) {
+			return { count: -1, loaded: false };
+		}
+		if (text == null) {
+			return { count: state.rows, loaded: true };
+		}
+		var count = 0;
+		for (var i = 0; i < state.rows; i++) {
+			if (rowContains(g.grid, i, text)) {
+				count++;
+			}
+		}
+		return { count: count, loaded: true };
+	};
+
+	/** Asks a list grid to fetch its rows again (a data grid shows its bean's rows, so it has nothing to refetch). */
+	S.refreshGrid = function (locator) {
+		var resolved = S.resolve(S.parse(locator).spec);
+		var owner = resolved.obj;
+		if (owner && owner.grid && isc.isA.BizListGrid(owner)) {
+			if (owner.refresh) {
+				owner.refresh();
+			}
+			else {
+				owner.grid.invalidateCache();
+			}
+			return true;
+		}
+		var g = gridOf(locator);
+		if (g.grid && g.grid.dataSource && g.grid.invalidateCache) {
+			g.grid.invalidateCache();
+			return true;
+		}
+		return false;
+	};
+
+	// ---------------------------------------------------------------- widget state, messages, menus
+
+	/** { found, shown, enabled } for a widget, without failing when it is missing. */
+	S.widgetState = function (locator) {
+		var parsed = S.parse(locator);
+		var resolved = S.resolve(parsed.spec);
+		if (!resolved.obj) {
+			return { found: false, shown: false, enabled: false, why: resolved.error };
+		}
+		var obj = resolved.obj;
+		var shown = shownObject(obj);
+		if (shown && parsed.spec.kind === "tab") {
+			// a tab hidden by its condition is removed from or hidden in the tab bar
+			shown = obj.isVisible() && obj.isDrawn();
+		}
+		return { found: true, shown: shown, enabled: !disabled(obj) };
+	};
+
+	/** The messages showing: [{ type: info|warning|error, text }]. */
+	S.messages = function () {
+		var result = [];
+		var d = S.dialog();
+		if (d) {
+			if (d.kind === "say") {
+				result.push({ type: "info", text: d.message });
+			}
+			else if (d.kind === "warn") {
+				// Skyve shows server problems (and validation) in a warning dialog titled Problems
+				var problems = (d.title === "Problems") || (isc.i18nMessages && d.title === isc.i18nMessages.editView_Problems);
+				result.push({ type: problems ? "error" : "warning", text: d.message });
+			}
+		}
+		S.problems().errors.forEach(function (e) {
+			result.push({ type: "error", text: e });
+		});
+		Array.prototype.slice.call(document.querySelectorAll(".ui-growl-item")).forEach(function (g) {
+			if (g.getClientRects().length === 0) {
+				return;
+			}
+			var cls = (g.querySelector(".ui-growl-image") || g).className;
+			var type = /error|fatal/.test(cls) ? "error" : /warn/.test(cls) ? "warning" : "info";
+			result.push({ type: type, text: strip(g.innerText || g.textContent) });
+		});
+		return result;
+	};
+
+	/**
+	 * Finds a menu entry: the module's section by title, then groups and the item by their shown text.
+	 * Returns { present, header (the section header element, when it is collapsed), row (the item's cell element) }.
+	 */
+	S.menu = function (moduleTitle, labels) {
+		var stack = isc.Canvas.getById("adminStack");
+		if (!stack) {
+			return { present: false, why: "no menu on this page" };
+		}
+		var index = -1;
+		for (var i = 0; i < stack.sections.length; i++) {
+			if (strip(stack.sections[i].title) === moduleTitle) {
+				index = i;
+				break;
+			}
+		}
+		if (index < 0) {
+			return { present: false, why: "no menu section " + moduleTitle };
+		}
+		var section = stack.sections[index];
+		var result = { present: true, expanded: stack.sectionIsExpanded(section) };
+		if (!result.expanded) {
+			var header = stack.getSectionHeader(index);
+			result.header = header ? header.getClipHandle() : null;
+		}
+		if (!labels || labels.length === 0) {
+			return result;
+		}
+		var tree = section.items && section.items[0];
+		if (!tree || !tree.data) {
+			return { present: false, why: "the " + moduleTitle + " section has no menu tree" };
+		}
+		var node = tree.data.getRoot();
+		for (var l = 0; l < labels.length; l++) {
+			var children = tree.data.getChildren(node) || [];
+			var next = null;
+			for (var c = 0; c < children.length; c++) {
+				if (strip(children[c].desc) === labels[l]) {
+					next = children[c];
+					break;
+				}
+			}
+			if (!next) {
+				return { present: false, why: "no menu entry " + labels.slice(0, l + 1).join(" / ") };
+			}
+			node = next;
+		}
+		if (!result.expanded) {
+			return result; // the caller expands the section and asks again
+		}
+		tree.data.openFolders(tree.data.getParents(node));
+		var row = tree.getRecordIndex(node);
+		result.row = row < 0 ? null : isc.AutoTest.getElement(S.objectLocator(tree) + "/body/row[" + row + "]/col[0]");
+		return result;
+	};
+
+	// ---------------------------------------------------------------- list membership and the HTML editor
+
+	/** A list membership's candidates and members (their shown text). */
+	S.membership = function (locator) {
+		var resolved = S.resolve(S.parse(locator).spec);
+		var m = resolved.obj;
+		if (!m || !m._candidateList) {
+			return { error: resolved.error || locator + " is not a list membership", retry: true };
+		}
+		var texts = function (list) {
+			return (list.getData() || []).map(function (r) {
+				return strip(r.bizKey);
+			});
+		};
+		return { candidates: texts(m._candidateList), members: texts(m._memberList) };
+	};
+
+	/** The element of a list membership row or button: part is candidate, member, assign or unassign. */
+	S.membershipElement = function (locator, part, text) {
+		var resolved = S.resolve(S.parse(locator).spec);
+		var m = resolved.obj;
+		if (!m || !m._candidateList) {
+			return null;
+		}
+		if (part === "assign" || part === "unassign") {
+			var buttons = m.members[1].members;
+			var b = buttons[part === "assign" ? 0 : 1];
+			return isc.AutoTest.getElement(S.objectLocator(b));
+		}
+		var list = part === "candidate" ? m._candidateList : m._memberList;
+		var data = list.getData() || [];
+		for (var i = 0; i < data.length; i++) {
+			if (strip(data[i].bizKey) === text) {
+				return isc.AutoTest.getElement(S.objectLocator(list) + "/body/row[" + i + "]/col[0]");
+			}
+		}
+		return null;
+	};
+
+	/** The HTML item's Edit button, and the editor window's Apply button and editor iframe when it is open. */
+	S.htmlEditor = function (locator) {
+		var resolved = S.resolve(S.parse(locator).spec);
+		var item = resolved.obj;
+		if (!item || !item._editButton) {
+			return { error: resolved.error || locator + " is not an HTML editor", retry: true };
+		}
+		var result = { edit: isc.AutoTest.getElement(S.objectLocator(item._editButton)) };
+		var editor = item._editor;
+		if (editor && editor.status === "ready" && window.CKEDITOR && CKEDITOR.instances._CKEditor === editor) {
+			result.frame = document.querySelector("iframe.cke_wysiwyg_frame");
+			var stack = isc.WindowStack._stack;
+			var top = stack[stack.length - 1];
+			var apply = null;
+			if (top) {
+				canvases().forEach(function (c) {
+					if (!apply && isc.isA.IButton(c) && top.contains(c) &&
+							strip(c.getTitle()) === strip(isc.i18nMessages.bizHTMLItem_EditHTMLPopupApply)) {
+						apply = c;
+					}
+				});
+			}
+			result.apply = apply ? isc.AutoTest.getElement(S.objectLocator(apply)) : null;
+		}
+		return result;
+	};
+
+	/** The Upload button of a content item (the main part of its split button). */
+	S.uploadButton = function (locator) {
+		var resolved = S.resolve(S.parse(locator).spec);
+		var item = resolved.obj;
+		if (!item || !item.canvas) {
+			return { error: resolved.error || locator + " is not a content item", retry: true };
+		}
+		var title = strip(isc.i18nMessages.bizUtilSplitButton_UploadButtonTitle);
+		var button = null;
+		canvases().forEach(function (c) {
+			if (!button && isc.isA.IButton(c) && !isc.isA.MenuButton(c) && item.canvas.contains(c) && strip(c.getTitle()) === title) {
+				button = c;
+			}
+		});
+		if (!button) {
+			return { error: "no Upload button on " + locator + " (is it read only?)", retry: true };
+		}
+		return { element: isc.AutoTest.getElement(S.objectLocator(button)), disabled: button.isDisabled() };
+	};
+
+	/** The upload page's iframe in the top-most window, if one is open. */
+	S.uploadFrame = function () {
+		var frames = Array.prototype.slice.call(document.querySelectorAll("iframe")).filter(function (f) {
+			return String(f.src || "").indexOf("upload.xhtml") >= 0 && f.getClientRects().length > 0;
+		});
+		return frames.length ? frames[frames.length - 1] : null;
 	};
 
 	/** Sets a slider through its own widget API, as a drag would, and returns the new value. */

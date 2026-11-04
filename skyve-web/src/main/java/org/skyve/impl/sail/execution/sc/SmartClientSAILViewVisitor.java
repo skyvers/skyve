@@ -23,6 +23,9 @@ import org.skyve.impl.metadata.view.widget.bound.ZoomIn;
 import org.skyve.impl.metadata.view.widget.bound.input.CheckBox;
 import org.skyve.impl.metadata.view.widget.bound.input.ColourPicker;
 import org.skyve.impl.metadata.view.widget.bound.input.Combo;
+import org.skyve.impl.metadata.view.widget.bound.input.ContentSignature;
+import org.skyve.impl.metadata.view.widget.bound.input.ContentUpload;
+import org.skyve.impl.metadata.view.widget.bound.input.ListMembership;
 import org.skyve.impl.metadata.view.widget.bound.input.DefaultWidget;
 import org.skyve.impl.metadata.view.widget.bound.input.Geometry;
 import org.skyve.impl.metadata.view.widget.bound.input.HTML;
@@ -322,10 +325,21 @@ public class SmartClientSAILViewVisitor {
 			type = InputType.TEXT;
 			suffix = textSuffix(binding, grid);
 		}
-		else if (! (widget instanceof HTML)) {
-			// Not an input SAIL can address (content, signature, membership, comparison...)
+		else if (widget instanceof HTML) {
+			type = InputType.HTML;
+		}
+		else if (widget instanceof ListMembership) {
+			if (grid == null) {
+				automationContext.put(binding, new Locator(Locator.sail(viewName, Kind.membership, sanitise(binding), null, null, null, null),
+															InputType.MEMBERSHIP));
+			}
 			return;
 		}
+		else if (! ((widget instanceof ContentUpload) || (widget instanceof ContentSignature))) {
+			// Not an input SAIL can address (check membership, comparison...)
+			return;
+		}
+		// content widgets are registered without an input type: <upload> and testValue use them, dataEnter does not
 
 		if (grid == null) {
 			automationContext.put(binding, Locator.item(viewName, sanitise(binding), suffix, type));

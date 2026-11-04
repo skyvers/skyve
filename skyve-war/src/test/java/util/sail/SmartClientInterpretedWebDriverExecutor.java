@@ -28,6 +28,16 @@ import org.skyve.metadata.module.query.MetaDataQueryDefinition;
 import org.skyve.metadata.sail.language.Step;
 import org.skyve.metadata.sail.language.step.Execute;
 import org.skyve.metadata.sail.language.step.TestFailure;
+import org.skyve.metadata.sail.language.step.TestGridRows;
+import org.skyve.metadata.sail.language.step.TestMessage;
+import org.skyve.metadata.sail.language.step.TestWidget;
+import org.skyve.metadata.sail.language.step.interaction.Upload;
+import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateMenu;
+import org.skyve.metadata.sail.language.step.interaction.navigation.TestMenu;
+import org.skyve.metadata.module.menu.MenuGroup;
+import org.skyve.metadata.module.menu.MenuItem;
+import org.skyve.impl.metadata.module.menu.AbstractDocumentOrQueryOrModelMenuItem;
+import org.skyve.impl.metadata.module.menu.EditItem;
 import org.skyve.metadata.sail.language.step.TestSuccess;
 import org.skyve.metadata.sail.language.step.TestValue;
 import org.skyve.metadata.sail.language.step.context.PushEditContext;
@@ -48,6 +58,7 @@ import org.skyve.metadata.sail.language.step.interaction.grids.DataGridNew;
 import org.skyve.metadata.sail.language.step.interaction.grids.DataGridRemove;
 import org.skyve.metadata.sail.language.step.interaction.grids.DataGridSelect;
 import org.skyve.metadata.sail.language.step.interaction.grids.DataGridZoom;
+import org.skyve.metadata.sail.language.step.interaction.grids.GridRowStep;
 import org.skyve.metadata.sail.language.step.interaction.grids.ListGridNew;
 import org.skyve.metadata.sail.language.step.interaction.grids.ListGridSelect;
 import org.skyve.metadata.sail.language.step.interaction.grids.ListGridZoom;
@@ -280,7 +291,7 @@ public class SmartClientInterpretedWebDriverExecutor extends InterpretedWebDrive
 		// Never replace with a new line as chrome under test will trip the default button on the form
 		String value = dataEnter.getValue();
 		if (value != null) {
-			value = value.replace("\n", " ");
+			value = substituteRunToken(value).replace("\n", " ");
 		}
 
 		boolean success = false;
@@ -329,6 +340,10 @@ public class SmartClientInterpretedWebDriverExecutor extends InterpretedWebDrive
 					throw new MetaDataException("<dataEnter /> on a slider needs a value");
 				}
 				return selenide.slider(locator, value);
+			case MEMBERSHIP:
+				return selenide.membership(locator, value);
+			case HTML:
+				return selenide.html(locator, value);
 			case TEXT:
 			default:
 				return selenide.text(new SmartClientTextCommand(locator, value, false));
@@ -373,10 +388,10 @@ public class SmartClientInterpretedWebDriverExecutor extends InterpretedWebDrive
 	 *
 	 * @param button the Step object representing the button to click
 	 * @param tagName the XML tag name of the button action
-	 * @param confirm whether to confirm the button click action
+	 * @param confirm how to answer a confirmation: null or true answers yes if one shows, false answers no (one must show)
 	 * @param testSuccess optional flag to control triggering test success actions; if null or true, test success is executed
 	 */
-	private void button(@Nonnull Step button, @Nonnull String tagName, boolean confirm, @Nullable Boolean testSuccess) {
+	private void button(@Nonnull Step button, @Nonnull String tagName, @Nullable Boolean confirm, @Nullable Boolean testSuccess) {
 		prepareForInteraction();
 		SmartClientAutomationContext context = context();
 
@@ -424,14 +439,14 @@ public class SmartClientInterpretedWebDriverExecutor extends InterpretedWebDrive
 
 	@Override
 	public void executeOk(Ok ok) {
-		button(ok, "ok", false, ok.getTestSuccess());
-		closed();
+		button(ok, "ok", ok.getConfirm(), ok.getTestSuccess());
+		closed(ok.getConfirm());
 	}
 
 	@SuppressWarnings("null") // a null here fails the test
 	@Override
 	public void executeSave(Save save) {
-		button(save, "save", false, save.getTestSuccess());
+		button(save, "save", save.getConfirm(), save.getTestSuccess());
 
 		Boolean createView = save.getCreateView();
 		if (Boolean.TRUE.equals(createView)) {
@@ -445,32 +460,38 @@ public class SmartClientInterpretedWebDriverExecutor extends InterpretedWebDrive
 
 	@Override
 	public void executeCancel(Cancel cancel) {
-		button(cancel, "cancel", false, cancel.getTestSuccess());
-		closed();
+		button(cancel, "cancel", null, cancel.getTestSuccess());
+		closed(null);
 	}
 
 	@Override
 	public void executeDelete(Delete delete) {
-		button(delete, "delete", true, delete.getTestSuccess());
-		closed();
+		button(delete, "delete", delete.getConfirm(), delete.getTestSuccess());
+		closed(delete.getConfirm());
 	}
 
 	@Override
 	public void executeZoomOut(ZoomOut zoomOut) {
-		button(zoomOut, "zoom out", false, zoomOut.getTestSuccess());
-		closed();
+		button(zoomOut, "zoom out", zoomOut.getConfirm(), zoomOut.getTestSuccess());
+		closed(zoomOut.getConfirm());
 	}
 
 	@Override
 	public void executeRemove(Remove remove) {
-		button(remove, "remove", true, remove.getTestSuccess());
-		closed();
+		button(remove, "remove", remove.getConfirm(), remove.getTestSuccess());
+		closed(remove.getConfirm());
 	}
 
 	/**
 	 * Pops the context of a view that an action closed and waits for the browser to show the view underneath.
+	 * A confirmation answered no leaves the view open, so nothing is popped.
+	 *
+	 * @param confirm	how the action's confirmation was answered
 	 */
-	private void closed() {
+	private void closed(@Nullable Boolean confirm) {
+		if (Boolean.FALSE.equals(confirm)) {
+			return;
+		}
 		pop();
 		SmartClientAutomationContext context = peek();
 		if (context != null) {
@@ -495,12 +516,13 @@ public class SmartClientInterpretedWebDriverExecutor extends InterpretedWebDrive
 
 	@Override
 	public void executeAction(Action action) {
-		button(action, action.getActionName(), Boolean.TRUE.equals(action.getConfirm()), action.getTestSuccess());
+		button(action, action.getActionName(), action.getConfirm(), action.getTestSuccess());
 	}
 
 	@Override
 	public void executeLookupDescriptionAutoComplete(LookupDescriptionAutoComplete complete) {
-		lookupDescription(complete, complete.getBinding(), null, complete.getSearch());
+		String search = complete.getSearch();
+		lookupDescription(complete, complete.getBinding(), null, (search == null) ? null : substituteRunToken(search));
 	}
 
 	@Override
@@ -631,7 +653,7 @@ public class SmartClientInterpretedWebDriverExecutor extends InterpretedWebDrive
 	@Override
 	public void executeZoomIn(ZoomIn zoom) {
 		Boolean testSuccess = zoom.getTestSuccess();
-		button(zoom, "zoomIn", false, testSuccess);
+		button(zoom, "zoomIn", null, testSuccess);
 		if (Boolean.FALSE.equals(testSuccess) && (selenide.dialogKind() != null)) {
 			selenide.trace("    The zoom in was refused: " + selenide.dialogMessage());
 			return;
@@ -670,6 +692,25 @@ public class SmartClientInterpretedWebDriverExecutor extends InterpretedWebDrive
 	}
 
 	/**
+	 * Finds the row a {@code rowContaining} step means: the first row, in the order shown, with a cell showing the text.
+	 *
+	 * @param context	the context
+	 * @param rowsKey	the identifier of the grid's row locator
+	 * @param step		the step
+	 * @return the zero-based row
+	 */
+	@SuppressWarnings("null") // checked by the caller
+	private int rowContaining(@Nonnull SmartClientAutomationContext context, @Nonnull String rowsKey, @Nonnull GridRowStep step) {
+		List<Locator> rows = context.getLocators(rowsKey);
+		if (rows == null) {
+			throw new MetaDataException(String.format("<%s /> grid [%s] is not on the view", step.getClass().getSimpleName(), rowsKey));
+		}
+		String text = substituteRunToken(step.getRowContaining());
+		selenide.trace(String.format("Find the row containing '%s'", text));
+		return selenide.rowContaining(rows.get(0).getLocator(), text);
+	}
+
+	/**
 	 * Executes a data grid gesture (new, select, zoom, edit or remove) on the UI element identified by the binding.
 	 *
 	 * @param step the Step object representing the data grid action to perform
@@ -690,6 +731,9 @@ public class SmartClientInterpretedWebDriverExecutor extends InterpretedWebDrive
 		}
 		boolean inline = (context.getLocators(binding + ".inline") != null);
 
+		if ((row == null) && (step instanceof GridRowStep gridRow) && (gridRow.getRowContaining() != null)) {
+			row = Integer.valueOf(rowContaining(context, binding + ".select", gridRow));
+		}
 		if ((! (step instanceof DataGridNew)) && (row == null)) {
 			throw new MetaDataException(String.format("<%s /> with binding [%s] needs a row", step.getClass().getSimpleName(), binding));
 		}
@@ -725,7 +769,7 @@ public class SmartClientInterpretedWebDriverExecutor extends InterpretedWebDrive
 													step.getClass().getSimpleName(),
 													binding,
 													(row == null) ? "" : " row " + row));
-					success = selenide.dataGridButton(new SmartClientDataGridButtonCommand(locator.getLocator(), step instanceof DataGridRemove));
+					success = selenide.dataGridButton(new SmartClientDataGridButtonCommand(locator.getLocator(), null));
 				}
 			}
 		}
@@ -790,6 +834,9 @@ public class SmartClientInterpretedWebDriverExecutor extends InterpretedWebDrive
 			throw new MetaDataException(String.format("<%s /> with identifier [%s] is not defined", step.getClass()
 					.getSimpleName(), listGridIdentifier));
 		}
+		if ((row == null) && (step instanceof GridRowStep gridRow) && (gridRow.getRowContaining() != null)) {
+			row = Integer.valueOf(rowContaining(context, listGridIdentifier + ".select", gridRow));
+		}
 		if ((! (step instanceof ListGridNew)) && (row == null)) {
 			throw new MetaDataException(String.format("<%s /> on list grid [%s] needs a row", step.getClass().getSimpleName(), listGridIdentifier));
 		}
@@ -801,7 +848,7 @@ public class SmartClientInterpretedWebDriverExecutor extends InterpretedWebDrive
 			select.setDocumentName(zoom.getDocumentName());
 			select.setModelName(zoom.getModelName());
 			select.setQueryName(zoom.getQueryName());
-			select.setRow(zoom.getRow());
+			select.setRow(row);
 
 			executeListGridSelect(select);
 		}
@@ -819,7 +866,7 @@ public class SmartClientInterpretedWebDriverExecutor extends InterpretedWebDrive
 													(step instanceof ListGridNew) ? "New" : "Zoom",
 													listGridIdentifier,
 													(row == null) ? "" : " row " + row));
-					success = selenide.listGridButton(new SmartClientListGridButtonCommand(locator.getLocator(), false));
+					success = selenide.listGridButton(new SmartClientListGridButtonCommand(locator.getLocator(), null));
 				}
 			}
 		}
@@ -913,7 +960,7 @@ public class SmartClientInterpretedWebDriverExecutor extends InterpretedWebDrive
 		}
 
 		String expected = test.getValue();
-		expected = (expected == null) ? "" : expected.trim();
+		expected = (expected == null) ? "" : substituteRunToken(expected).trim();
 		List<String> actual = selenide.values(locators.get(0).getLocator());
 		selenide.trace(String.format("Test value of %s is '%s' (displayed '%s')", binding, expected, actual.get(0)));
 		for (String value : actual) {
@@ -927,6 +974,300 @@ public class SmartClientInterpretedWebDriverExecutor extends InterpretedWebDrive
 		String wanted = expected;
 		check(false, () -> String.format("<testValue /> of [%s] expected '%s' but the widget displays '%s'%s",
 											binding, wanted, shown, alternatives));
+	}
+
+	// ------------------------------------------------------------------ phase 2 steps
+
+	/**
+	 * Uploads a test classpath file to a content widget (through its Upload button) or with an upload action,
+	 * using Skyve's upload page in the window that opens.
+	 */
+	@Override
+	public void executeUpload(Upload upload) {
+		prepareForInteraction();
+		SmartClientAutomationContext context = context();
+		String identifier = upload.getIdentifier(context);
+		List<Locator> locators = context.getLocators(identifier);
+		if (locators == null) {
+			throw new MetaDataException(String.format("<upload /> with %s [%s] is not on the view",
+														(upload.getBinding() != null) ? "binding" : "action", identifier));
+		}
+		java.io.File file = resourceFile(upload.getFile());
+		String locator = locators.get(0).getLocator();
+		selenide.trace(String.format("upload %s to [%s]", upload.getFile(), identifier));
+		org.openqa.selenium.WebElement trigger;
+		if (upload.getBinding() != null) {
+			trigger = selenide.uploadButton(locator);
+		}
+		else {
+			SmartClientSelenide.Found found = selenide.require(locator);
+			if (found.disabled()) {
+				throw new DomainException("<upload /> action [" + identifier + "] is disabled");
+			}
+			trigger = found.element().toWebElement();
+		}
+		selenide.upload(trigger, file);
+		if (upload.getBinding() != null) {
+			List<String> values = selenide.values(locator);
+			check(! values.get(0).isEmpty() || ((values.size() > 1) && (! values.get(1).isEmpty()) && (! "null".equals(values.get(1)))),
+					() -> String.format("<upload /> to [%s] finished but the widget holds no content", identifier));
+		}
+		checkSuccess(String.format("expected no error messages after uploading to [%s]", identifier));
+	}
+
+	/**
+	 * Resolves a test classpath resource to a file the browser can be given.
+	 *
+	 * @param resource	the resource path
+	 * @return the file
+	 */
+	private static @Nonnull java.io.File resourceFile(@Nonnull String resource) {
+		java.net.URL url = Thread.currentThread().getContextClassLoader().getResource(resource);
+		if (url == null) {
+			throw new MetaDataException("<upload /> file " + resource + " is not on the test classpath");
+		}
+		try {
+			return new java.io.File(url.toURI());
+		}
+		catch (java.net.URISyntaxException | IllegalArgumentException e) {
+			throw new MetaDataException("<upload /> file " + resource + " is not a file on disk: " + url, e);
+		}
+	}
+
+	/**
+	 * Asserts that a message (of the type, if given) contains the text: a SmartClient information or warning dialog,
+	 * the Problems dialog or a field error (error), or a growl, once the page has settled.
+	 */
+	@Override
+	public void executeTestMessage(TestMessage test) {
+		if (isNoneStrategy()) {
+			return;
+		}
+		String contains = substituteRunToken(test.getContains());
+		TestMessage.MessageType type = test.getType();
+		String severity = (type == null) ? null : type.name();
+		selenide.trace(String.format("test %s message contains '%s'", (severity == null) ? "a" : "an " + severity, contains));
+		// messages() waits for the page to settle, after which the step's messages are showing
+		boolean found = selenide.messages(severity).stream().anyMatch(m -> m.contains(contains));
+		check(found, () -> String.format("expected %s message containing '%s' but found: %s",
+											(severity == null) ? "a" : "an " + severity, contains, selenide.describeMessages()));
+		if (found) {
+			selenide.ok();
+		}
+	}
+
+	/**
+	 * Counts the rows of a list or data grid (only those containing the text, if given) and checks the bounds.
+	 * With the script's timeout, a list grid fetches its rows again and they are recounted until the bounds hold or the time is up.
+	 */
+	@Override
+	public void executeTestGridRows(TestGridRows test) {
+		if (isNoneStrategy()) {
+			return;
+		}
+		prepareForInteraction();
+		SmartClientAutomationContext context = context();
+		String identifier = test.getIdentifier(context);
+		List<Locator> locators = context.getLocators(identifier + ".select");
+		if (locators == null) {
+			throw new MetaDataException(String.format("<testGridRows /> grid [%s] is not on the view", identifier));
+		}
+		String locator = locators.get(0).getLocator();
+		String text = test.getRowContaining();
+		String contains = (text == null) ? null : substituteRunToken(text);
+		int min = test.getEffectiveMinRows();
+		Integer max = test.getMaxRows();
+		Integer timeout = test.getTimeoutMillis();
+		selenide.trace(String.format("test grid [%s] has %d..%s rows%s", identifier, Integer.valueOf(min),
+										(max == null) ? "" : max.toString(), (contains == null) ? "" : " containing '" + contains + "'"));
+		int count = selenide.awaitRows(locator, contains, c -> (c >= min) && ((max == null) || (c <= max.intValue())),
+										(timeout == null) ? 0L : timeout.longValue());
+		final int rows = count;
+		check((rows >= min) && ((max == null) || (rows <= max.intValue())),
+				() -> String.format("expected grid [%s] to have %d..%s rows%s but it has %d", identifier, Integer.valueOf(min),
+										(max == null) ? "" : max.toString(), (contains == null) ? "" : " containing '" + contains + "'",
+										Integer.valueOf(rows)));
+	}
+
+	/**
+	 * Asserts that a widget (by binding), an action's button or a tab is shown or not, and enabled or not.
+	 */
+	@Override
+	public void executeTestWidget(TestWidget test) {
+		if (isNoneStrategy()) {
+			return;
+		}
+		prepareForDataEntry();
+		SmartClientAutomationContext context = context();
+		String identifier = test.getIdentifier(context);
+		String tabPath = test.getTabPath();
+		if (tabPath != null) {
+			String[] titles = tabPath.split("::");
+			List<Locator> tab = context.getLocators(tabPath + " Tab");
+			identifier = (tab != null) ? tabPath + " Tab" : titles[titles.length - 1] + " Tab";
+		}
+		List<Locator> locators = (test.getBinding() != null) ? inputLocators(context, identifier) : context.getLocators(identifier);
+		if (locators == null) {
+			throw new MetaDataException(String.format("<testWidget /> [%s] is not in the view", identifier));
+		}
+		boolean shown = false;
+		boolean enabled = false;
+		for (Locator locator : locators) {
+			boolean[] state = selenide.widgetState(locator.getLocator());
+			if (state[1]) {
+				shown = true;
+				enabled = enabled || state[2];
+			}
+		}
+		final String what = identifier;
+		final boolean isShown = shown;
+		final boolean isEnabled = enabled;
+		Boolean expectedEnabled = test.getEnabled();
+		if (expectedEnabled != null) {
+			selenide.trace(String.format("test [%s] is shown and %s", what, expectedEnabled.booleanValue() ? "enabled" : "disabled"));
+			check(isShown && (isEnabled == expectedEnabled.booleanValue()),
+					() -> String.format("expected [%s] to be shown and %s but it is %s", what,
+											expectedEnabled.booleanValue() ? "enabled" : "disabled",
+											(! isShown) ? "not shown" : (isEnabled ? "enabled" : "disabled")));
+		}
+		else {
+			boolean expectedVisible = test.isExpectedVisible();
+			selenide.trace(String.format("test [%s] is %s", what, expectedVisible ? "shown" : "not shown"));
+			check(isShown == expectedVisible,
+					() -> String.format("expected [%s] to be %s but it is %s", what,
+											expectedVisible ? "shown" : "not shown", isShown ? "shown" : "not shown"));
+		}
+	}
+
+	/**
+	 * Clicks through the SmartClient menu (the module's section, then the item) and sets the context as the
+	 * equivalent navigation would.
+	 */
+	@Override
+	public void executeNavigateMenu(NavigateMenu menu) {
+		prepareForDataEntry();
+		MenuPath path = menuPath(menu.getModuleName(), menu.getItemName());
+		MenuItem item = path.item;
+		if (item == null) {
+			throw new MetaDataException(String.format("<navigateMenu /> module %s has no menu item %s", menu.getModuleName(), menu.getItemName()));
+		}
+		Customer c = CORE.getUser().getCustomer();
+		Module m = c.getModule(menu.getModuleName());
+		selenide.trace(String.format("Menu %s / %s", path.moduleTitle, String.join(" / ", path.labels())));
+		if (item instanceof AbstractDocumentOrQueryOrModelMenuItem listItem) {
+			PushListContext push = new PushListContext();
+			push.setModuleName(m.getName());
+			push.setDocumentName(listItem.getDocumentName());
+			push.setQueryName(listItem.getQueryName());
+			push.setModelName(listItem.getModelName());
+			executePushListContext(push);
+		}
+		else if (item instanceof EditItem editItem) {
+			Document d = m.getDocument(c, java.util.Objects.requireNonNull(editItem.getDocumentName()));
+			PushEditContext push = new PushEditContext();
+			push.setModuleName(d.getOwningModuleName());
+			push.setDocumentName(d.getName());
+			executePushEditContext(push);
+		}
+		else {
+			SmartClientAutomationContext context = peek();
+			if (context != null) {
+				context.setDocumentName(null);
+				context.setViewType(null);
+			}
+		}
+		if (! selenide.menu(path.moduleTitle, path.labels(), true)) {
+			throw new DomainException(String.format("<navigateMenu /> %s / %s is not in the menu", path.moduleTitle, String.join(" / ", path.labels())));
+		}
+		SmartClientAutomationContext context = peek();
+		if ((context != null) && (context.getViewType() != null)) {
+			awaitView(context);
+		}
+	}
+
+	/**
+	 * Asserts that a module's menu section, or one of its entries, is shown or not.
+	 */
+	@Override
+	public void executeTestMenu(TestMenu test) {
+		if (isNoneStrategy()) {
+			return;
+		}
+		String itemName = test.getItemName();
+		MenuPath path = menuPath(test.getModuleName(), itemName);
+		if ((itemName != null) && (path.item == null)) {
+			throw new MetaDataException(String.format("<testMenu /> module %s has no menu item %s", test.getModuleName(), itemName));
+		}
+		boolean expected = ! Boolean.FALSE.equals(test.getPresent());
+		boolean present = selenide.menu(path.moduleTitle, path.labels(), false);
+		String what = (itemName == null) ? path.moduleTitle : path.moduleTitle + " / " + String.join(" / ", path.labels());
+		selenide.trace(String.format("test menu %s is %s", what, expected ? "present" : "absent"));
+		check(present == expected, () -> String.format("expected the menu %s %s but it %s", what,
+														expected ? "to show" : "not to show", present ? "does" : "does not"));
+	}
+
+	/** A menu item and the labels shown for it. */
+	private static final class MenuPath {
+		String moduleTitle;
+		List<String> groupLabels = new java.util.ArrayList<>();
+		String itemLabel;
+		MenuItem item;
+
+		List<String> labels() {
+			List<String> result = new java.util.ArrayList<>(groupLabels);
+			if (itemLabel != null) {
+				result.add(itemLabel);
+			}
+			return result;
+		}
+	}
+
+	/**
+	 * Resolves a {@code /}-separated menu path (group names then the item name; each the metadata name or the shown name).
+	 *
+	 * @param moduleName	the module
+	 * @param itemPath		the path, or {@code null} for the module itself
+	 * @return the path, whose item is {@code null} if it is not in the module's menu
+	 */
+	private static @Nonnull MenuPath menuPath(@Nonnull String moduleName, @Nullable String itemPath) {
+		Customer c = CORE.getUser().getCustomer();
+		Module m = c.getModule(moduleName);
+		MenuPath result = new MenuPath();
+		result.moduleTitle = m.getLocalisedTitle();
+		if (itemPath == null) {
+			return result;
+		}
+		String[] names = itemPath.split("/");
+		List<MenuItem> items = m.getMenu().getItems();
+		for (int i = 0; i < names.length; i++) {
+			String name = names[i].trim();
+			MenuItem found = null;
+			for (MenuItem candidate : items) {
+				if (name.equals(candidate.getName()) || name.equals(candidate.getLocalisedName())) {
+					found = candidate;
+					break;
+				}
+			}
+			if (found == null) {
+				return result;
+			}
+			String label = found.getLocalisedName();
+			if (label == null) {
+				label = found.getName();
+			}
+			if (i < names.length - 1) {
+				if (! (found instanceof MenuGroup group)) {
+					return result;
+				}
+				result.groupLabels.add(label);
+				items = group.getItems();
+			}
+			else {
+				result.itemLabel = label;
+				result.item = found;
+			}
+		}
+		return result;
 	}
 
 	/**
