@@ -65,16 +65,18 @@
 			<action name="AddUnsubscribeLink" />
 			<tabSelect path="Attachments" />
 			<tabSelect path="Manage" />
-			<!-- The recipient actions need a tagged recipient, and a fresh database has none, so they fail with
-				"A tag must be selected for results" or "There are no tagged items". In SmartClient that server field
-				error then blocks every later action that validates, including delete, until the tag changes.
-				Tagging recipients and running these actions move to the phase-3 admin suite.
-			<action name="GetCount" />
-			<action name="TestSend" confirm="true" />
-			<action name="GetResults" />
-			<action name="CreateFiles" confirm="true" />
-			<action name="SendNow" confirm="true" />
-			-->
+			<!-- Nothing is tagged (a fresh database has none), so the recipient actions refuse to run: assert that they say so.
+				Tagging recipients and sending belong to the phase-3 admin suite. -->
+			<action name="GetCount" testSuccess="false" />
+			<testFailure message="A tag must be selected" />
+			<action name="TestSend" confirm="true" testSuccess="false" />
+			<testFailure message="There are no tagged items" />
+			<action name="GetResults" testSuccess="false" />
+			<testFailure message="A tag must be selected" />
+			<action name="CreateFiles" confirm="true" testSuccess="false" />
+			<testFailure message="A tag must be selected" />
+			<action name="SendNow" confirm="true" testSuccess="false" />
+			<testFailure message="A tag must be selected" />
 			<tabSelect path="Subscriptions" />
 			<delete />
 		</method>

@@ -454,8 +454,12 @@ public class SmartClientInterpretedWebDriverExecutor extends InterpretedWebDrive
 			throw new DomainException(String.format("Could not click button [%s]: it is disabled", tagName));
 		}
 
-		// testSuccess="false" leaves any message for a following testSuccess or testFailure step to check
-		if (BooleanUtils.isNotFalse(testSuccess)) {
+		// testSuccess="false" leaves any message for a following testSuccess or testFailure step to check;
+		// a confirmation answered no ran nothing, so there is no outcome to check (messages showing are older)
+		if (Boolean.FALSE.equals(confirm)) {
+			selenide.trace("    Declined: the action did not run");
+		}
+		else if (BooleanUtils.isNotFalse(testSuccess)) {
 			checkSuccess("expected no error messages after <" + tagName + " />");
 			selenide.ok();
 		}

@@ -46,12 +46,7 @@
 			<tabSelect path="Manage" />
 			<action name="SendNow" testSuccess="false" />
 			<testFailure message="must be selected" />
-			<!--
-				RUNTIME BUG (SmartClient): after SendNow's "tag" field error, SmartClient sends no later validating action, so
-				this communication cannot be deleted here; 99-restore.xml removes it with the rest of the suite's data.
 			<delete />
-			-->
-			<cancel />
 		</method>
 	</interaction>
 	<interaction name="Test data: generate tagged data, rerun the job, then delete the tagged data">
