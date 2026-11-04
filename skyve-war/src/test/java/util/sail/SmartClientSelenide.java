@@ -292,6 +292,12 @@ public class SmartClientSelenide extends Selenide<
 	 */
 	private boolean toolButton(@Nonnull String locator, boolean confirm) {
 		Found found = require(locator);
+		// grid tool buttons are enabled by the selection, which SmartClient can update after the click
+		long deadline = System.currentTimeMillis() + DIALOG_TIMEOUT_MILLIS;
+		while (found.disabled() && (System.currentTimeMillis() < deadline)) {
+			sleep(POLL_MILLIS, "Interrupted waiting for " + locator);
+			found = require(locator);
+		}
 		if (found.disabled()) {
 			trace("    The grid button is disabled");
 			return false;
@@ -308,6 +314,18 @@ public class SmartClientSelenide extends Selenide<
 		waitForFullPageResponse();
 
 		return true;
+	}
+
+	/**
+	 * Returns the row a data grid is editing inline.
+	 *
+	 * @param locator	a locator of the grid or one of its parts
+	 * @return the zero-based row, or -1 if no row is being edited
+	 */
+	public int editRow(@Nonnull String locator) {
+		waitForFullPageResponse();
+		Object row = script("return _sail.editRow(arguments[0])", locator.replaceFirst("\\}/.*$", "}"));
+		return (row instanceof Number number) ? number.intValue() : -1;
 	}
 
 	/**
@@ -459,8 +477,9 @@ public class SmartClientSelenide extends Selenide<
 		if ((value != null) && (! value.isEmpty())) {
 			element.sendKeys(value);
 		}
-		if (! command.keyPresses()) {
+		if ((! command.keyPresses()) && (! locator.contains("\"kind\":\"cell\""))) {
 			// leave the field, so that SmartClient commits the value and runs its change handlers
+			// (not in an inline grid editor, where leaving the last cell ends the row's edit)
 			acted();
 			element.sendKeys(Keys.TAB);
 			waitForFullPageResponse();
@@ -1071,9 +1090,19 @@ public class SmartClientSelenide extends Selenide<
 	 */
 	public boolean endInlineEditing() {
 		waitForFullPageResponse();
-		boolean result = Boolean.TRUE.equals(script("return _sail.endInlineEditing()"));
+		if (! Boolean.TRUE.equals(script("return _sail.inlineEditing()"))) {
+			return false;
+		}
+		// Enter commits the row, as it does for a user (ListGrid.endEditing() can drop a new row)
+		acted();
+		driver.switchTo().activeElement().sendKeys(Keys.ENTER);
 		waitForFullPageResponse();
-		return result;
+		if (Boolean.TRUE.equals(script("return _sail.inlineEditing()"))) {
+			trace("    Enter did not end the inline edit: ending it through SmartClient");
+			script("return _sail.endInlineEditing()");
+			waitForFullPageResponse();
+		}
+		return true;
 	}
 
 	/**

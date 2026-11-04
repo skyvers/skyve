@@ -703,6 +703,15 @@ public class SmartClientInterpretedWebDriverExecutor extends InterpretedWebDrive
 		}
 
 		boolean success = false;
+		if (step instanceof DataGridEdit) {
+			// clicking a row of an inline grid can start editing it straight away
+			for (Locator locator : locators) {
+				if ((! success) && (row != null) && (selenide.editRow(locator.getLocator()) == row.intValue())) {
+					selenide.trace(String.format("Row %d of data grid [%s] is being edited", row, binding));
+					success = true;
+				}
+			}
+		}
 		for (Locator locator : locators) {
 			if (! success) {
 				if (step instanceof DataGridSelect) {

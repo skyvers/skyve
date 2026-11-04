@@ -32,10 +32,53 @@
 		return !!(window.isc && isc.AutoTest && isc.BizUtil && isc.WindowStack && isc.Canvas);
 	};
 
-	/** True when no RPC is pending and AutoTest says the system is done. */
+	/** True when no RPC is pending and the system is done (see systemDone()). */
 	S.idle = function () {
-		return S.loaded() && !isc.RPCManager.requestsArePending() && isc.AutoTest.isSystemDone() === true;
+		return S.loaded() && !isc.RPCManager.requestsArePending() && systemDone() === true;
 	};
+
+	var busyCanvas = null;
+
+	/**
+	 * AutoTest.isSystemDone() without its network check, and counting only canvases that are shown:
+	 * a grid under a tab that is not selected never fetches, so AutoTest would wait for it for ever
+	 * (seen on ConditionsFixture). Falls back to AutoTest if the canvas check is unavailable.
+	 */
+	function systemDone() {
+		busyCanvas = null;
+		if (!isc.Page.isLoaded() || (isc.EH.resizeTimer != null)) {
+			return false;
+		}
+		var list = isc.Canvas._canvasList || [];
+		for (var i = 0; i < list.length; i++) {
+			var c = list[i];
+			if (!c || c.destroyed) {
+				continue;
+			}
+			// the method's name in the debug and in the production build
+			var done = c._isProcessingDone || c.$124j;
+			if (!isc.isA.Function(done)) {
+				return isc.AutoTest.isSystemDone({ includeNetworkOperations: false });
+			}
+			if (!done.call(c, true) && S.shown(c)) {
+				busyCanvas = c;
+				return false;
+			}
+		}
+		return true;
+	}
+
+	/** Explains why the system is not done, for diagnosis. */
+	function notDone() {
+		if (!isc.Page.isLoaded()) {
+			return "the page is not loaded";
+		}
+		if (isc.EH.resizeTimer != null) {
+			return "a page resize is pending";
+		}
+		return busyCanvas ? "canvas " + busyCanvas.getClassName() + " " + busyCanvas.ID + " is not done processing" :
+							String(isc.AutoTest._isSystemDoneLog || isc.AutoTest.$130x || "AutoTest says the system is not done");
+	}
 
 	/** The top-most edit view: the last WindowStack window holding a view, or the harness's current view. */
 	S.topView = function () {
@@ -68,9 +111,12 @@
 		if (!S.loaded()) {
 			return { loaded: false, url: String(location.href), title: document.title };
 		}
+		var rpc = isc.RPCManager.requestsArePending();
+		var done = systemDone();
 		return {
 			loaded: true,
-			idle: S.idle(),
+			idle: !rpc && done === true,
+			busy: rpc ? "requests are pending" : done !== true ? notDone() : null,
 			view: S.describe(S.topView()),
 			windows: (isc.WindowStack._stack || []).length,
 			dialog: S.dialog()
@@ -299,7 +345,8 @@
 			if (showing !== "list" || !isc.ListView._grid) {
 				return { error: "expected a list view but the browser shows " + showing, retry: true };
 			}
-			return { obj: gridPart(isc.ListView._grid, spec.part) };
+			var part = gridPart(isc.ListView._grid, spec.part);
+			return part ? { obj: part } : { error: "the list view has no " + spec.part + " yet", retry: true };
 		}
 		if (spec.view && showing !== spec.view) {
 			return { error: "expected view " + spec.view + " but the browser shows " + showing, retry: true };
@@ -379,7 +426,7 @@
 		if (parsed.spec) {
 			var resolved = S.resolve(parsed.spec);
 			if (!resolved.obj) {
-				return resolved;
+				return resolved.error ? resolved : { error: "nothing found for " + locator, retry: true };
 			}
 			obj = resolved.obj;
 			var root = S.objectLocator(obj);
@@ -506,7 +553,9 @@
 		var alternatives = [];
 		var result;
 		if (isc.isA.CheckboxItem(item)) {
-			result = value == null ? "" : String(!!value);
+			// only a real boolean is checked or unchecked; anything else (such as an unevaluated
+			// default expression) is shown as is, so that it neither passes for true nor stops data entry
+			result = value == null ? "" : (value === true || value === false) ? String(value) : JSON.stringify(value);
 		} else if (isc.isA.RichTextItem(item)) {
 			var html = value == null ? "" : String(value);
 			var div = document.createElement("div");
@@ -547,8 +596,8 @@
 	};
 
 	/**
-	 * The index of the first data column of a grid, skipping list views' tag and flag columns,
-	 * so that clicking a row selects it instead of tagging or flagging it.
+	 * The index of the first data column of a grid, skipping list views' tag and flag columns and
+	 * check box columns, so that clicking a row selects it instead of tagging, flagging or toggling it.
 	 */
 	S.dataColumn = function (locator) {
 		var resolved = S.resolve(S.parse(locator).spec);
@@ -557,13 +606,20 @@
 			return 0;
 		}
 		var fields = grid.getFields();
+		var fallback = -1;
 		for (var i = 0; i < fields.length; i++) {
 			var name = String(fields[i].name || "");
 			if (name !== "bizTagged" && name !== "bizFlagComment" && name.charAt(0) !== "_") {
-				return i;
+				// clicking a check box cell would toggle it
+				if (fields[i].type !== "boolean") {
+					return i;
+				}
+				if (fallback < 0) {
+					fallback = i;
+				}
 			}
 		}
-		return 0;
+		return fallback < 0 ? 0 : fallback;
 	};
 
 	/** True if a grid's row is selected (clicking it again would read as a double click, which zooms). */
@@ -575,6 +631,18 @@
 		}
 		var record = grid.getRecord(row);
 		return !!record && grid.isSelected(record);
+	};
+
+	/** The row a data grid is editing inline, or -1. */
+	S.editRow = function (locator) {
+		var resolved = S.resolve(S.parse(locator).spec);
+		var grid = resolved.obj;
+		var list = grid && grid.grid ? grid.grid : grid;
+		if (!list || !list.getEditRow) {
+			return -1;
+		}
+		var row = list.getEditRow();
+		return row == null ? -1 : row;
 	};
 
 	/** Sets a slider through its own widget API, as a drag would, and returns the new value. */
@@ -606,6 +674,17 @@
 			});
 		}
 		return result;
+	};
+
+	/** True if a data grid of the top-most view is editing a row inline. */
+	S.inlineEditing = function () {
+		var view = S.topView();
+		if (!view || !view._vm) {
+			return false;
+		}
+		return owned(view, function (c) {
+			return isc.isA.BizDataGrid(c) && c.grid && c.grid.getEditRow && c.grid.getEditRow() != null;
+		}).length > 0;
 	};
 
 	/** Ends inline editing in every data grid of the top-most view; true if a grid was editing. */
