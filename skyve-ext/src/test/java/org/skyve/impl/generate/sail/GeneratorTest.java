@@ -52,6 +52,7 @@ import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateEdit
 import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateList;
 import org.skyve.metadata.sail.language.step.interaction.session.Login;
 import org.skyve.metadata.sail.language.step.interaction.session.Logout;
+import org.skyve.metadata.sail.language.step.interaction.session.SwitchMode;
 import org.skyve.metadata.user.User;
 import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.web.UserAgentType;
@@ -117,6 +118,41 @@ class GeneratorTest {
 
 	@SuppressWarnings("null") // a null here fails the test
 	@Test
+	void addLoginAndOutSwitchesModeAfterLoginForDesktop() throws Exception {
+		User user = mock(User.class);
+		when(user.getName()).thenReturn("admin");
+		Automation automation = new Automation();
+		automation.setUxui("desktop");
+		Procedure before = new Procedure();
+		Comment existingBefore = new Comment();
+		before.getSteps().add(existingBefore);
+		automation.setBefore(before);
+
+		invokeAddLoginAndOut(automation, user, null, "secret");
+
+		List<Step> steps = automation.getBefore().getSteps();
+		assertThat(steps.size(), is(3));
+		assertThat(steps.get(0), instanceOf(Login.class));
+		assertThat(steps.get(1), instanceOf(SwitchMode.class));
+		assertThat(steps.get(2), is(existingBefore));
+	}
+
+	@SuppressWarnings("null") // a null here fails the test
+	@Test
+	void addLoginAndOutDoesNotSwitchModeForOtherUxUis() throws Exception {
+		User user = mock(User.class);
+		when(user.getName()).thenReturn("admin");
+		Automation automation = new Automation();
+		automation.setUxui("external");
+
+		invokeAddLoginAndOut(automation, user, null, "secret");
+
+		assertThat(automation.getBefore().getSteps().size(), is(1));
+		assertThat(automation.getBefore().getSteps().get(0), instanceOf(Login.class));
+	}
+
+	@SuppressWarnings("null") // a null here fails the test
+	@Test
 	void visitModuleSkipsAbstractChildInaccessibleAndForeignDocumentRefs() throws Exception {
 		User user = mock(User.class);
 		Customer customer = mock(Customer.class);
@@ -153,6 +189,7 @@ class GeneratorTest {
 		assertThat(result.getUserAgentType(), is(UserAgentType.desktop));
 		assertThat(result.getTestStrategy(), is(TestStrategy.Assert));
 		assertThat(result.getBefore().getSteps().get(0), instanceOf(Login.class));
+		assertThat(result.getBefore().getSteps().get(1), instanceOf(SwitchMode.class));
 		assertThat(result.getAfter().getSteps().get(0), instanceOf(Logout.class));
 		verify(module, never()).getDocument(customer, "ForeignDoc");
 	}

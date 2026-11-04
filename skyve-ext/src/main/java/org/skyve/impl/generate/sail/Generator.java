@@ -17,6 +17,7 @@ import org.skyve.metadata.module.menu.Menu;
 import org.skyve.metadata.module.menu.MenuGroup;
 import org.skyve.metadata.module.menu.MenuItem;
 import org.skyve.metadata.module.query.MetaDataQueryDefinition;
+import org.skyve.metadata.router.UxUi;
 import org.skyve.metadata.sail.language.Automation;
 import org.skyve.metadata.sail.language.Automation.TestStrategy;
 import org.skyve.metadata.sail.language.Interaction;
@@ -30,6 +31,7 @@ import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateEdit
 import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateList;
 import org.skyve.metadata.sail.language.step.interaction.session.Login;
 import org.skyve.metadata.sail.language.step.interaction.session.Logout;
+import org.skyve.metadata.sail.language.step.interaction.session.SwitchMode;
 import org.skyve.metadata.user.User;
 import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.web.UserAgentType;
@@ -434,11 +436,13 @@ System.out.println(visitModules(args[0]));
 		login.setPassword(password);
 		if (before == null) {
 			before = new Procedure();
-			before.getSteps().add(login);
 			automation.setBefore(before);
 		}
-		else {
-			before.getSteps().add(0, login);
+		List<Step> beforeSteps = before.getSteps();
+		beforeSteps.add(0, login);
+		// The router may not route the browser to SmartClient, so switch to it explicitly
+		if (UxUi.DESKTOP_NAME.equals(automation.getUxui())) {
+			beforeSteps.add(1, new SwitchMode());
 		}
 
 		Procedure after = automation.getAfter();
