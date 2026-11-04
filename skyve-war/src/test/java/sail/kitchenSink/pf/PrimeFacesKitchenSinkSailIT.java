@@ -27,4 +27,26 @@ class PrimeFacesKitchenSinkSailIT extends AbstractPrimeFacesInterpretedSail {
 	void test() {
 		sailResource("sail/kitchenSink/pf/pf-kitchensink-sail.xml");
 	}
+
+	/**
+	 * {@code <switchMode />} from SmartClient back to PrimeFaces. SAIL has no step that switches away from the
+	 * automation's renderer, so the switch to SmartClient is made here with PrimeFaces' own user menu (real clicks),
+	 * between two automations in the same browser session.
+	 */
+	@Test
+	void switchModeFromSmartClient() {
+		sailString(automation("<login user=\"admin\" password=\"admin\" /><testSuccess /><testMenu module=\"kitchensink\" />"));
+		selenium.switchToSmartClient();
+		sailString(automation("<switchMode />" +
+								"<testMenu module=\"kitchensink\" />" +
+								"<navigateMenu module=\"kitchensink\" item=\"Actions Fixture\" />" +
+								"<action name=\"RunFromToolbar\" />" +
+								"<testValue binding=\"outcome\" value=\"Run From Toolbar ran\" />" +
+								"<logout />"));
+	}
+
+	private static String automation(String steps) {
+		return "<automation uxui=\"tablet\" userAgentType=\"tablet\" testStrategy=\"Assert\" xmlns=\"http://www.skyve.org/xml/sail\">" +
+				"<interaction name=\"Switch mode\"><method>" + steps + "</method></interaction></automation>";
+	}
 }
