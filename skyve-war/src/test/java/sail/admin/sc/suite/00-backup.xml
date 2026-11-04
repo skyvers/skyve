@@ -42,6 +42,8 @@
 	<interaction name="Leave a marker that the restore must remove">
 		<method>
 			<navigateMenu module="admin" item="Security Admin/Data Groups" />
+			<comment>Precondition: no marker is left from an earlier run (whose restore did not run). If the next step fails, delete it and check the data.</comment>
+			<testGridRows module="admin" document="DataGroup" rowContaining="SAIL restore marker" maxRows="0" />
 			<listGridNew module="admin" document="DataGroup" />
 			<dataEnter binding="name" value="SAIL restore marker" />
 			<save />
