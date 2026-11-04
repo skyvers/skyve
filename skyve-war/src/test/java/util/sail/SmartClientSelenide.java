@@ -2,7 +2,6 @@ package util.sail;
 
 import static com.codeborne.selenide.Condition.exist;
 import static com.codeborne.selenide.Condition.visible;
-import static com.codeborne.selenide.Selectors.byName;
 import static com.codeborne.selenide.Selenide.$;
 
 import java.io.IOException;
@@ -128,49 +127,13 @@ public class SmartClientSelenide extends Selenide<
 	 */
 	@Override
 	public void login(@Nullable String customer, @Nonnull String username, @Nonnull String password) {
-		get("");
-		if (customer != null) {
-			$(byName("customer")).val(customer);
-		}
-		$(byName("user")).val(username);
-		$(byName("password")).val(password);
-		// mark this page so that the page the submit leads to can be told apart from it
-		script("window._sailSignIn = true;");
-		$("input[type=\"submit\"]").click();
-
-		if (waitForSignIn()) {
+		super.login(customer, username, password);
+		if (getLoginError() == null) {
 			selectSmartClient();
 		}
 		else {
-			trace(String.format("    Sign in as %s failed: the browser is still on the sign in page", username));
+			trace(String.format("    Sign in as %s failed: %s", username, getLoginError()));
 		}
-	}
-
-	/**
-	 * Waits until the page the sign-in submit leads to has loaded, and reports whether it is past the sign-in page.
-	 *
-	 * @return {@code true} if signed in, {@code false} if the sign-in page is showing again
-	 * @throws IllegalStateException if no new page loads in time
-	 */
-	private boolean waitForSignIn() {
-		long deadline = System.currentTimeMillis() + LOAD_TIMEOUT_MILLIS;
-		while (System.currentTimeMillis() < deadline) {
-			try {
-				Object state = script("if (window._sailSignIn || document.readyState !== 'complete') return 'waiting';" +
-										"return document.querySelector(\"input[name='password']\") ? 'login' : 'in';");
-				if ("in".equals(state)) {
-					return true;
-				}
-				if ("login".equals(state)) {
-					return false;
-				}
-			}
-			catch (@SuppressWarnings("unused") WebDriverException e) {
-				// the page is changing
-			}
-			sleep(POLL_MILLIS, "Interrupted waiting for sign in");
-		}
-		throw new IllegalStateException("Signing in did not lead to a new page within " + (LOAD_TIMEOUT_MILLIS / 1000) + " seconds");
 	}
 
 	/**
@@ -227,6 +190,7 @@ public class SmartClientSelenide extends Selenide<
 			trace("    The button is disabled");
 			return false;
 		}
+		requireShown(found, "button");
 		SelenideElement element = found.element();
 		prepare(element);
 		click(element);
@@ -332,6 +296,7 @@ public class SmartClientSelenide extends Selenide<
 			trace("    The grid button is disabled");
 			return false;
 		}
+		requireShown(found, "grid button");
 		SelenideElement element = found.element();
 		prepare(element);
 		click(element);
@@ -353,7 +318,18 @@ public class SmartClientSelenide extends Selenide<
 	 * @return {@code true} once clicked
 	 */
 	private boolean row(@Nonnull String locator, int row) {
-		String cell = String.format(locator, Integer.valueOf(row), Integer.valueOf(0));
+		int column = 0;
+		if (locator.startsWith(Locator.SAIL_PREFIX)) {
+			String grid = locator.replaceFirst("\\}/.*$", "}");
+			require(grid);
+			Object index = script("return _sail.dataColumn(arguments[0])", grid);
+			column = (index instanceof Number number) ? number.intValue() : 0;
+			if (Boolean.TRUE.equals(script("return _sail.rowSelected(arguments[0], arguments[1])", grid, Integer.valueOf(row)))) {
+				trace("    Row " + row + " is already selected");
+				return true;
+			}
+		}
+		String cell = String.format(locator, Integer.valueOf(row), Integer.valueOf(column));
 		SelenideElement element = require(cell).element();
 		prepare(element);
 		click(element);
@@ -450,6 +426,7 @@ public class SmartClientSelenide extends Selenide<
 			trace("    The tab is disabled");
 			return false;
 		}
+		requireShown(found, "tab");
 		SelenideElement element = found.element();
 		prepare(element);
 		click(element);
@@ -481,6 +458,12 @@ public class SmartClientSelenide extends Selenide<
 		element.sendKeys(Keys.BACK_SPACE);
 		if ((value != null) && (! value.isEmpty())) {
 			element.sendKeys(value);
+		}
+		if (! command.keyPresses()) {
+			// leave the field, so that SmartClient commits the value and runs its change handlers
+			acted();
+			element.sendKeys(Keys.TAB);
+			waitForFullPageResponse();
 		}
 
 		return true;
@@ -609,9 +592,6 @@ public class SmartClientSelenide extends Selenide<
 		}
 
 		lastProblem = problem;
-		System.err.println("**************");
-		System.err.println("Not successful - " + problem);
-		System.err.println("**************");
 		return false;
 	}
 
@@ -641,9 +621,6 @@ public class SmartClientSelenide extends Selenide<
 			lastProblem = String.format("expected a problem containing '%s' but found %s", messageToCheck, found);
 		}
 
-		System.err.println("**************");
-		System.err.println("Not successful - " + lastProblem);
-		System.err.println("**************");
 		return false;
 	}
 
@@ -662,6 +639,26 @@ public class SmartClientSelenide extends Selenide<
 	@Override
 	public void assertFailure() {
 		assertFailure(null);
+	}
+
+	/**
+	 * Describes the SmartClient dialog and the field errors of the showing view.
+	 *
+	 * @return the messages, or a statement that there are none
+	 */
+	@Override
+	public @Nonnull String describeMessages() {
+		try {
+			if (! isSmartClientPage()) {
+				return "(not a SmartClient page: " + driver.getCurrentUrl() + ')';
+			}
+			waitForFullPageResponse();
+			List<String> messages = problemMessages(map(script("return _sail.problems()")), true);
+			return messages.isEmpty() ? "no message, question or field error" : String.join("; ", messages);
+		}
+		catch (RuntimeException e) {
+			return "(could not read the messages: " + firstLine(e.getMessage()) + ')';
+		}
 	}
 
 	/**
@@ -802,6 +799,20 @@ public class SmartClientSelenide extends Selenide<
 															locator, lastProblem, state()));
 		}
 		return result;
+	}
+
+	/**
+	 * Fails if SmartClient says the widget is not shown (hidden by the view, or under a tab that is not selected).
+	 *
+	 * @param found	what was found
+	 * @param what	what the widget is, for the message
+	 * @throws IllegalStateException if the widget is not shown
+	 */
+	private static void requireShown(@Nonnull Found found, @Nonnull String what) {
+		if (! found.shown()) {
+			throw new IllegalStateException(String.format("The %s %s is on the view but not shown (hidden here, or on a tab that is not selected)",
+															what, found.locator()));
+		}
 	}
 
 	/**
@@ -957,6 +968,9 @@ public class SmartClientSelenide extends Selenide<
 	 * @return {@code true} if the button was found and clicked, {@code false} otherwise
 	 */
 	public boolean ok() {
+		if (! isSmartClientPage()) {
+			return false;
+		}
 		waitForFullPageResponse();
 		if (dialogKind() == null) {
 			return false;

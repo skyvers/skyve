@@ -25,7 +25,6 @@ import org.skyve.metadata.model.document.Relation;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.Module.DocumentRef;
 import org.skyve.metadata.module.query.MetaDataQueryDefinition;
-import org.skyve.metadata.sail.language.Automation.TestStrategy;
 import org.skyve.metadata.sail.language.Step;
 import org.skyve.metadata.sail.language.step.Execute;
 import org.skyve.metadata.sail.language.step.TestFailure;
@@ -56,8 +55,11 @@ import org.skyve.metadata.sail.language.step.interaction.lookup.LookupDescriptio
 import org.skyve.metadata.sail.language.step.interaction.lookup.LookupDescriptionEdit;
 import org.skyve.metadata.sail.language.step.interaction.lookup.LookupDescriptionNew;
 import org.skyve.metadata.sail.language.step.interaction.lookup.LookupDescriptionPick;
+import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateCalendar;
 import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateEdit;
 import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateList;
+import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateMap;
+import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateTree;
 import org.skyve.metadata.user.User;
 import org.skyve.metadata.view.View;
 import org.skyve.metadata.view.View.ViewType;
@@ -118,6 +120,27 @@ public class SmartClientInterpretedWebDriverExecutor extends InterpretedWebDrive
 	@Override
 	public void executeNavigateList(NavigateList list) {
 		super.executeNavigateList(list);
+
+		selenide.waitForList();
+	}
+
+	@Override
+	public void executeNavigateTree(NavigateTree tree) {
+		super.executeNavigateTree(tree);
+
+		selenide.waitForList();
+	}
+
+	@Override
+	public void executeNavigateMap(NavigateMap map) {
+		super.executeNavigateMap(map);
+
+		selenide.waitForList();
+	}
+
+	@Override
+	public void executeNavigateCalendar(NavigateCalendar calendar) {
+		super.executeNavigateCalendar(calendar);
 
 		selenide.waitForList();
 	}
@@ -394,7 +417,8 @@ public class SmartClientInterpretedWebDriverExecutor extends InterpretedWebDrive
 
 		// testSuccess="false" leaves any message for a following testSuccess or testFailure step to check
 		if (BooleanUtils.isNotFalse(testSuccess)) {
-			executeTestSuccess(new TestSuccess());
+			checkSuccess("expected no error messages after <" + tagName + " />");
+			selenide.ok();
 		}
 	}
 
@@ -868,6 +892,9 @@ public class SmartClientInterpretedWebDriverExecutor extends InterpretedWebDrive
 	 */
 	@Override
 	public void executeTestValue(TestValue test) {
+		if (isNoneStrategy()) {
+			return;
+		}
 		prepareForDataEntry(); // a row being edited inline stays in edit
 		SmartClientAutomationContext context = context();
 		String binding = test.getBinding();
@@ -886,31 +913,16 @@ public class SmartClientInterpretedWebDriverExecutor extends InterpretedWebDrive
 			}
 		}
 
-		fail(String.format("<testValue /> of [%s] expected '%s' but the widget displays '%s'%s",
-							binding,
-							expected,
-							actual.get(0),
-							(actual.size() > 1) ? " (value " + actual.subList(1, actual.size()) + ')' : ""));
+		String shown = actual.get(0);
+		String alternatives = (actual.size() > 1) ? " (value " + actual.subList(1, actual.size()) + ')' : "";
+		String wanted = expected;
+		check(false, () -> String.format("<testValue /> of [%s] expected '%s' but the widget displays '%s'%s",
+											binding, wanted, shown, alternatives));
 	}
 
 	/**
-	 * Reports a failed check according to the automation's test strategy:
-	 * {@code Assert} throws, {@code Verify} reports and carries on, {@code None} ignores it.
-	 *
-	 * @param message	what failed
+	 * Applies the base class's check, then dismisses any message the check has seen.
 	 */
-	private void fail(@Nonnull String message) {
-		TestStrategy strategy = getTestStrategy();
-		if (TestStrategy.Assert == strategy) {
-			throw new AssertionError(message);
-		}
-		if (TestStrategy.Verify == strategy) {
-			System.err.println("**************");
-			System.err.println("Not successful - " + message);
-			System.err.println("**************");
-		}
-	}
-
 	@Override
 	public void executeTestSuccess(TestSuccess success) {
 		super.executeTestSuccess(success);
@@ -918,6 +930,9 @@ public class SmartClientInterpretedWebDriverExecutor extends InterpretedWebDrive
 		selenide.ok();
 	}
 
+	/**
+	 * Applies the base class's check, then dismisses the message it has seen.
+	 */
 	@Override
 	public void executeTestFailure(TestFailure failure) {
 		super.executeTestFailure(failure);

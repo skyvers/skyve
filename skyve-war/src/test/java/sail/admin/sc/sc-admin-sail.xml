@@ -13,7 +13,9 @@
 	<interaction name="LoginError">
 		<method>
 			<login user="badmin" password="badmin" />
+			<testFailure />
 			<login user="admin" password="admin" />
+			<testSuccess />
 		</method>
 	</interaction>
 	<!-- Changing admin's password to "admin" fails the password policy, and a real change would lock admin

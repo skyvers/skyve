@@ -6,9 +6,11 @@ import java.nio.charset.StandardCharsets;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.impl.web.faces.FacesUtil;
 import org.skyve.metadata.sail.language.Automation;
+import org.skyve.metadata.user.User;
 import org.slf4j.Logger;
 import org.skyve.util.logging.SkyveLoggerFactory;
 
@@ -71,9 +73,21 @@ public abstract class AbstractSmartClientInterpretedSail extends AbstractH2Test 
 		sail(automation);
 	}
 	
-	private void sail(Automation automation) {
+	/**
+	 * Runs the automation as a user with every role, like the bootstrap user the scripts sign in as,
+	 * so that the test JVM sees the same views, actions and permissions as the browser.
+	 *
+	 * @param automation	the automation
+	 */
+	private void sail(@Nonnull Automation automation) {
+		AbstractPersistence persistence = AbstractPersistence.get();
+		User testUser = persistence.getUser();
+		persistence.setUser(AbstractPrimeFacesInterpretedSail.bootstrapLikeUser(testUser));
 		try (FacesUtil.SailFacesContextScope ignored = FacesUtil.withSailFacesContextIfNeeded()) {
 			automation.execute(new SmartClientInterpretedWebDriverExecutor(selenium));
+		}
+		finally {
+			persistence.setUser(testUser);
 		}
 	}
 }

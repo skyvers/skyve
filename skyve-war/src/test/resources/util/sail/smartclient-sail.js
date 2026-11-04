@@ -467,6 +467,23 @@
 		return String(value);
 	}
 
+	/** The zero-based position of a value among the options a combo's pick list or a radio group offers. */
+	function optionIndex(item, value) {
+		var data = item.getClientPickListData ? item.getClientPickListData() : null;
+		if (data && data.length) {
+			for (var i = 0; i < data.length; i++) {
+				var v = data[i][item.getValueFieldName ? item.getValueFieldName() : item.name];
+				if ((v == null && value == null) || (v != null && value != null && String(v) === String(value))) {
+					return i;
+				}
+			}
+			return -1;
+		}
+		var map = item.getValueMap();
+		var keys = isc.isA.Array(map) ? map.map(String) : Object.keys(map);
+		return value == null ? -1 : keys.indexOf(String(value));
+	}
+
 	/**
 	 * The value a form item displays, as a string, for testValue.
 	 * Returns { value, alternatives[], type } or { error }.
@@ -507,9 +524,14 @@
 			result = combo ? strip(combo.getDisplayValue()) : strip(item.getDisplayValue());
 			alternatives.push(value == null ? "" : String(value));
 		} else if (item.getValueMap && item.getValueMap() && !isc.isA.TextItem(item)) {
-			// combos and radios display the value map's text
+			// combos and radios display the value map's text; the code and the zero-based option index
+			// (what dataEnter takes) are accepted too
 			result = strip(item.getDisplayValue());
 			alternatives.push(value == null ? "" : String(value));
+			var index = optionIndex(item, value);
+			if (index >= 0) {
+				alternatives.push(String(index));
+			}
 		} else if (isc.isA.CanvasItem(item) && item.canvas && item.canvas.getItem && item.canvas.getItem("value")) {
 			// geometry: an inner form holds the text
 			result = String(item.canvas.getItem("value").getElementValue() || "");
@@ -522,6 +544,37 @@
 			alternatives.push(formatValue(item, value));
 		}
 		return { value: result, alternatives: alternatives, type: type };
+	};
+
+	/**
+	 * The index of the first data column of a grid, skipping list views' tag and flag columns,
+	 * so that clicking a row selects it instead of tagging or flagging it.
+	 */
+	S.dataColumn = function (locator) {
+		var resolved = S.resolve(S.parse(locator).spec);
+		var grid = resolved.obj;
+		if (!grid || !grid.getFields) {
+			return 0;
+		}
+		var fields = grid.getFields();
+		for (var i = 0; i < fields.length; i++) {
+			var name = String(fields[i].name || "");
+			if (name !== "bizTagged" && name !== "bizFlagComment" && name.charAt(0) !== "_") {
+				return i;
+			}
+		}
+		return 0;
+	};
+
+	/** True if a grid's row is selected (clicking it again would read as a double click, which zooms). */
+	S.rowSelected = function (locator, row) {
+		var resolved = S.resolve(S.parse(locator).spec);
+		var grid = resolved.obj;
+		if (!grid || !grid.getRecord || !grid.isSelected) {
+			return false;
+		}
+		var record = grid.getRecord(row);
+		return !!record && grid.isSelected(record);
 	};
 
 	/** Sets a slider through its own widget API, as a drag would, and returns the new value. */
