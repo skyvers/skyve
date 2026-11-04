@@ -21,7 +21,11 @@ import util.sail.Devices;
  * The destructive actions run in the file before the restore, so nothing depends on what they destroy.
  * Run it only against a disposable server.
  * <p>
- * Runs against {@code -Dsail.baseUrl} (default {@value BrowserConfiguration#DEFAULT_BASE_URL}),
+ * 00 first checks that the server has no other backup and no restore marker: 99 restores the oldest backup listed
+ * (runtime bug), so when 00 fails before that check has passed the restore is held back, as it could restore a stray
+ * backup.
+ * <p>
+ * Runs against {@code -Dsail.baseUrl} (required: there is no default server),
  * headless unless {@code -Dsail.headless=false}. {@code -Dsail.suite.only=03,04} runs only the files with those
  * prefixes, to work on a part of the suite; the restore runs only when 00 is one of them.
  */
@@ -37,6 +41,10 @@ class PrimeFacesAdminSuiteSailIT extends AbstractPrimeFacesInterpretedSail {
 		"98-destructive.xml"
 	};
 	private static final String RESTORE = "99-restore.xml";
+	// 00's interactions after its first one, which checks that the server has no stray backup or marker
+	private static final List<String> AFTER_PRECONDITION = List.of("Interaction \"Clear the completed jobs",
+																		"Interaction \"Back up the data",
+																		"Interaction \"Leave a marker");
 
 	public PrimeFacesAdminSuiteSailIT() {
 		super(new BrowserConfiguration()
@@ -60,7 +68,12 @@ class PrimeFacesAdminSuiteSailIT extends AbstractPrimeFacesInterpretedSail {
 				sailResource(FOLDER + file);
 			}
 			catch (AssertionError e) {
-				// Stop at the first failing file, as later files build on earlier ones, but still restore
+				// Stop at the first failing file, as later files build on earlier ones, but still restore,
+				// unless 00 failed before its precondition passed: then a stray backup may be listed first, and restoring would restore it
+				String message = String.valueOf(e.getMessage());
+				if (file.equals(FILES[0]) && AFTER_PRECONDITION.stream().noneMatch(message::contains)) {
+					backedUp = false;
+				}
 				outcomes.add(() -> {
 					throw new AssertionError(file + " failed: " + e.getMessage(), e);
 				});
