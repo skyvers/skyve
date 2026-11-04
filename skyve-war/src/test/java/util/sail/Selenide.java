@@ -8,7 +8,6 @@ import java.time.Duration;
 
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.skyve.domain.messages.DomainException;
 
@@ -184,7 +183,15 @@ public abstract class Selenide<
 		submit.click();
 
 		// Wait for the sign in page to be replaced by the next page (home, or the sign in page with its error), and for that page to load
-		waitFor(ExpectedConditions.stalenessOf(submitElement));
+		waitFor(d -> {
+			try {
+				submitElement.isEnabled();
+				return null;
+			}
+			catch (@SuppressWarnings("unused") org.openqa.selenium.WebDriverException e) {
+				return Boolean.TRUE; // stale, or no longer in the document: the page has been replaced
+			}
+		});
 		waitFor(d -> Boolean.valueOf("complete".equals(((JavascriptExecutor) d).executeScript("return document.readyState"))));
 
 		// A failed sign in comes back to the sign in page with an error message
