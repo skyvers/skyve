@@ -16,7 +16,7 @@ deployed-container validation.
 | Request selection | One immutable `RequestUxUiSelection` containing the effective user-agent type, emulation flag, and application-owned `UxUi`. |
 | Selected `UxUi` | The application-owned profile returned by the configured `UxUiSelector`. It controls routing, rendering applicability, and UX/UI-sensitive access checks. |
 | Faces theme state | The request-scoped Faces values derived from the selected `UxUi`, including the effective template, colour and scheme values, iframe resource family, and layout class fragment. Configured component-theme and SmartClient values remain on the selected `UxUi`. |
-| Layout family | The Facelets template family, such as Editorial, External, Ecuador, Ultima, or Diamond. It is distinct from the PrimeFaces component theme. |
+| Layout family | The Facelets template family, such as Editorial, Ecuador, Ultima, or Diamond. It is distinct from the PrimeFaces component theme. The former External family is now an alias for Editorial. |
 | Component theme | The exact PrimeFaces resource-library name exposed as `_skyveTheme.componentThemeName`. It is not inferred from the layout colour. |
 | SmartClient skin | The SmartClient presentation skin on the selected `UxUi`. A SmartClient profile may still resolve a Faces fallback for iframe pages. |
 

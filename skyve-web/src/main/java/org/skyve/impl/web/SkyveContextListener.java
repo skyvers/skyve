@@ -433,6 +433,18 @@ public class SkyveContextListener implements ServletContextListener {
 		UtilImpl.SMTP_TEST_RECIPIENT = getOptionalString("testRecipient", smtp);
 		Boolean smtpTestBogusSend = (Boolean) (smtpRequired ? getRequired(SMTP_KEY, "testBogusSend", smtp) : getOptional("testBogusSend", smtp));
 		UtilImpl.SMTP_TEST_BOGUS_SEND = Boolean.TRUE.equals(smtpTestBogusSend);
+		Boolean smtpLogBodyExcerpt = (Boolean) getOptional("logBodyExcerpt", smtp);
+		UtilImpl.SMTP_LOG_BODY_EXCERPT = Boolean.TRUE.equals(smtpLogBodyExcerpt);
+		Boolean smtpLogAttachments = (Boolean) getOptional("logAttachments", smtp);
+		UtilImpl.SMTP_LOG_ATTACHMENTS = Boolean.TRUE.equals(smtpLogAttachments);
+		Number smtpLogAttachmentsMaxBytes = getOptionalNumber("logAttachmentsMaxBytes", smtp);
+		UtilImpl.SMTP_LOG_ATTACHMENTS_MAX_BYTES = (smtpLogAttachmentsMaxBytes == null) ?
+														UtilImpl.DEFAULT_SMTP_LOG_ATTACHMENTS_MAX_BYTES :
+														smtpLogAttachmentsMaxBytes.longValue();
+		if (UtilImpl.SMTP_LOG_ATTACHMENTS_MAX_BYTES < 0L) {
+			LOGGER.warn("{}.logAttachmentsMaxBytes of {} is negative - using 0", SMTP_KEY, smtpLogAttachmentsMaxBytes);
+			UtilImpl.SMTP_LOG_ATTACHMENTS_MAX_BYTES = 0L;
+		}
 	}
 
 	private static boolean configureMailService(@Nonnull Map<String, Object> factories) {
@@ -606,6 +618,16 @@ public class SkyveContextListener implements ServletContextListener {
 
 		UtilImpl.THUMBNAIL_CONCURRENT_THREADS = getInt(THUMBNAIL_KEY, "concurrentThreads", thumbnail);
 		UtilImpl.THUMBNAIL_SUBSAMPLING_MINIMUM_TARGET_SIZE = getInt(THUMBNAIL_KEY, "subsamplingMinimumTargetSize", thumbnail);
+		// Optional so older JSON files keep the default
+		Number maximumDimension = getOptionalNumber("maximumDimension", thumbnail);
+		if (maximumDimension != null) {
+			// No unlimited setting - an uncapped size lets a request exhaust memory
+			double value = maximumDimension.doubleValue();
+			if ((value < 1) || (value > Integer.MAX_VALUE) || (value != Math.floor(value))) {
+				throw new IllegalStateException(THUMBNAIL_KEY + ".maximumDimension must be a whole number greater than 0");
+			}
+			UtilImpl.THUMBNAIL_MAXIMUM_DIMENSION = maximumDimension.intValue();
+		}
 		UtilImpl.THUMBNAIL_FILE_STORAGE = getBoolean(THUMBNAIL_KEY, "fileStorage", thumbnail);
 		UtilImpl.THUMBNAIL_DIRECTORY = getOptionalString(DIRECTORY_KEY, thumbnail);
 		if (UtilImpl.THUMBNAIL_DIRECTORY != null) {
@@ -827,8 +849,8 @@ public class SkyveContextListener implements ServletContextListener {
 		if (caches != null) {
 			for (String cacheName : caches.keySet()) {
 				Map<String, Object> cache = getRequiredObject(CACHES_KEY, cacheName, caches);
-				String prefix = String.format("caches.%s", cacheName);
-				String type = getRequiredString(CACHES_KEY + '.' + cacheName, "type", cache);
+				String prefix = CACHES_KEY + '.' + cacheName;
+				String type = getRequiredString(prefix, "type", cache);
 				int heapSizeEntries = getInt(prefix, HEAP_SIZE_ENTRIES_KEY, cache);
 				Number offHeapSizeInMb = getOptionalNumber(OFF_HEAP_SIZE_MB_KEY, cache);
 				Number expiryInMinutes = getOptionalNumber(EXPIRY_TIME_MINUTES_KEY, cache);
@@ -888,7 +910,7 @@ public class SkyveContextListener implements ServletContextListener {
 		Map<String, Object> dataStores = getRequiredObject(null, "dataStores", properties);
 		for (String dataStoreName : dataStores.keySet()) {
 			Map<String, Object> dataStore = getRequiredObject("dataStores", dataStoreName, dataStores);
-			String prefix = String.format("dataStores.%s", dataStoreName);
+			String prefix = "dataStores." + dataStoreName;
 			String dialect = getRequiredString(prefix, "dialect", dataStore);
 			String jndi = getOptionalString("jndi", dataStore);
 			if (jndi == null) {
@@ -927,7 +949,7 @@ public class SkyveContextListener implements ServletContextListener {
 		if (hibernateCaches != null) {
 			for (String cacheName : hibernateCaches.keySet()) {
 				Map<String, Object> cache = getRequiredObject("hibernate.caches", cacheName, hibernateCaches);
-				String prefix = String.format("hibernate.caches.%s", cacheName);
+				String prefix = HIBERNATE_KEY + '.' + CACHES_KEY + '.' + cacheName;
 				int heapSizeEntries = getInt(prefix, HEAP_SIZE_ENTRIES_KEY, cache);
 				Number offHeapSizeInMb = getOptionalNumber(OFF_HEAP_SIZE_MB_KEY, cache);
 				String expiryPolicyString = getOptionalString("expiryPolicy", cache);

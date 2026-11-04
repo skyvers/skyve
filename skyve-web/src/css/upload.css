@@ -214,6 +214,35 @@
 	display: none;
 }
 
+/* While a file uploads (see upload.xhtml) only its progress, a status and Stop show */
+#stopUpload,
+.skyve-upload-status {
+	display: none;
+}
+
+.skyve-uploading #stopUpload {
+	display: inline-block;
+}
+
+.skyve-uploading .skyve-upload-status {
+	align-self: center;
+	display: inline;
+	font-weight: 600;
+}
+
+.skyve-uploading #upload .ui-fileupload-choose,
+.skyve-uploading #upload .ui-fileupload-upload,
+.skyve-uploading #upload .ui-fileupload-cancel,
+.skyve-uploading #camera,
+.skyve-uploading #video {
+	display: none !important;
+}
+
+/* The file's own remove button; hidden this way as theme rules can keep it displayed */
+.skyve-uploading #upload .ui-fileupload-row > div:last-child {
+	visibility: hidden;
+}
+
 #form {
 	display: flex;
 	flex-direction: column;
@@ -228,14 +257,57 @@
 	flex: 0 0 auto;
 }
 
+/* The editor's bar: Crop and Draw on one side, Upload and Cancel on the other */
+#cropperUpload #cropperBar {
+	flex-wrap: nowrap;
+	justify-content: space-between;
+}
+
+#cropperBar .scrawl-modes,
+#cropperBar .cropper-actions {
+	display: flex;
+	gap: 8px;
+}
+
+/* The editorial theme sets button colours with !important in a cascade layer, which beats any unlayered rule,
+   so the selected mode also swaps the theme's own button colours for its hover colours. */
+#cropperBar .scrawl-modes .ui-button.scrawl-mode-selected {
+	--skyve-editorial-button-bg: var(--skyve-editorial-button-hover-bg);
+	--skyve-editorial-button-border: var(--skyve-editorial-button-hover-bg);
+	--skyve-editorial-button-fg: var(--skyve-editorial-button-hover-fg);
+	background: var(--primary-color, #3b82f6) !important;
+	border-color: var(--primary-color, #3b82f6) !important;
+	box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.75) !important;
+	color: var(--primary-color-text, #fff) !important;
+}
+
+/* Touch screens keep the last button tapped "hovered", which the editorial theme shows like the selected mode */
+@media (hover: none) {
+	#cropperBar .ui-button:not(.scrawl-mode-selected),
+	.cropperControls .ui-button,
+	#scrawlTextEntry .ui-button {
+		--skyve-editorial-button-hover-bg: var(--skyve-editorial-button-bg);
+		--skyve-editorial-button-hover-fg: var(--skyve-editorial-button-fg);
+	}
+}
+
+#cropperBar .scrawl-modes .ui-button.scrawl-mode-selected .ui-icon,
+#cropperBar .scrawl-modes .ui-button.scrawl-mode-selected .ui-button-text {
+	color: inherit !important;
+}
+
 #cropperContainer {
+	-webkit-touch-callout: none;
+	-webkit-user-select: none;
 	box-sizing: border-box;
 	display: none;
 	flex: 1 1 auto;
-	gap: 10px;
+	flex-direction: row;
+	gap: 8px;
 	justify-content: center;
 	min-height: 0;
-	padding: 10px;
+	padding: 8px;
+	user-select: none;
 }
 
 .cropperFrame {
@@ -248,6 +320,7 @@
 	min-width: 0;
 	overflow: visible;
 	padding: 18px;
+	position: relative;
 }
 
 #cropperImageContainer {
@@ -266,16 +339,185 @@
 	width: auto;
 }
 
+/* Drawing layers cover the frame. The ink shows the strokes in both modes but only takes input in draw mode,
+   where the photo layer shows the cropped photo in place of the cropper. */
+.scrawl-layer {
+	height: 100%;
+	left: 0;
+	pointer-events: none;
+	position: absolute;
+	top: 0;
+	width: 100%;
+}
+
+#scrawlPhoto {
+	display: none;
+	z-index: 1;
+}
+
+#scrawlInk {
+	touch-action: none;
+	z-index: 10;
+}
+
+.skyve-scrawl-drawing #cropperImageContainer {
+	visibility: hidden;
+}
+
+.skyve-scrawl-drawing #scrawlPhoto {
+	display: block;
+}
+
+.skyve-scrawl-drawing #scrawlInk {
+	cursor: crosshair;
+	pointer-events: auto;
+}
+
+/* The normal pointer, or move over a label that can be picked up (set by upload-image.js) */
+.skyve-scrawl-text #scrawlInk {
+	cursor: default;
+}
+
+/* Typing a label: over the editor's bar, while the label shows on the photo as it is typed */
+.skyve-image-editing #form {
+	position: relative;
+}
+
+.scrawl-text-entry {
+	align-items: center;
+	background: var(--surface-card, #fff);
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+	box-sizing: border-box;
+	display: flex;
+	gap: 8px;
+	left: 0;
+	padding: 8px;
+	position: absolute;
+	right: 0;
+	top: 0;
+	z-index: 100;
+}
+
+.scrawl-text-entry[hidden] {
+	display: none;
+}
+
+.scrawl-text-entry .ui-button {
+	flex: 0 0 auto;
+}
+
+/* 16px or more, or Safari on iPhone zooms the page in when the box gets focus */
+#scrawlText {
+	border: 1px solid #9ca3af;
+	border-radius: 6px;
+	box-sizing: border-box;
+	flex: 1 1 auto;
+	font-size: 16px !important;
+	min-height: 44px;
+	min-width: 0;
+	padding: 8px 12px;
+}
+
+/* Tools for the current mode: beside the photo on wide screens, below it on tall ones (see orientation below).
+   The fixed size stops the photo moving when the mode changes. */
 .cropperControls {
+	align-items: center;
+	box-sizing: border-box;
 	display: flex;
 	flex: 0 0 auto;
 	flex-direction: column;
-	gap: 10px;
 	justify-content: center;
+	width: 88px;
+}
+
+.scrawl-crop-tools,
+.scrawl-draw-tools {
+	align-items: center;
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+}
+
+.skyve-scrawl-drawing .scrawl-crop-tools,
+body:not(.skyve-scrawl-drawing) .scrawl-draw-tools {
+	display: none;
 }
 
 .cropperControls .ui-button {
-	margin-bottom: 0 !important;
+	margin: 0 !important;
+}
+
+.scrawl-colours {
+	display: grid;
+	gap: 10px;
+	grid-template-columns: repeat(2, 32px);
+}
+
+.scrawl-colour {
+	-webkit-appearance: none;
+	appearance: none;
+	background: var(--scrawl-colour);
+	border: 0;
+	border-radius: 50%;
+	box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.45), inset 0 0 0 1px rgba(255, 255, 255, 0.5);
+	cursor: pointer;
+	height: 32px;
+	margin: 0;
+	padding: 0;
+	position: relative;
+	width: 32px;
+}
+
+/* A bigger target for fingers than the dot itself */
+.scrawl-colour::before {
+	bottom: -5px;
+	content: "";
+	left: -5px;
+	position: absolute;
+	right: -5px;
+	top: -5px;
+}
+
+/* White then dark rings, so the chosen colour shows on light and dark themes */
+.scrawl-colour[aria-checked="true"] {
+	box-shadow: 0 0 0 2px #fff, 0 0 0 4px #1f2937;
+}
+
+.scrawl-colour:focus-visible {
+	outline: 2px solid var(--primary-color, #1e88e5);
+	outline-offset: 5px;
+}
+
+@media (hover: hover) and (pointer: fine) {
+	.scrawl-colour:hover {
+		transform: scale(1.12);
+	}
+}
+
+@media (orientation: portrait) {
+	#cropperContainer {
+		flex-direction: column;
+	}
+
+	.cropperControls {
+		flex-direction: row;
+		height: 48px;
+		width: auto;
+	}
+
+	.scrawl-crop-tools,
+	.scrawl-draw-tools {
+		flex-direction: row;
+	}
+
+	.scrawl-draw-tools {
+		gap: 14px;
+	}
+
+	.scrawl-colours {
+		display: flex;
+		gap: 8px;
+	}
 }
 
 @media(max-width: 640px) {
@@ -314,12 +556,106 @@
 		padding: 0 !important;
 	}
 
-	#cropperContainer {
+	/* Room for the cropper's handles without wasting a small screen */
+	.cropperFrame {
+		padding: 12px;
+	}
+}
+
+/* Five labelled buttons across a phone held upright */
+@media (max-width: 400px) {
+	#cropperUpload #cropperBar {
+		gap: 4px;
+		padding: 6px;
+	}
+
+	#cropperBar .scrawl-modes,
+	#cropperBar .cropper-actions {
+		gap: 3px;
+	}
+
+	#cropperUpload #cropperBar .ui-button {
+		min-width: 50px !important;
+		padding: 6px 3px !important;
+	}
+
+	#cropperUpload #cropperBar .ui-button .ui-button-text {
+		font-size: 11px;
+	}
+}
+
+/* Phones on their side: the editor's bar becomes an icon column on the left, so the photo gets the height */
+@media (max-height: 500px) and (orientation: landscape) {
+	.skyve-image-editing #form {
+		flex-direction: row;
+	}
+
+	.skyve-image-editing #cropperUpload {
+		display: flex !important;
 		flex-direction: column;
 	}
 
-	.cropperControls {
+	/* Tools in one column, Upload and Cancel at the bottom of a second */
+	#cropperUpload #cropperBar {
+		align-items: stretch;
+		border-radius: 0;
+		flex: 1 1 auto;
 		flex-direction: row;
-		justify-content: center;
+		gap: 4px;
+		justify-content: flex-start;
+		padding: 4px;
+	}
+
+	#cropperBar .scrawl-modes,
+	#cropperBar .cropper-actions {
+		flex-direction: column;
+		gap: 4px;
+	}
+
+	#cropperBar .cropper-actions {
+		justify-content: flex-end;
+	}
+
+	#cropperUpload #cropperBar .ui-button {
+		height: 38px !important;
+		min-height: 38px !important;
+		min-width: 44px !important;
+		padding: 0 !important;
+		width: 44px !important;
+	}
+
+	#cropperUpload #cropperBar .ui-button .ui-button-icon-left {
+		margin: 0 auto !important;
+	}
+
+	#cropperUpload #cropperBar .ui-button .ui-button-text {
+		display: none !important;
+	}
+
+	#cropperContainer {
+		padding: 4px 8px;
+	}
+
+	.cropperFrame {
+		padding: 10px;
+	}
+
+	.scrawl-colours {
+		gap: 8px;
+		grid-template-columns: repeat(3, 28px);
+	}
+
+	.scrawl-colour {
+		height: 28px;
+		width: 28px;
+	}
+
+	.cropperControls {
+		width: 112px;
+	}
+
+	/* Leave the colours beside it free, so a colour can be picked while typing */
+	.scrawl-text-entry {
+		right: 128px;
 	}
 }

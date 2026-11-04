@@ -40,8 +40,7 @@
 		</h:head>
 	
 		<h:body id="body" styleClass="ui-input-filled">
-			<h:panelGroup styleClass="skyveEnvBanner skyveTopEnvBanner" rendered="#{not empty bean.environmentIdentifier}">#{bean.environmentIdentifier}</h:panelGroup>
-			<h:panelGroup styleClass="skyveEnvBanner skyveBottomEnvBanner" rendered="#{not empty bean.environmentIdentifier}">#{bean.environmentIdentifier}</h:panelGroup>
+			<h:outputText value="#{bean.environmentBanners}" escape="false" />
 			<div class="#{showMenu ? 'layout-wrapper layout-menu-static layout-menu-light '.concat(_skyveTheme.layoutStyleClass) : 'layout-wrapper '.concat(_skyveTheme.layoutStyleClass)}">
 				<ui:include src="./topbar.xhtml">
 					<ui:param name="showMenu" value="#{showMenu}" />

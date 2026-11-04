@@ -66,8 +66,8 @@ public abstract class AbstractResourceServlet extends HttpServlet {
 	 * @param documentName the document name parsed from the request
 	 * @param binding the optional binding parameter
 	 * @param resourceFileName the resource or content identifier
-	 * @param imageWidth the requested image width
-	 * @param imageHeight the requested image height
+	 * @param imageWidth the requested image width, at most {@link UtilImpl#THUMBNAIL_MAXIMUM_DIMENSION}
+	 * @param imageHeight the requested image height, at most {@link UtilImpl#THUMBNAIL_MAXIMUM_DIMENSION}
 	 * @param user the authenticated user, if present
 	 * @param customer the authenticated customer, if present
 	 * @param customerName the resolved customer name
@@ -454,7 +454,9 @@ public abstract class AbstractResourceServlet extends HttpServlet {
 	}
 
 	static void logResourceIOException(@Nonnull Logger logger, @Nonnull IOException e) {
-		logger.warn("Problem getting the resource - {}", e.toString());
+		if (logger.isWarnEnabled()) {
+			logger.warn("Problem getting the resource - {}", e.toString());
+		}
 	}
 
 	/**
@@ -571,6 +573,7 @@ public abstract class AbstractResourceServlet extends HttpServlet {
 	
 	/**
 	 * Parses common request parameters shared by all resource servlet implementations.
+	 * The requested image width and height are each capped at {@link UtilImpl#THUMBNAIL_MAXIMUM_DIMENSION}.
 	 * Also resolves the current user and customer from the session and cookies.
 	 *
 	 * @param request the HTTP request
@@ -610,6 +613,10 @@ public abstract class AbstractResourceServlet extends HttpServlet {
 			imageHeight = 0;
 			LOGGER.error("Width/Height is malformed in the URL");
 		}
+		// Cap each side so a request cannot force a huge image into memory.
+		// The default cap of 2048 matches the largest preview size the Skyve clients ask for.
+		imageWidth = Math.min(imageWidth, UtilImpl.THUMBNAIL_MAXIMUM_DIMENSION);
+		imageHeight = Math.min(imageHeight, UtilImpl.THUMBNAIL_MAXIMUM_DIMENSION);
 
 		// A revoked session falls back to no user so that public resources are still served
 		User user = WebUtil.getValidatedSessionUser(request);

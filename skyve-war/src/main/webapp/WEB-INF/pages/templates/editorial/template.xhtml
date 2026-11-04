@@ -35,13 +35,24 @@
 				#{bean.apiScript}
 				SKYVE.PF.establishHistory();
 			</script>
+			<c:if test="#{showMenu}">
+				<!-- Apply the user's remembered collapsed menu before the first paint (see editorial/main.js) -->
+				<script type="text/javascript">
+					try {
+						if (localStorage.getItem('skyve.editorial.menu.collapsed') === 'true') {
+							document.documentElement.classList.add('skyve-editorial-menu-collapsed');
+						}
+					}
+					catch (e) {
+						// storage unavailable
+					}
+				</script>
+			</c:if>
 			<ui:insert name="templateHead" />
 		</h:head>
 		<h:body id="body" class="is-preload">
-			<h:panelGroup styleClass="skyveEnvBanner skyveTopEnvBanner" rendered="#{not empty bean.environmentIdentifier}">#{bean.environmentIdentifier}</h:panelGroup>
-			<h:panelGroup styleClass="skyveEnvBanner skyveBottomEnvBanner" rendered="#{not empty bean.environmentIdentifier}">#{bean.environmentIdentifier}</h:panelGroup>
-
-			<div id="wrapper">
+			<h:outputText value="#{bean.environmentBanners}" escape="false" />
+			<div id="wrapper" class="#{showMenu ? '' : 'no-sidebar'}">
 				<div id="main">
 					<div class="inner">
 						<header id="header" class="ui-panel">
@@ -136,7 +147,7 @@
 				<!-- Sidebar -->
 				<s:resetMenuState rendered="#{resetMenu}" />
 				<c:if test="#{showMenu}">
-					<div id="sidebar">
+					<div id="sidebar" data-toggle-label="#{bean.i18n['ui.menu.toggle']}">
 						<div class="inner">
 							<!-- Menu -->
 							<nav id="menu">

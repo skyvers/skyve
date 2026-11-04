@@ -649,6 +649,7 @@ public class FacesView extends HarnessView {
 	 * `selectGridRow([{name:'bizId', value:'abcd-0000'})`
 	 *
 	 * Set the selected row bizId and fire an action or rerender.
+	 * A null or blank bizId (the row was unselected) clears the selected row binding.
 	 *
 	 * if actionName is null - do nothing - just set the selected row.
 	 * else if actionName is "true" - rerender with validation.
@@ -656,7 +657,9 @@ public class FacesView extends HarnessView {
 	 * else run the action.
 	 */
 	public void selectGridRow(@Nullable String bizId, @Nullable String selectedIdBinding, @Nullable String actionName, @Nullable String source) {
-		if ((bizId != null) && (selectedIdBinding != null)) {
+		if (selectedIdBinding != null) {
+			// No bizId means the row was unselected - clear the binding (as per the SmartClient list grid)
+			final String selectedBizId = UtilImpl.processStringValue(bizId);
 			new FacesAction<Void>() {
 				@Override
 				public @Nullable Void callback() throws Exception {
@@ -665,7 +668,7 @@ public class FacesView extends HarnessView {
 					if (bean == null) {
 						throw new IllegalStateException("Cannot select a grid row as the FacesView has no current bean");
 					}
-					BindUtil.set(bean, selectedIdBinding, bizId);
+					BindUtil.set(bean, selectedIdBinding, selectedBizId);
 					return null;
 				}
 			}.execute();

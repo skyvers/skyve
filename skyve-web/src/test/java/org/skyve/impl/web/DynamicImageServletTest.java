@@ -1,5 +1,6 @@
 package org.skyve.impl.web;
 
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -21,6 +22,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.skyve.impl.util.UtilImpl;
 
 import jakarta.servlet.ServletOutputStream;
 import jakarta.servlet.WriteListener;
@@ -57,6 +59,20 @@ class DynamicImageServletTest {
 		assertEquals(1, image.getWidth());
 		assertEquals(1, image.getHeight());
 		}
+	}
+
+	@Test
+	void zoomedSizeAppliesTheZoomAndShrinksBothSidesToFitTheCap() {
+		int cap = UtilImpl.THUMBNAIL_MAXIMUM_DIMENSION;
+		assertAll(() -> assertEquals(new DynamicImageServlet.ImageSize(80, 36), DynamicImageServlet.zoomedSize(64, 125, 48, 75), "zoomed in and out"),
+					() -> assertEquals(new DynamicImageServlet.ImageSize(cap, cap), DynamicImageServlet.zoomedSize(cap, 100, cap, 100), "exactly at the cap"),
+					() -> assertEquals(new DynamicImageServlet.ImageSize(2048, 512), DynamicImageServlet.zoomedSize(4096, 100, 1024, 100), "keeps the shape"),
+					() -> assertEquals(new DynamicImageServlet.ImageSize(512, 2048), DynamicImageServlet.zoomedSize(1024, 100, 4096, 100), "keeps the shape when taller"),
+					() -> assertEquals(new DynamicImageServlet.ImageSize(2048, 1000), DynamicImageServlet.zoomedSize(1024, 400, 500, 400), "zoomed above the cap"),
+					() -> assertEquals(new DynamicImageServlet.ImageSize(2048, 683), DynamicImageServlet.zoomedSize(3000, 100, 1000, 100), "rounds to the nearest pixel"),
+					() -> assertEquals(new DynamicImageServlet.ImageSize(2048, 1), DynamicImageServlet.zoomedSize(50_000, 100, 1, 100), "a thin side stays 1 pixel"),
+					() -> assertEquals(new DynamicImageServlet.ImageSize(2048, 0), DynamicImageServlet.zoomedSize(50_000, 100, 0, 100), "a zero side stays 0"),
+					() -> assertEquals(new DynamicImageServlet.ImageSize(2048, 2048), DynamicImageServlet.zoomedSize(Integer.MAX_VALUE, Integer.MAX_VALUE, Integer.MAX_VALUE, Integer.MAX_VALUE), "no int overflow"));
 	}
 
 	@Test

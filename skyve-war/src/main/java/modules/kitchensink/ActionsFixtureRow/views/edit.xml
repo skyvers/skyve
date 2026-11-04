@@ -30,7 +30,9 @@
 	</form>
 	<actions>
 		<defaults />
-		<action className="RunFromRow" displayName="Run From Row" inActionPanel="false" disabled="rowActionDisabled" />
+		<!-- Named apart from its class so the row link must send the class; the confirmation's quotes, ampersand and braces are shown as written -->
+		<action name="runFromRowLink" className="RunFromRow" displayName="Run From Row" inActionPanel="false" disabled="rowActionDisabled"
+				confirm="Run &quot;Run From Row&quot; &amp; record {outcome}?" />
 		<export className="ExportFromRow" displayName="Export From Row" />
 	</actions>
 </view>

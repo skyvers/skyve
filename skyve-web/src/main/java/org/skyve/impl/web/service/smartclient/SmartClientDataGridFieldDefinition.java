@@ -1,7 +1,6 @@
 package org.skyve.impl.web.service.smartclient;
 
 import org.skyve.impl.bind.BindUtil;
-import org.skyve.impl.metadata.model.document.field.Field;
 import org.skyve.impl.metadata.view.widget.bound.input.ContentDisplay;
 import org.skyve.impl.metadata.view.widget.bound.input.ContentUpload;
 import org.skyve.impl.metadata.view.widget.bound.input.HTML;
@@ -16,7 +15,6 @@ import org.skyve.metadata.model.document.Relation;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
 import org.skyve.util.BeanValidator;
-import org.skyve.util.OWASP;
 import org.skyve.util.Util;
 
 import jakarta.annotation.Nonnull;
@@ -29,9 +27,6 @@ public class SmartClientDataGridFieldDefinition extends SmartClientAttributeDefi
 	protected boolean editable;
 	private boolean escapeTitle = true;
 
-	// for list grids, we need to convert the defaultValue into a JavaScript expression that can be evaluated on the client side, so we store it separately here.
-	protected String defaultValueJavascriptExpression;
-    
 	// when the field is a content upload, we need to generate a JavaScript formatter to render the content in the grid, so we store that separately here.
 	private String contentUploadFormatterJavascript;
 
@@ -80,29 +75,9 @@ public class SmartClientDataGridFieldDefinition extends SmartClientAttributeDefi
 		}
         Attribute attribute = target.getAttribute();
 
-        if (attribute instanceof Field field) {
-            // determine the defaultValue expression for the list grid
-        	defaultValueJavascriptExpression = field.getDefaultValue();
-        	if (defaultValueJavascriptExpression != null) {
-        		AttributeType attributeType = attribute.getAttributeType();
-				if (AttributeType.date.equals(attributeType) || 
-						AttributeType.dateTime.equals(attributeType) || 
-						AttributeType.time.equals(attributeType) || 
-						AttributeType.timestamp.equals(attributeType)) {
-					defaultValueJavascriptExpression = new StringBuilder(128).append("isc.DateUtil.parseSchemaDate('").append(defaultValueJavascriptExpression).append("')").toString();
-				}
-				else if (! (AttributeType.bool.equals(attributeType) || 
-								AttributeType.integer.equals(attributeType) ||
-								AttributeType.longInteger.equals(attributeType))) {
-					defaultValueJavascriptExpression = new StringBuilder(128)
-																.append('\'')
-																.append(OWASP.escapeJsStringWithHtmlFormatting(defaultValueJavascriptExpression, false, false))
-																.append('\'')
-																.toString();
-				}
-        	}
-        }
-        
+        // No defaultValue is rendered: new data grid rows are created on the server (inline or zoomed),
+        // where default value expressions are evaluated.
+
         if ((attribute instanceof Relation relation) && (widget instanceof LookupDescription lookupDescription)) { // widget could be a combo for instance
         	editorType = "comboBox";
         	lookup = new SmartClientLookupDefinition(dataGridBindingOverride != null,
@@ -117,11 +92,10 @@ public class SmartClientDataGridFieldDefinition extends SmartClientAttributeDefi
         }
 
         // By default a SmartClientDataGridDefinition sets memo fields to a text area.
-		if ((attribute != null) && AttributeType.memo.equals(attribute.getAttributeType())) {
-			if ((widget instanceof RichText) ||
-					(widget instanceof HTML)) {
-				editorType = null;
-			}
+		if ((attribute != null) &&
+				AttributeType.memo.equals(attribute.getAttributeType()) &&
+				((widget instanceof RichText) || (widget instanceof HTML))) {
+			editorType = null;
 		}
 		
 		if (widget instanceof ContentUpload content) {
@@ -172,9 +146,6 @@ public class SmartClientDataGridFieldDefinition extends SmartClientAttributeDefi
 		result.append(SmartClientViewRenderer.escapeSmartClientText(title, escapeTitle));
 		result.append("',type:'");
 		result.append(type).append('\'');
-		if (defaultValueJavascriptExpression != null) {
-			result.append(",defaultValue:").append(defaultValueJavascriptExpression);
-		}
 		if (editorType != null) {
 			result.append(",editorType:'").append(editorType).append('\'');
 		}
@@ -210,8 +181,6 @@ public class SmartClientDataGridFieldDefinition extends SmartClientAttributeDefi
 		if (escape) {
 			result.append(",escapeHTML:true");
 		}
-//TODO fix this
-//result.append(",changed:'alert(item.grid.getSelectedRecord().bizId)'");
 
 		return result.toString();
 	}

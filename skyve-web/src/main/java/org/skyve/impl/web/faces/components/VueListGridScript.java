@@ -4,28 +4,41 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.StringJoiner;
 import java.util.TreeMap;
 
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
+import org.skyve.domain.types.Enumeration;
+import org.skyve.impl.bind.BindUtil;
+import org.skyve.impl.metadata.customer.CustomerImpl;
+import org.skyve.impl.metadata.model.document.DocumentImpl;
 import org.skyve.impl.metadata.model.document.field.ConvertibleField;
+import org.skyve.impl.metadata.repository.module.MetaDataQueryContentColumnMetaData.DisplayType;
+import org.skyve.impl.metadata.view.HorizontalAlignment;
+import org.skyve.impl.snapshot.SmartClientFilterOperator;
+import org.skyve.impl.web.AbstractWebContext;
+import org.skyve.impl.web.faces.models.BeanMapAdapter;
+import org.skyve.impl.web.faces.views.FacesView;
 import org.skyve.impl.web.service.smartclient.SmartClientQueryColumnDefinition;
 import org.skyve.impl.web.service.smartclient.SmartClientViewRenderer;
 import org.skyve.metadata.ConverterName;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.Attribute.AttributeType;
+import org.skyve.metadata.model.document.Bizlet.DomainValue;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.model.document.DomainType;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.query.MetaDataQueryColumn;
+import org.skyve.metadata.module.query.MetaDataQueryContentColumn;
 import org.skyve.metadata.module.query.MetaDataQueryDefinition;
 import org.skyve.metadata.module.query.MetaDataQueryProjectedColumn;
 import org.skyve.metadata.user.User;
 import org.skyve.metadata.view.model.list.ListModel;
+import org.skyve.metadata.view.widget.FilterParameter;
+import org.skyve.metadata.view.widget.bound.Parameter;
 import org.skyve.util.Binder;
 import org.skyve.util.Binder.TargetMetaData;
 import org.skyve.util.JSON;
@@ -35,12 +48,14 @@ import com.google.common.collect.ImmutableMap;
 
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
+import jakarta.el.ValueExpression;
+import jakarta.faces.component.UIComponent;
 import jakarta.faces.component.UIOutput;
 import jakarta.faces.context.FacesContext;
 
 /**
  * This component isn't in the skyve.taglib.xml and has no @Component annotation and is not meant to be used on an XHTML page. 
- * The resources skyvevue/index.js and skyvevue/index.css are brought in view view.xhtml (if enabled)
+ * The resources skyve/vue/skyve.js and skyve/vue/skyve.css are brought in view view.xhtml (if enabled)
  */
 @SuppressWarnings("java:S1192") // Repeated literals are deliberate Vue list-grid script keys.
 public class VueListGridScript extends UIOutput {
@@ -63,6 +78,38 @@ public class VueListGridScript extends UIOutput {
 	private String stickyHeaderAnchorSelector;
 	
 	private String selectedRemoteCommand;
+
+	// Used to resolve the current bean, conversation and view binding each time the grid is rendered
+	private String managedBeanName;
+	// Filter parameters and parameters from the view's listGrid definition - see setParameters()
+	private List<Map<String, String>> gridParameters;
+
+	// The UX/UI name used to determine default column widths and alignment
+	private String uxui;
+	// Whether the row context menu (View Detail/Popout Detail) is shown
+	private boolean showContextMenu = true;
+
+	// NB attribute keys must not match a property of this class (eg "managedBeanName")
+	// as Faces would call the property setter on put() and recurse
+	private static final String MANAGED_BEAN_ATTRIBUTE = "managedBean";
+	private static final String UXUI_ATTRIBUTE = "uxui";
+	private static final String CONTEXT_MENU_ATTRIBUTE = "contextMenu";
+
+	/**
+	 * The name of the value expression that disables the add (new) button when true.
+	 */
+	public static final String DISABLE_ADD_VALUE_EXPRESSION = "disableAdd";
+	/**
+	 * The name of the value expression that disables zooming (button, row click and context menu) when true.
+	 */
+	public static final String DISABLE_ZOOM_VALUE_EXPRESSION = "disableZoom";
+
+	// Keys of the maps in the params list
+	private static final String PARAM_NAME_KEY = "name";
+	private static final String PARAM_OPERATOR_KEY = "operator";
+	private static final String PARAM_VALUE_KEY = "value";
+	private static final String PARAM_VALUE_BINDING_KEY = "valueBinding";
+	private static final String PARAM_NEW_NAME_KEY = "newName";
 	
 	/**
 	 * This exists so that Faces can instantiate the view tree and reinstate the attributes.
@@ -206,6 +253,110 @@ public class VueListGridScript extends UIOutput {
 	}
 
 	/**
+	 * Sets the name of the managed bean (the {@link FacesView}) that holds the current bean and conversation.
+	 * This is required for an embedded list grid so that its parameter values, conversation id and
+	 * view binding are current whenever the grid is rendered.
+	 *
+	 * @param managedBeanName the managed bean name, or {@code null}
+	 */
+	public void setManagedBeanName(@Nullable String managedBeanName) {
+		this.managedBeanName = managedBeanName;
+		Map<String, Object> attributes = getAttributes();
+		if (managedBeanName == null) {
+			attributes.remove(MANAGED_BEAN_ATTRIBUTE);
+		}
+		else {
+			attributes.put(MANAGED_BEAN_ATTRIBUTE, managedBeanName);
+		}
+	}
+
+	/**
+	 * Sets the UX/UI name used to determine default column widths and alignment.
+	 *
+	 * @param uxui the UX/UI name, or {@code null}
+	 */
+	public void setUxUiName(@Nullable String uxui) {
+		this.uxui = uxui;
+		Map<String, Object> attributes = getAttributes();
+		if (uxui == null) {
+			attributes.remove(UXUI_ATTRIBUTE);
+		}
+		else {
+			attributes.put(UXUI_ATTRIBUTE, uxui);
+		}
+	}
+
+	/**
+	 * Sets whether the row context menu (View Detail/Popout Detail) is shown.
+	 *
+	 * @param showContextMenu {@code true} to show the context menu
+	 */
+	public void setShowContextMenu(boolean showContextMenu) {
+		this.showContextMenu = showContextMenu;
+		getAttributes().put(CONTEXT_MENU_ATTRIBUTE, Boolean.valueOf(showContextMenu));
+	}
+
+	/**
+	 * Sets the filter parameters and parameters defined on the list grid in the view.
+	 * These are sent to the smartlist servlet the same way the SmartClient list grid sends them -
+	 * filter parameters as criteria and parameters as ":name" request parameters.
+	 * Values are resolved against the current bean whenever the grid is rendered.
+	 *
+	 * @param filterParameters the filter parameters, or {@code null}
+	 * @param parameters the parameters, or {@code null}
+	 */
+	public void setParameters(@Nullable List<FilterParameter> filterParameters, @Nullable List<Parameter> parameters) {
+		ArrayList<Map<String, String>> result = new ArrayList<>();
+		if (filterParameters != null) {
+			for (FilterParameter parameter : filterParameters) {
+				String filterBinding = parameter.getFilterBinding();
+				result.add(newParam(BindUtil.sanitiseBinding(filterBinding),
+										SmartClientFilterOperator.fromFilterOperator(parameter.getOperator()).name(),
+										parameter.getValueBinding(),
+										parameter.getValue(),
+										filterBinding));
+			}
+		}
+		if (parameters != null) {
+			for (Parameter parameter : parameters) {
+				String name = parameter.getName();
+				result.add(newParam(":" + BindUtil.sanitiseBinding(name),
+										SmartClientFilterOperator.equals.name(),
+										parameter.getValueBinding(),
+										parameter.getValue(),
+										name));
+			}
+		}
+
+		if (result.isEmpty()) {
+			gridParameters = null;
+			getAttributes().remove("params");
+		}
+		else {
+			gridParameters = result;
+			getAttributes().put("params", result);
+		}
+	}
+
+	private static @Nonnull Map<String, String> newParam(@Nonnull String name,
+															@Nonnull String operator,
+															@Nullable String valueBinding,
+															@Nullable String value,
+															@Nonnull String newName) {
+		Map<String, String> result = new TreeMap<>();
+		result.put(PARAM_NAME_KEY, name);
+		result.put(PARAM_OPERATOR_KEY, operator);
+		if (valueBinding != null) {
+			result.put(PARAM_VALUE_BINDING_KEY, valueBinding);
+		}
+		if (value != null) {
+			result.put(PARAM_VALUE_KEY, value);
+		}
+		result.put(PARAM_NEW_NAME_KEY, newName);
+		return result;
+	}
+
+	/**
 	 * Encodes and emits the generated script payload for the list grid component.
 	 *
 	 * @param context the current Faces context
@@ -213,11 +364,10 @@ public class VueListGridScript extends UIOutput {
 	 */
 	@Override
 	public void encodeBegin(@SuppressWarnings("null") @Nonnull FacesContext context) throws IOException {
-		Map<String, Object> attributes = getAttributes();
-		if (Boolean.TRUE.toString().equals(attributes.get("dynamic")) || (getValue() == null)) {
-			grabAttributes(attributes);
-			createScriptOutput();
-		}
+		// Always regenerate the script as the conversation, current bean and therefore
+		// parameter values can change between renders when the list grid is embedded in a view.
+		grabAttributes(getAttributes());
+		createScriptOutput(context);
 
 		super.encodeBegin(context);
 	}
@@ -247,19 +397,48 @@ public class VueListGridScript extends UIOutput {
 		this.stickyHeaderAnchorSelector = (String) attributes.get("stickyHeaderAnchorSelector");
 		
 		this.selectedRemoteCommand = (String) attributes.get("selectedRemoteCommand");
+
+		this.managedBeanName = (String) attributes.get(MANAGED_BEAN_ATTRIBUTE);
+		this.uxui = (String) attributes.get(UXUI_ATTRIBUTE);
+		this.showContextMenu = (! Boolean.FALSE.equals(attributes.get(CONTEXT_MENU_ATTRIBUTE)));
+		@SuppressWarnings("unchecked")
+		List<Map<String, String>> attributeParams = (List<Map<String, String>>) attributes.get("params");
+		this.gridParameters = attributeParams;
 	}
 
 	/**
 	 * Builds the JavaScript bootstrap payload and stores it as this component's value.
+	 *
+	 * @param context the current Faces context, or {@code null}
 	 */
-	private void createScriptOutput() {
+	@SuppressWarnings("java:S3776") // Complexity OK
+	private void createScriptOutput(@Nullable FacesContext context) {
 		final User user = CORE.getUser();
 		final Customer customer = user.getCustomer();
 		Module owningModule = customer.getModule(owningModuleName);
 		Document owningDocument = owningModule.getDocument(customer, owningDocumentName);
 
+		// Resolve the current state of the view when the grid is embedded
+		FacesView view = resolveView(context);
+		String currentContextId = contextId;
+		String viewBinding = null;
+		Bean currentBean = null;
+		if (view != null) {
+			AbstractWebContext webContext = view.getWebContext();
+			if (webContext != null) {
+				currentContextId = webContext.getWebId();
+			}
+			viewBinding = view.getViewBinding();
+			BeanMapAdapter adapter = view.getCurrentBean();
+			if (adapter != null) {
+				currentBean = adapter.getBean();
+			}
+		}
+
 		Map<String, Object> params = new TreeMap<>();
-		params.put("containerId", containerId);
+		// Mount on the exact client id of the container (if we know it)
+		UIComponent parent = getParent();
+		params.put("containerId", ((context != null) && (parent != null)) ? parent.getClientId(context) : containerId);
 		params.put("owningModule", owningModuleName);
 		if (queryName != null) {
 			params.put("query", queryName);
@@ -268,11 +447,34 @@ public class VueListGridScript extends UIOutput {
 		if (modelName != null) {
 			params.put("model", modelName);
 		}
-		if (contextId != null) {
-			params.put("contextId", contextId);
+		if (currentContextId != null) {
+			params.put("contextId", currentContextId);
+		}
+		if (viewBinding != null) {
+			params.put("contextBinding", BindUtil.sanitiseBinding(viewBinding));
+		}
+		if (this.gridParameters != null) {
+			List<Map<String, Object>> filterParams = new ArrayList<>(this.gridParameters.size());
+			Map<String, Object> newParams = new TreeMap<>();
+			for (Map<String, String> param : this.gridParameters) {
+				String value = resolveParamValue(param, currentBean);
+				Map<String, Object> filterParam = new TreeMap<>();
+				filterParam.put(PARAM_NAME_KEY, param.get(PARAM_NAME_KEY));
+				filterParam.put(PARAM_OPERATOR_KEY, param.get(PARAM_OPERATOR_KEY));
+				filterParam.put(PARAM_VALUE_KEY, value);
+				filterParams.add(filterParam);
+				if (value != null) {
+					newParams.put(param.get(PARAM_NEW_NAME_KEY), value);
+				}
+			}
+			params.put("params", filterParams);
+			params.put("newParams", newParams);
 		}
 		params.put("showAdd", showAdd);
 		params.put("showZoom", showZoom);
+		params.put("showContextMenu", Boolean.valueOf(showContextMenu));
+		params.put(DISABLE_ADD_VALUE_EXPRESSION, Boolean.valueOf(evaluateCondition(context, DISABLE_ADD_VALUE_EXPRESSION)));
+		params.put(DISABLE_ZOOM_VALUE_EXPRESSION, Boolean.valueOf(evaluateCondition(context, DISABLE_ZOOM_VALUE_EXPRESSION)));
 		params.put("showFilter", showFilter);
 		params.put("showSummary", showSummary);
 		params.put("showSnap", showSnap);
@@ -335,7 +537,7 @@ public class VueListGridScript extends UIOutput {
 																									drivingDocument,
 																									columnDefn,
 																									true,
-																									queryName);
+																									uxui);
 			String binding = columnDefn.getBinding();
 			TargetMetaData tmd = Binder.getMetaDataForBinding(customer, drivingModule, drivingDocument, binding);
 
@@ -343,16 +545,85 @@ public class VueListGridScript extends UIOutput {
 		}
 		params.put("columns", columns);
 
+		// Called straight away so that, on an ajax re-render, the existing grid is put back in
+		// place of the new container before the page is painted (SKYVE.listgrid defers a new mount)
 		StringJoiner sj = new StringJoiner(" \n");
 		sj.add("<script>")
-			.add("  setTimeout(() => {")
-			.add("    SKYVE.listgrid(")
-			.add(JSON.marshall(params))
-			.add("    );")
-			.add("  }, 0);")
+			.add("  SKYVE.listgrid(")
+			// parameter values come from the bean, so don't let them close the script element
+			.add(JSON.marshall(params).replace("</", "<\\/"))
+			.add("  );")
 			.add("</script>");
 
 		setValue(sj.toString());
+	}
+
+	/**
+	 * Resolve the managed bean for this grid, if it is a {@link FacesView}.
+	 *
+	 * @param context the current Faces context, or {@code null}
+	 * @return the view, or {@code null} if there is no managed bean
+	 */
+	private @Nullable FacesView resolveView(@Nullable FacesContext context) {
+		if ((context == null) || (managedBeanName == null)) {
+			return null;
+		}
+		Object result = context.getApplication().evaluateExpressionGet(context, "#{" + managedBeanName + "}", Object.class);
+		return (result instanceof FacesView view) ? view : null;
+	}
+
+	/**
+	 * Evaluate a boolean value expression set on this component (eg a disable condition).
+	 *
+	 * @param context the current Faces context, or {@code null}
+	 * @param name the value expression name
+	 * @return {@code true} if the value expression exists and evaluates to true
+	 */
+	private boolean evaluateCondition(@Nullable FacesContext context, @Nonnull String name) {
+		ValueExpression ve = getValueExpression(name);
+		Object result = null;
+		if (ve == null) {
+			// Faces stores literal value expressions as attribute values
+			result = getAttributes().get(name);
+		}
+		else if (context != null) {
+			result = ve.getValue(context.getELContext());
+		}
+		return Boolean.TRUE.equals(result) || String.valueOf(true).equals(result);
+	}
+
+	/**
+	 * Resolve a parameter value as a string the smartlist servlet can convert.
+	 * Beans are sent as their bizId, enumerations as their code and other values in their serialised form.
+	 *
+	 * @param param the parameter definition
+	 * @param bean the current bean, or {@code null}
+	 * @return the value, or {@code null}
+	 */
+	static @Nullable String resolveParamValue(@Nonnull Map<String, String> param, @Nullable Bean bean) {
+		String valueBinding = param.get(PARAM_VALUE_BINDING_KEY);
+		if (valueBinding == null) {
+			String value = param.get(PARAM_VALUE_KEY);
+			if ((value != null) && (bean != null) && (value.indexOf('{') >= 0)) {
+				return Binder.formatMessage(value, bean);
+			}
+			return value;
+		}
+
+		if (bean == null) {
+			return null;
+		}
+		Object value = Binder.get(bean, valueBinding);
+		if (value == null) {
+			return null;
+		}
+		if (value instanceof Bean valueBean) {
+			return valueBean.getBizId();
+		}
+		if (value instanceof Enumeration enumeration) {
+			return enumeration.toCode();
+		}
+		return value.toString();
 	}
 
 	/**
@@ -409,6 +680,11 @@ public class VueListGridScript extends UIOutput {
 		}
 
 		private @Nonnull String getType() {
+			// Content columns are displayed as a thumbnail image or a link
+			if (mdQueryColumn instanceof MetaDataQueryContentColumn contentColumn) {
+				return DisplayType.thumbnail.equals(contentColumn.getDisplay()) ? "image" : "link";
+			}
+
 			Attribute attribute = targetMetaData.getAttribute();
 			if (attribute == null) {
 				// Defaulting to text for unhandled implicit type attributes
@@ -457,8 +733,30 @@ public class VueListGridScript extends UIOutput {
 			return scQueryColumnDefn.isCanFilter();
 		}
 
-		private @Nullable Map<String, String> getValueMap() {
-			return scQueryColumnDefn.getValueMap();
+		/**
+		 * Returns the code and localised description of each value of an enumeration or constant domain column
+		 * (the columns with a SmartClient value map).
+		 * The descriptions come from the domain values as the value map is escaped for SmartClient's javascript.
+		 *
+		 * @return the code and description of each value, empty if this column has no constant values
+		 */
+		private @Nonnull List<Map<String, String>> getEnumValues() {
+			Attribute attribute = targetMetaData.getAttribute();
+			Map<String, String> valueMap = scQueryColumnDefn.getValueMap();
+			if ((attribute == null) || (valueMap == null) || valueMap.isEmpty()) {
+				return List.of();
+			}
+
+			DocumentImpl document = (DocumentImpl) targetMetaData.getDocument();
+			List<DomainValue> domainValues = document.getDomainValues((CustomerImpl) customer, DomainType.constant, attribute, null, true);
+			List<Map<String, String>> result = new ArrayList<>(domainValues.size());
+			for (DomainValue domainValue : domainValues) {
+				Map<String, String> enumValue = new TreeMap<>();
+				enumValue.put("value", domainValue.getCode());
+				enumValue.put("label", domainValue.getLocalisedDescription());
+				result.add(enumValue);
+			}
+			return result;
 		}
 		
 		private boolean isHidden() {
@@ -481,20 +779,32 @@ public class VueListGridScript extends UIOutput {
 			result.put("sortable", Boolean.valueOf(isSortable()));
 			result.put("filterable", Boolean.valueOf(isFilterable()));
 			result.put("hidden", Boolean.valueOf(isHidden()));
+			result.put("escape", Boolean.valueOf(scQueryColumnDefn.isEscape()));
+			Integer pixelWidth = scQueryColumnDefn.getPixelWidth();
+			if (pixelWidth != null) {
+				result.put("pixelWidth", pixelWidth);
+			}
+			HorizontalAlignment align = scQueryColumnDefn.getAlign();
+			if (align != null) {
+				result.put("align", align.toTextAlignmentString());
+			}
+			if (mdQueryColumn instanceof MetaDataQueryContentColumn contentColumn) {
+				Integer pixelHeight = contentColumn.getPixelHeight();
+				if (pixelHeight != null) {
+					result.put("pixelHeight", pixelHeight);
+				}
+				String emptyThumbnailRelativeFile = contentColumn.getEmptyThumbnailRelativeFile();
+				if (emptyThumbnailRelativeFile != null) {
+					result.put("emptyThumbnailRelativeFile", emptyThumbnailRelativeFile);
+				}
+			}
 			String converterName = getConverterName();
 			if (converterName != null) {
 				result.put("converter", converterName);
 			}
 
-			Map<String, String> values = getValueMap();
-			if (values != null) {
-				List<Map<String, String>> enumValues = new ArrayList<>(values.size());
-				for (Entry<String, String> entry : values.entrySet()) {
-					Map<String, String> enumValue = new TreeMap<>();
-					enumValue.put("value", entry.getKey());
-					enumValue.put("label", entry.getValue());
-					enumValues.add(enumValue);
-				}
+			List<Map<String, String>> enumValues = getEnumValues();
+			if (! enumValues.isEmpty()) {
 				result.put("enumValues", enumValues);
 			}
 			

@@ -52,26 +52,38 @@
 		<echo file="../skyve-web/src/main/resources/META-INF/resources/skyve/desktop/skyve-min.js" append="true">//# sourceMappingURL=skyve-min.js.map</echo>
 
 		<!-- Minify CSS with a modern parser. npx downloads the pinned tool only when this
-		     explicit Ant target is run; normal Maven builds package the committed outputs. -->
+		     explicit Ant target is run; normal Maven builds package the committed outputs.
+		     The bundle option inlines @imports, e.g. env-banner.css into basic and prime. -->
 		<exec executable="cmd" osfamily="windows" failonerror="true">
 			<arg value="/c"/><arg value="npx.cmd"/>
-			<arg value="--yes"/><arg value="lightningcss-cli@${lightningcss.version}"/><arg value="--minify"/>
+			<arg value="--yes"/><arg value="lightningcss-cli@${lightningcss.version}"/><arg value="--minify"/><arg value="--bundle"/>
 			<arg value="--output-file"/><arg value="src/main/resources/META-INF/resources/skyve/css/basic-min.css"/>
 			<arg value="src/css/basic.css"/>
 		</exec>
 		<exec executable="/bin/sh" osfamily="unix" failonerror="true">
 			<arg value="-lc"/>
-			<arg value="npx --yes lightningcss-cli@${lightningcss.version} --minify --output-file src/main/resources/META-INF/resources/skyve/css/basic-min.css src/css/basic.css"/>
+			<arg value="npx --yes lightningcss-cli@${lightningcss.version} --minify --bundle --output-file src/main/resources/META-INF/resources/skyve/css/basic-min.css src/css/basic.css"/>
 		</exec>
 		<exec executable="cmd" osfamily="windows" failonerror="true">
 			<arg value="/c"/><arg value="npx.cmd"/>
-			<arg value="--yes"/><arg value="lightningcss-cli@${lightningcss.version}"/><arg value="--minify"/>
+			<arg value="--yes"/><arg value="lightningcss-cli@${lightningcss.version}"/><arg value="--minify"/><arg value="--bundle"/>
 			<arg value="--output-file"/><arg value="src/main/resources/META-INF/resources/skyve/css/prime-min.css"/>
 			<arg value="src/css/prime.css"/>
 		</exec>
 		<exec executable="/bin/sh" osfamily="unix" failonerror="true">
 			<arg value="-lc"/>
-			<arg value="npx --yes lightningcss-cli@${lightningcss.version} --minify --output-file src/main/resources/META-INF/resources/skyve/css/prime-min.css src/css/prime.css"/>
+			<arg value="npx --yes lightningcss-cli@${lightningcss.version} --minify --bundle --output-file src/main/resources/META-INF/resources/skyve/css/prime-min.css src/css/prime.css"/>
+		</exec>
+		<!-- Standalone banner styles for the JSPs, which load neither basic nor prime -->
+		<exec executable="cmd" osfamily="windows" failonerror="true">
+			<arg value="/c"/><arg value="npx.cmd"/>
+			<arg value="--yes"/><arg value="lightningcss-cli@${lightningcss.version}"/><arg value="--minify"/>
+			<arg value="--output-file"/><arg value="src/main/resources/META-INF/resources/skyve/css/env-banner-min.css"/>
+			<arg value="src/css/env-banner.css"/>
+		</exec>
+		<exec executable="/bin/sh" osfamily="unix" failonerror="true">
+			<arg value="-lc"/>
+			<arg value="npx --yes lightningcss-cli@${lightningcss.version} --minify --output-file src/main/resources/META-INF/resources/skyve/css/env-banner-min.css src/css/env-banner.css"/>
 		</exec>
 		<exec executable="cmd" osfamily="windows" failonerror="true">
 			<arg value="/c"/><arg value="npx.cmd"/>

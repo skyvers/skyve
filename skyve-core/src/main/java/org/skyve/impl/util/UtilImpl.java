@@ -255,6 +255,10 @@ public class UtilImpl {
 	// target of 256 = max 1MB; target of 512 = max 4MB, target of 1024 = max 16MB per image.
 	public static int THUMBNAIL_SUBSAMPLING_MINIMUM_TARGET_SIZE = 512;
 
+	// The largest width or height in pixels of a requested thumbnail or dynamic image; a bigger image is shrunk to fit, keeping its shape.
+	// This limits the memory a request can use - 2048 is about 16MB per image. It must be a whole number greater than 0.
+	public static int THUMBNAIL_MAXIMUM_DIMENSION = 2048;
+
 	// Thumbnails can be stored on the file system or generated on the fly each time
 	public static boolean THUMBNAIL_FILE_STORAGE = true;
 
@@ -346,6 +350,13 @@ public class UtilImpl {
 	public static String SMTP_TEST_RECIPIENT = null;
 	// used to switch whether to send an email or not - false to actually send the email
 	public static boolean SMTP_TEST_BOGUS_SEND = false;
+	// used to switch whether MailLog stores a masked plain-text body excerpt - false to always redact
+	public static boolean SMTP_LOG_BODY_EXCERPT = false;
+	// used to switch whether MailLog stores the mail attachments as a zip - false to store attachment file names only
+	public static boolean SMTP_LOG_ATTACHMENTS = false;
+	// the maximum total size in bytes of the attachments stored against a single MailLog
+	public static final long DEFAULT_SMTP_LOG_ATTACHMENTS_MAX_BYTES = 5242880L;
+	public static long SMTP_LOG_ATTACHMENTS_MAX_BYTES = DEFAULT_SMTP_LOG_ATTACHMENTS_MAX_BYTES;
 
 	// Map Keys
 	@SuppressWarnings("java:S115") // Suppress "Constant names should comply with a naming convention" as these are not constants but enum values
@@ -842,6 +853,7 @@ public class UtilImpl {
 
     	THUMBNAIL_CONCURRENT_THREADS = 10;
     	THUMBNAIL_SUBSAMPLING_MINIMUM_TARGET_SIZE = 512;
+    	THUMBNAIL_MAXIMUM_DIMENSION = 2048;
     	THUMBNAIL_FILE_STORAGE = true;
     	THUMBNAIL_DIRECTORY = null;
     	
@@ -894,6 +906,9 @@ public class UtilImpl {
     	SMTP_SENDER = null;
     	SMTP_TEST_RECIPIENT = null;
     	SMTP_TEST_BOGUS_SEND = false;
+    	SMTP_LOG_BODY_EXCERPT = false;
+    	SMTP_LOG_ATTACHMENTS = false;
+    	SMTP_LOG_ATTACHMENTS_MAX_BYTES = DEFAULT_SMTP_LOG_ATTACHMENTS_MAX_BYTES;
 
     	MAP_TYPE = MapType.leaflet;
     	MAP_LAYERS = null;

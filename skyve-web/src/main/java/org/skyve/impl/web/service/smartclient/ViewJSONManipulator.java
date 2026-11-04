@@ -8,6 +8,7 @@ import java.util.Objects;
 import java.util.TreeMap;
 import java.util.function.UnaryOperator;
 
+import org.owasp.encoder.Encode;
 import org.skyve.EXT;
 import org.skyve.content.AttachmentContent;
 import org.skyve.domain.Bean;
@@ -162,10 +163,65 @@ public class ViewJSONManipulator extends ViewVisitor {
 	private class HrefProcessor extends ReferenceProcessor {
 		@Override
 		public void processActionReference(@Nonnull ActionReference reference) {
-			htmlGuts.append("javascript:").append(generateWidgetId());
-			htmlGuts.append("._view.doAction('").append(reference.getActionName()).append("',false,'");
+			// Send the action's class name, client validation and confirm as an action button does
+			String actionName = reference.getActionName();
+			boolean clientValidation = false;
+			String confirmationText = null;
+			Action action = obtainAction(actionName);
+			if (action != null) {
+				actionName = action.getResourceName();
+				clientValidation = (! Boolean.FALSE.equals(action.getClientValidation()));
+				confirmationText = action.getLocalisedConfirmationText();
+				if ((confirmationText != null) && ViewRenderer.shouldEscape(action.getEscapeConfirm())) {
+					confirmationText = OWASP.escapeHtml(confirmationText);
+				}
+			}
+
+			htmlGuts.append("javascript:");
+			if (confirmationText != null) {
+				// NB braces are escaped as htmlGuts is formatted for {binding} expressions
+				htmlGuts.append("isc.ask('").append(escapeConfirmationText(confirmationText));
+				htmlGuts.append("',function(b)\\{if(b)\\{");
+			}
+			htmlGuts.append(generateWidgetId());
+			htmlGuts.append("._view.doAction('").append(actionName).append("',").append(clientValidation).append(",'");
 			htmlGuts.append(currentBindings.getBindingPrefix());
 			htmlGuts.append("','{bizModule}','{bizDocument}','{bizId}')");
+			if (confirmationText != null) {
+				htmlGuts.append("\\}\\},\\{title:isc.i18nMessages.editView_Confirm\\})");
+			}
+		}
+
+		/**
+		 * Escapes confirmation text for a JavaScript string in a double-quoted href attribute, as the href
+		 * becomes a format. The attribute encoding keeps quotes and ampersands from ending or changing the
+		 * attribute, and the escaped braces stop the format reading the text as {binding} expressions.
+		 */
+		private @Nonnull String escapeConfirmationText(@Nonnull String confirmationText) {
+			return Encode.forJavaScriptAttribute(confirmationText).replace("{", "\\{").replace("}", "\\}");
+		}
+
+		// The action is declared on the row document's edit or create view in a data widget,
+		// as ReferenceProcessor.obtainActionForActionReference() finds it for faces
+		private @Nullable Action obtainAction(@Nonnull String actionName) {
+			Action result = null;
+			if (dataWidgetDocument == null) {
+				result = view.getAction(actionName);
+			}
+			else {
+				for (ViewType viewType : new ViewType[] {ViewType.edit, ViewType.create}) {
+					try {
+						result = dataWidgetDocument.getView(currentUxUi, customer, viewType.name()).getAction(actionName);
+					}
+					catch (@SuppressWarnings("unused") MetaDataException e) {
+						// No view of this type, try the next
+					}
+					if (result != null) {
+						break;
+					}
+				}
+			}
+			return result;
 		}
 
 		@Override
@@ -1664,6 +1720,7 @@ public class ViewJSONManipulator extends ViewVisitor {
 
 	private boolean visitingDataWidget = false;
 	private boolean processingDataWidget = false;
+	private Document dataWidgetDocument = null; // the row document of the data widget being processed
 	private boolean visitedDataWidgetHasEditableColumns = false;
 
 	@Override
@@ -1740,7 +1797,8 @@ public class ViewJSONManipulator extends ViewVisitor {
 			    }
 			    Document relatedDocument = module.getDocument(customer, targetRelation.getDocumentName());
 		        currentBindings = currentBindings.putOrGetChild(gridBinding, relatedDocument);
-		        
+		        dataWidgetDocument = relatedDocument;
+
 		        // Add these for polymorphic zooming on data grids
 		        addBinding(Bean.MODULE_KEY, false, false, Sanitisation.text);
 		        addBinding(Bean.DOCUMENT_KEY, false, false, Sanitisation.text);
@@ -1834,6 +1892,7 @@ public class ViewJSONManipulator extends ViewVisitor {
 		}
 		processingDataWidget = false;
 		visitingDataWidget = false;
+		dataWidgetDocument = null;
 		htmlGuts.setLength(0);
 	}
 	

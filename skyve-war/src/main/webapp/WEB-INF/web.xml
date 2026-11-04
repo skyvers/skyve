@@ -27,7 +27,6 @@
 				/leaflet/
 				/semantic24/
 				/skyve/
-				/skyvevue/
 				/sse/
 				/wicket/
 				/zxcvbn/
@@ -148,6 +147,7 @@
 					/jakarta.faces.resource/
 					/device.xhtml
 					/upload.xhtml
+					/imageMarkup.xhtml
         		]]>
         	</param-value>
         </init-param>

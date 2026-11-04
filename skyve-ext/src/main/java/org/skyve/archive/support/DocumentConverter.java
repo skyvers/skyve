@@ -47,6 +47,20 @@ public interface DocumentConverter {
      */
     public boolean handles(@Nonnull String module, @Nonnull String document);
 
+    /**
+     * Prepare an exported bean before it is written to an archive file.
+     * <p>
+     * Called once per bean by the archive export job, before the bean is marshalled to the archive.
+     * Implementations can clear values that should not be archived - for example content IDs, whose
+     * content is not archived and is garbage collected once the archived row is hard deleted.
+     * The default implementation does nothing.
+     *
+     * @param bean	The bean being archived (usually a projected {@link org.skyve.domain.DynamicBean}).
+     */
+    public default void prepareForArchive(@Nonnull Bean bean) {
+        // nothing to prepare by default
+    }
+
     public static @Nonnull String dateToString(@Nonnull Date date) {
         return DateTools.dateToString(date, Resolution.MILLISECOND);
     }

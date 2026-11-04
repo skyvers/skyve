@@ -6,6 +6,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.nio.charset.StandardCharsets;
 import java.security.Principal;
 import java.util.List;
+import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.UUID;
@@ -67,6 +68,7 @@ import org.skyve.metadata.view.View;
 import org.skyve.metadata.view.View.ViewParameter;
 import org.skyve.metadata.view.View.ViewType;
 import org.skyve.util.Binder.TargetMetaData;
+import org.skyve.util.JSON;
 import org.skyve.util.OWASP;
 import org.skyve.util.Util;
 import org.skyve.util.logging.Category;
@@ -193,7 +195,8 @@ public class SmartClientEditServlet extends HttpServlet {
 	 *
 	 * <p>A custom action, a download, OK, Save or a delete is refused with {@link ActionUnavailableException}
 	 * unless the view, as last rendered, offers a reachable trigger for it (see {@link ActionAvailability}).
-	 * A push request, and a delete with no bean (no conversation), are not checked.
+	 * A push request, an inline data grid's New (see {@link ServletConstants#INLINE_ADD_ACTION_NAME}) and a delete
+	 * with no bean (no conversation) are not checked.
 	 * Side effects of a refusal: {@link ActionAvailability} logs a warning, and the request is rolled back and written as
 	 * a status {@value #UNAVAILABLE_RESPONSE_STATUS} response; as for a question, the conversation is not cached and
 	 * the CSRF token is not replaced.
@@ -238,10 +241,11 @@ public class SmartClientEditServlet extends HttpServlet {
 	        }
 
 	        AbstractPersistence persistence = null;
+	        // Declared here so that an error response can include the growls and messages raised before the error
+	        AbstractWebContext webContext = null;
 	        try {
 				try {
 					// Start or continue a smartclient conversation
-					AbstractWebContext webContext = null;
 			        String webId = OWASP.sanitise(Sanitisation.text, Util.processStringValue(request.getParameter(AbstractWebContext.CONTEXT_NAME)));
 			        if (webId != null) {
 						webContext = StateUtil.getCachedConversation(webId, request);
@@ -365,9 +369,32 @@ public class SmartClientEditServlet extends HttpServlet {
 	
 					HttpSession session = request.getSession();
 					
-					// we have a user defined action to run
 					String actionName = webContext.getAction();
-					if ((actionName != null) && 
+					// an inline data grid's New button - add a new element to the grid's collection or inverse
+					if (ServletConstants.INLINE_ADD_ACTION_NAME.equals(actionName)) {
+						LOGGER.info("ADD to {} : {}", formBinding, gridBinding);
+						if ((editIdCounter == null) || (createIdCounter == null) || (gridBinding == null) || (formBean == null)) {
+							throw new ServletException(REQUEST_MALFORMED);
+						}
+
+						SmartClientListServlet.checkCsrfToken(session, request, response, currentCsrfToken);
+
+						add(webContext,
+								user,
+								customer,
+								formModule,
+								formDocument,
+								formBean,
+								gridBinding,
+								Integer.parseInt(editIdCounter),
+								Integer.parseInt(createIdCounter),
+								parameters,
+								persistence,
+								uxui.getName(),
+								pw);
+					}
+					// we have a user defined action to run
+					else if ((actionName != null) &&
 							(! ImplicitActionName.OK.toString().equals(actionName)) &&
 							(! ImplicitActionName.Save.toString().equals(actionName)) &&
 							(! ImplicitActionName.ZoomOut.toString().equals(actionName)) &&
@@ -513,8 +540,8 @@ public class SmartClientEditServlet extends HttpServlet {
 		    		produceUnavailableResponse(unavailable, pw);
 		    	}
 		    	else {
-		    		String reference = WebErrorUtil.logUnexpectedAndGetReference(LOGGER, "SmartClient edit request failed for operation " + operation, t);
-		    		produceErrorResponse(t, operation, true, pw, reference);
+		    		String reference = WebErrorUtil.logFailureAndGetReference(LOGGER, "SmartClient edit request failed for operation " + operation, t);
+		    		produceErrorResponse(t, operation, true, pw, reference, webContext);
 		    	}
 			}
 		    finally {
@@ -590,6 +617,33 @@ public class SmartClientEditServlet extends HttpServlet {
 	 *        point they are thrown.
 	 */
 	static void produceErrorResponse(@Nonnull Throwable t, @Nonnull Operation operation, boolean includeBindings, @Nonnull PrintWriter pw, @Nullable String reference) {
+		produceErrorResponse(t, operation, includeBindings, pw, reference, null);
+	}
+
+	/**
+	 * Pump out error text for smart client pages, with the growls and messages raised before the error.
+	 *
+	 * <p>The growls and messages are written beside {@code data} or {@code errors} as {@code _growls} and
+	 * {@code _messages}, in the same form as a successful response, so that the client shows them as Prime Faces
+	 * does. They are left out when {@code t} is a {@link SecurityException}, {@link SessionEndedException} or
+	 * {@link ConversationEndedException}, as Prime Faces redirects to the error page for these instead.
+	 *
+	 * @param t The exception.
+	 * @param operation fetch, add, remove or update.
+	 * @param includeBindings Only edit views can use the bindings available in the error messages. If bindings
+	 *        are included for errors generated from listgrids operations, no errors are shown
+	 * @param pw To append to.
+	 * @param reference If the error is unexpected, this is the reference logged against it, to help with support.
+	 *        This will be null for expected errors (ie MessageExceptions) as these are already logged at the
+	 *        point they are thrown.
+	 * @param webContext The conversation the growls and messages were added to, or null if there is none.
+	 */
+	static void produceErrorResponse(@Nonnull Throwable t,
+										@Nonnull Operation operation,
+										boolean includeBindings,
+										@Nonnull PrintWriter pw,
+										@Nullable String reference,
+										@Nullable AbstractWebContext webContext) {
 		if (t instanceof MessageException me) {
 			List<Message> ms = me.getMessages();
 			
@@ -624,7 +678,30 @@ public class SmartClientEditServlet extends HttpServlet {
             pw.append(WebErrorUtil.escapeJsStringWithHtmlFormatting(WebErrorUtil.genericMessage(errorReference))).append('"');
     	}
 
+    	if ((webContext != null) &&
+    			(! (t instanceof SecurityException)) &&
+    			(! (t instanceof SessionEndedException)) &&
+    			(! (t instanceof ConversationEndedException))) {
+    		appendNotifications("_growls", webContext.getGrowls(), pw);
+    		appendNotifications("_messages", webContext.getMessages(), pw);
+    	}
+
     	pw.append("}}");
+	}
+
+	/**
+	 * Appends a property holding growls or messages to the response, if there are any.
+	 *
+	 * @param name The property name.
+	 * @param notifications The growls or messages, each with a severity and summary, or null if there are none.
+	 * @param pw To append to.
+	 */
+	private static void appendNotifications(@Nonnull String name,
+												@Nullable List<Map<String, String>> notifications,
+												@Nonnull PrintWriter pw) {
+		if ((notifications != null) && (! notifications.isEmpty())) {
+			pw.append(",\"").append(name).append("\":").append(JSON.marshall(notifications));
+		}
 	}
 	
 	/**
@@ -1397,6 +1474,91 @@ public class SmartClientEditServlet extends HttpServlet {
 		
 		if (key != null) {
 			Monitoring.measure(key);
+		}
+	}
+
+	/**
+	 * Adds a new element to the collection or inverse of an inline data grid and writes the form's response,
+	 * as PrimeFaces' AddAction does.
+	 *
+	 * <p>The posted form values are applied first. The element is then created and added by
+	 * {@link WebUtil#addNewElement}, with the form bean as the parent. The response renders the form bean, whose grid
+	 * then holds the new row with its bizId; when an interceptor vetoes the add, the response is written without it.
+	 * The request is not checked by {@link ActionAvailability}.
+	 *
+	 * <p>Side effects: applies the posted values to the conversation's beans, runs the element's bizlet and the
+	 * interceptors, adds the element to the form bean's graph, writes the response to {@code pw} and records a
+	 * monitoring measurement for the element document.
+	 *
+	 * @param webContext the conversation's web context; must not be {@code null}
+	 * @param user the requesting user; must not be {@code null}
+	 * @param customer the user's customer; must not be {@code null}
+	 * @param formModule the module of the form document; must not be {@code null}
+	 * @param formDocument the document of the form holding the data grid; must not be {@code null}
+	 * @param formBean the bean of the form holding the data grid; must not be {@code null}
+	 * @param gridBinding the data grid's binding, relative to the form bean; must not be {@code null}
+	 * @param editIdCounter base edit-id counter for generated component ids
+	 * @param createIdCounter base create-id counter for generated component ids
+	 * @param parameters request parameters, with the form values under "bean"; must not be {@code null}
+	 * @param persistence the request's persistence; must not be {@code null}
+	 * @param uxui the request's UX/UI name; must not be {@code null}
+	 * @param pw the response writer; must not be {@code null}
+	 * @throws IllegalStateException if {@code gridBinding} does not resolve to a relation
+	 * @throws SecurityException if the relation and its document are persistent and the user cannot create that document
+	 * @throws Exception if applying the values, the bizlet, an interceptor or rendering fails
+	 */
+	@SuppressWarnings("java:S107") // Long parameter list matches the other request handlers here
+	private static void add(@Nonnull AbstractWebContext webContext,
+								@Nonnull User user,
+								@Nonnull Customer customer,
+								@Nonnull Module formModule,
+								@Nonnull Document formDocument,
+								@Nonnull Bean formBean,
+								@Nonnull String gridBinding,
+								int editIdCounter,
+								int createIdCounter,
+								@Nonnull SortedMap<String, Object> parameters,
+								@Nonnull AbstractPersistence persistence,
+								@Nonnull String uxui,
+								@Nonnull PrintWriter pw)
+	throws Exception {
+		// Apply the JSON values
+		View formView = formDocument.getView(uxui,
+												customer,
+												formBean.isCreated() ?
+													ViewType.edit.toString() :
+													ViewType.create.toString());
+		ViewJSONManipulator manipulator = newManipulator(user,
+															formModule,
+															formDocument,
+															formView,
+															uxui,
+															formBean,
+															editIdCounter,
+															createIdCounter,
+															true);
+		manipulator.visit();
+		manipulator.applyJSON((String) parameters.get("bean"), persistence, webContext);
+
+		Bean element = WebUtil.addNewElement(user, formBean, gridBinding, formBean, webContext);
+
+		pumpOutResponse(webContext,
+							user,
+							(CustomerImpl) customer,
+							formModule,
+							formDocument,
+							formView,
+							uxui,
+							formBean,
+							((DocumentImpl) formDocument).getBizlet(customer),
+							editIdCounter,
+							createIdCounter,
+							null,
+							pw);
+
+		if (element != null) {
+			Module elementModule = customer.getModule(element.getBizModule());
+			Monitoring.measure(RequestKey.create(elementModule.getDocument(customer, element.getBizDocument())));
 		}
 	}
 

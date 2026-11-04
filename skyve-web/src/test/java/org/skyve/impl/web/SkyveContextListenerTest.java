@@ -78,6 +78,9 @@ public class SkyveContextListenerTest {
 	private final String originalSmtpSender = UtilImpl.SMTP_SENDER;
 	private final String originalSmtpTestRecipient = UtilImpl.SMTP_TEST_RECIPIENT;
 	private final boolean originalSmtpTestBogusSend = UtilImpl.SMTP_TEST_BOGUS_SEND;
+	private final boolean originalSmtpLogBodyExcerpt = UtilImpl.SMTP_LOG_BODY_EXCERPT;
+	private final boolean originalSmtpLogAttachments = UtilImpl.SMTP_LOG_ATTACHMENTS;
+	private final long originalSmtpLogAttachmentsMaxBytes = UtilImpl.SMTP_LOG_ATTACHMENTS_MAX_BYTES;
 	private final UtilImpl.ArchiveConfig originalArchiveConfig = UtilImpl.ARCHIVE_CONFIG;
 	private final String originalCustomer = UtilImpl.CUSTOMER;
 	private final String originalSkyveContextRealPath = UtilImpl.SKYVE_CONTEXT_REAL_PATH;
@@ -103,6 +106,9 @@ public class SkyveContextListenerTest {
 		UtilImpl.SMTP_SENDER = originalSmtpSender;
 		UtilImpl.SMTP_TEST_RECIPIENT = originalSmtpTestRecipient;
 		UtilImpl.SMTP_TEST_BOGUS_SEND = originalSmtpTestBogusSend;
+		UtilImpl.SMTP_LOG_BODY_EXCERPT = originalSmtpLogBodyExcerpt;
+		UtilImpl.SMTP_LOG_ATTACHMENTS = originalSmtpLogAttachments;
+		UtilImpl.SMTP_LOG_ATTACHMENTS_MAX_BYTES = originalSmtpLogAttachmentsMaxBytes;
 		UtilImpl.ARCHIVE_CONFIG = originalArchiveConfig;
 		UtilImpl.CUSTOMER = originalCustomer;
 		UtilImpl.SKYVE_CONTEXT_REAL_PATH = originalSkyveContextRealPath;
@@ -284,11 +290,80 @@ public class SkyveContextListenerTest {
 		Map<String, Object> factories = new HashMap<>();
 		factories.put("mailServiceClass", NoOpMailService.class.getName());
 
+		UtilImpl.SMTP_LOG_BODY_EXCERPT = true;
+		UtilImpl.SMTP_LOG_ATTACHMENTS = true;
+		UtilImpl.SMTP_LOG_ATTACHMENTS_MAX_BYTES = 1L;
+
 		SkyveContextListener.configureMailServiceAndSmtp(properties, factories);
 
 		assertThat(UtilImpl.SMTP, is("localhost"));
 		assertEquals(25, UtilImpl.SMTP_PORT);
 		assertThat(UtilImpl.SMTP_SENDER, is("mailer@skyve.org"));
+		assertFalse(UtilImpl.SMTP_LOG_BODY_EXCERPT);
+		assertFalse(UtilImpl.SMTP_LOG_ATTACHMENTS);
+		assertEquals(UtilImpl.DEFAULT_SMTP_LOG_ATTACHMENTS_MAX_BYTES, UtilImpl.SMTP_LOG_ATTACHMENTS_MAX_BYTES);
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void testConfigureMailServiceAndSmtpReadsLogBodyExcerpt() {
+		Map<String, Object> properties = new HashMap<>();
+		Map<String, Object> smtp = new HashMap<>();
+		smtp.put("server", "localhost");
+		smtp.put("port", Integer.valueOf(25));
+		smtp.put("sender", "mailer@skyve.org");
+		smtp.put("testBogusSend", Boolean.FALSE);
+		smtp.put("logBodyExcerpt", Boolean.TRUE);
+		properties.put("smtp", smtp);
+
+		Map<String, Object> factories = new HashMap<>();
+		factories.put("mailServiceClass", NoOpMailService.class.getName());
+
+		SkyveContextListener.configureMailServiceAndSmtp(properties, factories);
+
+		assertTrue(UtilImpl.SMTP_LOG_BODY_EXCERPT);
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void testConfigureMailServiceAndSmtpClampsNegativeLogAttachmentsMaxBytes() {
+		Map<String, Object> properties = new HashMap<>();
+		Map<String, Object> smtp = new HashMap<>();
+		smtp.put("server", "localhost");
+		smtp.put("port", Integer.valueOf(25));
+		smtp.put("sender", "mailer@skyve.org");
+		smtp.put("testBogusSend", Boolean.FALSE);
+		smtp.put("logAttachmentsMaxBytes", Integer.valueOf(-1));
+		properties.put("smtp", smtp);
+
+		Map<String, Object> factories = new HashMap<>();
+		factories.put("mailServiceClass", NoOpMailService.class.getName());
+
+		SkyveContextListener.configureMailServiceAndSmtp(properties, factories);
+
+		assertEquals(0L, UtilImpl.SMTP_LOG_ATTACHMENTS_MAX_BYTES);
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void testConfigureMailServiceAndSmtpReadsLogAttachments() {
+		Map<String, Object> properties = new HashMap<>();
+		Map<String, Object> smtp = new HashMap<>();
+		smtp.put("server", "localhost");
+		smtp.put("port", Integer.valueOf(25));
+		smtp.put("sender", "mailer@skyve.org");
+		smtp.put("testBogusSend", Boolean.FALSE);
+		smtp.put("logAttachments", Boolean.TRUE);
+		smtp.put("logAttachmentsMaxBytes", Integer.valueOf(1024));
+		properties.put("smtp", smtp);
+
+		Map<String, Object> factories = new HashMap<>();
+		factories.put("mailServiceClass", NoOpMailService.class.getName());
+
+		SkyveContextListener.configureMailServiceAndSmtp(properties, factories);
+
+		assertTrue(UtilImpl.SMTP_LOG_ATTACHMENTS);
+		assertEquals(1024L, UtilImpl.SMTP_LOG_ATTACHMENTS_MAX_BYTES);
 	}
 
 	@Test
@@ -686,12 +761,13 @@ public class SkyveContextListenerTest {
 	@SuppressWarnings("static-method")
 	public void testPopulateUtilImplReadsThumbnailStanza() throws Exception {
 		int originalThreads = UtilImpl.THUMBNAIL_CONCURRENT_THREADS;
+		int originalMaximumDimension = UtilImpl.THUMBNAIL_MAXIMUM_DIMENSION;
 		String savedPropertiesFilePath = System.getProperty("PROPERTIES_FILE_PATH");
 		Class<? extends AbstractPersistence> originalPersistenceImplementation = AbstractPersistence.IMPLEMENTATION_CLASS;
 		Class<? extends DynamicPersistence> originalDynamicPersistenceImplementation = AbstractPersistence.DYNAMIC_IMPLEMENTATION_CLASS;
 		Path tempDir = Files.createTempDirectory("skyve-context-listener-thumbnail");
 		try {
-			String extraStanza = "\"thumbnail\":{\"concurrentThreads\":8,\"subsamplingMinimumTargetSize\":50,\"fileStorage\":false}";
+			String extraStanza = "\"thumbnail\":{\"concurrentThreads\":8,\"subsamplingMinimumTargetSize\":50,\"maximumDimension\":1000,\"fileStorage\":false}";
 			Path configFile = writeConfigurationWithExtra(tempDir, extraStanza);
 			System.setProperty("PROPERTIES_FILE_PATH", configFile.toString());
 			ProvidedRepository originalRepository = ProvidedRepositoryFactory.get();
@@ -703,12 +779,14 @@ public class SkyveContextListenerTest {
 				ProvidedRepositoryFactory.set(originalRepository);
 			}
 			assertEquals(8, UtilImpl.THUMBNAIL_CONCURRENT_THREADS);
+			assertEquals(1000, UtilImpl.THUMBNAIL_MAXIMUM_DIMENSION);
 		}
 		finally {
 			restoreProperty("PROPERTIES_FILE_PATH", savedPropertiesFilePath);
 			AbstractPersistence.IMPLEMENTATION_CLASS = originalPersistenceImplementation;
 			AbstractPersistence.DYNAMIC_IMPLEMENTATION_CLASS = originalDynamicPersistenceImplementation;
 			UtilImpl.THUMBNAIL_CONCURRENT_THREADS = originalThreads;
+			UtilImpl.THUMBNAIL_MAXIMUM_DIMENSION = originalMaximumDimension;
 			deleteTree(tempDir);
 		}
 	}
@@ -1692,6 +1770,61 @@ public class SkyveContextListenerTest {
 			UtilImpl.MODULE_DIRECTORY = originalModuleDirectory;
 			deleteTree(tempDirectory);
 		}
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void testConfigureThumbnailSettingsRejectsAMaximumDimensionThatIsNotAPositiveInt() {
+		int originalMaximumDimension = UtilImpl.THUMBNAIL_MAXIMUM_DIMENSION;
+		try {
+			// 1e10 would overflow an int and leave no effective cap
+			for (Number maximumDimension : new Number[] {Integer.valueOf(0), Integer.valueOf(-1), Double.valueOf(1000.5), Long.valueOf(10_000_000_000L)}) {
+				InvocationTargetException thrown = assertThrows(InvocationTargetException.class,
+						() -> configureThumbnailSettings(maximumDimension),
+						maximumDimension::toString);
+
+				assertThat(thrown.getCause(), instanceOf(IllegalStateException.class));
+				assertEquals("thumbnail.maximumDimension must be a whole number greater than 0",
+								thrown.getCause().getMessage(),
+								maximumDimension::toString);
+			}
+		}
+		finally {
+			UtilImpl.THUMBNAIL_MAXIMUM_DIMENSION = originalMaximumDimension;
+		}
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void testConfigureThumbnailSettingsKeepsTheMaximumDimensionWhenTheKeyIsMissing() throws Exception {
+		int originalMaximumDimension = UtilImpl.THUMBNAIL_MAXIMUM_DIMENSION;
+		try {
+			UtilImpl.THUMBNAIL_MAXIMUM_DIMENSION = 2048;
+			configureThumbnailSettings(null);
+			assertEquals(2048, UtilImpl.THUMBNAIL_MAXIMUM_DIMENSION);
+
+			configureThumbnailSettings(Integer.valueOf(1));
+			assertEquals(1, UtilImpl.THUMBNAIL_MAXIMUM_DIMENSION);
+		}
+		finally {
+			UtilImpl.THUMBNAIL_MAXIMUM_DIMENSION = originalMaximumDimension;
+		}
+	}
+
+	/**
+	 * Runs the listener's thumbnail configuration with a minimal stanza.
+	 *
+	 * @param maximumDimension the maximumDimension value, or {@code null} to leave the key out
+	 */
+	private static void configureThumbnailSettings(Number maximumDimension) throws Exception {
+		Map<String, Object> thumbnail = new HashMap<>();
+		thumbnail.put("concurrentThreads", Integer.valueOf(2));
+		thumbnail.put("subsamplingMinimumTargetSize", Integer.valueOf(20));
+		thumbnail.put("fileStorage", Boolean.FALSE);
+		if (maximumDimension != null) {
+			thumbnail.put("maximumDimension", maximumDimension);
+		}
+		invokePrivateStatic("configureThumbnailSettings", new Class<?>[] {Map.class}, Map.of("thumbnail", thumbnail));
 	}
 
 	@Test

@@ -50,7 +50,7 @@ body .layout-wrapper .layout-main .layout-content .skyve-action-bar {
 	box-sizing: border-box;
 }
 
-body .layout-wrapper .layout-main:has(> .layout-content .skyve-action-bar, > .layout-content .action-bar) > .skyve-global-messages:not(:empty) {
+body .layout-wrapper .layout-main:has(> .layout-content :is(.skyve-action-bar, .action-bar) > :is(.ui-toolbar-group-left, .ui-toolbar-group-right) > *) > .skyve-global-messages:not(:empty) {
 	margin-bottom: 0.5rem;
 	position: relative;
 	top: calc(var(--skyve-action-bar-height) + 0.5rem);
@@ -136,8 +136,8 @@ body .layout-wrapper .layout-main:has(> .layout-content .skyve-action-bar, > .la
 		white-space: nowrap;
 	}
 
-	body .layout-wrapper .layout-main .layout-content:has(.action-bar),
-	body .layout-wrapper .layout-main .layout-content:has(.skyve-action-bar) {
+	/* only a bar with actions in it; prime.css hides an empty one */
+	body .layout-wrapper .layout-main .layout-content:has(:is(.skyve-action-bar, .action-bar) > :is(.ui-toolbar-group-left, .ui-toolbar-group-right) > *) {
 		padding-top: calc(1rem + var(--skyve-action-bar-height));
 	}
 }
@@ -212,8 +212,8 @@ body .layout-wrapper .layout-main:has(> .layout-content .skyve-action-bar, > .la
 		white-space: nowrap;
 	}
 
-	body .layout-wrapper .layout-main .layout-content:has(.action-bar),
-	body .layout-wrapper .layout-main .layout-content:has(.skyve-action-bar) {
+	/* only a bar with actions in it; prime.css hides an empty one */
+	body .layout-wrapper .layout-main .layout-content:has(:is(.skyve-action-bar, .action-bar) > :is(.ui-toolbar-group-left, .ui-toolbar-group-right) > *) {
 		padding-top: calc(1rem + var(--skyve-action-bar-height));
 	}
 }
