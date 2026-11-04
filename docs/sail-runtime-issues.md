@@ -11,9 +11,8 @@ Each suspected cause was checked against the source on the `sail` branch.
   mechanism is not proven.
 - **Not confirmed**: the code does not show the suspected cause.
 
-Line numbers in P1 to P6 and SC-1 to SC-8 are for `sail` at `2f4c2021b8`,
-before master was merged in. Some of them have moved since. Line numbers in P7
-and P8 are for `sail` at `f332f66846`.
+All file and line citations are for `sail` at `f332f66846`. The exception is
+SC-2's suspected cause, which cites the code before its fix, at `2f4c2021b8`.
 
 | Id | Summary | Renderer | Cause checked | Status |
 |---|---|---|---|---|
@@ -125,16 +124,20 @@ until something rerenders the view.
 **Suspected cause.** No Skyve code closes the upload page after an action upload
 in PrimeFaces, on any UX/UI.
 
-- `skyve-web/src/main/java/org/skyve/impl/web/faces/views/ContentUploadView.java:697-701`
+- `skyve-web/src/main/java/org/skyve/impl/web/faces/views/ContentUploadView.java:723-727`
   only queues the success message (`addActionUploadSuccess`).
 - A content upload, by contrast, closes its page with a script
-  (`ContentUploadView.java:556`, reaching `SKYVE.PF.afterContentUpload` in
+  (`ContentUploadView.java:557`, reaching `SKYVE.PF.afterContentUpload` in
   `skyve-web/src/js/prime/pf.js`).
-- `skyve-war/src/main/webapp/upload.xhtml:33-37`, the only after-upload hook,
-  handles SmartClient only.
+- `skyve-war/src/main/webapp/upload.xhtml:47-51`, the only after-upload hook,
+  handles SmartClient only. Master's new upload page (`62e2264e60`) adds
+  handlers that run while a file uploads (`:35-40`), but none of them closes
+  the page.
 - The view refreshes only when the overlay or dialog hides.
   `skyve-web/src/main/java/org/skyve/impl/web/faces/pipeline/component/TabularComponentBuilder.java:4917`
-  (dialog) and `:4933` (overlay) set `onHide` to the refresh call.
+  (dialog) and `:4935` (overlay) set `onHide` to the refresh call. Master's
+  `322b0f1e6b` now appends the overlay to the page body (`:4932`). That moves
+  where the overlay shows. It does not close it.
 - On `external`, the page probably goes away through PrimeFaces' own overlay
   auto-hide, not through Skyve code. That would explain why only tablet shows
   the bug, but it is not proven.
@@ -316,8 +319,8 @@ page open. Select the Manage tab and press Get Count.
 - Master's `62e2264e60` ("Redo image upload Ux") changed the upload page
   (`skyve-war/src/main/webapp/upload.xhtml`).
 - Master's `322b0f1e6b` appends an upload action's overlay to the page body
-  (`overlay.setAppendTo("@(body)")`, in
-  `skyve-web/src/main/java/org/skyve/impl/web/faces/pipeline/component/TabularComponentBuilder.java`).
+  (`overlay.setAppendTo("@(body)")`, at
+  `skyve-web/src/main/java/org/skyve/impl/web/faces/pipeline/component/TabularComponentBuilder.java:4932`).
 - The PF executor reads messages from the page's elements, whether or not
   something covers them (`PrimeFacesSelenide.messages`,
   `skyve-war/src/test/java/util/sail/PrimeFacesSelenide.java:1379-1387`). So
@@ -359,7 +362,7 @@ committed. Colour has the same pattern, in a column that is commented out.
 **Reproduction.** Open a kitchensink view with the InlineGrid data grid in
 SmartClient, and add a row.
 
-**Suspected cause.**
+**Suspected cause.** These citations are for `2f4c2021b8`, before the fix.
 
 - `skyve-war/src/main/java/modules/kitchensink/InlineGrid/InlineGrid.xml:34-36`
   declares `<defaultValue>{el:false}</defaultValue>`.
@@ -390,13 +393,13 @@ never shows rows.
 
 **Suspected cause.**
 
-- `skyve-web/src/main/java/org/skyve/impl/web/faces/views/DesktopView.java:183`
-  (through `listDataSources`, `:719-744`) emits data sources only for the
+- `skyve-web/src/main/java/org/skyve/impl/web/faces/views/DesktopView.java:196`
+  (through `listDataSources`, `:724-749`) emits data sources only for the
   module's home list and its menu items.
-- `DesktopView.java:228` still asks the list view to use `<module>_<query>`.
+- `DesktopView.java:241` still asks the list view to use `<module>_<query>`.
 - `skyve-web/src/js/desktop/listview.js:321-322` (`_getDataSource`) returns
   `null` for the undefined data source.
-- `skyve-web/src/js/desktop/listgrid.js:1956-1958` reads
+- `skyve-web/src/js/desktop/listgrid.js:1959-1961` reads
   `this._dataSource.canCreate` from that null.
 
 **Checked:** Confirmed.
@@ -484,9 +487,9 @@ boxes.
 - `skyve-war/src/main/java/modules/admin/ControlPanel/views/edit.xml:4` binds
   the tab pane: `<tabPane selectedTabIndexBinding="tabIndex">`. The
   Instrumentation check boxes rerender.
-- `skyve-web/src/js/desktop/editView.js:1431-1436` selects the bound tab on
+- `skyve-web/src/js/desktop/editView.js:1469-1474` selects the bound tab on
   every scatter.
-- SmartClient's tab selection (`BizTabPane.tabSelected`, `editView.js:2239-2246`)
+- SmartClient's tab selection (`BizTabPane.tabSelected`, `editView.js:2277-2284`)
   does not write the user's choice back to the binding. The server therefore
   keeps `tabIndex` at 2.
 
@@ -515,7 +518,7 @@ pasting key events). The field ends up with only part of the text.
   default `changeOnKeypress: true`; Skyve's own item types turn it off.
 - So every keystroke fires the change handler, which saves the instance to the
   server for the rerender.
-- When the response is applied (`skyve-web/src/js/desktop/editView.js:962`,
+- When the response is applied (`skyve-web/src/js/desktop/editView.js:968`,
   `this._vm.setValues(...)`), it writes back the value that was sent. This
   overwrites anything typed in the meantime.
 - The User edit view (`User/views/edit.xml`) uses `onBlurHandlers` and is not
