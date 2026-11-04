@@ -477,12 +477,16 @@ public class SmartClientSelenide extends Selenide<
 		if ((value != null) && (! value.isEmpty())) {
 			element.sendKeys(value);
 		}
-		if ((! command.keyPresses()) && (! locator.contains("\"kind\":\"cell\""))) {
+		boolean cell = locator.contains("\"kind\":\"cell\"");
+		if ((! command.keyPresses()) && (! cell)) {
 			// leave the field, so that SmartClient commits the value and runs its change handlers
 			// (not in an inline grid editor, where leaving the last cell ends the row's edit)
 			acted();
 			element.sendKeys(Keys.TAB);
 			waitForFullPageResponse();
+		}
+		if ((! command.keyPresses()) && locator.startsWith(Locator.SAIL_PREFIX)) {
+			commit(locator, value);
 		}
 
 		return true;
@@ -521,7 +525,37 @@ public class SmartClientSelenide extends Selenide<
 		// leave the editor so SmartClient saves its value
 		element.sendKeys(Keys.TAB);
 		waitForFullPageResponse();
+		commit(locator, value);
 		return true;
+	}
+
+	/**
+	 * Makes sure what was typed reached the item and the form's ValuesManager, as leaving the field does,
+	 * before the script goes on. Leaving the field (Tab) normally does this, but without OS focus a headed
+	 * browser may not deliver the blur, and a following Save would then validate the old value.
+	 *
+	 * @param locator	the locator of the element typed into
+	 * @param value		what was typed
+	 * @throws IllegalStateException if the field did not take the text, or the value did not reach the form
+	 */
+	private void commit(@Nonnull String locator, @Nullable String value) {
+		Map<String, Object> result = map(script("return _sail.commit(arguments[0])", locator));
+		Object error = result.get("error");
+		if (error != null) {
+			throw new IllegalStateException("Could not commit " + locator + ": " + error);
+		}
+		if (! Boolean.TRUE.equals(result.get("focused"))) {
+			trace("    (the browser window does not have focus; committed the value through SmartClient)");
+		}
+		String element = String.valueOf(result.get("element"));
+		if ((value != null) && (! value.isEmpty()) && element.isEmpty()) {
+			throw new IllegalStateException(String.format("Typed '%s' into %s but the field shows nothing", value, locator));
+		}
+		if (! Boolean.TRUE.equals(result.get("committed"))) {
+			throw new IllegalStateException(String.format("Typed '%s' into %s but the value (%s) did not reach the form's values",
+															value, locator, result.get("stored")));
+		}
+		waitForFullPageResponse();
 	}
 
 	/**

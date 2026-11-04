@@ -645,6 +645,72 @@
 		return row == null ? -1 : row;
 	};
 
+	function same(a, b) {
+		if (a === b) {
+			return true;
+		}
+		if (a == null || b == null) {
+			return a == b;
+		}
+		if (isc.isA.Date(a) && isc.isA.Date(b)) {
+			return a.getTime() === b.getTime();
+		}
+		return String(a) === String(b);
+	}
+
+	/**
+	 * Commits what was typed into an item, the way leaving the field does, and reports where the value is.
+	 * Blur is what normally commits a SmartClient text field, and a browser window without OS focus
+	 * (a headed run behind another window) does not deliver focus and blur events reliably, so the typed
+	 * text could stay in the DOM only. FormItem.updateValue() takes the element's value into the item,
+	 * runs its change handlers and updates the form's ValuesManager; it does nothing if they already agree.
+	 *
+	 * @param locator	the SAIL locator of the item (with the suffix of the element typed into)
+	 * @return { element, stored, committed, focused } or { error }
+	 */
+	S.commit = function (locator) {
+		var parsed = S.parse(locator);
+		var resolved = S.resolve(parsed.spec);
+		var item = resolved.obj;
+		if (!isFormItem(item)) {
+			return { error: resolved.error || (locator + " is not a form item") };
+		}
+		var typed = item;
+		if (parsed.suffix) {
+			var element = isc.AutoTest.getElement(isc.AutoTest.getObjectLocator(item).replace(/\/objectType=[A-Za-z]+$/, "") + parsed.suffix);
+			var owner = element ? isc.AutoTest.getObject(isc.AutoTest.getLocator(element)) : null;
+			if (isFormItem(owner)) {
+				typed = owner;
+			}
+		}
+		if (isc.isA.RichTextItem(item)) {
+			var html = item.canvas ? item.canvas.getValue() : null;
+			if (!same(item.getValue(), html)) {
+				item.storeValue(html);
+			}
+		}
+		else {
+			if (typed !== item && typed.updateValue) {
+				typed.updateValue();
+			}
+			// date and time items take their value from their text field
+			if (item.updateValue && (typed === item || item.dateTextField || item.timeTextField)) {
+				item.updateValue();
+			}
+		}
+		var form = item.form;
+		var vm = form && form.valuesManager;
+		var stored = item.getValue();
+		var elementValue = isc.isA.RichTextItem(item) ? strip(item.canvas.getValue()) :
+							(typed.getElementValue ? typed.getElementValue() : null);
+		return {
+			element: elementValue == null ? "" : String(elementValue),
+			stored: stored == null ? "" : String(stored),
+			committed: !vm || same(stored, vm.getValue(item.name)),
+			focused: document.hasFocus()
+		};
+	};
+
 	/** Sets a slider through its own widget API, as a drag would, and returns the new value. */
 	S.slide = function (locator, value) {
 		var resolved = S.resolve(S.parse(locator).spec);
