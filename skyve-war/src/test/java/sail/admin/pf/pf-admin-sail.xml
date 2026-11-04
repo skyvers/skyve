@@ -67,7 +67,8 @@
 			<save />
 			<tabSelect path="Contents" />
 			<action name="AddUnsubscribeLink" />
-			<action name="AddImage" />
+			<comment>AddImage is an upload action: upload an image with it (pressing it alone leaves its upload page open)</comment>
+			<upload action="AddImage" file="sail/files/sail-image.png" />
 			<tabSelect path="Attachments" />
 			<tabSelect path="Manage" />
 			<!-- Nothing is tagged, so these refuse to run (and send nothing): check that they say why -->

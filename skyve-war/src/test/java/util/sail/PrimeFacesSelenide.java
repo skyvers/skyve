@@ -75,8 +75,6 @@ public class PrimeFacesSelenide extends Selenide<
 															"#growl .ui-growl-item-container, #pushGrowl .ui-growl-item-container, " +
 															ERROR_MESSAGES_SELECTOR;
 
-	/** The rows of a data table, excluding the header and the empty message. */
-	private static final String DATA_ROW_XPATH = ".//tbody[contains(@class, 'ui-datatable-data')]/tr[%d][not(contains(@class, 'ui-datatable-empty-message'))]/td";
 
 	@Override
 	public boolean button(PrimeFacesButtonCommand command) {
@@ -147,6 +145,9 @@ public class PrimeFacesSelenide extends Selenide<
 			if (! positive) {
 				return true;
 			}
+			// Wait for the confirmed gesture's request to start (or its page to unload): the confirmation can send it
+			// after its own handling, so the page can look idle in between
+			waitFor(d -> requestSent() ? Boolean.TRUE : null);
 		}
 		// A server-side question shows when its request comes back; answering resends the request
 		for (int i = 0; i < 10; i++) {
@@ -336,6 +337,95 @@ public class PrimeFacesSelenide extends Selenide<
 	}
 
 	/**
+	 * Indicates if a list grid is a Vue list grid (skyve-vue's ListGrid, mounted in the grid's container).
+	 *
+	 * @param gridId	the grid's client id (its container)
+	 * @return true for a Vue list grid
+	 */
+	public boolean isVueListGrid(@Nonnull String gridId) {
+		return Boolean.TRUE.equals(js("var e = document.getElementById(arguments[0]); return !! (e && e.querySelector('.skyve-vue-list-grid'));", gridId));
+	}
+
+	/**
+	 * Presses a Vue list grid's New button and waits for the new record's edit page.
+	 *
+	 * @param gridId	the grid's client id (its container)
+	 * @return true if the grid shows an enabled New button and it was pressed
+	 */
+	public boolean vueListGridNew(@Nonnull String gridId) {
+		// the toolbar's New button, or the floating one a list view keeps above its paginator
+		WebElement button = (WebElement) js("var e = document.getElementById(arguments[0]); if (! e) return null;" +
+											"var shown = function(b) {return b && (b.getClientRects().length > 0) && (! b.disabled);};" +
+											"var b = e.querySelector('button.skyve-vue-list-grid-new');" +
+											"if (shown(b)) return b;" +
+											"b = e.querySelector('.skyve-vue-list-grid-fab:not(.skyve-vue-list-grid-fab-hidden) button');" +
+											"return shown(b) ? b : null;", gridId);
+		if (button == null) {
+			return false;
+		}
+		js("window.sailPage = true;");
+		click($(button));
+		// Wait for the new record's edit page to replace this one and load
+		waitForNewPage();
+		return true;
+	}
+
+	/**
+	 * Zooms into a row of a Vue list grid with its View Detail button (or by clicking the row, when the grid zooms on a
+	 * row click and has no button), and waits for the row's edit page.
+	 *
+	 * @param gridId	the grid's client id (its container)
+	 * @param row	the zero-based row
+	 * @return true if the row could be zoomed into and was
+	 */
+	public boolean vueListGridZoom(@Nonnull String gridId, int row) {
+		WebElement target = (WebElement) js(ROWS_JS + "var r = rows[arguments[1]]; if (! r) return null;" +
+											"var b = r.querySelector('td.skyve-vue-list-grid-action button');" +
+											"if (b) return b.disabled ? null : b;" +
+											"return t.querySelector('.skyve-vue-list-grid-zoomable') ? r.querySelector('td') : null;",
+											gridId, Integer.valueOf(row));
+		if (target == null) {
+			return false;
+		}
+		js("window.sailPage = true;");
+		click($(target));
+		// Wait for the row's edit page to replace this one and load
+		waitForNewPage();
+		return true;
+	}
+
+	/**
+	 * Selects a row of a Vue list grid that has a selected action, as a user would, and waits for the selected action.
+	 * <p>
+	 * RUNTIME BUG (report bug 7): the grid restores its selection from its session state when the page is shown again,
+	 * without running the selected action, so a row can show as selected while the view's selected id binding is empty
+	 * (and a click on it unselects it). A user clicks such a row twice: once to unselect it, once to select it.
+	 *
+	 * @param gridId	the grid's client id (its container)
+	 * @param row	the zero-based row
+	 * @return true if the row is selected
+	 * @throws IllegalStateException	if the grid has no such row, or the row does not show as selected after the click
+	 */
+	public boolean vueListGridSelect(@Nonnull String gridId, int row) {
+		String selectedJs = ROWS_JS + "var r = rows[arguments[1]]; if (! r) return null;" +
+								"return r.classList.contains('p-highlight') || (r.getAttribute('aria-selected') === 'true') || " +
+								"  (r.getAttribute('data-p-highlight') === 'true');";
+		Object selected = js(selectedJs, gridId, Integer.valueOf(row));
+		if (selected == null) {
+			throw new IllegalStateException(String.format("Grid %s has no row %d", gridId, Integer.valueOf(row)));
+		}
+		if (Boolean.TRUE.equals(selected)) {
+			trace("    the row shows as selected already (restored by the grid): click it to unselect it first");
+			selectRow(gridId, row);
+		}
+		selectRow(gridId, row);
+		if (! Boolean.TRUE.equals(js(selectedJs, gridId, Integer.valueOf(row)))) {
+			throw new IllegalStateException(String.format("Row %d of grid %s does not show as selected after clicking it", Integer.valueOf(row), gridId));
+		}
+		return true;
+	}
+
+	/**
 	 * Clicks a data row of a data table.
 	 *
 	 * @param gridId	the data table's client id
@@ -347,12 +437,13 @@ public class PrimeFacesSelenide extends Selenide<
 		// check grid is present
 		WebElement element = elementById(gridId);
 		if (element != null && element.isDisplayed() && element.isEnabled()) {
-			// Find the row
-			List<WebElement> cells = element.findElements(By.xpath(String.format(DATA_ROW_XPATH, Integer.valueOf(row + 1))));
-			if (cells.isEmpty()) {
+			// Find the row's first cell (of a PrimeFaces data table or a Vue list grid)
+			WebElement cell = (WebElement) js(ROWS_JS + "var r = rows[arguments[1]]; return r ? r.querySelector('td') : null;",
+												gridId, Integer.valueOf(row));
+			if (cell == null) {
 				throw new IllegalStateException(String.format("Grid %s has no row %d", gridId, Integer.valueOf(row)));
 			}
-			click($(cells.get(0)));
+			click($(cell));
 
 			waitForAjaxResponse();
 
@@ -819,10 +910,12 @@ public class PrimeFacesSelenide extends Selenide<
 	}
 
 	/** The data rows of a data table (the empty message row excluded), from its client id. */
+	/** Defines {@code rows}: the data rows of the grid {@code arguments[0]}, a PrimeFaces data table or a Vue list grid. */
 	private static final String ROWS_JS = "var t = document.getElementById(arguments[0]); if (! t) return null;" +
-											"var body = t.querySelector('tbody.ui-datatable-data');" +
+											"var body = t.querySelector('tbody.ui-datatable-data') || t.querySelector('tbody.p-datatable-tbody');" +
 											"var rows = body ? Array.from(body.children).filter(function(r) {" +
-											"  return r.tagName === 'TR' && (! r.classList.contains('ui-datatable-empty-message'));}) : [];";
+											"  return r.tagName === 'TR' && (! r.classList.contains('ui-datatable-empty-message')) && " +
+											"    (! r.classList.contains('p-datatable-emptymessage'));}) : [];";
 
 	/**
 	 * Finds the first data row of a grid with a cell whose text contains the given text (case-sensitively).
@@ -864,6 +957,20 @@ public class PrimeFacesSelenide extends Selenide<
 	 * @param gridId	the data table's client id
 	 */
 	public void refreshGrid(@Nonnull String gridId) {
+		if (isVueListGrid(gridId)) {
+			// A Vue list grid refetches its rows quietly when it is told it was rendered again (as after an ajax update)
+			js("var app = window[arguments[0]]; if (app && app.skyveConfig) app.skyveConfig.renderedAt = Date.now();", gridId);
+			// Wait for the refetch to start (its spinner shows from the fetch's debounce), then for its rows
+			try {
+				waitFor(d -> Boolean.TRUE.equals(js("var e = document.getElementById(arguments[0]);" +
+													"return !! (e && e.querySelector('.skyve-vue-list-grid-spinner-active'));", gridId)) ? Boolean.TRUE : null);
+			}
+			catch (@SuppressWarnings("unused") org.openqa.selenium.TimeoutException e) {
+				// it has fetched already
+			}
+			waitForAjaxResponse();
+			return;
+		}
 		// The grid's id can be a panel around the data table: reload the data table (filter() fetches it from the server)
 		js("var e = document.getElementById(arguments[0]); if (! e) return;" +
 				"var t = e.classList.contains('ui-datatable') ? e : e.querySelector('.ui-datatable');" +
@@ -1152,17 +1259,25 @@ public class PrimeFacesSelenide extends Selenide<
 			});
 			input.sendKeys(file.getAbsolutePath());
 			trace("    file chosen");
-			// Wait for the upload widget to accept the file (its Upload button enables), or for the page to take the
-			// file by itself (no Upload button or file input any more)
+			// Wait for the shown Upload button to be ready: an image opens the image editor, whose Upload button works
+			// once its cropper is ready (it then uploads by itself); another file enables the file upload's own Upload
+			// button. Or the page takes the file by itself (no Upload button or file input any more).
 			Optional<WebElement> upload = waitFor(d -> {
-				List<WebElement> buttons = d.findElements(By.cssSelector(".ui-fileupload-upload"));
-				if (buttons.isEmpty() || d.findElements(By.cssSelector("input[type=file]")).isEmpty()) {
+				Object button = ((JavascriptExecutor) d).executeScript(
+						"var shown = function(e) {return e && (e.getClientRects().length > 0) && (getComputedStyle(e).visibility !== 'hidden');};" +
+						"var editor = document.getElementById('cropperUpload');" +
+						"if (shown(editor)) {" +
+						"  var crop = document.getElementById('crop');" +
+						"  var box = editor.parentNode.querySelector('#cropperImageContainer .cropper-container .cropper-crop-box');" +
+						"  return (shown(crop) && (! crop.disabled) && box && (box.offsetWidth > 0)) ? crop : null;" +
+						"}" +
+						"var b = document.querySelector('.ui-fileupload-upload');" +
+						"if ((! b) || (! document.querySelector('input[type=file]'))) return 'none';" +
+						"return (shown(b) && (! b.disabled) && (! b.classList.contains('ui-state-disabled'))) ? b : null;");
+				if ("none".equals(button)) {
 					return Optional.<WebElement>empty();
 				}
-				WebElement button = buttons.get(0);
-				String styleClass = button.getDomAttribute("class");
-				return (button.isEnabled() && ((styleClass == null) || (! styleClass.contains("ui-state-disabled")))) ?
-							Optional.of(button) : null;
+				return (button instanceof WebElement element) ? Optional.of(element) : null;
 			});
 			if (upload.isPresent()) {
 				click($(upload.get()));
@@ -1274,7 +1389,10 @@ public class PrimeFacesSelenide extends Selenide<
 	@Override
 	public @Nonnull String describeMessages() {
 		List<String> messages = messages(ALL_MESSAGES_SELECTOR);
-		return messages.isEmpty() ? "no messages" : String.join(" | ", messages);
+		String result = messages.isEmpty() ? "no messages" : String.join(" | ", messages);
+		// the page's script errors since it was marked, which can stop a response being applied
+		Object errors = js("return (window.sailScriptErrors && window.sailScriptErrors.length) ? window.sailScriptErrors.join(' | ') : null;");
+		return (errors == null) ? result : result + " (page script errors: " + errors + ")";
 	}
 
 	@Override
@@ -1373,6 +1491,21 @@ public class PrimeFacesSelenide extends Selenide<
 	}
 
 	/**
+	 * Returns false from the enclosing script while a Vue list grid is not mounted in its container yet (the page's
+	 * {@code SKYVE.listgrid(...)} call mounts it after the container renders) or is fetching its rows (its paginator
+	 * spinner is active, from the fetch's debounce until the rows arrive).
+	 */
+	private static final String VUE_GRIDS_BUSY_JS = "if (document.querySelector('.skyve-vue-list-grid-spinner-active')) return false;" +
+														"var scripts = document.getElementsByTagName('script');" +
+														"for (var i = 0; i < scripts.length; i++) {" +
+														"  var text = scripts[i].textContent || '';" +
+														"  if (text.indexOf('SKYVE.listgrid(') < 0) continue;" +
+														"  var m = /\"containerId\"\\s*:\\s*\"([^\"]+)\"/.exec(text);" +
+														"  var c = m ? document.getElementById(m[1]) : null;" +
+														"  if (c && (! c.querySelector('.skyve-vue-list-grid'))) return false;" +
+														"}";
+
+	/**
 	 * Indicates if the page has loaded (and its template has set up its layout) and no PrimeFaces or jQuery ajax request is running.
 	 *
 	 * @return true when idle
@@ -1383,6 +1516,7 @@ public class PrimeFacesSelenide extends Selenide<
 										"if (document.body && document.body.classList.contains('is-preload')) return false;" +
 										"if (window.PrimeFaces && PrimeFaces.ajax && PrimeFaces.ajax.Queue && (! PrimeFaces.ajax.Queue.isEmpty())) return false;" +
 										"if (window.jQuery && (jQuery.active > 0)) return false;" +
+										VUE_GRIDS_BUSY_JS +
 										"var w = document.getElementById('wheelOfDeath_start');" +
 										"return (! w) || (w.offsetParent === null);"));
 	}
@@ -1452,7 +1586,8 @@ public class PrimeFacesSelenide extends Selenide<
 	 * @return the view state
 	 */
 	private String markPage() {
-		js("if (! window.sailHooked) {window.sailHooked = true; window.sailAjax = 0; window.sailAjaxStarts = 0;" +
+		js("if (! window.sailHooked) {window.sailHooked = true; window.sailAjax = 0; window.sailAjaxStarts = 0; window.sailScriptErrors = [];" +
+				"  window.addEventListener('error', function(e) {window.sailScriptErrors.push(String(e.message));});" +
 				"  window.addEventListener('beforeunload', function() {window.sailUnloading = true;});" +
 				"  if (window.jQuery) {" +
 				"    jQuery(document).on('pfAjaxComplete', function() {window.sailAjax++;});" +
@@ -1470,6 +1605,19 @@ public class PrimeFacesSelenide extends Selenide<
 	 */
 	private boolean responseArrived() {
 		return Boolean.TRUE.equals(js("return (window.sailAjaxMark === undefined) || (window.sailAjax > window.sailAjaxMark);"));
+	}
+
+	/**
+	 * Indicates if a request has started since {@link #markPage()}, or the page is unloading or has been replaced.
+	 */
+	private boolean requestSent() {
+		try {
+			return Boolean.TRUE.equals(js("return (window.sailAjaxStartMark === undefined) || (window.sailAjaxStarts > window.sailAjaxStartMark) || " +
+											"(window.sailAjax > window.sailAjaxMark) || (window.sailUnloading === true);"));
+		}
+		catch (@SuppressWarnings("unused") WebDriverException e) {
+			return true; // between pages
+		}
 	}
 
 	/**
@@ -1590,8 +1738,14 @@ public class PrimeFacesSelenide extends Selenide<
 			// Wait for nothing to be over the element's centre (a header settling, an overlay closing).
 			// While it is covered, centre it again: the page can scroll itself after the first centring
 			// (e.g. a select menu focusing its input late), leaving the element under the fixed header.
+			// In a Vue list grid, also wait for the element to stop moving: the grid lays its toolbar out again over the
+			// next animation frames when it is shown (e.g. its tab is selected), so it must be in the same place twice.
 			waitFor(d -> js(CENTRE_SCRIPT + "var e = arguments[0], r = e.getBoundingClientRect();" +
 								"if ((r.width === 0) && (r.height === 0)) return true;" +
+								"if (e.closest && e.closest('.skyve-vue-list-grid')) {" +
+								"  var at = [r.left, r.top, r.width, r.height].join(',');" +
+								"  if (e.sailAt !== at) {e.sailAt = at; return null;}" +
+								"}" +
 								"var t = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2);" +
 								"if ((t === null) || (t === e) || e.contains(t) || t.contains(e) || (t.tagName === 'LABEL' && t.htmlFor === e.id)) return true;" +
 								"centre(e); return null;",

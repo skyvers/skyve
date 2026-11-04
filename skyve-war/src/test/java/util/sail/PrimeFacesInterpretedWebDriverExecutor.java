@@ -1071,6 +1071,12 @@ public class PrimeFacesInterpretedWebDriverExecutor extends InterpretedWebDriver
 			if (success) {
 				break;
 			}
+			String gridClientId = PrimeFacesAutomationContext.clientId(listGridComponent);
+			if (selenide.isVueListGrid(gridClientId)) {
+				// A Vue list grid (skyve-vue's ListGrid): its controls are in the browser, not in the component tree
+				success = vueListGridGesture(step, rowStep, listGridIdentifier, gridClientId);
+				continue;
+			}
 			List<UIComponent> buttonComponents = context.getFacesComponents(buttonIdentifier);
 			if ((buttonComponents == null) && (step instanceof ListGridZoom) && (rowStep != null)) {
 				// No zoom button: the list zooms when a row is selected
@@ -1133,6 +1139,29 @@ public class PrimeFacesInterpretedWebDriverExecutor extends InterpretedWebDriver
 		checkSuccess(String.format("expected no error messages after <%s />", step.getClass().getSimpleName()));
 	}
 	
+	/**
+	 * Does a list grid gesture on a Vue list grid: New with its New button, zoom with a row's View Detail button (or a
+	 * row click, when the grid zooms on a row click), select with a row click.
+	 *
+	 * @return true if the gesture was done
+	 */
+	private boolean vueListGridGesture(@Nonnull Step step, @Nullable GridRowStep rowStep, @Nonnull String listGridIdentifier, @Nonnull String gridClientId) {
+		if (rowStep == null) {
+			selenide.trace(String.format("New row on list grid [%s] (%s)", listGridIdentifier, gridClientId));
+			return selenide.vueListGridNew(gridClientId);
+		}
+		Integer row = resolveRow(rowStep, gridClientId);
+		if (row == null) { // not on the page
+			return false;
+		}
+		if (step instanceof ListGridSelect) {
+			selenide.trace(String.format("Select on row %d on list grid [%s] (%s)", row, listGridIdentifier, gridClientId));
+			return selenide.vueListGridSelect(gridClientId, row.intValue());
+		}
+		selenide.trace(String.format("Zoom on row %d on list grid [%s] (%s)", row, listGridIdentifier, gridClientId));
+		return selenide.vueListGridZoom(gridClientId, row.intValue());
+	}
+
 	@SuppressWarnings("null") // a null here fails the test; uses a nullable result where the API expects non-null; checks values the annotations say are non-null
 	private PushEditContext listGridContext(String queryName, String documentName, String modelName, Step step) {
 		PushEditContext result = new PushEditContext();
