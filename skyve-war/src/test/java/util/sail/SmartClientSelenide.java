@@ -693,37 +693,53 @@ public class SmartClientSelenide extends Selenide<
 			driver.switchTo().defaultContent();
 		}
 		trace("    upload pressed");
-		// Waits for the upload to be processed: the upload page closes its window, or shows why it could not
+		// Waits for the upload to be processed: the upload page closes its window (content uploads), or reports the
+		// outcome in its own messages (upload actions), or shows why it could not
 		WebElement uploadFrame = frame;
-		until("the upload to finish", d -> {
+		String outcome = until("the upload to finish", d -> {
 			if (! (script("return _sail.uploadFrame()") instanceof WebElement)) {
-				return Boolean.TRUE;
+				return "closed";
 			}
-			String problem = uploadPageProblem(uploadFrame);
-			if (problem != null) {
-				throw new IllegalStateException("The upload failed: " + problem);
+			List<String> result = uploadPageOutcome(uploadFrame);
+			if (result.isEmpty()) {
+				return null;
 			}
-			return null;
+			if ("error".equals(result.get(0))) {
+				throw new IllegalStateException("The upload failed: " + result.get(1));
+			}
+			return result.get(1);
 		});
+		if (! "closed".equals(outcome)) {
+			trace("    the upload page says: " + outcome + " - close it");
+			if (! (script("return _sail.windowClose()") instanceof WebElement close)) {
+				throw new IllegalStateException("The upload window has no close button");
+			}
+			click($(close));
+		}
 		waitForFullPageResponse();
 	}
 
 	/**
-	 * Reads an error shown on the upload page.
+	 * Reads the outcome the upload page shows: an error, or an information message.
 	 *
 	 * @param frame	the upload page's iframe
-	 * @return the error, or {@code null}
+	 * @return {severity, text}, or empty while it shows neither
 	 */
-	private @Nullable String uploadPageProblem(@Nonnull WebElement frame) {
+	@SuppressWarnings("unchecked")
+	private @Nonnull List<String> uploadPageOutcome(@Nonnull WebElement frame) {
 		try {
 			driver.switchTo().frame(frame);
-			Object problem = script("var e = Array.from(document.querySelectorAll('.ui-growl-error, .ui-growl-fatal, .ui-messages-error')).find(function(x) {" +
+			Object result = script("var e = Array.from(document.querySelectorAll('.ui-growl-error, .ui-growl-fatal, .ui-messages-error')).find(function(x) {" +
 									"  return x.getClientRects().length > 0 && (x.innerText || '').trim();});" +
-									"return e ? e.innerText.replace(/\\s+/g, ' ').trim() : null;");
-			return (problem == null) ? null : String.valueOf(problem);
+									"if (e) return ['error', e.innerText.replace(/\\s+/g, ' ').trim()];" +
+									"var i = Array.from(document.querySelectorAll('.ui-growl-info, .ui-messages-info')).find(function(x) {" +
+									"  return x.getClientRects().length > 0 && (x.innerText || '').trim();});" +
+									"if (i) return ['info', i.innerText.replace(/\\s+/g, ' ').trim()];" +
+									"return [];");
+			return (result instanceof List<?> list) ? (List<String>) list : List.of();
 		}
 		catch (@SuppressWarnings("unused") WebDriverException e) {
-			return null;
+			return List.of();
 		}
 		finally {
 			driver.switchTo().defaultContent();
@@ -1554,11 +1570,18 @@ public class SmartClientSelenide extends Selenide<
 		catch (@SuppressWarnings("unused") StaleElementReferenceException e) {
 			throw new IllegalStateException("The element went stale before it could be clicked: is the view re-rendering?");
 		}
-		catch (WebDriverException e) {
-			// This could occur when the control is behind a floating element
-			trace("    Could not click on the element (" + firstLine(e.getMessage()) + ") - scroll it into view and try again");
-			((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView({block: 'center'});", element);
-			clickIt(element, doubleClick);
+		catch (WebDriverException | com.codeborne.selenide.ex.UIAssertionError e) {
+			// Another element took the click: one of the same SmartClient widget's nested elements (click that), or a
+			// floating element (scroll the target to the centre and try again)
+			Object same = script("return _sail.sameCanvasAt(arguments[0])", target);
+			if (same instanceof WebElement top) {
+				clickIt($(top), doubleClick);
+			}
+			else {
+				trace("    Could not click on the element (" + firstLine(e.getMessage()) + ") - scroll it into view and try again");
+				((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView({block: 'center'});", element);
+				clickIt(element, doubleClick);
+			}
 		}
 	}
 

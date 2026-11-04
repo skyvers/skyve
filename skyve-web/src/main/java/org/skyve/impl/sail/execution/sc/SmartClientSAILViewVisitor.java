@@ -514,7 +514,14 @@ public class SmartClientSAILViewVisitor {
 	 */
 	private void visit(@Nullable String viewType, @Nonnull ActionImpl action) {
 		ImplicitActionName implicitName = action.getImplicitName();
-		if (implicitName != null) {
+		if (ImplicitActionName.Upload.equals(implicitName)) {
+			// an upload action's button carries the action's name (its class), which <upload action=""> uses
+			String name = action.getName();
+			if (name != null) {
+				visitAction(name);
+			}
+		}
+		else if (implicitName != null) {
 			visit(viewType, implicitName);
 		} else {
 			visitAction(action.getName());

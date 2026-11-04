@@ -407,7 +407,7 @@ public class SmartClientInterpretedWebDriverExecutor extends InterpretedWebDrive
 
 		// Guard against unsupported actions
 		if (a != null && a.getImplicitName() != null && EXCLUDED_IMPLICIT_ACTIONS.contains(a.getImplicitName())) {
-			throw new MetaDataException(String.format("<%s /> is not supported", tagName));
+			throw new MetaDataException(String.format("<%s /> is an upload action: use <upload action=\"%s\" file=\"...\" />", tagName, tagName));
 		}
 
 		String identifier = button.getIdentifier(context);

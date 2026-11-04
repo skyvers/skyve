@@ -356,10 +356,24 @@
 		}
 	}
 
-	/** The SmartClient dialog (isc.say, isc.warn, isc.ask all share isc.Dialog.Warn) if it is showing. */
+	/**
+	 * The dialog on top, if one is showing: isc.say, isc.warn and isc.ask share isc.Dialog.Warn, and Skyve shows a
+	 * server-side question in a Dialog of its own.
+	 */
+	function activeDialog() {
+		var top = null;
+		canvases().forEach(function (c) {
+			if (isc.isA.Dialog(c) && c.isDrawn() && c.isVisible() && (!top || c.getZIndex() > top.getZIndex())) {
+				top = c;
+			}
+		});
+		return top;
+	}
+
+	/** The dialog on top, as { kind: say|warn|ask, title, message, buttons }, or null. */
 	S.dialog = function () {
-		var d = isc.Dialog && isc.Dialog.Warn;
-		if (!d || !isc.isA.Canvas(d) || d.destroyed || !d.isDrawn() || !d.isVisible()) {
+		var d = activeDialog();
+		if (!d) {
 			return null;
 		}
 		var icon = String(d.icon || "");
@@ -373,8 +387,8 @@
 	};
 
 	function dialogButton(name) {
-		var d = isc.Dialog && isc.Dialog.Warn;
-		if (!S.dialog() || !d.toolbar) {
+		var d = activeDialog();
+		if (!d || !d.toolbar) {
 			return null;
 		}
 		var wanted = {
@@ -383,7 +397,9 @@
 			no: [isc.Dialog.NO_BUTTON_TITLE, "No"],
 			cancel: [isc.Dialog.CANCEL_BUTTON_TITLE, "Cancel"]
 		}[name] || [name];
-		var members = d.toolbar.getMembers();
+		var members = d.toolbar.getMembers().filter(function (b) {
+			return b.isVisible && b.isVisible();
+		});
 		for (var i = 0; i < members.length; i++) {
 			var title = strip(members[i].getTitle ? members[i].getTitle() : members[i].title);
 			if (wanted.indexOf(title) >= 0) {
@@ -1152,6 +1168,25 @@
 			return String(f.src || "").indexOf("upload.xhtml") >= 0 && f.getClientRects().length > 0;
 		});
 		return frames.length ? frames[frames.length - 1] : null;
+	};
+
+	/** The close button of the top-most window. */
+	S.windowClose = function () {
+		var stack = isc.WindowStack._stack || [];
+		var top = stack[stack.length - 1];
+		var button = top && top.closeButton;
+		return button ? button.getClipHandle() : null;
+	};
+
+	/**
+	 * The element at the centre of an element, if it belongs to the same canvas (SmartClient draws some widgets in
+	 * several nested elements; the top one takes the click).
+	 */
+	S.sameCanvasAt = function (element) {
+		var rect = element.getBoundingClientRect();
+		var hit = document.elementFromPoint(rect.left + rect.width / 2, rect.top + rect.height / 2);
+		var mine = canvasOf(element);
+		return (hit && mine && canvasOf(hit) === mine) ? hit : null;
 	};
 
 	/** Sets a slider through its own widget API, as a drag would, and returns the new value. */
