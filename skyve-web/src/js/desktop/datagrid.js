@@ -561,6 +561,10 @@ isc.BizDataGrid.addMethods({
 		const existing = new Set(grid.getData().map((record) => record.bizId));
 		this._view.doAction("Add", false, this._b, null, null, null, (data, success) => {
 			if (success) {
+				// Mark the view dirty, as editing or removing a row does, so Zoom Out posts to the
+				// server (which validates) and unsaved changes are noticed.
+				this._view._vm.setValue("_changed", true);
+				this._view._vm.setValue("_apply", true);
 				const rowNum = grid.getData().findIndex((record) => !existing.has(record.bizId));
 				if (rowNum >= 0) {
 					grid.selectSingleRecord(rowNum);
