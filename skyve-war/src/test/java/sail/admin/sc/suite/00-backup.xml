@@ -12,12 +12,20 @@
 		<testSuccess />
 		<switchMode />
 	</before>
+	<interaction name="Precondition: no stray backup or restore marker">
+		<method>
+			<comment>99-restore.xml restores the first backup listed (the oldest), so a stray backup (an interrupted run, a suite whose restore failed) would roll the database back to an unknown state. If this fails, delete the stray backups (Data Maintenance, Backup/Restore) and any SAIL restore marker data group, check the data, and run again. SmartClientAdminSuiteSailIT then does not restore.</comment>
+			<navigateEdit module="admin" document="DataMaintenance" />
+			<tabSelect path="Backup/Restore" />
+			<testGridRows module="admin" query="BackupsModel" maxRows="0" />
+			<navigateMenu module="admin" item="Security Admin/Data Groups" />
+			<testGridRows module="admin" document="DataGroup" rowContaining="SAIL restore marker" maxRows="0" />
+		</method>
+	</interaction>
 	<interaction name="Back up the data before the suite">
 		<method>
 			<navigateEdit module="admin" document="DataMaintenance" />
 			<tabSelect path="Backup/Restore" />
-			<comment>Precondition: no other backup. 99-restore.xml restores the first backup listed (the oldest), so a stray backup (an interrupted run, a suite whose restore failed) would roll the database back to an unknown state. If the next step fails, delete the stray backups (Data Maintenance, Backup/Restore) and run again.</comment>
-			<testGridRows module="admin" query="BackupsModel" maxRows="0" />
 			<dataEnter binding="includeContent" value="true" />
 			<dataEnter binding="includeAuditLog" value="true" />
 			<comment>No redaction, so a restore keeps admin's password</comment>
@@ -42,8 +50,6 @@
 	<interaction name="Leave a marker that the restore must remove">
 		<method>
 			<navigateMenu module="admin" item="Security Admin/Data Groups" />
-			<comment>Precondition: no marker is left from an earlier run (whose restore did not run). If the next step fails, delete it and check the data.</comment>
-			<testGridRows module="admin" document="DataGroup" rowContaining="SAIL restore marker" maxRows="0" />
 			<listGridNew module="admin" document="DataGroup" />
 			<dataEnter binding="name" value="SAIL restore marker" />
 			<save />

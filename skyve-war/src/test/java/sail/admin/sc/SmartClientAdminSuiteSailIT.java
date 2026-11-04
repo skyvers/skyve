@@ -35,6 +35,8 @@ class SmartClientAdminSuiteSailIT extends AbstractSmartClientInterpretedSail {
 		"98-destructive.xml"
 	};
 	private static final String RESTORE = "99-restore.xml";
+	// 00's interactions after its first one, which checks that the server has no stray backup or marker
+	private static final List<String> AFTER_PRECONDITION = List.of("Interaction \"Back up the data", "Interaction \"Leave a marker");
 
 	public SmartClientAdminSuiteSailIT() {
 		super(new BrowserConfiguration()
@@ -57,7 +59,12 @@ class SmartClientAdminSuiteSailIT extends AbstractSmartClientInterpretedSail {
 				sailResource(FOLDER + file);
 			}
 			catch (AssertionError e) {
-				// Stop at the first failing file, as later files build on earlier ones, but still restore
+				// Stop at the first failing file, as later files build on earlier ones, but still restore,
+				// unless 00 failed before its precondition passed: then a stray backup may be listed first, and restoring would restore it
+				String message = String.valueOf(e.getMessage());
+				if (file.equals(FILES[0]) && AFTER_PRECONDITION.stream().noneMatch(message::contains)) {
+					backedUp = false;
+				}
 				outcomes.add(() -> {
 					throw new AssertionError(file + " failed: " + e.getMessage(), e);
 				});
