@@ -138,31 +138,27 @@ public class SmartClientSelenide extends Selenide<
 	}
 
 	/**
-	 * Signs in, waits for the outcome, and on success selects the SmartClient UX/UI.
-	 * <p>
-	 * Desktop browsers are routed to PrimeFaces by default, so this clicks the PrimeFaces
-	 * "Switch mode" menu item, as a user would, which sets the session's UX/UI to {@code desktop}.
-	 * A failed sign-in leaves the browser on the sign-in page and is traced, not thrown,
-	 * because a script may sign in with bad credentials on purpose.
+	 * Signs in and waits for the outcome (see {@link Selenide#login(String, String, String)}).
+	 * Signing in does not switch the UX/UI: {@code <switchMode/>} does.
 	 */
 	@Override
 	public void login(@Nullable String customer, @Nonnull String username, @Nonnull String password) {
 		super.login(customer, username, password);
-		if (getLoginError() == null) {
-			selectSmartClient();
-		}
-		else {
+		if (getLoginError() != null) {
 			trace(String.format("    Sign in as %s failed: %s", username, getLoginError()));
 		}
 	}
 
 	/**
-	 * Makes the signed-in session use the SmartClient UX/UI.
+	 * Makes the signed-in session use the SmartClient UX/UI, as a user would: desktop browsers are routed to
+	 * PrimeFaces by default, so this clicks the PrimeFaces "Switch mode" menu item, which sets the session's
+	 * UX/UI to {@code desktop} and reloads the page. Does nothing if SmartClient is already showing.
 	 *
-	 * @throws IllegalStateException if the page has no "Switch mode" link or SmartClient does not load
+	 * @throws IllegalStateException if the page has no "Switch mode" control or SmartClient does not load
 	 */
-	private void selectSmartClient() {
+	public void switchToSmartClient() {
 		if (isSmartClientPage()) {
+			trace("    SmartClient is already showing");
 			return;
 		}
 		Object switched = script("""

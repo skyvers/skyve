@@ -13,6 +13,7 @@
 	<before>
 		<login user="admin" password="admin" />
 		<testSuccess />
+		<switchMode />
 	</before>
 	<interaction name="Configuration: save safe values (mail is only logged)">
 		<method>

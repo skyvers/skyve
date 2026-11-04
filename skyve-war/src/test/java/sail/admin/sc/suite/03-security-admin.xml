@@ -11,6 +11,7 @@
 	<before>
 		<login user="admin" password="admin" />
 		<testSuccess />
+		<switchMode />
 	</before>
 	<interaction name="Data Groups: create, find and delete">
 		<method>
@@ -84,6 +85,7 @@
 			<logout />
 			<login user="sail{run}" password="Sail{run}Pass1" />
 			<testSuccess />
+			<switchMode />
 			<comment>The user's roles decide the menu</comment>
 			<testMenu module="admin" item="Contacts" />
 			<testMenu module="admin" item="Password" />
@@ -104,9 +106,11 @@
 			<testFailure />
 			<login user="sail{run}" password="Sail{run}Pass2" />
 			<testSuccess />
+			<switchMode />
 			<logout />
 			<login user="admin" password="admin" />
 			<testSuccess />
+			<switchMode />
 		</method>
 	</interaction>
 	<interaction name="Sign In History and Security Log show the sign ins">

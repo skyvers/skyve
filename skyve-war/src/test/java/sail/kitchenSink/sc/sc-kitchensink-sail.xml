@@ -22,6 +22,7 @@
 	<interaction name="Login">
 		<method>
 			<login user="admin" password="admin" />
+			<switchMode />
 		</method>
 	</interaction>
 

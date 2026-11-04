@@ -7,6 +7,7 @@
 	<interaction name="Login/Logout">
 		<method>
 			<login user="admin" password="admin" />
+			<switchMode />
 			<logout />
 		</method>
 	</interaction>
@@ -16,6 +17,7 @@
 			<testFailure />
 			<login user="admin" password="admin" />
 			<testSuccess />
+			<switchMode />
 		</method>
 	</interaction>
 	<!-- Changing admin's password to "admin" fails the password policy, and a real change would lock admin

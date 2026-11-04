@@ -7,6 +7,7 @@
 	<before>
 		<login user="admin" password="admin" />
 		<testSuccess />
+		<switchMode />
 	</before>
 	<interaction name="Reports: the enabled reports list">
 		<method>

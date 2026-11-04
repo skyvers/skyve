@@ -118,6 +118,30 @@ public class SmartClientInterpretedWebDriverExecutor extends InterpretedWebDrive
 		this.selenide = selenide;
 	}
 
+	// The automation's UX/UI, which <switchMode/> switches to
+	private String automationUxUi;
+
+	@Override
+	public void executeAutomation(org.skyve.metadata.sail.language.Automation automation) {
+		automationUxUi = automation.getUxui();
+		super.executeAutomation(automation);
+	}
+
+	/**
+	 * Switches the session to the automation's renderer with the user-visible control. This harness drives
+	 * SmartClient, so the automation's UX/UI must be {@value org.skyve.metadata.router.UxUi#DESKTOP_NAME}.
+	 */
+	@Override
+	public void executeSwitchMode(org.skyve.metadata.sail.language.step.interaction.session.SwitchMode switchMode) {
+		if (! org.skyve.metadata.router.UxUi.DESKTOP_NAME.equals(automationUxUi)) {
+			throw new MetaDataException(String.format("<switchMode/> targets PrimeFaces for uxui %s, but this executor drives SmartClient " +
+														"(uxui %s): run the script with the PrimeFaces executor",
+														automationUxUi, org.skyve.metadata.router.UxUi.DESKTOP_NAME));
+		}
+		selenide.trace("Switch mode to SmartClient");
+		selenide.switchToSmartClient();
+	}
+
 	/**
 	 * Runs the script, then lets SmartClient settle.
 	 */
