@@ -4252,3 +4252,17 @@ mark {
 		transition: left 0.5s ease;
 	}
 }
+
+/* The fixed action bar's space is held by its in-flow wrapper, which is inside the view.
+   A docked view sidebar sits beside the view, so it started level with that wrapper and
+   slid under the bar. Hold the space on #sidebarWrapper instead so the view and a docked
+   sidebar both start below the bar. A floating sidebar is position:fixed so is unaffected. */
+#sidebarWrapper:has(> .ui-g > :is(.skyve-action-bar-wrapper, .action-bar-wrapper) > :is(.skyve-action-bar, .action-bar) > :is(.ui-toolbar-group-left, .ui-toolbar-group-right) > *) {
+	padding-top: var(--skyve-editorial-actionbar-height);
+}
+
+#sidebarWrapper > .ui-g > .skyve-action-bar-wrapper,
+#sidebarWrapper > .ui-g > .action-bar-wrapper {
+	height: 0;
+	min-height: 0;
+}
