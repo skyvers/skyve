@@ -81,6 +81,8 @@
 
   <xs:element name="save" type="tns:save"/>
 
+  <xs:element name="switchMode" type="tns:switchMode"/>
+
   <xs:element name="tabSelect" type="tns:tabSelect"/>
 
   <xs:element name="testDataEnter" type="tns:testDataEnter"/>
@@ -166,6 +168,7 @@
         <xs:element ref="tns:testWidget"/>
         <xs:element ref="tns:navigateMenu"/>
         <xs:element ref="tns:testMenu"/>
+        <xs:element ref="tns:switchMode"/>
       </xs:choice>
     </xs:sequence>
   </xs:complexType>
@@ -512,6 +515,10 @@
     <xs:attribute name="present" type="xs:boolean"/>
   </xs:complexType>
 
+  <xs:complexType name="switchMode">
+    <xs:sequence/>
+  </xs:complexType>
+
   <xs:complexType name="interaction">
     <xs:sequence>
       <xs:element name="before" type="tns:procedure" form="qualified" minOccurs="0"/>
@@ -566,6 +573,7 @@
               <xs:element ref="tns:testWidget"/>
               <xs:element ref="tns:navigateMenu"/>
               <xs:element ref="tns:testMenu"/>
+              <xs:element ref="tns:switchMode"/>
             </xs:choice>
           </xs:sequence>
         </xs:complexType>

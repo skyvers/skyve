@@ -45,6 +45,7 @@ import org.skyve.metadata.sail.language.step.interaction.lookup.LookupDescriptio
 import org.skyve.metadata.sail.language.step.interaction.lookup.LookupDescriptionPick;
 import org.skyve.metadata.sail.language.step.interaction.session.Login;
 import org.skyve.metadata.sail.language.step.interaction.session.Logout;
+import org.skyve.metadata.sail.language.step.interaction.session.SwitchMode;
 
 @SuppressWarnings("static-method")
 class SailExecutorTest {
@@ -124,7 +125,7 @@ class SailExecutorTest {
 		}
 	}
 
-	private static final String[] UNSUPPORTED = {"upload", "testMessage", "testGridRows", "testWidget", "navigateMenu", "testMenu"};
+	private static final String[] UNSUPPORTED = {"upload", "testMessage", "testGridRows", "testWidget", "navigateMenu", "testMenu", "switchMode"};
 
 	private static void executeUnsupportedSteps(ScriptExecutor<?> executor) {
 		executor.executeUpload(new Upload());
@@ -133,6 +134,7 @@ class SailExecutorTest {
 		executor.executeTestWidget(new TestWidget());
 		executor.executeNavigateMenu(new NavigateMenu());
 		executor.executeTestMenu(new TestMenu());
+		executor.executeSwitchMode(new SwitchMode());
 	}
 
 	private static final class TestContext extends AutomationContext<GenerateListContext, GenerateEditContext> {

@@ -47,6 +47,7 @@ import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateTree
 import org.skyve.metadata.sail.language.step.interaction.navigation.TestMenu;
 import org.skyve.metadata.sail.language.step.interaction.session.Login;
 import org.skyve.metadata.sail.language.step.interaction.session.Logout;
+import org.skyve.metadata.sail.language.step.interaction.session.SwitchMode;
 import org.skyve.web.WebAction;
 
 import jakarta.annotation.Nonnull;
@@ -675,6 +676,17 @@ public abstract class InterpretedWebDriverExecutor<
 	@Override
 	public void executeTestMenu(@Nonnull TestMenu test) {
 		throw notImplementedYet("<testMenu/>");
+	}
+
+	/**
+	 * Throws until a renderer implements {@code <switchMode/>}.
+	 *
+	 * @param switchMode the step
+	 * @throws UnsupportedOperationException always
+	 */
+	@Override
+	public void executeSwitchMode(@Nonnull SwitchMode switchMode) {
+		throw notImplementedYet("<switchMode/>");
 	}
 
 	/**
