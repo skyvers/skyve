@@ -7,8 +7,8 @@
 	auto complete), dataGridEdit (no row edit gesture).
 	dataGridSelect and listGridSelect need a grid with a selectedIdBinding (selecting a row of other grids zooms in PrimeFaces);
 	the kitchen sink has none.
-	Not here, as the language cannot express them yet: content upload, contentSignature, list and check membership,
-	data entry into inline grid cells.
+	Not here, as the language cannot express them yet: contentSignature, data entry into inline grid cells.
+	Rows are found with rowContaining and {run}-unique values, so the suite can run in any order, and again, on the same server.
 -->
 <automation uxui="tablet"
 			userAgentType="tablet"
@@ -29,12 +29,13 @@
 		<method>
 			<navigateList module="kitchensink" document="LookupDescription" />
 			<listGridNew module="kitchensink" document="LookupDescription" />
-			<dataEnter binding="description" value="SAIL lookup value" />
-			<testValue binding="description" value="SAIL lookup value" />
+			<dataEnter binding="description" value="SAIL lookup {run}" />
+			<testValue binding="description" value="SAIL lookup {run}" />
 			<save />
 			<testSuccess />
-			<testValue binding="description" value="SAIL lookup value" />
+			<testValue binding="description" value="SAIL lookup {run}" />
 			<ok />
+			<testGridRows module="kitchensink" document="LookupDescription" rowContaining="SAIL lookup {run}" minRows="1" maxRows="1" />
 		</method>
 	</interaction>
 	<interaction name="Kitchen Sink: generated test data">
@@ -91,26 +92,31 @@
 			<dataEnter binding="timestamp" value="07-Nov-2025 15:43:16" />
 			<testValue binding="timestamp" value="07-Nov-2025 15:43:16" />
 			<lookupDescriptionPick binding="lookupDescription" row="0" />
-			<lookupDescriptionAutoComplete binding="lookupDescription" search="SAIL lookup" />
-			<testValue binding="lookupDescription" value="SAIL lookup value" />
+			<lookupDescriptionAutoComplete binding="lookupDescription" search="SAIL lookup {run}" />
+			<testValue binding="lookupDescription" value="SAIL lookup {run}" />
 			<tabSelect path="Data Grids" />
 			<dataGridNew binding="containerGrid" />
 			<dataEnter binding="url" value="https://example.com" />
 			<testValue binding="url" value="https://example.com" />
 			<zoomOut />
+			<testGridRows binding="containerGrid" minRows="1" maxRows="1" />
 			<dataGridZoom binding="containerGrid" row="0" />
 			<testValue binding="url" value="https://example.com" />
 			<zoomOut />
 			<dataGridRemove binding="containerGrid" row="0" />
+			<testGridRows binding="containerGrid" maxRows="0" />
 			<dataGridNew binding="orderedGrid" />
 			<dataEnter binding="booleanFlag" value="true" />
 			<dataEnter binding="colour" value="#993366" />
 			<dataEnter binding="date" value="07-Nov-2025" />
 			<zoomOut />
-			<dataGridZoom binding="orderedGrid" row="0" />
+			<dataGridZoom binding="orderedGrid" rowContaining="#993366" />
 			<testValue binding="colour" value="#993366" />
 			<testValue binding="date" value="07-Nov-2025" />
+			<comment>Decline the removal first, then remove</comment>
+			<remove confirm="false" />
 			<remove />
+			<testGridRows binding="orderedGrid" maxRows="0" />
 			<comment>An inline grid adds and removes rows in place</comment>
 			<dataGridNew binding="inlineGrid" />
 			<dataGridRemove binding="inlineGrid" row="0" />
@@ -130,7 +136,9 @@
 			<testValue binding="geometry" value="POINT (138.9596428009031 -34.521214140240495)" />
 			<testValue binding="slider" value="30" />
 			<testValue binding="markup" value="Test paragraph" />
-			<testValue binding="lookupDescription" value="SAIL lookup value" />
+			<testValue binding="lookupDescription" value="SAIL lookup {run}" />
+			<comment>Upload into a content widget</comment>
+			<upload binding="contentLink" file="sail/files/sail-upload.txt" />
 			<comment>Kitchen sink is transient and the dev role cannot save it</comment>
 			<cancel />
 		</method>
@@ -149,22 +157,74 @@
 			<testValue binding="outcome" value="Run Shared ran" />
 			<dataEnter binding="eventText" value="changed" />
 			<testValue binding="outcome" value="Run From Event ran" />
+			<upload action="ActionsUpload" file="sail/files/sail-upload.txt" />
+			<!--
+				RUNTIME BUG (tablet UX/UI): after an action upload the upload page stays open and the view is not refreshed,
+				so the outcome only shows after the next rerender. The executor closes the upload page; the check box rerenders.
+			-->
+			<dataEnter binding="disableUpload" value="true" />
+			<testValue binding="outcome" value="Actions Upload ran" />
+			<testWidget action="ActionsUpload" enabled="false" />
+			<dataEnter binding="disableUpload" value="false" />
+			<comment>Each check box makes a trigger unavailable</comment>
+			<testWidget action="RunFromToolbar" enabled="true" />
+			<dataEnter binding="disableToolbarAction" value="true" />
+			<testWidget action="RunFromToolbar" enabled="false" />
+			<dataEnter binding="disableToolbarAction" value="false" />
+			<testWidget action="RunFromToolbar" enabled="true" />
+			<testWidget binding="eventText" visible="true" />
+			<dataEnter binding="hideEventText" value="true" />
+			<testWidget binding="eventText" visible="false" />
+			<dataEnter binding="hideEventText" value="false" />
+			<testWidget binding="eventText" />
+			<testWidget tab="Tab button" enabled="true" />
+			<dataEnter binding="disableTab" value="true" />
+			<testWidget tab="Tab button" enabled="false" />
+			<dataEnter binding="disableTab" value="false" />
+			<testWidget binding="outcome" enabled="false" />
 			<tabSelect path="Rows" />
 			<dataGridNew binding="rows" />
 			<dataEnter binding="name" value="SAIL row" />
 			<testValue binding="name" value="SAIL row" />
 			<zoomOut />
-			<dataGridZoom binding="rows" row="0" />
+			<testGridRows binding="rows" rowContaining="SAIL row" minRows="1" maxRows="1" />
+			<dataGridZoom binding="rows" rowContaining="SAIL row" />
 			<testValue binding="name" value="SAIL row" />
 			<zoomOut />
 			<save />
 			<testSuccess />
+			<comment>Decline the delete first, then delete</comment>
+			<delete confirm="false" />
+			<testWidget action="Delete" />
 			<delete />
+		</method>
+	</interaction>
+	<interaction name="Dialogs Fixture: confirmations and server-side questions">
+		<method>
+			<navigateEdit module="kitchensink" document="DialogsFixture" />
+			<comment>No confirm attribute answers yes; confirm="false" answers no</comment>
+			<action name="AskYesNo" />
+			<testValue binding="outcome" value="Yes or No answered Yes" />
+			<action name="AskYesNo" confirm="false" />
+			<testValue binding="outcome" value="Yes or No answered No" />
+			<comment>A client-side confirmation, then two questions in turn</comment>
+			<action name="AskTwice" confirm="true" />
+			<testValue binding="outcome" value="Ask twice answered YES then OK" />
+			<comment>Declining the client-side confirmation sends nothing</comment>
+			<action name="AskTwice" confirm="false" />
+			<testValue binding="outcome" value="Ask twice answered YES then OK" />
+			<action name="AskOnce" />
+			<testValue binding="outcome" value="Ask once answered OK" />
+			<cancel />
 		</method>
 	</interaction>
 	<interaction name="Escaping Fixture: zoom in">
 		<method>
 			<navigateEdit module="kitchensink" document="EscapingFixture" />
+			<comment>Zooming in validates the required fields first</comment>
+			<zoomIn binding="zoomTarget" testSuccess="false" />
+			<testMessage contains="required message" type="error" />
+			<testFailure message="required message" />
 			<dataEnter binding="text1" value="First" />
 			<dataEnter binding="text2" value="Second" />
 			<zoomIn binding="zoomTarget" />
@@ -185,8 +245,8 @@
 			<popContext />
 			<navigateLink href="?a=l&amp;m=kitchensink&amp;q=LookupDescription" />
 			<pushListContext module="kitchensink" document="LookupDescription" />
-			<listGridZoom module="kitchensink" document="LookupDescription" row="0" />
-			<testValue binding="description" value="SAIL lookup value" />
+			<listGridZoom module="kitchensink" document="LookupDescription" rowContaining="SAIL lookup {run}" />
+			<testValue binding="description" value="SAIL lookup {run}" />
 			<popContext />
 			<popContext />
 			<navigateMap module="kitchensink" document="ListAttributes" geometryBinding="geometry" />
@@ -198,9 +258,26 @@
 	<interaction name="Lookup values: zoom and delete">
 		<method>
 			<navigateList module="kitchensink" document="LookupDescription" />
-			<listGridZoom module="kitchensink" document="LookupDescription" row="0" />
-			<testValue binding="description" value="SAIL lookup value" />
+			<listGridZoom module="kitchensink" document="LookupDescription" rowContaining="SAIL lookup {run}" />
+			<testValue binding="description" value="SAIL lookup {run}" />
 			<delete />
+			<testGridRows module="kitchensink" document="LookupDescription" rowContaining="SAIL lookup {run}" maxRows="0" />
+		</method>
+	</interaction>
+	<interaction name="Menus">
+		<method>
+			<testMenu module="kitchensink" />
+			<testMenu module="kitchensink" item="Actions Fixture" />
+			<testMenu module="admin" item="Security Admin/Users" />
+			<comment>Heap Dumps is a desktop (SmartClient) menu item</comment>
+			<testMenu module="admin" item="DevOps/Heap Dumps" present="false" />
+			<navigateMenu module="kitchensink" item="Actions Fixture" />
+			<action name="RunFromToolbar" />
+			<testValue binding="outcome" value="Run From Toolbar ran" />
+			<navigateMenu module="kitchensink" item="Lookup values" />
+			<testGridRows module="kitchensink" document="LookupDescription" rowContaining="SAIL lookup {run}" maxRows="0" />
+			<navigateMenu module="admin" item="Security Admin/Users" />
+			<testWidget tab="Users" />
 		</method>
 	</interaction>
 	<interaction name="Logout">
