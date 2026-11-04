@@ -34,15 +34,13 @@
 	-->
 	<interaction name="Menu User Dashboard">
 		<method>
-			<!--
-				RUNTIME BUG (race): Update My Details straight after signing in sometimes fails with an optimistic lock error
-				("updated by user admin ... after you looked at it"), as something saves the user just as the dashboard opens.
-				Wait for the sign in to settle first.
-			-->
-			<pause millis="3000" />
 			<navigateEdit module="admin" document="UserDashboard" />
 			<testDataEnter />
+			<!--
+				RUNTIME BUG: Update My Details often fails with an optimistic lock error ("updated by user admin at ... after you
+				looked at it") when the server has handled sign ins or a restore since start up. See the PF admin report.
 			<action name="UpdateMyDetails" />
+			-->
 		</method>
 	</interaction>
 	<interaction name="Menu Contacts">

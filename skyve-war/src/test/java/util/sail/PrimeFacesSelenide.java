@@ -61,8 +61,6 @@ public class PrimeFacesSelenide extends Selenide<
 	PrimeFacesTextCommand,
 	PrimeFacesSelectOneCommand> {
 
-	/** How long to wait for an ajax request or a page to complete. */
-	private static final Duration RESPONSE_TIMEOUT = Duration.ofSeconds(30);
 
 	/** Selects error and fatal messages: global messages, growls and field messages. */
 	private static final String ERROR_MESSAGES_SELECTOR = "#messages .ui-messages-error, #messages .ui-messages-fatal, " +
@@ -116,22 +114,16 @@ public class PrimeFacesSelenide extends Selenide<
 	}
 
 	/**
-	 * Indicates if the client-side confirmation dialog shows, waiting briefly for it (it shows as the button is clicked).
-	 * A page that is being replaced counts as not showing it.
+	 * Indicates if the client-side confirmation dialog shows. A page that is being replaced counts as not showing it.
 	 */
 	private boolean confirmationShown() {
-		for (int i = 0; i < 3; i++) {
-			try {
-				if (Boolean.TRUE.equals(js("var b = document.getElementById('confirmOK'); return !! b && b.getClientRects().length > 0;"))) {
-					return true;
-				}
-			}
-			catch (@SuppressWarnings("unused") WebDriverException e) {
-				return false;
-			}
-			pause(50);
+		// No wait: PrimeFaces shows its confirmation synchronously in the click handler
+		try {
+			return Boolean.TRUE.equals(js("var b = document.getElementById('confirmOK'); return !! b && b.getClientRects().length > 0;"));
 		}
-		return false;
+		catch (@SuppressWarnings("unused") WebDriverException e) {
+			return false; // the page is being replaced
+		}
 	}
 
 	/**
@@ -190,9 +182,11 @@ public class PrimeFacesSelenide extends Selenide<
 
 		SelenideElement element = $(byId(id));
 		if (element.exists()) {
+			// Wait for the widget to be shown and enabled (a response that renders or enables it may still be applying)
 			element.shouldBe(visible).shouldBe(enabled);
 
 			SelenideElement inputElement = $(byId(String.format("%s_input", id)));
+			// Wait for the check box input of the widget to be rendered
 			inputElement.should(exist);
 
 			// don't need to check if checkbox is disabled coz we can still try to click it
@@ -327,8 +321,8 @@ public class PrimeFacesSelenide extends Selenide<
 		if (! selectRow(gridId, row)) {
 			return false;
 		}
-		new WebDriverWait(driver, RESPONSE_TIMEOUT).ignoring(WebDriverException.class)
-				.until(d -> Boolean.TRUE.equals(((JavascriptExecutor) d).executeScript("return (! window.sailPage) && document.readyState === 'complete';")));
+		// Wait for the row's edit page to replace this one and load
+		waitForNewPage();
 		waitForAjaxResponse();
 		return true;
 	}
@@ -369,12 +363,14 @@ public class PrimeFacesSelenide extends Selenide<
 		if (element.exists()) {
 			// Find the drop down button
 			element = $(byXpath(String.format("//span[@id='%s']/button", id)));
+			// Wait for the widget to be shown and enabled (a response that renders or enables it may still be applying)
 			element.shouldBe(visible).shouldBe(enabled);
 			click(element);
 
 			// Wait for pick list drop down - can be a span or div depending on theme
 			element = $(byXpath(String.format("//*[@id='%s_panel']", id)));
-			element.should(exist, RESPONSE_TIMEOUT).shouldBe(visible);
+			// Wait for the lookup's drop down panel to open with the search response
+			element.should(exist).shouldBe(visible);
 
 			// Select the zero-based row
 			// NB could be <div><div><ul><li> or <span><ul><li>
@@ -404,7 +400,8 @@ public class PrimeFacesSelenide extends Selenide<
 
 			// Wait for pick list drop down - can be a span or div depending on theme
 			element = $(byXpath(String.format("//*[@id='%s_panel']", id)));
-			element.should(exist, RESPONSE_TIMEOUT).shouldBe(visible, RESPONSE_TIMEOUT);
+			// Wait for the lookup's drop down panel to open with the search response
+			element.should(exist).shouldBe(visible);
 
 			// Select the first match
 			// NB could be <div><div><ul><li> or <span><ul><li>
@@ -426,7 +423,8 @@ public class PrimeFacesSelenide extends Selenide<
 	 * Waits for a lookup's drop down to close after a pick, and then for its item select request.
 	 */
 	private void waitForLookupSelection(@Nonnull String id) {
-		$(byId(id + "_panel")).shouldBe(hidden, RESPONSE_TIMEOUT);
+		// Wait for the drop down to close after the pick
+		$(byId(id + "_panel")).shouldBe(hidden);
 		waitForAjaxResponse();
 	}
 
@@ -438,6 +436,7 @@ public class PrimeFacesSelenide extends Selenide<
 		SelenideElement element = $(byId(id));
 		if (element.exists() && !disabledClass(element)) {
 			element = $(byXpath("//label[@for='" + id + ":" + index + "']"));
+			// Wait for the item to be rendered in the opened list or panel
 			element.should(exist);
 			click(element);
 
@@ -525,17 +524,21 @@ public class PrimeFacesSelenide extends Selenide<
 
 		SelenideElement element = $(byId(id));
 		if (element.exists() && (! disabledClass(element))) {
+			// Wait for the widget to be shown and enabled (a response that renders or enables it may still be applying)
 			element.shouldBe(visible).shouldBe(enabled);
 			element = $(byId(String.format("%s_label", id)));
+			// Wait for the item to be rendered in the opened list or panel
 			element.should(exist);
 			click(element);
 
 			// Wait for pick list drop down
 			element = $(byId(String.format("%s_panel", id)));
+			// Wait for the combo's drop down panel to open
 			element.should(appear);
 
 			// Value here should be an index in the drop down starting from 0
 			element = $(byId(String.format("%s_%s", id, String.valueOf(index))));
+			// Wait for the item to be rendered in the opened list or panel
 			element.should(exist);
 			click(element);
 
@@ -640,7 +643,15 @@ public class PrimeFacesSelenide extends Selenide<
 													"if (inn.length) {inn.forEach(function(li) {w.selectItem($(li));}); w.add();}" +
 													"return [];", id, members);
 		if ((missing != null) && missing.isEmpty()) {
-			pause(600); // the transfer animates
+			// Wait for the (animated) transfer to finish and save the members into the pick list's submitted input
+			waitFor(d -> {
+				List<String> current = pickListMembers(id);
+				return ((current != null) && new java.util.HashSet<>(current).equals(new java.util.HashSet<>(members)) &&
+						Boolean.TRUE.equals(js("var w = PrimeFaces.getWidgetById(arguments[0]);" +
+												"return (w.jq.find(':animated').length === 0) && " +
+												"(w.targetInput.children().length === w.targetList.children('li.ui-picklist-item').length);", id))) ?
+							Boolean.TRUE : null;
+			});
 			waitForAjaxResponse();
 		}
 		return missing;
@@ -867,14 +878,18 @@ public class PrimeFacesSelenide extends Selenide<
 		WebElement header = (WebElement) js(find, moduleTitle, groups, item, "header");
 		if ((header != null) && (header.getDomAttribute("class") != null) && (! header.getDomAttribute("class").contains("ui-state-active"))) {
 			click($(header));
-			pause(400);
+			// Wait for the module's panel to finish sliding open
+			waitFor(d -> js("var c = arguments[0].nextElementSibling;" +
+								"return (c && (! jQuery(c).is(':animated')) && getComputedStyle(c).display !== 'none') ? true : null;", header));
 		}
 		for (int g = 0, l = groups.size(); g < l; g++) {
 			WebElement group = (WebElement) js(find, moduleTitle, groups, item, "group" + g);
 			WebElement expandedFlag = (group == null) ? null : group.findElement(By.cssSelector(".ui-menuitem-text"));
 			if ((expandedFlag != null) && (! "true".equals(expandedFlag.getDomAttribute("aria-expanded")))) {
 				click($(group));
-				pause(400);
+				// Wait for the group's list to finish sliding open
+				waitFor(d -> js("var u = arguments[0].parentElement.querySelector(':scope > ul');" +
+									"return (u && (! jQuery(u).is(':animated')) && getComputedStyle(u).display !== 'none') ? true : null;", group));
 			}
 		}
 		target = (WebElement) js(find, moduleTitle, groups, item, "item");
@@ -883,9 +898,8 @@ public class PrimeFacesSelenide extends Selenide<
 		}
 		js("window.sailPage = true;");
 		click($(target));
-		// The item opens a new page
-		new WebDriverWait(driver, RESPONSE_TIMEOUT).ignoring(WebDriverException.class)
-				.until(d -> Boolean.TRUE.equals(((JavascriptExecutor) d).executeScript("return (! window.sailPage) && document.readyState === 'complete';")));
+		// Wait for the item's page to replace this one and load
+		waitForNewPage();
 		waitForAjaxResponse();
 		return true;
 	}
@@ -938,8 +952,8 @@ public class PrimeFacesSelenide extends Selenide<
 	 */
 	public boolean upload(@Nonnull WebElement trigger, @Nonnull java.io.File file) {
 		click($(trigger));
-		WebDriverWait wait = new WebDriverWait(driver, RESPONSE_TIMEOUT);
-		WebElement frame = wait.until(d -> {
+		// Wait for the upload page's frame to be put in the page
+		WebElement frame = waitFor(d -> {
 			for (WebElement f : d.findElements(By.tagName("iframe"))) {
 				String src = f.getDomAttribute("src");
 				String live = (String) js("return arguments[0].src;", f);
@@ -952,15 +966,16 @@ public class PrimeFacesSelenide extends Selenide<
 		trace("    upload page opened");
 		driver.switchTo().frame(frame);
 		try {
-			WebElement input = wait.until(d -> {
+			// Wait for the upload page to load its file input
+			WebElement input = waitFor(d -> {
 				List<WebElement> inputs = d.findElements(By.cssSelector("input[type=file]"));
 				return inputs.isEmpty() ? null : inputs.get(0);
 			});
 			input.sendKeys(file.getAbsolutePath());
 			trace("    file chosen");
-			pause(500);
 			// Press Upload once it is enabled, unless the page has taken the file by itself
-			wait.until(d -> {
+			// Wait for the upload widget to accept the file (its Upload button enables), then press it
+			waitFor(d -> {
 				List<WebElement> buttons = d.findElements(By.cssSelector(".ui-fileupload-upload"));
 				if (buttons.isEmpty() || d.findElements(By.cssSelector("input[type=file]")).isEmpty()) {
 					return Boolean.TRUE;
@@ -980,28 +995,26 @@ public class PrimeFacesSelenide extends Selenide<
 		trace("    upload pressed");
 		// The page closes the upload page when the upload has been processed. If it does not (the tablet UX/UI),
 		// the upload page's growl says how it went: close the upload page on success, fail otherwise.
-		long deadline = System.currentTimeMillis() + RESPONSE_TIMEOUT.toMillis();
-		while (System.currentTimeMillis() < deadline) {
+		// Wait for the upload's response: the page closes the upload page, or the upload page's growl reports it
+		List<String> outcome = waitFor(d -> {
 			if (uploadPageClosed(frame)) {
-				waitForAjaxResponse();
-				return true;
+				return List.of("closed", "");
 			}
-			List<String> outcome = uploadPageOutcome(frame);
-			if (! outcome.isEmpty()) {
-				if ("error".equals(outcome.get(0))) {
-					throw new IllegalStateException("The upload failed: " + outcome.get(1));
-				}
-				trace("    the upload page says: " + outcome.get(1) + " - close it");
-				js("var o = arguments[0].closest('.ui-overlaypanel, .ui-dialog');" +
-						"var w = o ? PrimeFaces.getWidgetById(o.id) : null;" +
-						"if (w && w.hide) w.hide(); else if (o) {var c = o.querySelector('.ui-overlaypanel-close, .ui-dialog-titlebar-close'); if (c) c.click();}",
-						frame);
-				waitForAjaxResponse();
-				return true;
-			}
-			pause(500);
+			List<String> result = uploadPageOutcome(frame);
+			return result.isEmpty() ? null : result;
+		});
+		if ("error".equals(outcome.get(0))) {
+			throw new IllegalStateException("The upload failed: " + outcome.get(1));
 		}
-		throw new IllegalStateException("The upload page did not finish the upload within " + RESPONSE_TIMEOUT.toSeconds() + "s");
+		if ("info".equals(outcome.get(0))) {
+			trace("    the upload page says: " + outcome.get(1) + " - close it");
+			js("var o = arguments[0].closest('.ui-overlaypanel, .ui-dialog');" +
+					"var w = o ? PrimeFaces.getWidgetById(o.id) : null;" +
+					"if (w && w.hide) w.hide(); else if (o) {var c = o.querySelector('.ui-overlaypanel-close, .ui-dialog-titlebar-close'); if (c) c.click();}",
+					frame);
+		}
+		waitForAjaxResponse();
+		return true;
 	}
 
 	private boolean uploadPageClosed(@Nonnull WebElement frame) {
@@ -1167,8 +1180,8 @@ public class PrimeFacesSelenide extends Selenide<
 	 * Waits until no PrimeFaces or jQuery ajax request is running and the ajax status indicator is hidden.
 	 */
 	public void waitForAjaxResponse() {
-		WebDriverWait wait = new WebDriverWait(driver, RESPONSE_TIMEOUT);
-		wait.ignoring(StaleElementReferenceException.class).until(d -> Boolean.valueOf(ajaxIdle()));
+		// Wait for the PrimeFaces ajax queue to empty and its partial responses to be applied
+		waitFor(d -> ajaxIdle() ? Boolean.TRUE : null);
 	}
 
 	/**
@@ -1185,35 +1198,44 @@ public class PrimeFacesSelenide extends Selenide<
 	}
 
 	/**
-	 * Waits for a new page (or a new view state), or for the request to come back with error messages
-	 * (such as validation errors), which leave the page as it was.
+	 * Waits for the page marked by {@link #markPage()} (or {@code window.sailPage}) to be replaced by a new page that has loaded.
+	 */
+	private void waitForNewPage() {
+		// Wait for the next page to replace this one (its window has no marker) and finish loading
+		waitFor(d -> {
+			try {
+				return Boolean.TRUE.equals(((JavascriptExecutor) d).executeScript(
+						"return (! window.sailPage) && document.readyState === 'complete';")) ? Boolean.TRUE : null;
+			}
+			catch (@SuppressWarnings("unused") WebDriverException e) {
+				return null; // between pages
+			}
+		});
+		waitForAjaxResponse();
+	}
+
+	/**
+	 * Waits for the response to a click: a new page (or view state), or a response that brings back error messages
+	 * (validation), which leaves the page as it was. When client-side validation stops the request before it is sent,
+	 * there is no response to wait for.
 	 *
 	 * @param oldViewState	the view state before the request
 	 */
 	public void waitForFullPageResponse(String oldViewState) {
-		WebDriverWait wait = new WebDriverWait(driver, RESPONSE_TIMEOUT);
 		try {
-			wait.ignoring(StaleElementReferenceException.class)
-					.until(d -> {
-						String viewState = getViewState();
-						if ((viewState != null) && (! viewState.equals(oldViewState))) {
-							return Boolean.TRUE;
-						}
-						if (! ajaxIdle()) {
-							return Boolean.FALSE;
-						}
-						List<String> errors = errorMessages();
-						if (errors.isEmpty()) {
-							return Boolean.FALSE;
-						}
-						// errors came back, or were shown without a request (client-side validation blocked it)
-						return Boolean.valueOf(messagesReplaced() || (! errors.equals(errorsBeforeClick)) ||
-												(System.currentTimeMillis() - clickTime > 2000L));
-					});
+			// Wait for the response to the click: a new page or view state, or errors from the server or client-side validation
+			waitFor(d -> {
+				String viewState = getViewState();
+				if ((viewState != null) && (! viewState.equals(oldViewState))) {
+					return Boolean.TRUE;
+				}
+				if ((! ajaxIdle()) || errorMessages().isEmpty()) {
+					return null;
+				}
+				return (responseArrived() || nothingSent()) ? Boolean.TRUE : null;
+			});
 		} catch (RuntimeException e) {
-			System.err.println("Timed out waiting for a navigation from " + driver.getCurrentUrl() + " : oldViewState = " + oldViewState +
-								" : idle " + ajaxIdle() + " : errors " + errorMessages() + " : before " + errorsBeforeClick +
-								" : ajax " + js("return [window.sailAjax, window.sailAjaxMark, window.sailAjaxHooked];"));
+			System.err.println("Timed out waiting for a navigation from " + driver.getCurrentUrl() + " : oldViewState = " + oldViewState);
 			throw e;
 		}
 
@@ -1221,34 +1243,34 @@ public class PrimeFacesSelenide extends Selenide<
 	}
 
 	/**
-	 * Notes how many ajax requests have completed, so {@link #messagesReplaced()} can tell when the next one has,
-	 * and returns the view state, before a click.
+	 * Counts ajax requests and notes page unloads from now on, so {@link #responseArrived()} and {@link #nothingSent()}
+	 * can tell what the next click did, and returns the view state, before a click.
 	 *
 	 * @return the view state
 	 */
 	private String markPage() {
-		js("if ((! window.sailAjaxHooked) && window.jQuery) {window.sailAjaxHooked = true; window.sailAjax = 0; window.sailAjaxStarts = 0;" +
-				"  jQuery(document).on('pfAjaxComplete', function() {window.sailAjax++;});" +
-				"  jQuery(document).on('pfAjaxStart', function() {window.sailAjaxStarts++;});}" +
-				"window.sailAjaxMark = window.sailAjax || 0; window.sailAjaxStartMark = window.sailAjaxStarts || 0;");
-		clickTime = System.currentTimeMillis();
-		errorsBeforeClick = errorMessages();
+		js("if (! window.sailHooked) {window.sailHooked = true; window.sailAjax = 0; window.sailAjaxStarts = 0;" +
+				"  window.addEventListener('beforeunload', function() {window.sailUnloading = true;});" +
+				"  if (window.jQuery) {" +
+				"    jQuery(document).on('pfAjaxComplete', function() {window.sailAjax++;});" +
+				"    jQuery(document).on('pfAjaxStart', function() {window.sailAjaxStarts++;});}}" +
+				"window.sailAjaxMark = window.sailAjax; window.sailAjaxStartMark = window.sailAjaxStarts; window.sailUnloading = false;");
 		return getViewState();
 	}
 
-	/** When the last click was made. */
-	private long clickTime = 0L;
-
-	/** The error messages shown before the last click, to notice new (client-side validation) errors. */
-	private List<String> errorsBeforeClick = new ArrayList<>();
+	/**
+	 * Indicates if an ajax response has arrived since {@link #markPage()}, or the page has been replaced.
+	 */
+	private boolean responseArrived() {
+		return Boolean.TRUE.equals(js("return (window.sailAjaxMark === undefined) || (window.sailAjax > window.sailAjaxMark);"));
+	}
 
 	/**
-	 * Indicates if an ajax request has completed since {@link #markPage()} (or the page has been replaced).
-	 *
-	 * @return true if it has been replaced
+	 * Indicates if the click since {@link #markPage()} sent nothing: no ajax request started and the page is not unloading.
 	 */
-	private boolean messagesReplaced() {
-		return Boolean.TRUE.equals(js("return (window.sailAjaxMark === undefined) || ((window.sailAjax || 0) > window.sailAjaxMark);"));
+	private boolean nothingSent() {
+		return Boolean.TRUE.equals(js("return (window.sailAjaxStartMark !== undefined) && (window.sailAjaxStarts === window.sailAjaxStartMark) && " +
+										"(! window.sailUnloading) && (! (window.PrimeFaces && PrimeFaces.ajax && PrimeFaces.ajax.Queue && (! PrimeFaces.ajax.Queue.isEmpty())));"));
 	}
 
 	@SuppressWarnings("static-method")
@@ -1298,25 +1320,20 @@ public class PrimeFacesSelenide extends Selenide<
 	}
 
 	/**
-	 * Waits (up to 2 seconds) until the element's centre is not covered by another element, e.g. while a header
-	 * settles or an overlay animates away.
+	 * Waits until the element's centre is not covered by another element, e.g. while a header settles or an overlay
+	 * animates away.
 	 */
 	private void waitUntilUncovered(@Nonnull WebElement element) {
-		long deadline = System.currentTimeMillis() + 2000L;
-		while (System.currentTimeMillis() < deadline) {
-			try {
-				if (Boolean.TRUE.equals(js("var e = arguments[0], r = e.getBoundingClientRect();" +
-											"if ((r.width === 0) && (r.height === 0)) return true;" +
-											"var t = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2);" +
-											"return (t === null) || (t === e) || e.contains(t) || t.contains(e) || (t.tagName === 'LABEL' && t.htmlFor === e.id);",
-											element))) {
-					return;
-				}
-			}
-			catch (@SuppressWarnings("unused") WebDriverException e) {
-				return;
-			}
-			pause(100);
+		try {
+			// Wait for nothing to be over the element's centre (a header settling, an overlay closing)
+			waitFor(d -> js("var e = arguments[0], r = e.getBoundingClientRect();" +
+								"if ((r.width === 0) && (r.height === 0)) return true;" +
+								"var t = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2);" +
+								"return ((t === null) || (t === e) || e.contains(t) || t.contains(e) || (t.tagName === 'LABEL' && t.htmlFor === e.id)) ? true : null;",
+								element));
+		}
+		catch (@SuppressWarnings("unused") org.openqa.selenium.TimeoutException | StaleElementReferenceException e) {
+			// still covered (or gone): the click falls back, or reports the problem
 		}
 	}
 
@@ -1357,30 +1374,14 @@ public class PrimeFacesSelenide extends Selenide<
 		return by(n -> driver.findElement(By.name(n)), name);
 	}
 
-	private static long maxWait = 1000L;
-	private static long waitInterval = 50L;
-
 	private static @Nullable WebElement by(@Nonnull Function<String, WebElement> function, @Nonnull String search) {
-		for (long l = 0; l <= maxWait; l += waitInterval) {
-			try {
-				try {
-					WebElement result = function.apply(search);
-					result.isDisplayed(); // check for stale element
-					result.isEnabled(); // check for stale element
-
-					return result;
-				} catch (NoSuchElementException | StaleElementReferenceException e) {
-					if (l > maxWait) {
-						throw e;
-					}
-
-					Thread.sleep(waitInterval); // NOSONAR java:S2925
-				}
-			} catch (@SuppressWarnings("unused") InterruptedException e) {
-				// do nothing here
-			}
+		// No wait: callers look for elements of a response that has already been waited for
+		try {
+			WebElement result = function.apply(search);
+			result.isDisplayed(); // check for stale element
+			return result;
+		} catch (@SuppressWarnings("unused") NoSuchElementException | StaleElementReferenceException e) {
+			return null;
 		}
-
-		return null;
 	}
 }

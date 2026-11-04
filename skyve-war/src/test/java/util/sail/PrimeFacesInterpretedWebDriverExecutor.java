@@ -1233,7 +1233,6 @@ public class PrimeFacesInterpretedWebDriverExecutor extends InterpretedWebDriver
 
 	/**
 	 * Asserts that a global message, growl or field message (of the type, if given) contains the text.
-	 * Waits up to 5 seconds for it to show.
 	 *
 	 * @param test	the step
 	 */
@@ -1246,15 +1245,9 @@ public class PrimeFacesInterpretedWebDriverExecutor extends InterpretedWebDriver
 		TestMessage.MessageType type = test.getType();
 		String severity = (type == null) ? null : type.name();
 		selenide.trace(String.format("test %s message contains '%s'", (severity == null) ? "a" : "an " + severity, contains));
-		long deadline = System.currentTimeMillis() + 5000L;
-		boolean found = false;
-		while (true) {
-			found = selenide.messagesOfType(severity).stream().anyMatch(m -> m.contains(contains));
-			if (found || (System.currentTimeMillis() > deadline)) {
-				break;
-			}
-			selenide.pause(250);
-		}
+		// No wait beyond the response: the messages of the last response are on the page once it has been applied
+		selenide.waitForAjaxResponse();
+		boolean found = selenide.messagesOfType(severity).stream().anyMatch(m -> m.contains(contains));
 		check(found, () -> String.format("expected %s message containing '%s' but found: %s",
 											(severity == null) ? "a" : "an " + severity, contains, selenide.describeMessages()));
 	}
@@ -1282,7 +1275,6 @@ public class PrimeFacesInterpretedWebDriverExecutor extends InterpretedWebDriver
 		int min = test.getEffectiveMinRows();
 		Integer max = test.getMaxRows();
 		Integer timeout = test.getTimeoutMillis();
-		long deadline = System.currentTimeMillis() + ((timeout == null) ? 0L : timeout.longValue());
 
 		String gridId = null;
 		for (UIComponent component : components) {
@@ -1297,15 +1289,21 @@ public class PrimeFacesInterpretedWebDriverExecutor extends InterpretedWebDriver
 		}
 		selenide.trace(String.format("test grid [%s] (%s) has %d..%s rows%s", identifier, gridId, Integer.valueOf(min),
 										(max == null) ? "" : max.toString(), (contains == null) ? "" : " containing '" + contains + "'"));
-		int count;
-		while (true) {
-			count = selenide.countRows(gridId, contains);
-			boolean holds = (count >= min) && ((max == null) || (count <= max.intValue()));
-			if (holds || (System.currentTimeMillis() >= deadline)) {
-				break;
+		int count = selenide.countRows(gridId, contains);
+		if ((timeout != null) && (! ((count >= min) && ((max == null) || (count <= max.intValue()))))) {
+			// Author-requested (timeoutMillis): poll a server-side job's effect by reloading the list each second
+			final String grid = gridId;
+			try {
+				selenide.waitFor(java.time.Duration.ofMillis(timeout.longValue()), java.time.Duration.ofSeconds(1), d -> {
+					selenide.refreshGrid(grid);
+					int n = selenide.countRows(grid, contains);
+					return ((n >= min) && ((max == null) || (n <= max.intValue()))) ? Boolean.TRUE : null;
+				});
 			}
-			selenide.pause(1000);
-			selenide.refreshGrid(gridId);
+			catch (@SuppressWarnings("unused") org.openqa.selenium.TimeoutException e) {
+				// reported below
+			}
+			count = selenide.countRows(gridId, contains);
 		}
 		final int rows = count;
 		check((rows >= min) && ((max == null) || (rows <= max.intValue())),
