@@ -57,6 +57,8 @@ class ComponentCollectingComponentBuilder extends NoOpComponentBuilder implement
 	// component that was built in the component builder but added in the layout builder
 	private MetaData addedViewComponent;
 	private String addedViewComponentIdentifier;
+	// the list grid built for addedViewComponent: the layout may add it inside a border, so register this, not what is added
+	private UIComponent addedListGridComponent;
 	
 	/**
 	 * Creates a component builder that records generated PrimeFaces components for SAIL execution steps.
@@ -336,6 +338,7 @@ class ComponentCollectingComponentBuilder extends NoOpComponentBuilder implement
 			addedViewComponent = listGrid;
 			if (step instanceof PushEditContext pushEditContext) { // an edit view
 				addedViewComponentIdentifier = String.format("%s.%s", pushEditContext.getModuleName(), modelName);
+				addedListGridComponent = component;
 			}
 			else {
 				addedViewComponentIdentifier = step.getIdentifier(context);
@@ -353,7 +356,8 @@ class ComponentCollectingComponentBuilder extends NoOpComponentBuilder implement
 	 */
 	void addToContainer(@Nonnull UIComponent componentToAdd) {
 		if (addedViewComponent instanceof ListGrid) {
-			listGrid(componentToAdd);
+			UIComponent listGridComponent = addedListGridComponent;
+			listGrid((listGridComponent == null) ? componentToAdd : listGridComponent);
 		}
 	}
 
@@ -389,6 +393,7 @@ class ComponentCollectingComponentBuilder extends NoOpComponentBuilder implement
 		
 		addedViewComponent = null;
 		addedViewComponentIdentifier = null;
+		addedListGridComponent = null;
 	}
 	
 	/**
