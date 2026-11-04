@@ -874,6 +874,16 @@ public class PrimeFacesSelenide extends Selenide<
 		if ((target == null) || (! open)) {
 			return (target != null);
 		}
+		// A small window hides the menu in a side bar: open it as a user would
+		WebElement toggle = (WebElement) js("var s = document.getElementById('sidebar');" +
+												"return (s && s.classList.contains('inactive')) ? s.querySelector('a.toggle') : null;");
+		if (toggle != null) {
+			trace("    open the side bar menu");
+			click($(toggle));
+			// Wait for the side bar to slide fully into the window
+			waitFor(d -> js("var s = document.getElementById('sidebar'), r = s.getBoundingClientRect();" +
+								"return ((! s.classList.contains('inactive')) && (r.left >= 0)) ? true : null;"));
+		}
 		// Expand the module and each group, then click the item
 		WebElement header = (WebElement) js(find, moduleTitle, groups, item, "header");
 		// The menu can restore its expanded panels, so look at what is open rather than at the markup's state
@@ -1292,9 +1302,10 @@ public class PrimeFacesSelenide extends Selenide<
 		waitUntilUncovered(wrappedElement);
 		try {
 			wrappedElement.click();
-		} catch (@SuppressWarnings("unused") WebDriverException e) {
+		} catch (WebDriverException e) {
 			// Something (a floating element or an animation) still covers it
-			trace("    Could not click on the element - scroll it to the middle again and retry");
+			String why = String.valueOf(e.getMessage());
+			trace("    Could not click on the element (" + why.substring(0, Math.min(why.length(), 200)).replace('\n', ' ') + ") - scroll it to the middle again and retry");
 			scrollToCentre(wrappedElement);
 			waitUntilUncovered(wrappedElement);
 			try {
