@@ -42,8 +42,17 @@ public abstract class AbstractPrimeFacesInterpretedSail extends AbstractH2Test {
 		sail(automation);
 	}
 	
-	protected void sailResource(String resourceName) {
+	/**
+	 * Runs the SAIL script at the given test classpath resource.
+	 *
+	 * @param resourceName	the resource path, e.g. {@code sail/admin/pf/pf-admin-sail.xml}
+	 * @throws IllegalArgumentException if the resource is missing or unreadable
+	 */
+	protected void sailResource(@Nonnull String resourceName) {
 		try (InputStream stream = Thread.currentThread().getContextClassLoader().getResourceAsStream(resourceName)) {
+			if (stream == null) {
+				throw new IllegalArgumentException("SAIL resource " + resourceName + " is not on the test classpath");
+			}
 			String sail = new String(stream.readAllBytes(), StandardCharsets.UTF_8);
 			Automation automation = XMLMetaData.unmarshalSAILString(sail);
 			sail(automation);

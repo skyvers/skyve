@@ -11,19 +11,19 @@ import util.sail.Devices;
 /**
  * Runs automated SAIL tests for the admin module (PrimeFaces).
  * <p>
- * Note: Replace the path in the {@code sailFile} parameter with the location of the test file you wish to run.
+ * Runs against {@code -Dsail.baseUrl} (default {@value BrowserConfiguration#DEFAULT_BASE_URL}),
+ * headless unless {@code -Dsail.headless=false}.
  */
 class PrimeFacesAdminSailIT extends AbstractPrimeFacesInterpretedSail {
 
 	public PrimeFacesAdminSailIT() {
 		super(new BrowserConfiguration()
 				.browser(Browsers.chrome)
-				.baseUrl("http://localhost:8080/skyve/")
 				.userAgentString(Devices.ipad.userAgentString));
 	}
 
 	@Test
 	void test() {
-		Assertions.assertDoesNotThrow(() -> sailFile("/Users/simeonsolomou/git/skyve/skyve-war/src/test/java/sail/admin/pf/pf-admin-sail.xml"));
+		Assertions.assertDoesNotThrow(() -> sailResource("sail/admin/pf/pf-admin-sail.xml"));
 	}
 }

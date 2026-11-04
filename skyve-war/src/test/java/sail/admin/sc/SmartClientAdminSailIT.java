@@ -10,18 +10,18 @@ import util.sail.BrowserConfiguration.Browsers;
 /**
  * Runs automated SAIL tests for the admin module (SmartClient).
  * <p>
- * Note: Replace the path in the {@code sailFile} parameter with the location of the test file you wish to run.
+ * Runs against {@code -Dsail.baseUrl} (default {@value BrowserConfiguration#DEFAULT_BASE_URL}),
+ * headless unless {@code -Dsail.headless=false}.
  */
 class SmartClientAdminSailIT extends AbstractSmartClientInterpretedSail {
 
 	public SmartClientAdminSailIT() {
 		super(new BrowserConfiguration()
-				.browser(Browsers.chrome)
-				.baseUrl("http://localhost:8080/skyve/"));
+				.browser(Browsers.chrome));
 	}
 
 	@Test
 	void test() {
-		Assertions.assertDoesNotThrow(() -> sailFile("/Users/simeonsolomou/git/skyve/skyve-war/src/test/java/sail/admin/sc/sc-admin-sail.xml"));
+		Assertions.assertDoesNotThrow(() -> sailResource("sail/admin/sc/sc-admin-sail.xml"));
 	}
 }

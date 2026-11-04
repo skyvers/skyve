@@ -11,19 +11,19 @@ import util.sail.Devices;
 /**
  * Runs automated SAIL tests for the kitchensink module (PrimeFaces).
  * <p>
- * Note: Replace the path in the {@code sailFile} parameter with the location of the test file you wish to run.
+ * Runs against {@code -Dsail.baseUrl} (default {@value BrowserConfiguration#DEFAULT_BASE_URL}),
+ * headless unless {@code -Dsail.headless=false}.
  */
 class PrimeFacesKitchenSinkSailIT extends AbstractPrimeFacesInterpretedSail {
 
 	public PrimeFacesKitchenSinkSailIT() {
 		super(new BrowserConfiguration()
 				.browser(Browsers.chrome)
-				.baseUrl("http://localhost:8080/skyve/")
 				.userAgentString(Devices.ipad.userAgentString));
 	}
 
 	@Test
 	void test() {
-		Assertions.assertDoesNotThrow(() -> sailFile("/Users/simeonsolomou/git/skyve/skyve-war/src/test/java/sail/kitchenSink/pf/pf-kitchensink-sail.xml"));
+		Assertions.assertDoesNotThrow(() -> sailResource("sail/kitchenSink/pf/pf-kitchensink-sail.xml"));
 	}
 }

@@ -65,15 +65,19 @@ abstract class CrossBrowserSelenium {
 	 * @throws Exception
 	 */
 	private void setupChrome(BrowserConfiguration config) {
-		List<String> arguments = new ArrayList<>(2);
+		List<String> arguments = new ArrayList<>(3);
 		String userAgentString = config.getUserAgentString();
 		if (userAgentString != null) {
 			arguments.add("--user-agent=" + userAgentString);
 		}
 		if (config.isHeadless()) {
 			arguments.add("--headless");
+			// Headless Chrome opens at 800x600, which squeezes the layouts; size it like a desktop window.
+			if (config.getResolution() == null) {
+				arguments.add("--window-size=1920,1080");
+			}
 		}
-		
+
 		ChromeOptions options = new ChromeOptions();
 		options.addArguments(arguments);
 		driver = new ChromeDriver(options);
