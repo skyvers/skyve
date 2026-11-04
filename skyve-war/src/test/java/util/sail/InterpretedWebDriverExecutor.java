@@ -70,7 +70,9 @@ import jakarta.annotation.Nullable;
  * <li>{@code None} makes no assertions. A step that throws still fails the automation.</li>
  * </ul>
  * Set the system property {@value #FAILURE_DIRECTORY_PROPERTY} to a directory to save a screenshot and the page source
- * for each failure, and {@value #TEST_STRATEGY_PROPERTY} to override the automation's test strategy.
+ * for each failure, and {@value #TEST_STRATEGY_PROPERTY} to override the automation's test strategy (any case; an
+ * invalid value fails before any step runs). Tests that the override would weaken (the admin suites, the strategy
+ * conformance test) refuse it: see {@link SailSuite#refuseTestStrategyOverride(String)}.
  *
  * @param <AC> automation context type
  * @param <S> concrete Selenide implementation
@@ -112,6 +114,7 @@ public abstract class InterpretedWebDriverExecutor<
 	 */
 	@Override
 	public void executeAutomation(@Nonnull Automation automation) {
+		testStrategyOverride(); // an invalid override fails here, before any step runs
 		initialiseAutomation(automation);
 		failures.clear();
 
@@ -234,11 +237,29 @@ public abstract class InterpretedWebDriverExecutor<
 	 */
 	@Override
 	public @Nullable TestStrategy getTestStrategy() {
+		TestStrategy override = testStrategyOverride();
+		return (override != null) ? override : super.getTestStrategy();
+	}
+
+	/**
+	 * Returns the test strategy that the {@value #TEST_STRATEGY_PROPERTY} system property names (ignoring case).
+	 *
+	 * @return the strategy, or null if the property is not set
+	 * @throws IllegalArgumentException	if the property names no strategy, saying which are valid
+	 */
+	public static @Nullable TestStrategy testStrategyOverride() {
 		String override = System.getProperty(TEST_STRATEGY_PROPERTY);
-		if ((override != null) && (! override.isBlank())) {
-			return TestStrategy.valueOf(override.trim());
+		if ((override == null) || override.isBlank()) {
+			return null;
 		}
-		return super.getTestStrategy();
+		String name = override.trim();
+		for (TestStrategy strategy : TestStrategy.values()) {
+			if (strategy.name().equalsIgnoreCase(name)) {
+				return strategy;
+			}
+		}
+		throw new IllegalArgumentException(String.format("-D%s=%s is not a SAIL test strategy: use one of %s",
+															TEST_STRATEGY_PROPERTY, override, java.util.Arrays.toString(TestStrategy.values())));
 	}
 
 	/**
@@ -348,7 +369,9 @@ public abstract class InterpretedWebDriverExecutor<
 			try {
 				Object value = method.invoke(step);
 				if ((value != null) && (! (value instanceof Collection<?>))) {
-					result.append(' ').append(property).append("=\"").append(value).append('"');
+					// never print a password into a failure message (they end up in test reports)
+					boolean secret = property.toLowerCase().contains("password");
+					result.append(' ').append(property).append("=\"").append(secret ? "****" : value).append('"');
 				}
 			}
 			catch (@SuppressWarnings("unused") ReflectiveOperationException | RuntimeException e) {
@@ -703,5 +726,173 @@ public abstract class InterpretedWebDriverExecutor<
 		SailFailure(@Nonnull String message, @Nullable Throwable cause) {
 			super(message, cause);
 		}
+	}
+
+	/**
+	 * Resolves a test classpath resource (an {@code <upload />} file) to a file the browser can be given.
+	 *
+	 * @param resource	the resource path, e.g. {@code sail/files/sail-upload.txt}
+	 * @return the file
+	 * @throws MetaDataException	if the resource is not on the test classpath, or is not a file on disk
+	 */
+	protected static @Nonnull java.io.File testResourceFile(@Nonnull String resource) {
+		java.net.URL url = Thread.currentThread().getContextClassLoader().getResource(resource);
+		if (url == null) {
+			throw new MetaDataException("<upload /> file " + resource + " is not on the test classpath");
+		}
+		try {
+			return new java.io.File(url.toURI());
+		}
+		catch (java.net.URISyntaxException | IllegalArgumentException e) {
+			throw new MetaDataException("<upload /> file " + resource + " is not a file on disk: " + url, e);
+		}
+	}
+
+	/** A menu item of a module and the labels shown for it (module title, group labels, item label). */
+	protected static final class SailMenuPath {
+		/** The module's localised title. */
+		public String moduleTitle;
+		/** The labels of the groups that hold the item, outermost first. */
+		public final List<String> groupLabels = new ArrayList<>();
+		/** The item's label, or null when the path names only the module or is not in the menu. */
+		public String itemLabel;
+		/** The item, or null when the path names only the module or is not in the menu. */
+		public org.skyve.metadata.module.menu.MenuItem item;
+
+		/**
+		 * Returns the group labels then the item label.
+		 *
+		 * @return the labels
+		 */
+		public @Nonnull List<String> labels() {
+			List<String> result = new ArrayList<>(groupLabels);
+			if (itemLabel != null) {
+				result.add(itemLabel);
+			}
+			return result;
+		}
+	}
+
+	/**
+	 * Resolves a {@code /}-separated menu path: group names then the item name, each the metadata name or the shown name.
+	 *
+	 * @param moduleName	the module
+	 * @param itemPath	the path, or null for the module only
+	 * @return the path; its item is null if the path is not in the module's menu
+	 */
+	protected static @Nonnull SailMenuPath resolveMenuPath(@Nonnull String moduleName, @Nullable String itemPath) {
+		org.skyve.metadata.customer.Customer c = org.skyve.CORE.getUser().getCustomer();
+		org.skyve.metadata.module.Module m = c.getModule(moduleName);
+		SailMenuPath result = new SailMenuPath();
+		result.moduleTitle = m.getLocalisedTitle();
+		if (itemPath == null) {
+			return result;
+		}
+		String[] names = itemPath.split("/");
+		List<org.skyve.metadata.module.menu.MenuItem> items = m.getMenu().getItems();
+		for (int i = 0; i < names.length; i++) {
+			String name = names[i].trim();
+			org.skyve.metadata.module.menu.MenuItem found = null;
+			for (org.skyve.metadata.module.menu.MenuItem candidate : items) {
+				if (name.equals(candidate.getName()) || name.equals(candidate.getLocalisedName())) {
+					found = candidate;
+					break;
+				}
+			}
+			if (found == null) {
+				return result;
+			}
+			String label = found.getLocalisedName();
+			if (label == null) {
+				label = found.getName();
+			}
+			if (i < names.length - 1) {
+				if (! (found instanceof org.skyve.metadata.module.menu.MenuGroup group)) {
+					return result;
+				}
+				result.groupLabels.add(label);
+				items = group.getItems();
+			}
+			else {
+				result.itemLabel = label;
+				result.item = found;
+			}
+		}
+		return result;
+	}
+
+	/**
+	 * Checks a {@code <testWidget />} against what the page shows, under the test strategy.
+	 *
+	 * @param test	the step
+	 * @param identifier	the widget's identifier, for the messages
+	 * @param shown	true if any rendering of the widget is shown
+	 * @param enabled	true if a shown rendering is enabled
+	 */
+	protected final void checkWidget(@Nonnull TestWidget test, @Nonnull String identifier, boolean shown, boolean enabled) {
+		Boolean expectedEnabled = test.getEnabled();
+		if (expectedEnabled != null) {
+			selenide.trace(String.format("test [%s] is shown and %s", identifier, expectedEnabled.booleanValue() ? "enabled" : "disabled"));
+			check(shown && (enabled == expectedEnabled.booleanValue()),
+					() -> String.format("expected [%s] to be shown and %s but it is %s",
+											identifier,
+											expectedEnabled.booleanValue() ? "enabled" : "disabled",
+											(! shown) ? "not shown" : (enabled ? "enabled" : "disabled")));
+		}
+		else {
+			boolean expectedVisible = test.isExpectedVisible();
+			selenide.trace(String.format("test [%s] is %s", identifier, expectedVisible ? "shown" : "not shown"));
+			check(shown == expectedVisible,
+					() -> String.format("expected [%s] to be %s but it is %s",
+											identifier,
+											expectedVisible ? "shown" : "not shown",
+											shown ? "shown" : "not shown"));
+		}
+	}
+
+	/**
+	 * Indicates if a row count is within a {@code <testGridRows />} step's bounds.
+	 *
+	 * @param test	the step
+	 * @param rows	the number of rows counted
+	 * @return true if the count is within the bounds
+	 */
+	protected static boolean rowCountHolds(@Nonnull TestGridRows test, int rows) {
+		Integer max = test.getMaxRows();
+		return (rows >= test.getEffectiveMinRows()) && ((max == null) || (rows <= max.intValue()));
+	}
+
+	/**
+	 * Checks a {@code <testGridRows />} step's bounds against the rows counted, under the test strategy.
+	 *
+	 * @param test	the step
+	 * @param identifier	the grid's identifier, for the message
+	 * @param contains	the text the counted rows contain (with {@code {run}} substituted), or null for every row
+	 * @param rows	the number of rows counted
+	 */
+	protected final void checkRowCount(@Nonnull TestGridRows test, @Nonnull String identifier, @Nullable String contains, int rows) {
+		Integer max = test.getMaxRows();
+		check(rowCountHolds(test, rows),
+				() -> String.format("expected grid [%s] to have %s%s rows%s but it has %d",
+										identifier,
+										Integer.valueOf(test.getEffectiveMinRows()),
+										(max == null) ? " or more" : " to " + max,
+										(contains == null) ? "" : " containing '" + contains + "'",
+										Integer.valueOf(rows)));
+	}
+
+	/**
+	 * Checks a {@code <testMenu />} step against whether the menu shows the module or item, under the test strategy.
+	 *
+	 * @param test	the step
+	 * @param path	the resolved menu path
+	 * @param present	true if the menu shows it
+	 */
+	protected final void checkMenu(@Nonnull TestMenu test, @Nonnull SailMenuPath path, boolean present) {
+		boolean expected = ! Boolean.FALSE.equals(test.getPresent());
+		String what = (test.getItemName() == null) ? path.moduleTitle : path.moduleTitle + " / " + String.join(" / ", path.labels());
+		selenide.trace(String.format("test menu %s is %s", what, expected ? "present" : "absent"));
+		check(present == expected, () -> String.format("expected the menu %s %s but it %s", what,
+														expected ? "to show" : "not to show", present ? "does" : "does not"));
 	}
 }

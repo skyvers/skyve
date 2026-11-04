@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.skyve.impl.metadata.user.UserImpl;
@@ -15,12 +16,17 @@ import org.skyve.metadata.user.User;
 
 import jakarta.annotation.Nonnull;
 import util.sail.BrowserConfiguration;
+import util.sail.SailServerLock;
 import util.sail.PrimeFacesInterpretedWebDriverExecutor;
 import util.sail.PrimeFacesSelenide;
 import util.sail.SailUsers;
 
 /**
  * Base test class for running SAIL scripts against a PrimeFaces UI in an interpreted browser session.
+ * <p>
+ * Each test class holds {@link SailServerLock} for its server ({@code -Dsail.baseUrl}) from before its first browser
+ * starts until the class has finished, so SAIL tests against one server run one at a time, even in forked JVMs
+ * (surefire's {@code forkCount}). A test whose server is in use waits for the other to finish: the one necessary wait.
  */
 public abstract class AbstractPrimeFacesInterpretedSail extends AbstractH2Test {
 
@@ -33,7 +39,14 @@ public abstract class AbstractPrimeFacesInterpretedSail extends AbstractH2Test {
 	
 	@BeforeEach
 	void setupBrowser() {
+		// One SAIL test at a time per server, even across forked JVMs (see SailServerLock): may wait for another to finish
+		SailServerLock.acquire(configuration.getBaseUrl());
 		selenium.startBrowser(configuration);
+	}
+
+	@AfterAll
+	static void releaseServer() {
+		SailServerLock.releaseAll();
 	}
 	
 	@AfterEach
