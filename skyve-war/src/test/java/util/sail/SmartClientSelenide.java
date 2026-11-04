@@ -154,15 +154,11 @@ public class SmartClientSelenide extends Selenide<
 					driver.getCurrentUrl(), driver.getTitle()));
 		}
 		avatar.shouldBe(visible).click();
-		com.codeborne.selenide.ElementsCollection items = com.codeborne.selenide.Selenide.$$("a.ui-menuitem-link");
-		SelenideElement item = items.findBy(com.codeborne.selenide.Condition.exactText("Switch mode"));
+		// Waits for the user menu's overlay panel to open (PrimeFaces shows it after the click, with an animation)
+		SelenideElement overlay = $(".profile-overlay").shouldBe(visible);
+		SelenideElement item = overlay.$$("a.ui-menuitem-link").findBy(com.codeborne.selenide.Condition.exactText("Switch mode"));
 		if (! item.exists()) {
 			throw new IllegalStateException("The user menu has no Switch mode item: this user cannot switch modes");
-		}
-		if (! item.isDisplayed()) {
-			// the item is in a collapsed Switch Mode submenu: open it
-			com.codeborne.selenide.Selenide.$$(".ui-submenu-link, .ui-menu-parent > a, .ui-widget-header")
-					.findBy(com.codeborne.selenide.Condition.exactText("Switch Mode")).shouldBe(visible).click();
 		}
 		item.shouldBe(visible).click();
 		trace("    Switched the session to the SmartClient UX/UI");
