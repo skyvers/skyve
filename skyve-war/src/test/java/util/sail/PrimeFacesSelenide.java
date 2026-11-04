@@ -792,12 +792,14 @@ public class PrimeFacesSelenide extends Selenide<
 	}
 
 	/**
-	 * Asks a lazily loaded grid (a list grid) to load its rows again.
+	 * Asks a grid (a PrimeFaces data table) to load its rows from the server again, with its current filters.
+	 * A data repeater (no data table widget) is left as it is.
 	 *
 	 * @param gridId	the data table's client id
 	 */
 	public void refreshGrid(@Nonnull String gridId) {
-		js("var w = PrimeFaces.getWidgetById(arguments[0]); if (w && w.cfg && w.cfg.lazy && w.filter) w.filter();", gridId);
+		// PrimeFaces 13 data tables have no lazy flag in their configuration: filter() reloads a lazy one from the server
+		js("var w = PrimeFaces.getWidgetById(arguments[0]); if (w && (typeof w.filter === 'function')) w.filter();", gridId);
 		waitForAjaxResponse();
 	}
 
