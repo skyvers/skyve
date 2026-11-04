@@ -376,14 +376,15 @@ public abstract class InterpretedWebDriverExecutor<
 	@Override
 	public void executeLogin(Login login) {
 		String customer = login.getCustomer();
-		String user = login.getUser();
+		String user = substituteRunToken(login.getUser());
+		String password = substituteRunToken(login.getPassword());
 
 		if (customer == null) {
 			selenide.trace("Login as " + user);
 		} else {
 			selenide.trace("Login as " + customer + "/" + user);
 		}
-		selenide.login(customer, user, login.getPassword());
+		selenide.login(customer, user, password);
 		loginError = selenide.getLoginError();
 
 		if ((loginError != null) && (! (nextStep instanceof TestFailure)) && (! isNoneStrategy())) {
@@ -567,21 +568,25 @@ public abstract class InterpretedWebDriverExecutor<
 			return;
 		}
 		String message = failure.getMessage();
+		if (message != null) {
+			message = substituteRunToken(message);
+		}
+		final String expected = message;
 		if (previousStep instanceof Login) {
-			selenide.trace("Test login failure" + ((message == null) ? "" : " with message '" + message + "'"));
-			check((loginError != null) && ((message == null) || loginError.contains(message)),
+			selenide.trace("Test login failure" + ((expected == null) ? "" : " with message '" + expected + "'"));
+			check((loginError != null) && ((expected == null) || loginError.contains(expected)),
 					() -> (loginError == null) ?
 							"expected the login to fail but it succeeded" :
-							"expected the login error to contain '" + message + "' but it was: " + loginError);
+							"expected the login error to contain '" + expected + "' but it was: " + loginError);
 		}
-		else if (message == null) {
+		else if (expected == null) {
 			selenide.trace("Test failure");
 			check(selenide.verifyFailure(), () -> "expected an error message but found: " + selenide.describeMessages());
 		}
 		else {
 			selenide.trace(String.format("Test failure with message '%s'", message));
-			check(selenide.verifyFailure(message),
-					() -> "expected an error message containing '" + message + "' but found: " + selenide.describeMessages());
+			check(selenide.verifyFailure(expected),
+					() -> "expected an error message containing '" + expected + "' but found: " + selenide.describeMessages());
 		}
 	}
 
