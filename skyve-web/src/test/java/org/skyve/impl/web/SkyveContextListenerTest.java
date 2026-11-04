@@ -761,12 +761,13 @@ public class SkyveContextListenerTest {
 	@SuppressWarnings("static-method")
 	public void testPopulateUtilImplReadsThumbnailStanza() throws Exception {
 		int originalThreads = UtilImpl.THUMBNAIL_CONCURRENT_THREADS;
+		int originalMaximumDimension = UtilImpl.THUMBNAIL_MAXIMUM_DIMENSION;
 		String savedPropertiesFilePath = System.getProperty("PROPERTIES_FILE_PATH");
 		Class<? extends AbstractPersistence> originalPersistenceImplementation = AbstractPersistence.IMPLEMENTATION_CLASS;
 		Class<? extends DynamicPersistence> originalDynamicPersistenceImplementation = AbstractPersistence.DYNAMIC_IMPLEMENTATION_CLASS;
 		Path tempDir = Files.createTempDirectory("skyve-context-listener-thumbnail");
 		try {
-			String extraStanza = "\"thumbnail\":{\"concurrentThreads\":8,\"subsamplingMinimumTargetSize\":50,\"fileStorage\":false}";
+			String extraStanza = "\"thumbnail\":{\"concurrentThreads\":8,\"subsamplingMinimumTargetSize\":50,\"maximumDimension\":1000,\"fileStorage\":false}";
 			Path configFile = writeConfigurationWithExtra(tempDir, extraStanza);
 			System.setProperty("PROPERTIES_FILE_PATH", configFile.toString());
 			ProvidedRepository originalRepository = ProvidedRepositoryFactory.get();
@@ -778,12 +779,14 @@ public class SkyveContextListenerTest {
 				ProvidedRepositoryFactory.set(originalRepository);
 			}
 			assertEquals(8, UtilImpl.THUMBNAIL_CONCURRENT_THREADS);
+			assertEquals(1000, UtilImpl.THUMBNAIL_MAXIMUM_DIMENSION);
 		}
 		finally {
 			restoreProperty("PROPERTIES_FILE_PATH", savedPropertiesFilePath);
 			AbstractPersistence.IMPLEMENTATION_CLASS = originalPersistenceImplementation;
 			AbstractPersistence.DYNAMIC_IMPLEMENTATION_CLASS = originalDynamicPersistenceImplementation;
 			UtilImpl.THUMBNAIL_CONCURRENT_THREADS = originalThreads;
+			UtilImpl.THUMBNAIL_MAXIMUM_DIMENSION = originalMaximumDimension;
 			deleteTree(tempDir);
 		}
 	}
@@ -1711,6 +1714,30 @@ public class SkyveContextListenerTest {
 		finally {
 			UtilImpl.MODULE_DIRECTORY = originalModuleDirectory;
 			deleteTree(tempDirectory);
+		}
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void testConfigureThumbnailSettingsRejectsNonPositiveMaximumDimension() {
+		int originalMaximumDimension = UtilImpl.THUMBNAIL_MAXIMUM_DIMENSION;
+		try {
+			for (int maximumDimension : new int[] {0, -1}) {
+				InvocationTargetException thrown = assertThrows(InvocationTargetException.class,
+						() -> invokePrivateStatic("configureThumbnailSettings",
+								new Class<?>[] {Map.class},
+								Map.of("thumbnail", Map.of(
+										"concurrentThreads", Integer.valueOf(2),
+										"subsamplingMinimumTargetSize", Integer.valueOf(20),
+										"maximumDimension", Integer.valueOf(maximumDimension),
+										"fileStorage", Boolean.FALSE))));
+
+				assertThat(thrown.getCause(), instanceOf(IllegalStateException.class));
+				assertEquals("thumbnail.maximumDimension must be greater than 0", thrown.getCause().getMessage());
+			}
+		}
+		finally {
+			UtilImpl.THUMBNAIL_MAXIMUM_DIMENSION = originalMaximumDimension;
 		}
 	}
 

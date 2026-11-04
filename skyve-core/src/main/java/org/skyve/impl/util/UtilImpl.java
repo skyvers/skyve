@@ -252,6 +252,10 @@ public class UtilImpl {
 	// target of 256 = max 1MB; target of 512 = max 4MB, target of 1024 = max 16MB per image.
 	public static int THUMBNAIL_SUBSAMPLING_MINIMUM_TARGET_SIZE = 512;
 
+	// The largest width or height in pixels of a requested thumbnail; bigger requests are scaled down to fit.
+	// This limits the memory a request can use - 2048 is about 16MB per image. It must be greater than 0.
+	public static int THUMBNAIL_MAXIMUM_DIMENSION = 2048;
+
 	// Thumbnails can be stored on the file system or generated on the fly each time
 	public static boolean THUMBNAIL_FILE_STORAGE = true;
 
@@ -846,6 +850,7 @@ public class UtilImpl {
 
     	THUMBNAIL_CONCURRENT_THREADS = 10;
     	THUMBNAIL_SUBSAMPLING_MINIMUM_TARGET_SIZE = 512;
+    	THUMBNAIL_MAXIMUM_DIMENSION = 2048;
     	THUMBNAIL_FILE_STORAGE = true;
     	THUMBNAIL_DIRECTORY = null;
     	

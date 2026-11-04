@@ -613,6 +613,15 @@ public class SkyveContextListener implements ServletContextListener {
 
 		UtilImpl.THUMBNAIL_CONCURRENT_THREADS = getInt(THUMBNAIL_KEY, "concurrentThreads", thumbnail);
 		UtilImpl.THUMBNAIL_SUBSAMPLING_MINIMUM_TARGET_SIZE = getInt(THUMBNAIL_KEY, "subsamplingMinimumTargetSize", thumbnail);
+		// Optional so older JSON files keep the default
+		Number maximumDimension = getNumber(THUMBNAIL_KEY, "maximumDimension", thumbnail, false);
+		if (maximumDimension != null) {
+			// No unlimited setting - an uncapped size lets a request exhaust memory
+			if (maximumDimension.intValue() <= 0) {
+				throw new IllegalStateException(THUMBNAIL_KEY + ".maximumDimension must be greater than 0");
+			}
+			UtilImpl.THUMBNAIL_MAXIMUM_DIMENSION = maximumDimension.intValue();
+		}
 		UtilImpl.THUMBNAIL_FILE_STORAGE = getBoolean(THUMBNAIL_KEY, "fileStorage", thumbnail);
 		UtilImpl.THUMBNAIL_DIRECTORY = getString(THUMBNAIL_KEY, DIRECTORY_KEY, thumbnail, false);
 		if (UtilImpl.THUMBNAIL_DIRECTORY != null) {
@@ -834,7 +843,7 @@ public class SkyveContextListener implements ServletContextListener {
 		if (caches != null) {
 			for (String cacheName : caches.keySet()) {
 				Map<String, Object> cache = getObject(CACHES_KEY, cacheName, caches, true);
-				String prefix = String.format("caches.%s", cacheName);
+				String prefix = CACHES_KEY + '.' + cacheName;
 				String type = getString(CACHES_KEY + '.' + cacheName, "type", cache, true);
 				int heapSizeEntries = getInt(prefix, HEAP_SIZE_ENTRIES_KEY, cache);
 				Number offHeapSizeInMb = getNumber(prefix, OFF_HEAP_SIZE_MB_KEY, cache, false);
@@ -895,7 +904,7 @@ public class SkyveContextListener implements ServletContextListener {
 		Map<String, Object> dataStores = getObject(null, "dataStores", properties, true);
 		for (String dataStoreName : dataStores.keySet()) {
 			Map<String, Object> dataStore = getObject("dataStores", dataStoreName, dataStores, true);
-			String prefix = String.format("dataStores.%s", dataStoreName);
+			String prefix = "dataStores." + dataStoreName;
 			String dialect = getString(prefix, "dialect", dataStore, true);
 			String jndi = getString(prefix, "jndi", dataStore, false);
 			if (jndi == null) {

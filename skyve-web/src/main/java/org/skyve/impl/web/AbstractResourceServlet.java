@@ -446,7 +446,9 @@ public abstract class AbstractResourceServlet extends HttpServlet {
 	}
 
 	static void logResourceIOException(@Nonnull Logger logger, @Nonnull IOException e) {
-		logger.warn("Problem getting the resource - {}", e.toString());
+		if (logger.isWarnEnabled()) {
+			logger.warn("Problem getting the resource - {}", e.toString());
+		}
 	}
 
 	/**
@@ -601,6 +603,14 @@ public abstract class AbstractResourceServlet extends HttpServlet {
 			imageWidth = 0;
 			imageHeight = 0;
 			LOGGER.error("Width/Height is malformed in the URL");
+		}
+		// Shrink an oversized box, keeping its aspect ratio, so a request cannot force a huge image into memory.
+		// The default cap of 2048 matches the largest preview size the Skyve clients ask for.
+		int maximumDimension = UtilImpl.THUMBNAIL_MAXIMUM_DIMENSION;
+		int largestSide = Math.max(imageWidth, imageHeight);
+		if ((largestSide > 0) && (largestSide > maximumDimension)) {
+			imageWidth = (int) ((long) imageWidth * maximumDimension / largestSide);
+			imageHeight = (int) ((long) imageHeight * maximumDimension / largestSide);
 		}
 
 		// A revoked session falls back to no user so that public resources are still served
