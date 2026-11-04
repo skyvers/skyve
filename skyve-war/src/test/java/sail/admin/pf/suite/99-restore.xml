@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!--
+	PrimeFaces admin suite, last step: restore the backup that 00-backup.xml made (the newest), which puts back the data as it
+	was before the suite, then delete that backup. PrimeFacesAdminSuiteSailIT runs this even when an earlier file fails.
+-->
+<automation uxui="tablet" userAgentType="tablet" testStrategy="Assert"
+			xsi:schemaLocation="http://www.skyve.org/xml/sail ../../../../../../main/java/schemas/sail.xsd"
+			xmlns="http://www.skyve.org/xml/sail"
+			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<before>
+		<login user="admin" password="admin" />
+		<testSuccess />
+	</before>
+	<interaction name="Restore the backup made before the suite">
+		<method>
+			<navigateEdit module="admin" document="DataMaintenance" />
+			<tabSelect path="Backup/Restore" />
+			<action name="RefreshBackupList" />
+			<comment>Backups are listed newest first</comment>
+			<!-- PHASE2: rowContaining the backup's name, once it can be captured -->
+			<listGridSelect module="admin" query="BackupsModel" row="0" />
+			<comment>Restore options: error on orphaned content, reindex both, delete the existing data first</comment>
+			<dataEnter binding="contentRestoreOption" value="2" />
+			<testValue binding="contentRestoreOption" value="error" />
+			<dataEnter binding="restoreIndexingOption" value="2" />
+			<testValue binding="restoreIndexingOption" value="both" />
+			<dataEnter binding="restorePreProcess" value="8" />
+			<testValue binding="restorePreProcess" value="deleteData" />
+			<action name="Restore" confirm="true" />
+			<!-- PHASE2: <testMessage contains="Restore" type="info" /> -->
+			<pause millis="10000" />
+		</method>
+	</interaction>
+	<interaction name="Sign in again after the restore, and delete its backup">
+		<method>
+			<logout />
+			<login user="admin" password="admin" />
+			<testSuccess />
+			<navigateEdit module="admin" document="DataMaintenance" />
+			<tabSelect path="Backup/Restore" />
+			<action name="RefreshBackupList" />
+			<listGridSelect module="admin" query="BackupsModel" row="0" />
+			<action name="DeleteBackup" confirm="true" />
+		</method>
+	</interaction>
+	<after>
+		<logout />
+	</after>
+</automation>
