@@ -15,6 +15,7 @@ import org.skyve.impl.metadata.module.ModuleImpl;
 import org.skyve.impl.metadata.view.ViewImpl;
 import org.skyve.impl.metadata.view.container.Tab;
 import org.skyve.impl.metadata.view.widget.bound.input.CheckBox;
+import org.skyve.impl.metadata.view.widget.bound.input.Slider;
 import org.skyve.impl.metadata.view.widget.bound.tabular.DataGrid;
 import org.skyve.metadata.sail.language.Step;
 import org.skyve.metadata.sail.language.step.interaction.DataEnter;
@@ -126,5 +127,19 @@ class TestDataEnterViewVisitorTest {
 		ViewImpl view = new ViewImpl();
 
 		return new TestDataEnterViewVisitor(customer, module, document, view, "desktop", bean);
+	}
+
+	@Test
+	void sliderValuesAreMovedIntoTheSlidersRange() {
+		Slider slider = new Slider();
+		assertEquals("42", TestDataEnterViewVisitor.sliderValue(slider, "42"));
+		assertEquals("51", TestDataEnterViewVisitor.sliderValue(slider, "3589"));
+		assertEquals("51", TestDataEnterViewVisitor.sliderValue(slider, "-3"));
+
+		slider.setMin(Double.valueOf(0));
+		slider.setMax(Double.valueOf(10));
+		assertEquals("2.5", TestDataEnterViewVisitor.sliderValue(slider, "2.5"));
+		assertEquals("5", TestDataEnterViewVisitor.sliderValue(slider, "1,234"));
+		assertEquals("abc", TestDataEnterViewVisitor.sliderValue(slider, "abc"));
 	}
 }

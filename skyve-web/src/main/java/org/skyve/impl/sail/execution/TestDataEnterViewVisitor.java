@@ -431,6 +431,11 @@ public class TestDataEnterViewVisitor extends NoOpViewVisitor {
 				}
 			}
 
+			// A slider only takes values in its range: the generated number may fall outside it
+			if ((value != null) && (bound instanceof Slider slider)) {
+				value = sliderValue(slider, value);
+			}
+
 			if (value != null) {
 				DataEnter enter = new DataEnter();
 				enter.setBinding(binding);
@@ -441,6 +446,32 @@ public class TestDataEnterViewVisitor extends NoOpViewVisitor {
 		}
 	}
 	
+	/**
+	 * Moves a generated slider value into the slider's range, so that a user could enter it.
+	 * Without a range, 1 to 100 is used, the range that both renderers' sliders accept.
+	 *
+	 * @param slider	the slider
+	 * @param value		the generated value
+	 * @return the value in range, as an integer when it is whole
+	 */
+	static @Nonnull String sliderValue(@Nonnull Slider slider, @Nonnull String value) {
+		double number;
+		try {
+			number = Double.parseDouble(value.replace(",", ""));
+		}
+		catch (@SuppressWarnings("unused") NumberFormatException e) {
+			return value;
+		}
+		Double min = slider.getMin();
+		Double max = slider.getMax();
+		double low = (min == null) ? 1d : min.doubleValue();
+		double high = (max == null) ? 100d : max.doubleValue();
+		if ((number < low) || (number > high)) {
+			number = Math.round((low + high) / 2d);
+		}
+		return (number == Math.rint(number)) ? String.valueOf((long) number) : String.valueOf(number);
+	}
+
 	/**
 	 * Evaluates visibility by negating the configured invisible condition result.
 	 *
