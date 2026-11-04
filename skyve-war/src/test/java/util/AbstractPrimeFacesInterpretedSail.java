@@ -6,21 +6,18 @@ import java.nio.charset.StandardCharsets;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.skyve.impl.metadata.user.RoleImpl;
 import org.skyve.impl.metadata.user.UserImpl;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.impl.web.faces.FacesUtil;
-import org.skyve.metadata.customer.Customer;
-import org.skyve.metadata.module.Module;
 import org.skyve.metadata.sail.language.Automation;
-import org.skyve.metadata.user.Role;
 import org.skyve.metadata.user.User;
 
 import jakarta.annotation.Nonnull;
 import util.sail.BrowserConfiguration;
 import util.sail.PrimeFacesInterpretedWebDriverExecutor;
 import util.sail.PrimeFacesSelenide;
+import util.sail.SailUsers;
 
 /**
  * Base test class for running SAIL scripts against a PrimeFaces UI in an interpreted browser session.
@@ -97,23 +94,9 @@ public abstract class AbstractPrimeFacesInterpretedSail extends AbstractH2Test {
 	 *
 	 * @param testUser	the test's user, whose customer, name and id are copied
 	 * @return the user
+	 * @see SailUsers#bootstrapLikeUser(User)
 	 */
 	protected static @Nonnull UserImpl bootstrapLikeUser(@Nonnull User testUser) {
-		UserImpl result = new UserImpl();
-		result.setCustomerName(testUser.getCustomerName());
-		result.setName(testUser.getName());
-		result.setId(testUser.getId());
-		result.setContactId(testUser.getContactId());
-		result.setContactName(testUser.getContactName());
-		result.setDataGroupId(testUser.getDataGroupId());
-		result.setHomeModuleName(testUser.getHomeModuleName());
-		result.setLanguageTag(testUser.getLanguageTag());
-		Customer customer = testUser.getCustomer();
-		for (Module module : customer.getModules()) {
-			for (Role role : module.getRoles()) {
-				result.addRole((RoleImpl) role);
-			}
-		}
-		return result;
+		return SailUsers.bootstrapLikeUser(testUser);
 	}
 }

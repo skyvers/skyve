@@ -9,12 +9,13 @@
 		<testSuccess />
 	</before>
 	<!--
-		RUNTIME BUG (race, seen once in a full run): straight after failed sign ins and two quick sign ins, Update My Details
-		failed with an optimistic lock error ("updated by user admin ... after you looked at it"): the sign in updates the
-		user record after the dashboard read it. So the dashboard runs first here, before the failed sign ins.
+		RUNTIME BUG (race): Update My Details straight after signing in sometimes fails with an optimistic lock error
+		("updated by user admin ... after you looked at it"), as something saves the user just as the dashboard opens.
+		Wait for the sign in to settle first, and do this before the failed sign ins.
 	-->
 	<interaction name="Home: User Dashboard">
 		<method>
+			<pause millis="3000" />
 			<navigateEdit module="admin" document="UserDashboard" />
 			<testValue binding="currentUser.userName" value="admin" />
 			<testWidget binding="currentUser.userName" enabled="false" />

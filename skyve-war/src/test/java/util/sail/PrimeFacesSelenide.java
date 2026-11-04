@@ -494,6 +494,8 @@ public class PrimeFacesSelenide extends Selenide<
 				&& element.isEnabled()
 				&& element.attr("disabled") == null
 				&& element.attr("readonly") == null) {
+			scrollToCentre(element.getWrappedElement());
+			waitUntilUncovered(element.getWrappedElement());
 			element.clear();
 
 			if (keyPresses) {
@@ -578,7 +580,7 @@ public class PrimeFacesSelenide extends Selenide<
 		if (! element.exists()) {
 			return false;
 		}
-		element.scrollTo();
+		scrollToCentre(element.getWrappedElement());
 		Boolean result = (Boolean) js("var w = PrimeFaces.getWidgetById(arguments[0]);" +
 										"if ((! w) || w.disabled) return false;" +
 										"if (! w.editor) {w.render();}" +
@@ -1254,26 +1256,67 @@ public class PrimeFacesSelenide extends Selenide<
 		return $(byName("jakarta.faces.ViewState")).attr("value");
 	}
 
+	/**
+	 * Clicks an element as a user would: scrolls it to the middle of the window (so a fixed header or banner cannot
+	 * cover it, even in a small window), waits until nothing else is over it, then clicks.
+	 * Falls back to a script click if another element still takes the click.
+	 *
+	 * @param element	the element to click
+	 */
 	public void click(SelenideElement element) {
 		WebElement wrappedElement = element.getWrappedElement();
+		scrollToCentre(wrappedElement);
+		waitUntilUncovered(wrappedElement);
 		try {
-			// Scroll the element into view on the page and see if the element can be made visible
-			if (! element.is(visible, Duration.ofMillis(250))) {
-				element.scrollTo();
-			}
-
 			wrappedElement.click();
 		} catch (@SuppressWarnings("unused") WebDriverException e) {
-			// This could occur when the control is behind a floating element (such as a sticky header)
-			JavascriptExecutor js = (JavascriptExecutor) driver;
+			// Something (a floating element or an animation) still covers it
+			trace("    Could not click on the element - scroll it to the middle again and retry");
+			scrollToCentre(wrappedElement);
+			waitUntilUncovered(wrappedElement);
 			try {
-				trace("    Could not click on the element - scroll it to the middle of the page and try again");
-				js.executeScript("arguments[0].scrollIntoView({block: 'center', inline: 'center'});", wrappedElement);
 				wrappedElement.click();
 			} catch (@SuppressWarnings("unused") WebDriverException e1) {
 				trace("    Could not click on the element - click it with script");
-				js.executeScript("arguments[0].click();", wrappedElement);
+				js("arguments[0].click();", wrappedElement);
 			}
+		}
+	}
+
+	/**
+	 * Scrolls an element to the middle of the window, away from fixed headers, banners and footers.
+	 *
+	 * @param element	the element
+	 */
+	public void scrollToCentre(@Nonnull WebElement element) {
+		try {
+			js("arguments[0].scrollIntoView({block: 'center', inline: 'center'});", element);
+		}
+		catch (@SuppressWarnings("unused") WebDriverException e) {
+			// not scrollable (e.g. hidden); the click reports the problem
+		}
+	}
+
+	/**
+	 * Waits (up to 2 seconds) until the element's centre is not covered by another element, e.g. while a header
+	 * settles or an overlay animates away.
+	 */
+	private void waitUntilUncovered(@Nonnull WebElement element) {
+		long deadline = System.currentTimeMillis() + 2000L;
+		while (System.currentTimeMillis() < deadline) {
+			try {
+				if (Boolean.TRUE.equals(js("var e = arguments[0], r = e.getBoundingClientRect();" +
+											"if ((r.width === 0) && (r.height === 0)) return true;" +
+											"var t = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2);" +
+											"return (t === null) || (t === e) || e.contains(t) || t.contains(e) || (t.tagName === 'LABEL' && t.htmlFor === e.id);",
+											element))) {
+					return;
+				}
+			}
+			catch (@SuppressWarnings("unused") WebDriverException e) {
+				return;
+			}
+			pause(100);
 		}
 	}
 
