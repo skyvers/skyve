@@ -16,7 +16,7 @@
 		<method>
 			<navigateEdit module="admin" document="DataMaintenance" />
 			<tabSelect path="Backup/Restore" />
-			<comment>99-restore.xml restores the first backup listed (the oldest), so there must be no other backup</comment>
+			<comment>Precondition: no other backup. 99-restore.xml restores the first backup listed (the oldest), so a stray backup (an interrupted run, a suite whose restore failed) would roll the database back to an unknown state. If the next step fails, delete the stray backups (Data Maintenance, Backup/Restore) and run again.</comment>
 			<testGridRows module="admin" query="BackupsModel" maxRows="0" />
 			<dataEnter binding="includeContent" value="true" />
 			<dataEnter binding="includeAuditLog" value="true" />
