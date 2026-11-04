@@ -36,7 +36,9 @@ class SmartClientAdminSuiteSailIT extends AbstractSmartClientInterpretedSail {
 	};
 	private static final String RESTORE = "99-restore.xml";
 	// 00's interactions after its first one, which checks that the server has no stray backup or marker
-	private static final List<String> AFTER_PRECONDITION = List.of("Interaction \"Back up the data", "Interaction \"Leave a marker");
+	private static final List<String> AFTER_PRECONDITION = List.of("Interaction \"Clear the completed jobs",
+																		"Interaction \"Back up the data",
+																		"Interaction \"Leave a marker");
 
 	public SmartClientAdminSuiteSailIT() {
 		super(new BrowserConfiguration()

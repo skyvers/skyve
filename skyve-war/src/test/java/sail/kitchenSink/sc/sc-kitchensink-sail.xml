@@ -240,6 +240,7 @@
 			<testValue binding="outcome" value="Run From Tab Button ran" />
 			<testSuccess />
 			<execute><![CDATA[window._sailExecuted = true;]]></execute>
+			<comment>Conformance for the pause op-code itself; the suites do not pause</comment>
 			<pause millis="100" />
 		</method>
 	</interaction>
