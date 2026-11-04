@@ -65,7 +65,11 @@ abstract class CrossBrowserSelenium {
 	 * @throws Exception
 	 */
 	private void setupChrome(BrowserConfiguration config) {
-		List<String> arguments = new ArrayList<>(3);
+		List<String> arguments = new ArrayList<>(6);
+		// Chrome throttles windows it thinks are hidden (a locked screen, behind other apps): keep timers and rendering running
+		arguments.add("--disable-backgrounding-occluded-windows");
+		arguments.add("--disable-renderer-backgrounding");
+		arguments.add("--disable-background-timer-throttling");
 		String userAgentString = config.getUserAgentString();
 		if (userAgentString != null) {
 			arguments.add("--user-agent=" + userAgentString);
