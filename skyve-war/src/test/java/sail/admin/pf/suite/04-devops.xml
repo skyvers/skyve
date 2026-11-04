@@ -70,7 +70,11 @@
 		<method>
 			<navigateMenu module="admin" item="DevOps/Monitoring Dashboard" />
 			<tabSelect path="Charts" />
+			<!--
+				LANGUAGE NEED: every Refresh button is inside a collapsible box that starts closed, and SAIL has no step to open
+				a box, so a user's click on Refresh cannot be scripted. Add Refresh back once there is one.
 			<action name="Refresh" />
+			-->
 			<tabSelect path="Requests" />
 			<testGridRows module="admin" query="RequestListModel" minRows="1" />
 		</method>

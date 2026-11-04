@@ -126,10 +126,11 @@
 			<tabSelect path="Import/Export" />
 			<tabSelect path="Backup/Restore" />
 			<action name="RefreshBackupList" />
-			<!-- testDataEnter picks a random data sensitivity, which redacts password hashes in the backup: a restore of it locks admin out -->
-			<dataEnter binding="dataSensitivity" value="1" />
-			<testValue binding="dataSensitivity" value="none" />
+			<!--
+				Backup moved to the admin suite (suite/00-backup.xml and 99-restore.xml), which makes, restores and deletes its
+				backup: a backup made here would be left behind, and the suites require that no other backup exists.
 			<action name="Backup" />
+			-->
 			<action name="UploadBackup" />
 			<tabSelect path="Data Refresh" />
 			<save />
