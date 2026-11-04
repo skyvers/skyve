@@ -61,6 +61,8 @@
 
   <xs:element name="navigateMap" type="tns:navigateMap"/>
 
+  <xs:element name="navigateMenu" type="tns:navigateMenu"/>
+
   <xs:element name="navigateTree" type="tns:navigateTree"/>
 
   <xs:element name="ok" type="tns:ok"/>
@@ -85,9 +87,19 @@
 
   <xs:element name="testFailure" type="tns:testFailure"/>
 
+  <xs:element name="testGridRows" type="tns:testGridRows"/>
+
+  <xs:element name="testMenu" type="tns:testMenu"/>
+
+  <xs:element name="testMessage" type="tns:testMessage"/>
+
   <xs:element name="testSuccess" type="tns:testSuccess"/>
 
   <xs:element name="testValue" type="tns:testValue"/>
+
+  <xs:element name="testWidget" type="tns:testWidget"/>
+
+  <xs:element name="upload" type="tns:upload"/>
 
   <xs:element name="zoomIn" type="tns:zoomIn"/>
 
@@ -148,6 +160,12 @@
         <xs:element ref="tns:pushEditContext"/>
         <xs:element ref="tns:popContext"/>
         <xs:element ref="tns:clearContext"/>
+        <xs:element ref="tns:upload"/>
+        <xs:element ref="tns:testMessage"/>
+        <xs:element ref="tns:testGridRows"/>
+        <xs:element ref="tns:testWidget"/>
+        <xs:element ref="tns:navigateMenu"/>
+        <xs:element ref="tns:testMenu"/>
       </xs:choice>
     </xs:sequence>
   </xs:complexType>
@@ -233,6 +251,7 @@
     <xs:complexContent>
       <xs:extension base="tns:abstractAction">
         <xs:sequence/>
+        <xs:attribute name="confirm" type="xs:boolean"/>
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>
@@ -246,6 +265,7 @@
     <xs:complexContent>
       <xs:extension base="tns:abstractAction">
         <xs:sequence/>
+        <xs:attribute name="confirm" type="xs:boolean"/>
         <xs:attribute name="createView" type="xs:boolean"/>
       </xs:extension>
     </xs:complexContent>
@@ -263,6 +283,7 @@
     <xs:complexContent>
       <xs:extension base="tns:abstractAction">
         <xs:sequence/>
+        <xs:attribute name="confirm" type="xs:boolean"/>
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>
@@ -271,6 +292,7 @@
     <xs:complexContent>
       <xs:extension base="tns:abstractAction">
         <xs:sequence/>
+        <xs:attribute name="confirm" type="xs:boolean"/>
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>
@@ -279,6 +301,7 @@
     <xs:complexContent>
       <xs:extension base="tns:abstractAction">
         <xs:sequence/>
+        <xs:attribute name="confirm" type="xs:boolean"/>
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>
@@ -332,25 +355,29 @@
   <xs:complexType name="dataGridZoom">
     <xs:sequence/>
     <xs:attribute name="binding" type="xs:string" use="required"/>
-    <xs:attribute name="row" type="xs:int" use="required"/>
+    <xs:attribute name="row" type="xs:int"/>
+    <xs:attribute name="rowContaining" type="xs:string"/>
   </xs:complexType>
 
   <xs:complexType name="dataGridEdit">
     <xs:sequence/>
     <xs:attribute name="binding" type="xs:string" use="required"/>
-    <xs:attribute name="row" type="xs:int" use="required"/>
+    <xs:attribute name="row" type="xs:int"/>
+    <xs:attribute name="rowContaining" type="xs:string"/>
   </xs:complexType>
 
   <xs:complexType name="dataGridRemove">
     <xs:sequence/>
     <xs:attribute name="binding" type="xs:string" use="required"/>
-    <xs:attribute name="row" type="xs:int" use="required"/>
+    <xs:attribute name="row" type="xs:int"/>
+    <xs:attribute name="rowContaining" type="xs:string"/>
   </xs:complexType>
 
   <xs:complexType name="dataGridSelect">
     <xs:sequence/>
     <xs:attribute name="binding" type="xs:string" use="required"/>
-    <xs:attribute name="row" type="xs:int" use="required"/>
+    <xs:attribute name="row" type="xs:int"/>
+    <xs:attribute name="rowContaining" type="xs:string"/>
   </xs:complexType>
 
   <xs:complexType name="listGridNew">
@@ -368,7 +395,8 @@
     <xs:attribute name="model" type="xs:string"/>
     <xs:attribute name="module" type="xs:string"/>
     <xs:attribute name="query" type="xs:string"/>
-    <xs:attribute name="row" type="xs:int" use="required"/>
+    <xs:attribute name="row" type="xs:int"/>
+    <xs:attribute name="rowContaining" type="xs:string"/>
   </xs:complexType>
 
   <xs:complexType name="listGridSelect">
@@ -377,7 +405,8 @@
     <xs:attribute name="model" type="xs:string"/>
     <xs:attribute name="module" type="xs:string"/>
     <xs:attribute name="query" type="xs:string"/>
-    <xs:attribute name="row" type="xs:int" use="required"/>
+    <xs:attribute name="row" type="xs:int"/>
+    <xs:attribute name="rowContaining" type="xs:string"/>
   </xs:complexType>
 
   <xs:complexType name="testValue">
@@ -435,6 +464,54 @@
     <xs:sequence/>
   </xs:complexType>
 
+  <xs:complexType name="upload">
+    <xs:sequence/>
+    <xs:attribute name="action" type="xs:string"/>
+    <xs:attribute name="binding" type="xs:string"/>
+    <xs:attribute name="file" type="xs:string" use="required"/>
+  </xs:complexType>
+
+  <xs:complexType name="testMessage">
+    <xs:sequence/>
+    <xs:attribute name="contains" type="xs:string" use="required"/>
+    <xs:attribute name="type" type="tns:messageType"/>
+  </xs:complexType>
+
+  <xs:complexType name="testGridRows">
+    <xs:sequence/>
+    <xs:attribute name="binding" type="xs:string"/>
+    <xs:attribute name="document" type="xs:string"/>
+    <xs:attribute name="maxRows" type="xs:int"/>
+    <xs:attribute name="minRows" type="xs:int"/>
+    <xs:attribute name="model" type="xs:string"/>
+    <xs:attribute name="module" type="xs:string"/>
+    <xs:attribute name="query" type="xs:string"/>
+    <xs:attribute name="rowContaining" type="xs:string"/>
+    <xs:attribute name="timeoutMillis" type="xs:int"/>
+  </xs:complexType>
+
+  <xs:complexType name="testWidget">
+    <xs:sequence/>
+    <xs:attribute name="action" type="xs:string"/>
+    <xs:attribute name="binding" type="xs:string"/>
+    <xs:attribute name="enabled" type="xs:boolean"/>
+    <xs:attribute name="tab" type="xs:string"/>
+    <xs:attribute name="visible" type="xs:boolean"/>
+  </xs:complexType>
+
+  <xs:complexType name="navigateMenu">
+    <xs:sequence/>
+    <xs:attribute name="item" type="xs:string" use="required"/>
+    <xs:attribute name="module" type="xs:string" use="required"/>
+  </xs:complexType>
+
+  <xs:complexType name="testMenu">
+    <xs:sequence/>
+    <xs:attribute name="item" type="xs:string"/>
+    <xs:attribute name="module" type="xs:string" use="required"/>
+    <xs:attribute name="present" type="xs:boolean"/>
+  </xs:complexType>
+
   <xs:complexType name="interaction">
     <xs:sequence>
       <xs:element name="before" type="tns:procedure" form="qualified" minOccurs="0"/>
@@ -483,6 +560,12 @@
               <xs:element ref="tns:pushEditContext"/>
               <xs:element ref="tns:popContext"/>
               <xs:element ref="tns:clearContext"/>
+              <xs:element ref="tns:upload"/>
+              <xs:element ref="tns:testMessage"/>
+              <xs:element ref="tns:testGridRows"/>
+              <xs:element ref="tns:testWidget"/>
+              <xs:element ref="tns:navigateMenu"/>
+              <xs:element ref="tns:testMenu"/>
             </xs:choice>
           </xs:sequence>
         </xs:complexType>
@@ -497,6 +580,14 @@
       <xs:enumeration value="Assert"/>
       <xs:enumeration value="Verify"/>
       <xs:enumeration value="None"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="messageType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="info"/>
+      <xs:enumeration value="warning"/>
+      <xs:enumeration value="error"/>
     </xs:restriction>
   </xs:simpleType>
 </xs:schema>

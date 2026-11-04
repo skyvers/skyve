@@ -2,6 +2,12 @@ package org.skyve.impl.sail.execution;
 
 import org.skyve.metadata.sail.language.step.Comment;
 import org.skyve.metadata.sail.language.step.Pause;
+import org.skyve.metadata.sail.language.step.TestGridRows;
+import org.skyve.metadata.sail.language.step.TestMessage;
+import org.skyve.metadata.sail.language.step.TestWidget;
+import org.skyve.metadata.sail.language.step.interaction.Upload;
+import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateMenu;
+import org.skyve.metadata.sail.language.step.interaction.navigation.TestMenu;
 
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
@@ -98,5 +104,65 @@ public abstract class SeleneseExecutor<T extends AutomationContext> extends Scri
 	@Override
 	public void executePause(@Nonnull Pause pause) {
 		// do nothing - we can't pause easily in Selenese
+	}
+
+	/**
+	 * Emits a comment that {@code <upload/>} is not supported, because this generator has no Selenese equivalent yet.
+	 *
+	 * @param upload the step being skipped
+	 */
+	@Override
+	public void executeUpload(@Nonnull Upload upload) {
+		comment("<upload/> not supported by this generator");
+	}
+
+	/**
+	 * Emits a comment that {@code <testMessage/>} is not supported, because this generator has no Selenese equivalent yet.
+	 *
+	 * @param test the step being skipped
+	 */
+	@Override
+	public void executeTestMessage(@Nonnull TestMessage test) {
+		comment("<testMessage/> not supported by this generator");
+	}
+
+	/**
+	 * Emits a comment that {@code <testGridRows/>} is not supported, because this generator has no Selenese equivalent yet.
+	 *
+	 * @param test the step being skipped
+	 */
+	@Override
+	public void executeTestGridRows(@Nonnull TestGridRows test) {
+		comment("<testGridRows/> not supported by this generator");
+	}
+
+	/**
+	 * Emits a comment that {@code <testWidget/>} is not supported, because this generator has no Selenese equivalent yet.
+	 *
+	 * @param test the step being skipped
+	 */
+	@Override
+	public void executeTestWidget(@Nonnull TestWidget test) {
+		comment("<testWidget/> not supported by this generator");
+	}
+
+	/**
+	 * Emits a comment that {@code <navigateMenu/>} is not supported, because this generator has no Selenese equivalent yet.
+	 *
+	 * @param menu the step being skipped
+	 */
+	@Override
+	public void executeNavigateMenu(@Nonnull NavigateMenu menu) {
+		comment("<navigateMenu/> not supported by this generator");
+	}
+
+	/**
+	 * Emits a comment that {@code <testMenu/>} is not supported, because this generator has no Selenese equivalent yet.
+	 *
+	 * @param test the step being skipped
+	 */
+	@Override
+	public void executeTestMenu(@Nonnull TestMenu test) {
+		comment("<testMenu/> not supported by this generator");
 	}
 }

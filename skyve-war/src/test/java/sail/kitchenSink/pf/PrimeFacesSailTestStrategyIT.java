@@ -18,7 +18,7 @@ import util.sail.Devices;
  * against the PrimeFaces kitchen sink: Assert stops at the first failure, Verify reports every failure at the end,
  * and None makes no assertions.
  * <p>
- * Runs against {@code -Dsail.baseUrl} (default {@value BrowserConfiguration#DEFAULT_BASE_URL}),
+ * Runs against the server named by {@code -Dsail.baseUrl} (required),
  * headless unless {@code -Dsail.headless=false}.
  */
 class PrimeFacesSailTestStrategyIT extends AbstractPrimeFacesInterpretedSail {

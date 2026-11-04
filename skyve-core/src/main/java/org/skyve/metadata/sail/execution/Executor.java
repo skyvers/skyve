@@ -6,8 +6,11 @@ import org.skyve.metadata.sail.language.step.Comment;
 import org.skyve.metadata.sail.language.step.Execute;
 import org.skyve.metadata.sail.language.step.Pause;
 import org.skyve.metadata.sail.language.step.TestFailure;
+import org.skyve.metadata.sail.language.step.TestGridRows;
+import org.skyve.metadata.sail.language.step.TestMessage;
 import org.skyve.metadata.sail.language.step.TestSuccess;
 import org.skyve.metadata.sail.language.step.TestValue;
+import org.skyve.metadata.sail.language.step.TestWidget;
 import org.skyve.metadata.sail.language.step.context.ClearContext;
 import org.skyve.metadata.sail.language.step.context.PopContext;
 import org.skyve.metadata.sail.language.step.context.PushEditContext;
@@ -15,6 +18,7 @@ import org.skyve.metadata.sail.language.step.context.PushListContext;
 import org.skyve.metadata.sail.language.step.interaction.DataEnter;
 import org.skyve.metadata.sail.language.step.interaction.TabSelect;
 import org.skyve.metadata.sail.language.step.interaction.TestDataEnter;
+import org.skyve.metadata.sail.language.step.interaction.Upload;
 import org.skyve.metadata.sail.language.step.interaction.actions.Action;
 import org.skyve.metadata.sail.language.step.interaction.actions.Cancel;
 import org.skyve.metadata.sail.language.step.interaction.actions.Delete;
@@ -40,7 +44,9 @@ import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateEdit
 import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateLink;
 import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateList;
 import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateMap;
+import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateMenu;
 import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateTree;
+import org.skyve.metadata.sail.language.step.interaction.navigation.TestMenu;
 import org.skyve.metadata.sail.language.step.interaction.session.Login;
 import org.skyve.metadata.sail.language.step.interaction.session.Logout;
 
@@ -60,6 +66,13 @@ import jakarta.annotation.Nonnull;
  *
  * <p>Threading: executor instances are not thread-safe and must be used from a
  * single thread per execution run.
+ *
+ * <p>Run token: executors that extend {@code org.skyve.impl.sail.execution.ContextualExecutor}
+ * must pass every value-like attribute through {@code substituteRunToken(String)} before
+ * using it, so that {@code {run}} in a script resolves to the run token. The attributes are
+ * {@code dataEnter@value}, {@code testValue@value}, {@code lookupDescriptionAutoComplete@search},
+ * {@code login@user}, {@code login@password}, {@code testFailure@message},
+ * {@code testMessage@contains} and every {@code rowContaining}.
  *
  * @see org.skyve.metadata.sail.language.Automation
  * @see org.skyve.metadata.sail.language.Interaction
@@ -321,4 +334,55 @@ public interface Executor {
 	 * @param pause the pause
 	 */
 	public void executePause(@Nonnull Pause pause);
+
+	/**
+	 * Uploads a classpath file into a content widget or through an upload action.
+	 *
+	 * <p>Precondition: exactly one of {@link Upload#getBinding()} and {@link Upload#getActionName()}
+	 * is set; {@link Upload#execute(Executor)} checks this before dispatching.
+	 *
+	 * @param upload the upload step
+	 */
+	public void executeUpload(@Nonnull Upload upload);
+
+	/**
+	 * Asserts that a message containing the given text, and optionally of the given severity, is shown.
+	 *
+	 * @param test the message assertion step
+	 */
+	public void executeTestMessage(@Nonnull TestMessage test);
+
+	/**
+	 * Asserts the number of rows, optionally of rows containing the given text, in a list or data grid.
+	 *
+	 * <p>When {@link TestGridRows#getTimeoutMillis()} is set, the grid is refreshed and counted
+	 * again until the assertion holds or the timeout elapses. Use
+	 * {@link TestGridRows#getEffectiveMinRows()} for the lower bound.
+	 *
+	 * @param test the grid assertion step
+	 */
+	public void executeTestGridRows(@Nonnull TestGridRows test);
+
+	/**
+	 * Asserts the visibility and enabled state of a widget, action button or tab.
+	 *
+	 * <p>Use {@link TestWidget#isExpectedVisible()} for the expected visibility.
+	 *
+	 * @param test the widget assertion step
+	 */
+	public void executeTestWidget(@Nonnull TestWidget test);
+
+	/**
+	 * Navigates by clicking through the rendered menu, then sets the context for the menu item's target.
+	 *
+	 * @param menu the menu navigation step
+	 */
+	public void executeNavigateMenu(@Nonnull NavigateMenu menu);
+
+	/**
+	 * Asserts whether a module's menu or one of its items is shown to the current user.
+	 *
+	 * @param test the menu assertion step
+	 */
+	public void executeTestMenu(@Nonnull TestMenu test);
 }
