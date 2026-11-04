@@ -10,7 +10,7 @@ import util.sail.BrowserConfiguration.Browsers;
 /**
  * Runs automated SAIL tests for the admin module (SmartClient).
  * <p>
- * Runs against {@code -Dsail.baseUrl} (default {@value BrowserConfiguration#DEFAULT_BASE_URL}),
+ * Runs against the server named by {@code -Dsail.baseUrl} (required),
  * headless unless {@code -Dsail.headless=false}.
  */
 class SmartClientAdminSailIT extends AbstractSmartClientInterpretedSail {
