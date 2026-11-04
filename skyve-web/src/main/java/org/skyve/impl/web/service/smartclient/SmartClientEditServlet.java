@@ -56,6 +56,8 @@ import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.document.Association;
 import org.skyve.metadata.model.document.Bizlet;
+import org.skyve.metadata.model.document.Collection;
+import org.skyve.metadata.model.document.Collection.CollectionType;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.router.UxUi;
@@ -349,9 +351,32 @@ public class SmartClientEditServlet extends HttpServlet {
 	
 					HttpSession session = request.getSession();
 					
-					// we have a user defined action to run
 					String actionName = webContext.getAction();
-					if ((actionName != null) && 
+					// an inline data grid's New button - add a new element to the grid's collection
+					if (ImplicitActionName.Add.toString().equals(actionName)) {
+						LOGGER.info("ADD to {} : {}", formBinding, gridBinding);
+						if ((editIdCounter == null) || (createIdCounter == null) || (gridBinding == null) || (formBean == null)) {
+							throw new ServletException(REQUEST_MALFORMED);
+						}
+
+						SmartClientListServlet.checkCsrfToken(session, request, response, currentCsrfToken);
+
+						add(webContext,
+								user,
+								customer,
+								formModule,
+								formDocument,
+								formBean,
+								gridBinding,
+								Integer.parseInt(editIdCounter),
+								Integer.parseInt(createIdCounter),
+								parameters,
+								persistence,
+								uxui.getName(),
+								pw);
+					}
+					// we have a user defined action to run
+					else if ((actionName != null) &&
 							(! ImplicitActionName.OK.toString().equals(actionName)) &&
 							(! ImplicitActionName.Save.toString().equals(actionName)) &&
 							(! ImplicitActionName.ZoomOut.toString().equals(actionName)) &&
@@ -1416,6 +1441,122 @@ public class SmartClientEditServlet extends HttpServlet {
 		if (key != null) {
 			Monitoring.measure(key);
 		}
+	}
+
+	/**
+	 * Adds a new element to the collection of an inline data grid and writes the form's response,
+	 * as PrimeFaces' AddAction does.
+	 *
+	 * <p>The posted form values are applied first. The new element is created with
+	 * {@link Document#newInstance(User)}, so its default values and its bizlet's {@code newInstance()} run.
+	 * The bizlet's {@code preExecute(Add)} then runs with the form bean as the parent, and the element is
+	 * added to the collection. The response renders the form bean, whose grid then holds the new row
+	 * with its bizId.
+	 *
+	 * @param webContext active web conversation context
+	 * @param user active user
+	 * @param customer active customer metadata
+	 * @param formModule form module
+	 * @param formDocument form document
+	 * @param formBean the bean of the form holding the data grid
+	 * @param gridBinding the data grid's collection binding, relative to the form bean
+	 * @param editIdCounter base edit-id counter for generated component ids
+	 * @param createIdCounter base create-id counter for generated component ids
+	 * @param parameters request parameters, with the form values under "bean"
+	 * @param persistence active persistence context
+	 * @param uxui active UX/UI profile name
+	 * @param pw response writer
+	 * @throws Exception when applying, creating or rendering fails
+	 */
+	@SuppressWarnings({"java:S107", "java:S3776"}) // Long parameter list matches the other request handlers here; complexity OK
+	private static void add(AbstractWebContext webContext,
+								User user,
+								Customer customer,
+								Module formModule,
+								Document formDocument,
+								Bean formBean,
+								String gridBinding,
+								int editIdCounter,
+								int createIdCounter,
+								SortedMap<String, Object> parameters,
+								AbstractPersistence persistence,
+								String uxui,
+								PrintWriter pw)
+	throws Exception {
+		// Apply the JSON values
+		View formView = formDocument.getView(uxui,
+												customer,
+												formBean.isCreated() ?
+													ViewType.edit.toString() :
+													ViewType.create.toString());
+		ViewJSONManipulator manipulator = newManipulator(user,
+															formModule,
+															formDocument,
+															formView,
+															uxui,
+															formBean,
+															editIdCounter,
+															createIdCounter,
+															true);
+		manipulator.visit();
+		manipulator.applyJSON((String) parameters.get("bean"), persistence, webContext);
+
+		TargetMetaData target = BindUtil.getMetaDataForBinding(customer, formModule, formDocument, gridBinding);
+		if (! (target.getAttribute() instanceof Collection collection)) {
+			throw new IllegalStateException(gridBinding + " doesn't resolve to a collection.");
+		}
+		Document elementDocument = target.getDocument().getRelatedDocument(customer, collection.getName());
+
+		// check for create privilege if the collection is persistent and the collection document is persistent
+		if (collection.isPersistent() &&
+				elementDocument.isPersistable() &&
+				(! user.canCreateDocument(elementDocument))) {
+			throw new SecurityException("create this data", user.getName());
+		}
+
+		RequestKey key = RequestKey.create(elementDocument);
+
+		Bean element = elementDocument.newInstance(user);
+
+		// set bizOrdinal if this is an ordered child collection
+		if (Boolean.TRUE.equals(collection.getOrdered()) && CollectionType.child.equals(collection.getType())) {
+			@SuppressWarnings("unchecked")
+			List<Bean> elements = (List<Bean>) BindUtil.get(formBean, gridBinding);
+			if (elements != null) {
+				BindUtil.set(element, Bean.ORDINAL_NAME, Integer.valueOf(elements.size() + 1));
+			}
+		}
+
+		CustomerImpl internalCustomer = (CustomerImpl) customer;
+		boolean vetoed = internalCustomer.interceptBeforePreExecute(ImplicitActionName.Add, element, formBean, webContext);
+		if (! vetoed) {
+			Bizlet<Bean> elementBizlet = ((DocumentImpl) elementDocument).getBizlet(customer);
+			if (elementBizlet != null) {
+				if (UtilImpl.BIZLET_TRACE) BIZLET_LOGGER.info(ENTERING_PRE_EXECUTE, elementBizlet.getClass().getName(), ImplicitActionName.Add, element, formBean, webContext);
+				element = elementBizlet.preExecute(ImplicitActionName.Add, element, formBean, webContext);
+				if (UtilImpl.BIZLET_TRACE) BIZLET_LOGGER.info(EXITING_PRE_EXECUTE, elementBizlet.getClass().getName(), element);
+			}
+			internalCustomer.interceptAfterPreExecute(ImplicitActionName.Add, element, formBean, webContext);
+
+			// add the new element to the collection after preExecute
+			BindUtil.addElementToCollection(formBean, gridBinding, element);
+		}
+
+		pumpOutResponse(webContext,
+							user,
+							internalCustomer,
+							formModule,
+							formDocument,
+							formView,
+							uxui,
+							formBean,
+							((DocumentImpl) formDocument).getBizlet(customer),
+							editIdCounter,
+							createIdCounter,
+							null,
+							pw);
+
+		Monitoring.measure(key);
 	}
 
 	/**

@@ -126,7 +126,6 @@ class SmartClientFieldAndDataGridDefinitionUnsafeTest {
 		def.name = "amount";
 		def.title = "Amount";
 		def.type = "integer";
-		def.defaultValueJavascriptExpression = "10";
 		def.editorType = "spinner";
 		def.required = true;
 		def.requiredMessage = "Need amount";
@@ -140,7 +139,6 @@ class SmartClientFieldAndDataGridDefinitionUnsafeTest {
 
 		String js = def.toJavascript();
 		assertTrue(js.contains("name:'amount'"));
-		assertTrue(js.contains("defaultValue:10"));
 		assertTrue(js.contains("editorType:'spinner'"));
 		assertTrue(js.contains("bizRequired:true,requiredMessage:'Need amount'"));
 		assertTrue(js.contains("valueMap:{"));
@@ -152,7 +150,7 @@ class SmartClientFieldAndDataGridDefinitionUnsafeTest {
 	}
 
 	@Test
-	void dataGridToJavascriptEscapesStringDefaultValueAsJavascriptLiteral() {
+	void dataGridToJavascriptOmitsDefaultValueAsServerCreatesNewRows() {
 		DocumentImpl document = new DocumentImpl();
 		document.setName("Fixture");
 		document.setOwningModuleName("test");
@@ -184,8 +182,9 @@ class SmartClientFieldAndDataGridDefinitionUnsafeTest {
 
 			String js = def.toJavascript();
 
-			assertTrue(js.contains("defaultValue:'Test {el:newGeometry(\\'POINT(0 0)\\')}'"), js);
-			assertFalse(js.contains("defaultValue:'Test {el:newGeometry('POINT(0 0)')}'"), js);
+			// A default value expression can't be evaluated on the client, so none is rendered
+			assertTrue(js.contains("name:'memo'"), js);
+			assertFalse(js.contains("defaultValue"), js);
 		}
 		finally {
 			CustomisationsStaticSingleton.set(previousCustomisations);

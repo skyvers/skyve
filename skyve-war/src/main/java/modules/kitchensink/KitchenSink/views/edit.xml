@@ -169,16 +169,15 @@
 				</containerColumn>
 			</dataGrid>
 			<dataGrid binding="inlineGrid" inline="true" title="Inline Grid">
-				<boundColumn binding="constantEnum" />
+				<!-- read-only first and last columns: double click or Edit on them should edit the nearest editable cell -->
+				<boundColumn binding="constantEnum" editable="false" />
 				<boundColumn binding="constantDomain" />
 				<boundColumn binding="variantDomain" />
 				<boundColumn binding="dynamicDomain" />
 				<boundColumn binding="booleanFlag" />
 				<boundColumn binding="date" />
-<!-- dont work in SC - gives smartgen error
 				<boundColumn binding="colour" />
-				<boundColumn binding="decimal5" />
--->
+				<boundColumn binding="decimal5" editable="false" />
 			</dataGrid>
 			<dataGrid binding="orderedGrid" title="Ordered Grid">
 				<boundColumn binding="booleanFlag" />

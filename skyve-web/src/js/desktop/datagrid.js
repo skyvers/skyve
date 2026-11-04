@@ -180,7 +180,10 @@ isc.BizDataGrid.addMethods({
 				this.grid.anySelected(),
 			click: () => {
 				if (this.grid.anySelected()) {
-					this.grid.startEditing(this._eventRowNum, this._eventColNum);
+					// Use the selected row; rows without a bizId yet don't set _eventRowNum
+					const rowNum = this.grid.getRecordIndex(this.grid.getSelectedRecord());
+					const colNum = rowNum === this._eventRowNum ? this._eventColNum : 0;
+					this.startEditingRow(rowNum, colNum);
 				}
 			},
 		};
@@ -361,12 +364,12 @@ isc.BizDataGrid.addMethods({
 				}
 				return false;
 			},
-			rowDoubleClick: function (record) {
+			rowDoubleClick: function (record, recordNum, fieldNum) {
 				if (config.editable && record && !record.isFolder) {
 					me._eventRecord = record;
 					if (config.inline) {
 						if (me.canUpdate && me.canEdit && me.showEdit && !me._disabled) {
-							this.startEditing(me._eventRowNum, me._eventColNum, false);
+							me.startEditingRow(recordNum, fieldNum);
 						}
 					} else if (me.canZoom && me.showZoom) {
 						if (me._view._blurry) {
@@ -527,10 +530,44 @@ isc.BizDataGrid.addMethods({
 	},
 
 	/**
+	 * Starts inline editing of a row at the editable cell closest to the given column.
+	 * SmartClient's startEditing() does nothing for a non-editable cell, so this
+	 * mirrors the fallback SmartClient uses for its own double-click edit event.
+	 * @param {number} rowNum - the row to edit.
+	 * @param {number} colNum - the column that was clicked.
+	 */
+	startEditingRow: function (rowNum, colNum) {
+		const grid = this.grid;
+		if (rowNum == null || rowNum < 0) return false;
+		const col = colNum == null || colNum < 0 ? 0 : colNum;
+		let cell = grid.findNextEditCell(rowNum, col, -1, true, true, false, true);
+		if (cell?.[0] !== rowNum) {
+			cell = grid.findNextEditCell(rowNum, col, 1, true, false, false, true);
+		}
+		if (cell?.[0] !== rowNum) return false;
+		return grid.startEditing(rowNum, cell[1], false);
+	},
+
+	/**
 	 * Adds a new record to the grid.
 	 */
 	add: function () {
-		this.grid.startEditingNew({ bizId: null });
+		// The server creates the new element, so default value expressions,
+		// the bizlet's newInstance() and preExecute(Add) all run and the new row has a bizId.
+		const grid = this.grid;
+		if (grid.getEditRow() != null) {
+			grid.endEditing();
+		}
+		const existing = new Set(grid.getData().map((record) => record.bizId));
+		this._view.doAction("Add", false, this._b, null, null, null, (data, success) => {
+			if (success) {
+				const rowNum = grid.getData().findIndex((record) => !existing.has(record.bizId));
+				if (rowNum >= 0) {
+					grid.selectSingleRecord(rowNum);
+					this.startEditingRow(rowNum, 0);
+				}
+			}
+		});
 	},
 
 	/**
