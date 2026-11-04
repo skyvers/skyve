@@ -46,7 +46,11 @@ public class Locator {
 		/** A rich text editor's editable area. */
 		RICH_TEXT,
 		/** A slider; data entry values are numbers. */
-		SLIDER
+		SLIDER,
+		/** A list membership; data entry values are the members' descriptions, separated by {@code |}. */
+		MEMBERSHIP,
+		/** An HTML editor (an edit button and an editor window); data entry values are HTML or text. */
+		HTML
 	}
 
 	/**
@@ -70,7 +74,9 @@ public class Locator {
 		/** The list grid of a list view, with an optional part. */
 		list,
 		/** A button on the SmartClient dialog: ok, yes, no or cancel. */
-		dialog
+		dialog,
+		/** A list membership, by sanitised binding. */
+		membership
 	}
 
 	/**
@@ -177,13 +183,13 @@ public class Locator {
 	 * @param view		the expected view as {@code module.Document}
 	 * @param name		the item name (the sanitised binding)
 	 * @param suffix	the AutoTest suffix to the input element, or {@code null} for the item itself
-	 * @param inputType	how data is entered
+	 * @param inputType	how data is entered, or {@code null} for a widget that only displays or uploads
 	 * @return the locator
 	 */
 	public static @Nonnull Locator item(@Nonnull String view,
 											@Nonnull String name,
 											@Nullable String suffix,
-											@Nonnull InputType inputType) {
+											@Nullable InputType inputType) {
 		return new Locator(sail(view, Kind.item, name, null, null, null, suffix), inputType);
 	}
 
