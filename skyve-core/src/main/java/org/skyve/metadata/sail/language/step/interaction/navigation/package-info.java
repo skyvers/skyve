@@ -17,6 +17,10 @@
  *       navigates to the tree view for a specified module and document.
  *   <li>{@link org.skyve.metadata.sail.language.step.interaction.navigation.NavigateCalendar} —
  *       navigates to the calendar view for a specified module and document.
+ *   <li>{@link org.skyve.metadata.sail.language.step.interaction.navigation.NavigateMenu} —
+ *       navigates by clicking a module's menu item in the rendered menu.
+ *   <li>{@link org.skyve.metadata.sail.language.step.interaction.navigation.TestMenu} —
+ *       asserts whether a module or menu item is shown to the current user.
  * </ul>
  *
  * @see org.skyve.metadata.sail.language.step.interaction

@@ -7,6 +7,12 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import org.junit.jupiter.api.Test;
 import org.skyve.metadata.sail.language.step.Comment;
 import org.skyve.metadata.sail.language.step.Pause;
+import org.skyve.metadata.sail.language.step.TestGridRows;
+import org.skyve.metadata.sail.language.step.TestMessage;
+import org.skyve.metadata.sail.language.step.TestWidget;
+import org.skyve.metadata.sail.language.step.interaction.Upload;
+import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateMenu;
+import org.skyve.metadata.sail.language.step.interaction.navigation.TestMenu;
 import org.skyve.metadata.sail.language.step.TestFailure;
 import org.skyve.metadata.sail.language.step.TestSuccess;
 import org.skyve.metadata.sail.language.step.TestValue;
@@ -88,6 +94,45 @@ class SailExecutorTest {
 		assertThat(script, containsString("<!-- hello -->"));
 		assertThat(script, not(containsString("250")));
 		assertThat(script, containsString("</table>"));
+	}
+
+	@Test
+	void webDriverExecutorCommentsTheStepsItCannotGenerate() {
+		TestWebDriverExecutor executor = new TestWebDriverExecutor();
+
+		executor.open("Unsupported");
+		executeUnsupportedSteps(executor);
+		executor.close();
+
+		String script = executor.toString();
+		for (String element : UNSUPPORTED) {
+			assertThat(script, containsString("trace(\"<" + element + "/> not supported by this generator\");"));
+		}
+	}
+
+	@Test
+	void seleneseExecutorCommentsTheStepsItCannotGenerate() {
+		TestSeleneseExecutor executor = new TestSeleneseExecutor();
+
+		executor.open("Unsupported");
+		executeUnsupportedSteps(executor);
+		executor.close();
+
+		String script = executor.toString();
+		for (String element : UNSUPPORTED) {
+			assertThat(script, containsString("<!-- <" + element + "/> not supported by this generator -->"));
+		}
+	}
+
+	private static final String[] UNSUPPORTED = {"upload", "testMessage", "testGridRows", "testWidget", "navigateMenu", "testMenu"};
+
+	private static void executeUnsupportedSteps(ScriptExecutor<?> executor) {
+		executor.executeUpload(new Upload());
+		executor.executeTestMessage(new TestMessage());
+		executor.executeTestGridRows(new TestGridRows());
+		executor.executeTestWidget(new TestWidget());
+		executor.executeNavigateMenu(new NavigateMenu());
+		executor.executeTestMenu(new TestMenu());
 	}
 
 	private static final class TestContext extends AutomationContext<GenerateListContext, GenerateEditContext> {

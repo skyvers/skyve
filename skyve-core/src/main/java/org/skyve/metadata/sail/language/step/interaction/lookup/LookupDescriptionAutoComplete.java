@@ -19,6 +19,8 @@ import jakarta.xml.bind.annotation.XmlType;
  * <p>Precondition: the widget must support auto-complete suggestions; if the search
  * produces no results the executor fails the step.
  *
+ * <p>{@code {run}} in {@code search} is replaced by the run token.
+ *
  * @see LookupDescriptionPick
  * @see LookupDescriptionNew
  * @see org.skyve.metadata.sail.execution.Executor#executeLookupDescriptionAutoComplete
