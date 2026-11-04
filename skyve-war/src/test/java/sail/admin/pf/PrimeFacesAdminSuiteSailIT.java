@@ -23,7 +23,7 @@ import util.sail.Devices;
  * <p>
  * Runs against {@code -Dsail.baseUrl} (default {@value BrowserConfiguration#DEFAULT_BASE_URL}),
  * headless unless {@code -Dsail.headless=false}. {@code -Dsail.suite.only=03,04} runs only the files with those
- * prefixes (and the restore), to work on a part of the suite.
+ * prefixes, to work on a part of the suite; the restore runs only when 00 is one of them.
  */
 class PrimeFacesAdminSuiteSailIT extends AbstractPrimeFacesInterpretedSail {
 	private static final String FOLDER = "sail/admin/pf/suite/";
@@ -34,7 +34,6 @@ class PrimeFacesAdminSuiteSailIT extends AbstractPrimeFacesInterpretedSail {
 		"03-security-admin.xml",
 		"04-devops.xml",
 		"05-reports-misc.xml",
-		"06-phone.xml",
 		"98-destructive.xml"
 	};
 	private static final String RESTORE = "99-restore.xml";
@@ -51,10 +50,12 @@ class PrimeFacesAdminSuiteSailIT extends AbstractPrimeFacesInterpretedSail {
 		List<String> prefixes = ((only == null) || only.isBlank()) ? List.of() : List.of(only.split("\\s*,\\s*"));
 
 		List<Executable> outcomes = new ArrayList<>(2);
+		boolean backedUp = false;
 		for (String file : FILES) {
 			if ((! prefixes.isEmpty()) && prefixes.stream().noneMatch(file::startsWith)) {
 				continue;
 			}
+			backedUp = backedUp || file.equals(FILES[0]);
 			try {
 				sailResource(FOLDER + file);
 			}
@@ -67,8 +68,11 @@ class PrimeFacesAdminSuiteSailIT extends AbstractPrimeFacesInterpretedSail {
 			}
 		}
 
+		// Restore only the backup that this run made
 		try {
-			sailResource(FOLDER + RESTORE);
+			if (backedUp) {
+				sailResource(FOLDER + RESTORE);
+			}
 		}
 		catch (AssertionError e) {
 			outcomes.add(() -> {

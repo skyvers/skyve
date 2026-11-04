@@ -122,6 +122,9 @@
 			<tabSelect path="Import/Export" />
 			<tabSelect path="Backup/Restore" />
 			<action name="RefreshBackupList" />
+			<!-- testDataEnter picks a random data sensitivity, which redacts password hashes in the backup: a restore of it locks admin out -->
+			<dataEnter binding="dataSensitivity" value="1" />
+			<testValue binding="dataSensitivity" value="none" />
 			<action name="Backup" />
 			<action name="UploadBackup" />
 			<tabSelect path="Data Refresh" />

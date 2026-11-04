@@ -17,12 +17,28 @@
 			<tabSelect path="Backup/Restore" />
 			<dataEnter binding="includeContent" value="true" />
 			<dataEnter binding="includeAuditLog" value="true" />
+			<comment>No redaction, so a restore keeps admin's password</comment>
+			<dataEnter binding="dataSensitivity" value="1" />
+			<testValue binding="dataSensitivity" value="none" />
 			<action name="Backup" />
-			<!-- PHASE2: <testMessage contains="Backup Job has been started" type="info" /> -->
-			<comment>The backup is a job: give it time, then refresh the list</comment>
-			<pause millis="5000" />
+			<testMessage contains="Backup Job has been started" type="info" />
+			<comment>The backup is a job: wait for it to finish</comment>
+			<navigateMenu module="admin" item="Jobs" />
+			<testGridRows module="admin" query="qCompletedJobs" rowContaining="Backup" minRows="1" timeoutMillis="60000" />
+			<navigateMenu module="admin" item="DevOps/Data Maintenance" />
+			<tabSelect path="Backup/Restore" />
 			<action name="RefreshBackupList" />
-			<!-- PHASE2: <testGridRows query="BackupsModel" minRows="1" timeoutMillis="60000" /> instead of the pause -->
+			<testGridRows module="admin" query="BackupsModel" minRows="1" timeoutMillis="60000" />
+		</method>
+	</interaction>
+	<interaction name="Leave a marker that the restore must remove">
+		<method>
+			<navigateMenu module="admin" item="Security Admin/Data Groups" />
+			<listGridNew module="admin" document="DataGroup" />
+			<dataEnter binding="name" value="SAIL restore marker" />
+			<save />
+			<ok />
+			<testGridRows module="admin" document="DataGroup" rowContaining="SAIL restore marker" minRows="1" />
 		</method>
 	</interaction>
 	<after>

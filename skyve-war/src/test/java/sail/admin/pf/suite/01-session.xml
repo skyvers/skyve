@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!-- PrimeFaces admin suite: signing in and out, and the home page (User Dashboard). -->
+<automation uxui="tablet" userAgentType="tablet" testStrategy="Assert"
+			xsi:schemaLocation="http://www.skyve.org/xml/sail ../../../../../../main/java/schemas/sail.xsd"
+			xmlns="http://www.skyve.org/xml/sail"
+			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<before>
+		<login user="admin" password="admin" />
+		<testSuccess />
+	</before>
+	<!--
+		RUNTIME BUG (race, seen once in a full run): straight after failed sign ins and two quick sign ins, Update My Details
+		failed with an optimistic lock error ("updated by user admin ... after you looked at it"): the sign in updates the
+		user record after the dashboard read it. So the dashboard runs first here, before the failed sign ins.
+	-->
+	<interaction name="Home: User Dashboard">
+		<method>
+			<navigateEdit module="admin" document="UserDashboard" />
+			<testValue binding="currentUser.userName" value="admin" />
+			<testWidget binding="currentUser.userName" enabled="false" />
+			<dataEnter binding="currentUser.contact.mobile" value="0400 000 {run}" />
+			<action name="UpdateMyDetails" />
+			<testValue binding="currentUser.contact.mobile" value="0400 000 {run}" />
+			<navigateEdit module="admin" document="UserDashboard" />
+			<testValue binding="currentUser.contact.mobile" value="0400 000 {run}" />
+		</method>
+	</interaction>
+	<interaction name="Sign in, out, and with a bad password">
+		<method>
+			<login user="admin" password="not the password" />
+			<testFailure message="Invalid username and/or password" />
+			<login user="nobody{run}" password="admin" />
+			<testFailure />
+			<login user="admin" password="admin" />
+			<testSuccess />
+			<testMenu module="admin" />
+			<testMenu module="admin" item="Contacts" />
+			<logout />
+			<login user="admin" password="admin" />
+			<testSuccess />
+		</method>
+	</interaction>
+	<after>
+		<logout />
+	</after>
+</automation>
