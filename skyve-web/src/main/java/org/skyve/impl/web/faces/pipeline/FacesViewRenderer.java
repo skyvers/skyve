@@ -153,11 +153,11 @@ import org.skyve.impl.web.faces.converters.timestamp.MMM_DD_YYYY_HH24_MI_SS;
 import org.skyve.impl.web.faces.converters.timestamp.MMM_DD_YYYY_HH_MI_SS;
 import org.skyve.impl.web.faces.converters.timestamp.MM_DD_YYYY_HH24_MI_SS;
 import org.skyve.impl.web.faces.converters.timestamp.MM_DD_YYYY_HH_MI_SS;
-import org.skyve.impl.web.faces.FacesUtil;
 import org.skyve.impl.web.faces.pipeline.component.ComponentBuilder;
 import org.skyve.impl.web.faces.pipeline.component.ComponentBuilderChain;
 import org.skyve.impl.web.faces.pipeline.component.ComponentBuilder.EventSourceComponent;
 import org.skyve.impl.web.faces.pipeline.component.EscapableText;
+import org.skyve.impl.web.faces.pipeline.component.SailComponentCollector;
 import org.skyve.impl.web.faces.pipeline.layout.LayoutBuilder;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.controller.Customisations;
@@ -1558,9 +1558,9 @@ public class FacesViewRenderer extends ViewRenderer {
 	    	componentBuilder.setProcess(cb.process);
 	    	componentBuilder.setUpdate(cb.update);
 	    	componentBuilder.setUserAgentType(cb.userAgentType);
-	    	// SAIL rebuilds views without a real Faces request to find the client ids of widgets: chain the view's
-	    	// builders after this one so SAIL's collecting builder sees the list grid too (they return it unchanged)
-	    	if (! FacesUtil.isRealFacesContext()) {
+	    	// SAIL rebuilds views to find the client ids of widgets: chain the view's builders after this one
+	    	// so SAIL's collecting builder sees the list grid too (they return it unchanged)
+	    	if ((cb instanceof ComponentBuilderChain chain) && chain.contains(SailComponentCollector.class)) {
 	    		componentBuilder = new ComponentBuilderChain(componentBuilder, cb);
 	    	}
 		}
