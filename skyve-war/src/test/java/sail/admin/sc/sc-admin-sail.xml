@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <automation uxui="desktop" userAgentType="desktop"
-	testStrategy="Verify"
+	testStrategy="Assert"
 	xsi:schemaLocation="http://www.skyve.org/xml/sail ../../../../../main/java/schemas/sail.xsd"
 	xmlns="http://www.skyve.org/xml/sail"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
@@ -16,6 +16,8 @@
 			<login user="admin" password="admin" />
 		</method>
 	</interaction>
+	<!-- Changing admin's password to "admin" fails the password policy, and a real change would lock admin
+		out of later runs. Changing a password moves to the phase-3 admin suite, which will use a throwaway user.
 	<interaction name="Change password">
 		<method>
 			<navigateEdit module="admin" document="ChangePassword" />
@@ -25,6 +27,7 @@
 			<action name="MakePasswordChange" />
 		</method>
 	</interaction>
+	-->
 	<interaction name="Menu User Dashboard">
 		<method>
 			<navigateEdit module="admin" document="UserDashboard" />
@@ -58,11 +61,16 @@
 			<action name="AddUnsubscribeLink" />
 			<tabSelect path="Attachments" />
 			<tabSelect path="Manage" />
+			<!-- The recipient actions need a tagged recipient, and a fresh database has none, so they fail with
+				"A tag must be selected for results" or "There are no tagged items". In SmartClient that server field
+				error then blocks every later action that validates, including delete, until the tag changes.
+				Tagging recipients and running these actions move to the phase-3 admin suite.
 			<action name="GetCount" />
 			<action name="TestSend" confirm="true" />
 			<action name="GetResults" />
 			<action name="CreateFiles" confirm="true" />
 			<action name="SendNow" confirm="true" />
+			-->
 			<tabSelect path="Subscriptions" />
 			<delete />
 		</method>
@@ -72,6 +80,9 @@
 			<navigateList document="Group" module="admin" />
 			<listGridNew document="Group" module="admin" />
 			<testDataEnter />
+			<!-- A group needs at least one role to save, and roles are a list membership, which no SAIL op-code
+				drives yet (a phase 2 language need). Assign the first candidate role through SmartClient. -->
+			<execute><![CDATA[var s = isc.WindowStack._stack; var v = s.length ? s[s.length - 1].items[0] : isc.BizUtil.getCurrentView(); var g = v._grids.roles; var m = g[Object.keys(g)[0]]; m._candidateList.selectSingleRecord(0); m._memberList.transferSelectedData(m._candidateList); v._vm.setValue('_changed', true); v._vm.setValue('_apply', true); if (m.changed) m.changed();]]></execute>
 			<tabSelect path="Group Details" />
 			<tabSelect path="Users in Group" />
 			<save />
@@ -79,7 +90,8 @@
 			<save />
 			<tabSelect path="Group Details" />
 			<tabSelect path="Users in Group" />
-			<cancel/>
+			<!-- delete rather than cancel, so that repeated runs do not leave groups behind -->
+			<delete />
 		</method>
 	</interaction>
 	<interaction name="Menu Security Admin::Data Groups">
@@ -115,7 +127,9 @@
 			<tabSelect path="Markdown Preview" />
 			<tabSelect path="Document Preview" />
 			<tabSelect path="Help" />
-			<action name="Submit" confirm="true" />
+			<!-- No script or output location has been entered, so Submit must refuse to run. -->
+			<action name="Submit" confirm="true" testSuccess="false" />
+			<testFailure message="Output location is required" />
 		</method>
 	</interaction>
 	<interaction name="Menu System Dashboard">
