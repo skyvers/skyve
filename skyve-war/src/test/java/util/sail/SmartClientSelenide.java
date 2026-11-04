@@ -1591,10 +1591,18 @@ public class SmartClientSelenide extends Selenide<
 			throw new IllegalStateException("The element went stale before it could be clicked: is the view re-rendering?");
 		}
 		catch (WebDriverException | com.codeborne.selenide.ex.UIAssertionError e) {
-			// Another element took the click: one of the same SmartClient widget's nested elements (click that), or a
+			// Another element took the click: SmartClient's hover (move the pointer off the widget that shows it, as a
+			// user would, then click), one of the same SmartClient widget's nested elements (click that), or a
 			// floating element (scroll the target to the centre and try again)
 			Object same = script("return _sail.sameCanvasAt(arguments[0])", target);
-			if (same instanceof WebElement top) {
+			if (Boolean.TRUE.equals(script("return _sail.hoverCovers(arguments[0])", target))) {
+				trace("    SmartClient's hover covers the element - move the pointer onto it, which hides the hover");
+				new org.openqa.selenium.interactions.Actions(driver).moveToElement(target).perform();
+				// Waits for SmartClient to hide its hover: the pointer left the widget that showed it
+				until("SmartClient's hover to hide", d -> Boolean.valueOf(! Boolean.TRUE.equals(script("return _sail.hoverCovers(arguments[0])", target))));
+				clickIt(element, doubleClick);
+			}
+			else if (same instanceof WebElement top) {
 				clickIt($(top), doubleClick);
 			}
 			else {

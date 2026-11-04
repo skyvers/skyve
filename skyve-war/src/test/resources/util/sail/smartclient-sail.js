@@ -1213,6 +1213,25 @@
 		return (hit && mine && canvasOf(hit) === mine) ? hit : null;
 	};
 
+	/**
+	 * True if SmartClient's hover (the tooltip-like Label isc.Hover shows when the pointer rests on a widget, e.g. a
+	 * text field's full value) is what is at the element's centre, covering it.
+	 */
+	S.hoverCovers = function (element) {
+		var hover = isc.Hover && isc.Hover.hoverCanvas;
+		if (!hover || !hover.isVisible || !hover.isVisible()) {
+			return false;
+		}
+		var rect = element.getBoundingClientRect();
+		var hit = document.elementFromPoint(rect.left + rect.width / 2, rect.top + rect.height / 2);
+		for (var c = hit && canvasOf(hit); c; c = c.parentElement) {
+			if (c === hover) {
+				return true;
+			}
+		}
+		return false;
+	};
+
 	/** True if the item runs a change handler (Skyve renders onChangedHandlers as the item's changed()), which may call the server. */
 	S.hasChangeHandler = function (locator) {
 		var resolved = S.resolve(S.parse(locator).spec);
