@@ -27,7 +27,15 @@ import org.skyve.metadata.module.Module.DocumentRef;
 import org.skyve.metadata.module.query.MetaDataQueryDefinition;
 import org.skyve.metadata.sail.language.Step;
 import org.skyve.metadata.sail.language.step.Execute;
-import org.skyve.metadata.sail.language.step.TestFailure;
+import org.skyve.metadata.sail.language.step.TestGridRows;
+import org.skyve.metadata.sail.language.step.TestMessage;
+import org.skyve.metadata.sail.language.step.TestWidget;
+import org.skyve.metadata.sail.language.step.interaction.Upload;
+import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateMenu;
+import org.skyve.metadata.sail.language.step.interaction.navigation.TestMenu;
+import org.skyve.impl.metadata.module.menu.AbstractDocumentOrQueryOrModelMenuItem;
+import org.skyve.metadata.module.menu.MenuItem;
+import org.skyve.impl.metadata.module.menu.EditItem;
 import org.skyve.metadata.sail.language.step.TestSuccess;
 import org.skyve.metadata.sail.language.step.TestValue;
 import org.skyve.metadata.sail.language.step.context.PushEditContext;
@@ -48,6 +56,7 @@ import org.skyve.metadata.sail.language.step.interaction.grids.DataGridNew;
 import org.skyve.metadata.sail.language.step.interaction.grids.DataGridRemove;
 import org.skyve.metadata.sail.language.step.interaction.grids.DataGridSelect;
 import org.skyve.metadata.sail.language.step.interaction.grids.DataGridZoom;
+import org.skyve.metadata.sail.language.step.interaction.grids.GridRowStep;
 import org.skyve.metadata.sail.language.step.interaction.grids.ListGridNew;
 import org.skyve.metadata.sail.language.step.interaction.grids.ListGridSelect;
 import org.skyve.metadata.sail.language.step.interaction.grids.ListGridZoom;
@@ -105,6 +114,21 @@ public class SmartClientInterpretedWebDriverExecutor extends InterpretedWebDrive
 	 */
 	public SmartClientInterpretedWebDriverExecutor(@Nonnull SmartClientSelenide selenide) {
 		this.selenide = selenide;
+	}
+
+	/**
+	 * Switches the session to the automation's renderer with the user-visible control. This harness drives
+	 * SmartClient, so the automation's UX/UI must be {@value org.skyve.metadata.router.UxUi#DESKTOP_NAME}.
+	 */
+	@Override
+	public void executeSwitchMode(org.skyve.metadata.sail.language.step.interaction.session.SwitchMode switchMode) {
+		if (! org.skyve.metadata.router.UxUi.DESKTOP_NAME.equals(getCurrentUxUi())) {
+			throw new MetaDataException(String.format("<switchMode/> targets PrimeFaces for uxui %s, but this executor drives SmartClient " +
+														"(uxui %s): run the script with the PrimeFaces executor",
+														getCurrentUxUi(), org.skyve.metadata.router.UxUi.DESKTOP_NAME));
+		}
+		selenide.trace("Switch mode to SmartClient");
+		selenide.switchToSmartClient();
 	}
 
 	/**
@@ -280,7 +304,7 @@ public class SmartClientInterpretedWebDriverExecutor extends InterpretedWebDrive
 		// Never replace with a new line as chrome under test will trip the default button on the form
 		String value = dataEnter.getValue();
 		if (value != null) {
-			value = value.replace("\n", " ");
+			value = substituteRunToken(value).replace("\n", " ");
 		}
 
 		boolean success = false;
@@ -329,6 +353,10 @@ public class SmartClientInterpretedWebDriverExecutor extends InterpretedWebDrive
 					throw new MetaDataException("<dataEnter /> on a slider needs a value");
 				}
 				return selenide.slider(locator, value);
+			case MEMBERSHIP:
+				return selenide.membership(locator, value);
+			case HTML:
+				return selenide.html(locator, value);
 			case TEXT:
 			default:
 				return selenide.text(new SmartClientTextCommand(locator, value, false));
@@ -373,10 +401,10 @@ public class SmartClientInterpretedWebDriverExecutor extends InterpretedWebDrive
 	 *
 	 * @param button the Step object representing the button to click
 	 * @param tagName the XML tag name of the button action
-	 * @param confirm whether to confirm the button click action
+	 * @param confirm how to answer a confirmation: null or true answers yes if one shows, false answers no (one must show)
 	 * @param testSuccess optional flag to control triggering test success actions; if null or true, test success is executed
 	 */
-	private void button(@Nonnull Step button, @Nonnull String tagName, boolean confirm, @Nullable Boolean testSuccess) {
+	private void button(@Nonnull Step button, @Nonnull String tagName, @Nullable Boolean confirm, @Nullable Boolean testSuccess) {
 		prepareForInteraction();
 		SmartClientAutomationContext context = context();
 
@@ -392,7 +420,7 @@ public class SmartClientInterpretedWebDriverExecutor extends InterpretedWebDrive
 
 		// Guard against unsupported actions
 		if (a != null && a.getImplicitName() != null && EXCLUDED_IMPLICIT_ACTIONS.contains(a.getImplicitName())) {
-			throw new MetaDataException(String.format("<%s /> is not supported", tagName));
+			throw new MetaDataException(String.format("<%s /> is an upload action: use <upload action=\"%s\" file=\"...\" />", tagName, tagName));
 		}
 
 		String identifier = button.getIdentifier(context);
@@ -415,62 +443,87 @@ public class SmartClientInterpretedWebDriverExecutor extends InterpretedWebDrive
 			throw new DomainException(String.format("Could not click button [%s]: it is disabled", tagName));
 		}
 
-		// testSuccess="false" leaves any message for a following testSuccess or testFailure step to check
-		if (BooleanUtils.isNotFalse(testSuccess)) {
+		// testSuccess="false" leaves any message for a following testSuccess or testFailure step to check;
+		// a confirmation answered no ran nothing, so there is no outcome to check (messages showing are older)
+		if (Boolean.FALSE.equals(confirm)) {
+			selenide.trace("    Declined: the action did not run");
+		}
+		else if (BooleanUtils.isNotFalse(testSuccess)) {
+			// an information message stays up for a testMessage step; the next click elsewhere dismisses it
 			checkSuccess("expected no error messages after <" + tagName + " />");
-			selenide.ok();
 		}
 	}
 
 	@Override
 	public void executeOk(Ok ok) {
-		button(ok, "ok", false, ok.getTestSuccess());
-		closed();
+		button(ok, "ok", ok.getConfirm(), ok.getTestSuccess());
+		closed(ok.getConfirm(), ok.getTestSuccess());
 	}
 
 	@SuppressWarnings("null") // a null here fails the test
 	@Override
 	public void executeSave(Save save) {
-		button(save, "save", false, save.getTestSuccess());
+		button(save, "save", save.getConfirm(), save.getTestSuccess());
 
+		// The browser now shows the create or edit view the script says: replace the context with one for that view,
+		// so that the locators are the new view's
 		Boolean createView = save.getCreateView();
-		if (Boolean.TRUE.equals(createView)) {
-			SmartClientAutomationContext context = peek();
-			context.setViewType(ViewType.create);
-		} else if (Boolean.FALSE.equals(createView)) {
-			SmartClientAutomationContext context = peek();
-			context.setViewType(ViewType.edit);
+		if (createView != null) {
+			SmartClientAutomationContext context = pop();
+			PushEditContext push = new PushEditContext();
+			push.setModuleName(context.getModuleName());
+			push.setDocumentName(context.getDocumentName());
+			push.setCreateView(createView);
+			push.setUxui(context.getUxui());
+			push.setUserAgentType(context.getUserAgentType());
+			push.execute(this);
 		}
 	}
 
 	@Override
 	public void executeCancel(Cancel cancel) {
-		button(cancel, "cancel", false, cancel.getTestSuccess());
-		closed();
+		button(cancel, "cancel", null, cancel.getTestSuccess());
+		closed(null, cancel.getTestSuccess());
 	}
 
 	@Override
 	public void executeDelete(Delete delete) {
-		button(delete, "delete", true, delete.getTestSuccess());
-		closed();
+		button(delete, "delete", delete.getConfirm(), delete.getTestSuccess());
+		closed(delete.getConfirm(), delete.getTestSuccess());
 	}
 
 	@Override
 	public void executeZoomOut(ZoomOut zoomOut) {
-		button(zoomOut, "zoom out", false, zoomOut.getTestSuccess());
-		closed();
+		button(zoomOut, "zoom out", zoomOut.getConfirm(), zoomOut.getTestSuccess());
+		closed(zoomOut.getConfirm(), zoomOut.getTestSuccess());
 	}
 
 	@Override
 	public void executeRemove(Remove remove) {
-		button(remove, "remove", true, remove.getTestSuccess());
-		closed();
+		button(remove, "remove", remove.getConfirm(), remove.getTestSuccess());
+		closed(remove.getConfirm(), remove.getTestSuccess());
 	}
 
 	/**
 	 * Pops the context of a view that an action closed and waits for the browser to show the view underneath.
+	 * A confirmation answered no leaves the view open, so nothing is popped; nor is it when the action was allowed to
+	 * fail ({@code testSuccess="false"}) and the view is still showing (it refused to close, and its problems are left
+	 * for a testFailure step).
+	 *
+	 * @param confirm		how the action's confirmation was answered
+	 * @param testSuccess	the step's testSuccess
 	 */
-	private void closed() {
+	@SuppressWarnings("null") // edit contexts have a module and document
+	private void closed(@Nullable Boolean confirm, @Nullable Boolean testSuccess) {
+		if (Boolean.FALSE.equals(confirm)) {
+			return;
+		}
+		SmartClientAutomationContext closing = context();
+		if (Boolean.FALSE.equals(testSuccess) && (ViewType.list != closing.getViewType()) &&
+				selenide.showsView(closing.getModuleName(), closing.getDocumentName())) {
+			selenide.trace("    The view did not close");
+			return;
+		}
 		pop();
 		SmartClientAutomationContext context = peek();
 		if (context != null) {
@@ -495,12 +548,13 @@ public class SmartClientInterpretedWebDriverExecutor extends InterpretedWebDrive
 
 	@Override
 	public void executeAction(Action action) {
-		button(action, action.getActionName(), Boolean.TRUE.equals(action.getConfirm()), action.getTestSuccess());
+		button(action, action.getActionName(), action.getConfirm(), action.getTestSuccess());
 	}
 
 	@Override
 	public void executeLookupDescriptionAutoComplete(LookupDescriptionAutoComplete complete) {
-		lookupDescription(complete, complete.getBinding(), null, complete.getSearch());
+		String search = complete.getSearch();
+		lookupDescription(complete, complete.getBinding(), null, (search == null) ? null : substituteRunToken(search));
 	}
 
 	@Override
@@ -631,7 +685,7 @@ public class SmartClientInterpretedWebDriverExecutor extends InterpretedWebDrive
 	@Override
 	public void executeZoomIn(ZoomIn zoom) {
 		Boolean testSuccess = zoom.getTestSuccess();
-		button(zoom, "zoomIn", false, testSuccess);
+		button(zoom, "zoomIn", null, testSuccess);
 		if (Boolean.FALSE.equals(testSuccess) && (selenide.dialogKind() != null)) {
 			selenide.trace("    The zoom in was refused: " + selenide.dialogMessage());
 			return;
@@ -670,6 +724,25 @@ public class SmartClientInterpretedWebDriverExecutor extends InterpretedWebDrive
 	}
 
 	/**
+	 * Finds the row a {@code rowContaining} step means: the first row, in the order shown, with a cell showing the text.
+	 *
+	 * @param context	the context
+	 * @param rowsKey	the identifier of the grid's row locator
+	 * @param step		the step
+	 * @return the zero-based row
+	 */
+	@SuppressWarnings("null") // checked by the caller
+	private int rowContaining(@Nonnull SmartClientAutomationContext context, @Nonnull String rowsKey, @Nonnull GridRowStep step) {
+		List<Locator> rows = context.getLocators(rowsKey);
+		if (rows == null) {
+			throw new MetaDataException(String.format("<%s /> grid [%s] is not on the view", step.getClass().getSimpleName(), rowsKey));
+		}
+		String text = substituteRunToken(step.getRowContaining());
+		selenide.trace(String.format("Find the row containing '%s'", text));
+		return selenide.rowContaining(rows.get(0).getLocator(), text);
+	}
+
+	/**
 	 * Executes a data grid gesture (new, select, zoom, edit or remove) on the UI element identified by the binding.
 	 *
 	 * @param step the Step object representing the data grid action to perform
@@ -690,6 +763,9 @@ public class SmartClientInterpretedWebDriverExecutor extends InterpretedWebDrive
 		}
 		boolean inline = (context.getLocators(binding + ".inline") != null);
 
+		if ((row == null) && (step instanceof GridRowStep gridRow) && (gridRow.getRowContaining() != null)) {
+			row = Integer.valueOf(rowContaining(context, binding + ".select", gridRow));
+		}
 		if ((! (step instanceof DataGridNew)) && (row == null)) {
 			throw new MetaDataException(String.format("<%s /> with binding [%s] needs a row", step.getClass().getSimpleName(), binding));
 		}
@@ -725,7 +801,7 @@ public class SmartClientInterpretedWebDriverExecutor extends InterpretedWebDrive
 													step.getClass().getSimpleName(),
 													binding,
 													(row == null) ? "" : " row " + row));
-					success = selenide.dataGridButton(new SmartClientDataGridButtonCommand(locator.getLocator(), step instanceof DataGridRemove));
+					success = selenide.dataGridButton(new SmartClientDataGridButtonCommand(locator.getLocator(), null));
 				}
 			}
 		}
@@ -790,6 +866,9 @@ public class SmartClientInterpretedWebDriverExecutor extends InterpretedWebDrive
 			throw new MetaDataException(String.format("<%s /> with identifier [%s] is not defined", step.getClass()
 					.getSimpleName(), listGridIdentifier));
 		}
+		if ((row == null) && (step instanceof GridRowStep gridRow) && (gridRow.getRowContaining() != null)) {
+			row = Integer.valueOf(rowContaining(context, listGridIdentifier + ".select", gridRow));
+		}
 		if ((! (step instanceof ListGridNew)) && (row == null)) {
 			throw new MetaDataException(String.format("<%s /> on list grid [%s] needs a row", step.getClass().getSimpleName(), listGridIdentifier));
 		}
@@ -801,7 +880,7 @@ public class SmartClientInterpretedWebDriverExecutor extends InterpretedWebDrive
 			select.setDocumentName(zoom.getDocumentName());
 			select.setModelName(zoom.getModelName());
 			select.setQueryName(zoom.getQueryName());
-			select.setRow(zoom.getRow());
+			select.setRow(row);
 
 			executeListGridSelect(select);
 		}
@@ -819,7 +898,7 @@ public class SmartClientInterpretedWebDriverExecutor extends InterpretedWebDrive
 													(step instanceof ListGridNew) ? "New" : "Zoom",
 													listGridIdentifier,
 													(row == null) ? "" : " row " + row));
-					success = selenide.listGridButton(new SmartClientListGridButtonCommand(locator.getLocator(), false));
+					success = selenide.listGridButton(new SmartClientListGridButtonCommand(locator.getLocator(), null));
 				}
 			}
 		}
@@ -913,7 +992,7 @@ public class SmartClientInterpretedWebDriverExecutor extends InterpretedWebDrive
 		}
 
 		String expected = test.getValue();
-		expected = (expected == null) ? "" : expected.trim();
+		expected = (expected == null) ? "" : substituteRunToken(expected).trim();
 		List<String> actual = selenide.values(locators.get(0).getLocator());
 		selenide.trace(String.format("Test value of %s is '%s' (displayed '%s')", binding, expected, actual.get(0)));
 		for (String value : actual) {
@@ -929,24 +1008,192 @@ public class SmartClientInterpretedWebDriverExecutor extends InterpretedWebDrive
 											binding, wanted, shown, alternatives));
 	}
 
+	// ------------------------------------------------------------------ phase 2 steps
+
 	/**
-	 * Applies the base class's check, then dismisses any message the check has seen.
+	 * Uploads a test classpath file to a content widget (through its Upload button) or with an upload action,
+	 * using Skyve's upload page in the window that opens.
 	 */
 	@Override
-	public void executeTestSuccess(TestSuccess success) {
-		super.executeTestSuccess(success);
-
-		selenide.ok();
+	public void executeUpload(Upload upload) {
+		prepareForInteraction();
+		SmartClientAutomationContext context = context();
+		String identifier = upload.getIdentifier(context);
+		List<Locator> locators = context.getLocators(identifier);
+		if (locators == null) {
+			throw new MetaDataException(String.format("<upload /> with %s [%s] is not on the view",
+														(upload.getBinding() != null) ? "binding" : "action", identifier));
+		}
+		java.io.File file = testResourceFile(upload.getFile());
+		String locator = locators.get(0).getLocator();
+		selenide.trace(String.format("upload %s to [%s]", upload.getFile(), identifier));
+		org.openqa.selenium.WebElement trigger;
+		if (upload.getBinding() != null) {
+			trigger = selenide.uploadButton(locator);
+		}
+		else {
+			SmartClientSelenide.Found found = selenide.require(locator);
+			if (found.disabled()) {
+				throw new DomainException("<upload /> action [" + identifier + "] is disabled");
+			}
+			trigger = found.element().toWebElement();
+		}
+		selenide.upload(trigger, file);
+		if (upload.getBinding() != null) {
+			List<String> values = selenide.values(locator);
+			check(! values.get(0).isEmpty() || ((values.size() > 1) && (! values.get(1).isEmpty()) && (! "null".equals(values.get(1)))),
+					() -> String.format("<upload /> to [%s] finished but the widget holds no content", identifier));
+		}
+		checkSuccess(String.format("expected no error messages after uploading to [%s]", identifier));
 	}
 
 	/**
-	 * Applies the base class's check, then dismisses the message it has seen.
+	 * Asserts that a message (of the type, if given) contains the text: a SmartClient information or warning dialog,
+	 * the Problems dialog or a field error (error), or a growl, once the page has settled.
 	 */
 	@Override
-	public void executeTestFailure(TestFailure failure) {
-		super.executeTestFailure(failure);
+	public void executeTestMessage(TestMessage test) {
+		if (isNoneStrategy()) {
+			return;
+		}
+		String contains = substituteRunToken(test.getContains());
+		TestMessage.MessageType type = test.getType();
+		String severity = (type == null) ? null : type.name();
+		selenide.trace(String.format("test %s message contains '%s'", (severity == null) ? "a" : "an " + severity, contains));
+		// messages() waits for the page to settle, after which the step's messages are showing
+		boolean found = selenide.messages(severity).stream().anyMatch(m -> m.contains(contains));
+		check(found, () -> String.format("expected %s message containing '%s' but found: %s",
+											(severity == null) ? "a" : "an " + severity, contains, selenide.describeMessages()));
+	}
 
-		selenide.ok();
+	/**
+	 * Counts the rows of a list or data grid (only those containing the text, if given) and checks the bounds.
+	 * With the script's timeout, a list grid fetches its rows again and they are recounted until the bounds hold or the time is up.
+	 */
+	@Override
+	public void executeTestGridRows(TestGridRows test) {
+		Integer timeout = test.getTimeoutMillis();
+		// Under None there is nothing to check, but a timeout still waits: scripts use it to wait for jobs
+		if (isNoneStrategy() && (timeout == null)) {
+			return;
+		}
+		prepareForInteraction();
+		SmartClientAutomationContext context = context();
+		String identifier = test.getIdentifier(context);
+		List<Locator> locators = context.getLocators(identifier + ".select");
+		if (locators == null) {
+			throw new MetaDataException(String.format("<testGridRows /> grid [%s] is not on the view", identifier));
+		}
+		String locator = locators.get(0).getLocator();
+		String text = test.getRowContaining();
+		String contains = (text == null) ? null : substituteRunToken(text);
+		Integer max = test.getMaxRows();
+		selenide.trace(String.format("test grid [%s] has %d..%s rows%s", identifier, Integer.valueOf(test.getEffectiveMinRows()),
+										(max == null) ? "" : max.toString(), (contains == null) ? "" : " containing '" + contains + "'"));
+		int rows = selenide.awaitRows(locator, contains, c -> rowCountHolds(test, c), (timeout == null) ? 0L : timeout.longValue());
+		if (! isNoneStrategy()) {
+			checkRowCount(test, identifier, contains, rows);
+		}
+	}
+
+	/**
+	 * Asserts that a widget (by binding), an action's button or a tab is shown or not, and enabled or not.
+	 */
+	@Override
+	public void executeTestWidget(TestWidget test) {
+		if (isNoneStrategy()) {
+			return;
+		}
+		prepareForDataEntry();
+		SmartClientAutomationContext context = context();
+		String identifier = test.getIdentifier(context);
+		String tabPath = test.getTabPath();
+		if (tabPath != null) {
+			String[] titles = tabPath.split("::");
+			List<Locator> tab = context.getLocators(tabPath + " Tab");
+			identifier = (tab != null) ? tabPath + " Tab" : titles[titles.length - 1] + " Tab";
+		}
+		List<Locator> locators = (test.getBinding() != null) ? inputLocators(context, identifier) : context.getLocators(identifier);
+		if (locators == null) {
+			throw new MetaDataException(String.format("<testWidget /> [%s] is not in the view", identifier));
+		}
+		boolean shown = false;
+		boolean enabled = false;
+		for (Locator locator : locators) {
+			boolean[] state = selenide.widgetState(locator.getLocator());
+			if (state[1]) {
+				shown = true;
+				enabled = enabled || state[2];
+			}
+		}
+		checkWidget(test, identifier, shown, enabled);
+	}
+
+	/**
+	 * Clicks through the SmartClient menu (the module's section, then the item) and sets the context as the
+	 * equivalent navigation would.
+	 */
+	@Override
+	public void executeNavigateMenu(NavigateMenu menu) {
+		prepareForDataEntry();
+		SailMenuPath path = resolveMenuPath(menu.getModuleName(), menu.getItemName());
+		MenuItem item = path.item;
+		if (item == null) {
+			throw new MetaDataException(String.format("<navigateMenu /> module %s has no menu item %s", menu.getModuleName(), menu.getItemName()));
+		}
+		Customer c = CORE.getUser().getCustomer();
+		Module m = c.getModule(menu.getModuleName());
+		selenide.trace(String.format("Menu %s / %s", path.moduleTitle, String.join(" / ", path.labels())));
+		if (item instanceof AbstractDocumentOrQueryOrModelMenuItem listItem) {
+			PushListContext push = new PushListContext();
+			push.setModuleName(m.getName());
+			push.setDocumentName(listItem.getDocumentName());
+			push.setQueryName(listItem.getQueryName());
+			push.setModelName(listItem.getModelName());
+			executePushListContext(push);
+		}
+		else if (item instanceof EditItem editItem) {
+			Document d = m.getDocument(c, java.util.Objects.requireNonNull(editItem.getDocumentName()));
+			PushEditContext push = new PushEditContext();
+			push.setModuleName(d.getOwningModuleName());
+			push.setDocumentName(d.getName());
+			executePushEditContext(push);
+		}
+		else {
+			SmartClientAutomationContext context = peek();
+			if (context != null) {
+				context.setDocumentName(null);
+				context.setViewType(null);
+			}
+		}
+		int windows = selenide.openWindows();
+		if (windows > 0) {
+			throw new IllegalStateException(String.format("<navigateMenu /> %s / %s: %d window(s) are open over the menu (%s): close them first",
+															path.moduleTitle, String.join(" / ", path.labels()), Integer.valueOf(windows), selenide.state()));
+		}
+		if (! selenide.menu(path.moduleTitle, path.labels(), true)) {
+			throw new DomainException(String.format("<navigateMenu /> %s / %s is not in the menu", path.moduleTitle, String.join(" / ", path.labels())));
+		}
+		SmartClientAutomationContext context = peek();
+		if ((context != null) && (context.getViewType() != null)) {
+			awaitView(context);
+		}
+	}
+
+	/**
+	 * Asserts that a module's menu section, or one of its entries, is shown or not.
+	 */
+	@Override
+	public void executeTestMenu(TestMenu test) {
+		if (isNoneStrategy()) {
+			return;
+		}
+		String itemName = test.getItemName();
+		SailMenuPath path = resolveMenuPath(test.getModuleName(), itemName);
+		if ((itemName != null) && (path.item == null)) {
+			throw new MetaDataException(String.format("<testMenu /> module %s has no menu item %s", test.getModuleName(), itemName));
+		}
+		checkMenu(test, path, selenide.menu(path.moduleTitle, path.labels(), false));
 	}
 
 	/**
@@ -977,8 +1224,8 @@ public class SmartClientInterpretedWebDriverExecutor extends InterpretedWebDrive
 	}
 
 	/**
-	 * Checks that no dialog is in the way. A message left by an action whose success was not tested is
-	 * dismissed (and traced); an unanswered question fails the step, because answering it is the script's job.
+	 * Checks that no dialog is in the way. A message left by an earlier step is dismissed now that the step needs the
+	 * view; an unanswered question fails the step, because answering it is the script's job.
 	 */
 	private void prepareForDataEntry() {
 		String kind = selenide.dialogKind();

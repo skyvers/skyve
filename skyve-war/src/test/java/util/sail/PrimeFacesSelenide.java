@@ -14,10 +14,12 @@ import static com.codeborne.selenide.Selenide.$;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Function;
 
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.Keys;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebDriverException;
@@ -156,17 +158,22 @@ public class PrimeFacesSelenide extends Selenide<
 			asked = true;
 			String question = (String) js("var m = document.getElementById('skyveQuestionMessage'); return m ? m.textContent : '';");
 			trace((positive ? "    answer yes to " : "    answer no to ") + question);
-			Boolean aborted = (Boolean) js("var d = document.querySelector('[role=alertdialog][aria-labelledby=skyveQuestionTitle]');" +
-											"var buttons = Array.from(d.querySelectorAll('.ui-dialog-buttonpane button'));" +
-											"var close = d.querySelector('.ui-dialog-titlebar-close');" +
-											"var abortLabel = close ? close.getAttribute('aria-label') : null;" +
-											"var negative = buttons.find(function(b) {return b.textContent.trim() === abortLabel;}) || buttons[buttons.length - 1];" +
-											"var positive = buttons.find(function(b) {return b !== negative;});" +
-											"var chosen = arguments[0] ? (positive || negative) : negative;" +
-											"chosen.click();" +
-											"return chosen === negative && abortLabel !== null;",
-											Boolean.valueOf(positive));
-			if (Boolean.TRUE.equals(aborted)) {
+			// Choose the answer's button: [the button, whether it aborts the gesture]
+			@SuppressWarnings("unchecked")
+			List<Object> choice = (List<Object>) js("var d = document.querySelector('[role=alertdialog][aria-labelledby=skyveQuestionTitle]');" +
+														"var buttons = Array.from(d.querySelectorAll('.ui-dialog-buttonpane button'));" +
+														"var close = d.querySelector('.ui-dialog-titlebar-close');" +
+														"var abortLabel = close ? close.getAttribute('aria-label') : null;" +
+														"var negative = buttons.find(function(b) {return b.textContent.trim() === abortLabel;}) || buttons[buttons.length - 1];" +
+														"var positive = buttons.find(function(b) {return b !== negative;});" +
+														"var chosen = arguments[0] ? (positive || negative) : negative;" +
+														"return [chosen, chosen === negative && abortLabel !== null];",
+														Boolean.valueOf(positive));
+			if ((choice == null) || (choice.get(0) == null)) {
+				throw new IllegalStateException("The question \"" + question + "\" has no button to answer it with");
+			}
+			click($((WebElement) choice.get(0)));
+			if (Boolean.TRUE.equals(choice.get(1))) {
 				return true;
 			}
 		}
@@ -243,10 +250,10 @@ public class PrimeFacesSelenide extends Selenide<
 		boolean ajax = command.ajax();
 
 		// check data grid is present
-		WebElement element = oldById(dataGridId);
+		WebElement element = elementById(dataGridId);
 		if (element != null && element.isDisplayed() && element.isEnabled()) {
 			// data grid button is present
-			element = oldById(buttonId);
+			element = elementById(buttonId);
 			if (element != null && element.isDisplayed() && element.isEnabled() && !element.getDomAttribute("class").contains("ui-state-disabled")) {
 				// All good, continue with the button click
 				String viewState = markPage();
@@ -280,10 +287,10 @@ public class PrimeFacesSelenide extends Selenide<
 		boolean ajax = command.ajax();
 
 		// check list grid is present
-		WebElement element = oldById(listGridId);
+		WebElement element = elementById(listGridId);
 		if (element != null && element.isDisplayed() && element.isEnabled()) {
 			// list grid button is present
-			element = oldById(buttonId);
+			element = elementById(buttonId);
 			if (element != null && element.isDisplayed() && element.isEnabled() && !element.getDomAttribute("class").contains("ui-state-disabled")) {
 				// All good, continue with the button click
 				String viewState = markPage();
@@ -338,7 +345,7 @@ public class PrimeFacesSelenide extends Selenide<
 	 */
 	private boolean selectRow(@Nonnull String gridId, int row) {
 		// check grid is present
-		WebElement element = oldById(gridId);
+		WebElement element = elementById(gridId);
 		if (element != null && element.isDisplayed() && element.isEnabled()) {
 			// Find the row
 			List<WebElement> cells = element.findElements(By.xpath(String.format(DATA_ROW_XPATH, Integer.valueOf(row + 1))));
@@ -453,7 +460,8 @@ public class PrimeFacesSelenide extends Selenide<
 	public boolean tab(PrimeFacesTabCommand command) {
 		String id = command.id();
 
-		SelenideElement element = $(byXpath(String.format("//a[contains(@href, '#%s')]", id)));
+		// the tab's header link (exactly this tab: a contains() test would also match tab10 for tab1)
+		SelenideElement element = $(byXpath(String.format("//a[@href='#%s']", id)));
 		if (element.exists()) {
 			click(element);
 
@@ -504,8 +512,8 @@ public class PrimeFacesSelenide extends Selenide<
 				}
 			} else {
 				element.val(value == null ? "" : value);
-				// Leave the field as a user would, so that its change event (and any ajax handler) fires now
-				js("if (document.activeElement === arguments[0]) arguments[0].blur();", element.getWrappedElement());
+				// Leave the field as a user would (Tab), so that its change event (and any ajax handler) fires now
+				element.sendKeys(Keys.TAB);
 			}
 
 			success = true;
@@ -557,28 +565,68 @@ public class PrimeFacesSelenide extends Selenide<
 	}
 
 	/**
-	 * Sets a slider: its widget, its hidden input (which is submitted) and its value display.
+	 * Sets a slider as a user would: drags its handle to the value's position, then presses the arrow keys on the handle
+	 * for any steps the drag missed (a pixel can be worth more than a step).
 	 *
 	 * @param sliderId	the slider's client id
 	 * @param value	the value
 	 * @return true if the slider is on the page and enabled
+	 * @throws IllegalStateException	if the slider cannot be set to the value (e.g. it is out of range or off its steps)
 	 */
 	public boolean slider(@Nonnull String sliderId, @Nullable String value) {
-		Boolean result = (Boolean) js("var w = PrimeFaces.getWidgetById(arguments[0]);" +
-										"if ((! w) || w.jq.hasClass('ui-state-disabled') || w.jq.slider('option', 'disabled')) return false;" +
-										"var v = arguments[1];" +
-										"w.setValue(v);" +
-										"w.input.val(v).trigger('change');" +
-										"if (w.output) w.output.text(w.cfg.displayTemplate.replace('{value}', v));" +
-										"return true;",
-										sliderId,
-										(value == null) ? "" : value);
+		@SuppressWarnings("unchecked")
+		List<Number> range = (List<Number>) js("var w = PrimeFaces.getWidgetById(arguments[0]);" +
+												"if ((! w) || w.jq.hasClass('ui-state-disabled') || w.jq.slider('option', 'disabled')) return null;" +
+												"var o = w.jq.slider('option');" +
+												"return [o.min, o.max, o.step || 1, (o.orientation === 'vertical') ? 1 : 0];", sliderId);
+		if (range == null) {
+			return false;
+		}
+		double min = range.get(0).doubleValue();
+		double max = range.get(1).doubleValue();
+		double step = range.get(2).doubleValue();
+		boolean vertical = (range.get(3).intValue() == 1);
+		double target = ((value == null) || value.isBlank()) ? min : Double.parseDouble(value.trim());
+
+		WebElement slider = driver.findElement(By.id(sliderId));
+		WebElement handle = slider.findElement(By.cssSelector(".ui-slider-handle"));
+		scrollToCentre(handle);
+		waitUntilUncovered(handle);
+		org.openqa.selenium.Rectangle track = slider.getRect();
+		double fraction = (max > min) ? Math.max(0, Math.min(1, (target - min) / (max - min))) : 0;
+		@SuppressWarnings("unchecked")
+		List<Number> origin = (List<Number>) js("var r = arguments[0].getBoundingClientRect(); return [r.left, r.top, r.width, r.height];", slider);
+		double left = origin.get(0).doubleValue();
+		double top = origin.get(1).doubleValue();
+		double width = origin.get(2).doubleValue();
+		double height = origin.get(3).doubleValue();
+		int x = (int) Math.round(vertical ? (left + (width / 2)) : (left + (fraction * width)));
+		int y = (int) Math.round(vertical ? (top + ((1 - fraction) * height)) : (top + (height / 2)));
+		trace(String.format("    drag the slider handle to %s (track %dx%d)", value, Integer.valueOf(track.getWidth()), Integer.valueOf(track.getHeight())));
+		new org.openqa.selenium.interactions.Actions(driver).clickAndHold(handle).moveToLocation(x, y).release().perform();
+
+		// The drag lands on the nearest pixel: press the arrow keys for the steps it missed
+		for (int presses = 0; presses < 1000; presses++) {
+			double current = ((Number) js("return PrimeFaces.getWidgetById(arguments[0]).jq.slider('value');", sliderId)).doubleValue();
+			long steps = Math.round((target - current) / step);
+			if (steps == 0) {
+				break;
+			}
+			handle.sendKeys((steps > 0) ? Keys.ARROW_RIGHT : Keys.ARROW_LEFT);
+		}
 		waitForAjaxResponse();
-		return Boolean.TRUE.equals(result);
+		double current = ((Number) js("return PrimeFaces.getWidgetById(arguments[0]).jq.slider('value');", sliderId)).doubleValue();
+		if (Math.abs(current - target) > (step / 2)) {
+			throw new IllegalStateException(String.format("Could not set slider %s to %s (range %s to %s, step %s): it shows %s",
+															sliderId, value, Double.valueOf(min), Double.valueOf(max), Double.valueOf(step), Double.valueOf(current)));
+		}
+		return true;
 	}
 
 	/**
-	 * Sets a text editor (rich text or HTML) to plain text.
+	 * Sets a text editor (rich text or HTML) to plain text as a user would: clicks into it, selects all its text and
+	 * types the value over it. The editor saves the text into its submitted input as it changes, and reports the change
+	 * when it loses the focus (the next step's click).
 	 *
 	 * @param id	the text editor's client id
 	 * @param value	the text
@@ -586,23 +634,38 @@ public class PrimeFacesSelenide extends Selenide<
 	 */
 	public boolean textEditor(@Nonnull String id, @Nullable String value) {
 		SelenideElement element = $(byId(id));
-		if (! element.exists()) {
+		if ((! element.exists()) || (! element.isDisplayed()) || Boolean.TRUE.equals(js("var w = PrimeFaces.getWidgetById(arguments[0]); return (! w) || w.disabled;", id))) {
 			return false;
 		}
-		scrollToCentre(element.getWrappedElement());
-		Boolean result = (Boolean) js("var w = PrimeFaces.getWidgetById(arguments[0]);" +
-										"if ((! w) || w.disabled) return false;" +
-										"if (! w.editor) {w.render();}" +
-										"w.setValue(arguments[1]);" +
-										"return true;",
-										id,
-										(value == null) ? "" : value);
+		// Wait for the editor to render (it is deferred until it is shown)
+		WebElement editor = waitFor(d -> {
+			List<WebElement> editors = d.findElements(By.cssSelector("[id='" + id + "'] .ql-editor"));
+			return editors.isEmpty() ? null : editors.get(0);
+		});
+		click($(editor));
+		editor.sendKeys(Keys.chord(selectAllKey(), "a"));
+		if ((value == null) || value.isEmpty()) {
+			editor.sendKeys(Keys.BACK_SPACE);
+		}
+		else {
+			editor.sendKeys(value);
+		}
 		waitForAjaxResponse();
-		return Boolean.TRUE.equals(result);
+		return true;
 	}
 
 	/**
-	 * Sets a colour picker's text value without opening its popup.
+	 * Returns the key that, with "a", selects all: Command on a Mac browser, Control elsewhere.
+	 */
+	private @Nonnull Keys selectAllKey() {
+		Object platform = js("return navigator.platform || '';");
+		return String.valueOf(platform).toLowerCase().startsWith("mac") ? Keys.COMMAND : Keys.CONTROL;
+	}
+
+	/**
+	 * Sets a colour picker as a keyboard user would: types the colour into its text field and leaves it with Tab.
+	 * The field gets the focus without a click, as a click opens the colour popup (which takes the focus, and would
+	 * then have to be closed with a click elsewhere, or with Escape, which undoes the change).
 	 *
 	 * @param id	the colour picker's client id (its input)
 	 * @param value	the colour, e.g. {@code #FF0000}
@@ -610,23 +673,20 @@ public class PrimeFacesSelenide extends Selenide<
 	 */
 	public boolean colourPicker(@Nonnull String id, @Nullable String value) {
 		SelenideElement element = $(byId(id));
-		if ((! element.exists()) || (element.attr("disabled") != null) || (element.attr("readonly") != null)) {
+		if ((! element.exists()) || (! element.isDisplayed()) || (element.attr("disabled") != null) || (element.attr("readonly") != null)) {
 			return false;
 		}
-		js("var e = document.getElementById(arguments[0]);" +
-				"e.value = arguments[1];" +
-				"e.dispatchEvent(new Event('input', {bubbles: true}));" +
-				"$(e).trigger('change');" +
-				"var w = PrimeFaces.getWidgetById(arguments[0]);" +
-				"if (w && w.hasBehavior('change')) w.callBehavior('change');",
-				id,
-				(value == null) ? "" : value);
+		scrollToCentre(element.getWrappedElement());
+		waitUntilUncovered(element.getWrappedElement());
+		element.clear();
+		element.sendKeys(((value == null) ? "" : value), Keys.TAB);
 		waitForAjaxResponse();
 		return true;
 	}
 
 	/**
 	 * Makes the given items (by label) the members of a pick list (list membership); every other item becomes a candidate.
+	 * As a user would: for each item in the wrong list, clicks it, then clicks the Add or Remove button.
 	 *
 	 * @param id	the pick list's client id
 	 * @param members	the labels of the items to make members
@@ -640,26 +700,37 @@ public class PrimeFacesSelenide extends Selenide<
 													"var all = w.sourceList.children('li.ui-picklist-item').toArray().concat(w.targetList.children('li.ui-picklist-item').toArray());" +
 													"var labels = all.map(label);" +
 													"var missing = wanted.filter(function(x) {return labels.indexOf(x) < 0;});" +
-													"if (missing.length) return missing.concat(['(the items are: ' + labels.join(' | ') + ')']);" +
-													"w.unselectAll();" +
-													"var out = w.targetList.children('li.ui-picklist-item').toArray().filter(function(li) {return wanted.indexOf(label(li)) < 0;});" +
-													"if (out.length) {out.forEach(function(li) {w.selectItem($(li));}); w.remove();}" +
-													"w.unselectAll();" +
-													"var inn = w.sourceList.children('li.ui-picklist-item').toArray().filter(function(li) {return wanted.indexOf(label(li)) >= 0;});" +
-													"if (inn.length) {inn.forEach(function(li) {w.selectItem($(li));}); w.add();}" +
-													"return [];", id, members);
-		if ((missing != null) && missing.isEmpty()) {
-			// Wait for the (animated) transfer to finish and save the members into the pick list's submitted input
-			waitFor(d -> {
-				List<String> current = pickListMembers(id);
-				return ((current != null) && new java.util.HashSet<>(current).equals(new java.util.HashSet<>(members)) &&
-						Boolean.TRUE.equals(js("var w = PrimeFaces.getWidgetById(arguments[0]);" +
-												"return (w.jq.find(':animated').length === 0) && " +
-												"(w.targetInput.children().length === w.targetList.children('li.ui-picklist-item').length);", id))) ?
-							Boolean.TRUE : null;
-			});
-			waitForAjaxResponse();
+													"return missing.length ? missing.concat(['(the items are: ' + labels.join(' | ') + ')']) : [];", id, members);
+		if ((missing == null) || (! missing.isEmpty())) {
+			return missing;
 		}
+		for (int moves = 0; moves < 1000; moves++) {
+			// the next item in the wrong list, and the button that moves it: [item, button] or null when none is left
+			List<WebElement> move = (List<WebElement>) js("var w = PrimeFaces.getWidgetById(arguments[0]); var wanted = arguments[1];" +
+															"var label = function(li) {return (li.getAttribute('data-item-label') || li.textContent || '').replace(/\\s+/g, ' ').trim();};" +
+															"var out = w.targetList.children('li.ui-picklist-item').toArray().find(function(li) {return wanted.indexOf(label(li)) < 0;});" +
+															"if (out) return [out, w.jq.find('.ui-picklist-button-remove')[0]];" +
+															"var inn = w.sourceList.children('li.ui-picklist-item').toArray().find(function(li) {return wanted.indexOf(label(li)) >= 0;});" +
+															"return inn ? [inn, w.jq.find('.ui-picklist-button-add')[0]] : null;", id, members);
+			if (move == null) {
+				break;
+			}
+			WebElement item = move.get(0);
+			String label = item.getText().replaceAll("\\s+", " ").trim();
+			trace("    move " + label);
+			click($(item));
+			click($(move.get(1)));
+			// Wait for the (animated) transfer to finish and be saved into the pick list's submitted input
+			waitFor(d -> Boolean.TRUE.equals(js("var w = PrimeFaces.getWidgetById(arguments[0]);" +
+													"return (w.jq.find(':animated').length === 0) && " +
+													"(w.targetInput.children().length === w.targetList.children('li.ui-picklist-item').length);", id)) ? Boolean.TRUE : null);
+		}
+		// Check the outcome, and wait for any request the transfers started
+		List<String> current = pickListMembers(id);
+		if ((current == null) || (! new java.util.HashSet<>(current).equals(new java.util.HashSet<>(members)))) {
+			throw new IllegalStateException("The pick list " + id + " has members " + current + " instead of " + members);
+		}
+		waitForAjaxResponse();
 		return missing;
 	}
 
@@ -787,12 +858,17 @@ public class PrimeFacesSelenide extends Selenide<
 	}
 
 	/**
-	 * Asks a lazily loaded grid (a list grid) to load its rows again.
+	 * Asks a grid (a PrimeFaces data table, or the panel around one) to load its rows from the server again, with its
+	 * current filters. A data repeater (no data table widget) is left as it is.
 	 *
 	 * @param gridId	the data table's client id
 	 */
 	public void refreshGrid(@Nonnull String gridId) {
-		js("var w = PrimeFaces.getWidgetById(arguments[0]); if (w && w.cfg && w.cfg.lazy && w.filter) w.filter();", gridId);
+		// The grid's id can be a panel around the data table: reload the data table (filter() fetches it from the server)
+		js("var e = document.getElementById(arguments[0]); if (! e) return;" +
+				"var t = e.classList.contains('ui-datatable') ? e : e.querySelector('.ui-datatable');" +
+				"var w = t ? PrimeFaces.getWidgetById(t.id) : null;" +
+				"if (w && (typeof w.filter === 'function')) w.filter();", gridId);
 		waitForAjaxResponse();
 	}
 
@@ -931,6 +1007,34 @@ public class PrimeFacesSelenide extends Selenide<
 	}
 
 	/**
+	 * Switches a PrimeFaces session to SmartClient as a user would: opens the header's user menu (the avatar) and
+	 * chooses Switch mode, then waits for SmartClient to load. For tests of switching back with {@code <switchMode />}.
+	 *
+	 * @throws IllegalStateException	if the user menu has no Switch mode item (the user cannot switch), or SmartClient does not load
+	 */
+	public void switchToSmartClient() {
+		click($(byId("avatar")));
+		// Wait for the user menu (the avatar's overlay panel) to open
+		WebElement item = waitFor(d -> (WebElement) js("var o = document.querySelector('.profile-overlay');" +
+														"if ((! o) || (o.getClientRects().length === 0) || (getComputedStyle(o).visibility === 'hidden')) return null;" +
+														"return Array.from(o.querySelectorAll('a.ui-menuitem-link')).find(function(a) {return a.textContent.trim() === 'Switch mode';}) || o;"));
+		if (! "a".equalsIgnoreCase(item.getTagName())) {
+			throw new IllegalStateException("The PrimeFaces user menu has no Switch mode item: this user cannot switch mode");
+		}
+		js("window.sailPage = true;");
+		click($(item));
+		// Wait for the page to reload as SmartClient
+		waitForNewPage();
+		// Wait for SmartClient's scripts to load (they define isc.BizUtil)
+		try {
+			waitFor(d -> smartClientShowing() ? Boolean.TRUE : null);
+		}
+		catch (org.openqa.selenium.TimeoutException e) {
+			throw new IllegalStateException("Switch mode was chosen but SmartClient did not load", e);
+		}
+	}
+
+	/**
 	 * Switches a SmartClient session to PrimeFaces as a user would: opens the header's user menu and chooses Switch Mode.
 	 *
 	 * @throws IllegalStateException	if the user menu has no Switch Mode item (the user cannot switch)
@@ -1048,29 +1152,28 @@ public class PrimeFacesSelenide extends Selenide<
 			});
 			input.sendKeys(file.getAbsolutePath());
 			trace("    file chosen");
-			// Press Upload once it is enabled, unless the page has taken the file by itself
-			// Wait for the upload widget to accept the file (its Upload button enables), then press it
-			waitFor(d -> {
+			// Wait for the upload widget to accept the file (its Upload button enables), or for the page to take the
+			// file by itself (no Upload button or file input any more)
+			Optional<WebElement> upload = waitFor(d -> {
 				List<WebElement> buttons = d.findElements(By.cssSelector(".ui-fileupload-upload"));
 				if (buttons.isEmpty() || d.findElements(By.cssSelector("input[type=file]")).isEmpty()) {
-					return Boolean.TRUE;
+					return Optional.<WebElement>empty();
 				}
 				WebElement button = buttons.get(0);
 				String styleClass = button.getDomAttribute("class");
-				if (button.isEnabled() && ((styleClass == null) || (! styleClass.contains("ui-state-disabled")))) {
-					click($(button));
-					return Boolean.TRUE;
-				}
-				return Boolean.FALSE;
+				return (button.isEnabled() && ((styleClass == null) || (! styleClass.contains("ui-state-disabled")))) ?
+							Optional.of(button) : null;
 			});
+			if (upload.isPresent()) {
+				click($(upload.get()));
+			}
 		}
 		finally {
 			driver.switchTo().defaultContent();
 		}
 		trace("    upload pressed");
-		// The page closes the upload page when the upload has been processed. If it does not (the tablet UX/UI),
-		// the upload page's growl says how it went: close the upload page on success, fail otherwise.
-		// Wait for the upload's response: the page closes the upload page, or the upload page's growl reports it
+		// Wait for the upload's response: the page closes the upload page when the upload has been processed; if it does
+		// not (the tablet UX/UI), the upload page's growl says how it went (closed with its close icon on success, below)
 		List<String> outcome = waitFor(d -> {
 			if (uploadPageClosed(frame)) {
 				return List.of("closed", "");
@@ -1082,11 +1185,20 @@ public class PrimeFacesSelenide extends Selenide<
 			throw new IllegalStateException("The upload failed: " + outcome.get(1));
 		}
 		if ("info".equals(outcome.get(0))) {
-			trace("    the upload page says: " + outcome.get(1) + " - close it");
-			js("var o = arguments[0].closest('.ui-overlaypanel, .ui-dialog');" +
-					"var w = o ? PrimeFaces.getWidgetById(o.id) : null;" +
-					"if (w && w.hide) w.hide(); else if (o) {var c = o.querySelector('.ui-overlaypanel-close, .ui-dialog-titlebar-close'); if (c) c.click();}",
-					frame);
+			// RUNTIME BUG (report bug 3): with the tablet UX/UI the upload page stays open after a successful upload.
+			// A user closes it with its close icon, so press that; with no close icon the step fails.
+			trace("    the upload page says: " + outcome.get(1) + " - close it with its close icon");
+			WebElement close = (WebElement) js("var o = arguments[0].closest('.ui-overlaypanel, .ui-dialog');" +
+												"var c = o ? o.querySelector('.ui-overlaypanel-close, .ui-dialog-titlebar-close') : null;" +
+												"return (c && c.getClientRects().length > 0) ? c : null;",
+												frame);
+			if (close == null) {
+				throw new IllegalStateException("The upload page stayed open after \"" + outcome.get(1) +
+													"\" and has no close icon a user could press");
+			}
+			click($(close));
+			// Wait for the upload page to close (its overlay's hide effect)
+			waitFor(d -> uploadPageClosed(frame) ? Boolean.TRUE : null);
 		}
 		waitForAjaxResponse();
 		return true;
@@ -1300,29 +1412,42 @@ public class PrimeFacesSelenide extends Selenide<
 	 * @param oldViewState	the view state before the request
 	 */
 	public void waitForFullPageResponse(String oldViewState) {
-		try {
-			// Wait for the response to the click: a new page or view state, or errors from the server or client-side validation
-			waitFor(d -> {
-				String viewState = getViewState();
-				if ((viewState != null) && (! viewState.equals(oldViewState))) {
-					return Boolean.TRUE;
-				}
-				if ((! ajaxIdle()) || errorMessages().isEmpty()) {
-					return null;
-				}
-				return (responseArrived() || nothingSent()) ? Boolean.TRUE : null;
-			});
-		} catch (RuntimeException e) {
-			System.err.println("Timed out waiting for a navigation from " + driver.getCurrentUrl() + " : oldViewState = " + oldViewState);
-			throw e;
-		}
+		// Wait for the response to the click: a new page or view state, or new errors from the server or client-side validation
+		// (errors that were on the page before the click, see markPage(), do not count; nor does a page that is unloading)
+		waitFor(d -> {
+			String viewState = getViewState();
+			if ((viewState != null) && (! viewState.equals(oldViewState))) {
+				return Boolean.TRUE;
+			}
+			if ((! ajaxIdle()) || (! newErrorsShown())) {
+				return null;
+			}
+			return (responseArrived() || nothingSent()) ? Boolean.TRUE : null;
+		});
 
 		waitForAjaxResponse();
 	}
 
 	/**
-	 * Counts ajax requests and notes page unloads from now on, so {@link #responseArrived()} and {@link #nothingSent()}
-	 * can tell what the next click did, and returns the view state, before a click.
+	 * Indicates if error messages are shown that were not on the page when {@link #markPage()} last ran, and the page is
+	 * not unloading.
+	 */
+	private boolean newErrorsShown() {
+		try {
+			return Boolean.TRUE.equals(js("if (window.sailUnloading) return false;" +
+											"return Array.from(document.querySelectorAll(arguments[0])).some(function(e) {" +
+											"  return (e.sailSeen !== (e.firstChild || true)) && (e.innerText || e.textContent || '').trim().length > 0;});",
+											ERROR_MESSAGES_SELECTOR));
+		}
+		catch (@SuppressWarnings("unused") WebDriverException e) {
+			return false; // between pages
+		}
+	}
+
+	/**
+	 * Counts ajax requests and notes page unloads from now on, and marks the error messages already shown, so
+	 * {@link #responseArrived()}, {@link #nothingSent()} and {@link #newErrorsShown()} can tell what the next click did,
+	 * and returns the view state, before a click.
 	 *
 	 * @return the view state
 	 */
@@ -1332,7 +1457,11 @@ public class PrimeFacesSelenide extends Selenide<
 				"  if (window.jQuery) {" +
 				"    jQuery(document).on('pfAjaxComplete', function() {window.sailAjax++;});" +
 				"    jQuery(document).on('pfAjaxStart', function() {window.sailAjaxStarts++;});}}" +
-				"window.sailAjaxMark = window.sailAjax; window.sailAjaxStartMark = window.sailAjaxStarts; window.sailUnloading = false;");
+				"window.sailAjaxMark = window.sailAjax; window.sailAjaxStartMark = window.sailAjaxStarts; window.sailUnloading = false;" +
+				// the error messages shown now are an earlier step's: the response to the next click brings its own
+				// (a message counts as new when it is a new element, or its content has been rendered again)
+				"document.querySelectorAll(arguments[0]).forEach(function(e) {e.sailSeen = e.firstChild || true;});",
+				ERROR_MESSAGES_SELECTOR);
 		return getViewState();
 	}
 
@@ -1351,9 +1480,18 @@ public class PrimeFacesSelenide extends Selenide<
 										"(! window.sailUnloading) && (! (window.PrimeFaces && PrimeFaces.ajax && PrimeFaces.ajax.Queue && (! PrimeFaces.ajax.Queue.isEmpty())));"));
 	}
 
-	@SuppressWarnings("static-method")
-	public String getViewState() {
-		return $(byName("jakarta.faces.ViewState")).attr("value");
+	/**
+	 * Returns the page's Faces view state, without waiting.
+	 *
+	 * @return the view state, or null if the page has none (e.g. between pages)
+	 */
+	public @Nullable String getViewState() {
+		try {
+			return (String) js("var e = document.getElementsByName('jakarta.faces.ViewState')[0]; return e ? e.value : null;");
+		}
+		catch (@SuppressWarnings("unused") WebDriverException e) {
+			return null; // between pages
+		}
 	}
 
 	/**
@@ -1473,32 +1611,14 @@ public class PrimeFacesSelenide extends Selenide<
 		return (styleClass != null) && styleClass.contains("ui-state-disabled");
 	}
 
-	public List<WebElement> oldByClass(String className) {
-		try {
-			return driver.findElements(By.className(className));
-		} catch (@SuppressWarnings("unused") NoSuchElementException e) {
-			return null;
-		}
-	}
-
-	public List<WebElement> oldByCss(String selector) {
-		try {
-			return driver.findElements(By.cssSelector(selector));
-		} catch (@SuppressWarnings("unused") NoSuchElementException e) {
-			return null;
-		}
-	}
-
-	public WebElement oldById(String id) {
-		return by(i -> driver.findElement(By.id(i)),id);
-	}
-
-	public WebElement oldByXpath(String xpath) {
-		return by(x -> driver.findElement(By.xpath(x)), xpath);
-	}
-
-	public WebElement oldByName(String name) {
-		return by(n -> driver.findElement(By.name(n)), name);
+	/**
+	 * Finds an element by id, without waiting.
+	 *
+	 * @param id	the element's id
+	 * @return the element, or null if it is not on the page
+	 */
+	public @Nullable WebElement elementById(@Nonnull String id) {
+		return by(i -> driver.findElement(By.id(i)), id);
 	}
 
 	private static @Nullable WebElement by(@Nonnull Function<String, WebElement> function, @Nonnull String search) {

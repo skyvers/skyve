@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!--
+	SmartClient admin suite, step 0: leave a marker after the backup, which 99-restore.xml checks that the restore removed.
+-->
+<automation uxui="desktop" userAgentType="desktop" testStrategy="Assert"
+			xsi:schemaLocation="http://www.skyve.org/xml/sail ../../../../../../main/java/schemas/sail.xsd"
+			xmlns="http://www.skyve.org/xml/sail"
+			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<before>
+		<login user="admin" password="admin" />
+		<testSuccess />
+		<switchMode />
+	</before>
+	<interaction name="Leave a marker that the restore must remove">
+		<method>
+			<navigateMenu module="admin" item="Security Admin/Data Groups" />
+			<listGridNew module="admin" document="DataGroup" />
+			<dataEnter binding="name" value="SAIL restore marker" />
+			<save />
+			<ok />
+			<testGridRows module="admin" document="DataGroup" rowContaining="SAIL restore marker" minRows="1" />
+		</method>
+	</interaction>
+	<after>
+		<logout />
+	</after>
+</automation>

@@ -164,18 +164,23 @@ public abstract class Selenide<
 			open(baseUrl);
 		}
 		// The page's own scripts can move the focus while typing (seen with headed browsers): check what landed and retry
-		for (int attempt = 1; attempt <= 3; attempt++) {
+		boolean typed = false;
+		for (int attempt = 1; (attempt <= 3) && (! typed); attempt++) {
 			if (customer != null) {
 				$(byName("customer")).val(customer);
 			}
 			$(byName("user")).val(username);
 			$(byName("password")).val(password);
-			if (username.equals($(byName("user")).getValue()) &&
-					password.equals($(byName("password")).getValue()) &&
-					((customer == null) || customer.equals($(byName("customer")).getValue()))) {
-				break;
+			typed = username.equals($(byName("user")).getValue()) &&
+						password.equals($(byName("password")).getValue()) &&
+						((customer == null) || customer.equals($(byName("customer")).getValue()));
+			if (! typed) {
+				trace("    the sign in fields did not take the typed values - type them again");
 			}
-			trace("    the sign in fields did not take the typed values - type them again");
+		}
+		if (! typed) {
+			// Submitting garbled credentials could make a sign in that should succeed fail (or a testFailure pass)
+			throw new IllegalStateException("The sign in fields did not take the typed values after 3 attempts");
 		}
 
 		SelenideElement submit = $("input[type=\"submit\"]");

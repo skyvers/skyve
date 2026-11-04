@@ -7,6 +7,7 @@
 	<interaction name="Login/Logout">
 		<method>
 			<login user="admin" password="admin" />
+			<switchMode />
 			<logout />
 		</method>
 	</interaction>
@@ -16,10 +17,11 @@
 			<testFailure />
 			<login user="admin" password="admin" />
 			<testSuccess />
+			<switchMode />
 		</method>
 	</interaction>
 	<!-- Changing admin's password to "admin" fails the password policy, and a real change would lock admin
-		out of later runs. Changing a password moves to the phase-3 admin suite, which will use a throwaway user.
+		out of later runs. The admin suite changes a password, for a user it creates (suite/03-security-admin.xml).
 	<interaction name="Change password">
 		<method>
 			<navigateEdit module="admin" document="ChangePassword" />
@@ -63,16 +65,18 @@
 			<action name="AddUnsubscribeLink" />
 			<tabSelect path="Attachments" />
 			<tabSelect path="Manage" />
-			<!-- The recipient actions need a tagged recipient, and a fresh database has none, so they fail with
-				"A tag must be selected for results" or "There are no tagged items". In SmartClient that server field
-				error then blocks every later action that validates, including delete, until the tag changes.
-				Tagging recipients and running these actions move to the phase-3 admin suite.
-			<action name="GetCount" />
-			<action name="TestSend" confirm="true" />
-			<action name="GetResults" />
-			<action name="CreateFiles" confirm="true" />
-			<action name="SendNow" confirm="true" />
-			-->
+			<!-- Nothing is tagged (a fresh database has none), so the recipient actions refuse to run: assert that they say so.
+				Tagging recipients and sending belong to the phase-3 admin suite. -->
+			<action name="GetCount" testSuccess="false" />
+			<testFailure message="A tag must be selected" />
+			<action name="TestSend" confirm="true" testSuccess="false" />
+			<testFailure message="There are no tagged items" />
+			<action name="GetResults" testSuccess="false" />
+			<testFailure message="A tag must be selected" />
+			<action name="CreateFiles" confirm="true" testSuccess="false" />
+			<testFailure message="A tag must be selected" />
+			<action name="SendNow" confirm="true" testSuccess="false" />
+			<testFailure message="A tag must be selected" />
 			<tabSelect path="Subscriptions" />
 			<delete />
 		</method>
@@ -82,9 +86,10 @@
 			<navigateList document="Group" module="admin" />
 			<listGridNew document="Group" module="admin" />
 			<testDataEnter />
-			<!-- A group needs at least one role to save, and roles are a list membership, which no SAIL op-code
-				drives yet (a phase 2 language need). Assign the first candidate role through SmartClient. -->
-			<execute><![CDATA[var s = isc.WindowStack._stack; var v = s.length ? s[s.length - 1].items[0] : isc.BizUtil.getCurrentView(); var g = v._grids.roles; var m = g[Object.keys(g)[0]]; m._candidateList.selectSingleRecord(0); m._memberList.transferSelectedData(m._candidateList); v._vm.setValue('_changed', true); v._vm.setValue('_apply', true); if (m.changed) m.changed();]]></execute>
+			<comment>A group needs at least one role to save: assign one, as a user would (select it, press assign)</comment>
+			<tabSelect path="Group Details" />
+			<dataEnter binding="roles" value="Admin - BasicUser (General access to the administration module)" />
+			<testValue binding="roles" value="Admin - BasicUser (General access to the administration module)" />
 			<tabSelect path="Group Details" />
 			<tabSelect path="Users in Group" />
 			<save />

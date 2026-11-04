@@ -537,6 +537,9 @@ public class PrimeFacesInlineWebDriverExecutor extends WebDriverExecutor<PrimeFa
 	 */
 	@Override
 	public void executeOk(@Nonnull Ok ok) {
+		if (SailGeneratorSupport.declineNotSupported(ok.getConfirm(), "ok", this::comment)) {
+			return;
+		}
 		redirectButton(ok, "ok", false, ok.getTestSuccess());
 		pop();
 	}
@@ -548,6 +551,9 @@ public class PrimeFacesInlineWebDriverExecutor extends WebDriverExecutor<PrimeFa
 	 */
 	@Override
 	public void executeSave(@Nonnull Save save) {
+		if (SailGeneratorSupport.declineNotSupported(save.getConfirm(), "save", this::comment)) {
+			return;
+		}
 		button(save, "save", true, false, save.getTestSuccess());
 		Boolean createView = save.getCreateView(); // NB could be null
 		if (Boolean.TRUE.equals(createView)) {
@@ -584,6 +590,9 @@ public class PrimeFacesInlineWebDriverExecutor extends WebDriverExecutor<PrimeFa
 	 */
 	@Override
 	public void executeDelete(@Nonnull Delete delete) {
+		if (SailGeneratorSupport.declineNotSupported(delete.getConfirm(), "delete", this::comment)) {
+			return;
+		}
 		redirectButton(delete, "delete", true, delete.getTestSuccess());
 		pop();
 	}
@@ -595,6 +604,9 @@ public class PrimeFacesInlineWebDriverExecutor extends WebDriverExecutor<PrimeFa
 	 */
 	@Override
 	public void executeZoomOut(@Nonnull ZoomOut zoomOut) {
+		if (SailGeneratorSupport.declineNotSupported(zoomOut.getConfirm(), "zoomOut", this::comment)) {
+			return;
+		}
 		button(zoomOut, "zoom out", false, false, zoomOut.getTestSuccess());
 		pop();
 	}
@@ -606,6 +618,9 @@ public class PrimeFacesInlineWebDriverExecutor extends WebDriverExecutor<PrimeFa
 	 */
 	@Override
 	public void executeRemove(@Nonnull Remove remove) {
+		if (SailGeneratorSupport.declineNotSupported(remove.getConfirm(), "remove", this::comment)) {
+			return;
+		}
 		button(remove, "remove", false, true, remove.getTestSuccess());
 		pop();
 	}
@@ -617,10 +632,16 @@ public class PrimeFacesInlineWebDriverExecutor extends WebDriverExecutor<PrimeFa
 	 */
 	@Override
 	public void executeAction(@Nonnull Action action) {
+		if (SailGeneratorSupport.declineNotSupported(action.getConfirm(), action.getActionName(), this::comment)) {
+			return;
+		}
+		// confirm true or absent answers positively when asked: the generated code must answer when the action asks
+		PrimeFacesAutomationContext context = peek();
+		boolean confirm = (context != null) && SailGeneratorSupport.actionConfirms(context, action.getActionName());
 		button(action, 
 				action.getActionName(),
 				true,
-				Boolean.TRUE.equals(action.getConfirm()),
+				confirm,
 				action.getTestSuccess());
 	}
 
@@ -811,7 +832,12 @@ public class PrimeFacesInlineWebDriverExecutor extends WebDriverExecutor<PrimeFa
 															"DataGridNew",
 														binding));
 		}
+		// a row found by its text cannot be generated: say so, and generate no gesture (the context still follows the step)
+		boolean generate = ! SailGeneratorSupport.rowContainingNotSupported(step, this::comment);
 		for (UIComponent dataGridComponent : dataGridComponents) {
+			if (! generate) {
+				break;
+			}
 			String dataGridClientId = PrimeFacesAutomationContext.clientId(dataGridComponent);
 			boolean ajax = false;
 			if (row != null) {
@@ -937,7 +963,12 @@ public class PrimeFacesInlineWebDriverExecutor extends WebDriverExecutor<PrimeFa
 															step.getClass().getSimpleName(),
 															listGridIdentifier));
 		}
+		// a row found by its text cannot be generated: say so, and generate no gesture (the context still follows the step)
+		boolean generate = ! SailGeneratorSupport.rowContainingNotSupported(step, this::comment);
 		for (UIComponent listGridComponent : listGridComponents) {
+			if (! generate) {
+				break;
+			}
 			List<UIComponent> buttonComponents = context.getFacesComponents(buttonIdentifier);
 			if (buttonComponents != null) { // button may not be shown
 				String listGridClientId = PrimeFacesAutomationContext.clientId(listGridComponent);

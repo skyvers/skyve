@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <!--
-	PrimeFaces admin suite, last step: restore the backup that 00-backup.xml made (the newest), which puts back the data as it
-	was before the suite, then delete that backup. PrimeFacesAdminSuiteSailIT runs this even when an earlier file fails.
+	PrimeFaces admin suite, last step: restore the backup that 00-backup.xml made (the only one: 00-precondition.xml checks
+	that no other exists, as this restores the oldest listed), which puts back the data as it was before the suite, then
+	delete that backup. PrimeFacesAdminSuiteSailIT runs this even when a later file fails, but only once
+	00-precondition.xml has passed.
 -->
 <automation uxui="tablet" userAgentType="tablet" testStrategy="Assert"
 			xsi:schemaLocation="http://www.skyve.org/xml/sail ../../../../../../main/java/schemas/sail.xsd"
@@ -30,9 +32,10 @@
 			<testValue binding="restorePreProcess" value="deleteData" />
 			<action name="Restore" confirm="false" />
 			<action name="Restore" confirm="true" />
-			<testMessage contains="estore" type="info" />
-			<comment>The restore is a job: give it time</comment>
-			<pause millis="10000" />
+			<testMessage contains="Restore Job has been started" type="info" />
+			<comment>The restore is a job: wait for its row in the completed jobs list (00-backup cleared the list before the backup, so the restored list has no RestoreJob row until this one finishes)</comment>
+			<navigateMenu module="admin" item="Jobs" />
+			<testGridRows module="admin" query="qCompletedJobs" rowContaining="RestoreJob" minRows="1" timeoutMillis="120000" />
 		</method>
 	</interaction>
 	<interaction name="Sign in again after the restore, and delete its backup">
@@ -49,6 +52,8 @@
 			<listGridSelect module="admin" query="BackupsModel" row="0" />
 			<action name="DeleteBackup" confirm="true" />
 			<testWidget action="DeleteBackup" enabled="false" />
+			<action name="RefreshBackupList" />
+			<testGridRows module="admin" query="BackupsModel" maxRows="0" />
 		</method>
 	</interaction>
 	<after>

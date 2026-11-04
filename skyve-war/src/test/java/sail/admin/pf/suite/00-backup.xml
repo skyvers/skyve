@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <!--
-	PrimeFaces admin suite, step 0: back up the data before the suite changes it.
-	99-restore.xml restores this backup (the newest one), so the suite leaves the server as it found it and can be rerun.
+	PrimeFaces admin suite, set up after 00-precondition.xml: back up the data before the suite changes it.
+	99-restore.xml restores the first backup listed, which is the oldest (runtime bug 1); 00-precondition.xml has checked
+	that no other backup exists, so the one restored is this one. The suite then leaves the server as it found it (less the
+	completed jobs list, see below) and can be rerun.
 -->
 <automation uxui="tablet" userAgentType="tablet" testStrategy="Assert"
 			xsi:schemaLocation="http://www.skyve.org/xml/sail ../../../../../../main/java/schemas/sail.xsd"
@@ -11,13 +13,19 @@
 		<login user="admin" password="admin" />
 		<testSuccess />
 	</before>
+	<interaction name="Clear the completed jobs list">
+		<method>
+			<comment>The suite waits for its jobs (backup, test data, restore) by their rows in the completed jobs list. Every restore leaves a RestoreJob row in the data it restores, so without this the restore's own row could not be told from an earlier one. The list is job history only.</comment>
+			<navigateMenu module="admin" item="Jobs" />
+			<action name="DeleteCompletedJobs" />
+			<action name="Refresh" />
+			<testGridRows module="admin" query="qCompletedJobs" maxRows="0" timeoutMillis="10000" />
+		</method>
+	</interaction>
 	<interaction name="Back up the data before the suite">
 		<method>
 			<navigateEdit module="admin" document="DataMaintenance" />
 			<tabSelect path="Backup/Restore" />
-			<action name="RefreshBackupList" />
-			<comment>99-restore restores the oldest backup (runtime bug), so no other backup may exist: delete strays by hand on the server</comment>
-			<testGridRows module="admin" query="BackupsModel" maxRows="0" />
 			<dataEnter binding="includeContent" value="true" />
 			<dataEnter binding="includeAuditLog" value="true" />
 			<comment>No redaction, so a restore keeps admin's password</comment>

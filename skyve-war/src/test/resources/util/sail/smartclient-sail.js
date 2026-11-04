@@ -12,7 +12,7 @@
  *   sail:{"view":"kitchensink.KitchenSink","kind":"item","name":"text"}/element
  * Spec properties:
  *   view    - "module.Document" expected on the top-most edit view (omitted for list views)
- *   kind    - item | button | zoomIn | tab | dataGrid | listGrid | list | dialog
+ *   kind    - item | membership | button | zoomIn | tab | dataGrid | listGrid | list | cell | dialog
  *   name    - item name (sanitised binding), action name, binding, tab title or dialog button
  *   ordinal - zero-based index of a list grid in its view (kind listGrid)
  *   part    - new | zoom | edit | remove | rows (grids)
@@ -32,9 +32,99 @@
 		return !!(window.isc && isc.AutoTest && isc.BizUtil && isc.WindowStack && isc.Canvas);
 	};
 
-	/** True when no RPC is pending and the system is done (see systemDone()). */
+	// ---------------------------------------------------------------- deferred work
+	//
+	// SmartClient and Skyve start some work from timers rather than straight from the event: a dialog's
+	// callback (Window.returnValue() delays it 50 ms), a blur's rerender and the click it swallowed
+	// (EditView._rerenderBlurryAction, BizButton action), a grid row selection's server call (bizSelected,
+	// after the double click delay), the refresh of a view's list grids, and SmartClient's redraw and reflow
+	// queues (0 ms) after any change. All of them go through isc.Timer.setTimeout(), so the helper counts the
+	// timers that have not fired yet, and the page is not settled until they have.
+	// Left out, because they do not follow from a step and could keep the page busy for ever: background repeat
+	// timers, timers of a second or more (hovers, view refreshes), mouse-still-down repeats, and maps, which
+	// charts retry every 100 ms while their scripts are not loaded (offline: never).
+
+	var deferred = {};
+	var timerTokens = {};
+	var sequence = 0;
+
+	function describeAction(action) {
+		if (isc.isA.Function(action)) {
+			return "function";
+		}
+		var target = action && action.target;
+		var owner = target && target.getClassName ? target.getClassName() : "isc";
+		return owner + "." + (action && action.methodName);
+	}
+
+	function ignored(action, delay, backgroundRepeatTimer) {
+		if (backgroundRepeatTimer || isc.isA.String(action) || (delay != null && delay >= 1000)) {
+			return true;
+		}
+		var target = action && action.target;
+		var method = action && action.methodName;
+		if (method === "$kq" || method === "_handleMouseStillDown") {
+			return true;
+		}
+		// Skyve's maps and charts (BizMap, BizMapPicker, BizChart) retry until their script loads, which offline is never
+		var name = target && target.getClassName ? target.getClassName() : "";
+		return /^Biz(Map|Chart)/.test(name);
+	}
+
+	function instrument() {
+		if (isc.Timer._sailSetTimeout) {
+			return;
+		}
+		var setTimeout = isc.Timer.setTimeout;
+		isc.Timer._sailSetTimeout = setTimeout;
+		isc.Timer.setTimeout = function (action, delay, units, frequentTimer, backgroundRepeatTimer) {
+			if (action && action.action != null) {
+				// the parameter object form
+				return isc.Timer.setTimeout(action.action, action.delay, action.units, frequentTimer, backgroundRepeatTimer);
+			}
+			if (action == null || ignored(action, delay, backgroundRepeatTimer)) {
+				return setTimeout.apply(this, arguments);
+			}
+			var token = ++sequence;
+			deferred[token] = describeAction(action);
+			var wrapped = function () {
+				delete deferred[token];
+				if (isc.isA.Function(action)) {
+					return action();
+				}
+				var target = action.target || window;
+				var method = isc.isA.Function(action.methodName) ? action.methodName : target[action.methodName];
+				return method.apply(target, action.args || []);
+			};
+			var id = setTimeout.call(this, wrapped, delay, units, frequentTimer, backgroundRepeatTimer);
+			timerTokens[id] = token;
+			return id;
+		};
+		var clear = isc.Timer.clear;
+		isc.Timer.clear = function (id) {
+			var token = timerTokens[id];
+			if (token) {
+				delete deferred[token];
+				delete timerTokens[id];
+			}
+			return clear.apply(this, arguments);
+		};
+	}
+
+	/** The deferred calls that have not fired yet. */
+	S.deferred = function () {
+		return Object.keys(deferred).map(function (k) {
+			return deferred[k];
+		});
+	};
+
+	/** True when no RPC is pending, no tracked deferred call is waiting to fire, and the system is done (see systemDone()). */
 	S.idle = function () {
-		return S.loaded() && !isc.RPCManager.requestsArePending() && systemDone() === true;
+		if (!S.loaded()) {
+			return false;
+		}
+		instrument();
+		return !isc.RPCManager.requestsArePending() && S.deferred().length === 0 && systemDone() === true;
 	};
 
 	var busyCanvas = null;
@@ -106,6 +196,11 @@
 		return mod ? mod + "." + doc : String(view.getID ? view.getID() : view);
 	};
 
+	/** True once SmartClient has loaded and settled: the condition the harness waits on after every step. */
+	S.settled = function () {
+		return document.readyState === "complete" && S.idle();
+	};
+
 	/** What the browser is showing, for error messages and waits. */
 	S.state = function () {
 		if (!S.loaded()) {
@@ -113,10 +208,11 @@
 		}
 		var rpc = isc.RPCManager.requestsArePending();
 		var done = systemDone();
+		var waiting = S.deferred();
 		return {
 			loaded: true,
-			idle: !rpc && done === true,
-			busy: rpc ? "requests are pending" : done !== true ? notDone() : null,
+			idle: !rpc && waiting.length === 0 && done === true,
+			busy: rpc ? "requests are pending" : waiting.length ? "deferred calls pending: " + waiting.join(", ") : done !== true ? notDone() : null,
 			view: S.describe(S.topView()),
 			windows: (isc.WindowStack._stack || []).length,
 			dialog: S.dialog()
@@ -262,10 +358,24 @@
 		}
 	}
 
-	/** The SmartClient dialog (isc.say, isc.warn, isc.ask all share isc.Dialog.Warn) if it is showing. */
+	/**
+	 * The dialog on top, if one is showing: isc.say, isc.warn and isc.ask share isc.Dialog.Warn, and Skyve shows a
+	 * server-side question in a Dialog of its own.
+	 */
+	function activeDialog() {
+		var top = null;
+		canvases().forEach(function (c) {
+			if (isc.isA.Dialog(c) && c.isDrawn() && c.isVisible() && (!top || c.getZIndex() > top.getZIndex())) {
+				top = c;
+			}
+		});
+		return top;
+	}
+
+	/** The dialog on top, as { kind: say|warn|ask, title, message, buttons }, or null. */
 	S.dialog = function () {
-		var d = isc.Dialog && isc.Dialog.Warn;
-		if (!d || !isc.isA.Canvas(d) || d.destroyed || !d.isDrawn() || !d.isVisible()) {
+		var d = activeDialog();
+		if (!d) {
 			return null;
 		}
 		var icon = String(d.icon || "");
@@ -278,9 +388,25 @@
 		return { kind: kind, title: strip(d.title), message: strip(d.message), buttons: titles };
 	};
 
+	/**
+	 * The dialog on top (as S.dialog() describes it) when the element is not part of it, so that a click on the element
+	 * would land on the dialog's modal mask; otherwise null.
+	 */
+	S.dialogInTheWay = function (element) {
+		var d = activeDialog();
+		if (!d) {
+			return null;
+		}
+		var canvas = canvasOf(element);
+		if (canvas && ((canvas === d) || d.contains(canvas, true))) {
+			return null;
+		}
+		return S.dialog();
+	};
+
 	function dialogButton(name) {
-		var d = isc.Dialog && isc.Dialog.Warn;
-		if (!S.dialog() || !d.toolbar) {
+		var d = activeDialog();
+		if (!d || !d.toolbar) {
 			return null;
 		}
 		var wanted = {
@@ -289,7 +415,9 @@
 			no: [isc.Dialog.NO_BUTTON_TITLE, "No"],
 			cancel: [isc.Dialog.CANCEL_BUTTON_TITLE, "Cancel"]
 		}[name] || [name];
-		var members = d.toolbar.getMembers();
+		var members = d.toolbar.getMembers().filter(function (b) {
+			return b.isVisible && b.isVisible();
+		});
 		for (var i = 0; i < members.length; i++) {
 			var title = strip(members[i].getTitle ? members[i].getTitle() : members[i].title);
 			if (wanted.indexOf(title) >= 0) {
@@ -349,7 +477,7 @@
 			return part ? { obj: part } : { error: "the list view has no " + spec.part + " yet", retry: true };
 		}
 		if (spec.view && showing !== spec.view) {
-			return { error: "expected view " + spec.view + " but the browser shows " + showing, retry: true };
+			return { error: "expected view " + spec.view + " but the browser shows " + showing, retry: true, wrongView: true };
 		}
 
 		var found = null;
@@ -358,6 +486,15 @@
 			case "item":
 				found = pick(items(view, spec.name));
 				what = "form item named " + spec.name;
+				break;
+			case "membership":
+				var lists = ((view._grids && view._grids[spec.name]) ? Object.keys(view._grids[spec.name]).map(function (id) {
+					return view._grids[spec.name][id];
+				}) : []).filter(function (g) {
+					return g && !g.destroyed && isc.isA.BizListMembership(g);
+				});
+				found = pick(lists);
+				what = "list membership " + spec.name;
 				break;
 			case "cell":
 				found = pick(cells(view, spec.name, spec.field));
@@ -476,6 +613,21 @@
 	}
 
 	/**
+	 * True while SmartClient would read a click on the element as the second click of a double click: the same widget
+	 * was clicked less than EventHandler.DOUBLE_CLICK_DELAY ago. A button then fires doubleClick, not its action.
+	 */
+	S.clickWouldPair = function (element) {
+		var EH = isc.EH;
+		var canvas = canvasOf(element);
+		if (!canvas || !EH.lastClickTarget || EH.lastClickTime == null) {
+			return false;
+		}
+		var same = (EH.lastClickTarget === canvas) || (canvas.contains && canvas.contains(EH.lastClickTarget)) ||
+					(EH.lastClickTarget.contains && EH.lastClickTarget.contains(canvas));
+		return same && (isc.timeStamp() - EH.lastClickTime) < EH.DOUBLE_CLICK_DELAY;
+	};
+
+	/**
 	 * Scrolls an element into view the SmartClient way: Canvas.scrollIntoView() on the nearest
 	 * canvas, which also scrolls every ancestor's viewport (SmartClient's custom scrollbars do not
 	 * respond to DOM scrollIntoView()). Falls back to the DOM call.
@@ -545,6 +697,13 @@
 			return resolved;
 		}
 		var item = resolved.obj;
+		if (item && item._candidateList) {
+			// list membership: the members, in order, |-separated
+			var members = (item._memberList.getData() || []).map(function (r) {
+				return strip(r.bizKey);
+			});
+			return { value: members.join("|"), alternatives: [], type: item.getClassName() };
+		}
 		if (!isFormItem(item)) {
 			return { error: locator + " is not a form item" };
 		}
@@ -562,6 +721,12 @@
 			div.innerHTML = html;
 			result = strip(div.textContent || div.innerText || "");
 			alternatives.push(html);
+		} else if (isc.isA.BizHTMLItem && isc.isA.BizHTMLItem(item)) {
+			var markup = value == null ? "" : String(value);
+			var holder = document.createElement("div");
+			holder.innerHTML = markup;
+			result = strip(holder.textContent || holder.innerText || "");
+			alternatives.push(markup);
 		} else if (isc.isA.SliderItem(item)) {
 			result = value == null ? "" : String(value);
 		} else if (item.dateTextField || item.timeTextField) {
@@ -622,6 +787,16 @@
 		return fallback < 0 ? 0 : fallback;
 	};
 
+	/** Scrolls a grid's row into view with ListGrid.scrollToRow(); returns false if the locator is not a grid. */
+	S.scrollToRow = function (locator, row) {
+		var g = gridOf(locator);
+		if (!g.grid || !g.grid.scrollToRow) {
+			return false;
+		}
+		g.grid.scrollToRow(row);
+		return true;
+	};
+
 	/** True if a grid's row is selected (clicking it again would read as a double click, which zooms). */
 	S.rowSelected = function (locator, row) {
 		var resolved = S.resolve(S.parse(locator).spec);
@@ -643,6 +818,457 @@
 		}
 		var row = list.getEditRow();
 		return row == null ? -1 : row;
+	};
+
+	function same(a, b) {
+		if (a === b) {
+			return true;
+		}
+		if (a == null || b == null) {
+			return a == b;
+		}
+		if (isc.isA.Date(a) && isc.isA.Date(b)) {
+			return a.getTime() === b.getTime();
+		}
+		return String(a) === String(b);
+	}
+
+	/**
+	 * Commits what was typed into an item, the way leaving the field does, and reports where the value is.
+	 * Blur is what normally commits a SmartClient text field, and a browser window without OS focus
+	 * (a headed run behind another window) does not deliver focus and blur events reliably, so the typed
+	 * text could stay in the DOM only. FormItem.updateValue() takes the element's value into the item,
+	 * runs its change handlers and updates the form's ValuesManager; it does nothing if they already agree.
+	 *
+	 * @param locator	the SAIL locator of the item (with the suffix of the element typed into)
+	 * @return { element, stored, committed, focused } or { error }
+	 */
+	S.commit = function (locator) {
+		var parsed = S.parse(locator);
+		var resolved = S.resolve(parsed.spec);
+		var item = resolved.obj;
+		if (!isFormItem(item)) {
+			return { error: resolved.error || (locator + " is not a form item") };
+		}
+		var typed = item;
+		if (parsed.suffix) {
+			var element = isc.AutoTest.getElement(isc.AutoTest.getObjectLocator(item).replace(/\/objectType=[A-Za-z]+$/, "") + parsed.suffix);
+			var owner = element ? isc.AutoTest.getObject(isc.AutoTest.getLocator(element)) : null;
+			if (isFormItem(owner)) {
+				typed = owner;
+			}
+		}
+		if (isc.isA.RichTextItem(item)) {
+			var html = item.canvas ? item.canvas.getValue() : null;
+			if (!same(item.getValue(), html)) {
+				item.storeValue(html);
+			}
+		}
+		else {
+			if (typed !== item && typed.updateValue) {
+				typed.updateValue();
+			}
+			// date and time items take their value from their text field
+			if (item.updateValue && (typed === item || item.dateTextField || item.timeTextField)) {
+				item.updateValue();
+			}
+		}
+		var form = item.form;
+		var vm = form && form.valuesManager;
+		var stored = item.getValue();
+		var elementValue = isc.isA.RichTextItem(item) ? strip(item.canvas.getValue()) :
+							(typed.getElementValue ? typed.getElementValue() : null);
+		var cls = typed.getClassName();
+		return {
+			element: elementValue == null ? "" : String(elementValue),
+			// a plain text field shows exactly what was typed (masked, formatted and date fields need not)
+			plain: (cls === "TextItem" || cls === "PasswordItem" || cls === "TextAreaItem") && !typed.mask &&
+					!typed.formatter && !typed.formatEditorValue && typed === item,
+			stored: stored == null ? "" : String(stored),
+			committed: !vm || same(stored, vm.getValue(item.name)),
+			focused: document.hasFocus()
+		};
+	};
+
+	// ---------------------------------------------------------------- grid rows
+
+	/** The grid (a ListGrid) a SAIL grid locator resolves to: list views, list grids and data grids give their inner grid. */
+	function gridOf(locator) {
+		var resolved = S.resolve(S.parse(locator).spec);
+		if (!resolved.obj) {
+			return { error: resolved.error || "no grid for " + locator };
+		}
+		var grid = resolved.obj;
+		if (grid.grid && isc.isA.ListGrid(grid.grid)) {
+			grid = grid.grid;
+		}
+		return isc.isA.ListGrid(grid) ? { grid: grid } : { error: locator + " is not a grid" };
+	}
+
+	/** The text a row shows, cell by cell, skipping list views' tag and flag columns. */
+	function rowTexts(grid, rowNum) {
+		var record = grid.getRecord(rowNum);
+		var fields = grid.getFields();
+		var texts = [];
+		for (var i = 0; i < fields.length; i++) {
+			var name = String(fields[i].name || "");
+			if (name === "bizTagged" || name === "bizFlagComment") {
+				continue;
+			}
+			var value = record ? grid.getCellValue(record, rowNum, i) : null;
+			texts.push(strip(value));
+		}
+		return texts;
+	}
+
+	function rowContains(grid, rowNum, text) {
+		var texts = rowTexts(grid, rowNum);
+		for (var i = 0; i < texts.length; i++) {
+			if (texts[i].indexOf(text) >= 0) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * The rows a grid has: { rows, loaded }. A list grid pages its rows, so it counts as loaded once its length is known
+	 * and its first page has arrived; rowContaining then searches the rows it has fetched, in the order shown.
+	 */
+	function loadedRows(grid) {
+		var total = grid.getTotalRows();
+		var data = grid.getData();
+		// A plain array counts as loaded: some list grids never fetch (User Hits: autoFetchData false, data stays []),
+		// and callers count only once the page has settled, i.e. after any fetch a draw started has returned
+		if (data && data.lengthIsKnown && !data.lengthIsKnown()) {
+			return { rows: 0, loaded: false };
+		}
+		var loaded = !(data && data.rowIsLoaded && total > 0 && !data.rowIsLoaded(0));
+		return { rows: total, loaded: loaded };
+	}
+
+	function rowFetched(grid, rowNum) {
+		var data = grid.getData();
+		return !(data && data.rowIsLoaded) || data.rowIsLoaded(rowNum);
+	}
+
+	/** The zero-based index of the first row showing the text in one of its cells, or -1 (or { error }). */
+	S.rowIndex = function (locator, text) {
+		var g = gridOf(locator);
+		if (g.error) {
+			return { error: g.error, retry: true };
+		}
+		var state = loadedRows(g.grid);
+		if (!state.loaded) {
+			return { error: "the grid's rows are still loading", retry: true };
+		}
+		for (var i = 0; i < state.rows; i++) {
+			if (rowFetched(g.grid, i) && rowContains(g.grid, i, text)) {
+				return { row: i };
+			}
+		}
+		return { row: -1, rows: state.rows };
+	};
+
+	/** Counts a grid's rows, or only those showing the text: { count, loaded } or { error }. */
+	S.countRows = function (locator, text) {
+		var g = gridOf(locator);
+		if (g.error) {
+			return { error: g.error };
+		}
+		var state = loadedRows(g.grid);
+		if (!state.loaded) {
+			return { count: -1, loaded: false };
+		}
+		if (text == null) {
+			return { count: state.rows, loaded: true };
+		}
+		var count = 0;
+		for (var i = 0; i < state.rows; i++) {
+			if (rowFetched(g.grid, i) && rowContains(g.grid, i, text)) {
+				count++;
+			}
+		}
+		return { count: count, loaded: true };
+	};
+
+	/** Asks a list grid to fetch its rows again (a data grid shows its bean's rows, so it has nothing to refetch). */
+	S.refreshGrid = function (locator) {
+		var resolved = S.resolve(S.parse(locator).spec);
+		var owner = resolved.obj;
+		if (owner && owner.grid && isc.isA.BizListGrid(owner)) {
+			if (owner.refresh) {
+				owner.refresh();
+			}
+			else {
+				owner.grid.invalidateCache();
+			}
+			return true;
+		}
+		var g = gridOf(locator);
+		if (g.grid && g.grid.dataSource && g.grid.invalidateCache) {
+			g.grid.invalidateCache();
+			return true;
+		}
+		return false;
+	};
+
+	// ---------------------------------------------------------------- widget state, messages, menus
+
+	/** { found, shown, enabled } for a widget, without failing when it is missing. */
+	S.widgetState = function (locator) {
+		var parsed = S.parse(locator);
+		var resolved = S.resolve(parsed.spec);
+		if (!resolved.obj) {
+			// on the wrong view nothing can be said about the widget: the caller fails rather than read it as hidden
+			return { found: false, shown: false, enabled: false, why: resolved.error, wrongView: !!resolved.wrongView };
+		}
+		var obj = resolved.obj;
+		var shown = shownObject(obj);
+		if (shown && parsed.spec.kind === "tab") {
+			// a tab hidden by its condition is removed from or hidden in the tab bar
+			shown = obj.isVisible() && obj.isDrawn();
+		}
+		return { found: true, shown: shown, enabled: !disabled(obj) };
+	};
+
+	/** The messages showing: [{ type: info|warning|error, text }]. */
+	S.messages = function () {
+		var result = [];
+		var d = S.dialog();
+		if (d) {
+			if (d.kind === "say") {
+				result.push({ type: "info", text: d.message });
+			}
+			else if (d.kind === "warn") {
+				// Skyve shows server problems (and validation) in a warning dialog titled Problems
+				var problems = (d.title === "Problems") || (isc.i18nMessages && d.title === isc.i18nMessages.editView_Problems);
+				result.push({ type: problems ? "error" : "warning", text: d.message });
+			}
+		}
+		S.problems().errors.forEach(function (e) {
+			result.push({ type: "error", text: e });
+		});
+		// PrimeFaces growls (Skyve's desktop page has a growl): counted as soon as they are in the page, as
+		// PrimeFaces fades them in with jQuery after the response has arrived
+		Array.prototype.slice.call(document.querySelectorAll(".ui-growl-item")).forEach(function (g) {
+			var cls = (g.querySelector(".ui-growl-image") || g).className;
+			var type = /error|fatal/.test(cls) ? "error" : /warn/.test(cls) ? "warning" : "info";
+			result.push({ type: type, text: strip(g.innerText || g.textContent) });
+		});
+		return result;
+	};
+
+	/**
+	 * Finds a menu entry: the module's section by title, then groups and the item by their shown text.
+	 * Returns { present, header (the section header element, when it is collapsed), row (the item's cell element) }.
+	 */
+	S.menu = function (moduleTitle, labels) {
+		var stack = isc.Canvas.getById("adminStack");
+		if (!stack) {
+			return { present: false, why: "no menu on this page" };
+		}
+		var index = -1;
+		for (var i = 0; i < stack.sections.length; i++) {
+			if (strip(stack.sections[i].title) === moduleTitle) {
+				index = i;
+				break;
+			}
+		}
+		if (index < 0) {
+			return { present: false, why: "no menu section " + moduleTitle };
+		}
+		var section = stack.sections[index];
+		var result = { present: true, expanded: stack.sectionIsExpanded(section) };
+		if (!result.expanded) {
+			var header = stack.getSectionHeader(index);
+			result.header = header ? header.getClipHandle() : null;
+		}
+		if (!labels || labels.length === 0) {
+			return result;
+		}
+		var tree = section.items && section.items[0];
+		if (!tree || !tree.data) {
+			return { present: false, why: "the " + moduleTitle + " section has no menu tree" };
+		}
+		var node = tree.data.getRoot();
+		var path = [];
+		for (var l = 0; l < labels.length; l++) {
+			var children = tree.data.getChildren(node) || [];
+			var next = null;
+			for (var c = 0; c < children.length; c++) {
+				if (strip(children[c].desc) === labels[l]) {
+					next = children[c];
+					break;
+				}
+			}
+			if (!next) {
+				return { present: false, why: "no menu entry " + labels.slice(0, l + 1).join(" / ") };
+			}
+			node = next;
+			path.push(next);
+		}
+		if (!result.expanded) {
+			return result; // the caller expands the section and asks again
+		}
+		// a closed group on the way: the caller opens it as a user does (double-clicking its row) and asks again
+		for (var f = 0; f < path.length - 1; f++) {
+			if (!tree.data.isOpen(path[f])) {
+				var folderRow = tree.getRecordIndex(path[f]);
+				if (folderRow >= 0) {
+					tree.scrollToRow(folderRow);
+				}
+				result.folder = strip(path[f].desc);
+				result.folderRow = folderRow < 0 ? null : isc.AutoTest.getElement(S.objectLocator(tree) + "/body/row[" + folderRow + "]/col[0]");
+				return result;
+			}
+		}
+		var row = tree.getRecordIndex(node);
+		if (row >= 0) {
+			// a menu tree's rows scroll inside its section: bring the row into view the grid's way
+			tree.scrollToRow(row);
+		}
+		result.row = row < 0 ? null : isc.AutoTest.getElement(S.objectLocator(tree) + "/body/row[" + row + "]/col[0]");
+		return result;
+	};
+
+	// ---------------------------------------------------------------- list membership and the HTML editor
+
+	/** A list membership's candidates and members (their shown text). */
+	S.membership = function (locator) {
+		var resolved = S.resolve(S.parse(locator).spec);
+		var m = resolved.obj;
+		if (!m || !m._candidateList) {
+			return { error: resolved.error || locator + " is not a list membership", retry: true };
+		}
+		var texts = function (list) {
+			return (list.getData() || []).map(function (r) {
+				return strip(r.bizKey);
+			});
+		};
+		return { candidates: texts(m._candidateList), members: texts(m._memberList) };
+	};
+
+	/** The element of a list membership row or button: part is candidate, member, assign or unassign. */
+	S.membershipElement = function (locator, part, text) {
+		var resolved = S.resolve(S.parse(locator).spec);
+		var m = resolved.obj;
+		if (!m || !m._candidateList) {
+			return null;
+		}
+		if (part === "assign" || part === "unassign") {
+			var buttons = m.members[1].members;
+			var b = buttons[part === "assign" ? 0 : 1];
+			return isc.AutoTest.getElement(S.objectLocator(b));
+		}
+		var list = part === "candidate" ? m._candidateList : m._memberList;
+		var data = list.getData() || [];
+		for (var i = 0; i < data.length; i++) {
+			if (strip(data[i].bizKey) === text) {
+				return isc.AutoTest.getElement(S.objectLocator(list) + "/body/row[" + i + "]/col[0]");
+			}
+		}
+		return null;
+	};
+
+	/** The HTML item's Edit button, and the editor window's Apply button and editor iframe when it is open. */
+	S.htmlEditor = function (locator) {
+		var resolved = S.resolve(S.parse(locator).spec);
+		var item = resolved.obj;
+		if (!item || !item._editButton) {
+			return { error: resolved.error || locator + " is not an HTML editor", retry: true };
+		}
+		var result = { edit: isc.AutoTest.getElement(S.objectLocator(item._editButton)) };
+		var editor = item._editor;
+		if (editor && editor.status === "ready" && window.CKEDITOR && CKEDITOR.instances._CKEditor === editor) {
+			result.frame = document.querySelector("iframe.cke_wysiwyg_frame");
+			var stack = isc.WindowStack._stack;
+			var top = stack[stack.length - 1];
+			var apply = null;
+			if (top) {
+				canvases().forEach(function (c) {
+					if (!apply && isc.isA.IButton(c) && top.contains(c) &&
+							strip(c.getTitle()) === strip(isc.i18nMessages.bizHTMLItem_EditHTMLPopupApply)) {
+						apply = c;
+					}
+				});
+			}
+			result.apply = apply ? isc.AutoTest.getElement(S.objectLocator(apply)) : null;
+		}
+		return result;
+	};
+
+	/** The Upload button of a content item (the main part of its split button). */
+	S.uploadButton = function (locator) {
+		var resolved = S.resolve(S.parse(locator).spec);
+		var item = resolved.obj;
+		if (!item || !item.canvas) {
+			return { error: resolved.error || locator + " is not a content item", retry: true };
+		}
+		var title = strip(isc.i18nMessages.bizUtilSplitButton_UploadButtonTitle);
+		var button = null;
+		canvases().forEach(function (c) {
+			if (!button && isc.isA.IButton(c) && !isc.isA.MenuButton(c) && item.canvas.contains(c) && strip(c.getTitle()) === title) {
+				button = c;
+			}
+		});
+		if (!button) {
+			return { error: "no Upload button on " + locator + " (is it read only?)", retry: true };
+		}
+		return { element: isc.AutoTest.getElement(S.objectLocator(button)), disabled: button.isDisabled() };
+	};
+
+	/** The upload page's iframe in the top-most window, if one is open. */
+	S.uploadFrame = function () {
+		var frames = Array.prototype.slice.call(document.querySelectorAll("iframe")).filter(function (f) {
+			return String(f.src || "").indexOf("upload.xhtml") >= 0 && f.getClientRects().length > 0;
+		});
+		return frames.length ? frames[frames.length - 1] : null;
+	};
+
+	/** The close button of the top-most window. */
+	S.windowClose = function () {
+		var stack = isc.WindowStack._stack || [];
+		var top = stack[stack.length - 1];
+		var button = top && top.closeButton;
+		return button ? button.getClipHandle() : null;
+	};
+
+	/**
+	 * The element at the centre of an element, if it belongs to the same canvas (SmartClient draws some widgets in
+	 * several nested elements; the top one takes the click).
+	 */
+	S.sameCanvasAt = function (element) {
+		var rect = element.getBoundingClientRect();
+		var hit = document.elementFromPoint(rect.left + rect.width / 2, rect.top + rect.height / 2);
+		var mine = canvasOf(element);
+		return (hit && mine && canvasOf(hit) === mine) ? hit : null;
+	};
+
+	/**
+	 * True if SmartClient's hover (the tooltip-like Label isc.Hover shows when the pointer rests on a widget, e.g. a
+	 * text field's full value) is what is at the element's centre, covering it.
+	 */
+	S.hoverCovers = function (element) {
+		var hover = isc.Hover && isc.Hover.hoverCanvas;
+		if (!hover || !hover.isVisible || !hover.isVisible()) {
+			return false;
+		}
+		var rect = element.getBoundingClientRect();
+		var hit = document.elementFromPoint(rect.left + rect.width / 2, rect.top + rect.height / 2);
+		for (var c = hit && canvasOf(hit); c; c = c.parentElement) {
+			if (c === hover) {
+				return true;
+			}
+		}
+		return false;
+	};
+
+	/** True if the item runs a change handler (Skyve renders onChangedHandlers as the item's changed()), which may call the server. */
+	S.hasChangeHandler = function (locator) {
+		var resolved = S.resolve(S.parse(locator).spec);
+		var item = resolved.obj;
+		return !!(item && isFormItem(item) && isc.isA.Function(item.changed));
 	};
 
 	/** Sets a slider through its own widget API, as a drag would, and returns the new value. */
@@ -687,23 +1313,6 @@
 		}).length > 0;
 	};
 
-	/** Ends inline editing in every data grid of the top-most view; true if a grid was editing. */
-	S.endInlineEditing = function () {
-		var view = S.topView();
-		var ended = false;
-		if (view && view._vm) {
-			owned(view, function (c) {
-				return isc.isA.BizDataGrid(c);
-			}).forEach(function (grid) {
-				var list = grid.grid;
-				if (list && list.getEditRow && list.getEditRow() != null) {
-					list.endEditing();
-					ended = true;
-				}
-			});
-		}
-		return ended;
-	};
 
 	window._sail = S;
 })();
