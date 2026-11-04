@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!--
+	SmartClient admin suite, restore bracket part 1 (SmartClient only): truncate all the data, keeping the bootstrap user.
+	SmartClientAdminSuiteSailIT runs this only when 00-backup.xml passed, and always runs 99-restore.xml after it, even
+	when this file fails, so a failure after the truncate cannot leave the server without its data.
+-->
+<automation uxui="desktop" userAgentType="desktop" testStrategy="Assert"
+			xsi:schemaLocation="http://www.skyve.org/xml/sail ../../../../../../main/java/schemas/sail.xsd"
+			xmlns="http://www.skyve.org/xml/sail"
+			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<before>
+		<login user="admin" password="admin" />
+		<testSuccess />
+		<switchMode />
+	</before>
+	<interaction name="Check that the backup to restore exists">
+		<method>
+			<comment>Truncate only when 99-restore.xml has its backup to restore: 00-backup.xml's, the only one</comment>
+			<navigateEdit module="admin" document="DataMaintenance" />
+			<tabSelect path="Backup/Restore" />
+			<testGridRows module="admin" query="BackupsModel" minRows="1" maxRows="1" />
+		</method>
+	</interaction>
+	<interaction name="Truncate all the data, keeping the bootstrap user">
+		<method>
+			<comment>Truncate deletes every row of the customer's data; 99-restore.xml puts it back</comment>
+			<tabSelect path="Data" />
+			<dataEnter binding="injectBootstrapUser" value="true" />
+			<dataEnter binding="confirmPassword" value="admin" />
+			<action name="Truncate" />
+			<testSuccess />
+		</method>
+	</interaction>
+	<interaction name="Check the truncate">
+		<method>
+			<comment>Truncating re-creates the bootstrap user, which ends this session: sign in again</comment>
+			<logout />
+			<login user="admin" password="admin" />
+			<testSuccess />
+			<switchMode />
+			<comment>The marker left after the backup has gone with everything else</comment>
+			<navigateMenu module="admin" item="Security Admin/Data Groups" />
+			<testGridRows module="admin" document="DataGroup" maxRows="0" />
+		</method>
+	</interaction>
+	<after>
+		<logout />
+	</after>
+</automation>

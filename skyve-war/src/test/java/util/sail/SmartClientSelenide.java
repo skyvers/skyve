@@ -452,7 +452,12 @@ public class SmartClientSelenide extends Selenide<
 	 */
 	public @Nonnull boolean[] widgetState(@Nonnull String locator) {
 		waitForFullPageResponse();
-		Map<String, Object> result = map(script("return _sail.widgetState(arguments[0])", root(locator)));
+		// Waits for the view the locator expects, as when locating: on another view the widget's state is unknown,
+		// which must fail the step rather than read as "not shown"
+		Map<String, Object> result = until("the view of " + locator + " to show", d -> {
+			Map<String, Object> state = map(script("return _sail.widgetState(arguments[0])", root(locator)));
+			return Boolean.TRUE.equals(state.get("wrongView")) ? null : state;
+		});
 		return new boolean[] {Boolean.TRUE.equals(result.get("found")),
 								Boolean.TRUE.equals(result.get("shown")),
 								Boolean.TRUE.equals(result.get("enabled"))};
@@ -505,6 +510,18 @@ public class SmartClientSelenide extends Selenide<
 			SelenideElement element = $(header);
 			prepare(element);
 			click(element);
+			waitForFullPageResponse();
+			result = map(script("return _sail.menu(arguments[0], arguments[1])", moduleTitle, labels));
+		}
+		// Open each closed group on the way, as a user does: double-click its row (a menu tree has no open icons)
+		for (int i = 0; (i < labels.size()) && (result.get("folder") != null); i++) {
+			if (! (result.get("folderRow") instanceof WebElement folder)) {
+				throw new IllegalStateException("The menu group " + result.get("folder") + " is not shown");
+			}
+			trace("    Open the " + result.get("folder") + " menu group");
+			SelenideElement element = $(folder);
+			prepare(element);
+			doubleClick(element);
 			waitForFullPageResponse();
 			result = map(script("return _sail.menu(arguments[0], arguments[1])", moduleTitle, labels));
 		}
@@ -845,8 +862,13 @@ public class SmartClientSelenide extends Selenide<
 
 		// Wait for the pick list drop down
 		String pickList = String.format("%s/item[Class=ComboBoxItem||name=_combo]/pickList", locator);
-		SelenideElement element = require(pickList).element();
-		element.should(exist, Duration.ofSeconds(30)).shouldBe(visible);
+		require(pickList);
+		// Waits for SmartClient to show the pick list it has drawn (the search's fetch has returned by now)
+		until("the lookup's pick list to show", d -> {
+			Found list = find(pickList);
+			return ((list != null) && list.shown()) ? Boolean.TRUE : null;
+		});
+		SelenideElement element;
 
 		// Select the first row
 		element = require(pickList + "/body/row[0]/col[0]").element();
@@ -908,9 +930,9 @@ public class SmartClientSelenide extends Selenide<
 			return false;
 		}
 
-		// Type as a user would: select what is there, delete it, then type the value key by key,
-		// so that SmartClient sees every change (setting the DOM value directly can leave the item's value stale)
-		// Click into the field as a user would, then select what is there (the selection itself is set through the DOM)
+		// Type as a user would: click into the field, select what is there (the selection itself is set through the DOM),
+		// delete it, then type the value (key by key when a change handler runs, see below), so that SmartClient sees
+		// every change (setting the DOM value directly can leave the item's value stale)
 		click(element);
 		script("if (arguments[0].select) arguments[0].select();", element.toWebElement());
 		// Keys go to whatever has the focus, as from a keyboard: a change handler can rerender the field's form while
@@ -1108,10 +1130,10 @@ public class SmartClientSelenide extends Selenide<
 
 	@Override
 	public boolean verifyFailure(String messageToCheck) {
-		Map<String, Object> problems = map(script("return _sail.problems()"));
-		List<String> found = problemMessages(problems, true);
+		// Error messages only (the Problems dialog, field errors, error growls), once the page has settled, as PrimeFaces
+		List<String> found = messages("error");
 		if (found.isEmpty()) {
-			lastProblem = "no error message, question or field error is showing";
+			lastProblem = "no error message or field error is showing (" + describeMessages() + ')';
 		}
 		else if (messageToCheck == null) {
 			return true;
@@ -1163,15 +1185,6 @@ public class SmartClientSelenide extends Selenide<
 		catch (RuntimeException e) {
 			return "(could not read the messages: " + firstLine(e.getMessage()) + ')';
 		}
-	}
-
-	/**
-	 * Returns the reason the last verification failed.
-	 *
-	 * @return the reason, or {@code null}
-	 */
-	public @Nullable String getLastProblem() {
-		return lastProblem;
 	}
 
 	/**
@@ -1279,21 +1292,6 @@ public class SmartClientSelenide extends Selenide<
 	}
 
 	/**
-	 * Locates the element specified by the given locator, waiting for it to appear.
-	 *
-	 * @param locator the SmartClient AutoTest or SAIL locator string
-	 * @return the located SelenideElement; or null if the element cannot be found
-	 */
-	public @Nullable SelenideElement locate(@Nonnull String locator) {
-		try {
-			return require(locator).element();
-		}
-		catch (@SuppressWarnings("unused") IllegalStateException e) {
-			return null;
-		}
-	}
-
-	/**
 	 * Locates an element, waiting for it to appear, and failing with the browser's explanation if it does not.
 	 *
 	 * @param locator	the AutoTest or SAIL locator
@@ -1301,7 +1299,6 @@ public class SmartClientSelenide extends Selenide<
 	 * @throws IllegalStateException if nothing is found in time, or the locator can never match
 	 */
 	public @Nonnull Found require(@Nonnull String locator) {
-		trace("    Locating " + locator);
 		waitForFullPageResponse();
 		// Waits for SmartClient to draw the widget: after a response it lays out and draws from zero-delay timers
 		return until("SmartClient to show " + locator, d -> {
@@ -1320,7 +1317,7 @@ public class SmartClientSelenide extends Selenide<
 	 * Looks for an element once, without waiting.
 	 *
 	 * @param locator	the AutoTest or SAIL locator
-	 * @return what was found, or {@code null}; {@link #getLastProblem()} then says why
+	 * @return what was found, or {@code null}
 	 */
 	public @Nullable Found findNow(@Nonnull String locator) {
 		waitForFullPageResponse();
@@ -1404,6 +1401,18 @@ public class SmartClientSelenide extends Selenide<
 			waitForFullPageResponse();
 			return expected.equals(script("return _sail.describe(_sail.topView())")) ? Boolean.TRUE : null;
 		});
+	}
+
+	/**
+	 * Reports whether the browser shows the view (its top-most edit view), once the page has settled.
+	 *
+	 * @param moduleName	the module
+	 * @param documentName	the document
+	 * @return {@code true} if it shows
+	 */
+	public boolean showsView(@Nonnull String moduleName, @Nonnull String documentName) {
+		waitForFullPageResponse();
+		return (moduleName + '.' + documentName).equals(script("return _sail.describe(_sail.topView())"));
 	}
 
 	/**
@@ -1578,6 +1587,7 @@ public class SmartClientSelenide extends Selenide<
 	 */
 	private void click(@Nonnull SelenideElement element, boolean doubleClick) {
 		WebElement target = element.toWebElement();
+		dismissDialogInTheWay(target);
 		if ((! doubleClick) && Boolean.TRUE.equals(script("return !!window._sail && _sail.clickWouldPair(arguments[0])", target))) {
 			// Waits for SmartClient's double-click interval to pass: it would read this click as the second click of a
 			// double click on the same widget (a button then ignores it), and SAIL means a separate click
@@ -1610,6 +1620,26 @@ public class SmartClientSelenide extends Selenide<
 				((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView({block: 'center'});", element);
 				clickIt(element, doubleClick);
 			}
+		}
+	}
+
+	/**
+	 * Dismisses a message dialog that an earlier step left showing, when it is in the way of a click elsewhere, as a user
+	 * would before going on. Messages stay up until then, for testMessage, testSuccess and testFailure to read.
+	 *
+	 * @param target	the element to be clicked
+	 * @throws IllegalStateException if the dialog is an unanswered question: answering it is the script's job
+	 */
+	private void dismissDialogInTheWay(@Nonnull WebElement target) {
+		if (! Boolean.TRUE.equals(script("return !!window._sail"))) {
+			return;
+		}
+		if (script("return _sail.dialogInTheWay(arguments[0])", target) instanceof Map<?, ?> dialog) {
+			if ("ask".equals(dialog.get("kind"))) {
+				throw new IllegalStateException("An unanswered question is showing: " + dialog.get("message"));
+			}
+			trace("    Dismiss the " + dialog.get("kind") + " message '" + dialog.get("message") + "' left by an earlier step");
+			ok();
 		}
 	}
 

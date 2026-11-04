@@ -12,7 +12,7 @@
  *   sail:{"view":"kitchensink.KitchenSink","kind":"item","name":"text"}/element
  * Spec properties:
  *   view    - "module.Document" expected on the top-most edit view (omitted for list views)
- *   kind    - item | button | zoomIn | tab | dataGrid | listGrid | list | dialog
+ *   kind    - item | membership | button | zoomIn | tab | dataGrid | listGrid | list | cell | dialog
  *   name    - item name (sanitised binding), action name, binding, tab title or dialog button
  *   ordinal - zero-based index of a list grid in its view (kind listGrid)
  *   part    - new | zoom | edit | remove | rows (grids)
@@ -388,6 +388,22 @@
 		return { kind: kind, title: strip(d.title), message: strip(d.message), buttons: titles };
 	};
 
+	/**
+	 * The dialog on top (as S.dialog() describes it) when the element is not part of it, so that a click on the element
+	 * would land on the dialog's modal mask; otherwise null.
+	 */
+	S.dialogInTheWay = function (element) {
+		var d = activeDialog();
+		if (!d) {
+			return null;
+		}
+		var canvas = canvasOf(element);
+		if (canvas && ((canvas === d) || d.contains(canvas, true))) {
+			return null;
+		}
+		return S.dialog();
+	};
+
 	function dialogButton(name) {
 		var d = activeDialog();
 		if (!d || !d.toolbar) {
@@ -461,7 +477,7 @@
 			return part ? { obj: part } : { error: "the list view has no " + spec.part + " yet", retry: true };
 		}
 		if (spec.view && showing !== spec.view) {
-			return { error: "expected view " + spec.view + " but the browser shows " + showing, retry: true };
+			return { error: "expected view " + spec.view + " but the browser shows " + showing, retry: true, wrongView: true };
 		}
 
 		var found = null;
@@ -922,6 +938,8 @@
 	function loadedRows(grid) {
 		var total = grid.getTotalRows();
 		var data = grid.getData();
+		// A plain array counts as loaded: some list grids never fetch (User Hits: autoFetchData false, data stays []),
+		// and callers count only once the page has settled, i.e. after any fetch a draw started has returned
 		if (data && data.lengthIsKnown && !data.lengthIsKnown()) {
 			return { rows: 0, loaded: false };
 		}
@@ -1002,7 +1020,8 @@
 		var parsed = S.parse(locator);
 		var resolved = S.resolve(parsed.spec);
 		if (!resolved.obj) {
-			return { found: false, shown: false, enabled: false, why: resolved.error };
+			// on the wrong view nothing can be said about the widget: the caller fails rather than read it as hidden
+			return { found: false, shown: false, enabled: false, why: resolved.error, wrongView: !!resolved.wrongView };
 		}
 		var obj = resolved.obj;
 		var shown = shownObject(obj);
@@ -1073,6 +1092,7 @@
 			return { present: false, why: "the " + moduleTitle + " section has no menu tree" };
 		}
 		var node = tree.data.getRoot();
+		var path = [];
 		for (var l = 0; l < labels.length; l++) {
 			var children = tree.data.getChildren(node) || [];
 			var next = null;
@@ -1086,11 +1106,23 @@
 				return { present: false, why: "no menu entry " + labels.slice(0, l + 1).join(" / ") };
 			}
 			node = next;
+			path.push(next);
 		}
 		if (!result.expanded) {
 			return result; // the caller expands the section and asks again
 		}
-		tree.data.openFolders(tree.data.getParents(node));
+		// a closed group on the way: the caller opens it as a user does (double-clicking its row) and asks again
+		for (var f = 0; f < path.length - 1; f++) {
+			if (!tree.data.isOpen(path[f])) {
+				var folderRow = tree.getRecordIndex(path[f]);
+				if (folderRow >= 0) {
+					tree.scrollToRow(folderRow);
+				}
+				result.folder = strip(path[f].desc);
+				result.folderRow = folderRow < 0 ? null : isc.AutoTest.getElement(S.objectLocator(tree) + "/body/row[" + folderRow + "]/col[0]");
+				return result;
+			}
+		}
 		var row = tree.getRecordIndex(node);
 		if (row >= 0) {
 			// a menu tree's rows scroll inside its section: bring the row into view the grid's way

@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <!--
-	SmartClient admin suite, last step: restore the backup that 00-backup.xml made (the only one: 00 checks that no other
-	exists, as this restores the oldest listed), which puts back the data as it was before the suite, then delete that backup. SmartClientAdminSuiteSailIT runs this even when an earlier file fails.
+	SmartClient admin suite, restore bracket part 2: restore the backup that 00-backup.xml made (the only one: 00 checks
+	that no other exists, as this restores the oldest listed), which puts back the data as it was before the suite (and
+	before 99-truncate.xml), then delete that backup. SmartClientAdminSuiteSailIT runs this whenever 00-backup.xml passed,
+	even when a later file (99-truncate.xml too) fails.
 -->
 <automation uxui="desktop" userAgentType="desktop" testStrategy="Assert"
 			xsi:schemaLocation="http://www.skyve.org/xml/sail ../../../../../../main/java/schemas/sail.xsd"
@@ -12,29 +14,11 @@
 		<testSuccess />
 		<switchMode />
 	</before>
-	<interaction name="Truncate all the data (SmartClient only), keeping the bootstrap user">
-		<method>
-			<comment>Truncate deletes every row of the customer's data; the restore below puts it back</comment>
-			<navigateMenu module="admin" item="DevOps/Data Maintenance" />
-			<tabSelect path="Data" />
-			<dataEnter binding="injectBootstrapUser" value="true" />
-			<dataEnter binding="confirmPassword" value="admin" />
-			<action name="Truncate" />
-			<testSuccess />
-			<comment>The marker left after the backup has gone with everything else</comment>
-			<navigateMenu module="admin" item="Security Admin/Data Groups" />
-			<testGridRows module="admin" document="DataGroup" maxRows="0" />
-			<comment>Truncating re-creates the bootstrap user, which ends this session: sign in again</comment>
-			<logout />
-			<login user="admin" password="admin" />
-			<testSuccess />
-			<switchMode />
-		</method>
-	</interaction>
 	<interaction name="Restore the backup made before the suite">
 		<method>
 			<navigateEdit module="admin" document="DataMaintenance" />
 			<tabSelect path="Backup/Restore" />
+			<testGridRows module="admin" query="BackupsModel" minRows="1" maxRows="1" />
 			<!--
 				RUNTIME BUG: backups are listed oldest first (BackupsModel re-sorts its descending file list into a TreeMap).
 				On a server the suite keeps clean, the only backup is the one 00-backup.xml made; this restores the oldest.
@@ -49,7 +33,11 @@
 			<testValue binding="restorePreProcess" value="deleteData" />
 			<action name="Restore" confirm="false" />
 			<action name="Restore" confirm="true" />
-			<testMessage contains="estore" type="info" />
+			<!--
+				RUNTIME DIFFERENCE: as with Backup (00-backup.xml), SmartClient does not show the action's "Restore Job has been
+				started" growl, only the job's "System Restore complete" push message later. The Jobs list below waits for the job.
+			<testMessage contains="Restore Job has been started" type="info" />
+			-->
 			<comment>The restore is a job: wait for its row in the completed jobs list (00 cleared the list before the backup, so the restored list has no RestoreJob row until this one finishes)</comment>
 			<navigateMenu module="admin" item="Jobs" />
 			<testGridRows module="admin" query="qCompletedJobs" rowContaining="RestoreJob" minRows="1" timeoutMillis="120000" />
@@ -68,7 +56,7 @@
 			<tabSelect path="Backup/Restore" />
 			<listGridSelect module="admin" query="BackupsModel" row="0" />
 			<action name="DeleteBackup" confirm="true" />
-			<testWidget action="DeleteBackup" enabled="false" />
+			<testGridRows module="admin" query="BackupsModel" maxRows="0" timeoutMillis="10000" />
 		</method>
 	</interaction>
 	<after>

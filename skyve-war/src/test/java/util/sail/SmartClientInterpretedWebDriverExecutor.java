@@ -27,7 +27,6 @@ import org.skyve.metadata.module.Module.DocumentRef;
 import org.skyve.metadata.module.query.MetaDataQueryDefinition;
 import org.skyve.metadata.sail.language.Step;
 import org.skyve.metadata.sail.language.step.Execute;
-import org.skyve.metadata.sail.language.step.TestFailure;
 import org.skyve.metadata.sail.language.step.TestGridRows;
 import org.skyve.metadata.sail.language.step.TestMessage;
 import org.skyve.metadata.sail.language.step.TestWidget;
@@ -451,15 +450,15 @@ public class SmartClientInterpretedWebDriverExecutor extends InterpretedWebDrive
 			selenide.trace("    Declined: the action did not run");
 		}
 		else if (BooleanUtils.isNotFalse(testSuccess)) {
+			// an information message stays up for a testMessage step; the next click elsewhere dismisses it
 			checkSuccess("expected no error messages after <" + tagName + " />");
-			selenide.ok();
 		}
 	}
 
 	@Override
 	public void executeOk(Ok ok) {
 		button(ok, "ok", ok.getConfirm(), ok.getTestSuccess());
-		closed(ok.getConfirm());
+		closed(ok.getConfirm(), ok.getTestSuccess());
 	}
 
 	@SuppressWarnings("null") // a null here fails the test
@@ -485,35 +484,45 @@ public class SmartClientInterpretedWebDriverExecutor extends InterpretedWebDrive
 	@Override
 	public void executeCancel(Cancel cancel) {
 		button(cancel, "cancel", null, cancel.getTestSuccess());
-		closed(null);
+		closed(null, cancel.getTestSuccess());
 	}
 
 	@Override
 	public void executeDelete(Delete delete) {
 		button(delete, "delete", delete.getConfirm(), delete.getTestSuccess());
-		closed(delete.getConfirm());
+		closed(delete.getConfirm(), delete.getTestSuccess());
 	}
 
 	@Override
 	public void executeZoomOut(ZoomOut zoomOut) {
 		button(zoomOut, "zoom out", zoomOut.getConfirm(), zoomOut.getTestSuccess());
-		closed(zoomOut.getConfirm());
+		closed(zoomOut.getConfirm(), zoomOut.getTestSuccess());
 	}
 
 	@Override
 	public void executeRemove(Remove remove) {
 		button(remove, "remove", remove.getConfirm(), remove.getTestSuccess());
-		closed(remove.getConfirm());
+		closed(remove.getConfirm(), remove.getTestSuccess());
 	}
 
 	/**
 	 * Pops the context of a view that an action closed and waits for the browser to show the view underneath.
-	 * A confirmation answered no leaves the view open, so nothing is popped.
+	 * A confirmation answered no leaves the view open, so nothing is popped; nor is it when the action was allowed to
+	 * fail ({@code testSuccess="false"}) and the view is still showing (it refused to close, and its problems are left
+	 * for a testFailure step).
 	 *
-	 * @param confirm	how the action's confirmation was answered
+	 * @param confirm		how the action's confirmation was answered
+	 * @param testSuccess	the step's testSuccess
 	 */
-	private void closed(@Nullable Boolean confirm) {
+	@SuppressWarnings("null") // edit contexts have a module and document
+	private void closed(@Nullable Boolean confirm, @Nullable Boolean testSuccess) {
 		if (Boolean.FALSE.equals(confirm)) {
+			return;
+		}
+		SmartClientAutomationContext closing = context();
+		if (Boolean.FALSE.equals(testSuccess) && (ViewType.list != closing.getViewType()) &&
+				selenide.showsView(closing.getModuleName(), closing.getDocumentName())) {
+			selenide.trace("    The view did not close");
 			return;
 		}
 		pop();
@@ -1075,9 +1084,6 @@ public class SmartClientInterpretedWebDriverExecutor extends InterpretedWebDrive
 		boolean found = selenide.messages(severity).stream().anyMatch(m -> m.contains(contains));
 		check(found, () -> String.format("expected %s message containing '%s' but found: %s",
 											(severity == null) ? "a" : "an " + severity, contains, selenide.describeMessages()));
-		if (found) {
-			selenide.ok();
-		}
 	}
 
 	/**
@@ -1300,26 +1306,6 @@ public class SmartClientInterpretedWebDriverExecutor extends InterpretedWebDrive
 	}
 
 	/**
-	 * Applies the base class's check, then dismisses any message the check has seen.
-	 */
-	@Override
-	public void executeTestSuccess(TestSuccess success) {
-		super.executeTestSuccess(success);
-
-		selenide.ok();
-	}
-
-	/**
-	 * Applies the base class's check, then dismisses the message it has seen.
-	 */
-	@Override
-	public void executeTestFailure(TestFailure failure) {
-		super.executeTestFailure(failure);
-
-		selenide.ok();
-	}
-
-	/**
 	 * Returns the current context.
 	 *
 	 * @return the context
@@ -1347,8 +1333,8 @@ public class SmartClientInterpretedWebDriverExecutor extends InterpretedWebDrive
 	}
 
 	/**
-	 * Checks that no dialog is in the way. A message left by an action whose success was not tested is
-	 * dismissed (and traced); an unanswered question fails the step, because answering it is the script's job.
+	 * Checks that no dialog is in the way. A message left by an earlier step is dismissed now that the step needs the
+	 * view; an unanswered question fails the step, because answering it is the script's job.
 	 */
 	private void prepareForDataEntry() {
 		String kind = selenide.dialogKind();
