@@ -475,14 +475,12 @@ public class SmartClientSelenide extends Selenide<
 			return false;
 		}
 
-		element.clear();
-		if (command.keyPresses()) {
-			if (value != null) {
-				element.sendKeys(value);
-			}
-		}
-		else {
-			element.val((value == null) ? "" : value);
+		// Type as a user would: select what is there, delete it, then type the value key by key,
+		// so that SmartClient sees every change (setting the DOM value directly can leave the item's value stale)
+		script("arguments[0].focus(); if (arguments[0].select) arguments[0].select();", element.toWebElement());
+		element.sendKeys(Keys.BACK_SPACE);
+		if ((value != null) && (! value.isEmpty())) {
+			element.sendKeys(value);
 		}
 
 		return true;

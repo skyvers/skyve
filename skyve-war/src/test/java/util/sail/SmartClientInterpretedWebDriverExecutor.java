@@ -599,9 +599,19 @@ public class SmartClientInterpretedWebDriverExecutor extends InterpretedWebDrive
 		}
 	}
 
+	/**
+	 * Clicks the zoom in button and pushes the context of the view it opens.
+	 * With {@code testSuccess="false"}, a zoom in that is refused (an empty reference, a problem on the view)
+	 * leaves its message for a following {@code testFailure} and opens no view, so no context is pushed.
+	 */
 	@Override
 	public void executeZoomIn(ZoomIn zoom) {
-		button(zoom, "zoomIn", false, zoom.getTestSuccess());
+		Boolean testSuccess = zoom.getTestSuccess();
+		button(zoom, "zoomIn", false, testSuccess);
+		if (Boolean.FALSE.equals(testSuccess) && (selenide.dialogKind() != null)) {
+			selenide.trace("    The zoom in was refused: " + selenide.dialogMessage());
+			return;
+		}
 		pushRelated(zoom.getBinding());
 	}
 
@@ -858,7 +868,7 @@ public class SmartClientInterpretedWebDriverExecutor extends InterpretedWebDrive
 	 */
 	@Override
 	public void executeTestValue(TestValue test) {
-		prepareForInteraction();
+		prepareForDataEntry(); // a row being edited inline stays in edit
 		SmartClientAutomationContext context = context();
 		String binding = test.getBinding();
 		List<Locator> locators = inputLocators(context, binding);
