@@ -1,7 +1,10 @@
 package util.sail;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
+import org.primefaces.component.autocomplete.AutoComplete;
 import org.primefaces.component.colorpicker.ColorPicker;
 import org.primefaces.component.datepicker.DatePicker;
 import org.primefaces.component.inputmask.InputMask;
@@ -11,7 +14,9 @@ import org.primefaces.component.password.Password;
 import org.primefaces.component.selectbooleancheckbox.SelectBooleanCheckbox;
 import org.primefaces.component.selectonemenu.SelectOneMenu;
 import org.primefaces.component.selectoneradio.SelectOneRadio;
+import org.primefaces.component.slider.Slider;
 import org.primefaces.component.spinner.Spinner;
+import org.primefaces.component.texteditor.TextEditor;
 import org.primefaces.component.tristatecheckbox.TriStateCheckbox;
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
@@ -21,6 +26,7 @@ import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
 import org.skyve.impl.metadata.module.ModuleImpl;
 import org.skyve.impl.metadata.view.ViewImpl;
+import org.skyve.impl.metadata.view.widget.bound.tabular.DataGrid;
 import org.skyve.impl.sail.execution.TestDataEnterViewVisitor;
 import org.skyve.impl.sail.execution.pf.PrimeFacesAutomationContext;
 import org.skyve.impl.sail.execution.pf.PrimeFacesGenerateEditContext;
@@ -37,7 +43,6 @@ import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.Module.DocumentRef;
 import org.skyve.metadata.module.query.MetaDataQueryDefinition;
 import org.skyve.metadata.sail.language.Step;
-import org.skyve.metadata.sail.language.step.TestSuccess;
 import org.skyve.metadata.sail.language.step.TestValue;
 import org.skyve.metadata.sail.language.step.context.PushEditContext;
 import org.skyve.metadata.sail.language.step.context.PushListContext;
@@ -64,6 +69,12 @@ import org.skyve.metadata.sail.language.step.interaction.lookup.LookupDescriptio
 import org.skyve.metadata.sail.language.step.interaction.lookup.LookupDescriptionEdit;
 import org.skyve.metadata.sail.language.step.interaction.lookup.LookupDescriptionNew;
 import org.skyve.metadata.sail.language.step.interaction.lookup.LookupDescriptionPick;
+import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateCalendar;
+import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateEdit;
+import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateLink;
+import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateList;
+import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateMap;
+import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateTree;
 import org.skyve.metadata.user.User;
 import org.skyve.metadata.view.View.ViewType;
 import org.skyve.metadata.view.model.list.ListModel;
@@ -71,7 +82,11 @@ import org.skyve.util.Binder.TargetMetaData;
 import org.skyve.util.DataBuilder;
 import org.skyve.util.test.SkyveFixture.FixtureType;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+import jakarta.faces.component.UICommand;
 import jakarta.faces.component.UIComponent;
+import jakarta.faces.component.html.HtmlInputHidden;
 import util.sail.commands.impl.PrimeFacesButtonCommand;
 import util.sail.commands.impl.PrimeFacesCheckboxCommand;
 import util.sail.commands.impl.PrimeFacesDataGridButtonCommand;
@@ -127,6 +142,72 @@ public class PrimeFacesInterpretedWebDriverExecutor extends InterpretedWebDriver
 		newContext.generate(new PrimeFacesGenerateEditContext(push, componentBuilder, layoutBuilder));
 	}
 	
+	/**
+	 * Opens the list and waits for it to load.
+	 *
+	 * @param list	the step
+	 */
+	@Override
+	public void executeNavigateList(NavigateList list) {
+		super.executeNavigateList(list);
+		selenide.waitForAjaxResponse();
+	}
+
+	/**
+	 * Opens the edit view and waits for it to load.
+	 *
+	 * @param edit	the step
+	 */
+	@Override
+	public void executeNavigateEdit(NavigateEdit edit) {
+		super.executeNavigateEdit(edit);
+		selenide.waitForAjaxResponse();
+	}
+
+	/**
+	 * Opens the map ({@code external/map.xhtml}) and waits for it to load.
+	 *
+	 * @param map	the step
+	 */
+	@Override
+	public void executeNavigateMap(NavigateMap map) {
+		super.executeNavigateMap(map);
+		selenide.waitForAjaxResponse();
+	}
+
+	/**
+	 * Opens the link and waits for it to load.
+	 *
+	 * @param link	the step
+	 */
+	@Override
+	public void executeNavigateLink(NavigateLink link) {
+		super.executeNavigateLink(link);
+		selenide.waitForAjaxResponse();
+	}
+
+	/**
+	 * Fails: the PrimeFaces UX/UIs have no tree page (the router has no route for {@code a=t}, so it shows the home page).
+	 *
+	 * @param tree	the step
+	 */
+	@Override
+	public void executeNavigateTree(NavigateTree tree) {
+		throw new UnsupportedOperationException("<navigateTree /> is not available in PrimeFaces: " +
+													"the router has no tree page (a=t) for the PrimeFaces UX/UIs");
+	}
+
+	/**
+	 * Fails: the PrimeFaces UX/UIs have no calendar page (the router has no route for {@code a=c}, so it shows the home page).
+	 *
+	 * @param calendar	the step
+	 */
+	@Override
+	public void executeNavigateCalendar(NavigateCalendar calendar) {
+		throw new UnsupportedOperationException("<navigateCalendar /> is not available in PrimeFaces: " +
+													"the router has no calendar page (a=c) for the PrimeFaces UX/UIs");
+	}
+
 	@Override
 	public void executeTabSelect(TabSelect tabSelect) {
 		PrimeFacesAutomationContext context = peek();
@@ -193,6 +274,13 @@ public class PrimeFacesInterpretedWebDriverExecutor extends InterpretedWebDriver
 		}
 	}
 
+	/**
+	 * Enters a value into the first enabled, displayed widget for the binding. Combos and radios take a zero-based index,
+	 * check boxes take true or false, sliders take a number, rich text and HTML editors take plain text,
+	 * and other widgets take the text a user would type.
+	 *
+	 * @param dataEnter	the step
+	 */
 	@SuppressWarnings("null") // checks values the annotations say are non-null
 	@Override
 	public void executeDataEnter(DataEnter dataEnter) {
@@ -205,51 +293,238 @@ public class PrimeFacesInterpretedWebDriverExecutor extends InterpretedWebDriver
 					String.format("<dataEnter /> with binding [%s] is not supported or is not on the view", identifier));
 		}
 
+		// Never replace with a new line as chrome under test will trip the default button on the form
+		String value = dataEnter.getValue();
+		if (value != null) {
+			value = value.replace("\n", " ");
+		}
+
 		boolean success = false;
 		for (UIComponent component : components) {
 			String clientId = PrimeFacesAutomationContext.clientId(component);
-			boolean text = component instanceof InputText
-					|| component instanceof InputTextarea
-					|| component instanceof Password
-					|| component instanceof InputMask;
-			boolean selectOne = component instanceof SelectOneMenu;
-			boolean radio = component instanceof SelectOneRadio;
-			boolean checkbox = component instanceof SelectBooleanCheckbox || component instanceof TriStateCheckbox;
-			boolean _input = component instanceof Spinner || component instanceof DatePicker;
-			
-			// TODO implement colour picker testing
-			if (component instanceof ColorPicker) {
-				selenide.trace(String.format("Ignore colour picker %s (%s) for now", identifier, clientId));
-				return;
-			}
-			
-			// Never replace with a new line as chrome under test will trip the default button on the form
-			String value = dataEnter.getValue();
-			if (value != null) {
-				value = value.replace("\n", " ");
-			}
-			
-			// if exists and is not disabled
 			selenide.trace(String.format("set %s (%s) to %s", identifier, clientId, value));
 
-			if (checkbox) {
-				success = success || selenide.checkbox(new PrimeFacesCheckboxCommand(clientId, Boolean.valueOf(value)));
-			} else if (text) {
-				success = success || selenide.text(new PrimeFacesTextCommand(clientId, value, false));
-			} else if (_input) {
-				success = success || selenide._input(clientId, value, false);
-			} else if (selectOne) {
-				success = success || selenide.selectOne(new PrimeFacesSelectOneCommand(clientId, Integer.parseInt(value)));
-			} else if (radio) {
-				success = success || selenide.radio(new PrimeFacesRadioCommand(clientId, Integer.parseInt(value)));
+			if (component instanceof SelectBooleanCheckbox || component instanceof TriStateCheckbox) {
+				success = selenide.checkbox(new PrimeFacesCheckboxCommand(clientId, Boolean.valueOf(value)));
+			} else if (component instanceof ColorPicker) {
+				success = selenide.colourPicker(clientId, value);
+			} else if (component instanceof InputText
+					|| component instanceof InputTextarea
+					|| component instanceof Password
+					|| component instanceof InputMask) {
+				success = selenide.text(new PrimeFacesTextCommand(clientId, value, false));
+			} else if (component instanceof Spinner || component instanceof DatePicker) {
+				success = selenide._input(clientId, value, false);
+			} else if (component instanceof SelectOneMenu) {
+				success = selenide.selectOne(new PrimeFacesSelectOneCommand(clientId, index(identifier, value)));
+			} else if (component instanceof SelectOneRadio) {
+				success = selenide.radio(new PrimeFacesRadioCommand(clientId, index(identifier, value)));
+			} else if (component instanceof TextEditor) {
+				success = selenide.textEditor(clientId, value);
+			} else if (component instanceof AutoComplete) {
+				throw new MetaDataException(String.format("<dataEnter /> with binding [%s] is a lookup description: " +
+															"use <lookupDescriptionAutoComplete /> or <lookupDescriptionPick />",
+															identifier));
+			} else {
+				Slider slider = findChild(component, Slider.class);
+				if (slider == null) {
+					throw new MetaDataException(String.format("<dataEnter /> with binding [%s] is a %s, which PrimeFaces SAIL cannot enter data into",
+																identifier,
+																component.getClass().getSimpleName()));
+				}
+				success = selenide.slider(PrimeFacesAutomationContext.clientId(slider), value);
+			}
+
+			if (success) {
+				break;
 			}
 		}
 
 		if (!success) {
-			throw new DomainException("Data entry failed");
+			throw new DomainException(String.format("Data entry failed: binding [%s] has no displayed, enabled widget to enter '%s' into",
+														identifier,
+														value));
 		}
 	}
 
+	/**
+	 * Parses a combo or radio index.
+	 */
+	private static int index(@Nonnull String binding, @Nullable String value) {
+		try {
+			return Integer.parseInt(Objects.requireNonNull(value));
+		}
+		catch (@SuppressWarnings("unused") NumberFormatException | NullPointerException e) {
+			throw new MetaDataException(String.format("<dataEnter /> with binding [%s] needs a zero-based index for a combo or radio, not '%s'",
+														binding,
+														value));
+		}
+	}
+
+	/**
+	 * Finds the first descendant (or the component itself) of the given type.
+	 */
+	private static @Nullable <T extends UIComponent> T findChild(@Nonnull UIComponent component, @Nonnull Class<T> type) {
+		if (type.isInstance(component)) {
+			return type.cast(component);
+		}
+		for (UIComponent child : component.getChildren()) {
+			T result = findChild(child, type);
+			if (result != null) {
+				return result;
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * Compares the value shown by each widget for the binding that is on the page with the expected value,
+	 * honouring the test strategy. Text widgets compare their text; combos and radios match the selected
+	 * option's zero-based index (as {@code <dataEnter />} takes), its value or its label; check boxes compare
+	 * true, false or an empty value (unset); rich text and HTML editors match their plain text or their HTML;
+	 * colours compare ignoring case.
+	 *
+	 * @param test	the step
+	 */
+	@SuppressWarnings("null") // a null here fails the test
+	@Override
+	public void executeTestValue(TestValue test) {
+		if (isNoneStrategy()) {
+			return;
+		}
+		PrimeFacesAutomationContext context = peek();
+		String identifier = test.getIdentifier(context);
+
+		List<UIComponent> components = context.getFacesComponents(identifier);
+		if (components == null) {
+			throw new MetaDataException(String.format("<testValue /> with binding [%s] is not supported or is not on the view", identifier));
+		}
+
+		String expected = test.getValue();
+		expected = (expected == null) ? "" : expected.replace("\n", " ").trim();
+
+		boolean found = false;
+		for (UIComponent component : components) {
+			String clientId = PrimeFacesAutomationContext.clientId(component);
+			boolean ignoreCase = (component instanceof ColorPicker);
+			List<String> actuals = actualValues(component, clientId);
+			if (actuals == null) { // not on the page
+				continue;
+			}
+			found = true;
+			selenide.trace(String.format("test %s (%s) is %s", identifier, clientId, expected));
+
+			boolean matched = false;
+			for (String actual : actuals) {
+				String trimmed = (actual == null) ? "" : actual.trim();
+				if (ignoreCase ? trimmed.equalsIgnoreCase(expected) : trimmed.equals(expected)) {
+					matched = true;
+					break;
+				}
+			}
+			final String expectedValue = expected;
+			check(matched, () -> String.format("expected [%s] to be '%s' but it was %s", identifier, expectedValue, describeActuals(actuals)));
+		}
+
+		if (! found) {
+			throw new DomainException(String.format("<testValue /> with binding [%s] has no widget on the page", identifier));
+		}
+	}
+
+	private static @Nonnull String describeActuals(@Nonnull List<String> actuals) {
+		if (actuals.size() == 1) {
+			return "'" + actuals.get(0) + "'";
+		}
+		StringBuilder result = new StringBuilder(64);
+		for (String actual : actuals) {
+			result.append(result.isEmpty() ? "'" : " / '").append(actual).append('\'');
+		}
+		return result.toString();
+	}
+
+	/**
+	 * Reads the representations of a widget's value that a {@code <testValue />} can match.
+	 *
+	 * @return the values, or null if the widget is not on the page
+	 */
+	private @Nullable List<String> actualValues(@Nonnull UIComponent component, @Nonnull String clientId) {
+		List<String> result = new ArrayList<>(3);
+		if (component instanceof SelectBooleanCheckbox || component instanceof TriStateCheckbox) {
+			if (selenide.inputValue(clientId + "_input") == null) {
+				return null;
+			}
+			Boolean value = selenide.checkboxValue(clientId);
+			result.add((value == null) ? "" : value.toString());
+		} else if (component instanceof SelectOneMenu) {
+			List<String> values = selenide.selectOneValues(clientId);
+			if (values == null) {
+				return null;
+			}
+			result.addAll(values);
+		} else if (component instanceof SelectOneRadio) {
+			List<String> values = selenide.radioValues(clientId);
+			if (values == null) {
+				return null;
+			}
+			result.addAll(values);
+		} else if (component instanceof TextEditor) {
+			List<String> values = selenide.textEditorValues(clientId);
+			if (values == null) {
+				return null;
+			}
+			result.addAll(values);
+		} else if (component instanceof Spinner || component instanceof DatePicker || component instanceof AutoComplete) {
+			String value = selenide.inputValue(clientId + "_input");
+			if (value == null) {
+				return null;
+			}
+			result.add(value);
+		} else {
+			Slider slider = findChild(component, Slider.class);
+			HtmlInputHidden hidden = (slider == null) ? null : findChild(component, HtmlInputHidden.class);
+			String value = selenide.inputValue((hidden == null) ? clientId : PrimeFacesAutomationContext.clientId(hidden));
+			if (value == null) {
+				return null;
+			}
+			result.add(value);
+		}
+		return result;
+	}
+
+	/**
+	 * Checks that the element with the client id shows the label of the component that this JVM built, so a click cannot
+	 * land on another button. The ids are generated in order, so they shift when the page and this JVM's view differ
+	 * (for example when the browser's user cannot see an action).
+	 *
+	 * @throws IllegalStateException	if the labels differ
+	 */
+	private void verifyLabel(@Nonnull UIComponent component, @Nonnull String clientId, @Nonnull String tagName) {
+		if ((! (component instanceof UICommand)) || (component.getValueExpression("value") != null)) {
+			return;
+		}
+		Object value = ((UICommand) component).getValue();
+		if (! (value instanceof String expected)) {
+			return;
+		}
+		expected = expected.replaceAll("<[^>]*>", "").replaceAll("\\s+", " ").trim();
+		String actual = selenide.label(clientId);
+		if (expected.isEmpty() || (actual == null) || actual.isEmpty()) {
+			return;
+		}
+		if (! expected.equalsIgnoreCase(actual)) {
+			throw new IllegalStateException(String.format("<%s /> expected the button %s to be '%s' but the page shows '%s': " +
+															"the page's view differs from the view SAIL built (user permissions, customer or UX/UI)",
+															tagName,
+															clientId,
+															expected,
+															actual));
+		}
+	}
+
+	/**
+	 * Clicks the first clickable component for the step, waits, then checks for success unless the step's
+	 * {@code testSuccess} is false.
+	 */
 	private void button(Step button, String tagName, boolean ajax, boolean confirm, Boolean testSuccess) {
 		PrimeFacesAutomationContext context = peek();
 		@SuppressWarnings("null") // uses a nullable result where the API expects non-null
@@ -266,20 +541,25 @@ public class PrimeFacesInterpretedWebDriverExecutor extends InterpretedWebDriver
 			String clientId = PrimeFacesAutomationContext.clientId(component);
 
 			selenide.trace(String.format("click [%s] (%s)", tagName, clientId));
-			boolean successful = selenide.button(new PrimeFacesButtonCommand(clientId, ajax, confirm));
-
-			if (successful && !Boolean.FALSE.equals(testSuccess)) { // true or null (defaults on)
-				executeTestSuccess(new TestSuccess());
+			verifyLabel(component, clientId, tagName);
+			success = selenide.button(new PrimeFacesButtonCommand(clientId, ajax, confirm));
+			if (success) {
+				break;
 			}
-
-			success = success || successful;
 		}
 
 		if (!success) {
-			throw new DomainException("Could not click button");
+			throw new DomainException(String.format("Could not click button [%s]: it is not on the page or is disabled", tagName));
+		}
+		if (!Boolean.FALSE.equals(testSuccess)) { // true or null (defaults on)
+			checkSuccess(String.format("expected no error messages after [%s]", tagName));
 		}
 	}
 
+	/**
+	 * Clicks the first clickable component for the step, waits for the next page, then checks for success unless
+	 * the step's {@code testSuccess} is false.
+	 */
 	private void redirectButton(Step button, String tagName, boolean confirm, Boolean testSuccess) {
 		PrimeFacesAutomationContext context = peek();
 		@SuppressWarnings("null") // uses a nullable result where the API expects non-null
@@ -296,17 +576,18 @@ public class PrimeFacesInterpretedWebDriverExecutor extends InterpretedWebDriver
 			String clientId = PrimeFacesAutomationContext.clientId(component);
 
 			selenide.trace(String.format("click [%s] (%s)", tagName, clientId));
-			boolean successful = selenide.redirectButton(clientId, confirm);
-
-			if (successful && !Boolean.FALSE.equals(testSuccess)) { // true or null (defaults on)
-				executeTestSuccess(new TestSuccess());
+			verifyLabel(component, clientId, tagName);
+			success = selenide.redirectButton(clientId, confirm);
+			if (success) {
+				break;
 			}
-
-			success = success || successful;
 		}
 
 		if (!success) {
-			throw new DomainException("Could not click button");
+			throw new DomainException(String.format("Could not click button [%s]: it is not on the page or is disabled", tagName));
+		}
+		if (!Boolean.FALSE.equals(testSuccess)) { // true or null (defaults on)
+			checkSuccess(String.format("expected no error messages after [%s]", tagName));
 		}
 	}
 
@@ -370,14 +651,28 @@ public class PrimeFacesInterpretedWebDriverExecutor extends InterpretedWebDriver
 		lookupDescription(pick, pick.getBinding(), pick.getRow(), null);
 	}
 
+	/**
+	 * Fails: a PrimeFaces lookup description is an auto complete with a drop down, and has no New gesture.
+	 *
+	 * @param nu	the step
+	 */
 	@Override
 	public void executeLookupDescriptionNew(LookupDescriptionNew nu) {
-		throw new IllegalStateException("This interaction is unavailable in PrimeFaces");
+		throw new UnsupportedOperationException(String.format("<lookupDescriptionNew /> on [%s] is not available in PrimeFaces: " +
+																"its lookup description is an auto complete with no New button",
+																nu.getBinding()));
 	}
 
+	/**
+	 * Fails: a PrimeFaces lookup description is an auto complete with a drop down, and has no Edit gesture.
+	 *
+	 * @param edit	the step
+	 */
 	@Override
 	public void executeLookupDescriptionEdit(LookupDescriptionEdit edit) {
-		throw new IllegalStateException("This interaction is unavailable in PrimeFaces");
+		throw new UnsupportedOperationException(String.format("<lookupDescriptionEdit /> on [%s] is not available in PrimeFaces: " +
+																"its lookup description is an auto complete with no Edit button",
+																edit.getBinding()));
 	}
 
 	private void lookupDescription(Step step, String binding, Integer row, String search) {
@@ -401,6 +696,12 @@ public class PrimeFacesInterpretedWebDriverExecutor extends InterpretedWebDriver
 				selenide.trace(String.format("Auto complete with search '%s' on lookup description [%s] (%s)", search, binding, clientId));
 				success = success || selenide.lookupDescriptionBySearch(new PrimeFacesLookupDescriptionBySearchCommand(clientId, search));
 			}
+		}
+
+		if (! success) {
+			throw new DomainException(String.format("<%s /> with binding [%s] has no lookup on the page",
+														step.getClass().getSimpleName(),
+														binding));
 		}
 	}
 
@@ -448,14 +749,38 @@ public class PrimeFacesInterpretedWebDriverExecutor extends InterpretedWebDriver
 		dataGridGesture(remove, remove.getBinding(), remove.getRow());
 	}
 
+	/**
+	 * Selects a row of a data grid that has a {@code selectedIdBinding}.
+	 * Fails for other grids: in PrimeFaces, selecting a row of them zooms into it, so use {@code <dataGridZoom />}.
+	 *
+	 * @param select	the step
+	 */
 	@Override
 	public void executeDataGridSelect(DataGridSelect select) {
-		dataGridGesture(select, select.getBinding(), select.getRow());
+		String binding = select.getBinding();
+		PrimeFacesAutomationContext context = peek();
+		@SuppressWarnings("null") // a null here fails the test
+		List<Object> widgets = context.getSkyveWidgets(binding);
+		if ((widgets != null) && (! widgets.isEmpty()) &&
+				(widgets.get(0) instanceof DataGrid grid) && (grid.getSelectedIdBinding() == null)) {
+			throw new UnsupportedOperationException(String.format("<dataGridSelect /> on [%s] is not available in PrimeFaces: " +
+																	"the grid has no selectedIdBinding, so selecting a row zooms into it; use <dataGridZoom />",
+																	binding));
+		}
+		dataGridGesture(select, binding, select.getRow());
 	}
 
+	/**
+	 * Fails: PrimeFaces data grids have no row edit gesture. An inline grid shows its cells as inputs,
+	 * and other grids zoom into a row ({@code <dataGridZoom />}).
+	 *
+	 * @param edit	the step
+	 */
 	@Override
 	public void executeDataGridEdit(DataGridEdit edit) {
-		throw new IllegalStateException("This interaction is unavailable in PrimeFaces");
+		throw new UnsupportedOperationException(String.format("<dataGridEdit /> on [%s] is not available in PrimeFaces: " +
+																"its data grids have no row edit gesture; use <dataGridZoom />",
+																edit.getBinding()));
 	}
 
 	private void dataGridGesture(Step step, String binding, Integer row) {
@@ -470,9 +795,18 @@ public class PrimeFacesInterpretedWebDriverExecutor extends InterpretedWebDriver
 					.getSimpleName(), binding));
 		}
 
+		// An inline grid adds its row in place with ajax; other grids zoom into a new view
+		List<Object> gridWidgets = context.getSkyveWidgets(binding);
+		boolean inline = (gridWidgets != null) && (! gridWidgets.isEmpty()) &&
+							(gridWidgets.get(0) instanceof DataGrid grid) && Boolean.TRUE.equals(grid.getInline());
+
+		boolean success = false;
 		for (UIComponent dataGridComponent : dataGridComponents) {
+			if (success) {
+				break;
+			}
 			String dataGridClientId = PrimeFacesAutomationContext.clientId(dataGridComponent);
-			boolean ajax = false;
+			boolean ajax = inline;
 
 			if (row != null) {
 				if (step instanceof DataGridZoom) {
@@ -494,22 +828,30 @@ public class PrimeFacesInterpretedWebDriverExecutor extends InterpretedWebDriver
 					String buttonClientId = row != null
 							? PrimeFacesAutomationContext.clientId(buttonComponent, row)
 							: PrimeFacesAutomationContext.clientId(buttonComponent);
-					if (buttonClientId.startsWith(dataGridClientId)) {
+					if ((! success) && buttonClientId.startsWith(dataGridClientId)) {
 						if (step instanceof DataGridSelect) {
 							if (row == null) {
 								throw new MetaDataException("No row defined in DataGridSelect");
 							}
-							selenide.dataGridSelect(new PrimeFacesDataGridSelectCommand(dataGridClientId, row.intValue()));
+							success = selenide.dataGridSelect(new PrimeFacesDataGridSelectCommand(dataGridClientId, row.intValue()));
 						} else {
-							selenide.dataGridButton(new PrimeFacesDataGridButtonCommand(dataGridClientId, buttonClientId, ajax));
+							success = selenide.dataGridButton(new PrimeFacesDataGridButtonCommand(dataGridClientId, buttonClientId, ajax));
 						}
 					}
 				}
 			}
 		}
 
+		if (! success) {
+			throw new DomainException(String.format("<%s /> with binding [%s] could not be done: the grid, %s or its button is not on the page or is disabled",
+														step.getClass().getSimpleName(),
+														binding,
+														(row == null) ? "it" : "row " + row));
+		}
+		checkSuccess(String.format("expected no error messages after <%s />", step.getClass().getSimpleName()));
+
 		// Determine the document of the edit view to push
-		if (step instanceof DataGridNew || step instanceof DataGridZoom) {
+		if ((! inline) && (step instanceof DataGridNew || step instanceof DataGridZoom)) {
 			Customer c = CORE.getUser().getCustomer();
 			@SuppressWarnings("null") // uses a nullable result where the API expects non-null
 			Module m = c.getModule(context.getModuleName());
@@ -549,8 +891,26 @@ public class PrimeFacesInterpretedWebDriverExecutor extends InterpretedWebDriver
 		push.execute(this);
 	}
 
+	/**
+	 * Selects a row of a list grid that has a {@code selectedIdBinding}.
+	 * Fails for other lists: in PrimeFaces, selecting a row of them zooms into it, so use {@code <listGridZoom />}.
+	 *
+	 * @param select	the step
+	 */
 	@Override
 	public void executeListGridSelect(ListGridSelect select) {
+		PrimeFacesAutomationContext context = peek();
+		@SuppressWarnings("null") // a null here fails the test
+		String identifier = select.getIdentifier(context);
+		@SuppressWarnings("null") // a null here fails the test
+		List<Object> widgets = context.getSkyveWidgets(identifier);
+		if ((widgets != null) && (! widgets.isEmpty()) &&
+				(widgets.get(0) instanceof org.skyve.impl.metadata.view.widget.bound.tabular.ListGrid grid) &&
+				(grid.getSelectedIdBinding() == null)) {
+			throw new UnsupportedOperationException(String.format("<listGridSelect /> on [%s] is not available in PrimeFaces: " +
+																	"the list has no selectedIdBinding, so selecting a row zooms into it; use <listGridZoom />",
+																	identifier.substring(0, identifier.lastIndexOf('.'))));
+		}
 		listGridGesture(select, select.getRow());
 	}
 
@@ -568,7 +928,11 @@ public class PrimeFacesInterpretedWebDriverExecutor extends InterpretedWebDriver
 					.getSimpleName(), listGridIdentifier));
 		}
 
+		boolean success = false;
 		for (UIComponent listGridComponent : listGridComponents) {
+			if (success) {
+				break;
+			}
 			List<UIComponent> buttonComponents = context.getFacesComponents(buttonIdentifier);
 			if (buttonComponents != null) {
 				String listGridClientId = PrimeFacesAutomationContext.clientId(listGridComponent);
@@ -590,20 +954,28 @@ public class PrimeFacesInterpretedWebDriverExecutor extends InterpretedWebDriver
 					String buttonClientId = row != null
 							? PrimeFacesAutomationContext.clientId(buttonComponent, row)
 							: PrimeFacesAutomationContext.clientId(buttonComponent);
-					if (buttonClientId.startsWith(listGridClientId)) {
+					if ((! success) && buttonClientId.startsWith(listGridClientId)) {
 						if (step instanceof ListGridSelect) {
 							if (row == null) {
 								throw new MetaDataException("No row defined in ListGridSelect");
 							}
 
-							selenide.listGridSelect(new PrimeFacesListGridSelectCommand(listGridClientId, row.intValue()));
+							success = selenide.listGridSelect(new PrimeFacesListGridSelectCommand(listGridClientId, row.intValue()));
 						} else {
-							selenide.listGridButton(new PrimeFacesListGridButtonCommand(listGridClientId, buttonClientId, false));
+							success = selenide.listGridButton(new PrimeFacesListGridButtonCommand(listGridClientId, buttonClientId, false));
 						}
 					}
 				}
 			}
 		}
+
+		if (! success) {
+			throw new DomainException(String.format("<%s /> on [%s] could not be done: the list, %s or its button is not on the page or is disabled",
+														step.getClass().getSimpleName(),
+														listGridIdentifier,
+														(row == null) ? "it" : "row " + row));
+		}
+		checkSuccess(String.format("expected no error messages after <%s />", step.getClass().getSimpleName()));
 	}
 	
 	@SuppressWarnings("null") // a null here fails the test; uses a nullable result where the API expects non-null; checks values the annotations say are non-null
@@ -655,8 +1027,4 @@ public class PrimeFacesInterpretedWebDriverExecutor extends InterpretedWebDriver
 		return result;
 	}
 
-	@Override
-	public void executeTestValue(TestValue test) {
-		// TODO Auto-generated method stub
-	}
 }

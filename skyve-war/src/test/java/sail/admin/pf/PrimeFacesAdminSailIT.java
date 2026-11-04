@@ -1,7 +1,6 @@
 package sail.admin.pf;
 
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.Assertions;
 
 import util.AbstractPrimeFacesInterpretedSail;
 import util.sail.BrowserConfiguration;
@@ -13,6 +12,8 @@ import util.sail.Devices;
  * <p>
  * Runs against {@code -Dsail.baseUrl} (default {@value BrowserConfiguration#DEFAULT_BASE_URL}),
  * headless unless {@code -Dsail.headless=false}.
+ * The script's test strategy decides how failures are reported; the test fails with an {@link AssertionError}
+ * naming each failed interaction and step.
  */
 class PrimeFacesAdminSailIT extends AbstractPrimeFacesInterpretedSail {
 
@@ -24,6 +25,6 @@ class PrimeFacesAdminSailIT extends AbstractPrimeFacesInterpretedSail {
 
 	@Test
 	void test() {
-		Assertions.assertDoesNotThrow(() -> sailResource("sail/admin/pf/pf-admin-sail.xml"));
+		sailResource("sail/admin/pf/pf-admin-sail.xml");
 	}
 }

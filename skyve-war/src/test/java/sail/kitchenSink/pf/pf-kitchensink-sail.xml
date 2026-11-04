@@ -1,19 +1,206 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!--
+	PrimeFaces SAIL conformance suite: exercises every op-code that applies to PrimeFaces and every kitchen sink widget that
+	SAIL can enter data into, checking values with testValue after data entry.
+	Not here, as PrimeFaces has no such UI (the executor fails them with a reason):
+	navigateTree and navigateCalendar (no a=t or a=c page), lookupDescriptionNew and lookupDescriptionEdit (the lookup is an
+	auto complete), dataGridEdit (no row edit gesture).
+	dataGridSelect and listGridSelect need a grid with a selectedIdBinding (selecting a row of other grids zooms in PrimeFaces);
+	the kitchen sink has none.
+	Not here, as the language cannot express them yet: content upload, contentSignature, list and check membership,
+	data entry into inline grid cells.
+-->
 <automation uxui="tablet"
 			userAgentType="tablet"
-			testStrategy="Verify"
+			testStrategy="Assert"
 			xsi:schemaLocation="http://www.skyve.org/xml/sail ../../../../main/java/schemas/sail.xsd"
 			xmlns="http://www.skyve.org/xml/sail"
 			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<interaction name="Login">
 		<method>
+			<comment>A bad password is refused, then admin signs in</comment>
+			<login user="admin" password="not the password" />
+			<testFailure />
 			<login user="admin" password="admin" />
+			<testSuccess />
 		</method>
 	</interaction>
-	<interaction name="Kitchen Sink">
+	<interaction name="Lookup values: create one to look up">
+		<method>
+			<navigateList module="kitchensink" document="LookupDescription" />
+			<listGridNew module="kitchensink" document="LookupDescription" />
+			<dataEnter binding="description" value="SAIL lookup value" />
+			<testValue binding="description" value="SAIL lookup value" />
+			<save />
+			<testSuccess />
+			<testValue binding="description" value="SAIL lookup value" />
+			<ok />
+		</method>
+	</interaction>
+	<interaction name="Kitchen Sink: generated test data">
 		<method>
 			<navigateEdit module="kitchensink" document="KitchenSink" />
 			<testDataEnter />
+		</method>
+	</interaction>
+	<interaction name="Kitchen Sink: every widget">
+		<method>
+			<navigateEdit module="kitchensink" document="KitchenSink" />
+			<tabSelect path="Widgets" />
+			<dataEnter binding="booleanFlag" value="true" />
+			<testValue binding="booleanFlag" value="true" />
+			<dataEnter binding="colour" value="#336699" />
+			<testValue binding="colour" value="#336699" />
+			<dataEnter binding="date" value="07-Nov-2025" />
+			<testValue binding="date" value="07-Nov-2025" />
+			<dataEnter binding="dateTime" value="07-Nov-2025 15:38" />
+			<testValue binding="dateTime" value="07-Nov-2025 15:38" />
+			<dataEnter binding="decimal10" value="0.0123456789" />
+			<testValue binding="decimal10" value="0.0123456789" />
+			<dataEnter binding="decimal2" value="0.25" />
+			<testValue binding="decimal2" value="0.25" />
+			<dataEnter binding="decimal5" value="0.12345" />
+			<testValue binding="decimal5" value="0.12345" />
+			<comment>Combos and radios take a zero-based index; testValue matches the index, the code or the label</comment>
+			<dataEnter binding="combo" value="2" />
+			<testValue binding="combo" value="two" />
+			<dataEnter binding="radio" value="2" />
+			<testValue binding="radio" value="three" />
+			<dataEnter binding="geometry" value="POINT (138.9596428009031 -34.521214140240495)" />
+			<testValue binding="geometry" value="POINT (138.9596428009031 -34.521214140240495)" />
+			<dataEnter binding="id" value="01949764-173c-7f8f-8b2a-0e19f7e52650" />
+			<testValue binding="id" value="01949764-173c-7f8f-8b2a-0e19f7e52650" />
+			<dataEnter binding="normalInteger" value="42" />
+			<testValue binding="normalInteger" value="42" />
+			<dataEnter binding="spinner" value="5" />
+			<testValue binding="spinner" value="5" />
+			<dataEnter binding="slider" value="30" />
+			<testValue binding="slider" value="30" />
+			<dataEnter binding="longInteger" value="111" />
+			<testValue binding="longInteger" value="111" />
+			<dataEnter binding="html" value="SAIL HTML" />
+			<testValue binding="html" value="SAIL HTML" />
+			<dataEnter binding="markup" value="Test paragraph" />
+			<testValue binding="markup" value="Test paragraph" />
+			<dataEnter binding="memo" value="This is a test memo field." />
+			<testValue binding="memo" value="This is a test memo field." />
+			<dataEnter binding="text" value="Sample text entry" />
+			<testValue binding="text" value="Sample text entry" />
+			<dataEnter binding="time" value="11:11" />
+			<testValue binding="time" value="11:11" />
+			<dataEnter binding="timestamp" value="07-Nov-2025 15:43:16" />
+			<testValue binding="timestamp" value="07-Nov-2025 15:43:16" />
+			<lookupDescriptionPick binding="lookupDescription" row="0" />
+			<lookupDescriptionAutoComplete binding="lookupDescription" search="SAIL lookup" />
+			<testValue binding="lookupDescription" value="SAIL lookup value" />
+			<tabSelect path="Data Grids" />
+			<dataGridNew binding="containerGrid" />
+			<dataEnter binding="url" value="https://example.com" />
+			<testValue binding="url" value="https://example.com" />
+			<zoomOut />
+			<dataGridZoom binding="containerGrid" row="0" />
+			<testValue binding="url" value="https://example.com" />
+			<zoomOut />
+			<dataGridRemove binding="containerGrid" row="0" />
+			<dataGridNew binding="orderedGrid" />
+			<dataEnter binding="booleanFlag" value="true" />
+			<dataEnter binding="colour" value="#993366" />
+			<dataEnter binding="date" value="07-Nov-2025" />
+			<zoomOut />
+			<dataGridZoom binding="orderedGrid" row="0" />
+			<testValue binding="colour" value="#993366" />
+			<testValue binding="date" value="07-Nov-2025" />
+			<remove />
+			<comment>An inline grid adds and removes rows in place</comment>
+			<dataGridNew binding="inlineGrid" />
+			<dataGridRemove binding="inlineGrid" row="0" />
+			<tabSelect path="List/Check Membership" />
+			<tabSelect path="Charts" />
+			<tabSelect path="Comparison" />
+			<tabSelect path="ListGrid" />
+			<tabSelect path="Map" />
+			<tabSelect path="Tree Grid" />
+			<tabSelect path="Widgets" />
+			<comment>The values survive the zooms, which round trip to the server</comment>
+			<testValue binding="booleanFlag" value="true" />
+			<testValue binding="colour" value="#336699" />
+			<testValue binding="decimal2" value="0.25" />
+			<testValue binding="combo" value="two" />
+			<testValue binding="radio" value="three" />
+			<testValue binding="geometry" value="POINT (138.9596428009031 -34.521214140240495)" />
+			<testValue binding="slider" value="30" />
+			<testValue binding="markup" value="Test paragraph" />
+			<testValue binding="lookupDescription" value="SAIL lookup value" />
+			<comment>Kitchen sink is transient and the dev role cannot save it</comment>
+			<cancel />
+		</method>
+	</interaction>
+	<interaction name="Actions Fixture: actions, buttons and change events">
+		<method>
+			<navigateEdit module="kitchensink" document="ActionsFixture" />
+			<action name="RunFromToolbar" />
+			<testValue binding="outcome" value="Run From Toolbar ran" />
+			<action name="RunFromFormButton" />
+			<testValue binding="outcome" value="Run From Form Button ran" />
+			<tabSelect path="Tab button" />
+			<action name="RunFromTabButton" />
+			<testValue binding="outcome" value="Run From Tab Button ran" />
+			<action name="RunSharedFirst" />
+			<testValue binding="outcome" value="Run Shared ran" />
+			<dataEnter binding="eventText" value="changed" />
+			<testValue binding="outcome" value="Run From Event ran" />
+			<tabSelect path="Rows" />
+			<dataGridNew binding="rows" />
+			<dataEnter binding="name" value="SAIL row" />
+			<testValue binding="name" value="SAIL row" />
+			<zoomOut />
+			<dataGridZoom binding="rows" row="0" />
+			<testValue binding="name" value="SAIL row" />
+			<zoomOut />
+			<save />
+			<testSuccess />
+			<delete />
+		</method>
+	</interaction>
+	<interaction name="Escaping Fixture: zoom in">
+		<method>
+			<navigateEdit module="kitchensink" document="EscapingFixture" />
+			<dataEnter binding="text1" value="First" />
+			<dataEnter binding="text2" value="Second" />
+			<zoomIn binding="zoomTarget" />
+			<dataEnter binding="description" value="Zoomed in" />
+			<testValue binding="description" value="Zoomed in" />
+			<zoomOut />
+			<cancel />
+		</method>
+	</interaction>
+	<interaction name="Contexts, links, maps and scripts">
+		<method>
+			<clearContext />
+			<navigateLink href="?a=e&amp;m=kitchensink&amp;d=ActionsFixture" />
+			<comment>Say which view the link opened, so steps can find its widgets</comment>
+			<pushEditContext module="kitchensink" document="ActionsFixture" />
+			<action name="RunFromToolbar" />
+			<testValue binding="outcome" value="Run From Toolbar ran" />
+			<popContext />
+			<navigateLink href="?a=l&amp;m=kitchensink&amp;q=LookupDescription" />
+			<pushListContext module="kitchensink" document="LookupDescription" />
+			<listGridZoom module="kitchensink" document="LookupDescription" row="0" />
+			<testValue binding="description" value="SAIL lookup value" />
+			<popContext />
+			<popContext />
+			<navigateMap module="kitchensink" document="ListAttributes" geometryBinding="geometry" />
+			<testSuccess />
+			<execute>window.scrollTo(0, 0);</execute>
+			<pause millis="100" />
+		</method>
+	</interaction>
+	<interaction name="Lookup values: zoom and delete">
+		<method>
+			<navigateList module="kitchensink" document="LookupDescription" />
+			<listGridZoom module="kitchensink" document="LookupDescription" row="0" />
+			<testValue binding="description" value="SAIL lookup value" />
+			<delete />
 		</method>
 	</interaction>
 	<interaction name="Logout">

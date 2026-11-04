@@ -6,9 +6,16 @@ import java.nio.charset.StandardCharsets;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.skyve.impl.metadata.user.RoleImpl;
+import org.skyve.impl.metadata.user.UserImpl;
+import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.impl.web.faces.FacesUtil;
+import org.skyve.metadata.customer.Customer;
+import org.skyve.metadata.module.Module;
 import org.skyve.metadata.sail.language.Automation;
+import org.skyve.metadata.user.Role;
+import org.skyve.metadata.user.User;
 
 import jakarta.annotation.Nonnull;
 import util.sail.BrowserConfiguration;
@@ -66,9 +73,47 @@ public abstract class AbstractPrimeFacesInterpretedSail extends AbstractH2Test {
 		sail(automation);
 	}
 	
+	/**
+	 * Runs the automation. The PrimeFaces executor rebuilds each view's component tree in this JVM to find the
+	 * client ids of the widgets on the page, so it runs as a user with the same permissions as the bootstrap user
+	 * that the browser signs in as (every role of every module), not as the test's super user. Otherwise actions that
+	 * the browser's user cannot see (such as Save on a document they cannot create) would be in the tree, shift the
+	 * generated ids, and the executor would find the wrong elements.
+	 */
 	private void sail(Automation automation) {
+		AbstractPersistence persistence = AbstractPersistence.get();
+		User testUser = persistence.getUser();
+		persistence.setUser(bootstrapLikeUser(testUser));
 		try (FacesUtil.SailFacesContextScope ignored = FacesUtil.withSailFacesContextIfNeeded()) {
 			automation.execute(new PrimeFacesInterpretedWebDriverExecutor(selenium));
 		}
+		finally {
+			persistence.setUser(testUser);
+		}
+	}
+
+	/**
+	 * Creates a user of the test user's customer with every role of every module, as Skyve's bootstrap user has.
+	 *
+	 * @param testUser	the test's user, whose customer, name and id are copied
+	 * @return the user
+	 */
+	protected static @Nonnull UserImpl bootstrapLikeUser(@Nonnull User testUser) {
+		UserImpl result = new UserImpl();
+		result.setCustomerName(testUser.getCustomerName());
+		result.setName(testUser.getName());
+		result.setId(testUser.getId());
+		result.setContactId(testUser.getContactId());
+		result.setContactName(testUser.getContactName());
+		result.setDataGroupId(testUser.getDataGroupId());
+		result.setHomeModuleName(testUser.getHomeModuleName());
+		result.setLanguageTag(testUser.getLanguageTag());
+		Customer customer = testUser.getCustomer();
+		for (Module module : customer.getModules()) {
+			for (Role role : module.getRoles()) {
+				result.addRole((RoleImpl) role);
+			}
+		}
+		return result;
 	}
 }

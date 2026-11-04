@@ -12,10 +12,10 @@ import static com.codeborne.selenide.Selenide.$;
 
 
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
 
-import org.junit.Assert;
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.NoSuchElementException;
@@ -44,7 +44,7 @@ import util.sail.commands.impl.PrimeFacesTextCommand;
 /**
  * Selenide implementation for the PrimeFaces framework,
  * binding PrimeFaces-specific command types to provide typed, framework-specific UI automation capabilities.
- * 
+ *
  * @author mike
  */
 public class PrimeFacesSelenide extends Selenide<
@@ -60,7 +60,24 @@ public class PrimeFacesSelenide extends Selenide<
 	PrimeFacesTabCommand,
 	PrimeFacesTextCommand,
 	PrimeFacesSelectOneCommand> {
-	
+
+	/** How long to wait for an ajax request or a page to complete. */
+	private static final Duration RESPONSE_TIMEOUT = Duration.ofSeconds(30);
+
+	/** Selects error and fatal messages: global messages, growls and field messages. */
+	private static final String ERROR_MESSAGES_SELECTOR = "#messages .ui-messages-error, #messages .ui-messages-fatal, " +
+															"#growl .ui-growl-error, #growl .ui-growl-fatal, " +
+															"#pushGrowl .ui-growl-error, #pushGrowl .ui-growl-fatal, " +
+															".ui-message-error, .ui-message-fatal";
+
+	/** Selects every message: global messages, growls and field messages. */
+	private static final String ALL_MESSAGES_SELECTOR = "#messages .ui-messages-info, #messages .ui-messages-warn, " +
+															"#growl .ui-growl-item-container, #pushGrowl .ui-growl-item-container, " +
+															ERROR_MESSAGES_SELECTOR;
+
+	/** The rows of a data table, excluding the header and the empty message. */
+	private static final String DATA_ROW_XPATH = ".//tbody[contains(@class, 'ui-datatable-data')]/tr[%d][not(contains(@class, 'ui-datatable-empty-message'))]/td";
+
 	@Override
 	public boolean button(PrimeFacesButtonCommand command) {
 		String id = command.id();
@@ -68,8 +85,8 @@ public class PrimeFacesSelenide extends Selenide<
 		boolean ajax = command.ajax();
 
 		SelenideElement element = $(byId(id));
-		if (element.exists() && (!disabledClass(element))) {
-			String viewState = getViewState();
+		if (element.exists() && (!disabledClass(element)) && (element.attr("disabled") == null)) {
+			String viewState = markPage();
 			click(element);
 
 			if (confirm) {
@@ -102,14 +119,13 @@ public class PrimeFacesSelenide extends Selenide<
 
 			// don't need to check if checkbox is disabled coz we can still try to click it
 			// check the value and only click if we need a different value
-			String js = String.format("return window.SKYVE.PF.getCheckboxValue('%s')", id);
-			Boolean checkboxValue = (Boolean) ((JavascriptExecutor) driver).executeScript(js);
 			if (value == null) {
+				Boolean checkboxValue = checkboxValue(id);
 				for (int i = 0, l = 2; i < l; i++) { // try at most twice
 					if (checkboxValue != null) {
 						click(element);
 						waitForAjaxResponse();
-						checkboxValue = (Boolean) ((JavascriptExecutor) driver).executeScript(js);
+						checkboxValue = checkboxValue(id);
 					}
 				}
 
@@ -117,11 +133,12 @@ public class PrimeFacesSelenide extends Selenide<
 					throw new IllegalStateException("Could not set checkbox to null or unknown value");
 				}
 			} else {
+				Boolean checkboxValue = checkboxValue(id);
 				for (int i = 0, l = 2; i < l; i++) { // try at most twice
 					if (checkboxValue == null || (value.booleanValue() != checkboxValue.booleanValue())) {
 						click(element);
 						waitForAjaxResponse();
-						checkboxValue = (Boolean) ((JavascriptExecutor) driver).executeScript(js);
+						checkboxValue = checkboxValue(id);
 					}
 				}
 
@@ -134,6 +151,16 @@ public class PrimeFacesSelenide extends Selenide<
 		}
 
 		return false;
+	}
+
+	/**
+	 * Returns a check box's value.
+	 *
+	 * @param id	the check box's client id
+	 * @return true, false, or null for the third state of a tri-state check box
+	 */
+	public @Nullable Boolean checkboxValue(@Nonnull String id) {
+		return (Boolean) js("return window.SKYVE.PF.getCheckboxValue(arguments[0])", id);
 	}
 
 	@Override
@@ -149,7 +176,7 @@ public class PrimeFacesSelenide extends Selenide<
 			element = oldById(buttonId);
 			if (element != null && element.isDisplayed() && element.isEnabled() && !element.getDomAttribute("class").contains("ui-state-disabled")) {
 				// All good, continue with the button click
-				String viewState = getViewState();
+				String viewState = markPage();
 				click($(element));
 
 				if (ajax) {
@@ -167,22 +194,7 @@ public class PrimeFacesSelenide extends Selenide<
 
 	@Override
 	public boolean dataGridSelect(PrimeFacesDataGridSelectCommand command) {
-		String dataGridId = command.dataGridId();
-		int row = command.row();
-
-		// check list grid is present
-		WebElement element = oldById(dataGridId);
-		if (element != null && element.isDisplayed() && element.isEnabled()) {
-			// Find the row
-			element = element.findElement(By.xpath(String.format(".//tr[%s]/td", String.valueOf(row + 1))));
-			click($(element));
-
-			waitForAjaxResponse();
-
-			return true;
-		}
-
-		return false;
+		return selectRow(command.dataGridId(), command.row());
 	}
 
 	@Override
@@ -198,7 +210,7 @@ public class PrimeFacesSelenide extends Selenide<
 			element = oldById(buttonId);
 			if (element != null && element.isDisplayed() && element.isEnabled() && !element.getDomAttribute("class").contains("ui-state-disabled")) {
 				// All good, continue with the button click
-				String viewState = getViewState();
+				String viewState = markPage();
 				click($(element));
 
 				if (ajax) {
@@ -216,15 +228,27 @@ public class PrimeFacesSelenide extends Selenide<
 
 	@Override
 	public boolean listGridSelect(PrimeFacesListGridSelectCommand command) {
-		String listGridId = command.listGridId();
-		int row = command.row();
+		return selectRow(command.listGridId(), command.row());
+	}
 
-		// check list grid is present
-		WebElement element = oldById(listGridId);
+	/**
+	 * Clicks a data row of a data table.
+	 *
+	 * @param gridId	the data table's client id
+	 * @param row	the zero-based row
+	 * @return true if the grid is displayed and the row was clicked
+	 * @throws IllegalStateException	if the grid has no such row
+	 */
+	private boolean selectRow(@Nonnull String gridId, int row) {
+		// check grid is present
+		WebElement element = oldById(gridId);
 		if (element != null && element.isDisplayed() && element.isEnabled()) {
 			// Find the row
-			element = element.findElement(By.xpath(String.format(".//tr[%s]/td", String.valueOf(row + 1))));
-			click($(element));
+			List<WebElement> cells = element.findElements(By.xpath(String.format(DATA_ROW_XPATH, Integer.valueOf(row + 1))));
+			if (cells.isEmpty()) {
+				throw new IllegalStateException(String.format("Grid %s has no row %d", gridId, Integer.valueOf(row)));
+			}
+			click($(cells.get(0)));
 
 			waitForAjaxResponse();
 
@@ -248,16 +272,18 @@ public class PrimeFacesSelenide extends Selenide<
 
 			// Wait for pick list drop down - can be a span or div depending on theme
 			element = $(byXpath(String.format("//*[@id='%s_panel']", id)));
-			element.should(exist, Duration.ofSeconds(30)).shouldBe(visible);
+			element.should(exist, RESPONSE_TIMEOUT).shouldBe(visible);
 
-			// Select the row
+			// Select the zero-based row
 			// NB could be <div><div><ul><li> or <span><ul><li>
 			// in the middle means find the <ul> anywhere below
-			element = $(byXpath(String.format("//*[@id='%s_panel']//ul/li[%d]", id, Integer.valueOf(row))));
-			element.should(exist);
+			element = $(byXpath(String.format("(//*[@id='%s_panel']//li[contains(@class, 'ui-autocomplete-item')])[%d]", id, Integer.valueOf(row + 1))));
+			if (! element.exists()) {
+				throw new IllegalStateException(String.format("Lookup %s has no row %d to pick", id, Integer.valueOf(row)));
+			}
 			click(element);
 
-			waitForAjaxResponse();
+			waitForLookupSelection(id);
 
 			return true;
 		}
@@ -276,20 +302,30 @@ public class PrimeFacesSelenide extends Selenide<
 
 			// Wait for pick list drop down - can be a span or div depending on theme
 			element = $(byXpath(String.format("//*[@id='%s_panel']", id)));
-			element.should(exist, Duration.ofSeconds(30)).shouldBe(visible);
+			element.should(exist, RESPONSE_TIMEOUT).shouldBe(visible, RESPONSE_TIMEOUT);
 
-			// Select the first row
+			// Select the first match
 			// NB could be <div><div><ul><li> or <span><ul><li>
 			// in the middle means find the <ul> anywhere below
-			element = $(byXpath(String.format("//*[@id='%s_panel']//ul/li", id)));
-			element.should(exist);
+			element = $(byXpath(String.format("(//*[@id='%s_panel']//li[contains(@class, 'ui-autocomplete-item')])[1]", id)));
+			if (! element.exists()) {
+				throw new IllegalStateException(String.format("Lookup %s has no match for '%s'", id, search));
+			}
 			click(element);
-			waitForAjaxResponse();
+			waitForLookupSelection(id);
 
 			return true;
 		}
 
 		return false;
+	}
+
+	/**
+	 * Waits for a lookup's drop down to close after a pick, and then for its item select request.
+	 */
+	private void waitForLookupSelection(@Nonnull String id) {
+		$(byId(id + "_panel")).shouldBe(hidden, RESPONSE_TIMEOUT);
+		waitForAjaxResponse();
 	}
 
 	@Override
@@ -329,6 +365,21 @@ public class PrimeFacesSelenide extends Selenide<
 
 	@Override
 	public boolean text(PrimeFacesTextCommand command) {
+		// An ajax response that is still re-rendering the field can make it stale: wait and try again
+		for (int attempt = 1; ; attempt++) {
+			try {
+				return textOnce(command);
+			}
+			catch (StaleElementReferenceException e) {
+				if (attempt >= 3) {
+					throw e;
+				}
+				waitForAjaxResponse();
+			}
+		}
+	}
+
+	private boolean textOnce(PrimeFacesTextCommand command) {
 		String id = command.id();
 		String value = command.value();
 		boolean keyPresses = command.keyPresses();
@@ -349,6 +400,8 @@ public class PrimeFacesSelenide extends Selenide<
 				}
 			} else {
 				element.val(value == null ? "" : value);
+				// Leave the field as a user would, so that its change event (and any ajax handler) fires now
+				js("if (document.activeElement === arguments[0]) arguments[0].blur();", element.getWrappedElement());
 			}
 
 			success = true;
@@ -390,6 +443,146 @@ public class PrimeFacesSelenide extends Selenide<
 		return false;
 	}
 
+	/**
+	 * Sets a slider: its widget, its hidden input (which is submitted) and its value display.
+	 *
+	 * @param sliderId	the slider's client id
+	 * @param value	the value
+	 * @return true if the slider is on the page and enabled
+	 */
+	public boolean slider(@Nonnull String sliderId, @Nullable String value) {
+		Boolean result = (Boolean) js("var w = PrimeFaces.getWidgetById(arguments[0]);" +
+										"if ((! w) || w.jq.hasClass('ui-state-disabled') || w.jq.slider('option', 'disabled')) return false;" +
+										"var v = arguments[1];" +
+										"w.setValue(v);" +
+										"w.input.val(v).trigger('change');" +
+										"if (w.output) w.output.text(w.cfg.displayTemplate.replace('{value}', v));" +
+										"return true;",
+										sliderId,
+										(value == null) ? "" : value);
+		waitForAjaxResponse();
+		return Boolean.TRUE.equals(result);
+	}
+
+	/**
+	 * Sets a text editor (rich text or HTML) to plain text.
+	 *
+	 * @param id	the text editor's client id
+	 * @param value	the text
+	 * @return true if the editor is on the page and enabled
+	 */
+	public boolean textEditor(@Nonnull String id, @Nullable String value) {
+		SelenideElement element = $(byId(id));
+		if (! element.exists()) {
+			return false;
+		}
+		element.scrollTo();
+		Boolean result = (Boolean) js("var w = PrimeFaces.getWidgetById(arguments[0]);" +
+										"if ((! w) || w.disabled) return false;" +
+										"if (! w.editor) {w.render();}" +
+										"w.setValue(arguments[1]);" +
+										"return true;",
+										id,
+										(value == null) ? "" : value);
+		waitForAjaxResponse();
+		return Boolean.TRUE.equals(result);
+	}
+
+	/**
+	 * Sets a colour picker's text value without opening its popup.
+	 *
+	 * @param id	the colour picker's client id (its input)
+	 * @param value	the colour, e.g. {@code #FF0000}
+	 * @return true if the colour picker is on the page and enabled
+	 */
+	public boolean colourPicker(@Nonnull String id, @Nullable String value) {
+		SelenideElement element = $(byId(id));
+		if ((! element.exists()) || (element.attr("disabled") != null) || (element.attr("readonly") != null)) {
+			return false;
+		}
+		js("var e = document.getElementById(arguments[0]);" +
+				"e.value = arguments[1];" +
+				"e.dispatchEvent(new Event('input', {bubbles: true}));" +
+				"$(e).trigger('change');" +
+				"var w = PrimeFaces.getWidgetById(arguments[0]);" +
+				"if (w && w.hasBehavior('change')) w.callBehavior('change');",
+				id,
+				(value == null) ? "" : value);
+		waitForAjaxResponse();
+		return true;
+	}
+
+	/**
+	 * Returns the value of an input element.
+	 *
+	 * @param id	the input's id
+	 * @return its value, or null if there is no such element
+	 */
+	public @Nullable String inputValue(@Nonnull String id) {
+		return (String) js("var e = document.getElementById(arguments[0]); return e ? (e.value == null ? '' : String(e.value)) : null;", id);
+	}
+
+	/**
+	 * Returns a text editor's text and HTML.
+	 *
+	 * @param id	the text editor's client id
+	 * @return the plain text then the HTML, or null if there is no such editor
+	 */
+	@SuppressWarnings("unchecked")
+	public @Nullable List<String> textEditorValues(@Nonnull String id) {
+		return (List<String>) js("var w = PrimeFaces.getWidgetById(arguments[0]); if (! w) return null;" +
+									"var html = w.input.val() || '';" +
+									"var text = w.editor ? w.editor.getText() : $('<div>').html(html).text();" +
+									"return [text.trim(), html];", id);
+	}
+
+	/**
+	 * Returns the selected option of a select one menu (combo) as its index, value and label.
+	 *
+	 * @param id	the select one menu's client id
+	 * @return the selected index, value and label, or null if there is no such menu
+	 */
+	@SuppressWarnings("unchecked")
+	public @Nullable List<String> selectOneValues(@Nonnull String id) {
+		return (List<String>) js("var s = document.getElementById(arguments[0] + '_input'); if (! s) return null;" +
+									"var i = s.selectedIndex; if (i < 0) return ['', '', ''];" +
+									"var o = s.options[i];" +
+									"var label = (o.text || '').replace(/\\u00a0/g, ' ').trim();" +
+									"return [String(i), o.value, label];", id);
+	}
+
+	/**
+	 * Returns the selected option of a radio group as its index, value and label.
+	 *
+	 * @param id	the radio group's client id
+	 * @return the selected index, value and label (empty strings when nothing is selected), or null if there is no such group
+	 */
+	@SuppressWarnings("unchecked")
+	public @Nullable List<String> radioValues(@Nonnull String id) {
+		return (List<String>) js("if (! document.getElementById(arguments[0])) return null;" +
+									"var inputs = document.getElementsByName(arguments[0]);" +
+									"for (var i = 0; i < inputs.length; i++) {" +
+									"  if (inputs[i].checked) {" +
+									"    var l = document.querySelector('label[for=\"' + inputs[i].id + '\"]');" +
+									"    return [String(i), inputs[i].value, l ? l.textContent.trim() : ''];" +
+									"  }" +
+									"}" +
+									"return ['', '', ''];", id);
+	}
+
+	/**
+	 * Returns the label (or else the title) that an element shows, such as a button's text.
+	 *
+	 * @param id	the element's id
+	 * @return the label with whitespace collapsed, or null if there is no such element
+	 */
+	public @Nullable String label(@Nonnull String id) {
+		return (String) js("var e = document.getElementById(arguments[0]); if (! e) return null;" +
+								"var t = e.querySelector('.ui-button-text');" +
+								"var s = ((t ? t.textContent : e.textContent) || '').replace(/\\s+/g, ' ').trim();" +
+								"return s || e.title || '';", id);
+	}
+
 	@Override
 	public boolean confirm() {
 		// Wait for confirm dialog to appear
@@ -399,50 +592,51 @@ public class PrimeFacesSelenide extends Selenide<
 		return true;
 	}
 
+	/**
+	 * Returns the text of each error or fatal message on the page: global messages, growls and field messages.
+	 *
+	 * @return the messages; empty when there are none
+	 */
+	public @Nonnull List<String> errorMessages() {
+		return messages(ERROR_MESSAGES_SELECTOR);
+	}
+
+	@SuppressWarnings("unchecked")
+	private @Nonnull List<String> messages(@Nonnull String selector) {
+		List<String> result = (List<String>) js("var out = [];" +
+													"document.querySelectorAll(arguments[0]).forEach(function(e) {" +
+													"  var t = (e.innerText || e.textContent || '').replace(/\\s+/g, ' ').trim();" +
+													"  if (t && (out.indexOf(t) < 0)) out.push(t);" +
+													"});" +
+													"return out;", selector);
+		return (result == null) ? new ArrayList<>() : result;
+	}
+
+	@Override
+	public @Nonnull String describeMessages() {
+		List<String> messages = messages(ALL_MESSAGES_SELECTOR);
+		return messages.isEmpty() ? "no messages" : String.join(" | ", messages);
+	}
+
 	@Override
 	public boolean verifySuccess() {
-		WebElement messages = oldById("messages");
-		if ((messages != null) && messages.isDisplayed()) {
-			String innerHTML = messages.getDomProperty("innerHTML");
-			if (innerHTML.contains("ui-messages-error") || innerHTML.contains("ui-messages-fatal")) {
-				System.err.println("**************");
-				System.err.println("Not successful");
-				System.err.println(innerHTML);
-				System.err.println("**************");
-			}
-
-			return false;
-		}
-
-		return true;
+		return errorMessages().isEmpty();
 	}
 
 	@Override
 	public void assertSuccess() {
-		Assert.assertTrue("Not successful", verifySuccess());
+		if (! verifySuccess()) {
+			throw new AssertionError("Not successful: " + describeMessages());
+		}
 	}
 
 	@Override
 	public boolean verifyFailure(String messageToCheck) {
-		WebElement messages = oldById("messages");
-		if (messages != null && messages.isDisplayed()) {
-			String innerHTML = messages.getDomProperty("innerHTML");
-			if (innerHTML.contains("ui-messages-error") || innerHTML.contains("ui-messages-fatal")) {
-				if (messageToCheck == null || innerHTML.contains(messageToCheck)) {
-					return true;
-				}
-
-				System.err.println("**************");
-				System.err.println("Not successful");
-				System.err.println(innerHTML);
-				System.err.println("**************");
+		for (String message : errorMessages()) {
+			if ((messageToCheck == null) || message.contains(messageToCheck)) {
+				return true;
 			}
 		}
-
-		System.err.println("**************");
-		System.err.println("Not successful - no error or fatal messages.");
-		System.err.println("**************");
-
 		return false;
 	}
 
@@ -453,12 +647,14 @@ public class PrimeFacesSelenide extends Selenide<
 
 	@Override
 	public void assertFailure(String messageToCheck) {
-		Assert.assertTrue("Successful", verifyFailure(messageToCheck));
+		if (! verifyFailure(messageToCheck)) {
+			throw new AssertionError("Successful: " + describeMessages());
+		}
 	}
 
 	@Override
 	public void assertFailure() {
-		Assert.assertTrue("Successful", verifyFailure());
+		assertFailure(null);
 	}
 
 	public boolean _input(String id, String value, boolean keyPresses) {
@@ -469,8 +665,8 @@ public class PrimeFacesSelenide extends Selenide<
 
 	public boolean redirectButton(String id, boolean confirm) {
 		SelenideElement element = $(byId(id));
-		if (element.exists() && (!disabledClass(element))) {
-			String viewState = getViewState();
+		if (element.exists() && (!disabledClass(element)) && (element.attr("disabled") == null)) {
+			String viewState = markPage();
 			click(element);
 
 			if (confirm) {
@@ -485,24 +681,70 @@ public class PrimeFacesSelenide extends Selenide<
 		return false;
 	}
 
-	@SuppressWarnings("static-method")
+	/**
+	 * Waits until no PrimeFaces or jQuery ajax request is running and the ajax status indicator is hidden.
+	 */
 	public void waitForAjaxResponse() {
-		// Wait until wheelOfDeath is invisible after AJAX
-		$(byId("wheelOfDeath_start")).shouldBe(hidden);
+		WebDriverWait wait = new WebDriverWait(driver, RESPONSE_TIMEOUT);
+		wait.ignoring(StaleElementReferenceException.class).until(d -> Boolean.valueOf(ajaxIdle()));
 	}
 
+	/**
+	 * Indicates if the page has loaded and no PrimeFaces or jQuery ajax request is running.
+	 *
+	 * @return true when idle
+	 */
+	private boolean ajaxIdle() {
+		return Boolean.TRUE.equals(js("if (document.readyState !== 'complete') return false;" +
+										"if (window.PrimeFaces && PrimeFaces.ajax && PrimeFaces.ajax.Queue && (! PrimeFaces.ajax.Queue.isEmpty())) return false;" +
+										"if (window.jQuery && (jQuery.active > 0)) return false;" +
+										"var w = document.getElementById('wheelOfDeath_start');" +
+										"return (! w) || (w.offsetParent === null);"));
+	}
+
+	/**
+	 * Waits for a new page (or a new view state), or for the request to come back with error messages
+	 * (such as validation errors), which leave the page as it was.
+	 *
+	 * @param oldViewState	the view state before the request
+	 */
 	public void waitForFullPageResponse(String oldViewState) {
-		WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(30));
+		WebDriverWait wait = new WebDriverWait(driver, RESPONSE_TIMEOUT);
 		try {
 			wait.ignoring(StaleElementReferenceException.class)
-					.until(d -> ((getViewState() == null) || getViewState().equals(oldViewState)) ? Boolean.FALSE : Boolean.TRUE);
+					.until(d -> {
+						String viewState = markPage();
+						if ((viewState != null) && (! viewState.equals(oldViewState))) {
+							return Boolean.TRUE;
+						}
+						return Boolean.valueOf(ajaxIdle() && messagesReplaced() && (! errorMessages().isEmpty()));
+					});
 		} catch (RuntimeException e) {
 			System.err.println("Timed out waiting for a navigation from " + driver.getCurrentUrl() + " : oldViewState = " + oldViewState);
 			throw e;
 		}
 
-		wait = new WebDriverWait(driver, Duration.ofSeconds(5));
-		wait.until(d -> ((JavascriptExecutor) d).executeScript("return document.readyState").equals("complete") ? Boolean.TRUE : Boolean.FALSE);
+		waitForAjaxResponse();
+	}
+
+	/**
+	 * Marks the global messages element, so {@link #messagesReplaced()} can tell when a response has re-rendered it,
+	 * and returns the view state, before a click.
+	 *
+	 * @return the view state
+	 */
+	private String markPage() {
+		js("var m = document.getElementById('messages'); if (m) m.sailMark = true;");
+		return getViewState();
+	}
+
+	/**
+	 * Indicates if the global messages element marked by {@link #markPage()} has since been replaced (or the page has).
+	 *
+	 * @return true if it has been replaced
+	 */
+	private boolean messagesReplaced() {
+		return Boolean.TRUE.equals(js("var m = document.getElementById('messages'); return (! m) || (! m.sailMark);"));
 	}
 
 	@SuppressWarnings("static-method")
@@ -525,29 +767,33 @@ public class PrimeFacesSelenide extends Selenide<
 			try {
 				// Scroll to the top of the page and see if the element can be made visible
 				trace("    Could not click on the element - scroll to the top of the page and try again");
-				js.executeScript("javascript:window.scrollTo(0, 0)");
+				js.executeScript("window.scrollTo(0, 0)");
 				wrappedElement.click();
 			} catch (@SuppressWarnings("unused") WebDriverException e1) {
 				try {
 					// Scroll to the bottom of the page and try again in case the floating element is at the bottom
 					trace("    Could not click on the element - scroll to the bottom of the page and try again");
-					js.executeScript("javascript:window.scrollTo(0, 999999)");
+					js.executeScript("window.scrollTo(0, 999999)");
 					wrappedElement.click();
 				} catch (@SuppressWarnings("unused") WebDriverException e2) {
 					// Scroll the element into view on the page using javascript and see if the element can be made visible
 					trace("    Could not click on the element - scroll to the element and try again");
-					js.executeScript("arguments[0].scrollIntoView(true);", element);
+					js.executeScript("arguments[0].scrollIntoView(true);", wrappedElement);
 					wrappedElement.click();
 				}
 			}
 		}
 	}
 
+	private @Nullable Object js(@Nonnull String script, Object... arguments) {
+		return ((JavascriptExecutor) driver).executeScript(script, arguments);
+	}
+
 	private static boolean disabledClass(SelenideElement element) {
 		String styleClass = element.attr("class");
 		return (styleClass != null) && styleClass.contains("ui-state-disabled");
 	}
-	
+
 	public List<WebElement> oldByClass(String className) {
 		try {
 			return driver.findElements(By.className(className));

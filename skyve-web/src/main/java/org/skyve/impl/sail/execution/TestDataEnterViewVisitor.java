@@ -216,7 +216,7 @@ public class TestDataEnterViewVisitor extends NoOpViewVisitor {
 	}
 	
 	/**
-	 * No-op for geometry widgets in current test data generation strategy.
+	 * Generates data-entry for a geometry (as WKT text) when visible, enabled, and outside tabular widgets.
 	 *
 	 * @param geometry the geometry widget metadata
 	 * @param parentVisible whether parent containers are visible
@@ -224,7 +224,7 @@ public class TestDataEnterViewVisitor extends NoOpViewVisitor {
 	 */
 	@Override
 	public void visitGeometry(@Nonnull Geometry geometry, boolean parentVisible, boolean parentEnabled) {
-		// TODO Auto-generated method stub
+		addDataEnter(geometry, parentVisible, parentEnabled, visible(geometry), enabled(geometry));
 	}
 	
 	/**

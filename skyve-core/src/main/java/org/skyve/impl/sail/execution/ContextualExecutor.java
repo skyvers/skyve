@@ -93,6 +93,17 @@ public abstract class ContextualExecutor<T extends AutomationContext> implements
 	 */
 	@Override
 	public void executeAutomation(@Nonnull Automation automation) {
+		initialiseAutomation(automation);
+	}
+
+	/**
+	 * Sets the automation-wide defaults (UX/UI, user agent type and test strategy) from the automation.
+	 * Executors that drive the automation themselves, instead of calling {@link #executeAutomation(Automation)}
+	 * on this class, call this first.
+	 *
+	 * @param automation	the automation being executed
+	 */
+	protected final void initialiseAutomation(@Nonnull Automation automation) {
 		currentUxUi = automation.getUxui();
 		currentUserAgentType = automation.getUserAgentType();
 		testStrategy = automation.getTestStrategy();

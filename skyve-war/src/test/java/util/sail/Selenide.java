@@ -4,9 +4,19 @@ import static com.codeborne.selenide.Selectors.byName;
 import static com.codeborne.selenide.Selenide.$;
 import static com.codeborne.selenide.Selenide.open;
 
+import java.time.Duration;
+
+import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
 import org.skyve.domain.messages.DomainException;
 
+import com.codeborne.selenide.SelenideElement;
 import com.codeborne.selenide.WebDriverRunner;
+
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 
 import util.sail.commands.ButtonCommand;
 import util.sail.commands.CheckboxCommand;
@@ -56,7 +66,10 @@ public abstract class Selenide<
 		TXTC extends TextCommand,
 		SELC extends SelectOneCommand> extends CrossBrowserSelenium {
 
+	private static final Duration LOGIN_TIMEOUT = Duration.ofSeconds(30);
+
 	private String baseUrl;
+	private String loginError;
 
 	@Override
 	public void startBrowser(@SuppressWarnings("hiding") BrowserConfiguration configuration) {
@@ -71,8 +84,18 @@ public abstract class Selenide<
 	 * 
 	 * @param url relative URL path
 	 */
-	public void get(String url) {
+	public void get(@Nonnull String url) {
 		open(baseUrl + url);
+	}
+
+	/**
+	 * Opens the specified absolute URL.
+	 * 
+	 * @param url absolute URL
+	 */
+	@SuppressWarnings("static-method")
+	public void openUrl(@Nonnull String url) {
+		open(url);
 	}
 
 	/**
@@ -86,13 +109,16 @@ public abstract class Selenide<
 	}
 
 	/**
-	 * Performs login using optional customer, username, and password.
+	 * Performs login using optional customer, username, and password, and waits for the outcome:
+	 * either the page after sign in, or the sign in page showing an error.
+	 * {@link #getLoginError()} then says which.
 	 * 
 	 * @param customer optional customer identifier
 	 * @param username login username
 	 * @param password login password
 	 */
-	public void login(String customer, String username, String password) {
+	public void login(@Nullable String customer, @Nonnull String username, @Nonnull String password) {
+		loginError = null;
 		open(baseUrl);
 		if (customer != null) {
 			$(byName("customer")).val(customer);
@@ -101,7 +127,29 @@ public abstract class Selenide<
 		$(byName("user")).val(username);
 		$(byName("password")).val(password);
 
-		$("input[type=\"submit\"").click();
+		SelenideElement submit = $("input[type=\"submit\"]");
+		WebElement submitElement = submit.getWrappedElement();
+		submit.click();
+
+		// Wait for the login page to go, then for the next page to load
+		WebDriverWait wait = new WebDriverWait(driver, LOGIN_TIMEOUT);
+		wait.until(ExpectedConditions.stalenessOf(submitElement));
+		wait.until(d -> "complete".equals(((JavascriptExecutor) d).executeScript("return document.readyState")));
+
+		// A failed sign in comes back to the sign in page with an error message
+		if ($("input[type=\"submit\"]").exists() && $(byName("password")).exists()) {
+			SelenideElement error = $(".ui.error.message");
+			loginError = error.exists() ? error.text().replaceAll("\\s+", " ").trim() : "still on the sign in page";
+		}
+	}
+
+	/**
+	 * Returns the error that the last {@link #login(String, String, String)} showed.
+	 * 
+	 * @return the error text, or null if the last sign in succeeded
+	 */
+	public @Nullable String getLoginError() {
+		return loginError;
 	}
 
 	/**
@@ -258,6 +306,16 @@ public abstract class Selenide<
 	 * @param messageToCheck message to check for failure
 	 */
 	public abstract void assertFailure(String messageToCheck);
+
+	/**
+	 * Describes the messages the page shows, for failure reports.
+	 * 
+	 * @return the message text, or a description of their absence; never null
+	 */
+	@SuppressWarnings("static-method")
+	public @Nonnull String describeMessages() {
+		return "(no message details available)";
+	}
 
 	/**
 	 * Outputs a trace comment to the console.
