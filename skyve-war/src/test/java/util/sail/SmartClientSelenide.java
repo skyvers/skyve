@@ -655,7 +655,8 @@ public class SmartClientSelenide extends Selenide<
 
 	/**
 	 * Uploads a file through Skyve's upload page: click the trigger (a content item's Upload button, or an upload action),
-	 * choose the file in the page's file input, press its Upload button, and wait for the page's window to close.
+	 * choose the file in the page's file input, press its Upload button (the image editor's, for an image), and wait for the
+	 * page's window to close.
 	 *
 	 * @param trigger	the element that opens the upload page
 	 * @param file		the file
@@ -677,20 +678,23 @@ public class SmartClientSelenide extends Selenide<
 			});
 			input.sendKeys(file.getAbsolutePath());
 			trace("    file chosen");
-			// Press Upload once it is enabled, unless the page has taken the file by itself
-			waitFor(d -> {
-				List<WebElement> buttons = d.findElements(org.openqa.selenium.By.cssSelector(".ui-fileupload-upload"));
-				if (buttons.isEmpty() || d.findElements(org.openqa.selenium.By.cssSelector("input[type=file]")).isEmpty()) {
-					return Boolean.TRUE;
+			// Waits for the page to offer its Upload button for the file: the file list's (enabled once it has the file),
+			// or, for an image, the image editor's (#crop, shown once the editor has the image); or for the page to have
+			// taken the file by itself (no file input left)
+			WebElement upload = waitFor(d -> {
+				for (WebElement button : d.findElements(org.openqa.selenium.By.cssSelector(".ui-fileupload-upload, #crop"))) {
+					String styleClass = button.getDomAttribute("class");
+					if (button.isDisplayed() && button.isEnabled() &&
+							((styleClass == null) || (! styleClass.contains("ui-state-disabled")))) {
+						return button;
+					}
 				}
-				WebElement button = buttons.get(0);
-				String styleClass = button.getDomAttribute("class");
-				if (button.isEnabled() && ((styleClass == null) || (! styleClass.contains("ui-state-disabled")))) {
-					button.click();
-					return Boolean.TRUE;
-				}
-				return Boolean.FALSE;
+				return d.findElements(org.openqa.selenium.By.cssSelector("input[type=file]")).isEmpty() ? input : null;
 			});
+			if (upload != input) {
+				trace("    press " + (("crop".equals(upload.getDomAttribute("id"))) ? "the image editor's Upload" : "Upload"));
+				upload.click();
+			}
 		}
 		finally {
 			driver.switchTo().defaultContent();
