@@ -92,7 +92,8 @@ public class PrimeFacesSelenide extends Selenide<
 	 */
 	public boolean button(@Nonnull String id, boolean ajax, @Nullable Boolean answer) {
 		SelenideElement element = $(byId(id));
-		if (element.exists() && (!disabledClass(element)) && (element.attr("disabled") == null)) {
+		// a user can only press a button that is shown (another rendering of the same action may be)
+		if (element.exists() && element.isDisplayed() && (!disabledClass(element)) && (element.attr("disabled") == null)) {
 			String viewState = markPage();
 			click(element);
 
@@ -542,6 +543,11 @@ public class PrimeFacesSelenide extends Selenide<
 			element.should(exist);
 			click(element);
 
+			// Wait for the drop down's closing transition to end: at its end PrimeFaces focuses the menu
+			// (aria-expanded is set false just before), which scrolls the window back to it
+			waitFor(d -> js("var w = PrimeFaces.getWidgetById(arguments[0]);" +
+								"return ((! w) || (! w.keyboardTarget) || (w.keyboardTarget.attr('aria-expanded') !== 'true')) ? true : null;",
+								id));
 			waitForAjaxResponse();
 
 			return true;
@@ -879,7 +885,7 @@ public class PrimeFacesSelenide extends Selenide<
 												"return (s && s.classList.contains('inactive')) ? s.querySelector('a.toggle') : null;");
 		if (toggle != null) {
 			trace("    open the side bar menu");
-			click($(toggle));
+			clickToggle(toggle);
 			// Wait for the side bar to slide fully into the window
 			waitFor(d -> js("var s = document.getElementById('sidebar'), r = s.getBoundingClientRect();" +
 								"return ((! s.classList.contains('inactive')) && (r.left >= 0)) ? true : null;"));
@@ -1052,7 +1058,7 @@ public class PrimeFacesSelenide extends Selenide<
 				WebElement button = buttons.get(0);
 				String styleClass = button.getDomAttribute("class");
 				if (button.isEnabled() && ((styleClass == null) || (! styleClass.contains("ui-state-disabled")))) {
-					((JavascriptExecutor) d).executeScript("arguments[0].click();", button);
+					click($(button));
 					return Boolean.TRUE;
 				}
 				return Boolean.FALSE;
@@ -1217,7 +1223,8 @@ public class PrimeFacesSelenide extends Selenide<
 	 */
 	public boolean redirectButton(@Nonnull String id, @Nullable Boolean answer) {
 		SelenideElement element = $(byId(id));
-		if (element.exists() && (!disabledClass(element)) && (element.attr("disabled") == null)) {
+		// a user can only press a button that is shown (another rendering of the same action may be)
+		if (element.exists() && element.isDisplayed() && (!disabledClass(element)) && (element.attr("disabled") == null)) {
 			String viewState = markPage();
 			click(element);
 
@@ -1254,12 +1261,14 @@ public class PrimeFacesSelenide extends Selenide<
 	}
 
 	/**
-	 * Indicates if the page has loaded and no PrimeFaces or jQuery ajax request is running.
+	 * Indicates if the page has loaded (and its template has set up its layout) and no PrimeFaces or jQuery ajax request is running.
 	 *
 	 * @return true when idle
 	 */
 	private boolean ajaxIdle() {
 		return Boolean.TRUE.equals(js("if (document.readyState !== 'complete') return false;" +
+										// the template's page script has finished setting up the layout (side bar, breakpoints)
+										"if (document.body && document.body.classList.contains('is-preload')) return false;" +
 										"if (window.PrimeFaces && PrimeFaces.ajax && PrimeFaces.ajax.Queue && (! PrimeFaces.ajax.Queue.isEmpty())) return false;" +
 										"if (window.jQuery && (jQuery.active > 0)) return false;" +
 										"var w = document.getElementById('wheelOfDeath_start');" +
@@ -1349,10 +1358,11 @@ public class PrimeFacesSelenide extends Selenide<
 
 	/**
 	 * Clicks an element as a user would: scrolls it to the middle of the window (so a fixed header or banner cannot
-	 * cover it, even in a small window), waits until nothing else is over it, then clicks.
-	 * Falls back to a script click if another element still takes the click.
+	 * cover it, even in a small window), waits until nothing else is over it, then clicks it with WebDriver.
+	 * There is no script fallback: a click a user could not make fails, saying why.
 	 *
 	 * @param element	the element to click
+	 * @throws IllegalStateException	if the element cannot take a user's click
 	 */
 	public void click(SelenideElement element) {
 		WebElement wrappedElement = element.getWrappedElement();
@@ -1361,19 +1371,63 @@ public class PrimeFacesSelenide extends Selenide<
 		try {
 			wrappedElement.click();
 		} catch (WebDriverException e) {
-			// Something (a floating element or an animation) still covers it
 			String why = String.valueOf(e.getMessage());
-			trace("    Could not click on the element (" + why.substring(0, Math.min(why.length(), 200)).replace('\n', ' ') + ") - scroll it to the middle again and retry");
-			scrollToCentre(wrappedElement);
-			waitUntilUncovered(wrappedElement);
-			try {
-				wrappedElement.click();
-			} catch (@SuppressWarnings("unused") WebDriverException e1) {
-				trace("    Could not click on the element - click it with script");
-				js("arguments[0].click();", wrappedElement);
-			}
+			int newline = why.indexOf('\n');
+			throw new IllegalStateException("A user could not click " + describeForClick(wrappedElement) + ": " +
+												((newline > 0) ? why.substring(0, newline) : why), e);
 		}
 	}
+
+	/**
+	 * Clicks the editorial template's side bar toggle (the menu button of a small window) with the pointer.
+	 * <p>
+	 * A per-widget case: the toggle hangs outside its (off-canvas) side bar's box, so WebDriver's element click calls it
+	 * "not interactable" although it is shown and on top. A user clicks it where it is drawn, so press the pointer at the
+	 * centre of its part inside the window, after checking that the toggle is what is there.
+	 */
+	private void clickToggle(@Nonnull WebElement toggle) {
+		// Wait for the template to lay the toggle out (it has no size until its breakpoint styles apply)
+		waitFor(d -> js("var r = arguments[0].getBoundingClientRect(); return (r.width > 0 && r.height > 0) ? true : null;", toggle));
+		@SuppressWarnings("unchecked")
+		List<Number> point = (List<Number>) js("var e = arguments[0], r = e.getBoundingClientRect();" +
+												"var x = (Math.max(r.left, 0) + Math.min(r.right, window.innerWidth)) / 2;" +
+												"var y = (Math.max(r.top, 0) + Math.min(r.bottom, window.innerHeight)) / 2;" +
+												"var t = document.elementFromPoint(x, y);" +
+												"return (t === e || e.contains(t)) ? [Math.round(x), Math.round(y)] : null;", toggle);
+		if (point == null) {
+			throw new IllegalStateException("A user could not click the side bar menu toggle " + describeForClick(toggle));
+		}
+		new org.openqa.selenium.interactions.Actions(driver).moveToLocation(point.get(0).intValue(), point.get(1).intValue()).click().perform();
+	}
+
+	/**
+	 * Describes an element, where it is and what is over its centre, for a click failure.
+	 */
+	private @Nonnull String describeForClick(@Nonnull WebElement element) {
+		try {
+			return String.valueOf(js("var e = arguments[0], r = e.getBoundingClientRect();" +
+										"var t = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2);" +
+										"var d = function(x) {return x ? '<' + x.tagName.toLowerCase() + (x.id ? ' id=' + x.id : '') + " +
+										"  (x.className && x.className.baseVal === undefined ? ' class=\"' + x.className + '\"' : '') + '>' : 'nothing';};" +
+										"return d(e) + ' at [' + Math.round(r.left) + ',' + Math.round(r.top) + ' ' + Math.round(r.width) + 'x' + Math.round(r.height) + " +
+										"  '] in a ' + window.innerWidth + 'x' + window.innerHeight + ' window scrolled to ' + Math.round(window.scrollY) + ' of ' + " +
+										"  (document.documentElement.scrollHeight - window.innerHeight) + ', under ' + d(t) + (t ? ' (' + getComputedStyle(t).position + ')' : '') + " +
+										"  '; the fixed action bar is ' + (function() {var b = document.querySelector('.skyve-action-bar-wrapper'); " +
+										"    if (! b) return 'absent'; var r2 = b.getBoundingClientRect(); return getComputedStyle(b).position + ' at ' + Math.round(r2.top) + '+' + Math.round(r2.height);})();", element));
+		}
+		catch (@SuppressWarnings("unused") WebDriverException e) {
+			return String.valueOf(element);
+		}
+	}
+
+	/**
+	 * Defines <code>centre(e)</code>: scrollIntoView, then make sure the window itself scrolled the element to its middle
+	 * (scrollIntoView can leave the window as it was, e.g. after an ajax update replaced part of the page).
+	 */
+	private static final String CENTRE_SCRIPT = "var centre = function(e) {e.scrollIntoView({block: 'center', inline: 'nearest'});" +
+													"var r = e.getBoundingClientRect(), mid = r.top + r.height / 2;" +
+													"if ((mid < window.innerHeight * 0.25) || (mid > window.innerHeight * 0.75)) {" +
+													"  window.scrollBy(0, mid - window.innerHeight / 2);}};";
 
 	/**
 	 * Scrolls an element to the middle of the window, away from fixed headers, banners and footers.
@@ -1382,7 +1436,7 @@ public class PrimeFacesSelenide extends Selenide<
 	 */
 	public void scrollToCentre(@Nonnull WebElement element) {
 		try {
-			js("arguments[0].scrollIntoView({block: 'center', inline: 'center'});", element);
+			js(CENTRE_SCRIPT + "centre(arguments[0]);", element);
 		}
 		catch (@SuppressWarnings("unused") WebDriverException e) {
 			// not scrollable (e.g. hidden); the click reports the problem
@@ -1395,15 +1449,18 @@ public class PrimeFacesSelenide extends Selenide<
 	 */
 	private void waitUntilUncovered(@Nonnull WebElement element) {
 		try {
-			// Wait for nothing to be over the element's centre (a header settling, an overlay closing)
-			waitFor(d -> js("var e = arguments[0], r = e.getBoundingClientRect();" +
+			// Wait for nothing to be over the element's centre (a header settling, an overlay closing).
+			// While it is covered, centre it again: the page can scroll itself after the first centring
+			// (e.g. a select menu focusing its input late), leaving the element under the fixed header.
+			waitFor(d -> js(CENTRE_SCRIPT + "var e = arguments[0], r = e.getBoundingClientRect();" +
 								"if ((r.width === 0) && (r.height === 0)) return true;" +
 								"var t = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2);" +
-								"return ((t === null) || (t === e) || e.contains(t) || t.contains(e) || (t.tagName === 'LABEL' && t.htmlFor === e.id)) ? true : null;",
+								"if ((t === null) || (t === e) || e.contains(t) || t.contains(e) || (t.tagName === 'LABEL' && t.htmlFor === e.id)) return true;" +
+								"centre(e); return null;",
 								element));
 		}
 		catch (@SuppressWarnings("unused") org.openqa.selenium.TimeoutException | StaleElementReferenceException e) {
-			// still covered (or gone): the click falls back, or reports the problem
+			// still covered (or gone): the click or typing reports the problem
 		}
 	}
 

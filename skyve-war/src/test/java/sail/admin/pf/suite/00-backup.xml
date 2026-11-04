@@ -15,6 +15,9 @@
 		<method>
 			<navigateEdit module="admin" document="DataMaintenance" />
 			<tabSelect path="Backup/Restore" />
+			<action name="RefreshBackupList" />
+			<comment>99-restore restores the oldest backup (runtime bug), so no other backup may exist: delete strays by hand on the server</comment>
+			<testGridRows module="admin" query="BackupsModel" maxRows="0" />
 			<dataEnter binding="includeContent" value="true" />
 			<dataEnter binding="includeAuditLog" value="true" />
 			<comment>No redaction, so a restore keeps admin's password</comment>
