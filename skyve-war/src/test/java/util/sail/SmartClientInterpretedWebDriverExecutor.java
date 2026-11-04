@@ -25,7 +25,9 @@ import org.skyve.metadata.model.document.Relation;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.Module.DocumentRef;
 import org.skyve.metadata.module.query.MetaDataQueryDefinition;
+import org.skyve.metadata.sail.language.Automation.TestStrategy;
 import org.skyve.metadata.sail.language.Step;
+import org.skyve.metadata.sail.language.step.Execute;
 import org.skyve.metadata.sail.language.step.TestFailure;
 import org.skyve.metadata.sail.language.step.TestSuccess;
 import org.skyve.metadata.sail.language.step.TestValue;
@@ -64,6 +66,8 @@ import org.skyve.util.Binder.TargetMetaData;
 import org.skyve.util.DataBuilder;
 import org.skyve.util.test.SkyveFixture.FixtureType;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import util.sail.commands.impl.SmartClientButtonCommand;
 import util.sail.commands.impl.SmartClientCheckboxCommand;
 import util.sail.commands.impl.SmartClientDataGridButtonCommand;
@@ -80,33 +84,54 @@ import util.sail.commands.impl.SmartClientTextCommand;
 /**
  * Executor for SmartClient-based UI automation, interpreting web steps
  * using a {@link SmartClientSelenide} instance and {@link SmartClientAutomationContext}.
- * 
+ * <p>
+ * Locators come from {@link org.skyve.impl.sail.execution.sc.SmartClientSAILViewVisitor} and are resolved
+ * in the browser against the view that is showing. After each step that opens or closes a view, the
+ * executor waits for the browser to show the view the automation context expects, so that a step that
+ * did not do what the script expects fails there and then.
+ *
  * @author simeonsolomou
  */
 public class SmartClientInterpretedWebDriverExecutor extends InterpretedWebDriverExecutor<SmartClientAutomationContext, SmartClientSelenide> {
 
-	private static List<ImplicitActionName> EXCLUDED_IMPLICIT_ACTIONS = List.of(ImplicitActionName.Upload);
+	private static final List<ImplicitActionName> EXCLUDED_IMPLICIT_ACTIONS = List.of(ImplicitActionName.Upload);
 
-	public SmartClientInterpretedWebDriverExecutor(SmartClientSelenide selenide) {
+	/**
+	 * Creates an executor that drives the given browser.
+	 *
+	 * @param selenide	the SmartClient browser driver
+	 */
+	public SmartClientInterpretedWebDriverExecutor(@Nonnull SmartClientSelenide selenide) {
 		this.selenide = selenide;
+	}
+
+	/**
+	 * Runs the script, then lets SmartClient settle.
+	 */
+	@Override
+	public void executeExecute(Execute execute) {
+		prepareForInteraction();
+		super.executeExecute(execute);
+		selenide.settle();
 	}
 
 	@Override
 	public void executeNavigateList(NavigateList list) {
-		// Reset the window number whenever navigating to a new URL (loading a fresh page)
-		SmartClientAutomationContext.resetWindowNumber();
-
 		super.executeNavigateList(list);
+
+		selenide.waitForList();
 	}
 
 	@Override
 	public void executeNavigateEdit(NavigateEdit edit) {
-		// Reset the window number whenever navigating to a new URL (loading a fresh page)
-		SmartClientAutomationContext.resetWindowNumber();
-
 		super.executeNavigateEdit(edit);
+
+		selenide.waitForView(edit.getModuleName(), edit.getDocumentName());
 	}
 
+	/**
+	 * Pushes a list context. This only generates locators; the caller navigates and then waits for the list.
+	 */
 	@Override
 	public void executePushListContext(PushListContext push) {
 		SmartClientAutomationContext newContext = new SmartClientAutomationContext();
@@ -114,10 +139,11 @@ public class SmartClientInterpretedWebDriverExecutor extends InterpretedWebDrive
 		push(newContext);
 
 		newContext.generate(new SmartClientGenerateListContext(push));
-
-		selenide.waitForFullPageResponse();
 	}
 
+	/**
+	 * Pushes an edit context. This only generates locators; the caller opens the view and then waits for it.
+	 */
 	@Override
 	public void executePushEditContext(PushEditContext push) {
 		SmartClientAutomationContext newContext = new SmartClientAutomationContext();
@@ -125,49 +151,52 @@ public class SmartClientInterpretedWebDriverExecutor extends InterpretedWebDrive
 		push(newContext);
 
 		newContext.generate(new SmartClientGenerateEditContext(push));
-
-		selenide.waitForFullPageResponse();
 	}
-	
+
+	/**
+	 * Selects a tab. A {@code ::}-separated path selects each tab along the path in turn.
+	 */
 	@Override
 	public void executeTabSelect(TabSelect tabSelect) {
-		SmartClientAutomationContext context = peek();
-		@SuppressWarnings("null") // uses a nullable result where the API expects non-null
-		String identifier = tabSelect.getIdentifier(context);
+		prepareForInteraction();
+		SmartClientAutomationContext context = context();
 
-		@SuppressWarnings("null") // a null here fails the test
-		List<Locator> locators = context.getLocators(identifier);
-		if (locators == null) {
-			throw new MetaDataException(
-					String.format("<tabSelect /> with path [%s] is not valid or is not on the view", tabSelect.getTabPath()));
-		}
-		
-		if (tabSelect.getTabPath().contains("/")) {
-			// TODO: Address this edge case properly
-			throw new MetaDataException(
-			        String.format("<tabSelect /> with path [%s] is invalid because '/' cannot be used with SmartClient locators", tabSelect.getTabPath()));
-		}
-
-		boolean success = false;
-		for (Locator locator : locators) {
-			if (success) {
-				continue;
+		String path = tabSelect.getTabPath();
+		String[] titles = path.split("::");
+		StringBuilder prefix = new StringBuilder(path.length());
+		for (String title : titles) {
+			if (prefix.length() > 0) {
+				prefix.append("::");
+			}
+			prefix.append(title);
+			String identifier = prefix + " Tab";
+			List<Locator> locators = context.getLocators(identifier);
+			if ((locators == null) && (titles.length > 1)) {
+				locators = context.getLocators(title + " Tab");
+			}
+			if (locators == null) {
+				throw new MetaDataException(String.format("<tabSelect /> with path [%s] is not valid or is not on the view (no tab [%s])",
+															path, prefix));
 			}
 
-			selenide.trace(String.format("click tab [%s] (%s)", tabSelect.getTabPath(), locator));
-			success = selenide.tab(new SmartClientTabCommand(locator.getLocator()));
-		}
+			boolean success = false;
+			for (Locator locator : locators) {
+				if (! success) {
+					selenide.trace(String.format("click tab [%s] (%s)", prefix, locator));
+					success = selenide.tab(new SmartClientTabCommand(locator.getLocator()));
+				}
+			}
 
-		if (!success) {
-			throw new DomainException("Tab not selected");
+			if (! success) {
+				throw new DomainException("Tab [" + prefix + "] not selected");
+			}
 		}
-
-		selenide.waitForFullPageResponse();
 	}
 
 	@Override
 	public void executeTestDataEnter(TestDataEnter testDataEnter) {
-		SmartClientAutomationContext context = peek();
+		prepareForInteraction();
+		SmartClientAutomationContext context = context();
 
 		User u = CORE.getUser();
 		Customer c = u.getCustomer();
@@ -175,7 +204,7 @@ public class SmartClientInterpretedWebDriverExecutor extends InterpretedWebDrive
 		Module m = c.getModule(context.getModuleName());
 		@SuppressWarnings("null") // uses a nullable result where the API expects non-null
 		Document d = m.getDocument(c, context.getDocumentName());
-		
+
 		Bean bean = null;
 
 		String fixture = testDataEnter.getFixture();
@@ -205,58 +234,128 @@ public class SmartClientInterpretedWebDriverExecutor extends InterpretedWebDrive
 		}
 	}
 
-	@SuppressWarnings("null") // checks values the annotations say are non-null
+	/**
+	 * Enters data into the widget(s) bound to the binding.
+	 * <p>
+	 * Checkboxes take {@code true} or {@code false}; combos and radios take a zero-based option index;
+	 * sliders take a number; lookup descriptions take search text and pick the first match;
+	 * everything else is typed. While a data grid row is being edited inline (after {@code dataGridEdit}
+	 * or {@code dataGridNew} on an inline grid), the binding is first tried as a column of that grid.
+	 */
 	@Override
 	public void executeDataEnter(DataEnter dataEnter) {
-		SmartClientAutomationContext context = peek();
+		prepareForDataEntry();
+		SmartClientAutomationContext context = context();
 
 		String identifier = dataEnter.getIdentifier(context);
-		List<Locator> locators = context.getLocators(identifier);
+		List<Locator> locators = inputLocators(context, identifier);
 		if (locators == null) {
 			throw new MetaDataException(
 					String.format("<dataEnter /> with binding [%s] is not supported or is not on the view", identifier));
 		}
 
+		// Never replace with a new line as chrome under test will trip the default button on the form
+		String value = dataEnter.getValue();
+		if (value != null) {
+			value = value.replace("\n", " ");
+		}
+
 		boolean success = false;
+		boolean supported = false;
 		for (Locator locator : locators) {
 			InputType inputType = locator.getInputType();
-
-			// Never replace with a new line as chrome under test will trip the default button on the form
-			String value = dataEnter.getValue();
-			if (value != null) {
-				value = value.replace("\n", " ");
-			}
-
-			selenide.trace(String.format("set %s to %s", identifier, value));
-
-			if (InputType.CHECKBOX == inputType) {
-				success = success || selenide.checkbox(new SmartClientCheckboxCommand(locator.getLocator(), Boolean.valueOf(value)));
-			} else if (InputType.COMBO == inputType) {
-				success = success || selenide.selectOne(new SmartClientSelectOneCommand(locator.getLocator(), Integer.parseInt(value)));
-			} else if (InputType.TEXT == inputType) {
-				success = success || selenide.text(new SmartClientTextCommand(locator.getLocator(), value, false));
-			} else if (InputType.RADIO == inputType) {
-				success = success || selenide.radio(new SmartClientRadioCommand(locator.getLocator(), Integer.parseInt(value)));
+			if ((! success) && (inputType != null)) {
+				supported = true;
+				selenide.trace(String.format("set %s to %s", identifier, value));
+				success = enter(locator.getLocator(), inputType, value);
 			}
 		}
 
-		if (!success) {
-			throw new DomainException("Data entry failed");
+		if (! supported) {
+			throw new MetaDataException(String.format("<dataEnter /> with binding [%s] is on the view but its widget does not take data entry", identifier));
+		}
+		if (! success) {
+			throw new DomainException(String.format("Data entry failed for binding [%s] (is the widget disabled or read only?)", identifier));
 		}
 
 		selenide.waitForFullPageResponse();
 	}
 
 	/**
+	 * Enters a value into one widget.
+	 *
+	 * @param locator	the widget's locator
+	 * @param inputType	how data is entered
+	 * @param value		the value
+	 * @return {@code true} if the value was entered
+	 */
+	private boolean enter(@Nonnull String locator, @Nonnull InputType inputType, @Nullable String value) {
+		switch (inputType) {
+			case CHECKBOX:
+				return selenide.checkbox(new SmartClientCheckboxCommand(locator, Boolean.valueOf(value)));
+			case COMBO:
+				return selenide.selectOne(new SmartClientSelectOneCommand(locator, index(value)));
+			case RADIO:
+				return selenide.radio(new SmartClientRadioCommand(locator, index(value)));
+			case LOOKUP_DESCRIPTION:
+				return selenide.lookupDescriptionBySearch(new SmartClientLookupDescriptionBySearchCommand(locator, value));
+			case RICH_TEXT:
+				return selenide.richText(locator, value);
+			case SLIDER:
+				if (value == null) {
+					throw new MetaDataException("<dataEnter /> on a slider needs a value");
+				}
+				return selenide.slider(locator, value);
+			case TEXT:
+			default:
+				return selenide.text(new SmartClientTextCommand(locator, value, false));
+		}
+	}
+
+	/**
+	 * Parses a combo or radio index.
+	 *
+	 * @param value	the value
+	 * @return the index
+	 */
+	private static int index(@Nullable String value) {
+		try {
+			return Integer.parseInt(value);
+		}
+		catch (NumberFormatException e) {
+			throw new MetaDataException("<dataEnter /> on a SmartClient combo or radio takes a zero-based option index, not [" + value + "]", e);
+		}
+	}
+
+	/**
+	 * Finds the input locators for a binding, preferring a column of a data grid row being edited inline.
+	 *
+	 * @param context		the context
+	 * @param identifier	the binding
+	 * @return the locators, or {@code null}
+	 */
+	private static @Nullable List<Locator> inputLocators(@Nonnull SmartClientAutomationContext context, @Nonnull String identifier) {
+		String inline = context.getInlineGridBinding();
+		if (inline != null) {
+			List<Locator> result = context.getLocators(inline + '.' + identifier);
+			if (result != null) {
+				return result;
+			}
+		}
+		return context.getLocators(identifier);
+	}
+
+	/**
 	 * Attempts to click a button identified by the given {@link Step} and tag name within the current UI context.
-	 * 
+	 *
 	 * @param button the Step object representing the button to click
 	 * @param tagName the XML tag name of the button action
 	 * @param confirm whether to confirm the button click action
 	 * @param testSuccess optional flag to control triggering test success actions; if null or true, test success is executed
 	 */
-	private void button(Step button, String tagName, boolean confirm, Boolean testSuccess) {
-		SmartClientAutomationContext context = peek();
+	private void button(@Nonnull Step button, @Nonnull String tagName, boolean confirm, @Nullable Boolean testSuccess) {
+		prepareForInteraction();
+		SmartClientAutomationContext context = context();
 
 		User u = CORE.getUser();
 		Customer c = u.getCustomer();
@@ -283,35 +382,26 @@ public class SmartClientInterpretedWebDriverExecutor extends InterpretedWebDrive
 
 		boolean success = false;
 		for (Locator locator : locators) {
-			if (success) {
-				continue;
-			}
-
-			selenide.trace(String.format("click [%s]", tagName));
-			success = selenide.button(new SmartClientButtonCommand(locator.getLocator(), confirm));
-
-			if (success) {
-				if (BooleanUtils.isNotFalse(testSuccess)) {
-					executeTestSuccess(new TestSuccess());
-				} else {
-					selenide.ok();
-				}
+			if (! success) {
+				selenide.trace(String.format("click [%s]", tagName));
+				success = selenide.button(new SmartClientButtonCommand(locator.getLocator(), confirm));
 			}
 		}
 
-		if (!success) {
-			throw new DomainException("Could not click button");
+		if (! success) {
+			throw new DomainException(String.format("Could not click button [%s]: it is disabled", tagName));
+		}
+
+		// testSuccess="false" leaves any message for a following testSuccess or testFailure step to check
+		if (BooleanUtils.isNotFalse(testSuccess)) {
+			executeTestSuccess(new TestSuccess());
 		}
 	}
 
 	@Override
 	public void executeOk(Ok ok) {
 		button(ok, "ok", false, ok.getTestSuccess());
-		pop();
-
-		SmartClientAutomationContext.decrementWindowNumber();
-
-		selenide.waitForFullPageResponse();
+		closed();
 	}
 
 	@SuppressWarnings("null") // a null here fails the test
@@ -327,69 +417,71 @@ public class SmartClientInterpretedWebDriverExecutor extends InterpretedWebDrive
 			SmartClientAutomationContext context = peek();
 			context.setViewType(ViewType.edit);
 		}
-
-		selenide.waitForFullPageResponse();
 	}
 
 	@Override
 	public void executeCancel(Cancel cancel) {
 		button(cancel, "cancel", false, cancel.getTestSuccess());
-		pop();
-
-		SmartClientAutomationContext.decrementWindowNumber();
-
-		selenide.waitForFullPageResponse();
+		closed();
 	}
 
 	@Override
 	public void executeDelete(Delete delete) {
 		button(delete, "delete", true, delete.getTestSuccess());
-		pop();
-
-		SmartClientAutomationContext.decrementWindowNumber();
-
-		selenide.waitForFullPageResponse();
+		closed();
 	}
 
 	@Override
 	public void executeZoomOut(ZoomOut zoomOut) {
 		button(zoomOut, "zoom out", false, zoomOut.getTestSuccess());
-		pop();
-
-		SmartClientAutomationContext.decrementWindowNumber();
-
-		selenide.waitForFullPageResponse();
+		closed();
 	}
 
 	@Override
 	public void executeRemove(Remove remove) {
 		button(remove, "remove", true, remove.getTestSuccess());
+		closed();
+	}
+
+	/**
+	 * Pops the context of a view that an action closed and waits for the browser to show the view underneath.
+	 */
+	private void closed() {
 		pop();
+		SmartClientAutomationContext context = peek();
+		if (context != null) {
+			awaitView(context);
+		}
+	}
 
-		SmartClientAutomationContext.decrementWindowNumber();
-
-		selenide.waitForFullPageResponse();
+	/**
+	 * Waits until the browser shows the view a context describes.
+	 *
+	 * @param context	the context
+	 */
+	@SuppressWarnings("null") // edit contexts have a module and document
+	private void awaitView(@Nonnull SmartClientAutomationContext context) {
+		if (ViewType.list == context.getViewType()) {
+			selenide.waitForList();
+		}
+		else {
+			selenide.waitForView(context.getModuleName(), context.getDocumentName());
+		}
 	}
 
 	@Override
 	public void executeAction(Action action) {
 		button(action, action.getActionName(), Boolean.TRUE.equals(action.getConfirm()), action.getTestSuccess());
-
-		selenide.waitForFullPageResponse();
 	}
 
 	@Override
 	public void executeLookupDescriptionAutoComplete(LookupDescriptionAutoComplete complete) {
 		lookupDescription(complete, complete.getBinding(), null, complete.getSearch());
-
-		selenide.waitForFullPageResponse();
 	}
 
 	@Override
 	public void executeLookupDescriptionPick(LookupDescriptionPick pick) {
 		lookupDescription(pick, pick.getBinding(), pick.getRow(), null);
-
-		selenide.waitForFullPageResponse();
 	}
 
 	/**
@@ -400,106 +492,87 @@ public class SmartClientInterpretedWebDriverExecutor extends InterpretedWebDrive
 	 * @param row optional row index for row-based lookup; if null, search parameter is used
 	 * @param search optional search text for autocomplete lookup; used if row is null
 	 */
-	private void lookupDescription(Step step, String binding, Integer row, String search) {
-		SmartClientAutomationContext context = peek();
-		
-		@SuppressWarnings("null") // a null here fails the test
-		List<Locator> locators = context.getLocators(binding);
-		if (locators == null) {
-			throw new MetaDataException(String.format("<%s /> with binding [%s] is not on the view", step.getClass()
-					.getSimpleName(), binding));
-		}
+	private void lookupDescription(@Nonnull Step step, @Nonnull String binding, @Nullable Integer row, @Nullable String search) {
+		prepareForInteraction();
+		List<Locator> locators = locators(step, binding);
 
 		boolean success = false;
-
 		for (Locator locator : locators) {
-			if (row != null) {
-				selenide.trace(String.format("Pick on row %d on lookup description [%s]", row, binding));
-				success = success || selenide.lookupDescriptionByRow(new SmartClientLookupDescriptionByRowCommand(locator.getLocator(), row.intValue()));
-			} else {
-				selenide.trace(String.format("Auto complete with search '%s' on lookup description [%s]", search, binding));
-				success = success || selenide.lookupDescriptionBySearch(new SmartClientLookupDescriptionBySearchCommand(locator.getLocator(), search));
+			if (! success) {
+				if (row != null) {
+					selenide.trace(String.format("Pick on row %d on lookup description [%s]", row, binding));
+					success = selenide.lookupDescriptionByRow(new SmartClientLookupDescriptionByRowCommand(locator.getLocator(), row.intValue()));
+				} else {
+					selenide.trace(String.format("Auto complete with search '%s' on lookup description [%s]", search, binding));
+					success = selenide.lookupDescriptionBySearch(new SmartClientLookupDescriptionBySearchCommand(locator.getLocator(), search));
+				}
 			}
 		}
 
-		if (!success) {
-			throw new DomainException("Data entry failed");
+		if (! success) {
+			throw new DomainException(String.format("Lookup description [%s] failed (is it disabled?)", binding));
 		}
+	}
+
+	/**
+	 * Returns the locators for an identifier, failing if there are none.
+	 *
+	 * @param step			the step, for the message
+	 * @param identifier	the identifier
+	 * @return the locators
+	 */
+	private @Nonnull List<Locator> locators(@Nonnull Step step, @Nonnull String identifier) {
+		List<Locator> result = context().getLocators(identifier);
+		if (result == null) {
+			throw new MetaDataException(String.format("<%s /> with binding [%s] is not on the view",
+														step.getClass().getSimpleName(), identifier));
+		}
+		return result;
 	}
 
 	@Override
 	public void executeLookupDescriptionNew(LookupDescriptionNew nu) {
-		lookupDescriptionNew(nu, nu.getBinding());
-
-		// Determine the document of the edit view to push
-		SmartClientAutomationContext context = peek();
-		String binding = nu.getBinding();
-
-		User u = CORE.getUser();
-		Customer c = u.getCustomer();
-		@SuppressWarnings("null") // a null here fails the test; uses a nullable result where the API expects non-null
-		Module m = c.getModule(context.getModuleName());
-		@SuppressWarnings("null") // uses a nullable result where the API expects non-null
-		Document d = m.getDocument(c, context.getDocumentName());
-		TargetMetaData target = BindUtil.getMetaDataForBinding(c, m, d, binding);
-		Relation relation = (Relation) target.getAttribute();
-
-		if (relation != null) {
-			String newDocumentName = relation.getDocumentName();
-			d = m.getDocument(c, newDocumentName);
-			String newModuleName = d.getOwningModuleName();
-
-			// Push it
-			PushEditContext push = new PushEditContext();
-			push.setModuleName(newModuleName);
-			push.setDocumentName(newDocumentName);
-
-			SmartClientAutomationContext.incrementWindowNumber();
-			push.execute(this);
-		}
-
-		selenide.waitForFullPageResponse();
-	}
-	
-	/**
-	 * Executes a new action on lookup descriptions for UI elements identified by the given binding.
-	 * 
-	 * @param step the Step object representing the current automation step
-	 * @param binding the binding string used to identify UI elements
-	 */
-	private void lookupDescriptionNew(Step step, String binding) {
-		SmartClientAutomationContext context = peek();
-
-		@SuppressWarnings("null") // a null here fails the test
-		List<Locator> locators = context.getLocators(binding);
-		if (locators == null) {
-			throw new MetaDataException(String.format("<%s /> with binding [%s] is not on the view",
-					step.getClass().getSimpleName(), binding));
-		}
-
-		boolean success = false;
-
-		for (Locator locator : locators) {
-			if (success) {
-				continue;
-			}
-
-			selenide.trace(String.format("New on lookup description [%s]", binding));
-			success = selenide.lookupDescriptionNew(locator.getLocator());
-		}
-
-		if (!success) {
-			throw new DomainException("New on lookup description failed");
-		}
+		lookupDescriptionMenu(nu, nu.getBinding(), true);
 	}
 
 	@Override
 	public void executeLookupDescriptionEdit(LookupDescriptionEdit edit) {
-		lookupDescriptionEdit(edit, edit.getBinding());
+		lookupDescriptionMenu(edit, edit.getBinding(), false);
+	}
 
-		// Determine the document of the edit view to push
-		SmartClientAutomationContext context = peek();
-		String binding = edit.getBinding();
+	/**
+	 * Chooses New or Edit on a lookup description, then pushes the context of the view that opens.
+	 *
+	 * @param step		the step
+	 * @param binding	the lookup description's binding
+	 * @param nu		{@code true} for New, {@code false} for Edit
+	 */
+	private void lookupDescriptionMenu(@Nonnull Step step, @Nonnull String binding, boolean nu) {
+		prepareForInteraction();
+		List<Locator> locators = locators(step, binding);
+
+		boolean success = false;
+		for (Locator locator : locators) {
+			if (! success) {
+				selenide.trace(String.format("%s on lookup description [%s]", nu ? "New" : "Edit", binding));
+				success = nu ? selenide.lookupDescriptionNew(locator.getLocator()) : selenide.lookupDescriptionEdit(locator.getLocator());
+			}
+		}
+
+		if (! success) {
+			throw new DomainException(String.format("%s on lookup description [%s] failed (is it disabled?)", nu ? "New" : "Edit", binding));
+		}
+
+		pushRelated(binding);
+	}
+
+	/**
+	 * Pushes the edit context of the document a relation binding points to, and waits for its view to show.
+	 *
+	 * @param binding	the relation binding, relative to the current context's document
+	 */
+	private void pushRelated(@Nonnull String binding) {
+		SmartClientAutomationContext context = context();
 
 		User u = CORE.getUser();
 		Customer c = u.getCustomer();
@@ -508,9 +581,7 @@ public class SmartClientInterpretedWebDriverExecutor extends InterpretedWebDrive
 		@SuppressWarnings("null") // uses a nullable result where the API expects non-null
 		Document d = m.getDocument(c, context.getDocumentName());
 		TargetMetaData target = BindUtil.getMetaDataForBinding(c, m, d, binding);
-		Relation relation = (Relation) target.getAttribute();
-
-		if (relation != null) {
+		if (target.getAttribute() instanceof Relation relation) {
 			String newDocumentName = relation.getDocumentName();
 			d = m.getDocument(c, newDocumentName);
 			String newModuleName = d.getOwningModuleName();
@@ -519,238 +590,141 @@ public class SmartClientInterpretedWebDriverExecutor extends InterpretedWebDrive
 			PushEditContext push = new PushEditContext();
 			push.setModuleName(newModuleName);
 			push.setDocumentName(newDocumentName);
-
-			SmartClientAutomationContext.incrementWindowNumber();
 			push.execute(this);
+
+			selenide.waitForView(newModuleName, newDocumentName);
 		}
-
-		selenide.waitForFullPageResponse();
-	}
-
-	/**
-	 * Performs an edit action on lookup descriptions for UI elements identified by the given binding.
-	 * 
-	 * @param step the Step object representing the current automation step
-	 * @param binding the binding string used to identify UI elements
-	 */
-	private void lookupDescriptionEdit(Step step, String binding) {
-		SmartClientAutomationContext context = peek();
-
-		@SuppressWarnings("null") // a null here fails the test
-		List<Locator> locators = context.getLocators(binding);
-		if (locators == null) {
-			throw new MetaDataException(String.format("<%s /> with binding [%s] is not on the view",
-					step.getClass().getSimpleName(), binding));
-		}
-
-		boolean success = false;
-
-		for (Locator locator : locators) {
-			if (success) {
-				continue;
-			}
-
-			selenide.trace(String.format("Edit on lookup description [%s]", binding));
-			success = selenide.lookupDescriptionEdit(locator.getLocator());
-		}
-
-		if (!success) {
-			throw new DomainException("Edit on lookup description failed");
+		else {
+			throw new MetaDataException("Binding [" + binding + "] is not a relation, so it does not open a view");
 		}
 	}
 
 	@Override
 	public void executeZoomIn(ZoomIn zoom) {
 		button(zoom, "zoomIn", false, zoom.getTestSuccess());
-
-		// Determine the document of the edit view to push
-		SmartClientAutomationContext context = peek();
-
-		String binding = zoom.getBinding();
-		Customer c = CORE.getUser().getCustomer();
-		@SuppressWarnings("null") // a null here fails the test; uses a nullable result where the API expects non-null
-		Module m = c.getModule(context.getModuleName());
-		@SuppressWarnings("null") // uses a nullable result where the API expects non-null
-		Document d = m.getDocument(c, context.getDocumentName());
-		TargetMetaData target = BindUtil.getMetaDataForBinding(c, m, d, binding);
-		Relation relation = (Relation) target.getAttribute();
-
-		if (relation != null) {
-			String newDocumentName = relation.getDocumentName();
-			d = m.getDocument(c, newDocumentName);
-			String newModuleName = d.getOwningModuleName();
-			
-			// Push it
-			PushEditContext push = new PushEditContext();
-			push.setModuleName(newModuleName);
-			push.setDocumentName(newDocumentName);
-
-			SmartClientAutomationContext.incrementWindowNumber();
-			push.execute(this);
-		}
-
-		selenide.waitForFullPageResponse();
+		pushRelated(zoom.getBinding());
 	}
-	
+
 	@Override
 	public void executeDataGridNew(DataGridNew nu) {
 		dataGridGesture(nu, nu.getBinding(), null);
-
-		selenide.waitForFullPageResponse();
 	}
-	
+
 	@Override
 	public void executeDataGridZoom(DataGridZoom zoom) {
 		dataGridGesture(zoom, zoom.getBinding(), zoom.getRow());
-
-		selenide.waitForFullPageResponse();
 	}
-	
+
 	@Override
 	public void executeDataGridRemove(DataGridRemove remove) {
 		dataGridGesture(remove, remove.getBinding(), remove.getRow());
-
-		selenide.waitForFullPageResponse();
-		selenide.sleep(250, "Waiting for asynchronous DataGrid update");
 	}
 
 	@Override
 	public void executeDataGridSelect(DataGridSelect select) {
 		dataGridGesture(select, select.getBinding(), select.getRow());
-
-		selenide.waitForFullPageResponse();
-	}
-
-	@Override
-	public void executeDataGridEdit(DataGridEdit edit) {
-		// TODO Auto-generated method stub
 	}
 
 	/**
-	 * Executes a data grid gesture (new, select, zoom, or remove) on the UI element identified by the binding.
-	 * 
+	 * Selects the row, then clicks the grid's Edit button so the row is edited inline.
+	 * Following {@code dataEnter} steps address the grid's columns by their bindings,
+	 * until any other kind of step ends the inline edit.
+	 */
+	@Override
+	public void executeDataGridEdit(DataGridEdit edit) {
+		dataGridGesture(edit, edit.getBinding(), edit.getRow());
+	}
+
+	/**
+	 * Executes a data grid gesture (new, select, zoom, edit or remove) on the UI element identified by the binding.
+	 *
 	 * @param step the Step object representing the data grid action to perform
 	 * @param binding the binding string used to identify the data grid UI elements
 	 * @param row optional row index for row-specific gestures; required for select, zoom, and remove actions
 	 */
-	private void dataGridGesture(Step step, String binding, Integer row) {
-		SmartClientAutomationContext context = peek();
+	private void dataGridGesture(@Nonnull Step step, @Nonnull String binding, @Nullable Integer row) {
+		prepareForInteraction();
+		SmartClientAutomationContext context = context();
 		@SuppressWarnings("null") // uses a nullable result where the API expects non-null
 		String buttonIdentifier = step.getIdentifier(context);
-		
+
 		@SuppressWarnings("null") // a null here fails the test; uses a nullable result where the API expects non-null
 		List<Locator> locators = context.getLocators(buttonIdentifier);
 		if (locators == null) {
 			throw new MetaDataException(String.format("<%s /> with binding [%s] is not on the view", step.getClass()
 					.getSimpleName(), binding));
 		}
+		boolean inline = (context.getLocators(binding + ".inline") != null);
+
+		if ((! (step instanceof DataGridNew)) && (row == null)) {
+			throw new MetaDataException(String.format("<%s /> with binding [%s] needs a row", step.getClass().getSimpleName(), binding));
+		}
+
+		// Must select row before completing zoom, edit or remove actions
+		if ((step instanceof DataGridZoom) || (step instanceof DataGridRemove) || (step instanceof DataGridEdit)) {
+			DataGridSelect select = new DataGridSelect();
+			select.setBinding(binding);
+			select.setRow(row);
+			executeDataGridSelect(select);
+		}
 
 		boolean success = false;
-
 		for (Locator locator : locators) {
-			if (success) {
-				continue;
-			}
-
-			if (row != null) {
-				if (step instanceof DataGridZoom) {
-					selenide.trace(String.format("Zoom on row %d on data grid [%s]", row, binding));
-				} else if (step instanceof DataGridSelect) {
-					selenide.trace(String.format("Select on row %d on list grid [%s]", row, binding));
-				} else {
-					selenide.trace(String.format("Remove on row %d on data grid [%s]", row, binding));
-				}
-			} else {
-				selenide.trace(String.format("New row on data grid [%s]", binding));
-			}
-
-			if (step instanceof DataGridNew) {
-				success = selenide.dataGridButton(new SmartClientDataGridButtonCommand(locator.getLocator(), false));
-			} else {
-				if (row == null) {
-					throw new MetaDataException("No row defined in DataGridSelect");
-				}
-
+			if (! success) {
 				if (step instanceof DataGridSelect) {
-					success = selenide.dataGridSelect(new SmartClientDataGridSelectCommand(locator.getLocator(), row.intValue()));
-				} else {
-					// Must select row before completing zoom or remove actions
-					DataGridSelect select = new DataGridSelect();
-					select.setBinding(binding);
-					select.setRow(row);
-
-					executeDataGridSelect(select);
-
-					if (step instanceof DataGridRemove) {
-						success = selenide.dataGridButton(new SmartClientDataGridButtonCommand(locator.getLocator(), true));
-					} else {
-						success = selenide.dataGridButton(new SmartClientDataGridButtonCommand(locator.getLocator(), false));
-					}
+					selenide.trace(String.format("Select on row %d on data grid [%s]", row, binding));
+					@SuppressWarnings("null") // checked above
+					int r = row.intValue();
+					success = selenide.dataGridSelect(new SmartClientDataGridSelectCommand(locator.getLocator(), r));
+				}
+				else {
+					selenide.trace(String.format("%s on data grid [%s]%s",
+													step.getClass().getSimpleName(),
+													binding,
+													(row == null) ? "" : " row " + row));
+					success = selenide.dataGridButton(new SmartClientDataGridButtonCommand(locator.getLocator(), step instanceof DataGridRemove));
 				}
 			}
 		}
 
-		if (!success) {
-			throw new DomainException("Data grid gesture failed");
+		if (! success) {
+			throw new DomainException(String.format("<%s /> on data grid [%s] failed: the grid's button is disabled",
+														step.getClass().getSimpleName(), binding));
 		}
 
-		// Determine the document of the edit view to push
-		if (step instanceof DataGridNew || step instanceof DataGridZoom) {
-			User u = CORE.getUser();
-			Customer c = u.getCustomer();
-			@SuppressWarnings("null") // uses a nullable result where the API expects non-null
-			Module m = c.getModule(context.getModuleName());
-			@SuppressWarnings("null") // uses a nullable result where the API expects non-null
-			Document d = m.getDocument(c, context.getDocumentName());
-			TargetMetaData target = BindUtil.getMetaDataForBinding(c, m, d, binding);
-			Relation relation = (Relation) target.getAttribute();
-
-			if (relation != null) {
-				String newDocumentName = relation.getDocumentName();
-				d = m.getDocument(c, newDocumentName);
-				String newModuleName = d.getOwningModuleName();
-				
-				// Push it
-				PushEditContext push = new PushEditContext();
-				push.setModuleName(newModuleName);
-				push.setDocumentName(newDocumentName);
-
-				SmartClientAutomationContext.incrementWindowNumber();
-				push.execute(this);
-			}
+		if ((step instanceof DataGridEdit) || (inline && (step instanceof DataGridNew))) {
+			// the row is now being edited inline
+			context.setInlineGridBinding(binding);
+		}
+		else if ((step instanceof DataGridNew) || (step instanceof DataGridZoom)) {
+			pushRelated(binding);
 		}
 	}
 
 	@Override
 	public void executeListGridNew(ListGridNew nu) {
 		listGridGesture(nu, null);
-		
+
 		PushEditContext push = listGridContext(nu.getQueryName(), nu.getDocumentName(), nu.getModelName(), nu);
 		push.setCreateView(nu.getCreateView());
-
-		SmartClientAutomationContext.incrementWindowNumber();
 		push.execute(this);
 
-		selenide.waitForFullPageResponse();
+		selenide.waitForView(push.getModuleName(), push.getDocumentName());
 	}
 
 	@Override
 	public void executeListGridZoom(ListGridZoom zoom) {
 		listGridGesture(zoom, zoom.getRow());
-		
-		PushEditContext push = listGridContext(zoom.getQueryName(), zoom.getDocumentName(), zoom.getModelName(), zoom);
 
-		SmartClientAutomationContext.incrementWindowNumber();
+		PushEditContext push = listGridContext(zoom.getQueryName(), zoom.getDocumentName(), zoom.getModelName(), zoom);
 		push.execute(this);
 
-		selenide.waitForFullPageResponse();
+		selenide.waitForView(push.getModuleName(), push.getDocumentName());
 	}
 
 	@Override
 	public void executeListGridSelect(ListGridSelect select) {
 		listGridGesture(select, select.getRow());
-
-		selenide.waitForFullPageResponse();
 	}
 
 	/**
@@ -759,57 +733,63 @@ public class SmartClientInterpretedWebDriverExecutor extends InterpretedWebDrive
 	 * @param step the Step object representing the list grid action to perform
 	 * @param row the row index for row-specific actions; may be required depending on the step type
 	 */
-	private void listGridGesture(Step step, Integer row) {
-		SmartClientAutomationContext context = peek();
+	private void listGridGesture(@Nonnull Step step, @Nullable Integer row) {
+		prepareForInteraction();
+		SmartClientAutomationContext context = context();
 		@SuppressWarnings("null") // uses a nullable result where the API expects non-null
 		String buttonIdentifier = step.getIdentifier(context);
 		@SuppressWarnings("null") // a null here fails the test
 		String listGridIdentifier = buttonIdentifier.substring(0, buttonIdentifier.lastIndexOf('.'));
-		
+
 		@SuppressWarnings("null") // a null here fails the test
 		List<Locator> locators = context.getLocators(buttonIdentifier);
 		if (locators == null) {
 			throw new MetaDataException(String.format("<%s /> with identifier [%s] is not defined", step.getClass()
 					.getSimpleName(), listGridIdentifier));
 		}
+		if ((! (step instanceof ListGridNew)) && (row == null)) {
+			throw new MetaDataException(String.format("<%s /> on list grid [%s] needs a row", step.getClass().getSimpleName(), listGridIdentifier));
+		}
+
+		if (step instanceof ListGridZoom zoom) {
+			// Must select row before completing zoom action
+			ListGridSelect select = new ListGridSelect();
+			select.setModuleName(zoom.getModuleName());
+			select.setDocumentName(zoom.getDocumentName());
+			select.setModelName(zoom.getModelName());
+			select.setQueryName(zoom.getQueryName());
+			select.setRow(zoom.getRow());
+
+			executeListGridSelect(select);
+		}
 
 		boolean success = false;
-
 		for (Locator locator : locators) {
-			if (success) {
-				continue;
-			}
-
-			if (step instanceof ListGridNew) {
-				selenide.trace(String.format("New on list grid [%s]", listGridIdentifier));
-				success = selenide.listGridButton(new SmartClientListGridButtonCommand(locator.getLocator(), false));
-			} else if (step instanceof ListGridSelect) {
-				selenide.trace(String.format("Select on row %d on list grid [%s]", row, listGridIdentifier));
-				success = selenide.listGridSelect(new SmartClientListGridSelectCommand(locator.getLocator(), row.intValue()));
-			} else if (step instanceof ListGridZoom zoom) {
-				// Must select row before completing zoom action
-				ListGridSelect select = new ListGridSelect();
-				select.setModuleName(zoom.getModuleName());
-				select.setDocumentName(zoom.getDocumentName());
-				select.setModelName(zoom.getModelName());
-				select.setQueryName(zoom.getQueryName());
-				select.setRow(zoom.getRow());
-
-				executeListGridSelect(select);
-
-				selenide.trace(String.format("Zoom on row %d on list grid [%s]", row, listGridIdentifier));
-				success = selenide.listGridButton(new SmartClientListGridButtonCommand(locator.getLocator(), false));
+			if (! success) {
+				if (step instanceof ListGridSelect) {
+					selenide.trace(String.format("Select on row %d on list grid [%s]", row, listGridIdentifier));
+					@SuppressWarnings("null") // checked above
+					int r = row.intValue();
+					success = selenide.listGridSelect(new SmartClientListGridSelectCommand(locator.getLocator(), r));
+				} else {
+					selenide.trace(String.format("%s on list grid [%s]%s",
+													(step instanceof ListGridNew) ? "New" : "Zoom",
+													listGridIdentifier,
+													(row == null) ? "" : " row " + row));
+					success = selenide.listGridButton(new SmartClientListGridButtonCommand(locator.getLocator(), false));
+				}
 			}
 		}
 
-		if (!success) {
-			throw new DomainException("List grid gesture failed");
+		if (! success) {
+			throw new DomainException(String.format("<%s /> on list grid [%s] failed: the grid's button is disabled",
+														step.getClass().getSimpleName(), listGridIdentifier));
 		}
 	}
-	
+
 	/**
 	 * Constructs a PushEditContext based on the current view type and provided identifiers.
-	 * 
+	 *
 	 * @param queryName optional query name to resolve metadata
 	 * @param documentName optional document name to resolve metadata
 	 * @param modelName optional model name to resolve metadata
@@ -817,10 +797,13 @@ public class SmartClientInterpretedWebDriverExecutor extends InterpretedWebDrive
 	 * @return a PushEditContext with module and document names set appropriately
 	 */
 	@SuppressWarnings("null") // a null here fails the test; uses a nullable result where the API expects non-null; checks values the annotations say are non-null
-	private PushEditContext listGridContext(String queryName, String documentName, String modelName, Step step) {
+	private @Nonnull PushEditContext listGridContext(@Nullable String queryName,
+														@Nullable String documentName,
+														@Nullable String modelName,
+														@Nonnull Step step) {
 		PushEditContext result = new PushEditContext();
 
-		SmartClientAutomationContext context = peek();
+		SmartClientAutomationContext context = context();
 
 		if (ViewType.list.equals(context.getViewType())) {
 			result.setModuleName(context.getModuleName());
@@ -834,7 +817,7 @@ public class SmartClientInterpretedWebDriverExecutor extends InterpretedWebDrive
 			} else if (modelName != null) {
 				key = modelName;
 			}
-			
+
 			Customer c = CORE.getUser().getCustomer();
 			Module m = c.getModule(context.getModuleName());
 			MetaDataQueryDefinition q = m.getMetaDataQuery(key);
@@ -856,7 +839,7 @@ public class SmartClientInterpretedWebDriverExecutor extends InterpretedWebDrive
 						result.setDocumentName(d.getName());
 					} else {
 						throw new MetaDataException(
-								String.format("<%s /> with identifier [%s] requires queryName, documentName or modelName defined", 
+								String.format("<%s /> with identifier [%s] requires queryName, documentName or modelName defined",
 										step.getClass().getSimpleName(), step.getIdentifier(context)));
 					}
 				}
@@ -866,22 +849,110 @@ public class SmartClientInterpretedWebDriverExecutor extends InterpretedWebDrive
 		return result;
 	}
 
+	/**
+	 * Compares the value the widget bound to the binding displays with the expected value.
+	 * <p>
+	 * The displayed value is compared as a trimmed string: checkboxes display {@code true} or {@code false},
+	 * combos and radios their option's text, dates and times their formatted text, rich text its text
+	 * (or its HTML), sliders their number. A lookup description displays its description.
+	 */
 	@Override
 	public void executeTestValue(TestValue test) {
-		// TODO Auto-generated method stub
+		prepareForInteraction();
+		SmartClientAutomationContext context = context();
+		String binding = test.getBinding();
+		List<Locator> locators = inputLocators(context, binding);
+		if (locators == null) {
+			throw new MetaDataException(String.format("<testValue /> with binding [%s] is not on the view", binding));
+		}
+
+		String expected = test.getValue();
+		expected = (expected == null) ? "" : expected.trim();
+		List<String> actual = selenide.values(locators.get(0).getLocator());
+		selenide.trace(String.format("Test value of %s is '%s' (displayed '%s')", binding, expected, actual.get(0)));
+		for (String value : actual) {
+			if (expected.equals(value.trim())) {
+				return;
+			}
+		}
+
+		fail(String.format("<testValue /> of [%s] expected '%s' but the widget displays '%s'%s",
+							binding,
+							expected,
+							actual.get(0),
+							(actual.size() > 1) ? " (value " + actual.subList(1, actual.size()) + ')' : ""));
 	}
-	
+
+	/**
+	 * Reports a failed check according to the automation's test strategy:
+	 * {@code Assert} throws, {@code Verify} reports and carries on, {@code None} ignores it.
+	 *
+	 * @param message	what failed
+	 */
+	private void fail(@Nonnull String message) {
+		TestStrategy strategy = getTestStrategy();
+		if (TestStrategy.Assert == strategy) {
+			throw new AssertionError(message);
+		}
+		if (TestStrategy.Verify == strategy) {
+			System.err.println("**************");
+			System.err.println("Not successful - " + message);
+			System.err.println("**************");
+		}
+	}
+
 	@Override
 	public void executeTestSuccess(TestSuccess success) {
 		super.executeTestSuccess(success);
 
 		selenide.ok();
 	}
-	
+
 	@Override
 	public void executeTestFailure(TestFailure failure) {
 		super.executeTestFailure(failure);
 
 		selenide.ok();
+	}
+
+	/**
+	 * Returns the current context.
+	 *
+	 * @return the context
+	 * @throws IllegalStateException if no view has been navigated to
+	 */
+	private @Nonnull SmartClientAutomationContext context() {
+		SmartClientAutomationContext result = peek();
+		if (result == null) {
+			throw new IllegalStateException("There is no view to interact with: navigate to one first");
+		}
+		return result;
+	}
+
+	/**
+	 * Ends any inline grid edit, then checks that no dialog is in the way.
+	 */
+	private void prepareForInteraction() {
+		SmartClientAutomationContext context = peek();
+		if ((context != null) && (context.getInlineGridBinding() != null)) {
+			selenide.trace("End inline editing of data grid [" + context.getInlineGridBinding() + ']');
+			selenide.endInlineEditing();
+			context.setInlineGridBinding(null);
+		}
+		prepareForDataEntry();
+	}
+
+	/**
+	 * Checks that no dialog is in the way. A message left by an action whose success was not tested is
+	 * dismissed (and traced); an unanswered question fails the step, because answering it is the script's job.
+	 */
+	private void prepareForDataEntry() {
+		String kind = selenide.dialogKind();
+		if ("ask".equals(kind)) {
+			throw new IllegalStateException("An unanswered question is showing: " + selenide.dialogMessage());
+		}
+		if (kind != null) {
+			selenide.ok();
+		}
 	}
 }
