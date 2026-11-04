@@ -12,6 +12,25 @@
 		<testSuccess />
 		<switchMode />
 	</before>
+	<interaction name="Truncate all the data (SmartClient only), keeping the bootstrap user">
+		<method>
+			<comment>Truncate deletes every row of the customer's data; the restore below puts it back</comment>
+			<navigateMenu module="admin" item="DevOps/Data Maintenance" />
+			<tabSelect path="Data" />
+			<dataEnter binding="injectBootstrapUser" value="true" />
+			<dataEnter binding="confirmPassword" value="admin" />
+			<action name="Truncate" />
+			<testSuccess />
+			<comment>The marker left after the backup has gone with everything else</comment>
+			<navigateMenu module="admin" item="Security Admin/Data Groups" />
+			<testGridRows module="admin" document="DataGroup" maxRows="0" />
+			<comment>Truncating re-creates the bootstrap user, which ends this session: sign in again</comment>
+			<logout />
+			<login user="admin" password="admin" />
+			<testSuccess />
+			<switchMode />
+		</method>
+	</interaction>
 	<interaction name="Restore the backup made before the suite">
 		<method>
 			<navigateEdit module="admin" document="DataMaintenance" />

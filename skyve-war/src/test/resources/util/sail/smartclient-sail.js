@@ -771,6 +771,16 @@
 		return fallback < 0 ? 0 : fallback;
 	};
 
+	/** Scrolls a grid's row into view with ListGrid.scrollToRow(); returns false if the locator is not a grid. */
+	S.scrollToRow = function (locator, row) {
+		var g = gridOf(locator);
+		if (!g.grid || !g.grid.scrollToRow) {
+			return false;
+		}
+		g.grid.scrollToRow(row);
+		return true;
+	};
+
 	/** True if a grid's row is selected (clicking it again would read as a double click, which zooms). */
 	S.rowSelected = function (locator, row) {
 		var resolved = S.resolve(S.parse(locator).spec);
@@ -1082,6 +1092,10 @@
 		}
 		tree.data.openFolders(tree.data.getParents(node));
 		var row = tree.getRecordIndex(node);
+		if (row >= 0) {
+			// a menu tree's rows scroll inside its section: bring the row into view the grid's way
+			tree.scrollToRow(row);
+		}
 		result.row = row < 0 ? null : isc.AutoTest.getElement(S.objectLocator(tree) + "/body/row[" + row + "]/col[0]");
 		return result;
 	};

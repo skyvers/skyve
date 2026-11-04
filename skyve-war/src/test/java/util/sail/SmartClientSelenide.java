@@ -790,6 +790,11 @@ public class SmartClientSelenide extends Selenide<
 				return true;
 			}
 		}
+		if (locator.startsWith(Locator.SAIL_PREFIX)) {
+			// the row may be scrolled out of the grid's body: bring it into view the grid's way first
+			script("return _sail.scrollToRow(arguments[0], arguments[1])", root(locator), Integer.valueOf(row));
+			waitForFullPageResponse();
+		}
 		String cell = String.format(locator, Integer.valueOf(row), Integer.valueOf(column));
 		SelenideElement element = require(cell).element();
 		prepare(element);
@@ -1364,6 +1369,17 @@ public class SmartClientSelenide extends Selenide<
 			throw new IllegalStateException(String.format("The %s %s is on the view but not shown (hidden here, or on a tab that is not selected)",
 															what, found.locator()));
 		}
+	}
+
+	/**
+	 * Counts the windows open in the window stack (zoomed-in views, pick lists, upload pages).
+	 *
+	 * @return the number of windows
+	 */
+	public int openWindows() {
+		waitForFullPageResponse();
+		Object count = script("return (isc.WindowStack._stack || []).length");
+		return (count instanceof Number number) ? number.intValue() : 0;
 	}
 
 	/**

@@ -1205,6 +1205,11 @@ public class SmartClientInterpretedWebDriverExecutor extends InterpretedWebDrive
 				context.setViewType(null);
 			}
 		}
+		int windows = selenide.openWindows();
+		if (windows > 0) {
+			throw new IllegalStateException(String.format("<navigateMenu /> %s / %s: %d window(s) are open over the menu (%s): close them first",
+															path.moduleTitle, String.join(" / ", path.labels()), Integer.valueOf(windows), selenide.state()));
+		}
 		if (! selenide.menu(path.moduleTitle, path.labels(), true)) {
 			throw new DomainException(String.format("<navigateMenu /> %s / %s is not in the menu", path.moduleTitle, String.join(" / ", path.labels())));
 		}
