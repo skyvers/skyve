@@ -3,6 +3,7 @@ package util.sail;
 import static com.codeborne.selenide.Condition.appear;
 import static com.codeborne.selenide.Condition.enabled;
 import static com.codeborne.selenide.Condition.exist;
+import static com.codeborne.selenide.Condition.hidden;
 import static com.codeborne.selenide.Condition.visible;
 import static com.codeborne.selenide.Selectors.byId;
 import static com.codeborne.selenide.Selectors.byName;
@@ -282,7 +283,7 @@ public class PrimeFacesSelenide extends Selenide<
 			}
 			click(element);
 
-			waitForAjaxResponse();
+			waitForLookupSelection(id);
 
 			return true;
 		}
@@ -311,12 +312,20 @@ public class PrimeFacesSelenide extends Selenide<
 				throw new IllegalStateException(String.format("Lookup %s has no match for '%s'", id, search));
 			}
 			click(element);
-			waitForAjaxResponse();
+			waitForLookupSelection(id);
 
 			return true;
 		}
 
 		return false;
+	}
+
+	/**
+	 * Waits for a lookup's drop down to close after a pick, and then for its item select request.
+	 */
+	private void waitForLookupSelection(@Nonnull String id) {
+		$(byId(id + "_panel")).shouldBe(hidden, RESPONSE_TIMEOUT);
+		waitForAjaxResponse();
 	}
 
 	@Override
@@ -356,6 +365,21 @@ public class PrimeFacesSelenide extends Selenide<
 
 	@Override
 	public boolean text(PrimeFacesTextCommand command) {
+		// An ajax response that is still re-rendering the field can make it stale: wait and try again
+		for (int attempt = 1; ; attempt++) {
+			try {
+				return textOnce(command);
+			}
+			catch (StaleElementReferenceException e) {
+				if (attempt >= 3) {
+					throw e;
+				}
+				waitForAjaxResponse();
+			}
+		}
+	}
+
+	private boolean textOnce(PrimeFacesTextCommand command) {
 		String id = command.id();
 		String value = command.value();
 		boolean keyPresses = command.keyPresses();

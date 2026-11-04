@@ -26,6 +26,7 @@ import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
 import org.skyve.impl.metadata.module.ModuleImpl;
 import org.skyve.impl.metadata.view.ViewImpl;
+import org.skyve.impl.metadata.view.widget.bound.tabular.DataGrid;
 import org.skyve.impl.sail.execution.TestDataEnterViewVisitor;
 import org.skyve.impl.sail.execution.pf.PrimeFacesAutomationContext;
 import org.skyve.impl.sail.execution.pf.PrimeFacesGenerateEditContext;
@@ -748,9 +749,25 @@ public class PrimeFacesInterpretedWebDriverExecutor extends InterpretedWebDriver
 		dataGridGesture(remove, remove.getBinding(), remove.getRow());
 	}
 
+	/**
+	 * Selects a row of a data grid that has a {@code selectedIdBinding}.
+	 * Fails for other grids: in PrimeFaces, selecting a row of them zooms into it, so use {@code <dataGridZoom />}.
+	 *
+	 * @param select	the step
+	 */
 	@Override
 	public void executeDataGridSelect(DataGridSelect select) {
-		dataGridGesture(select, select.getBinding(), select.getRow());
+		String binding = select.getBinding();
+		PrimeFacesAutomationContext context = peek();
+		@SuppressWarnings("null") // a null here fails the test
+		List<Object> widgets = context.getSkyveWidgets(binding);
+		if ((widgets != null) && (! widgets.isEmpty()) &&
+				(widgets.get(0) instanceof DataGrid grid) && (grid.getSelectedIdBinding() == null)) {
+			throw new UnsupportedOperationException(String.format("<dataGridSelect /> on [%s] is not available in PrimeFaces: " +
+																	"the grid has no selectedIdBinding, so selecting a row zooms into it; use <dataGridZoom />",
+																	binding));
+		}
+		dataGridGesture(select, binding, select.getRow());
 	}
 
 	/**
@@ -778,13 +795,18 @@ public class PrimeFacesInterpretedWebDriverExecutor extends InterpretedWebDriver
 					.getSimpleName(), binding));
 		}
 
+		// An inline grid adds its row in place with ajax; other grids zoom into a new view
+		List<Object> gridWidgets = context.getSkyveWidgets(binding);
+		boolean inline = (gridWidgets != null) && (! gridWidgets.isEmpty()) &&
+							(gridWidgets.get(0) instanceof DataGrid grid) && Boolean.TRUE.equals(grid.getInline());
+
 		boolean success = false;
 		for (UIComponent dataGridComponent : dataGridComponents) {
 			if (success) {
 				break;
 			}
 			String dataGridClientId = PrimeFacesAutomationContext.clientId(dataGridComponent);
-			boolean ajax = false;
+			boolean ajax = inline;
 
 			if (row != null) {
 				if (step instanceof DataGridZoom) {
@@ -829,7 +851,7 @@ public class PrimeFacesInterpretedWebDriverExecutor extends InterpretedWebDriver
 		checkSuccess(String.format("expected no error messages after <%s />", step.getClass().getSimpleName()));
 
 		// Determine the document of the edit view to push
-		if (step instanceof DataGridNew || step instanceof DataGridZoom) {
+		if ((! inline) && (step instanceof DataGridNew || step instanceof DataGridZoom)) {
 			Customer c = CORE.getUser().getCustomer();
 			@SuppressWarnings("null") // uses a nullable result where the API expects non-null
 			Module m = c.getModule(context.getModuleName());
@@ -869,8 +891,26 @@ public class PrimeFacesInterpretedWebDriverExecutor extends InterpretedWebDriver
 		push.execute(this);
 	}
 
+	/**
+	 * Selects a row of a list grid that has a {@code selectedIdBinding}.
+	 * Fails for other lists: in PrimeFaces, selecting a row of them zooms into it, so use {@code <listGridZoom />}.
+	 *
+	 * @param select	the step
+	 */
 	@Override
 	public void executeListGridSelect(ListGridSelect select) {
+		PrimeFacesAutomationContext context = peek();
+		@SuppressWarnings("null") // a null here fails the test
+		String identifier = select.getIdentifier(context);
+		@SuppressWarnings("null") // a null here fails the test
+		List<Object> widgets = context.getSkyveWidgets(identifier);
+		if ((widgets != null) && (! widgets.isEmpty()) &&
+				(widgets.get(0) instanceof org.skyve.impl.metadata.view.widget.bound.tabular.ListGrid grid) &&
+				(grid.getSelectedIdBinding() == null)) {
+			throw new UnsupportedOperationException(String.format("<listGridSelect /> on [%s] is not available in PrimeFaces: " +
+																	"the list has no selectedIdBinding, so selecting a row zooms into it; use <listGridZoom />",
+																	identifier.substring(0, identifier.lastIndexOf('.'))));
+		}
 		listGridGesture(select, select.getRow());
 	}
 
