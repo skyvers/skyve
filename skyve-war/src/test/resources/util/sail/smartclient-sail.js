@@ -42,7 +42,7 @@
 	// timers that have not fired yet, and the page is not settled until they have.
 	// Left out, because they do not follow from a step and could keep the page busy for ever: background repeat
 	// timers, timers of a second or more (hovers, view refreshes), mouse-still-down repeats, and maps, which
-	// retry build() every 100 ms while offline (BizMap, BizMapPicker).
+	// charts retry every 100 ms while their scripts are not loaded (offline: never).
 
 	var deferred = {};
 	var timerTokens = {};
@@ -66,9 +66,9 @@
 		if (method === "$kq" || method === "_handleMouseStillDown") {
 			return true;
 		}
-		// Skyve's map widgets (BizMap, BizMapPicker) retry build() until the map script loads, which offline is never
+		// Skyve's maps and charts (BizMap, BizMapPicker, BizChart) retry until their script loads, which offline is never
 		var name = target && target.getClassName ? target.getClassName() : "";
-		return /^BizMap/.test(name);
+		return /^Biz(Map|Chart)/.test(name);
 	}
 
 	function instrument() {

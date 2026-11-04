@@ -29,6 +29,11 @@
 			<testWidget binding="queryTrace" enabled="true" />
 			<dataEnter binding="queryTrace" value="true" />
 			<testValue binding="queryTrace" value="true" />
+			<!--
+				RUNTIME BEHAVIOUR (SmartClient): GenerateMenuSAIL set the view's selected tab to Results, and the checkbox's
+				rerender restores that tab, so the view jumps away from Instrumentation. Select it again.
+			-->
+			<tabSelect path="Instrumentation" />
 			<dataEnter binding="queryTrace" value="false" />
 			<testValue binding="queryTrace" value="false" />
 			<tabSelect path="User Remember-Me Tokens" />
@@ -40,7 +45,6 @@
 			<navigateMenu module="admin" item="DevOps/Data Maintenance" />
 			<tabSelect path="Import/Export" />
 			<tabSelect path="Backup/Restore" />
-			<action name="RefreshBackupList" />
 			<testGridRows module="admin" query="BackupsModel" minRows="1" />
 			<comment>Delete, Download and Restore need a backup selected</comment>
 			<testWidget action="DeleteBackup" enabled="false" />
@@ -49,6 +53,16 @@
 			<testWidget action="Restore" enabled="true" />
 			<tabSelect path="Data Refresh" />
 			<testGridRows binding="refreshDocuments" minRows="1" />
+			<comment>SmartClient only: the Data tab's DDL actions only show the DDL; Truncate runs in 99-restore.xml</comment>
+			<tabSelect path="Data" />
+			<action name="Create" />
+			<action name="Drop" />
+			<action name="Sync" />
+			<testWidget action="Truncate" enabled="true" />
+			<tabSelect path="Content" />
+			<testWidget action="DropIndexing" enabled="true" />
+			<tabSelect path="Manage Audits" />
+			<action name="CheckAuditMatches" />
 			<tabSelect path="Import/Export" />
 			<listGridNew module="admin" query="qImportExport" />
 			<testWidget binding="mode" />
@@ -71,9 +85,26 @@
 		<method>
 			<navigateMenu module="admin" item="DevOps/Monitoring Dashboard" />
 			<tabSelect path="Charts" />
+			<!--
+				LANGUAGE GAP: in SmartClient every Refresh button is in a collapsible box that starts closed, and no op-code
+				expands a collapsible. Check that they are hidden; refreshing moves to a future expand step.
 			<action name="Refresh" />
+			-->
+			<testWidget action="Refresh" visible="false" />
 			<tabSelect path="Requests" />
 			<testGridRows module="admin" query="RequestListModel" minRows="1" />
+		</method>
+	</interaction>
+	<interaction name="User Hits (SmartClient only)">
+		<method>
+			<navigateMenu module="admin" item="DevOps/User Hits" />
+			<testGridRows module="admin" document="UserMonthlyHits" minRows="0" />
+		</method>
+	</interaction>
+	<interaction name="Heap Dumps (SmartClient only)">
+		<method>
+			<navigateMenu module="admin" item="DevOps/Heap Dumps" />
+			<testWidget action="DownloadHeapDump" enabled="false" />
 		</method>
 	</interaction>
 	<after>
