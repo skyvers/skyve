@@ -16,6 +16,8 @@
 		<method>
 			<navigateEdit module="admin" document="DataMaintenance" />
 			<tabSelect path="Backup/Restore" />
+			<comment>99-restore.xml restores the first backup listed (the oldest), so there must be no other backup</comment>
+			<testGridRows module="admin" query="BackupsModel" maxRows="0" />
 			<dataEnter binding="includeContent" value="true" />
 			<dataEnter binding="includeAuditLog" value="true" />
 			<comment>No redaction, so a restore keeps admin's password</comment>
