@@ -2,8 +2,8 @@
 <!--
 	SmartClient admin suite, restore bracket part 2: restore the backup that 00-backup.xml made (the only one: 00 checks
 	that no other exists, as this restores the oldest listed), which puts back the data as it was before the suite (and
-	before 99-truncate.xml), then delete that backup. SmartClientAdminSuiteSailIT runs this whenever 00-backup.xml passed,
-	even when a later file (99-truncate.xml too) fails.
+	before 99-truncate.xml), then delete that backup. SmartClientAdminSuiteSailIT runs this whenever 00-precondition.xml and
+	00-backup.xml passed, even when a later file (99-truncate.xml too) fails.
 -->
 <automation uxui="desktop" userAgentType="desktop" testStrategy="Assert"
 			xsi:schemaLocation="http://www.skyve.org/xml/sail ../../../../../../main/java/schemas/sail.xsd"

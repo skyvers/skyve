@@ -33,9 +33,8 @@ import org.skyve.metadata.sail.language.step.TestWidget;
 import org.skyve.metadata.sail.language.step.interaction.Upload;
 import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateMenu;
 import org.skyve.metadata.sail.language.step.interaction.navigation.TestMenu;
-import org.skyve.metadata.module.menu.MenuGroup;
-import org.skyve.metadata.module.menu.MenuItem;
 import org.skyve.impl.metadata.module.menu.AbstractDocumentOrQueryOrModelMenuItem;
+import org.skyve.metadata.module.menu.MenuItem;
 import org.skyve.impl.metadata.module.menu.EditItem;
 import org.skyve.metadata.sail.language.step.TestSuccess;
 import org.skyve.metadata.sail.language.step.TestValue;
@@ -1025,7 +1024,7 @@ public class SmartClientInterpretedWebDriverExecutor extends InterpretedWebDrive
 			throw new MetaDataException(String.format("<upload /> with %s [%s] is not on the view",
 														(upload.getBinding() != null) ? "binding" : "action", identifier));
 		}
-		java.io.File file = resourceFile(upload.getFile());
+		java.io.File file = testResourceFile(upload.getFile());
 		String locator = locators.get(0).getLocator();
 		selenide.trace(String.format("upload %s to [%s]", upload.getFile(), identifier));
 		org.openqa.selenium.WebElement trigger;
@@ -1046,25 +1045,6 @@ public class SmartClientInterpretedWebDriverExecutor extends InterpretedWebDrive
 					() -> String.format("<upload /> to [%s] finished but the widget holds no content", identifier));
 		}
 		checkSuccess(String.format("expected no error messages after uploading to [%s]", identifier));
-	}
-
-	/**
-	 * Resolves a test classpath resource to a file the browser can be given.
-	 *
-	 * @param resource	the resource path
-	 * @return the file
-	 */
-	private static @Nonnull java.io.File resourceFile(@Nonnull String resource) {
-		java.net.URL url = Thread.currentThread().getContextClassLoader().getResource(resource);
-		if (url == null) {
-			throw new MetaDataException("<upload /> file " + resource + " is not on the test classpath");
-		}
-		try {
-			return new java.io.File(url.toURI());
-		}
-		catch (java.net.URISyntaxException | IllegalArgumentException e) {
-			throw new MetaDataException("<upload /> file " + resource + " is not a file on disk: " + url, e);
-		}
 	}
 
 	/**
@@ -1092,7 +1072,9 @@ public class SmartClientInterpretedWebDriverExecutor extends InterpretedWebDrive
 	 */
 	@Override
 	public void executeTestGridRows(TestGridRows test) {
-		if (isNoneStrategy()) {
+		Integer timeout = test.getTimeoutMillis();
+		// Under None there is nothing to check, but a timeout still waits: scripts use it to wait for jobs
+		if (isNoneStrategy() && (timeout == null)) {
 			return;
 		}
 		prepareForInteraction();
@@ -1105,18 +1087,13 @@ public class SmartClientInterpretedWebDriverExecutor extends InterpretedWebDrive
 		String locator = locators.get(0).getLocator();
 		String text = test.getRowContaining();
 		String contains = (text == null) ? null : substituteRunToken(text);
-		int min = test.getEffectiveMinRows();
 		Integer max = test.getMaxRows();
-		Integer timeout = test.getTimeoutMillis();
-		selenide.trace(String.format("test grid [%s] has %d..%s rows%s", identifier, Integer.valueOf(min),
+		selenide.trace(String.format("test grid [%s] has %d..%s rows%s", identifier, Integer.valueOf(test.getEffectiveMinRows()),
 										(max == null) ? "" : max.toString(), (contains == null) ? "" : " containing '" + contains + "'"));
-		int count = selenide.awaitRows(locator, contains, c -> (c >= min) && ((max == null) || (c <= max.intValue())),
-										(timeout == null) ? 0L : timeout.longValue());
-		final int rows = count;
-		check((rows >= min) && ((max == null) || (rows <= max.intValue())),
-				() -> String.format("expected grid [%s] to have %d..%s rows%s but it has %d", identifier, Integer.valueOf(min),
-										(max == null) ? "" : max.toString(), (contains == null) ? "" : " containing '" + contains + "'",
-										Integer.valueOf(rows)));
+		int rows = selenide.awaitRows(locator, contains, c -> rowCountHolds(test, c), (timeout == null) ? 0L : timeout.longValue());
+		if (! isNoneStrategy()) {
+			checkRowCount(test, identifier, contains, rows);
+		}
 	}
 
 	/**
@@ -1149,24 +1126,7 @@ public class SmartClientInterpretedWebDriverExecutor extends InterpretedWebDrive
 				enabled = enabled || state[2];
 			}
 		}
-		final String what = identifier;
-		final boolean isShown = shown;
-		final boolean isEnabled = enabled;
-		Boolean expectedEnabled = test.getEnabled();
-		if (expectedEnabled != null) {
-			selenide.trace(String.format("test [%s] is shown and %s", what, expectedEnabled.booleanValue() ? "enabled" : "disabled"));
-			check(isShown && (isEnabled == expectedEnabled.booleanValue()),
-					() -> String.format("expected [%s] to be shown and %s but it is %s", what,
-											expectedEnabled.booleanValue() ? "enabled" : "disabled",
-											(! isShown) ? "not shown" : (isEnabled ? "enabled" : "disabled")));
-		}
-		else {
-			boolean expectedVisible = test.isExpectedVisible();
-			selenide.trace(String.format("test [%s] is %s", what, expectedVisible ? "shown" : "not shown"));
-			check(isShown == expectedVisible,
-					() -> String.format("expected [%s] to be %s but it is %s", what,
-											expectedVisible ? "shown" : "not shown", isShown ? "shown" : "not shown"));
-		}
+		checkWidget(test, identifier, shown, enabled);
 	}
 
 	/**
@@ -1176,7 +1136,7 @@ public class SmartClientInterpretedWebDriverExecutor extends InterpretedWebDrive
 	@Override
 	public void executeNavigateMenu(NavigateMenu menu) {
 		prepareForDataEntry();
-		MenuPath path = menuPath(menu.getModuleName(), menu.getItemName());
+		SailMenuPath path = resolveMenuPath(menu.getModuleName(), menu.getItemName());
 		MenuItem item = path.item;
 		if (item == null) {
 			throw new MetaDataException(String.format("<navigateMenu /> module %s has no menu item %s", menu.getModuleName(), menu.getItemName()));
@@ -1229,80 +1189,11 @@ public class SmartClientInterpretedWebDriverExecutor extends InterpretedWebDrive
 			return;
 		}
 		String itemName = test.getItemName();
-		MenuPath path = menuPath(test.getModuleName(), itemName);
+		SailMenuPath path = resolveMenuPath(test.getModuleName(), itemName);
 		if ((itemName != null) && (path.item == null)) {
 			throw new MetaDataException(String.format("<testMenu /> module %s has no menu item %s", test.getModuleName(), itemName));
 		}
-		boolean expected = ! Boolean.FALSE.equals(test.getPresent());
-		boolean present = selenide.menu(path.moduleTitle, path.labels(), false);
-		String what = (itemName == null) ? path.moduleTitle : path.moduleTitle + " / " + String.join(" / ", path.labels());
-		selenide.trace(String.format("test menu %s is %s", what, expected ? "present" : "absent"));
-		check(present == expected, () -> String.format("expected the menu %s %s but it %s", what,
-														expected ? "to show" : "not to show", present ? "does" : "does not"));
-	}
-
-	/** A menu item and the labels shown for it. */
-	private static final class MenuPath {
-		String moduleTitle;
-		List<String> groupLabels = new java.util.ArrayList<>();
-		String itemLabel;
-		MenuItem item;
-
-		List<String> labels() {
-			List<String> result = new java.util.ArrayList<>(groupLabels);
-			if (itemLabel != null) {
-				result.add(itemLabel);
-			}
-			return result;
-		}
-	}
-
-	/**
-	 * Resolves a {@code /}-separated menu path (group names then the item name; each the metadata name or the shown name).
-	 *
-	 * @param moduleName	the module
-	 * @param itemPath		the path, or {@code null} for the module itself
-	 * @return the path, whose item is {@code null} if it is not in the module's menu
-	 */
-	private static @Nonnull MenuPath menuPath(@Nonnull String moduleName, @Nullable String itemPath) {
-		Customer c = CORE.getUser().getCustomer();
-		Module m = c.getModule(moduleName);
-		MenuPath result = new MenuPath();
-		result.moduleTitle = m.getLocalisedTitle();
-		if (itemPath == null) {
-			return result;
-		}
-		String[] names = itemPath.split("/");
-		List<MenuItem> items = m.getMenu().getItems();
-		for (int i = 0; i < names.length; i++) {
-			String name = names[i].trim();
-			MenuItem found = null;
-			for (MenuItem candidate : items) {
-				if (name.equals(candidate.getName()) || name.equals(candidate.getLocalisedName())) {
-					found = candidate;
-					break;
-				}
-			}
-			if (found == null) {
-				return result;
-			}
-			String label = found.getLocalisedName();
-			if (label == null) {
-				label = found.getName();
-			}
-			if (i < names.length - 1) {
-				if (! (found instanceof MenuGroup group)) {
-					return result;
-				}
-				result.groupLabels.add(label);
-				items = group.getItems();
-			}
-			else {
-				result.itemLabel = label;
-				result.item = found;
-			}
-		}
-		return result;
+		checkMenu(test, path, selenide.menu(path.moduleTitle, path.labels(), false));
 	}
 
 	/**
