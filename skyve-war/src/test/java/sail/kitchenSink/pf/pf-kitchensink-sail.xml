@@ -280,6 +280,19 @@
 			<testWidget tab="Users" />
 		</method>
 	</interaction>
+	<interaction name="Switch mode">
+		<method>
+			<comment>PrimeFaces is showing already: nothing to do</comment>
+			<switchMode />
+			<testMenu module="kitchensink" />
+			<comment>Switch to SmartClient with PrimeFaces' own menu item, then back to PrimeFaces through SmartClient's menu</comment>
+			<execute>Array.from(document.querySelectorAll('a.ui-menuitem-link')).find(function(a) {return a.textContent.trim() === 'Switch mode';}).click();</execute>
+			<switchMode />
+			<navigateMenu module="kitchensink" item="Actions Fixture" />
+			<action name="RunFromToolbar" />
+			<testValue binding="outcome" value="Run From Toolbar ran" />
+		</method>
+	</interaction>
 	<interaction name="Logout">
 		<method>
 			<logout />

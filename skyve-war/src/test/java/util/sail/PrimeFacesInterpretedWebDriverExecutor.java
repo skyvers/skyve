@@ -39,6 +39,7 @@ import org.skyve.metadata.sail.language.step.TestGridRows;
 import org.skyve.metadata.sail.language.step.TestMessage;
 import org.skyve.metadata.sail.language.step.TestWidget;
 import org.skyve.metadata.sail.language.step.interaction.Upload;
+import org.skyve.metadata.sail.language.step.interaction.session.SwitchMode;
 import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateMenu;
 import org.skyve.metadata.sail.language.step.interaction.navigation.TestMenu;
 import org.skyve.impl.metadata.view.widget.bound.input.TextField;
@@ -1496,5 +1497,37 @@ public class PrimeFacesInterpretedWebDriverExecutor extends InterpretedWebDriver
 			}
 		}
 		return result;
+	}
+
+	/**
+	 * Switches the session to PrimeFaces, through SmartClient's header menu, if SmartClient is showing.
+	 * Does nothing when PrimeFaces is already showing.
+	 *
+	 * @param switchMode	the step
+	 */
+	@Override
+	public void executeSwitchMode(SwitchMode switchMode) {
+		if ("desktop".equals(getCurrentUxUi())) {
+			throw new UnsupportedOperationException("<switchMode /> to SmartClient (uxui desktop) is the SmartClient executor's job");
+		}
+		if (! selenide.smartClientShowing()) {
+			selenide.trace("Switch mode: PrimeFaces is showing already");
+			return;
+		}
+		selenide.trace("Switch mode: SmartClient to PrimeFaces");
+		selenide.switchFromSmartClient();
+		if (selenide.smartClientShowing()) {
+			throw new DomainException("<switchMode /> chose Switch Mode but SmartClient is still showing");
+		}
+	}
+
+	/**
+	 * Runs the script, then waits for any request or page load it started.
+	 *
+	 * @param execute	the step
+	 */
+	@Override
+	public void executeExecute(org.skyve.metadata.sail.language.step.Execute execute) {
+		selenide.runScript(execute.getScript());
 	}
 }

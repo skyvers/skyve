@@ -916,6 +916,64 @@ public class PrimeFacesSelenide extends Selenide<
 	}
 
 	/**
+	 * Indicates if the page is a SmartClient page.
+	 *
+	 * @return true for SmartClient, false for PrimeFaces (or any other page)
+	 */
+	public boolean smartClientShowing() {
+		return Boolean.TRUE.equals(js("return !! (window.isc && window.isc.BizUtil);"));
+	}
+
+	/**
+	 * Switches a SmartClient session to PrimeFaces as a user would: opens the header's user menu and chooses Switch Mode.
+	 *
+	 * @throws IllegalStateException	if the user menu has no Switch Mode item (the user cannot switch)
+	 */
+	public void switchFromSmartClient() {
+		// Wait for SmartClient to draw its header's user menu button (the avatar)
+		WebElement avatar = waitFor(d -> (WebElement) js("var c = isc.Canvas._canvasList.find(function(x) {return x && x._userMenu && x.isDrawn && x.isDrawn();});" +
+															"return c ? c.getClipHandle() : null;"));
+		click($(avatar));
+		// Wait for the user menu to be shown
+		waitFor(d -> js("var c = isc.Canvas._canvasList.find(function(x) {return x && x._userMenu;});" +
+							"return (c && c._userMenu.isVisible() && c._userMenu.isDrawn()) ? true : null;"));
+		WebElement item = (WebElement) js("var m = isc.Canvas._canvasList.find(function(x) {return x && x._userMenu;})._userMenu;" +
+											"var cells = Array.from(m.getClipHandle().querySelectorAll('td'));" +
+											"return cells.find(function(td) {return (td.textContent || '').trim() === 'Switch Mode';}) || null;");
+		if (item == null) {
+			throw new IllegalStateException("The SmartClient user menu has no Switch Mode item: this user cannot switch mode");
+		}
+		js("window.sailPage = true;");
+		click($(item));
+		// Wait for the PrimeFaces page to replace the SmartClient one
+		waitForNewPage();
+	}
+
+	/**
+	 * Runs a script (the SAIL {@code <execute>} step), then waits for any request or new page it started.
+	 *
+	 * @param script	the JavaScript
+	 */
+	public void runScript(@Nonnull String script) {
+		markPage();
+		js(script);
+		waitForAjaxResponse();
+		if (Boolean.TRUE.equals(js("return !! window.sailUnloading;"))) {
+			// Wait for the page the script navigated to (its window has no marker)
+			waitFor(d -> {
+				try {
+					return Boolean.TRUE.equals(((JavascriptExecutor) d).executeScript(
+							"return (window.sailUnloading === undefined) && document.readyState === 'complete';")) ? Boolean.TRUE : null;
+				}
+				catch (@SuppressWarnings("unused") WebDriverException e) {
+					return null; // between pages
+				}
+			});
+			waitForAjaxResponse();
+		}
+	}
+
+	/**
 	 * Finds the element of a content widget that opens its upload page.
 	 *
 	 * @param contentId	the content widget's client id
