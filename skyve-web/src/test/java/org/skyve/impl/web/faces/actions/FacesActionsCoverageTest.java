@@ -876,8 +876,18 @@ class FacesActionsCoverageTest {
 		verify(facesView, never()).getBean();
 	}
 
+	/**
+	 * Gives the thread a persistence with a user, so an add action gets past {@code CORE.getUser()} to the missing bean.
+	 */
+	private static void setThreadPersistenceWithAUser() {
+		AbstractPersistence persistence = mock(AbstractPersistence.class, CALLS_REAL_METHODS);
+		persistence.setUser(mock(User.class));
+		persistence.setForThread();
+	}
+
 	@Test
 	void addActionInlineBypassesValidationAndThrowsWhenBeanMissing() {
+		setThreadPersistenceWithAUser();
 		FacesView facesView = mock(FacesView.class);
 		when(facesView.getViewBinding()).thenReturn(null);
 		when(facesView.getBean()).thenReturn(null);
@@ -888,6 +898,7 @@ class FacesActionsCoverageTest {
 
 	@Test
 	void addActionNonInlineContinuesAfterValidationPassesThenThrowsWhenBeanMissing() {
+		setThreadPersistenceWithAUser();
 		UIViewRoot root = mock(UIViewRoot.class);
 		doReturn(Boolean.TRUE).when(root).isRendered();
 		when(root.getFacetsAndChildren()).thenAnswer(i -> java.util.Arrays.asList().iterator());
@@ -911,6 +922,7 @@ class FacesActionsCoverageTest {
 
 	@Test
 	void addActionWithExistingViewBindingStillThrowsWhenBeanMissing() {
+		setThreadPersistenceWithAUser();
 		FacesView facesView = mock(FacesView.class);
 		when(facesView.getViewBinding()).thenReturn("parent.child");
 		when(facesView.getBean()).thenReturn(null);

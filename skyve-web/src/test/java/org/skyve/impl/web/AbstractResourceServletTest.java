@@ -1,5 +1,6 @@
 package org.skyve.impl.web;
 
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -581,17 +582,19 @@ class AbstractResourceServletTest {
 	}
 
 	@Test
-	void parseRequestParamsShrinksOversizedImageSizeKeepingShape() throws Exception {
-		assertEquals("2048x512", parsedImageSize("8192", "2048"));
-		assertEquals("2048x2048", parsedImageSize("2048", "2048"));
-		assertEquals("100x2048", parsedImageSize("200", "4096"));
-		assertEquals("2048x0", parsedImageSize(String.valueOf(Integer.MAX_VALUE), null));
-		assertEquals("64x48", parsedImageSize("64", "48"));
+	void parseRequestParamsCapsEachImageSide() throws Exception {
+		assertAll(() -> assertEquals("2048x2048", parsedImageSize("8192", "2048"), "both sides at or above the cap"),
+					() -> assertEquals("2048x2048", parsedImageSize("2048", "2048"), "exactly at the cap"),
+					() -> assertEquals("2048x2047", parsedImageSize("2049", "2047"), "one above and one below the cap"),
+					() -> assertEquals("200x2048", parsedImageSize("200", "4096"), "only the oversized side changes"),
+					() -> assertEquals("2048x1", parsedImageSize("8192", "1"), "a thin side is kept, not rounded to 0"),
+					() -> assertEquals("2048x0", parsedImageSize(String.valueOf(Integer.MAX_VALUE), null), "no height requested"),
+					() -> assertEquals("64x48", parsedImageSize("64", "48"), "below the cap"));
 
 		int originalMaximum = UtilImpl.THUMBNAIL_MAXIMUM_DIMENSION;
 		try {
 			UtilImpl.THUMBNAIL_MAXIMUM_DIMENSION = 100;
-			assertEquals("100x50", parsedImageSize("400", "200"));
+			assertEquals("100x100", parsedImageSize("400", "200"));
 		}
 		finally {
 			UtilImpl.THUMBNAIL_MAXIMUM_DIMENSION = originalMaximum;

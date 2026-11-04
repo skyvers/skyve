@@ -31,6 +31,7 @@ import org.skyve.domain.messages.ValidationException;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.cache.StateUtil;
 import org.skyve.impl.metadata.customer.CustomerImpl;
+import org.skyve.impl.metadata.model.document.DocumentImpl;
 import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
 import org.skyve.impl.metadata.user.SuperUser;
 import org.skyve.impl.metadata.user.UserImpl;
@@ -39,9 +40,13 @@ import org.skyve.impl.util.TimeUtil;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.WebStatsUtil;
 import org.skyve.metadata.MetaDataException;
+import org.skyve.metadata.controller.ImplicitActionName;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Bizlet;
+import org.skyve.metadata.model.document.Collection;
+import org.skyve.metadata.model.document.Collection.CollectionType;
 import org.skyve.metadata.model.document.Document;
+import org.skyve.metadata.model.document.Relation;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.repository.ProvidedRepository;
 import org.skyve.metadata.repository.Repository;
@@ -50,6 +55,7 @@ import org.skyve.metadata.view.TextOutput.Sanitisation;
 import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.Persistence;
 import org.skyve.util.Binder;
+import org.skyve.util.Binder.TargetMetaData;
 import org.skyve.util.GeoIPService;
 import org.skyve.util.IPGeolocation;
 import org.skyve.util.JSON;
@@ -57,6 +63,7 @@ import org.skyve.util.Mail;
 import org.skyve.util.OWASP;
 import org.skyve.util.SecurityUtil;
 import org.skyve.util.Util;
+import org.skyve.util.logging.Category;
 import org.skyve.util.logging.SkyveLoggerFactory;
 import org.skyve.web.WebContext;
 import org.slf4j.Logger;
@@ -74,6 +81,7 @@ import jakarta.servlet.http.HttpSession;
  */
 public class WebUtil {
     private static final Logger LOGGER = SkyveLoggerFactory.getLogger(WebUtil.class);
+    private static final Logger BIZLET_LOGGER = Category.BIZLET.logger();
 	private static final String CONCURRENT_SESSION_EVENT_TYPE = "Concurrent Session";
 
 	private WebUtil() {
@@ -743,7 +751,7 @@ public class WebUtil {
 								}
 								if (! expired) {
 									Repository r = CORE.getRepository();
-									org.skyve.metadata.user.User u = r.retrieveUser(String.format("%s/%s", customerName, userName));
+									org.skyve.metadata.user.User u = r.retrieveUser(customerName + '/' + userName);
 									// // don't allow credential existence to leak
 									if (u == null) {
 										return Util.nullSafeI18n("exception.passwordResetTokenExpired");
@@ -819,7 +827,81 @@ public class WebUtil {
 		
 		return result;
 	}
-	
+
+	/**
+	 * Creates a new element for the collection or inverse at a binding and adds it there, as a data grid's New does.
+	 *
+	 * <p>The element is created with {@link Document#newInstance(User)}, so its default values and its bizlet's
+	 * {@code newInstance()} run. An ordered child collection gives it the next {@link Bean#ORDINAL_NAME}. The
+	 * interceptors and the element bizlet's {@code preExecute(Add)} then run with {@code parentBean} as the parent,
+	 * and the element is added unless an interceptor vetoes it. The PrimeFaces and SmartClient data grids both add
+	 * through this method.
+	 *
+	 * <p>Side effects: runs application code (bizlet and interceptors) and adds the element to the bean graph;
+	 * nothing is persisted.
+	 *
+	 * @param user the user adding the element; must not be {@code null}
+	 * @param bean the bean that {@code binding} is relative to; must not be {@code null}
+	 * @param binding the binding of the collection or inverse, relative to {@code bean}; must not be {@code null}
+	 * @param parentBean the bean passed to {@code preExecute(Add)} as the parent; must not be {@code null}
+	 * @param webContext the conversation's web context; must not be {@code null}
+	 * @return the added element, or {@code null} when an interceptor vetoed the add, in which case nothing was added
+	 * @throws IllegalStateException if {@code binding} does not resolve to a relation
+	 * @throws SecurityException if the relation and its document are persistent and the user cannot create that document
+	 * @throws Exception if the bizlet or an interceptor throws
+	 */
+	public static @Nullable Bean addNewElement(@Nonnull User user,
+												@Nonnull Bean bean,
+												@Nonnull String binding,
+												@Nonnull Bean parentBean,
+												@Nonnull WebContext webContext)
+	throws Exception {
+		Customer customer = user.getCustomer();
+		Module module = customer.getModule(bean.getBizModule());
+		Document document = module.getDocument(customer, bean.getBizDocument());
+		TargetMetaData target = BindUtil.getMetaDataForBinding(customer, module, document, binding);
+		if (! (target.getAttribute() instanceof Relation relation)) {
+			throw new IllegalStateException(binding + " doesn't resolve to a relation.");
+		}
+		Document elementDocument = target.getDocument().getRelatedDocument(customer, relation.getName());
+
+		// check for create privilege if the relation is persistent and its document is persistent
+		if (relation.isPersistent() &&
+				elementDocument.isPersistable() &&
+				(! user.canCreateDocument(elementDocument))) {
+			throw new SecurityException("create this data", user.getName());
+		}
+
+		Bean element = elementDocument.newInstance(user);
+
+		// set bizOrdinal if this is an ordered child collection
+		if ((relation instanceof Collection collection) &&
+				Boolean.TRUE.equals(collection.getOrdered()) &&
+				CollectionType.child.equals(collection.getType())) {
+			@SuppressWarnings("unchecked")
+			List<Bean> elements = (List<Bean>) BindUtil.get(bean, binding);
+			if (elements != null) {
+				BindUtil.set(element, Bean.ORDINAL_NAME, Integer.valueOf(elements.size() + 1));
+			}
+		}
+
+		CustomerImpl internalCustomer = (CustomerImpl) customer;
+		if (internalCustomer.interceptBeforePreExecute(ImplicitActionName.Add, element, parentBean, webContext)) {
+			return null;
+		}
+		Bizlet<Bean> bizlet = ((DocumentImpl) elementDocument).getBizlet(customer);
+		if (bizlet != null) {
+			if (UtilImpl.BIZLET_TRACE) BIZLET_LOGGER.info("Entering {}.preExecute: {}, {}, {}, {}", bizlet.getClass().getName(), ImplicitActionName.Add, element, parentBean, webContext);
+			element = bizlet.preExecute(ImplicitActionName.Add, element, parentBean, webContext);
+			if (UtilImpl.BIZLET_TRACE) BIZLET_LOGGER.info("Exiting {}.preExecute: {}", bizlet.getClass().getName(), element);
+		}
+		internalCustomer.interceptAfterPreExecute(ImplicitActionName.Add, element, parentBean, webContext);
+
+		// add the new element after preExecute
+		BindUtil.addElementToCollection(bean, binding, element);
+		return element;
+	}
+
 	/**
 	 * Returns a sanitized same-origin Referer header value, or {@code null} when absent/invalid.
 	 *
@@ -990,14 +1072,18 @@ public class WebUtil {
 	}
 
 	/**
-	 * Builds the thin top and bottom environment banners shown in non-production environments.
+	 * Builds the thin top and bottom environment banners, shown whenever an environment identifier is set.
 	 *
 	 * <p>This is the single source of the banner markup for JSPs, Facelets templates and the SmartClient desktop.
+	 * The identifier is HTML-escaped here, so callers write the result unescaped into HTML (and escape it again
+	 * only for another context, such as a JavaScript string).
 	 * The styles come from {@code src/css/env-banner.css}. The build bundles it into {@code basic-min.css} and
 	 * {@code prime-min.css} and also minifies it to {@code env-banner-min.css} for the JSPs, so the page must load
 	 * one of those.
 	 *
-	 * @return the banner markup, or {@code null} when no environment identifier is configured
+	 * <p>Side effects: none. Threading: reads {@link UtilImpl#ENVIRONMENT_IDENTIFIER}, which is set at startup.
+	 *
+	 * @return the banner markup, or {@code null} when the environment identifier is {@code null} or blank
 	 */
 	public static @Nullable String getEnvironmentBannersHtml() {
 		String identifier = OWASP.escapeHtml(UtilImpl.ENVIRONMENT_IDENTIFIER);

@@ -114,10 +114,22 @@ public class DesktopView extends HarnessView {
 	/**
 	 * Returns generated environment banner script.
 	 *
-	 * @return generated environment banner script, or {@code null}
+	 * @return generated environment banner script, empty when no environment identifier is set,
+	 * 			or {@code null} before {@link #preRender()}
 	 */
 	public String getBannerScript() {
 		return bannerScript;
+	}
+
+	/**
+	 * Builds the script that appends the environment banners to the page body, after SmartClient has drawn into it.
+	 * The banner markup is escaped as a JavaScript string.
+	 *
+	 * @return the script, or an empty string when no environment identifier is set
+	 */
+	static @Nonnull String buildBannerScript() {
+		String banners = WebUtil.getEnvironmentBannersHtml();
+		return (banners == null) ? "" : "$('body').append('" + OWASP.escapeJsString(banners) + "');";
 	}
 
 	/**
@@ -221,14 +233,7 @@ public class DesktopView extends HarnessView {
 						}
 					}
 					uiScript = sb.toString();
-					sb.setLength(0);
-					
-					// Appended after SmartClient has drawn into the body
-					String banners = WebUtil.getEnvironmentBannersHtml();
-					if (banners != null) {
-						sb.append("$('body').append('").append(OWASP.escapeJsString(banners)).append("');");
-					}
-					bannerScript = sb.toString();
+					bannerScript = buildBannerScript();
 					
 					return null;
 				}

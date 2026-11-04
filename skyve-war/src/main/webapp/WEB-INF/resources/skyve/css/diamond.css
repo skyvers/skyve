@@ -98,12 +98,11 @@ body .layout-wrapper .layout-content-wrapper .layout-content .skyve-action-bar .
 	white-space: nowrap;
 }
 
-body .layout-wrapper .layout-content-wrapper .layout-content:has(.action-bar),
-body .layout-wrapper .layout-content-wrapper .layout-content:has(.skyve-action-bar) {
+body .layout-wrapper .layout-content-wrapper .layout-content:has(:is(.skyve-action-bar, .action-bar) > :is(.ui-toolbar-group-left, .ui-toolbar-group-right) > *) {
 	padding-top: calc(2rem + var(--skyve-action-bar-height));
 }
 
-body .layout-wrapper:has(> .layout-content-wrapper > .layout-content .skyve-action-bar, > .layout-content-wrapper > .layout-content .action-bar) > .skyve-global-messages:not(:empty) {
+body .layout-wrapper:has(> .layout-content-wrapper > .layout-content :is(.skyve-action-bar, .action-bar) > :is(.ui-toolbar-group-left, .ui-toolbar-group-right) > *) > .skyve-global-messages:not(:empty) {
 	margin-bottom: 0.5rem;
 	position: relative;
 	top: calc(var(--skyve-diamond-topbar-height) + var(--skyve-action-bar-height) + 0.5rem);
@@ -115,7 +114,7 @@ body .layout-wrapper:has(> .layout-content-wrapper > .layout-content .skyve-acti
 		left: var(--skyve-diamond-sidebar-width);
 	}
 
-	body .layout-wrapper.layout-static:has(> .layout-content-wrapper > .layout-content .skyve-action-bar, > .layout-content-wrapper > .layout-content .action-bar) > .skyve-global-messages:not(:empty) {
+	body .layout-wrapper.layout-static:has(> .layout-content-wrapper > .layout-content :is(.skyve-action-bar, .action-bar) > :is(.ui-toolbar-group-left, .ui-toolbar-group-right) > *) > .skyve-global-messages:not(:empty) {
 		margin-left: var(--skyve-diamond-sidebar-width);
 	}
 }

@@ -133,6 +133,22 @@ class ThemeFaceletsStructureTest {
 	}
 
 	@Test
+	void everyFamilyShowsEnvironmentBannersAndLoadsTheVueBundle() throws IOException {
+		for (String family : FAMILIES) {
+			String template = read("WEB-INF/pages/templates/" + family + "/template.xhtml");
+			String view = read("WEB-INF/pages/templates/" + family + "/view.xhtml");
+
+			assertTrue(template.contains("<h:outputText value=\"#{bean.environmentBanners}\" escape=\"false\" />"),
+						family + ": " + template);
+			assertTrue(view.contains("<h:outputScript library=\"skyve\" name=\"vue/skyve.js?v=#{bean.webResourceFileVersion}\" />"),
+						family + ": " + view);
+			assertTrue(view.contains("<h:outputStylesheet library=\"skyve\" name=\"vue/skyve.css?v=#{bean.webResourceFileVersion}\" />"),
+						family + ": " + view);
+			assertFalse(view.contains("skyvevue"), family + ": " + view);
+		}
+	}
+
+	@Test
 	void resolvedPropertiesReplaceFamilyParsingAndFallbacks() throws IOException {
 		String editorialHead = read("WEB-INF/pages/templates/editorial/head-resources.xhtml");
 		String ecuadorBody = read("WEB-INF/pages/templates/ecuador/body-resources.xhtml");

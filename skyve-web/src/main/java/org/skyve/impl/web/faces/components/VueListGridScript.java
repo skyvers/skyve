@@ -728,7 +728,8 @@ public class VueListGridScript extends UIOutput {
 		}
 
 		/**
-		 * The values of an enumeration or constant domain column (the columns with a SmartClient value map).
+		 * Returns the code and localised description of each value of an enumeration or constant domain column
+		 * (the columns with a SmartClient value map).
 		 * The descriptions come from the domain values as the value map is escaped for SmartClient's javascript.
 		 *
 		 * @return the code and description of each value, empty if this column has no constant values

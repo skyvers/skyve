@@ -1719,26 +1719,57 @@ public class SkyveContextListenerTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testConfigureThumbnailSettingsRejectsNonPositiveMaximumDimension() {
+	public void testConfigureThumbnailSettingsRejectsAMaximumDimensionThatIsNotAPositiveInt() {
 		int originalMaximumDimension = UtilImpl.THUMBNAIL_MAXIMUM_DIMENSION;
 		try {
-			for (int maximumDimension : new int[] {0, -1}) {
+			// 1e10 would overflow an int and leave no effective cap
+			for (Number maximumDimension : new Number[] {Integer.valueOf(0), Integer.valueOf(-1), Double.valueOf(1000.5), Long.valueOf(10_000_000_000L)}) {
 				InvocationTargetException thrown = assertThrows(InvocationTargetException.class,
-						() -> invokePrivateStatic("configureThumbnailSettings",
-								new Class<?>[] {Map.class},
-								Map.of("thumbnail", Map.of(
-										"concurrentThreads", Integer.valueOf(2),
-										"subsamplingMinimumTargetSize", Integer.valueOf(20),
-										"maximumDimension", Integer.valueOf(maximumDimension),
-										"fileStorage", Boolean.FALSE))));
+						() -> configureThumbnailSettings(maximumDimension),
+						maximumDimension::toString);
 
 				assertThat(thrown.getCause(), instanceOf(IllegalStateException.class));
-				assertEquals("thumbnail.maximumDimension must be greater than 0", thrown.getCause().getMessage());
+				assertEquals("thumbnail.maximumDimension must be a whole number greater than 0",
+								thrown.getCause().getMessage(),
+								maximumDimension::toString);
 			}
 		}
 		finally {
 			UtilImpl.THUMBNAIL_MAXIMUM_DIMENSION = originalMaximumDimension;
 		}
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void testConfigureThumbnailSettingsKeepsTheMaximumDimensionWhenTheKeyIsMissing() throws Exception {
+		int originalMaximumDimension = UtilImpl.THUMBNAIL_MAXIMUM_DIMENSION;
+		try {
+			UtilImpl.THUMBNAIL_MAXIMUM_DIMENSION = 2048;
+			configureThumbnailSettings(null);
+			assertEquals(2048, UtilImpl.THUMBNAIL_MAXIMUM_DIMENSION);
+
+			configureThumbnailSettings(Integer.valueOf(1));
+			assertEquals(1, UtilImpl.THUMBNAIL_MAXIMUM_DIMENSION);
+		}
+		finally {
+			UtilImpl.THUMBNAIL_MAXIMUM_DIMENSION = originalMaximumDimension;
+		}
+	}
+
+	/**
+	 * Runs the listener's thumbnail configuration with a minimal stanza.
+	 *
+	 * @param maximumDimension the maximumDimension value, or {@code null} to leave the key out
+	 */
+	private static void configureThumbnailSettings(Number maximumDimension) throws Exception {
+		Map<String, Object> thumbnail = new HashMap<>();
+		thumbnail.put("concurrentThreads", Integer.valueOf(2));
+		thumbnail.put("subsamplingMinimumTargetSize", Integer.valueOf(20));
+		thumbnail.put("fileStorage", Boolean.FALSE);
+		if (maximumDimension != null) {
+			thumbnail.put("maximumDimension", maximumDimension);
+		}
+		invokePrivateStatic("configureThumbnailSettings", new Class<?>[] {Map.class}, Map.of("thumbnail", thumbnail));
 	}
 
 	@Test

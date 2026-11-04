@@ -1,5 +1,6 @@
 package org.skyve.impl.web.service.smartclient;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -53,6 +54,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import modules.kitchensink.domain.KitchenSink;
 import modules.test.AbstractSkyveTest;
 import modules.test.domain.AllAttributesPersistent;
 
@@ -309,6 +311,80 @@ class SmartClientEditServletH2Test extends AbstractSkyveTest {
 		String body = sink.toString();
 		assertTrue(body.contains("\"status\":0"), body);
 		assertTrue(body.contains("\"data\":"), body);
+	}
+
+	@Test
+	void addRendersTheFormWithTheNewInlineRow() throws Exception {
+		KitchenSink kitchenSink = KitchenSink.newInstance();
+		kitchenSink.setText("edit-add-" + System.nanoTime());
+
+		String body = invokeAdd(kitchenSink, KitchenSink.inlineGridPropertyName);
+
+		assertTrue(body.contains("\"status\":0"), body);
+		assertEquals(1, kitchenSink.getInlineGrid().size());
+		assertTrue(body.contains(kitchenSink.getInlineGrid().get(0).getBizId()), body);
+	}
+
+	@Test
+	void addToAnInverseManyAddsTheElement() throws Exception {
+		AllAttributesPersistent bean = AllAttributesPersistent.newInstance();
+		bean.setText("edit-add-inverse-" + System.nanoTime());
+
+		String body = invokeAdd(bean, AllAttributesPersistent.inverseAggregatedAssociationPropertyName);
+
+		assertTrue(body.contains("\"status\":0"), body);
+		assertEquals(1, bean.getInverseAggregatedAssociation().size());
+	}
+
+	private String invokeAdd(Bean formBean, String gridBinding) throws Exception {
+		AbstractWebContext webContext = mockWebContext();
+		webContext.setConversation((AbstractPersistence) p);
+		webContext.setCurrentBean(formBean);
+		org.skyve.metadata.module.Module formModule = c.getModule(formBean.getBizModule());
+		org.skyve.metadata.model.document.Document formDocument = formModule.getDocument(c, formBean.getBizDocument());
+		SortedMap<String, Object> parameters = new TreeMap<>();
+		parameters.put("bean", "{}");
+		StringWriter sink = new StringWriter();
+		try (PrintWriter writer = new PrintWriter(sink, true)) {
+			Method add = SmartClientEditServlet.class.getDeclaredMethod("add",
+					AbstractWebContext.class,
+					org.skyve.metadata.user.User.class,
+					org.skyve.metadata.customer.Customer.class,
+					org.skyve.metadata.module.Module.class,
+					org.skyve.metadata.model.document.Document.class,
+					Bean.class,
+					String.class,
+					int.class,
+					int.class,
+					SortedMap.class,
+					AbstractPersistence.class,
+					String.class,
+					PrintWriter.class);
+			add.setAccessible(true);
+			try {
+				add.invoke(null,
+						webContext,
+						u,
+						c,
+						formModule,
+						formDocument,
+						formBean,
+						gridBinding,
+						Integer.valueOf(0),
+						Integer.valueOf(0),
+						parameters,
+						p,
+						UXUI,
+						writer);
+			} catch (InvocationTargetException e) {
+				Throwable cause = e.getCause();
+				if (cause instanceof Exception exception) {
+					throw exception;
+				}
+				throw e;
+			}
+		}
+		return sink.toString();
 	}
 
 	private String invokeFetch(String bizId,

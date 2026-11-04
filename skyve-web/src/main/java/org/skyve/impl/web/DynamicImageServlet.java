@@ -15,6 +15,7 @@ import org.skyve.domain.messages.ConversationEndedException;
 import org.skyve.domain.messages.SessionEndedException;
 import org.skyve.impl.cache.StateUtil;
 import org.skyve.impl.persistence.AbstractPersistence;
+import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.model.document.DynamicImage;
@@ -30,6 +31,7 @@ import org.skyve.util.monitoring.Monitoring;
 import org.skyve.util.monitoring.RequestKey;
 import org.slf4j.Logger;
 
+import jakarta.annotation.Nonnull;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
@@ -57,6 +59,51 @@ public class DynamicImageServlet extends HttpServlet {
 	private static final String CACHE_CONTROL = "Cache-Control";
 	private static final String CACHE_VALUE = "cache";
 	private static final String NO_CACHE_VALUE = "private,no-cache,no-store";
+
+	/**
+	 * The width and height in pixels to generate a dynamic image at.
+	 *
+	 * @param width the image width
+	 * @param height the image height
+	 */
+	record ImageSize(int width, int height) {
+		// nothing to add
+	}
+
+	/**
+	 * Applies the zoom percentages to a requested image size, then, if either side is bigger than
+	 * {@link UtilImpl#THUMBNAIL_MAXIMUM_DIMENSION}, shrinks both sides by the same factor so the bigger side
+	 * fits. This stops a request making the application generate a huge image, and keeps the image's shape
+	 * because the application draws at exactly this size.
+	 *
+	 * @param width the requested width in pixels
+	 * @param widthZoom the zoom to apply to the width, where 100 is no zoom
+	 * @param height the requested height in pixels
+	 * @param heightZoom the zoom to apply to the height, where 100 is no zoom
+	 * @return the zoomed size; a positive side stays at least 1 pixel when shrunk
+	 */
+	static @Nonnull ImageSize zoomedSize(int width, int widthZoom, int height, int heightZoom) {
+		double zoomedWidth = width * (widthZoom / 100.0);
+		double zoomedHeight = height * (heightZoom / 100.0);
+		double biggerSide = Math.max(zoomedWidth, zoomedHeight);
+		if (biggerSide <= UtilImpl.THUMBNAIL_MAXIMUM_DIMENSION) {
+			return new ImageSize((int) zoomedWidth, (int) zoomedHeight);
+		}
+
+		double scale = UtilImpl.THUMBNAIL_MAXIMUM_DIMENSION / biggerSide;
+		return new ImageSize(shrink(zoomedWidth, scale), shrink(zoomedHeight, scale));
+	}
+
+	/**
+	 * Shrinks a positive image side by a scale less than 1, rounding to the nearest pixel but not below 1.
+	 * A side that isn't positive is left as it is.
+	 */
+	private static int shrink(double side, double scale) {
+		if (side <= 0) {
+			return (int) side;
+		}
+		return (int) Math.max(1, Math.round(side * scale));
+	}
 
 	/**
 	 * Generates a dynamic image for the current conversation bean and streams the rendered thumbnail response.
@@ -154,10 +201,8 @@ public class DynamicImageServlet extends HttpServlet {
 			format = dynamicImage.getFormat();
 			quality = dynamicImage.getCompressionQuality();
 			cacheTime = dynamicImage.getCacheTime();
-			image = dynamicImage.getImage(bean,
-											(int) (width * (widthZoom / 100.0)), 
-											(int) (height * (heightZoom / 100.0)), 
-											user);
+			ImageSize size = zoomedSize(width, widthZoom, height, heightZoom);
+			image = dynamicImage.getImage(bean, size.width(), size.height(), user);
 		}
 		catch (Exception e) {
 			exception = e;

@@ -56,8 +56,6 @@ import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.document.Association;
 import org.skyve.metadata.model.document.Bizlet;
-import org.skyve.metadata.model.document.Collection;
-import org.skyve.metadata.model.document.Collection.CollectionType;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.router.UxUi;
@@ -194,7 +192,8 @@ public class SmartClientEditServlet extends HttpServlet {
 	 *
 	 * <p>A custom action, a download, OK, Save or a delete is refused with {@link ActionUnavailableException}
 	 * unless the view, as last rendered, offers a reachable trigger for it (see {@link ActionAvailability}).
-	 * A push request, and a delete with no bean (no conversation), are not checked.
+	 * A push request, an inline data grid's New (see {@link ServletConstants#INLINE_ADD_ACTION_NAME}) and a delete
+	 * with no bean (no conversation) are not checked.
 	 * Side effects of a refusal: {@link ActionAvailability} logs a warning, and the request is rolled back and written as
 	 * a status {@value #UNAVAILABLE_RESPONSE_STATUS} response; as for a question, the conversation is not cached and
 	 * the CSRF token is not replaced.
@@ -352,8 +351,8 @@ public class SmartClientEditServlet extends HttpServlet {
 					HttpSession session = request.getSession();
 					
 					String actionName = webContext.getAction();
-					// an inline data grid's New button - add a new element to the grid's collection
-					if (ImplicitActionName.Add.toString().equals(actionName)) {
+					// an inline data grid's New button - add a new element to the grid's collection or inverse
+					if (ServletConstants.INLINE_ADD_ACTION_NAME.equals(actionName)) {
 						LOGGER.info("ADD to {} : {}", formBinding, gridBinding);
 						if ((editIdCounter == null) || (createIdCounter == null) || (gridBinding == null) || (formBean == null)) {
 							throw new ServletException(REQUEST_MALFORMED);
@@ -1444,44 +1443,49 @@ public class SmartClientEditServlet extends HttpServlet {
 	}
 
 	/**
-	 * Adds a new element to the collection of an inline data grid and writes the form's response,
+	 * Adds a new element to the collection or inverse of an inline data grid and writes the form's response,
 	 * as PrimeFaces' AddAction does.
 	 *
-	 * <p>The posted form values are applied first. The new element is created with
-	 * {@link Document#newInstance(User)}, so its default values and its bizlet's {@code newInstance()} run.
-	 * The bizlet's {@code preExecute(Add)} then runs with the form bean as the parent, and the element is
-	 * added to the collection. The response renders the form bean, whose grid then holds the new row
-	 * with its bizId.
+	 * <p>The posted form values are applied first. The element is then created and added by
+	 * {@link WebUtil#addNewElement}, with the form bean as the parent. The response renders the form bean, whose grid
+	 * then holds the new row with its bizId; when an interceptor vetoes the add, the response is written without it.
+	 * The request is not checked by {@link ActionAvailability}.
 	 *
-	 * @param webContext active web conversation context
-	 * @param user active user
-	 * @param customer active customer metadata
-	 * @param formModule form module
-	 * @param formDocument form document
-	 * @param formBean the bean of the form holding the data grid
-	 * @param gridBinding the data grid's collection binding, relative to the form bean
+	 * <p>Side effects: applies the posted values to the conversation's beans, runs the element's bizlet and the
+	 * interceptors, adds the element to the form bean's graph, writes the response to {@code pw} and records a
+	 * monitoring measurement for the element document.
+	 *
+	 * @param webContext the conversation's web context; must not be {@code null}
+	 * @param user the requesting user; must not be {@code null}
+	 * @param customer the user's customer; must not be {@code null}
+	 * @param formModule the module of the form document; must not be {@code null}
+	 * @param formDocument the document of the form holding the data grid; must not be {@code null}
+	 * @param formBean the bean of the form holding the data grid; must not be {@code null}
+	 * @param gridBinding the data grid's binding, relative to the form bean; must not be {@code null}
 	 * @param editIdCounter base edit-id counter for generated component ids
 	 * @param createIdCounter base create-id counter for generated component ids
-	 * @param parameters request parameters, with the form values under "bean"
-	 * @param persistence active persistence context
-	 * @param uxui active UX/UI profile name
-	 * @param pw response writer
-	 * @throws Exception when applying, creating or rendering fails
+	 * @param parameters request parameters, with the form values under "bean"; must not be {@code null}
+	 * @param persistence the request's persistence; must not be {@code null}
+	 * @param uxui the request's UX/UI name; must not be {@code null}
+	 * @param pw the response writer; must not be {@code null}
+	 * @throws IllegalStateException if {@code gridBinding} does not resolve to a relation
+	 * @throws SecurityException if the relation and its document are persistent and the user cannot create that document
+	 * @throws Exception if applying the values, the bizlet, an interceptor or rendering fails
 	 */
-	@SuppressWarnings({"java:S107", "java:S3776"}) // Long parameter list matches the other request handlers here; complexity OK
-	private static void add(AbstractWebContext webContext,
-								User user,
-								Customer customer,
-								Module formModule,
-								Document formDocument,
-								Bean formBean,
-								String gridBinding,
+	@SuppressWarnings("java:S107") // Long parameter list matches the other request handlers here
+	private static void add(@Nonnull AbstractWebContext webContext,
+								@Nonnull User user,
+								@Nonnull Customer customer,
+								@Nonnull Module formModule,
+								@Nonnull Document formDocument,
+								@Nonnull Bean formBean,
+								@Nonnull String gridBinding,
 								int editIdCounter,
 								int createIdCounter,
-								SortedMap<String, Object> parameters,
-								AbstractPersistence persistence,
-								String uxui,
-								PrintWriter pw)
+								@Nonnull SortedMap<String, Object> parameters,
+								@Nonnull AbstractPersistence persistence,
+								@Nonnull String uxui,
+								@Nonnull PrintWriter pw)
 	throws Exception {
 		// Apply the JSON values
 		View formView = formDocument.getView(uxui,
@@ -1501,50 +1505,11 @@ public class SmartClientEditServlet extends HttpServlet {
 		manipulator.visit();
 		manipulator.applyJSON((String) parameters.get("bean"), persistence, webContext);
 
-		TargetMetaData target = BindUtil.getMetaDataForBinding(customer, formModule, formDocument, gridBinding);
-		if (! (target.getAttribute() instanceof Collection collection)) {
-			throw new IllegalStateException(gridBinding + " doesn't resolve to a collection.");
-		}
-		Document elementDocument = target.getDocument().getRelatedDocument(customer, collection.getName());
-
-		// check for create privilege if the collection is persistent and the collection document is persistent
-		if (collection.isPersistent() &&
-				elementDocument.isPersistable() &&
-				(! user.canCreateDocument(elementDocument))) {
-			throw new SecurityException("create this data", user.getName());
-		}
-
-		RequestKey key = RequestKey.create(elementDocument);
-
-		Bean element = elementDocument.newInstance(user);
-
-		// set bizOrdinal if this is an ordered child collection
-		if (Boolean.TRUE.equals(collection.getOrdered()) && CollectionType.child.equals(collection.getType())) {
-			@SuppressWarnings("unchecked")
-			List<Bean> elements = (List<Bean>) BindUtil.get(formBean, gridBinding);
-			if (elements != null) {
-				BindUtil.set(element, Bean.ORDINAL_NAME, Integer.valueOf(elements.size() + 1));
-			}
-		}
-
-		CustomerImpl internalCustomer = (CustomerImpl) customer;
-		boolean vetoed = internalCustomer.interceptBeforePreExecute(ImplicitActionName.Add, element, formBean, webContext);
-		if (! vetoed) {
-			Bizlet<Bean> elementBizlet = ((DocumentImpl) elementDocument).getBizlet(customer);
-			if (elementBizlet != null) {
-				if (UtilImpl.BIZLET_TRACE) BIZLET_LOGGER.info(ENTERING_PRE_EXECUTE, elementBizlet.getClass().getName(), ImplicitActionName.Add, element, formBean, webContext);
-				element = elementBizlet.preExecute(ImplicitActionName.Add, element, formBean, webContext);
-				if (UtilImpl.BIZLET_TRACE) BIZLET_LOGGER.info(EXITING_PRE_EXECUTE, elementBizlet.getClass().getName(), element);
-			}
-			internalCustomer.interceptAfterPreExecute(ImplicitActionName.Add, element, formBean, webContext);
-
-			// add the new element to the collection after preExecute
-			BindUtil.addElementToCollection(formBean, gridBinding, element);
-		}
+		Bean element = WebUtil.addNewElement(user, formBean, gridBinding, formBean, webContext);
 
 		pumpOutResponse(webContext,
 							user,
-							internalCustomer,
+							(CustomerImpl) customer,
 							formModule,
 							formDocument,
 							formView,
@@ -1556,7 +1521,10 @@ public class SmartClientEditServlet extends HttpServlet {
 							null,
 							pw);
 
-		Monitoring.measure(key);
+		if (element != null) {
+			Module elementModule = customer.getModule(element.getBizModule());
+			Monitoring.measure(RequestKey.create(elementModule.getDocument(customer, element.getBizDocument())));
+		}
 	}
 
 	/**

@@ -97,7 +97,10 @@
 				MENU_COLLAPSED_CLASS = 'skyve-editorial-menu-collapsed',
 				$html = $('html');
 
-			$('<a href="#sidebar" class="toggle" role="button" aria-label="Toggle menu" title="Toggle menu"> </a>')
+			// The template gives the localised label; jQuery escapes the attribute values.
+			var toggleLabel = $sidebar.attr('data-toggle-label') || 'Toggle menu';
+			$('<a href="#sidebar" class="toggle" role="button"> </a>')
+				.attr({'aria-label': toggleLabel, title: toggleLabel})
 				.appendTo($sidebar)
 				.on('click', function(event) {
 

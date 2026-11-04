@@ -113,6 +113,25 @@ class VueListGridScriptColumnMetaDataTest {
 	}
 
 	@Test
+	void toMapOmitsEnumValuesForAnEmptyValueMap() throws Exception {
+		// Variant and dynamic domain columns get an empty value map; an empty enumValues would hide their converters
+		MetaDataQueryColumn mdColumn = mock(MetaDataQueryColumn.class);
+		SmartClientQueryColumnDefinition scColumn = mock(SmartClientQueryColumnDefinition.class);
+		when(scColumn.getName()).thenReturn("variant");
+		when(scColumn.getTitle()).thenReturn("Variant");
+		when(scColumn.getValueMap()).thenReturn(Map.of());
+
+		Attribute attribute = mock(Attribute.class);
+		when(attribute.getAttributeType()).thenReturn(AttributeType.text);
+		when(attribute.getDomainType()).thenReturn(DomainType.variant);
+		TargetMetaData tmd = new TargetMetaData(mock(DocumentImpl.class), attribute, String.class);
+
+		Map<String, Object> map = invokeToMap(mdColumn, scColumn, tmd, mock(CustomerImpl.class));
+
+		assertFalse(map.containsKey("enumValues"), map::toString);
+	}
+
+	@Test
 	void toMapAddsConverterNameForConvertibleField() throws Exception {
 		MetaDataQueryColumn mdColumn = mock(MetaDataQueryColumn.class);
 		SmartClientQueryColumnDefinition scColumn = mock(SmartClientQueryColumnDefinition.class);

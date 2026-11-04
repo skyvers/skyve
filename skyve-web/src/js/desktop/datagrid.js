@@ -180,7 +180,7 @@ isc.BizDataGrid.addMethods({
 				this.grid.anySelected(),
 			click: () => {
 				if (this.grid.anySelected()) {
-					// Use the selected row; rows without a bizId yet don't set _eventRowNum
+					// Use the selected row, as _eventRowNum is set by clicking a row, not by selecting one in code
 					const rowNum = this.grid.getRecordIndex(this.grid.getSelectedRecord());
 					const colNum = rowNum === this._eventRowNum ? this._eventColNum : 0;
 					this.startEditingRow(rowNum, colNum);
@@ -538,14 +538,14 @@ isc.BizDataGrid.addMethods({
 	 */
 	startEditingRow: function (rowNum, colNum) {
 		const grid = this.grid;
-		if (rowNum == null || rowNum < 0) return false;
+		if (rowNum == null || rowNum < 0) return;
 		const col = colNum == null || colNum < 0 ? 0 : colNum;
 		let cell = grid.findNextEditCell(rowNum, col, -1, true, true, false, true);
 		if (cell?.[0] !== rowNum) {
 			cell = grid.findNextEditCell(rowNum, col, 1, true, false, false, true);
 		}
-		if (cell?.[0] !== rowNum) return false;
-		return grid.startEditing(rowNum, cell[1], false);
+		if (cell?.[0] !== rowNum) return;
+		grid.startEditing(rowNum, cell[1], false);
 	},
 
 	/**
@@ -557,9 +557,12 @@ isc.BizDataGrid.addMethods({
 		const grid = this.grid;
 		if (grid.getEditRow() != null) {
 			grid.endEditing();
+			// A row that fails validation stays in edit. Stop here, as the server's
+			// response replaces the grid's data and would lose the row's unsaved edits.
+			if (grid.getEditRow() != null || grid.hasErrors()) return;
 		}
 		const existing = new Set(grid.getData().map((record) => record.bizId));
-		this._view.doAction("Add", false, this._b, null, null, null, (data, success) => {
+		this._view.doAction("_ADD", false, this._b, null, null, null, (data, success) => {
 			if (success) {
 				// Mark the view dirty, as editing or removing a row does, so Zoom Out posts to the
 				// server (which validates) and unsaved changes are noticed.

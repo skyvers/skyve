@@ -29,6 +29,32 @@ class DesktopViewTest {
 	}
 
 	@Test
+	void bannerScriptEscapesTheBannerMarkupAsAJavaScriptString() {
+		String originalIdentifier = UtilImpl.ENVIRONMENT_IDENTIFIER;
+		try {
+			UtilImpl.ENVIRONMENT_IDENTIFIER = null;
+			assertEquals("", DesktopView.buildBannerScript());
+
+			UtilImpl.ENVIRONMENT_IDENTIFIER = "it's <UAT>";
+			String script = DesktopView.buildBannerScript();
+
+			assertTrue(script.startsWith("$('body').append('"), script);
+			assertTrue(script.endsWith("');"), script);
+			String body = script.substring("$('body').append('".length(), script.length() - "');".length());
+			// Neither an unescaped quote nor "</" can end the string or the enclosing script element
+			assertFalse(body.replace("\\'", "").contains("'"), body);
+			assertFalse(body.contains("</"), body);
+			// the HTML-escaped identifier, with its ampersands escaped again for the script
+			assertTrue(body.contains("it\\x26#39;s \\x26lt;UAT\\x26gt;"), body);
+			assertTrue(body.contains("class=\\\"skyveEnvBanner skyveTopEnvBanner\\\""), body);
+			assertTrue(body.contains("skyveTopEnvBanner") && body.contains("skyveBottomEnvBanner"), body);
+		}
+		finally {
+			UtilImpl.ENVIRONMENT_IDENTIFIER = originalIdentifier;
+		}
+	}
+
+	@Test
 	void getSmartClientDirReturnsConfiguredDirectory() {
 		DesktopView view = new DesktopView();
 

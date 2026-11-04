@@ -481,7 +481,14 @@ export default {
         },
         snapshotState() {
 
-            const visibleColNames = this.selectedColumns.map(col => col.field);
+            // Save the default choice as no choice, so the snapshot keeps showing the default
+            // columns when the query's columns change later
+            const defaultColNames = this.defaultColumns().map(col => col.field);
+            let visibleColNames = this.selectedColumns.map(col => col.field);
+            if ((visibleColNames.length === defaultColNames.length) &&
+                    visibleColNames.every(name => defaultColNames.includes(name))) {
+                visibleColNames = [];
+            }
 
             return {
                 "filters": this.filters,
@@ -738,7 +745,7 @@ export default {
             }
         },
         /**
-         * The columns shown when none have been chosen - those not hidden by default.
+         * Returns the columns not hidden by default, which are shown when none have been chosen.
          */
         defaultColumns() {
             return this.columns.filter(col => !col.hidden);

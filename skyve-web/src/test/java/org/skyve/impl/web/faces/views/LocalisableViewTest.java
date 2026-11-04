@@ -52,6 +52,22 @@ class LocalisableViewTest {
 	}
 
 	@Test
+	void environmentBannersAreTheEscapedSharedMarkup() {
+		String originalIdentifier = UtilImpl.ENVIRONMENT_IDENTIFIER;
+		try {
+			UtilImpl.ENVIRONMENT_IDENTIFIER = "UAT <b>";
+			TestLocalisableView view = new TestLocalisableView();
+
+			assertEquals("<div class=\"skyveEnvBanner skyveTopEnvBanner\">UAT &lt;b&gt;</div>"
+							+ "<div class=\"skyveEnvBanner skyveBottomEnvBanner\">UAT &lt;b&gt;</div>",
+							view.getEnvironmentBanners());
+		}
+		finally {
+			UtilImpl.ENVIRONMENT_IDENTIFIER = originalIdentifier;
+		}
+	}
+
+	@Test
 	void i18nMapAdapterUnsupportedOperationsThrow() {
 		LocalisableView.I18nMapAdapter map = new LocalisableView.I18nMapAdapter();
 

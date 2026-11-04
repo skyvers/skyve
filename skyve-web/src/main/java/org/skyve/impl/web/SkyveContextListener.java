@@ -617,8 +617,9 @@ public class SkyveContextListener implements ServletContextListener {
 		Number maximumDimension = getNumber(THUMBNAIL_KEY, "maximumDimension", thumbnail, false);
 		if (maximumDimension != null) {
 			// No unlimited setting - an uncapped size lets a request exhaust memory
-			if (maximumDimension.intValue() <= 0) {
-				throw new IllegalStateException(THUMBNAIL_KEY + ".maximumDimension must be greater than 0");
+			double value = maximumDimension.doubleValue();
+			if ((value < 1) || (value > Integer.MAX_VALUE) || (value != Math.floor(value))) {
+				throw new IllegalStateException(THUMBNAIL_KEY + ".maximumDimension must be a whole number greater than 0");
 			}
 			UtilImpl.THUMBNAIL_MAXIMUM_DIMENSION = maximumDimension.intValue();
 		}
@@ -844,7 +845,7 @@ public class SkyveContextListener implements ServletContextListener {
 			for (String cacheName : caches.keySet()) {
 				Map<String, Object> cache = getObject(CACHES_KEY, cacheName, caches, true);
 				String prefix = CACHES_KEY + '.' + cacheName;
-				String type = getString(CACHES_KEY + '.' + cacheName, "type", cache, true);
+				String type = getString(prefix, "type", cache, true);
 				int heapSizeEntries = getInt(prefix, HEAP_SIZE_ENTRIES_KEY, cache);
 				Number offHeapSizeInMb = getNumber(prefix, OFF_HEAP_SIZE_MB_KEY, cache, false);
 				Number expiryInMinutes = getNumber(prefix, EXPIRY_TIME_MINUTES_KEY, cache, false);
@@ -943,7 +944,7 @@ public class SkyveContextListener implements ServletContextListener {
 		if (hibernateCaches != null) {
 			for (String cacheName : hibernateCaches.keySet()) {
 				Map<String, Object> cache = getObject("hibernate.caches", cacheName, hibernateCaches, true);
-				String prefix = String.format("hibernate.caches.%s", cacheName);
+				String prefix = HIBERNATE_KEY + '.' + CACHES_KEY + '.' + cacheName;
 				int heapSizeEntries = getInt(prefix, HEAP_SIZE_ENTRIES_KEY, cache);
 				Number offHeapSizeInMb = getNumber(prefix, OFF_HEAP_SIZE_MB_KEY, cache, false);
 				String expiryPolicyString = getString(prefix, "expiryPolicy", cache, false);
