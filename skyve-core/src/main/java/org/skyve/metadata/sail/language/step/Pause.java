@@ -14,9 +14,10 @@ import jakarta.xml.bind.annotation.XmlType;
 /**
  * Pauses SAIL script execution for the specified number of milliseconds.
  *
- * <p>Use this step to introduce a deliberate wait between interactions, for example
- * to allow asynchronous UI updates, animations, or server-side processing to complete
- * before the next assertion or interaction step runs.
+ * <p>This is a fixed delay and a last resort. The executors already wait for the
+ * asynchronous work a step starts, and {@code <testGridRows timeoutMillis="..."/>}
+ * waits for a condition such as a background job's result. Use a pause only when no
+ * observable condition exists, and say why in a comment.
  *
  * @see org.skyve.metadata.sail.execution.Executor#executePause
  */
