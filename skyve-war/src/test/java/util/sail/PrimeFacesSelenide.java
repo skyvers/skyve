@@ -156,17 +156,22 @@ public class PrimeFacesSelenide extends Selenide<
 			asked = true;
 			String question = (String) js("var m = document.getElementById('skyveQuestionMessage'); return m ? m.textContent : '';");
 			trace((positive ? "    answer yes to " : "    answer no to ") + question);
-			Boolean aborted = (Boolean) js("var d = document.querySelector('[role=alertdialog][aria-labelledby=skyveQuestionTitle]');" +
-											"var buttons = Array.from(d.querySelectorAll('.ui-dialog-buttonpane button'));" +
-											"var close = d.querySelector('.ui-dialog-titlebar-close');" +
-											"var abortLabel = close ? close.getAttribute('aria-label') : null;" +
-											"var negative = buttons.find(function(b) {return b.textContent.trim() === abortLabel;}) || buttons[buttons.length - 1];" +
-											"var positive = buttons.find(function(b) {return b !== negative;});" +
-											"var chosen = arguments[0] ? (positive || negative) : negative;" +
-											"chosen.click();" +
-											"return chosen === negative && abortLabel !== null;",
-											Boolean.valueOf(positive));
-			if (Boolean.TRUE.equals(aborted)) {
+			// Choose the answer's button: [the button, whether it aborts the gesture]
+			@SuppressWarnings("unchecked")
+			List<Object> choice = (List<Object>) js("var d = document.querySelector('[role=alertdialog][aria-labelledby=skyveQuestionTitle]');" +
+														"var buttons = Array.from(d.querySelectorAll('.ui-dialog-buttonpane button'));" +
+														"var close = d.querySelector('.ui-dialog-titlebar-close');" +
+														"var abortLabel = close ? close.getAttribute('aria-label') : null;" +
+														"var negative = buttons.find(function(b) {return b.textContent.trim() === abortLabel;}) || buttons[buttons.length - 1];" +
+														"var positive = buttons.find(function(b) {return b !== negative;});" +
+														"var chosen = arguments[0] ? (positive || negative) : negative;" +
+														"return [chosen, chosen === negative && abortLabel !== null];",
+														Boolean.valueOf(positive));
+			if ((choice == null) || (choice.get(0) == null)) {
+				throw new IllegalStateException("The question \"" + question + "\" has no button to answer it with");
+			}
+			click($((WebElement) choice.get(0)));
+			if (Boolean.TRUE.equals(choice.get(1))) {
 				return true;
 			}
 		}
@@ -787,12 +792,14 @@ public class PrimeFacesSelenide extends Selenide<
 	}
 
 	/**
-	 * Asks a lazily loaded grid (a list grid) to load its rows again.
+	 * Asks a grid (a PrimeFaces data table) to load its rows from the server again, with its current filters.
+	 * A data repeater (no data table widget) is left as it is.
 	 *
 	 * @param gridId	the data table's client id
 	 */
 	public void refreshGrid(@Nonnull String gridId) {
-		js("var w = PrimeFaces.getWidgetById(arguments[0]); if (w && w.cfg && w.cfg.lazy && w.filter) w.filter();", gridId);
+		// PrimeFaces 13 data tables have no lazy flag in their configuration: filter() reloads a lazy one from the server
+		js("var w = PrimeFaces.getWidgetById(arguments[0]); if (w && (typeof w.filter === 'function')) w.filter();", gridId);
 		waitForAjaxResponse();
 	}
 
@@ -1082,11 +1089,20 @@ public class PrimeFacesSelenide extends Selenide<
 			throw new IllegalStateException("The upload failed: " + outcome.get(1));
 		}
 		if ("info".equals(outcome.get(0))) {
-			trace("    the upload page says: " + outcome.get(1) + " - close it");
-			js("var o = arguments[0].closest('.ui-overlaypanel, .ui-dialog');" +
-					"var w = o ? PrimeFaces.getWidgetById(o.id) : null;" +
-					"if (w && w.hide) w.hide(); else if (o) {var c = o.querySelector('.ui-overlaypanel-close, .ui-dialog-titlebar-close'); if (c) c.click();}",
-					frame);
+			// RUNTIME BUG (report bug 3): with the tablet UX/UI the upload page stays open after a successful upload.
+			// A user closes it with its close icon, so press that; with no close icon the step fails.
+			trace("    the upload page says: " + outcome.get(1) + " - close it with its close icon");
+			WebElement close = (WebElement) js("var o = arguments[0].closest('.ui-overlaypanel, .ui-dialog');" +
+												"var c = o ? o.querySelector('.ui-overlaypanel-close, .ui-dialog-titlebar-close') : null;" +
+												"return (c && c.getClientRects().length > 0) ? c : null;",
+												frame);
+			if (close == null) {
+				throw new IllegalStateException("The upload page stayed open after \"" + outcome.get(1) +
+													"\" and has no close icon a user could press");
+			}
+			click($(close));
+			// Wait for the upload page to close (its overlay's hide effect)
+			waitFor(d -> uploadPageClosed(frame) ? Boolean.TRUE : null);
 		}
 		waitForAjaxResponse();
 		return true;
