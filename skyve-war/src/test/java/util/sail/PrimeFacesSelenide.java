@@ -1416,18 +1416,22 @@ public class PrimeFacesSelenide extends Selenide<
 	}
 
 	/**
+	 * Defines <code>centre(e)</code>: scrollIntoView, then make sure the window itself scrolled the element to its middle
+	 * (scrollIntoView can leave the window as it was, e.g. after an ajax update replaced part of the page).
+	 */
+	private static final String CENTRE_SCRIPT = "var centre = function(e) {e.scrollIntoView({block: 'center', inline: 'nearest'});" +
+													"var r = e.getBoundingClientRect(), mid = r.top + r.height / 2;" +
+													"if ((mid < window.innerHeight * 0.25) || (mid > window.innerHeight * 0.75)) {" +
+													"  window.scrollBy(0, mid - window.innerHeight / 2);}};";
+
+	/**
 	 * Scrolls an element to the middle of the window, away from fixed headers, banners and footers.
 	 *
 	 * @param element	the element
 	 */
 	public void scrollToCentre(@Nonnull WebElement element) {
 		try {
-			// scrollIntoView, then make sure the window itself scrolled the element to its middle
-			// (scrollIntoView can leave the window as it was, e.g. after an ajax update replaced part of the page)
-			js("var e = arguments[0]; e.scrollIntoView({block: 'center', inline: 'nearest'});" +
-					"var r = e.getBoundingClientRect(), mid = r.top + r.height / 2;" +
-					"if ((mid < window.innerHeight * 0.25) || (mid > window.innerHeight * 0.75)) {" +
-					"  window.scrollBy(0, mid - window.innerHeight / 2);}", element);
+			js(CENTRE_SCRIPT + "centre(arguments[0]);", element);
 		}
 		catch (@SuppressWarnings("unused") WebDriverException e) {
 			// not scrollable (e.g. hidden); the click reports the problem
@@ -1440,15 +1444,18 @@ public class PrimeFacesSelenide extends Selenide<
 	 */
 	private void waitUntilUncovered(@Nonnull WebElement element) {
 		try {
-			// Wait for nothing to be over the element's centre (a header settling, an overlay closing)
-			waitFor(d -> js("var e = arguments[0], r = e.getBoundingClientRect();" +
+			// Wait for nothing to be over the element's centre (a header settling, an overlay closing).
+			// While it is covered, centre it again: the page can scroll itself after the first centring
+			// (e.g. a select menu focusing its input late), leaving the element under the fixed header.
+			waitFor(d -> js(CENTRE_SCRIPT + "var e = arguments[0], r = e.getBoundingClientRect();" +
 								"if ((r.width === 0) && (r.height === 0)) return true;" +
 								"var t = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2);" +
-								"return ((t === null) || (t === e) || e.contains(t) || t.contains(e) || (t.tagName === 'LABEL' && t.htmlFor === e.id)) ? true : null;",
+								"if ((t === null) || (t === e) || e.contains(t) || t.contains(e) || (t.tagName === 'LABEL' && t.htmlFor === e.id)) return true;" +
+								"centre(e); return null;",
 								element));
 		}
 		catch (@SuppressWarnings("unused") org.openqa.selenium.TimeoutException | StaleElementReferenceException e) {
-			// still covered (or gone): the click falls back, or reports the problem
+			// still covered (or gone): the click or typing reports the problem
 		}
 	}
 
