@@ -876,7 +876,8 @@ public class PrimeFacesSelenide extends Selenide<
 		}
 		// Expand the module and each group, then click the item
 		WebElement header = (WebElement) js(find, moduleTitle, groups, item, "header");
-		if ((header != null) && (header.getDomAttribute("class") != null) && (! header.getDomAttribute("class").contains("ui-state-active"))) {
+		// The menu can restore its expanded panels, so look at what is open rather than at the markup's state
+		if ((header != null) && Boolean.TRUE.equals(js("var c = arguments[0].nextElementSibling; return (! c) || getComputedStyle(c).display === 'none';", header))) {
 			click($(header));
 			// Wait for the module's panel to finish sliding open
 			waitFor(d -> js("var c = arguments[0].nextElementSibling;" +
@@ -884,8 +885,8 @@ public class PrimeFacesSelenide extends Selenide<
 		}
 		for (int g = 0, l = groups.size(); g < l; g++) {
 			WebElement group = (WebElement) js(find, moduleTitle, groups, item, "group" + g);
-			WebElement expandedFlag = (group == null) ? null : group.findElement(By.cssSelector(".ui-menuitem-text"));
-			if ((expandedFlag != null) && (! "true".equals(expandedFlag.getDomAttribute("aria-expanded")))) {
+			if ((group != null) && Boolean.TRUE.equals(js("var u = arguments[0].parentElement.querySelector(':scope > ul');" +
+															"return (! u) || getComputedStyle(u).display === 'none';", group))) {
 				click($(group));
 				// Wait for the group's list to finish sliding open
 				waitFor(d -> js("var u = arguments[0].parentElement.querySelector(':scope > ul');" +
