@@ -1,7 +1,6 @@
 package sail.kitchenSink.pf;
 
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.Assertions;
 
 import util.AbstractPrimeFacesInterpretedSail;
 import util.sail.BrowserConfiguration;
@@ -13,6 +12,8 @@ import util.sail.Devices;
  * <p>
  * Runs against {@code -Dsail.baseUrl} (default {@value BrowserConfiguration#DEFAULT_BASE_URL}),
  * headless unless {@code -Dsail.headless=false}.
+ * The script's test strategy decides how failures are reported; the test fails with an {@link AssertionError}
+ * naming each failed interaction and step.
  */
 class PrimeFacesKitchenSinkSailIT extends AbstractPrimeFacesInterpretedSail {
 
@@ -24,6 +25,6 @@ class PrimeFacesKitchenSinkSailIT extends AbstractPrimeFacesInterpretedSail {
 
 	@Test
 	void test() {
-		Assertions.assertDoesNotThrow(() -> sailResource("sail/kitchenSink/pf/pf-kitchensink-sail.xml"));
+		sailResource("sail/kitchenSink/pf/pf-kitchensink-sail.xml");
 	}
 }
