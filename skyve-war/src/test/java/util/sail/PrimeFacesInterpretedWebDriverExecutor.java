@@ -11,6 +11,7 @@ import org.primefaces.component.inputmask.InputMask;
 import org.primefaces.component.inputtext.InputText;
 import org.primefaces.component.inputtextarea.InputTextarea;
 import org.primefaces.component.password.Password;
+import org.primefaces.component.picklist.PickList;
 import org.primefaces.component.selectbooleancheckbox.SelectBooleanCheckbox;
 import org.primefaces.component.selectonemenu.SelectOneMenu;
 import org.primefaces.component.selectoneradio.SelectOneRadio;
@@ -26,6 +27,22 @@ import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
 import org.skyve.impl.metadata.module.ModuleImpl;
 import org.skyve.impl.metadata.view.ViewImpl;
+import org.skyve.impl.metadata.module.menu.AbstractDocumentOrQueryOrModelMenuItem;
+import org.skyve.impl.metadata.module.menu.CalendarItem;
+import org.skyve.impl.metadata.module.menu.EditItem;
+import org.skyve.impl.metadata.module.menu.ListItem;
+import org.skyve.impl.metadata.module.menu.MapItem;
+import org.skyve.impl.metadata.module.menu.TreeItem;
+import org.skyve.metadata.module.menu.MenuGroup;
+import org.skyve.metadata.module.menu.MenuItem;
+import org.skyve.metadata.sail.language.step.TestGridRows;
+import org.skyve.metadata.sail.language.step.TestMessage;
+import org.skyve.metadata.sail.language.step.TestWidget;
+import org.skyve.metadata.sail.language.step.interaction.Upload;
+import org.skyve.metadata.sail.language.step.interaction.session.SwitchMode;
+import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateMenu;
+import org.skyve.metadata.sail.language.step.interaction.navigation.TestMenu;
+import org.skyve.impl.metadata.view.widget.bound.input.TextField;
 import org.skyve.impl.metadata.view.widget.bound.tabular.DataGrid;
 import org.skyve.impl.sail.execution.TestDataEnterViewVisitor;
 import org.skyve.impl.sail.execution.pf.PrimeFacesAutomationContext;
@@ -58,6 +75,7 @@ import org.skyve.metadata.sail.language.step.interaction.actions.Save;
 import org.skyve.metadata.sail.language.step.interaction.actions.ZoomIn;
 import org.skyve.metadata.sail.language.step.interaction.actions.ZoomOut;
 import org.skyve.metadata.sail.language.step.interaction.grids.DataGridEdit;
+import org.skyve.metadata.sail.language.step.interaction.grids.GridRowStep;
 import org.skyve.metadata.sail.language.step.interaction.grids.DataGridNew;
 import org.skyve.metadata.sail.language.step.interaction.grids.DataGridRemove;
 import org.skyve.metadata.sail.language.step.interaction.grids.DataGridSelect;
@@ -296,6 +314,7 @@ public class PrimeFacesInterpretedWebDriverExecutor extends InterpretedWebDriver
 		// Never replace with a new line as chrome under test will trip the default button on the form
 		String value = dataEnter.getValue();
 		if (value != null) {
+			value = substituteRunToken(value);
 			value = value.replace("\n", " ");
 		}
 
@@ -321,6 +340,16 @@ public class PrimeFacesInterpretedWebDriverExecutor extends InterpretedWebDriver
 				success = selenide.radio(new PrimeFacesRadioCommand(clientId, index(identifier, value)));
 			} else if (component instanceof TextEditor) {
 				success = selenide.textEditor(clientId, value);
+			} else if (component instanceof PickList) {
+				List<String> members = membershipItems(value);
+				List<String> missing = selenide.pickList(clientId, members);
+				if ((missing != null) && (! missing.isEmpty())) {
+					throw new DomainException(String.format("<dataEnter /> list membership [%s] has no items %s", identifier, missing));
+				}
+				success = (missing != null);
+			} else if ((component instanceof AutoComplete) && (widgetAt(context, identifier, components.indexOf(component)) instanceof TextField)) {
+				// a text field with suggestions (complete="suggest") takes typed text
+				success = selenide._input(clientId, value, false);
 			} else if (component instanceof AutoComplete) {
 				throw new MetaDataException(String.format("<dataEnter /> with binding [%s] is a lookup description: " +
 															"use <lookupDescriptionAutoComplete /> or <lookupDescriptionPick />",
@@ -345,6 +374,30 @@ public class PrimeFacesInterpretedWebDriverExecutor extends InterpretedWebDriver
 														identifier,
 														value));
 		}
+	}
+
+	/**
+	 * Splits a membership value ({@code A|B}) into its item labels.
+	 */
+	private static @Nonnull List<String> membershipItems(@Nullable String value) {
+		List<String> result = new ArrayList<>();
+		if (value != null) {
+			for (String item : value.split("\\|")) {
+				String trimmed = item.trim();
+				if (! trimmed.isEmpty()) {
+					result.add(trimmed);
+				}
+			}
+		}
+		return result;
+	}
+
+	/**
+	 * Returns the widget metadata collected with the component at the index, or null.
+	 */
+	private static @Nullable Object widgetAt(@Nonnull PrimeFacesAutomationContext context, @Nonnull String identifier, int index) {
+		List<Object> widgets = context.getSkyveWidgets(identifier);
+		return ((widgets == null) || (index < 0) || (index >= widgets.size())) ? null : widgets.get(index);
 	}
 
 	/**
@@ -401,11 +454,23 @@ public class PrimeFacesInterpretedWebDriverExecutor extends InterpretedWebDriver
 		}
 
 		String expected = test.getValue();
-		expected = (expected == null) ? "" : expected.replace("\n", " ").trim();
+		expected = (expected == null) ? "" : substituteRunToken(expected).replace("\n", " ").trim();
 
 		boolean found = false;
 		for (UIComponent component : components) {
 			String clientId = PrimeFacesAutomationContext.clientId(component);
+			if (component instanceof PickList) {
+				List<String> members = selenide.pickListMembers(clientId);
+				if (members == null) {
+					continue;
+				}
+				found = true;
+				List<String> expectedMembers = membershipItems(expected);
+				selenide.trace(String.format("test %s (%s) members are %s", identifier, clientId, expectedMembers));
+				check(new java.util.HashSet<>(members).equals(new java.util.HashSet<>(expectedMembers)),
+						() -> String.format("expected [%s] members to be %s but they are %s", identifier, expectedMembers, members));
+				continue;
+			}
 			boolean ignoreCase = (component instanceof ColorPicker);
 			List<String> actuals = actualValues(component, clientId);
 			if (actuals == null) { // not on the page
@@ -525,7 +590,7 @@ public class PrimeFacesInterpretedWebDriverExecutor extends InterpretedWebDriver
 	 * Clicks the first clickable component for the step, waits, then checks for success unless the step's
 	 * {@code testSuccess} is false.
 	 */
-	private void button(Step button, String tagName, boolean ajax, boolean confirm, Boolean testSuccess) {
+	private boolean button(Step button, String tagName, boolean ajax, Boolean answer, Boolean testSuccess) {
 		PrimeFacesAutomationContext context = peek();
 		@SuppressWarnings("null") // uses a nullable result where the API expects non-null
 		String identifier = button.getIdentifier(context);
@@ -542,7 +607,7 @@ public class PrimeFacesInterpretedWebDriverExecutor extends InterpretedWebDriver
 
 			selenide.trace(String.format("click [%s] (%s)", tagName, clientId));
 			verifyLabel(component, clientId, tagName);
-			success = selenide.button(new PrimeFacesButtonCommand(clientId, ajax, confirm));
+			success = selenide.button(clientId, ajax, answer);
 			if (success) {
 				break;
 			}
@@ -551,16 +616,21 @@ public class PrimeFacesInterpretedWebDriverExecutor extends InterpretedWebDriver
 		if (!success) {
 			throw new DomainException(String.format("Could not click button [%s]: it is not on the page or is disabled", tagName));
 		}
+		if (selenide.wasDeclined()) {
+			selenide.trace(String.format("[%s] was declined", tagName));
+			return true;
+		}
 		if (!Boolean.FALSE.equals(testSuccess)) { // true or null (defaults on)
 			checkSuccess(String.format("expected no error messages after [%s]", tagName));
 		}
+		return false;
 	}
 
 	/**
 	 * Clicks the first clickable component for the step, waits for the next page, then checks for success unless
 	 * the step's {@code testSuccess} is false.
 	 */
-	private void redirectButton(Step button, String tagName, boolean confirm, Boolean testSuccess) {
+	private boolean redirectButton(Step button, String tagName, Boolean answer, Boolean testSuccess) {
 		PrimeFacesAutomationContext context = peek();
 		@SuppressWarnings("null") // uses a nullable result where the API expects non-null
 		String identifier = button.getIdentifier(context);
@@ -577,7 +647,7 @@ public class PrimeFacesInterpretedWebDriverExecutor extends InterpretedWebDriver
 
 			selenide.trace(String.format("click [%s] (%s)", tagName, clientId));
 			verifyLabel(component, clientId, tagName);
-			success = selenide.redirectButton(clientId, confirm);
+			success = selenide.redirectButton(clientId, answer);
 			if (success) {
 				break;
 			}
@@ -586,21 +656,27 @@ public class PrimeFacesInterpretedWebDriverExecutor extends InterpretedWebDriver
 		if (!success) {
 			throw new DomainException(String.format("Could not click button [%s]: it is not on the page or is disabled", tagName));
 		}
+		if (selenide.wasDeclined()) {
+			selenide.trace(String.format("[%s] was declined", tagName));
+			return true;
+		}
 		if (!Boolean.FALSE.equals(testSuccess)) { // true or null (defaults on)
 			checkSuccess(String.format("expected no error messages after [%s]", tagName));
 		}
+		return false;
 	}
 
 	@Override
 	public void executeOk(Ok ok) {
-		redirectButton(ok, "ok", false, ok.getTestSuccess());
-		pop();
+		if (! redirectButton(ok, "ok", ok.getConfirm(), ok.getTestSuccess())) {
+			pop();
+		}
 	}
 
 	@SuppressWarnings("null") // a null here fails the test
 	@Override
 	public void executeSave(Save save) {
-		button(save, "save", true, false, save.getTestSuccess());
+		button(save, "save", true, save.getConfirm(), save.getTestSuccess());
 
 		Boolean createView = save.getCreateView();
 		if (Boolean.TRUE.equals(createView)) {
@@ -614,36 +690,40 @@ public class PrimeFacesInterpretedWebDriverExecutor extends InterpretedWebDriver
 
 	@Override
 	public void executeCancel(Cancel cancel) {
-		button(cancel, "cancel", false, false, cancel.getTestSuccess());
-		pop();
+		if (! button(cancel, "cancel", false, null, cancel.getTestSuccess())) {
+			pop();
+		}
 	}
 
 	@Override
 	public void executeDelete(Delete delete) {
-		redirectButton(delete, "delete", true, delete.getTestSuccess());
-		pop();
+		if (! redirectButton(delete, "delete", delete.getConfirm(), delete.getTestSuccess())) {
+			pop();
+		}
 	}
 
 	@Override
 	public void executeZoomOut(ZoomOut zoomOut) {
-		button(zoomOut, "zoom out", false, false, zoomOut.getTestSuccess());
-		pop();
+		if (! button(zoomOut, "zoom out", false, zoomOut.getConfirm(), zoomOut.getTestSuccess())) {
+			pop();
+		}
 	}
 
 	@Override
 	public void executeRemove(Remove remove) {
-		button(remove, "remove", false, true, remove.getTestSuccess());
-		pop();
+		if (! button(remove, "remove", false, remove.getConfirm(), remove.getTestSuccess())) {
+			pop();
+		}
 	}
 
 	@Override
 	public void executeAction(Action action) {
-		button(action, action.getActionName(), true, Boolean.TRUE.equals(action.getConfirm()), action.getTestSuccess());
+		button(action, action.getActionName(), true, action.getConfirm(), action.getTestSuccess());
 	}
 
 	@Override
 	public void executeLookupDescriptionAutoComplete(LookupDescriptionAutoComplete complete) {
-		lookupDescription(complete, complete.getBinding(), null, complete.getSearch());
+		lookupDescription(complete, complete.getBinding(), null, substituteRunToken(complete.getSearch()));
 	}
 
 	@Override
@@ -707,7 +787,14 @@ public class PrimeFacesInterpretedWebDriverExecutor extends InterpretedWebDriver
 
 	@Override
 	public void executeZoomIn(ZoomIn zoom) {
-		button(zoom, "zoomIn", false, false, zoom.getTestSuccess());
+		if (button(zoom, "zoomIn", false, null, zoom.getTestSuccess())) {
+			return;
+		}
+		// A refused zoom (e.g. validation errors, expected with testSuccess="false") stays in this view
+		if (! selenide.verifySuccess()) {
+			selenide.trace("zoom in was refused; staying in this view");
+			return;
+		}
 		
 		// Determine the document of the edit view to push
 		PrimeFacesAutomationContext context = peek();
@@ -741,12 +828,12 @@ public class PrimeFacesInterpretedWebDriverExecutor extends InterpretedWebDriver
 	
 	@Override
 	public void executeDataGridZoom(DataGridZoom zoom) {
-		dataGridGesture(zoom, zoom.getBinding(), zoom.getRow());
+		dataGridGesture(zoom, zoom.getBinding(), zoom);
 	}
 	
 	@Override
 	public void executeDataGridRemove(DataGridRemove remove) {
-		dataGridGesture(remove, remove.getBinding(), remove.getRow());
+		dataGridGesture(remove, remove.getBinding(), remove);
 	}
 
 	/**
@@ -767,7 +854,7 @@ public class PrimeFacesInterpretedWebDriverExecutor extends InterpretedWebDriver
 																	"the grid has no selectedIdBinding, so selecting a row zooms into it; use <dataGridZoom />",
 																	binding));
 		}
-		dataGridGesture(select, binding, select.getRow());
+		dataGridGesture(select, binding, select);
 	}
 
 	/**
@@ -783,7 +870,7 @@ public class PrimeFacesInterpretedWebDriverExecutor extends InterpretedWebDriver
 																edit.getBinding()));
 	}
 
-	private void dataGridGesture(Step step, String binding, Integer row) {
+	private void dataGridGesture(Step step, String binding, GridRowStep rowStep) {
 		PrimeFacesAutomationContext context = peek();
 		@SuppressWarnings("null") // uses a nullable result where the API expects non-null
 		String buttonIdentifier = step.getIdentifier(context);
@@ -807,6 +894,13 @@ public class PrimeFacesInterpretedWebDriverExecutor extends InterpretedWebDriver
 			}
 			String dataGridClientId = PrimeFacesAutomationContext.clientId(dataGridComponent);
 			boolean ajax = inline;
+			Integer row = null;
+			if (rowStep != null) {
+				row = resolveRow(rowStep, dataGridClientId);
+				if (row == null) { // not on the page
+					continue;
+				}
+			}
 
 			if (row != null) {
 				if (step instanceof DataGridZoom) {
@@ -846,7 +940,7 @@ public class PrimeFacesInterpretedWebDriverExecutor extends InterpretedWebDriver
 			throw new DomainException(String.format("<%s /> with binding [%s] could not be done: the grid, %s or its button is not on the page or is disabled",
 														step.getClass().getSimpleName(),
 														binding,
-														(row == null) ? "it" : "row " + row));
+														describeRow(rowStep)));
 		}
 		checkSuccess(String.format("expected no error messages after <%s />", step.getClass().getSimpleName()));
 
@@ -874,6 +968,38 @@ public class PrimeFacesInterpretedWebDriverExecutor extends InterpretedWebDriver
 		}
 	}
 
+	/**
+	 * Resolves a grid step's row: its {@code row}, or the first row on the page with a cell containing its
+	 * {@code rowContaining} text (after {@code {run}} substitution).
+	 *
+	 * @return the zero-based row, or null if the grid is not on the page
+	 * @throws DomainException	if no row contains the text
+	 */
+	private @Nullable Integer resolveRow(@Nonnull GridRowStep step, @Nonnull String gridClientId) {
+		Integer row = step.getRow();
+		if (row != null) {
+			return row;
+		}
+		String text = substituteRunToken(Objects.requireNonNull(step.getRowContaining(), "rowContaining"));
+		int result = selenide.rowContaining(gridClientId, text);
+		if (result == -2) {
+			return null;
+		}
+		if (result < 0) {
+			throw new DomainException(String.format("Grid %s has no row containing '%s'", gridClientId, text));
+		}
+		selenide.trace(String.format("    row %d contains '%s'", Integer.valueOf(result), text));
+		return Integer.valueOf(result);
+	}
+
+	private String describeRow(@Nullable GridRowStep step) {
+		if (step == null) {
+			return "it";
+		}
+		Integer row = step.getRow();
+		return (row != null) ? "row " + row : "the row containing '" + substituteRunToken(String.valueOf(step.getRowContaining())) + "'";
+	}
+
 	@Override
 	public void executeListGridNew(ListGridNew nu) {
 		listGridGesture(nu, null);
@@ -885,7 +1011,7 @@ public class PrimeFacesInterpretedWebDriverExecutor extends InterpretedWebDriver
 
 	@Override
 	public void executeListGridZoom(ListGridZoom zoom) {
-		listGridGesture(zoom, zoom.getRow());
+		listGridGesture(zoom, zoom);
 		
 		PushEditContext push = listGridContext(zoom.getQueryName(), zoom.getDocumentName(), zoom.getModelName(), zoom);
 		push.execute(this);
@@ -911,10 +1037,10 @@ public class PrimeFacesInterpretedWebDriverExecutor extends InterpretedWebDriver
 																	"the list has no selectedIdBinding, so selecting a row zooms into it; use <listGridZoom />",
 																	identifier.substring(0, identifier.lastIndexOf('.'))));
 		}
-		listGridGesture(select, select.getRow());
+		listGridGesture(select, select);
 	}
 
-	private void listGridGesture(Step step, Integer row) {
+	private void listGridGesture(Step step, GridRowStep rowStep) {
 		PrimeFacesAutomationContext context = peek();
 		@SuppressWarnings("null") // uses a nullable result where the API expects non-null
 		String buttonIdentifier = step.getIdentifier(context);
@@ -934,8 +1060,25 @@ public class PrimeFacesInterpretedWebDriverExecutor extends InterpretedWebDriver
 				break;
 			}
 			List<UIComponent> buttonComponents = context.getFacesComponents(buttonIdentifier);
+			if ((buttonComponents == null) && (step instanceof ListGridZoom) && (rowStep != null)) {
+				// No zoom button: the list zooms when a row is selected
+				String listGridClientId = PrimeFacesAutomationContext.clientId(listGridComponent);
+				Integer row = resolveRow(rowStep, listGridClientId);
+				if (row != null) {
+					selenide.trace(String.format("Zoom by selecting row %d on list grid [%s] (%s)", row, listGridIdentifier, listGridClientId));
+					success = selenide.zoomRowBySelection(listGridClientId, row.intValue());
+				}
+				continue;
+			}
 			if (buttonComponents != null) {
 				String listGridClientId = PrimeFacesAutomationContext.clientId(listGridComponent);
+				Integer row = null;
+				if (rowStep != null) {
+					row = resolveRow(rowStep, listGridClientId);
+					if (row == null) { // not on the page
+						continue;
+					}
+				}
 
 				if (row != null) {
 					if (step instanceof ListGridZoom) {
@@ -973,7 +1116,7 @@ public class PrimeFacesInterpretedWebDriverExecutor extends InterpretedWebDriver
 			throw new DomainException(String.format("<%s /> on [%s] could not be done: the list, %s or its button is not on the page or is disabled",
 														step.getClass().getSimpleName(),
 														listGridIdentifier,
-														(row == null) ? "it" : "row " + row));
+														describeRow(rowStep)));
 		}
 		checkSuccess(String.format("expected no error messages after <%s />", step.getClass().getSimpleName()));
 	}
@@ -1027,4 +1170,364 @@ public class PrimeFacesInterpretedWebDriverExecutor extends InterpretedWebDriver
 		return result;
 	}
 
+
+	/**
+	 * Uploads a test classpath file: into a content widget (through its upload page), or through an upload action's
+	 * upload page. For a content widget, the widget must then hold content.
+	 *
+	 * @param upload	the step
+	 */
+	@SuppressWarnings("null") // a null here fails the test
+	@Override
+	public void executeUpload(Upload upload) {
+		PrimeFacesAutomationContext context = peek();
+		String identifier = upload.getIdentifier(context);
+		List<UIComponent> components = context.getFacesComponents(identifier);
+		if (components == null) {
+			throw new MetaDataException(String.format("<upload /> with %s [%s] is not on the view",
+														(upload.getBinding() != null) ? "binding" : "action", identifier));
+		}
+		java.io.File file = resourceFile(upload.getFile());
+
+		boolean success = false;
+		for (UIComponent component : components) {
+			String clientId = PrimeFacesAutomationContext.clientId(component);
+			selenide.trace(String.format("upload %s to [%s] (%s)", upload.getFile(), identifier, clientId));
+			if (upload.getBinding() != null) {
+				org.openqa.selenium.WebElement trigger = selenide.contentUploadTrigger(clientId);
+				if ((trigger != null) && selenide.upload(trigger, file)) {
+					String value = selenide.contentValue(clientId);
+					if ((value == null) || value.isEmpty()) {
+						throw new DomainException(String.format("<upload /> to [%s] finished but the widget holds no content", identifier));
+					}
+					success = true;
+				}
+			}
+			else {
+				success = selenide.upload(clientId, file);
+			}
+			if (success) {
+				break;
+			}
+		}
+		if (! success) {
+			throw new DomainException(String.format("<upload /> to [%s]: no displayed, enabled widget to upload with", identifier));
+		}
+		checkSuccess(String.format("expected no error messages after uploading to [%s]", identifier));
+	}
+
+	/**
+	 * Resolves a test classpath resource to a file the browser can be given.
+	 */
+	private static @Nonnull java.io.File resourceFile(@Nonnull String resource) {
+		java.net.URL url = Thread.currentThread().getContextClassLoader().getResource(resource);
+		if (url == null) {
+			throw new MetaDataException("<upload /> file " + resource + " is not on the test classpath");
+		}
+		try {
+			return new java.io.File(url.toURI());
+		}
+		catch (java.net.URISyntaxException | IllegalArgumentException e) {
+			throw new MetaDataException("<upload /> file " + resource + " is not a file on disk: " + url, e);
+		}
+	}
+
+	/**
+	 * Asserts that a global message, growl or field message (of the type, if given) contains the text.
+	 *
+	 * @param test	the step
+	 */
+	@Override
+	public void executeTestMessage(TestMessage test) {
+		if (isNoneStrategy()) {
+			return;
+		}
+		String contains = substituteRunToken(test.getContains());
+		TestMessage.MessageType type = test.getType();
+		String severity = (type == null) ? null : type.name();
+		selenide.trace(String.format("test %s message contains '%s'", (severity == null) ? "a" : "an " + severity, contains));
+		// No wait beyond the response: the messages of the last response are on the page once it has been applied
+		selenide.waitForAjaxResponse();
+		boolean found = selenide.messagesOfType(severity).stream().anyMatch(m -> m.contains(contains));
+		check(found, () -> String.format("expected %s message containing '%s' but found: %s",
+											(severity == null) ? "a" : "an " + severity, contains, selenide.describeMessages()));
+	}
+
+	/**
+	 * Counts the rows of a list or data grid (only those containing the text, if given) and checks the bounds.
+	 * With a timeout, a list grid is reloaded and the rows recounted until the bounds hold or the time is up.
+	 *
+	 * @param test	the step
+	 */
+	@SuppressWarnings("null") // a null here fails the test
+	@Override
+	public void executeTestGridRows(TestGridRows test) {
+		if (isNoneStrategy()) {
+			return;
+		}
+		PrimeFacesAutomationContext context = peek();
+		String identifier = test.getIdentifier(context);
+		List<UIComponent> components = context.getFacesComponents(identifier);
+		if (components == null) {
+			throw new MetaDataException(String.format("<testGridRows /> grid [%s] is not on the view", identifier));
+		}
+		String text = test.getRowContaining();
+		final String contains = (text == null) ? null : substituteRunToken(text);
+		int min = test.getEffectiveMinRows();
+		Integer max = test.getMaxRows();
+		Integer timeout = test.getTimeoutMillis();
+
+		String gridId = null;
+		for (UIComponent component : components) {
+			String clientId = PrimeFacesAutomationContext.clientId(component);
+			if (selenide.countRows(clientId, null) >= 0) {
+				gridId = clientId;
+				break;
+			}
+		}
+		if (gridId == null) {
+			throw new DomainException(String.format("<testGridRows /> grid [%s] is not on the page", identifier));
+		}
+		selenide.trace(String.format("test grid [%s] (%s) has %d..%s rows%s", identifier, gridId, Integer.valueOf(min),
+										(max == null) ? "" : max.toString(), (contains == null) ? "" : " containing '" + contains + "'"));
+		int count = selenide.countRows(gridId, contains);
+		if ((timeout != null) && (! ((count >= min) && ((max == null) || (count <= max.intValue()))))) {
+			// Author-requested (timeoutMillis): poll a server-side job's effect by reloading the list each second
+			final String grid = gridId;
+			try {
+				selenide.waitFor(java.time.Duration.ofMillis(timeout.longValue()), java.time.Duration.ofSeconds(1), d -> {
+					selenide.refreshGrid(grid);
+					int n = selenide.countRows(grid, contains);
+					return ((n >= min) && ((max == null) || (n <= max.intValue()))) ? Boolean.TRUE : null;
+				});
+			}
+			catch (@SuppressWarnings("unused") org.openqa.selenium.TimeoutException e) {
+				// reported below
+			}
+			count = selenide.countRows(gridId, contains);
+		}
+		final int rows = count;
+		check((rows >= min) && ((max == null) || (rows <= max.intValue())),
+				() -> String.format("expected grid [%s] to have %s%s rows%s but it has %d",
+										identifier,
+										Integer.valueOf(min),
+										(max == null) ? " or more" : " to " + max,
+										(contains == null) ? "" : " containing '" + contains + "'",
+										Integer.valueOf(rows)));
+	}
+
+	/**
+	 * Asserts that a widget, action or tab is (or is not) shown, and (if given) is (or is not) enabled.
+	 * Not shown includes not rendered.
+	 *
+	 * @param test	the step
+	 */
+	@SuppressWarnings("null") // a null here fails the test
+	@Override
+	public void executeTestWidget(TestWidget test) {
+		if (isNoneStrategy()) {
+			return;
+		}
+		PrimeFacesAutomationContext context = peek();
+		String identifier = test.getIdentifier(context);
+		List<UIComponent> components = context.getFacesComponents(identifier);
+		if (components == null) {
+			throw new MetaDataException(String.format("<testWidget /> [%s] is not in the view", identifier));
+		}
+		boolean tab = (test.getTabPath() != null);
+		boolean shown = false;
+		boolean enabled = false;
+		for (UIComponent component : components) {
+			String clientId = PrimeFacesAutomationContext.clientId(component);
+			List<Boolean> state = tab ? selenide.tabState(clientId) : selenide.widgetState(clientId);
+			if (Boolean.TRUE.equals(state.get(0))) {
+				shown = true;
+				enabled = enabled || Boolean.TRUE.equals(state.get(1));
+			}
+		}
+		Boolean expectedEnabled = test.getEnabled();
+		final boolean isShown = shown;
+		final boolean isEnabled = enabled;
+		if (expectedEnabled != null) {
+			selenide.trace(String.format("test [%s] is shown and %s", identifier, expectedEnabled.booleanValue() ? "enabled" : "disabled"));
+			check(isShown && (isEnabled == expectedEnabled.booleanValue()),
+					() -> String.format("expected [%s] to be shown and %s but it is %s",
+											identifier,
+											expectedEnabled.booleanValue() ? "enabled" : "disabled",
+											(! isShown) ? "not shown" : (isEnabled ? "enabled" : "disabled")));
+		}
+		else {
+			boolean expectedVisible = test.isExpectedVisible();
+			selenide.trace(String.format("test [%s] is %s", identifier, expectedVisible ? "shown" : "not shown"));
+			check(isShown == expectedVisible,
+					() -> String.format("expected [%s] to be %s but it is %s",
+											identifier,
+											expectedVisible ? "shown" : "not shown",
+											isShown ? "shown" : "not shown"));
+		}
+	}
+
+	/**
+	 * Clicks through the menu (module, groups, item) and sets the context as the equivalent navigate step would.
+	 *
+	 * @param menu	the step
+	 */
+	@Override
+	public void executeNavigateMenu(NavigateMenu menu) {
+		MenuPath path = menuPath(menu.getModuleName(), menu.getItemName());
+		MenuItem item = path.item;
+		if (item == null) {
+			throw new MetaDataException(String.format("<navigateMenu /> module %s has no menu item %s", menu.getModuleName(), menu.getItemName()));
+		}
+		Customer c = CORE.getUser().getCustomer();
+		Module m = c.getModule(menu.getModuleName());
+		selenide.trace(String.format("Menu %s / %s", path.moduleTitle, String.join(" / ", path.labels())));
+		if (item instanceof TreeItem || item instanceof CalendarItem) {
+			throw new UnsupportedOperationException(String.format("<navigateMenu /> item %s is a %s, which PrimeFaces cannot show",
+																	menu.getItemName(),
+																	(item instanceof TreeItem) ? "tree" : "calendar"));
+		}
+		if (item instanceof ListItem || item instanceof MapItem) {
+			AbstractDocumentOrQueryOrModelMenuItem listItem = (AbstractDocumentOrQueryOrModelMenuItem) item;
+			PushListContext push = new PushListContext();
+			push.setModuleName(m.getName());
+			push.setDocumentName(listItem.getDocumentName());
+			push.setQueryName(listItem.getQueryName());
+			push.setModelName(listItem.getModelName());
+			executePushListContext(push);
+		}
+		else if (item instanceof EditItem editItem) {
+			Document d = m.getDocument(c, Objects.requireNonNull(editItem.getDocumentName()));
+			PushEditContext push = new PushEditContext();
+			push.setModuleName(d.getOwningModuleName());
+			push.setDocumentName(d.getName());
+			executePushEditContext(push);
+		}
+		else {
+			PrimeFacesAutomationContext context = peek();
+			if (context != null) {
+				context.setDocumentName(null);
+				context.setViewType(null);
+			}
+		}
+		if (! selenide.menu(path.moduleTitle, path.groupLabels, path.itemLabel, true)) {
+			throw new DomainException(String.format("<navigateMenu /> %s / %s is not in the menu", path.moduleTitle, String.join(" / ", path.labels())));
+		}
+	}
+
+	/**
+	 * Asserts that a module, or a menu item of it, is (or is not) in the menu.
+	 *
+	 * @param test	the step
+	 */
+	@Override
+	public void executeTestMenu(TestMenu test) {
+		if (isNoneStrategy()) {
+			return;
+		}
+		String itemName = test.getItemName();
+		MenuPath path = menuPath(test.getModuleName(), itemName);
+		if ((itemName != null) && (path.item == null)) {
+			throw new MetaDataException(String.format("<testMenu /> module %s has no menu item %s", test.getModuleName(), itemName));
+		}
+		boolean expected = ! Boolean.FALSE.equals(test.getPresent());
+		boolean present = selenide.menu(path.moduleTitle, path.groupLabels, path.itemLabel, false);
+		String what = (itemName == null) ? path.moduleTitle : path.moduleTitle + " / " + String.join(" / ", path.labels());
+		selenide.trace(String.format("test menu %s is %s", what, expected ? "present" : "absent"));
+		check(present == expected, () -> String.format("expected the menu %s %s but it %s", what,
+														expected ? "to show" : "not to show", present ? "does" : "does not"));
+	}
+
+	/** A menu item and the labels shown for it. */
+	private static final class MenuPath {
+		String moduleTitle;
+		List<String> groupLabels = new ArrayList<>();
+		String itemLabel;
+		MenuItem item;
+
+		List<String> labels() {
+			List<String> result = new ArrayList<>(groupLabels);
+			if (itemLabel != null) {
+				result.add(itemLabel);
+			}
+			return result;
+		}
+	}
+
+	/**
+	 * Resolves a {@code /}-separated menu path (group names then the item name; each the metadata name or the shown name).
+	 */
+	private static @Nonnull MenuPath menuPath(@Nonnull String moduleName, @Nullable String itemPath) {
+		Customer c = CORE.getUser().getCustomer();
+		Module m = c.getModule(moduleName);
+		MenuPath result = new MenuPath();
+		result.moduleTitle = m.getLocalisedTitle();
+		if (itemPath == null) {
+			return result;
+		}
+		String[] names = itemPath.split("/");
+		List<MenuItem> items = m.getMenu().getItems();
+		for (int i = 0; i < names.length; i++) {
+			String name = names[i].trim();
+			MenuItem found = null;
+			for (MenuItem candidate : items) {
+				String label = candidate.getLocalisedName();
+				if (name.equals(candidate.getName()) || name.equals(label)) {
+					found = candidate;
+					break;
+				}
+			}
+			if (found == null) {
+				return result;
+			}
+			String label = found.getLocalisedName();
+			if (label == null) {
+				label = found.getName();
+			}
+			if (i < names.length - 1) {
+				if (! (found instanceof MenuGroup group)) {
+					return result;
+				}
+				result.groupLabels.add(label);
+				items = group.getItems();
+			}
+			else {
+				result.itemLabel = label;
+				result.item = found;
+			}
+		}
+		return result;
+	}
+
+	/**
+	 * Switches the session to PrimeFaces, through SmartClient's header menu, if SmartClient is showing.
+	 * Does nothing when PrimeFaces is already showing.
+	 *
+	 * @param switchMode	the step
+	 */
+	@Override
+	public void executeSwitchMode(SwitchMode switchMode) {
+		if ("desktop".equals(getCurrentUxUi())) {
+			throw new UnsupportedOperationException("<switchMode /> to SmartClient (uxui desktop) is the SmartClient executor's job");
+		}
+		if (! selenide.smartClientShowing()) {
+			selenide.trace("Switch mode: PrimeFaces is showing already");
+			return;
+		}
+		selenide.trace("Switch mode: SmartClient to PrimeFaces");
+		selenide.switchFromSmartClient();
+		if (selenide.smartClientShowing()) {
+			throw new DomainException("<switchMode /> chose Switch Mode but SmartClient is still showing");
+		}
+	}
+
+	/**
+	 * Runs the script, then waits for any request or page load it started.
+	 *
+	 * @param execute	the step
+	 */
+	@Override
+	public void executeExecute(org.skyve.metadata.sail.language.step.Execute execute) {
+		selenide.runScript(execute.getScript());
+	}
 }

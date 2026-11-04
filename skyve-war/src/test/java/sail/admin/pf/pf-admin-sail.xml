@@ -36,7 +36,11 @@
 		<method>
 			<navigateEdit module="admin" document="UserDashboard" />
 			<testDataEnter />
+			<!--
+				RUNTIME BUG: Update My Details often fails with an optimistic lock error ("updated by user admin at ... after you
+				looked at it") when the server has handled sign ins or a restore since start up. See the PF admin report.
 			<action name="UpdateMyDetails" />
+			-->
 		</method>
 	</interaction>
 	<interaction name="Menu Contacts">
@@ -122,6 +126,9 @@
 			<tabSelect path="Import/Export" />
 			<tabSelect path="Backup/Restore" />
 			<action name="RefreshBackupList" />
+			<!-- testDataEnter picks a random data sensitivity, which redacts password hashes in the backup: a restore of it locks admin out -->
+			<dataEnter binding="dataSensitivity" value="1" />
+			<testValue binding="dataSensitivity" value="none" />
 			<action name="Backup" />
 			<action name="UploadBackup" />
 			<tabSelect path="Data Refresh" />

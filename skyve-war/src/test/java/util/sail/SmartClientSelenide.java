@@ -66,19 +66,6 @@ public class SmartClientSelenide extends Selenide<
 	private static final String HELPER_RESOURCE = "util/sail/smartclient-sail.js";
 	private static final String HELPER = loadHelper();
 
-	/**
-	 * The system property that sets how long a wait for the browser may take, in milliseconds.
-	 */
-	public static final String TIMEOUT_PROPERTY = "sail.timeoutMillis";
-
-	/**
-	 * How long any wait for the browser may take: {@value #TIMEOUT_PROPERTY}, by default 30 seconds.
-	 */
-	public static final long TIMEOUT_MILLIS = Long.getLong(TIMEOUT_PROPERTY, 30_000L).longValue();
-
-	// How often WebDriverWait evaluates a condition while it waits
-	private static final Duration POLLING = Duration.ofMillis(50);
-
 	private static final String DIALOG_OK = Locator.sail(null, Kind.dialog, "ok", null, null, null, null);
 
 	// The reason the last locate() or verify call failed, for messages
@@ -113,24 +100,22 @@ public class SmartClientSelenide extends Selenide<
 	}
 
 	/**
-	 * The one way this class waits for the browser: WebDriver's condition wait, for {@link #TIMEOUT_MILLIS}.
-	 * The condition returns {@code null} or {@code false} to keep waiting; an exception it throws ends the wait.
+	 * Waits for an asynchronous event with the harness's one wait mechanism ({@link Selenide#waitFor}), turning a timeout
+	 * into a failure that says what was waited for and what the browser shows.
 	 *
 	 * @param <T>		the result type
 	 * @param what		the asynchronous event waited for, for the timeout message
-	 * @param condition	the condition
+	 * @param condition	the condition: {@code null} or {@code false} keeps waiting; an exception it throws ends the wait
 	 * @return the condition's result
-	 * @throws IllegalStateException if the condition does not hold in time
+	 * @throws IllegalStateException if the condition does not hold within {@link Selenide#TIMEOUT}
 	 */
 	private <T> @Nonnull T until(@Nonnull String what, @Nonnull java.util.function.Function<org.openqa.selenium.WebDriver, T> condition) {
 		try {
-			return new WebDriverWait(driver, Duration.ofMillis(TIMEOUT_MILLIS), POLLING)
-						.ignoring(StaleElementReferenceException.class)
-						.until(condition);
+			return waitFor(condition);
 		}
 		catch (org.openqa.selenium.TimeoutException e) {
 			throw new IllegalStateException(String.format("Waited %d s for %s%s (browser state %s)",
-															Long.valueOf(TIMEOUT_MILLIS / 1000),
+															Long.valueOf(TIMEOUT.toSeconds()),
 															what,
 															(lastProblem == null) ? "" : ": " + lastProblem,
 															state()), e);
@@ -161,15 +146,25 @@ public class SmartClientSelenide extends Selenide<
 			trace("    SmartClient is already showing");
 			return;
 		}
-		Object switched = script("""
-				const a = Array.from(document.querySelectorAll('a')).find((x) => /switch mode/i.test(x.textContent || '') || x.querySelector('.fa-retweet'));
-				if (a) { a.click(); return true; }
-				return false;""");
-		if (! Boolean.TRUE.equals(switched)) {
+		// Real clicks, as a user would: the avatar opens the user menu, whose Switch Mode submenu holds "Switch mode"
+		SelenideElement avatar = $("#avatar");
+		if (! avatar.exists()) {
 			throw new IllegalStateException(String.format(
-					"Signed in, but %s (%s) is not SmartClient and has no \"Switch mode\" link to select the SmartClient UX/UI. " +
-					"Can this user switch modes?", driver.getCurrentUrl(), driver.getTitle()));
+					"Signed in, but %s (%s) is not SmartClient and has no user menu with Switch mode: can this user switch modes?",
+					driver.getCurrentUrl(), driver.getTitle()));
 		}
+		avatar.shouldBe(visible).click();
+		com.codeborne.selenide.ElementsCollection items = com.codeborne.selenide.Selenide.$$("a.ui-menuitem-link");
+		SelenideElement item = items.findBy(com.codeborne.selenide.Condition.exactText("Switch mode"));
+		if (! item.exists()) {
+			throw new IllegalStateException("The user menu has no Switch mode item: this user cannot switch modes");
+		}
+		if (! item.isDisplayed()) {
+			// the item is in a collapsed Switch Mode submenu: open it
+			com.codeborne.selenide.Selenide.$$(".ui-submenu-link, .ui-menu-parent > a, .ui-widget-header")
+					.findBy(com.codeborne.selenide.Condition.exactText("Switch Mode")).shouldBe(visible).click();
+		}
+		item.shouldBe(visible).click();
 		trace("    Switched the session to the SmartClient UX/UI");
 
 		// Waits for the reload the mode switch makes (an ajax request, then location.reload()) to bring up SmartClient
@@ -431,7 +426,7 @@ public class SmartClientSelenide extends Selenide<
 		try {
 			// The script asked to wait for the server to change the rows (a job finishing, say). A list grid only sees the
 			// change when it fetches again, so refetch and recount, once a second, until the count holds or the time is up.
-			new WebDriverWait(driver, Duration.ofMillis(timeoutMillis), Duration.ofSeconds(1)).until(d -> {
+			waitFor(Duration.ofMillis(timeoutMillis), Duration.ofSeconds(1), d -> {
 				refreshGrid(locator);
 				count[0] = countRows(locator, text);
 				return Boolean.valueOf(holds.test(count[0]));
@@ -661,17 +656,16 @@ public class SmartClientSelenide extends Selenide<
 		WebElement frame = until("the upload page to open", d -> (WebElement) script("return _sail.uploadFrame()"));
 		trace("    upload page opened");
 		// Waits for the upload page's file input, then for its Upload button to enable once it has the file
-		WebDriverWait wait = new WebDriverWait(driver, Duration.ofMillis(TIMEOUT_MILLIS), POLLING);
 		driver.switchTo().frame(frame);
 		try {
-			WebElement input = wait.until(d -> {
+			WebElement input = waitFor(d -> {
 				List<WebElement> inputs = d.findElements(org.openqa.selenium.By.cssSelector("input[type=file]"));
 				return inputs.isEmpty() ? null : inputs.get(0);
 			});
 			input.sendKeys(file.getAbsolutePath());
 			trace("    file chosen");
 			// Press Upload once it is enabled, unless the page has taken the file by itself
-			wait.until(d -> {
+			waitFor(d -> {
 				List<WebElement> buttons = d.findElements(org.openqa.selenium.By.cssSelector(".ui-fileupload-upload"));
 				if (buttons.isEmpty() || d.findElements(org.openqa.selenium.By.cssSelector("input[type=file]")).isEmpty()) {
 					return Boolean.TRUE;
@@ -679,7 +673,7 @@ public class SmartClientSelenide extends Selenide<
 				WebElement button = buttons.get(0);
 				String styleClass = button.getDomAttribute("class");
 				if (button.isEnabled() && ((styleClass == null) || (! styleClass.contains("ui-state-disabled")))) {
-					((JavascriptExecutor) d).executeScript("arguments[0].click();", button);
+					button.click();
 					return Boolean.TRUE;
 				}
 				return Boolean.FALSE;
@@ -920,7 +914,9 @@ public class SmartClientSelenide extends Selenide<
 
 		// Type as a user would: select what is there, delete it, then type the value key by key,
 		// so that SmartClient sees every change (setting the DOM value directly can leave the item's value stale)
-		script("arguments[0].focus(); if (arguments[0].select) arguments[0].select();", element.toWebElement());
+		// Click into the field as a user would, then select what is there (the selection itself is set through the DOM)
+		click(element);
+		script("if (arguments[0].select) arguments[0].select();", element.toWebElement());
 		// Keys go to whatever has the focus, as from a keyboard: a change handler can rerender the field's form while
 		// typing, and SmartClient gives the new field the focus, so the rest of the text must follow it
 		new org.openqa.selenium.interactions.Actions(driver).sendKeys(Keys.BACK_SPACE).perform();
@@ -1554,9 +1550,7 @@ public class SmartClientSelenide extends Selenide<
 		driver.switchTo().activeElement().sendKeys(Keys.ENTER);
 		waitForFullPageResponse();
 		if (Boolean.TRUE.equals(script("return _sail.inlineEditing()"))) {
-			trace("    Enter did not end the inline edit: ending it through SmartClient");
-			script("return _sail.endInlineEditing()");
-			waitForFullPageResponse();
+			throw new IllegalStateException("Enter did not end the inline edit of the data grid row");
 		}
 		return true;
 	}

@@ -8,7 +8,6 @@ import java.time.Duration;
 
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.skyve.domain.messages.DomainException;
 
@@ -66,7 +65,13 @@ public abstract class Selenide<
 		TXTC extends TextCommand,
 		SELC extends SelectOneCommand> extends CrossBrowserSelenium {
 
-	private static final Duration LOGIN_TIMEOUT = Duration.ofSeconds(30);
+	/** System property naming the timeout in seconds for every wait on the browser (default 30). */
+	public static final String TIMEOUT_PROPERTY = "sail.timeoutSeconds";
+	/**
+	 * The timeout for every wait on the browser, for an asynchronous event (a page or ajax response, an element
+	 * appearing). It is a limit, not a delay: waits end as soon as their event happens.
+	 */
+	public static final Duration TIMEOUT = Duration.ofSeconds(Long.getLong(TIMEOUT_PROPERTY, 30L).longValue());
 
 	private String baseUrl;
 	private String loginError;
@@ -76,7 +81,40 @@ public abstract class Selenide<
 		super.startBrowser(configuration);
 
 		WebDriverRunner.setWebDriver(driver);
+		// Selenide's should...() conditions share the one timeout
+		com.codeborne.selenide.Configuration.timeout = TIMEOUT.toMillis();
 		this.baseUrl = configuration.getBaseUrl();
+	}
+
+	/**
+	 * Waits for an asynchronous event in the browser: the one wait mechanism of the SAIL harness.
+	 *
+	 * @param <T> the condition's result type
+	 * @param condition	true (or non-null) when the event has happened
+	 * @return the condition's result
+	 * @throws org.openqa.selenium.TimeoutException	if the event does not happen within {@link #TIMEOUT}
+	 */
+	public <T> T waitFor(@Nonnull java.util.function.Function<org.openqa.selenium.WebDriver, T> condition) {
+		return waitFor(TIMEOUT, Duration.ofMillis(100), condition);
+	}
+
+	/**
+	 * Waits for an asynchronous event in the browser with a timeout and polling interval of the script author's choosing
+	 * (e.g. a {@code timeoutMillis} that polls a server job).
+	 *
+	 * @param <T> the condition's result type
+	 * @param timeout	the timeout
+	 * @param polling	how often to evaluate the condition
+	 * @param condition	true (or non-null) when the event has happened
+	 * @return the condition's result
+	 * @throws org.openqa.selenium.TimeoutException	if the event does not happen in time
+	 */
+	public <T> T waitFor(@Nonnull Duration timeout,
+							@Nonnull Duration polling,
+							@Nonnull java.util.function.Function<org.openqa.selenium.WebDriver, T> condition) {
+		return new WebDriverWait(driver, timeout, polling)
+					.ignoring(org.openqa.selenium.StaleElementReferenceException.class)
+					.until(condition);
 	}
 
 	/**
@@ -125,21 +163,36 @@ public abstract class Selenide<
 			logout();
 			open(baseUrl);
 		}
-		if (customer != null) {
-			$(byName("customer")).val(customer);
+		// The page's own scripts can move the focus while typing (seen with headed browsers): check what landed and retry
+		for (int attempt = 1; attempt <= 3; attempt++) {
+			if (customer != null) {
+				$(byName("customer")).val(customer);
+			}
+			$(byName("user")).val(username);
+			$(byName("password")).val(password);
+			if (username.equals($(byName("user")).getValue()) &&
+					password.equals($(byName("password")).getValue()) &&
+					((customer == null) || customer.equals($(byName("customer")).getValue()))) {
+				break;
+			}
+			trace("    the sign in fields did not take the typed values - type them again");
 		}
-
-		$(byName("user")).val(username);
-		$(byName("password")).val(password);
 
 		SelenideElement submit = $("input[type=\"submit\"]");
 		WebElement submitElement = submit.getWrappedElement();
 		submit.click();
 
-		// Wait for the login page to go, then for the next page to load
-		WebDriverWait wait = new WebDriverWait(driver, LOGIN_TIMEOUT);
-		wait.until(ExpectedConditions.stalenessOf(submitElement));
-		wait.until(d -> "complete".equals(((JavascriptExecutor) d).executeScript("return document.readyState")));
+		// Wait for the sign in page to be replaced by the next page (home, or the sign in page with its error), and for that page to load
+		waitFor(d -> {
+			try {
+				submitElement.isEnabled();
+				return null;
+			}
+			catch (@SuppressWarnings("unused") org.openqa.selenium.WebDriverException e) {
+				return Boolean.TRUE; // stale, or no longer in the document: the page has been replaced
+			}
+		});
+		waitFor(d -> Boolean.valueOf("complete".equals(((JavascriptExecutor) d).executeScript("return document.readyState"))));
 
 		// A failed sign in comes back to the sign in page with an error message
 		if ($("input[type=\"submit\"]").exists() && $(byName("password")).exists()) {

@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!-- PrimeFaces admin suite: Contacts, Communication Templates and Communications. -->
+<automation uxui="tablet" userAgentType="tablet" testStrategy="Assert"
+			xsi:schemaLocation="http://www.skyve.org/xml/sail ../../../../../../main/java/schemas/sail.xsd"
+			xmlns="http://www.skyve.org/xml/sail"
+			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<before>
+		<login user="admin" password="admin" />
+		<testSuccess />
+	</before>
+	<interaction name="Contacts: create, find, change and delete">
+		<method>
+			<navigateMenu module="admin" item="Contacts" />
+			<listGridNew module="admin" document="Contact" />
+			<dataEnter binding="name" value="SAIL Contact {run}" />
+			<dataEnter binding="email1" value="sail.{run}@example.com" />
+			<dataEnter binding="mobile" value="0400 111 222" />
+			<upload binding="image" file="sail/files/sail-image.png" />
+			<save />
+			<testValue binding="name" value="SAIL Contact {run}" />
+			<testValue binding="email1" value="sail.{run}@example.com" />
+			<ok />
+			<testGridRows module="admin" document="Contact" rowContaining="SAIL Contact {run}" minRows="1" maxRows="1" />
+			<listGridZoom module="admin" document="Contact" rowContaining="SAIL Contact {run}" />
+			<testValue binding="mobile" value="0400 111 222" />
+			<dataEnter binding="mobile" value="0400 333 444" />
+			<save />
+			<testValue binding="mobile" value="0400 333 444" />
+			<delete confirm="false" />
+			<delete />
+			<testGridRows module="admin" document="Contact" rowContaining="SAIL Contact {run}" maxRows="0" />
+		</method>
+	</interaction>
+	<interaction name="Communication Templates: create and delete">
+		<method>
+			<navigateMenu module="admin" item="Communication/Communication Templates" />
+			<listGridNew module="admin" document="CommunicationTemplate" />
+			<dataEnter binding="name" value="SAIL Template {run}" />
+			<dataEnter binding="description" value="A SAIL template" />
+			<dataEnter binding="template" value="&lt;p&gt;{body}&lt;/p&gt;" />
+			<save />
+			<testSuccess />
+			<testValue binding="name" value="SAIL Template {run}" />
+			<ok />
+			<testGridRows module="admin" document="CommunicationTemplate" rowContaining="SAIL Template {run}" minRows="1" maxRows="1" />
+			<listGridZoom module="admin" document="CommunicationTemplate" rowContaining="SAIL Template {run}" />
+			<delete />
+			<testGridRows module="admin" document="CommunicationTemplate" rowContaining="SAIL Template {run}" maxRows="0" />
+		</method>
+	</interaction>
+	<interaction name="Communications: create, every tab, safe actions, delete">
+		<method>
+			<navigateMenu module="admin" item="Communication/Communications" />
+			<listGridNew module="admin" document="Communication" />
+			<tabSelect path="Contents" />
+			<dataEnter binding="description" value="SAIL Communication {run}" />
+			<dataEnter binding="sendTo" value="{contact.email1}" />
+			<dataEnter binding="subject" value="SAIL subject {run}" />
+			<comment>Subscriptions shows only once the communication is saved</comment>
+			<testWidget tab="Subscriptions" visible="false" />
+			<tabSelect path="Attachments" />
+			<upload binding="attachment1" file="sail/files/sail-upload.txt" />
+			<tabSelect path="Manage" />
+			<save />
+			<testSuccess />
+			<testValue binding="description" value="SAIL Communication {run}" />
+			<testWidget tab="Subscriptions" />
+			<tabSelect path="Subscriptions" />
+			<tabSelect path="Contents" />
+			<action name="AddUnsubscribeLink" />
+			<tabSelect path="Manage" />
+			<comment>Nothing is tagged, so these refuse to run (and send nothing): check that they say why</comment>
+			<action name="GetCount" testSuccess="false" />
+			<testFailure message="must be selected for results" />
+			<testMessage contains="must be selected for results" type="error" />
+			<action name="GetResults" testSuccess="false" />
+			<testFailure message="must be selected for results" />
+			<action name="TestSend" confirm="false" />
+			<action name="TestSend" testSuccess="false" />
+			<testFailure message="There are no tagged items" />
+			<action name="CreateFiles" testSuccess="false" />
+			<testFailure message="must be selected for results" />
+			<save />
+			<ok />
+			<testGridRows module="admin" document="Communication" rowContaining="SAIL Communication {run}" minRows="1" maxRows="1" />
+			<listGridZoom module="admin" document="Communication" rowContaining="SAIL Communication {run}" />
+			<delete />
+			<testGridRows module="admin" document="Communication" rowContaining="SAIL Communication {run}" maxRows="0" />
+		</method>
+	</interaction>
+	<after>
+		<logout />
+	</after>
+</automation>

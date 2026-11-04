@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!--
+	PrimeFaces admin suite, step 0: back up the data before the suite changes it.
+	99-restore.xml restores this backup (the newest one), so the suite leaves the server as it found it and can be rerun.
+-->
+<automation uxui="tablet" userAgentType="tablet" testStrategy="Assert"
+			xsi:schemaLocation="http://www.skyve.org/xml/sail ../../../../../../main/java/schemas/sail.xsd"
+			xmlns="http://www.skyve.org/xml/sail"
+			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<before>
+		<login user="admin" password="admin" />
+		<testSuccess />
+	</before>
+	<interaction name="Back up the data before the suite">
+		<method>
+			<navigateEdit module="admin" document="DataMaintenance" />
+			<tabSelect path="Backup/Restore" />
+			<dataEnter binding="includeContent" value="true" />
+			<dataEnter binding="includeAuditLog" value="true" />
+			<comment>No redaction, so a restore keeps admin's password</comment>
+			<dataEnter binding="dataSensitivity" value="1" />
+			<testValue binding="dataSensitivity" value="none" />
+			<action name="Backup" />
+			<testMessage contains="Backup Job has been started" type="info" />
+			<comment>The backup is a job: wait for it to finish</comment>
+			<navigateMenu module="admin" item="Jobs" />
+			<testGridRows module="admin" query="qCompletedJobs" rowContaining="Backup" minRows="1" timeoutMillis="60000" />
+			<navigateMenu module="admin" item="DevOps/Data Maintenance" />
+			<tabSelect path="Backup/Restore" />
+			<action name="RefreshBackupList" />
+			<testGridRows module="admin" query="BackupsModel" minRows="1" timeoutMillis="60000" />
+		</method>
+	</interaction>
+	<interaction name="Leave a marker that the restore must remove">
+		<method>
+			<navigateMenu module="admin" item="Security Admin/Data Groups" />
+			<listGridNew module="admin" document="DataGroup" />
+			<dataEnter binding="name" value="SAIL restore marker" />
+			<save />
+			<ok />
+			<testGridRows module="admin" document="DataGroup" rowContaining="SAIL restore marker" minRows="1" />
+		</method>
+	</interaction>
+	<after>
+		<logout />
+	</after>
+</automation>

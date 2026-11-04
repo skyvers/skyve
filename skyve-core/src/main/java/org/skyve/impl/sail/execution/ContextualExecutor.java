@@ -213,6 +213,15 @@ public abstract class ContextualExecutor<T extends AutomationContext> implements
 		context.setViewType(null);
 	}
 	
+	/**
+	 * Returns the UX/UI the automation (or the latest context that names one) runs in.
+	 *
+	 * @return the UX/UI name, or null before the automation starts
+	 */
+	public @Nullable String getCurrentUxUi() {
+		return currentUxUi;
+	}
+
 	public @Nullable TestStrategy getTestStrategy() {
 		return testStrategy;
 	}

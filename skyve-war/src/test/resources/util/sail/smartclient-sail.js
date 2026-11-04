@@ -1262,23 +1262,6 @@
 		}).length > 0;
 	};
 
-	/** Ends inline editing in every data grid of the top-most view; true if a grid was editing. */
-	S.endInlineEditing = function () {
-		var view = S.topView();
-		var ended = false;
-		if (view && view._vm) {
-			owned(view, function (c) {
-				return isc.isA.BizDataGrid(c);
-			}).forEach(function (grid) {
-				var list = grid.grid;
-				if (list && list.getEditRow && list.getEditRow() != null) {
-					list.endEditing();
-					ended = true;
-				}
-			});
-		}
-		return ended;
-	};
 
 	window._sail = S;
 })();
