@@ -31,7 +31,7 @@ Each check uses the view the user was shown: the view of the request's UX/UI for
 document, the edit view for a saved bean and the create view for a new one. A row link is
 looked for in the form's view, and its action in the row document's edit view.
 
-Not checked: ZoomOut, Cancel, Remove in a zoomed view, Add, New, Edit, Navigate, Report and
+Not checked: ZoomOut, Cancel, Remove in a zoomed view, Add (including a data grid's New), New, Edit, Navigate, Report and
 Print; requests that name no action, such as rerenders; and PrimeFaces buttons and links,
 as JSF already ignores a click on a disabled or unrendered component, silently as before.
 

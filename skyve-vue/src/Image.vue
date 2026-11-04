@@ -15,11 +15,20 @@ export default {
         id: String,
         module: String,
         document: String,
-        size: {
+        width: {
             type: Number,
             default: 64
         },
-        binding: String
+        height: {
+            type: Number,
+            default: 64
+        },
+        binding: String,
+        // Image shown when there is no content (relative to the customer resources)
+        emptyThumbnailRelativeFile: {
+            type: String,
+            default: null
+        }
     },
     data() {
         return {
@@ -29,18 +38,30 @@ export default {
         modoc() {
             return this.module + '.' + this.document;
         },
-        srcUrl() {
+        contentUrl() {
             const searchParams = new URLSearchParams();
             searchParams.append(params.id, this.id);
             searchParams.append(params.modoc, this.modoc);
             searchParams.append(params.binding, this.rectifiedBinding);
-
-            if (!!this.size) {
-                searchParams.append(params.width, this.size);
-                searchParams.append(params.height, this.size);
-            }
-
             return `content?${searchParams}`;
+        },
+        srcUrl() {
+            return `${this.contentUrl}&${params.width}=${this.width}&${params.height}=${this.height}`;
+        },
+        emptyUrl() {
+            const searchParams = new URLSearchParams();
+            searchParams.append(params.id, this.emptyThumbnailRelativeFile);
+            searchParams.append(params.modoc, this.modoc);
+            searchParams.append(params.width, this.width);
+            searchParams.append(params.height, this.height);
+            return `resources?${searchParams}`;
+        },
+        imageStyle() {
+            return {
+                width: `${this.width}px`,
+                height: `${this.height}px`,
+                objectFit: 'contain'
+            };
         },
         rectifiedBinding() {
             // Convert from the SmartClient sanitised binding into the
@@ -56,16 +77,20 @@ export default {
 </script>
 
 <template>
-    <img
+    <a
         v-if="!!id"
-        :src="srcUrl"
-        class="data-grid-image"
+        :href="contentUrl"
+        style="border:0"
+        target="_blank"
+    >
+        <img
+            :src="srcUrl"
+            :style="imageStyle"
+        />
+    </a>
+    <img
+        v-else-if="!!emptyThumbnailRelativeFile"
+        :src="emptyUrl"
+        :style="imageStyle"
     />
 </template>
-
-<style scoped>
-.data-grid-image {
-    max-width: 100px;
-    max-height: 100px;
-}
-</style>

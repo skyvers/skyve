@@ -1453,6 +1453,9 @@ isc.BizListGrid.addMethods({
 			minHeight: 100,
 			leaveScrollbarGap: true,
 			autoFetchData: false,
+			// Wait briefly before fetching uncached rows so fast scrolling through a large
+			// list does not send a page query (plus a count query) for every redraw.
+			dataFetchDelay: 100,
 			useAllDataSourceFields: true,
 			showHeader: true,
 			headerHeight: 30,

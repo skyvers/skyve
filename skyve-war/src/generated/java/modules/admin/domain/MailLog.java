@@ -18,7 +18,8 @@ import org.skyve.util.ExpressionEvaluator;
  * Mail Log
  * <br/>
  * The Mail Log records outbound mail dispatch requests and relay outcomes across all configured mail providers.
-			For security, email body content is never stored; body excerpts are always redacted.
+			For security, email body content is redacted by default. Set smtp.logBodyExcerpt to true to store a plain-text body excerpt (up to 500 characters) with verification and one-time codes masked.
+			Set smtp.logAttachments to true to also store the attachments sent (as a zip, up to smtp.logAttachmentsMaxBytes in total).
  * 
  * @stereotype "persistent"
  */
@@ -58,6 +59,9 @@ public class MailLog extends AbstractPersistentBean implements org.skyve.domain.
 
 	/** @hidden */
 	public static final String attachmentFileNamesPropertyName = "attachmentFileNames";
+
+	/** @hidden */
+	public static final String attachmentsPropertyName = "attachments";
 
 	/** @hidden */
 	public static final String dispatchStatusPropertyName = "dispatchStatus";
@@ -138,6 +142,13 @@ public class MailLog extends AbstractPersistentBean implements org.skyve.domain.
 	 * Attachment Filenames
 	 **/
 	private String attachmentFileNames;
+
+	/**
+	 * Attachments
+	 * <br/>
+	 * A zip of the attachments sent, stored when smtp.logAttachments is true.
+	 **/
+	private String attachments;
 
 	/**
 	 * Dispatch Status
@@ -375,6 +386,24 @@ public class MailLog extends AbstractPersistentBean implements org.skyve.domain.
 	public void setAttachmentFileNames(String attachmentFileNames) {
 		preset(attachmentFileNamesPropertyName, attachmentFileNames);
 		this.attachmentFileNames = attachmentFileNames;
+	}
+
+	/**
+	 * {@link #attachments} accessor.
+	 * @return	The value.
+	 **/
+	public String getAttachments() {
+		return attachments;
+	}
+
+	/**
+	 * {@link #attachments} mutator.
+	 * @param attachments	The new value.
+	 **/
+	@XmlElement
+	public void setAttachments(String attachments) {
+		preset(attachmentsPropertyName, attachments);
+		this.attachments = attachments;
 	}
 
 	/**
@@ -647,5 +676,24 @@ public class MailLog extends AbstractPersistentBean implements org.skyve.domain.
 	public void setArchiveFilename(String archiveFilename) {
 		preset(archiveFilenamePropertyName, archiveFilename);
 		this.archiveFilename = archiveFilename;
+	}
+
+	/**
+	 * True when the attachments sent have been stored
+	 *
+	 * @return The condition
+	 */
+	@XmlTransient
+	public boolean isHasAttachments() {
+		return (getAttachments() != null);
+	}
+
+	/**
+	 * {@link #isHasAttachments} negation.
+	 *
+	 * @return The negated condition
+	 */
+	public boolean isNotHasAttachments() {
+		return (! isHasAttachments());
 	}
 }

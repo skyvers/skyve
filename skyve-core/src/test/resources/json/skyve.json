@@ -162,6 +162,9 @@
 		// assuming the images are relatively square.
 		// target of 256 = max 1MB; target of 512 = max 4MB, target of 1024 = max 16MB per image.
 		"subsamplingMinimumTargetSize": 512,
+		// The largest width or height in pixels of a requested thumbnail or dynamic image; a bigger image is shrunk to fit, keeping its shape.
+		// This limits the memory a request can use - 2048 is about 16MB per image. It must be a whole number greater than 0.
+		"maximumDimension": 2048,
 		// Thumbnails can be stored on the file system or generated on the fly each time
 		"fileStorage": true,
 		// Where to put thumbnails if fileStorage is true - defaults to <content.directory>/SKYVE_THUMBNAILS/
@@ -353,6 +356,12 @@
 		"sender": "mailer@skyve.org", 
 		// Set true so emails are never sent, they are logged
 		"testBogusSend": false, 
+		// Set true to store a masked plain-text body excerpt in the Mail Log (default false redacts the body)
+		"logBodyExcerpt": false,
+		// Set true to store the mail attachments as a zip in the Mail Log (default false stores attachment file names only)
+		"logAttachments": false,
+		// Maximum total size in bytes of the attachments stored against a single Mail Log entry
+		"logAttachmentsMaxBytes": 5242880,
 		// Test Recipient (all emails only sent to this email address)
 		"testRecipient": "test@yourdomain.com"
 	},

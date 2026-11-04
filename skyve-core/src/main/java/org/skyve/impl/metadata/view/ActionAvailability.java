@@ -54,8 +54,8 @@ import jakarta.annotation.Nullable;
  * action name. Their triggers count as the host view's own.
  *
  * <p>A custom action, or a BizExport, BizImport, Download or Upload action, is requested by its resource (class)
- * name, as SmartClient's toolbar, buttons and events send it; links and the PrimeFaces upload send the action's name,
- * so they reach the action only when its name is its class. The server then looks the class up by the requested name,
+ * name, as SmartClient's toolbar, buttons, events and links send it; the PrimeFaces upload sends the action's name,
+ * so it reaches the action only when its name is its class. The server then looks the class up by the requested name,
  * so a request by an action's name is refused when the name differs from the class: it cannot pass for one action
  * and run another class of that name. Two actions sharing a class make that class reachable when either is.
  * Built-in actions are requested by their implicit name (see

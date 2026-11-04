@@ -17,9 +17,21 @@ These notes collect release-ready framework changes introduced for Skyve 10.
 - [Lucene Content Identifiers and Garbage Collection](#lucene-content-identifiers-and-garbage-collection)
 - [Scheduled Backups and Azure Copies](#scheduled-backups-and-azure-copies)
 - [Custom Property Order and Fluent Builders](#custom-property-order-and-fluent-builders)
+- [Mail Log Body Excerpts and Attachments](#mail-log-body-excerpts-and-attachments)
 - Decimal10 converters `Decimal10Integer`, `Decimal10IntegerPercentage`, `Decimal10OneDecimalPlace` and `Decimal10TwoDecimalPlacesPercentage` are new, and `Decimal10DollarsAndCents` can now be named in metadata.
 - [Server-side Questions](#server-side-questions): server code can ask the user an OK/Cancel or Yes/No question with `EXT.getDialogs()`, in SmartClient and PrimeFaces.
 - [Server-side Action Availability](server-side-action-availability.md): the server refuses a request for a view action that the view, as last rendered, offers the user no way to trigger.
+- SmartClient `link`s to an action now send the action's class name, as its buttons do, so a link whose action is named apart from its class is no longer refused. They also ask the action's `confirm` text first.
+  - Behaviour change: such a link now validates the form before it runs, as a button does, unless its action sets `clientValidation="false"`. It never validated before.
+- The Editorial menu can be collapsed on wide screens with the menu button in the topbar, and stays collapsed on later pages. The setting is kept in the browser's local storage.
+- The `external` PrimeFaces layout family has been removed. It was a copy of `editorial`. A `UxUi` that names `external`, or names no PrimeFaces template, now uses `editorial`.
+  - Behaviour change: a project's own copy of `WEB-INF/pages/templates/external/` is now ignored, because the name `external` always resolves to `editorial`. If you didn't customise it, you can delete it; upgrading doesn't remove it. If you customised it and still need it, plumb it back in as a copy of `editorial` under a new name. Rename the folder, for example to `WEB-INF/pages/templates/myproject/`, and name it as the template in your `UxUis`, for example `UxUi.newPrimeFaces("external", "myproject", SKYVE_THEME, THEME_COLOUR)`. Merge in later changes to `editorial/template.xhtml` and `editorial/view.xhtml` as you would for any copy, such as the `showMenu` handling, the collapsed-menu script and the Vue bundle path below.
+  - A renamed copy is not treated as the Skyve family, which only the name `editorial` is. Name a theme colour in the `UxUi`: with none, a copy gets `indigo` rather than `blue`. The `dark` colour does not force dark mode in a copy, as it does in `editorial`.
+- In SmartClient, the New button of an inline `dataGrid` now asks the server for the new row, as PrimeFaces does. The form's values are posted, and the server creates the element, so its default values, its bizlet's `newInstance()`, the interceptors and its bizlet's `preExecute(ImplicitActionName.Add)` all run, and the row has a bizId. The view is then marked as changed. New also works on a grid bound to an `inverseMany`.
+  - Behaviour change: these methods never ran for an inline SmartClient New before. An interceptor that vetoes the add now stops the row being added. A row being edited that fails validation is kept, and no row is added.
+  - Behaviour change: SmartClient data grid columns no longer send their default value to the browser. The protected field `SmartClientDataGridFieldDefinition.defaultValueJavascriptExpression` has been removed, so a subclass that used it no longer compiles.
+- Thumbnail and dynamic image requests are capped by the new optional `thumbnail.maximumDimension` setting in the JSON configuration, which defaults to `2048`. A bigger thumbnail or dynamic image is shrunk to fit, keeping its shape.
+- The thin environment banners, shown when `environment.identifier` is set, now also appear on the sign-in, error and other JSP pages, as well as on PrimeFaces and SmartClient views. The identifier is HTML-escaped. A blank identifier shows no banner.
 
 ## Model-backed Lookup Descriptions
 
@@ -161,6 +173,31 @@ declaration order instead of being sorted by key.
   privileges, content permissions and content restrictions.
 - A `<property>` with no `key` is ignored when metadata is loaded.
 
+## Mail Log Body Excerpts and Attachments
+
+The Mail Log can now optionally store more of each outbound mail. Both settings are off by
+default, live in the `smtp` stanza of the JSON configuration, and can be changed at runtime
+from the Startup page, which writes them to the override configuration.
+
+- `smtp.logBodyExcerpt`: when `true`, `MailLog.bodyExcerpt` stores the first 500 characters
+  of the plain-text body instead of `[REDACTED]`. Only numeric codes that follow a known phrase
+  ("verification code", "one-time code", "security code", "2FA code" and similar) are masked.
+  Anything else in the body is stored as written, such as a temporary password or a plain-text
+  reset link in a custom template, so check your templates before turning this on.
+  `bodyExcerpt` is now 500 characters long (was 255); DDL sync widens the column.
+- `smtp.logAttachments` and `smtp.logAttachmentsMaxBytes`: when `true`, the attachments sent
+  are stored as a zip in the new `MailLog.attachments` content attribute, up to the given total
+  size (default 5 MB). Attachments over the limit are left out and listed in `SKIPPED.txt`
+  inside the zip; a negative limit is treated as 0. The zip is not text-indexed, but it is
+  stored unmasked and can be downloaded by anyone who can read the Mail Log (by default the
+  SecurityAdministrator role). It is kept until the Mail Log is hard
+  deleted after archiving, when content garbage collection removes it. Archived Mail Logs
+  do not keep their attachments: the content ID is cleared in the archived copy.
+- `org.skyve.archive.support.DocumentConverter` gains a default no-op
+  `prepareForArchive(Bean)`, called by the archive export job before each bean is written,
+  so a document's converter can clear values that should not be archived.
+- `org.skyve.domain.app.admin.MailLog` gains `getAttachments()` and `setAttachments(String)`.
+  Re-assemble the admin module so its generated `MailLog` implements them.
 ## Server-side Questions
 
 Server code can now ask the user a question part way through a request, where before

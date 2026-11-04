@@ -180,6 +180,16 @@ export function applyConverters(row, columnDefinitionMap) {
             continue;
         }
 
+        // Enumerations and constant domains display the description of the code
+        if (columnDef.enumValues) {
+            const code = String(oldValue);
+            const enumValue = columnDef.enumValues.find(ev => ev.value === code);
+            if (enumValue) {
+                row[field] = enumValue.label;
+            }
+            continue;
+        }
+
         // Otherwise try to find the right converter
         if (columnDef.converter) {
             const fieldConverter = Converters[columnDef.converter];

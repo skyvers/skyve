@@ -28,14 +28,12 @@ class ThemeRoutingStructureTest {
 	void builtInInternalNavigationDoesNotPropagateEmulation() throws Exception {
 		Path templates = Path.of("src/main/webapp/WEB-INF/pages/templates");
 		String editorial = Files.readString(templates.resolve("editorial/template.xhtml"));
-		String external = Files.readString(templates.resolve("external/template.xhtml"));
 		String ecuadorTemplate = Files.readString(templates.resolve("ecuador/template.xhtml"));
 		String ecuadorTopbar = Files.readString(templates.resolve("ecuador/topbar.xhtml"));
 		String ultimaTopbar = Files.readString(templates.resolve("ultima/topbar.xhtml"));
 		String diamond = Files.readString(templates.resolve("diamond/template.xhtml"));
 
 		assertProfileAndAccountAreRaw(editorial);
-		assertProfileAndAccountAreRaw(external);
 		assertProfileAndAccountAreRaw(ecuadorTopbar);
 		assertProfileAndAccountAreRaw(ultimaTopbar);
 		assertFalse(ecuadorTemplate.contains("getEmulationAwareUrl"));

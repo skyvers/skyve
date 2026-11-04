@@ -89,7 +89,18 @@
 					.appendTo($head);
 
 		// Toggle.
-			$('<a href="#sidebar" class="toggle"> </a>')
+			// On wide screens the sidebar is docked and the toggle collapses it, remembering the
+			// choice in localStorage. The class is put on <html> by the template's <head> so the
+			// remembered state is in place before the first paint. On narrower screens the sidebar
+			// is an overlay and the toggle opens and closes it as before.
+			var MENU_COLLAPSED_KEY = 'skyve.editorial.menu.collapsed',
+				MENU_COLLAPSED_CLASS = 'skyve-editorial-menu-collapsed',
+				$html = $('html');
+
+			// The template gives the localised label; jQuery escapes the attribute values.
+			var toggleLabel = $sidebar.attr('data-toggle-label') || 'Toggle menu';
+			$('<a href="#sidebar" class="toggle" role="button"> </a>')
+				.attr({'aria-label': toggleLabel, title: toggleLabel})
 				.appendTo($sidebar)
 				.on('click', function(event) {
 
@@ -97,7 +108,30 @@
 						event.preventDefault();
 						event.stopPropagation();
 
-					// Toggle.
+					// Docked (wide screens) - collapse or expand and remember.
+						if (breakpoints.active('>large')) {
+							var collapsed = ! $html.hasClass(MENU_COLLAPSED_CLASS);
+							$html.toggleClass(MENU_COLLAPSED_CLASS, collapsed);
+							try {
+								if (collapsed) {
+									localStorage.setItem(MENU_COLLAPSED_KEY, 'true');
+								}
+								else {
+									localStorage.removeItem(MENU_COLLAPSED_KEY);
+								}
+							}
+							catch (e) {
+								// storage unavailable - the setting lasts until the next page load
+							}
+
+							// Let grids, charts etc re-layout once the content has finished resizing.
+							window.setTimeout(function() {
+								window.dispatchEvent(new Event('resize'));
+							}, 550);
+							return;
+						}
+
+					// Overlay (narrower screens) - toggle.
 						$sidebar.toggleClass('inactive');
 
 				});

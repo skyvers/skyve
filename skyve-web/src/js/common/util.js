@@ -114,6 +114,24 @@ SKYVE.Util = (function () {
 		},
 
 		/**
+		 * Returns the thumbnail size to request for an image preview box.
+		 * The box's larger side is rounded up to 256, 512, 1024 or 2048 (the most) so the
+		 * server caches at most four thumbnails per image, however the box is sized.
+		 * The server fits the image inside this square, keeping its aspect ratio.
+		 * @param {number} [width] - box width in pixels; anything else counts as unknown.
+		 * @param {number} [height] - box height in pixels; anything else counts as unknown.
+		 * @returns {number} 256, 512, 1024 or 2048; 1024 when neither side is known.
+		 */
+		contentPreviewSize: function (width, height) {
+			const known = [width, height].filter((n) => typeof n === "number" && n > 0);
+			if (known.length === 0) {
+				return 1024;
+			}
+			const side = Math.max(...known);
+			return [256, 512, 1024].find((step) => side <= step) || 2048;
+		},
+
+		/**
 		 * Recovers from an error page by reloading the owning Skyve browsing context when possible.
 		 * @param {string} url - fallback retry URL from the error page link.
 		 * @returns {boolean} false when navigation was handled, true to allow the link default.

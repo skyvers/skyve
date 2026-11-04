@@ -142,6 +142,65 @@ public class ImageUtilTest {
 	}
 
 	@Test
+	public void burnSvgScalesFullResolutionMarkupOntoASubsampledImage() throws Exception {
+		// Markup drawn against a 400px image, burned onto a 100px copy of it
+		BufferedImage image = new BufferedImage(100, 100, BufferedImage.TYPE_INT_ARGB);
+		String svg = "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"400\" height=\"400\" viewBox=\"0 0 400 400\">"
+				+ "<rect x=\"200\" y=\"200\" width=\"200\" height=\"200\" fill=\"#ff0000\"/>"
+				+ "</svg>";
+
+		ImageUtil.burnSvg(image, svg);
+
+		assertEquals(0xffff0000, image.getRGB(75, 75));
+		assertEquals(0xffff0000, image.getRGB(55, 95));
+		assertEquals(0, image.getRGB(25, 25) >>> 24);
+		assertEquals(0, image.getRGB(45, 75) >>> 24);
+	}
+
+	@Test
+	public void burnSvgDrawsTextHungFromItsTopEdgeBelowTheTop() throws Exception {
+		// Excalidraw positions text by its top edge: y="0" with dominant-baseline="text-before-edge"
+		BufferedImage image = new BufferedImage(100, 100, BufferedImage.TYPE_INT_ARGB);
+		String svg = "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"100\" height=\"100\" viewBox=\"0 0 100 100\">"
+				+ "<g transform=\"translate(10 30)\"><text x=\"0\" y=\"0\" font-family=\"Helvetica\" font-size=\"40px\" fill=\"#000000\" "
+				+ "text-anchor=\"start\" dominant-baseline=\"text-before-edge\">HH</text></g>"
+				+ "</svg>";
+
+		ImageUtil.burnSvg(image, svg);
+
+		// The letters hang below y=30, so they are inked between 30 and 75 and not above
+		int inkedAbove = 0;
+		int inkedBelow = 0;
+		for (int y = 0; y < 100; y++) {
+			for (int x = 0; x < 100; x++) {
+				if ((image.getRGB(x, y) >>> 24) > 128) {
+					if (y < 30) {
+						inkedAbove++;
+					}
+					else {
+						inkedBelow++;
+					}
+				}
+			}
+		}
+		assertEquals(0, inkedAbove);
+		assertTrue("no text drawn below its top edge", inkedBelow > 100);
+	}
+
+	@Test
+	public void burnSvgDrawsMarkupMatchingTheImageAtItsOwnSize() throws Exception {
+		BufferedImage image = new BufferedImage(100, 100, BufferedImage.TYPE_INT_ARGB);
+		String svg = "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"100\" height=\"100\" viewBox=\"0 0 100 100\">"
+				+ "<rect x=\"10\" y=\"10\" width=\"20\" height=\"20\" fill=\"#0000ff\"/>"
+				+ "</svg>";
+
+		ImageUtil.burnSvg(image, svg);
+
+		assertEquals(0xff0000ff, image.getRGB(20, 20));
+		assertEquals(0, image.getRGB(40, 40) >>> 24);
+	}
+
+	@Test
 	public void burnSvgWithTransparentFillAttributeNormalises() throws Exception {
 		// Covers normaliseTransparentForBatik L229-231 (fill="transparent" → "none")
 		BufferedImage image = new BufferedImage(100, 100, BufferedImage.TYPE_INT_ARGB);
