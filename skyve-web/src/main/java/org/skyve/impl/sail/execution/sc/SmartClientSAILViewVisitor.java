@@ -439,6 +439,13 @@ public class SmartClientSAILViewVisitor {
 		automationContext.put(key + ".new", Locator.widget(viewName, Kind.listGrid, null, ordinal, "new", null));
 		automationContext.put(key + ".zoom", Locator.widget(viewName, Kind.listGrid, null, ordinal, "zoom", null));
 		automationContext.put(key + ".select", Locator.widget(viewName, Kind.listGrid, null, ordinal, "rows", ROW_CELL));
+		if ((queryName == null) && (modelName != null)) {
+			// also as module.model, as a script naming the model in query="" (as for a query) identifies it
+			String alias = module.getName() + '.' + modelName;
+			automationContext.put(alias + ".new", Locator.widget(viewName, Kind.listGrid, null, ordinal, "new", null));
+			automationContext.put(alias + ".zoom", Locator.widget(viewName, Kind.listGrid, null, ordinal, "zoom", null));
+			automationContext.put(alias + ".select", Locator.widget(viewName, Kind.listGrid, null, ordinal, "rows", ROW_CELL));
+		}
 	}
 
 	/**

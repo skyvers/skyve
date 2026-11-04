@@ -920,14 +920,29 @@ public class SmartClientSelenide extends Selenide<
 		// Type as a user would: select what is there, delete it, then type the value key by key,
 		// so that SmartClient sees every change (setting the DOM value directly can leave the item's value stale)
 		script("arguments[0].focus(); if (arguments[0].select) arguments[0].select();", element.toWebElement());
-		element.sendKeys(Keys.BACK_SPACE);
+		// Keys go to whatever has the focus, as from a keyboard: a change handler can rerender the field's form while
+		// typing, and SmartClient gives the new field the focus, so the rest of the text must follow it
+		new org.openqa.selenium.interactions.Actions(driver).sendKeys(Keys.BACK_SPACE).perform();
 		if ((value != null) && (! value.isEmpty())) {
-			element.sendKeys(value);
+			if (locator.startsWith(Locator.SAIL_PREFIX) && Boolean.TRUE.equals(script("return _sail.hasChangeHandler(arguments[0])", root(locator)))) {
+				// The field's change handler can call the server on a keystroke, and the response sets the field to the value
+				// it was sent: a burst of keys would be overwritten. So type a key, wait for what it started, type the next.
+				for (int i = 0, l = value.length(); i < l; i++) {
+					new org.openqa.selenium.interactions.Actions(driver).sendKeys(String.valueOf(value.charAt(i))).perform();
+					waitForFullPageResponse();
+				}
+			}
+			else {
+				new org.openqa.selenium.interactions.Actions(driver).sendKeys(value).perform();
+			}
 		}
 		boolean cell = locator.contains("\"kind\":\"cell\"");
 		if ((! command.keyPresses()) && (! cell)) {
 			// leave the field, so that SmartClient commits the value and runs its change handlers
-			// (not in an inline grid editor, where leaving the last cell ends the row's edit)
+			// (not in an inline grid editor, where leaving the last cell ends the row's edit).
+			// A change handler can rerender the field's form while typing, so find the field again first.
+			waitForFullPageResponse();
+			element = require(locator).element();
 			element.sendKeys(Keys.TAB);
 			// SmartClient can keep focus in the field (a modal window's only field takes the Tab back). Then the next
 			// click would blur it first: the field re-validates, the form re-lays out under the pointer and the click is
@@ -999,6 +1014,9 @@ public class SmartClientSelenide extends Selenide<
 		String element = String.valueOf(result.get("element"));
 		if ((value != null) && (! value.isEmpty()) && element.isEmpty()) {
 			throw new IllegalStateException(String.format("Typed '%s' into %s but the field shows nothing", value, locator));
+		}
+		if ((value != null) && Boolean.TRUE.equals(result.get("plain")) && (! value.equals(element))) {
+			throw new IllegalStateException(String.format("Typed '%s' into %s but the field shows '%s'", value, locator, element));
 		}
 		if (! Boolean.TRUE.equals(result.get("committed"))) {
 			throw new IllegalStateException(String.format("Typed '%s' into %s but the value (%s) did not reach the form's values",

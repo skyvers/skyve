@@ -448,13 +448,18 @@ public class SmartClientInterpretedWebDriverExecutor extends InterpretedWebDrive
 	public void executeSave(Save save) {
 		button(save, "save", save.getConfirm(), save.getTestSuccess());
 
+		// The browser now shows the create or edit view the script says: replace the context with one for that view,
+		// so that the locators are the new view's
 		Boolean createView = save.getCreateView();
-		if (Boolean.TRUE.equals(createView)) {
-			SmartClientAutomationContext context = peek();
-			context.setViewType(ViewType.create);
-		} else if (Boolean.FALSE.equals(createView)) {
-			SmartClientAutomationContext context = peek();
-			context.setViewType(ViewType.edit);
+		if (createView != null) {
+			SmartClientAutomationContext context = pop();
+			PushEditContext push = new PushEditContext();
+			push.setModuleName(context.getModuleName());
+			push.setDocumentName(context.getDocumentName());
+			push.setCreateView(createView);
+			push.setUxui(context.getUxui());
+			push.setUserAgentType(context.getUserAgentType());
+			push.execute(this);
 		}
 	}
 

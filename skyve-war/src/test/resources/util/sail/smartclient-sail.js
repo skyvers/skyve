@@ -42,7 +42,7 @@
 	// timers that have not fired yet, and the page is not settled until they have.
 	// Left out, because they do not follow from a step and could keep the page busy for ever: background repeat
 	// timers, timers of a second or more (hovers, view refreshes), mouse-still-down repeats, and maps, which
-	// retry build() every 100 ms while offline.
+	// retry build() every 100 ms while offline (BizMap, BizMapPicker).
 
 	var deferred = {};
 	var timerTokens = {};
@@ -66,7 +66,9 @@
 		if (method === "$kq" || method === "_handleMouseStillDown") {
 			return true;
 		}
-		return !!(target && isc.isA.BizMap && isc.isA.BizMap(target));
+		// Skyve's map widgets (BizMap, BizMapPicker) retry build() until the map script loads, which offline is never
+		var name = target && target.getClassName ? target.getClassName() : "";
+		return /^BizMap/.test(name);
 	}
 
 	function instrument() {
@@ -850,8 +852,12 @@
 		var stored = item.getValue();
 		var elementValue = isc.isA.RichTextItem(item) ? strip(item.canvas.getValue()) :
 							(typed.getElementValue ? typed.getElementValue() : null);
+		var cls = typed.getClassName();
 		return {
 			element: elementValue == null ? "" : String(elementValue),
+			// a plain text field shows exactly what was typed (masked, formatted and date fields need not)
+			plain: (cls === "TextItem" || cls === "PasswordItem" || cls === "TextAreaItem") && !typed.mask &&
+					!typed.formatter && !typed.formatEditorValue && typed === item,
 			stored: stored == null ? "" : String(stored),
 			committed: !vm || same(stored, vm.getValue(item.name)),
 			focused: document.hasFocus()
@@ -899,18 +905,23 @@
 		return false;
 	}
 
-	/** The rows a grid has loaded: { rows, loaded } or { error }. */
+	/**
+	 * The rows a grid has: { rows, loaded }. A list grid pages its rows, so it counts as loaded once its length is known
+	 * and its first page has arrived; rowContaining then searches the rows it has fetched, in the order shown.
+	 */
 	function loadedRows(grid) {
 		var total = grid.getTotalRows();
 		var data = grid.getData();
 		if (data && data.lengthIsKnown && !data.lengthIsKnown()) {
 			return { rows: 0, loaded: false };
 		}
-		var loaded = true;
-		if (data && data.rangeIsLoaded && total > 0 && !data.rangeIsLoaded(0, total)) {
-			loaded = false;
-		}
+		var loaded = !(data && data.rowIsLoaded && total > 0 && !data.rowIsLoaded(0));
 		return { rows: total, loaded: loaded };
+	}
+
+	function rowFetched(grid, rowNum) {
+		var data = grid.getData();
+		return !(data && data.rowIsLoaded) || data.rowIsLoaded(rowNum);
 	}
 
 	/** The zero-based index of the first row showing the text in one of its cells, or -1 (or { error }). */
@@ -924,7 +935,7 @@
 			return { error: "the grid's rows are still loading", retry: true };
 		}
 		for (var i = 0; i < state.rows; i++) {
-			if (rowContains(g.grid, i, text)) {
+			if (rowFetched(g.grid, i) && rowContains(g.grid, i, text)) {
 				return { row: i };
 			}
 		}
@@ -946,7 +957,7 @@
 		}
 		var count = 0;
 		for (var i = 0; i < state.rows; i++) {
-			if (rowContains(g.grid, i, text)) {
+			if (rowFetched(g.grid, i) && rowContains(g.grid, i, text)) {
 				count++;
 			}
 		}
@@ -1009,10 +1020,9 @@
 		S.problems().errors.forEach(function (e) {
 			result.push({ type: "error", text: e });
 		});
+		// PrimeFaces growls (Skyve's desktop page has a growl): counted as soon as they are in the page, as
+		// PrimeFaces fades them in with jQuery after the response has arrived
 		Array.prototype.slice.call(document.querySelectorAll(".ui-growl-item")).forEach(function (g) {
-			if (g.getClientRects().length === 0) {
-				return;
-			}
 			var cls = (g.querySelector(".ui-growl-image") || g).className;
 			var type = /error|fatal/.test(cls) ? "error" : /warn/.test(cls) ? "warning" : "info";
 			result.push({ type: type, text: strip(g.innerText || g.textContent) });
@@ -1187,6 +1197,13 @@
 		var hit = document.elementFromPoint(rect.left + rect.width / 2, rect.top + rect.height / 2);
 		var mine = canvasOf(element);
 		return (hit && mine && canvasOf(hit) === mine) ? hit : null;
+	};
+
+	/** True if the item runs a change handler (Skyve renders onChangedHandlers as the item's changed()), which may call the server. */
+	S.hasChangeHandler = function (locator) {
+		var resolved = S.resolve(S.parse(locator).spec);
+		var item = resolved.obj;
+		return !!(item && isFormItem(item) && isc.isA.Function(item.changed));
 	};
 
 	/** Sets a slider through its own widget API, as a drag would, and returns the new value. */
