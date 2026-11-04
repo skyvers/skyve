@@ -79,6 +79,14 @@ server's data.
   clicks a button, it checks that the page shows the same label as the component
   it built. A drifted id therefore fails the step instead of clicking another
   button.
+
+  By default, PF list views and list grids are rendered by `VueListGrid`,
+  which mounts skyve-vue's ListGrid (a PrimeVue data table) in the grid's
+  container. The executor finds such a Vue list grid by its container's client
+  id. The grid's toolbar, rows and buttons are made in the browser, not in the
+  component tree, so the executor finds them in the page by their
+  `skyve-vue-list-grid` classes. A list grid rendered as a PrimeFaces data table
+  is still driven through its built components.
 - **SmartClient.** The SC executor generates `sail:` locators: a JSON spec such
   as `{"view":"kitchensink.KitchenSink","kind":"item","name":"text"}`. A browser
   helper, `util/sail/smartclient-sail.js`, resolves each spec against the live
@@ -253,7 +261,7 @@ Support: **yes** means implemented; **no** means the step fails with a reason
 | `tabSelect` | `path`\* | Selects a tab by its title. | yes; title only, so nested tabs with the same title clash | yes; `Outer::Inner` selects each tab in turn |
 | `dataEnter` | `binding`\*, `value`\*, `navigateToWidget` | Enters the value into the first displayed, enabled widget for the binding; see [Values](#values). Fails if no widget can take it. `navigateToWidget` is accepted and ignored: the executors always scroll the target into view. | yes | yes; after `dataGridNew`/`dataGridEdit` on an inline grid, bindings are tried as the grid's columns first |
 | `testDataEnter` | `fixture` | Builds a bean with `DataBuilder` (the named fixture, or the `sail` fixture), then enters its values into every scalar widget of the view. Membership widgets are skipped. | yes | yes |
-| `upload` | `binding` or `action` (exactly one), `file`\* | Uploads a file from the **test** classpath (for example `sail/files/sail-image.png` from `skyve-war/src/test/resources`). With `binding`, it uses the content widget's upload page, and the widget must hold content afterwards. With `action`, it presses the upload action's button, chooses the file and submits it. | yes | yes |
+| `upload` | `binding` or `action` (exactly one), `file`\* | Uploads a file from the **test** classpath (for example `sail/files/sail-image.png` from `skyve-war/src/test/resources`). With `binding`, it uses the content widget's upload page, and the widget must hold content afterwards. With `action`, it presses the upload action's button, chooses the file and submits it. When the upload page opens the chosen file in its image editor, as it does for an image field, the step presses the editor's Upload button (`#crop`), which uploads it. Otherwise it presses the file list's Upload button. | yes; in the image editor, it waits for the cropper before pressing Upload | yes |
 | `lookupDescriptionAutoComplete` | `binding`\*, `search`\* | Types the search text into the lookup and picks the first suggestion. Fails if nothing matches. | yes | yes |
 | `lookupDescriptionPick` | `binding`\*, `row`\* | Opens the lookup's drop-down and picks the zero-based row. | yes | yes |
 | `lookupDescriptionNew` | `binding`\* | Opens New on the lookup and pushes the related document's context. | no: PF lookups have no New | yes |
@@ -275,7 +283,7 @@ action raises, in turn. These are located by their role, not their caption.
 
 | Element | Attributes | Semantics | PF | SC |
 |---|---|---|---|---|
-| `action` | `name`\*, `confirm`, `testSuccess` | Presses the view's button for the action. | yes | yes; an implicit Upload action fails: use `<upload action="…"/>` |
+| `action` | `name`\*, `confirm`, `testSuccess` | Presses the view's button for the action. | yes; an upload action only opens its upload page, which stays open: use `<upload action="…"/>` | yes; an implicit Upload action fails: use `<upload action="…"/>` |
 | `save` | `confirm`, `createView`, `testSuccess` | Presses Save. `createView` sets the context's view type for what follows: `true` for create, `false` for edit. | yes | yes |
 | `ok` | `confirm`, `testSuccess` | Presses OK, then pops the context once the view has closed. | yes | yes |
 | `cancel` | `testSuccess` | Presses Cancel, then pops the context once the view has closed. | yes | yes |
@@ -310,9 +318,9 @@ of these defaults from the current context.
 | `dataGridEdit` | `binding`\*, `row` or `rowContaining` | Starts an inline edit of the row. | no: PF grids have no row edit gesture; inline cells are inputs | yes; the following `dataEnter`, `testValue` and `testWidget` steps address the row's columns, and any other step ends the edit |
 | `dataGridRemove` | `binding`\*, `row` or `rowContaining` | Removes the row from the collection. The record itself is not deleted. | yes | yes |
 | `dataGridSelect` | `binding`\*, `row` or `rowContaining` | Selects the row without zooming. | only on grids with a `selectedIdBinding`; on other grids a selection zooms | yes |
-| `listGridNew` | `module`, `document`, `query`, `model`, `createView` | Presses New and pushes the new document's context. | yes | yes |
-| `listGridZoom` | as `listGridNew` without `createView`, plus `row` or `rowContaining` | Opens the row and pushes its context. | yes | yes |
-| `listGridSelect` | as `listGridZoom` | Selects the row without opening it. | only on grids with a `selectedIdBinding` | yes |
+| `listGridNew` | `module`, `document`, `query`, `model`, `createView` | Presses New and pushes the new document's context. | yes; on a Vue list grid, its toolbar's New button, or the floating one a list view shows above its paginator | yes |
+| `listGridZoom` | as `listGridNew` without `createView`, plus `row` or `rowContaining` | Opens the row and pushes its context. | yes; on a Vue list grid, the row's View Detail button, or a click on the row when the grid zooms on a row click | yes |
+| `listGridSelect` | as `listGridZoom` | Selects the row without opening it. | only on grids with a `selectedIdBinding`. On a Vue list grid, it clicks the row. A row that already shows as selected is clicked twice, to unselect and select it (runtime issue P7). The step fails if the row does not show as selected afterwards. | yes |
 
 ### Assertions
 
@@ -325,7 +333,7 @@ Under None, they are skipped.
 | `testSuccess` | | Asserts that no error message, growl or field error is shown. Information messages do not count. Straight after a login, it asserts that the login succeeded. | yes | yes |
 | `testFailure` | `message` | Asserts that an error is shown and, if `message` is given, that the error contains it. Only errors count: error messages and growls, field errors, and in SC the Problems dialog. Straight after a login, it asserts that the login was rejected. | yes | yes |
 | `testMessage` | `contains`\*, `type` (`info`, `warning`, `error`) | Asserts that a growl or message containing the text, case-sensitively, is shown. With `type`, the message must have that severity. Unlike `testSuccess`/`testFailure`, it sees information and warning messages too. | yes: global messages, growls and field messages | yes: `isc.say` is info, `isc.warn` is warning, the Problems dialog and field errors are error, and growls go by their class |
-| `testGridRows` | `binding`, or `module`/`document`/`query`/`model`; `rowContaining`, `minRows`, `maxRows`, `timeoutMillis` | Counts the rows, or only those containing the text, and asserts `minRows ≤ count ≤ maxRows`. An absent `minRows` means 0 and an absent `maxRows` means no maximum. With neither, the step asserts at least one row. `maxRows="0"` asserts absence. `binding` (a data grid) cannot be combined with the list attributes. With `timeoutMillis`, the grid is reloaded from the server and recounted every second until the bounds hold or time runs out. Use it to wait for a server job. A timed step still waits under None. | yes | yes; only list grids are reloaded |
+| `testGridRows` | `binding`, or `module`/`document`/`query`/`model`; `rowContaining`, `minRows`, `maxRows`, `timeoutMillis` | Counts the rows, or only those containing the text, and asserts `minRows ≤ count ≤ maxRows`. An absent `minRows` means 0 and an absent `maxRows` means no maximum. With neither, the step asserts at least one row. `maxRows="0"` asserts absence. `binding` (a data grid) cannot be combined with the list attributes. With `timeoutMillis`, the grid is reloaded from the server and recounted every second until the bounds hold or time runs out. Use it to wait for a server job. A timed step still waits under None. | yes; a Vue list grid refetches its rows as it does after an ajax update, and the step waits for that fetch | yes; only list grids are reloaded |
 | `testWidget` | exactly one of `binding`, `action`, `tab`; `visible`, `enabled` | `visible="true"` asserts the target is shown. `visible="false"` asserts it is hidden or not rendered. `enabled` asserts it is shown and is, or is not, enabled. With neither, the step asserts visible. `visible="false"` cannot be combined with `enabled`. `tab` is a tab path as for `tabSelect`. | yes | yes |
 
 `testMenu` is listed under [Navigation](#navigation).
@@ -359,6 +367,10 @@ the page URL:
 ```text
 Interaction "Contacts: create and find" step 4 <save />: expected no error messages after [save] but found: ... [at http://localhost:8180/skyve/?a=e&m=admin&d=Contact]
 ```
+
+In PF, the messages listed after "but found:" also include the page's script
+errors, as `(page script errors: …)`. A script error can stop a response from
+being applied.
 
 Under Verify, the message starts with `SAIL automation failed with N failure(s):`
 and lists one failure per line. Nothing is only logged: a script never prints a
@@ -644,11 +656,16 @@ The harness follows these rules, and changes to it must keep them.
    event, such as:
    - a page or ajax response;
    - the PrimeFaces ajax queue emptying;
+   - a Vue list grid being mounted in its container, and its fetch ending (its
+     paginator spinner shows from the fetch's debounce until the rows arrive);
    - SmartClient having no pending RPC or deferred timer;
    - a widget being drawn;
    - a dialog opening or closing;
    - an animation ending;
    - an upload finishing.
+
+   In PF, after a confirmation is accepted, the executor waits for the request
+   it sends to start, because the page can look idle in between.
 
    SmartClient pairs two clicks on the same widget within its double-click
    interval into a double click, which silently swallows the second click.
@@ -664,7 +681,10 @@ The harness follows these rules, and changes to it must keep them.
    `SailServerLock`, which blocks while another JVM's SAIL test is using the
    same server.
 3. **No script clicks for user gestures.** A click goes through WebDriver, after
-   the target is scrolled to the centre of the window and nothing covers it. A
+   the target is scrolled to the centre of the window and nothing covers it. In
+   a Vue list grid, the click also waits for the target to be in the same place
+   twice in a row: the grid lays its toolbar out again over the next animation
+   frames when it is shown, for example when its tab is selected. A
    click a user could not make fails the step, with a diagnosis: the element,
    its position, the window, and what covers it. A script click would hide
    exactly the faults SAIL exists to find. Two pointer gestures are named
@@ -686,7 +706,7 @@ Both executors use a few script calls that are not gestures:
 | Renderer | Script call | Why |
 |---|---|---|
 | both | Scrolling: DOM `scrollIntoView` (PF also `window.scrollBy`); SC `Canvas.scrollIntoView()`, `ListGrid.scrollToRow()` and the menu tree's `scrollToRow()` | Bring the target to the centre before a real click |
-| both | Reloading a grid for `testGridRows timeoutMillis`: PF the data table's `filter()`; SC `BizListGrid.refresh()` or `invalidateCache()` | Refetch the rows from the server, as the author asked |
+| both | Reloading a grid for `testGridRows timeoutMillis`: PF the data table's `filter()`, or for a Vue list grid setting its `skyveConfig.renderedAt`, as an ajax update does; SC `BizListGrid.refresh()` or `invalidateCache()` | Refetch the rows from the server, as the author asked |
 | SC | `Slider.setValue()` after the thumb is scrolled into view and checked | The widget's own API, which fires the same change events as a drag |
 | SC | Selecting existing text before typing: `select()`, a DOM range in rich text, `execCommand('selectAll')` in the HTML editor | So that typing replaces the text |
 | SC | `blur()` when SmartClient keeps the focus after Tab | The field must be left before the next click |
@@ -725,8 +745,9 @@ Scripts follow the same rules. Use `testGridRows timeoutMillis` or
   browser has, which is the first page of a paged list.
 - **Runtime bugs.** Update My Details is commented out of both admin scripts
   (runtime issue P4). Other runtime bugs have workarounds in the scripts or the
-  executors, and SC's missing Backup and Restore "started" growls are left out
-  of its green path. See the issues list.
+  executors, such as the second click on a Vue list grid row (P7). SC's missing
+  Backup and Restore "started" growls are left out of its green path. See the
+  issues list.
 
 ## Runtime Bugs Found
 

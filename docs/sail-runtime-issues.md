@@ -11,7 +11,9 @@ Each suspected cause was checked against the source on the `sail` branch.
   mechanism is not proven.
 - **Not confirmed**: the code does not show the suspected cause.
 
-Line numbers are for `sail` at the time of writing.
+Line numbers in P1 to P6 and SC-1 to SC-8 are for `sail` at `2f4c2021b8`,
+before master was merged in. Some of them have moved since. Line numbers in P7
+and P8 are for `sail` at `f332f66846`.
 
 | Id | Summary | Renderer | Cause checked | Status |
 |---|---|---|---|---|
@@ -21,8 +23,10 @@ Line numbers are for `sail` at the time of writing.
 | [P4](#p4-update-my-details-fails-with-an-optimistic-lock) | Update My Details fails with an optimistic lock | both | Partly confirmed | open |
 | [P5](#p5-tablet-escapingfixture-shows-required-field-messages-at-once) | Tablet EscapingFixture shows required-field messages at once | PF | Not investigated | open (may be by design) |
 | [P6](#p6-re-run-job-of-generate-test-data-always-fails) | Re-run Job of Generate Test Data always fails | both | Confirmed | open |
+| [P7](#p7-a-vue-list-grid-restores-a-selection-without-its-selected-action) | A Vue list grid restores a selection without its selected action | PF | Confirmed | open |
+| [P8](#p8-an-action-upload-page-left-open-hides-later-error-messages) | An action upload page left open hides later error messages | PF | Not investigated | open (not confirmed) |
 | [SC-1](#sc-1-withdrawn-actions-blocked-after-a-server-field-error) | Actions blocked after a server field error | SC | Withdrawn: a harness fault | withdrawn |
-| [SC-2](#sc-2-inline-grid-default-values-reach-smartclient-as-objects) | Inline grid default values reach SmartClient as objects | SC | Confirmed | open on `sail`; fixed on `master` |
+| [SC-2](#sc-2-fixed-inline-grid-default-values-reach-smartclient-as-objects) | Inline grid default values reach SmartClient as objects | SC | Confirmed | fixed by master |
 | [SC-3](#sc-3-a-list-without-a-menu-item-fails-to-load) | A list without a menu item fails to load | SC | Confirmed | open |
 | [SC-4](#sc-4-conditionsfixture-never-settles) | ConditionsFixture never settles | SC | In SmartClient, not Skyve | open |
 | [SC-6](#sc-6-the-backup-and-restore-started-growls-are-not-shown) | The Backup and Restore "started" growls are not shown | SC | Plausible (client) | open |
@@ -244,6 +248,93 @@ The PF file notes the bug in a comment.
 
 **Status:** open.
 
+## P7: A Vue list grid restores a selection without its selected action
+
+**Symptom.** In PrimeFaces, a list grid with a `selectedIdBinding` can show a
+row as selected when its view opens, although the view's selected id binding
+is empty. The actions that need a selection stay disabled. On Data Maintenance,
+the backup row shows as selected, but Delete Backup and Restore stay disabled.
+Clicking the row unselects it.
+
+**Reproduction.** In PrimeFaces, open Data Maintenance > Backup/Restore with at
+least one backup, and select the backup. Leave the view, then open Data
+Maintenance again in the same browser session. The backup row shows as
+selected, and Delete Backup and Restore are disabled.
+
+**Suspected cause.** The grid keeps its selection in its session state and
+shows it again, but only a row click runs the selected action.
+
+- `skyve-vue/src/ListGrid.vue:1240-1241` keeps the DataTable's state in
+  session storage (`stateStorage="session"`, keyed by the data source).
+  `:1259` binds the selection to that DataTable (`v-model:selection="selectedRow"`).
+- `ListGrid.vue:854-856` documents that the selection "is kept in the grid's
+  (session) state so it shows when coming back".
+- `ListGrid.vue:839-843` (`onRowSelect`) is the only code that runs the selected
+  action with the row's bizId. It runs on the DataTable's `row-select` event
+  (`:1262`), which a click fires. Restoring the state does not fire it.
+- The selected action is what sets the binding. On Data Maintenance it is
+  `BackupSelected`
+  (`skyve-war/src/main/java/modules/admin/DataMaintenance/views/edit.xml:42`
+  and `:54-56`). Delete Backup and Restore are disabled by `notBackupSelected`
+  (`skyve-war/src/main/java/modules/admin/DataMaintenance/DataMaintenance.xml:206-210`
+  tests `selectedBackupName != null`).
+- A click on the restored row fires `row-unselect` (`:1263`, `onRowUnselect`
+  at `:848-852`), which sends no bizId and clears the binding again.
+
+A fix would be to run the selected action for a restored selection, or not to
+restore the selection of a grid that has a selected action.
+
+**Checked:** Confirmed.
+
+**Workaround in the suites.** `listGridSelect` on a Vue list grid checks
+whether the row already shows as selected. If it does, the PF executor clicks
+it twice, once to unselect it and once to select it, as a user would have to.
+The step fails if the row does not show as selected afterwards. See
+`PrimeFacesSelenide.vueListGridSelect`
+(`skyve-war/src/test/java/util/sail/PrimeFacesSelenide.java:409`), added in
+`54410fc95f`. The PF admin suite selects the backup row in 04-devops and
+again in 99-restore.
+
+**Status:** open.
+
+## P8: An action upload page left open hides later error messages
+
+**Symptom.** In PrimeFaces, an upload action's upload page that is left open
+over the view can stop later error messages from showing. In the old admin
+script (`pf-admin-sail.xml`), Communications pressed the AddImage upload action
+with `<action>` and did not upload anything. The upload page stayed open.
+After master's new upload page arrived, the first refused action on the Manage
+tab (GetCount) no longer showed its error message, "A tag must be selected for
+results".
+
+**Reproduction.** Not reproduced on its own. In PrimeFaces, open a new
+Communication, select the Contents tab, press Add Image and leave its upload
+page open. Select the Manage tab and press Get Count.
+
+**Suspected cause.** None found. Things that may be involved:
+
+- Master's `62e2264e60` ("Redo image upload Ux") changed the upload page
+  (`skyve-war/src/main/webapp/upload.xhtml`).
+- Master's `322b0f1e6b` appends an upload action's overlay to the page body
+  (`overlay.setAppendTo("@(body)")`, in
+  `skyve-web/src/main/java/org/skyve/impl/web/faces/pipeline/component/TabularComponentBuilder.java`).
+- The PF executor reads messages from the page's elements, whether or not
+  something covers them (`PrimeFacesSelenide.messages`,
+  `skyve-war/src/test/java/util/sail/PrimeFacesSelenide.java:1379-1387`). So
+  the message was not in the page at all. The open page covering it would not
+  explain that.
+
+**Checked:** Not investigated. The only record is the message of `00482bac03`,
+which changed the script instead. It is not known whether the cause is in
+Skyve or in the harness.
+
+**Workaround in the suites.** `pf-admin-sail.xml` now uploads an image with
+AddImage (`<upload action="AddImage" .../>`), so the upload page closes before
+the next step. The PF kitchen sink uploads with its upload action in the same
+way. The PF admin suite does not press AddImage.
+
+**Status:** open (not confirmed).
+
 ## SC-1 (withdrawn): Actions blocked after a server field error
 
 **Reported symptom.** On Communications, after GetCount answered "A tag must be
@@ -259,7 +350,7 @@ refusals, as the PF scripts do.
 
 **Status:** withdrawn.
 
-## SC-2: Inline grid default values reach SmartClient as objects
+## SC-2 (fixed): Inline grid default values reach SmartClient as objects
 
 **Symptom.** In SmartClient, a new row in an inline data grid shows the
 `booleanFlag` check box as checked, and the row can be dropped when it is
@@ -278,11 +369,16 @@ SmartClient, and add a row.
 - The client therefore receives `defaultValue:{el:false}`, a JavaScript object,
   which is truthy. The expression is never evaluated.
 
-**Checked:** Confirmed on `sail`. Commit `738e964cde` on `master` (not yet in
-`sail`) removes the client-side default value. New inline rows are now created
-on the server, where default value expressions are evaluated.
+**Checked:** Confirmed on `sail` at `2f4c2021b8`.
 
-**Status:** open on `sail`; fixed on `master`.
+**Fix.** Master's `738e964cde` ("Fix inline editing double click on
+non-editable column and use the server for new inline records") removed the
+default value from the SmartClient field definition. New inline rows are now
+created on the server, where default value expressions are evaluated
+(`SmartClientDataGridFieldDefinition.java:78`). It reached `sail` through the
+null-safety merge (`807f0ef4b8`).
+
+**Status:** fixed by master.
 
 ## SC-3: A list without a menu item fails to load
 
