@@ -1,7 +1,9 @@
 package org.skyve.impl.sail.execution;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.CALLS_REAL_METHODS;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -18,6 +20,7 @@ import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.query.MetaDataQueryDefinition;
+import org.skyve.metadata.sail.language.Automation;
 import org.skyve.metadata.sail.language.step.context.PushListContext;
 import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateEdit;
 import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateLink;
@@ -144,6 +147,37 @@ class ContextualExecutorTest {
 		ContextualExecutor<AutomationContext<GenerateListContext, GenerateEditContext>> executor = newExecutor();
 
 		assertThrows(IllegalStateException.class, () -> executor.newContext(push, newContext()));
+	}
+
+	@Test
+	void substituteRunTokenReplacesEveryOccurrenceWithTheSameToken() {
+		ContextualExecutor<AutomationContext<GenerateListContext, GenerateEditContext>> executor = newExecutor();
+
+		String token = executor.getRunToken();
+		assertTrue(token.matches("[0-9a-z]{8,}"), token);
+		assertEquals("jane" + token + "@" + token + ".com", executor.substituteRunToken("jane{run}@{run}.com"));
+		assertEquals(token, executor.getRunToken());
+	}
+
+	@Test
+	void substituteRunTokenReturnsValueWithoutTokenUnchanged() {
+		ContextualExecutor<AutomationContext<GenerateListContext, GenerateEditContext>> executor = newExecutor();
+		String value = "jane {RUN} run";
+
+		assertSame(value, executor.substituteRunToken(value));
+	}
+
+	@Test
+	void executeAutomationStartsARunToken() {
+		ContextualExecutor<AutomationContext<GenerateListContext, GenerateEditContext>> executor = newExecutor();
+		Automation automation = new Automation();
+		automation.setUxui("desktop");
+		automation.setUserAgentType(org.skyve.web.UserAgentType.desktop);
+
+		executor.executeAutomation(automation);
+
+		String token = executor.getRunToken();
+		assertEquals("u" + token, executor.substituteRunToken("u" + ContextualExecutor.RUN_TOKEN));
 	}
 
 	private static ContextualExecutor<AutomationContext<GenerateListContext, GenerateEditContext>> newExecutor() {
