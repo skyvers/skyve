@@ -24,6 +24,9 @@ import jakarta.xml.bind.annotation.XmlType;
  * the login is expected to fail: the executor must not throw when it is rejected, and the
  * {@code testFailure} step asserts that it was.
  *
+ * <p>Login does not switch renderers; follow it with {@link SwitchMode} when the router may not
+ * route the browser to the renderer that the automation's {@code uxui} targets.
+ *
  * <p>{@code {run}} in {@code user} or {@code password} is replaced by the run token, so a script
  * can log in as a user that it created earlier in the same run.
  *

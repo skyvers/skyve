@@ -35,6 +35,8 @@ import org.skyve.metadata.sail.language.step.interaction.grids.ListGridSelect;
 import org.skyve.metadata.sail.language.step.interaction.grids.ListGridZoom;
 import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateMenu;
 import org.skyve.metadata.sail.language.step.interaction.navigation.TestMenu;
+import org.skyve.metadata.sail.language.step.interaction.session.Login;
+import org.skyve.metadata.sail.language.step.interaction.session.SwitchMode;
 
 /**
  * Unmarshals and marshals the SAIL language additions through the generated sail.xsd.
@@ -101,6 +103,22 @@ class SailLanguageXmlTest {
 		Step step = XMLMetaData.unmarshalSAILString(xml).getInteractions().get(0).getSteps().get(0);
 		Executor executor = mock(Executor.class);
 		assertThrows(MetaDataException.class, () -> step.execute(executor));
+	}
+
+	@Test
+	void switchModeRoundTripsAfterLogin() {
+		String xml = HEAD + "<login user=\"admin\" password=\"admin\"/><switchMode/>" + TAIL;
+		Automation automation = XMLMetaData.unmarshalSAILString(xml);
+		List<Step> steps = XMLMetaData.unmarshalSAILString(XMLMetaData.marshalSAIL(automation)).getInteractions().get(0).getSteps();
+		assertAll(() -> assertEquals(2, steps.size()),
+					() -> assertThat(steps.get(0), instanceOf(Login.class)),
+					() -> assertThat(steps.get(1), instanceOf(SwitchMode.class)));
+	}
+
+	@Test
+	void switchModeWithAnAttributeIsRejectedByTheSchema() {
+		String xml = HEAD + "<switchMode uxui=\"desktop\"/>" + TAIL;
+		assertThrows(MetaDataException.class, () -> XMLMetaData.unmarshalSAILString(xml));
 	}
 
 	@Test

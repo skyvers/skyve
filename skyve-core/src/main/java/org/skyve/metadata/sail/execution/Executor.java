@@ -49,6 +49,7 @@ import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateTree
 import org.skyve.metadata.sail.language.step.interaction.navigation.TestMenu;
 import org.skyve.metadata.sail.language.step.interaction.session.Login;
 import org.skyve.metadata.sail.language.step.interaction.session.Logout;
+import org.skyve.metadata.sail.language.step.interaction.session.SwitchMode;
 
 import jakarta.annotation.Nonnull;
 
@@ -385,4 +386,15 @@ public interface Executor {
 	 * @param test the menu assertion step
 	 */
 	public void executeTestMenu(@Nonnull TestMenu test);
+
+	/**
+	 * Switches the browser session to the automation's renderer (SmartClient for the {@code desktop}
+	 * UX/UI, PrimeFaces otherwise) through the user-visible "Switch mode" control.
+	 *
+	 * <p>Does nothing if the session already shows that renderer; fails if the control is not
+	 * available because the user cannot switch modes.
+	 *
+	 * @param switchMode the switch mode step
+	 */
+	public void executeSwitchMode(@Nonnull SwitchMode switchMode);
 }

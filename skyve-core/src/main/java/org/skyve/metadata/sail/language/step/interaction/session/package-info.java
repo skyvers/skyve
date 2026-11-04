@@ -8,6 +8,8 @@
  *       a customer name for multi-tenant deployments.
  *   <li>{@link org.skyve.metadata.sail.language.step.interaction.session.Logout} — invalidates
  *       the current session and returns the executor to an unauthenticated state.
+ *   <li>{@link org.skyve.metadata.sail.language.step.interaction.session.SwitchMode} — switches
+ *       the session to the automation's renderer through the "Switch mode" control.
  * </ul>
  *
  * <p>A well-formed SAIL script begins with a {@code Login} step and ends with a

@@ -53,6 +53,7 @@ import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateTree
 import org.skyve.metadata.sail.language.step.interaction.navigation.TestMenu;
 import org.skyve.metadata.sail.language.step.interaction.session.Login;
 import org.skyve.metadata.sail.language.step.interaction.session.Logout;
+import org.skyve.metadata.sail.language.step.interaction.session.SwitchMode;
 
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
@@ -194,7 +195,8 @@ public class Interaction implements Executable {
 						@XmlElementRef(type = TestGridRows.class),
 						@XmlElementRef(type = TestWidget.class),
 						@XmlElementRef(type = NavigateMenu.class),
-						@XmlElementRef(type = TestMenu.class)})
+						@XmlElementRef(type = TestMenu.class),
+						@XmlElementRef(type = SwitchMode.class)})
 	public @Nonnull List<Step> getSteps() {
 		return steps;
 	}

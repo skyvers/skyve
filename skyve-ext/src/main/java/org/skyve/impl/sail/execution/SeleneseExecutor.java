@@ -8,6 +8,7 @@ import org.skyve.metadata.sail.language.step.TestWidget;
 import org.skyve.metadata.sail.language.step.interaction.Upload;
 import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateMenu;
 import org.skyve.metadata.sail.language.step.interaction.navigation.TestMenu;
+import org.skyve.metadata.sail.language.step.interaction.session.SwitchMode;
 
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
@@ -164,5 +165,15 @@ public abstract class SeleneseExecutor<T extends AutomationContext> extends Scri
 	@Override
 	public void executeTestMenu(@Nonnull TestMenu test) {
 		comment("<testMenu/> not supported by this generator");
+	}
+
+	/**
+	 * Emits a comment that {@code <switchMode/>} is not supported, because this generator has no Selenese equivalent yet.
+	 *
+	 * @param switchMode the step being skipped
+	 */
+	@Override
+	public void executeSwitchMode(@Nonnull SwitchMode switchMode) {
+		comment("<switchMode/> not supported by this generator");
 	}
 }
