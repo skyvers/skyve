@@ -447,12 +447,14 @@ public class TestDataEnterViewVisitor extends NoOpViewVisitor {
 	}
 	
 	/**
-	 * Moves a generated slider value into the slider's range, so that a user could enter it.
-	 * Without a range, 1 to 100 is used, the range that both renderers' sliders accept.
+	 * Moves a generated slider value into the slider's range and onto its steps, so that a user could enter it.
+	 * Without a range, 1 to 100 is used, the range that both renderers' sliders accept. A value out of range becomes the
+	 * range's midpoint. The steps are those PrimeFaces gives the slider: the range over the number of discrete values
+	 * (rounded to the rounding precision), or 1.
 	 *
 	 * @param slider	the slider
 	 * @param value		the generated value
-	 * @return the value in range, as an integer when it is whole
+	 * @return the value in range and on a step, as an integer when it is whole
 	 */
 	static @Nonnull String sliderValue(@Nonnull Slider slider, @Nonnull String value) {
 		double number;
@@ -466,10 +468,29 @@ public class TestDataEnterViewVisitor extends NoOpViewVisitor {
 		Double max = slider.getMax();
 		double low = (min == null) ? 1d : min.doubleValue();
 		double high = (max == null) ? 100d : max.doubleValue();
-		if ((number < low) || (number > high)) {
-			number = Math.round((low + high) / 2d);
+		double step = 1d;
+		Integer discreteValues = slider.getNumberOfDiscreteValues();
+		if ((discreteValues != null) && (discreteValues.intValue() > 0) && (min != null) && (max != null)) {
+			step = (high - low) / discreteValues.doubleValue();
+			Integer precision = slider.getRoundingPrecision();
+			if (precision != null) {
+				step = java.math.BigDecimal.valueOf(step).setScale(precision.intValue(), java.math.RoundingMode.HALF_UP).doubleValue();
+			}
 		}
-		return (number == Math.rint(number)) ? String.valueOf((long) number) : String.valueOf(number);
+		if ((number < low) || (number > high)) {
+			number = (low + high) / 2d;
+		}
+		if (step > 0d) {
+			number = low + (Math.round((number - low) / step) * step);
+			if (number > high) {
+				number -= step;
+			}
+			if (number < low) {
+				number = low;
+			}
+		}
+		java.math.BigDecimal result = java.math.BigDecimal.valueOf(number).setScale(10, java.math.RoundingMode.HALF_UP).stripTrailingZeros();
+		return (result.scale() <= 0) ? result.toBigInteger().toString() : result.toPlainString();
 	}
 
 	/**
