@@ -37,22 +37,12 @@ op-code set and how each renderer supports it, and running the suites.
 Runtime bugs that the suites found are listed in
 [SAIL runtime issues](sail-runtime-issues.md).
 
-## Status
-
-- The language is complete. The schema is `skyve-war/src/main/java/schemas/sail.xsd`,
-  with an identical copy in `skyve-core/src/test/resources/schemas/sail.xsd`.
-- The PF executor, the PF kitchen sink suite and the PF admin suite are on the
-  `sail` branch.
-- The SC executor's support for the newer steps, the updated SC kitchen sink
-  and the SC admin suite are on `sail-sc` and are not merged yet. Until then the
-  SC executor on `sail`:
-  - throws "not implemented yet" for `upload`, `testMessage`, `testGridRows`,
-    `testWidget`, `navigateMenu`, `testMenu` and `switchMode`;
-  - fails grid steps that use `rowContaining`;
-  - still switches to SmartClient inside `<login/>`;
-  - still has fixed polling sleeps in `SmartClientSelenide`.
-
-  The SC column of the op-code reference below describes `sail-sc`.
+The schema is `skyve-war/src/main/java/schemas/sail.xsd`, with an identical copy
+in `skyve-core/src/test/resources/schemas/sail.xsd`. Both executors implement
+the whole language. A step that a renderer has no UI for fails with a reason;
+the PF and SC columns of the [op-code reference](#op-code-reference) say which.
+Code that implements `Executor` must be updated for Skyve 11; see
+[Upgrading](#upgrading).
 
 ## How the Interpreted Executors Work
 
@@ -61,7 +51,9 @@ script from the test classpath and runs it with an interpreted executor:
 
 | Class | Role |
 |---|---|
-| `util.AbstractPrimeFacesInterpretedSail`, `util.AbstractSmartClientInterpretedSail` | Test bases. Start and stop the browser, unmarshal the script (`sailResource`, `sailFile`, `sailString`) and run it. |
+| `util.AbstractPrimeFacesInterpretedSail`, `util.AbstractSmartClientInterpretedSail` | Test bases. Take the server lock, start and stop the browser, unmarshal the script (`sailResource`, `sailFile`, `sailString`) and run it. |
+| `util.sail.SailServerLock` | A cross-JVM file lock per base URL, so that only one SAIL IT at a time uses a server; see [One test per server](#one-test-per-server). |
+| `util.sail.SailSuite` | Runs a multi-file suite: set-up files, suite files and a gated restore; see [Admin: application suite](#admin-application-suite). |
 | `util.sail.InterpretedWebDriverExecutor` | Shared executor base. Runs the automation, applies the test strategy, records failures, and implements login, logout, URL navigation, the context steps, `testSuccess`, `testFailure`, `comment`, `execute` and `pause`. |
 | `util.sail.PrimeFacesInterpretedWebDriverExecutor`, `util.sail.SmartClientInterpretedWebDriverExecutor` | Renderer executors. They locate widgets and implement the remaining steps. |
 | `util.sail.PrimeFacesSelenide`, `util.sail.SmartClientSelenide`, `util.sail.Selenide` | Browser gestures and waits. |
@@ -206,7 +198,7 @@ It is not substituted in other attributes, such as `navigateEdit@bizId` or
 | Combo, radio | The zero-based position of the option. For a combo, this counts the empty first entry when there is one. | The option's position, code or label |
 | Slider | A number | The number |
 | Rich text, HTML | Plain text | The plain text or the HTML |
-| Lookup description | Not supported: use `lookupDescriptionAutoComplete` or `lookupDescriptionPick` | The displayed description |
+| Lookup description | PF: not supported, so use `lookupDescriptionAutoComplete` or `lookupDescriptionPick`. SC: the search text; the first match is picked. | The displayed description |
 | List membership | The `\|`-separated descriptions of the items to select, for example `Admin\|Basic`. Every other item is deselected. | The members, `\|`-separated |
 
 An empty membership cannot be expressed, because a blank value counts as absent.
@@ -285,12 +277,17 @@ action raises, in turn. These are located by their role, not their caption.
 |---|---|---|---|---|
 | `action` | `name`\*, `confirm`, `testSuccess` | Presses the view's button for the action. | yes | yes; an implicit Upload action fails: use `<upload action="…"/>` |
 | `save` | `confirm`, `createView`, `testSuccess` | Presses Save. `createView` sets the context's view type for what follows: `true` for create, `false` for edit. | yes | yes |
-| `ok` | `confirm`, `testSuccess` | Presses OK, then pops the context. | yes | yes |
-| `cancel` | `testSuccess` | Presses Cancel, then pops the context. | yes | yes |
-| `delete` | `confirm`, `testSuccess` | Presses Delete, then pops the context. | yes | yes |
-| `remove` | `confirm`, `testSuccess` | Presses Remove in a zoomed-in child view, then pops the context. | yes | yes |
-| `zoomOut` | `confirm`, `testSuccess` | Presses Zoom Out, then pops the context. | yes | yes |
+| `ok` | `confirm`, `testSuccess` | Presses OK, then pops the context once the view has closed. | yes | yes |
+| `cancel` | `testSuccess` | Presses Cancel, then pops the context once the view has closed. | yes | yes |
+| `delete` | `confirm`, `testSuccess` | Presses Delete, then pops the context once the view has closed. | yes | yes |
+| `remove` | `confirm`, `testSuccess` | Presses Remove in a zoomed-in child view, then pops the context once the view has closed. | yes | yes |
+| `zoomOut` | `confirm`, `testSuccess` | Presses Zoom Out, then pops the context once the view has closed. | yes | yes |
 | `zoomIn` | `binding`\*, `testSuccess` | Presses the zoom-in button of an association, then pushes the related document's context. If the zoom is refused, for example by validation with `testSuccess="false"`, it stays in the view and pushes nothing. | yes | yes |
+
+If a closing step is declined, or is refused with errors (expected with
+`testSuccess="false"`), its view stays open and its context is kept, so the
+script can carry on in that view. A save that is declined or refused keeps its
+view type.
 
 A view opened by URL (`navigateEdit`) has no Delete, OK or Cancel buttons:
 Skyve renders it as the only view (`onlyView`), which is by design. To exercise
@@ -326,9 +323,9 @@ Under None, they are skipped.
 |---|---|---|---|---|
 | `testValue` | `binding`\*, `value`\* | Asserts that the widget shows the value; see [Values](#values). | yes | yes |
 | `testSuccess` | | Asserts that no error message, growl or field error is shown. Information messages do not count. Straight after a login, it asserts that the login succeeded. | yes | yes |
-| `testFailure` | `message` | Asserts that an error is shown and, if `message` is given, that the error contains it. Straight after a login, it asserts that the login was rejected. | yes | yes; an unanswered question or a field error also counts |
+| `testFailure` | `message` | Asserts that an error is shown and, if `message` is given, that the error contains it. Only errors count: error messages and growls, field errors, and in SC the Problems dialog. Straight after a login, it asserts that the login was rejected. | yes | yes |
 | `testMessage` | `contains`\*, `type` (`info`, `warning`, `error`) | Asserts that a growl or message containing the text, case-sensitively, is shown. With `type`, the message must have that severity. Unlike `testSuccess`/`testFailure`, it sees information and warning messages too. | yes: global messages, growls and field messages | yes: `isc.say` is info, `isc.warn` is warning, the Problems dialog and field errors are error, and growls go by their class |
-| `testGridRows` | `binding`, or `module`/`document`/`query`/`model`; `rowContaining`, `minRows`, `maxRows`, `timeoutMillis` | Counts the rows, or only those containing the text, and asserts `minRows ≤ count ≤ maxRows`. An absent `minRows` means 0 and an absent `maxRows` means no maximum. With neither, the step asserts at least one row. `maxRows="0"` asserts absence. `binding` (a data grid) cannot be combined with the list attributes. With `timeoutMillis`, a list grid is reloaded and recounted every second until the bounds hold or time runs out. Use it to wait for a server job. | yes | yes; data grids are not reloaded |
+| `testGridRows` | `binding`, or `module`/`document`/`query`/`model`; `rowContaining`, `minRows`, `maxRows`, `timeoutMillis` | Counts the rows, or only those containing the text, and asserts `minRows ≤ count ≤ maxRows`. An absent `minRows` means 0 and an absent `maxRows` means no maximum. With neither, the step asserts at least one row. `maxRows="0"` asserts absence. `binding` (a data grid) cannot be combined with the list attributes. With `timeoutMillis`, the grid is reloaded from the server and recounted every second until the bounds hold or time runs out. Use it to wait for a server job. A timed step still waits under None. | yes | yes; only list grids are reloaded |
 | `testWidget` | exactly one of `binding`, `action`, `tab`; `visible`, `enabled` | `visible="true"` asserts the target is shown. `visible="false"` asserts it is hidden or not rendered. `enabled` asserts it is shown and is, or is not, enabled. With neither, the step asserts visible. `visible="false"` cannot be combined with `enabled`. `tab` is a tab path as for `tabSelect`. | yes | yes |
 
 `testMenu` is listed under [Navigation](#navigation).
@@ -339,7 +336,7 @@ Under None, they are skipped.
 |---|---|---|---|---|
 | `comment` | text | Written to the trace. Does nothing else. | yes | yes |
 | `execute` | JavaScript text | Runs the script in the browser page. Use it sparingly: it bypasses what SAIL is testing. | yes; then waits for any request or page load the script started | yes; checks for open dialogs first, then waits for SmartClient to settle |
-| `pause` | `millis`\* | Sleeps. Avoid it: see [Synchronisation Rules](#synchronisation-rules). | yes | yes |
+| `pause` | `millis`\* | Sleeps. This is a last resort, for when no observable condition exists: see [Synchronisation Rules](#synchronisation-rules). The kitchen sinks pause once, for 100 ms, only to test the op-code. | yes | yes |
 
 ## Test Strategies and Failure Reports
 
@@ -370,7 +367,13 @@ failure and then passes.
 Two system properties help when a run fails:
 
 - `-Dsail.testStrategy=Verify` overrides every script's strategy, so a single
-  run lists all the failures.
+  run lists all the failures. The value is matched ignoring case. An invalid
+  value fails before any step runs, with a message that lists the valid
+  strategies.
+  - The admin suites refuse the override, as does `PrimeFacesSailTestStrategyIT`:
+    the test fails fast if the property is set. Under Verify a failed
+    precondition would not stop a suite, and under None nothing would be
+    checked before the restore.
 - `-Dsail.failureDir=<dir>` saves a screenshot (`.png`) and the page source
   (`.html`) for each failure, named `NN-<interaction>-stepNN`.
 
@@ -429,6 +432,7 @@ Failsafe is skipped by default (`skipIntegrationTests`).
 mvn -pl skyve-war -am test \
 	-Dtest='PrimeFacesKitchenSinkSailIT,PrimeFacesAdminSuiteSailIT' \
 	-Dsurefire.failIfNoSpecifiedTests=false \
+	-Dsurefire.rerunFailingTestsCount=0 \
 	-DforkCount=1 \
 	-Dsail.baseUrl=http://localhost:8180/skyve/
 ```
@@ -439,22 +443,23 @@ tests. The SAIL ITs are:
 
 | IT | Script | Renderer |
 |---|---|---|
-| `PrimeFacesKitchenSinkSailIT` | `sail/kitchenSink/pf/pf-kitchensink-sail.xml` | PF, tablet |
+| `PrimeFacesKitchenSinkSailIT` | `sail/kitchenSink/pf/pf-kitchensink-sail.xml`, plus a second test that switches to SmartClient with PrimeFaces' user menu and checks `<switchMode/>` back | PF, tablet |
 | `PrimeFacesSailTestStrategyIT` | inline scripts, 3 tests | PF, tablet |
 | `PrimeFacesAdminSuiteSailIT` | `sail/admin/pf/suite/*.xml` | PF, tablet |
 | `PrimeFacesAdminSailIT` | `sail/admin/pf/pf-admin-sail.xml` (the older single-file admin script) | PF, tablet |
 | `PrimeFacesAdminPhoneSailIT` | `sail/admin/pf/admin-phone-smoke.xml` | PF, phone |
 | `SmartClientKitchenSinkSailIT` | `sail/kitchenSink/sc/sc-kitchensink-sail.xml` | SC |
 | `SmartClientAdminSailIT` | `sail/admin/sc/sc-admin-sail.xml` | SC |
-| `SmartClientAdminSuiteSailIT` (on `sail-sc`) | `sail/admin/sc/suite/*.xml` | SC |
+| `SmartClientAdminSuiteSailIT` | `sail/admin/sc/suite/*.xml` | SC |
 
 To run the SAIL unit tests without any browser IT, exclude ITs and give a base
 URL that nothing answers:
 
 ```bash
 mvn -pl skyve-core,skyve-ext,skyve-web,skyve-war -am test \
-	-Dtest='org/skyve/impl/sail/**/*Test,org/skyve/metadata/sail/**/*Test,org/skyve/impl/generate/sail/**/*Test,modules/admin/ControlPanel/actions/*SAIL*,sail/SailScriptsUnmarshalTest,!*IT' \
+	-Dtest='org/skyve/impl/sail/**/*Test,org/skyve/metadata/sail/**/*Test,org/skyve/impl/generate/sail/**/*Test,modules/admin/ControlPanel/actions/*SAIL*,sail/SailScriptsUnmarshalTest,util/sail/*Test,!*IT' \
 	-Dsurefire.failIfNoSpecifiedTests=false \
+	-Dsurefire.rerunFailingTestsCount=0 \
 	-Dsail.baseUrl=http://localhost:1/skyve/
 ```
 
@@ -468,10 +473,11 @@ support does), run Maven in a copy of the checkout instead.
 | `sail.baseUrl` | none (required) | The server's base URL, ending in `/`, for example `http://localhost:8180/skyve/` |
 | `sail.headless` | `true` | `false` shows the browser window |
 | `sail.timeoutSeconds` | `30` | The limit for every wait on the browser. It is a limit, not a delay: waits end as soon as their event happens. |
-| `sail.testStrategy` | the script's | Overrides every script's strategy |
+| `sail.testStrategy` | the script's | Overrides every script's strategy. Refused by the admin suites and `PrimeFacesSailTestStrategyIT`. |
 | `sail.failureDir` | none | Directory for failure screenshots and page sources |
-| `sail.suite.only` | all files | Admin suites only: comma-separated file prefixes to run, for example `03,04` |
-| `forkCount` | `2` (skyve-war pom) | Must be `1` for SAIL ITs |
+| `sail.suite.only` | all files | Admin suites only: comma-separated prefixes of the suite files to run, for example `03,04`. The set-up files and the restore always run. |
+| `surefire.rerunFailingTestsCount` | `2` (root pom) | Pass `0` for SAIL runs |
+| `forkCount` | `2` (skyve-war pom) | `1` is recommended; `2` is safe, because the server lock serialises SAIL ITs |
 
 **Why there is no default base URL.** SAIL scripts change data. Early in this
 work, a run that did not name a server fell back to `http://localhost:8080/skyve/`
@@ -480,12 +486,26 @@ admin contact and wrote sign-in and password history. `BrowserConfiguration.getB
 now throws if `-Dsail.baseUrl` is not set, so a run must name its disposable
 server.
 
-**Why `-DforkCount=1`.** The skyve-war pom sets `forkCount` to 2, so surefire
-runs two test classes at once. SAIL ITs against one server then share the
-server's data and its `admin` user. When the PF and SC admin suites ran
-together, they failed with `StaleObjectStateException` on the admin user, and
-one suite's backup or restore would undo the other's work. Run SAIL ITs
-serially.
+<a id="one-test-per-server"></a>**One test per server.** SAIL ITs against one server share its data and
+its `admin` user. When the PF and SC admin suites once ran at the same time,
+they failed with `StaleObjectStateException` on the admin user. Worse, one
+suite's backup or restore would undo the other's work.
+
+The skyve-war pom sets `forkCount` to 2, so surefire runs two test classes at
+once in separate JVMs. To keep SAIL ITs serial anyway, both test bases take
+`util.sail.SailServerLock` for their base URL before the browser starts. They
+hold it until the IT class has finished.
+
+- The lock is an operating-system file lock on
+  `skyve-sail-<base url>.lock` in `java.io.tmpdir`.
+- It therefore works across forked JVMs, and the operating system releases it
+  if a JVM dies.
+- A test that has to wait prints a line naming the lock file.
+- It serialises only tests on the same machine that share a temporary
+  directory.
+
+`-DforkCount=1` is still the simplest way to run, because tests then run in
+order and their logs do not interleave.
 
 **Headless and headed.** Headless is the default. Headless Chrome is sized to
 1920×1080, because its default of 800×600 squeezes the layouts. A headed window
@@ -498,14 +518,11 @@ Chrome always runs with `--disable-backgrounding-occluded-windows`,
 Without these flags, a locked screen or a window behind other apps stalls the
 page's timers.
 
-**Reruns.** The root pom hard-codes `rerunFailingTestsCount` to 2, and a value
-written in the plugin configuration cannot be overridden with
-`-Dsurefire.rerunFailingTestsCount=0`. A SAIL IT that fails is therefore run up
-to twice more. If it passes on a rerun, surefire reports it as a flake and the
-build passes. A rerun of an admin suite also repeats its destructive steps. When
-you need a strict result, for example when proving a fix, change the pom
-setting to a property in your local copy and pass
-`-Dsurefire.rerunFailingTestsCount=0`.
+**Reruns.** The root pom sets surefire's rerun count from the property
+`surefire.rerunFailingTestsCount`, which defaults to 2. Pass
+`-Dsurefire.rerunFailingTestsCount=0` for SAIL runs. With reruns on, a SAIL IT
+that fails and then passes on a rerun is reported as a flake, and the build
+passes. A rerun of an admin suite also repeats its destructive steps.
 
 ## The Suites
 
@@ -544,92 +561,136 @@ The admin suites test the admin module as an application, through its menus,
 as an administrator would use it. The PF suite is `sail/admin/pf/suite/`, run by
 `PrimeFacesAdminSuiteSailIT`:
 
-| File | Covers |
-|---|---|
-| `00-backup.xml` | Precondition: no other backup exists. Backs up with no redaction, waits for the backup job, and leaves a "SAIL restore marker" data group. |
-| `01-session.xml` | User Dashboard; sign in with a bad password, an unknown user and the right one; sign out and in. |
-| `02-contacts-communications.xml` | Contact create, find, change and delete, with an image upload and a declined delete; Communication Templates; Communications: every tab, attachments, and the send actions' refusals. |
-| `03-security-admin.xml` | Data Groups; Groups (roles through list membership); the User wizard; the new user signs in, sees a role-filtered menu and changes their password; Sign In History; Security Log; Configuration tabs; Mail Log. |
-| `04-devops.xml` | Control Panel (every tab, a query, cache statistics, generated SAIL); Data Maintenance (the backup list, import/export); Document Creator; Monitoring Dashboard. |
-| `05-reports-misc.xml` | Reports, Audits, System Dashboard, Document Numbers, Jobs. |
-| `98-destructive.xml` | Configuration saved with safe values (`mailBogusSend` on, so mail is only logged); a mail send that is refused; generate, rerun and delete tagged test data; delete completed jobs (declined, then confirmed). |
-| `99-restore.xml` | Restores the 00 backup (declined, then confirmed), signs in again, checks the marker has gone, and deletes the backup. |
+| File | Role | Covers |
+|---|---|---|
+| `00-precondition.xml` | set up | No backup and no "SAIL restore marker" data group exist |
+| `00-backup.xml` | set up | Clears the completed jobs list. Backs up with no redaction, waits for the backup job, and leaves the restore marker data group. |
+| `01-session.xml` | suite | User Dashboard; sign in with a bad password, an unknown user and the right one; sign out and in |
+| `02-contacts-communications.xml` | suite | Contact create, find, change and delete, with an image upload and a declined delete; Communication Templates; Communications: every tab, attachments, and the send actions' refusals |
+| `03-security-admin.xml` | suite | Data Groups; Groups (roles through list membership); the User wizard; the new user signs in, sees a role-filtered menu and changes their password; Sign In History; Security Log; Configuration tabs; Mail Log |
+| `04-devops.xml` | suite | Control Panel (every tab, a query, cache statistics, generated SAIL); Data Maintenance (the backup list, import/export); Document Creator; Monitoring Dashboard |
+| `05-reports-misc.xml` | suite | Reports, Audits, System Dashboard, Document Numbers, Jobs |
+| `98-destructive.xml` | suite | Configuration saved with safe values (`mailBogusSend` on, so mail is only logged); a mail send that is refused; generate, rerun and delete tagged test data; delete completed jobs (declined, then confirmed) |
+| `99-restore.xml` | restore | Restores the backup (declined, then confirmed) and waits for the restore job. Signs in again, checks that the marker has gone, and deletes the backup. |
 
-**Ordering.** The IT runs the files in this order in one browser session. Each
-file is its own automation and signs in for itself. The IT stops at the first
-file that fails, because later files build on earlier ones. Dangerous actions
-run in 98, after everything that depends on the data they change.
+The SC suite, `sail/admin/sc/suite/` run by `SmartClientAdminSuiteSailIT`,
+mirrors it file by file and interaction by interaction, with these differences:
 
-**The backup/restore bracket.** 00 backs up the data and 99 restores it, so the
-suite leaves the server as it found it and can be run again. The IT runs 99
-whenever 00 was among the files run, even when a later file failed. It then
-reports both outcomes with `assertAll`.
+- The marker is a set-up file of its own, `00-marker.xml`.
+- It covers the menu items and actions that only SmartClient has, among them
+  Heap Dumps, Report Manager, Snapshots and Tags. Its 98 also drops the
+  content index and reindexes, and truncates the audit log.
+- Its last suite file, `99-truncate.xml`, first checks that exactly one backup
+  is listed. It then truncates all data, keeping the bootstrap user, and checks
+  the result.
+
+**How `SailSuite` runs a suite.** Both ITs run their files with
+`util.sail.SailSuite`, in one browser session. Each file is its own automation
+and signs in for itself.
+
+1. The set-up files run first, in order.
+2. The suite files run in order. The run stops at the first file that fails,
+   because later files build on earlier ones. Dangerous actions run in 98 (and
+   SC's 99-truncate), after everything that depends on the data they change.
+3. The restore file runs last, even after a failure, including a failure of
+   the truncate. It runs only if the set-up files it requires have passed:
+   - PF: `00-precondition.xml`;
+   - SC: `00-precondition.xml` and `00-backup.xml`.
+
+   If a required file did not pass, the suite prints that the restore was held
+   back. The decision depends on which files passed, not on message text.
+4. The test then fails with every outcome: the first file that failed and, if
+   it failed too, the restore.
+
+`-Dsail.suite.only=03,04` runs only the suite files with those prefixes. The
+set-up files and the restore always run, so the bracket stays intact. The
+suites refuse `-Dsail.testStrategy`.
+
+**The backup/restore bracket.** 00-backup backs up the data and 99-restore
+restores it, so a suite leaves the server as it found it and can be run again.
 
 **The no-stray-backup precondition.** The backups list shows the oldest backup
-first (runtime issue P1), and 99 restores row 0. A backup left by anything
-else would therefore be restored instead of the suite's own. 00 refreshes the
-backup list and asserts `<testGridRows module="admin" query="BackupsModel" maxRows="0"/>`
-before it backs up. If it fails, delete the stray backups on the server by hand.
-The suite asserts rather than deleting them, because a test should not decide to
+first (runtime issue P1), and 99-restore restores row 0. If another backup
+existed, it would be restored instead of the suite's own. 00-precondition
+refreshes the backup list and asserts
+`<testGridRows module="admin" query="BackupsModel" maxRows="0"/>`. It also
+asserts that no restore marker is left over. If it fails, delete the stray
+backups and marker on the server by hand, check the data, and run again. The
+suite asserts rather than deleting them, because a test should not decide to
 delete someone's backup. For the same reason, the older `pf-admin-sail.xml`
-no longer makes a backup.
+makes no backup.
+
+**Waiting for jobs.** Backup, restore and test data generation run as jobs.
+The suites wait for each job with `testGridRows ... timeoutMillis` on its row
+in the completed jobs list (`qCompletedJobs`). To make the rows of this run
+distinguishable, 00-backup clears the completed jobs list first, so the
+server's earlier job history is lost. No `<pause>` is used.
 
 The admin suites must never lock `admin` out. They run no `testDataEnter` on
 Configuration, change passwords only for the user they create, and back up with
 data sensitivity "none". A redacted backup cannot be restored safely (runtime
 issue P2).
 
-The SC suite is `sail/admin/sc/suite/` on `sail-sc`, run by
-`SmartClientAdminSuiteSailIT`. It mirrors the PF suite file by file and
-interaction by interaction. It adds the menu items and actions that only
-SmartClient has, among them Heap Dumps, Report Manager, Snapshots and Tags, and
-the DropIndexing, TruncateAuditLog and Truncate actions. Truncate runs in 99,
-just before the restore. Its precondition
-also asserts that no restore marker is left over. If 00 fails before its
-precondition has passed, the SC IT does not run 99, so it can never restore a
-stray backup. The PF IT runs 99 whenever 00 ran.
-
 With both suites following the precondition, and each deleting its own backup
-in 99, the PF and SC suites can run one after the other in either order against
-the same server.
+in 99-restore, the PF and SC suites can run one after the other, in either
+order, against the same server.
 
 ## Synchronisation Rules
 
 Timing problems show up as flakes, especially in SmartClient and in headed runs.
-The harness follows three rules, and changes to it must keep them.
+The harness follows these rules, and changes to it must keep them.
 
 1. **No sleeps or fixed delays.** Every wait waits for a named asynchronous
-   event: a page or ajax response, the PrimeFaces ajax queue emptying,
-   SmartClient having no pending RPC or deferred timer, a widget being drawn, a
-   dialog opening or closing, an animation ending, or an upload finishing. The
-   one deliberate delay is SmartClient's double-click interval. Two clicks on
-   the same widget within it are paired into a double click, which silently
-   swallows the second click, so a click waits only when it would pair with
-   the previous one.
+   event, such as:
+   - a page or ajax response;
+   - the PrimeFaces ajax queue emptying;
+   - SmartClient having no pending RPC or deferred timer;
+   - a widget being drawn;
+   - a dialog opening or closing;
+   - an animation ending;
+   - an upload finishing.
+
+   SmartClient pairs two clicks on the same widget within its double-click
+   interval into a double click, which silently swallows the second click.
+   A click therefore waits for that interval to pass, but only when it would
+   pair with the previous click. The only `Thread.sleep` in the interpreted
+   harness is behind the `<pause>` op-code. (The older `PrimeFacesSelenium`
+   class, used only by the legacy generated tests, has its own.)
 2. **One condition-wait mechanism.** All waits go through `Selenide.waitFor(...)`
    (a `WebDriverWait` polling every 100 ms), or Selenide's `should(...)`. Both
    are bounded by `Selenide.TIMEOUT` (`-Dsail.timeoutSeconds`). The only other
    polling interval is the one an author asks for with `testGridRows@timeoutMillis`,
-   which checks every second.
+   which checks every second. The one deliberate wait outside this mechanism is
+   `SailServerLock`, which blocks while another JVM's SAIL test is using the
+   same server.
 3. **No script clicks for user gestures.** A click goes through WebDriver, after
    the target is scrolled to the centre of the window and nothing covers it. A
    click a user could not make fails the step, with a diagnosis: the element,
    its position, the window, and what covers it. A script click would hide
-   exactly the faults SAIL exists to find. The named exceptions are widget
-   operations with no reliable pointer gesture:
-   - PF: the editorial side bar toggle, pressed with a real pointer click at its
-     drawn centre after checking that it is the topmost element.
-   - SC: the slider value, set with `Slider.setValue()`.
-   - SC: committing typed text with `FormItem.updateValue()`.
-   - Grid and menu scrolling.
+   exactly the faults SAIL exists to find. Two pointer gestures are named
+   per-widget cases, and both are real pointer actions, not scripts:
+   - **PF side bar toggle.** The editorial side bar toggle hangs outside its
+     off-canvas side bar, so WebDriver reports it as not interactable,
+     although it is drawn on top. It is pressed with a pointer click at its
+     drawn centre, after `elementFromPoint` confirms that the toggle is the
+     topmost element there (`PrimeFacesSelenide.clickToggle`).
+   - **SC hover.** When SmartClient's hover covers the target, the pointer
+     is first moved onto the target, which hides the hover, as a user's pointer
+     would. The click is then made.
 
-   Two script clicks remain in `PrimeFacesSelenide`, and they break this rule:
-   - The answer button of a server-side question (`SKYVE.PF.ask`) is clicked
-     from JavaScript.
-   - A tablet action upload page that stays open is closed from JavaScript,
-     as a workaround for runtime issue P3.
+PF drives every widget with real gestures. The slider is dragged, then
+adjusted with the arrow keys. A colour picker is typed into and left with Tab
+(a click would open its popup). Pick list items are clicked, then Add or Remove.
+Both executors use a few script calls that are not gestures:
 
-   They should become pointer clicks.
+| Renderer | Script call | Why |
+|---|---|---|
+| both | Scrolling: DOM `scrollIntoView` (PF also `window.scrollBy`); SC `Canvas.scrollIntoView()`, `ListGrid.scrollToRow()` and the menu tree's `scrollToRow()` | Bring the target to the centre before a real click |
+| both | Reloading a grid for `testGridRows timeoutMillis`: PF the data table's `filter()`; SC `BizListGrid.refresh()` or `invalidateCache()` | Refetch the rows from the server, as the author asked |
+| SC | `Slider.setValue()` after the thumb is scrolled into view and checked | The widget's own API, which fires the same change events as a drag |
+| SC | Selecting existing text before typing: `select()`, a DOM range in rich text, `execCommand('selectAll')` in the HTML editor | So that typing replaces the text |
+| SC | `blur()` when SmartClient keeps the focus after Tab | The field must be left before the next click |
+| SC | `FormItem.updateValue()` / `RichTextItem.storeValue()` | Confirm that the typed value reached the form and its ValuesManager. This is a no-op when it already has. |
 
 Scripts follow the same rules. Use `testGridRows timeoutMillis` or
 `testMessage` to wait for a server job, not `<pause>`.
@@ -643,10 +704,14 @@ Scripts follow the same rules. Use `testGridRows timeoutMillis` or
   `lookupDescriptionEdit` or `dataGridEdit`. PF select steps work only on
   grids with a `selectedIdBinding`, so the same script can behave differently
   by renderer.
-- **`checkMembership` has no PF component.** `FacesViewRenderer` renders none.
+- **`checkMembership`** is rendered by neither PF nor SmartClient, so it
+  cannot be tested.
 - **No step for**: content signatures, downloads (content, reports, exports),
-  or opening a collapsed box. The Monitoring Dashboard's Refresh buttons sit in
-  boxes that start collapsed, so they are not tested.
+  opening a collapsed box, or waiting for a job.
+  - The Monitoring Dashboard's Refresh buttons sit in boxes that start
+    collapsed, so they are not tested.
+  - Jobs are waited for through the completed jobs list, which is why the admin
+    suites clear it.
 - **Server configuration.** InviteUsers, CreateUsers, SendMail, JobSchedule
   editing and RunJobNow are not covered. They need mail or the job scheduler,
   which the test server runs without.
@@ -658,15 +723,10 @@ Scripts follow the same rules. Use `testGridRows timeoutMillis` or
   and ignored.
 - **Paged lists.** `rowContaining` and `testGridRows` see only the rows the
   browser has, which is the first page of a paged list.
-- **Pauses in the admin suite.** `98-destructive.xml` (two 5 s pauses after
-  test data jobs) and `99-restore.xml` (a 10 s pause after the restore job) still
-  use `<pause>`. These are the remaining exceptions to the no-sleep rule.
-- **Update My Details is commented out** of both admin scripts (runtime issue
-  P4). Other runtime bugs have workarounds in the scripts or the executors;
-  see the issues list.
-- **`sc-admin-sail.xml` on `sail`** still has the Communications recipient
-  actions commented out, for SC finding 1. That finding was later withdrawn,
-  and `sail-sc` restores the actions.
+- **Runtime bugs.** Update My Details is commented out of both admin scripts
+  (runtime issue P4). Other runtime bugs have workarounds in the scripts or the
+  executors, and SC's missing Backup and Restore "started" growls are left out
+  of its green path. See the issues list.
 
 ## Runtime Bugs Found
 
@@ -678,11 +738,43 @@ its reproduction and suspected cause, is in
 ## Other Executors
 
 The `Executor` visitor (`org.skyve.metadata.sail.execution.Executor`) has
-other implementations, which generate code instead of driving a browser: the
-skyve-ext `WebDriverExecutor` and `SeleneseExecutor`, and their PrimeFaces
-subclasses. They emit a "not supported by this generator" comment for the
-newer steps (`upload`, `testMessage`, `testGridRows`, `testWidget`,
-`navigateMenu`, `testMenu` and `switchMode`). The SAIL generator
-(`org.skyve.impl.generate.sail.Generator`), used by the Control Panel's generate
-SAIL actions, writes menu and view scripts. It adds `<switchMode/>` after the
-generated `<login/>` for desktop automations.
+other implementations, which generate test code instead of driving a browser:
+
+- skyve-ext `WebDriverExecutor` and `SeleneseExecutor`, with their skyve-web
+  PrimeFaces subclasses `PrimeFacesInlineWebDriverExecutor` and
+  `PrimeFacesSeleneseExecutor`. The Control Panel's SAIL actions use them.
+  - They emit a "not supported by this generator" comment for `upload`,
+    `testMessage`, `testGridRows`, `testWidget`, `navigateMenu`, `testMenu` and
+    `switchMode`.
+  - The PrimeFaces generators also emit a "not supported" comment, and no
+    gesture, for a grid step with `rowContaining` and for `confirm="false"`.
+    The context still follows.
+  - With `confirm` absent or `true`, the generated code answers the action's
+    confirmation when the action has confirmation text.
+- The SAIL generator (`org.skyve.impl.generate.sail.Generator`) writes menu and
+  view scripts. It adds `<switchMode/>` after the generated `<login/>` for
+  desktop automations.
+
+## Upgrading
+
+The SAIL language changes are additive for script authors. Code that
+implements `Executor` directly is affected.
+
+- **Breaking:** `Executor` has 7 new abstract methods: `executeUpload`,
+  `executeTestMessage`, `executeTestGridRows`, `executeTestWidget`,
+  `executeNavigateMenu`, `executeTestMenu` and `executeSwitchMode`. An
+  executor outside Skyve must implement them, even if only to fail or to emit
+  a comment. Executors that extend skyve-ext `WebDriverExecutor` or
+  `SeleneseExecutor` inherit comment-emitting implementations.
+- The six row steps (`dataGridZoom`, `dataGridEdit`, `dataGridRemove`,
+  `dataGridSelect`, `listGridZoom` and `listGridSelect`) implement
+  `GridRowStep`. Their `row` is no longer required in the XSD, and `getRow()`
+  returns `null` when the step uses `rowContaining`. Code that unboxes
+  `getRow()` must handle that case.
+- `confirm` is now also an attribute of `ok`, `save`, `delete`, `remove` and
+  `zoomOut`. On `action`, an absent `confirm` now means "answer positively if
+  asked". Before, nothing was answered.
+- Executors that extend `ContextualExecutor` must pass value attributes
+  through `substituteRunToken(String)`; see [The run token](#the-run-token).
+- `<login/>` does not switch renderers. Scripts for SmartClient follow it with
+  `<switchMode/>`.

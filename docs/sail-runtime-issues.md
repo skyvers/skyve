@@ -19,11 +19,13 @@ Line numbers are for `sail` at the time of writing.
 | [P2](#p2-restoring-a-redacted-backup-locks-everyone-out) | Restoring a redacted backup locks everyone out | both | Confirmed | open |
 | [P3](#p3-a-tablet-action-upload-never-closes-or-refreshes) | A tablet action upload never closes or refreshes | PF | Plausible | open |
 | [P4](#p4-update-my-details-fails-with-an-optimistic-lock) | Update My Details fails with an optimistic lock | both | Partly confirmed | open |
+| [P5](#p5-tablet-escapingfixture-shows-required-field-messages-at-once) | Tablet EscapingFixture shows required-field messages at once | PF | Not investigated | open (may be by design) |
+| [P6](#p6-re-run-job-of-generate-test-data-always-fails) | Re-run Job of Generate Test Data always fails | both | Confirmed | open |
 | [SC-1](#sc-1-withdrawn-actions-blocked-after-a-server-field-error) | Actions blocked after a server field error | SC | Withdrawn: a harness fault | withdrawn |
 | [SC-2](#sc-2-inline-grid-default-values-reach-smartclient-as-objects) | Inline grid default values reach SmartClient as objects | SC | Confirmed | open on `sail`; fixed on `master` |
 | [SC-3](#sc-3-a-list-without-a-menu-item-fails-to-load) | A list without a menu item fails to load | SC | Confirmed | open |
 | [SC-4](#sc-4-conditionsfixture-never-settles) | ConditionsFixture never settles | SC | In SmartClient, not Skyve | open |
-| [SC-6](#sc-6-the-backup-started-growl-is-not-shown) | The "Backup Job has been started" growl is not shown | SC | Plausible (client) | open |
+| [SC-6](#sc-6-the-backup-and-restore-started-growls-are-not-shown) | The Backup and Restore "started" growls are not shown | SC | Plausible (client) | open |
 | [SC-7](#sc-7-control-panel-jumps-back-to-the-results-tab) | Control Panel jumps back to the Results tab | SC | Confirmed | open |
 | [SC-8](#sc-8-the-user-wizard-password-field-loses-fast-typing) | The User wizard password field loses fast typing | SC | Confirmed | open |
 
@@ -57,8 +59,9 @@ would keep the intended order.
 
 **Checked:** Confirmed.
 
-**Workaround in the suites.** 00-backup asserts that no other backup exists,
-and 99-restore restores row 0. See [the precondition](sail.md#admin-application-suite).
+**Workaround in the suites.** 00-precondition asserts that no backup exists,
+00-backup makes the only one, and 99-restore restores row 0. 99-restore is held
+back unless the precondition passed. See [the precondition](sail.md#admin-application-suite).
 
 **Status:** open.
 
@@ -138,9 +141,10 @@ parent overlay or dialog, which also fires the refresh, as content uploads do.
 **Checked:** Plausible. There is no UX/UI-specific code; the
 difference between tablet and external is not explained by Skyve code.
 
-**Workaround in the suites.** On tablet, the PF executor closes the upload page
-itself when it reports success. The kitchen sink rerenders with a check box
-before checking Outcome.
+**Workaround in the suites.** On tablet, when the upload page reports success
+but stays open, the PF executor closes it as a user would: with a real click on
+its close icon. If there is no close icon, the step fails. The kitchen sink
+rerenders with a check box before checking Outcome.
 
 **Status:** open.
 
@@ -189,6 +193,57 @@ scripts, rather than worked around with a delay.
 
 **Status:** open.
 
+## P5: Tablet EscapingFixture shows required-field messages at once
+
+**Symptom.** With the tablet UX/UI, the kitchensink EscapingFixture view shows
+its required-field messages as soon as it is first rendered. Client-side
+validation then blocks a zoom in without sending a request.
+
+**Reproduction.** As tablet, open kitchensink EscapingFixture and press a
+zoom-in button before entering anything.
+
+**Suspected cause.** None suggested. This may be intended behaviour. It is
+noted because it made the executor's full-page waits time out until the
+executor learned to detect a request that client-side validation had blocked.
+
+**Checked:** Not investigated.
+
+**Status:** open (may be by design).
+
+## P6: Re-run Job of Generate Test Data always fails
+
+**Symptom.** Re-running a completed Generate Test Data job fails at once.
+server.log shows
+`ClassCastException: modules.admin.Job.JobExtension cannot be cast to modules.admin.ControlPanel.ControlPanelExtension`
+at `GenerateTestDataJob.java:42`.
+
+**Reproduction.**
+
+1. Control Panel > Design: Generate Test Data.
+2. Jobs: zoom into the completed Generate Test Data row and press Re-run Job.
+
+The rerun is listed as failed.
+
+**Suspected cause.** The rerun gives the job the Job bean, not the Control
+Panel it was first started with.
+
+- `skyve-war/src/main/java/modules/admin/Job/actions/RerunJob.java:59` calls
+  `EXT.getJobScheduler().runOneShotJob(jobToRerun, bean, CORE.getUser())`, where
+  `bean` is the Job being viewed.
+- `skyve-war/src/main/java/modules/admin/ControlPanel/GenerateTestDataJob.java:42`
+  casts `getBean()` to `ControlPanelExtension`.
+
+Any job that expects the bean it was started with is affected in the same way
+when it is re-run.
+
+**Checked:** Confirmed.
+
+**Workaround in the suites.** Both 98-destructive files still press Re-run Job,
+and count the failed rerun's row in the completed jobs list (`minRows="2"`).
+The PF file notes the bug in a comment.
+
+**Status:** open.
+
 ## SC-1 (withdrawn): Actions blocked after a server field error
 
 **Reported symptom.** On Communications, after GetCount answered "A tag must be
@@ -199,6 +254,8 @@ nothing.
 clicks on the same widget within its double-click delay into a double click,
 and the second action click was lost that way. The SC executor now waits out
 the double-click interval when a click would pair, and the actions run.
+`sc-admin-sail.xml` and the SC suite now run these actions and assert their
+refusals, as the PF scripts do.
 
 **Status:** withdrawn.
 
@@ -278,34 +335,38 @@ the admin suite instead.
 
 **Status:** open.
 
-## SC-6: The backup started growl is not shown
+## SC-6: The Backup and Restore started growls are not shown
 
 **Symptom.** In SmartClient, Data Maintenance > Backup does not show the
-"Backup Job has been started" growl. PrimeFaces shows it. Only the later
-"Backup Completed" push message appears.
+"Backup Job has been started" growl, and Restore does not show "Restore Job has
+been started". PrimeFaces shows both. Only the jobs' later push messages
+appear: "Backup Completed" and "System Restore complete."
 
 **Reproduction.** In SmartClient, open Data Maintenance > Backup/Restore and
-press Backup.
+press Backup. Then select the backup and press Restore.
 
 **Suspected cause.** The server side works:
 
 - `skyve-war/src/main/java/modules/admin/DataMaintenance/actions/Backup.java:36`
-  calls `webContext.growl(...)`.
+  and `skyve-war/src/main/java/modules/admin/DataMaintenance/actions/Restore.java:72`
+  call `webContext.growl(...)`.
 - `SmartClientWebContext` keeps the growl, and `ViewJSONManipulator` returns it
   as `_growls`.
 - `skyve-web/src/js/desktop/editView.js` passes it to `isc.BizUtil.growl`.
 
 The likely cause is on the client. `skyve-web/src/js/desktop/util.js:853-860`
 re-creates one shared PrimeFaces Growl widget for every growl, and PrimeFaces
-Growl clears its existing messages when it shows new ones. The backup job's
-push message (`skyve-ext/src/main/java/org/skyve/impl/backup/BackupJob.java:601`)
-arrives through the same widget (`util.js:867-886`) and can replace the
+Growl clears its existing messages when it shows new ones. The jobs' push
+messages (`skyve-ext/src/main/java/org/skyve/impl/backup/BackupJob.java:601`,
+`skyve-ext/src/main/java/org/skyve/impl/backup/RestoreJob.java:120` and `:219`)
+arrive through the same widget (`util.js:867-886`). They can replace the
 "started" growl before it is seen.
 
 **Checked:** Not confirmed as a server bug; plausible as a client-side race.
 
-**Workaround in the suites.** The SC suite leaves this `testMessage` out of the
-green path, with an XML comment.
+**Workaround in the suites.** The SC suite's 00-backup and 99-restore comment
+out these `testMessage` steps as a "RUNTIME DIFFERENCE". They wait instead for
+the job's row in the completed jobs list.
 
 **Status:** open.
 
@@ -335,8 +396,8 @@ boxes.
 
 **Checked:** Confirmed.
 
-**Workaround in the suites.** The SC suite leaves the tab check after
-GenerateMenuSAIL out of the green path, with an XML comment.
+**Workaround in the suites.** The SC suite's 04-devops selects the
+Instrumentation tab again after the check box's rerender, with an XML comment.
 
 **Status:** open.
 
