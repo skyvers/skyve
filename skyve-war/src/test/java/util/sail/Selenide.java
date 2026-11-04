@@ -120,6 +120,11 @@ public abstract class Selenide<
 	public void login(@Nullable String customer, @Nonnull String username, @Nonnull String password) {
 		loginError = null;
 		open(baseUrl);
+		if (! $(byName("user")).exists()) {
+			// Still signed in (e.g. an earlier script stopped before its logout): sign out first
+			logout();
+			open(baseUrl);
+		}
 		if (customer != null) {
 			$(byName("customer")).val(customer);
 		}

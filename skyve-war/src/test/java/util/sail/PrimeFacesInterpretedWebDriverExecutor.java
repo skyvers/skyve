@@ -11,6 +11,7 @@ import org.primefaces.component.inputmask.InputMask;
 import org.primefaces.component.inputtext.InputText;
 import org.primefaces.component.inputtextarea.InputTextarea;
 import org.primefaces.component.password.Password;
+import org.primefaces.component.picklist.PickList;
 import org.primefaces.component.selectbooleancheckbox.SelectBooleanCheckbox;
 import org.primefaces.component.selectonemenu.SelectOneMenu;
 import org.primefaces.component.selectoneradio.SelectOneRadio;
@@ -40,6 +41,7 @@ import org.skyve.metadata.sail.language.step.TestWidget;
 import org.skyve.metadata.sail.language.step.interaction.Upload;
 import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateMenu;
 import org.skyve.metadata.sail.language.step.interaction.navigation.TestMenu;
+import org.skyve.impl.metadata.view.widget.bound.input.TextField;
 import org.skyve.impl.metadata.view.widget.bound.tabular.DataGrid;
 import org.skyve.impl.sail.execution.TestDataEnterViewVisitor;
 import org.skyve.impl.sail.execution.pf.PrimeFacesAutomationContext;
@@ -337,6 +339,16 @@ public class PrimeFacesInterpretedWebDriverExecutor extends InterpretedWebDriver
 				success = selenide.radio(new PrimeFacesRadioCommand(clientId, index(identifier, value)));
 			} else if (component instanceof TextEditor) {
 				success = selenide.textEditor(clientId, value);
+			} else if (component instanceof PickList) {
+				List<String> members = membershipItems(value);
+				List<String> missing = selenide.pickList(clientId, members);
+				if ((missing != null) && (! missing.isEmpty())) {
+					throw new DomainException(String.format("<dataEnter /> list membership [%s] has no items %s", identifier, missing));
+				}
+				success = (missing != null);
+			} else if ((component instanceof AutoComplete) && (widgetAt(context, identifier, components.indexOf(component)) instanceof TextField)) {
+				// a text field with suggestions (complete="suggest") takes typed text
+				success = selenide._input(clientId, value, false);
 			} else if (component instanceof AutoComplete) {
 				throw new MetaDataException(String.format("<dataEnter /> with binding [%s] is a lookup description: " +
 															"use <lookupDescriptionAutoComplete /> or <lookupDescriptionPick />",
@@ -361,6 +373,30 @@ public class PrimeFacesInterpretedWebDriverExecutor extends InterpretedWebDriver
 														identifier,
 														value));
 		}
+	}
+
+	/**
+	 * Splits a membership value ({@code A|B}) into its item labels.
+	 */
+	private static @Nonnull List<String> membershipItems(@Nullable String value) {
+		List<String> result = new ArrayList<>();
+		if (value != null) {
+			for (String item : value.split("\\|")) {
+				String trimmed = item.trim();
+				if (! trimmed.isEmpty()) {
+					result.add(trimmed);
+				}
+			}
+		}
+		return result;
+	}
+
+	/**
+	 * Returns the widget metadata collected with the component at the index, or null.
+	 */
+	private static @Nullable Object widgetAt(@Nonnull PrimeFacesAutomationContext context, @Nonnull String identifier, int index) {
+		List<Object> widgets = context.getSkyveWidgets(identifier);
+		return ((widgets == null) || (index < 0) || (index >= widgets.size())) ? null : widgets.get(index);
 	}
 
 	/**
@@ -422,6 +458,18 @@ public class PrimeFacesInterpretedWebDriverExecutor extends InterpretedWebDriver
 		boolean found = false;
 		for (UIComponent component : components) {
 			String clientId = PrimeFacesAutomationContext.clientId(component);
+			if (component instanceof PickList) {
+				List<String> members = selenide.pickListMembers(clientId);
+				if (members == null) {
+					continue;
+				}
+				found = true;
+				List<String> expectedMembers = membershipItems(expected);
+				selenide.trace(String.format("test %s (%s) members are %s", identifier, clientId, expectedMembers));
+				check(new java.util.HashSet<>(members).equals(new java.util.HashSet<>(expectedMembers)),
+						() -> String.format("expected [%s] members to be %s but they are %s", identifier, expectedMembers, members));
+				continue;
+			}
 			boolean ignoreCase = (component instanceof ColorPicker);
 			List<String> actuals = actualValues(component, clientId);
 			if (actuals == null) { // not on the page
@@ -1011,6 +1059,16 @@ public class PrimeFacesInterpretedWebDriverExecutor extends InterpretedWebDriver
 				break;
 			}
 			List<UIComponent> buttonComponents = context.getFacesComponents(buttonIdentifier);
+			if ((buttonComponents == null) && (step instanceof ListGridZoom) && (rowStep != null)) {
+				// No zoom button: the list zooms when a row is selected
+				String listGridClientId = PrimeFacesAutomationContext.clientId(listGridComponent);
+				Integer row = resolveRow(rowStep, listGridClientId);
+				if (row != null) {
+					selenide.trace(String.format("Zoom by selecting row %d on list grid [%s] (%s)", row, listGridIdentifier, listGridClientId));
+					success = selenide.zoomRowBySelection(listGridClientId, row.intValue());
+				}
+				continue;
+			}
 			if (buttonComponents != null) {
 				String listGridClientId = PrimeFacesAutomationContext.clientId(listGridComponent);
 				Integer row = null;

@@ -316,6 +316,24 @@ public class PrimeFacesSelenide extends Selenide<
 	}
 
 	/**
+	 * Zooms into a row of a list whose rows zoom when selected (it has no zoom button), and waits for the new page.
+	 *
+	 * @param gridId	the data table's client id
+	 * @param row	the zero-based row
+	 * @return true if the list is displayed and the row was clicked
+	 */
+	public boolean zoomRowBySelection(@Nonnull String gridId, int row) {
+		js("window.sailPage = true;");
+		if (! selectRow(gridId, row)) {
+			return false;
+		}
+		new WebDriverWait(driver, RESPONSE_TIMEOUT).ignoring(WebDriverException.class)
+				.until(d -> Boolean.TRUE.equals(((JavascriptExecutor) d).executeScript("return (! window.sailPage) && document.readyState === 'complete';")));
+		waitForAjaxResponse();
+		return true;
+	}
+
+	/**
 	 * Clicks a data row of a data table.
 	 *
 	 * @param gridId	the data table's client id
@@ -594,6 +612,49 @@ public class PrimeFacesSelenide extends Selenide<
 				(value == null) ? "" : value);
 		waitForAjaxResponse();
 		return true;
+	}
+
+	/**
+	 * Makes the given items (by label) the members of a pick list (list membership); every other item becomes a candidate.
+	 *
+	 * @param id	the pick list's client id
+	 * @param members	the labels of the items to make members
+	 * @return the labels that are not items of the pick list (empty when all were found), or null if the pick list is not on the page
+	 */
+	@SuppressWarnings("unchecked")
+	public @Nullable List<String> pickList(@Nonnull String id, @Nonnull List<String> members) {
+		List<String> missing = (List<String>) js("var w = PrimeFaces.getWidgetById(arguments[0]); if ((! w) || (! w.sourceList)) return null;" +
+													"var wanted = arguments[1];" +
+													"var label = function(li) {return (li.getAttribute('data-item-label') || li.textContent || '').replace(/\\s+/g, ' ').trim();};" +
+													"var all = w.sourceList.children('li.ui-picklist-item').toArray().concat(w.targetList.children('li.ui-picklist-item').toArray());" +
+													"var labels = all.map(label);" +
+													"var missing = wanted.filter(function(x) {return labels.indexOf(x) < 0;});" +
+													"if (missing.length) return missing.concat(['(the items are: ' + labels.join(' | ') + ')']);" +
+													"w.unselectAll();" +
+													"var out = w.targetList.children('li.ui-picklist-item').toArray().filter(function(li) {return wanted.indexOf(label(li)) < 0;});" +
+													"if (out.length) {out.forEach(function(li) {w.selectItem($(li));}); w.remove();}" +
+													"w.unselectAll();" +
+													"var inn = w.sourceList.children('li.ui-picklist-item').toArray().filter(function(li) {return wanted.indexOf(label(li)) >= 0;});" +
+													"if (inn.length) {inn.forEach(function(li) {w.selectItem($(li));}); w.add();}" +
+													"return [];", id, members);
+		if ((missing != null) && missing.isEmpty()) {
+			pause(600); // the transfer animates
+			waitForAjaxResponse();
+		}
+		return missing;
+	}
+
+	/**
+	 * Returns the labels of a pick list's members, in order.
+	 *
+	 * @param id	the pick list's client id
+	 * @return the labels, or null if the pick list is not on the page
+	 */
+	@SuppressWarnings("unchecked")
+	public @Nullable List<String> pickListMembers(@Nonnull String id) {
+		return (List<String>) js("var w = PrimeFaces.getWidgetById(arguments[0]); if ((! w) || (! w.targetList)) return null;" +
+									"return w.targetList.children('li.ui-picklist-item').toArray().map(function(li) {" +
+									"  return (li.getAttribute('data-item-label') || li.textContent || '').replace(/\\s+/g, ' ').trim();});", id);
 	}
 
 	/**

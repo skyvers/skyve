@@ -15,6 +15,8 @@ import org.skyve.impl.metadata.view.widget.bound.input.ColourPicker;
 import org.skyve.impl.metadata.view.widget.bound.input.Combo;
 import org.skyve.impl.metadata.view.widget.bound.input.ContentUpload;
 import org.skyve.impl.metadata.view.widget.bound.input.Geometry;
+import org.skyve.impl.metadata.view.widget.bound.input.ListMembership;
+import org.skyve.impl.web.faces.pipeline.component.EscapableText;
 import org.skyve.impl.metadata.view.widget.bound.input.HTML;
 import org.skyve.impl.metadata.view.widget.bound.input.LookupDescription;
 import org.skyve.impl.metadata.view.widget.bound.input.Password;
@@ -25,6 +27,7 @@ import org.skyve.impl.metadata.view.widget.bound.input.Spinner;
 import org.skyve.impl.metadata.view.widget.bound.input.TextArea;
 import org.skyve.impl.metadata.view.widget.bound.input.TextField;
 import org.skyve.impl.metadata.view.widget.bound.tabular.DataGrid;
+import org.skyve.impl.metadata.view.widget.bound.tabular.DataRepeater;
 import org.skyve.impl.metadata.view.widget.bound.tabular.ListGrid;
 import org.skyve.impl.web.faces.pipeline.component.NoOpComponentBuilder;
 import org.skyve.metadata.MetaData;
@@ -375,7 +378,8 @@ class ComponentCollectingComponentBuilder extends NoOpComponentBuilder {
 			else if (header instanceof CommandButton) { // command button straight in the header facet
 				context.put(addedViewComponentIdentifier + ".new", header, addedViewComponent);
 			}
-			UIComponent zoomButton = potentialActionColumn.getChildren().get(0);
+			// a list without zoom (or a model list with no action column) has no zoom button
+			UIComponent zoomButton = (potentialActionColumn.getChildCount() > 0) ? potentialActionColumn.getChildren().get(0) : null;
 			if ((zoomButton instanceof CommandButton) || (zoomButton instanceof Button)) {
 				context.put(addedViewComponentIdentifier + ".zoom", zoomButton, addedViewComponent);
 			}
@@ -519,6 +523,38 @@ class ComponentCollectingComponentBuilder extends NoOpComponentBuilder {
 			context.put(ImplicitActionName.Remove.toString(), component, ImplicitActionName.Remove);
 		}
 		return component;
+	}
+
+	/**
+	 * Registers a data repeater against its binding, so its rows can be counted.
+	 *
+	 * @param component the rendered data repeater
+	 * @param dataWidgetVar the data widget variable
+	 * @param repeater the data repeater metadata
+	 * @return the supplied component
+	 */
+	@Override
+	public @Nullable UIComponent dataRepeater(@Nullable UIComponent component,
+												@Nonnull String dataWidgetVar,
+												@Nonnull DataRepeater repeater) {
+		return putByBinding(repeater, component);
+	}
+
+	/**
+	 * Registers a list membership (pick list) component against its binding for later automation lookup.
+	 *
+	 * @param component the rendered list membership component
+	 * @param candidatesHeading candidates heading
+	 * @param membersHeading members heading
+	 * @param membership list membership metadata
+	 * @return the supplied component
+	 */
+	@Override
+	public @Nullable EventSourceComponent listMembership(@Nullable EventSourceComponent component,
+															@Nullable EscapableText candidatesHeading,
+															@Nullable EscapableText membersHeading,
+															@Nonnull ListMembership membership) {
+		return putByBinding(membership, component);
 	}
 
 	/**
