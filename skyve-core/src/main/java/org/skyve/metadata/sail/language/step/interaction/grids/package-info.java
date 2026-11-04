@@ -27,6 +27,9 @@
  *     </ul>
  * </ul>
  *
+ * <p>The row steps implement {@link org.skyve.metadata.sail.language.step.interaction.grids.GridRowStep},
+ * so a row can be located by index ({@code row}) or by the text of one of its cells ({@code rowContaining}).
+ *
  * @see org.skyve.metadata.sail.language.step.interaction
  */
 package org.skyve.metadata.sail.language.step.interaction.grids;

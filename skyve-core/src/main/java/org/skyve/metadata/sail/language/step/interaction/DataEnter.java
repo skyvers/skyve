@@ -20,6 +20,15 @@ import jakarta.xml.bind.annotation.XmlType;
  * into the viewport before entering the value, which may be necessary for widgets
  * that are only activated on focus.
  *
+ * <p>For a {@code listMembership} or {@code checkMembership} widget, {@code value} is a
+ * {@code |}-separated list of the items that must end up selected, for example
+ * {@code value="Admin|Basic"}; every other item is deselected. Items are matched by their
+ * displayed description. An empty selection cannot be expressed because a blank value is
+ * treated as absent.
+ *
+ * <p>{@code {run}} in {@code value} is replaced by the run token; see
+ * {@code ContextualExecutor.substituteRunToken(String)}.
+ *
  * @see org.skyve.metadata.sail.language.step.TestValue
  * @see org.skyve.metadata.sail.execution.Executor#executeDataEnter
  */
@@ -57,7 +66,8 @@ public class DataEnter implements Step {
 	}
 
 	/**
-	 * Sets the value.
+	 * Sets the value to enter. {@code {run}} is replaced by the run token, and for membership
+	 * widgets the value is a {@code |}-separated list of the items to select.
 	 * @param value the value
 	 */
 	@XmlAttribute(name = "value", required = true)

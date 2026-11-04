@@ -20,6 +20,9 @@ import jakarta.xml.bind.annotation.XmlType;
  * {@link org.skyve.util.DataBuilder} fixture to use for generation; if omitted
  * the executor uses the default test fixture for the current document.
  *
+ * <p>Membership widgets ({@code listMembership} and {@code checkMembership}) are skipped;
+ * use {@link DataEnter} to set them.
+ *
  * @see org.skyve.util.DataBuilder
  * @see DataEnter
  * @see org.skyve.metadata.sail.execution.Executor#executeTestDataEnter

@@ -12,6 +12,8 @@
  *       the view using a randomly generated test fixture, useful for smoke testing.
  *   <li>{@link org.skyve.metadata.sail.language.step.interaction.TabSelect} — selects a
  *       named tab in the current view, supporting nested paths with {@code /} separators.
+ *   <li>{@link org.skyve.metadata.sail.language.step.interaction.Upload} — uploads a classpath
+ *       file into a content widget or through an upload action.
  * </ul>
  *
  * <p>Sub-packages organise interactions by widget category:

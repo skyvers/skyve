@@ -42,6 +42,13 @@ public abstract class ContextualExecutor<T extends AutomationContext> implements
 
 	private Deque<T> contextStack = new ArrayDeque<>(8);
 
+	/**
+	 * The token that SAIL authors write in value-like attributes to make values unique to a run.
+	 */
+	public static final String RUN_TOKEN = "{run}";
+
+	private String runToken = null;
+
 	protected final void push(@Nonnull T context) {
 		String uxui = context.getUxui();
 		if (uxui == null) {
@@ -107,6 +114,7 @@ public abstract class ContextualExecutor<T extends AutomationContext> implements
 		currentUxUi = automation.getUxui();
 		currentUserAgentType = automation.getUserAgentType();
 		testStrategy = automation.getTestStrategy();
+		runToken = newRunToken();
 	}
 	
 	/**
@@ -268,5 +276,50 @@ public abstract class ContextualExecutor<T extends AutomationContext> implements
 		newContext.setUserAgentType(push.getUserAgentType());
 
 		return newContext;
+	}
+
+	/**
+	 * Returns the token that replaces {@value #RUN_TOKEN} in this run's values.
+	 *
+	 * <p>A new token is made by each {@link #executeAutomation(Automation)}, and on first use if
+	 * steps are executed without one. It is 8 or more lower-case letters and digits, derived
+	 * from the current time, so reruns against the same database do not clash on unique keys
+	 * such as user and group names.
+	 *
+	 * @return the run token
+	 */
+	public final @Nonnull String getRunToken() {
+		String result = runToken;
+		if (result == null) {
+			result = newRunToken();
+			runToken = result;
+		}
+		return result;
+	}
+
+	/**
+	 * Returns {@code value} with every {@value #RUN_TOKEN} replaced by {@link #getRunToken()}.
+	 *
+	 * <p>Executors must call this on every value-like attribute before using it; the
+	 * attributes are listed on {@link Executor}. Generator executors that emit code
+	 * for a later run would freeze the token into the generated code.
+	 *
+	 * @param value the attribute value as written in the script
+	 * @return the value with the run token substituted; {@code value} itself when it has no {@value #RUN_TOKEN}
+	 */
+	public final @Nonnull String substituteRunToken(@Nonnull String value) {
+		if (value.contains(RUN_TOKEN)) {
+			return value.replace(RUN_TOKEN, getRunToken());
+		}
+		return value;
+	}
+
+	/**
+	 * Makes a run token from the current time in base 36.
+	 *
+	 * @return a new run token
+	 */
+	private static @Nonnull String newRunToken() {
+		return Long.toString(System.currentTimeMillis(), Character.MAX_RADIX);
 	}
 }

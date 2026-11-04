@@ -15,8 +15,9 @@ import jakarta.xml.bind.annotation.XmlType;
  * Executes a named custom action — such as BizImport, BizExport, Upload, Download,
  * Report, Server, or any other declared action — on the current edit view.
  *
- * <p>If the action produces a confirmation dialog, set {@code confirm} to {@code true}
- * so the executor clicks through the OK/Yes/Continue button automatically.
+ * <p>If the action produces a confirmation dialog or server-side question, it is answered
+ * positively (OK/Yes/Continue) when {@code confirm} is {@code true} or absent, and negatively
+ * (No/Cancel) when {@code confirm} is {@code false}; see {@link #setConfirm(Boolean)}.
  *
  * @see AbstractAction
  * @see org.skyve.metadata.sail.execution.Executor#executeAction
@@ -26,7 +27,7 @@ import jakarta.xml.bind.annotation.XmlType;
 public class Action extends AbstractAction {
 
 	private String actionName;
-	private Boolean confirm; // Need to press OK/Yes/Continue on the confirmation dialog
+	private Boolean confirm; // null/true answers the confirmation positively, false negatively
 
 	/**
 	 * Returns the actionName.
@@ -46,16 +47,21 @@ public class Action extends AbstractAction {
 	}
 
 	/**
-	 * Returns the confirm.
-	 * @return the result
+	 * Returns how to answer the confirmation that this action can show.
+	 * @return {@code true} or {@code null} to answer positively, {@code false} to answer negatively
 	 */
 	public @Nullable Boolean getConfirm() {
 		return confirm;
 	}
 
 	/**
-	 * Sets the confirm.
-	 * @param confirm the confirm
+	 * Sets how to answer a confirmation dialog or server-side question shown after the action's button is pressed.
+	 * <ul>
+	 *   <li>{@code true} or absent: answer positively (Yes/OK/Continue) if a confirmation is shown.</li>
+	 *   <li>{@code false}: answer negatively (No/Cancel); the step fails if no confirmation is shown.</li>
+	 * </ul>
+	 * Executors locate the positive and negative buttons by role, not by caption.
+	 * @param confirm {@code true} or {@code null} to answer positively, {@code false} to answer negatively
 	 */
 	@XmlAttribute(name = "confirm")
 	public void setConfirm(@Nullable Boolean confirm) {

@@ -20,6 +20,11 @@ import jakarta.xml.bind.annotation.XmlType;
  * {@code message} is provided and no displayed error matches it. Use this to verify
  * that the application correctly rejects invalid input.
  *
+ * <p>Directly after a {@link org.skyve.metadata.sail.language.step.interaction.session.Login},
+ * it asserts that the login was rejected instead.
+ *
+ * <p>{@code {run}} in {@code message} is replaced by the run token.
+ *
  * @see TestSuccess
  * @see org.skyve.metadata.sail.execution.Executor#executeTestFailure
  */

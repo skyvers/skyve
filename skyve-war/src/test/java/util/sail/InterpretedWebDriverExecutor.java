@@ -28,17 +28,23 @@ import org.skyve.metadata.sail.language.step.Comment;
 import org.skyve.metadata.sail.language.step.Execute;
 import org.skyve.metadata.sail.language.step.Pause;
 import org.skyve.metadata.sail.language.step.TestFailure;
+import org.skyve.metadata.sail.language.step.TestGridRows;
+import org.skyve.metadata.sail.language.step.TestMessage;
 import org.skyve.metadata.sail.language.step.TestSuccess;
+import org.skyve.metadata.sail.language.step.TestWidget;
 import org.skyve.metadata.sail.language.step.context.ClearContext;
 import org.skyve.metadata.sail.language.step.context.PopContext;
 import org.skyve.metadata.sail.language.step.context.PushEditContext;
 import org.skyve.metadata.sail.language.step.context.PushListContext;
+import org.skyve.metadata.sail.language.step.interaction.Upload;
 import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateCalendar;
 import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateEdit;
 import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateLink;
 import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateList;
 import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateMap;
+import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateMenu;
 import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateTree;
+import org.skyve.metadata.sail.language.step.interaction.navigation.TestMenu;
 import org.skyve.metadata.sail.language.step.interaction.session.Login;
 import org.skyve.metadata.sail.language.step.interaction.session.Logout;
 import org.skyve.web.WebAction;
@@ -593,6 +599,82 @@ public abstract class InterpretedWebDriverExecutor<
 	@Override
 	public void executePause(Pause pause) {
 		selenide.pause(pause.getMillis());
+	}
+
+	/**
+	 * Builds the exception thrown by a step that this renderer does not implement yet.
+	 *
+	 * @param element the SAIL element, such as {@code <upload/>}
+	 * @return the exception to throw
+	 */
+	private @Nonnull UnsupportedOperationException notImplementedYet(@Nonnull String element) {
+		return new UnsupportedOperationException(element + " is not implemented yet for " + getClass().getSimpleName());
+	}
+
+	/**
+	 * Throws until a renderer implements {@code <upload/>}.
+	 *
+	 * @param upload the step
+	 * @throws UnsupportedOperationException always
+	 */
+	@Override
+	public void executeUpload(@Nonnull Upload upload) {
+		throw notImplementedYet("<upload/>");
+	}
+
+	/**
+	 * Throws until a renderer implements {@code <testMessage/>}.
+	 *
+	 * @param test the step
+	 * @throws UnsupportedOperationException always
+	 */
+	@Override
+	public void executeTestMessage(@Nonnull TestMessage test) {
+		throw notImplementedYet("<testMessage/>");
+	}
+
+	/**
+	 * Throws until a renderer implements {@code <testGridRows/>}.
+	 *
+	 * @param test the step
+	 * @throws UnsupportedOperationException always
+	 */
+	@Override
+	public void executeTestGridRows(@Nonnull TestGridRows test) {
+		throw notImplementedYet("<testGridRows/>");
+	}
+
+	/**
+	 * Throws until a renderer implements {@code <testWidget/>}.
+	 *
+	 * @param test the step
+	 * @throws UnsupportedOperationException always
+	 */
+	@Override
+	public void executeTestWidget(@Nonnull TestWidget test) {
+		throw notImplementedYet("<testWidget/>");
+	}
+
+	/**
+	 * Throws until a renderer implements {@code <navigateMenu/>}.
+	 *
+	 * @param menu the step
+	 * @throws UnsupportedOperationException always
+	 */
+	@Override
+	public void executeNavigateMenu(@Nonnull NavigateMenu menu) {
+		throw notImplementedYet("<navigateMenu/>");
+	}
+
+	/**
+	 * Throws until a renderer implements {@code <testMenu/>}.
+	 *
+	 * @param test the step
+	 * @throws UnsupportedOperationException always
+	 */
+	@Override
+	public void executeTestMenu(@Nonnull TestMenu test) {
+		throw notImplementedYet("<testMenu/>");
 	}
 
 	/**
