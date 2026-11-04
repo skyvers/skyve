@@ -86,7 +86,10 @@ server's data.
   id. The grid's toolbar, rows and buttons are made in the browser, not in the
   component tree, so the executor finds them in the page by their
   `skyve-vue-list-grid` classes. A list grid rendered as a PrimeFaces data table
-  is still driven through its built components.
+  is still driven through its built components. A list grid's
+  `componentBuilderClass` property (`vue`, `faces` or a builder class) chooses
+  how it is rendered. The executor checks each grid in the page, so it follows
+  the property grid by grid; a custom builder must render one of these two.
 - **SmartClient.** The SC executor generates `sail:` locators: a JSON spec such
   as `{"view":"kitchensink.KitchenSink","kind":"item","name":"text"}`. A browser
   helper, `util/sail/smartclient-sail.js`, resolves each spec against the live
@@ -548,6 +551,10 @@ fixtures, with `testStrategy="Assert"`.
 
 - sign in failure and success;
 - lookup values created and found by `{run}` content;
+- ListGridFixture: the same lookup values in a Vue list grid and a PrimeFaces
+  data table, chosen by each list grid's `componentBuilderClass` property
+  (`vue`, `faces`). The same steps run on each grid: count, select, zoom, New,
+  and delete from the zoomed record;
 - generated `testDataEnter`;
 - `dataEnter` and `testValue` on every KitchenSink widget, with values checked
   again after server round trips;
@@ -561,7 +568,8 @@ fixtures, with `testStrategy="Assert"`.
 - sign out.
 
 `sc-kitchensink-sail.xml` covers the same ground for SmartClient, except
-membership. The only kitchen sink membership widget is on ConditionsFixture,
+membership and ListGridFixture (`componentBuilderClass` only applies to
+PrimeFaces). The only kitchen sink membership widget is on ConditionsFixture,
 which never settles in SmartClient (runtime issue SC-4).
 
 Both kitchen sinks make their records unique with `{run}`, so they can be rerun

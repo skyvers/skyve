@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<view name="edit"
+		title="List Grid Fixture"
+		xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd"
+		xmlns="http://www.skyve.org/xml/view"
+		xmlns:c="http://www.skyve.org/xml/common"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<listGrid query="qListGridFixtureVue"
+				title="Vue list grid"
+				continueConversation="false"
+				selectedIdBinding="selectedVueId">
+		<properties>
+			<c:property key="componentBuilderClass">vue</c:property>
+		</properties>
+	</listGrid>
+	<listGrid query="qListGridFixtureFaces"
+				title="PrimeFaces data table"
+				continueConversation="false"
+				selectedIdBinding="selectedFacesId">
+		<properties>
+			<c:property key="componentBuilderClass">faces</c:property>
+		</properties>
+	</listGrid>
+	<actions>
+		<defaults />
+	</actions>
+</view>

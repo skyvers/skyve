@@ -26,6 +26,7 @@
 		<document ref="DialogsFixtureRow" />
 		<document ref="ActionsFixture" />
 		<document ref="ActionsFixtureRow" />
+		<document ref="ListGridFixture" />
 	</documents>
 	<roles>
 		<role name="dev">
@@ -122,6 +123,7 @@
 					<action name="RunFromRow" />
 					<action name="ExportFromRow" />
 				</document>
+				<document name="ListGridFixture" permission="CRUDD" />
 			</privileges>
 		</role>
 	</roles>
@@ -162,6 +164,9 @@
 		<edit name="Actions Fixture" document="ActionsFixture">
 			<role name="dev" />
 		</edit>
+		<edit name="List Grid Fixture" document="ListGridFixture">
+			<role name="dev" />
+		</edit>
 	</menu>
 	<queries>
 		<query name="qEscapingFixture" documentName="ListAttributes">
@@ -184,6 +189,18 @@
 				<column binding="selection" displayName="Selected Lookup" />
 				<column binding="selection.description" displayName="Selected Description" />
 				<column binding="singleSelection.description" displayName="Single-column Selection" />
+			</columns>
+		</query>
+		<query name="qListGridFixtureVue" documentName="LookupDescription">
+			<description>Lookup values listed by the List Grid Fixture's Vue list grid.</description>
+			<columns>
+				<column binding="description" displayName="Lookup Description" sortOrder="ascending" />
+			</columns>
+		</query>
+		<query name="qListGridFixtureFaces" documentName="LookupDescription">
+			<description>Lookup values listed by the List Grid Fixture's PrimeFaces data table.</description>
+			<columns>
+				<column binding="description" displayName="Lookup Description" sortOrder="ascending" />
 			</columns>
 		</query>
 		<query name="qConditionsFixtureListAttributes" documentName="ListAttributes">

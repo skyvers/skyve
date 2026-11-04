@@ -5,8 +5,8 @@
 	Not here, as PrimeFaces has no such UI (the executor fails them with a reason):
 	navigateTree and navigateCalendar (no a=t or a=c page), lookupDescriptionNew and lookupDescriptionEdit (the lookup is an
 	auto complete), dataGridEdit (no row edit gesture).
-	dataGridSelect and listGridSelect need a grid with a selectedIdBinding (selecting a row of other grids zooms in PrimeFaces);
-	the kitchen sink has none.
+	listGridSelect needs a list grid with a selectedIdBinding (selecting a row of other grids zooms in PrimeFaces): the List Grid
+	Fixture has one of each PrimeFaces kind. dataGridSelect needs a data grid with a selectedIdBinding; the kitchen sink has none.
 	Not here, as the language cannot express them yet: contentSignature, data entry into inline grid cells.
 	Rows are found with rowContaining and {run}-unique values, so the suite can run in any order, and again, on the same server.
 -->
@@ -36,6 +36,41 @@
 			<testValue binding="description" value="SAIL lookup {run}" />
 			<ok />
 			<testGridRows module="kitchensink" document="LookupDescription" rowContaining="SAIL lookup {run}" minRows="1" maxRows="1" />
+		</method>
+	</interaction>
+	<interaction name="List Grid Fixture: a Vue list grid and a PrimeFaces data table">
+		<method>
+			<comment>Each list grid chooses how PrimeFaces renders it with its componentBuilderClass property. The same steps run on each.</comment>
+			<comment>Vue list grid: componentBuilderClass is vue</comment>
+			<navigateEdit module="kitchensink" document="ListGridFixture" />
+			<testGridRows module="kitchensink" query="qListGridFixtureVue" rowContaining="SAIL lookup {run}" minRows="1" maxRows="1" />
+			<listGridSelect module="kitchensink" query="qListGridFixtureVue" rowContaining="SAIL lookup {run}" />
+			<listGridZoom module="kitchensink" query="qListGridFixtureVue" rowContaining="SAIL lookup {run}" />
+			<testValue binding="description" value="SAIL lookup {run}" />
+			<cancel />
+			<listGridNew module="kitchensink" query="qListGridFixtureVue" />
+			<dataEnter binding="description" value="SAIL vue grid {run}" />
+			<ok />
+			<testGridRows module="kitchensink" query="qListGridFixtureVue" rowContaining="SAIL vue grid {run}" minRows="1" maxRows="1" />
+			<listGridZoom module="kitchensink" query="qListGridFixtureVue" rowContaining="SAIL vue grid {run}" />
+			<testValue binding="description" value="SAIL vue grid {run}" />
+			<delete />
+			<testGridRows module="kitchensink" query="qListGridFixtureVue" rowContaining="SAIL vue grid {run}" maxRows="0" />
+			<comment>PrimeFaces data table: componentBuilderClass is faces</comment>
+			<navigateEdit module="kitchensink" document="ListGridFixture" />
+			<testGridRows module="kitchensink" query="qListGridFixtureFaces" rowContaining="SAIL lookup {run}" minRows="1" maxRows="1" />
+			<listGridSelect module="kitchensink" query="qListGridFixtureFaces" rowContaining="SAIL lookup {run}" />
+			<listGridZoom module="kitchensink" query="qListGridFixtureFaces" rowContaining="SAIL lookup {run}" />
+			<testValue binding="description" value="SAIL lookup {run}" />
+			<cancel />
+			<listGridNew module="kitchensink" query="qListGridFixtureFaces" />
+			<dataEnter binding="description" value="SAIL faces grid {run}" />
+			<ok />
+			<testGridRows module="kitchensink" query="qListGridFixtureFaces" rowContaining="SAIL faces grid {run}" minRows="1" maxRows="1" />
+			<listGridZoom module="kitchensink" query="qListGridFixtureFaces" rowContaining="SAIL faces grid {run}" />
+			<testValue binding="description" value="SAIL faces grid {run}" />
+			<delete />
+			<testGridRows module="kitchensink" query="qListGridFixtureFaces" rowContaining="SAIL faces grid {run}" maxRows="0" />
 		</method>
 	</interaction>
 	<interaction name="Kitchen Sink: generated test data">

@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<document name="ListGridFixture"
+			xmlns="http://www.skyve.org/xml/document"
+			xsi:schemaLocation="http://www.skyve.org/xml/document ../../../schemas/document.xsd"
+			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<documentation>
+		<![CDATA[
+			Non-persistent Kitchen Sink fixture for the PrimeFaces list grid renderers.
+
+			Its view lists the lookup values twice: once in a Vue list grid and once in a PrimeFaces data table,
+			chosen by each list grid's componentBuilderClass property. Each grid has a selectedIdBinding, so a row
+			can be selected as well as zoomed into.
+		]]>
+	</documentation>
+	<singularAlias>List Grid Fixture</singularAlias>
+	<pluralAlias>List Grid Fixtures</pluralAlias>
+	<bizKey expression="List Grid Fixture" />
+	<attributes>
+		<id name="selectedVueId">
+			<displayName>Selected Vue Id</displayName>
+			<description>The bizId of the row selected in the Vue list grid.</description>
+		</id>
+		<id name="selectedFacesId">
+			<displayName>Selected Faces Id</displayName>
+			<description>The bizId of the row selected in the PrimeFaces data table.</description>
+		</id>
+	</attributes>
+</document>
