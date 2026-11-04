@@ -45,10 +45,14 @@ class FacesThemeViewTest {
 		UxUi incomplete = UxUi.newPrimeFaces("tablet", "editorial", "exact-theme");
 		incomplete.setPfTemplateName(null);
 		FacesThemeView missing = viewFor(incomplete);
+		FacesThemeView external = viewFor(UxUi.newPrimeFaces("tablet", "external", "skyve", "dark"));
 
 		assertAll(
-				() -> assertEquals("external", missing.getTemplateName()),
-				() -> assertEquals("blue", missing.getBaseColour()));
+				() -> assertEquals("editorial", missing.getTemplateName()),
+				() -> assertEquals("blue", missing.getBaseColour()),
+				// the former external copy of editorial is an alias
+				() -> assertEquals("editorial", external.getTemplateName()),
+				() -> assertTrue(external.isForcedDark()));
 	}
 
 	@Test
@@ -79,7 +83,7 @@ class FacesThemeViewTest {
 				() -> assertNull(absent.getComponentThemeName()),
 				() -> assertEquals("casablanca", smartClient.getComponentThemeName()),
 				() -> assertTrue(smartClient.isSmartClient()),
-				() -> assertEquals("external", smartClient.getTemplateName()));
+				() -> assertEquals("editorial", smartClient.getTemplateName()));
 	}
 
 	@Test

@@ -17,7 +17,7 @@ import org.skyve.metadata.router.UxUi;
 @SuppressWarnings({ "static-method", "java:S1192" }) // Repeated literals are deliberate Facelets structure contracts.
 class ThemeFaceletsStructureTest {
 	private static final String IFRAME_TEMPLATE_PATH = "WEB-INF/pages/templates/iframe/template.xhtml";
-	private static final List<String> FAMILIES = List.of("editorial", "external", "ecuador", "ultima", "diamond");
+	private static final List<String> FAMILIES = List.of("editorial", "ecuador", "ultima", "diamond");
 	private static final List<String> DYNAMIC_CLIENT_PAGES = List.of("external/home.xhtml",
 			"external/edit.xhtml",
 			"external/list.xhtml",
@@ -135,7 +135,6 @@ class ThemeFaceletsStructureTest {
 	@Test
 	void resolvedPropertiesReplaceFamilyParsingAndFallbacks() throws IOException {
 		String editorialHead = read("WEB-INF/pages/templates/editorial/head-resources.xhtml");
-		String externalHead = read("WEB-INF/pages/templates/external/head-resources.xhtml");
 		String ecuadorBody = read("WEB-INF/pages/templates/ecuador/body-resources.xhtml");
 		String ultima = read("WEB-INF/pages/templates/ultima/template.xhtml");
 		String diamond = read("WEB-INF/pages/templates/diamond/template.xhtml");
@@ -144,8 +143,6 @@ class ThemeFaceletsStructureTest {
 		assertTrue(editorialHead.contains("_skyveTheme.baseColour"), editorialHead);
 		assertTrue(editorialHead.contains("_skyveTheme.forcedDark"), editorialHead);
 		assertTrue(editorialHead.contains("not _skyveTheme.smartClient"), editorialHead);
-		assertTrue(externalHead.contains("_skyveTheme.baseColour"), externalHead);
-		assertTrue(externalHead.contains("not _skyveTheme.smartClient"), externalHead);
 		assertTrue(ecuadorBody.contains("_skyveTheme.baseColour"), ecuadorBody);
 		assertTrue(ultima.contains("_skyveTheme.baseColour"), ultima);
 		assertTrue(ultima.contains("_skyveTheme.layoutStyleClass"), ultima);

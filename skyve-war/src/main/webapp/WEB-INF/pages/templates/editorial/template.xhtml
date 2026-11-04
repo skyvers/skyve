@@ -35,6 +35,19 @@
 				#{bean.apiScript}
 				SKYVE.PF.establishHistory();
 			</script>
+			<c:if test="#{showMenu}">
+				<!-- Apply the user's remembered collapsed menu before the first paint (see editorial/main.js) -->
+				<script type="text/javascript">
+					try {
+						if (localStorage.getItem('skyve.editorial.menu.collapsed') === 'true') {
+							document.documentElement.classList.add('skyve-editorial-menu-collapsed');
+						}
+					}
+					catch (e) {
+						// storage unavailable
+					}
+				</script>
+			</c:if>
 			<ui:insert name="templateHead" />
 		</h:head>
 		<h:body id="body" class="is-preload">

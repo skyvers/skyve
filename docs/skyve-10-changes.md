@@ -23,6 +23,9 @@ These notes collect release-ready framework changes introduced for Skyve 10.
 - [Server-side Action Availability](server-side-action-availability.md): the server refuses a request for a view action that the view, as last rendered, offers the user no way to trigger.
 - SmartClient `link`s to an action now send the action's class name, as its buttons do, so a link whose action is named apart from its class is no longer refused. They also ask the action's `confirm` text first.
   - Behaviour change: such a link now validates the form before it runs, as a button does, unless its action sets `clientValidation="false"`. It never validated before.
+- The Editorial menu can be collapsed on wide screens with the menu button in the topbar, and stays collapsed on later pages. The setting is kept in the browser's local storage.
+- The `external` PrimeFaces layout family has been removed. It was a copy of `editorial`. A `UxUi` that names `external`, or names no PrimeFaces template, now uses `editorial`.
+  - Behaviour change: a project's own copy of `WEB-INF/pages/templates/external/` is now ignored, because the name `external` always resolves to `editorial`. If you customised it and still need it, plumb it back in as a copy of `editorial` under a new name. Rename the folder, for example to `WEB-INF/pages/templates/myproject/`, and name it as the template in your `UxUis`, for example `UxUi.newPrimeFaces("external", "myproject", SKYVE_THEME, THEME_COLOUR)`. Merge in later changes to `editorial/template.xhtml` as you would for any copy, such as the `showMenu` handling and the collapsed-menu script.
 
 ## Model-backed Lookup Descriptions
 

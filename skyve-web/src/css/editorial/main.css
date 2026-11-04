@@ -64,6 +64,10 @@
 	   branded chrome without needing its own topbar colour (35% accent over near-black) */
 	--skyve-editorial-topbar-bg: color-mix(in srgb, var(--skyve-editorial-accent) 35%, #0b1420);
 	--skyve-editorial-topbar-text: #f8fafc;
+	/* menu toggle chip when the menu floats or is collapsed */
+	--skyve-editorial-menu-toggle-solid-bg: color-mix(in srgb, var(--skyve-editorial-topbar-text) 30%, var(--skyve-editorial-topbar-bg));
+	--skyve-editorial-menu-toggle-solid-hover-bg: color-mix(in srgb, var(--skyve-editorial-topbar-text) 40%, var(--skyve-editorial-topbar-bg));
+	--skyve-editorial-menu-toggle-solid-shadow: 0 0.125rem 0.375rem rgba(0, 0, 0, 0.3);
 	--skyve-editorial-warning: #d97706;
 	--skyve-editorial-warning-soft: rgba(217, 119, 6, 0.12);
 }
@@ -3199,8 +3203,12 @@ mark {
 
 		@media screen and (min-width: 1281px) {
 			#main {
-				margin-left: var(--skyve-editorial-sidebar-width);
-				width: calc(100% - var(--skyve-editorial-sidebar-width));
+				-moz-transition: margin-left 0.5s ease, width 0.5s ease;
+				-webkit-transition: margin-left 0.5s ease, width 0.5s ease;
+				-ms-transition: margin-left 0.5s ease, width 0.5s ease;
+				transition: margin-left 0.5s ease, width 0.5s ease;
+				margin-left: var(--skyve-editorial-content-offset, var(--skyve-editorial-sidebar-width));
+				width: calc(100% - var(--skyve-editorial-content-offset, var(--skyve-editorial-sidebar-width)));
 			}
 		}
 
@@ -3210,18 +3218,14 @@ mark {
 			--skyve-editorial-sidebar-width: 0px;
 		}
 
-		@media screen and (max-width: 1280px) {
-
-			#main > .inner {
-				padding: 0 0.5em 0.1em 3em ;
-			}
-
-				#main > .inner > section {
-					padding: 1em 0 2em 0 ;
-				}
-
+		/* Menu collapsed by the user (wide screens only - see editorial/main.js).
+		   The sidebar keeps its width so it can slide out; the content stops making room for it. */
+		html.skyve-editorial-menu-collapsed {
+			--skyve-editorial-content-offset: 0px;
 		}
 
+		/* NB no extra left gutter once the sidebar floats (<= 1280px) - the content keeps the
+		   docked padding above and the toggle lives in the topbar */
 		@media screen and (max-width: 736px) {
 
 			#main > .inner {
@@ -3623,7 +3627,7 @@ mark {
 					line-height: var(--skyve-editorial-header-height);
 				}
 
-					/* themed as a translucent chip on the topbar, like the avatar */
+					/* a solid chip on the topbar - the overlay sidebar's shadow would wash out a translucent one */
 					#sidebar .toggle:before {
 						color: var(--skyve-editorial-topbar-text);
 						font-size: 1.1rem;
@@ -3632,8 +3636,9 @@ mark {
 					}
 
 					#sidebar .toggle:after {
-						background: rgba(255, 255, 255, 0.18);
+						background: var(--skyve-editorial-menu-toggle-solid-bg);
 						border-radius: 0.375rem;
+						box-shadow: var(--skyve-editorial-menu-toggle-solid-shadow);
 						content: '';
 						height: 2.75rem;
 						left: 50%;
@@ -3644,7 +3649,7 @@ mark {
 					}
 
 					#sidebar .toggle:hover:after {
-						background: rgba(255, 255, 255, 0.28);
+						background: var(--skyve-editorial-menu-toggle-solid-hover-bg);
 					}
 
 				#sidebar.inactive .toggle {
@@ -3666,6 +3671,55 @@ mark {
 				top: 0;
 				z-index: 22;
 			}
+
+			html.skyve-editorial-menu-collapsed #sidebar {
+				margin-left: calc(0px - var(--skyve-editorial-sidebar-width));
+			}
+
+			/* the toggle sits on the topbar just right of the sidebar, so it ends up at the
+			   left edge of the topbar when the sidebar slides out */
+			#sidebar .toggle,
+			#sidebar.inactive .toggle {
+				display: block;
+				height: var(--skyve-editorial-header-height);
+				left: var(--skyve-editorial-sidebar-width);
+				line-height: var(--skyve-editorial-header-height);
+				text-indent: 5rem;
+				width: 5rem;
+			}
+
+				#sidebar .toggle:before {
+					color: var(--skyve-editorial-topbar-text);
+					font-size: 1.1rem;
+					margin-left: 0;
+					z-index: 1;
+				}
+
+				#sidebar .toggle:after {
+					background: rgba(255, 255, 255, 0.18);
+					border-radius: 0.375rem;
+					content: '';
+					height: 2.75rem;
+					left: 50%;
+					margin: -1.375rem 0 0 -1.375rem;
+					position: absolute;
+					top: 50%;
+					width: 2.75rem;
+				}
+
+				#sidebar .toggle:hover:after {
+					background: rgba(255, 255, 255, 0.28);
+				}
+
+				/* on its own at the left of the topbar when collapsed - make it solid */
+				html.skyve-editorial-menu-collapsed #sidebar .toggle:after {
+					background: var(--skyve-editorial-menu-toggle-solid-bg);
+					box-shadow: var(--skyve-editorial-menu-toggle-solid-shadow);
+				}
+
+				html.skyve-editorial-menu-collapsed #sidebar .toggle:hover:after {
+					background: var(--skyve-editorial-menu-toggle-solid-hover-bg);
+				}
 
 			#menu > table:first-child {
 				border-bottom: 0 !important;
@@ -4042,7 +4096,7 @@ mark {
 		box-sizing: border-box;
 		box-shadow: var(--skyve-editorial-divider-shadow);
 		height: var(--skyve-editorial-header-height);
-		left: var(--skyve-editorial-sidebar-width);
+		left: var(--skyve-editorial-content-offset, var(--skyve-editorial-sidebar-width));
 		min-width: 0;
 		padding: 0 3.75rem 0 5rem;
 		position: fixed;
@@ -4110,7 +4164,7 @@ mark {
 		display: flex;
 		flex-wrap: nowrap;
 		gap: 0.5rem;
-		left: var(--skyve-editorial-sidebar-width);
+		left: var(--skyve-editorial-content-offset, var(--skyve-editorial-sidebar-width));
 		min-height: var(--skyve-editorial-actionbar-height);
 		overflow-x: auto;
 		overflow-y: hidden;
@@ -4185,5 +4239,16 @@ mark {
 	.skyve-action-bar,
 	.action-bar {
 		left: 0;
+	}
+}
+
+/* follow the sidebar as it is collapsed or expanded (see #sidebar transition) */
+@media screen and (min-width: 1281px) {
+	#header,
+	#sidebarWrapper .skyve-action-bar,
+	#sidebarWrapper .action-bar,
+	.skyve-action-bar,
+	.action-bar {
+		transition: left 0.5s ease;
 	}
 }
