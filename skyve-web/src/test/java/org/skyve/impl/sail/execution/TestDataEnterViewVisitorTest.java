@@ -138,8 +138,19 @@ class TestDataEnterViewVisitorTest {
 
 		slider.setMin(Double.valueOf(0));
 		slider.setMax(Double.valueOf(10));
-		assertEquals("2.5", TestDataEnterViewVisitor.sliderValue(slider, "2.5"));
+		assertEquals("3", TestDataEnterViewVisitor.sliderValue(slider, "2.5"), "onto the default step of 1");
 		assertEquals("5", TestDataEnterViewVisitor.sliderValue(slider, "1,234"));
 		assertEquals("abc", TestDataEnterViewVisitor.sliderValue(slider, "abc"));
+	}
+
+	@Test
+	void sliderValuesStayInAFractionalRangeAndOnItsSteps() {
+		Slider slider = new Slider();
+		slider.setMin(Double.valueOf(0.1));
+		slider.setMax(Double.valueOf(0.5));
+		assertEquals("0.1", TestDataEnterViewVisitor.sliderValue(slider, "7"), "the midpoint 0.3, onto the step of 1 from 0.1");
+		slider.setNumberOfDiscreteValues(Integer.valueOf(4));
+		assertEquals("0.3", TestDataEnterViewVisitor.sliderValue(slider, "7"), "the midpoint, on a step of 0.1");
+		assertEquals("0.2", TestDataEnterViewVisitor.sliderValue(slider, "0.21"), "onto the nearest step");
 	}
 }

@@ -118,8 +118,11 @@
 			<remove />
 			<testGridRows binding="orderedGrid" maxRows="0" />
 			<comment>An inline grid adds and removes rows in place</comment>
+			<testGridRows binding="inlineGrid" maxRows="0" />
 			<dataGridNew binding="inlineGrid" />
+			<testGridRows binding="inlineGrid" minRows="1" maxRows="1" />
 			<dataGridRemove binding="inlineGrid" row="0" />
+			<testGridRows binding="inlineGrid" maxRows="0" />
 			<tabSelect path="List/Check Membership" />
 			<tabSelect path="Charts" />
 			<tabSelect path="Comparison" />
@@ -251,7 +254,10 @@
 			<popContext />
 			<navigateMap module="kitchensink" document="ListAttributes" geometryBinding="geometry" />
 			<testSuccess />
-			<execute>window.scrollTo(0, 0);</execute>
+			<comment>execute runs a script in the page: show a growl, then check it (op-code conformance, not a user gesture)</comment>
+			<execute>PF('growl').renderMessage({summary: 'SAIL executed this script', detail: '', severity: 'info'});</execute>
+			<testMessage contains="SAIL executed this script" type="info" />
+			<comment>pause waits for the given time (op-code conformance: it has nothing to check)</comment>
 			<pause millis="100" />
 		</method>
 	</interaction>
@@ -285,12 +291,7 @@
 			<comment>PrimeFaces is showing already: nothing to do</comment>
 			<switchMode />
 			<testMenu module="kitchensink" />
-			<comment>Switch to SmartClient with PrimeFaces' own menu item, then back to PrimeFaces through SmartClient's menu</comment>
-			<execute>Array.from(document.querySelectorAll('a.ui-menuitem-link')).find(function(a) {return a.textContent.trim() === 'Switch mode';}).click();</execute>
-			<switchMode />
-			<navigateMenu module="kitchensink" item="Actions Fixture" />
-			<action name="RunFromToolbar" />
-			<testValue binding="outcome" value="Run From Toolbar ran" />
+			<comment>Switching back from SmartClient is PrimeFacesKitchenSinkSailIT.switchModeFromSmartClient (its user menu is clicked from Java, as SAIL has no step to switch away from the automation's renderer)</comment>
 		</method>
 	</interaction>
 	<interaction name="Logout">

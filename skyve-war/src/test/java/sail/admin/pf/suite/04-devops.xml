@@ -21,7 +21,9 @@
 			<action name="CacheStats" />
 			<tabSelect path="SAIL" />
 			<lookupDescriptionAutoComplete binding="sailUser" search="admin" />
+			<comment>With only a user chosen, generating is refused until a UX/UI and user agent are chosen</comment>
 			<action name="GenerateMenuSAIL" testSuccess="false" />
+			<testFailure message="Select a value" />
 			<tabSelect path="Results" />
 			<tabSelect path="Instrumentation" />
 			<comment>A server-wide trace flag: switch it on and back off</comment>
@@ -40,7 +42,8 @@
 			<tabSelect path="Import/Export" />
 			<tabSelect path="Backup/Restore" />
 			<action name="RefreshBackupList" />
-			<testGridRows module="admin" query="BackupsModel" minRows="1" />
+			<comment>00-backup.xml (always run first, even with -Dsail.suite.only) made the one backup listed</comment>
+			<testGridRows module="admin" query="BackupsModel" minRows="1" maxRows="1" />
 			<comment>Delete, Download and Restore need a backup selected</comment>
 			<testWidget action="DeleteBackup" enabled="false" />
 			<listGridSelect module="admin" query="BackupsModel" row="0" />

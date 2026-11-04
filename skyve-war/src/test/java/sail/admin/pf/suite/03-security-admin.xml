@@ -116,7 +116,8 @@
 			<listGridZoom module="admin" query="qLoginHistory" rowContaining="sail{run}" />
 			<cancel />
 			<navigateMenu module="admin" item="Security Admin/Security Log" />
-			<testGridRows module="admin" document="SecurityLog" minRows="0" />
+			<comment>The new user's password change is logged</comment>
+			<testGridRows module="admin" document="SecurityLog" rowContaining="sail{run} changed their password" minRows="1" />
 		</method>
 	</interaction>
 	<interaction name="Delete the user and the group">

@@ -6,12 +6,14 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import util.AbstractPrimeFacesInterpretedSail;
 import util.sail.BrowserConfiguration;
 import util.sail.BrowserConfiguration.Browsers;
 import util.sail.Devices;
+import util.sail.SailSuite;
 
 /**
  * Checks that SAIL test strategies behave as {@link org.skyve.metadata.sail.language.Automation.TestStrategy} documents,
@@ -19,7 +21,8 @@ import util.sail.Devices;
  * and None makes no assertions.
  * <p>
  * Runs against the server named by {@code -Dsail.baseUrl} (required),
- * headless unless {@code -Dsail.headless=false}.
+ * headless unless {@code -Dsail.headless=false}. {@code -Dsail.testStrategy} is refused, as it would give every test
+ * the same strategy.
  */
 class PrimeFacesSailTestStrategyIT extends AbstractPrimeFacesInterpretedSail {
 	private static final String SCRIPT = """
@@ -57,6 +60,12 @@ class PrimeFacesSailTestStrategyIT extends AbstractPrimeFacesInterpretedSail {
 				</interaction>
 			</automation>
 			""";
+
+	@BeforeEach
+	@SuppressWarnings("static-method")
+	void refuseOverride() {
+		SailSuite.refuseTestStrategyOverride("PrimeFacesSailTestStrategyIT");
+	}
 
 	public PrimeFacesSailTestStrategyIT() {
 		super(new BrowserConfiguration()

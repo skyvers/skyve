@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.skyve.impl.persistence.AbstractPersistence;
@@ -16,11 +17,16 @@ import org.skyve.util.logging.SkyveLoggerFactory;
 
 import jakarta.annotation.Nonnull;
 import util.sail.BrowserConfiguration;
+import util.sail.SailServerLock;
 import util.sail.SmartClientInterpretedWebDriverExecutor;
 import util.sail.SmartClientSelenide;
 
 /**
  * Base test class for running SAIL scripts against a SmartClient UI in an interpreted browser session.
+ * <p>
+ * Each test class holds {@link SailServerLock} for its server ({@code -Dsail.baseUrl}) from before its first browser
+ * starts until the class has finished, so SAIL tests against one server run one at a time, even in forked JVMs
+ * (surefire's {@code forkCount}). A test whose server is in use waits for the other to finish: the one necessary wait.
  */
 public abstract class AbstractSmartClientInterpretedSail extends AbstractH2Test {
 
@@ -35,7 +41,14 @@ public abstract class AbstractSmartClientInterpretedSail extends AbstractH2Test 
 	
 	@BeforeEach
 	void setupBrowser() {
+		// One SAIL test at a time per server, even across forked JVMs (see SailServerLock): may wait for another to finish
+		SailServerLock.acquire(configuration.getBaseUrl());
 		selenium.startBrowser(configuration);
+	}
+
+	@AfterAll
+	static void releaseServer() {
+		SailServerLock.releaseAll();
 	}
 	
 	@AfterEach

@@ -668,15 +668,16 @@ public class PrimeFacesInterpretedWebDriverExecutor extends InterpretedWebDriver
 
 	@Override
 	public void executeOk(Ok ok) {
-		if (! redirectButton(ok, "ok", ok.getConfirm(), ok.getTestSuccess())) {
-			pop();
-		}
+		popIfClosed("ok", redirectButton(ok, "ok", ok.getConfirm(), ok.getTestSuccess()));
 	}
 
 	@SuppressWarnings("null") // a null here fails the test
 	@Override
 	public void executeSave(Save save) {
-		button(save, "save", true, save.getConfirm(), save.getTestSuccess());
+		if (button(save, "save", true, save.getConfirm(), save.getTestSuccess()) || (! selenide.verifySuccess())) {
+			// declined or refused: nothing was saved, so the view is still the one it was
+			return;
+		}
 
 		Boolean createView = save.getCreateView();
 		if (Boolean.TRUE.equals(createView)) {
@@ -690,30 +691,40 @@ public class PrimeFacesInterpretedWebDriverExecutor extends InterpretedWebDriver
 
 	@Override
 	public void executeCancel(Cancel cancel) {
-		if (! button(cancel, "cancel", false, null, cancel.getTestSuccess())) {
-			pop();
-		}
+		popIfClosed("cancel", button(cancel, "cancel", false, null, cancel.getTestSuccess()));
 	}
 
 	@Override
 	public void executeDelete(Delete delete) {
-		if (! redirectButton(delete, "delete", delete.getConfirm(), delete.getTestSuccess())) {
-			pop();
-		}
+		popIfClosed("delete", redirectButton(delete, "delete", delete.getConfirm(), delete.getTestSuccess()));
 	}
 
 	@Override
 	public void executeZoomOut(ZoomOut zoomOut) {
-		if (! button(zoomOut, "zoom out", false, zoomOut.getConfirm(), zoomOut.getTestSuccess())) {
-			pop();
-		}
+		popIfClosed("zoom out", button(zoomOut, "zoom out", false, zoomOut.getConfirm(), zoomOut.getTestSuccess()));
 	}
 
 	@Override
 	public void executeRemove(Remove remove) {
-		if (! button(remove, "remove", false, remove.getConfirm(), remove.getTestSuccess())) {
-			pop();
+		popIfClosed("remove", button(remove, "remove", false, remove.getConfirm(), remove.getTestSuccess()));
+	}
+
+	/**
+	 * Pops the context after a gesture that closes the view (ok, cancel, delete, zoom out, remove), unless it was
+	 * declined or refused (error messages, e.g. expected with {@code testSuccess="false"}): then the view stays.
+	 *
+	 * @param tagName	the gesture, for the trace
+	 * @param declined	true if the gesture was declined
+	 */
+	private void popIfClosed(@Nonnull String tagName, boolean declined) {
+		if (declined) {
+			return;
 		}
+		if (! selenide.verifySuccess()) {
+			selenide.trace(String.format("[%s] was refused; staying in this view", tagName));
+			return;
+		}
+		pop();
 	}
 
 	@Override
@@ -723,7 +734,8 @@ public class PrimeFacesInterpretedWebDriverExecutor extends InterpretedWebDriver
 
 	@Override
 	public void executeLookupDescriptionAutoComplete(LookupDescriptionAutoComplete complete) {
-		lookupDescription(complete, complete.getBinding(), null, substituteRunToken(complete.getSearch()));
+		String search = complete.getSearch();
+		lookupDescription(complete, complete.getBinding(), null, (search == null) ? null : substituteRunToken(search));
 	}
 
 	@Override
@@ -1187,7 +1199,7 @@ public class PrimeFacesInterpretedWebDriverExecutor extends InterpretedWebDriver
 			throw new MetaDataException(String.format("<upload /> with %s [%s] is not on the view",
 														(upload.getBinding() != null) ? "binding" : "action", identifier));
 		}
-		java.io.File file = resourceFile(upload.getFile());
+		java.io.File file = testResourceFile(upload.getFile());
 
 		boolean success = false;
 		for (UIComponent component : components) {
@@ -1217,22 +1229,6 @@ public class PrimeFacesInterpretedWebDriverExecutor extends InterpretedWebDriver
 	}
 
 	/**
-	 * Resolves a test classpath resource to a file the browser can be given.
-	 */
-	private static @Nonnull java.io.File resourceFile(@Nonnull String resource) {
-		java.net.URL url = Thread.currentThread().getContextClassLoader().getResource(resource);
-		if (url == null) {
-			throw new MetaDataException("<upload /> file " + resource + " is not on the test classpath");
-		}
-		try {
-			return new java.io.File(url.toURI());
-		}
-		catch (java.net.URISyntaxException | IllegalArgumentException e) {
-			throw new MetaDataException("<upload /> file " + resource + " is not a file on disk: " + url, e);
-		}
-	}
-
-	/**
 	 * Asserts that a global message, growl or field message (of the type, if given) contains the text.
 	 *
 	 * @param test	the step
@@ -1255,14 +1251,17 @@ public class PrimeFacesInterpretedWebDriverExecutor extends InterpretedWebDriver
 
 	/**
 	 * Counts the rows of a list or data grid (only those containing the text, if given) and checks the bounds.
-	 * With a timeout, a list grid is reloaded and the rows recounted until the bounds hold or the time is up.
+	 * With a timeout, the grid is reloaded from the server and the rows recounted each second until the bounds hold or
+	 * the time is up; this wait happens under the None strategy too (scripts use it to wait for jobs), with no check.
 	 *
 	 * @param test	the step
 	 */
 	@SuppressWarnings("null") // a null here fails the test
 	@Override
 	public void executeTestGridRows(TestGridRows test) {
-		if (isNoneStrategy()) {
+		Integer timeout = test.getTimeoutMillis();
+		// Under None there is nothing to check, but a timeout still waits: scripts use it to wait for jobs
+		if (isNoneStrategy() && (timeout == null)) {
 			return;
 		}
 		PrimeFacesAutomationContext context = peek();
@@ -1273,9 +1272,6 @@ public class PrimeFacesInterpretedWebDriverExecutor extends InterpretedWebDriver
 		}
 		String text = test.getRowContaining();
 		final String contains = (text == null) ? null : substituteRunToken(text);
-		int min = test.getEffectiveMinRows();
-		Integer max = test.getMaxRows();
-		Integer timeout = test.getTimeoutMillis();
 
 		String gridId = null;
 		for (UIComponent component : components) {
@@ -1288,17 +1284,17 @@ public class PrimeFacesInterpretedWebDriverExecutor extends InterpretedWebDriver
 		if (gridId == null) {
 			throw new DomainException(String.format("<testGridRows /> grid [%s] is not on the page", identifier));
 		}
-		selenide.trace(String.format("test grid [%s] (%s) has %d..%s rows%s", identifier, gridId, Integer.valueOf(min),
+		Integer max = test.getMaxRows();
+		selenide.trace(String.format("test grid [%s] (%s) has %d..%s rows%s", identifier, gridId, Integer.valueOf(test.getEffectiveMinRows()),
 										(max == null) ? "" : max.toString(), (contains == null) ? "" : " containing '" + contains + "'"));
 		int count = selenide.countRows(gridId, contains);
-		if ((timeout != null) && (! ((count >= min) && ((max == null) || (count <= max.intValue()))))) {
-			// Author-requested (timeoutMillis): poll a server-side job's effect by reloading the list each second
+		if ((timeout != null) && (! rowCountHolds(test, count))) {
+			// Author-requested (timeoutMillis): poll a server-side job's effect by reloading the grid each second
 			final String grid = gridId;
 			try {
 				selenide.waitFor(java.time.Duration.ofMillis(timeout.longValue()), java.time.Duration.ofSeconds(1), d -> {
 					selenide.refreshGrid(grid);
-					int n = selenide.countRows(grid, contains);
-					return ((n >= min) && ((max == null) || (n <= max.intValue()))) ? Boolean.TRUE : null;
+					return rowCountHolds(test, selenide.countRows(grid, contains)) ? Boolean.TRUE : null;
 				});
 			}
 			catch (@SuppressWarnings("unused") org.openqa.selenium.TimeoutException e) {
@@ -1306,14 +1302,7 @@ public class PrimeFacesInterpretedWebDriverExecutor extends InterpretedWebDriver
 			}
 			count = selenide.countRows(gridId, contains);
 		}
-		final int rows = count;
-		check((rows >= min) && ((max == null) || (rows <= max.intValue())),
-				() -> String.format("expected grid [%s] to have %s%s rows%s but it has %d",
-										identifier,
-										Integer.valueOf(min),
-										(max == null) ? " or more" : " to " + max,
-										(contains == null) ? "" : " containing '" + contains + "'",
-										Integer.valueOf(rows)));
+		checkRowCount(test, identifier, contains, count);
 	}
 
 	/**
@@ -1345,26 +1334,7 @@ public class PrimeFacesInterpretedWebDriverExecutor extends InterpretedWebDriver
 				enabled = enabled || Boolean.TRUE.equals(state.get(1));
 			}
 		}
-		Boolean expectedEnabled = test.getEnabled();
-		final boolean isShown = shown;
-		final boolean isEnabled = enabled;
-		if (expectedEnabled != null) {
-			selenide.trace(String.format("test [%s] is shown and %s", identifier, expectedEnabled.booleanValue() ? "enabled" : "disabled"));
-			check(isShown && (isEnabled == expectedEnabled.booleanValue()),
-					() -> String.format("expected [%s] to be shown and %s but it is %s",
-											identifier,
-											expectedEnabled.booleanValue() ? "enabled" : "disabled",
-											(! isShown) ? "not shown" : (isEnabled ? "enabled" : "disabled")));
-		}
-		else {
-			boolean expectedVisible = test.isExpectedVisible();
-			selenide.trace(String.format("test [%s] is %s", identifier, expectedVisible ? "shown" : "not shown"));
-			check(isShown == expectedVisible,
-					() -> String.format("expected [%s] to be %s but it is %s",
-											identifier,
-											expectedVisible ? "shown" : "not shown",
-											isShown ? "shown" : "not shown"));
-		}
+		checkWidget(test, identifier, shown, enabled);
 	}
 
 	/**
@@ -1374,7 +1344,7 @@ public class PrimeFacesInterpretedWebDriverExecutor extends InterpretedWebDriver
 	 */
 	@Override
 	public void executeNavigateMenu(NavigateMenu menu) {
-		MenuPath path = menuPath(menu.getModuleName(), menu.getItemName());
+		SailMenuPath path = resolveMenuPath(menu.getModuleName(), menu.getItemName());
 		MenuItem item = path.item;
 		if (item == null) {
 			throw new MetaDataException(String.format("<navigateMenu /> module %s has no menu item %s", menu.getModuleName(), menu.getItemName()));
@@ -1426,77 +1396,11 @@ public class PrimeFacesInterpretedWebDriverExecutor extends InterpretedWebDriver
 			return;
 		}
 		String itemName = test.getItemName();
-		MenuPath path = menuPath(test.getModuleName(), itemName);
+		SailMenuPath path = resolveMenuPath(test.getModuleName(), itemName);
 		if ((itemName != null) && (path.item == null)) {
 			throw new MetaDataException(String.format("<testMenu /> module %s has no menu item %s", test.getModuleName(), itemName));
 		}
-		boolean expected = ! Boolean.FALSE.equals(test.getPresent());
-		boolean present = selenide.menu(path.moduleTitle, path.groupLabels, path.itemLabel, false);
-		String what = (itemName == null) ? path.moduleTitle : path.moduleTitle + " / " + String.join(" / ", path.labels());
-		selenide.trace(String.format("test menu %s is %s", what, expected ? "present" : "absent"));
-		check(present == expected, () -> String.format("expected the menu %s %s but it %s", what,
-														expected ? "to show" : "not to show", present ? "does" : "does not"));
-	}
-
-	/** A menu item and the labels shown for it. */
-	private static final class MenuPath {
-		String moduleTitle;
-		List<String> groupLabels = new ArrayList<>();
-		String itemLabel;
-		MenuItem item;
-
-		List<String> labels() {
-			List<String> result = new ArrayList<>(groupLabels);
-			if (itemLabel != null) {
-				result.add(itemLabel);
-			}
-			return result;
-		}
-	}
-
-	/**
-	 * Resolves a {@code /}-separated menu path (group names then the item name; each the metadata name or the shown name).
-	 */
-	private static @Nonnull MenuPath menuPath(@Nonnull String moduleName, @Nullable String itemPath) {
-		Customer c = CORE.getUser().getCustomer();
-		Module m = c.getModule(moduleName);
-		MenuPath result = new MenuPath();
-		result.moduleTitle = m.getLocalisedTitle();
-		if (itemPath == null) {
-			return result;
-		}
-		String[] names = itemPath.split("/");
-		List<MenuItem> items = m.getMenu().getItems();
-		for (int i = 0; i < names.length; i++) {
-			String name = names[i].trim();
-			MenuItem found = null;
-			for (MenuItem candidate : items) {
-				String label = candidate.getLocalisedName();
-				if (name.equals(candidate.getName()) || name.equals(label)) {
-					found = candidate;
-					break;
-				}
-			}
-			if (found == null) {
-				return result;
-			}
-			String label = found.getLocalisedName();
-			if (label == null) {
-				label = found.getName();
-			}
-			if (i < names.length - 1) {
-				if (! (found instanceof MenuGroup group)) {
-					return result;
-				}
-				result.groupLabels.add(label);
-				items = group.getItems();
-			}
-			else {
-				result.itemLabel = label;
-				result.item = found;
-			}
-		}
-		return result;
+		checkMenu(test, path, selenide.menu(path.moduleTitle, path.groupLabels, path.itemLabel, false));
 	}
 
 	/**
