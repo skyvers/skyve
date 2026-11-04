@@ -14,6 +14,7 @@ import org.skyve.impl.metadata.view.widget.bound.input.CheckBox;
 import org.skyve.impl.metadata.view.widget.bound.input.ColourPicker;
 import org.skyve.impl.metadata.view.widget.bound.input.Combo;
 import org.skyve.impl.metadata.view.widget.bound.input.ContentUpload;
+import org.skyve.impl.metadata.view.widget.bound.input.Geometry;
 import org.skyve.impl.metadata.view.widget.bound.input.HTML;
 import org.skyve.impl.metadata.view.widget.bound.input.LookupDescription;
 import org.skyve.impl.metadata.view.widget.bound.input.Password;
@@ -494,6 +495,61 @@ class ComponentCollectingComponentBuilder extends NoOpComponentBuilder {
 		return putByBinding(colour, component);
 	}
 	
+	/**
+	 * Registers the Remove action component (of a child view zoomed into from a data grid) for later automation lookup.
+	 *
+	 * @param component the rendered component
+	 * @param label action label
+	 * @param iconStyleClass icon style class
+	 * @param toolTip tooltip text
+	 * @param confirmationText optional confirmation text
+	 * @param action action metadata definition
+	 * @param canDelete whether the removed bean can be deleted
+	 * @return the supplied component
+	 */
+	@Override
+	public @Nullable UIComponent remove(@Nullable UIComponent component,
+											@Nullable String label,
+											@Nullable String iconStyleClass,
+											@Nullable String toolTip,
+											@Nullable String confirmationText,
+											@Nonnull Action action,
+											boolean canDelete) {
+		if (component != null) {
+			context.put(ImplicitActionName.Remove.toString(), component, ImplicitActionName.Remove);
+		}
+		return component;
+	}
+
+	/**
+	 * Registers a geometry's text field against its binding for later automation lookup.
+	 * The geometry's map button and overlay are not registered: SAIL enters geometry as WKT text.
+	 *
+	 * @param component the rendered geometry component
+	 * @param dataWidgetVar optional data-widget variable
+	 * @param geometry geometry metadata
+	 * @param formDisabledCondition form-level disabled condition
+	 * @param title field title
+	 * @param requiredMessage optional required-field message
+	 * @param textAlignment text alignment metadata
+	 * @return the supplied component
+	 */
+	@Override
+	public @Nullable EventSourceComponent geometry(@Nullable EventSourceComponent component,
+														@Nullable String dataWidgetVar,
+														@Nonnull Geometry geometry,
+														@Nullable String formDisabledCondition,
+														@Nullable String title,
+														@Nullable String requiredMessage,
+														@Nullable HorizontalAlignment textAlignment) {
+		String binding = geometry.getBinding();
+		if ((component != null) && (binding != null)) {
+			context.put(binding, component.getEventSource(), geometry);
+		}
+
+		return component;
+	}
+
 	/**
 	 * Registers a combo component against its binding for later automation lookup.
 	 *
