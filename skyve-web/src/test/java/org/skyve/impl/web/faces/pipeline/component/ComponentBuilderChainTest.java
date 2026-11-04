@@ -1,6 +1,8 @@
 package org.skyve.impl.web.faces.pipeline.component;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -616,5 +618,20 @@ class ComponentBuilderChainTest {
 		UIComponent result = mock(UIComponent.class);
 		when(mockBuilder.view(null, false)).thenReturn(result);
 		assertSame(result, chain.view(null, false));
+	}
+
+	private static final class Collector extends NoOpComponentBuilder implements SailComponentCollector {
+		// marker only
+	}
+
+	@Test
+	void containsFindsDirectAndNestedBuildersOfTheType() {
+		ComponentBuilderChain direct = new ComponentBuilderChain(new NoOpComponentBuilder(), new Collector());
+		ComponentBuilderChain nested = new ComponentBuilderChain(new NoOpComponentBuilder(), direct);
+		ComponentBuilderChain without = new ComponentBuilderChain(new NoOpComponentBuilder(), new NoOpComponentBuilder());
+
+		assertTrue(direct.contains(SailComponentCollector.class));
+		assertTrue(nested.contains(SailComponentCollector.class));
+		assertFalse(without.contains(SailComponentCollector.class));
 	}
 }

@@ -72,6 +72,22 @@ public class ComponentBuilderChain extends ComponentBuilder {
 	public ComponentBuilderChain(@Nonnull ComponentBuilder... builders) {
 		this.builders = builders;
 	}
+
+	/**
+	 * Indicates whether this chain, or a chain nested in it, delegates to a builder of the given type.
+	 *
+	 * @param type	the builder type (a class or interface) to look for
+	 * @return	{@code true} if any delegated builder is an instance of {@code type}
+	 */
+	public boolean contains(@Nonnull Class<?> type) {
+		for (ComponentBuilder builder : builders) {
+			if (type.isInstance(builder) ||
+					((builder instanceof ComponentBuilderChain chain) && chain.contains(type))) {
+				return true;
+			}
+		}
+		return false;
+	}
 	
 	/**
 	 * Sets the managed bean name on this chain and all delegated builders.

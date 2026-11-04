@@ -37,6 +37,7 @@ import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.query.QueryDefinition;
 import org.skyve.metadata.sail.language.Step;
 import org.skyve.metadata.sail.language.step.context.PushEditContext;
+import org.skyve.impl.web.faces.pipeline.component.SailComponentCollector;
 import org.skyve.metadata.view.Action;
 import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.metadata.view.widget.bound.Bound;
@@ -50,7 +51,7 @@ import jakarta.faces.component.html.HtmlPanelGroup;
  * Collects generated PrimeFaces components and indexes them in the automation context.
  */
 @SuppressWarnings("java:S1192") // Repeated literals are deliberate component selector fragments.
-class ComponentCollectingComponentBuilder extends NoOpComponentBuilder {
+class ComponentCollectingComponentBuilder extends NoOpComponentBuilder implements SailComponentCollector {
 	private PrimeFacesAutomationContext context;
 	private Step step;
 	// component that was built in the component builder but added in the layout builder
