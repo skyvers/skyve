@@ -15,10 +15,13 @@ import org.junit.jupiter.api.Test;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.sail.execution.Executor;
+import org.skyve.metadata.sail.language.step.CaptureValue;
 import org.skyve.metadata.sail.language.step.TestGridRows;
 import org.skyve.metadata.sail.language.step.TestMessage;
 import org.skyve.metadata.sail.language.step.TestMessage.MessageType;
 import org.skyve.metadata.sail.language.step.TestWidget;
+import org.skyve.metadata.sail.language.step.interaction.DataEnter;
+import org.skyve.metadata.sail.language.step.interaction.DataEnter.Match;
 import org.skyve.metadata.sail.language.step.interaction.Upload;
 import org.skyve.metadata.sail.language.step.interaction.actions.Action;
 import org.skyve.metadata.sail.language.step.interaction.actions.Delete;
@@ -31,8 +34,14 @@ import org.skyve.metadata.sail.language.step.interaction.grids.DataGridRemove;
 import org.skyve.metadata.sail.language.step.interaction.grids.DataGridSelect;
 import org.skyve.metadata.sail.language.step.interaction.grids.DataGridZoom;
 import org.skyve.metadata.sail.language.step.interaction.grids.GridRowStep;
+import org.skyve.metadata.sail.language.step.interaction.grids.ListGridClearFilter;
+import org.skyve.metadata.sail.language.step.interaction.grids.ListGridFilter;
+import org.skyve.metadata.sail.language.step.interaction.grids.ListGridFilter.FilterOperator;
 import org.skyve.metadata.sail.language.step.interaction.grids.ListGridSelect;
+import org.skyve.metadata.sail.language.step.interaction.grids.ListGridSort;
 import org.skyve.metadata.sail.language.step.interaction.grids.ListGridZoom;
+import org.skyve.metadata.sail.language.step.interaction.lookup.LookupDescriptionAutoComplete;
+import org.skyve.metadata.sail.language.step.interaction.lookup.LookupDescriptionPick;
 import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateMenu;
 import org.skyve.metadata.sail.language.step.interaction.navigation.TestMenu;
 import org.skyve.metadata.sail.language.step.interaction.session.Login;
@@ -72,6 +81,136 @@ class SailLanguageXmlTest {
 			"<navigateMenu module=\"admin\" item=\"Contacts\"/>" +
 			"<testMenu module=\"admin\" item=\"Users\" present=\"false\"/>" +
 			TAIL;
+
+	private static final String LANGUAGE_GAPS = HEAD +
+			"<listGridFilter module=\"admin\" query=\"qContacts\" column=\"name\" value=\"Smith{run}\" operator=\"startsWith\"/>" +
+			"<listGridFilter document=\"Contact\" column=\"name\"/>" +
+			"<listGridClearFilter module=\"admin\" document=\"Contact\" model=\"m\"/>" +
+			"<listGridSort query=\"qContacts\" column=\"name\" descending=\"true\"/>" +
+			"<listGridSort query=\"qContacts\" column=\"email\"/>" +
+			"<dataEnter binding=\"status\" value=\"Active\" match=\"code\"/>" +
+			"<dataEnter binding=\"status\" value=\"Active Member\" match=\"label\"/>" +
+			"<dataEnter binding=\"status\" value=\"2\"/>" +
+			"<lookupDescriptionPick binding=\"contact\" rowContaining=\"Smith{run}\"/>" +
+			"<lookupDescriptionAutoComplete binding=\"contact\" search=\"Smi\" pick=\"Smith{var:n}\"/>" +
+			"<captureValue binding=\"invoiceNumber\" variable=\"invoice\"/>" +
+			TAIL;
+
+	@Test
+	void unmarshalsTheLanguageGaps() {
+		assertLanguageGaps(XMLMetaData.unmarshalSAILString(LANGUAGE_GAPS).getInteractions().get(0).getSteps());
+	}
+
+	@Test
+	void marshalsAndUnmarshalsTheLanguageGaps() {
+		String xml = XMLMetaData.marshalSAIL(XMLMetaData.unmarshalSAILString(LANGUAGE_GAPS));
+		assertLanguageGaps(XMLMetaData.unmarshalSAILString(xml).getInteractions().get(0).getSteps());
+	}
+
+	@Test
+	void unmarshalsALegacyLookupDescriptionPickByRow() {
+		String xml = HEAD + "<lookupDescriptionPick binding=\"contact\" row=\"1\"/><lookupDescriptionAutoComplete binding=\"contact\" search=\"S\"/>" + TAIL;
+		List<Step> steps = XMLMetaData.unmarshalSAILString(xml).getInteractions().get(0).getSteps();
+		LookupDescriptionPick pick = (LookupDescriptionPick) steps.get(0);
+		assertAll(() -> assertEquals(Integer.valueOf(1), pick.getRow()),
+					() -> assertThat(pick.getRowContaining(), is(nullValue())),
+					() -> assertThat(((LookupDescriptionAutoComplete) steps.get(1)).getPick(), is(nullValue())));
+	}
+
+	@Test
+	void unknownFilterOperatorIsRejectedByTheSchema() {
+		String xml = HEAD + "<listGridFilter query=\"q\" column=\"c\" value=\"v\" operator=\"like\"/>" + TAIL;
+		assertThrows(MetaDataException.class, () -> XMLMetaData.unmarshalSAILString(xml));
+	}
+
+	@Test
+	void listGridFilterAndSortWithoutColumnAreRejectedByTheSchema() {
+		assertAll(() -> assertThrows(MetaDataException.class, () -> XMLMetaData.unmarshalSAILString(HEAD + "<listGridFilter query=\"q\" value=\"v\"/>" + TAIL)),
+					() -> assertThrows(MetaDataException.class, () -> XMLMetaData.unmarshalSAILString(HEAD + "<listGridSort query=\"q\"/>" + TAIL)));
+	}
+
+	@Test
+	void unknownMatchIsRejectedByTheSchema() {
+		String xml = HEAD + "<dataEnter binding=\"status\" value=\"x\" match=\"description\"/>" + TAIL;
+		assertThrows(MetaDataException.class, () -> XMLMetaData.unmarshalSAILString(xml));
+	}
+
+	@Test
+	void captureValueWithoutVariableIsRejectedByTheSchema() {
+		String xml = HEAD + "<captureValue binding=\"invoiceNumber\"/>" + TAIL;
+		assertThrows(MetaDataException.class, () -> XMLMetaData.unmarshalSAILString(xml));
+	}
+
+	@Test
+	void lookupDescriptionPickWithoutRowUnmarshalsButCannotExecute() {
+		String xml = HEAD + "<lookupDescriptionPick binding=\"contact\"/>" + TAIL;
+		Step step = XMLMetaData.unmarshalSAILString(xml).getInteractions().get(0).getSteps().get(0);
+		Executor executor = mock(Executor.class);
+		assertThrows(MetaDataException.class, () -> step.execute(executor));
+	}
+
+	@Test
+	@SuppressWarnings("null") // before and after are present in the XML
+	void proceduresAcceptTheLanguageGapSteps() {
+		String steps = "<listGridFilter query=\"q\" column=\"c\"/><listGridClearFilter query=\"q\"/>" +
+						"<listGridSort query=\"q\" column=\"c\"/><captureValue binding=\"b\" variable=\"v\"/>";
+		String xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" +
+						"<automation uxui=\"desktop\" userAgentType=\"desktop\" xmlns=\"http://www.skyve.org/xml/sail\">" +
+						"<before>" + steps + "</before>" +
+						"<interaction name=\"i\"><before>" + steps + "</before><method/><after>" + steps + "</after></interaction>" +
+						"<after>" + steps + "</after></automation>";
+		Automation automation = XMLMetaData.unmarshalSAILString(xml);
+		Interaction interaction = automation.getInteractions().get(0);
+		assertAll(() -> assertEquals(4, automation.getBefore().getSteps().size()),
+					() -> assertEquals(4, automation.getAfter().getSteps().size()),
+					() -> assertEquals(4, interaction.getBefore().getSteps().size()),
+					() -> assertEquals(4, interaction.getAfter().getSteps().size()),
+					() -> assertThat(automation.getBefore().getSteps().get(3), instanceOf(CaptureValue.class)));
+	}
+
+	private static void assertLanguageGaps(List<Step> steps) {
+		assertEquals(11, steps.size());
+		ListGridFilter filter = (ListGridFilter) steps.get(0);
+		ListGridFilter clearColumn = (ListGridFilter) steps.get(1);
+		ListGridClearFilter clear = (ListGridClearFilter) steps.get(2);
+		ListGridSort descending = (ListGridSort) steps.get(3);
+		ListGridSort ascending = (ListGridSort) steps.get(4);
+		DataEnter code = (DataEnter) steps.get(5);
+		DataEnter label = (DataEnter) steps.get(6);
+		DataEnter index = (DataEnter) steps.get(7);
+		LookupDescriptionPick pick = (LookupDescriptionPick) steps.get(8);
+		LookupDescriptionAutoComplete complete = (LookupDescriptionAutoComplete) steps.get(9);
+		CaptureValue capture = (CaptureValue) steps.get(10);
+		assertAll(() -> assertEquals("admin", filter.getModuleName()),
+					() -> assertEquals("qContacts", filter.getQueryName()),
+					() -> assertEquals("name", filter.getColumn()),
+					() -> assertEquals("Smith{run}", filter.getValue()),
+					() -> assertEquals(FilterOperator.startsWith, filter.getOperator()),
+					() -> assertEquals("Contact", clearColumn.getDocumentName()),
+					() -> assertThat(clearColumn.getValue(), is(nullValue())),
+					() -> assertThat(clearColumn.getOperator(), is(nullValue())),
+					() -> assertEquals(FilterOperator.contains, clearColumn.getEffectiveOperator()),
+					() -> assertEquals("admin", clear.getModuleName()),
+					() -> assertEquals("Contact", clear.getDocumentName()),
+					() -> assertEquals("m", clear.getModelName()),
+					() -> assertEquals("name", descending.getColumn()),
+					() -> assertEquals(Boolean.TRUE, descending.getDescending()),
+					() -> assertEquals("email", ascending.getColumn()),
+					() -> assertThat(ascending.getDescending(), is(nullValue())),
+					() -> assertEquals(Match.code, code.getMatch()),
+					() -> assertEquals("Active", code.getValue()),
+					() -> assertEquals(Match.label, label.getMatch()),
+					() -> assertEquals("Active Member", label.getValue()),
+					() -> assertThat(index.getMatch(), is(nullValue())),
+					() -> assertEquals(Match.index, index.getEffectiveMatch()),
+					() -> assertEquals("contact", pick.getBinding()),
+					() -> assertEquals("Smith{run}", pick.getRowContaining()),
+					() -> assertThat(pick.getRow(), is(nullValue())),
+					() -> assertEquals("Smi", complete.getSearch()),
+					() -> assertEquals("Smith{var:n}", complete.getPick()),
+					() -> assertEquals("invoiceNumber", capture.getBinding()),
+					() -> assertEquals("invoice", capture.getVariable()));
+	}
 
 	@Test
 	void unmarshalsTheLanguageAdditions() {

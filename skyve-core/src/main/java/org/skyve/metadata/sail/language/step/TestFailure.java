@@ -23,7 +23,7 @@ import jakarta.xml.bind.annotation.XmlType;
  * <p>Directly after a {@link org.skyve.metadata.sail.language.step.interaction.session.Login},
  * it asserts that the login was rejected instead.
  *
- * <p>{@code {run}} in {@code message} is replaced by the run token.
+ * <p>{@code {run}} and {@code {var:name}} in {@code message} are replaced by the run token and the captured variables.
  *
  * @see TestSuccess
  * @see org.skyve.metadata.sail.execution.Executor#executeTestFailure

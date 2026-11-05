@@ -22,6 +22,8 @@
  *       optionally containing some text, a list or data grid shows.
  *   <li>{@link org.skyve.metadata.sail.language.step.TestWidget} — asserts whether a widget,
  *       action button or tab is visible and enabled.
+ *   <li>{@link org.skyve.metadata.sail.language.step.CaptureValue} — keeps the value a widget
+ *       shows in a variable that later steps use as {@code {var:name}}.
  * </ul>
  *
  * <p>All types are JAXB-annotated for XML serialisation using the namespace defined by

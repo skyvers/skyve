@@ -453,10 +453,14 @@ public class PrimeFacesInlineWebDriverExecutor extends WebDriverExecutor<PrimeFa
 				indent().append("_input(\"").append(clientId).append("\", \"").append(value).append("\");").newline();
 			}
 			else if (selectOne) {
-				indent().append("selectOne(\"").append(clientId).append("\", ").append(value).append(");").newline();
+				if (! SailGeneratorSupport.optionMatchNotSupported(dataEnter, this::comment)) {
+					indent().append("selectOne(\"").append(clientId).append("\", ").append(value).append(");").newline();
+				}
 			}
 			else if (radio) {
-				indent().append("radio(\"").append(clientId).append("\", ").append(value).append(");").newline();
+				if (! SailGeneratorSupport.optionMatchNotSupported(dataEnter, this::comment)) {
+					indent().append("radio(\"").append(clientId).append("\", ").append(value).append(");").newline();
+				}
 			}
 		}
 	}
@@ -652,6 +656,9 @@ public class PrimeFacesInlineWebDriverExecutor extends WebDriverExecutor<PrimeFa
 	 */
 	@Override
 	public void executeLookupDescriptionAutoComplete(@Nonnull LookupDescriptionAutoComplete complete) {
+		if (SailGeneratorSupport.pickNotSupported(complete, this::comment)) {
+			return;
+		}
 		lookupDescription(complete, complete.getBinding(), null, complete.getSearch());
 	}
 
@@ -662,6 +669,9 @@ public class PrimeFacesInlineWebDriverExecutor extends WebDriverExecutor<PrimeFa
 	 */
 	@Override
 	public void executeLookupDescriptionPick(@Nonnull LookupDescriptionPick pick) {
+		if (SailGeneratorSupport.rowContainingNotSupported(pick, this::comment)) {
+			return;
+		}
 		lookupDescription(pick, pick.getBinding(), pick.getRow(), null);
 	}
 

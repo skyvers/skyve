@@ -16,14 +16,23 @@ import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.OutputType;
 import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebDriver;
+import org.skyve.CORE;
+import org.skyve.impl.metadata.user.UserImpl;
+import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.sail.execution.AutomationContext;
 import org.skyve.impl.sail.execution.WebDriverExecutor;
 import org.skyve.metadata.MetaDataException;
+import org.skyve.metadata.customer.Customer;
+import org.skyve.metadata.module.Module;
+import org.skyve.metadata.module.query.MetaDataQueryColumn;
+import org.skyve.metadata.module.query.MetaDataQueryDefinition;
+import org.skyve.metadata.module.query.MetaDataQueryProjectedColumn;
 import org.skyve.metadata.sail.language.Automation;
 import org.skyve.metadata.sail.language.Automation.TestStrategy;
 import org.skyve.metadata.sail.language.Interaction;
 import org.skyve.metadata.sail.language.Procedure;
 import org.skyve.metadata.sail.language.Step;
+import org.skyve.metadata.sail.language.step.CaptureValue;
 import org.skyve.metadata.sail.language.step.Comment;
 import org.skyve.metadata.sail.language.step.Execute;
 import org.skyve.metadata.sail.language.step.Pause;
@@ -36,7 +45,15 @@ import org.skyve.metadata.sail.language.step.context.ClearContext;
 import org.skyve.metadata.sail.language.step.context.PopContext;
 import org.skyve.metadata.sail.language.step.context.PushEditContext;
 import org.skyve.metadata.sail.language.step.context.PushListContext;
+import org.skyve.metadata.sail.language.step.interaction.DataEnter;
+import org.skyve.metadata.sail.language.step.interaction.DataEnter.Match;
 import org.skyve.metadata.sail.language.step.interaction.Upload;
+import org.skyve.metadata.sail.language.step.interaction.grids.ListGridClearFilter;
+import org.skyve.metadata.sail.language.step.interaction.grids.ListGridFilter;
+import org.skyve.metadata.sail.language.step.interaction.grids.ListGridFilter.FilterOperator;
+import org.skyve.metadata.sail.language.step.interaction.grids.ListGridSort;
+import org.skyve.metadata.sail.language.step.interaction.lookup.LookupDescriptionAutoComplete;
+import org.skyve.metadata.sail.language.step.interaction.lookup.LookupDescriptionPick;
 import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateCalendar;
 import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateEdit;
 import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateLink;
@@ -48,6 +65,7 @@ import org.skyve.metadata.sail.language.step.interaction.navigation.TestMenu;
 import org.skyve.metadata.sail.language.step.interaction.session.Login;
 import org.skyve.metadata.sail.language.step.interaction.session.Logout;
 import org.skyve.metadata.sail.language.step.interaction.session.SwitchMode;
+import org.skyve.metadata.user.User;
 import org.skyve.web.WebAction;
 
 import jakarta.annotation.Nonnull;
@@ -73,6 +91,31 @@ import jakarta.annotation.Nullable;
  * for each failure, and {@value #TEST_STRATEGY_PROPERTY} to override the automation's test strategy (any case; an
  * invalid value fails before any step runs). Tests that the override would weaken (the admin suites, the strategy
  * conformance test) refuse it: see {@link SailSuite#refuseTestStrategyOverride(String)}.
+ * <p>
+ * <b>Views for the signed-in user.</b> Given {@link #useViewRoles(SailViewRoles)}, each {@code <login/>} sets the
+ * persistence user that builds the views for the rest of the run: a user with the registered roles of the user
+ * signing in, or a user with every role if that user is not registered. The user from before the first login is
+ * restored when the automation ends.
+ * <p>
+ * <b>Renderer hooks.</b> This class implements what does not depend on the renderer: token substitution
+ * ({@code {run}}, {@code {var:name}}), the variables, argument checks and the test strategy. It leaves these
+ * hooks to the renderer executors. Each one throws {@link UnsupportedOperationException} until the renderer
+ * overrides it, so a script that uses an unimplemented feature fails instead of passing.
+ * <ul>
+ * <li>{@link #filterListGrid(ListGridFilter, String, String, FilterOperator)} for {@code <listGridFilter/>};</li>
+ * <li>{@link #clearListGridFilters(ListGridClearFilter)} for {@code <listGridClearFilter/>};</li>
+ * <li>{@link #sortListGrid(ListGridSort, String, boolean)} for {@code <listGridSort/>};</li>
+ * <li>{@link #readWidgetValue(CaptureValue)} for {@code <captureValue/>};</li>
+ * <li>{@link #enterOption(DataEnter, String, Match)} for {@code <dataEnter match="code|label"/>}, called by the
+ * 		renderer's {@code executeDataEnter};</li>
+ * <li>{@link #pickLookupDescriptionRowContaining(LookupDescriptionPick, String)} for
+ * 		{@code <lookupDescriptionPick rowContaining="…"/>}, called by the renderer's {@code executeLookupDescriptionPick};</li>
+ * <li>{@link #autoCompleteLookupDescriptionAndPick(LookupDescriptionAutoComplete, String, String)} for
+ * 		{@code <lookupDescriptionAutoComplete pick="…"/>}, called by the renderer's {@code executeLookupDescriptionAutoComplete}.</li>
+ * </ul>
+ * Every hook receives its text values with the tokens already substituted. Like any step, a hook throws when it
+ * cannot do what the step says, and makes the implicit success check, {@link #checkSuccess(String)}, where the other
+ * steps of its kind do. A hook that changes a list grid waits for the grid's fetch to end before it returns.
  *
  * @param <AC> automation context type
  * @param <S> concrete Selenide implementation
@@ -105,6 +148,10 @@ public abstract class InterpretedWebDriverExecutor<
 	private String loginError;
 	/** Counts failures, to name diagnostic files uniquely. */
 	private int failureCount = 0;
+	/** The roles to build the views with for each user that signs in, or null to keep the persistence user. */
+	private SailViewRoles viewRoles;
+	/** The persistence user when the first login of the run switched it, which the views are built from; or null. */
+	private User viewTemplateUser;
 
 	/**
 	 * Runs the automation's before procedure, interactions and after procedure, applying the test strategy.
@@ -118,16 +165,21 @@ public abstract class InterpretedWebDriverExecutor<
 		initialiseAutomation(automation);
 		failures.clear();
 
-		Procedure before = automation.getBefore();
-		if (before != null) {
-			runSteps("Before Automation", before.getSteps(), true);
+		try {
+			Procedure before = automation.getBefore();
+			if (before != null) {
+				runSteps("Before Automation", before.getSteps(), true);
+			}
+			for (Interaction interaction : automation.getInteractions()) {
+				executeInteraction(interaction);
+			}
+			Procedure after = automation.getAfter();
+			if (after != null) {
+				runSteps("After Automation", after.getSteps(), true);
+			}
 		}
-		for (Interaction interaction : automation.getInteractions()) {
-			executeInteraction(interaction);
-		}
-		Procedure after = automation.getAfter();
-		if (after != null) {
-			runSteps("After Automation", after.getSteps(), true);
+		finally {
+			restoreViewUser();
 		}
 
 		if (! failures.isEmpty()) {
@@ -400,8 +452,9 @@ public abstract class InterpretedWebDriverExecutor<
 	@Override
 	public void executeLogin(Login login) {
 		String customer = login.getCustomer();
-		String user = substituteRunToken(login.getUser());
-		String password = substituteRunToken(login.getPassword());
+		String user = substituteTokens(login.getUser());
+		String password = substituteTokens(login.getPassword());
+		switchViewUser(login.getUser(), user);
 
 		if (customer == null) {
 			selenide.trace("Login as " + user);
@@ -414,6 +467,61 @@ public abstract class InterpretedWebDriverExecutor<
 		if ((loginError != null) && (! (nextStep instanceof TestFailure)) && (! isNoneStrategy())) {
 			throw new IllegalStateException(String.format("Login as %s failed: %s", user, loginError));
 		}
+	}
+
+	/**
+	 * Builds the views for the rest of the run with the roles registered for the user signing in, or with every role
+	 * if the user is not registered: see {@link SailViewRoles}. Does nothing without {@link #useViewRoles(SailViewRoles)}.
+	 *
+	 * <p>Side effects: sets the thread's persistence user, and keeps the user it replaces the first time so that
+	 * {@link #restoreViewUser()} can put it back.
+	 *
+	 * @param scriptUserName	the login's user as written in the script
+	 * @param userName	the login's user with the tokens substituted
+	 * @throws IllegalArgumentException	if a registered role is not a role of the customer
+	 */
+	private void switchViewUser(@Nonnull String scriptUserName, @Nonnull String userName) {
+		SailViewRoles roles = viewRoles;
+		if (roles == null) {
+			return;
+		}
+		AbstractPersistence persistence = AbstractPersistence.get();
+		User template = viewTemplateUser;
+		if (template == null) {
+			template = persistence.getUser();
+			viewTemplateUser = template;
+		}
+		List<String> roleNames = roles.roleNames(scriptUserName, userName);
+		UserImpl viewUser;
+		if (roleNames == null) {
+			viewUser = SailUsers.bootstrapLikeUser(template);
+		}
+		else {
+			selenide.trace(String.format("Views are built for %s with the roles %s", userName, roleNames));
+			viewUser = SailUsers.userWithRoles(template, roleNames);
+		}
+		persistence.setUser(viewUser);
+	}
+
+	/**
+	 * Puts back the persistence user that the first login of the run replaced, if any.
+	 */
+	private void restoreViewUser() {
+		User template = viewTemplateUser;
+		if (template != null) {
+			AbstractPersistence.get().setUser(template);
+			viewTemplateUser = null;
+		}
+	}
+
+	/**
+	 * Builds the views of each user that signs in with the user's registered roles; see {@link SailViewRoles}.
+	 * Call it before the automation runs.
+	 *
+	 * @param roles	the registered roles
+	 */
+	public final void useViewRoles(@Nonnull SailViewRoles roles) {
+		viewRoles = roles;
 	}
 
 	@Override
@@ -593,7 +701,7 @@ public abstract class InterpretedWebDriverExecutor<
 		}
 		String message = failure.getMessage();
 		if (message != null) {
-			message = substituteRunToken(message);
+			message = substituteTokens(message);
 		}
 		final String expected = message;
 		if (previousStep instanceof Login) {
@@ -636,7 +744,7 @@ public abstract class InterpretedWebDriverExecutor<
 	 * @param element the SAIL element, such as {@code <upload/>}
 	 * @return the exception to throw
 	 */
-	private @Nonnull UnsupportedOperationException notImplementedYet(@Nonnull String element) {
+	protected final @Nonnull UnsupportedOperationException notImplementedYet(@Nonnull String element) {
 		return new UnsupportedOperationException(element + " is not implemented yet for " + getClass().getSimpleName());
 	}
 
@@ -715,6 +823,243 @@ public abstract class InterpretedWebDriverExecutor<
 	@Override
 	public void executeSwitchMode(@Nonnull SwitchMode switchMode) {
 		throw notImplementedYet("<switchMode/>");
+	}
+
+	/**
+	 * Filters a column of a list grid, or clears the column's filter: see {@link #filterListGrid}.
+	 * Checks first that the column is a filterable column of the list grid's query, when it has one.
+	 *
+	 * @param filter the step
+	 */
+	@Override
+	public void executeListGridFilter(@Nonnull ListGridFilter filter) {
+		String column = filter.getColumn();
+		checkListGridColumn(filter, filter.getModuleName(), filter.getDocumentName(), filter.getQueryName(), filter.getModelName(), column, true);
+		String value = filter.getValue();
+		if (value != null) {
+			value = substituteTokens(value);
+		}
+		FilterOperator operator = filter.getEffectiveOperator();
+		if (value == null) {
+			selenide.trace(String.format("Clear the filter of column [%s]", column));
+		}
+		else {
+			selenide.trace(String.format("Filter column [%s] %s '%s'", column, operator, value));
+		}
+		filterListGrid(filter, column, value, operator);
+	}
+
+	/**
+	 * Clears every column filter of a list grid: see {@link #clearListGridFilters}.
+	 *
+	 * @param clear the step
+	 */
+	@Override
+	public void executeListGridClearFilter(@Nonnull ListGridClearFilter clear) {
+		selenide.trace("Clear the list grid's filters");
+		clearListGridFilters(clear);
+	}
+
+	/**
+	 * Sorts a list grid by a column: see {@link #sortListGrid}.
+	 * Checks first that the column is a sortable column of the list grid's query, when it has one.
+	 *
+	 * @param sort the step
+	 */
+	@Override
+	public void executeListGridSort(@Nonnull ListGridSort sort) {
+		String column = sort.getColumn();
+		checkListGridColumn(sort, sort.getModuleName(), sort.getDocumentName(), sort.getQueryName(), sort.getModelName(), column, false);
+		boolean descending = Boolean.TRUE.equals(sort.getDescending());
+		selenide.trace(String.format("Sort by column [%s] %s", column, descending ? "descending" : "ascending"));
+		sortListGrid(sort, column, descending);
+	}
+
+	/**
+	 * Reads the value a widget shows (see {@link #readWidgetValue}) into the step's variable, trimmed.
+	 * A value is captured under every test strategy, as it is not an assertion.
+	 *
+	 * @param capture the step
+	 * @throws IllegalStateException if the widget shows no value: a blank variable would match anything
+	 */
+	@Override
+	public void executeCaptureValue(@Nonnull CaptureValue capture) {
+		String binding = capture.getBinding();
+		String variable = capture.getVariable();
+		String value = readWidgetValue(capture);
+		if (value != null) {
+			value = value.trim();
+		}
+		if ((value == null) || value.isEmpty()) {
+			throw new IllegalStateException(String.format("[%s] shows no value to keep in {var:%s}", binding, variable));
+		}
+		putVariable(variable, value);
+		selenide.trace(String.format("Keep [%s] '%s' in {var:%s}", binding, value, variable));
+	}
+
+	/**
+	 * Checks that a column named by a list grid step is a column of the list grid's query, and that it can be
+	 * filtered or sorted. A model's columns are made by its code, so they are not checked.
+	 *
+	 * @param step	the step, for the messages
+	 * @param moduleName	the step's module, or null for the context's
+	 * @param documentName	the step's document, or null for the context's
+	 * @param queryName	the step's query, or null for the document's default query
+	 * @param modelName	the step's model, or null
+	 * @param column	the column's binding
+	 * @param filter	true to check the column can be filtered, false to check it can be sorted
+	 * @throws MetaDataException	if the list grid cannot be resolved, or the column is not one of its query, or
+	 * 								cannot be filtered or sorted
+	 */
+	private void checkListGridColumn(@Nonnull Step step,
+										@Nullable String moduleName,
+										@Nullable String documentName,
+										@Nullable String queryName,
+										@Nullable String modelName,
+										@Nonnull String column,
+										boolean filter) {
+		if (modelName != null) {
+			return;
+		}
+		String element = Introspector.decapitalize(step.getClass().getSimpleName());
+		AC context = peek();
+		String m = (moduleName != null) ? moduleName : ((context == null) ? null : context.getModuleName());
+		String d = (documentName != null) ? documentName : ((context == null) ? null : context.getDocumentName());
+		if ((m == null) || ((queryName == null) && (d == null))) {
+			throw new MetaDataException(String.format("<%s /> needs a module and a query or document, or a list context to take them from", element));
+		}
+		Customer c = CORE.getUser().getCustomer();
+		Module module = c.getModule(m);
+		MetaDataQueryDefinition query = null;
+		if (queryName != null) {
+			query = module.getMetaDataQuery(queryName);
+			if (query == null) {
+				// As the list grid does, an undefined query name is the name of a document to use the default query of
+				query = module.getDocumentDefaultQuery(c, queryName);
+			}
+		}
+		else if (d != null) {
+			query = module.getDocumentDefaultQuery(c, d);
+		}
+		if (query == null) {
+			throw new MetaDataException(String.format("<%s /> has no list grid query in module %s", element, m));
+		}
+		List<MetaDataQueryColumn> columns = query.getColumns();
+		List<String> names = new ArrayList<>(columns.size());
+		for (MetaDataQueryColumn candidate : columns) {
+			String binding = candidate.getBinding();
+			String name = (binding == null) ? candidate.getName() : binding;
+			if (column.equals(name)) {
+				if (candidate instanceof MetaDataQueryProjectedColumn projected) {
+					if (filter && (! projected.isFilterable())) {
+						throw new MetaDataException(String.format("<%s /> column [%s] of query %s.%s cannot be filtered",
+																	element, column, m, query.getName()));
+					}
+					if ((! filter) && (! projected.isSortable())) {
+						throw new MetaDataException(String.format("<%s /> column [%s] of query %s.%s cannot be sorted",
+																	element, column, m, query.getName()));
+					}
+				}
+				return;
+			}
+			names.add(name);
+		}
+		throw new MetaDataException(String.format("<%s /> column [%s] is not a column of query %s.%s: its columns are %s",
+													element, column, m, query.getName(), names));
+	}
+
+	/**
+	 * Renderer hook for {@code <listGridFilter/>}: filters the column of the step's list grid, as a user does in the
+	 * grid's column filters, then waits for the grid to fetch its rows. A filter on a column that is already filtered
+	 * replaces it, and filters on different columns are ANDed.
+	 *
+	 * @param filter	the step, which names the list grid
+	 * @param column	the column's binding, checked to be a filterable column of the grid's query (unless it has a model)
+	 * @param value	the value with the tokens substituted, or null to clear the column's filter
+	 * @param operator	how the column is compared with the value; ignored when the value is null
+	 * @throws UnsupportedOperationException	until the renderer implements it
+	 */
+	protected void filterListGrid(@Nonnull ListGridFilter filter, @Nonnull String column, @Nullable String value, @Nonnull FilterOperator operator) {
+		throw notImplementedYet("<listGridFilter/>");
+	}
+
+	/**
+	 * Renderer hook for {@code <listGridClearFilter/>}: clears every column filter of the step's list grid, then waits
+	 * for the grid to fetch its rows.
+	 *
+	 * @param clear	the step, which names the list grid
+	 * @throws UnsupportedOperationException	until the renderer implements it
+	 */
+	protected void clearListGridFilters(@Nonnull ListGridClearFilter clear) {
+		throw notImplementedYet("<listGridClearFilter/>");
+	}
+
+	/**
+	 * Renderer hook for {@code <listGridSort/>}: sorts the step's list grid by the column alone, as a user does by
+	 * clicking the column's header until it shows the direction, then waits for the grid to fetch its rows.
+	 *
+	 * @param sort	the step, which names the list grid
+	 * @param column	the column's binding, checked to be a sortable column of the grid's query (unless it has a model)
+	 * @param descending	true for descending, false for ascending
+	 * @throws UnsupportedOperationException	until the renderer implements it
+	 */
+	protected void sortListGrid(@Nonnull ListGridSort sort, @Nonnull String column, boolean descending) {
+		throw notImplementedYet("<listGridSort/>");
+	}
+
+	/**
+	 * Renderer hook for {@code <captureValue/>}: reads the text that the first displayed widget for the binding shows,
+	 * as {@code <testValue/>} reads it (a combo or radio shows its option's label, a check box true or false).
+	 *
+	 * @param capture	the step
+	 * @return the displayed text, or null or blank if the widget shows no value (the step then fails)
+	 * @throws UnsupportedOperationException	until the renderer implements it
+	 */
+	protected @Nullable String readWidgetValue(@Nonnull CaptureValue capture) {
+		throw notImplementedYet("<captureValue/>");
+	}
+
+	/**
+	 * Renderer hook for {@code <dataEnter match="code"/>} and {@code <dataEnter match="label"/>}: chooses the option
+	 * of a combo or radio whose code or displayed label equals the value. The renderer's {@code executeDataEnter} calls
+	 * it when the match is not {@code index}. It fails if the widget is not a combo or radio, or if no option or more
+	 * than one has that code or label.
+	 *
+	 * @param dataEnter	the step
+	 * @param value	the value with the tokens substituted
+	 * @param match	{@link Match#code} or {@link Match#label}
+	 * @throws UnsupportedOperationException	until the renderer implements it
+	 */
+	protected void enterOption(@Nonnull DataEnter dataEnter, @Nonnull String value, @Nonnull Match match) {
+		throw notImplementedYet("<dataEnter match=\"" + match + "\"/>");
+	}
+
+	/**
+	 * Renderer hook for {@code <lookupDescriptionPick rowContaining="…"/>}: opens the lookup's drop-down and picks the
+	 * first row, in the order shown, whose text contains the given text (case-sensitive). The renderer's
+	 * {@code executeLookupDescriptionPick} calls it when the step has {@code rowContaining}. It fails if no row does.
+	 *
+	 * @param pick	the step
+	 * @param rowContaining	the text with the tokens substituted
+	 * @throws UnsupportedOperationException	until the renderer implements it
+	 */
+	protected void pickLookupDescriptionRowContaining(@Nonnull LookupDescriptionPick pick, @Nonnull String rowContaining) {
+		throw notImplementedYet("<lookupDescriptionPick rowContaining=\"…\"/>");
+	}
+
+	/**
+	 * Renderer hook for {@code <lookupDescriptionAutoComplete pick="…"/>}: types the search text into the lookup and
+	 * picks the first suggestion, in the order shown, whose text contains {@code pick} (case-sensitive). The renderer's
+	 * {@code executeLookupDescriptionAutoComplete} calls it when the step has {@code pick}. It fails if no suggestion
+	 * does.
+	 *
+	 * @param complete	the step
+	 * @param search	the search text with the tokens substituted
+	 * @param pick	the text the suggestion contains, with the tokens substituted
+	 * @throws UnsupportedOperationException	until the renderer implements it
+	 */
+	protected void autoCompleteLookupDescriptionAndPick(@Nonnull LookupDescriptionAutoComplete complete, @Nonnull String search, @Nonnull String pick) {
+		throw notImplementedYet("<lookupDescriptionAutoComplete pick=\"…\"/>");
 	}
 
 	/**

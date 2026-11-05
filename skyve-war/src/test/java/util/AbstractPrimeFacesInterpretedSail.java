@@ -17,6 +17,7 @@ import org.skyve.metadata.user.User;
 import jakarta.annotation.Nonnull;
 import util.sail.BrowserConfiguration;
 import util.sail.SailServerLock;
+import util.sail.SailViewRoles;
 import util.sail.PrimeFacesInterpretedWebDriverExecutor;
 import util.sail.PrimeFacesSelenide;
 import util.sail.SailUsers;
@@ -37,6 +38,20 @@ public abstract class AbstractPrimeFacesInterpretedSail extends AbstractH2Test {
 		this.configuration = configuration;
 	}
 	
+	/** The roles the views are built with for the users the scripts sign in as. */
+	private final SailViewRoles viewRoles = new SailViewRoles();
+
+	/**
+	 * Builds the views for a user that the scripts sign in as with the user's roles, instead of every role.
+	 * Call it before running the scripts; see {@link SailViewRoles}.
+	 *
+	 * @param userName	the user name as a script signs in with it; may contain {@code {run}}
+	 * @param roleNames	the user's roles: {@code module.Role}, or a customer role's name
+	 */
+	protected final void viewRoles(@Nonnull String userName, @Nonnull String... roleNames) {
+		viewRoles.register(userName, roleNames);
+	}
+
 	@BeforeEach
 	void setupBrowser() {
 		// One SAIL test at a time per server, even across forked JVMs (see SailServerLock): may wait for another to finish
@@ -88,14 +103,17 @@ public abstract class AbstractPrimeFacesInterpretedSail extends AbstractH2Test {
 	 * client ids of the widgets on the page, so it runs as a user with the same permissions as the bootstrap user
 	 * that the browser signs in as (every role of every module), not as the test's super user. Otherwise actions that
 	 * the browser's user cannot see (such as Save on a document they cannot create) would be in the tree, shift the
-	 * generated ids, and the executor would find the wrong elements.
+	 * generated ids, and the executor would find the wrong elements. A login as a user registered with
+	 * {@link #viewRoles(String, String...)} builds the views with that user's roles instead.
 	 */
 	private void sail(Automation automation) {
 		AbstractPersistence persistence = AbstractPersistence.get();
 		User testUser = persistence.getUser();
 		persistence.setUser(bootstrapLikeUser(testUser));
 		try (FacesUtil.SailFacesContextScope ignored = FacesUtil.withSailFacesContextIfNeeded()) {
-			automation.execute(new PrimeFacesInterpretedWebDriverExecutor(selenium));
+			PrimeFacesInterpretedWebDriverExecutor executor = new PrimeFacesInterpretedWebDriverExecutor(selenium);
+			executor.useViewRoles(viewRoles);
+			automation.execute(executor);
 		}
 		finally {
 			persistence.setUser(testUser);

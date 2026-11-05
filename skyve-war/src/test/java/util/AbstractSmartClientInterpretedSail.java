@@ -18,6 +18,7 @@ import org.skyve.util.logging.SkyveLoggerFactory;
 import jakarta.annotation.Nonnull;
 import util.sail.BrowserConfiguration;
 import util.sail.SailServerLock;
+import util.sail.SailViewRoles;
 import util.sail.SmartClientInterpretedWebDriverExecutor;
 import util.sail.SmartClientSelenide;
 
@@ -39,6 +40,20 @@ public abstract class AbstractSmartClientInterpretedSail extends AbstractH2Test 
 		this.configuration = configuration;
 	}
 	
+	/** The roles the views are built with for the users the scripts sign in as. */
+	private final SailViewRoles viewRoles = new SailViewRoles();
+
+	/**
+	 * Builds the views for a user that the scripts sign in as with the user's roles, instead of every role.
+	 * Call it before running the scripts; see {@link SailViewRoles}.
+	 *
+	 * @param userName	the user name as a script signs in with it; may contain {@code {run}}
+	 * @param roleNames	the user's roles: {@code module.Role}, or a customer role's name
+	 */
+	protected final void viewRoles(@Nonnull String userName, @Nonnull String... roleNames) {
+		viewRoles.register(userName, roleNames);
+	}
+
 	@BeforeEach
 	void setupBrowser() {
 		// One SAIL test at a time per server, even across forked JVMs (see SailServerLock): may wait for another to finish
@@ -88,7 +103,8 @@ public abstract class AbstractSmartClientInterpretedSail extends AbstractH2Test 
 	
 	/**
 	 * Runs the automation as a user with every role, like the bootstrap user the scripts sign in as,
-	 * so that the test JVM sees the same views, actions and permissions as the browser.
+	 * so that the test JVM sees the same views, actions and permissions as the browser. A login as a user registered
+	 * with {@link #viewRoles(String, String...)} builds the views with that user's roles instead.
 	 *
 	 * @param automation	the automation
 	 */
@@ -97,7 +113,9 @@ public abstract class AbstractSmartClientInterpretedSail extends AbstractH2Test 
 		User testUser = persistence.getUser();
 		persistence.setUser(util.sail.SailUsers.bootstrapLikeUser(testUser));
 		try (FacesUtil.SailFacesContextScope ignored = FacesUtil.withSailFacesContextIfNeeded()) {
-			automation.execute(new SmartClientInterpretedWebDriverExecutor(selenium));
+			SmartClientInterpretedWebDriverExecutor executor = new SmartClientInterpretedWebDriverExecutor(selenium);
+			executor.useViewRoles(viewRoles);
+			automation.execute(executor);
 		}
 		finally {
 			persistence.setUser(testUser);

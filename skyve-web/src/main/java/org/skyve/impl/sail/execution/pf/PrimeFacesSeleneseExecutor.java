@@ -432,6 +432,9 @@ public class PrimeFacesSeleneseExecutor extends SeleneseExecutor<PrimeFacesAutom
 				comment(String.format("Ignore colour picker %s (%s) for now", identifier, clientId));
 				return;
 			}
+			if ((selectOne || radio) && SailGeneratorSupport.optionMatchNotSupported(dataEnter, this::comment)) {
+				continue;
+			}
 			
 			// if exists and is not disabled
 			comment(String.format("set %s (%s) if it exists and is not disabled", identifier, clientId));
@@ -667,6 +670,9 @@ public class PrimeFacesSeleneseExecutor extends SeleneseExecutor<PrimeFacesAutom
 	 */
 	@Override
 	public void executeLookupDescriptionAutoComplete(@Nonnull LookupDescriptionAutoComplete complete) {
+		if (SailGeneratorSupport.pickNotSupported(complete, this::comment)) {
+			return;
+		}
 		lookupDescription(complete, complete.getBinding(), null, complete.getSearch());
 	}
 
@@ -677,6 +683,9 @@ public class PrimeFacesSeleneseExecutor extends SeleneseExecutor<PrimeFacesAutom
 	 */
 	@Override
 	public void executeLookupDescriptionPick(@Nonnull LookupDescriptionPick pick) {
+		if (SailGeneratorSupport.rowContainingNotSupported(pick, this::comment)) {
+			return;
+		}
 		lookupDescription(pick, pick.getBinding(), pick.getRow(), null);
 	}
 

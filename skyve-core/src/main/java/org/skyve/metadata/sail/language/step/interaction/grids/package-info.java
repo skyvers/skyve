@@ -24,6 +24,12 @@
  *           a row by its zero-based index, e.g. for tag/untag operations.
  *       <li>{@link org.skyve.metadata.sail.language.step.interaction.grids.ListGridZoom} — zooms into
  *           a row by its zero-based index.
+ *       <li>{@link org.skyve.metadata.sail.language.step.interaction.grids.ListGridFilter} — filters
+ *           one column, or clears that column's filter.
+ *       <li>{@link org.skyve.metadata.sail.language.step.interaction.grids.ListGridClearFilter} — clears
+ *           every column filter.
+ *       <li>{@link org.skyve.metadata.sail.language.step.interaction.grids.ListGridSort} — sorts by
+ *           one column.
  *     </ul>
  * </ul>
  *

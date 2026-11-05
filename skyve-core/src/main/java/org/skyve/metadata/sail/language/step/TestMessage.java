@@ -19,7 +19,7 @@ import jakarta.xml.bind.annotation.XmlType;
  *
  * <p>When {@code type} is set, the matching message must also have that severity.
  * The match is a case-sensitive substring match on the message's displayed text.
- * {@code {run}} in {@code contains} is replaced by the run token.
+ * {@code {run}} and {@code {var:name}} in {@code contains} are replaced by the run token and the captured variables.
  *
  * <p>Unlike {@link TestSuccess} and {@link TestFailure}, this step asserts information and
  * warning messages as well as errors.
@@ -58,7 +58,7 @@ public class TestMessage implements Step {
 
 	/**
 	 * Sets the text that the message must contain.
-	 * @param contains the text; {@code {run}} is replaced by the run token
+	 * @param contains the text; {@code {run}} and {@code {var:name}} are substituted
 	 */
 	@XmlAttribute(name = "contains", required = true)
 	public void setContains(@Nonnull String contains) {

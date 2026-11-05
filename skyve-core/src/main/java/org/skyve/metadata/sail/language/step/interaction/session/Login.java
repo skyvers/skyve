@@ -27,8 +27,8 @@ import jakarta.xml.bind.annotation.XmlType;
  * <p>Login does not switch renderers; follow it with {@link SwitchMode} when the router may not
  * route the browser to the renderer that the automation's {@code uxui} targets.
  *
- * <p>{@code {run}} in {@code user} or {@code password} is replaced by the run token, so a script
- * can log in as a user that it created earlier in the same run.
+ * <p>{@code {run}} and {@code {var:name}} in {@code user} or {@code password} are replaced by the run token
+ * and the captured variables, so a script can log in as a user that it created earlier in the same run.
  *
  * @see Logout
  * @see org.skyve.metadata.sail.execution.Executor#executeLogin

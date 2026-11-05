@@ -7,6 +7,7 @@ import org.skyve.metadata.sail.execution.Executor;
 import org.skyve.metadata.sail.language.Step;
 
 import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
@@ -19,7 +20,11 @@ import jakarta.xml.bind.annotation.XmlType;
  * <p>Precondition: the widget must support auto-complete suggestions; if the search
  * produces no results the executor fails the step.
  *
- * <p>{@code {run}} in {@code search} is replaced by the run token.
+ * <p>With {@code pick}, the step picks the first suggestion, in the order shown, whose text contains
+ * {@code pick} (case-sensitive) instead of the first suggestion, and fails if no suggestion does.
+ *
+ * <p>{@code {run}} and {@code {var:name}} in {@code search} and {@code pick} are replaced by the run token
+ * and the captured variables.
  *
  * @see LookupDescriptionPick
  * @see LookupDescriptionNew
@@ -31,6 +36,7 @@ public class LookupDescriptionAutoComplete implements Step {
 
 	private String binding;
 	private String search;
+	private String pick;
 	
 	/**
 	 * Returns the binding.
@@ -64,6 +70,23 @@ public class LookupDescriptionAutoComplete implements Step {
 	@XmlAttribute(name = "search", required = true)
 	public void setSearch(@Nonnull String search) {
 		this.search = UtilImpl.processStringValue(search);
+	}
+
+	/**
+	 * Returns the text that the suggestion to pick contains.
+	 * @return the text, or {@code null} to pick the first suggestion
+	 */
+	public @Nullable String getPick() {
+		return pick;
+	}
+
+	/**
+	 * Sets the text that the suggestion to pick contains.
+	 * @param pick the text, or {@code null} to pick the first suggestion
+	 */
+	@XmlAttribute(name = "pick")
+	public void setPick(@Nullable String pick) {
+		this.pick = UtilImpl.processStringValue(pick);
 	}
 
 	/**

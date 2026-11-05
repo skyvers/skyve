@@ -6,6 +6,7 @@ import java.util.List;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.sail.execution.Executor;
+import org.skyve.metadata.sail.language.step.CaptureValue;
 import org.skyve.metadata.sail.language.step.Comment;
 import org.skyve.metadata.sail.language.step.Execute;
 import org.skyve.metadata.sail.language.step.Pause;
@@ -36,8 +37,11 @@ import org.skyve.metadata.sail.language.step.interaction.grids.DataGridNew;
 import org.skyve.metadata.sail.language.step.interaction.grids.DataGridRemove;
 import org.skyve.metadata.sail.language.step.interaction.grids.DataGridSelect;
 import org.skyve.metadata.sail.language.step.interaction.grids.DataGridZoom;
+import org.skyve.metadata.sail.language.step.interaction.grids.ListGridClearFilter;
+import org.skyve.metadata.sail.language.step.interaction.grids.ListGridFilter;
 import org.skyve.metadata.sail.language.step.interaction.grids.ListGridNew;
 import org.skyve.metadata.sail.language.step.interaction.grids.ListGridSelect;
+import org.skyve.metadata.sail.language.step.interaction.grids.ListGridSort;
 import org.skyve.metadata.sail.language.step.interaction.grids.ListGridZoom;
 import org.skyve.metadata.sail.language.step.interaction.lookup.LookupDescriptionAutoComplete;
 import org.skyve.metadata.sail.language.step.interaction.lookup.LookupDescriptionEdit;
@@ -196,7 +200,11 @@ public class Interaction implements Executable {
 						@XmlElementRef(type = TestWidget.class),
 						@XmlElementRef(type = NavigateMenu.class),
 						@XmlElementRef(type = TestMenu.class),
-						@XmlElementRef(type = SwitchMode.class)})
+						@XmlElementRef(type = SwitchMode.class),
+						@XmlElementRef(type = ListGridFilter.class),
+						@XmlElementRef(type = ListGridClearFilter.class),
+						@XmlElementRef(type = ListGridSort.class),
+						@XmlElementRef(type = CaptureValue.class)})
 	public @Nonnull List<Step> getSteps() {
 		return steps;
 	}

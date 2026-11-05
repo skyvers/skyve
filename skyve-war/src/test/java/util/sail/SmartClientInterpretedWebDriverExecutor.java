@@ -41,6 +41,7 @@ import org.skyve.metadata.sail.language.step.TestValue;
 import org.skyve.metadata.sail.language.step.context.PushEditContext;
 import org.skyve.metadata.sail.language.step.context.PushListContext;
 import org.skyve.metadata.sail.language.step.interaction.DataEnter;
+import org.skyve.metadata.sail.language.step.interaction.DataEnter.Match;
 import org.skyve.metadata.sail.language.step.interaction.TabSelect;
 import org.skyve.metadata.sail.language.step.interaction.TestDataEnter;
 import org.skyve.metadata.sail.language.step.interaction.actions.Action;
@@ -291,6 +292,14 @@ public class SmartClientInterpretedWebDriverExecutor extends InterpretedWebDrive
 	 */
 	@Override
 	public void executeDataEnter(DataEnter dataEnter) {
+		Match match = dataEnter.getEffectiveMatch();
+		String matchValue = dataEnter.getValue();
+		@SuppressWarnings("null") // SAIL XML turns a blank value into null
+		boolean matchValuePresent = (matchValue != null);
+		if ((match != Match.index) && matchValuePresent) {
+			enterOption(dataEnter, substituteTokens(matchValue), match);
+			return;
+		}
 		prepareForDataEntry();
 		SmartClientAutomationContext context = context();
 
@@ -304,7 +313,7 @@ public class SmartClientInterpretedWebDriverExecutor extends InterpretedWebDrive
 		// Never replace with a new line as chrome under test will trip the default button on the form
 		String value = dataEnter.getValue();
 		if (value != null) {
-			value = substituteRunToken(value).replace("\n", " ");
+			value = substituteTokens(value).replace("\n", " ");
 		}
 
 		boolean success = false;
@@ -554,11 +563,23 @@ public class SmartClientInterpretedWebDriverExecutor extends InterpretedWebDrive
 	@Override
 	public void executeLookupDescriptionAutoComplete(LookupDescriptionAutoComplete complete) {
 		String search = complete.getSearch();
-		lookupDescription(complete, complete.getBinding(), null, (search == null) ? null : substituteRunToken(search));
+		String pick = complete.getPick();
+		@SuppressWarnings("null") // SAIL XML turns a blank value into null
+		boolean searchPresent = (search != null);
+		if ((pick != null) && searchPresent) {
+			autoCompleteLookupDescriptionAndPick(complete, substituteTokens(search), substituteTokens(pick));
+			return;
+		}
+		lookupDescription(complete, complete.getBinding(), null, (search == null) ? null : substituteTokens(search));
 	}
 
 	@Override
 	public void executeLookupDescriptionPick(LookupDescriptionPick pick) {
+		String rowContaining = pick.getRowContaining();
+		if (rowContaining != null) {
+			pickLookupDescriptionRowContaining(pick, substituteTokens(rowContaining));
+			return;
+		}
 		lookupDescription(pick, pick.getBinding(), pick.getRow(), null);
 	}
 
@@ -737,7 +758,7 @@ public class SmartClientInterpretedWebDriverExecutor extends InterpretedWebDrive
 		if (rows == null) {
 			throw new MetaDataException(String.format("<%s /> grid [%s] is not on the view", step.getClass().getSimpleName(), rowsKey));
 		}
-		String text = substituteRunToken(step.getRowContaining());
+		String text = substituteTokens(step.getRowContaining());
 		selenide.trace(String.format("Find the row containing '%s'", text));
 		return selenide.rowContaining(rows.get(0).getLocator(), text);
 	}
@@ -992,7 +1013,7 @@ public class SmartClientInterpretedWebDriverExecutor extends InterpretedWebDrive
 		}
 
 		String expected = test.getValue();
-		expected = (expected == null) ? "" : substituteRunToken(expected).trim();
+		expected = (expected == null) ? "" : substituteTokens(expected).trim();
 		List<String> actual = selenide.values(locators.get(0).getLocator());
 		selenide.trace(String.format("Test value of %s is '%s' (displayed '%s')", binding, expected, actual.get(0)));
 		for (String value : actual) {
@@ -1056,7 +1077,7 @@ public class SmartClientInterpretedWebDriverExecutor extends InterpretedWebDrive
 		if (isNoneStrategy()) {
 			return;
 		}
-		String contains = substituteRunToken(test.getContains());
+		String contains = substituteTokens(test.getContains());
 		TestMessage.MessageType type = test.getType();
 		String severity = (type == null) ? null : type.name();
 		selenide.trace(String.format("test %s message contains '%s'", (severity == null) ? "a" : "an " + severity, contains));
@@ -1086,7 +1107,7 @@ public class SmartClientInterpretedWebDriverExecutor extends InterpretedWebDrive
 		}
 		String locator = locators.get(0).getLocator();
 		String text = test.getRowContaining();
-		String contains = (text == null) ? null : substituteRunToken(text);
+		String contains = (text == null) ? null : substituteTokens(text);
 		Integer max = test.getMaxRows();
 		selenide.trace(String.format("test grid [%s] has %d..%s rows%s", identifier, Integer.valueOf(test.getEffectiveMinRows()),
 										(max == null) ? "" : max.toString(), (contains == null) ? "" : " containing '" + contains + "'"));

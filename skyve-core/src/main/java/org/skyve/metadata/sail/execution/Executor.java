@@ -2,6 +2,7 @@ package org.skyve.metadata.sail.execution;
 
 import org.skyve.metadata.sail.language.Automation;
 import org.skyve.metadata.sail.language.Interaction;
+import org.skyve.metadata.sail.language.step.CaptureValue;
 import org.skyve.metadata.sail.language.step.Comment;
 import org.skyve.metadata.sail.language.step.Execute;
 import org.skyve.metadata.sail.language.step.Pause;
@@ -32,8 +33,11 @@ import org.skyve.metadata.sail.language.step.interaction.grids.DataGridNew;
 import org.skyve.metadata.sail.language.step.interaction.grids.DataGridRemove;
 import org.skyve.metadata.sail.language.step.interaction.grids.DataGridSelect;
 import org.skyve.metadata.sail.language.step.interaction.grids.DataGridZoom;
+import org.skyve.metadata.sail.language.step.interaction.grids.ListGridClearFilter;
+import org.skyve.metadata.sail.language.step.interaction.grids.ListGridFilter;
 import org.skyve.metadata.sail.language.step.interaction.grids.ListGridNew;
 import org.skyve.metadata.sail.language.step.interaction.grids.ListGridSelect;
+import org.skyve.metadata.sail.language.step.interaction.grids.ListGridSort;
 import org.skyve.metadata.sail.language.step.interaction.grids.ListGridZoom;
 import org.skyve.metadata.sail.language.step.interaction.lookup.LookupDescriptionAutoComplete;
 import org.skyve.metadata.sail.language.step.interaction.lookup.LookupDescriptionEdit;
@@ -68,12 +72,14 @@ import jakarta.annotation.Nonnull;
  * <p>Threading: executor instances are not thread-safe and must be used from a
  * single thread per execution run.
  *
- * <p>Run token: executors that extend {@code org.skyve.impl.sail.execution.ContextualExecutor}
- * must pass every value-like attribute through {@code substituteRunToken(String)} before
- * using it, so that {@code {run}} in a script resolves to the run token. The attributes are
+ * <p>Tokens: executors that extend {@code org.skyve.impl.sail.execution.ContextualExecutor}
+ * must pass every value-like attribute through {@code substituteTokens(String)} before
+ * using it, so that {@code {run}} in a script resolves to the run token and {@code {var:name}}
+ * to a value captured by {@link #executeCaptureValue(CaptureValue)}. The attributes are
  * {@code dataEnter@value}, {@code testValue@value}, {@code lookupDescriptionAutoComplete@search},
- * {@code login@user}, {@code login@password}, {@code testFailure@message},
- * {@code testMessage@contains} and every {@code rowContaining}.
+ * {@code lookupDescriptionAutoComplete@pick}, {@code listGridFilter@value}, {@code login@user},
+ * {@code login@password}, {@code testFailure@message}, {@code testMessage@contains} and every
+ * {@code rowContaining}.
  *
  * @see org.skyve.metadata.sail.language.Automation
  * @see org.skyve.metadata.sail.language.Interaction
@@ -397,4 +403,37 @@ public interface Executor {
 	 * @param switchMode the switch mode step
 	 */
 	public void executeSwitchMode(@Nonnull SwitchMode switchMode);
+
+	/**
+	 * Filters one column of a list grid, or clears that column's filter when the step has no value.
+	 *
+	 * <p>Filters on different columns are ANDed. Use {@link ListGridFilter#getEffectiveOperator()} for the
+	 * operator; {@link ListGridFilter#execute(Executor)} has already checked that an operator comes with a value.
+	 *
+	 * @param filter the list grid filter step
+	 */
+	public void executeListGridFilter(@Nonnull ListGridFilter filter);
+
+	/**
+	 * Clears every column filter of a list grid.
+	 *
+	 * @param clear the list grid clear filter step
+	 */
+	public void executeListGridClearFilter(@Nonnull ListGridClearFilter clear);
+
+	/**
+	 * Sorts a list grid by one column, ascending unless {@link ListGridSort#getDescending()} is {@code true}.
+	 *
+	 * @param sort the list grid sort step
+	 */
+	public void executeListGridSort(@Nonnull ListGridSort sort);
+
+	/**
+	 * Reads the value a widget shows into a variable that later steps use as {@code {var:name}}.
+	 *
+	 * <p>Precondition: {@link CaptureValue#execute(Executor)} has checked the variable name.
+	 *
+	 * @param capture the capture value step
+	 */
+	public void executeCaptureValue(@Nonnull CaptureValue capture);
 }
