@@ -9,7 +9,8 @@
  *       types a search string into the lookup field and selects the first match from
  *       the auto-complete dropdown.
  *   <li>{@link org.skyve.metadata.sail.language.step.interaction.lookup.LookupDescriptionPick} —
- *       opens the lookup picker dialog and selects the row at the specified zero-based index.
+ *       opens the lookup picker dialog and selects the row at the specified zero-based index,
+ *       or the first row containing some text.
  *   <li>{@link org.skyve.metadata.sail.language.step.interaction.lookup.LookupDescriptionEdit} —
  *       zooms into the currently selected related instance for editing.
  *   <li>{@link org.skyve.metadata.sail.language.step.interaction.lookup.LookupDescriptionNew} —

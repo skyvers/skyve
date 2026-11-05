@@ -33,10 +33,20 @@ public class LookupDescription extends AbstractPersistentBean {
 	/** @hidden */
 	public static final String descriptionPropertyName = "description";
 
+	/** @hidden */
+	public static final String numberPropertyName = "number";
+
 	/**
 	 * description
 	 **/
 	private String description;
+
+	/**
+	 * Number
+	 * <br/>
+	 * Set from a number sequence when the lookup value is first saved.
+	 **/
+	private Integer number;
 
 	@Override
 	@XmlTransient
@@ -89,5 +99,23 @@ public class LookupDescription extends AbstractPersistentBean {
 	public void setDescription(String description) {
 		preset(descriptionPropertyName, description);
 		this.description = description;
+	}
+
+	/**
+	 * {@link #number} accessor.
+	 * @return	The value.
+	 **/
+	public Integer getNumber() {
+		return number;
+	}
+
+	/**
+	 * {@link #number} mutator.
+	 * @param number	The new value.
+	 **/
+	@XmlElement
+	public void setNumber(Integer number) {
+		preset(numberPropertyName, number);
+		this.number = number;
 	}
 }

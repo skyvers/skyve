@@ -73,4 +73,21 @@ class LookupDescriptionAutoCompleteTest {
 		AutomationContext<?, ?> ctx = mock(AutomationContext.class);
 		assertThat(step.getIdentifier(ctx), is("contact.search"));
 	}
+
+	@Test
+	void defaultPickIsNull() {
+		assertThat(step.getPick(), is(nullValue()));
+	}
+
+	@Test
+	void setPickRoundtripTrims() {
+		step.setPick("  Smith{run}  ");
+		assertThat(step.getPick(), is("Smith{run}"));
+	}
+
+	@Test
+	void setPickBlankBecomesNull() {
+		step.setPick("   ");
+		assertThat(step.getPick(), is(nullValue()));
+	}
 }

@@ -2,6 +2,8 @@ package org.skyve.impl.sail.execution;
 
 import java.util.ArrayDeque;
 import java.util.Deque;
+import java.util.Map;
+import java.util.TreeMap;
 
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
@@ -47,7 +49,18 @@ public abstract class ContextualExecutor<T extends AutomationContext> implements
 	 */
 	public static final String RUN_TOKEN = "{run}";
 
+	/**
+	 * The start of a variable token, {@code {var:name}}, that SAIL authors write in value-like attributes
+	 * to use a value captured earlier in the run.
+	 */
+	public static final String VARIABLE_TOKEN_START = "{var:";
+
 	private String runToken = null;
+
+	/**
+	 * The variables captured in this run, by name. Sorted so that a failure lists the defined names in order.
+	 */
+	private final Map<String, String> variables = new TreeMap<>();
 
 	protected final void push(@Nonnull T context) {
 		String uxui = context.getUxui();
@@ -115,6 +128,7 @@ public abstract class ContextualExecutor<T extends AutomationContext> implements
 		currentUserAgentType = automation.getUserAgentType();
 		testStrategy = automation.getTestStrategy();
 		runToken = newRunToken();
+		variables.clear();
 	}
 	
 	/**
@@ -307,20 +321,85 @@ public abstract class ContextualExecutor<T extends AutomationContext> implements
 	}
 
 	/**
-	 * Returns {@code value} with every {@value #RUN_TOKEN} replaced by {@link #getRunToken()}.
+	 * Returns {@code value} with every {@value #RUN_TOKEN} replaced by {@link #getRunToken()}, and every
+	 * {@code {var:name}} replaced by the value of the variable {@code name}; see {@link #putVariable(String, String)}.
 	 *
 	 * <p>Executors must call this on every value-like attribute before using it; the
 	 * attributes are listed on {@link Executor}. Generator executors that emit code
 	 * for a later run would freeze the token into the generated code.
 	 *
+	 * <p>The value is scanned once, left to right, so a substituted value is not itself substituted.
+	 *
+	 * <p>Complexity: O(n) in the length of {@code value}.
+	 *
 	 * @param value the attribute value as written in the script
-	 * @return the value with the run token substituted; {@code value} itself when it has no {@value #RUN_TOKEN}
+	 * @return the value with the tokens substituted; {@code value} itself when it has no token
+	 * @throws MetaDataException if a {@code {var:name}} names a variable that has not been captured in this run,
+	 * 			or a variable token has no closing brace
 	 */
-	public final @Nonnull String substituteRunToken(@Nonnull String value) {
-		if (value.contains(RUN_TOKEN)) {
-			return value.replace(RUN_TOKEN, getRunToken());
+	public final @Nonnull String substituteTokens(@Nonnull String value) {
+		int brace = value.indexOf('{');
+		if (brace < 0) {
+			return value;
 		}
-		return value;
+		StringBuilder result = null;
+		int copied = 0;
+		while (brace >= 0) {
+			String replacement = null;
+			int end = brace;
+			if (value.startsWith(RUN_TOKEN, brace)) {
+				replacement = getRunToken();
+				end = brace + RUN_TOKEN.length();
+			}
+			else if (value.startsWith(VARIABLE_TOKEN_START, brace)) {
+				int close = value.indexOf('}', brace);
+				if (close < 0) {
+					throw new MetaDataException("'" + value + "' has a " + VARIABLE_TOKEN_START + " with no closing }");
+				}
+				String name = value.substring(brace + VARIABLE_TOKEN_START.length(), close);
+				replacement = variables.get(name);
+				if (replacement == null) {
+					throw new MetaDataException(VARIABLE_TOKEN_START + name + "} is not defined: capture it first with <captureValue variable=\"" +
+													name + "\" />" + (variables.isEmpty() ? "; no variables are defined" : "; the variables defined are " + variables.keySet()));
+				}
+				end = close + 1;
+			}
+			if (replacement != null) {
+				if (result == null) {
+					result = new StringBuilder(value.length() + 32);
+				}
+				result.append(value, copied, brace).append(replacement);
+				copied = end;
+			}
+			brace = value.indexOf('{', Math.max(end, brace + 1));
+		}
+		if (result == null) {
+			return value;
+		}
+		return result.append(value, copied, value.length()).toString();
+	}
+
+	/**
+	 * Sets the variable {@code name} to {@code value} for the rest of this run, replacing any earlier value.
+	 * Each {@link #executeAutomation(Automation)} starts with no variables.
+	 *
+	 * <p>Side effects: later {@link #substituteTokens(String)} calls replace {@code {var:name}} with {@code value}.
+	 *
+	 * @param name the variable name
+	 * @param value the value
+	 */
+	public final void putVariable(@Nonnull String name, @Nonnull String value) {
+		variables.put(name, value);
+	}
+
+	/**
+	 * Returns the value of the variable {@code name}.
+	 *
+	 * @param name the variable name
+	 * @return the value, or {@code null} if the variable has not been captured in this run
+	 */
+	public final @Nullable String getVariable(@Nonnull String name) {
+		return variables.get(name);
 	}
 
 	/**

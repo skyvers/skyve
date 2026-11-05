@@ -11,6 +11,8 @@
 
   <xs:element name="cancel" type="tns:cancel"/>
 
+  <xs:element name="captureValue" type="tns:captureValue"/>
+
   <xs:element name="clearContext" type="tns:clearContext"/>
 
   <xs:element name="comment" type="tns:comment"/>
@@ -33,9 +35,15 @@
 
   <xs:element name="interaction" type="tns:interaction"/>
 
+  <xs:element name="listGridClearFilter" type="tns:listGridClearFilter"/>
+
+  <xs:element name="listGridFilter" type="tns:listGridFilter"/>
+
   <xs:element name="listGridNew" type="tns:listGridNew"/>
 
   <xs:element name="listGridSelect" type="tns:listGridSelect"/>
+
+  <xs:element name="listGridSort" type="tns:listGridSort"/>
 
   <xs:element name="listGridZoom" type="tns:listGridZoom"/>
 
@@ -169,6 +177,10 @@
         <xs:element ref="tns:navigateMenu"/>
         <xs:element ref="tns:testMenu"/>
         <xs:element ref="tns:switchMode"/>
+        <xs:element ref="tns:listGridFilter"/>
+        <xs:element ref="tns:listGridClearFilter"/>
+        <xs:element ref="tns:listGridSort"/>
+        <xs:element ref="tns:captureValue"/>
       </xs:choice>
     </xs:sequence>
   </xs:complexType>
@@ -246,6 +258,7 @@
   <xs:complexType name="dataEnter">
     <xs:sequence/>
     <xs:attribute name="binding" type="xs:string" use="required"/>
+    <xs:attribute name="match" type="tns:match"/>
     <xs:attribute name="navigateToWidget" type="xs:boolean"/>
     <xs:attribute name="value" type="xs:string" use="required"/>
   </xs:complexType>
@@ -322,13 +335,15 @@
   <xs:complexType name="lookupDescriptionAutoComplete">
     <xs:sequence/>
     <xs:attribute name="binding" type="xs:string" use="required"/>
+    <xs:attribute name="pick" type="xs:string"/>
     <xs:attribute name="search" type="xs:string" use="required"/>
   </xs:complexType>
 
   <xs:complexType name="lookupDescriptionPick">
     <xs:sequence/>
     <xs:attribute name="binding" type="xs:string" use="required"/>
-    <xs:attribute name="row" type="xs:int" use="required"/>
+    <xs:attribute name="row" type="xs:int"/>
+    <xs:attribute name="rowContaining" type="xs:string"/>
   </xs:complexType>
 
   <xs:complexType name="lookupDescriptionNew">
@@ -519,6 +534,41 @@
     <xs:sequence/>
   </xs:complexType>
 
+  <xs:complexType name="listGridFilter">
+    <xs:sequence/>
+    <xs:attribute name="column" type="xs:string" use="required"/>
+    <xs:attribute name="document" type="xs:string"/>
+    <xs:attribute name="model" type="xs:string"/>
+    <xs:attribute name="module" type="xs:string"/>
+    <xs:attribute name="operator" type="tns:filterOperator"/>
+    <xs:attribute name="query" type="xs:string"/>
+    <xs:attribute name="value" type="xs:string"/>
+  </xs:complexType>
+
+  <xs:complexType name="listGridClearFilter">
+    <xs:sequence/>
+    <xs:attribute name="document" type="xs:string"/>
+    <xs:attribute name="model" type="xs:string"/>
+    <xs:attribute name="module" type="xs:string"/>
+    <xs:attribute name="query" type="xs:string"/>
+  </xs:complexType>
+
+  <xs:complexType name="listGridSort">
+    <xs:sequence/>
+    <xs:attribute name="column" type="xs:string" use="required"/>
+    <xs:attribute name="descending" type="xs:boolean"/>
+    <xs:attribute name="document" type="xs:string"/>
+    <xs:attribute name="model" type="xs:string"/>
+    <xs:attribute name="module" type="xs:string"/>
+    <xs:attribute name="query" type="xs:string"/>
+  </xs:complexType>
+
+  <xs:complexType name="captureValue">
+    <xs:sequence/>
+    <xs:attribute name="binding" type="xs:string" use="required"/>
+    <xs:attribute name="variable" type="xs:string" use="required"/>
+  </xs:complexType>
+
   <xs:complexType name="interaction">
     <xs:sequence>
       <xs:element name="before" type="tns:procedure" form="qualified" minOccurs="0"/>
@@ -574,6 +624,10 @@
               <xs:element ref="tns:navigateMenu"/>
               <xs:element ref="tns:testMenu"/>
               <xs:element ref="tns:switchMode"/>
+              <xs:element ref="tns:listGridFilter"/>
+              <xs:element ref="tns:listGridClearFilter"/>
+              <xs:element ref="tns:listGridSort"/>
+              <xs:element ref="tns:captureValue"/>
             </xs:choice>
           </xs:sequence>
         </xs:complexType>
@@ -591,11 +645,30 @@
     </xs:restriction>
   </xs:simpleType>
 
+  <xs:simpleType name="match">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="index"/>
+      <xs:enumeration value="code"/>
+      <xs:enumeration value="label"/>
+    </xs:restriction>
+  </xs:simpleType>
+
   <xs:simpleType name="messageType">
     <xs:restriction base="xs:string">
       <xs:enumeration value="info"/>
       <xs:enumeration value="warning"/>
       <xs:enumeration value="error"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="filterOperator">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="contains"/>
+      <xs:enumeration value="startsWith"/>
+      <xs:enumeration value="equals"/>
+      <xs:enumeration value="notEquals"/>
+      <xs:enumeration value="lessThan"/>
+      <xs:enumeration value="greaterThan"/>
     </xs:restriction>
   </xs:simpleType>
 </xs:schema>

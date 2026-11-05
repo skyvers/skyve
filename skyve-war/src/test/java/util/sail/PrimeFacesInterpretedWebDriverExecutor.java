@@ -64,6 +64,7 @@ import org.skyve.metadata.sail.language.step.TestValue;
 import org.skyve.metadata.sail.language.step.context.PushEditContext;
 import org.skyve.metadata.sail.language.step.context.PushListContext;
 import org.skyve.metadata.sail.language.step.interaction.DataEnter;
+import org.skyve.metadata.sail.language.step.interaction.DataEnter.Match;
 import org.skyve.metadata.sail.language.step.interaction.TabSelect;
 import org.skyve.metadata.sail.language.step.interaction.TestDataEnter;
 import org.skyve.metadata.sail.language.step.interaction.actions.Action;
@@ -302,6 +303,12 @@ public class PrimeFacesInterpretedWebDriverExecutor extends InterpretedWebDriver
 	@SuppressWarnings("null") // checks values the annotations say are non-null
 	@Override
 	public void executeDataEnter(DataEnter dataEnter) {
+		Match match = dataEnter.getEffectiveMatch();
+		String matchValue = dataEnter.getValue();
+		if ((match != Match.index) && (matchValue != null)) { // SAIL XML turns a blank value into null
+			enterOption(dataEnter, substituteTokens(matchValue), match);
+			return;
+		}
 		PrimeFacesAutomationContext context = peek();
 		String identifier = dataEnter.getIdentifier(context);
 
@@ -314,7 +321,7 @@ public class PrimeFacesInterpretedWebDriverExecutor extends InterpretedWebDriver
 		// Never replace with a new line as chrome under test will trip the default button on the form
 		String value = dataEnter.getValue();
 		if (value != null) {
-			value = substituteRunToken(value);
+			value = substituteTokens(value);
 			value = value.replace("\n", " ");
 		}
 
@@ -454,7 +461,7 @@ public class PrimeFacesInterpretedWebDriverExecutor extends InterpretedWebDriver
 		}
 
 		String expected = test.getValue();
-		expected = (expected == null) ? "" : substituteRunToken(expected).replace("\n", " ").trim();
+		expected = (expected == null) ? "" : substituteTokens(expected).replace("\n", " ").trim();
 
 		boolean found = false;
 		for (UIComponent component : components) {
@@ -735,11 +742,23 @@ public class PrimeFacesInterpretedWebDriverExecutor extends InterpretedWebDriver
 	@Override
 	public void executeLookupDescriptionAutoComplete(LookupDescriptionAutoComplete complete) {
 		String search = complete.getSearch();
-		lookupDescription(complete, complete.getBinding(), null, (search == null) ? null : substituteRunToken(search));
+		String pick = complete.getPick();
+		@SuppressWarnings("null") // SAIL XML turns a blank value into null
+		boolean searchPresent = (search != null);
+		if ((pick != null) && searchPresent) {
+			autoCompleteLookupDescriptionAndPick(complete, substituteTokens(search), substituteTokens(pick));
+			return;
+		}
+		lookupDescription(complete, complete.getBinding(), null, (search == null) ? null : substituteTokens(search));
 	}
 
 	@Override
 	public void executeLookupDescriptionPick(LookupDescriptionPick pick) {
+		String rowContaining = pick.getRowContaining();
+		if (rowContaining != null) {
+			pickLookupDescriptionRowContaining(pick, substituteTokens(rowContaining));
+			return;
+		}
 		lookupDescription(pick, pick.getBinding(), pick.getRow(), null);
 	}
 
@@ -992,7 +1011,7 @@ public class PrimeFacesInterpretedWebDriverExecutor extends InterpretedWebDriver
 		if (row != null) {
 			return row;
 		}
-		String text = substituteRunToken(Objects.requireNonNull(step.getRowContaining(), "rowContaining"));
+		String text = substituteTokens(Objects.requireNonNull(step.getRowContaining(), "rowContaining"));
 		int result = selenide.rowContaining(gridClientId, text);
 		if (result == -2) {
 			return null;
@@ -1009,7 +1028,7 @@ public class PrimeFacesInterpretedWebDriverExecutor extends InterpretedWebDriver
 			return "it";
 		}
 		Integer row = step.getRow();
-		return (row != null) ? "row " + row : "the row containing '" + substituteRunToken(String.valueOf(step.getRowContaining())) + "'";
+		return (row != null) ? "row " + row : "the row containing '" + substituteTokens(String.valueOf(step.getRowContaining())) + "'";
 	}
 
 	@Override
@@ -1267,7 +1286,7 @@ public class PrimeFacesInterpretedWebDriverExecutor extends InterpretedWebDriver
 		if (isNoneStrategy()) {
 			return;
 		}
-		String contains = substituteRunToken(test.getContains());
+		String contains = substituteTokens(test.getContains());
 		TestMessage.MessageType type = test.getType();
 		String severity = (type == null) ? null : type.name();
 		selenide.trace(String.format("test %s message contains '%s'", (severity == null) ? "a" : "an " + severity, contains));
@@ -1300,7 +1319,7 @@ public class PrimeFacesInterpretedWebDriverExecutor extends InterpretedWebDriver
 			throw new MetaDataException(String.format("<testGridRows /> grid [%s] is not on the view", identifier));
 		}
 		String text = test.getRowContaining();
-		final String contains = (text == null) ? null : substituteRunToken(text);
+		final String contains = (text == null) ? null : substituteTokens(text);
 
 		String gridId = null;
 		for (UIComponent component : components) {

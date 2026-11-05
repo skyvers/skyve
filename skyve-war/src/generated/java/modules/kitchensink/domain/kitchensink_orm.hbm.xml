@@ -171,6 +171,7 @@
 		<property name="bizDataGroupId" length="36" />
 		<property name="bizUserId" length="36" not-null="true" />
 		<property name="description" length="1024" />
+		<property name="number" />
 		<filter name="kitchensinkLookupDescriptionNoneFilter" condition="1=0"/>
 		<filter name="kitchensinkLookupDescriptionCustomerFilter" condition="bizCustomer=:customerParam"/>
 		<filter name="kitchensinkLookupDescriptionDataGroupIdFilter" condition="bizDataGroupId=:dataGroupIdParam"/>

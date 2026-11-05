@@ -1,11 +1,15 @@
 package org.skyve.impl.sail.execution;
 
+import org.skyve.metadata.sail.language.step.CaptureValue;
 import org.skyve.metadata.sail.language.step.Comment;
 import org.skyve.metadata.sail.language.step.Pause;
 import org.skyve.metadata.sail.language.step.TestGridRows;
 import org.skyve.metadata.sail.language.step.TestMessage;
 import org.skyve.metadata.sail.language.step.TestWidget;
 import org.skyve.metadata.sail.language.step.interaction.Upload;
+import org.skyve.metadata.sail.language.step.interaction.grids.ListGridClearFilter;
+import org.skyve.metadata.sail.language.step.interaction.grids.ListGridFilter;
+import org.skyve.metadata.sail.language.step.interaction.grids.ListGridSort;
 import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateMenu;
 import org.skyve.metadata.sail.language.step.interaction.navigation.TestMenu;
 import org.skyve.metadata.sail.language.step.interaction.session.SwitchMode;
@@ -175,5 +179,45 @@ public abstract class SeleneseExecutor<T extends AutomationContext> extends Scri
 	@Override
 	public void executeSwitchMode(@Nonnull SwitchMode switchMode) {
 		comment("<switchMode/> not supported by this generator");
+	}
+
+	/**
+	 * Emits a comment that {@code <listGridFilter/>} is not supported, because this generator has no Selenese equivalent yet.
+	 *
+	 * @param filter the step being skipped
+	 */
+	@Override
+	public void executeListGridFilter(@Nonnull ListGridFilter filter) {
+		comment("<listGridFilter/> not supported by this generator");
+	}
+
+	/**
+	 * Emits a comment that {@code <listGridClearFilter/>} is not supported, because this generator has no Selenese equivalent yet.
+	 *
+	 * @param clear the step being skipped
+	 */
+	@Override
+	public void executeListGridClearFilter(@Nonnull ListGridClearFilter clear) {
+		comment("<listGridClearFilter/> not supported by this generator");
+	}
+
+	/**
+	 * Emits a comment that {@code <listGridSort/>} is not supported, because this generator has no Selenese equivalent yet.
+	 *
+	 * @param sort the step being skipped
+	 */
+	@Override
+	public void executeListGridSort(@Nonnull ListGridSort sort) {
+		comment("<listGridSort/> not supported by this generator");
+	}
+
+	/**
+	 * Emits a comment that {@code <captureValue/>} is not supported, because this generator has no Selenese equivalent yet.
+	 *
+	 * @param capture the step being skipped
+	 */
+	@Override
+	public void executeCaptureValue(@Nonnull CaptureValue capture) {
+		comment("<captureValue/> not supported by this generator");
 	}
 }

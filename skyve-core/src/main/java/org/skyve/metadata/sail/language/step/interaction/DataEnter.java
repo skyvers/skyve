@@ -26,8 +26,14 @@ import jakarta.xml.bind.annotation.XmlType;
  * displayed description. An empty selection cannot be expressed because a blank value is
  * treated as absent.
  *
- * <p>{@code {run}} in {@code value} is replaced by the run token; see
- * {@code ContextualExecutor.substituteRunToken(String)}.
+ * <p>For a combo or radio, {@code match} says how {@code value} names the option: by its zero-based
+ * position ({@link Match#index}, the default, so that older scripts are unchanged), by its {@link Match#code}
+ * or by its displayed {@link Match#label}. For a combo, the position counts the empty first entry when there
+ * is one. A code or label must name exactly one option. {@code match} other than {@code index} fails the step
+ * on any other widget.
+ *
+ * <p>{@code {run}} and {@code {var:name}} in {@code value} are replaced by the run token and the captured
+ * variables; see {@code ContextualExecutor.substituteTokens(String)}.
  *
  * @see org.skyve.metadata.sail.language.step.TestValue
  * @see org.skyve.metadata.sail.execution.Executor#executeDataEnter
@@ -35,10 +41,24 @@ import jakarta.xml.bind.annotation.XmlType;
 @XmlType(namespace = XMLMetaData.SAIL_NAMESPACE)
 @XmlRootElement(namespace = XMLMetaData.SAIL_NAMESPACE)
 public class DataEnter implements Step {
+	/**
+	 * How a {@link DataEnter} value names the option of a combo or radio.
+	 */
+	@XmlType(namespace = XMLMetaData.SAIL_NAMESPACE)
+	@SuppressWarnings("java:S115") // Enum names are SAIL XML values.
+	public enum Match {
+		/** The value is the option's zero-based position. */
+		index,
+		/** The value is the option's code. */
+		code,
+		/** The value is the option's displayed label. */
+		label
+	}
 
 	private String binding;
 	private String value;
 	private Boolean navigateToWidget;
+	private Match match;
 	
 	/**
 	 * Returns the binding.
@@ -66,7 +86,7 @@ public class DataEnter implements Step {
 	}
 
 	/**
-	 * Sets the value to enter. {@code {run}} is replaced by the run token, and for membership
+	 * Sets the value to enter. {@code {run}} and {@code {var:name}} are substituted, and for membership
 	 * widgets the value is a {@code |}-separated list of the items to select.
 	 * @param value the value
 	 */
@@ -90,6 +110,31 @@ public class DataEnter implements Step {
 	@XmlAttribute(name = "navigateToWidget")
 	public void setNavigateToWidget(@Nullable Boolean navigateToWidget) {
 		this.navigateToWidget = navigateToWidget;
+	}
+
+	/**
+	 * Returns how the value names a combo or radio option, as written in the script.
+	 * @return the match, or {@code null} for the default; see {@link #getEffectiveMatch()}
+	 */
+	public @Nullable Match getMatch() {
+		return match;
+	}
+
+	/**
+	 * Sets how the value names a combo or radio option.
+	 * @param match the match, or {@code null} for {@link Match#index}
+	 */
+	@XmlAttribute(name = "match")
+	public void setMatch(@Nullable Match match) {
+		this.match = match;
+	}
+
+	/**
+	 * Returns how the value names a combo or radio option, after applying the default.
+	 * @return {@code match} if set, otherwise {@link Match#index}
+	 */
+	public @Nonnull Match getEffectiveMatch() {
+		return (match == null) ? Match.index : match;
 	}
 
 	/**

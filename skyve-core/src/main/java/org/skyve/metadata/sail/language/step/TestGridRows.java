@@ -30,7 +30,7 @@ import jakarta.xml.bind.annotation.XmlType;
  *
  * <p>When {@code timeoutMillis} is set, the executor refreshes the grid and counts again until the
  * assertion holds or the timeout elapses, which waits for asynchronous jobs.
- * {@code {run}} in {@code rowContaining} is replaced by the run token.
+ * {@code {run}} and {@code {var:name}} in {@code rowContaining} are replaced by the run token and the captured variables.
  *
  * @see org.skyve.metadata.sail.language.step.interaction.grids.GridRowStep
  * @see org.skyve.metadata.sail.execution.Executor#executeTestGridRows
@@ -144,7 +144,7 @@ public class TestGridRows implements Step {
 
 	/**
 	 * Sets the text that a counted row must have in one of its cells.
-	 * @param rowContaining the text, or {@code null} to count every row; {@code {run}} is replaced by the run token
+	 * @param rowContaining the text, or {@code null} to count every row; {@code {run}} and {@code {var:name}} are substituted
 	 */
 	@XmlAttribute(name = "rowContaining")
 	public void setRowContaining(@Nullable String rowContaining) {

@@ -1,6 +1,8 @@
 package org.skyve.impl.sail.execution;
 
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -150,21 +152,21 @@ class ContextualExecutorTest {
 	}
 
 	@Test
-	void substituteRunTokenReplacesEveryOccurrenceWithTheSameToken() {
+	void substituteTokensReplacesEveryOccurrenceWithTheSameToken() {
 		ContextualExecutor<AutomationContext<GenerateListContext, GenerateEditContext>> executor = newExecutor();
 
 		String token = executor.getRunToken();
 		assertTrue(token.matches("[0-9a-z]{8,}"), token);
-		assertEquals("jane" + token + "@" + token + ".com", executor.substituteRunToken("jane{run}@{run}.com"));
+		assertEquals("jane" + token + "@" + token + ".com", executor.substituteTokens("jane{run}@{run}.com"));
 		assertEquals(token, executor.getRunToken());
 	}
 
 	@Test
-	void substituteRunTokenReturnsValueWithoutTokenUnchanged() {
+	void substituteTokensReturnsValueWithoutTokenUnchanged() {
 		ContextualExecutor<AutomationContext<GenerateListContext, GenerateEditContext>> executor = newExecutor();
 		String value = "jane {RUN} run";
 
-		assertSame(value, executor.substituteRunToken(value));
+		assertSame(value, executor.substituteTokens(value));
 	}
 
 	@Test
@@ -177,7 +179,72 @@ class ContextualExecutorTest {
 		executor.executeAutomation(automation);
 
 		String token = executor.getRunToken();
-		assertEquals("u" + token, executor.substituteRunToken("u" + ContextualExecutor.RUN_TOKEN));
+		assertEquals("u" + token, executor.substituteTokens("u" + ContextualExecutor.RUN_TOKEN));
+	}
+
+	@Test
+	void substituteTokensReplacesVariablesAndTheRunToken() {
+		ContextualExecutor<AutomationContext<GenerateListContext, GenerateEditContext>> executor = newExecutor();
+		executor.putVariable("invoice", "INV-42");
+		executor.putVariable("n", "7");
+		String token = executor.getRunToken();
+
+		assertAll(() -> assertEquals("INV-42", executor.substituteTokens("{var:invoice}")),
+					() -> assertEquals("a INV-42 b 7 c " + token, executor.substituteTokens("a {var:invoice} b {var:n} c {run}")),
+					() -> assertEquals("{x} {} {var} {RUN}", executor.substituteTokens("{x} {} {var} {RUN}")),
+					() -> assertEquals("{" + token + "}", executor.substituteTokens("{{run}}")),
+					() -> assertEquals("7" + token + "7", executor.substituteTokens("{var:n}{run}{var:n}")));
+	}
+
+	@Test
+	void substituteTokensDoesNotSubstituteAVariableValue() {
+		ContextualExecutor<AutomationContext<GenerateListContext, GenerateEditContext>> executor = newExecutor();
+		executor.putVariable("literal", "{run} and {var:literal}");
+
+		assertEquals("<{run} and {var:literal}>", executor.substituteTokens("<{var:literal}>"));
+	}
+
+	@Test
+	void substituteTokensFailsForAnUndefinedVariable() {
+		ContextualExecutor<AutomationContext<GenerateListContext, GenerateEditContext>> executor = newExecutor();
+		MetaDataException none = assertThrows(MetaDataException.class, () -> executor.substituteTokens("x{var:invoice}"));
+		executor.putVariable("order", "1");
+		MetaDataException some = assertThrows(MetaDataException.class, () -> executor.substituteTokens("x{var:invoice}"));
+
+		assertAll(() -> assertTrue(none.getMessage().contains("{var:invoice} is not defined"), none.getMessage()),
+					() -> assertTrue(none.getMessage().contains("no variables are defined"), none.getMessage()),
+					() -> assertTrue(some.getMessage().contains("[order]"), some.getMessage()));
+	}
+
+	@Test
+	void substituteTokensFailsForAnUnterminatedVariable() {
+		ContextualExecutor<AutomationContext<GenerateListContext, GenerateEditContext>> executor = newExecutor();
+		executor.putVariable("invoice", "INV-42");
+
+		assertThrows(MetaDataException.class, () -> executor.substituteTokens("x{var:invoice"));
+	}
+
+	@Test
+	void putVariableReplacesAnEarlierValue() {
+		ContextualExecutor<AutomationContext<GenerateListContext, GenerateEditContext>> executor = newExecutor();
+		executor.putVariable("invoice", "INV-1");
+		executor.putVariable("invoice", "INV-2");
+
+		assertAll(() -> assertEquals("INV-2", executor.getVariable("invoice")),
+					() -> assertNull(executor.getVariable("order")));
+	}
+
+	@Test
+	void executeAutomationStartsWithNoVariables() {
+		ContextualExecutor<AutomationContext<GenerateListContext, GenerateEditContext>> executor = newExecutor();
+		executor.putVariable("invoice", "INV-1");
+		Automation automation = new Automation();
+		automation.setUxui("desktop");
+		automation.setUserAgentType(org.skyve.web.UserAgentType.desktop);
+
+		executor.executeAutomation(automation);
+
+		assertNull(executor.getVariable("invoice"));
 	}
 
 	private static ContextualExecutor<AutomationContext<GenerateListContext, GenerateEditContext>> newExecutor() {

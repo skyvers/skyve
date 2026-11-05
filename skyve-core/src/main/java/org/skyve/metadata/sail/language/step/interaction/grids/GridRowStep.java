@@ -9,7 +9,8 @@ import jakarta.xml.bind.annotation.XmlTransient;
 
 /**
  * A grid step that acts on one row, located either by its zero-based {@code row} index
- * or by the text of one of its cells ({@code rowContaining}).
+ * or by the text of one of its cells ({@code rowContaining}). A lookup description's drop-down
+ * is a grid of rows too, so {@code lookupDescriptionPick} is a row step.
  *
  * <p>Invariant: exactly one of {@link #getRow()} and {@link #getRowContaining()} is set
  * on a step that is about to be executed. The XSD cannot express this, so every
@@ -18,8 +19,8 @@ import jakarta.xml.bind.annotation.XmlTransient;
  *
  * <p>{@code rowContaining} selects the first row, in the grid's displayed order, that has
  * a cell whose text contains the given value (case-sensitive). Executors must pass it through
- * {@code ContextualExecutor.substituteRunToken(String)} before matching, so that
- * {@code {run}} resolves to the run token.
+ * {@code ContextualExecutor.substituteTokens(String)} before matching, so that
+ * {@code {run}} and {@code {var:name}} resolve.
  *
  * @see DataGridZoom
  * @see DataGridEdit
@@ -27,6 +28,7 @@ import jakarta.xml.bind.annotation.XmlTransient;
  * @see DataGridSelect
  * @see ListGridZoom
  * @see ListGridSelect
+ * @see org.skyve.metadata.sail.language.step.interaction.lookup.LookupDescriptionPick
  */
 @XmlTransient
 public interface GridRowStep extends Step {

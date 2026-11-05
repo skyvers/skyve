@@ -83,7 +83,7 @@ public class DataGridRemove implements GridRowStep {
 	/**
 	 * Sets the text that a cell of the target row contains; the first such row is the target.
 	 * Exactly one of {@code row} and {@code rowContaining} must be set.
-	 * {@code {run}} in the text is replaced by the run token.
+	 * {@code {run}} and {@code {var:name}} in the text are replaced by the run token and the captured variables.
 	 * @param rowContaining the text, or {@code null} to locate the row by {@code row}
 	 */
 	@XmlAttribute(name = "rowContaining")
