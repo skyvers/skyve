@@ -498,11 +498,17 @@ public class SmartClientSelenide extends Selenide<
 	/**
 	 * Filters a column of a list grid as a user does, or clears the column's filter, and waits for the rows.
 	 * <p>
-	 * In simple filtering, a column whose filter row cell applies the operator (substring for text, equality for
-	 * anything else), or a column being cleared, is filtered in the filter row: click the cell, replace its text, press the
-	 * row's Filter button. Any other operator is applied with the grid's advanced filter: the grid's toggle switches to
-	 * advanced filtering (keeping the filter row's filters as clauses), the clauses are set as a saved snapshot sets them,
-	 * and the advanced filter's Filter button is pressed. A grid in advanced filtering stays in it.
+	 * In simple filtering, a column that the filter row shows is filtered there when the row's own operator is the one
+	 * asked for (substring for text, equality for anything else), or when the column is being cleared: a text, number,
+	 * date or time cell is typed into, an enum's or association's select has its option chosen, and a boolean's check box
+	 * is clicked until it shows the value; then the row's Filter button is pressed. Any other operator, or a column the
+	 * row does not show, is applied with the grid's advanced filter: the grid's toggle switches to advanced filtering
+	 * (keeping the filter row's filters as clauses), the clauses are set as a saved snapshot sets them, and the advanced
+	 * filter's Filter button is pressed. A grid in advanced filtering stays in it.
+	 * <p>
+	 * The browser helper checks the operator against the column (enums, booleans and associations take equals; dates and
+	 * times equals, lessThan and greaterThan) and reads the value: an enum's option by its label, else its code; a boolean
+	 * true or false; a date or time in the format the column shows.
 	 *
 	 * @param locator	a locator of the list grid's rows
 	 * @param column	the column's field name (its sanitised binding)
@@ -526,35 +532,114 @@ public class SmartClientSelenide extends Selenide<
 			}
 			return result;
 		});
-		boolean change = "row".equals(plan.get("mode")) ? filterInRow(plan, column, value) : filterInAdvanced(grid, plan, operator);
+		boolean change = "row".equals(plan.get("mode")) ? filterInRow(grid, plan, column, value) : filterInAdvanced(grid, plan, operator);
 		awaitList(grid, "criteria", before, change, "the list grid to fetch its rows with the new filter");
 	}
 
 	/**
-	 * Types a column's filter into the grid's filter row and presses the row's Filter button.
+	 * Filters a column in the grid's filter row, as a user does with its cell, then presses the row's Filter button:
+	 * a text, number, date or time cell is typed into, a select has its option chosen, a check box is clicked until it
+	 * shows the value.
 	 *
-	 * @param plan		the browser helper's plan: the cell's input, the Filter button and the cell's current text
-	 * @param column	the column, for the trace
+	 * @param grid		the list grid's SAIL locator, without a suffix
+	 * @param plan		the browser helper's plan for the cell
+	 * @param column	the column
 	 * @param value		the value, or {@code null} to clear the cell
 	 * @return whether the filter changes
 	 */
-	private boolean filterInRow(@Nonnull Map<String, Object> plan, @Nonnull String column, @Nullable String value) {
-		String current = String.valueOf(plan.get("current"));
-		trace(String.format("    In the filter row, %s column %s", (value == null) ? "clear" : "type '" + value + "' into", column));
-		SelenideElement input = $((WebElement) plan.get("input"));
-		prepare(input);
-		click(input);
-		// select what the cell holds (through the DOM) so that the keys replace it
-		script("if (arguments[0].select) arguments[0].select();", input.toWebElement());
-		new org.openqa.selenium.interactions.Actions(driver).sendKeys(Keys.BACK_SPACE).perform();
-		if ((value != null) && (! value.isEmpty())) {
-			new org.openqa.selenium.interactions.Actions(driver).sendKeys(value).perform();
+	private boolean filterInRow(@Nonnull String grid, @Nonnull Map<String, Object> plan, @Nonnull String column, @Nullable String value) {
+		Object cell = plan.get("cell");
+		boolean result;
+		if ("select".equals(cell)) {
+			result = selectInRow(grid, plan, column, value);
+		}
+		else if ("checkbox".equals(cell)) {
+			int clicks = ((Number) plan.get("clicks")).intValue();
+			trace(String.format("    In the filter row, click the check box of column %s %d time(s), to %s", column, Integer.valueOf(clicks),
+									(value == null) ? "clear it" : value));
+			for (int i = 0; i < clicks; i++) {
+				// the check box redraws as it changes, so find it again for each click
+				Map<String, Object> again = map(script("return _sail.listFilterPlan(arguments[0], arguments[1], arguments[2], 'equals')", grid, column, value));
+				SelenideElement box = $((WebElement) ((i == 0) ? plan.get("element") : again.get("element")));
+				prepare(box);
+				click(box);
+				waitForFullPageResponse();
+			}
+			result = (clicks > 0);
+		}
+		else {
+			String current = String.valueOf(plan.get("current"));
+			trace(String.format("    In the filter row, %s column %s", (value == null) ? "clear" : "type '" + value + "' into", column));
+			SelenideElement input = $((WebElement) plan.get("input"));
+			prepare(input);
+			click(input);
+			// select what the cell holds (through the DOM) so that the keys replace it
+			script("if (arguments[0].select) arguments[0].select();", input.toWebElement());
+			new org.openqa.selenium.interactions.Actions(driver).sendKeys(Keys.BACK_SPACE).perform();
+			if ((value != null) && (! value.isEmpty())) {
+				new org.openqa.selenium.interactions.Actions(driver).sendKeys(value).perform();
+			}
+			result = ! current.equals((value == null) ? "" : value);
 		}
 		trace("    Press the filter row's Filter button");
 		SelenideElement button = $((WebElement) plan.get("button"));
 		prepare(button);
 		click(button);
-		return ! current.equals((value == null) ? "" : value);
+		return result;
+	}
+
+	/**
+	 * Chooses the option a value names in a filter row select, as a user does: open the select, click the option (in a
+	 * multiple select, click options until only the one named is chosen, then close the list with Escape).
+	 *
+	 * @param grid		the list grid's SAIL locator, without a suffix
+	 * @param plan		the browser helper's plan: the select's element and whether it is multiple
+	 * @param column	the column
+	 * @param value		the option's label or code, or {@code null} to choose none
+	 * @return whether the selection changed
+	 */
+	@SuppressWarnings("unchecked")
+	private boolean selectInRow(@Nonnull String grid, @Nonnull Map<String, Object> plan, @Nonnull String column, @Nullable String value) {
+		trace(String.format("    In the filter row, open the select of column %s and choose %s", column, (value == null) ? "nothing" : "'" + value + "'"));
+		SelenideElement opener = $((WebElement) plan.get("opener"));
+		prepare(opener);
+		click(opener);
+		boolean multiple = Boolean.TRUE.equals(plan.get("multiple"));
+		boolean changed = false;
+		for (int i = 0; i < 50; i++) {
+			waitForFullPageResponse();
+			// Waits for the select's pick list to show its options (a select of records fetches them)
+			Map<String, Object> rows = until("the options of the " + column + " select to show", d -> {
+				Map<String, Object> result = map(script("return _sail.listSelectRows(arguments[0], arguments[1], arguments[2])", grid, column, value));
+				Object error = result.get("error");
+				if (error != null) {
+					if (! Boolean.TRUE.equals(result.get("retry"))) {
+						throw new IllegalStateException("Cannot filter " + grid + ": " + error);
+					}
+					lastProblem = String.valueOf(error);
+					return null;
+				}
+				return result;
+			});
+			List<WebElement> toClick = (List<WebElement>) rows.get("rows");
+			if ((toClick == null) || toClick.isEmpty()) {
+				break;
+			}
+			changed = changed || multiple || Boolean.TRUE.equals(rows.get("changed"));
+			// the pick list redraws its rows as they are chosen, so click one and look again
+			SelenideElement row = $(toClick.get(0));
+			prepare(row);
+			click(row);
+			if (! multiple) {
+				break;
+			}
+		}
+		if (multiple) {
+			trace("    Close the select's list with Escape");
+			new org.openqa.selenium.interactions.Actions(driver).sendKeys(Keys.ESCAPE).perform();
+		}
+		waitForFullPageResponse();
+		return changed;
 	}
 
 	/**
@@ -575,7 +660,7 @@ public class SmartClientSelenide extends Selenide<
 			waitForFullPageResponse();
 		}
 		trace("    Set the advanced filter's clauses to " + plan.get("criteria"));
-		Map<String, Object> result = map(script("return _sail.listAdvancedCriteria(arguments[0], arguments[1])", grid, plan.get("criteria")));
+		Map<String, Object> result = map(script("return _sail.listAdvancedCriteria(arguments[0])", grid));
 		if (! (result.get("button") instanceof WebElement filter)) {
 			throw new IllegalStateException("Cannot filter " + grid + " with the advanced filter: " + result.get("error"));
 		}

@@ -110,6 +110,179 @@
 		</method>
 	</interaction>
 
+	<interaction name="List attributes to filter by type">
+		<method>
+			<navigateMenu module="kitchensink" item="List" />
+			<listGridNew module="kitchensink" document="ListAttributes" />
+			<dataEnter binding="text" value="SAIL types {run} a" />
+			<dataEnter binding="constantEnum" value="one" match="code" />
+			<dataEnter binding="constantDomain" value="One (1)!" match="label" />
+			<dataEnter binding="booleanFlag" value="true" />
+			<dataEnter binding="date" value="01-Jan-2024" />
+			<dataEnter binding="dateTime" value="01-Jan-2024 09:00" />
+			<dataEnter binding="time" value="09:00" />
+			<dataEnter binding="timestamp" value="01-Jan-2024 09:00:00" />
+			<save />
+			<ok />
+			<listGridNew module="kitchensink" document="ListAttributes" />
+			<dataEnter binding="text" value="SAIL types {run} b" />
+			<dataEnter binding="constantEnum" value="two" match="code" />
+			<dataEnter binding="constantDomain" value="Two (2)!" match="label" />
+			<dataEnter binding="booleanFlag" value="false" />
+			<dataEnter binding="date" value="15-Jun-2024" />
+			<dataEnter binding="dateTime" value="15-Jun-2024 12:30" />
+			<dataEnter binding="time" value="12:30" />
+			<dataEnter binding="timestamp" value="15-Jun-2024 12:30:30" />
+			<save />
+			<ok />
+			<listGridNew module="kitchensink" document="ListAttributes" />
+			<dataEnter binding="text" value="SAIL types {run} c" />
+			<dataEnter binding="constantEnum" value="three" match="code" />
+			<dataEnter binding="constantDomain" value="Three (3)!" match="label" />
+			<dataEnter binding="booleanFlag" value="true" />
+			<dataEnter binding="date" value="31-Dec-2024" />
+			<dataEnter binding="dateTime" value="31-Dec-2024 18:45" />
+			<dataEnter binding="time" value="18:45" />
+			<dataEnter binding="timestamp" value="31-Dec-2024 18:45:45" />
+			<save />
+			<ok />
+			<testGridRows module="kitchensink" document="ListAttributes" rowContaining="01-Jan-2024 09:00" minRows="1" />
+			<testGridRows module="kitchensink" document="ListAttributes" rowContaining="15-Jun-2024 12:30" minRows="1" />
+			<testGridRows module="kitchensink" document="ListAttributes" rowContaining="31-Dec-2024 18:45" minRows="1" />
+		</method>
+	</interaction>
+
+	<interaction name="Filters on enum, boolean, date and time columns">
+		<method>
+			<comment>The list does not show the text column, so rows are told apart by their Date Time, which only this script's rows have: a leftover from an earlier run has the same values as this run's row, so the rows that show still tell</comment>
+			<navigateMenu module="kitchensink" item="List" />
+			<comment>An enum's filter row cell is a select: the value names an option by its label, or else by its code</comment>
+			<listGridFilter module="kitchensink" document="ListAttributes" column="constantEnum" value="Two (2)!" operator="equals" />
+			<testGridRows module="kitchensink" document="ListAttributes" rowContaining="01-Jan-2024 09:00" maxRows="0" />
+			<testGridRows module="kitchensink" document="ListAttributes" rowContaining="15-Jun-2024 12:30" minRows="1" />
+			<testGridRows module="kitchensink" document="ListAttributes" rowContaining="31-Dec-2024 18:45" maxRows="0" />
+			<listGridFilter module="kitchensink" document="ListAttributes" column="constantEnum" value="three" operator="equals" />
+			<testGridRows module="kitchensink" document="ListAttributes" rowContaining="01-Jan-2024 09:00" maxRows="0" />
+			<testGridRows module="kitchensink" document="ListAttributes" rowContaining="15-Jun-2024 12:30" maxRows="0" />
+			<testGridRows module="kitchensink" document="ListAttributes" rowContaining="31-Dec-2024 18:45" minRows="1" />
+			<listGridFilter module="kitchensink" document="ListAttributes" column="constantEnum" />
+			<testGridRows module="kitchensink" document="ListAttributes" rowContaining="01-Jan-2024 09:00" minRows="1" />
+			<testGridRows module="kitchensink" document="ListAttributes" rowContaining="15-Jun-2024 12:30" minRows="1" />
+			<testGridRows module="kitchensink" document="ListAttributes" rowContaining="31-Dec-2024 18:45" minRows="1" />
+			<comment>A constant domain is a select too</comment>
+			<listGridFilter module="kitchensink" document="ListAttributes" column="constantDomain" value="One (1)!" operator="equals" />
+			<testGridRows module="kitchensink" document="ListAttributes" rowContaining="01-Jan-2024 09:00" minRows="1" />
+			<testGridRows module="kitchensink" document="ListAttributes" rowContaining="15-Jun-2024 12:30" maxRows="0" />
+			<testGridRows module="kitchensink" document="ListAttributes" rowContaining="31-Dec-2024 18:45" maxRows="0" />
+			<listGridFilter module="kitchensink" document="ListAttributes" column="constantDomain" />
+			<comment>A boolean's cell is a check box, clicked until it shows the value</comment>
+			<listGridFilter module="kitchensink" document="ListAttributes" column="booleanFlag" value="true" operator="equals" />
+			<testGridRows module="kitchensink" document="ListAttributes" rowContaining="01-Jan-2024 09:00" minRows="1" />
+			<testGridRows module="kitchensink" document="ListAttributes" rowContaining="15-Jun-2024 12:30" maxRows="0" />
+			<testGridRows module="kitchensink" document="ListAttributes" rowContaining="31-Dec-2024 18:45" minRows="1" />
+			<listGridFilter module="kitchensink" document="ListAttributes" column="booleanFlag" value="false" operator="equals" />
+			<testGridRows module="kitchensink" document="ListAttributes" rowContaining="01-Jan-2024 09:00" maxRows="0" />
+			<testGridRows module="kitchensink" document="ListAttributes" rowContaining="15-Jun-2024 12:30" minRows="1" />
+			<testGridRows module="kitchensink" document="ListAttributes" rowContaining="31-Dec-2024 18:45" maxRows="0" />
+			<listGridFilter module="kitchensink" document="ListAttributes" column="booleanFlag" />
+			<testGridRows module="kitchensink" document="ListAttributes" rowContaining="01-Jan-2024 09:00" minRows="1" />
+			<testGridRows module="kitchensink" document="ListAttributes" rowContaining="15-Jun-2024 12:30" minRows="1" />
+			<testGridRows module="kitchensink" document="ListAttributes" rowContaining="31-Dec-2024 18:45" minRows="1" />
+			<comment>Dates and date times are typed in the format the column shows</comment>
+			<listGridFilter module="kitchensink" document="ListAttributes" column="date" value="15-Jun-2024" operator="equals" />
+			<testGridRows module="kitchensink" document="ListAttributes" rowContaining="01-Jan-2024 09:00" maxRows="0" />
+			<testGridRows module="kitchensink" document="ListAttributes" rowContaining="15-Jun-2024 12:30" minRows="1" />
+			<testGridRows module="kitchensink" document="ListAttributes" rowContaining="31-Dec-2024 18:45" maxRows="0" />
+			<listGridFilter module="kitchensink" document="ListAttributes" column="date" />
+			<listGridFilter module="kitchensink" document="ListAttributes" column="dateTime" value="31-Dec-2024 18:45" operator="equals" />
+			<testGridRows module="kitchensink" document="ListAttributes" rowContaining="01-Jan-2024 09:00" maxRows="0" />
+			<testGridRows module="kitchensink" document="ListAttributes" rowContaining="15-Jun-2024 12:30" maxRows="0" />
+			<testGridRows module="kitchensink" document="ListAttributes" rowContaining="31-Dec-2024 18:45" minRows="1" />
+			<listGridFilter module="kitchensink" document="ListAttributes" column="dateTime" />
+			<testGridRows module="kitchensink" document="ListAttributes" rowContaining="01-Jan-2024 09:00" minRows="1" />
+			<testGridRows module="kitchensink" document="ListAttributes" rowContaining="15-Jun-2024 12:30" minRows="1" />
+			<testGridRows module="kitchensink" document="ListAttributes" rowContaining="31-Dec-2024 18:45" minRows="1" />
+			<comment>lessThan and greaterThan, and the timestamp column that the list does not show, use the advanced filter</comment>
+			<listGridFilter module="kitchensink" document="ListAttributes" column="date" value="01-Jan-2024" operator="greaterThan" />
+			<testGridRows module="kitchensink" document="ListAttributes" rowContaining="01-Jan-2024 09:00" maxRows="0" />
+			<testGridRows module="kitchensink" document="ListAttributes" rowContaining="15-Jun-2024 12:30" minRows="1" />
+			<testGridRows module="kitchensink" document="ListAttributes" rowContaining="31-Dec-2024 18:45" minRows="1" />
+			<listGridFilter module="kitchensink" document="ListAttributes" column="dateTime" value="31-Dec-2024 18:45" operator="lessThan" />
+			<testGridRows module="kitchensink" document="ListAttributes" rowContaining="01-Jan-2024 09:00" maxRows="0" />
+			<testGridRows module="kitchensink" document="ListAttributes" rowContaining="15-Jun-2024 12:30" minRows="1" />
+			<testGridRows module="kitchensink" document="ListAttributes" rowContaining="31-Dec-2024 18:45" maxRows="0" />
+			<listGridFilter module="kitchensink" document="ListAttributes" column="dateTime" />
+			<listGridFilter module="kitchensink" document="ListAttributes" column="date" />
+			<testGridRows module="kitchensink" document="ListAttributes" rowContaining="01-Jan-2024 09:00" minRows="1" />
+			<testGridRows module="kitchensink" document="ListAttributes" rowContaining="15-Jun-2024 12:30" minRows="1" />
+			<testGridRows module="kitchensink" document="ListAttributes" rowContaining="31-Dec-2024 18:45" minRows="1" />
+			<listGridFilter module="kitchensink" document="ListAttributes" column="timestamp" value="01-Jan-2024 09:00:00" operator="equals" />
+			<testGridRows module="kitchensink" document="ListAttributes" rowContaining="01-Jan-2024 09:00" minRows="1" />
+			<testGridRows module="kitchensink" document="ListAttributes" rowContaining="15-Jun-2024 12:30" maxRows="0" />
+			<testGridRows module="kitchensink" document="ListAttributes" rowContaining="31-Dec-2024 18:45" maxRows="0" />
+			<listGridFilter module="kitchensink" document="ListAttributes" column="timestamp" value="01-Jan-2024 09:00:00" operator="greaterThan" />
+			<testGridRows module="kitchensink" document="ListAttributes" rowContaining="01-Jan-2024 09:00" maxRows="0" />
+			<testGridRows module="kitchensink" document="ListAttributes" rowContaining="15-Jun-2024 12:30" minRows="1" />
+			<testGridRows module="kitchensink" document="ListAttributes" rowContaining="31-Dec-2024 18:45" minRows="1" />
+			<listGridFilter module="kitchensink" document="ListAttributes" column="timestamp" />
+			<comment>In advanced filtering, enum and boolean filters are clauses</comment>
+			<listGridFilter module="kitchensink" document="ListAttributes" column="constantEnum" value="One (1)!" operator="equals" />
+			<testGridRows module="kitchensink" document="ListAttributes" rowContaining="01-Jan-2024 09:00" minRows="1" />
+			<testGridRows module="kitchensink" document="ListAttributes" rowContaining="15-Jun-2024 12:30" maxRows="0" />
+			<testGridRows module="kitchensink" document="ListAttributes" rowContaining="31-Dec-2024 18:45" maxRows="0" />
+			<listGridFilter module="kitchensink" document="ListAttributes" column="booleanFlag" value="false" operator="equals" />
+			<testGridRows module="kitchensink" document="ListAttributes" rowContaining="01-Jan-2024 09:00" maxRows="0" />
+			<testGridRows module="kitchensink" document="ListAttributes" rowContaining="15-Jun-2024 12:30" maxRows="0" />
+			<testGridRows module="kitchensink" document="ListAttributes" rowContaining="31-Dec-2024 18:45" maxRows="0" />
+			<listGridClearFilter module="kitchensink" document="ListAttributes" />
+			<testGridRows module="kitchensink" document="ListAttributes" rowContaining="01-Jan-2024 09:00" minRows="1" />
+			<testGridRows module="kitchensink" document="ListAttributes" rowContaining="15-Jun-2024 12:30" minRows="1" />
+			<testGridRows module="kitchensink" document="ListAttributes" rowContaining="31-Dec-2024 18:45" minRows="1" />
+		</method>
+	</interaction>
+
+	<interaction name="Association and model list grids">
+		<method>
+			<navigateEdit module="kitchensink" document="ModelLookupFixture" />
+			<dataEnter binding="name" value="SAIL association {run}" />
+			<lookupDescriptionPick binding="selection" rowContaining="SAIL filter {run} b" />
+			<save />
+			<comment>An association's filter row cell is a select of records: the value is the record's description</comment>
+			<listGridFilter module="kitchensink" query="qModelLookupFixtures" column="selection" value="SAIL filter {run} b" operator="equals" />
+			<testGridRows module="kitchensink" query="qModelLookupFixtures" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qModelLookupFixtures" rowContaining="SAIL association {run}" minRows="1" maxRows="1" />
+			<listGridFilter module="kitchensink" query="qModelLookupFixtures" column="selection" />
+			<comment>contains on the description through the association is typed into the filter row</comment>
+			<listGridFilter module="kitchensink" query="qModelLookupFixtures" column="selection.description" value="{run} b" />
+			<testGridRows module="kitchensink" query="qModelLookupFixtures" minRows="1" maxRows="1" />
+			<listGridClearFilter module="kitchensink" query="qModelLookupFixtures" />
+			<comment>A model's list grid</comment>
+			<listGridFilter module="kitchensink" document="ModelLookupFixture" model="LookupValuesModel" column="description" value="SAIL filter {run}" />
+			<testGridRows module="kitchensink" document="ModelLookupFixture" model="LookupValuesModel" minRows="3" maxRows="3" />
+			<listGridFilter module="kitchensink" document="ModelLookupFixture" model="LookupValuesModel" column="description" value="SAIL filter {run} c" operator="equals" />
+			<testGridRows module="kitchensink" document="ModelLookupFixture" model="LookupValuesModel" minRows="1" maxRows="1" />
+			<listGridClearFilter module="kitchensink" document="ModelLookupFixture" model="LookupValuesModel" />
+			<comment>A view opened by URL has no Delete button, so delete from the zoomed-in view</comment>
+			<listGridZoom module="kitchensink" query="qModelLookupFixtures" rowContaining="SAIL association {run}" />
+			<delete />
+			<clearContext />
+		</method>
+	</interaction>
+
+	<interaction name="Remove the list attributes">
+		<method>
+			<navigateMenu module="kitchensink" item="List" />
+			<listGridFilter module="kitchensink" document="ListAttributes" column="text" value="SAIL types {run}" />
+			<listGridZoom module="kitchensink" document="ListAttributes" row="0" />
+			<delete />
+			<listGridZoom module="kitchensink" document="ListAttributes" row="0" />
+			<delete />
+			<listGridZoom module="kitchensink" document="ListAttributes" row="0" />
+			<delete />
+			<testGridRows module="kitchensink" document="ListAttributes" maxRows="0" />
+		</method>
+	</interaction>
+
 	<interaction name="Remove the lookup values">
 		<method>
 			<navigateMenu module="kitchensink" item="Lookup values" />
