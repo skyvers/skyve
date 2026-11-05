@@ -21,6 +21,20 @@
 			<c:property key="componentBuilderClass">faces</c:property>
 		</properties>
 	</listGrid>
+	<listGrid query="qListGridFixtureVueAttributes"
+				title="Vue list grid of column types"
+				continueConversation="false">
+		<properties>
+			<c:property key="componentBuilderClass">vue</c:property>
+		</properties>
+	</listGrid>
+	<listGrid query="qListGridFixtureFacesAttributes"
+				title="PrimeFaces data table of column types"
+				continueConversation="false">
+		<properties>
+			<c:property key="componentBuilderClass">faces</c:property>
+		</properties>
+	</listGrid>
 	<actions>
 		<defaults />
 	</actions>
