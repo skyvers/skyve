@@ -443,7 +443,7 @@ afterwards.
 | Enum, constant domain | `equals`, `notEquals`, from the menu's drop-down | `equals`, from the filter's combo | `equals`, from the filter row's select |
 | Boolean | `equals`, `notEquals`, with the three-state check box | `equals`, with the filter's check box | `equals`, with the filter row's three-state check box |
 | Date, dateTime, timestamp | `equals`, `notEquals`, `lessThan` (Before), `greaterThan` (After) | `equals` only | `equals` in the filter row; `lessThan` and `greaterThan` in the advanced filter |
-| Time | `equals` | `equals` only | fails: SmartClient sends a time filter as a date, and the server rejects it (runtime issue SC-9) |
+| Time | `equals` | `equals` only | `equals` in the filter row (not yet run); `lessThan`, `greaterThan` and hidden columns fail in the advanced filter (runtime issue SC-9) |
 | Association | as text, on its business key | as text | `equals`, by the related record's description, from the filter row's select. Use a column through the association, such as `selection.description`, for `contains` |
 
 **PF details.** The Vue list grid uses each column's filter menu. A new filter
