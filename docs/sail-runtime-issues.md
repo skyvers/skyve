@@ -251,7 +251,7 @@ The PF file notes the bug in a comment.
 
 **Status:** open.
 
-## P7: A Vue list grid restores a selection without its selected action
+## P7 (by design): A Vue list grid restores a selection without its selected action
 
 **Symptom.** In PrimeFaces, a list grid with a `selectedIdBinding` can show a
 row as selected when its view opens, although the view's selected id binding
@@ -298,7 +298,10 @@ The step fails if the row does not show as selected afterwards. See
 `54410fc95f`. The PF admin suite selects the backup row in 04-devops and
 again in 99-restore.
 
-**Status:** open.
+**Status:** by design (Mike, 2026-11-05). The grid restores its selection so
+that, after zooming into a row and coming back with OK or Cancel, the user can
+see which row they came from. Selected actions stay disabled until the row is
+selected again, which the suites' workaround does.
 
 ## P8: An action upload page left open hides later error messages
 
