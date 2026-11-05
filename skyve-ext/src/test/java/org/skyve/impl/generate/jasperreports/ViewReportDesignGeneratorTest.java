@@ -125,4 +125,17 @@ class ViewReportDesignGeneratorTest {
 				.count();
 		assertTrue(detailCount >= 1);
 	}
+
+	@Test
+	void createTitleBandForAReportThrowsWhenTheViewHasNoTitle() {
+		DesignSpecification design = new DesignSpecification();
+		design.setName("Untitled");
+		design.setReportType(DesignSpecification.ReportType.report);
+		when(mockVisitor.getViewTitle()).thenReturn(null);
+		ViewReportDesignGenerator gen = new ViewReportDesignGenerator(mockVisitor);
+
+		IllegalStateException e = assertThrows(IllegalStateException.class, () -> gen.createTitleBand(design));
+
+		assertTrue(e.getMessage().equals("The view for report design Untitled has no title"), e.getMessage());
+	}
 }

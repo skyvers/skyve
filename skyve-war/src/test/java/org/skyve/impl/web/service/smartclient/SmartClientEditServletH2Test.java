@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
+import java.util.UUID;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -133,6 +134,76 @@ class SmartClientEditServletH2Test extends AbstractSkyveTest {
 
 		assertTrue(response.body().contains("\"status\":-1"), response.body());
 		assertTrue(response.body().contains("\"totalRows\":0"), response.body());
+	}
+
+	@Test
+	void aCachedConversationWithoutPersistenceIsAnUnexpectedError() throws Exception {
+		RequestBuilder request = newRequest(u);
+		String webId = request.cacheConversation(AllAttributesPersistent.newInstance(), null);
+
+		CapturedResponse response = service(request
+				.param("_operationType", Operation.fetch.toString())
+				.param(AbstractWebContext.CONTEXT_NAME, webId)
+				.param(AbstractWebContext.MODULE_NAME, AllAttributesPersistent.MODULE_NAME)
+				.param(AbstractWebContext.DOCUMENT_NAME, AllAttributesPersistent.DOCUMENT_NAME)).doGet();
+
+		assertUnexpectedFetchError(response.body());
+	}
+
+	@Test
+	void aFormBindingWithoutAConversationIsMalformed() throws Exception {
+		CapturedResponse response = service(newRequest(u)
+				.param("_operationType", Operation.fetch.toString())
+				.param(AbstractWebContext.BINDING_NAME, AllAttributesPersistent.aggregatedAssociationPropertyName)
+				.param(AbstractWebContext.MODULE_NAME, AllAttributesPersistent.MODULE_NAME)
+				.param(AbstractWebContext.DOCUMENT_NAME, AllAttributesPersistent.DOCUMENT_NAME)).doGet();
+
+		assertUnexpectedFetchError(response.body());
+	}
+
+	@Test
+	void aRequestWithoutAModuleAndDocumentIsMalformed() throws Exception {
+		CapturedResponse response = service(newRequest(u)
+				.param("_operationType", Operation.fetch.toString())).doGet();
+
+		assertUnexpectedFetchError(response.body());
+	}
+
+	@Test
+	void aGridBindingWithoutARowBizIdIsMalformed() throws Exception {
+		RequestBuilder request = newRequest(u);
+		String webId = request.cacheConversation(AllAttributesPersistent.newInstance(), AbstractPersistence.get());
+
+		CapturedResponse response = service(request
+				.param("_operationType", Operation.fetch.toString())
+				.param(AbstractWebContext.CONTEXT_NAME, webId)
+				.param(AbstractWebContext.GRID_BINDING_NAME, AllAttributesPersistent.inverseAggregatedAssociationPropertyName)
+				.param(AbstractWebContext.MODULE_NAME, AllAttributesPersistent.MODULE_NAME)
+				.param(AbstractWebContext.DOCUMENT_NAME, AllAttributesPersistent.DOCUMENT_NAME)).doGet();
+
+		assertUnexpectedFetchError(response.body());
+	}
+
+	@Test
+	void fetchOfASubFormWithoutAContextBeanIsAnInvariantFailure() {
+		String formBinding = AllAttributesPersistent.aggregatedAssociationPropertyName;
+
+		IllegalStateException e = assertThrows(IllegalStateException.class,
+												() -> invokeSubFormFetch(null, formBinding, null));
+
+		assertEquals("No context bean for the sub form with binding " + formBinding, e.getMessage());
+	}
+
+	@Test
+	void fetchOfAnExistingSubFormBeanThatIsNotThereIsAnError() {
+		AllAttributesPersistent contextBean = AllAttributesPersistent.newInstance(); // no aggregated association
+
+		ServletException e = assertThrows(ServletException.class,
+											() -> invokeSubFormFetch(contextBean,
+																		AllAttributesPersistent.aggregatedAssociationPropertyName,
+																		"missing-bizId"));
+
+		assertEquals("processBean is null", e.getMessage());
 	}
 
 	@Test
@@ -443,6 +514,59 @@ class SmartClientEditServletH2Test extends AbstractSkyveTest {
 		return sink.toString();
 	}
 
+	/**
+	 * Fetches the aggregated association of a context bean, as a zoom in from its form does.
+	 */
+	private void invokeSubFormFetch(Bean contextBean, String formBinding, String bizId) throws Exception {
+		AbstractWebContext webContext = mockWebContext();
+		webContext.setConversation((AbstractPersistence) p);
+		try (PrintWriter writer = new PrintWriter(new StringWriter(), true)) {
+			Method fetch = SmartClientEditServlet.class.getDeclaredMethod("fetch",
+					AbstractWebContext.class,
+					org.skyve.metadata.user.User.class,
+					org.skyve.metadata.customer.Customer.class,
+					Bean.class,
+					org.skyve.metadata.module.Module.class,
+					org.skyve.metadata.model.document.Document.class,
+					String.class,
+					String.class,
+					String.class,
+					int.class,
+					int.class,
+					ImplicitActionName.class,
+					SortedMap.class,
+					AbstractPersistence.class,
+					String.class,
+					PrintWriter.class);
+			fetch.setAccessible(true);
+			try {
+				fetch.invoke(null,
+						webContext,
+						u,
+						c,
+						contextBean,
+						m,
+						aapd,
+						formBinding,
+						null,
+						bizId,
+						Integer.valueOf(0),
+						Integer.valueOf(0),
+						null,
+						new TreeMap<>(),
+						p,
+						UXUI,
+						writer);
+			} catch (InvocationTargetException e) {
+				Throwable cause = e.getCause();
+				if (cause instanceof Exception exception) {
+					throw exception;
+				}
+				throw e;
+			}
+		}
+	}
+
 	private String invokeRemove(PersistentBean beanToDelete) throws Exception {
 		AbstractWebContext webContext = mockWebContext();
 		webContext.setConversation((AbstractPersistence) p);
@@ -478,6 +602,15 @@ class SmartClientEditServletH2Test extends AbstractSkyveTest {
 			}
 		}
 		return sink.toString();
+	}
+
+	/**
+	 * Asserts the fetch failed unexpectedly, so the response shows the generic message with a support reference.
+	 */
+	private static void assertUnexpectedFetchError(String body) {
+		assertTrue(body.contains("\"status\":-1"), body);
+		assertTrue(body.contains("\"totalRows\":0"), body);
+		assertTrue(body.contains(" Reference: "), body);
 	}
 
 	private static void assertSuccessfulEditFetch(String body) {
@@ -543,6 +676,21 @@ class SmartClientEditServletH2Test extends AbstractSkyveTest {
 		private RequestBuilder param(String name, String value) {
 			parameters.put(name, new String[] { value });
 			return this;
+		}
+
+		/**
+		 * Caches a conversation in this request's session on a bean, as a previous request leaves it.
+		 *
+		 * @return	The conversation's web id, which the client sends with the request.
+		 */
+		private String cacheConversation(Bean bean, AbstractPersistence conversation) {
+			HttpServletRequest request = mock(HttpServletRequest.class);
+			when(request.getSession(false)).thenReturn(session);
+			SmartClientWebContext webContext = new SmartClientWebContext(UUID.randomUUID().toString(), request);
+			webContext.setConversation(conversation);
+			webContext.setCurrentBean(bean);
+			webContext.cacheConversationAndCycleTransaction();
+			return webContext.getWebId();
 		}
 
 		private HttpServletRequest build() {

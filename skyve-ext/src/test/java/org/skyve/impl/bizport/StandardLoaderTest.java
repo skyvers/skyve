@@ -907,6 +907,98 @@ public class StandardLoaderTest {
 		verify(sheet).addErrorAtCurrentRow(problems, idColumn, "Missing column");
 	}
 
+	@Test
+	public void populateThrowsWhenTheWorkbookHasNoSheetForOneOfItsKeys() {
+		BizPortWorkbook workbook = mock(BizPortWorkbook.class);
+		SheetKey orderKey = new SheetKey("sales", "Order");
+		when(workbook.getSheetKeys()).thenReturn(new LinkedHashSet<>(List.of(orderKey)));
+		when(workbook.getSheet(orderKey)).thenReturn(null);
+		StandardLoader loader = new StandardLoader(workbook, new UploadException());
+		Persistence persistence = mock(Persistence.class);
+		User user = mock(User.class);
+		when(persistence.getUser()).thenReturn(user);
+		when(user.getCustomer()).thenReturn(mock(Customer.class));
+
+		IllegalStateException e = org.junit.Assert.assertThrows(IllegalStateException.class, () -> loader.populate(persistence));
+
+		assertTrue(e.getMessage().startsWith("The workbook has no sheet for "));
+	}
+
+	@Test
+	public void linkParentFromRowThrowsWhenTheSheetHasNoParentColumn() {
+		UploadException problems = new UploadException();
+		StandardLoader loader = new StandardLoader(mockWorkbook(), problems);
+		BizPortSheet sheet = parentLinkSheet(problems, "P1", "C1");
+		when(sheet.getColumn(ChildBean.PARENT_NAME)).thenReturn(null);
+		when(sheet.getTitle()).thenReturn("Lines");
+
+		Throwable cause = invocationFailure(() -> invokeLinkParentFromRow(loader, sheet, mock(Customer.class), document("sales", "Line"), "lines"));
+
+		assertTrue(cause instanceof IllegalStateException);
+		assertEquals("Sheet Lines has no " + ChildBean.PARENT_NAME + " column", cause.getMessage());
+	}
+
+	@Test
+	public void linkAssociationsFromRowThrowsWhenTheSheetHasNoColumnForAFilledAssociation() {
+		UploadException problems = new UploadException();
+		StandardLoader loader = new StandardLoader(mockWorkbook(), problems);
+		BizPortSheet sheet = associationSheet(problems, "customer", "C1");
+		when(sheet.getColumn("customer")).thenReturn(null);
+		when(sheet.getTitle()).thenReturn("Orders");
+		Association association = association("customer", "Customer");
+
+		Throwable cause = invocationFailure(() -> invokeLinkAssociationsFromRow(loader, sheet, mock(Customer.class), mock(Module.class), mock(Bean.class), List.of(association)));
+
+		assertTrue(cause instanceof IllegalStateException);
+		assertEquals("Sheet Orders has no customer column", cause.getMessage());
+	}
+
+	@Test
+	public void populateCollectionFromRowThrowsWhenTheSheetHasNoOwnerColumn() {
+		UploadException problems = new UploadException();
+		StandardLoader loader = new StandardLoader(mockWorkbook(), problems);
+		BizPortSheet sheet = collectionSheet(problems, "O1", "E1");
+		when(sheet.getColumn(PersistentBean.OWNER_COLUMN_NAME)).thenReturn(null);
+		when(sheet.getTitle()).thenReturn("Items");
+
+		Throwable cause = invocationFailure(() -> invokePopulateCollectionFromRow(loader, "items", document("sales", "Order"), document("sales", "Line"), sheet));
+
+		assertTrue(cause instanceof IllegalStateException);
+		assertEquals("Sheet Items has no " + PersistentBean.OWNER_COLUMN_NAME + " column", cause.getMessage());
+	}
+
+	@SuppressWarnings("null") // a null here fails the test
+	@Test
+	public void populateCollectionFromRowThrowsWhenTheSheetHasNoElementColumn() throws Exception {
+		UploadException problems = new UploadException();
+		BizPortWorkbook workbook = mockWorkbook();
+		StandardLoader loader = new StandardLoader(workbook, problems);
+		Document ownerDocument = document("sales", "Order");
+		BizPortSheet sheet = collectionSheet(problems, "O1", "E1");
+		BizPortColumn ownerColumn = sheet.getColumn(PersistentBean.OWNER_COLUMN_NAME);
+		SheetKey ownerKey = new SheetKey("sales", "Order");
+		ownerColumn.setReferencedSheet(ownerKey);
+		when(workbook.getSheet(ownerKey)).thenReturn(mock(BizPortSheet.class));
+		when(sheet.getColumn(PersistentBean.ELEMENT_COLUMN_NAME)).thenReturn(null);
+		when(sheet.getTitle()).thenReturn("Items");
+		putMappedBean(loader, ownerDocument, "O1", mock(Bean.class));
+
+		Throwable cause = invocationFailure(() -> invokePopulateCollectionFromRow(loader, "items", ownerDocument, document("sales", "Line"), sheet));
+
+		assertTrue(cause instanceof IllegalStateException);
+		assertEquals("Sheet Items has no " + PersistentBean.ELEMENT_COLUMN_NAME + " column", cause.getMessage());
+	}
+
+	/**
+	 * Runs a reflective invocation of a private StandardLoader method that is expected to fail.
+	 *
+	 * @return	The exception thrown by the invoked method.
+	 */
+	private static Throwable invocationFailure(org.junit.function.ThrowingRunnable invocation) {
+		java.lang.reflect.InvocationTargetException e = org.junit.Assert.assertThrows(java.lang.reflect.InvocationTargetException.class, invocation);
+		return e.getCause();
+	}
+
 	private static Document document(String moduleName, String documentName) {
 		Document document = mock(Document.class);
 		when(document.getOwningModuleName()).thenReturn(moduleName);

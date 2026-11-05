@@ -13,6 +13,7 @@ import org.skyve.impl.metadata.model.InterfaceImpl;
 import org.skyve.impl.metadata.model.document.AssociationImpl;
 import org.skyve.impl.metadata.model.document.CollectionImpl;
 import org.skyve.impl.metadata.model.document.InverseMany;
+import org.skyve.impl.metadata.model.document.UniqueConstraintImpl;
 import org.skyve.impl.metadata.model.document.field.Date;
 import org.skyve.impl.metadata.model.document.field.DateTime;
 import org.skyve.impl.metadata.model.document.field.Decimal2;
@@ -1338,5 +1339,166 @@ class DocumentMetaDataTest {
 		org.skyve.metadata.model.document.Document result = d.convert("test.TestDoc");
 		assertNotNull(result);
 		assertNotNull(result.getAttribute("myAssoc"));
+	}
+
+	// ── Required values that metadata built in code can omit ─────────────────
+
+	private static void assertConvertFails(DocumentMetaData d, String expectedMessagePart) {
+		MetaDataException e = assertThrows(MetaDataException.class, () -> d.convert("test"));
+		assertTrue(e.getMessage().contains(expectedMessagePart), e.getMessage());
+	}
+
+	private static CollectionImpl aggregationCollection() {
+		CollectionImpl coll = new CollectionImpl();
+		coll.setName("myCollection");
+		coll.setDisplayName("My Collection");
+		coll.setDocumentName("OtherDoc");
+		coll.setType(CollectionType.aggregation);
+		return coll;
+	}
+
+	private static InverseMany inverseMany() {
+		InverseMany inv = new InverseMany();
+		inv.setName("myInverse");
+		inv.setDisplayName("My Inverse");
+		inv.setDocumentName("OtherDoc");
+		inv.setReferenceName("testDoc");
+		return inv;
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void convertThrowsWhenExtendsDocumentIsNull() {
+		DocumentMetaData d = minimalTransientDoc();
+		d.setExtends(new Extends()); // document name is null
+		assertConvertFails(d, "The extends [document] is required");
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void convertThrowsWhenEnumeratedValueCodeIsNull() {
+		DocumentMetaData d = minimalTransientDoc();
+		Enumeration enumAttr = new Enumeration();
+		enumAttr.setName("myEnum");
+		enumAttr.setDisplayName("My Enum");
+		enumAttr.getXmlValues().add(new Enumeration.EnumeratedValue()); // code is null
+		d.getAttributes().add(enumAttr);
+		assertConvertFails(d, "myEnum has a value with no [code] defined.");
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void convertThrowsWhenInverseReferenceNameIsNull() {
+		DocumentMetaData d = minimalTransientDoc();
+		InverseMany inv = new InverseMany();
+		inv.setName("myInverse");
+		inv.setDisplayName("My Inverse");
+		inv.setDocumentName("OtherDoc");
+		// reference name is null
+		d.getAttributes().add(inv);
+		assertConvertFails(d, "The inverse [referenceName] is required for inverse myInverse");
+	}
+
+	@Test
+	@SuppressWarnings({"static-method", "null"}) // passes null on purpose
+	void convertThrowsWhenCollectionTypeIsNull() {
+		DocumentMetaData d = minimalTransientDoc();
+		CollectionImpl coll = aggregationCollection();
+		coll.setType(null);
+		d.getAttributes().add(coll);
+		assertConvertFails(d, "The collection [type] is required for collection myCollection");
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void convertThrowsWhenCollectionOrderingByIsNull() {
+		DocumentMetaData d = minimalTransientDoc();
+		CollectionImpl coll = aggregationCollection();
+		OrderingImpl ordering = new OrderingImpl(); // by is null
+		ordering.setSort(SortDirection.ascending);
+		coll.getOrdering().add(ordering);
+		d.getAttributes().add(coll);
+		assertConvertFails(d, "The collection ordering [by] is required for collection myCollection");
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void convertThrowsWhenCollectionOrderingSortIsNull() {
+		DocumentMetaData d = minimalTransientDoc();
+		CollectionImpl coll = aggregationCollection();
+		OrderingImpl ordering = new OrderingImpl();
+		ordering.setBy("name");
+		// sort is null
+		coll.getOrdering().add(ordering);
+		d.getAttributes().add(coll);
+		assertConvertFails(d, "The collection ordering [sort] is required for collection myCollection");
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void convertThrowsWhenCollectionUniqueConstraintNameIsNull() {
+		DocumentMetaData d = minimalTransientDoc();
+		CollectionImpl coll = aggregationCollection();
+		UniqueConstraintImpl unique = new UniqueConstraintImpl(); // name is null
+		unique.setMessage("Must be unique");
+		coll.getUniqueConstraints().add(unique);
+		d.getAttributes().add(coll);
+		assertConvertFails(d, "The collection unique constraint [name] is required for collection myCollection");
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void convertThrowsWhenCollectionUniqueConstraintMessageIsNull() {
+		DocumentMetaData d = minimalTransientDoc();
+		CollectionImpl coll = aggregationCollection();
+		UniqueConstraintImpl unique = new UniqueConstraintImpl();
+		unique.setName("uniqueThing");
+		// message is null
+		coll.getUniqueConstraints().add(unique);
+		d.getAttributes().add(coll);
+		assertConvertFails(d, "The collection unique constraint [message] is required for constraint uniqueThing in collection myCollection");
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void convertThrowsWhenInverseOrderingByIsNull() {
+		DocumentMetaData d = minimalTransientDoc();
+		InverseMany inv = inverseMany();
+		OrderingImpl ordering = new OrderingImpl(); // by is null
+		ordering.setSort(SortDirection.ascending);
+		inv.getOrdering().add(ordering);
+		d.getAttributes().add(inv);
+		assertConvertFails(d, "The inverse ordering [by] is required for inverse myInverse");
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void convertThrowsWhenInverseOrderingSortIsNull() {
+		DocumentMetaData d = minimalTransientDoc();
+		InverseMany inv = inverseMany();
+		OrderingImpl ordering = new OrderingImpl();
+		ordering.setBy("name");
+		// sort is null
+		inv.getOrdering().add(ordering);
+		d.getAttributes().add(inv);
+		assertConvertFails(d, "The inverse ordering [sort] is required for inverse myInverse");
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void convertThrowsWhenUniqueConstraintScopeIsNull() {
+		DocumentMetaData d = minimalTransientDoc();
+		Persistent persistent = new Persistent();
+		persistent.setName("TST_TestDoc");
+		d.setPersistent(persistent);
+		BizKey bk = new BizKey();
+		bk.setExpression("{name}");
+		d.setBizKey(bk);
+		UniqueConstraint constraint = new UniqueConstraint();
+		constraint.setName("uniqueThing");
+		// scope is null
+		constraint.setMessage("Must be unique");
+		d.getUniqueConstraints().add(constraint);
+		assertConvertFails(d, "The unique constraint [scope] is required for constraint uniqueThing");
 	}
 }

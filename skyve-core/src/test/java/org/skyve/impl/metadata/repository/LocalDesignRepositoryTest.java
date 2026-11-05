@@ -14,18 +14,24 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.lang.reflect.Field;
 import java.sql.Connection;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeSet;
 
 import org.junit.jupiter.api.Test;
 import org.locationtech.jts.geom.Geometry;
 import org.mockito.ArgumentCaptor;
+import org.skyve.impl.metadata.OrderingImpl;
 import org.skyve.impl.metadata.customer.CustomerImpl;
+import org.skyve.impl.metadata.model.document.CollectionImpl;
+import org.skyve.impl.metadata.model.document.DocumentImpl;
 import org.skyve.impl.metadata.model.document.InverseOne;
 import org.skyve.impl.metadata.model.document.field.Enumeration;
+import org.skyve.impl.metadata.module.ModuleImpl;
 import org.skyve.impl.metadata.module.menu.EditItem;
 import org.skyve.impl.metadata.module.menu.ListItem;
 import org.skyve.impl.metadata.module.menu.MapItem;
@@ -41,8 +47,10 @@ import org.skyve.impl.metadata.repository.behaviour.ActionMetaData;
 import org.skyve.impl.metadata.user.ActionPrivilege;
 import org.skyve.impl.metadata.user.RoleImpl;
 import org.skyve.impl.metadata.user.UserImpl;
+import org.skyve.impl.metadata.view.ViewImpl;
 import org.skyve.metadata.MetaData;
 import org.skyve.metadata.MetaDataException;
+import org.skyve.metadata.SortDirection;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.Attribute.AttributeType;
@@ -60,6 +68,9 @@ import org.skyve.metadata.view.View.ViewType;
 import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.metadata.view.model.map.MapModel;
 import org.skyve.impl.metadata.view.container.form.FormLabelLayout;
+
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 
 @SuppressWarnings("static-method")
 class LocalDesignRepositoryTest {
@@ -1039,6 +1050,201 @@ class LocalDesignRepositoryTest {
 
 		MetaDataException e = assertThrows(MetaDataException.class, () -> repository.validateDocumentForGenerateDomain(customer, document));
 		assertEquals("The target [documentName] of Target in Inverse inverse in document admin.Owner cannot be found.", e.getMessage());
+	}
+
+	@Test
+	void resetMenusThrowsWhenAMenuItemHasNoRoleNames() {
+		LocalDesignRepository repository = new LocalDesignRepository();
+		MenuImpl moduleMenu = new MenuImpl();
+		moduleMenu.getItems().add(new RolelessMenuItem());
+		Module module = mock(Module.class);
+		when(module.getName()).thenReturn("admin");
+		when(module.getMenu()).thenReturn(moduleMenu);
+		CustomerImpl customer = mock(CustomerImpl.class);
+		when(customer.getModules()).thenReturn(List.of(module));
+		UserImpl user = mock(UserImpl.class);
+		when(user.getCustomer()).thenReturn(customer);
+
+		IllegalStateException e = assertThrows(IllegalStateException.class, () -> repository.resetMenus(user));
+		assertEquals("Menu item roleless in module admin has no role names", e.getMessage());
+	}
+
+	@Test
+	void validateModuleForGenerateDomainThrowsWhenContentAccessBindingIsInvalid() {
+		LocalDesignRepository repository = org.mockito.Mockito.spy(new LocalDesignRepository());
+		Customer customer = mock(Customer.class);
+		Module module = moduleWithRoleAccess(customer, UserAccess.content("testModule", "Doc", "missing"));
+		when(module.getDocument(customer, "Doc")).thenReturn(mock(Document.class));
+
+		MetaDataException e = assertThrows(MetaDataException.class, () -> repository.validateModuleForGenerateDomain(customer, module));
+		assertTrue(e.getMessage().endsWith("] in module testModule with binding missing is not a valid binding."), e.getMessage());
+	}
+
+	@Test
+	void validateModuleForGenerateDomainThrowsWhenADocumentAccessHasNoDocumentName() {
+		LocalDesignRepository repository = org.mockito.Mockito.spy(new LocalDesignRepository());
+		Customer customer = mock(Customer.class);
+		@SuppressWarnings("null") // passes null on purpose
+		UserAccess access = UserAccess.dynamicImage("testModule", null, "image");
+		Module module = moduleWithRoleAccess(customer, access);
+
+		IllegalStateException e = assertThrows(IllegalStateException.class, () -> repository.validateModuleForGenerateDomain(customer, module));
+		assertTrue(e.getMessage().endsWith("] has no document name"), e.getMessage());
+	}
+
+	@Test
+	void validateModuleForGenerateDomainThrowsWhenAContentAccessHasNoBinding() {
+		LocalDesignRepository repository = org.mockito.Mockito.spy(new LocalDesignRepository());
+		Customer customer = mock(Customer.class);
+		@SuppressWarnings("null") // passes null on purpose
+		UserAccess access = UserAccess.content("testModule", "Doc", null);
+		Module module = moduleWithRoleAccess(customer, access);
+
+		IllegalStateException e = assertThrows(IllegalStateException.class, () -> repository.validateModuleForGenerateDomain(customer, module));
+		assertTrue(e.getMessage().endsWith("] has no component"), e.getMessage());
+	}
+
+	@Test
+	void validateModuleForGenerateDomainThrowsWhenMapItemHasNoGeometryBinding() {
+		LocalDesignRepository repository = org.mockito.Mockito.spy(new LocalDesignRepository());
+		Customer customer = mock(Customer.class);
+		Module module = mock(Module.class);
+		Document document = mock(Document.class);
+
+		MapItem menuItem = new MapItem();
+		menuItem.setName("mapItem");
+		menuItem.setDocumentName("Doc");
+		MenuImpl menu = new MenuImpl();
+		menu.getItems().add(menuItem);
+
+		when(customer.getName()).thenReturn("testCustomer");
+		when(module.getName()).thenReturn("testModule");
+		stubPersistentHomeDocument(customer, module);
+		when(module.getMetadataQueries()).thenReturn(List.of());
+		when(module.getMenu()).thenReturn(menu);
+		when(module.getDocument(customer, "Doc")).thenReturn(document);
+		when(document.getPersistent()).thenReturn(mock(Persistent.class));
+
+		MetaDataException e = assertThrows(MetaDataException.class, () -> repository.validateModuleForGenerateDomain(customer, module));
+		assertEquals("Map Menu [mapItem] in module testModule has no geometryBinding.", e.getMessage());
+	}
+
+	@Test
+	void validateDocumentForGenerateDomainThrowsWhenANamedConditionIsNotDefined() {
+		LocalDesignRepository repository = org.mockito.Mockito.spy(new LocalDesignRepository());
+		CustomerImpl customer = mock(CustomerImpl.class);
+		Document document = mock(Document.class);
+		when(document.getOwningModuleName()).thenReturn("admin");
+		when(document.getName()).thenReturn("Owner");
+		when(document.getConditionNames()).thenReturn(Set.of("active"));
+		doReturn(mock(Module.class)).when(repository).getModule(customer, "admin");
+
+		IllegalStateException e = assertThrows(IllegalStateException.class, () -> repository.validateDocumentForGenerateDomain(customer, document));
+		assertEquals("Condition active in document admin.Owner is named but not defined", e.getMessage());
+	}
+
+	@Test
+	void validateDocumentForGenerateDomainThrowsWhenACollectionOrderingBindingIsInvalid() {
+		LocalDesignRepository repository = org.mockito.Mockito.spy(new LocalDesignRepository());
+		CustomerImpl customer = mock(CustomerImpl.class);
+		Module module = mock(Module.class);
+		Module otherModule = mock(Module.class);
+		Document targetDocument = mock(Document.class);
+		when(targetDocument.getOwningModuleName()).thenReturn("other");
+		when(targetDocument.getName()).thenReturn("Target");
+		when(module.getDocumentRefs()).thenReturn(Map.of("Target", new DocumentRef()));
+		when(module.getDocument(customer, "Target")).thenReturn(targetDocument);
+		doReturn(module).when(repository).getModule(customer, "admin");
+		doReturn(otherModule).when(repository).getModule(customer, "other");
+
+		CollectionImpl collection = new CollectionImpl();
+		collection.setName("items");
+		collection.setDocumentName("Target");
+		collection.getOrdering().add(new OrderingImpl("missing", SortDirection.ascending));
+		Document document = mock(Document.class);
+		when(document.getOwningModuleName()).thenReturn("admin");
+		when(document.getName()).thenReturn("Owner");
+		when(document.getConditionNames()).thenReturn(Set.of());
+		doReturn(List.of(collection)).when(document).getAttributes();
+
+		MetaDataException e = assertThrows(MetaDataException.class, () -> repository.validateDocumentForGenerateDomain(customer, document));
+		assertEquals("The order by binding of missing in collection items in document admin.Owner is invalid", e.getMessage());
+	}
+
+	@Test
+	void validateViewForGenerateDomainThrowsWhenAReportAccessReportDoesNotExist() throws Exception {
+		LocalDesignRepository repository = org.mockito.Mockito.spy(new LocalDesignRepository());
+		CustomerImpl customer = mock(CustomerImpl.class);
+		ModuleImpl module = mock(ModuleImpl.class);
+		when(module.getName()).thenReturn("admin");
+		DocumentImpl document = new DocumentImpl();
+		document.setOwningModuleName("admin");
+		document.setName("Doc");
+		when(customer.getModule("admin")).thenReturn(module);
+		when(module.getDocument(customer, "Doc")).thenReturn(document);
+		doReturn(module).when(repository).getModule(customer, "admin");
+		doReturn(null).when(repository).getReportFileName(customer, document, "missingReport");
+
+		ViewImpl view = new ViewImpl();
+		view.setName("edit");
+		view.setTitle("Edit");
+		Set<UserAccess> accesses = new TreeSet<>();
+		accesses.add(UserAccess.report("admin", "Doc", "missingReport"));
+		Field accessesField = ViewImpl.class.getDeclaredField("accesses");
+		accessesField.setAccessible(true);
+		accessesField.set(view, accesses);
+
+		MetaDataException e = assertThrows(MetaDataException.class, () -> repository.validateViewForGenerateDomain(customer, document, view, "desktop"));
+		assertTrue(e.getMessage().endsWith(" in view edit for module/document/report admin/Doc/missingReport does not exist."), e.getMessage());
+	}
+
+	/**
+	 * Stubs a module whose single role has the given access, with no menu items or queries.
+	 */
+	private static Module moduleWithRoleAccess(Customer customer, UserAccess access) {
+		Module module = mock(Module.class);
+		RoleImpl role = new RoleImpl();
+		role.setName("admin");
+		role.getAccesses().put(access, Set.of());
+		when(customer.getName()).thenReturn("testCustomer");
+		when(module.getName()).thenReturn("testModule");
+		stubPersistentHomeDocument(customer, module);
+		when(module.getMetadataQueries()).thenReturn(List.of());
+		when(module.getMenu()).thenReturn(new MenuImpl());
+		when(module.getRoles()).thenReturn(List.of(role));
+		return module;
+	}
+
+	/**
+	 * A menu item (not a group) that breaks the invariant that menu items have role names.
+	 */
+	private static final class RolelessMenuItem implements MenuItem {
+		private static final long serialVersionUID = 1L;
+
+		@Override
+		public @Nonnull String getName() {
+			return "roleless";
+		}
+
+		@Override
+		public @Nullable Set<String> getRoleNames() {
+			return null;
+		}
+
+		@Override
+		public @Nonnull Set<String> getUxUis() {
+			return Set.of();
+		}
+
+		@Override
+		public boolean isApplicable(@Nonnull String uxui) {
+			return true;
+		}
+
+		@Override
+		public @Nonnull Map<String, String> getProperties() {
+			return Map.of();
+		}
 	}
 
 	/**

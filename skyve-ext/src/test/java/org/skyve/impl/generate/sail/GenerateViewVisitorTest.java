@@ -134,6 +134,26 @@ class GenerateViewVisitorTest {
 	}
 
 	@Test
+	void visitDataGridThrowsForAnAddableGridWithoutABinding() {
+		GenerateViewVisitor visitor = visitor();
+
+		MetaDataException e = assertThrows(MetaDataException.class, () -> visitor.visitDataGrid(new DataGrid(), true, true));
+		assertEquals("A data grid in view create of document Order has no binding", e.getMessage());
+		assertEquals(1, visitor.getPopulateSteps().size());
+	}
+
+	@Test
+	void visitButtonThrowsForANonExistentViewAction() {
+		GenerateViewVisitor visitor = visitor();
+		Button button = new Button();
+		button.setActionName("missing");
+
+		MetaDataException e = assertThrows(MetaDataException.class, () -> visitor.visitButton(button, true, true));
+		assertEquals("Button action missing does not exist in view create of document Order", e.getMessage());
+		assertTrue(visitor.getActionSteps().isEmpty());
+	}
+
+	@Test
 	void actionFlagsOnlyRequirePersistenceForSaveOkAndDelete() {
 		DocumentImpl transientDocument = document(null);
 		GenerateViewVisitor transientVisitor = visitor(transientDocument);

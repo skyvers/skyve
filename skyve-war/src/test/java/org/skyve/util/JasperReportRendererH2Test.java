@@ -100,4 +100,37 @@ class JasperReportRendererH2Test extends AbstractH2Test {
 		// subreport reports produce variables for totals
 		assertThat(jrxml, notNullValue());
 	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void listDesignWithoutAQueryNameRendersTheDocumentDefaultQueryColumns() throws Exception {
+		DesignSpecification list = listSpec();
+		list.setDocumentName(AllAttributesPersistent.DOCUMENT_NAME);
+
+		String jrxml = new JasperReportRenderer(list).getJrxml();
+
+		// the driving document attribute types are carried through to the report fields
+		assertThat(jrxml, containsString("<field name=\"" + AllAttributesPersistent.datePropertyName + "\" class=\"java.util.Date\"/>"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void listDesignWithAQueryNameRendersTheNamedQueryColumns() throws Exception {
+		DesignSpecification list = listSpec();
+		list.setQueryName("qH");
+
+		String jrxml = new JasperReportRenderer(list).getJrxml();
+
+		assertThat(jrxml, containsString("<field name=\"text_display\""));
+	}
+
+	private static DesignSpecification listSpec() {
+		DesignSpecification result = new DesignSpecification();
+		result.setName("list");
+		result.setModuleName(AllAttributesPersistent.MODULE_NAME);
+		result.setWidth(Integer.valueOf(842));
+		result.setHeight(Integer.valueOf(595));
+		result.setDefinitionSource(DesignSpecification.DefinitionSource.list);
+		return result;
+	}
 }

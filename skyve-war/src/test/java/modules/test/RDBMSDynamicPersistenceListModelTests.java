@@ -149,4 +149,28 @@ class RDBMSDynamicPersistenceListModelTests extends AbstractSkyveTest {
 		List<Bean> rows = model.getRows();
 		Assertions.assertEquals(14, rows.size(), "Rows not the right size");
 	}
+
+	@Test
+	void testFieldValueThatCannotBeCoercedIsKeptAsStored() throws Exception {
+		DynamicPersistentBean row = Util.constructRandomInstance(u, m, aadpd, 0);
+		row = p.save(row);
+		String bizId = row.getBizId();
+		// Simulate schema evolution - the stored value of the integer field is no longer an integer
+		String dynamicEntity = RDBMSDynamicPersistenceListModel.getDynamicEntityPersistent(c).getPersistentIdentifier();
+		p.newSQL("update " + dynamicEntity + " set fields = :fields where bizId = :bizId")
+			.putParameter("fields", "{\"" + AllAttributesPersistent.normalIntegerPropertyName + "\":\"notAnInteger\"}", true)
+			.putParameter(Bean.DOCUMENT_ID, bizId, false)
+			.execute();
+
+		List<MetaDataQueryColumn> columns = new ArrayList<>(1);
+		MetaDataQueryProjectedColumnImpl column = new MetaDataQueryProjectedColumnImpl();
+		column.setBinding(AllAttributesPersistent.normalIntegerPropertyName);
+		column.setDisplayName("Integer");
+		columns.add(column);
+		RDBMSDynamicPersistenceListModel<Bean> model = new RDBMSDynamicPersistenceListModel<>("Test", aadpd, columns);
+		model.postConstruct(c, true);
+
+		Bean result = model.getRows().stream().filter(b -> bizId.equals(b.getBizId())).findFirst().orElseThrow();
+		Assertions.assertEquals("notAnInteger", result.getDynamic(AllAttributesPersistent.normalIntegerPropertyName));
+	}
 }

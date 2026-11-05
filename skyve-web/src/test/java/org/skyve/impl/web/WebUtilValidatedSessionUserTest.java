@@ -2,6 +2,8 @@ package org.skyve.impl.web;
 
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -134,6 +136,30 @@ class WebUtilValidatedSessionUserTest {
 
 		assertNull(WebUtil.getValidatedSessionUser(request(session, "demo/someoneElse")));
 		verify(session, never()).invalidate();
+	}
+
+	@Test
+	void returnsNullWithoutInvalidatingWhenPrincipalHasNoName() {
+		UserImpl user = user();
+		HttpSession session = session(user);
+		StateUtil.addSession(USER_ID, session);
+		HttpServletRequest request = request(session, null);
+		when(request.getUserPrincipal()).thenReturn(mock(Principal.class)); // getName() returns null
+
+		assertNull(WebUtil.getValidatedSessionUser(request));
+		verify(session, never()).invalidate();
+	}
+
+	@Test
+	void sessionUserWithoutCustomerNameIsAnInvariantFailure() {
+		UserImpl user = user();
+		user.setCustomerName(null);
+		HttpSession session = session(user);
+		StateUtil.addSession(USER_ID, session);
+		HttpServletRequest request = request(session, "demo/tester");
+
+		IllegalStateException e = assertThrows(IllegalStateException.class, () -> WebUtil.getValidatedSessionUser(request));
+		assertTrue(e.getMessage().contains("has no customer name or user name"), e.getMessage());
 	}
 
 	@Test

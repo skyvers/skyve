@@ -268,6 +268,25 @@ public class POIWorkbookTest {
 	}
 
 	@Test
+	public void writeThrowsWhenASheetHasNoColumnForOneOfItsBindings() throws Exception {
+		POIWorkbook wb = new POIWorkbook(true);
+		POISheet sheet = new POISheet("MySheet");
+		sheet.addColumn("name", new BizPortColumn("Name", null));
+		wb.addSheet(new SheetKey("mod", "doc"), sheet);
+		wb.materialise();
+		// break the invariant that every column binding has a column
+		java.lang.reflect.Field columnsField = POISheet.class.getDeclaredField("columns");
+		columnsField.setAccessible(true);
+		@SuppressWarnings("unchecked")
+		java.util.Map<String, BizPortColumn> columns = (java.util.Map<String, BizPortColumn>) columnsField.get(sheet);
+		columns.put("name", null);
+
+		IllegalStateException e = org.junit.Assert.assertThrows(IllegalStateException.class, () -> wb.write(new ByteArrayOutputStream()));
+
+		assertEquals("Sheet MySheet has no column for binding name", e.getMessage());
+	}
+
+	@Test
 	public void materialiseWithLongTitleTruncatesToValidName() throws Exception {
 		POIWorkbook wb = new POIWorkbook(true);
 		// Title longer than 29 chars (the max allowed by generateValidUniqueSheetTitle)

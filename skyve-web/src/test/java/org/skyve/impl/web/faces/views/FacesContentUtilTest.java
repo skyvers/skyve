@@ -1,5 +1,6 @@
 package org.skyve.impl.web.faces.views;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.CALLS_REAL_METHODS;
 import static org.mockito.Mockito.mock;
@@ -104,6 +105,41 @@ class FacesContentUtilTest {
 				() -> FacesContentUtil.handleFileUpload("test.txt", new byte[] {9}, "text/plain", root, "child.contentId"));
 
 		verify(user).canAccessContent("c1", "admin", "Child", "bizCustomer", "dg3", "bu3", "contentId");
+	}
+
+	@Test
+	void handleFileUploadThrowsWhenContentOwnerHasNoBizCustomer() {
+		assertContentOwnerWithoutIdentityIsRefused(null, "bu4");
+	}
+
+	@Test
+	void handleFileUploadThrowsWhenContentOwnerHasNoBizUserId() {
+		assertContentOwnerWithoutIdentityIsRefused("bizCustomer", null);
+	}
+
+	/**
+	 * Asserts that an upload to a content owner that the user can access, but which lacks a bizCustomer or bizUserId,
+	 * is refused before any content is stored.
+	 */
+	private static void assertContentOwnerWithoutIdentityIsRefused(String bizCustomer, String bizUserId) {
+		User user = mock(User.class);
+		Customer customer = mock(Customer.class);
+		Bean bean = mock(Bean.class);
+		bindPersistenceForUser(user);
+
+		when(user.getCustomer()).thenReturn(customer);
+		when(bean.getBizId()).thenReturn("b4");
+		when(bean.getBizModule()).thenReturn("admin");
+		when(bean.getBizDocument()).thenReturn("Contact");
+		when(bean.getBizCustomer()).thenReturn(bizCustomer);
+		when(bean.getBizUserId()).thenReturn(bizUserId);
+		when(user.canAccessContent("b4", "admin", "Contact", bizCustomer, null, bizUserId, "contentId"))
+				.thenReturn(Boolean.TRUE);
+
+		IllegalStateException e = assertThrows(IllegalStateException.class,
+				() -> FacesContentUtil.handleFileUpload("test.txt", new byte[] {5}, "text/plain", bean, "contentId"));
+
+		assertEquals("Content owner admin.Contact#b4 has no bizCustomer or bizUserId", e.getMessage());
 	}
 
 	private static void bindPersistenceForUser(User user) {

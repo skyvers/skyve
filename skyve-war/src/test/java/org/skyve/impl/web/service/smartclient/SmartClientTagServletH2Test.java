@@ -1,5 +1,6 @@
 package org.skyve.impl.web.service.smartclient;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
@@ -66,6 +67,57 @@ class SmartClientTagServletH2Test extends AbstractSkyveTest {
 
 		assertTrue(response.body().contains("isc.warn('"), response.body());
 		assertTrue(response.body().contains("tag operation was unsuccessful"), response.body());
+	}
+
+	@Test
+	void listWithoutAMenuButtonIdIsAnError() throws Exception {
+		CapturedResponse response = service(newRequest(u)
+				.param("a", "L")).doGet();
+
+		assertUnexpectedWarning(response.body());
+	}
+
+	@Test
+	void untagWithoutCriteriaIsAnError() throws Exception {
+		CapturedResponse response = service(newRequest(u)
+				.param("a", "U")
+				.param("t", "tag-1")
+				.param("d", "admin_qContacts")).doGet();
+
+		assertUnexpectedWarning(response.body());
+	}
+
+	@Test
+	void clearWithoutATagIsAnError() throws Exception {
+		CapturedResponse response = service(newRequest(u)
+				.param("a", "C")).doGet();
+
+		assertUnexpectedWarning(response.body());
+	}
+
+	@Test
+	void newTagWithoutANameIsAnErrorAndCreatesNoTag() throws Exception {
+		CapturedResponse response = service(newRequest(u)
+				.param("a", "N")).doGet();
+
+		assertUnexpectedWarning(response.body());
+		assertFalse(response.body().contains("{bizId:'"), response.body());
+	}
+
+	@Test
+	void deleteWithoutATagIsAnError() throws Exception {
+		CapturedResponse response = service(newRequest(u)
+				.param("a", "D")).doGet();
+
+		assertUnexpectedWarning(response.body());
+	}
+
+	/**
+	 * Asserts the request failed unexpectedly, so the warning shows the generic message with a support reference.
+	 */
+	private static void assertUnexpectedWarning(String body) {
+		assertTrue(body.startsWith("isc.warn('The tag operation was unsuccessful."), body);
+		assertTrue(body.contains(" Reference: "), body);
 	}
 
 	private static void assertBaseTagMenu(String body) {

@@ -42,6 +42,7 @@ import org.skyve.impl.metadata.view.widget.bound.input.ContentDisplay;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.sail.mock.MockWebContext;
 import org.skyve.impl.util.UtilImpl;
+import org.skyve.impl.web.RequestUxUiSelectionTestUtil;
 import org.skyve.impl.web.faces.views.UnifiedUploadState.UploadAffordance;
 import org.skyve.impl.web.faces.views.UnifiedUploadState.UploadCategory;
 import org.skyve.impl.web.faces.views.UnifiedUploadState.UploadKind;
@@ -49,7 +50,10 @@ import org.skyve.impl.web.faces.views.UnifiedUploadState.UploadMode;
 import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
+import org.skyve.metadata.router.UxUi;
 import org.skyve.metadata.user.User;
+import org.skyve.metadata.user.UserAccess;
+import org.skyve.web.UserAgentType;
 
 import jakarta.faces.application.FacesMessage;
 import jakarta.faces.context.ExternalContext;
@@ -1457,6 +1461,81 @@ class UploadViewsStateTest {
 			}
 		}
 
+		verify(persistence).rollback();
+		verify(context).addMessage(isNull(), any());
+	}
+
+	@Test
+	void contentUploadChecksContentAccessForTheUnsanitisedContentBinding() throws Exception {
+		boolean originalForceNonPersistentCaching = UtilImpl.FORCE_NON_PERSISTENT_CACHING;
+		String originalCacheDirectory = UtilImpl.CACHE_DIRECTORY;
+		SessionCacheConfig originalSessionCache = UtilImpl.SESSION_CACHE;
+		ConversationCacheConfig originalConversationCache = UtilImpl.CONVERSATION_CACHE;
+		Path cacheDirectory = Files.createTempDirectory("content-upload-access-cache");
+		FacesContext context = Mockito.mock(FacesContext.class);
+		ExternalContext externalContext = Mockito.mock(ExternalContext.class);
+		HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
+		HttpSession session = Mockito.mock(HttpSession.class);
+		MockWebContext webContext = new MockWebContext();
+		AbstractPersistence persistence = Mockito.mock(AbstractPersistence.class);
+		User user = Mockito.mock(User.class);
+		HashMap<String, Object> values = new HashMap<>();
+		values.put(Bean.DOCUMENT_ID, "bean-1");
+		Bean bean = new DynamicBean("test", "Doc", values);
+		ContentUploadView view = new ContentUploadView();
+		FileUploadEvent event = Mockito.mock(FileUploadEvent.class);
+		UploadedFile file = Mockito.mock(UploadedFile.class);
+
+		when(context.getExternalContext()).thenReturn(externalContext);
+		when(externalContext.getRequest()).thenReturn(request);
+		when(request.getSession(false)).thenReturn(session);
+		when(session.getId()).thenReturn(webContext.getSessionId());
+		RequestUxUiSelectionTestUtil.install(request,
+												UserAgentType.desktop,
+												false,
+												UxUi.newPrimeFaces(UxUi.DESKTOP_NAME, "editorial", "skyve", "blue"));
+		when(persistence.getUser()).thenReturn(user);
+		// content access is granted, but the user has no customer to check document access with
+		doReturn(Boolean.TRUE).when(user).canAccess(UserAccess.content("test", "Doc", "attachment.contentId"), UxUi.DESKTOP_NAME);
+		FacesContextBridge.setCurrent(context);
+		setField(AbstractUploadView.class, view, "canAccess", Boolean.TRUE);
+		setField(ContentUploadView.class, view, "contentBinding", "attachment_contentId");
+		when(event.getFile()).thenReturn(file);
+		doReturn(Long.valueOf(1024L)).when(file).getSize();
+		when(file.getFileName()).thenReturn("ok.txt");
+		when(file.getContent()).thenReturn(new byte[] {1, 2, 3});
+		when(file.getContentType()).thenReturn("text/plain");
+		webContext.setCurrentBean(bean);
+
+		try {
+			UtilImpl.FORCE_NON_PERSISTENT_CACHING = true;
+			UtilImpl.CACHE_DIRECTORY = cacheDirectory.toString() + File.separator;
+			UtilImpl.SESSION_CACHE = new SessionCacheConfig(100, 10);
+			UtilImpl.CONVERSATION_CACHE = new ConversationCacheConfig(100, 10);
+			DefaultCaching.get().shutdown();
+			DefaultCaching.get().startup();
+			StateUtil.commitAndCacheConversation(webContext);
+			setField(AbstractUploadView.class, view, "context", webContext.getWebId());
+			bindPersistenceToThread(persistence);
+
+			assertDoesNotThrow(() -> view.handleFileUpload(event));
+		}
+		finally {
+			unbindPersistenceFromThread();
+			DefaultCaching.get().shutdown();
+			UtilImpl.FORCE_NON_PERSISTENT_CACHING = originalForceNonPersistentCaching;
+			UtilImpl.CACHE_DIRECTORY = originalCacheDirectory;
+			UtilImpl.SESSION_CACHE = originalSessionCache;
+			UtilImpl.CONVERSATION_CACHE = originalConversationCache;
+			try (Stream<Path> paths = Files.walk(cacheDirectory)) {
+				paths.sorted((a, b) -> b.compareTo(a))
+						.map(Path::toFile)
+						.forEach(File::delete);
+			}
+		}
+
+		verify(user).canAccess(UserAccess.content("test", "Doc", "attachment.contentId"), UxUi.DESKTOP_NAME);
+		verify(user).getCustomer();
 		verify(persistence).rollback();
 		verify(context).addMessage(isNull(), any());
 	}

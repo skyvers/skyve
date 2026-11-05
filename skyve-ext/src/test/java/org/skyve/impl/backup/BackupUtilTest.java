@@ -1307,6 +1307,188 @@ public class BackupUtilTest {
 		}
 	}
 
+	@Test
+	@SuppressWarnings("static-method")
+	public void getTablesThrowsWhenAPersistableDocumentHasNoTableName() throws Exception {
+		GetTablesFixture fixture = new GetTablesFixture(null);
+		fixture.exportReferences();
+
+		Exception e = fixture.getTablesFailure();
+
+		assertTrue(e instanceof MetaDataException);
+		assertThat(e.getMessage(), containsString("MyDoc has persistent metadata with no table name"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void getTablesThrowsWhenAnExportedReferenceHasNoModuleName() throws Exception {
+		GetTablesFixture fixture = new GetTablesFixture("T_DOC");
+		fixture.exportReferences(exportedReference(null, "items", CollectionType.aggregation, mock(Persistent.class)));
+
+		Exception e = fixture.getTablesFailure();
+
+		assertTrue(e instanceof IllegalStateException);
+		assertThat(e.getMessage(), containsString("An exported reference to MyDoc has no module or document name"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void getTablesThrowsWhenAnExportedCollectionReferenceHasNoReferenceFieldName() throws Exception {
+		GetTablesFixture fixture = new GetTablesFixture("T_DOC");
+		fixture.referencedDocument();
+		fixture.exportReferences(exportedReference("mod", null, CollectionType.aggregation, mock(Persistent.class)));
+
+		Exception e = fixture.getTablesFailure();
+
+		assertTrue(e instanceof IllegalStateException);
+		assertThat(e.getMessage(), containsString("The exported reference from mod.RefDoc to MyDoc has no reference field name"));
+	}
+
+	@Test
+	@SuppressWarnings({ "static-method", "boxing" })
+	public void getTablesThrowsWhenAPolymorphicDerivationHasNoTableName() throws Exception {
+		GetTablesFixture fixture = new GetTablesFixture("T_DOC");
+		Document referencedDocument = fixture.referencedDocument();
+		Persistent ownerPersistent = mock(Persistent.class);
+		when(ownerPersistent.isPolymorphicallyMapped()).thenReturn(true);
+		Document derivedDocument = mock(Document.class);
+		Persistent derivedPersistent = mock(Persistent.class);
+		when(derivedDocument.getName()).thenReturn("DerivedDoc");
+		when(derivedDocument.isPersistable()).thenReturn(true);
+		when(derivedDocument.getPersistent()).thenReturn(derivedPersistent);
+		when(derivedPersistent.getPersistentIdentifier()).thenReturn("T_DERIVED");
+		when(fixture.customer.getDerivedDocuments(referencedDocument)).thenReturn(Collections.singletonList("mod.DerivedDoc"));
+		when(fixture.module.getDocument(fixture.customer, "DerivedDoc")).thenReturn(derivedDocument);
+		fixture.exportReferences(exportedReference("mod", "items", CollectionType.aggregation, ownerPersistent));
+
+		Exception e = fixture.getTablesFailure();
+
+		assertTrue(e instanceof MetaDataException);
+		assertThat(e.getMessage(), containsString("DerivedDoc has persistent metadata with no table name"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void getTablesThrowsWhenTheUltimateDocumentOfAJoinedReferenceHasNoTableName() throws Exception {
+		GetTablesFixture fixture = new GetTablesFixture("T_DOC");
+		Document referencedDocument = fixture.referencedDocument();
+		Persistent referencedPersistent = mock(Persistent.class);
+		when(referencedDocument.getPersistent()).thenReturn(referencedPersistent);
+		when(referencedPersistent.getAgnosticIdentifier()).thenReturn("T_REF");
+		Persistent ownerPersistent = mock(Persistent.class);
+		when(ownerPersistent.getStrategy()).thenReturn(Persistent.ExtensionStrategy.joined);
+		fixture.exportReferences(exportedReference("mod", "items", CollectionType.aggregation, ownerPersistent));
+
+		Exception e = fixture.getTablesFailure();
+
+		assertTrue(e instanceof MetaDataException);
+		assertThat(e.getMessage(), containsString("RefDoc has persistent metadata with no table name"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	public void getTablesThrowsWhenANonPolymorphicReferenceOwnerHasNoTableName() throws Exception {
+		GetTablesFixture fixture = new GetTablesFixture("T_DOC");
+		fixture.referencedDocument();
+		Persistent ownerPersistent = mock(Persistent.class);
+		when(ownerPersistent.getPersistentIdentifier()).thenReturn("T_OWNER");
+		fixture.exportReferences(exportedReference("mod", "items", CollectionType.aggregation, ownerPersistent));
+
+		Exception e = fixture.getTablesFailure();
+
+		assertTrue(e instanceof MetaDataException);
+		assertThat(e.getMessage(), containsString("RefDoc has persistent metadata with no table name"));
+	}
+
+	private static ExportedReference exportedReference(String moduleName, String referenceFieldName, CollectionType type, Persistent persistent) {
+		ExportedReference result = new ExportedReference();
+		result.setModuleName(moduleName);
+		result.setDocumentName("RefDoc");
+		result.setReferenceFieldName(referenceFieldName);
+		result.setType(type);
+		result.setPersistent(persistent);
+		return result;
+	}
+
+	/**
+	 * A customer with module "mod" holding the static persistent document "MyDoc", optionally exporting references
+	 * to the document "RefDoc" whose collection "items" points at "MyDoc".
+	 */
+	private static final class GetTablesFixture {
+		final ProvidedRepository repository = mock(ProvidedRepository.class);
+		final AbstractPersistence persistence = mock(AbstractPersistence.class);
+		final CustomerImpl customer = mock(CustomerImpl.class);
+		final Module module = mock(Module.class);
+		final Document document = mock(Document.class);
+
+		@SuppressWarnings("boxing")
+		GetTablesFixture(String agnosticIdentifier) {
+			User user = mock(User.class);
+			DocumentRef documentRef = mock(DocumentRef.class);
+			Persistent persistent = mock(Persistent.class);
+			Map<String, DocumentRef> refs = new HashMap<>();
+			refs.put("MyDoc", documentRef);
+
+			when(persistence.getUser()).thenReturn(user);
+			when(user.getCustomer()).thenReturn(customer);
+			when(customer.getModules()).thenReturn(Collections.singletonList(module));
+			when(customer.getModule("mod")).thenReturn(module);
+			when(module.getName()).thenReturn("mod");
+			when(module.getDocumentRefs()).thenReturn(refs);
+			when(module.getDocument(customer, "MyDoc")).thenReturn(document);
+			when(documentRef.getOwningModuleName()).thenReturn("mod");
+			when(document.getName()).thenReturn("MyDoc");
+			when(document.isDynamic()).thenReturn(false);
+			when(document.isPersistable()).thenReturn(true);
+			when(document.getPersistent()).thenReturn(persistent);
+			when(document.getOwningModuleName()).thenReturn("mod");
+			when(document.getAllAttributes(customer)).thenReturn(Collections.emptyList());
+			when(document.getBizKeySensitity()).thenReturn(org.skyve.metadata.model.Attribute.Sensitivity.none);
+			when(persistent.getAgnosticIdentifier()).thenReturn(agnosticIdentifier);
+			when(persistent.getPersistentIdentifier()).thenReturn("T_DOC");
+			when(repository.findNearestPersistentSingleOrJoinedSuperDocument(customer, module, document)).thenReturn(document);
+		}
+
+		void exportReferences(ExportedReference... references) {
+			when(customer.getExportedReferences(document)).thenReturn(Arrays.asList(references));
+		}
+
+		@SuppressWarnings("boxing")
+		Document referencedDocument() {
+			Document result = mock(Document.class);
+			org.skyve.metadata.model.document.Collection collection = mock(org.skyve.metadata.model.document.Collection.class);
+			when(module.getDocument(customer, "RefDoc")).thenReturn(result);
+			when(result.getName()).thenReturn("RefDoc");
+			when(result.isDynamic()).thenReturn(false);
+			when(result.getNullSafeReferenceByName("items")).thenReturn(collection);
+			when(collection.isPersistent()).thenReturn(true);
+			return result;
+		}
+
+		Exception getTablesFailure() throws Exception {
+			ProvidedRepository previousRepository = ProvidedRepositoryFactory.get();
+			ProvidedRepositoryFactory.set(repository);
+			try {
+				Exception[] failure = new Exception[1];
+				withThreadLocalPersistence(persistence, () -> {
+					try {
+						BackupUtil.getTables();
+					}
+					catch (Exception e) {
+						failure[0] = e;
+					}
+				});
+				if (failure[0] == null) {
+					throw new AssertionError("Expected BackupUtil.getTables() to fail");
+				}
+				return failure[0];
+			}
+			finally {
+				ProvidedRepositoryFactory.set(previousRepository);
+			}
+		}
+	}
+
 	private static void withThreadLocalPersistence(AbstractPersistence persistence, ThrowingRunnable runnable) throws Exception {
 		ThreadLocal<AbstractPersistence> threadLocal = getThreadLocalPersistence();
 		AbstractPersistence previous = threadLocal.get();

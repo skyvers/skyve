@@ -5,18 +5,41 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.io.File;
 import java.lang.reflect.Field;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.HashMap;
+import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Test;
+import org.skyve.cache.ConversationCacheConfig;
+import org.skyve.cache.SessionCacheConfig;
 import org.skyve.content.AttachmentContent;
 import org.skyve.domain.Bean;
+import org.skyve.domain.DynamicBean;
+import org.skyve.impl.cache.DefaultCaching;
+import org.skyve.impl.cache.StateUtil;
+import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.sail.mock.MockFacesContext;
+import org.skyve.impl.sail.mock.MockWebContext;
+import org.skyve.impl.util.UtilImpl;
+import org.skyve.impl.web.RequestUxUiSelectionTestUtil;
+import org.skyve.metadata.router.UxUi;
+import org.skyve.metadata.user.User;
+import org.skyve.metadata.user.UserAccess;
+import org.skyve.web.UserAgentType;
 import org.skyve.web.WebContext;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
+
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 
 @SuppressWarnings({ "static-method", "java:S1192", "java:S5960" }) // Repeated values and assertions are test-only.
 class ImageMarkupViewTest {
@@ -125,6 +148,70 @@ class ImageMarkupViewTest {
 			assertDoesNotThrow(view::apply);
 			assertTrue(context.getMessages().hasNext());
 		}
+	}
+
+	@Test
+	@SuppressWarnings("unchecked") // Mockito stubs the generic thread-local accessor
+	void applyChecksContentAccessForTheUnsanitisedContentBinding() throws Exception {
+		boolean originalForceNonPersistentCaching = UtilImpl.FORCE_NON_PERSISTENT_CACHING;
+		String originalCacheDirectory = UtilImpl.CACHE_DIRECTORY;
+		SessionCacheConfig originalSessionCache = UtilImpl.SESSION_CACHE;
+		ConversationCacheConfig originalConversationCache = UtilImpl.CONVERSATION_CACHE;
+		Path cacheDirectory = Files.createTempDirectory("image-markup-access-cache");
+		HttpServletRequest request = mock(HttpServletRequest.class);
+		HttpSession session = mock(HttpSession.class);
+		MockWebContext webContext = new MockWebContext();
+		AbstractPersistence persistence = mock(AbstractPersistence.class);
+		User user = mock(User.class);
+		HashMap<String, Object> values = new HashMap<>();
+		values.put(Bean.DOCUMENT_ID, "bean-1");
+		webContext.setCurrentBean(new DynamicBean("test", "Doc", values));
+		when(request.getSession(false)).thenReturn(session);
+		when(session.getId()).thenReturn(webContext.getSessionId());
+		RequestUxUiSelectionTestUtil.install(request,
+												UserAgentType.desktop,
+												false,
+												UxUi.newPrimeFaces(UxUi.DESKTOP_NAME, "editorial", "skyve", "blue"));
+		when(persistence.getUser()).thenReturn(user);
+		// content access is granted, but the user has no customer to check document access with
+		doReturn(Boolean.TRUE).when(user).canAccess(UserAccess.content("test", "Doc", "attachment.contentId"), UxUi.DESKTOP_NAME);
+		ImageMarkupView view = new ImageMarkupView();
+		setField(view, "canAccess", Boolean.TRUE);
+		view.setContentBindingParameter("attachment_contentId");
+		Field threadLocalPersistence = AbstractPersistence.class.getDeclaredField("threadLocalPersistence");
+		threadLocalPersistence.setAccessible(true);
+
+		try (MockFacesContext context = MockFacesContext.get(request, new MockHttpServletResponse())) {
+			UtilImpl.FORCE_NON_PERSISTENT_CACHING = true;
+			UtilImpl.CACHE_DIRECTORY = cacheDirectory.toString() + File.separator;
+			UtilImpl.SESSION_CACHE = new SessionCacheConfig(100, 10);
+			UtilImpl.CONVERSATION_CACHE = new ConversationCacheConfig(100, 10);
+			DefaultCaching.get().shutdown();
+			DefaultCaching.get().startup();
+			StateUtil.commitAndCacheConversation(webContext);
+			view.setContextParameter(webContext.getWebId());
+			((ThreadLocal<AbstractPersistence>) threadLocalPersistence.get(null)).set(persistence);
+
+			assertDoesNotThrow(view::apply);
+			assertTrue(context.getMessages().hasNext());
+		}
+		finally {
+			((ThreadLocal<AbstractPersistence>) threadLocalPersistence.get(null)).remove();
+			DefaultCaching.get().shutdown();
+			UtilImpl.FORCE_NON_PERSISTENT_CACHING = originalForceNonPersistentCaching;
+			UtilImpl.CACHE_DIRECTORY = originalCacheDirectory;
+			UtilImpl.SESSION_CACHE = originalSessionCache;
+			UtilImpl.CONVERSATION_CACHE = originalConversationCache;
+			try (Stream<Path> paths = Files.walk(cacheDirectory)) {
+				paths.sorted((a, b) -> b.compareTo(a))
+						.map(Path::toFile)
+						.forEach(File::delete);
+			}
+		}
+
+		verify(user).canAccess(UserAccess.content("test", "Doc", "attachment.contentId"), UxUi.DESKTOP_NAME);
+		verify(user).getCustomer();
+		verify(persistence).rollback();
 	}
 
 	@Test

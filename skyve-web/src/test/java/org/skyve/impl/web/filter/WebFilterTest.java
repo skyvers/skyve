@@ -15,6 +15,7 @@ import static org.mockito.Mockito.when;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.Vector;
 import java.util.stream.Stream;
@@ -442,6 +443,42 @@ class WebFilterTest {
 
 		filter.doFilter(request, response, chain);
 		// Not an image content type → passes through
+	}
+
+	@Test
+	void testThumbnailFilterWritesTheThumbnailOfAnImageResponse() throws Exception {
+		FilterConfig config = Assertions.assertDoesNotThrow(() -> mock(FilterConfig.class));
+
+		ThumbnailFilter filter = new ThumbnailFilter();
+		filter.init(config);
+
+		String svg = "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"10\" height=\"10\"/>";
+		HttpServletRequest request = mock(HttpServletRequest.class);
+		HttpServletResponse response = mock(HttpServletResponse.class);
+		// An SVG image is its own thumbnail, so the filter writes the image back as the thumbnail
+		FilterChain chain = (req, res) -> {
+			res.setContentType("image/svg+xml;charset=UTF-8");
+			res.getOutputStream().write(svg.getBytes(StandardCharsets.UTF_8));
+		};
+
+		when(request.getParameter("_w")).thenReturn("64");
+		when(request.getParameter("_h")).thenReturn("64");
+		when(request.getRequestURI()).thenReturn("/test/thumbnail-filter-image.svg");
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		ServletOutputStream sos = new ServletOutputStream() {
+			@Override public void write(int b) { baos.write(b); }
+			@Override public boolean isReady() { return true; }
+			@Override public void setWriteListener(WriteListener l) {
+				// no-op for test stream
+			}
+		};
+		when(response.getOutputStream()).thenReturn(sos);
+
+		filter.doFilter(request, response, chain);
+
+		verify(response).setContentType("image/svg+xml");
+		verify(response).setContentLength(svg.getBytes(StandardCharsets.UTF_8).length);
+		assertEquals(svg, baos.toString(StandardCharsets.UTF_8));
 	}
 
 	@Test

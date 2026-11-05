@@ -10,8 +10,11 @@ import org.junit.jupiter.api.Test;
 import org.skyve.impl.metadata.module.JobMetaDataImpl;
 import org.skyve.impl.metadata.module.menu.CalendarItem;
 import org.skyve.impl.metadata.view.container.form.FormLabelLayout;
+import org.skyve.domain.types.formatters.Formatters;
+import org.skyve.metadata.FormatterName;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.module.Module;
+import org.skyve.metadata.module.query.MetaDataQueryProjectedColumn;
 import org.skyve.metadata.user.DocumentPermission;
 import org.skyve.metadata.view.View.ViewType;
 
@@ -1330,5 +1333,196 @@ class ModuleMetaDataTest {
 		role.getAccesses().add(access2);
 		module.getRoles().add(role);
 		assertThrows(MetaDataException.class, () -> module.convert("test"));
+	}
+
+	// ── Required values that metadata built in code can omit ─────────────────
+
+	private static void assertConvertFails(ModuleMetaData module, String expectedMessagePart) {
+		MetaDataException e = assertThrows(MetaDataException.class, () -> module.convert("test"));
+		assertTrue(e.getMessage().contains(expectedMessagePart), e.getMessage());
+	}
+
+	@Test
+	void convertThrowsWhenJobClassNameIsNull() {
+		ModuleMetaData module = createMinimalModuleMetaData();
+		JobMetaDataImpl job = new JobMetaDataImpl();
+		job.setName("myJob");
+		job.setDisplayName("My Job");
+		// className is null
+		module.getJobs().add(job);
+		assertConvertFails(module, "The [className] for job myJob is required");
+	}
+
+	private static MetaDataQueryProjectedColumnMetaData addProjectedNameColumn(ModuleMetaData module) {
+		MetaDataQueryMetaData q = createMetaDataQuery("myQuery", "TestDocument");
+		MetaDataQueryProjectedColumnMetaData col = new MetaDataQueryProjectedColumnMetaData();
+		col.setBinding("name");
+		q.getColumns().add(col);
+		module.getQueries().add(q);
+		return col;
+	}
+
+	@Test
+	void convertThrowsWhenProjectedColumnHasFormatterAndCustomFormatter() {
+		ModuleMetaData module = createMinimalModuleMetaData();
+		MetaDataQueryProjectedColumnMetaData col = addProjectedNameColumn(module);
+		col.setFormatterName(FormatterName.values()[0]);
+		col.setCustomFormatterName("myFormatter");
+		assertConvertFails(module, "formatter and customFormatter cannot both be defined in column name in query myQuery");
+	}
+
+	@Test
+	void convertSetsFormatterNameOnProjectedColumn() {
+		ModuleMetaData module = createMinimalModuleMetaData();
+		MetaDataQueryProjectedColumnMetaData col = addProjectedNameColumn(module);
+		FormatterName formatterName = FormatterName.values()[0];
+		col.setFormatterName(formatterName);
+		Module result = module.convert("test");
+		MetaDataQueryProjectedColumn column = (MetaDataQueryProjectedColumn) result.getNullSafeMetaDataQuery("myQuery").getColumns().get(0);
+		assertEquals(formatterName, column.getFormatterName());
+		assertNull(column.getCustomFormatterName());
+	}
+
+	@Test
+	void convertSetsCustomFormatterNameOnProjectedColumn() {
+		ModuleMetaData module = createMinimalModuleMetaData();
+		MetaDataQueryProjectedColumnMetaData col = addProjectedNameColumn(module);
+		String customFormatterName = Formatters.getNames().iterator().next();
+		col.setCustomFormatterName(customFormatterName);
+		Module result = module.convert("test");
+		MetaDataQueryProjectedColumn column = (MetaDataQueryProjectedColumn) result.getNullSafeMetaDataQuery("myQuery").getColumns().get(0);
+		assertEquals(customFormatterName, column.getCustomFormatterName());
+		assertNull(column.getFormatterName());
+	}
+
+	@Test
+	void convertThrowsWhenProjectedColumnCustomFormatterIsNotDefined() {
+		ModuleMetaData module = createMinimalModuleMetaData();
+		MetaDataQueryProjectedColumnMetaData col = addProjectedNameColumn(module);
+		col.setCustomFormatterName("noSuchFormatter");
+		assertConvertFails(module, "customFormatter noSuchFormatter is not defined");
+	}
+
+	@Test
+	void convertThrowsWhenContentColumnDisplayIsNull() {
+		ModuleMetaData module = createMinimalModuleMetaData();
+		MetaDataQueryMetaData q = createMetaDataQuery("myQuery", "TestDocument");
+		MetaDataQueryContentColumnMetaData col = new MetaDataQueryContentColumnMetaData();
+		col.setBinding("photo");
+		// display is null
+		q.getColumns().add(col);
+		module.getQueries().add(q);
+		assertConvertFails(module, "The [display] for a content query column is missing in query myQuery");
+	}
+
+	@Test
+	void convertThrowsWhenSQLQueryIsNull() {
+		ModuleMetaData module = createMinimalModuleMetaData();
+		SQLMetaData q = new SQLMetaData();
+		q.setName("mySQL");
+		q.setDescription("desc");
+		// query is null
+		module.getQueries().add(q);
+		assertConvertFails(module, "The [query] for SQL query mySQL is required");
+	}
+
+	@Test
+	void convertThrowsWhenBizQLQueryIsNull() {
+		ModuleMetaData module = createMinimalModuleMetaData();
+		BizQLMetaData q = new BizQLMetaData();
+		q.setName("myBizQL");
+		q.setDescription("desc");
+		// query is null
+		module.getQueries().add(q);
+		assertConvertFails(module, "The [query] for BizQL query myBizQL is required");
+	}
+
+	@Test
+	void convertThrowsWhenQueryImportRefIsNull() {
+		ModuleMetaData module = createMinimalModuleMetaData();
+		MetaDataQueryReferenceMetaData q = new MetaDataQueryReferenceMetaData();
+		q.setModuleRef("otherModule");
+		// ref is null
+		module.getQueries().add(q);
+		assertConvertFails(module, "The [ref] for a query import is required");
+	}
+
+	@Test
+	void convertThrowsWhenQueryImportModuleRefIsNull() {
+		ModuleMetaData module = createMinimalModuleMetaData();
+		MetaDataQueryReferenceMetaData q = new MetaDataQueryReferenceMetaData();
+		q.setRef("otherQuery");
+		// moduleRef is null
+		module.getQueries().add(q);
+		assertConvertFails(module, "The [moduleRef] for query import otherQuery is required");
+	}
+
+	@Test
+	void convertThrowsWhenSQLImportRefIsNull() {
+		ModuleMetaData module = createMinimalModuleMetaData();
+		SQLReferenceMetaData q = new SQLReferenceMetaData();
+		q.setModuleRef("otherModule");
+		// ref is null
+		module.getQueries().add(q);
+		assertConvertFails(module, "The [ref] for an SQL import is required");
+	}
+
+	@Test
+	void convertThrowsWhenSQLImportModuleRefIsNull() {
+		ModuleMetaData module = createMinimalModuleMetaData();
+		SQLReferenceMetaData q = new SQLReferenceMetaData();
+		q.setRef("otherSQL");
+		// moduleRef is null
+		module.getQueries().add(q);
+		assertConvertFails(module, "The [moduleRef] for SQL import otherSQL is required");
+	}
+
+	@Test
+	void convertThrowsWhenBizQLImportRefIsNull() {
+		ModuleMetaData module = createMinimalModuleMetaData();
+		BizQLReferenceMetaData q = new BizQLReferenceMetaData();
+		q.setModuleRef("otherModule");
+		// ref is null
+		module.getQueries().add(q);
+		assertConvertFails(module, "The [ref] for a BizQL import is required");
+	}
+
+	@Test
+	void convertThrowsWhenBizQLImportModuleRefIsNull() {
+		ModuleMetaData module = createMinimalModuleMetaData();
+		BizQLReferenceMetaData q = new BizQLReferenceMetaData();
+		q.setRef("otherBizQL");
+		// moduleRef is null
+		module.getQueries().add(q);
+		assertConvertFails(module, "The [moduleRef] for BizQL import otherBizQL is required");
+	}
+
+	@Test
+	void convertThrowsWhenQueryTypeIsUnrecognised() {
+		ModuleMetaData module = createMinimalModuleMetaData();
+		QueryMetaData q = new QueryMetaData() {
+			private static final long serialVersionUID = 1L;
+		};
+		q.setName("strange");
+		module.getQueries().add(q);
+		assertConvertFails(module, "Unrecognised query type " + q.getClass().getName());
+	}
+
+	@Test
+	void convertThrowsWhenRoleDescriptionIsNull() {
+		ModuleMetaData module = createMinimalModuleMetaData();
+		ModuleRoleMetaData role = new ModuleRoleMetaData();
+		role.setName("viewer");
+		// description is null
+		module.getRoles().add(role);
+		assertConvertFails(module, "The [description] for role viewer is required");
+	}
+
+	@SuppressWarnings("null") // passes null on purpose
+	@Test
+	void convertThrowsWhenMenuIsNull() {
+		ModuleMetaData module = createMinimalModuleMetaData();
+		module.setMenu(null);
+		assertConvertFails(module, "The module [menu] is required");
 	}
 }

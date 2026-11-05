@@ -9,10 +9,15 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.when;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Map;
+import java.util.SortedMap;
+import java.util.TreeMap;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Assertions;
@@ -22,13 +27,19 @@ import org.skyve.domain.HierarchicalBean;
 import org.skyve.domain.PersistentBean;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.messages.ValidationException;
+import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.snapshot.SmartClientFilterOperator;
+import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.DomainType;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
+import org.skyve.metadata.module.query.MetaDataQueryColumn;
 import org.skyve.metadata.user.User;
 import org.skyve.metadata.view.model.list.Filter;
+import org.skyve.metadata.view.model.list.Page;
+import org.skyve.persistence.DocumentQuery.AggregateFunction;
+import org.skyve.web.SortParameter;
 import org.locationtech.jts.geom.Geometry;
 import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.impl.metadata.model.document.field.Text;
@@ -111,6 +122,90 @@ class SmartClientListServletHelperTest {
 																model));
 
 		assertTrue(e.getMessage().contains("does not support filtering"), e.getMessage());
+	}
+
+	@Test
+	void getDrivingDocumentOfAModelWithoutOneIsAnInvariantFailure() throws Exception {
+		ListModel<Bean> model = mock(ListModel.class); // getDrivingDocument() returns null
+		Method method = SmartClientListServlet.class.getDeclaredMethod("getDrivingDocument", ListModel.class);
+		method.setAccessible(true);
+
+		InvocationTargetException e = Assertions.assertThrows(InvocationTargetException.class, () -> method.invoke(null, model));
+
+		IllegalStateException cause = Assertions.assertInstanceOf(IllegalStateException.class, e.getCause());
+		assertTrue(cause.getMessage().endsWith(" has no driving document"), cause.getMessage());
+	}
+
+	@Test
+	void fetchOfAPageWithNoRowsListIsAnInvariantFailure() throws Exception {
+		ListModel<Bean> model = mock(ListModel.class);
+		when(model.fetch()).thenReturn(new Page()); // no rows list
+		AbstractPersistence persistence = persistenceFor(mock(User.class));
+		Method fetch = SmartClientListServlet.class.getDeclaredMethod("fetch",
+																		Module.class,
+																		Document.class,
+																		int.class,
+																		int.class,
+																		SmartClientFilterOperator.class,
+																		String[].class,
+																		SortParameter[].class,
+																		AggregateFunction.class,
+																		boolean.class,
+																		String.class,
+																		SortedMap.class,
+																		AbstractPersistence.class,
+																		PrintWriter.class,
+																		ListModel.class);
+		fetch.setAccessible(true);
+		StringWriter sink = new StringWriter();
+
+		IllegalStateException e = Assertions.assertThrows(IllegalStateException.class,
+															() -> invokeVoid(fetch,
+																				mock(Module.class),
+																				mock(Document.class),
+																				Integer.valueOf(0),
+																				Integer.valueOf(10),
+																				null,
+																				null,
+																				null,
+																				null,
+																				Boolean.FALSE,
+																				null,
+																				new TreeMap<>(),
+																				persistence,
+																				new PrintWriter(sink),
+																				model));
+
+		assertTrue(e.getMessage().endsWith(" fetched a page with no rows list"), e.getMessage());
+		assertEquals("", sink.toString());
+	}
+
+	@Test
+	void updateOfAModelWithAColumnWithoutABindingOrNameIsAMetaDataError() throws Exception {
+		ListModel<Bean> model = mock(ListModel.class);
+		when(model.getDrivingDocument()).thenReturn(mock(Document.class));
+		when(model.getColumns()).thenReturn(java.util.List.of(mock(MetaDataQueryColumn.class))); // no binding or name
+		SortedMap<String, Object> properties = new TreeMap<>(Map.of(Bean.DOCUMENT_ID, "row-1"));
+
+		MetaDataException e = Assertions.assertThrows(MetaDataException.class,
+														() -> invokeUpdate(model, properties, new StringWriter()));
+
+		assertTrue(e.getMessage().endsWith(" has no binding or name"), e.getMessage());
+		verify(model, never()).update(anyString(), org.mockito.ArgumentMatchers.any());
+	}
+
+	@Test
+	void updateOfAModelThatReturnsNoBeanIsAnInvariantFailure() throws Exception {
+		ListModel<Bean> model = mock(ListModel.class); // update() returns null
+		when(model.getDrivingDocument()).thenReturn(mock(Document.class));
+		SortedMap<String, Object> properties = new TreeMap<>(Map.of(Bean.DOCUMENT_ID, "row-1"));
+		StringWriter sink = new StringWriter();
+
+		IllegalStateException e = Assertions.assertThrows(IllegalStateException.class,
+															() -> invokeUpdate(model, properties, sink));
+
+		assertTrue(e.getMessage().endsWith(" returned no bean from update of row-1"), e.getMessage());
+		assertEquals("", sink.toString());
 	}
 
 	@Test
@@ -1425,6 +1520,25 @@ class SmartClientListServletHelperTest {
 	private static Object compoundFilterOperator(String name) throws Exception {
 		Class<?> compoundFilterOperatorClass = Class.forName("org.skyve.impl.snapshot.CompoundFilterOperator");
 		return Enum.valueOf((Class<? extends Enum>) compoundFilterOperatorClass.asSubclass(Enum.class), name);
+	}
+
+	private static void invokeUpdate(ListModel<Bean> model, SortedMap<String, Object> properties, StringWriter sink) throws Exception {
+		Method update = SmartClientListServlet.class.getDeclaredMethod("update",
+																		Module.class,
+																		ListModel.class,
+																		boolean.class,
+																		SortedMap.class,
+																		AbstractPersistence.class,
+																		PrintWriter.class);
+		update.setAccessible(true);
+		invokeVoid(update, mock(Module.class), model, Boolean.FALSE, properties, persistenceFor(mock(User.class)), new PrintWriter(sink));
+	}
+
+	private static AbstractPersistence persistenceFor(User user) {
+		AbstractPersistence result = mock(AbstractPersistence.class);
+		when(result.getUser()).thenReturn(user);
+		when(user.getCustomer()).thenReturn(mock(Customer.class));
+		return result;
 	}
 
 	private static void invokeVoid(Method method, Object... args) throws Exception {

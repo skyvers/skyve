@@ -723,6 +723,43 @@ class CommunicationUtilTest {
 		assertThat(Integer.valueOf(mailService.writeCount), is(Integer.valueOf(0)));
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
+	@Test
+	void testSendThrowsWhenMonitoringBccAndTheAdminUserHasNoContact() throws Exception {
+		CaptureMailService mailService = new CaptureMailService();
+		MailServiceStaticSingleton.set(mailService);
+		AbstractContentManager.IMPLEMENTATION_CLASS = NoOpContentManager.class;
+		configureExecutableCommunication("sender@example.com", "to@example.com", null, true);
+		AbstractPersistence persistence = AbstractPersistence.get();
+		Customer customer = persistence.getUser().getCustomer();
+		Document userDocument = customer.getModule(AppConstants.ADMIN_MODULE_NAME).getDocument(customer, AppConstants.USER_DOCUMENT_NAME);
+		org.skyve.domain.app.admin.User adminUser = persistence.retrieve(userDocument, "admin-user");
+		when(adminUser.getContact()).thenReturn(null);
+
+		IllegalStateException e = assertThrows(IllegalStateException.class,
+				() -> CommunicationUtil.send(communication, CommunicationUtil.RunMode.ACTION, ResponseMode.EXPLICIT, null));
+
+		assertThat(e.getMessage(), is("Admin user admin-user has no contact"));
+		assertThat(Integer.valueOf(mailService.sendCount), is(Integer.valueOf(0)));
+	}
+
+	@Test
+	void testSendThrowsWhenTheCommunicationTemplateHasNoTemplateMarkup() throws Exception {
+		CaptureMailService mailService = new CaptureMailService();
+		CommunicationTemplate template = mock(CommunicationTemplate.class);
+		MailServiceStaticSingleton.set(mailService);
+		AbstractContentManager.IMPLEMENTATION_CLASS = NoOpContentManager.class;
+		configureExecutableCommunication("sender@example.com", "to@example.com", null, false);
+		when(communication.getTemplate()).thenReturn(template);
+		when(template.getTemplate()).thenReturn(null);
+
+		IllegalStateException e = assertThrows(IllegalStateException.class,
+				() -> CommunicationUtil.send(communication, CommunicationUtil.RunMode.ACTION, ResponseMode.EXPLICIT, null));
+
+		assertThat(e.getMessage(), is("The communication template has no template"));
+		assertThat(Integer.valueOf(mailService.sendCount), is(Integer.valueOf(0)));
+	}
+
 	@SuppressWarnings("boxing")
 	private static Communication communicationForResults(ActionType actionType, long count) {
 		Communication communication = mock(Communication.class);

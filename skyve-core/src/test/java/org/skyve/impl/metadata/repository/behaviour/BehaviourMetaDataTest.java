@@ -9,6 +9,12 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
+import org.skyve.impl.metadata.behaviour.IfStatement;
+import org.skyve.impl.metadata.behaviour.InvokeStatement;
+import org.skyve.impl.metadata.behaviour.InvokeStaticStatement;
+import org.skyve.impl.metadata.behaviour.MethodArgument;
+import org.skyve.impl.metadata.behaviour.SetStatement;
+import org.skyve.impl.metadata.repository.behaviour.statement.StatementMetaData;
 import org.skyve.metadata.MetaDataException;
 
 @SuppressWarnings("static-method")
@@ -229,5 +235,101 @@ class BehaviourMetaDataTest {
 		ActionMetaData a = new ActionMetaData();
 		assertDoesNotThrow(() -> a.execute(null));
 	}
-}
 
+	// ---- ActionMetaData.convert() statement validation ----
+
+	private static IfStatement ifStatement(String condition) {
+		IfStatement result = new IfStatement();
+		result.setCondition(condition);
+		return result;
+	}
+
+	private static SetStatement setStatement(String binding, String expression) {
+		SetStatement result = new SetStatement();
+		result.setBinding(binding);
+		result.setExpression(expression);
+		return result;
+	}
+
+	private static MethodArgument argument(String typeName, String expression) {
+		MethodArgument result = new MethodArgument();
+		result.setTypeName(typeName);
+		result.setExpression(expression);
+		return result;
+	}
+
+	private static InvokeStaticStatement invokeStatic(String className, String methodName) {
+		InvokeStaticStatement result = new InvokeStaticStatement();
+		result.setClassName(className);
+		result.setMethodName(methodName);
+		return result;
+	}
+
+	private static ActionMetaData action(StatementMetaData... statements) {
+		ActionMetaData result = new ActionMetaData();
+		result.setName("myAction");
+		for (StatementMetaData statement : statements) {
+			result.getStatements().add(statement);
+		}
+		return result;
+	}
+
+	private static void assertConvertFails(ActionMetaData action, String expectedMessagePart) {
+		MetaDataException e = assertThrows(MetaDataException.class, () -> action.convert("test"));
+		assertTrue(e.getMessage().contains(expectedMessagePart), e.getMessage());
+	}
+
+	@Test
+	void actionConvertValidatesNestedStatements() {
+		IfStatement ifStatement = ifStatement("true");
+		ifStatement.getThenStatements().add(setStatement("name", "'then'"));
+		InvokeStaticStatement invoke = invokeStatic("java.lang.String", "valueOf");
+		invoke.getArguments().add(argument("java.lang.Object", "{name}"));
+		ifStatement.getElseStatements().add(invoke);
+		InvokeStatement invokeMethod = new InvokeStatement();
+		invokeMethod.setMethodName("toString");
+		ActionMetaData a = action(ifStatement, invokeMethod);
+		assertSame(a, a.convert("test"));
+	}
+
+	@Test
+	void actionConvertThrowsWhenIfConditionIsNull() {
+		assertConvertFails(action(ifStatement(null)), "The if [condition] is required for action myAction");
+	}
+
+	@Test
+	void actionConvertThrowsWhenNestedSetBindingIsNull() {
+		IfStatement ifStatement = ifStatement("true");
+		ifStatement.getElseStatements().add(setStatement(null, "'x'"));
+		assertConvertFails(action(ifStatement), "The set [binding] is required for action myAction");
+	}
+
+	@Test
+	void actionConvertThrowsWhenSetExpressionIsNull() {
+		assertConvertFails(action(setStatement("name", null)), "The set [expression] is required for action myAction");
+	}
+
+	@Test
+	void actionConvertThrowsWhenInvokeStaticClassNameIsNull() {
+		assertConvertFails(action(invokeStatic(null, "valueOf")), "The invokeStatic [className] is required for action myAction");
+	}
+
+	@Test
+	void actionConvertThrowsWhenInvokeMethodNameIsNull() {
+		assertConvertFails(action(invokeStatic("java.lang.String", null)), "The invoke [method] is required for action myAction");
+	}
+
+	@Test
+	void actionConvertThrowsWhenArgumentTypeNameIsNull() {
+		InvokeStaticStatement invoke = invokeStatic("java.lang.String", "valueOf");
+		invoke.getArguments().add(argument(null, "{name}"));
+		assertConvertFails(action(invoke), "The argument [typeName] is required for action myAction");
+	}
+
+	@Test
+	void actionConvertThrowsWhenArgumentExpressionIsNull() {
+		InvokeStaticStatement invoke = invokeStatic("java.lang.String", "valueOf");
+		invoke.getArguments().add(argument("java.lang.Object", null));
+		assertConvertFails(action(invoke), "The argument [expression] is required for action myAction");
+	}
+}

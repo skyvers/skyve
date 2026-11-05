@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.awt.Color;
@@ -194,6 +195,17 @@ class ThumbnailTest {
 
 		assertNotNull(t.getBytes());
 		assertEquals(MimeType.png, t.getMimeType());
+	}
+
+	@Test
+	void contentConstructorWithDimensionsThrowsWhenTheContentHasNoContentId() throws IOException {
+		AttachmentContent named = createPngContent();
+		AttachmentContent content = new AttachmentContent("testCustomer", "testModule", "testDocument", null, "testUser", "testId", "testAttr");
+		content.attachment("unsaved.png", MimeType.png, named.getContentBytes());
+
+		IllegalStateException e = assertThrows(IllegalStateException.class, () -> new Thumbnail(content, 4, 4));
+
+		assertEquals("Attachment content has no content ID to cache its thumb nail against", e.getMessage());
 	}
 
 	@Test

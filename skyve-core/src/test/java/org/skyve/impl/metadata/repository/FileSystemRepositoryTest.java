@@ -7,10 +7,13 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.controller.BizExportAction;
 import org.skyve.metadata.controller.BizImportAction;
@@ -38,6 +41,8 @@ import org.skyve.web.WebContext;
 
 import java.awt.image.BufferedImage;
 import java.lang.reflect.Field;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Objects;
@@ -1369,6 +1374,41 @@ class FileSystemRepositoryTest {
 		public void bizImport(org.skyve.bizport.BizPortWorkbook bizPortable,
 				org.skyve.domain.messages.UploadException problems) {
 			// no-op
+		}
+	}
+
+	@Test
+	void getUploadActionThrowsWhenTheClassActionIsNotResolved() {
+		LocalDesignRepository repo = spy(new LocalDesignRepository(basePath));
+		Document document = mock(Document.class);
+		when(document.getName()).thenReturn("MyDoc");
+		doReturn(null).when(repo).getClassAction(null, document, "upload", true, false);
+
+		IllegalStateException e = assertThrows(IllegalStateException.class, () -> repo.getUploadAction(null, document, "upload", false));
+		assertEquals("Upload action upload was not resolved for document MyDoc", e.getMessage());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void defaultConstructorThrowsWhenTheAbsoluteBasePathCannotBeDetermined() throws Exception {
+		Field absoluteBasePathField = UtilImpl.class.getDeclaredField("absoluteBasePath");
+		absoluteBasePathField.setAccessible(true);
+		Object absoluteBasePath = absoluteBasePathField.get(null);
+		String appsJarDirectory = UtilImpl.APPS_JAR_DIRECTORY;
+		Thread thread = Thread.currentThread();
+		ClassLoader contextClassLoader = thread.getContextClassLoader();
+		try (URLClassLoader emptyClassLoader = new URLClassLoader(new URL[0], null)) { // cannot find schemas/common.xsd
+			absoluteBasePathField.set(null, null);
+			UtilImpl.APPS_JAR_DIRECTORY = null;
+			thread.setContextClassLoader(emptyClassLoader);
+
+			MetaDataException e = assertThrows(MetaDataException.class, LocalDesignRepository::new);
+			assertEquals("Cannot determine absolute base path. Where is schemas/common.xsd?", e.getMessage());
+		}
+		finally {
+			thread.setContextClassLoader(contextClassLoader);
+			UtilImpl.APPS_JAR_DIRECTORY = appsJarDirectory;
+			absoluteBasePathField.set(null, absoluteBasePath);
 		}
 	}
 

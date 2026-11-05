@@ -3,14 +3,19 @@ package org.skyve.impl.web.service.smartclient;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.CALLS_REAL_METHODS;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -24,6 +29,7 @@ import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
 import org.skyve.impl.metadata.module.ModuleImpl;
+import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
 import org.skyve.impl.metadata.view.ActionImpl;
 import org.skyve.impl.metadata.view.HorizontalAlignment;
 import org.skyve.impl.metadata.view.Inject;
@@ -49,6 +55,7 @@ import org.skyve.impl.metadata.view.widget.bound.ProgressBar;
 import org.skyve.impl.metadata.view.widget.bound.ZoomIn;
 import org.skyve.impl.metadata.view.widget.bound.input.CheckBox;
 import org.skyve.impl.metadata.view.widget.bound.input.ColourPicker;
+import org.skyve.impl.metadata.view.widget.bound.input.Comparison;
 import org.skyve.impl.metadata.view.widget.bound.input.ContentSignature;
 import org.skyve.impl.metadata.view.widget.bound.input.ContentUpload;
 import org.skyve.impl.metadata.view.widget.bound.input.Geometry;
@@ -61,19 +68,27 @@ import org.skyve.impl.metadata.view.widget.bound.input.Slider;
 import org.skyve.impl.metadata.view.widget.bound.input.Spinner;
 import org.skyve.impl.metadata.view.widget.bound.input.TextArea;
 import org.skyve.impl.metadata.view.widget.bound.input.TextField;
+import org.skyve.impl.metadata.view.widget.bound.tabular.DataRepeater;
 import org.skyve.impl.metadata.view.widget.bound.tabular.ListGrid;
 import org.skyve.impl.metadata.view.widget.bound.tabular.ListRepeater;
 import org.skyve.impl.metadata.view.widget.bound.tabular.TreeGrid;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.web.AbstractWebContext;
 import org.skyve.impl.web.content.ContentMediaClassifier.ContentMediaKind;
+import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Persistent;
+import org.skyve.metadata.model.document.Document;
+import org.skyve.metadata.model.document.Reference;
+import org.skyve.metadata.repository.ProvidedRepository;
 import org.skyve.metadata.user.User;
 import org.skyve.metadata.view.Disableable;
 import org.skyve.metadata.view.Invisible;
 import org.skyve.metadata.view.TextOutput.Sanitisation;
 import org.skyve.metadata.view.View.ViewType;
+import org.skyve.metadata.view.model.comparison.ComparisonComposite;
+import org.skyve.metadata.view.model.comparison.ComparisonModel;
+import org.skyve.metadata.view.model.comparison.ComparisonProperty;
 import org.skyve.metadata.view.widget.FilterParameter;
 import org.skyve.metadata.view.widget.bound.Parameter;
 import org.skyve.util.JSON;
@@ -572,6 +587,103 @@ class ViewJSONManipulatorCoreTest {
 		ViewBindings bindingTree = bindingTree(manipulator);
 		assertTrue(bindingTree.getBindings().contains("approveHidden"));
 		assertTrue(bindingTree.getBindings().contains("approveDisabled"));
+	}
+
+	@Test
+	void visitButtonForAnActionNotInTheViewIsAMetaDataError() {
+		ViewJSONManipulator manipulator = newManipulator(ViewType.edit.toString(), null, 0, 0);
+		Button button = new Button();
+		button.setActionName("missing");
+
+		MetaDataException e = assertThrows(MetaDataException.class, () -> manipulator.visitButton(button, true, true));
+
+		assertEquals("Button action missing is not defined in view edit", e.getMessage());
+	}
+
+	@Test
+	void visitDataRepeaterWithoutABindingIsAMetaDataError() {
+		ViewJSONManipulator manipulator = newManipulator(ViewType.edit.toString(), visibleBean(), 0, 0);
+		DataRepeater repeater = new DataRepeater(); // no binding
+
+		MetaDataException e = assertThrows(MetaDataException.class, () -> manipulator.visitDataRepeater(repeater, true, true));
+
+		assertEquals("A data grid/repeater in view edit has no binding", e.getMessage());
+	}
+
+	@Test
+	void visitComparisonWithoutABindingIsAMetaDataError() {
+		ViewJSONManipulator manipulator = comparisonManipulator(false);
+
+		MetaDataException e = assertThrows(MetaDataException.class, () -> manipulator.visitComparison(new Comparison(), true, true));
+
+		assertEquals("A comparison in view edit has no binding", e.getMessage());
+	}
+
+	@Test
+	void visitComparisonWithoutAModelNameIsAMetaDataError() {
+		ViewJSONManipulator manipulator = comparisonManipulator(false);
+		Comparison comparison = new Comparison();
+		comparison.setBinding("association");
+
+		MetaDataException e = assertThrows(MetaDataException.class, () -> manipulator.visitComparison(comparison, true, true));
+
+		assertEquals("Could not populate the comparison editor [association]", e.getMessage());
+		assertEquals("The comparison [association] has no model name", e.getCause().getMessage());
+	}
+
+	@Test
+	void visitComparisonOfAModelThatProducesNoComparisonIsAMetaDataError() {
+		ViewJSONManipulator manipulator = comparisonManipulator(false);
+		Comparison comparison = new Comparison();
+		comparison.setBinding("association");
+		comparison.setModelName("CompareModel");
+		ProvidedRepository originalRepository = ProvidedRepositoryFactory.get();
+		ProvidedRepository repository = mock(ProvidedRepository.class);
+		ComparisonModel<Bean, Bean> model = mock(ComparisonModel.class); // getComparisonComposite() returns null
+		doReturn(model).when(repository).getComparisonModel(any(), any(), eq("CompareModel"), eq(true));
+		ProvidedRepositoryFactory.set(repository);
+		try {
+			MetaDataException e = assertThrows(MetaDataException.class, () -> manipulator.visitComparison(comparison, true, true));
+
+			assertEquals("Could not populate the comparison editor [association]", e.getMessage());
+			assertEquals("Comparison model [CompareModel] produced no comparison", e.getCause().getMessage());
+		}
+		finally {
+			ProvidedRepositoryFactory.set(originalRepository);
+		}
+	}
+
+	@Test
+	void comparisonBindingsForApplyBindNamedPropertiesAndRejectAChildWithoutAReferenceName() throws Exception {
+		ViewJSONManipulator manipulator = comparisonManipulator(true);
+		ComparisonComposite root = new ComparisonComposite();
+		ComparisonProperty named = new ComparisonProperty();
+		named.setName("text");
+		root.getProperties().add(named);
+		root.getProperties().add(new ComparisonProperty()); // no name, so nothing to bind
+		root.getChildren().add(new ComparisonComposite()); // no reference name
+		DocumentImpl nodeDocument = mock(DocumentImpl.class);
+		when(nodeDocument.getName()).thenReturn("NodeDoc");
+
+		MetaDataException e = assertThrows(MetaDataException.class,
+											() -> invokeAddComparisonBindingsForApply(manipulator, root, nodeDocument));
+
+		assertEquals("A comparison child of document NodeDoc has no reference name", e.getMessage());
+		assertMutableBinding(bindingTree(manipulator), "text", Sanitisation.none);
+	}
+
+	@Test
+	void comparisonBindingsForApplyRejectAChildReachedThroughANonRelation() {
+		ViewJSONManipulator manipulator = comparisonManipulator(true);
+		ComparisonComposite root = new ComparisonComposite();
+		ComparisonComposite child = new ComparisonComposite();
+		child.setReferenceName(Bean.BIZ_KEY); // an implicit attribute, not a relation
+		root.getChildren().add(child);
+
+		MetaDataException e = assertThrows(MetaDataException.class,
+											() -> invokeAddComparisonBindingsForApply(manipulator, root, mock(DocumentImpl.class)));
+
+		assertEquals("No target relation for comparison binding " + Bean.BIZ_KEY, e.getMessage());
 	}
 
 	@Test
@@ -1210,6 +1322,41 @@ class ViewJSONManipulatorCoreTest {
 		protected ContentMediaKind loadContentMediaKind(String contentId) {
 			lookupCount.incrementAndGet();
 			return ContentMediaKind.image;
+		}
+	}
+
+	/**
+	 * A manipulator of an edit view whose document has an "association" reference, for the owner bean.
+	 */
+	private static ViewJSONManipulator comparisonManipulator(boolean forApply) {
+		CustomerImpl customer = mock(CustomerImpl.class);
+		User user = mock(User.class);
+		when(user.getCustomer()).thenReturn(customer);
+		ModuleImpl module = mock(ModuleImpl.class);
+		DocumentImpl document = mock(DocumentImpl.class);
+		Reference reference = mock(Reference.class);
+		when(reference.getDocumentName()).thenReturn("RelatedDoc");
+		when(document.getNullSafeReferenceByName("association")).thenReturn(reference);
+		when(module.getDocument(customer, "RelatedDoc")).thenReturn(mock(DocumentImpl.class));
+		TestOwnerBean owner = new TestOwnerBean();
+		owner.setBizId("owner-1");
+		return new ViewJSONManipulator(user, module, document, testView(ViewType.edit.toString()), "external", owner, 0, 0, forApply);
+	}
+
+	private static void invokeAddComparisonBindingsForApply(ViewJSONManipulator manipulator,
+																ComparisonComposite node,
+																Document nodeDocument)
+	throws Exception {
+		Method method = ViewJSONManipulator.class.getDeclaredMethod("addComparisonBindingsForApply", ComparisonComposite.class, Document.class);
+		method.setAccessible(true);
+		try {
+			method.invoke(manipulator, node, nodeDocument);
+		}
+		catch (InvocationTargetException e) {
+			if (e.getCause() instanceof Exception cause) {
+				throw cause;
+			}
+			throw e;
 		}
 	}
 

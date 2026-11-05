@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.CALLS_REAL_METHODS;
 import static org.mockito.Mockito.any;
@@ -77,6 +78,19 @@ class VueListGridComponentBuilderTest {
 		UIComponent existing = new HtmlPanelGroup();
 
 		assertSame(existing, builder.listGrid(existing, "sales", "Order", "recent", "desktop", null, null, null, null, false));
+	}
+
+	@Test
+	void listGridThrowsWhenTheListModelHasNoDrivingDocument() {
+		ListModel<Bean> model = mock(ListModel.class);
+		when(model.getDrivingDocument()).thenReturn(null);
+		VueListGridComponentBuilder builder = new VueListGridComponentBuilder();
+		ListGrid grid = new ListGrid();
+
+		IllegalStateException e = assertThrows(IllegalStateException.class,
+												() -> builder.listGrid(null, "sales", "Order", "recent", "desktop", model, null, grid, null, false));
+
+		assertEquals("List model " + model.getClass().getName() + " has no driving document", e.getMessage());
 	}
 
 	@Test

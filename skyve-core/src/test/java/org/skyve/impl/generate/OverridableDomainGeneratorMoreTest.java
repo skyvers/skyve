@@ -5070,4 +5070,156 @@ class OverridableDomainGeneratorMoreTest {
 		assertTrue(java.contains("getMtmBackRefsElementById"), "manyToMany should have get-by-id method, got: " + java);
 		assertTrue(java.contains("addMtmBackRefsElement"), "manyToMany should have add method, got: " + java);
 	}
+
+	// ----- null-safety invariants -------------------------------------------
+
+	@Test
+	void generateThrowsWhenACustomerDisappearsAfterPopulatingDataStructures() throws Exception {
+		OverridableDomainGenerator gen = generator();
+		ProvidedRepository repo = mock(ProvidedRepository.class);
+		gen.repository = repo;
+		Customer customer = mock(Customer.class);
+		when(repo.getAllVanillaModuleNames()).thenReturn(java.util.List.of());
+		when(repo.getAllCustomerNames()).thenReturn(java.util.List.of("ghost"));
+		// found while populating the data structures but gone when generating the overrides
+		when(repo.getCustomer("ghost")).thenReturn(customer, (Customer) null);
+
+		MetaDataException e = assertThrows(MetaDataException.class, gen::generate);
+		assertEquals("Customer ghost does not exist.", e.getMessage());
+	}
+
+	@Test
+	void generateThrowsWhenAVanillaModuleIsNotInTheRepository() {
+		OverridableDomainGenerator gen = generator();
+		ProvidedRepository repo = mock(ProvidedRepository.class);
+		gen.repository = repo;
+		when(repo.getAllVanillaModuleNames()).thenReturn(java.util.List.of("ghost"));
+
+		MetaDataException e = assertThrows(MetaDataException.class, gen::generate);
+		assertEquals("Module ghost was not found", e.getMessage());
+	}
+
+	@Test
+	void generateOverriddenOrmThrowsForExportedReferenceWithoutModuleName() throws Exception {
+		OverridableDomainGenerator gen = generator();
+		ProvidedRepository repo = mock(ProvidedRepository.class);
+		injectRepository(gen, repo);
+		setupModuleDocumentVanillaClasses(gen, "sales", java.util.Map.of());
+		setupPersistentPropertyLengths(gen, "OWNER_TABLE_NAMELESS_REF");
+
+		CustomerImpl customer = new CustomerImpl();
+		customer.setName("acme");
+		customer.getModuleEntries().put("sales", null);
+
+		DocumentImpl ownerDoc = newDocument();
+		ownerDoc.setName("OwnerDoc");
+		ownerDoc.setOwningModuleName("sales");
+		ownerDoc.setPersistent(persistentOf("OWNER_TABLE_NAMELESS_REF"));
+
+		org.skyve.impl.metadata.customer.ExportedReference ref = new org.skyve.impl.metadata.customer.ExportedReference();
+		ref.setReferenceFieldName("owner");
+		ref.setDocumentName("Referrer");
+
+		Field exportedField = CustomerImpl.class.getDeclaredField("exportedReferences");
+		exportedField.setAccessible(true);
+		@SuppressWarnings("unchecked")
+		java.util.Map<String, java.util.List<org.skyve.impl.metadata.customer.ExportedReference>> exported =
+				(java.util.Map<String, java.util.List<org.skyve.impl.metadata.customer.ExportedReference>>) exportedField.get(customer);
+		exported.put("sales.OwnerDoc", java.util.List.of(ref));
+
+		Module module = mock(Module.class);
+		when(module.getName()).thenReturn("sales");
+		when(repo.getModule(customer, "sales")).thenReturn(module);
+		when(repo.vtable("acme", "modules/sales/OwnerDoc")).thenReturn(null);
+
+		ProvidedRepository previousRepository = ProvidedRepositoryFactory.get();
+		ProvidedRepositoryFactory.set(repo);
+		try {
+			Method m = declaredMethod("generateOverriddenORM",
+										StringBuilder.class,
+										Customer.class,
+										Module.class,
+										Document.class,
+										StringBuilder.class);
+			StringBuilder contents = new StringBuilder();
+			StringBuilder filterDefs = new StringBuilder();
+			InvocationTargetException e = assertThrows(InvocationTargetException.class,
+														() -> m.invoke(gen, contents, customer, module, ownerDoc, filterDefs));
+			assertTrue(e.getCause() instanceof IllegalStateException);
+			assertEquals("Exported reference owner to document sales.OwnerDoc has no module or document name",
+							e.getCause().getMessage());
+		}
+		finally {
+			ProvidedRepositoryFactory.set(previousRepository);
+		}
+	}
+
+	@Test
+	@SuppressWarnings("boxing")
+	void addReferenceThrowsForVanillaReferenceToDocumentWithoutVanillaClass() throws Exception {
+		OverridableDomainGenerator gen = generator();
+
+		DocumentImpl refDoc = newDocument();
+		refDoc.setName("CustomerOnlyDoc");
+		refDoc.setOwningModuleName("testMod");
+
+		org.skyve.impl.metadata.model.document.AssociationImpl assoc =
+				new org.skyve.impl.metadata.model.document.AssociationImpl();
+		assoc.setName("custAssoc");
+		assoc.setDisplayName("Cust Assoc");
+		assoc.setDocumentName("CustomerOnlyDoc");
+		assoc.setType(org.skyve.metadata.model.document.Association.AssociationType.aggregation);
+
+		Module module = mock(Module.class);
+		when(module.getName()).thenReturn("testMod");
+		when(module.getDocument(null, "CustomerOnlyDoc")).thenReturn(refDoc);
+
+		Method m = declaredMethod("addReference",
+									org.skyve.metadata.model.document.Reference.class,
+									boolean.class,
+									org.skyve.metadata.customer.Customer.class,
+									Module.class, String.class, boolean.class, String.class,
+									Set.class, StringBuilder.class, StringBuilder.class);
+		InvocationTargetException e = assertThrows(InvocationTargetException.class,
+													() -> m.invoke(gen, assoc, false, null, module, "OwnerDoc", false,
+																	"modules.testMod.domain", new HashSet<>(), new StringBuilder(), new StringBuilder()));
+		assertTrue(e.getCause() instanceof IllegalStateException);
+		assertEquals("Reference custAssoc in document testMod.OwnerDoc targets document testMod.CustomerOnlyDoc which has no vanilla domain class",
+						e.getCause().getMessage());
+	}
+
+	@Test
+	@SuppressWarnings("boxing")
+	void addInverseThrowsForVanillaInverseOfDocumentWithoutVanillaClass() throws Exception {
+		OverridableDomainGenerator gen = generator();
+
+		DocumentImpl propDoc = newDocument();
+		propDoc.setName("CustomerOnlyDoc");
+		propDoc.setOwningModuleName("testMod");
+
+		org.skyve.impl.metadata.model.document.InverseMany inverseMany =
+				new org.skyve.impl.metadata.model.document.InverseMany();
+		inverseMany.setName("custBack");
+		inverseMany.setDisplayName("Cust Back");
+		inverseMany.setDocumentName("CustomerOnlyDoc");
+		inverseMany.setReferenceName("owner");
+		inverseMany.setRelationship(org.skyve.impl.metadata.model.document.AbstractInverse.InverseRelationship.oneToMany);
+
+		Module module = mock(Module.class);
+		when(module.getName()).thenReturn("testMod");
+		when(module.getDocument(null, "CustomerOnlyDoc")).thenReturn(propDoc);
+
+		Method m = declaredMethod("addInverse",
+									org.skyve.impl.metadata.model.document.AbstractInverse.class,
+									boolean.class,
+									org.skyve.metadata.customer.Customer.class,
+									Module.class, String.class, boolean.class, String.class,
+									Set.class, StringBuilder.class, StringBuilder.class);
+		InvocationTargetException e = assertThrows(InvocationTargetException.class,
+													() -> m.invoke(gen, inverseMany, false, null, module, "OwnerDoc", false,
+																	"modules.testMod.domain", new HashSet<>(), new StringBuilder(), new StringBuilder()));
+		assertTrue(e.getCause() instanceof IllegalStateException);
+		assertEquals("Inverse custBack in document testMod.OwnerDoc targets document testMod.CustomerOnlyDoc which has no vanilla domain class",
+						e.getCause().getMessage());
+	}
 }

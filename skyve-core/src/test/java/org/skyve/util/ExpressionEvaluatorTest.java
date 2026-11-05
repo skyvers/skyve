@@ -424,6 +424,19 @@ class ExpressionEvaluatorTest {
 	}
 
 	@Test
+	void formatThrowsWhenTheExpressionProducesNull() {
+		User user = mock(User.class);
+		Customer customer = mock(Customer.class);
+		when(user.getCustomer()).thenReturn(customer);
+
+		withThreadLocalUserAndCustomer(user, () -> {
+			// a user without an ID makes {USERID} evaluate to null
+			IllegalStateException e = assertThrows(IllegalStateException.class, () -> ExpressionEvaluator.format("{USERID}"));
+			assertThat(e.getMessage(), is("Formatting expression {USERID} produced null"));
+		});
+	}
+
+	@Test
 	void evaluateUsernameExpressionReturnsContactName() {
 		User user = mock(User.class);
 		Customer customer = mock(Customer.class);

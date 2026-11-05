@@ -6,8 +6,14 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import org.junit.jupiter.api.Test;
+import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
+import org.skyve.metadata.model.document.Document;
+import org.skyve.metadata.module.Module;
+import org.skyve.metadata.repository.ProvidedRepository;
 import org.skyve.metadata.view.View.ViewType;
 import org.skyve.web.WebAction;
 
@@ -344,5 +350,37 @@ class RouteCriteriaTest {
 		rc.setModuleName("admin");
 		// documentName is null
 		assertThrows(IllegalStateException.class, () -> rc.canonicalise(null, "someBinding"));
+	}
+
+	@Test
+	void canonicaliseWithBindingResolvesTheBindingDocumentThroughTheRepository() {
+		ProvidedRepository repository = mock(ProvidedRepository.class);
+		Module module = mock(Module.class);
+		Document document = mock(Document.class);
+		when(repository.getModule(null, "admin")).thenReturn(module);
+		when(repository.getDocument(null, module, "Contact")).thenReturn(document);
+		when(document.getOwningModuleName()).thenReturn("base");
+		when(document.getName()).thenReturn("BaseContact");
+		RouteCriteria rc = new RouteCriteria();
+		rc.setWebAction(WebAction.e);
+		rc.setModuleName("admin");
+		rc.setDocumentName("Contact");
+
+		ProvidedRepository previous = ProvidedRepositoryFactory.isConfigured() ? ProvidedRepositoryFactory.get() : null;
+		try {
+			ProvidedRepositoryFactory.set(repository);
+			rc.canonicalise(null, "bizKey"); // an implicit attribute of the document
+		}
+		finally {
+			if (previous == null) {
+				ProvidedRepositoryFactory.clear();
+			}
+			else {
+				ProvidedRepositoryFactory.set(previous);
+			}
+		}
+
+		assertEquals("base", rc.getModuleName());
+		assertEquals("BaseContact", rc.getDocumentName());
 	}
 }

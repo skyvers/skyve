@@ -425,6 +425,18 @@ class RouterTest implements TaggingUxUiSelector {
 		return result;
 	}
 
+	@Test
+	@SuppressWarnings("static-method")
+	void convertThrowsWhenRouteOutcomeUrlIsNull() {
+		Router router = new Router();
+		UxUiMetadata uxui = new UxUiMetadata();
+		uxui.setName("desktop");
+		uxui.getRoutes().add(new Route()); // outcome URL is null
+		router.getUxUis().add(uxui);
+		MetaDataException exception = assertThrows(MetaDataException.class, () -> router.convert("test router"));
+		assertEquals("test router route outcome is required for UX/UI desktop.", exception.getMessage());
+	}
+
 	private static Router routerWithUxUi(String name) {
 		Router result = new Router();
 		UxUiMetadata uxui = new UxUiMetadata();

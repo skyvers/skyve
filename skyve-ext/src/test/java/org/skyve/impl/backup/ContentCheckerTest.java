@@ -49,6 +49,27 @@ public class ContentCheckerTest {
 	}
 
 	@Test
+	public void checkContentThrowsWhenTheDynamicEntityDocumentHasNoTableName() throws Exception {
+		AbstractPersistence persistence = bindMockPersistence();
+		org.skyve.metadata.user.User user = mock(org.skyve.metadata.user.User.class);
+		Customer customer = mock(Customer.class);
+		Module admin = mock(Module.class);
+		Document dynamicEntity = mock(Document.class);
+		when(persistence.getUser()).thenReturn(user);
+		when(user.getCustomer()).thenReturn(customer);
+		when(customer.getName()).thenReturn("demo");
+		when(customer.getModule(org.skyve.domain.app.AppConstants.ADMIN_MODULE_NAME)).thenReturn(admin);
+		when(admin.getDocument(customer, org.skyve.domain.app.AppConstants.DYNAMIC_ENTITY_DOCUMENT_NAME)).thenReturn(dynamicEntity);
+		// persistent metadata without a name has no table name
+		when(dynamicEntity.getPersistent()).thenReturn(new Persistent());
+
+		org.skyve.metadata.MetaDataException e = org.junit.Assert.assertThrows(org.skyve.metadata.MetaDataException.class,
+																			() -> new ContentChecker().checkContent());
+
+		assertThat(e.getMessage(), is("The dynamic entity document has persistent metadata with no table name."));
+	}
+
+	@Test
 	public void hasContentRecognisesContentAndImageFieldsOnly() throws Exception {
 		Table scalar = new Table("Scalar", "SCALAR");
 		scalar.fields.put("name", new BackupField(AttributeType.text, Sensitivity.none));

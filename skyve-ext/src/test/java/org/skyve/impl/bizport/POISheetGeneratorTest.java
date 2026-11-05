@@ -167,6 +167,29 @@ class POISheetGeneratorTest {
 		}
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
+	@Test
+	void getDownloadStripsTheBracesFromABracedBindingExpression() throws Exception {
+		Bean bean = new DynamicBean("sales", "Order",
+				new java.util.HashMap<>(java.util.Map.of(Bean.DOCUMENT_ID, "order-1", "name", "Widget")));
+		Customer customer = customer();
+		org.skyve.impl.metadata.model.document.field.Text name = new org.skyve.impl.metadata.model.document.field.Text();
+		name.setName("name");
+		name.setDisplayName("Name");
+		name.setLength(50);
+		when(customer.getModule("sales").getDocument(customer, "Order").getAttribute("name")).thenReturn(name);
+		bindPersistenceWithCustomer(customer, List.of(bean));
+		POISheetGenerator gen = new POISheetGenerator("sales", "Order");
+		gen.setDownloadName("orders");
+		gen.addField("Name", "{name}");
+
+		Download download = gen.getDownload();
+
+		try (XSSFWorkbook workbook = new XSSFWorkbook(new ByteArrayInputStream(download.getBytes()))) {
+			assertEquals("Widget", workbook.getSheetAt(0).getRow(1).getCell(0).getStringCellValue());
+		}
+	}
+
 	private static Customer customer() {
 		Customer customer = mock(Customer.class);
 		Module module = mock(Module.class);

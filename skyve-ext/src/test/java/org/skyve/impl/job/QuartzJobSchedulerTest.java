@@ -557,6 +557,36 @@ public class QuartzJobSchedulerTest {
 		assertThrows(DomainException.class, () -> quartzJobScheduler.postRestore(false));
 	}
 
+	@Test
+	public void startupAddsTheRepositoryModuleJobsAndFailsWhenAJobClassCannotBeLoaded() throws Exception {
+		ProvidedRepository originalRepository = ProvidedRepositoryFactory.get();
+		ProvidedRepository repository = mock(ProvidedRepository.class);
+		Module module = mock(Module.class);
+		JobMetaData job = job("mod", "missing", "Missing");
+		when(job.getClassName()).thenReturn("org.skyve.impl.job.NoSuchJob");
+		when(repository.getAllVanillaModuleNames()).thenReturn(List.of("mod"));
+		when(repository.getModule(null, "mod")).thenReturn(module);
+		when(module.getJobs()).thenReturn(List.of(job));
+		try {
+			ProvidedRepositoryFactory.set(repository);
+
+			// the unloadable job class stops startup before any internal jobs are scheduled
+			IllegalStateException e = assertThrows(IllegalStateException.class, () -> new QuartzJobScheduler().startup());
+
+			assertThat(e.getMessage(), is("Could not schedule jobs"));
+			assertThat(e.getCause() instanceof ClassNotFoundException, is(true));
+			verify(repository).getModule(null, "mod");
+		}
+		finally {
+			// startup() started a real scheduler before it failed
+			Scheduler started = getScheduler();
+			if ((started != null) && (started != scheduler)) {
+				started.shutdown();
+			}
+			ProvidedRepositoryFactory.set(originalRepository);
+		}
+	}
+
 	private static Trigger scheduledTrigger() throws Exception {
 		ArgumentCaptor<Trigger> trigger = ArgumentCaptor.forClass(Trigger.class);
 		verify(getScheduler()).scheduleJob(trigger.capture());

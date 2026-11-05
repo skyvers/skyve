@@ -18,10 +18,16 @@ import java.util.List;
 import java.util.Map;
 
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.skyve.impl.cache.StateUtil;
+import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
 import org.skyve.impl.persistence.AbstractPersistence;
+import org.skyve.impl.web.RequestUxUiSelection;
+import org.skyve.impl.web.UserAgent;
+import org.skyve.metadata.router.UxUi;
 import org.skyve.metadata.user.User;
+import org.skyve.web.UserAgentType;
 import org.skyve.web.WebContext;
 
 import jakarta.servlet.ServletException;
@@ -32,6 +38,19 @@ import modules.test.AbstractSkyveTest;
 
 @SuppressWarnings({ "resource", "java:S1989", "java:S5960" }) // Servlet exceptions and assertions are test-only.
 class SmartClientSnapServletH2Test extends AbstractSkyveTest {
+	/**
+	 * A valid SmartClient snapshot of the contacts list grid.
+	 */
+	private static final String SNAPSHOT = "{\"criteria\":{\"_constructor\":\"AdvancedCriteria\",\"operator\":\"and\",\"criteria\":[{\"fieldName\":\"name\",\"operator\":\"iStartsWith\",\"value\":\"AA\"}]},\"advancedCriteriaStyle\":\"radio\",\"fieldState\":\"[{name:\\\"name\\\",width:246}]\",\"sortState\":\"({sortSpecifiers:[{property:\\\"name\\\",direction:\\\"ascending\\\"}]})\",\"groupState\":\"\",\"summaryType\":\"\"}";
+
+	/**
+	 * Build the test user's menus as login does; the menus are what grant list (aggregate) access.
+	 */
+	@BeforeEach
+	void resetMenus() {
+		ProvidedRepositoryFactory.getNullSafe().resetMenus(u);
+	}
+
 	@AfterEach
 	void restorePersistenceUser() {
 		AbstractPersistence.get().setUser(u);
@@ -64,6 +83,64 @@ class SmartClientSnapServletH2Test extends AbstractSkyveTest {
 
 		assertTrue(response.body().contains("isc.warn('"), response.body());
 		assertTrue(response.body().contains("Snapshot operation was unsuccessful"), response.body());
+	}
+
+	@Test
+	void aNewSnapshotIsListedForItsDatasource() throws Exception {
+		CapturedResponse created = service(newRequest(u)
+				.param("a", "N")
+				.param("t", "sc")
+				.param("d", "admin_qContacts")
+				.param("n", "Starts with AA")
+				.param("s", SNAPSHOT)).doGet();
+
+		String body = created.body();
+		assertTrue(body.startsWith("{\"bizId\":\""), body);
+		String snapId = body.substring(10, body.length() - 2);
+		// The servlet commits and closes the thread's persistence, so the next request starts another
+		AbstractPersistence.get().setUser(u);
+
+		CapturedResponse listed = service(newRequest(u)
+				.param("a", "L")
+				.param("t", "sc")
+				.param("d", "admin_qContacts")).doGet();
+
+		assertTrue(listed.body().startsWith("[{\"bizId\":\"" + snapId + "\",\"name\":\"Starts with AA\",\"snapshot\":{"), listed.body());
+	}
+
+	@Test
+	void updateWithoutASnapshotIsAnError() throws Exception {
+		CapturedResponse response = service(newRequest(u)
+				.param("a", "U")
+				.param("i", "snap-1")).doGet();
+
+		assertUnexpectedWarning(response.body());
+	}
+
+	@Test
+	void newWithoutASnapshotNameIsAnError() throws Exception {
+		CapturedResponse response = service(newRequest(u)
+				.param("a", "N")
+				.param("d", "admin_qContacts")
+				.param("s", SNAPSHOT)).doGet();
+
+		assertUnexpectedWarning(response.body());
+	}
+
+	@Test
+	void deleteWithoutASnapshotIdIsAnError() throws Exception {
+		CapturedResponse response = service(newRequest(u)
+				.param("a", "D")).doGet();
+
+		assertUnexpectedWarning(response.body());
+	}
+
+	/**
+	 * Asserts the request failed unexpectedly, so the warning shows the generic message with a support reference.
+	 */
+	private static void assertUnexpectedWarning(String body) {
+		assertTrue(body.startsWith("isc.warn('The Snapshot operation was unsuccessful."), body);
+		assertTrue(body.contains(" Reference: "), body);
 	}
 
 	private static ServletHarness service(RequestBuilder request) throws IOException {
@@ -134,6 +211,11 @@ class SmartClientSnapServletH2Test extends AbstractSkyveTest {
 			when(request.getUserPrincipal()).thenReturn((Principal) null);
 			when(request.getLocale()).thenReturn(java.util.Locale.ENGLISH);
 			when(request.getHeader("User-Agent")).thenReturn("Mozilla/5.0");
+			// as the desktop UX/UI, a UX/UI the test user has list access in
+			when(request.getAttribute(UserAgent.class.getName() + ".selection")).thenReturn(
+					new RequestUxUiSelection(UserAgentType.desktop,
+												false,
+												UxUi.newSmartClient(UxUi.DESKTOP_NAME, "Cerulean", "omega")));
 			for (Map.Entry<String, String[]> entry : parameters.entrySet()) {
 				when(request.getParameter(entry.getKey())).thenReturn(entry.getValue()[0]);
 				when(request.getParameterValues(entry.getKey())).thenReturn(entry.getValue());

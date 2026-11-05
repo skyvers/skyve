@@ -563,6 +563,144 @@ class AbstractDataFileLoaderTest {
 	}
 
 	@Test
+	void addFieldInDebugModeFinalisesAFieldWithAConverter() throws Exception {
+		Customer customer = customer();
+		Document document = customer.getModule("sales").getDocument(customer, "Order");
+		Text name = new Text();
+		name.setName("name");
+		name.setDisplayName("name");
+		name.setLength(50);
+		@SuppressWarnings("rawtypes")
+		Converter converter = mock(Converter.class);
+		name.setConverter(converter);
+		when(document.getAttribute("name")).thenReturn(name);
+		bindPersistence(persistence(customer, null, null));
+		TestLoader loader = new TestLoader(LoaderActivityType.CREATE_ALL, new UploadException());
+		loader.setDebugMode(true);
+
+		loader.addField("name");
+
+		assertSame(converter, loader.getFields().get(0).getConverter());
+		assertSame(name, loader.getFields().get(0).getAttribute());
+	}
+
+	@Test
+	void lookupBeanThrowsWhenTheFieldHasNoBinding() throws Exception {
+		bindPersistence(persistence(customer(), null, null));
+		TestLoader loader = new TestLoader(LoaderActivityType.CREATE_FIND, new UploadException());
+		DataFileField field = new DataFileField(null);
+		Bean order = dynamicOrder();
+		StringBuilder what = new StringBuilder();
+
+		IllegalStateException e = assertThrows(IllegalStateException.class, () -> loader.lookupBean(order, field, "Acme", what));
+
+		assertThat(e.getMessage(), is("A field without a binding cannot look up a bean"));
+	}
+
+	@Test
+	void beanResultInDebugModeFallsBackToDateConversionWhenTheConverterFails() throws Exception {
+		UploadException problems = new UploadException();
+		Bean bean = mock(Bean.class);
+		bindPersistence(persistence(customer(), bean, null));
+		TestLoader loader = new TestLoader(LoaderActivityType.CREATE_FIND, problems);
+		loader.setDebugMode(true);
+		@SuppressWarnings("rawtypes")
+		Converter converter = mock(Converter.class);
+		when(converter.fromDisplayValue("yes")).thenThrow(new IllegalArgumentException("not convertible"));
+		DataFileField field = field("convertedBinding", AttributeType.dateTime);
+		field.setIndex(0);
+		field.setConverter(converter);
+		loader.getFields().add(field);
+
+		assertSame(bean, loader.beanResult());
+
+		verify(converter).fromDisplayValue("yes");
+		assertThat(problems.hasErrors(), is(false));
+	}
+
+	@Test
+	void beanResultLoadsNothingWhenNeitherTheConverterNorDateConversionYieldAValue() throws Exception {
+		UploadException problems = new UploadException();
+		Bean bean = mock(Bean.class);
+		bindPersistence(persistence(customer(), bean, null));
+		TestLoader loader = new TestLoader(LoaderActivityType.CREATE_FIND, problems);
+		loader.nullDateIndexes.add(Integer.valueOf(0));
+		@SuppressWarnings("rawtypes")
+		Converter converter = mock(Converter.class);
+		when(converter.fromDisplayValue("yes")).thenReturn(null);
+		DataFileField field = field("convertedBinding", AttributeType.dateTime);
+		field.setIndex(0);
+		field.setConverter(converter);
+		loader.getFields().add(field);
+
+		assertSame(bean, loader.beanResult());
+
+		verify(converter).fromDisplayValue("yes");
+		assertThat(problems.hasProblems(), is(false));
+	}
+
+	@Test
+	void beanResultInDebugModeSkipsUnsupportedAttributeTypes() throws Exception {
+		UploadException problems = new UploadException();
+		Bean bean = mock(Bean.class);
+		bindPersistence(persistence(customer(), bean, null));
+		TestLoader loader = new TestLoader(LoaderActivityType.CREATE_FIND, problems);
+		loader.setDebugMode(true);
+		DataFileField field = field("upload", AttributeType.content);
+		field.setIndex(0);
+		loader.getFields().add(field);
+
+		assertSame(bean, loader.beanResult());
+
+		assertThat(problems.hasProblems(), is(false));
+	}
+
+	@Test
+	void beanResultForCreateAllWarnsWhenNoBeanWasCreatedToLoadInto() throws Exception {
+		UploadException problems = new UploadException();
+		bindPersistence(persistence(customer(), null, null));
+		TestLoader loader = new TestLoader(LoaderActivityType.CREATE_ALL, problems);
+		DataFileField field = field("name", AttributeType.text);
+		field.setIndex(0);
+		loader.getFields().add(field);
+
+		assertThat(loader.beanResult(), is((Bean) null));
+
+		assertThat(warningContaining(problems, "No Order was created to load into"), is(true));
+	}
+
+	@Test
+	void beanResultForFindWarnsWhenAFieldHasNoLoadAction() throws Exception {
+		UploadException problems = new UploadException();
+		DocumentFilter filter = mock(DocumentFilter.class);
+		when(filter.isEmpty()).thenReturn(true);
+		bindPersistence(persistence(customer(), null, filter));
+		TestLoader loader = new TestLoader(LoaderActivityType.FIND, problems);
+		DataFileField field = field("name", AttributeType.text);
+		field.setIndex(0);
+		field.setLoadAction(null);
+		loader.getFields().add(field);
+
+		assertThat(loader.beanResult(), is((Bean) null));
+
+		assertThat(warningContaining(problems, "No load action was specified to find by name"), is(true));
+	}
+
+	@Test
+	void beanResultForCreateFindWarnsWhenNoBeanWasCreatedToLoadInto() throws Exception {
+		UploadException problems = new UploadException();
+		bindPersistence(persistence(customer(), null, null));
+		TestLoader loader = new TestLoader(LoaderActivityType.CREATE_FIND, problems);
+		DataFileField field = field("name", AttributeType.text);
+		field.setIndex(0);
+		loader.getFields().add(field);
+
+		assertThat(loader.beanResult(), is((Bean) null));
+
+		assertThat(warningContaining(problems, "No Order was created to load into"), is(true));
+	}
+
+	@Test
 	void beanResultsStopsAtNoDataAndAddsWarningWhenNothingLoaded() throws Exception {
 		UploadException problems = new UploadException();
 		bindPersistence(persistence(customer(), null, null));
@@ -671,6 +809,15 @@ class AbstractDataFileLoaderTest {
 		return false;
 	}
 
+	private static boolean warningContaining(UploadException problems, String text) {
+		for (UploadException.Problem problem : problems.getWarnings()) {
+			if (problem.getWhat().contains(text)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
 	private static void bindPersistence(AbstractPersistence persistence) throws Exception {
 		Field field = AbstractPersistence.class.getDeclaredField("threadLocalPersistence");
 		field.setAccessible(true);
@@ -689,6 +836,7 @@ class AbstractDataFileLoaderTest {
 		private final Set<Integer> nullStringIndexes = new HashSet<>();
 		private final Set<Integer> throwStringIndexes = new HashSet<>();
 		private final Set<Integer> throwNumericIndexes = new HashSet<>();
+		private final Set<Integer> nullDateIndexes = new HashSet<>();
 
 		private TestLoader(LoaderActivityType activityType, UploadException exception) {
 			super(activityType, exception, "sales", "Order");
@@ -734,6 +882,9 @@ class AbstractDataFileLoaderTest {
 
 		@Override
 		Date getDateFieldValue(int index) {
+			if (nullDateIndexes.contains(Integer.valueOf(index))) {
+				return null;
+			}
 			return new Date(1_700_000_000_000L);
 		}
 	}

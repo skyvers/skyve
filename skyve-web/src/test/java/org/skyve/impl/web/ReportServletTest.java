@@ -3,8 +3,10 @@ package org.skyve.impl.web;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.CALLS_REAL_METHODS;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -23,10 +25,18 @@ import java.util.Map;
 
 import org.junit.jupiter.api.Test;
 import org.skyve.content.MimeType;
+import org.skyve.domain.Bean;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.report.jasperreports.ReportDesignParameters;
+import org.skyve.metadata.customer.Customer;
+import org.skyve.metadata.model.document.Document;
+import org.skyve.metadata.module.Module;
+import org.skyve.metadata.router.UxUi;
 import org.skyve.metadata.user.User;
+import org.skyve.metadata.user.UserAccess;
+import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.report.ReportFormat;
+import org.skyve.web.UserAgentType;
 
 import jakarta.servlet.ServletOutputStream;
 import jakarta.servlet.WriteListener;
@@ -242,6 +252,44 @@ class ReportServletTest {
 
 			verify(response).setContentType(MimeType.html.toString());
 			assertTrue(out.asString().contains("There are no report parameters in this request"), out.asString());
+		}
+		finally {
+			clearThreadPersistence();
+		}
+	}
+
+	@Test
+	@SuppressWarnings({"resource", "boxing"})
+	void doExportOfAModelWithoutADrivingDocumentWritesTheGenericError() throws Exception {
+		User user = mock(User.class);
+		Customer customer = mock(Customer.class);
+		Module module = mock(Module.class);
+		Document document = mock(Document.class);
+		ListModel<Bean> model = mock(ListModel.class);
+		when(user.getCustomer()).thenReturn(customer);
+		when(user.canAccess(any(UserAccess.class), anyString())).thenReturn(true);
+		when(customer.getModule("mod")).thenReturn(module);
+		when(module.getDocument(customer, "Doc")).thenReturn(document);
+		when(document.getListModel(customer, "Model", true)).thenReturn(model); // getDrivingDocument() returns null
+		AbstractPersistence persistence = mock(AbstractPersistence.class, CALLS_REAL_METHODS);
+		persistence.setUser(user);
+		persistence.setForThread();
+		try (CapturingServletOutputStream out = new CapturingServletOutputStream()) {
+			HttpServletRequest request = mock(HttpServletRequest.class);
+			when(request.getParameter("values")).thenReturn("{\"ds\":\"mod_Doc__Model\",\"reportFormat\":\"csv\"}");
+			when(request.getAttribute(UserAgent.class.getName() + ".selection")).thenReturn(
+					new RequestUxUiSelection(UserAgentType.desktop, false, UxUi.newSmartClient(UxUi.DESKTOP_NAME, "Cerulean", "omega")));
+			HttpServletResponse response = mock(HttpServletResponse.class);
+			when(response.getOutputStream()).thenReturn(out);
+
+			Method method = ReportServlet.class.getDeclaredMethod("doExport", HttpServletRequest.class, HttpServletResponse.class);
+			method.setAccessible(true);
+			invokeVoid(method, request, response);
+
+			verify(model).getDrivingDocument();
+			verify(user, never()).canReadDocument(any());
+			verify(response).setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+			assertTrue(out.asString().startsWith("<html><head/><body><h3>"), out.asString());
 		}
 		finally {
 			clearThreadPersistence();

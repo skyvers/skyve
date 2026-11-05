@@ -18,6 +18,7 @@ import org.skyve.domain.HierarchicalBean;
 import org.skyve.domain.PersistentBean;
 import org.skyve.impl.metadata.model.document.field.Field.IndexType;
 import org.skyve.impl.metadata.model.document.field.Text;
+import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.Attribute.AttributeType;
@@ -204,6 +205,42 @@ public class TableTest {
 	@Test
 	public void fromJSONThrowsWhenTheJsonDefinesNoTable() {
 		Assert.assertThrows(IllegalArgumentException.class, () -> Table.fromJSON("null"));
+	}
+
+	@Test
+	public void fromJSONQualifiesUnqualifiedTableAndOwnerNamesWithTheConfiguredSchema() throws Exception {
+		JoinTable join = new JoinTable("myJoin", "myJoin", "ownerTable", "ownerTable", false);
+		join.fields.put("owner_id", Table.ASSOCIATION);
+		String json = join.toJSON();
+		String previousCatalog = UtilImpl.CATALOG;
+		String previousSchema = UtilImpl.SCHEMA;
+		try {
+			UtilImpl.CATALOG = null;
+			UtilImpl.SCHEMA = "app";
+
+			JoinTable restored = (JoinTable) Table.fromJSON(json);
+
+			assertEquals("myJoin", restored.agnosticIdentifier);
+			assertEquals("app.myJoin", restored.persistentIdentifier);
+			assertEquals("ownerTable", restored.ownerAgnosticIdentifier);
+			assertEquals("app.ownerTable", restored.ownerPersistentIdentifier);
+		}
+		finally {
+			UtilImpl.CATALOG = previousCatalog;
+			UtilImpl.SCHEMA = previousSchema;
+		}
+	}
+
+	@Test
+	public void qualifyThrowsWhenThereIsNoIdentifierToQualify() throws Exception {
+		java.lang.reflect.Method qualify = Table.class.getDeclaredMethod("qualify", String.class);
+		qualify.setAccessible(true);
+
+		java.lang.reflect.InvocationTargetException e = Assert.assertThrows(java.lang.reflect.InvocationTargetException.class,
+																			() -> qualify.invoke(null, (Object) null));
+
+		assertTrue(e.getCause() instanceof IllegalStateException);
+		assertEquals("Cannot qualify table identifier null", e.getCause().getMessage());
 	}
 
 	private static Document document(String moduleName, String name) {

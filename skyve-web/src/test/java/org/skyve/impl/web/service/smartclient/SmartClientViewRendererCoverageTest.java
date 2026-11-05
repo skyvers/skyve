@@ -80,6 +80,7 @@ import org.skyve.metadata.controller.Customisations;
 import org.skyve.metadata.controller.ImplicitActionName;
 import org.skyve.metadata.model.Dynamic;
 import org.skyve.metadata.model.document.Association.AssociationType;
+import org.skyve.metadata.module.query.MetaDataQueryDefinition;
 import org.skyve.metadata.user.User;
 import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.util.OWASP;
@@ -552,6 +553,58 @@ class SmartClientViewRendererCoverageTest {
 		assertTrue(code.contains(".setDataSource('locations');"), code);
 		assertTrue(code.contains("isc.BizChart.create({_view:view,width:320,chartType:'bar'})"), code);
 		assertTrue(code.contains(".setDataSource('salesByMonth');"), code);
+	}
+
+	@Test
+	void renderChartWithoutAModelNameOrAModelIsAMetaDataError() {
+		when(view.getName()).thenReturn("edit");
+		when(view.getSidebar()).thenReturn(null);
+		SmartClientViewRenderer renderer = new SmartClientViewRenderer(user, module, document, view, "desktop", false);
+		renderer.renderView(NO_ICON);
+		Chart chart = new Chart(); // no model name or model
+		chart.setType(ChartType.pie);
+
+		MetaDataException e = assertThrows(MetaDataException.class, () -> renderer.renderChart(chart));
+
+		org.junit.jupiter.api.Assertions.assertEquals("Chart requires a modelName or a model", e.getMessage());
+	}
+
+	@Test
+	void renderFormLookupDescriptionNotBoundToARelationIsAnInvariantFailure() {
+		addTextAttribute("name");
+		SmartClientViewRenderer renderer = rendererWithOpenForm();
+		LookupDescription lookup = new LookupDescription();
+		lookup.setBinding("name");
+		lookup.setDescriptionBinding(Bean.BIZ_KEY);
+
+		IllegalStateException e = assertThrows(IllegalStateException.class,
+												() -> renderer.renderFormLookupDescription(null, false, false, Bean.BIZ_KEY, lookup));
+
+		org.junit.jupiter.api.Assertions.assertEquals("Lookup description name has no lookup definition", e.getMessage());
+	}
+
+	@Test
+	void renderFormLookupDescriptionWithoutAModelOrAQueryIsAMetaDataError() {
+		document.setDynamism(new Dynamic());
+		AssociationImpl association = new AssociationImpl();
+		association.setName("contact");
+		association.setDisplayName("Contact");
+		association.setDocumentName("Contact");
+		association.setType(AssociationType.aggregation);
+		document.putAttribute(association);
+		MetaDataQueryDefinition defaultQuery = mock(MetaDataQueryDefinition.class);
+		when(defaultQuery.getName()).thenReturn("qContacts");
+		when(defaultQuery.getDocumentName()).thenReturn("Contact");
+		when(module.getDocumentDefaultQuery(customer, "Contact")).thenReturn(defaultQuery);
+		SmartClientViewRenderer renderer = rendererWithOpenForm();
+		LookupDescription lookup = new LookupDescription();
+		lookup.setBinding("contact");
+		lookup.setDescriptionBinding(Bean.BIZ_KEY);
+
+		MetaDataException e = assertThrows(MetaDataException.class,
+											() -> renderer.renderFormLookupDescription(null, true, true, Bean.BIZ_KEY, lookup));
+
+		org.junit.jupiter.api.Assertions.assertEquals("Lookup description has no query to use.", e.getMessage());
 	}
 
 	@Test
