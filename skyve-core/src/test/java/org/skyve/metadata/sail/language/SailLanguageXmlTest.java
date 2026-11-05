@@ -290,6 +290,18 @@ class SailLanguageXmlTest {
 					() -> assertThat(before.getSteps().get(1), instanceOf(NavigateMenu.class)));
 	}
 
+	@Test
+	void aCharacterReferenceKeepsANewLineInAValue() {
+		String xml = HEAD +
+						"<dataEnter binding=\"memo\" value=\"line 1&#10;line 2&#10;&#10;line 4\"/>" +
+						"<dataEnter binding=\"memo\" value=\"line 1\nline 2\"/>" +
+						TAIL;
+		List<Step> steps = XMLMetaData.unmarshalSAILString(xml).getInteractions().get(0).getSteps();
+		assertAll(() -> assertEquals("line 1\nline 2\n\nline 4", ((DataEnter) steps.get(0)).getValue()),
+					// XML attribute-value normalisation makes a literal new line in an attribute a space
+					() -> assertEquals("line 1 line 2", ((DataEnter) steps.get(1)).getValue()));
+	}
+
 	private static void assertAdditions(List<Step> steps) {
 		assertEquals(21, steps.size());
 		Upload bindingUpload = (Upload) steps.get(12);

@@ -166,6 +166,27 @@
 			<ok />
 		</method>
 	</interaction>
+	<interaction name="List attributes: multi-line text">
+		<method>
+			<comment>A new line in an attribute value is written &amp;#10; (XML makes a literal new line in an attribute a space)</comment>
+			<navigateList module="kitchensink" document="ListAttributes" />
+			<listGridNew module="kitchensink" document="ListAttributes" />
+			<dataEnter binding="text" value="SAIL lines {run}" />
+			<dataEnter binding="memo" value="SAIL line 1 {run}&#10;line 2&#10;&#10;line 4" />
+			<testValue binding="memo" value="SAIL line 1 {run}&#10;line 2&#10;&#10;line 4" />
+			<dataEnter binding="markup" value="Rich line 1&#10;Rich line 2" />
+			<testValue binding="markup" value="Rich line 1&#10;Rich line 2" />
+			<save />
+			<testValue binding="memo" value="SAIL line 1 {run}&#10;line 2&#10;&#10;line 4" />
+			<testValue binding="markup" value="Rich line 1&#10;Rich line 2" />
+			<ok />
+			<navigateEdit module="kitchensink" document="ListGridFixture" />
+			<listGridZoom module="kitchensink" query="qListGridFixtureVueAttributes" rowContaining="SAIL lines {run}" />
+			<testValue binding="memo" value="SAIL line 1 {run}&#10;line 2&#10;&#10;line 4" />
+			<testValue binding="markup" value="Rich line 1&#10;Rich line 2" />
+			<delete />
+		</method>
+	</interaction>
 	<interaction name="List Grid Fixture: filters on each column type">
 		<method>
 			<navigateEdit module="kitchensink" document="ListGridFixture" />

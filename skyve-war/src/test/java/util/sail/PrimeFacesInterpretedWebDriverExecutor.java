@@ -330,16 +330,18 @@ public class PrimeFacesInterpretedWebDriverExecutor extends InterpretedWebDriver
 					String.format("<dataEnter /> with binding [%s] is not supported or is not on the view", identifier));
 		}
 
-		// Never replace with a new line as chrome under test will trip the default button on the form
-		String value = dataEnter.getValue();
-		if (value != null) {
-			value = substituteTokens(value);
-			value = value.replace("\n", " ");
+		// A text area or a rich text editor takes the value's new lines (typed as Enter). Other widgets get spaces
+		// instead: a new line typed into a single line input would press the form's default button.
+		String multiLineValue = dataEnter.getValue();
+		if (multiLineValue != null) {
+			multiLineValue = substituteTokens(multiLineValue).replace("\r\n", "\n");
 		}
+		String singleLineValue = (multiLineValue == null) ? null : multiLineValue.replace('\n', ' ');
 
 		boolean success = false;
 		for (UIComponent component : components) {
 			String clientId = PrimeFacesAutomationContext.clientId(component);
+			String value = multiLine(component) ? multiLineValue : singleLineValue;
 			selenide.trace(String.format("set %s (%s) to %s", identifier, clientId, value));
 
 			if (component instanceof SelectBooleanCheckbox || component instanceof TriStateCheckbox) {
@@ -393,8 +395,15 @@ public class PrimeFacesInterpretedWebDriverExecutor extends InterpretedWebDriver
 		if (!success) {
 			throw new DomainException(String.format("Data entry failed: binding [%s] has no displayed, enabled widget to enter '%s' into",
 														identifier,
-														value));
+														singleLineValue));
 		}
+	}
+
+	/**
+	 * Indicates if a widget holds new lines: a text area or a rich text (or HTML) editor.
+	 */
+	private static boolean multiLine(@Nonnull UIComponent component) {
+		return (component instanceof InputTextarea) || (component instanceof TextEditor);
 	}
 
 	/**
@@ -474,8 +483,10 @@ public class PrimeFacesInterpretedWebDriverExecutor extends InterpretedWebDriver
 			throw new MetaDataException(String.format("<testValue /> with binding [%s] is not supported or is not on the view", identifier));
 		}
 
-		String expected = test.getValue();
-		expected = (expected == null) ? "" : substituteTokens(expected).replace("\n", " ").trim();
+		String expectedValue = test.getValue();
+		// A text area or rich text editor shows new lines; other widgets were given spaces for them (see executeDataEnter)
+		String multiLineExpected = (expectedValue == null) ? "" : substituteTokens(expectedValue).replace("\r\n", "\n").trim();
+		String singleLineExpected = multiLineExpected.replace('\n', ' ');
 
 		boolean found = false;
 		for (UIComponent component : components) {
@@ -486,13 +497,14 @@ public class PrimeFacesInterpretedWebDriverExecutor extends InterpretedWebDriver
 					continue;
 				}
 				found = true;
-				List<String> expectedMembers = membershipItems(expected);
+				List<String> expectedMembers = membershipItems(singleLineExpected);
 				selenide.trace(String.format("test %s (%s) members are %s", identifier, clientId, expectedMembers));
 				check(new java.util.HashSet<>(members).equals(new java.util.HashSet<>(expectedMembers)),
 						() -> String.format("expected [%s] members to be %s but they are %s", identifier, expectedMembers, members));
 				continue;
 			}
 			boolean ignoreCase = (component instanceof ColorPicker);
+			String expected = multiLine(component) ? multiLineExpected : singleLineExpected;
 			List<String> actuals = actualValues(component, clientId);
 			if (actuals == null) { // not on the page
 				continue;
@@ -502,14 +514,13 @@ public class PrimeFacesInterpretedWebDriverExecutor extends InterpretedWebDriver
 
 			boolean matched = false;
 			for (String actual : actuals) {
-				String trimmed = (actual == null) ? "" : actual.trim();
+				String trimmed = (actual == null) ? "" : actual.replace("\r\n", "\n").trim();
 				if (ignoreCase ? trimmed.equalsIgnoreCase(expected) : trimmed.equals(expected)) {
 					matched = true;
 					break;
 				}
 			}
-			final String expectedValue = expected;
-			check(matched, () -> String.format("expected [%s] to be '%s' but it was %s", identifier, expectedValue, describeActuals(actuals)));
+			check(matched, () -> String.format("expected [%s] to be '%s' but it was %s", identifier, expected, describeActuals(actuals)));
 		}
 
 		if (! found) {
