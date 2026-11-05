@@ -5,10 +5,13 @@ import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.skyve.impl.sail.execution.AutomationContext;
+import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.sail.execution.Executor;
 
 class NavigateLinkTest {
@@ -46,8 +49,42 @@ class NavigateLinkTest {
 	@Test
 	void executeCallsExecutor() {
 		Executor executor = mock(Executor.class);
+		step.setHref("someHref");
 		step.execute(executor);
 		verify(executor).executeNavigateLink(step);
+	}
+
+	@Test
+	void executeByTextCallsExecutor() {
+		Executor executor = mock(Executor.class);
+		step.setText("Open");
+		step.execute(executor);
+		verify(executor).executeNavigateLink(step);
+	}
+
+	@Test
+	void executeNeedsExactlyOneOfHrefAndText() {
+		Executor executor = mock(Executor.class);
+		assertThrows(MetaDataException.class, () -> step.execute(executor));
+		step.setHref("someHref");
+		step.setText("Open");
+		assertThrows(MetaDataException.class, () -> step.execute(executor));
+		verifyNoInteractions(executor);
+	}
+
+	@Test
+	void setTextTrimsAndBlankBecomesNull() {
+		step.setText("  Open  ");
+		assertThat(step.getText(), is("Open"));
+		step.setText("   ");
+		assertThat(step.getText(), is(nullValue()));
+	}
+
+	@Test
+	void getIdentifierReturnsTextWithoutHref() {
+		step.setText("Open");
+		AutomationContext<?, ?> ctx = mock(AutomationContext.class);
+		assertThat(step.getIdentifier(ctx), is("Open"));
 	}
 
 	@Test

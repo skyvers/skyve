@@ -5,9 +5,11 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
 import java.util.List;
 
@@ -42,6 +44,7 @@ import org.skyve.metadata.sail.language.step.interaction.grids.ListGridSort;
 import org.skyve.metadata.sail.language.step.interaction.grids.ListGridZoom;
 import org.skyve.metadata.sail.language.step.interaction.lookup.LookupDescriptionAutoComplete;
 import org.skyve.metadata.sail.language.step.interaction.lookup.LookupDescriptionPick;
+import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateLink;
 import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateMenu;
 import org.skyve.metadata.sail.language.step.interaction.navigation.TestMenu;
 import org.skyve.metadata.sail.language.step.interaction.session.Login;
@@ -300,6 +303,33 @@ class SailLanguageXmlTest {
 		assertAll(() -> assertEquals("line 1\nline 2\n\nline 4", ((DataEnter) steps.get(0)).getValue()),
 					// XML attribute-value normalisation makes a literal new line in an attribute a space
 					() -> assertEquals("line 1 line 2", ((DataEnter) steps.get(1)).getValue()));
+	}
+
+	@Test
+	void navigateLinkByHrefOrTextRoundTrips() {
+		String xml = HEAD +
+						"<navigateLink href=\"?a=e&amp;m=admin&amp;d=Contact&amp;i={var:id}\"/>" +
+						"<navigateLink text=\"Open request {run}\"/>" +
+						TAIL;
+		Automation automation = XMLMetaData.unmarshalSAILString(xml);
+		List<Step> steps = XMLMetaData.unmarshalSAILString(XMLMetaData.marshalSAIL(automation)).getInteractions().get(0).getSteps();
+		NavigateLink byHref = (NavigateLink) steps.get(0);
+		NavigateLink byText = (NavigateLink) steps.get(1);
+		assertAll(() -> assertEquals("?a=e&m=admin&d=Contact&i={var:id}", byHref.getHref()),
+					() -> assertThat(byHref.getText(), is(nullValue())),
+					() -> assertEquals("Open request {run}", byText.getText()),
+					() -> assertThat(byText.getHref(), is(nullValue())));
+	}
+
+	@Test
+	void navigateLinkNeedsExactlyOneOfHrefAndText() {
+		String xml = HEAD + "<navigateLink/><navigateLink href=\"?a=l\" text=\"Open\"/><navigateLink text=\"Open\"/>" + TAIL;
+		List<Step> steps = XMLMetaData.unmarshalSAILString(xml).getInteractions().get(0).getSteps();
+		Executor executor = mock(Executor.class);
+		assertAll(() -> assertThrows(MetaDataException.class, () -> steps.get(0).execute(executor)),
+					() -> assertThrows(MetaDataException.class, () -> steps.get(1).execute(executor)),
+					() -> assertDoesNotThrow(() -> steps.get(2).execute(executor)));
+		verify(executor).executeNavigateLink((NavigateLink) steps.get(2));
 	}
 
 	private static void assertAdditions(List<Step> steps) {

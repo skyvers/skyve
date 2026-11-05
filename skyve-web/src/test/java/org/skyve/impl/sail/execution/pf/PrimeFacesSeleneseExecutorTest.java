@@ -271,6 +271,18 @@ class PrimeFacesSeleneseExecutorTest {
 					() -> assertFalse(script.contains("form:status_input"), script));
 	}
 
+	@Test
+	void linksByTextAreNotGenerated() {
+		TestPrimeFacesSeleneseExecutor executor = new TestPrimeFacesSeleneseExecutor();
+		executor.pushContextWith(inForm(new AutoComplete()));
+		NavigateLink link = new NavigateLink();
+		link.setText("Open the request");
+		executor.executeNavigateLink(link);
+
+		String script = executor.toString();
+		assertTrue(script.contains("<navigateLink text=\"Open the request\" /> is not supported by this generator"), script);
+	}
+
 	private static DataEnter dataEnter(Match match) {
 		DataEnter result = new DataEnter();
 		result.setBinding("status");

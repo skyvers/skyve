@@ -207,7 +207,21 @@ class InterpretedWebDriverExecutorTest {
 					() -> assertThrows(UnsupportedOperationException.class,
 										() -> executor.pickLookupDescriptionRowContaining(new LookupDescriptionPick(), "x")),
 					() -> assertThrows(UnsupportedOperationException.class,
-										() -> executor.autoCompleteLookupDescriptionAndPick(new LookupDescriptionAutoComplete(), "x", "y")));
+										() -> executor.autoCompleteLookupDescriptionAndPick(new LookupDescriptionAutoComplete(), "x", "y")),
+					() -> assertThrows(UnsupportedOperationException.class, () -> executor.clickLinkContaining(new NavigateLink(), "x")));
+	}
+
+	@Test
+	void navigateLinkByTextSubstitutesTheTextAndCallsTheHook() {
+		executor.putVariable("id", "42");
+		NavigateLink link = new NavigateLink();
+		link.setText("Request {var:id} of {run}");
+		doNothing().when(executor).clickLinkContaining(any(), anyString());
+
+		executor.executeNavigateLink(link);
+
+		verify(executor).clickLinkContaining(link, "Request 42 of " + executor.getRunToken());
+		verify(executor.selenide, never()).get(anyString());
 	}
 
 	@Test

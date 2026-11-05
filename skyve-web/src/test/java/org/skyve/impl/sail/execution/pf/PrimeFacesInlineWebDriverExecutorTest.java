@@ -188,6 +188,18 @@ class PrimeFacesInlineWebDriverExecutorTest {
 					() -> assertFalse(script.contains("lookupDescription(\"form:status\""), script));
 	}
 
+	@Test
+	void linksByTextAreNotGenerated() {
+		TestPrimeFacesInlineWebDriverExecutor executor = new TestPrimeFacesInlineWebDriverExecutor();
+		executor.pushContextWith(inForm(new AutoComplete()));
+		NavigateLink link = new NavigateLink();
+		link.setText("Open the request");
+		executor.executeNavigateLink(link);
+
+		String script = executor.toString();
+		assertTrue(script.contains("<navigateLink text=\"Open the request\" /> is not supported by this generator"), script);
+	}
+
 	private static DataEnter dataEnter(Match match) {
 		DataEnter result = new DataEnter();
 		result.setBinding("status");

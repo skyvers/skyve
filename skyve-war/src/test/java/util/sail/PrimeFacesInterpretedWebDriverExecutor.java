@@ -1868,6 +1868,22 @@ public class PrimeFacesInterpretedWebDriverExecutor extends InterpretedWebDriver
 	}
 
 	/**
+	 * Clicks the first displayed link on the page whose visible text contains the text, and waits for the page it loads
+	 * (or the ajax request it sends).
+	 *
+	 * @param link	the step
+	 * @param text	the text
+	 * @throws DomainException	if no displayed link contains the text
+	 */
+	@Override
+	protected void clickLinkContaining(NavigateLink link, String text) {
+		if (! selenide.followLinkContaining(text)) {
+			throw new DomainException(String.format("<navigateLink text=\"%s\" /> found no displayed link containing it: the page's links are %s",
+														text, selenide.linkTexts()));
+		}
+	}
+
+	/**
 	 * Uploads a test classpath file: into a content widget (through its upload page), or through an upload action's
 	 * upload page. For a content widget, the widget must then hold content.
 	 *

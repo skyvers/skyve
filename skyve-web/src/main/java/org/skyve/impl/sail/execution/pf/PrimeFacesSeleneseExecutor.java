@@ -295,13 +295,14 @@ public class PrimeFacesSeleneseExecutor extends SeleneseExecutor<PrimeFacesAutom
 	 *
 	 * <p>Current behavior: delegates to the superclass so the executor records the null driving-document state,
 	 * then performs no additional action because PrimeFaces link navigation command generation is not yet implemented.
+	 * A link clicked by its text ({@code navigateLink text}) is not generated: a comment says so.
 	 *
 	 * @param link the link-navigation step to resolve
 	 */
 	@Override
 	public void executeNavigateLink(@Nonnull NavigateLink link) {
 		super.executeNavigateLink(link); // null driving document
-		// TODO Auto-generated method stub
+		SailGeneratorSupport.linkTextNotSupported(link, this::comment);
 	}
 
 	/**

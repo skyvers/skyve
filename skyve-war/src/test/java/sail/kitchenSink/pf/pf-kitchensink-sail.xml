@@ -336,12 +336,16 @@
 			<testGridRows module="kitchensink" query="qListGridFixtureFaces" rowContaining="SAIL faces grid {run}" maxRows="0" />
 		</method>
 	</interaction>
-	<interaction name="Links: tokens in href and bizId">
+	<interaction name="Links: a link in page markup, and tokens in href and bizId">
 		<method>
-			<comment>Selecting a data table row shows its id</comment>
+			<comment>Selecting a data table row shows its id, and a blurb's link to it</comment>
 			<navigateEdit module="kitchensink" document="ListGridFixture" />
 			<listGridSelect module="kitchensink" query="qListGridFixtureFaces" rowContaining="SAIL lookup {run}" />
 			<captureValue binding="selectedFacesId" variable="lookupId" />
+			<navigateLink text="Open the selected lookup value" />
+			<pushEditContext module="kitchensink" document="LookupDescription" />
+			<testValue binding="description" value="SAIL lookup {run}" />
+			<popContext />
 			<comment>The captured id in a bizId and in an href</comment>
 			<navigateEdit module="kitchensink" document="LookupDescription" bizId="{var:lookupId}" />
 			<testValue binding="description" value="SAIL lookup {run}" />

@@ -1807,6 +1807,62 @@ public class PrimeFacesSelenide extends Selenide<
 		waitForNewPage();
 	}
 
+	/** Defines {@code links}: the displayed links ({@code <a>}) of the page, in document order. */
+	private static final String LINKS_JS = "var links = Array.from(document.querySelectorAll('a')).filter(function(a) {" +
+												"  return (a.getClientRects().length > 0) && (getComputedStyle(a).visibility !== 'hidden');});";
+
+	/**
+	 * Clicks the first displayed link ({@code <a>}) of the page whose visible text contains the text (case-sensitive),
+	 * as a user does, then waits for what it leads to: a new page that has loaded, or an ajax request and its response.
+	 *
+	 * @param text	the text
+	 * @return true if a link was clicked, false if no displayed link contains the text
+	 * @throws IllegalStateException	if the link opens another window, which SAIL does not follow
+	 */
+	public boolean followLinkContaining(@Nonnull String text) {
+		waitForAjaxResponse();
+		WebElement link = (WebElement) js(LINKS_JS + "var t = arguments[0];" +
+											"return links.find(function(a) {return (a.innerText || '').indexOf(t) >= 0;}) || null;", text);
+		if (link == null) {
+			return false;
+		}
+		String target = link.getDomAttribute("target");
+		if ((target != null) && (! target.isEmpty()) && (! "_self".equals(target)) && (! "_top".equals(target)) && (! "_parent".equals(target))) {
+			throw new IllegalStateException(String.format("The link containing '%s' opens another window (target %s), which SAIL does not follow", text, target));
+		}
+		trace("    click " + link.getDomAttribute("href"));
+		markPage();
+		js("window.sailPage = true;");
+		click($(link));
+		// Wait for the link's new page to load, or for the ajax request it sent
+		String outcome = waitFor(d -> {
+			try {
+				return (String) ((JavascriptExecutor) d).executeScript(
+						"if (! window.sailPage) return (document.readyState === 'complete') ? 'page' : null;" +
+						"if (window.sailUnloading) return null;" +
+						"return (window.sailAjaxStarts > window.sailAjaxStartMark) ? 'ajax' : null;");
+			}
+			catch (@SuppressWarnings("unused") WebDriverException e) {
+				return null; // between pages
+			}
+		});
+		trace("    the link led to " + ("page".equals(outcome) ? "a new page" : "an ajax request"));
+		waitForAjaxResponse();
+		return true;
+	}
+
+	/**
+	 * Returns the visible texts of the page's displayed links, for a failure.
+	 *
+	 * @return the texts, at most 30
+	 */
+	@SuppressWarnings("unchecked")
+	public @Nonnull List<String> linkTexts() {
+		List<String> result = (List<String>) js(LINKS_JS + "return links.map(function(a) {return (a.innerText || '').replace(/\\s+/g, ' ').trim();})" +
+													".filter(function(t) {return t;}).slice(0, 30);");
+		return (result == null) ? new ArrayList<>() : result;
+	}
+
 	/**
 	 * Runs a script (the SAIL {@code <execute>} step), then waits for any request or new page it started.
 	 *
