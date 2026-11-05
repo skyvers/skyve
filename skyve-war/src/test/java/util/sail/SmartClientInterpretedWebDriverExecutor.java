@@ -1,6 +1,8 @@
 package util.sail;
 
+import java.beans.Introspector;
 import java.util.List;
+import java.util.Objects;
 
 import org.apache.commons.lang3.BooleanUtils;
 import org.skyve.CORE;
@@ -26,6 +28,7 @@ import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.Module.DocumentRef;
 import org.skyve.metadata.module.query.MetaDataQueryDefinition;
 import org.skyve.metadata.sail.language.Step;
+import org.skyve.metadata.sail.language.step.CaptureValue;
 import org.skyve.metadata.sail.language.step.Execute;
 import org.skyve.metadata.sail.language.step.TestGridRows;
 import org.skyve.metadata.sail.language.step.TestMessage;
@@ -58,8 +61,12 @@ import org.skyve.metadata.sail.language.step.interaction.grids.DataGridRemove;
 import org.skyve.metadata.sail.language.step.interaction.grids.DataGridSelect;
 import org.skyve.metadata.sail.language.step.interaction.grids.DataGridZoom;
 import org.skyve.metadata.sail.language.step.interaction.grids.GridRowStep;
+import org.skyve.metadata.sail.language.step.interaction.grids.ListGridClearFilter;
+import org.skyve.metadata.sail.language.step.interaction.grids.ListGridFilter;
+import org.skyve.metadata.sail.language.step.interaction.grids.ListGridFilter.FilterOperator;
 import org.skyve.metadata.sail.language.step.interaction.grids.ListGridNew;
 import org.skyve.metadata.sail.language.step.interaction.grids.ListGridSelect;
+import org.skyve.metadata.sail.language.step.interaction.grids.ListGridSort;
 import org.skyve.metadata.sail.language.step.interaction.grids.ListGridZoom;
 import org.skyve.metadata.sail.language.step.interaction.lookup.LookupDescriptionAutoComplete;
 import org.skyve.metadata.sail.language.step.interaction.lookup.LookupDescriptionEdit;
@@ -285,7 +292,8 @@ public class SmartClientInterpretedWebDriverExecutor extends InterpretedWebDrive
 	/**
 	 * Enters data into the widget(s) bound to the binding.
 	 * <p>
-	 * Checkboxes take {@code true} or {@code false}; combos and radios take a zero-based option index;
+	 * Checkboxes take {@code true} or {@code false}; combos and radios take a zero-based option index, or with
+	 * {@code match} the option's code or label (see {@link #enterOption});
 	 * sliders take a number; lookup descriptions take search text and pick the first match;
 	 * everything else is typed. While a data grid row is being edited inline (after {@code dataGridEdit}
 	 * or {@code dataGridNew} on an inline grid), the binding is first tried as a column of that grid.
@@ -1215,6 +1223,162 @@ public class SmartClientInterpretedWebDriverExecutor extends InterpretedWebDrive
 			throw new MetaDataException(String.format("<testMenu /> module %s has no menu item %s", test.getModuleName(), itemName));
 		}
 		checkMenu(test, path, selenide.menu(path.moduleTitle, path.labels(), false));
+	}
+
+	// ------------------------------------------------------------------ renderer hooks
+
+	/**
+	 * Filters the column in the list grid's filter row (substring for text, equality otherwise), or with the grid's
+	 * advanced filter for the other operators: see {@link SmartClientSelenide#filterListGrid}.
+	 */
+	@Override
+	protected void filterListGrid(@Nonnull ListGridFilter filter, @Nonnull String column, @Nullable String value, @Nonnull FilterOperator operator) {
+		prepareForInteraction();
+		selenide.filterListGrid(listGridRows(filter), sanitised(column), value, operator.name());
+	}
+
+	/**
+	 * Presses the list grid's Clear filter button.
+	 */
+	@Override
+	protected void clearListGridFilters(@Nonnull ListGridClearFilter clear) {
+		prepareForInteraction();
+		selenide.clearListGridFilters(listGridRows(clear));
+	}
+
+	/**
+	 * Clicks the column's header until the list grid is sorted by it alone, in the direction asked for.
+	 */
+	@Override
+	protected void sortListGrid(@Nonnull ListGridSort sort, @Nonnull String column, boolean descending) {
+		prepareForInteraction();
+		selenide.sortListGrid(listGridRows(sort), sanitised(column), descending);
+	}
+
+	/**
+	 * Returns the locator of the rows of the list grid a step names.
+	 *
+	 * @param step	the list grid step
+	 * @return the locator
+	 */
+	private @Nonnull String listGridRows(@Nonnull Step step) {
+		SmartClientAutomationContext context = context();
+		String identifier = step.getIdentifier(context);
+		List<Locator> locators = context.getLocators(identifier + ".select");
+		if (locators == null) {
+			throw new MetaDataException(String.format("<%s /> list grid [%s] is not on the view",
+														Introspector.decapitalize(step.getClass().getSimpleName()), identifier));
+		}
+		return locators.get(0).getLocator();
+	}
+
+	/**
+	 * Returns a column's binding as the grid names its field.
+	 *
+	 * @param column	the binding
+	 * @return the sanitised binding
+	 */
+	private static @Nonnull String sanitised(@Nonnull String column) {
+		return Objects.requireNonNull(BindUtil.sanitiseBinding(column));
+	}
+
+	/**
+	 * Reads what the first displayed widget for the binding shows, as {@code testValue} reads it.
+	 */
+	@Override
+	protected @Nullable String readWidgetValue(@Nonnull CaptureValue capture) {
+		prepareForDataEntry(); // a row being edited inline stays in edit
+		String binding = capture.getBinding();
+		List<Locator> locators = inputLocators(context(), binding);
+		if (locators == null) {
+			throw new MetaDataException(String.format("<captureValue /> with binding [%s] is not on the view", binding));
+		}
+		for (Locator locator : locators) {
+			if (selenide.widgetState(locator.getLocator())[1]) {
+				return selenide.value(locator.getLocator());
+			}
+		}
+		throw new IllegalStateException(String.format("<captureValue /> binding [%s] has no widget showing", binding));
+	}
+
+	/**
+	 * Chooses the combo or radio option with the code or label: the option's position is found in the browser, then it is
+	 * chosen as {@code dataEnter} chooses a position.
+	 */
+	@Override
+	protected void enterOption(@Nonnull DataEnter dataEnter, @Nonnull String value, @Nonnull Match match) {
+		prepareForDataEntry();
+		SmartClientAutomationContext context = context();
+		String identifier = dataEnter.getIdentifier(context);
+		List<Locator> locators = inputLocators(context, identifier);
+		if (locators == null) {
+			throw new MetaDataException(
+					String.format("<dataEnter /> with binding [%s] is not supported or is not on the view", identifier));
+		}
+
+		boolean option = false;
+		boolean success = false;
+		for (Locator locator : locators) {
+			InputType inputType = locator.getInputType();
+			if ((! success) && ((inputType == InputType.COMBO) || (inputType == InputType.RADIO))) {
+				option = true;
+				int index = selenide.optionIndex(locator.getLocator(), value, match == Match.code);
+				selenide.trace(String.format("set %s to the option with %s %s (option %d)", identifier, match, value, Integer.valueOf(index)));
+				success = enter(locator.getLocator(), inputType, String.valueOf(index));
+			}
+		}
+
+		if (! option) {
+			throw new MetaDataException(String.format("<dataEnter match=\"%s\" /> with binding [%s] needs a combo or radio, but its widget is neither",
+														match, identifier));
+		}
+		if (! success) {
+			throw new DomainException(String.format("Data entry failed for binding [%s] (is the widget disabled or read only?)", identifier));
+		}
+
+		selenide.waitForFullPageResponse();
+	}
+
+	/**
+	 * Opens the lookup's drop-down with its picker and picks the first row that contains the text.
+	 */
+	@Override
+	protected void pickLookupDescriptionRowContaining(@Nonnull LookupDescriptionPick pick, @Nonnull String rowContaining) {
+		lookupDescriptionContaining(pick, pick.getBinding(), null, rowContaining);
+	}
+
+	/**
+	 * Types the search into the lookup and picks the first suggestion that contains the pick text.
+	 */
+	@Override
+	protected void autoCompleteLookupDescriptionAndPick(@Nonnull LookupDescriptionAutoComplete complete, @Nonnull String search, @Nonnull String pick) {
+		lookupDescriptionContaining(complete, complete.getBinding(), search, pick);
+	}
+
+	/**
+	 * Picks the first row of a lookup description's drop-down that contains the text.
+	 *
+	 * @param step		the step
+	 * @param binding	the lookup description's binding
+	 * @param search	the text to type, or {@code null} to open the drop-down with its picker
+	 * @param text		the text the row contains
+	 */
+	private void lookupDescriptionContaining(@Nonnull Step step, @Nonnull String binding, @Nullable String search, @Nonnull String text) {
+		prepareForInteraction();
+		List<Locator> locators = locators(step, binding);
+
+		boolean success = false;
+		for (Locator locator : locators) {
+			if (! success) {
+				selenide.trace(String.format("%s lookup description [%s] and pick the row containing '%s'",
+												(search == null) ? "Open" : "Search '" + search + "' in", binding, text));
+				success = selenide.lookupDescriptionContaining(locator.getLocator(), search, text);
+			}
+		}
+
+		if (! success) {
+			throw new DomainException(String.format("Lookup description [%s] failed (is it disabled?)", binding));
+		}
 	}
 
 	/**
