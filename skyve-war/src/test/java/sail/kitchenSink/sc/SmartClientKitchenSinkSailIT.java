@@ -72,7 +72,11 @@ class SmartClientKitchenSinkSailIT extends AbstractSmartClientInterpretedSail {
 				""";
 		AssertionError e = Assertions.assertThrows(AssertionError.class, () -> sailString(script));
 		String message = e.getMessage();
-		Assertions.assertAll(() -> Assertions.assertTrue(message.contains("with 3 failure(s)"), message),
+		// each step that threw is attached with its cause, so its stack trace shows where it failed
+		Throwable[] thrown = e.getSuppressed();
+		Assertions.assertAll(() -> Assertions.assertEquals(3, thrown.length),
+								() -> Assertions.assertTrue(java.util.Arrays.stream(thrown).allMatch(t -> t.getCause() != null)),
+								() -> Assertions.assertTrue(message.contains("with 3 failure(s)"), message),
 								() -> Assertions.assertTrue(message.contains("found no displayed link containing it: the page's links are ["), message),
 								() -> Assertions.assertTrue(message.contains("no option has the label Fourth"), message),
 								() -> Assertions.assertTrue(message.contains("holds an enum, which is filtered with equals, not greaterThan"), message));

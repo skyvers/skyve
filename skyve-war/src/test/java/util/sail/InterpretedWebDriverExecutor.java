@@ -136,6 +136,8 @@ public abstract class InterpretedWebDriverExecutor<
 
 	/** Failures recorded under the Verify strategy, in order. */
 	private final List<String> failures = new ArrayList<>();
+	/** What each failure under Verify threw, in order, for the report's causes. */
+	private final List<SailFailure> thrown = new ArrayList<>();
 	/** The interaction (or procedure) being executed, for failure messages. */
 	private String procedureName;
 	/** The 1-based number of the top-level step being executed, for failure messages. */
@@ -166,6 +168,7 @@ public abstract class InterpretedWebDriverExecutor<
 		testStrategyOverride(); // an invalid override fails here, before any step runs
 		initialiseAutomation(automation);
 		failures.clear();
+		thrown.clear();
 
 		try {
 			Procedure before = automation.getBefore();
@@ -190,7 +193,12 @@ public abstract class InterpretedWebDriverExecutor<
 			for (String failure : failures) {
 				message.append("\n  - ").append(failure);
 			}
-			throw new AssertionError(message.toString());
+			AssertionError error = new AssertionError(message.toString());
+			// each step that threw is attached, with its causes and stack trace, as it would be under Assert
+			for (SailFailure failure : thrown) {
+				error.addSuppressed(failure);
+			}
+			throw error;
 		}
 	}
 
@@ -252,6 +260,9 @@ public abstract class InterpretedWebDriverExecutor<
 				String failure = failureMessage(reason(t));
 				if ((! halt) && (TestStrategy.Verify == getTestStrategy())) {
 					record(failure);
+					SailFailure cause = new SailFailure(failure, t);
+					thrown.add(cause);
+					selenide.trace("    Cause: " + causes(t));
 					return false;
 				}
 				diagnose();
@@ -359,6 +370,32 @@ public abstract class InterpretedWebDriverExecutor<
 			message = message.trim();
 		}
 		return t.getClass().getSimpleName() + (message.isEmpty() ? "" : ": " + message);
+	}
+
+	/**
+	 * Describes a throwable's cause chain, and where it was thrown, for the trace.
+	 *
+	 * @param t	the throwable
+	 * @return each cause's class and first message line, outermost first, then the top frame and the harness's frames
+	 */
+	private static @Nonnull String causes(@Nonnull Throwable t) {
+		StringBuilder result = new StringBuilder(256);
+		for (Throwable cause = t; cause != null; cause = (cause.getCause() == cause) ? null : cause.getCause()) {
+			if (cause != t) {
+				result.append(" <- caused by ");
+			}
+			result.append(reason(cause));
+		}
+		// where it was thrown, and the harness's frames that led there (the step's own lines)
+		StackTraceElement[] frames = t.getStackTrace();
+		int shown = 0;
+		for (int i = 0; (i < frames.length) && (shown < 6); i++) {
+			if ((i == 0) || frames[i].getClassName().startsWith("util.sail.")) {
+				result.append("\n        at ").append(frames[i]);
+				shown++;
+			}
+		}
+		return result.toString();
 	}
 
 	private @Nullable String currentUrl() {
