@@ -38,6 +38,99 @@
 			<testGridRows module="kitchensink" document="LookupDescription" rowContaining="SAIL lookup {run}" minRows="1" maxRows="1" />
 		</method>
 	</interaction>
+	<interaction name="Lookup values: generated numbers, filters and sorts">
+		<method>
+			<comment>Each new lookup value gets the next number when it is first saved: keep each one in a variable</comment>
+			<navigateList module="kitchensink" document="LookupDescription" />
+			<listGridNew module="kitchensink" document="LookupDescription" />
+			<dataEnter binding="description" value="SAIL filter {run} a" />
+			<save />
+			<captureValue binding="number" variable="numberA" />
+			<testValue binding="number" value="{var:numberA}" />
+			<ok />
+			<listGridNew module="kitchensink" document="LookupDescription" />
+			<dataEnter binding="description" value="SAIL filter {run} b" />
+			<save />
+			<captureValue binding="number" variable="numberB" />
+			<ok />
+			<listGridNew module="kitchensink" document="LookupDescription" />
+			<dataEnter binding="description" value="SAIL filter {run} c" />
+			<save />
+			<captureValue binding="number" variable="numberC" />
+			<ok />
+			<comment>The list is a Vue list grid: filter its text column, then AND a filter on its number column</comment>
+			<listGridFilter module="kitchensink" document="LookupDescription" column="description" value="SAIL filter {run}" />
+			<testGridRows module="kitchensink" document="LookupDescription" minRows="3" maxRows="3" />
+			<listGridFilter module="kitchensink" document="LookupDescription" column="number" value="{var:numberA}" operator="greaterThan" />
+			<testGridRows module="kitchensink" document="LookupDescription" minRows="2" maxRows="2" />
+			<testGridRows module="kitchensink" document="LookupDescription" rowContaining="SAIL filter {run} a" maxRows="0" />
+			<comment>A new filter on a column replaces its old one</comment>
+			<listGridFilter module="kitchensink" document="LookupDescription" column="number" value="{var:numberB}" operator="equals" />
+			<testGridRows module="kitchensink" document="LookupDescription" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" document="LookupDescription" rowContaining="SAIL filter {run} b" minRows="1" maxRows="1" />
+			<listGridFilter module="kitchensink" document="LookupDescription" column="number" value="{var:numberB}" operator="lessThan" />
+			<testGridRows module="kitchensink" document="LookupDescription" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" document="LookupDescription" rowContaining="SAIL filter {run} a" minRows="1" maxRows="1" />
+			<comment>No value clears the column's filter</comment>
+			<listGridFilter module="kitchensink" document="LookupDescription" column="number" />
+			<testGridRows module="kitchensink" document="LookupDescription" minRows="3" maxRows="3" />
+			<comment>The newest value has the highest number, so it is first when sorted by number descending</comment>
+			<listGridSort module="kitchensink" document="LookupDescription" column="number" descending="true" />
+			<listGridZoom module="kitchensink" document="LookupDescription" rowContaining="SAIL filter {run}" />
+			<testValue binding="description" value="SAIL filter {run} c" />
+			<testValue binding="number" value="{var:numberC}" />
+			<cancel />
+			<listGridSort module="kitchensink" document="LookupDescription" column="number" />
+			<listGridZoom module="kitchensink" document="LookupDescription" rowContaining="SAIL filter {run}" />
+			<testValue binding="description" value="SAIL filter {run} a" />
+			<cancel />
+			<listGridSort module="kitchensink" document="LookupDescription" column="description" descending="true" />
+			<listGridZoom module="kitchensink" document="LookupDescription" rowContaining="SAIL filter {run}" />
+			<testValue binding="description" value="SAIL filter {run} c" />
+			<cancel />
+			<listGridClearFilter module="kitchensink" document="LookupDescription" />
+			<testGridRows module="kitchensink" document="LookupDescription" rowContaining="SAIL lookup {run}" minRows="1" maxRows="1" />
+			<listGridSort module="kitchensink" document="LookupDescription" column="description" />
+		</method>
+	</interaction>
+	<interaction name="List Grid Fixture: filters and sorts in a Vue list grid and a PrimeFaces data table">
+		<method>
+			<navigateEdit module="kitchensink" document="ListGridFixture" />
+			<comment>Vue list grid</comment>
+			<listGridFilter module="kitchensink" query="qListGridFixtureVue" column="description" value="SAIL filter {run}" />
+			<testGridRows module="kitchensink" query="qListGridFixtureVue" minRows="3" maxRows="3" />
+			<listGridFilter module="kitchensink" query="qListGridFixtureVue" column="description" value="SAIL filter {run} b" operator="equals" />
+			<testGridRows module="kitchensink" query="qListGridFixtureVue" minRows="1" maxRows="1" />
+			<listGridFilter module="kitchensink" query="qListGridFixtureVue" column="description" value="SAIL filter {run}" operator="startsWith" />
+			<testGridRows module="kitchensink" query="qListGridFixtureVue" minRows="3" maxRows="3" />
+			<listGridSort module="kitchensink" query="qListGridFixtureVue" column="description" descending="true" />
+			<listGridZoom module="kitchensink" query="qListGridFixtureVue" rowContaining="SAIL filter {run}" />
+			<testValue binding="description" value="SAIL filter {run} c" />
+			<cancel />
+			<listGridClearFilter module="kitchensink" query="qListGridFixtureVue" />
+			<testGridRows module="kitchensink" query="qListGridFixtureVue" rowContaining="SAIL lookup {run}" minRows="1" maxRows="1" />
+			<listGridSort module="kitchensink" query="qListGridFixtureVue" column="description" />
+			<comment>PrimeFaces data table: its text filters compare with contains</comment>
+			<listGridFilter module="kitchensink" query="qListGridFixtureFaces" column="description" value="SAIL filter {run}" />
+			<testGridRows module="kitchensink" query="qListGridFixtureFaces" minRows="3" maxRows="3" />
+			<listGridFilter module="kitchensink" query="qListGridFixtureFaces" column="description" value="{run} b" />
+			<testGridRows module="kitchensink" query="qListGridFixtureFaces" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qListGridFixtureFaces" rowContaining="SAIL filter {run} b" minRows="1" maxRows="1" />
+			<listGridFilter module="kitchensink" query="qListGridFixtureFaces" column="description" value="SAIL filter {run}" />
+			<listGridSort module="kitchensink" query="qListGridFixtureFaces" column="description" descending="true" />
+			<listGridZoom module="kitchensink" query="qListGridFixtureFaces" rowContaining="SAIL filter {run}" />
+			<testValue binding="description" value="SAIL filter {run} c" />
+			<cancel />
+			<listGridFilter module="kitchensink" query="qListGridFixtureFaces" column="description" value="SAIL filter {run}" />
+			<listGridSort module="kitchensink" query="qListGridFixtureFaces" column="description" />
+			<listGridZoom module="kitchensink" query="qListGridFixtureFaces" rowContaining="SAIL filter {run}" />
+			<testValue binding="description" value="SAIL filter {run} a" />
+			<cancel />
+			<listGridFilter module="kitchensink" query="qListGridFixtureFaces" column="description" value="SAIL filter {run}" />
+			<listGridClearFilter module="kitchensink" query="qListGridFixtureFaces" />
+			<testGridRows module="kitchensink" query="qListGridFixtureFaces" rowContaining="SAIL lookup {run}" minRows="1" maxRows="1" />
+		</method>
+	</interaction>
 	<interaction name="List Grid Fixture: a Vue list grid and a PrimeFaces data table">
 		<method>
 			<comment>Each list grid chooses how PrimeFaces renders it with its componentBuilderClass property. The same steps run on each.</comment>
@@ -102,6 +195,18 @@
 			<testValue binding="combo" value="two" />
 			<dataEnter binding="radio" value="2" />
 			<testValue binding="radio" value="three" />
+			<comment>match chooses an option by its code or its label; captureValue keeps the label a combo shows</comment>
+			<dataEnter binding="combo" value="three" match="code" />
+			<testValue binding="combo" value="Third" />
+			<dataEnter binding="combo" value="Second" match="label" />
+			<testValue binding="combo" value="two" />
+			<captureValue binding="combo" variable="comboLabel" />
+			<testValue binding="combo" value="{var:comboLabel}" />
+			<testValue binding="combo" value="Second" />
+			<dataEnter binding="radio" value="one" match="code" />
+			<testValue binding="radio" value="First" />
+			<dataEnter binding="radio" value="Third" match="label" />
+			<testValue binding="radio" value="three" />
 			<dataEnter binding="geometry" value="POINT (138.9596428009031 -34.521214140240495)" />
 			<testValue binding="geometry" value="POINT (138.9596428009031 -34.521214140240495)" />
 			<dataEnter binding="id" value="01949764-173c-7f8f-8b2a-0e19f7e52650" />
@@ -127,6 +232,11 @@
 			<dataEnter binding="timestamp" value="07-Nov-2025 15:43:16" />
 			<testValue binding="timestamp" value="07-Nov-2025 15:43:16" />
 			<lookupDescriptionPick binding="lookupDescription" row="0" />
+			<comment>Pick lookup rows by their text, from the drop down and from a search's suggestions</comment>
+			<lookupDescriptionPick binding="lookupDescription" rowContaining="SAIL filter {run} b" />
+			<testValue binding="lookupDescription" value="SAIL filter {run} b" />
+			<lookupDescriptionAutoComplete binding="lookupDescription" search="SAIL filter {run}" pick="{run} c" />
+			<testValue binding="lookupDescription" value="SAIL filter {run} c" />
 			<lookupDescriptionAutoComplete binding="lookupDescription" search="SAIL lookup {run}" />
 			<testValue binding="lookupDescription" value="SAIL lookup {run}" />
 			<tabSelect path="Data Grids" />
@@ -303,6 +413,13 @@
 			<testValue binding="description" value="SAIL lookup {run}" />
 			<delete />
 			<testGridRows module="kitchensink" document="LookupDescription" rowContaining="SAIL lookup {run}" maxRows="0" />
+			<listGridZoom module="kitchensink" document="LookupDescription" rowContaining="SAIL filter {run} a" />
+			<delete />
+			<listGridZoom module="kitchensink" document="LookupDescription" rowContaining="SAIL filter {run} b" />
+			<delete />
+			<listGridZoom module="kitchensink" document="LookupDescription" rowContaining="SAIL filter {run} c" />
+			<delete />
+			<testGridRows module="kitchensink" document="LookupDescription" rowContaining="SAIL filter {run}" maxRows="0" />
 		</method>
 	</interaction>
 	<interaction name="Menus">

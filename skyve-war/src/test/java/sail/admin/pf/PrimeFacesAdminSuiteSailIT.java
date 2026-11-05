@@ -32,6 +32,8 @@ class PrimeFacesAdminSuiteSailIT extends AbstractPrimeFacesInterpretedSail {
 
 	@Test
 	void suite() {
+		// The user that 03-security-admin makes, in a group with these roles: build that user's views with them
+		viewRoles("sail{run}", "admin.BasicUser", "admin.ContactViewer");
 		new SailSuite("sail/admin/pf/suite/")
 				.setUp("00-precondition.xml", "00-backup.xml")
 				.files("01-session.xml",
