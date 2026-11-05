@@ -663,6 +663,107 @@ class MavenSkyveProjectTest {
 	}
 
 	@Test
+	void assembleTestFilesCopiesUtilTestResources() throws IOException {
+		File skyveDir = createSkyveDirStructure(Files.createDirectory(tempFolder.resolve("skyve")).toFile());
+		Path helper = skyveDir.toPath().resolve("skyve-war/src/test/resources/util/sail/smartclient-sail.js");
+		Files.createDirectories(helper.getParent());
+		Files.writeString(helper, "// helper");
+		// Skyve's own test resources outside util are not part of an app
+		Path skyveOnly = skyveDir.toPath().resolve("skyve-war/src/test/resources/sail/files/sail-image.png");
+		Files.createDirectories(skyveOnly.getParent());
+		Files.writeString(skyveOnly, "png");
+		File projectDir = Files.createDirectory(tempFolder.resolve("project")).toFile();
+		new File(projectDir, "src/test/java/util").mkdirs();
+		new File(projectDir, "src/generatedTest/java").mkdirs();
+
+		MavenSkyveProject project = new MavenSkyveProjectCreator()
+				.projectName("test")
+				.projectDirectory(projectDir.getAbsolutePath())
+				.customerName("testCustomer")
+				.skyveDirectory(skyveDir.getAbsolutePath())
+				.initialise();
+
+		project.assemble(false, false, false, true);
+
+		Path copied = projectDir.toPath().resolve("src/test/resources/util/sail/smartclient-sail.js");
+		assertEquals("// helper", Files.readString(copied));
+		assertFalse(Files.exists(projectDir.toPath().resolve("src/test/resources/sail/files/sail-image.png")));
+	}
+
+	@Test
+	void assembleTestFilesFromProjectCopiesUtilTestResources() throws IOException {
+		File templateDir = Files.createDirectory(tempFolder.resolve("template")).toFile();
+		new File(templateDir, "src/test/java/util").mkdirs();
+		new File(templateDir, "src/generatedTest/java/modules").mkdirs();
+		Path helper = templateDir.toPath().resolve("src/test/resources/util/sail/smartclient-sail.js");
+		Files.createDirectories(helper.getParent());
+		Files.writeString(helper, "// template helper");
+		File projectDir = Files.createDirectory(tempFolder.resolve("project")).toFile();
+
+		MavenSkyveProject project = new MavenSkyveProjectCreator()
+				.projectName("test")
+				.projectDirectory(projectDir.getAbsolutePath())
+				.customerName("testCustomer")
+				.skyveDirectory(templateDir.getAbsolutePath())
+				.copyFromProject(true)
+				.initialise();
+
+		project.assemble(false, false, false, true);
+
+		Path copied = projectDir.toPath().resolve("src/test/resources/util/sail/smartclient-sail.js");
+		assertEquals("// template helper", Files.readString(copied));
+	}
+
+	@Test
+	void clearBeforeAssembleRemovesOnlyUtilTestResources() throws IOException {
+		File skyveDir = createSkyveDirStructure(Files.createDirectory(tempFolder.resolve("skyve")).toFile());
+		File projectDir = Files.createDirectory(tempFolder.resolve("project")).toFile();
+		for (String rel : new String[]{
+				"src/main/java/modules/admin",
+				"src/main/java/resources",
+				"src/main/java/schemas",
+				"src/main/java/router",
+				"src/generated/java/modules/admin",
+				"src/main/webapp/desktop",
+				"src/main/webapp/external",
+				"src/main/webapp/pages",
+				"src/main/webapp/WEB-INF/resources/skyve",
+				"src/test/java/util",
+				"src/generatedTest/java/modules/admin"}) {
+			new File(projectDir, rel).mkdirs();
+		}
+		Path stale = projectDir.toPath().resolve("src/test/resources/util/sail/smartclient-sail.js");
+		Files.createDirectories(stale.getParent());
+		Files.writeString(stale, "// old helper");
+		Path appOwn = projectDir.toPath().resolve("src/test/resources/jasperreports.properties");
+		Files.writeString(appOwn, "app");
+
+		MavenSkyveProject project = new MavenSkyveProjectCreator()
+				.projectName("test")
+				.projectDirectory(projectDir.getAbsolutePath())
+				.customerName("testCustomer")
+				.skyveDirectory(skyveDir.getAbsolutePath())
+				.initialise();
+
+		project.clearBeforeAssemble();
+
+		assertFalse(Files.exists(stale));
+		assertTrue(Files.exists(appOwn));
+	}
+
+	@Test
+	void testResourceDirectoryBuilderSetsTarget() {
+		MavenSkyveProject project = new MavenSkyveProjectCreator()
+				.projectName(PROJECT_NAME)
+				.projectDirectory(PROJECT_DIR)
+				.customerName(CUSTOMER_NAME)
+				.testResourceDirectory("custom/testResources")
+				.initialise();
+
+		assertEquals(Paths.get(PROJECT_DIR, "custom/testResources"), project.getAbsoluteTestResourcePath());
+	}
+
+	@Test
 	void clearBeforeAssembleWithEmptyDirsDoesNotThrow() throws IOException {
 		File skyveDir = createSkyveDirStructure(Files.createDirectory(tempFolder.resolve("skyve")).toFile());
 		File projectDir = Files.createDirectory(tempFolder.resolve("project")).toFile();

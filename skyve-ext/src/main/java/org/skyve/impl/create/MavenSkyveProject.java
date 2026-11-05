@@ -60,6 +60,10 @@ public class MavenSkyveProject {
 	 */
 	public static final Path SKYVE_TEST_PATH = SKYVE_WAR_PATH.resolve("src").resolve("test").resolve("java");
 	/**
+	 * Relative test-resources path in the Skyve template WAR.
+	 */
+	public static final Path SKYVE_TEST_RESOURCES_PATH = SKYVE_WAR_PATH.resolve("src").resolve("test").resolve("resources");
+	/**
 	 * Relative generated-test path in the Skyve template WAR.
 	 */
 	public static final Path SKYVE_GENERATED_TEST_PATH = SKYVE_WAR_PATH.resolve("src").resolve("generatedTest").resolve("java");
@@ -78,6 +82,7 @@ public class MavenSkyveProject {
 	private final Path resourceDirectory;
 	private final Path webDirectory;
 	private final Path testDirectory;
+	private final Path testResourceDirectory;
 	private final Path generatedTestDirectory;
 	private final String skyveScript;
 	private final Map<String, Pair<ModuleMetaData, List<DocumentMetaData>>> metaData = new HashMap<>();
@@ -99,6 +104,7 @@ public class MavenSkyveProject {
 		this.resourceDirectory = Paths.get(builder.resourceDirectory);
 		this.webDirectory = Paths.get(builder.webDirectory);
 		this.testDirectory = Paths.get(builder.testDirectory);
+		this.testResourceDirectory = Paths.get(builder.testResourceDirectory);
 		this.generatedTestDirectory = Paths.get(builder.generatedTestDirectory);
 		this.skyveScript = builder.skyveScript;
 		this.copyFromProject = builder.copyFromProject;
@@ -259,6 +265,15 @@ public class MavenSkyveProject {
 	}
 
 	/**
+	 * Returns the absolute test-resources directory.
+	 *
+	 * @return the absolute test-resources directory.
+	 */
+	public @Nonnull Path getAbsoluteTestResourcePath() {
+		return projectDirectory.resolve(testResourceDirectory);
+	}
+
+	/**
 	 * Returns the relative generated-test directory.
 	 *
 	 * @return the relative generated-test directory.
@@ -380,6 +395,7 @@ public class MavenSkyveProject {
 		getSkyveGeneratedFiles(getAbsoluteGeneratedPath()).forEach(File::delete);
 		getSkyveWebAppFiles(getAbsoluteWebPath()).forEach(File::delete);
 		getSkyveTestFiles(getAbsoluteTestPath()).forEach(File::delete);
+		getSkyveTestResourceFiles(getAbsoluteTestResourcePath()).forEach(File::delete);
 		getSkyveGeneratedTestFiles(getAbsoluteGeneratedTestPath()).forEach(File::delete);
 		getHistoricFiles(getAbsoluteProjectPath()).forEach(File::delete);
 	}
@@ -418,6 +434,7 @@ public class MavenSkyveProject {
 		}
 		if (includeTestFiles) {
 			copySkyveTestFiles();
+			copySkyveTestResourceFiles();
 			copySkyveGeneratedTestFiles();
 		}
 	}
@@ -672,6 +689,34 @@ public class MavenSkyveProject {
 	}
 
 	/**
+	 * Returns test resource files to copy from the template: everything under {@code util}, such as the SAIL
+	 * SmartClient helper script {@code util/sail/smartclient-sail.js} that the {@code util} test classes load.
+	 *
+	 * @param basePath the template test-resources base path.
+	 * @return test resource files to copy; empty when there is no {@code util} directory.
+	 */
+	private static @Nonnull List<File> getSkyveTestResourceFiles(@Nonnull Path basePath) {
+		final File utilDir = basePath.resolve("util").toFile();
+		if (! utilDir.isDirectory()) {
+			return new ArrayList<>();
+		}
+		return new ArrayList<>(FileUtils.listFiles(utilDir, null, true));
+	}
+
+	/**
+	 * Copies test resource files that the copied {@code util} test classes need onto the test classpath.
+	 *
+	 * @throws IOException if any copy operation fails.
+	 */
+	private void copySkyveTestResourceFiles() throws IOException {
+		final Path relativeTestResourcePath = copyFromProject ? Paths.get("src").resolve("test").resolve("resources") : SKYVE_TEST_RESOURCES_PATH;
+		final Path absoluteTestResourcePath = skyveDirectory.resolve(relativeTestResourcePath);
+		final File targetDir = getAbsoluteTestResourcePath().toFile();
+
+		copyFiles(targetDir, absoluteTestResourcePath, getSkyveTestResourceFiles(absoluteTestResourcePath));
+	}
+
+	/**
 	 * Returns generated test files to copy from the template.
 	 *
 	 * @param basePath the template generated-test base path.
@@ -761,6 +806,10 @@ public class MavenSkyveProject {
 		 */
 		static final String DEFAULT_TEST_DIRECTORY = "src/test/java/";
 		/**
+		 * Default relative test-resources directory used by new project scaffolds.
+		 */
+		static final String DEFAULT_TEST_RESOURCES_DIRECTORY = "src/test/resources/";
+		/**
 		 * Default relative generated-test directory used by new project scaffolds.
 		 */
 		static final String DEFAULT_GENERATED_TEST_DIRECTORY = "src/generatedTest/java/";
@@ -775,6 +824,7 @@ public class MavenSkyveProject {
 		private String resourceDirectory = DEFAULT_RESOURCES_DIRECTORY;
 		private String webDirectory = DEFAULT_WEB_DIRECTORY;
 		private String testDirectory = DEFAULT_TEST_DIRECTORY;
+		private String testResourceDirectory = DEFAULT_TEST_RESOURCES_DIRECTORY;
 		private String generatedTestDirectory = DEFAULT_GENERATED_TEST_DIRECTORY;
 		private String skyveScript;
 		private boolean copyFromProject = false;
@@ -912,6 +962,18 @@ public class MavenSkyveProject {
 		@SuppressWarnings("hiding")
 		public @Nonnull MavenSkyveProjectCreator testDirectory(final @Nonnull String testDirectory) {
 			this.testDirectory = testDirectory;
+			return this;
+		}
+
+		/**
+		 * Sets the relative test-resources directory.
+		 *
+		 * @param testResourceDirectory the relative test-resources directory.
+		 * @return this builder.
+		 */
+		@SuppressWarnings("hiding")
+		public @Nonnull MavenSkyveProjectCreator testResourceDirectory(final @Nonnull String testResourceDirectory) {
+			this.testResourceDirectory = testResourceDirectory;
 			return this;
 		}
 

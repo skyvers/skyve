@@ -41,7 +41,7 @@ The schema is `skyve-war/src/main/java/schemas/sail.xsd`, with an identical copy
 in `skyve-core/src/test/resources/schemas/sail.xsd`. Both executors implement
 the whole language. A step that a renderer has no UI for fails with a reason;
 the PF and SC columns of the [op-code reference](#op-code-reference) say which.
-Code that implements `Executor` must be updated for Skyve 11; see
+Code that implements `Executor` must be updated for Skyve 10; see
 [Upgrading](#upgrading).
 
 ## How the Interpreted Executors Work
@@ -95,6 +95,9 @@ server's data.
   helper, `util/sail/smartclient-sail.js`, resolves each spec against the live
   view through Skyve's client object model and `isc.AutoTest`. No component
   counters or window indexes are derived in Java.
+  The helper is a test resource in `skyve-war/src/test/resources`. An app
+  gets it from `skyve:assemble`, which copies `src/test/resources/util/**`
+  as well as `src/test/java/util/**`.
 
 ### The test user
 
