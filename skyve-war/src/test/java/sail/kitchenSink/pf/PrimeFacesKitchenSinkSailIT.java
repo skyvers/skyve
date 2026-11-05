@@ -1,5 +1,9 @@
 package sail.kitchenSink.pf;
 
+import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import org.junit.jupiter.api.Test;
 
 import util.AbstractPrimeFacesInterpretedSail;
@@ -43,6 +47,49 @@ class PrimeFacesKitchenSinkSailIT extends AbstractPrimeFacesInterpretedSail {
 								"<action name=\"RunFromToolbar\" />" +
 								"<testValue binding=\"outcome\" value=\"Run From Toolbar ran\" />" +
 								"<logout />"));
+	}
+
+	/**
+	 * The steps added for long lists, options and lookups fail with a reason when the page cannot do what they say.
+	 * Run under Verify, so that every interaction runs and each failure is reported.
+	 */
+	@Test
+	void unmatchedOptionsColumnsAndRowsFail() {
+		String script = """
+				<automation uxui="tablet" userAgentType="tablet" testStrategy="Verify" xmlns="http://www.skyve.org/xml/sail">
+					<interaction name="Login">
+						<method>
+							<login user="admin" password="admin" />
+						</method>
+					</interaction>
+					<interaction name="No such option">
+						<method>
+							<navigateEdit module="kitchensink" document="KitchenSink" />
+							<tabSelect path="Widgets" />
+							<dataEnter binding="combo" value="Fourth" match="label" />
+						</method>
+					</interaction>
+					<interaction name="A text column has no greater than">
+						<method>
+							<navigateList module="kitchensink" document="LookupDescription" />
+							<listGridFilter module="kitchensink" document="LookupDescription" column="description" value="x" operator="greaterThan" />
+						</method>
+					</interaction>
+					<interaction name="No such lookup row">
+						<method>
+							<navigateEdit module="kitchensink" document="KitchenSink" />
+							<tabSelect path="Widgets" />
+							<lookupDescriptionPick binding="lookupDescription" rowContaining="no such row {run}" />
+						</method>
+					</interaction>
+				</automation>
+				""";
+		AssertionError e = assertThrows(AssertionError.class, () -> sailString(script));
+		String message = e.getMessage();
+		assertAll(() -> assertTrue(message.contains("with 3 failure(s)"), message),
+					() -> assertTrue(message.contains("has no option with the label 'Fourth'"), message),
+					() -> assertTrue(message.contains("is a text column, which cannot filter with greaterThan"), message),
+					() -> assertTrue(message.contains("has no row containing 'no such row "), message));
 	}
 
 	private static String automation(String steps) {

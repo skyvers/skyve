@@ -6,6 +6,7 @@ import java.util.Objects;
 
 import org.primefaces.component.autocomplete.AutoComplete;
 import org.primefaces.component.colorpicker.ColorPicker;
+import org.primefaces.component.datatable.DataTable;
 import org.primefaces.component.datepicker.DatePicker;
 import org.primefaces.component.inputmask.InputMask;
 import org.primefaces.component.inputtext.InputText;
@@ -55,11 +56,15 @@ import org.skyve.impl.web.faces.pipeline.layout.ResponsiveLayoutBuilder;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
+import org.skyve.metadata.model.Attribute;
+import org.skyve.metadata.model.Attribute.AttributeType;
+import org.skyve.metadata.model.document.DomainType;
 import org.skyve.metadata.model.document.Relation;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.Module.DocumentRef;
 import org.skyve.metadata.module.query.MetaDataQueryDefinition;
 import org.skyve.metadata.sail.language.Step;
+import org.skyve.metadata.sail.language.step.CaptureValue;
 import org.skyve.metadata.sail.language.step.TestValue;
 import org.skyve.metadata.sail.language.step.context.PushEditContext;
 import org.skyve.metadata.sail.language.step.context.PushListContext;
@@ -82,6 +87,10 @@ import org.skyve.metadata.sail.language.step.interaction.grids.DataGridRemove;
 import org.skyve.metadata.sail.language.step.interaction.grids.DataGridSelect;
 import org.skyve.metadata.sail.language.step.interaction.grids.DataGridZoom;
 import org.skyve.metadata.sail.language.step.interaction.grids.ListGridNew;
+import org.skyve.metadata.sail.language.step.interaction.grids.ListGridClearFilter;
+import org.skyve.metadata.sail.language.step.interaction.grids.ListGridFilter;
+import org.skyve.metadata.sail.language.step.interaction.grids.ListGridFilter.FilterOperator;
+import org.skyve.metadata.sail.language.step.interaction.grids.ListGridSort;
 import org.skyve.metadata.sail.language.step.interaction.grids.ListGridSelect;
 import org.skyve.metadata.sail.language.step.interaction.grids.ListGridZoom;
 import org.skyve.metadata.sail.language.step.interaction.lookup.LookupDescriptionAutoComplete;
@@ -1230,6 +1239,432 @@ public class PrimeFacesInterpretedWebDriverExecutor extends InterpretedWebDriver
 		return result;
 	}
 
+	/**
+	 * A list grid of the view that is on the page.
+	 *
+	 * @param component	the grid's component, built in this JVM
+	 * @param clientId	the grid's client id: a Vue list grid's container, or a PrimeFaces data table
+	 * @param vue	true for a Vue list grid, false for a PrimeFaces data table
+	 */
+	private record ListGridOnPage(@Nonnull UIComponent component, @Nonnull String clientId, boolean vue) {
+	}
+
+	/**
+	 * A column of a Vue list grid.
+	 *
+	 * @param field	the column's field in the grid (its sanitised binding)
+	 * @param type	the grid's type for the column, such as text, numeric or enum
+	 */
+	private record VueColumn(@Nonnull String field, @Nonnull String type) {
+	}
+
+	/**
+	 * Filters a column of a Vue list grid in its filter menu, or of a PrimeFaces data table in its filter row.
+	 * <p>
+	 * A Vue list grid filters text and numeric columns: a text column with contains, startsWith, equals or notEquals
+	 * (which its menu calls Contains, Starts With, Equals and Not Equals, and compares ignoring case), a numeric
+	 * column with equals, notEquals, lessThan or greaterThan. A PrimeFaces data table has one comparison per column,
+	 * which the server chooses from the column's type (see {@code SkyveLazyDataModel}): contains for text (and for a
+	 * variant domain's description and an association's business key) and equals for the other typed filters.
+	 * Other columns and comparisons fail the step with the reason.
+	 *
+	 * @param filter	the step
+	 * @param column	the column's binding
+	 * @param value	the value, or null to clear the column's filter
+	 * @param operator	the comparison; ignored when the value is null
+	 */
+	@Override
+	protected void filterListGrid(ListGridFilter filter, String column, @Nullable String value, FilterOperator operator) {
+		ListGridOnPage grid = listGridOnPage(filter, "listGridFilter");
+		if (grid.vue()) {
+			VueColumn vueColumn = vueColumn(grid, column, "listGridFilter", true);
+			String matchMode = null;
+			if (value != null) {
+				matchMode = vueMatchMode(vueColumn.type(), operator);
+				if (matchMode == null) {
+					throw new UnsupportedOperationException(String.format("<listGridFilter /> column [%s] of the Vue list grid %s is a %s column, which cannot filter with %s: %s",
+																			column,
+																			grid.clientId(),
+																			vueColumn.type(),
+																			operator,
+																			vueOperators(vueColumn.type())));
+				}
+			}
+			selenide.vueListGridFilter(grid.clientId(), vueColumn.field(), matchMode, value);
+		}
+		else {
+			UIComponent facesColumn = facesColumn(grid, column, "listGridFilter");
+			FilterOperator only = facesFilterOperator(filter, column);
+			if (only == null) {
+				throw new UnsupportedOperationException(String.format("<listGridFilter /> column [%s] of the PrimeFaces data table %s is filtered by choosing a value " +
+																		"(a combo or check box), which PrimeFaces SAIL does not do yet",
+																		column,
+																		grid.clientId()));
+			}
+			if ((value != null) && (operator != only)) {
+				throw new UnsupportedOperationException(String.format("<listGridFilter /> column [%s] of the PrimeFaces data table %s filters with %s only, so it cannot filter with %s",
+																		column,
+																		grid.clientId(),
+																		only,
+																		operator));
+			}
+			selenide.facesListGridFilter(PrimeFacesAutomationContext.clientId(facesColumn), facesFilterToggleId(grid), value);
+		}
+		checkSuccess("expected no error messages after <listGridFilter />");
+	}
+
+	/**
+	 * Clears every column filter of a Vue list grid (Clear in each filtered column's menu), or of a PrimeFaces data table
+	 * (deleting the text of each filter in its filter row).
+	 *
+	 * @param clear	the step
+	 */
+	@Override
+	protected void clearListGridFilters(ListGridClearFilter clear) {
+		ListGridOnPage grid = listGridOnPage(clear, "listGridClearFilter");
+		int cleared = grid.vue() ?
+						selenide.vueListGridClearFilters(grid.clientId()) :
+						selenide.facesListGridClearFilters(grid.clientId(), facesFilterToggleId(grid));
+		selenide.trace(String.format("    cleared %d filter(s)", Integer.valueOf(cleared)));
+		checkSuccess("expected no error messages after <listGridClearFilter />");
+	}
+
+	/**
+	 * Sorts a Vue list grid or a PrimeFaces data table by a column alone, by clicking the column's title.
+	 *
+	 * @param sort	the step
+	 * @param column	the column's binding
+	 * @param descending	true for descending
+	 */
+	@Override
+	protected void sortListGrid(ListGridSort sort, String column, boolean descending) {
+		ListGridOnPage grid = listGridOnPage(sort, "listGridSort");
+		if (grid.vue()) {
+			selenide.vueListGridSort(grid.clientId(), vueColumn(grid, column, "listGridSort", false).field(), descending);
+		}
+		else {
+			UIComponent facesColumn = facesColumn(grid, column, "listGridSort");
+			selenide.facesListGridSort(grid.clientId(), PrimeFacesAutomationContext.clientId(facesColumn), descending);
+		}
+		checkSuccess("expected no error messages after <listGridSort />");
+	}
+
+	/**
+	 * Finds the list grid that a list grid step names, on the page.
+	 *
+	 * @throws MetaDataException	if the view has no such list grid
+	 * @throws DomainException	if the list grid is not on the page
+	 */
+	private @Nonnull ListGridOnPage listGridOnPage(@Nonnull Step step, @Nonnull String element) {
+		PrimeFacesAutomationContext context = peek();
+		@SuppressWarnings("null") // a null here fails the test
+		String identifier = step.getIdentifier(context);
+		@SuppressWarnings("null") // a null here fails the test
+		List<UIComponent> components = context.getFacesComponents(identifier);
+		if (components == null) {
+			throw new MetaDataException(String.format("<%s /> list grid [%s] is not on the view", element, identifier));
+		}
+		for (UIComponent component : components) {
+			String clientId = PrimeFacesAutomationContext.clientId(component);
+			if (selenide.isVueListGrid(clientId)) {
+				return new ListGridOnPage(component, clientId, true);
+			}
+			org.openqa.selenium.WebElement table = selenide.elementById(clientId);
+			if ((table != null) && table.isDisplayed()) {
+				return new ListGridOnPage(component, clientId, false);
+			}
+		}
+		throw new DomainException(String.format("<%s /> list grid [%s] is not on the page", element, identifier));
+	}
+
+	/**
+	 * Finds a column of a Vue list grid by its binding, and checks that it is shown and can be filtered or sorted.
+	 *
+	 * @throws MetaDataException	if the grid has no such column, or it cannot be filtered or sorted
+	 * @throws DomainException	if the column is not shown
+	 */
+	private @Nonnull VueColumn vueColumn(@Nonnull ListGridOnPage grid, @Nonnull String column, @Nonnull String element, boolean filter) {
+		String field = column;
+		List<Object> info = selenide.vueListGridColumn(grid.clientId(), field);
+		String sanitised = BindUtil.sanitiseBinding(column);
+		if ((info == null) && (sanitised != null) && (! sanitised.equals(column))) {
+			field = sanitised;
+			info = selenide.vueListGridColumn(grid.clientId(), field);
+		}
+		if (info == null) {
+			throw new MetaDataException(String.format("<%s /> column [%s] is not a column of the Vue list grid %s", element, column, grid.clientId()));
+		}
+		if (! Boolean.TRUE.equals(info.get(2))) {
+			throw new DomainException(String.format("<%s /> column [%s] (%s) is not shown in the Vue list grid %s: a user would show it with the grid's column chooser",
+														element, column, info.get(1), grid.clientId()));
+		}
+		if (! Boolean.TRUE.equals(info.get(filter ? 3 : 4))) {
+			throw new MetaDataException(String.format("<%s /> column [%s] of the Vue list grid %s cannot be %s",
+														element, column, grid.clientId(), filter ? "filtered" : "sorted"));
+		}
+		return new VueColumn(field, String.valueOf(info.get(0)));
+	}
+
+	/**
+	 * Returns the label of the match mode that a Vue list grid's column filter menu offers for an operator
+	 * (see skyve-vue's MatchModes.js), or null if a column of the type cannot compare that way, or is not a text or
+	 * numeric column (the only ones with a typed filter value that PF SAIL enters).
+	 */
+	private static @Nullable String vueMatchMode(@Nonnull String type, @Nonnull FilterOperator operator) {
+		if ("text".equals(type)) {
+			return switch (operator) {
+				case contains -> "Contains";
+				case startsWith -> "Starts With";
+				case equals -> "Equals";
+				case notEquals -> "Not Equals";
+				default -> null;
+			};
+		}
+		if ("numeric".equals(type)) {
+			return switch (operator) {
+				case equals -> "Equals";
+				case notEquals -> "Not Equals";
+				case lessThan -> "Less Than";
+				case greaterThan -> "Greater Than";
+				default -> null;
+			};
+		}
+		return null;
+	}
+
+	/**
+	 * Describes the operators a Vue list grid column of the type can filter with, for a failure.
+	 */
+	private static @Nonnull String vueOperators(@Nonnull String type) {
+		if ("text".equals(type)) {
+			return "a text column filters with contains, startsWith, equals or notEquals";
+		}
+		if ("numeric".equals(type)) {
+			return "a numeric column filters with equals, notEquals, lessThan or greaterThan";
+		}
+		return "PrimeFaces SAIL filters only the text and numeric columns of a Vue list grid";
+	}
+
+	/**
+	 * Finds the column of a PrimeFaces data table with the binding as its field.
+	 *
+	 * @throws MetaDataException	if the table has no such column
+	 */
+	private static @Nonnull UIComponent facesColumn(@Nonnull ListGridOnPage grid, @Nonnull String column, @Nonnull String element) {
+		DataTable table = findChild(grid.component(), DataTable.class);
+		if (table != null) {
+			for (UIComponent child : table.getChildren()) {
+				if ((child instanceof org.primefaces.component.column.Column facesColumn) && column.equals(facesColumn.getField())) {
+					return facesColumn;
+				}
+			}
+		}
+		throw new MetaDataException(String.format("<%s /> column [%s] is not a column of the PrimeFaces data table %s", element, column, grid.clientId()));
+	}
+
+	/**
+	 * Returns the client id of a PrimeFaces data table's filter toggle (in its action column's header), or null if it
+	 * has none.
+	 */
+	private static @Nullable String facesFilterToggleId(@Nonnull ListGridOnPage grid) {
+		DataTable table = findChild(grid.component(), DataTable.class);
+		int count = (table == null) ? 0 : table.getChildCount();
+		if (count == 0) {
+			return null;
+		}
+		UIComponent header = table.getChildren().get(count - 1).getFacet("header");
+		if (header != null) {
+			for (UIComponent child : header.getChildren()) {
+				if ((child instanceof org.primefaces.component.button.Button button) &&
+						(button.getOnclick() != null) && button.getOnclick().contains("toggleFilters")) {
+					return PrimeFacesAutomationContext.clientId(button);
+				}
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * Returns the one comparison that a PrimeFaces data table's typed column filter makes, as {@code SkyveLazyDataModel}
+	 * applies it: contains for text (without a constant domain), a variant domain's description and an association's
+	 * business key (and the implicit bizKey); equals otherwise.
+	 *
+	 * @return the comparison, or null if the column is filtered by choosing a value (a constant domain's combo or a
+	 * 			boolean's check box)
+	 */
+	@SuppressWarnings("null") // a null here fails the test
+	private @Nullable FilterOperator facesFilterOperator(@Nonnull ListGridFilter filter, @Nonnull String column) {
+		PrimeFacesAutomationContext context = peek();
+		Customer c = CORE.getUser().getCustomer();
+		String moduleName = filter.getModuleName();
+		Module m = c.getModule((moduleName != null) ? moduleName : context.getModuleName());
+		String documentName = filter.getDocumentName();
+		if (documentName == null) {
+			documentName = context.getDocumentName();
+		}
+		String queryName = filter.getQueryName();
+		String modelName = filter.getModelName();
+		Document driving;
+		if (modelName != null) {
+			driving = m.getDocument(c, documentName).getListModel(c, modelName, true).getDrivingDocument();
+		}
+		else {
+			MetaDataQueryDefinition query = (queryName == null) ? null : m.getMetaDataQuery(queryName);
+			if (query == null) {
+				query = m.getDocumentDefaultQuery(c, (queryName == null) ? documentName : queryName);
+			}
+			driving = query.getDocumentModule(c).getDocument(c, query.getDocumentName());
+		}
+		TargetMetaData target = BindUtil.getMetaDataForBinding(c, c.getModule(driving.getOwningModuleName()), driving, column);
+		Attribute attribute = target.getAttribute();
+		if (attribute == null) {
+			return column.endsWith(Bean.BIZ_KEY) ? FilterOperator.contains : FilterOperator.equals;
+		}
+		DomainType domain = attribute.getDomainType();
+		AttributeType type = attribute.getAttributeType();
+		if ((domain == DomainType.constant) || (type == AttributeType.bool)) {
+			return null;
+		}
+		if ((domain == DomainType.variant) || (type == AttributeType.association)) {
+			return FilterOperator.contains;
+		}
+		boolean textual = (type == AttributeType.text) || (type == AttributeType.memo) || (type == AttributeType.markup) || (type == AttributeType.colour);
+		return (textual && (domain == null)) ? FilterOperator.contains : FilterOperator.equals;
+	}
+
+	/**
+	 * Returns the text that the first displayed widget for the binding shows, as {@code <testValue />} reads it: the
+	 * text of an input, the label of a combo's or radio's option, true or false (or empty) for a check box, the plain
+	 * text of a rich text or HTML editor, the {@code |}-separated members of a list membership.
+	 *
+	 * @param capture	the step
+	 * @return the text
+	 * @throws DomainException	if no widget for the binding is shown
+	 */
+	@SuppressWarnings("null") // a null here fails the test
+	@Override
+	protected @Nullable String readWidgetValue(CaptureValue capture) {
+		PrimeFacesAutomationContext context = peek();
+		String identifier = capture.getIdentifier(context);
+		List<UIComponent> components = context.getFacesComponents(identifier);
+		if (components == null) {
+			throw new MetaDataException(String.format("<captureValue /> with binding [%s] is not supported or is not on the view", identifier));
+		}
+		for (UIComponent component : components) {
+			String clientId = PrimeFacesAutomationContext.clientId(component);
+			if (! Boolean.TRUE.equals(selenide.widgetState(clientId).get(0))) { // not shown
+				continue;
+			}
+			if (component instanceof PickList) {
+				List<String> members = selenide.pickListMembers(clientId);
+				if (members != null) {
+					return String.join("|", members);
+				}
+				continue;
+			}
+			List<String> actuals = actualValues(component, clientId);
+			if (actuals == null) { // not on the page
+				continue;
+			}
+			// a combo or radio shows its option's label (after its index and value)
+			return ((component instanceof SelectOneMenu) || (component instanceof SelectOneRadio)) ? actuals.get(2) : actuals.get(0);
+		}
+		throw new DomainException(String.format("<captureValue /> with binding [%s] has no widget shown on the page", identifier));
+	}
+
+	/**
+	 * Chooses the option of a combo or radio whose code (its value in the page) or label (its text in the page) equals
+	 * the value, as a user does: a combo's drop down item, or a radio's label, is clicked.
+	 *
+	 * @param dataEnter	the step
+	 * @param value	the code or label
+	 * @param match	{@link Match#code} or {@link Match#label}
+	 * @throws MetaDataException	if the widget is not a combo or radio
+	 * @throws DomainException	if no option, or more than one, has the code or label, or no widget is shown and enabled
+	 */
+	@SuppressWarnings("null") // a null here fails the test
+	@Override
+	protected void enterOption(DataEnter dataEnter, String value, Match match) {
+		PrimeFacesAutomationContext context = peek();
+		String identifier = dataEnter.getIdentifier(context);
+		List<UIComponent> components = context.getFacesComponents(identifier);
+		if (components == null) {
+			throw new MetaDataException(String.format("<dataEnter /> with binding [%s] is not supported or is not on the view", identifier));
+		}
+		for (UIComponent component : components) {
+			boolean combo = (component instanceof SelectOneMenu);
+			if ((! combo) && (! (component instanceof SelectOneRadio))) {
+				throw new MetaDataException(String.format("<dataEnter match=\"%s\" /> with binding [%s] is a %s: match=\"%s\" chooses an option of a combo or radio",
+															match, identifier, component.getClass().getSimpleName(), match));
+			}
+			String clientId = PrimeFacesAutomationContext.clientId(component);
+			List<List<String>> options = combo ? selenide.selectOneOptions(clientId) : selenide.radioOptions(clientId);
+			if (options == null) { // not on the page
+				continue;
+			}
+			int part = (match == Match.code) ? 0 : 1;
+			int index = -1;
+			for (int i = 0, l = options.size(); i < l; i++) {
+				if (value.equals(options.get(i).get(part))) {
+					if (index >= 0) {
+						throw new DomainException(String.format("<dataEnter /> with binding [%s] has more than one option with the %s '%s': its options are %s",
+																	identifier, match, value, options));
+					}
+					index = i;
+				}
+			}
+			if (index < 0) {
+				throw new DomainException(String.format("<dataEnter /> with binding [%s] has no option with the %s '%s': its options (code and label) are %s",
+															identifier, match, value, options));
+			}
+			selenide.trace(String.format("set %s (%s) to the option with the %s '%s' (option %d)", identifier, clientId, match, value, Integer.valueOf(index)));
+			boolean success = combo ?
+								selenide.selectOne(new PrimeFacesSelectOneCommand(clientId, index)) :
+								selenide.radio(new PrimeFacesRadioCommand(clientId, index));
+			if (success) {
+				return;
+			}
+		}
+		throw new DomainException(String.format("Data entry failed: binding [%s] has no displayed, enabled combo or radio to choose '%s' in",
+													identifier, value));
+	}
+
+	@Override
+	protected void pickLookupDescriptionRowContaining(LookupDescriptionPick pick, String rowContaining) {
+		lookupDescriptionContaining(pick, pick.getBinding(), null, rowContaining);
+	}
+
+	@Override
+	protected void autoCompleteLookupDescriptionAndPick(LookupDescriptionAutoComplete complete, String search, String pick) {
+		lookupDescriptionContaining(complete, complete.getBinding(), search, pick);
+	}
+
+	/**
+	 * Picks the first row of a lookup description's drop down that contains the text, opening the drop down with its
+	 * button or with a search.
+	 */
+	private void lookupDescriptionContaining(@Nonnull Step step, @Nonnull String binding, @Nullable String search, @Nonnull String text) {
+		PrimeFacesAutomationContext context = peek();
+		@SuppressWarnings("null") // a null here fails the test
+		List<UIComponent> lookupComponents = context.getFacesComponents(binding);
+		if (lookupComponents == null) {
+			throw new MetaDataException(String.format("<%s /> with binding [%s] is not on the view.", step.getClass().getSimpleName(), binding));
+		}
+		for (UIComponent lookupComponent : lookupComponents) {
+			String clientId = PrimeFacesAutomationContext.clientId(lookupComponent);
+			if (search == null) {
+				selenide.trace(String.format("Pick the row containing '%s' on lookup description [%s] (%s)", text, binding, clientId));
+			}
+			else {
+				selenide.trace(String.format("Auto complete with search '%s' and pick the row containing '%s' on lookup description [%s] (%s)",
+												search, text, binding, clientId));
+			}
+			if (selenide.lookupDescriptionContaining(clientId, search, text)) {
+				return;
+			}
+		}
+		throw new DomainException(String.format("<%s /> with binding [%s] has no lookup on the page", step.getClass().getSimpleName(), binding));
+	}
 
 	/**
 	 * Uploads a test classpath file: into a content widget (through its upload page), or through an upload action's
