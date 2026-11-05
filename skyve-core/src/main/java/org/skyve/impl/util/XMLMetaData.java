@@ -35,6 +35,7 @@ import org.dom4j.Node;
 import org.dom4j.QName;
 import org.dom4j.Visitor;
 import org.dom4j.VisitorSupport;
+import org.dom4j.io.DocumentResult;
 import org.dom4j.io.OutputFormat;
 import org.dom4j.io.XMLWriter;
 import org.skyve.impl.metadata.repository.behaviour.ActionMetaData;
@@ -803,13 +804,16 @@ public class XMLMetaData {
 			marshaller.setProperty(Marshaller.JAXB_SCHEMA_LOCATION,
 									SAIL_NAMESPACE + " http://www.skyve.org/xml/sail.xsd");
 			marshaller.setSchema(SAIL_SCHEMA);
-			StringWriter sos = new StringWriter(1024);
-			marshaller.marshal(automation, sos);
+			// Marshal straight into dom4j (as SAX events), not through text: JAXB writes a tab in an attribute value as
+			// is, which re-parsing the text would turn into a space
+			DocumentResult dom4j = new DocumentResult();
+			marshaller.marshal(automation, dom4j);
 
-			Document document = SecureDom4j.newSAXReader().read(new StringReader(sos.toString()));
+			Document document = dom4j.getDocument();
 			Visitor visitor = new JAXBFixingVisitor(VIEW_NAMESPACE);
 			document.accept(visitor);
-			return format(document);
+			// A step's value can hold new lines (a text area's lines), which must survive being read back
+			return format(document, true);
 		}
 		catch (Exception e) {
 			throw new MetaDataException("Could not marshal SAIL", e);
@@ -1007,15 +1011,35 @@ public class XMLMetaData {
 	}
 
 	/**
-	 * Formats XML after metadata cleanup so removed elements leave no blank lines.
-	 * Text content retains its whitespace; CDATA blocks have a trimmed value and an indented boundary.
+	 * Formats XML after metadata cleanup, writing attribute values' whitespace as dom4j does: see
+	 * {@link #format(Document, boolean)}.
 	 *
 	 * @param document the cleaned metadata document
 	 * @return XML with tab indentation
 	 * @throws IOException if writing the XML fails
 	 */
-	@SuppressWarnings("java:S3776") // complexity OK
 	private static @Nonnull String format(@Nonnull Document document) throws IOException {
+		return format(document, false);
+	}
+
+	/**
+	 * Formats XML after metadata cleanup so removed elements leave no blank lines.
+	 * Text content retains its whitespace; CDATA blocks have a trimmed value and an indented boundary.
+	 *
+	 * <p>
+	 * dom4j writes a tab, new line or carriage return in an attribute value as is, and an XML parser then reads each as
+	 * a space (attribute-value normalisation). With {@code attributeWhitespaceAsReferences}, they are written as the
+	 * character references {@code &#9;}, {@code &#10;} and {@code &#13;} instead, so that the value reads back as it was.
+	 * Only SAIL asks for this: other metadata keeps its existing output, and its values read back as before.
+	 *
+	 * @param document the cleaned metadata document
+	 * @param attributeWhitespaceAsReferences true to write tabs, new lines and carriage returns in attribute values as
+	 * 											character references
+	 * @return XML with tab indentation
+	 * @throws IOException if writing the XML fails
+	 */
+	@SuppressWarnings("java:S3776") // complexity OK
+	private static @Nonnull String format(@Nonnull Document document, boolean attributeWhitespaceAsReferences) throws IOException {
 		// Keep this ordering next to the writer: JAXB property order does not define XML attribute order.
 		document.accept(new VisitorSupport() {
 			@Override
@@ -1042,6 +1066,16 @@ public class XMLMetaData {
 		XMLWriter writer = new XMLWriter(result, format) {
 			private final List<Namespace> rootNamespaces = new ArrayList<>();
 			private boolean rootAttributesPending = true;
+
+			@Override
+			protected String escapeAttributeEntities(@SuppressWarnings("null") @Nonnull String text) {
+				String result = super.escapeAttributeEntities(text);
+				if (attributeWhitespaceAsReferences) {
+					// dom4j leaves these as is, and the escaped text has no others
+					result = result.replace("\t", "&#9;").replace("\n", "&#10;").replace("\r", "&#13;");
+				}
+				return result;
+			}
 
 			@Override
 			protected void writeNamespace(@SuppressWarnings("null") @Nonnull Namespace namespace) throws IOException {
