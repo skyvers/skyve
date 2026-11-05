@@ -1,18 +1,18 @@
 package org.skyve.impl.persistence.hibernate.dialect;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.mock;
 
 import org.hibernate.boot.Metadata;
 import org.hibernate.mapping.UniqueKey;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 @SuppressWarnings("static-method")
-public class NoOpUniqueDelegateTest {
+class NoOpUniqueDelegateTest {
 
 	@Test
-	public void getAlterTableToAddUniqueKeyCommandReturnsEmpty() {
+	void getAlterTableToAddUniqueKeyCommandReturnsEmpty() {
 		H2SpatialDialect dialect = new H2SpatialDialect();
 		NoOpUniqueDelegate delegate = new NoOpUniqueDelegate(dialect);
 		UniqueKey uk = mock(UniqueKey.class);
@@ -21,7 +21,7 @@ public class NoOpUniqueDelegateTest {
 	}
 
 	@Test
-	public void getAlterTableToDropUniqueKeyCommandReturnsEmpty() {
+	void getAlterTableToDropUniqueKeyCommandReturnsEmpty() {
 		H2SpatialDialect dialect = new H2SpatialDialect();
 		NoOpUniqueDelegate delegate = new NoOpUniqueDelegate(dialect);
 		UniqueKey uk = mock(UniqueKey.class);
@@ -30,7 +30,7 @@ public class NoOpUniqueDelegateTest {
 	}
 
 	@Test
-	public void constructorWithDialectDoesNotThrow() {
+	void constructorWithDialectDoesNotThrow() {
 		H2SpatialDialect dialect = new H2SpatialDialect();
 		NoOpUniqueDelegate delegate = new NoOpUniqueDelegate(dialect);
 		assertNotNull(delegate);

@@ -10,6 +10,9 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -53,6 +56,7 @@ import org.skyve.metadata.user.User;
 import org.skyve.metadata.view.View;
 import org.skyve.web.WebContext;
 
+import jakarta.annotation.Nullable;
 import jakarta.faces.FacesException;
 import jakarta.faces.component.UIComponent;
 import jakarta.faces.component.UIViewRoot;
@@ -2277,6 +2281,234 @@ class FacesViewTest {
 		catch (Throwable ignored) {
 			ignored.getClass();
 			// Headless unit scope intentionally triggers framework-dependent exceptions.
+		}
+	}
+
+	// ----- null and invariant paths -----
+
+	/**
+	 * Installs a mocked Faces context that can record messages and clear partial render ids,
+	 * as a failing {@code FacesAction} does, and binds a mocked persistence to the thread.
+	 */
+	private static FacesContext installActionContext() throws Exception {
+		FacesContext facesContext = mock(FacesContext.class);
+		PartialViewContext partialViewContext = mock(PartialViewContext.class);
+		when(facesContext.getPartialViewContext()).thenReturn(partialViewContext);
+		when(partialViewContext.getRenderIds()).thenReturn(new ArrayList<>());
+		FacesContextBridge.setCurrent(facesContext);
+		bindPersistenceToThread(mock(AbstractPersistence.class));
+		return facesContext;
+	}
+
+	@Test
+	void saveThrowsWhenTheFacesViewHasNoBeanAfterSaving() throws Exception {
+		Bean bean = mock(Bean.class);
+		// The bean is there before the save and gone after it
+		FacesView view = new FacesView() {
+			private static final long serialVersionUID = 1L;
+			private boolean beanGiven = false;
+
+			@Override
+			public @Nullable Bean getBean() {
+				if (beanGiven) {
+					return null;
+				}
+				beanGiven = true;
+				return bean;
+			}
+		};
+		try {
+			FacesContext facesContext = installActionContext();
+
+			IllegalStateException e = assertThrows(IllegalStateException.class, view::save);
+
+			assertEquals("The FacesView has no bean after saving", e.getMessage());
+			verify(facesContext).addMessage(isNull(), argThat(m -> "Saved".equals(m.getSummary())));
+		}
+		finally {
+			unbindPersistenceFromThread();
+		}
+	}
+
+	@Test
+	@SuppressWarnings("rawtypes")
+	void navigateSelectEventThrowsWhenTheSelectedRowHasNoBean() {
+		FacesView view = new FacesView();
+		SelectEvent event = mock(SelectEvent.class);
+		when(event.getObject()).thenReturn(new BeanMapAdapter(null, null));
+
+		FacesException e = assertThrows(FacesException.class, () -> view.navigate(event));
+
+		assertEquals("Cannot zoom in on data grid row selection as there is no row bean", e.getMessage());
+	}
+
+	@Test
+	void selectGridRowEventSetsTheSelectedRowBizIdOnTheCurrentBean() throws Exception {
+		FacesView view = new FacesView();
+		Map<String, Object> values = new HashMap<>();
+		values.put("selectedId", null);
+		setPrivateField(view, "currentBean", new BeanMapAdapter(new DynamicBean("test", "RootDoc", values), null));
+		try {
+			FacesContext facesContext = installActionContext();
+
+			view.selectGridRow(selectEvent("biz-200#Contact.admin"));
+
+			assertEquals("biz-200", values.get("selectedId"));
+			verify(facesContext, never()).addMessage(any(), any());
+		}
+		finally {
+			unbindPersistenceFromThread();
+		}
+	}
+
+	@Test
+	void selectGridRowEventReportsAnErrorWhenTheFacesViewHasNoCurrentBean() throws Exception {
+		FacesView view = new FacesView();
+		try {
+			FacesContext facesContext = installActionContext();
+
+			view.selectGridRow(selectEvent("biz-200"));
+
+			verify(facesContext).addMessage(isNull(), any());
+			verify(AbstractPersistence.get()).setRollbackOnly();
+		}
+		finally {
+			unbindPersistenceFromThread();
+		}
+	}
+
+	/**
+	 * A grid row selection event of a row with the given bizId, from a grid that sets {@code selectedId} and has no action.
+	 */
+	private static SelectEvent<BeanMapAdapter> selectEvent(String bizId) {
+		UIComponent component = mock(UIComponent.class);
+		Map<String, Object> attributes = new HashMap<>();
+		attributes.put("selectedIdBinding", "selectedId");
+		when(component.getAttributes()).thenReturn(attributes);
+		Bean selectedBean = mock(Bean.class);
+		when(selectedBean.getBizId()).thenReturn(bizId);
+		SelectEvent<BeanMapAdapter> result = mock(SelectEvent.class);
+		when(result.getComponent()).thenReturn(component);
+		when(result.getObject()).thenReturn(new BeanMapAdapter(selectedBean, null));
+		return result;
+	}
+
+	@Test
+	void selectGridRowStringReportsAnErrorWhenTheFacesViewHasNoCurrentBean() throws Exception {
+		FacesView view = new FacesView();
+		try {
+			FacesContext facesContext = installActionContext();
+
+			view.selectGridRow("biz-100", "selectedId", null, null);
+
+			verify(facesContext).addMessage(isNull(), any());
+			verify(AbstractPersistence.get()).setRollbackOnly();
+		}
+		finally {
+			unbindPersistenceFromThread();
+		}
+	}
+
+	@Test
+	void onRowReorderThrowsWhenTheFacesViewHasNoCurrentBean() {
+		FacesView view = new FacesView();
+		ReorderEvent event = mock(ReorderEvent.class);
+		UIComponent component = mock(UIComponent.class);
+		Map<String, Object> attributes = new HashMap<>();
+		attributes.put(ComponentBuilder.COLLECTION_BINDING_ATTRIBUTE_KEY, "items");
+		when(event.getComponent()).thenReturn(component);
+		when(component.getAttributes()).thenReturn(attributes);
+
+		IllegalStateException e = assertThrows(IllegalStateException.class, () -> view.onRowReorder(event));
+
+		assertEquals("Cannot reorder items as the FacesView has no current bean", e.getMessage());
+	}
+
+	@Test
+	void contentUrlAndFileNameOfTheCurrentBeanDefaultWhenNoContentIsBound() throws Exception {
+		FacesView view = new FacesView();
+		Map<String, Object> values = new HashMap<>();
+		values.put("content", null);
+		setPrivateField(view, "currentBean", new BeanMapAdapter(new DynamicBean("test", "RootDoc", values), null));
+		try {
+			installActionContext();
+
+			assertEquals("images/blank.gif", view.getContentUrl("content", true));
+			assertEquals("javascript:void(0)", view.getContentUrl("content", false));
+			assertEquals("&lt;Empty&gt;", view.getContentFileName("content"));
+		}
+		finally {
+			unbindPersistenceFromThread();
+		}
+	}
+
+	@Test
+	void contentUrlOfARowAdapterResolvesTheAdaptedBean() throws Exception {
+		FacesView view = new FacesView();
+		Map<String, Object> values = new HashMap<>();
+		values.put("content", "content-1");
+		BeanMapAdapter row = new BeanMapAdapter(new DynamicBean("test", "RowDoc", values), null);
+		try {
+			installActionContext();
+
+			assertEquals("content?_n=content-1&_doc=test.RowDoc&_b=content", view.getContentUrl(row, "content", false));
+		}
+		finally {
+			unbindPersistenceFromThread();
+		}
+	}
+
+	@Test
+	void contentUrlOfARowAdapterThrowsWhenTheAdapterHasNoBean() {
+		FacesView view = new FacesView();
+		BeanMapAdapter row = new BeanMapAdapter(null, null);
+
+		IllegalStateException e = assertThrows(IllegalStateException.class, () -> view.getContentUrl(row, "content", true));
+
+		assertEquals("Cannot resolve content for a bean map adapter with no bean", e.getMessage());
+	}
+
+	@Test
+	void getDynamicImageUrlThrowsWhenTheFacesViewHasNoWebContext() {
+		FacesView view = new FacesView();
+
+		IllegalStateException e = assertThrows(IllegalStateException.class,
+												() -> view.getDynamicImageUrl("testImage", "test", "ImageDoc", null, null, null, null));
+
+		assertEquals("Cannot make an image URL as the FacesView has no web context", e.getMessage());
+	}
+
+	@Test
+	void getMapScriptForAModelThrowsWhenTheFacesViewHasNoWebContext() throws Exception {
+		FacesView view = new FacesView();
+		setPrivateField(view, "currentBean", new BeanMapAdapter(mock(Bean.class), null));
+
+		IllegalStateException e = assertThrows(IllegalStateException.class,
+												() -> view.getMapScript("mapEl", null, null, null, "mapModel", "loading", null, null, null, false, false));
+
+		assertEquals("Cannot make a map script for model mapModel as the FacesView has no web context or current bean", e.getMessage());
+	}
+
+	@Test
+	void signReportsAnErrorWhenTheFacesViewHasNoCurrentBean() throws Exception {
+		FacesView view = new FacesView();
+		try {
+			FacesContext facesContext = installActionContext();
+			ExternalContext externalContext = mock(ExternalContext.class);
+			when(facesContext.getExternalContext()).thenReturn(externalContext);
+			Map<String, String> requestParameters = new HashMap<>();
+			requestParameters.put("sig_signature_value", "[[{\"x\":1,\"y\":1}]]");
+			when(externalContext.getRequestParameterMap()).thenReturn(requestParameters);
+
+			view.sign("sig", "signature", 100, 40, "#fff", "#000");
+
+			// a generic error, not the validation message for a missing signature (which needs the view root)
+			verify(facesContext).addMessage(isNull(), any());
+			verify(facesContext, never()).getViewRoot();
+			verify(AbstractPersistence.get()).setRollbackOnly();
+		}
+		finally {
+			unbindPersistenceFromThread();
 		}
 	}
 }

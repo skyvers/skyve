@@ -1,5 +1,6 @@
 package org.skyve.impl.web.faces.pipeline;
 
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
@@ -26,6 +27,7 @@ import java.util.stream.Stream;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.function.Executable;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -44,6 +46,7 @@ import org.skyve.impl.metadata.view.ActionImpl;
 import org.skyve.impl.metadata.view.RelativeSize;
 import org.skyve.impl.metadata.view.ViewImpl;
 import org.skyve.impl.metadata.view.container.Collapsible;
+import org.skyve.impl.metadata.view.container.Tab;
 import org.skyve.impl.metadata.view.container.VBox;
 import org.skyve.impl.metadata.view.container.form.Form;
 import org.skyve.impl.metadata.view.container.form.FormColumn;
@@ -58,11 +61,23 @@ import org.skyve.impl.metadata.view.widget.MapDisplay;
 import org.skyve.impl.metadata.view.widget.Spacer;
 import org.skyve.impl.metadata.view.widget.StaticImage;
 import org.skyve.impl.metadata.view.widget.bound.input.CheckBox;
+import org.skyve.impl.metadata.view.widget.bound.input.ColourPicker;
+import org.skyve.impl.metadata.view.widget.bound.input.Combo;
+import org.skyve.impl.metadata.view.widget.bound.input.ContentSignature;
+import org.skyve.impl.metadata.view.widget.bound.input.Geometry;
+import org.skyve.impl.metadata.view.widget.bound.input.GeometryMap;
 import org.skyve.impl.metadata.view.widget.bound.input.ListMembership;
 import org.skyve.impl.metadata.view.widget.bound.input.LookupDescription;
+import org.skyve.impl.metadata.view.widget.bound.input.Password;
+import org.skyve.impl.metadata.view.widget.bound.input.Radio;
+import org.skyve.impl.metadata.view.widget.bound.input.RichText;
+import org.skyve.impl.metadata.view.widget.bound.input.Slider;
+import org.skyve.impl.metadata.view.widget.bound.input.Spinner;
+import org.skyve.impl.metadata.view.widget.bound.input.TextArea;
 import org.skyve.impl.metadata.view.widget.bound.input.TextField;
 import org.skyve.impl.metadata.view.widget.bound.tabular.DataGrid;
 import org.skyve.impl.metadata.view.widget.bound.tabular.DataGridBoundColumn;
+import org.skyve.impl.metadata.view.widget.bound.tabular.DataGridContainerColumn;
 import org.skyve.impl.metadata.view.widget.bound.tabular.ListGrid;
 import org.skyve.impl.metadata.view.widget.bound.tabular.ListRepeater;
 import org.skyve.impl.sail.mock.MockFacesContext;
@@ -1018,6 +1033,133 @@ class FacesViewRendererTest {
 		Exception exception = assertThrows(IllegalArgumentException.class, () -> convertConverter(converter, null));
 
 		assertEquals(converter + " cannot be converted to a faces converter", exception.getMessage());
+	}
+
+	@Test
+	void renderingThrowsWhenABuilderProducesNoComponent() {
+		Customisations customisations = mock(Customisations.class);
+		Customisations previousCustomisations = CustomisationsStaticSingleton.get();
+		try {
+			CustomisationsStaticSingleton.set(customisations);
+			assertAll(
+				assertProducesNo("tab", r -> r.renderTab("Tab", null, new Tab())),
+				assertProducesNo("checkBox", r -> r.renderFormCheckBox(new CheckBox())),
+				assertProducesNo("colourPicker", r -> r.renderFormColourPicker(new ColourPicker())),
+				assertProducesNo("combo", r -> r.renderFormCombo(new Combo())),
+				assertProducesNo("geometry", r -> r.renderFormGeometry(new Geometry())),
+				assertProducesNo("geometryMap", r -> r.renderFormGeometryMap(new GeometryMap())),
+				assertProducesNo("listMembership", r -> r.renderListMembership(null, null, new ListMembership())),
+				assertProducesNo("lookupDescription", r -> r.renderFormLookupDescription(null, false, false, "bizKey", new LookupDescription())),
+				assertProducesNo("password", r -> r.renderFormPassword(new Password())),
+				assertProducesNo("radio", r -> r.renderFormRadio(new Radio())),
+				assertProducesNo("richText", r -> r.renderFormRichText(new RichText())),
+				assertProducesNo("slider", r -> r.renderFormSlider(new Slider())),
+				assertProducesNo("spinner", r -> r.renderFormSpinner(new Spinner())),
+				assertProducesNo("textArea", r -> r.renderFormTextArea(new TextArea())),
+				assertProducesNo("text", r -> r.renderFormTextField(new TextField())),
+				() -> {
+					FacesViewRenderer renderer = newRenderer(createView(null), null, mock(ComponentBuilder.class), mock(LayoutBuilder.class));
+					IllegalStateException e = assertThrows(IllegalStateException.class,
+															() -> renderer.renderFormContentSignature(new ContentSignature()),
+															"contentSignatureLayout");
+					assertEquals("The layout builder produced no contentSignatureLayout component", e.getMessage());
+				});
+		}
+		finally {
+			CustomisationsStaticSingleton.set(previousCustomisations);
+		}
+	}
+
+	/**
+	 * Asserts that rendering with a component builder that produces nothing throws, naming the component.
+	 */
+	private static Executable assertProducesNo(String componentName, java.util.function.Consumer<FacesViewRenderer> render) {
+		return () -> {
+			FacesViewRenderer renderer = newRenderer(createView(null), null, mock(ComponentBuilder.class), mock(LayoutBuilder.class));
+			IllegalStateException e = assertThrows(IllegalStateException.class, () -> render.accept(renderer), componentName);
+			assertEquals("The component builder produced no " + componentName + " component", e.getMessage(), componentName);
+		};
+	}
+
+	@Test
+	void renderFormInputThrowsWhenTheFormHasNoCurrentFormItem() throws ReflectiveOperationException {
+		ComponentBuilder cb = mock(ComponentBuilder.class);
+		FacesViewRenderer renderer = newRenderer(createView(null), null, cb, mock(LayoutBuilder.class));
+		CheckBox checkBox = new CheckBox();
+		TestComponent component = new TestComponent("checkbox");
+		when(cb.checkBox(any(), isNull(), same(checkBox), isNull(), isNull(), isNull())).thenReturn(new EventSourceComponent(component, component));
+		Form form = new Form();
+		form.getColumns().add(new FormColumn());
+		setViewRendererField(renderer, "currentForm", form);
+
+		IllegalStateException e = assertThrows(IllegalStateException.class, () -> renderer.renderFormCheckBox(checkBox));
+
+		assertEquals("There is no current form item or form column to add a component to", e.getMessage());
+	}
+
+	@Test
+	void renderBlurbRejectsABlurbWithNoMarkup() {
+		FacesViewRenderer renderer = newRenderer(createView(null), null, mock(ComponentBuilder.class), mock(LayoutBuilder.class));
+		Blurb blurb = new Blurb();
+
+		MetaDataException e = assertThrows(MetaDataException.class, () -> renderer.renderBlurb(null, blurb));
+
+		assertEquals("A Blurb in view edit has no markup specified.", e.getMessage());
+	}
+
+	@Test
+	void renderListGridThrowsWithoutACurrentListWidgetModel() {
+		FacesViewRenderer renderer = newRenderer(createView(null), null, mock(ComponentBuilder.class), mock(LayoutBuilder.class));
+		ListGrid grid = new ListGrid();
+
+		IllegalStateException e = assertThrows(IllegalStateException.class, () -> renderer.renderListGrid(null, false, grid));
+
+		assertEquals("There is no current list widget model to render a list grid with", e.getMessage());
+	}
+
+	@Test
+	void renderListGridThrowsWhenTheComponentBuilderProducesNoListGrid() throws ReflectiveOperationException {
+		ComponentBuilder cb = mock(ComponentBuilder.class);
+		FacesViewRenderer renderer = newRenderer(createView(null), null, cb, mock(LayoutBuilder.class));
+		setViewRendererField(renderer, "currentListWidgetModel", mock(ListModel.class));
+		ListGrid grid = new ListGrid();
+
+		IllegalStateException e = assertThrows(IllegalStateException.class, () -> renderer.renderListGrid(null, false, grid));
+
+		assertEquals("The component builder produced no listGrid component", e.getMessage());
+	}
+
+	@Test
+	void renderListRepeaterThrowsWithoutACurrentListWidgetModel() {
+		FacesViewRenderer renderer = newRenderer(createView(null), null, mock(ComponentBuilder.class), mock(LayoutBuilder.class));
+		ListRepeater repeater = new ListRepeater();
+
+		IllegalStateException e = assertThrows(IllegalStateException.class, () -> renderer.renderListRepeater(null, repeater));
+
+		assertEquals("There is no current list widget model to render a list repeater with", e.getMessage());
+	}
+
+	@Test
+	void renderDataGridColumnsThrowWithoutACurrentDataWidget() {
+		Customisations customisations = mock(Customisations.class);
+		Customisations previousCustomisations = CustomisationsStaticSingleton.get();
+		try {
+			CustomisationsStaticSingleton.set(customisations);
+			FacesViewRenderer renderer = newRenderer(createView(null), null, mock(ComponentBuilder.class), mock(LayoutBuilder.class));
+			DataGridBoundColumn boundColumn = new DataGridBoundColumn();
+			DataGridContainerColumn containerColumn = new DataGridContainerColumn();
+
+			IllegalStateException bound = assertThrows(IllegalStateException.class,
+														() -> renderer.renderDataGridBoundColumn("Name", boundColumn));
+			IllegalStateException container = assertThrows(IllegalStateException.class,
+															() -> renderer.renderDataGridContainerColumn("Actions", containerColumn));
+
+			assertEquals("There is no current data widget to add a bound column to", bound.getMessage());
+			assertEquals("There is no current data widget to add a container column to", container.getMessage());
+		}
+		finally {
+			CustomisationsStaticSingleton.set(previousCustomisations);
+		}
 	}
 
 	private static ViewImpl createView(String actionsWidgetId) {

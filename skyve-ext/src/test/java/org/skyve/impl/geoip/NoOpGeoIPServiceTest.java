@@ -1,16 +1,16 @@
 package org.skyve.impl.geoip;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertSame;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertSame;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.skyve.util.IPGeolocation;
 
-public class NoOpGeoIPServiceTest {
+class NoOpGeoIPServiceTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testGeolocateReturnsEmpty() {
+	void testGeolocateReturnsEmpty() {
 		// covers L14: geolocate always returns IPGeolocation.EMPTY
 		NoOpGeoIPService service = new NoOpGeoIPService();
 		assertSame(IPGeolocation.EMPTY, service.geolocate("1.2.3.4"));
@@ -18,7 +18,7 @@ public class NoOpGeoIPServiceTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testIsBlockingReturnsFalse() {
+	void testIsBlockingReturnsFalse() {
 		// covers L19: isBlocking always returns false
 		NoOpGeoIPService service = new NoOpGeoIPService();
 		assertFalse(service.isBlocking());

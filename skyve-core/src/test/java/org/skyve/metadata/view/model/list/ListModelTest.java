@@ -3,10 +3,12 @@ package org.skyve.metadata.view.model.list;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -18,9 +20,13 @@ import org.junit.jupiter.api.function.Executable;
 import org.mockito.Mockito;
 import org.skyve.domain.Bean;
 import org.skyve.domain.types.Decimal2;
+import org.skyve.impl.metadata.customer.CustomerImpl;
+import org.skyve.impl.metadata.model.document.DocumentImpl;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.metadata.FilterOperator;
 import org.skyve.metadata.customer.Customer;
+import org.skyve.metadata.model.Attribute;
+import org.skyve.metadata.model.document.DomainType;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.query.MetaDataQueryColumn;
@@ -479,6 +485,64 @@ class ListModelTest {
 
 		withCustomer(() -> assertThrows(IllegalStateException.class,
 											() -> model.addParameters(document, List.of(parameter), null)));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void addParametersWithNullOrOperatorsAddsANullOrSomethingFilterForEachOperator() {
+		Filter filter = mock(Filter.class);
+		Filter newFilter = mock(Filter.class);
+		List<FilterOperator> operators = List.of(FilterOperator.nullOrEqual,
+													FilterOperator.nullOrGreater,
+													FilterOperator.nullOrGreaterEqual,
+													FilterOperator.nullOrLess,
+													FilterOperator.nullOrLessEqual,
+													FilterOperator.nullOrLike,
+													FilterOperator.nullOrNotEqual,
+													FilterOperator.nullOrNotLike);
+		List<FilterParameter> parameters = new ArrayList<>();
+		for (FilterOperator operator : operators) {
+			FilterParameter parameter = mock(FilterParameter.class);
+			when(parameter.getFilterBinding()).thenReturn(Bean.BIZ_KEY);
+			when(parameter.getOperator()).thenReturn(operator);
+			when(parameter.getValue()).thenReturn("value");
+			parameters.add(parameter);
+		}
+		Document document = mockDrivingDocument();
+		ListModel<Bean> model = new NoFilterListModel(filter, newFilter, document);
+
+		withCustomer(() -> model.addParameters(document, parameters, null));
+
+		int count = operators.size();
+		verify(newFilter).addEquals(Bean.BIZ_KEY, "value");
+		verify(newFilter, times(4)).addGreaterThan(Bean.BIZ_KEY, "value");
+		verify(newFilter).addContains(Bean.BIZ_KEY, "value");
+		verify(newFilter).addNotEquals(Bean.BIZ_KEY, "value");
+		verify(newFilter).addNotContains(Bean.BIZ_KEY, "value");
+		verify(newFilter, times(count)).addNull(Bean.BIZ_KEY);
+		verify(newFilter, times(count)).addOr(newFilter);
+		verify(filter, times(count)).addAnd(newFilter);
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void getTop100VariantDomainValueCodesReturnsNoCodesWhenThereAreNoDomainValues() {
+		CustomerImpl customer = mock(CustomerImpl.class);
+		Attribute attribute = mock(Attribute.class);
+		DocumentImpl document = mock(DocumentImpl.class);
+		when(document.getDomainValues(customer, DomainType.variant, attribute, null, true)).thenReturn(List.of());
+		User user = mock(User.class);
+		when(user.getCustomer()).thenReturn(customer);
+		AbstractPersistence persistence = Mockito.mock(AbstractPersistence.class,
+														Mockito.withSettings().defaultAnswer(Mockito.CALLS_REAL_METHODS));
+		persistence.setUser(user);
+		persistence.setForThread();
+		try {
+			assertEquals(0, ListModel.getTop100VariantDomainValueCodesFromDescriptionFilter(document, attribute, "x").length);
+		}
+		finally {
+			clearPersistenceThreadLocal();
+		}
 	}
 
 	@Test

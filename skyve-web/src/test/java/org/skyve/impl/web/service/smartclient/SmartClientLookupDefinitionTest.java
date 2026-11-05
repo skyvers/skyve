@@ -5,6 +5,7 @@ import org.skyve.metadata.view.model.list.ListModel;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -15,11 +16,13 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.skyve.impl.metadata.view.widget.bound.input.LookupDescription;
 import org.skyve.impl.metadata.view.widget.bound.input.LookupDescriptionColumn;
+import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.model.document.Reference;
 import org.skyve.metadata.model.document.Relation;
 import org.skyve.metadata.module.Module;
+import org.skyve.metadata.module.query.MetaDataQueryColumn;
 import org.skyve.metadata.module.query.MetaDataQueryDefinition;
 import org.skyve.metadata.user.User;
 
@@ -256,4 +259,49 @@ class SmartClientLookupDefinitionTest {
 		org.mockito.Mockito.verifyNoInteractions(module);
 	}
 
+
+	@Test
+	void modelLookupWithoutADrivingDocumentIsAnInvariantFailure() {
+		Module module = mock(Module.class);
+		Document owner = mock(Document.class);
+		Customer customer = mock(Customer.class);
+		Relation relation = mock(Relation.class);
+		ListModel<Bean> model = mock(ListModel.class); // getDrivingDocument() returns null
+		LookupDescription lookup = new LookupDescription();
+		lookup.setModelName("ContactsModel");
+		when(owner.getName()).thenReturn("Order");
+		when(owner.getListModel(customer, "ContactsModel", true)).thenReturn(model);
+
+		IllegalStateException e = assertThrows(IllegalStateException.class,
+												() -> new SmartClientLookupDefinition(false, null, customer, module,
+																						owner, relation, lookup, true, "desktop"));
+
+		assertEquals("List model ContactsModel in document Order has no driving document", e.getMessage());
+	}
+
+	@Test
+	void dropDownColumnsOfAQueryColumnWithoutANameOrBindingAreAMetaDataError() {
+		Module module = mock(Module.class);
+		Document document = mock(Document.class);
+		Relation relation = mock(Relation.class);
+		LookupDescription lookup = mock(LookupDescription.class);
+		MetaDataQueryDefinition query = mock(MetaDataQueryDefinition.class);
+		Customer customer = mock(Customer.class);
+		MetaDataQueryColumn column = mock(MetaDataQueryColumn.class); // no name or binding
+
+		when(relation.getName()).thenReturn("customer");
+		when(lookup.getQuery()).thenReturn("customerQuery");
+		when(lookup.getDropDownColumns()).thenReturn(List.of(mock(LookupDescriptionColumn.class)));
+		when(module.getNullSafeMetaDataQuery("customerQuery")).thenReturn(query);
+		when(query.getName()).thenReturn("customerQuery");
+		when(query.getDocumentName()).thenReturn("Contact");
+		when(query.getColumns()).thenReturn(List.of(column));
+		when(module.getDocument(customer, "Contact")).thenReturn(mock(Document.class));
+
+		MetaDataException e = assertThrows(MetaDataException.class,
+											() -> new SmartClientLookupDefinition(false, null, customer, module,
+																					document, relation, lookup, true, "desktop"));
+
+		assertEquals("A column in the lookup query for customer has no name or binding", e.getMessage());
+	}
 }

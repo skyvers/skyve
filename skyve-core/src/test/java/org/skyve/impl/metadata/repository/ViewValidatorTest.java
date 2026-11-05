@@ -4199,4 +4199,345 @@ class ViewValidatorTest {
 		verify(repository, never()).getListModel(customer, intermediate, "ContactsModel", false);
 	}
 
+	// ---- required values that metadata built in code can omit ----
+
+	private static void assertMessageContains(MetaDataException e, String expected) {
+		assertTrue(e.getMessage().contains(expected), e.getMessage());
+	}
+
+	private MetaDataException assertVisitThrows() {
+		ViewValidator v = newValidator();
+		return assertThrows(MetaDataException.class, v::visit);
+	}
+
+	@Test
+	void condition_baseDocumentModuleNotForCustomer_throws() {
+		DocumentImpl baseDocument = new DocumentImpl();
+		baseDocument.setOwningModuleName("otherMod");
+		baseDocument.setName("BaseDoc");
+
+		DocumentImpl childDocument = new DocumentImpl();
+		childDocument.setOwningModuleName("testMod");
+		childDocument.setName("ChildDoc");
+		Extends extension = new Extends();
+		extension.setDocumentName("BaseDoc");
+		childDocument.setExtends(extension);
+
+		when(module.getDocument(customer, "BaseDoc")).thenReturn(baseDocument);
+		when(repository.getModule(customer, "otherMod")).thenReturn(null);
+
+		Spacer s = new Spacer();
+		s.setXmlInvisibleCondition("baseFlag");
+		view.getContained().add(s);
+
+		ViewValidator v = newValidator(childDocument);
+		MetaDataException e = assertThrows(MetaDataException.class, v::visit);
+		assertMessageContains(e, "Module otherMod of document BaseDoc");
+		assertMessageContains(e, "does not exist for customer");
+	}
+
+	@Test
+	void button_iconShowActionVanishesAfterValidation_throwsIllegalState() {
+		ActionImpl action = new ActionImpl();
+		action.setName("act");
+		action.setIconStyleClass("fa fa-check");
+		ViewImpl spyView = org.mockito.Mockito.spy(view);
+		// first lookup validates the action exists, the second (for the icon) breaks the invariant
+		doReturn(action).doReturn(null).when(spyView).getAction("act");
+
+		Button btn = new Button();
+		btn.setActionName("act");
+		btn.setShow(ActionShow.icon);
+
+		ViewValidator v = new ViewValidator(spyView, repository, customer, document, "desktop");
+		IllegalStateException e = assertThrows(IllegalStateException.class, () -> v.visitButton(btn, true, true));
+		assertTrue(e.getMessage().contains("references a non-existent action act"), e.getMessage());
+	}
+
+	@Test
+	void dynamicImage_missingName_throws() {
+		org.skyve.impl.metadata.view.widget.DynamicImage image = new org.skyve.impl.metadata.view.widget.DynamicImage();
+		ViewValidator v = newValidator();
+		MetaDataException e = assertThrows(MetaDataException.class, () -> v.visitDynamicImage(image, true, true));
+		assertMessageContains(e, " - name is required.");
+	}
+
+	@Test
+	void dialogButton_missingDisplayName_throws() {
+		DialogButton button = new DialogButton();
+		button.setDialogName("dlg");
+		ViewValidator v = newValidator();
+		MetaDataException e = assertThrows(MetaDataException.class, () -> v.visitDialogButton(button, true, true));
+		assertMessageContains(e, " - displayName is required.");
+	}
+
+	@Test
+	void chart_missingType_throws() {
+		when(repository.getChartModel(any(), any(), eq("existingChartModel"), eq(false))).thenReturn(mock(ChartModel.class));
+		Chart chart = new Chart();
+		chart.setModelName("existingChartModel");
+		view.getContained().add(chart);
+
+		assertMessageContains(assertVisitThrows(), " - type is required.");
+	}
+
+	@Test
+	void chart_inlineModelMissingLabel_throws() {
+		Chart chart = new Chart();
+		chart.setType(ChartType.bar);
+		chart.setModel(new ChartBuilderMetaData());
+		view.getContained().add(chart);
+
+		assertMessageContains(assertVisitThrows(), " - label is required.");
+	}
+
+	private ChartBuilderMetaData addValidInlineChartModel() {
+		DocumentImpl chartDoc = new DocumentImpl();
+		chartDoc.setOwningModuleName("testMod");
+		chartDoc.setName("ChartDoc");
+		org.skyve.impl.metadata.model.document.field.Integer amount = new org.skyve.impl.metadata.model.document.field.Integer();
+		amount.setName("amount");
+		chartDoc.putAttribute(amount);
+		when(module.getDocument(any(), eq("ChartDoc"))).thenReturn(chartDoc);
+		ChartBuilderMetaData model = new ChartBuilderMetaData();
+		model.setLabel("Sales");
+		model.setModuleName("testMod");
+		model.setDocumentName("ChartDoc");
+		model.setCategoryBinding(Bean.DOCUMENT_ID);
+		model.setValueBinding("amount");
+		Chart chart = new Chart();
+		chart.setType(ChartType.bar);
+		chart.setModel(model);
+		view.getContained().add(chart);
+		return model;
+	}
+
+	@SuppressWarnings("null") // passes null on purpose
+	@Test
+	void chart_temporalBucketMissingType_throws() {
+		ChartBuilderMetaData model = addValidInlineChartModel();
+		org.skyve.impl.metadata.view.model.chart.TemporalBucketMetaData bucket = new org.skyve.impl.metadata.view.model.chart.TemporalBucketMetaData();
+		bucket.setType(null); // the constructor defaults the type to day
+		model.setCategoryBucket(bucket);
+
+		assertMessageContains(assertVisitThrows(), " - type is required for temporalBucket.");
+	}
+
+	@Test
+	void chart_topMissingBy_throws() {
+		ChartBuilderMetaData model = addValidInlineChartModel();
+		org.skyve.impl.metadata.view.model.chart.ChartBuilderTopMetaData top = new org.skyve.impl.metadata.view.model.chart.ChartBuilderTopMetaData();
+		top.setSort(org.skyve.metadata.SortDirection.ascending);
+		model.setTop(top);
+
+		assertMessageContains(assertVisitThrows(), " - by is required for top.");
+	}
+
+	@Test
+	void chart_topMissingSort_throws() {
+		ChartBuilderMetaData model = addValidInlineChartModel();
+		org.skyve.impl.metadata.view.model.chart.ChartBuilderTopMetaData top = new org.skyve.impl.metadata.view.model.chart.ChartBuilderTopMetaData();
+		top.setBy(org.skyve.metadata.view.model.chart.OrderBy.value);
+		model.setTop(top);
+
+		assertMessageContains(assertVisitThrows(), " - sort is required for top.");
+	}
+
+	@Test
+	void chart_orderMissingBy_throws() {
+		ChartBuilderMetaData model = addValidInlineChartModel();
+		org.skyve.impl.metadata.view.model.chart.ChartBuilderOrderMetaData order = new org.skyve.impl.metadata.view.model.chart.ChartBuilderOrderMetaData();
+		order.setSort(org.skyve.metadata.SortDirection.descending);
+		model.setOrder(order);
+
+		assertMessageContains(assertVisitThrows(), " - by is required for order.");
+	}
+
+	@Test
+	void chart_orderMissingSort_throws() {
+		ChartBuilderMetaData model = addValidInlineChartModel();
+		org.skyve.impl.metadata.view.model.chart.ChartBuilderOrderMetaData order = new org.skyve.impl.metadata.view.model.chart.ChartBuilderOrderMetaData();
+		order.setBy(org.skyve.metadata.view.model.chart.OrderBy.category);
+		model.setOrder(order);
+
+		assertMessageContains(assertVisitThrows(), " - sort is required for order.");
+	}
+
+	@Test
+	void html_missingPixelWidth_throws() {
+		HTML html = new HTML();
+		html.setBinding("text");
+		html.setPixelHeight(Integer.valueOf(100));
+		ViewValidator v = newValidator();
+		MetaDataException e = assertThrows(MetaDataException.class, () -> v.visitHTML(html, true, true));
+		assertMessageContains(e, " - pixelWidth is required.");
+	}
+
+	@Test
+	void html_missingPixelHeight_throws() {
+		HTML html = new HTML();
+		html.setBinding("text");
+		html.setPixelWidth(Integer.valueOf(100));
+		ViewValidator v = newValidator();
+		MetaDataException e = assertThrows(MetaDataException.class, () -> v.visitHTML(html, true, true));
+		assertMessageContains(e, " - pixelHeight is required.");
+	}
+
+	@Test
+	void lookupDescription_missingDescriptionBinding_throws() {
+		LookupDescription lookup = new LookupDescription();
+		lookup.setBinding("contact");
+		ViewValidator v = newValidator();
+		MetaDataException e = assertThrows(MetaDataException.class, () -> v.visitLookupDescription(lookup, true, true));
+		assertMessageContains(e, " - descriptionBinding is required.");
+	}
+
+	@Test
+	void parameter_missingName_throws() {
+		Parameter parameter = mock(Parameter.class);
+		ViewValidator v = newValidator();
+		MetaDataException e = assertThrows(MetaDataException.class, () -> v.visitParameter(parameter, true, true));
+		assertMessageContains(e, " - name is required.");
+	}
+
+	@Test
+	void filterParameter_missingFilterBinding_throws() {
+		FilterParameter parameter = mock(FilterParameter.class);
+		ViewValidator v = newValidator();
+		MetaDataException e = assertThrows(MetaDataException.class, () -> v.visitFilterParameter(parameter, true, true));
+		assertMessageContains(e, " - filterBinding is required.");
+	}
+
+	@Test
+	void filterParameter_missingOperator_throws() {
+		FilterParameter parameter = mock(FilterParameter.class);
+		when(parameter.getFilterBinding()).thenReturn("status");
+		ViewValidator v = newValidator();
+		MetaDataException e = assertThrows(MetaDataException.class, () -> v.visitFilterParameter(parameter, true, true));
+		assertMessageContains(e, " - operator is required.");
+	}
+
+	private void addLink(org.skyve.impl.metadata.view.reference.Reference reference) {
+		Link link = new Link();
+		link.setValue("Go");
+		link.setReference(reference);
+		view.getContained().add(link);
+	}
+
+	@Test
+	void link_resourceReferenceMissingRelativeFile_throws() {
+		addLink(new org.skyve.impl.metadata.view.reference.ResourceReference());
+		assertMessageContains(assertVisitThrows(), " - relativeFile is required for a resource reference.");
+	}
+
+	@Test
+	void link_reportReferenceMissingModuleName_throws() {
+		ReportReference reference = new ReportReference();
+		reference.setDocumentName("TargetDoc");
+		reference.setReportName("report");
+		addLink(reference);
+		assertMessageContains(assertVisitThrows(), " - moduleName is required for a report reference.");
+	}
+
+	@Test
+	void link_reportReferenceMissingDocumentName_throws() {
+		ReportReference reference = new ReportReference();
+		reference.setModuleName("testMod");
+		reference.setReportName("report");
+		addLink(reference);
+		assertMessageContains(assertVisitThrows(), " - documentName is required for a report reference.");
+	}
+
+	@Test
+	void link_reportReferenceMissingReportName_throws() {
+		ReportReference reference = new ReportReference();
+		reference.setModuleName("testMod");
+		reference.setDocumentName("TargetDoc");
+		addLink(reference);
+		assertMessageContains(assertVisitThrows(), " - reportName is required for a report reference.");
+	}
+
+	@Test
+	void link_implicitActionReferenceMissingName_throws() {
+		addLink(new org.skyve.impl.metadata.view.reference.ImplicitActionReference());
+		assertMessageContains(assertVisitThrows(), " - implicitActionName is required for an implicit action reference.");
+	}
+
+	@Test
+	void link_externalReferenceMissingHref_throws() {
+		addLink(new org.skyve.impl.metadata.view.reference.ExternalReference());
+		assertMessageContains(assertVisitThrows(), " - href is required for an external reference.");
+	}
+
+	@Test
+	void link_editViewReferenceMissingModuleName_throws() {
+		EditViewReference reference = new EditViewReference();
+		reference.setDocumentName("TargetDoc");
+		addLink(reference);
+		assertMessageContains(assertVisitThrows(), " - moduleName is required for an edit view reference.");
+	}
+
+	@Test
+	void link_editViewReferenceMissingDocumentName_throws() {
+		EditViewReference reference = new EditViewReference();
+		reference.setModuleName("testMod");
+		addLink(reference);
+		assertMessageContains(assertVisitThrows(), " - documentName is required for an edit view reference.");
+	}
+
+	@Test
+	void link_defaultListViewReferenceMissingModuleName_throws() {
+		DefaultListViewReference reference = new DefaultListViewReference();
+		reference.setDocumentName("TargetDoc");
+		addLink(reference);
+		assertMessageContains(assertVisitThrows(), " - moduleName is required for a default list view reference.");
+	}
+
+	@Test
+	void link_defaultListViewReferenceMissingDocumentName_throws() {
+		DefaultListViewReference reference = new DefaultListViewReference();
+		reference.setModuleName("testMod");
+		addLink(reference);
+		assertMessageContains(assertVisitThrows(), " - documentName is required for a default list view reference.");
+	}
+
+	@Test
+	void link_actionReferenceMissingActionName_throws() {
+		addLink(new ActionReference());
+		assertMessageContains(assertVisitThrows(), " - action is required for an action reference.");
+	}
+
+	@Test
+	void tab_missingTitle_throws() {
+		Tab tab = new Tab();
+		ViewValidator v = newValidator();
+		MetaDataException e = assertThrows(MetaDataException.class, () -> v.visitTab(tab, true, true));
+		assertMessageContains(e, " - title is required.");
+	}
+
+	@Test
+	void inject_missingScript_throws() {
+		Inject inject = new Inject();
+		ViewValidator v = newValidator();
+		MetaDataException e = assertThrows(MetaDataException.class, () -> v.visitInject(inject, true, true));
+		assertMessageContains(e, " - script is required.");
+	}
+
+	@Test
+	void serverSideEventAction_missingActionName_throws() {
+		ServerSideActionEventAction server = new ServerSideActionEventAction();
+		ViewValidator v = newValidator();
+		MetaDataException e = assertThrows(MetaDataException.class, () -> v.visitServerSideActionEventAction(server, true, true));
+		assertMessageContains(e, "[server] event action in an event handler");
+		assertMessageContains(e, " - action is required.");
+	}
+
+	@Test
+	void sidebar_missingFloatingPixelWidthBreakpoint_throws() {
+		Sidebar sidebar = new Sidebar();
+		sidebar.setPixelWidth(Integer.valueOf(300));
+		ViewValidator v = newValidator();
+		MetaDataException e = assertThrows(MetaDataException.class, () -> v.visitSidebar(sidebar, true, true));
+		assertMessageContains(e, " - floatingPixelWidthBreakpoint is required.");
+	}
 }

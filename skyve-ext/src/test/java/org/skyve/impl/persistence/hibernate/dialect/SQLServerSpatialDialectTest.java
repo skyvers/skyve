@@ -3,49 +3,50 @@ package org.skyve.impl.persistence.hibernate.dialect;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.Point;
 import org.skyve.impl.persistence.hibernate.dialect.SkyveDialect.RDBMS;
 @SuppressWarnings("static-method")
-public class SQLServerSpatialDialectTest {
+class SQLServerSpatialDialectTest {
 
 	// ---- SQLServer2008SpatialDialect ----
 
 	@Test
-	public void sqlServer2008getRDBMSReturnsSqlServer() {
+	void sqlServer2008getRDBMSReturnsSqlServer() {
 		SQLServer2008SpatialDialect dialect = new SQLServer2008SpatialDialect();
 		assertThat(dialect.getRDBMS(), is(RDBMS.sqlserver));
 	}
 
 	@Test
-	public void sqlServer2008getGeometryTypeIsNotNull() {
+	void sqlServer2008getGeometryTypeIsNotNull() {
 		SQLServer2008SpatialDialect dialect = new SQLServer2008SpatialDialect();
 		assertThat(dialect.getGeometryType(), notNullValue());
 	}
 
 	@Test
-	public void sqlServer2008getGeometrySqlType() {
+	void sqlServer2008getGeometrySqlType() {
 		SQLServer2008SpatialDialect dialect = new SQLServer2008SpatialDialect();
 		int sqlType = dialect.getGeometrySqlType();
 		assertThat(Integer.valueOf(sqlType), notNullValue());
 	}
 
 	@Test
-	public void sqlServer2008getModifyColumnStringIsNotNull() {
+	void sqlServer2008getModifyColumnStringIsNotNull() {
 		SQLServer2008SpatialDialect dialect = new SQLServer2008SpatialDialect();
 		assertThat(dialect.getModifyColumnString(), notNullValue());
 	}
 
 	@SuppressWarnings("null") // passes null on purpose
 	@Test
-	public void sqlServer2008isAlterTableColumnChangeRequiredWithNullsReturnsFalse() {
+	void sqlServer2008isAlterTableColumnChangeRequiredWithNullsReturnsFalse() {
 		SQLServer2008SpatialDialect dialect = new SQLServer2008SpatialDialect();
 		assertFalse(dialect.isAlterTableColumnChangeRequired(null, null));
 	}
@@ -53,45 +54,45 @@ public class SQLServerSpatialDialectTest {
 	// ---- SQLServer2012SpatialDialect ----
 
 	@Test
-	public void sqlServer2012getRDBMSReturnsSqlServer() {
+	void sqlServer2012getRDBMSReturnsSqlServer() {
 		SQLServer2012SpatialDialect dialect = new SQLServer2012SpatialDialect();
 		assertThat(dialect.getRDBMS(), is(RDBMS.sqlserver));
 	}
 
 	@Test
-	public void sqlServer2012getGeometryTypeIsNotNull() {
+	void sqlServer2012getGeometryTypeIsNotNull() {
 		SQLServer2012SpatialDialect dialect = new SQLServer2012SpatialDialect();
 		assertThat(dialect.getGeometryType(), notNullValue());
 	}
 
 	@SuppressWarnings("null") // passes null on purpose
 	@Test
-	public void sqlServer2012isAlterTableColumnChangeRequiredWithNullsReturnsFalse() {
+	void sqlServer2012isAlterTableColumnChangeRequiredWithNullsReturnsFalse() {
 		SQLServer2012SpatialDialect dialect = new SQLServer2012SpatialDialect();
 		assertFalse(dialect.isAlterTableColumnChangeRequired(null, null));
 	}
 
 	@Test
-	public void sqlServer2012getGeometrySqlType() {
+	void sqlServer2012getGeometrySqlType() {
 		SQLServer2012SpatialDialect dialect = new SQLServer2012SpatialDialect();
 		int sqlType = dialect.getGeometrySqlType();
 		assertThat(Integer.valueOf(sqlType), notNullValue());
 	}
 
 	@Test
-	public void sqlServer2012getModifyColumnStringIsNotNull() {
+	void sqlServer2012getModifyColumnStringIsNotNull() {
 		SQLServer2012SpatialDialect dialect = new SQLServer2012SpatialDialect();
 		assertThat(dialect.getModifyColumnString(), notNullValue());
 	}
 
 	@Test
-	public void sqlServer2008getUniqueDelegateIsNotNull() {
+	void sqlServer2008getUniqueDelegateIsNotNull() {
 		SQLServer2008SpatialDialect dialect = new SQLServer2008SpatialDialect();
 		assertThat(dialect.getUniqueDelegate(), notNullValue());
 	}
 
 	@Test
-	public void sqlServer2012getUniqueDelegateIsNotNull() {
+	void sqlServer2012getUniqueDelegateIsNotNull() {
 		SQLServer2012SpatialDialect dialect = new SQLServer2012SpatialDialect();
 		assertThat(dialect.getUniqueDelegate(), notNullValue());
 	}
@@ -99,7 +100,7 @@ public class SQLServerSpatialDialectTest {
         // ---- convertToPersistedValue ----
 
         @Test
-        public void sqlServer2008ConvertToPersistedValueReturnsNonNull() {
+        void sqlServer2008ConvertToPersistedValueReturnsNonNull() {
                 SQLServer2008SpatialDialect dialect = new SQLServer2008SpatialDialect();
                 GeometryFactory gf = new GeometryFactory();
                 Point point = gf.createPoint(new Coordinate(1.0, 2.0));
@@ -107,7 +108,7 @@ public class SQLServerSpatialDialectTest {
         }
 
         @Test
-        public void sqlServer2012ConvertToPersistedValueReturnsNonNull() {
+        void sqlServer2012ConvertToPersistedValueReturnsNonNull() {
                 SQLServer2012SpatialDialect dialect = new SQLServer2012SpatialDialect();
                 GeometryFactory gf = new GeometryFactory();
                 Point point = gf.createPoint(new Coordinate(3.0, 4.0));
@@ -115,7 +116,7 @@ public class SQLServerSpatialDialectTest {
         }
 
         @Test
-        public void sqlServer2008ConvertFromPersistedValueRoundTrip() {
+        void sqlServer2008ConvertFromPersistedValueRoundTrip() {
                 SQLServer2008SpatialDialect dialect = new SQLServer2008SpatialDialect();
                 GeometryFactory gf = new GeometryFactory();
                 Point point = gf.createPoint(new Coordinate(5.0, 6.0));
@@ -124,7 +125,7 @@ public class SQLServerSpatialDialectTest {
         }
 
         @Test
-        public void sqlServer2012ConvertFromPersistedValueRoundTrip() {
+        void sqlServer2012ConvertFromPersistedValueRoundTrip() {
                 SQLServer2012SpatialDialect dialect = new SQLServer2012SpatialDialect();
                 GeometryFactory gf = new GeometryFactory();
                 Point point = gf.createPoint(new Coordinate(5.0, 6.0));
@@ -133,7 +134,7 @@ public class SQLServerSpatialDialectTest {
         }
 
         @Test
-        public void sqlServer2008ConvertFromPersistedValueWithBlob() throws Exception {
+        void sqlServer2008ConvertFromPersistedValueWithBlob() throws Exception {
                 SQLServer2008SpatialDialect dialect = new SQLServer2008SpatialDialect();
                 GeometryFactory gf = new GeometryFactory();
                 Point point = gf.createPoint(new Coordinate(5.0, 6.0));
@@ -143,19 +144,19 @@ public class SQLServerSpatialDialectTest {
                 assertNotNull(dialect.convertFromPersistedValue(blob));
         }
 
-        @Test(expected = IllegalArgumentException.class)
-        public void sqlServer2008ConvertFromPersistedValueWithInvalidTypeThrows() {
+        @Test
+        void sqlServer2008ConvertFromPersistedValueWithInvalidTypeThrows() {
                 SQLServer2008SpatialDialect dialect = new SQLServer2008SpatialDialect();
-                dialect.convertFromPersistedValue("not_a_byte_array");
+                assertThrows(IllegalArgumentException.class, () -> dialect.convertFromPersistedValue("not_a_byte_array"));
         }
 
-        @Test(expected = IllegalArgumentException.class)
+        @Test
         @SuppressWarnings("boxing")
-        public void sqlServer2008ConvertFromPersistedValueBlobGetBytesThrowsSQLExceptionWraps() throws Exception {
+        void sqlServer2008ConvertFromPersistedValueBlobGetBytesThrowsSQLExceptionWraps() throws Exception {
                 SQLServer2008SpatialDialect dialect = new SQLServer2008SpatialDialect();
                 java.sql.Blob blob = mock(java.sql.Blob.class);
                 when(blob.length()).thenReturn(10L);
                 when(blob.getBytes(1L, 10)).thenThrow(new java.sql.SQLException("SQL error"));
-                dialect.convertFromPersistedValue(blob);
+                assertThrows(IllegalArgumentException.class, () -> dialect.convertFromPersistedValue(blob));
         }
 }

@@ -895,4 +895,112 @@ class JasperReportRendererTest {
 		assertThat(((JRDesignSubreport) elements[1]).getDataSourceExpression().getText(), containsString("JRBeanCollectionDataSource"));
 		assertThat(((JRDesignSubreport) elements[1]).getExpression().getText(), containsString("itemsReport"));
 	}
+
+	@Test
+	void addQueryInSqlModeThrowsWhenTheDesignHasNoModuleOrDocumentName() {
+		DesignSpecification spec = new DesignSpecification();
+		spec.setName("Orders");
+		spec.setMode(Mode.sql);
+		spec.setModuleName("sales");
+		JasperReportRenderer renderer = new JasperReportRenderer(spec);
+
+		IllegalStateException e = assertThrows(IllegalStateException.class, () -> renderer.addQuery(spec));
+
+		assertThat(e.getMessage(), is("Report design Orders has no module or document name"));
+	}
+
+	@Test
+	void addQueryInSqlModeJoinsAJoinedExtensionAndTheJoinerTableOfAnAggregatedSubreport() throws Exception {
+		Customer customer = sqlSubreportCustomer();
+		DesignSpecification spec = sqlSubreportSpec();
+		ReportField items = new ReportField();
+		items.setName("items");
+		spec.setField(items);
+		JasperReportRenderer renderer = new JasperReportRenderer(spec);
+
+		withThreadLocalCustomer(customer, () -> renderer.addQuery(spec));
+
+		String query = renderer.jasperDesign.getQuery().getText();
+		assertThat(query, containsString("from SPECIAL_ORDER a"));
+		assertThat(query, containsString("join PARENT_items items on items.element_id =  SpecialOrder.bizId"));
+		assertThat(query, containsString("where items.owner_id = $P{ID}"));
+		assertThat(Integer.valueOf(spec.getAlias()), is(Integer.valueOf('b')));
+	}
+
+	@Test
+	void addQueryInSqlModeThrowsWhenAJoinerSubreportHasNoCollectionField() throws Exception {
+		Customer customer = sqlSubreportCustomer();
+		DesignSpecification spec = sqlSubreportSpec();
+		JasperReportRenderer renderer = new JasperReportRenderer(spec);
+
+		IllegalStateException[] thrown = new IllegalStateException[1];
+		withThreadLocalCustomer(customer, () -> thrown[0] = assertThrows(IllegalStateException.class, () -> renderer.addQuery(spec)));
+
+		assertThat(thrown[0].getMessage(), is("Subreport design Items has no collection field"));
+	}
+
+	/**
+	 * A customer whose sales.SpecialOrder document extends sales.BaseOrder with the joined strategy.
+	 */
+	private static Customer sqlSubreportCustomer() {
+		Customer customer = mock(Customer.class);
+		Module module = mock(Module.class);
+		org.skyve.metadata.model.document.Document document = mock(org.skyve.metadata.model.document.Document.class);
+		org.skyve.metadata.model.document.Document baseDocument = mock(org.skyve.metadata.model.document.Document.class);
+		org.skyve.metadata.model.Extends inherits = new org.skyve.metadata.model.Extends();
+		inherits.setDocumentName("BaseOrder");
+		org.skyve.metadata.model.Persistent persistent = new org.skyve.metadata.model.Persistent();
+		persistent.setName("SPECIAL_ORDER");
+		persistent.setStrategy(org.skyve.metadata.model.Persistent.ExtensionStrategy.joined);
+		when(customer.getModule("sales")).thenReturn(module);
+		when(module.getDocument(customer, "SpecialOrder")).thenReturn(document);
+		when(module.getDocument(customer, "BaseOrder")).thenReturn(baseDocument);
+		when(document.getName()).thenReturn("SpecialOrder");
+		when(document.getExtends()).thenReturn(inherits);
+		when(document.getPersistent()).thenReturn(persistent);
+		when(baseDocument.getName()).thenReturn("BaseOrder");
+		return customer;
+	}
+
+	private static DesignSpecification sqlSubreportSpec() {
+		DesignSpecification spec = new DesignSpecification();
+		spec.setName("Items");
+		spec.setMode(Mode.sql);
+		spec.setModuleName("sales");
+		spec.setDocumentName("SpecialOrder");
+		spec.setReportType(DesignSpecification.ReportType.subreport);
+		spec.setCollectionType(org.skyve.metadata.model.document.Collection.CollectionType.aggregation);
+		spec.setParentReportPersistentName("PARENT");
+		spec.setAlias('a');
+		return spec;
+	}
+
+	private static void withThreadLocalCustomer(Customer customer, ThrowingRunnable runnable) throws Exception {
+		AbstractPersistence persistence = mock(AbstractPersistence.class);
+		User user = mock(User.class);
+		when(persistence.getUser()).thenReturn(user);
+		when(user.getCustomer()).thenReturn(customer);
+		Field field = AbstractPersistence.class.getDeclaredField("threadLocalPersistence");
+		field.setAccessible(true);
+		@SuppressWarnings("unchecked")
+		ThreadLocal<AbstractPersistence> threadLocal = (ThreadLocal<AbstractPersistence>) field.get(null);
+		AbstractPersistence previous = threadLocal.get();
+		try {
+			threadLocal.set(persistence);
+			runnable.run();
+		}
+		finally {
+			if (previous == null) {
+				threadLocal.remove();
+			}
+			else {
+				threadLocal.set(previous);
+			}
+		}
+	}
+
+	@FunctionalInterface
+	private interface ThrowingRunnable {
+		void run() throws Exception;
+	}
 }

@@ -1,15 +1,15 @@
 package org.skyve.impl.archive.support;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.lang.reflect.Field;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
@@ -17,78 +17,78 @@ import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
 
 @SuppressWarnings("static-method")
-public class ArchiveUtilsTest {
+class ArchiveUtilsTest {
 
 	// ---- ARCHIVE_CHARSET ----
 
 	@Test
-	public void archiveCharsetIsUtf8() {
+	void archiveCharsetIsUtf8() {
 		assertEquals("UTF-8", ArchiveUtils.ARCHIVE_CHARSET.name());
 	}
 
 	// ---- ARCHIVE_FILE_SUFFIX ----
 
 	@Test
-	public void archiveFileSuffixIsCorrect() {
+	void archiveFileSuffixIsCorrect() {
 		assertEquals(".archive", ArchiveUtils.ARCHIVE_FILE_SUFFIX);
 	}
 
 	// ---- excerptLine ----
 
 	@Test
-	public void excerptLineNullReturnsNullString() {
+	void excerptLineNullReturnsNullString() {
 		// null input → String.valueOf(null) → "null"
 		assertEquals("null", ArchiveUtils.excerptLine(null));
 	}
 
 	@Test
-	public void excerptLineShortStringReturnsOriginal() {
+	void excerptLineShortStringReturnsOriginal() {
 		String input = "short line";
 		assertEquals(input, ArchiveUtils.excerptLine(input));
 	}
 
 	@Test
-	public void excerptLineExactBoundaryReturnsOriginal() {
+	void excerptLineExactBoundaryReturnsOriginal() {
 		// boundary: 2 * 100 + 20 = 220 chars — NOT long enough, so returned as-is
 		String input = "a".repeat(220);
 		assertEquals(input, ArchiveUtils.excerptLine(input));
 	}
 
 	@Test
-	public void excerptLineLongStringProducesExcerpt() {
+	void excerptLineLongStringProducesExcerpt() {
 		// 221 chars should trigger the excerpt path
 		String input = "A".repeat(100) + "B".repeat(121);
 		String result = ArchiveUtils.excerptLine(input);
 		// Should contain the separator
-		assertTrue("excerpt should contain separator", result.contains(" … "));
+		assertTrue(result.contains(" … "), "excerpt should contain separator");
 	}
 
 	@Test
-	public void excerptLinePreservesStartAndEnd() {
+	void excerptLinePreservesStartAndEnd() {
 		// 300-char string: first 100 chars are 'S', last 100 chars are 'E'
 		String start = "S".repeat(100);
 		String middle = "M".repeat(100);
 		String end = "E".repeat(100);
 		String input = start + middle + end;
 		String result = ArchiveUtils.excerptLine(input);
-		assertTrue("result should start with S's", result.startsWith(start));
-		assertTrue("result should end with E's", result.endsWith(end));
+		assertTrue(result.startsWith(start), "result should start with S's");
+		assertTrue(result.endsWith(end), "result should end with E's");
 	}
 
 	@Test
-	public void excerptLineEmptyStringReturnsEmpty() {
+	void excerptLineEmptyStringReturnsEmpty() {
 		assertEquals("", ArchiveUtils.excerptLine(""));
 	}
 
         @Test
-        public void archiveUtilsDefaultConstructor() {
+        void archiveUtilsDefaultConstructor() {
                 // covers class initialiser line 13
                 ArchiveUtils au = new ArchiveUtils();
                 assertNotNull(au);
         }
 
 	@Test
-	public void getDocumentResolvesFromCurrentUserCustomer() throws Exception {
+	void getDocumentResolvesFromCurrentUserCustomer() throws Exception {
 		AbstractPersistence persistence = mock(AbstractPersistence.class);
 		User user = mock(User.class);
 		Customer customer = mock(Customer.class);

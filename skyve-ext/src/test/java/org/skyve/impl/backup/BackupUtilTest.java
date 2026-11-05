@@ -4,10 +4,11 @@ import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.skyve.impl.backup.BackupUtil.redactData;
@@ -31,7 +32,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.GeometryFactory;
@@ -53,10 +54,10 @@ import org.skyve.metadata.repository.ProvidedRepository;
 import org.skyve.persistence.SQL;
 import org.skyve.metadata.user.User;
 
-public class BackupUtilTest {
+class BackupUtilTest {
 	@Test
 	@SuppressWarnings("static-method")
-	public void testRedactSegment() {
+	void testRedactSegment() {
 		// setup the test data
 		String input1 = "Client 1",
 				input2 = "Cli2",
@@ -105,7 +106,7 @@ public class BackupUtilTest {
 	
 	@Test
 	@SuppressWarnings("static-method")
-	public void testRedactInteger() {
+	void testRedactInteger() {
 		// setup the test data
 		Integer input1 = Integer.valueOf(0);
 		Integer input2 = Integer.valueOf(5);
@@ -145,7 +146,7 @@ public class BackupUtilTest {
 	
 	@Test
 	@SuppressWarnings("static-method")
-	public void testRedactLong() {
+	void testRedactLong() {
 		// setup the test data
 		Long input1 = Long.valueOf("30000000000");
 		Long input2 = Long.valueOf("23179213");
@@ -185,7 +186,7 @@ public class BackupUtilTest {
 	
 	@Test
 	@SuppressWarnings("static-method")
-	public void testRedactBigDecimal() {
+	void testRedactBigDecimal() {
 		// setup the test data
 		BigDecimal input1 = new BigDecimal("0.212342342345254");
 		BigDecimal input2 = new BigDecimal("12342.6123234223");
@@ -225,7 +226,7 @@ public class BackupUtilTest {
 	
 	@Test
 	@SuppressWarnings("static-method")
-	public void testRedactDate() {
+	void testRedactDate() {
 		// setup the test data
 		Date input1 =  Date.valueOf(LocalDate.of(2000, Month.JANUARY, 15));
 		Date input2 =  Date.valueOf(LocalDate.of(1989, Month.JUNE, 11));
@@ -265,7 +266,7 @@ public class BackupUtilTest {
 	
 	@Test
 	@SuppressWarnings("static-method")
-	public void testRedactTimestamp() {
+	void testRedactTimestamp() {
 		// setup the test data
 		java.sql.Timestamp input1 = java.sql.Timestamp.valueOf(LocalDateTime.of(2000, Month.JANUARY, 15, 23, 58));
 		java.sql.Timestamp input2 = java.sql.Timestamp.valueOf(LocalDateTime.of(1989, Month.MAY, 11, 21, 45));
@@ -305,7 +306,7 @@ public class BackupUtilTest {
 	
 	@Test
 	@SuppressWarnings("static-method")
-	public void testRedactTime() {
+	void testRedactTime() {
 		// setup the test data
 		Time input1 = Time.valueOf(LocalTime.of(1, 2, 3, 4));
 		Time input2 = Time.valueOf(LocalTime.of(23, 58, 56, 6));
@@ -345,7 +346,7 @@ public class BackupUtilTest {
 	
 	@Test
 	@SuppressWarnings({"static-method", "null"}) // a null here fails the test
-	public void testRedactGeometry() {
+	void testRedactGeometry() {
 		// setup the test data
 		GeometryFactory geometryFactory = new GeometryFactory();
         Coordinate[] pointCoords = new Coordinate[] { new Coordinate(23.12, -91.22) };
@@ -376,7 +377,7 @@ public class BackupUtilTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void hasBizCustomerReturnsFalseForTableWithoutCustomerField() {
+	void hasBizCustomerReturnsFalseForTableWithoutCustomerField() {
 		Table table = new Table("myTable", "myTable");
 		table.fields.put("bizId", Table.TEXT);
 		table.fields.put("bizKey", Table.TEXT);
@@ -385,7 +386,7 @@ public class BackupUtilTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void hasBizCustomerReturnsTrueWhenCustomerFieldPresent() {
+	void hasBizCustomerReturnsTrueWhenCustomerFieldPresent() {
 		Table table = new Table("myTable", "myTable");
 		table.fields.put("bizId", Table.TEXT);
 		table.fields.put(Bean.CUSTOMER_NAME, Table.TEXT);
@@ -394,7 +395,7 @@ public class BackupUtilTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void hasBizCustomerReturnsTrueForMixedCaseFieldName() {
+	void hasBizCustomerReturnsTrueForMixedCaseFieldName() {
 		Table table = new Table("myTable", "myTable");
 		table.fields.put("BIZCUSTOMER", Table.TEXT);  // CUSTOMER_NAME = "bizCustomer"
 		// equalsIgnoreCase so "BIZCUSTOMER" matches "bizCustomer"
@@ -405,7 +406,7 @@ public class BackupUtilTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void secureSQLForJoinTableAlwaysAddsOwnerConstraint() {
+	void secureSQLForJoinTableAlwaysAddsOwnerConstraint() {
 		JoinTable joinTable = new JoinTable("owner_roles", "owner_roles", "Owner", "Owner", false);
 		StringBuilder sql = new StringBuilder("select * from owner_roles");
 		BackupUtil.secureSQL(sql, joinTable, "testCustomer");
@@ -417,17 +418,17 @@ public class BackupUtilTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void secureSQLForRegularTableWithNoCustomerFieldDoesNotAppend() {
+	void secureSQLForRegularTableWithNoCustomerFieldDoesNotAppend() {
 		Table table = new Table("NoCustomerTable", "NoCustomerTable");
 		table.fields.put("bizId", Table.TEXT);
 		StringBuilder sql = new StringBuilder("select * from NoCustomerTable");
 		BackupUtil.secureSQL(sql, table, "testCustomer");
-		assertFalse("SQL should remain non-empty after secureSQL", sql.isEmpty());
+		assertFalse(sql.isEmpty(), "SQL should remain non-empty after secureSQL");
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void redactDataReturnsNullForNullValue() {
+	void redactDataReturnsNullForNullValue() {
 		assertThat(redactData(AttributeType.text, null), is(nullValue()));
 		assertThat(redactData(AttributeType.integer, null), is(nullValue()));
 		assertThat(redactData(AttributeType.date, null), is(nullValue()));
@@ -435,7 +436,7 @@ public class BackupUtilTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void redactDataReturnsValueUnchangedForUnknownType() {
+	void redactDataReturnsValueUnchangedForUnknownType() {
 		// association type is not redacted by default — value returned unchanged
 		String value = "some-association-id";
 		Object result = redactData(AttributeType.association, value);
@@ -444,7 +445,7 @@ public class BackupUtilTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void redactDataContentTypeReturnsNull() {
+	void redactDataContentTypeReturnsNull() {
 		// content and image fields are nullified
 		Object result = redactData(AttributeType.content, "some-content-id");
 		assertThat(result, is(nullValue()));
@@ -452,14 +453,14 @@ public class BackupUtilTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void redactDataImageTypeReturnsNull() {
+	void redactDataImageTypeReturnsNull() {
 		Object result = redactData(AttributeType.image, "image-id");
 		assertThat(result, is(nullValue()));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void redactDataDateTypeRoundsToFirstOfMonth() {
+	void redactDataDateTypeRoundsToFirstOfMonth() {
 		Date input = Date.valueOf(LocalDate.of(2023, Month.JULY, 15));
 		Date result = (Date) redactData(AttributeType.date, input);
 		assertThat(result, is(Date.valueOf(LocalDate.of(2023, Month.JULY, 1))));
@@ -467,7 +468,7 @@ public class BackupUtilTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void redactDataTimeTypeRoundsToHour() {
+	void redactDataTimeTypeRoundsToHour() {
 		Time input = Time.valueOf(LocalTime.of(14, 37, 22));
 		Time result = (Time) redactData(AttributeType.time, input);
 		assertThat(result, is(Time.valueOf(LocalTime.of(14, 0, 0))));
@@ -475,7 +476,7 @@ public class BackupUtilTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void redactDataDateTimeTypeRoundsToFirstOfMonth() {
+	void redactDataDateTimeTypeRoundsToFirstOfMonth() {
 		Timestamp input = Timestamp.valueOf(LocalDateTime.of(2023, Month.AUGUST, 20, 10, 30, 0));
 		Timestamp result = (Timestamp) redactData(AttributeType.dateTime, input);
 		assertThat(result, is(Timestamp.valueOf(LocalDateTime.of(2023, Month.AUGUST, 1, 0, 0, 0))));
@@ -483,7 +484,7 @@ public class BackupUtilTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void redactDataTimestampTypeRoundsToFirstOfMonth() {
+	void redactDataTimestampTypeRoundsToFirstOfMonth() {
 		Timestamp input = Timestamp.valueOf(LocalDateTime.of(2021, Month.MARCH, 14, 9, 15, 0));
 		Timestamp result = (Timestamp) redactData(AttributeType.timestamp, input);
 		assertThat(result, is(Timestamp.valueOf(LocalDateTime.of(2021, Month.MARCH, 1, 0, 0, 0))));
@@ -491,7 +492,7 @@ public class BackupUtilTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void redactDataDecimal2TypeRoundsToNearestTen() {
+	void redactDataDecimal2TypeRoundsToNearestTen() {
 		BigDecimal input = BigDecimal.valueOf(47.5);
 		BigDecimal result = (BigDecimal) redactData(AttributeType.decimal2, input);
 		assertThat(result, is(BigDecimal.valueOf(50.0)));
@@ -499,7 +500,7 @@ public class BackupUtilTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void redactDataDecimal5TypeRoundsToNearestTen() {
+	void redactDataDecimal5TypeRoundsToNearestTen() {
 		BigDecimal input = BigDecimal.valueOf(23.12345);
 		BigDecimal result = (BigDecimal) redactData(AttributeType.decimal5, input);
 		assertThat(result, is(BigDecimal.valueOf(20.0)));
@@ -507,7 +508,7 @@ public class BackupUtilTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void redactDataDecimal10TypeRoundsToNearestTen() {
+	void redactDataDecimal10TypeRoundsToNearestTen() {
 		BigDecimal input = BigDecimal.valueOf(99.9999);
 		BigDecimal result = (BigDecimal) redactData(AttributeType.decimal10, input);
 		assertThat(result, is(BigDecimal.valueOf(100.0)));
@@ -515,14 +516,14 @@ public class BackupUtilTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void redactDataBoolTypeReturnsSameBooleanValue() {
+	void redactDataBoolTypeReturnsSameBooleanValue() {
 		Object result = redactData(AttributeType.bool, Boolean.TRUE);
 		assertThat(result, is(Boolean.TRUE));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void redactDataEnumerationTypeReturnsValueUnchanged() {
+	void redactDataEnumerationTypeReturnsValueUnchanged() {
 		String value = "ACTIVE";
 		Object result = redactData(AttributeType.enumeration, value);
 		assertThat(result, is(value));
@@ -530,7 +531,7 @@ public class BackupUtilTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void redactDataColourTypeReturnsValueUnchanged() {
+	void redactDataColourTypeReturnsValueUnchanged() {
 		String value = "#FF0000";
 		Object result = redactData(AttributeType.colour, value);
 		assertThat(result, is(value));
@@ -538,7 +539,7 @@ public class BackupUtilTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void writeAndReadScriptRoundtripsCommands() throws Exception {
+	void writeAndReadScriptRoundtripsCommands() throws Exception {
 		List<String> commands = Arrays.asList("INSERT INTO foo VALUES (1)", "UPDATE bar SET x = 2");
 		File tempFile = Files.createTempFile("backup_test_", ".sql").toFile();
 		try {
@@ -555,7 +556,7 @@ public class BackupUtilTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void readScriptStripsTrailingSemicolon() throws Exception {
+	void readScriptStripsTrailingSemicolon() throws Exception {
 		List<String> commands = Arrays.asList("SELECT 1");
 		File tempFile = Files.createTempFile("backup_test_", ".sql").toFile();
 		try {
@@ -571,14 +572,14 @@ public class BackupUtilTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void hasBizCustomerReturnsFalseForTableWithNoCustomerField() {
+	void hasBizCustomerReturnsFalseForTableWithNoCustomerField() {
 		Table table = new Table("test", "test");
 		assertFalse(BackupUtil.hasBizCustomer(table));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void hasBizCustomerReturnsTrueForTableWithCustomerField() {
+	void hasBizCustomerReturnsTrueForTableWithCustomerField() {
 		Table table = new Table("test", "test");
 		table.fields.put(Bean.CUSTOMER_NAME, Table.TEXT);
 		assertTrue(BackupUtil.hasBizCustomer(table));
@@ -586,7 +587,7 @@ public class BackupUtilTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void hasBizCustomerIsCaseInsensitive() {
+	void hasBizCustomerIsCaseInsensitive() {
 		Table table = new Table("test", "test");
 		table.fields.put(Bean.CUSTOMER_NAME.toUpperCase(), Table.TEXT);
 		assertTrue(BackupUtil.hasBizCustomer(table));
@@ -594,7 +595,7 @@ public class BackupUtilTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void secureSQLAppendsNothingForSingleTenantTableWithoutCustomerField() {
+	void secureSQLAppendsNothingForSingleTenantTableWithoutCustomerField() {
 		String previous = UtilImpl.CUSTOMER;
 		UtilImpl.CUSTOMER = "acme";
 		try {
@@ -610,7 +611,7 @@ public class BackupUtilTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void tableToJSONRoundtripsViaFromJSON() throws Exception {
+	void tableToJSONRoundtripsViaFromJSON() throws Exception {
 		Table table = new Table("myTable", "myTable");
 		table.fields.put("id", Table.TEXT);
 		table.fields.put("amount", Table.INTEGER);
@@ -626,7 +627,7 @@ public class BackupUtilTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void tableEqualsBasedOnAgnosticIdentifier() {
+	void tableEqualsBasedOnAgnosticIdentifier() {
 		Table t1 = new Table("same", "same");
 		Table t2 = new Table("same", "different");
 		Table t3 = new Table("other", "same");
@@ -636,7 +637,7 @@ public class BackupUtilTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void tableHashCodeConsistentWithEquals() {
+	void tableHashCodeConsistentWithEquals() {
 		Table t1 = new Table("abc", "abc");
 		Table t2 = new Table("abc", "xyz");
 		assertEquals(t2.hashCode(), t1.hashCode());
@@ -644,7 +645,7 @@ public class BackupUtilTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void writeAndReadTablesRoundtrips() throws Exception {
+	void writeAndReadTablesRoundtrips() throws Exception {
 		Table t1 = new Table("table1", "Table1");
 		t1.fields.put("bizId", Table.TEXT);
 		t1.fields.put("bizVersion", Table.INTEGER);
@@ -665,7 +666,7 @@ public class BackupUtilTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void writeAndReadTablesPreservesFieldTypes() throws Exception {
+	void writeAndReadTablesPreservesFieldTypes() throws Exception {
 		Table t = new Table("myTable", "myTable");
 		t.fields.put("textField", Table.TEXT);
 		t.fields.put("intField", Table.INTEGER);
@@ -689,14 +690,14 @@ public class BackupUtilTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void redactDataNullValueReturnsNull() {
+	void redactDataNullValueReturnsNull() {
 		Object result = redactData(AttributeType.text, null);
 		assertThat(result, nullValue());
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void redactDataCollectionTypeReturnsValueUnchanged() {
+	void redactDataCollectionTypeReturnsValueUnchanged() {
 		String value = "col-value";
 		Object result = redactData(AttributeType.collection, value);
 		assertThat(result, is(value));
@@ -704,7 +705,7 @@ public class BackupUtilTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void redactDataInverseManyTypeReturnsValueUnchanged() {
+	void redactDataInverseManyTypeReturnsValueUnchanged() {
 		String value = "inv-many-value";
 		Object result = redactData(AttributeType.inverseMany, value);
 		assertThat(result, is(value));
@@ -712,7 +713,7 @@ public class BackupUtilTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void redactDataInverseOneTypeReturnsValueUnchanged() {
+	void redactDataInverseOneTypeReturnsValueUnchanged() {
 		String value = "inv-one-value";
 		Object result = redactData(AttributeType.inverseOne, value);
 		assertThat(result, is(value));
@@ -720,7 +721,7 @@ public class BackupUtilTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void joinTableToJSONAndFromJSONRoundtrips() throws Exception {
+	void joinTableToJSONAndFromJSONRoundtrips() throws Exception {
 		JoinTable joinTable = new JoinTable("ownerTable_elements", "ownerTable_elements",
 				"ownerTable", "ownerTable", false);
 		String json = joinTable.toJSON();
@@ -734,7 +735,7 @@ public class BackupUtilTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void orderedJoinTableToJSONAndFromJSONRoundtrips() throws Exception {
+	void orderedJoinTableToJSONAndFromJSONRoundtrips() throws Exception {
 		JoinTable joinTable = new JoinTable("list_items", "list_items",
 				"myList", "myList", true);
 		String json = joinTable.toJSON();
@@ -746,7 +747,7 @@ public class BackupUtilTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void joinTableHasOwnerAndElementFields() {
+	void joinTableHasOwnerAndElementFields() {
 		JoinTable joinTable = new JoinTable("t_elem", "t_elem", "t_owner", "t_owner", false);
 		assertTrue(joinTable.fields.containsKey("owner_id"));
 		assertTrue(joinTable.fields.containsKey("element_id"));
@@ -754,14 +755,14 @@ public class BackupUtilTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void orderedJoinTableHasOrderByField() {
+	void orderedJoinTableHasOrderByField() {
 		JoinTable joinTable = new JoinTable("t_elem", "t_elem", "t_owner", "t_owner", true);
 		assertTrue(joinTable.fields.containsKey("bizOrdinal"));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void tableFromJSONPreservesFieldTypes() throws Exception {
+	void tableFromJSONPreservesFieldTypes() throws Exception {
 		Table t = new Table("myTable", "myTable");
 		t.fields.put("bizId", Table.TEXT);
 		t.fields.put("amount", Table.INTEGER);
@@ -775,7 +776,7 @@ public class BackupUtilTest {
 
 	@Test
 	@SuppressWarnings({ "static-method", "boxing" })
-	public void getTablesReturnsSingleTableForSimpleStaticDocument() throws Exception {
+	void getTablesReturnsSingleTableForSimpleStaticDocument() throws Exception {
 		ProvidedRepository previousRepository = ProvidedRepositoryFactory.get();
 		ProvidedRepository repository = mock(ProvidedRepository.class);
 		ProvidedRepositoryFactory.set(repository);
@@ -834,7 +835,7 @@ public class BackupUtilTest {
 
 	@Test
 	@SuppressWarnings({ "static-method", "boxing" })
-	public void getTablesAddsJoinTableForAggregationReference() throws Exception {
+	void getTablesAddsJoinTableForAggregationReference() throws Exception {
 		ProvidedRepository previousRepository = ProvidedRepositoryFactory.get();
 		ProvidedRepository repository = mock(ProvidedRepository.class);
 		ProvidedRepositoryFactory.set(repository);
@@ -909,7 +910,7 @@ public class BackupUtilTest {
 
 	@Test
 	@SuppressWarnings({ "static-method", "boxing" })
-	public void getTablesAddsJoinTableForJoinedReferenceStrategy() throws Exception {
+	void getTablesAddsJoinTableForJoinedReferenceStrategy() throws Exception {
 		ProvidedRepository previousRepository = ProvidedRepositoryFactory.get();
 		ProvidedRepository repository = mock(ProvidedRepository.class);
 		ProvidedRepositoryFactory.set(repository);
@@ -989,7 +990,7 @@ public class BackupUtilTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void getTablesForAllCustomersThrowsWhenCustomerMissing() throws Exception {
+	void getTablesForAllCustomersThrowsWhenCustomerMissing() throws Exception {
 		ProvidedRepository previousRepository = ProvidedRepositoryFactory.get();
 		ProvidedRepository repository = mock(ProvidedRepository.class);
 		try {
@@ -999,7 +1000,7 @@ public class BackupUtilTest {
 
 			try {
 				BackupUtil.getTablesForAllCustomers();
-				org.junit.Assert.fail("Expected MetaDataException");
+				fail("Expected MetaDataException");
 			}
 			catch (MetaDataException e) {
 				assertThat(e.getMessage(), containsString("missingCustomer does not exist"));
@@ -1012,7 +1013,7 @@ public class BackupUtilTest {
 
 	@Test
 	@SuppressWarnings({ "static-method", "boxing" })
-	public void getTablesForAllCustomersReturnsMergedTables() throws Exception {
+	void getTablesForAllCustomersReturnsMergedTables() throws Exception {
 		ProvidedRepository previousRepository = ProvidedRepositoryFactory.get();
 		ProvidedRepository repository = mock(ProvidedRepository.class);
 		try {
@@ -1093,7 +1094,7 @@ public class BackupUtilTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void validateSkyveBackupThrowsWhenDirectoryMissing() throws Exception {
+	void validateSkyveBackupThrowsWhenDirectoryMissing() throws Exception {
 		AbstractPersistence persistence = mock(AbstractPersistence.class);
 		User user = mock(User.class);
 		when(persistence.getUser()).thenReturn(user);
@@ -1108,13 +1109,13 @@ public class BackupUtilTest {
 				assertThat(e.getMessage(), containsString("is not a directory"));
 				return;
 			}
-			org.junit.Assert.fail("Expected DomainException");
+			fail("Expected DomainException");
 		});
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void validateSkyveBackupThrowsWhenRootContainsNoCsvFiles() throws Exception {
+	void validateSkyveBackupThrowsWhenRootContainsNoCsvFiles() throws Exception {
 		AbstractPersistence persistence = mock(AbstractPersistence.class);
 		User user = mock(User.class);
 		when(persistence.getUser()).thenReturn(user);
@@ -1135,7 +1136,7 @@ public class BackupUtilTest {
 					assertThat(e.getMessage(), containsString("No valid Skyve CSV files"));
 					return;
 				}
-				org.junit.Assert.fail("Expected DomainException");
+				fail("Expected DomainException");
 			});
 		}
 		finally {
@@ -1148,7 +1149,7 @@ public class BackupUtilTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void validateSkyveBackupReturnsDirectoryWhenRootContainsCsvFile() throws Exception {
+	void validateSkyveBackupReturnsDirectoryWhenRootContainsCsvFile() throws Exception {
 		AbstractPersistence persistence = mock(AbstractPersistence.class);
 		User user = mock(User.class);
 		when(persistence.getUser()).thenReturn(user);
@@ -1180,20 +1181,20 @@ public class BackupUtilTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void privateRedactStringReturnsNullForNullInput() throws Exception {
+	void privateRedactStringReturnsNullForNullInput() throws Exception {
 		assertThat(invokePrivate("redactString", new Class<?>[] { String.class, Integer.class }, null, Integer.valueOf(10)), is(nullValue()));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void privateRedactNumericReturnsNullForNullInputAndUnsupportedNumber() throws Exception {
+	void privateRedactNumericReturnsNullForNullInputAndUnsupportedNumber() throws Exception {
 		assertThat(invokePrivate("redactNumeric", new Class<?>[] { Number.class }, new Object[] { null }), is(nullValue()));
 		assertThat(invokePrivate("redactNumeric", new Class<?>[] { Number.class }, Short.valueOf((short) 7)), is(nullValue()));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void privateRedactGeometryReturnsOriginalForUnsupportedGeometryType() throws Exception {
+	void privateRedactGeometryReturnsOriginalForUnsupportedGeometryType() throws Exception {
 		Geometry geometry = new GeometryFactory().createMultiPointFromCoords(new Coordinate[] { new Coordinate(1.2, 3.4), new Coordinate(5.6, 7.8) });
 
 		Object result = invokePrivate("redactGeometry", new Class<?>[] { Geometry.class }, geometry);
@@ -1203,7 +1204,7 @@ public class BackupUtilTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void executeScriptThrowsWhenPersistenceIsNotHibernate() throws Exception {
+	void executeScriptThrowsWhenPersistenceIsNotHibernate() throws Exception {
 		AbstractPersistence persistence = mock(AbstractPersistence.class);
 		SQL sql = mock(SQL.class);
 		when(persistence.newSQL("select 1")).thenReturn(sql);
@@ -1218,13 +1219,13 @@ public class BackupUtilTest {
 				assertThat(e.getMessage(), containsString("AbstractHibernatePersistence"));
 				return;
 			}
-			org.junit.Assert.fail("Expected ClassCastException");
+			fail("Expected ClassCastException");
 		});
 	}
 
 	@Test
 	@SuppressWarnings({ "static-method", "boxing" })
-	public void getTablesAddsJoinTableForPolymorphicReference() throws Exception {
+	void getTablesAddsJoinTableForPolymorphicReference() throws Exception {
 		ProvidedRepository previousRepository = ProvidedRepositoryFactory.get();
 		ProvidedRepository repository = mock(ProvidedRepository.class);
 		ProvidedRepositoryFactory.set(repository);
@@ -1304,6 +1305,188 @@ public class BackupUtilTest {
 		}
 		finally {
 			ProvidedRepositoryFactory.set(previousRepository);
+		}
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void getTablesThrowsWhenAPersistableDocumentHasNoTableName() throws Exception {
+		GetTablesFixture fixture = new GetTablesFixture(null);
+		fixture.exportReferences();
+
+		Exception e = fixture.getTablesFailure();
+
+		assertTrue(e instanceof MetaDataException);
+		assertThat(e.getMessage(), containsString("MyDoc has persistent metadata with no table name"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void getTablesThrowsWhenAnExportedReferenceHasNoModuleName() throws Exception {
+		GetTablesFixture fixture = new GetTablesFixture("T_DOC");
+		fixture.exportReferences(exportedReference(null, "items", CollectionType.aggregation, mock(Persistent.class)));
+
+		Exception e = fixture.getTablesFailure();
+
+		assertTrue(e instanceof IllegalStateException);
+		assertThat(e.getMessage(), containsString("An exported reference to MyDoc has no module or document name"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void getTablesThrowsWhenAnExportedCollectionReferenceHasNoReferenceFieldName() throws Exception {
+		GetTablesFixture fixture = new GetTablesFixture("T_DOC");
+		fixture.referencedDocument();
+		fixture.exportReferences(exportedReference("mod", null, CollectionType.aggregation, mock(Persistent.class)));
+
+		Exception e = fixture.getTablesFailure();
+
+		assertTrue(e instanceof IllegalStateException);
+		assertThat(e.getMessage(), containsString("The exported reference from mod.RefDoc to MyDoc has no reference field name"));
+	}
+
+	@Test
+	@SuppressWarnings({ "static-method", "boxing" })
+	void getTablesThrowsWhenAPolymorphicDerivationHasNoTableName() throws Exception {
+		GetTablesFixture fixture = new GetTablesFixture("T_DOC");
+		Document referencedDocument = fixture.referencedDocument();
+		Persistent ownerPersistent = mock(Persistent.class);
+		when(ownerPersistent.isPolymorphicallyMapped()).thenReturn(true);
+		Document derivedDocument = mock(Document.class);
+		Persistent derivedPersistent = mock(Persistent.class);
+		when(derivedDocument.getName()).thenReturn("DerivedDoc");
+		when(derivedDocument.isPersistable()).thenReturn(true);
+		when(derivedDocument.getPersistent()).thenReturn(derivedPersistent);
+		when(derivedPersistent.getPersistentIdentifier()).thenReturn("T_DERIVED");
+		when(fixture.customer.getDerivedDocuments(referencedDocument)).thenReturn(Collections.singletonList("mod.DerivedDoc"));
+		when(fixture.module.getDocument(fixture.customer, "DerivedDoc")).thenReturn(derivedDocument);
+		fixture.exportReferences(exportedReference("mod", "items", CollectionType.aggregation, ownerPersistent));
+
+		Exception e = fixture.getTablesFailure();
+
+		assertTrue(e instanceof MetaDataException);
+		assertThat(e.getMessage(), containsString("DerivedDoc has persistent metadata with no table name"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void getTablesThrowsWhenTheUltimateDocumentOfAJoinedReferenceHasNoTableName() throws Exception {
+		GetTablesFixture fixture = new GetTablesFixture("T_DOC");
+		Document referencedDocument = fixture.referencedDocument();
+		Persistent referencedPersistent = mock(Persistent.class);
+		when(referencedDocument.getPersistent()).thenReturn(referencedPersistent);
+		when(referencedPersistent.getAgnosticIdentifier()).thenReturn("T_REF");
+		Persistent ownerPersistent = mock(Persistent.class);
+		when(ownerPersistent.getStrategy()).thenReturn(Persistent.ExtensionStrategy.joined);
+		fixture.exportReferences(exportedReference("mod", "items", CollectionType.aggregation, ownerPersistent));
+
+		Exception e = fixture.getTablesFailure();
+
+		assertTrue(e instanceof MetaDataException);
+		assertThat(e.getMessage(), containsString("RefDoc has persistent metadata with no table name"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void getTablesThrowsWhenANonPolymorphicReferenceOwnerHasNoTableName() throws Exception {
+		GetTablesFixture fixture = new GetTablesFixture("T_DOC");
+		fixture.referencedDocument();
+		Persistent ownerPersistent = mock(Persistent.class);
+		when(ownerPersistent.getPersistentIdentifier()).thenReturn("T_OWNER");
+		fixture.exportReferences(exportedReference("mod", "items", CollectionType.aggregation, ownerPersistent));
+
+		Exception e = fixture.getTablesFailure();
+
+		assertTrue(e instanceof MetaDataException);
+		assertThat(e.getMessage(), containsString("RefDoc has persistent metadata with no table name"));
+	}
+
+	private static ExportedReference exportedReference(String moduleName, String referenceFieldName, CollectionType type, Persistent persistent) {
+		ExportedReference result = new ExportedReference();
+		result.setModuleName(moduleName);
+		result.setDocumentName("RefDoc");
+		result.setReferenceFieldName(referenceFieldName);
+		result.setType(type);
+		result.setPersistent(persistent);
+		return result;
+	}
+
+	/**
+	 * A customer with module "mod" holding the static persistent document "MyDoc", optionally exporting references
+	 * to the document "RefDoc" whose collection "items" points at "MyDoc".
+	 */
+	private static final class GetTablesFixture {
+		final ProvidedRepository repository = mock(ProvidedRepository.class);
+		final AbstractPersistence persistence = mock(AbstractPersistence.class);
+		final CustomerImpl customer = mock(CustomerImpl.class);
+		final Module module = mock(Module.class);
+		final Document document = mock(Document.class);
+
+		@SuppressWarnings("boxing")
+		GetTablesFixture(String agnosticIdentifier) {
+			User user = mock(User.class);
+			DocumentRef documentRef = mock(DocumentRef.class);
+			Persistent persistent = mock(Persistent.class);
+			Map<String, DocumentRef> refs = new HashMap<>();
+			refs.put("MyDoc", documentRef);
+
+			when(persistence.getUser()).thenReturn(user);
+			when(user.getCustomer()).thenReturn(customer);
+			when(customer.getModules()).thenReturn(Collections.singletonList(module));
+			when(customer.getModule("mod")).thenReturn(module);
+			when(module.getName()).thenReturn("mod");
+			when(module.getDocumentRefs()).thenReturn(refs);
+			when(module.getDocument(customer, "MyDoc")).thenReturn(document);
+			when(documentRef.getOwningModuleName()).thenReturn("mod");
+			when(document.getName()).thenReturn("MyDoc");
+			when(document.isDynamic()).thenReturn(false);
+			when(document.isPersistable()).thenReturn(true);
+			when(document.getPersistent()).thenReturn(persistent);
+			when(document.getOwningModuleName()).thenReturn("mod");
+			when(document.getAllAttributes(customer)).thenReturn(Collections.emptyList());
+			when(document.getBizKeySensitity()).thenReturn(org.skyve.metadata.model.Attribute.Sensitivity.none);
+			when(persistent.getAgnosticIdentifier()).thenReturn(agnosticIdentifier);
+			when(persistent.getPersistentIdentifier()).thenReturn("T_DOC");
+			when(repository.findNearestPersistentSingleOrJoinedSuperDocument(customer, module, document)).thenReturn(document);
+		}
+
+		void exportReferences(ExportedReference... references) {
+			when(customer.getExportedReferences(document)).thenReturn(Arrays.asList(references));
+		}
+
+		@SuppressWarnings("boxing")
+		Document referencedDocument() {
+			Document result = mock(Document.class);
+			org.skyve.metadata.model.document.Collection collection = mock(org.skyve.metadata.model.document.Collection.class);
+			when(module.getDocument(customer, "RefDoc")).thenReturn(result);
+			when(result.getName()).thenReturn("RefDoc");
+			when(result.isDynamic()).thenReturn(false);
+			when(result.getNullSafeReferenceByName("items")).thenReturn(collection);
+			when(collection.isPersistent()).thenReturn(true);
+			return result;
+		}
+
+		Exception getTablesFailure() throws Exception {
+			ProvidedRepository previousRepository = ProvidedRepositoryFactory.get();
+			ProvidedRepositoryFactory.set(repository);
+			try {
+				Exception[] failure = new Exception[1];
+				withThreadLocalPersistence(persistence, () -> {
+					try {
+						BackupUtil.getTables();
+					}
+					catch (Exception e) {
+						failure[0] = e;
+					}
+				});
+				if (failure[0] == null) {
+					throw new AssertionError("Expected BackupUtil.getTables() to fail");
+				}
+				return failure[0];
+			}
+			finally {
+				ProvidedRepositoryFactory.set(previousRepository);
+			}
 		}
 	}
 

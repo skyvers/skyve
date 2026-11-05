@@ -7,6 +7,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.CALLS_REAL_METHODS;
 import static org.mockito.Mockito.mock;
@@ -23,6 +24,8 @@ import java.lang.reflect.Field;
 import java.util.List;
 import java.util.Locale;
 
+import org.hibernate.proxy.HibernateProxy;
+import org.hibernate.proxy.LazyInitializer;
 import org.junit.jupiter.api.Test;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.metadata.user.User;
@@ -489,5 +492,15 @@ class UtilTest {
 	void setDataGroupWithNonBeanObjectDoesNotThrow() {
 		// setDataGroup delegates to UtilImpl - for non-bean objects it returns without needing persistence
 		assertDoesNotThrow(() -> Util.setDataGroup("not-a-bean", "group1"));
+	}
+
+	@Test
+	void deproxyThrowsWhenTheProxyHasNoImplementation() {
+		HibernateProxy proxy = mock(HibernateProxy.class);
+		LazyInitializer initializer = mock(LazyInitializer.class);
+		when(proxy.getHibernateLazyInitializer()).thenReturn(initializer);
+
+		IllegalStateException e = assertThrows(IllegalStateException.class, () -> Util.deproxy(proxy));
+		assertEquals("Proxy of " + proxy.getClass().getName() + " has no implementation", e.getMessage());
 	}
 }

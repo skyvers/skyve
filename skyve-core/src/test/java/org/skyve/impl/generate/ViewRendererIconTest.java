@@ -1,5 +1,7 @@
 package org.skyve.impl.generate;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.CALLS_REAL_METHODS;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -11,7 +13,11 @@ import org.skyve.impl.metadata.MetadataIconResolver.ResolvedIcon;
 import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
 import org.skyve.impl.metadata.module.ModuleImpl;
+import org.skyve.impl.metadata.view.ActionImpl;
 import org.skyve.impl.metadata.view.ViewImpl;
+import org.skyve.impl.metadata.view.event.ServerSideActionEventAction;
+import org.skyve.impl.metadata.view.widget.Button;
+import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.user.User;
 
 import jakarta.annotation.Nonnull;
@@ -70,6 +76,35 @@ class ViewRendererIconTest {
 
 		verify(renderer).renderView(icon);
 		verify(renderer).renderedView(icon);
+	}
+
+	@Test
+	void serverSideActionEventThrowsForANonExistentViewAction() {
+		ViewImpl view = new ViewImpl();
+		view.setName("edit");
+		ViewRenderer renderer = renderer(document(), view);
+		ServerSideActionEventAction server = new ServerSideActionEventAction();
+		server.setActionName("missing");
+
+		MetaDataException e = assertThrows(MetaDataException.class,
+											() -> renderer.visitServerSideActionEventAction(server, true, true));
+		assertEquals("View edit references a non-existent action missing", e.getMessage());
+	}
+
+	@Test
+	void buttonThrowsForACustomActionWithoutAClassName() {
+		ViewImpl view = new ViewImpl();
+		view.setName("edit");
+		ActionImpl action = new ActionImpl();
+		action.setName("noClass");
+		action.setDisplayName("No Class");
+		view.putAction(action);
+		ViewRenderer renderer = renderer(document(), view);
+		Button button = new Button();
+		button.setActionName("noClass");
+
+		MetaDataException e = assertThrows(MetaDataException.class, () -> renderer.visitButton(button, true, true));
+		assertEquals("Action noClass has no class name", e.getMessage());
 	}
 
 	private static DocumentImpl document() {

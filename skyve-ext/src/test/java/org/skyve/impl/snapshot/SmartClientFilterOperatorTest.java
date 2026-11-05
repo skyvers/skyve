@@ -1,119 +1,119 @@
 package org.skyve.impl.snapshot;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.skyve.metadata.FilterOperator;
 
 @SuppressWarnings("static-method")
-public class SmartClientFilterOperatorTest {
+class SmartClientFilterOperatorTest {
 
 	// ---- fromFilterOperator mappings ----
 
 	@Test
-	public void equalMapsToEquals() {
+	void equalMapsToEquals() {
 		assertEquals(SmartClientFilterOperator.equals,
 				SmartClientFilterOperator.fromFilterOperator(FilterOperator.equal));
 	}
 
 	@Test
-	public void greaterMapsToGreaterThan() {
+	void greaterMapsToGreaterThan() {
 		assertEquals(SmartClientFilterOperator.greaterThan,
 				SmartClientFilterOperator.fromFilterOperator(FilterOperator.greater));
 	}
 
 	@Test
-	public void greaterEqualMapsToGreaterOrEqual() {
+	void greaterEqualMapsToGreaterOrEqual() {
 		assertEquals(SmartClientFilterOperator.greaterOrEqual,
 				SmartClientFilterOperator.fromFilterOperator(FilterOperator.greaterEqual));
 	}
 
 	@Test
-	public void isNullMapsToIsNull() {
+	void isNullMapsToIsNull() {
 		assertEquals(SmartClientFilterOperator.isNull,
 				SmartClientFilterOperator.fromFilterOperator(FilterOperator.isNull));
 	}
 
 	@Test
-	public void lessMapsToLessThan() {
+	void lessMapsToLessThan() {
 		assertEquals(SmartClientFilterOperator.lessThan,
 				SmartClientFilterOperator.fromFilterOperator(FilterOperator.less));
 	}
 
 	@Test
-	public void lessEqualMapsToLessOrEqual() {
+	void lessEqualMapsToLessOrEqual() {
 		assertEquals(SmartClientFilterOperator.lessOrEqual,
 				SmartClientFilterOperator.fromFilterOperator(FilterOperator.lessEqual));
 	}
 
 	@Test
-	public void likeMapsToIContains() {
+	void likeMapsToIContains() {
 		assertEquals(SmartClientFilterOperator.iContains,
 				SmartClientFilterOperator.fromFilterOperator(FilterOperator.like));
 	}
 
 	@Test
-	public void notEqualMapsToINotEqual() {
+	void notEqualMapsToINotEqual() {
 		assertEquals(SmartClientFilterOperator.iNotEqual,
 				SmartClientFilterOperator.fromFilterOperator(FilterOperator.notEqual));
 	}
 
 	@Test
-	public void notLikeMapsToINotContains() {
+	void notLikeMapsToINotContains() {
 		assertEquals(SmartClientFilterOperator.iNotContains,
 				SmartClientFilterOperator.fromFilterOperator(FilterOperator.notLike));
 	}
 
 	@Test
-	public void notNullMapsToNotNull() {
+	void notNullMapsToNotNull() {
 		assertEquals(SmartClientFilterOperator.notNull,
 				SmartClientFilterOperator.fromFilterOperator(FilterOperator.notNull));
 	}
 
 	@Test
-	public void nullOrEqualMapsToEquals() {
+	void nullOrEqualMapsToEquals() {
 		assertEquals(SmartClientFilterOperator.equals,
 				SmartClientFilterOperator.fromFilterOperator(FilterOperator.nullOrEqual));
 	}
 
 	@Test
-	public void nullOrGreaterMapsToGreaterThan() {
+	void nullOrGreaterMapsToGreaterThan() {
 		assertEquals(SmartClientFilterOperator.greaterThan,
 				SmartClientFilterOperator.fromFilterOperator(FilterOperator.nullOrGreater));
 	}
 
 	@Test
-	public void nullOrGreaterEqualMapsToGreaterOrEqual() {
+	void nullOrGreaterEqualMapsToGreaterOrEqual() {
 		assertEquals(SmartClientFilterOperator.greaterOrEqual,
 				SmartClientFilterOperator.fromFilterOperator(FilterOperator.nullOrGreaterEqual));
 	}
 
 	@Test
-	public void nullOrLessMapsToLessThan() {
+	void nullOrLessMapsToLessThan() {
 		assertEquals(SmartClientFilterOperator.lessThan,
 				SmartClientFilterOperator.fromFilterOperator(FilterOperator.nullOrLess));
 	}
 
 	@Test
-	public void nullOrLessEqualMapsToLessOrEqual() {
+	void nullOrLessEqualMapsToLessOrEqual() {
 		assertEquals(SmartClientFilterOperator.lessOrEqual,
 				SmartClientFilterOperator.fromFilterOperator(FilterOperator.nullOrLessEqual));
 	}
 
 	@Test
-	public void nullOrLikeMapsToIContains() {
+	void nullOrLikeMapsToIContains() {
 		assertEquals(SmartClientFilterOperator.iContains,
 				SmartClientFilterOperator.fromFilterOperator(FilterOperator.nullOrLike));
 	}
 
 	@Test
-	public void nullOrNotEqualMapsToNotEqual() {
+	void nullOrNotEqualMapsToNotEqual() {
 		assertEquals(SmartClientFilterOperator.notEqual,
 				SmartClientFilterOperator.fromFilterOperator(FilterOperator.nullOrNotEqual));
 	}
 
 	@Test
-	public void nullOrNotLikeMapsToINotContains() {
+	void nullOrNotLikeMapsToINotContains() {
 		assertEquals(SmartClientFilterOperator.iNotContains,
 				SmartClientFilterOperator.fromFilterOperator(FilterOperator.nullOrNotLike));
 	}
@@ -121,17 +121,17 @@ public class SmartClientFilterOperatorTest {
 	// ---- enum constants sanity ----
 
 	@Test
-	public void valuesArrayIsNonEmpty() {
+	void valuesArrayIsNonEmpty() {
 		assertTrue(SmartClientFilterOperator.values().length > 0);
 	}
 
 	@Test
-	public void valueOfSubstringIsSubstring() {
+	void valueOfSubstringIsSubstring() {
 		assertEquals(SmartClientFilterOperator.substring,
 				SmartClientFilterOperator.valueOf("substring"));
 	}
 
 	private static void assertTrue(boolean condition) {
-		org.junit.Assert.assertTrue(condition);
+		org.junit.jupiter.api.Assertions.assertTrue(condition);
 	}
 }

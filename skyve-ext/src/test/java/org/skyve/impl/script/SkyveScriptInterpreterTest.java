@@ -2,15 +2,15 @@ package org.skyve.impl.script;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertThrows;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.commonmark.node.Document;
 import org.commonmark.node.Node;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.skyve.impl.metadata.model.document.field.Enumeration;
 import org.skyve.impl.metadata.model.document.field.Text;
 import org.skyve.impl.metadata.repository.document.DocumentMetaData;
@@ -22,12 +22,12 @@ import org.skyve.metadata.model.document.Collection;
 import org.skyve.metadata.model.document.Collection.CollectionType;
 
 @SuppressWarnings("static-method")
-public class SkyveScriptInterpreterTest {
+class SkyveScriptInterpreterTest {
 
 	SkyveScriptInterpreter i;
 
-	@Before
-	public void resetStaticState() throws Exception {
+	@BeforeEach
+	void resetStaticState() throws Exception {
 		java.lang.reflect.Field moduleField = SkyveScriptInterpreter.class.getDeclaredField("currentModule");
 		moduleField.setAccessible(true);
 		moduleField.set(null, null);
@@ -40,7 +40,7 @@ public class SkyveScriptInterpreterTest {
 	}
 
 	@Test
-	public void testModuleHeading() {
+	void testModuleHeading() {
 		// setup the test data
 		String script = "# admin";
 
@@ -60,7 +60,7 @@ public class SkyveScriptInterpreterTest {
 	}
 
 	@Test
-	public void testModuleHeadingDisplayName() {
+	void testModuleHeadingDisplayName() {
 		// setup the test data
 		String script = "# 'admin'";
 
@@ -78,7 +78,7 @@ public class SkyveScriptInterpreterTest {
 	}
 
 	@Test
-	public void testModuleSetsPrototypeByDefault() {
+	void testModuleSetsPrototypeByDefault() {
 		// setup the test data
 		String script = "# admin";
 
@@ -95,7 +95,7 @@ public class SkyveScriptInterpreterTest {
 	}
 
 	@Test
-	public void testModuleDoesntSetPrototypeWhenRequested() {
+	void testModuleDoesntSetPrototypeWhenRequested() {
 		// setup the test data
 		String script = "# admin";
 
@@ -114,7 +114,7 @@ public class SkyveScriptInterpreterTest {
 
 	@SuppressWarnings("null") // a null here fails the test
 	@Test
-	public void testDocumentHeading() {
+	void testDocumentHeading() {
 		// setup the test data
 		String script = "# Admin\n## Address";
 
@@ -142,7 +142,7 @@ public class SkyveScriptInterpreterTest {
 
 	@SuppressWarnings("null") // a null here fails the test
 	@Test
-	public void testDocumentHeadingWithPersistentName() {
+	void testDocumentHeadingWithPersistentName() {
 		// setup the test data
 		String script = "# Admin\n## Address `ADM_Address`";
 
@@ -164,7 +164,7 @@ public class SkyveScriptInterpreterTest {
 	}
 
 	@Test
-	public void testDocumentHeadingWithDisplayName() {
+	void testDocumentHeadingWithDisplayName() {
 		// setup the test data
 		String script = "# Admin\n## 'Address Title'";
 
@@ -186,7 +186,7 @@ public class SkyveScriptInterpreterTest {
 
 	@SuppressWarnings("null") // a null here fails the test
 	@Test
-	public void testDocumentHeadingWithDisplayNameAndPersistentName() {
+	void testDocumentHeadingWithDisplayNameAndPersistentName() {
 		// setup the test data
 		String script = "# Admin\n## 'Address Title' `ADM_Address`";
 
@@ -208,7 +208,7 @@ public class SkyveScriptInterpreterTest {
 	}
 
 	@Test
-	public void testAssociation() {
+	void testAssociation() {
 		// setup the test data
 		String script = "# Admin\n## Address\n- country Country";
 
@@ -234,7 +234,7 @@ public class SkyveScriptInterpreterTest {
 	}
 
 	@Test
-	public void testAssociationRequired() {
+	void testAssociationRequired() {
 		// setup the test data
 		String script = "# Admin\n## Address\n- *country* Country";
 
@@ -262,7 +262,7 @@ public class SkyveScriptInterpreterTest {
 	}
 
 	@Test
-	public void testAssociationAggregation() {
+	void testAssociationAggregation() {
 		// setup the test data
 		String script = "# Admin\n## Address\n- *country* Country `aggregation`";
 
@@ -291,7 +291,7 @@ public class SkyveScriptInterpreterTest {
 	}
 
 	@Test
-	public void testAssociationComposition() {
+	void testAssociationComposition() {
 		// setup the test data
 		String script = "# Admin\n## Address\n- country Country `composition`";
 
@@ -320,7 +320,7 @@ public class SkyveScriptInterpreterTest {
 	}
 
 	@Test
-	public void testAssociationRelatedDocument() {
+	void testAssociationRelatedDocument() {
 		// setup the test data
 		String script = "# Admin\n## Address\n- *user* admin.User";
 
@@ -357,7 +357,7 @@ public class SkyveScriptInterpreterTest {
 
 	@Test
 	@SuppressWarnings("java:S5961")
-	public void testAssociationRelatedDocumentMultipleReferences() {
+	void testAssociationRelatedDocumentMultipleReferences() {
 		// setup the test data
 		String script = "# Admin\n## Address\n- *user* admin.User\n## Contact\n- user admin.User";
 
@@ -406,7 +406,7 @@ public class SkyveScriptInterpreterTest {
 	}
 
 	@Test
-	public void testAssociationRequiredComposition() {
+	void testAssociationRequiredComposition() {
 		// setup the test data
 		String script = "# Admin\n## Address\n- *country* Country `composition`";
 
@@ -435,7 +435,7 @@ public class SkyveScriptInterpreterTest {
 	}
 
 	@Test
-	public void testCollection() {
+	void testCollection() {
 		// setup the test data
 		String script = "# Admin\n## Address\n+ roles Role";
 
@@ -462,7 +462,7 @@ public class SkyveScriptInterpreterTest {
 	}
 
 	@Test
-	public void testCollectionRequired() {
+	void testCollectionRequired() {
 		// setup the test data
 		String script = "# Admin\n## Address\n+ *roles* Role";
 
@@ -489,7 +489,7 @@ public class SkyveScriptInterpreterTest {
 	}
 
 	@Test
-	public void testCollectionComposition() {
+	void testCollectionComposition() {
 		// setup the test data
 		String script = "# Admin\n## Address\n+ *roles* Role `composition`";
 
@@ -517,7 +517,7 @@ public class SkyveScriptInterpreterTest {
 	}
 
 	@Test
-	public void testCollectionRelatedDocument() {
+	void testCollectionRelatedDocument() {
 		// setup the test data
 		String script = "# Admin\n## Address\n+ users admin.User";
 
@@ -551,7 +551,7 @@ public class SkyveScriptInterpreterTest {
 	}
 
 	@Test
-	public void testCollectionRequiredChild() {
+	void testCollectionRequiredChild() {
 		// setup the test data
 		String script = "# Admin\n## Address\n+ *roles* Role `child`";
 
@@ -580,7 +580,7 @@ public class SkyveScriptInterpreterTest {
 
 	@SuppressWarnings("null") // a null here fails the test
 	@Test
-	public void testCollectionChildUpdatesParentAfter() {
+	void testCollectionChildUpdatesParentAfter() {
 		// setup the test data
 		String script = "# Admin\n## Address\n+ *roles* Role `child`\n## Role\n- roleName text 50";
 
@@ -615,7 +615,7 @@ public class SkyveScriptInterpreterTest {
 
 	@SuppressWarnings("null") // a null here fails the test
 	@Test
-	public void testCollectionChildUpdatesParentBefore() {
+	void testCollectionChildUpdatesParentBefore() {
 		// setup the test data
 		String script = "# Admin\n## Role\n- roleName text 50\n## Address\n+ *roles* Role `child`";
 
@@ -649,7 +649,7 @@ public class SkyveScriptInterpreterTest {
 	}
 
 	@Test
-	public void testParse() {
+	void testParse() {
 		// setup the test data
 		String script = "# Admin\n## Address\n- active boolean";
 		i = new SkyveScriptInterpreter(script);
@@ -664,7 +664,7 @@ public class SkyveScriptInterpreterTest {
 
 	@Test
 	@SuppressWarnings("java:S5976")
-	public void testPreProcessAddsEnumDefinition() {
+	void testPreProcessAddsEnumDefinition() {
 		// setup the test data
 		String script = "# Admin\n## Address\n- state (QLD,NSW,WA,NT,ACT,SA,VIC,TAS)";
 		i = new SkyveScriptInterpreter(script);
@@ -678,7 +678,7 @@ public class SkyveScriptInterpreterTest {
 	}
 	
 	@Test
-	public void testPreProcessAddsMissingHeadingSpace() {
+	void testPreProcessAddsMissingHeadingSpace() {
 		// setup the test data
 		String script = "#Admin\n##Address\n- active boolean\n- completionDate date";
 		i = new SkyveScriptInterpreter(script);
@@ -692,7 +692,7 @@ public class SkyveScriptInterpreterTest {
 	}
 
 	@Test
-	public void testPreProcessAddsMissingListItemSpace() {
+	void testPreProcessAddsMissingListItemSpace() {
 		// setup the test data
 		String script = "# Admin\n## Address\n-active boolean\n- completionDate date";
 		i = new SkyveScriptInterpreter(script);
@@ -706,7 +706,7 @@ public class SkyveScriptInterpreterTest {
 	}
 
 	@Test
-	public void testPreProcessAddsMissingRequiredDeclaration() {
+	void testPreProcessAddsMissingRequiredDeclaration() {
 		// setup the test data
 		String script = "# Admin\n## Address\n- *active boolean";
 		i = new SkyveScriptInterpreter(script);
@@ -720,7 +720,7 @@ public class SkyveScriptInterpreterTest {
 	}
 
 	@Test
-	public void testPreProcessAddsMissingRequiredDeclarationDisplayName() {
+	void testPreProcessAddsMissingRequiredDeclarationDisplayName() {
 		// setup the test data
 		String script = "# Admin\n## Address\n- *'First Name' boolean";
 		i = new SkyveScriptInterpreter(script);
@@ -734,7 +734,7 @@ public class SkyveScriptInterpreterTest {
 	}
 
 	@Test
-	public void testPreProcessReplacesCollectionTypeBrackets() {
+	void testPreProcessReplacesCollectionTypeBrackets() {
 		// setup the test data
 		String script = "# Admin\n## Address\n- country Country [composition]";
 		i = new SkyveScriptInterpreter(script);
@@ -748,7 +748,7 @@ public class SkyveScriptInterpreterTest {
 	}
 
 	@Test
-	public void testPreProcessMultiple() {
+	void testPreProcessMultiple() {
 		// setup the test data
 		String script = "# Admin\n## Address\n-state (QLD,NSW,WA,NT,ACT,SA,VIC,TAS)\n- *completionDate date";
 		i = new SkyveScriptInterpreter(script);
@@ -762,7 +762,7 @@ public class SkyveScriptInterpreterTest {
 	}
 
 	@Test
-	public void testPreProcessValidMarkdownDoesNothing() {
+	void testPreProcessValidMarkdownDoesNothing() {
 		// setup the test data
 		String script = "# Admin\n## Address\n- active boolean";
 		i = new SkyveScriptInterpreter(script);
@@ -775,7 +775,7 @@ public class SkyveScriptInterpreterTest {
 	}
 
 	@Test
-	public void testScalarAttributeDisplayName() {
+	void testScalarAttributeDisplayName() {
 		// setup the test data
 		String script = "# Admin\n## Address\n- 'Yes/No' boolean";
 
@@ -798,7 +798,7 @@ public class SkyveScriptInterpreterTest {
 	}
 
 	@Test
-	public void testScalarBooleanAttribute() {
+	void testScalarBooleanAttribute() {
 		// setup the test data
 		String script = "# Admin\n## Address\n- active boolean";
 
@@ -821,7 +821,7 @@ public class SkyveScriptInterpreterTest {
 	}
 
 	@Test
-	public void testScalarColourAttribute() {
+	void testScalarColourAttribute() {
 		// setup the test data
 		String script = "# Admin\n## Address\n- selectedColour colour";
 
@@ -844,7 +844,7 @@ public class SkyveScriptInterpreterTest {
 	}
 	
 	@Test
-	public void testScalarContentAttribute() {
+	void testScalarContentAttribute() {
 		// setup the test data
 		String script = "# Admin\n## Address\n- content content";
 
@@ -867,7 +867,7 @@ public class SkyveScriptInterpreterTest {
 	}
 
 	@Test
-	public void testScalarDateAttribute() {
+	void testScalarDateAttribute() {
 		// setup the test data
 		String script = "# Admin\n## Address\n- completionDate date";
 
@@ -890,7 +890,7 @@ public class SkyveScriptInterpreterTest {
 	}
 
 	@Test
-	public void testScalarDateTimeAttribute() {
+	void testScalarDateTimeAttribute() {
 		// setup the test data
 		String script = "# Admin\n## Address\n- completionDate dateTime";
 
@@ -913,7 +913,7 @@ public class SkyveScriptInterpreterTest {
 	}
 
 	@Test
-	public void testScalarDecimal2Attribute() {
+	void testScalarDecimal2Attribute() {
 		// setup the test data
 		String script = "# Admin\n## Address\n- amount decimal2";
 
@@ -936,7 +936,7 @@ public class SkyveScriptInterpreterTest {
 	}
 
 	@Test
-	public void testScalarDecimal5Attribute() {
+	void testScalarDecimal5Attribute() {
 		// setup the test data
 		String script = "# Admin\n## Address\n- amount decimal5";
 
@@ -959,7 +959,7 @@ public class SkyveScriptInterpreterTest {
 	}
 
 	@Test
-	public void testScalarDecimal10Attribute() {
+	void testScalarDecimal10Attribute() {
 		// setup the test data
 		String script = "# Admin\n## Address\n- amount decimal10";
 
@@ -982,7 +982,7 @@ public class SkyveScriptInterpreterTest {
 	}
 
 	@Test
-	public void testScalarEnumAttribute() {
+	void testScalarEnumAttribute() {
 		// setup the test data
 		String script = "# Admin\n## Address\n- state enum (QLD, NSW, WA, NT, ACT, SA, VIC, TAS)";
 
@@ -1007,7 +1007,7 @@ public class SkyveScriptInterpreterTest {
 	}
 
 	@Test
-	public void testScalarEnumWithSpacesAttribute() {
+	void testScalarEnumWithSpacesAttribute() {
 		// setup the test data
 		String script = "# Admin\n## Address\n- status enum (\"Not Started\", 'In Progress', Pending Review, Complete)";
 
@@ -1044,7 +1044,7 @@ public class SkyveScriptInterpreterTest {
 	}
 
 	@Test
-	public void testScalarIdAttribute() {
+	void testScalarIdAttribute() {
 		// setup the test data
 		String script = "# Admin\n## Address\n- selectedAddressId id";
 
@@ -1067,7 +1067,7 @@ public class SkyveScriptInterpreterTest {
 	}
 
 	@Test
-	public void testScalarIntegerAttribute() {
+	void testScalarIntegerAttribute() {
 		// setup the test data
 		String script = "# Admin\n## Address\n- postCode integer";
 
@@ -1094,7 +1094,7 @@ public class SkyveScriptInterpreterTest {
 	 * document.
 	 */
 	@Test
-	public void testScalarInvalidAttribute() {
+	void testScalarInvalidAttribute() {
 		// setup the test data
 		String script = "# Admin\n## Address\n- amount unknown";
 
@@ -1109,14 +1109,14 @@ public class SkyveScriptInterpreterTest {
 		DocumentMetaData document = i.getDocuments().get(0);
 
 		assertThat(document, is(notNullValue()));
-		assertEquals("No attribtes should be added to the document", 0, document.getAttributes().size());
-		assertEquals("1 error should be returned by the interpreter", 1, i.getErrors().size());
+		assertEquals(0, document.getAttributes().size(), "No attribtes should be added to the document");
+		assertEquals(1, i.getErrors().size(), "1 error should be returned by the interpreter");
 		assertEquals(3, i.getErrors().get(0).getLineNumber());
 	}
 
 	@SuppressWarnings("null") // a null here fails the test
 	@Test
-	public void testScalarMultipleReqiredAttributesSetsBizKey() {
+	void testScalarMultipleReqiredAttributesSetsBizKey() {
 		// setup the test data
 		String script = "# Admin\n## Address\n- *addressLine1* text 50\n- *suburb* text 50";
 
@@ -1137,7 +1137,7 @@ public class SkyveScriptInterpreterTest {
 
 	@SuppressWarnings("null") // a null here fails the test
 	@Test
-	public void testScalarRequiredAttribute() {
+	void testScalarRequiredAttribute() {
 		// setup the test data
 		String script = "# Admin\n## Address\n- *completionDate* date";
 
@@ -1164,7 +1164,7 @@ public class SkyveScriptInterpreterTest {
 
 	@SuppressWarnings("null") // a null here fails the test
 	@Test
-	public void testScalarRequiredAttributeDisplayName() {
+	void testScalarRequiredAttributeDisplayName() {
 		// setup the test data
 		String script = "# Admin\n## Address\n- *\"Completion Date\"* date";
 
@@ -1190,7 +1190,7 @@ public class SkyveScriptInterpreterTest {
 	}
 
 	@Test
-	public void testScalarRequiredAttributeDisplayName2() {
+	void testScalarRequiredAttributeDisplayName2() {
 		// setup the test data
 		String script = "# Admin\n## Address\n- *'Completion Date'* date";
 
@@ -1216,7 +1216,7 @@ public class SkyveScriptInterpreterTest {
 
 	@SuppressWarnings("null") // a null here fails the test
 	@Test
-	public void testScalarTextAttribute() {
+	void testScalarTextAttribute() {
 		// setup the test data
 		String script = "# Admin\n## Address\n- postCode text 4";
 
@@ -1243,7 +1243,7 @@ public class SkyveScriptInterpreterTest {
 	}
 
 	@Test
-	public void testScalarTextAttributeDisplayName() {
+	void testScalarTextAttributeDisplayName() {
 		// setup the test data
 		String script = "# Admin\n## Address\n- 'Address Line 1' text 4";
 
@@ -1269,7 +1269,7 @@ public class SkyveScriptInterpreterTest {
 	}
 
 	@Test
-	public void testSplitAttribute() {
+	void testSplitAttribute() {
 		// setup the test data
 		String input = "postCode text 100";
 
@@ -1284,7 +1284,7 @@ public class SkyveScriptInterpreterTest {
 	}
 
 	@Test
-	public void testSplitAttributeDisplayName() {
+	void testSplitAttributeDisplayName() {
 		// setup the test data
 		String input = "'Yes/No' boolean";
 
@@ -1298,7 +1298,7 @@ public class SkyveScriptInterpreterTest {
 	}
 
 	@Test
-	public void testSplitAttributeDisplayNameSpaces() {
+	void testSplitAttributeDisplayNameSpaces() {
 		// setup the test data
 		String input = "'Post Code' text 100";
 
@@ -1313,7 +1313,7 @@ public class SkyveScriptInterpreterTest {
 	}
 
 	@Test
-	public void testSplitAttributeEnumShorthand() {
+	void testSplitAttributeEnumShorthand() {
 		// setup the test data
 		String input = "state (sa, vic)";
 
@@ -1327,7 +1327,7 @@ public class SkyveScriptInterpreterTest {
 	}
 
 	@Test
-	public void testSplitAttributeEnum() {
+	void testSplitAttributeEnum() {
 		// setup the test data
 		String input = "state enum (sa, vic)";
 
@@ -1342,7 +1342,7 @@ public class SkyveScriptInterpreterTest {
 	}
 
 	@Test
-	public void testScalarGeometryAttribute() {
+	void testScalarGeometryAttribute() {
 		// setup the test data
 		String script = "# Admin\n## Address\n- location geometry";
 
@@ -1365,7 +1365,7 @@ public class SkyveScriptInterpreterTest {
 	}
 
 	@Test
-	public void testScalarLongIntegerAttribute() {
+	void testScalarLongIntegerAttribute() {
 		// setup the test data
 		String script = "# Admin\n## Account\n- balance longInteger";
 
@@ -1388,7 +1388,7 @@ public class SkyveScriptInterpreterTest {
 	}
 
 	@Test
-	public void testScalarMemoAttribute() {
+	void testScalarMemoAttribute() {
 		// setup the test data
 		String script = "# Admin\n## Contact\n- notes memo";
 
@@ -1411,7 +1411,7 @@ public class SkyveScriptInterpreterTest {
 	}
 
 	@Test
-	public void testScalarMarkupAttribute() {
+	void testScalarMarkupAttribute() {
 		// setup the test data
 		String script = "# Admin\n## Article\n- body markup";
 
@@ -1434,7 +1434,7 @@ public class SkyveScriptInterpreterTest {
 	}
 
 	@Test
-	public void testScalarTimeAttribute() {
+	void testScalarTimeAttribute() {
 		// setup the test data
 		String script = "# Admin\n## Schedule\n- startTime time";
 
@@ -1457,7 +1457,7 @@ public class SkyveScriptInterpreterTest {
 	}
 
 	@Test
-	public void testScalarTimestampAttribute() {
+	void testScalarTimestampAttribute() {
 		// setup the test data
 		String script = "# Admin\n## Log\n- createdAt timestamp";
 
@@ -1481,19 +1481,19 @@ public class SkyveScriptInterpreterTest {
 
         @SuppressWarnings("null") // passes null on purpose
         @Test
-        public void testPreProcessThrowsWhenScriptIsNull() {
+        void testPreProcessThrowsWhenScriptIsNull() {
                 i = new SkyveScriptInterpreter(null);
                 assertThrows(IllegalArgumentException.class, () -> i.preProcess());
         }
 
         @Test
-        public void testPreProcessThrowsWhenScriptIsEmpty() {
+        void testPreProcessThrowsWhenScriptIsEmpty() {
                 i = new SkyveScriptInterpreter("");
                 assertThrows(IllegalArgumentException.class, () -> i.preProcess());
         }
 
         @Test
-        public void testMultipleModulesAddsError() {
+        void testMultipleModulesAddsError() {
                 String script = "# Admin\n## Document1\n- name text\n# Another\n## Document2\n- name text";
                 i = new SkyveScriptInterpreter(script);
                 i.process();
@@ -1502,7 +1502,7 @@ public class SkyveScriptInterpreterTest {
         }
 
         @Test
-        public void testSetPrototypeModulesFalse() {
+        void testSetPrototypeModulesFalse() {
                 String script = "# Admin\n## Customer\n- name text";
                 i = new SkyveScriptInterpreter(script);
                 i.setPrototypeModules(false);
@@ -1512,7 +1512,7 @@ public class SkyveScriptInterpreterTest {
         }
 
         @Test
-        public void testGetDocumentsReturnsDocuments() {
+        void testGetDocumentsReturnsDocuments() {
                 String script = "# Admin\n## Customer\n- name text\n## Order\n- total decimal10";
                 i = new SkyveScriptInterpreter(script);
                 i.process();
@@ -1520,7 +1520,7 @@ public class SkyveScriptInterpreterTest {
         }
 
         @Test
-        public void testPreProcessReturnsScript() {
+        void testPreProcessReturnsScript() {
                 String script = "# Admin\n## Customer\n- name text";
                 i = new SkyveScriptInterpreter(script);
                 String result = i.preProcess();
@@ -1528,7 +1528,7 @@ public class SkyveScriptInterpreterTest {
         }
 
 	@Test
-	public void testTwoArgConstructorCreatesInterpreter() {
+	void testTwoArgConstructorCreatesInterpreter() {
 		// covers <init>@141: the two-arg constructor (calls this(script) and sets defaultModule)
 		i = new SkyveScriptInterpreter("# admin\n## Customer\n- name text\n", "admin");
 		i.process();
@@ -1537,14 +1537,14 @@ public class SkyveScriptInterpreterTest {
 
 	@SuppressWarnings("null") // passes null on purpose
 	@Test
-	public void testParseNullScriptThrowsIllegalArgument() {
+	void testParseNullScriptThrowsIllegalArgument() {
 		// covers parse@163: the throw statement when script is null
 		i = new SkyveScriptInterpreter(null);
 		assertThrows(IllegalArgumentException.class, () -> i.parse());
 	}
 
 	@Test
-	public void testInvalidScriptsAddErrors() {
+	void testInvalidScriptsAddErrors() {
 		String[][] cases = {
 				{"# Admin\n## Customer\n* name text\n", "star bullet marker should add error"},
 				{"# `code`\n## Customer\n- name text\n", "code-span heading should add critical error"},
@@ -1557,12 +1557,12 @@ public class SkyveScriptInterpreterTest {
 		for (String[] testCase : cases) {
 			i = new SkyveScriptInterpreter(testCase[0]);
 			i.process();
-			assertFalse(testCase[1], i.getErrors().isEmpty());
+			assertFalse(i.getErrors().isEmpty(), testCase[1]);
 		}
 	}
 
         @Test
-        public void testDocumentWithoutModuleUsesDefaultModule() {
+        void testDocumentWithoutModuleUsesDefaultModule() {
                 // covers L372 (currentModule == null) and initialiseDefaultModule() L922-933
                 i = new SkyveScriptInterpreter("## Customer\n- name text 50\n", "myapp");
                 i.process();
@@ -1571,22 +1571,22 @@ public class SkyveScriptInterpreterTest {
         }
 
 	@Test
-	public void testDocumentWithoutModuleAndNoDefaultAddsCritical() {
+	void testDocumentWithoutModuleAndNoDefaultAddsCritical() {
 		// covers L372 and initialiseDefaultModule() L922, L935 (addCritical path)
 		i = new SkyveScriptInterpreter("## Customer\n- name text 50\n");
 		i.process();
-		assertFalse("no default module should add critical error", i.getErrors().isEmpty());
+		assertFalse(i.getErrors().isEmpty(), "no default module should add critical error");
 	}
 
         @Test
-        public void testTwoDocumentsInModuleCoversAppendRoleElseBranch() {
+        void testTwoDocumentsInModuleCoversAppendRoleElseBranch() {
                 // covers appendRole L507-516 (else branch when module already has roles from first document)
                 i = new SkyveScriptInterpreter("# Admin\n## FirstDoc\n- name text 50\n\n## SecondDoc\n- age integer\n");
                 i.process();
                 assertEquals(1, i.getModules().size());
                 assertEquals(2, i.getDocuments().size());
                 // module roles should have been populated from firstDoc and reused for secondDoc
-                assertFalse("module should have roles", i.getModules().get(0).getRoles().isEmpty());
+                assertFalse(i.getModules().get(0).getRoles().isEmpty(), "module should have roles");
         }
 
 }

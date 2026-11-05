@@ -12,9 +12,9 @@ import org.hibernate.type.StringType;
 import org.hibernate.type.TypeFactory;
 import org.hibernate.type.TypeResolver;
 import org.hibernate.type.spi.TypeConfiguration;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-public class InlineIdsInClauseBuilderTest {
+class InlineIdsInClauseBuilderTest {
 	private static class LimitedInExpressionCountDialect extends H2Dialect {
 		private final int inExpressionCountLimit;
 
@@ -38,7 +38,7 @@ public class InlineIdsInClauseBuilderTest {
 	}
 
 	@Test
-	public void testEscapesSingleQuotesForStringIdentifierValues() {
+	void testEscapesSingleQuotesForStringIdentifierValues() {
 		InlineIdsInClauseBuilder builder = new InlineIdsInClauseBuilder(
 				new H2Dialect(),
 				StringType.INSTANCE,
@@ -50,7 +50,7 @@ public class InlineIdsInClauseBuilderTest {
 	}
 
 	@Test
-	public void testKeepsNumericIdentifierValuesUnquoted() {
+	void testKeepsNumericIdentifierValuesUnquoted() {
 		InlineIdsInClauseBuilder builder = new InlineIdsInClauseBuilder(
 				new H2Dialect(),
 				IntegerType.INSTANCE,
@@ -62,7 +62,7 @@ public class InlineIdsInClauseBuilderTest {
 	}
 
 	@Test
-	public void testRendersNullIdentifierValueAsSqlNull() {
+	void testRendersNullIdentifierValueAsSqlNull() {
 		InlineIdsInClauseBuilder builder = new InlineIdsInClauseBuilder(
 				new H2Dialect(),
 				IntegerType.INSTANCE,
@@ -74,7 +74,7 @@ public class InlineIdsInClauseBuilderTest {
 	}
 
 	@Test
-	public void testQuotesEnumIdentifierValues() {
+	void testQuotesEnumIdentifierValues() {
 		InlineIdsInClauseBuilder builder = new InlineIdsInClauseBuilder(
 				new H2Dialect(),
 				IntegerType.INSTANCE,
@@ -86,7 +86,7 @@ public class InlineIdsInClauseBuilderTest {
 	}
 
 	@Test
-	public void testQuotesEmptyStringIdentifierValues() {
+	void testQuotesEmptyStringIdentifierValues() {
 		InlineIdsInClauseBuilder builder = new InlineIdsInClauseBuilder(
 				new H2Dialect(),
 				StringType.INSTANCE,
@@ -98,7 +98,7 @@ public class InlineIdsInClauseBuilderTest {
 	}
 
 	@Test
-	public void testEscapesMultipleConsecutiveSingleQuotes() {
+	void testEscapesMultipleConsecutiveSingleQuotes() {
 		InlineIdsInClauseBuilder builder = new InlineIdsInClauseBuilder(
 				new H2Dialect(),
 				StringType.INSTANCE,
@@ -110,7 +110,7 @@ public class InlineIdsInClauseBuilderTest {
 	}
 
 	@Test
-	public void testPreservesBackslashesInStringValues() {
+	void testPreservesBackslashesInStringValues() {
 		InlineIdsInClauseBuilder builder = new InlineIdsInClauseBuilder(
 				new H2Dialect(),
 				StringType.INSTANCE,
@@ -122,7 +122,7 @@ public class InlineIdsInClauseBuilderTest {
 	}
 
 	@Test
-	public void testHandlesCompositeIdentifierValues() {
+	void testHandlesCompositeIdentifierValues() {
 		InlineIdsInClauseBuilder builder = new InlineIdsInClauseBuilder(
 				new H2Dialect(),
 				IntegerType.INSTANCE,
@@ -134,7 +134,7 @@ public class InlineIdsInClauseBuilderTest {
 	}
 
 	@Test
-	public void testHandlesVeryLongIdentifierValues() {
+	void testHandlesVeryLongIdentifierValues() {
 		String veryLongValue = "a".repeat(4096) + "'" + "b".repeat(4096);
 		InlineIdsInClauseBuilder builder = new InlineIdsInClauseBuilder(
 				new H2Dialect(),
@@ -147,7 +147,7 @@ public class InlineIdsInClauseBuilderTest {
 	}
 
 	@Test
-	public void testSplitsInlineIdsAcrossChunksWhenDialectDefinesInClauseLimit() {
+	void testSplitsInlineIdsAcrossChunksWhenDialectDefinesInClauseLimit() {
 		InlineIdsInClauseBuilder builder = new InlineIdsInClauseBuilder(
 				new LimitedInExpressionCountDialect(2),
 				IntegerType.INSTANCE,

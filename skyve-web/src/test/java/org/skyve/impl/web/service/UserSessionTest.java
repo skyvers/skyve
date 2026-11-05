@@ -1,35 +1,35 @@
 package org.skyve.impl.web.service;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.skyve.impl.metadata.user.ClientUserData;
 
 @SuppressWarnings("static-method")
-public class UserSessionTest {
+class UserSessionTest {
 
 	@Test
-	public void getSessionIdReturnsNullInitially() {
+	void getSessionIdReturnsNullInitially() {
 		UserSession session = new UserSession();
 		assertNull(session.getSessionID());
 	}
 
 	@Test
-	public void setAndGetSessionIdRoundtrip() {
+	void setAndGetSessionIdRoundtrip() {
 		UserSession session = new UserSession();
 		session.setSessionID("abc123");
 		assertEquals("abc123", session.getSessionID());
 	}
 
 	@Test
-	public void getClientUserDataReturnsNullInitially() {
+	void getClientUserDataReturnsNullInitially() {
 		UserSession session = new UserSession();
 		assertNull(session.getClientUserData());
 	}
 
 	@Test
-	public void setAndGetClientUserDataRoundtrip() {
+	void setAndGetClientUserDataRoundtrip() {
 		UserSession session = new UserSession();
 		ClientUserData data = new ClientUserData();
 		session.setClientUserData(data);

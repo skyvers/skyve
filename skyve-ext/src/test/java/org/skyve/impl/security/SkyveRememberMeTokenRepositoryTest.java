@@ -1,8 +1,8 @@
 package org.skyve.impl.security;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -12,7 +12,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.Date;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.skyve.persistence.Persistence;
 import org.skyve.persistence.SQL;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -22,62 +22,62 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.security.web.authentication.rememberme.PersistentRememberMeToken;
 
 @SuppressWarnings({"static-method", "boxing", "java:S8692"}) // system clock OK
-public class SkyveRememberMeTokenRepositoryTest {
+class SkyveRememberMeTokenRepositoryTest {
 
 	@Test
-	public void testGetGetTokenForSeriesSqlReturnsDefault() {
+	void testGetGetTokenForSeriesSqlReturnsDefault() {
 		SkyveRememberMeTokenRepository repo = new SkyveRememberMeTokenRepository();
 		assertNotNull(repo.getGetTokenForSeriesSql());
 	}
 
 	@Test
-	public void testSetGetTokenForSeriesSqlRoundTrips() {
+	void testSetGetTokenForSeriesSqlRoundTrips() {
 		SkyveRememberMeTokenRepository repo = new SkyveRememberMeTokenRepository();
 		repo.setGetTokenForSeriesSql("select * from custom_token where series = ?");
 		assertEquals("select * from custom_token where series = ?", repo.getGetTokenForSeriesSql());
 	}
 
 	@Test
-	public void testGetCreateNewTokenSqlReturnsDefault() {
+	void testGetCreateNewTokenSqlReturnsDefault() {
 		SkyveRememberMeTokenRepository repo = new SkyveRememberMeTokenRepository();
 		assertNotNull(repo.getCreateNewTokenSql());
 	}
 
 	@Test
-	public void testSetCreateNewTokenSqlRoundTrips() {
+	void testSetCreateNewTokenSqlRoundTrips() {
 		SkyveRememberMeTokenRepository repo = new SkyveRememberMeTokenRepository();
 		repo.setCreateNewTokenSql("insert into custom_token values(?, ?)");
 		assertEquals("insert into custom_token values(?, ?)", repo.getCreateNewTokenSql());
 	}
 
 	@Test
-	public void testGetUpdateTokenSqlReturnsDefault() {
+	void testGetUpdateTokenSqlReturnsDefault() {
 		SkyveRememberMeTokenRepository repo = new SkyveRememberMeTokenRepository();
 		assertNotNull(repo.getUpdateTokenSql());
 	}
 
 	@Test
-	public void testSetUpdateTokenSqlRoundTrips() {
+	void testSetUpdateTokenSqlRoundTrips() {
 		SkyveRememberMeTokenRepository repo = new SkyveRememberMeTokenRepository();
 		repo.setUpdateTokenSql("update custom_token set token = ? where series = ?");
 		assertEquals("update custom_token set token = ? where series = ?", repo.getUpdateTokenSql());
 	}
 
 	@Test
-	public void testGetRemoveUserTokensSqlReturnsDefault() {
+	void testGetRemoveUserTokensSqlReturnsDefault() {
 		SkyveRememberMeTokenRepository repo = new SkyveRememberMeTokenRepository();
 		assertNotNull(repo.getRemoveUserTokensSql());
 	}
 
 	@Test
-	public void testSetRemoveUserTokensSqlRoundTrips() {
+	void testSetRemoveUserTokensSqlRoundTrips() {
 		SkyveRememberMeTokenRepository repo = new SkyveRememberMeTokenRepository();
 		repo.setRemoveUserTokensSql("delete from custom_token where user = ?");
 		assertEquals("delete from custom_token where user = ?", repo.getRemoveUserTokensSql());
 	}
 
 	@Test
-	public void testGetTokenForSeriesWithNullJdbcTemplateThrowsOrReturnsNull() {
+	void testGetTokenForSeriesWithNullJdbcTemplateThrowsOrReturnsNull() {
 		// With no DataSource injected, getJdbcTemplate() returns null.
 		// The implementation throws IllegalStateException for null JdbcTemplate.
 		SkyveRememberMeTokenRepository repo = new SkyveRememberMeTokenRepository();
@@ -91,7 +91,7 @@ public class SkyveRememberMeTokenRepositoryTest {
 	}
 
 	@Test
-	public void testRemoveUserTokensViaPersistenceCallsExecute() {
+	void testRemoveUserTokensViaPersistenceCallsExecute() {
 		SkyveRememberMeTokenRepository repo = new SkyveRememberMeTokenRepository();
 		Persistence p = mock(Persistence.class);
 		SQL sql = mock(SQL.class);
@@ -106,7 +106,7 @@ public class SkyveRememberMeTokenRepositoryTest {
 	}
 
 	@Test
-	public void testCreateNewTokenUsesJdbcTemplate() {
+	void testCreateNewTokenUsesJdbcTemplate() {
 		SkyveRememberMeTokenRepository repo = new SkyveRememberMeTokenRepository();
 		JdbcTemplate jdbcTemplate = mock(JdbcTemplate.class);
 		when(jdbcTemplate.update(anyString(), (Object[]) any())).thenReturn(1);
@@ -119,7 +119,7 @@ public class SkyveRememberMeTokenRepositoryTest {
 	}
 
 	@Test
-	public void testCreateNewTokenWithNoSlashInUsername() {
+	void testCreateNewTokenWithNoSlashInUsername() {
 		SkyveRememberMeTokenRepository repo = new SkyveRememberMeTokenRepository();
 		JdbcTemplate jdbcTemplate = mock(JdbcTemplate.class);
 		when(jdbcTemplate.update(anyString(), (Object[]) any())).thenReturn(1);
@@ -133,7 +133,7 @@ public class SkyveRememberMeTokenRepositoryTest {
 	}
 
 	@Test
-	public void testUpdateTokenUsesJdbcTemplate() {
+	void testUpdateTokenUsesJdbcTemplate() {
 		SkyveRememberMeTokenRepository repo = new SkyveRememberMeTokenRepository();
 		JdbcTemplate jdbcTemplate = mock(JdbcTemplate.class);
 		when(jdbcTemplate.update(anyString(), (Object[]) any())).thenReturn(1);
@@ -145,7 +145,7 @@ public class SkyveRememberMeTokenRepositoryTest {
 	}
 
 	@Test
-	public void testRemoveUserTokensStringUsesJdbcTemplate() {
+	void testRemoveUserTokensStringUsesJdbcTemplate() {
 		SkyveRememberMeTokenRepository repo = new SkyveRememberMeTokenRepository();
 		JdbcTemplate jdbcTemplate = mock(JdbcTemplate.class);
 		when(jdbcTemplate.update(anyString(), (Object[]) any())).thenReturn(1);
@@ -158,7 +158,7 @@ public class SkyveRememberMeTokenRepositoryTest {
 
 	@SuppressWarnings("unchecked")
 	@Test
-	public void testGetTokenForSeriesReturnsTokenWhenFound() {
+	void testGetTokenForSeriesReturnsTokenWhenFound() {
 		SkyveRememberMeTokenRepository repo = new SkyveRememberMeTokenRepository();
 		JdbcTemplate jdbcTemplate = mock(JdbcTemplate.class);
 		PersistentRememberMeToken expected = new PersistentRememberMeToken("user", "series1", "token1", new Date());
@@ -172,7 +172,7 @@ public class SkyveRememberMeTokenRepositoryTest {
 
 	@SuppressWarnings("unchecked")
 	@Test
-	public void testGetTokenForSeriesReturnsNullOnEmptyResult() {
+	void testGetTokenForSeriesReturnsNullOnEmptyResult() {
 		SkyveRememberMeTokenRepository repo = new SkyveRememberMeTokenRepository();
 		JdbcTemplate jdbcTemplate = mock(JdbcTemplate.class);
 		when(jdbcTemplate.queryForObject(anyString(), any(RowMapper.class), (Object[]) any()))
@@ -185,7 +185,7 @@ public class SkyveRememberMeTokenRepositoryTest {
 
 	@SuppressWarnings("unchecked")
 	@Test
-	public void testGetTokenForSeriesReturnsNullOnIncorrectResultSize() {
+	void testGetTokenForSeriesReturnsNullOnIncorrectResultSize() {
 		SkyveRememberMeTokenRepository repo = new SkyveRememberMeTokenRepository();
 		JdbcTemplate jdbcTemplate = mock(JdbcTemplate.class);
 		when(jdbcTemplate.queryForObject(anyString(), any(RowMapper.class), (Object[]) any()))

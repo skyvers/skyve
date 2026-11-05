@@ -16,33 +16,55 @@ import java.util.List;
 import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
+import java.util.UUID;
 
 import org.skyve.EXT;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.skyve.domain.Bean;
+import org.skyve.domain.PersistentBean;
 import org.skyve.impl.web.SortParameterImpl;
 import org.skyve.impl.cache.StateUtil;
+import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
 import org.skyve.impl.persistence.AbstractPersistence;
+import org.skyve.impl.util.UtilImpl;
+import org.skyve.impl.web.AbstractWebContext;
+import org.skyve.impl.web.RequestUxUiSelection;
+import org.skyve.impl.web.UserAgent;
 import org.skyve.impl.snapshot.SmartClientFilterOperator;
 import org.skyve.metadata.SortDirection;
+import org.skyve.metadata.router.UxUi;
 import org.skyve.metadata.user.User;
+import org.skyve.metadata.view.model.list.Filter;
 import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.persistence.DocumentQuery.AggregateFunction;
 import org.skyve.util.DataBuilder;
 import org.skyve.util.test.SkyveFixture.FixtureType;
 import org.skyve.web.SortParameter;
+import org.skyve.web.UserAgentType;
 import org.skyve.web.WebContext;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import modules.admin.domain.Contact;
+import modules.admin.domain.Snapshot;
 import modules.test.AbstractSkyveTest;
 import modules.test.domain.AllAttributesPersistent;
 
 class SmartClientListServletH2Test extends AbstractSkyveTest {
 	private static final String DATASOURCE = "test_AllAttributesPersistent";
+	private static final String CONTACTS_DATASOURCE = "admin_qContacts";
+
+	/**
+	 * Build the test user's menus as login does; the menus are what grant list (aggregate) access.
+	 */
+	@BeforeEach
+	void resetMenus() {
+		ProvidedRepositoryFactory.getNullSafe().resetMenus(u);
+	}
 
 	@AfterEach
 	void restorePersistenceUser() {
@@ -159,6 +181,172 @@ class SmartClientListServletH2Test extends AbstractSkyveTest {
 
 		assertTrue(response.body().contains("\"status\":-1"));
 		assertTrue(response.body().contains("\"totalRows\":0"));
+	}
+
+	@Test
+	void fetchLogsTheRowCountWhenCommandTracing() throws Exception {
+		AllAttributesPersistent bean = saveUncommittedBean("list-trace");
+		boolean commandTrace = UtilImpl.COMMAND_TRACE;
+		UtilImpl.COMMAND_TRACE = true;
+		try {
+			String body = invokeFetch(0, 25, SmartClientFilterOperator.substring, null, null, null, false,
+										new TreeMap<>(Map.of("text", "list-trace")));
+
+			assertSuccessfulFetch(body);
+			assertTrue(body.contains(bean.getBizId()), body);
+		}
+		finally {
+			UtilImpl.COMMAND_TRACE = commandTrace;
+		}
+	}
+
+	@Test
+	void simpleCriteriaOnAVariantDomainFilterOnTheMatchingCodes() throws Exception {
+		org.skyve.metadata.module.Module admin = c.getModule(Snapshot.MODULE_NAME);
+		org.skyve.metadata.model.document.Document snapshot = admin.getDocument(c, Snapshot.DOCUMENT_NAME);
+		ListModel<Bean> model = EXT.newListModel(admin.getDocumentDefaultQuery(c, Snapshot.DOCUMENT_NAME));
+		Filter before = model.getFilter();
+		assertTrue((before != null) && before.isEmpty());
+
+		SmartClientListServlet.addSimpleFilterCriteriaToQuery(admin,
+																snapshot,
+																c,
+																SmartClientFilterOperator.substring,
+																new TreeMap<>(Map.of(Snapshot.moduleNamePropertyName, "admin")),
+																null,
+																model);
+
+		Filter after = model.getFilter();
+		assertTrue((after != null) && (! after.isEmpty()));
+	}
+
+	@Test
+	void fetchWithABlankSortByIsAnError() throws Exception {
+		CapturedResponse response = service(newRequest(u)
+				.param("_operationType", Operation.fetch.toString())
+				.param("_dataSource", CONTACTS_DATASOURCE)
+				.param("_sortBy", " ")).doGet();
+
+		assertUnexpectedFetchError(response.body());
+	}
+
+	@Test
+	void fetchSortsByTheSortByBindingInTheRequestedDirection() throws Exception {
+		Contact first = saveContact("list-sort-by-a");
+		Contact second = saveContact("list-sort-by-b");
+
+		CapturedResponse response = service(newRequest(u)
+				.param("_operationType", Operation.fetch.toString())
+				.param("_dataSource", CONTACTS_DATASOURCE)
+				.param("_textMatchStyle", SmartClientFilterOperator.substring.toString())
+				.param(Contact.namePropertyName, "list-sort-by-")
+				.param("_sortBy", "-" + Contact.namePropertyName)).doGet();
+
+		String body = response.body();
+		assertSuccessfulFetch(body);
+		assertTrue(body.indexOf(second.getBizId()) >= 0, body);
+		assertTrue(body.indexOf(second.getBizId()) < body.indexOf(first.getBizId()), body);
+	}
+
+	@Test
+	void fetchOfAModelDatasourceUsesTheModelsDrivingDocument() throws Exception {
+		boolean accessControl = UtilImpl.ACCESS_CONTROL;
+		UtilImpl.ACCESS_CONTROL = false; // the model's access is not under test
+		try {
+			CapturedResponse response = service(newRequest(u)
+					.param("_operationType", Operation.fetch.toString())
+					.param("_dataSource", "kitchensink_ModelLookupFixture__LookupValuesModel")).doGet();
+
+			assertSuccessfulFetch(response.body());
+		}
+		finally {
+			UtilImpl.ACCESS_CONTROL = accessControl;
+		}
+	}
+
+	@Test
+	void aViewConversationWithoutPersistenceIsAnUnexpectedError() throws Exception {
+		RequestBuilder request = newRequest(u);
+		String webId = request.cacheConversationWithoutPersistence(AllAttributesPersistent.newInstance());
+
+		CapturedResponse response = service(request
+				.param("_operationType", Operation.fetch.toString())
+				.param("_dataSource", CONTACTS_DATASOURCE)
+				.param(AbstractWebContext.CONTEXT_NAME, webId)
+				.param(AbstractWebContext.CONTINUE_CONVERSATION, "true")).doGet();
+
+		assertUnexpectedFetchError(response.body());
+	}
+
+	@Test
+	void tagAndUntagARowOfTheList() throws Exception {
+		Contact contact = saveContact("list-tag");
+		String tagId = EXT.getTagManager().create("list-tag-" + System.nanoTime(), true);
+
+		CapturedResponse tagged = service(newRequest(u)
+				.param("_operationType", Operation.update.toString())
+				.param("_dataSource", CONTACTS_DATASOURCE)
+				.param("_tagId", tagId)
+				.param(Bean.DOCUMENT_ID, contact.getBizId())
+				.param(PersistentBean.TAGGED_NAME, "TAG")).doGet();
+
+		assertTrue(tagged.body().contains("\"status\":0"), tagged.body());
+		assertTrue(tagged.body().contains("\"" + PersistentBean.TAGGED_NAME + "\":true"), tagged.body());
+
+		CapturedResponse untagged = service(newRequest(u)
+				.param("_operationType", Operation.update.toString())
+				.param("_dataSource", CONTACTS_DATASOURCE)
+				.param("_tagId", tagId)
+				.param(Bean.DOCUMENT_ID, contact.getBizId())
+				.param(PersistentBean.TAGGED_NAME, "UNTAG")).doGet();
+
+		assertTrue(untagged.body().contains("\"status\":0"), untagged.body());
+		assertTrue(untagged.body().contains("\"" + PersistentBean.TAGGED_NAME + "\":false"), untagged.body());
+	}
+
+	@Test
+	void tagWithoutATagIdIsAnError() throws Exception {
+		CapturedResponse response = service(newRequest(u)
+				.param("_operationType", Operation.update.toString())
+				.param("_dataSource", CONTACTS_DATASOURCE)
+				.param(Bean.DOCUMENT_ID, "row-1")
+				.param(PersistentBean.TAGGED_NAME, "TAG")).doGet();
+
+		assertUnexpectedError(response.body());
+	}
+
+	@Test
+	void untagWithoutATagIdIsAnError() throws Exception {
+		CapturedResponse response = service(newRequest(u)
+				.param("_operationType", Operation.update.toString())
+				.param("_dataSource", CONTACTS_DATASOURCE)
+				.param(Bean.DOCUMENT_ID, "row-1")
+				.param(PersistentBean.TAGGED_NAME, "UNTAG")).doGet();
+
+		assertUnexpectedError(response.body());
+	}
+
+	/**
+	 * Saves a contact to list. The admin menu lists contacts through their default query (qContacts),
+	 * which is what gives the test user access to list them.
+	 */
+	private Contact saveContact(String name) {
+		Contact bean = new DataBuilder().fixture(FixtureType.crud).build(Contact.MODULE_NAME, Contact.DOCUMENT_NAME);
+		bean.setName(name + '-' + System.nanoTime());
+		return p.save(bean);
+	}
+
+	/**
+	 * Asserts the request failed unexpectedly, so the response shows the generic message with a support reference.
+	 */
+	private static void assertUnexpectedError(String body) {
+		assertTrue(body.contains("\"status\":-1"), body);
+		assertTrue(body.contains(" Reference: "), body);
+	}
+
+	private static void assertUnexpectedFetchError(String body) {
+		assertUnexpectedError(body);
+		assertTrue(body.contains("\"totalRows\":0"), body);
 	}
 
 	private AllAttributesPersistent saveUncommittedBean(String textPrefix) {
@@ -281,6 +469,20 @@ class SmartClientListServletH2Test extends AbstractSkyveTest {
 			return this;
 		}
 
+		/**
+		 * Caches a conversation without persistence in this request's session on a bean.
+		 *
+		 * @return	The conversation's web id, which the client sends with the request.
+		 */
+		private String cacheConversationWithoutPersistence(Bean bean) {
+			HttpServletRequest request = mock(HttpServletRequest.class);
+			when(request.getSession(false)).thenReturn(session);
+			SmartClientWebContext webContext = new SmartClientWebContext(UUID.randomUUID().toString(), request);
+			webContext.setCurrentBean(bean);
+			webContext.cacheConversationAndCycleTransaction();
+			return webContext.getWebId();
+		}
+
 		private HttpServletRequest build() {
 			HttpServletRequest request = mock(HttpServletRequest.class);
 			when(request.getParameterNames()).thenReturn(parameterNames());
@@ -290,6 +492,11 @@ class SmartClientListServletH2Test extends AbstractSkyveTest {
 			when(request.getUserPrincipal()).thenReturn((Principal) null);
 			when(request.getLocale()).thenReturn(java.util.Locale.ENGLISH);
 			when(request.getHeader("User-Agent")).thenReturn("Mozilla/5.0");
+			// list as the desktop UX/UI, a UX/UI the test user has list access in
+			when(request.getAttribute(UserAgent.class.getName() + ".selection")).thenReturn(
+					new RequestUxUiSelection(UserAgentType.desktop,
+												false,
+												UxUi.newSmartClient(UxUi.DESKTOP_NAME, "Cerulean", "omega")));
 			for (Map.Entry<String, String[]> entry : parameters.entrySet()) {
 				when(request.getParameter(entry.getKey())).thenReturn(entry.getValue()[0]);
 				when(request.getParameterValues(entry.getKey())).thenReturn(entry.getValue());

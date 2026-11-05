@@ -1,16 +1,16 @@
 package org.skyve.impl.script;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.skyve.impl.script.SkyveScriptException.ExceptionType;
 
 @SuppressWarnings("static-method")
-public class SkyveScriptExceptionTest {
+class SkyveScriptExceptionTest {
 
 	@Test
-	public void testConstructorMessageAndLineNumber() {
+	void testConstructorMessageAndLineNumber() {
 		SkyveScriptException ex = new SkyveScriptException(ExceptionType.error, "Something went wrong", 42);
 		assertEquals("Something went wrong", ex.getMessage());
 		assertEquals(42, ex.getLineNumber());
@@ -18,14 +18,14 @@ public class SkyveScriptExceptionTest {
 	}
 
 	@Test
-	public void testConstructorWithI18nValues() {
+	void testConstructorWithI18nValues() {
 		SkyveScriptException ex = new SkyveScriptException(ExceptionType.warning, "msg.key", 10, "param1");
 		assertEquals(10, ex.getLineNumber());
 		assertEquals(ExceptionType.warning, ex.getType());
 	}
 
 	@Test
-	public void testConstructorWithI18nFlag() {
+	void testConstructorWithI18nFlag() {
 		SkyveScriptException ex = new SkyveScriptException(ExceptionType.info, "raw message", 5, false);
 		assertEquals("raw message", ex.getMessage());
 		assertEquals(5, ex.getLineNumber());
@@ -33,34 +33,34 @@ public class SkyveScriptExceptionTest {
 	}
 
 	@Test
-	public void testExceptionTypeValues() {
+	void testExceptionTypeValues() {
 		ExceptionType[] values = ExceptionType.values();
 		assertNotNull(values);
 		assertEquals(4, values.length);
 	}
 
 	@Test
-	public void testExceptionTypeInfo() {
+	void testExceptionTypeInfo() {
 		assertEquals(ExceptionType.info, ExceptionType.valueOf("info"));
 	}
 
 	@Test
-	public void testExceptionTypeWarning() {
+	void testExceptionTypeWarning() {
 		assertEquals(ExceptionType.warning, ExceptionType.valueOf("warning"));
 	}
 
 	@Test
-	public void testExceptionTypeError() {
+	void testExceptionTypeError() {
 		assertEquals(ExceptionType.error, ExceptionType.valueOf("error"));
 	}
 
 	@Test
-	public void testExceptionTypeCritical() {
+	void testExceptionTypeCritical() {
 		assertEquals(ExceptionType.critical, ExceptionType.valueOf("critical"));
 	}
 
 	@Test
-	public void testExceptionIsThrowable() {
+	void testExceptionIsThrowable() {
 		SkyveScriptException ex = new SkyveScriptException(ExceptionType.critical, "critical error", 99);
 		try {
 			throw ex;

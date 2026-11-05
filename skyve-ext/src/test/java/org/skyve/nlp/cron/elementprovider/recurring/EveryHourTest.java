@@ -4,13 +4,13 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-public class EveryHourTest {
+class EveryHourTest {
 
 	@Test
 	@SuppressWarnings({ "static-method", "boxing" })
-	public void testMatchesHourly() {
+	void testMatchesHourly() {
 		EveryHour provider = new EveryHour();
 		assertThat(provider.matches("hourly"), is(true));
 		assertThat(provider.canProvideHour(), is(true));
@@ -18,7 +18,7 @@ public class EveryHourTest {
 
 	@Test
 	@SuppressWarnings({ "static-method", "boxing" })
-	public void testMatchesEveryHour() {
+	void testMatchesEveryHour() {
 		EveryHour provider = new EveryHour();
 		assertThat(provider.matches("every hour"), is(true));
 		assertThat(provider.canProvideHour(), is(true));
@@ -26,7 +26,7 @@ public class EveryHourTest {
 
 	@Test
 	@SuppressWarnings({ "static-method", "boxing" })
-	public void testNoMatchYieldsCannotProvide() {
+	void testNoMatchYieldsCannotProvide() {
 		EveryHour provider = new EveryHour();
 		assertThat(provider.matches("daily"), is(false));
 		assertThat(provider.canProvideHour(), is(false));
@@ -34,7 +34,7 @@ public class EveryHourTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testGetHourElementWhenNotMatched() {
+	void testGetHourElementWhenNotMatched() {
 		EveryHour provider = new EveryHour();
 		// no call to matches — segments empty
 		assertThat(provider.getHourElement(), is(nullValue()));
@@ -42,7 +42,7 @@ public class EveryHourTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testGetHourElementHourly() {
+	void testGetHourElementHourly() {
 		EveryHour provider = new EveryHour();
 		provider.matches("hourly");
 		// "hourly" produces ≤ 3 segments → element is "*"
@@ -51,7 +51,7 @@ public class EveryHourTest {
 
 	@Test
 	@SuppressWarnings({ "static-method", "boxing" })
-	public void testGetHourElementEvery2Hours() {
+	void testGetHourElementEvery2Hours() {
 		EveryHour provider = new EveryHour();
 		provider.matches("every 2 hours");
 		// "every 2 hours" — 4+ segments captured → element is "*/2"
@@ -61,7 +61,7 @@ public class EveryHourTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testGetMinuteElementAlwaysNull() {
+	void testGetMinuteElementAlwaysNull() {
 		EveryHour provider = new EveryHour();
 		provider.matches("hourly");
 		assertThat(provider.getMinuteElement(), is(nullValue()));
@@ -69,7 +69,7 @@ public class EveryHourTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testGetDayNumberElementAlwaysNull() {
+	void testGetDayNumberElementAlwaysNull() {
 		EveryHour provider = new EveryHour();
 		provider.matches("hourly");
 		assertThat(provider.getDayNumberElement(), is(nullValue()));
@@ -77,7 +77,7 @@ public class EveryHourTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testGetMonthElementAlwaysNull() {
+	void testGetMonthElementAlwaysNull() {
 		EveryHour provider = new EveryHour();
 		provider.matches("hourly");
 		assertThat(provider.getMonthElement(), is(nullValue()));
@@ -85,7 +85,7 @@ public class EveryHourTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testGetDayOfWeekElementAlwaysNull() {
+	void testGetDayOfWeekElementAlwaysNull() {
 		EveryHour provider = new EveryHour();
 		provider.matches("hourly");
 		assertThat(provider.getDayOfWeekElement(), is(nullValue()));
@@ -93,7 +93,7 @@ public class EveryHourTest {
 
 	@Test
 	@SuppressWarnings({ "static-method", "boxing" })
-	public void testCannotProvideOtherElements() {
+	void testCannotProvideOtherElements() {
 		EveryHour provider = new EveryHour();
 		provider.matches("hourly");
 		assertThat(provider.canProvideMinute(), is(false));
@@ -104,7 +104,7 @@ public class EveryHourTest {
 
 	@Test
 	@SuppressWarnings({ "static-method", "boxing" })
-	public void testLockedElements() {
+	void testLockedElements() {
 		EveryHour provider = new EveryHour();
 		assertThat(provider.isHourElementLocked(), is(true));
 		assertThat(provider.isMinuteElementLocked(), is(false));

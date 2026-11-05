@@ -3,19 +3,19 @@ package org.skyve.impl.persistence.hibernate.dialect.mysqlbugfix;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThrows;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.hibernate.spatial.SpatialFunction;
 import org.hibernate.spatial.SpatialRelation;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 @SuppressWarnings("static-method")
-public class MySQL8SpatialDialectTest {
+class MySQL8SpatialDialectTest {
 
 	@Test
-	public void constructorDoesNotThrow() {
+	void constructorDoesNotThrow() {
 		MySQL8SpatialDialect dialect = new MySQL8SpatialDialect();
 		assertNotNull(dialect);
 	}
@@ -23,63 +23,63 @@ public class MySQL8SpatialDialectTest {
 	// ---- getSpatialRelateSQL switch cases ----
 
 	@Test
-	public void getSpatialRelateSQLWithin() {
+	void getSpatialRelateSQLWithin() {
 		MySQL8SpatialDialect dialect = new MySQL8SpatialDialect();
 		String sql = dialect.getSpatialRelateSQL("geom", SpatialRelation.WITHIN);
 		assertThat(sql, containsString("ST_within"));
 	}
 
 	@Test
-	public void getSpatialRelateSQLContains() {
+	void getSpatialRelateSQLContains() {
 		MySQL8SpatialDialect dialect = new MySQL8SpatialDialect();
 		String sql = dialect.getSpatialRelateSQL("geom", SpatialRelation.CONTAINS);
 		assertThat(sql, containsString("ST_contains"));
 	}
 
 	@Test
-	public void getSpatialRelateSQLCrosses() {
+	void getSpatialRelateSQLCrosses() {
 		MySQL8SpatialDialect dialect = new MySQL8SpatialDialect();
 		String sql = dialect.getSpatialRelateSQL("geom", SpatialRelation.CROSSES);
 		assertThat(sql, containsString("ST_crosses"));
 	}
 
 	@Test
-	public void getSpatialRelateSQLOverlaps() {
+	void getSpatialRelateSQLOverlaps() {
 		MySQL8SpatialDialect dialect = new MySQL8SpatialDialect();
 		String sql = dialect.getSpatialRelateSQL("geom", SpatialRelation.OVERLAPS);
 		assertThat(sql, containsString("ST_overlaps"));
 	}
 
 	@Test
-	public void getSpatialRelateSQLDisjoint() {
+	void getSpatialRelateSQLDisjoint() {
 		MySQL8SpatialDialect dialect = new MySQL8SpatialDialect();
 		String sql = dialect.getSpatialRelateSQL("geom", SpatialRelation.DISJOINT);
 		assertThat(sql, containsString("ST_disjoint"));
 	}
 
 	@Test
-	public void getSpatialRelateSQLIntersects() {
+	void getSpatialRelateSQLIntersects() {
 		MySQL8SpatialDialect dialect = new MySQL8SpatialDialect();
 		String sql = dialect.getSpatialRelateSQL("geom", SpatialRelation.INTERSECTS);
 		assertThat(sql, containsString("ST_intersects"));
 	}
 
 	@Test
-	public void getSpatialRelateSQLTouches() {
+	void getSpatialRelateSQLTouches() {
 		MySQL8SpatialDialect dialect = new MySQL8SpatialDialect();
 		String sql = dialect.getSpatialRelateSQL("geom", SpatialRelation.TOUCHES);
 		assertThat(sql, containsString("ST_touches"));
 	}
 
 	@Test
-	public void getSpatialRelateSQLEquals() {
+	void getSpatialRelateSQLEquals() {
 		MySQL8SpatialDialect dialect = new MySQL8SpatialDialect();
 		String sql = dialect.getSpatialRelateSQL("geom", SpatialRelation.EQUALS);
 		assertThat(sql, containsString("ST_equals"));
 	}
 
 	@Test
-	public void getSpatialRelateSQLDefaultThrows() {
+	void getSpatialRelateSQLDefaultThrows() {
 		MySQL8SpatialDialect dialect = new MySQL8SpatialDialect();
 		assertThrows(IllegalArgumentException.class, () -> dialect.getSpatialRelateSQL("geom", 9999));
 	}
@@ -87,26 +87,26 @@ public class MySQL8SpatialDialectTest {
 	// ---- Other spatial methods ----
 
 	@Test
-	public void getSpatialFilterExpressionReturnsNonNull() {
+	void getSpatialFilterExpressionReturnsNonNull() {
 		MySQL8SpatialDialect dialect = new MySQL8SpatialDialect();
 		String sql = dialect.getSpatialFilterExpression("geom");
 		assertThat(sql, notNullValue());
 	}
 
 	@Test
-	public void getSpatialAggregateSQLThrowsUnsupported() {
+	void getSpatialAggregateSQLThrowsUnsupported() {
 		MySQL8SpatialDialect dialect = new MySQL8SpatialDialect();
 		assertThrows(UnsupportedOperationException.class, () -> dialect.getSpatialAggregateSQL("geom", 1));
 	}
 
 	@Test
-	public void getDWithinSQLThrowsUnsupported() {
+	void getDWithinSQLThrowsUnsupported() {
 		MySQL8SpatialDialect dialect = new MySQL8SpatialDialect();
 		assertThrows(UnsupportedOperationException.class, () -> dialect.getDWithinSQL("geom"));
 	}
 
 	@Test
-	public void getHavingSridSQLReturnsNonNull() {
+	void getHavingSridSQLReturnsNonNull() {
 		MySQL8SpatialDialect dialect = new MySQL8SpatialDialect();
 		String sql = dialect.getHavingSridSQL("geom");
 		assertThat(sql, notNullValue());
@@ -114,27 +114,27 @@ public class MySQL8SpatialDialectTest {
 	}
 
 	@Test
-	public void getIsEmptySQLIsEmpty() {
+	void getIsEmptySQLIsEmpty() {
 		MySQL8SpatialDialect dialect = new MySQL8SpatialDialect();
 		String sql = dialect.getIsEmptySQL("geom", true);
 		assertThat(sql, containsString("ST_IsEmpty"));
 	}
 
 	@Test
-	public void getIsEmptySQLIsNotEmpty() {
+	void getIsEmptySQLIsNotEmpty() {
 		MySQL8SpatialDialect dialect = new MySQL8SpatialDialect();
 		String sql = dialect.getIsEmptySQL("geom", false);
 		assertThat(sql, containsString("NOT"));
 	}
 
 	@Test
-	public void supportsFilteringReturnsTrue() {
+	void supportsFilteringReturnsTrue() {
 		MySQL8SpatialDialect dialect = new MySQL8SpatialDialect();
 		assertTrue(dialect.supportsFiltering());
 	}
 
 	@Test
-	public void supportsConvexHullDoesNotThrow() {
+	void supportsConvexHullDoesNotThrow() {
 		MySQL8SpatialDialect dialect = new MySQL8SpatialDialect();
 		// just verify the method can be called without throwing
 		dialect.supports(SpatialFunction.convexhull);
@@ -142,7 +142,7 @@ public class MySQL8SpatialDialectTest {
 	}
 
 	@Test
-	public void supportsWithinDoesNotThrow() {
+	void supportsWithinDoesNotThrow() {
 		MySQL8SpatialDialect dialect = new MySQL8SpatialDialect();
 		dialect.supports(SpatialFunction.within);
 		assertNotNull(dialect);

@@ -1,10 +1,10 @@
 package org.skyve.util;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -15,24 +15,24 @@ import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.skyve.domain.messages.MessageSeverity;
 import org.skyve.metadata.user.User;
 
 @SuppressWarnings({"static-method", "boxing"})
-public class PushMessageTest {
+class PushMessageTest {
 
-	@Before
-	public void setUp() {
+	@BeforeEach
+	void setUp() {
 		// Ensure reaper is stopped before each test
 		PushMessage.stopReaper();
 		PushMessage.RECEIVERS.clear();
 	}
 
-	@After
-	public void tearDown() {
+	@AfterEach
+	void tearDown() {
 		// Ensure reaper is always stopped after each test
 		PushMessage.stopReaper();
 		PushMessage.RECEIVERS.clear();
@@ -41,20 +41,20 @@ public class PushMessageTest {
 	// ======== user(String) ========
 
 	@Test
-	public void testUserStringAddsToUserIds() {
+	void testUserStringAddsToUserIds() {
 		PushMessage msg = new PushMessage().user("user-1");
 		Set<String> ids = msg.getUserIds();
-		assertTrue("user-1 should be in userIds", ids.contains("user-1"));
+		assertTrue(ids.contains("user-1"), "user-1 should be in userIds");
 	}
 
 	@Test
-	public void testUserStringMultiple() {
+	void testUserStringMultiple() {
 		PushMessage msg = new PushMessage().user("a").user("b").user("c");
 		assertEquals(3, msg.getUserIds().size());
 	}
 
 	@Test
-	public void testUserStringIsSortedSet() {
+	void testUserStringIsSortedSet() {
 		PushMessage msg = new PushMessage().user("c").user("a").user("b");
 		List<String> ordered = new java.util.ArrayList<>(msg.getUserIds());
 		assertEquals("a", ordered.get(0));
@@ -65,7 +65,7 @@ public class PushMessageTest {
 	// ======== user(User) ========
 
 	@Test
-	public void testUserObjectAddsToUserIds() {
+	void testUserObjectAddsToUserIds() {
 		User user = mock(User.class);
 		when(user.getId()).thenReturn("mocked-user-id");
 		PushMessage msg = new PushMessage().user(user);
@@ -75,7 +75,7 @@ public class PushMessageTest {
 	// ======== getItems() ========
 
 	@Test
-	public void testGetItemsEmptyOnNewMessage() {
+	void testGetItemsEmptyOnNewMessage() {
 		PushMessage msg = new PushMessage();
 		assertNotNull(msg.getItems());
 		assertTrue(msg.getItems().isEmpty());
@@ -84,7 +84,7 @@ public class PushMessageTest {
 	// ======== growl() ========
 
 	@Test
-	public void testGrowlAddsItemWithCorrectType() {
+	void testGrowlAddsItemWithCorrectType() {
 		PushMessage msg = new PushMessage().growl(MessageSeverity.info, "Hello");
 		List<Map<String, Object>> items = msg.getItems();
 		assertEquals(1, items.size());
@@ -92,19 +92,19 @@ public class PushMessageTest {
 	}
 
 	@Test
-	public void testGrowlAddsItemWithSeverity() {
+	void testGrowlAddsItemWithSeverity() {
 		PushMessage msg = new PushMessage().growl(MessageSeverity.warn, "Watch out");
 		assertEquals("warn", msg.getItems().get(0).get("severity"));
 	}
 
 	@Test
-	public void testGrowlAddsItemWithMessage() {
+	void testGrowlAddsItemWithMessage() {
 		PushMessage msg = new PushMessage().growl(MessageSeverity.error, "Bad thing");
 		assertNotNull(msg.getItems().get(0).get("message"));
 	}
 
 	@Test
-	public void testGrowlReturnsSelf() {
+	void testGrowlReturnsSelf() {
 		PushMessage msg = new PushMessage();
 		assertSame(msg, msg.growl(MessageSeverity.info, "Test"));
 	}
@@ -112,7 +112,7 @@ public class PushMessageTest {
 	// ======== message() ========
 
 	@Test
-	public void testMessageAddsItemWithCorrectType() {
+	void testMessageAddsItemWithCorrectType() {
 		PushMessage msg = new PushMessage().message(MessageSeverity.info, "Hello");
 		List<Map<String, Object>> items = msg.getItems();
 		assertEquals(1, items.size());
@@ -120,13 +120,13 @@ public class PushMessageTest {
 	}
 
 	@Test
-	public void testMessageAddsItemWithSeverity() {
+	void testMessageAddsItemWithSeverity() {
 		PushMessage msg = new PushMessage().message(MessageSeverity.error, "Error");
 		assertEquals("error", msg.getItems().get(0).get("severity"));
 	}
 
 	@Test
-	public void testMessageReturnsSelf() {
+	void testMessageReturnsSelf() {
 		PushMessage msg = new PushMessage();
 		assertSame(msg, msg.message(MessageSeverity.info, "Test"));
 	}
@@ -134,7 +134,7 @@ public class PushMessageTest {
 	// ======== rerender() ========
 
 	@Test
-	public void testRerenderAddsItemWithCorrectType() {
+	void testRerenderAddsItemWithCorrectType() {
 		PushMessage msg = new PushMessage().rerender();
 		List<Map<String, Object>> items = msg.getItems();
 		assertEquals(1, items.size());
@@ -142,7 +142,7 @@ public class PushMessageTest {
 	}
 
 	@Test
-	public void testRerenderReturnsSelf() {
+	void testRerenderReturnsSelf() {
 		PushMessage msg = new PushMessage();
 		assertSame(msg, msg.rerender());
 	}
@@ -150,7 +150,7 @@ public class PushMessageTest {
 	// ======== execute() ========
 
 	@Test
-	public void testExecuteAddsItemWithCorrectType() {
+	void testExecuteAddsItemWithCorrectType() {
 		Map<String, Object> args = new HashMap<>();
 		args.put("key", "value");
 		PushMessage msg = new PushMessage().execute("myFunction", args);
@@ -160,14 +160,14 @@ public class PushMessageTest {
 	}
 
 	@Test
-	public void testExecuteAddsMethodName() {
+	void testExecuteAddsMethodName() {
 		Map<String, Object> args = new HashMap<>();
 		PushMessage msg = new PushMessage().execute("doSomething", args);
 		assertEquals("doSomething", msg.getItems().get(0).get("method"));
 	}
 
 	@Test
-	public void testExecuteAddsArgument() {
+	void testExecuteAddsArgument() {
 		Map<String, Object> args = new HashMap<>();
 		args.put("x", Integer.valueOf(42));
 		PushMessage msg = new PushMessage().execute("fn", args);
@@ -177,7 +177,7 @@ public class PushMessageTest {
 	}
 
 	@Test
-	public void testExecuteReturnsSelf() {
+	void testExecuteReturnsSelf() {
 		PushMessage msg = new PushMessage();
 		assertSame(msg, msg.execute("fn", new HashMap<>()));
 	}
@@ -185,7 +185,7 @@ public class PushMessageTest {
 	// ======== chaining ========
 
 	@Test
-	public void testChainingMultipleItems() {
+	void testChainingMultipleItems() {
 		PushMessage msg = new PushMessage()
 				.user("u1")
 				.growl(MessageSeverity.info, "Hi")
@@ -198,23 +198,23 @@ public class PushMessageTest {
 	// ======== toString() ========
 
 	@Test
-	public void testToStringContainsUserIds() {
+	void testToStringContainsUserIds() {
 		PushMessage msg = new PushMessage().user("user-xyz");
 		String s = msg.toString();
-		assertTrue("toString should contain userIds", s.contains("userIds"));
+		assertTrue(s.contains("userIds"), "toString should contain userIds");
 	}
 
 	@Test
-	public void testToStringContainsItems() {
+	void testToStringContainsItems() {
 		PushMessage msg = new PushMessage().rerender();
 		String s = msg.toString();
-		assertTrue("toString should contain items", s.contains("items"));
+		assertTrue(s.contains("items"), "toString should contain items");
 	}
 
 	// ======== startReaper / stopReaper ========
 
 	@Test
-	public void testStartAndStopReaperDoesNotThrow() {
+	void testStartAndStopReaperDoesNotThrow() {
 		PushMessage.startReaper(10);
 		PushMessage.stopReaper();
 		// No exception = pass
@@ -222,7 +222,7 @@ public class PushMessageTest {
 	}
 
 	@Test
-	public void testStartReaperTwiceIsIgnored() {
+	void testStartReaperTwiceIsIgnored() {
 		PushMessage.startReaper(10);
 		// Starting again should log a warning but not throw
 		PushMessage.startReaper(10);
@@ -231,7 +231,7 @@ public class PushMessageTest {
 	}
 
 	@Test
-	public void testStopReaperWhenNotStartedDoesNotThrow() {
+	void testStopReaperWhenNotStartedDoesNotThrow() {
 		// Already stopped in setUp(); calling again should be safe
 		PushMessage.stopReaper();
 		assertNotNull(new PushMessage());
@@ -240,12 +240,12 @@ public class PushMessageTest {
 	// ======== RECEIVERS queue ========
 
 	@Test
-	public void testReceiversQueueIsInitiallyEmpty() {
+	void testReceiversQueueIsInitiallyEmpty() {
 		assertTrue(PushMessage.RECEIVERS.isEmpty());
 	}
 
 	@Test
-	public void testReceiversQueueCanAddAndRemove() {
+	void testReceiversQueueCanAddAndRemove() {
 		PushMessage.PushMessageReceiver receiver = mock(PushMessage.PushMessageReceiver.class);
 		when(receiver.isStale()).thenReturn(Boolean.FALSE);
 		PushMessage.RECEIVERS.add(receiver);
@@ -257,7 +257,7 @@ public class PushMessageTest {
         // ======== PushMessageReceiver default methods ========
 
         @Test
-        public void testPushMessageReceiverDefaultIsStaleReturnsFalse() {
+        void testPushMessageReceiverDefaultIsStaleReturnsFalse() {
                 // covers the isStale() default method body
                 PushMessage.PushMessageReceiver receiver = new PushMessage.PushMessageReceiver() {
                         @Override public String forUserId() { return "u"; }
@@ -267,7 +267,7 @@ public class PushMessageTest {
         }
 
         @Test
-        public void testPushMessageReceiverDefaultCloseIsNoOp() {
+        void testPushMessageReceiverDefaultCloseIsNoOp() {
                 // covers L268: default close() method closing brace
                 PushMessage.PushMessageReceiver receiver = new PushMessage.PushMessageReceiver() {
                         @Override public String forUserId() { return "u"; }
@@ -280,7 +280,7 @@ public class PushMessageTest {
         // ======== reaper stale / non-stale behaviour ========
 
         @Test
-        public void testReaperRemovesStaleReceiverAndCallsClose() throws InterruptedException {
+        void testReaperRemovesStaleReceiverAndCallsClose() throws InterruptedException {
                 // covers L83-88 (remove + close call) and L73 (isStale() call)
                 CountDownLatch closeLatch = new CountDownLatch(1);
                 PushMessage.PushMessageReceiver staleReceiver = new PushMessage.PushMessageReceiver() {
@@ -291,12 +291,12 @@ public class PushMessageTest {
                 };
                 PushMessage.RECEIVERS.add(staleReceiver);
                 PushMessage.startReaper(1);
-                assertTrue("close() should be called on stale receiver within 3s", closeLatch.await(3, TimeUnit.SECONDS));
-                assertTrue("Stale receiver should be removed from RECEIVERS", PushMessage.RECEIVERS.isEmpty());
+                assertTrue(closeLatch.await(3, TimeUnit.SECONDS), "close() should be called on stale receiver within 3s");
+                assertTrue(PushMessage.RECEIVERS.isEmpty(), "Stale receiver should be removed from RECEIVERS");
         }
 
         @Test
-        public void testReaperKeepsNonStaleReceiver() throws InterruptedException {
+        void testReaperKeepsNonStaleReceiver() throws InterruptedException {
                 // covers L80 (continue when !stale): reaper runs but non-stale receiver is kept
                 CountDownLatch reaperRanLatch = new CountDownLatch(1);
                 PushMessage.PushMessageReceiver triggerReceiver = new PushMessage.PushMessageReceiver() {
@@ -313,12 +313,12 @@ public class PushMessageTest {
                 PushMessage.RECEIVERS.add(triggerReceiver);
                 PushMessage.RECEIVERS.add(activeReceiver);
                 PushMessage.startReaper(1);
-                assertTrue("Reaper should have run", reaperRanLatch.await(3, TimeUnit.SECONDS));
-                assertTrue("Non-stale receiver should remain", PushMessage.RECEIVERS.contains(activeReceiver));
+                assertTrue(reaperRanLatch.await(3, TimeUnit.SECONDS), "Reaper should have run");
+                assertTrue(PushMessage.RECEIVERS.contains(activeReceiver), "Non-stale receiver should remain");
         }
 
         @Test
-        public void testReaperHandlesIsStaleThrowingRuntimeException() throws InterruptedException {
+        void testReaperHandlesIsStaleThrowingRuntimeException() throws InterruptedException {
                 // covers L75-76: RuntimeException from isStale() → defensive stale=true → close() called
                 CountDownLatch closeLatch = new CountDownLatch(1);
                 PushMessage.PushMessageReceiver throwingReceiver = new PushMessage.PushMessageReceiver() {
@@ -329,11 +329,11 @@ public class PushMessageTest {
                 };
                 PushMessage.RECEIVERS.add(throwingReceiver);
                 PushMessage.startReaper(1);
-                assertTrue("close() should be called when isStale() throws", closeLatch.await(3, TimeUnit.SECONDS));
+                assertTrue(closeLatch.await(3, TimeUnit.SECONDS), "close() should be called when isStale() throws");
         }
 
 	@Test
-	public void testReaperCatchesExceptionFromClose() throws InterruptedException {
+	void testReaperCatchesExceptionFromClose() throws InterruptedException {
 		CountDownLatch closeLatch = new CountDownLatch(1);
 		PushMessage.PushMessageReceiver throwingCloseReceiver = new PushMessage.PushMessageReceiver() {
 			@Override public String forUserId() { return "closeThrow"; }
@@ -346,6 +346,6 @@ public class PushMessageTest {
 		};
 		PushMessage.RECEIVERS.add(throwingCloseReceiver);
 		PushMessage.startReaper(1);
-		assertTrue("reaper should call close() even when it throws", closeLatch.await(3, TimeUnit.SECONDS));
+		assertTrue(closeLatch.await(3, TimeUnit.SECONDS), "reaper should call close() even when it throws");
 	}
 }

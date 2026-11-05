@@ -8,8 +8,9 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.lessThan;
 import static org.hamcrest.Matchers.notNullValue;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.IOException;
 import java.time.Duration;
@@ -45,7 +46,7 @@ import org.apache.lucene.search.Query;
 import org.apache.lucene.search.TopDocs;
 import org.apache.lucene.store.ByteBuffersDirectory;
 import org.apache.lucene.store.Directory;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.skyve.domain.types.Decimal;
 import org.skyve.domain.types.Decimal2;
 import org.skyve.domain.types.Decimal5;
@@ -58,7 +59,7 @@ import com.google.common.util.concurrent.AtomicDouble;
  * I've used addNotNull().
  */
 @SuppressWarnings({"boxing", "static-method", "null", "java:S8692"}) // system clock OK
-public class LuceneFilterTest {
+class LuceneFilterTest {
 
     private static final String DECIMAL_FIELD = "our_decimal";
     private static final String DOUBLE_FIELD = "our_doub";
@@ -78,7 +79,7 @@ public class LuceneFilterTest {
     }
 
     @Test
-    public void testContainsBasic() {
+    void testContainsBasic() {
 
         String testTextVal = "this is a test text field";
         List<Document> docs = List.of(createDoc(testTextVal, 1.1), createDoc("FOOBAR", 1.1));
@@ -97,7 +98,7 @@ public class LuceneFilterTest {
     }
 
     @Test
-    public void testContainsOr() {
+    void testContainsOr() {
 
         List<Document> docs = List.of(
                 createDoc("test baz", 1.1),
@@ -135,7 +136,7 @@ public class LuceneFilterTest {
     }
 
     @Test
-    public void testContainsAnd() {
+    void testContainsAnd() {
 
         List<Document> docs = List.of(
                 createDoc("test baz", 777),
@@ -169,7 +170,7 @@ public class LuceneFilterTest {
     }
 
     @Test
-    public void testNull() {
+    void testNull() {
 
         Document target = new Document();
         target.add(new DoubleField(DOUBLE_FIELD, 4.4, Store.YES));
@@ -194,7 +195,7 @@ public class LuceneFilterTest {
     }
 
     @Test
-    public void testNotNull() {
+    void testNotNull() {
 
         Document target = new Document();
         target.add(new DoubleField(DOUBLE_FIELD, 4.4, Store.YES));
@@ -218,7 +219,7 @@ public class LuceneFilterTest {
     }
 
     @Test
-    public void testEqualsString() {
+    void testEqualsString() {
 
         // Make sure we get 0 results first
         {
@@ -251,7 +252,7 @@ public class LuceneFilterTest {
     }
 
     @Test
-    public void testNotEqualsString() {
+    void testNotEqualsString() {
 
         List<Document> docs = List.of(
                 createDoc("FOOBAR", 1.1),
@@ -272,7 +273,7 @@ public class LuceneFilterTest {
     }
 
     @Test
-    public void testEqualsDate() {
+    void testEqualsDate() {
 
         Date now = new Date();
         Date future = Date.from(Instant.now()
@@ -290,7 +291,7 @@ public class LuceneFilterTest {
     }
 
     @Test
-    public void testNotEqualsDate() {
+    void testNotEqualsDate() {
 
         Date now = new Date();
         Date future = Date.from(Instant.now()
@@ -309,7 +310,7 @@ public class LuceneFilterTest {
     }
 
     @Test
-    public void testEqualsInteger() {
+    void testEqualsInteger() {
 
         int targetValue = 4;
         List<Document> docs = List.of(createDoc(777), createDoc(targetValue), createDoc(555));
@@ -324,7 +325,7 @@ public class LuceneFilterTest {
     }
 
     @Test
-    public void testNotEqualsInteger() {
+    void testNotEqualsInteger() {
 
         int targetValue = 444;
         List<Document> docs = List.of(createDoc(2), createDoc(targetValue), createDoc(3));
@@ -343,7 +344,7 @@ public class LuceneFilterTest {
     }
 
     @Test
-    public void testEqualsLong() {
+    void testEqualsLong() {
 
         long targetValue = Long.MAX_VALUE;
         List<Document> docs = List.of(createDoc(Long.MIN_VALUE), createDoc(targetValue), createDoc(555l));
@@ -358,7 +359,7 @@ public class LuceneFilterTest {
     }
 
     @Test
-    public void testNotEqualsLong() {
+    void testNotEqualsLong() {
 
         long targetValue = Long.MAX_VALUE;
         List<Document> docs = List.of(createDoc(Long.MIN_VALUE), createDoc(targetValue), createDoc(555l));
@@ -376,7 +377,7 @@ public class LuceneFilterTest {
     }
 
     @Test
-    public void testEqualsDecimal() {
+    void testEqualsDecimal() {
 
         Decimal targetValue = new Decimal5("5.45");
 
@@ -401,7 +402,7 @@ public class LuceneFilterTest {
     }
 
     @Test
-    public void testNotEqualsDecimal() {
+    void testNotEqualsDecimal() {
 
         Decimal targetValue = new Decimal5("5.45");
 
@@ -428,7 +429,7 @@ public class LuceneFilterTest {
     }
 
     @Test
-    public void testEqualsBoolean() {
+    void testEqualsBoolean() {
 
         List<Document> docs = List.of(createDoc(true), createDoc(false), createDoc(true));
 
@@ -445,7 +446,7 @@ public class LuceneFilterTest {
     }
 
     @Test
-    public void testNotEqualsBoolean() {
+    void testNotEqualsBoolean() {
 
         List<Document> docs = List.of(createDoc(true), createDoc(false), createDoc(true));
 
@@ -462,7 +463,7 @@ public class LuceneFilterTest {
     }
 
     @Test
-    public void testEqualsEnum() {
+    void testEqualsEnum() {
 
         List<Document> docs = List.of(
                 createDoc(TestEnum.Y),
@@ -482,7 +483,7 @@ public class LuceneFilterTest {
     }
 
     @Test
-    public void testEqualsIn() {
+    void testEqualsIn() {
 
         List<Document> docs = List.of(
                 createDoc(TestEnum.Y),
@@ -499,7 +500,7 @@ public class LuceneFilterTest {
     }
 
     @Test
-    public void testNotEqualsEnum() {
+    void testNotEqualsEnum() {
 
         List<Document> docs = List.of(
                 createDoc(TestEnum.Y),
@@ -523,7 +524,7 @@ public class LuceneFilterTest {
     }
 
     @Test
-    public void testContains() {
+    void testContains() {
         List<Document> docs = List.of(
                 createDoc("some test* string", 9),
                 createDoc("shouldnt match TEST xyzz", 777),
@@ -543,7 +544,7 @@ public class LuceneFilterTest {
     }
 
     @Test
-    public void testNotContains() {
+    void testNotContains() {
         List<Document> docs = List.of(
                 createDoc("some test? string", 999),
                 createDoc("shouldnt match TEST xyzz", 7),
@@ -564,7 +565,7 @@ public class LuceneFilterTest {
     }
 
     @Test
-    public void testStartsWith() {
+    void testStartsWith() {
         List<Document> docs = List.of(
                 createDoc("the quick brown fox", 7),
                 createDoc("the slow grey slug", 7),
@@ -601,7 +602,7 @@ public class LuceneFilterTest {
     }
 
     @Test
-    public void testEndsWith() {
+    void testEndsWith() {
         List<Document> docs = List.of(
                 createDoc("blue", 7),
                 createDoc("purple", 7),
@@ -638,7 +639,7 @@ public class LuceneFilterTest {
     }
 
     @Test
-    public void testStringRangeQueries() {
+    void testStringRangeQueries() {
 
         List<Document> docs = List.of(
                 createDoc("Aqua"),
@@ -771,7 +772,7 @@ public class LuceneFilterTest {
     }
 
     @Test
-    public void testDateRangeQueries() {
+    void testDateRangeQueries() {
 
         final Instant start = Instant.parse("2014-01-01T08:00:00Z");
         List<Document> docs = datesSeries(start, Duration.ofDays(1)).limit(10)
@@ -845,7 +846,7 @@ public class LuceneFilterTest {
     }
 
     @Test
-    public void testIntRangeQueries() {
+    void testIntRangeQueries() {
 
         AtomicInteger i = new AtomicInteger(1);
         List<Document> docs = Stream.generate(() -> createDoc(i.getAndIncrement()))
@@ -901,7 +902,7 @@ public class LuceneFilterTest {
     }
 
     @Test
-    public void testLongRangeQueries() {
+    void testLongRangeQueries() {
 
         AtomicLong i = new AtomicLong(1);
         List<Document> docs = Stream.generate(() -> createDoc(i.getAndIncrement()))
@@ -957,7 +958,7 @@ public class LuceneFilterTest {
     }
 
     @Test
-    public void testDoubleRangeQueries() {
+    void testDoubleRangeQueries() {
 
         AtomicDouble i = new AtomicDouble(1.0);
         List<Document> docs = Stream.generate(() -> {
@@ -1214,53 +1215,53 @@ public class LuceneFilterTest {
 
     }
 
-    @Test(expected = UnsupportedOperationException.class)
-    public void testAddTaggedThrowsUnsupportedOperationException() {
-        new LuceneFilter().addTagged("tag", true);
+    @Test
+    void testAddTaggedThrowsUnsupportedOperationException() {
+        assertThrows(UnsupportedOperationException.class, () -> new LuceneFilter().addTagged("tag", true));
     }
 
-    @Test(expected = UnsupportedOperationException.class)
-    public void testAddWithinGeometryThrowsUnsupportedOperationException() {
-        new LuceneFilter().addWithin("binding", null);
+    @Test
+    void testAddWithinGeometryThrowsUnsupportedOperationException() {
+        assertThrows(UnsupportedOperationException.class, () -> new LuceneFilter().addWithin("binding", null));
     }
 
-    @Test(expected = UnsupportedOperationException.class)
-    public void testAddContainsGeometryThrowsUnsupportedOperationException() {
-        new LuceneFilter().addContains("binding", (org.locationtech.jts.geom.Geometry) null);
+    @Test
+    void testAddContainsGeometryThrowsUnsupportedOperationException() {
+        assertThrows(UnsupportedOperationException.class, () -> new LuceneFilter().addContains("binding", (org.locationtech.jts.geom.Geometry) null));
     }
 
-    @Test(expected = UnsupportedOperationException.class)
-    public void testAddCrossesGeometryThrowsUnsupportedOperationException() {
-        new LuceneFilter().addCrosses("binding", null);
+    @Test
+    void testAddCrossesGeometryThrowsUnsupportedOperationException() {
+        assertThrows(UnsupportedOperationException.class, () -> new LuceneFilter().addCrosses("binding", null));
     }
 
-    @Test(expected = UnsupportedOperationException.class)
-    public void testAddDisjointGeometryThrowsUnsupportedOperationException() {
-        new LuceneFilter().addDisjoint("binding", null);
+    @Test
+    void testAddDisjointGeometryThrowsUnsupportedOperationException() {
+        assertThrows(UnsupportedOperationException.class, () -> new LuceneFilter().addDisjoint("binding", null));
     }
 
-    @Test(expected = UnsupportedOperationException.class)
-    public void testAddIntersectsGeometryThrowsUnsupportedOperationException() {
-        new LuceneFilter().addIntersects("binding", null);
+    @Test
+    void testAddIntersectsGeometryThrowsUnsupportedOperationException() {
+        assertThrows(UnsupportedOperationException.class, () -> new LuceneFilter().addIntersects("binding", null));
     }
 
-    @Test(expected = UnsupportedOperationException.class)
-    public void testAddOverlapsGeometryThrowsUnsupportedOperationException() {
-        new LuceneFilter().addOverlaps("binding", null);
+    @Test
+    void testAddOverlapsGeometryThrowsUnsupportedOperationException() {
+        assertThrows(UnsupportedOperationException.class, () -> new LuceneFilter().addOverlaps("binding", null));
     }
 
-    @Test(expected = UnsupportedOperationException.class)
-    public void testAddTouchesGeometryThrowsUnsupportedOperationException() {
-        new LuceneFilter().addTouches("binding", null);
+    @Test
+    void testAddTouchesGeometryThrowsUnsupportedOperationException() {
+        assertThrows(UnsupportedOperationException.class, () -> new LuceneFilter().addTouches("binding", null));
     }
 
-    @Test(expected = UnsupportedOperationException.class)
-    public void testAddNotEqualsGeometryThrowsUnsupportedOperationException() {
-        new LuceneFilter().addNotEquals("binding", (org.locationtech.jts.geom.Geometry) null);
+    @Test
+    void testAddNotEqualsGeometryThrowsUnsupportedOperationException() {
+        assertThrows(UnsupportedOperationException.class, () -> new LuceneFilter().addNotEquals("binding", (org.locationtech.jts.geom.Geometry) null));
     }
 
-    @Test(expected = UnsupportedOperationException.class)
-    public void testAddEqualsGeometryThrowsUnsupportedOperationException() {
-        new LuceneFilter().addEquals("binding", (org.locationtech.jts.geom.Geometry) null);
+    @Test
+    void testAddEqualsGeometryThrowsUnsupportedOperationException() {
+        assertThrows(UnsupportedOperationException.class, () -> new LuceneFilter().addEquals("binding", (org.locationtech.jts.geom.Geometry) null));
     }
 }

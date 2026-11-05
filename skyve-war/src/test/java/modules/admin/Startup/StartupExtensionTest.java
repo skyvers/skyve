@@ -9,9 +9,9 @@ import static org.mockito.Mockito.times;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.mockito.ArgumentCaptor;
@@ -28,7 +28,7 @@ import modules.admin.domain.Startup.BackupType;
 import modules.admin.domain.Startup.CaptchaType;
 import modules.admin.domain.Startup.MapType;
 
-public class StartupExtensionTest {
+class StartupExtensionTest {
 	private Map<String, Object> overrideProperties;
 
 	@Mock
@@ -41,9 +41,9 @@ public class StartupExtensionTest {
 	@SuppressWarnings("resource")
 	private AutoCloseable closeable;
 	
-	@Before
+	@BeforeEach
 	@SuppressWarnings("resource")
-	public void before() {
+	void before() {
 		closeable = MockitoAnnotations.openMocks(this);
 
 		Map<String, Object> properties = new HashMap<>();
@@ -65,8 +65,8 @@ public class StartupExtensionTest {
 		Mockito.when(bean.getMapLayer()).thenReturn(UtilImpl.MAP_LAYERS);
 	}
 
-	@After
-	public void tearDown() throws Exception {
+	@AfterEach
+	void tearDown() throws Exception {
 		UtilImpl.SMTP_LOG_BODY_EXCERPT = false;
 		UtilImpl.SMTP_LOG_ATTACHMENTS = false;
 		UtilImpl.SMTP_LOG_ATTACHMENTS_MAX_BYTES = UtilImpl.DEFAULT_SMTP_LOG_ATTACHMENTS_MAX_BYTES;
@@ -76,7 +76,7 @@ public class StartupExtensionTest {
 	}
 	
 	@Test
-	public void testSaveConfigurationEmptyPropertiesWritesNulls() throws Exception {
+	void testSaveConfigurationEmptyPropertiesWritesNulls() throws Exception {
 		// setup mocks
 		Mockito.doNothing().when(bean).writeConfiguration(anyString());
 
@@ -88,7 +88,7 @@ public class StartupExtensionTest {
 	}
 	
 	@Test
-	public void testSaveConfigurationUpdatesApiProperties() throws Exception {
+	void testSaveConfigurationUpdatesApiProperties() throws Exception {
 		// setup mocks
 		Mockito.when(bean.getApiGoogleMapsKey()).thenReturn("12345");
 		Mockito.when(bean.getApiGoogleRecaptchaSiteKey()).thenReturn("12345");
@@ -109,7 +109,7 @@ public class StartupExtensionTest {
 	}
 
 	@Test
-	public void testSaveConfigurationUpdatesBackupProperties() throws Exception {
+	void testSaveConfigurationUpdatesBackupProperties() throws Exception {
 		// setup mocks
 		Mockito.when(bean.getBackupType()).thenReturn(BackupType.none);
 
@@ -126,7 +126,7 @@ public class StartupExtensionTest {
 	}
 
 	@Test
-	public void testSaveConfigurationUpdatesEnvironmentProperties() throws Exception {
+	void testSaveConfigurationUpdatesEnvironmentProperties() throws Exception {
 		// setup mocks
 		Mockito.when(bean.getEnvironmentIdentifier()).thenReturn("dev");
 		Mockito.when(bean.getEnvironmentSupportEmail()).thenReturn("test@test.com");
@@ -147,7 +147,7 @@ public class StartupExtensionTest {
 	}
 
 	@Test
-	public void testSaveConfigurationUpdatesMailProperties() throws Exception {
+	void testSaveConfigurationUpdatesMailProperties() throws Exception {
 		UtilImpl.SMTP_TEST_BOGUS_SEND = true; // set to true to ensure it is overridden and included below
 		UtilImpl.SMTP_LOG_BODY_EXCERPT = false; // set to false to ensure it is overridden and included below
 		UtilImpl.SMTP_LOG_ATTACHMENTS = false; // set to false to ensure it is overridden and included below
@@ -189,7 +189,7 @@ public class StartupExtensionTest {
 	}
 
 	@Test
-	public void testSaveConfigurationUpdatesMapProperties() throws Exception {
+	void testSaveConfigurationUpdatesMapProperties() throws Exception {
 		// setup mocks
 		Mockito.when(bean.getMapCentre()).thenReturn(new GeometryFactory().createPoint(new Coordinate(1, 1)));
 		Mockito.when(bean.getMapLayer()).thenReturn("google.maps.MapTypeId.HYBRID");
@@ -212,7 +212,7 @@ public class StartupExtensionTest {
 	}
 
 	@Test
-	public void testSaveConfigurationUpdatesConcurrentSessionSecurityProperties() throws Exception {
+	void testSaveConfigurationUpdatesConcurrentSessionSecurityProperties() throws Exception {
 		UtilImpl.CONCURRENT_SESSION_WARNINGS = true;
 		UtilImpl.CONCURRENT_SESSION_NOTIFICATIONS = true;
 
@@ -232,7 +232,7 @@ public class StartupExtensionTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testConcurrentSessionSettingsAccessorsAndDefaults() {
+	void testConcurrentSessionSettingsAccessorsAndDefaults() {
 		StartupExtension startup = new StartupExtension();
 
 		assertThat(Startup.concurrentSessionWarningsPropertyName, containsString("concurrentSessionWarnings"));
@@ -248,7 +248,7 @@ public class StartupExtensionTest {
 	}
 
 	@Test
-	public void testSetDontShowEmptyOverrideProperties() throws Exception {
+	void testSetDontShowEmptyOverrideProperties() throws Exception {
 		// setup mocks
 		Mockito.when(bean.getDontShowAgain()).thenReturn(Boolean.TRUE);
 		ArgumentCaptor<String> valueCapture = ArgumentCaptor.forClass(String.class);
@@ -264,7 +264,7 @@ public class StartupExtensionTest {
 	}
 
 	@Test
-	public void testSetDontShowMergeExistingOverrideProperties() throws Exception {
+	void testSetDontShowMergeExistingOverrideProperties() throws Exception {
 		// setup test data
 		Map<String, Object> smtp = new HashMap<>();
 		smtp.put(StartupExtension.SMTP_SERVER_KEY, "localhost");
@@ -286,7 +286,7 @@ public class StartupExtensionTest {
 	}
 
 	@Test
-	public void testSaveConfigurationUpdatesCaptchaGoogleRecaptcha() throws Exception {
+	void testSaveConfigurationUpdatesCaptchaGoogleRecaptcha() throws Exception {
 		// setup test data so recaptcha keys differ from UtilImpl values
 		UtilImpl.GOOGLE_RECAPTCHA_SITE_KEY = null;
 		UtilImpl.GOOGLE_RECAPTCHA_SECRET_KEY = null;
@@ -311,7 +311,7 @@ public class StartupExtensionTest {
 	}
 
 	@Test
-	public void testSaveConfigurationUpdatesCaptchaTypeCloudflareTurnstile() throws Exception {
+	void testSaveConfigurationUpdatesCaptchaTypeCloudflareTurnstile() throws Exception {
 		// setup test data so turnstile keys differ from UtilImpl values
 		UtilImpl.CLOUDFLARE_TURNSTILE_SITE_KEY = null;
 		UtilImpl.CLOUDFLARE_TURNSTILE_SECRET_KEY = null;
@@ -336,7 +336,7 @@ public class StartupExtensionTest {
 	}
 
 	@Test
-	public void testSaveConfigurationUpdatesCaptchaTypeNull() throws Exception {
+	void testSaveConfigurationUpdatesCaptchaTypeNull() throws Exception {
 		// setup test data so keys are present and will be cleared
 		UtilImpl.GOOGLE_RECAPTCHA_SITE_KEY = "existing-site-key";
 		UtilImpl.CLOUDFLARE_TURNSTILE_SITE_KEY = "existing-turnstile";
@@ -363,14 +363,14 @@ public class StartupExtensionTest {
 	}
 
 	@Test
-	public void testMarshallReturnsNullForEmptyProperties() {
+	void testMarshallReturnsNullForEmptyProperties() {
 		Map<String, Object> properties = new HashMap<>();
 		String result = bean.marshall(properties);
 		org.hamcrest.MatcherAssert.assertThat(result, org.hamcrest.CoreMatchers.is(org.hamcrest.CoreMatchers.nullValue()));
 	}
 
 	@Test
-	public void testMarshallReturnsNullWhenAllSubMapsEmpty() {
+	void testMarshallReturnsNullWhenAllSubMapsEmpty() {
 		Map<String, Object> properties = new HashMap<>();
 		properties.put(StartupExtension.API_STANZA_KEY, new HashMap<>());
 		properties.put(StartupExtension.SMTP_STANZA_KEY, new HashMap<>());
@@ -379,7 +379,7 @@ public class StartupExtensionTest {
 	}
 
 	@Test
-	public void testClearApiClearsApiStanzaAndWrites() throws Exception {
+	void testClearApiClearsApiStanzaAndWrites() throws Exception {
 		// setup test data with an existing api stanza
 		Map<String, Object> properties = new HashMap<>(overrideProperties);
 		Map<String, Object> api = new HashMap<>();
@@ -398,7 +398,7 @@ public class StartupExtensionTest {
 	}
 
 	@Test
-	public void testSaveConfigurationUpdatesRemainingSecurityProperties() throws Exception {
+	void testSaveConfigurationUpdatesRemainingSecurityProperties() throws Exception {
 		// set UtilImpl defaults to trigger all branch conditions
 		UtilImpl.PASSWORD_CHANGE_NOTIFICATIONS = true;
 		UtilImpl.DIFFERENT_COUNTRY_LOGIN_NOTIFICATIONS = true;
@@ -437,7 +437,7 @@ public class StartupExtensionTest {
 	}
 
 	@Test
-	public void testSaveConfigurationUpdatesBackupWithAzureType() throws Exception {
+	void testSaveConfigurationUpdatesBackupWithAzureType() throws Exception {
 		// setup mocks
 		Mockito.when(bean.getBackupType()).thenReturn(BackupType.azure);
 		Mockito.when(bean.getBackupConnectionString()).thenReturn("DefaultEndpointsProtocol=https");

@@ -1,28 +1,28 @@
 package org.skyve.impl.sms;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.skyve.util.SMSService;
 
 @SuppressWarnings("static-method")
-public class SMSServiceTest {
+class SMSServiceTest {
 
 	// ---- SMSServiceStaticSingleton ----
 
 	@SuppressWarnings("null") // passes null on purpose
 	@Test
-	public void singletonGetReturnsNullInitially() {
+	void singletonGetReturnsNullInitially() {
 		SMSServiceStaticSingleton.set(null);
 		assertNull(SMSServiceStaticSingleton.get());
 	}
 
 	@SuppressWarnings("null") // passes null on purpose
 	@Test
-	public void singletonSetAndGetReturnsSetService() {
+	void singletonSetAndGetReturnsSetService() {
 		SMSService svc = new NoOpSMSService();
 		SMSServiceStaticSingleton.set(svc);
 		try {
@@ -35,7 +35,7 @@ public class SMSServiceTest {
 
 	@SuppressWarnings("null") // passes null on purpose
 	@Test
-	public void singletonSetDefaultSetsNoOpService() {
+	void singletonSetDefaultSetsNoOpService() {
 		SMSServiceStaticSingleton.setDefault();
 		try {
 			assertNotNull(SMSServiceStaticSingleton.get());
@@ -48,13 +48,13 @@ public class SMSServiceTest {
 	// ---- NoOpSMSService ----
 
 	@Test
-	public void noOpTextWithTwoArgsReturnsFalse() {
+	void noOpTextWithTwoArgsReturnsFalse() {
 		NoOpSMSService svc = new NoOpSMSService();
 		assertFalse(svc.text("+61400000000", "Test message"));
 	}
 
 	@Test
-	public void noOpTextWithThreeArgsReturnsFalse() {
+	void noOpTextWithThreeArgsReturnsFalse() {
 		NoOpSMSService svc = new NoOpSMSService();
 		assertFalse(svc.text("+61400000000", "+61411111111", "Test message"));
 	}

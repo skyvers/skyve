@@ -500,6 +500,33 @@ class DocumentImplTest {
 		assertTrue(assoc.isRequired());
 	}
 
+	// ---- getParentDocument without a customer ----
+
+	@Test
+	void getParentDocumentWithoutCustomerResolvesThroughTheRepositoryModule() {
+		doc.setOwningModuleName("admin");
+		doc.setParentDocumentName("Parent");
+		ProvidedRepository repository = mock(ProvidedRepository.class);
+		Module module = mock(Module.class);
+		Document parent = mock(Document.class);
+		when(repository.getModule(null, "admin")).thenReturn(module);
+		when(module.getDocument(null, "Parent")).thenReturn(parent);
+
+		withRepository(repository, () -> assertThat(doc.getParentDocument(null), is(parent)));
+	}
+
+	@Test
+	void getParentDocumentWithoutCustomerThrowsWhenOwningModuleIsMissing() {
+		doc.setOwningModuleName("admin");
+		doc.setParentDocumentName("Parent");
+		ProvidedRepository repository = mock(ProvidedRepository.class);
+
+		withRepository(repository, () -> {
+			MetaDataException e = assertThrows(MetaDataException.class, () -> doc.getParentDocument(null));
+			assertThat(e.getMessage(), is("Owning module admin not found in repository"));
+		});
+	}
+
 	private void makeDynamicDocument(String name) {
 		doc.setOwningModuleName("test");
 		doc.setName(name);

@@ -10,18 +10,32 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.CALLS_REAL_METHODS;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.withSettings;
 
 import java.io.InputStream;
+import java.lang.reflect.Field;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.skyve.impl.domain.AbstractPersistentBean;
+import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.util.UtilImpl.ArchiveConfig;
 import org.skyve.impl.util.UtilImpl.ArchiveConfig.ArchiveDocConfig;
 import org.skyve.impl.util.UtilImpl.ArchiveConfig.ArchiveSchedule;
+import org.skyve.metadata.customer.Customer;
+import org.skyve.metadata.model.document.Document;
+import org.skyve.metadata.model.document.Reference;
+import org.skyve.metadata.module.Module;
+import org.skyve.metadata.user.User;
 
 @SuppressWarnings("boxing")
 class UtilImplTest {
@@ -404,6 +418,42 @@ class UtilImplTest {
 	void testSetDataGroupWithNonBeanObject() {
 		// Non-List, non-AbstractPersistentBean: should be a no-op without throwing
 		assertDoesNotThrow(() -> UtilImpl.setDataGroup("not-a-bean", "someGroup"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void testSetDataGroupSetsTheBeanDataGroupAndSkipsTransientReferences() throws Exception {
+		AbstractPersistentBean bean = mock(AbstractPersistentBean.class);
+		when(bean.getBizModule()).thenReturn("admin");
+		when(bean.getBizDocument()).thenReturn("Contact");
+		Reference reference = mock(Reference.class);
+		when(reference.isPersistent()).thenReturn(false);
+		Document document = mock(Document.class);
+		when(document.getReferenceNames()).thenReturn(Set.of("transientReference"));
+		when(document.getNullSafeReferenceByName("transientReference")).thenReturn(reference);
+		Module module = mock(Module.class);
+		Customer customer = mock(Customer.class);
+		when(customer.getModule("admin")).thenReturn(module);
+		when(module.getDocument(customer, "Contact")).thenReturn(document);
+		User user = mock(User.class);
+		when(user.getCustomer()).thenReturn(customer);
+		AbstractPersistence persistence = mock(AbstractPersistence.class, withSettings().defaultAnswer(CALLS_REAL_METHODS));
+		persistence.setUser(user);
+		persistence.setForThread();
+		try {
+			UtilImpl.setDataGroup(bean, "group1");
+		}
+		finally {
+			Field field = AbstractPersistence.class.getDeclaredField("threadLocalPersistence");
+			field.setAccessible(true);
+			@SuppressWarnings("unchecked")
+			ThreadLocal<AbstractPersistence> threadLocal = (ThreadLocal<AbstractPersistence>) field.get(null);
+			threadLocal.remove();
+		}
+
+		verify(bean).setBizDataGroupId("group1");
+		verify(document).getNullSafeReferenceByName("transientReference");
+		verify(reference).isPersistent();
 	}
 
 	@Test

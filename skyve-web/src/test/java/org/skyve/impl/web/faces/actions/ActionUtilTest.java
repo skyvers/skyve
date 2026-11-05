@@ -5,32 +5,57 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.CALLS_REAL_METHODS;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.io.File;
 import java.lang.reflect.Field;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.ArrayDeque;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.function.Executable;
+import org.primefaces.PrimeFaces;
+import org.skyve.cache.ConversationCacheConfig;
+import org.skyve.cache.SessionCacheConfig;
 import org.skyve.domain.Bean;
 import org.skyve.domain.DynamicBean;
+import org.skyve.impl.cache.DefaultCaching;
 import org.skyve.impl.persistence.AbstractPersistence;
+import org.skyve.impl.sail.mock.MockWebContext;
+import org.skyve.impl.util.UtilImpl;
+import org.skyve.impl.web.faces.FacesUtil;
 import org.skyve.impl.web.faces.views.FacesView;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.query.MetaDataQueryDefinition;
 import org.skyve.metadata.user.User;
 
+import jakarta.faces.context.ExternalContext;
+import jakarta.faces.context.FacesContext;
+
 
 @SuppressWarnings({ "static-method", "java:S1192" }) // Repeated values are deliberate navigation fixtures.
 class ActionUtilTest {
+	private abstract static class FacesContextBridge extends FacesContext {
+		static void setCurrent(FacesContext context) {
+			setCurrentInstance(context);
+		}
+	}
+
 	@AfterEach
 	void tearDown() {
 		clearThreadPersistence();
+		FacesContextBridge.setCurrent(null);
 	}
 
 	@Test
@@ -177,6 +202,98 @@ class ActionUtilTest {
 		when(module.getDocumentDefaultQuery(customer, "q")).thenReturn(query);
 
 		assertEquals(query, ActionUtil.getMetaDataQuery("admin", "q"));
+	}
+
+	@Test
+	void redirectViewScopedConversationRefusesAViewWithNoWebContext() {
+		FacesView facesView = mock(FacesView.class);
+
+		IllegalStateException e = assertThrows(IllegalStateException.class,
+												() -> ActionUtil.redirectViewScopedConversation(facesView, true));
+
+		assertEquals("Cannot redirect a view scoped conversation as the FacesView has no web context", e.getMessage());
+	}
+
+	@Test
+	void redirectViewScopedConversationRefusesAViewWithNoBean() throws Throwable {
+		withConversationCache(() -> {
+			FacesView facesView = mock(FacesView.class);
+			when(facesView.getWebContext()).thenReturn(new MockWebContext());
+
+			IllegalStateException e = assertThrows(IllegalStateException.class,
+													() -> ActionUtil.redirectViewScopedConversation(facesView, true));
+
+			assertEquals("Cannot redirect a view scoped conversation as the FacesView has no bean", e.getMessage());
+		});
+	}
+
+	@Test
+	void redirectViewScopedConversationAppendsTheZoomInBindingsTailFirst() throws Throwable {
+		withConversationCache(() -> {
+			Bean bean = mock(Bean.class);
+			when(bean.getBizModule()).thenReturn("admin");
+			when(bean.getBizDocument()).thenReturn("Contact");
+			doReturn(Boolean.TRUE).when(bean).isPersisted();
+			when(bean.getBizId()).thenReturn("b1");
+			ArrayDeque<String> zoomInBindings = new ArrayDeque<>();
+			zoomInBindings.push("outer");
+			zoomInBindings.push("inner");
+			FacesView facesView = mock(FacesView.class);
+			when(facesView.getWebContext()).thenReturn(new MockWebContext());
+			when(facesView.getBean()).thenReturn(bean);
+			when(facesView.getZoomInBindings()).thenReturn(zoomInBindings);
+			Map<String, Object> sessionMap = new HashMap<>();
+			ExternalContext externalContext = mock(ExternalContext.class);
+			when(externalContext.getSessionMap()).thenReturn(sessionMap);
+			FacesContext facesContext = mock(FacesContext.class);
+			when(facesContext.getExternalContext()).thenReturn(externalContext);
+			FacesContextBridge.setCurrent(facesContext);
+			PrimeFaces originalPrimeFaces = PrimeFaces.current();
+			PrimeFaces primeFaces = mock(PrimeFaces.class);
+			PrimeFaces.setCurrent(primeFaces);
+			try {
+				ActionUtil.redirectViewScopedConversation(facesView, true);
+			}
+			finally {
+				PrimeFaces.setCurrent(originalPrimeFaces);
+			}
+
+			assertSame(facesView, sessionMap.get(FacesUtil.MANAGED_BEAN_NAME_KEY));
+			verify(primeFaces).executeScript("SKYVE.PF.pushHistory()");
+			verify(externalContext).redirect(org.skyve.util.Util.getSkyveContextUrl() + "/?a=e&m=admin&d=Contact&i=b1&b=outer,inner");
+		});
+	}
+
+	/**
+	 * Runs the body with a fresh, non-persistent conversation cache, restoring the cache configuration afterwards.
+	 */
+	private static void withConversationCache(Executable body) throws Throwable {
+		boolean originalForceNonPersistentCaching = UtilImpl.FORCE_NON_PERSISTENT_CACHING;
+		String originalCacheDirectory = UtilImpl.CACHE_DIRECTORY;
+		SessionCacheConfig originalSessionCache = UtilImpl.SESSION_CACHE;
+		ConversationCacheConfig originalConversationCache = UtilImpl.CONVERSATION_CACHE;
+		Path cacheDirectory = Files.createTempDirectory("action-util-cache");
+		try {
+			UtilImpl.FORCE_NON_PERSISTENT_CACHING = true;
+			UtilImpl.CACHE_DIRECTORY = cacheDirectory.toString() + File.separator;
+			UtilImpl.SESSION_CACHE = new SessionCacheConfig(100, 10);
+			UtilImpl.CONVERSATION_CACHE = new ConversationCacheConfig(100, 10);
+			DefaultCaching.get().shutdown();
+			DefaultCaching.get().startup();
+			body.execute();
+		}
+		finally {
+			DefaultCaching.get().shutdown();
+			UtilImpl.FORCE_NON_PERSISTENT_CACHING = originalForceNonPersistentCaching;
+			UtilImpl.CACHE_DIRECTORY = originalCacheDirectory;
+			UtilImpl.SESSION_CACHE = originalSessionCache;
+			UtilImpl.CONVERSATION_CACHE = originalConversationCache;
+			try (Stream<Path> paths = Files.walk(cacheDirectory)) {
+				paths.sorted(Comparator.reverseOrder())
+						.map(Path::toFile)
+						.forEach(File::delete);
+			}
+		}
 	}
 
 	private static void bindPersistenceForUser(User user) {

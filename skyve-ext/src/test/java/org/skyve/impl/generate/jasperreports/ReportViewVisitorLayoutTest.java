@@ -509,6 +509,131 @@ class ReportViewVisitorLayoutTest {
 		visitor.visitZoomOutAction(null);
 	}
 
+	@Test
+	void layoutThrowsWhenTheContainerHasNoTop() {
+		Container container = new Container(null, Integer.valueOf(0), Integer.valueOf(600), false, ContainerType.vbox);
+
+		IllegalStateException e = assertThrows(IllegalStateException.class, () -> visitor.layout(container));
+
+		assertThat(e.getMessage(), is("Container vbox has no top to lay out from"));
+	}
+
+	@Test
+	void layoutThrowsWhenABorderTitledContainerHasNoType() {
+		Container container = new Container(Integer.valueOf(0), Integer.valueOf(0), Integer.valueOf(600), false, ContainerType.vbox);
+		container.setBorder(Boolean.TRUE);
+		container.setBorderTitle("Section");
+		container.setContainerType(null);
+
+		IllegalStateException e = assertThrows(IllegalStateException.class, () -> visitor.layout(container));
+
+		assertThat(e.getMessage(), is("Container has no type"));
+	}
+
+	@Test
+	void layoutLeafContainerSplitsTheWidthBetweenUnsizedElements() {
+		Container vbox = new Container(Integer.valueOf(0), Integer.valueOf(0), Integer.valueOf(900), false, ContainerType.vbox);
+		ReportElement first = new ReportElement(ElementType.dynamicImage, "first", "chart", null, null, null, null);
+		ReportElement last = new ReportElement(ElementType.dynamicImage, "last", "chart", null, null, null, null);
+		vbox.getElements().add(first);
+		vbox.getElements().add(last);
+
+		visitor.layout(vbox);
+
+		assertThat(first.getElementWidth(), is(Integer.valueOf(450)));
+		assertThat(last.getElementWidth(), is(Integer.valueOf(900)));
+	}
+
+	@Test
+	void layoutThrowsWhenAHorizontalLeafContainerHasNoLeft() {
+		Container hbox = new Container(Integer.valueOf(0), null, Integer.valueOf(900), true, ContainerType.hbox);
+		hbox.getElements().add(new ReportElement(ElementType.dynamicImage, "image", "chart", null, null, null, null));
+
+		IllegalStateException e = assertThrows(IllegalStateException.class, () -> visitor.layout(hbox));
+
+		assertThat(e.getMessage(), is("Container hbox has no left to lay out from"));
+	}
+
+	@Test
+	void layoutThrowsWhenAContainerWithChildrenHasNoLeft() {
+		Container parent = new Container(Integer.valueOf(0), null, Integer.valueOf(600), false, ContainerType.vbox);
+		parent.addContainer(new Container(Integer.valueOf(0), Integer.valueOf(0), null, false, ContainerType.vbox));
+
+		IllegalStateException e = assertThrows(IllegalStateException.class, () -> visitor.layout(parent));
+
+		assertThat(e.getMessage(), is("Container vbox has no left to lay out from"));
+	}
+
+	@Test
+	void layoutThrowsWhenAHorizontalContainerHasAnUnsizedChild() {
+		Container parent = new Container(Integer.valueOf(0), Integer.valueOf(0), Integer.valueOf(1000), true, ContainerType.hbox);
+		Container first = new Container(Integer.valueOf(0), Integer.valueOf(0), null, false, ContainerType.vbox);
+		parent.addContainer(first);
+		parent.addContainer(new Container(Integer.valueOf(0), Integer.valueOf(0), null, false, ContainerType.vbox));
+		InvariantBreakingVisitor breaking = invariantBreakingVisitor();
+		breaking.unsizeAfterLayout = first;
+
+		IllegalStateException e = assertThrows(IllegalStateException.class, () -> breaking.layout(parent));
+
+		assertThat(e.getMessage(), is("Container hbox has an unsized child"));
+	}
+
+	@Test
+	void layoutThrowsWhenAFormColumnElementHasNoRow() {
+		Container column = new Container(Integer.valueOf(0), Integer.valueOf(0), Integer.valueOf(600), false, ContainerType.column);
+		column.setRows(1);
+		column.getElements().add(new ReportElement(ElementType.textField, "rowless", "$F{rowless}", null, null, null, null));
+
+		IllegalStateException e = assertThrows(IllegalStateException.class, () -> visitor.layout(column));
+
+		assertThat(e.getMessage(), is("Report element rowless in a form column has no row"));
+	}
+
+	@Test
+	void layoutThrowsWhenAChildContainerHasNoHeightAfterLayout() {
+		Container parent = new Container(Integer.valueOf(0), Integer.valueOf(0), Integer.valueOf(1000), true, ContainerType.hbox);
+		Container child = new Container(Integer.valueOf(0), Integer.valueOf(0), null, false, ContainerType.vbox);
+		parent.addContainer(child);
+		InvariantBreakingVisitor breaking = invariantBreakingVisitor();
+		breaking.unheightAfterLayout = child;
+
+		IllegalStateException e = assertThrows(IllegalStateException.class, () -> breaking.layout(parent));
+
+		assertThat(e.getMessage(), is("Container vbox has no height after layout"));
+	}
+
+	private InvariantBreakingVisitor invariantBreakingVisitor() {
+		InvariantBreakingVisitor result = new InvariantBreakingVisitor();
+		result.setDesign(design);
+		result.detailBands = new ArrayList<>();
+		result.band = new ReportBand();
+		result.band.setParent(design);
+		return result;
+	}
+
+	/**
+	 * Clears the width or height of a nominated container once it has been laid out, breaking the layout invariants.
+	 */
+	private static final class InvariantBreakingVisitor extends ReportViewVisitor {
+		private Container unsizeAfterLayout;
+		private Container unheightAfterLayout;
+
+		private InvariantBreakingVisitor() {
+			super(null, null, null, null, TestVisitor.newView(), "desktop");
+		}
+
+		@Override
+		protected void layout(Container container) {
+			super.layout(container);
+			if (container == unsizeAfterLayout) {
+				container.setWidth(null);
+			}
+			if (container == unheightAfterLayout) {
+				container.setHeight(null);
+			}
+		}
+	}
+
 	private static final class TestVisitor extends ReportViewVisitor {
 		private TestVisitor() {
 			super(null, null, null, null, newView(), "desktop");

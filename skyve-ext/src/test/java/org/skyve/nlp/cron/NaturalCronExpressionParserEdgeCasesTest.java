@@ -3,43 +3,49 @@ package org.skyve.nlp.cron;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import org.junit.Test;
+import java.util.concurrent.TimeUnit;
 
-public class NaturalCronExpressionParserEdgeCasesTest {
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Timeout;
+import org.junit.jupiter.api.Timeout.ThreadMode;
+
+class NaturalCronExpressionParserEdgeCasesTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testParseNullReturnsNull() {
+	void testParseNullReturnsNull() {
 		// string is null → returns null (covers L146)
 		NaturalCronExpressionParser parser = new NaturalCronExpressionParser();
 		assertThat(parser.parse(null), is(nullValue()));
 	}
 
-	@Test(expected = CronParserException.class)
+	@Test
 	@SuppressWarnings("static-method")
-	public void testParseUnparsableThrowsException() {
+	void testParseUnparsableThrowsException() {
 		// unparsable string → throws CronParserException (covers L140)
-		new NaturalCronExpressionParser().parse("xyz abc 123 qrs");
+		assertThrows(CronParserException.class, () -> new NaturalCronExpressionParser().parse("xyz abc 123 qrs"));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testValidPatternMatchesWellFormedSixFieldExpression() {
+	void testValidPatternMatchesWellFormedSixFieldExpression() {
 		assertTrue("0 0 0 * * *".matches(NaturalCronExpressionParser.VALID_PATTERN));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testValidPatternRejectsFiveFieldExpression() {
+	void testValidPatternRejectsFiveFieldExpression() {
 		assertFalse("0 0 0 * *".matches(NaturalCronExpressionParser.VALID_PATTERN));
 	}
 
-	@Test(timeout = 1000)
+	@Test
+	@Timeout(value = 1000, unit = TimeUnit.MILLISECONDS, threadMode = ThreadMode.SEPARATE_THREAD)
 	@SuppressWarnings("static-method")
-	public void testValidPatternDoesNotReDoSOnAdversarialInput() {
+	void testValidPatternDoesNotReDoSOnAdversarialInput() {
 		// Without possessive quantifiers the old pattern was O(2^n) on this input:
 		// a valid-looking 6th field with many two-digit comma values ending in an
 		// invalid character forces exponential backtracking via [1-9]? ambiguity.

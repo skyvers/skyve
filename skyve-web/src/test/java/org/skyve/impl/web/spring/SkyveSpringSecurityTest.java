@@ -83,14 +83,21 @@ class SkyveSpringSecurityTest {
 	@Test
 	void lockoutHelpersReturnFalseWhenLockoutIsDisabled() {
 		long now = 200_000L;
+		int threshold = UtilImpl.ACCOUNT_LOCKOUT_THRESHOLD;
+		int duration = UtilImpl.ACCOUNT_LOCKOUT_DURATION_MULTIPLE_IN_SECONDS;
+		try {
+			UtilImpl.ACCOUNT_LOCKOUT_THRESHOLD = 0;
+			UtilImpl.ACCOUNT_LOCKOUT_DURATION_MULTIPLE_IN_SECONDS = 10;
+			assertFalse(SkyveSpringSecurity.hasActiveLockout(100, now - 1_000L, now));
 
-		UtilImpl.ACCOUNT_LOCKOUT_THRESHOLD = 0;
-		UtilImpl.ACCOUNT_LOCKOUT_DURATION_MULTIPLE_IN_SECONDS = 10;
-		assertFalse(SkyveSpringSecurity.hasActiveLockout(100, now - 1_000L, now));
-
-		UtilImpl.ACCOUNT_LOCKOUT_THRESHOLD = 3;
-		UtilImpl.ACCOUNT_LOCKOUT_DURATION_MULTIPLE_IN_SECONDS = 0;
-		assertFalse(SkyveSpringSecurity.hasActiveLockout(100, now - 1_000L, now));
+			UtilImpl.ACCOUNT_LOCKOUT_THRESHOLD = 3;
+			UtilImpl.ACCOUNT_LOCKOUT_DURATION_MULTIPLE_IN_SECONDS = 0;
+			assertFalse(SkyveSpringSecurity.hasActiveLockout(100, now - 1_000L, now));
+		}
+		finally {
+			UtilImpl.ACCOUNT_LOCKOUT_THRESHOLD = threshold;
+			UtilImpl.ACCOUNT_LOCKOUT_DURATION_MULTIPLE_IN_SECONDS = duration;
+		}
 	}
 
 	@Test

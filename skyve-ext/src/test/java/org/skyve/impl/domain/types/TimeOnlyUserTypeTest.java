@@ -1,18 +1,18 @@
 package org.skyve.impl.domain.types;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 import java.util.Calendar;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.skyve.domain.types.TimeOnly;
 
 @SuppressWarnings({ "static-method", "java:S8692" }) // system clock OK
-public class TimeOnlyUserTypeTest {
+class TimeOnlyUserTypeTest {
 
 	@Test
-	public void testHashCodeReturnsSameValueForSameTime() {
+	void testHashCodeReturnsSameValueForSameTime() {
 		TimeOnlyUserType userType = new TimeOnlyUserType();
 		TimeOnly t1 = new TimeOnly(10, 30, 0);
 		TimeOnly t2 = new TimeOnly(10, 30, 0);
@@ -20,7 +20,7 @@ public class TimeOnlyUserTypeTest {
 	}
 
 	@Test
-	public void testHashCodeReturnsDifferentValueForDifferentTime() {
+	void testHashCodeReturnsDifferentValueForDifferentTime() {
 		TimeOnlyUserType userType = new TimeOnlyUserType();
 		TimeOnly t1 = new TimeOnly(10, 30, 0);
 		TimeOnly t2 = new TimeOnly(11, 45, 0);
@@ -28,7 +28,7 @@ public class TimeOnlyUserTypeTest {
 	}
 
 	@Test
-	public void testEqualsReturnsTrueForSameHMSFromDifferentDays() {
+	void testEqualsReturnsTrueForSameHMSFromDifferentDays() {
 		TimeOnlyUserType userType = new TimeOnlyUserType();
 		// Create two dates with the same H/M/S/MS but different day — different epoch ms but equal per equals()
 		Calendar cal1 = Calendar.getInstance();
@@ -38,11 +38,11 @@ public class TimeOnlyUserTypeTest {
 		cal2.set(2024, Calendar.JANUARY, 2, 10, 30, 0);
 		cal2.set(Calendar.MILLISECOND, 0);
 		// Different epochs but same H/M/S/MS → equals should return true (covers L56 true branch)
-		org.junit.Assert.assertTrue(userType.equals(cal1.getTime(), cal2.getTime()));
+		org.junit.jupiter.api.Assertions.assertTrue(userType.equals(cal1.getTime(), cal2.getTime()));
 	}
 
 	@Test
-	public void testEqualsReturnsFalseForDifferentMilliseconds() {
+	void testEqualsReturnsFalseForDifferentMilliseconds() {
 		TimeOnlyUserType userType = new TimeOnlyUserType();
 		// Same H/M/S but different millis → equals returns false (covers L56 false branch)
 		Calendar cal1 = Calendar.getInstance();
@@ -51,6 +51,6 @@ public class TimeOnlyUserTypeTest {
 		Calendar cal2 = Calendar.getInstance();
 		cal2.set(2024, Calendar.JANUARY, 1, 10, 30, 0);
 		cal2.set(Calendar.MILLISECOND, 500);
-		org.junit.Assert.assertFalse(userType.equals(cal1.getTime(), cal2.getTime()));
+		org.junit.jupiter.api.Assertions.assertFalse(userType.equals(cal1.getTime(), cal2.getTime()));
 	}
 }

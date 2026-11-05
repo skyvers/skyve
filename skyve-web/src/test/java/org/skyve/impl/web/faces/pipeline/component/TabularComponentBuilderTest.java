@@ -863,6 +863,13 @@ class TabularComponentBuilderTest {
 	private static ListGridCallResult invokeListGrid(boolean canCreateDocument,
 											java.util.function.Consumer<ListGrid> gridConfigurer,
 											String stickyHeaderAnchorSelector) {
+		return invokeListGrid(canCreateDocument, gridConfigurer, stickyHeaderAnchorSelector, null);
+	}
+
+	private static ListGridCallResult invokeListGrid(boolean canCreateDocument,
+											java.util.function.Consumer<ListGrid> gridConfigurer,
+											String stickyHeaderAnchorSelector,
+											Document owningDocument) {
 		CapturingListGridBuilder builder = new CapturingListGridBuilder();
 		DataTable dataTable = mock(DataTable.class);
 		UIOutput emptyMessage = mock(UIOutput.class);
@@ -920,7 +927,7 @@ class TabularComponentBuilderTest {
 											"recentOrders",
 											"desktop",
 											model,
-											null,
+											owningDocument,
 											grid,
 											stickyHeaderAnchorSelector,
 											false);
@@ -3705,6 +3712,190 @@ class TabularComponentBuilderTest {
 		assertTrue(r.builder.actionCreateUrlParams.contains("region="));
 		assertTrue(r.builder.actionCreateUrlParams.contains("regionBinding"));
 		assertTrue(r.builder.actionCreateUrlParams.contains("limit=25"));
+	}
+
+	@Test
+	void testListGridCreateUrlParamsUseTheBizIdOfAnAssociationAndIgnoreANonAttributeBinding() {
+		FilterParameter associationFilter = mock(FilterParameter.class);
+		when(associationFilter.getFilterBinding()).thenReturn("account");
+		when(associationFilter.getOperator()).thenReturn(org.skyve.metadata.FilterOperator.equal);
+		when(associationFilter.getValueBinding()).thenReturn("account");
+
+		FilterParameter expressionFilter = mock(FilterParameter.class);
+		when(expressionFilter.getFilterBinding()).thenReturn("status");
+		when(expressionFilter.getOperator()).thenReturn(org.skyve.metadata.FilterOperator.equal);
+		when(expressionFilter.getValueBinding()).thenReturn("notAnAttribute");
+
+		Document owningDocument = mock(Document.class);
+		when(owningDocument.getOwningModuleName()).thenReturn("sales");
+		when(owningDocument.getName()).thenReturn("Order");
+		org.skyve.metadata.model.document.Association association = mock(org.skyve.metadata.model.document.Association.class);
+		when(association.getDocumentName()).thenReturn("Account");
+		when(owningDocument.getAttribute("account")).thenReturn(association);
+
+		ListGridCallResult r = invokeListGrid(true, grid -> {
+			grid.setShowZoom(Boolean.FALSE);
+			grid.getFilterParameters().add(associationFilter);
+			grid.getFilterParameters().add(expressionFilter);
+		}, null, owningDocument);
+
+		String createUrlParams = r.builder.actionCreateUrlParams;
+		assertNotNull(createUrlParams);
+		// an association is passed as its bizId
+		assertTrue(createUrlParams.contains("&account=#{skyve.currentBean['account.bizId']}"), createUrlParams);
+		// a binding that is not an attribute of the owning document is passed as a binding expression
+		assertTrue(createUrlParams.contains("&status=#{skyve.currentBean['{notAnAttribute}']}"), createUrlParams);
+	}
+
+	@Test
+	void testListGridThrowsWhenTheListModelHasNoDrivingDocument() {
+		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
+		ListModel<org.skyve.domain.Bean> model = mockListModel();
+		ListGrid grid = new ListGrid();
+
+		IllegalStateException e = assertThrows(IllegalStateException.class,
+												() -> builder.listGrid(null, "sales", "Order", "recent", "desktop", model, null, grid, null, false));
+
+		assertEquals("List model " + model.getClass().getName() + " has no driving document", e.getMessage());
+	}
+
+	@Test
+	void testListRepeaterThrowsWhenTheListModelHasNoDrivingDocument() {
+		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
+		ListModel<org.skyve.domain.Bean> model = mockListModel();
+
+		IllegalStateException e = assertThrows(IllegalStateException.class,
+												() -> builder.listRepeater(null, "Order", "recent", "desktop", model, null, null, true, true));
+
+		assertEquals("List model " + model.getClass().getName() + " has no driving document", e.getMessage());
+	}
+
+	@Test
+	void testAddListGridDataColumnsThrowsWhenTheListModelHasNoDrivingDocument() {
+		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
+		ListModel<org.skyve.domain.Bean> model = mockListModel();
+		List<UIComponent> children = new ArrayList<>();
+		org.skyve.metadata.user.User user = mock(org.skyve.metadata.user.User.class);
+		AbstractPersistence persistence = mock(AbstractPersistence.class, org.mockito.Mockito.CALLS_REAL_METHODS);
+		when(persistence.getUser()).thenReturn(user);
+		AbstractPersistence previous = currentPersistenceIfPresent();
+		try {
+			persistence.setForThread();
+
+			IllegalStateException e = assertThrows(IllegalStateException.class,
+													() -> builder.addListGridDataColumns(model, children, false, "rows", "desktop"));
+
+			assertEquals("List model " + model.getClass().getName() + " has no driving document", e.getMessage());
+			assertTrue(children.isEmpty());
+		}
+		finally {
+			restorePersistence(previous);
+		}
+	}
+
+	@Test
+	void testLookupDropDownColumnsThrowWhenTheListModelHasNoDrivingDocument() {
+		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
+		ListModel<org.skyve.domain.Bean> model = mockListModel();
+		AutoComplete autoComplete = new AutoComplete();
+		List<org.skyve.impl.metadata.view.widget.bound.input.LookupDescriptionColumn> dropDownColumns = List.of();
+		org.skyve.metadata.customer.Customer customer = mock(org.skyve.metadata.customer.Customer.class);
+
+		IllegalStateException e = assertThrows(IllegalStateException.class,
+												() -> builder.addLookupDropDownColumns(autoComplete, dropDownColumns, model, customer));
+
+		assertEquals("List model " + model.getClass().getName() + " has no driving document", e.getMessage());
+	}
+
+	@Test
+	@SuppressWarnings("boxing")
+	void testLookupDropDownColumnsThrowForAProjectedColumnWithNoNameOrBinding() {
+		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
+		ListModel<org.skyve.domain.Bean> model = mockListModel();
+		Document document = mock(Document.class);
+		when(document.getOwningModuleName()).thenReturn("sales");
+		when(model.getDrivingDocument()).thenReturn(document);
+		MetaDataQueryProjectedColumn column = mock(MetaDataQueryProjectedColumn.class);
+		when(column.isProjected()).thenReturn(Boolean.TRUE);
+		when(column.getName()).thenReturn(null);
+		when(column.getBinding()).thenReturn(null);
+		when(model.getColumns()).thenReturn(List.of(column));
+		AutoComplete autoComplete = new AutoComplete();
+		List<org.skyve.impl.metadata.view.widget.bound.input.LookupDescriptionColumn> dropDownColumns = List.of();
+		org.skyve.metadata.customer.Customer customer = mock(org.skyve.metadata.customer.Customer.class);
+
+		IllegalStateException e = assertThrows(IllegalStateException.class,
+												() -> builder.addLookupDropDownColumns(autoComplete, dropDownColumns, model, customer));
+
+		assertEquals("A query column of list model " + model.getClass().getName() + " has no name or binding", e.getMessage());
+	}
+
+	@Test
+	void testLookupDescriptionWithDropDownColumnsThrowsWithNeitherAModelNorAQuery() {
+		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
+		AutoComplete autoComplete = new AutoComplete();
+		when(mockApplication.createComponent(AutoComplete.COMPONENT_TYPE)).thenReturn(autoComplete);
+		FacesView managedBean = mock(FacesView.class);
+		when(managedBean.nextId()).thenReturn("lookupId");
+		builder.setManagedBeanForTest(managedBean);
+		Document owningDocument = mock(Document.class);
+		org.skyve.impl.metadata.view.widget.bound.input.LookupDescriptionColumn dropDown = new org.skyve.impl.metadata.view.widget.bound.input.LookupDescriptionColumn();
+		dropDown.setName("name");
+		org.skyve.metadata.user.User user = mock(org.skyve.metadata.user.User.class);
+		when(user.getCustomer()).thenReturn(mock(org.skyve.metadata.customer.Customer.class));
+		AbstractPersistence persistence = mock(AbstractPersistence.class, org.mockito.Mockito.CALLS_REAL_METHODS);
+		when(persistence.getUser()).thenReturn(user);
+		AbstractPersistence previous = currentPersistenceIfPresent();
+		try {
+			persistence.setForThread();
+
+			IllegalStateException e = assertThrows(IllegalStateException.class,
+													() -> builder.lookupDescription(null, "customer", "Customer", null, HorizontalAlignment.left, null, null,
+																					"bizKey", null, List.of(), List.of(), null, false,
+																					owningDocument, null, List.of(dropDown)));
+
+			assertEquals("A lookup description of customer has neither a model nor a query", e.getMessage());
+		}
+		finally {
+			restorePersistence(previous);
+		}
+	}
+
+	@Test
+	void testUnboundWidgetsAreRejected() {
+		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
+		FacesView managedBean = mock(FacesView.class);
+		when(managedBean.nextId()).thenReturn("unboundId");
+		builder.setManagedBeanForTest(managedBean);
+		when(mockApplication.createComponent(HtmlOutputText.COMPONENT_TYPE)).thenReturn(mock(HtmlOutputText.class));
+		HtmlPanelGrid panelGrid = mock(HtmlPanelGrid.class);
+		when(panelGrid.getChildren()).thenReturn(new ArrayList<>());
+		when(mockApplication.createComponent(HtmlPanelGrid.COMPONENT_TYPE)).thenReturn(panelGrid);
+		Blurb blurb = new Blurb();
+		DataGrid grid = new DataGrid();
+		DataRepeater repeater = new DataRepeater();
+		ContentUpload content = new ContentUpload();
+		UIComponent layout = new HtmlPanelGroup();
+		ContentSignature signature = new ContentSignature();
+
+		assertAll(
+			() -> assertEquals("An output text needs a value or a binding",
+								assertThrows(IllegalStateException.class, () -> builder.blurb(null, null, null, null, blurb)).getMessage(),
+								"blurb"),
+			() -> assertEquals("A data grid has no binding",
+								assertThrows(org.skyve.metadata.MetaDataException.class, () -> builder.dataGrid(null, "row", false, grid)).getMessage(),
+								"data grid"),
+			() -> assertEquals("A data repeater has no binding",
+								assertThrows(org.skyve.metadata.MetaDataException.class, () -> builder.dataRepeater(null, "row", repeater)).getMessage(),
+								"data repeater"),
+			() -> assertEquals("A content widget has no binding",
+								assertThrows(org.skyve.metadata.MetaDataException.class,
+												() -> builder.content(null, null, content, null, null, null, null, true, false)).getMessage(),
+								"content"),
+			() -> assertEquals("A content signature has no binding",
+								assertThrows(org.skyve.metadata.MetaDataException.class,
+												() -> builder.addContentSignature(null, layout, signature, null, null, null)).getMessage(),
+								"content signature"));
 	}
 
 	@Test

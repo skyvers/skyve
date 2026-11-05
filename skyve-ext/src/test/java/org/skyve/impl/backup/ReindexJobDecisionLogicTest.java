@@ -1,7 +1,7 @@
 package org.skyve.impl.backup;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -9,7 +9,7 @@ import static org.mockito.Mockito.when;
 import java.lang.reflect.Method;
 import java.util.List;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.skyve.impl.metadata.model.document.field.Field;
 import org.skyve.impl.metadata.model.document.field.Field.IndexType;
 import org.skyve.impl.metadata.model.document.field.Memo;
@@ -20,9 +20,9 @@ import org.skyve.metadata.model.Attribute.Sensitivity;
 import org.skyve.metadata.model.document.Document;
 
 @SuppressWarnings({"static-method", "boxing"})
-public class ReindexJobDecisionLogicTest {
+class ReindexJobDecisionLogicTest {
 	@Test
-	public void needsIndexingReturnsFalseForNonPersistableDocument() throws Exception {
+	void needsIndexingReturnsFalseForNonPersistableDocument() throws Exception {
 		Customer customer = mock(Customer.class);
 		Document document = mock(Document.class);
 		when(document.isPersistable()).thenReturn(Boolean.FALSE);
@@ -31,7 +31,7 @@ public class ReindexJobDecisionLogicTest {
 	}
 
 	@Test
-	public void needsIndexingReturnsTrueForBothIndexField() throws Exception {
+	void needsIndexingReturnsTrueForBothIndexField() throws Exception {
 		Customer customer = mock(Customer.class);
 		Field field = mock(Field.class);
 		when(field.getIndex()).thenReturn(IndexType.both);
@@ -41,7 +41,7 @@ public class ReindexJobDecisionLogicTest {
 	}
 
 	@Test
-	public void needsIndexingReturnsTrueForTextualIndexField() throws Exception {
+	void needsIndexingReturnsTrueForTextualIndexField() throws Exception {
 		Customer customer = mock(Customer.class);
 		Field field = mock(Field.class);
 		when(field.getIndex()).thenReturn(IndexType.textual);
@@ -51,7 +51,7 @@ public class ReindexJobDecisionLogicTest {
 	}
 
 	@Test
-	public void needsIndexingReturnsTrueForMemoWithNullIndex() throws Exception {
+	void needsIndexingReturnsTrueForMemoWithNullIndex() throws Exception {
 		Customer customer = mock(Customer.class);
 		Memo memo = mock(Memo.class);
 		when(memo.getIndex()).thenReturn(null);
@@ -61,7 +61,7 @@ public class ReindexJobDecisionLogicTest {
 	}
 
 	@Test
-	public void needsIndexingReturnsFalseForMemoWithNoneIndex() throws Exception {
+	void needsIndexingReturnsFalseForMemoWithNoneIndex() throws Exception {
 		Customer customer = mock(Customer.class);
 		Memo memo = mock(Memo.class);
 		when(memo.getIndex()).thenReturn(IndexType.none);
@@ -71,7 +71,7 @@ public class ReindexJobDecisionLogicTest {
 	}
 
 	@Test
-	public void needsIndexingReturnsFalseForPersistableDocumentWithNoFields() throws Exception {
+	void needsIndexingReturnsFalseForPersistableDocumentWithNoFields() throws Exception {
 		Customer customer = mock(Customer.class);
 		Attribute attribute = mock(Attribute.class);
 
@@ -80,7 +80,7 @@ public class ReindexJobDecisionLogicTest {
 	}
 
 	@Test
-	public void needsIndexingReturnsFalseForFieldWithNullIndexThatIsNotMemo() throws Exception {
+	void needsIndexingReturnsFalseForFieldWithNullIndexThatIsNotMemo() throws Exception {
 		Customer customer = mock(Customer.class);
 		Field field = mock(Field.class);
 		when(field.getIndex()).thenReturn(null);
@@ -90,7 +90,7 @@ public class ReindexJobDecisionLogicTest {
 	}
 
 	@Test
-	public void hasContentReturnsTrueForContentField() throws Exception {
+	void hasContentReturnsTrueForContentField() throws Exception {
 		Table table = new Table("agnostic", "persistent");
 		table.fields.put("upload", new BackupField(AttributeType.content, Sensitivity.none));
 
@@ -98,7 +98,7 @@ public class ReindexJobDecisionLogicTest {
 	}
 
 	@Test
-	public void hasContentReturnsTrueForImageField() throws Exception {
+	void hasContentReturnsTrueForImageField() throws Exception {
 		Table table = new Table("agnostic", "persistent");
 		table.fields.put("image", new BackupField(AttributeType.image, Sensitivity.none));
 
@@ -106,7 +106,7 @@ public class ReindexJobDecisionLogicTest {
 	}
 
 	@Test
-	public void hasContentReturnsFalseWhenNoContentFieldsExist() throws Exception {
+	void hasContentReturnsFalseWhenNoContentFieldsExist() throws Exception {
 		Table table = new Table("agnostic", "persistent");
 		table.fields.put("name", new BackupField(AttributeType.text, Sensitivity.none));
 

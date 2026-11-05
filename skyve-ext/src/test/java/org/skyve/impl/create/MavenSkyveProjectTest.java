@@ -1,10 +1,10 @@
 package org.skyve.impl.create;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
@@ -12,17 +12,16 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-import org.junit.Ignore;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 import org.skyve.impl.create.MavenSkyveProject.MavenSkyveProjectCreator;
 
 @SuppressWarnings("static-method")
-public class MavenSkyveProjectTest {
+class MavenSkyveProjectTest {
 
-	@Rule
-	public TemporaryFolder tempFolder = new TemporaryFolder();
+	@TempDir
+	Path tempFolder;
 
 	private static final String PROJECT_NAME = "myProject";
 	private static final String PROJECT_DIR = "/tmp/projects/myProject";
@@ -49,13 +48,13 @@ public class MavenSkyveProjectTest {
 	// ---- Builder constructor tests ----
 
 	@Test
-	public void defaultConstructorCreatesCreator() {
+	void defaultConstructorCreatesCreator() {
 		MavenSkyveProjectCreator creator = new MavenSkyveProjectCreator();
 		assertNotNull(creator);
 	}
 
 	@Test
-	public void constructorWithProjectNameSetsName() {
+	void constructorWithProjectNameSetsName() {
 		MavenSkyveProject project = new MavenSkyveProjectCreator(PROJECT_NAME)
 				.projectDirectory(PROJECT_DIR)
 				.customerName(CUSTOMER_NAME)
@@ -66,79 +65,79 @@ public class MavenSkyveProjectTest {
 	// ---- Builder fluent setter tests ----
 
 	@Test
-	public void builderProjectNameFluentMethodReturnsCreator() {
+	void builderProjectNameFluentMethodReturnsCreator() {
 		MavenSkyveProjectCreator creator = new MavenSkyveProjectCreator();
 		assertNotNull(creator.projectName(PROJECT_NAME));
 	}
 
 	@Test
-	public void builderProjectDescriptionFluentMethodReturnsCreator() {
+	void builderProjectDescriptionFluentMethodReturnsCreator() {
 		MavenSkyveProjectCreator creator = new MavenSkyveProjectCreator();
 		assertNotNull(creator.projectDescription("My Description"));
 	}
 
 	@Test
-	public void builderProjectDirectoryFluentMethodReturnsCreator() {
+	void builderProjectDirectoryFluentMethodReturnsCreator() {
 		MavenSkyveProjectCreator creator = new MavenSkyveProjectCreator();
 		assertNotNull(creator.projectDirectory(PROJECT_DIR));
 	}
 
 	@Test
-	public void builderCustomerNameFluentMethodReturnsCreator() {
+	void builderCustomerNameFluentMethodReturnsCreator() {
 		MavenSkyveProjectCreator creator = new MavenSkyveProjectCreator();
 		assertNotNull(creator.customerName(CUSTOMER_NAME));
 	}
 
 	@Test
-	public void builderSkyveDirectoryFluentMethodReturnsCreator() {
+	void builderSkyveDirectoryFluentMethodReturnsCreator() {
 		MavenSkyveProjectCreator creator = new MavenSkyveProjectCreator();
 		assertNotNull(creator.skyveDirectory(SKYVE_DIR));
 	}
 
 	@Test
-	public void builderSrcDirectoryFluentMethodReturnsCreator() {
+	void builderSrcDirectoryFluentMethodReturnsCreator() {
 		MavenSkyveProjectCreator creator = new MavenSkyveProjectCreator();
 		assertNotNull(creator.srcDirectory("custom/src"));
 	}
 
 	@Test
-	public void builderGeneratedDirectoryFluentMethodReturnsCreator() {
+	void builderGeneratedDirectoryFluentMethodReturnsCreator() {
 		MavenSkyveProjectCreator creator = new MavenSkyveProjectCreator();
 		assertNotNull(creator.generatedDirectory("custom/gen"));
 	}
 
 	@Test
-	public void builderResourceDirectoryFluentMethodReturnsCreator() {
+	void builderResourceDirectoryFluentMethodReturnsCreator() {
 		MavenSkyveProjectCreator creator = new MavenSkyveProjectCreator();
 		assertNotNull(creator.resourceDirectory("custom/res"));
 	}
 
 	@Test
-	public void builderWebDirectoryFluentMethodReturnsCreator() {
+	void builderWebDirectoryFluentMethodReturnsCreator() {
 		MavenSkyveProjectCreator creator = new MavenSkyveProjectCreator();
 		assertNotNull(creator.webDirectory("custom/web"));
 	}
 
 	@Test
-	public void builderTestDirectoryFluentMethodReturnsCreator() {
+	void builderTestDirectoryFluentMethodReturnsCreator() {
 		MavenSkyveProjectCreator creator = new MavenSkyveProjectCreator();
 		assertNotNull(creator.testDirectory("custom/test"));
 	}
 
 	@Test
-	public void builderGeneratedTestDirectoryFluentMethodReturnsCreator() {
+	void builderGeneratedTestDirectoryFluentMethodReturnsCreator() {
 		MavenSkyveProjectCreator creator = new MavenSkyveProjectCreator();
 		assertNotNull(creator.generatedTestDirectory("custom/genTest"));
 	}
 
 	@Test
-	public void builderSkyveScriptFluentMethodReturnsCreator() {
+	void builderSkyveScriptFluentMethodReturnsCreator() {
 		MavenSkyveProjectCreator creator = new MavenSkyveProjectCreator();
 		assertNotNull(creator.skyveScript("script content"));
 	}
 
 	@Test
-	public void builderCopyFromProjectFluentMethodReturnsCreator() {
+	void builderCopyFromProjectFluentMethodReturnsCreator() {
 		MavenSkyveProjectCreator creator = new MavenSkyveProjectCreator();
 		assertNotNull(creator.copyFromProject(true));
 	}
@@ -146,19 +145,19 @@ public class MavenSkyveProjectTest {
 	// ---- Project getter tests ----
 
 	@Test
-	public void getProjectNameReturnsName() {
+	void getProjectNameReturnsName() {
 		MavenSkyveProject p = createBasicProject();
 		assertEquals(PROJECT_NAME, p.getProjectName());
 	}
 
 	@Test
-	public void getProjectDescriptionDefaultsToProjectName() {
+	void getProjectDescriptionDefaultsToProjectName() {
 		MavenSkyveProject p = createBasicProject();
 		assertEquals(PROJECT_NAME, p.getProjectDescription());
 	}
 
 	@Test
-	public void getProjectDescriptionUsesExplicitDescription() {
+	void getProjectDescriptionUsesExplicitDescription() {
 		MavenSkyveProject p = new MavenSkyveProjectCreator()
 				.projectName(PROJECT_NAME)
 				.projectDescription("My Custom Description")
@@ -169,25 +168,25 @@ public class MavenSkyveProjectTest {
 	}
 
 	@Test
-	public void getAbsoluteProjectPathReturnsDirectory() {
+	void getAbsoluteProjectPathReturnsDirectory() {
 		MavenSkyveProject p = createBasicProject();
 		assertEquals(Paths.get(PROJECT_DIR), p.getAbsoluteProjectPath());
 	}
 
 	@Test
-	public void getCustomerNameReturnsCustomer() {
+	void getCustomerNameReturnsCustomer() {
 		MavenSkyveProject p = createBasicProject();
 		assertEquals(CUSTOMER_NAME, p.getCustomerName());
 	}
 
 	@Test
-	public void getAbsoluteSkyvePathNullWhenNotSet() {
+	void getAbsoluteSkyvePathNullWhenNotSet() {
 		MavenSkyveProject p = createBasicProject();
 		assertNull(p.getAbsoluteSkyvePath());
 	}
 
 	@Test
-	public void getAbsoluteSkyvePathReturnsSkyveDirectory() {
+	void getAbsoluteSkyvePathReturnsSkyveDirectory() {
 		MavenSkyveProject p = createProjectWithSkyve();
 		assertEquals(Paths.get(SKYVE_DIR), p.getAbsoluteSkyvePath());
 	}
@@ -195,37 +194,37 @@ public class MavenSkyveProjectTest {
 	// ---- Relative path getters use builder defaults ----
 
 	@Test
-	public void getRelativeSrcPathUsesDefault() {
+	void getRelativeSrcPathUsesDefault() {
 		MavenSkyveProject p = createBasicProject();
 		assertEquals(Paths.get(MavenSkyveProjectCreator.DEFAULT_SRC_DIRECTORY), p.getRelativeSrcPath());
 	}
 
 	@Test
-	public void getRelativeGeneratedPathUsesDefault() {
+	void getRelativeGeneratedPathUsesDefault() {
 		MavenSkyveProject p = createBasicProject();
 		assertEquals(Paths.get(MavenSkyveProjectCreator.DEFAULT_GENERATED_DIRECTORY), p.getRelativeGeneratedPath());
 	}
 
 	@Test
-	public void getRelativeResourcePathUsesDefault() {
+	void getRelativeResourcePathUsesDefault() {
 		MavenSkyveProject p = createBasicProject();
 		assertEquals(Paths.get(MavenSkyveProjectCreator.DEFAULT_RESOURCES_DIRECTORY), p.getRelativeResourcePath());
 	}
 
 	@Test
-	public void getRelativeWebPathUsesDefault() {
+	void getRelativeWebPathUsesDefault() {
 		MavenSkyveProject p = createBasicProject();
 		assertEquals(Paths.get(MavenSkyveProjectCreator.DEFAULT_WEB_DIRECTORY), p.getRelativeWebPath());
 	}
 
 	@Test
-	public void getRelativeTestPathUsesDefault() {
+	void getRelativeTestPathUsesDefault() {
 		MavenSkyveProject p = createBasicProject();
 		assertEquals(Paths.get(MavenSkyveProjectCreator.DEFAULT_TEST_DIRECTORY), p.getRelativeTestPath());
 	}
 
 	@Test
-	public void getRelativeGeneratedTestPathUsesDefault() {
+	void getRelativeGeneratedTestPathUsesDefault() {
 		MavenSkyveProject p = createBasicProject();
 		assertEquals(Paths.get(MavenSkyveProjectCreator.DEFAULT_GENERATED_TEST_DIRECTORY), p.getRelativeGeneratedTestPath());
 	}
@@ -233,14 +232,14 @@ public class MavenSkyveProjectTest {
 	// ---- Absolute path getters resolve relative to project directory ----
 
 	@Test
-	public void getAbsoluteSrcPathResolvesUnderProjectDir() {
+	void getAbsoluteSrcPathResolvesUnderProjectDir() {
 		MavenSkyveProject p = createBasicProject();
 		Path expected = Paths.get(PROJECT_DIR).resolve(MavenSkyveProjectCreator.DEFAULT_SRC_DIRECTORY);
 		assertEquals(expected, p.getAbsoluteSrcPath());
 	}
 
 	@Test
-	public void getAbsoluteCustomerPathResolvesUnderSrcDir() {
+	void getAbsoluteCustomerPathResolvesUnderSrcDir() {
 		MavenSkyveProject p = createBasicProject();
 		Path expected = Paths.get(PROJECT_DIR)
 				.resolve(MavenSkyveProjectCreator.DEFAULT_SRC_DIRECTORY)
@@ -250,7 +249,7 @@ public class MavenSkyveProjectTest {
 	}
 
 	@Test
-	public void getAbsoluteCustomerResourcesPathResolvesUnderCustomerDir() {
+	void getAbsoluteCustomerResourcesPathResolvesUnderCustomerDir() {
 		MavenSkyveProject p = createBasicProject();
 		Path expected = Paths.get(PROJECT_DIR)
 				.resolve(MavenSkyveProjectCreator.DEFAULT_SRC_DIRECTORY)
@@ -261,49 +260,49 @@ public class MavenSkyveProjectTest {
 	}
 
 	@Test
-	public void getAbsoluteGeneratedPathResolvesUnderProjectDir() {
+	void getAbsoluteGeneratedPathResolvesUnderProjectDir() {
 		MavenSkyveProject p = createBasicProject();
 		Path expected = Paths.get(PROJECT_DIR).resolve(MavenSkyveProjectCreator.DEFAULT_GENERATED_DIRECTORY);
 		assertEquals(expected, p.getAbsoluteGeneratedPath());
 	}
 
 	@Test
-	public void getAbsoluteResourcePathResolvesUnderProjectDir() {
+	void getAbsoluteResourcePathResolvesUnderProjectDir() {
 		MavenSkyveProject p = createBasicProject();
 		Path expected = Paths.get(PROJECT_DIR).resolve(MavenSkyveProjectCreator.DEFAULT_RESOURCES_DIRECTORY);
 		assertEquals(expected, p.getAbsoluteResourcePath());
 	}
 
 	@Test
-	public void getAbsoluteWebPathResolvesUnderProjectDir() {
+	void getAbsoluteWebPathResolvesUnderProjectDir() {
 		MavenSkyveProject p = createBasicProject();
 		Path expected = Paths.get(PROJECT_DIR).resolve(MavenSkyveProjectCreator.DEFAULT_WEB_DIRECTORY);
 		assertEquals(expected, p.getAbsoluteWebPath());
 	}
 
 	@Test
-	public void getAbsoluteTestPathResolvesUnderProjectDir() {
+	void getAbsoluteTestPathResolvesUnderProjectDir() {
 		MavenSkyveProject p = createBasicProject();
 		Path expected = Paths.get(PROJECT_DIR).resolve(MavenSkyveProjectCreator.DEFAULT_TEST_DIRECTORY);
 		assertEquals(expected, p.getAbsoluteTestPath());
 	}
 
 	@Test
-	public void getAbsoluteGeneratedTestPathResolvesUnderProjectDir() {
+	void getAbsoluteGeneratedTestPathResolvesUnderProjectDir() {
 		MavenSkyveProject p = createBasicProject();
 		Path expected = Paths.get(PROJECT_DIR).resolve(MavenSkyveProjectCreator.DEFAULT_GENERATED_TEST_DIRECTORY);
 		assertEquals(expected, p.getAbsoluteGeneratedTestPath());
 	}
 
 	@Test
-	public void getAbsoluteDockerPathResolvesUnderProjectDir() {
+	void getAbsoluteDockerPathResolvesUnderProjectDir() {
 		MavenSkyveProject p = createBasicProject();
 		Path expected = Paths.get(PROJECT_DIR).resolve("docker");
 		assertEquals(expected, p.getAbsoluteDockerPath());
 	}
 
 	@Test
-	public void getAbsoluteDeploymentsPathResolvesUnderProjectDir() {
+	void getAbsoluteDeploymentsPathResolvesUnderProjectDir() {
 		MavenSkyveProject p = createBasicProject();
 		Path expected = Paths.get(PROJECT_DIR).resolve("deployments");
 		assertEquals(expected, p.getAbsoluteDeploymentsPath());
@@ -312,13 +311,13 @@ public class MavenSkyveProjectTest {
 	// ---- Skyve-directory-dependent paths ----
 
 	@Test
-	public void getSkyveBasePathReturnsSkyveDirectoryAbsolutePath() {
+	void getSkyveBasePathReturnsSkyveDirectoryAbsolutePath() {
 		MavenSkyveProject p = createProjectWithSkyve();
 		assertEquals(Paths.get(SKYVE_DIR).toAbsolutePath(), p.getSkyveBasePath());
 	}
 
 	@Test
-	public void getSkyveAbsoluteWarPathResolvesUnderSkyveDir() {
+	void getSkyveAbsoluteWarPathResolvesUnderSkyveDir() {
 		MavenSkyveProject p = createProjectWithSkyve();
 		Path expected = Paths.get(SKYVE_DIR).resolve(MavenSkyveProject.SKYVE_WEBAPP_PATH);
 		assertEquals(expected, p.getSkyveAbsoluteWarPath());
@@ -327,7 +326,7 @@ public class MavenSkyveProjectTest {
 	// ---- Other property tests ----
 
 	@Test
-	public void getSkyveScriptReturnsScript() {
+	void getSkyveScriptReturnsScript() {
 		MavenSkyveProject p = new MavenSkyveProjectCreator()
 				.projectName(PROJECT_NAME)
 				.projectDirectory(PROJECT_DIR)
@@ -338,33 +337,33 @@ public class MavenSkyveProjectTest {
 	}
 
 	@Test
-	public void getSkyveScriptNullByDefault() {
+	void getSkyveScriptNullByDefault() {
 		MavenSkyveProject p = createBasicProject();
 		assertNull(p.getSkyveScript());
 	}
 
 	@Test
-	public void getSkyveScriptPathResolvesScriptsFolder() {
+	void getSkyveScriptPathResolvesScriptsFolder() {
 		MavenSkyveProject p = createBasicProject();
 		Path expected = Paths.get(PROJECT_DIR).resolve("scripts").resolve("skyve.md");
 		assertEquals(expected, p.getSkyveScriptPath());
 	}
 
 	@Test
-	public void getMetaDataInitiallyEmpty() {
+	void getMetaDataInitiallyEmpty() {
 		MavenSkyveProject p = createBasicProject();
 		assertNotNull(p.getMetaData());
 		assertTrue(p.getMetaData().isEmpty());
 	}
 
 	@Test
-	public void isCopyFromProjectDefaultFalse() {
+	void isCopyFromProjectDefaultFalse() {
 		MavenSkyveProject p = createBasicProject();
 		assertFalse(p.isCopyFromProject());
 	}
 
 	@Test
-	public void isCopyFromProjectTrueWhenSet() {
+	void isCopyFromProjectTrueWhenSet() {
 		MavenSkyveProject p = new MavenSkyveProjectCreator()
 				.projectName(PROJECT_NAME)
 				.projectDirectory(PROJECT_DIR)
@@ -377,7 +376,7 @@ public class MavenSkyveProjectTest {
 	// ---- Custom directory overrides ----
 
 	@Test
-	public void customSrcDirectoryApplied() {
+	void customSrcDirectoryApplied() {
 		MavenSkyveProject p = new MavenSkyveProjectCreator()
 				.projectName(PROJECT_NAME)
 				.projectDirectory(PROJECT_DIR)
@@ -388,7 +387,7 @@ public class MavenSkyveProjectTest {
 	}
 
 	@Test
-	public void customGeneratedDirectoryApplied() {
+	void customGeneratedDirectoryApplied() {
 		MavenSkyveProject p = new MavenSkyveProjectCreator()
 				.projectName(PROJECT_NAME)
 				.projectDirectory(PROJECT_DIR)
@@ -399,7 +398,7 @@ public class MavenSkyveProjectTest {
 	}
 
 	@Test
-	public void customResourceDirectoryApplied() {
+	void customResourceDirectoryApplied() {
 		MavenSkyveProject p = new MavenSkyveProjectCreator()
 				.projectName(PROJECT_NAME)
 				.projectDirectory(PROJECT_DIR)
@@ -410,7 +409,7 @@ public class MavenSkyveProjectTest {
 	}
 
 	@Test
-	public void customWebDirectoryApplied() {
+	void customWebDirectoryApplied() {
 		MavenSkyveProject p = new MavenSkyveProjectCreator()
 				.projectName(PROJECT_NAME)
 				.projectDirectory(PROJECT_DIR)
@@ -421,7 +420,7 @@ public class MavenSkyveProjectTest {
 	}
 
 	@Test
-	public void customTestDirectoryApplied() {
+	void customTestDirectoryApplied() {
 		MavenSkyveProject p = new MavenSkyveProjectCreator()
 				.projectName(PROJECT_NAME)
 				.projectDirectory(PROJECT_DIR)
@@ -432,7 +431,7 @@ public class MavenSkyveProjectTest {
 	}
 
 	@Test
-	public void customGeneratedTestDirectoryApplied() {
+	void customGeneratedTestDirectoryApplied() {
 		MavenSkyveProject p = new MavenSkyveProjectCreator()
 				.projectName(PROJECT_NAME)
 				.projectDirectory(PROJECT_DIR)
@@ -445,42 +444,42 @@ public class MavenSkyveProjectTest {
 	// ---- Static constant tests ----
 
 	@Test
-	public void staticSkyveWarPathEndsWithWebapp() {
+	void staticSkyveWarPathEndsWithWebapp() {
 		assertTrue(MavenSkyveProject.SKYVE_WEBAPP_PATH.toString().contains("webapp"));
 	}
 
 	@Test
-	public void staticSkyveTestPathEndsWithJava() {
+	void staticSkyveTestPathEndsWithJava() {
 		assertTrue(MavenSkyveProject.SKYVE_TEST_PATH.toString().contains("java"));
 	}
 
 	@Test
-	public void staticSkyveGeneratedPathEndsWithJava() {
+	void staticSkyveGeneratedPathEndsWithJava() {
 		assertTrue(MavenSkyveProject.SKYVE_GENERATED_PATH.toString().contains("java"));
 	}
 
 	@Test
-	public void staticSkyveWebPathEndsWithJava() {
+	void staticSkyveWebPathEndsWithJava() {
 		assertTrue(MavenSkyveProject.SKYVE_WEB_PATH.toString().contains("java"));
 	}
 
 	@Test
-	public void staticSkyveSrcPathEndsWithJava() {
+	void staticSkyveSrcPathEndsWithJava() {
 		assertTrue(MavenSkyveProject.SKYVE_SRC_PATH.toString().contains("java"));
 	}
 
 	@Test
-	public void staticSkyveSrcResourcesPathContainsResources() {
+	void staticSkyveSrcResourcesPathContainsResources() {
 		assertTrue(MavenSkyveProject.SKYVE_SRC_RESOURCES_PATH.toString().contains("resources"));
 	}
 
 	@Test
-	public void staticSkyveGeneratedTestPathContainsGeneratedTest() {
+	void staticSkyveGeneratedTestPathContainsGeneratedTest() {
 		assertTrue(MavenSkyveProject.SKYVE_GENERATED_TEST_PATH.toString().contains("generatedTest"));
 	}
 
 	@Test
-	public void applyScriptWithValidScriptPopulatesMetaData() throws SkyveProjectCreationException {
+	void applyScriptWithValidScriptPopulatesMetaData() throws SkyveProjectCreationException {
 		MavenSkyveProject project = new MavenSkyveProjectCreator()
 				.projectName(PROJECT_NAME)
 				.projectDirectory(PROJECT_DIR)
@@ -493,7 +492,7 @@ public class MavenSkyveProjectTest {
 	}
 
 	@Test
-	public void applyScriptWithNoModulesDetectedLeavesMetaDataEmpty() throws SkyveProjectCreationException {
+	void applyScriptWithNoModulesDetectedLeavesMetaDataEmpty() throws SkyveProjectCreationException {
 		// A script with no module heading produces no modules
 		MavenSkyveProject project = new MavenSkyveProjectCreator()
 				.projectName(PROJECT_NAME)
@@ -506,7 +505,7 @@ public class MavenSkyveProjectTest {
 	}
 
 	@Test
-	public void applyScriptWithValidModuleAndDocumentPopulatesMetaData() throws SkyveProjectCreationException {
+	void applyScriptWithValidModuleAndDocumentPopulatesMetaData() throws SkyveProjectCreationException {
 		MavenSkyveProject project = new MavenSkyveProjectCreator()
 				.projectName(PROJECT_NAME)
 				.projectDirectory(PROJECT_DIR)
@@ -518,7 +517,7 @@ public class MavenSkyveProjectTest {
 	}
 
 	@Test
-	public void getSkyveScriptReturnsScriptSetViaBuilder() {
+	void getSkyveScriptReturnsScriptSetViaBuilder() {
 		MavenSkyveProject project = new MavenSkyveProjectCreator()
 				.projectName(PROJECT_NAME)
 				.projectDirectory(PROJECT_DIR)
@@ -529,13 +528,13 @@ public class MavenSkyveProjectTest {
 	}
 
 	@Test
-	public void getSkyveScriptPathContainsScriptsDir() {
+	void getSkyveScriptPathContainsScriptsDir() {
 		MavenSkyveProject project = createBasicProject();
 		assertTrue(project.getSkyveScriptPath().toString().contains("scripts"));
 	}
 
 	@Test
-	public void isCopyFromProjectDefaultIsFalse() {
+	void isCopyFromProjectDefaultIsFalse() {
 		MavenSkyveProject project = createBasicProject();
 		assertFalse(project.isCopyFromProject());
 	}
@@ -571,9 +570,9 @@ public class MavenSkyveProjectTest {
 	}
 
 	@Test
-	public void assembleWithAllFalseDoesNotCopyAnyFiles() throws IOException {
-		File skyveDir = createSkyveDirStructure(tempFolder.newFolder("skyve"));
-		File projectDir = tempFolder.newFolder("project");
+	void assembleWithAllFalseDoesNotCopyAnyFiles() throws IOException {
+		File skyveDir = createSkyveDirStructure(Files.createDirectory(tempFolder.resolve("skyve")).toFile());
+		File projectDir = Files.createDirectory(tempFolder.resolve("project")).toFile();
 
 		MavenSkyveProject project = new MavenSkyveProjectCreator()
 				.projectName("test")
@@ -591,9 +590,9 @@ public class MavenSkyveProjectTest {
 	}
 
 	@Test
-	public void assembleWithAppFilesOnlySucceeds() throws IOException {
-		File skyveDir = createSkyveDirStructure(tempFolder.newFolder("skyve"));
-		File projectDir = tempFolder.newFolder("project");
+	void assembleWithAppFilesOnlySucceeds() throws IOException {
+		File skyveDir = createSkyveDirStructure(Files.createDirectory(tempFolder.resolve("skyve")).toFile());
+		File projectDir = Files.createDirectory(tempFolder.resolve("project")).toFile();
 		// Create the required target sub-dirs
 		new File(projectDir, "src/main/java").mkdirs();
 		new File(projectDir, "src/main/resources").mkdirs();
@@ -611,9 +610,9 @@ public class MavenSkyveProjectTest {
 	}
 
 	@Test
-	public void assembleGeneratedFilesOnlySucceeds() throws IOException {
-		File skyveDir = createSkyveDirStructure(tempFolder.newFolder("skyve"));
-		File projectDir = tempFolder.newFolder("project");
+	void assembleGeneratedFilesOnlySucceeds() throws IOException {
+		File skyveDir = createSkyveDirStructure(Files.createDirectory(tempFolder.resolve("skyve")).toFile());
+		File projectDir = Files.createDirectory(tempFolder.resolve("project")).toFile();
 		new File(projectDir, "src/generated/java").mkdirs();
 
 		MavenSkyveProject project = new MavenSkyveProjectCreator()
@@ -627,11 +626,11 @@ public class MavenSkyveProjectTest {
 		assertNotNull(project);
 	}
 
-	@Ignore("copySkyveWebAppFiles adds hardcoded WEB-INF files (beans.xml etc.) that must exist - needs full skyve tree")
+	@Disabled("copySkyveWebAppFiles adds hardcoded WEB-INF files (beans.xml etc.) that must exist - needs full skyve tree")
 	@Test
-	public void assembleWebAppFilesOnlySucceeds() throws IOException {
-		File skyveDir = createSkyveDirStructure(tempFolder.newFolder("skyve"));
-		File projectDir = tempFolder.newFolder("project");
+	void assembleWebAppFilesOnlySucceeds() throws IOException {
+		File skyveDir = createSkyveDirStructure(Files.createDirectory(tempFolder.resolve("skyve")).toFile());
+		File projectDir = Files.createDirectory(tempFolder.resolve("project")).toFile();
 		new File(projectDir, "src/main/webapp").mkdirs();
 
 		MavenSkyveProject project = new MavenSkyveProjectCreator()
@@ -646,9 +645,9 @@ public class MavenSkyveProjectTest {
 	}
 
 	@Test
-	public void assembleTestFilesOnlySucceeds() throws IOException {
-		File skyveDir = createSkyveDirStructure(tempFolder.newFolder("skyve"));
-		File projectDir = tempFolder.newFolder("project");
+	void assembleTestFilesOnlySucceeds() throws IOException {
+		File skyveDir = createSkyveDirStructure(Files.createDirectory(tempFolder.resolve("skyve")).toFile());
+		File projectDir = Files.createDirectory(tempFolder.resolve("project")).toFile();
 		new File(projectDir, "src/test/java/util").mkdirs();
 		new File(projectDir, "src/generatedTest/java").mkdirs();
 
@@ -664,9 +663,9 @@ public class MavenSkyveProjectTest {
 	}
 
 	@Test
-	public void clearBeforeAssembleWithEmptyDirsDoesNotThrow() throws IOException {
-		File skyveDir = createSkyveDirStructure(tempFolder.newFolder("skyve"));
-		File projectDir = tempFolder.newFolder("project");
+	void clearBeforeAssembleWithEmptyDirsDoesNotThrow() throws IOException {
+		File skyveDir = createSkyveDirStructure(Files.createDirectory(tempFolder.resolve("skyve")).toFile());
+		File projectDir = Files.createDirectory(tempFolder.resolve("project")).toFile();
 		// Create the directories that clearBeforeAssemble() tries to list
 		new File(projectDir, "src/main/java/modules").mkdirs();
 		new File(projectDir, "src/main/java/modules/admin").mkdirs();
@@ -693,8 +692,8 @@ public class MavenSkyveProjectTest {
 	}
 
 	@Test
-	public void applyScriptWithWriteToFileTrueWritesScriptFile() throws Exception {
-		File projectDir = tempFolder.newFolder("project");
+	void applyScriptWithWriteToFileTrueWritesScriptFile() throws Exception {
+		File projectDir = Files.createDirectory(tempFolder.resolve("project")).toFile();
 
 		MavenSkyveProject project = new MavenSkyveProjectCreator()
 				.projectName("test")

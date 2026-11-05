@@ -3,6 +3,7 @@ package org.skyve.metadata.view.model.list;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -67,5 +68,13 @@ class DocumentQueryListModelTest {
 		model.fetch();
 
 		verify(detailQuery).insertBoundOrdering(Bean.BIZ_KEY, SortDirection.ascending);
+	}
+
+	@Test
+	void fetchThrowsWhenASortParameterHasNoBinding() {
+		model.setSortParameters(new SortParameter[] {new SortParameterImpl()});
+
+		IllegalStateException e = assertThrows(IllegalStateException.class, model::fetch);
+		assertEquals("A sort parameter for query qTest has no binding to sort by", e.getMessage());
 	}
 }

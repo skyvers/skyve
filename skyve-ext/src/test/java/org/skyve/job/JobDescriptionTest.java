@@ -3,17 +3,17 @@ package org.skyve.job;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.sameInstance;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.skyve.domain.types.Timestamp;
 import org.skyve.metadata.user.User;
 
 @SuppressWarnings("static-method")
-public class JobDescriptionTest {
+class JobDescriptionTest {
 	@Test
-	public void gettersAndSettersRoundTripAllProperties() {
+	void gettersAndSettersRoundTripAllProperties() {
 		JobDescription description = new JobDescription();
 		Timestamp start = new Timestamp();
 		Timestamp end = new Timestamp();
@@ -39,7 +39,7 @@ public class JobDescriptionTest {
 	}
 
 	@Test
-	public void jobStatusExposesExpectedValues() {
+	void jobStatusExposesExpectedValues() {
 		assertThat(JobStatus.valueOf("complete"), is(JobStatus.complete));
 		assertThat(JobStatus.valueOf("failed"), is(JobStatus.failed));
 		assertThat(JobStatus.valueOf("cancelled"), is(JobStatus.cancelled));

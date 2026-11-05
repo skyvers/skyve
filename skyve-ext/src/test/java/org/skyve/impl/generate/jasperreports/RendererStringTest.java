@@ -953,6 +953,70 @@ class RendererStringTest {
 	}
 
 	@Test
+	void renderDesignSqlModeJoinsAJoinedExtensionAndTheJoinerTableOfAnAggregatedSubreport() throws Exception {
+		Customer customer = joinedOrderCustomer();
+
+		withThreadLocalCustomer(customer, () -> {
+			DesignSpecification design = joinerSubreportDesign();
+			ReportField items = field("items", "java.util.List", design);
+			design.setField(items);
+			design.setAlias('a');
+
+			String result = Renderer.renderDesign(design);
+
+			assertThat(result, containsString("from ORDER_TABLE a"));
+			assertThat(result, containsString("join PARENT_items items on items.element_id =  Order.bizId"));
+			assertThat(result, containsString("where items.owner_id = $P{ID}"));
+			assertEquals('b', design.getAlias());
+		});
+	}
+
+	@Test
+	void renderDesignSqlModeThrowsWhenAJoinerSubreportHasNoCollectionField() throws Exception {
+		Customer customer = joinedOrderCustomer();
+
+		withThreadLocalCustomer(customer, () -> {
+			DesignSpecification design = joinerSubreportDesign();
+
+			IllegalStateException e = assertThrows(IllegalStateException.class, () -> Renderer.renderDesign(design));
+
+			assertThat(e.getMessage(), is("Subreport design OrderReport has no collection field"));
+		});
+	}
+
+	/**
+	 * A customer whose sales.Order document extends sales.BaseOrder with the joined strategy.
+	 */
+	private static Customer joinedOrderCustomer() {
+		Customer customer = mock(Customer.class);
+		Module module = mock(Module.class);
+		Document document = mock(Document.class);
+		Document baseDocument = mock(Document.class);
+		org.skyve.metadata.model.Extends inherits = new org.skyve.metadata.model.Extends();
+		inherits.setDocumentName("BaseOrder");
+		Persistent persistent = new Persistent();
+		persistent.setName("ORDER_TABLE");
+		persistent.setStrategy(Persistent.ExtensionStrategy.joined);
+		when(customer.getModule("sales")).thenReturn(module);
+		when(module.getDocument(customer, "Order")).thenReturn(document);
+		when(module.getDocument(customer, "BaseOrder")).thenReturn(baseDocument);
+		when(document.getName()).thenReturn("Order");
+		when(document.getExtends()).thenReturn(inherits);
+		when(document.getPersistent()).thenReturn(persistent);
+		when(baseDocument.getName()).thenReturn("BaseOrder");
+		return customer;
+	}
+
+	private static DesignSpecification joinerSubreportDesign() {
+		DesignSpecification design = newRenderableDesign();
+		design.setMode(DesignSpecification.Mode.sql);
+		design.setReportType(DesignSpecification.ReportType.subreport);
+		design.setCollectionType(org.skyve.metadata.model.document.Collection.CollectionType.aggregation);
+		design.setParentReportPersistentName("PARENT");
+		return design;
+	}
+
+	@Test
 	void addElementCreatesAndAddsToTheBand() {
 		DesignSpecification spec = new DesignSpecification();
 		ReportBand band = new ReportBand();

@@ -625,6 +625,55 @@ class GeneratorTest {
 	}
 
 	@Test
+	void visitMenuListItemWithoutQueryOrDocumentThrows() {
+		ListItem item = new ListItem();
+		item.setName("Nothing");
+		UserImpl user = userWithMenuItem(item);
+
+		MetaDataException e = assertThrows(MetaDataException.class,
+											() -> Generator.visitMenu(user, "sales", "desktop", UserAgentType.desktop, TestStrategy.None));
+		assertThat(e.getMessage(), is("List menu item Nothing in module sales has no query or document"));
+	}
+
+	@Test
+	void visitMenuEditItemWithoutDocumentThrows() {
+		EditItem item = new EditItem();
+		item.setName("Nothing");
+		UserImpl user = userWithMenuItem(item);
+
+		MetaDataException e = assertThrows(MetaDataException.class,
+											() -> Generator.visitMenu(user, "sales", "desktop", UserAgentType.desktop, TestStrategy.None));
+		assertThat(e.getMessage(), is("Edit menu item Nothing in module sales has no document"));
+	}
+
+	@Test
+	void visitMenuThrowsWhenTheUserHasNoMenuForTheModule() {
+		UserImpl user = mock(UserImpl.class);
+		CustomerImpl customer = new CustomerImpl();
+		ProvidedRepository repository = mock(ProvidedRepository.class);
+		when(user.getName()).thenReturn("admin");
+		when(user.getCustomer()).thenReturn(customer);
+		when(repository.getModule(customer, "sales")).thenReturn(module("sales"));
+		ProvidedRepositoryFactory.set(repository);
+
+		IllegalStateException e = assertThrows(IllegalStateException.class,
+												() -> Generator.visitMenu(user, "sales", "desktop", UserAgentType.desktop, TestStrategy.None));
+		assertThat(e.getMessage(), is("User admin has no menu for module sales"));
+	}
+
+	@Test
+	void addLoginAndOutThrowsWhenTheUserHasNoName() {
+		Automation automation = new Automation();
+		User user = mock(User.class);
+
+		java.lang.reflect.InvocationTargetException e = assertThrows(java.lang.reflect.InvocationTargetException.class,
+																		() -> invokeAddLoginAndOut(automation, user, "demo", "secret"));
+		assertThat(e.getCause(), instanceOf(IllegalStateException.class));
+		assertThat(e.getCause().getMessage(), is("Cannot log in to the automation as the user has no name"));
+		assertThat(automation.getBefore(), is((Procedure) null));
+	}
+
+	@Test
 	void visitMenuEditItemCreatesNavigateEditInteraction() throws Exception {
 		UserImpl user = mock(UserImpl.class);
 		CustomerImpl customer = new CustomerImpl();
@@ -726,6 +775,22 @@ class GeneratorTest {
 		Method method = Generator.class.getDeclaredMethod("addLoginAndOut", Automation.class, User.class, String.class, String.class);
 		method.setAccessible(true);
 		method.invoke(null, automation, user, customer, password);
+	}
+
+	/**
+	 * Returns a user whose sales module menu has the given single item.
+	 */
+	private static UserImpl userWithMenuItem(org.skyve.metadata.module.menu.MenuItem item) {
+		UserImpl user = mock(UserImpl.class);
+		CustomerImpl customer = new CustomerImpl();
+		MenuImpl menu = new MenuImpl();
+		menu.getItems().add(item);
+		ProvidedRepository repository = mock(ProvidedRepository.class);
+		when(user.getCustomer()).thenReturn(customer);
+		when(user.getModuleMenu("sales")).thenReturn(menu);
+		when(repository.getModule(customer, "sales")).thenReturn(module("sales"));
+		ProvidedRepositoryFactory.set(repository);
+		return user;
 	}
 
 	private static DocumentRef documentRef(String owningModuleName) {

@@ -142,6 +142,24 @@ class DownloadServletTest {
 	}
 
 	@Test
+	void cachedConversationWithoutPersistenceWritesGenericFallbackWithoutRunningTheDownload() throws Exception {
+		DownloadAction<Bean> action = actionReturning(new Download("result.txt", "download body", MimeType.plain));
+		Lifecycle lifecycle = lifecycle(action, false, true);
+		lifecycle.webContext.setConversation(null);
+		TestableDownloadServlet servlet = new TestableDownloadServlet(lifecycle.webContext);
+		CapturingServletOutputStream output = new CapturingServletOutputStream();
+
+		servlet.doGet(request(lifecycle.user, "mod.Doc", "DownloadResult", null), response(output));
+
+		// The invariant failure is unexpected, so it gets the generic error page
+		assertTrue(output.asString().contains("An error occured whilst processing your report."), output.asString());
+		assertFalse(servlet.writeInvoked);
+		assertFalse(servlet.cacheInvoked);
+		verify(action, never()).download(any(), any());
+		verify(lifecycle.persistence, never()).begin();
+	}
+
+	@Test
 	void streamBackedDownloadIsProcessedAndClosedWhenWriterFails() throws Exception {
 		TrackingInputStream raw = new TrackingInputStream("streamed".getBytes(StandardCharsets.UTF_8));
 		WebFileInputStream stream = new WebFileInputStream(raw);

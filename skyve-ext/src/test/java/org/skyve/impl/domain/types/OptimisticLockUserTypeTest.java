@@ -1,12 +1,13 @@
 package org.skyve.impl.domain.types;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotSame;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -16,11 +17,11 @@ import java.sql.ResultSet;
 import java.sql.Types;
 import java.util.Date;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.skyve.domain.types.OptimisticLock;
 
 @SuppressWarnings({"resource", "boxing"})
-public class OptimisticLockUserTypeTest {
+class OptimisticLockUserTypeTest {
 
 	private final OptimisticLockUserType type = new OptimisticLockUserType();
 
@@ -29,104 +30,104 @@ public class OptimisticLockUserTypeTest {
 	}
 
 	@Test
-	public void testSqlTypes() {
+	void testSqlTypes() {
 		assertArrayEquals(new int[] {Types.VARCHAR}, type.sqlTypes());
 	}
 
 	@Test
-	public void testReturnedClass() {
+	void testReturnedClass() {
 		assertEquals(OptimisticLock.class, type.returnedClass());
 	}
 
 	@Test
-	public void testIsMutableTrue() {
+	void testIsMutableTrue() {
 		assertTrue(type.isMutable());
 	}
 
 	@Test
-	public void testEqualsBothNull() {
+	void testEqualsBothNull() {
 		assertTrue(type.equals(null, null));
 	}
 
 	@Test
-	public void testEqualsXNull() {
+	void testEqualsXNull() {
 		assertFalse(type.equals(null, lock("admin")));
 	}
 
 	@Test
-	public void testEqualsYNull() {
+	void testEqualsYNull() {
 		assertFalse(type.equals(lock("admin"), null));
 	}
 
 	@Test
-	public void testEqualsSameRef() {
+	void testEqualsSameRef() {
 		OptimisticLock l = lock("admin");
 		assertTrue(type.equals(l, l));
 	}
 
 	@Test
-	public void testEqualsSameValue() {
+	void testEqualsSameValue() {
 		OptimisticLock l1 = lock("admin");
 		OptimisticLock l2 = lock("admin");
 		assertTrue(type.equals(l1, l2));
 	}
 
 	@Test
-	public void testEqualsDistinctUsers() {
+	void testEqualsDistinctUsers() {
 		assertFalse(type.equals(lock("alice"), lock("bob")));
 	}
 
 	@Test
-	public void testHashCode() {
+	void testHashCode() {
 		OptimisticLock l = lock("admin");
 		assertEquals(l.hashCode(), type.hashCode(l));
 	}
 
 	@Test
-	public void testDeepCopyNull() throws Exception {
+	void testDeepCopyNull() throws Exception {
 		assertNull(type.deepCopy(null));
 	}
 
 	@Test
-	public void testDeepCopyNonNull() throws Exception {
+	void testDeepCopyNonNull() throws Exception {
 		OptimisticLock original = lock("admin");
 		Object copy = type.deepCopy(original);
 		assertEquals(original, copy);
-		assertNotSame("deep copy must not be same reference", original, copy);
+		assertNotSame(original, copy, "deep copy must not be same reference");
 	}
 
 	@Test
-	public void testDisassemble() {
+	void testDisassemble() {
 		OptimisticLock l = lock("admin");
 		assertSame(l, type.disassemble(l));
 	}
 
 	@Test
-	public void testAssemble() {
+	void testAssemble() {
 		OptimisticLock l = lock("admin");
 		assertSame(l, type.assemble(l, null));
 	}
 
 	@Test
-	public void testReplace() {
+	void testReplace() {
 		OptimisticLock original = lock("admin");
 		OptimisticLock target = lock("other");
 		assertSame(original, type.replace(original, target, null));
 	}
 
 	@Test
-	public void testObjectToSQLStringNull() throws Exception {
+	void testObjectToSQLStringNull() throws Exception {
 		assertEquals("NULL", type.objectToSQLString(null, null));
 	}
 
 	@Test
-	public void testObjectToSQLStringNonNull() throws Exception {
+	void testObjectToSQLStringNonNull() throws Exception {
 		OptimisticLock l = lock("admin");
 		assertEquals(l.toString(), type.objectToSQLString(l, null));
 	}
 
 	@Test
-	public void testNullSafeGetReturnsNullWhenColumnNull() throws Exception {
+	void testNullSafeGetReturnsNullWhenColumnNull() throws Exception {
 		ResultSet rs = mock(ResultSet.class);
 		when(rs.getString("col")).thenReturn(null);
 		when(rs.wasNull()).thenReturn(Boolean.TRUE);
@@ -134,7 +135,7 @@ public class OptimisticLockUserTypeTest {
 	}
 
 	@Test
-	public void testNullSafeGetReturnsNullWhenEmptyString() throws Exception {
+	void testNullSafeGetReturnsNullWhenEmptyString() throws Exception {
 		ResultSet rs = mock(ResultSet.class);
 		when(rs.getString("col")).thenReturn("");
 		when(rs.wasNull()).thenReturn(Boolean.FALSE);
@@ -142,7 +143,7 @@ public class OptimisticLockUserTypeTest {
 	}
 
 	@Test
-	public void testNullSafeGetReturnsLockWhenNotNull() throws Exception {
+	void testNullSafeGetReturnsLockWhenNotNull() throws Exception {
 		OptimisticLock l = lock("admin");
 		String lockString = l.toString();
 		ResultSet rs = mock(ResultSet.class);
@@ -154,32 +155,32 @@ public class OptimisticLockUserTypeTest {
 	}
 
 	@Test
-	public void testNullSafeSetNull() throws Exception {
+	void testNullSafeSetNull() throws Exception {
 		PreparedStatement ps = mock(PreparedStatement.class);
 		type.nullSafeSet(ps, null, 1, null);
 		verify(ps).setNull(1, Types.VARCHAR);
 	}
 
 	@Test
-	public void testNullSafeSetNonNull() throws Exception {
+	void testNullSafeSetNonNull() throws Exception {
 		PreparedStatement ps = mock(PreparedStatement.class);
 		OptimisticLock l = lock("admin");
 		type.nullSafeSet(ps, l, 2, null);
 		verify(ps).setString(2, l.toString());
 	}
 
-	@Test(expected = org.hibernate.HibernateException.class)
-	public void testNullSafeGetThrowsHibernateExceptionForMalformedValue() throws Exception {
+	@Test
+	void testNullSafeGetThrowsHibernateExceptionForMalformedValue() throws Exception {
 		// covers L53-54: DomainException catch when lock string too short
 		ResultSet rs = mock(ResultSet.class);
 		when(rs.getString("col")).thenReturn("bad");
 		when(rs.wasNull()).thenReturn(Boolean.FALSE);
-		type.nullSafeGet(rs, new String[] {"col"}, null, null);
+		assertThrows(org.hibernate.HibernateException.class, () -> type.nullSafeGet(rs, new String[] {"col"}, null, null));
 	}
 
-	@Test(expected = org.hibernate.HibernateException.class)
-	public void testDeepCopyThrowsHibernateExceptionForMalformedValue() {
+	@Test
+	void testDeepCopyThrowsHibernateExceptionForMalformedValue() {
 		// covers L75-76: DomainException catch when toString() produces invalid lock string
-		type.deepCopy("bad");
+		assertThrows(org.hibernate.HibernateException.class, () -> type.deepCopy("bad"));
 	}
 }

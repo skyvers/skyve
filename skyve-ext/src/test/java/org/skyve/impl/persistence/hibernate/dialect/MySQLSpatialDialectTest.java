@@ -3,54 +3,54 @@ package org.skyve.impl.persistence.hibernate.dialect;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.Point;
 import org.skyve.impl.persistence.hibernate.dialect.SkyveDialect.RDBMS;
 
 @SuppressWarnings("static-method")
-public class MySQLSpatialDialectTest {
+class MySQLSpatialDialectTest {
 
 	// ---- MySQL5InnoDBSpatialDialect ----
 
 	@Test
-	public void mysql5getRDBMSReturnsMysql() {
+	void mysql5getRDBMSReturnsMysql() {
 		MySQL5InnoDBSpatialDialect dialect = new MySQL5InnoDBSpatialDialect();
 		assertThat(dialect.getRDBMS(), is(RDBMS.mysql));
 	}
 
 	@Test
-	public void mysql5getGeometryTypeIsNotNull() {
+	void mysql5getGeometryTypeIsNotNull() {
 		MySQL5InnoDBSpatialDialect dialect = new MySQL5InnoDBSpatialDialect();
 		assertThat(dialect.getGeometryType(), notNullValue());
 	}
 
 	@Test
-	public void mysql5getGeometrySqlType() {
+	void mysql5getGeometrySqlType() {
 		MySQL5InnoDBSpatialDialect dialect = new MySQL5InnoDBSpatialDialect();
 		int sqlType = dialect.getGeometrySqlType();
 		assertThat(Integer.valueOf(sqlType), notNullValue());
 	}
 
 	@Test
-	public void mysql5getModifyColumnStringIsNotNull() {
+	void mysql5getModifyColumnStringIsNotNull() {
 		MySQL5InnoDBSpatialDialect dialect = new MySQL5InnoDBSpatialDialect();
 		assertThat(dialect.getModifyColumnString(), notNullValue());
 	}
 
 	@SuppressWarnings("null") // passes null on purpose
 	@Test
-	public void mysql5isAlterTableColumnChangeRequiredWithNullsReturnsFalse() {
+	void mysql5isAlterTableColumnChangeRequiredWithNullsReturnsFalse() {
 		MySQL5InnoDBSpatialDialect dialect = new MySQL5InnoDBSpatialDialect();
 		assertFalse(dialect.isAlterTableColumnChangeRequired(null, null));
 	}
 
 	@Test
-	public void mysql5getIndexExporterIsNotNull() {
+	void mysql5getIndexExporterIsNotNull() {
 		MySQL5InnoDBSpatialDialect dialect = new MySQL5InnoDBSpatialDialect();
 		assertThat(dialect.getIndexExporter(), notNullValue());
 	}
@@ -58,26 +58,26 @@ public class MySQLSpatialDialectTest {
 	// ---- MySQL56InnoDBSpatialDialect ----
 
 	@Test
-	public void mysql56getRDBMSReturnsMysql() {
+	void mysql56getRDBMSReturnsMysql() {
 		MySQL56InnoDBSpatialDialect dialect = new MySQL56InnoDBSpatialDialect();
 		assertThat(dialect.getRDBMS(), is(RDBMS.mysql));
 	}
 
 	@Test
-	public void mysql56getGeometryTypeIsNotNull() {
+	void mysql56getGeometryTypeIsNotNull() {
 		MySQL56InnoDBSpatialDialect dialect = new MySQL56InnoDBSpatialDialect();
 		assertThat(dialect.getGeometryType(), notNullValue());
 	}
 
 	@SuppressWarnings("null") // passes null on purpose
 	@Test
-	public void mysql56isAlterTableColumnChangeRequiredWithNullsReturnsFalse() {
+	void mysql56isAlterTableColumnChangeRequiredWithNullsReturnsFalse() {
 		MySQL56InnoDBSpatialDialect dialect = new MySQL56InnoDBSpatialDialect();
 		assertFalse(dialect.isAlterTableColumnChangeRequired(null, null));
 	}
 
 	@Test
-	public void mysql56getIndexExporterIsNotNull() {
+	void mysql56getIndexExporterIsNotNull() {
 		MySQL56InnoDBSpatialDialect dialect = new MySQL56InnoDBSpatialDialect();
 		assertThat(dialect.getIndexExporter(), notNullValue());
 	}
@@ -85,52 +85,52 @@ public class MySQLSpatialDialectTest {
 	// ---- MySQL8InnoDBSpatialDialect ----
 
 	@Test
-	public void mysql8getRDBMSReturnsMysql() {
+	void mysql8getRDBMSReturnsMysql() {
 		MySQL8InnoDBSpatialDialect dialect = new MySQL8InnoDBSpatialDialect();
 		assertThat(dialect.getRDBMS(), is(RDBMS.mysql));
 	}
 
 	@Test
-	public void mysql8getGeometryTypeIsNotNull() {
+	void mysql8getGeometryTypeIsNotNull() {
 		MySQL8InnoDBSpatialDialect dialect = new MySQL8InnoDBSpatialDialect();
 		assertThat(dialect.getGeometryType(), notNullValue());
 	}
 
 	@SuppressWarnings("null") // passes null on purpose
 	@Test
-	public void mysql8isAlterTableColumnChangeRequiredWithNullsReturnsFalse() {
+	void mysql8isAlterTableColumnChangeRequiredWithNullsReturnsFalse() {
 		MySQL8InnoDBSpatialDialect dialect = new MySQL8InnoDBSpatialDialect();
 		assertFalse(dialect.isAlterTableColumnChangeRequired(null, null));
 	}
 
 	@Test
-	public void mysql8getIndexExporterIsNotNull() {
+	void mysql8getIndexExporterIsNotNull() {
 		MySQL8InnoDBSpatialDialect dialect = new MySQL8InnoDBSpatialDialect();
 		assertThat(dialect.getIndexExporter(), notNullValue());
 	}
 
 	@Test
-	public void mysql56getGeometrySqlType() {
+	void mysql56getGeometrySqlType() {
 		MySQL56InnoDBSpatialDialect dialect = new MySQL56InnoDBSpatialDialect();
 		int sqlType = dialect.getGeometrySqlType();
 		assertThat(Integer.valueOf(sqlType), notNullValue());
 	}
 
 	@Test
-	public void mysql56getModifyColumnStringIsNotNull() {
+	void mysql56getModifyColumnStringIsNotNull() {
 		MySQL56InnoDBSpatialDialect dialect = new MySQL56InnoDBSpatialDialect();
 		assertThat(dialect.getModifyColumnString(), notNullValue());
 	}
 
 	@Test
-	public void mysql8getGeometrySqlType() {
+	void mysql8getGeometrySqlType() {
 		MySQL8InnoDBSpatialDialect dialect = new MySQL8InnoDBSpatialDialect();
 		int sqlType = dialect.getGeometrySqlType();
 		assertThat(Integer.valueOf(sqlType), notNullValue());
 	}
 
 	@Test
-	public void mysql8getModifyColumnStringIsNotNull() {
+	void mysql8getModifyColumnStringIsNotNull() {
 		MySQL8InnoDBSpatialDialect dialect = new MySQL8InnoDBSpatialDialect();
 		assertThat(dialect.getModifyColumnString(), notNullValue());
 	}
@@ -138,7 +138,7 @@ public class MySQLSpatialDialectTest {
         // ---- MySQLSpatialDialectDelegate — convertTo/FromPersistedValue ----
 
         @Test
-        public void mysql5ConvertToPersistedValueReturnsNonNull() {
+        void mysql5ConvertToPersistedValueReturnsNonNull() {
                 MySQL5InnoDBSpatialDialect dialect = new MySQL5InnoDBSpatialDialect();
                 GeometryFactory gf = new GeometryFactory();
                 Point point = gf.createPoint(new Coordinate(1.0, 2.0));
@@ -147,7 +147,7 @@ public class MySQLSpatialDialectTest {
         }
 
         @Test
-        public void mysql5ConvertRoundTrip() {
+        void mysql5ConvertRoundTrip() {
                 MySQL5InnoDBSpatialDialect dialect = new MySQL5InnoDBSpatialDialect();
                 GeometryFactory gf = new GeometryFactory();
                 Point point = gf.createPoint(new Coordinate(3.0, 4.0));
@@ -159,7 +159,7 @@ public class MySQLSpatialDialectTest {
         }
 
         @Test
-        public void mysql56ConvertToPersistedValueReturnsNonNull() {
+        void mysql56ConvertToPersistedValueReturnsNonNull() {
                 MySQL56InnoDBSpatialDialect dialect = new MySQL56InnoDBSpatialDialect();
                 GeometryFactory gf = new GeometryFactory();
                 Point point = gf.createPoint(new Coordinate(5.0, 6.0));
@@ -169,7 +169,7 @@ public class MySQLSpatialDialectTest {
 
         @SuppressWarnings("null") // uses a nullable result where the API expects non-null
         @Test
-        public void mysql56ConvertRoundTrip() {
+        void mysql56ConvertRoundTrip() {
                 MySQL56InnoDBSpatialDialect dialect = new MySQL56InnoDBSpatialDialect();
                 GeometryFactory gf = new GeometryFactory();
                 Point point = gf.createPoint(new Coordinate(5.0, 6.0));
@@ -178,7 +178,7 @@ public class MySQLSpatialDialectTest {
         }
 
         @Test
-        public void mysql8ConvertToPersistedValueReturnsNonNull() {
+        void mysql8ConvertToPersistedValueReturnsNonNull() {
                 MySQL8InnoDBSpatialDialect dialect = new MySQL8InnoDBSpatialDialect();
                 GeometryFactory gf = new GeometryFactory();
                 Point point = gf.createPoint(new Coordinate(7.0, 8.0));
@@ -188,7 +188,7 @@ public class MySQLSpatialDialectTest {
 
         @SuppressWarnings("null") // uses a nullable result where the API expects non-null
         @Test
-        public void mysql8ConvertRoundTrip() {
+        void mysql8ConvertRoundTrip() {
                 MySQL8InnoDBSpatialDialect dialect = new MySQL8InnoDBSpatialDialect();
                 GeometryFactory gf = new GeometryFactory();
                 Point point = gf.createPoint(new Coordinate(7.0, 8.0));

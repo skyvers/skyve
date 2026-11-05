@@ -1,15 +1,13 @@
 package org.skyve.impl.report.jasperreports;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.ByteArrayOutputStream;
 import java.lang.reflect.Method;
 import java.util.stream.Stream;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-import org.junit.runners.Parameterized.Parameters;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.skyve.report.ReportFormat;
 
 import net.sf.jasperreports.engine.export.HtmlExporter;
@@ -25,19 +23,9 @@ import net.sf.jasperreports.engine.export.ooxml.JRXlsxExporter;
 import net.sf.jasperreports.pdf.JRPdfExporter;
 import net.sf.jasperreports.poi.export.JRXlsExporter;
 
-@RunWith(Parameterized.class)
-public class JasperReportUtilTest {
-
-	private final ReportFormat format;
-	private final Class<?> exporterClass;
-
-	public JasperReportUtilTest(ReportFormat format, Class<?> exporterClass) {
-		this.format = format;
-		this.exporterClass = exporterClass;
-	}
-
-	@Parameters(name = "{0}")
-	public static Iterable<Object[]> formats() {
+@SuppressWarnings("static-method")
+class JasperReportUtilTest {
+	static Iterable<Object[]> formats() {
 		return Stream.of(new Object[][] {
 			{ReportFormat.txt, JRTextExporter.class},
 			{ReportFormat.csv, JRCsvExporter.class},
@@ -54,8 +42,9 @@ public class JasperReportUtilTest {
 		})::iterator;
 	}
 
-	@Test
-	public void getExporterReturnsExpectedExporterForFormat() throws Exception {
+	@ParameterizedTest(name = "{0}")
+	@MethodSource("formats")
+	void getExporterReturnsExpectedExporterForFormat(ReportFormat format, Class<?> exporterClass) throws Exception {
 		Method method = JasperReportUtil.class.getDeclaredMethod("getExporter", ReportFormat.class, java.io.OutputStream.class);
 		method.setAccessible(true);
 

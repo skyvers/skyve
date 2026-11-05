@@ -2,8 +2,8 @@ package org.skyve.impl.backup;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
@@ -17,9 +17,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InOrder;
 import org.skyve.domain.Bean;
@@ -31,19 +31,19 @@ import org.skyve.metadata.user.User;
 import org.skyve.persistence.SQL;
 
 @SuppressWarnings("static-method")
-public class TruncateTest {
-	@After
-	public void teardown() throws Exception {
+class TruncateTest {
+	@AfterEach
+	void teardown() throws Exception {
 		unbindPersistenceFromThread();
 	}
 
 	@Test
-	public void constructorCreatesUtilityInstance() {
+	void constructorCreatesUtilityInstance() {
 		assertThat(new Truncate(), is(org.hamcrest.CoreMatchers.notNullValue()));
 	}
 
 	@Test
-	public void truncateDatabaseUnlinksAndDeletesTablesInConstraintSafeOrder() throws Exception {
+	void truncateDatabaseUnlinksAndDeletesTablesInConstraintSafeOrder() throws Exception {
 		AbstractPersistence persistence = bindMockPersistence();
 		SQL sql = fluentSQL();
 		when(persistence.newSQL(anyString())).thenReturn(sql);
@@ -96,7 +96,7 @@ public class TruncateTest {
 	}
 
 	@Test
-	public void truncateDoesNothingWhenDatabaseAndContentAreFalse() throws Exception {
+	void truncateDoesNothingWhenDatabaseAndContentAreFalse() throws Exception {
 		AbstractPersistence persistence = bindMockPersistence();
 		Collection<Table> tables = List.of(new Table("CustomerDoc", "ADM_CUSTOMER_DOC"));
 
@@ -108,19 +108,19 @@ public class TruncateTest {
 	}
 
 	@Test
-	public void truncateThrowsWithoutTruncatingWhenTheUserHasNoCustomer() throws Exception {
+	void truncateThrowsWithoutTruncatingWhenTheUserHasNoCustomer() throws Exception {
 		AbstractPersistence persistence = bindMockPersistence();
 		User user = mock(User.class);
 		when(persistence.getUser()).thenReturn(user);
 		when(user.getCustomerName()).thenReturn(null);
 
-		Assert.assertThrows(IllegalStateException.class, () -> Truncate.truncate(null, true, true));
+		Assertions.assertThrows(IllegalStateException.class, () -> Truncate.truncate(null, true, true));
 
 		verify(persistence, times(0)).newSQL(anyString());
 	}
 
 	@Test
-	public void truncateContentOnlyUsesConfiguredContentManager() throws Exception {
+	void truncateContentOnlyUsesConfiguredContentManager() throws Exception {
 		Class<? extends AbstractContentManager> originalContentManagerClass = AbstractContentManager.IMPLEMENTATION_CLASS;
 		try {
 			AbstractContentManager.IMPLEMENTATION_CLASS = RecordingContentManager.class;

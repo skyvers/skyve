@@ -1,91 +1,83 @@
 package org.skyve.domain.types.converters.integer;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import java.util.Arrays;
-import java.util.Collection;
+import java.util.stream.Stream;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-import org.junit.runners.Parameterized.Parameter;
-import org.junit.runners.Parameterized.Parameters;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.function.Executable;
 import org.skyve.domain.messages.ConversionException;
 import org.skyve.metadata.model.Attribute.AttributeType;
 
-@RunWith(Parameterized.class)
-public class SimplePercentageTest {
-	@Parameters(name = "{0}")
-	public static Collection<Object[]> invalidDisplayValues() {
-		return Arrays.asList(new Object[][] {
-				{"notANumber%"},
-				{"99999999999%"},
-				{"-99999999999%"}
-		});
+class SimplePercentageTest {
+	private static Stream<String> invalidDisplayValues() {
+		return Stream.of("notANumber%", "99999999999%", "-99999999999%");
 	}
-
-	@Parameter
-	public String invalidDisplayValue;
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void toDisplayValueAppendsPercentSign() throws ConversionException {
+	void toDisplayValueAppendsPercentSign() throws ConversionException {
 		SimplePercentage converter = new SimplePercentage();
 		assertEquals("42%", converter.toDisplayValue(Integer.valueOf(42)));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void fromDisplayValueStripsPercentSign() throws ConversionException {
+	void fromDisplayValueStripsPercentSign() throws ConversionException {
 		SimplePercentage converter = new SimplePercentage();
 		assertEquals(Integer.valueOf(42), converter.fromDisplayValue("42%"));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void fromDisplayValueWithNoPercentSign() throws ConversionException {
+	void fromDisplayValueWithNoPercentSign() throws ConversionException {
 		SimplePercentage converter = new SimplePercentage();
 		assertEquals(Integer.valueOf(100), converter.fromDisplayValue("100"));
 	}
 
-	public void fromDisplayValueInvalidThrowsConversionException() {
+	@Test
+	@SuppressWarnings("static-method")
+	void fromDisplayValueInvalidThrowsConversionException() {
 		SimplePercentage converter = new SimplePercentage();
-		assertThrows(ConversionException.class, () -> converter.fromDisplayValue(invalidDisplayValue));
+		assertAll(invalidDisplayValues().map(invalidDisplayValue -> (Executable) () -> assertThrows(ConversionException.class,
+				() -> converter.fromDisplayValue(invalidDisplayValue),
+				invalidDisplayValue)));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void getValueTypeReturnsIntegerClass() {
+	void getValueTypeReturnsIntegerClass() {
 		SimplePercentage converter = new SimplePercentage();
 		assertEquals(Integer.class, converter.getValueType());
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void getAttributeTypeReturnsInteger() {
+	void getAttributeTypeReturnsInteger() {
 		SimplePercentage converter = new SimplePercentage();
 		assertEquals(AttributeType.integer, converter.getAttributeType());
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void getFormatReturnsNull() {
+	void getFormatReturnsNull() {
 		SimplePercentage converter = new SimplePercentage();
 		assertNull(converter.getFormat());
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void getValidatorReturnsNull() {
+	void getValidatorReturnsNull() {
 		SimplePercentage converter = new SimplePercentage();
 		assertNull(converter.getValidator());
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void getFormatPatternReturnsNull() {
+	void getFormatPatternReturnsNull() {
 		SimplePercentage converter = new SimplePercentage();
 		assertNull(converter.getFormatPattern());
 	}

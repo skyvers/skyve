@@ -504,4 +504,47 @@ class CustomerMetaDataTest {
 		customer.getFlagRoles().add(featureRole2);
 		assertThrows(MetaDataException.class, () -> customer.convert("test"));
 	}
+
+	// ── Required values that metadata built in code can omit ─────────────────
+
+	private static void assertConvertFails(CustomerMetaData customer, String expectedMessagePart) {
+		MetaDataException e = assertThrows(MetaDataException.class, () -> customer.convert("test"));
+		assertTrue(e.getMessage().contains(expectedMessagePart), e.getMessage());
+	}
+
+	@SuppressWarnings("null") // passes null on purpose
+	@Test
+	void convertThrowsWhenModulesIsNull() {
+		CustomerMetaData customer = createMinimalCustomerMetaData();
+		customer.setModules(null);
+		assertConvertFails(customer, "The customer [modules] is required");
+	}
+
+	@Test
+	void convertThrowsWhenCustomerRoleDescriptionIsNull() {
+		CustomerMetaData customer = createMinimalCustomerMetaData();
+		CustomerRolesMetaData rolesMetaData = new CustomerRolesMetaData();
+		CustomerRoleMetaData role = new CustomerRoleMetaData();
+		role.setName("AdminRole");
+		// description is null
+		rolesMetaData.getRoles().add(role);
+		customer.setRoles(rolesMetaData);
+		assertConvertFails(customer, "The [description] for customer role AdminRole is required");
+	}
+
+	@Test
+	void convertThrowsWhenModuleRoleModuleNameIsNull() {
+		CustomerMetaData customer = createMinimalCustomerMetaData();
+		CustomerRolesMetaData rolesMetaData = new CustomerRolesMetaData();
+		CustomerRoleMetaData role = new CustomerRoleMetaData();
+		role.setName("AdminRole");
+		role.setDescription("Administers the customer");
+		CustomerModuleRoleMetaData moduleRole = new CustomerModuleRoleMetaData();
+		moduleRole.setName("BasicUser");
+		// module name is null
+		role.getRoles().add(moduleRole);
+		rolesMetaData.getRoles().add(role);
+		customer.setRoles(rolesMetaData);
+		assertConvertFails(customer, "The [module] of module role BasicUser for customer role AdminRole is required");
+	}
 }

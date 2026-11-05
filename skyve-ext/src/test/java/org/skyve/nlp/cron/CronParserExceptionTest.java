@@ -2,27 +2,27 @@ package org.skyve.nlp.cron;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 @SuppressWarnings("static-method")
-public class CronParserExceptionTest {
+class CronParserExceptionTest {
 
 	@Test
-	public void testConstructorStoresMessage() {
+	void testConstructorStoresMessage() {
 		CronParserException ex = new CronParserException("test message");
 		assertThat(ex.getMessage(), is("test message"));
 	}
 
 	@Test
-	public void testIsRuntimeException() {
+	void testIsRuntimeException() {
 		assertTrue(RuntimeException.class.isAssignableFrom(CronParserException.class));
 	}
 
 	@Test
-	public void testExceptionCanBeThrown() {
+	void testExceptionCanBeThrown() {
 		try {
 			throw new CronParserException("thrown");
 		} catch (CronParserException e) {

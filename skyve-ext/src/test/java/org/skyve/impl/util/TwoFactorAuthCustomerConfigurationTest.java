@@ -1,37 +1,37 @@
 package org.skyve.impl.util;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.skyve.impl.util.TwoFactorAuthCustomerConfiguration.TfaType;
 
 @SuppressWarnings("static-method")
-public class TwoFactorAuthCustomerConfigurationTest {
+class TwoFactorAuthCustomerConfigurationTest {
 
 	// ---- Constructor and getters ----
 
 	@Test
-	public void constructorStoresTfaType() {
+	void constructorStoresTfaType() {
 		TwoFactorAuthCustomerConfiguration cfg = new TwoFactorAuthCustomerConfiguration("email", 60, "Subject", "Body");
 		assertEquals("email", cfg.getTfaType());
 	}
 
 	@Test
-	public void constructorStoresTimeoutSeconds() {
+	void constructorStoresTimeoutSeconds() {
 		TwoFactorAuthCustomerConfiguration cfg = new TwoFactorAuthCustomerConfiguration("email", 120, "Subject", "Body");
 		assertEquals(120, cfg.getTfaTimeOutSeconds());
 	}
 
 	@Test
-	public void constructorStoresEmailSubject() {
+	void constructorStoresEmailSubject() {
 		TwoFactorAuthCustomerConfiguration cfg = new TwoFactorAuthCustomerConfiguration("email", 60, "MySubject", "Body");
 		assertEquals("MySubject", cfg.getTwoFactorEmailSubject());
 	}
 
 	@Test
-	public void constructorStoresEmailBody() {
+	void constructorStoresEmailBody() {
 		TwoFactorAuthCustomerConfiguration cfg = new TwoFactorAuthCustomerConfiguration("email", 60, "Subject", "MyBody");
 		assertEquals("MyBody", cfg.getTwoFactorEmailBody());
 	}
@@ -39,19 +39,19 @@ public class TwoFactorAuthCustomerConfigurationTest {
 	// ---- isTfaEmail ----
 
 	@Test
-	public void isTfaEmailTrueForEmailType() {
+	void isTfaEmailTrueForEmailType() {
 		TwoFactorAuthCustomerConfiguration cfg = new TwoFactorAuthCustomerConfiguration("email", 60, "S", "B");
 		assertTrue(cfg.isTfaEmail());
 	}
 
 	@Test
-	public void isTfaEmailTrueForEmailUpperCase() {
+	void isTfaEmailTrueForEmailUpperCase() {
 		TwoFactorAuthCustomerConfiguration cfg = new TwoFactorAuthCustomerConfiguration("EMAIL", 60, "S", "B");
 		assertTrue(cfg.isTfaEmail());
 	}
 
 	@Test
-	public void isTfaEmailFalseForOffType() {
+	void isTfaEmailFalseForOffType() {
 		TwoFactorAuthCustomerConfiguration cfg = new TwoFactorAuthCustomerConfiguration("off", 0, "S", "B");
 		assertFalse(cfg.isTfaEmail());
 	}
@@ -59,13 +59,13 @@ public class TwoFactorAuthCustomerConfigurationTest {
 	// ---- isTfaOff ----
 
 	@Test
-	public void isTfaOffTrueForOffType() {
+	void isTfaOffTrueForOffType() {
 		TwoFactorAuthCustomerConfiguration cfg = new TwoFactorAuthCustomerConfiguration("off", 0, "S", "B");
 		assertTrue(cfg.isTfaOff());
 	}
 
 	@Test
-	public void isTfaOffFalseForEmailType() {
+	void isTfaOffFalseForEmailType() {
 		TwoFactorAuthCustomerConfiguration cfg = new TwoFactorAuthCustomerConfiguration("email", 60, "S", "B");
 		assertFalse(cfg.isTfaOff());
 	}
@@ -73,25 +73,25 @@ public class TwoFactorAuthCustomerConfigurationTest {
 	// ---- getParsedTfaType ----
 
 	@Test
-	public void parsedTfaTypeIsEmailForEmailString() {
+	void parsedTfaTypeIsEmailForEmailString() {
 		TwoFactorAuthCustomerConfiguration cfg = new TwoFactorAuthCustomerConfiguration("email", 60, "S", "B");
 		assertEquals(TfaType.EMAIL, cfg.getParsedTfaType());
 	}
 
 	@Test
-	public void parsedTfaTypeIsOffForOffString() {
+	void parsedTfaTypeIsOffForOffString() {
 		TwoFactorAuthCustomerConfiguration cfg = new TwoFactorAuthCustomerConfiguration("off", 0, "S", "B");
 		assertEquals(TfaType.OFF, cfg.getParsedTfaType());
 	}
 
 	@Test
-	public void parsedTfaTypeIsUnsupportedForUnknownString() {
+	void parsedTfaTypeIsUnsupportedForUnknownString() {
 		TwoFactorAuthCustomerConfiguration cfg = new TwoFactorAuthCustomerConfiguration("sms", 60, "S", "B");
 		assertEquals(TfaType.UNSUPPORTED, cfg.getParsedTfaType());
 	}
 
 	@Test
-	public void parsedTfaTypeIsUnsupportedForNullString() {
+	void parsedTfaTypeIsUnsupportedForNullString() {
 		TwoFactorAuthCustomerConfiguration cfg = new TwoFactorAuthCustomerConfiguration(null, 0, "S", "B");
 		assertEquals(TfaType.UNSUPPORTED, cfg.getParsedTfaType());
 	}

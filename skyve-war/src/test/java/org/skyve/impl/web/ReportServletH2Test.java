@@ -17,6 +17,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.security.Principal;
 import java.util.Map;
+import java.util.UUID;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -24,12 +25,16 @@ import org.junit.jupiter.api.Test;
 import org.skyve.impl.cache.StateUtil;
 import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
 import org.skyve.impl.persistence.AbstractPersistence;
+import org.skyve.impl.web.service.smartclient.SmartClientWebContext;
 import org.skyve.metadata.router.UxUi;
 import org.skyve.report.ReportFormat;
 import org.skyve.util.DataBuilder;
 import org.skyve.util.test.SkyveFixture.FixtureType;
 import org.skyve.web.UserAgentType;
 import org.skyve.web.WebContext;
+import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.mock.web.MockHttpServletResponse;
+import org.springframework.mock.web.MockHttpSession;
 
 import jakarta.servlet.ServletOutputStream;
 import jakarta.servlet.WriteListener;
@@ -159,6 +164,33 @@ class ReportServletH2Test extends AbstractSkyveTest {
 		String body = output.text();
 		assertTrue(body.contains("Missing Report Parameters"), body);
 		assertTrue(body.contains("There are no report parameters"), body);
+	}
+
+	@Test
+	void doReportWithoutAReportNameGeneratesTheEditViewReportOfTheConversationBean() throws Exception {
+		Contact contact = saveReportBean("report-print");
+		MockHttpSession session = new MockHttpSession();
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/report");
+		request.setSession(session);
+		// print as the desktop UX/UI, a UX/UI the test user has access to the contact's edit view in
+		request.setAttribute(UserAgent.class.getName() + ".selection",
+								new RequestUxUiSelection(UserAgentType.desktop,
+															false,
+															UxUi.newSmartClient(UxUi.DESKTOP_NAME, "Cerulean", "omega")));
+		SmartClientWebContext webContext = new SmartClientWebContext(UUID.randomUUID().toString(), request);
+		webContext.setCurrentBean(contact);
+		StateUtil.commitAndCacheConversation(webContext);
+		request.addParameter(AbstractWebContext.CONTEXT_NAME, webContext.getWebId());
+		request.addParameter(AbstractWebContext.MODULE_NAME, Contact.MODULE_NAME);
+		request.addParameter(AbstractWebContext.DOCUMENT_NAME, Contact.DOCUMENT_NAME);
+		request.addParameter(AbstractWebContext.REPORT_FORMAT, ReportFormat.csv.name());
+		MockHttpServletResponse response = new MockHttpServletResponse();
+
+		invokeDoReport(request, response);
+
+		assertEquals(HttpServletResponse.SC_OK, response.getStatus(), response.getContentAsString());
+		assertTrue(response.getContentType().startsWith(org.skyve.content.MimeType.csv.toString()), response.getContentType());
+		assertTrue(response.getContentAsString().contains(contact.getName()), response.getContentAsString());
 	}
 
 	@Test
@@ -306,6 +338,21 @@ class ReportServletH2Test extends AbstractSkyveTest {
 		doExport.setAccessible(true);
 		try {
 			doExport.invoke(null, request, response);
+		}
+		catch (InvocationTargetException e) {
+			Throwable cause = e.getCause();
+			if (cause instanceof Exception exception) {
+				throw exception;
+			}
+			throw e;
+		}
+	}
+
+	private static void invokeDoReport(HttpServletRequest request, HttpServletResponse response) throws Exception {
+		Method doReport = ReportServlet.class.getDeclaredMethod("doReport", HttpServletRequest.class, HttpServletResponse.class);
+		doReport.setAccessible(true);
+		try {
+			doReport.invoke(null, request, response);
 		}
 		catch (InvocationTargetException e) {
 			Throwable cause = e.getCause();

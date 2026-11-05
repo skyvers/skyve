@@ -1,34 +1,33 @@
 package org.skyve.impl.archive.support;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
 /**
  * Tests for {@link BufferedLineReader}.
  */
-public class BufferedLineReaderTest {
+class BufferedLineReaderTest {
 
-	@Rule
-	public TemporaryFolder tmp = new TemporaryFolder();
+	@TempDir
+	Path tmp;
 
 	private Path writeFile(String content) throws IOException {
-		Path path = tmp.newFile().toPath();
+		Path path = Files.createTempFile(tmp, "junit", null);
 		Files.write(path, content.getBytes(StandardCharsets.UTF_8));
 		return path;
 	}
 
 	@Test
-	public void readSingleLine() throws IOException {
+	void readSingleLine() throws IOException {
 		Path path = writeFile("hello world\n");
 		try (BufferedLineReader reader = new BufferedLineReader(path, 0)) {
 			BufferedLineReader.Line line = reader.readLine();
@@ -40,7 +39,7 @@ public class BufferedLineReaderTest {
 
 	@SuppressWarnings("null") // a null here fails the test
 	@Test
-	public void readMultipleLines() throws IOException {
+	void readMultipleLines() throws IOException {
 		Path path = writeFile("line1\nline2\nline3\n");
 		try (BufferedLineReader reader = new BufferedLineReader(path, 0)) {
 			assertEquals("line1", reader.readLine().line());
@@ -51,7 +50,7 @@ public class BufferedLineReaderTest {
 	}
 
 	@Test
-	public void readLineWithoutTrailingNewline() throws IOException {
+	void readLineWithoutTrailingNewline() throws IOException {
 		Path path = writeFile("no newline at end");
 		try (BufferedLineReader reader = new BufferedLineReader(path, 0)) {
 			BufferedLineReader.Line line = reader.readLine();
@@ -62,7 +61,7 @@ public class BufferedLineReaderTest {
 	}
 
 	@Test
-	public void readEmptyFile() throws IOException {
+	void readEmptyFile() throws IOException {
 		Path path = writeFile("");
 		try (BufferedLineReader reader = new BufferedLineReader(path, 0)) {
 			assertNull(reader.readLine());
@@ -70,7 +69,7 @@ public class BufferedLineReaderTest {
 	}
 
 	@Test
-	public void lineOffsetsAreCorrect() throws IOException {
+	void lineOffsetsAreCorrect() throws IOException {
 		// "abc\ndef\n" — line1 starts at 0, ends at 4 (after \n); line2 starts at 4, ends at 8
 		Path path = writeFile("abc\ndef\n");
 		try (BufferedLineReader reader = new BufferedLineReader(path, 0)) {
@@ -87,7 +86,7 @@ public class BufferedLineReaderTest {
 	}
 
 	@Test
-	public void lineLengthExcludesNewline() throws IOException {
+	void lineLengthExcludesNewline() throws IOException {
 		// "hello\n" — length = 5 (not including '\n')
 		Path path = writeFile("hello\n");
 		try (BufferedLineReader reader = new BufferedLineReader(path, 0)) {
@@ -98,7 +97,7 @@ public class BufferedLineReaderTest {
 	}
 
 	@Test
-	public void startOffsetSkipsBytes() throws IOException {
+	void startOffsetSkipsBytes() throws IOException {
 		// "skip\nread\n" — start reading from offset 5 (skipping "skip\n")
 		Path path = writeFile("skip\nread\n");
 		try (BufferedLineReader reader = new BufferedLineReader(path, 5)) {

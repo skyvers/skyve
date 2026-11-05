@@ -1,30 +1,30 @@
 package org.skyve.impl.web;
 
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.mockito.Mockito.mock;
 
-import org.junit.After;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 @SuppressWarnings("static-method")
-public class WebContainerTest {
-	@After
-	public void tearDown() {
+class WebContainerTest {
+	@AfterEach
+	void tearDown() {
 		WebContainer.clear();
 	}
 
 	@Test
-	public void getHttpServletRequestResponseReturnsNullWhenNotSet() {
+	void getHttpServletRequestResponseReturnsNullWhenNotSet() {
 		assertNull(WebContainer.getHttpServletRequestResponse());
 	}
 
 	@Test
-	public void setAndGetHttpServletRequestResponse() {
+	void setAndGetHttpServletRequestResponse() {
 		HttpServletRequest request = mock(HttpServletRequest.class);
 		HttpServletResponse response = mock(HttpServletResponse.class);
 
@@ -37,7 +37,7 @@ public class WebContainerTest {
 	}
 
 	@Test
-	public void clearRemovesHttpServletRequestResponse() {
+	void clearRemovesHttpServletRequestResponse() {
 		HttpServletRequest request = mock(HttpServletRequest.class);
 		HttpServletResponse response = mock(HttpServletResponse.class);
 

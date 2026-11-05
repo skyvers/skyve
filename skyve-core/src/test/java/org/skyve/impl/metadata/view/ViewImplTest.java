@@ -15,8 +15,14 @@ import java.util.TreeSet;
 
 import org.junit.jupiter.api.Test;
 import org.skyve.impl.metadata.customer.CustomerImpl;
+import org.skyve.impl.metadata.model.document.DocumentImpl;
+import org.skyve.impl.metadata.module.ModuleImpl;
 import org.skyve.impl.metadata.view.component.Component;
 import org.skyve.impl.metadata.view.container.Sidebar;
+import org.skyve.impl.metadata.view.widget.bound.input.CompleteType;
+import org.skyve.impl.metadata.view.widget.bound.input.TextField;
+import org.skyve.impl.util.UtilImpl;
+import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.user.UserAccess;
 
@@ -224,5 +230,113 @@ class ViewImplTest {
 		Set<UserAccess> result = v.getAccesses(customer, mock(Document.class), "desktop");
 
 		assertEquals(Set.of(UserAccess.singular("admin", "User")), result);
+	}
+
+	@Test
+	void getAccessesTranslatesComponentAggregatesIntoTheOwningDocument() throws Exception {
+		Set<UserAccess> fragmentAccesses = new TreeSet<>();
+		fragmentAccesses.add(UserAccess.queryAggregate("other", "qContacts"));
+		fragmentAccesses.add(UserAccess.documentAggregate("other", "Contact"));
+		fragmentAccesses.add(UserAccess.modelAggregate("other", "Contact", "contactModel"));
+		fragmentAccesses.add(UserAccess.dynamicImage("other", "Contact", "contactImage"));
+
+		Set<UserAccess> result = accessesWithComponentFragment(fragmentAccesses);
+
+		assertEquals(Set.of(UserAccess.singular("admin", "User"),
+								UserAccess.queryAggregate("admin", "qContacts"),
+								UserAccess.documentAggregate("admin", "Contact"),
+								UserAccess.modelAggregate("admin", "User", "contactModel"),
+								UserAccess.dynamicImage("admin", "User", "contactImage")),
+						result);
+	}
+
+	@Test
+	void getAccessesThrowsWhenAComponentAggregateHasNoComponent() throws Exception {
+		Set<UserAccess> fragmentAccesses = new TreeSet<>();
+		@SuppressWarnings("null") // passes null on purpose
+		UserAccess componentless = UserAccess.queryAggregate("other", null);
+		fragmentAccesses.add(componentless);
+
+		IllegalStateException e = assertThrows(IllegalStateException.class, () -> accessesWithComponentFragment(fragmentAccesses));
+		assertTrue(e.getMessage().endsWith("has no component"), e.getMessage());
+	}
+
+	/**
+	 * Gets the accesses of a view in document admin.User with a singular access and one component
+	 * whose fragment has the given accesses.
+	 */
+	private static Set<UserAccess> accessesWithComponentFragment(Set<UserAccess> fragmentAccesses) throws Exception {
+		Field accessesField = ViewImpl.class.getDeclaredField("accesses");
+		accessesField.setAccessible(true);
+		ViewImpl v = new ViewImpl();
+		Set<UserAccess> accesses = new TreeSet<>();
+		accesses.add(UserAccess.singular("admin", "User"));
+		accessesField.set(v, accesses);
+		ViewImpl fragment = new ViewImpl();
+		accessesField.set(fragment, fragmentAccesses);
+		CustomerImpl customer = mock(CustomerImpl.class);
+		Component component = mock(Component.class);
+		when(component.getFragment(customer, "desktop")).thenReturn(fragment);
+		Field componentsField = ViewImpl.class.getDeclaredField("components");
+		componentsField.setAccessible(true);
+		@SuppressWarnings("unchecked")
+		Set<Component> components = (Set<Component>) componentsField.get(v);
+		components.add(component);
+		Document document = mock(Document.class);
+		when(document.getOwningModuleName()).thenReturn("admin");
+		when(document.getName()).thenReturn("User");
+
+		return v.getAccesses(customer, document, "desktop");
+	}
+
+	@Test
+	void resolveThrowsWhenAPreviousCompleteTextFieldHasNoBinding() {
+		ViewImpl v = new ViewImpl();
+		v.setName("edit");
+		TextField text = new TextField(); // no binding
+		text.setComplete(CompleteType.previous);
+		v.getContained().add(text);
+		ModuleImpl module = mock(ModuleImpl.class);
+		when(module.getName()).thenReturn("admin");
+		DocumentImpl document = new DocumentImpl();
+		document.setName("User");
+		CustomerImpl customer = mock(CustomerImpl.class);
+
+		boolean accessControl = UtilImpl.ACCESS_CONTROL;
+		UtilImpl.ACCESS_CONTROL = true;
+		try {
+			MetaDataException e = assertThrows(MetaDataException.class, () -> v.resolve("desktop", customer, module, document, true));
+			assertEquals("A text field binding is required in view edit for document admin.User", e.getMessage());
+		}
+		finally {
+			UtilImpl.ACCESS_CONTROL = accessControl;
+		}
+	}
+
+	@Test
+	void resolveAddsAPreviousCompleteAccessForATextFieldWithABinding() {
+		ViewImpl v = new ViewImpl();
+		v.setName("edit");
+		TextField text = new TextField();
+		text.setBinding("name");
+		text.setComplete(CompleteType.previous);
+		v.getContained().add(text);
+		ModuleImpl module = mock(ModuleImpl.class);
+		when(module.getName()).thenReturn("admin");
+		DocumentImpl document = new DocumentImpl();
+		document.setName("User");
+		CustomerImpl customer = mock(CustomerImpl.class);
+
+		boolean accessControl = UtilImpl.ACCESS_CONTROL;
+		UtilImpl.ACCESS_CONTROL = true;
+		try {
+			v.resolve("desktop", customer, module, document, true);
+			Set<UserAccess> accesses = v.getAccesses(customer, document, "desktop");
+			assertNotNull(accesses);
+			assertTrue(accesses.contains(UserAccess.previousComplete("admin", "User", "name")), String.valueOf(accesses));
+		}
+		finally {
+			UtilImpl.ACCESS_CONTROL = accessControl;
+		}
 	}
 }

@@ -3,7 +3,7 @@ package org.skyve.util;
 import static java.util.stream.Collectors.toSet;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -11,17 +11,17 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.UUID;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.skyve.impl.util.UUIDv7;
 
 @SuppressWarnings("java:S8692") // system clock OK
-public class UUIDv7Test {
+class UUIDv7Test {
 
     private final int iterationCount = 100_000;
 
 	@Test
     @SuppressWarnings("boxing")
-    public void duplicateTest() {
+    void duplicateTest() {
 
         Set<String> generated = new TreeSet<>();
 
@@ -35,7 +35,7 @@ public class UUIDv7Test {
 
     @SuppressWarnings("boxing")
 	@Test
-    public void sameTimeTest() {
+    void sameTimeTest() {
 
         Instant now = Instant.now();
 
@@ -63,7 +63,7 @@ public class UUIDv7Test {
 
  	@Test
     @SuppressWarnings("static-method")
- 	public void testToInstant() {
+ 	void testToInstant() {
 
         Instant now = Instant.now();
 

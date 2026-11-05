@@ -1,19 +1,19 @@
 package org.skyve.impl.snapshot;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 @SuppressWarnings("static-method")
-public class SnapshotFilterTest {
+class SnapshotFilterTest {
 
 	@Test
-	public void testFromMapReturnsCriterionWhenColumnPresent() {
+	void testFromMapReturnsCriterionWhenColumnPresent() {
 		Map<String, Object> map = new LinkedHashMap<>();
 		map.put("column", "name");
 		map.put("operator", "contains");
@@ -21,22 +21,22 @@ public class SnapshotFilterTest {
 		SnapshotFilter filter = SnapshotFilter.fromMap(map);
 
 		assertNotNull(filter);
-		assertTrue("should be a SnapshotCriterion when column key is present", filter instanceof SnapshotCriterion);
+		assertTrue(filter instanceof SnapshotCriterion, "should be a SnapshotCriterion when column key is present");
 	}
 
 	@Test
-	public void testFromMapReturnsCriteriaWhenNoColumnPresent() {
+	void testFromMapReturnsCriteriaWhenNoColumnPresent() {
 		Map<String, Object> map = new LinkedHashMap<>();
 		map.put("operator", "and");
 
 		SnapshotFilter filter = SnapshotFilter.fromMap(map);
 
 		assertNotNull(filter);
-		assertTrue("should be a SnapshotCriteria when column key is absent", filter instanceof SnapshotCriteria);
+		assertTrue(filter instanceof SnapshotCriteria, "should be a SnapshotCriteria when column key is absent");
 	}
 
 	@Test
-	public void testFromMapCriterionPopulatesColumn() {
+	void testFromMapCriterionPopulatesColumn() {
 		Map<String, Object> map = new LinkedHashMap<>();
 		map.put("column", "status");
 		map.put("operator", "equals");
@@ -49,7 +49,7 @@ public class SnapshotFilterTest {
 	}
 
 	@Test
-	public void testFromMapCriteriaPopulatesOperator() {
+	void testFromMapCriteriaPopulatesOperator() {
 		Map<String, Object> map = new LinkedHashMap<>();
 		map.put("operator", "or");
 
