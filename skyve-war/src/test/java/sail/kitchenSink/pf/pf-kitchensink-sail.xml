@@ -44,6 +44,8 @@
 			<navigateEdit module="kitchensink" document="ModelLookupFixture" />
 			<testGridRows module="kitchensink" document="ModelLookupFixture" model="LookupValuesModel" rowContaining="SAIL lookup {run}" minRows="1" maxRows="1" />
 			<testGridRows model="LookupValuesModel" rowContaining="SAIL lookup {run}" minRows="1" maxRows="1" />
+			<comment>Scripts written before model= worked name it as a query: that still finds it</comment>
+			<testGridRows module="kitchensink" query="LookupValuesModel" rowContaining="SAIL lookup {run}" minRows="1" maxRows="1" />
 			<listGridZoom module="kitchensink" document="ModelLookupFixture" model="LookupValuesModel" rowContaining="SAIL lookup {run}" />
 			<testValue binding="description" value="SAIL lookup {run}" />
 			<cancel />

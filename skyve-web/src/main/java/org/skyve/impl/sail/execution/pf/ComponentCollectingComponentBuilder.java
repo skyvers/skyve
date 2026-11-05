@@ -57,6 +57,8 @@ class ComponentCollectingComponentBuilder extends NoOpComponentBuilder implement
 	// component that was built in the component builder but added in the layout builder
 	private MetaData addedViewComponent;
 	private String addedViewComponentIdentifier;
+	// a model's list grid in an edit view is also registered as module.model, as scripts name it with query="<model>"
+	private String addedViewComponentAliasIdentifier;
 	// the list grid built for addedViewComponent: the layout may add it inside a border, so register this, not what is added
 	private UIComponent addedListGridComponent;
 	
@@ -338,10 +340,16 @@ class ComponentCollectingComponentBuilder extends NoOpComponentBuilder implement
 			addedViewComponent = listGrid;
 			if (step instanceof PushEditContext pushEditContext) { // an edit view
 				// Keyed as a list grid step names it (NavigateList.listGridIdentifier): a query's grid by the query
-				// (modelName is the query's name), a model's grid by the model's document and the model
-				addedViewComponentIdentifier = (listGrid.getModelName() == null) ?
-													String.format("%s.%s", pushEditContext.getModuleName(), modelName) :
-													String.format("%s.%s.%s", pushEditContext.getModuleName(), modelDocumentName, modelName);
+				// (modelName is the query's name), a model's grid by the model's document and the model (model="..."),
+				// and also by the model alone, as scripts have named it with query="<model>"
+				String moduleAndName = String.format("%s.%s", pushEditContext.getModuleName(), modelName);
+				if (listGrid.getModelName() == null) {
+					addedViewComponentIdentifier = moduleAndName;
+				}
+				else {
+					addedViewComponentIdentifier = String.format("%s.%s.%s", pushEditContext.getModuleName(), modelDocumentName, modelName);
+					addedViewComponentAliasIdentifier = moduleAndName;
+				}
 				addedListGridComponent = component;
 			}
 			else {
@@ -371,7 +379,26 @@ class ComponentCollectingComponentBuilder extends NoOpComponentBuilder implement
 	 * @param listGridComponent the rendered list-grid component instance
 	 */
 	private void listGrid(@Nonnull UIComponent listGridComponent) {
-		context.put(addedViewComponentIdentifier, listGridComponent, addedViewComponentIdentifier);
+		registerListGrid(addedViewComponentIdentifier, listGridComponent);
+		String alias = addedViewComponentAliasIdentifier;
+		if (alias != null) {
+			registerListGrid(alias, listGridComponent);
+		}
+
+		addedViewComponent = null;
+		addedViewComponentIdentifier = null;
+		addedViewComponentAliasIdentifier = null;
+		addedListGridComponent = null;
+	}
+
+	/**
+	 * Registers a list grid's component and its row-action controls under an identifier.
+	 *
+	 * @param identifier the list grid's identifier, as list grid steps name it
+	 * @param listGridComponent the rendered list-grid component instance
+	 */
+	private void registerListGrid(@Nonnull String identifier, @Nonnull UIComponent listGridComponent) {
+		context.put(identifier, listGridComponent, identifier);
 		int childCount = listGridComponent.getChildCount();
 		if (childCount > 0) {
 			UIComponent potentialActionColumn = listGridComponent.getChildren().get(childCount - 1);
@@ -380,25 +407,22 @@ class ComponentCollectingComponentBuilder extends NoOpComponentBuilder implement
 				if (header.getChildCount() >= 2) { // add button is 2nd in the list if it exists
 					UIComponent addButton = header.getChildren().get(1);
 					if ((addButton instanceof CommandButton) || (addButton instanceof Button)) { // there is an add button (might be no create privilege)
-						context.put(addedViewComponentIdentifier + ".new", addButton, addedViewComponent);
+						context.put(identifier + ".new", addButton, addedViewComponent);
 					}
 				}
 			}
 			else if (header instanceof CommandButton) { // command button straight in the header facet
-				context.put(addedViewComponentIdentifier + ".new", header, addedViewComponent);
+				context.put(identifier + ".new", header, addedViewComponent);
 			}
 			// a list without zoom (or a model list with no action column) has no zoom button
 			UIComponent zoomButton = (potentialActionColumn.getChildCount() > 0) ? potentialActionColumn.getChildren().get(0) : null;
 			if ((zoomButton instanceof CommandButton) || (zoomButton instanceof Button)) {
-				context.put(addedViewComponentIdentifier + ".zoom", zoomButton, addedViewComponent);
+				context.put(identifier + ".zoom", zoomButton, addedViewComponent);
 			}
-			context.put(addedViewComponentIdentifier + ".select", listGridComponent.getChildren().get(0), addedViewComponent);
+			context.put(identifier + ".select", listGridComponent.getChildren().get(0), addedViewComponent);
 		}
-		
-		addedViewComponent = null;
-		addedViewComponentIdentifier = null;
-		addedListGridComponent = null;
 	}
+
 	
 	/**
 	 * Registers DataGrid action-column controls (new, zoom, remove, and select) for automation lookup.
