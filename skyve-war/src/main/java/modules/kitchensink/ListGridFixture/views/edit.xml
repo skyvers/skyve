@@ -17,10 +17,26 @@
 				title="PrimeFaces data table"
 				continueConversation="false"
 				selectedIdBinding="selectedFacesId">
+		<onSelectedHandlers>
+			<rerender clientValidation="false" />
+		</onSelectedHandlers>
 		<properties>
 			<c:property key="componentBuilderClass">faces</c:property>
 		</properties>
 	</listGrid>
+	<form>
+		<column />
+		<row>
+			<item>
+				<textField binding="selectedFacesId" disabled="true" />
+			</item>
+		</row>
+		<row>
+			<item>
+				<blurb escape="false"><![CDATA[<a href="./?a=e&m=kitchensink&d=LookupDescription&i={selectedFacesId}">Open the selected lookup value</a>]]></blurb>
+			</item>
+		</row>
+	</form>
 	<listGrid query="qListGridFixtureVueAttributes"
 				title="Vue list grid of column types"
 				continueConversation="false">

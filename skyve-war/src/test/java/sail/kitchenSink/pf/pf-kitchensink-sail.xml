@@ -336,6 +336,21 @@
 			<testGridRows module="kitchensink" query="qListGridFixtureFaces" rowContaining="SAIL faces grid {run}" maxRows="0" />
 		</method>
 	</interaction>
+	<interaction name="Links: tokens in href and bizId">
+		<method>
+			<comment>Selecting a data table row shows its id</comment>
+			<navigateEdit module="kitchensink" document="ListGridFixture" />
+			<listGridSelect module="kitchensink" query="qListGridFixtureFaces" rowContaining="SAIL lookup {run}" />
+			<captureValue binding="selectedFacesId" variable="lookupId" />
+			<comment>The captured id in a bizId and in an href</comment>
+			<navigateEdit module="kitchensink" document="LookupDescription" bizId="{var:lookupId}" />
+			<testValue binding="description" value="SAIL lookup {run}" />
+			<navigateLink href="?a=e&amp;m=kitchensink&amp;d=LookupDescription&amp;i={var:lookupId}" />
+			<pushEditContext module="kitchensink" document="LookupDescription" />
+			<testValue binding="description" value="SAIL lookup {run}" />
+			<popContext />
+		</method>
+	</interaction>
 	<interaction name="Kitchen Sink: generated test data">
 		<method>
 			<navigateEdit module="kitchensink" document="KitchenSink" />

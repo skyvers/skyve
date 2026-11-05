@@ -614,6 +614,12 @@ public abstract class InterpretedWebDriverExecutor<
 		selenide.get(url);
 	}
 
+	/**
+	 * Pushes an edit context and opens the edit view, of a new instance or of the {@code bizId}, whose tokens
+	 * ({@code {run}}, {@code {var:name}}) are substituted, so that a script can open a record it captured the id of.
+	 *
+	 * @param edit	the step
+	 */
 	@Override
 	public void executeNavigateEdit(NavigateEdit edit) {
 		String moduleName = edit.getModuleName();
@@ -625,6 +631,9 @@ public abstract class InterpretedWebDriverExecutor<
 		executePushEditContext(push);
 
 		String bizId = edit.getBizId();
+		if (bizId != null) {
+			bizId = substituteTokens(bizId);
+		}
 		if (bizId == null) {
 			selenide.trace(String.format("Edit new document [%s.%s] instance", moduleName, documentName));
 			selenide.get(String.format("?a=e&m=%s&d=%s", moduleName, documentName));
@@ -635,7 +644,8 @@ public abstract class InterpretedWebDriverExecutor<
 	}
 
 	/**
-	 * Opens the link: an absolute URL as is, otherwise relative to the base URL.
+	 * Opens the link: an absolute URL as is, otherwise relative to the base URL. The {@code href}'s tokens
+	 * ({@code {run}}, {@code {var:name}}) are substituted first.
 	 * Any current context no longer has a document or view type, as the page is unknown.
 	 *
 	 * @param link	the step
@@ -645,7 +655,7 @@ public abstract class InterpretedWebDriverExecutor<
 		if (peek() != null) {
 			super.executeNavigateLink(link);
 		}
-		String href = link.getHref();
+		String href = substituteTokens(link.getHref());
 		selenide.trace("Navigate to link " + href);
 		if (href.matches("^[a-zA-Z][a-zA-Z0-9+.-]*:.*")) {
 			selenide.openUrl(href);

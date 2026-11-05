@@ -45,6 +45,8 @@ import org.skyve.metadata.sail.language.step.interaction.grids.ListGridFilter.Fi
 import org.skyve.metadata.sail.language.step.interaction.grids.ListGridSort;
 import org.skyve.metadata.sail.language.step.interaction.lookup.LookupDescriptionAutoComplete;
 import org.skyve.metadata.sail.language.step.interaction.lookup.LookupDescriptionPick;
+import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateEdit;
+import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateLink;
 import org.skyve.metadata.sail.language.step.interaction.session.Login;
 import org.skyve.metadata.user.User;
 
@@ -265,6 +267,44 @@ class InterpretedWebDriverExecutorTest {
 		result.setUser(user);
 		result.setPassword("x");
 		return result;
+	}
+
+	@Test
+	void navigateEditSubstitutesTheBizIdsTokens() {
+		doNothing().when(executor).executePushEditContext(any());
+		executor.putVariable("id", "01a1-b2");
+		NavigateEdit edit = new NavigateEdit();
+		edit.setModuleName("kitchensink");
+		edit.setDocumentName("LookupDescription");
+		edit.setBizId("{var:id}");
+
+		executor.executeNavigateEdit(edit);
+
+		verify(executor.selenide).get("?a=e&m=kitchensink&d=LookupDescription&i=01a1-b2");
+	}
+
+	@Test
+	void navigateLinkSubstitutesTheHrefsTokens() {
+		executor.putVariable("id", "01a1-b2");
+		NavigateLink relative = new NavigateLink();
+		relative.setHref("?a=e&m=kitchensink&d=LookupDescription&i={var:id}&r={run}");
+		NavigateLink absolute = new NavigateLink();
+		absolute.setHref("https://example.com/{var:id}");
+
+		executor.executeNavigateLink(relative);
+		executor.executeNavigateLink(absolute);
+
+		assertAll(() -> verify(executor.selenide).get("?a=e&m=kitchensink&d=LookupDescription&i=01a1-b2&r=" + executor.getRunToken()),
+					() -> verify(executor.selenide).openUrl("https://example.com/01a1-b2"));
+	}
+
+	@Test
+	void navigateLinkWithAnUndefinedVariableFailsBeforeNavigating() {
+		NavigateLink link = new NavigateLink();
+		link.setHref("?a=e&m=kitchensink&d=LookupDescription&i={var:missing}");
+
+		assertThrows(MetaDataException.class, () -> executor.executeNavigateLink(link));
+		verify(executor.selenide, never()).get(anyString());
 	}
 
 	private static CaptureValue capture(String binding, String variable) {
