@@ -39,8 +39,10 @@ Runtime bugs that the suites found are listed in
 
 The schema is `skyve-war/src/main/java/schemas/sail.xsd`, with an identical copy
 in `skyve-core/src/test/resources/schemas/sail.xsd`. Both executors implement
-the whole language. A step that a renderer has no UI for fails with a reason;
-the PF and SC columns of the [op-code reference](#op-code-reference) say which.
+the whole language, except the steps and attributes marked **pending**. A
+pending feature fails with "not implemented yet" until its renderer implements
+it. A step that a renderer has no UI for fails with a reason; the PF and SC
+columns of the [op-code reference](#op-code-reference) say which.
 Code that implements `Executor` must be updated for Skyve 11; see
 [Upgrading](#upgrading).
 
@@ -54,8 +56,9 @@ script from the test classpath and runs it with an interpreted executor:
 | `util.AbstractPrimeFacesInterpretedSail`, `util.AbstractSmartClientInterpretedSail` | Test bases. Take the server lock, start and stop the browser, unmarshal the script (`sailResource`, `sailFile`, `sailString`) and run it. |
 | `util.sail.SailServerLock` | A cross-JVM file lock per base URL, so that only one SAIL IT at a time uses a server; see [One test per server](#one-test-per-server). |
 | `util.sail.SailSuite` | Runs a multi-file suite: set-up files, suite files and a gated restore; see [Admin: application suite](#admin-application-suite). |
-| `util.sail.InterpretedWebDriverExecutor` | Shared executor base. Runs the automation, applies the test strategy, records failures, and implements login, logout, URL navigation, the context steps, `testSuccess`, `testFailure`, `comment`, `execute` and `pause`. |
-| `util.sail.PrimeFacesInterpretedWebDriverExecutor`, `util.sail.SmartClientInterpretedWebDriverExecutor` | Renderer executors. They locate widgets and implement the remaining steps. |
+| `util.sail.InterpretedWebDriverExecutor` | Shared executor base. Runs the automation, applies the test strategy, records failures, and implements login, logout, URL navigation, the context steps, `testSuccess`, `testFailure`, `comment`, `execute` and `pause`. It also keeps the [variables](#the-run-token-and-variables), checks the list grid steps' columns, and switches the [view roles](#the-test-user) at each login. |
+| `util.sail.PrimeFacesInterpretedWebDriverExecutor`, `util.sail.SmartClientInterpretedWebDriverExecutor` | Renderer executors. They locate widgets and implement the remaining steps, and the base's renderer hooks; see [Renderer hooks](#renderer-hooks). |
+| `util.sail.SailUsers`, `util.sail.SailViewRoles` | The users the views are built as; see [The test user](#the-test-user). |
 | `util.sail.PrimeFacesSelenide`, `util.sail.SmartClientSelenide`, `util.sail.Selenide` | Browser gestures and waits. |
 | `util.sail.BrowserConfiguration`, `util.sail.CrossBrowserSelenium`, `util.sail.Devices` | Browser, user agent, window size and Chrome options. |
 
@@ -101,11 +104,61 @@ server's data.
 Generated ids depend on what the user may see. A Save button that the user
 cannot use is not rendered, and every later id shifts. The executor therefore
 builds views as a user with every role of every module, as Skyve's bootstrap
-user has (`util.sail.SailUsers.bootstrapLikeUser`). Scripts should sign in as
-the bootstrap user, or as a user with the same permissions. A script can sign in
-as a less privileged user, as `03-security-admin.xml` does. It must then keep to
-navigation and assertions that the full-permission view does not affect, such as
-menus, sign-in outcomes and screens where both users see the same thing.
+user has (`util.sail.SailUsers.bootstrapLikeUser`).
+
+A script that signs in as a user with fewer roles needs the views built with
+that user's roles. The test JVM cannot read the server's users, so the IT
+registers each such user's roles before it runs the script:
+
+```java
+@Test
+void clientWorkflow() {
+	viewRoles("client", "todo.ToDoClient");
+	viewRoles("tim", "timesheet.TimesheetUser", "admin.BasicUser");
+	sailResource("sail/apps/todo-client.xml");
+}
+```
+
+- `viewRoles(user, roles...)` is on both test bases. It fills a
+  `util.sail.SailViewRoles`.
+- A role is `module.Role`, or the name of a customer role. A customer role
+  gives each of its module roles, as Skyve does when it reads a user.
+- At each `<login/>`, the executor builds the views for the rest of the run as
+  a user with exactly the registered roles of the user signing in. A user that
+  is not registered gets every role. One script can sign in as several users.
+- The user name is matched as written in the script, then with `{run}` and
+  `{var:name}` substituted. So `viewRoles("jane{run}", "admin.BasicUser")`
+  matches a user that the script created.
+- The view user has the test's customer (`bizhub`), name and id. Only the roles
+  differ. A role the customer does not have fails the login step.
+- The test's user is restored when the automation ends.
+
+Without a registration, a script that signs in as a less privileged user must
+keep to navigation and assertions that the full-permission view does not
+affect, as `03-security-admin.xml` does: menus, sign-in outcomes and screens
+where both users see the same thing.
+
+### Renderer hooks
+
+`InterpretedWebDriverExecutor` implements the parts of the newer steps that do
+not depend on the renderer: token substitution, variables, column checks and
+the empty-value rule. It leaves the gestures to the renderer executors as
+protected hooks. Each hook throws `UnsupportedOperationException` ("is not
+implemented yet for …") until the renderer overrides it, so a script never
+passes a step that did nothing.
+
+| Hook | For |
+|---|---|
+| `filterListGrid(ListGridFilter, String column, String value, FilterOperator)` | `listGridFilter`; a null value clears the column |
+| `clearListGridFilters(ListGridClearFilter)` | `listGridClearFilter` |
+| `sortListGrid(ListGridSort, String column, boolean descending)` | `listGridSort` |
+| `readWidgetValue(CaptureValue)` | `captureValue`; returns the displayed text |
+| `enterOption(DataEnter, String value, Match)` | `dataEnter match="code\|label"`, called from the renderer's `executeDataEnter` |
+| `pickLookupDescriptionRowContaining(LookupDescriptionPick, String text)` | `lookupDescriptionPick rowContaining`, called from the renderer's `executeLookupDescriptionPick` |
+| `autoCompleteLookupDescriptionAndPick(LookupDescriptionAutoComplete, String search, String pick)` | `lookupDescriptionAutoComplete pick`, called from the renderer's `executeLookupDescriptionAutoComplete` |
+
+Hooks get their text with the tokens substituted. A hook that changes a list
+waits for the list's fetch to end before it returns.
 
 ### UX/UI and user agent
 
@@ -178,7 +231,7 @@ cannot follow, for example through `<navigateLink/>` or `<execute>`:
 
 `<clearContext/>` empties the stack.
 
-### The run token
+### The run token and variables
 
 `{run}` in a value is replaced with a token unique to the run. The token is the
 current time in milliseconds in base 36: 8 or more lower-case letters and
@@ -187,17 +240,42 @@ file. In a multi-file suite, a value created with `{run}` in one file cannot be
 found with `{run}` in the next file.
 
 Use `{run}` to make the records a script creates unique, so a script can run
-again, or alongside another script, without clashing with leftovers. It is
-substituted in:
+again, or alongside another script, without clashing with leftovers.
+
+`{var:name}` is replaced with the value of a variable. `<captureValue/>` sets
+it from what a widget shows. Use it for values the application made, such as a
+generated number, that a later step must find again:
+
+```xml
+<save />
+<captureValue binding="number" variable="number" />
+<ok />
+<listGridFilter module="kitchensink" document="LookupDescription" column="number" value="{var:number}" operator="equals" />
+<testGridRows module="kitchensink" document="LookupDescription" minRows="1" maxRows="1" />
+```
+
+- The value is the displayed text, trimmed, as `testValue` reads it.
+- A widget that shows no value fails `captureValue`. A blank variable would
+  match any row.
+- A name is a letter, then letters, digits or underscores.
+- Capturing the same variable again replaces its value.
+- Variables last for one automation, which means one script file. A suite's
+  next file starts with none.
+- Using a variable that has not been captured fails the step, and the message
+  lists the variables that are defined.
+- A substituted value is not substituted again.
+
+`{run}` and `{var:name}` are substituted in:
 
 - `dataEnter@value` and `testValue@value`;
-- `lookupDescriptionAutoComplete@search`;
+- `lookupDescriptionAutoComplete@search` and `@pick`;
+- `listGridFilter@value`;
 - `login@user` and `login@password`, to sign in as a user created earlier in the
   same run;
 - `testFailure@message` and `testMessage@contains`;
-- every `rowContaining`.
+- every `rowContaining`, including `lookupDescriptionPick@rowContaining`.
 
-It is not substituted in other attributes, such as `navigateEdit@bizId` or
+They are not substituted in other attributes, such as `navigateEdit@bizId` or
 `navigateLink@href`.
 
 ### Values
@@ -206,7 +284,7 @@ It is not substituted in other attributes, such as `navigateEdit@bizId` or
 |---|---|---|
 | Text, text area, password, masked, date, time, spinner, colour | The text a user would type. A newline becomes a space, because a typed newline would trip the form's default button. | The displayed text, trimmed. Colours ignore case. |
 | Check box | `true` or `false` | `true`, `false`, or empty for unset (PF) |
-| Combo, radio | The zero-based position of the option. For a combo, this counts the empty first entry when there is one. | The option's position, code or label |
+| Combo, radio | By default, the zero-based position of the option. For a combo, this counts the empty first entry when there is one. With `match="code"` or `match="label"`, the option's code or label; see [Data entry](#data-entry). | The option's position, code or label |
 | Slider | A number | The number |
 | Rich text, HTML | Plain text | The plain text or the HTML |
 | Lookup description | PF: not supported, so use `lookupDescriptionAutoComplete` or `lookupDescriptionPick`. SC: the search text; the first match is picked. | The displayed description |
@@ -262,11 +340,12 @@ Support: **yes** means implemented; **no** means the step fails with a reason
 | Element | Attributes | Semantics | PF | SC |
 |---|---|---|---|---|
 | `tabSelect` | `path`\* | Selects a tab by its title. | yes; title only, so nested tabs with the same title clash | yes; `Outer::Inner` selects each tab in turn |
-| `dataEnter` | `binding`\*, `value`\*, `navigateToWidget` | Enters the value into the first displayed, enabled widget for the binding; see [Values](#values). Fails if no widget can take it. `navigateToWidget` is accepted and ignored: the executors always scroll the target into view. | yes | yes; after `dataGridNew`/`dataGridEdit` on an inline grid, bindings are tried as the grid's columns first |
+| `dataEnter` | `binding`\*, `value`\*, `navigateToWidget`, `match` | Enters the value into the first displayed, enabled widget for the binding; see [Values](#values). Fails if no widget can take it. `navigateToWidget` is accepted and ignored: the executors always scroll the target into view. | yes | yes; after `dataGridNew`/`dataGridEdit` on an inline grid, bindings are tried as the grid's columns first |
+| `dataEnter match` | `index` (default), `code`, `label` | How the value names a combo or radio option: its position, its code or its label. A code or label must name exactly one option. `code` and `label` fail on any other widget. Prefer `code`: labels change with the language, and positions change when options are added. | `index` yes; `code`, `label` pending | `index` yes; `code`, `label` pending |
 | `testDataEnter` | `fixture` | Builds a bean with `DataBuilder` (the named fixture, or the `sail` fixture), then enters its values into every scalar widget of the view. Membership widgets are skipped. | yes | yes |
 | `upload` | `binding` or `action` (exactly one), `file`\* | Uploads a file from the **test** classpath (for example `sail/files/sail-image.png` from `skyve-war/src/test/resources`). With `binding`, it uses the content widget's upload page, and the widget must hold content afterwards. With `action`, it presses the upload action's button, chooses the file and submits it. When the upload page opens the chosen file in its image editor, as it does for an image field, the step presses the editor's Upload button (`#crop`), which uploads it. Otherwise it presses the file list's Upload button. | yes; in the image editor, it waits for the cropper before pressing Upload | yes |
-| `lookupDescriptionAutoComplete` | `binding`\*, `search`\* | Types the search text into the lookup and picks the first suggestion. Fails if nothing matches. | yes | yes |
-| `lookupDescriptionPick` | `binding`\*, `row`\* | Opens the lookup's drop-down and picks the zero-based row. | yes | yes |
+| `lookupDescriptionAutoComplete` | `binding`\*, `search`\*, `pick` | Types the search text into the lookup and picks the first suggestion. With `pick`, it picks the first suggestion, in the order shown, that contains the text (case-sensitive). Fails if nothing matches. | yes; `pick` pending | yes; `pick` pending |
+| `lookupDescriptionPick` | `binding`\*, `row` or `rowContaining` (exactly one) | Opens the lookup's drop-down and picks the zero-based row, or the first row, in the order shown, that contains the text (case-sensitive). | `row` yes; `rowContaining` pending | `row` yes; `rowContaining` pending |
 | `lookupDescriptionNew` | `binding`\* | Opens New on the lookup and pushes the related document's context. | no: PF lookups have no New | yes |
 | `lookupDescriptionEdit` | `binding`\* | Opens Edit on the lookup and pushes the related document's context. | no: PF lookups have no Edit | yes |
 
@@ -324,6 +403,16 @@ of these defaults from the current context.
 | `listGridNew` | `module`, `document`, `query`, `model`, `createView` | Presses New and pushes the new document's context. | yes; on a Vue list grid, its toolbar's New button, or the floating one a list view shows above its paginator | yes |
 | `listGridZoom` | as `listGridNew` without `createView`, plus `row` or `rowContaining` | Opens the row and pushes its context. | yes; on a Vue list grid, the row's View Detail button, or a click on the row when the grid zooms on a row click | yes |
 | `listGridSelect` | as `listGridZoom` | Selects the row without opening it. | only on grids with a `selectedIdBinding`. On a Vue list grid, it clicks the row. A row that already shows as selected is clicked twice, to unselect and select it (runtime issue P7). The step fails if the row does not show as selected afterwards. | yes |
+| `listGridFilter` | `module`, `document`, `query`, `model`; `column`\*, `value`, `operator` | Filters a column, as a user does in the grid's column filters. `column` is the column's binding. `operator` is `contains` (the default), `startsWith`, `equals`, `notEquals`, `lessThan` or `greaterThan`. Filters on different columns are ANDed, and a new filter on a column replaces its old one. Without `value`, the step clears that column's filter; `operator` then fails the step. | pending | pending |
+| `listGridClearFilter` | `module`, `document`, `query`, `model` | Clears every column filter. | pending | pending |
+| `listGridSort` | `module`, `document`, `query`, `model`; `column`\*, `descending` | Sorts by the column alone, ascending unless `descending="true"`. Sort before a `rowContaining` when more than one row could match. | pending | pending |
+
+`listGridFilter` and `listGridSort` check `column` against the list's query
+before they touch the page. A column that is not in the query, or that the
+query says cannot be filtered or sorted, fails the step with the query's
+columns. A model's columns are not checked. Filter or sort a list with more
+rows than one page before you find a row in it: `rowContaining` sees only the
+rows the browser has.
 
 ### Assertions
 
@@ -348,6 +437,7 @@ Under None, they are skipped.
 | `comment` | text | Written to the trace. Does nothing else. | yes | yes |
 | `execute` | JavaScript text | Runs the script in the browser page. Use it sparingly: it bypasses what SAIL is testing. | yes; then waits for any request or page load the script started | yes; checks for open dialogs first, then waits for SmartClient to settle |
 | `pause` | `millis`\* | Sleeps. This is a last resort, for when no observable condition exists: see [Synchronisation Rules](#synchronisation-rules). The kitchen sinks pause once, for 100 ms, only to test the op-code. | yes | yes |
+| `captureValue` | `binding`\*, `variable`\* | Keeps the value the widget shows in a variable for `{var:name}`; see [The run token and variables](#the-run-token-and-variables). It is not an assertion, so it runs under every strategy. | pending | pending |
 
 ## Test Strategies and Failure Reports
 
@@ -575,6 +665,19 @@ which never settles in SmartClient (runtime issue SC-4).
 Both kitchen sinks make their records unique with `{run}`, so they can be rerun
 without resetting the database.
 
+Kitchen sink fixtures for the newer steps:
+
+- `KitchenSink.combo` and `KitchenSink.radio` have codes `one`, `two` and
+  `three`, and labels `First`, `Second` and `Third`, for `dataEnter match`.
+- `LookupDescription` has a `number` that its Bizlet sets from a number
+  sequence when a value is first saved. It is the generated value for
+  `captureValue`. Its default query, listed by the "Lookup values" menu item,
+  has the text column `description` and the number column `number`, for
+  `listGridFilter` and `listGridSort`.
+- `KitchenSink.lookupDescription` picks from the same lookup values, for
+  `lookupDescriptionPick rowContaining` and `lookupDescriptionAutoComplete
+  pick`.
+
 ### Admin: application suite
 
 The admin suites test the admin module as an application, through its menus,
@@ -743,14 +846,17 @@ Scripts follow the same rules. Use `testGridRows timeoutMillis` or
 - **Server configuration.** InviteUsers, CreateUsers, SendMail, JobSchedule
   editing and RunJobNow are not covered. They need mail or the job scheduler,
   which the test server runs without.
-- **Single test user.** Views are built as an every-role user. A script that
-  signs in as a less privileged user must avoid views that differ for them.
+- **View roles.** Views are built as an every-role user, unless the IT
+  registers the signed-in user's roles with `viewRoles`. A script that signs in
+  as an unregistered, less privileged user must avoid views that differ for
+  them. See [The test user](#the-test-user).
 - **Unused attributes.** `dataEnter@navigateToWidget`,
   `navigateMap@refreshTimeInSeconds`, `navigateMap@showRefreshControls`,
   `navigateCalendar@startBinding` and `navigateCalendar@endBinding` are accepted
   and ignored.
 - **Paged lists.** `rowContaining` and `testGridRows` see only the rows the
-  browser has, which is the first page of a paged list.
+  browser has, which is the first page of a paged list. Use `listGridFilter`
+  and `listGridSort` to bring the row onto it.
 - **Runtime bugs.** Update My Details is commented out of both admin scripts
   (runtime issue P4). Other runtime bugs have workarounds in the scripts or the
   executors, such as the second click on a Vue list grid row (P7). SC's missing
@@ -773,11 +879,16 @@ other implementations, which generate test code instead of driving a browser:
   PrimeFaces subclasses `PrimeFacesInlineWebDriverExecutor` and
   `PrimeFacesSeleneseExecutor`. The Control Panel's SAIL actions use them.
   - They emit a "not supported by this generator" comment for `upload`,
-    `testMessage`, `testGridRows`, `testWidget`, `navigateMenu`, `testMenu` and
-    `switchMode`.
+    `testMessage`, `testGridRows`, `testWidget`, `navigateMenu`, `testMenu`,
+    `switchMode`, `listGridFilter`, `listGridClearFilter`, `listGridSort` and
+    `captureValue`.
   - The PrimeFaces generators also emit a "not supported" comment, and no
-    gesture, for a grid step with `rowContaining` and for `confirm="false"`.
+    gesture, for a grid step or `lookupDescriptionPick` with `rowContaining`,
+    for a combo or radio `dataEnter` with `match="code"` or `match="label"`,
+    for `lookupDescriptionAutoComplete` with `pick`, and for `confirm="false"`.
     The context still follows.
+  - They do not substitute `{run}` or `{var:name}`: the generated code has
+    them as written.
   - With `confirm` absent or `true`, the generated code answers the action's
     confirmation when the action has confirmation text.
 - The SAIL generator (`org.skyve.impl.generate.sail.Generator`) writes menu and
@@ -789,21 +900,27 @@ other implementations, which generate test code instead of driving a browser:
 The SAIL language changes are additive for script authors. Code that
 implements `Executor` directly is affected.
 
-- **Breaking:** `Executor` has 7 new abstract methods: `executeUpload`,
+- **Breaking:** `Executor` has 11 new abstract methods: `executeUpload`,
   `executeTestMessage`, `executeTestGridRows`, `executeTestWidget`,
-  `executeNavigateMenu`, `executeTestMenu` and `executeSwitchMode`. An
-  executor outside Skyve must implement them, even if only to fail or to emit
-  a comment. Executors that extend skyve-ext `WebDriverExecutor` or
-  `SeleneseExecutor` inherit comment-emitting implementations.
+  `executeNavigateMenu`, `executeTestMenu`, `executeSwitchMode`,
+  `executeListGridFilter`, `executeListGridClearFilter`, `executeListGridSort`
+  and `executeCaptureValue`. An executor outside Skyve must implement them,
+  even if only to fail or to emit a comment. Executors that extend skyve-ext
+  `WebDriverExecutor` or `SeleneseExecutor` inherit comment-emitting
+  implementations.
 - The six row steps (`dataGridZoom`, `dataGridEdit`, `dataGridRemove`,
   `dataGridSelect`, `listGridZoom` and `listGridSelect`) implement
   `GridRowStep`. Their `row` is no longer required in the XSD, and `getRow()`
   returns `null` when the step uses `rowContaining`. Code that unboxes
-  `getRow()` must handle that case.
+  `getRow()` must handle that case. `lookupDescriptionPick` is now a
+  `GridRowStep` too, with the same change.
 - `confirm` is now also an attribute of `ok`, `save`, `delete`, `remove` and
   `zoomOut`. On `action`, an absent `confirm` now means "answer positively if
   asked". Before, nothing was answered.
 - Executors that extend `ContextualExecutor` must pass value attributes
-  through `substituteRunToken(String)`; see [The run token](#the-run-token).
+  through `substituteTokens(String)`, which replaces `{run}` and `{var:name}`;
+  see [The run token and variables](#the-run-token-and-variables).
+- `dataEnter` without `match` still takes an option's position, so existing
+  scripts are unchanged.
 - `<login/>` does not switch renderers. Scripts for SmartClient follow it with
   `<switchMode/>`.
