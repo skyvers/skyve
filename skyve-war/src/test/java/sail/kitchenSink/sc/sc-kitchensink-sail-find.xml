@@ -202,7 +202,7 @@
 			<testGridRows module="kitchensink" document="ListAttributes" rowContaining="01-Jan-2024 09:00" minRows="1" />
 			<testGridRows module="kitchensink" document="ListAttributes" rowContaining="15-Jun-2024 12:30" minRows="1" />
 			<testGridRows module="kitchensink" document="ListAttributes" rowContaining="31-Dec-2024 18:45" minRows="1" />
-			<comment>lessThan and greaterThan, and the timestamp column that the list does not show, use the advanced filter</comment>
+			<comment>lessThan and greaterThan, and the time and timestamp columns that the list does not show, use the advanced filter</comment>
 			<listGridFilter module="kitchensink" document="ListAttributes" column="date" value="01-Jan-2024" operator="greaterThan" />
 			<testGridRows module="kitchensink" document="ListAttributes" rowContaining="01-Jan-2024 09:00" maxRows="0" />
 			<testGridRows module="kitchensink" document="ListAttributes" rowContaining="15-Jun-2024 12:30" minRows="1" />
@@ -216,6 +216,19 @@
 			<testGridRows module="kitchensink" document="ListAttributes" rowContaining="01-Jan-2024 09:00" minRows="1" />
 			<testGridRows module="kitchensink" document="ListAttributes" rowContaining="15-Jun-2024 12:30" minRows="1" />
 			<testGridRows module="kitchensink" document="ListAttributes" rowContaining="31-Dec-2024 18:45" minRows="1" />
+			<listGridFilter module="kitchensink" document="ListAttributes" column="time" value="12:30" operator="equals" />
+			<testGridRows module="kitchensink" document="ListAttributes" rowContaining="01-Jan-2024 09:00" maxRows="0" />
+			<testGridRows module="kitchensink" document="ListAttributes" rowContaining="15-Jun-2024 12:30" minRows="1" />
+			<testGridRows module="kitchensink" document="ListAttributes" rowContaining="31-Dec-2024 18:45" maxRows="0" />
+			<listGridFilter module="kitchensink" document="ListAttributes" column="time" value="12:30" operator="lessThan" />
+			<testGridRows module="kitchensink" document="ListAttributes" rowContaining="01-Jan-2024 09:00" minRows="1" />
+			<testGridRows module="kitchensink" document="ListAttributes" rowContaining="15-Jun-2024 12:30" maxRows="0" />
+			<testGridRows module="kitchensink" document="ListAttributes" rowContaining="31-Dec-2024 18:45" maxRows="0" />
+			<listGridFilter module="kitchensink" document="ListAttributes" column="time" value="12:30" operator="greaterThan" />
+			<testGridRows module="kitchensink" document="ListAttributes" rowContaining="01-Jan-2024 09:00" maxRows="0" />
+			<testGridRows module="kitchensink" document="ListAttributes" rowContaining="15-Jun-2024 12:30" maxRows="0" />
+			<testGridRows module="kitchensink" document="ListAttributes" rowContaining="31-Dec-2024 18:45" minRows="1" />
+			<listGridFilter module="kitchensink" document="ListAttributes" column="time" />
 			<listGridFilter module="kitchensink" document="ListAttributes" column="timestamp" value="01-Jan-2024 09:00:00" operator="equals" />
 			<testGridRows module="kitchensink" document="ListAttributes" rowContaining="01-Jan-2024 09:00" minRows="1" />
 			<testGridRows module="kitchensink" document="ListAttributes" rowContaining="15-Jun-2024 12:30" maxRows="0" />
@@ -266,6 +279,19 @@
 			<listGridZoom module="kitchensink" query="qModelLookupFixtures" rowContaining="SAIL association {run}" />
 			<delete />
 			<clearContext />
+		</method>
+	</interaction>
+
+	<interaction name="A time column in the filter row">
+		<method>
+			<comment>The List Grid Fixture's list of column types shows the time column, so its filter row takes a time</comment>
+			<navigateEdit module="kitchensink" document="ListGridFixture" />
+			<listGridFilter module="kitchensink" query="qListGridFixtureFacesAttributes" column="text" value="SAIL types {run}" />
+			<listGridFilter module="kitchensink" query="qListGridFixtureFacesAttributes" column="time" value="12:30" operator="equals" />
+			<testGridRows module="kitchensink" query="qListGridFixtureFacesAttributes" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qListGridFixtureFacesAttributes" rowContaining="SAIL types {run} b" minRows="1" maxRows="1" />
+			<listGridFilter module="kitchensink" query="qListGridFixtureFacesAttributes" column="time" />
+			<testGridRows module="kitchensink" query="qListGridFixtureFacesAttributes" minRows="3" maxRows="3" />
 		</method>
 	</interaction>
 

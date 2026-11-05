@@ -324,7 +324,7 @@ isc.BizUtil.addClassMethods({
 	},
 
 	/**
-	 * Converts filter criteria by renaming `_display_*` fields.
+	 * Converts filter criteria by renaming `_display_*` fields, and by keeping time values as times.
 	 * @param {Object} criteria - the criteria to convert.
 	 */
 	convertFilterCriteria: function (criteria) {
@@ -333,7 +333,17 @@ isc.BizUtil.addClassMethods({
 				criteria.criteria.forEach((criterion) =>
 					isc.BizUtil.convertFilterCriteria(criterion),
 				);
-			} else if (
+				return;
+			}
+			// SmartClient's FilterBuilder flags every Date in a clause as a logical date unless its field is a datetime,
+			// so a time clause's value is sent as a date (1970-01-01). A Date flagged as both is a time: send it as one.
+			["value", "start", "end"].forEach((name) => {
+				const value = criteria[name];
+				if (isc.isA.Date(value) && value.logicalTime && value.logicalDate) {
+					delete value.logicalDate;
+				}
+			});
+			if (
 				criteria.fieldName &&
 				criteria.fieldName.startsWith("_display_")
 			) {
