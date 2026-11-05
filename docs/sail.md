@@ -276,22 +276,30 @@ generated number, that a later step must find again:
 - `login@user` and `login@password`, to sign in as a user created earlier in the
   same run;
 - `testFailure@message` and `testMessage@contains`;
-- every `rowContaining`, including `lookupDescriptionPick@rowContaining`.
+- every `rowContaining`, including `lookupDescriptionPick@rowContaining`;
+- `navigateEdit@bizId`, `navigateLink@href` and `navigateLink@text`.
 
-They are not substituted in other attributes, such as `navigateEdit@bizId` or
-`navigateLink@href`.
+They are not substituted in attributes that name metadata, such as `module`,
+`binding`, `column` or a menu item, nor in numbers, flags, file names,
+`comment` text or `execute` scripts.
 
 ### Values
 
 | Widget | `dataEnter` value | `testValue` value |
 |---|---|---|
-| Text, text area, password, masked, date, time, spinner, colour | The text a user would type. A newline becomes a space, because a typed newline would trip the form's default button. | The displayed text, trimmed. Colours ignore case. |
+| Text, password, masked, date, time, spinner, colour | The text a user would type. A newline becomes a space, because a typed newline would trip the form's default button. | The displayed text, trimmed. Colours ignore case. |
+| Text area | The text. Each newline is typed as Enter. | The text, newlines included (`\r\n` reads as `\n`) |
 | Check box | `true` or `false` | `true`, `false`, or empty for unset (PF) |
 | Combo, radio | By default, the zero-based position of the option. For a combo, this counts the empty first entry when there is one. With `match="code"` or `match="label"`, the option's code or label; see [Data entry](#data-entry). | The option's position, code or label |
 | Slider | A number | The number |
-| Rich text, HTML | Plain text | The plain text or the HTML |
+| Rich text, HTML | Plain text. Each newline is typed as Enter. | The plain text or the HTML |
 | Lookup description | PF: not supported, so use `lookupDescriptionAutoComplete` or `lookupDescriptionPick`. SC: the search text; the first match is picked. | The displayed description |
 | List membership | The `\|`-separated descriptions of the items to select, for example `Admin\|Basic`. Every other item is deselected. | The members, `\|`-separated |
+
+Write a newline in a value as `&#10;`, for example
+`value="09:00 10:30 Client A&#10;&#10;13:00 17:00 Client B"`. XML turns a
+literal newline inside an attribute into a space before SAIL reads it. SC
+support for multi-line values is pending.
 
 An empty membership cannot be expressed, because a blank value counts as absent.
 `testDataEnter` skips membership widgets.
@@ -323,7 +331,7 @@ Support: **yes** means implemented; **no** means the step fails with a reason
 | `navigateTree` | as `navigateList` | Opens `a=t`. | no: no PF tree page | URL only: waits for the view, with no tree gestures |
 | `navigateMap` | as `navigateList`, plus `geometryBinding`, `refreshTimeInSeconds`, `showRefreshControls` | Opens `a=m` with `&b=<geometryBinding>`. `geometryBinding` is required unless a model is named. The two refresh attributes are accepted and ignored. | yes | URL only |
 | `navigateCalendar` | as `navigateList`, plus `startBinding`, `endBinding` | Opens `a=c`. The bindings are accepted and ignored. | no: no PF calendar page | URL only |
-| `navigateLink` | `href`\* | Opens an absolute URL as is, or otherwise a URL relative to the base URL. The top context, if any, loses its document and view type. Push a context afterwards if later steps need one. | yes | yes |
+| `navigateLink` | `href` or `text` (exactly one) | With `href`, opens an absolute URL as is, or otherwise a URL relative to the base URL. With `text`, clicks the first displayed link (`<a>`), in page order, whose visible text contains the text (case-sensitive), such as a link in a blurb; a link that opens a new window fails the step, and no match fails it with the page's link texts. The top context, if any, loses its document and view type. Push a context afterwards if later steps need one. | yes | `href` yes; `text` pending |
 | `navigateMenu` | `module`\*, `item`\* | Clicks through the rendered menu, then sets the context as the equivalent navigate step would. `item` is the menu item's name, or its shown label. Use `/` to qualify it with group names, for example `Security Admin/Users`. | yes; tree and calendar items fail | yes; fails if a window covers the menu |
 | `testMenu` | `module`\*, `item`, `present` | Asserts that the module, or an item of it, is shown (`present` true or absent) or not shown (`false`). `item` is named as for `navigateMenu`. | yes | yes |
 
