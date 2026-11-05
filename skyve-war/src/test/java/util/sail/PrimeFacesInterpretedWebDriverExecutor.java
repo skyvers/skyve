@@ -1215,6 +1215,22 @@ public class PrimeFacesInterpretedWebDriverExecutor extends InterpretedWebDriver
 		if (ViewType.list.equals(context.getViewType())) {
 			result.setModuleName(context.getModuleName());
 			result.setDocumentName(context.getDocumentName());
+		} else if ((queryName == null) && (modelName != null)) {
+			// A model of its document (the step's, or else the view's) lists its driving document
+			Customer c = CORE.getUser().getCustomer();
+			Module m = c.getModule(context.getModuleName());
+			Document owner = m.getDocument(c, (documentName != null) ? documentName : context.getDocumentName());
+			ListModel<Bean> lm = owner.getListModel(c, modelName, true);
+			Document d = (lm == null) ? null : lm.getDrivingDocument();
+			if (d == null) {
+				throw new MetaDataException(String.format("<%s /> with identifier [%s]: model %s of document %s has no driving document",
+															step.getClass().getSimpleName(),
+															step.getIdentifier(context),
+															modelName,
+															owner.getName()));
+			}
+			result.setModuleName(d.getOwningModuleName());
+			result.setDocumentName(d.getName());
 		} else {
 			String key = queryName;
 			if (key == null) {
@@ -1234,7 +1250,9 @@ public class PrimeFacesInterpretedWebDriverExecutor extends InterpretedWebDriver
 			} else {
 				DocumentRef r = m.getDocumentRefs().get(key);
 				if (r != null) {
-					result.setModuleName(r.getReferencedModuleName());
+					// a document of this module has no referenced module
+					String referencedModuleName = r.getReferencedModuleName();
+					result.setModuleName((referencedModuleName == null) ? m.getName() : referencedModuleName);
 					result.setDocumentName(key);
 				} else {
 					Document d = m.getDocument(c, context.getDocumentName());
@@ -2021,6 +2039,14 @@ public class PrimeFacesInterpretedWebDriverExecutor extends InterpretedWebDriver
 		String identifier = test.getIdentifier(context);
 		List<UIComponent> components = context.getFacesComponents(identifier);
 		if (components == null) {
+			String actionName = test.getActionName();
+			if ((actionName != null) && Boolean.FALSE.equals(test.getVisible()) && viewHasAction(context, actionName)) {
+				// An action of the view with no button (such as one that is not in the action panel and has no
+				// button in the view) is not shown
+				selenide.trace(String.format("test action [%s] is not shown: the view has it but renders no button for it", actionName));
+				checkWidget(test, identifier, false, false);
+				return;
+			}
 			throw new MetaDataException(String.format("<testWidget /> [%s] is not in the view", identifier));
 		}
 		boolean tab = (test.getTabPath() != null);
@@ -2035,6 +2061,23 @@ public class PrimeFacesInterpretedWebDriverExecutor extends InterpretedWebDriver
 			}
 		}
 		checkWidget(test, identifier, shown, enabled);
+	}
+
+	/**
+	 * Indicates if the context's view (in its UX/UI and view type) declares the action.
+	 */
+	@SuppressWarnings("null") // a null here fails the test
+	private static boolean viewHasAction(@Nonnull PrimeFacesAutomationContext context, @Nonnull String actionName) {
+		Customer c = CORE.getUser().getCustomer();
+		String moduleName = context.getModuleName();
+		String documentName = context.getDocumentName();
+		ViewType viewType = context.getViewType();
+		if ((moduleName == null) || (documentName == null) || (viewType == null)) {
+			return false;
+		}
+		Document d = c.getModule(moduleName).getDocument(c, documentName);
+		org.skyve.metadata.view.View view = d.getView(context.getUxui(), c, viewType.toString());
+		return (view != null) && (view.getAction(actionName) != null);
 	}
 
 	/**

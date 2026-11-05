@@ -38,6 +38,19 @@
 			<testGridRows module="kitchensink" document="LookupDescription" rowContaining="SAIL lookup {run}" minRows="1" maxRows="1" />
 		</method>
 	</interaction>
+	<interaction name="Model Lookup Fixture: a model's list grid in an edit view">
+		<method>
+			<comment>A list grid of a model is named by the model's document (here, the view's) and the model</comment>
+			<navigateEdit module="kitchensink" document="ModelLookupFixture" />
+			<testGridRows module="kitchensink" document="ModelLookupFixture" model="LookupValuesModel" rowContaining="SAIL lookup {run}" minRows="1" maxRows="1" />
+			<testGridRows model="LookupValuesModel" rowContaining="SAIL lookup {run}" minRows="1" maxRows="1" />
+			<comment>Scripts written before model= worked name it as a query: that still finds it</comment>
+			<testGridRows module="kitchensink" query="LookupValuesModel" rowContaining="SAIL lookup {run}" minRows="1" maxRows="1" />
+			<listGridZoom module="kitchensink" document="ModelLookupFixture" model="LookupValuesModel" rowContaining="SAIL lookup {run}" />
+			<testValue binding="description" value="SAIL lookup {run}" />
+			<cancel />
+		</method>
+	</interaction>
 	<interaction name="Lookup values: generated numbers, filters and sorts">
 		<method>
 			<comment>Each new lookup value gets the next number when it is first saved: keep each one in a variable</comment>
@@ -505,6 +518,9 @@
 			<dataEnter binding="disableUpload" value="false" />
 			<comment>Each check box makes a trigger unavailable</comment>
 			<testWidget action="RunFromToolbar" enabled="true" />
+			<comment>Actions with no button are not shown: Run From Event is not in the action panel, and Run Without Trigger is invisible</comment>
+			<testWidget action="RunFromEvent" visible="false" />
+			<testWidget action="RunWithoutTrigger" visible="false" />
 			<dataEnter binding="disableToolbarAction" value="true" />
 			<testWidget action="RunFromToolbar" enabled="false" />
 			<dataEnter binding="disableToolbarAction" value="false" />
