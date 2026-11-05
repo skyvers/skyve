@@ -283,6 +283,44 @@
 		</method>
 	</interaction>
 
+	<interaction name="List attributes: multi-line text">
+		<method>
+			<comment>A new line in an attribute value is written &amp;#10; (XML makes a literal new line in an attribute a space).
+				A text area and a rich text editor get the new lines, typed as Enter.</comment>
+			<navigateMenu module="kitchensink" item="List" />
+			<listGridNew module="kitchensink" document="ListAttributes" />
+			<dataEnter binding="text" value="SAIL lines {run}" />
+			<dataEnter binding="memo" value="SAIL line 1 {run}&#10;line 2&#10;&#10;line 4" />
+			<testValue binding="memo" value="SAIL line 1 {run}&#10;line 2&#10;&#10;line 4" />
+			<dataEnter binding="markup" value="Rich line 1&#10;Rich line 2" />
+			<testValue binding="markup" value="Rich line 1&#10;Rich line 2" />
+			<save />
+			<testValue binding="memo" value="SAIL line 1 {run}&#10;line 2&#10;&#10;line 4" />
+			<testValue binding="markup" value="Rich line 1&#10;Rich line 2" />
+			<ok />
+			<comment>The list does not show the text column, so the advanced filter finds the row</comment>
+			<listGridFilter module="kitchensink" document="ListAttributes" column="text" value="SAIL lines {run}" />
+			<listGridZoom module="kitchensink" document="ListAttributes" row="0" />
+			<testValue binding="memo" value="SAIL line 1 {run}&#10;line 2&#10;&#10;line 4" />
+			<testValue binding="markup" value="Rich line 1&#10;Rich line 2" />
+			<delete />
+		</method>
+	</interaction>
+
+	<interaction name="Links: a link in page markup">
+		<method>
+			<comment>The List Grid Fixture's blurb links to the lookup value selected in its second list grid. In SmartClient,
+				selecting a row there rerenders the view without end (runtime issue), so the link is followed with nothing
+				selected, which opens a new lookup value.</comment>
+			<navigateEdit module="kitchensink" document="ListGridFixture" />
+			<navigateLink text="Open the selected lookup value" />
+			<pushEditContext module="kitchensink" document="LookupDescription" />
+			<testWidget binding="description" enabled="true" />
+			<testValue binding="description" value="" />
+			<popContext />
+		</method>
+	</interaction>
+
 	<interaction name="Remove the lookup values">
 		<method>
 			<navigateMenu module="kitchensink" item="Lookup values" />
