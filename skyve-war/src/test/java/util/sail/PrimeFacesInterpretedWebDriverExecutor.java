@@ -1215,6 +1215,22 @@ public class PrimeFacesInterpretedWebDriverExecutor extends InterpretedWebDriver
 		if (ViewType.list.equals(context.getViewType())) {
 			result.setModuleName(context.getModuleName());
 			result.setDocumentName(context.getDocumentName());
+		} else if ((queryName == null) && (modelName != null)) {
+			// A model of its document (the step's, or else the view's) lists its driving document
+			Customer c = CORE.getUser().getCustomer();
+			Module m = c.getModule(context.getModuleName());
+			Document owner = m.getDocument(c, (documentName != null) ? documentName : context.getDocumentName());
+			ListModel<Bean> lm = owner.getListModel(c, modelName, true);
+			Document d = (lm == null) ? null : lm.getDrivingDocument();
+			if (d == null) {
+				throw new MetaDataException(String.format("<%s /> with identifier [%s]: model %s of document %s has no driving document",
+															step.getClass().getSimpleName(),
+															step.getIdentifier(context),
+															modelName,
+															owner.getName()));
+			}
+			result.setModuleName(d.getOwningModuleName());
+			result.setDocumentName(d.getName());
 		} else {
 			String key = queryName;
 			if (key == null) {
@@ -1234,7 +1250,9 @@ public class PrimeFacesInterpretedWebDriverExecutor extends InterpretedWebDriver
 			} else {
 				DocumentRef r = m.getDocumentRefs().get(key);
 				if (r != null) {
-					result.setModuleName(r.getReferencedModuleName());
+					// a document of this module has no referenced module
+					String referencedModuleName = r.getReferencedModuleName();
+					result.setModuleName((referencedModuleName == null) ? m.getName() : referencedModuleName);
 					result.setDocumentName(key);
 				} else {
 					Document d = m.getDocument(c, context.getDocumentName());

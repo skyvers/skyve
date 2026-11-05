@@ -337,7 +337,11 @@ class ComponentCollectingComponentBuilder extends NoOpComponentBuilder implement
 		if (component != null) {
 			addedViewComponent = listGrid;
 			if (step instanceof PushEditContext pushEditContext) { // an edit view
-				addedViewComponentIdentifier = String.format("%s.%s", pushEditContext.getModuleName(), modelName);
+				// Keyed as a list grid step names it (NavigateList.listGridIdentifier): a query's grid by the query
+				// (modelName is the query's name), a model's grid by the model's document and the model
+				addedViewComponentIdentifier = (listGrid.getModelName() == null) ?
+													String.format("%s.%s", pushEditContext.getModuleName(), modelName) :
+													String.format("%s.%s.%s", pushEditContext.getModuleName(), modelDocumentName, modelName);
 				addedListGridComponent = component;
 			}
 			else {

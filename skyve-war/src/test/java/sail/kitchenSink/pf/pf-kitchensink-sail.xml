@@ -38,6 +38,17 @@
 			<testGridRows module="kitchensink" document="LookupDescription" rowContaining="SAIL lookup {run}" minRows="1" maxRows="1" />
 		</method>
 	</interaction>
+	<interaction name="Model Lookup Fixture: a model's list grid in an edit view">
+		<method>
+			<comment>A list grid of a model is named by the model's document (here, the view's) and the model</comment>
+			<navigateEdit module="kitchensink" document="ModelLookupFixture" />
+			<testGridRows module="kitchensink" document="ModelLookupFixture" model="LookupValuesModel" rowContaining="SAIL lookup {run}" minRows="1" maxRows="1" />
+			<testGridRows model="LookupValuesModel" rowContaining="SAIL lookup {run}" minRows="1" maxRows="1" />
+			<listGridZoom module="kitchensink" document="ModelLookupFixture" model="LookupValuesModel" rowContaining="SAIL lookup {run}" />
+			<testValue binding="description" value="SAIL lookup {run}" />
+			<cancel />
+		</method>
+	</interaction>
 	<interaction name="Lookup values: generated numbers, filters and sorts">
 		<method>
 			<comment>Each new lookup value gets the next number when it is first saved: keep each one in a variable</comment>
