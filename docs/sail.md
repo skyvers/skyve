@@ -344,11 +344,11 @@ Support: **yes** means implemented; **no** means the step fails with a reason
 |---|---|---|---|---|
 | `tabSelect` | `path`\* | Selects a tab by its title. | yes; title only, so nested tabs with the same title clash | yes; `Outer::Inner` selects each tab in turn |
 | `dataEnter` | `binding`\*, `value`\*, `navigateToWidget`, `match` | Enters the value into the first displayed, enabled widget for the binding; see [Values](#values). Fails if no widget can take it. `navigateToWidget` is accepted and ignored: the executors always scroll the target into view. | yes | yes; after `dataGridNew`/`dataGridEdit` on an inline grid, bindings are tried as the grid's columns first |
-| `dataEnter match` | `index` (default), `code`, `label` | How the value names a combo or radio option: its position, its code or its label. A code or label must name exactly one option. `code` and `label` fail on any other widget. Prefer `code`: labels change with the language, and positions change when options are added. | `index` yes; `code`, `label` pending | `index` yes; `code`, `label` pending |
+| `dataEnter match` | `index` (default), `code`, `label` | How the value names a combo or radio option: its position, its code or its label. A code or label must name exactly one option. `code` and `label` fail on any other widget. Prefer `code`: labels change with the language, and positions change when options are added. | yes: the option's value or its label as the page shows them (a combo's empty first entry counts) | yes: the option's position is found from the item's options, then it is chosen as with an index |
 | `testDataEnter` | `fixture` | Builds a bean with `DataBuilder` (the named fixture, or the `sail` fixture), then enters its values into every scalar widget of the view. Membership widgets are skipped. | yes | yes |
 | `upload` | `binding` or `action` (exactly one), `file`\* | Uploads a file from the **test** classpath (for example `sail/files/sail-image.png` from `skyve-war/src/test/resources`). With `binding`, it uses the content widget's upload page, and the widget must hold content afterwards. With `action`, it presses the upload action's button, chooses the file and submits it. When the upload page opens the chosen file in its image editor, as it does for an image field, the step presses the editor's Upload button (`#crop`), which uploads it. Otherwise it presses the file list's Upload button. | yes; in the image editor, it waits for the cropper before pressing Upload | yes |
-| `lookupDescriptionAutoComplete` | `binding`\*, `search`\*, `pick` | Types the search text into the lookup and picks the first suggestion. With `pick`, it picks the first suggestion, in the order shown, that contains the text (case-sensitive). Fails if nothing matches. | yes; `pick` pending | yes; `pick` pending |
-| `lookupDescriptionPick` | `binding`\*, `row` or `rowContaining` (exactly one) | Opens the lookup's drop-down and picks the zero-based row, or the first row, in the order shown, that contains the text (case-sensitive). | `row` yes; `rowContaining` pending | `row` yes; `rowContaining` pending |
+| `lookupDescriptionAutoComplete` | `binding`\*, `search`\*, `pick` | Types the search text into the lookup and picks the first suggestion. With `pick`, it picks the first suggestion, in the order shown, that contains the text (case-sensitive). Fails if nothing matches. | yes | yes; only the rows the drop-down has fetched are searched |
+| `lookupDescriptionPick` | `binding`\*, `row` or `rowContaining` (exactly one) | Opens the lookup's drop-down and picks the zero-based row, or the first row, in the order shown, that contains the text (case-sensitive). | yes; `rowContaining` sees only the rows the drop-down shows | yes; `rowContaining` sees only the rows the drop-down has fetched |
 | `lookupDescriptionNew` | `binding`\* | Opens New on the lookup and pushes the related document's context. | no: PF lookups have no New | yes |
 | `lookupDescriptionEdit` | `binding`\* | Opens Edit on the lookup and pushes the related document's context. | no: PF lookups have no Edit | yes |
 
@@ -406,9 +406,9 @@ of these defaults from the current context.
 | `listGridNew` | `module`, `document`, `query`, `model`, `createView` | Presses New and pushes the new document's context. | yes; on a Vue list grid, its toolbar's New button, or the floating one a list view shows above its paginator | yes |
 | `listGridZoom` | as `listGridNew` without `createView`, plus `row` or `rowContaining` | Opens the row and pushes its context. | yes; on a Vue list grid, the row's View Detail button, or a click on the row when the grid zooms on a row click | yes |
 | `listGridSelect` | as `listGridZoom` | Selects the row without opening it. | only on grids with a `selectedIdBinding`. On a Vue list grid, it clicks the row. A row that already shows as selected is clicked twice, to unselect and select it (runtime issue P7). The step fails if the row does not show as selected afterwards. | yes |
-| `listGridFilter` | `module`, `document`, `query`, `model`; `column`\*, `value`, `operator` | Filters a column, as a user does in the grid's column filters. `column` is the column's binding. `operator` is `contains` (the default), `startsWith`, `equals`, `notEquals`, `lessThan` or `greaterThan`. Filters on different columns are ANDed, and a new filter on a column replaces its old one. Without `value`, the step clears that column's filter; `operator` then fails the step. | pending | pending |
-| `listGridClearFilter` | `module`, `document`, `query`, `model` | Clears every column filter. | pending | pending |
-| `listGridSort` | `module`, `document`, `query`, `model`; `column`\*, `descending` | Sorts by the column alone, ascending unless `descending="true"`. Sort before a `rowContaining` when more than one row could match. | pending | pending |
+| `listGridFilter` | `module`, `document`, `query`, `model`; `column`\*, `value`, `operator` | Filters a column, as a user does in the grid's column filters. `column` is the column's binding. `operator` is `contains` (the default), `startsWith`, `equals`, `notEquals`, `lessThan` or `greaterThan`. Filters on different columns are ANDed, and a new filter on a column replaces its old one. Without `value`, the step clears that column's filter; `operator` then fails the step. | yes; see [Filtering lists](#filtering-lists) | yes; see [Filtering lists](#filtering-lists) |
+| `listGridClearFilter` | `module`, `document`, `query`, `model` | Clears every column filter. | yes: Clear in each filtered column's menu (Vue); in a data table it deletes each typed filter's text, chooses each combo filter's empty option and unsets each check box | yes: the toolbar's Clear filter button, which clears the filter row and the advanced filter |
+| `listGridSort` | `module`, `document`, `query`, `model`; `column`\*, `descending` | Sorts by the column alone, ascending unless `descending="true"`. Sort before a `rowContaining` when more than one row could match. | yes: clicks the column title until it alone shows the direction. PrimeFaces ignores a sort click on an empty data table, so that fails | yes: clicks the column header, once for ascending and again to reverse |
 
 `listGridFilter` and `listGridSort` check `column` against the list's query
 before they touch the page. A column that is not in the query, or that the
@@ -416,6 +416,53 @@ query says cannot be filtered or sorted, fails the step with the query's
 columns. A model's columns are not checked. Filter or sort a list with more
 rows than one page before you find a row in it: `rowContaining` sees only the
 rows the browser has.
+
+### Filtering lists
+
+A filter without `operator` means `contains`, so filters on enum, boolean,
+date and time columns need `operator="equals"` (or another operator the column
+takes). Values are written the same way in both renderers:
+
+- **Enum or constant domain:** the option's shown label exactly, or else its
+  code exactly. The step fails, listing the `code=label` pairs, if neither
+  matches or more than one option does.
+- **Boolean:** `true` or `false`.
+- **Date, dateTime, timestamp and time:** as `dataEnter` takes them for that
+  field, which is the attribute's converter format. With the default
+  converters: `07-Nov-2025`, `07-Nov-2025 15:38`, `07-Nov-2025 15:43:16` and
+  `11:11`.
+
+A step whose operator the column cannot take fails and names the operators it
+can take. Filter, clear and sort steps fail if an error message shows
+afterwards.
+
+| Column type | PF Vue list grid | PF data table | SC list grid |
+|---|---|---|---|
+| Text | `contains`, `startsWith`, `equals`, `notEquals`; all ignore case | `contains` only, as the server decides (also for a variant domain's description and an association's business key) | `contains` in the filter row (ignores case); the others in the advanced filter (`contains` and `startsWith` ignore case) |
+| Number | `equals`, `notEquals`, `lessThan`, `greaterThan` | `equals` only | `equals` in the filter row; the others in the advanced filter |
+| Enum, constant domain | `equals`, `notEquals`, from the menu's drop-down | `equals`, from the filter's combo | `equals`, from the filter row's select |
+| Boolean | `equals`, `notEquals`, with the three-state check box | `equals`, with the filter's check box | `equals`, with the filter row's three-state check box |
+| Date, dateTime, timestamp | `equals`, `notEquals`, `lessThan` (Before), `greaterThan` (After) | `equals` only | `equals` in the filter row; `lessThan` and `greaterThan` in the advanced filter |
+| Time | `equals` | `equals` only | fails: SmartClient sends a time filter as a date, and the server rejects it (runtime issue SC-9) |
+| Association | as text, on its business key | as text | `equals`, by the related record's description, from the filter row's select. Use a column through the association, such as `selection.description`, for `contains` |
+
+**PF details.** The Vue list grid uses each column's filter menu. A new filter
+on a column that already has one presses Clear first. The step fails on a
+column the grid does not show (show it with the column chooser first) and on a
+grid whose toolbar shows Match Any, because its filters are ORed. The Vue
+grid's calendar takes `dd/mm/yyyy`, so the harness converts date values. A data
+table filters each column one way, chosen by the server; the step opens the
+filter row with Toggle filters when it is hidden.
+
+**SC details.** The filter row is used for the operators it applies:
+`contains` on text, `equals` on anything else, and clearing. Other operators,
+and columns the row does not show, use the advanced filter. Its toggle and
+Filter button are clicked, but the clauses are set through the filter
+builder's API, as a saved snapshot sets them; the field, operator and value
+pickers are not clicked. The filter row's existing filters become clauses. The
+grid then stays in advanced filtering until the view is opened again, so later
+filters on it are clauses too. An association `equals` fails once the grid is
+in advanced filtering, because that hides the row.
 
 ### Assertions
 
@@ -440,7 +487,7 @@ Under None, they are skipped.
 | `comment` | text | Written to the trace. Does nothing else. | yes | yes |
 | `execute` | JavaScript text | Runs the script in the browser page. Use it sparingly: it bypasses what SAIL is testing. | yes; then waits for any request or page load the script started | yes; checks for open dialogs first, then waits for SmartClient to settle |
 | `pause` | `millis`\* | Sleeps. This is a last resort, for when no observable condition exists: see [Synchronisation Rules](#synchronisation-rules). The kitchen sinks pause once, for 100 ms, only to test the op-code. | yes | yes |
-| `captureValue` | `binding`\*, `variable`\* | Keeps the value the widget shows in a variable for `{var:name}`; see [The run token and variables](#the-run-token-and-variables). It is not an assertion, so it runs under every strategy. | pending | pending |
+| `captureValue` | `binding`\*, `variable`\* | Keeps the value the widget shows in a variable for `{var:name}`; see [The run token and variables](#the-run-token-and-variables). It is not an assertion, so it runs under every strategy. | yes | yes |
 
 ## Test Strategies and Failure Reports
 
@@ -927,3 +974,10 @@ implements `Executor` directly is affected.
   scripts are unchanged.
 - `<login/>` does not switch renderers. Scripts for SmartClient follow it with
   `<switchMode/>`.
+- An app that runs the PrimeFaces SAIL harness needs Mojarra on its test
+  classpath, as skyve-war has: add `org.glassfish:jakarta.faces` with
+  `<scope>test</scope>`, at the version Skyve uses. Without it the harness
+  fails with `ClassNotFoundException: com.sun.faces.util.Util`.
+- `skyve:assemble` now also copies `src/test/resources/util/**`, which holds
+  the SmartClient helper. It deletes an app's own files under that folder, as
+  it already did under `src/test/java/util`.

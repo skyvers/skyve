@@ -530,3 +530,25 @@ pasting key events). The field ends up with only part of the text.
 handler one key at a time, and waits for what each key starts.
 
 **Status:** open.
+
+## SC-9: Filtering a time column fails
+
+**Symptom.** In a SmartClient list grid, filtering a time column fails with
+"Please enter a properly formatted value", whether the filter is set in the
+filter row or in the advanced filter.
+
+**Reproduction.** In SmartClient, open kitchen sink ListAttributes' List, open
+the advanced filter and add a clause on the time column, such as Time equals
+11:11. Press Filter.
+
+**Suspected cause.** SmartClient sends the time criterion to the server as a
+date (`1970-01-01`), and the server's `HH24_MI` converter rejects it. The
+code path has not been traced yet.
+
+**Checked:** Reproduced outside SAIL, by setting the advanced filter's time
+clause in three different ways.
+
+**Workaround in the suites.** The SC kitchen sink does not filter time
+columns. `listGridFilter` on a time column fails with the server's message.
+
+**Status:** open.
