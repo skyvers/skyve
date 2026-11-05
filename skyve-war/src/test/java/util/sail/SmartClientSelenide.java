@@ -1615,6 +1615,73 @@ public class SmartClientSelenide extends Selenide<
 	}
 
 	/**
+	 * Reports whether a form item keeps new lines (a text area or a rich text editor), so that {@code dataEnter} types them
+	 * as Enter and {@code testValue} compares them.
+	 *
+	 * @param locator	the SAIL locator of the item
+	 * @return {@code true} for a text area or rich text editor
+	 */
+	public boolean multiLine(@Nonnull String locator) {
+		require(root(locator)); // wait for the item to exist
+		return Boolean.TRUE.equals(script("return _sail.multiLine(arguments[0])", root(locator)));
+	}
+
+	/**
+	 * Clicks the first displayed link ({@code <a>}) of the page whose visible text contains the text (case-sensitive), as
+	 * a user does, then waits for what it leads to: the new page loading and SmartClient settling, or, for a link that
+	 * stays on the page (a fragment or a script), SmartClient settling.
+	 *
+	 * @param text	the text
+	 * @return {@code true} if a link was clicked, {@code false} if no displayed link contains the text
+	 * @throws IllegalStateException	if the link opens another window, which SAIL does not follow
+	 */
+	public boolean followLinkContaining(@Nonnull String text) {
+		waitForFullPageResponse();
+		Map<String, Object> link = map(script("return _sail.link(arguments[0])", text));
+		if (! (link.get("element") instanceof WebElement element)) {
+			return false;
+		}
+		String target = String.valueOf(link.get("target"));
+		if ((! target.isEmpty()) && (! "_self".equals(target)) && (! "_top".equals(target)) && (! "_parent".equals(target))) {
+			throw new IllegalStateException(String.format("The link containing '%s' opens another window (target %s), which SAIL does not follow",
+															text, target));
+		}
+		boolean newPage = Boolean.TRUE.equals(link.get("newPage"));
+		trace("    click " + link.get("href"));
+		// mark this page, so that the new page can be told from it
+		script("window._sailOldPage = true;");
+		SelenideElement anchor = $(element);
+		prepare(anchor);
+		click(anchor);
+		if (newPage) {
+			// Waits for the link's page to replace this one and load
+			until("the page of the link to load", d -> {
+				try {
+					return Boolean.TRUE.equals(script("return !window._sailOldPage && document.readyState === 'complete'")) ? Boolean.TRUE : null;
+				}
+				catch (@SuppressWarnings("unused") WebDriverException e) {
+					return null; // between pages
+				}
+			});
+			trace("    the link loaded a new page");
+		}
+		waitForFullPageResponse();
+		return true;
+	}
+
+	/**
+	 * Returns the visible texts of the page's displayed links, for a failure.
+	 *
+	 * @return the texts, at most 30
+	 */
+	@SuppressWarnings("unchecked")
+	public @Nonnull List<String> linkTexts() {
+		waitForFullPageResponse();
+		Object result = script("return _sail.linkTexts()");
+		return (result instanceof List<?> list) ? (List<String>) list : List.of();
+	}
+
+	/**
 	 * Reads the value a form item displays, for {@code testValue}.
 	 *
 	 * @param locator	the SAIL locator of the item

@@ -74,6 +74,7 @@ import org.skyve.metadata.sail.language.step.interaction.lookup.LookupDescriptio
 import org.skyve.metadata.sail.language.step.interaction.lookup.LookupDescriptionPick;
 import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateCalendar;
 import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateEdit;
+import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateLink;
 import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateList;
 import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateMap;
 import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateTree;
@@ -318,11 +319,13 @@ public class SmartClientInterpretedWebDriverExecutor extends InterpretedWebDrive
 					String.format("<dataEnter /> with binding [%s] is not supported or is not on the view", identifier));
 		}
 
-		// Never replace with a new line as chrome under test will trip the default button on the form
-		String value = dataEnter.getValue();
-		if (value != null) {
-			value = substituteTokens(value).replace("\n", " ");
+		// A text area or a rich text editor takes the value's new lines (typed as Enter). Other widgets get spaces
+		// instead: a new line typed into a single line input would press the form's default button.
+		String multiLineValue = dataEnter.getValue();
+		if (multiLineValue != null) {
+			multiLineValue = substituteTokens(multiLineValue).replace("\r\n", "\n");
 		}
+		String singleLineValue = (multiLineValue == null) ? null : multiLineValue.replace('\n', ' ');
 
 		boolean success = false;
 		boolean supported = false;
@@ -330,6 +333,9 @@ public class SmartClientInterpretedWebDriverExecutor extends InterpretedWebDrive
 			InputType inputType = locator.getInputType();
 			if ((! success) && (inputType != null)) {
 				supported = true;
+				String value = ((singleLineValue != null) && (! singleLineValue.equals(multiLineValue)) && multiLine(locator)) ?
+									multiLineValue :
+									singleLineValue;
 				selenide.trace(String.format("set %s to %s", identifier, value));
 				success = enter(locator.getLocator(), inputType, value);
 			}
@@ -343,6 +349,17 @@ public class SmartClientInterpretedWebDriverExecutor extends InterpretedWebDrive
 		}
 
 		selenide.waitForFullPageResponse();
+	}
+
+	/**
+	 * Indicates if a widget keeps new lines: a rich text editor, or a text area.
+	 *
+	 * @param locator	the widget's locator
+	 * @return {@code true} if it does
+	 */
+	private boolean multiLine(@Nonnull Locator locator) {
+		InputType inputType = locator.getInputType();
+		return (inputType == InputType.RICH_TEXT) || ((inputType == InputType.TEXT) && selenide.multiLine(locator.getLocator()));
 	}
 
 	/**
@@ -1020,12 +1037,15 @@ public class SmartClientInterpretedWebDriverExecutor extends InterpretedWebDrive
 			throw new MetaDataException(String.format("<testValue /> with binding [%s] is not on the view", binding));
 		}
 
-		String expected = test.getValue();
-		expected = (expected == null) ? "" : substituteTokens(expected).trim();
-		List<String> actual = selenide.values(locators.get(0).getLocator());
+		// A text area or rich text editor shows new lines; other widgets were given spaces for them (see executeDataEnter)
+		String expectedValue = test.getValue();
+		String multiLineExpected = (expectedValue == null) ? "" : substituteTokens(expectedValue).replace("\r\n", "\n").trim();
+		Locator first = locators.get(0);
+		String expected = ((multiLineExpected.indexOf('\n') >= 0) && multiLine(first)) ? multiLineExpected : multiLineExpected.replace('\n', ' ');
+		List<String> actual = selenide.values(first.getLocator());
 		selenide.trace(String.format("Test value of %s is '%s' (displayed '%s')", binding, expected, actual.get(0)));
 		for (String value : actual) {
-			if (expected.equals(value.trim())) {
+			if (expected.equals(value.replace("\r\n", "\n").trim())) {
 				return;
 			}
 		}
@@ -1382,6 +1402,19 @@ public class SmartClientInterpretedWebDriverExecutor extends InterpretedWebDrive
 
 		if (! success) {
 			throw new DomainException(String.format("Lookup description [%s] failed (is it disabled?)", binding));
+		}
+	}
+
+	/**
+	 * Clicks the first displayed link on the page whose text contains the text, then waits for its page, or for
+	 * SmartClient to settle. Fails listing the page's links if none contains the text.
+	 */
+	@Override
+	protected void clickLinkContaining(@Nonnull NavigateLink link, @Nonnull String text) {
+		prepareForInteraction();
+		if (! selenide.followLinkContaining(text)) {
+			throw new IllegalStateException(String.format("<navigateLink text=\"%s\" /> found no displayed link containing it: the page's links are %s",
+															text, selenide.linkTexts()));
 		}
 	}
 
