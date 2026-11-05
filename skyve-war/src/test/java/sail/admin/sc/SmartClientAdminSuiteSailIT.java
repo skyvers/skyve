@@ -37,6 +37,8 @@ class SmartClientAdminSuiteSailIT extends AbstractSmartClientInterpretedSail {
 
 	@Test
 	void suite() {
+		// 03 makes this user with a group giving these roles, then signs in as them: build their views with their roles
+		viewRoles("sail{run}", "admin.BasicUser", "admin.ContactViewer");
 		new SailSuite("sail/admin/sc/suite/")
 				.setUp("00-precondition.xml", "00-backup.xml", "00-marker.xml")
 				.files("01-session.xml",

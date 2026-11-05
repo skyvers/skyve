@@ -445,6 +445,278 @@ public class SmartClientSelenide extends Selenide<
 	}
 
 	/**
+	 * Waits for a list grid's rows to be loaded, and returns its filter and sort state.
+	 *
+	 * @param grid	the list grid's SAIL locator, without a suffix
+	 * @return the state: {@code advanced}, {@code criteria}, {@code filtered} and {@code sort}
+	 */
+	private @Nonnull Map<String, Object> listState(@Nonnull String grid) {
+		require(grid);
+		waitForFullPageResponse();
+		// Waits for the list grid's rows to arrive (it fetches them after it is drawn)
+		return until("the rows of " + grid + " to load", d -> {
+			Map<String, Object> state = map(script("return _sail.listState(arguments[0])", grid));
+			if (state.get("error") != null) {
+				lastProblem = String.valueOf(state.get("error"));
+				return null;
+			}
+			return Boolean.TRUE.equals(state.get("loaded")) ? state : null;
+		});
+	}
+
+	/**
+	 * Waits for a list grid to show the rows a filter or sort gesture asked for: the page has settled, the grid's
+	 * criteria or sort have changed from what they were before the gesture (when the gesture changes them) and its rows
+	 * have arrived. A grid that has all the rows filters and sorts them itself, without a fetch.
+	 *
+	 * @param grid		the list grid's SAIL locator, without a suffix
+	 * @param key		{@code criteria} or {@code sort}
+	 * @param before	the value of the key before the gesture
+	 * @param change	whether the gesture changes the value
+	 * @param what		the event, for the timeout message
+	 */
+	private void awaitList(@Nonnull String grid, @Nonnull String key, @Nullable Object before, boolean change, @Nonnull String what) {
+		waitForFullPageResponse();
+		// Waits for the grid to apply the gesture: its criteria (or sort) change, then its rows arrive
+		until(what, d -> {
+			waitForFullPageResponse();
+			Map<String, Object> state = map(script("return _sail.listState(arguments[0])", grid));
+			if (state.get("error") != null) {
+				lastProblem = String.valueOf(state.get("error"));
+				return null;
+			}
+			if (change && Objects.equals(before, state.get(key))) {
+				lastProblem = "the grid still has its " + key + " " + before;
+				return null;
+			}
+			lastProblem = "the grid's rows are loading";
+			return Boolean.TRUE.equals(state.get("loaded")) ? Boolean.TRUE : null;
+		});
+		lastProblem = null;
+	}
+
+	/**
+	 * Filters a column of a list grid as a user does, or clears the column's filter, and waits for the rows.
+	 * <p>
+	 * In simple filtering, a column whose filter row cell applies the operator (substring for text, equality for
+	 * anything else), or a column being cleared, is filtered in the filter row: click the cell, replace its text, press the
+	 * row's Filter button. Any other operator is applied with the grid's advanced filter: the grid's toggle switches to
+	 * advanced filtering (keeping the filter row's filters as clauses), the clauses are set as a saved snapshot sets them,
+	 * and the advanced filter's Filter button is pressed. A grid in advanced filtering stays in it.
+	 *
+	 * @param locator	a locator of the list grid's rows
+	 * @param column	the column's field name (its sanitised binding)
+	 * @param value		the value, or {@code null} to clear the column's filter
+	 * @param operator	the SAIL operator: contains, startsWith, equals, notEquals, lessThan or greaterThan
+	 */
+	public void filterListGrid(@Nonnull String locator, @Nonnull String column, @Nullable String value, @Nonnull String operator) {
+		String grid = root(locator);
+		Object before = listState(grid).get("criteria");
+		// Waits for the grid's filter row or advanced filter to be drawn
+		Map<String, Object> plan = until("the filter of " + grid + " to show", d -> {
+			Map<String, Object> result = map(script("return _sail.listFilterPlan(arguments[0], arguments[1], arguments[2], arguments[3])",
+														grid, column, value, operator));
+			Object error = result.get("error");
+			if (error != null) {
+				if (! Boolean.TRUE.equals(result.get("retry"))) {
+					throw new IllegalStateException("Cannot filter " + grid + ": " + error);
+				}
+				lastProblem = String.valueOf(error);
+				return null;
+			}
+			return result;
+		});
+		boolean change = "row".equals(plan.get("mode")) ? filterInRow(plan, column, value) : filterInAdvanced(grid, plan, operator);
+		awaitList(grid, "criteria", before, change, "the list grid to fetch its rows with the new filter");
+	}
+
+	/**
+	 * Types a column's filter into the grid's filter row and presses the row's Filter button.
+	 *
+	 * @param plan		the browser helper's plan: the cell's input, the Filter button and the cell's current text
+	 * @param column	the column, for the trace
+	 * @param value		the value, or {@code null} to clear the cell
+	 * @return whether the filter changes
+	 */
+	private boolean filterInRow(@Nonnull Map<String, Object> plan, @Nonnull String column, @Nullable String value) {
+		String current = String.valueOf(plan.get("current"));
+		trace(String.format("    In the filter row, %s column %s", (value == null) ? "clear" : "type '" + value + "' into", column));
+		SelenideElement input = $((WebElement) plan.get("input"));
+		prepare(input);
+		click(input);
+		// select what the cell holds (through the DOM) so that the keys replace it
+		script("if (arguments[0].select) arguments[0].select();", input.toWebElement());
+		new org.openqa.selenium.interactions.Actions(driver).sendKeys(Keys.BACK_SPACE).perform();
+		if ((value != null) && (! value.isEmpty())) {
+			new org.openqa.selenium.interactions.Actions(driver).sendKeys(value).perform();
+		}
+		trace("    Press the filter row's Filter button");
+		SelenideElement button = $((WebElement) plan.get("button"));
+		prepare(button);
+		click(button);
+		return ! current.equals((value == null) ? "" : value);
+	}
+
+	/**
+	 * Filters with the grid's advanced filter: switch the grid to it if needed, set its clauses and press its Filter button.
+	 *
+	 * @param grid		the list grid's SAIL locator, without a suffix
+	 * @param plan		the browser helper's plan: the toggle (when the grid is in simple filtering) and the criteria
+	 * @param operator	the operator, for the trace
+	 * @return {@code true}: the criteria change
+	 */
+	private boolean filterInAdvanced(@Nonnull String grid, @Nonnull Map<String, Object> plan, @Nonnull String operator) {
+		if (plan.get("toggle") instanceof WebElement toggle) {
+			trace("    Switch the grid to advanced filtering, for operator " + operator);
+			SelenideElement element = $(toggle);
+			prepare(element);
+			click(element);
+			// switching fetches the rows with the advanced filter's (empty) criteria
+			waitForFullPageResponse();
+		}
+		trace("    Set the advanced filter's clauses to " + plan.get("criteria"));
+		Map<String, Object> result = map(script("return _sail.listAdvancedCriteria(arguments[0], arguments[1])", grid, plan.get("criteria")));
+		if (! (result.get("button") instanceof WebElement filter)) {
+			throw new IllegalStateException("Cannot filter " + grid + " with the advanced filter: " + result.get("error"));
+		}
+		trace("    Press the advanced filter's Filter button");
+		SelenideElement element = $(filter);
+		prepare(element);
+		click(element);
+		return true;
+	}
+
+	/**
+	 * Clears every filter of a list grid with its toolbar's Clear button, and waits for the rows.
+	 *
+	 * @param locator	a locator of the list grid's rows
+	 */
+	public void clearListGridFilters(@Nonnull String locator) {
+		String grid = root(locator);
+		Map<String, Object> state = listState(grid);
+		Map<String, Object> result = map(script("return _sail.listClearButton(arguments[0])", grid));
+		if (! (result.get("button") instanceof WebElement clear)) {
+			throw new IllegalStateException("Cannot clear the filters of " + grid + ": " + result.get("error"));
+		}
+		if (Boolean.TRUE.equals(result.get("disabled"))) {
+			throw new IllegalStateException("The Clear filter button of " + grid + " is disabled");
+		}
+		trace("    Press the list grid's Clear filter button");
+		SelenideElement element = $(clear);
+		prepare(element);
+		click(element);
+		awaitList(grid, "criteria", state.get("criteria"), Boolean.TRUE.equals(state.get("filtered")),
+					"the list grid to fetch its rows without filters");
+	}
+
+	/**
+	 * Sorts a list grid by one column, as a user does: click the column's header until the grid is sorted by that
+	 * column alone, in the direction wanted. The first click sorts by the column alone; the next turns its direction.
+	 *
+	 * @param locator		a locator of the list grid's rows
+	 * @param column		the column's field name (its sanitised binding)
+	 * @param descending	the direction
+	 */
+	public void sortListGrid(@Nonnull String locator, @Nonnull String column, boolean descending) {
+		String grid = root(locator);
+		for (int clicks = 0; clicks < 3; clicks++) {
+			Object before = listState(grid).get("sort");
+			Map<String, Object> plan = map(script("return _sail.listSortPlan(arguments[0], arguments[1])", grid, column));
+			if (plan.get("error") != null) {
+				throw new IllegalStateException("Cannot sort " + grid + ": " + plan.get("error"));
+			}
+			if (Boolean.TRUE.equals(plan.get("sorted")) && (descending == Boolean.TRUE.equals(plan.get("descending")))) {
+				trace(String.format("    Sorted by %s %s", column, descending ? "descending" : "ascending"));
+				return;
+			}
+			if (! Boolean.TRUE.equals(plan.get("canSort"))) {
+				throw new IllegalStateException("The list grid " + grid + " cannot be sorted by " + column);
+			}
+			if (! (plan.get("header") instanceof WebElement header)) {
+				throw new IllegalStateException("The list grid " + grid + " shows no header for " + column);
+			}
+			trace("    Click the header of " + column);
+			SelenideElement element = $(header);
+			prepare(element);
+			click(element);
+			awaitList(grid, "sort", before, true, "the list grid to show its rows sorted by " + column);
+		}
+		throw new IllegalStateException(String.format("Clicking the header of %s did not sort %s by it alone, %s", column, grid,
+														descending ? "descending" : "ascending"));
+	}
+
+	/**
+	 * Returns the position of the combo or radio option whose code or label is the value, as {@code dataEnter} takes it.
+	 *
+	 * @param locator	the combo's or radio group's locator
+	 * @param value		the code or label
+	 * @param byCode	{@code true} to match the code, {@code false} the label
+	 * @return the zero-based position
+	 * @throws IllegalStateException if no option, or more than one, matches
+	 */
+	public int optionIndex(@Nonnull String locator, @Nonnull String value, boolean byCode) {
+		require(root(locator));
+		Map<String, Object> result = map(script("return _sail.optionIndex(arguments[0], arguments[1], arguments[2])",
+													root(locator), value, Boolean.valueOf(byCode)));
+		if (result.get("index") instanceof Number index) {
+			return index.intValue();
+		}
+		throw new IllegalStateException(String.format("Cannot choose an option of %s: %s (the options, code=label, are %s)",
+														locator, result.get("error"), result.get("options")));
+	}
+
+	/**
+	 * Picks the first row of a lookup description's drop-down, in the order shown, that shows the text in a cell:
+	 * open the drop-down with its picker (or type the search into the lookup, which opens it), then click the row.
+	 *
+	 * @param locator	the lookup description's locator
+	 * @param search	the text to type, or {@code null} to open the drop-down with its picker
+	 * @param text		the text the row contains (case-sensitive)
+	 * @return {@code true} once picked, {@code false} if the lookup is disabled
+	 * @throws IllegalStateException if no row shows the text
+	 */
+	public boolean lookupDescriptionContaining(@Nonnull String locator, @Nullable String search, @Nonnull String text) {
+		Found found = require(locator);
+		if (found.disabled()) {
+			trace("    The lookup description is disabled");
+			return false;
+		}
+		prepare(found.element());
+
+		String combo = String.format("%s/item[Class=ComboBoxItem||name=_combo]", locator);
+		if (search == null) {
+			SelenideElement picker = require(combo + "/[icon=\"picker\"]").element();
+			prepare(picker);
+			click(picker);
+		}
+		else if (! text(new SmartClientTextCommand(combo + "/element", search, true))) {
+			return false;
+		}
+
+		waitForFullPageResponse();
+		// Waits for SmartClient to show the drop-down with its rows (the fetch the picker or the search started has returned)
+		Number row = until("the lookup's drop-down to show its rows", d -> {
+			Map<String, Object> result = map(script("return _sail.pickListRow(arguments[0], arguments[1])", root(locator), text));
+			if (result.get("row") instanceof Number number) {
+				if (number.intValue() < 0) {
+					throw new IllegalStateException(String.format("No row of the drop-down of %s contains '%s' (%s rows)",
+																	locator, text, result.get("rows")));
+				}
+				return number;
+			}
+			lastProblem = String.valueOf(result.get("error"));
+			return null;
+		});
+		trace(String.format("    Row %d contains '%s'", Integer.valueOf(row.intValue()), text));
+		SelenideElement element = require(String.format("%s/pickList/body/row[%d]/col[0]", combo, Integer.valueOf(row.intValue()))).element();
+		prepare(element);
+		click(element);
+		waitForFullPageResponse();
+
+		return true;
+	}
+
+	/**
 	 * Reports whether a widget is on the view, shown and enabled, without failing if it is not there.
 	 *
 	 * @param locator	the widget's locator

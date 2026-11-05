@@ -20,7 +20,7 @@
 (function () {
 	"use strict";
 
-	var VERSION = 1;
+	var VERSION = 2;
 	if (window._sail && window._sail.version === VERSION) {
 		return;
 	}
@@ -1011,6 +1011,279 @@
 			return true;
 		}
 		return false;
+	};
+
+	// ---------------------------------------------------------------- list grid filters and sorting
+
+	/** The BizListGrid a SAIL list grid locator names (a list view's, or one in a view): { owner, grid } or { error, retry }. */
+	function listOwner(locator) {
+		var spec = S.parse(locator).spec;
+		var whole = {};
+		Object.keys(spec || {}).forEach(function (key) {
+			if (key !== "part") {
+				whole[key] = spec[key];
+			}
+		});
+		var resolved = S.resolve(whole);
+		var owner = resolved.obj;
+		if (!owner) {
+			return { error: resolved.error || "no list grid for " + locator, retry: true };
+		}
+		if (!isc.isA.BizListGrid(owner) || !owner.grid) {
+			return { error: locator + " is not a list grid" };
+		}
+		return { owner: owner, grid: owner.grid };
+	}
+
+	/** The name of the grid field showing a column (its sanitised binding, or the _display_ field of an enum or association). */
+	function listField(grid, column) {
+		if (grid.getField(column)) {
+			return column;
+		}
+		return grid.getField("_display_" + column) ? "_display_" + column : null;
+	}
+
+	/** The criteria the grid fetched its rows with, as JSON, to tell when a gesture's fetch has happened. */
+	function fetchedCriteria(grid) {
+		var data = grid.getData();
+		return JSON.stringify(data && data.getCriteria ? data.getCriteria() : null);
+	}
+
+	/**
+	 * The operator the filter row applies to a field: text is matched as a substring (case-insensitively), anything
+	 * else (numbers, dates, enums, booleans) by equality. The grid does not let a user choose another operator there.
+	 */
+	function rowOperator(grid, name) {
+		var field = grid.getField(name);
+		if (field.valueMap || name.indexOf("_display_") === 0) {
+			return "equals";
+		}
+		var type = field.type || "text";
+		return isc.SimpleType.inheritsFrom(type, "text") ? "contains" : "equals";
+	}
+
+	/** The SmartClient operator a FilterBuilder clause uses for a SAIL operator, as the clause's operator picker titles it. */
+	var CLAUSE_OPERATORS = {
+		contains: "iContains",
+		startsWith: "iStartsWith",
+		equals: "equals",
+		notEquals: "notEqual",
+		lessThan: "lessThan",
+		greaterThan: "greaterThan"
+	};
+
+	/** The top level clauses of advanced criteria, or the clauses simple filter row criteria stand for. */
+	function clauses(criteria) {
+		if (!criteria || isc.isA.emptyObject(criteria)) {
+			return [];
+		}
+		if (!isc.DataSource.isAdvancedCriteria(criteria)) {
+			criteria = isc.DataSource.convertCriteria(criteria, "substring");
+		}
+		if (criteria.operator !== "and" || !criteria.criteria) {
+			return [criteria];
+		}
+		return criteria.criteria.slice();
+	}
+
+	/**
+	 * The list grid's state: { advanced, criteria (JSON of the criteria of its rows), filtered, loaded, sort (JSON) } or
+	 * { error }.
+	 */
+	S.listState = function (locator) {
+		var l = listOwner(locator);
+		if (l.error) {
+			return l;
+		}
+		var state = loadedRows(l.grid);
+		var data = l.grid.getData();
+		return {
+			advanced: !!l.owner._advancedFilter.toggleButton.selected,
+			criteria: fetchedCriteria(l.grid),
+			filtered: clauses(data && data.getCriteria ? data.getCriteria() : null).length > 0,
+			loaded: state.loaded,
+			sort: JSON.stringify(l.grid.getSort() || [])
+		};
+	};
+
+	/**
+	 * Works out how a user filters a column of a list grid, without changing anything.
+	 * The filter row is used while the grid is in simple filtering and the row's own operator for the column is the one
+	 * wanted (or the column is being cleared). Otherwise the advanced filter is used, with the criteria the grid has, the
+	 * column's clause replaced; the caller presses the toggle (if the grid is in simple filtering) and Filter.
+	 * Returns { mode: "row", input, button, current } or { mode: "advanced", toggle, button, criteria } or { error, retry }.
+	 */
+	S.listFilterPlan = function (locator, column, value, operator) {
+		var l = listOwner(locator);
+		if (l.error) {
+			return l;
+		}
+		var grid = l.grid;
+		var name = listField(grid, column);
+		if (!name) {
+			return { error: "the list grid has no column " + column };
+		}
+		var filter = l.owner._advancedFilter;
+		var advanced = !!filter.toggleButton.selected;
+		if (!advanced && (value == null || rowOperator(grid, name) === operator)) {
+			var editor = grid.filterEditor;
+			var form = editor && editor.getEditForm ? editor.getEditForm() : null;
+			var item = form ? form.getItem(name) : null;
+			if (!item || !editor.actionButton) {
+				return { error: "the filter row has no field for column " + column + " (or no Filter button)", retry: true };
+			}
+			var current = item.getValue();
+			return {
+				mode: "row",
+				input: item.getFocusElement() || item.getDataElement(),
+				button: isc.AutoTest.getElement(S.objectLocator(editor.actionButton)),
+				current: current == null ? "" : String(current)
+			};
+		}
+		var existing = advanced ? filter.getCriteria() : grid.getFilterEditorCriteria(true);
+		var kept = clauses(existing).filter(function (c) {
+			return c.fieldName !== name;
+		});
+		if (value != null) {
+			var field = grid.getField(name);
+			var numeric = field.type && (isc.SimpleType.inheritsFrom(field.type, "integer") || isc.SimpleType.inheritsFrom(field.type, "float"));
+			kept.push({ fieldName: name, operator: CLAUSE_OPERATORS[operator], value: numeric && !isNaN(Number(value)) ? Number(value) : value });
+		}
+		return {
+			mode: "advanced",
+			toggle: advanced ? null : isc.AutoTest.getElement(S.objectLocator(filter.toggleButton)),
+			criteria: { _constructor: "AdvancedCriteria", operator: "and", criteria: kept }
+		};
+	};
+
+	/**
+	 * Puts criteria into the advanced filter's clauses, as a saved snapshot does, and returns its Filter button.
+	 * The grid must be in advanced filtering (its toggle pressed).
+	 */
+	S.listAdvancedCriteria = function (locator, criteria) {
+		var l = listOwner(locator);
+		if (l.error) {
+			return l;
+		}
+		var filter = l.owner._advancedFilter;
+		if (!filter.toggleButton.selected) {
+			return { error: "the list grid is not in advanced filtering" };
+		}
+		filter.setCriteria(criteria);
+		return { button: isc.AutoTest.getElement(S.objectLocator(filter._filterButton)) };
+	};
+
+	/** The list grid toolbar's Clear (filter) button. */
+	S.listClearButton = function (locator) {
+		var l = listOwner(locator);
+		if (l.error) {
+			return l;
+		}
+		var tools = l.owner.getMembers()[0];
+		var buttons = (tools && tools.getMembers ? tools.getMembers() : []).filter(function (m) {
+			return isc.isA.Canvas(m) && /icons\/filter_delete\.png$/.test(String(m.icon || ""));
+		});
+		if (!buttons.length) {
+			return { error: "the list grid's toolbar has no Clear filter button (does it show filters?)" };
+		}
+		return { button: isc.AutoTest.getElement(S.objectLocator(buttons[0])), disabled: buttons[0].isDisabled() };
+	};
+
+	/**
+	 * The sort a list grid shows, and the header button that sorts by a column: { sorted (the column is the only sort),
+	 * descending, header, canSort } or { error, retry }.
+	 */
+	S.listSortPlan = function (locator, column) {
+		var l = listOwner(locator);
+		if (l.error) {
+			return l;
+		}
+		var grid = l.grid;
+		var name = listField(grid, column);
+		if (!name) {
+			return { error: "the list grid has no column " + column };
+		}
+		var sort = grid.getSort() || [];
+		var header = grid.getFieldHeaderButton ? grid.getFieldHeaderButton(grid.getFieldNum(name)) : null;
+		return {
+			sorted: sort.length === 1 && sort[0].property === name,
+			descending: sort.length > 0 && sort[0].direction === "descending",
+			header: header ? header.getClipHandle() : null,
+			canSort: grid.canSort !== false && grid.getField(name).canSort !== false
+		};
+	};
+
+	// ---------------------------------------------------------------- options and pick lists
+
+	/**
+	 * The zero-based position, as dataEnter takes it, of the combo or radio option whose code or label is the value:
+	 * { index } or { error, options }. A combo counts its empty first entry when it has one.
+	 */
+	S.optionIndex = function (locator, value, byCode) {
+		var resolved = S.resolve(S.parse(locator).spec);
+		var item = resolved.obj;
+		if (!isFormItem(item)) {
+			return { error: resolved.error || locator + " is not a form item", retry: !!resolved.retry };
+		}
+		var options = [];
+		var data = item.getClientPickListData ? item.getClientPickListData() : null;
+		if (data && data.length) {
+			var valueField = item.getValueFieldName ? item.getValueFieldName() : item.name;
+			var displayField = item.getDisplayFieldName ? item.getDisplayFieldName() : null;
+			data.forEach(function (row) {
+				var code = row[valueField];
+				var label = displayField && row[displayField] != null ? row[displayField] : item.mapValueToDisplay(code);
+				options.push({ code: code == null ? "" : String(code), label: strip(label) });
+			});
+		}
+		else {
+			var map = item.getValueMap() || {};
+			(isc.isA.Array(map) ? map.map(String) : Object.keys(map)).forEach(function (code) {
+				options.push({ code: code, label: strip(isc.isA.Array(map) ? code : map[code]) });
+			});
+		}
+		var matches = [];
+		options.forEach(function (option, i) {
+			if ((byCode ? option.code : option.label) === value) {
+				matches.push(i);
+			}
+		});
+		if (matches.length === 1) {
+			return { index: matches[0] };
+		}
+		return {
+			error: (matches.length ? "more than one option has the " : "no option has the ") + (byCode ? "code " : "label ") + value,
+			options: options.map(function (o) {
+				return o.code + "=" + o.label;
+			})
+		};
+	};
+
+	/**
+	 * The first row, in the order shown, of a lookup description's open pick list that shows the text in a cell:
+	 * { row, rows } (row -1 when none does), or { error, retry } while the pick list is not shown or its rows are loading.
+	 */
+	S.pickListRow = function (locator, text) {
+		var resolved = S.resolve(S.parse(locator).spec);
+		var item = resolved.obj;
+		var combo = item && item.canvas && item.canvas.getItem ? item.canvas.getItem("_combo") : null;
+		if (!combo) {
+			return { error: resolved.error || locator + " is not a lookup description", retry: !!resolved.retry };
+		}
+		var list = combo.pickList;
+		if (!list || !S.shown(list)) {
+			return { error: "the lookup's pick list is not showing", retry: true };
+		}
+		var state = loadedRows(list);
+		if (!state.loaded) {
+			return { error: "the lookup's pick list rows are still loading", retry: true };
+		}
+		for (var i = 0; i < state.rows; i++) {
+			if (rowFetched(list, i) && rowContains(list, i, text)) {
+				return { row: i, rows: state.rows };
+			}
+		}
+		return { row: -1, rows: state.rows };
 	};
 
 	// ---------------------------------------------------------------- widget state, messages, menus

@@ -13,6 +13,8 @@
 	- zoomIn that opens a view: no fixture has a populated zoom in reference, so the refused path is tested.
 	- ConditionsFixture: SmartClient never finishes processing one of its forms here, so SAIL cannot wait for it.
 	- listGridNew in a view: the kitchen sink's list grids in views hide New (ConditionsFixture's does not, see above).
+	- Finding by content (list filters and sorting, captureValue, dataEnter match, lookups by row text): see
+	  sc-kitchensink-sail-find.xml.
 -->
 <automation uxui="desktop" userAgentType="desktop"
 	testStrategy="Assert"
@@ -302,6 +304,12 @@
 			<dataEnter binding="name" value="SAIL model lookup {run}" />
 			<save />
 			<comment>The saved fixture now shows in the view's "Saved selections" list grid</comment>
+			<testGridRows module="kitchensink" query="qModelLookupFixtures" rowContaining="SAIL model lookup {run}" minRows="1" maxRows="1" />
+			<comment>Filter and sort a list grid in a view (sc-kitchensink-sail-find.xml covers the operators on a list view)</comment>
+			<listGridFilter module="kitchensink" query="qModelLookupFixtures" column="name" value="{run}" />
+			<testGridRows module="kitchensink" query="qModelLookupFixtures" minRows="1" maxRows="1" />
+			<listGridSort module="kitchensink" query="qModelLookupFixtures" column="name" descending="true" />
+			<listGridClearFilter module="kitchensink" query="qModelLookupFixtures" />
 			<testGridRows module="kitchensink" query="qModelLookupFixtures" rowContaining="SAIL model lookup {run}" minRows="1" maxRows="1" />
 			<listGridSelect module="kitchensink" query="qModelLookupFixtures" rowContaining="SAIL model lookup {run}" />
 			<listGridZoom module="kitchensink" query="qModelLookupFixtures" rowContaining="SAIL model lookup {run}" />
