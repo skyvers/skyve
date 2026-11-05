@@ -417,6 +417,11 @@ of these defaults from the current context.
 | `listGridClearFilter` | `module`, `document`, `query`, `model` | Clears every column filter. | yes: Clear in each filtered column's menu (Vue); in a data table it deletes each typed filter's text, chooses each combo filter's empty option and unsets each check box | yes: the toolbar's Clear filter button, which clears the filter row and the advanced filter |
 | `listGridSort` | `module`, `document`, `query`, `model`; `column`\*, `descending` | Sorts by the column alone, ascending unless `descending="true"`. Sort before a `rowContaining` when more than one row could match. | yes: clicks the column title until it alone shows the direction. PrimeFaces ignores a sort click on an empty data table, so that fails | yes: clicks the column header, once for ascending and again to reverse |
 
+A list step that names no `module`, `document`, `query` or `model` uses the
+list the context shows: the one `navigateList` or a list menu item opened, with
+its query or model. Name the list when the view shows more than one, such as an
+edit view's list grids.
+
 `listGridFilter` and `listGridSort` check `column` against the list's query
 before they touch the page. A column that is not in the query, or that the
 query says cannot be filtered or sorted, fails the step with the query's
@@ -523,8 +528,11 @@ errors, as `(page script errors: …)`. A script error can stop a response from
 being applied.
 
 Under Verify, the message starts with `SAIL automation failed with N failure(s):`
-and lists one failure per line. Nothing is only logged: a script never prints a
-failure and then passes.
+and lists one failure per line. Each failure from a step that threw is also
+attached to the `AssertionError` as a suppressed exception, with the original
+exception as its cause, so the test report shows its stack trace; the trace
+shows the cause chain and the harness frames. Nothing is only logged: a script
+never prints a failure and then passes.
 
 Two system properties help when a run fails:
 
