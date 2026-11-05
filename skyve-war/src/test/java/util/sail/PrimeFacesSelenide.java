@@ -658,6 +658,30 @@ public class PrimeFacesSelenide extends Selenide<
 		return success;
 	}
 
+	/**
+	 * Replaces the text of an input as a user does: clicks into it, selects its text and types over it (or deletes it),
+	 * then leaves it with Tab, so that its change event (and any ajax handler) fires once, with the new text.
+	 * {@code clear()} would first fire a change event with an empty value: a date picker that holds a value can then be
+	 * re-rendered by that event's response with its old value, after the new text was typed.
+	 *
+	 * @param id	the input's id
+	 * @param value	the text, or null or empty to delete the text
+	 * @return true if the input is shown, enabled and editable
+	 */
+	public boolean typeOver(@Nonnull String id, @Nullable String value) {
+		SelenideElement element = $(byId(id));
+		if ((! element.exists()) || (! element.isDisplayed()) || (! element.isEnabled()) ||
+				(element.attr("disabled") != null) || (element.attr("readonly") != null)) {
+			return false;
+		}
+		click(element);
+		element.sendKeys(Keys.chord(selectAllKey(), "a"));
+		element.sendKeys(((value == null) || value.isEmpty()) ? Keys.BACK_SPACE.toString() : value);
+		element.sendKeys(Keys.TAB);
+		waitForAjaxResponse();
+		return true;
+	}
+
 	@Override
 	public boolean selectOne(PrimeFacesSelectOneCommand command) {
 		String id = command.id();
