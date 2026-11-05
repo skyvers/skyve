@@ -516,6 +516,9 @@
 			<dataEnter binding="disableUpload" value="false" />
 			<comment>Each check box makes a trigger unavailable</comment>
 			<testWidget action="RunFromToolbar" enabled="true" />
+			<comment>Actions with no button are not shown: Run From Event is not in the action panel, and Run Without Trigger is invisible</comment>
+			<testWidget action="RunFromEvent" visible="false" />
+			<testWidget action="RunWithoutTrigger" visible="false" />
 			<dataEnter binding="disableToolbarAction" value="true" />
 			<testWidget action="RunFromToolbar" enabled="false" />
 			<dataEnter binding="disableToolbarAction" value="false" />

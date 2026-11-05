@@ -51,7 +51,7 @@ class PrimeFacesKitchenSinkSailIT extends AbstractPrimeFacesInterpretedSail {
 
 	/**
 	 * The steps added for long lists, options and lookups fail with a reason when the page cannot do what they say:
-	 * no such option, operator, lookup row or link, a column the Vue list grid does not show, and a sort of an empty data table.
+	 * no such option, operator, lookup row, link or action, a column the Vue list grid does not show, and a sort of an empty data table.
 	 * Run under Verify, so that every interaction runs and each failure is reported.
 	 */
 	@Test
@@ -97,6 +97,12 @@ class PrimeFacesKitchenSinkSailIT extends AbstractPrimeFacesInterpretedSail {
 							<listGridSort module="kitchensink" query="qListGridFixtureFacesAttributes" column="text" descending="true" />
 						</method>
 					</interaction>
+					<interaction name="No such action">
+						<method>
+							<navigateEdit module="kitchensink" document="ActionsFixture" />
+							<testWidget action="NoSuchAction{run}" visible="false" />
+						</method>
+					</interaction>
 					<interaction name="No such link">
 						<method>
 							<navigateEdit module="kitchensink" document="ListGridFixture" />
@@ -107,13 +113,14 @@ class PrimeFacesKitchenSinkSailIT extends AbstractPrimeFacesInterpretedSail {
 				""";
 		AssertionError e = assertThrows(AssertionError.class, () -> sailString(script));
 		String message = e.getMessage();
-		assertAll(() -> assertTrue(message.contains("with 6 failure(s)"), message),
+		assertAll(() -> assertTrue(message.contains("with 7 failure(s)"), message),
 					() -> assertTrue(message.contains("has no option with the label 'Fourth'"), message),
 					() -> assertTrue(message.contains("is a text column, which cannot filter with greaterThan"), message),
 					() -> assertTrue(message.contains("has no row containing 'no such row "), message),
 					() -> assertTrue(message.contains("column [time] (Time) is not shown in the Vue list grid"), message),
 					() -> assertTrue(message.contains("PrimeFaces does not sort an empty data table"), message),
-					() -> assertTrue(message.contains("found no displayed link containing it: the page's links are ["), message));
+					() -> assertTrue(message.contains("found no displayed link containing it: the page's links are ["), message),
+					() -> assertTrue(message.contains("<testWidget /> [NoSuchAction{run}] is not in the view"), message));
 	}
 
 	private static String automation(String steps) {
