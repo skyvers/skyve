@@ -915,6 +915,27 @@ Scripts follow the same rules. Use `testGridRows timeoutMillis` or
   registers the signed-in user's roles with `viewRoles`. A script that signs in
   as an unregistered, less privileged user must avoid views that differ for
   them. See [The test user](#the-test-user).
+  - `viewRoles` takes module roles and customer roles, not groups. Groups are
+    data, which the test JVM cannot read, so list the roles a user gets
+    through their groups.
+  - An app whose UX/UI selector routes by role can send the every-role user
+    somewhere the script does not expect. Biz Hub Apps, for example, routes
+    any user with a client role to its support centre UX/UI. Sign in as a
+    user with the roles the workflow needs, and register them.
+- **Rejected uploads.** `upload` expects the upload to succeed. A script
+  cannot expect an upload to be refused and check its message (such as "file
+  already exists").
+- **What `captureValue` reads.** It reads a widget in the view by binding. It
+  cannot read a list cell or the view's title, so a number that is only shown
+  in a list or a title cannot be captured.
+- **Links in grid rows.** No step clicks a link in a data grid or list grid
+  row (for example a "Revoke Access" link in each row). `navigateLink text`
+  clicks the first matching link on the page, which is the wrong one when
+  every row has the same link.
+- **One automation per renderer.** `{run}` and `{var:name}` belong to one
+  automation. A workflow that moves between renderers (a client in the
+  support centre, then staff in SmartClient) is several scripts, and the IT
+  has to pass the run token and any captured values between them itself.
 - **Unused attributes.** `dataEnter@navigateToWidget`,
   `navigateMap@refreshTimeInSeconds`, `navigateMap@showRefreshControls`,
   `navigateCalendar@startBinding` and `navigateCalendar@endBinding` are accepted
