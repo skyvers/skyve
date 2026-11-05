@@ -39,9 +39,7 @@ Runtime bugs that the suites found are listed in
 
 The schema is `skyve-war/src/main/java/schemas/sail.xsd`, with an identical copy
 in `skyve-core/src/test/resources/schemas/sail.xsd`. Both executors implement
-the whole language, except the steps and attributes marked **pending**. A
-pending feature fails with "not implemented yet" until its renderer implements
-it. A step that a renderer has no UI for fails with a reason; the PF and SC
+the whole language. A step that a renderer has no UI for fails with a reason; the PF and SC
 columns of the [op-code reference](#op-code-reference) say which.
 Code that implements `Executor` must be updated for Skyve 10; see
 [Upgrading](#upgrading).
@@ -298,8 +296,9 @@ They are not substituted in attributes that name metadata, such as `module`,
 
 Write a newline in a value as `&#10;`, for example
 `value="09:00 10:30 Client A&#10;&#10;13:00 17:00 Client B"`. XML turns a
-literal newline inside an attribute into a space before SAIL reads it. SC
-support for multi-line values is pending.
+literal newline inside an attribute into a space before SAIL reads it. Rich
+text reads as laid out: a line for each line break or block, and an empty
+block is a blank line.
 
 An empty membership cannot be expressed, because a blank value counts as absent.
 `testDataEnter` skips membership widgets.
@@ -331,7 +330,7 @@ Support: **yes** means implemented; **no** means the step fails with a reason
 | `navigateTree` | as `navigateList` | Opens `a=t`. | no: no PF tree page | URL only: waits for the view, with no tree gestures |
 | `navigateMap` | as `navigateList`, plus `geometryBinding`, `refreshTimeInSeconds`, `showRefreshControls` | Opens `a=m` with `&b=<geometryBinding>`. `geometryBinding` is required unless a model is named. The two refresh attributes are accepted and ignored. | yes | URL only |
 | `navigateCalendar` | as `navigateList`, plus `startBinding`, `endBinding` | Opens `a=c`. The bindings are accepted and ignored. | no: no PF calendar page | URL only |
-| `navigateLink` | `href` or `text` (exactly one) | With `href`, opens an absolute URL as is, or otherwise a URL relative to the base URL. With `text`, clicks the first displayed link (`<a>`), in page order, whose visible text contains the text (case-sensitive), such as a link in a blurb; a link that opens a new window fails the step, and no match fails it with the page's link texts. The top context, if any, loses its document and view type. Push a context afterwards if later steps need one. | yes | `href` yes; `text` pending |
+| `navigateLink` | `href` or `text` (exactly one) | With `href`, opens an absolute URL as is, or otherwise a URL relative to the base URL. With `text`, clicks the first displayed link (`<a>`), in page order, whose visible text contains the text (case-sensitive), such as a link in a blurb; a link that opens a new window fails the step, and no match fails it with the page's link texts. The top context, if any, loses its document and view type. Push a context afterwards if later steps need one. | yes | yes; with `text`, if the link leads to another page the step waits for it to load, then for SmartClient to settle |
 | `navigateMenu` | `module`\*, `item`\* | Clicks through the rendered menu, then sets the context as the equivalent navigate step would. `item` is the menu item's name, or its shown label. Use `/` to qualify it with group names, for example `Security Admin/Users`. | yes; tree and calendar items fail | yes; fails if a window covers the menu |
 | `testMenu` | `module`\*, `item`, `present` | Asserts that the module, or an item of it, is shown (`present` true or absent) or not shown (`false`). `item` is named as for `navigateMenu`. | yes | yes |
 
@@ -451,7 +450,7 @@ afterwards.
 | Enum, constant domain | `equals`, `notEquals`, from the menu's drop-down | `equals`, from the filter's combo | `equals`, from the filter row's select |
 | Boolean | `equals`, `notEquals`, with the three-state check box | `equals`, with the filter's check box | `equals`, with the filter row's three-state check box |
 | Date, dateTime, timestamp | `equals`, `notEquals`, `lessThan` (Before), `greaterThan` (After) | `equals` only | `equals` in the filter row; `lessThan` and `greaterThan` in the advanced filter |
-| Time | `equals` | `equals` only | `equals` in the filter row (not yet run); `lessThan`, `greaterThan` and hidden columns fail in the advanced filter (runtime issue SC-9) |
+| Time | `equals` | `equals` only | `equals` in the filter row when the list shows the column; `equals`, `lessThan` and `greaterThan` in the advanced filter, for a shown or hidden column |
 | Association | as text, on its business key | as text | `equals`, by the related record's description, from the filter row's select. Use a column through the association, such as `selection.description`, for `contains` |
 
 **PF details.** The Vue list grid uses each column's filter menu. A new filter

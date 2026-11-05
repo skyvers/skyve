@@ -534,7 +534,7 @@ handler one key at a time, and waits for what each key starts.
 
 **Status:** open.
 
-## SC-9: Filtering a time column in the advanced filter fails
+## SC-9 (fixed): Filtering a time column in the advanced filter fails
 
 **Symptom.** In a SmartClient list grid, any advanced filter clause on a time
 column fails with "Please enter a properly formatted value". `equals` can seem
@@ -561,14 +561,46 @@ than 11:11. Press Filter.
 **Checked:** Confirmed in the browser and on the wire. The files involved are
 identical on master, so this is not a null-safety regression.
 
-**Proposed fix.** In `isc.BizUtil.convertFilterCriteria`
+**Fix (15aec46f53).** In `isc.BizUtil.convertFilterCriteria`
 (`skyve-web/src/js/desktop/util.js`), which every list and pick-list fetch
 already passes through, delete `logicalDate` from any Date `value`, `start`
 or `end` that also has `logicalTime`. Only this bug produces such a Date. It
-needs `skyve-min.js` rebuilt and can only be checked in a browser.
+needs `skyve-min.js` rebuilt and can only be checked in a browser. Checked on
+the wire: a time clause is now sent as `12:30:00.000`, and date and dateTime
+clauses are unchanged.
 
-**Workaround in the suites.** The SC kitchen sink does not filter time
-columns through the advanced filter. `listGridFilter` on a time column fails
-with the server's message.
+A list grid with filter parameters builds its criteria again in
+`completeFilterCriteria`, which does not pass through this function, so an
+advanced time filter on such a grid is still sent as a date.
 
-**Status:** open; fix proposed.
+**Suites.** The SC kitchen sink filters ListAttributes' time column with
+`equals`, `lessThan` and `greaterThan` through the advanced filter, and with
+`equals` in a filter row.
+
+**Status:** fixed, except on list grids with filter parameters.
+
+## SC-10: Selecting a row whose selected handler rerenders loops for ever
+
+**Symptom.** In SmartClient, on the kitchen sink List Grid Fixture, selecting
+a row in the `qListGridFixtureFaces` list grid makes SmartClient send about 13
+requests a second, without end. That grid has `selectedIdBinding` and an
+`onSelectedHandlers` `<rerender>`.
+
+**Reproduction.** In SmartClient, open the List Grid Fixture and click a row
+of its faces list grid. Watch the network requests.
+
+**Suspected cause.** Read from `skyve-web/src/js/desktop/listgrid.js`
+(`selectionUpdated` → `bizSelected`, and `refresh` deselecting), not stepped
+through. The rerender refreshes the view's list grids. The refresh deselects
+and reselects the row, and each of those fires the selected handler again,
+which rerenders again.
+
+**Checked:** Reproduced with Playwright outside SAIL. `listgrid.js` and
+`skyve-min.js` are identical on master, so this is not a null-safety
+regression; the fixture only exposed it.
+
+**Workaround in the suites.** The SC kitchen sink does not select a row in
+that grid. So `navigateEdit bizId="{var:…}"` and `navigateLink href` with
+`{var:}` are run only in PF; the substitution is shared code with unit tests.
+
+**Status:** open.
