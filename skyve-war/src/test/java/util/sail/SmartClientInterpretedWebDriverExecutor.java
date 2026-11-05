@@ -1229,12 +1229,14 @@ public class SmartClientInterpretedWebDriverExecutor extends InterpretedWebDrive
 
 	/**
 	 * Filters the column in the list grid's filter row (substring for text, equality otherwise), or with the grid's
-	 * advanced filter for the other operators: see {@link SmartClientSelenide#filterListGrid}.
+	 * advanced filter for the other operators and the columns the row does not show, then checks that no error shows:
+	 * see {@link SmartClientSelenide#filterListGrid}.
 	 */
 	@Override
 	protected void filterListGrid(@Nonnull ListGridFilter filter, @Nonnull String column, @Nullable String value, @Nonnull FilterOperator operator) {
 		prepareForInteraction();
 		selenide.filterListGrid(listGridRows(filter), sanitised(column), value, operator.name());
+		checkSuccess("expected no error messages after <listGridFilter />");
 	}
 
 	/**
@@ -1244,6 +1246,7 @@ public class SmartClientInterpretedWebDriverExecutor extends InterpretedWebDrive
 	protected void clearListGridFilters(@Nonnull ListGridClearFilter clear) {
 		prepareForInteraction();
 		selenide.clearListGridFilters(listGridRows(clear));
+		checkSuccess("expected no error messages after <listGridClearFilter />");
 	}
 
 	/**
@@ -1253,6 +1256,7 @@ public class SmartClientInterpretedWebDriverExecutor extends InterpretedWebDrive
 	protected void sortListGrid(@Nonnull ListGridSort sort, @Nonnull String column, boolean descending) {
 		prepareForInteraction();
 		selenide.sortListGrid(listGridRows(sort), sanitised(column), descending);
+		checkSuccess("expected no error messages after <listGridSort />");
 	}
 
 	/**

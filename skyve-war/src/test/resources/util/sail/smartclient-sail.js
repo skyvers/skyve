@@ -1035,12 +1035,23 @@
 		return { owner: owner, grid: owner.grid };
 	}
 
-	/** The name of the grid field showing a column (its sanitised binding, or the _display_ field of an enum or association). */
+	/** A grid field by name, shown or hidden, or the data source's field. */
+	function fieldDef(grid, name) {
+		var fields = grid.getAllFields ? grid.getAllFields() : grid.getFields();
+		for (var i = 0; i < fields.length; i++) {
+			if (fields[i].name === name) {
+				return fields[i];
+			}
+		}
+		return grid.getDataSource() ? grid.getDataSource().getField(name) : null;
+	}
+
+	/** The name of the grid field for a column (its sanitised binding, or its _display_ field), or null. */
 	function listField(grid, column) {
-		if (grid.getField(column)) {
+		if (fieldDef(grid, column)) {
 			return column;
 		}
-		return grid.getField("_display_" + column) ? "_display_" + column : null;
+		return fieldDef(grid, "_display_" + column) ? "_display_" + column : null;
 	}
 
 	/** The criteria the grid fetched its rows with, as JSON, to tell when a gesture's fetch has happened. */
@@ -1050,16 +1061,44 @@
 	}
 
 	/**
-	 * The operator the filter row applies to a field: text is matched as a substring (case-insensitively), anything
-	 * else (numbers, dates, enums, booleans) by equality. The grid does not let a user choose another operator there.
+	 * What a column holds, which decides its filter row cell and the operators it takes: association (a select of
+	 * records), enum (a select of options), boolean (a check box), date, datetime, time, number or text.
 	 */
-	function rowOperator(grid, name) {
-		var field = grid.getField(name);
-		if (field.valueMap || name.indexOf("_display_") === 0) {
-			return "equals";
+	function columnKind(grid, name) {
+		var field = fieldDef(grid, name);
+		var properties = field.filterEditorProperties || field.editorProperties;
+		if (properties && properties.optionDataSource) {
+			return "association";
 		}
-		var type = field.type || "text";
-		return isc.SimpleType.inheritsFrom(type, "text") ? "contains" : "equals";
+		if (field.valueMap) {
+			return "enum";
+		}
+		var base = isc.SimpleType.getBaseType(field.type || "text", grid.getDataSource()) || "text";
+		if (base === "boolean" || base === "date" || base === "datetime" || base === "time") {
+			return base;
+		}
+		if (base === "integer" || base === "float" || base === "localeInt" || base === "localeFloat" || base === "localeCurrency") {
+			return "number";
+		}
+		return "text";
+	}
+
+	/** The SAIL operators each kind of column takes. */
+	var KIND_OPERATORS = {
+		association: ["equals"],
+		enum: ["equals"],
+		boolean: ["equals"],
+		date: ["equals", "lessThan", "greaterThan"],
+		datetime: ["equals", "lessThan", "greaterThan"],
+		time: ["equals", "lessThan", "greaterThan"]
+	};
+
+	/**
+	 * The operator the filter row applies to a kind of column: text is matched as a substring (case-insensitively),
+	 * anything else by equality. The grid does not let a user choose another operator there.
+	 */
+	function rowOperator(kind) {
+		return kind === "text" ? "contains" : "equals";
 	}
 
 	/** The SmartClient operator a FilterBuilder clause uses for a SAIL operator, as the clause's operator picker titles it. */
@@ -1071,6 +1110,87 @@
 		lessThan: "lessThan",
 		greaterThan: "greaterThan"
 	};
+
+	/** The options of an enum column: [{ code, label }]. */
+	function enumOptions(field) {
+		var map = field.valueMap || {};
+		return (isc.isA.Array(map) ? map.map(String) : Object.keys(map)).map(function (code) {
+			return { code: code, label: strip(isc.isA.Array(map) ? code : map[code]) };
+		});
+	}
+
+	/**
+	 * The option a value names: the one whose shown label is the value, or else the one whose code is. Returns
+	 * { option } or { error } when neither matches, or more than one does, listing the options as code=label.
+	 */
+	function namedOption(options, value, what) {
+		var byLabel = options.filter(function (o) {
+			return o.label === value;
+		});
+		var matches = byLabel.length ? byLabel : options.filter(function (o) {
+			return o.code === value;
+		});
+		if (matches.length === 1) {
+			return { option: matches[0] };
+		}
+		return {
+			error: (matches.length ? "more than one option of " : "no option of ") + what + " has the label or code '" + value +
+					"'; the options (code=label) are " + options.map(function (o) {
+						return o.code + "=" + o.label;
+					}).join(", ")
+		};
+	}
+
+	/** The format a date, date time or time column shows, as an example of now, for messages. */
+	function exampleText(field, kind) {
+		var type = isc.SimpleType.getType(field.type);
+		var editor = type && type.editorType && isc[type.editorType];
+		var formatter = editor && editor.getInstanceProperty ? editor.getInstanceProperty("dateFormatter") : null;
+		var now = new Date();
+		if (kind === "time") {
+			return isc.Time.toShortTime(now, formatter || "toShortPadded24HourTime", true);
+		}
+		return formatter && now[formatter] ? now[formatter]() : String(now);
+	}
+
+	/**
+	 * The value a filter compares a column with, from the step's text: { value } or { error }.
+	 * An enum takes an option's label or code, a boolean true or false, and a date, date time or time the text the
+	 * column shows (as dataEnter takes it for such a field).
+	 */
+	function columnValue(grid, name, kind, text) {
+		var field = fieldDef(grid, name);
+		if (kind === "enum") {
+			var named = namedOption(enumOptions(field), text, "column " + name);
+			return named.error ? named : { value: named.option.code };
+		}
+		if (kind === "boolean") {
+			if (text !== "true" && text !== "false") {
+				return { error: "a boolean column is filtered by true or false, not '" + text + "'" };
+			}
+			return { value: text === "true" };
+		}
+		if (kind === "date" || kind === "datetime") {
+			var type = isc.SimpleType.getType(field.type);
+			var editor = type && type.editorType && isc[type.editorType];
+			var formatter = editor && editor.getInstanceProperty ? editor.getInstanceProperty("dateFormatter") : null;
+			var date = isc.BizDateItem.parseInput(text, formatter);
+			if (!date) {
+				return { error: "'" + text + "' is not a " + kind + " in the column's format, such as " + exampleText(field, kind) };
+			}
+			return { value: date };
+		}
+		if (kind === "time") {
+			if (!/^\d?\d:\d\d(:\d\d)?\s*([aApP][mM])?$/.test(text)) {
+				return { error: "'" + text + "' is not a time in the column's format, such as " + exampleText(field, kind) };
+			}
+			return { value: isc.Time.parseInput(text) };
+		}
+		if (kind === "number" && !isNaN(Number(text))) {
+			return { value: Number(text) };
+		}
+		return { value: text };
+	}
 
 	/** The top level clauses of advanced criteria, or the clauses simple filter row criteria stand for. */
 	function clauses(criteria) {
@@ -1106,12 +1226,30 @@
 		};
 	};
 
+	/** The filter row cell of a column, if the row shows the column: { item, button } or null. */
+	function rowCell(grid, name) {
+		var editor = grid.filterEditor;
+		var form = editor && editor.getEditForm ? editor.getEditForm() : null;
+		var item = form ? form.getItem(name) : null;
+		if (!item || !editor.actionButton || !S.shown(editor) || !item.isVisible()) {
+			return null;
+		}
+		return { item: item, button: isc.AutoTest.getElement(S.objectLocator(editor.actionButton)) };
+	}
+
+	/** The element a user types into for a filter row cell (a date or time item's text field). */
+	function typingElement(item) {
+		var field = item.dateTextField || item.timeTextField || item;
+		return field.getFocusElement() || field.getDataElement() || itemElement(item);
+	}
+
 	/**
 	 * Works out how a user filters a column of a list grid, without changing anything.
-	 * The filter row is used while the grid is in simple filtering and the row's own operator for the column is the one
-	 * wanted (or the column is being cleared). Otherwise the advanced filter is used, with the criteria the grid has, the
-	 * column's clause replaced; the caller presses the toggle (if the grid is in simple filtering) and Filter.
-	 * Returns { mode: "row", input, button, current } or { mode: "advanced", toggle, button, criteria } or { error, retry }.
+	 * The filter row is used while the grid is in simple filtering, the row shows the column and its own operator for the
+	 * column is the one wanted (or the column is being cleared). Otherwise the advanced filter is used, with the criteria
+	 * the grid has, the column's clause replaced; the caller presses the toggle (if the grid is in simple filtering), then
+	 * calls listAdvancedCriteria and presses Filter.
+	 * Returns { mode: "row", cell: type|select|checkbox, ... } or { mode: "advanced", toggle, criteria } or { error, retry }.
 	 */
 	S.listFilterPlan = function (locator, column, value, operator) {
 		var l = listOwner(locator);
@@ -1123,44 +1261,135 @@
 		if (!name) {
 			return { error: "the list grid has no column " + column };
 		}
+		var kind = columnKind(grid, name);
+		var allowed = KIND_OPERATORS[kind];
+		if (value != null && allowed && allowed.indexOf(operator) < 0) {
+			return { error: "column " + column + " holds " + (kind === "enum" || kind === "association" ? "an " : "a ") + kind +
+						", which is filtered with " + allowed.join(", ") + ", not " + operator };
+		}
+		var converted = value == null ? { value: null } : columnValue(grid, name, kind, value);
+		if (converted.error) {
+			return { error: "column " + column + ": " + converted.error };
+		}
 		var filter = l.owner._advancedFilter;
 		var advanced = !!filter.toggleButton.selected;
-		if (!advanced && (value == null || rowOperator(grid, name) === operator)) {
-			var editor = grid.filterEditor;
-			var form = editor && editor.getEditForm ? editor.getEditForm() : null;
-			var item = form ? form.getItem(name) : null;
-			if (!item || !editor.actionButton) {
-				return { error: "the filter row has no field for column " + column + " (or no Filter button)", retry: true };
+		var cell = advanced ? null : rowCell(grid, name);
+		if (cell && (value == null || rowOperator(kind) === operator)) {
+			var item = cell.item;
+			var result = { mode: "row", kind: kind, button: cell.button };
+			if (isc.isA.SelectItem(item)) {
+				result.cell = "select";
+				result.opener = itemElement(item);
+				result.multiple = !!item.multiple;
 			}
-			var current = item.getValue();
-			return {
-				mode: "row",
-				input: item.getFocusElement() || item.getDataElement(),
-				button: isc.AutoTest.getElement(S.objectLocator(editor.actionButton)),
-				current: current == null ? "" : String(current)
-			};
+			else if (isc.isA.CheckboxItem(item)) {
+				var states = [null, true, false]; // the order a click cycles through
+				var from = states.indexOf(item.getValue() == null ? null : item.getValue());
+				var to = states.indexOf(converted.value);
+				result.cell = "checkbox";
+				result.element = isc.AutoTest.getElement(S.objectLocator(item) + "/valueicon") || itemElement(item);
+				result.clicks = (to - Math.max(from, 0) + 3) % 3;
+			}
+			else {
+				var input = typingElement(item);
+				result.cell = "type";
+				result.input = input;
+				result.current = input && input.value != null ? String(input.value) : "";
+			}
+			return result;
+		}
+		if (kind === "association") {
+			return { error: "column " + column + " is an association, which SmartClient filters by choosing a record in the filter row, " +
+						(advanced ? "and the grid is in advanced filtering, which hides the row" : "and the row does not show the column") };
 		}
 		var existing = advanced ? filter.getCriteria() : grid.getFilterEditorCriteria(true);
 		var kept = clauses(existing).filter(function (c) {
 			return c.fieldName !== name;
 		});
 		if (value != null) {
-			var field = grid.getField(name);
-			var numeric = field.type && (isc.SimpleType.inheritsFrom(field.type, "integer") || isc.SimpleType.inheritsFrom(field.type, "float"));
-			kept.push({ fieldName: name, operator: CLAUSE_OPERATORS[operator], value: numeric && !isNaN(Number(value)) ? Number(value) : value });
+			kept.push({ fieldName: name, operator: CLAUSE_OPERATORS[operator], value: converted.value });
 		}
+		// the criteria keep their dates here, as they would not survive the trip to the harness and back
+		l.owner._sailCriteria = { _constructor: "AdvancedCriteria", operator: "and", criteria: kept };
 		return {
 			mode: "advanced",
 			toggle: advanced ? null : isc.AutoTest.getElement(S.objectLocator(filter.toggleButton)),
-			criteria: { _constructor: "AdvancedCriteria", operator: "and", criteria: kept }
+			criteria: JSON.stringify(l.owner._sailCriteria)
 		};
 	};
 
 	/**
-	 * Puts criteria into the advanced filter's clauses, as a saved snapshot does, and returns its Filter button.
-	 * The grid must be in advanced filtering (its toggle pressed).
+	 * The rows to click in a filter row select's open pick list so that it chooses exactly the option the value names
+	 * (none when the value is null): { rows (elements), multiple } or { error, retry } while the pick list is not shown
+	 * or loading. A multiple select toggles rows; a single select takes one click.
 	 */
-	S.listAdvancedCriteria = function (locator, criteria) {
+	S.listSelectRows = function (locator, column, value) {
+		var l = listOwner(locator);
+		if (l.error) {
+			return l;
+		}
+		var name = listField(l.grid, column);
+		var cell = name ? rowCell(l.grid, name) : null;
+		if (!cell || !isc.isA.SelectItem(cell.item)) {
+			return { error: "the filter row has no select for column " + column };
+		}
+		var item = cell.item;
+		var list = item.pickList;
+		if (!list || !S.shown(list)) {
+			return { error: "the select's pick list is not showing", retry: true };
+		}
+		var state = loadedRows(list);
+		if (!state.loaded) {
+			return { error: "the select's options are still loading", retry: true };
+		}
+		var valueField = item.getValueFieldName();
+		var displayField = item.getDisplayFieldName ? item.getDisplayFieldName() : null;
+		var options = [];
+		for (var i = 0; i < state.rows; i++) {
+			var record = rowFetched(list, i) ? list.getRecord(i) : null;
+			var code = record ? record[valueField] : null;
+			var label = record && displayField && record[displayField] != null ? record[displayField] : item.mapValueToDisplay(code);
+			options.push({ row: i, code: code == null ? "" : String(code), label: strip(label) });
+		}
+		var wanted = null;
+		if (value != null) {
+			var named = namedOption(options.filter(function (o) {
+				return o.code !== "";
+			}), value, "column " + column);
+			if (named.error) {
+				return { error: named.error };
+			}
+			wanted = named.option;
+		}
+		var element = function (row) {
+			return isc.AutoTest.getElement(S.objectLocator(list) + "/body/row[" + row + "]/col[0]");
+		};
+		if (!item.multiple) {
+			var target = wanted || options.filter(function (o) {
+				return o.code === "";
+			})[0];
+			if (!target) {
+				return { error: "the select of column " + column + " has no empty option to clear it with" };
+			}
+			var current = item.getValue();
+			return { rows: [element(target.row)], multiple: false, changed: (current == null ? "" : String(current)) !== target.code };
+		}
+		var selected = item.getValue() || [];
+		var rows = [];
+		options.forEach(function (o) {
+			var on = selected.map(String).indexOf(o.code) >= 0;
+			if (on !== (wanted === o)) {
+				rows.push(element(o.row));
+			}
+		});
+		return { rows: rows, multiple: true };
+	};
+
+	/**
+	 * Puts the criteria listFilterPlan worked out into the advanced filter's clauses, as a saved snapshot does, and returns
+	 * its Filter button. The grid must be in advanced filtering (its toggle pressed).
+	 */
+	S.listAdvancedCriteria = function (locator) {
 		var l = listOwner(locator);
 		if (l.error) {
 			return l;
@@ -1169,7 +1398,11 @@
 		if (!filter.toggleButton.selected) {
 			return { error: "the list grid is not in advanced filtering" };
 		}
-		filter.setCriteria(criteria);
+		if (!l.owner._sailCriteria) {
+			return { error: "no criteria were worked out for the advanced filter" };
+		}
+		filter.setCriteria(l.owner._sailCriteria);
+		delete l.owner._sailCriteria;
 		return { button: isc.AutoTest.getElement(S.objectLocator(filter._filterButton)) };
 	};
 
@@ -1209,7 +1442,7 @@
 			sorted: sort.length === 1 && sort[0].property === name,
 			descending: sort.length > 0 && sort[0].direction === "descending",
 			header: header ? header.getClipHandle() : null,
-			canSort: grid.canSort !== false && grid.getField(name).canSort !== false
+			canSort: grid.canSort !== false && fieldDef(grid, name).canSort !== false
 		};
 	};
 
