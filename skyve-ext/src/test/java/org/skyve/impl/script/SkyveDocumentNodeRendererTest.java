@@ -9,9 +9,9 @@ import org.apache.commons.text.StringEscapeUtils;
 import org.commonmark.node.Node;
 import org.commonmark.parser.Parser;
 import org.commonmark.renderer.html.HtmlRenderer;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-public class SkyveDocumentNodeRendererTest {
+class SkyveDocumentNodeRendererTest {
 
 	private static final Parser PARSER = Parser.builder().build();
 
@@ -35,7 +35,7 @@ public class SkyveDocumentNodeRendererTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testHeading2CreatesDocumentDefinition() {
+	void testHeading2CreatesDocumentDefinition() {
 		String result = render("## MyDocument");
 		assertThat(result, containsString("<document name=\"MyDocument\""));
 		assertThat(result, containsString("xmlns=\"http://www.skyve.org/xml/document\""));
@@ -43,35 +43,35 @@ public class SkyveDocumentNodeRendererTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testHeading2CreatesSingularAlias() {
+	void testHeading2CreatesSingularAlias() {
 		String result = render("## myDocument");
 		assertThat(result, containsString("<singularAlias>My Document</singularAlias>"));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testHeading2CreatesPluralAlias() {
+	void testHeading2CreatesPluralAlias() {
 		String result = render("## myDocument");
 		assertThat(result, containsString("<pluralAlias>My Documents</pluralAlias>"));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testHeading2CreatesIconElement() {
+	void testHeading2CreatesIconElement() {
 		String result = render("## MyDocument");
 		assertThat(result, containsString("<iconStyleClass>"));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testHeading2CreatesBizKey() {
+	void testHeading2CreatesBizKey() {
 		String result = render("## MyDocument");
 		assertThat(result, containsString("<bizKey expression=\"MyDocument\"/>"));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testHeading2WithPersistentNameCreatesPersistentElement() {
+	void testHeading2WithPersistentNameCreatesPersistentElement() {
 		// Heading2 with inline code creates a persistent name
 		String result = render("## MyDocument `MY_TABLE`");
 		assertThat(result, containsString("<persistent name=\"MY_TABLE\" />"));
@@ -81,7 +81,7 @@ public class SkyveDocumentNodeRendererTest {
 
 	@Test
 	@SuppressWarnings({"static-method", "java:S5976"})
-	public void testBulletListCreatesAttributesElement() {
+	void testBulletListCreatesAttributesElement() {
 		String markdown = "## MyDocument\n\n- name text 50\n";
 		String result = render(markdown);
 		assertThat(result, containsString("<attributes>"));
@@ -89,7 +89,7 @@ public class SkyveDocumentNodeRendererTest {
 
 	@Test
 	@SuppressWarnings({"static-method", "java:S5976"})
-	public void testTextAttributeWithLength() {
+	void testTextAttributeWithLength() {
 		String markdown = "## MyDocument\n\n- name text 50\n";
 		String result = render(markdown);
 		assertThat(result, containsString("<text name=\"name\""));
@@ -98,7 +98,7 @@ public class SkyveDocumentNodeRendererTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testTextAttributeWithLengthDisplayName() {
+	void testTextAttributeWithLengthDisplayName() {
 		String markdown = "## MyDocument\n\n- firstName text 100\n";
 		String result = render(markdown);
 		assertThat(result, containsString("<displayName>First Name</displayName>"));
@@ -106,7 +106,7 @@ public class SkyveDocumentNodeRendererTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testTextAttributeMissingLengthEmitsAlert() {
+	void testTextAttributeMissingLengthEmitsAlert() {
 		String markdown = "## MyDocument\n\n- name text\n";
 		String result = render(markdown);
 		assertThat(result, containsString("missing required field length"));
@@ -114,7 +114,7 @@ public class SkyveDocumentNodeRendererTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testBooleanAttribute() {
+	void testBooleanAttribute() {
 		String markdown = "## MyDocument\n\n- active boolean\n";
 		String result = render(markdown);
 		assertThat(result, containsString("<boolean name=\"active\""));
@@ -122,7 +122,7 @@ public class SkyveDocumentNodeRendererTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testDateAttribute() {
+	void testDateAttribute() {
 		String markdown = "## MyDocument\n\n- birthDate date\n";
 		String result = render(markdown);
 		assertThat(result, containsString("<date name=\"birthDate\""));
@@ -130,7 +130,7 @@ public class SkyveDocumentNodeRendererTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testDateTimeAttribute() {
+	void testDateTimeAttribute() {
 		String markdown = "## MyDocument\n\n- createdAt dateTime\n";
 		String result = render(markdown);
 		assertThat(result, containsString("<dateTime name=\"createdAt\""));
@@ -138,7 +138,7 @@ public class SkyveDocumentNodeRendererTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testDecimal10Attribute() {
+	void testDecimal10Attribute() {
 		String markdown = "## MyDocument\n\n- amount decimal10\n";
 		String result = render(markdown);
 		assertThat(result, containsString("<decimal10 name=\"amount\""));
@@ -146,7 +146,7 @@ public class SkyveDocumentNodeRendererTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testDecimal2Attribute() {
+	void testDecimal2Attribute() {
 		String markdown = "## MyDocument\n\n- price decimal2\n";
 		String result = render(markdown);
 		assertThat(result, containsString("<decimal2 name=\"price\""));
@@ -154,7 +154,7 @@ public class SkyveDocumentNodeRendererTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testDecimal5Attribute() {
+	void testDecimal5Attribute() {
 		String markdown = "## MyDocument\n\n- ratio decimal5\n";
 		String result = render(markdown);
 		assertThat(result, containsString("<decimal5 name=\"ratio\""));
@@ -162,7 +162,7 @@ public class SkyveDocumentNodeRendererTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testGeometryAttribute() {
+	void testGeometryAttribute() {
 		String markdown = "## MyDocument\n\n- location geometry\n";
 		String result = render(markdown);
 		assertThat(result, containsString("<geometry name=\"location\""));
@@ -170,7 +170,7 @@ public class SkyveDocumentNodeRendererTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testIdAttribute() {
+	void testIdAttribute() {
 		String markdown = "## MyDocument\n\n- externalId id\n";
 		String result = render(markdown);
 		assertThat(result, containsString("<id name=\"externalId\""));
@@ -178,7 +178,7 @@ public class SkyveDocumentNodeRendererTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testIntegerAttribute() {
+	void testIntegerAttribute() {
 		String markdown = "## MyDocument\n\n- count integer\n";
 		String result = render(markdown);
 		assertThat(result, containsString("<integer name=\"count\""));
@@ -186,7 +186,7 @@ public class SkyveDocumentNodeRendererTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testLongIntegerAttribute() {
+	void testLongIntegerAttribute() {
 		String markdown = "## MyDocument\n\n- bigCount longInteger\n";
 		String result = render(markdown);
 		assertThat(result, containsString("<longInteger name=\"bigCount\""));
@@ -194,7 +194,7 @@ public class SkyveDocumentNodeRendererTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testMemoAttribute() {
+	void testMemoAttribute() {
 		String markdown = "## MyDocument\n\n- notes memo\n";
 		String result = render(markdown);
 		assertThat(result, containsString("<memo name=\"notes\""));
@@ -202,7 +202,7 @@ public class SkyveDocumentNodeRendererTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testMarkupAttribute() {
+	void testMarkupAttribute() {
 		String markdown = "## MyDocument\n\n- body markup\n";
 		String result = render(markdown);
 		assertThat(result, containsString("<markup name=\"body\""));
@@ -210,7 +210,7 @@ public class SkyveDocumentNodeRendererTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testTimeAttribute() {
+	void testTimeAttribute() {
 		String markdown = "## MyDocument\n\n- startTime time\n";
 		String result = render(markdown);
 		assertThat(result, containsString("<time name=\"startTime\""));
@@ -218,7 +218,7 @@ public class SkyveDocumentNodeRendererTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testTimestampAttribute() {
+	void testTimestampAttribute() {
 		String markdown = "## MyDocument\n\n- created timestamp\n";
 		String result = render(markdown);
 		assertThat(result, containsString("<timestamp name=\"created\""));
@@ -226,7 +226,7 @@ public class SkyveDocumentNodeRendererTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testEnumAttributeWithValues() {
+	void testEnumAttributeWithValues() {
 		String markdown = "## MyDocument\n\n- status enum (active,inactive)\n";
 		String result = render(markdown);
 		assertThat(result, containsString("<enum name=\"status\""));
@@ -236,7 +236,7 @@ public class SkyveDocumentNodeRendererTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testEnumAttributeMissingBracketsEmitsAlert() {
+	void testEnumAttributeMissingBracketsEmitsAlert() {
 		String markdown = "## MyDocument\n\n- status enum noBrackets\n";
 		String result = render(markdown);
 		assertThat(result, containsString("missing required value array"));
@@ -244,7 +244,7 @@ public class SkyveDocumentNodeRendererTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testAssociationAttribute() {
+	void testAssociationAttribute() {
 		// Uppercase type in a dash list = association
 		String markdown = "## MyDocument\n\n- customer Customer\n";
 		String result = render(markdown);
@@ -254,7 +254,7 @@ public class SkyveDocumentNodeRendererTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testUnsupportedAttributeTypeEmitsAlert() {
+	void testUnsupportedAttributeTypeEmitsAlert() {
 		String markdown = "## MyDocument\n\n- weirdField unknownType\n";
 		String result = render(markdown);
 		assertThat(result, containsString("Unsupported attribute"));
@@ -262,7 +262,7 @@ public class SkyveDocumentNodeRendererTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testRequiredAttributeViaEmphasis() {
+	void testRequiredAttributeViaEmphasis() {
 		// emphasis (*name*) marks attribute as required
 		String markdown = "## MyDocument\n\n- *name* text 50\n";
 		String result = render(markdown);
@@ -271,7 +271,7 @@ public class SkyveDocumentNodeRendererTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testDocumentEndWrittenWhenNoMoreNodes() {
+	void testDocumentEndWrittenWhenNoMoreNodes() {
 		String markdown = "## MyDocument\n\n- name text 50\n";
 		String result = render(markdown);
 		assertThat(result, containsString("</attributes>"));
@@ -282,7 +282,7 @@ public class SkyveDocumentNodeRendererTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testOrderedListEmitsUnknownTypeAlert() {
+	void testOrderedListEmitsUnknownTypeAlert() {
 		String markdown = "## MyDocument\n\n1. someItem unknownType\n";
 		String result = render(markdown);
 		assertThat(result, containsString("Unknown list item type"));
@@ -292,7 +292,7 @@ public class SkyveDocumentNodeRendererTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testGetNodeTypesIncludesHeadingAndListTypes() {
+	void testGetNodeTypesIncludesHeadingAndListTypes() {
 		// Verify the renderer handles Heading/BulletList/OrderedList/ListItem
 		// by rendering a heading and checking output is produced
 		String result = render("## Document");
@@ -303,7 +303,7 @@ public class SkyveDocumentNodeRendererTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testHtmlSpacingModeEmitsBreakTags() {
+	void testHtmlSpacingModeEmitsBreakTags() {
 		String markdown = "## MyDocument";
 		String result = renderWithSpacing(markdown);
 		assertThat(result, containsString("<br"));
@@ -311,7 +311,7 @@ public class SkyveDocumentNodeRendererTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testHtmlSpacingModeEmitsEmspForIndent() {
+	void testHtmlSpacingModeEmitsEmspForIndent() {
 		String markdown = "## MyDocument\n\n- name text 50\n";
 		String result = renderWithSpacing(markdown);
 		assertThat(result, containsString("\u2003")); // em space (&emsp;)
@@ -321,7 +321,7 @@ public class SkyveDocumentNodeRendererTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testPlusMarkerListCreatesCollection() {
+	void testPlusMarkerListCreatesCollection() {
 		String markdown = "## MyDocument\n\n+ lines LineItem\n";
 		String result = render(markdown);
 		assertThat(result, containsString("<collection name=\"lines\""));
@@ -332,7 +332,7 @@ public class SkyveDocumentNodeRendererTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testMultipleDocumentHeadingsProduceMultipleDocumentElements() {
+	void testMultipleDocumentHeadingsProduceMultipleDocumentElements() {
 		String markdown = "## DocA\n\n## DocB\n";
 		String result = render(markdown);
 		assertThat(result, containsString("name=\"DocA\""));
@@ -343,7 +343,7 @@ public class SkyveDocumentNodeRendererTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testAsteriskBulletMarkerEmitsUnknownTypeAlert() {
+	void testAsteriskBulletMarkerEmitsUnknownTypeAlert() {
 		// CommonMark allows '*' as a bullet marker; Skyve only supports '-' and '+',
 		// so a '*' list should produce the "Unknown list item type" span.
 		String markdown = "## MyDocument\n\n* weirdItem text\n";
@@ -356,7 +356,7 @@ public class SkyveDocumentNodeRendererTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testMultipleItemsInBulletListParsesAllItems() {
+	void testMultipleItemsInBulletListParsesAllItems() {
 		// Two items in the same dash list exercise the while-loop iteration path.
 		String markdown = "## MyDocument\n\n- name text 50\n- age integer\n";
 		String result = render(markdown);
@@ -368,7 +368,7 @@ public class SkyveDocumentNodeRendererTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testRequiredEmphasisWithMissingTypeEmitsInvalidAlert() {
+	void testRequiredEmphasisWithMissingTypeEmitsInvalidAlert() {
 		// "*name*" alone (emphasis with no following text) triggers the "Invalid attribute definition" path.
 		String markdown = "## MyDocument\n\n- *name*\n";
 		String result = render(markdown);
@@ -379,7 +379,7 @@ public class SkyveDocumentNodeRendererTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testRequiredAssociationAttribute() {
+	void testRequiredAssociationAttribute() {
 		// "*customer* Customer" — emphasis makes it required, uppercase type = association.
 		String markdown = "## MyDocument\n\n- *customer* Customer\n";
 		String result = render(markdown);
@@ -391,7 +391,7 @@ public class SkyveDocumentNodeRendererTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testRequiredCollectionAttribute() {
+	void testRequiredCollectionAttribute() {
 		// "*lines* LineItem" in a + list — required collection with minCardinality 1.
 		String markdown = "## MyDocument\n\n+ *lines* LineItem\n";
 		String result = render(markdown);
@@ -402,7 +402,7 @@ public class SkyveDocumentNodeRendererTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testTwoDocumentsClosesFirstDocumentBeforeSecond() {
+	void testTwoDocumentsClosesFirstDocumentBeforeSecond() {
 		// A second H2 heading follows the first document's attribute list.
 		// This triggers isNodeHeading2(node.getNext()) to return true,
 		// causing writeDocumentEnd() to emit </document> for the first document.
@@ -414,7 +414,7 @@ public class SkyveDocumentNodeRendererTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testBulletListFollowedByHeading1CoversIsNodeHeading2FalsePath() {
+	void testBulletListFollowedByHeading1CoversIsNodeHeading2FalsePath() {
 		// A Heading1 (module declaration) follows the BulletList —
 		// isNodeHeading2(node.getNext()) returns false (line 394 of SkyveDocumentNodeRenderer),
 		// so writeDocumentEnd() is NOT called from the BulletList handler.

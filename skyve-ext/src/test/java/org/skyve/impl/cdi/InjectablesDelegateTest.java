@@ -1,6 +1,6 @@
 package org.skyve.impl.cdi;
 
-import static org.junit.Assert.assertSame;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
@@ -16,7 +16,7 @@ import java.nio.file.Path;
 import java.util.Date;
 import java.util.List;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.pf4j.PluginManager;
 import org.skyve.domain.Bean;
 import org.skyve.domain.number.NumberGenerator;
@@ -45,9 +45,9 @@ import org.skyve.util.MailService;
 import org.skyve.web.BackgroundTask;
 
 @SuppressWarnings({ "static-method", "boxing", "java:S8692" }) // system clock OK
-public class InjectablesDelegateTest {
+class InjectablesDelegateTest {
 	@Test
-	public void repositoryInjectableDelegatesToCoreRepository() throws Exception {
+	void repositoryInjectableDelegatesToCoreRepository() throws Exception {
 		ProvidedRepository original = getProvidedRepository();
 		ProvidedRepository repository = mock(ProvidedRepository.class);
 		try {
@@ -78,7 +78,7 @@ public class InjectablesDelegateTest {
 	}
 
 	@Test
-	public void numberGeneratorInjectableDelegatesToStaticSingleton() {
+	void numberGeneratorInjectableDelegatesToStaticSingleton() {
 		NumberGenerator original = NumberGeneratorStaticSingleton.get();
 		NumberGenerator generator = mock(NumberGenerator.class);
 		try {
@@ -96,7 +96,7 @@ public class InjectablesDelegateTest {
 	}
 
 	@Test
-	public void mailServiceInjectableDelegatesToEffectiveMailService() throws Exception {
+	void mailServiceInjectableDelegatesToEffectiveMailService() throws Exception {
 		MailService originalConfigured = getMailServiceField("configuredInstance");
 		MailService originalEffective = getMailServiceField("effectiveInstance");
 		MailService service = mock(MailService.class);
@@ -129,7 +129,7 @@ public class InjectablesDelegateTest {
 	}
 
 	@Test
-	public void addInManagerInjectableDelegatesToSingletonManager() throws Exception {
+	void addInManagerInjectableDelegatesToSingletonManager() throws Exception {
 		PF4JAddInManager manager = PF4JAddInManager.get();
 		PluginManager pluginManager = mock(PluginManager.class);
 		Runnable extension = mock(Runnable.class);
@@ -150,7 +150,7 @@ public class InjectablesDelegateTest {
 	}
 
 	@Test
-	public void addInManagerInjectableStartupUsesConfiguredAddinsDirectory() throws Exception {
+	void addInManagerInjectableStartupUsesConfiguredAddinsDirectory() throws Exception {
 		PF4JAddInManager manager = PF4JAddInManager.get();
 		String originalAddinsDirectory = UtilImpl.ADDINS_DIRECTORY;
 		Path tempDir = Files.createTempDirectory("addin-injectable-");
@@ -161,7 +161,7 @@ public class InjectablesDelegateTest {
 
 			injectable.startup();
 
-			org.junit.Assert.assertNotNull(getPluginManager(manager));
+			org.junit.jupiter.api.Assertions.assertNotNull(getPluginManager(manager));
 		}
 		finally {
 			manager.shutdown();
@@ -171,7 +171,7 @@ public class InjectablesDelegateTest {
 	}
 
 	@Test
-	public void jobSchedulerInjectableDelegatesToStaticSingleton() {
+	void jobSchedulerInjectableDelegatesToStaticSingleton() {
 		JobScheduler original = JobSchedulerStaticSingleton.get();
 		JobScheduler scheduler = mock(JobScheduler.class);
 		JobSchedulerInjectable injectable = new JobSchedulerInjectable();
@@ -204,7 +204,7 @@ public class InjectablesDelegateTest {
 			injectable.shutdown();
 
 			assertSame(jobs, injectable.getCustomerRunningJobs());
-			org.junit.Assert.assertTrue(injectable.cancelJob("instance-1"));
+			org.junit.jupiter.api.Assertions.assertTrue(injectable.cancelJob("instance-1"));
 
 			verify(scheduler).startup();
 			verify(scheduler).runOneShotJob(job, bean, user);
@@ -229,7 +229,7 @@ public class InjectablesDelegateTest {
 	}
 
 	@Test
-	public void geoIpServiceInjectableDelegatesToStaticSingleton() {
+	void geoIpServiceInjectableDelegatesToStaticSingleton() {
 		GeoIPService original = GeoIPServiceStaticSingleton.get();
 		GeoIPService service = mock(GeoIPService.class);
 		IPGeolocation location = IPGeolocation.EMPTY;

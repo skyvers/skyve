@@ -1,14 +1,14 @@
 package org.skyve.domain.messages;
 
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.skyve.impl.util.UtilImpl;
 
-public class TestSerialization {
+class TestSerialization {
 	@Test
 	@SuppressWarnings("static-method")
-	public void testValidationException() {
+	void testValidationException() {
 		assertNotNull(UtilImpl.cloneBySerialization(new ValidationException(new Message("testBinding", "testText"))));
 	}
 }

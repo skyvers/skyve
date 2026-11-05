@@ -4,27 +4,27 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-public class MidnightTest {
+class MidnightTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testGetDayNumberElementReturnsNull() {
+	void testGetDayNumberElementReturnsNull() {
 		Midnight provider = new Midnight();
 		assertThat(provider.getDayNumberElement(), is(nullValue()));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testGetMonthElementReturnsNull() {
+	void testGetMonthElementReturnsNull() {
 		Midnight provider = new Midnight();
 		assertThat(provider.getMonthElement(), is(nullValue()));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testGetDayOfWeekElementReturnsNull() {
+	void testGetDayOfWeekElementReturnsNull() {
 		Midnight provider = new Midnight();
 		assertThat(provider.getDayOfWeekElement(), is(nullValue()));
 	}

@@ -4,34 +4,34 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Mockito.when;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
 
-public class ConfigurationExtensionTest {
+class ConfigurationExtensionTest {
 	@Spy
 	private ConfigurationExtension bean;
 
 	@SuppressWarnings("resource")
 	private AutoCloseable closeable;
 	
-	@Before
+	@BeforeEach
 	@SuppressWarnings("resource")
-	public void setup() {
+	void setup() {
 		closeable = MockitoAnnotations.openMocks(this);
 	}
 
-	@After
-	public void tearDown() throws Exception {
+	@AfterEach
+	void tearDown() throws Exception {
 		if (closeable != null) {
 			closeable.close();
 		}
 	}
 	
 	@Test
-	public void testGetPasswordRuleDescriptionLenghtOnly() {
+	void testGetPasswordRuleDescriptionLenghtOnly() {
 		when(bean.getPasswordRequireLowercase()).thenReturn(Boolean.FALSE);
 		when(bean.getPasswordRequireNumeric()).thenReturn(Boolean.FALSE);
 		when(bean.getPasswordRequireSpecial()).thenReturn(Boolean.FALSE);
@@ -45,7 +45,7 @@ public class ConfigurationExtensionTest {
 	}
 
 	@Test
-	public void testGetPasswordRuleDescriptionMustContainNumeric() {
+	void testGetPasswordRuleDescriptionMustContainNumeric() {
 		// setup mocks
 		when(bean.getPasswordRequireLowercase()).thenReturn(Boolean.FALSE);
 		when(bean.getPasswordRequireNumeric()).thenReturn(Boolean.TRUE);
@@ -60,7 +60,7 @@ public class ConfigurationExtensionTest {
 	}
 
 	@Test
-	public void testGetPasswordRuleDescriptionMustContainLowercase() {
+	void testGetPasswordRuleDescriptionMustContainLowercase() {
 		// setup mocks
 		when(bean.getPasswordRequireLowercase()).thenReturn(Boolean.TRUE);
 		when(bean.getPasswordRequireNumeric()).thenReturn(Boolean.FALSE);
@@ -75,7 +75,7 @@ public class ConfigurationExtensionTest {
 	}
 
 	@Test
-	public void testGetPasswordRuleDescriptionMustContainSpecial() {
+	void testGetPasswordRuleDescriptionMustContainSpecial() {
 		// setup mocks
 		when(bean.getPasswordRequireLowercase()).thenReturn(Boolean.FALSE);
 		when(bean.getPasswordRequireNumeric()).thenReturn(Boolean.FALSE);
@@ -90,7 +90,7 @@ public class ConfigurationExtensionTest {
 	}
 
 	@Test
-	public void testGetPasswordRuleDescriptionMustContainUppercase() {
+	void testGetPasswordRuleDescriptionMustContainUppercase() {
 		// setup mocks
 		when(bean.getPasswordRequireLowercase()).thenReturn(Boolean.FALSE);
 		when(bean.getPasswordRequireNumeric()).thenReturn(Boolean.FALSE);
@@ -105,7 +105,7 @@ public class ConfigurationExtensionTest {
 	}
 
 	@Test
-	public void testGetPasswordRuleDescriptionTwoRules() {
+	void testGetPasswordRuleDescriptionTwoRules() {
 		// setup mocks
 		when(bean.getPasswordRequireLowercase()).thenReturn(Boolean.TRUE);
 		when(bean.getPasswordRequireNumeric()).thenReturn(Boolean.FALSE);
@@ -120,7 +120,7 @@ public class ConfigurationExtensionTest {
 	}
 
 	@Test
-	public void testGetPasswordRuleDescriptionThreeRules() {
+	void testGetPasswordRuleDescriptionThreeRules() {
 		// setup mocks
 		when(bean.getPasswordRequireLowercase()).thenReturn(Boolean.TRUE);
 		when(bean.getPasswordRequireNumeric()).thenReturn(Boolean.TRUE);
@@ -136,7 +136,7 @@ public class ConfigurationExtensionTest {
 	}
 
 	@Test
-	public void testGetPasswordRuleDescriptionFourRules() {
+	void testGetPasswordRuleDescriptionFourRules() {
 		// setup mocks
 		when(bean.getPasswordRequireLowercase()).thenReturn(Boolean.TRUE);
 		when(bean.getPasswordRequireNumeric()).thenReturn(Boolean.TRUE);
@@ -152,7 +152,7 @@ public class ConfigurationExtensionTest {
 	}
 
 	@Test
-	public void testMeetsComplexityStringTooShortReturnsFalse() {
+	void testMeetsComplexityStringTooShortReturnsFalse() {
 		// setup test data
 		String cleartext = "short";
 
@@ -164,7 +164,7 @@ public class ConfigurationExtensionTest {
 	}
 
 	@Test
-	public void testMeetsComplexityStringNotTooShortReturnsTrue() {
+	void testMeetsComplexityStringNotTooShortReturnsTrue() {
 		// setup test data
 		String cleartext = "not too short";
 
@@ -181,7 +181,7 @@ public class ConfigurationExtensionTest {
 	}
 
 	@Test
-	public void testMeetsComplexityStringMustContainNumericInvalid() {
+	void testMeetsComplexityStringMustContainNumericInvalid() {
 		// setup test data
 		String cleartext = "does not contain numeric";
 
@@ -199,7 +199,7 @@ public class ConfigurationExtensionTest {
 	}
 
 	@Test
-	public void testMeetsComplexityStringMustContainNumericValid() {
+	void testMeetsComplexityStringMustContainNumericValid() {
 		// setup test data
 		String cleartext1 = "contains one numera1";
 		String cleartext2 = "3ontains one numeral";
@@ -223,7 +223,7 @@ public class ConfigurationExtensionTest {
 	}
 
 	@Test
-	public void testMeetsComplexityStringMustContainLowercaseInvalid() {
+	void testMeetsComplexityStringMustContainLowercaseInvalid() {
 		// setup test data
 		String cleartext = "DOES NOT CONTAIN LOWERCASE";
 
@@ -241,7 +241,7 @@ public class ConfigurationExtensionTest {
 	}
 
 	@Test
-	public void testMeetsComplexityStringMustContainLowercaseValid() {
+	void testMeetsComplexityStringMustContainLowercaseValid() {
 		// setup test data
 		String cleartext1 = "CONTAINS ONE LOWERCASe";
 		String cleartext2 = "cONTAINS ONE LOWERCASE";
@@ -265,7 +265,7 @@ public class ConfigurationExtensionTest {
 	}
 
 	@Test
-	public void testMeetsComplexityStringMustContainSpecialInvalid() {
+	void testMeetsComplexityStringMustContainSpecialInvalid() {
 		// setup test data
 		String cleartext = "doesNotContainSp3cial";
 
@@ -283,7 +283,7 @@ public class ConfigurationExtensionTest {
 	}
 
 	@Test
-	public void testMeetsComplexityStringMustContainSpecialValid() {
+	void testMeetsComplexityStringMustContainSpecialValid() {
 		// setup test data
 		String cleartext1 = "contains onespecial";
 		String cleartext2 = "%ontainsonespecial";
@@ -307,7 +307,7 @@ public class ConfigurationExtensionTest {
 	}
 
 	@Test
-	public void testMeetsComplexityStringMustContainUppercaseInvalid() {
+	void testMeetsComplexityStringMustContainUppercaseInvalid() {
 		// setup test data
 		String cleartext = "does not contain uppercase";
 
@@ -325,7 +325,7 @@ public class ConfigurationExtensionTest {
 	}
 
 	@Test
-	public void testMeetsComplexityStringMustContainUppercaseValid() {
+	void testMeetsComplexityStringMustContainUppercaseValid() {
 		// setup test data
 		String cleartext1 = "contains one uppercasE";
 		String cleartext2 = "Contains one uppercase";

@@ -1,12 +1,12 @@
 package org.skyve.impl.job;
 
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 
 import java.util.Date;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.skyve.domain.Bean;
 import org.skyve.job.JobSchedule;
 import org.skyve.metadata.module.JobMetaData;
@@ -19,7 +19,7 @@ import org.skyve.web.BackgroundTask;
  * values return the expected stubs.
  */
 @SuppressWarnings("static-method")
-public class MockJobSchedulerTest {
+class MockJobSchedulerTest {
 
 	private static MockJobScheduler scheduler() {
 		return new MockJobScheduler();
@@ -38,102 +38,102 @@ public class MockJobSchedulerTest {
 	}
 
 	@Test
-	public void testStartup() {
+	void testStartup() {
 		MockJobScheduler s = scheduler();
 		s.startup();
 		assertNotNull(s);
 	}
 
 	@Test
-	public void testShutdown() {
+	void testShutdown() {
 		MockJobScheduler s = scheduler();
 		s.shutdown();
 		assertNotNull(s);
 	}
 
 	@Test
-	public void testRunOneShotJobNoSleep() {
+	void testRunOneShotJobNoSleep() {
 		MockJobScheduler s = scheduler();
 		s.runOneShotJob(job(), null, user());
 		assertNotNull(s);
 	}
 
 	@Test
-	public void testRunOneShotJobWithSleep() {
+	void testRunOneShotJobWithSleep() {
 		MockJobScheduler s = scheduler();
 		s.runOneShotJob(job(), null, user(), 0);
 		assertNotNull(s);
 	}
 
 	@Test
-	public void testRunBackgroundTask() {
+	void testRunBackgroundTask() {
 		MockJobScheduler s = scheduler();
 		s.runBackgroundTask(TestBackgroundTask.class, user(), "webId");
 		assertNotNull(s);
 	}
 
 	@Test
-	public void testRunContentGarbageCollector() {
+	void testRunContentGarbageCollector() {
 		MockJobScheduler s = scheduler();
 		s.runContentGarbageCollector();
 		assertNotNull(s);
 	}
 
 	@Test
-	public void testScheduleOneShotJob() {
+	void testScheduleOneShotJob() {
 		MockJobScheduler s = scheduler();
 		s.scheduleOneShotJob(job(), null, user(), new Date(0L));
 		assertNotNull(s);
 	}
 
 	@Test
-	public void testScheduleJob() {
+	void testScheduleJob() {
 		MockJobScheduler s = scheduler();
 		s.scheduleJob(jobSchedule(), user());
 		assertNotNull(s);
 	}
 
 	@Test
-	public void testUnscheduleJob() {
+	void testUnscheduleJob() {
 		MockJobScheduler s = scheduler();
 		s.unscheduleJob("uuid-1", "demo");
 		assertNotNull(s);
 	}
 
 	@Test
-	public void testScheduleReport() {
+	void testScheduleReport() {
 		MockJobScheduler s = scheduler();
 		s.scheduleReport(jobSchedule(), user());
 		assertNotNull(s);
 	}
 
 	@Test
-	public void testUnscheduleReport() {
+	void testUnscheduleReport() {
 		MockJobScheduler s = scheduler();
 		s.unscheduleReport("uuid-1", "demo");
 		assertNotNull(s);
 	}
 
 	@Test
-	public void testGetCustomerRunningJobsReturnsEmptyList() {
+	void testGetCustomerRunningJobsReturnsEmptyList() {
 		assertNotNull(scheduler().getCustomerRunningJobs());
 		assertTrue(scheduler().getCustomerRunningJobs().isEmpty());
 	}
 
 	@Test
-	public void testCancelJobReturnsTrue() {
+	void testCancelJobReturnsTrue() {
 		assertTrue(scheduler().cancelJob("instance-1"));
 	}
 
 	@Test
-	public void testValidateMetaData() {
+	void testValidateMetaData() {
 		MockJobScheduler s = scheduler();
 		s.validateMetaData();
 		assertNotNull(s);
 	}
 
 	@Test
-	public void testPreRestore() {
+	void testPreRestore() {
 		MockJobScheduler s = scheduler();
 		s.preRestore();
 		assertNotNull(s);
@@ -141,14 +141,14 @@ public class MockJobSchedulerTest {
 
 	@SuppressWarnings("null") // passes null on purpose
 	@Test
-	public void testRunRestoreJob() {
+	void testRunRestoreJob() {
 		MockJobScheduler s = scheduler();
 		s.runRestoreJob(null);
 		assertNotNull(s);
 	}
 
 	@Test
-	public void testPostRestore() {
+	void testPostRestore() {
 		MockJobScheduler s = scheduler();
 		s.postRestore(true);
 		s.postRestore(false);

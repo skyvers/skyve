@@ -1,12 +1,12 @@
 package org.skyve.job;
 
-import static org.junit.Assert.fail;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.Arrays;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -17,7 +17,7 @@ import org.skyve.persistence.Persistence;
 import jakarta.inject.Inject;
 
 @SuppressWarnings("boxing")
-public class IteratingJobTest {
+class IteratingJobTest {
 
 	@Mock
 	private Persistence persistence;
@@ -27,14 +27,14 @@ public class IteratingJobTest {
 	@InjectMocks
 	private TestJob testJob;
 	
-	@Before
+	@BeforeEach
 	@SuppressWarnings("deprecation")
-	public void before() {
+	void before() {
 		MockitoAnnotations.initMocks(this);
 	}
 
 	@Test
-	public void testNoErrors() throws Exception {
+	void testNoErrors() throws Exception {
 		testJob.setElements(Arrays.asList("element1", "element2", "element3"));
 		testJob.execute();
 
@@ -49,7 +49,7 @@ public class IteratingJobTest {
 	 * Tests that no elements are processed after a failure.
 	 */
 	@Test
-	public void testErrorOnFirstElementWithoutContinue() {
+	void testErrorOnFirstElementWithoutContinue() {
 		testJob.setElements(Arrays.asList("exception", "element2", "element3"));
 
 		try {
@@ -70,7 +70,7 @@ public class IteratingJobTest {
 	 * Tests that no elements are processed after a failure.
 	 */
 	@Test
-	public void testErrorOnSecondElementWithoutContinue() {
+	void testErrorOnSecondElementWithoutContinue() {
 		testJob.setElements(Arrays.asList("element1", "exception", "element3", "element4"));
 
 		try {
@@ -88,7 +88,7 @@ public class IteratingJobTest {
 	}
 
 	@Test
-	public void testCommitEveryElement() throws Exception {
+	void testCommitEveryElement() throws Exception {
 		Mockito.when(testJob.getCommitFrequency()).thenReturn(1);
 		testJob.setElements(Arrays.asList("element1", "element2", "element3"));
 		testJob.execute();
@@ -103,7 +103,7 @@ public class IteratingJobTest {
 	}
 
 	@Test
-	public void testCommitInBatches() throws Exception {
+	void testCommitInBatches() throws Exception {
 		Mockito.when(testJob.getCommitFrequency()).thenReturn(2);
 		testJob.setElements(Arrays.asList("element1", "element2", "element3", "element4"));
 		testJob.execute();
@@ -118,7 +118,7 @@ public class IteratingJobTest {
 	}
 
 	@Test
-	public void testCommitInBatchesWithErrorInTheMiddleOfTheBatch() {
+	void testCommitInBatchesWithErrorInTheMiddleOfTheBatch() {
 		Mockito.when(testJob.getCommitFrequency()).thenReturn(3);
 		testJob.setElements(Arrays.asList("element1", "element2", "element3", "element4", "exception", "element6"));
 
@@ -139,7 +139,7 @@ public class IteratingJobTest {
 	}
 
 	@Test
-	public void testCommitEveryElementWithErrorOnLastElement() {
+	void testCommitEveryElementWithErrorOnLastElement() {
 		Mockito.when(testJob.getCommitFrequency()).thenReturn(1);
 		testJob.setElements(Arrays.asList("element1", "element2", "element3", "exception"));
 
@@ -160,7 +160,7 @@ public class IteratingJobTest {
 	}
 
 	@Test
-	public void testContinueOnFailureWithErrorOnFirstElement() {
+	void testContinueOnFailureWithErrorOnFirstElement() {
 		Mockito.when(testJob.continueOnFailure()).thenReturn(Boolean.TRUE);
 		testJob.setElements(Arrays.asList("exception", "element2", "element3", "element4"));
 
@@ -179,7 +179,7 @@ public class IteratingJobTest {
 	}
 
 	@Test
-	public void testContinueOnFailureWithErrorOnLastElement() {
+	void testContinueOnFailureWithErrorOnLastElement() {
 		Mockito.when(testJob.continueOnFailure()).thenReturn(Boolean.TRUE);
 		testJob.setElements(Arrays.asList("element1", "element2", "element3", "exception"));
 
@@ -198,7 +198,7 @@ public class IteratingJobTest {
 	}
 
 	@Test
-	public void testCommitEveryElementWithContinueOnFailureAndErrorOnFirstElement() {
+	void testCommitEveryElementWithContinueOnFailureAndErrorOnFirstElement() {
 		Mockito.when(testJob.getCommitFrequency()).thenReturn(1);
 		Mockito.when(testJob.continueOnFailure()).thenReturn(Boolean.TRUE);
 		testJob.setElements(Arrays.asList("exception", "element2", "element3", "element4"));
@@ -222,7 +222,7 @@ public class IteratingJobTest {
 	}
 
 	@Test
-	public void testCommitEveryElementWithContinueOnFailureAndErrorOnLastElement() {
+	void testCommitEveryElementWithContinueOnFailureAndErrorOnLastElement() {
 		Mockito.when(testJob.getCommitFrequency()).thenReturn(1);
 		Mockito.when(testJob.continueOnFailure()).thenReturn(Boolean.TRUE);
 		testJob.setElements(Arrays.asList("element1", "element2", "element3", "exception"));
@@ -246,7 +246,7 @@ public class IteratingJobTest {
 	}
 
 	@Test
-	public void testCommitInBatchesWithContinueOnFailureAndErrorInTheMiddleOfTheBatch() {
+	void testCommitInBatchesWithContinueOnFailureAndErrorInTheMiddleOfTheBatch() {
 		Mockito.when(testJob.getCommitFrequency()).thenReturn(3);
 		Mockito.when(testJob.continueOnFailure()).thenReturn(Boolean.TRUE);
 		testJob.setElements(Arrays.asList("element1", "element2", "element3", "element4", "exception", "element6"));
@@ -269,7 +269,7 @@ public class IteratingJobTest {
 	}
 
 	@Test
-	public void testGetNumRolledBackElementsAfterCommitEveryElementWithFailure() {
+	void testGetNumRolledBackElementsAfterCommitEveryElementWithFailure() {
 		Mockito.when(testJob.getCommitFrequency()).thenReturn(1);
 		Mockito.when(testJob.continueOnFailure()).thenReturn(Boolean.TRUE);
 		testJob.setElements(Arrays.asList("element1", "exception", "element3"));
@@ -285,14 +285,14 @@ public class IteratingJobTest {
 	}
 
 	@Test
-	public void testSetPersistenceExposesFieldForSubclasses() {
+	void testSetPersistenceExposesFieldForSubclasses() {
 		// Verifies that the protected setPersistence setter can be called from within the package.
 		testJob.setPersistence(persistence);
 		assertEquals(0, testJob.getNumRolledBackElements());
 	}
 
 	@Test
-	public void testCommitInBatchesWithContinueOnFailureAndErrorsInMultipleBatches() {
+	void testCommitInBatchesWithContinueOnFailureAndErrorsInMultipleBatches() {
 		Mockito.when(testJob.getCommitFrequency()).thenReturn(3);
 		Mockito.when(testJob.continueOnFailure()).thenReturn(Boolean.TRUE);
 		testJob.setElements(Arrays.asList("element1", "element2", "element3",
@@ -318,7 +318,7 @@ public class IteratingJobTest {
 	}
 
 	@Test
-	public void testJobCancelledMidwayStopsProcessing() throws Exception {
+	void testJobCancelledMidwayStopsProcessing() throws Exception {
 		testJob.setElements(Arrays.asList("element1", "element2", "element3"));
 		// First call to isCancelled returns false (processes element1), second returns true (cancels before element2)
 		Mockito.when(testJob.isCancelled()).thenReturn(false, true);

@@ -1,27 +1,27 @@
 package org.skyve.impl.geoip;
 
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.util.GeoIPService;
 
 @SuppressWarnings("static-method")
-public class GeoIPServiceStaticSingletonTest {
+class GeoIPServiceStaticSingletonTest {
 
         @SuppressWarnings("null") // passes null on purpose
         @Test
-        public void getReturnsNullInitially() {
+        void getReturnsNullInitially() {
                 GeoIPServiceStaticSingleton.set(null);
                 assertNull(GeoIPServiceStaticSingleton.get());
         }
 
         @SuppressWarnings("null") // passes null on purpose
         @Test
-        public void setAndGetRoundtrip() {
+        void setAndGetRoundtrip() {
                 GeoIPService svc = new NoOpGeoIPService();
                 GeoIPServiceStaticSingleton.set(svc);
                 try {
@@ -34,7 +34,7 @@ public class GeoIPServiceStaticSingletonTest {
 
         @SuppressWarnings("null") // passes null on purpose
         @Test
-        public void setDefaultWithNullKeyInstallsNoOpService() {
+        void setDefaultWithNullKeyInstallsNoOpService() {
                 // UtilImpl.GEO_IP_KEY is null in test environment
                 GeoIPServiceStaticSingleton.setDefault();
                 try {
@@ -47,7 +47,7 @@ public class GeoIPServiceStaticSingletonTest {
 
         @SuppressWarnings("null") // passes null on purpose
         @Test
-        public void setDefaultWithNonNullKeyInstallsIPInfoIo() {
+        void setDefaultWithNonNullKeyInstallsIPInfoIo() {
                 String savedKey = UtilImpl.GEO_IP_KEY;
                 UtilImpl.GEO_IP_KEY = "test-key";
                 try {

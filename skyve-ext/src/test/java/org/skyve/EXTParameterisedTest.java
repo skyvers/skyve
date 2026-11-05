@@ -3,21 +3,17 @@ package org.skyve;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Arrays;
 import java.util.Collection;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-import org.junit.runners.Parameterized.Parameter;
-import org.junit.runners.Parameterized.Parameters;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.util.Util;
 
-@RunWith(value = Parameterized.class)
-public class EXTParameterisedTest {
+class EXTParameterisedTest {
 
 	private static String shortPassword = "password";
 
@@ -29,13 +25,7 @@ public class EXTParameterisedTest {
 	// Intended to exercise LegacyBCryptPasswordEncoder's truncation behaviour (73 UTF-8 bytes total).
 	private static String veryLongPassword = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\u00e9b";
 
-	@Parameter(value = 0)
-	public String algorithm;
-	@Parameter(value = 1)
-	public String clearText;
-
-	@Parameters(name = "{index}: testParse({0}) = {1}")
-	public static Collection<String[]> data() {
+	static Collection<String[]> data() {
 		return Arrays.asList(new String[][] {
 				{ "argon2", shortPassword },
 				{ "argon2", longPassword },
@@ -52,8 +42,10 @@ public class EXTParameterisedTest {
 	/**
 	 * Tests that each hashedPassword input cleartext in the parameters list.
 	 */
-	@Test
-	public void testHashPassword() {
+	@ParameterizedTest(name = "{index}: testParse({0}) = {1}")
+	@MethodSource("data")
+	@SuppressWarnings("static-method")
+	void testHashPassword(String algorithm, String clearText) {
 		// setup the test data
 		UtilImpl.PASSWORD_HASHING_ALGORITHM = algorithm;
 
@@ -64,7 +56,7 @@ public class EXTParameterisedTest {
 		String result = EXT.hashPassword(clearText);
 
 		// verify the result
-		assertTrue("Encoded length should be less than 255 chars", result.length() <= 255);
+		assertTrue(result.length() <= 255, "Encoded length should be less than 255 chars");
 		assertThat(result, is(not(clearText)));
 		assertTrue(EXT.checkPassword(clearText, result));
 	}

@@ -1,16 +1,17 @@
 package org.skyve.impl.mail;
 
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.lang.reflect.Field;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.skyve.util.MailService;
 
 @SuppressWarnings("static-method")
-public class MailServiceStaticSingletonTest {
+class MailServiceStaticSingletonTest {
 
 	private static void clearStaticState() throws Exception {
 		Field configured = MailServiceStaticSingleton.class.getDeclaredField("configuredInstance");
@@ -22,42 +23,42 @@ public class MailServiceStaticSingletonTest {
 		effective.set(null, null);
 	}
 
-	@Before
-	public void setUp() throws Exception {
+	@BeforeEach
+	void setUp() throws Exception {
 		clearStaticState();
 	}
 
 	/** Reset static state after each test so tests do not interfere. */
-	@After
-	public void tearDown() throws Exception {
+	@AfterEach
+	void tearDown() throws Exception {
 		clearStaticState();
 	}
 
-	@Test(expected = IllegalStateException.class)
-	public void getThrowsWhenNotInitialised() {
-		MailServiceStaticSingleton.get();
-	}
-
-	@Test(expected = IllegalStateException.class)
-	public void getEffectiveThrowsWhenNotInitialised() {
-		MailServiceStaticSingleton.getEffective();
+	@Test
+	void getThrowsWhenNotInitialised() {
+		assertThrows(IllegalStateException.class, () -> MailServiceStaticSingleton.get());
 	}
 
 	@Test
-	public void setAndGetReturnConfiguredInstance() {
+	void getEffectiveThrowsWhenNotInitialised() {
+		assertThrows(IllegalStateException.class, () -> MailServiceStaticSingleton.getEffective());
+	}
+
+	@Test
+	void setAndGetReturnConfiguredInstance() {
 		MailService impl = new SMTPMailService();
 		MailServiceStaticSingleton.set(impl);
 		assertNotNull(MailServiceStaticSingleton.get());
 	}
 
 	@Test
-	public void setAndGetEffectiveReturnsDecorated() {
+	void setAndGetEffectiveReturnsDecorated() {
 		MailServiceStaticSingleton.set(new SMTPMailService());
 		assertNotNull(MailServiceStaticSingleton.getEffective());
 	}
 
 	@Test
-	public void setDefaultInitialisesWithSMTPService() {
+	void setDefaultInitialisesWithSMTPService() {
 		MailServiceStaticSingleton.setDefault();
 		assertNotNull(MailServiceStaticSingleton.get());
 		assertNotNull(MailServiceStaticSingleton.getEffective());

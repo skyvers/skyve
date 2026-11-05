@@ -1,22 +1,22 @@
 package org.skyve.impl.create;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertSame;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 @SuppressWarnings("static-method")
-public class SkyveProjectCreationExceptionTest {
+class SkyveProjectCreationExceptionTest {
 
 	@Test
-	public void messageConstructorStoresMessage() {
+	void messageConstructorStoresMessage() {
 		SkyveProjectCreationException ex = new SkyveProjectCreationException("test message");
 		assertEquals("test message", ex.getMessage());
 	}
 
 	@Test
-	public void messageCauseConstructorStoresBoth() {
+	void messageCauseConstructorStoresBoth() {
 		Throwable cause = new RuntimeException("cause");
 		SkyveProjectCreationException ex = new SkyveProjectCreationException("msg", cause);
 		assertEquals("msg", ex.getMessage());
@@ -24,7 +24,7 @@ public class SkyveProjectCreationExceptionTest {
 	}
 
 	@Test
-	public void isInstanceOfException() {
+	void isInstanceOfException() {
 		SkyveProjectCreationException ex = new SkyveProjectCreationException("x");
 		assertNotNull(ex);
 	}

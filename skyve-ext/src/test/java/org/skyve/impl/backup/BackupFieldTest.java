@@ -1,38 +1,38 @@
 package org.skyve.impl.backup;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.skyve.metadata.model.Attribute.AttributeType;
 import org.skyve.metadata.model.Attribute.Sensitivity;
 
 @SuppressWarnings("static-method")
-public class BackupFieldTest {
+class BackupFieldTest {
 
 	@Test
-	public void constructorSetsAttributeTypeAndSensitivity() {
+	void constructorSetsAttributeTypeAndSensitivity() {
 		BackupField field = new BackupField(AttributeType.text, Sensitivity.personal);
 		assertEquals(AttributeType.text, field.getAttributeType());
 		assertEquals(Sensitivity.personal, field.getSensitivity());
 	}
 
 	@Test
-	public void constructorAllowsNullSensitivity() {
+	void constructorAllowsNullSensitivity() {
 		BackupField field = new BackupField(AttributeType.integer, null);
 		assertEquals(AttributeType.integer, field.getAttributeType());
 		assertNull(field.getSensitivity());
 	}
 
 	@Test
-	public void setSensitivityUpdatesSensitivity() {
+	void setSensitivityUpdatesSensitivity() {
 		BackupField field = new BackupField(AttributeType.bool, Sensitivity.personal);
 		field.setSensitivity(Sensitivity.restricted);
 		assertEquals(Sensitivity.restricted, field.getSensitivity());
 	}
 
 	@Test
-	public void setSensitivityToNullClearsSensitivity() {
+	void setSensitivityToNullClearsSensitivity() {
 		BackupField field = new BackupField(AttributeType.text, Sensitivity.personal);
 		field.setSensitivity(null);
 		assertNull(field.getSensitivity());
@@ -41,7 +41,7 @@ public class BackupFieldTest {
         // ---- BackupLengthField ----
 
         @Test
-        public void backupLengthFieldConstructorSetsMaxLength() {
+        void backupLengthFieldConstructorSetsMaxLength() {
                 BackupLengthField lf = new BackupLengthField(AttributeType.text, Sensitivity.personal, Integer.valueOf(255));
                 assertEquals(AttributeType.text, lf.getAttributeType());
                 assertEquals(Sensitivity.personal, lf.getSensitivity());
@@ -49,7 +49,7 @@ public class BackupFieldTest {
         }
 
         @Test
-        public void backupLengthFieldAllowsNullMaxLength() {
+        void backupLengthFieldAllowsNullMaxLength() {
                 BackupLengthField lf = new BackupLengthField(AttributeType.integer, null, null);
                 assertNull(lf.getMaxLength());
         }

@@ -3,36 +3,36 @@ package org.skyve.impl.web.faces.converters.lang;
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 
-import org.junit.Before;
-import org.junit.Test;
-public class StringTest {
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+class StringTest {
 	private String converter;
 
-	@Before
-	public void before() {
+	@BeforeEach
+	void before() {
 		converter = new String();
 	}
 
 	@Test
-	public void testGetAsObjectEmptyStringValueReturnsNull() {
+	void testGetAsObjectEmptyStringValueReturnsNull() {
 		// call the method under test
 		assertThat(converter.getAsObject(null, null, ""), is(nullValue()));
 	}
 
 	@Test
-	public void testGetAsObjectWhitespaceStringValueReturnsNull() {
+	void testGetAsObjectWhitespaceStringValueReturnsNull() {
 		// call the method under test
 		assertThat(converter.getAsObject(null, null, " "), is(nullValue()));
 	}
 
 	@Test
-	public void testGetAsObjectWordValueTrimsWhitespace() {
+	void testGetAsObjectWordValueTrimsWhitespace() {
 		// call the method under test
 		assertThat(converter.getAsObject(null, null, " word "), is("word"));
 	}
 
 	@Test
-	public void testGetAsObjectWordValue() {
+	void testGetAsObjectWordValue() {
 		// setup the test data
 		java.lang.String testValue = "word";
 
@@ -42,7 +42,7 @@ public class StringTest {
 
 
 	@Test
-	public void testGetAsStringTrueValue() {
+	void testGetAsStringTrueValue() {
 		// setup the test data
 		java.lang.String testValue = "test";
 

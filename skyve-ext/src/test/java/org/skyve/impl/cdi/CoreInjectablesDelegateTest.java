@@ -1,7 +1,7 @@
 package org.skyve.impl.cdi;
 
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -13,7 +13,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.skyve.domain.Bean;
 import org.skyve.domain.types.DateOnly;
 import org.skyve.domain.types.DateTime;
@@ -38,10 +38,10 @@ import org.skyve.metadata.user.User;
 import org.skyve.metadata.user.UserAccess;
 
 @SuppressWarnings({ "static-method", "unchecked", "boxing" })
-public class CoreInjectablesDelegateTest {
+class CoreInjectablesDelegateTest {
 	@Test
 	@SuppressWarnings("java:S5961")
-	public void userInjectableDelegatesToCoreUser() throws Exception {
+	void userInjectableDelegatesToCoreUser() throws Exception {
 		User user = mock(User.class);
 		Customer customer = mock(Customer.class);
 		Map<String, Object> attributes = Map.of("k", "v");
@@ -131,7 +131,7 @@ public class CoreInjectablesDelegateTest {
 
 	@Test
 	@SuppressWarnings("java:S5961")
-	public void customerInjectableDelegatesToCoreCustomer() throws Exception {
+	void customerInjectableDelegatesToCoreCustomer() throws Exception {
 		User user = mock(User.class);
 		Customer customer = mock(Customer.class);
 		Module module = mock(Module.class);

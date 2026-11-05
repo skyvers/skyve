@@ -1,16 +1,16 @@
 package org.skyve.content;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.util.Map;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.skyve.domain.PersistentBean;
 
 @SuppressWarnings("static-method")
-public class BeanContentTest {
+class BeanContentTest {
 
 	private static PersistentBean mockBean(String customer, String module, String document,
 			String dataGroupId, String userId, String bizId) {
@@ -25,7 +25,7 @@ public class BeanContentTest {
 	}
 
 	@Test
-	public void testConstructorStoresFieldsFromBean() {
+	void testConstructorStoresFieldsFromBean() {
 		PersistentBean bean = mockBean("demo", "admin", "User", "dg1", "user1", "biz1");
 
 		BeanContent content = new BeanContent(bean);
@@ -39,7 +39,7 @@ public class BeanContentTest {
 	}
 
 	@Test
-	public void testConstructorWithNullDataGroupId() {
+	void testConstructorWithNullDataGroupId() {
 		PersistentBean bean = mockBean("demo", "admin", "User", null, "user1", "biz1");
 
 		BeanContent content = new BeanContent(bean);
@@ -49,7 +49,7 @@ public class BeanContentTest {
 	}
 
 	@Test
-	public void testGetPropertiesReturnsEmptyMapByDefault() {
+	void testGetPropertiesReturnsEmptyMapByDefault() {
 		PersistentBean bean = mockBean("demo", "admin", "User", null, "user1", "biz1");
 
 		BeanContent content = new BeanContent(bean);
@@ -60,7 +60,7 @@ public class BeanContentTest {
 	}
 
 	@Test
-	public void testGetPropertiesMapIsMutable() {
+	void testGetPropertiesMapIsMutable() {
 		PersistentBean bean = mockBean("demo", "admin", "User", null, "user1", "biz1");
 
 		BeanContent content = new BeanContent(bean);

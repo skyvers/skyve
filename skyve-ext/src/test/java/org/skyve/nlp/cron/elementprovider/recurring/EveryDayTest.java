@@ -3,15 +3,15 @@ package org.skyve.nlp.cron.elementprovider.recurring;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-public class EveryDayTest {
+class EveryDayTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testGetDayOfWeekElementWithoutMatchReturnsNull() {
+	void testGetDayOfWeekElementWithoutMatchReturnsNull() {
 		// no matches() called → segments empty → ternary false path returns null (covers L95)
 		EveryDay provider = new EveryDay();
 		assertThat(provider.getDayOfWeekElement(), is(nullValue()));
@@ -19,7 +19,7 @@ public class EveryDayTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testCanProvideDayOfWeekReturnsFalseWithNoSegments() {
+	void testCanProvideDayOfWeekReturnsFalseWithNoSegments() {
 		EveryDay provider = new EveryDay();
 		assertFalse(provider.canProvideDayOfWeek());
 	}

@@ -1,8 +1,8 @@
 package org.skyve.impl.backup;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -18,7 +18,7 @@ import java.util.Collections;
 import java.util.Collection;
 import java.util.List;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.skyve.content.AttachmentContent;
 import org.skyve.content.ContentManager;
 import org.skyve.impl.content.AbstractContentManager;
@@ -29,9 +29,9 @@ import org.skyve.metadata.user.User;
 import org.skyve.metadata.model.Attribute.AttributeType;
 
 @SuppressWarnings({"static-method", "boxing", "resource", "hiding"})
-public class ReindexAttachmentsJobExecuteTest {
+class ReindexAttachmentsJobExecuteTest {
 	@Test
-	public void seamMethodsDelegateToBaseImplementations() throws Exception {
+	void seamMethodsDelegateToBaseImplementations() throws Exception {
 		AbstractPersistence persistence = mock(AbstractPersistence.class, CALLS_REAL_METHODS);
 		User user = mock(User.class);
 		Customer customer = mock(Customer.class);
@@ -53,7 +53,7 @@ public class ReindexAttachmentsJobExecuteTest {
 	}
 
 	@Test
-	public void executeReturnsEarlyWhenContentManagerCannotReindex() throws Exception {
+	void executeReturnsEarlyWhenContentManagerCannotReindex() throws Exception {
 		Connection connection = mock(Connection.class);
 		ContentManager truncateCm = mock(ContentManager.class);
 		ContentManager scanCm = mock(ContentManager.class);
@@ -70,20 +70,20 @@ public class ReindexAttachmentsJobExecuteTest {
 	}
 
 	@Test
-	public void executeThrowsWithoutTruncatingWhenThereIsNoCustomer() throws Exception {
+	void executeThrowsWithoutTruncatingWhenThereIsNoCustomer() throws Exception {
 		Connection connection = mock(Connection.class);
 		ContentManager truncateCm = mock(ContentManager.class);
 		ContentManager scanCm = mock(ContentManager.class);
 
 		TestableReindexAttachmentsJob job = new TestableReindexAttachmentsJob(null, connection, List.of(), truncateCm, scanCm);
 
-		org.junit.Assert.assertThrows(IllegalStateException.class, job::execute);
+		org.junit.jupiter.api.Assertions.assertThrows(IllegalStateException.class, job::execute);
 		verify(truncateCm, never()).truncateAttachmentIndexing(org.mockito.ArgumentMatchers.anyString());
 		verify(connection, never()).setAutoCommit(false);
 	}
 
 	@Test
-	public void executeSkipsTableWithoutContentAndCompletes() throws Exception {
+	void executeSkipsTableWithoutContentAndCompletes() throws Exception {
 		Connection connection = mock(Connection.class);
 		AbstractContentManager truncateCm = mock(AbstractContentManager.class);
 		AbstractContentManager scanCm = mock(AbstractContentManager.class);
@@ -101,7 +101,7 @@ public class ReindexAttachmentsJobExecuteTest {
 	}
 
 	@Test
-	public void executeReindexesAttachmentWhenLookupSucceeds() throws Exception {
+	void executeReindexesAttachmentWhenLookupSucceeds() throws Exception {
 		Connection connection = mock(Connection.class);
 		Statement statement = mock(Statement.class);
 		ResultSet resultSet = mock(ResultSet.class);
@@ -127,7 +127,7 @@ public class ReindexAttachmentsJobExecuteTest {
 	}
 
 	@Test
-	public void executeIndexesAttachmentWhenFieldIndexTypeIsUndefined() throws Exception {
+	void executeIndexesAttachmentWhenFieldIndexTypeIsUndefined() throws Exception {
 		Connection connection = mock(Connection.class);
 		Statement statement = mock(Statement.class);
 		ResultSet resultSet = mock(ResultSet.class);
@@ -151,7 +151,7 @@ public class ReindexAttachmentsJobExecuteTest {
 	}
 
 	@Test
-	public void executeProcessesMultipleContentTablesAndSkipsMixedNonContentTable() throws Exception {
+	void executeProcessesMultipleContentTablesAndSkipsMixedNonContentTable() throws Exception {
 		Connection connection = mock(Connection.class);
 		Statement firstStatement = mock(Statement.class);
 		Statement secondStatement = mock(Statement.class);
@@ -192,7 +192,7 @@ public class ReindexAttachmentsJobExecuteTest {
 	}
 
 	@Test
-	public void executeUsesFalseIndexWhenFieldIndexTypeIsNone() throws Exception {
+	void executeUsesFalseIndexWhenFieldIndexTypeIsNone() throws Exception {
 		Connection connection = mock(Connection.class);
 		Statement statement = mock(Statement.class);
 		ResultSet resultSet = mock(ResultSet.class);
@@ -217,7 +217,7 @@ public class ReindexAttachmentsJobExecuteTest {
 	}
 
 	@Test
-	public void executeLogsAttachmentErrorsAndContinues() throws Exception {
+	void executeLogsAttachmentErrorsAndContinues() throws Exception {
 		Connection connection = mock(Connection.class);
 		Statement statement = mock(Statement.class);
 		ResultSet resultSet = mock(ResultSet.class);
@@ -240,7 +240,7 @@ public class ReindexAttachmentsJobExecuteTest {
 	}
 
 	@Test
-	public void executeLogsWhenAttachmentDoesNotExist() throws Exception {
+	void executeLogsWhenAttachmentDoesNotExist() throws Exception {
 		Connection connection = mock(Connection.class);
 		Statement statement = mock(Statement.class);
 		ResultSet resultSet = mock(ResultSet.class);
@@ -263,7 +263,7 @@ public class ReindexAttachmentsJobExecuteTest {
 	}
 
 	@Test
-	public void executeReturnsEarlyWhenCancelled() throws Exception {
+	void executeReturnsEarlyWhenCancelled() throws Exception {
 		Connection connection = mock(Connection.class);
 		Statement statement = mock(Statement.class);
 		ResultSet resultSet = mock(ResultSet.class);
@@ -284,7 +284,7 @@ public class ReindexAttachmentsJobExecuteTest {
 	}
 
 	@Test
-	public void executeSkipsNonContentFieldWithinMixedTable() throws Exception {
+	void executeSkipsNonContentFieldWithinMixedTable() throws Exception {
 		Connection connection = mock(Connection.class);
 		Statement statement = mock(Statement.class);
 		ResultSet resultSet = mock(ResultSet.class);
@@ -309,7 +309,7 @@ public class ReindexAttachmentsJobExecuteTest {
 	}
 
 	@Test
-	public void executeSkipsNullResultSetValues() throws Exception {
+	void executeSkipsNullResultSetValues() throws Exception {
 		Connection connection = mock(Connection.class);
 		Statement statement = mock(Statement.class);
 		ResultSet resultSet = mock(ResultSet.class);
@@ -331,7 +331,7 @@ public class ReindexAttachmentsJobExecuteTest {
 	}
 
 	@Test
-	public void executeIndexesWhenIndexTypeTextual() throws Exception {
+	void executeIndexesWhenIndexTypeTextual() throws Exception {
 		Connection connection = mock(Connection.class);
 		Statement statement = mock(Statement.class);
 		ResultSet resultSet = mock(ResultSet.class);

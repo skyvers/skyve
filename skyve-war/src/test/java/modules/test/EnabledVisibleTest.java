@@ -1,7 +1,7 @@
 package modules.test;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 import org.skyve.impl.metadata.view.ActionImpl;
 import org.skyve.impl.metadata.view.container.HBox;
 import org.skyve.impl.metadata.view.container.Tab;
@@ -27,7 +27,7 @@ import org.skyve.metadata.view.Disableable;
 import org.skyve.metadata.view.Invisible;
 import org.skyve.util.Binder;
 
-public class EnabledVisibleTest {
+class EnabledVisibleTest {
 	private static final String CONDITION = "test";
 	private static final String NEGATED_CONDITION = "notTest";
 	private static final String TRUE = Boolean.TRUE.toString();
@@ -35,13 +35,13 @@ public class EnabledVisibleTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testBlurb() {
+	void testBlurb() {
 		testVisible(new Blurb());
 	}
 	
 	@Test
 	@SuppressWarnings("static-method")
-	public void testDialogButton() {
+	void testDialogButton() {
 		DialogButton button = new DialogButton();
 		testVisible(button);
 		testEnabled(button);
@@ -49,13 +49,13 @@ public class EnabledVisibleTest {
 	
 	@Test
 	@SuppressWarnings("static-method")
-	public void testDynamicImage() {
+	void testDynamicImage() {
 		testVisible(new DynamicImage());
 	}
 	
 	@Test
 	@SuppressWarnings("static-method")
-	public void testForm() {
+	void testForm() {
 		Form form = new Form();
 		testVisible(form);
 		testEnabled(form);
@@ -63,13 +63,13 @@ public class EnabledVisibleTest {
 	
 	@Test
 	@SuppressWarnings("static-method")
-	public void testHBox() {
+	void testHBox() {
 		testVisible(new HBox());
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testInputWidget() {
+	void testInputWidget() {
 		TextField text = new TextField();
 		testVisible(text);
 		testEnabled(text);
@@ -77,7 +77,7 @@ public class EnabledVisibleTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testLookupDescription() {
+	void testLookupDescription() {
 		LookupDescription lookup = new LookupDescription();
 		testVisible(lookup);
 		testEnabled(lookup);
@@ -89,19 +89,19 @@ public class EnabledVisibleTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testLabel() {
+	void testLabel() {
 		testVisible(new Label());
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testLink() {
+	void testLink() {
 		testVisible(new Link());
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testListGrid() {
+	void testListGrid() {
 		ListGrid list = new ListGrid();
 		testVisible(list);
 		testEnabled(list);
@@ -110,37 +110,37 @@ public class EnabledVisibleTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testMapDisplay() {
+	void testMapDisplay() {
 		testVisible(new MapDisplay());
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testProgressBar() {
+	void testProgressBar() {
 		testVisible(new ProgressBar());
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testSetInvisibleEventAction() {
+	void testSetInvisibleEventAction() {
 		testVisible(new SetInvisibleEventAction());
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testSetDisabledEventAction() {
+	void testSetDisabledEventAction() {
 		testEnabled(new SetDisabledEventAction());
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testStaticImage() {
+	void testStaticImage() {
 		testVisible(new StaticImage());
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testTab() {
+	void testTab() {
 		Tab tab = new Tab();
 		testVisible(tab);
 		testEnabled(tab);
@@ -148,7 +148,7 @@ public class EnabledVisibleTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testTabPane() {
+	void testTabPane() {
 		TabPane pane = new TabPane();
 		testVisible(pane);
 		testEnabled(pane);
@@ -156,7 +156,7 @@ public class EnabledVisibleTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testDataGrid() {
+	void testDataGrid() {
 		DataGrid grid = new DataGrid();
 		testVisible(grid);
 		testEnabled(grid);
@@ -165,13 +165,13 @@ public class EnabledVisibleTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testVBox() {
+	void testVBox() {
 		testVisible(new VBox());
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testActionImpl() {
+	void testActionImpl() {
 		ActionImpl action = new ActionImpl();
 		testVisible(action);
 		testEnabled(action);
@@ -206,15 +206,15 @@ public class EnabledVisibleTest {
 		String negatedConditionName = "xml" + Character.toUpperCase(negatedCondition.charAt(0)) + negatedCondition.substring(1) + "Condition";
 
 		Binder.set(metaData, authoredConditionName, CONDITION);
-		Assert.assertEquals(CONDITION, Binder.get(metaData, conditionName));
+		Assertions.assertEquals(CONDITION, Binder.get(metaData, conditionName));
 
 		Binder.set(metaData, negatedConditionName, CONDITION);
-		Assert.assertEquals(NEGATED_CONDITION, Binder.get(metaData, conditionName));
+		Assertions.assertEquals(NEGATED_CONDITION, Binder.get(metaData, conditionName));
 		Binder.set(metaData, negatedConditionName, NEGATED_CONDITION);
-		Assert.assertEquals(CONDITION, Binder.get(metaData, conditionName));
+		Assertions.assertEquals(CONDITION, Binder.get(metaData, conditionName));
 		Binder.set(metaData, negatedConditionName, TRUE);
-		Assert.assertEquals(FALSE, Binder.get(metaData, conditionName));
+		Assertions.assertEquals(FALSE, Binder.get(metaData, conditionName));
 		Binder.set(metaData, negatedConditionName, FALSE);
-		Assert.assertEquals(TRUE, Binder.get(metaData, conditionName));
+		Assertions.assertEquals(TRUE, Binder.get(metaData, conditionName));
 	}
 }

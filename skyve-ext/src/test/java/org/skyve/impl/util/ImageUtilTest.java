@@ -1,9 +1,9 @@
 package org.skyve.impl.util;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -17,22 +17,21 @@ import java.nio.file.Files;
 
 import javax.imageio.ImageIO;
 
-import org.junit.After;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
 import org.skyve.metadata.repository.ProvidedRepository;
 
 @SuppressWarnings("static-method")
-public class ImageUtilTest {
-	@Rule
-	public TemporaryFolder temp = new TemporaryFolder();
+class ImageUtilTest {
+	@TempDir
+	private File temp;
 
 	private final ProvidedRepository originalRepository = ProvidedRepositoryFactory.get();
 
-	@After
-	public void teardown() {
+	@AfterEach
+	void teardown() {
 		if (originalRepository == null) {
 			ProvidedRepositoryFactory.clear();
 		}
@@ -42,7 +41,7 @@ public class ImageUtilTest {
 	}
 
 	@Test
-	public void signatureWithNullColorsRendersTransparentPng() throws Exception {
+	void signatureWithNullColorsRendersTransparentPng() throws Exception {
 		String json = "[[[10,10],[50,50],[90,10]]]";
 		byte[] result = ImageUtil.signature(json, 200, 100, null, null);
 		assertNotNull(result);
@@ -53,7 +52,7 @@ public class ImageUtilTest {
 	}
 
 	@Test
-	public void signatureWithExplicitColorsRendersOpaquePng() throws Exception {
+	void signatureWithExplicitColorsRendersOpaquePng() throws Exception {
 		String json = "[[[10,10],[50,50],[90,10]]]";
 		byte[] result = ImageUtil.signature(json, 200, 100, "#ffffff", "#000000");
 		assertNotNull(result);
@@ -63,7 +62,7 @@ public class ImageUtilTest {
 	}
 
 	@Test
-	public void signatureWithEmptyLinesJsonRendersBlankPng() throws Exception {
+	void signatureWithEmptyLinesJsonRendersBlankPng() throws Exception {
 		// No strokes — just creates a blank image
 		String json = "[]";
 		byte[] result = ImageUtil.signature(json, 100, 100, null, null);
@@ -72,7 +71,7 @@ public class ImageUtilTest {
 	}
 
 	@Test
-	public void readValidPngStreamReturnsImage() throws Exception {
+	void readValidPngStreamReturnsImage() throws Exception {
 		// Create a small PNG in-memory
 		BufferedImage source = new BufferedImage(20, 20, BufferedImage.TYPE_INT_RGB);
 		ByteArrayOutputStream bos = new ByteArrayOutputStream();
@@ -84,7 +83,7 @@ public class ImageUtilTest {
 	}
 
 	@Test
-	public void readValidPngStreamWithLargeTargetReturnsImage() throws Exception {
+	void readValidPngStreamWithLargeTargetReturnsImage() throws Exception {
 		// subsamplingMinimumTargetSize larger than image → subsampling = 0 (not applied)
 		BufferedImage source = new BufferedImage(20, 20, BufferedImage.TYPE_INT_RGB);
 		ByteArrayOutputStream bos = new ByteArrayOutputStream();
@@ -95,7 +94,7 @@ public class ImageUtilTest {
 	}
 
 	@Test
-	public void readNonImageStreamReturnsNull() throws Exception {
+	void readNonImageStreamReturnsNull() throws Exception {
 		// Pass non-image bytes — ImageIO cannot read it, should return null
 		InputStream is = new ByteArrayInputStream("not an image".getBytes());
 		BufferedImage result = ImageUtil.read(is, 1);
@@ -103,7 +102,7 @@ public class ImageUtilTest {
 	}
 
 	@Test
-	public void svgWithoutExtensionUsesBlankIconAndAddsDimensions() throws Exception {
+	void svgWithoutExtensionUsesBlankIconAndAddsDimensions() throws Exception {
 		File blank = svgFile("blank.svg", "<svg viewBox=\"0 0 10 10\"><rect width=\"10\" height=\"10\"/></svg>");
 		ProvidedRepository repository = mock(ProvidedRepository.class);
 		when(repository.findResourceFile("files/blank.svg", null, null)).thenReturn(blank);
@@ -116,8 +115,8 @@ public class ImageUtilTest {
 	}
 
 	@Test
-	public void svgFallsBackToBlankIconWhenSpecificIconDoesNotExist() throws Exception {
-		File missingSpecificIcon = new File(temp.getRoot(), "missing.svg");
+	void svgFallsBackToBlankIconWhenSpecificIconDoesNotExist() throws Exception {
+		File missingSpecificIcon = new File(temp, "missing.svg");
 		File blank = svgFile("blank.svg", "<svg viewBox=\"0 0 20 20\"><circle r=\"4\"/></svg>");
 		ProvidedRepository repository = mock(ProvidedRepository.class);
 		when(repository.findResourceFile("files/pdf.svg", null, null)).thenReturn(missingSpecificIcon);
@@ -131,7 +130,7 @@ public class ImageUtilTest {
 	}
 
 	@Test
-	public void burnSvgWithSimpleRectRendersOntoImage() throws Exception {
+	void burnSvgWithSimpleRectRendersOntoImage() throws Exception {
 		BufferedImage image = new BufferedImage(100, 100, BufferedImage.TYPE_INT_ARGB);
 		assertEquals(100, image.getWidth());
 		String svg = "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"100\" height=\"100\">"
@@ -142,7 +141,7 @@ public class ImageUtilTest {
 	}
 
 	@Test
-	public void burnSvgScalesFullResolutionMarkupOntoASubsampledImage() throws Exception {
+	void burnSvgScalesFullResolutionMarkupOntoASubsampledImage() throws Exception {
 		// Markup drawn against a 400px image, burned onto a 100px copy of it
 		BufferedImage image = new BufferedImage(100, 100, BufferedImage.TYPE_INT_ARGB);
 		String svg = "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"400\" height=\"400\" viewBox=\"0 0 400 400\">"
@@ -158,7 +157,7 @@ public class ImageUtilTest {
 	}
 
 	@Test
-	public void burnSvgDrawsTextHungFromItsTopEdgeBelowTheTop() throws Exception {
+	void burnSvgDrawsTextHungFromItsTopEdgeBelowTheTop() throws Exception {
 		// Excalidraw positions text by its top edge: y="0" with dominant-baseline="text-before-edge"
 		BufferedImage image = new BufferedImage(100, 100, BufferedImage.TYPE_INT_ARGB);
 		String svg = "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"100\" height=\"100\" viewBox=\"0 0 100 100\">"
@@ -184,11 +183,11 @@ public class ImageUtilTest {
 			}
 		}
 		assertEquals(0, inkedAbove);
-		assertTrue("no text drawn below its top edge", inkedBelow > 100);
+		assertTrue(inkedBelow > 100, "no text drawn below its top edge");
 	}
 
 	@Test
-	public void burnSvgDrawsMarkupMatchingTheImageAtItsOwnSize() throws Exception {
+	void burnSvgDrawsMarkupMatchingTheImageAtItsOwnSize() throws Exception {
 		BufferedImage image = new BufferedImage(100, 100, BufferedImage.TYPE_INT_ARGB);
 		String svg = "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"100\" height=\"100\" viewBox=\"0 0 100 100\">"
 				+ "<rect x=\"10\" y=\"10\" width=\"20\" height=\"20\" fill=\"#0000ff\"/>"
@@ -201,7 +200,7 @@ public class ImageUtilTest {
 	}
 
 	@Test
-	public void burnSvgWithTransparentFillAttributeNormalises() throws Exception {
+	void burnSvgWithTransparentFillAttributeNormalises() throws Exception {
 		// Covers normaliseTransparentForBatik L229-231 (fill="transparent" → "none")
 		BufferedImage image = new BufferedImage(100, 100, BufferedImage.TYPE_INT_ARGB);
 		assertEquals(100, image.getHeight());
@@ -212,7 +211,7 @@ public class ImageUtilTest {
 	}
 
 	@Test
-	public void burnSvgWithStyleTransparentNormalises() throws Exception {
+	void burnSvgWithStyleTransparentNormalises() throws Exception {
 		// Covers normaliseTransparentForBatik L225-227 (style="...transparent..." → "...none...")
 		BufferedImage image = new BufferedImage(100, 100, BufferedImage.TYPE_INT_ARGB);
 		assertEquals(100, image.getWidth());
@@ -223,7 +222,7 @@ public class ImageUtilTest {
 	}
 
 	@Test
-	public void burnSvgWithStyleElementStripsStyleAndSucceeds() throws Exception {
+	void burnSvgWithStyleElementStripsStyleAndSucceeds() throws Exception {
 		// Covers the replaceAll for <style> element stripping in burnSvg
 		BufferedImage image = new BufferedImage(100, 100, BufferedImage.TYPE_INT_ARGB);
 		assertEquals(100, image.getHeight());
@@ -235,7 +234,7 @@ public class ImageUtilTest {
 	}
 
 	private File svgFile(String name, String xml) throws Exception {
-		File file = temp.newFile(name);
+		File file = new File(temp, name);
 		Files.writeString(file.toPath(), xml, StandardCharsets.UTF_8);
 		return file;
 	}

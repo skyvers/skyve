@@ -1,14 +1,14 @@
 package org.skyve.nlp.cron.elementprovider.recurring;
 
-import static org.junit.Assert.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 @SuppressWarnings("static-method")
-public class EveryWeekTest {
+class EveryWeekTest {
 
 	@Test
-	public void testCanProvideDayOfWeekReturnsFalseWithNoSegments() {
+	void testCanProvideDayOfWeekReturnsFalseWithNoSegments() {
 		// no matches() called → segments empty → returns false
 		EveryWeek provider = new EveryWeek();
 		assertFalse(provider.canProvideDayOfWeek());

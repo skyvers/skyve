@@ -4,19 +4,19 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.skyve.CORE;
 import org.skyve.util.DataBuilder;
 import org.skyve.util.test.SkyveFixture.FixtureType;
 
 import modules.admin.UserProxy.UserProxyExtension;
 import modules.admin.domain.User;
-import util.AbstractH2TestForJUnit4;
+import util.AbstractH2Test;
 
-public class UserExtensionTest extends AbstractH2TestForJUnit4 {
+class UserExtensionTest extends AbstractH2Test {
 	@Test
 	@SuppressWarnings("static-method")
-	public void testToUserProxy() throws Exception {
+	void testToUserProxy() throws Exception {
 		// setup test data
 		UserExtension ue = new DataBuilder().fixture(FixtureType.crud).build(User.MODULE_NAME, User.DOCUMENT_NAME);
 

@@ -3,20 +3,20 @@ package org.skyve.job;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.sameInstance;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.lang.reflect.Field;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
 import org.skyve.domain.Bean;
 
 @SuppressWarnings("static-method")
-public class ViewBackgroundTaskTest {
+class ViewBackgroundTaskTest {
 	private static class RecordingViewBackgroundTask extends ViewBackgroundTask<Bean> {
 		private int executeCalls;
 		private Bean executedBean;
@@ -29,7 +29,7 @@ public class ViewBackgroundTaskTest {
 	}
 
 	@Test
-	public void executeBeanCallbackRecordsInvocation() {
+	void executeBeanCallbackRecordsInvocation() {
 		RecordingViewBackgroundTask task = new RecordingViewBackgroundTask();
 		Bean bean = mock(Bean.class);
 
@@ -40,7 +40,7 @@ public class ViewBackgroundTaskTest {
 	}
 
 	@Test
-	public void getBeanReadsInternalBeanField() throws Exception {
+	void getBeanReadsInternalBeanField() throws Exception {
 		RecordingViewBackgroundTask task = new RecordingViewBackgroundTask();
 		Bean bean = mock(Bean.class);
 		Field field = ViewBackgroundTask.class.getDeclaredField("bean");
@@ -51,7 +51,7 @@ public class ViewBackgroundTaskTest {
 	}
 
 	@Test
-	public void quartzExecuteWithEmptyContextSwallowsSetupFailure() throws Exception {
+	void quartzExecuteWithEmptyContextSwallowsSetupFailure() throws Exception {
 		RecordingViewBackgroundTask task = new RecordingViewBackgroundTask();
 		JobExecutionContext context = mock(JobExecutionContext.class);
 		when(context.getMergedJobDataMap()).thenReturn(new JobDataMap());

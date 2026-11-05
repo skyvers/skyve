@@ -1,17 +1,18 @@
 package org.skyve.impl.backup;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.skyve.domain.Bean;
 import org.skyve.domain.ChildBean;
 import org.skyve.domain.HierarchicalBean;
@@ -29,55 +30,55 @@ import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 
 @SuppressWarnings({"static-method", "boxing"})
-public class TableTest {
+class TableTest {
 
 	@Test
-	public void testConstructorSetsIdentifiers() {
+	void testConstructorSetsIdentifiers() {
 		Table t = new Table("myTable", "schema.myTable");
 		assertEquals("myTable", t.agnosticIdentifier);
 		assertEquals("schema.myTable", t.persistentIdentifier);
 	}
 
 	@Test
-	public void testEqualsMatchesByAgnosticIdentifier() {
+	void testEqualsMatchesByAgnosticIdentifier() {
 		Table t1 = new Table("myTable", "schema.myTable");
 		Table t2 = new Table("myTable", "other.myTable");
 		assertEquals(t1, t2);
 	}
 
 	@Test
-	public void testEqualsReturnsFalseForDifferentIdentifier() {
+	void testEqualsReturnsFalseForDifferentIdentifier() {
 		Table t1 = new Table("myTable", "schema.myTable");
 		Table t2 = new Table("otherTable", "schema.otherTable");
 		assertNotEquals(t1, t2);
 	}
 
 	@Test
-	public void testEqualsReturnsFalseForNull() {
+	void testEqualsReturnsFalseForNull() {
 		Table t = new Table("myTable", "schema.myTable");
 		assertNotEquals(null, t);
 	}
 
 	@Test
-	public void testEqualsReturnsFalseForNonTableObject() {
+	void testEqualsReturnsFalseForNonTableObject() {
 		Table t = new Table("myTable", "schema.myTable");
 		assertNotEquals("myTable", t);
 	}
 
 	@Test
-	public void testEqualsReturnsTrueForSameInstance() {
+	void testEqualsReturnsTrueForSameInstance() {
 		Table t = new Table("myTable", "schema.myTable");
 		assertEquals(t, t);
 	}
 
 	@Test
-	public void testHashCodeBasedOnAgnosticIdentifier() {
+	void testHashCodeBasedOnAgnosticIdentifier() {
 		Table t = new Table("myTable", "schema.myTable");
 		assertEquals("myTable".hashCode(), t.hashCode());
 	}
 
 	@Test
-	public void testToJSONProducesValidJson() throws Exception {
+	void testToJSONProducesValidJson() throws Exception {
 		Table t = new Table("myTable", "schema.myTable");
 		t.fields.put("bizId", new BackupField(AttributeType.text, Sensitivity.none));
 		t.fields.put("bizVersion", new BackupField(AttributeType.integer, Sensitivity.none));
@@ -88,7 +89,7 @@ public class TableTest {
 	}
 
 	@Test
-	public void testFromJSONRoundTripsSimpleTable() throws Exception {
+	void testFromJSONRoundTripsSimpleTable() throws Exception {
 		Table original = new Table("myTable", "myTable");
 		original.fields.put("bizId", new BackupField(AttributeType.text, Sensitivity.none));
 		original.fields.put("bizVersion", new BackupField(AttributeType.integer, Sensitivity.none));
@@ -101,7 +102,7 @@ public class TableTest {
 	}
 
 	@Test
-	public void testFromJSONRoundTripsJoinTable() throws Exception {
+	void testFromJSONRoundTripsJoinTable() throws Exception {
 		JoinTable join = new JoinTable("myJoin", "myJoin", "ownerTable", "ownerTable", true);
 		join.fields.put("owner_id", Table.ASSOCIATION);
 		String json = join.toJSON();
@@ -116,14 +117,14 @@ public class TableTest {
 	}
 
 	@Test
-	public void testToJSONWithEmptyFieldsDoesNotThrow() throws Exception {
+	void testToJSONWithEmptyFieldsDoesNotThrow() throws Exception {
 		Table t = new Table("emptyTable", "emptyTable");
 		String json = t.toJSON();
 		assertNotNull(json);
 	}
 
 	@Test
-	public void addFieldsFromDocumentAddsSystemScalarEmbeddedAndAssociationFields() {
+	void addFieldsFromDocumentAddsSystemScalarEmbeddedAndAssociationFields() {
 		Customer customer = mock(Customer.class);
 		Module module = mock(Module.class);
 		Document document = document("admin", "Invoice");
@@ -154,7 +155,7 @@ public class TableTest {
 		assertTrue(table.fields.containsKey("code"));
 		assertTrue(table.fields.containsKey("addr_line1"));
 		assertTrue(table.fields.containsKey("customer_id"));
-		Assert.assertFalse(table.fields.containsKey("dynamicValue"));
+		assertFalse(table.fields.containsKey("dynamicValue"));
 		assertEquals(Sensitivity.confidential, table.fields.get("code").getSensitivity());
 		assertEquals(AttributeType.text, table.fields.get("addr_line1").getAttributeType());
 		assertEquals(AttributeType.association, table.fields.get("customer_id").getAttributeType());
@@ -163,7 +164,7 @@ public class TableTest {
 	}
 
 	@Test
-	public void addFieldsFromDocumentAddsHierarchyAndChildParentFields() {
+	void addFieldsFromDocumentAddsHierarchyAndChildParentFields() {
 		Customer customer = mock(Customer.class);
 		Document hierarchy = document("admin", "Node");
 		when(hierarchy.getParentDocumentName()).thenReturn("Node");
@@ -189,7 +190,7 @@ public class TableTest {
 	}
 
 	@Test
-	public void addFieldsFromDocumentUpgradesAnExistingFieldWithoutSensitivity() {
+	void addFieldsFromDocumentUpgradesAnExistingFieldWithoutSensitivity() {
 		Customer customer = mock(Customer.class);
 		Document document = document("admin", "Invoice");
 		Text code = text("code", AttributeType.text, Sensitivity.personal, 20, null, false);
@@ -203,12 +204,12 @@ public class TableTest {
 	}
 
 	@Test
-	public void fromJSONThrowsWhenTheJsonDefinesNoTable() {
-		Assert.assertThrows(IllegalArgumentException.class, () -> Table.fromJSON("null"));
+	void fromJSONThrowsWhenTheJsonDefinesNoTable() {
+		assertThrows(IllegalArgumentException.class, () -> Table.fromJSON("null"));
 	}
 
 	@Test
-	public void fromJSONQualifiesUnqualifiedTableAndOwnerNamesWithTheConfiguredSchema() throws Exception {
+	void fromJSONQualifiesUnqualifiedTableAndOwnerNamesWithTheConfiguredSchema() throws Exception {
 		JoinTable join = new JoinTable("myJoin", "myJoin", "ownerTable", "ownerTable", false);
 		join.fields.put("owner_id", Table.ASSOCIATION);
 		String json = join.toJSON();
@@ -232,11 +233,11 @@ public class TableTest {
 	}
 
 	@Test
-	public void qualifyThrowsWhenThereIsNoIdentifierToQualify() throws Exception {
+	void qualifyThrowsWhenThereIsNoIdentifierToQualify() throws Exception {
 		java.lang.reflect.Method qualify = Table.class.getDeclaredMethod("qualify", String.class);
 		qualify.setAccessible(true);
 
-		java.lang.reflect.InvocationTargetException e = Assert.assertThrows(java.lang.reflect.InvocationTargetException.class,
+		java.lang.reflect.InvocationTargetException e = assertThrows(java.lang.reflect.InvocationTargetException.class,
 																			() -> qualify.invoke(null, (Object) null));
 
 		assertTrue(e.getCause() instanceof IllegalStateException);

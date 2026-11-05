@@ -1,14 +1,14 @@
 package org.skyve.impl.util;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.mockito.Mockito.mock;
 
 import java.util.HashMap;
 import java.util.Map;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.skyve.domain.Bean;
 import org.skyve.metadata.model.document.Document;
 
@@ -16,10 +16,10 @@ import org.skyve.metadata.model.document.Document;
  * Tests for {@link ReportParameters}.
  */
 @SuppressWarnings("static-method")
-public class ReportParametersTest {
+class ReportParametersTest {
 
 	@Test
-	public void threeArgConstructorStoresValues() {
+	void threeArgConstructorStoresValues() {
 		Document doc = mock(Document.class);
 		Map<String, Object> params = new HashMap<>();
 		params.put("key", "value");
@@ -33,7 +33,7 @@ public class ReportParametersTest {
 	}
 
 	@Test
-	public void fourArgConstructorStoresBean() {
+	void fourArgConstructorStoresBean() {
 		Document doc = mock(Document.class);
 		Bean bean = mock(Bean.class);
 		Map<String, Object> params = new HashMap<>();
@@ -48,7 +48,7 @@ public class ReportParametersTest {
 
 	@SuppressWarnings({"null", "unused"}) // checks values the annotations say are non-null
 	@Test
-	public void threeArgConstructorWithNullDocumentAndEmptyParams() {
+	void threeArgConstructorWithNullDocumentAndEmptyParams() {
 		Map<String, Object> params = new HashMap<>();
 		ReportParameters rp = new ReportParameters(null, "nullDocReport", params);
 
@@ -59,7 +59,7 @@ public class ReportParametersTest {
 	}
 
 	@Test
-	public void reportNameIsPreserved() {
+	void reportNameIsPreserved() {
 		@SuppressWarnings("null") // passes null on purpose
 		ReportParameters rp = new ReportParameters(null, "specificReportName", new HashMap<>());
 		assertEquals("specificReportName", rp.getReportName());

@@ -1,37 +1,37 @@
 package org.skyve.impl.web.service.smartclient;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 @SuppressWarnings("static-method")
-public class OperationEnumTest {
+class OperationEnumTest {
 
 	@Test
-	public void valuesContainsFourOperations() {
+	void valuesContainsFourOperations() {
 		Operation[] values = Operation.values();
 		assertNotNull(values);
 		assertEquals(4, values.length);
 	}
 
 	@Test
-	public void valueOfFetch() {
+	void valueOfFetch() {
 		assertEquals(Operation.fetch, Operation.valueOf("fetch"));
 	}
 
 	@Test
-	public void valueOfAdd() {
+	void valueOfAdd() {
 		assertEquals(Operation.add, Operation.valueOf("add"));
 	}
 
 	@Test
-	public void valueOfUpdate() {
+	void valueOfUpdate() {
 		assertEquals(Operation.update, Operation.valueOf("update"));
 	}
 
 	@Test
-	public void valueOfRemove() {
+	void valueOfRemove() {
 		assertEquals(Operation.remove, Operation.valueOf("remove"));
 	}
 }

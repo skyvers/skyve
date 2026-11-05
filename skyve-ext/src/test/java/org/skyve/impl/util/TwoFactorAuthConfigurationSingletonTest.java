@@ -1,76 +1,76 @@
 package org.skyve.impl.util;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.lang.reflect.Field;
 
-import org.junit.After;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.user.User;
 
 @SuppressWarnings("static-method")
-public class TwoFactorAuthConfigurationSingletonTest {
-	@After
-	public void after() {
+class TwoFactorAuthConfigurationSingletonTest {
+	@AfterEach
+	void after() {
 		TwoFactorAuthConfigurationSingleton.getInstance().shutdown();
 	}
 
 	@Test
-	public void testGetInstanceIsNotNull() {
+	void testGetInstanceIsNotNull() {
 		assertNotNull(TwoFactorAuthConfigurationSingleton.getInstance());
 	}
 
 	@Test
-	public void testGetInstanceReturnsSameInstance() {
+	void testGetInstanceReturnsSameInstance() {
 		assertSame(TwoFactorAuthConfigurationSingleton.getInstance(),
 				TwoFactorAuthConfigurationSingleton.getInstance());
 	}
 
 	@Test
-	public void testIsPushTfaStaticReturnsFalseForNull() {
+	void testIsPushTfaStaticReturnsFalseForNull() {
 		assertFalse(TwoFactorAuthConfigurationSingleton.isPushTfa((TwoFactorAuthCustomerConfiguration) null));
 	}
 
 	@Test
-	public void testIsPushTfaStaticReturnsTrueForEmailType() {
+	void testIsPushTfaStaticReturnsTrueForEmailType() {
 		TwoFactorAuthCustomerConfiguration config =
 				new TwoFactorAuthCustomerConfiguration("email", 60, "Subject", "Body");
 		assertTrue(TwoFactorAuthConfigurationSingleton.isPushTfa(config));
 	}
 
 	@Test
-	public void testIsPushTfaStaticReturnsFalseForOffType() {
+	void testIsPushTfaStaticReturnsFalseForOffType() {
 		TwoFactorAuthCustomerConfiguration config =
 				new TwoFactorAuthCustomerConfiguration("off", 0, "Subject", "Body");
 		assertFalse(TwoFactorAuthConfigurationSingleton.isPushTfa(config));
 	}
 
 	@Test
-	public void testIsPushTfaInstanceReturnsFalseForNullCustomerName() {
+	void testIsPushTfaInstanceReturnsFalseForNullCustomerName() {
 		assertFalse(TwoFactorAuthConfigurationSingleton.getInstance().isPushTfa((String) null));
 	}
 
 	@Test
-	public void testIsPushTfaInstanceReturnsFalseForUnknownCustomer() {
+	void testIsPushTfaInstanceReturnsFalseForUnknownCustomer() {
 		// No config loaded for this customer - getConfig returns null → isPushTfa returns false
 		assertFalse(TwoFactorAuthConfigurationSingleton.getInstance().isPushTfa("unknownCustomer_xyzzy"));
 	}
 
 	@Test
-	public void testGetConfigReturnsNullForUnknownCustomer() {
+	void testGetConfigReturnsNullForUnknownCustomer() {
 		assertNull(TwoFactorAuthConfigurationSingleton.getInstance().getConfig("nobody_xyzzy"));
 	}
 
 	@Test
-	public void testClearConfigForAbsentKeyDoesNotThrow() {
+	void testClearConfigForAbsentKeyDoesNotThrow() {
 		// Clearing a customer that was never added must be safe
 		TwoFactorAuthConfigurationSingleton singleton = TwoFactorAuthConfigurationSingleton.getInstance();
 		singleton.clearConfig("nonexistent_xyzzy");
@@ -78,7 +78,7 @@ public class TwoFactorAuthConfigurationSingletonTest {
 	}
 
 	@Test
-	public void testAddCachesConfigurationForCurrentCustomer() throws Exception {
+	void testAddCachesConfigurationForCurrentCustomer() throws Exception {
 		Customer customer = mock(Customer.class);
 		when(customer.getName()).thenReturn("test-customer");
 		User user = mock(User.class);
@@ -97,7 +97,7 @@ public class TwoFactorAuthConfigurationSingletonTest {
 	}
 
 	@Test
-	public void testAddIgnoresNullConfiguration() throws Exception {
+	void testAddIgnoresNullConfiguration() throws Exception {
 		Customer customer = mock(Customer.class);
 		when(customer.getName()).thenReturn("null-config-customer");
 		User user = mock(User.class);
@@ -113,7 +113,7 @@ public class TwoFactorAuthConfigurationSingletonTest {
 	}
 
 	@Test
-	public void testShutdownClearsConfiguration() {
+	void testShutdownClearsConfiguration() {
 		// After shutdown() the in-memory map is cleared; a subsequent getConfig must return null
 		TwoFactorAuthConfigurationSingleton singleton = TwoFactorAuthConfigurationSingleton.getInstance();
 		singleton.shutdown();
