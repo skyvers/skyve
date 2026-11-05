@@ -10,7 +10,8 @@
  *   <li>{@link org.skyve.metadata.sail.language.step.interaction.navigation.NavigateList} —
  *       navigates to the list view for a specified module and document.
  *   <li>{@link org.skyve.metadata.sail.language.step.interaction.navigation.NavigateLink} —
- *       follows a named navigation link within the current view.
+ *       opens a URL ({@code href}), or clicks the first displayed link on the page whose text contains
+ *       {@code text}.
  *   <li>{@link org.skyve.metadata.sail.language.step.interaction.navigation.NavigateMap} —
  *       navigates to the map view for a specified module and document.
  *   <li>{@link org.skyve.metadata.sail.language.step.interaction.navigation.NavigateTree} —

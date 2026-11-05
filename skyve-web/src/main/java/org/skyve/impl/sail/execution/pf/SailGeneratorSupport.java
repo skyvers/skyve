@@ -12,6 +12,7 @@ import org.skyve.metadata.sail.language.step.interaction.DataEnter;
 import org.skyve.metadata.sail.language.step.interaction.DataEnter.Match;
 import org.skyve.metadata.sail.language.step.interaction.grids.GridRowStep;
 import org.skyve.metadata.sail.language.step.interaction.lookup.LookupDescriptionAutoComplete;
+import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateLink;
 import org.skyve.metadata.view.Action;
 import org.skyve.metadata.view.View;
 import org.skyve.metadata.view.View.ViewType;
@@ -23,7 +24,8 @@ import jakarta.annotation.Nullable;
  * What the PrimeFaces SAIL code generators ({@link PrimeFacesInlineWebDriverExecutor}, {@link PrimeFacesSeleneseExecutor})
  * share about the parts of the language they cannot generate: a grid or lookup row found by its text
  * ({@code rowContaining}), a combo or radio option named by its code or label ({@code match}), a lookup suggestion
- * found by its text ({@code pick}), and declining a confirmation ({@code confirm="false"}). The generated code drives
+ * found by its text ({@code pick}), a link clicked by its text ({@code navigateLink text}), and declining a confirmation
+ * ({@code confirm="false"}). The generated code drives
  * the page with fixed row and option numbers and can only accept a client-side confirmation.
  */
 final class SailGeneratorSupport {
@@ -79,6 +81,23 @@ final class SailGeneratorSupport {
 		if (pick != null) {
 			comment.accept(String.format("<lookupDescriptionAutoComplete binding=\"%s\" pick=\"%s\" /> is not supported by this generator (it picks the first suggestion): not generated",
 											complete.getBinding(), pick));
+			return true;
+		}
+		return false;
+	}
+
+	/**
+	 * Indicates if a link step clicks a link by its text ({@code text}), which the generators cannot express, and if so
+	 * emits a comment saying that the step is not generated.
+	 *
+	 * @param link	the step
+	 * @param comment	emits a comment into the generated code
+	 * @return true if the step must be skipped
+	 */
+	static boolean linkTextNotSupported(@Nonnull NavigateLink link, @Nonnull Consumer<String> comment) {
+		String text = link.getText();
+		if (text != null) {
+			comment.accept(String.format("<navigateLink text=\"%s\" /> is not supported by this generator (it needs a link's URL): not generated", text));
 			return true;
 		}
 		return false;

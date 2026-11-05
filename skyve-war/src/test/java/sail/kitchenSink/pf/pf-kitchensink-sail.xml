@@ -166,6 +166,27 @@
 			<ok />
 		</method>
 	</interaction>
+	<interaction name="List attributes: multi-line text">
+		<method>
+			<comment>A new line in an attribute value is written &amp;#10; (XML makes a literal new line in an attribute a space)</comment>
+			<navigateList module="kitchensink" document="ListAttributes" />
+			<listGridNew module="kitchensink" document="ListAttributes" />
+			<dataEnter binding="text" value="SAIL lines {run}" />
+			<dataEnter binding="memo" value="SAIL line 1 {run}&#10;line 2&#10;&#10;line 4" />
+			<testValue binding="memo" value="SAIL line 1 {run}&#10;line 2&#10;&#10;line 4" />
+			<dataEnter binding="markup" value="Rich line 1&#10;Rich line 2" />
+			<testValue binding="markup" value="Rich line 1&#10;Rich line 2" />
+			<save />
+			<testValue binding="memo" value="SAIL line 1 {run}&#10;line 2&#10;&#10;line 4" />
+			<testValue binding="markup" value="Rich line 1&#10;Rich line 2" />
+			<ok />
+			<navigateEdit module="kitchensink" document="ListGridFixture" />
+			<listGridZoom module="kitchensink" query="qListGridFixtureVueAttributes" rowContaining="SAIL lines {run}" />
+			<testValue binding="memo" value="SAIL line 1 {run}&#10;line 2&#10;&#10;line 4" />
+			<testValue binding="markup" value="Rich line 1&#10;Rich line 2" />
+			<delete />
+		</method>
+	</interaction>
 	<interaction name="List Grid Fixture: filters on each column type">
 		<method>
 			<navigateEdit module="kitchensink" document="ListGridFixture" />
@@ -313,6 +334,25 @@
 			<testValue binding="description" value="SAIL faces grid {run}" />
 			<delete />
 			<testGridRows module="kitchensink" query="qListGridFixtureFaces" rowContaining="SAIL faces grid {run}" maxRows="0" />
+		</method>
+	</interaction>
+	<interaction name="Links: a link in page markup, and tokens in href and bizId">
+		<method>
+			<comment>Selecting a data table row shows its id, and a blurb's link to it</comment>
+			<navigateEdit module="kitchensink" document="ListGridFixture" />
+			<listGridSelect module="kitchensink" query="qListGridFixtureFaces" rowContaining="SAIL lookup {run}" />
+			<captureValue binding="selectedFacesId" variable="lookupId" />
+			<navigateLink text="Open the selected lookup value" />
+			<pushEditContext module="kitchensink" document="LookupDescription" />
+			<testValue binding="description" value="SAIL lookup {run}" />
+			<popContext />
+			<comment>The captured id in a bizId and in an href</comment>
+			<navigateEdit module="kitchensink" document="LookupDescription" bizId="{var:lookupId}" />
+			<testValue binding="description" value="SAIL lookup {run}" />
+			<navigateLink href="?a=e&amp;m=kitchensink&amp;d=LookupDescription&amp;i={var:lookupId}" />
+			<pushEditContext module="kitchensink" document="LookupDescription" />
+			<testValue binding="description" value="SAIL lookup {run}" />
+			<popContext />
 		</method>
 	</interaction>
 	<interaction name="Kitchen Sink: generated test data">

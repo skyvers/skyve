@@ -10,6 +10,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 import java.util.function.Supplier;
 
 import org.openqa.selenium.JavascriptExecutor;
@@ -111,7 +112,8 @@ import jakarta.annotation.Nullable;
  * <li>{@link #pickLookupDescriptionRowContaining(LookupDescriptionPick, String)} for
  * 		{@code <lookupDescriptionPick rowContaining="…"/>}, called by the renderer's {@code executeLookupDescriptionPick};</li>
  * <li>{@link #autoCompleteLookupDescriptionAndPick(LookupDescriptionAutoComplete, String, String)} for
- * 		{@code <lookupDescriptionAutoComplete pick="…"/>}, called by the renderer's {@code executeLookupDescriptionAutoComplete}.</li>
+ * 		{@code <lookupDescriptionAutoComplete pick="…"/>}, called by the renderer's {@code executeLookupDescriptionAutoComplete};</li>
+ * <li>{@link #clickLinkContaining(NavigateLink, String)} for {@code <navigateLink text="…"/>}.</li>
  * </ul>
  * Every hook receives its text values with the tokens already substituted. Like any step, a hook throws when it
  * cannot do what the step says, and makes the implicit success check, {@link #checkSuccess(String)}, where the other
@@ -614,6 +616,12 @@ public abstract class InterpretedWebDriverExecutor<
 		selenide.get(url);
 	}
 
+	/**
+	 * Pushes an edit context and opens the edit view, of a new instance or of the {@code bizId}, whose tokens
+	 * ({@code {run}}, {@code {var:name}}) are substituted, so that a script can open a record it captured the id of.
+	 *
+	 * @param edit	the step
+	 */
 	@Override
 	public void executeNavigateEdit(NavigateEdit edit) {
 		String moduleName = edit.getModuleName();
@@ -625,6 +633,9 @@ public abstract class InterpretedWebDriverExecutor<
 		executePushEditContext(push);
 
 		String bizId = edit.getBizId();
+		if (bizId != null) {
+			bizId = substituteTokens(bizId);
+		}
 		if (bizId == null) {
 			selenide.trace(String.format("Edit new document [%s.%s] instance", moduleName, documentName));
 			selenide.get(String.format("?a=e&m=%s&d=%s", moduleName, documentName));
@@ -635,7 +646,9 @@ public abstract class InterpretedWebDriverExecutor<
 	}
 
 	/**
-	 * Opens the link: an absolute URL as is, otherwise relative to the base URL.
+	 * Opens the link: an absolute URL as is, otherwise relative to the base URL; or, with {@code text}, clicks the first
+	 * displayed link on the page whose text contains it (see {@link #clickLinkContaining}). The {@code href}'s or
+	 * {@code text}'s tokens ({@code {run}}, {@code {var:name}}) are substituted first.
 	 * Any current context no longer has a document or view type, as the page is unknown.
 	 *
 	 * @param link	the step
@@ -645,7 +658,14 @@ public abstract class InterpretedWebDriverExecutor<
 		if (peek() != null) {
 			super.executeNavigateLink(link);
 		}
-		String href = link.getHref();
+		String text = link.getText();
+		if (text != null) {
+			text = substituteTokens(text);
+			selenide.trace("Follow the link containing '" + text + "'");
+			clickLinkContaining(link, text);
+			return;
+		}
+		String href = substituteTokens(Objects.requireNonNull(link.getHref(), "href"));
 		selenide.trace("Navigate to link " + href);
 		if (href.matches("^[a-zA-Z][a-zA-Z0-9+.-]*:.*")) {
 			selenide.openUrl(href);
@@ -1060,6 +1080,19 @@ public abstract class InterpretedWebDriverExecutor<
 	 */
 	protected void autoCompleteLookupDescriptionAndPick(@Nonnull LookupDescriptionAutoComplete complete, @Nonnull String search, @Nonnull String pick) {
 		throw notImplementedYet("<lookupDescriptionAutoComplete pick=\"…\"/>");
+	}
+
+	/**
+	 * Renderer hook for {@code <navigateLink text="…"/>}: clicks the first displayed link ({@code <a>}) on the page whose
+	 * visible text contains the text (case-sensitive), as a user does, then waits for the page or view it leads to.
+	 * It fails if no displayed link contains the text.
+	 *
+	 * @param link	the step
+	 * @param text	the text with the tokens substituted
+	 * @throws UnsupportedOperationException	until the renderer implements it
+	 */
+	protected void clickLinkContaining(@Nonnull NavigateLink link, @Nonnull String text) {
+		throw notImplementedYet("<navigateLink text=\"…\"/>");
 	}
 
 	/**
