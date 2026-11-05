@@ -225,6 +225,7 @@ public abstract class ContextualExecutor<T extends AutomationContext> implements
 		}
 		context.setDocumentName(null);
 		context.setViewType(null);
+		context.setList(null);
 	}
 	
 	/**
@@ -279,6 +280,7 @@ public abstract class ContextualExecutor<T extends AutomationContext> implements
 		}
 
 		newContext.setViewType(ViewType.list);
+		newContext.setList(push);
 		newContext.setUxui(push.getUxui());
 		newContext.setUserAgentType(push.getUserAgentType());
 		

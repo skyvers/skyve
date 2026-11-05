@@ -5,6 +5,7 @@ import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.sail.execution.Executor;
 import org.skyve.metadata.sail.language.Step;
+import org.skyve.metadata.sail.language.step.context.PushListContext;
 
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
@@ -136,6 +137,12 @@ public class NavigateList implements Step {
 														@Nullable String queryName,
 														@Nullable String documentName,
 														@Nullable String modelName) {
+		// A step that names no list means the list the context shows, such as a query list a menu item opened
+		PushListContext list = context.getList();
+		if ((moduleName == null) && (queryName == null) && (documentName == null) && (modelName == null) && (list != null)) {
+			return list.getIdentifier(context);
+		}
+
 		String result = null;
 		
 		String keyModuleName = (moduleName == null) ? context.getModuleName() : moduleName;

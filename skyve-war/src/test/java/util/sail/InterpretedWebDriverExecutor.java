@@ -959,9 +959,9 @@ public abstract class InterpretedWebDriverExecutor<
 	 * filtered or sorted. A model's columns are made by its code, so they are not checked.
 	 *
 	 * @param step	the step, for the messages
-	 * @param moduleName	the step's module, or null for the context's
+	 * @param moduleName	the step's module, or null for the context's (or, when the step names no list, the context's list's)
 	 * @param documentName	the step's document, or null for the context's
-	 * @param queryName	the step's query, or null for the document's default query
+	 * @param queryName	the step's query, or null for the document's default query (or the context's list's query)
 	 * @param modelName	the step's model, or null
 	 * @param column	the column's binding
 	 * @param filter	true to check the column can be filtered, false to check it can be sorted
@@ -975,24 +975,36 @@ public abstract class InterpretedWebDriverExecutor<
 										@Nullable String modelName,
 										@Nonnull String column,
 										boolean filter) {
-		if (modelName != null) {
+		AC context = peek();
+		// A step that names no list means the list the context shows (see NavigateList.listGridIdentifier)
+		PushListContext list = (context == null) ? null : context.getList();
+		String listModuleName = moduleName;
+		String listDocumentName = documentName;
+		String listQueryName = queryName;
+		String listModelName = modelName;
+		if ((list != null) && (moduleName == null) && (documentName == null) && (queryName == null) && (modelName == null)) {
+			listModuleName = list.getModuleName();
+			listDocumentName = list.getDocumentName();
+			listQueryName = list.getQueryName();
+			listModelName = list.getModelName();
+		}
+		if (listModelName != null) {
 			return;
 		}
 		String element = Introspector.decapitalize(step.getClass().getSimpleName());
-		AC context = peek();
-		String m = (moduleName != null) ? moduleName : ((context == null) ? null : context.getModuleName());
-		String d = (documentName != null) ? documentName : ((context == null) ? null : context.getDocumentName());
-		if ((m == null) || ((queryName == null) && (d == null))) {
+		String m = (listModuleName != null) ? listModuleName : ((context == null) ? null : context.getModuleName());
+		String d = (listDocumentName != null) ? listDocumentName : ((context == null) ? null : context.getDocumentName());
+		if ((m == null) || ((listQueryName == null) && (d == null))) {
 			throw new MetaDataException(String.format("<%s /> needs a module and a query or document, or a list context to take them from", element));
 		}
 		Customer c = CORE.getUser().getCustomer();
 		Module module = c.getModule(m);
 		MetaDataQueryDefinition query = null;
-		if (queryName != null) {
-			query = module.getMetaDataQuery(queryName);
+		if (listQueryName != null) {
+			query = module.getMetaDataQuery(listQueryName);
 			if (query == null) {
 				// As the list grid does, an undefined query name is the name of a document to use the default query of
-				query = module.getDocumentDefaultQuery(c, queryName);
+				query = module.getDocumentDefaultQuery(c, listQueryName);
 			}
 		}
 		else if (d != null) {

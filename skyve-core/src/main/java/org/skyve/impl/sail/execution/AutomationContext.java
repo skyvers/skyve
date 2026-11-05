@@ -1,5 +1,6 @@
 package org.skyve.impl.sail.execution;
 
+import org.skyve.metadata.sail.language.step.context.PushListContext;
 import org.skyve.metadata.view.View.ViewType;
 import org.skyve.web.UserAgentType;
 
@@ -20,6 +21,7 @@ public abstract class AutomationContext<GLC extends GenerateListContext, GEC ext
 	private ViewType viewType;
 	private String uxui;
 	private UserAgentType userAgentType;
+	private PushListContext list;
 
 	public AutomationContext() {
 		// Nothing to see here
@@ -31,6 +33,7 @@ public abstract class AutomationContext<GLC extends GenerateListContext, GEC ext
 		viewType = context.viewType;
 		uxui = context.uxui;
 		userAgentType = context.userAgentType;
+		list = context.list;
 	}
 	
 	public @Nullable String getModuleName() {
@@ -71,6 +74,26 @@ public abstract class AutomationContext<GLC extends GenerateListContext, GEC ext
 	
 	public void setUserAgentType(@Nullable UserAgentType userAgentType) {
 		this.userAgentType = userAgentType;
+	}
+
+	/**
+	 * Returns the list this context shows, as navigated to: its module and its query, or its document (and model).
+	 * List grid steps that name no list default to it (see
+	 * {@link org.skyve.metadata.sail.language.step.interaction.navigation.NavigateList#listGridIdentifier}).
+	 *
+	 * @return the list, or {@code null} if this context does not show a list
+	 */
+	public @Nullable PushListContext getList() {
+		return list;
+	}
+
+	/**
+	 * Sets the list this context shows.
+	 *
+	 * @param list the list, or {@code null} if this context does not show a list
+	 */
+	public void setList(@Nullable PushListContext list) {
+		this.list = list;
 	}
 
 	/**
