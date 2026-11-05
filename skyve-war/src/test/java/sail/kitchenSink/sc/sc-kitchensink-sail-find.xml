@@ -202,7 +202,7 @@
 			<testGridRows module="kitchensink" document="ListAttributes" rowContaining="01-Jan-2024 09:00" minRows="1" />
 			<testGridRows module="kitchensink" document="ListAttributes" rowContaining="15-Jun-2024 12:30" minRows="1" />
 			<testGridRows module="kitchensink" document="ListAttributes" rowContaining="31-Dec-2024 18:45" minRows="1" />
-			<comment>lessThan and greaterThan, and the timestamp column that the list does not show, use the advanced filter</comment>
+			<comment>lessThan and greaterThan, and the time and timestamp columns that the list does not show, use the advanced filter</comment>
 			<listGridFilter module="kitchensink" document="ListAttributes" column="date" value="01-Jan-2024" operator="greaterThan" />
 			<testGridRows module="kitchensink" document="ListAttributes" rowContaining="01-Jan-2024 09:00" maxRows="0" />
 			<testGridRows module="kitchensink" document="ListAttributes" rowContaining="15-Jun-2024 12:30" minRows="1" />
@@ -216,6 +216,19 @@
 			<testGridRows module="kitchensink" document="ListAttributes" rowContaining="01-Jan-2024 09:00" minRows="1" />
 			<testGridRows module="kitchensink" document="ListAttributes" rowContaining="15-Jun-2024 12:30" minRows="1" />
 			<testGridRows module="kitchensink" document="ListAttributes" rowContaining="31-Dec-2024 18:45" minRows="1" />
+			<listGridFilter module="kitchensink" document="ListAttributes" column="time" value="12:30" operator="equals" />
+			<testGridRows module="kitchensink" document="ListAttributes" rowContaining="01-Jan-2024 09:00" maxRows="0" />
+			<testGridRows module="kitchensink" document="ListAttributes" rowContaining="15-Jun-2024 12:30" minRows="1" />
+			<testGridRows module="kitchensink" document="ListAttributes" rowContaining="31-Dec-2024 18:45" maxRows="0" />
+			<listGridFilter module="kitchensink" document="ListAttributes" column="time" value="12:30" operator="lessThan" />
+			<testGridRows module="kitchensink" document="ListAttributes" rowContaining="01-Jan-2024 09:00" minRows="1" />
+			<testGridRows module="kitchensink" document="ListAttributes" rowContaining="15-Jun-2024 12:30" maxRows="0" />
+			<testGridRows module="kitchensink" document="ListAttributes" rowContaining="31-Dec-2024 18:45" maxRows="0" />
+			<listGridFilter module="kitchensink" document="ListAttributes" column="time" value="12:30" operator="greaterThan" />
+			<testGridRows module="kitchensink" document="ListAttributes" rowContaining="01-Jan-2024 09:00" maxRows="0" />
+			<testGridRows module="kitchensink" document="ListAttributes" rowContaining="15-Jun-2024 12:30" maxRows="0" />
+			<testGridRows module="kitchensink" document="ListAttributes" rowContaining="31-Dec-2024 18:45" minRows="1" />
+			<listGridFilter module="kitchensink" document="ListAttributes" column="time" />
 			<listGridFilter module="kitchensink" document="ListAttributes" column="timestamp" value="01-Jan-2024 09:00:00" operator="equals" />
 			<testGridRows module="kitchensink" document="ListAttributes" rowContaining="01-Jan-2024 09:00" minRows="1" />
 			<testGridRows module="kitchensink" document="ListAttributes" rowContaining="15-Jun-2024 12:30" maxRows="0" />
@@ -269,6 +282,19 @@
 		</method>
 	</interaction>
 
+	<interaction name="A time column in the filter row">
+		<method>
+			<comment>The List Grid Fixture's list of column types shows the time column, so its filter row takes a time</comment>
+			<navigateEdit module="kitchensink" document="ListGridFixture" />
+			<listGridFilter module="kitchensink" query="qListGridFixtureFacesAttributes" column="text" value="SAIL types {run}" />
+			<listGridFilter module="kitchensink" query="qListGridFixtureFacesAttributes" column="time" value="12:30" operator="equals" />
+			<testGridRows module="kitchensink" query="qListGridFixtureFacesAttributes" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qListGridFixtureFacesAttributes" rowContaining="SAIL types {run} b" minRows="1" maxRows="1" />
+			<listGridFilter module="kitchensink" query="qListGridFixtureFacesAttributes" column="time" />
+			<testGridRows module="kitchensink" query="qListGridFixtureFacesAttributes" minRows="3" maxRows="3" />
+		</method>
+	</interaction>
+
 	<interaction name="Remove the list attributes">
 		<method>
 			<navigateMenu module="kitchensink" item="List" />
@@ -280,6 +306,44 @@
 			<listGridZoom module="kitchensink" document="ListAttributes" row="0" />
 			<delete />
 			<testGridRows module="kitchensink" document="ListAttributes" maxRows="0" />
+		</method>
+	</interaction>
+
+	<interaction name="List attributes: multi-line text">
+		<method>
+			<comment>A new line in an attribute value is written &amp;#10; (XML makes a literal new line in an attribute a space).
+				A text area and a rich text editor get the new lines, typed as Enter.</comment>
+			<navigateMenu module="kitchensink" item="List" />
+			<listGridNew module="kitchensink" document="ListAttributes" />
+			<dataEnter binding="text" value="SAIL lines {run}" />
+			<dataEnter binding="memo" value="SAIL line 1 {run}&#10;line 2&#10;&#10;line 4" />
+			<testValue binding="memo" value="SAIL line 1 {run}&#10;line 2&#10;&#10;line 4" />
+			<dataEnter binding="markup" value="Rich line 1&#10;Rich line 2" />
+			<testValue binding="markup" value="Rich line 1&#10;Rich line 2" />
+			<save />
+			<testValue binding="memo" value="SAIL line 1 {run}&#10;line 2&#10;&#10;line 4" />
+			<testValue binding="markup" value="Rich line 1&#10;Rich line 2" />
+			<ok />
+			<comment>The list does not show the text column, so the advanced filter finds the row</comment>
+			<listGridFilter module="kitchensink" document="ListAttributes" column="text" value="SAIL lines {run}" />
+			<listGridZoom module="kitchensink" document="ListAttributes" row="0" />
+			<testValue binding="memo" value="SAIL line 1 {run}&#10;line 2&#10;&#10;line 4" />
+			<testValue binding="markup" value="Rich line 1&#10;Rich line 2" />
+			<delete />
+		</method>
+	</interaction>
+
+	<interaction name="Links: a link in page markup">
+		<method>
+			<comment>The List Grid Fixture's blurb links to the lookup value selected in its second list grid. In SmartClient,
+				selecting a row there rerenders the view without end (runtime issue), so the link is followed with nothing
+				selected, which opens a new lookup value.</comment>
+			<navigateEdit module="kitchensink" document="ListGridFixture" />
+			<navigateLink text="Open the selected lookup value" />
+			<pushEditContext module="kitchensink" document="LookupDescription" />
+			<testWidget binding="description" enabled="true" />
+			<testValue binding="description" value="" />
+			<popContext />
 		</method>
 	</interaction>
 

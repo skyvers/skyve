@@ -20,7 +20,7 @@
 (function () {
 	"use strict";
 
-	var VERSION = 2;
+	var VERSION = 3;
 	if (window._sail && window._sail.version === VERSION) {
 		return;
 	}
@@ -683,6 +683,61 @@
 		return value == null ? -1 : keys.indexOf(String(value));
 	}
 
+	/** True if the item keeps new lines: a text area or a rich text editor. */
+	function multiLine(item) {
+		return isFormItem(item) && (isc.isA.TextAreaItem(item) || isc.isA.RichTextItem(item));
+	}
+
+	/** True if the form item a locator names keeps new lines, so that dataEnter types them and testValue compares them. */
+	S.multiLine = function (locator) {
+		return multiLine(S.resolve(S.parse(locator).spec).obj);
+	};
+
+	var BLOCKS = /^(P|DIV|LI|UL|OL|H[1-6]|BLOCKQUOTE|PRE|TABLE|TR)$/;
+
+	/**
+	 * The text of rich text HTML as a browser lays it out: a line break, or the start and end of a block (paragraph, div,
+	 * list item, heading), starts a new line, so that each block is on its own line and an empty block with a line
+	 * break is an empty line. The spaces in each line are collapsed; the HTML's own new lines are only layout.
+	 */
+	function htmlLines(html) {
+		var holder = document.createElement("div");
+		holder.innerHTML = String(html == null ? "" : html);
+		var out = "";
+		var newLine = function () {
+			if (out.length > 0 && out.charAt(out.length - 1) !== "\n") {
+				out += "\n";
+			}
+		};
+		var walk = function (node) {
+			if (node.nodeType === 3) {
+				var text = node.nodeValue.replace(/[\r\n]+/g, " ");
+				// white space at the start of a line is not shown (as between blocks)
+				out += (out.length === 0 || out.charAt(out.length - 1) === "\n") ? text.replace(/^\s+/, "") : text;
+			}
+			else if (node.nodeType === 1) {
+				if (node.nodeName === "BR") {
+					out += "\n";
+					return;
+				}
+				var block = BLOCKS.test(node.nodeName);
+				if (block) {
+					newLine();
+				}
+				for (var child = node.firstChild; child; child = child.nextSibling) {
+					walk(child);
+				}
+				if (block) {
+					newLine();
+				}
+			}
+		};
+		walk(holder);
+		return out.replace(/\u00a0/g, " ").split("\n").map(function (line) {
+			return line.replace(/\s+/g, " ").trim();
+		}).join("\n").replace(/^\n+|\n+$/g, "");
+	}
+
 	/**
 	 * The value a form item displays, as a string, for testValue.
 	 * Returns { value, alternatives[], type } or { error }.
@@ -719,7 +774,9 @@
 			var html = value == null ? "" : String(value);
 			var div = document.createElement("div");
 			div.innerHTML = html;
-			result = strip(div.textContent || div.innerText || "");
+			result = htmlLines(html);
+			// the text on one line, as this read it before rich text kept its lines, and the HTML
+			alternatives.push(strip(div.textContent || div.innerText || ""));
 			alternatives.push(html);
 		} else if (isc.isA.BizHTMLItem && isc.isA.BizHTMLItem(item)) {
 			var markup = value == null ? "" : String(value);
@@ -757,7 +814,7 @@
 			result = item.getDisplayValue ? strip(item.getDisplayValue()) : formatValue(item, value);
 			alternatives.push(formatValue(item, value));
 		}
-		return { value: result, alternatives: alternatives, type: type };
+		return { value: result, alternatives: alternatives, type: type, multiLine: multiLine(item) };
 	};
 
 	/**
@@ -1517,6 +1574,47 @@
 			}
 		}
 		return { row: -1, rows: state.rows };
+	};
+
+	// ---------------------------------------------------------------- links
+
+	/** The displayed links (<a>) of the page, in document order. */
+	function links() {
+		return Array.prototype.slice.call(document.querySelectorAll("a")).filter(function (a) {
+			return a.getClientRects().length > 0 && getComputedStyle(a).visibility !== "hidden";
+		});
+	}
+
+	/** The visible texts of the page's displayed links, at most 30, for a failure. */
+	S.linkTexts = function () {
+		return links().map(function (a) {
+			return (a.innerText || "").replace(/\s+/g, " ").trim();
+		}).filter(function (t) {
+			return t;
+		}).slice(0, 30);
+	};
+
+	/**
+	 * The first displayed link whose visible text contains the text (case-sensitive): { element, href, target, newPage },
+	 * where newPage says whether following it loads another page (an http(s) URL that is not just this page with
+	 * another fragment), or null if no link does.
+	 */
+	S.link = function (text) {
+		var found = links().filter(function (a) {
+			return (a.innerText || "").indexOf(text) >= 0;
+		})[0];
+		if (!found) {
+			return null;
+		}
+		var href = found.getAttribute("href");
+		var newPage = false;
+		if (href && href.charAt(0) !== "#") {
+			var url = new URL(found.href, location.href);
+			var here = new URL(location.href);
+			newPage = /^https?:$/.test(url.protocol) &&
+						!(url.origin === here.origin && url.pathname === here.pathname && url.search === here.search && url.hash);
+		}
+		return { element: found, href: found.href, target: found.getAttribute("target") || "", newPage: newPage };
 	};
 
 	// ---------------------------------------------------------------- widget state, messages, menus
