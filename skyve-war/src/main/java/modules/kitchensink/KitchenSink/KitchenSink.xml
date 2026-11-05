@@ -28,20 +28,21 @@
 		<decimal5 name="decimal5">
 			<displayName>Decimal 5</displayName>
 		</decimal5>
+		<!-- The combo and radio labels differ from their codes, so that SAIL can choose an option by its code or its label. -->
 		<enum name="combo">
 			<displayName>Combo</displayName>
 			<values>
-				<value code="one" />
-				<value code="two" />
-				<value code="three" />
+				<value name="one" code="one" description="First" />
+				<value name="two" code="two" description="Second" />
+				<value name="three" code="three" description="Third" />
 			</values>
 		</enum>
 		<enum name="radio">
 			<displayName>Radio</displayName>
 			<values>
-				<value code="one" />
-				<value code="two" />
-				<value code="three" />
+				<value name="one" code="one" description="First" />
+				<value name="two" code="two" description="Second" />
+				<value name="three" code="three" description="Third" />
 			</values>
 		</enum>
 		<geometry name="geometry">
