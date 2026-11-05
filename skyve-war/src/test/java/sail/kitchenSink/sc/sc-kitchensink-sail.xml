@@ -78,10 +78,16 @@
 			<testValue binding="booleanFlag" value="false" />
 			<dataEnter binding="colour" value="#000000" />
 			<testValue binding="colour" value="#000000" />
+			<comment>date and dateTime rerender the view when they lose the focus, which replaces their elements and sets the
+				form's values: entered back to back, neither may lose its value to the other's rerender</comment>
 			<dataEnter binding="date" value="07-Nov-2025" />
-			<testValue binding="date" value="07-Nov-2025" />
 			<dataEnter binding="dateTime" value="07-Nov-2025 15:38" />
+			<testValue binding="date" value="07-Nov-2025" />
 			<testValue binding="dateTime" value="07-Nov-2025 15:38" />
+			<dataEnter binding="date" value="08-Nov-2025" />
+			<dataEnter binding="dateTime" value="08-Nov-2025 16:45" />
+			<testValue binding="date" value="08-Nov-2025" />
+			<testValue binding="dateTime" value="08-Nov-2025 16:45" />
 			<dataEnter binding="decimal10" value="0.0123456789" />
 			<testValue binding="decimal10" value="0.0123456789" />
 			<dataEnter binding="decimal2" value="0.25" />
