@@ -50,7 +50,8 @@ class PrimeFacesKitchenSinkSailIT extends AbstractPrimeFacesInterpretedSail {
 	}
 
 	/**
-	 * The steps added for long lists, options and lookups fail with a reason when the page cannot do what they say.
+	 * The steps added for long lists, options and lookups fail with a reason when the page cannot do what they say:
+	 * no such option, operator or lookup row, a column the Vue list grid does not show, and a sort of an empty data table.
 	 * Run under Verify, so that every interaction runs and each failure is reported.
 	 */
 	@Test
@@ -82,14 +83,30 @@ class PrimeFacesKitchenSinkSailIT extends AbstractPrimeFacesInterpretedSail {
 							<lookupDescriptionPick binding="lookupDescription" rowContaining="no such row {run}" />
 						</method>
 					</interaction>
+					<interaction name="A hidden column">
+						<method>
+							<navigateList module="kitchensink" document="ListAttributes" />
+							<listGridFilter module="kitchensink" document="ListAttributes" column="time" value="10:00" />
+						</method>
+					</interaction>
+					<interaction name="An empty data table">
+						<method>
+							<navigateEdit module="kitchensink" document="ListGridFixture" />
+							<listGridFilter module="kitchensink" query="qListGridFixtureFacesAttributes" column="text" value="no such row {run}" />
+							<testGridRows module="kitchensink" query="qListGridFixtureFacesAttributes" maxRows="0" />
+							<listGridSort module="kitchensink" query="qListGridFixtureFacesAttributes" column="text" descending="true" />
+						</method>
+					</interaction>
 				</automation>
 				""";
 		AssertionError e = assertThrows(AssertionError.class, () -> sailString(script));
 		String message = e.getMessage();
-		assertAll(() -> assertTrue(message.contains("with 3 failure(s)"), message),
+		assertAll(() -> assertTrue(message.contains("with 5 failure(s)"), message),
 					() -> assertTrue(message.contains("has no option with the label 'Fourth'"), message),
 					() -> assertTrue(message.contains("is a text column, which cannot filter with greaterThan"), message),
-					() -> assertTrue(message.contains("has no row containing 'no such row "), message));
+					() -> assertTrue(message.contains("has no row containing 'no such row "), message),
+					() -> assertTrue(message.contains("column [time] (Time) is not shown in the Vue list grid"), message),
+					() -> assertTrue(message.contains("PrimeFaces does not sort an empty data table"), message));
 	}
 
 	private static String automation(String steps) {

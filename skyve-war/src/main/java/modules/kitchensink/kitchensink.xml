@@ -203,6 +203,32 @@
 				<column binding="description" displayName="Lookup Description" sortOrder="ascending" />
 			</columns>
 		</query>
+		<query name="qListGridFixtureVueAttributes" documentName="ListAttributes">
+			<description>List attributes listed by the List Grid Fixture's Vue list grid, for filters on each column type.</description>
+			<columns>
+				<column binding="text" displayName="Text" sortOrder="ascending" />
+				<column binding="constantEnum" displayName="Constant Enum" />
+				<column binding="constantDomain" displayName="Constant Domain" />
+				<column binding="booleanFlag" displayName="Boolean Flag" />
+				<column binding="date" displayName="Date" />
+				<column binding="dateTime" displayName="Date Time" />
+				<column binding="time" displayName="Time" />
+				<column binding="timestamp" displayName="Timestamp" />
+			</columns>
+		</query>
+		<query name="qListGridFixtureFacesAttributes" documentName="ListAttributes">
+			<description>List attributes listed by the List Grid Fixture's PrimeFaces data table, for filters on each column type.</description>
+			<columns>
+				<column binding="text" displayName="Text" sortOrder="ascending" />
+				<column binding="constantEnum" displayName="Constant Enum" />
+				<column binding="constantDomain" displayName="Constant Domain" />
+				<column binding="booleanFlag" displayName="Boolean Flag" />
+				<column binding="date" displayName="Date" />
+				<column binding="dateTime" displayName="Date Time" />
+				<column binding="time" displayName="Time" />
+				<column binding="timestamp" displayName="Timestamp" />
+			</columns>
+		</query>
 		<query name="qConditionsFixtureListAttributes" documentName="ListAttributes">
 			<description>List attributes listed by the list grids and list repeaters of the Kitchen Sink conditions fixture view.</description>
 			<columns>
