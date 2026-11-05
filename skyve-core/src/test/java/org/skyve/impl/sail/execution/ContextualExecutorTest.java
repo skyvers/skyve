@@ -87,6 +87,8 @@ class ContextualExecutorTest {
 		assertEquals("admin", result.getModuleName());
 		assertEquals("Contact", result.getDocumentName());
 		assertEquals(ViewType.list, result.getViewType());
+		// list grid steps that name no list default to the list the context shows
+		assertSame(push, result.getList());
 	}
 
 	/**

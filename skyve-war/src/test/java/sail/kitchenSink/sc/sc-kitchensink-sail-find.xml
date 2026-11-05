@@ -17,6 +17,24 @@
 		<switchMode />
 	</before>
 
+	<interaction name="List steps default to the list a menu item opened">
+		<method>
+			<comment>Sign In History lists the query qLoginHistory, not its document's default query: list steps that name
+				no list mean the menu item's list</comment>
+			<navigateMenu module="admin" item="Security Admin/Sign In History" />
+			<testGridRows minRows="1" />
+			<listGridFilter column="userName" value="admin" />
+			<listGridFilter column="failed" value="false" operator="equals" />
+			<testGridRows rowContaining="admin" minRows="1" />
+			<listGridSort column="loginDateTime" descending="true" />
+			<listGridSelect row="0" />
+			<listGridZoom row="0" />
+			<cancel />
+			<listGridClearFilter />
+			<testGridRows minRows="1" />
+		</method>
+	</interaction>
+
 	<interaction name="Lookup values with generated numbers">
 		<method>
 			<navigateMenu module="kitchensink" item="Lookup values" />

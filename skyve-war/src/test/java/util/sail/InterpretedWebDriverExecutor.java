@@ -136,6 +136,8 @@ public abstract class InterpretedWebDriverExecutor<
 
 	/** Failures recorded under the Verify strategy, in order. */
 	private final List<String> failures = new ArrayList<>();
+	/** What each failure under Verify threw, in order, for the report's causes. */
+	private final List<SailFailure> thrown = new ArrayList<>();
 	/** The interaction (or procedure) being executed, for failure messages. */
 	private String procedureName;
 	/** The 1-based number of the top-level step being executed, for failure messages. */
@@ -166,6 +168,7 @@ public abstract class InterpretedWebDriverExecutor<
 		testStrategyOverride(); // an invalid override fails here, before any step runs
 		initialiseAutomation(automation);
 		failures.clear();
+		thrown.clear();
 
 		try {
 			Procedure before = automation.getBefore();
@@ -190,7 +193,12 @@ public abstract class InterpretedWebDriverExecutor<
 			for (String failure : failures) {
 				message.append("\n  - ").append(failure);
 			}
-			throw new AssertionError(message.toString());
+			AssertionError error = new AssertionError(message.toString());
+			// each step that threw is attached, with its causes and stack trace, as it would be under Assert
+			for (SailFailure failure : thrown) {
+				error.addSuppressed(failure);
+			}
+			throw error;
 		}
 	}
 
@@ -252,6 +260,9 @@ public abstract class InterpretedWebDriverExecutor<
 				String failure = failureMessage(reason(t));
 				if ((! halt) && (TestStrategy.Verify == getTestStrategy())) {
 					record(failure);
+					SailFailure cause = new SailFailure(failure, t);
+					thrown.add(cause);
+					selenide.trace("    Cause: " + causes(t));
 					return false;
 				}
 				diagnose();
@@ -359,6 +370,32 @@ public abstract class InterpretedWebDriverExecutor<
 			message = message.trim();
 		}
 		return t.getClass().getSimpleName() + (message.isEmpty() ? "" : ": " + message);
+	}
+
+	/**
+	 * Describes a throwable's cause chain, and where it was thrown, for the trace.
+	 *
+	 * @param t	the throwable
+	 * @return each cause's class and first message line, outermost first, then the top frame and the harness's frames
+	 */
+	private static @Nonnull String causes(@Nonnull Throwable t) {
+		StringBuilder result = new StringBuilder(256);
+		for (Throwable cause = t; cause != null; cause = (cause.getCause() == cause) ? null : cause.getCause()) {
+			if (cause != t) {
+				result.append(" <- caused by ");
+			}
+			result.append(reason(cause));
+		}
+		// where it was thrown, and the harness's frames that led there (the step's own lines)
+		StackTraceElement[] frames = t.getStackTrace();
+		int shown = 0;
+		for (int i = 0; (i < frames.length) && (shown < 6); i++) {
+			if ((i == 0) || frames[i].getClassName().startsWith("util.sail.")) {
+				result.append("\n        at ").append(frames[i]);
+				shown++;
+			}
+		}
+		return result.toString();
 	}
 
 	private @Nullable String currentUrl() {
@@ -922,9 +959,9 @@ public abstract class InterpretedWebDriverExecutor<
 	 * filtered or sorted. A model's columns are made by its code, so they are not checked.
 	 *
 	 * @param step	the step, for the messages
-	 * @param moduleName	the step's module, or null for the context's
+	 * @param moduleName	the step's module, or null for the context's (or, when the step names no list, the context's list's)
 	 * @param documentName	the step's document, or null for the context's
-	 * @param queryName	the step's query, or null for the document's default query
+	 * @param queryName	the step's query, or null for the document's default query (or the context's list's query)
 	 * @param modelName	the step's model, or null
 	 * @param column	the column's binding
 	 * @param filter	true to check the column can be filtered, false to check it can be sorted
@@ -938,24 +975,36 @@ public abstract class InterpretedWebDriverExecutor<
 										@Nullable String modelName,
 										@Nonnull String column,
 										boolean filter) {
-		if (modelName != null) {
+		AC context = peek();
+		// A step that names no list means the list the context shows (see NavigateList.listGridIdentifier)
+		PushListContext list = (context == null) ? null : context.getList();
+		String listModuleName = moduleName;
+		String listDocumentName = documentName;
+		String listQueryName = queryName;
+		String listModelName = modelName;
+		if ((list != null) && (moduleName == null) && (documentName == null) && (queryName == null) && (modelName == null)) {
+			listModuleName = list.getModuleName();
+			listDocumentName = list.getDocumentName();
+			listQueryName = list.getQueryName();
+			listModelName = list.getModelName();
+		}
+		if (listModelName != null) {
 			return;
 		}
 		String element = Introspector.decapitalize(step.getClass().getSimpleName());
-		AC context = peek();
-		String m = (moduleName != null) ? moduleName : ((context == null) ? null : context.getModuleName());
-		String d = (documentName != null) ? documentName : ((context == null) ? null : context.getDocumentName());
-		if ((m == null) || ((queryName == null) && (d == null))) {
+		String m = (listModuleName != null) ? listModuleName : ((context == null) ? null : context.getModuleName());
+		String d = (listDocumentName != null) ? listDocumentName : ((context == null) ? null : context.getDocumentName());
+		if ((m == null) || ((listQueryName == null) && (d == null))) {
 			throw new MetaDataException(String.format("<%s /> needs a module and a query or document, or a list context to take them from", element));
 		}
 		Customer c = CORE.getUser().getCustomer();
 		Module module = c.getModule(m);
 		MetaDataQueryDefinition query = null;
-		if (queryName != null) {
-			query = module.getMetaDataQuery(queryName);
+		if (listQueryName != null) {
+			query = module.getMetaDataQuery(listQueryName);
 			if (query == null) {
 				// As the list grid does, an undefined query name is the name of a document to use the default query of
-				query = module.getDocumentDefaultQuery(c, queryName);
+				query = module.getDocumentDefaultQuery(c, listQueryName);
 			}
 		}
 		else if (d != null) {

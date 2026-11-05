@@ -40,12 +40,20 @@
 				</row>
 				<row>
 					<item>
-						<default binding="date" />
+						<textField binding="date">
+							<onBlurHandlers>
+								<rerender clientValidation="false" />
+							</onBlurHandlers>
+						</textField>
 					</item>
 				</row>
 				<row>
 					<item>
-						<default binding="dateTime" />
+						<textField binding="dateTime">
+							<onBlurHandlers>
+								<rerender clientValidation="false" />
+							</onBlurHandlers>
+						</textField>
 					</item>
 				</row>
 				<row>

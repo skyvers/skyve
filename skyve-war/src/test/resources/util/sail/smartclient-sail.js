@@ -20,7 +20,7 @@
 (function () {
 	"use strict";
 
-	var VERSION = 3;
+	var VERSION = 4;
 	if (window._sail && window._sail.version === VERSION) {
 		return;
 	}
@@ -599,6 +599,43 @@
 		}
 		return element || null;
 	}
+
+	/** True if the element a locator finds now has the focus, or holds the element that has it. */
+	S.hasFocus = function (locator) {
+		var element = S.find(locator).element;
+		var active = document.activeElement;
+		return !!element && !!active && (active === element || element.contains(active));
+	};
+
+	/**
+	 * Takes the focus away from the form item a locator names, if the item still has it, and returns whether it did, so
+	 * that SmartClient runs the item's exit and blur handlers. Tab can leave the focus in the item: a date or time item
+	 * moves it from its text field to its picker icon, and a modal window's only field takes it back. The elements are
+	 * looked up afresh, as a redraw (such as a blur handler's rerender) replaces a widget's elements.
+	 */
+	S.blurIfFocused = function (locator) {
+		var active = document.activeElement;
+		if (!active || active === document.body) {
+			return false;
+		}
+		var found = S.find(locator);
+		var element = found.element;
+		var inside = !!element && (active === element || element.contains(active));
+		var parsed = S.parse(locator);
+		if (!inside && parsed.spec) {
+			// the focus may be on another part of the item, such as a date item's picker icon
+			var item = S.resolve(parsed.spec).obj;
+			var focus = item && item.form && item.form.getFocusSubItem ? item.form.getFocusSubItem() : null;
+			for (var f = focus; f && !inside; f = f.parentItem) {
+				inside = (f === item);
+			}
+		}
+		if (inside) {
+			active.blur();
+			return true;
+		}
+		return false;
+	};
 
 	/** The canvas whose DOM contains an element. */
 	function canvasOf(element) {

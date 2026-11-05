@@ -1295,6 +1295,7 @@ public class SmartClientSelenide extends Selenide<
 		// delete it, then type the value (key by key when a change handler runs, see below), so that SmartClient sees
 		// every change (setting the DOM value directly can leave the item's value stale)
 		click(element);
+		element = focusAfterBlurHandlers(locator, element);
 		script("if (arguments[0].select) arguments[0].select();", element.toWebElement());
 		// Keys go to whatever has the focus, as from a keyboard: a change handler can rerender the field's form while
 		// typing, and SmartClient gives the new field the focus, so the rest of the text must follow it
@@ -1320,10 +1321,15 @@ public class SmartClientSelenide extends Selenide<
 			waitForFullPageResponse();
 			element = require(locator).element();
 			element.sendKeys(Keys.TAB);
-			// SmartClient can keep focus in the field (a modal window's only field takes the Tab back). Then the next
-			// click would blur it first: the field re-validates, the form re-lays out under the pointer and the click is
-			// lost. So make sure the field has been left before going on.
-			script("if (document.activeElement === arguments[0]) arguments[0].blur();", element.toWebElement());
+			// SmartClient can keep the focus in the field: a modal window's only field takes the Tab back, and a date or
+			// time item moves it to its picker icon. Then the field is only left at the next click, whose blur makes the
+			// field re-validate and re-lay out the form under the pointer (losing the click), and runs the field's exit and
+			// blur handlers late: a rerender's response would then overwrite the next field typed into. So leave the field
+			// now, and wait below for what that runs. The field is found again by its locator, as the Tab's blur can already
+			// have redrawn it (a blur handler that rerenders the view replaces its element).
+			if (Boolean.TRUE.equals(script("return _sail.blurIfFocused(arguments[0])", locator))) {
+				trace("    Left the field, which kept the focus after Tab");
+			}
 			waitForFullPageResponse();
 		}
 		if ((! command.keyPresses()) && locator.startsWith(Locator.SAIL_PREFIX)) {
@@ -1331,6 +1337,33 @@ public class SmartClientSelenide extends Selenide<
 		}
 
 		return true;
+	}
+
+	/**
+	 * Waits for what clicking into a field set off, then makes sure the field has the focus. Clicking a field takes the
+	 * focus from the one before it, whose blur handlers can rerender the view: a server round trip that sets the form's
+	 * values and redraws it, replacing the field's element and losing anything typed meanwhile. So wait for that to
+	 * finish, find the field again by its locator, and click it again if the redraw took its focus.
+	 *
+	 * @param locator	the field's locator
+	 * @param element	the field's element, as clicked
+	 * @return the field's element now
+	 */
+	private @Nonnull SelenideElement focusAfterBlurHandlers(@Nonnull String locator, @Nonnull SelenideElement element) {
+		// Waits for the blur handlers of the field the click left (a rerender's request and redraw) to finish
+		waitForFullPageResponse();
+		if (! locator.startsWith(Locator.SAIL_PREFIX)) {
+			return element;
+		}
+		SelenideElement result = require(locator).element();
+		if (! Boolean.TRUE.equals(script("return _sail.hasFocus(arguments[0])", locator))) {
+			trace("    The view was redrawn after the click: click into the field again");
+			prepare(result);
+			click(result);
+			waitForFullPageResponse();
+			result = require(locator).element();
+		}
+		return result;
 	}
 
 	/**
