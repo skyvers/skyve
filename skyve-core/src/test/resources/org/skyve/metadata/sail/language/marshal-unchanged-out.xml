@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ns2:automation testStrategy="Assert" userAgentType="desktop" uxui="desktop" xmlns:ns2="http://www.skyve.org/xml/sail" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.skyve.org/xml/sail http://www.skyve.org/xml/sail.xsd">
+	<ns2:before>
+		<ns2:login password="admin" user="admin"/>
+	</ns2:before>
+	<ns2:interaction name="i">
+		<ns2:method>
+			<ns2:navigateEdit bizId="{var:id}" document="Contact" module="admin"/>
+			<ns2:navigateLink href="?a=e&amp;m=admin&amp;d=Contact"/>
+			<ns2:navigateLink text="Open request {run}"/>
+			<ns2:dataEnter binding="name" value="Smith &lt;&amp;&gt; &quot;Jo&quot; café {run}"/>
+			<ns2:dataEnter binding="status" match="code" value="Active"/>
+			<ns2:listGridFilter column="name" module="admin" operator="startsWith" query="qContacts" value="Smith{run}"/>
+			<ns2:listGridSort column="name" descending="true" query="qContacts"/>
+			<ns2:lookupDescriptionPick binding="contact" rowContaining="Smith{run}"/>
+			<ns2:captureValue binding="invoiceNumber" variable="invoice"/>
+			<ns2:action confirm="false" name="Restore"/>
+			<ns2:testGridRows maxRows="2" minRows="1" query="qJobs" rowContaining="Backup" timeoutMillis="30000"/>
+			<ns2:testWidget tab="Backup/Restore" visible="false"/>
+			<ns2:comment>A comment</ns2:comment>
+			<ns2:execute>var a = 1;
+var b = 2;</ns2:execute>
+			<ns2:testValue binding="name" value="Smith"/>
+		</ns2:method>
+	</ns2:interaction>
+	<ns2:after>
+		<ns2:logout/>
+	</ns2:after>
+</ns2:automation>

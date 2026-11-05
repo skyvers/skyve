@@ -8,6 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
@@ -330,6 +331,41 @@ class SailLanguageXmlTest {
 					() -> assertThrows(MetaDataException.class, () -> steps.get(1).execute(executor)),
 					() -> assertDoesNotThrow(() -> steps.get(2).execute(executor)));
 		verify(executor).executeNavigateLink((NavigateLink) steps.get(2));
+	}
+
+	@Test
+	void newLinesTabsAndCarriageReturnsSurviveMarshalling() {
+		String xml = HEAD +
+						"<dataEnter binding=\"memo\" value=\"a&#10;&#10;b\"/>" +
+						"<dataEnter binding=\"memo\" value=\"x&#9;y&#13;&#10;z\"/>" +
+						"<dataEnter binding=\"name\" value=\"&lt;&amp;&quot; caf\u00e9&#10;2\"/>" +
+						TAIL;
+		String marshalled = XMLMetaData.marshalSAIL(XMLMetaData.unmarshalSAILString(xml));
+		List<Step> steps = XMLMetaData.unmarshalSAILString(marshalled).getInteractions().get(0).getSteps();
+		assertAll(() -> assertTrue(marshalled.contains("value=\"a&#10;&#10;b\""), marshalled),
+					() -> assertTrue(marshalled.contains("value=\"x&#9;y&#13;&#10;z\""), marshalled),
+					() -> assertTrue(marshalled.contains("value=\"&lt;&amp;&quot; caf\u00e9&#10;2\""), marshalled),
+					() -> assertEquals("a\n\nb", ((DataEnter) steps.get(0)).getValue()),
+					() -> assertEquals("x\ty\r\nz", ((DataEnter) steps.get(1)).getValue()),
+					() -> assertEquals("<&\" caf\u00e9\n2", ((DataEnter) steps.get(2)).getValue()));
+	}
+
+	/**
+	 * The expected output was marshalled before tabs, new lines and carriage returns were written as character
+	 * references: a script without them (but with markup characters, a non-ASCII character and a multi-line script
+	 * element) marshals byte for byte as before.
+	 */
+	@Test
+	void marshallingAScriptWithoutLineBreaksInAttributesIsUnchanged() throws Exception {
+		String in = resource("marshal-unchanged-in.xml");
+		String expected = resource("marshal-unchanged-out.xml");
+		assertEquals(expected, XMLMetaData.marshalSAIL(XMLMetaData.unmarshalSAILString(in)));
+	}
+
+	private static String resource(String name) throws java.io.IOException {
+		try (java.io.InputStream in = SailLanguageXmlTest.class.getResourceAsStream(name)) {
+			return new String(java.util.Objects.requireNonNull(in, name).readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
+		}
 	}
 
 	private static void assertAdditions(List<Step> steps) {
