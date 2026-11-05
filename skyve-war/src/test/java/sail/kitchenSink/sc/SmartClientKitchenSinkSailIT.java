@@ -24,4 +24,13 @@ class SmartClientKitchenSinkSailIT extends AbstractSmartClientInterpretedSail {
 	void test() {
 		Assertions.assertDoesNotThrow(() -> sailResource("sail/kitchenSink/sc/sc-kitchensink-sail.xml"));
 	}
+
+	/**
+	 * Finds by content: list grid filters and sorting, captured generated values, options by code or label,
+	 * and lookup description rows by their text.
+	 */
+	@Test
+	void find() {
+		Assertions.assertDoesNotThrow(() -> sailResource("sail/kitchenSink/sc/sc-kitchensink-sail-find.xml"));
+	}
 }
