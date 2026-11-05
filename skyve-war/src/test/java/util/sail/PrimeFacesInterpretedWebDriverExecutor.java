@@ -24,6 +24,8 @@ import org.skyve.CORE;
 import org.skyve.domain.Bean;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.impl.bind.BindUtil;
+import org.skyve.domain.types.converters.Converter;
+import org.skyve.impl.metadata.model.document.field.ConvertibleField;
 import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
 import org.skyve.impl.metadata.module.ModuleImpl;
@@ -115,6 +117,7 @@ import jakarta.annotation.Nullable;
 import jakarta.faces.component.UICommand;
 import jakarta.faces.component.UIComponent;
 import jakarta.faces.component.html.HtmlInputHidden;
+import util.sail.PrimeFacesSelenide.VueFilterInput;
 import util.sail.commands.impl.PrimeFacesButtonCommand;
 import util.sail.commands.impl.PrimeFacesCheckboxCommand;
 import util.sail.commands.impl.PrimeFacesDataGridButtonCommand;
@@ -1256,18 +1259,26 @@ public class PrimeFacesInterpretedWebDriverExecutor extends InterpretedWebDriver
 	 *
 	 * @param field	the column's field in the grid (its sanitised binding)
 	 * @param type	the grid's type for the column, such as text, numeric or enum
+	 * @param options	an enum column's [code, label] pairs; empty for other columns
 	 */
-	private record VueColumn(@Nonnull String field, @Nonnull String type) {
+	private record VueColumn(@Nonnull String field, @Nonnull String type, @Nonnull List<List<String>> options) {
 	}
 
 	/**
 	 * Filters a column of a Vue list grid in its filter menu, or of a PrimeFaces data table in its filter row.
 	 * <p>
-	 * A Vue list grid filters text and numeric columns: a text column with contains, startsWith, equals or notEquals
-	 * (which its menu calls Contains, Starts With, Equals and Not Equals, and compares ignoring case), a numeric
-	 * column with equals, notEquals, lessThan or greaterThan. A PrimeFaces data table has one comparison per column,
-	 * which the server chooses from the column's type (see {@code SkyveLazyDataModel}): contains for text (and for a
-	 * variant domain's description and an association's business key) and equals for the other typed filters.
+	 * A Vue list grid offers, by column type: text contains, startsWith, equals and notEquals (its menu's Contains,
+	 * Starts With, Equals and Not Equals, which ignore case); numeric equals, notEquals, lessThan and greaterThan;
+	 * enum (and constant domain) and boolean equals and notEquals; date, date time and timestamp equals, notEquals,
+	 * lessThan and greaterThan (Before and After); time equals.
+	 * <p>
+	 * A PrimeFaces data table has one comparison per column: equals for a combo (constant domain) or check box (boolean)
+	 * filter, and for a typed filter the one the server chooses from the column's type (see {@code SkyveLazyDataModel}):
+	 * contains for text (and for a variant domain's description and an association's business key), equals otherwise.
+	 * <p>
+	 * Values: an option is named by its shown label, or else by its code; a boolean is true or false; a date, date time,
+	 * time or timestamp is written as the column's attribute shows it (its converter's format, as {@code <dataEnter />}
+	 * takes it), and is typed into a Vue calendar in the calendar's own format.
 	 * Other columns and comparisons fail the step with the reason.
 	 *
 	 * @param filter	the step
@@ -1280,26 +1291,67 @@ public class PrimeFacesInterpretedWebDriverExecutor extends InterpretedWebDriver
 		ListGridOnPage grid = listGridOnPage(filter, "listGridFilter");
 		if (grid.vue()) {
 			VueColumn vueColumn = vueColumn(grid, column, "listGridFilter", true);
+			String type = vueColumn.type();
+			VueFilterInput input = vueFilterInput(type);
+			if (input == null) {
+				throw new UnsupportedOperationException(String.format("<listGridFilter /> column [%s] of the Vue list grid %s is a %s column, which PrimeFaces SAIL cannot filter",
+																		column, grid.clientId(), type));
+			}
 			String matchMode = null;
+			String entered = null;
 			if (value != null) {
-				matchMode = vueMatchMode(vueColumn.type(), operator);
+				matchMode = vueMatchMode(type, operator);
 				if (matchMode == null) {
 					throw new UnsupportedOperationException(String.format("<listGridFilter /> column [%s] of the Vue list grid %s is a %s column, which cannot filter with %s: %s",
 																			column,
 																			grid.clientId(),
-																			vueColumn.type(),
+																			type,
 																			operator,
-																			vueOperators(vueColumn.type())));
+																			vueOperators(type)));
 				}
+				entered = switch (input) {
+					case text -> value;
+					case option -> vueColumn.options().get(optionIndex(column, value, vueColumn.options())).get(1);
+					case check -> booleanValue(column, value);
+					case calendar -> vueCalendarText(filter, column, type, value);
+				};
 			}
-			selenide.vueListGridFilter(grid.clientId(), vueColumn.field(), matchMode, value);
+			selenide.vueListGridFilter(grid.clientId(), vueColumn.field(), matchMode, entered, input);
 		}
 		else {
 			UIComponent facesColumn = facesColumn(grid, column, "listGridFilter");
+			String toggleId = facesFilterToggleId(grid);
+			UIComponent chooser = facesColumn.getFacet("filter");
+			if ((chooser instanceof SelectOneMenu) || (chooser instanceof TriStateCheckbox)) {
+				if ((value != null) && (operator != FilterOperator.equals)) {
+					throw new UnsupportedOperationException(String.format("<listGridFilter /> column [%s] of the PrimeFaces data table %s is filtered with a %s, which compares with equals only, so it cannot filter with %s",
+																			column,
+																			grid.clientId(),
+																			(chooser instanceof SelectOneMenu) ? "combo" : "check box",
+																			operator));
+				}
+				String chooserId = PrimeFacesAutomationContext.clientId(chooser);
+				if (chooser instanceof SelectOneMenu) {
+					int index = 0; // the empty option clears the filter
+					if (value != null) {
+						List<List<String>> options = selenide.selectOneOptions(chooserId);
+						if (options == null) {
+							throw new DomainException(String.format("<listGridFilter /> column [%s] of the PrimeFaces data table %s has no combo filter on the page",
+																		column, grid.clientId()));
+						}
+						index = optionIndex(column, value, options);
+					}
+					selenide.facesListGridChooseFilter(chooserId, toggleId, index);
+				}
+				else {
+					selenide.facesListGridCheckFilter(chooserId, toggleId, (value == null) ? null : Boolean.valueOf(booleanValue(column, value)));
+				}
+				checkSuccess("expected no error messages after <listGridFilter />");
+				return;
+			}
 			FilterOperator only = facesFilterOperator(filter, column);
 			if (only == null) {
-				throw new UnsupportedOperationException(String.format("<listGridFilter /> column [%s] of the PrimeFaces data table %s is filtered by choosing a value " +
-																		"(a combo or check box), which PrimeFaces SAIL does not do yet",
+				throw new UnsupportedOperationException(String.format("<listGridFilter /> column [%s] of the PrimeFaces data table %s has no typed filter",
 																		column,
 																		grid.clientId()));
 			}
@@ -1310,14 +1362,15 @@ public class PrimeFacesInterpretedWebDriverExecutor extends InterpretedWebDriver
 																		only,
 																		operator));
 			}
-			selenide.facesListGridFilter(PrimeFacesAutomationContext.clientId(facesColumn), facesFilterToggleId(grid), value);
+			selenide.facesListGridFilter(PrimeFacesAutomationContext.clientId(facesColumn), toggleId, value);
 		}
 		checkSuccess("expected no error messages after <listGridFilter />");
 	}
 
 	/**
 	 * Clears every column filter of a Vue list grid (Clear in each filtered column's menu), or of a PrimeFaces data table
-	 * (deleting the text of each filter in its filter row).
+	 * (deleting the text of each typed filter, choosing the empty option of each combo filter and unsetting each check
+	 * box filter).
 	 *
 	 * @param clear	the step
 	 */
@@ -1404,7 +1457,9 @@ public class PrimeFacesInterpretedWebDriverExecutor extends InterpretedWebDriver
 			throw new MetaDataException(String.format("<%s /> column [%s] of the Vue list grid %s cannot be %s",
 														element, column, grid.clientId(), filter ? "filtered" : "sorted"));
 		}
-		return new VueColumn(field, String.valueOf(info.get(0)));
+		@SuppressWarnings("unchecked")
+		List<List<String>> options = (List<List<String>>) info.get(5);
+		return new VueColumn(field, String.valueOf(info.get(0)), options);
 	}
 
 	/**
@@ -1431,7 +1486,125 @@ public class PrimeFacesInterpretedWebDriverExecutor extends InterpretedWebDriver
 				default -> null;
 			};
 		}
+		if ("enum".equals(type) || "boolean".equals(type)) {
+			return switch (operator) {
+				case equals -> "Equals";
+				case notEquals -> "Not Equals";
+				default -> null;
+			};
+		}
+		if ("date".equals(type) || "dateTime".equals(type) || "timestamp".equals(type)) {
+			return switch (operator) {
+				case equals -> "Equals";
+				case notEquals -> "Not Equals";
+				case lessThan -> "Before";
+				case greaterThan -> "After";
+				default -> null;
+			};
+		}
+		if ("time".equals(type)) {
+			return (operator == FilterOperator.equals) ? "Equals" : null;
+		}
 		return null;
+	}
+
+	/**
+	 * Returns how a Vue list grid's column filter of the type takes its value, or null if PF SAIL cannot enter one.
+	 */
+	private static @Nullable VueFilterInput vueFilterInput(@Nonnull String type) {
+		return switch (type) {
+			case "text", "numeric" -> VueFilterInput.text;
+			case "enum" -> VueFilterInput.option;
+			case "boolean" -> VueFilterInput.check;
+			case "date", "dateTime", "timestamp", "time" -> VueFilterInput.calendar;
+			default -> null;
+		};
+	}
+
+	/**
+	 * Returns the text to type into a Vue list grid's filter calendar for a value written as the column's attribute
+	 * shows it (its converter's format): the calendar's format is dd/mm/yyyy, then HH:mm for a date time and HH:mm:ss
+	 * for a timestamp, and HH:mm for a time.
+	 *
+	 * @throws MetaDataException	if the value is not in the attribute's format
+	 */
+	private @Nonnull String vueCalendarText(@Nonnull ListGridFilter filter, @Nonnull String column, @Nonnull String type, @Nonnull String value) {
+		Customer c = CORE.getUser().getCustomer();
+		Attribute attribute = listGridAttribute(filter, column);
+		Converter<?> converter = (attribute instanceof ConvertibleField field) ? field.getConverterForCustomer(c) : null;
+		Object date;
+		try {
+			date = (attribute == null) ? null : BindUtil.fromString(c, converter, attribute.getImplementingType(), value);
+		}
+		catch (@SuppressWarnings("unused") Exception e) {
+			date = null;
+		}
+		if (! (date instanceof java.util.Date d)) {
+			throw new MetaDataException(String.format("<listGridFilter /> value '%s' for column [%s] is not a %s in the format its attribute shows%s",
+														value, column, type,
+														(converter == null) ? "" : " (" + converter.getClass().getSimpleName() + ")"));
+		}
+		String pattern = switch (type) {
+			case "dateTime" -> "dd/MM/yyyy HH:mm";
+			case "timestamp" -> "dd/MM/yyyy HH:mm:ss";
+			case "time" -> "HH:mm";
+			default -> "dd/MM/yyyy";
+		};
+		return new java.text.SimpleDateFormat(pattern).format(d);
+	}
+
+	/**
+	 * Returns the index of the option whose shown label equals the value, or else whose code does.
+	 *
+	 * @param column	the column, for the messages
+	 * @param value	the label or code
+	 * @param options	the options' [code, label] pairs
+	 * @throws DomainException	if no option, or more than one, has the value as its label, or else as its code
+	 */
+	private static int optionIndex(@Nonnull String column, @Nonnull String value, @Nonnull List<List<String>> options) {
+		for (int part = 1; part >= 0; part--) {
+			int index = -1;
+			for (int i = 0, l = options.size(); i < l; i++) {
+				if (value.equals(options.get(i).get(part))) {
+					if (index >= 0) {
+						throw new DomainException(String.format("<listGridFilter /> column [%s] has more than one option with the %s '%s': its options are %s",
+																	column, (part == 1) ? "label" : "code", value, describeOptions(options)));
+					}
+					index = i;
+				}
+			}
+			if (index >= 0) {
+				return index;
+			}
+		}
+		throw new DomainException(String.format("<listGridFilter /> column [%s] has no option with the label or code '%s': its options are %s",
+													column, value, describeOptions(options)));
+	}
+
+	/**
+	 * Describes options as {@code code=label} pairs, leaving out an empty option, for a failure.
+	 */
+	private static @Nonnull String describeOptions(@Nonnull List<List<String>> options) {
+		StringBuilder result = new StringBuilder(64);
+		for (List<String> option : options) {
+			if (! option.get(0).isEmpty()) {
+				result.append(result.isEmpty() ? "" : ", ").append(option.get(0)).append('=').append(option.get(1));
+			}
+		}
+		return result.toString();
+	}
+
+	/**
+	 * Checks a boolean filter value.
+	 *
+	 * @return true or false
+	 * @throws MetaDataException	if the value is not true or false
+	 */
+	private static @Nonnull String booleanValue(@Nonnull String column, @Nonnull String value) {
+		if ("true".equals(value) || "false".equals(value)) {
+			return value;
+		}
+		throw new MetaDataException(String.format("<listGridFilter /> column [%s] is a boolean column, which filters with true or false, not '%s'", column, value));
 	}
 
 	/**
@@ -1444,7 +1617,13 @@ public class PrimeFacesInterpretedWebDriverExecutor extends InterpretedWebDriver
 		if ("numeric".equals(type)) {
 			return "a numeric column filters with equals, notEquals, lessThan or greaterThan";
 		}
-		return "PrimeFaces SAIL filters only the text and numeric columns of a Vue list grid";
+		if ("enum".equals(type) || "boolean".equals(type)) {
+			return "an enum or boolean column filters with equals or notEquals";
+		}
+		if ("time".equals(type)) {
+			return "a time column filters with equals";
+		}
+		return "a date, date time or timestamp column filters with equals, notEquals, lessThan or greaterThan";
 	}
 
 	/**
@@ -1494,8 +1673,30 @@ public class PrimeFacesInterpretedWebDriverExecutor extends InterpretedWebDriver
 	 * @return the comparison, or null if the column is filtered by choosing a value (a constant domain's combo or a
 	 * 			boolean's check box)
 	 */
-	@SuppressWarnings("null") // a null here fails the test
 	private @Nullable FilterOperator facesFilterOperator(@Nonnull ListGridFilter filter, @Nonnull String column) {
+		Attribute attribute = listGridAttribute(filter, column);
+		if (attribute == null) {
+			return column.endsWith(Bean.BIZ_KEY) ? FilterOperator.contains : FilterOperator.equals;
+		}
+		DomainType domain = attribute.getDomainType();
+		AttributeType type = attribute.getAttributeType();
+		if ((domain == DomainType.constant) || (type == AttributeType.bool)) {
+			return null;
+		}
+		if ((domain == DomainType.variant) || (type == AttributeType.association)) {
+			return FilterOperator.contains;
+		}
+		boolean textual = (type == AttributeType.text) || (type == AttributeType.memo) || (type == AttributeType.markup) || (type == AttributeType.colour);
+		return (textual && (domain == null)) ? FilterOperator.contains : FilterOperator.equals;
+	}
+
+	/**
+	 * Returns the attribute that a list grid filter step's column binds to, in the list's driving document.
+	 *
+	 * @return the attribute, or null for an implicit attribute (such as bizKey)
+	 */
+	@SuppressWarnings("null") // a null here fails the test
+	private @Nullable Attribute listGridAttribute(@Nonnull ListGridFilter filter, @Nonnull String column) {
 		PrimeFacesAutomationContext context = peek();
 		Customer c = CORE.getUser().getCustomer();
 		String moduleName = filter.getModuleName();
@@ -1518,20 +1719,7 @@ public class PrimeFacesInterpretedWebDriverExecutor extends InterpretedWebDriver
 			driving = query.getDocumentModule(c).getDocument(c, query.getDocumentName());
 		}
 		TargetMetaData target = BindUtil.getMetaDataForBinding(c, c.getModule(driving.getOwningModuleName()), driving, column);
-		Attribute attribute = target.getAttribute();
-		if (attribute == null) {
-			return column.endsWith(Bean.BIZ_KEY) ? FilterOperator.contains : FilterOperator.equals;
-		}
-		DomainType domain = attribute.getDomainType();
-		AttributeType type = attribute.getAttributeType();
-		if ((domain == DomainType.constant) || (type == AttributeType.bool)) {
-			return null;
-		}
-		if ((domain == DomainType.variant) || (type == AttributeType.association)) {
-			return FilterOperator.contains;
-		}
-		boolean textual = (type == AttributeType.text) || (type == AttributeType.memo) || (type == AttributeType.markup) || (type == AttributeType.colour);
-		return (textual && (domain == null)) ? FilterOperator.contains : FilterOperator.equals;
+		return target.getAttribute();
 	}
 
 	/**

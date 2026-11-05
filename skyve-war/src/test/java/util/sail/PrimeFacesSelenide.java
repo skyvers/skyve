@@ -1087,14 +1087,30 @@ public class PrimeFacesSelenide extends Selenide<
 	 *
 	 * @param gridId	the grid's client id (its container)
 	 * @param field	the column's field (its sanitised binding)
-	 * @return [type, title, shown, filterable, sortable], where type is the grid's column type (such as text, numeric or
-	 * 			enum) and shown is false when the column is not in the grid's shown columns; or null if the grid has no
-	 * 			such column (or is not on the page)
+	 * @return [type, title, shown, filterable, sortable, options], where type is the grid's column type (such as text,
+	 * 			numeric or enum), shown is false when the column is not in the grid's shown columns, and options are an enum
+	 * 			column's [code, label] pairs (empty for other columns); or null if the grid has no such column (or is not on
+	 * 			the page)
 	 */
 	@SuppressWarnings("unchecked")
 	public @Nullable List<Object> vueListGridColumn(@Nonnull String gridId, @Nonnull String field) {
 		return (List<Object>) js(VUE_COLUMN_JS + "if (! col) return null;" +
-									"return [String(col.type), String(col.header), !! th, !! col.filterable, !! col.sortable];", gridId, field);
+									"var options = (col.enumValues || []).map(function(v) {return [String(v.value), String(v.label)];});" +
+									"return [String(col.type), String(col.header), !! th, !! col.filterable, !! col.sortable, options];", gridId, field);
+	}
+
+	/**
+	 * How a value is entered in a Vue list grid's column filter menu.
+	 */
+	public enum VueFilterInput {
+		/** Typed into a text input (text and numeric columns). */
+		text,
+		/** Chosen from a drop down by its label (enum columns). */
+		option,
+		/** A tri-state check box clicked until it shows True or False (boolean columns). */
+		check,
+		/** Typed into a calendar's input in the calendar's format, then Enter (date, date time, time and timestamp columns). */
+		calendar
 	}
 
 	/**
@@ -1105,11 +1121,17 @@ public class PrimeFacesSelenide extends Selenide<
 	 * @param gridId	the grid's client id (its container)
 	 * @param field	the column's field (its sanitised binding); the column must be shown and filterable
 	 * @param matchMode	the label of the match mode to choose, such as Contains; ignored when the value is null
-	 * @param value	the value to type, or null to clear the column's filter
-	 * @throws IllegalStateException	if the column has no filter menu, or its menu lacks the match mode or a text input,
-	 * 									or the column does not show a filter afterwards
+	 * @param value	the value as the filter's input takes it (see {@link VueFilterInput}): the text to type, the option's
+	 * 				label, true or false, or the date or time in the calendar's format; or null to clear the column's filter
+	 * @param input	how the value is entered
+	 * @throws IllegalStateException	if the column has no filter menu, or its menu lacks the match mode or the input,
+	 * 									or the input does not take the value, or the column does not show a filter afterwards
 	 */
-	public void vueListGridFilter(@Nonnull String gridId, @Nonnull String field, @Nullable String matchMode, @Nullable String value) {
+	public void vueListGridFilter(@Nonnull String gridId,
+									@Nonnull String field,
+									@Nullable String matchMode,
+									@Nullable String value,
+									@Nonnull VueFilterInput input) {
 		waitForAjaxResponse();
 		WebElement button = vueFilterButton(gridId, field);
 		if (vueFilterActive(button)) {
@@ -1142,15 +1164,7 @@ public class PrimeFacesSelenide extends Selenide<
 			trace("    choose " + matchMode);
 			chooseVueDropdownOption(dropdown, Objects.requireNonNull(matchMode));
 		}
-		WebElement input = (WebElement) js("var o = document.getElementById(arguments[0]);" +
-											"return o.querySelector('.p-column-filter-constraint input.p-column-filter');", overlayId);
-		if (input == null) {
-			throw new IllegalStateException(String.format("The filter menu of column %s of list grid %s has no text input", field, gridId));
-		}
-		trace("    type " + value);
-		click($(input));
-		input.sendKeys(Keys.chord(selectAllKey(), "a"));
-		input.sendKeys(value);
+		enterVueFilterValue(overlayId, String.format("column %s of list grid %s", field, gridId), value, input);
 		WebElement apply = (WebElement) js("return document.getElementById(arguments[0]).querySelector('[data-pc-name=filterapplybutton]');", overlayId);
 		long fetches = markVueListGridFetch();
 		click($(apply));
@@ -1159,6 +1173,70 @@ public class PrimeFacesSelenide extends Selenide<
 		waitForVueListGridFetch(fetches);
 		if (! vueFilterActive(vueFilterButton(gridId, field))) {
 			throw new IllegalStateException(String.format("Column %s of list grid %s does not show a filter after Apply", field, gridId));
+		}
+	}
+
+	/**
+	 * Enters the value into the first constraint of an open filter menu.
+	 *
+	 * @param overlayId	the filter menu's id
+	 * @param what	the column, for the messages
+	 * @param value	the value as the input takes it
+	 * @param input	how the value is entered
+	 * @throws IllegalStateException	if the menu has no such input, or the input does not take the value
+	 */
+	private void enterVueFilterValue(@Nonnull String overlayId, @Nonnull String what, @Nonnull String value, @Nonnull VueFilterInput input) {
+		String selector = switch (input) {
+			case text -> "input.p-column-filter";
+			case option -> ".p-dropdown:not(.p-column-filter-matchmode-dropdown)";
+			case check -> ".p-tristatecheckbox";
+			case calendar -> ".p-calendar input";
+		};
+		WebElement element = (WebElement) js("return document.getElementById(arguments[0]).querySelector('.p-column-filter-constraint ' + arguments[1]);",
+												overlayId, selector);
+		if (element == null) {
+			throw new IllegalStateException(String.format("The filter menu of %s has no %s input", what, input));
+		}
+		switch (input) {
+			case text -> {
+				trace("    type " + value);
+				click($(element));
+				element.sendKeys(Keys.chord(selectAllKey(), "a"));
+				element.sendKeys(value);
+			}
+			case option -> {
+				trace("    choose " + value);
+				chooseVueDropdownOption(element, value);
+			}
+			case check -> {
+				// The check box cycles through Not Selected, True and False; its status says which it shows
+				String wanted = Boolean.parseBoolean(value) ? "True" : "False";
+				for (int clicks = 0; clicks <= 3; clicks++) {
+					String shown = String.valueOf(js("var s = arguments[0].querySelector('[role=status]'); return s ? s.textContent.trim() : '';", element));
+					if (wanted.equals(shown)) {
+						break;
+					}
+					if (clicks == 3) {
+						throw new IllegalStateException(String.format("The filter check box of %s shows %s, not %s, after 3 clicks", what, shown, wanted));
+					}
+					trace("    click the check box (it shows " + shown + ")");
+					click($(element));
+				}
+			}
+			case calendar -> {
+				trace("    type " + value + " into the calendar, then Enter");
+				click($(element));
+				element.sendKeys(Keys.chord(selectAllKey(), "a"));
+				element.sendKeys(value, Keys.ENTER);
+				// Wait for the calendar's panel to close: Enter closes it once the typed text is a valid date or time
+				try {
+					waitFor(d -> (js("return document.querySelector('.p-datepicker:not(.p-datepicker-inline)');") == null) ? Boolean.TRUE : null);
+				}
+				catch (org.openqa.selenium.TimeoutException e) {
+					throw new IllegalStateException(String.format("The filter calendar of %s did not take '%s' (it shows '%s')",
+																	what, value, element.getDomProperty("value")), e);
+				}
+			}
 		}
 	}
 
@@ -1349,8 +1427,70 @@ public class PrimeFacesSelenide extends Selenide<
 	}
 
 	/**
+	 * Filters a column of a PrimeFaces data table by choosing an option of its combo filter (a select one menu), as a
+	 * user does, showing the filters with the table's filter toggle first if they are hidden. Waits for the filter
+	 * request the choice sends, and its response.
+	 *
+	 * @param menuId	the combo filter's client id
+	 * @param toggleId	the client id of the table's filter toggle, or null if it has none
+	 * @param index	the zero-based option, the empty first option (0) clearing the filter
+	 * @throws IllegalStateException	if the combo cannot be shown or chosen from
+	 */
+	public void facesListGridChooseFilter(@Nonnull String menuId, @Nullable String toggleId, int index) {
+		waitForAjaxResponse();
+		showFacesFilter(menuId, toggleId);
+		List<String> current = selectOneValues(menuId);
+		if ((current != null) && String.valueOf(index).equals(current.get(0))) {
+			trace("    the column's filter shows that option already");
+			return;
+		}
+		markPage();
+		if (! selectOne(new PrimeFacesSelectOneCommand(menuId, index))) {
+			throw new IllegalStateException(String.format("The combo filter %s is disabled", menuId));
+		}
+		// Wait for the filter request that the combo's change sends, then for its response
+		waitFor(d -> requestSent() ? Boolean.TRUE : null);
+		waitForAjaxResponse();
+	}
+
+	/**
+	 * Filters a column of a PrimeFaces data table with its tri-state check box filter, as a user does: clicks it until it
+	 * shows the value (it cycles through unset, checked and crossed), showing the filters with the table's filter toggle
+	 * first if they are hidden. Waits for the filter request each click sends, and its response.
+	 *
+	 * @param checkId	the check box filter's client id
+	 * @param toggleId	the client id of the table's filter toggle, or null if it has none
+	 * @param value	true (checked), false (crossed), or null to clear the filter (unset)
+	 * @throws IllegalStateException	if the check box does not show the value after three clicks
+	 */
+	public void facesListGridCheckFilter(@Nonnull String checkId, @Nullable String toggleId, @Nullable Boolean value) {
+		waitForAjaxResponse();
+		showFacesFilter(checkId, toggleId);
+		// the check box's input holds 0 (unset), 1 (checked) or 2 (crossed)
+		String wanted = (value == null) ? "0" : (value.booleanValue() ? "1" : "2");
+		for (int clicks = 0; clicks <= 3; clicks++) {
+			String shown = inputValue(checkId + "_input");
+			if (wanted.equals(shown)) {
+				return;
+			}
+			if (clicks == 3) {
+				break;
+			}
+			trace("    click the check box filter");
+			WebElement box = Objects.requireNonNull(elementById(checkId)).findElement(By.cssSelector(".ui-chkbox-box"));
+			markPage();
+			click($(box));
+			// Wait for the filter request that the check box's change sends, then for its response
+			waitFor(d -> requestSent() ? Boolean.TRUE : null);
+			waitForAjaxResponse();
+		}
+		throw new IllegalStateException(String.format("The check box filter %s does not show %s after 3 clicks", checkId, value));
+	}
+
+	/**
 	 * Clears every column filter of a PrimeFaces data table as a user does: deletes the text of each filter that has
-	 * some, showing the filters with the table's filter toggle first if they are hidden. Waits for each filter request.
+	 * some, chooses the empty option of each combo filter and unsets each check box filter, showing the filters with
+	 * the table's filter toggle first if they are hidden. Waits for each filter request.
 	 *
 	 * @param gridId	the data table's client id
 	 * @param toggleId	the client id of the table's filter toggle, or null if it has none
@@ -1360,13 +1500,24 @@ public class PrimeFacesSelenide extends Selenide<
 		int result = 0;
 		for (int i = 0; i < 1000; i++) {
 			waitForAjaxResponse();
-			String columnId = (String) js("var t = document.getElementById(arguments[0]); if (! t) return null;" +
-											"var i = Array.from(t.querySelectorAll('thead th input.ui-column-filter')).find(function(x) {return x.value !== '';});" +
-											"return i ? i.closest('th').id : null;", gridId);
-			if (columnId == null) {
+			// [kind, id] of the first filter with a value: a text filter's column, a combo filter or a check box filter
+			@SuppressWarnings("unchecked")
+			List<String> filter = (List<String>) js("var t = document.getElementById(arguments[0]); if (! t) return null;" +
+														"var i = Array.from(t.querySelectorAll('thead th input.ui-column-filter')).find(function(x) {return x.value !== '';});" +
+														"if (i) return ['text', i.closest('th').id];" +
+														"var s = Array.from(t.querySelectorAll('thead th .ui-column-customfilter select')).find(function(x) {return x.value !== '';});" +
+														"if (s) return ['combo', s.id.replace(/_input$/, '')];" +
+														"var c = Array.from(t.querySelectorAll('thead th .ui-column-customfilter .ui-chkbox input')).find(function(x) {return x.value !== '0';});" +
+														"return c ? ['check', c.id.replace(/_input$/, '')] : null;", gridId);
+			if (filter == null) {
 				break;
 			}
-			typeFacesFilter(facesFilterInput(columnId, toggleId), null);
+			String id = filter.get(1);
+			switch (filter.get(0)) {
+				case "text" -> typeFacesFilter(facesFilterInput(id, toggleId), null);
+				case "combo" -> facesListGridChooseFilter(id, toggleId, 0);
+				default -> facesListGridCheckFilter(id, toggleId, null);
+			}
 			result++;
 		}
 		return result;
@@ -1425,17 +1576,30 @@ public class PrimeFacesSelenide extends Selenide<
 		if ((result == null) || (! "input".equalsIgnoreCase(result.getTagName()))) {
 			throw new IllegalStateException(String.format("Column %s of the data table has no text filter", columnId));
 		}
-		if (! result.isDisplayed()) {
+		showFacesFilter(columnId + ":filter", toggleId);
+		return result;
+	}
+
+	/**
+	 * Shows a data table's filters with its filter toggle, if the filter element is hidden.
+	 *
+	 * @throws IllegalStateException	if the filter is not on the page, or is hidden and the table has no toggle
+	 */
+	private void showFacesFilter(@Nonnull String filterId, @Nullable String toggleId) {
+		WebElement filter = elementById(filterId);
+		if (filter == null) {
+			throw new IllegalStateException(String.format("The data table filter %s is not on the page", filterId));
+		}
+		if (! filter.isDisplayed()) {
 			WebElement toggle = (toggleId == null) ? null : elementById(toggleId);
 			if ((toggle == null) || (! toggle.isDisplayed())) {
-				throw new IllegalStateException(String.format("The filters of column %s are hidden and the data table has no filter toggle to show them", columnId));
+				throw new IllegalStateException(String.format("The data table filter %s is hidden and the table has no filter toggle to show it", filterId));
 			}
 			trace("    show the filters");
 			click($(toggle));
 			// Wait for the toggle to show the filters
-			waitFor(d -> result.isDisplayed() ? Boolean.TRUE : null);
+			waitFor(d -> filter.isDisplayed() ? Boolean.TRUE : null);
 		}
-		return result;
 	}
 
 	/**
