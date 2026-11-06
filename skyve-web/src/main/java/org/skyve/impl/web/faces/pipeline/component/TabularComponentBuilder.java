@@ -2527,6 +2527,34 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		return new EventSourceComponent(result, result);
 	}
 
+	/**
+	 * Creates the pick-list as the other overload does, and shows its target controls (the move up and down buttons of
+	 * the members list) when the membership's collection is ordered, so that a user can put its members in a new order.
+	 * The members are gathered in the order the list shows them (see {@code SkyveDualListModelMap.gather()}).
+	 *
+	 * @param component existing wrapper component to reuse; when non-{@code null}, returned unchanged
+	 * @param candidatesHeading raw candidates-list heading and nullable escape flag; may be {@code null}
+	 * @param membersHeading raw members-list heading and nullable escape flag; may be {@code null}
+	 * @param membership list-membership metadata
+	 * @param ordered whether the membership's collection is ordered
+	 * @return existing wrapper or configured pick-list wrapper
+	 */
+	@Override
+	public @Nonnull EventSourceComponent listMembership(@Nullable EventSourceComponent component,
+														@Nullable EscapableText candidatesHeading,
+														@Nullable EscapableText membersHeading,
+														@Nonnull ListMembership membership,
+														boolean ordered) {
+		if (component != null) {
+			return component;
+		}
+		EventSourceComponent result = listMembership(null, candidatesHeading, membersHeading, membership);
+		if (ordered && (result.getComponent() instanceof PickList pickList)) {
+			pickList.setShowTargetControls(true);
+		}
+		return result;
+	}
+
 	@Override
 	public @Nonnull EventSourceComponent checkBox(@Nullable EventSourceComponent component,
 													@Nullable String dataWidgetVar,

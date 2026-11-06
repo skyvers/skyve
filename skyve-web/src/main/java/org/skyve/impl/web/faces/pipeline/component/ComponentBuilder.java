@@ -784,6 +784,27 @@ public abstract class ComponentBuilder extends AbstractFacesBuilder {
 																		@Nullable EscapableText candidatesHeading,
 																		@Nullable EscapableText membersHeading,
 																		@Nonnull ListMembership membership);
+
+	/**
+	 * Creates a list-membership component wrapper for a membership whose collection may be ordered: a user can put an
+	 * ordered membership's members in a new order. This default ignores {@code ordered} and calls
+	 * {@link #listMembership(EventSourceComponent, EscapableText, EscapableText, ListMembership)}, so a builder that only
+	 * implements that method still works.
+	 *
+	 * @param component the existing wrapper component
+	 * @param candidatesHeading raw candidates-list heading and nullable escape flag, as for the other overload
+	 * @param membersHeading raw members-list heading and nullable escape flag, as for the other overload
+	 * @param membership the membership metadata
+	 * @param ordered whether the membership's collection is ordered
+	 * @return the resulting wrapper component
+	 */
+	public @Nullable EventSourceComponent listMembership(@Nullable EventSourceComponent component,
+															@Nullable EscapableText candidatesHeading,
+															@Nullable EscapableText membersHeading,
+															@Nonnull ListMembership membership,
+															boolean ordered) {
+		return listMembership(component, candidatesHeading, membersHeading, membership);
+	}
 	
 	/**
 	 * Creates a checkbox component wrapper.

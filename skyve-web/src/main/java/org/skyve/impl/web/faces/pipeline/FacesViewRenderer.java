@@ -2439,9 +2439,9 @@ public class FacesViewRenderer extends ViewRenderer {
 	/**
 	 * Renders list-membership control.
 	 *
-	 * <p>Side effects: creates a pick-list component, passes raw caption metadata
-	 * and nullable escape flags to the component builder, and adds the pick-list to
-	 * the current container.
+	 * <p>Side effects: creates a pick-list component, passes raw caption metadata,
+	 * nullable escape flags and whether the membership's collection is ordered to the
+	 * component builder, and adds the pick-list to the current container.
 	 *
 	 * @param candidatesHeading raw candidates heading
 	 * @param membersHeading raw members heading
@@ -2449,10 +2449,17 @@ public class FacesViewRenderer extends ViewRenderer {
 	 */
 	@Override
 	public void renderListMembership(@Nullable String candidatesHeading, @Nullable String membersHeading, @Nonnull ListMembership membership) {
+		// Determine if the membership's collection is ordered, as for a data grid
+		boolean ordered = false;
+		TargetMetaData target = getCurrentTarget();
+		if ((target != null) && (target.getAttribute() instanceof Collection collection)) {
+			ordered = Boolean.TRUE.equals(collection.getOrdered());
+		}
 		EventSourceComponent c = cb.listMembership(null,
 													EscapableText.of(candidatesHeading, shouldEscape(membership.getEscapeCandidatesHeading())),
 													EscapableText.of(membersHeading, shouldEscape(membership.getEscapeMembersHeading())),
-													membership);
+													membership,
+													ordered);
 		if (c == null) {
 			throw new IllegalStateException("The component builder produced no listMembership component");
 		}

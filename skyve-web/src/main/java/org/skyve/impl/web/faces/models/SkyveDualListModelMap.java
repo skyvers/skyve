@@ -20,6 +20,7 @@ import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.document.Bizlet.DomainValue;
+import org.skyve.metadata.model.document.Collection;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.model.document.DomainType;
 import org.skyve.metadata.model.document.Relation;
@@ -115,13 +116,33 @@ public class SkyveDualListModelMap extends TreeMap<String, DualListModel<DomainV
 				// If the domain value exists in the target collection, 
 				// move it from the source to the target in the DualListModel
 				List<DomainValue> target = new ArrayList<>(10);
-				Iterator<DomainValue> i = source.iterator();
-				while (i.hasNext()) {
-					DomainValue domainValue = i.next();
-					Bean element = Binder.getElementInCollection(bean, binding, domainValue.getCode());
-					if (element != null) {
-						i.remove();
-						target.add(domainValue);
+				if ((targetAttribute instanceof Collection collection) && Boolean.TRUE.equals(collection.getOrdered())) {
+					// an ordered membership shows its members in the collection's order
+					@SuppressWarnings("unchecked")
+					List<Bean> elements = (List<Bean>) Binder.get(bean, binding);
+					if (elements != null) {
+						for (Bean element : elements) {
+							Iterator<DomainValue> i = source.iterator();
+							while (i.hasNext()) {
+								DomainValue domainValue = i.next();
+								if (domainValue.getCode().equals(element.getBizId())) {
+									i.remove();
+									target.add(domainValue);
+									break;
+								}
+							}
+						}
+					}
+				}
+				else {
+					Iterator<DomainValue> i = source.iterator();
+					while (i.hasNext()) {
+						DomainValue domainValue = i.next();
+						Bean element = Binder.getElementInCollection(bean, binding, domainValue.getCode());
+						if (element != null) {
+							i.remove();
+							target.add(domainValue);
+						}
 					}
 				}
 

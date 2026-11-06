@@ -3931,6 +3931,37 @@ class TabularComponentBuilderTest {
 	}
 
 	@Test
+	void testListMembershipShowsTargetControlsOnlyForAnOrderedCollection() {
+		assertAll(() -> assertEquals(Boolean.TRUE, lastShowTargetControls(true), "an ordered membership's members can be reordered"),
+					() -> assertEquals(Boolean.FALSE, lastShowTargetControls(false), "an unordered membership is unchanged"));
+	}
+
+	/**
+	 * Builds a list membership's pick-list through the ordered overload and returns the last value its
+	 * {@code showTargetControls} was set to.
+	 */
+	private Boolean lastShowTargetControls(boolean ordered) {
+		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
+		PickList pickList = mock(PickList.class);
+		FacesView managedBean = mock(FacesView.class);
+		when(managedBean.nextId()).thenReturn("pickListId", "sourceCaptionId", "targetCaptionId");
+		builder.setManagedBeanForTest(managedBean);
+		when(mockApplication.createComponent(PickList.COMPONENT_TYPE)).thenReturn(pickList);
+		when(mockApplication.createComponent(HtmlOutputText.COMPONENT_TYPE)).thenReturn(mock(HtmlOutputText.class), mock(HtmlOutputText.class));
+		when(pickList.getFacets()).thenReturn(new HashMap<>());
+		ListMembership membership = new ListMembership();
+		membership.setBinding("roles");
+
+		EventSourceComponent result = builder.listMembership(null, null, null, membership, ordered);
+
+		assertSame(pickList, result.getComponent());
+		org.mockito.ArgumentCaptor<Boolean> shown = org.mockito.ArgumentCaptor.forClass(Boolean.class);
+		verify(pickList, atLeastOnce()).setShowTargetControls(shown.capture().booleanValue());
+		List<Boolean> values = shown.getAllValues();
+		return values.get(values.size() - 1);
+	}
+
+	@Test
 	void testListMembershipEscapesFacetHeadingsByDefaultAndWhenExplicitTrue() {
 		ListMembership membership = new ListMembership();
 		membership.setBinding("roles");

@@ -1034,6 +1034,29 @@ public class ComponentBuilderChain extends ComponentBuilder {
 	}
 
 	/**
+	 * Delegates list-membership input construction for a membership whose collection may be ordered.
+	 *
+	 * @param component the source event source component
+	 * @param candidatesHeading raw candidates-list heading and nullable escape flag
+	 * @param membersHeading raw members-list heading and nullable escape flag
+	 * @param membership the list-membership metadata
+	 * @param ordered whether the membership's collection is ordered
+	 * @return the transformed event source component
+	 */
+	@Override
+	public @Nullable EventSourceComponent listMembership(@Nullable EventSourceComponent component,
+															@Nullable EscapableText candidatesHeading,
+															@Nullable EscapableText membersHeading,
+															@Nonnull ListMembership membership,
+															boolean ordered) {
+		EventSourceComponent result = component;
+		for (ComponentBuilder builder : builders) {
+			result = builder.listMembership(result, candidatesHeading, membersHeading, membership, ordered);
+		}
+		return result;
+	}
+
+	/**
 	 * Delegates checkbox input construction.
 	 *
 	 * @param component the source event source component

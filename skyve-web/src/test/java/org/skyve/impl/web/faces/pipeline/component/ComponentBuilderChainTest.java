@@ -440,6 +440,16 @@ class ComponentBuilderChainTest {
 	}
 
 	@Test
+	void orderedListMembershipDelegatesToBuilder() {
+		ListMembership membership = mock(ListMembership.class);
+		EscapableText candidates = EscapableText.of("candidates", true);
+		EscapableText members = EscapableText.of("members", false);
+		EventSourceComponent result = new EventSourceComponent(mock(UIComponent.class), mock(UIComponentBase.class));
+		when(mockBuilder.listMembership(mockEventSource, candidates, members, membership, true)).thenReturn(result);
+		assertSame(result, chain.listMembership(mockEventSource, candidates, members, membership, true));
+	}
+
+	@Test
 	void checkBoxDelegatesToBuilder() {
 		CheckBox checkBox = mock(CheckBox.class);
 		EventSourceComponent result = new EventSourceComponent(mock(UIComponent.class), mock(UIComponentBase.class));

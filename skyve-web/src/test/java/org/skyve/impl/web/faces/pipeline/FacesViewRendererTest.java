@@ -400,7 +400,7 @@ class FacesViewRendererTest {
 		membership.setEscapeCandidatesHeading(Boolean.TRUE);
 		membership.setEscapeMembersHeading(null);
 		TestComponent component = new TestComponent("pickList");
-		when(cb.listMembership(any(), any(), any(), same(membership))).thenReturn(new EventSourceComponent(component, component));
+		when(cb.listMembership(any(), any(), any(), same(membership), eq(false))).thenReturn(new EventSourceComponent(component, component));
 
 		assertThrows(IllegalStateException.class,
 						() -> renderer.renderListMembership("<img src=x onerror=alert(1)>", "<img src=x onerror=alert(1)>", membership));
@@ -410,7 +410,8 @@ class FacesViewRendererTest {
 		verify(cb).listMembership(isNull(),
 									candidates.capture(),
 									members.capture(),
-									same(membership));
+									same(membership),
+									eq(false));
 		assertEquals("<img src=x onerror=alert(1)>", candidates.getValue().getValue());
 		assertTrue(candidates.getValue().shouldEscape());
 		assertTrue(candidates.getValue().getEscape());
@@ -428,14 +429,14 @@ class FacesViewRendererTest {
 		membership.setEscapeCandidatesHeading(Boolean.FALSE);
 		membership.setEscapeMembersHeading(Boolean.FALSE);
 		TestComponent component = new TestComponent("pickList");
-		when(cb.listMembership(any(), any(), any(), same(membership))).thenReturn(new EventSourceComponent(component, component));
+		when(cb.listMembership(any(), any(), any(), same(membership), eq(false))).thenReturn(new EventSourceComponent(component, component));
 
 		assertThrows(IllegalStateException.class,
 						() -> renderer.renderListMembership("<b>Candidates</b>", "<i>Members</i>", membership));
 
 		ArgumentCaptor<EscapableText> candidates = ArgumentCaptor.forClass(EscapableText.class);
 		ArgumentCaptor<EscapableText> members = ArgumentCaptor.forClass(EscapableText.class);
-		verify(cb).listMembership(isNull(), candidates.capture(), members.capture(), same(membership));
+		verify(cb).listMembership(isNull(), candidates.capture(), members.capture(), same(membership), eq(false));
 		assertEquals("<b>Candidates</b>", candidates.getValue().getValue());
 		assertFalse(candidates.getValue().shouldEscape());
 		assertFalse(candidates.getValue().getEscape());
