@@ -147,6 +147,8 @@ public class SpringSecurityConfig {
 				.requestMatchers("/smartcomplete").authenticated()
 				// Secure SC text search servlet
 				.requestMatchers("/smartsearch").authenticated()
+				// Secure the SAIL recording servlet
+				.requestMatchers("/sailrecording").authenticated()
 				// Secure map servlet
 				.requestMatchers("/map").authenticated()
 				// Secure the Bizport Export Servlet

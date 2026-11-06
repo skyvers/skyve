@@ -209,6 +209,54 @@
 				<![CDATA[Boolean.TRUE.equals(getTestTagGeneratedData())]]>
 			</expression>
 		</condition>
+		<condition name="devOps" usage="view">
+			<description>
+				<![CDATA[
+					The user has the DevOps role, so sees all of the Control Panel, not only its SAIL recording controls.
+				]]>
+			</description>
+			<expression>
+				<![CDATA[
+					isUserInRole("admin", "DevOps")
+				]]>
+			</expression>
+		</condition>
+		<condition name="sailRecordingAllowed" usage="view">
+			<description>
+				<![CDATA[
+					The configuration (sail.recording) and the user's roles (admin.SAILRecorder) allow SAIL recording.
+				]]>
+			</description>
+			<expression>
+				<![CDATA[
+					modules.admin.ControlPanel.ControlPanelExtension.recordingAllowed()
+				]]>
+			</expression>
+		</condition>
+		<condition name="sailRecording" usage="view">
+			<description>
+				<![CDATA[
+					This session is recording SAIL.
+				]]>
+			</description>
+			<expression>
+				<![CDATA[
+					modules.admin.ControlPanel.ControlPanelExtension.recordingStarted()
+				]]>
+			</expression>
+		</condition>
+		<condition name="sailRecordingDownloadable" usage="view">
+			<description>
+				<![CDATA[
+					This session's SAIL recording has stopped and its script can be downloaded.
+				]]>
+			</description>
+			<expression>
+				<![CDATA[
+					modules.admin.ControlPanel.ControlPanelExtension.recordingDownloadable()
+				]]>
+			</expression>
+		</condition>
 		<condition name="resultsNotNull">
 			<expression>
 				<![CDATA[

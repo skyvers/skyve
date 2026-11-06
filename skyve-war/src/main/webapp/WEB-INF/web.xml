@@ -540,6 +540,17 @@
 		<url-pattern>/smartedit</url-pattern>
 	</servlet-mapping>
 
+	<!-- Receives the steps of a SAIL recording, for sessions that are recording (see docs/sail.md, Recording) -->
+	<servlet>
+		<servlet-name>SailRecordingServlet</servlet-name>
+		<servlet-class>org.skyve.impl.sail.recording.SailRecordingServlet</servlet-class>
+		<async-supported>true</async-supported>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>SailRecordingServlet</servlet-name>
+		<url-pattern>/sailrecording</url-pattern>
+	</servlet-mapping>
+
 	<servlet>
 		<servlet-name>SmartClientGeneratorServlet</servlet-name>
 		<servlet-class>org.skyve.impl.web.service.smartclient.SmartClientGeneratorServlet</servlet-class>
