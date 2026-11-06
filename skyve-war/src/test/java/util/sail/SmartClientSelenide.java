@@ -1763,7 +1763,6 @@ public class SmartClientSelenide extends Selenide<
 	 * @throws IllegalStateException if the row has no such displayed link (the message lists the row's links), or
 	 * 									{@code confirm} is false and nothing asks
 	 */
-	@SuppressWarnings("null") // the link is checked to be an element
 	public boolean clickRowLink(@Nonnull String locator, int row, @Nonnull String text, boolean action, @Nullable Boolean confirm) {
 		String grid = root(locator);
 		require(grid);
