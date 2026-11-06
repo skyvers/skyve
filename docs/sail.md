@@ -799,7 +799,8 @@ fixtures, with `testStrategy="Assert"`.
   again after server round trips;
 - data grids: container, ordered and inline grids;
 - ActionsFixture: toolbar, form and tab buttons, change events and uploads,
-  an upload that is refused, a row's cell and the view's title;
+  an upload that is refused, a click low on the page straight after an
+  upload (PF), a row's cell and the view's title;
 - DialogsFixture: confirmations and server-side questions, answered yes and no;
 - EscapingFixture: zoom in and out;
 - contexts, links, a map, and `execute`;
@@ -938,6 +939,11 @@ The harness follows these rules, and changes to it must keep them.
    event, such as:
    - a page or ajax response;
    - the PrimeFaces ajax queue emptying;
+   - in PF, the form's deferred focus after a response having run. Each view's
+     form has a `<p:focus/>`, which focuses its first input from a timer and so
+     scrolls the page. The harness counts these timers by wrapping
+     `PrimeFaces.focus`. A click straight after an action upload hit this
+     scroll, because closing the upload page refreshes the view;
    - a Vue list grid being mounted in its container, and its fetch ending (its
      paginator spinner shows from the fetch's debounce until the rows arrive);
    - SmartClient having no pending RPC or deferred timer;

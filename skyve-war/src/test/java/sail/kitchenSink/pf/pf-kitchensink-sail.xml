@@ -548,6 +548,8 @@
 			<testWidget tab="Tab button" enabled="false" />
 			<dataEnter binding="disableTab" value="false" />
 			<testWidget binding="outcome" enabled="false" />
+			<comment>A click low on the page straight after an upload: closing the upload page refreshes the view, and the form's deferred focus then scrolls the page</comment>
+			<upload action="ActionsUpload" file="sail/files/sail-upload.txt" />
 			<tabSelect path="Rows" />
 			<dataGridNew binding="rows" />
 			<dataEnter binding="name" value="SAIL row" />
