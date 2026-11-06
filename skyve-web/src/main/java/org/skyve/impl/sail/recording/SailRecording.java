@@ -2,13 +2,18 @@ package org.skyve.impl.sail.recording;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.skyve.impl.cache.StateUtil;
 import org.skyve.impl.util.UtilImpl;
+import org.skyve.metadata.customer.Customer;
+import org.skyve.metadata.module.Module;
+import org.skyve.metadata.user.Role;
 import org.skyve.metadata.user.User;
 
 import jakarta.annotation.Nonnull;
@@ -48,6 +53,12 @@ public final class SailRecording implements Serializable {
 	private final String customerName;
 	private final String userName;
 	private final long startedMillis;
+	/** The user's effective roles when recording started, {@code module.Role}, sorted. */
+	private final ArrayList<String> roleNames;
+	/** The UX/UI the user got when recording started, or null if not known. */
+	private final String uxui;
+	/** The CSRF token issued for this recording, or null before the recorder first asks. Guarded by this. */
+	private Integer token = null;
 	/** The recorded steps in the order received: each an op-code and its attributes. Guarded by this. */
 	private final ArrayList<LinkedHashMap<String, String>> steps = new ArrayList<>();
 	/** The ids of the steps received, so that a step resent by the recorder is added once. Guarded by this. */
@@ -59,10 +70,16 @@ public final class SailRecording implements Serializable {
 	/** The script built when recording stopped. Guarded by this. */
 	private String xml = null;
 
-	private SailRecording(@Nullable String customerName, @Nonnull String userName, long startedMillis) {
+	private SailRecording(@Nullable String customerName,
+							@Nonnull String userName,
+							long startedMillis,
+							@Nonnull List<String> roleNames,
+							@Nullable String uxui) {
 		this.customerName = customerName;
 		this.userName = userName;
 		this.startedMillis = startedMillis;
+		this.roleNames = new ArrayList<>(roleNames);
+		this.uxui = uxui;
 	}
 
 	/**
@@ -118,13 +135,113 @@ public final class SailRecording implements Serializable {
 	 * @throws SecurityException if the configuration or the user's roles do not allow recording
 	 */
 	public static @Nonnull SailRecording start(@Nonnull HttpSession session, @Nonnull User user) {
+		return start(session, user, null);
+	}
+
+	/**
+	 * Starts a new recording in the session, replacing any earlier one (and the script it built), and keeps the user's
+	 * effective roles and UX/UI for the script's header.
+	 *
+	 * <p>Side effects: sets the session attribute {@link #SESSION_ATTRIBUTE_NAME}; removes the earlier recording's
+	 * CSRF token from the session's tokens.
+	 *
+	 * @param session	the session to record
+	 * @param user	the signed-in user
+	 * @param uxui	the UX/UI the user got, or {@code null} if not known
+	 * @return the new recording
+	 * @throws SecurityException if the configuration or the user's roles do not allow recording
+	 */
+	public static @Nonnull SailRecording start(@Nonnull HttpSession session, @Nonnull User user, @Nullable String uxui) {
 		if (! isAllowed(user)) {
 			throw new SecurityException("SAIL recording is not allowed for " + user.getName());
 		}
+		SailRecording earlier = get(session);
+		if (earlier != null) {
+			earlier.forgetToken(session);
+		}
 		String name = user.getName();
-		SailRecording result = new SailRecording(user.getCustomerName(), (name == null) ? "" : name, System.currentTimeMillis());
+		SailRecording result = new SailRecording(user.getCustomerName(),
+													(name == null) ? "" : name,
+													System.currentTimeMillis(),
+													effectiveRoleNames(user),
+													uxui);
 		session.setAttribute(SESSION_ATTRIBUTE_NAME, result);
 		return result;
+	}
+
+	/**
+	 * Returns a user's effective roles: each role of each of the customer's modules that the user is in, whether
+	 * directly or through a group, as {@code module.Role}.
+	 *
+	 * <p>Complexity: O(r) in the customer's module roles.
+	 *
+	 * @param user	the user
+	 * @return the role names, sorted; empty if the user has no customer
+	 */
+	public static @Nonnull List<String> effectiveRoleNames(@Nonnull User user) {
+		Customer customer = user.getCustomer();
+		List<String> result = new ArrayList<>();
+		if (customer != null) {
+			for (Module module : customer.getModules()) {
+				String moduleName = module.getName();
+				for (Role role : module.getRoles()) {
+					String roleName = role.getName();
+					if (user.isInRole(moduleName, roleName)) {
+						result.add(moduleName + '.' + roleName);
+					}
+				}
+			}
+		}
+		Collections.sort(result);
+		return result;
+	}
+
+	/**
+	 * Returns the CSRF token for this recording's batches, issuing it the first time. The same token serves every page
+	 * of the recording, so the session's tokens do not grow with each page the recorder loads into.
+	 *
+	 * <p>Side effects: the first call adds the token to the session's tokens ({@link StateUtil}).
+	 *
+	 * @param session	the recording's session
+	 * @return the token
+	 */
+	public synchronized @Nonnull Integer token(@Nonnull HttpSession session) {
+		Integer result = token;
+		if (result == null) {
+			result = StateUtil.createToken();
+			StateUtil.replaceToken(session, null, result);
+			token = result;
+		}
+		return result;
+	}
+
+	/**
+	 * Removes this recording's token from the session's tokens, as a new recording replaces it.
+	 */
+	private synchronized void forgetToken(@Nonnull HttpSession session) {
+		Integer old = token;
+		if (old != null) {
+			StateUtil.replaceToken(session, old, StateUtil.createToken());
+			token = null;
+		}
+	}
+
+	/**
+	 * Returns the user's effective roles when recording started.
+	 *
+	 * @return the role names, {@code module.Role}, sorted
+	 */
+	public @Nonnull List<String> getRoleNames() {
+		return Collections.unmodifiableList(roleNames);
+	}
+
+	/**
+	 * Returns the UX/UI the user got when recording started.
+	 *
+	 * @return the UX/UI name, or {@code null} if not known
+	 */
+	public @Nullable String getUxui() {
+		return uxui;
 	}
 
 	/**
@@ -272,11 +389,27 @@ public final class SailRecording implements Serializable {
 	 * @return the script as SAIL XML
 	 */
 	public synchronized @Nonnull String stop() {
+		return stop(null);
+	}
+
+	/**
+	 * Stops recording and builds the script from the steps, checking each step with {@code check}: a step it cannot
+	 * confirm becomes a comment that says why. Stopping again returns the script built the first time.
+	 *
+	 * <p>Side effects: the recording no longer takes steps, and {@link #isRecording(HttpSession, User)} is false.
+	 *
+	 * @param check	checks the steps against the metadata, or {@code null} for no checks
+	 * @return the script as SAIL XML
+	 */
+	public synchronized @Nonnull String stop(@Nullable SailRecordingBuilder.StepCheck check) {
 		if (xml == null) {
 			stoppedMillis = System.currentTimeMillis();
 			// The sign in page asks for the customer only when the configuration does not fix one
 			String loginCustomerName = (UtilImpl.CUSTOMER == null) ? customerName : null;
-			SailRecordingBuilder builder = new SailRecordingBuilder(loginCustomerName, userName, startedMillis, stoppedMillis);
+			SailRecordingBuilder builder = new SailRecordingBuilder(loginCustomerName, userName, startedMillis, stoppedMillis)
+												.roles(roleNames)
+												.uxui(uxui)
+												.check(check);
 			xml = SailRecordingBuilder.toXml(builder.build(steps));
 		}
 		return xml;

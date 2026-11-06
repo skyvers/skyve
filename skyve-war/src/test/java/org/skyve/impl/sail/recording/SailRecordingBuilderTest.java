@@ -226,6 +226,70 @@ class SailRecordingBuilderTest {
 					() -> assertFalse(xml.contains("ns2:")));
 	}
 
+	/**
+	 * Context for whoever edits the script: a heading per screen, a data entry's label and earlier value, a zoomed
+	 * row's bizKey and values, and what responses showed and changed, each before the step it belongs with.
+	 */
+	@Test
+	void contextIsWrittenAsComments() {
+		List<Map<String, String>> steps = List.of(
+				step("op", "navigateMenu", "module", "admin", "item", "Contacts", "screen", "admin.ControlPanel (Control Panel), edit view, SmartClient"),
+				step("op", "listGridZoom", "rowContaining", "Fred", "rowBizKey", "Fred Smith", "rowTexts", "Fred Smith | Person",
+						"screen", "list admin_qContacts, SmartClient"),
+				step("op", "dataEnter", "binding", "mobile", "value", "0400", "label", "Mobile", "before", "",
+						"screen", "admin.Contact (Contact), edit view, SmartClient"),
+				step("op", "dataEnter", "binding", "name", "value", "Fred", "label", "Name", "before", "Frederick",
+						"screen", "admin.Contact (Contact), edit view, SmartClient"),
+				step("op", "save", "screen", "admin.Contact (Contact), edit view, SmartClient"),
+				step("op", "context", "text", "changed on screen: email1 \"\" -> \"a@b\""),
+				step("op", "context", "text", "shown: info growl \"Saved\""),
+				step("op", "ok", "screen", "admin.Contact (Contact), edit view, SmartClient"));
+		SailRecordingBuilder.Result result = build(steps);
+		List<Step> method = method(result);
+		assertAll(() -> assertEquals(6, method.size()),
+					() -> assertEquals(List.of("screen: admin.ControlPanel (Control Panel), edit view, SmartClient"), result.commentsFor(method.get(0))),
+					() -> assertEquals(List.of("screen: list admin_qContacts, SmartClient",
+												"row: bizKey \"Fred Smith\", showing Fred Smith | Person"), result.commentsFor(method.get(1))),
+					() -> assertEquals(List.of("screen: admin.Contact (Contact), edit view, SmartClient", "\"Mobile\" was empty"),
+										result.commentsFor(method.get(2))),
+					() -> assertEquals(List.of("\"Name\" was \"Frederick\""), result.commentsFor(method.get(3))),
+					() -> assertEquals(List.of(), result.commentsFor(method.get(4))),
+					() -> assertEquals(List.of("changed on screen: email1 \"\" -> \"a@b\"", "shown: info growl \"Saved\""),
+										result.commentsFor(method.get(5))));
+	}
+
+	/**
+	 * A step the check cannot confirm, or a row named by text it did not show, becomes a comment saying why; it is
+	 * never dropped.
+	 */
+	@Test
+	void unconfirmedStepsBecomeCommentsSayingWhy() {
+		List<Map<String, String>> steps = List.of(
+				step("op", "navigateMenu", "module", "admin", "item", "Contacts"),
+				step("op", "listGridZoom", "rowContaining", "Fred", "rowTexts", "Jane | Person"),
+				step("op", "dataEnter", "binding", "nope", "value", "x", "view", "admin.Contact"),
+				step("op", "save"));
+		SailRecordingBuilder.Result result = new SailRecordingBuilder(null, "admin", STARTED, STOPPED)
+				.check(recorded -> "nope".equals(recorded.get("binding")) ? "the admin.Contact view has no a widget for the binding nope" : null)
+				.build(steps);
+		List<Step> method = method(result);
+		assertAll(() -> assertEquals(2, method.size()),
+					() -> assertEquals(List.of("unconfirmed: listGridZoom rowContaining=\"Fred\" - the row did not show \"Fred\"",
+												"unconfirmed: dataEnter binding=\"nope\" value=\"x\" - the admin.Contact view has no a widget for the binding nope"),
+										result.commentsFor(method.get(1))));
+	}
+
+	@Test
+	void theHeaderHasTheRolesReadyForViewRolesAndTheUxUi() {
+		SailRecordingBuilder.Result result = new SailRecordingBuilder(null, "jane", STARTED, STOPPED)
+				.roles(List.of("admin.AppUser", "admin.BasicUser"))
+				.uxui("desktop")
+				.build(List.of());
+		List<String> header = result.commentsFor(result.automation());
+		assertAll(() -> assertEquals("The recorded user's roles, for the test: viewRoles(\"jane\", \"admin.AppUser\", \"admin.BasicUser\");", header.get(2)),
+					() -> assertEquals("The recorded user got the UX/UI desktop.", header.get(3)));
+	}
+
 	@Test
 	void commentTextCannotCloseTheComment() {
 		assertEquals(" a - - - b - ", SailRecordingBuilder.commentText("a --- b -"));

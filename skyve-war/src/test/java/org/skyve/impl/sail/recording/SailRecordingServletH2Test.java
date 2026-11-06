@@ -122,6 +122,73 @@ class SailRecordingServletH2Test extends AbstractSkyveTest {
 	}
 
 	/**
+	 * Every page of a recording gets the same token, so the session's tokens do not grow with the pages; a new
+	 * recording replaces it.
+	 */
+	@Test
+	void theTokenIsIssuedOncePerRecording() throws Exception {
+		SailRecording.start(session, u);
+		String first = token();
+		assertEquals(first, token());
+		SailRecording.start(session, u);
+		String second = token();
+		assertAll(() -> assertTrue(! first.equals(second), first),
+					() -> assertTrue(! StateUtil.checkToken(session, Integer.valueOf(first)), "the old token is gone"),
+					() -> assertTrue(StateUtil.checkToken(session, Integer.valueOf(second))));
+	}
+
+	/**
+	 * Whenever recording is on, a signed-in user (no SAILRecorder role, no recording) gets their own effective roles,
+	 * with the roles of their groups.
+	 */
+	@Test
+	void theRolesAreTheSignedInUsersWithTheirGroups() throws Exception {
+		org.skyve.metadata.user.User grouped = groupedUser();
+		session.setAttribute(WebContext.USER_SESSION_ATTRIBUTE_NAME, grouped);
+		StateUtil.addSession(grouped.getId(), session);
+		String body = get(Map.of("roles", "")).body();
+		Map<?, ?> answer = (Map<?, ?>) java.util.Objects.requireNonNull(JSON.unmarshall(body), body);
+		java.util.List<?> roles = (java.util.List<?>) answer.get("roles");
+		assertAll(() -> assertTrue(roles.contains("admin.BasicUser"), "from the group: " + body),
+					() -> assertTrue(roles.contains("admin.AppUser"), "direct: " + body),
+					() -> assertTrue(! roles.contains("admin.DevOps"), body),
+					() -> assertTrue(! roles.contains("admin.SAILRecorder"), body),
+					() -> assertEquals(grouped.getName(), answer.get("user")));
+
+		UtilImpl.SAIL_RECORDING = false;
+		Response off = get(Map.of("roles", ""));
+		verify(off.response).sendError(HttpServletResponse.SC_FORBIDDEN);
+	}
+
+	/**
+	 * A user with the role admin.AppUser directly and admin.BasicUser through a group.
+	 */
+	private static org.skyve.metadata.user.User groupedUser() {
+		AbstractPersistence persistence = AbstractPersistence.get();
+		long suffix = System.nanoTime();
+		modules.admin.Group.GroupExtension group = new org.skyve.util.DataBuilder().fixture(org.skyve.util.test.SkyveFixture.FixtureType.crud)
+																.build(modules.admin.domain.Group.MODULE_NAME, modules.admin.domain.Group.DOCUMENT_NAME);
+		group.setName("SAIL group " + suffix);
+		group.getRoles().clear();
+		modules.admin.domain.GroupRole groupRole = modules.admin.domain.GroupRole.newInstance();
+		groupRole.setRoleName("admin.BasicUser");
+		group.addRolesElement(groupRole);
+		group = persistence.save(group);
+
+		modules.admin.User.UserExtension user = new org.skyve.util.DataBuilder().fixture(org.skyve.util.test.SkyveFixture.FixtureType.crud)
+																.build(modules.admin.domain.User.MODULE_NAME, modules.admin.domain.User.DOCUMENT_NAME);
+		user.setUserName("sail.grouped." + suffix);
+		user.getGroups().clear();
+		user.getRoles().clear();
+		user.addGroupsElement(group);
+		modules.admin.domain.UserRole userRole = modules.admin.domain.UserRole.newInstance();
+		userRole.setRoleName("admin.AppUser");
+		user.addRolesElement(userRole);
+		user = persistence.save(user);
+		return java.util.Objects.requireNonNull(user.toMetaDataUser());
+	}
+
+	/**
 	 * Asks for the page's token, as the recorder does when it loads.
 	 */
 	private String token() throws Exception {
