@@ -5,10 +5,10 @@
 		xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../../schemas/view.xsd"
 		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<tabPane selectedTabIndexBinding="tabIndex">
-		<tab title="admin.controlPanel.edit.design.tabTitle">
+		<tab title="admin.controlPanel.edit.design.tabTitle" visible="devOps">
 			<component name="_generateTestData" />
 		</tab>
-		<tab title="admin.controlPanel.edit.sail.tabTitle">
+		<tab title="admin.controlPanel.edit.sail.tabTitle" visible="devOps">
 			<form border="true">
 				<column responsiveWidth="3" />
 				<column />

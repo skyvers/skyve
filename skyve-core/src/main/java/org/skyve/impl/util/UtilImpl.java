@@ -442,6 +442,11 @@ public class UtilImpl {
 	public static boolean HEALTH_CHECK = true;
 	// Number of seconds to cache the health results to alleviate denial of service
 	public static int HEALTH_CACHE_TIME_IN_SECONDS = 60; // 1 min
+
+	// Allow users with the admin.SAILRecorder role to record SAIL scripts (sail.recording)
+	public static boolean SAIL_RECORDING = false;
+	// The most steps one SAIL recording keeps (sail.maximumSteps)
+	public static int SAIL_RECORDING_MAXIMUM_STEPS = 5000;
 	
 	// These 3 are used to create a user with all roles for the customer assigned, if the user does not already exist
 	public static String BOOTSTRAP_CUSTOMER = null;
@@ -957,6 +962,9 @@ public class UtilImpl {
     	
     	HEALTH_CHECK = true;
     	HEALTH_CACHE_TIME_IN_SECONDS = 60; // 1 min
+
+    	SAIL_RECORDING = false;
+    	SAIL_RECORDING_MAXIMUM_STEPS = 5000;
     	
     	BOOTSTRAP_CUSTOMER = null;
     	BOOTSTRAP_USER = null;

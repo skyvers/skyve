@@ -911,6 +911,7 @@ isc.EditView.addMethods({
 
 	/**
 	 * Scatter method for distributing values into corresponding UI components and grids.
+	 * The SAIL recorder (src/js/sail/recorder-sc.js) wraps this method to record the user's data entry before a response replaces the values.
 	 *
 	 * @param {Object} values - the values to be scattered into the UI components and grids.
 	 * @param {boolean} values.persisted - whether the data has been persisted.
@@ -1765,7 +1766,9 @@ isc.BizButton.addMethods({
 			this.showDisabledIcon = this.hasDisabledIcon;
 		}
 
-		// Defines the action triggered on button click
+		// Defines the action triggered on button click.
+		// The SAIL recorder (src/js/sail/recorder-sc.js) wraps initWidget and then this action, to record the step for
+		// the button's type and actionName: keep the _blurry handling and the confirmation through isc.ask in step.
 		this.action = function () {
 			if (this._view && this._view._blurry) {
 				this._view._blurry = this;
@@ -2266,6 +2269,7 @@ isc.BizTabPane.addMethods({
 
 	/**
 	 * Handles the selection of a tab.
+	 * The SAIL recorder (src/js/sail/recorder-sc.js) wraps this method to record tabSelect when the user selects a tab.
 	 *
 	 * @function
 	 * @param {number} tabNum - the tab number that was selected

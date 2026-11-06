@@ -10,6 +10,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.function.Supplier;
 
@@ -156,6 +157,8 @@ public abstract class InterpretedWebDriverExecutor<
 	private SailViewRoles viewRoles;
 	/** The persistence user when the first login of the run switched it, which the views are built from; or null. */
 	private User viewTemplateUser;
+	/** The variables each automation starts with, by name; see {@link #useVariables(Map)}. */
+	private final Map<String, String> startingVariables = new java.util.TreeMap<>();
 
 	/**
 	 * Runs the automation's before procedure, interactions and after procedure, applying the test strategy.
@@ -167,6 +170,9 @@ public abstract class InterpretedWebDriverExecutor<
 	public void executeAutomation(@Nonnull Automation automation) {
 		testStrategyOverride(); // an invalid override fails here, before any step runs
 		initialiseAutomation(automation);
+		for (Map.Entry<String, String> variable : startingVariables.entrySet()) {
+			putVariable(variable.getKey(), variable.getValue());
+		}
 		failures.clear();
 		thrown.clear();
 
@@ -561,6 +567,21 @@ public abstract class InterpretedWebDriverExecutor<
 	 */
 	public final void useViewRoles(@Nonnull SailViewRoles roles) {
 		viewRoles = roles;
+	}
+
+	/**
+	 * Defines variables that every automation this executor runs starts with, for {@code {var:name}}, as if each had
+	 * been captured. A recorded script signs in with {@code password="{var:password}"}, because the recorder never
+	 * records a password: the test supplies it this way, and the script runs unedited. A {@code <captureValue/>} of the
+	 * same name replaces the value for the rest of that automation.
+	 *
+	 * <p>Side effects: replaces the variables given before.
+	 *
+	 * @param variables	the variables by name; copied
+	 */
+	public final void useVariables(@Nonnull Map<String, String> variables) {
+		startingVariables.clear();
+		startingVariables.putAll(variables);
 	}
 
 	@Override

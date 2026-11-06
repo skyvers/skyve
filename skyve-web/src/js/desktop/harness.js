@@ -162,6 +162,7 @@ isc.BizUtil.addClassProperties({
 
 	/**
 	 * Handles click events on menu items.
+	 * The SAIL recorder (src/js/sail/recorder-sc.js) wraps this method to record navigateMenu: keep its arguments.
 	 * @param {isc.TreeGrid} viewer - the TreeGrid that triggered the event.
 	 * @param {Object} leaf - the clicked leaf node.
 	 * @param {number} recordNum - the record number of the clicked leaf.

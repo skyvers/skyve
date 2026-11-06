@@ -127,6 +127,7 @@ public class SkyveContextListener implements ServletContextListener {
 	private static final String ACCOUNT_KEY = "account";
 	private static final String ENVIRONMENT_KEY = "environment";
 	private static final String HEALTH_KEY = "health";
+	private static final String SAIL_KEY = "sail";
 	private static final String BOOTSTRAP_KEY = "bootstrap";
 	private static final String API_KEY = "api";
 	private static final String DOES_NOT_EXIST = " does not exist.";
@@ -265,6 +266,7 @@ public class SkyveContextListener implements ServletContextListener {
 		configureAccountSettings(properties);
 		configureEnvironmentSettings(properties);
 		configureHealthSettings(properties);
+		configureSailSettings(properties);
 		configureApiSettings(properties);
 		configureBootstrapSettings(properties);
 		configurePrimeFlex(ctx);
@@ -815,6 +817,36 @@ public class SkyveContextListener implements ServletContextListener {
 
 		UtilImpl.HEALTH_CHECK = getBoolean(HEALTH_KEY, "check", health);
 		UtilImpl.HEALTH_CACHE_TIME_IN_SECONDS = getInt(HEALTH_KEY, "cacheTimeInSeconds", health);
+	}
+
+	/**
+	 * Reads the optional {@code sail} section: {@code sail.recording} allows users with the {@code admin.SAILRecorder}
+	 * role to record SAIL scripts. It defaults to {@code false}. {@code sail.maximumSteps} caps the steps one recording
+	 * keeps (default 5000). Recording is allowed in production (a null
+	 * {@code environment.identifier}), with a warning, because a recording holds the data the user saw and typed.
+	 *
+	 * <p>Side effects: sets {@link UtilImpl#SAIL_RECORDING} and {@link UtilImpl#SAIL_RECORDING_MAXIMUM_STEPS}; logs a warning when recording is allowed in production.
+	 * Must run after the environment settings are read.
+	 *
+	 * @param properties	the configuration
+	 */
+	private static void configureSailSettings(@Nonnull Map<String, Object> properties) {
+		Map<String, Object> sail = getOptionalObject(SAIL_KEY, properties);
+		Boolean recording = (sail == null) ? null : (Boolean) getOptional("recording", sail);
+		UtilImpl.SAIL_RECORDING = Boolean.TRUE.equals(recording);
+		if (sail != null) {
+			applyOptionalInt(sail, SAIL_KEY, "maximumSteps", value -> {
+				if (value < 1) {
+					throw new IllegalStateException(SAIL_KEY + ".maximumSteps must be greater than 0");
+				}
+				UtilImpl.SAIL_RECORDING_MAXIMUM_STEPS = value;
+			});
+		}
+		if (UtilImpl.SAIL_RECORDING && (UtilImpl.ENVIRONMENT_IDENTIFIER == null)) {
+			LOGGER.warn(WARNING_BANNER);
+			LOGGER.warn("SAIL recording (sail.recording) is enabled in production - users with the admin.SAILRecorder role can record what they see and type");
+			LOGGER.warn(WARNING_BANNER);
+		}
 	}
 
 	private static void configureApiSettings(@Nonnull Map<String, Object> properties) {

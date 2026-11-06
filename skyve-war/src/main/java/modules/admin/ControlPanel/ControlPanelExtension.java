@@ -3,9 +3,14 @@ package modules.admin.ControlPanel;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 
+import org.skyve.CORE;
+import org.skyve.EXT;
+import org.skyve.impl.sail.recording.SailRecording;
 import org.skyve.impl.util.UtilImpl;
 
 import modules.admin.domain.ControlPanel;
+import jakarta.annotation.Nullable;
+import jakarta.servlet.http.HttpSession;
 import modules.admin.domain.ModuleDocument;
 
 /**
@@ -15,6 +20,48 @@ public class ControlPanelExtension extends ControlPanel {
 	private static final long serialVersionUID = -6204655500999983605L;
 
 	private String unescapedResults;
+
+	/**
+	 * Indicates whether the configuration ({@code sail.recording}) and the signed-in user's roles
+	 * ({@code admin.SAILRecorder}) allow SAIL recording; the condition {@code sailRecordingAllowed}.
+	 *
+	 * @return true if the user may record
+	 */
+	public static boolean recordingAllowed() {
+		return SailRecording.isAllowed(CORE.getUser());
+	}
+
+	/**
+	 * Indicates whether this request's session is recording SAIL; the condition {@code sailRecording}.
+	 *
+	 * @return true if the session is recording, false outside a web request
+	 */
+	public static boolean recordingStarted() {
+		return SailRecording.isRecording(session(), CORE.getUser());
+	}
+
+	/**
+	 * Indicates whether this request's session has a stopped SAIL recording to download; the condition
+	 * {@code sailRecordingDownloadable}.
+	 *
+	 * @return true if there is a recorded script, false outside a web request
+	 */
+	public static boolean recordingDownloadable() {
+		if (! recordingAllowed()) {
+			return false;
+		}
+		SailRecording recording = SailRecording.get(session());
+		return (recording != null) && (recording.getXml() != null);
+	}
+
+	/**
+	 * Returns this request's session without creating one.
+	 *
+	 * @return the session, or {@code null} outside a web request or before a session exists
+	 */
+	public static @Nullable HttpSession session() {
+		return EXT.isWebRequest() ? EXT.getHttpServletRequest().getSession(false) : null;
+	}
 
 	/**
 	 * Create a new DocumentName to hold the module and document name for creating test data.

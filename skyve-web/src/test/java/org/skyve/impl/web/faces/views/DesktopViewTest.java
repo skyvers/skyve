@@ -30,6 +30,7 @@ import org.skyve.impl.metadata.module.menu.EditItem;
 import org.skyve.impl.metadata.module.menu.ListItem;
 import org.skyve.impl.metadata.user.UserImpl;
 import org.skyve.impl.persistence.AbstractPersistence;
+import org.skyve.impl.sail.recording.SailRecording;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.RequestUxUiSelectionTestUtil;
 import org.skyve.metadata.MetaDataException;
@@ -44,6 +45,7 @@ import org.skyve.metadata.user.User;
 import org.skyve.util.Icons;
 import org.skyve.web.UserAgentType;
 import org.skyve.web.WebAction;
+import org.skyve.web.WebContext;
 
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
@@ -51,6 +53,7 @@ import jakarta.faces.context.ExternalContext;
 import jakarta.faces.context.FacesContext;
 import jakarta.faces.context.PartialViewContext;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 
 @SuppressWarnings("static-method")
 class DesktopViewTest {
@@ -487,6 +490,71 @@ class DesktopViewTest {
 		Field field = AbstractPersistence.class.getDeclaredField("threadLocalPersistence");
 		field.setAccessible(true);
 		((ThreadLocal<AbstractPersistence>) field.get(null)).remove();
+	}
+
+	/**
+	 * The page loads the SAIL recorder only when every part of the gate passes: the configuration, the role and a
+	 * recording started in the session.
+	 */
+	@Test
+	void sailRecordingNeedsTheWholeGate() {
+		boolean originalSailRecording = UtilImpl.SAIL_RECORDING;
+		try {
+			UtilImpl.SAIL_RECORDING = true;
+			User recorder = sailUser(true);
+			HttpSession session = attributeSession();
+			session.setAttribute(WebContext.USER_SESSION_ATTRIBUTE_NAME, recorder);
+			assertFalse(sailRecording(session), "not started");
+
+			SailRecording recording = SailRecording.start(session, recorder);
+			assertTrue(sailRecording(session), "started");
+
+			UtilImpl.SAIL_RECORDING = false;
+			assertFalse(sailRecording(session), "configuration off");
+			UtilImpl.SAIL_RECORDING = true;
+
+			session.setAttribute(WebContext.USER_SESSION_ATTRIBUTE_NAME, sailUser(false));
+			assertFalse(sailRecording(session), "no SAILRecorder role");
+			session.setAttribute(WebContext.USER_SESSION_ATTRIBUTE_NAME, recorder);
+			assertTrue(sailRecording(session), "all parts again");
+
+			// a stopped recording is tested in skyve-war's SailRecordingTest: stopping builds XML, which needs the schemas
+			assertFalse(sailRecording(null), "no session");
+			assertTrue(SailRecording.get(session) == recording);
+		}
+		finally {
+			UtilImpl.SAIL_RECORDING = originalSailRecording;
+		}
+	}
+
+	private static boolean sailRecording(@Nullable HttpSession session) {
+		HttpServletRequest request = mock(HttpServletRequest.class);
+		when(request.getSession(false)).thenReturn(session);
+		ExternalContext externalContext = mock(ExternalContext.class);
+		when(externalContext.getRequest()).thenReturn(request);
+		FacesContext context = mock(FacesContext.class);
+		when(context.getExternalContext()).thenReturn(externalContext);
+		FacesContextBridge.setCurrent(context);
+		return new DesktopView().isSailRecording();
+	}
+
+	private static User sailUser(boolean recorder) {
+		User result = mock(User.class);
+		when(result.getName()).thenReturn("admin");
+		when(result.getCustomerName()).thenReturn("demo");
+		when(Boolean.valueOf(result.isInRole(SailRecording.ROLE_MODULE_NAME, SailRecording.ROLE_NAME))).thenReturn(Boolean.valueOf(recorder));
+		return result;
+	}
+
+	/**
+	 * A session mock that keeps its attributes.
+	 */
+	private static HttpSession attributeSession() {
+		java.util.Map<String, Object> attributes = new java.util.HashMap<>();
+		HttpSession result = mock(HttpSession.class);
+		org.mockito.Mockito.doAnswer(i -> attributes.put(i.getArgument(0), i.getArgument(1))).when(result).setAttribute(anyString(), any());
+		when(result.getAttribute(anyString())).thenAnswer(i -> attributes.get(i.getArgument(0)));
+		return result;
 	}
 
 	/**
