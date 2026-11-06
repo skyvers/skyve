@@ -706,6 +706,7 @@ tests. The SAIL ITs are:
 |---|---|---|
 | `PrimeFacesKitchenSinkSailIT` | `sail/kitchenSink/pf/pf-kitchensink-sail.xml`, plus a test that switches to SmartClient with PrimeFaces' user menu and checks `<switchMode/>` back, one that checks the find steps' failures, and `rowLink` (`pf-kitchensink-row-link.xml`) | PF, tablet |
 | `PrimeFacesSailTestStrategyIT` | inline scripts, 3 tests | PF, tablet |
+| `PrimeFacesFocusSailIT` | where a page puts the focus (runtime issue P11): a rerender low in a long view keeps the scroll and the focus; a loaded view focuses its first input | PF, tablet |
 | `PrimeFacesAdminSuiteSailIT` | `sail/admin/pf/suite/*.xml` | PF, tablet |
 | `PrimeFacesAdminSailIT` | `sail/admin/pf/pf-admin-sail.xml` (the older single-file admin script) | PF, tablet |
 | `PrimeFacesAdminPhoneSailIT` | `sail/admin/pf/admin-phone-smoke.xml` | PF, phone |
@@ -951,11 +952,6 @@ The harness follows these rules, and changes to it must keep them.
    event, such as:
    - a page or ajax response;
    - the PrimeFaces ajax queue emptying;
-   - in PF, the form's deferred focus after a response having run. Each view's
-     form has a `<p:focus/>`, which focuses its first input from a timer and so
-     scrolls the page. The harness counts these timers by wrapping
-     `PrimeFaces.focus`. A click straight after an action upload hit this
-     scroll, because closing the upload page refreshes the view;
    - a Vue list grid being mounted in its container, and its fetch ending (its
      paginator spinner shows from the fetch's debounce until the rows arrive);
    - SmartClient having no pending RPC or deferred timer;
