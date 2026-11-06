@@ -851,7 +851,8 @@ public class WebUtil {
 	 * @param user the user adding the element; must not be {@code null}
 	 * @param bean the bean that {@code binding} is relative to; must not be {@code null}
 	 * @param binding the binding of the collection or inverse, relative to {@code bean}; must not be {@code null}
-	 * @param parentBean the bean passed to {@code preExecute(Add)} as the parent; must not be {@code null}
+	 * @param parentBean the bean of the view the element is added from, passed to the interceptors and
+	 *        {@code preExecute(Add)} as the parent; may be {@code null}, as their contracts allow
 	 * @param webContext the conversation's web context; must not be {@code null}
 	 * @return the added element, or {@code null} when an interceptor vetoed the add, in which case nothing was added
 	 * @throws IllegalStateException if {@code binding} does not resolve to a relation
@@ -861,7 +862,7 @@ public class WebUtil {
 	public static @Nullable Bean addNewElement(@Nonnull User user,
 												@Nonnull Bean bean,
 												@Nonnull String binding,
-												@Nonnull Bean parentBean,
+												@Nullable Bean parentBean,
 												@Nonnull WebContext webContext)
 	throws Exception {
 		Customer customer = user.getCustomer();
