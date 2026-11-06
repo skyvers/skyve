@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<document name="OrderedGridFixtureLine"
+			xmlns="http://www.skyve.org/xml/document"
+			xsi:schemaLocation="http://www.skyve.org/xml/document ../../../schemas/document.xsd"
+			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<documentation>
+		<![CDATA[
+			Line of the Kitchen Sink ordered grid fixture's inline data grid.
+		]]>
+	</documentation>
+	<persistent name="KS_OrderedGridFixtureLine" />
+	<singularAlias>Ordered Grid Fixture Line</singularAlias>
+	<pluralAlias>Ordered Grid Fixture Lines</pluralAlias>
+	<parentDocument>OrderedGridFixture</parentDocument>
+	<bizKey expression="{name}" />
+	<attributes>
+		<text name="name">
+			<displayName>Name</displayName>
+			<length>100</length>
+		</text>
+	</attributes>
+</document>

@@ -232,10 +232,37 @@
 			<key column="parent_id" />
 			<one-to-many entity-name="kitchensinkOrderedGridFixtureRow" />
 		</bag>
+		<bag name="lines" order-by="bizOrdinal" cascade="all-delete-orphan">
+			<key column="parent_id" />
+			<one-to-many entity-name="kitchensinkOrderedGridFixtureLine" />
+		</bag>
+		<list name="members" table="KS_OrderedGridFixture_members" cascade="persist,save-update,refresh,merge">
+			<key column="owner_id" foreign-key="FK_KS_OrderedGridFixture_members_owner_id" />
+			<list-index column="bizOrdinal"/>
+			<many-to-many entity-name="kitchensinkLookupDescription" foreign-key="FK_KS_OrderedGridFixture_members_element_id" column="element_id" />
+		</list>
 		<filter name="kitchensinkOrderedGridFixtureNoneFilter" condition="1=0"/>
 		<filter name="kitchensinkOrderedGridFixtureCustomerFilter" condition="bizCustomer=:customerParam"/>
 		<filter name="kitchensinkOrderedGridFixtureDataGroupIdFilter" condition="bizDataGroupId=:dataGroupIdParam"/>
 		<filter name="kitchensinkOrderedGridFixtureUserIdFilter" condition="bizUserId=:userIdParam"/>
+	</class>
+
+	<class name="modules.kitchensink.domain.OrderedGridFixtureLine" table="KS_OrderedGridFixtureLine" entity-name="kitchensinkOrderedGridFixtureLine">
+		<id name="bizId" length="36" />
+		<version name="bizVersion" unsaved-value="null" />
+		<property name="bizLock" type="OptimisticLock" length="271" not-null="true" />
+		<property name="bizKey" length="1024" not-null="true" />
+		<property name="bizCustomer" length="50" not-null="true" />
+		<property name="bizFlagComment" length="1024" />
+		<property name="bizDataGroupId" length="36" />
+		<property name="bizUserId" length="36" not-null="true" />
+		<property name="bizOrdinal" />
+		<many-to-one name="parent" entity-name="kitchensinkOrderedGridFixture" column="parent_id" insert="false" update="false" foreign-key="FK_KS_OrderedGridFixtureLine_parent" />
+		<property name="name" length="100" />
+		<filter name="kitchensinkOrderedGridFixtureLineNoneFilter" condition="1=0"/>
+		<filter name="kitchensinkOrderedGridFixtureLineCustomerFilter" condition="bizCustomer=:customerParam"/>
+		<filter name="kitchensinkOrderedGridFixtureLineDataGroupIdFilter" condition="bizDataGroupId=:dataGroupIdParam"/>
+		<filter name="kitchensinkOrderedGridFixtureLineUserIdFilter" condition="bizUserId=:userIdParam"/>
 	</class>
 
 	<class name="modules.kitchensink.domain.OrderedGridFixtureRow" table="KS_OrderedGridFixtureRow" entity-name="kitchensinkOrderedGridFixtureRow">
@@ -354,6 +381,16 @@
 		<filter-param name="dataGroupIdParam" type="string"/>
 	</filter-def>
 	<filter-def name="kitchensinkOrderedGridFixtureUserIdFilter">
+		<filter-param name="userIdParam" type="string"/>
+	</filter-def>
+	<filter-def name="kitchensinkOrderedGridFixtureLineNoneFilter" />
+	<filter-def name="kitchensinkOrderedGridFixtureLineCustomerFilter">
+		<filter-param name="customerParam" type="string"/>
+	</filter-def>
+	<filter-def name="kitchensinkOrderedGridFixtureLineDataGroupIdFilter">
+		<filter-param name="dataGroupIdParam" type="string"/>
+	</filter-def>
+	<filter-def name="kitchensinkOrderedGridFixtureLineUserIdFilter">
 		<filter-param name="userIdParam" type="string"/>
 	</filter-def>
 	<filter-def name="kitchensinkOrderedGridFixtureRowNoneFilter" />

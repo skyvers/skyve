@@ -5,8 +5,8 @@
 			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<documentation>
 		<![CDATA[
-			Kitchen Sink fixture for an ordered data grid that is saved: its rows can be dragged into a new order,
-			and the order is kept by their ordinals.
+			Kitchen Sink fixture for ordered collections that are saved: a data grid, an inline data grid and a list
+			membership, whose rows (or members) can be dragged into a new order, kept by their ordinals.
 		]]>
 	</documentation>
 	<persistent name="KS_OrderedGridFixture" />
@@ -22,6 +22,19 @@
 			<displayName>Rows</displayName>
 			<description>An ordered collection: its rows can be dragged into a new order.</description>
 			<documentName>OrderedGridFixtureRow</documentName>
+			<minCardinality>0</minCardinality>
+		</collection>
+		<collection name="lines" type="child" ordered="true">
+			<displayName>Lines</displayName>
+			<description>An ordered collection, edited inline: its rows can be dragged into a new order.</description>
+			<documentName>OrderedGridFixtureLine</documentName>
+			<minCardinality>0</minCardinality>
+		</collection>
+		<collection name="members" type="aggregation" ordered="true">
+			<displayName>Members</displayName>
+			<description>An ordered list membership of lookup values: its members can be dragged into a new order.</description>
+			<domain>variant</domain>
+			<documentName>LookupDescription</documentName>
 			<minCardinality>0</minCardinality>
 		</collection>
 	</attributes>

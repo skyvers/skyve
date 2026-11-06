@@ -394,6 +394,55 @@
 			<delete />
 		</method>
 	</interaction>
+	<interaction name="Ordered inline grid and ordered list membership: keep their order once saved">
+		<method>
+			<comment>Lookup values to be members</comment>
+			<navigateMenu module="kitchensink" item="Lookup values" />
+			<listGridNew module="kitchensink" document="LookupDescription" />
+			<dataEnter binding="description" value="SAIL member {run} a" />
+			<save />
+			<ok />
+			<listGridNew module="kitchensink" document="LookupDescription" />
+			<dataEnter binding="description" value="SAIL member {run} b" />
+			<save />
+			<ok />
+			<listGridNew module="kitchensink" document="LookupDescription" />
+			<dataEnter binding="description" value="SAIL member {run} c" />
+			<save />
+			<ok />
+			<navigateMenu module="kitchensink" item="Ordered Grid Fixtures" />
+			<listGridNew module="kitchensink" document="OrderedGridFixture" />
+			<dataEnter binding="name" value="SAIL ordered lines {run}" />
+			<comment>The ordered inline grid: inline adds, a drag, and an inline edit</comment>
+			<dataGridNew binding="lines" />
+			<dataEnter binding="name" value="First {run}" />
+			<dataGridNew binding="lines" />
+			<dataEnter binding="name" value="Second {run}" />
+			<dataGridNew binding="lines" />
+			<dataEnter binding="name" value="Third {run}" />
+			<dataGridMove binding="lines" rowContaining="Third {run}" to="0" />
+			<dataGridEdit binding="lines" row="1" />
+			<dataEnter binding="name" value="First edited {run}" />
+			<comment>The ordered membership. SAIL has no gesture to drag members into a new order; SmartClient assigns them in the order the value names them</comment>
+			<dataEnter binding="members" value="SAIL member {run} c|SAIL member {run} a|SAIL member {run} b" />
+			<save />
+			<ok />
+			<comment>Reopen it from its list, so the order comes from the database</comment>
+			<listGridZoom module="kitchensink" document="OrderedGridFixture" rowContaining="SAIL ordered lines {run}" />
+			<captureCell binding="lines" row="0" column="name" variable="line0" pattern="^Third " />
+			<captureCell binding="lines" row="1" column="name" variable="line1" pattern="^First edited " />
+			<captureCell binding="lines" row="2" column="name" variable="line2" pattern="^Second " />
+			<testValue binding="members" value="SAIL member {run} c|SAIL member {run} a|SAIL member {run} b" />
+			<delete />
+			<navigateMenu module="kitchensink" item="Lookup values" />
+			<listGridZoom module="kitchensink" document="LookupDescription" rowContaining="SAIL member {run} a" />
+			<delete />
+			<listGridZoom module="kitchensink" document="LookupDescription" rowContaining="SAIL member {run} b" />
+			<delete />
+			<listGridZoom module="kitchensink" document="LookupDescription" rowContaining="SAIL member {run} c" />
+			<delete />
+		</method>
+	</interaction>
 	<interaction name="Logout">
 		<method>
 			<logout />

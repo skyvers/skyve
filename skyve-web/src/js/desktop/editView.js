@@ -1385,8 +1385,10 @@ isc.EditView.addMethods({
 								smartClientGrid.fields[0].type === "enum")
 						) {
 							if (grid._ordinal) {
+								// Number an ordered membership's members in the order they show, which a drag may have
+								// changed. The data is the member list's own array, already in that order, so it is
+								// not sorted here (sorting it in place would fire the list's dataChanged).
 								grid._memberList.reorderData();
-								data = data.sortByProperty(grid._ordinal, true);
 							}
 
 							// Extract bizIds from list memberships

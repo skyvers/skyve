@@ -777,8 +777,11 @@ effect:
   row's `bizOrdinal` (`ViewJSONManipulator`; its own ordinal sort is
   commented out).
 
-The list membership branch's sort is kept: it only runs for an ordered
-membership, and none exists to compare it on. `skyve-min.js` is rebuilt.
+The list membership branch's sort, which only runs for an ordered
+membership, was first kept, as no ordered membership existed to compare it on.
+It was removed too once the kitchen sink had one (see below): its data is the
+member list's own array (checked in the browser), already in the order the
+members show. `skyve-min.js` is rebuilt.
 
 **No side effects (Mike's acceptance test).** The same gestures were run on
 the bundle with the sort and on the bundle without it, capturing the whole
@@ -791,14 +794,25 @@ each save and as loaded; an unordered inline grid after inline adds, a remove
 and a select, and after a column header sort (a real click) and the add that
 followed; and an unordered list membership on each save and as loaded. Two
 runs on the bundle with the sort were identical too, so the capture is
-deterministic. The kitchen sink has no ordered inline grid and no ordered
-membership, so those were not compared.
+deterministic.
+
+The second comparison, for the membership branch's sort, used the same method
+on OrderedGridFixture's ordered inline grid `lines` and ordered list
+membership `members`: inline adds, a drag (`dataGridMove`), an inline edit, a
+select and a remove in the grid; members added, dragged into a new order in
+the member list (a real drag), one removed; saves, the record reopened and
+saved as loaded. Two runs with the sort were identical, the run without it
+was identical to both, and so was a rerun of the first comparison's cases.
 
 **Suites.** The SC kitchen sink edits a ModelLookupFixture row again with
 `dataGridEdit` and changes its model lookup column with
 `lookupDescriptionAutoComplete pick`. Before the fix that step failed ("no
 inline editor for column selection of data grid rows (is a row being
 edited?)"); after it, it passes.
+Both kitchen sinks save OrderedGridFixture's ordered membership and reopen it
+to check its members' order; the SC kitchen sink also moves, edits and saves
+rows of its ordered inline grid and checks their positions once reopened.
+These pass with and without the membership branch's sort.
 
 **Status:** fixed.
 
