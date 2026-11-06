@@ -176,19 +176,17 @@ public final class SailRecording implements Serializable {
 	 * <p>Complexity: O(r) in the customer's module roles.
 	 *
 	 * @param user	the user
-	 * @return the role names, sorted; empty if the user has no customer
+	 * @return the role names, sorted
 	 */
 	public static @Nonnull List<String> effectiveRoleNames(@Nonnull User user) {
 		Customer customer = user.getCustomer();
 		List<String> result = new ArrayList<>();
-		if (customer != null) {
-			for (Module module : customer.getModules()) {
-				String moduleName = module.getName();
-				for (Role role : module.getRoles()) {
-					String roleName = role.getName();
-					if (user.isInRole(moduleName, roleName)) {
-						result.add(moduleName + '.' + roleName);
-					}
+		for (Module module : customer.getModules()) {
+			String moduleName = module.getName();
+			for (Role role : module.getRoles()) {
+				String roleName = role.getName();
+				if (user.isInRole(moduleName, roleName)) {
+					result.add(moduleName + '.' + roleName);
 				}
 			}
 		}
