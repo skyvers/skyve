@@ -127,7 +127,8 @@ class ThemeFaceletsStructureTest {
 			assertTrue(template.contains("styleClass=\"skyve-global-messages\""), family + ": " + template);
 			assertTrue(headResources.contains("skyve/prime/skyve-min.js?v=#{bean.webResourceFileVersion}"),
 					family + ": " + headResources);
-			assertFalse(headResources.contains("<c:if"), family + ": " + headResources);
+			// the only c:if is the SAIL recorder's tag, which must add nothing to the page unless the session records
+			assertFalse(headResources.replace(PrimeFacesHeadSailRecorderTest.RECORDER, "").contains("<c:if"), family + ": " + headResources);
 			assertFalse(bodyResources.contains("<c:if"), family + ": " + bodyResources);
 		}
 	}

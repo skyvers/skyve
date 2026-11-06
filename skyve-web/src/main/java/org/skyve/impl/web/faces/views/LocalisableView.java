@@ -9,6 +9,7 @@ import java.util.Set;
 
 import org.skyve.CORE;
 import org.skyve.impl.persistence.AbstractPersistence;
+import org.skyve.impl.sail.recording.SailRecording;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.WebUtil;
 import org.skyve.impl.web.faces.FacesAction;
@@ -16,11 +17,14 @@ import org.skyve.metadata.user.User;
 import org.skyve.util.Util;
 import org.skyve.util.logging.Category;
 import org.skyve.util.logging.SkyveLoggerFactory;
+import org.skyve.web.WebContext;
 import org.slf4j.Logger;
 
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import jakarta.faces.context.FacesContext;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 
 /**
  * Adds EL localisation via "i18n" map property to any Faces View that extends it.
@@ -253,5 +257,22 @@ public abstract class LocalisableView implements Serializable {
 	@SuppressWarnings("static-method")
 	public @Nonnull String getWebResourceFileVersion() {
 		return UtilImpl.WEB_RESOURCE_FILE_VERSION;
+	}
+
+	/**
+	 * Indicates whether the page loads the SAIL recorder, because the session is recording: see
+	 * {@link SailRecording#isRecording(HttpSession, User)}. When it is false, the page has no trace of the recorder.
+	 * The SmartClient home page and each PrimeFaces theme's head resources test it.
+	 *
+	 * <p>Side effects: none; it does not create a session.
+	 *
+	 * @return true if the session is recording
+	 */
+	@SuppressWarnings("static-method")
+	public boolean isSailRecording() {
+		HttpServletRequest request = (HttpServletRequest) FacesContext.getCurrentInstance().getExternalContext().getRequest();
+		HttpSession session = request.getSession(false);
+		Object user = (session == null) ? null : session.getAttribute(WebContext.USER_SESSION_ATTRIBUTE_NAME);
+		return SailRecording.isRecording(session, (user instanceof User u) ? u : null);
 	}
 }

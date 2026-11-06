@@ -809,7 +809,8 @@ fixtures, with `testStrategy="Assert"`.
   again after server round trips;
 - data grids: container, ordered and inline grids;
 - ActionsFixture: toolbar, form and tab buttons, change events and uploads,
-  an upload that is refused, a row's cell and the view's title;
+  an upload that is refused, a click low on the page straight after an
+  upload (PF), a row's cell and the view's title;
 - DialogsFixture: confirmations and server-side questions, answered yes and no;
 - EscapingFixture: zoom in and out;
 - contexts, links, a map, and `execute`;
@@ -948,6 +949,11 @@ The harness follows these rules, and changes to it must keep them.
    event, such as:
    - a page or ajax response;
    - the PrimeFaces ajax queue emptying;
+   - in PF, the form's deferred focus after a response having run. Each view's
+     form has a `<p:focus/>`, which focuses its first input from a timer and so
+     scrolls the page. The harness counts these timers by wrapping
+     `PrimeFaces.focus`. A click straight after an action upload hit this
+     scroll, because closing the upload page refreshes the view;
    - a Vue list grid being mounted in its container, and its fetch ending (its
      paginator spinner shows from the fetch's debounce until the rows arrive);
    - SmartClient having no pending RPC or deferred timer;
@@ -1107,6 +1113,16 @@ silently.
   `SailRecordingChecks` checking the steps, and writes its XML.
 - `GET sailrecording?roles` returns the signed-in user's effective roles whenever `sail.recording` is on, for any
   signed-in user (no recording or SAILRecorder role needed): the harness uses it (see [The test user](#the-test-user)).
+- PrimeFaces groundwork (phase 4). There is no PrimeFaces recorder bundle yet, so while a session records, PrimeFaces
+  pages ask for it and get a 404.
+  - Each theme's `head-resources.xhtml` adds `skyve/sail/recorder-pf-min.js` after `skyve/prime/skyve-min.js` only
+    through `#{bean.sailRecording}`. That is the same gate, which every page bean inherits from `LocalisableView`.
+  - `org.skyve.impl.sail.recording.PrimeFacesRecordingMap` builds the map a PrimeFaces recorder names gestures with:
+    each element's client id and what a step calls it (a binding and widget kind, an action, a tab path, a grid and its
+    controls), and each grid's columns. It uses the executors' own mock render, as the signed-in user, under a mock
+    Faces context. `FacesView.getSailRecordingEditMap()` and `getSailRecordingListMap()` build it only while the
+    session records.
+  - The PrimeFaces Control Panel (`views/external/edit.xml`) has the Recording controls, as the desktop one does.
 - `SmartClientRecorderRoundTripSailIT` records two workflows (kitchen sink widgets, actions, tabs and list grids; admin
   contacts) and replays each recording unedited. It also checks that the home page is unchanged unless the session
   records.
