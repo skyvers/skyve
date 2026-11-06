@@ -1,6 +1,8 @@
 # Plan: completing SAIL
 
-Status: open work list, 2026-11-06. It collects every SAIL suggestion from the
+Status: worked through on 2026-11-06 (see each item). Still open: 1.6, a
+child-text multi-line form, following a new window, and the unapproved runtime
+bugs in section 3. It collects every SAIL suggestion from the
 Biz Hub Apps regression run (2026-11-05) and the earlier SAIL completion run
 that is not done yet. The recorder has its own plan:
 [plan_sail_recorder.md](plan_sail_recorder.md).
@@ -117,7 +119,7 @@ scripts W1–W8 in the Biz Hub `Apps/src/test/java/sail/apps/` suite.
 | 1.3 | **Done (39e5c203fd, fb6e39b010):** `dataGridLink` (PF conformance since P9's fix, 150d05dddc). Was: no step clicks a link in a grid row | W4 can't press "Revoke Access" (a link in each Portal grid row) | Optional `rowContaining`/`row` plus `binding` or grid name on `navigateLink text`, so the link is found within that row. Or a `dataGridLink`/`listGridLink` step |
 | 1.4 | **Done (39e5c203fd, fb6e39b010):** `sailWorkflow(...)` (`util.sail.SailWorkflow`) and a `<workflow>` root. Was: `{run}` and `{var:}` don't cross automations | W1, W4, W6 and W6b move between the support centre (PF) and SmartClient, so each is 2–4 scripts that the IT stitches together | A harness runner that takes several scripts (or one file with several automations) and shares the run token and variables between them |
 | 1.5 | `viewRoles` can't take a group | Every Apps persona needed its effective roles listed by hand (from SQL) | **Done** (Mike chose C, 2026-11-06, `sail-recorder`): when `sail.recording` is on, `GET sailrecording?roles` returns the signed-in user's effective roles (groups expanded), and the harness builds the views with them after each `<login/>` of a user with no `viewRoles` registration. A registration still wins; without the endpoint (flag off, older server) the views keep every role. See [The test user](../sail.md#the-test-user) |
-| 1.6 | SmartClient `dataGridZoom` on a grid without inline editing reported "the grid's button is disabled" unless a `dataGridSelect` came first | W6b, the timesheet's `timedLines` grid | The executor already selects the row before zooming (`dataGridGesture`), so this is probably the zoom being clicked before the button enables. Reproduce in the kitchen sink and wait for the button to enable. Unconfirmed |
+| 1.6 | **Not reproduced (2026-11-06):** 58 zooms in the kitchen sink, including the W6b shape (a rerender shows and repopulates the grid, then an immediate zoom), all opened the row. A read-only grid never draws its zoom button in SmartClient, so "disabled" does not fit the Apps grid; left open until the Apps rerun shows it with a trace. Was: SmartClient `dataGridZoom` on a grid without inline editing reported "the grid's button is disabled" unless a `dataGridSelect` came first | W6b, the timesheet's `timedLines` grid | The executor already selects the row before zooming (`dataGridGesture`), so this is probably the zoom being clicked before the button enables. Reproduce in the kitchen sink and wait for the button to enable. Unconfirmed |
 
 ### Smaller additions (optional)
 
@@ -134,7 +136,11 @@ scripts W1–W8 in the Biz Hub `Apps/src/test/java/sail/apps/` suite.
 
 ## 2. Harness flakes not yet explained
 
-Both came from headed runs of the admin suites (2026-11-05), once each.
+**Closed (Mike, 2026-11-06).** The PF sign-in was Mike typing while the headed
+window took the focus. Document Numbers did not reproduce in 25 headed loops; a
+headed loop showed a date item committing half-typed text when another headed
+browser briefly took the focus, which fits it. Both came from headed runs of the
+admin suites (2026-11-05), once each.
 
 - **SmartClient Document Numbers:** a field lost its typed start value after
   Save in `SmartClientAdminSailIT`.
@@ -170,9 +176,10 @@ reproductions are in [sail-runtime-issues.md](../sail-runtime-issues.md).
 - **SC-6:** the Backup and Restore "started" growls are not shown.
 - **SC-7:** Control Panel jumps back to the Results tab.
 - **SC-8:** the User wizard password field loses fast typing.
-- **SC-9 (rest), fix approved by Mike (2026-11-05):** an advanced time filter on a list grid with filter
-  parameters is still sent as a date, because `completeFilterCriteria` doesn't
-  go through `isc.BizUtil.convertFilterCriteria`.
+- **SC-9 (rest), fixed (68b85f9586), approved by Mike (2026-11-05):** an advanced
+  time filter on a list grid with filter parameters was still sent as a date,
+  because `completeFilterCriteria` didn't go through
+  `isc.BizUtil.convertFilterCriteria`.
 - **SC-10:** selecting a row whose selected handler rerenders loops for ever.
 - **SC-11, fixed (approved by Mike, 2026-11-06):** a model lookup column of a
   SmartClient inline data grid row edited again ended the row's edit, because
@@ -183,18 +190,26 @@ reproductions are in [sail-runtime-issues.md](../sail-runtime-issues.md).
   the next request. `ViewJSONManipulator` now follows the request's order only
   for ordered collections.
 
+- **P11, fixed (e19217194e), approved by Mike (2026-11-06):** every PF ajax
+  response that updated the form refocused, and scrolled to, the page's first
+  input. `<p:focus>` now renders only when a page is loaded.
+- **P12, fixed (a08aa5541d), approved by Mike (2026-11-06):** a PF ordered list
+  membership's members could not be reordered, and a saved order was not shown
+  on reopen.
+
 P7 is by design (Mike, 2026-11-05): the restored selection shows where you came
 from after zooming in and pressing OK or Cancel.
 
 ## 4. Other loose ends
 
-- One Eclipse null warning: `@Nonnull parentBean` on `WebUtil.addNewElement`.
-- Not yet proven in a conformance script: lookup columns in a SmartClient
-  inline data grid.
+- **Done (0d17493161):** the Eclipse null warning on `WebUtil.addNewElement`'s `parentBean`.
+- **Done (ff85eb51e7):** lookup columns in a SmartClient inline data grid, in the
+  conformance script (changing one in a row edited again needed SC-11's fix).
 - The language gaps the recorder needs later (recorder gaps 5–10:
   `listGridEdit`, list grid tools, tags and snapshots, `dataGridMove`, actions
   inside trees, maps and calendars, browser back/refresh/new tab and checking
-  downloads) are in the recorder plan.
+  downloads) are in the recorder plan. `dataGridMove` (gap 8) is done
+  (80e89fecb2), and so is `listMembershipMove` (80cdb2cba7); the rest are open.
 - After this work, Mike reruns the Apps A/B regression test (master vs `sail`)
   from the Apps chat. The recorder (phases 1–5) is merged into `sail` first, so
   the rerun covers it. See [Backward compatibility](#backward-compatibility).
