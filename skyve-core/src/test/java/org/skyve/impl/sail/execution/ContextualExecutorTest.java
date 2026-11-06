@@ -2,6 +2,7 @@ package org.skyve.impl.sail.execution;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -284,7 +285,7 @@ class ContextualExecutorTest {
 
 		executor.executeAutomation(automation);
 
-		assertAll(() -> assertTrue(before != executor.getRun()),
+		assertAll(() -> assertNotSame(before, executor.getRun()),
 					() -> assertEquals(executor.getRun().getRunToken(), executor.getRunToken()));
 	}
 

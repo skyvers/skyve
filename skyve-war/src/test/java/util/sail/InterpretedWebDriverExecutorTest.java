@@ -17,6 +17,7 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.withSettings;
@@ -38,6 +39,7 @@ import org.skyve.metadata.module.query.MetaDataQueryColumn;
 import org.skyve.metadata.module.query.MetaDataQueryDefinition;
 import org.skyve.metadata.module.query.MetaDataQueryProjectedColumn;
 import org.skyve.impl.sail.execution.RunState;
+import org.skyve.metadata.sail.language.Automation;
 import org.skyve.metadata.sail.language.step.CaptureCell;
 import org.skyve.metadata.sail.language.step.CaptureTitle;
 import org.skyve.metadata.sail.language.step.CaptureValue;
@@ -206,6 +208,10 @@ class InterpretedWebDriverExecutorTest {
 		bindQuery();
 		DataEnter dataEnter = new DataEnter();
 		dataEnter.setBinding("status");
+		NavigateLink link = new NavigateLink();
+		CaptureCell cell = new CaptureCell();
+		CaptureTitle title = new CaptureTitle();
+		DataGridLink gridLink = new DataGridLink();
 		assertAll(() -> assertThrows(UnsupportedOperationException.class, () -> executor.executeListGridFilter(filter("name", "x", null))),
 					() -> assertThrows(UnsupportedOperationException.class, () -> executor.executeListGridClearFilter(new ListGridClearFilter())),
 					() -> assertThrows(UnsupportedOperationException.class, () -> executor.executeListGridSort(sort("amount"))),
@@ -215,10 +221,10 @@ class InterpretedWebDriverExecutorTest {
 										() -> executor.pickLookupDescriptionRowContaining(new LookupDescriptionPick(), "x")),
 					() -> assertThrows(UnsupportedOperationException.class,
 										() -> executor.autoCompleteLookupDescriptionAndPick(new LookupDescriptionAutoComplete(), "x", "y")),
-					() -> assertThrows(UnsupportedOperationException.class, () -> executor.clickLinkContaining(new NavigateLink(), "x")),
-					() -> assertThrows(UnsupportedOperationException.class, () -> executor.readGridCell(new CaptureCell())),
-					() -> assertThrows(UnsupportedOperationException.class, () -> executor.readViewTitle(new CaptureTitle())),
-					() -> assertThrows(UnsupportedOperationException.class, () -> executor.clickDataGridLink(new DataGridLink(), "x", true)));
+					() -> assertThrows(UnsupportedOperationException.class, () -> executor.clickLinkContaining(link, "x")),
+					() -> assertThrows(UnsupportedOperationException.class, () -> executor.readGridCell(cell)),
+					() -> assertThrows(UnsupportedOperationException.class, () -> executor.readViewTitle(title)),
+					() -> assertThrows(UnsupportedOperationException.class, () -> executor.clickDataGridLink(gridLink, "x", true)));
 	}
 
 	@Test
@@ -289,7 +295,7 @@ class InterpretedWebDriverExecutorTest {
 		UserImpl client = (UserImpl) usersSet.get(usersSet.size() - 1);
 		assertAll(() -> assertTrue(client.isInRole("todo", "ToDoClient")),
 					() -> assertFalse(client.isInRole("todo", "ToDoManager"), "the registration wins"));
-		verify(executor.selenide, org.mockito.Mockito.times(1)).signedInRoleNames();
+		verify(executor.selenide, times(1)).signedInRoleNames();
 	}
 
 	@Test
@@ -458,7 +464,7 @@ class InterpretedWebDriverExecutorTest {
 		executor.executeDataGridLink(declined);
 
 		assertAll(() -> verify(executor).clickDataGridLink(checked, "Revoke Access", true),
-					() -> verify(executor.selenide, org.mockito.Mockito.times(1)).verifySuccess());
+					() -> verify(executor.selenide, times(1)).verifySuccess());
 	}
 
 	@Test
@@ -491,7 +497,8 @@ class InterpretedWebDriverExecutorTest {
 		}).when(executor).executeUpload(any(Upload.class));
 		when(executor.selenide.describeMessages()).thenReturn("no messages");
 
-		AssertionError e = assertThrows(AssertionError.class, () -> executor.executeAutomation(XMLMetaData.unmarshalSAILString(script)));
+		Automation automation = XMLMetaData.unmarshalSAILString(script);
+		AssertionError e = assertThrows(AssertionError.class, () -> executor.executeAutomation(automation));
 		assertAll(() -> assertTrue(e.getMessage().contains("with 2 failure(s)"), e.getMessage()),
 					() -> assertTrue(e.getMessage().contains("containing 'something else' but found: (the upload page said: The file f.txt already exists)"), e.getMessage()),
 					() -> assertTrue(e.getMessage().contains("expected the upload to succeed but it was refused: The file f.txt already exists"), e.getMessage()));

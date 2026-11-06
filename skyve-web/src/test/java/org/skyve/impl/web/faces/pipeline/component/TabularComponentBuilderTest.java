@@ -3947,7 +3947,9 @@ class TabularComponentBuilderTest {
 		when(managedBean.nextId()).thenReturn("pickListId", "sourceCaptionId", "targetCaptionId");
 		builder.setManagedBeanForTest(managedBean);
 		when(mockApplication.createComponent(PickList.COMPONENT_TYPE)).thenReturn(pickList);
-		when(mockApplication.createComponent(HtmlOutputText.COMPONENT_TYPE)).thenReturn(mock(HtmlOutputText.class), mock(HtmlOutputText.class));
+		HtmlOutputText sourceCaption = mock(HtmlOutputText.class);
+		HtmlOutputText targetCaption = mock(HtmlOutputText.class);
+		when(mockApplication.createComponent(HtmlOutputText.COMPONENT_TYPE)).thenReturn(sourceCaption, targetCaption);
 		when(pickList.getFacets()).thenReturn(new HashMap<>());
 		ListMembership membership = new ListMembership();
 		membership.setBinding("roles");

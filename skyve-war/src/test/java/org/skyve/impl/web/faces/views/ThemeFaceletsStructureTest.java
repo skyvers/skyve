@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Test;
@@ -245,10 +246,11 @@ class ThemeFaceletsStructureTest {
 	void pagesFocusTheirFirstInputOnlyWhenLoaded() throws IOException {
 		String include = read("WEB-INF/pages/includes/formFocusAndPush.xhtml");
 		assertTrue(include.contains("<p:focus rendered=\"#{not facesContext.postback}\" />"), include);
+		Pattern focus = Pattern.compile("<p:focus", Pattern.LITERAL);
 		try (Stream<Path> files = Files.walk(webappRoot())) {
 			for (Path file : files.filter(path -> path.toString().endsWith(".xhtml")).toList()) {
 				String page = Files.readString(file);
-				int focuses = page.split("<p:focus", -1).length - 1;
+				int focuses = focus.split(page, -1).length - 1;
 				assertTrue(file.endsWith("formFocusAndPush.xhtml") ? (focuses == 1) : (focuses == 0), file + ": " + page);
 			}
 		}

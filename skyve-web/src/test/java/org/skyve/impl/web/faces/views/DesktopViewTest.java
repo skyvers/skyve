@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -520,7 +521,7 @@ class DesktopViewTest {
 
 			// a stopped recording is tested in skyve-war's SailRecordingTest: stopping builds XML, which needs the schemas
 			assertFalse(sailRecording(null), "no session");
-			assertTrue(SailRecording.get(session) == recording);
+			assertSame(recording, SailRecording.get(session));
 		}
 		finally {
 			UtilImpl.SAIL_RECORDING = originalSailRecording;
@@ -542,7 +543,8 @@ class DesktopViewTest {
 		User result = mock(User.class);
 		when(result.getName()).thenReturn("admin");
 		when(result.getCustomerName()).thenReturn("demo");
-		when(result.getCustomer()).thenReturn(mock(Customer.class));
+		Customer customer = mock(Customer.class);
+		when(result.getCustomer()).thenReturn(customer);
 		when(Boolean.valueOf(result.isInRole(SailRecording.ROLE_MODULE_NAME, SailRecording.ROLE_NAME))).thenReturn(Boolean.valueOf(recorder));
 		return result;
 	}
