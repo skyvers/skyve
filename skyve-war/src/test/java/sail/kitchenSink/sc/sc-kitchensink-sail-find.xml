@@ -322,14 +322,18 @@
 			<testValue binding="selection" value="SAIL filter {run} c" />
 			<lookupDescriptionPick binding="singleSelection" rowContaining="SAIL filter {run} b" />
 			<testValue binding="singleSelection" value="SAIL filter {run} b" />
-			<comment>Editing the row again shows its values. A model lookup column of a row edited again cannot be changed: its drop-down's fetch ends the row's edit (runtime issue SC-11)</comment>
+			<comment>Edit the row again and change a model lookup column: its drop-down's fetch must not end the row's edit (runtime issue SC-11)</comment>
 			<dataGridEdit binding="rows" row="0" />
 			<testValue binding="selection" value="SAIL filter {run} c" />
+			<testValue binding="singleSelection" value="SAIL filter {run} b" />
+			<lookupDescriptionAutoComplete binding="selection" search="SAIL filter {run}" pick="{run} a" />
+			<testValue binding="selection" value="SAIL filter {run} a" />
 			<testValue binding="singleSelection" value="SAIL filter {run} b" />
 			<save />
 			<comment>Save ended the inline edit, so this is the form's lookup of the same binding, which is untouched</comment>
 			<testValue binding="selection" value="" />
-			<testGridRows binding="rows" rowContaining="SAIL filter {run} c" minRows="1" maxRows="1" />
+			<testGridRows binding="rows" rowContaining="SAIL filter {run} a" minRows="1" maxRows="1" />
+			<testGridRows binding="rows" rowContaining="SAIL filter {run} c" maxRows="0" />
 			<testGridRows binding="rows" rowContaining="SAIL filter {run} b" minRows="1" maxRows="1" />
 			<comment>A view opened by URL has no Delete button, so delete from the zoomed-in view</comment>
 			<listGridZoom module="kitchensink" query="qModelLookupFixtures" rowContaining="SAIL inline lookups {run}" />

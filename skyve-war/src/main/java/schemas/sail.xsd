@@ -27,6 +27,8 @@
 
   <xs:element name="dataGridLink" type="tns:dataGridLink"/>
 
+  <xs:element name="dataGridMove" type="tns:dataGridMove"/>
+
   <xs:element name="dataGridNew" type="tns:dataGridNew"/>
 
   <xs:element name="dataGridRemove" type="tns:dataGridRemove"/>
@@ -192,6 +194,7 @@
         <xs:element ref="tns:captureCell"/>
         <xs:element ref="tns:captureTitle"/>
         <xs:element ref="tns:dataGridLink"/>
+        <xs:element ref="tns:dataGridMove"/>
       </xs:choice>
     </xs:sequence>
   </xs:complexType>
@@ -614,6 +617,14 @@
     <xs:attribute name="text" type="xs:string" use="required"/>
   </xs:complexType>
 
+  <xs:complexType name="dataGridMove">
+    <xs:sequence/>
+    <xs:attribute name="binding" type="xs:string" use="required"/>
+    <xs:attribute name="row" type="xs:int"/>
+    <xs:attribute name="rowContaining" type="xs:string"/>
+    <xs:attribute name="to" type="xs:int" use="required"/>
+  </xs:complexType>
+
   <xs:complexType name="interaction">
     <xs:sequence>
       <xs:element name="before" type="tns:procedure" form="qualified" minOccurs="0"/>
@@ -676,6 +687,7 @@
               <xs:element ref="tns:captureCell"/>
               <xs:element ref="tns:captureTitle"/>
               <xs:element ref="tns:dataGridLink"/>
+              <xs:element ref="tns:dataGridMove"/>
             </xs:choice>
           </xs:sequence>
         </xs:complexType>

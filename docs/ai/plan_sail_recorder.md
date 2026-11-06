@@ -197,7 +197,7 @@ The phase 2 principle still holds: extend existing steps with optional attribute
 5. **`listGridEdit`**: inline editing of a row in an SC list grid (the list grid's Edit item). It mirrors `dataGridEdit` and is SC only.
 6. **List grid tools:** `<listGridTool query="…" tool="refresh|clearSelection|export|chart"/>` for toolbar features that aren't view actions.
 7. **Tags and snapshots:** select a snapshot, create, update or delete one, and tag or untag rows. These need a way to answer a text prompt, because tag and snapshot names are typed into a prompt and `confirm` only answers yes/no. The recorder must at least note when a snapshot was active, because it changes the list's filter.
-8. **`dataGridMove`:** reorder a row of an ordered data grid, with `row`/`rowContaining` and a target position.
+8. **`dataGridMove`:** reorder a row of an ordered data grid, with `row`/`rowContaining` and a target position. **Done** on `sail-sc`, 2026-11-06: `<dataGridMove binding row|rowContaining to/>`, a real drag in both renderers (see [Grids](../sail.md#grids)).
 9. **Trees, maps and calendars** beyond navigation: expanding tree nodes, zooming into tree rows, and clicking map features and calendar events.
 10. **Browser and output:** `navigateBack`, `refresh`, links or reports that open a new tab, and checking a download's contents.
 

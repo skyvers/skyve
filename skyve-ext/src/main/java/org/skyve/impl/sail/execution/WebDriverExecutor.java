@@ -14,6 +14,7 @@ import org.skyve.metadata.sail.language.step.TestMessage;
 import org.skyve.metadata.sail.language.step.TestWidget;
 import org.skyve.metadata.sail.language.step.interaction.Upload;
 import org.skyve.metadata.sail.language.step.interaction.grids.DataGridLink;
+import org.skyve.metadata.sail.language.step.interaction.grids.DataGridMove;
 import org.skyve.metadata.sail.language.step.interaction.grids.ListGridClearFilter;
 import org.skyve.metadata.sail.language.step.interaction.grids.ListGridFilter;
 import org.skyve.metadata.sail.language.step.interaction.grids.ListGridSort;
@@ -225,6 +226,17 @@ public abstract class WebDriverExecutor<T extends AutomationContext> extends Scr
 	@Override
 	public void executeDataGridLink(@Nonnull DataGridLink link) {
 		comment("<dataGridLink/> not supported by this generator");
+	}
+
+	/**
+	 * Emits a comment that {@code <dataGridMove/>} is not supported, because this generator has no WebDriver equivalent yet.
+	 * The context is left as it is.
+	 *
+	 * @param move the step being skipped
+	 */
+	@Override
+	public void executeDataGridMove(@Nonnull DataGridMove move) {
+		comment("<dataGridMove/> not supported by this generator");
 	}
 
 	/**

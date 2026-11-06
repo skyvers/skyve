@@ -32,6 +32,7 @@ import org.skyve.metadata.sail.language.step.interaction.actions.ZoomIn;
 import org.skyve.metadata.sail.language.step.interaction.actions.ZoomOut;
 import org.skyve.metadata.sail.language.step.interaction.grids.DataGridEdit;
 import org.skyve.metadata.sail.language.step.interaction.grids.DataGridLink;
+import org.skyve.metadata.sail.language.step.interaction.grids.DataGridMove;
 import org.skyve.metadata.sail.language.step.interaction.grids.DataGridNew;
 import org.skyve.metadata.sail.language.step.interaction.grids.DataGridRemove;
 import org.skyve.metadata.sail.language.step.interaction.grids.DataGridSelect;
@@ -470,4 +471,14 @@ public interface Executor {
 	 * @param link the data grid link step
 	 */
 	public void executeDataGridLink(@Nonnull DataGridLink link);
+
+	/**
+	 * Moves a row of an ordered data grid to another position with a drag-and-drop gesture, as a user reorders rows.
+	 * The context is unchanged.
+	 *
+	 * <p>Precondition: {@link DataGridMove#execute(Executor)} has checked the row and that {@code to} is 0 or more.
+	 *
+	 * @param move the data grid move step
+	 */
+	public void executeDataGridMove(@Nonnull DataGridMove move);
 }

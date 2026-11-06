@@ -14,6 +14,7 @@ import static com.codeborne.selenide.Selenide.$;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
@@ -1024,6 +1025,71 @@ public class PrimeFacesSelenide extends Selenide<
 									"return -1;", gridId, text);
 		return (result == null) ? -2 : result.intValue();
 	}
+
+	/**
+	 * Drags a row of an ordered data grid by its drag handle to another position, as a user reorders rows: presses the
+	 * mouse on the handle, moves it over the row at the position (its upper half to drop the row before it when moving
+	 * up, its lower half to drop it after it when moving down) and releases it. PrimeFaces then sends the move to the
+	 * server ({@code rowReorder}), which reorders the collection and numbers its ordinals.
+	 *
+	 * @param gridId	the data table's client id
+	 * @param from		the zero-based row to move
+	 * @param to		the zero-based position to move it to
+	 * @throws IllegalStateException if the grid is not on the page or not ordered, a row is out of range, or the row
+	 * 			is not at the position after the drag
+	 */
+	public void dataGridMove(@Nonnull String gridId, int from, int to) {
+		@SuppressWarnings("unchecked")
+		Map<String, Object> plan = (Map<String, Object>) js(ROWS_JS + ROW_SIGNATURE_JS +
+											"if (! body || ! body.classList.contains('ui-sortable')) return {error: 'it is not an ordered grid, so its rows cannot be dragged'};" +
+											"var n = rows.length, f = arguments[1], to = arguments[2];" +
+											"if (f < 0 || f >= n) return {error: 'it has no row ' + f + ' (it has ' + n + ' rows)'};" +
+											"if (to >= n) return {error: 'position ' + to + ' is past its last row (it has ' + n + ' rows)'};" +
+											"var handle = rows[f].querySelector('.fa-sort') || rows[f].querySelector('td');" +
+											"return {handle: handle, target: rows[to], signature: signature(rows[f])};",
+											gridId, Integer.valueOf(from), Integer.valueOf(to));
+		if (plan == null) {
+			throw new IllegalStateException("Cannot move row " + from + " of " + gridId + ": the grid is not on the page");
+		}
+		Object error = plan.get("error");
+		if (error != null) {
+			throw new IllegalStateException("Cannot move row " + from + " of " + gridId + ": " + error);
+		}
+		if (from == to) {
+			trace("    Row " + from + " is already at position " + to);
+			return;
+		}
+		WebElement handle = (WebElement) plan.get("handle");
+		WebElement target = (WebElement) plan.get("target");
+		scrollToCentre(target);
+		scrollToCentre(handle);
+		waitUntilUncovered(handle);
+		int quarter = Math.max(1, target.getSize().getHeight() / 4);
+		int direction = (to < from) ? -1 : 1;
+		// Press on the handle, move past jQuery UI's drag threshold so that the sort starts, then over the half of the
+		// target row that puts the row on the far side of it, and release there. Each move is a pointer event that the
+		// sortable tracks.
+		new org.openqa.selenium.interactions.Actions(driver)
+				.moveToElement(handle)
+				.clickAndHold()
+				.moveByOffset(0, 5 * direction)
+				.moveByOffset(0, 5 * direction)
+				.moveToElement(target, 0, quarter * direction)
+				.moveByOffset(0, direction)
+				.release()
+				.perform();
+		// Waits for the rowReorder ajax request the drop sends, and its response
+		waitForAjaxResponse();
+		Object moved = js(ROWS_JS + ROW_SIGNATURE_JS + "var r = rows[arguments[1]]; return r ? signature(r) : null;", gridId, Integer.valueOf(to));
+		if (! String.valueOf(plan.get("signature")).equals(moved)) {
+			throw new IllegalStateException("Dragged row " + from + " of " + gridId + " to position " + to + ", but the grid does not show it there");
+		}
+	}
+
+	/** Defines {@code signature(row)}: what a row shows, its cells' text and its inputs' values. */
+	private static final String ROW_SIGNATURE_JS = "var signature = function(r) {return Array.from(r.querySelectorAll('td')).map(function(c) {" +
+													"  return (c.textContent || '') + Array.from(c.querySelectorAll('input,textarea,select')).map(function(i) {return i.value;}).join('|');" +
+													"}).join('||');};";
 
 	/**
 	 * Counts the data rows of a grid, optionally only those with a cell containing the text.

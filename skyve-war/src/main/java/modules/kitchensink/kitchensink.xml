@@ -27,6 +27,8 @@
 		<document ref="ActionsFixture" />
 		<document ref="ActionsFixtureRow" />
 		<document ref="ListGridFixture" />
+		<document ref="OrderedGridFixture" />
+		<document ref="OrderedGridFixtureRow" />
 	</documents>
 	<roles>
 		<role name="dev">
@@ -124,6 +126,8 @@
 					<action name="ExportFromRow" />
 				</document>
 				<document name="ListGridFixture" permission="CRUDD" />
+				<document name="OrderedGridFixture" permission="CRUDD" />
+				<document name="OrderedGridFixtureRow" permission="CRUDD" />
 			</privileges>
 		</role>
 	</roles>
@@ -167,6 +171,9 @@
 		<edit name="List Grid Fixture" document="ListGridFixture">
 			<role name="dev" />
 		</edit>
+		<list name="Ordered Grid Fixtures" document="OrderedGridFixture">
+			<role name="dev" />
+		</list>
 	</menu>
 	<queries>
 		<query name="qEscapingFixture" documentName="ListAttributes">

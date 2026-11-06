@@ -20,7 +20,7 @@
 (function () {
 	"use strict";
 
-	var VERSION = 6;
+	var VERSION = 8;
 	if (window._sail && window._sail.version === VERSION) {
 		return;
 	}
@@ -1003,6 +1003,69 @@
 		}
 		return isc.isA.ListGrid(grid) ? { grid: grid } : { error: locator + " is not a grid" };
 	}
+
+	/**
+	 * Checks that a data grid's row can be dragged to a position, and remembers the row's record so that dataGridMoved()
+	 * can tell where it went: { rows } or { error }. Only an ordered data grid (SmartClient's canReorderRecords) lets a
+	 * user drag its rows.
+	 */
+	S.dataGridMovePlan = function (locator, from, to) {
+		var g = gridOf(locator);
+		if (g.error) {
+			return g;
+		}
+		var grid = g.grid;
+		if (!grid.canReorderRecords) {
+			return { error: "it is not an ordered grid, so its rows cannot be dragged (or it may not be changed)" };
+		}
+		var rows = grid.getTotalRows();
+		if (from < 0 || from >= rows) {
+			return { error: "it has no row " + from + " (it has " + rows + " rows)" };
+		}
+		if (to >= rows) {
+			return { error: "position " + to + " is past its last row (it has " + rows + " rows)" };
+		}
+		grid._sailMoving = grid.getRecord(from);
+		return { rows: rows };
+	};
+
+	/**
+	 * The header button of a grid's column, to click to sort the grid by it: { header, sorted (the column is the grid's
+	 * only sort), descending } or { error }.
+	 */
+	S.gridHeader = function (locator, column) {
+		var g = gridOf(locator);
+		if (g.error) {
+			return g;
+		}
+		var grid = g.grid;
+		var fieldNum = grid.getFieldNum(column);
+		if (fieldNum < 0) {
+			return { error: "the grid has no column " + column };
+		}
+		if (!grid.canSort) {
+			return { error: "the grid cannot be sorted (an ordered grid keeps its rows' order)" };
+		}
+		var button = grid.getFieldHeaderButton(fieldNum);
+		var element = button && button.getHandle ? button.getHandle() : null;
+		if (!element) {
+			return { error: "column " + column + " has no header shown" };
+		}
+		var spec = grid.getSort ? (grid.getSort() || []) : [];
+		var sorted = spec.length === 1 && spec[0].property === column;
+		return { header: element, sorted: sorted, descending: sorted && spec[0].direction === "descending" };
+	};
+
+	/** True if the record dataGridMovePlan() remembered is now the data grid's row at the position; forgets it. */
+	S.dataGridMoved = function (locator, to) {
+		var g = gridOf(locator);
+		if (g.error) {
+			return false;
+		}
+		var moving = g.grid._sailMoving;
+		delete g.grid._sailMoving;
+		return !!moving && g.grid.getRecord(to) === moving;
+	};
 
 	/** The text a row shows, cell by cell, skipping list views' tag and flag columns. */
 	function rowTexts(grid, rowNum) {
