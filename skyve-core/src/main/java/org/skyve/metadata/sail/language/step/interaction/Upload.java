@@ -28,6 +28,11 @@ import jakarta.xml.bind.annotation.XmlType;
  * this, so {@link #execute(Executor)} checks it. {@code file} is a classpath resource path
  * resolved by the executor (in the test JVM), not a path on the server.
  *
+ * <p>Unless {@code testSuccess} is {@code false}, the step checks afterwards that the upload succeeded: that the content
+ * widget holds content, and that no error is shown. With {@code testSuccess="false"} an upload that the application refuses
+ * does not fail the step, so that a following {@code <testFailure message="..."/>} can check the refusal, wherever it is
+ * shown (on the upload page or in the view).
+ *
  * @see DataEnter
  * @see org.skyve.metadata.sail.execution.Executor#executeUpload
  */
@@ -38,6 +43,7 @@ public class Upload implements Step {
 	private String binding;
 	private String actionName;
 	private String file;
+	private Boolean testSuccess; // null/true checks the upload succeeded
 
 	/**
 	 * Returns the binding of the content widget that receives the file.
@@ -88,6 +94,25 @@ public class Upload implements Step {
 	@XmlAttribute(name = "file", required = true)
 	public void setFile(@Nonnull String file) {
 		this.file = UtilImpl.processStringValue(file);
+	}
+
+	/**
+	 * Returns whether to check that the upload succeeded.
+	 * @return {@code false} to skip the checks; {@code true} or {@code null} to make them
+	 */
+	public @Nullable Boolean getTestSuccess() {
+		return testSuccess;
+	}
+
+	/**
+	 * Sets whether to check that the upload succeeded: that a content widget holds content afterwards, and that no error
+	 * is shown. Set it to {@code false} when the upload is expected to be refused and the next step is a
+	 * {@code <testFailure/>}.
+	 * @param testSuccess {@code false} to skip the checks; {@code true} or {@code null} to make them
+	 */
+	@XmlAttribute(name = "testSuccess")
+	public void setTestSuccess(@Nullable Boolean testSuccess) {
+		this.testSuccess = testSuccess;
 	}
 
 	/**

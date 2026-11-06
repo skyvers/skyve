@@ -19,12 +19,22 @@ import org.openqa.selenium.OutputType;
 import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebDriver;
 import org.skyve.CORE;
+import org.skyve.impl.metadata.customer.CustomerImpl;
+import org.skyve.impl.metadata.model.document.DocumentImpl;
+import org.skyve.impl.metadata.module.ModuleImpl;
 import org.skyve.impl.metadata.user.UserImpl;
+import org.skyve.impl.metadata.view.NoOpViewVisitor;
+import org.skyve.impl.metadata.view.ViewImpl;
+import org.skyve.impl.metadata.view.reference.ActionReference;
+import org.skyve.impl.metadata.view.reference.ImplicitActionReference;
+import org.skyve.impl.metadata.view.widget.Link;
+import org.skyve.impl.metadata.view.widget.bound.tabular.DataGrid;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.sail.execution.AutomationContext;
 import org.skyve.impl.sail.execution.WebDriverExecutor;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.customer.Customer;
+import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.query.MetaDataQueryColumn;
 import org.skyve.metadata.module.query.MetaDataQueryDefinition;
@@ -34,6 +44,9 @@ import org.skyve.metadata.sail.language.Automation.TestStrategy;
 import org.skyve.metadata.sail.language.Interaction;
 import org.skyve.metadata.sail.language.Procedure;
 import org.skyve.metadata.sail.language.Step;
+import org.skyve.metadata.sail.language.step.CaptureCell;
+import org.skyve.metadata.sail.language.step.CaptureStep;
+import org.skyve.metadata.sail.language.step.CaptureTitle;
 import org.skyve.metadata.sail.language.step.CaptureValue;
 import org.skyve.metadata.sail.language.step.Comment;
 import org.skyve.metadata.sail.language.step.Execute;
@@ -50,6 +63,7 @@ import org.skyve.metadata.sail.language.step.context.PushListContext;
 import org.skyve.metadata.sail.language.step.interaction.DataEnter;
 import org.skyve.metadata.sail.language.step.interaction.DataEnter.Match;
 import org.skyve.metadata.sail.language.step.interaction.Upload;
+import org.skyve.metadata.sail.language.step.interaction.grids.DataGridLink;
 import org.skyve.metadata.sail.language.step.interaction.grids.ListGridClearFilter;
 import org.skyve.metadata.sail.language.step.interaction.grids.ListGridFilter;
 import org.skyve.metadata.sail.language.step.interaction.grids.ListGridFilter.FilterOperator;
@@ -68,6 +82,8 @@ import org.skyve.metadata.sail.language.step.interaction.session.Login;
 import org.skyve.metadata.sail.language.step.interaction.session.Logout;
 import org.skyve.metadata.sail.language.step.interaction.session.SwitchMode;
 import org.skyve.metadata.user.User;
+import org.skyve.metadata.view.View;
+import org.skyve.metadata.view.View.ViewType;
 import org.skyve.web.WebAction;
 
 import jakarta.annotation.Nonnull;
@@ -114,7 +130,10 @@ import jakarta.annotation.Nullable;
  * 		{@code <lookupDescriptionPick rowContaining="…"/>}, called by the renderer's {@code executeLookupDescriptionPick};</li>
  * <li>{@link #autoCompleteLookupDescriptionAndPick(LookupDescriptionAutoComplete, String, String)} for
  * 		{@code <lookupDescriptionAutoComplete pick="…"/>}, called by the renderer's {@code executeLookupDescriptionAutoComplete};</li>
- * <li>{@link #clickLinkContaining(NavigateLink, String)} for {@code <navigateLink text="…"/>}.</li>
+ * <li>{@link #clickLinkContaining(NavigateLink, String)} for {@code <navigateLink text="…"/>};</li>
+ * <li>{@link #readGridCell(CaptureCell)} for {@code <captureCell/>};</li>
+ * <li>{@link #readViewTitle(CaptureTitle)} for {@code <captureTitle/>};</li>
+ * <li>{@link #clickDataGridLink(DataGridLink, String, boolean)} for {@code <dataGridLink/>}.</li>
  * </ul>
  * Every hook receives its text values with the tokens already substituted. Like any step, a hook throws when it
  * cannot do what the step says, and makes the implicit success check, {@link #checkSuccess(String)}, where the other
@@ -151,6 +170,11 @@ public abstract class InterpretedWebDriverExecutor<
 	private Step nextStep;
 	/** The error shown by the last login, or null if it succeeded. */
 	private String loginError;
+	/**
+	 * The refusal shown by the last {@code <upload testSuccess="false"/>} (on the upload page, which a user then closes),
+	 * or null if it was not refused; see {@link #uploadRefused(String)}.
+	 */
+	private String uploadError;
 	/** Counts failures, to name diagnostic files uniquely. */
 	private int failureCount = 0;
 	/** The roles to build the views with for each user that signs in, or null to keep the persistence user. */
@@ -490,13 +514,17 @@ public abstract class InterpretedWebDriverExecutor<
 
 	/**
 	 * Signs in and waits for the outcome. A failed sign in fails the step, unless the next step is a
-	 * {@code <testFailure />}, which then asserts that it failed.
+	 * {@code <testFailure />}, which then asserts that it failed. The tokens ({@code {run}}, {@code {var:name}}) of the
+	 * customer, user and password are substituted.
 	 *
 	 * @param login	the login step
 	 */
 	@Override
 	public void executeLogin(Login login) {
 		String customer = login.getCustomer();
+		if (customer != null) {
+			customer = substituteTokens(customer);
+		}
 		String user = substituteTokens(login.getUser());
 		String password = substituteTokens(login.getPassword());
 		switchViewUser(login.getUser(), user);
@@ -747,6 +775,10 @@ public abstract class InterpretedWebDriverExecutor<
 			selenide.trace("Test login success");
 			check(loginError == null, () -> "expected the login to succeed but it failed: " + loginError);
 		}
+		else if ((previousStep instanceof Upload) && (uploadError != null)) {
+			selenide.trace("Test upload success");
+			check(false, () -> "expected the upload to succeed but it was refused: " + uploadError);
+		}
 		else {
 			selenide.trace("Test success");
 			checkSuccess("expected no error messages");
@@ -768,7 +800,8 @@ public abstract class InterpretedWebDriverExecutor<
 
 	/**
 	 * Asserts that there is an error message, optionally containing the step's message, or, straight after a login,
-	 * that the login failed.
+	 * that the login failed. Straight after an upload that was refused on its upload page, the refusal counts as an
+	 * error message, as well as the errors the view shows.
 	 *
 	 * @param failure	the step
 	 */
@@ -791,18 +824,28 @@ public abstract class InterpretedWebDriverExecutor<
 		}
 		else if (expected == null) {
 			selenide.trace("Test failure");
-			check(selenide.verifyFailure(), () -> "expected an error message but found: " + selenide.describeMessages());
+			String refusal = refusedUpload();
+			check((refusal != null) || selenide.verifyFailure(),
+					() -> "expected an error message but found: " + selenide.describeMessages());
 		}
 		else {
 			selenide.trace(String.format("Test failure with message '%s'", message));
-			check(selenide.verifyFailure(expected),
-					() -> "expected an error message containing '" + expected + "' but found: " + selenide.describeMessages());
+			String refusal = refusedUpload();
+			check(((refusal != null) && refusal.contains(expected)) || selenide.verifyFailure(expected),
+					() -> "expected an error message containing '" + expected + "' but found: " +
+							((refusal == null) ? "" : "(the upload page said: " + refusal + ") ") + selenide.describeMessages());
 		}
 	}
 
+	/**
+	 * Writes the comment to the trace, with its tokens ({@code {run}}, {@code {var:name}}) substituted.
+	 *
+	 * @param comment	the step
+	 */
 	@Override
 	public void executeComment(Comment comment) {
-		selenide.trace(comment.getComment());
+		String text = comment.getComment();
+		selenide.trace((text == null) ? "" : substituteTokens(text));
 	}
 
 	@Override
@@ -912,7 +955,7 @@ public abstract class InterpretedWebDriverExecutor<
 	@Override
 	public void executeListGridFilter(@Nonnull ListGridFilter filter) {
 		String column = filter.getColumn();
-		checkListGridColumn(filter, filter.getModuleName(), filter.getDocumentName(), filter.getQueryName(), filter.getModelName(), column, true);
+		checkListGridColumn(filter, filter.getModuleName(), filter.getDocumentName(), filter.getQueryName(), filter.getModelName(), column, Boolean.TRUE);
 		String value = filter.getValue();
 		if (value != null) {
 			value = substituteTokens(value);
@@ -947,7 +990,7 @@ public abstract class InterpretedWebDriverExecutor<
 	@Override
 	public void executeListGridSort(@Nonnull ListGridSort sort) {
 		String column = sort.getColumn();
-		checkListGridColumn(sort, sort.getModuleName(), sort.getDocumentName(), sort.getQueryName(), sort.getModelName(), column, false);
+		checkListGridColumn(sort, sort.getModuleName(), sort.getDocumentName(), sort.getQueryName(), sort.getModelName(), column, Boolean.FALSE);
 		boolean descending = Boolean.TRUE.equals(sort.getDescending());
 		selenide.trace(String.format("Sort by column [%s] %s", column, descending ? "descending" : "ascending"));
 		sortListGrid(sort, column, descending);
@@ -962,17 +1005,225 @@ public abstract class InterpretedWebDriverExecutor<
 	 */
 	@Override
 	public void executeCaptureValue(@Nonnull CaptureValue capture) {
-		String binding = capture.getBinding();
-		String variable = capture.getVariable();
-		String value = readWidgetValue(capture);
-		if (value != null) {
-			value = value.trim();
+		keep(capture, "[" + capture.getBinding() + "]", readWidgetValue(capture));
+	}
+
+	/**
+	 * Reads the text a grid cell shows (see {@link #readGridCell}) into the step's variable, as {@code <captureValue/>}
+	 * does. For a list grid, the column is checked first to be a column of the grid's query, when it has one.
+	 *
+	 * @param capture the step
+	 * @throws IllegalStateException if the cell shows no value, or the pattern does not match it
+	 */
+	@Override
+	public void executeCaptureCell(@Nonnull CaptureCell capture) {
+		String column = capture.getColumn();
+		if (capture.getBinding() == null) {
+			checkListGridColumn(capture, capture.getModuleName(), capture.getDocumentName(), capture.getQueryName(), capture.getModelName(), column, null);
 		}
-		if ((value == null) || value.isEmpty()) {
-			throw new IllegalStateException(String.format("[%s] shows no value to keep in {var:%s}", binding, variable));
+		keep(capture, "column [" + column + "] of " + describeRow(capture), readGridCell(capture));
+	}
+
+	/**
+	 * Reads the title the current view shows (see {@link #readViewTitle}) into the step's variable, as
+	 * {@code <captureValue/>} does.
+	 *
+	 * @param capture the step
+	 * @throws IllegalStateException if the view shows no title, or the pattern does not match it
+	 */
+	@Override
+	public void executeCaptureTitle(@Nonnull CaptureTitle capture) {
+		keep(capture, "the view's title", readViewTitle(capture));
+	}
+
+	/**
+	 * Keeps a capture step's value in its variable: the text read, trimmed, or the part of it that the step's pattern
+	 * picks (see {@link CaptureStep#extract(String, String)}), trimmed. A value is captured under every test strategy,
+	 * as it is not an assertion.
+	 *
+	 * @param capture	the step
+	 * @param what	what was read, for the trace and the failure, such as {@code [binding]}; the failure starts with it
+	 * @param text	the text read, or null if nothing is shown
+	 * @throws IllegalStateException if the text is blank, or the pattern does not match it (a blank variable would match
+	 * 									anything)
+	 */
+	private void keep(@Nonnull CaptureStep capture, @Nonnull String what, @Nullable String text) {
+		String variable = capture.getVariable();
+		String read = (text == null) ? "" : text.trim();
+		if (read.isEmpty()) {
+			throw new IllegalStateException(String.format("%s shows no value to keep in {var:%s}", what, variable));
+		}
+		String value = read;
+		String pattern = capture.getPattern();
+		if (pattern != null) {
+			String extracted = CaptureStep.extract(pattern, read);
+			value = (extracted == null) ? "" : extracted.trim();
+			if (value.isEmpty()) {
+				throw new IllegalStateException(String.format("%s shows '%s', in which the pattern %s finds no value to keep in {var:%s}",
+																what, read, pattern, variable));
+			}
 		}
 		putVariable(variable, value);
-		selenide.trace(String.format("Keep [%s] '%s' in {var:%s}", binding, value, variable));
+		selenide.trace(String.format("Keep '%s' from %s in {var:%s}", value, what, variable));
+	}
+
+	/**
+	 * Describes a capture cell step's row, for the trace and failures.
+	 *
+	 * @param capture	the step
+	 * @return {@code row n}, or {@code the row containing 'text'} with the tokens substituted
+	 */
+	private @Nonnull String describeRow(@Nonnull CaptureCell capture) {
+		Integer row = capture.getRow();
+		if (row != null) {
+			return "row " + row;
+		}
+		return "the row containing '" + substituteTokens(Objects.requireNonNull(capture.getRowContaining(), "rowContaining")) + "'";
+	}
+
+	/**
+	 * Clicks a link in a data grid's row: see {@link #clickDataGridLink}. The link's text has its tokens substituted. A
+	 * link that runs an action is pressed as an action's button is: its confirmation and questions are answered as the
+	 * step's {@code confirm} says, and unless it was declined or {@code testSuccess} is false, the step checks that no
+	 * error is shown; the view and its context stay. Any other link is followed as {@code <navigateLink/>} follows one:
+	 * the top context loses its document and view type, so a script pushes a context for the page it reaches.
+	 *
+	 * @param link	the step
+	 */
+	@Override
+	public void executeDataGridLink(@Nonnull DataGridLink link) {
+		String text = substituteTokens(link.getText());
+		boolean action = dataGridLinkRunsAction(link.getBinding(), text);
+		selenide.trace(String.format("Click the link containing '%s' in a row of data grid [%s]%s",
+										text, link.getBinding(), action ? "" : " (it leads to another page)"));
+		boolean declined = clickDataGridLink(link, text, action);
+		if (! action) {
+			AC context = peek();
+			if (context != null) {
+				context.setDocumentName(null);
+				context.setViewType(null);
+				context.setList(null);
+			}
+			return;
+		}
+		if (declined) {
+			selenide.trace("    Declined: the action did not run");
+		}
+		else if (! Boolean.FALSE.equals(link.getTestSuccess())) {
+			checkSuccess(String.format("expected no error messages after the link '%s' in data grid [%s]", text, link.getBinding()));
+		}
+	}
+
+	/**
+	 * Indicates if a link in a data grid's rows runs an action, from the view's metadata: the links of the context's
+	 * view's data grid with the binding whose shown value contains the text (or, if none does, as with a value made by an
+	 * expression, every link of the grid) all have an action reference. A grid that the view does not declare, or that has
+	 * no links, counts as running an action, the usual kind of row link.
+	 *
+	 * @param binding	the data grid's binding
+	 * @param text	the link's text, with the tokens substituted
+	 * @return true if the link runs an action, false if it leads to another page
+	 */
+	private boolean dataGridLinkRunsAction(@Nonnull String binding, @Nonnull String text) {
+		AC context = peek();
+		if (context == null) {
+			return true;
+		}
+		String moduleName = context.getModuleName();
+		String documentName = context.getDocumentName();
+		ViewType viewType = context.getViewType();
+		if ((moduleName == null) || (documentName == null) || (viewType == null)) {
+			return true;
+		}
+		Customer c = CORE.getUser().getCustomer();
+		Module m = c.getModule(moduleName);
+		Document d = m.getDocument(c, documentName);
+		String uxui = context.getUxui();
+		View view = d.getView(uxui, c, viewType.toString());
+		GridLinks links = new GridLinks((CustomerImpl) c, (ModuleImpl) m, (DocumentImpl) d, (ViewImpl) view,
+											(uxui == null) ? "" : uxui, binding);
+		links.visit();
+		List<Link> candidates = new ArrayList<>();
+		for (Link candidate : links.links) {
+			String value = candidate.getLocalisedValue();
+			if ((value != null) && value.contains(text)) {
+				candidates.add(candidate);
+			}
+		}
+		if (candidates.isEmpty()) {
+			candidates = links.links;
+		}
+		for (Link candidate : candidates) {
+			Object reference = candidate.getReference();
+			if (! ((reference instanceof ActionReference) || (reference instanceof ImplicitActionReference))) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	/**
+	 * Collects the links of the columns of the data grid bound to a binding.
+	 */
+	private static final class GridLinks extends NoOpViewVisitor {
+		private final String binding;
+		/** The nesting depth inside the data grid, 0 when outside it. */
+		private int depth = 0;
+		final List<Link> links = new ArrayList<>();
+
+		GridLinks(@Nonnull CustomerImpl customer,
+					@Nonnull ModuleImpl module,
+					@Nonnull DocumentImpl document,
+					@Nonnull ViewImpl view,
+					@Nonnull String uxui,
+					@Nonnull String binding) {
+			super(customer, module, document, view, uxui);
+			this.binding = binding;
+		}
+
+		@Override
+		public void visitDataGrid(@Nonnull DataGrid grid, boolean parentVisible, boolean parentEnabled) {
+			if ((depth > 0) || binding.equals(grid.getBinding())) {
+				depth++;
+			}
+		}
+
+		@Override
+		public void visitedDataGrid(@Nonnull DataGrid grid, boolean parentVisible, boolean parentEnabled) {
+			if (depth > 0) {
+				depth--;
+			}
+		}
+
+		@Override
+		public void visitLink(@Nonnull Link link, boolean parentVisible, boolean parentEnabled) {
+			if (depth > 0) {
+				links.add(link);
+			}
+		}
+	}
+
+	/**
+	 * Records that the upload a renderer has just made with {@code testSuccess="false"} was refused on its upload page,
+	 * which the renderer has then closed, as a user does after reading the refusal. A following {@code <testFailure/>}
+	 * counts the refusal as an error, and a following {@code <testSuccess/>} fails with it.
+	 *
+	 * @param refusal	what the upload page said, or null if the upload was not refused there
+	 */
+	protected final void uploadRefused(@Nullable String refusal) {
+		uploadError = refusal;
+		if (refusal != null) {
+			selenide.trace("    The upload was refused: " + refusal);
+		}
+	}
+
+	/**
+	 * Returns the refusal of the upload made by the previous step, if that step was an upload that was refused.
+	 *
+	 * @return the refusal, or null
+	 */
+	private @Nullable String refusedUpload() {
+		return (previousStep instanceof Upload) ? uploadError : null;
 	}
 
 	/**
@@ -985,7 +1236,7 @@ public abstract class InterpretedWebDriverExecutor<
 	 * @param queryName	the step's query, or null for the document's default query (or the context's list's query)
 	 * @param modelName	the step's model, or null
 	 * @param column	the column's binding
-	 * @param filter	true to check the column can be filtered, false to check it can be sorted
+	 * @param filter	true to check the column can be filtered, false to check it can be sorted, null to check neither
 	 * @throws MetaDataException	if the list grid cannot be resolved, or the column is not one of its query, or
 	 * 								cannot be filtered or sorted
 	 */
@@ -995,7 +1246,7 @@ public abstract class InterpretedWebDriverExecutor<
 										@Nullable String queryName,
 										@Nullable String modelName,
 										@Nonnull String column,
-										boolean filter) {
+										@Nullable Boolean filter) {
 		AC context = peek();
 		// A step that names no list means the list the context shows (see NavigateList.listGridIdentifier)
 		PushListContext list = (context == null) ? null : context.getList();
@@ -1040,12 +1291,12 @@ public abstract class InterpretedWebDriverExecutor<
 			String binding = candidate.getBinding();
 			String name = (binding == null) ? candidate.getName() : binding;
 			if (column.equals(name)) {
-				if (candidate instanceof MetaDataQueryProjectedColumn projected) {
-					if (filter && (! projected.isFilterable())) {
+				if ((filter != null) && (candidate instanceof MetaDataQueryProjectedColumn projected)) {
+					if (filter.booleanValue() && (! projected.isFilterable())) {
 						throw new MetaDataException(String.format("<%s /> column [%s] of query %s.%s cannot be filtered",
 																	element, column, m, query.getName()));
 					}
-					if ((! filter) && (! projected.isSortable())) {
+					if ((! filter.booleanValue()) && (! projected.isSortable())) {
 						throw new MetaDataException(String.format("<%s /> column [%s] of query %s.%s cannot be sorted",
 																	element, column, m, query.getName()));
 					}
@@ -1163,6 +1414,48 @@ public abstract class InterpretedWebDriverExecutor<
 	 */
 	protected void clickLinkContaining(@Nonnull NavigateLink link, @Nonnull String text) {
 		throw notImplementedYet("<navigateLink text=\"…\"/>");
+	}
+
+	/**
+	 * Renderer hook for {@code <captureCell/>}: reads the text that a cell of the step's grid shows: the cell in the
+	 * column whose binding is the step's column, of the step's row ({@code row}, or the first row, in the order shown,
+	 * that has a cell containing {@code rowContaining} with its tokens substituted). An input in the cell (an inline grid)
+	 * reads as its value.
+	 *
+	 * @param capture	the step, which names the grid, the row and the column
+	 * @return the displayed text, or null or blank if the cell shows no value (the step then fails)
+	 * @throws UnsupportedOperationException	until the renderer implements it
+	 */
+	protected @Nullable String readGridCell(@Nonnull CaptureCell capture) {
+		throw notImplementedYet("<captureCell/>");
+	}
+
+	/**
+	 * Renderer hook for {@code <captureTitle/>}: reads the title that the current view shows, as a user reads it.
+	 *
+	 * @param capture	the step
+	 * @return the displayed title, or null or blank if the view shows none (the step then fails)
+	 * @throws UnsupportedOperationException	until the renderer implements it
+	 */
+	protected @Nullable String readViewTitle(@Nonnull CaptureTitle capture) {
+		throw notImplementedYet("<captureTitle/>");
+	}
+
+	/**
+	 * Renderer hook for {@code <dataGridLink/>}: clicks the first displayed link in the step's row of its data grid whose
+	 * visible text contains the text (case-sensitive), as a user does. For a link that runs an action, it then answers the
+	 * confirmation and questions as the step's {@code confirm} says (failing if it is false and nothing asks) and waits for
+	 * the response; for any other link, it waits for the page or view it leads to. It fails if the row has no such
+	 * displayed link, listing the row's links, or if the link is disabled.
+	 *
+	 * @param link	the step, which names the grid and the row
+	 * @param text	the link's text, with the tokens substituted
+	 * @param action	true if the link runs an action, false if it leads to another page
+	 * @return true if the action's confirmation or a question was answered negatively, so the action did not run
+	 * @throws UnsupportedOperationException	until the renderer implements it
+	 */
+	protected boolean clickDataGridLink(@Nonnull DataGridLink link, @Nonnull String text, boolean action) {
+		throw notImplementedYet("<dataGridLink/>");
 	}
 
 	/**

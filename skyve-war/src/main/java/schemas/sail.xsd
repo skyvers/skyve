@@ -11,6 +11,10 @@
 
   <xs:element name="cancel" type="tns:cancel"/>
 
+  <xs:element name="captureCell" type="tns:captureCell"/>
+
+  <xs:element name="captureTitle" type="tns:captureTitle"/>
+
   <xs:element name="captureValue" type="tns:captureValue"/>
 
   <xs:element name="clearContext" type="tns:clearContext"/>
@@ -20,6 +24,8 @@
   <xs:element name="dataEnter" type="tns:dataEnter"/>
 
   <xs:element name="dataGridEdit" type="tns:dataGridEdit"/>
+
+  <xs:element name="dataGridLink" type="tns:dataGridLink"/>
 
   <xs:element name="dataGridNew" type="tns:dataGridNew"/>
 
@@ -111,6 +117,8 @@
 
   <xs:element name="upload" type="tns:upload"/>
 
+  <xs:element name="workflow" type="tns:workflow"/>
+
   <xs:element name="zoomIn" type="tns:zoomIn"/>
 
   <xs:element name="zoomOut" type="tns:zoomOut"/>
@@ -181,6 +189,9 @@
         <xs:element ref="tns:listGridClearFilter"/>
         <xs:element ref="tns:listGridSort"/>
         <xs:element ref="tns:captureValue"/>
+        <xs:element ref="tns:captureCell"/>
+        <xs:element ref="tns:captureTitle"/>
+        <xs:element ref="tns:dataGridLink"/>
       </xs:choice>
     </xs:sequence>
   </xs:complexType>
@@ -242,6 +253,7 @@
 
   <xs:complexType name="navigateLink">
     <xs:sequence/>
+    <xs:attribute name="exact" type="xs:boolean"/>
     <xs:attribute name="href" type="xs:string"/>
     <xs:attribute name="text" type="xs:string"/>
   </xs:complexType>
@@ -488,6 +500,7 @@
     <xs:attribute name="action" type="xs:string"/>
     <xs:attribute name="binding" type="xs:string"/>
     <xs:attribute name="file" type="xs:string" use="required"/>
+    <xs:attribute name="testSuccess" type="xs:boolean"/>
   </xs:complexType>
 
   <xs:complexType name="testMessage">
@@ -567,7 +580,38 @@
   <xs:complexType name="captureValue">
     <xs:sequence/>
     <xs:attribute name="binding" type="xs:string" use="required"/>
+    <xs:attribute name="pattern" type="xs:string"/>
     <xs:attribute name="variable" type="xs:string" use="required"/>
+  </xs:complexType>
+
+  <xs:complexType name="captureCell">
+    <xs:sequence/>
+    <xs:attribute name="binding" type="xs:string"/>
+    <xs:attribute name="column" type="xs:string" use="required"/>
+    <xs:attribute name="document" type="xs:string"/>
+    <xs:attribute name="model" type="xs:string"/>
+    <xs:attribute name="module" type="xs:string"/>
+    <xs:attribute name="pattern" type="xs:string"/>
+    <xs:attribute name="query" type="xs:string"/>
+    <xs:attribute name="row" type="xs:int"/>
+    <xs:attribute name="rowContaining" type="xs:string"/>
+    <xs:attribute name="variable" type="xs:string" use="required"/>
+  </xs:complexType>
+
+  <xs:complexType name="captureTitle">
+    <xs:sequence/>
+    <xs:attribute name="pattern" type="xs:string"/>
+    <xs:attribute name="variable" type="xs:string" use="required"/>
+  </xs:complexType>
+
+  <xs:complexType name="dataGridLink">
+    <xs:sequence/>
+    <xs:attribute name="binding" type="xs:string" use="required"/>
+    <xs:attribute name="confirm" type="xs:boolean"/>
+    <xs:attribute name="row" type="xs:int"/>
+    <xs:attribute name="rowContaining" type="xs:string"/>
+    <xs:attribute name="testSuccess" type="xs:boolean"/>
+    <xs:attribute name="text" type="xs:string" use="required"/>
   </xs:complexType>
 
   <xs:complexType name="interaction">
@@ -629,6 +673,9 @@
               <xs:element ref="tns:listGridClearFilter"/>
               <xs:element ref="tns:listGridSort"/>
               <xs:element ref="tns:captureValue"/>
+              <xs:element ref="tns:captureCell"/>
+              <xs:element ref="tns:captureTitle"/>
+              <xs:element ref="tns:dataGridLink"/>
             </xs:choice>
           </xs:sequence>
         </xs:complexType>
@@ -636,6 +683,12 @@
       <xs:element name="after" type="tns:procedure" form="qualified" minOccurs="0"/>
     </xs:sequence>
     <xs:attribute name="name" type="xs:string" use="required"/>
+  </xs:complexType>
+
+  <xs:complexType name="workflow">
+    <xs:sequence>
+      <xs:element ref="tns:automation" maxOccurs="unbounded"/>
+    </xs:sequence>
   </xs:complexType>
 
   <xs:simpleType name="testStrategy">

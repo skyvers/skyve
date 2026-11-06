@@ -52,6 +52,8 @@ script from the test classpath and runs it with an interpreted executor:
 | Class | Role |
 |---|---|
 | `util.AbstractPrimeFacesInterpretedSail`, `util.AbstractSmartClientInterpretedSail` | Test bases. Take the server lock, start and stop the browser, unmarshal the script (`sailResource`, `sailFile`, `sailString`) and run it. |
+| `util.AbstractInterpretedSailWorkflow` | Test base for [workflows](#workflows): `sailWorkflow(...)` runs several scripts, or a `<workflow>` file, as one run across renderers. |
+| `util.sail.SailWorkflow` | Runs a workflow: picks the executor for each automation, starts a browser only when the device changes, and shares the run token and variables. |
 | `util.sail.SailServerLock` | A cross-JVM file lock per base URL, so that only one SAIL IT at a time uses a server; see [One test per server](#one-test-per-server). |
 | `util.sail.SailSuite` | Runs a multi-file suite: set-up files, suite files and a gated restore; see [Admin: application suite](#admin-application-suite). |
 | `util.sail.InterpretedWebDriverExecutor` | Shared executor base. Runs the automation, applies the test strategy, records failures, and implements login, logout, URL navigation, the context steps, `testSuccess`, `testFailure`, `comment`, `execute` and `pause`. It also keeps the [variables](#the-run-token-and-variables), checks the list grid steps' columns, and switches the [view roles](#the-test-user) at each login. |
@@ -154,6 +156,10 @@ passes a step that did nothing.
 | `clearListGridFilters(ListGridClearFilter)` | `listGridClearFilter` |
 | `sortListGrid(ListGridSort, String column, boolean descending)` | `listGridSort` |
 | `readWidgetValue(CaptureValue)` | `captureValue`; returns the displayed text |
+| `readGridCell(CaptureCell)` | `captureCell`; returns the cell's displayed text |
+| `readViewTitle(CaptureTitle)` | `captureTitle`; returns the view's title as shown |
+| `clickDataGridLink(DataGridLink, String text, boolean action)` | `dataGridLink`; clicks the link in the row, and for an action answers its confirmation; returns true if declined |
+| `clickLinkContaining(NavigateLink, String text)` | `navigateLink text`, with or without `exact` |
 | `enterOption(DataEnter, String value, Match)` | `dataEnter match="code\|label"`, called from the renderer's `executeDataEnter` |
 | `pickLookupDescriptionRowContaining(LookupDescriptionPick, String text)` | `lookupDescriptionPick rowContaining`, called from the renderer's `executeLookupDescriptionPick` |
 | `autoCompleteLookupDescriptionAndPick(LookupDescriptionAutoComplete, String search, String pick)` | `lookupDescriptionAutoComplete pick`, called from the renderer's `executeLookupDescriptionAutoComplete` |
@@ -196,6 +202,64 @@ error fails the unit build.
 The children are an optional `<before>`, one or more `<interaction>` elements
 and an optional `<after>`.
 
+### Workflows
+
+A workflow is several automations run in order as one run. Each automation
+keeps its own `uxui`, `userAgentType` and `testStrategy`, so a workflow can move
+between renderers: a client raises a request in a PrimeFaces UX/UI, then staff
+handle it in SmartClient. The automations share the
+[run token and the variables](#the-run-token-and-variables), so a later
+automation finds what an earlier one made, by `{run}` or by a captured value.
+
+A workflow is either several script files or one file whose root is
+`<workflow>`, holding the `<automation>` elements:
+
+```xml
+<workflow xmlns="http://www.skyve.org/xml/sail">
+	<automation uxui="tablet" userAgentType="tablet">
+		<interaction name="Client: raise a request">...</interaction>
+	</automation>
+	<automation uxui="desktop" userAgentType="desktop">
+		<interaction name="Staff: find it by {var:number}">...</interaction>
+	</automation>
+</workflow>
+```
+
+An IT runs a workflow with `util.AbstractInterpretedSailWorkflow`:
+
+```java
+class RequestWorkflowSailIT extends AbstractInterpretedSailWorkflow {
+	@Test
+	void request() {
+		viewRoles("client{run}", "todo.ToDoClient");
+		sailWorkflow("sail/apps/request-1-client.xml", "sail/apps/request-2-staff.xml");
+		// or sailWorkflow("sail/apps/request-workflow.xml") for a <workflow> file
+	}
+}
+```
+
+- Each automation runs in SmartClient when its `uxui` is `desktop`, and in
+  PrimeFaces otherwise.
+- The browser is chosen by the automation's `userAgentType`: an iPad's user
+  agent for `tablet`, an iPhone's user agent and window size for `phone`, and a
+  desktop Chrome otherwise. `browser(UserAgentType, Supplier)` replaces one.
+- A new browser starts only when an automation needs another device than the
+  previous one. Otherwise the next automation drives the same browser, even in
+  the other renderer, and so the same session. Each automation signs in for
+  itself.
+- The server lock is taken once, by the first automation, and held until the
+  test class has finished.
+- [View roles](#the-test-user) work as in a single script, including users
+  named with `{run}`, which is the workflow's token.
+- The workflow stops at the first automation that fails, and the failure names
+  the file and the automation.
+- `util.sail.SailWorkflow` does the work, so a test that extends another base
+  (as the Biz Hub Apps ITs extend `AbstractH2Test`) can use it directly.
+
+`XMLMetaData.unmarshalSAILWorkflowFile` and `unmarshalSAILWorkflowString` read a
+`<workflow>`, or a single `<automation>` as a workflow of one. The existing
+`unmarshalSAIL*` methods read an `<automation>` only.
+
 ### Interactions and procedures
 
 An `<interaction name="...">` is the unit of a script and appears in failure
@@ -237,15 +301,18 @@ cannot follow, for example through `<navigateLink/>` or `<execute>`:
 `{run}` in a value is replaced with a token unique to the run. The token is the
 current time in milliseconds in base 36: 8 or more lower-case letters and
 digits. A new token is made for each automation, which means once per script
-file. In a multi-file suite, a value created with `{run}` in one file cannot be
-found with `{run}` in the next file.
+file, unless the automation is part of a [workflow](#workflows), whose
+automations share one token. In a multi-file suite (`SailSuite`), a value
+created with `{run}` in one file cannot be found with `{run}` in the next file.
 
 Use `{run}` to make the records a script creates unique, so a script can run
 again, or alongside another script, without clashing with leftovers.
 
-`{var:name}` is replaced with the value of a variable. `<captureValue/>` sets
-it from what a widget shows. Use it for values the application made, such as a
-generated number, that a later step must find again:
+`{var:name}` is replaced with the value of a variable. Three steps set one:
+`<captureValue/>` from what a widget shows, `<captureCell/>` from a list or
+data grid cell, and `<captureTitle/>` from the view's title. Use them for values
+the application made, such as a generated number, that a later step must find
+again:
 
 ```xml
 <save />
@@ -256,12 +323,18 @@ generated number, that a later step must find again:
 ```
 
 - The value is the displayed text, trimmed, as `testValue` reads it.
-- A widget that shows no value fails `captureValue`. A blank variable would
-  match any row.
+- With `pattern`, a Java regular expression, the value is the part of the text
+  that the pattern finds (the first match, not the whole text): its first
+  group, or the whole match if it has no group. For example
+  `<captureTitle variable="request" pattern="Request (\d+)"/>` keeps the
+  number of "Request 1234 - printer". A pattern that finds nothing fails the
+  step and shows the text that was read.
+- A widget, cell or title that shows no value fails the step. A blank variable
+  would match any row.
 - A name is a letter, then letters, digits or underscores.
 - Capturing the same variable again replaces its value.
-- Variables last for one automation, which means one script file. A suite's
-  next file starts with none.
+- Variables last for one automation, which means one script file, or for a
+  whole [workflow](#workflows). A suite's next file starts with none.
 - Using a variable that has not been captured fails the step, and the message
   lists the variables that are defined.
 - A substituted value is not substituted again.
@@ -274,15 +347,17 @@ generated number, that a later step must find again:
 - `dataEnter@value` and `testValue@value`;
 - `lookupDescriptionAutoComplete@search` and `@pick`;
 - `listGridFilter@value`;
-- `login@user` and `login@password`, to sign in as a user created earlier in the
-  same run;
+- `login@user`, `login@password` and `login@customer`, to sign in as a user
+  created earlier in the same run;
 - `testFailure@message` and `testMessage@contains`;
 - every `rowContaining`, including `lookupDescriptionPick@rowContaining`;
-- `navigateEdit@bizId`, `navigateLink@href` and `navigateLink@text`.
+- `navigateEdit@bizId`, `navigateLink@href`, `navigateLink@text` and
+  `dataGridLink@text`;
+- `comment` text, which the trace then shows with the values.
 
 They are not substituted in attributes that name metadata, such as `module`,
 `binding`, `column` or a menu item, nor in numbers, flags, file names,
-`comment` text or `execute` scripts.
+`pattern`s or `execute` scripts (`{` is normal JavaScript).
 
 ### Values
 
@@ -333,7 +408,7 @@ Support: **yes** means implemented; **no** means the step fails with a reason
 | `navigateTree` | as `navigateList` | Opens `a=t`. | no: no PF tree page | URL only: waits for the view, with no tree gestures |
 | `navigateMap` | as `navigateList`, plus `geometryBinding`, `refreshTimeInSeconds`, `showRefreshControls` | Opens `a=m` with `&b=<geometryBinding>`. `geometryBinding` is required unless a model is named. The two refresh attributes are accepted and ignored. | yes | URL only |
 | `navigateCalendar` | as `navigateList`, plus `startBinding`, `endBinding` | Opens `a=c`. The bindings are accepted and ignored. | no: no PF calendar page | URL only |
-| `navigateLink` | `href` or `text` (exactly one) | With `href`, opens an absolute URL as is, or otherwise a URL relative to the base URL. With `text`, clicks the first displayed link (`<a>`), in page order, whose visible text contains the text (case-sensitive), such as a link in a blurb; a link that opens a new window fails the step, and no match fails it with the page's link texts. The top context, if any, loses its document and view type. Push a context afterwards if later steps need one. | yes | yes; with `text`, if the link leads to another page the step waits for it to load, then for SmartClient to settle |
+| `navigateLink` | `href` or `text` (exactly one), `exact` | With `href`, opens an absolute URL as is, or otherwise a URL relative to the base URL. With `text`, clicks the first displayed link (`<a>`), in page order, whose visible text contains the text (case-sensitive), such as a link in a blurb; with `exact="true"`, the link's visible text, trimmed, must equal the text. A link that opens a new window fails the step, and no match fails it with the page's link texts. `exact` with `href` fails the step. The top context, if any, loses its document and view type. Push a context afterwards if later steps need one. | yes | yes; with `text`, if the link leads to another page the step waits for it to load, then for SmartClient to settle |
 | `navigateMenu` | `module`\*, `item`\* | Clicks through the rendered menu, then sets the context as the equivalent navigate step would. `item` is the menu item's name, or its shown label. Use `/` to qualify it with group names, for example `Security Admin/Users`. | yes; tree and calendar items fail | yes; fails if a window covers the menu |
 | `testMenu` | `module`\*, `item`, `present` | Asserts that the module, or an item of it, is shown (`present` true or absent) or not shown (`false`). `item` is named as for `navigateMenu`. | yes | yes |
 
@@ -356,7 +431,7 @@ Support: **yes** means implemented; **no** means the step fails with a reason
 | `dataEnter` | `binding`\*, `value`\*, `navigateToWidget`, `match` | Enters the value into the first displayed, enabled widget for the binding; see [Values](#values). Fails if no widget can take it. `navigateToWidget` is accepted and ignored: the executors always scroll the target into view. | yes | yes; after `dataGridNew`/`dataGridEdit` on an inline grid, bindings are tried as the grid's columns first |
 | `dataEnter match` | `index` (default), `code`, `label` | How the value names a combo or radio option: its position, its code or its label. A code or label must name exactly one option. `code` and `label` fail on any other widget. Prefer `code`: labels change with the language, and positions change when options are added. | yes: the option's value or its label as the page shows them (a combo's empty first entry counts) | yes: the option's position is found from the item's options, then it is chosen as with an index |
 | `testDataEnter` | `fixture` | Builds a bean with `DataBuilder` (the named fixture, or the `sail` fixture), then enters its values into every scalar widget of the view. Membership widgets are skipped. | yes | yes |
-| `upload` | `binding` or `action` (exactly one), `file`\* | Uploads a file from the **test** classpath (for example `sail/files/sail-image.png` from `skyve-war/src/test/resources`). With `binding`, it uses the content widget's upload page, and the widget must hold content afterwards. With `action`, it presses the upload action's button, chooses the file and submits it. When the upload page opens the chosen file in its image editor, as it does for an image field, the step presses the editor's Upload button (`#crop`), which uploads it. Otherwise it presses the file list's Upload button. | yes; in the image editor, it waits for the cropper before pressing Upload | yes |
+| `upload` | `binding` or `action` (exactly one), `file`\*, `testSuccess` | Uploads a file from the **test** classpath (for example `sail/files/sail-image.png` from `skyve-war/src/test/resources`). With `binding`, it uses the content widget's upload page, and the widget must hold content afterwards. With `action`, it presses the upload action's button, chooses the file and submits it. When the upload page opens the chosen file in its image editor, as it does for an image field, the step presses the editor's Upload button (`#crop`), which uploads it. Otherwise it presses the file list's Upload button. With `testSuccess="false"`, the upload may be refused: the step does not check that the widget holds content or that no error shows. A refusal shown on the upload page is kept, and the upload page is closed with its close button, as a user does after reading it. A following `<testFailure message="..."/>` then checks the refusal, wherever it shows: on the upload page or in the view. | yes; in the image editor, it waits for the cropper before pressing Upload | yes |
 | `lookupDescriptionAutoComplete` | `binding`\*, `search`\*, `pick` | Types the search text into the lookup and picks the first suggestion. With `pick`, it picks the first suggestion, in the order shown, that contains the text (case-sensitive). Fails if nothing matches. | yes | yes; only the rows the drop-down has fetched are searched. After `dataGridNew`/`dataGridEdit` on an inline grid, a column of the binding is used first, as for `dataEnter` |
 | `lookupDescriptionPick` | `binding`\*, `row` or `rowContaining` (exactly one) | Opens the lookup's drop-down and picks the zero-based row, or the first row, in the order shown, that contains the text (case-sensitive). | yes; `rowContaining` sees only the rows the drop-down shows | yes; `rowContaining` sees only the rows the drop-down has fetched. After `dataGridNew`/`dataGridEdit` on an inline grid, a column of the binding is used first, as for `dataEnter` |
 | `lookupDescriptionNew` | `binding`\* | Opens New on the lookup and pushes the related document's context. | no: PF lookups have no New | yes |
@@ -413,6 +488,7 @@ of these defaults from the current context.
 | `dataGridEdit` | `binding`\*, `row` or `rowContaining` | Starts an inline edit of the row. | no: PF grids have no row edit gesture; inline cells are inputs | yes; the following `dataEnter`, `testValue`, `testWidget`, `lookupDescriptionPick` and `lookupDescriptionAutoComplete` steps address the row's columns, and any other step ends the edit |
 | `dataGridRemove` | `binding`\*, `row` or `rowContaining` | Removes the row from the collection. The record itself is not deleted. | yes | yes |
 | `dataGridSelect` | `binding`\*, `row` or `rowContaining` | Selects the row without zooming. | only on grids with a `selectedIdBinding`; on other grids a selection zooms | yes |
+| `dataGridLink` | `binding`\*, `row` or `rowContaining`, `text`\*, `confirm`, `testSuccess` | Clicks the first displayed link in the row whose visible text contains `text` (case-sensitive), such as a "Revoke Access" link in every row. A link that runs an action is pressed as an [action step](#actions) presses its button: `confirm` answers its confirmation and questions, and the step checks for errors unless `testSuccess="false"` or it was declined; the view and its context stay. Any other link is followed as `navigateLink` follows one: the top context loses its document and view type. Which kind a link is comes from the view's metadata: the grid's links whose shown value contains the text (or every link of the grid if none does) all have an action reference. No such link in the row fails the step, listing the row's links. | yes, but runtime issue P9 zooms into the row as well, so it cannot be used on a grid that zooms when a row is selected | yes |
 | `listGridNew` | `module`, `document`, `query`, `model`, `createView` | Presses New and pushes the new document's context. | yes; on a Vue list grid, its toolbar's New button, or the floating one a list view shows above its paginator | yes |
 | `listGridZoom` | as `listGridNew` without `createView`, plus `row` or `rowContaining` | Opens the row and pushes its context. | yes; on a Vue list grid, the row's View Detail button, or a click on the row when the grid zooms on a row click | yes |
 | `listGridSelect` | as `listGridZoom` | Selects the row without opening it. | only on grids with a `selectedIdBinding`. On a Vue list grid, it clicks the row. A row that already shows as selected is clicked twice, to unselect and select it: the grid restores its selection by design, without running the selected action (P7). The step fails if the row does not show as selected afterwards. | yes |
@@ -487,8 +563,8 @@ Under None, they are skipped.
 | Element | Attributes | Semantics | PF | SC |
 |---|---|---|---|---|
 | `testValue` | `binding`\*, `value`\* | Asserts that the widget shows the value; see [Values](#values). | yes | yes |
-| `testSuccess` | | Asserts that no error message, growl or field error is shown. Information messages do not count. Straight after a login, it asserts that the login succeeded. | yes | yes |
-| `testFailure` | `message` | Asserts that an error is shown and, if `message` is given, that the error contains it. Only errors count: error messages and growls, field errors, and in SC the Problems dialog. Straight after a login, it asserts that the login was rejected. | yes | yes |
+| `testSuccess` | | Asserts that no error message, growl or field error is shown. Information messages do not count. Straight after a login, it asserts that the login succeeded; straight after an `upload testSuccess="false"`, that the upload was not refused. | yes | yes |
+| `testFailure` | `message` | Asserts that an error is shown and, if `message` is given, that the error contains it. Only errors count: error messages and growls, field errors, and in SC the Problems dialog. Straight after a login, it asserts that the login was rejected. Straight after an `upload testSuccess="false"`, a refusal on the upload page counts too. | yes | yes |
 | `testMessage` | `contains`\*, `type` (`info`, `warning`, `error`) | Asserts that a growl or message containing the text, case-sensitively, is shown. With `type`, the message must have that severity. Unlike `testSuccess`/`testFailure`, it sees information and warning messages too. | yes: global messages, growls and field messages | yes: `isc.say` is info, `isc.warn` is warning, the Problems dialog and field errors are error, and growls go by their class |
 | `testGridRows` | `binding`, or `module`/`document`/`query`/`model`; `rowContaining`, `minRows`, `maxRows`, `timeoutMillis` | Counts the rows, or only those containing the text, and asserts `minRows ≤ count ≤ maxRows`. An absent `minRows` means 0 and an absent `maxRows` means no maximum. With neither, the step asserts at least one row. `maxRows="0"` asserts absence. `binding` (a data grid) cannot be combined with the list attributes. With `timeoutMillis`, the grid is reloaded from the server and recounted every second until the bounds hold or time runs out. Use it to wait for a server job. A timed step still waits under None. | yes; a Vue list grid refetches its rows as it does after an ajax update, and the step waits for that fetch | yes; only list grids are reloaded |
 | `testWidget` | exactly one of `binding`, `action`, `tab`; `visible`, `enabled` | `visible="true"` asserts the target is shown. `visible="false"` asserts it is hidden or not rendered. `enabled` asserts it is shown and is, or is not, enabled. With neither, the step asserts visible. `visible="false"` cannot be combined with `enabled`. `tab` is a tab path as for `tabSelect`. | yes | yes |
@@ -499,10 +575,12 @@ Under None, they are skipped.
 
 | Element | Content or attributes | Semantics | PF | SC |
 |---|---|---|---|---|
-| `comment` | text | Written to the trace. Does nothing else. | yes | yes |
+| `comment` | text | Written to the trace, with `{run}` and `{var:name}` substituted. Does nothing else. | yes | yes |
 | `execute` | JavaScript text | Runs the script in the browser page. Use it sparingly: it bypasses what SAIL is testing. | yes; then waits for any request or page load the script started | yes; checks for open dialogs first, then waits for SmartClient to settle |
 | `pause` | `millis`\* | Sleeps. This is a last resort, for when no observable condition exists: see [Synchronisation Rules](#synchronisation-rules). The kitchen sinks pause once, for 100 ms, only to test the op-code. | yes | yes |
-| `captureValue` | `binding`\*, `variable`\* | Keeps the value the widget shows in a variable for `{var:name}`; see [The run token and variables](#the-run-token-and-variables). It is not an assertion, so it runs under every strategy. | yes | yes |
+| `captureValue` | `binding`\*, `variable`\*, `pattern` | Keeps the value the widget shows in a variable for `{var:name}`; see [The run token and variables](#the-run-token-and-variables). It is not an assertion, so it runs under every strategy. | yes | yes |
+| `captureCell` | `variable`\*, `column`\*, `row` or `rowContaining`, `binding` or `module`/`document`/`query`/`model`, `pattern` | Keeps the text a grid cell shows: the cell in the column whose binding is `column`, of the row. The grid is a data grid named by `binding`, or a list grid named as the [grid steps](#grids) name it, each attribute defaulting from the context; `binding` cannot be combined with the list attributes. A list grid's column is checked against its query first. A cell's input (an inline grid) reads as its value. | yes: a data table's column by its header, a Vue list grid's by its title; the title a card layout repeats in a cell is left out | yes: the grid field of the sanitised binding |
+| `captureTitle` | `variable`\*, `pattern` | Keeps the title the current view shows. | yes: the template's title | yes: the view's header (a list view's too) |
 
 ## Test Strategies and Failure Reports
 
@@ -617,7 +695,7 @@ tests. The SAIL ITs are:
 
 | IT | Script | Renderer |
 |---|---|---|
-| `PrimeFacesKitchenSinkSailIT` | `sail/kitchenSink/pf/pf-kitchensink-sail.xml`, plus a second test that switches to SmartClient with PrimeFaces' user menu and checks `<switchMode/>` back | PF, tablet |
+| `PrimeFacesKitchenSinkSailIT` | `sail/kitchenSink/pf/pf-kitchensink-sail.xml`, plus a test that switches to SmartClient with PrimeFaces' user menu and checks `<switchMode/>` back, one that checks the find steps' failures, and `rowLink` (`pf-kitchensink-row-link.xml`), disabled until runtime issue P9 is fixed | PF, tablet |
 | `PrimeFacesSailTestStrategyIT` | inline scripts, 3 tests | PF, tablet |
 | `PrimeFacesAdminSuiteSailIT` | `sail/admin/pf/suite/*.xml` | PF, tablet |
 | `PrimeFacesAdminSailIT` | `sail/admin/pf/pf-admin-sail.xml` (the older single-file admin script) | PF, tablet |
@@ -626,6 +704,7 @@ tests. The SAIL ITs are:
 | `SmartClientAdminSailIT` | `sail/admin/sc/sc-admin-sail.xml` | SC |
 | `SmartClientAdminSuiteSailIT` | `sail/admin/sc/suite/*.xml` | SC |
 | `SmartClientRecorderRoundTripSailIT` | records `sail/kitchenSink/sc/sc-recorder-round-trip.xml` and an admin contacts workflow, and replays the recordings; see [Recording](#recording). Needs `sail.recording` on. | SC |
+| `KitchenSinkWorkflowSailIT` | `sail/kitchenSink/workflow/`: three files (PF tablet, SC, PF tablet) and one `<workflow>` file (PF external, then SC in the same browser) | both |
 
 To run the SAIL unit tests without any browser IT, exclude ITs and give a base
 URL that nothing answers:
@@ -719,7 +798,8 @@ fixtures, with `testStrategy="Assert"`.
 - `dataEnter` and `testValue` on every KitchenSink widget, with values checked
   again after server round trips;
 - data grids: container, ordered and inline grids;
-- ActionsFixture: toolbar, form and tab buttons, change events and uploads;
+- ActionsFixture: toolbar, form and tab buttons, change events and uploads,
+  an upload that is refused, a row's cell and the view's title;
 - DialogsFixture: confirmations and server-side questions, answered yes and no;
 - EscapingFixture: zoom in and out;
 - contexts, links, a map, and `execute`;
@@ -729,7 +809,9 @@ fixtures, with `testStrategy="Assert"`.
 
 `sc-kitchensink-sail.xml` covers the same ground for SmartClient, except
 membership and ListGridFixture (`componentBuilderClass` only applies to
-PrimeFaces). The only kitchen sink membership widget is on ConditionsFixture,
+PrimeFaces). It also clicks the ActionsFixture's Run From Row link in a row,
+declined and confirmed, which PF does in its separate, disabled `rowLink` test
+(runtime issue P9). The only kitchen sink membership widget is on ConditionsFixture,
 which never settles in SmartClient (runtime issue SC-4).
 
 Both kitchen sinks make their records unique with `{run}`, so they can be rerun
@@ -746,7 +828,8 @@ Kitchen sink fixtures for the newer steps:
   `listGridFilter` and `listGridSort`.
 - `KitchenSink.lookupDescription` picks from the same lookup values, for
   `lookupDescriptionPick rowContaining` and `lookupDescriptionAutoComplete
-  pick`.
+  pick`. The kitchen sinks also read a lookup value's number from its list cell
+  with `captureCell`.
 - ModelLookupFixture's inline data grid `rows` has model lookup description
   columns, `selection` and `singleSelection`, which the form above it also
   has. The SC kitchen sink sets them in a new row and reads them after
@@ -756,6 +839,15 @@ Kitchen sink fixtures for the newer steps:
   parameter (`text` not null), so SmartClient completes its criteria in the
   browser; the SC kitchen sink filters its time column there (runtime issue
   SC-9). PF does not use that grid.
+- ActionsFixture's Upload action refuses a file named `sail-refused.txt` with
+  "The file sail-refused.txt already exists", as Upload Backup refuses a backup
+  that exists, for `upload testSuccess="false"`.
+- ActionsFixture's rows grid has a Run From Row link in each row, whose action
+  asks for a confirmation, for `dataGridLink`.
+
+`KitchenSinkWorkflowSailIT` is the conformance for [workflows](#workflows):
+PrimeFaces makes a lookup value and keeps its number, then SmartClient finds it
+by the number and `{run}`, and so on back to PrimeFaces.
 
 ### Admin: application suite
 
@@ -1032,20 +1124,13 @@ silently.
     somewhere the script does not expect. Biz Hub Apps, for example, routes
     any user with a client role to its support centre UX/UI. Sign in as a
     user with the roles the workflow needs, and register them.
-- **Rejected uploads.** `upload` expects the upload to succeed. A script
-  cannot expect an upload to be refused and check its message (such as "file
-  already exists").
-- **What `captureValue` reads.** It reads a widget in the view by binding. It
-  cannot read a list cell or the view's title, so a number that is only shown
-  in a list or a title cannot be captured.
-- **Links in grid rows.** No step clicks a link in a data grid or list grid
-  row (for example a "Revoke Access" link in each row). `navigateLink text`
-  clicks the first matching link on the page, which is the wrong one when
-  every row has the same link.
-- **One automation per renderer.** `{run}` and `{var:name}` belong to one
-  automation. A workflow that moves between renderers (a client in the
-  support centre, then staff in SmartClient) is several scripts, and the IT
-  has to pass the run token and any captured values between them itself.
+- **Links in rows.** `dataGridLink` clicks links in data grid rows only, not in
+  list grid rows. In PrimeFaces, clicking an action link in a row of a grid that
+  zooms when a row is selected also zooms into the row (runtime issue P9).
+- **Refused uploads** are read from the upload page's messages. An upload action
+  that refuses a file by throwing a `ValidationException`, rather than an
+  `UploadException`, shows only a generic error reference there (runtime issue
+  P10), so `testFailure message` cannot check its text.
 - **Unused attributes.** `dataEnter@navigateToWidget`,
   `navigateMap@refreshTimeInSeconds`, `navigateMap@showRefreshControls`,
   `navigateCalendar@startBinding` and `navigateCalendar@endBinding` are accepted
@@ -1076,8 +1161,8 @@ other implementations, which generate test code instead of driving a browser:
   `PrimeFacesSeleneseExecutor`. The Control Panel's SAIL actions use them.
   - They emit a "not supported by this generator" comment for `upload`,
     `testMessage`, `testGridRows`, `testWidget`, `navigateMenu`, `testMenu`,
-    `switchMode`, `listGridFilter`, `listGridClearFilter`, `listGridSort` and
-    `captureValue`.
+    `switchMode`, `listGridFilter`, `listGridClearFilter`, `listGridSort`,
+    `captureValue`, `captureCell`, `captureTitle` and `dataGridLink`.
   - The PrimeFaces generators also emit a "not supported" comment, and no
     gesture, for a grid step or `lookupDescriptionPick` with `rowContaining`,
     for a combo or radio `dataEnter` with `match="code"` or `match="label"`,
@@ -1096,14 +1181,24 @@ other implementations, which generate test code instead of driving a browser:
 The SAIL language changes are additive for script authors. Code that
 implements `Executor` directly is affected.
 
-- **Breaking:** `Executor` has 11 new abstract methods: `executeUpload`,
+- **Breaking:** `Executor` has 14 new abstract methods: `executeUpload`,
   `executeTestMessage`, `executeTestGridRows`, `executeTestWidget`,
   `executeNavigateMenu`, `executeTestMenu`, `executeSwitchMode`,
-  `executeListGridFilter`, `executeListGridClearFilter`, `executeListGridSort`
-  and `executeCaptureValue`. An executor outside Skyve must implement them,
+  `executeListGridFilter`, `executeListGridClearFilter`, `executeListGridSort`,
+  `executeCaptureValue`, `executeCaptureCell`, `executeCaptureTitle` and
+  `executeDataGridLink`. An executor outside Skyve must implement them,
   even if only to fail or to emit a comment. Executors that extend skyve-ext
   `WebDriverExecutor` or `SeleneseExecutor` inherit comment-emitting
   implementations.
+- `CaptureValue` implements the new `CaptureStep` (variable and `pattern`);
+  `CaptureValue.VARIABLE_NAME_PATTERN` is now declared there and still reachable
+  through `CaptureValue`.
+- `ContextualExecutor` keeps `{run}` and the variables in a `RunState`.
+  `shareRun(RunState)` makes an executor use another's run for every
+  automation, which is how a workflow shares them; without it, each automation
+  starts its own run, as before.
+- `upload`'s new `testSuccess`, the capture steps' `pattern` and
+  `navigateLink`'s `exact` are optional, so existing scripts are unchanged.
 - The six row steps (`dataGridZoom`, `dataGridEdit`, `dataGridRemove`,
   `dataGridSelect`, `listGridZoom` and `listGridSelect`) implement
   `GridRowStep`. Their `row` is no longer required in the XSD, and `getRow()`

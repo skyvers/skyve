@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.skyve.impl.util.XMLMetaData;
+import org.skyve.metadata.sail.language.step.CaptureCell;
+import org.skyve.metadata.sail.language.step.CaptureTitle;
 import org.skyve.metadata.sail.language.step.CaptureValue;
 import org.skyve.metadata.sail.language.step.Comment;
 import org.skyve.metadata.sail.language.step.Execute;
@@ -31,6 +33,7 @@ import org.skyve.metadata.sail.language.step.interaction.actions.Save;
 import org.skyve.metadata.sail.language.step.interaction.actions.ZoomIn;
 import org.skyve.metadata.sail.language.step.interaction.actions.ZoomOut;
 import org.skyve.metadata.sail.language.step.interaction.grids.DataGridEdit;
+import org.skyve.metadata.sail.language.step.interaction.grids.DataGridLink;
 import org.skyve.metadata.sail.language.step.interaction.grids.DataGridNew;
 import org.skyve.metadata.sail.language.step.interaction.grids.DataGridRemove;
 import org.skyve.metadata.sail.language.step.interaction.grids.DataGridSelect;
@@ -139,7 +142,10 @@ public class Procedure {
 						@XmlElementRef(type = ListGridFilter.class),
 						@XmlElementRef(type = ListGridClearFilter.class),
 						@XmlElementRef(type = ListGridSort.class),
-						@XmlElementRef(type = CaptureValue.class)})
+						@XmlElementRef(type = CaptureValue.class),
+						@XmlElementRef(type = CaptureCell.class),
+						@XmlElementRef(type = CaptureTitle.class),
+						@XmlElementRef(type = DataGridLink.class)})
 	public @Nonnull List<Step> getSteps() {
 		return steps;
 	}

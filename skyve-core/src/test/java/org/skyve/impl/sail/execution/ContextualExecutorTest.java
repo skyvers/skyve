@@ -249,6 +249,45 @@ class ContextualExecutorTest {
 		assertNull(executor.getVariable("invoice"));
 	}
 
+	@Test
+	void aSharedRunKeepsItsTokenAndVariablesAcrossAutomationsAndExecutors() {
+		ContextualExecutor<AutomationContext<GenerateListContext, GenerateEditContext>> first = newExecutor();
+		ContextualExecutor<AutomationContext<GenerateListContext, GenerateEditContext>> second = newExecutor();
+		RunState run = new RunState();
+		first.shareRun(run);
+		second.shareRun(run);
+		Automation automation = new Automation();
+		automation.setUxui("desktop");
+		automation.setUserAgentType(org.skyve.web.UserAgentType.desktop);
+
+		first.executeAutomation(automation);
+		first.putVariable("invoice", "INV-1");
+		second.executeAutomation(automation);
+		second.putVariable("order", "7");
+		first.executeAutomation(automation);
+
+		assertAll(() -> assertSame(run, first.getRun()),
+					() -> assertEquals(run.getRunToken(), first.getRunToken()),
+					() -> assertEquals(run.getRunToken(), second.getRunToken()),
+					() -> assertEquals("INV-1 7 " + run.getRunToken(), second.substituteTokens("{var:invoice} {var:order} {run}")),
+					() -> assertEquals("7", first.getVariable("order")),
+					() -> assertEquals("INV-1", run.getVariable("invoice")));
+	}
+
+	@Test
+	void anUnsharedRunIsReplacedByEachAutomation() {
+		ContextualExecutor<AutomationContext<GenerateListContext, GenerateEditContext>> executor = newExecutor();
+		RunState before = executor.getRun();
+		Automation automation = new Automation();
+		automation.setUxui("desktop");
+		automation.setUserAgentType(org.skyve.web.UserAgentType.desktop);
+
+		executor.executeAutomation(automation);
+
+		assertAll(() -> assertTrue(before != executor.getRun()),
+					() -> assertEquals(executor.getRun().getRunToken(), executor.getRunToken()));
+	}
+
 	private static ContextualExecutor<AutomationContext<GenerateListContext, GenerateEditContext>> newExecutor() {
 		return mock(ContextualExecutor.class, withSettings().useConstructor().defaultAnswer(CALLS_REAL_METHODS));
 	}

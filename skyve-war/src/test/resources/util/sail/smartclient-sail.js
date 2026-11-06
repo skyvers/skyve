@@ -20,7 +20,7 @@
 (function () {
 	"use strict";
 
-	var VERSION = 5;
+	var VERSION = 6;
 	if (window._sail && window._sail.version === VERSION) {
 		return;
 	}
@@ -1639,13 +1639,14 @@
 	};
 
 	/**
-	 * The first displayed link whose visible text contains the text (case-sensitive): { element, href, target, newPage },
-	 * where newPage says whether following it loads another page (an http(s) URL that is not just this page with
-	 * another fragment), or null if no link does.
+	 * The first displayed link whose visible text contains the text (case-sensitive), or with exact, whose visible text
+	 * (trimmed, white space collapsed) equals it: { element, href, target, newPage }, where newPage says whether following
+	 * it loads another page (an http(s) URL that is not just this page with another fragment), or null if no link does.
 	 */
-	S.link = function (text) {
+	S.link = function (text, exact) {
 		var found = links().filter(function (a) {
-			return (a.innerText || "").indexOf(text) >= 0;
+			var shown = a.innerText || "";
+			return exact ? (shown.replace(/\s+/g, " ").trim() === text) : (shown.indexOf(text) >= 0);
 		})[0];
 		if (!found) {
 			return null;
@@ -1659,6 +1660,93 @@
 						!(url.origin === here.origin && url.pathname === here.pathname && url.search === here.search && url.hash);
 		}
 		return { element: found, href: found.href, target: found.getAttribute("target") || "", newPage: newPage };
+	};
+
+	/**
+	 * The text a grid cell shows, as a user reads it: { text } or { error, retry }. The column is the grid field named by
+	 * the (sanitised) binding. A row being edited inline reads as its editor's value.
+	 */
+	S.cellText = function (locator, rowNum, field) {
+		var g = gridOf(locator);
+		if (g.error) {
+			return { error: g.error, retry: true };
+		}
+		var grid = g.grid;
+		var state = loadedRows(grid);
+		if (!state.loaded) {
+			return { error: "the grid's rows are still loading", retry: true };
+		}
+		if (rowNum >= state.rows) {
+			return { error: "the grid has " + state.rows + " rows" };
+		}
+		var fieldNum = grid.getFieldNum(field);
+		if (fieldNum < 0) {
+			return { error: "the grid shows no field " + field + ": its fields are " + grid.getFields().map(function (f) {
+				return f.name;
+			}).join(", ") };
+		}
+		if (grid.getEditRow && grid.getEditRow() === rowNum && grid.getEditValue) {
+			var edited = grid.getEditValue(rowNum, fieldNum);
+			return { text: edited == null ? "" : String(edited) };
+		}
+		var record = grid.getRecord(rowNum);
+		return { text: strip(record ? grid.getCellValue(record, rowNum, fieldNum) : "") };
+	};
+
+	/** The title the current view shows in its header, or null. */
+	S.title = function () {
+		var view = S.topView();
+		var header = (view && S.describe(view) === "list") ? isc.ListView._header : (view && view._header);
+		var member = header && header.getMember ? header.getMember(0) : null;
+		var element = member && member.getHandle ? member.getHandle() : null;
+		var title = element ? element.querySelector(".titleBar:not(i)") : null;
+		return title ? strip(title.innerText || title.textContent) : (element ? strip(element.innerText) : null);
+	};
+
+	/**
+	 * The first displayed link in a grid row whose visible text contains the text (case-sensitive):
+	 * { element, href, newPage, links } (element null if none does; links are the row's link texts) or { error, retry }.
+	 * The row is scrolled into view the grid's way first.
+	 */
+	S.rowLink = function (locator, rowNum, text) {
+		var g = gridOf(locator);
+		if (g.error) {
+			return { error: g.error, retry: true };
+		}
+		var grid = g.grid;
+		var state = loadedRows(grid);
+		if (!state.loaded) {
+			return { error: "the grid's rows are still loading", retry: true };
+		}
+		if (rowNum >= state.rows) {
+			return { error: "the grid has " + state.rows + " rows" };
+		}
+		grid.scrollToRow(rowNum);
+		var body = grid.body;
+		var row = body && body.getTableElement ? body.getTableElement(rowNum) : null;
+		if (!row) {
+			return { error: "row " + rowNum + " is not drawn yet", retry: true };
+		}
+		var shown = Array.prototype.slice.call(row.querySelectorAll("a")).filter(function (a) {
+			return a.getClientRects().length > 0 && getComputedStyle(a).visibility !== "hidden";
+		});
+		var found = shown.filter(function (a) {
+			return (a.innerText || "").indexOf(text) >= 0;
+		})[0] || null;
+		var newPage = false;
+		var href = found ? found.getAttribute("href") : null;
+		if (href && href.charAt(0) !== "#" && !/^javascript:/i.test(href)) {
+			var url = new URL(found.href, location.href);
+			newPage = /^https?:$/.test(url.protocol);
+		}
+		return {
+			element: found,
+			href: href,
+			newPage: newPage,
+			links: shown.map(function (a) {
+				return strip(a.innerText);
+			})
+		};
 	};
 
 	// ---------------------------------------------------------------- widget state, messages, menus

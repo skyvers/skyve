@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import util.AbstractPrimeFacesInterpretedSail;
@@ -30,6 +31,15 @@ class PrimeFacesKitchenSinkSailIT extends AbstractPrimeFacesInterpretedSail {
 	@Test
 	void test() {
 		sailResource("sail/kitchenSink/pf/pf-kitchensink-sail.xml");
+	}
+
+	/**
+	 * {@code <dataGridLink />}: the Actions Fixture's Run From Row link in a row, declined and confirmed.
+	 */
+	@Test
+	@Disabled("Runtime issue P9 (docs/sail-runtime-issues.md): clicking a row's action link also selects the row, which zooms into it")
+	void rowLink() {
+		sailResource("sail/kitchenSink/pf/pf-kitchensink-row-link.xml");
 	}
 
 	/**

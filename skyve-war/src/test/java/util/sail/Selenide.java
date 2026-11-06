@@ -87,6 +87,23 @@ public abstract class Selenide<
 	}
 
 	/**
+	 * Drives the browser that another instance started (see {@link CrossBrowserSelenium#useBrowserOf}), and makes it
+	 * Selenide's browser.
+	 *
+	 * @param other	the instance whose browser to drive
+	 */
+	@Override
+	public void useBrowserOf(@Nonnull CrossBrowserSelenium other) {
+		super.useBrowserOf(other);
+		WebDriverRunner.setWebDriver(driver);
+		com.codeborne.selenide.Configuration.timeout = TIMEOUT.toMillis();
+		BrowserConfiguration shared = getConfiguration();
+		if (shared != null) {
+			this.baseUrl = shared.getBaseUrl();
+		}
+	}
+
+	/**
 	 * Waits for an asynchronous event in the browser: the one wait mechanism of the SAIL harness.
 	 *
 	 * @param <T> the condition's result type

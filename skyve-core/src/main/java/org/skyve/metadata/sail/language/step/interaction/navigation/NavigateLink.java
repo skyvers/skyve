@@ -16,7 +16,8 @@ import jakarta.xml.bind.annotation.XmlType;
 /**
  * Navigates the browser by a link, without relying on a module/document binding: either to the URL or Skyve view
  * that {@code href} names, or by clicking the first displayed link ({@code <a>}) on the page whose visible text
- * contains {@code text} (case-sensitive), such as a link in a blurb's markup.
+ * contains {@code text} (case-sensitive), such as a link in a blurb's markup. With {@code exact="true"}, the link's visible
+ * text, trimmed, must equal {@code text}.
  *
  * <p>Invariant: exactly one of {@link #getHref()} and {@link #getText()} is set on a step that is about to be
  * executed. The XSD cannot express this, so {@link #execute(Executor)} checks it.
@@ -34,6 +35,7 @@ public class NavigateLink implements Step {
 
 	private String href;
 	private String text;
+	private Boolean exact; // null/false: the link's text contains the text; true: equals it
 	
 	/**
 	 * Returns the URL to open: absolute, or relative to the application's base URL.
@@ -70,14 +72,36 @@ public class NavigateLink implements Step {
 	}
 
 	/**
+	 * Returns whether the link's visible text must equal {@link #getText()} rather than contain it.
+	 * @return {@code true} to match the whole text; {@code false} or {@code null} to match text it contains
+	 */
+	public @Nullable Boolean getExact() {
+		return exact;
+	}
+
+	/**
+	 * Sets whether the link's visible text, trimmed, must equal {@link #getText()} (case-sensitive), rather than contain it.
+	 * Only applies with {@code text}.
+	 * @param exact {@code true} to match the whole text; {@code false} or {@code null} to match text it contains
+	 */
+	@XmlAttribute(name = "exact")
+	public void setExact(@Nullable Boolean exact) {
+		this.exact = exact;
+	}
+
+	/**
 	 * Checks that exactly one of {@code href} and {@code text} is set, then executes the step.
 	 * @param executor the executor
-	 * @throws MetaDataException if neither or both of {@code href} and {@code text} are set
+	 * @throws MetaDataException if neither or both of {@code href} and {@code text} are set, or {@code exact} is set
+	 * 								with {@code href}
 	 */
 	@Override
 	public void execute(@Nonnull Executor executor) {
 		if ((href == null) == (text == null)) {
 			throw new MetaDataException("<NavigateLink /> requires exactly one of [href] or [text]");
+		}
+		if ((exact != null) && (text == null)) {
+			throw new MetaDataException("<NavigateLink /> [exact] applies only to [text]");
 		}
 		executor.executeNavigateLink(this);
 	}

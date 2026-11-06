@@ -18,7 +18,10 @@ import org.junit.jupiter.api.Test;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.sail.execution.Executor;
+import org.skyve.metadata.sail.language.step.CaptureCell;
+import org.skyve.metadata.sail.language.step.CaptureTitle;
 import org.skyve.metadata.sail.language.step.CaptureValue;
+import org.skyve.metadata.sail.language.step.Comment;
 import org.skyve.metadata.sail.language.step.TestGridRows;
 import org.skyve.metadata.sail.language.step.TestMessage;
 import org.skyve.metadata.sail.language.step.TestMessage.MessageType;
@@ -33,6 +36,7 @@ import org.skyve.metadata.sail.language.step.interaction.actions.Remove;
 import org.skyve.metadata.sail.language.step.interaction.actions.Save;
 import org.skyve.metadata.sail.language.step.interaction.actions.ZoomOut;
 import org.skyve.metadata.sail.language.step.interaction.grids.DataGridEdit;
+import org.skyve.metadata.sail.language.step.interaction.grids.DataGridLink;
 import org.skyve.metadata.sail.language.step.interaction.grids.DataGridRemove;
 import org.skyve.metadata.sail.language.step.interaction.grids.DataGridSelect;
 import org.skyve.metadata.sail.language.step.interaction.grids.DataGridZoom;
@@ -99,6 +103,117 @@ class SailLanguageXmlTest {
 			"<lookupDescriptionAutoComplete binding=\"contact\" search=\"Smi\" pick=\"Smith{var:n}\"/>" +
 			"<captureValue binding=\"invoiceNumber\" variable=\"invoice\"/>" +
 			TAIL;
+
+	private static final String APPS_GAPS = HEAD +
+			"<upload action=\"ImportAction\" file=\"sail/files/data.csv\" testSuccess=\"false\"/>" +
+			"<captureValue binding=\"reference\" variable=\"ref\" pattern=\"REF-(\\d+)\"/>" +
+			"<captureCell query=\"qToDos\" rowContaining=\"SAIL {run}\" column=\"reference\" variable=\"cell\" pattern=\"\\d+\"/>" +
+			"<captureCell binding=\"rows\" row=\"0\" column=\"name\" variable=\"row\"/>" +
+			"<captureTitle variable=\"title\" pattern=\"Request (\\d+)\"/>" +
+			"<dataGridLink binding=\"rows\" rowContaining=\"SAIL {run}\" text=\"Run From Row\" confirm=\"false\" testSuccess=\"false\"/>" +
+			"<navigateLink text=\"Open\" exact=\"true\"/>" +
+			"<comment>Made {run}</comment>" +
+			"<login user=\"jane{run}\" password=\"x\" customer=\"{var:customer}\"/>" +
+			TAIL;
+
+	private static final String WORKFLOW = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" +
+			"<workflow xmlns=\"http://www.skyve.org/xml/sail\">" +
+			"<automation uxui=\"tablet\" userAgentType=\"tablet\"><interaction name=\"pf\"><method>" +
+			"<captureTitle variable=\"title\"/></method></interaction></automation>" +
+			"<automation uxui=\"desktop\" userAgentType=\"desktop\" testStrategy=\"Verify\"><interaction name=\"sc\"><method>" +
+			"<dataGridLink binding=\"rows\" row=\"0\" text=\"Go\"/></method></interaction></automation>" +
+			"</workflow>";
+
+	@Test
+	void unmarshalsTheAppsGaps() {
+		assertAppsGaps(XMLMetaData.unmarshalSAILString(APPS_GAPS).getInteractions().get(0).getSteps());
+	}
+
+	@Test
+	void marshalsAndUnmarshalsTheAppsGaps() {
+		String xml = XMLMetaData.marshalSAIL(XMLMetaData.unmarshalSAILString(APPS_GAPS));
+		assertAppsGaps(XMLMetaData.unmarshalSAILString(xml).getInteractions().get(0).getSteps());
+	}
+
+	@Test
+	void unmarshalsAWorkflowOfAutomations() {
+		assertWorkflow(XMLMetaData.unmarshalSAILWorkflowString(WORKFLOW));
+	}
+
+	@Test
+	void marshalsAndUnmarshalsAWorkflow() {
+		String xml = XMLMetaData.marshalSAILWorkflow(XMLMetaData.unmarshalSAILWorkflowString(WORKFLOW));
+		assertAll(() -> assertTrue(xml.contains(":workflow "), xml),
+					() -> assertWorkflow(XMLMetaData.unmarshalSAILWorkflowString(xml)));
+	}
+
+	@Test
+	void aSingleAutomationIsAWorkflowOfOne() {
+		Workflow workflow = XMLMetaData.unmarshalSAILWorkflowString(LANGUAGE_GAPS);
+		assertAll(() -> assertEquals(1, workflow.getAutomations().size()),
+					() -> assertEquals(11, workflow.getAutomations().get(0).getInteractions().get(0).getSteps().size()));
+	}
+
+	@Test
+	void aWorkflowIsNotAnAutomation() {
+		assertAll(() -> assertThrows(MetaDataException.class, () -> XMLMetaData.unmarshalSAILString(WORKFLOW)),
+					() -> assertThrows(MetaDataException.class,
+											() -> XMLMetaData.unmarshalSAILWorkflowString("<workflow xmlns=\"http://www.skyve.org/xml/sail\"/>")));
+	}
+
+	@Test
+	void theNewStepsWithoutTheirRequiredAttributesAreRejectedByTheSchema() {
+		assertAll(() -> assertThrows(MetaDataException.class, () -> XMLMetaData.unmarshalSAILString(HEAD + "<captureCell binding=\"rows\" row=\"0\" variable=\"v\"/>" + TAIL)),
+					() -> assertThrows(MetaDataException.class, () -> XMLMetaData.unmarshalSAILString(HEAD + "<captureCell binding=\"rows\" row=\"0\" column=\"c\"/>" + TAIL)),
+					() -> assertThrows(MetaDataException.class, () -> XMLMetaData.unmarshalSAILString(HEAD + "<captureTitle/>" + TAIL)),
+					() -> assertThrows(MetaDataException.class, () -> XMLMetaData.unmarshalSAILString(HEAD + "<dataGridLink binding=\"rows\" row=\"0\"/>" + TAIL)),
+					() -> assertThrows(MetaDataException.class, () -> XMLMetaData.unmarshalSAILString(HEAD + "<dataGridLink row=\"0\" text=\"Go\"/>" + TAIL)));
+	}
+
+	private static void assertAppsGaps(List<Step> steps) {
+		assertEquals(9, steps.size());
+		Upload upload = (Upload) steps.get(0);
+		CaptureValue value = (CaptureValue) steps.get(1);
+		CaptureCell listCell = (CaptureCell) steps.get(2);
+		CaptureCell gridCell = (CaptureCell) steps.get(3);
+		CaptureTitle title = (CaptureTitle) steps.get(4);
+		DataGridLink link = (DataGridLink) steps.get(5);
+		NavigateLink exact = (NavigateLink) steps.get(6);
+		Comment comment = (Comment) steps.get(7);
+		Login login = (Login) steps.get(8);
+		assertAll(() -> assertEquals(Boolean.FALSE, upload.getTestSuccess()),
+					() -> assertEquals("REF-(\\d+)", value.getPattern()),
+					() -> assertEquals("qToDos", listCell.getQueryName()),
+					() -> assertEquals("SAIL {run}", listCell.getRowContaining()),
+					() -> assertEquals("reference", listCell.getColumn()),
+					() -> assertEquals("cell", listCell.getVariable()),
+					() -> assertEquals("\\d+", listCell.getPattern()),
+					() -> assertEquals("rows", gridCell.getBinding()),
+					() -> assertEquals(Integer.valueOf(0), gridCell.getRow()),
+					() -> assertThat(gridCell.getPattern(), is(nullValue())),
+					() -> assertEquals("title", title.getVariable()),
+					() -> assertEquals("Request (\\d+)", title.getPattern()),
+					() -> assertEquals("rows", link.getBinding()),
+					() -> assertEquals("SAIL {run}", link.getRowContaining()),
+					() -> assertEquals("Run From Row", link.getText()),
+					() -> assertEquals(Boolean.FALSE, link.getConfirm()),
+					() -> assertEquals(Boolean.FALSE, link.getTestSuccess()),
+					() -> assertEquals(Boolean.TRUE, exact.getExact()),
+					() -> assertEquals("Made {run}", comment.getComment()),
+					() -> assertEquals("{var:customer}", login.getCustomer()));
+	}
+
+	private static void assertWorkflow(Workflow workflow) {
+		List<Automation> automations = workflow.getAutomations();
+		assertEquals(2, automations.size());
+		Automation pf = automations.get(0);
+		Automation sc = automations.get(1);
+		assertAll(() -> assertEquals("tablet", pf.getUxui()),
+					() -> assertThat(pf.getInteractions().get(0).getSteps().get(0), instanceOf(CaptureTitle.class)),
+					() -> assertEquals("desktop", sc.getUxui()),
+					() -> assertEquals(Automation.TestStrategy.Verify, sc.getTestStrategy()),
+					() -> assertThat(sc.getInteractions().get(0).getSteps().get(0), instanceOf(DataGridLink.class)));
+	}
 
 	@Test
 	void unmarshalsTheLanguageGaps() {

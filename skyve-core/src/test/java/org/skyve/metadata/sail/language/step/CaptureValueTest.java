@@ -75,4 +75,22 @@ class CaptureValueTest {
 		step.setBinding("invoiceNumber");
 		assertThat(step.getIdentifier(mock(AutomationContext.class)), is("invoiceNumber"));
 	}
+
+	@Test
+	void patternDefaultsToNullAndTrims() {
+		assertThat(step.getPattern(), is(nullValue()));
+		step.setPattern(" REF-(\\d+) ");
+		assertThat(step.getPattern(), is("REF-(\\d+)"));
+	}
+
+	@Test
+	void executeRejectsAnInvalidPattern() {
+		Executor executor = mock(Executor.class);
+		step.setBinding("invoiceNumber");
+		step.setVariable("invoice");
+		step.setPattern("REF-(\\d+");
+		MetaDataException e = assertThrows(MetaDataException.class, () -> step.execute(executor));
+		assertThat(e.getMessage(), org.hamcrest.CoreMatchers.containsString("[pattern] REF-(\\d+ is not a regular expression"));
+		verifyNoInteractions(executor);
+	}
 }

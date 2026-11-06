@@ -10,6 +10,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.io.Reader;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
@@ -47,6 +48,7 @@ import org.skyve.impl.metadata.repository.router.Router;
 import org.skyve.impl.metadata.repository.view.ViewMetaData;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.sail.language.Automation;
+import org.skyve.metadata.sail.language.Workflow;
 import org.skyve.util.Util;
 import org.skyve.util.logging.SkyveLoggerFactory;
 import org.slf4j.Logger;
@@ -119,6 +121,8 @@ public class XMLMetaData {
 
 	private static final JAXBContext SAIL_CONTEXT;
 	private static final Schema SAIL_SCHEMA;
+	/** Knows both SAIL roots: a workflow, and an automation on its own. */
+	private static final JAXBContext SAIL_WORKFLOW_CONTEXT;
 
 	static {
 		try {
@@ -142,6 +146,7 @@ public class XMLMetaData {
 			BEHAVIOUR_SCHEMA = getSchema(UtilImpl.getAbsoluteBasePath() + "schemas/behaviour.xsd");
 
 			SAIL_CONTEXT = JAXBContext.newInstance(Automation.class);
+			SAIL_WORKFLOW_CONTEXT = JAXBContext.newInstance(Workflow.class, Automation.class);
 			SAIL_SCHEMA = getSchema(UtilImpl.getAbsoluteBasePath() + "schemas/sail.xsd");
 		}
 		catch (Exception e) {
@@ -851,6 +856,90 @@ public class XMLMetaData {
 	}
 
 	/**
+	 * Marshals a SAIL workflow (several automations in one {@code <workflow>} document).
+	 *
+	 * @param workflow	the workflow
+	 * @return the XML
+	 * @throws MetaDataException	if the workflow cannot be marshalled, or is not valid against sail.xsd
+	 */
+	public static @Nonnull String marshalSAILWorkflow(@Nonnull Workflow workflow) {
+		try {
+			Marshaller marshaller = SAIL_WORKFLOW_CONTEXT.createMarshaller();
+			marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.FALSE);
+			marshaller.setProperty(Marshaller.JAXB_SCHEMA_LOCATION,
+									SAIL_NAMESPACE + " http://www.skyve.org/xml/sail.xsd");
+			marshaller.setSchema(SAIL_SCHEMA);
+			// As marshalSAIL: straight into dom4j, so that tabs in attribute values survive
+			DocumentResult dom4j = new DocumentResult();
+			marshaller.marshal(workflow, dom4j);
+
+			Document document = dom4j.getDocument();
+			Visitor visitor = new JAXBFixingVisitor(VIEW_NAMESPACE);
+			document.accept(visitor);
+			return format(document, true);
+		}
+		catch (Exception e) {
+			throw new MetaDataException("Could not marshal SAIL workflow", e);
+		}
+	}
+
+	/**
+	 * Unmarshals a SAIL file whose root is a {@code <workflow>} (several automations) or a single {@code <automation>},
+	 * which is returned as a workflow of one.
+	 *
+	 * @param file	the file's path
+	 * @return the workflow
+	 * @throws MetaDataException	if the file cannot be read, or is not valid against sail.xsd
+	 */
+	public static @Nonnull Workflow unmarshalSAILWorkflowFile(@Nonnull String file) {
+		// As unmarshalSAILFile: read as UTF-8 explicitly
+		try (FileInputStream fis = new FileInputStream(file)) {
+			try (BufferedInputStream bis = new BufferedInputStream(fis)) {
+				try (InputStreamReader isr = new InputStreamReader(bis, StandardCharsets.UTF_8)) {
+					try (BufferedReader br = new BufferedReader(isr)) {
+						return workflow(unmarshalSAILWorkflow(br));
+					}
+				}
+			}
+		}
+		catch (Exception e) {
+			throw new MetaDataException("Could not unmarshal SAIL at " + file, e);
+		}
+	}
+
+	/**
+	 * Unmarshals SAIL whose root is a {@code <workflow>} (several automations) or a single {@code <automation>},
+	 * which is returned as a workflow of one.
+	 *
+	 * @param sail	the XML
+	 * @return the workflow
+	 * @throws MetaDataException	if the XML is not valid against sail.xsd
+	 */
+	public static @Nonnull Workflow unmarshalSAILWorkflowString(@Nonnull String sail) {
+		try (StringReader sr = new StringReader(sail)) {
+			return workflow(unmarshalSAILWorkflow(sr));
+		}
+		catch (Exception e) {
+			throw new MetaDataException("Could not unmarshal SAIL " + sail, e);
+		}
+	}
+
+	private static @Nonnull Object unmarshalSAILWorkflow(@Nonnull Reader reader) throws JAXBException {
+		Unmarshaller unmarshaller = SAIL_WORKFLOW_CONTEXT.createUnmarshaller();
+		unmarshaller.setSchema(SAIL_SCHEMA);
+		return unmarshaller.unmarshal(reader);
+	}
+
+	private static @Nonnull Workflow workflow(@Nonnull Object root) {
+		if (root instanceof Workflow workflow) {
+			return workflow;
+		}
+		Workflow result = new Workflow();
+		result.getAutomations().add((Automation) root);
+		return result;
+	}
+
+	/**
 	 * Preferred XML attribute order, sampled from the admin module and completed with
 	 * other bundled metadata. Edit one entry to reorder an element; unlisted
 	 * attributes and elements follow alphabetic order. Namespace declarations and
@@ -1396,7 +1485,8 @@ public class XMLMetaData {
 															BizletMetaData.class,
 															ViewMetaData.class,
 															Router.class,
-															Automation.class);
+															Automation.class,
+															Workflow.class);
 		jaxbContext.generateSchema(new SchemaOutputResolver() {
 			@Override
 			public @Nonnull Result createOutput(@SuppressWarnings("null") @Nonnull String namespaceUri,

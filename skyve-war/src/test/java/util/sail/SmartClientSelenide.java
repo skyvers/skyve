@@ -1030,6 +1030,32 @@ public class SmartClientSelenide extends Selenide<
 	 * @throws IllegalStateException if the upload page does not open, reports an error or does not close
 	 */
 	public void upload(@Nonnull WebElement trigger, @Nonnull java.io.File file) {
+		upload(trigger, file, false);
+	}
+
+	/**
+	 * Uploads a file through Skyve's upload page, opened by clicking the given element, when the application may refuse
+	 * it. A refusal shown on the upload page is read, then the upload window is closed with its close button, as a user
+	 * does after reading it.
+	 *
+	 * @param trigger	the element that opens the upload page
+	 * @param file		the file
+	 * @return what the upload page said when it refused the file, or null if it took it
+	 * @throws IllegalStateException if the upload page does not open or does not close
+	 */
+	public @Nullable String uploadOrRefusal(@Nonnull WebElement trigger, @Nonnull java.io.File file) {
+		return upload(trigger, file, true);
+	}
+
+	/**
+	 * Uploads a file through Skyve's upload page.
+	 *
+	 * @param trigger	the element that opens the upload page
+	 * @param file		the file
+	 * @param refusable	true to return a refusal (and close the upload window), false to fail with it
+	 * @return the refusal, or null if the upload page took the file
+	 */
+	private @Nullable String upload(@Nonnull WebElement trigger, @Nonnull java.io.File file, boolean refusable) {
 		SelenideElement element = $(trigger);
 		prepare(element);
 		click(element);
@@ -1079,18 +1105,29 @@ public class SmartClientSelenide extends Selenide<
 				return null;
 			}
 			if ("error".equals(result.get(0))) {
-				throw new IllegalStateException("The upload failed: " + result.get(1));
+				if (! refusable) {
+					throw new IllegalStateException("The upload failed: " + result.get(1));
+				}
+				return "error:" + result.get(1);
 			}
 			return result.get(1);
 		});
-		if (! "closed".equals(outcome)) {
+		String refusal = null;
+		if (outcome.startsWith("error:")) {
+			refusal = outcome.substring(6);
+			trace("    the upload page refused the file: " + refusal + " - close it");
+		}
+		else if (! "closed".equals(outcome)) {
 			trace("    the upload page says: " + outcome + " - close it");
+		}
+		if (! "closed".equals(outcome)) {
 			if (! (script("return _sail.windowClose()") instanceof WebElement close)) {
 				throw new IllegalStateException("The upload window has no close button");
 			}
 			click($(close));
 		}
 		waitForFullPageResponse();
+		return refusal;
 	}
 
 	/**
@@ -1103,9 +1140,13 @@ public class SmartClientSelenide extends Selenide<
 	private @Nonnull List<String> uploadPageOutcome(@Nonnull WebElement frame) {
 		try {
 			driver.switchTo().frame(frame);
-			Object result = script("var e = Array.from(document.querySelectorAll('.ui-growl-error, .ui-growl-fatal, .ui-messages-error')).find(function(x) {" +
+			// an error, followed by the problems the page lists (an upload action's refusal is in its problems table)
+			Object result = script("var p = document.querySelector('#problems table');" +
+									"var problems = p ? p.innerText.replace(/\\s+/g, ' ').trim() : '';" +
+									"var e = Array.from(document.querySelectorAll('.ui-growl-error, .ui-growl-fatal, .ui-messages-error')).find(function(x) {" +
 									"  return x.getClientRects().length > 0 && (x.innerText || '').trim();});" +
-									"if (e) return ['error', e.innerText.replace(/\\s+/g, ' ').trim()];" +
+									"if (e) return ['error', e.innerText.replace(/\\s+/g, ' ').trim() + (problems ? ' ' + problems : '')];" +
+									"if (problems) return ['error', problems];" +
 									"var i = Array.from(document.querySelectorAll('.ui-growl-info, .ui-messages-info')).find(function(x) {" +
 									"  return x.getClientRects().length > 0 && (x.innerText || '').trim();});" +
 									"if (i) return ['info', i.innerText.replace(/\\s+/g, ' ').trim()];" +
@@ -1670,6 +1711,108 @@ public class SmartClientSelenide extends Selenide<
 	}
 
 	/**
+	 * Reads the text a grid cell shows, waiting for the grid's rows to load.
+	 *
+	 * @param locator	a locator of the grid's rows
+	 * @param row		the zero-based row
+	 * @param field		the column's grid field (its sanitised binding)
+	 * @return the cell's text
+	 * @throws IllegalStateException if the grid has no such row or field
+	 */
+	public @Nonnull String cellText(@Nonnull String locator, int row, @Nonnull String field) {
+		String grid = root(locator);
+		require(grid);
+		waitForFullPageResponse();
+		// Waits for the grid's rows to arrive (a list grid fetches them after it is drawn)
+		return until("the rows of " + grid + " to load", d -> {
+			Map<String, Object> result = map(script("return _sail.cellText(arguments[0], arguments[1], arguments[2])", grid, Integer.valueOf(row), field));
+			Object text = result.get("text");
+			if (text != null) {
+				return String.valueOf(text);
+			}
+			if (! Boolean.TRUE.equals(result.get("retry"))) {
+				throw new IllegalStateException(String.format("Could not read field %s of row %d of %s: %s", field, Integer.valueOf(row), grid, result.get("error")));
+			}
+			lastProblem = String.valueOf(result.get("error"));
+			return null;
+		});
+	}
+
+	/**
+	 * Reads the title that the current view shows in its header.
+	 *
+	 * @return the title, or null if the view shows none
+	 */
+	public @Nullable String viewTitle() {
+		waitForFullPageResponse();
+		Object result = script("return _sail.title()");
+		return (result == null) ? null : String.valueOf(result);
+	}
+
+	/**
+	 * Clicks the first displayed link in a grid row whose visible text contains the text, as a user does. For a link that
+	 * runs an action, answers its confirmation and the questions it raises (see {@link #answer(Boolean, String)}); for a
+	 * link that loads another page, waits for it. Then waits for SmartClient to settle.
+	 *
+	 * @param locator	a locator of the grid's rows
+	 * @param row		the zero-based row
+	 * @param text		the link's text
+	 * @param action	true if the link runs an action
+	 * @param confirm	how to answer a confirmation (see {@link #answer(Boolean, String)})
+	 * @return {@code true} if the action's confirmation was answered no, so it did not run
+	 * @throws IllegalStateException if the row has no such displayed link (the message lists the row's links), or
+	 * 									{@code confirm} is false and nothing asks
+	 */
+	@SuppressWarnings("null") // the link is checked to be an element
+	public boolean clickRowLink(@Nonnull String locator, int row, @Nonnull String text, boolean action, @Nullable Boolean confirm) {
+		String grid = root(locator);
+		require(grid);
+		waitForFullPageResponse();
+		// Waits for the row to be drawn once the grid has scrolled to it
+		Map<String, Object> found = until("row " + row + " of " + grid + " to be drawn", d -> {
+			Map<String, Object> result = map(script("return _sail.rowLink(arguments[0], arguments[1], arguments[2])", grid, Integer.valueOf(row), text));
+			if (result.get("error") == null) {
+				return result;
+			}
+			if (! Boolean.TRUE.equals(result.get("retry"))) {
+				throw new IllegalStateException(String.format("Row %d of %s: %s", Integer.valueOf(row), grid, result.get("error")));
+			}
+			lastProblem = String.valueOf(result.get("error"));
+			return null;
+		});
+		if (! (found.get("element") instanceof WebElement element)) {
+			throw new IllegalStateException(String.format("Row %d of %s has no displayed link containing '%s': its links are %s",
+															Integer.valueOf(row), grid, text, found.get("links")));
+		}
+		boolean newPage = (! action) && Boolean.TRUE.equals(found.get("newPage"));
+		trace("    click " + found.get("href"));
+		if (newPage) {
+			// mark this page, so that the new page can be told from it
+			script("window._sailOldPage = true;");
+		}
+		SelenideElement anchor = $(element);
+		prepare(anchor);
+		click(anchor);
+		if (newPage) {
+			// Waits for the link's page to replace this one and load
+			until("the page of the link to load", d -> {
+				try {
+					return Boolean.TRUE.equals(script("return !window._sailOldPage && document.readyState === 'complete'")) ? Boolean.TRUE : null;
+				}
+				catch (@SuppressWarnings("unused") WebDriverException e) {
+					return null; // between pages
+				}
+			});
+		}
+		waitForFullPageResponse();
+		if (! action) {
+			return false;
+		}
+		answer(confirm, "the link '" + text + "'");
+		return Boolean.FALSE.equals(confirm);
+	}
+
+	/**
 	 * Clicks the first displayed link ({@code <a>}) of the page whose visible text contains the text (case-sensitive), as
 	 * a user does, then waits for what it leads to: the new page loading and SmartClient settling, or, for a link that
 	 * stays on the page (a fragment or a script), SmartClient settling.
@@ -1679,8 +1822,22 @@ public class SmartClientSelenide extends Selenide<
 	 * @throws IllegalStateException	if the link opens another window, which SAIL does not follow
 	 */
 	public boolean followLinkContaining(@Nonnull String text) {
+		return followLinkContaining(text, false);
+	}
+
+	/**
+	 * Clicks the first displayed link ({@code <a>}) of the page whose visible text contains the text, or with
+	 * {@code exact}, whose visible text (trimmed, white space collapsed) equals it, both case-sensitive; then waits as
+	 * {@link #followLinkContaining(String)} does.
+	 *
+	 * @param text	the text
+	 * @param exact	true to match the link's whole text
+	 * @return {@code true} if a link was clicked, {@code false} if no displayed link matches
+	 * @throws IllegalStateException	if the link opens another window, which SAIL does not follow
+	 */
+	public boolean followLinkContaining(@Nonnull String text, boolean exact) {
 		waitForFullPageResponse();
-		Map<String, Object> link = map(script("return _sail.link(arguments[0])", text));
+		Map<String, Object> link = map(script("return _sail.link(arguments[0], arguments[1])", text, Boolean.valueOf(exact)));
 		if (! (link.get("element") instanceof WebElement element)) {
 			return false;
 		}
