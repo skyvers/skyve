@@ -71,6 +71,8 @@ import org.skyve.metadata.model.document.Reference;
 import org.skyve.metadata.model.document.Reference.ReferenceType;
 import org.skyve.metadata.model.document.Relation;
 import org.skyve.metadata.module.Module;
+import org.skyve.metadata.module.query.QueryDefinition;
+import org.skyve.metadata.user.Role;
 import org.skyve.metadata.module.Module.DocumentRef;
 import org.skyve.metadata.repository.ProvidedRepository;
 import org.skyve.util.logging.SkyveLoggerFactory;
@@ -514,6 +516,146 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 		if (write) {
 			generation.put(mappingFilePath, mappingFileContents);
 		}
+
+		generateModuleMetadataEnums(module, packagePath);
+	}
+
+	/**
+	 * Generate one enum per kind of module metadata (<code>&lt;Module&gt;Role</code>,
+	 * <code>&lt;Module&gt;Document</code>, <code>&lt;Module&gt;Query</code>) in the module's
+	 * domain package, each implementing the corresponding <code>org.skyve.metadata</code>
+	 * reference interface so a single enum constant carries the module name and metadata name
+	 * (e.g. <code>user.isInRole(AdminRole.AUDIT_MANAGER)</code>) and resolves itself through the
+	 * current customer via the interface's default method. An empty kind generates no enum.
+	 *
+	 * @param module	The module to generate metadata enums for.
+	 * @param packagePath	The module's domain package path (relative, '/' separated).
+	 */
+	private void generateModuleMetadataEnums(final Module module, final String packagePath) {
+		generateModuleMetadataEnum(module, packagePath, "Role", "role", "roles",
+									"org.skyve.metadata.user.ModuleRole", "roleName",
+									module.getRoles().stream().map(Role::getName).toList());
+		generateModuleMetadataEnum(module, packagePath, "Document", "document", "documents",
+									"org.skyve.metadata.model.document.ModuleDocument", "documentName",
+									new ArrayList<>(module.getDocumentRefs().keySet()));
+		generateModuleMetadataEnum(module, packagePath, "Query", "query", "queries",
+									"org.skyve.metadata.module.query.ModuleQuery", "queryName",
+									module.getMetadataQueries().stream().map(QueryDefinition::getName).toList());
+	}
+
+	/**
+	 * Generate one module metadata reference enum (e.g. <code>AdminRole</code>) with a constant
+	 * per metadata name, implementing the given reference interface. The enum class name dodges
+	 * document class names in the same package case-insensitively, mirroring the module metadata
+	 * factory class. Nothing is generated when there are no names.
+	 *
+	 * @param module	The module to generate the enum for.
+	 * @param packagePath	The module's domain package path (relative, '/' separated).
+	 * @param kindSuffix	The enum class name suffix - "Role", "Document" or "Query".
+	 * @param kind	The singular metadata kind for javadoc and error messages - e.g. "role".
+	 * @param kindPlural	The plural metadata kind for javadoc - e.g. "roles", "queries".
+	 * @param interfaceClassName	The fully qualified reference interface the enum implements.
+	 * @param nameAccessor	The interface's name accessor method - e.g. "roleName".
+	 * @param names	The metadata names to generate enum constants for.
+	 */
+	private void generateModuleMetadataEnum(final Module module,
+											final String packagePath,
+											final String kindSuffix,
+											final String kind,
+											final String kindPlural,
+											final String interfaceClassName,
+											final String nameAccessor,
+											final List<String> names) {
+		if (names.isEmpty()) {
+			return;
+		}
+
+		final String moduleName = module.getName();
+		final String packageName = packagePath.replaceAll("\\\\|\\/", ".");
+		final String interfaceSimpleName = interfaceClassName.substring(interfaceClassName.lastIndexOf('.') + 1);
+
+		// Dodge document class names in the same generated package - e.g. a module could declare a
+		// document named <Module>Role. The comparison is case-insensitive because the generated
+		// files must coexist on case-insensitive file systems (macOS, Windows).
+		String enumName = BindUtil.toJavaTypeIdentifier(moduleName) + kindSuffix;
+		while (containsIgnoreCase(module.getDocumentRefs().keySet(), enumName)) {
+			enumName += kindSuffix;
+		}
+
+		StringBuilder contents = new StringBuilder(2048);
+		contents.append("package ").append(packageName).append(";\n\n");
+
+		Set<String> imports = new TreeSet<>();
+		imports.add("jakarta.annotation.Generated");
+		imports.add(interfaceClassName);
+
+		// generate imports
+		for (String importClassName : imports) {
+			contents.append("import ").append(importClassName).append(";\n");
+		}
+
+		// generate javadoc
+		contents.append("\n/**\n");
+		contents.append(" * Compile-time references to the ").append(kindPlural).append(" declared in the ")
+					.append(moduleName).append(" module.\n");
+		contents.append(" * Generated - local changes will be overwritten.\n");
+		contents.append(" */\n");
+		contents.append("@Generated(value = \"").append(getClass().getName()).append("\")\n");
+		contents.append("public enum ").append(enumName).append(" implements ").append(interfaceSimpleName).append(" {\n");
+
+		Set<String> constantNames = new TreeSet<>();
+		boolean first = true;
+		for (String name : names) {
+			String constantName = BindUtil.toJavaStaticIdentifier(name);
+			if (! constantNames.add(constantName)) {
+				throw new MetaDataException("Module " + moduleName + ' ' + kind + ' ' + name +
+												" yields the duplicate Java enum constant name " + constantName +
+												" in the generated " + enumName + " enum. Rename the " + kind + '.');
+			}
+			if (! first) {
+				contents.append(",\n");
+			}
+			first = false;
+			String literal = javaStringLiteral(name);
+			contents.append("\t/** The \"").append(literal).append("\" ").append(kind).append(". */\n");
+			contents.append("\t").append(constantName).append("(\"").append(literal).append("\")");
+		}
+		contents.append(";\n");
+
+		contents.append("\n\tprivate final String name;\n");
+		contents.append("\n\tprivate ").append(enumName).append("(String name) {\n");
+		contents.append("\t\tthis.name = name;\n");
+		contents.append("\t}\n");
+
+		contents.append("\n\t@Override\n");
+		contents.append("\tpublic String moduleName() {\n");
+		contents.append("\t\treturn \"").append(javaStringLiteral(moduleName)).append("\";\n");
+		contents.append("\t}\n");
+
+		contents.append("\n\t@Override\n");
+		contents.append("\tpublic String ").append(nameAccessor).append("() {\n");
+		contents.append("\t\treturn name;\n");
+		contents.append("\t}\n");
+		contents.append("}\n");
+		contents.trimToSize();
+
+		if (write) {
+			generation.put(Paths.get(generatedSrcPath, packagePath, enumName + ".java"), contents);
+		}
+	}
+
+	/** Whether the set contains the candidate, compared case-insensitively. */
+	private static boolean containsIgnoreCase(final Set<String> names, final String candidate) {
+		return names.stream().anyMatch(candidate::equalsIgnoreCase);
+	}
+
+	/** Escapes a metadata name for emission inside a generated Java String literal. */
+	private static String javaStringLiteral(final String name) {
+		return name.replace("\\", "\\\\")
+					.replace("\"", "\\\"")
+					.replace("\n", "\\n")
+					.replace("\r", "\\r")
+					.replace("\t", "\\t");
 	}
 
 	private SkyveFactory retrieveFactoryAnnotation(final File factoryFile) {
