@@ -225,6 +225,10 @@
 			<dataGridNew binding="orderedGrid" />
 			<dataEnter binding="date" value="01-Jan-2020" />
 			<zoomOut />
+			<comment>Zoom straight after zooming out, by content and with no dataGridSelect first (the step selects the row itself)</comment>
+			<dataGridZoom binding="orderedGrid" rowContaining="01-Jan-2020" />
+			<testValue binding="date" value="01-Jan-2020" />
+			<zoomOut />
 			<dataGridSelect binding="orderedGrid" rowContaining="01-Jan-2020" />
 			<dataGridRemove binding="orderedGrid" rowContaining="01-Jan-2020" />
 			<testGridRows binding="orderedGrid" maxRows="0" />

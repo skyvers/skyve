@@ -20,7 +20,7 @@
 (function () {
 	"use strict";
 
-	var VERSION = 4;
+	var VERSION = 5;
 	if (window._sail && window._sail.version === VERSION) {
 		return;
 	}
@@ -230,7 +230,12 @@
 	};
 
 	function itemShown(item) {
-		return !!item.form && S.shown(item.form) && item.isVisible() && item.isDrawn();
+		var form = item.form;
+		if (form && form.grid && !form.isDrawn() && form.grid.getEditRow && form.grid.getEditRow() != null) {
+			// a grid's row editor: its form is never drawn, as its items are drawn in the grid's body
+			return S.shown(form.grid) && item.isVisible() && item.isDrawn();
+		}
+		return !!form && S.shown(form) && item.isVisible() && item.isDrawn();
 	}
 
 	function isFormItem(o) {
@@ -1593,7 +1598,9 @@
 	S.pickListRow = function (locator, text) {
 		var resolved = S.resolve(S.parse(locator).spec);
 		var item = resolved.obj;
-		var combo = item && item.canvas && item.canvas.getItem ? item.canvas.getItem("_combo") : null;
+		// a form's lookup description holds a combo box; an inline data grid row edits the column with a plain one
+		var combo = item && item.canvas && item.canvas.getItem ? item.canvas.getItem("_combo") :
+					(item && isc.isA.ComboBoxItem(item) ? item : null);
 		if (!combo) {
 			return { error: resolved.error || locator + " is not a lookup description", retry: !!resolved.retry };
 		}

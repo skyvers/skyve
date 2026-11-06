@@ -227,7 +227,7 @@ public class SmartClientSAILViewVisitor {
 			visitComponent(component);
 		}
 		else if (widget instanceof Bound bound) {
-			visitInput(bound, null);
+			visitInput(bound, bound.getBinding(), null);
 		}
 	}
 
@@ -265,7 +265,7 @@ public class SmartClientSAILViewVisitor {
 					visitWidget(defaultWidget);
 				}
 				else {
-					visitInput(defaultWidget, grid);
+					visitInput(defaultWidget, binding, grid);
 				}
 			} finally {
 				defaultWidget.setBinding(definedBinding);
@@ -279,11 +279,11 @@ public class SmartClientSAILViewVisitor {
 	 * {@code testValue} can still read them.
 	 *
 	 * @param widget the input widget
+	 * @param binding the binding to register it under: the widget's own, or a data grid column's
 	 * @param grid the inline data grid whose column this is, or {@code null} in a form
 	 */
 	@SuppressWarnings("java:S3776") // Complexity OK
-	private void visitInput(@Nonnull Bound widget, @Nullable AbstractDataWidget grid) {
-		String binding = widget.getBinding();
+	private void visitInput(@Nonnull Bound widget, @Nullable String binding, @Nullable AbstractDataWidget grid) {
 		if (binding == null) {
 			return;
 		}
@@ -301,7 +301,8 @@ public class SmartClientSAILViewVisitor {
 		}
 		else if (widget instanceof LookupDescription) {
 			type = InputType.LOOKUP_DESCRIPTION;
-			suffix = LOOKUP_CANVAS;
+			// in an inline data grid row, the cell's editor is the combo box itself
+			suffix = (grid == null) ? LOOKUP_CANVAS : null;
 		}
 		else if (widget instanceof RichText) {
 			type = InputType.RICH_TEXT;
@@ -520,7 +521,8 @@ public class SmartClientSAILViewVisitor {
 							visitDefaultBinding(columnBinding, rowDocument, grid);
 						}
 						else {
-							visitInput(input, grid);
+							// the input names no binding of its own: its cell is the column's
+							visitInput(input, columnBinding, grid);
 						}
 					}
 				}

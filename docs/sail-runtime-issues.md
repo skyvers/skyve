@@ -31,6 +31,7 @@ SC-2's suspected cause, which cites the code before its fix, at `2f4c2021b8`.
 | [SC-6](#sc-6-the-backup-and-restore-started-growls-are-not-shown) | The Backup and Restore "started" growls are not shown | SC | Plausible (client) | open |
 | [SC-7](#sc-7-control-panel-jumps-back-to-the-results-tab) | Control Panel jumps back to the Results tab | SC | Confirmed | open |
 | [SC-8](#sc-8-the-user-wizard-password-field-loses-fast-typing) | The User wizard password field loses fast typing | SC | Confirmed | open |
+| [SC-11](#sc-11-a-model-lookup-column-ends-the-inline-edit-of-a-row-edited-again) | A model lookup column ends the inline edit of a row edited again | SC | Confirmed (stack traced) | open |
 
 SC finding 5 is not listed. It was that a view opened by URL hides Delete, OK
 and Cancel, which is by design (`onlyView`); see the note under
@@ -569,15 +570,24 @@ needs `skyve-min.js` rebuilt and can only be checked in a browser. Checked on
 the wire: a time clause is now sent as `12:30:00.000`, and date and dateTime
 clauses are unchanged.
 
-A list grid with filter parameters builds its criteria again in
-`completeFilterCriteria`, which does not pass through this function, so an
-advanced time filter on such a grid is still sent as a date.
+A list grid with filter parameters built its criteria again in
+`completeFilterCriteria` from the filter editor's criteria, which had not
+passed through this function, so an advanced time filter on such a grid was
+still sent as a date. Fixed (68b85f9586) in `BizListGrid`'s `filterData`
+(`skyve-web/src/js/desktop/listgrid.js`): it now converts the criteria once,
+after completing them, and completes a copy (`isc.clone`, which keeps a
+Date's logical flags) because the filter row is given the editor's criteria
+back unconverted. Checked on the wire: on the List Grid Fixture's grid with
+a filter parameter, `time lessThan 12:30` is sent as `12:30:00.000` beside
+the parameter's clause.
 
 **Suites.** The SC kitchen sink filters ListAttributes' time column with
 `equals`, `lessThan` and `greaterThan` through the advanced filter, and with
-`equals` in a filter row.
+`equals` in a filter row. It filters the List Grid Fixture's PrimeFaces data
+table of column types, which has a filter parameter, with `equals` in the
+filter row and `lessThan` and `greaterThan` in the advanced filter.
 
-**Status:** fixed, except on list grids with filter parameters.
+**Status:** fixed.
 
 ## SC-10: Selecting a row whose selected handler rerenders loops for ever
 
@@ -602,5 +612,35 @@ regression; the fixture only exposed it.
 **Workaround in the suites.** The SC kitchen sink does not select a row in
 that grid. So `navigateEdit bizId="{var:…}"` and `navigateLink href` with
 `{var:}` are run only in PF; the substitution is shared code with unit tests.
+
+**Status:** open.
+
+## SC-11: A model lookup column ends the inline edit of a row edited again
+
+**Symptom.** In a SmartClient inline data grid, a lookup description column
+on a model (`model="..."`, not a query) can be set in a new row, but not in a
+row that is edited again. Typing a key into it, or opening its drop-down, ends
+the row's edit at once: the editor closes and the keystroke is lost. A user
+sees the same thing.
+
+**Reproduction.** In SmartClient, open the kitchen sink Model Lookup Fixture.
+In "Data-grid model lookups", press New, pick a value in the multi-column
+lookup and press Enter. Press Edit, click into the lookup and type a letter.
+
+**Cause (traced in the browser).** The grid's model lookup editor gets a
+`pickListProperties.filterData` (`SmartClientAttributeDefinition`
+`appendEditorProperties`, "Model lookups in grid editors need the enclosing
+view's conversation bean"), which calls `view.gather(false)` for `_c`.
+`_gather` (`skyve-web/src/js/desktop/editView.js`) sorts every data grid's
+data array in place with `data.sortByProperty(grid._ordinal, true)`, even for
+a grid without an ordinal. That fires the grid's `dataChanged`, whose
+`_remapEditRows` calls `hideInlineEditor`: the stack from the drop-down's
+fetch is `filterDataBoundPickList` → `filterData` → `gather` → `_gather` →
+`sortByProperty` → `dataChanged` → `_remapEditRows` → `hideInlineEditor`. Why
+a new row's edit survives the same fetch was not looked into.
+
+**Workaround in the suites.** The SC kitchen sink sets the model lookup
+columns in a new row only. After `dataGridEdit` it reads them, but does not
+change them.
 
 **Status:** open.
