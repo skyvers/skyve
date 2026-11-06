@@ -195,9 +195,11 @@
 		<echo file="src/main/resources/META-INF/resources/skyve/prime/device-min.js" append="true">//# sourceMappingURL=device-min.js.map</echo>
 
 	    <!-- Minify the SAIL recorder for SmartClient: a bundle of its own, which a page loads only while its session
-	         records (see docs/sail.md, Recording). It is never merged into skyve-min.js. -->
+	         records (see docs/sail.md, Recording). It is never merged into skyve-min.js. Each renderer's bundle is the
+	         shared core (recorder-core.js) followed by that renderer's adapter (recorder-sc.js, later recorder-pf.js). -->
 		<mkdir dir="src/main/resources/META-INF/resources/skyve/sail"/>
 	    <java jar="${closure.compiler.jar}" fork="true">
+	        <arg value="--js=src/js/sail/recorder-core.js"/>
 	        <arg value="--js=src/js/sail/recorder-sc.js"/>
 	        <arg value="--js_output_file=src/main/resources/META-INF/resources/skyve/sail/recorder-sc-min.js"/>
 	        <arg value="--create_source_map=src/main/resources/META-INF/resources/skyve/sail/recorder-sc-min.js.map"/>
