@@ -20,7 +20,7 @@
 (function () {
 	"use strict";
 
-	var VERSION = 6;
+	var VERSION = 7;
 	if (window._sail && window._sail.version === VERSION) {
 		return;
 	}
@@ -1003,6 +1003,42 @@
 		}
 		return isc.isA.ListGrid(grid) ? { grid: grid } : { error: locator + " is not a grid" };
 	}
+
+	/**
+	 * Checks that a data grid's row can be dragged to a position, and remembers the row's record so that dataGridMoved()
+	 * can tell where it went: { rows } or { error }. Only an ordered data grid (SmartClient's canReorderRecords) lets a
+	 * user drag its rows.
+	 */
+	S.dataGridMovePlan = function (locator, from, to) {
+		var g = gridOf(locator);
+		if (g.error) {
+			return g;
+		}
+		var grid = g.grid;
+		if (!grid.canReorderRecords) {
+			return { error: "it is not an ordered grid, so its rows cannot be dragged (or it may not be changed)" };
+		}
+		var rows = grid.getTotalRows();
+		if (from < 0 || from >= rows) {
+			return { error: "it has no row " + from + " (it has " + rows + " rows)" };
+		}
+		if (to >= rows) {
+			return { error: "position " + to + " is past its last row (it has " + rows + " rows)" };
+		}
+		grid._sailMoving = grid.getRecord(from);
+		return { rows: rows };
+	};
+
+	/** True if the record dataGridMovePlan() remembered is now the data grid's row at the position; forgets it. */
+	S.dataGridMoved = function (locator, to) {
+		var g = gridOf(locator);
+		if (g.error) {
+			return false;
+		}
+		var moving = g.grid._sailMoving;
+		delete g.grid._sailMoving;
+		return !!moving && g.grid.getRecord(to) === moving;
+	};
 
 	/** The text a row shows, cell by cell, skipping list views' tag and flag columns. */
 	function rowTexts(grid, rowNum) {

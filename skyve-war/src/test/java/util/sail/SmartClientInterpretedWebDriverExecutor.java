@@ -59,6 +59,7 @@ import org.skyve.metadata.sail.language.step.interaction.actions.ZoomIn;
 import org.skyve.metadata.sail.language.step.interaction.actions.ZoomOut;
 import org.skyve.metadata.sail.language.step.interaction.grids.DataGridEdit;
 import org.skyve.metadata.sail.language.step.interaction.grids.DataGridLink;
+import org.skyve.metadata.sail.language.step.interaction.grids.DataGridMove;
 import org.skyve.metadata.sail.language.step.interaction.grids.DataGridNew;
 import org.skyve.metadata.sail.language.step.interaction.grids.DataGridRemove;
 import org.skyve.metadata.sail.language.step.interaction.grids.DataGridSelect;
@@ -792,6 +793,27 @@ public class SmartClientInterpretedWebDriverExecutor extends InterpretedWebDrive
 	@Override
 	public void executeDataGridEdit(DataGridEdit edit) {
 		dataGridGesture(edit, edit.getBinding(), edit.getRow());
+	}
+
+	/**
+	 * Drags a row of an ordered data grid to the position, ending any inline edit first: see
+	 * {@link SmartClientSelenide#dataGridMove(String, int, int)}. The view's context is unchanged.
+	 */
+	@Override
+	public void executeDataGridMove(DataGridMove move) {
+		prepareForInteraction();
+		SmartClientAutomationContext context = context();
+		String binding = move.getBinding();
+		String rowsKey = binding + ".select";
+		List<Locator> rows = context.getLocators(rowsKey);
+		if (rows == null) {
+			throw new MetaDataException(String.format("<dataGridMove /> with binding [%s] is not on the view", binding));
+		}
+		Integer row = move.getRow();
+		int from = (row == null) ? rowContaining(context, rowsKey, move) : row.intValue();
+		int to = move.getTo().intValue();
+		selenide.trace(String.format("Move row %d of data grid [%s] to position %d", Integer.valueOf(from), binding, Integer.valueOf(to)));
+		selenide.dataGridMove(rows.get(0).getLocator(), from, to);
 	}
 
 	/**

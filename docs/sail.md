@@ -497,6 +497,7 @@ of these defaults from the current context.
 | `dataGridEdit` | `binding`\*, `row` or `rowContaining` | Starts an inline edit of the row. | no: PF grids have no row edit gesture; inline cells are inputs | yes; the following `dataEnter`, `testValue`, `testWidget`, `lookupDescriptionPick` and `lookupDescriptionAutoComplete` steps address the row's columns, and any other step ends the edit |
 | `dataGridRemove` | `binding`\*, `row` or `rowContaining` | Removes the row from the collection. The record itself is not deleted. | yes | yes |
 | `dataGridSelect` | `binding`\*, `row` or `rowContaining` | Selects the row without zooming. | only on grids with a `selectedIdBinding`; on other grids a selection zooms | yes |
+| `dataGridMove` | `binding`\*, `row` or `rowContaining`, `to`\* | Drags the row of an ordered data grid to the zero-based position `to`, counted in the rows as shown, with a real drag-and-drop gesture. The rows are numbered again in their new order, which a save keeps. Fails on a grid that is not ordered (its rows cannot be dragged) and when `to` is past the last row. The context is unchanged. | yes: the row is dragged by its drag handle, and the server reorders the collection at once (`rowReorder`) | yes; it ends any inline edit first |
 | `dataGridLink` | `binding`\*, `row` or `rowContaining`, `text`\*, `confirm`, `testSuccess` | Clicks the first displayed link in the row whose visible text contains `text` (case-sensitive), such as a "Revoke Access" link in every row. A link that runs an action is pressed as an [action step](#actions) presses its button: `confirm` answers its confirmation and questions, and the step checks for errors unless `testSuccess="false"` or it was declined; the view and its context stay. Any other link is followed as `navigateLink` follows one: the top context loses its document and view type. Which kind a link is comes from the view's metadata: the grid's links whose shown value contains the text (or every link of the grid if none does) all have an action reference. No such link in the row fails the step, listing the row's links. | yes, but runtime issue P9 zooms into the row as well, so it cannot be used on a grid that zooms when a row is selected | yes |
 | `listGridNew` | `module`, `document`, `query`, `model`, `createView` | Presses New and pushes the new document's context. | yes; on a Vue list grid, its toolbar's New button, or the floating one a list view shows above its paginator | yes |
 | `listGridZoom` | as `listGridNew` without `createView`, plus `row` or `rowContaining` | Opens the row and pushes its context. | yes; on a Vue list grid, the row's View Detail button, or a click on the row when the grid zooms on a row click | yes |
@@ -845,6 +846,11 @@ Kitchen sink fixtures for the newer steps:
   has. The SC kitchen sink sets them in a new row and reads them after
   `dataGridEdit`; it cannot change them in a row edited again (runtime issue
   SC-11).
+- `OrderedGridFixture` (the "Ordered Grid Fixtures" menu list) is saved and has
+  an ordered data grid, `rows`, whose rows are added through their own view.
+  Both kitchen sinks add three rows, `dataGridMove` them, save, and reopen the
+  fixture from its list to check each row's position with `captureCell` and a
+  `pattern`.
 - ListGridFixture's "PrimeFaces data table of column types" has a filter
   parameter (`text` not null), so SmartClient completes its criteria in the
   browser; the SC kitchen sink filters its time column there (runtime issue
@@ -1213,12 +1219,12 @@ other implementations, which generate test code instead of driving a browser:
 The SAIL language changes are additive for script authors. Code that
 implements `Executor` directly is affected.
 
-- **Breaking:** `Executor` has 14 new abstract methods: `executeUpload`,
+- **Breaking:** `Executor` has 15 new abstract methods: `executeUpload`,
   `executeTestMessage`, `executeTestGridRows`, `executeTestWidget`,
   `executeNavigateMenu`, `executeTestMenu`, `executeSwitchMode`,
   `executeListGridFilter`, `executeListGridClearFilter`, `executeListGridSort`,
-  `executeCaptureValue`, `executeCaptureCell`, `executeCaptureTitle` and
-  `executeDataGridLink`. An executor outside Skyve must implement them,
+  `executeCaptureValue`, `executeCaptureCell`, `executeCaptureTitle`,
+  `executeDataGridLink` and `executeDataGridMove`. An executor outside Skyve must implement them,
   even if only to fail or to emit a comment. Executors that extend skyve-ext
   `WebDriverExecutor` or `SeleneseExecutor` inherit comment-emitting
   implementations.

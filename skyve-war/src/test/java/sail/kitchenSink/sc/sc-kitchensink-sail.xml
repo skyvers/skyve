@@ -354,6 +354,43 @@
 		</method>
 	</interaction>
 
+	<interaction name="Ordered grid: drag rows into a new order, and keep it once saved">
+		<method>
+			<navigateMenu module="kitchensink" item="Ordered Grid Fixtures" />
+			<listGridNew module="kitchensink" document="OrderedGridFixture" />
+			<dataEnter binding="name" value="SAIL ordered {run}" />
+			<dataGridNew binding="rows" />
+			<dataEnter binding="name" value="First {run}" />
+			<zoomOut />
+			<dataGridNew binding="rows" />
+			<dataEnter binding="name" value="Second {run}" />
+			<zoomOut />
+			<dataGridNew binding="rows" />
+			<dataEnter binding="name" value="Third {run}" />
+			<zoomOut />
+			<comment>Drag the last row to the top. A captured cell's pattern must find its text, so it checks the row's position</comment>
+			<dataGridMove binding="rows" rowContaining="Third {run}" to="0" />
+			<captureCell binding="rows" row="0" column="name" variable="top" pattern="^Third " />
+			<save />
+			<ok />
+			<comment>Reopen it from its list, so the rows come from the database in their saved order</comment>
+			<listGridZoom module="kitchensink" document="OrderedGridFixture" rowContaining="SAIL ordered {run}" />
+			<captureCell binding="rows" row="0" column="name" variable="row0" pattern="^Third " />
+			<captureCell binding="rows" row="1" column="name" variable="row1" pattern="^First " />
+			<captureCell binding="rows" row="2" column="name" variable="row2" pattern="^Second " />
+			<comment>Drag a row down, by its position</comment>
+			<dataGridMove binding="rows" row="0" to="2" />
+			<captureCell binding="rows" row="0" column="name" variable="row0" pattern="^First " />
+			<captureCell binding="rows" row="2" column="name" variable="row2" pattern="^Third " />
+			<save />
+			<ok />
+			<listGridZoom module="kitchensink" document="OrderedGridFixture" rowContaining="SAIL ordered {run}" />
+			<captureCell binding="rows" row="0" column="name" variable="row0" pattern="^First " />
+			<captureCell binding="rows" row="1" column="name" variable="row1" pattern="^Second " />
+			<captureCell binding="rows" row="2" column="name" variable="row2" pattern="^Third " />
+			<delete />
+		</method>
+	</interaction>
 	<interaction name="Logout">
 		<method>
 			<logout />

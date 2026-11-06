@@ -86,6 +86,7 @@ import org.skyve.metadata.sail.language.step.interaction.actions.ZoomIn;
 import org.skyve.metadata.sail.language.step.interaction.actions.ZoomOut;
 import org.skyve.metadata.sail.language.step.interaction.grids.DataGridEdit;
 import org.skyve.metadata.sail.language.step.interaction.grids.DataGridLink;
+import org.skyve.metadata.sail.language.step.interaction.grids.DataGridMove;
 import org.skyve.metadata.sail.language.step.interaction.grids.GridRowStep;
 import org.skyve.metadata.sail.language.step.interaction.grids.DataGridNew;
 import org.skyve.metadata.sail.language.step.interaction.grids.DataGridRemove;
@@ -893,6 +894,33 @@ public class PrimeFacesInterpretedWebDriverExecutor extends InterpretedWebDriver
 	@Override
 	public void executeDataGridRemove(DataGridRemove remove) {
 		dataGridGesture(remove, remove.getBinding(), remove);
+	}
+
+	/**
+	 * Drags a row of an ordered data grid by its drag handle to the position, then checks that no error shows: see
+	 * {@link PrimeFacesSelenide#dataGridMove(String, int, int)}. The view's context is unchanged.
+	 */
+	@Override
+	public void executeDataGridMove(DataGridMove move) {
+		String binding = move.getBinding();
+		PrimeFacesAutomationContext context = peek();
+		@SuppressWarnings("null") // a null here fails the test
+		List<UIComponent> components = context.getFacesComponents(binding);
+		if (components == null) {
+			throw new MetaDataException(String.format("<dataGridMove /> with binding [%s] is not on the view", binding));
+		}
+		for (UIComponent component : components) {
+			String gridId = PrimeFacesAutomationContext.clientId(component);
+			Integer row = resolveRow(move, gridId);
+			if (row != null) {
+				int to = move.getTo().intValue();
+				selenide.trace(String.format("Move row %d of data grid [%s] to position %d (%s)", row, binding, Integer.valueOf(to), gridId));
+				selenide.dataGridMove(gridId, row.intValue(), to);
+				checkSuccess("expected no error messages after <dataGridMove />");
+				return;
+			}
+		}
+		throw new DomainException(String.format("<dataGridMove /> with binding [%s] could not be done: the grid is not on the page", binding));
 	}
 
 	/**
@@ -1987,12 +2015,14 @@ public class PrimeFacesInterpretedWebDriverExecutor extends InterpretedWebDriver
 		if ((table != null) && (widgets != null) && (! widgets.isEmpty()) && (widgets.get(0) instanceof DataGrid grid)) {
 			List<org.skyve.impl.metadata.view.widget.bound.tabular.DataGridColumn> columns = grid.getColumns();
 			List<String> bindings = new ArrayList<>(columns.size());
+			// an ordered grid's table has its drag handle column before the grid's columns
+			int offset = table.isDraggableRows() ? 1 : 0;
 			for (int i = 0, l = columns.size(); i < l; i++) {
 				if (columns.get(i) instanceof org.skyve.impl.metadata.view.widget.bound.tabular.DataGridBoundColumn bound) {
 					String candidate = bound.getBinding();
 					if (column.equals(candidate)) {
-						if (i < table.getChildCount()) {
-							return table.getChildren().get(i);
+						if (i + offset < table.getChildCount()) {
+							return table.getChildren().get(i + offset);
 						}
 						break;
 					}
