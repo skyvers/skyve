@@ -2,6 +2,13 @@
 
 Status: approved to build, 2026-11-04. See [Decisions](#decisions-mike-2026-11-04). On 2026-11-06 Mike said to build it on the `sail` branch. Phase 0 (language gaps 1–4) is done; the recorder itself has not been started. Other open SAIL work is in [plan_sail_completion.md](plan_sail_completion.md).
 
+**This run (Mike, 2026-11-06):**
+
+- Build phases 1–5 in a `sail-recorder` stream worktree, recreated from `sail`. The worktree, ports, build, compatibility and decision rules are in [How the work is done](plan_sail_completion.md#how-the-work-is-done).
+- Merge the recorder into `sail` before the Apps A/B rerun, so the rerun covers it. The gate keeps it off by default, but it changes shared pages (`home.xhtml`, the PF theme heads, the Control Panel), the admin module (the new role) and the JSON config.
+- Ask Mike about the phase 3 overlay UX before building it. Decide the other recorder internals yourself (which SC methods to wrap, the endpoint's shape, the Control Panel layout), and log them in `DECISIONS.md`.
+- **Round trip, the test for every phase:** run an existing SAIL script through the Selenide executor with recording on, download the recording, then replay it through the same renderer's executor, unedited, and expect it to pass. Make it an IT in the kitchen sink suite, and use admin workflows as well. For phase 3, have the IT add assertions through the overlay. For phase 4, run the same scripts in PF.
+
 ## Summary
 
 A recorder that watches a person use a Skyve app, in SmartClient (SC) or PrimeFaces (PF), and writes a SAIL script of what they did. The script is a first draft. A person or an AI then edits it into a test: adds assertions, turns values into parameters, and removes steps that aren't needed.

@@ -13,6 +13,48 @@ about them.
 
 ## How the work is done
 
+This section applies to this plan and to the recorder plan.
+
+### Where
+
+- All paths are relative to `~/skyve-sail`. Never read or edit anything in the
+  shared checkout `~/_/skyve`, and never switch branches there. Its plan
+  copies are stale.
+- The orchestrator works on `sail` and merges into it. Agents work in stream
+  worktrees off `sail`, one branch each, for example `sail-pf`, `sail-sc`,
+  `sail-lang` and `sail-recorder`. Reset an old stream branch to `sail` before
+  reusing it. Commit on `sail` and the stream branches only, and never push.
+- The run-skyve skill is not tracked. Copy `.claude/skills/run-skyve` into
+  every new worktree.
+
+### Servers, builds and the Apps rig
+
+- **Disposable servers only.** Always pass `-Dsail.baseUrl`. Run SAIL ITs one
+  at a time per server (`-DforkCount=1`, named tests, the `sail-it` profile).
+- Each worktree gets its own run-skyve `SKYVE_RUN_DIR` (under the session
+  scratchpad) and a fixed `SKYVE_PORT_OFFSET`:
+
+  | Worktree | Offset | HTTP |
+  |---|---|---|
+  | `sail` | 300 | 8380 |
+  | `sail-pf` | 310 | 8390 |
+  | `sail-sc` | 320 | 8400 |
+  | `sail-lang` | 350 | 8430 |
+  | `sail-recorder` | 360 | 8440 |
+
+- **Hands off:** port 8080 (Mike's server), the Apps A/B rig (offsets 330 and
+  340, so HTTP 8410 and 8420) and MySQL 3358. Don't stop, remove or prune any
+  Docker container or volume (the rig's `apps-ab-mysql57-lc` must survive for
+  the Apps rerun).
+- Build in an rsync'd mirror, not in the worktree (the IDE's compiler
+  overwrites `target/classes`). Use `mvn -o`. Never `mvn install` into
+  `~/.m2`: master and `sail` are both `10.0.0-SNAPSHOT`, so it would replace
+  the master snapshot Mike builds against. If an install is needed, use
+  `-Dmaven.repo.local=<scratchpad>/m2`.
+- No Spotless. Format by hand.
+
+### Language and harness
+
 - **Language changes** follow the phase 2 principle: extend an existing step
   with an optional attribute where the meaning fits, add an op-code only for a
   new gesture, and keep existing scripts unmarshalling unchanged. Regenerate
@@ -20,18 +62,48 @@ about them.
   `skyve-core/src/test/resources/schemas/sail.xsd`). Each new step gets an
   `Executor` method, a no-op in the `Generator`, both interpreted executors and
   a kitchen sink conformance script.
-- **Definition of done** for harness work: the kitchen sink and admin suites
-  green 3 times headless and 3 times headed (`-Dsail.headless=false`), in both
-  renderers.
 - **No fixed sleeps or pauses** in the harness. Wait on a condition only when
-  it is needed, and say why in a comment.
-- **Disposable servers only.** Always pass `-Dsail.baseUrl`; never point SAIL
-  at port 8080. Run SAIL ITs one at a time (`-DforkCount=1`, named tests, the
-  `sail-it` profile).
-- Build in an rsync'd mirror, not in the worktree (the IDE's compiler
-  overwrites `target/classes`). No Spotless.
+  it is needed, and say in a comment which event it waits for.
 - Update `docs/sail.md` (op-code tables, PF and SC columns, Known Limitations)
   in the same change.
+
+### Backward compatibility
+
+The Apps A/B rerun uses the Apps SAIL scripts and ITs unchanged, so keep all
+of these working:
+
+- the SAIL language: existing scripts unmarshal and run the same way;
+- the harness Java API the Apps ITs call: `BrowserConfiguration`, `Devices`,
+  `AbstractPrimeFacesInterpretedSail`, `AbstractSmartClientInterpretedSail`,
+  `AbstractH2Test`, the `*Selenide` and `*InterpretedWebDriverExecutor`
+  classes, `SailViewRoles`, `SailUsers` and `SailServerLock`;
+- the `-Dsail.*` system properties.
+
+**Check before finishing:** in a mirror, copy
+`~/bizhub-apps-sail/Apps/src/test/java/sail/apps/` (read only; it is
+uncommitted work from the Apps run) into `skyve-war/src/test/java/sail/apps/`
+and run `test-compile`. Those ITs only import Skyve core/web classes, the
+`util` harness and JUnit, so they compile without Apps. Don't start them.
+
+### Definition of done
+
+- The kitchen sink and admin suites green 3 times headless and 3 times headed
+  (`-Dsail.headless=false`), in both renderers.
+- The full reactor unit tests green.
+- No new Eclipse null warnings (see the batch ECJ recipe in memory).
+- `docs/sail.md` updated, and the Apps compile check above passing.
+- The recorder: its round trip green for every phase (see the recorder plan).
+
+### Decisions and questions
+
+- **Ask Mike first** about: the section 1 step shapes where there is a real
+  choice; any section 3 runtime bug; the recorder's phase 3 overlay UX. Put
+  all the section 1 questions in one proposal and ask once. Keep working on
+  unblocked items while waiting.
+- **Everything else:** make the best guess, and log it with its reason in
+  `DECISIONS.md` in the session scratchpad. It goes to Mike at the end.
+- At the end, report what's done, what's open and the decision log, and
+  update the memory notes.
 
 ## 1. Language and harness gaps (found by Apps)
 
@@ -75,7 +147,8 @@ the executor, not a pause.
 ## 3. Skyve runtime bugs SAIL found
 
 These are Skyve bugs, not harness bugs. They are reported, not fixed, and the
-scripts work around them. Ask Mike which to fix before starting on any. Full
+scripts work around them. Ask Mike which to fix before starting on any, except
+SC-9, which is approved. Full
 reproductions are in [sail-runtime-issues.md](../sail-runtime-issues.md).
 
 - **P1:** backups are listed oldest first.
@@ -93,7 +166,7 @@ reproductions are in [sail-runtime-issues.md](../sail-runtime-issues.md).
 - **SC-6:** the Backup and Restore "started" growls are not shown.
 - **SC-7:** Control Panel jumps back to the Results tab.
 - **SC-8:** the User wizard password field loses fast typing.
-- **SC-9 (rest):** an advanced time filter on a list grid with filter
+- **SC-9 (rest), fix approved by Mike (2026-11-05):** an advanced time filter on a list grid with filter
   parameters is still sent as a date, because `completeFilterCriteria` doesn't
   go through `isc.BizUtil.convertFilterCriteria`.
 - **SC-10:** selecting a row whose selected handler rerenders loops for ever.
@@ -111,5 +184,5 @@ from after zooming in and pressing OK or Cancel.
   inside trees, maps and calendars, browser back/refresh/new tab and checking
   downloads) are in the recorder plan.
 - After this work, Mike reruns the Apps A/B regression test (master vs `sail`)
-  from the Apps chat. Keep the language backward compatible, so the Apps
-  scripts keep working.
+  from the Apps chat. The recorder (phases 1–5) is merged into `sail` first, so
+  the rerun covers it. See [Backward compatibility](#backward-compatibility).
