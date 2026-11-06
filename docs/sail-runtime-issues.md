@@ -762,7 +762,7 @@ is what its grid shows, and wrong for an unordered one.
 PrimeFaces is not affected: its data grid columns have no sort, and it
 applies values through `FacesView` in place.
 
-**Fix (approved by Mike, option C).** `ViewJSONManipulator` follows the
+**Fix (e1cd0310d9, approved by Mike, option C).** `ViewJSONManipulator` follows the
 request's order only for an ordered collection (`Collection.getOrdered()`).
 For an unordered collection (or an inverse many), existing beans stay where
 they are, beans missing from the request are removed, and new beans go on
