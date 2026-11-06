@@ -340,9 +340,7 @@ public final class SailRecording implements Serializable {
 	 * @throws IllegalStateException if the recording has stopped
 	 */
 	public synchronized int add(@Nonnull List<?> batch) {
-		if (stoppedMillis != 0L) {
-			throw new IllegalStateException("The SAIL recording has stopped");
-		}
+		checkRecording();
 		int result = 0;
 		for (Object element : batch) {
 			if (element instanceof Map<?, ?> map) {
@@ -402,15 +400,119 @@ public final class SailRecording implements Serializable {
 	public synchronized @Nonnull String stop(@Nullable SailRecordingBuilder.StepCheck check) {
 		if (xml == null) {
 			stoppedMillis = System.currentTimeMillis();
-			// The sign in page asks for the customer only when the configuration does not fix one
-			String loginCustomerName = (UtilImpl.CUSTOMER == null) ? customerName : null;
-			SailRecordingBuilder builder = new SailRecordingBuilder(loginCustomerName, userName, startedMillis, stoppedMillis)
-												.roles(roleNames)
-												.uxui(uxui)
-												.check(check);
-			xml = SailRecordingBuilder.toXml(builder.build(steps));
+			xml = SailRecordingBuilder.toXml(builder().check(check).build(steps));
 		}
 		return xml;
+	}
+
+	/**
+	 * Returns the name to download the script as: {@code sail-recording-yyyyMMdd-HHmm.xml}, from when recording started.
+	 *
+	 * @return the file name
+	 */
+	public @Nonnull String fileName() {
+		return "sail-recording-" + new java.text.SimpleDateFormat("yyyyMMdd-HHmm").format(new java.util.Date(startedMillis)) + ".xml";
+	}
+
+	/**
+	 * Returns the number of gestures recorded so far: the steps that are not context.
+	 *
+	 * <p>Complexity: O(n) in the steps.
+	 *
+	 * @return the gesture count
+	 */
+	public synchronized int getGestureCount() {
+		int result = 0;
+		for (Map<String, String> step : steps) {
+			if (! SailRecordingBuilder.CONTEXT.equals(step.get(SailRecordingBuilder.OP))) {
+				result++;
+			}
+		}
+		return result;
+	}
+
+	/**
+	 * Deletes a recorded entry. Its id stays known, so that a resent copy is not added again.
+	 *
+	 * @param id	the entry's {@value #STEP_ID_KEY}
+	 * @return true if it was deleted
+	 * @throws IllegalStateException if the recording has stopped
+	 */
+	public synchronized boolean delete(@Nonnull String id) {
+		checkRecording();
+		for (int i = steps.size() - 1; i >= 0; i--) {
+			if (id.equals(steps.get(i).get(STEP_ID_KEY))) {
+				steps.remove(i);
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * Undoes the last gesture: removes the last entry that is not context, with the context recorded after it.
+	 *
+	 * @return the number of entries removed
+	 * @throws IllegalStateException if the recording has stopped
+	 */
+	public synchronized int undo() {
+		checkRecording();
+		int last = steps.size() - 1;
+		while ((last >= 0) && SailRecordingBuilder.CONTEXT.equals(steps.get(last).get(SailRecordingBuilder.OP))) {
+			last--;
+		}
+		if (last < 0) {
+			return 0;
+		}
+		int result = steps.size() - last;
+		steps.subList(last, steps.size()).clear();
+		return result;
+	}
+
+	private void checkRecording() {
+		if (stoppedMillis != 0L) {
+			throw new IllegalStateException("The SAIL recording has stopped");
+		}
+	}
+
+	/**
+	 * Returns what the script shows for a range of the entries, for the recorder's panel: each entry's id and lines
+	 * (see {@link SailRecordingBuilder#preview(List, int, int)}).
+	 *
+	 * @param from	the zero-based index of the first entry
+	 * @param count	the most entries
+	 * @return for each entry, a map with {@code id} and {@code lines}
+	 */
+	public synchronized @Nonnull List<Map<String, Object>> preview(int from, int count) {
+		List<List<String>> lines = builder().preview(steps, from, count);
+		int start = Math.max(0, Math.min(from, steps.size()));
+		List<Map<String, Object>> result = new ArrayList<>(lines.size());
+		for (int i = 0, l = lines.size(); i < l; i++) {
+			Map<String, Object> entry = new LinkedHashMap<>(4);
+			Map<String, String> step = steps.get(start + i);
+			entry.put(STEP_ID_KEY, step.get(STEP_ID_KEY));
+			entry.put("context", Boolean.valueOf(SailRecordingBuilder.CONTEXT.equals(step.get(SailRecordingBuilder.OP))));
+			entry.put("lines", lines.get(i));
+			result.add(entry);
+		}
+		return result;
+	}
+
+	/**
+	 * Returns the script as it stands: the one built on Stop, or while recording one built now without the metadata
+	 * checks, for the panel's Copy and Download.
+	 *
+	 * @return the SAIL XML
+	 */
+	public synchronized @Nonnull String currentXml() {
+		return (xml == null) ? SailRecordingBuilder.toXml(builder().build(steps)) : xml;
+	}
+
+	private @Nonnull SailRecordingBuilder builder() {
+		// The sign in page asks for the customer only when the configuration does not fix one
+		String loginCustomerName = (UtilImpl.CUSTOMER == null) ? customerName : null;
+		long stopped = (stoppedMillis == 0L) ? System.currentTimeMillis() : stoppedMillis;
+		return new SailRecordingBuilder(loginCustomerName, userName, startedMillis, stopped).roles(roleNames).uxui(uxui);
 	}
 
 	/**

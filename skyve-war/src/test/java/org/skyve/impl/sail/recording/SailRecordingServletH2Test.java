@@ -74,8 +74,8 @@ class SailRecordingServletH2Test extends AbstractSkyveTest {
 		SailRecording recording = SailRecording.start(session, u);
 		String token = token();
 		String batch = "{\"_csrf\":" + token + ",\"steps\":[{\"id\":\"p-1\",\"op\":\"save\"},{\"id\":\"p-2\",\"op\":\"ok\"}]}";
-		assertEquals("{\"received\":2,\"steps\":2}", post(batch).body());
-		assertEquals("{\"received\":0,\"steps\":2}", post(batch).body());
+		assertEquals("{\"received\":2,\"steps\":2,\"gestures\":2,\"stopped\":false}", post(batch).body());
+		assertEquals("{\"received\":0,\"steps\":2,\"gestures\":2,\"stopped\":false}", post(batch).body());
 
 		Response forged = post("{\"_csrf\":12345,\"steps\":[{\"id\":\"p-3\",\"op\":\"save\"}]}");
 		Response none = post("{\"steps\":[{\"id\":\"p-3\",\"op\":\"save\"}]}");
@@ -91,7 +91,7 @@ class SailRecordingServletH2Test extends AbstractSkyveTest {
 		UtilImpl.SAIL_RECORDING_MAXIMUM_STEPS = 1;
 		SailRecording.start(session, u);
 		String body = post("{\"_csrf\":" + token() + ",\"steps\":[{\"id\":\"p-1\",\"op\":\"save\"},{\"id\":\"p-2\",\"op\":\"ok\"}]}").body();
-		assertEquals("{\"received\":1,\"steps\":1,\"limitReached\":true,\"maximumSteps\":1}", body);
+		assertEquals("{\"received\":1,\"steps\":1,\"gestures\":1,\"stopped\":false,\"limitReached\":true,\"maximumSteps\":1}", body);
 	}
 
 	@Test
@@ -99,8 +99,9 @@ class SailRecordingServletH2Test extends AbstractSkyveTest {
 		SailRecording recording = SailRecording.start(session, u);
 		String token = token();
 		post("{\"_csrf\":" + token + ",\"steps\":[{\"id\":\"p-1\",\"op\":\"save\"}]}");
+		// while recording, the script as it stands, for the panel's Copy and Download
 		Response early = get(Map.of("format", "xml"));
-		verify(early.response).sendError(HttpServletResponse.SC_NOT_FOUND);
+		assertTrue(early.body().contains("<save/>"), early.body());
 
 		String xml = recording.stop();
 		Response late = post("{\"_csrf\":" + token + ",\"steps\":[{\"id\":\"p-2\",\"op\":\"ok\"}]}");
@@ -115,10 +116,35 @@ class SailRecordingServletH2Test extends AbstractSkyveTest {
 		SailRecording.start(session, u);
 		post("{\"_csrf\":" + token() + ",\"steps\":[{\"id\":\"p-1\",\"op\":\"save\"},{\"id\":\"p-2\",\"op\":\"ok\"},{\"id\":\"p-3\",\"op\":\"cancel\"}]}");
 		String body = get(Map.of("from", "1", "count", "1")).body();
-		assertTrue(body.startsWith("{\"total\":3,\"from\":1,\"steps\":["), body);
-		assertTrue(body.contains("\"op\":\"ok\"") && (! body.contains("\"op\":\"save\"")), body);
+		assertTrue(body.startsWith("{\"total\":3,\"gestures\":3,\"stopped\":false,\"from\":1,\"entries\":[{\"id\":\"p-2\""), body);
+		assertTrue(body.contains("\"lines\":[\"<ok") && (! body.contains("<save")), body);
 		Response bad = get(Map.of("from", "x"));
 		verify(bad.response).sendError(HttpServletResponse.SC_BAD_REQUEST);
+	}
+
+	/**
+	 * The panel deletes an entry, undoes the last gesture with its context, and stops the recording, which checks the
+	 * steps and offers the script as a file.
+	 */
+	@Test
+	void thePanelDeletesUndoesAndStops() throws Exception {
+		SailRecording recording = SailRecording.start(session, u);
+		String token = token();
+		post("{\"_csrf\":" + token + ",\"steps\":[{\"id\":\"p-1\",\"op\":\"save\"},{\"id\":\"p-2\",\"op\":\"comment\",\"text\":\"a note\"}," +
+				"{\"id\":\"p-3\",\"op\":\"ok\"},{\"id\":\"p-4\",\"op\":\"context\",\"text\":\"shown: info growl\"}]}");
+		String deleted = post("{\"_csrf\":" + token + ",\"delete\":\"p-2\"}").body();
+		String undone = post("{\"_csrf\":" + token + ",\"undo\":true}").body();
+		// a resent copy of a deleted step is not added again
+		post("{\"_csrf\":" + token + ",\"steps\":[{\"id\":\"p-2\",\"op\":\"comment\",\"text\":\"a note\"}]}");
+		String stopped = post("{\"_csrf\":" + token + ",\"stop\":true}").body();
+		Response file = get(Map.of("format", "xml", "download", "true"));
+		assertAll(() -> assertTrue(deleted.contains("\"steps\":3,\"gestures\":2"), deleted),
+					() -> assertTrue(undone.contains("\"steps\":1,\"gestures\":1"), undone),
+					() -> assertTrue(stopped.contains("\"stopped\":true"), stopped),
+					() -> assertTrue(recording.isStopped()),
+					() -> assertTrue(file.body().contains("<save/>") && (! file.body().contains("<ok/>")) && (! file.body().contains("a note")), file.body()),
+					() -> verify(file.response).setHeader(org.mockito.ArgumentMatchers.eq("Content-Disposition"),
+															org.mockito.ArgumentMatchers.startsWith("attachment; filename=\"sail-recording-")));
 	}
 
 	/**

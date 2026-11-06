@@ -31,6 +31,10 @@ import org.skyve.metadata.sail.language.Interaction;
 import org.skyve.metadata.sail.language.Procedure;
 import org.skyve.metadata.sail.language.Step;
 import org.skyve.metadata.sail.language.step.Comment;
+import org.skyve.metadata.sail.language.step.TestGridRows;
+import org.skyve.metadata.sail.language.step.TestMessage;
+import org.skyve.metadata.sail.language.step.TestValue;
+import org.skyve.metadata.sail.language.step.interaction.actions.AbstractAction;
 import org.skyve.metadata.sail.language.step.interaction.DataEnter;
 import org.skyve.metadata.sail.language.step.interaction.DataEnter.Match;
 import org.skyve.metadata.sail.language.step.interaction.TabSelect;
@@ -90,6 +94,8 @@ public final class SailRecordingBuilder {
 	public static final String ROW_BIZ_KEY = "rowBizKey";
 	/** The key of the text a zoomed row's cells showed, {@value #CELL_SEPARATOR}-separated. */
 	public static final String ROW_TEXTS = "rowTexts";
+	/** The key of a context entry that is true when the response showed errors. */
+	public static final String ERRORS = "errors";
 	/** Separates a row's cell texts in {@value #ROW_TEXTS}. */
 	public static final String CELL_SEPARATOR = " | ";
 
@@ -122,7 +128,7 @@ public final class SailRecordingBuilder {
 	private static final String CONFIRM = "confirm";
 	/** The keys of a recorded step that are not attributes of its SAIL step. */
 	private static final java.util.Set<String> CONTEXT_KEYS = java.util.Set.of(OP, VIEW, TARGET, SailRecording.STEP_ID_KEY,
-																				SCREEN, LABEL, BEFORE, ROW_BIZ_KEY, ROW_TEXTS);
+																				SCREEN, LABEL, BEFORE, ROW_BIZ_KEY, ROW_TEXTS, ERRORS);
 
 	/**
 	 * The order attributes are written in, whatever the element: the identifying attributes first, then the values,
@@ -165,6 +171,10 @@ public final class SailRecordingBuilder {
 	private StepCheck check = null;
 
 	private final IdentityHashMap<Object, List<String>> comments = new IdentityHashMap<>();
+	/** The screen of the last entry, for the headings. */
+	private String screen = null;
+	/** The step of the last gesture, which a following "errors shown" context marks testSuccess="false". */
+	private Step lastStep = null;
 	/** Comments waiting for the next step. */
 	private final List<String> pending = new ArrayList<>();
 
@@ -254,31 +264,11 @@ public final class SailRecordingBuilder {
 		interaction.setName("Recording");
 		automation.getInteractions().add(interaction);
 		List<Step> method = interaction.getSteps();
-		String screen = null;
+		screen = null;
+		lastStep = null;
 		for (int i = 0; i < end; i++) {
-			Map<String, String> recorded = steps.get(i);
-			if (CONTEXT.equals(recorded.get(OP))) {
-				String text = text(recorded, TEXT);
-				if (text != null) {
-					pending.add(text);
-				}
-				continue;
-			}
-			String stepScreen = text(recorded, SCREEN);
-			if ((stepScreen != null) && (! stepScreen.equals(screen))) {
-				pending.add("screen: " + stepScreen);
-				screen = stepScreen;
-			}
-			Step step = step(recorded);
+			Step step = entry(steps.get(i), true);
 			if (step != null) {
-				String reason = unconfirmed(recorded);
-				if (reason != null) {
-					pending.add("unconfirmed: " + describe(recorded) + " - " + reason);
-					step = null;
-				}
-			}
-			if (step != null) {
-				addOwnContext(recorded);
 				if (method.isEmpty() && (! isNavigation(step))) {
 					pending.add(0, "The recording started in the Control Panel. Navigate to the view of the next step to replay it on its own.");
 				}
@@ -294,6 +284,109 @@ public final class SailRecordingBuilder {
 			pending.clear();
 		}
 		return new Result(automation, new IdentityHashMap<>(comments));
+	}
+
+	/**
+	 * Turns a recorded entry into its step, adding the comments that go before it to {@link #pending}: context, a
+	 * heading when the screen changes, the step's own context, and an unmapped or unconfirmed gesture. A context
+	 * entry that says errors were shown sets {@code testSuccess="false"} on the action before it, as a replay needs.
+	 *
+	 * @param recorded	the recorded entry
+	 * @param checked	true to check the step ({@link #unconfirmed(Map)})
+	 * @return the step, or {@code null} if the entry is a comment
+	 */
+	private @Nullable Step entry(@Nonnull Map<String, String> recorded, boolean checked) {
+		if (CONTEXT.equals(recorded.get(OP))) {
+			String text = text(recorded, TEXT);
+			if (text != null) {
+				pending.add(text);
+			}
+			if ("true".equals(recorded.get(ERRORS)) && (lastStep instanceof AbstractAction action)) {
+				action.setTestSuccess(Boolean.FALSE);
+			}
+			return null;
+		}
+		String stepScreen = text(recorded, SCREEN);
+		if ((stepScreen != null) && (! stepScreen.equals(screen))) {
+			pending.add("screen: " + stepScreen);
+			screen = stepScreen;
+		}
+		Step step = step(recorded);
+		if ((step != null) && checked) {
+			String reason = unconfirmed(recorded);
+			if (reason != null) {
+				pending.add("unconfirmed: " + describe(recorded) + " - " + reason);
+				step = null;
+			}
+		}
+		if (step != null) {
+			addOwnContext(recorded);
+		}
+		lastStep = step;
+		return step;
+	}
+
+	/**
+	 * Returns what the script shows for a range of the recorded entries, for the recorder's panel: each entry's
+	 * comments and its step's XML, one line each. Steps are not checked against the metadata (that happens on Stop),
+	 * and the header is left out.
+	 *
+	 * <p>Complexity: O(from + count): the screen headings need the entries before the range.
+	 *
+	 * @param steps	all the recorded entries
+	 * @param from	the zero-based index of the first entry
+	 * @param count	the most entries to return
+	 * @return for each entry in the range, its lines; a line that starts with {@code <!--} is a comment
+	 */
+	public @Nonnull List<List<String>> preview(@Nonnull List<? extends Map<String, String>> steps, int from, int count) {
+		pending.clear();
+		screen = null;
+		lastStep = null;
+		int start = Math.max(0, Math.min(from, steps.size()));
+		int end = Math.max(start, Math.min(steps.size(), start + Math.max(0, count)));
+		List<List<String>> result = new ArrayList<>(end - start);
+		for (int i = 0; i < end; i++) {
+			pending.clear();
+			Step step = entry(steps.get(i), false);
+			if (i >= start) {
+				List<String> lines = new ArrayList<>(pending.size() + 1);
+				for (String comment : pending) {
+					lines.add("<!--" + commentText(comment) + "-->");
+				}
+				if (step != null) {
+					lines.addAll(elementLines(step));
+				}
+				result.add(lines);
+			}
+		}
+		pending.clear();
+		return result;
+	}
+
+	/**
+	 * Returns a step's XML as {@link #toXml(Result)} writes it, one line per line, without indentation.
+	 */
+	private static @Nonnull List<String> elementLines(@Nonnull Step step) {
+		Automation automation = new Automation();
+		automation.setUxui(UxUi.DESKTOP_NAME);
+		automation.setUserAgentType(UserAgentType.desktop);
+		Interaction interaction = new Interaction();
+		interaction.setName("Preview");
+		interaction.getSteps().add(step);
+		automation.getInteractions().add(interaction);
+		String xml = toXml(new Result(automation, new IdentityHashMap<>()));
+		int start = xml.indexOf("<method>");
+		int end = xml.indexOf("</method>");
+		List<String> result = new ArrayList<>(2);
+		if ((start >= 0) && (end > start)) {
+			for (String line : xml.substring(start + "<method>".length(), end).split("\n")) {
+				String trimmed = line.strip();
+				if (! trimmed.isEmpty()) {
+					result.add(trimmed);
+				}
+			}
+		}
+		return result;
 	}
 
 	/**
@@ -409,6 +502,10 @@ public final class SailRecordingBuilder {
 				case "cancel" -> new Cancel();
 				case "listGridZoom" -> listGridZoom(recorded);
 				case "listGridNew" -> listGridNew(recorded);
+				case "comment" -> comment(recorded);
+				case "testValue" -> testValue(recorded);
+				case "testMessage" -> testMessage(recorded);
+				case "testGridRows" -> testGridRows(recorded);
 				default -> null;
 			};
 		}
@@ -568,6 +665,58 @@ public final class SailRecordingBuilder {
 			catch (@SuppressWarnings("unused") NumberFormatException e) {
 				return null;
 			}
+		}
+		return result;
+	}
+
+	private static @Nullable Step comment(@Nonnull Map<String, String> recorded) {
+		String text = text(recorded, TEXT);
+		if (text == null) {
+			return null;
+		}
+		Comment result = new Comment();
+		result.setComment(text);
+		return result;
+	}
+
+	private static @Nullable Step testValue(@Nonnull Map<String, String> recorded) {
+		String binding = text(recorded, "binding");
+		String value = recorded.get("value");
+		if ((binding == null) || (value == null) || value.isBlank()) {
+			return null; // SAIL cannot test an empty value
+		}
+		TestValue result = new TestValue();
+		result.setBinding(binding);
+		result.setValue(value);
+		return result;
+	}
+
+	private static @Nullable Step testMessage(@Nonnull Map<String, String> recorded) {
+		String contains = text(recorded, "contains");
+		if (contains == null) {
+			return null;
+		}
+		TestMessage result = new TestMessage();
+		result.setContains(contains);
+		return result;
+	}
+
+	private static @Nullable Step testGridRows(@Nonnull Map<String, String> recorded) {
+		TestGridRows result = new TestGridRows();
+		result.setBinding(text(recorded, "binding"));
+		result.setModuleName(text(recorded, MODULE));
+		result.setDocumentName(text(recorded, DOCUMENT));
+		result.setQueryName(text(recorded, QUERY));
+		result.setModelName(text(recorded, MODEL));
+		result.setRowContaining(recorded.get("rowContaining"));
+		try {
+			String min = text(recorded, "minRows");
+			String max = text(recorded, "maxRows");
+			result.setMinRows((min == null) ? null : Integer.valueOf(min));
+			result.setMaxRows((max == null) ? null : Integer.valueOf(max));
+		}
+		catch (@SuppressWarnings("unused") NumberFormatException e) {
+			return null;
 		}
 		return result;
 	}

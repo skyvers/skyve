@@ -1,8 +1,5 @@
 package modules.admin.ControlPanel.actions;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
-
 import org.skyve.CORE;
 import org.skyve.content.MimeType;
 import org.skyve.domain.messages.Message;
@@ -13,7 +10,6 @@ import org.skyve.metadata.controller.DownloadAction;
 import org.skyve.util.Util;
 import org.skyve.web.WebContext;
 
-import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import modules.admin.ControlPanel.ControlPanelExtension;
 
@@ -45,17 +41,7 @@ public class DownloadSAILRecording extends DownloadAction<ControlPanelExtension>
 		if ((recording == null) || (xml == null)) {
 			throw new ValidationException(new Message(Util.nullSafeI18n("admin.controlPanel.sailRecording.notStopped")));
 		}
-		return new Download(fileName(recording), xml, MimeType.xml);
-	}
-
-	/**
-	 * Returns the download's file name: {@code sail-recording-yyyyMMdd-HHmm.xml}, from when the recording started.
-	 *
-	 * @param recording	the recording
-	 * @return the file name
-	 */
-	static @Nonnull String fileName(@Nonnull SailRecording recording) {
-		return "sail-recording-" + new SimpleDateFormat("yyyyMMdd-HHmm").format(new Date(recording.getStartedMillis())) + ".xml";
+		return new Download(recording.fileName(), xml, MimeType.xml);
 	}
 
 	private static @Nullable SailRecording stoppedRecording() {
