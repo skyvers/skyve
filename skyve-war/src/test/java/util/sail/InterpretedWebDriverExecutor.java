@@ -19,6 +19,7 @@ import org.openqa.selenium.OutputType;
 import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebDriver;
 import org.skyve.CORE;
+import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
 import org.skyve.impl.metadata.module.ModuleImpl;
@@ -84,6 +85,7 @@ import org.skyve.metadata.sail.language.step.interaction.session.SwitchMode;
 import org.skyve.metadata.user.User;
 import org.skyve.metadata.view.View;
 import org.skyve.metadata.view.View.ViewType;
+import org.skyve.util.Binder.TargetMetaData;
 import org.skyve.web.WebAction;
 
 import jakarta.annotation.Nonnull;
@@ -1696,5 +1698,60 @@ public abstract class InterpretedWebDriverExecutor<
 		selenide.trace(String.format("test menu %s is %s", what, expected ? "present" : "absent"));
 		check(present == expected, () -> String.format("expected the menu %s %s but it %s", what,
 														expected ? "to show" : "not to show", present ? "does" : "does not"));
+	}
+
+	/**
+	 * Splits a list membership's value ({@code A|B}) into its members' descriptions, in order.
+	 *
+	 * @param value	the value
+	 * @return the descriptions, trimmed, without blanks
+	 */
+	protected static @Nonnull List<String> membershipItems(@Nullable String value) {
+		List<String> result = new ArrayList<>();
+		if (value != null) {
+			for (String item : value.split("\\|")) {
+				String trimmed = item.trim();
+				if (! trimmed.isEmpty()) {
+					result.add(trimmed);
+				}
+			}
+		}
+		return result;
+	}
+
+	/**
+	 * Returns whether a list membership shows the members expected: in the same order for an ordered membership, whose
+	 * order is part of its value, and in any order otherwise, so that a script may list an unordered membership's members
+	 * in any order.
+	 *
+	 * @param members	the members shown, in order
+	 * @param expected	the members expected, in order
+	 * @param ordered	whether the membership's collection is ordered
+	 * @return whether they match
+	 */
+	static boolean membersMatch(@Nonnull List<String> members, @Nonnull List<String> expected, boolean ordered) {
+		return ordered ? members.equals(expected) : new java.util.HashSet<>(members).equals(new java.util.HashSet<>(expected));
+	}
+
+	/**
+	 * Returns whether a binding of the current context's document names an ordered collection, as an ordered list
+	 * membership's binding does.
+	 *
+	 * @param binding	the binding
+	 * @return {@code true} if it is an ordered collection; {@code false} otherwise, or when there is no document context
+	 */
+	protected boolean isOrderedCollection(@Nonnull String binding) {
+		AC context = peek();
+		String moduleName = (context == null) ? null : context.getModuleName();
+		String documentName = (context == null) ? null : context.getDocumentName();
+		if ((moduleName == null) || (documentName == null)) {
+			return false;
+		}
+		Customer c = CORE.getUser().getCustomer();
+		Module m = c.getModule(moduleName);
+		Document d = m.getDocument(c, documentName);
+		TargetMetaData target = BindUtil.getMetaDataForBinding(c, m, d, binding);
+		return (target.getAttribute() instanceof org.skyve.metadata.model.document.Collection collection) &&
+				Boolean.TRUE.equals(collection.getOrdered());
 	}
 }

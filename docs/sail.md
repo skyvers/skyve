@@ -379,7 +379,7 @@ They are not substituted in attributes that name metadata, such as `module`,
 | Slider | A number | The number |
 | Rich text, HTML | Plain text. Each newline is typed as Enter. | The plain text or the HTML |
 | Lookup description | PF: not supported, so use `lookupDescriptionAutoComplete` or `lookupDescriptionPick`. SC: the search text; the first match is picked. | The displayed description |
-| List membership | The `\|`-separated descriptions of the items to select, for example `Admin\|Basic`. Every other item is deselected. | The members, `\|`-separated |
+| List membership | The `\|`-separated descriptions of the items to select, for example `Admin\|Basic`. Every other item is deselected. New members are added in the order the value names them in SC, and in the candidates' order in PF; use `listMembershipMove` to put an ordered membership's members in order. | The members, `\|`-separated. For an ordered membership (its collection is ordered) they are compared in order; for an unordered one, in any order |
 
 Write a newline in a value as `&#10;`, for example
 `value="09:00 10:30 Client A&#10;&#10;13:00 17:00 Client B"`. XML turns a

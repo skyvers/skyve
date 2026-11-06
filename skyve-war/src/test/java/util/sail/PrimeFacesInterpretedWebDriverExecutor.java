@@ -412,22 +412,6 @@ public class PrimeFacesInterpretedWebDriverExecutor extends InterpretedWebDriver
 	}
 
 	/**
-	 * Splits a membership value ({@code A|B}) into its item labels.
-	 */
-	private static @Nonnull List<String> membershipItems(@Nullable String value) {
-		List<String> result = new ArrayList<>();
-		if (value != null) {
-			for (String item : value.split("\\|")) {
-				String trimmed = item.trim();
-				if (! trimmed.isEmpty()) {
-					result.add(trimmed);
-				}
-			}
-		}
-		return result;
-	}
-
-	/**
 	 * Returns the widget metadata collected with the component at the index, or null.
 	 */
 	private static @Nullable Object widgetAt(@Nonnull PrimeFacesAutomationContext context, @Nonnull String identifier, int index) {
@@ -503,9 +487,12 @@ public class PrimeFacesInterpretedWebDriverExecutor extends InterpretedWebDriver
 				}
 				found = true;
 				List<String> expectedMembers = membershipItems(singleLineExpected);
-				selenide.trace(String.format("test %s (%s) members are %s", identifier, clientId, expectedMembers));
-				check(new java.util.HashSet<>(members).equals(new java.util.HashSet<>(expectedMembers)),
-						() -> String.format("expected [%s] members to be %s but they are %s", identifier, expectedMembers, members));
+				// an ordered membership's members are compared in order; an unordered one's in any order
+				boolean ordered = isOrderedCollection(identifier);
+				selenide.trace(String.format("test %s (%s) members are %s%s", identifier, clientId, expectedMembers, ordered ? ", in order" : ""));
+				check(membersMatch(members, expectedMembers, ordered),
+						() -> String.format("expected [%s] members to be %s%s but they are %s",
+											identifier, expectedMembers, ordered ? " in that order" : "", members));
 				continue;
 			}
 			boolean ignoreCase = (component instanceof ColorPicker);
