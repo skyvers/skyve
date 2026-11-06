@@ -185,8 +185,9 @@
 
 	/** The plain text of rich text HTML, a line for each line break or block, as the SAIL helper reads it. */
 	function htmlLines(html) {
-		var holder = document.createElement("div");
-		holder.innerHTML = String(html == null ? "" : html);
+		// parsed into a document of its own, which runs no scripts or event handlers (an <img onerror> in the HTML),
+		// never into the page
+		var holder = new DOMParser().parseFromString(String(html == null ? "" : html), "text/html").body;
 		var blocks = /^(P|DIV|LI|UL|OL|H[1-6]|BLOCKQUOTE|PRE|TABLE|TR)$/;
 		var out = "";
 		var newLine = function () {

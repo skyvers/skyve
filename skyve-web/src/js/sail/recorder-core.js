@@ -370,30 +370,49 @@
 			var previousHeight = script.scrollHeight;
 			loadedFrom = range.from;
 			loadedCount = range.entries.length;
-			var html = [];
+			// built with DOM nodes and text, never markup: a step's text is whatever the page or the user gave
+			var element = function (tag, className, text) {
+				var result = document.createElement(tag);
+				if (className) {
+					result.className = className;
+				}
+				if (text != null) {
+					result.textContent = text;
+				}
+				return result;
+			};
+			var nodes = document.createDocumentFragment();
 			if (loadedFrom > 0) {
-				html.push("<div class=\"more\">" + loadedFrom + " earlier entries: scroll up for more</div>");
+				nodes.appendChild(element("div", "more", Number(loadedFrom) + " earlier entries: scroll up for more"));
 			}
 			range.entries.forEach(function (entry) {
-				var lines = entry.lines.map(function (line) {
-					var comment = (line.indexOf("<!--") === 0);
-					return "<span class=\"" + (comment ? "comment" : "step") + "\">" + escape(line) + "</span>";
-				}).join("\n");
-				html.push("<div class=\"entry\" data-id=\"" + escape(entry.id || "") + "\"><pre>" + lines + "</pre>" +
-							((entry.context || stopped || !entry.id) ? "" :
-								"<button type=\"button\" data-act=\"delete\" data-id=\"" + escape(entry.id) + "\" title=\"Delete\">&#10005;</button>") +
-							"</div>");
+				var div = element("div", "entry");
+				div.setAttribute("data-id", String(entry.id || ""));
+				var pre = element("pre");
+				(entry.lines || []).forEach(function (line, i) {
+					if (i > 0) {
+						pre.appendChild(document.createTextNode("\n"));
+					}
+					pre.appendChild(element("span", (String(line).indexOf("<!--") === 0) ? "comment" : "step", String(line)));
+				});
+				div.appendChild(pre);
+				if (!entry.context && !stopped && entry.id) {
+					var button = element("button", null, "\u2715");
+					button.type = "button";
+					button.setAttribute("data-act", "delete");
+					button.setAttribute("data-id", String(entry.id));
+					button.title = "Delete";
+					div.appendChild(button);
+				}
+				nodes.appendChild(div);
 			});
-			script.innerHTML = html.join("");
+			script.textContent = "";
+			script.appendChild(nodes);
 			if (earlier) {
 				script.scrollTop = script.scrollHeight - previousHeight;
 			} else if (atBottom || (ui.scroll == null)) {
 				script.scrollTop = script.scrollHeight;
 			}
-		}
-
-		function escape(text) {
-			return String(text).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 		}
 
 		// ---------------------------------------------------------------- panel actions
