@@ -3,6 +3,7 @@ package sail.kitchenSink.pf;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.regex.Pattern;
@@ -85,7 +86,7 @@ class PrimeFacesRecorderRoundTripSailIT extends AbstractPrimeFacesInterpretedSai
 
 	@Test
 	void kitchenSink() {
-		String xml = record(() -> sailResource("sail/kitchenSink/pf/pf-recorder-round-trip.xml"));
+		String xml = recordWorkflow(() -> sailResource("sail/kitchenSink/pf/pf-recorder-round-trip.xml"));
 		assertAll(() -> assertTrue(xml.contains("<automation uxui=\"tablet\" userAgentType=\"tablet\""), xml),
 					() -> assertTrue(xml.contains("<navigateMenu module=\"kitchensink\" item=\"Lookup values\"/>"), xml),
 					() -> assertTrue(xml.contains("<listGridZoom rowContaining=\"0 SAIL Recorded "), xml),
@@ -107,32 +108,33 @@ class PrimeFacesRecorderRoundTripSailIT extends AbstractPrimeFacesInterpretedSai
 	 */
 	@Test
 	void moreGestures() {
-		String xml = record(() -> sailResource("sail/kitchenSink/pf/pf-recorder-round-trip-more.xml"));
-		assertAll(() -> assertTrue(xml.contains("<captureValue binding=\"number\" variable=\"number\"/>"), xml),
-					() -> assertTrue(xml.contains("<listGridFilter column=\"number\" value=\"{var:number}\" operator=\"equals\"/>"), xml),
-					() -> assertTrue(xml.contains("<listGridFilter column=\"number\"/>"), xml),
-					() -> assertTrue(xml.contains("<listGridSort column=\"description\" descending=\"true\"/>"), xml),
-					() -> assertTrue(xml.contains("<listGridClearFilter/>"), xml),
-					() -> assertTrue(xml.contains("<listGridSelect module=\"kitchensink\" query=\"qListGridFixtureVue\" rowContaining=\"0 SAIL lookup "), xml),
-					() -> assertTrue(xml.contains("<listGridSelect module=\"kitchensink\" query=\"qListGridFixtureFaces\" rowContaining=\"0 SAIL lookup "), xml),
-					() -> assertTrue(xml.contains("<lookupDescriptionPick binding=\"lookupDescription\" rowContaining=\"0 SAIL lookup "), xml),
-					() -> assertTrue(xml.contains("<lookupDescriptionAutoComplete binding=\"lookupDescription\" search=\"0 SAIL lookup "), xml),
-					() -> assertTrue(xml.contains("<dataGridNew binding=\"containerGrid\"/>"), xml),
-					() -> assertTrue(xml.contains("<dataGridZoom binding=\"containerGrid\""), xml),
-					() -> assertTrue(xml.contains("<dataGridRemove binding=\"inlineGrid\""), xml),
-					() -> assertTrue(xml.contains("<dataGridMove binding=\"rows\" rowContaining=\"Second "), xml),
-					() -> assertTrue(xml.contains("<upload action=\"ActionsUpload\" file=\"sail/files/sail-refused.txt\" testSuccess=\"false\"/>"), xml),
-					() -> assertTrue(xml.contains("<upload binding=\"contentLink\" file=\"sail/files/sail-upload.txt\"/>"), xml),
-					() -> assertTrue(xml.contains("text=\"Run From Row\" confirm=\"false\"/>"), xml),
-					() -> assertTrue(xml.contains("<action name=\"AskYesNo\" confirm=\"false\"/>"), xml),
-					() -> assertTrue(xml.contains("<navigateMap module=\"kitchensink\" document=\"ListAttributes\" geometryBinding=\"geometry\"/>"), xml),
-					() -> assertTrue(xml.contains("<dataGridSelect binding=\"rows\" rowContaining=\"SAIL selectable "), xml));
+		String xml = recordWorkflow(() -> sailResource("sail/kitchenSink/pf/pf-recorder-round-trip-more.xml"));
+		assertContainsAll(xml,
+				"<captureValue binding=\"number\" variable=\"number\"/>",
+				"<listGridFilter column=\"number\" value=\"{var:number}\" operator=\"equals\"/>",
+				"<listGridFilter column=\"number\"/>",
+				"<listGridSort column=\"description\" descending=\"true\"/>",
+				"<listGridClearFilter/>",
+				"<listGridSelect module=\"kitchensink\" query=\"qListGridFixtureVue\" rowContaining=\"0 SAIL lookup ",
+				"<listGridSelect module=\"kitchensink\" query=\"qListGridFixtureFaces\" rowContaining=\"0 SAIL lookup ",
+				"<lookupDescriptionPick binding=\"lookupDescription\" rowContaining=\"0 SAIL lookup ",
+				"<lookupDescriptionAutoComplete binding=\"lookupDescription\" search=\"0 SAIL lookup ",
+				"<dataGridNew binding=\"containerGrid\"/>",
+				"<dataGridZoom binding=\"containerGrid\"",
+				"<dataGridRemove binding=\"inlineGrid\"",
+				"<dataGridMove binding=\"rows\" rowContaining=\"Second ",
+				"<upload action=\"ActionsUpload\" file=\"sail/files/sail-refused.txt\" testSuccess=\"false\"/>",
+				"<upload binding=\"contentLink\" file=\"sail/files/sail-upload.txt\"/>",
+				"text=\"Run From Row\" confirm=\"false\"/>",
+				"<action name=\"AskYesNo\" confirm=\"false\"/>",
+				"<navigateMap module=\"kitchensink\" document=\"ListAttributes\" geometryBinding=\"geometry\"/>",
+				"<dataGridSelect binding=\"rows\" rowContaining=\"SAIL selectable ");
 		replay(xml);
 	}
 
 	@Test
 	void adminContacts() {
-		String xml = record(() -> sailString(CONTACTS));
+		String xml = recordWorkflow(() -> sailString(CONTACTS));
 		assertAll(() -> assertTrue(xml.contains("<listGridNew/>"), xml),
 					() -> assertTrue(xml.contains("<listGridZoom rowContaining=\"SAIL Recorded Contact "), xml),
 					() -> assertTrue(xml.contains("<delete confirm=\"false\"/>"), xml),
@@ -164,7 +166,7 @@ class PrimeFacesRecorderRoundTripSailIT extends AbstractPrimeFacesInterpretedSai
 		click(field("description"), false);
 		awaitRecorder();
 		new Actions(driver()).sendKeys(Keys.ESCAPE).perform();
-		assertFalse(Boolean.TRUE.equals(js("return SKYVE.SailRecorder.checking();")), "Esc leaves Check mode");
+		assertNotEquals(Boolean.TRUE, js("return SKYVE.SailRecorder.checking();"), "Esc leaves Check mode");
 
 		sailString(HEAD + "<interaction name=\"Lookup value\"><method>" +
 					"<pushEditContext module=\"kitchensink\" document=\"LookupDescription\" />" +
@@ -209,7 +211,7 @@ class PrimeFacesRecorderRoundTripSailIT extends AbstractPrimeFacesInterpretedSai
 
 		panel("stop");
 		selenium.waitFor(d -> Boolean.TRUE.equals(js("return !SKYVE.SailRecorder.active() && !SKYVE.SailRecorder.busy();")) ? Boolean.TRUE : null);
-		assertTrue(Boolean.TRUE.equals(js("return !document.getElementById('skyve-sail-recorder').shadowRoot.querySelector('.bar [data-act=download]').hidden;")),
+		assertEquals(Boolean.TRUE, js("return !document.getElementById('skyve-sail-recorder').shadowRoot.querySelector('.bar [data-act=download]').hidden;"),
 					"Stop offers the download");
 
 		String xml = fetch("sailrecording?format=xml");
@@ -238,11 +240,11 @@ class PrimeFacesRecorderRoundTripSailIT extends AbstractPrimeFacesInterpretedSai
 		String signOut = "var a = Array.prototype.find.call(document.querySelectorAll('a[href]'), function (e) {" +
 							"return /(^|\\/)loggedOut$/.test(new URL(e.href, location.href).pathname); }); if (a) { a.click(); } return !!a;";
 		String warningOpen = "return document.getElementById('skyve-sail-recorder').shadowRoot.querySelector('.warning').classList.contains('open');";
-		assertTrue(Boolean.TRUE.equals(js(signOut)), "the page has a sign out link");
-		assertTrue(Boolean.TRUE.equals(js(warningOpen)), "signing out warns");
+		assertEquals(Boolean.TRUE, js(signOut), "the page has a sign out link");
+		assertEquals(Boolean.TRUE, js(warningOpen), "signing out warns");
 		panel("keep");
-		assertFalse(Boolean.TRUE.equals(js(warningOpen)), "Keep recording closes the warning");
-		assertTrue(Boolean.TRUE.equals(js("return SKYVE.SailRecorder.active() && (location.pathname.indexOf('loggedOut') < 0);")), "still recording on the page");
+		assertNotEquals(Boolean.TRUE, js(warningOpen), "Keep recording closes the warning");
+		assertEquals(Boolean.TRUE, js("return SKYVE.SailRecorder.active() && (location.pathname.indexOf('loggedOut') < 0);"), "still recording on the page");
 
 		js(signOut);
 		panel("stop-download");
@@ -274,7 +276,7 @@ class PrimeFacesRecorderRoundTripSailIT extends AbstractPrimeFacesInterpretedSai
 	/**
 	 * Signs in, starts recording in the Control Panel, runs the workflow, stops recording and returns the script.
 	 */
-	private @Nonnull String record(@Nonnull Runnable workflow) {
+	private @Nonnull String recordWorkflow(@Nonnull Runnable workflow) {
 		sailString(SIGN_IN);
 		sailString(START);
 		awaitRecorder();
@@ -290,6 +292,11 @@ class PrimeFacesRecorderRoundTripSailIT extends AbstractPrimeFacesInterpretedSai
 					() -> assertFalse(xml.contains("StopSAILRecording"), xml),
 					() -> assertFalse(xml.contains("item=\"DevOps/Control Panel\""), xml));
 		return xml;
+	}
+
+	/** Asserts that the script has each of the texts, reporting every one it lacks. */
+	private static void assertContainsAll(@Nonnull String xml, @Nonnull String... expected) {
+		assertAll(java.util.Arrays.stream(expected).map(text -> (org.junit.jupiter.api.function.Executable) () -> assertTrue(xml.contains(text), "no " + text + " in " + xml)));
 	}
 
 	private void replay(@Nonnull String xml) {
@@ -376,12 +383,25 @@ class PrimeFacesRecorderRoundTripSailIT extends AbstractPrimeFacesInterpretedSai
 	 * render: the Faces view state, the CSRF tokens and the conversation's id in the content upload URLs.
 	 */
 	private @Nonnull String page() {
-		return fetch("?a=e&m=kitchensink&d=KitchenSink")
-				.replaceAll("(name=\"jakarta.faces.ViewState\"[^>]*value=\")[^\"]*\"", "$1\"")
-				.replaceAll("(id=\"[^\"]*ViewState[^\"]*\"[^>]*value=\")[^\"]*\"", "$1\"")
-				.replaceAll("(name=\"(_csrf|uxuicsrf|csrfToken)\"[^>]*value=\")[^\"]*\"", "$1\"")
-				.replaceAll("_c=[0-9a-f-]+", "_c=");
+		String html = fetch("?a=e&m=kitchensink&d=KitchenSink");
+		// each <input> tag (a linear match), with the value of a view state or token input emptied
+		java.util.regex.Matcher inputs = INPUT_TAG.matcher(html);
+		StringBuilder result = new StringBuilder(html.length());
+		while (inputs.find()) {
+			String input = inputs.group();
+			if (input.contains("ViewState") || input.contains("name=\"_csrf\"") || input.contains("name=\"uxuicsrf\"") ||
+					input.contains("name=\"csrfToken\"")) {
+				input = INPUT_VALUE.matcher(input).replaceAll("value=\"\"");
+			}
+			inputs.appendReplacement(result, java.util.regex.Matcher.quoteReplacement(input));
+		}
+		inputs.appendTail(result);
+		return CONVERSATION_ID.matcher(result).replaceAll("_c=");
 	}
+
+	private static final Pattern INPUT_TAG = Pattern.compile("<input[^>]*>");
+	private static final Pattern INPUT_VALUE = Pattern.compile("value=\"[^\"]*\"");
+	private static final Pattern CONVERSATION_ID = Pattern.compile("_c=[0-9a-f-]+");
 
 	private @Nonnull String fetch(@Nonnull String relativeUrl) {
 		String url = new BrowserConfiguration().getBaseUrl() + relativeUrl;

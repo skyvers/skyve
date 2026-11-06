@@ -4,15 +4,20 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
-import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
-import java.util.Date;
+import java.util.HashMap;
 import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.BiConsumer;
+import java.util.function.Function;
+import java.util.function.IntConsumer;
+import java.util.function.ObjIntConsumer;
 import java.util.function.Consumer;
 
 import org.dom4j.Attribute;
@@ -98,6 +103,8 @@ import jakarta.annotation.Nullable;
  * <p>Threading: not thread-safe; build each script with its own instance.
  */
 public final class SailRecordingBuilder {
+	private static final org.slf4j.Logger LOGGER = org.skyve.util.logging.SkyveLoggerFactory.getLogger(SailRecordingBuilder.class);
+
 	/** The key of a recorded step's op-code. */
 	public static final String OP = "op";
 	/** The key of the top view, {@code module.Document} or {@code list}, when the gesture was made. */
@@ -160,6 +167,12 @@ public final class SailRecordingBuilder {
 	private static final String QUERY = "query";
 	private static final String MODEL = "model";
 	private static final String CONFIRM = "confirm";
+	private static final String ACTION = "action";
+	private static final String BINDING = "binding";
+	private static final String COLUMN = "column";
+	private static final String ROW_CONTAINING = "rowContaining";
+	private static final String VALUE = "value";
+	private static final String VARIABLE = "variable";
 	/** The keys of a recorded step that are not attributes of its SAIL step. */
 	private static final java.util.Set<String> CONTEXT_KEYS = java.util.Set.of(OP, VIEW, TARGET, SailRecording.STEP_ID_KEY,
 																				SCREEN, LABEL, BEFORE, ROW_BIZ_KEY, ROW_TEXTS, ERRORS, GRID, DECLINED,
@@ -171,11 +184,11 @@ public final class SailRecordingBuilder {
 	 * then the options. Unlisted attributes follow in alphabetic order.
 	 */
 	private static final List<String> ATTRIBUTE_ORDER = List.of("uxui", "userAgentType", "testStrategy",
-																	"name", "customer", "user", "password",
+																	"name", "customer", "user", PASSWORD_VARIABLE,
 																	MODULE, DOCUMENT, QUERY, MODEL, "item", "bizId",
-																	"binding", "action", "path", "column", "row", "rowContaining",
+																	BINDING, ACTION, "path", COLUMN, "row", ROW_CONTAINING,
 																	"to", "text", "search", "pick", "file",
-																	"value", "match", "operator", "descending", "variable", "pattern",
+																	VALUE, "match", "operator", "descending", VARIABLE, "pattern",
 																	"createView", CONFIRM, "testSuccess");
 
 	/**
@@ -207,10 +220,11 @@ public final class SailRecordingBuilder {
 	private String uxui = null;
 	private UserAgentType userAgentType = null;
 	private StepCheck check = null;
+	private final List<String> notes = new ArrayList<>(1);
 
 	private final IdentityHashMap<Object, List<String>> comments = new IdentityHashMap<>();
 	/** The screen of the last entry, for the headings. */
-	private String screen = null;
+	private String lastScreen = null;
 	/** The step of the last gesture, which a following "errors shown" context marks testSuccess="false". */
 	private Step lastStep = null;
 	/** Comments waiting for the next step. */
@@ -262,7 +276,7 @@ public final class SailRecordingBuilder {
 	 * @param agentType	the user agent type, or {@code null} for desktop
 	 * @return this
 	 */
-	public @Nonnull SailRecordingBuilder target(@Nullable String uxuiName, @Nullable UserAgentType agentType) {
+	public @Nonnull SailRecordingBuilder targeting(@Nullable String uxuiName, @Nullable UserAgentType agentType) {
 		uxui = uxuiName;
 		userAgentType = agentType;
 		return this;
@@ -279,6 +293,17 @@ public final class SailRecordingBuilder {
 	/** The renderer the script targets, for its header. */
 	private @Nonnull String renderer() {
 		return UxUi.DESKTOP_NAME.equals(targetUxui()) ? "SmartClient" : "PrimeFaces (" + targetUxui() + ")";
+	}
+
+	/**
+	 * Adds a note to the script's header comments, such as why its steps were not checked.
+	 *
+	 * @param note	the note
+	 * @return this
+	 */
+	public @Nonnull SailRecordingBuilder note(@Nonnull String note) {
+		notes.add(note);
+		return this;
 	}
 
 	/**
@@ -309,13 +334,7 @@ public final class SailRecordingBuilder {
 		automation.setUserAgentType(targetUserAgentType());
 
 		int end = endBeforeStoppingSteps(steps);
-		int gestures = 0;
-		for (int i = 0; i < end; i++) {
-			if (! CONTEXT.equals(steps.get(i).get(OP))) {
-				gestures++;
-			}
-		}
-		comments.put(automation, header(gestures));
+		comments.put(automation, header(gestures(steps, end)));
 
 		Procedure before = new Procedure();
 		Login login = new Login();
@@ -330,20 +349,12 @@ public final class SailRecordingBuilder {
 		interaction.setName("Recording");
 		automation.getInteractions().add(interaction);
 		List<Step> method = interaction.getSteps();
-		screen = null;
+		lastScreen = null;
 		lastStep = null;
-		List<Map<String, String>> entries = SailRecordingCaptures.apply(steps.subList(0, end));
-		for (Map<String, String> recorded : entries) {
+		for (Map<String, String> recorded : withCaptures(steps.subList(0, end))) {
 			Step step = entry(recorded, true);
 			if (step != null) {
-				if (method.isEmpty() && (! isNavigation(step))) {
-					pending.add(0, "The recording started in the Control Panel. Navigate to the view of the next step to replay it on its own.");
-				}
-				method.add(step);
-				if (! pending.isEmpty()) {
-					comments.put(step, new ArrayList<>(pending));
-					pending.clear();
-				}
+				addStep(method, step);
 			}
 		}
 		if (! pending.isEmpty()) {
@@ -351,6 +362,41 @@ public final class SailRecordingBuilder {
 			pending.clear();
 		}
 		return new Result(automation, new IdentityHashMap<>(comments));
+	}
+
+	/** The number of recorded gestures among the first {@code end} entries: those that are not context. */
+	private static int gestures(@Nonnull List<? extends Map<String, String>> steps, int end) {
+		int result = 0;
+		for (int i = 0; i < end; i++) {
+			if (! CONTEXT.equals(steps.get(i).get(OP))) {
+				result++;
+			}
+		}
+		return result;
+	}
+
+	/** The entries with their captures (see {@link SailRecordingCaptures}); without them if they cannot be worked out. */
+	private static @Nonnull List<? extends Map<String, String>> withCaptures(@Nonnull List<? extends Map<String, String>> entries) {
+		try {
+			return SailRecordingCaptures.apply(entries);
+		}
+		catch (RuntimeException e) {
+			// the script without its captures, rather than no script
+			LOGGER.warn("SAIL recording could not work out the captures", e);
+			return entries;
+		}
+	}
+
+	/** Adds a step to the method, with the comments that go before it. */
+	private void addStep(@Nonnull List<Step> method, @Nonnull Step step) {
+		if (method.isEmpty() && (! isNavigation(step))) {
+			pending.add(0, "The recording started in the Control Panel. Navigate to the view of the next step to replay it on its own.");
+		}
+		method.add(step);
+		if (! pending.isEmpty()) {
+			comments.put(step, new ArrayList<>(pending));
+			pending.clear();
+		}
 	}
 
 	/**
@@ -364,44 +410,81 @@ public final class SailRecordingBuilder {
 	 */
 	private @Nullable Step entry(@Nonnull Map<String, String> recorded, boolean checked) {
 		if (CONTEXT.equals(recorded.get(OP))) {
-			String text = text(recorded, TEXT);
-			if (text != null) {
-				pending.add(text);
-			}
-			if ("true".equals(recorded.get(ERRORS))) {
-				if (lastStep instanceof AbstractAction action) {
-					action.setTestSuccess(Boolean.FALSE);
-				}
-				else if (lastStep instanceof DataGridLink link) {
-					link.setTestSuccess(Boolean.FALSE);
-				}
-				else if (lastStep instanceof Upload upload) {
-					upload.setTestSuccess(Boolean.FALSE);
-				}
-			}
-			if ("true".equals(recorded.get(DECLINED))) {
-				decline(lastStep);
-			}
+			context(recorded);
 			return null;
 		}
 		String stepScreen = text(recorded, SCREEN);
-		if ((stepScreen != null) && (! stepScreen.equals(screen))) {
+		if ((stepScreen != null) && (! stepScreen.equals(lastScreen))) {
 			pending.add("screen: " + stepScreen);
-			screen = stepScreen;
+			lastScreen = stepScreen;
 		}
-		Step step = step(recorded);
-		if ((step != null) && checked) {
-			String reason = unconfirmed(recorded);
-			if (reason != null) {
-				pending.add("unconfirmed: " + describe(recorded) + " - " + reason);
-				step = null;
-			}
+		Step step = safeStep(recorded);
+		if ((step != null) && checked && (! confirmed(recorded))) {
+			step = null;
 		}
 		if (step != null) {
 			addOwnContext(recorded);
 		}
 		lastStep = step;
 		return step;
+	}
+
+	/**
+	 * Adds a context entry's text to the comments, and applies what it says to the step before it: errors were shown
+	 * ({@code testSuccess="false"}), or a question was declined ({@code confirm="false"}).
+	 */
+	private void context(@Nonnull Map<String, String> recorded) {
+		String text = text(recorded, TEXT);
+		if (text != null) {
+			pending.add(text);
+		}
+		if ("true".equals(recorded.get(ERRORS))) {
+			if (lastStep instanceof AbstractAction action) {
+				action.setTestSuccess(Boolean.FALSE);
+			}
+			else if (lastStep instanceof DataGridLink link) {
+				link.setTestSuccess(Boolean.FALSE);
+			}
+			else if (lastStep instanceof Upload upload) {
+				upload.setTestSuccess(Boolean.FALSE);
+			}
+		}
+		if ("true".equals(recorded.get(DECLINED))) {
+			decline(lastStep);
+		}
+	}
+
+	/** The step for a gesture, or null; a step that cannot be built (a value it cannot take) is a comment, never a broken script. */
+	private @Nullable Step safeStep(@Nonnull Map<String, String> recorded) {
+		try {
+			return step(recorded);
+		}
+		catch (RuntimeException e) {
+			LOGGER.warn("SAIL recording could not build the step {}", recorded, e);
+			pending.add(UNMAPPED_PREFIX + describe(recorded) + " - " + e);
+			return null;
+		}
+	}
+
+	/**
+	 * Whether a step passes the checks; one that fails becomes an unconfirmed comment, and one the checks fail on is kept
+	 * with a comment that it was not checked.
+	 */
+	private boolean confirmed(@Nonnull Map<String, String> recorded) {
+		String reason;
+		try {
+			reason = unconfirmed(recorded);
+		}
+		catch (RuntimeException e) {
+			LOGGER.warn("SAIL recording could not check the step {}", recorded, e);
+			pending.add("not checked: " + describe(recorded) + " - " + e);
+			return true;
+		}
+		if (reason != null) {
+			pending.add("unconfirmed: " + describe(recorded) + " - " + reason);
+			return false;
+		}
+		return true;
 	}
 
 	/**
@@ -418,10 +501,11 @@ public final class SailRecordingBuilder {
 	 */
 	public @Nonnull List<List<String>> preview(@Nonnull List<? extends Map<String, String>> steps, int from, int count) {
 		pending.clear();
-		screen = null;
+		lastScreen = null;
 		lastStep = null;
 		int start = Math.max(0, Math.min(from, steps.size()));
-		int end = Math.max(start, Math.min(steps.size(), start + Math.max(0, count)));
+		// in long arithmetic: start + count overflows for a large count
+		int end = (int) Math.max(start, Math.min((long) start + Math.max(0, count), steps.size()));
 		List<List<String>> result = new ArrayList<>(end - start);
 		for (int i = 0; i < end; i++) {
 			pending.clear();
@@ -432,13 +516,24 @@ public final class SailRecordingBuilder {
 					lines.add("<!--" + commentText(comment) + "-->");
 				}
 				if (step != null) {
-					lines.addAll(elementLines(step));
+					lines.addAll(safeElementLines(step, steps.get(i)));
 				}
 				result.add(lines);
 			}
 		}
 		pending.clear();
 		return result;
+	}
+
+	/** A step's lines, or a comment if the step cannot be written. */
+	private static @Nonnull List<String> safeElementLines(@Nonnull Step step, @Nonnull Map<String, String> recorded) {
+		try {
+			return elementLines(step);
+		}
+		catch (RuntimeException e) {
+			LOGGER.warn("SAIL recording could not show the step {}", recorded, e);
+			return List.of("<!--" + commentText(UNMAPPED_PREFIX + describe(recorded) + " - " + e) + "-->");
+		}
 	}
 
 	/**
@@ -489,14 +584,14 @@ public final class SailRecordingBuilder {
 	}
 
 	private @Nonnull List<String> header(int stepCount) {
-		SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+		DateTimeFormatter format = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm").withZone(ZoneId.systemDefault());
 		List<String> result = new ArrayList<>(2);
 		result.add(String.format("Recorded in %s by %s%s from %s to %s (%d recorded gestures).",
 									renderer(),
 									(customerName == null) ? "" : customerName + '/',
 									userName,
-									format.format(new Date(startedMillis)),
-									format.format(new Date(stoppedMillis)),
+									format.format(Instant.ofEpochMilli(startedMillis)),
+									format.format(Instant.ofEpochMilli(stoppedMillis)),
 									Integer.valueOf(stepCount)));
 		result.add("The password is never recorded: define the variable \"" + PASSWORD_VARIABLE +
 						"\" before running this script, or replace {var:" + PASSWORD_VARIABLE + "}.");
@@ -511,6 +606,7 @@ public final class SailRecordingBuilder {
 		if (uxui != null) {
 			result.add("The recorded user got the UX/UI " + uxui + ".");
 		}
+		result.addAll(notes);
 		return result;
 	}
 
@@ -521,7 +617,7 @@ public final class SailRecordingBuilder {
 	 * @return the reason, or {@code null} if the step is confirmed
 	 */
 	private @Nullable String unconfirmed(@Nonnull Map<String, String> recorded) {
-		String rowContaining = recorded.get("rowContaining");
+		String rowContaining = recorded.get(ROW_CONTAINING);
 		String rowTexts = recorded.get(ROW_TEXTS);
 		if ((rowContaining != null) && (rowTexts != null) && (! rowContaining.contains("{var:")) && (! rowTexts.contains(rowContaining))) {
 			return "the row did not show \"" + rowContaining + '"';
@@ -564,60 +660,68 @@ public final class SailRecordingBuilder {
 	 * @param recorded	the recorded gesture
 	 * @return the step, or {@code null} if the gesture became a comment
 	 */
-	@SuppressWarnings("java:S1541") // one case per op-code is clearer than a dispatch table
 	private @Nullable Step step(@Nonnull Map<String, String> recorded) {
 		String op = recorded.get(OP);
-		Step result = null;
-		if (op != null) {
-			result = switch (op) {
-				case "navigateMenu" -> navigateMenu(recorded);
-				case "navigateEdit" -> navigateEdit(recorded);
-				case "navigateList" -> navigateList(recorded);
-				case "dataEnter" -> dataEnter(recorded);
-				case "tabSelect" -> tabSelect(recorded);
-				case "action" -> action(recorded);
-				case "save" -> declinable(new Save(), Save::setConfirm, recorded);
-				case "ok" -> declinable(new Ok(), Ok::setConfirm, recorded);
-				case "delete" -> declinable(new Delete(), Delete::setConfirm, recorded);
-				case "zoomOut" -> declinable(new ZoomOut(), ZoomOut::setConfirm, recorded);
-				case "remove" -> declinable(new Remove(), Remove::setConfirm, recorded);
-				case "cancel" -> new Cancel();
-				case "listGridZoom" -> listGridZoom(recorded);
-				case "listGridNew" -> listGridNew(recorded);
-				case "listGridSelect" -> listGridSelect(recorded);
-				case "listGridFilter" -> listGridFilter(recorded);
-				case "listGridClearFilter" -> list(new ListGridClearFilter(), ListGridClearFilter::setModuleName, ListGridClearFilter::setDocumentName,
-													ListGridClearFilter::setQueryName, ListGridClearFilter::setModelName, recorded);
-				case "listGridSort" -> listGridSort(recorded);
-				case "navigateTree" -> listNavigation(new NavigateTree(), recorded);
-				case "navigateMap" -> navigateMap(recorded);
-				case "navigateCalendar" -> listNavigation(new NavigateCalendar(), recorded);
-				case "dataGridNew" -> dataGridNew(recorded);
-				case "dataGridZoom" -> gridRow(new DataGridZoom(), DataGridZoom::setBinding, DataGridZoom::setRow, DataGridZoom::setRowContaining, recorded);
-				case "dataGridEdit" -> gridRow(new DataGridEdit(), DataGridEdit::setBinding, DataGridEdit::setRow, DataGridEdit::setRowContaining, recorded);
-				case "dataGridRemove" -> gridRow(new DataGridRemove(), DataGridRemove::setBinding, DataGridRemove::setRow, DataGridRemove::setRowContaining, recorded);
-				case "dataGridSelect" -> gridRow(new DataGridSelect(), DataGridSelect::setBinding, DataGridSelect::setRow, DataGridSelect::setRowContaining, recorded);
-				case "dataGridMove" -> dataGridMove(recorded);
-				case "dataGridLink" -> dataGridLink(recorded);
-				case "lookupDescriptionPick" -> gridRow(new LookupDescriptionPick(), LookupDescriptionPick::setBinding, LookupDescriptionPick::setRow,
-														LookupDescriptionPick::setRowContaining, recorded);
-				case "lookupDescriptionAutoComplete" -> lookupDescriptionAutoComplete(recorded);
-				case "lookupDescriptionNew" -> bound(new LookupDescriptionNew(), LookupDescriptionNew::setBinding, recorded);
-				case "lookupDescriptionEdit" -> bound(new LookupDescriptionEdit(), LookupDescriptionEdit::setBinding, recorded);
-				case "upload" -> upload(recorded);
-				case "captureValue" -> captureValue(recorded);
-				case "captureCell" -> captureCell(recorded);
-				case "captureTitle" -> captureTitle(recorded);
-				case "comment" -> comment(recorded);
-				case "testValue" -> testValue(recorded);
-				case "testMessage" -> testMessage(recorded);
-				case "testGridRows" -> testGridRows(recorded);
-				default -> null;
-			};
-		}
+		Function<Map<String, String>, Step> factory = (op == null) ? null : STEP_FACTORIES.get(op);
+		Step result = (factory == null) ? null : factory.apply(recorded);
 		if (result == null) {
 			pending.add(UNMAPPED_PREFIX + describe(recorded));
 		}
+		return result;
+	}
+
+	/** Makes each op-code's step from a recorded gesture; a factory returns {@code null} for an incomplete gesture. */
+	private static final Map<String, Function<Map<String, String>, Step>> STEP_FACTORIES = stepFactories();
+
+	private static @Nonnull Map<String, Function<Map<String, String>, Step>> stepFactories() {
+		Map<String, Function<Map<String, String>, Step>> result = new HashMap<>(64);
+		result.put("navigateMenu", SailRecordingBuilder::navigateMenu);
+		result.put("navigateEdit", SailRecordingBuilder::navigateEdit);
+		result.put("navigateList", SailRecordingBuilder::navigateList);
+		result.put("navigateTree", recorded -> listNavigation(new NavigateTree(), recorded));
+		result.put("navigateMap", SailRecordingBuilder::navigateMap);
+		result.put("navigateCalendar", recorded -> listNavigation(new NavigateCalendar(), recorded));
+		result.put("dataEnter", SailRecordingBuilder::dataEnter);
+		result.put("tabSelect", SailRecordingBuilder::tabSelect);
+		result.put(ACTION, SailRecordingBuilder::action);
+		result.put("save", recorded -> declinable(new Save(), Save::setConfirm, recorded));
+		result.put("ok", recorded -> declinable(new Ok(), Ok::setConfirm, recorded));
+		result.put("delete", recorded -> declinable(new Delete(), Delete::setConfirm, recorded));
+		result.put("zoomOut", recorded -> declinable(new ZoomOut(), ZoomOut::setConfirm, recorded));
+		result.put("remove", recorded -> declinable(new Remove(), Remove::setConfirm, recorded));
+		result.put("cancel", recorded -> new Cancel());
+		result.put("listGridZoom", SailRecordingBuilder::listGridZoom);
+		result.put("listGridNew", SailRecordingBuilder::listGridNew);
+		result.put("listGridSelect", SailRecordingBuilder::listGridSelect);
+		result.put("listGridFilter", SailRecordingBuilder::listGridFilter);
+		result.put("listGridClearFilter", recorded -> list(new ListGridClearFilter(), ListGridClearFilter::setModuleName,
+															ListGridClearFilter::setDocumentName, ListGridClearFilter::setQueryName,
+															ListGridClearFilter::setModelName, recorded));
+		result.put("listGridSort", SailRecordingBuilder::listGridSort);
+		result.put("dataGridNew", SailRecordingBuilder::dataGridNew);
+		result.put("dataGridZoom", recorded -> gridRow(new DataGridZoom(), DataGridZoom::setBinding, DataGridZoom::setRow,
+															DataGridZoom::setRowContaining, recorded));
+		result.put("dataGridEdit", recorded -> gridRow(new DataGridEdit(), DataGridEdit::setBinding, DataGridEdit::setRow,
+															DataGridEdit::setRowContaining, recorded));
+		result.put("dataGridRemove", recorded -> gridRow(new DataGridRemove(), DataGridRemove::setBinding, DataGridRemove::setRow,
+															DataGridRemove::setRowContaining, recorded));
+		result.put("dataGridSelect", recorded -> gridRow(new DataGridSelect(), DataGridSelect::setBinding, DataGridSelect::setRow,
+															DataGridSelect::setRowContaining, recorded));
+		result.put("dataGridMove", SailRecordingBuilder::dataGridMove);
+		result.put("dataGridLink", SailRecordingBuilder::dataGridLink);
+		result.put("lookupDescriptionPick", recorded -> gridRow(new LookupDescriptionPick(), LookupDescriptionPick::setBinding,
+																	LookupDescriptionPick::setRow, LookupDescriptionPick::setRowContaining, recorded));
+		result.put("lookupDescriptionAutoComplete", SailRecordingBuilder::lookupDescriptionAutoComplete);
+		result.put("lookupDescriptionNew", recorded -> bound(new LookupDescriptionNew(), LookupDescriptionNew::setBinding, recorded));
+		result.put("lookupDescriptionEdit", recorded -> bound(new LookupDescriptionEdit(), LookupDescriptionEdit::setBinding, recorded));
+		result.put("upload", SailRecordingBuilder::upload);
+		result.put("captureValue", SailRecordingBuilder::captureValue);
+		result.put("captureCell", SailRecordingBuilder::captureCell);
+		result.put("captureTitle", SailRecordingBuilder::captureTitle);
+		result.put("comment", SailRecordingBuilder::comment);
+		result.put("testValue", SailRecordingBuilder::testValue);
+		result.put("testMessage", SailRecordingBuilder::testMessage);
+		result.put("testGridRows", SailRecordingBuilder::testGridRows);
 		return result;
 	}
 
@@ -692,8 +796,8 @@ public final class SailRecordingBuilder {
 	}
 
 	private static @Nullable Step dataEnter(@Nonnull Map<String, String> recorded) {
-		String binding = text(recorded, "binding");
-		String value = recorded.get("value");
+		String binding = text(recorded, BINDING);
+		String value = recorded.get(VALUE);
 		// SAIL cannot enter an empty value: a blank value counts as absent
 		if ((binding == null) || (value == null) || value.isBlank()) {
 			return null;
@@ -703,7 +807,12 @@ public final class SailRecordingBuilder {
 		result.setValue(value);
 		String match = text(recorded, "match");
 		if ((match != null) && (! Match.index.name().equals(match))) {
-			result.setMatch(Match.valueOf(match));
+			try {
+				result.setMatch(Match.valueOf(match));
+			}
+			catch (@SuppressWarnings("unused") IllegalArgumentException e) {
+				return null; // a match SAIL has not: an unmapped comment
+			}
 		}
 		return result;
 	}
@@ -777,13 +886,13 @@ public final class SailRecordingBuilder {
 	private static @Nullable Step listGridZoom(@Nonnull Map<String, String> recorded) {
 		ListGridZoom result = list(new ListGridZoom(), ListGridZoom::setModuleName, ListGridZoom::setDocumentName,
 									ListGridZoom::setQueryName, ListGridZoom::setModelName, recorded);
-		return locateRow(recorded, result::setRow, result::setRowContaining) ? result : null;
+		return locateRow(recorded, row -> result.setRow(Integer.valueOf(row)), result::setRowContaining) ? result : null;
 	}
 
 	private static @Nullable Step listGridSelect(@Nonnull Map<String, String> recorded) {
 		ListGridSelect result = list(new ListGridSelect(), ListGridSelect::setModuleName, ListGridSelect::setDocumentName,
 										ListGridSelect::setQueryName, ListGridSelect::setModelName, recorded);
-		return locateRow(recorded, result::setRow, result::setRowContaining) ? result : null;
+		return locateRow(recorded, row -> result.setRow(Integer.valueOf(row)), result::setRowContaining) ? result : null;
 	}
 
 	/**
@@ -792,9 +901,9 @@ public final class SailRecordingBuilder {
 	 * @return false if neither or both are given, or the row is not a number
 	 */
 	private static boolean locateRow(@Nonnull Map<String, String> recorded,
-										@Nonnull Consumer<Integer> setRow,
+										@Nonnull IntConsumer setRow,
 										@Nonnull Consumer<String> setRowContaining) {
-		String rowContaining = recorded.get("rowContaining");
+		String rowContaining = recorded.get(ROW_CONTAINING);
 		String row = text(recorded, "row");
 		boolean hasText = (rowContaining != null) && (! rowContaining.isBlank());
 		if (hasText == (row != null)) {
@@ -805,7 +914,7 @@ public final class SailRecordingBuilder {
 			return true;
 		}
 		try {
-			setRow.accept(Integer.valueOf(row));
+			setRow.accept(Integer.parseInt(row));
 			return true;
 		}
 		catch (@SuppressWarnings("unused") NumberFormatException e) {
@@ -828,14 +937,14 @@ public final class SailRecordingBuilder {
 	}
 
 	private static @Nullable Step listGridFilter(@Nonnull Map<String, String> recorded) {
-		String column = text(recorded, "column");
+		String column = text(recorded, COLUMN);
 		if (column == null) {
 			return null;
 		}
 		ListGridFilter result = list(new ListGridFilter(), ListGridFilter::setModuleName, ListGridFilter::setDocumentName,
 										ListGridFilter::setQueryName, ListGridFilter::setModelName, recorded);
 		result.setColumn(column);
-		String value = recorded.get("value");
+		String value = recorded.get(VALUE);
 		if ((value != null) && (! value.isEmpty())) {
 			result.setValue(value);
 			String operator = text(recorded, "operator");
@@ -852,7 +961,7 @@ public final class SailRecordingBuilder {
 	}
 
 	private static @Nullable Step listGridSort(@Nonnull Map<String, String> recorded) {
-		String column = text(recorded, "column");
+		String column = text(recorded, COLUMN);
 		if (column == null) {
 			return null;
 		}
@@ -884,7 +993,7 @@ public final class SailRecordingBuilder {
 
 	/** A step that names only a binding. */
 	private static @Nullable <S extends Step> S bound(@Nonnull S step, @Nonnull BiConsumer<S, String> setBinding, @Nonnull Map<String, String> recorded) {
-		String binding = text(recorded, "binding");
+		String binding = text(recorded, BINDING);
 		if (binding == null) {
 			return null;
 		}
@@ -895,7 +1004,7 @@ public final class SailRecordingBuilder {
 	/** A step that names a grid (or lookup) binding and a row. */
 	private static @Nullable <S extends Step> S gridRow(@Nonnull S step,
 														@Nonnull BiConsumer<S, String> setBinding,
-														@Nonnull BiConsumer<S, Integer> setRow,
+														@Nonnull ObjIntConsumer<S> setRow,
 														@Nonnull BiConsumer<S, String> setRowContaining,
 														@Nonnull Map<String, String> recorded) {
 		if (bound(step, setBinding, recorded) == null) {
@@ -948,8 +1057,8 @@ public final class SailRecordingBuilder {
 	}
 
 	private static @Nullable Step upload(@Nonnull Map<String, String> recorded) {
-		String binding = text(recorded, "binding");
-		String actionName = text(recorded, "action");
+		String binding = text(recorded, BINDING);
+		String actionName = text(recorded, ACTION);
 		String file = text(recorded, "file");
 		if ((file == null) || ((binding == null) == (actionName == null))) {
 			return null;
@@ -964,7 +1073,7 @@ public final class SailRecordingBuilder {
 
 	private static @Nullable Step captureValue(@Nonnull Map<String, String> recorded) {
 		CaptureValue result = bound(new CaptureValue(), CaptureValue::setBinding, recorded);
-		String variable = text(recorded, "variable");
+		String variable = text(recorded, VARIABLE);
 		if ((result == null) || (variable == null)) {
 			return null;
 		}
@@ -973,21 +1082,21 @@ public final class SailRecordingBuilder {
 	}
 
 	private static @Nullable Step captureCell(@Nonnull Map<String, String> recorded) {
-		String column = text(recorded, "column");
-		String variable = text(recorded, "variable");
+		String column = text(recorded, COLUMN);
+		String variable = text(recorded, VARIABLE);
 		if ((column == null) || (variable == null)) {
 			return null;
 		}
 		CaptureCell result = list(new CaptureCell(), CaptureCell::setModuleName, CaptureCell::setDocumentName,
 									CaptureCell::setQueryName, CaptureCell::setModelName, recorded);
-		result.setBinding(text(recorded, "binding"));
+		result.setBinding(text(recorded, BINDING));
 		result.setColumn(column);
 		result.setVariable(variable);
-		return locateRow(recorded, result::setRow, result::setRowContaining) ? result : null;
+		return locateRow(recorded, row -> result.setRow(Integer.valueOf(row)), result::setRowContaining) ? result : null;
 	}
 
 	private static @Nullable Step captureTitle(@Nonnull Map<String, String> recorded) {
-		String variable = text(recorded, "variable");
+		String variable = text(recorded, VARIABLE);
 		if (variable == null) {
 			return null;
 		}
@@ -1007,8 +1116,8 @@ public final class SailRecordingBuilder {
 	}
 
 	private static @Nullable Step testValue(@Nonnull Map<String, String> recorded) {
-		String binding = text(recorded, "binding");
-		String value = recorded.get("value");
+		String binding = text(recorded, BINDING);
+		String value = recorded.get(VALUE);
 		if ((binding == null) || (value == null) || value.isBlank()) {
 			return null; // SAIL cannot test an empty value
 		}
@@ -1030,12 +1139,12 @@ public final class SailRecordingBuilder {
 
 	private static @Nullable Step testGridRows(@Nonnull Map<String, String> recorded) {
 		TestGridRows result = new TestGridRows();
-		result.setBinding(text(recorded, "binding"));
+		result.setBinding(text(recorded, BINDING));
 		result.setModuleName(text(recorded, MODULE));
 		result.setDocumentName(text(recorded, DOCUMENT));
 		result.setQueryName(text(recorded, QUERY));
 		result.setModelName(text(recorded, MODEL));
-		result.setRowContaining(recorded.get("rowContaining"));
+		result.setRowContaining(recorded.get(ROW_CONTAINING));
 		try {
 			String min = text(recorded, "minRows");
 			String max = text(recorded, "maxRows");
@@ -1132,6 +1241,30 @@ public final class SailRecordingBuilder {
 	 */
 	private static void tidy(@Nonnull Element element, @Nonnull Namespace sail) {
 		element.setQName(QName.get(element.getName(), sail));
+		orderAttributes(element);
+		Collection<Namespace> declared = new ArrayList<>(element.declaredNamespaces());
+		for (Namespace namespace : declared) {
+			element.remove(namespace);
+		}
+
+		List<Node> content = element.content();
+		// the marshalled layout is replaced by the writer's own
+		content.removeIf(node -> (node.getNodeType() == Node.TEXT_NODE) && node.getText().isBlank());
+		for (int i = 0, l = content.size(); i < l; i++) {
+			if (content.get(i) instanceof Element child) {
+				String comment = placeholderComment(child);
+				if (comment == null) {
+					tidy(child, sail);
+				}
+				else {
+					content.set(i, DocumentHelper.createComment(commentText(comment)));
+				}
+			}
+		}
+	}
+
+	/** Keeps an element's own (unqualified) attributes, in {@link #ATTRIBUTE_ORDER} and then alphabetic order. */
+	private static void orderAttributes(@Nonnull Element element) {
 		List<Attribute> attributes = new ArrayList<>(element.attributes().size());
 		for (Attribute attribute : element.attributes()) {
 			if (attribute.getNamespaceURI().isEmpty()) {
@@ -1143,31 +1276,22 @@ public final class SailRecordingBuilder {
 			return (rank < 0) ? Integer.MAX_VALUE : rank;
 		}).thenComparing(Attribute::getName));
 		element.setAttributes(attributes);
-		Collection<Namespace> declared = new ArrayList<>(element.declaredNamespaces());
-		for (Namespace namespace : declared) {
-			element.remove(namespace);
-		}
-
-		List<Node> content = element.content();
-		// the marshalled layout is replaced by the writer's own
-		content.removeIf(node -> (node.getNodeType() == Node.TEXT_NODE) && node.getText().isBlank());
-		for (int i = 0, l = content.size(); i < l; i++) {
-			if (content.get(i) instanceof Element child) {
-				String text = child.getText();
-				int marker = text.indexOf(XML_COMMENT_MARKER);
-				if ("comment".equals(child.getName()) && (marker >= 0)) {
-					String comment = text.substring(marker + XML_COMMENT_MARKER.length());
-					if (comment.endsWith(XMLMetaData.CDATA_END_TAG)) {
-						comment = comment.substring(0, comment.length() - XMLMetaData.CDATA_END_TAG.length());
-					}
-					content.set(i, DocumentHelper.createComment(commentText(comment)));
-				}
-				else {
-					tidy(child, sail);
-				}
-			}
-		}
 	}
+
+	/** The comment a placeholder {@code <comment>} element stands for, or {@code null} if the element is not one. */
+	private static @Nullable String placeholderComment(@Nonnull Element element) {
+		String text = element.getText();
+		int marker = text.indexOf(XML_COMMENT_MARKER);
+		if ((! "comment".equals(element.getName())) || (marker < 0)) {
+			return null;
+		}
+		String result = text.substring(marker + XML_COMMENT_MARKER.length());
+		if (result.endsWith(XMLMetaData.CDATA_END_TAG)) {
+			result = result.substring(0, result.length() - XMLMetaData.CDATA_END_TAG.length());
+		}
+		return result;
+	}
+
 
 	/**
 	 * Returns the text of an XML comment, padded with spaces. A comment cannot hold {@code --} or end with {@code -},

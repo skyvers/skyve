@@ -403,6 +403,37 @@ class FacesViewTest {
 		}
 	}
 
+	/**
+	 * A map that cannot be built never breaks the page: the getters log and return no map.
+	 */
+	@Test
+	void sailRecordingMapsThatCannotBeBuiltAreNull() {
+		FacesView view = new FacesView() {
+			private static final long serialVersionUID = 1L;
+
+			@Override
+			public boolean isSailRecording() {
+				return true;
+			}
+		};
+		view.setBizModuleParameter("noSuchModule");
+		view.setBizDocumentParameter("NoSuchDocument");
+		HttpServletRequest request = mock(HttpServletRequest.class);
+		ExternalContext externalContext = mock(ExternalContext.class);
+		when(externalContext.getRequest()).thenReturn(request);
+		FacesContext facesContext = mock(FacesContext.class);
+		when(facesContext.getExternalContext()).thenReturn(externalContext);
+		FacesContextBridge.setCurrent(facesContext);
+		try {
+			assertNull(view.getSailRecordingEditMap());
+			assertNull(view.getSailRecordingListMap());
+			assertNull(view.getSailRecordingState());
+		}
+		finally {
+			FacesContextBridge.setCurrent(null);
+		}
+	}
+
 	@Test
 	void getUserReturnsSessionUserFromFacesContext() {
 		FacesView view = new FacesView();

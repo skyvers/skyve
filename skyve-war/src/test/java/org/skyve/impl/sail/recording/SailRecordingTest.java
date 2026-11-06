@@ -52,7 +52,8 @@ class SailRecordingTest {
 		User result = mock(User.class);
 		when(result.getName()).thenReturn("admin");
 		when(result.getCustomerName()).thenReturn("demo");
-		when(result.getCustomer()).thenReturn(mock(org.skyve.metadata.customer.Customer.class));
+		org.skyve.metadata.customer.Customer customer = mock(org.skyve.metadata.customer.Customer.class);
+		when(result.getCustomer()).thenReturn(customer);
 		when(Boolean.valueOf(result.isInRole(SailRecording.ROLE_MODULE_NAME, SailRecording.ROLE_NAME))).thenReturn(Boolean.valueOf(recorder));
 		return result;
 	}
@@ -167,10 +168,36 @@ class SailRecordingTest {
 		recording.add(List.of(step("a", "save")));
 		assertNull(recording.getXml());
 		String xml = recording.stop();
+		List<Map<String, Object>> more = List.of(step("b", "ok"));
 		assertAll(() -> assertTrue(recording.isStopped()),
 					() -> assertTrue(xml.contains("<save/>"), xml),
 					() -> assertSame(xml, recording.stop()),
 					() -> assertSame(xml, recording.getXml()),
-					() -> assertThrows(IllegalStateException.class, () -> recording.add(List.of(step("b", "ok")))));
+					() -> assertThrows(IllegalStateException.class, () -> recording.add(more)));
+	}
+
+	@Test
+	void aHugeRangeIsClampedWithoutOverflow() {
+		SailRecording recording = SailRecording.start(session(), user(true));
+		recording.add(List.of(step("a", "save"), step("b", "ok")));
+		assertAll(() -> assertEquals(List.of("ok"), recording.getSteps(1, Integer.MAX_VALUE).stream().map(s -> s.get("op")).toList()),
+					() -> assertEquals(2, recording.getSteps(0, Integer.MAX_VALUE).size()));
+	}
+
+	/**
+	 * Checks that fail do not leave a recording stopped with nothing to download: each step the check fails on is kept,
+	 * with a comment that it was not checked.
+	 */
+	@Test
+	void failingChecksStillGiveAScript() {
+		SailRecording recording = SailRecording.start(session(), user(true));
+		recording.add(List.of(step("a", "save")));
+		String xml = recording.stop(recorded -> {
+			throw new IllegalStateException("no metadata");
+		});
+		assertAll(() -> assertTrue(recording.isStopped()),
+					() -> assertTrue(xml.contains("<save/>"), xml),
+					() -> assertTrue(xml.contains("<!-- not checked: save "), xml),
+					() -> assertSame(xml, recording.getXml()));
 	}
 }

@@ -38,6 +38,8 @@ import jakarta.servlet.http.HttpSession;
  * the steps, the step ids and the built script are guarded by this object's monitor.
  */
 public final class SailRecording implements Serializable {
+	private static final org.slf4j.Logger LOGGER = org.skyve.util.logging.SkyveLoggerFactory.getLogger(SailRecording.class);
+
 	private static final long serialVersionUID = -2381796113574580742L;
 
 	/** The session attribute that holds the session's recording. */
@@ -56,6 +58,11 @@ public final class SailRecording implements Serializable {
 	private final long startedMillis;
 	/** The user's effective roles when recording started, {@code module.Role}, sorted. */
 	private final ArrayList<String> roleNames;
+	/**
+	 * The PrimeFaces recorder's client-id maps built for this recording, by the page and user they describe (see
+	 * {@link #pageMap(String, java.util.function.Supplier)}). Not kept when the session is serialised.
+	 */
+	private transient Map<String, String> pageMaps = null;
 	/** The UX/UI the user got when recording started, or null if not known. */
 	private final String uxui;
 	/** The user agent type the user got when recording started, or null if not known. */
@@ -245,7 +252,7 @@ public final class SailRecording implements Serializable {
 	private synchronized void forgetToken(@Nonnull HttpSession session) {
 		Integer old = token;
 		if (old != null) {
-			StateUtil.replaceToken(session, old, StateUtil.createToken());
+			StateUtil.removeToken(session, old);
 			token = null;
 		}
 	}
@@ -266,6 +273,43 @@ public final class SailRecording implements Serializable {
 	 */
 	public @Nullable String getUxui() {
 		return uxui;
+	}
+
+	/**
+	 * Returns a PrimeFaces client-id map, built the first time a page asks for it and kept for the rest of the recording,
+	 * as an ajax update of a page's form renders the map again. At most {@value #PAGE_MAPS} maps are kept.
+	 *
+	 * <p>Side effects: builds the map if it is not kept (a view's component tree build), under this recording's lock.
+	 *
+	 * @param key	what the map depends on: the page, its UX/UI and user agent type, and the user and their roles
+	 * @param build	builds the map
+	 * @return the map
+	 */
+	public synchronized @Nonnull String pageMap(@Nonnull String key, @Nonnull java.util.function.Supplier<String> build) {
+		if (pageMaps == null) {
+			pageMaps = new java.util.HashMap<>();
+		}
+		String result = pageMaps.get(key);
+		if (result == null) {
+			result = build.get();
+			if (pageMaps.size() >= PAGE_MAPS) {
+				pageMaps.clear();
+			}
+			pageMaps.put(key, result);
+		}
+		return result;
+	}
+
+	/** How many client-id maps a recording keeps. */
+	private static final int PAGE_MAPS = 100;
+
+	/**
+	 * Returns the user agent type the user got when recording started.
+	 *
+	 * @return the user agent type, or {@code null} if not known (the script then targets desktop)
+	 */
+	public @Nullable UserAgentType getUserAgentType() {
+		return userAgentType;
 	}
 
 	/**
@@ -334,7 +378,8 @@ public final class SailRecording implements Serializable {
 	 */
 	public synchronized @Nonnull List<Map<String, String>> getSteps(int from, int count) {
 		int start = Math.max(0, Math.min(from, steps.size()));
-		int end = Math.max(start, Math.min(steps.size(), start + Math.max(0, count)));
+		// in long arithmetic: start + count overflows for a large count
+		int end = (int) Math.max(start, Math.min((long) start + Math.max(0, count), steps.size()));
 		List<Map<String, String>> result = new ArrayList<>(end - start);
 		for (int i = start; i < end; i++) {
 			result.add(new LinkedHashMap<>(steps.get(i)));
@@ -425,8 +470,20 @@ public final class SailRecording implements Serializable {
 	 */
 	public synchronized @Nonnull String stop(@Nullable SailRecordingBuilder.StepCheck check) {
 		if (xml == null) {
-			stoppedMillis = System.currentTimeMillis();
-			xml = SailRecordingBuilder.toXml(builder().check(check).build(steps));
+			// Build first, and stop only once there is a script: a recording must never be left stopped with nothing to
+			// download. If the checks fail, the script is built without them (it says so); if even that fails, the
+			// recording carries on and the error goes to the caller.
+			long stopped = System.currentTimeMillis();
+			String built;
+			try {
+				built = SailRecordingBuilder.toXml(builder(stopped).check(check).build(steps));
+			}
+			catch (RuntimeException e) {
+				LOGGER.warn("SAIL recording could not check its steps; building the script without the checks", e);
+				built = SailRecordingBuilder.toXml(builder(stopped).note("The steps could not be checked against the metadata: " + e).build(steps));
+			}
+			stoppedMillis = stopped;
+			xml = built;
 		}
 		return xml;
 	}
@@ -437,7 +494,8 @@ public final class SailRecording implements Serializable {
 	 * @return the file name
 	 */
 	public @Nonnull String fileName() {
-		return "sail-recording-" + new java.text.SimpleDateFormat("yyyyMMdd-HHmm").format(new java.util.Date(startedMillis)) + ".xml";
+		return "sail-recording-" + java.time.format.DateTimeFormatter.ofPattern("yyyyMMdd-HHmm").withZone(java.time.ZoneId.systemDefault())
+																		.format(java.time.Instant.ofEpochMilli(startedMillis)) + ".xml";
 	}
 
 	/**
@@ -560,11 +618,14 @@ public final class SailRecording implements Serializable {
 	}
 
 	private @Nonnull SailRecordingBuilder builder() {
+		return builder((stoppedMillis == 0L) ? System.currentTimeMillis() : stoppedMillis);
+	}
+
+	private @Nonnull SailRecordingBuilder builder(long stopped) {
 		// The sign in page asks for the customer only when the configuration does not fix one
 		String loginCustomerName = (UtilImpl.CUSTOMER == null) ? customerName : null;
-		long stopped = (stoppedMillis == 0L) ? System.currentTimeMillis() : stoppedMillis;
 		SailRecordingBuilder result = new SailRecordingBuilder(loginCustomerName, userName, startedMillis, stopped).roles(roleNames);
-		return (userAgentType == null) ? result.uxui(uxui) : result.target(uxui, userAgentType);
+		return (userAgentType == null) ? result.uxui(uxui) : result.targeting(uxui, userAgentType);
 	}
 
 	/**

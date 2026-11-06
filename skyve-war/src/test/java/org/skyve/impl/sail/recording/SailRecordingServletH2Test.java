@@ -2,6 +2,7 @@ package org.skyve.impl.sail.recording;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -178,7 +179,7 @@ class SailRecordingServletH2Test extends AbstractSkyveTest {
 		assertEquals(first, token());
 		SailRecording.start(session, u);
 		String second = token();
-		assertAll(() -> assertTrue(! first.equals(second), first),
+		assertAll(() -> assertNotEquals(first, second, first),
 					() -> assertTrue(! StateUtil.checkToken(session, Integer.valueOf(first)), "the old token is gone"),
 					() -> assertTrue(StateUtil.checkToken(session, Integer.valueOf(second))));
 	}

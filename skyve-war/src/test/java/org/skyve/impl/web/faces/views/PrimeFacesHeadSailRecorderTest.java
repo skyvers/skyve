@@ -25,6 +25,7 @@ class PrimeFacesHeadSailRecorderTest {
 	private static final String[] THEMES = {"editorial", "ultima", "ecuador", "diamond", "iframe"};
 	private static final String SKYVE_MIN = "<script type=\"text/javascript\" src=\"skyve/prime/skyve-min.js?v=#{bean.webResourceFileVersion}\"></script>";
 	static final String RECORDER = "<c:if test=\"#{bean.sailRecording}\"><script type=\"text/javascript\" src=\"skyve/sail/recorder-pf-min.js?v=#{bean.webResourceFileVersion}\"></script></c:if>";
+	private static final java.util.regex.Pattern RECORDER_PF = java.util.regex.Pattern.compile("recorder-pf", java.util.regex.Pattern.LITERAL);
 	private static final String JSTL_NAMESPACE = "\n\t\txmlns:c=\"http://java.sun.com/jsp/jstl/core\"";
 
 	@Test
@@ -34,7 +35,7 @@ class PrimeFacesHeadSailRecorderTest {
 			String head = Files.readString(Path.of("src/main/webapp/WEB-INF/pages/templates/" + theme + "/head-resources.xhtml"));
 			String without = head.replace(RECORDER, "").replace(JSTL_NAMESPACE, "");
 			checks.add(() -> assertTrue(head.contains(SKYVE_MIN + RECORDER + "\n"), theme + ": the recorder tag follows skyve-min.js on its line"));
-			checks.add(() -> assertEquals(1, head.split("recorder-pf", -1).length - 1, theme + ": the recorder is referenced once"));
+			checks.add(() -> assertEquals(1, RECORDER_PF.split(head, -1).length - 1, theme + ": the recorder is referenced once"));
 			checks.add(() -> assertFalse(without.contains("sail") || without.contains("c:"), theme + ": nothing else refers to SAIL or JSTL"));
 			checks.add(() -> assertTrue(without.contains(SKYVE_MIN + "\n"), theme + ": without the tag, the line is as before"));
 		}
