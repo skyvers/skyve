@@ -369,7 +369,8 @@ public final class SailMedia {
 			return null;
 		}
 		return matcher.group(1)
-				.replaceAll("\\s+xmlns(?::\\w+)?=\"[^\"]*\"", "")
+				// one white space before each namespace declaration: a \s+ here would backtrack over long runs of spaces
+				.replaceAll("\\sxmlns(?::\\w+)?=\"[^\"]*\"", "")
 				.replaceAll("<(/?)\\w+:", "<$1")
 				.replaceAll("\\s+", " ")
 				.trim();
