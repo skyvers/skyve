@@ -164,11 +164,7 @@ class ComponentCollectingComponentBuilder extends NoOpComponentBuilder implement
 												@Nullable String toolTip,
 												@Nullable String confirmationText, 
 												@Nonnull Action action) {
-		if (component != null) {
-			context.put(action.getName(), component, action);
-		}
-		
-		return component;
+		return putByActionName(component, action);
 	}
 	
 	/**
@@ -197,11 +193,7 @@ class ComponentCollectingComponentBuilder extends NoOpComponentBuilder implement
 													@Nonnull org.skyve.impl.metadata.view.widget.Button button,
 													@Nullable String formDisabledCondition,
 													@Nonnull Action action) {
-		if (component != null) {
-			context.put(action.getName(), component, action);
-		}
-		
-		return component;
+		return putByActionName(component, action);
 	}
 
 	/**
@@ -222,11 +214,7 @@ class ComponentCollectingComponentBuilder extends NoOpComponentBuilder implement
 											@Nullable String toolTip,
 											@Nullable String confirmationText, 
 											@Nonnull Action action) {
-		if (component != null) {
-			context.put(action.getName(), component, action);
-		}
-		
-		return component;
+		return putByActionName(component, action);
 	}
 	
 	/**
@@ -251,11 +239,7 @@ class ComponentCollectingComponentBuilder extends NoOpComponentBuilder implement
 													@Nonnull org.skyve.impl.metadata.view.widget.Button button,
 													@Nullable String formDisabledCondition,
 													@Nonnull Action action) {
-		if (component != null) {
-			context.put(action.getName(), component, action);
-		}
-		
-		return component;
+		return putByActionName(component, action);
 	}
 	
 	/**
@@ -276,11 +260,7 @@ class ComponentCollectingComponentBuilder extends NoOpComponentBuilder implement
 											@Nullable String toolTip,
 											@Nullable String confirmationText, 
 											@Nonnull Action action) {
-		if (component != null) {
-			context.put(action.getName(), component, action);
-		}
-		
-		return component;
+		return putByActionName(component, action);
 	}
 	
 	/**
@@ -305,13 +285,23 @@ class ComponentCollectingComponentBuilder extends NoOpComponentBuilder implement
 													@Nonnull org.skyve.impl.metadata.view.widget.Button button,
 													@Nullable String formDisabledCondition,
 													@Nonnull Action action) {
+		return putByActionName(component, action);
+	}
+	
+	/**
+	 * Registers a rendered component under its action's name, as the download, report and upload steps find it.
+	 *
+	 * @param component the rendered component, or {@code null} when none was rendered
+	 * @param action the action metadata
+	 * @return the supplied component
+	 */
+	private @Nullable UIComponent putByActionName(@Nullable UIComponent component, @Nonnull Action action) {
 		if (component != null) {
 			context.put(action.getName(), component, action);
 		}
-		
 		return component;
 	}
-	
+
 	/**
 	 * Tracks a list-grid component and stores its generated identifier for later container attachment.
 	 *
