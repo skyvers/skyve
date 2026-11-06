@@ -300,6 +300,34 @@
 		</method>
 	</interaction>
 
+	<interaction name="Lookup description columns in an inline data grid">
+		<method>
+			<comment>After dataGridNew or dataGridEdit on an inline grid, dataEnter, testValue and the lookup description steps address the row's columns, not the form's lookups of the same bindings</comment>
+			<navigateEdit module="kitchensink" document="ModelLookupFixture" />
+			<dataEnter binding="name" value="SAIL inline lookups {run}" />
+			<dataGridNew binding="rows" />
+			<dataEnter binding="selection" value="SAIL filter {run} a" />
+			<testValue binding="selection" value="SAIL filter {run} a" />
+			<lookupDescriptionAutoComplete binding="selection" search="SAIL filter {run}" pick="{run} c" />
+			<testValue binding="selection" value="SAIL filter {run} c" />
+			<lookupDescriptionPick binding="singleSelection" rowContaining="SAIL filter {run} b" />
+			<testValue binding="singleSelection" value="SAIL filter {run} b" />
+			<comment>Editing the row again shows its values. A model lookup column of a row edited again cannot be changed: its drop-down's fetch ends the row's edit (runtime issue SC-11)</comment>
+			<dataGridEdit binding="rows" row="0" />
+			<testValue binding="selection" value="SAIL filter {run} c" />
+			<testValue binding="singleSelection" value="SAIL filter {run} b" />
+			<save />
+			<comment>Save ended the inline edit, so this is the form's lookup of the same binding, which is untouched</comment>
+			<testValue binding="selection" value="" />
+			<testGridRows binding="rows" rowContaining="SAIL filter {run} c" minRows="1" maxRows="1" />
+			<testGridRows binding="rows" rowContaining="SAIL filter {run} b" minRows="1" maxRows="1" />
+			<comment>A view opened by URL has no Delete button, so delete from the zoomed-in view</comment>
+			<listGridZoom module="kitchensink" query="qModelLookupFixtures" rowContaining="SAIL inline lookups {run}" />
+			<delete />
+			<clearContext />
+		</method>
+	</interaction>
+
 	<interaction name="A time column in the filter row, and in the advanced filter of a grid with a filter parameter">
 		<method>
 			<comment>The List Grid Fixture's list of column types shows the time column, so its filter row takes a time</comment>

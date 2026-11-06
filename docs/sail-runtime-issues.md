@@ -31,6 +31,7 @@ SC-2's suspected cause, which cites the code before its fix, at `2f4c2021b8`.
 | [SC-6](#sc-6-the-backup-and-restore-started-growls-are-not-shown) | The Backup and Restore "started" growls are not shown | SC | Plausible (client) | open |
 | [SC-7](#sc-7-control-panel-jumps-back-to-the-results-tab) | Control Panel jumps back to the Results tab | SC | Confirmed | open |
 | [SC-8](#sc-8-the-user-wizard-password-field-loses-fast-typing) | The User wizard password field loses fast typing | SC | Confirmed | open |
+| [SC-11](#sc-11-a-model-lookup-column-ends-the-inline-edit-of-a-row-edited-again) | A model lookup column ends the inline edit of a row edited again | SC | Confirmed (stack traced) | open |
 
 SC finding 5 is not listed. It was that a view opened by URL hides Delete, OK
 and Cancel, which is by design (`onlyView`); see the note under
@@ -611,5 +612,35 @@ regression; the fixture only exposed it.
 **Workaround in the suites.** The SC kitchen sink does not select a row in
 that grid. So `navigateEdit bizId="{var:…}"` and `navigateLink href` with
 `{var:}` are run only in PF; the substitution is shared code with unit tests.
+
+**Status:** open.
+
+## SC-11: A model lookup column ends the inline edit of a row edited again
+
+**Symptom.** In a SmartClient inline data grid, a lookup description column
+on a model (`model="..."`, not a query) can be set in a new row, but not in a
+row that is edited again. Typing a key into it, or opening its drop-down, ends
+the row's edit at once: the editor closes and the keystroke is lost. A user
+sees the same thing.
+
+**Reproduction.** In SmartClient, open the kitchen sink Model Lookup Fixture.
+In "Data-grid model lookups", press New, pick a value in the multi-column
+lookup and press Enter. Press Edit, click into the lookup and type a letter.
+
+**Cause (traced in the browser).** The grid's model lookup editor gets a
+`pickListProperties.filterData` (`SmartClientAttributeDefinition`
+`appendEditorProperties`, "Model lookups in grid editors need the enclosing
+view's conversation bean"), which calls `view.gather(false)` for `_c`.
+`_gather` (`skyve-web/src/js/desktop/editView.js`) sorts every data grid's
+data array in place with `data.sortByProperty(grid._ordinal, true)`, even for
+a grid without an ordinal. That fires the grid's `dataChanged`, whose
+`_remapEditRows` calls `hideInlineEditor`: the stack from the drop-down's
+fetch is `filterDataBoundPickList` → `filterData` → `gather` → `_gather` →
+`sortByProperty` → `dataChanged` → `_remapEditRows` → `hideInlineEditor`. Why
+a new row's edit survives the same fetch was not looked into.
+
+**Workaround in the suites.** The SC kitchen sink sets the model lookup
+columns in a new row only. After `dataGridEdit` it reads them, but does not
+change them.
 
 **Status:** open.

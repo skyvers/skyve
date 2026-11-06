@@ -617,8 +617,7 @@ public class SmartClientInterpretedWebDriverExecutor extends InterpretedWebDrive
 	 * @param search optional search text for autocomplete lookup; used if row is null
 	 */
 	private void lookupDescription(@Nonnull Step step, @Nonnull String binding, @Nullable Integer row, @Nullable String search) {
-		prepareForInteraction();
-		List<Locator> locators = locators(step, binding);
+		List<Locator> locators = lookupLocators(step, binding);
 
 		boolean success = false;
 		for (Locator locator : locators) {
@@ -636,6 +635,29 @@ public class SmartClientInterpretedWebDriverExecutor extends InterpretedWebDrive
 		if (! success) {
 			throw new DomainException(String.format("Lookup description [%s] failed (is it disabled?)", binding));
 		}
+	}
+
+	/**
+	 * Returns the locators of the lookup description a pick or auto complete step names. While a data grid row is edited
+	 * inline and that grid has a column of the binding, it is that column's editor, and the row stays in edit (as for
+	 * {@code dataEnter}); otherwise any inline edit ends and it is the view's lookup description.
+	 *
+	 * @param step		the step
+	 * @param binding	the lookup description's binding
+	 * @return the locators
+	 */
+	private @Nonnull List<Locator> lookupLocators(@Nonnull Step step, @Nonnull String binding) {
+		SmartClientAutomationContext context = context();
+		String inline = context.getInlineGridBinding();
+		if (inline != null) {
+			List<Locator> result = context.getLocators(inline + '.' + binding);
+			if (result != null) {
+				prepareForDataEntry();
+				return result;
+			}
+		}
+		prepareForInteraction();
+		return locators(step, binding);
 	}
 
 	/**
@@ -1388,8 +1410,7 @@ public class SmartClientInterpretedWebDriverExecutor extends InterpretedWebDrive
 	 * @param text		the text the row contains
 	 */
 	private void lookupDescriptionContaining(@Nonnull Step step, @Nonnull String binding, @Nullable String search, @Nonnull String text) {
-		prepareForInteraction();
-		List<Locator> locators = locators(step, binding);
+		List<Locator> locators = lookupLocators(step, binding);
 
 		boolean success = false;
 		for (Locator locator : locators) {

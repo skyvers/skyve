@@ -767,7 +767,7 @@ public class SmartClientSelenide extends Selenide<
 		}
 		prepare(found.element());
 
-		String combo = String.format("%s/item[Class=ComboBoxItem||name=_combo]", locator);
+		String combo = combo(locator);
 		if (search == null) {
 			SelenideElement picker = require(combo + "/[icon=\"picker\"]").element();
 			prepare(picker);
@@ -798,6 +798,17 @@ public class SmartClientSelenide extends Selenide<
 		waitForFullPageResponse();
 
 		return true;
+	}
+
+	/**
+	 * Returns the locator of a lookup description's combo box: a form's lookup description holds one, while an inline
+	 * data grid row edits a lookup description column with a plain combo box, which its cell locator names.
+	 *
+	 * @param locator	the lookup description's locator
+	 * @return the combo box's locator
+	 */
+	private static @Nonnull String combo(@Nonnull String locator) {
+		return locator.contains("\"kind\":\"cell\"") ? locator : locator + "/item[Class=ComboBoxItem||name=_combo]";
 	}
 
 	/**
@@ -1184,16 +1195,16 @@ public class SmartClientSelenide extends Selenide<
 		prepare(found.element());
 
 		// Find the drop down button
-		SelenideElement element = require(String.format("%s/item[Class=ComboBoxItem||name=_combo]/[icon=\"picker\"]", locator)).element();
+		SelenideElement element = require(combo(locator) + "/[icon=\"picker\"]").element();
 		prepare(element);
 		click(element);
 
 		// Wait for the pick list drop down
-		require(String.format("%s/item[Class=ComboBoxItem||name=_combo]/pickList", locator)).element().shouldBe(visible);
+		require(combo(locator) + "/pickList").element().shouldBe(visible);
 
 		// Value here should be an index in the drop down starting from 0
-		element = require(String.format("%s/item[Class=ComboBoxItem||name=_combo]/pickList/body/row[%d]/col[0]",
-											locator,
+		element = require(String.format("%s/pickList/body/row[%d]/col[0]",
+											combo(locator),
 											Integer.valueOf(row))).element();
 		prepare(element);
 		click(element);
@@ -1215,13 +1226,13 @@ public class SmartClientSelenide extends Selenide<
 		prepare(found.element());
 
 		// Enter search
-		String searchBarLocator = String.format("%s/item[Class=ComboBoxItem||name=_combo]/element", locator);
+		String searchBarLocator = combo(locator) + "/element";
 		if (! text(new SmartClientTextCommand(searchBarLocator, search, true))) {
 			return false;
 		}
 
 		// Wait for the pick list drop down
-		String pickList = String.format("%s/item[Class=ComboBoxItem||name=_combo]/pickList", locator);
+		String pickList = combo(locator) + "/pickList";
 		require(pickList);
 		// Waits for SmartClient to show the pick list it has drawn (the search's fetch has returned by now)
 		until("the lookup's pick list to show", d -> {
