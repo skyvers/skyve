@@ -1,10 +1,13 @@
 package org.skyve.impl.web.service.smartclient;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.IdentityHashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.TreeMap;
 import java.util.function.UnaryOperator;
 
@@ -744,7 +747,13 @@ public class ViewJSONManipulator extends ViewVisitor {
 				// 1) foo is null
 				// 2) foo.bars yields null and we don't need to apply any processing
 				if (beanList != null) {
-					// process the existing beans applying the changes and ordering from the requestList
+					// process the existing beans applying the changes from the requestList.
+					// An ordered collection takes the requestList's order, which is the order its grid shows (a user may
+					// have dragged its rows). An unordered collection keeps its own order: the requestList's order is only
+					// how its grid was sorted for display, and moving its beans would make Hibernate rewrite the
+					// collection. So its existing beans stay where they are, and its new beans go on the end.
+					boolean ordered = (relation instanceof Collection collection) && Boolean.TRUE.equals(collection.getOrdered());
+					Set<Bean> requested = ordered ? null : Collections.newSetFromMap(new IdentityHashMap<>());
 					int newIndex = 0;
 					for (Object requestListItem : requestList) {
 						String thisBizId = null;
@@ -778,12 +787,12 @@ public class ViewJSONManipulator extends ViewVisitor {
 											persistence,
 											webContext);
 							}
-							BindUtil.addElementToCollection(appliedTo, childBindingPrefix, newIndex, thisBean);
+							BindUtil.addElementToCollection(appliedTo, childBindingPrefix, ordered ? newIndex : beanList.size(), thisBean);
 						}
 						else { // found
 							// Only move the bean in the collection if required
 							// NB We do this conditionally so we don't upset hibernate collection dirtiness
-							if (beanList.indexOf(thisBean) != newIndex) {
+							if (ordered && (beanList.indexOf(thisBean) != newIndex)) {
 								beanList.remove(thisBean);
 								beanList.add(newIndex, thisBean);
 							}
@@ -798,12 +807,24 @@ public class ViewJSONManipulator extends ViewVisitor {
 											webContext);
 							}
 						}
+						if (requested != null) {
+							requested.add(thisBean);
+						}
 						newIndex++;
 					}
 	
 					// delete any left over beans in the list as these were not present in the requestList
-					while (beanList.size() > newIndex) {
-						BindUtil.removeElementFromCollection(appliedTo, childBindingPrefix, newIndex);
+					if (requested == null) { // ordered: the requested beans are first, in order
+						while (beanList.size() > newIndex) {
+							BindUtil.removeElementFromCollection(appliedTo, childBindingPrefix, newIndex);
+						}
+					}
+					else {
+						for (int i = beanList.size() - 1; i >= 0; i--) {
+							if (! requested.contains(beanList.get(i))) {
+								BindUtil.removeElementFromCollection(appliedTo, childBindingPrefix, i);
+							}
+						}
 					}
 					
 					BindUtil.orderByMetaData(appliedTo, childBindingPrefix);

@@ -37,6 +37,7 @@ import org.skyve.metadata.sail.language.step.interaction.actions.Save;
 import org.skyve.metadata.sail.language.step.interaction.actions.ZoomOut;
 import org.skyve.metadata.sail.language.step.interaction.grids.DataGridEdit;
 import org.skyve.metadata.sail.language.step.interaction.grids.DataGridLink;
+import org.skyve.metadata.sail.language.step.interaction.grids.DataGridMove;
 import org.skyve.metadata.sail.language.step.interaction.grids.DataGridRemove;
 import org.skyve.metadata.sail.language.step.interaction.grids.DataGridSelect;
 import org.skyve.metadata.sail.language.step.interaction.grids.DataGridZoom;
@@ -168,6 +169,31 @@ class SailLanguageXmlTest {
 					() -> assertThrows(MetaDataException.class, () -> XMLMetaData.unmarshalSAILString(HEAD + "<captureTitle/>" + TAIL)),
 					() -> assertThrows(MetaDataException.class, () -> XMLMetaData.unmarshalSAILString(HEAD + "<dataGridLink binding=\"rows\" row=\"0\"/>" + TAIL)),
 					() -> assertThrows(MetaDataException.class, () -> XMLMetaData.unmarshalSAILString(HEAD + "<dataGridLink row=\"0\" text=\"Go\"/>" + TAIL)));
+	}
+
+	private static final String DATA_GRID_MOVE = HEAD +
+			"<dataGridMove binding=\"rows\" rowContaining=\"Third {run}\" to=\"0\"/>" +
+			"<dataGridMove binding=\"rows\" row=\"2\" to=\"1\"/>" +
+			TAIL;
+
+	@Test
+	void marshalsAndUnmarshalsDataGridMove() {
+		String xml = XMLMetaData.marshalSAIL(XMLMetaData.unmarshalSAILString(DATA_GRID_MOVE));
+		List<Step> steps = XMLMetaData.unmarshalSAILString(xml).getInteractions().get(0).getSteps();
+		DataGridMove byText = (DataGridMove) steps.get(0);
+		DataGridMove byRow = (DataGridMove) steps.get(1);
+		assertAll(() -> assertEquals(2, steps.size()),
+					() -> assertEquals("rows", byText.getBinding()),
+					() -> assertEquals("Third {run}", byText.getRowContaining()),
+					() -> assertEquals(Integer.valueOf(0), byText.getTo()),
+					() -> assertEquals(Integer.valueOf(2), byRow.getRow()),
+					() -> assertEquals(Integer.valueOf(1), byRow.getTo()));
+	}
+
+	@Test
+	void dataGridMoveWithoutItsRequiredAttributesIsRejectedByTheSchema() {
+		assertAll(() -> assertThrows(MetaDataException.class, () -> XMLMetaData.unmarshalSAILString(HEAD + "<dataGridMove binding=\"rows\" row=\"0\"/>" + TAIL)),
+					() -> assertThrows(MetaDataException.class, () -> XMLMetaData.unmarshalSAILString(HEAD + "<dataGridMove row=\"0\" to=\"1\"/>" + TAIL)));
 	}
 
 	private static void assertAppsGaps(List<Step> steps) {

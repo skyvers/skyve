@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<view name="edit"
+		title="Ordered Grid Fixture"
+		xmlns="http://www.skyve.org/xml/view"
+		xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<form>
+		<column responsiveWidth="3" />
+		<column responsiveWidth="9" />
+		<row>
+			<item>
+				<default binding="name" />
+			</item>
+		</row>
+	</form>
+	<dataGrid binding="rows" title="Rows">
+		<boundColumn binding="name" />
+	</dataGrid>
+	<actions>
+		<defaults />
+	</actions>
+</view>

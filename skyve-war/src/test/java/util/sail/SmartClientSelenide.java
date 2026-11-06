@@ -1223,6 +1223,95 @@ public class SmartClientSelenide extends Selenide<
 		return true;
 	}
 
+	/**
+	 * Clicks a data grid's column header until the grid is sorted by that column alone, in the direction asked for, as a
+	 * user sorts the rows it shows. No SAIL step does this (an IT that needs the gesture calls it): sorting a data grid is
+	 * a display choice, not something a script means to record.
+	 *
+	 * @param locator		a locator of the grid's rows
+	 * @param column		the column's field name (its sanitised binding)
+	 * @param descending	whether to sort descending
+	 * @throws IllegalStateException if the grid has no such column or cannot be sorted
+	 */
+	public void sortDataGrid(@Nonnull String locator, @Nonnull String column, boolean descending) {
+		String grid = root(locator);
+		require(grid);
+		// a header click sorts ascending, and a click on the sorted column turns the sort round: at most two clicks
+		for (int i = 0; i < 3; i++) {
+			Map<String, Object> plan = map(script("return _sail.gridHeader(arguments[0], arguments[1])", grid, column));
+			Object error = plan.get("error");
+			if (error != null) {
+				throw new IllegalStateException("Cannot sort " + grid + " by " + column + ": " + error);
+			}
+			if (Boolean.TRUE.equals(plan.get("sorted")) && (Boolean.TRUE.equals(plan.get("descending")) == descending)) {
+				return;
+			}
+			SelenideElement header = $((WebElement) plan.get("header"));
+			prepare(header);
+			click(header);
+			waitForFullPageResponse();
+		}
+		throw new IllegalStateException("Clicking the header of column " + column + " did not sort " + grid + (descending ? " descending" : " ascending"));
+	}
+
+	/**
+	 * Drags a row of an ordered data grid to another position, as a user reorders rows: presses the mouse on one of the
+	 * row's cells, moves it over the row at the position (its upper half to drop the row before it when moving up, its
+	 * lower half to drop it after it when moving down) and releases it. SmartClient then moves the row in the grid's data
+	 * and numbers the rows again (BizDataGrid's {@code recordDrop}).
+	 *
+	 * @param locator	a locator of the grid's rows, with {@code %d} for the row and the column
+	 * @param from		the zero-based row to move
+	 * @param to		the zero-based position to move it to
+	 * @throws IllegalStateException if the grid is not ordered, a row is out of range, or the row is not at the position
+	 * 			after the drag
+	 */
+	public void dataGridMove(@Nonnull String locator, int from, int to) {
+		String grid = root(locator);
+		require(grid);
+		Map<String, Object> plan = map(script("return _sail.dataGridMovePlan(arguments[0], arguments[1], arguments[2])",
+												grid, Integer.valueOf(from), Integer.valueOf(to)));
+		Object error = plan.get("error");
+		if (error != null) {
+			throw new IllegalStateException("Cannot move row " + from + " of " + grid + ": " + error);
+		}
+		if (from == to) {
+			script("_sail.dataGridMoved(arguments[0], arguments[1])", grid, Integer.valueOf(to));
+			trace("    Row " + from + " is already at position " + to);
+			return;
+		}
+		Object index = script("return _sail.dataColumn(arguments[0])", grid);
+		int column = (index instanceof Number number) ? number.intValue() : 0;
+		// the rows may be scrolled out of the grid's body: bring each into view the grid's way, as row() does
+		script("return _sail.scrollToRow(arguments[0], arguments[1])", grid, Integer.valueOf(to));
+		script("return _sail.scrollToRow(arguments[0], arguments[1])", grid, Integer.valueOf(from));
+		waitForFullPageResponse();
+		SelenideElement source = require(String.format(locator, Integer.valueOf(from), Integer.valueOf(column))).element();
+		SelenideElement target = require(String.format(locator, Integer.valueOf(to), Integer.valueOf(column))).element();
+		prepare(source);
+		prepare(target);
+		WebElement sourceElement = source.toWebElement();
+		WebElement targetElement = target.toWebElement();
+		int quarter = Math.max(1, targetElement.getSize().getHeight() / 4);
+		int direction = (to < from) ? -1 : 1;
+		// Press on the row, move past SmartClient's drag threshold so that the drag starts, then over the half of the
+		// target row that drops the row on the far side of it, and release there. Each move is a pointer event that
+		// SmartClient's drag tracking sees.
+		new org.openqa.selenium.interactions.Actions(driver)
+				.moveToElement(sourceElement)
+				.clickAndHold()
+				.moveByOffset(0, 5 * direction)
+				.moveByOffset(0, 5 * direction)
+				.moveToElement(targetElement, 0, quarter * direction)
+				.moveByOffset(0, direction)
+				.release()
+				.perform();
+		waitForFullPageResponse();
+		if (! Boolean.TRUE.equals(script("return _sail.dataGridMoved(arguments[0], arguments[1])", grid, Integer.valueOf(to)))) {
+			throw new IllegalStateException("Dragged row " + from + " of " + grid + " to position " + to + ", but the grid does not show it there");
+		}
+	}
+
 	@Override
 	public boolean lookupDescriptionByRow(SmartClientLookupDescriptionByRowCommand command) {
 		String locator = command.locator();

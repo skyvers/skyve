@@ -36,6 +36,7 @@ import org.skyve.metadata.sail.language.step.interaction.actions.ZoomIn;
 import org.skyve.metadata.sail.language.step.interaction.actions.ZoomOut;
 import org.skyve.metadata.sail.language.step.interaction.grids.DataGridEdit;
 import org.skyve.metadata.sail.language.step.interaction.grids.DataGridLink;
+import org.skyve.metadata.sail.language.step.interaction.grids.DataGridMove;
 import org.skyve.metadata.sail.language.step.interaction.grids.DataGridNew;
 import org.skyve.metadata.sail.language.step.interaction.grids.DataGridRemove;
 import org.skyve.metadata.sail.language.step.interaction.grids.DataGridSelect;
@@ -210,7 +211,8 @@ public class Interaction implements Executable {
 						@XmlElementRef(type = CaptureValue.class),
 						@XmlElementRef(type = CaptureCell.class),
 						@XmlElementRef(type = CaptureTitle.class),
-						@XmlElementRef(type = DataGridLink.class)})
+						@XmlElementRef(type = DataGridLink.class),
+						@XmlElementRef(type = DataGridMove.class)})
 	public @Nonnull List<Step> getSteps() {
 		return steps;
 	}

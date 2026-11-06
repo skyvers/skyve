@@ -15,6 +15,8 @@
  *           a row, opening it in a modal or new edit view.
  *       <li>{@link org.skyve.metadata.sail.language.step.interaction.grids.DataGridRemove} — removes
  *           the row at the specified index.
+ *       <li>{@link org.skyve.metadata.sail.language.step.interaction.grids.DataGridMove} — drags a row
+ *           of an ordered data grid to another position.
  *     </ul>
  *   <li><b>List-grid steps</b> — operate on module-level list views:
  *     <ul>
