@@ -8,6 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.Mockito.CALLS_REAL_METHODS;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -24,6 +25,8 @@ import org.junit.jupiter.api.Test;
 import org.primefaces.model.DualListModel;
 import org.skyve.domain.Bean;
 import org.skyve.domain.DynamicBean;
+import org.skyve.impl.metadata.customer.CustomerImpl;
+import org.skyve.impl.metadata.model.document.DocumentImpl;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.web.AbstractWebContext;
 import org.skyve.impl.web.faces.views.FacesView;
@@ -176,6 +179,79 @@ class SkyveDualListModelMapTest {
 
 		assertEquals(List.of(role), fixture.roles);
 		assertFalse(fixture.map.containsKey("roles"));
+	}
+
+	@Test
+	void scatterListsAnOrderedMembershipsMembersInTheCollectionsOrder() {
+		ScatterFixture fixture = new ScatterFixture(true);
+
+		DualListModel<DomainValue> model = fixture.map.get("roles");
+
+		assertEquals(List.of("r3", "r1"), codes(model.getTarget()));
+		assertEquals(List.of("r2"), codes(model.getSource()));
+	}
+
+	@Test
+	void scatterListsAnUnorderedMembershipsMembersInTheCandidatesOrder() {
+		ScatterFixture fixture = new ScatterFixture(false);
+
+		DualListModel<DomainValue> model = fixture.map.get("roles");
+
+		assertEquals(List.of("r1", "r3"), codes(model.getTarget()));
+		assertEquals(List.of("r2"), codes(model.getSource()));
+	}
+
+	private static List<String> codes(List<DomainValue> values) {
+		return values.stream().map(DomainValue::getCode).toList();
+	}
+
+	/**
+	 * A view of an admin.User bean whose "roles" collection of admin.Role holds roles "r3" then "r1", and whose domain
+	 * values (the candidates) are "r1", "r2" and "r3" in that order.
+	 */
+	private static final class ScatterFixture {
+		final SkyveDualListModelMap map;
+
+		ScatterFixture(boolean ordered) {
+			User user = mock(User.class);
+			CustomerImpl customer = mock(CustomerImpl.class);
+			Module module = mock(Module.class);
+			DocumentImpl userDocument = mock(DocumentImpl.class);
+			Document roleDocument = mock(Document.class);
+			Collection collection = mock(Collection.class);
+			when(user.getCustomer()).thenReturn(customer);
+			when(customer.getModule("admin")).thenReturn(module);
+			when(module.getDocument(customer, "User")).thenReturn(userDocument);
+			when(module.getDocument(customer, "Role")).thenReturn(roleDocument);
+			when(userDocument.getAttribute("roles")).thenReturn(collection);
+			when(collection.getDocumentName()).thenReturn("Role");
+			when(collection.getOrdered()).thenReturn(Boolean.valueOf(ordered));
+			AbstractPersistence persistence = mock(AbstractPersistence.class, CALLS_REAL_METHODS);
+			persistence.setUser(user);
+			persistence.setForThread();
+
+			List<Bean> roles = new ArrayList<>();
+			roles.add(role("r3"));
+			roles.add(role("r1"));
+			Map<String, Object> values = new HashMap<>();
+			values.put("roles", roles);
+			Bean bean = new DynamicBean("admin", "User", values);
+			List<DomainValue> candidates = new ArrayList<>();
+			candidates.add(new DomainValue("r1", "Role 1"));
+			candidates.add(new DomainValue("r2", "Role 2"));
+			candidates.add(new DomainValue("r3", "Role 3"));
+			when(userDocument.getDomainValues(any(), any(), any(), any(), anyBoolean())).thenReturn(candidates);
+
+			FacesView view = mock(FacesView.class);
+			when(view.getCurrentBean()).thenReturn(new BeanMapAdapter(bean, null));
+			map = new SkyveDualListModelMap(view);
+		}
+
+		private static Bean role(String bizId) {
+			Bean result = mock(Bean.class);
+			when(result.getBizId()).thenReturn(bizId);
+			return result;
+		}
 	}
 
 	/**
