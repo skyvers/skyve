@@ -1174,7 +1174,7 @@ customer only when the sign in page asks for one (no `environment.customer`).
 | Picking from a lookup | `lookupDescriptionPick rowContaining` the description picked; when the user typed into the lookup first, `lookupDescriptionAutoComplete` with `search` (what was typed) and `pick` (the description picked). Never a row number, and never `dataEnter`. SmartClient's New and Edit on a lookup are `lookupDescriptionNew` and `lookupDescriptionEdit`. |
 | Uploading a file | `upload` with the content widget's `binding` or the upload `action`, and `file="sail/files/<the file's name>"`, with a comment saying the editor supplies the file there (the test classpath). An upload the page refused is written with `testSuccess="false"`, and the refusal as context. |
 | Answering a server-side question No or Cancel | `confirm="false"` on the step that raised it. |
-| A tree, map or calendar menu item, or such a page loaded by URL (SmartClient) | `navigateTree`, `navigateMap` (with `geometryBinding`) or `navigateCalendar`. What is done inside the tree, map or calendar is unmapped. |
+| A tree, map or calendar menu item, or such a page loaded by URL | `navigateTree`, `navigateMap` (with `geometryBinding`) or `navigateCalendar`; PrimeFaces has a map page only. What is done inside the tree, map or calendar is unmapped. |
 
 In PrimeFaces, data entry is read from the fields the page's map names: what a field shows when the next step is taken,
 or when the next ajax request is sent, is compared with what it showed when the page loaded or the last response
@@ -1289,9 +1289,8 @@ dropped silently.
   pick from the Pick button's pop-up list is recorded as a drop-down pick.
 - A filter on a date or time column is written in Skyve's default converter format; an application with other
   converters needs the value edited.
-- The kitchen sink has a tree and a calendar menu item (SmartClient only), which the SmartClient round trip navigates,
-  but no map menu item (no persistent kitchen sink document has a geometry): `navigateMap` from a menu item is covered by
-  the builder's unit tests only.
+- The kitchen sink has a tree and a calendar menu item (SmartClient only) and a map menu item: the SmartClient round
+  trip navigates all three, and the PrimeFaces one the map.
 - A PrimeFaces list grid shows its first page of rows, and a replay finds a row only among them: a recording that zooms
   into a row replays only while that row is on the first page.
 - A recording starts in the Control Panel. If its first gesture is not a navigation, the script says so in a comment.

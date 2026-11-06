@@ -817,6 +817,13 @@
 				}
 			}
 		}
+		var mapNavigation = mapStep(url.searchParams);
+		if (mapNavigation) {
+			// a map item opens the map page: navigateMap, as the SmartClient recorder records it
+			navigating();
+			core.record(mapNavigation);
+			return true;
+		}
 		var step = { op: "navigateMenu", module: module, item: labels.join("/") };
 		if ((url.searchParams.get("a") === "e") && url.searchParams.get("d")) {
 			step.target = module + "." + url.searchParams.get("d");
@@ -824,6 +831,29 @@
 		navigating();
 		core.record(step);
 		return true;
+	}
+
+	/**
+	 * The navigateMap step for a map page's URL parameters (a=m, m, q or d and q for a model, b the geometry binding), or
+	 * null for any other page. q names a query, or a document (its default query) when it starts with a capital.
+	 */
+	function mapStep(params) {
+		if ((params.get("a") !== "m") || !params.get("m") || !params.get("q")) {
+			return null;
+		}
+		var step = { op: "navigateMap", module: params.get("m") };
+		if (params.get("d")) {
+			step.document = params.get("d");
+			step.model = params.get("q");
+		} else if (/^[A-Z]/.test(params.get("q"))) {
+			step.document = params.get("q");
+		} else {
+			step.query = params.get("q");
+		}
+		if (params.get("b")) {
+			step.geometryBinding = params.get("b");
+		}
+		return step;
 	}
 
 	/** Lets a held step go: its confirmation was answered yes, or no confirmation came. */
@@ -1149,6 +1179,10 @@
 				list.query = params.get("q");
 			}
 			core.push(list);
+		} else if (mapStep(params)) {
+			var mapNavigation = mapStep(params);
+			mapNavigation.view = "";
+			core.push(mapNavigation);
 		} else if (a) {
 			core.push({ op: "unmapped", text: "opened " + location.search + " (no SAIL step opens this page)", view: "" });
 		}

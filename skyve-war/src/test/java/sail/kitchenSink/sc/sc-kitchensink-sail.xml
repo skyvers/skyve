@@ -5,8 +5,8 @@
 
 	Not covered here, and why:
 	- navigateTree, navigateMap, navigateCalendar, navigateLink: implemented in the shared executor base. The kitchen sink's
-	  Calendar, Map and Tree items are links; its desktop-only Condition Node Tree and List Attribute Calendar items are
-	  navigated by SmartClientRecorderRoundTripSailIT (sc-recorder-round-trip-more.xml), and it has no map menu item.
+	  Calendar, Map and Tree items are links; its Condition Node Tree, List Attribute Map and List Attribute Calendar items
+	  are navigated by SmartClientRecorderRoundTripSailIT (sc-recorder-round-trip-more.xml).
 	- listMembership: the kitchen sink's only list membership is on ConditionsFixture (see below); the SC admin suite
 	  covers it (group roles).
 	- contentSignature, checkMembership (not rendered by SmartClient), comparison, geometryMap, map, chart:

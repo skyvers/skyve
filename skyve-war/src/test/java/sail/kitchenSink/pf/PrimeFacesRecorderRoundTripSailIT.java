@@ -102,7 +102,7 @@ class PrimeFacesRecorderRoundTripSailIT extends AbstractPrimeFacesInterpretedSai
 
 	/**
 	 * Lookups, data grids, uploads, Vue list grid filters, sorting and selection, a data table's selection, a generated
-	 * number reused later (a capture), server-side questions and a data grid's selection: see
+	 * number reused later (a capture), server-side questions, a data grid's selection and a map: see
 	 * pf-recorder-round-trip-more.xml.
 	 */
 	@Test
@@ -125,6 +125,7 @@ class PrimeFacesRecorderRoundTripSailIT extends AbstractPrimeFacesInterpretedSai
 					() -> assertTrue(xml.contains("<upload binding=\"contentLink\" file=\"sail/files/sail-upload.txt\"/>"), xml),
 					() -> assertTrue(xml.contains("text=\"Run From Row\" confirm=\"false\"/>"), xml),
 					() -> assertTrue(xml.contains("<action name=\"AskYesNo\" confirm=\"false\"/>"), xml),
+					() -> assertTrue(xml.contains("<navigateMap module=\"kitchensink\" document=\"ListAttributes\" geometryBinding=\"geometry\"/>"), xml),
 					() -> assertTrue(xml.contains("<dataGridSelect binding=\"rows\" rowContaining=\"SAIL selectable "), xml));
 		replay(xml);
 	}

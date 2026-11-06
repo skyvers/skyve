@@ -4,8 +4,7 @@
 	phase 5 maps. Data grids (new, zoom, inline edits, select, remove, a drag and a link in a row), lookups (pick,
 	autocomplete, new and edit, and in an inline grid), uploads (refused and accepted), list filters, sorting and
 	selection, a number the application generates and the list is then filtered by (a capture), and server-side
-	questions, and tree and calendar menu items (the kitchen sink has no map menu item: no persistent kitchen sink
-	document has a geometry). It has no login: it runs in a session that is already signed in and recording.
+	questions, and tree, map and calendar menu items. It has no login: it runs in a session that is already signed in and recording.
 	The lookup values it makes sort first ("0 ...") and are deleted again at the end.
 -->
 <automation uxui="desktop" userAgentType="desktop" testStrategy="Assert"
@@ -126,9 +125,10 @@
 			<listGridSelect module="kitchensink" query="qListGridFixtureVue" rowContaining="0 SAIL lookup {run} a" />
 		</method>
 	</interaction>
-	<interaction name="A tree and a calendar">
+	<interaction name="A tree, a map and a calendar">
 		<method>
 			<navigateMenu module="kitchensink" item="Condition Node Tree" />
+			<navigateMenu module="kitchensink" item="List Attribute Map" />
 			<navigateMenu module="kitchensink" item="List Attribute Calendar" />
 		</method>
 	</interaction>
