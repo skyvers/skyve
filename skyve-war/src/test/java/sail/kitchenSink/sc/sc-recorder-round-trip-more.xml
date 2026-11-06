@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!--
+	The second kitchen sink workflow that SmartClientRecorderRoundTripSailIT records and replays: the gestures recorder
+	phase 5 maps. Data grids (new, zoom, inline edits, select, remove, a drag and a link in a row), lookups (pick,
+	autocomplete, new and edit, and in an inline grid), uploads (refused and accepted), list filters, sorting and
+	selection, a number the application generates and the list is then filtered by (a capture), and server-side
+	questions. (The app's only tree and map menu items are in whosin, which this customer does not have.) It has no login: it runs in a session that is already signed in and recording.
+	The lookup values it makes sort first ("0 ...") and are deleted again at the end.
+-->
+<automation uxui="desktop" userAgentType="desktop" testStrategy="Assert"
+	xsi:schemaLocation="http://www.skyve.org/xml/sail ../../../../main/java/schemas/sail.xsd"
+	xmlns="http://www.skyve.org/xml/sail"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<interaction name="Lookup values: a generated number, list filters and sorting">
+		<method>
+			<navigateMenu module="kitchensink" item="Lookup values" />
+			<listGridNew module="kitchensink" document="LookupDescription" />
+			<dataEnter binding="description" value="0 SAIL lookup {run} a" />
+			<save />
+			<captureValue binding="number" variable="a" />
+			<ok />
+			<listGridNew module="kitchensink" document="LookupDescription" />
+			<dataEnter binding="description" value="0 SAIL lookup {run} b" />
+			<save />
+			<ok />
+			<listGridFilter module="kitchensink" document="LookupDescription" column="description" value="{run}" />
+			<listGridFilter module="kitchensink" document="LookupDescription" column="number" value="{var:a}" operator="equals" />
+			<testGridRows module="kitchensink" document="LookupDescription" minRows="1" maxRows="1" />
+			<listGridFilter module="kitchensink" document="LookupDescription" column="number" />
+			<listGridSort module="kitchensink" document="LookupDescription" column="description" descending="true" />
+			<listGridZoom module="kitchensink" document="LookupDescription" rowContaining="0 SAIL lookup {run} b" />
+			<cancel />
+			<listGridClearFilter module="kitchensink" document="LookupDescription" />
+		</method>
+	</interaction>
+	<interaction name="Lookups in a view and in an inline grid">
+		<method>
+			<navigateEdit module="kitchensink" document="ModelLookupFixture" />
+			<dataEnter binding="name" value="SAIL model lookup {run}" />
+			<lookupDescriptionPick binding="selection" rowContaining="0 SAIL lookup {run} a" />
+			<lookupDescriptionAutoComplete binding="singleSelection" search="0 SAIL lookup {run}" pick="{run} b" />
+			<dataGridNew binding="rows" />
+			<lookupDescriptionPick binding="selection" rowContaining="0 SAIL lookup {run} b" />
+			<save />
+			<listGridZoom module="kitchensink" query="qModelLookupFixtures" rowContaining="SAIL model lookup {run}" />
+			<delete />
+		</method>
+	</interaction>
+	<interaction name="Kitchen sink: a lookup's New and Edit, and data grids">
+		<method>
+			<navigateEdit module="kitchensink" document="KitchenSink" />
+			<dataEnter binding="text" value="Required text" />
+			<lookupDescriptionAutoComplete binding="lookupDescription" search="0 SAIL lookup {run} a" />
+			<lookupDescriptionEdit binding="lookupDescription" />
+			<zoomOut />
+			<lookupDescriptionNew binding="lookupDescription" />
+			<dataEnter binding="description" value="0 SAIL lookup {run} c" />
+			<zoomOut />
+			<tabSelect path="Data Grids" />
+			<dataGridNew binding="inlineGrid" />
+			<dataEnter binding="booleanFlag" value="true" />
+			<dataEnter binding="date" value="07-Nov-2025" />
+			<dataGridEdit binding="inlineGrid" row="0" />
+			<dataEnter binding="booleanFlag" value="false" />
+			<dataGridRemove binding="inlineGrid" row="0" />
+			<dataGridNew binding="containerGrid" />
+			<dataEnter binding="url" value="https://example.com/{run}" />
+			<zoomOut />
+			<dataGridSelect binding="containerGrid" row="0" />
+			<dataGridRemove binding="containerGrid" row="0" />
+			<dataGridNew binding="orderedGrid" />
+			<dataEnter binding="date" value="01-Jan-2020" />
+			<zoomOut />
+			<dataGridZoom binding="orderedGrid" rowContaining="01-Jan-2020" />
+			<zoomOut />
+			<dataGridSelect binding="orderedGrid" rowContaining="01-Jan-2020" />
+			<tabSelect path="Widgets" />
+		</method>
+	</interaction>
+	<interaction name="Ordered grid: drag a row">
+		<method>
+			<navigateMenu module="kitchensink" item="Ordered Grid Fixtures" />
+			<listGridNew module="kitchensink" document="OrderedGridFixture" />
+			<dataEnter binding="name" value="SAIL ordered {run}" />
+			<dataGridNew binding="rows" />
+			<dataEnter binding="name" value="First {run}" />
+			<zoomOut />
+			<dataGridNew binding="rows" />
+			<dataEnter binding="name" value="Second {run}" />
+			<zoomOut />
+			<dataGridMove binding="rows" rowContaining="Second {run}" to="0" />
+			<save />
+			<delete />
+		</method>
+	</interaction>
+	<interaction name="Actions fixture: uploads and a link in a row">
+		<method>
+			<navigateEdit module="kitchensink" document="ActionsFixture" />
+			<upload action="ActionsUpload" file="sail/files/sail-refused.txt" testSuccess="false" />
+			<testFailure message="sail-refused.txt already exists" />
+			<upload action="ActionsUpload" file="sail/files/sail-upload.txt" />
+			<tabSelect path="Rows" />
+			<dataGridNew binding="rows" />
+			<dataEnter binding="name" value="SAIL row {run}" />
+			<zoomOut />
+			<dataGridLink binding="rows" rowContaining="SAIL row {run}" text="Run From Row" confirm="false" />
+			<dataGridLink binding="rows" rowContaining="SAIL row {run}" text="Run From Row" />
+			<testGridRows binding="rows" rowContaining="Run From Row ran" minRows="1" maxRows="1" />
+		</method>
+	</interaction>
+	<interaction name="Content upload and server-side questions">
+		<method>
+			<navigateEdit module="kitchensink" document="UploadFixture" />
+			<upload binding="contentLinkNone" file="sail/files/sail-upload.txt" />
+			<navigateEdit module="kitchensink" document="DialogsFixture" />
+			<action name="AskYesNo" />
+			<testValue binding="outcome" value="Yes or No answered Yes" />
+			<action name="AskYesNo" confirm="false" />
+			<testValue binding="outcome" value="Yes or No answered No" />
+		</method>
+	</interaction>
+	<interaction name="List grid selection">
+		<method>
+			<navigateEdit module="kitchensink" document="ListGridFixture" />
+			<listGridSelect module="kitchensink" query="qListGridFixtureVue" rowContaining="0 SAIL lookup {run} a" />
+		</method>
+	</interaction>
+	<interaction name="Delete the lookup values">
+		<method>
+			<navigateMenu module="kitchensink" item="Lookup values" />
+			<listGridZoom module="kitchensink" document="LookupDescription" rowContaining="0 SAIL lookup {run} a" />
+			<delete />
+			<listGridZoom module="kitchensink" document="LookupDescription" rowContaining="0 SAIL lookup {run} b" />
+			<delete />
+		</method>
+	</interaction>
+</automation>

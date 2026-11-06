@@ -243,7 +243,7 @@
 	/** A change to a widget the adapter cannot read: noted, so that the gesture is not dropped. */
 	function onChange(event) {
 		var m = mapped(event.target);
-		if (m && m.entry.binding && !m.entry.step) {
+		if (m && m.entry.binding && !m.entry.step && (m.entry.widget !== "lookupDescription")) {
 			var value = fieldValue(m.id, m.entry.widget);
 			if (value && value.unreadable && (unreadable.indexOf(m.entry.binding) < 0)) {
 				unreadable.push(m.entry.binding);
@@ -309,7 +309,13 @@
 			}
 		});
 		if (changes.length) {
-			core.push({ op: "context", text: "changed on screen: " + changes.join("; ") });
+			var changedValues = {};
+			Object.keys(now).forEach(function (id) {
+				if (Object.prototype.hasOwnProperty.call(shown, id) && (shown[id] !== now[id]) && now[id]) {
+					changedValues[map.ids[id].binding] = now[id];
+				}
+			});
+			core.push({ op: "context", text: "changed on screen: " + changes.join("; "), shown: JSON.stringify(changedValues) });
 		}
 		shown = now;
 		recordMessages();
@@ -329,7 +335,13 @@
 	/** The text each cell of a row shows, as rowContaining compares it (a cell's text contains the text). */
 	function cellTexts(row) {
 		return Array.prototype.map.call(row.querySelectorAll("td"), function (td) {
-			return String(td.textContent || "").trim();
+			// a card layout repeats the column's title in each cell, an inline cell's select lists its options, and a
+			// button's label (View Detail, a date picker's) is not what the row shows
+			var cell = td.cloneNode(true);
+			cell.querySelectorAll(".ui-column-title, .skyve-card-cell-label, select, script, button").forEach(function (e) {
+				e.remove();
+			});
+			return String(cell.textContent || "").replace(/\s+/g, " ").trim();
 		});
 	}
 
@@ -414,6 +426,13 @@
 						(cell && !cell.classList.contains("skyve-vue-list-grid-action") && vue.querySelector(".skyve-vue-list-grid-zoomable"));
 			var rows = rowsOf(vue);
 			var rowNum = tr ? rows.indexOf(tr) : -1;
+			var component = vueComponent(grid.id);
+			if (!zoom && (rowNum >= 0) && cell && component && component.selectable && !target.closest("a, button")) {
+				step = withRow(gridAttributes(grid.entry), rows, rowNum);
+				step.op = "listGridSelect";
+				core.record(step);
+				return true;
+			}
 			if (zoom && (rowNum >= 0)) {
 				step = gridAttributes(grid.entry);
 				step.op = "listGridZoom";
@@ -434,6 +453,340 @@
 		navigating();
 		core.record(step);
 		return true;
+	}
+
+	// ---------------------------------------------------------------- data grids, lookups and list grids (phase 5)
+
+	/** What the user last typed into each lookup, by the lookup's client id. */
+	var lookupTyped = {};
+	/** The state (filters and sort) each Vue list grid showed, by its container id. */
+	var vueStates = {};
+	/** SmartClient-style filter operators (the Vue list grid's match modes) and the listGridFilter operators they are. */
+	var OPERATORS = { iContains: "contains", contains: "contains", iStartsWith: "startsWith", startsWith: "startsWith",
+						equals: "equals", iEquals: "equals", notEqual: "notEquals", iNotEqual: "notEquals",
+						lessThan: "lessThan", greaterThan: "greaterThan" };
+	var MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+	/** Adds a row to a step: rowContaining (or row) and the row's texts, for the checks. */
+	function withRow(step, rows, rowNum) {
+		var located = rowLocator(rows, rowNum);
+		if (located.rowContaining != null) {
+			step.rowContaining = located.rowContaining;
+		} else {
+			step.row = located.row;
+		}
+		step.rowTexts = cellTexts(rows[rowNum]).filter(function (t) {
+			return !!t;
+		}).join(" | ");
+		return step;
+	}
+
+	/** The mapped data grid (a data table) an element is in: { id, entry, element } or null. */
+	function dataGridAt(element) {
+		for (var e = element; e && (e !== document.body); e = e.parentElement) {
+			if (e.id && e.classList && e.classList.contains("ui-datatable")) {
+				var entry = map.ids[mapKey(e.id)];
+				if (entry && (entry.dataGrid || entry.listGrid)) {
+					return { id: e.id, entry: entry, element: e };
+				}
+			}
+		}
+		return null;
+	}
+
+	/** A lookup's typing: kept for the autocomplete step its pick becomes. */
+	function onInput(event) {
+		if (!core || !core.active()) {
+			return;
+		}
+		var target = event.target;
+		var m = (target && target.id && /_input$/.test(target.id)) ? mapped(target) : null;
+		if (m && (m.entry.widget === "lookupDescription")) {
+			lookupTyped[target.id.replace(/_input$/, "")] = target.value;
+		}
+	}
+
+	/**
+	 * A pick from a lookup's drop-down: lookupDescriptionAutoComplete when the user typed into it first (search what was
+	 * typed, pick the description chosen), otherwise lookupDescriptionPick of the row containing the description. Returns
+	 * true if the click was on a lookup's item.
+	 */
+	function lookupPick(target) {
+		var item = target.closest(".ui-autocomplete-item");
+		var panel = item ? item.closest("[id$='_panel']") : null;
+		if (!panel) {
+			return false;
+		}
+		var id = panel.id.substring(0, panel.id.length - "_panel".length);
+		var entry = map.ids[mapKey(id)];
+		if (!entry || (entry.widget !== "lookupDescription")) {
+			return false;
+		}
+		var description = text(item);
+		var typed = lookupTyped[id];
+		delete lookupTyped[id];
+		var step = (typed && typed.trim()) ? { op: "lookupDescriptionAutoComplete", binding: entry.binding, search: typed, pick: description } :
+												{ op: "lookupDescriptionPick", binding: entry.binding, rowContaining: description };
+		step.label = label(id);
+		core.record(step);
+		return true;
+	}
+
+	/** The step for a link in a data grid's row (dataGridLink), or null. */
+	function rowLinkStep(target) {
+		var link = target.closest("a");
+		var grid = link ? dataGridAt(link) : null;
+		if (!grid || !grid.entry.dataGrid) {
+			return null;
+		}
+		var rows = rowsOf(grid.element);
+		var tr = link.closest("tr");
+		var rowNum = tr ? rows.indexOf(tr) : -1;
+		if (rowNum < 0) {
+			return null;
+		}
+		var step = withRow({ op: "dataGridLink", binding: grid.entry.dataGrid }, rows, rowNum);
+		step.text = String(link.innerText || link.textContent || "").replace(/\s+/g, " ").trim();
+		return step.text ? { step: step, link: link } : null;
+	}
+
+	/** The parameters of a request's form data (a jQuery ajax settings.data string). */
+	function formParams(data) {
+		var result = {};
+		if (typeof data !== "string") {
+			return result;
+		}
+		data.split("&").forEach(function (pair) {
+			var equals = pair.indexOf("=");
+			if (equals > 0) {
+				try {
+					result[decodeURIComponent(pair.substring(0, equals))] = decodeURIComponent(pair.substring(equals + 1).replace(/\+/g, " "));
+				} catch (e) {
+					// not form data
+				}
+			}
+		});
+		return result;
+	}
+
+	/**
+	 * A PrimeFaces ajax request about to go: a data table's rowReorder (a drag) is dataGridMove; its rowSelect is
+	 * dataGridSelect or listGridSelect.
+	 */
+	function onAjaxRequest(settings) {
+		var params = formParams(settings && settings.data);
+		var source = params["jakarta.faces.source"] || params["javax.faces.source"];
+		var behaviour = params["jakarta.faces.behavior.event"] || params["javax.faces.behavior.event"];
+		var table = source ? document.getElementById(source) : null;
+		var grid = table ? dataGridAt(table) : null;
+		if (!grid) {
+			return;
+		}
+		var rows = rowsOf(grid.element);
+		if ((behaviour === "rowReorder") && grid.entry.dataGrid) {
+			var to = Number(params[source + "_toIndex"]);
+			if ((to >= 0) && rows[to]) {
+				var move = withRow({ op: "dataGridMove", binding: grid.entry.dataGrid }, rows, to);
+				move.to = String(to);
+				core.record(move);
+			}
+		} else if (behaviour === "rowSelect") {
+			var selected = grid.element.querySelector("tbody tr.ui-state-highlight");
+			var rowNum = selected ? rows.indexOf(selected) : -1;
+			if (rowNum >= 0) {
+				var select = grid.entry.dataGrid ? { op: "dataGridSelect", binding: grid.entry.dataGrid } : gridAttributes(grid.entry);
+				if (!grid.entry.dataGrid) {
+					select.op = "listGridSelect";
+				}
+				core.record(withRow(select, rows, rowNum));
+			}
+		}
+	}
+
+	/** The Vue list grid component in a container, or null. */
+	function vueComponent(containerId) {
+		// the app's root component is the one rendered into its container (app._instance is only in development builds)
+		var app = window[containerId];
+		var root = app && app._container && app._container._vnode && app._container._vnode.component;
+		var component = root && root.subTree && root.subTree.component;
+		return component ? component.proxy : null;
+	}
+
+	function pad(n) {
+		return (n < 10) ? "0" + n : String(n);
+	}
+
+	/** A filter value as listGridFilter writes it: an enum's label, a boolean, a date as Skyve's default converter. */
+	function filterText(column, value) {
+		if ((value === true) || (value === false)) {
+			return String(value);
+		}
+		if (column && column.enumValues) {
+			var option = column.enumValues.filter(function (o) {
+				return o.value === value;
+			})[0];
+			if (option) {
+				return String(option.label);
+			}
+		}
+		if (value instanceof Date) {
+			var date = pad(value.getDate()) + "-" + MONTHS[value.getMonth()] + "-" + value.getFullYear();
+			if (column && (column.type === "dateTime")) {
+				return date + " " + pad(value.getHours()) + ":" + pad(value.getMinutes());
+			}
+			if (column && (column.type === "timestamp")) {
+				return date + " " + pad(value.getHours()) + ":" + pad(value.getMinutes()) + ":" + pad(value.getSeconds());
+			}
+			if (column && (column.type === "time")) {
+				return pad(value.getHours()) + ":" + pad(value.getMinutes());
+			}
+			return date;
+		}
+		return String(value);
+	}
+
+	/** The column binding of a Vue list grid's field, from the map's columns, or the field unsanitised. */
+	function columnBinding(entry, field) {
+		var grid = map.grids[entry.listGrid] || {};
+		var found = (grid.columns || []).filter(function (c) {
+			return (c.name === field) || (c.binding === field) || (c.binding && (c.binding.replace(/\./g, "_") === field));
+		})[0];
+		return found ? (found.binding || found.name) : String(field).replace(/_(\d*)_/g, "[$1]").replace(/_/g, ".");
+	}
+
+	/** A Vue list grid's filters and sort: { ok, any, columns: { field: { operator, value } }, sort: [{ field, order }] }. */
+	function vueState(component) {
+		var topLevel = component.selectedTopLevelOperator;
+		topLevel = (topLevel && topLevel.value) ? topLevel.value : topLevel;
+		var result = { ok: topLevel !== "or", columns: {}, sort: [] };
+		var columns = {};
+		(component.columns || []).forEach(function (c) {
+			columns[c.field] = c;
+		});
+		Object.keys(component.filters || {}).forEach(function (field) {
+			var filter = component.filters[field] || {};
+			var constraints = (filter.constraints || [filter]).filter(function (c) {
+				return c && (c.value != null) && (c.value !== "");
+			});
+			if (constraints.length > 1) {
+				result.ok = false;
+			} else if (constraints.length === 1) {
+				var operator = OPERATORS[constraints[0].matchMode];
+				if (!operator) {
+					result.ok = false;
+				} else {
+					result.columns[field] = { operator: operator, value: filterText(columns[field], constraints[0].value) };
+				}
+			}
+		});
+		(component.multiSortMeta || []).forEach(function (s) {
+			result.sort.push({ field: s.field, order: s.order });
+		});
+		return result;
+	}
+
+	/**
+	 * A Vue list grid is about to fetch its rows (window.fetch of smartlist): records how the user changed each grid's
+	 * filters and sort since it last fetched.
+	 */
+	function vueFetching() {
+		Object.keys(map.ids).forEach(function (id) {
+			var entry = map.ids[id];
+			var component = entry.listGrid ? vueComponent(id) : null;
+			if (!component) {
+				return;
+			}
+			var now = vueState(component);
+			var before = vueStates[id];
+			vueStates[id] = now;
+			if (!before) {
+				return; // the state the grid had when the page loaded (perhaps kept from before)
+			}
+			var list = function (op) {
+				var step = gridAttributes(entry);
+				step.op = op;
+				return step;
+			};
+			if (!now.ok) {
+				if (JSON.stringify(now) !== JSON.stringify(before)) {
+					core.unmapped("filtered a list in a way SAIL cannot write as column filters ANDed together");
+				}
+				return;
+			}
+			var names = Object.keys(now.columns);
+			var old = Object.keys(before.columns);
+			if (!names.length && old.length) {
+				core.record(list("listGridClearFilter"));
+			} else {
+				names.forEach(function (name) {
+					var was = before.columns[name];
+					var is = now.columns[name];
+					if (!was || (was.operator !== is.operator) || (was.value !== is.value)) {
+						var step = list("listGridFilter");
+						step.column = columnBinding(entry, name);
+						step.value = is.value;
+						if (is.operator !== "contains") {
+							step.operator = is.operator;
+						}
+						core.record(step);
+					}
+				});
+				old.forEach(function (name) {
+					if (!now.columns[name]) {
+						var step = list("listGridFilter");
+						step.column = columnBinding(entry, name);
+						core.record(step);
+					}
+				});
+			}
+			if (JSON.stringify(now.sort) !== JSON.stringify(before.sort)) {
+				if (now.sort.length === 1) {
+					var sort = list("listGridSort");
+					sort.column = columnBinding(entry, now.sort[0].field);
+					if (now.sort[0].order === -1) {
+						sort.descending = "true";
+					}
+					core.record(sort);
+				} else {
+					core.unmapped(now.sort.length ? "sorted a list by more than one column" : "cleared a list's sort");
+				}
+			}
+		});
+	}
+
+	/** Keeps each Vue list grid's state as the page shows it, so that only the user's changes are recorded. */
+	function vueBaseline() {
+		Object.keys(map.ids).forEach(function (id) {
+			var component = map.ids[id].listGrid ? vueComponent(id) : null;
+			if (component && !vueStates[id]) {
+				vueStates[id] = vueState(component);
+			}
+		});
+	}
+
+	/** The question a server-side question dialog asks, and whether the button declines it (No, Cancel or the abort). */
+	function questionAnswer(target) {
+		var button = target.closest(".ui-dialog-buttonpane button");
+		var dialog = button ? button.closest("[role=alertdialog][aria-labelledby=skyveQuestionTitle]") : null;
+		if (!dialog) {
+			return null;
+		}
+		var buttons = Array.prototype.slice.call(dialog.querySelectorAll(".ui-dialog-buttonpane button"));
+		var close = dialog.querySelector(".ui-dialog-titlebar-close");
+		var abortLabel = close ? close.getAttribute("aria-label") : null;
+		var negative = buttons.filter(function (b) {
+			return text(b) === abortLabel;
+		})[0] || buttons[buttons.length - 1];
+		var title = document.getElementById("skyveQuestionTitle");
+		return { declined: button === negative, answer: text(button), question: text(title) };
+	}
+
+	/** The title the page shows for its view, as captureTitle reads it. */
+	function viewTitle() {
+		var title = Array.prototype.filter.call(document.querySelectorAll(".skyve-title-text"), function (t) {
+			return t.getClientRects().length > 0;
+		})[0];
+		return title ? String(title.innerText || "").trim() : "";
 	}
 
 	// ---------------------------------------------------------------- clicks
@@ -503,6 +856,22 @@
 			}
 		} else if (entry.step === "tabSelect") {
 			step = { op: "tabSelect", path: entry.path };
+		} else if (/^dataGrid(New|Zoom|Remove|Select)$/.test(entry.step)) {
+			step = { op: entry.step, binding: entry.binding };
+			if (entry.step !== "dataGridNew") {
+				var grid = dataGridAt(m.element);
+				var gridRows = grid ? rowsOf(grid.element) : [];
+				var row = m.element.closest("tr");
+				var at = row ? gridRows.indexOf(row) : m.row;
+				if (at < 0) {
+					return null;
+				}
+				withRow(step, gridRows, at);
+			}
+		} else if (entry.step === "upload") {
+			// the core records the upload when the upload page sends the file
+			core.handled();
+			return null;
 		} else {
 			step = { op: "unmapped", text: "pressed " + entry.step + " " + (entry.binding || entry.action || entry.name || "") +
 											" (recorded in a later phase)" };
@@ -518,7 +887,7 @@
 		// the global confirm dialog answers the button that asked
 		if (target.closest(".ui-confirmdialog-no")) {
 			if (confirming) {
-				if (CLOSING_STEPS[confirming.op] || (confirming.op === "save") || (confirming.op === "action")) {
+				if (CLOSING_STEPS[confirming.op] || (confirming.op === "save") || (confirming.op === "action") || (confirming.op === "dataGridLink")) {
 					confirming.confirm = "false";
 				}
 				release();
@@ -529,8 +898,19 @@
 			release();
 			return;
 		}
+		var question = questionAnswer(target);
+		if (question) {
+			// a server-side question: No (or the button that aborts) declines the step that raised it
+			if (question.declined) {
+				core.push({ op: "context", text: "answered \"" + question.answer + "\" to \"" + question.question + "\"", declined: "true" });
+			}
+			return;
+		}
 		release();
 		notNavigating();
+		if (lookupPick(target)) {
+			return;
+		}
 		var link = target.closest("a.ui-menuitem-link");
 		if (link && link.closest(".ui-panelmenu")) {
 			recordMenu(link); // opening a module or a group is not a step
@@ -550,7 +930,21 @@
 			return;
 		}
 		var m = mapped(target);
-		if (!m || !m.entry.step || disabled(m.element.closest("button, a") || m.element)) {
+		if (m && m.entry.widget && /^content/.test(m.entry.widget)) {
+			core.handled(); // a content widget's upload: the core records it from the upload page
+			return;
+		}
+		if (!m || !m.entry.step) {
+			var rowLink = rowLinkStep(target);
+			if (rowLink && !disabled(rowLink.link)) {
+				// an action link may ask in the confirm dialog: the step waits for the answer, or for its request to go
+				rowLink.step.hold = true;
+				confirming = rowLink.step;
+				core.record(rowLink.step);
+			}
+			return;
+		}
+		if (disabled(m.element.closest("button, a") || m.element)) {
 			return;
 		}
 		if ((m.entry.step === "action") && (m.entry.name === STOP_ACTION)) {
@@ -572,7 +966,8 @@
 		if (!step) {
 			return;
 		}
-		if (CLOSING_STEPS[step.op] || (step.op === "listGridNew") || (step.op === "listGridZoom")) {
+		if (CLOSING_STEPS[step.op] || (step.op === "listGridNew") || (step.op === "listGridZoom") ||
+				(step.op === "dataGridNew") || (step.op === "dataGridZoom")) {
 			navigating();
 		}
 		// a button may ask for confirmation in the global confirm dialog: its step waits for the answer
@@ -647,6 +1042,10 @@
 	// ---------------------------------------------------------------- unmapped clicks
 
 	function control(element) {
+		if (element.closest(".p-column-filter-overlay, .p-column-filter-menu-button, .p-sortable-column, .p-column-header-content, " +
+								".ui-dialog-titlebar, .ui-overlaypanel-close, .ui-dialog-titlebar-close")) {
+			return null; // a list's filter and sort are recorded when it fetches; a dialog's or overlay's close
+		}
 		if (element.closest(".ui-confirmdialog, .ui-confirm-dialog, .ui-panelmenu, .ui-tabs-nav, .ui-growl, #skyve-sail-recorder")) {
 			return null;
 		}
@@ -683,13 +1082,29 @@
 		core = recorder;
 		core.listen(document, "click", onClick, true);
 		core.listen(document, "change", onChange, true);
+		core.listen(document, "input", onInput, true);
 		// PrimeFaces' ajax events, which it triggers through jQuery
-		var send = function () {
+		var send = function (event, xhr, settings) {
 			if (core.active()) {
 				flushDataEntry();
 				release();
+				onAjaxRequest(settings);
 			}
 		};
+		// a Vue list grid fetches its rows with window.fetch (smartlist): its filters and sort are the user's then
+		core.wrap(window, "fetch", function (original) {
+			return function (request) {
+				var url = (request && request.url) ? request.url : String(request || "");
+				if (core.active() && /smartlist(\?|$)/.test(url)) {
+					try {
+						vueFetching();
+					} catch (e) {
+						// never stop the grid's fetch
+					}
+				}
+				return original.apply(window, arguments);
+			};
+		});
 		jQuery(document).on("pfAjaxSend", send);
 		jQuery(document).on("pfAjaxComplete", onAjaxComplete);
 		core.onDetach(function () {
@@ -741,7 +1156,7 @@
 		attach: attach,
 		flush: flushDataEntry,
 		describe: function () {
-			return { view: describeView(), screen: screen() };
+			return { view: describeView(), screen: screen(), title: viewTitle() };
 		},
 		connected: function () {
 			// nothing to resolve: the map names the page's list
@@ -762,16 +1177,32 @@
 		reset: function () {
 			confirming = null;
 			unreadable = [];
+			lookupTyped = {};
+			vueStates = {};
 		}
 	});
 	SKYVE.SailRecorder = recorder;
 
 	function begin() {
+		if (window.top !== window) {
+			// a page in a frame (the upload page, in a renderer's window or overlay): the page around it records
+			return;
+		}
 		readMap();
 		shown = snapshot();
 		recorder.start(readJson("sailRecorderState", "data-state"));
 		recordPageLoad();
 		recordMessages();
+		// the values the page shows, which a later step may reuse (a capture; see SailRecordingCaptures)
+		var values = {};
+		Object.keys(shown).forEach(function (id) {
+			if (shown[id] && map.ids[id]) {
+				values[map.ids[id].binding] = shown[id];
+			}
+		});
+		if (core && recorder.active() && Object.keys(values).length) {
+			core.push({ op: "context", shown: JSON.stringify(values) });
+		}
 	}
 	if (document.readyState === "loading") {
 		document.addEventListener("DOMContentLoaded", begin);

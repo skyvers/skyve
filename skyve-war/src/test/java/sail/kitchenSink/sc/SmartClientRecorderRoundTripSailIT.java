@@ -91,6 +91,37 @@ class SmartClientRecorderRoundTripSailIT extends AbstractSmartClientInterpretedS
 		replay(xml);
 	}
 
+	/**
+	 * Data grids, lookups, uploads, list filters, sorting and selection, a generated number reused later (a capture),
+	 * server-side questions, and tree and map menu items: see sc-recorder-round-trip-more.xml.
+	 */
+	@Test
+	void moreGestures() {
+		String xml = record(() -> sailResource("sail/kitchenSink/sc/sc-recorder-round-trip-more.xml"));
+		assertAll(() -> assertTrue(xml.contains("<captureValue binding=\"number\" variable=\"number\"/>"), xml),
+					() -> assertTrue(xml.contains("<listGridFilter column=\"number\" value=\"{var:number}\" operator=\"equals\"/>"), xml),
+					() -> assertTrue(xml.contains("<listGridFilter column=\"number\"/>"), xml),
+					() -> assertTrue(xml.contains("<listGridSort column=\"description\" descending=\"true\"/>"), xml),
+					() -> assertTrue(xml.contains("<listGridClearFilter/>"), xml),
+					() -> assertTrue(xml.contains("<listGridSelect module=\"kitchensink\" query=\"qListGridFixtureVue\" rowContaining=\"0 SAIL lookup "), xml),
+					() -> assertTrue(xml.contains("<lookupDescriptionPick binding=\"selection\" rowContaining=\"0 SAIL lookup "), xml),
+					() -> assertTrue(xml.contains("<lookupDescriptionAutoComplete binding=\"singleSelection\" search=\"0 SAIL lookup "), xml),
+					() -> assertTrue(xml.contains("<lookupDescriptionEdit binding=\"lookupDescription\"/>"), xml),
+					() -> assertTrue(xml.contains("<lookupDescriptionNew binding=\"lookupDescription\"/>"), xml),
+					() -> assertTrue(xml.contains("<dataGridNew binding=\"inlineGrid\"/>"), xml),
+					() -> assertTrue(xml.contains("<dataEnter binding=\"date\" value=\"07-Nov-2025\"/>"), xml),
+					() -> assertTrue(xml.contains("<dataGridEdit binding=\"inlineGrid\" rowContaining=\"07-Nov-2025\"/>"), xml),
+					() -> assertTrue(xml.contains("<dataGridRemove binding=\"inlineGrid\""), xml),
+					() -> assertTrue(xml.contains("<dataGridZoom binding=\"orderedGrid\" rowContaining=\"01-Jan-2020\"/>"), xml),
+					() -> assertTrue(xml.contains("<dataGridSelect binding=\"orderedGrid\" rowContaining=\"01-Jan-2020\"/>"), xml),
+					() -> assertTrue(xml.contains("<dataGridMove binding=\"rows\" rowContaining=\"Second "), xml),
+					() -> assertTrue(xml.contains("<upload action=\"ActionsUpload\" file=\"sail/files/sail-refused.txt\" testSuccess=\"false\"/>"), xml),
+					() -> assertTrue(xml.contains("<upload binding=\"contentLinkNone\" file=\"sail/files/sail-upload.txt\"/>"), xml),
+					() -> assertTrue(xml.contains("text=\"Run From Row\" confirm=\"false\"/>"), xml),
+					() -> assertTrue(xml.contains("<action name=\"AskYesNo\" confirm=\"false\"/>"), xml));
+		replay(xml);
+	}
+
 	@Test
 	void adminContacts() {
 		String xml = record(() -> sailString(CONTACTS));
@@ -166,6 +197,13 @@ class SmartClientRecorderRoundTripSailIT extends AbstractSmartClientInterpretedS
 		panel("undo");
 		awaitPanel();
 		panel("collapse");
+		// leave no lookup value behind
+		sailString(HEAD + "<interaction name=\"Delete the lookup value\"><method>" +
+					"<pushListContext module=\"kitchensink\" document=\"LookupDescription\" />" +
+					"<listGridZoom module=\"kitchensink\" document=\"LookupDescription\" rowContaining=\"" + value + "\" />" +
+					"<delete />" +
+					"</method></interaction>" + TAIL);
+		awaitRecorder();
 
 		// stop in the panel, which offers the download
 		panel("stop");

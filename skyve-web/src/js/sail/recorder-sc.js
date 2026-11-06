@@ -20,12 +20,26 @@
  *     isc.EditView.gather               notes the errors when validation stops a request in the browser
  *     isc.EditView._displayGrowlsAndMessages, _displayFailure   note the messages and errors a response shows
  *     isc.BizUtil.growl                 notes the growls shown
+ *     isc.BizDataGrid zoom, add, startEditingRow   dataGridZoom, dataGridNew, dataGridEdit
+ *     isc.ListGrid removeSelectedData, recordDrop  dataGridRemove, dataGridMove (on a data grid)
+ *     isc.ListGrid setEditValue         dataEnter into an inline data grid's cells, after dataGridNew or dataGridEdit
+ *     isc.ListGrid handleSortChanged    listGridSort, when the user sorted a list grid
+ *     isc.ListGrid filterData           listGridFilter and listGridClearFilter, from the criteria a BizListGrid's user set
+ *     isc.BizLookupDescriptionItem.zoom lookupDescriptionNew, lookupDescriptionEdit
+ *     isc.BizUtil.openContentUpload     marks the click handled: the core records the upload from its page
  * - it handles SmartClient's ValuesManager.itemChanged() notification, which a view's forms fire when the user
  *   changes a field: the field's final value becomes a dataEnter step before the next step or server response;
- * - it wraps isc.ask, to see a confirmation the user declined (confirm="false");
+ * - it wraps isc.ask, to see a confirmation the user declined (confirm="false"), and notes a server-side question the
+ *   user answered No or Cancel (the step before it gets confirm="false");
+ * - a click on a data grid row selects it (dataGridSelect), and on a link in the row follows it (dataGridLink); a click
+ *   on a row of a list grid whose selection does something selects it (listGridSelect). A selection is written only if
+ *   the next step does not act on the same grid's row;
+ * - a lookup's pick is lookupDescriptionPick (rowContaining the chosen description), or, when the user typed into it
+ *   first, lookupDescriptionAutoComplete (search and pick);
  * - it describes, for the core, a click that recorded nothing (an "unmapped" comment) and what a Check mode click
  *   checks (a growl or dialog message, a field, a grid row or a grid);
- * - a page load with a=e or a=l in its URL (a link, a typed URL, a reload) is recorded as navigateEdit or navigateList.
+ * - a page load with a=e, a=l, a=t, a=m or a=c in its URL (a link, a typed URL, a reload) is recorded as navigateEdit,
+ *   navigateList, navigateTree, navigateMap or navigateCalendar; a tree, map or calendar menu item likewise.
  */
 (function () {
 	"use strict";
@@ -52,6 +66,29 @@
 	var confirmable = null;
 	/** A navigateList step for the page load whose query or document is known once the page has its data sources. */
 	var pageList = null;
+	/** A grid row selection not yet written: { owner, step }. The next step drops it if it acts on the same grid. */
+	var pendingSelect = null;
+	/** Cells of inline data grids the user changed, not yet written: { dataGrid, rowNum, field }. */
+	var gridEdits = [];
+	/** What the user last typed into each lookup's combo, by the lookup item's ID. */
+	var lookupTyped = {};
+	/** The data grid a row was just dragged in: the click that ends the drag is not a selection. */
+	var droppedOn = null;
+	/**
+	 * A row link's step, held until its javascript: runs: an action link asks for confirmation then (isc.ask), and the
+	 * answer may decline the step. Released at the next gesture, step or response if nothing asked.
+	 */
+	var heldLink = null;
+
+	/** Lets a held row link's step go, when nothing asked about it. */
+	function releaseLink() {
+		var step = heldLink;
+		heldLink = null;
+		if (step && step.hold) {
+			delete step.hold;
+			core.send();
+		}
+	}
 
 	// ---------------------------------------------------------------- what the page shows
 
@@ -135,6 +172,9 @@
 		if (!core || !core.active() || !item || !item.form || !item.form._view) {
 			return;
 		}
+		if (isc.isA.BizLookupDescriptionItem && isc.isA.BizLookupDescriptionItem(item)) {
+			return; // a lookup's pick is seen by its combo: see watchLookup()
+		}
 		for (var i = 0; i < changed.length; i++) {
 			if (changed[i] === item) {
 				return;
@@ -197,8 +237,11 @@
 		if (isc.isA.SliderItem(item)) {
 			return (value == null) ? { unmapped: "cleared " + binding } : { binding: binding, value: String(value) };
 		}
-		if ((isc.isA.BizLookupDescriptionItem && isc.isA.BizLookupDescriptionItem(item)) || (item.canvas && !isc.isA.RichTextItem(item))) {
-			return { unmapped: "changed " + binding + " (a " + item.getClassName() + ", recorded in a later phase)" };
+		if (isc.isA.BizLookupDescriptionItem && isc.isA.BizLookupDescriptionItem(item)) {
+			return lookupEntry(item, binding);
+		}
+		if (item.canvas && !isc.isA.RichTextItem(item)) {
+			return { unmapped: "changed " + binding + " (a " + item.getClassName() + ", which SAIL cannot enter)" };
 		}
 		if (isc.isA.CheckboxItem(item)) {
 			return (value === true || value === false) ? { binding: binding, value: String(value) } :
@@ -235,6 +278,14 @@
 				var screen = screenOf(owner);
 				if (entry.unmapped) {
 					core.push({ op: "unmapped", text: entry.unmapped, view: view, screen: screen });
+				} else if (entry.op) {
+					entry.view = view;
+					entry.screen = screen;
+					entry.label = strip(item.title || item.name).replace(/\s*\*$/, "");
+					if (owner._sailEntered) {
+						owner._sailEntered[item.name] = true;
+					}
+					core.push(entry);
 				} else {
 					var step = { op: "dataEnter", binding: entry.binding, value: entry.value, view: view, screen: screen,
 									label: strip(item.title || item.name).replace(/\s*\*$/, "") };
@@ -315,15 +366,30 @@
 		var sameRecord = before && values && (view._sailBizId === values.bizId);
 		var entered = view._sailEntered || {};
 		var now = shownValues(view);
+		// the values the application showed (not the user's entries), which a later step may reuse (a capture)
+		var shown = {};
 		if (sameRecord) {
 			var changes = [];
 			Object.keys(now).forEach(function (name) {
 				if (!entered[name] && Object.prototype.hasOwnProperty.call(before, name) && (before[name] !== now[name])) {
 					changes.push(unsanitise(name) + " \"" + before[name] + "\" -> \"" + now[name] + "\"");
+					if (now[name]) {
+						shown[unsanitise(name)] = now[name];
+					}
 				}
 			});
 			if (changes.length) {
-				core.push({ op: "context", text: "changed on screen: " + changes.join("; "), view: describe(view), screen: screenOf(view) });
+				core.push({ op: "context", text: "changed on screen: " + changes.join("; "), view: describe(view), screen: screenOf(view),
+							shown: JSON.stringify(shown) });
+			}
+		} else {
+			Object.keys(now).forEach(function (name) {
+				if (now[name] && (now[name].indexOf("...") < 0)) {
+					shown[unsanitise(name)] = now[name];
+				}
+			});
+			if (Object.keys(shown).length) {
+				core.push({ op: "context", view: describe(view), screen: screenOf(view), shown: JSON.stringify(shown) });
 			}
 		}
 		view._sailShown = now;
@@ -481,6 +547,553 @@
 		return (best == null) ? { row: String(rowNum) } : { rowContaining: best };
 	}
 
+	// ---------------------------------------------------------------- lookups
+
+	/** The lookup item a form (a lookup's own combo form) belongs to, or null. */
+	function lookupOfForm(form) {
+		var item = form && form.canvasItem;
+		return (item && isc.isA.BizLookupDescriptionItem && isc.isA.BizLookupDescriptionItem(item)) ? item : null;
+	}
+
+	/**
+	 * The step for a lookup the user picked from: lookupDescriptionAutoComplete when the user typed into it first
+	 * (search what was typed, pick the description chosen), otherwise lookupDescriptionPick of the row containing the
+	 * description chosen. Never a row number, and never dataEnter.
+	 */
+	function lookupEntry(item, binding) {
+		var typed = lookupTyped[item.getID()];
+		delete lookupTyped[item.getID()];
+		var combo = item._form ? item._form.getItem("_combo") : null;
+		var description = combo ? strip(combo.getDisplayValue()) : "";
+		if ((item.getValue() == null) || !description) {
+			return { unmapped: "cleared the lookup " + binding };
+		}
+		if (typed && typed.trim()) {
+			return { op: "lookupDescriptionAutoComplete", binding: binding, search: typed, pick: description };
+		}
+		return { op: "lookupDescriptionPick", binding: binding, rowContaining: description };
+	}
+
+	/** Lookup combos whose changed() is wrapped, to undo when recording stops. */
+	var watchedCombos = [];
+
+	/**
+	 * Wraps a lookup's combo's changed(), which runs when the user picks a row (the lookup then has a value) or types
+	 * (its value is the text). A pick in a view's form is queued as the lookup's data entry; in an inline grid the
+	 * grid's setEditValue() sees it.
+	 */
+	function watchLookup(item) {
+		var combo = (item && item._form) ? item._form.getItem("_combo") : null;
+		if (!combo || combo._sailWatched) {
+			return;
+		}
+		var original = combo.changed;
+		combo._sailWatched = true;
+		combo._sailChanged = original;
+		watchedCombos.push(combo);
+		combo.changed = function (form, comboItem, value) {
+			var result = isc.isA.Function(original) ? original.apply(this, arguments) : undefined;
+			if (core && core.active()) {
+				if ((value != null) && (this.getDisplayValue() == value)) {
+					lookupTyped[item.getID()] = String(value);
+				} else if ((item.getValue() != null) && item.form && item.form._view && (changed.indexOf(item) < 0)) {
+					changed.push(item);
+				}
+			}
+			return result;
+		};
+	}
+
+	function unwatchLookups() {
+		watchedCombos.forEach(function (combo) {
+			if (!combo.destroyed) {
+				combo.changed = combo._sailChanged;
+				delete combo._sailChanged;
+				delete combo._sailWatched;
+			}
+		});
+		watchedCombos = [];
+	}
+
+	/** Keeps what the user types into a lookup's combo, for the autocomplete step its pick becomes. */
+	function onInput(event) {
+		if (!core || !core.active()) {
+			return;
+		}
+		var target = event.target;
+		if (!target || (target.tagName !== "INPUT")) {
+			return;
+		}
+		var lookup = lookupOfForm(canvasOf(target));
+		if (lookup) {
+			lookupTyped[lookup.getID()] = target.value;
+		}
+	}
+
+	// ---------------------------------------------------------------- data grids and list grid rows
+
+	/** The BizDataGrid a ListGrid is the grid of, or null. */
+	function dataGridOf(grid) {
+		for (var g = grid; g; g = g.parentElement) {
+			if (isc.isA.BizDataGrid(g)) {
+				return (g.grid === grid) ? g : null;
+			}
+		}
+		return null;
+	}
+
+	/** The BizListGrid a ListGrid is the grid of, or null. */
+	function listGridOf(grid) {
+		for (var g = grid; g; g = g.parentElement) {
+			if (isc.isA.BizListGrid(g)) {
+				return (g.grid === grid) ? g : null;
+			}
+		}
+		return null;
+	}
+
+	/** What each cell of a row shows, by column binding, as JSON: what a later step may capture (captureCell). */
+	function cellsOf(grid, rowNum) {
+		var record = grid.getRecord(rowNum);
+		var result = {};
+		grid.getFields().forEach(function (field, i) {
+			var name = String(field.name || "");
+			if (record && name && (name.charAt(0) !== "_") && (name !== "bizTagged") && (name !== "bizFlagComment")) {
+				var text = strip(grid.getCellValue(record, rowNum, i));
+				if (text) {
+					result[unsanitise(name)] = text;
+				}
+			}
+		});
+		return JSON.stringify(result);
+	}
+
+	/** Adds a row to a step: rowContaining (or row), the row's texts for the checks and its cells for captures. */
+	function withRow(step, grid, rowNum) {
+		var located = rowLocator(grid, rowNum, grid.getRecord(rowNum));
+		if (located.rowContaining != null) {
+			step.rowContaining = located.rowContaining;
+		} else {
+			step.row = located.row;
+		}
+		step.rowTexts = rowTexts(grid, rowNum).filter(function (text) {
+			return !!text;
+		}).join(" | ");
+		step.cells = cellsOf(grid, rowNum);
+		return step;
+	}
+
+	function dataGridStep(op, dataGrid, rowNum) {
+		var step = { op: op, binding: unsanitise(dataGrid._b) };
+		return (rowNum == null) ? step : withRow(step, dataGrid.grid, rowNum);
+	}
+
+	/** The row a data grid's tool acts on: the selected row, or else the row last clicked. */
+	function selectedRow(owner) {
+		var grid = owner.grid;
+		var record = grid.getSelectedRecord ? grid.getSelectedRecord() : null;
+		if (record) {
+			return grid.getRecordIndex(record);
+		}
+		return (owner._eventRowNum != null) ? owner._eventRowNum : -1;
+	}
+
+	/** Records a step that acts on a grid, dropping a selection of the same grid's row that it makes needless. */
+	function recordOnGrid(step, owner) {
+		if (pendingSelect && (pendingSelect.owner === owner)) {
+			pendingSelect = null;
+		}
+		return core.record(step);
+	}
+
+	/** Writes the cells the user changed in inline data grids as dataEnter steps into the grid's columns. */
+	function flushGridEdits() {
+		var edits = gridEdits;
+		gridEdits = [];
+		edits.forEach(function (edit) {
+			var dataGrid = edit.dataGrid;
+			var grid = dataGrid.grid;
+			if (!grid || grid.destroyed) {
+				return;
+			}
+			var displayFor = grid.getFields().some(function (f) {
+				return f.displayField === edit.field;
+			});
+			if (displayFor) {
+				return; // the description an inline lookup shows: its column's step says it
+			}
+			var editing = (grid.getEditRow() === edit.rowNum);
+			var now = editing ? grid.getEditValue(edit.rowNum, grid.getFieldNum(edit.field)) :
+							((grid.getRecord(edit.rowNum) || {})[edit.field]);
+			if (sameValue(now, edit.original)) {
+				return; // stored again unchanged, as the grid does for every editor when the row's edit ends
+			}
+			var form = editing && grid.getEditForm ? grid.getEditForm() : null;
+			var item = form ? form.getItem(edit.field) : null;
+			var column = grid.getField(edit.field);
+			var entry;
+			if (item && column && column.displayField && (column.displayField !== edit.field)) {
+				var picked = strip(item.getDisplayValue());
+				entry = picked ? { op: "lookupDescriptionPick", binding: unsanitise(edit.field), rowContaining: picked } :
+									{ unmapped: "cleared the lookup " + unsanitise(edit.field) };
+			} else {
+				entry = item ? dataEntry(item) : committedEntry(grid, edit.rowNum, edit.field);
+			}
+			if (!entry) {
+				return;
+			}
+			var view = describe(dataGrid._view);
+			var screen = screenOf(dataGrid._view);
+			if (entry.unmapped) {
+				core.push({ op: "unmapped", text: entry.unmapped + " (in the data grid " + unsanitise(dataGrid._b) + ")", view: view, screen: screen });
+				return;
+			}
+			var field = grid.getField(edit.field);
+			var step = entry.op ? entry : { op: "dataEnter", binding: entry.binding, value: entry.value };
+			if (entry.match) {
+				step.match = entry.match;
+			}
+			step.grid = unsanitise(dataGrid._b);
+			step.view = view;
+			step.screen = screen;
+			step.label = strip((field && field.title) || edit.field);
+			core.push(step);
+		});
+	}
+
+	/** True if two cell values are the same (empty values are the same, and dates by their time). */
+	function sameValue(a, b) {
+		var empty = function (v) {
+			return (v == null) || (v === "");
+		};
+		if (empty(a) || empty(b)) {
+			return empty(a) && empty(b);
+		}
+		if (isc.isA.Date(a) && isc.isA.Date(b)) {
+			return a.getTime() === b.getTime();
+		}
+		return String(a) === String(b);
+	}
+
+	/** A dataEnter entry for a committed inline cell, from the row's value, as dataEntry() writes a field's. */
+	function committedEntry(grid, rowNum, fieldName) {
+		var record = (grid.getEditedRecord ? grid.getEditedRecord(rowNum) : null) || grid.getRecord(rowNum);
+		var field = grid.getField(fieldName);
+		var binding = unsanitise(fieldName);
+		var value = record ? record[fieldName] : null;
+		if ((value == null) || (value === "")) {
+			return { unmapped: "cleared " + binding };
+		}
+		if ((value === true) || (value === false)) {
+			return { binding: binding, value: String(value) };
+		}
+		if (field && field.displayField && (field.displayField !== fieldName)) {
+			// an inline lookup: its column shows the description it picked
+			var description = strip(record[field.displayField] || grid.getCellValue(record, rowNum, grid.getFieldNum(fieldName)));
+			return description ? { op: "lookupDescriptionPick", binding: binding, rowContaining: description } : { unmapped: "cleared the lookup " + binding };
+		}
+		if (field && field.valueMap) {
+			return { binding: binding, value: String(value), match: "code" };
+		}
+		if (isc.isA.Date(value)) {
+			return { binding: binding, value: strip(grid.getCellValue(record, rowNum, grid.getFieldNum(fieldName))) };
+		}
+		return { binding: binding, value: String(value) };
+	}
+
+	/**
+	 * A mouse button going down, before SmartClient acts on it (it answers a dialog, or runs a row's link, on the button
+	 * going up, before the DOM's click): on a link in a data grid row, dataGridLink (an action link may ask for
+	 * confirmation, so the step is what the isc.ask wrapper answers); on a server-side question's No or Cancel, the
+	 * step that raised the question is declined.
+	 */
+	/** Notes that the user touched a list grid (its filter row or tools): its next fetch may be the user's filter. */
+	function touch(event) {
+		if (!core || !core.active() || core.isPanelEvent(event)) {
+			return;
+		}
+		for (var c = canvasOf(event.target); c; c = c.parentElement) {
+			if (isc.isA.BizListGrid(c)) {
+				c._sailTouched = true;
+				return;
+			}
+		}
+	}
+
+	function onMouseDown(event) {
+		if (!core || !core.active() || core.isPanelEvent(event)) {
+			return;
+		}
+		touch(event);
+		confirmable = null;
+		droppedOn = null;
+		releaseLink();
+		var target = event.target;
+		var canvas = canvasOf(target);
+		if (!canvas) {
+			return;
+		}
+		if (isc.isA.Button(canvas) || isc.isA.StretchImgButton(canvas)) {
+			for (var d = canvas.parentElement; d; d = d.parentElement) {
+				if (isc.isA.Dialog(d)) {
+					var answer = strip(canvas.getTitle ? canvas.getTitle() : canvas.title);
+					// a server-side question is a Dialog of its own (isc.ask uses isc.Dialog.Warn, wrapped below)
+					if ((d !== isc.Dialog.Warn) && (String(d.icon || "").indexOf("ask") >= 0) && ((answer === isc.Dialog.NO_BUTTON_TITLE) ||
+							(answer === isc.Dialog.CANCEL_BUTTON_TITLE) || (answer === "No") || (answer === "Cancel"))) {
+						core.push({ op: "context", text: "answered \"" + answer + "\" to \"" + strip(d.title) + "\"", declined: "true" });
+					}
+					return;
+				}
+			}
+			return;
+		}
+		var link = target.closest ? target.closest("a[href]") : null;
+		if (link && isc.isA.GridBody && isc.isA.GridBody(canvas)) {
+			var dataGrid = dataGridOf(canvas.grid);
+			var rowNum = canvas.getEventRow ? canvas.getEventRow() : -1;
+			if (dataGrid && (rowNum != null) && (rowNum >= 0) && canvas.grid.getRecord(rowNum)) {
+				var step = dataGridStep("dataGridLink", dataGrid, rowNum);
+				step.text = strip(link.innerText || link.textContent);
+				step.hold = true;
+				heldLink = recordOnGrid(step, dataGrid);
+				confirmable = heldLink;
+			}
+		}
+	}
+
+	/**
+	 * A click, once SmartClient has selected the row: on a data grid row, a selection (dataGridSelect); on a row of a
+	 * list grid whose selection does something, listGridSelect. A link in the row recorded its step going down.
+	 */
+	function onClick(event) {
+		if (!core || !core.active() || core.isPanelEvent(event)) {
+			return;
+		}
+		var target = event.target;
+		var canvas = canvasOf(target);
+		if (!canvas || !(isc.isA.GridBody && isc.isA.GridBody(canvas)) || (target.closest && target.closest("a[href]"))) {
+			return;
+		}
+		var grid = canvas.grid;
+		var dataGrid = dataGridOf(grid);
+		var rowNum = canvas.getEventRow ? canvas.getEventRow() : -1;
+		if (dataGrid) {
+			if (droppedOn === dataGrid) {
+				droppedOn = null; // the click that ended a row's drag
+				return;
+			}
+			if ((rowNum == null) || (rowNum < 0) || !grid.getRecord(rowNum) || (grid.getEditRow && (grid.getEditRow() === rowNum))) {
+				return;
+			}
+			pendingSelect = { owner: dataGrid, step: dataGridStep("dataGridSelect", dataGrid, rowNum) };
+			core.handled();
+			return;
+		}
+		var listGrid = listGridOf(grid);
+		if (listGrid && (listGrid.selectedIdBinding || listGrid.bizSelected) && (rowNum != null) && (rowNum >= 0) && grid.getRecord(rowNum)) {
+			var select = gridList(listGrid);
+			select.op = "listGridSelect";
+			pendingSelect = { owner: listGrid, step: withRow(select, grid, rowNum) };
+			core.handled();
+		}
+	}
+
+	/** Writes the pending selection, the inline grid cells and the form fields the user changed. */
+	function flush() {
+		releaseLink();
+		flushGridEdits();
+		flushDataEntry();
+		if (pendingSelect) {
+			var select = pendingSelect.step;
+			pendingSelect = null;
+			core.push(select);
+		}
+	}
+
+	// ---------------------------------------------------------------- list grid filters and sorting
+
+	/** SmartClient's filter operators and the listGridFilter operators they are. */
+	var OPERATORS = { iContains: "contains", contains: "contains", iStartsWith: "startsWith", startsWith: "startsWith",
+						equals: "equals", iEquals: "equals", notEqual: "notEquals", iNotEqual: "notEquals",
+						lessThan: "lessThan", greaterThan: "greaterThan" };
+	var MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+	function pad(n) {
+		return (n < 10) ? "0" + n : String(n);
+	}
+
+	/** A filter value as listGridFilter writes it: an enum's label, a boolean, a date as Skyve's default converter. */
+	function filterText(grid, fieldName, value) {
+		var field = grid.getField(fieldName) || {};
+		if ((value === true) || (value === false)) {
+			return String(value);
+		}
+		if (field.valueMap && !isc.isA.Array(field.valueMap) && (field.valueMap[value] != null)) {
+			return strip(field.valueMap[value]);
+		}
+		if (isc.isA.Date(value)) {
+			var text = pad(value.getDate()) + "-" + MONTHS[value.getMonth()] + "-" + value.getFullYear();
+			if (field.type === "datetime") {
+				text += " " + pad(value.getHours()) + ":" + pad(value.getMinutes());
+			} else if (field.type === "time") {
+				text = pad(value.getHours()) + ":" + pad(value.getMinutes());
+			}
+			return text;
+		}
+		return String(value);
+	}
+
+	/**
+	 * The filter a BizListGrid shows, as { ok, columns: { field: { operator, value } } }: ok is false when it cannot be
+	 * written as per-column filters ANDed together (an OR, a nested clause, two clauses on one column, an operator
+	 * listGridFilter has not).
+	 */
+	function filterState(listGrid) {
+		var grid = listGrid.grid;
+		var advanced = listGrid._advancedFilter && listGrid._advancedFilter.toggleButton && listGrid._advancedFilter.toggleButton.selected;
+		var criteria = advanced ? listGrid._advancedFilter.getCriteria() : (grid.getFilterEditorCriteria ? grid.getFilterEditorCriteria(true) : null);
+		var result = { ok: true, columns: {} };
+		if (!criteria) {
+			return result;
+		}
+		var add = function (fieldName, operator, value) {
+			if ((fieldName == null) || (value == null) || (value === "") || (fieldName === "bizTagged") || (fieldName === "bizFlagComment")) {
+				return;
+			}
+			var mapped = OPERATORS[operator];
+			if (!mapped || result.columns[fieldName] || isc.isA.Array(value)) {
+				result.ok = false;
+				return;
+			}
+			result.columns[fieldName] = { operator: mapped, value: filterText(grid, fieldName, value) };
+		};
+		if (criteria.criteria || (criteria._constructor === "AdvancedCriteria")) {
+			if (criteria.operator && (criteria.operator !== "and")) {
+				result.ok = false;
+				return result;
+			}
+			(criteria.criteria || []).forEach(function (clause) {
+				if (clause.criteria) {
+					result.ok = false;
+				} else {
+					add(clause.fieldName, clause.operator, clause.value);
+				}
+			});
+		} else {
+			Object.keys(criteria).forEach(function (fieldName) {
+				var field = grid.getField(fieldName) || {};
+				var text = !field.type || (field.type === "text") || (field.type === "string");
+				add(fieldName, (text && !field.valueMap) ? "iContains" : "equals", criteria[fieldName]);
+			});
+		}
+		return result;
+	}
+
+	/** True if the gesture being handled is on the list grid (its filter row, toolbar or advanced filter). */
+	function gestureOn(owner) {
+		var target = core.gestureTarget();
+		var canvas = target ? canvasOf(target) : null;
+		return !!canvas && ((canvas === owner) || owner.contains(canvas, true));
+	}
+
+	/** A list grid is about to fetch: records how the user changed its filter, column by column. */
+	function filtered(listGrid) {
+		var before = listGrid._sailFilter || { ok: true, columns: {} };
+		var now = filterState(listGrid);
+		listGrid._sailFilter = now;
+		// the filter row can fetch a moment after the user typed (a delayed fetch), outside the gesture
+		var touched = listGrid._sailTouched;
+		delete listGrid._sailTouched;
+		if (!gestureOn(listGrid) && !touched) {
+			return;
+		}
+		var list = function (op) {
+			var step = gridList(listGrid);
+			step.op = op;
+			return step;
+		};
+		if (!now.ok) {
+			core.unmapped("filtered the list " + describeGrid(listGrid) + " in a way SAIL cannot write as column filters ANDed together");
+			return;
+		}
+		var names = Object.keys(now.columns);
+		var old = Object.keys(before.columns);
+		if (!names.length && old.length) {
+			recordOnGrid(list("listGridClearFilter"), listGrid);
+			return;
+		}
+		names.forEach(function (name) {
+			var was = before.columns[name];
+			var is = now.columns[name];
+			if (!was || (was.operator !== is.operator) || (was.value !== is.value)) {
+				var step = list("listGridFilter");
+				step.column = unsanitise(name);
+				step.value = is.value;
+				if (is.operator !== "contains") {
+					step.operator = is.operator;
+				}
+				recordOnGrid(step, listGrid);
+			}
+		});
+		old.forEach(function (name) {
+			if (!now.columns[name]) {
+				var step = list("listGridFilter");
+				step.column = unsanitise(name);
+				recordOnGrid(step, listGrid);
+			}
+		});
+	}
+
+	// ---------------------------------------------------------------- trees, maps and calendars
+
+	/** What a list-like menu item or page names: { document[, model] } or { query } (a document's default query). */
+	function listTarget(module, name) {
+		var model = name.indexOf("__");
+		if (model >= 0) {
+			return { document: name.substring(0, model), model: name.substring(model + 2) };
+		}
+		var ds = isc.DataSource.get(module + "_" + name);
+		var modoc = String((ds && ds.modoc) || "");
+		if (modoc.substring(modoc.indexOf(".") + 1) === name) {
+			return { document: name };
+		}
+		return /^[A-Z]/.test(name) ? { document: name } : { query: name };
+	}
+
+	/** The step for a tree, map or calendar menu item, or null for any other item. */
+	function listMenuStep(module, leaf) {
+		var op = { tree: "navigateTree", map: "navigateMap", cal: "navigateCalendar" }[leaf.ref];
+		if (!op) {
+			return null;
+		}
+		var name = String(leaf.name || "");
+		var step = { op: op, module: module };
+		if (op === "navigateMap") {
+			var underscore = name.lastIndexOf("_");
+			if (underscore > 0) {
+				step.geometryBinding = name.substring(underscore + 1);
+				name = name.substring(0, underscore);
+			}
+		}
+		var target = listTarget(module, name);
+		Object.keys(target).forEach(function (key) {
+			step[key] = target[key];
+		});
+		return step;
+	}
+
+	// ---------------------------------------------------------------- the view's title
+
+	/** The title the top view shows, as captureTitle reads it. */
+	function viewTitle() {
+		var view = topView();
+		var header = (view && describe(view) === "list") ? isc.ListView._header : (view && view._header);
+		var member = header && header.getMember ? header.getMember(0) : null;
+		var element = member && member.getHandle ? member.getHandle() : null;
+		var title = element ? element.querySelector(".titleBar:not(i)") : null;
+		return title ? strip(title.innerText || title.textContent) : (element ? strip(element.innerText) : "");
+	}
+
 	// ---------------------------------------------------------------- the wrapped methods
 
 	function recordMenu(viewer, leaf) {
@@ -490,6 +1103,11 @@
 			labels.unshift(strip(node.desc));
 		}
 		var module = tree.getRoot().name;
+		var listStep = listMenuStep(leaf.module || module, leaf);
+		if (listStep) {
+			core.record(listStep);
+			return;
+		}
 		var step = { op: "navigateMenu", module: module, item: labels.join("/") };
 		if (leaf.ref === "edit") {
 			step.target = (leaf.module || module) + "." + leaf.name;
@@ -509,6 +1127,11 @@
 		}
 		if (!button.type || ACTION_TYPES[button.type]) {
 			return core.record({ op: "action", name: name });
+		}
+		if (button.type === "Upload") {
+			// the core records the upload when the upload page sends the file
+			core.handled();
+			return null;
 		}
 		return core.unmapped("pressed " + strip(button.title || name) + " (a " + button.type + " action, not recorded yet)");
 	}
@@ -629,18 +1252,22 @@
 						} else {
 							step.row = located.row;
 						}
+						step.cells = cellsOf(this.grid, this._eventRowNum);
 					}
-					core.record(step);
+					recordOnGrid(step, this);
 				}
 				return original.apply(this, arguments);
 			};
 		});
+
+		attachPhase5();
 
 		var editViewProto = isc.EditView.getPrototype();
 		wrap(editViewProto, "scatter", function (original) {
 			return function (values) {
 				// a server response replaces the values: the user's entries so far are final
 				if (core.active()) {
+					releaseLink();
 					flushDataEntry();
 				}
 				var result = original.apply(this, arguments);
@@ -719,6 +1346,9 @@
 			return function (message, callback) {
 				var step = confirmable;
 				confirmable = null;
+				if (step && (step === heldLink)) {
+					heldLink = null; // the answer below lets it go
+				}
 				var args = Array.prototype.slice.call(arguments);
 				if (core.active() && step && isc.isA.Function(callback)) {
 					step.hold = true;
@@ -741,6 +1371,174 @@
 		});
 	}
 
+	/** Wraps the data grid, list grid, lookup and upload methods, and listens for row clicks and lookup typing. */
+	function attachPhase5() {
+		var wrap = core.wrap;
+		var dataGridProto = isc.BizDataGrid.getPrototype();
+		wrap(dataGridProto, "zoom", function (original) {
+			return function (zoomToNew) {
+				if (core.active()) {
+					if (zoomToNew) {
+						recordOnGrid(dataGridStep("dataGridNew", this, null), this);
+					} else {
+						var rowNum = selectedRow(this);
+						if (rowNum >= 0) {
+							recordOnGrid(dataGridStep("dataGridZoom", this, rowNum), this);
+						}
+					}
+				}
+				return original.apply(this, arguments);
+			};
+		});
+		wrap(dataGridProto, "add", function (original) {
+			return function () {
+				if (core.active()) {
+					recordOnGrid(dataGridStep("dataGridNew", this, null), this);
+					// add() starts editing the new row when the server returns it: not a dataGridEdit
+					this._sailAdding = true;
+				}
+				return original.apply(this, arguments);
+			};
+		});
+		wrap(dataGridProto, "startEditingRow", function (original) {
+			return function (rowNum) {
+				if (this._sailAdding) {
+					delete this._sailAdding;
+				} else if (core.active() && (rowNum != null) && (rowNum >= 0) && this.grid.getRecord(rowNum)) {
+					recordOnGrid(dataGridStep("dataGridEdit", this, rowNum), this);
+				}
+				return original.apply(this, arguments);
+			};
+		});
+
+		var gridProto = isc.ListGrid.getPrototype();
+		wrap(gridProto, "removeSelectedData", function (original) {
+			return function () {
+				var dataGrid = core.active() ? dataGridOf(this) : null;
+				if (dataGrid) {
+					var rowNum = selectedRow(dataGrid);
+					if (rowNum >= 0) {
+						recordOnGrid(dataGridStep("dataGridRemove", dataGrid, rowNum), dataGrid);
+					}
+				}
+				return original.apply(this, arguments);
+			};
+		});
+		wrap(gridProto, "recordDrop", function (original) {
+			return function (dropRecords) {
+				var dataGrid = core.active() ? dataGridOf(this) : null;
+				var record = (dataGrid && dropRecords && dropRecords.length) ? dropRecords[0] : null;
+				var step = record ? dataGridStep("dataGridMove", dataGrid, this.getRecordIndex(record)) : null;
+				var result = original.apply(this, arguments);
+				if (step) {
+					var to = this.getRecordIndex(record);
+					droppedOn = dataGrid;
+					if (to >= 0) {
+						step.to = String(to);
+						recordOnGrid(step, dataGrid);
+					}
+				}
+				return result;
+			};
+		});
+		// the grid stores each inline editor's value with setEditValue (its private _editorChange is not in every build)
+		wrap(gridProto, "setEditValue", function (original) {
+			return function (rowNum, colNum) {
+				var dataGrid = core.active() ? dataGridOf(this) : null;
+				if (dataGrid && (rowNum != null) && (rowNum >= 0)) {
+					var field = isc.isA.String(colNum) ? colNum : this.getFieldName(colNum);
+					var known = gridEdits.some(function (edit) {
+						return (edit.dataGrid === dataGrid) && (edit.rowNum === rowNum) && (edit.field === field);
+					});
+					if (field && !known) {
+						var record = this.getRecord(rowNum);
+						gridEdits.push({ dataGrid: dataGrid, rowNum: rowNum, field: field, original: record ? record[field] : null });
+					}
+				}
+				return original.apply(this, arguments);
+			};
+		});
+		wrap(gridProto, "handleSortChanged", function (original) {
+			return function (sortSpecifiers) {
+				var listGrid = core.active() ? listGridOf(this) : null;
+				if (listGrid && gestureOn(listGrid)) {
+					var specs = (sortSpecifiers || []).filter(function (spec) {
+						return spec && spec.property;
+					});
+					if (specs.length === 1) {
+						var step = gridList(listGrid);
+						step.op = "listGridSort";
+						step.column = unsanitise(specs[0].property);
+						if (specs[0].direction === "descending") {
+							step.descending = "true";
+						}
+						recordOnGrid(step, listGrid);
+					} else {
+						core.unmapped(specs.length ? "sorted the list " + describeGrid(listGrid) + " by more than one column" :
+															"cleared the sort of the list " + describeGrid(listGrid));
+					}
+				}
+				return original.apply(this, arguments);
+			};
+		});
+
+		// a BizListGrid's grid fetches through its own filterData, which calls this one (Super): a filter row submit, the
+		// advanced filter's Filter button and a refresh (Clear filter) all do
+		wrap(gridProto, "filterData", function (original) {
+			return function () {
+				var listGrid = core.active() ? listGridOf(this) : null;
+				if (listGrid) {
+					filtered(listGrid);
+				}
+				return original.apply(this, arguments);
+			};
+		});
+
+		wrap(isc.BizLookupDescriptionItem.getPrototype(), "init", function (original) {
+			return function () {
+				var result = original.apply(this, arguments);
+				if (core.active()) {
+					watchLookup(this);
+				}
+				return result;
+			};
+		});
+		(isc.Canvas._canvasList || []).forEach(function (c) {
+			if (c && !c.destroyed && isc.isA.DynamicForm(c) && lookupOfForm(c)) {
+				watchLookup(lookupOfForm(c));
+			}
+		});
+		core.onDetach(unwatchLookups);
+
+		wrap(isc.BizLookupDescriptionItem.getPrototype(), "zoom", function (original) {
+			return function (zoomToNew) {
+				if (core.active()) {
+					var step = { op: zoomToNew ? "lookupDescriptionNew" : "lookupDescriptionEdit", binding: unsanitise(this.name) };
+					var dataGrid = this.grid ? dataGridOf(this.grid) : null;
+					if (dataGrid) {
+						step.grid = unsanitise(dataGrid._b);
+					}
+					core.record(step);
+				}
+				return original.apply(this, arguments);
+			};
+		});
+		wrap(isc.BizUtil, "openContentUpload", function (original) {
+			return function () {
+				if (core.active()) {
+					// the core records the upload when the upload page sends the file
+					core.handled();
+				}
+				return original.apply(this, arguments);
+			};
+		});
+
+		core.listen(document, "input", onInput, true);
+		core.listen(document, "mousedown", onMouseDown, true);
+		core.listen(document, "keydown", touch, true);
+		core.listen(document, "click", onClick, true);
+	}
+
 	// ---------------------------------------------------------------- unmapped clicks
 
 	/** Describes the control a click landed on, or null if it was not on a control (a field, a label, the page). */
@@ -755,6 +1553,16 @@
 				// dialogs answer a step's question; tabs and the menu record their own steps; fields are data entry
 				return null;
 			}
+			if (isc.isA.BizDataGrid(c)) {
+				// a data grid's rows and tools record their steps (a selection, a remove after its confirmation)
+				return null;
+			}
+			if (c.parentElement && (c.parentElement.filterEditor === c)) {
+				return null; // a list grid's filter row: its filter is recorded when the grid fetches
+			}
+			if (isc.isA.Window(c) && c.header && c.header.contains(canvas, true)) {
+				return null; // a window's close box
+			}
 		}
 		if (!canvas || (canvas.isDisabled && canvas.isDisabled())) {
 			return null;
@@ -765,15 +1573,7 @@
 		}
 		if (isc.isA.GridBody && isc.isA.GridBody(canvas)) {
 			// a row click selects; it is a gesture of its own on grids that act on a selection, and on data grids
-			for (var g = canvas.grid; g; g = g.parentElement) {
-				if (isc.isA.BizDataGrid(g)) {
-					return "a row of the data grid " + unsanitise(g._b);
-				}
-				if (isc.isA.BizListGrid(g)) {
-					return g.bizSelected ? "a row of the list grid " + describeGrid(g) + ", which selects it" : null;
-				}
-			}
-			return null;
+			return null; // a row click selects: recorded as a selection where it matters
 		}
 		if (isc.isA.Button(canvas) || isc.isA.StretchImgButton(canvas) || isc.isA.ImgButton(canvas)) {
 			var title = strip(canvas.title || canvas.prompt || element.textContent);
@@ -813,6 +1613,18 @@
 				pageList = list;
 			}
 			core.push(list);
+		} else if (((params.a === "t") || (params.a === "m") || (params.a === "c")) && params.q) {
+			var step = { op: { t: "navigateTree", m: "navigateMap", c: "navigateCalendar" }[params.a], module: params.m, view: "" };
+			if (params.d) {
+				step.document = params.d;
+				step.model = params.q;
+			} else {
+				step.query = params.q;
+			}
+			if (params.b) {
+				step.geometryBinding = params.b;
+			}
+			core.push(step);
 		} else if (params.a) {
 			core.push({ op: "unmapped", text: "opened " + location.search + " (not recorded yet)", view: "" });
 		}
@@ -982,10 +1794,10 @@
 	var recorder = SKYVE.SailRecorderCore.create({
 		transport: transport,
 		attach: attach,
-		flush: flushDataEntry,
+		flush: flush,
 		describe: function () {
 			var view = topView();
-			return { view: describe(view), screen: screenOf(view) };
+			return { view: describe(view), screen: screenOf(view), title: viewTitle() };
 		},
 		connected: resolvePageList,
 		control: control,
@@ -995,12 +1807,17 @@
 			window.location = "loggedOut";
 		},
 		idle: function () {
-			return changed.length === 0;
+			// a pending selection is not data in flight: the next step decides whether it is written
+			return (changed.length === 0) && (gridEdits.length === 0);
 		},
 		reset: function () {
+			heldLink = null;
 			changed = [];
 			confirmable = null;
 			pageList = null;
+			pendingSelect = null;
+			gridEdits = [];
+			lookupTyped = {};
 		}
 	});
 	SKYVE.SailRecorder = recorder;
