@@ -22,6 +22,7 @@ import org.skyve.impl.cache.StateUtil;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.util.JSON;
+import org.skyve.web.UserAgentType;
 import org.skyve.web.WebContext;
 
 import jakarta.servlet.ReadListener;
@@ -120,6 +121,25 @@ class SailRecordingServletH2Test extends AbstractSkyveTest {
 		assertTrue(body.contains("\"lines\":[\"<ok") && (! body.contains("<save")), body);
 		Response bad = get(Map.of("from", "x"));
 		verify(bad.response).sendError(HttpServletResponse.SC_BAD_REQUEST);
+	}
+
+	/**
+	 * A PrimeFaces page carries the recorder's state inline: the endpoint's token, the counts and the last entries, so
+	 * that the recorder on each page load starts without asking. The script targets the UX/UI the user got.
+	 */
+	@Test
+	void thePageStateHasTheTokenAndTheLastEntries() throws Exception {
+		SailRecording recording = SailRecording.start(session, u, "tablet", UserAgentType.tablet);
+		String token = token();
+		post("{\"_csrf\":" + token + ",\"steps\":[{\"id\":\"p-1\",\"op\":\"save\"},{\"id\":\"p-2\",\"op\":\"ok\"},{\"id\":\"p-3\",\"op\":\"cancel\"}]}");
+		String state = recording.pageState(session, 2);
+		Map<?, ?> parsed = (Map<?, ?>) java.util.Objects.requireNonNull(JSON.unmarshall(state), state);
+		assertAll(() -> assertTrue(state.startsWith("{\"recording\":true,\"_csrf\":"), state),
+					() -> assertEquals(token, String.valueOf(parsed.get("_csrf")), "the endpoint's token: " + state),
+					() -> assertEquals("3", String.valueOf(parsed.get("steps")), state),
+					() -> assertEquals("1", String.valueOf(parsed.get("from")), state),
+					() -> assertTrue(state.contains("\"p-2\"") && state.contains("\"p-3\"") && (! state.contains("\"p-1\"")), state),
+					() -> assertTrue(recording.stop().contains("<automation uxui=\"tablet\" userAgentType=\"tablet\""), recording.getXml()));
 	}
 
 	/**

@@ -39,6 +39,7 @@ import org.skyve.impl.metadata.view.widget.bound.input.CompleteType;
 import org.skyve.impl.metadata.view.widget.bound.input.ContentCapture;
 import org.skyve.impl.metadata.view.widget.bound.input.ContentDisplay;
 import org.skyve.impl.sail.recording.PrimeFacesRecordingMap;
+import org.skyve.impl.sail.recording.SailRecording;
 import org.skyve.impl.util.ImageUtil;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.AbstractWebContext;
@@ -99,6 +100,7 @@ import jakarta.faces.model.SelectItem;
 import jakarta.faces.view.ViewScoped;
 import jakarta.inject.Named;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 
 /**
  * Models a view interaction and binds it to the active Skyve web context.
@@ -1663,6 +1665,27 @@ public class FacesView extends HarnessView {
 		RequestUxUiSelection selection = UserAgent.getSelection((HttpServletRequest) FacesContext.getCurrentInstance().getExternalContext().getRequest());
 		return PrimeFacesRecordingMap.edit(moduleName, documentName, selection.getUxUi().getName(), selection.getUserAgentType());
 	}
+
+	/**
+	 * Returns what the PrimeFaces SAIL recorder needs to start on this page at once, as JSON: the recording's CSRF
+	 * token, its counts and the last entries the panel shows (see {@link SailRecording#pageState(HttpSession, int)}).
+	 * Only while the session records ({@link #isSailRecording()}).
+	 *
+	 * <p>Complexity: renders the last {@value #SAIL_RECORDING_INLINE_ENTRIES} entries; call it once per render.
+	 *
+	 * @return the state as JSON, or {@code null} when the session is not recording
+	 */
+	public @Nullable String getSailRecordingState() {
+		if (! isSailRecording()) {
+			return null;
+		}
+		HttpSession session = ((HttpServletRequest) FacesContext.getCurrentInstance().getExternalContext().getRequest()).getSession(false);
+		SailRecording recording = SailRecording.get(session);
+		return ((session == null) || (recording == null)) ? null : recording.pageState(session, SAIL_RECORDING_INLINE_ENTRIES);
+	}
+
+	/** How many of the last entries a page's recorder state holds; earlier ones are fetched when the panel scrolls. */
+	private static final int SAIL_RECORDING_INLINE_ENTRIES = 50;
 
 	/**
 	 * Returns the PrimeFaces SAIL recorder's client-id map of this list page's list grid (see

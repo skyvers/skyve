@@ -15,6 +15,7 @@ import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.Role;
 import org.skyve.metadata.user.User;
+import org.skyve.web.UserAgentType;
 
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
@@ -57,6 +58,8 @@ public final class SailRecording implements Serializable {
 	private final ArrayList<String> roleNames;
 	/** The UX/UI the user got when recording started, or null if not known. */
 	private final String uxui;
+	/** The user agent type the user got when recording started, or null if not known. */
+	private final UserAgentType userAgentType;
 	/** The CSRF token issued for this recording, or null before the recorder first asks. Guarded by this. */
 	private Integer token = null;
 	/** The recorded steps in the order received: each an op-code and its attributes. Guarded by this. */
@@ -74,12 +77,14 @@ public final class SailRecording implements Serializable {
 							@Nonnull String userName,
 							long startedMillis,
 							@Nonnull List<String> roleNames,
-							@Nullable String uxui) {
+							@Nullable String uxui,
+							@Nullable UserAgentType userAgentType) {
 		this.customerName = customerName;
 		this.userName = userName;
 		this.startedMillis = startedMillis;
 		this.roleNames = new ArrayList<>(roleNames);
 		this.uxui = uxui;
+		this.userAgentType = userAgentType;
 	}
 
 	/**
@@ -152,6 +157,26 @@ public final class SailRecording implements Serializable {
 	 * @throws SecurityException if the configuration or the user's roles do not allow recording
 	 */
 	public static @Nonnull SailRecording start(@Nonnull HttpSession session, @Nonnull User user, @Nullable String uxui) {
+		return start(session, user, uxui, null);
+	}
+
+	/**
+	 * Starts a new recording in the session, replacing any earlier one (and the script it built), for the UX/UI and user
+	 * agent type the user got: the script targets them, so that a PrimeFaces recording replays in PrimeFaces.
+	 *
+	 * <p>Side effects: as {@link #start(HttpSession, User, String)}.
+	 *
+	 * @param session	the session to record
+	 * @param user	the signed-in user
+	 * @param uxui	the UX/UI the user got, or {@code null} if not known
+	 * @param userAgentType	the user's agent type, or {@code null} if not known (the script then targets desktop)
+	 * @return the new recording
+	 * @throws SecurityException if the configuration or the user's roles do not allow recording
+	 */
+	public static @Nonnull SailRecording start(@Nonnull HttpSession session,
+												@Nonnull User user,
+												@Nullable String uxui,
+												@Nullable UserAgentType userAgentType) {
 		if (! isAllowed(user)) {
 			throw new SecurityException("SAIL recording is not allowed for " + user.getName());
 		}
@@ -164,7 +189,8 @@ public final class SailRecording implements Serializable {
 													(name == null) ? "" : name,
 													System.currentTimeMillis(),
 													effectiveRoleNames(user),
-													uxui);
+													uxui,
+													userAgentType);
 		session.setAttribute(SESSION_ATTRIBUTE_NAME, result);
 		return result;
 	}
@@ -499,6 +525,31 @@ public final class SailRecording implements Serializable {
 	}
 
 	/**
+	 * Returns what a page that loads the recorder needs to start at once, as JSON: the recording's CSRF token, its
+	 * counts, and the last entries as the panel shows them, so that the panel needs no request to appear. A renderer
+	 * that does a full page load per view (PrimeFaces) renders it into each page while recording.
+	 *
+	 * <p>Side effects: issues the recording's token if it has none ({@link #token(HttpSession)}).
+	 *
+	 * <p>Complexity: O(n) in the entries, for the last {@code count} entries' rendering.
+	 *
+	 * @param session	the recording's session
+	 * @param count	how many of the last entries to include
+	 * @return {@code {"recording":true,"_csrf":t,"steps":n,"gestures":g,"from":i,"entries":[...]}}
+	 */
+	public synchronized @Nonnull String pageState(@Nonnull HttpSession session, int count) {
+		int from = Math.max(0, steps.size() - count);
+		Map<String, Object> result = new LinkedHashMap<>(8);
+		result.put("recording", Boolean.TRUE);
+		result.put("_csrf", token(session));
+		result.put("steps", Integer.valueOf(steps.size()));
+		result.put("gestures", Integer.valueOf(getGestureCount()));
+		result.put("from", Integer.valueOf(from));
+		result.put("entries", preview(from, count));
+		return org.skyve.util.JSON.marshall(result);
+	}
+
+	/**
 	 * Returns the script as it stands: the one built on Stop, or while recording one built now without the metadata
 	 * checks, for the panel's Copy and Download.
 	 *
@@ -512,7 +563,8 @@ public final class SailRecording implements Serializable {
 		// The sign in page asks for the customer only when the configuration does not fix one
 		String loginCustomerName = (UtilImpl.CUSTOMER == null) ? customerName : null;
 		long stopped = (stoppedMillis == 0L) ? System.currentTimeMillis() : stoppedMillis;
-		return new SailRecordingBuilder(loginCustomerName, userName, startedMillis, stopped).roles(roleNames).uxui(uxui);
+		SailRecordingBuilder result = new SailRecordingBuilder(loginCustomerName, userName, startedMillis, stopped).roles(roleNames);
+		return (userAgentType == null) ? result.uxui(uxui) : result.target(uxui, userAgentType);
 	}
 
 	/**

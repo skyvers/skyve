@@ -378,8 +378,8 @@ class FacesViewTest {
 	}
 
 	/**
-	 * The PrimeFaces recorder's client-id maps are built only while the session records: a page whose session is not
-	 * recording builds nothing. {@code PrimeFacesRecordingMapH2Test} tests the maps themselves.
+	 * The PrimeFaces recorder's client-id maps and inline state are built only while the session records: a page whose
+	 * session is not recording builds nothing. {@code PrimeFacesRecordingMapH2Test} tests the maps themselves.
 	 */
 	@Test
 	void sailRecordingMapsAreNullUnlessRecording() {
@@ -395,6 +395,7 @@ class FacesViewTest {
 		try {
 			assertNull(view.getSailRecordingEditMap());
 			assertNull(view.getSailRecordingListMap());
+			assertNull(view.getSailRecordingState());
 			verify(request, never()).getSession();
 		}
 		finally {
