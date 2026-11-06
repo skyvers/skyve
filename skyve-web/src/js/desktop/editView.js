@@ -1369,9 +1369,10 @@ isc.EditView.addMethods({
 						const smartClientGrid = grid.grid;
 
 						if (smartClientGrid) {
-							// Ensure correct ordering when user reorders data via drag-and-drop
+							// Number an ordered grid's rows in the order they show, which a drag-and-drop may have
+							// changed. The data is the grid's own array, already in that order, so it is not sorted
+							// here: sorting it in place fires the grid's dataChanged, which closes an inline edit.
 							smartClientGrid.reorderData();
-							data = data.sortByProperty(grid._ordinal, true);
 						}
 
 						// Process list memberships or aggregated references in data grids

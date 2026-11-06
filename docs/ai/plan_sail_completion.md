@@ -174,6 +174,10 @@ reproductions are in [sail-runtime-issues.md](../sail-runtime-issues.md).
   parameters is still sent as a date, because `completeFilterCriteria` doesn't
   go through `isc.BizUtil.convertFilterCriteria`.
 - **SC-10:** selecting a row whose selected handler rerenders loops for ever.
+- **SC-11, fixed (approved by Mike, 2026-11-06):** a model lookup column of a
+  SmartClient inline data grid row edited again ended the row's edit, because
+  `_gather` sorted the grid's data in place. The sort is removed; captures of
+  what was sent and shown before and after the change were identical.
 
 P7 is by design (Mike, 2026-11-05): the restored selection shows where you came
 from after zooming in and pressing OK or Cancel.

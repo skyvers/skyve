@@ -33,7 +33,7 @@ SC-2's suspected cause, which cites the code before its fix, at `2f4c2021b8`.
 | [SC-6](#sc-6-the-backup-and-restore-started-growls-are-not-shown) | The Backup and Restore "started" growls are not shown | SC | Plausible (client) | open |
 | [SC-7](#sc-7-control-panel-jumps-back-to-the-results-tab) | Control Panel jumps back to the Results tab | SC | Confirmed | open |
 | [SC-8](#sc-8-the-user-wizard-password-field-loses-fast-typing) | The User wizard password field loses fast typing | SC | Confirmed | open |
-| [SC-11](#sc-11-a-model-lookup-column-ends-the-inline-edit-of-a-row-edited-again) | A model lookup column ends the inline edit of a row edited again | SC | Confirmed (stack traced) | open |
+| [SC-11](#sc-11-fixed-a-model-lookup-column-ends-the-inline-edit-of-a-row-edited-again) | A model lookup column ends the inline edit of a row edited again | SC | Confirmed (stack traced) | fixed |
 
 SC finding 5 is not listed. It was that a view opened by URL hides Delete, OK
 and Cancel, which is by design (`onlyView`); see the note under
@@ -676,7 +676,7 @@ that grid. So `navigateEdit bizId="{var:…}"` and `navigateLink href` with
 
 **Status:** open.
 
-## SC-11: A model lookup column ends the inline edit of a row edited again
+## SC-11 (fixed): A model lookup column ends the inline edit of a row edited again
 
 **Symptom.** In a SmartClient inline data grid, a lookup description column
 on a model (`model="..."`, not a query) can be set in a new row, but not in a
@@ -700,8 +700,41 @@ fetch is `filterDataBoundPickList` → `filterData` → `gather` → `_gather` �
 `sortByProperty` → `dataChanged` → `_remapEditRows` → `hideInlineEditor`. Why
 a new row's edit survives the same fetch was not looked into.
 
-**Workaround in the suites.** The SC kitchen sink sets the model lookup
-columns in a new row only. After `dataGridEdit` it reads them, but does not
-change them.
+**Fix (approved by Mike).** `_gather` no longer sorts a data grid's data. It
+still calls `reorderData()`, which numbers an ordered grid's rows (their
+`bizOrdinal`) in the order they show. The sort was a no-op apart from its side
+effect:
+- The data it sorted is the grid's own array (checked in the browser: the
+  values manager's array is the grid's `getData()`), which is already in the
+  order the rows show, so on an ordered grid, sorting by the ordinals that
+  `reorderData()` has just written changes nothing.
+- On an unordered grid it sorted by a null property, which leaves a stable
+  sort's order as it was.
+- The server takes the rows in the order they are sent and applies each
+  row's `bizOrdinal` (`ViewJSONManipulator`; its own ordinal sort is
+  commented out).
 
-**Status:** open.
+The list membership branch's sort is kept: it only runs for an ordered
+membership, and none exists to compare it on. `skyve-min.js` is rebuilt.
+
+**No side effects (Mike's acceptance test).** The same gestures were run on
+the bundle with the sort and on the bundle without it, capturing the whole
+bean each request sent and what each grid showed (its rendered rows, its
+selection and its editing row). The two captures were identical, in row order,
+`bizOrdinal` and every other field: an ordered grid after rows were added
+through their view, after a drag (`dataGridMove`), after a select, after a
+remove, on each save and as loaded again; an unordered grid that is saved, on
+each save and as loaded; an unordered inline grid after inline adds, a remove
+and a select, and after a column header sort (a real click) and the add that
+followed; and an unordered list membership on each save and as loaded. Two
+runs on the bundle with the sort were identical too, so the capture is
+deterministic. The kitchen sink has no ordered inline grid and no ordered
+membership, so those were not compared.
+
+**Suites.** The SC kitchen sink edits a ModelLookupFixture row again with
+`dataGridEdit` and changes its model lookup column with
+`lookupDescriptionAutoComplete pick`. Before the fix that step failed ("no
+inline editor for column selection of data grid rows (is a row being
+edited?)"); after it, it passes.
+
+**Status:** fixed.

@@ -843,9 +843,8 @@ Kitchen sink fixtures for the newer steps:
   with `captureCell`.
 - ModelLookupFixture's inline data grid `rows` has model lookup description
   columns, `selection` and `singleSelection`, which the form above it also
-  has. The SC kitchen sink sets them in a new row and reads them after
-  `dataGridEdit`; it cannot change them in a row edited again (runtime issue
-  SC-11).
+  has. The SC kitchen sink sets them in a new row, and changes one again
+  after `dataGridEdit` (runtime issue SC-11).
 - `OrderedGridFixture` (the "Ordered Grid Fixtures" menu list) is saved and has
   an ordered data grid, `rows`, whose rows are added through their own view.
   Both kitchen sinks add three rows, `dataGridMove` them, save, and reopen the
