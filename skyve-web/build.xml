@@ -196,7 +196,7 @@
 
 	    <!-- Minify the SAIL recorder for SmartClient: a bundle of its own, which a page loads only while its session
 	         records (see docs/sail.md, Recording). It is never merged into skyve-min.js. Each renderer's bundle is the
-	         shared core (recorder-core.js) followed by that renderer's adapter (recorder-sc.js, later recorder-pf.js). -->
+	         shared core (recorder-core.js) followed by that renderer's adapter (recorder-sc.js, recorder-pf.js). -->
 		<mkdir dir="src/main/resources/META-INF/resources/skyve/sail"/>
 	    <java jar="${closure.compiler.jar}" fork="true">
 	        <arg value="--js=src/js/sail/recorder-core.js"/>
@@ -206,6 +206,14 @@
 	        <arg value="--source_map_include_content"/>
 	    </java>
 		<echo file="src/main/resources/META-INF/resources/skyve/sail/recorder-sc-min.js" append="true">//# sourceMappingURL=recorder-sc-min.js.map</echo>
+	    <java jar="${closure.compiler.jar}" fork="true">
+	        <arg value="--js=src/js/sail/recorder-core.js"/>
+	        <arg value="--js=src/js/sail/recorder-pf.js"/>
+	        <arg value="--js_output_file=src/main/resources/META-INF/resources/skyve/sail/recorder-pf-min.js"/>
+	        <arg value="--create_source_map=src/main/resources/META-INF/resources/skyve/sail/recorder-pf-min.js.map"/>
+	        <arg value="--source_map_include_content"/>
+	    </java>
+		<echo file="src/main/resources/META-INF/resources/skyve/sail/recorder-pf-min.js" append="true">//# sourceMappingURL=recorder-pf-min.js.map</echo>
 
 	    <!-- Minify image markup JavaScript -->
 	    <java jar="${closure.compiler.jar}" fork="true">
