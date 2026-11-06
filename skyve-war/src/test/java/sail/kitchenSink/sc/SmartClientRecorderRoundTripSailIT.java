@@ -112,6 +112,8 @@ class SmartClientRecorderRoundTripSailIT extends AbstractSmartClientInterpretedS
 	 */
 	@Test
 	void checksThroughThePanel() {
+		// one value across the scripts below ({run} differs in each), so that the row clicked is this test's own
+		String value = "SAIL checked " + Long.toString(System.currentTimeMillis(), 36);
 		sailString(SIGN_IN);
 		sailString(START);
 		awaitRecorder();
@@ -132,7 +134,7 @@ class SmartClientRecorderRoundTripSailIT extends AbstractSmartClientInterpretedS
 		// enter and save the value, then alt-click its field to check it
 		sailString(HEAD + "<interaction name=\"Lookup value\"><method>" +
 					"<pushEditContext module=\"kitchensink\" document=\"LookupDescription\" />" +
-					"<dataEnter binding=\"description\" value=\"SAIL checked {run}\" />" +
+					"<dataEnter binding=\"description\" value=\"" + value + "\" />" +
 					"<save />" +
 					"</method></interaction>" + TAIL);
 		click(field("description"), true);
@@ -144,7 +146,7 @@ class SmartClientRecorderRoundTripSailIT extends AbstractSmartClientInterpretedS
 
 		// check the row in Check mode
 		panel("check");
-		click(row("SAIL checked "), false);
+		click(row(value), false);
 		awaitRecorder();
 		new Actions(driver()).sendKeys(Keys.ESCAPE).perform();
 
@@ -159,7 +161,7 @@ class SmartClientRecorderRoundTripSailIT extends AbstractSmartClientInterpretedS
 		awaitPanel();
 
 		// a second row check by alt-click, undone
-		click(row("SAIL checked "), true);
+		click(row(value), true);
 		awaitRecorder();
 		panel("undo");
 		awaitPanel();
@@ -175,8 +177,8 @@ class SmartClientRecorderRoundTripSailIT extends AbstractSmartClientInterpretedS
 		selenium.trace("Recorded:\n" + xml);
 		assertAll(() -> assertTrue(xml.contains("<save testSuccess=\"false\"/>"), xml),
 					() -> assertTrue(xml.contains("<testMessage contains=\""), xml),
-					() -> assertTrue(xml.contains("<testValue binding=\"description\" value=\"SAIL checked "), xml),
-					() -> assertTrue(xml.contains("<testGridRows rowContaining=\"SAIL checked "), xml),
+					() -> assertTrue(xml.contains("<testValue binding=\"description\" value=\"" + value + "\"/>"), xml),
+					() -> assertTrue(xml.contains("<testGridRows rowContaining=\"" + value + "\""), xml),
 					() -> assertEquals(1, xml.split("<testGridRows ", -1).length - 1, "the undone check is gone: " + xml),
 					() -> assertTrue(xml.contains("A note from the panel"), xml),
 					() -> assertFalse(xml.contains("Delete me"), xml),

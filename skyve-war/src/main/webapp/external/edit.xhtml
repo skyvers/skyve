@@ -5,6 +5,7 @@
 		xmlns:f="http://java.sun.com/jsf/core"
 		xmlns:p="http://primefaces.org/ui"
 		xmlns:s="http://skyve.org/xml/ui"
+		xmlns:c="http://java.sun.com/jsp/jstl/core"
 		lang="#{skyve.languageTag}" xml:lang="#{skyve.languageTag}"
 		dir="#{skyve.dir}">
 		
@@ -32,14 +33,14 @@
 				<s:csrfForm managedBean="skyve">
 					<ui:include src="/WEB-INF/pages/includes/formFocusAndPush.xhtml">
 						<ui:param name="bean" value="#{skyve}" />
-					</ui:include>
+					</ui:include><c:if test="#{skyve.sailRecording}"><span id="sailRecorderMap" hidden="hidden" data-map="#{skyve.sailRecordingEditMap}"></span></c:if>
 					<div id="sidebarWrapper">
 						<s:view module="#{skyve.bizModuleParameter}"
 									document="#{skyve.bizDocumentParameter}"
 									managedBean="skyve"
 									update="@form" />
 					</div>
-				</s:csrfForm>
+				</s:csrfForm><c:if test="#{skyve.sailRecording}"><span id="sailRecorderState" hidden="hidden" data-state="#{skyve.sailRecordingState}"></span></c:if>
 			</ui:define>
 		</ui:composition>
 	</f:view>

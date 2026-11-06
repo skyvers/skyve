@@ -168,6 +168,7 @@ public final class SailRecordingBuilder {
 
 	private List<String> roleNames = List.of();
 	private String uxui = null;
+	private UserAgentType userAgentType = null;
 	private StepCheck check = null;
 
 	private final IdentityHashMap<Object, List<String>> comments = new IdentityHashMap<>();
@@ -216,6 +217,34 @@ public final class SailRecordingBuilder {
 	}
 
 	/**
+	 * Sets the UX/UI and user agent type the script targets: the ones the recording user got, so that a recording made
+	 * in PrimeFaces (for example {@code tablet}) replays in PrimeFaces. Without them, the script targets SmartClient
+	 * ({@code desktop}).
+	 *
+	 * @param uxuiName	the UX/UI name, or {@code null} for desktop
+	 * @param agentType	the user agent type, or {@code null} for desktop
+	 * @return this
+	 */
+	public @Nonnull SailRecordingBuilder target(@Nullable String uxuiName, @Nullable UserAgentType agentType) {
+		uxui = uxuiName;
+		userAgentType = agentType;
+		return this;
+	}
+
+	private @Nonnull String targetUxui() {
+		return ((uxui == null) || (userAgentType == null)) ? UxUi.DESKTOP_NAME : uxui;
+	}
+
+	private @Nonnull UserAgentType targetUserAgentType() {
+		return ((uxui == null) || (userAgentType == null)) ? UserAgentType.desktop : userAgentType;
+	}
+
+	/** The renderer the script targets, for its header. */
+	private @Nonnull String renderer() {
+		return UxUi.DESKTOP_NAME.equals(targetUxui()) ? "SmartClient" : "PrimeFaces (" + targetUxui() + ")";
+	}
+
+	/**
 	 * Sets the check each step must pass to be a step: one it fails becomes a comment that says why.
 	 *
 	 * @param stepCheck	the check, or {@code null} for none
@@ -239,8 +268,8 @@ public final class SailRecordingBuilder {
 		pending.clear();
 
 		Automation automation = new Automation();
-		automation.setUxui(UxUi.DESKTOP_NAME);
-		automation.setUserAgentType(UserAgentType.desktop);
+		automation.setUxui(targetUxui());
+		automation.setUserAgentType(targetUserAgentType());
 
 		int end = endBeforeStoppingSteps(steps);
 		int gestures = 0;
@@ -413,7 +442,8 @@ public final class SailRecordingBuilder {
 	private @Nonnull List<String> header(int stepCount) {
 		SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm");
 		List<String> result = new ArrayList<>(2);
-		result.add(String.format("Recorded in SmartClient by %s%s from %s to %s (%d recorded gestures).",
+		result.add(String.format("Recorded in %s by %s%s from %s to %s (%d recorded gestures).",
+									renderer(),
 									(customerName == null) ? "" : customerName + '/',
 									userName,
 									format.format(new Date(startedMillis)),

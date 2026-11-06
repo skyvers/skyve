@@ -35,6 +35,7 @@ import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateList
 import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateMenu;
 import org.skyve.metadata.sail.language.step.interaction.session.Login;
 import org.skyve.metadata.sail.language.step.interaction.session.SwitchMode;
+import org.skyve.web.UserAgentType;
 
 /**
  * Tests that recorded steps become the SAIL steps they stand for, that gestures which are not steps become comments,
@@ -288,6 +289,35 @@ class SailRecordingBuilderTest {
 		List<String> header = result.commentsFor(result.automation());
 		assertAll(() -> assertEquals("The recorded user's roles, for the test: viewRoles(\"jane\", \"admin.AppUser\", \"admin.BasicUser\");", header.get(2)),
 					() -> assertEquals("The recorded user got the UX/UI desktop.", header.get(3)));
+	}
+
+	/**
+	 * A recording made in PrimeFaces targets the UX/UI and user agent type the user got, and its header says so.
+	 */
+	@Test
+	void aPrimeFacesRecordingTargetsItsUxUiAndUserAgentType() {
+		SailRecordingBuilder.Result result = new SailRecordingBuilder(null, "jane", STARTED, STOPPED)
+				.target("tablet", UserAgentType.tablet)
+				.build(List.of());
+		Automation automation = result.automation();
+		List<String> header = result.commentsFor(automation);
+		assertAll(() -> assertEquals("tablet", automation.getUxui()),
+					() -> assertEquals(UserAgentType.tablet, automation.getUserAgentType()),
+					() -> assertTrue(header.get(0).startsWith("Recorded in PrimeFaces (tablet) by jane from "), header.get(0)),
+					() -> assertTrue(xml(result).startsWith("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<automation uxui=\"tablet\" userAgentType=\"tablet\""),
+										xml(result)));
+	}
+
+	@Test
+	void aSmartClientRecordingTargetsDesktop() {
+		SailRecordingBuilder.Result result = new SailRecordingBuilder(null, "jane", STARTED, STOPPED).uxui("desktop").build(List.of());
+		assertAll(() -> assertEquals("desktop", result.automation().getUxui()),
+					() -> assertEquals(UserAgentType.desktop, result.automation().getUserAgentType()),
+					() -> assertTrue(result.commentsFor(result.automation()).get(0).startsWith("Recorded in SmartClient by jane from ")));
+	}
+
+	private static String xml(SailRecordingBuilder.Result result) {
+		return SailRecordingBuilder.toXml(result);
 	}
 
 	/**

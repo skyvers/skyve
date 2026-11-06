@@ -323,8 +323,11 @@
 
 		// ---------------------------------------------------------------- the panel's view of the script
 
-		/** The server's recording changed: show its count, and its script if the panel is expanded. */
-		function changed(state) {
+		/**
+		 * The server's recording changed: show its count, and its script if the panel is expanded (unless the panel
+		 * already shows it, as when a page brought it).
+		 */
+		function changed(state, shown) {
 			if (state && (state.gestures != null)) {
 				gestures = state.gestures;
 				total = (state.steps != null) ? state.steps : total;
@@ -332,7 +335,7 @@
 			if (bar) {
 				bar.querySelector(".count").textContent = String(gestures);
 			}
-			if (drawer && drawer.classList.contains("open")) {
+			if (drawer && drawer.classList.contains("open") && !shown) {
 				loadScript(false);
 			}
 		}
@@ -524,14 +527,14 @@
 			});
 		}
 
-		function setExpanded(expanded) {
+		function setExpanded(expanded, shown) {
 			if (!drawer) {
 				return;
 			}
 			drawer.classList.toggle("open", expanded);
 			ui.expanded = expanded;
 			saveUiState(ui);
-			if (expanded) {
+			if (expanded && !shown) {
 				loadScript(false);
 			}
 		}
@@ -632,7 +635,8 @@
 				placeBar();
 			}
 			bar.querySelector(".count").textContent = String(gestures);
-			setExpanded(!!ui.expanded);
+			// a page that brought the recording's state shows it without a request (see start)
+			setExpanded(!!ui.expanded, true);
 			return host;
 		}
 
@@ -640,9 +644,11 @@
 			var x = ui.x;
 			var y = ui.y;
 			if ((x == null) || (y == null) || (x > window.innerWidth - 40) || (y > window.innerHeight - 20) || (x < 0) || (y < 0)) {
-				bar.style.right = "12px";
+				// the adapter's corner keeps clear of the renderer's own corner controls (a list's floating New button)
+				var left = (adapter.corner === "bottom-left");
+				bar.style.right = left ? "" : "12px";
+				bar.style.left = left ? "12px" : "";
 				bar.style.bottom = "12px";
-				bar.style.left = "";
 				bar.style.top = "";
 			} else {
 				bar.style.left = x + "px";
@@ -850,9 +856,13 @@
 			token = null;
 			pageId = newPageId();
 			sequence = 0;
+			var range = null;
 			if (initial) {
 				gestures = initial.gestures || 0;
 				total = initial.steps || 0;
+				if (initial.entries) {
+					range = { total: total, gestures: gestures, from: initial.from || 0, entries: initial.entries };
+				}
 			}
 			attach();
 			mount(host && host.parentNode && host.hasAttribute("data-mounted") ? host.parentNode : null);
@@ -861,7 +871,18 @@
 			bar.querySelector("[data-act=check]").hidden = false;
 			bar.querySelector("[data-act=note]").hidden = false;
 			bar.querySelector("[data-act=download]").hidden = true;
-			connect();
+			if (initial && initial._csrf) {
+				// the page brought the recording's state: no request is needed to start, or to show the panel
+				token = initial._csrf;
+				adapter.connected();
+				if (range && drawer.classList.contains("open")) {
+					showScript(range, false);
+				}
+				changed(null, true);
+				send();
+			} else {
+				connect();
+			}
 		}
 
 		/**
