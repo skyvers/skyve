@@ -1113,6 +1113,16 @@ public class SmartClientInterpretedWebDriverExecutor extends InterpretedWebDrive
 		String expected = ((multiLineExpected.indexOf('\n') >= 0) && multiLine(first)) ? multiLineExpected : multiLineExpected.replace('\n', ' ');
 		List<String> actual = selenide.values(first.getLocator());
 		selenide.trace(String.format("Test value of %s is '%s' (displayed '%s')", binding, expected, actual.get(0)));
+		if (first.getInputType() == InputType.MEMBERSHIP) {
+			// an ordered membership's members are compared in order; an unordered one's in any order
+			boolean ordered = isOrderedCollection(binding);
+			List<String> members = membershipItems(actual.get(0));
+			List<String> expectedMembers = membershipItems(expected);
+			check(membersMatch(members, expectedMembers, ordered),
+					() -> String.format("<testValue /> of [%s] expected the members %s%s but they are %s",
+										binding, expectedMembers, ordered ? " in that order" : "", members));
+			return;
+		}
 		for (String value : actual) {
 			if (expected.equals(value.replace("\r\n", "\n").trim())) {
 				return;

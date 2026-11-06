@@ -577,4 +577,28 @@ class InterpretedWebDriverExecutorTest {
 			throw new IllegalStateException(e);
 		}
 	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void anOrderedMembershipsMembersMatchOnlyInOrder() {
+		assertAll(() -> assertTrue(InterpretedWebDriverExecutor.membersMatch(List.of("a", "c", "b"), List.of("a", "c", "b"), true)),
+					() -> assertFalse(InterpretedWebDriverExecutor.membersMatch(List.of("a", "b", "c"), List.of("a", "c", "b"), true)),
+					() -> assertFalse(InterpretedWebDriverExecutor.membersMatch(List.of("a", "c"), List.of("a", "c", "b"), true)));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void anUnorderedMembershipsMembersMatchInAnyOrder() {
+		assertAll(() -> assertTrue(InterpretedWebDriverExecutor.membersMatch(List.of("a", "b", "c"), List.of("c", "a", "b"), false)),
+					() -> assertFalse(InterpretedWebDriverExecutor.membersMatch(List.of("a", "b"), List.of("a", "b", "c"), false)),
+					() -> assertFalse(InterpretedWebDriverExecutor.membersMatch(List.of("a", "b", "d"), List.of("a", "b", "c"), false)));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void membershipItemsSplitsTheValueInOrder() {
+		assertAll(() -> assertEquals(List.of("Admin - B", "Admin - A"), InterpretedWebDriverExecutor.membershipItems(" Admin - B | Admin - A ")),
+					() -> assertEquals(List.of(), InterpretedWebDriverExecutor.membershipItems(null)),
+					() -> assertEquals(List.of("x"), InterpretedWebDriverExecutor.membershipItems("x||")));
+	}
 }
