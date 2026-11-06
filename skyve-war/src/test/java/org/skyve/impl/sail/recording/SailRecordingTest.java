@@ -52,7 +52,8 @@ class SailRecordingTest {
 		User result = mock(User.class);
 		when(result.getName()).thenReturn("admin");
 		when(result.getCustomerName()).thenReturn("demo");
-		when(result.getCustomer()).thenReturn(mock(org.skyve.metadata.customer.Customer.class));
+		org.skyve.metadata.customer.Customer customer = mock(org.skyve.metadata.customer.Customer.class);
+		when(result.getCustomer()).thenReturn(customer);
 		when(Boolean.valueOf(result.isInRole(SailRecording.ROLE_MODULE_NAME, SailRecording.ROLE_NAME))).thenReturn(Boolean.valueOf(recorder));
 		return result;
 	}
@@ -167,11 +168,12 @@ class SailRecordingTest {
 		recording.add(List.of(step("a", "save")));
 		assertNull(recording.getXml());
 		String xml = recording.stop();
+		List<Map<String, Object>> more = List.of(step("b", "ok"));
 		assertAll(() -> assertTrue(recording.isStopped()),
 					() -> assertTrue(xml.contains("<save/>"), xml),
 					() -> assertSame(xml, recording.stop()),
 					() -> assertSame(xml, recording.getXml()),
-					() -> assertThrows(IllegalStateException.class, () -> recording.add(List.of(step("b", "ok")))));
+					() -> assertThrows(IllegalStateException.class, () -> recording.add(more)));
 	}
 
 	@Test

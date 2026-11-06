@@ -286,7 +286,7 @@ public class SailRecordingServlet extends HttpServlet {
 		}
 		Map<String, Object> roles = new java.util.LinkedHashMap<>();
 		roles.put("user", user.getName());
-		roles.put("roles", SailRecording.effectiveRoleNames(user));
+		roles.put(ROLES_PARAMETER, SailRecording.effectiveRoleNames(user)); // the JSON key is named as the parameter
 		response.setContentType(MimeType.json.toString());
 		response.setCharacterEncoding(StandardCharsets.UTF_8.name());
 		try (PrintWriter pw = response.getWriter()) {

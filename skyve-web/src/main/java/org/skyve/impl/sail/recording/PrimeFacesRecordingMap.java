@@ -216,21 +216,35 @@ public final class PrimeFacesRecordingMap {
 				Object widget = widgets.get(i);
 				UIComponent component = components.get(i);
 				Map<String, Object> entry = entry(identifier, widget, listIdentifier);
-				// A component with no id (a Vue list grid's placeholder child) is not in the page, and a bound widget with no
-				// parent (a data grid column's widget) is not in the tree the page renders, so neither has a client id to give
-				if ((entry != null) && (component.getId() != null) && ((component.getParent() != null) || (! (widget instanceof Bound)))) {
-					String clientId = PrimeFacesAutomationContext.clientId(component);
-					String mappedFrom = idIdentifiers.get(clientId);
-					if ((mappedFrom == null) || (parts(identifier) > parts(mappedFrom))) {
-						ids.put(clientId, entry);
-						idIdentifiers.put(clientId, identifier);
-					}
+				if ((entry != null) && inPage(component, widget)) {
+					putId(PrimeFacesAutomationContext.clientId(component), identifier, entry, ids, idIdentifiers);
 				}
 				putGrid(context, identifier, widget, grids);
 			}
 		}
 		result.put("ids", ids);
 		result.put("grids", grids);
+	}
+
+	/**
+	 * A component with no id (a Vue list grid's placeholder child) is not in the page, and a bound widget with no parent
+	 * (a data grid column's widget) is not in the tree the page renders, so neither has a client id to give.
+	 */
+	private static boolean inPage(@Nonnull UIComponent component, @Nonnull Object widget) {
+		return (component.getId() != null) && ((component.getParent() != null) || (! (widget instanceof Bound)));
+	}
+
+	/** Maps a client id to its entry, keeping the fullest name when an element is reached by several. */
+	private static void putId(@Nonnull String clientId,
+								@Nonnull String identifier,
+								@Nonnull Map<String, Object> entry,
+								@Nonnull Map<String, Map<String, Object>> ids,
+								@Nonnull Map<String, String> idIdentifiers) {
+		String mappedFrom = idIdentifiers.get(clientId);
+		if ((mappedFrom == null) || (parts(identifier) > parts(mappedFrom))) {
+			ids.put(clientId, entry);
+			idIdentifiers.put(clientId, identifier);
+		}
 	}
 
 	private static int parts(@Nonnull String identifier) {
@@ -263,33 +277,10 @@ public final class PrimeFacesRecordingMap {
 			result.put(BINDING, zoomIn.getBinding());
 		}
 		else if (widget instanceof DataGrid grid) {
-			String binding = grid.getBinding();
-			String gesture = gesture(identifier, binding);
-			if (gesture == null) {
-				result.put("dataGrid", binding);
-			}
-			else {
-				result.put(STEP, "dataGrid" + gesture);
-				result.put(BINDING, binding);
-			}
+			putDataGrid(identifier, grid, result);
 		}
 		else if ((widget instanceof String) || (widget instanceof ListGrid)) {
-			String gridIdentifier = identifier;
-			String gesture = null;
-			int dot = identifier.lastIndexOf('.');
-			if (widget instanceof ListGrid) {
-				gridIdentifier = identifier.substring(0, dot);
-				gesture = gesture(identifier, gridIdentifier);
-			}
-			if (gesture == null) {
-				result.put("listGrid", gridIdentifier);
-			}
-			else {
-				result.put(STEP, "listGrid" + gesture);
-			}
-			if (! gridIdentifier.equals(listIdentifier)) {
-				putListGridAttributes(gridIdentifier, result);
-			}
+			putListGrid(identifier, widget instanceof ListGrid, listIdentifier, result);
 		}
 		else if (widget instanceof Bound bound) {
 			result.put(BINDING, bound.getBinding());
@@ -300,6 +291,40 @@ public final class PrimeFacesRecordingMap {
 			return null;
 		}
 		return result;
+	}
+
+	/** Puts a data grid's entry: the grid itself, or one of its controls' steps. */
+	private static void putDataGrid(@Nonnull String identifier, @Nonnull DataGrid grid, @Nonnull Map<String, Object> result) {
+		String binding = grid.getBinding();
+		String gesture = gesture(identifier, binding);
+		if (gesture == null) {
+			result.put("dataGrid", binding);
+		}
+		else {
+			result.put(STEP, "dataGrid" + gesture);
+			result.put(BINDING, binding);
+		}
+	}
+
+	/**
+	 * Puts a list grid's entry: the grid itself (its identifier), or one of its controls' steps (its identifier is the
+	 * grid's with the control's suffix), with the grid's attributes unless it is the list page's own list.
+	 */
+	private static void putListGrid(@Nonnull String identifier,
+										boolean control,
+										@Nullable String listIdentifier,
+										@Nonnull Map<String, Object> result) {
+		String gridIdentifier = control ? identifier.substring(0, identifier.lastIndexOf('.')) : identifier;
+		String gesture = control ? gesture(identifier, gridIdentifier) : null;
+		if (gesture == null) {
+			result.put("listGrid", gridIdentifier);
+		}
+		else {
+			result.put(STEP, "listGrid" + gesture);
+		}
+		if (! gridIdentifier.equals(listIdentifier)) {
+			putListGridAttributes(gridIdentifier, result);
+		}
 	}
 
 	/**

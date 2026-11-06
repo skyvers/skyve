@@ -3,6 +3,7 @@ package sail.kitchenSink.sc;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
@@ -78,7 +79,7 @@ class SmartClientRecorderRoundTripSailIT extends AbstractSmartClientInterpretedS
 
 	@Test
 	void kitchenSink() {
-		String xml = record(() -> sailResource("sail/kitchenSink/sc/sc-recorder-round-trip.xml"));
+		String xml = recordWorkflow(() -> sailResource("sail/kitchenSink/sc/sc-recorder-round-trip.xml"));
 		assertAll(() -> assertTrue(xml.contains("<navigateMenu module=\"kitchensink\" item=\"Lookup values\"/>"), xml),
 					() -> assertTrue(xml.contains("<navigateEdit module=\"kitchensink\" document=\"KitchenSink\"/>"), xml),
 					() -> assertTrue(xml.contains("<dataEnter binding=\"combo\" value=\"one\" match=\"code\"/>"), xml),
@@ -97,37 +98,38 @@ class SmartClientRecorderRoundTripSailIT extends AbstractSmartClientInterpretedS
 	 */
 	@Test
 	void moreGestures() {
-		String xml = record(() -> sailResource("sail/kitchenSink/sc/sc-recorder-round-trip-more.xml"));
-		assertAll(() -> assertTrue(xml.contains("<captureValue binding=\"number\" variable=\"number\"/>"), xml),
-					() -> assertTrue(xml.contains("<listGridFilter column=\"number\" value=\"{var:number}\" operator=\"equals\"/>"), xml),
-					() -> assertTrue(xml.contains("<listGridFilter column=\"number\"/>"), xml),
-					() -> assertTrue(xml.contains("<listGridSort column=\"description\" descending=\"true\"/>"), xml),
-					() -> assertTrue(xml.contains("<listGridClearFilter/>"), xml),
-					() -> assertTrue(xml.contains("<listGridSelect module=\"kitchensink\" query=\"qListGridFixtureVue\" rowContaining=\"0 SAIL lookup "), xml),
-					() -> assertTrue(xml.contains("<lookupDescriptionPick binding=\"selection\" rowContaining=\"0 SAIL lookup "), xml),
-					() -> assertTrue(xml.contains("<lookupDescriptionAutoComplete binding=\"singleSelection\" search=\"0 SAIL lookup "), xml),
-					() -> assertTrue(xml.contains("<lookupDescriptionEdit binding=\"lookupDescription\"/>"), xml),
-					() -> assertTrue(xml.contains("<lookupDescriptionNew binding=\"lookupDescription\"/>"), xml),
-					() -> assertTrue(xml.contains("<dataGridNew binding=\"inlineGrid\"/>"), xml),
-					() -> assertTrue(xml.contains("<dataEnter binding=\"date\" value=\"07-Nov-2025\"/>"), xml),
-					() -> assertTrue(xml.contains("<dataGridEdit binding=\"inlineGrid\" rowContaining=\"07-Nov-2025\"/>"), xml),
-					() -> assertTrue(xml.contains("<dataGridRemove binding=\"inlineGrid\""), xml),
-					() -> assertTrue(xml.contains("<dataGridZoom binding=\"orderedGrid\" rowContaining=\"01-Jan-2020\"/>"), xml),
-					() -> assertTrue(xml.contains("<dataGridSelect binding=\"orderedGrid\" rowContaining=\"01-Jan-2020\"/>"), xml),
-					() -> assertTrue(xml.contains("<dataGridMove binding=\"rows\" rowContaining=\"Second "), xml),
-					() -> assertTrue(xml.contains("<upload action=\"ActionsUpload\" file=\"sail/files/sail-refused.txt\" testSuccess=\"false\"/>"), xml),
-					() -> assertTrue(xml.contains("<upload binding=\"contentLinkNone\" file=\"sail/files/sail-upload.txt\"/>"), xml),
-					() -> assertTrue(xml.contains("text=\"Run From Row\" confirm=\"false\"/>"), xml),
-					() -> assertTrue(xml.contains("<action name=\"AskYesNo\" confirm=\"false\"/>"), xml),
-					() -> assertTrue(xml.contains("<navigateTree module=\"kitchensink\" query=\"qConditionsFixtureNodes\"/>"), xml),
-					() -> assertTrue(xml.contains("<navigateMap module=\"kitchensink\" document=\"ListAttributes\" geometryBinding=\"geometry\"/>"), xml),
-					() -> assertTrue(xml.contains("<navigateCalendar module=\"kitchensink\" document=\"ListAttributes\"/>"), xml));
+		String xml = recordWorkflow(() -> sailResource("sail/kitchenSink/sc/sc-recorder-round-trip-more.xml"));
+		assertContainsAll(xml,
+				"<captureValue binding=\"number\" variable=\"number\"/>",
+				"<listGridFilter column=\"number\" value=\"{var:number}\" operator=\"equals\"/>",
+				"<listGridFilter column=\"number\"/>",
+				"<listGridSort column=\"description\" descending=\"true\"/>",
+				"<listGridClearFilter/>",
+				"<listGridSelect module=\"kitchensink\" query=\"qListGridFixtureVue\" rowContaining=\"0 SAIL lookup ",
+				"<lookupDescriptionPick binding=\"selection\" rowContaining=\"0 SAIL lookup ",
+				"<lookupDescriptionAutoComplete binding=\"singleSelection\" search=\"0 SAIL lookup ",
+				"<lookupDescriptionEdit binding=\"lookupDescription\"/>",
+				"<lookupDescriptionNew binding=\"lookupDescription\"/>",
+				"<dataGridNew binding=\"inlineGrid\"/>",
+				"<dataEnter binding=\"date\" value=\"07-Nov-2025\"/>",
+				"<dataGridEdit binding=\"inlineGrid\" rowContaining=\"07-Nov-2025\"/>",
+				"<dataGridRemove binding=\"inlineGrid\"",
+				"<dataGridZoom binding=\"orderedGrid\" rowContaining=\"01-Jan-2020\"/>",
+				"<dataGridSelect binding=\"orderedGrid\" rowContaining=\"01-Jan-2020\"/>",
+				"<dataGridMove binding=\"rows\" rowContaining=\"Second ",
+				"<upload action=\"ActionsUpload\" file=\"sail/files/sail-refused.txt\" testSuccess=\"false\"/>",
+				"<upload binding=\"contentLinkNone\" file=\"sail/files/sail-upload.txt\"/>",
+				"text=\"Run From Row\" confirm=\"false\"/>",
+				"<action name=\"AskYesNo\" confirm=\"false\"/>",
+				"<navigateTree module=\"kitchensink\" query=\"qConditionsFixtureNodes\"/>",
+				"<navigateMap module=\"kitchensink\" document=\"ListAttributes\" geometryBinding=\"geometry\"/>",
+				"<navigateCalendar module=\"kitchensink\" document=\"ListAttributes\"/>");
 		replay(xml);
 	}
 
 	@Test
 	void adminContacts() {
-		String xml = record(() -> sailString(CONTACTS));
+		String xml = recordWorkflow(() -> sailString(CONTACTS));
 		assertAll(() -> assertTrue(xml.contains("<listGridNew/>"), xml),
 					() -> assertTrue(xml.contains("<listGridZoom rowContaining=\"SAIL Recorded Contact "), xml),
 					() -> assertTrue(xml.contains("<delete confirm=\"false\"/>"), xml),
@@ -163,7 +165,7 @@ class SmartClientRecorderRoundTripSailIT extends AbstractSmartClientInterpretedS
 		click(field("description"), false);
 		awaitRecorder();
 		new Actions(driver()).sendKeys(Keys.ESCAPE).perform();
-		assertFalse(Boolean.TRUE.equals(js("return SKYVE.SailRecorder.checking();")), "Esc leaves Check mode");
+		assertNotEquals(Boolean.TRUE, js("return SKYVE.SailRecorder.checking();"), "Esc leaves Check mode");
 
 		// enter and save the value, then alt-click its field to check it
 		sailString(HEAD + "<interaction name=\"Lookup value\"><method>" +
@@ -211,7 +213,7 @@ class SmartClientRecorderRoundTripSailIT extends AbstractSmartClientInterpretedS
 		// stop in the panel, which offers the download
 		panel("stop");
 		selenium.waitFor(d -> Boolean.TRUE.equals(js("return !SKYVE.SailRecorder.active() && !SKYVE.SailRecorder.busy();")) ? Boolean.TRUE : null);
-		assertTrue(Boolean.TRUE.equals(js("return !document.getElementById('skyve-sail-recorder').shadowRoot.querySelector('.bar [data-act=download]').hidden;")),
+		assertEquals(Boolean.TRUE, js("return !document.getElementById('skyve-sail-recorder').shadowRoot.querySelector('.bar [data-act=download]').hidden;"),
 					"Stop offers the download");
 
 		String xml = fetch("sailrecording?format=xml");
@@ -329,7 +331,7 @@ class SmartClientRecorderRoundTripSailIT extends AbstractSmartClientInterpretedS
 	/**
 	 * Signs in, starts recording in the Control Panel, runs the workflow, stops recording and returns the script.
 	 */
-	private @Nonnull String record(@Nonnull Runnable workflow) {
+	private @Nonnull String recordWorkflow(@Nonnull Runnable workflow) {
 		sailString(SIGN_IN);
 		sailString(START);
 		awaitRecorder();
@@ -351,6 +353,11 @@ class SmartClientRecorderRoundTripSailIT extends AbstractSmartClientInterpretedS
 	/**
 	 * Runs the recorded script as downloaded, defining only the password it signs in with.
 	 */
+	/** Asserts that the script has each of the texts, reporting every one it lacks. */
+	private static void assertContainsAll(@Nonnull String xml, @Nonnull String... expected) {
+		assertAll(java.util.Arrays.stream(expected).map(text -> (org.junit.jupiter.api.function.Executable) () -> assertTrue(xml.contains(text), "no " + text + " in " + xml)));
+	}
+
 	private void replay(@Nonnull String xml) {
 		variable("password", "admin");
 		sailString(xml);

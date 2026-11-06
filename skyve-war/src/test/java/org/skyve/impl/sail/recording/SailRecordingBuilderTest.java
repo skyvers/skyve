@@ -123,12 +123,6 @@ class SailRecordingBuilderTest {
 		DataEnter text = (DataEnter) method.get(2);
 		DataEnter code = (DataEnter) method.get(3);
 		Action action = (Action) method.get(5);
-		Ok ok = (Ok) method.get(7);
-		ListGridZoom byText = (ListGridZoom) method.get(8);
-		ListGridZoom byRow = (ListGridZoom) method.get(9);
-		ListGridNew modelNew = (ListGridNew) method.get(10);
-		NavigateEdit edit = (NavigateEdit) method.get(15);
-		NavigateList list = (NavigateList) method.get(16);
 		assertAll(() -> assertEquals(17, method.size()),
 					() -> assertEquals("admin", menu.getModuleName()),
 					() -> assertEquals("Contacts", menu.getItemName()),
@@ -141,8 +135,37 @@ class SailRecordingBuilderTest {
 					() -> assertEquals("Check", action.getActionName()),
 					() -> assertEquals(Boolean.FALSE, action.getConfirm()),
 					() -> assertInstanceOf(Save.class, method.get(6)),
-					() -> assertNull(((Save) method.get(6)).getConfirm()),
-					() -> assertEquals(Boolean.FALSE, ok.getConfirm()),
+					() -> assertNull(((Save) method.get(6)).getConfirm()));
+	}
+
+	@Test
+	void eachRecordedGestureBecomesItsStepContinued() {
+		List<Map<String, String>> steps = List.of(
+				step("op", "navigateMenu", "module", "admin", "item", "Contacts", "view", ""),
+				step("op", "listGridNew", "view", "list"),
+				step("op", "dataEnter", "binding", "name", "value", "Fred", "view", "admin.Contact"),
+				step("op", "dataEnter", "binding", "contactType", "value", "Person", "match", "code"),
+				step("op", "tabSelect", "path", "Details::Address"),
+				step("op", "action", "name", "Check", "confirm", "false"),
+				step("op", "save"),
+				step("op", "ok", "confirm", "false"),
+				step("op", "listGridZoom", "rowContaining", "Fred"),
+				step("op", "listGridZoom", "module", "admin", "query", "qContacts", "row", "3"),
+				step("op", "listGridNew", "module", "admin", "document", "Contact", "model", "MyModel"),
+				step("op", "cancel"),
+				step("op", "delete"),
+				step("op", "zoomOut"),
+				step("op", "remove"),
+				step("op", "navigateEdit", "module", "admin", "document", "Contact", "bizId", "123"),
+				step("op", "navigateList", "module", "admin", "query", "qContacts"));
+		List<Step> method = method(build(steps));
+		Ok ok = (Ok) method.get(7);
+		ListGridZoom byText = (ListGridZoom) method.get(8);
+		ListGridZoom byRow = (ListGridZoom) method.get(9);
+		ListGridNew modelNew = (ListGridNew) method.get(10);
+		NavigateEdit edit = (NavigateEdit) method.get(15);
+		NavigateList list = (NavigateList) method.get(16);
+		assertAll(() -> assertEquals(Boolean.FALSE, ok.getConfirm()),
 					() -> assertEquals("Fred", byText.getRowContaining()),
 					() -> assertNull(byText.getRow()),
 					() -> assertEquals("qContacts", byRow.getQueryName()),
@@ -156,6 +179,7 @@ class SailRecordingBuilderTest {
 					() -> assertEquals("123", edit.getBizId()),
 					() -> assertEquals("qContacts", list.getQueryName()));
 	}
+
 
 	/**
 	 * Phase 5's gestures become their steps: data grids, lookups, uploads, list filters and sorting, list selections,
@@ -190,11 +214,6 @@ class SailRecordingBuilderTest {
 		DataGridMove move = (DataGridMove) method.get(5);
 		DataGridLink link = (DataGridLink) method.get(6);
 		LookupDescriptionAutoComplete auto = (LookupDescriptionAutoComplete) method.get(8);
-		Upload upload = (Upload) method.get(11);
-		ListGridFilter contains = (ListGridFilter) method.get(12);
-		ListGridFilter equals = (ListGridFilter) method.get(13);
-		ListGridFilter cleared = (ListGridFilter) method.get(14);
-		NavigateMap map = (NavigateMap) method.get(19);
 		assertAll(() -> assertEquals(22, method.size()),
 					() -> assertEquals("rows", ((DataGridNew) method.get(0)).getBinding()),
 					() -> assertEquals("Fred", ((DataGridZoom) method.get(1)).getRowContaining()),
@@ -208,8 +227,41 @@ class SailRecordingBuilderTest {
 					() -> assertEquals("Fre", auto.getSearch()),
 					() -> assertEquals("Fred Smith", auto.getPick()),
 					() -> assertInstanceOf(LookupDescriptionNew.class, method.get(9)),
-					() -> assertInstanceOf(LookupDescriptionEdit.class, method.get(10)),
-					() -> assertEquals("Import", upload.getActionName()),
+					() -> assertInstanceOf(LookupDescriptionEdit.class, method.get(10)));
+	}
+
+	@Test
+	void gridsLookupsUploadsAndListsBecomeTheirStepsContinued() {
+		List<Map<String, String>> steps = List.of(
+				step("op", "dataGridNew", "binding", "rows"),
+				step("op", "dataGridZoom", "binding", "rows", "rowContaining", "Fred", "rowTexts", "Fred | 3"),
+				step("op", "dataGridEdit", "binding", "rows", "row", "2"),
+				step("op", "dataGridRemove", "binding", "rows", "rowContaining", "Fred"),
+				step("op", "dataGridSelect", "binding", "rows", "rowContaining", "Fred"),
+				step("op", "dataGridMove", "binding", "rows", "rowContaining", "Fred", "to", "0"),
+				step("op", "dataGridLink", "binding", "rows", "rowContaining", "Fred", "text", "Revoke", "confirm", "false"),
+				step("op", "lookupDescriptionPick", "binding", "contact", "rowContaining", "Fred Smith"),
+				step("op", "lookupDescriptionAutoComplete", "binding", "contact", "search", "Fre", "pick", "Fred Smith"),
+				step("op", "lookupDescriptionNew", "binding", "contact"),
+				step("op", "lookupDescriptionEdit", "binding", "contact"),
+				step("op", "upload", "action", "Import", "file", "C:\\fakepath\\people.csv"),
+				step("op", "listGridFilter", "column", "name", "value", "Fred"),
+				step("op", "listGridFilter", "module", "admin", "query", "qContacts", "column", "number", "value", "7", "operator", "equals"),
+				step("op", "listGridFilter", "column", "name"),
+				step("op", "listGridClearFilter"),
+				step("op", "listGridSort", "column", "name", "descending", "true"),
+				step("op", "listGridSelect", "rowContaining", "Fred"),
+				step("op", "navigateTree", "module", "whosin", "query", "qStaff"),
+				step("op", "navigateMap", "module", "whosin", "query", "qStaff", "geometryBinding", "location"),
+				step("op", "navigateCalendar", "module", "admin", "document", "Job"),
+				step("op", "dataEnter", "binding", "date", "value", "07-Nov-2025", "grid", "rows"));
+		List<Step> method = method(build(steps));
+		Upload upload = (Upload) method.get(11);
+		ListGridFilter contains = (ListGridFilter) method.get(12);
+		ListGridFilter equals = (ListGridFilter) method.get(13);
+		ListGridFilter cleared = (ListGridFilter) method.get(14);
+		NavigateMap map = (NavigateMap) method.get(19);
+		assertAll(() -> assertEquals("Import", upload.getActionName()),
 					() -> assertEquals("sail/files/people.csv", upload.getFile()),
 					() -> assertNull(contains.getOperator()),
 					() -> assertEquals("Fred", contains.getValue()),
@@ -224,6 +276,7 @@ class SailRecordingBuilderTest {
 					() -> assertInstanceOf(NavigateCalendar.class, method.get(20)),
 					() -> assertEquals("date", ((DataEnter) method.get(21)).getBinding()));
 	}
+
 
 	/**
 	 * An upload the page refused, and a server-side question the user declined, set the step's testSuccess and
@@ -435,7 +488,7 @@ class SailRecordingBuilderTest {
 	@Test
 	void aPrimeFacesRecordingTargetsItsUxUiAndUserAgentType() {
 		SailRecordingBuilder.Result result = new SailRecordingBuilder(null, "jane", STARTED, STOPPED)
-				.target("tablet", UserAgentType.tablet)
+				.targeting("tablet", UserAgentType.tablet)
 				.build(List.of());
 		Automation automation = result.automation();
 		List<String> header = result.commentsFor(automation);

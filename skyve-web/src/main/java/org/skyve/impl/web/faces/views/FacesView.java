@@ -1739,14 +1739,14 @@ public class FacesView extends HarnessView {
 		}
 		String documentName = getBizDocumentParameter();
 		String queryName = getQueryNameParameter();
-		String modelName = getModelName();
+		String listModelName = getModelName();
 		try {
 			RequestUxUiSelection selection = UserAgent.getSelection((HttpServletRequest) FacesContext.getCurrentInstance().getExternalContext().getRequest());
 			String uxui = selection.getUxUi().getName();
 			UserAgentType userAgentType = selection.getUserAgentType();
 			return sailRecordingMap(String.join("|", "list", moduleName, String.valueOf(documentName), String.valueOf(queryName),
-													String.valueOf(modelName), uxui, userAgentType.name()),
-									() -> PrimeFacesRecordingMap.list(moduleName, documentName, queryName, modelName, uxui, userAgentType));
+													String.valueOf(listModelName), uxui, userAgentType.name()),
+									() -> PrimeFacesRecordingMap.list(moduleName, documentName, queryName, listModelName, uxui, userAgentType));
 		}
 		catch (Exception e) {
 			FACES_LOGGER.warn("SAIL recording could not build the client-id map of the list {}.{}", moduleName, queryName, e);

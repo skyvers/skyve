@@ -494,7 +494,8 @@ public final class SailRecording implements Serializable {
 	 * @return the file name
 	 */
 	public @Nonnull String fileName() {
-		return "sail-recording-" + new java.text.SimpleDateFormat("yyyyMMdd-HHmm").format(new java.util.Date(startedMillis)) + ".xml";
+		return "sail-recording-" + java.time.format.DateTimeFormatter.ofPattern("yyyyMMdd-HHmm").withZone(java.time.ZoneId.systemDefault())
+																		.format(java.time.Instant.ofEpochMilli(startedMillis)) + ".xml";
 	}
 
 	/**
@@ -624,7 +625,7 @@ public final class SailRecording implements Serializable {
 		// The sign in page asks for the customer only when the configuration does not fix one
 		String loginCustomerName = (UtilImpl.CUSTOMER == null) ? customerName : null;
 		SailRecordingBuilder result = new SailRecordingBuilder(loginCustomerName, userName, startedMillis, stopped).roles(roleNames);
-		return (userAgentType == null) ? result.uxui(uxui) : result.target(uxui, userAgentType);
+		return (userAgentType == null) ? result.uxui(uxui) : result.targeting(uxui, userAgentType);
 	}
 
 	/**
