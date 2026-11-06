@@ -1013,9 +1013,9 @@ Scripts follow the same rules. Use `testGridRows timeoutMillis` or
 
 ## Recording
 
-The SAIL recorder writes a script of what a user does in SmartClient. The script is a first draft: an editor (a person
-or an AI) adds assertions, puts `{run}` into values that must be unique, and removes steps that do not matter. The plan,
-with the phases still to come (context comments, assertions while recording, PrimeFaces, and the remaining gestures), is
+The SAIL recorder writes a script of what a user does in SmartClient or PrimeFaces. The script is a first draft: an
+editor (a person or an AI) adds assertions, puts `{run}` into values that must be unique, and removes steps that do not
+matter. The plan, with the phase still to come (the remaining gestures), is
 [plan_sail_recorder.md](ai/plan_sail_recorder.md).
 
 ### The gate
@@ -1035,8 +1035,9 @@ tells the user to stop and download it; nothing is lost silently.
 
 ### Start, stop and download
 
-1. Open **DevOps / Control Panel**, select the **SAIL** tab, and press **Start** in the Recording box. The recorder loads
-   into the page at once, without a reload.
+1. Open **DevOps / Control Panel**, select the **SAIL** tab, and press **Start** in the Recording box. In SmartClient
+   the recorder loads into the page at once, without a reload; in PrimeFaces the page loads again, with the recorder
+   (the reload is not recorded).
 2. Use the application. Every page of the session loads the recorder until recording stops, and shows its panel.
 3. Press **Stop** in the panel, or in the Control Panel. The recorder sends its last steps first, then the server
    checks and builds the script. Going back to the Control Panel to stop is left out of the script.
@@ -1052,8 +1053,9 @@ and offers to stop and download first.
 While recording, each page shows the recorder's panel. It is drawn in a Shadow DOM root, so the application's styles
 and the panel's cannot affect each other, and nothing done in the panel is recorded or reaches the application.
 
-- **Collapsed**, it is a small bar in the bottom right corner, which can be dragged elsewhere: a red dot, the number of
-  recorded gestures, **Check**, **Note**, **Stop**, and a control that expands it.
+- **Collapsed**, it is a small bar in the bottom right corner (bottom left in PrimeFaces, clear of a list grid's New
+  button), which can be dragged elsewhere: a red dot, the number of recorded gestures, **Check**, **Note**, **Stop**,
+  and a control that expands it.
 - **Expanded**, it slides out on the right and shows the script as it is written, newest at the bottom, with the context
   comments greyed. Scrolling to the top loads earlier entries. The script is read-only: each gesture has a delete
   button, **Undo** removes the last gesture (with the context recorded after it), and **Copy** and **Download** take the
@@ -1069,11 +1071,16 @@ and the panel's cannot affect each other, and nothing done in the panel is recor
     elsewhere on a grid, `testGridRows` with `minRows` and `maxRows` set to the rows it shows.
 - **Note** opens a small input in the panel: the text becomes a `<comment>` step.
 - The panel's state (expanded or not, where the bar is, the scroll) is kept in the browser tab's `sessionStorage`.
+  PrimeFaces loads a page per view: each page comes back with the panel as it was, without its slide-in, from that
+  state and from the recording's state, which the page carries (see [How it works](#how-it-works)).
 
 ### What is recorded
 
-The script has `uxui="desktop"` and `userAgentType="desktop"`, one step per line, and each element's attributes in a fixed
-order. Its `<before>` signs in as the user who recorded, then switches to SmartClient:
+A SmartClient recording has `uxui="desktop"` and `userAgentType="desktop"`; a PrimeFaces recording has the UX/UI and user
+agent type the user got (for example `uxui="tablet" userAgentType="tablet"`), so that it replays through the PrimeFaces
+executor. The script has one step per line, and each element's attributes in a fixed order. Its `<before>` signs in as
+the user who recorded, then switches mode (to SmartClient for desktop; in PrimeFaces, when PrimeFaces already shows, it
+does nothing):
 
 ```xml
 <before>
@@ -1094,7 +1101,13 @@ customer only when the sign in page asks for one (no `environment.customer`).
 | Typing into or changing a field | `dataEnter` with the final value, written before the next step or server response. Combos and radios record the option's code with `match="code"`; check boxes `true` or `false`; dates and times the text as shown; rich text its plain text. New lines are written as `&#10;`. |
 | Selecting a tab | `tabSelect`, with `::` for nested tabs. Selecting the tab already shown records nothing. |
 | A view's buttons | `ok`, `save`, `cancel`, `delete`, `zoomOut`, `remove`, or `action name="..."` for the view's own actions. A declined confirmation adds `confirm="false"`. |
-| A list grid's New, or zooming into a row | `listGridNew`, `listGridZoom`. A row is named with `rowContaining`: its bizKey when a cell shows it, otherwise the cell the fewest loaded rows show, the leftmost on a tie; `row` only when no text finds the row first. The list view's own grid is named by the context; a grid in a view by `module` and `query` (or `document` and `model`). |
+| A list grid's New, or zooming into a row | `listGridNew`, `listGridZoom`. A row is named with `rowContaining`: its bizKey when a cell shows it, otherwise the cell the fewest loaded rows show, the leftmost on a tie; `row` only when no text finds the row first. The list view's own grid is named by the context; a grid in a view by `module` and `query` (or `document` and `model`). In PrimeFaces, both a Vue list grid (its New, its View Detail or a zoomable row) and a PrimeFaces data table. |
+
+In PrimeFaces, data entry is read from the fields the page's map names: what a field shows when the next step is taken,
+or when the next ajax request is sent, is compared with what it showed when the page loaded or the last response
+arrived, and each change becomes a `dataEnter` with the final value, in page order. A check box that can be empty keeps
+its empty, true or false state. A widget the recorder cannot read yet (a lookup, for example) is an unmapped comment
+for its change.
 
 The script also carries context for whoever edits it, as XML comments:
 
@@ -1122,7 +1135,7 @@ silently.
 
 ### How it works
 
-- `desktop/home.xhtml` adds `skyve/sail/recorder-sc-min.js` after `skyve-min.js` only through
+- SmartClient: `desktop/home.xhtml` adds `skyve/sail/recorder-sc-min.js` after `skyve-min.js` only through
   `#{desktop.sailRecording}`, which checks the gate. The Control Panel's SAIL tab loads the same bundle when Start's
   response says the session records. The bundle is built by `skyve-web/build.xml` (`compress`) from
   `skyve-web/src/js/sail/recorder-sc.js`, and is never merged into `skyve-min.js`.
@@ -1144,26 +1157,39 @@ silently.
   and with `download` as a file.
 - `GET sailrecording?roles` returns the signed-in user's effective roles whenever `sail.recording` is on, for any
   signed-in user (no recording or SAILRecorder role needed): the harness uses it (see [The test user](#the-test-user)).
-- PrimeFaces groundwork (phase 4). There is no PrimeFaces recorder bundle yet, so while a session records, PrimeFaces
-  pages ask for it and get a 404.
-  - Each theme's `head-resources.xhtml` adds `skyve/sail/recorder-pf-min.js` after `skyve/prime/skyve-min.js` only
-    through `#{bean.sailRecording}`. That is the same gate, which every page bean inherits from `LocalisableView`.
-  - `org.skyve.impl.sail.recording.PrimeFacesRecordingMap` builds the map a PrimeFaces recorder names gestures with:
-    each element's client id and what a step calls it (a binding and widget kind, an action, a tab path, a grid and its
+- PrimeFaces: `skyve/sail/recorder-pf-min.js` is the same core followed by the PrimeFaces adapter (`recorder-pf.js`).
+  Everything a page adds goes through the same gate, which every page bean inherits from `LocalisableView`, inside a
+  `c:if` with no text of its own, so a page whose session is not recording is byte for byte what it was:
+  - each theme's `head-resources.xhtml` adds the bundle after `skyve/prime/skyve-min.js` (`#{bean.sailRecording}`);
+  - `external/edit.xhtml` and `external/list.xhtml` render, inside the form, a hidden `#sailRecorderMap` span with the
+    page's client-id map, so that an ajax update of the form brings the map of what the view now shows; and, after the
+    form, a hidden `#sailRecorderState` span with the recording's state: its CSRF token, its counts and its last 50
+    entries (`FacesView.getSailRecordingState()`), so that the recorder and its panel start with no request.
+  - `org.skyve.impl.sail.recording.PrimeFacesRecordingMap` builds the map: each element's client id (a data table's
+    row index left out) and what a step calls it (a binding and widget kind, an action, a tab path, a grid and its
     controls), and each grid's columns. It uses the executors' own mock render, as the signed-in user, under a mock
     Faces context. `FacesView.getSailRecordingEditMap()` and `getSailRecordingListMap()` build it only while the
     session records.
+  - The adapter listens to the DOM in the capture phase and to PrimeFaces' `pfAjaxSend` and `pfAjaxComplete` events:
+    data entry is flushed before each request, and each response's messages, growls, field errors and changed values
+    become context. A gesture that loads the next page (a menu item, a list's New or zoom, OK) marks it in
+    `sessionStorage`, so the load is not recorded again as a navigation. A button that asks for confirmation holds
+    its step until the confirm dialog is answered.
+  - Its requests to `sailrecording` go through jQuery, so that a page's own ajax wait (and the PrimeFaces Selenide
+    harness's) covers them.
   - The PrimeFaces Control Panel (`views/external/edit.xml`) has the Recording controls, as the desktop one does.
-- `SmartClientRecorderRoundTripSailIT` records two workflows (kitchen sink widgets, actions, tabs and list grids; admin
-  contacts) and replays each recording unedited. It also checks that the home page is unchanged unless the session
-  records.
+- `SmartClientRecorderRoundTripSailIT` and `PrimeFacesRecorderRoundTripSailIT` each record kitchen sink and admin
+  contacts workflows, and checks, notes, a delete and an undo through the panel, and replay each recording unedited
+  through their renderer's executor (PrimeFaces as `tablet`). They also check that pages are unchanged unless the
+  session records; the PrimeFaces one also checks the sign out warning.
 
 ### Limits
 
-- SmartClient only. PrimeFaces recording,
-  and lookups, data grids, uploads, server-side questions, list filters and sorting, and tree, map and calendar
-  navigation come in later phases; until then they are unmapped comments (or, for a field such as a lookup, an unmapped
-  comment for its change).
+- Lookups, data grids, uploads, server-side questions, list filters and sorting, and tree, map and calendar navigation
+  come in a later phase; until then they are unmapped comments (or, for a field such as a lookup, an unmapped comment
+  for its change).
+- A PrimeFaces list grid shows its first page of rows, and a replay finds a row only among them: a recording that zooms
+  into a row replays only while that row is on the first page.
 - A recording starts in the Control Panel. If its first gesture is not a navigation, the script says so in a comment.
 - Recorded values are user data. A recording against real data holds real names and values; edit them out before a
   script is committed.
