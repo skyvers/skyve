@@ -13,7 +13,10 @@
  *     isc.BizButton.initWidget          wraps each button's action: action, save, ok, cancel, delete, zoomOut, remove
  *     isc.BizTabPane.tabSelected        tabSelect, when the user selected the tab
  *     isc.BizListGrid.zoom              listGridZoom (rowContaining), listGridNew
- *     isc.EditView.scatter              writes the pending dataEnter steps before a response replaces the values
+ *     isc.EditView.scatter              writes the pending dataEnter steps before a response replaces the values, then
+ *                                       notes what the response changed on screen and what each field shows
+ *     isc.EditView._displayGrowlsAndMessages, _displayFailure   note the messages and errors a response shows
+ *     isc.BizUtil.growl                 notes the growls shown
  * - it handles SmartClient's ValuesManager.itemChanged() notification, which a view's forms fire when the user
  *   changes a field: the field's final value becomes a dataEnter step before the next step or server response;
  * - it wraps isc.ask, to see a confirmation the user declined (confirm="false");
@@ -104,6 +107,24 @@
 		return view._mod ? view._mod + "." + view._doc : "";
 	}
 
+	/**
+	 * Describes the screen a view shows, for the script's heading comments: module and document (and its name),
+	 * view and renderer; or the list view's data source.
+	 */
+	function screenOf(view) {
+		if (!view) {
+			return "";
+		}
+		if (isc.ListView && view === isc.ListView.contents) {
+			var grid = isc.ListView._grid;
+			var ds = grid && (grid._dataSource || (grid.grid && grid.grid.dataSource));
+			var id = ds && (ds.ID || ds);
+			return "list " + (isc.isA.String(id) ? id : "") + ", SmartClient";
+		}
+		return view._mod ? view._mod + "." + view._doc + " (" + strip(view._singular) + "), " +
+								(view._sailViewType || "edit") + " view, SmartClient" : "";
+	}
+
 	/** The binding a form item's name stands for: org.skyve.impl.bind.BindUtil.unsanitiseBinding(). */
 	function unsanitise(name) {
 		return String(name).replace(/_(\d*)_/g, "[$1]").replace(/_/g, ".");
@@ -132,7 +153,11 @@
 	function push(step) {
 		step.id = pageId + "-" + (++sequence);
 		if (step.view === undefined) {
-			step.view = describe(topView());
+			var view = topView();
+			step.view = describe(view);
+			if (step.screen === undefined) {
+				step.screen = screenOf(view);
+			}
 		}
 		queue.push(step);
 		if (gesture) {
@@ -369,18 +394,126 @@
 			var item = items[i];
 			var entry = dataEntry(item);
 			if (entry) {
-				var view = describe(item.form._view);
+				var owner = item.form._view;
+				var view = describe(owner);
+				var screen = screenOf(owner);
 				if (entry.unmapped) {
-					push({ op: "unmapped", text: entry.unmapped, view: view });
+					push({ op: "unmapped", text: entry.unmapped, view: view, screen: screen });
 				} else {
-					var step = { op: "dataEnter", binding: entry.binding, value: entry.value, view: view };
+					var step = { op: "dataEnter", binding: entry.binding, value: entry.value, view: view, screen: screen,
+									label: strip(item.title || item.name).replace(/\s*\*$/, "") };
 					if (entry.match) {
 						step.match = entry.match;
+					}
+					// what the field showed before the user changed it, from the last response's snapshot
+					var shown = owner._sailShown;
+					if (shown && Object.prototype.hasOwnProperty.call(shown, item.name)) {
+						step.before = shown[item.name];
+					}
+					if (owner._sailEntered) {
+						owner._sailEntered[item.name] = true;
 					}
 					push(step);
 				}
 			}
 		}
+	}
+
+	// ---------------------------------------------------------------- context: what the screen showed
+
+	var SHOWN_LENGTH = 60;
+
+	function shorten(text) {
+		return (text.length > SHOWN_LENGTH) ? text.substring(0, SHOWN_LENGTH) + "..." : text;
+	}
+
+	/** The text a form item shows, or null for an item whose value is not text (a grid, a map, an image). */
+	function shownText(item) {
+		var value = item.getValue();
+		if (isc.isA.CheckboxItem(item)) {
+			return (value == null) ? "" : String(value);
+		}
+		if (isc.isA.RichTextItem(item) || (isc.isA.BizHTMLItem && isc.isA.BizHTMLItem(item))) {
+			return shorten(htmlLines(value).replace(/\n/g, " "));
+		}
+		if (item.canvas && !isc.isA.SliderItem(item) && !(isc.isA.BizLookupDescriptionItem && isc.isA.BizLookupDescriptionItem(item))) {
+			return null;
+		}
+		if (item.dateTextField || item.timeTextField) {
+			var field = item.dateTextField || item.timeTextField;
+			return shorten(String((field.getElementValue ? field.getElementValue() : item.getDisplayValue()) || ""));
+		}
+		if ((item.getValueMap && item.getValueMap() && !isc.isA.TextItem(item)) ||
+				(isc.isA.BizLookupDescriptionItem && isc.isA.BizLookupDescriptionItem(item))) {
+			return shorten(strip(item.getDisplayValue()));
+		}
+		return (value == null) ? "" : shorten(isc.isA.Date(value) ? String(item.getDisplayValue()) : String(value));
+	}
+
+	/** What each bound form item of a view shows, by item name. */
+	function shownValues(view) {
+		var result = {};
+		(isc.Canvas._canvasList || []).forEach(function (c) {
+			if (c && !c.destroyed && (c._view === view) && isc.isA.DynamicForm(c)) {
+				(c.getItems() || []).forEach(function (item) {
+					var name = item.name;
+					if (name && (name.charAt(0) !== "_") && !isc.isA.PasswordItem(item) && !isc.isA.StaticTextItem(item) &&
+							!isc.isA.ButtonItem(item) && !isc.isA.SpacerItem(item)) {
+						var text = shownText(item);
+						if (text != null) {
+							result[name] = text;
+						}
+					}
+				});
+			}
+		});
+		return result;
+	}
+
+	/**
+	 * After a response for the same record: records, as context, the values the response changed on screen,
+	 * leaving out what the user entered. Then keeps what the view shows for the next data entry and response.
+	 */
+	function recordChangedValues(view, values) {
+		var before = view._sailShown;
+		var sameRecord = before && values && (view._sailBizId === values.bizId);
+		var entered = view._sailEntered || {};
+		var now = shownValues(view);
+		if (sameRecord) {
+			var changes = [];
+			Object.keys(now).forEach(function (name) {
+				if (!entered[name] && Object.prototype.hasOwnProperty.call(before, name) && (before[name] !== now[name])) {
+					changes.push(unsanitise(name) + " \"" + before[name] + "\" -> \"" + now[name] + "\"");
+				}
+			});
+			if (changes.length) {
+				push({ op: "context", text: "changed on screen: " + changes.join("; "), view: describe(view), screen: screenOf(view) });
+			}
+		}
+		view._sailShown = now;
+		view._sailBizId = values ? values.bizId : null;
+		view._sailEntered = {};
+	}
+
+	/** Records, as context, the messages and errors a response showed. */
+	function recordShown(view, parts) {
+		var texts = parts.filter(function (text) {
+			return !!text;
+		});
+		if (texts.length) {
+			push({ op: "context", text: "shown: " + texts.join("; "), view: describe(view), screen: screenOf(view) });
+		}
+	}
+
+	function messageTexts(growls, messages) {
+		var result = [];
+		(growls || []).forEach(function (g) {
+			result.push((g.severity || "info") + " growl \"" + strip(g.summary) + "\"");
+		});
+		(messages || []).forEach(function (m) {
+			result.push((m.severity || "info") + " message \"" + strip(m.summary) + "\"");
+		});
+		return result;
 	}
 
 	// ---------------------------------------------------------------- list grids
@@ -636,6 +769,13 @@
 					} else {
 						var located = rowLocator(this.grid, this._eventRowNum, this._eventRecord);
 						step.op = "listGridZoom";
+						var eventRecord = this._eventRecord;
+						if (eventRecord && eventRecord.bizKey) {
+							step.rowBizKey = strip(eventRecord.bizKey);
+						}
+						step.rowTexts = rowTexts(this.grid, this._eventRowNum).filter(function (text) {
+							return !!text;
+						}).join(" | ");
 						if (located.rowContaining != null) {
 							step.rowContaining = located.rowContaining;
 						} else {
@@ -648,11 +788,53 @@
 			};
 		});
 
-		wrap(isc.EditView.getPrototype(), "scatter", function (original) {
-			return function () {
+		var editViewProto = isc.EditView.getPrototype();
+		wrap(editViewProto, "scatter", function (original) {
+			return function (values) {
 				// a server response replaces the values: the user's entries so far are final
 				if (active) {
 					flushDataEntry();
+				}
+				var result = original.apply(this, arguments);
+				if (active) {
+					this._sailViewType = (values && values.created) ? "edit" : "create";
+					recordChangedValues(this, values);
+				}
+				return result;
+			};
+		});
+		wrap(editViewProto, "_displayGrowlsAndMessages", function (original) {
+			return function (growls, messages) {
+				// growls are noted by isc.BizUtil.growl, below
+				if (active) {
+					recordShown(this, messageTexts(null, messages));
+				}
+				return original.apply(this, arguments);
+			};
+		});
+		wrap(isc.BizUtil, "growl", function (original) {
+			return function (growls) {
+				if (active) {
+					recordShown(topView(), messageTexts(isc.isA.Array(growls) ? growls : null, null));
+				}
+				return original.apply(this, arguments);
+			};
+		});
+		wrap(editViewProto, "_displayFailure", function (original) {
+			return function (dsResponse, data) {
+				if (active && dsResponse) {
+					var status = dsResponse.status;
+					if ((status === -1) || (status === isc.EditView._UNAVAILABLE)) {
+						// the growls are noted by isc.BizUtil.growl
+						recordShown(this, messageTexts(null, dsResponse._messages).concat(["problem \"" + shorten(strip(data)) + "\""]));
+					} else if (dsResponse.errors) {
+						var errors = [];
+						var all = isc.isA.Array(dsResponse.errors) ? dsResponse.errors[0] : dsResponse.errors;
+						Object.keys(all || {}).forEach(function (name) {
+							errors.push(unsanitise(name) + " error \"" + strip(all[name]) + "\"");
+						});
+						recordShown(this, errors);
+					}
 				}
 				return original.apply(this, arguments);
 			};

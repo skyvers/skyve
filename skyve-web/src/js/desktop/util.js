@@ -856,6 +856,7 @@ isc.BizUtil.addClassMethods({
 
 	/**
 	 * Displays growl notifications.
+	 * The SAIL recorder (src/js/sail/recorder-sc.js) wraps this method to note the growls shown: keep its arguments.
 	 * @param {Array} msgs - the messages to display.
 	 * @param {number} life - the duration of the notification.
 	 * @param {boolean} sticky - whether the notification is sticky.
