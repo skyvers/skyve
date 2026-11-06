@@ -17,7 +17,6 @@ import org.openqa.selenium.Keys;
 import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.support.ui.WebDriverWait;
 import org.skyve.impl.sail.execution.sc.Locator;
 import org.skyve.impl.sail.execution.sc.Locator.Kind;
 
@@ -109,7 +108,7 @@ public class SmartClientSelenide extends Selenide<
 	 * @return the condition's result
 	 * @throws IllegalStateException if the condition does not hold within {@link Selenide#TIMEOUT}
 	 */
-	private <T> @Nonnull T until(@Nonnull String what, @Nonnull java.util.function.Function<org.openqa.selenium.WebDriver, T> condition) {
+	private @Nonnull <T> T until(@Nonnull String what, @Nonnull java.util.function.Function<org.openqa.selenium.WebDriver, T> condition) {
 		try {
 			return waitFor(condition);
 		}
