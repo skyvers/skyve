@@ -2264,6 +2264,7 @@ isc.BizListGrid.addMethods({
 	/**
 	 * Navigates to the edit view, either for a new or existing record, based on the specified parameters.
 	 * Handles the conversation continuation logic and ensures the proper context for zooming into the record.
+	 * The SAIL recorder (src/js/sail/recorder-sc.js) wraps this method to record listGridNew and listGridZoom: keep its arguments and _eventRecord/_eventRowNum.
 	 *
 	 * @param {boolean} zoomToNew - indicates whether to navigate to a new record (true) or an existing one (false).
 	 * @param {boolean} contConv - specifies whether to continue the owning view's conversation (true) or start a new one (false).
