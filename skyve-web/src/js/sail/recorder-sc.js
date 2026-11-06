@@ -1,12 +1,14 @@
 /*
- * SAIL recorder for SmartClient: records what the user does as SAIL steps. See docs/sail.md, "Recording".
+ * SAIL recorder for SmartClient: the SmartClient adapter of the recorder core (recorder-core.js), with which
+ * skyve-web/build.xml concatenates it into skyve/sail/recorder-sc-min.js. See docs/sail.md, "Recording".
  *
  * Only a session that is recording loads this script: desktop/home.xhtml adds it when DesktopView.isSailRecording()
- * is true, and the Control Panel loads it when recording starts. The steps go to the sailrecording endpoint
- * (org.skyve.impl.sail.recording.SailRecordingServlet), which builds the script when recording stops.
+ * is true, and the Control Panel loads it when recording starts. The core sends the steps to the sailrecording
+ * endpoint (org.skyve.impl.sail.recording.SailRecordingServlet), shows the panel and runs Check mode; this adapter
+ * maps SmartClient to SAIL.
  *
- * Skyve's client code has no recorder checks in it. The recorder attaches itself when it loads, and detaches when
- * recording stops:
+ * Skyve's client code has no recorder checks in it. The adapter attaches itself when recording starts, and detaches
+ * when it stops:
  * - it wraps these methods of Skyve's SmartClient classes, calling the original and recording what it did (each is
  *   marked in skyve-web/src/js/desktop with a comment pointing here):
  *     isc.BizUtil.handleMenuItemClick   navigateMenu
@@ -15,17 +17,15 @@
  *     isc.BizListGrid.zoom              listGridZoom (rowContaining), listGridNew
  *     isc.EditView.scatter              writes the pending dataEnter steps before a response replaces the values, then
  *                                       notes what the response changed on screen and what each field shows
+ *     isc.EditView.gather               notes the errors when validation stops a request in the browser
  *     isc.EditView._displayGrowlsAndMessages, _displayFailure   note the messages and errors a response shows
  *     isc.BizUtil.growl                 notes the growls shown
  * - it handles SmartClient's ValuesManager.itemChanged() notification, which a view's forms fire when the user
  *   changes a field: the field's final value becomes a dataEnter step before the next step or server response;
  * - it wraps isc.ask, to see a confirmation the user declined (confirm="false");
- * - DOM listeners on document, in the capture phase, mark when a user gesture starts, so that only gestures are
- *   recorded, and a click on a control that no step records becomes an "unmapped" comment. A gesture is never dropped.
+ * - it describes, for the core, a click that recorded nothing (an "unmapped" comment) and what a Check mode click
+ *   checks (a growl or dialog message, a field, a grid row or a grid);
  * - a page load with a=e or a=l in its URL (a link, a typed URL, a reload) is recorded as navigateEdit or navigateList.
- *
- * The recorder only ever runs while recording, but it must not slow down the page: it does its work when a gesture
- * or response happens, and uses no timers.
  */
 (function () {
 	"use strict";
@@ -37,7 +37,6 @@
 		return;
 	}
 
-	var ENDPOINT = "sailrecording";
 	/** The Control Panel's recording actions, which are not recorded. */
 	var CONTROL_ACTIONS = { StartSAILRecording: true, StopSAILRecording: true, DownloadSAILRecording: true };
 	var STOP_ACTION = "StopSAILRecording";
@@ -45,30 +44,12 @@
 	var BUTTON_STEPS = { OK: "ok", Save: "save", Cancel: "cancel", Delete: "delete", ZoomOut: "zoomOut", Remove: "remove" };
 	var ACTION_TYPES = { Download: true };
 
-	var active = false;
-	/** Identifies this page's steps, so that the server adds a step resent from this page once. */
-	var pageId = Date.now().toString(36) + Math.random().toString(36).substring(2, 8);
-	var sequence = 0;
-	/** The CSRF token for this page, from the endpoint. */
-	var token = null;
-	/** Steps not yet acknowledged by the server, in order. */
-	var queue = [];
-	/** How many steps at the head of the queue the request in flight carries, or 0. */
-	var inFlight = 0;
+	/** The recorder (recorder-core.js) this adapter records for. */
+	var core = null;
 	/** Form items the user changed whose values are not yet written as dataEnter steps, in the order first changed. */
 	var changed = [];
 	/** The step the button being pressed recorded, while its action may ask for a confirmation. */
 	var confirmable = null;
-	/** More than 0 while a button's action runs: its step is sent once the action has asked any confirmation. */
-	var holdSends = 0;
-	/** The gesture being handled: { target, steps } while a DOM event is being dispatched, else null. */
-	var gesture = null;
-	/** Functions that undo what start() attached. */
-	var detach = [];
-	/** Callbacks waiting for the steps recorded so far to be sent. */
-	var drained = [];
-	/** True while asking the endpoint for this page's token. */
-	var connecting = false;
 	/** A navigateList step for the page load whose query or document is known once the page has its data sources. */
 	var pageList = null;
 
@@ -142,151 +123,6 @@
 		return null;
 	}
 
-	// ---------------------------------------------------------------- recording and sending
-
-	/** Records a step, after writing any pending data entry. Returns the step. */
-	function record(step) {
-		flushDataEntry();
-		return push(step);
-	}
-
-	function push(step) {
-		step.id = pageId + "-" + (++sequence);
-		if (step.view === undefined) {
-			var view = topView();
-			step.view = describe(view);
-			if (step.screen === undefined) {
-				step.screen = screenOf(view);
-			}
-		}
-		queue.push(step);
-		if (gesture) {
-			gesture.steps++;
-		}
-		send();
-		return step;
-	}
-
-	/** Records a gesture that has no step yet, as an "unmapped" comment, once if it repeats (a double click). */
-	function unmapped(text) {
-		var last = queue.length ? queue[queue.length - 1] : null;
-		if (last && (last.op === "unmapped") && (last.text === text)) {
-			if (gesture) {
-				gesture.steps++;
-			}
-			return last;
-		}
-		return record({ op: "unmapped", text: text });
-	}
-
-	/** Copies steps to send, without the recorder's own flags. */
-	function sendable(steps) {
-		return steps.map(function (s) {
-			var copy = {};
-			for (var key in s) {
-				if (Object.prototype.hasOwnProperty.call(s, key) && (key !== "hold")) {
-					copy[key] = s[key];
-				}
-			}
-			return copy;
-		});
-	}
-
-	/** Calls back once every step recorded so far has been sent, or sending has failed or stopped. */
-	function whenSent(callback) {
-		drained.push(callback);
-		send();
-	}
-
-	function notifyDrained() {
-		var callbacks = drained;
-		drained = [];
-		callbacks.forEach(function (callback) {
-			callback();
-		});
-	}
-
-	/**
-	 * Sends the steps not yet sent, one request at a time, up to any step still waiting for the user's answer to a
-	 * confirmation. The request goes through SmartClient's RPCManager, so that the page counts as busy until the
-	 * server has the steps.
-	 */
-	function send() {
-		if (inFlight || holdSends) {
-			return;
-		}
-		if (token == null) {
-			if (!connecting) {
-				notifyDrained();
-			}
-			return;
-		}
-		var count = 0;
-		while ((count < queue.length) && !queue[count].hold) {
-			count++;
-		}
-		if (count === 0) {
-			notifyDrained();
-			return;
-		}
-		inFlight = count;
-		isc.RPCManager.sendRequest({
-			actionURL: ENDPOINT,
-			httpMethod: "POST",
-			useSimpleHttp: true,
-			contentType: "application/json",
-			data: JSON.stringify({ _csrf: token, steps: sendable(queue.slice(0, count)) }),
-			serverOutputAsString: true,
-			showPrompt: false,
-			willHandleError: true,
-			callback: function (response, data) {
-				var status = response.httpResponseCode;
-				inFlight = 0;
-				if (status === 200) {
-					queue.splice(0, count);
-					if (limitReached(data)) {
-						return;
-					}
-					send();
-				} else if (status === 403) {
-					// the session no longer records (stopped in another tab, signed out, or not allowed)
-					stop();
-				} else {
-					// kept: sent again with the next step, or from the page's beacon as it unloads
-					notifyDrained();
-				}
-			}
-		});
-	}
-
-	/**
-	 * True if the server's answer says the recording is full: the recorder stops, and tells the user to stop the
-	 * recording and download what it holds. The server keeps the steps it has.
-	 */
-	function limitReached(data) {
-		var answer = null;
-		try {
-			answer = JSON.parse(data);
-		} catch (e) {
-			answer = null;
-		}
-		if (!answer || !answer.limitReached) {
-			return false;
-		}
-		stop();
-		isc.warn("The SAIL recording has reached its limit of " + answer.maximumSteps +
-					" steps and records nothing more. Stop it in the Control Panel and download it.");
-		return true;
-	}
-
-	/** Sends what is left as the page unloads; the server adds a step it has already received once. */
-	function onPageHide() {
-		flushDataEntry();
-		if (queue.length && (token != null) && navigator.sendBeacon) {
-			navigator.sendBeacon(ENDPOINT, new Blob([JSON.stringify({ _csrf: token, steps: sendable(queue) })], { type: "application/json" }));
-		}
-	}
-
 	// ---------------------------------------------------------------- data entry
 
 	/** ValuesManager.itemChanged(): the user changed a form item of a view. */
@@ -296,7 +132,7 @@
 		while (item && item.parentItem) {
 			item = item.parentItem;
 		}
-		if (!active || !item || !item.form || !item.form._view) {
+		if (!core || !core.active() || !item || !item.form || !item.form._view) {
 			return;
 		}
 		for (var i = 0; i < changed.length; i++) {
@@ -398,7 +234,7 @@
 				var view = describe(owner);
 				var screen = screenOf(owner);
 				if (entry.unmapped) {
-					push({ op: "unmapped", text: entry.unmapped, view: view, screen: screen });
+					core.push({ op: "unmapped", text: entry.unmapped, view: view, screen: screen });
 				} else {
 					var step = { op: "dataEnter", binding: entry.binding, value: entry.value, view: view, screen: screen,
 									label: strip(item.title || item.name).replace(/\s*\*$/, "") };
@@ -413,7 +249,7 @@
 					if (owner._sailEntered) {
 						owner._sailEntered[item.name] = true;
 					}
-					push(step);
+					core.push(step);
 				}
 			}
 		}
@@ -487,7 +323,7 @@
 				}
 			});
 			if (changes.length) {
-				push({ op: "context", text: "changed on screen: " + changes.join("; "), view: describe(view), screen: screenOf(view) });
+				core.push({ op: "context", text: "changed on screen: " + changes.join("; "), view: describe(view), screen: screenOf(view) });
 			}
 		}
 		view._sailShown = now;
@@ -496,13 +332,31 @@
 	}
 
 	/** Records, as context, the messages and errors a response showed. */
-	function recordShown(view, parts) {
+	function recordShown(view, parts, errors) {
 		var texts = parts.filter(function (text) {
 			return !!text;
 		});
 		if (texts.length) {
-			push({ op: "context", text: "shown: " + texts.join("; "), view: describe(view), screen: screenOf(view) });
+			var step = { op: "context", text: "shown: " + texts.join("; "), view: describe(view), screen: screenOf(view) };
+			// the action before showed errors: its replay must not expect success
+			if (errors || texts.some(function (text) {
+				return /^(error|fatal) /.test(text);
+			})) {
+				step.errors = "true";
+			}
+			core.push(step);
 		}
+	}
+
+	/** Notes the field errors a view shows, when validation in the browser stops a request. */
+	function recordErrors(view) {
+		var all = (view._vm && view._vm.getErrors) ? view._vm.getErrors() : null;
+		var errors = [];
+		Object.keys(all || {}).forEach(function (name) {
+			var message = all[name];
+			errors.push(unsanitise(name) + " error \"" + strip(isc.isA.Array(message) ? message.join(" ") : message) + "\"");
+		});
+		recordShown(view, errors.length ? errors : ["errors"], true);
 	}
 
 	function messageTexts(growls, messages) {
@@ -629,14 +483,6 @@
 
 	// ---------------------------------------------------------------- the wrapped methods
 
-	function wrap(owner, name, wrapper) {
-		var original = owner[name];
-		owner[name] = wrapper(original);
-		detach.push(function () {
-			owner[name] = original;
-		});
-	}
-
 	function recordMenu(viewer, leaf) {
 		var labels = [];
 		var tree = viewer.data;
@@ -648,7 +494,7 @@
 		if (leaf.ref === "edit") {
 			step.target = (leaf.module || module) + "." + leaf.name;
 		}
-		record(step);
+		core.record(step);
 	}
 
 	/** Records what a BizButton's action does, before it does it. Returns the step, or null. */
@@ -659,12 +505,12 @@
 		}
 		var op = BUTTON_STEPS[button.type];
 		if (op) {
-			return record({ op: op });
+			return core.record({ op: op });
 		}
 		if (!button.type || ACTION_TYPES[button.type]) {
-			return record({ op: "action", name: name });
+			return core.record({ op: "action", name: name });
 		}
-		return unmapped("pressed " + strip(button.title || name) + " (a " + button.type + " action, not recorded yet)");
+		return core.unmapped("pressed " + strip(button.title || name) + " (a " + button.type + " action, not recorded yet)");
 	}
 
 	function wrapButton(button) {
@@ -674,7 +520,7 @@
 		var action = button.action;
 		button._sailAction = action;
 		button.action = function () {
-			if (!active) {
+			if (!core.active()) {
 				return action.apply(this, arguments);
 			}
 			if (this.actionName === STOP_ACTION) {
@@ -682,22 +528,21 @@
 				var me = this;
 				var args = arguments;
 				flushDataEntry();
-				whenSent(function () {
-					stop();
+				core.whenSent(function () {
+					core.stop(true);
 					action.apply(me, args);
 				});
 				return undefined;
 			}
 			// a click that a field's blur swallowed is pressed again once the blur's server call returns: record that one
 			var swallowed = this._view && this._view._blurry;
-			holdSends++;
+			core.beginHold();
 			try {
 				confirmable = swallowed ? null : recordButton(this);
 				return action.apply(this, arguments);
 			} finally {
 				confirmable = null;
-				holdSends--;
-				send();
+				core.endHold();
 			}
 		};
 	}
@@ -711,10 +556,12 @@
 		});
 	}
 
-	function attach() {
+	function attach(recorder) {
+		core = recorder;
+		var wrap = core.wrap;
 		wrap(isc.BizUtil, "handleMenuItemClick", function (original) {
 			return function (viewer, leaf) {
-				if (active) {
+				if (core.active()) {
 					recordMenu(viewer, leaf);
 				}
 				return original.apply(this, arguments);
@@ -725,7 +572,7 @@
 		wrap(buttonProto, "initWidget", function (original) {
 			return function () {
 				var result = original.apply(this, arguments);
-				if (active) {
+				if (core.active()) {
 					wrapButton(this);
 				}
 				return result;
@@ -736,13 +583,14 @@
 				wrapButton(c);
 			}
 		});
-		detach.push(unwrapButtons);
+		core.onDetach(unwrapButtons);
 
 		wrap(isc.BizTabPane.getPrototype(), "tabSelected", function (original) {
 			return function (tabNum) {
 				// a tab the page selects by itself (a server response, a view opening) is not a gesture
-				var on = gesture ? canvasOf(gesture.target) : null;
-				if (active && on && this.tabBar && this.tabBar.contains(on, true)) {
+				var target = core.gestureTarget();
+				var on = target ? canvasOf(target) : null;
+				if (core.active() && on && this.tabBar && this.tabBar.contains(on, true)) {
 					var titles = [];
 					var tab = this.getTabObject(tabNum);
 					titles.unshift(strip(tab ? tab.title : ""));
@@ -754,7 +602,7 @@
 							}
 						}
 					}
-					record({ op: "tabSelect", path: titles.join("::") });
+					core.record({ op: "tabSelect", path: titles.join("::") });
 				}
 				return original.apply(this, arguments);
 			};
@@ -762,7 +610,7 @@
 
 		wrap(isc.BizListGrid.getPrototype(), "zoom", function (original) {
 			return function (zoomToNew) {
-				if (active) {
+				if (core.active()) {
 					var step = gridList(this);
 					if (zoomToNew) {
 						step.op = "listGridNew";
@@ -782,7 +630,7 @@
 							step.row = located.row;
 						}
 					}
-					record(step);
+					core.record(step);
 				}
 				return original.apply(this, arguments);
 			};
@@ -792,11 +640,11 @@
 		wrap(editViewProto, "scatter", function (original) {
 			return function (values) {
 				// a server response replaces the values: the user's entries so far are final
-				if (active) {
+				if (core.active()) {
 					flushDataEntry();
 				}
 				var result = original.apply(this, arguments);
-				if (active) {
+				if (core.active()) {
 					this._sailViewType = (values && values.created) ? "edit" : "create";
 					recordChangedValues(this, values);
 				}
@@ -806,7 +654,7 @@
 		wrap(editViewProto, "_displayGrowlsAndMessages", function (original) {
 			return function (growls, messages) {
 				// growls are noted by isc.BizUtil.growl, below
-				if (active) {
+				if (core.active()) {
 					recordShown(this, messageTexts(null, messages));
 				}
 				return original.apply(this, arguments);
@@ -814,7 +662,7 @@
 		});
 		wrap(isc.BizUtil, "growl", function (original) {
 			return function (growls) {
-				if (active) {
+				if (core.active()) {
 					recordShown(topView(), messageTexts(isc.isA.Array(growls) ? growls : null, null));
 				}
 				return original.apply(this, arguments);
@@ -822,21 +670,30 @@
 		});
 		wrap(editViewProto, "_displayFailure", function (original) {
 			return function (dsResponse, data) {
-				if (active && dsResponse) {
+				if (core.active() && dsResponse) {
 					var status = dsResponse.status;
 					if ((status === -1) || (status === isc.EditView._UNAVAILABLE)) {
 						// the growls are noted by isc.BizUtil.growl
-						recordShown(this, messageTexts(null, dsResponse._messages).concat(["problem \"" + shorten(strip(data)) + "\""]));
+						recordShown(this, messageTexts(null, dsResponse._messages).concat(["problem \"" + shorten(strip(data)) + "\""]), true);
 					} else if (dsResponse.errors) {
 						var errors = [];
 						var all = isc.isA.Array(dsResponse.errors) ? dsResponse.errors[0] : dsResponse.errors;
 						Object.keys(all || {}).forEach(function (name) {
 							errors.push(unsanitise(name) + " error \"" + strip(all[name]) + "\"");
 						});
-						recordShown(this, errors);
+						recordShown(this, errors, true);
 					}
 				}
 				return original.apply(this, arguments);
+			};
+		});
+		wrap(editViewProto, "gather", function (original) {
+			return function (validate) {
+				var result = original.apply(this, arguments);
+				if (core.active() && validate && !result) {
+					recordErrors(this);
+				}
+				return result;
 			};
 		});
 
@@ -850,7 +707,7 @@
 			}
 			return undefined;
 		};
-		detach.push(function () {
+		core.onDetach(function () {
 			if (hadItemChanged) {
 				vmProto.itemChanged = vmItemChanged;
 			} else {
@@ -863,7 +720,7 @@
 				var step = confirmable;
 				confirmable = null;
 				var args = Array.prototype.slice.call(arguments);
-				if (active && step && isc.isA.Function(callback)) {
+				if (core.active() && step && isc.isA.Function(callback)) {
 					step.hold = true;
 					args[1] = function (value) {
 						delete step.hold;
@@ -875,64 +732,16 @@
 								step.confirm = "false";
 							}
 						}
-						send();
+						core.send();
 						return callback.apply(this, arguments);
 					};
 				}
 				return original.apply(this, args);
 			};
 		});
-
-		listen(document, "mousedown", startGesture, true);
-		listen(document, "keydown", startGesture, true);
-		listen(window, "mouseup", endGesture, false);
-		listen(window, "keyup", endKeyGesture, false);
-		listen(window, "click", clicked, false);
-		listen(window, "pagehide", onPageHide, false);
 	}
 
-	function listen(target, type, handler, capture) {
-		target.addEventListener(type, handler, capture);
-		detach.push(function () {
-			target.removeEventListener(type, handler, capture);
-		});
-	}
-
-	// ---------------------------------------------------------------- gestures
-
-	/** A mouse button or key went down: SmartClient handles what it does until it comes up. */
-	function startGesture(event) {
-		gesture = { target: event.target, steps: 0 };
-	}
-
-	function endKeyGesture() {
-		gesture = null;
-	}
-
-	function endGesture() {
-		// a click is handled on the mouse up; keep the gesture for the click event that follows
-		if (gesture && gesture.ended) {
-			gesture = null;
-		} else if (gesture) {
-			gesture.ended = true;
-		}
-	}
-
-	/**
-	 * A click has been handled. If it recorded nothing but was on a control, it was a gesture the recorder cannot map:
-	 * record it as a comment, so that the editor sees the gap.
-	 */
-	function clicked(event) {
-		var g = gesture;
-		gesture = null;
-		if (!active || !g || g.steps > 0) {
-			return;
-		}
-		var description = control(event.target);
-		if (description) {
-			unmapped("click on " + description);
-		}
-	}
+	// ---------------------------------------------------------------- unmapped clicks
 
 	/** Describes the control a click landed on, or null if it was not on a control (a field, a label, the page). */
 	function control(element) {
@@ -992,7 +801,7 @@
 			if (params.i) {
 				edit.bizId = params.i;
 			}
-			push(edit);
+			core.push(edit);
 		} else if (params.a === "l" && params.q) {
 			var list = { op: "navigateList", module: params.m, view: "" };
 			if (params.d) {
@@ -1003,9 +812,9 @@
 				list.query = params.q;
 				pageList = list;
 			}
-			push(list);
+			core.push(list);
 		} else if (params.a) {
-			push({ op: "unmapped", text: "opened " + location.search + " (not recorded yet)", view: "" });
+			core.push({ op: "unmapped", text: "opened " + location.search + " (not recorded yet)", view: "" });
 		}
 	}
 
@@ -1026,88 +835,188 @@
 		}
 	}
 
-	/** Asks the endpoint whether this session records, and for this page's token. */
-	function connect() {
-		connecting = true;
-		isc.RPCManager.sendRequest({
-			actionURL: ENDPOINT,
-			httpMethod: "GET",
+	// ---------------------------------------------------------------- Check mode
+
+	/** A rectangle in the window from a SmartClient page rectangle [left, top, width, height]. */
+	function windowRect(pageRect) {
+		return { left: pageRect[0] - isc.Page.getScrollLeft(), top: pageRect[1] - isc.Page.getScrollTop(),
+					width: pageRect[2], height: pageRect[3] };
+	}
+
+	/** The form item of a view under the pointer: the item whose rectangle holds it. */
+	function itemAt(form, event) {
+		var items = form.getItems() || [];
+		for (var i = 0; i < items.length; i++) {
+			var item = items[i];
+			if (item.isVisible && item.isVisible() && item.isDrawn && item.isDrawn() && item.getPageRect) {
+				var r = item.getPageRect();
+				if (r && (event.pageX >= r[0]) && (event.pageX <= r[0] + r[2]) && (event.pageY >= r[1]) && (event.pageY <= r[1] + r[3])) {
+					return item;
+				}
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * A check of a field: testMessage with the validation error it shows, or else testValue with what it shows, as
+	 * dataEnter would enter it.
+	 */
+	function fieldCheck(item) {
+		while (item.parentItem) {
+			item = item.parentItem;
+		}
+		if (!item.name || (item.name.charAt(0) === "_") || !item.form || !item.form._view) {
+			return null;
+		}
+		var view = item.form._view;
+		// a field showing a validation error checks the error, which SAIL reads as a message
+		var errors = item.form.getFieldErrors ? item.form.getFieldErrors(item.name) : null;
+		var error = strip(isc.isA.Array(errors) ? errors[0] : errors);
+		if (error) {
+			return { rect: windowRect(item.getPageRect()), label: "testMessage \"" + shorten(error) + "\"",
+						step: { op: "testMessage", contains: error, view: describe(view), screen: screenOf(view) } };
+		}
+		var entry = dataEntry(item);
+		if (!entry || entry.unmapped) {
+			return null;
+		}
+		return { rect: windowRect(item.getPageRect()), label: "testValue " + entry.binding,
+					step: { op: "testValue", binding: entry.binding, value: entry.value, view: describe(view), screen: screenOf(view),
+							label: strip(item.title || item.name).replace(/\s*\*$/, "") } };
+	}
+
+	/**
+	 * A check of a grid: on a row, testGridRows that a row containing its most distinctive text is there; elsewhere on
+	 * the grid, testGridRows of its row count.
+	 */
+	function gridCheck(owner, event) {
+		var grid = owner.grid;
+		var body = grid && grid.body;
+		if (!body) {
+			return null;
+		}
+		var step = isc.isA.BizDataGrid(owner) ? { binding: unsanitise(owner._b) } : gridList(owner);
+		step.op = "testGridRows";
+		var row = -1;
+		if (event.target && body.getHandle() && body.getHandle().contains(event.target)) {
+			row = body.getEventRow(event.pageY - body.getPageTop() + body.getScrollTop());
+		}
+		var data = grid.getData();
+		if ((row >= 0) && grid.getRecord(row) && (!data || !data.rowIsLoaded || data.rowIsLoaded(row))) {
+			var located = rowLocator(grid, row, grid.getRecord(row));
+			if (located.rowContaining == null) {
+				return null;
+			}
+			step.rowContaining = located.rowContaining;
+			step.minRows = "1";
+			return { rect: { left: body.getPageLeft() - isc.Page.getScrollLeft(), top: body.getRowPageTop(row) - isc.Page.getScrollTop(),
+								width: body.getVisibleWidth(), height: body.getRowSize(row) },
+						label: "testGridRows containing \"" + located.rowContaining + "\"", step: step };
+		}
+		var count = grid.getTotalRows();
+		step.minRows = String(count);
+		step.maxRows = String(count);
+		return { rect: windowRect(owner.getPageRect()), label: "testGridRows " + count + " rows", step: step };
+	}
+
+	/**
+	 * What a click in Check mode checks at the pointer: a growl or dialog message (testMessage), a field (testValue)
+	 * or a grid (testGridRows). Returns { rect, label, step } or null.
+	 */
+	function checkTarget(element, event) {
+		var growl = (element && element.closest) ? element.closest(".ui-growl-item") : null;
+		if (growl) {
+			var title = growl.querySelector(".ui-growl-title");
+			var text = strip(title ? title.textContent : growl.textContent);
+			var g = growl.getBoundingClientRect();
+			return text ? { rect: { left: g.left, top: g.top, width: g.width, height: g.height }, label: "testMessage \"" + text + "\"",
+								step: { op: "testMessage", contains: text } } : null;
+		}
+		var canvas = canvasOf(element);
+		for (var c = canvas; c; c = c.parentElement) {
+			if (isc.isA.Dialog(c)) {
+				var message = strip(c.message);
+				return message ? { rect: windowRect(c.getPageRect()), label: "testMessage \"" + shorten(message) + "\"",
+									step: { op: "testMessage", contains: message } } : null;
+			}
+			if (isc.isA.BizListGrid(c) || isc.isA.BizDataGrid(c)) {
+				return gridCheck(c, event);
+			}
+			if (isc.isA.DynamicForm(c) && c._view) {
+				var item = itemAt(c, event);
+				return item ? fieldCheck(item) : null;
+			}
+		}
+		return null;
+	}
+
+	// ---------------------------------------------------------------- the adapter
+
+	/** Sends a request through SmartClient's RPCManager, so that the page counts as busy until it returns. */
+	function transport(method, url, body, callback) {
+		var request = {
+			actionURL: url,
+			httpMethod: method,
 			useSimpleHttp: true,
 			serverOutputAsString: true,
 			showPrompt: false,
 			willHandleError: true,
 			callback: function (response, data) {
-				var state = null;
-				try {
-					state = (response.httpResponseCode === 200) ? JSON.parse(data) : null;
-				} catch (e) {
-					state = null;
-				}
-				connecting = false;
-				if (state && state.recording) {
-					token = state._csrf;
-					resolvePageList();
-					send();
-				} else {
-					stop();
-				}
+				callback(response.httpResponseCode, data);
 			}
-		});
+		};
+		if (body != null) {
+			request.contentType = "application/json";
+			request.data = body;
+		}
+		isc.RPCManager.sendRequest(request);
 	}
 
-	function start() {
-		if (active) {
-			return;
-		}
-		active = true;
-		queue = [];
-		changed = [];
-		token = null;
-		pageId = Date.now().toString(36) + Math.random().toString(36).substring(2, 8);
-		sequence = 0;
-		attach();
-		connect();
+	/** The header menu's Logout item, which signs out (and so ends the recording). */
+	function isSignOut(element) {
+		var canvas = canvasOf(element);
+		return !!canvas && isc.isA.Menu(canvas) && /^\s*Logout\s*$/.test(strip(element.textContent || ""));
 	}
 
-	function stop() {
-		if (!active) {
-			return;
-		}
-		active = false;
-		while (detach.length) {
-			detach.pop()();
-		}
-		queue = [];
-		changed = [];
-		gesture = null;
-		confirmable = null;
-		token = null;
-		connecting = false;
-		pageList = null;
-		notifyDrained();
-	}
-
-	SKYVE.SailRecorder = {
-		start: start,
-		stop: stop,
-		/** True while recording. */
-		active: function () {
-			return active;
+	var recorder = SKYVE.SailRecorderCore.create({
+		transport: transport,
+		attach: attach,
+		flush: flushDataEntry,
+		describe: function () {
+			var view = topView();
+			return { view: describe(view), screen: screenOf(view) };
 		},
-		/** True once the endpoint has confirmed the session records and every step so far has reached it. */
-		ready: function () {
-			return active && (token != null) && !inFlight && (queue.length === 0) && (changed.length === 0);
+		connected: resolvePageList,
+		control: control,
+		checkTarget: checkTarget,
+		isSignOut: isSignOut,
+		signOut: function () {
+			window.location = "loggedOut";
 		},
-		/** The steps not yet acknowledged by the server, for diagnosis. */
-		pending: function () {
-			return queue.slice();
+		idle: function () {
+			return changed.length === 0;
+		},
+		reset: function () {
+			changed = [];
+			confirmable = null;
+			pageList = null;
 		}
-	};
+	});
+	SKYVE.SailRecorder = recorder;
 
 	// Loaded with the page (not by the Control Panel's Start): the URL that opened it is the user's navigation
 	var duringPageLoad = (document.readyState !== "complete");
-	start();
-	if (duringPageLoad) {
-		recordPageLoad();
+	if (duringPageLoad && !document.body) {
+		// the panel needs the body: start once the page has parsed it
+		document.addEventListener("DOMContentLoaded", function () {
+			recorder.start();
+			recordPageLoad();
+		});
+	} else {
+		recorder.start();
+		if (duringPageLoad) {
+			recordPageLoad();
+		}
 	}
 })();

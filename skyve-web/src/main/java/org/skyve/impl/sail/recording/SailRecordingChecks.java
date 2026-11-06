@@ -19,7 +19,7 @@ import jakarta.annotation.Nullable;
 
 /**
  * Checks recorded SmartClient steps against the metadata, as the SAIL SmartClient executor will find them: a data
- * entry's binding, an action and a tab must be on the edit or create view of the screen the gesture was made on.
+ * entry's (or a testValue's) binding, an action and a tab must be on the edit or create view of the screen the gesture was made on.
  *
  * <p>The views are built as the current user ({@code CORE.getUser()}), the user who recorded, with the same locator
  * generation the executor uses ({@link SmartClientAutomationContext}). A screen that cannot be built is not checked.
@@ -40,7 +40,7 @@ public final class SailRecordingChecks implements SailRecordingBuilder.StepCheck
 		String op = recorded.get(SailRecordingBuilder.OP);
 		String identifier;
 		String what;
-		if ("dataEnter".equals(op)) {
+		if ("dataEnter".equals(op) || "testValue".equals(op)) {
 			identifier = recorded.get("binding");
 			what = "a widget for the binding " + identifier;
 		}

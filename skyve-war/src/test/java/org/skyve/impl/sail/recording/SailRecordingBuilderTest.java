@@ -290,6 +290,54 @@ class SailRecordingBuilderTest {
 					() -> assertEquals("The recorded user got the UX/UI desktop.", header.get(3)));
 	}
 
+	/**
+	 * Checks and notes added through the panel become their steps; an action whose response showed errors gets
+	 * testSuccess="false", so that its replay does not expect success.
+	 */
+	@Test
+	void checksNotesAndFailedActions() {
+		List<Map<String, String>> steps = List.of(
+				step("op", "navigateMenu", "module", "admin", "item", "Contacts"),
+				step("op", "save"),
+				step("op", "context", "text", "shown: name error \"required\"", "errors", "true"),
+				step("op", "testMessage", "contains", "required"),
+				step("op", "testValue", "binding", "name", "value", "Fred"),
+				step("op", "testGridRows", "rowContaining", "Fred", "minRows", "1"),
+				step("op", "testGridRows", "module", "admin", "query", "qContacts", "minRows", "3", "maxRows", "3"),
+				step("op", "comment", "text", "a note"),
+				step("op", "save"),
+				step("op", "context", "text", "shown: info growl \"Saved\""));
+		List<Step> method = method(build(steps));
+		org.skyve.metadata.sail.language.step.TestGridRows row = (org.skyve.metadata.sail.language.step.TestGridRows) method.get(4);
+		org.skyve.metadata.sail.language.step.TestGridRows count = (org.skyve.metadata.sail.language.step.TestGridRows) method.get(5);
+		assertAll(() -> assertEquals(8, method.size()),
+					() -> assertEquals(Boolean.FALSE, ((Save) method.get(1)).getTestSuccess()),
+					() -> assertEquals("required", ((org.skyve.metadata.sail.language.step.TestMessage) method.get(2)).getContains()),
+					() -> assertEquals("Fred", ((org.skyve.metadata.sail.language.step.TestValue) method.get(3)).getValue()),
+					() -> assertEquals("Fred", row.getRowContaining()),
+					() -> assertEquals(Integer.valueOf(1), row.getMinRows()),
+					() -> assertNull(row.getMaxRows()),
+					() -> assertEquals("qContacts", count.getQueryName()),
+					() -> assertEquals(Integer.valueOf(3), count.getMaxRows()),
+					() -> assertEquals("a note", ((org.skyve.metadata.sail.language.step.Comment) method.get(6)).getComment()),
+					() -> assertNull(((Save) method.get(7)).getTestSuccess(), "an info growl is not an error"));
+	}
+
+	/**
+	 * The panel shows each entry as the script writes it: its comments, then its step.
+	 */
+	@Test
+	void thePreviewShowsEachEntrysLines() {
+		List<Map<String, String>> steps = List.of(
+				step("op", "navigateMenu", "module", "admin", "item", "Contacts", "screen", "list x"),
+				step("op", "dataEnter", "binding", "name", "value", "Fred", "label", "Name", "screen", "edit y"),
+				step("op", "context", "text", "shown: info growl \"Saved\""));
+		List<List<String>> preview = new SailRecordingBuilder(null, "admin", STARTED, STOPPED).preview(steps, 1, 5);
+		assertAll(() -> assertEquals(2, preview.size()),
+					() -> assertEquals(List.of("<!-- screen: edit y -->", "<!-- \"Name\" -->", "<dataEnter binding=\"name\" value=\"Fred\"/>"), preview.get(0)),
+					() -> assertEquals(List.of("<!-- shown: info growl \"Saved\" -->"), preview.get(1)));
+	}
+
 	@Test
 	void commentTextCannotCloseTheComment() {
 		assertEquals(" a - - - b - ", SailRecordingBuilder.commentText("a --- b -"));

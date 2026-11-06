@@ -1041,14 +1041,38 @@ tells the user to stop and download it; nothing is lost silently.
 
 1. Open **DevOps / Control Panel**, select the **SAIL** tab, and press **Start** in the Recording box. The recorder loads
    into the page at once, without a reload.
-2. Use the application. Every page of the session loads the recorder until recording stops.
-3. Come back to the Control Panel and press **Stop**. The recorder sends its last steps first, then the server builds the
-   script. Going back to the Control Panel to stop is left out of the script.
-4. Press **Download** for the script, `sail-recording-<yyyyMMdd-HHmm>.xml`. It can be downloaded again until the next
-   recording starts or the session ends.
+2. Use the application. Every page of the session loads the recorder until recording stops, and shows its panel.
+3. Press **Stop** in the panel, or in the Control Panel. The recorder sends its last steps first, then the server
+   checks and builds the script. Going back to the Control Panel to stop is left out of the script.
+4. Press **Download** (the panel offers it as soon as recording stops) for the script,
+   `sail-recording-<yyyyMMdd-HHmm>.xml`. It can be downloaded again until the next recording starts or the session ends.
 
 The recording lives only in the server session. It is never written to the database, and signing out or the session
-expiring discards it, so download it first.
+expiring discards it, so download it first. The panel asks before the header menu's Logout signs out while recording,
+and offers to stop and download first.
+
+### The panel
+
+While recording, each page shows the recorder's panel. It is drawn in a Shadow DOM root, so the application's styles
+and the panel's cannot affect each other, and nothing done in the panel is recorded or reaches the application.
+
+- **Collapsed**, it is a small bar in the bottom right corner, which can be dragged elsewhere: a red dot, the number of
+  recorded gestures, **Check**, **Note**, **Stop**, and a control that expands it.
+- **Expanded**, it slides out on the right and shows the script as it is written, newest at the bottom, with the context
+  comments greyed. Scrolling to the top loads earlier entries. The script is read-only: each gesture has a delete
+  button, **Undo** removes the last gesture (with the context recorded after it), and **Copy** and **Download** take the
+  script as it stands. Edit it later, in the IDE or with AI.
+- **Check** turns Check mode on: the field, message or grid under the pointer is outlined, and a click adds a check
+  instead of reaching the application. **Esc** turns it off. An alt-click adds a check without turning Check mode on. A
+  short notice confirms each step added. Checks go into the script where they are added:
+  - a field adds `testValue` with the value it shows, written as `dataEnter` would enter it (a combo's code); a field
+    showing a validation error adds `testMessage contains` with the error instead;
+  - a growl or a dialog's message (an `isc.say`, `isc.warn` or the Problems dialog) adds `testMessage contains` with
+    its text;
+  - a grid row adds `testGridRows rowContaining` with the row's bizKey or most distinctive cell, and `minRows="1"`;
+    elsewhere on a grid, `testGridRows` with `minRows` and `maxRows` set to the rows it shows.
+- **Note** opens a small input in the panel: the text becomes a `<comment>` step.
+- The panel's state (expanded or not, where the bar is, the scroll) is kept in the browser tab's `sessionStorage`.
 
 ### What is recorded
 
@@ -1087,6 +1111,9 @@ The script also carries context for whoever edits it, as XML comments:
 - after each step: the growls, messages, problems and field errors the response showed (`shown: ...`), and the bound
   values the response changed on screen, without the user's own entries (`changed on screen: ...`).
 
+An action whose response showed errors (a problem, field errors, an error message or growl, or validation in the
+browser that stopped the request) is written with `testSuccess="false"`, so that its replay does not expect success.
+
 When recording stops, the server checks each step against the metadata, building the views as the recording user
 with the same locators the SmartClient executor uses: a data entry's binding, an action and a tab must be on the
 screen's edit or create view, and a row named by text must have shown that text. A step that fails becomes an
@@ -1113,6 +1140,12 @@ silently.
   unloads, and the server adds each step once. `GET sailrecording?from=i&count=n` returns a range of the steps.
 - On Stop, `org.skyve.impl.sail.recording.SailRecordingBuilder` builds the `Automation`, with
   `SailRecordingChecks` checking the steps, and writes its XML.
+- The bundle is the shared core (`recorder-core.js`: the panel, Check mode, the step model and the requests) followed
+  by the SmartClient adapter (`recorder-sc.js`); the PrimeFaces bundle will reuse the core. The core's
+  `SKYVE.SailRecorder.mount(container)` puts the panel into a container instead of the page's corner.
+- The panel reads the script back in ranges (`GET sailrecording?from=&count=`), and deletes, undoes and stops with the
+  same batches the steps go in (`delete`, `undo`, `stop`). `GET sailrecording?format=xml` gives the script as it stands,
+  and with `download` as a file.
 - `GET sailrecording?roles` returns the signed-in user's effective roles whenever `sail.recording` is on, for any
   signed-in user (no recording or SAILRecorder role needed): the harness uses it (see [The test user](#the-test-user)).
 - PrimeFaces groundwork (phase 4). There is no PrimeFaces recorder bundle yet, so while a session records, PrimeFaces
@@ -1131,8 +1164,7 @@ silently.
 
 ### Limits
 
-- Client-side validation that stops a request before it is sent is not noted as context; server errors are.
-- SmartClient only. PrimeFaces recording, assertions added while recording,
+- SmartClient only. PrimeFaces recording,
   and lookups, data grids, uploads, server-side questions, list filters and sorting, and tree, map and calendar
   navigation come in later phases; until then they are unmapped comments (or, for a field such as a lookup, an unmapped
   comment for its change).

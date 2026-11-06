@@ -38,12 +38,16 @@ import jakarta.servlet.http.HttpSession;
  * 		whenever {@code sail.recording} is on: the SAIL harness builds its views with them. It needs no recording and no
  * 		SAILRecorder role; status 403 when recording is off or nobody is signed in.</li>
  * <li>{@code GET} with {@code from} (and optionally {@code count}, default {@value #DEFAULT_RANGE_COUNT}) returns a
- * 		range of the recorded steps, recording or stopped: {@code {"total":n,"from":i,"steps":[...]}}.</li>
- * <li>{@code GET} with {@code format=xml} returns the script built when the session's recording stopped: the same
- * 		XML the Control Panel downloads. Status 404 if there is none.</li>
+ * 		range of the recorded entries as the recorder's panel shows them, recording or stopped:
+ * 		{@code {"total":n,"gestures":g,"stopped":b,"from":i,"entries":[{"id","context","lines":[...]}]}}.</li>
+ * <li>{@code GET} with {@code format=xml} returns the script: the one built when the recording stopped (the same XML
+ * 		the Control Panel downloads), or while recording, one built now without the metadata checks. With
+ * 		{@code download}, as an attachment. Status 404 if there is no recording.</li>
  * <li>{@code POST} with a JSON body {@code {"_csrf":token,"steps":[...]}} adds the steps (see
  * 		{@link SailRecording#add(List)}) and answers {@code {"received":added,"steps":total}}, with
- * 		{@code "limitReached":true,"maximumSteps":cap} once the recording is full. A token the session did
+ * 		{@code "limitReached":true,"maximumSteps":cap} once the recording is full. The batch can also carry
+ * 		{@code "delete":id}, {@code "undo":true} (the last gesture) and {@code "stop":true} (stop, with the metadata
+ * 		checks), applied in that order after its steps; the answer then also has {@code gestures} and {@code stopped}. A token the session did
  * 		not issue is refused with status 403. The token stays valid for the recording, so that the recorder can resend
  * 		steps from a beacon as the page unloads.</li>
  * </ul>
@@ -68,6 +72,14 @@ public class SailRecordingServlet extends HttpServlet {
 	static final String FROM_PARAMETER = "from";
 	/** The parameter that limits a range of steps; see {@link #FROM_PARAMETER}. */
 	static final String COUNT_PARAMETER = "count";
+	/** With {@value #FORMAT_PARAMETER}{@code =xml}, asks for the script as a file to save. */
+	static final String DOWNLOAD_PARAMETER = "download";
+	/** A batch key: the id of an entry to delete. */
+	static final String DELETE_KEY = "delete";
+	/** A batch key: true to undo the last gesture. */
+	static final String UNDO_KEY = "undo";
+	/** A batch key: true to stop recording (after adding the batch's steps). */
+	static final String STOP_KEY = "stop";
 	/** The parameter that asks a GET for the signed-in user's effective roles. */
 	static final String ROLES_PARAMETER = "roles";
 	/** The steps a range has when it does not say. */
@@ -96,13 +108,16 @@ public class SailRecordingServlet extends HttpServlet {
 		}
 		if (XML_FORMAT.equals(request.getParameter(FORMAT_PARAMETER))) {
 			SailRecording recording = SailRecording.isAllowed(user) ? SailRecording.get(session) : null;
-			String xml = (recording == null) ? null : recording.getXml();
-			if (xml == null) {
+			if (recording == null) {
 				response.sendError(HttpServletResponse.SC_NOT_FOUND);
 				return;
 			}
+			String xml = recording.currentXml();
 			response.setContentType(MimeType.xml.toString());
 			response.setCharacterEncoding(StandardCharsets.UTF_8.name());
+			if (request.getParameter(DOWNLOAD_PARAMETER) != null) {
+				response.setHeader("Content-Disposition", "attachment; filename=\"" + recording.fileName() + '"');
+			}
 			try (PrintWriter pw = response.getWriter()) {
 				pw.print(xml);
 			}
@@ -174,6 +189,16 @@ public class SailRecordingServlet extends HttpServlet {
 		int added;
 		try {
 			added = (steps instanceof List<?> list) ? recording.add(list) : 0;
+			Object delete = batch.get(DELETE_KEY);
+			if (delete != null) {
+				recording.delete(delete.toString());
+			}
+			if (Boolean.TRUE.equals(batch.get(UNDO_KEY))) {
+				recording.undo();
+			}
+			if (Boolean.TRUE.equals(batch.get(STOP_KEY))) {
+				stop(recording, user);
+			}
 		}
 		catch (@SuppressWarnings("unused") IllegalStateException e) { // stopped since the gate was checked
 			response.setStatus(HttpServletResponse.SC_FORBIDDEN);
@@ -185,6 +210,8 @@ public class SailRecordingServlet extends HttpServlet {
 		try (PrintWriter pw = response.getWriter()) {
 			pw.append("{\"received\":").append(String.valueOf(added));
 			pw.append(",\"steps\":").append(String.valueOf(recording.getStepCount()));
+			pw.append(",\"gestures\":").append(String.valueOf(recording.getGestureCount()));
+			pw.append(",\"stopped\":").append(String.valueOf(recording.isStopped()));
 			if (recording.isLimitReached()) {
 				pw.append(",\"limitReached\":true,\"maximumSteps\":").append(String.valueOf(UtilImpl.SAIL_RECORDING_MAXIMUM_STEPS));
 			}
@@ -217,13 +244,33 @@ public class SailRecordingServlet extends HttpServlet {
 			response.sendError(HttpServletResponse.SC_BAD_REQUEST);
 			return;
 		}
-		List<Map<String, String>> steps = recording.getSteps(start, length);
+		List<Map<String, Object>> entries = recording.preview(start, length);
 		response.setContentType(MimeType.json.toString());
 		response.setCharacterEncoding(StandardCharsets.UTF_8.name());
 		try (PrintWriter pw = response.getWriter()) {
 			pw.append("{\"total\":").append(String.valueOf(recording.getStepCount()));
-			pw.append(",\"from\":").append(String.valueOf(Math.max(0, start)));
-			pw.append(",\"steps\":").append(JSON.marshall(steps)).append('}');
+			pw.append(",\"gestures\":").append(String.valueOf(recording.getGestureCount()));
+			pw.append(",\"stopped\":").append(String.valueOf(recording.isStopped()));
+			pw.append(",\"from\":").append(String.valueOf(Math.max(0, Math.min(start, recording.getStepCount()))));
+			pw.append(",\"entries\":").append(JSON.marshall(entries)).append('}');
+		}
+	}
+
+	/**
+	 * Stops the recording from the recorder's panel, checking the steps as the Control Panel's Stop does: as the
+	 * signed-in user, in a transaction of its own.
+	 */
+	private static void stop(@Nonnull SailRecording recording, @Nullable User user) {
+		AbstractPersistence persistence = AbstractPersistence.get();
+		try {
+			persistence.begin();
+			if (user != null) {
+				persistence.setUser(user);
+			}
+			recording.stop(new SailRecordingChecks());
+		}
+		finally {
+			persistence.commit(true);
 		}
 	}
 

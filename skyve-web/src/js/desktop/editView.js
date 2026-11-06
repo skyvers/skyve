@@ -1322,6 +1322,8 @@ isc.EditView.addMethods({
 
 	/**
 	 * Extracts values from view controls into the instance.
+	 * The SAIL recorder (src/js/sail/recorder-sc.js) wraps this method to note the errors when validation fails: keep
+	 * its validate argument and null result.
 	 * If validation errors exist, returns null.
 	 *
 	 * @param {boolean} validate - determines whether to perform validation before gathering data.
