@@ -35,6 +35,26 @@ import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateList
 import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateMenu;
 import org.skyve.metadata.sail.language.step.interaction.session.Login;
 import org.skyve.metadata.sail.language.step.interaction.session.SwitchMode;
+import org.skyve.metadata.sail.language.step.interaction.Upload;
+import org.skyve.metadata.sail.language.step.interaction.grids.DataGridEdit;
+import org.skyve.metadata.sail.language.step.interaction.grids.DataGridLink;
+import org.skyve.metadata.sail.language.step.interaction.grids.DataGridMove;
+import org.skyve.metadata.sail.language.step.interaction.grids.DataGridNew;
+import org.skyve.metadata.sail.language.step.interaction.grids.DataGridRemove;
+import org.skyve.metadata.sail.language.step.interaction.grids.DataGridSelect;
+import org.skyve.metadata.sail.language.step.interaction.grids.DataGridZoom;
+import org.skyve.metadata.sail.language.step.interaction.grids.ListGridClearFilter;
+import org.skyve.metadata.sail.language.step.interaction.grids.ListGridFilter;
+import org.skyve.metadata.sail.language.step.interaction.grids.ListGridFilter.FilterOperator;
+import org.skyve.metadata.sail.language.step.interaction.grids.ListGridSelect;
+import org.skyve.metadata.sail.language.step.interaction.grids.ListGridSort;
+import org.skyve.metadata.sail.language.step.interaction.lookup.LookupDescriptionAutoComplete;
+import org.skyve.metadata.sail.language.step.interaction.lookup.LookupDescriptionEdit;
+import org.skyve.metadata.sail.language.step.interaction.lookup.LookupDescriptionNew;
+import org.skyve.metadata.sail.language.step.interaction.lookup.LookupDescriptionPick;
+import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateCalendar;
+import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateMap;
+import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateTree;
 import org.skyve.web.UserAgentType;
 
 /**
@@ -135,6 +155,96 @@ class SailRecordingBuilderTest {
 					() -> assertInstanceOf(Remove.class, method.get(14)),
 					() -> assertEquals("123", edit.getBizId()),
 					() -> assertEquals("qContacts", list.getQueryName()));
+	}
+
+	/**
+	 * Phase 5's gestures become their steps: data grids, lookups, uploads, list filters and sorting, list selections,
+	 * and trees, maps and calendars.
+	 */
+	@Test
+	void gridsLookupsUploadsAndListsBecomeTheirSteps() {
+		List<Map<String, String>> steps = List.of(
+				step("op", "dataGridNew", "binding", "rows"),
+				step("op", "dataGridZoom", "binding", "rows", "rowContaining", "Fred", "rowTexts", "Fred | 3"),
+				step("op", "dataGridEdit", "binding", "rows", "row", "2"),
+				step("op", "dataGridRemove", "binding", "rows", "rowContaining", "Fred"),
+				step("op", "dataGridSelect", "binding", "rows", "rowContaining", "Fred"),
+				step("op", "dataGridMove", "binding", "rows", "rowContaining", "Fred", "to", "0"),
+				step("op", "dataGridLink", "binding", "rows", "rowContaining", "Fred", "text", "Revoke", "confirm", "false"),
+				step("op", "lookupDescriptionPick", "binding", "contact", "rowContaining", "Fred Smith"),
+				step("op", "lookupDescriptionAutoComplete", "binding", "contact", "search", "Fre", "pick", "Fred Smith"),
+				step("op", "lookupDescriptionNew", "binding", "contact"),
+				step("op", "lookupDescriptionEdit", "binding", "contact"),
+				step("op", "upload", "action", "Import", "file", "C:\\fakepath\\people.csv"),
+				step("op", "listGridFilter", "column", "name", "value", "Fred"),
+				step("op", "listGridFilter", "module", "admin", "query", "qContacts", "column", "number", "value", "7", "operator", "equals"),
+				step("op", "listGridFilter", "column", "name"),
+				step("op", "listGridClearFilter"),
+				step("op", "listGridSort", "column", "name", "descending", "true"),
+				step("op", "listGridSelect", "rowContaining", "Fred"),
+				step("op", "navigateTree", "module", "whosin", "query", "qStaff"),
+				step("op", "navigateMap", "module", "whosin", "query", "qStaff", "geometryBinding", "location"),
+				step("op", "navigateCalendar", "module", "admin", "document", "Job"),
+				step("op", "dataEnter", "binding", "date", "value", "07-Nov-2025", "grid", "rows"));
+		List<Step> method = method(build(steps));
+		DataGridMove move = (DataGridMove) method.get(5);
+		DataGridLink link = (DataGridLink) method.get(6);
+		LookupDescriptionAutoComplete auto = (LookupDescriptionAutoComplete) method.get(8);
+		Upload upload = (Upload) method.get(11);
+		ListGridFilter contains = (ListGridFilter) method.get(12);
+		ListGridFilter equals = (ListGridFilter) method.get(13);
+		ListGridFilter cleared = (ListGridFilter) method.get(14);
+		NavigateMap map = (NavigateMap) method.get(19);
+		assertAll(() -> assertEquals(22, method.size()),
+					() -> assertEquals("rows", ((DataGridNew) method.get(0)).getBinding()),
+					() -> assertEquals("Fred", ((DataGridZoom) method.get(1)).getRowContaining()),
+					() -> assertEquals(Integer.valueOf(2), ((DataGridEdit) method.get(2)).getRow()),
+					() -> assertInstanceOf(DataGridRemove.class, method.get(3)),
+					() -> assertInstanceOf(DataGridSelect.class, method.get(4)),
+					() -> assertEquals(Integer.valueOf(0), move.getTo()),
+					() -> assertEquals("Revoke", link.getText()),
+					() -> assertEquals(Boolean.FALSE, link.getConfirm()),
+					() -> assertEquals("Fred Smith", ((LookupDescriptionPick) method.get(7)).getRowContaining()),
+					() -> assertEquals("Fre", auto.getSearch()),
+					() -> assertEquals("Fred Smith", auto.getPick()),
+					() -> assertInstanceOf(LookupDescriptionNew.class, method.get(9)),
+					() -> assertInstanceOf(LookupDescriptionEdit.class, method.get(10)),
+					() -> assertEquals("Import", upload.getActionName()),
+					() -> assertEquals("sail/files/people.csv", upload.getFile()),
+					() -> assertNull(contains.getOperator()),
+					() -> assertEquals("Fred", contains.getValue()),
+					() -> assertEquals(FilterOperator.equals, equals.getOperator()),
+					() -> assertEquals("qContacts", equals.getQueryName()),
+					() -> assertNull(cleared.getValue()),
+					() -> assertInstanceOf(ListGridClearFilter.class, method.get(15)),
+					() -> assertEquals(Boolean.TRUE, ((ListGridSort) method.get(16)).getDescending()),
+					() -> assertEquals("Fred", ((ListGridSelect) method.get(17)).getRowContaining()),
+					() -> assertInstanceOf(NavigateTree.class, method.get(18)),
+					() -> assertEquals("location", map.getGeometryBinding()),
+					() -> assertInstanceOf(NavigateCalendar.class, method.get(20)),
+					() -> assertEquals("date", ((DataEnter) method.get(21)).getBinding()));
+	}
+
+	/**
+	 * An upload the page refused, and a server-side question the user declined, set the step's testSuccess and
+	 * confirm; the upload says where its file goes.
+	 */
+	@Test
+	void refusedUploadsAndDeclinedQuestions() {
+		SailRecordingBuilder.Result result = build(List.of(
+				step("op", "upload", "binding", "photo", "file", "me.png"),
+				step("op", "context", "text", "shown: upload refused \"too big\"", "errors", "true"),
+				step("op", "action", "name", "AskYesNo"),
+				step("op", "context", "text", "answered \"No\" to \"Sure?\"", "declined", "true"),
+				step("op", "dataGridLink", "binding", "rows", "row", "0", "text", "Run"),
+				step("op", "context", "errors", "true")));
+		List<Step> method = method(result);
+		String xml = SailRecordingBuilder.toXml(result);
+		assertAll(() -> assertEquals(Boolean.FALSE, ((Upload) method.get(0)).getTestSuccess()),
+					() -> assertEquals(Boolean.FALSE, ((Action) method.get(1)).getConfirm()),
+					() -> assertEquals(Boolean.FALSE, ((DataGridLink) method.get(2)).getTestSuccess()),
+					() -> assertTrue(xml.contains("<!-- upload: the file me.png was chosen; put a file of that name in sail/files"), xml),
+					() -> assertTrue(xml.contains("<upload binding=\"photo\" file=\"sail/files/me.png\" testSuccess=\"false\"/>"), xml));
 	}
 
 	/**

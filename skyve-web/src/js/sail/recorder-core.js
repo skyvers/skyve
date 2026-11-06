@@ -17,7 +17,10 @@
  *   The panel's own interactions are never recorded and never reach the page;
  * - Check mode: the adapter outlines the field, message or grid under the pointer, and a click (or an alt-click
  *   outside Check mode) adds testValue, testMessage or testGridRows; the click never reaches the page;
- * - the warning before signing out while recording.
+ * - the warning before signing out while recording;
+ * - uploads, the same in every renderer: the content and action upload page (upload.xhtml) opens in an iframe, and the
+ *   core listens to its file upload (jQuery fileuploadsend and fileuploadalways in that page) to record an upload step
+ *   with the chosen file's name, and the refusal the page shows, if any.
  *
  * Panel UI state (expanded, position, scroll) is kept in sessionStorage, never localStorage, and the panel works
  * without it. The recorder uses no timers: it works when a gesture or a response happens.
@@ -201,6 +204,10 @@
 				step.view = where.view;
 				if (step.screen === undefined) {
 					step.screen = where.screen;
+				}
+				if ((step.title === undefined) && where.title) {
+					// the view's title, which a later step may reuse (a capture; see SailRecordingCaptures)
+					step.title = where.title;
 				}
 			}
 			queue.push(step);
@@ -806,7 +813,85 @@
 			});
 		}
 
+		// ---------------------------------------------------------------- uploads
+
+		/** The parameters of a URL's query string. */
+		function queryParams(search) {
+			var result = {};
+			String(search || "").replace(/^\?/, "").split("&").forEach(function (pair) {
+				var equals = pair.indexOf("=");
+				if (equals > 0) {
+					result[decodeURIComponent(pair.substring(0, equals))] = decodeURIComponent(pair.substring(equals + 1).replace(/\+/g, " "));
+				}
+			});
+			return result;
+		}
+
+		/** The refusal an upload page shows: its first error growl, error message or problem, shortened, or "". */
+		function refusalIn(doc) {
+			var texts = [];
+			doc.querySelectorAll(".ui-growl-item-container.ui-growl-error .ui-growl-message, .ui-messages-error, #problems tbody tr").forEach(function (e) {
+				var text = String(e.textContent || "").replace(/\s+/g, " ").trim();
+				if (text && texts.indexOf(text) < 0) {
+					texts.push(text);
+				}
+			});
+			var result = texts[0] || "";
+			return (result.length > 120) ? result.substring(0, 120) + "..." : result;
+		}
+
+		/**
+		 * An iframe loaded: if it is the upload page, records each upload it makes as an upload step, naming the
+		 * content binding (_n) or the upload action (_a) from the page's URL and the chosen file's name, then notes the
+		 * refusal the page shows (errors: the step's replay may be refused).
+		 */
+		function onFrameLoad(event) {
+			var frame = event.target;
+			if (!active || !frame || (frame.tagName !== "IFRAME")) {
+				return;
+			}
+			var win = null;
+			var doc = null;
+			try {
+				win = frame.contentWindow;
+				doc = frame.contentDocument;
+			} catch (e) {
+				return; // another origin
+			}
+			if (!win || !doc || !win.jQuery || !/\/upload\.xhtml$/.test(win.location.pathname)) {
+				return;
+			}
+			var params = queryParams(win.location.search);
+			var target = (params._u === "action") ? { action: params._a } : { binding: params._n };
+			if (!target.action && !target.binding) {
+				return;
+			}
+			var file = null;
+			win.jQuery(doc).on("fileuploadsend", "#upload", function (e, data) {
+				var chosen = data && data.files && data.files[0];
+				file = chosen ? chosen.name : null;
+			});
+			win.jQuery(doc).on("fileuploadalways", "#upload", function () {
+				if (!active || !file) {
+					return;
+				}
+				var step = { op: "upload", file: file };
+				if (target.action) {
+					step.action = target.action;
+				} else {
+					step.binding = target.binding;
+				}
+				file = null;
+				record(step);
+				var refusal = refusalIn(doc);
+				if (refusal) {
+					push({ op: "context", text: "shown: upload refused \"" + refusal + "\"", errors: "true" });
+				}
+			});
+		}
+
 		function attach() {
+			listen(document, "load", onFrameLoad, true);
 			// on window, in the capture phase, so that Check mode and the sign out warning act before the page
 			CHECK_EVENTS.forEach(function (type) {
 				listen(window, type, onCheckEvent, true);
@@ -941,6 +1026,12 @@
 				send();
 			},
 			send: send,
+			/** Marks the gesture being handled as recorded, though it has no step of its own yet (it records one later). */
+			handled: function () {
+				if (gesture) {
+					gesture.steps++;
+				}
+			},
 			lastQueued: function () {
 				return queue.length ? queue[queue.length - 1] : null;
 			},

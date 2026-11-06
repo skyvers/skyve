@@ -37,6 +37,9 @@
 			</item>
 		</row>
 	</form>
+	<dataGrid binding="rows" title="Data grid with a selected id" selectedIdBinding="selectedRowId">
+		<boundColumn binding="description" />
+	</dataGrid>
 	<listGrid query="qListGridFixtureVueAttributes"
 				title="Vue list grid of column types"
 				continueConversation="false">

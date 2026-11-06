@@ -717,7 +717,8 @@ tests. The SAIL ITs are:
 | `SmartClientAdminSuiteSailIT` | `sail/admin/sc/suite/*.xml` | SC |
 | `SmartClientDataGridSortSailIT` | an inline script, then a column header sort of a data grid and a Save through `SmartClientSelenide` (no SAIL step sorts a data grid); runtime issue SC-12 | SC |
 | `SmartClientServerRolesSailIT` | `sail/admin/sc/suite/03-security-admin.xml` with no `viewRoles` registration: the new user's views are built with the roles the server reports. Needs `sail.recording` on. | SC |
-| `SmartClientRecorderRoundTripSailIT` | records `sail/kitchenSink/sc/sc-recorder-round-trip.xml` and an admin contacts workflow, and replays the recordings; see [Recording](#recording). Needs `sail.recording` on. | SC |
+| `SmartClientRecorderRoundTripSailIT` | records `sail/kitchenSink/sc/sc-recorder-round-trip.xml`, `sc-recorder-round-trip-more.xml` (grids, lookups, uploads, list filters, captures, questions), an admin contacts workflow and checks added through the panel, and replays the recordings; also checks that the home page is unchanged unless recording. See [Recording](#recording). Needs `sail.recording` on. | SC |
+| `PrimeFacesRecorderRoundTripSailIT` | records `sail/kitchenSink/pf/pf-recorder-round-trip.xml`, `pf-recorder-round-trip-more.xml` (grids, lookups, uploads, list filters, captures, questions), an admin contacts workflow and checks added through the panel, and replays the recordings; also checks the sign out warning and that pages are unchanged unless recording. See [Recording](#recording). Needs `sail.recording` on. | PF, tablet |
 | `KitchenSinkWorkflowSailIT` | `sail/kitchenSink/workflow/`: three files (PF tablet, SC, PF tablet) and one `<workflow>` file (PF external, then SC in the same browser) | both |
 
 To run the SAIL unit tests without any browser IT, exclude ITs and give a base
@@ -1078,8 +1079,7 @@ Scripts follow the same rules. Use `testGridRows timeoutMillis` or
 
 The SAIL recorder writes a script of what a user does in SmartClient or PrimeFaces. The script is a first draft: an
 editor (a person or an AI) adds assertions, puts `{run}` into values that must be unique, and removes steps that do not
-matter. The plan, with the phase still to come (the remaining gestures), is
-[plan_sail_recorder.md](ai/plan_sail_recorder.md).
+matter. The plan it was built to is [plan_sail_recorder.md](ai/plan_sail_recorder.md).
 
 ### The gate
 
@@ -1165,12 +1165,41 @@ customer only when the sign in page asks for one (no `environment.customer`).
 | Selecting a tab | `tabSelect`, with `::` for nested tabs. Selecting the tab already shown records nothing. |
 | A view's buttons | `ok`, `save`, `cancel`, `delete`, `zoomOut`, `remove`, or `action name="..."` for the view's own actions. A declined confirmation adds `confirm="false"`. |
 | A list grid's New, or zooming into a row | `listGridNew`, `listGridZoom`. A row is named with `rowContaining`: its bizKey when a cell shows it, otherwise the cell the fewest loaded rows show, the leftmost on a tie; `row` only when no text finds the row first. The list view's own grid is named by the context; a grid in a view by `module` and `query` (or `document` and `model`). In PrimeFaces, both a Vue list grid (its New, its View Detail or a zoomable row) and a PrimeFaces data table. |
+| Selecting a list grid row | `listGridSelect`, for a list grid whose selection does something (a `selectedIdBinding` or a selected action); a click on another list grid's row is not a gesture. In SmartClient the selection is written only if the next step does not act on the same grid. |
+| Filtering, clearing the filter of, or sorting a list grid | `listGridFilter` for each column whose filter changed (no `value` for a column the user cleared), `listGridClearFilter` when the user cleared them all, `listGridSort` with `descending="true"` for a descending sort. `operator` is written unless it is `contains`; an enum's value is its label; a date or time in Skyve's default converter format (`07-Nov-2025`, `07-Nov-2025 15:38`, `11:11`). SmartClient: the filter row and the advanced filter; PrimeFaces: a Vue list grid's column filters and headers. A filter SAIL cannot write as column filters ANDed together (an OR, two clauses on a column, an operator SAIL has not), a sort by more than one column, and a PrimeFaces data table's filters and sorts are unmapped comments. |
+| A data grid's New, zoom, remove, select or row edit | `dataGridNew`, `dataGridZoom`, `dataGridRemove`, `dataGridSelect` and (SmartClient's inline grids) `dataGridEdit`, named by `binding` and the row as for list grids. A selection followed by a step on the same grid's row is written as that step only. |
+| Typing into an inline data grid's cells (SmartClient) | `dataEnter` into the grid's columns, after the `dataGridNew` or `dataGridEdit` that started the row's edit. An inline lookup's pick is `lookupDescriptionPick`. |
+| Dragging an ordered data grid's row | `dataGridMove` with the row and its new position, `to`. |
+| A link in a data grid's row | `dataGridLink` with the row and the link's text; a declined confirmation adds `confirm="false"`. |
+| Picking from a lookup | `lookupDescriptionPick rowContaining` the description picked; when the user typed into the lookup first, `lookupDescriptionAutoComplete` with `search` (what was typed) and `pick` (the description picked). Never a row number, and never `dataEnter`. SmartClient's New and Edit on a lookup are `lookupDescriptionNew` and `lookupDescriptionEdit`. |
+| Uploading a file | `upload` with the content widget's `binding` or the upload `action`, and `file="sail/files/<the file's name>"`, with a comment saying the editor supplies the file there (the test classpath). An upload the page refused is written with `testSuccess="false"`, and the refusal as context. |
+| Answering a server-side question No or Cancel | `confirm="false"` on the step that raised it. |
+| A tree, map or calendar menu item, or such a page loaded by URL (SmartClient) | `navigateTree`, `navigateMap` (with `geometryBinding`) or `navigateCalendar`. What is done inside the tree, map or calendar is unmapped. |
 
 In PrimeFaces, data entry is read from the fields the page's map names: what a field shows when the next step is taken,
 or when the next ajax request is sent, is compared with what it showed when the page loaded or the last response
 arrived, and each change becomes a `dataEnter` with the final value, in page order. A check box that can be empty keeps
-its empty, true or false state. A widget the recorder cannot read yet (a lookup, for example) is an unmapped comment
-for its change.
+its empty, true or false state. A widget the PrimeFaces executor cannot enter data into (a geometry, a comparison) is an
+unmapped comment for its change.
+
+**Values the application made.** When a value the user types later (or filters by, or searches a lookup for), or the
+text a later step finds a row by, equals a value the application showed earlier and the user did not type or choose,
+the script captures it where it was shown and uses `{var:name}` later: `captureValue` after the response that showed
+it in a field, `captureCell` before the zoom or select of the row that showed it in a cell, or `captureTitle` before
+the step on the view whose title it was. For example, a lookup value's generated number, shown after the save, then
+typed into the list's filter:
+
+```xml
+<save/>
+<captureValue binding="number" variable="number"/>
+<ok/>
+<listGridFilter column="number" value="{var:number}" operator="equals"/>
+```
+
+A value counts when it is not blank, not `true` or `false`, and has a digit or at least 4 characters; the latest value
+shown wins. The variable is named after the binding or column (its last part), or `title`, numbered if the name is
+taken. No `pattern` is written: the whole text is captured. The script is built this way on Stop
+(`SailRecordingCaptures`).
 
 The script also carries context for whoever edits it, as XML comments:
 
@@ -1192,9 +1221,9 @@ screen's edit or create view, and a row named by text must have shown that text.
 `<!-- unconfirmed: ... - why -->` comment instead; it is never dropped.
 
 Anything else is written as an `<!-- unmapped: ... -->` comment where it happened, so the editor sees the gap: a click on
-a control that records no step (a grid tool, a data grid row, a link, a header menu item), clearing a field (SAIL cannot
-enter an empty value), and typing into a password field (passwords are never recorded). A gesture is never dropped
-silently.
+a control that records no step (a list grid tool, a link outside a grid, a header menu item), clearing a field (SAIL
+cannot enter an empty value), and typing into a password field (passwords are never recorded). A gesture is never
+dropped silently.
 
 ### How it works
 
@@ -1212,8 +1241,8 @@ silently.
   unloads, and the server adds each step once. `GET sailrecording?from=i&count=n` returns a range of the steps.
 - On Stop, `org.skyve.impl.sail.recording.SailRecordingBuilder` builds the `Automation`, with
   `SailRecordingChecks` checking the steps, and writes its XML.
-- The bundle is the shared core (`recorder-core.js`: the panel, Check mode, the step model and the requests) followed
-  by the SmartClient adapter (`recorder-sc.js`); the PrimeFaces bundle will reuse the core. The core's
+- The bundle is the shared core (`recorder-core.js`: the panel, Check mode, the step model, the requests and uploads)
+  followed by the SmartClient adapter (`recorder-sc.js`); the PrimeFaces bundle reuses the core. The core's
   `SKYVE.SailRecorder.mount(container)` puts the panel into a container instead of the page's corner.
 - The panel reads the script back in ranges (`GET sailrecording?from=&count=`), and deletes, undoes and stops with the
   same batches the steps go in (`delete`, `undo`, `stop`). `GET sailrecording?format=xml` gives the script as it stands,
@@ -1240,17 +1269,29 @@ silently.
     its step until the confirm dialog is answered.
   - Its requests to `sailrecording` go through jQuery, so that a page's own ajax wait (and the PrimeFaces Selenide
     harness's) covers them.
+  - Lookups are recorded from their drop-down's items, data table drags and selections from the PrimeFaces ajax request
+    they send (`rowReorder`, `rowSelect`), and a Vue list grid's filters and sort from the grid's own state each time it
+    fetches its rows (`smartlist`).
   - The PrimeFaces Control Panel (`views/external/edit.xml`) has the Recording controls, as the desktop one does.
+- Uploads, in both renderers: the upload page (`upload.xhtml`) opens in an iframe, and the core listens to its file
+  upload, naming the binding or action from the page's URL. The PrimeFaces recorder does not start in a frame.
 - `SmartClientRecorderRoundTripSailIT` and `PrimeFacesRecorderRoundTripSailIT` each record kitchen sink and admin
-  contacts workflows, and checks, notes, a delete and an undo through the panel, and replay each recording unedited
-  through their renderer's executor (PrimeFaces as `tablet`). They also check that pages are unchanged unless the
-  session records; the PrimeFaces one also checks the sign out warning.
+  contacts workflows, a second kitchen sink workflow of grids, lookups, uploads, list filters, sorting and selection,
+  a captured number and server-side questions (`moreGestures`), and checks, notes, a delete and an undo through the
+  panel, and replay each recording unedited through their renderer's executor (PrimeFaces as `tablet`). They also
+  check that pages are unchanged unless the session records; the PrimeFaces one also checks the sign out warning.
 
 ### Limits
 
-- Lookups, data grids, uploads, server-side questions, list filters and sorting, and tree, map and calendar navigation
-  come in a later phase; until then they are unmapped comments (or, for a field such as a lookup, an unmapped comment
-  for its change).
+- Not recorded, as unmapped comments: what is done inside a tree, map or calendar; a PrimeFaces data table list grid's
+  filters and sorts (a Vue list grid's are recorded); PrimeFaces inline data grid cells (their inputs are not in the
+  page's map); list grid tools that are not view actions (refresh, export, tags, snapshots); a SmartClient lookup's
+  pick from the Pick button's pop-up list is recorded as a drop-down pick.
+- A filter on a date or time column is written in Skyve's default converter format; an application with other
+  converters needs the value edited.
+- The kitchen sink has a tree and a calendar menu item (SmartClient only), which the SmartClient round trip navigates,
+  but no map menu item (no persistent kitchen sink document has a geometry): `navigateMap` from a menu item is covered by
+  the builder's unit tests only.
 - A PrimeFaces list grid shows its first page of rows, and a replay finds a row only among them: a recording that zooms
   into a row replays only while that row is on the first page.
 - A recording starts in the Control Panel. If its first gesture is not a navigation, the script says so in a comment.

@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!--
+	The second kitchen sink workflow that PrimeFacesRecorderRoundTripSailIT records and replays (tablet): the gestures
+	recorder phase 5 maps in PrimeFaces. Lookups (pick and autocomplete), data grids (new, zoom, remove, a drag and a
+	link in a row), uploads (refused and accepted, by action and into a content widget), Vue list grid filters, sorting
+	and selection, a data table's selection, a number the application generates that the list is then filtered by (a
+	capture), server-side questions, and a data grid's selection (the List Grid Fixture's grid with a selectedIdBinding).
+	PrimeFaces has no lookup New or Edit and no row edit. It has no login: it runs in a session that is already signed in
+	and recording. The lookup values it makes sort first ("0 ...") and are deleted again at the end.
+-->
+<automation uxui="tablet" userAgentType="tablet" testStrategy="Assert"
+	xsi:schemaLocation="http://www.skyve.org/xml/sail ../../../../main/java/schemas/sail.xsd"
+	xmlns="http://www.skyve.org/xml/sail"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<interaction name="Lookup values: a generated number, list filters and sorting">
+		<method>
+			<navigateMenu module="kitchensink" item="Lookup values" />
+			<listGridNew module="kitchensink" document="LookupDescription" />
+			<dataEnter binding="description" value="0 SAIL lookup {run} a" />
+			<save />
+			<captureValue binding="number" variable="a" />
+			<ok />
+			<listGridNew module="kitchensink" document="LookupDescription" />
+			<dataEnter binding="description" value="0 SAIL lookup {run} b" />
+			<save />
+			<ok />
+			<listGridFilter module="kitchensink" document="LookupDescription" column="description" value="{run}" />
+			<listGridFilter module="kitchensink" document="LookupDescription" column="number" value="{var:a}" operator="equals" />
+			<testGridRows module="kitchensink" document="LookupDescription" minRows="1" maxRows="1" />
+			<listGridFilter module="kitchensink" document="LookupDescription" column="number" />
+			<listGridSort module="kitchensink" document="LookupDescription" column="description" descending="true" />
+			<listGridZoom module="kitchensink" document="LookupDescription" rowContaining="0 SAIL lookup {run} b" />
+			<cancel />
+			<listGridClearFilter module="kitchensink" document="LookupDescription" />
+		</method>
+	</interaction>
+	<interaction name="Kitchen sink: lookups, data grids and a content upload">
+		<method>
+			<navigateEdit module="kitchensink" document="KitchenSink" />
+			<dataEnter binding="text" value="Required text" />
+			<lookupDescriptionPick binding="lookupDescription" rowContaining="0 SAIL lookup {run} a" />
+			<lookupDescriptionAutoComplete binding="lookupDescription" search="0 SAIL lookup {run}" pick="{run} b" />
+			<tabSelect path="Data Grids" />
+			<dataGridNew binding="containerGrid" />
+			<dataEnter binding="url" value="https://example.com/{run}" />
+			<zoomOut />
+			<dataGridZoom binding="containerGrid" row="0" />
+			<zoomOut />
+			<dataGridRemove binding="containerGrid" row="0" />
+			<dataGridNew binding="inlineGrid" />
+			<dataGridRemove binding="inlineGrid" row="0" />
+			<tabSelect path="Widgets" />
+			<upload binding="contentLink" file="sail/files/sail-upload.txt" />
+			<cancel />
+		</method>
+	</interaction>
+	<interaction name="Actions fixture: uploads and a link in a row">
+		<method>
+			<navigateEdit module="kitchensink" document="ActionsFixture" />
+			<upload action="ActionsUpload" file="sail/files/sail-refused.txt" testSuccess="false" />
+			<testFailure message="sail-refused.txt already exists" />
+			<upload action="ActionsUpload" file="sail/files/sail-upload.txt" />
+			<tabSelect path="Rows" />
+			<dataGridNew binding="rows" />
+			<dataEnter binding="name" value="SAIL row {run}" />
+			<zoomOut />
+			<dataGridLink binding="rows" rowContaining="SAIL row {run}" text="Run From Row" confirm="false" />
+			<dataGridLink binding="rows" rowContaining="SAIL row {run}" text="Run From Row" />
+			<testGridRows binding="rows" rowContaining="Run From Row ran" minRows="1" maxRows="1" />
+		</method>
+	</interaction>
+	<interaction name="Server-side questions">
+		<method>
+			<navigateEdit module="kitchensink" document="DialogsFixture" />
+			<action name="AskYesNo" />
+			<testValue binding="outcome" value="Yes or No answered Yes" />
+			<action name="AskYesNo" confirm="false" />
+			<testValue binding="outcome" value="Yes or No answered No" />
+		</method>
+	</interaction>
+	<interaction name="Ordered grid: drag a row">
+		<method>
+			<navigateList module="kitchensink" document="OrderedGridFixture" />
+			<listGridNew module="kitchensink" document="OrderedGridFixture" />
+			<dataEnter binding="name" value="SAIL ordered {run}" />
+			<dataGridNew binding="rows" />
+			<dataEnter binding="name" value="First {run}" />
+			<zoomOut />
+			<dataGridNew binding="rows" />
+			<dataEnter binding="name" value="Second {run}" />
+			<zoomOut />
+			<dataGridMove binding="rows" rowContaining="Second {run}" to="0" />
+			<save />
+			<delete />
+		</method>
+	</interaction>
+	<interaction name="Selection: a Vue list grid, a PrimeFaces data table and a data grid">
+		<method>
+			<navigateEdit module="kitchensink" document="ListGridFixture" />
+			<listGridSelect module="kitchensink" query="qListGridFixtureVue" rowContaining="0 SAIL lookup {run} a" />
+			<listGridSelect module="kitchensink" query="qListGridFixtureFaces" rowContaining="0 SAIL lookup {run} a" />
+			<dataGridNew binding="rows" />
+			<dataEnter binding="description" value="SAIL selectable {run}" />
+			<zoomOut />
+			<dataGridSelect binding="rows" rowContaining="SAIL selectable {run}" />
+		</method>
+	</interaction>
+	<interaction name="Delete the lookup values">
+		<method>
+			<navigateMenu module="kitchensink" item="Lookup values" />
+			<listGridZoom module="kitchensink" document="LookupDescription" rowContaining="0 SAIL lookup {run} a" />
+			<delete />
+			<listGridZoom module="kitchensink" document="LookupDescription" rowContaining="0 SAIL lookup {run} b" />
+			<delete />
+		</method>
+	</interaction>
+</automation>

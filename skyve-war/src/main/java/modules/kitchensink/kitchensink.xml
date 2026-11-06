@@ -176,6 +176,16 @@
 		<list name="Ordered Grid Fixtures" document="OrderedGridFixture">
 			<role name="dev" />
 		</list>
+		<!-- A tree and a calendar menu item, for SAIL's navigateTree and navigateCalendar (SmartClient). No persistent
+			 kitchen sink document has a geometry, so there is no map menu item. -->
+		<tree name="Condition Node Tree" query="qConditionsFixtureNodes">
+			<uxui name="desktop" />
+			<role name="dev" />
+		</tree>
+		<calendar name="List Attribute Calendar" document="ListAttributes" startBinding="dateTime" endBinding="dateTime">
+			<uxui name="desktop" />
+			<role name="dev" />
+		</calendar>
 	</menu>
 	<queries>
 		<query name="qEscapingFixture" documentName="ListAttributes">

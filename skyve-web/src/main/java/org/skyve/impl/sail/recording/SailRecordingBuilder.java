@@ -13,6 +13,7 @@ import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 
 import org.dom4j.Attribute;
 import org.dom4j.Document;
@@ -30,6 +31,9 @@ import org.skyve.metadata.sail.language.Automation;
 import org.skyve.metadata.sail.language.Interaction;
 import org.skyve.metadata.sail.language.Procedure;
 import org.skyve.metadata.sail.language.Step;
+import org.skyve.metadata.sail.language.step.CaptureCell;
+import org.skyve.metadata.sail.language.step.CaptureTitle;
+import org.skyve.metadata.sail.language.step.CaptureValue;
 import org.skyve.metadata.sail.language.step.Comment;
 import org.skyve.metadata.sail.language.step.TestGridRows;
 import org.skyve.metadata.sail.language.step.TestMessage;
@@ -38,6 +42,7 @@ import org.skyve.metadata.sail.language.step.interaction.actions.AbstractAction;
 import org.skyve.metadata.sail.language.step.interaction.DataEnter;
 import org.skyve.metadata.sail.language.step.interaction.DataEnter.Match;
 import org.skyve.metadata.sail.language.step.interaction.TabSelect;
+import org.skyve.metadata.sail.language.step.interaction.Upload;
 import org.skyve.metadata.sail.language.step.interaction.actions.Action;
 import org.skyve.metadata.sail.language.step.interaction.actions.Cancel;
 import org.skyve.metadata.sail.language.step.interaction.actions.Delete;
@@ -45,11 +50,30 @@ import org.skyve.metadata.sail.language.step.interaction.actions.Ok;
 import org.skyve.metadata.sail.language.step.interaction.actions.Remove;
 import org.skyve.metadata.sail.language.step.interaction.actions.Save;
 import org.skyve.metadata.sail.language.step.interaction.actions.ZoomOut;
+import org.skyve.metadata.sail.language.step.interaction.grids.DataGridEdit;
+import org.skyve.metadata.sail.language.step.interaction.grids.DataGridLink;
+import org.skyve.metadata.sail.language.step.interaction.grids.DataGridMove;
+import org.skyve.metadata.sail.language.step.interaction.grids.DataGridNew;
+import org.skyve.metadata.sail.language.step.interaction.grids.DataGridRemove;
+import org.skyve.metadata.sail.language.step.interaction.grids.DataGridSelect;
+import org.skyve.metadata.sail.language.step.interaction.grids.DataGridZoom;
+import org.skyve.metadata.sail.language.step.interaction.grids.ListGridClearFilter;
+import org.skyve.metadata.sail.language.step.interaction.grids.ListGridFilter;
+import org.skyve.metadata.sail.language.step.interaction.grids.ListGridFilter.FilterOperator;
 import org.skyve.metadata.sail.language.step.interaction.grids.ListGridNew;
+import org.skyve.metadata.sail.language.step.interaction.grids.ListGridSelect;
+import org.skyve.metadata.sail.language.step.interaction.grids.ListGridSort;
 import org.skyve.metadata.sail.language.step.interaction.grids.ListGridZoom;
+import org.skyve.metadata.sail.language.step.interaction.lookup.LookupDescriptionAutoComplete;
+import org.skyve.metadata.sail.language.step.interaction.lookup.LookupDescriptionEdit;
+import org.skyve.metadata.sail.language.step.interaction.lookup.LookupDescriptionNew;
+import org.skyve.metadata.sail.language.step.interaction.lookup.LookupDescriptionPick;
+import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateCalendar;
 import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateEdit;
 import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateList;
+import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateMap;
 import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateMenu;
+import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateTree;
 import org.skyve.metadata.sail.language.step.interaction.session.Login;
 import org.skyve.metadata.sail.language.step.interaction.session.SwitchMode;
 import org.skyve.web.UserAgentType;
@@ -96,6 +120,16 @@ public final class SailRecordingBuilder {
 	public static final String ROW_TEXTS = "rowTexts";
 	/** The key of a context entry that is true when the response showed errors. */
 	public static final String ERRORS = "errors";
+	/**
+	 * The key of an inline data grid's binding on a {@code dataEnter} into one of its cells: the step's binding is
+	 * the grid's column, so it is not checked against the view's widgets.
+	 */
+	public static final String GRID = "grid";
+	/**
+	 * The key of a context entry that says the user declined a question the step before it raised (a server-side
+	 * question answered No or Cancel): the step gets {@code confirm="false"}.
+	 */
+	public static final String DECLINED = "declined";
 	/** Separates a row's cell texts in {@value #ROW_TEXTS}. */
 	public static final String CELL_SEPARATOR = " | ";
 
@@ -128,7 +162,9 @@ public final class SailRecordingBuilder {
 	private static final String CONFIRM = "confirm";
 	/** The keys of a recorded step that are not attributes of its SAIL step. */
 	private static final java.util.Set<String> CONTEXT_KEYS = java.util.Set.of(OP, VIEW, TARGET, SailRecording.STEP_ID_KEY,
-																				SCREEN, LABEL, BEFORE, ROW_BIZ_KEY, ROW_TEXTS, ERRORS);
+																				SCREEN, LABEL, BEFORE, ROW_BIZ_KEY, ROW_TEXTS, ERRORS, GRID, DECLINED,
+																				SailRecordingCaptures.SHOWN, SailRecordingCaptures.CELLS,
+																				SailRecordingCaptures.TITLE, "file", "refusal");
 
 	/**
 	 * The order attributes are written in, whatever the element: the identifying attributes first, then the values,
@@ -137,8 +173,9 @@ public final class SailRecordingBuilder {
 	private static final List<String> ATTRIBUTE_ORDER = List.of("uxui", "userAgentType", "testStrategy",
 																	"name", "customer", "user", "password",
 																	MODULE, DOCUMENT, QUERY, MODEL, "item", "bizId",
-																	"binding", "path", "column", "row", "rowContaining",
-																	"value", "match", "operator", "descending",
+																	"binding", "action", "path", "column", "row", "rowContaining",
+																	"to", "text", "search", "pick", "file",
+																	"value", "match", "operator", "descending", "variable", "pattern",
 																	"createView", CONFIRM, "testSuccess");
 
 	/**
@@ -295,8 +332,9 @@ public final class SailRecordingBuilder {
 		List<Step> method = interaction.getSteps();
 		screen = null;
 		lastStep = null;
-		for (int i = 0; i < end; i++) {
-			Step step = entry(steps.get(i), true);
+		List<Map<String, String>> entries = SailRecordingCaptures.apply(steps.subList(0, end));
+		for (Map<String, String> recorded : entries) {
+			Step step = entry(recorded, true);
 			if (step != null) {
 				if (method.isEmpty() && (! isNavigation(step))) {
 					pending.add(0, "The recording started in the Control Panel. Navigate to the view of the next step to replay it on its own.");
@@ -330,8 +368,19 @@ public final class SailRecordingBuilder {
 			if (text != null) {
 				pending.add(text);
 			}
-			if ("true".equals(recorded.get(ERRORS)) && (lastStep instanceof AbstractAction action)) {
-				action.setTestSuccess(Boolean.FALSE);
+			if ("true".equals(recorded.get(ERRORS))) {
+				if (lastStep instanceof AbstractAction action) {
+					action.setTestSuccess(Boolean.FALSE);
+				}
+				else if (lastStep instanceof DataGridLink link) {
+					link.setTestSuccess(Boolean.FALSE);
+				}
+				else if (lastStep instanceof Upload upload) {
+					upload.setTestSuccess(Boolean.FALSE);
+				}
+			}
+			if ("true".equals(recorded.get(DECLINED))) {
+				decline(lastStep);
 			}
 			return null;
 		}
@@ -474,7 +523,7 @@ public final class SailRecordingBuilder {
 	private @Nullable String unconfirmed(@Nonnull Map<String, String> recorded) {
 		String rowContaining = recorded.get("rowContaining");
 		String rowTexts = recorded.get(ROW_TEXTS);
-		if ((rowContaining != null) && (rowTexts != null) && (! rowTexts.contains(rowContaining))) {
+		if ((rowContaining != null) && (rowTexts != null) && (! rowContaining.contains("{var:")) && (! rowTexts.contains(rowContaining))) {
 			return "the row did not show \"" + rowContaining + '"';
 		}
 		return (check == null) ? null : check.unconfirmed(recorded);
@@ -495,6 +544,9 @@ public final class SailRecordingBuilder {
 				pending.add('"' + label + "\" was " + (before.isBlank() ? "empty" : '"' + before + '"'));
 			}
 		}
+		if ("upload".equals(recorded.get(OP))) {
+			pending.add("upload: the file " + recorded.get("file") + " was chosen; put a file of that name in sail/files on the test classpath (skyve-war/src/test/resources), or change the path");
+		}
 		String rowTexts = text(recorded, ROW_TEXTS);
 		if (rowTexts != null) {
 			String bizKey = text(recorded, ROW_BIZ_KEY);
@@ -503,7 +555,7 @@ public final class SailRecordingBuilder {
 	}
 
 	private static boolean isNavigation(@Nonnull Step step) {
-		return (step instanceof NavigateMenu) || (step instanceof NavigateEdit) || (step instanceof NavigateList);
+		return (step instanceof NavigateMenu) || (step instanceof NavigateEdit) || (step instanceof NavigateList); // trees, maps and calendars are lists
 	}
 
 	/**
@@ -532,6 +584,30 @@ public final class SailRecordingBuilder {
 				case "cancel" -> new Cancel();
 				case "listGridZoom" -> listGridZoom(recorded);
 				case "listGridNew" -> listGridNew(recorded);
+				case "listGridSelect" -> listGridSelect(recorded);
+				case "listGridFilter" -> listGridFilter(recorded);
+				case "listGridClearFilter" -> list(new ListGridClearFilter(), ListGridClearFilter::setModuleName, ListGridClearFilter::setDocumentName,
+													ListGridClearFilter::setQueryName, ListGridClearFilter::setModelName, recorded);
+				case "listGridSort" -> listGridSort(recorded);
+				case "navigateTree" -> listNavigation(new NavigateTree(), recorded);
+				case "navigateMap" -> navigateMap(recorded);
+				case "navigateCalendar" -> listNavigation(new NavigateCalendar(), recorded);
+				case "dataGridNew" -> dataGridNew(recorded);
+				case "dataGridZoom" -> gridRow(new DataGridZoom(), DataGridZoom::setBinding, DataGridZoom::setRow, DataGridZoom::setRowContaining, recorded);
+				case "dataGridEdit" -> gridRow(new DataGridEdit(), DataGridEdit::setBinding, DataGridEdit::setRow, DataGridEdit::setRowContaining, recorded);
+				case "dataGridRemove" -> gridRow(new DataGridRemove(), DataGridRemove::setBinding, DataGridRemove::setRow, DataGridRemove::setRowContaining, recorded);
+				case "dataGridSelect" -> gridRow(new DataGridSelect(), DataGridSelect::setBinding, DataGridSelect::setRow, DataGridSelect::setRowContaining, recorded);
+				case "dataGridMove" -> dataGridMove(recorded);
+				case "dataGridLink" -> dataGridLink(recorded);
+				case "lookupDescriptionPick" -> gridRow(new LookupDescriptionPick(), LookupDescriptionPick::setBinding, LookupDescriptionPick::setRow,
+														LookupDescriptionPick::setRowContaining, recorded);
+				case "lookupDescriptionAutoComplete" -> lookupDescriptionAutoComplete(recorded);
+				case "lookupDescriptionNew" -> bound(new LookupDescriptionNew(), LookupDescriptionNew::setBinding, recorded);
+				case "lookupDescriptionEdit" -> bound(new LookupDescriptionEdit(), LookupDescriptionEdit::setBinding, recorded);
+				case "upload" -> upload(recorded);
+				case "captureValue" -> captureValue(recorded);
+				case "captureCell" -> captureCell(recorded);
+				case "captureTitle" -> captureTitle(recorded);
 				case "comment" -> comment(recorded);
 				case "testValue" -> testValue(recorded);
 				case "testMessage" -> testMessage(recorded);
@@ -652,6 +728,31 @@ public final class SailRecordingBuilder {
 		return declinable(result, Action::setConfirm, recorded);
 	}
 
+	/** Sets {@code confirm="false"} on a step that takes it. */
+	private static void decline(@Nullable Step step) {
+		if (step instanceof Action action) {
+			action.setConfirm(Boolean.FALSE);
+		}
+		else if (step instanceof Save save) {
+			save.setConfirm(Boolean.FALSE);
+		}
+		else if (step instanceof Ok ok) {
+			ok.setConfirm(Boolean.FALSE);
+		}
+		else if (step instanceof Delete delete) {
+			delete.setConfirm(Boolean.FALSE);
+		}
+		else if (step instanceof ZoomOut zoomOut) {
+			zoomOut.setConfirm(Boolean.FALSE);
+		}
+		else if (step instanceof Remove remove) {
+			remove.setConfirm(Boolean.FALSE);
+		}
+		else if (step instanceof DataGridLink link) {
+			link.setConfirm(Boolean.FALSE);
+		}
+	}
+
 	private static boolean declined(@Nonnull Map<String, String> recorded) {
 		return "false".equals(recorded.get(CONFIRM));
 	}
@@ -674,28 +775,224 @@ public final class SailRecordingBuilder {
 	}
 
 	private static @Nullable Step listGridZoom(@Nonnull Map<String, String> recorded) {
+		ListGridZoom result = list(new ListGridZoom(), ListGridZoom::setModuleName, ListGridZoom::setDocumentName,
+									ListGridZoom::setQueryName, ListGridZoom::setModelName, recorded);
+		return locateRow(recorded, result::setRow, result::setRowContaining) ? result : null;
+	}
+
+	private static @Nullable Step listGridSelect(@Nonnull Map<String, String> recorded) {
+		ListGridSelect result = list(new ListGridSelect(), ListGridSelect::setModuleName, ListGridSelect::setDocumentName,
+										ListGridSelect::setQueryName, ListGridSelect::setModelName, recorded);
+		return locateRow(recorded, result::setRow, result::setRowContaining) ? result : null;
+	}
+
+	/**
+	 * Sets a step's row from the recorded {@code row} or {@code rowContaining}, exactly one of which must be given.
+	 *
+	 * @return false if neither or both are given, or the row is not a number
+	 */
+	private static boolean locateRow(@Nonnull Map<String, String> recorded,
+										@Nonnull Consumer<Integer> setRow,
+										@Nonnull Consumer<String> setRowContaining) {
 		String rowContaining = recorded.get("rowContaining");
 		String row = text(recorded, "row");
 		boolean hasText = (rowContaining != null) && (! rowContaining.isBlank());
 		if (hasText == (row != null)) {
-			return null; // exactly one of row and rowContaining
+			return false;
 		}
-		ListGridZoom result = new ListGridZoom();
-		result.setModuleName(text(recorded, MODULE));
-		result.setDocumentName(text(recorded, DOCUMENT));
-		result.setQueryName(text(recorded, QUERY));
-		result.setModelName(text(recorded, MODEL));
 		if (hasText) {
-			result.setRowContaining(rowContaining);
+			setRowContaining.accept(rowContaining);
+			return true;
 		}
-		else {
-			try {
-				result.setRow(Integer.valueOf(row));
-			}
-			catch (@SuppressWarnings("unused") NumberFormatException e) {
-				return null;
+		try {
+			setRow.accept(Integer.valueOf(row));
+			return true;
+		}
+		catch (@SuppressWarnings("unused") NumberFormatException e) {
+			return false;
+		}
+	}
+
+	/** Sets a list step's module, document, query and model from the recorded gesture. */
+	private static @Nonnull <S extends Step> S list(@Nonnull S step,
+													@Nonnull BiConsumer<S, String> setModule,
+													@Nonnull BiConsumer<S, String> setDocument,
+													@Nonnull BiConsumer<S, String> setQuery,
+													@Nonnull BiConsumer<S, String> setModel,
+													@Nonnull Map<String, String> recorded) {
+		setModule.accept(step, text(recorded, MODULE));
+		setDocument.accept(step, text(recorded, DOCUMENT));
+		setQuery.accept(step, text(recorded, QUERY));
+		setModel.accept(step, text(recorded, MODEL));
+		return step;
+	}
+
+	private static @Nullable Step listGridFilter(@Nonnull Map<String, String> recorded) {
+		String column = text(recorded, "column");
+		if (column == null) {
+			return null;
+		}
+		ListGridFilter result = list(new ListGridFilter(), ListGridFilter::setModuleName, ListGridFilter::setDocumentName,
+										ListGridFilter::setQueryName, ListGridFilter::setModelName, recorded);
+		result.setColumn(column);
+		String value = recorded.get("value");
+		if ((value != null) && (! value.isEmpty())) {
+			result.setValue(value);
+			String operator = text(recorded, "operator");
+			if ((operator != null) && (! FilterOperator.contains.name().equals(operator))) {
+				try {
+					result.setOperator(FilterOperator.valueOf(operator));
+				}
+				catch (@SuppressWarnings("unused") IllegalArgumentException e) {
+					return null;
+				}
 			}
 		}
+		return result;
+	}
+
+	private static @Nullable Step listGridSort(@Nonnull Map<String, String> recorded) {
+		String column = text(recorded, "column");
+		if (column == null) {
+			return null;
+		}
+		ListGridSort result = list(new ListGridSort(), ListGridSort::setModuleName, ListGridSort::setDocumentName,
+									ListGridSort::setQueryName, ListGridSort::setModelName, recorded);
+		result.setColumn(column);
+		if ("true".equals(recorded.get("descending"))) {
+			result.setDescending(Boolean.TRUE);
+		}
+		return result;
+	}
+
+	private static @Nullable Step listNavigation(@Nonnull NavigateList step, @Nonnull Map<String, String> recorded) {
+		String module = text(recorded, MODULE);
+		if ((module == null) || ((text(recorded, DOCUMENT) == null) && (text(recorded, QUERY) == null))) {
+			return null;
+		}
+		return list(step, NavigateList::setModuleName, NavigateList::setDocumentName, NavigateList::setQueryName, NavigateList::setModelName, recorded);
+	}
+
+	private static @Nullable Step navigateMap(@Nonnull Map<String, String> recorded) {
+		NavigateMap result = new NavigateMap();
+		result.setGeometryBinding(text(recorded, "geometryBinding"));
+		if ((result.getGeometryBinding() == null) && (text(recorded, MODEL) == null)) {
+			return null; // a map needs its geometry binding, unless a model names it
+		}
+		return listNavigation(result, recorded);
+	}
+
+	/** A step that names only a binding. */
+	private static @Nullable <S extends Step> S bound(@Nonnull S step, @Nonnull BiConsumer<S, String> setBinding, @Nonnull Map<String, String> recorded) {
+		String binding = text(recorded, "binding");
+		if (binding == null) {
+			return null;
+		}
+		setBinding.accept(step, binding);
+		return step;
+	}
+
+	/** A step that names a grid (or lookup) binding and a row. */
+	private static @Nullable <S extends Step> S gridRow(@Nonnull S step,
+														@Nonnull BiConsumer<S, String> setBinding,
+														@Nonnull BiConsumer<S, Integer> setRow,
+														@Nonnull BiConsumer<S, String> setRowContaining,
+														@Nonnull Map<String, String> recorded) {
+		if (bound(step, setBinding, recorded) == null) {
+			return null;
+		}
+		return locateRow(recorded, row -> setRow.accept(step, row), text -> setRowContaining.accept(step, text)) ? step : null;
+	}
+
+	private static @Nullable Step dataGridNew(@Nonnull Map<String, String> recorded) {
+		return bound(new DataGridNew(), DataGridNew::setBinding, recorded);
+	}
+
+	private static @Nullable Step dataGridMove(@Nonnull Map<String, String> recorded) {
+		DataGridMove result = gridRow(new DataGridMove(), DataGridMove::setBinding, DataGridMove::setRow, DataGridMove::setRowContaining, recorded);
+		String to = text(recorded, "to");
+		if ((result == null) || (to == null)) {
+			return null;
+		}
+		try {
+			result.setTo(Integer.valueOf(to));
+		}
+		catch (@SuppressWarnings("unused") NumberFormatException e) {
+			return null;
+		}
+		return result;
+	}
+
+	private static @Nullable Step dataGridLink(@Nonnull Map<String, String> recorded) {
+		DataGridLink result = gridRow(new DataGridLink(), DataGridLink::setBinding, DataGridLink::setRow, DataGridLink::setRowContaining, recorded);
+		String linkText = text(recorded, TEXT);
+		if ((result == null) || (linkText == null)) {
+			return null;
+		}
+		result.setText(linkText);
+		return declinable(result, DataGridLink::setConfirm, recorded);
+	}
+
+	private static @Nullable Step lookupDescriptionAutoComplete(@Nonnull Map<String, String> recorded) {
+		LookupDescriptionAutoComplete result = bound(new LookupDescriptionAutoComplete(), LookupDescriptionAutoComplete::setBinding, recorded);
+		String search = recorded.get("search");
+		if ((result == null) || (search == null) || search.isBlank()) {
+			return null;
+		}
+		result.setSearch(search);
+		String pick = recorded.get("pick");
+		if ((pick != null) && (! pick.isBlank())) {
+			result.setPick(pick);
+		}
+		return result;
+	}
+
+	private static @Nullable Step upload(@Nonnull Map<String, String> recorded) {
+		String binding = text(recorded, "binding");
+		String actionName = text(recorded, "action");
+		String file = text(recorded, "file");
+		if ((file == null) || ((binding == null) == (actionName == null))) {
+			return null;
+		}
+		Upload result = new Upload();
+		result.setBinding(binding);
+		result.setActionName(actionName);
+		// the editor supplies the file: by convention, the kitchen sinks' upload files are in sail/files
+		result.setFile("sail/files/" + file.substring(Math.max(file.lastIndexOf('/'), file.lastIndexOf('\\')) + 1));
+		return result;
+	}
+
+	private static @Nullable Step captureValue(@Nonnull Map<String, String> recorded) {
+		CaptureValue result = bound(new CaptureValue(), CaptureValue::setBinding, recorded);
+		String variable = text(recorded, "variable");
+		if ((result == null) || (variable == null)) {
+			return null;
+		}
+		result.setVariable(variable);
+		return result;
+	}
+
+	private static @Nullable Step captureCell(@Nonnull Map<String, String> recorded) {
+		String column = text(recorded, "column");
+		String variable = text(recorded, "variable");
+		if ((column == null) || (variable == null)) {
+			return null;
+		}
+		CaptureCell result = list(new CaptureCell(), CaptureCell::setModuleName, CaptureCell::setDocumentName,
+									CaptureCell::setQueryName, CaptureCell::setModelName, recorded);
+		result.setBinding(text(recorded, "binding"));
+		result.setColumn(column);
+		result.setVariable(variable);
+		return locateRow(recorded, result::setRow, result::setRowContaining) ? result : null;
+	}
+
+	private static @Nullable Step captureTitle(@Nonnull Map<String, String> recorded) {
+		String variable = text(recorded, "variable");
+		if (variable == null) {
+			return null;
+		}
+		CaptureTitle result = new CaptureTitle();
+		result.setVariable(variable);
 		return result;
 	}
 

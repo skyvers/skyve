@@ -100,6 +100,35 @@ class PrimeFacesRecorderRoundTripSailIT extends AbstractPrimeFacesInterpretedSai
 		replay(xml);
 	}
 
+	/**
+	 * Lookups, data grids, uploads, Vue list grid filters, sorting and selection, a data table's selection, a generated
+	 * number reused later (a capture), server-side questions and a data grid's selection: see
+	 * pf-recorder-round-trip-more.xml.
+	 */
+	@Test
+	void moreGestures() {
+		String xml = record(() -> sailResource("sail/kitchenSink/pf/pf-recorder-round-trip-more.xml"));
+		assertAll(() -> assertTrue(xml.contains("<captureValue binding=\"number\" variable=\"number\"/>"), xml),
+					() -> assertTrue(xml.contains("<listGridFilter column=\"number\" value=\"{var:number}\" operator=\"equals\"/>"), xml),
+					() -> assertTrue(xml.contains("<listGridFilter column=\"number\"/>"), xml),
+					() -> assertTrue(xml.contains("<listGridSort column=\"description\" descending=\"true\"/>"), xml),
+					() -> assertTrue(xml.contains("<listGridClearFilter/>"), xml),
+					() -> assertTrue(xml.contains("<listGridSelect module=\"kitchensink\" query=\"qListGridFixtureVue\" rowContaining=\"0 SAIL lookup "), xml),
+					() -> assertTrue(xml.contains("<listGridSelect module=\"kitchensink\" query=\"qListGridFixtureFaces\" rowContaining=\"0 SAIL lookup "), xml),
+					() -> assertTrue(xml.contains("<lookupDescriptionPick binding=\"lookupDescription\" rowContaining=\"0 SAIL lookup "), xml),
+					() -> assertTrue(xml.contains("<lookupDescriptionAutoComplete binding=\"lookupDescription\" search=\"0 SAIL lookup "), xml),
+					() -> assertTrue(xml.contains("<dataGridNew binding=\"containerGrid\"/>"), xml),
+					() -> assertTrue(xml.contains("<dataGridZoom binding=\"containerGrid\""), xml),
+					() -> assertTrue(xml.contains("<dataGridRemove binding=\"inlineGrid\""), xml),
+					() -> assertTrue(xml.contains("<dataGridMove binding=\"rows\" rowContaining=\"Second "), xml),
+					() -> assertTrue(xml.contains("<upload action=\"ActionsUpload\" file=\"sail/files/sail-refused.txt\" testSuccess=\"false\"/>"), xml),
+					() -> assertTrue(xml.contains("<upload binding=\"contentLink\" file=\"sail/files/sail-upload.txt\"/>"), xml),
+					() -> assertTrue(xml.contains("text=\"Run From Row\" confirm=\"false\"/>"), xml),
+					() -> assertTrue(xml.contains("<action name=\"AskYesNo\" confirm=\"false\"/>"), xml),
+					() -> assertTrue(xml.contains("<dataGridSelect binding=\"rows\" rowContaining=\"SAIL selectable "), xml));
+		replay(xml);
+	}
+
 	@Test
 	void adminContacts() {
 		String xml = record(() -> sailString(CONTACTS));
