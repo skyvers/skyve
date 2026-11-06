@@ -26,7 +26,7 @@ SC-2's suspected cause, which cites the code before its fix, at `2f4c2021b8`.
 | [P8](#p8-an-action-upload-page-left-open-hides-later-error-messages) | An action upload page left open hides later error messages | PF | Not investigated | open (not confirmed) |
 | [P9](#p9-fixed-an-action-link-in-a-data-grid-row-also-zooms-into-the-row) | An action link in a data grid row also zooms into the row | PF | Confirmed | fixed (150d05dddc) |
 | [P10](#p10-fixed-an-upload-actions-validationexception-shows-only-an-error-reference) | An upload action's ValidationException shows only an error reference | both | Confirmed | fixed (150d05dddc) |
-| [P11](#p11-fixed-every-pf-response-moves-the-focus-to-the-first-input) | Every PF response moves the focus to the first input | PF | Confirmed | fixed (COMMIT) |
+| [P11](#p11-fixed-every-pf-response-moves-the-focus-to-the-first-input) | Every PF response moves the focus to the first input | PF | Confirmed | fixed (e19217194e) |
 | [SC-1](#sc-1-withdrawn-actions-blocked-after-a-server-field-error) | Actions blocked after a server field error | SC | Withdrawn: a harness fault | withdrawn |
 | [SC-2](#sc-2-fixed-inline-grid-default-values-reach-smartclient-as-objects) | Inline grid default values reach SmartClient as objects | SC | Confirmed | fixed by master |
 | [SC-3](#sc-3-a-list-without-a-menu-item-fails-to-load) | A list without a menu item fails to load | SC | Confirmed | open |
@@ -444,7 +444,7 @@ each response. `PrimeFaces.focus` focuses from a 50 ms timer.
 `PrimeFaces.focus` once, the page scrolled from 509 to 60, and the focus moved
 from the Run From Form Button the user had tabbed to, to the first check box.
 
-**Fix.** COMMIT: the include renders `<p:focus rendered="#{not
+**Fix.** `e19217194e`: the include renders `<p:focus rendered="#{not
 facesContext.postback}" />`, so a page focuses its first input only when it is
 loaded (a GET). After a postback, including one that fails validation, the
 focus stays where it is; Mike chose not to jump to the first invalid field.
