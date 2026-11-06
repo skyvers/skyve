@@ -87,6 +87,7 @@ import org.skyve.metadata.view.widget.bound.Parameter;
 import org.skyve.util.OWASP;
 import org.skyve.util.Util;
 import org.skyve.util.logging.Category;
+import org.skyve.web.UserAgentType;
 import org.slf4j.Logger;
 
 import jakarta.annotation.Nonnull;
@@ -1662,8 +1663,37 @@ public class FacesView extends HarnessView {
 		if ((moduleName == null) || (documentName == null) || (! isSailRecording())) {
 			return null;
 		}
-		RequestUxUiSelection selection = UserAgent.getSelection((HttpServletRequest) FacesContext.getCurrentInstance().getExternalContext().getRequest());
-		return PrimeFacesRecordingMap.edit(moduleName, documentName, selection.getUxUi().getName(), selection.getUserAgentType());
+		try {
+			RequestUxUiSelection selection = UserAgent.getSelection((HttpServletRequest) FacesContext.getCurrentInstance().getExternalContext().getRequest());
+			String uxui = selection.getUxUi().getName();
+			UserAgentType userAgentType = selection.getUserAgentType();
+			return sailRecordingMap(String.join("|", "edit", moduleName, documentName, uxui, userAgentType.name()),
+									() -> PrimeFacesRecordingMap.edit(moduleName, documentName, uxui, userAgentType));
+		}
+		catch (Exception e) {
+			// recording must never break the page: the recorder records less (unmapped gestures) without its map
+			FACES_LOGGER.warn("SAIL recording could not build the client-id map of {}.{}", moduleName, documentName, e);
+			return null;
+		}
+	}
+
+	/**
+	 * Returns a client-id map, built once per recording for the page it describes and the user it was built for, as an
+	 * ajax update of the form renders it again with the page.
+	 *
+	 * @param page	what the map depends on besides the user: the page kind, module, document or list, UX/UI and user agent
+	 * @param build	builds the map
+	 * @return the map
+	 */
+	private @Nonnull String sailRecordingMap(@Nonnull String page, @Nonnull java.util.function.Supplier<String> build) {
+		HttpSession session = ((HttpServletRequest) FacesContext.getCurrentInstance().getExternalContext().getRequest()).getSession(false);
+		SailRecording recording = SailRecording.get(session);
+		if (recording == null) {
+			return build.get();
+		}
+		org.skyve.metadata.user.User user = getUser();
+		String key = page + '|' + ((user == null) ? "" : user.getName() + '|' + String.join(",", SailRecording.effectiveRoleNames(user)));
+		return recording.pageMap(key, build);
 	}
 
 	/**
@@ -1679,9 +1709,15 @@ public class FacesView extends HarnessView {
 		if (! isSailRecording()) {
 			return null;
 		}
-		HttpSession session = ((HttpServletRequest) FacesContext.getCurrentInstance().getExternalContext().getRequest()).getSession(false);
-		SailRecording recording = SailRecording.get(session);
-		return ((session == null) || (recording == null)) ? null : recording.pageState(session, SAIL_RECORDING_INLINE_ENTRIES);
+		try {
+			HttpSession session = ((HttpServletRequest) FacesContext.getCurrentInstance().getExternalContext().getRequest()).getSession(false);
+			SailRecording recording = SailRecording.get(session);
+			return ((session == null) || (recording == null)) ? null : recording.pageState(session, SAIL_RECORDING_INLINE_ENTRIES);
+		}
+		catch (Exception e) {
+			FACES_LOGGER.warn("SAIL recording could not give the page its state", e);
+			return null;
+		}
 	}
 
 	/** How many of the last entries a page's recorder state holds; earlier ones are fetched when the panel scrolls. */
@@ -1701,12 +1737,20 @@ public class FacesView extends HarnessView {
 		if ((moduleName == null) || (! isSailRecording())) {
 			return null;
 		}
-		RequestUxUiSelection selection = UserAgent.getSelection((HttpServletRequest) FacesContext.getCurrentInstance().getExternalContext().getRequest());
-		return PrimeFacesRecordingMap.list(moduleName,
-											getBizDocumentParameter(),
-											getQueryNameParameter(),
-											getModelName(),
-											selection.getUxUi().getName(),
-											selection.getUserAgentType());
+		String documentName = getBizDocumentParameter();
+		String queryName = getQueryNameParameter();
+		String modelName = getModelName();
+		try {
+			RequestUxUiSelection selection = UserAgent.getSelection((HttpServletRequest) FacesContext.getCurrentInstance().getExternalContext().getRequest());
+			String uxui = selection.getUxUi().getName();
+			UserAgentType userAgentType = selection.getUserAgentType();
+			return sailRecordingMap(String.join("|", "list", moduleName, String.valueOf(documentName), String.valueOf(queryName),
+													String.valueOf(modelName), uxui, userAgentType.name()),
+									() -> PrimeFacesRecordingMap.list(moduleName, documentName, queryName, modelName, uxui, userAgentType));
+		}
+		catch (Exception e) {
+			FACES_LOGGER.warn("SAIL recording could not build the client-id map of the list {}.{}", moduleName, queryName, e);
+			return null;
+		}
 	}
 }

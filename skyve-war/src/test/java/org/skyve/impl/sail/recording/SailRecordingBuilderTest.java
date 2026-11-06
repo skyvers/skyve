@@ -248,6 +248,34 @@ class SailRecordingBuilderTest {
 	}
 
 	/**
+	 * A stored step the builder cannot take (a match SAIL has not) is a comment in the script and the panel's preview;
+	 * it never breaks the build of the steps around it.
+	 */
+	@Test
+	void aStepThatCannotBeBuiltIsAComment() {
+		List<Map<String, String>> steps = List.of(
+				step("op", "dataEnter", "binding", "status", "value", "Active", "match", "bogus"),
+				step("op", "save"));
+		SailRecordingBuilder.Result result = build(steps);
+		String xml = SailRecordingBuilder.toXml(result);
+		List<List<String>> preview = new SailRecordingBuilder(null, "admin", STARTED, STOPPED).preview(steps, 0, 10);
+		assertAll(() -> assertEquals(1, method(result).size()),
+					() -> assertInstanceOf(Save.class, method(result).get(0)),
+					() -> assertTrue(xml.contains("<!-- unmapped: dataEnter "), xml),
+					() -> assertTrue(preview.get(0).get(0).startsWith("<!-- unmapped: dataEnter "), preview.toString()),
+					() -> assertEquals(List.of("<save/>"), preview.get(1)));
+	}
+
+	/** A range as large as an int can be is clamped to the steps, without overflow. */
+	@Test
+	void aPreviewOfAHugeRangeIsClamped() {
+		List<Map<String, String>> steps = List.of(step("op", "save"), step("op", "ok"));
+		SailRecordingBuilder builder = new SailRecordingBuilder(null, "admin", STARTED, STOPPED);
+		assertAll(() -> assertEquals(1, builder.preview(steps, 1, Integer.MAX_VALUE).size()),
+					() -> assertEquals(2, builder.preview(steps, 0, Integer.MAX_VALUE).size()));
+	}
+
+	/**
 	 * A gesture is never dropped: an unmapped gesture, an unknown op-code and an incomplete step each become a comment
 	 * before the next step, and those after the last step go at the end of the method.
 	 */

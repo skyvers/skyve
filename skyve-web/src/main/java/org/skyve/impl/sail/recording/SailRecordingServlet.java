@@ -267,7 +267,7 @@ public class SailRecordingServlet extends HttpServlet {
 			if (user != null) {
 				persistence.setUser(user);
 			}
-			recording.stop(new SailRecordingChecks());
+			recording.stop(new SailRecordingChecks(recording.getUxui(), recording.getUserAgentType()));
 		}
 		finally {
 			persistence.commit(true);

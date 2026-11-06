@@ -101,6 +101,19 @@ class PrimeFacesRecordingMapH2Test extends AbstractSkyveTest {
 					() -> assertFalse(devOps.contains(start), "no recording control without the recorder role"));
 	}
 
+	/**
+	 * A document with a separate create view (User's wizard): the page renders both views, so the map names the create
+	 * view's elements too, as a new record shows them.
+	 */
+	@Test
+	void aCreateViewIsMappedToo() throws Exception {
+		AbstractPersistence.get().setUser(SailUsers.bootstrapLikeUser(u));
+		Map<String, Object> map = parse(PrimeFacesRecordingMap.edit("admin", "User", "tablet", UserAgentType.tablet));
+		Collection<Map<String, Object>> entries = ((Map<String, Map<String, Object>>) map.get("ids")).values();
+		assertAll(() -> assertTrue(entries.contains(Map.of("step", "action", "name", "Next")), "the create view's Next: " + entries),
+					() -> assertTrue(entries.contains(Map.of("step", "save")), "the edit view's Save: " + entries));
+	}
+
 	private static Collection<Map<String, Object>> controlPanelEntries() throws Exception {
 		Map<String, Object> map = parse(PrimeFacesRecordingMap.edit("admin", "ControlPanel", "external", UserAgentType.desktop));
 		return ((Map<String, Map<String, Object>>) map.get("ids")).values();

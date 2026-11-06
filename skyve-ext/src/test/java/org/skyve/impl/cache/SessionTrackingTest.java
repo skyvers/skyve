@@ -277,6 +277,21 @@ class SessionTrackingTest {
 	}
 
 	@Test
+	void removeTokenRemovesOnlyThatToken() {
+		String sessionId = "remove-token-session";
+		Integer kept = StateUtil.createToken();
+		Integer removed = StateUtil.createToken();
+		StateUtil.replaceToken(sessionId, null, kept);
+		StateUtil.replaceToken(sessionId, null, removed);
+		StateUtil.removeToken(sessionId, removed);
+		StateUtil.removeToken(sessionId, null);
+		StateUtil.removeToken("no-such-session", kept);
+		assertThat(StateUtil.checkToken(sessionId, removed), is(false));
+		assertThat(StateUtil.checkToken(sessionId, kept), is(true));
+		StateUtil.clearTokens(sessionId);
+	}
+
+	@Test
 	void replaceTokenAddsTokenForSession() {
 		String sessionId = "token-session-" + System.nanoTime();
 		Integer token = StateUtil.createToken();

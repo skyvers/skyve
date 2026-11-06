@@ -298,6 +298,39 @@ public class StateUtil {
 		return (values != null) && values.contains(token);
 	}
 
+	/**
+	 * Removes one token from a session's tokens, leaving its other tokens valid.
+	 *
+	 * <p>Side effects: puts the session's token set back in the CSRF token cache.
+	 *
+	 * @param session	the session
+	 * @param token	the token to remove, or {@code null} to do nothing
+	 */
+	public static void removeToken(@Nonnull HttpSession session, @Nullable Integer token) {
+		removeToken(session.getId(), token);
+	}
+
+	/**
+	 * Removes one token from a session's tokens, leaving its other tokens valid.
+	 *
+	 * <p>Side effects: puts the session's token set back in the CSRF token cache.
+	 *
+	 * @param sessionId	the session's id
+	 * @param token	the token to remove, or {@code null} to do nothing
+	 */
+	@SuppressWarnings("rawtypes")
+	public static void removeToken(@Nonnull String sessionId, @Nullable Integer token) {
+		if (token == null) {
+			return;
+		}
+		Cache<String, TreeSet> tokens = getTokens();
+		TreeSet values = tokens.get(sessionId);
+		if ((values != null) && values.remove(token)) {
+			// Note that EHCache puts are thread-safe
+			tokens.put(sessionId, values);
+		}
+	}
+
 	public static void replaceToken(@Nonnull HttpSession session,
 										@Nullable Integer oldToken,
 										@Nonnull Integer newToken) {

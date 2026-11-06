@@ -98,6 +98,8 @@ import jakarta.annotation.Nullable;
  * <p>Threading: not thread-safe; build each script with its own instance.
  */
 public final class SailRecordingBuilder {
+	private static final org.slf4j.Logger LOGGER = org.skyve.util.logging.SkyveLoggerFactory.getLogger(SailRecordingBuilder.class);
+
 	/** The key of a recorded step's op-code. */
 	public static final String OP = "op";
 	/** The key of the top view, {@code module.Document} or {@code list}, when the gesture was made. */
@@ -207,6 +209,7 @@ public final class SailRecordingBuilder {
 	private String uxui = null;
 	private UserAgentType userAgentType = null;
 	private StepCheck check = null;
+	private final List<String> notes = new ArrayList<>(1);
 
 	private final IdentityHashMap<Object, List<String>> comments = new IdentityHashMap<>();
 	/** The screen of the last entry, for the headings. */
@@ -282,6 +285,17 @@ public final class SailRecordingBuilder {
 	}
 
 	/**
+	 * Adds a note to the script's header comments, such as why its steps were not checked.
+	 *
+	 * @param note	the note
+	 * @return this
+	 */
+	public @Nonnull SailRecordingBuilder note(@Nonnull String note) {
+		notes.add(note);
+		return this;
+	}
+
+	/**
 	 * Sets the check each step must pass to be a step: one it fails becomes a comment that says why.
 	 *
 	 * @param stepCheck	the check, or {@code null} for none
@@ -332,7 +346,15 @@ public final class SailRecordingBuilder {
 		List<Step> method = interaction.getSteps();
 		screen = null;
 		lastStep = null;
-		List<Map<String, String>> entries = SailRecordingCaptures.apply(steps.subList(0, end));
+		List<? extends Map<String, String>> entries;
+		try {
+			entries = SailRecordingCaptures.apply(steps.subList(0, end));
+		}
+		catch (RuntimeException e) {
+			// the script without its captures, rather than no script
+			LOGGER.warn("SAIL recording could not work out the captures", e);
+			entries = steps.subList(0, end);
+		}
 		for (Map<String, String> recorded : entries) {
 			Step step = entry(recorded, true);
 			if (step != null) {
@@ -389,9 +411,26 @@ public final class SailRecordingBuilder {
 			pending.add("screen: " + stepScreen);
 			screen = stepScreen;
 		}
-		Step step = step(recorded);
+		Step step;
+		try {
+			step = step(recorded);
+		}
+		catch (RuntimeException e) {
+			// a step that cannot be built (a value it cannot take) is a comment, never a broken script
+			LOGGER.warn("SAIL recording could not build the step {}", recorded, e);
+			pending.add(UNMAPPED_PREFIX + describe(recorded) + " - " + e);
+			step = null;
+		}
 		if ((step != null) && checked) {
-			String reason = unconfirmed(recorded);
+			String reason;
+			try {
+				reason = unconfirmed(recorded);
+			}
+			catch (RuntimeException e) {
+				LOGGER.warn("SAIL recording could not check the step {}", recorded, e);
+				reason = null;
+				pending.add("not checked: " + describe(recorded) + " - " + e);
+			}
 			if (reason != null) {
 				pending.add("unconfirmed: " + describe(recorded) + " - " + reason);
 				step = null;
@@ -421,7 +460,8 @@ public final class SailRecordingBuilder {
 		screen = null;
 		lastStep = null;
 		int start = Math.max(0, Math.min(from, steps.size()));
-		int end = Math.max(start, Math.min(steps.size(), start + Math.max(0, count)));
+		// in long arithmetic: start + count overflows for a large count
+		int end = (int) Math.max(start, Math.min((long) start + Math.max(0, count), steps.size()));
 		List<List<String>> result = new ArrayList<>(end - start);
 		for (int i = 0; i < end; i++) {
 			pending.clear();
@@ -432,7 +472,13 @@ public final class SailRecordingBuilder {
 					lines.add("<!--" + commentText(comment) + "-->");
 				}
 				if (step != null) {
-					lines.addAll(elementLines(step));
+					try {
+						lines.addAll(elementLines(step));
+					}
+					catch (RuntimeException e) {
+						LOGGER.warn("SAIL recording could not show the step {}", steps.get(i), e);
+						lines.add("<!--" + commentText(UNMAPPED_PREFIX + describe(steps.get(i)) + " - " + e) + "-->");
+					}
 				}
 				result.add(lines);
 			}
@@ -511,6 +557,7 @@ public final class SailRecordingBuilder {
 		if (uxui != null) {
 			result.add("The recorded user got the UX/UI " + uxui + ".");
 		}
+		result.addAll(notes);
 		return result;
 	}
 
@@ -703,7 +750,12 @@ public final class SailRecordingBuilder {
 		result.setValue(value);
 		String match = text(recorded, "match");
 		if ((match != null) && (! Match.index.name().equals(match))) {
-			result.setMatch(Match.valueOf(match));
+			try {
+				result.setMatch(Match.valueOf(match));
+			}
+			catch (@SuppressWarnings("unused") IllegalArgumentException e) {
+				return null; // a match SAIL has not: an unmapped comment
+			}
 		}
 		return result;
 	}
