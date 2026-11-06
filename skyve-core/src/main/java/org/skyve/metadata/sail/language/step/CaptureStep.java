@@ -36,7 +36,7 @@ public interface CaptureStep extends Step {
 	/**
 	 * The regular expression that a variable name must match: a letter, then letters, digits or underscores.
 	 */
-	public static final String VARIABLE_NAME_PATTERN = "[A-Za-z][A-Za-z0-9_]*";
+	public static final String VARIABLE_NAME_PATTERN = "[A-Za-z]\\w*";
 
 	/**
 	 * Returns the name of the variable that receives the value.
@@ -59,7 +59,8 @@ public interface CaptureStep extends Step {
 	 * @throws MetaDataException	if the variable name does not match {@value #VARIABLE_NAME_PATTERN}, or the pattern is not
 	 * 								a valid regular expression
 	 */
-	@SuppressWarnings("null") // the variable is null on a step read from XML without it
+	// The variable is null on a step built without one (its getter is @Nonnull for a validated step): this is the check
+	@SuppressWarnings({"null", "java:S2589"})
 	public static void validateCapture(@Nonnull CaptureStep step) {
 		String variable = step.getVariable();
 		String element = step.getClass().getSimpleName();
