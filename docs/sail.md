@@ -831,9 +831,11 @@ mvn ... -Dsail.snapshotDir=/tmp/sail-media -Dsail.videoDir=/tmp/sail-media
   folder and link to each other.
 
 Snapshots slow a run by the time each screenshot takes. The screencast
-costs little. Recordings show whatever the browser showed, so a run against
-real data records real data: names, addresses, amounts. Keep such
-recordings out of shared places and out of the repository.
+costs little. The pages show a login's password as `********` (a
+`{var:...}` password is shown as written). Recordings still show whatever
+the browser showed, so a run against real data records real data: names,
+addresses, amounts. Keep such recordings out of shared places and out of
+the repository.
 
 ## The Suites
 
