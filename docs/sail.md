@@ -742,6 +742,10 @@ Kitchen sink fixtures for the newer steps:
 - `KitchenSink.lookupDescription` picks from the same lookup values, for
   `lookupDescriptionPick rowContaining` and `lookupDescriptionAutoComplete
   pick`.
+- ListGridFixture's "PrimeFaces data table of column types" has a filter
+  parameter (`text` not null), so SmartClient completes its criteria in the
+  browser; the SC kitchen sink filters its time column there (runtime issue
+  SC-9). PF does not use that grid.
 
 ### Admin: application suite
 

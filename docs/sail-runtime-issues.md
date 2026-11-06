@@ -569,15 +569,24 @@ needs `skyve-min.js` rebuilt and can only be checked in a browser. Checked on
 the wire: a time clause is now sent as `12:30:00.000`, and date and dateTime
 clauses are unchanged.
 
-A list grid with filter parameters builds its criteria again in
-`completeFilterCriteria`, which does not pass through this function, so an
-advanced time filter on such a grid is still sent as a date.
+A list grid with filter parameters built its criteria again in
+`completeFilterCriteria` from the filter editor's criteria, which had not
+passed through this function, so an advanced time filter on such a grid was
+still sent as a date. Fixed in `BizListGrid`'s `filterData`
+(`skyve-web/src/js/desktop/listgrid.js`): it now converts the criteria once,
+after completing them, and completes a copy (`isc.clone`, which keeps a
+Date's logical flags) because the filter row is given the editor's criteria
+back unconverted. Checked on the wire: on the List Grid Fixture's grid with
+a filter parameter, `time lessThan 12:30` is sent as `12:30:00.000` beside
+the parameter's clause.
 
 **Suites.** The SC kitchen sink filters ListAttributes' time column with
 `equals`, `lessThan` and `greaterThan` through the advanced filter, and with
-`equals` in a filter row.
+`equals` in a filter row. It filters the List Grid Fixture's PrimeFaces data
+table of column types, which has a filter parameter, with `equals` in the
+filter row and `lessThan` and `greaterThan` in the advanced filter.
 
-**Status:** fixed, except on list grids with filter parameters.
+**Status:** fixed.
 
 ## SC-10: Selecting a row whose selected handler rerenders loops for ever
 

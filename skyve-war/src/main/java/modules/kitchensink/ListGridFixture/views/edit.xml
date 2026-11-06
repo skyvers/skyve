@@ -47,6 +47,7 @@
 	<listGrid query="qListGridFixtureFacesAttributes"
 				title="PrimeFaces data table of column types"
 				continueConversation="false">
+		<filterParameter filterBinding="text" operator="notNull" />
 		<properties>
 			<c:property key="componentBuilderClass">faces</c:property>
 		</properties>

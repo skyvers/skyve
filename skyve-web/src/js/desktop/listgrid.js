@@ -1691,15 +1691,17 @@ isc.BizListGrid.addMethods({
 					: me.grid.getFilterEditorCriteria(true);
 				if (!editorCriteria) editorCriteria = {};
 
-				isc.BizUtil.convertFilterCriteria(result);
-
 				if (config && config.params) {
+					// Complete a copy: completeFilterCriteria() shares the editor criteria's clauses,
+					// and setFilterEditorCriteria() below needs them unconverted
 					result = isc.BizUtil.completeFilterCriteria(
-						editorCriteria,
+						isc.clone(editorCriteria),
 						config.params,
 						me._view,
 					);
 				}
+
+				isc.BizUtil.convertFilterCriteria(result);
 
 				this.Super("filterData", [result, callback, requestProperties]);
 

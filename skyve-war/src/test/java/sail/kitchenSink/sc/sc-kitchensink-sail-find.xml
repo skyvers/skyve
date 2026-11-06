@@ -300,7 +300,7 @@
 		</method>
 	</interaction>
 
-	<interaction name="A time column in the filter row">
+	<interaction name="A time column in the filter row, and in the advanced filter of a grid with a filter parameter">
 		<method>
 			<comment>The List Grid Fixture's list of column types shows the time column, so its filter row takes a time</comment>
 			<navigateEdit module="kitchensink" document="ListGridFixture" />
@@ -310,6 +310,14 @@
 			<testGridRows module="kitchensink" query="qListGridFixtureFacesAttributes" rowContaining="SAIL types {run} b" minRows="1" maxRows="1" />
 			<listGridFilter module="kitchensink" query="qListGridFixtureFacesAttributes" column="time" />
 			<testGridRows module="kitchensink" query="qListGridFixtureFacesAttributes" minRows="3" maxRows="3" />
+			<comment>The grid has a filter parameter, so the browser completes its criteria before it fetches: a time in the advanced filter must still be sent as a time (runtime issue SC-9)</comment>
+			<listGridFilter module="kitchensink" query="qListGridFixtureFacesAttributes" column="time" value="12:30" operator="lessThan" />
+			<testGridRows module="kitchensink" query="qListGridFixtureFacesAttributes" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qListGridFixtureFacesAttributes" rowContaining="SAIL types {run} a" minRows="1" maxRows="1" />
+			<listGridFilter module="kitchensink" query="qListGridFixtureFacesAttributes" column="time" value="12:30" operator="greaterThan" />
+			<testGridRows module="kitchensink" query="qListGridFixtureFacesAttributes" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qListGridFixtureFacesAttributes" rowContaining="SAIL types {run} c" minRows="1" maxRows="1" />
+			<listGridClearFilter module="kitchensink" query="qListGridFixtureFacesAttributes" />
 		</method>
 	</interaction>
 
