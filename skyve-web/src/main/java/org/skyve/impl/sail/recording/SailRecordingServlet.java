@@ -1,0 +1,273 @@
+package org.skyve.impl.sail.recording;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.PrintWriter;
+import java.nio.charset.StandardCharsets;
+import java.security.Principal;
+import java.util.List;
+import java.util.Map;
+
+import org.skyve.content.MimeType;
+import org.skyve.impl.cache.StateUtil;
+import org.skyve.impl.persistence.AbstractPersistence;
+import org.skyve.impl.util.UtilImpl;
+import org.skyve.impl.web.AbstractWebContext;
+import org.skyve.impl.web.WebUtil;
+import org.skyve.metadata.user.User;
+import org.skyve.util.JSON;
+import org.skyve.util.logging.SkyveLoggerFactory;
+import org.slf4j.Logger;
+
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
+
+/**
+ * Receives the steps the browser recorder records, for the session's {@link SailRecording}.
+ *
+ * <ul>
+ * <li>{@code GET} answers whether the session is recording: {@code {"recording":true,"_csrf":token,"steps":n}}, or
+ * 		status 403 with {@code {"recording":false}}. Each GET issues a CSRF token for the page that asked, as Skyve's
+ * 		SmartClient servlets do ({@link StateUtil#createToken()}).</li>
+ * <li>{@code GET} with {@code from} (and optionally {@code count}, default {@value #DEFAULT_RANGE_COUNT}) returns a
+ * 		range of the recorded steps, recording or stopped: {@code {"total":n,"from":i,"steps":[...]}}.</li>
+ * <li>{@code GET} with {@code format=xml} returns the script built when the session's recording stopped: the same
+ * 		XML the Control Panel downloads. Status 404 if there is none.</li>
+ * <li>{@code POST} with a JSON body {@code {"_csrf":token,"steps":[...]}} adds the steps (see
+ * 		{@link SailRecording#add(List)}) and answers {@code {"received":added,"steps":total}}, with
+ * 		{@code "limitReached":true,"maximumSteps":cap} once the recording is full. A token the session did
+ * 		not issue is refused with status 403. The token stays valid for the page, so that the recorder can resend
+ * 		steps from a beacon as the page unloads.</li>
+ * </ul>
+ * Every request is checked against the whole gate ({@link SailRecording#isRecording(HttpSession, User)}, or for the
+ * script, {@link SailRecording#isAllowed(User)}): a session that is not recording gets status 403 and nothing else.
+ *
+ * <p>Threading: thread-safe; the servlet holds no state.
+ */
+public class SailRecordingServlet extends HttpServlet {
+	private static final long serialVersionUID = 6436209818571040713L;
+
+	private static final Logger LOGGER = SkyveLoggerFactory.getLogger(SailRecordingServlet.class);
+
+	/** The most a batch's body may hold. */
+	static final int MAXIMUM_BODY_BYTES = 1024 * 1024;
+	/** The parameter that asks a GET for the stopped recording's script. */
+	static final String FORMAT_PARAMETER = "format";
+	/** The {@value #FORMAT_PARAMETER} that asks for the script. */
+	static final String XML_FORMAT = "xml";
+	static final String STEPS_KEY = "steps";
+	/** The parameter that asks a GET for a range of the recorded steps, from this zero-based index. */
+	static final String FROM_PARAMETER = "from";
+	/** The parameter that limits a range of steps; see {@link #FROM_PARAMETER}. */
+	static final String COUNT_PARAMETER = "count";
+	/** The steps a range has when it does not say. */
+	static final int DEFAULT_RANGE_COUNT = 50;
+	private static final String NOT_RECORDING = "{\"recording\":false}";
+
+	/**
+	 * Answers whether the session is recording, with a CSRF token, or returns the stopped recording's script.
+	 */
+	@Override
+	@SuppressWarnings("java:S1989") // there exists JavaEE error pages
+	protected void doGet(@SuppressWarnings("null") @Nonnull HttpServletRequest request,
+							@SuppressWarnings("null") @Nonnull HttpServletResponse response)
+	throws IOException {
+		noCache(response);
+		HttpSession session = request.getSession(false);
+		User user = user(request);
+		String from = request.getParameter(FROM_PARAMETER);
+		if (from != null) {
+			writeRange(session, user, from, request.getParameter(COUNT_PARAMETER), response);
+			return;
+		}
+		if (XML_FORMAT.equals(request.getParameter(FORMAT_PARAMETER))) {
+			SailRecording recording = SailRecording.isAllowed(user) ? SailRecording.get(session) : null;
+			String xml = (recording == null) ? null : recording.getXml();
+			if (xml == null) {
+				response.sendError(HttpServletResponse.SC_NOT_FOUND);
+				return;
+			}
+			response.setContentType(MimeType.xml.toString());
+			response.setCharacterEncoding(StandardCharsets.UTF_8.name());
+			try (PrintWriter pw = response.getWriter()) {
+				pw.print(xml);
+			}
+			return;
+		}
+
+		response.setContentType(MimeType.json.toString());
+		response.setCharacterEncoding(StandardCharsets.UTF_8.name());
+		if ((session == null) || (! SailRecording.isRecording(session, user))) {
+			response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+			try (PrintWriter pw = response.getWriter()) {
+				pw.print(NOT_RECORDING);
+			}
+			return;
+		}
+		SailRecording recording = SailRecording.get(session);
+		Integer token = StateUtil.createToken();
+		StateUtil.replaceToken(session, null, token);
+		try (PrintWriter pw = response.getWriter()) {
+			pw.append("{\"recording\":true,\"").append(AbstractWebContext.CSRF_TOKEN_NAME).append("\":").append(token.toString());
+			pw.append(",\"steps\":").append(String.valueOf((recording == null) ? 0 : recording.getStepCount())).append('}');
+		}
+	}
+
+	/**
+	 * Adds a batch of recorded steps to the session's recording.
+	 */
+	@Override
+	@SuppressWarnings("java:S1989") // there exists JavaEE error pages
+	protected void doPost(@SuppressWarnings("null") @Nonnull HttpServletRequest request,
+							@SuppressWarnings("null") @Nonnull HttpServletResponse response)
+	throws IOException {
+		noCache(response);
+		response.setContentType(MimeType.json.toString());
+		response.setCharacterEncoding(StandardCharsets.UTF_8.name());
+
+		HttpSession session = request.getSession(false);
+		User user = user(request);
+		SailRecording recording = SailRecording.get(session);
+		if ((session == null) || (recording == null) || (! SailRecording.isRecording(session, user))) {
+			response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+			try (PrintWriter pw = response.getWriter()) {
+				pw.print(NOT_RECORDING);
+			}
+			return;
+		}
+
+		byte[] body;
+		try (InputStream in = request.getInputStream()) {
+			body = in.readNBytes(MAXIMUM_BODY_BYTES + 1);
+		}
+		if (body.length > MAXIMUM_BODY_BYTES) {
+			response.sendError(HttpServletResponse.SC_REQUEST_ENTITY_TOO_LARGE);
+			return;
+		}
+		Map<?, ?> batch = batch(new String(body, StandardCharsets.UTF_8));
+		if ((batch == null) || (! StateUtil.checkToken(session, token(batch.get(AbstractWebContext.CSRF_TOKEN_NAME))))) {
+			LOGGER.warn("SAIL recording batch refused for session {}: no valid CSRF token", session.getId());
+			response.sendError(HttpServletResponse.SC_FORBIDDEN);
+			return;
+		}
+		Object steps = batch.get(STEPS_KEY);
+		int added;
+		try {
+			added = (steps instanceof List<?> list) ? recording.add(list) : 0;
+		}
+		catch (@SuppressWarnings("unused") IllegalStateException e) { // stopped since the gate was checked
+			response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+			try (PrintWriter pw = response.getWriter()) {
+				pw.print(NOT_RECORDING);
+			}
+			return;
+		}
+		try (PrintWriter pw = response.getWriter()) {
+			pw.append("{\"received\":").append(String.valueOf(added));
+			pw.append(",\"steps\":").append(String.valueOf(recording.getStepCount()));
+			if (recording.isLimitReached()) {
+				pw.append(",\"limitReached\":true,\"maximumSteps\":").append(String.valueOf(UtilImpl.SAIL_RECORDING_MAXIMUM_STEPS));
+			}
+			pw.append('}');
+		}
+	}
+
+	/**
+	 * Writes a range of the session's recorded steps as {@code {"total":n,"from":i,"steps":[...]}}, recording or
+	 * stopped; status 404 if there is no recording, 400 if the range is not numbers.
+	 */
+	private static void writeRange(@Nullable HttpSession session,
+									@Nullable User user,
+									@Nonnull String from,
+									@Nullable String count,
+									@Nonnull HttpServletResponse response)
+	throws IOException {
+		SailRecording recording = SailRecording.isAllowed(user) ? SailRecording.get(session) : null;
+		if (recording == null) {
+			response.sendError(HttpServletResponse.SC_NOT_FOUND);
+			return;
+		}
+		int start;
+		int length;
+		try {
+			start = Integer.parseInt(from.trim());
+			length = (count == null) ? DEFAULT_RANGE_COUNT : Integer.parseInt(count.trim());
+		}
+		catch (@SuppressWarnings("unused") NumberFormatException e) {
+			response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+			return;
+		}
+		List<Map<String, String>> steps = recording.getSteps(start, length);
+		response.setContentType(MimeType.json.toString());
+		response.setCharacterEncoding(StandardCharsets.UTF_8.name());
+		try (PrintWriter pw = response.getWriter()) {
+			pw.append("{\"total\":").append(String.valueOf(recording.getStepCount()));
+			pw.append(",\"from\":").append(String.valueOf(Math.max(0, start)));
+			pw.append(",\"steps\":").append(JSON.marshall(steps)).append('}');
+		}
+	}
+
+	private static void noCache(@Nonnull HttpServletResponse response) {
+		response.addHeader("Cache-control", "private,no-cache,no-store"); // never
+		response.addDateHeader("Expires", 0); // never
+	}
+
+	/**
+	 * Returns the signed-in user, as Skyve's other servlets find it.
+	 *
+	 * @return the user, or {@code null} if nobody is signed in or the session has ended
+	 */
+	private static @Nullable User user(@Nonnull HttpServletRequest request) {
+		Principal principal = request.getUserPrincipal();
+		AbstractPersistence persistence = AbstractPersistence.get();
+		try {
+			persistence.begin();
+			return WebUtil.processUserPrincipalForRequest(request, (principal == null) ? null : principal.getName());
+		}
+		catch (Exception e) {
+			LOGGER.warn("SAIL recording could not read the signed in user", e);
+			persistence.rollback();
+			return null;
+		}
+		finally {
+			persistence.commit(true);
+		}
+	}
+
+	/**
+	 * Parses a batch's JSON body.
+	 *
+	 * @return the batch, or {@code null} if the body is not a JSON object
+	 */
+	private static @Nullable Map<?, ?> batch(@Nonnull String body) {
+		try {
+			return (JSON.unmarshall(body) instanceof Map<?, ?> map) ? map : null;
+		}
+		catch (Exception e) {
+			LOGGER.warn("SAIL recording batch is not JSON: {}", e.toString());
+			return null;
+		}
+	}
+
+	/**
+	 * Returns a CSRF token sent as a JSON number or string.
+	 */
+	private static @Nullable Integer token(@Nullable Object value) {
+		if (value instanceof Number number) {
+			return Integer.valueOf(number.intValue());
+		}
+		if (value instanceof String string) {
+			try {
+				return Integer.valueOf(string.trim());
+			}
+			catch (@SuppressWarnings("unused") NumberFormatException e) {
+				return null;
+			}
+		}
+		return null;
+	}
+}

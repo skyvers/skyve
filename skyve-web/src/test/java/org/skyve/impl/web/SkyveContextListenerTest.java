@@ -831,6 +831,56 @@ class SkyveContextListenerTest {
 
 	@Test
 	@SuppressWarnings("static-method")
+	void testPopulateUtilImplReadsSailRecording() throws Exception {
+		assertTrue(populateSailRecording("\"sail\":{\"recording\":true}", false));
+	}
+
+	/**
+	 * Recording is off unless the configuration turns it on: an absent sail section or setting means false.
+	 */
+	@Test
+	@SuppressWarnings("static-method")
+	void testPopulateUtilImplSailRecordingDefaultsToFalse() throws Exception {
+		assertFalse(populateSailRecording("\"sail\":{}", true));
+		assertFalse(populateSailRecording("\"sail\":{\"recording\":false}", true));
+		assertFalse(populateSailRecording(null, true));
+	}
+
+	/**
+	 * Populates UtilImpl from a configuration with the extra stanza, or none, and returns {@link UtilImpl#SAIL_RECORDING}.
+	 * The setting starts as {@code initial}, the opposite of what is expected, so that the result proves it was read.
+	 */
+	private static boolean populateSailRecording(String extraStanza, boolean initial) throws Exception {
+		boolean originalSailRecording = UtilImpl.SAIL_RECORDING;
+		String savedPropertiesFilePath = System.getProperty("PROPERTIES_FILE_PATH");
+		Class<? extends AbstractPersistence> originalPersistenceImplementation = AbstractPersistence.IMPLEMENTATION_CLASS;
+		Class<? extends DynamicPersistence> originalDynamicPersistenceImplementation = AbstractPersistence.DYNAMIC_IMPLEMENTATION_CLASS;
+		Path tempDir = Files.createTempDirectory("skyve-context-listener-sail");
+		try {
+			UtilImpl.SAIL_RECORDING = initial;
+			Path configFile = (extraStanza == null) ? writeConfiguration(tempDir, false) : writeConfigurationWithExtra(tempDir, extraStanza);
+			System.setProperty("PROPERTIES_FILE_PATH", configFile.toString());
+			ProvidedRepository originalRepository = ProvidedRepositoryFactory.get();
+			ProvidedRepositoryFactory.set(mock(ProvidedRepository.class));
+			try {
+				invokePopulateUtilImpl(configFile, tempDir);
+			}
+			finally {
+				ProvidedRepositoryFactory.set(originalRepository);
+			}
+			return UtilImpl.SAIL_RECORDING;
+		}
+		finally {
+			restoreProperty("PROPERTIES_FILE_PATH", savedPropertiesFilePath);
+			AbstractPersistence.IMPLEMENTATION_CLASS = originalPersistenceImplementation;
+			AbstractPersistence.DYNAMIC_IMPLEMENTATION_CLASS = originalDynamicPersistenceImplementation;
+			UtilImpl.SAIL_RECORDING = originalSailRecording;
+			deleteTree(tempDir);
+		}
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
 	void testPopulateUtilImplReadsBootstrapStanza() throws Exception {
 		String originalBootstrapCustomer = UtilImpl.BOOTSTRAP_CUSTOMER;
 		String originalUser = UtilImpl.BOOTSTRAP_USER;

@@ -462,6 +462,14 @@
 		// Number of seconds to cache the health results to alleviate denial of service
 		"cacheTimeInSeconds": 60
 	},
+	// SAIL (Skyve Application Integration Language) settings
+	"sail": {
+		// Allow users with the admin.SAILRecorder role to record SAIL scripts, started and stopped in the Control Panel.
+		// A recording holds what the user saw and typed: Skyve logs a warning when this is on in production (identifier null).
+		"recording": false,
+		// The most steps one recording keeps: the recorder then asks the user to stop and download it.
+		"maximumSteps": 5000
+	},
 	// bootstrap user settings - creates a user with all customer roles assigned, if the user does not already exist
 	// NOTE: the user will NOT be created for production environments (where the environment identifier above is null)
 	"bootstrap": {
