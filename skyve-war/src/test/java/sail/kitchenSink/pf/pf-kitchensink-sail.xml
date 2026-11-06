@@ -8,7 +8,7 @@
 	listGridSelect needs a list grid with a selectedIdBinding (selecting a row of other grids zooms in PrimeFaces): the List Grid
 	Fixture has one of each PrimeFaces kind. dataGridSelect needs a data grid with a selectedIdBinding; the kitchen sink has none.
 	Not here, as the language cannot express them yet: contentSignature, data entry into inline grid cells.
-	dataGridLink is in pf-kitchensink-row-link.xml, whose test is disabled until runtime issue P9 is fixed.
+	dataGridLink is in pf-kitchensink-row-link.xml, run by its own test (rowLink).
 	Rows are found with rowContaining and {run}-unique values, so the suite can run in any order, and again, on the same server.
 -->
 <automation uxui="tablet"
@@ -520,6 +520,9 @@
 			<comment>The upload action refuses this file; testSuccess="false" lets testFailure check the refusal on the upload page</comment>
 			<upload action="ActionsUpload" file="sail/files/sail-refused.txt" testSuccess="false" />
 			<testFailure message="sail-refused.txt already exists" />
+			<comment>This file is refused by a validation, which the upload page shows as a refusal too</comment>
+			<upload action="ActionsUpload" file="sail/files/sail-invalid.txt" testSuccess="false" />
+			<testFailure message="sail-invalid.txt is not a valid upload" />
 			<upload action="ActionsUpload" file="sail/files/sail-upload.txt" />
 			<!--
 				RUNTIME BUG (tablet UX/UI): after an action upload the upload page stays open and the view is not refreshed,
