@@ -93,7 +93,7 @@ class SmartClientRecorderRoundTripSailIT extends AbstractSmartClientInterpretedS
 
 	/**
 	 * Data grids, lookups, uploads, list filters, sorting and selection, a generated number reused later (a capture),
-	 * server-side questions, and tree and map menu items: see sc-recorder-round-trip-more.xml.
+	 * server-side questions, and tree and calendar menu items: see sc-recorder-round-trip-more.xml.
 	 */
 	@Test
 	void moreGestures() {
@@ -118,7 +118,9 @@ class SmartClientRecorderRoundTripSailIT extends AbstractSmartClientInterpretedS
 					() -> assertTrue(xml.contains("<upload action=\"ActionsUpload\" file=\"sail/files/sail-refused.txt\" testSuccess=\"false\"/>"), xml),
 					() -> assertTrue(xml.contains("<upload binding=\"contentLinkNone\" file=\"sail/files/sail-upload.txt\"/>"), xml),
 					() -> assertTrue(xml.contains("text=\"Run From Row\" confirm=\"false\"/>"), xml),
-					() -> assertTrue(xml.contains("<action name=\"AskYesNo\" confirm=\"false\"/>"), xml));
+					() -> assertTrue(xml.contains("<action name=\"AskYesNo\" confirm=\"false\"/>"), xml),
+					() -> assertTrue(xml.contains("<navigateTree module=\"kitchensink\" query=\"qConditionsFixtureNodes\"/>"), xml),
+					() -> assertTrue(xml.contains("<navigateCalendar module=\"kitchensink\" document=\"ListAttributes\"/>"), xml));
 		replay(xml);
 	}
 

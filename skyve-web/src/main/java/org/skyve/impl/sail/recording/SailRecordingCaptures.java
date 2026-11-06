@@ -32,8 +32,8 @@ import jakarta.annotation.Nullable;
  * </ul>
  *
  * <p>The heuristic, kept simple on purpose: a value is a candidate when it was shown after the recording's first
- * navigation and not on the Control Panel, is not {@code true} or {@code false}, has at least 2 characters, has a digit
- * or at least 4 characters, and the user had not typed or chosen it before it was shown (a
+ * navigation and not on the Control Panel, is not {@code true} or {@code false}, has a digit or at least 4 characters
+ * (a generated number can be a single digit), and the user had not typed or chosen it before it was shown (a
  * data entry, a filter value, a lookup's search or pick). A use is a
  * {@code dataEnter} value, a {@code listGridFilter} value, a lookup's {@code search} or {@code pick}, or any
  * {@code rowContaining}, that equals a candidate exactly (both trimmed); the latest candidate shown before the use
@@ -239,7 +239,7 @@ final class SailRecordingCaptures {
 		if ((result == null) || "true".equalsIgnoreCase(result) || "false".equalsIgnoreCase(result) || typed.contains(result)) {
 			return null;
 		}
-		if ((result.length() < 2) || ((result.length() < 4) && (! result.chars().anyMatch(Character::isDigit)))) {
+		if ((result.length() < 4) && (! result.chars().anyMatch(Character::isDigit))) {
 			return null;
 		}
 		return result;

@@ -4,8 +4,9 @@
 	and every kitchen sink widget that SAIL can enter data into, checking values with testValue.
 
 	Not covered here, and why:
-	- navigateTree, navigateMap, navigateCalendar, navigateLink: implemented in the shared executor base,
-	  and the kitchen sink has no tree, map or calendar menu items (its Calendar, Map and Tree items are links).
+	- navigateTree, navigateMap, navigateCalendar, navigateLink: implemented in the shared executor base. The kitchen sink's
+	  Calendar, Map and Tree items are links; its desktop-only Condition Node Tree and List Attribute Calendar items are
+	  navigated by SmartClientRecorderRoundTripSailIT (sc-recorder-round-trip-more.xml), and it has no map menu item.
 	- listMembership: the kitchen sink's only list membership is on ConditionsFixture (see below); the SC admin suite
 	  covers it (group roles).
 	- contentSignature, checkMembership (not rendered by SmartClient), comparison, geometryMap, map, chart:

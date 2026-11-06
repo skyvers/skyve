@@ -9,7 +9,7 @@
 
 			Its view lists the lookup values twice: once in a Vue list grid and once in a PrimeFaces data table,
 			chosen by each list grid's componentBuilderClass property. Each grid has a selectedIdBinding, so a row
-			can be selected as well as zoomed into.
+			can be selected as well as zoomed into. A data grid of rows has one too, for dataGridSelect.
 		]]>
 	</documentation>
 	<singularAlias>List Grid Fixture</singularAlias>
@@ -24,5 +24,15 @@
 			<displayName>Selected Faces Id</displayName>
 			<description>The bizId of the row selected in the PrimeFaces data table.</description>
 		</id>
+		<id name="selectedRowId">
+			<displayName>Selected Row Id</displayName>
+			<description>The bizId of the row selected in the data grid of rows.</description>
+		</id>
+		<collection name="rows" type="aggregation">
+			<displayName>Rows</displayName>
+			<description>Lookup values added to the data grid that a row can be selected in (dataGridSelect).</description>
+			<documentName>LookupDescription</documentName>
+			<minCardinality>0</minCardinality>
+		</collection>
 	</attributes>
 </document>

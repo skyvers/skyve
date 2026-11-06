@@ -4,8 +4,8 @@
 	recorder phase 5 maps in PrimeFaces. Lookups (pick and autocomplete), data grids (new, zoom, remove, a drag and a
 	link in a row), uploads (refused and accepted, by action and into a content widget), Vue list grid filters, sorting
 	and selection, a data table's selection, a number the application generates that the list is then filtered by (a
-	capture), and server-side questions. PrimeFaces has no lookup New or Edit, no row edit, and the kitchen sink has no
-	data grid with a selectedIdBinding (dataGridSelect). It has no login: it runs in a session that is already signed in
+	capture), server-side questions, and a data grid's selection (the List Grid Fixture's grid with a selectedIdBinding).
+	PrimeFaces has no lookup New or Edit and no row edit. It has no login: it runs in a session that is already signed in
 	and recording. The lookup values it makes sort first ("0 ...") and are deleted again at the end.
 -->
 <automation uxui="tablet" userAgentType="tablet" testStrategy="Assert"
@@ -94,11 +94,15 @@
 			<delete />
 		</method>
 	</interaction>
-	<interaction name="List grid selection: a Vue list grid and a PrimeFaces data table">
+	<interaction name="Selection: a Vue list grid, a PrimeFaces data table and a data grid">
 		<method>
 			<navigateEdit module="kitchensink" document="ListGridFixture" />
 			<listGridSelect module="kitchensink" query="qListGridFixtureVue" rowContaining="0 SAIL lookup {run} a" />
 			<listGridSelect module="kitchensink" query="qListGridFixtureFaces" rowContaining="0 SAIL lookup {run} a" />
+			<dataGridNew binding="rows" />
+			<dataEnter binding="description" value="SAIL selectable {run}" />
+			<zoomOut />
+			<dataGridSelect binding="rows" rowContaining="SAIL selectable {run}" />
 		</method>
 	</interaction>
 	<interaction name="Delete the lookup values">

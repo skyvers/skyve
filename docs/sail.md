@@ -1241,8 +1241,9 @@ dropped silently.
   pick from the Pick button's pop-up list is recorded as a drop-down pick.
 - A filter on a date or time column is written in Skyve's default converter format; an application with other
   converters needs the value edited.
-- No tree, map or calendar menu item is in the kitchen sink, so the round trips do not cover their navigation (the
-  builder's unit tests do).
+- The kitchen sink has a tree and a calendar menu item (SmartClient only), which the SmartClient round trip navigates,
+  but no map menu item (no persistent kitchen sink document has a geometry): `navigateMap` from a menu item is covered by
+  the builder's unit tests only.
 - A PrimeFaces list grid shows its first page of rows, and a replay finds a row only among them: a recording that zooms
   into a row replays only while that row is on the first page.
 - A recording starts in the Control Panel. If its first gesture is not a navigation, the script says so in a comment.

@@ -48,11 +48,10 @@ class SailRecordingCapturesTest {
 				step("op", "context", "view", "admin.ControlPanel", "shown", "{\"number\":\"12345\"}"),
 				step("op", "navigateMenu", "module", "kitchensink", "item", "Lookup values"),
 				step("op", "dataEnter", "binding", "description", "value", "Widget"),
-				step("op", "context", "shown", "{\"description\":\"Widget\",\"flag\":\"true\",\"code\":\"ab\",\"one\":\"1\"}"),
+				step("op", "context", "shown", "{\"description\":\"Widget\",\"flag\":\"true\",\"code\":\"ab\"}"),
 				step("op", "dataEnter", "binding", "other", "value", "Widget"),
 				step("op", "dataEnter", "binding", "flag2", "value", "true"),
 				step("op", "dataEnter", "binding", "code2", "value", "ab"),
-				step("op", "dataEnter", "binding", "one2", "value", "1"),
 				step("op", "dataEnter", "binding", "number2", "value", "12345"));
 		List<Map<String, String>> result = SailRecordingCaptures.apply(entries);
 		assertEquals(entries, result);
