@@ -1820,12 +1820,40 @@ public class PrimeFacesSelenide extends Selenide<
 	 * @throws IllegalStateException	if the link opens another window, which SAIL does not follow
 	 */
 	public boolean followLinkContaining(@Nonnull String text) {
+		return followLinkContaining(text, false);
+	}
+
+	/**
+	 * Clicks the first displayed link ({@code <a>}) of the page whose visible text contains the text, or with
+	 * {@code exact}, whose visible text (trimmed, white space collapsed) equals it, both case-sensitive; then waits as
+	 * {@link #followLinkContaining(String)} does.
+	 *
+	 * @param text	the text
+	 * @param exact	true to match the link's whole text
+	 * @return true if a link was clicked, false if no displayed link matches
+	 * @throws IllegalStateException	if the link opens another window, which SAIL does not follow
+	 */
+	public boolean followLinkContaining(@Nonnull String text, boolean exact) {
 		waitForAjaxResponse();
-		WebElement link = (WebElement) js(LINKS_JS + "var t = arguments[0];" +
-											"return links.find(function(a) {return (a.innerText || '').indexOf(t) >= 0;}) || null;", text);
+		WebElement link = (WebElement) js(LINKS_JS + "var t = arguments[0], exact = arguments[1];" +
+											"return links.find(function(a) {var x = (a.innerText || '');" +
+											"  return exact ? (x.replace(/\\s+/g, ' ').trim() === t) : (x.indexOf(t) >= 0);}) || null;",
+											text, Boolean.valueOf(exact));
 		if (link == null) {
 			return false;
 		}
+		followLink(link, text);
+		return true;
+	}
+
+	/**
+	 * Clicks a link, then waits for what it leads to: a new page that has loaded, or an ajax request and its response.
+	 *
+	 * @param link	the link
+	 * @param text	the text it was found by, for the messages
+	 * @throws IllegalStateException	if the link opens another window, which SAIL does not follow
+	 */
+	private void followLink(@Nonnull WebElement link, @Nonnull String text) {
 		String target = link.getDomAttribute("target");
 		if ((target != null) && (! target.isEmpty()) && (! "_self".equals(target)) && (! "_top".equals(target)) && (! "_parent".equals(target))) {
 			throw new IllegalStateException(String.format("The link containing '%s' opens another window (target %s), which SAIL does not follow", text, target));
@@ -1848,7 +1876,6 @@ public class PrimeFacesSelenide extends Selenide<
 		});
 		trace("    the link led to " + ("page".equals(outcome) ? "a new page" : "an ajax request"));
 		waitForAjaxResponse();
-		return true;
 	}
 
 	/**
@@ -1861,6 +1888,111 @@ public class PrimeFacesSelenide extends Selenide<
 		List<String> result = (List<String>) js(LINKS_JS + "return links.map(function(a) {return (a.innerText || '').replace(/\\s+/g, ' ').trim();})" +
 													".filter(function(t) {return t;}).slice(0, 30);");
 		return (result == null) ? new ArrayList<>() : result;
+	}
+
+	/**
+	 * Reads the text a cell of a grid shows: the cell of the row under the column header that has the id (a PrimeFaces
+	 * data table's column) or else the title (a Vue list grid's column). A cell's input (an inline grid) reads as its
+	 * value; the column title that a responsive table (or a data grid shown as cards) repeats in its cells is left out.
+	 *
+	 * @param gridId	the grid's client id (a data table, or a Vue list grid's container)
+	 * @param row	the zero-based row
+	 * @param headerId	the column header's id, or null to find it by its title
+	 * @param headerTitle	the column header's title, used when there is no id
+	 * @return [text] when the cell is found, or [null, why not]
+	 */
+	@SuppressWarnings("unchecked")
+	public @Nonnull List<String> cellText(@Nonnull String gridId, int row, @Nullable String headerId, @Nullable String headerTitle) {
+		waitForAjaxResponse();
+		List<String> result = (List<String>) js(ROWS_JS + "if (! t) return [null, 'the grid is not on the page'];" +
+												"var r = rows[arguments[1]];" +
+												"if (! r) return [null, 'the grid has ' + rows.length + ' rows'];" +
+												"var th = arguments[2] ? document.getElementById(arguments[2]) : null;" +
+												"var title = arguments[3];" +
+												"var heads = Array.from(t.querySelectorAll('thead th'));" +
+												"if ((! th) && (title !== null)) th = heads.find(function(h) {" +
+												"  var x = h.querySelector('.p-column-title, .ui-column-title'); return x && (x.textContent.trim() === title);}) || null;" +
+												"if (! th) return [null, 'the grid shows no such column: its columns are ' + heads.map(function(h) {return (h.innerText || '').trim();}).filter(function(x) {return x;}).join(', ')];" +
+												"var td = r.cells[th.cellIndex];" +
+												"if (! td) return [null, 'the row has no cell under the column'];" +
+												"var input = td.querySelector('input:not([type=hidden]), textarea, select');" +
+												"if (input) return [String(input.value)];" +
+												"var text = td.innerText || '';" +
+												"td.querySelectorAll('.ui-column-title, .skyve-card-cell-label').forEach(function(x) {if (x.innerText) text = text.replace(x.innerText, '');});" +
+												"return [text.trim()];",
+												gridId, Integer.valueOf(row), headerId, headerTitle);
+		return (result == null) ? List.of() : result;
+	}
+
+	/**
+	 * Reads the title the page shows for its view (the template's title).
+	 *
+	 * @return the title, or null if the page shows none
+	 */
+	public @Nullable String viewTitle() {
+		waitForAjaxResponse();
+		return (String) js("var t = Array.from(document.querySelectorAll('.skyve-title-text')).find(function(x) {return x.getClientRects().length > 0;});" +
+							"return t ? t.innerText : null;");
+	}
+
+	/**
+	 * Finds the first displayed link ({@code <a>}) in a row of a grid whose visible text contains the text (case-sensitive).
+	 *
+	 * @param gridId	the grid's client id
+	 * @param row	the zero-based row
+	 * @param text	the text
+	 * @return [the link or null, whether it is disabled, the texts of the row's displayed links]
+	 */
+	@SuppressWarnings("unchecked")
+	private @Nonnull List<Object> rowLink(@Nonnull String gridId, int row, @Nonnull String text) {
+		List<Object> result = (List<Object>) js(ROWS_JS + "var r = rows[arguments[1]]; if (! r) return [null, false, []];" +
+												"var links = Array.from(r.querySelectorAll('a')).filter(function(a) {" +
+												"  return (a.getClientRects().length > 0) && (getComputedStyle(a).visibility !== 'hidden');});" +
+												"var t = arguments[2];" +
+												"var link = links.find(function(a) {return (a.innerText || '').indexOf(t) >= 0;}) || null;" +
+												"var disabled = !! link && (link.classList.contains('ui-state-disabled') || (link.getAttribute('aria-disabled') === 'true') || link.hasAttribute('disabled'));" +
+												"return [link, disabled, links.map(function(a) {return (a.innerText || '').replace(/\\s+/g, ' ').trim();})];",
+												gridId, Integer.valueOf(row), text);
+		return (result == null) ? java.util.Arrays.asList(null, Boolean.FALSE, List.of()) : result;
+	}
+
+	/**
+	 * Clicks the first displayed link in a row of a grid whose visible text contains the text, as a user does. For a link
+	 * that runs an action, answers its confirmation and the questions it raises, then waits for the response; for any
+	 * other link, waits for the page or ajax request it leads to.
+	 *
+	 * @param gridId	the grid's client id
+	 * @param row	the zero-based row
+	 * @param text	the link's text
+	 * @param action	true if the link runs an action
+	 * @param answer	true or null to answer positively if asked, false to answer negatively (which must be asked)
+	 * @return true if the action was declined, so it did not run
+	 * @throws IllegalStateException	if the row has no such displayed link (the message lists the row's links), the link is
+	 * 									disabled, or the answer is false but nothing asked
+	 */
+	public boolean clickRowLink(@Nonnull String gridId, int row, @Nonnull String text, boolean action, @Nullable Boolean answer) {
+		waitForAjaxResponse();
+		List<Object> found = rowLink(gridId, row, text);
+		if (! (found.get(0) instanceof WebElement link)) {
+			throw new IllegalStateException(String.format("Row %d of grid %s has no displayed link containing '%s': its links are %s",
+															Integer.valueOf(row), gridId, text, found.get(2)));
+		}
+		if (Boolean.TRUE.equals(found.get(1))) {
+			throw new IllegalStateException(String.format("The link containing '%s' in row %d of grid %s is disabled", text, Integer.valueOf(row), gridId));
+		}
+		if (! action) {
+			followLink(link, text);
+			return false;
+		}
+		trace("    click the link " + (link.getText()));
+		markPage();
+		click($(link));
+		declined = answerQuestions(answer);
+		if (declined) {
+			return true;
+		}
+		waitForAjaxResponse();
+		return false;
 	}
 
 	/**
@@ -1919,11 +2051,25 @@ public class PrimeFacesSelenide extends Selenide<
 	 * @return true if the trigger was on the page and the upload completed
 	 */
 	public boolean upload(@Nonnull String triggerId, @Nonnull java.io.File file) {
-		SelenideElement trigger = $(byId(triggerId));
-		if ((! trigger.exists()) || disabledClass(trigger) || (trigger.attr("disabled") != null)) {
+		WebElement trigger = uploadTrigger(triggerId);
+		if (trigger == null) {
 			return false;
 		}
-		return upload(trigger.getWrappedElement(), file);
+		return upload(trigger, file);
+	}
+
+	/**
+	 * Finds an enabled element that opens an upload page, such as an upload action's button.
+	 *
+	 * @param triggerId	the element's id
+	 * @return the element, or null if it is not on the page or is disabled
+	 */
+	public @Nullable WebElement uploadTrigger(@Nonnull String triggerId) {
+		SelenideElement trigger = $(byId(triggerId));
+		if ((! trigger.exists()) || disabledClass(trigger) || (trigger.attr("disabled") != null)) {
+			return null;
+		}
+		return trigger.getWrappedElement();
 	}
 
 	/**
@@ -1934,6 +2080,33 @@ public class PrimeFacesSelenide extends Selenide<
 	 * @return true when the upload completed
 	 */
 	public boolean upload(@Nonnull WebElement trigger, @Nonnull java.io.File file) {
+		upload(trigger, file, false);
+		return true;
+	}
+
+	/**
+	 * Uploads a file through Skyve's upload page, opened by clicking the given element, when the application may refuse it.
+	 * A refusal shown on the upload page is read, then the upload page is closed with its close icon, as a user does
+	 * after reading it.
+	 *
+	 * @param trigger	the element that opens the upload page
+	 * @param file	the file to upload
+	 * @return what the upload page said when it refused the file, or null if it took it
+	 */
+	public @Nullable String uploadOrRefusal(@Nonnull WebElement trigger, @Nonnull java.io.File file) {
+		return upload(trigger, file, true);
+	}
+
+	/**
+	 * Uploads a file through Skyve's upload page.
+	 *
+	 * @param trigger	the element that opens the upload page
+	 * @param file	the file to upload
+	 * @param refusable	true to return a refusal (and close the upload page), false to fail with it
+	 * @return the refusal, or null if the upload page took the file
+	 * @throws IllegalStateException	if the upload page refuses the file and it is not refusable
+	 */
+	private @Nullable String upload(@Nonnull WebElement trigger, @Nonnull java.io.File file, boolean refusable) {
 		click($(trigger));
 		// Wait for the upload page's frame to be put in the page
 		WebElement frame = waitFor(d -> {
@@ -1994,26 +2167,42 @@ public class PrimeFacesSelenide extends Selenide<
 			return result.isEmpty() ? null : result;
 		});
 		if ("error".equals(outcome.get(0))) {
-			throw new IllegalStateException("The upload failed: " + outcome.get(1));
+			if (! refusable) {
+				throw new IllegalStateException("The upload failed: " + outcome.get(1));
+			}
+			trace("    the upload page refused the file: " + outcome.get(1) + " - close it with its close icon");
+			closeUploadPage(frame, outcome.get(1));
+			waitForAjaxResponse();
+			return outcome.get(1);
 		}
 		if ("info".equals(outcome.get(0))) {
 			// RUNTIME BUG (report bug 3): with the tablet UX/UI the upload page stays open after a successful upload.
 			// A user closes it with its close icon, so press that; with no close icon the step fails.
 			trace("    the upload page says: " + outcome.get(1) + " - close it with its close icon");
-			WebElement close = (WebElement) js("var o = arguments[0].closest('.ui-overlaypanel, .ui-dialog');" +
-												"var c = o ? o.querySelector('.ui-overlaypanel-close, .ui-dialog-titlebar-close') : null;" +
-												"return (c && c.getClientRects().length > 0) ? c : null;",
-												frame);
-			if (close == null) {
-				throw new IllegalStateException("The upload page stayed open after \"" + outcome.get(1) +
-													"\" and has no close icon a user could press");
-			}
-			click($(close));
-			// Wait for the upload page to close (its overlay's hide effect)
-			waitFor(d -> uploadPageClosed(frame) ? Boolean.TRUE : null);
+			closeUploadPage(frame, outcome.get(1));
 		}
 		waitForAjaxResponse();
-		return true;
+		return null;
+	}
+
+	/**
+	 * Closes the upload page with its close icon, as a user does, and waits for it to close.
+	 *
+	 * @param frame	the upload page's frame
+	 * @param said	what the upload page says, for the failure
+	 * @throws IllegalStateException	if the upload page has no close icon
+	 */
+	private void closeUploadPage(@Nonnull WebElement frame, @Nonnull String said) {
+		WebElement close = (WebElement) js("var o = arguments[0].closest('.ui-overlaypanel, .ui-dialog');" +
+											"var c = o ? o.querySelector('.ui-overlaypanel-close, .ui-dialog-titlebar-close') : null;" +
+											"return (c && c.getClientRects().length > 0) ? c : null;",
+											frame);
+		if (close == null) {
+			throw new IllegalStateException("The upload page stayed open after \"" + said + "\" and has no close icon a user could press");
+		}
+		click($(close));
+		// Wait for the upload page to close (its overlay's hide effect)
+		waitFor(d -> uploadPageClosed(frame) ? Boolean.TRUE : null);
 	}
 
 	private boolean uploadPageClosed(@Nonnull WebElement frame) {
@@ -2035,11 +2224,13 @@ public class PrimeFacesSelenide extends Selenide<
 	private @Nonnull List<String> uploadPageOutcome(@Nonnull WebElement frame) {
 		try {
 			driver.switchTo().frame(frame);
-			List<String> result = (List<String>) js("var e = Array.from(document.querySelectorAll('.ui-growl-error, .ui-growl-fatal, .ui-messages-error')).find(function(x) {" +
+			// an error, followed by the problems the page lists (an upload action's refusal is in its problems table)
+			List<String> result = (List<String>) js("var p = document.querySelector('#problems table');" +
+														"var problems = p ? p.innerText.replace(/\\s+/g, ' ').trim() : '';" +
+														"var e = Array.from(document.querySelectorAll('.ui-growl-error, .ui-growl-fatal, .ui-messages-error')).find(function(x) {" +
 														"  return x.getClientRects().length > 0 && (x.innerText || '').trim();});" +
-														"if (e) return ['error', e.innerText.replace(/\\s+/g, ' ').trim()];" +
-														"var p = document.querySelector('#problems table');" +
-														"if (p) return ['error', p.innerText.replace(/\\s+/g, ' ').trim()];" +
+														"if (e) return ['error', e.innerText.replace(/\\s+/g, ' ').trim() + (problems ? ' ' + problems : '')];" +
+														"if (problems) return ['error', problems];" +
 														"var i = document.querySelector('.ui-growl-info');" +
 														"if (i) return ['info', i.innerText.replace(/\\s+/g, ' ').trim()];" +
 														"return [];");

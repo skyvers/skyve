@@ -64,6 +64,16 @@
 			<comment>contains on a text column is typed into the filter row</comment>
 			<listGridFilter module="kitchensink" document="LookupDescription" column="description" value="{run}" />
 			<testGridRows module="kitchensink" document="LookupDescription" minRows="3" maxRows="3" />
+			<comment>A list cell shows the number the view showed: capture it from the row and find the row by it</comment>
+			<captureCell module="kitchensink" document="LookupDescription" rowContaining="SAIL filter {run} b" column="number" variable="cellB" />
+			<listGridFilter module="kitchensink" document="LookupDescription" column="number" value="{var:cellB}" operator="equals" />
+			<testGridRows module="kitchensink" document="LookupDescription" rowContaining="SAIL filter {run} b" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" document="LookupDescription" minRows="1" maxRows="1" />
+			<comment>A pattern keeps part of a cell's text: its first group</comment>
+			<captureCell rowContaining="SAIL filter {run} b" column="description" variable="cellRun" pattern="SAIL filter (\S+) b" />
+			<testGridRows rowContaining="filter {var:cellRun} b" minRows="1" maxRows="1" />
+			<listGridFilter module="kitchensink" document="LookupDescription" column="number" />
+			<testGridRows module="kitchensink" document="LookupDescription" minRows="3" maxRows="3" />
 			<listGridSort module="kitchensink" document="LookupDescription" column="number" descending="true" />
 			<listGridZoom module="kitchensink" document="LookupDescription" row="0" />
 			<testValue binding="description" value="SAIL filter {run} c" />
@@ -357,7 +367,7 @@
 				selecting a row there rerenders the view without end (runtime issue), so the link is followed with nothing
 				selected, which opens a new lookup value.</comment>
 			<navigateEdit module="kitchensink" document="ListGridFixture" />
-			<navigateLink text="Open the selected lookup value" />
+			<navigateLink text="Open the selected lookup value" exact="true" />
 			<pushEditContext module="kitchensink" document="LookupDescription" />
 			<testWidget binding="description" enabled="true" />
 			<testValue binding="description" value="" />

@@ -28,6 +28,8 @@ import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.Module.DocumentRef;
 import org.skyve.metadata.module.query.MetaDataQueryDefinition;
 import org.skyve.metadata.sail.language.Step;
+import org.skyve.metadata.sail.language.step.CaptureCell;
+import org.skyve.metadata.sail.language.step.CaptureTitle;
 import org.skyve.metadata.sail.language.step.CaptureValue;
 import org.skyve.metadata.sail.language.step.Execute;
 import org.skyve.metadata.sail.language.step.TestGridRows;
@@ -56,6 +58,7 @@ import org.skyve.metadata.sail.language.step.interaction.actions.Save;
 import org.skyve.metadata.sail.language.step.interaction.actions.ZoomIn;
 import org.skyve.metadata.sail.language.step.interaction.actions.ZoomOut;
 import org.skyve.metadata.sail.language.step.interaction.grids.DataGridEdit;
+import org.skyve.metadata.sail.language.step.interaction.grids.DataGridLink;
 import org.skyve.metadata.sail.language.step.interaction.grids.DataGridNew;
 import org.skyve.metadata.sail.language.step.interaction.grids.DataGridRemove;
 import org.skyve.metadata.sail.language.step.interaction.grids.DataGridSelect;
@@ -1065,6 +1068,7 @@ public class SmartClientInterpretedWebDriverExecutor extends InterpretedWebDrive
 	 */
 	@Override
 	public void executeUpload(Upload upload) {
+		uploadRefused(null);
 		prepareForInteraction();
 		SmartClientAutomationContext context = context();
 		String identifier = upload.getIdentifier(context);
@@ -1086,6 +1090,11 @@ public class SmartClientInterpretedWebDriverExecutor extends InterpretedWebDrive
 				throw new DomainException("<upload /> action [" + identifier + "] is disabled");
 			}
 			trigger = found.element().toWebElement();
+		}
+		if (Boolean.FALSE.equals(upload.getTestSuccess())) {
+			// the application may refuse the file: keep any refusal for a following testFailure, and check nothing
+			uploadRefused(selenide.uploadOrRefusal(trigger, file));
+			return;
 		}
 		selenide.upload(trigger, file);
 		if (upload.getBinding() != null) {
@@ -1412,10 +1421,61 @@ public class SmartClientInterpretedWebDriverExecutor extends InterpretedWebDrive
 	@Override
 	protected void clickLinkContaining(@Nonnull NavigateLink link, @Nonnull String text) {
 		prepareForInteraction();
-		if (! selenide.followLinkContaining(text)) {
-			throw new IllegalStateException(String.format("<navigateLink text=\"%s\" /> found no displayed link containing it: the page's links are %s",
-															text, selenide.linkTexts()));
+		boolean exact = Boolean.TRUE.equals(link.getExact());
+		if (! selenide.followLinkContaining(text, exact)) {
+			throw new IllegalStateException(String.format("<navigateLink text=\"%s\"%s /> found no displayed link %s it: the page's links are %s",
+															text, exact ? " exact=\"true\"" : "", exact ? "with exactly that text for" : "containing",
+															selenide.linkTexts()));
 		}
+	}
+
+	/**
+	 * Reads the text a cell of a data grid (by binding) or list grid shows, in the grid field named by the column's
+	 * sanitised binding.
+	 */
+	@Override
+	protected @Nullable String readGridCell(@Nonnull CaptureCell capture) {
+		prepareForInteraction();
+		SmartClientAutomationContext context = context();
+		String identifier = capture.getIdentifier(context);
+		String rowsKey = identifier + ".select";
+		List<Locator> locators = context.getLocators(rowsKey);
+		if (locators == null) {
+			throw new MetaDataException(String.format("<captureCell /> grid [%s] is not on the view", identifier));
+		}
+		Integer row = capture.getRow();
+		int r = (row != null) ? row.intValue() : rowContaining(context, rowsKey, capture);
+		String column = capture.getColumn();
+		selenide.trace(String.format("read column [%s] of row %d of grid [%s]", column, Integer.valueOf(r), identifier));
+		return selenide.cellText(locators.get(0).getLocator(), r, sanitised(column));
+	}
+
+	/**
+	 * Reads the title the current view shows in its header.
+	 */
+	@Override
+	protected @Nullable String readViewTitle(@Nonnull CaptureTitle capture) {
+		prepareForInteraction();
+		return selenide.viewTitle();
+	}
+
+	/**
+	 * Clicks a link in a data grid's row (see {@link SmartClientSelenide#clickRowLink}).
+	 */
+	@Override
+	protected boolean clickDataGridLink(@Nonnull DataGridLink link, @Nonnull String text, boolean action) {
+		prepareForInteraction();
+		SmartClientAutomationContext context = context();
+		String binding = link.getBinding();
+		String rowsKey = binding + ".select";
+		List<Locator> locators = context.getLocators(rowsKey);
+		if (locators == null) {
+			throw new MetaDataException(String.format("<dataGridLink /> with binding [%s] is not on the view", binding));
+		}
+		Integer row = link.getRow();
+		int r = (row != null) ? row.intValue() : rowContaining(context, rowsKey, link);
+		selenide.trace(String.format("    row %d of data grid [%s]", Integer.valueOf(r), binding));
+		return selenide.clickRowLink(locators.get(0).getLocator(), r, text, action, link.getConfirm());
 	}
 
 	/**

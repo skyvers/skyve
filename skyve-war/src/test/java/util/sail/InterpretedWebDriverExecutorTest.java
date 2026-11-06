@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
@@ -36,7 +37,13 @@ import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.query.MetaDataQueryColumn;
 import org.skyve.metadata.module.query.MetaDataQueryDefinition;
 import org.skyve.metadata.module.query.MetaDataQueryProjectedColumn;
+import org.skyve.impl.sail.execution.RunState;
+import org.skyve.metadata.sail.language.step.CaptureCell;
+import org.skyve.metadata.sail.language.step.CaptureTitle;
 import org.skyve.metadata.sail.language.step.CaptureValue;
+import org.skyve.metadata.sail.language.step.Comment;
+import org.skyve.metadata.sail.language.step.interaction.Upload;
+import org.skyve.metadata.sail.language.step.interaction.grids.DataGridLink;
 import org.skyve.metadata.sail.language.step.interaction.DataEnter;
 import org.skyve.metadata.sail.language.step.interaction.DataEnter.Match;
 import org.skyve.metadata.sail.language.step.interaction.grids.ListGridClearFilter;
@@ -208,7 +215,10 @@ class InterpretedWebDriverExecutorTest {
 										() -> executor.pickLookupDescriptionRowContaining(new LookupDescriptionPick(), "x")),
 					() -> assertThrows(UnsupportedOperationException.class,
 										() -> executor.autoCompleteLookupDescriptionAndPick(new LookupDescriptionAutoComplete(), "x", "y")),
-					() -> assertThrows(UnsupportedOperationException.class, () -> executor.clickLinkContaining(new NavigateLink(), "x")));
+					() -> assertThrows(UnsupportedOperationException.class, () -> executor.clickLinkContaining(new NavigateLink(), "x")),
+					() -> assertThrows(UnsupportedOperationException.class, () -> executor.readGridCell(new CaptureCell())),
+					() -> assertThrows(UnsupportedOperationException.class, () -> executor.readViewTitle(new CaptureTitle())),
+					() -> assertThrows(UnsupportedOperationException.class, () -> executor.clickDataGridLink(new DataGridLink(), "x", true)));
 	}
 
 	@Test
@@ -319,6 +329,163 @@ class InterpretedWebDriverExecutorTest {
 
 		assertThrows(MetaDataException.class, () -> executor.executeNavigateLink(link));
 		verify(executor.selenide, never()).get(anyString());
+	}
+
+	@Test
+	void aCapturePatternKeepsItsFirstGroupOrItsWholeMatch() {
+		CaptureValue group = capture("reference", "number");
+		group.setPattern("REF-(\\d+)");
+		doReturn(" Request REF-42 - printer ").when(executor).readWidgetValue(group);
+		CaptureValue whole = capture("reference", "whole");
+		whole.setPattern("REF-\\d+");
+		doReturn("Request REF-42").when(executor).readWidgetValue(whole);
+
+		executor.executeCaptureValue(group);
+		executor.executeCaptureValue(whole);
+
+		assertAll(() -> assertEquals("42", executor.getVariable("number")),
+					() -> assertEquals("REF-42", executor.getVariable("whole")));
+	}
+
+	@Test
+	void aCapturePatternThatDoesNotMatchFailsWithTheTextRead() {
+		CaptureValue capture = capture("reference", "number");
+		capture.setPattern("REF-(\\d+)");
+		doReturn("no reference").when(executor).readWidgetValue(capture);
+
+		IllegalStateException e = assertThrows(IllegalStateException.class, () -> executor.executeCaptureValue(capture));
+		assertAll(() -> assertTrue(e.getMessage().contains("'no reference'"), e.getMessage()),
+					() -> assertTrue(e.getMessage().contains("REF-(\\d+)"), e.getMessage()),
+					() -> assertEquals(null, executor.getVariable("number")));
+	}
+
+	@Test
+	void captureCellOfADataGridKeepsTheCellsText() {
+		CaptureCell cell = new CaptureCell();
+		cell.setBinding("rows");
+		cell.setRowContaining("SAIL {run}");
+		cell.setColumn("outcome");
+		cell.setVariable("outcome");
+		cell.setPattern("Run From (\\w+) ran");
+		doReturn("Run From Row ran").when(executor).readGridCell(cell);
+
+		executor.executeCaptureCell(cell);
+
+		assertEquals("Row", executor.getVariable("outcome"));
+	}
+
+	@Test
+	void captureCellOfAListChecksTheColumnAgainstTheQuery() {
+		bindQuery();
+		CaptureCell cell = new CaptureCell();
+		cell.setModuleName("kitchensink");
+		cell.setQueryName("qThings");
+		cell.setRow(Integer.valueOf(0));
+		cell.setColumn("missing");
+		cell.setVariable("v");
+		CaptureCell blank = new CaptureCell();
+		blank.setModuleName("kitchensink");
+		blank.setQueryName("qThings");
+		blank.setRow(Integer.valueOf(0));
+		blank.setColumn("name");
+		blank.setVariable("v");
+		doReturn(" ").when(executor).readGridCell(blank);
+
+		MetaDataException e = assertThrows(MetaDataException.class, () -> executor.executeCaptureCell(cell));
+		IllegalStateException empty = assertThrows(IllegalStateException.class, () -> executor.executeCaptureCell(blank));
+		assertAll(() -> assertTrue(e.getMessage().contains("[missing] is not a column of query kitchensink.qThings"), e.getMessage()),
+					() -> assertTrue(empty.getMessage().contains("column [name] of row 0 shows no value to keep in {var:v}"), empty.getMessage()),
+					() -> verify(executor, never()).readGridCell(cell));
+	}
+
+	@Test
+	void captureTitleKeepsTheTitle() {
+		CaptureTitle title = new CaptureTitle();
+		title.setVariable("request");
+		title.setPattern("Request (\\d+)");
+		doReturn("Request 1234 - printer").when(executor).readViewTitle(title);
+
+		executor.executeCaptureTitle(title);
+
+		assertEquals("1234", executor.getVariable("request"));
+	}
+
+	@Test
+	void dataGridLinkSubstitutesTheTextAndChecksSuccessUnlessDeclinedOrTold() {
+		executor.putVariable("verb", "Revoke");
+		DataGridLink checked = link(null);
+		DataGridLink unchecked = link(Boolean.FALSE);
+		DataGridLink declined = link(null);
+		declined.setConfirm(Boolean.FALSE);
+		doReturn(Boolean.FALSE).when(executor).clickDataGridLink(any(), anyString(), anyBoolean());
+		doReturn(Boolean.TRUE).when(executor).clickDataGridLink(eq(declined), anyString(), anyBoolean());
+		when(Boolean.valueOf(executor.selenide.verifySuccess())).thenReturn(Boolean.TRUE);
+
+		executor.executeDataGridLink(checked);
+		executor.executeDataGridLink(unchecked);
+		executor.executeDataGridLink(declined);
+
+		assertAll(() -> verify(executor).clickDataGridLink(checked, "Revoke Access", true),
+					() -> verify(executor.selenide, org.mockito.Mockito.times(1)).verifySuccess());
+	}
+
+	@Test
+	void loginSubstitutesTheCustomerAndACommentItsTokens() {
+		executor.putVariable("customer", "demo");
+		Login login = login("admin");
+		login.setCustomer("{var:customer}");
+		Comment comment = new Comment();
+		comment.setComment("Run {run} for {var:customer}");
+
+		executor.executeLogin(login);
+		executor.executeComment(comment);
+
+		assertAll(() -> verify(executor.selenide).login("demo", "admin", "x"),
+					() -> verify(executor.selenide).trace("Run " + executor.getRunToken() + " for demo"));
+	}
+
+	@Test
+	void testFailureAfterARefusedUploadChecksTheRefusal() {
+		String script = "<automation uxui=\"desktop\" userAgentType=\"desktop\" testStrategy=\"Verify\" xmlns=\"http://www.skyve.org/xml/sail\">" +
+							"<interaction name=\"refused\"><method>" +
+								"<upload action=\"Up\" file=\"f.txt\" testSuccess=\"false\"/><testFailure message=\"already exists\"/>" +
+								"<upload action=\"Up\" file=\"f.txt\" testSuccess=\"false\"/><testFailure message=\"something else\"/>" +
+								"<upload action=\"Up\" file=\"f.txt\" testSuccess=\"false\"/><testSuccess/>" +
+							"</method></interaction>" +
+						"</automation>";
+		doAnswer(i -> {
+			executor.uploadRefused("The file f.txt already exists");
+			return null;
+		}).when(executor).executeUpload(any(Upload.class));
+		when(executor.selenide.describeMessages()).thenReturn("no messages");
+
+		AssertionError e = assertThrows(AssertionError.class, () -> executor.executeAutomation(XMLMetaData.unmarshalSAILString(script)));
+		assertAll(() -> assertTrue(e.getMessage().contains("with 2 failure(s)"), e.getMessage()),
+					() -> assertTrue(e.getMessage().contains("containing 'something else' but found: (the upload page said: The file f.txt already exists)"), e.getMessage()),
+					() -> assertTrue(e.getMessage().contains("expected the upload to succeed but it was refused: The file f.txt already exists"), e.getMessage()));
+	}
+
+	@Test
+	void aSharedRunCarriesTheTokenAndVariablesIntoTheNextAutomation() {
+		RunState run = new RunState();
+		run.putVariable("number", "7");
+		executor.shareRun(run);
+		String script = "<automation uxui=\"desktop\" userAgentType=\"desktop\" xmlns=\"http://www.skyve.org/xml/sail\">" +
+							"<interaction name=\"i\"><method><login user=\"jane{run}\" password=\"{var:number}\"/></method></interaction>" +
+						"</automation>";
+
+		executor.executeAutomation(XMLMetaData.unmarshalSAILString(script));
+
+		verify(executor.selenide).login(null, "jane" + run.getRunToken(), "7");
+	}
+
+	private static DataGridLink link(Boolean testSuccess) {
+		DataGridLink result = new DataGridLink();
+		result.setBinding("rows");
+		result.setRow(Integer.valueOf(0));
+		result.setText("{var:verb} Access");
+		result.setTestSuccess(testSuccess);
+		return result;
 	}
 
 	private static CaptureValue capture(String binding, String variable) {

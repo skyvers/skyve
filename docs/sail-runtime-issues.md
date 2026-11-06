@@ -24,6 +24,8 @@ SC-2's suspected cause, which cites the code before its fix, at `2f4c2021b8`.
 | [P6](#p6-re-run-job-of-generate-test-data-always-fails) | Re-run Job of Generate Test Data always fails | both | Confirmed | open |
 | [P7](#p7-a-vue-list-grid-restores-a-selection-without-its-selected-action) | A Vue list grid restores a selection without its selected action | PF | Confirmed | open |
 | [P8](#p8-an-action-upload-page-left-open-hides-later-error-messages) | An action upload page left open hides later error messages | PF | Not investigated | open (not confirmed) |
+| [P9](#p9-an-action-link-in-a-data-grid-row-also-zooms-into-the-row) | An action link in a data grid row also zooms into the row | PF | Confirmed | open |
+| [P10](#p10-an-upload-actions-validationexception-shows-only-an-error-reference) | An upload action's ValidationException shows only an error reference | both | Confirmed | open |
 | [SC-1](#sc-1-withdrawn-actions-blocked-after-a-server-field-error) | Actions blocked after a server field error | SC | Withdrawn: a harness fault | withdrawn |
 | [SC-2](#sc-2-fixed-inline-grid-default-values-reach-smartclient-as-objects) | Inline grid default values reach SmartClient as objects | SC | Confirmed | fixed by master |
 | [SC-3](#sc-3-a-list-without-a-menu-item-fails-to-load) | A list without a menu item fails to load | SC | Confirmed | open |
@@ -340,6 +342,65 @@ the next step. The PF kitchen sink uploads with its upload action in the same
 way. The PF admin suite does not press AddImage.
 
 **Status:** open (not confirmed).
+
+## P9: An action link in a data grid row also zooms into the row
+
+**Symptom.** In PrimeFaces, clicking an action link in a row of a data grid that
+zooms when a row is selected (a grid with no `selectedIdBinding`) zooms into the
+row. The link's confirmation shows for a moment, then the row's view replaces
+the page, and the link's action does not run. A user cannot use such a link.
+Found by the `dataGridLink` conformance (2026-11-06) on the ActionsFixture's
+Run From Row link. Biz Hub Apps' Revoke Access link is the same kind of link.
+
+**Reproduction.** In PrimeFaces (tablet), open a new Actions Fixture, select the
+Rows tab, add a row and zoom out. Click the row's Run From Row link: the view
+zooms into the row.
+
+**Suspected cause.** The link's text is a plain `<span>`:
+`TabularComponentBuilder.addCommandLinkText` adds an `outputText` child to the
+`CommandLink`. PrimeFaces' data table selects a row on a click whose target
+matches `rowSelectorForRowClick`,
+`"td:not(.ui-column-unselectable):not(.ui-grouped-column),span:not(.ui-c)"`
+(`components.js` of PrimeFaces 13.0.10). The click lands on the link's span,
+which has no `ui-c` class, so the row is selected, and selecting a row of such
+a grid zooms into it.
+
+**Checked:** Confirmed. With the span given the class `ui-c` (a one-line change
+in `addCommandLinkText`, tried in a scratch build only), the PF `dataGridLink`
+conformance passes, declined and confirmed.
+
+**Workaround in the suites.** None: `PrimeFacesKitchenSinkSailIT.rowLink` is
+disabled until this is fixed. SmartClient runs the same steps in its kitchen
+sink.
+
+**Status:** open.
+
+## P10: An upload action's ValidationException shows only an error reference
+
+**Symptom.** When an upload action refuses a file by throwing a
+`ValidationException` (as whosin's UploadQualifications and admin's
+ImportReportSpecifications do), the upload page does not show its message. It
+shows "An error occurred while processing your request. Reference: ...", as an
+information message, and the server logs the validation as an unexpected error.
+Found while adding the refused upload fixture (2026-11-06).
+
+**Reproduction.** Make an upload action throw
+`new ValidationException(new Message("..."))`, and upload a file through it in
+either renderer.
+
+**Suspected cause.** `ContentUploadView.handleActionFileUpload` catches
+`UploadException` (shown as the upload's problems) and
+`ActionUnavailableException` (shown as its message). Any other exception,
+`ValidationException` included, falls into `catch (Exception e)`, which logs it
+with `WebErrorUtil.logUnexpectedAndGetReference` and adds a `FacesMessage`
+with the generic message and no severity, so it shows as information.
+
+**Checked:** Confirmed in the code and in the kitchen sink.
+
+**Workaround in the suites.** The ActionsFixture's Upload action refuses its
+file with an `UploadException`, as Upload Backup does.
+
+**Status:** open.
 
 ## SC-1 (withdrawn): Actions blocked after a server field error
 

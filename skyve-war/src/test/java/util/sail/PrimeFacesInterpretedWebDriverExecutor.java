@@ -66,6 +66,8 @@ import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.Module.DocumentRef;
 import org.skyve.metadata.module.query.MetaDataQueryDefinition;
 import org.skyve.metadata.sail.language.Step;
+import org.skyve.metadata.sail.language.step.CaptureCell;
+import org.skyve.metadata.sail.language.step.CaptureTitle;
 import org.skyve.metadata.sail.language.step.CaptureValue;
 import org.skyve.metadata.sail.language.step.TestValue;
 import org.skyve.metadata.sail.language.step.context.PushEditContext;
@@ -83,6 +85,7 @@ import org.skyve.metadata.sail.language.step.interaction.actions.Save;
 import org.skyve.metadata.sail.language.step.interaction.actions.ZoomIn;
 import org.skyve.metadata.sail.language.step.interaction.actions.ZoomOut;
 import org.skyve.metadata.sail.language.step.interaction.grids.DataGridEdit;
+import org.skyve.metadata.sail.language.step.interaction.grids.DataGridLink;
 import org.skyve.metadata.sail.language.step.interaction.grids.GridRowStep;
 import org.skyve.metadata.sail.language.step.interaction.grids.DataGridNew;
 import org.skyve.metadata.sail.language.step.interaction.grids.DataGridRemove;
@@ -1288,9 +1291,10 @@ public class PrimeFacesInterpretedWebDriverExecutor extends InterpretedWebDriver
 	 *
 	 * @param field	the column's field in the grid (its sanitised binding)
 	 * @param type	the grid's type for the column, such as text, numeric or enum
+	 * @param title	the column's title, as its header shows it
 	 * @param options	an enum column's [code, label] pairs; empty for other columns
 	 */
-	private record VueColumn(@Nonnull String field, @Nonnull String type, @Nonnull List<List<String>> options) {
+	private record VueColumn(@Nonnull String field, @Nonnull String type, @Nonnull String title, @Nonnull List<List<String>> options) {
 	}
 
 	/**
@@ -1468,6 +1472,22 @@ public class PrimeFacesInterpretedWebDriverExecutor extends InterpretedWebDriver
 	 * @throws DomainException	if the column is not shown
 	 */
 	private @Nonnull VueColumn vueColumn(@Nonnull ListGridOnPage grid, @Nonnull String column, @Nonnull String element, boolean filter) {
+		VueColumn result = vueColumn(grid, column, element);
+		List<Object> info = selenide.vueListGridColumn(grid.clientId(), result.field());
+		if ((info == null) || (! Boolean.TRUE.equals(info.get(filter ? 3 : 4)))) {
+			throw new MetaDataException(String.format("<%s /> column [%s] of the Vue list grid %s cannot be %s",
+														element, column, grid.clientId(), filter ? "filtered" : "sorted"));
+		}
+		return result;
+	}
+
+	/**
+	 * Finds a column of a Vue list grid by its binding, and checks that it is shown.
+	 *
+	 * @throws MetaDataException	if the grid has no such column
+	 * @throws DomainException	if the column is not shown
+	 */
+	private @Nonnull VueColumn vueColumn(@Nonnull ListGridOnPage grid, @Nonnull String column, @Nonnull String element) {
 		String field = column;
 		List<Object> info = selenide.vueListGridColumn(grid.clientId(), field);
 		String sanitised = BindUtil.sanitiseBinding(column);
@@ -1482,13 +1502,9 @@ public class PrimeFacesInterpretedWebDriverExecutor extends InterpretedWebDriver
 			throw new DomainException(String.format("<%s /> column [%s] (%s) is not shown in the Vue list grid %s: a user would show it with the grid's column chooser",
 														element, column, info.get(1), grid.clientId()));
 		}
-		if (! Boolean.TRUE.equals(info.get(filter ? 3 : 4))) {
-			throw new MetaDataException(String.format("<%s /> column [%s] of the Vue list grid %s cannot be %s",
-														element, column, grid.clientId(), filter ? "filtered" : "sorted"));
-		}
 		@SuppressWarnings("unchecked")
 		List<List<String>> options = (List<List<String>>) info.get(5);
-		return new VueColumn(field, String.valueOf(info.get(0)), options);
+		return new VueColumn(field, String.valueOf(info.get(0)), String.valueOf(info.get(1)), options);
 	}
 
 	/**
@@ -1895,21 +1911,160 @@ public class PrimeFacesInterpretedWebDriverExecutor extends InterpretedWebDriver
 	 */
 	@Override
 	protected void clickLinkContaining(NavigateLink link, String text) {
-		if (! selenide.followLinkContaining(text)) {
-			throw new DomainException(String.format("<navigateLink text=\"%s\" /> found no displayed link containing it: the page's links are %s",
-														text, selenide.linkTexts()));
+		boolean exact = Boolean.TRUE.equals(link.getExact());
+		if (! selenide.followLinkContaining(text, exact)) {
+			throw new DomainException(String.format("<navigateLink text=\"%s\"%s /> found no displayed link %s it: the page's links are %s",
+														text, exact ? " exact=\"true\"" : "", exact ? "with exactly that text for" : "containing",
+														selenide.linkTexts()));
 		}
 	}
 
 	/**
+	 * Reads the text of a cell of a data grid (by binding) or a list grid of the view. The column is found by its header:
+	 * a PrimeFaces data table's column by the column component built for it (a data grid's column by its place in the
+	 * grid's metadata, a list's by its field), a Vue list grid's by its title.
+	 *
+	 * @param capture	the step
+	 * @return the cell's text
+	 * @throws DomainException	if the grid is not on the page, or the row or cell cannot be read
+	 */
+	@SuppressWarnings("null") // a null here fails the test
+	@Override
+	protected @Nullable String readGridCell(CaptureCell capture) {
+		PrimeFacesAutomationContext context = peek();
+		String identifier = capture.getIdentifier(context);
+		List<UIComponent> components = context.getFacesComponents(identifier);
+		if (components == null) {
+			throw new MetaDataException(String.format("<captureCell /> grid [%s] is not on the view", identifier));
+		}
+		String column = capture.getColumn();
+		for (UIComponent component : components) {
+			String gridId = PrimeFacesAutomationContext.clientId(component);
+			if (selenide.countRows(gridId, null) < 0) { // not on the page
+				continue;
+			}
+			Integer row = resolveRow(capture, gridId);
+			if (row == null) {
+				continue;
+			}
+			String headerId = null;
+			String headerTitle = null;
+			if (selenide.isVueListGrid(gridId)) {
+				ListGridOnPage grid = new ListGridOnPage(component, gridId, true);
+				VueColumn vue = vueColumn(grid, column, "captureCell");
+				headerTitle = vue.title();
+			}
+			else {
+				headerId = PrimeFacesAutomationContext.clientId(cellColumn(context, component, capture.getBinding(), column, gridId));
+			}
+			selenide.trace(String.format("read column [%s] of row %d of grid [%s] (%s)", column, row, identifier, gridId));
+			List<String> text = selenide.cellText(gridId, row.intValue(), headerId, headerTitle);
+			if (text.isEmpty() || (text.get(0) == null)) {
+				throw new DomainException(String.format("<captureCell /> could not read column [%s] of row %d of grid [%s]: %s",
+															column, row, identifier, text.isEmpty() ? "" : text.get(1)));
+			}
+			return text.get(0);
+		}
+		throw new DomainException(String.format("<captureCell /> grid [%s] is not on the page", identifier));
+	}
+
+	/**
+	 * Finds the column component of a PrimeFaces data table for a column binding: a data grid's by the column's place
+	 * among the grid's columns in the view's metadata, a list grid's by its field.
+	 *
+	 * @throws MetaDataException	if the grid has no such column
+	 */
+	private static @Nonnull UIComponent cellColumn(@Nonnull PrimeFacesAutomationContext context,
+													@Nonnull UIComponent component,
+													@Nullable String binding,
+													@Nonnull String column,
+													@Nonnull String gridId) {
+		if (binding == null) {
+			return facesColumn(new ListGridOnPage(component, gridId, false), column, "captureCell");
+		}
+		DataTable table = (component instanceof DataTable dataTable) ? dataTable : findChild(component, DataTable.class);
+		List<Object> widgets = context.getSkyveWidgets(binding);
+		if ((table != null) && (widgets != null) && (! widgets.isEmpty()) && (widgets.get(0) instanceof DataGrid grid)) {
+			List<org.skyve.impl.metadata.view.widget.bound.tabular.DataGridColumn> columns = grid.getColumns();
+			List<String> bindings = new ArrayList<>(columns.size());
+			for (int i = 0, l = columns.size(); i < l; i++) {
+				if (columns.get(i) instanceof org.skyve.impl.metadata.view.widget.bound.tabular.DataGridBoundColumn bound) {
+					String candidate = bound.getBinding();
+					if (column.equals(candidate)) {
+						if (i < table.getChildCount()) {
+							return table.getChildren().get(i);
+						}
+						break;
+					}
+					bindings.add(candidate);
+				}
+			}
+			throw new MetaDataException(String.format("<captureCell /> column [%s] is not a column of data grid [%s]: its columns are %s",
+														column, binding, bindings));
+		}
+		throw new MetaDataException(String.format("<captureCell /> [%s] is not a data grid", binding));
+	}
+
+	/**
+	 * Reads the title the page shows for the view.
+	 *
+	 * @param capture	the step
+	 * @return the title
+	 */
+	@Override
+	protected @Nullable String readViewTitle(CaptureTitle capture) {
+		return selenide.viewTitle();
+	}
+
+	/**
+	 * Clicks a link in a data grid's row (see {@link PrimeFacesSelenide#clickRowLink}).
+	 *
+	 * @param link	the step
+	 * @param text	the link's text
+	 * @param action	true if the link runs an action
+	 * @return true if the action was declined
+	 * @throws DomainException	if the grid is not on the page
+	 */
+	@SuppressWarnings("null") // a null here fails the test
+	@Override
+	protected boolean clickDataGridLink(DataGridLink link, String text, boolean action) {
+		PrimeFacesAutomationContext context = peek();
+		String binding = link.getBinding();
+		List<UIComponent> components = context.getFacesComponents(binding);
+		if (components == null) {
+			throw new MetaDataException(String.format("<dataGridLink /> with binding [%s] is not on the view", binding));
+		}
+		for (UIComponent component : components) {
+			String gridId = PrimeFacesAutomationContext.clientId(component);
+			if (selenide.countRows(gridId, null) < 0) { // not on the page
+				continue;
+			}
+			Integer row = resolveRow(link, gridId);
+			if (row == null) {
+				continue;
+			}
+			selenide.trace(String.format("    row %d of data grid [%s] (%s)", row, binding, gridId));
+			return selenide.clickRowLink(gridId, row.intValue(), text, action, link.getConfirm());
+		}
+		throw new DomainException(String.format("<dataGridLink /> data grid [%s] is not on the page", binding));
+	}
+
+	/**
 	 * Uploads a test classpath file: into a content widget (through its upload page), or through an upload action's
-	 * upload page. For a content widget, the widget must then hold content.
+	 * upload page. For a content widget, the widget must then hold content. With {@code testSuccess="false"}, a refusal
+	 * on the upload page is recorded for a following {@code <testFailure/>} (the upload page is closed, as a user does),
+	 * and neither the content nor the messages are checked.
 	 *
 	 * @param upload	the step
 	 */
 	@SuppressWarnings("null") // a null here fails the test
 	@Override
 	public void executeUpload(Upload upload) {
+		uploadRefused(null);
+		if (Boolean.FALSE.equals(upload.getTestSuccess())) {
+			uploadRefusable(upload);
+			return;
+		}
 		PrimeFacesAutomationContext context = peek();
 		String identifier = upload.getIdentifier(context);
 		List<UIComponent> components = context.getFacesComponents(identifier);
@@ -1944,6 +2099,36 @@ public class PrimeFacesInterpretedWebDriverExecutor extends InterpretedWebDriver
 			throw new DomainException(String.format("<upload /> to [%s]: no displayed, enabled widget to upload with", identifier));
 		}
 		checkSuccess(String.format("expected no error messages after uploading to [%s]", identifier));
+	}
+
+	/**
+	 * Uploads a file that the application may refuse ({@code testSuccess="false"}): a refusal on the upload page is
+	 * recorded, and nothing else is checked.
+	 *
+	 * @param upload	the step
+	 */
+	@SuppressWarnings("null") // a null here fails the test
+	private void uploadRefusable(@Nonnull Upload upload) {
+		PrimeFacesAutomationContext context = peek();
+		String identifier = upload.getIdentifier(context);
+		List<UIComponent> components = context.getFacesComponents(identifier);
+		if (components == null) {
+			throw new MetaDataException(String.format("<upload /> with %s [%s] is not on the view",
+														(upload.getBinding() != null) ? "binding" : "action", identifier));
+		}
+		java.io.File file = testResourceFile(upload.getFile());
+		for (UIComponent component : components) {
+			String clientId = PrimeFacesAutomationContext.clientId(component);
+			org.openqa.selenium.WebElement trigger = (upload.getBinding() != null) ?
+														selenide.contentUploadTrigger(clientId) :
+														selenide.uploadTrigger(clientId);
+			if (trigger != null) {
+				selenide.trace(String.format("upload %s to [%s] (%s), which may be refused", upload.getFile(), identifier, clientId));
+				uploadRefused(selenide.uploadOrRefusal(trigger, file));
+				return;
+			}
+		}
+		throw new DomainException(String.format("<upload /> to [%s]: no displayed, enabled widget to upload with", identifier));
 	}
 
 	/**

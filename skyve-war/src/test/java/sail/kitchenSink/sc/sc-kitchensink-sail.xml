@@ -44,7 +44,7 @@
 
 	<interaction name="Lookup values to pick">
 		<method>
-			<comment>Create the lookup values that the kitchen sink's lookup description picks from; {run} keeps each run's values apart</comment>
+			<comment>Create the lookup values that the kitchen sink's lookup description picks from; {run} keeps each run's values apart (this run's is {run})</comment>
 			<navigateMenu module="kitchensink" item="Lookup values" />
 			<listGridNew module="kitchensink" document="LookupDescription" />
 			<comment>description is required: saving without it must fail</comment>
@@ -250,6 +250,30 @@
 			<execute><![CDATA[window._sailExecuted = true;]]></execute>
 			<comment>Conformance for the pause op-code itself; the suites do not pause</comment>
 			<pause millis="100" />
+		</method>
+	</interaction>
+
+	<interaction name="Actions Fixture: a refused upload, a link in a row, a cell and the title">
+		<method>
+			<navigateEdit module="kitchensink" document="ActionsFixture" />
+			<comment>The view's title, with a pattern that keeps its first word</comment>
+			<captureTitle variable="fixture" pattern="(\w+) Fixture" />
+			<comment>The upload action refuses this file; testSuccess="false" lets testFailure check the refusal on the upload page</comment>
+			<upload action="ActionsUpload" file="sail/files/sail-refused.txt" testSuccess="false" />
+			<testFailure message="sail-refused.txt already exists" />
+			<upload action="ActionsUpload" file="sail/files/sail-upload.txt" />
+			<tabSelect path="Rows" />
+			<dataGridNew binding="rows" />
+			<dataEnter binding="name" value="SAIL row of {var:fixture} {run}" />
+			<zoomOut />
+			<testGridRows binding="rows" rowContaining="SAIL row of Actions {run}" minRows="1" maxRows="1" />
+			<comment>The row's link asks for a confirmation: declined, its action does not run</comment>
+			<dataGridLink binding="rows" rowContaining="SAIL row of Actions {run}" text="Run From Row" confirm="false" />
+			<testGridRows binding="rows" rowContaining="Run From Row ran" maxRows="0" />
+			<dataGridLink binding="rows" rowContaining="SAIL row of Actions {run}" text="Run From Row" />
+			<testGridRows binding="rows" rowContaining="Run From Row ran" minRows="1" maxRows="1" />
+			<captureCell binding="rows" rowContaining="SAIL row of Actions {run}" column="outcome" variable="outcome" pattern="Run From (\w+) ran" />
+			<testGridRows binding="rows" rowContaining="Run From {var:outcome} ran" minRows="1" maxRows="1" />
 		</method>
 	</interaction>
 
