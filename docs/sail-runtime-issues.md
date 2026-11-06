@@ -24,8 +24,8 @@ SC-2's suspected cause, which cites the code before its fix, at `2f4c2021b8`.
 | [P6](#p6-re-run-job-of-generate-test-data-always-fails) | Re-run Job of Generate Test Data always fails | both | Confirmed | open |
 | [P7](#p7-a-vue-list-grid-restores-a-selection-without-its-selected-action) | A Vue list grid restores a selection without its selected action | PF | Confirmed | open |
 | [P8](#p8-an-action-upload-page-left-open-hides-later-error-messages) | An action upload page left open hides later error messages | PF | Not investigated | open (not confirmed) |
-| [P9](#p9-an-action-link-in-a-data-grid-row-also-zooms-into-the-row) | An action link in a data grid row also zooms into the row | PF | Confirmed | open |
-| [P10](#p10-an-upload-actions-validationexception-shows-only-an-error-reference) | An upload action's ValidationException shows only an error reference | both | Confirmed | open |
+| [P9](#p9-fixed-an-action-link-in-a-data-grid-row-also-zooms-into-the-row) | An action link in a data grid row also zooms into the row | PF | Confirmed | fixed (150d05dddc) |
+| [P10](#p10-fixed-an-upload-actions-validationexception-shows-only-an-error-reference) | An upload action's ValidationException shows only an error reference | both | Confirmed | fixed (150d05dddc) |
 | [SC-1](#sc-1-withdrawn-actions-blocked-after-a-server-field-error) | Actions blocked after a server field error | SC | Withdrawn: a harness fault | withdrawn |
 | [SC-2](#sc-2-fixed-inline-grid-default-values-reach-smartclient-as-objects) | Inline grid default values reach SmartClient as objects | SC | Confirmed | fixed by master |
 | [SC-3](#sc-3-a-list-without-a-menu-item-fails-to-load) | A list without a menu item fails to load | SC | Confirmed | open |
@@ -344,7 +344,7 @@ way. The PF admin suite does not press AddImage.
 
 **Status:** open (not confirmed).
 
-## P9: An action link in a data grid row also zooms into the row
+## P9 (fixed): An action link in a data grid row also zooms into the row
 
 **Symptom.** In PrimeFaces, clicking an action link in a row of a data grid that
 zooms when a row is selected (a grid with no `selectedIdBinding`) zooms into the
@@ -370,13 +370,16 @@ a grid zooms into it.
 in `addCommandLinkText`, tried in a scratch build only), the PF `dataGridLink`
 conformance passes, declined and confirmed.
 
-**Workaround in the suites.** None: `PrimeFacesKitchenSinkSailIT.rowLink` is
-disabled until this is fixed. SmartClient runs the same steps in its kitchen
-sink.
+**Fix.** `150d05dddc`: `addCommandLinkText` gives the text's span the class
+`ui-c`, as a PrimeFaces button's text has. Nothing styles `.ui-c` on its own;
+PrimeFaces uses it only to skip row clicks and row drags.
 
-**Status:** open.
+**Workaround in the suites.** None needed now: `PrimeFacesKitchenSinkSailIT.rowLink`
+runs the row link, declined and confirmed.
 
-## P10: An upload action's ValidationException shows only an error reference
+**Status:** fixed.
+
+## P10 (fixed): An upload action's ValidationException shows only an error reference
 
 **Symptom.** When an upload action refuses a file by throwing a
 `ValidationException` (as whosin's UploadQualifications and admin's
@@ -398,10 +401,18 @@ with the generic message and no severity, so it shows as information.
 
 **Checked:** Confirmed in the code and in the kitchen sink.
 
-**Workaround in the suites.** The ActionsFixture's Upload action refuses its
-file with an `UploadException`, as Upload Backup does.
+**Fix.** `150d05dddc`: `handleActionFileUpload` turns a `MessageException` from
+the upload action into the upload's errors (each message, with its bindings as
+where), so the upload page shows it as it shows an `UploadException`'s
+problems. A content upload shows a `MessageException`'s messages as error
+messages. Unexpected failures and unavailable actions are now shown as errors,
+not information.
 
-**Status:** open.
+**Workaround in the suites.** None needed now: the ActionsFixture's Upload
+action refuses `sail-invalid.txt` with a `ValidationException`, and both
+kitchen sinks check the refusal.
+
+**Status:** fixed.
 
 ## SC-1 (withdrawn): Actions blocked after a server field error
 

@@ -488,7 +488,7 @@ of these defaults from the current context.
 | `dataGridEdit` | `binding`\*, `row` or `rowContaining` | Starts an inline edit of the row. | no: PF grids have no row edit gesture; inline cells are inputs | yes; the following `dataEnter`, `testValue`, `testWidget`, `lookupDescriptionPick` and `lookupDescriptionAutoComplete` steps address the row's columns, and any other step ends the edit |
 | `dataGridRemove` | `binding`\*, `row` or `rowContaining` | Removes the row from the collection. The record itself is not deleted. | yes | yes |
 | `dataGridSelect` | `binding`\*, `row` or `rowContaining` | Selects the row without zooming. | only on grids with a `selectedIdBinding`; on other grids a selection zooms | yes |
-| `dataGridLink` | `binding`\*, `row` or `rowContaining`, `text`\*, `confirm`, `testSuccess` | Clicks the first displayed link in the row whose visible text contains `text` (case-sensitive), such as a "Revoke Access" link in every row. A link that runs an action is pressed as an [action step](#actions) presses its button: `confirm` answers its confirmation and questions, and the step checks for errors unless `testSuccess="false"` or it was declined; the view and its context stay. Any other link is followed as `navigateLink` follows one: the top context loses its document and view type. Which kind a link is comes from the view's metadata: the grid's links whose shown value contains the text (or every link of the grid if none does) all have an action reference. No such link in the row fails the step, listing the row's links. | yes, but runtime issue P9 zooms into the row as well, so it cannot be used on a grid that zooms when a row is selected | yes |
+| `dataGridLink` | `binding`\*, `row` or `rowContaining`, `text`\*, `confirm`, `testSuccess` | Clicks the first displayed link in the row whose visible text contains `text` (case-sensitive), such as a "Revoke Access" link in every row. A link that runs an action is pressed as an [action step](#actions) presses its button: `confirm` answers its confirmation and questions, and the step checks for errors unless `testSuccess="false"` or it was declined; the view and its context stay. Any other link is followed as `navigateLink` follows one: the top context loses its document and view type. Which kind a link is comes from the view's metadata: the grid's links whose shown value contains the text (or every link of the grid if none does) all have an action reference. No such link in the row fails the step, listing the row's links. | yes; a click on a row's link does not select the row, so it works on a grid that zooms when a row is selected | yes |
 | `listGridNew` | `module`, `document`, `query`, `model`, `createView` | Presses New and pushes the new document's context. | yes; on a Vue list grid, its toolbar's New button, or the floating one a list view shows above its paginator | yes |
 | `listGridZoom` | as `listGridNew` without `createView`, plus `row` or `rowContaining` | Opens the row and pushes its context. | yes; on a Vue list grid, the row's View Detail button, or a click on the row when the grid zooms on a row click | yes |
 | `listGridSelect` | as `listGridZoom` | Selects the row without opening it. | only on grids with a `selectedIdBinding`. On a Vue list grid, it clicks the row. A row that already shows as selected is clicked twice, to unselect and select it: the grid restores its selection by design, without running the selected action (P7). The step fails if the row does not show as selected afterwards. | yes |
@@ -695,7 +695,7 @@ tests. The SAIL ITs are:
 
 | IT | Script | Renderer |
 |---|---|---|
-| `PrimeFacesKitchenSinkSailIT` | `sail/kitchenSink/pf/pf-kitchensink-sail.xml`, plus a test that switches to SmartClient with PrimeFaces' user menu and checks `<switchMode/>` back, one that checks the find steps' failures, and `rowLink` (`pf-kitchensink-row-link.xml`), disabled until runtime issue P9 is fixed | PF, tablet |
+| `PrimeFacesKitchenSinkSailIT` | `sail/kitchenSink/pf/pf-kitchensink-sail.xml`, plus a test that switches to SmartClient with PrimeFaces' user menu and checks `<switchMode/>` back, one that checks the find steps' failures, and `rowLink` (`pf-kitchensink-row-link.xml`) | PF, tablet |
 | `PrimeFacesSailTestStrategyIT` | inline scripts, 3 tests | PF, tablet |
 | `PrimeFacesAdminSuiteSailIT` | `sail/admin/pf/suite/*.xml` | PF, tablet |
 | `PrimeFacesAdminSailIT` | `sail/admin/pf/pf-admin-sail.xml` (the older single-file admin script) | PF, tablet |
@@ -810,8 +810,7 @@ fixtures, with `testStrategy="Assert"`.
 `sc-kitchensink-sail.xml` covers the same ground for SmartClient, except
 membership and ListGridFixture (`componentBuilderClass` only applies to
 PrimeFaces). It also clicks the ActionsFixture's Run From Row link in a row,
-declined and confirmed, which PF does in its separate, disabled `rowLink` test
-(runtime issue P9). The only kitchen sink membership widget is on ConditionsFixture,
+declined and confirmed, which PF does in its separate `rowLink` test. The only kitchen sink membership widget is on ConditionsFixture,
 which never settles in SmartClient (runtime issue SC-4).
 
 Both kitchen sinks make their records unique with `{run}`, so they can be rerun
@@ -840,8 +839,11 @@ Kitchen sink fixtures for the newer steps:
   browser; the SC kitchen sink filters its time column there (runtime issue
   SC-9). PF does not use that grid.
 - ActionsFixture's Upload action refuses a file named `sail-refused.txt` with
-  "The file sail-refused.txt already exists", as Upload Backup refuses a backup
-  that exists, for `upload testSuccess="false"`.
+  "The file sail-refused.txt already exists" (an `UploadException`), as Upload
+  Backup refuses a backup that exists, and one named `sail-invalid.txt` with
+  "The file sail-invalid.txt is not a valid upload" (a `ValidationException`),
+  for `upload testSuccess="false"`. The upload page shows either refusal as the
+  upload's problems.
 - ActionsFixture's rows grid has a Run From Row link in each row, whose action
   asks for a confirmation, for `dataGridLink`.
 
@@ -1125,12 +1127,7 @@ silently.
     any user with a client role to its support centre UX/UI. Sign in as a
     user with the roles the workflow needs, and register them.
 - **Links in rows.** `dataGridLink` clicks links in data grid rows only, not in
-  list grid rows. In PrimeFaces, clicking an action link in a row of a grid that
-  zooms when a row is selected also zooms into the row (runtime issue P9).
-- **Refused uploads** are read from the upload page's messages. An upload action
-  that refuses a file by throwing a `ValidationException`, rather than an
-  `UploadException`, shows only a generic error reference there (runtime issue
-  P10), so `testFailure message` cannot check its text.
+  list grid rows.
 - **Unused attributes.** `dataEnter@navigateToWidget`,
   `navigateMap@refreshTimeInSeconds`, `navigateMap@showRefreshControls`,
   `navigateCalendar@startBinding` and `navigateCalendar@endBinding` are accepted
