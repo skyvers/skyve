@@ -617,7 +617,9 @@ public class ContentUploadView extends AbstractUploadView {
 	 * warning, rolled back, and enqueued as the refusal's localised message. A
 	 * {@link MessageException} (such as a {@code ValidationException}) that the
 	 * upload action throws is shown as the upload's problems, as an
-	 * {@link UploadException}'s are.
+	 * {@link UploadException}'s are, except an {@link ActionUnavailableException},
+	 * which the upload action or an interceptor can also throw: that is shown as the
+	 * refusal, as above.
 	 *
 	 * @param event PrimeFaces upload event; must not be {@code null}
 	 * @throws Exception if upload preconditions or processing fail unexpectedly
@@ -727,11 +729,14 @@ public class ContentUploadView extends AbstractUploadView {
 				exception = e;
 			}
 			catch (RuntimeException e) {
-				if (! (e instanceof MessageException messageException)) {
+				// An unavailable action is refused by the outer handler, as every other action is; anything that is not a
+				// message exception is unexpected, and is handled there too
+				if ((e instanceof ActionUnavailableException) || (! (e instanceof MessageException messageException))) {
 					throw e;
 				}
 				// A refusal by a validation (or another message exception) is shown as the upload's problems, as an
-				// UploadException's are, rather than as an unexpected failure
+				// UploadException's are, rather than as an unexpected failure. As for an UploadException, the persistence
+				// is rolled back and the conversation (whose bean the action did not replace) is cached again.
 				LOGGER.warn("File upload refused with a message exception.", e);
 				persistence.rollback();
 				exception = uploadException(messageException);

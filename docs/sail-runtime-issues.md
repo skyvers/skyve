@@ -407,13 +407,16 @@ with the generic message and no severity, so it shows as information.
 **Fix.** `150d05dddc`: `handleActionFileUpload` turns a `MessageException` from
 the upload action into the upload's errors (each message, with its bindings as
 where), so the upload page shows it as it shows an `UploadException`'s
-problems. A content upload shows a `MessageException`'s messages as error
+problems. An `ActionUnavailableException` (also a `MessageException`) that the
+upload action or an interceptor throws still goes to the refusal of an
+unavailable action, as for every other action. A content upload shows a `MessageException`'s messages as error
 messages. Unexpected failures and unavailable actions are now shown as errors,
 not information.
 
 **Workaround in the suites.** None needed now: the ActionsFixture's Upload
-action refuses `sail-invalid.txt` with a `ValidationException`, and both
-kitchen sinks check the refusal.
+action refuses `sail-invalid.txt` with a `ValidationException` and
+`sail-unavailable.txt` with an `ActionUnavailableException`, and both kitchen
+sinks and `ActionsFixtureBizPortAndUploadH2Test` check each refusal.
 
 **Status:** fixed.
 
