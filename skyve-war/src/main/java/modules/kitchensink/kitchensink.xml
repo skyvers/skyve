@@ -29,6 +29,7 @@
 		<document ref="ListGridFixture" />
 		<document ref="OrderedGridFixture" />
 		<document ref="OrderedGridFixtureRow" />
+		<document ref="OrderedGridFixtureLine" />
 	</documents>
 	<roles>
 		<role name="dev">
@@ -128,6 +129,7 @@
 				<document name="ListGridFixture" permission="CRUDD" />
 				<document name="OrderedGridFixture" permission="CRUDD" />
 				<document name="OrderedGridFixtureRow" permission="CRUDD" />
+				<document name="OrderedGridFixtureLine" permission="CRUDD" />
 			</privileges>
 		</role>
 	</roles>

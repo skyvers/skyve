@@ -849,10 +849,19 @@ Kitchen sink fixtures for the newer steps:
   has. The SC kitchen sink sets them in a new row, and changes one again
   after `dataGridEdit` (runtime issue SC-11).
 - `OrderedGridFixture` (the "Ordered Grid Fixtures" menu list) is saved and has
-  an ordered data grid, `rows`, whose rows are added through their own view.
-  Both kitchen sinks add three rows, `dataGridMove` them, save, and reopen the
-  fixture from its list to check each row's position with `captureCell` and a
-  `pattern`.
+  three ordered collections:
+  - `rows`, a data grid whose rows are added through their own view. Both
+    kitchen sinks add three rows, `dataGridMove` them, save, and reopen the
+    fixture from its list to check each row's position with `captureCell` and
+    a `pattern`.
+  - `lines`, an inline data grid. The SC kitchen sink adds lines inline, moves
+    one, edits one, saves and checks their positions once reopened (PF cannot
+    type into inline cells).
+  - `members`, an ordered list membership of lookup values. SAIL has no
+    gesture to drag members into a new order: in SC, `dataEnter` assigns
+    members in the order its value names them; PF's pick list assigns them in
+    the candidates' order and has no control to reorder them. Both kitchen
+    sinks save the members and check their order once reopened.
 - ListGridFixture's "PrimeFaces data table of column types" has a filter
   parameter (`text` not null), so SmartClient completes its criteria in the
   browser; the SC kitchen sink filters its time column there (runtime issue

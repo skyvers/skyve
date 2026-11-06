@@ -16,6 +16,10 @@
 	<dataGrid binding="rows" title="Rows">
 		<boundColumn binding="name" />
 	</dataGrid>
+	<dataGrid binding="lines" title="Lines" inline="true">
+		<boundColumn binding="name" />
+	</dataGrid>
+	<listMembership binding="members" candidatesHeading="Lookup values" membersHeading="Members" />
 	<actions>
 		<defaults />
 	</actions>

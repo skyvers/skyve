@@ -698,6 +698,42 @@
 			<delete />
 		</method>
 	</interaction>
+	<interaction name="Ordered list membership: keep its order once saved">
+		<method>
+			<comment>Lookup values to be members</comment>
+			<navigateList module="kitchensink" document="LookupDescription" />
+			<listGridNew module="kitchensink" document="LookupDescription" />
+			<dataEnter binding="description" value="SAIL member {run} a" />
+			<save />
+			<ok />
+			<listGridNew module="kitchensink" document="LookupDescription" />
+			<dataEnter binding="description" value="SAIL member {run} b" />
+			<save />
+			<ok />
+			<listGridNew module="kitchensink" document="LookupDescription" />
+			<dataEnter binding="description" value="SAIL member {run} c" />
+			<save />
+			<ok />
+			<navigateList module="kitchensink" document="OrderedGridFixture" />
+			<listGridNew module="kitchensink" document="OrderedGridFixture" />
+			<dataEnter binding="name" value="SAIL ordered members {run}" />
+			<comment>PrimeFaces' pick list has no control to reorder members: they are assigned in the order of the candidates</comment>
+			<dataEnter binding="members" value="SAIL member {run} a|SAIL member {run} b|SAIL member {run} c" />
+			<save />
+			<ok />
+			<comment>Reopen it from its list, so the order comes from the database</comment>
+			<listGridZoom module="kitchensink" document="OrderedGridFixture" rowContaining="SAIL ordered members {run}" />
+			<testValue binding="members" value="SAIL member {run} a|SAIL member {run} b|SAIL member {run} c" />
+			<delete />
+			<navigateList module="kitchensink" document="LookupDescription" />
+			<listGridZoom module="kitchensink" document="LookupDescription" rowContaining="SAIL member {run} a" />
+			<delete />
+			<listGridZoom module="kitchensink" document="LookupDescription" rowContaining="SAIL member {run} b" />
+			<delete />
+			<listGridZoom module="kitchensink" document="LookupDescription" rowContaining="SAIL member {run} c" />
+			<delete />
+		</method>
+	</interaction>
 	<interaction name="Menus">
 		<method>
 			<testMenu module="kitchensink" />
