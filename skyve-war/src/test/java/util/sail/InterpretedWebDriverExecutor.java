@@ -183,6 +183,8 @@ public abstract class InterpretedWebDriverExecutor<
 	private User viewTemplateUser;
 	/** The variables each automation starts with, by name; see {@link #useVariables(Map)}. */
 	private final Map<String, String> startingVariables = new java.util.TreeMap<>();
+	/** The step snapshots and video of the running automation, when the system properties ask for them; or null. */
+	private SailMedia media;
 
 	/**
 	 * Runs the automation's before procedure, interactions and after procedure, applying the test strategy.
@@ -199,6 +201,7 @@ public abstract class InterpretedWebDriverExecutor<
 		}
 		failures.clear();
 		thrown.clear();
+		media = SailMedia.start(selenide, automation);
 
 		try {
 			Procedure before = automation.getBefore();
@@ -215,6 +218,10 @@ public abstract class InterpretedWebDriverExecutor<
 		}
 		finally {
 			restoreViewUser();
+			if (media != null) {
+				media.finish();
+				media = null;
+			}
 		}
 
 		if (! failures.isEmpty()) {
@@ -279,15 +286,25 @@ public abstract class InterpretedWebDriverExecutor<
 			stepNumber = i + 1;
 			currentStep = step;
 			nextStep = (i + 1 < l) ? steps.get(i + 1) : null;
+			int failuresBefore = failures.size();
+			if (media != null) {
+				media.stepStarted(name, stepNumber, step);
+			}
 			try {
 				step.execute(this);
 			}
 			catch (SailFailure e) {
 				// already described where it happened (Assert)
+				if (media != null) {
+					media.stepEnded(e.getMessage());
+				}
 				throw e;
 			}
 			catch (Throwable t) { // NOSONAR java:S1181 any step failure, including Selenide assertion errors, is a SAIL failure
 				String failure = failureMessage(reason(t));
+				if (media != null) {
+					media.stepEnded(failure);
+				}
 				if ((! halt) && (TestStrategy.Verify == getTestStrategy())) {
 					record(failure);
 					SailFailure cause = new SailFailure(failure, t);
@@ -297,6 +314,10 @@ public abstract class InterpretedWebDriverExecutor<
 				}
 				diagnose();
 				throw new SailFailure(failure, t);
+			}
+			if (media != null) {
+				// a check that failed under Verify was recorded without throwing
+				media.stepEnded((failures.size() > failuresBefore) ? failures.get(failures.size() - 1) : null);
 			}
 			previousStep = step;
 		}

@@ -742,6 +742,9 @@ support does), run Maven in a copy of the checkout instead.
 | `sail.timeoutSeconds` | `30` | The limit for every wait on the browser. It is a limit, not a delay: waits end as soon as their event happens. |
 | `sail.testStrategy` | the script's | Overrides every script's strategy. Refused by the admin suites and `PrimeFacesSailTestStrategyIT`. |
 | `sail.failureDir` | none | Directory for failure screenshots and page sources |
+| `sail.snapshotDir` | none | Directory for a screenshot after every step and a film strip of the run; see [Snapshots and video](#snapshots-and-video) |
+| `sail.snapshotSource` | `false` | `true` also saves each step's page source with its snapshot |
+| `sail.videoDir` | none | Directory for a video of the run (Chrome's screencast) and its player; see [Snapshots and video](#snapshots-and-video) |
 | `sail.suite.only` | all files | Admin suites only: comma-separated prefixes of the suite files to run, for example `03,04`. The set-up files and the restore always run. |
 | `surefire.rerunFailingTestsCount` | `2` (root pom) | Pass `0` for SAIL runs |
 | `forkCount` | `2` (skyve-war pom) | `1` is recommended; `2` is safe, because the server lock serialises SAIL ITs |
@@ -790,6 +793,47 @@ page's timers.
 `-Dsurefire.rerunFailingTestsCount=0` for SAIL runs. With reruns on, a SAIL IT
 that fails and then passes on a rerun is reported as a flake, and the build
 passes. A rerun of an admin suite also repeats its destructive steps.
+
+### Snapshots and video
+
+Two opt-in system properties record what a run did, for a person to look
+through afterwards. Both renderers have them. Without the properties, the
+executor does no extra work.
+
+```bash
+mvn ... -Dsail.snapshotDir=/tmp/sail-media -Dsail.videoDir=/tmp/sail-media
+```
+
+- **Step snapshots (`sail.snapshotDir`).** After every step, and when a step
+  fails (before the test strategy acts on it), the executor saves a
+  screenshot, named by sequence, interaction and step, for example
+  `012-Contacts-create-save.png`. With `-Dsail.snapshotSource=true` it also
+  saves the page source. The run's `index.html` is a film strip: each step's
+  number, interaction, the step as SAIL XML, its outcome (with the failure),
+  its duration and its screenshot. Failed steps are highlighted, and a link
+  jumps to the first failure.
+- **Video (`sail.videoDir`).** The executor records Chrome's DevTools
+  screencast (`Page.startScreencast`: JPEG, quality 60, at most 1280×800),
+  saving each frame with the time Chrome drew it, and each step's start and end.
+  The run's `player.html` plays the frames at their real timing, captioned
+  with the step that was running. It has play and pause, a speed of 0.5x to 4x,
+  a slider, and a step list to jump to. The screencast uses raw CDP commands
+  through Selenium's DevTools, so it does not depend on the DevTools version
+  Selenium was built for. Frames are written and acknowledged on a thread of
+  their own, so the test does not wait for them. A browser without DevTools
+  (not Chromium) has no video; the run carries on and the trace says so.
+- **Folders.** Each automation run gets its own folder under each directory,
+  named by its start time, the test (`Class.method`) and, in a suite, the
+  script file. Suites, workflows and ITs with several tests therefore keep
+  every run. Each directory's `index.html` lists the runs, newest first. The
+  pages are static files that open from the file system. When both
+  properties name the same directory, a run's film strip and player are in one
+  folder and link to each other.
+
+Snapshots slow a run by the time each screenshot takes. The screencast
+costs little. Recordings show whatever the browser showed, so a run against
+real data records real data: names, addresses, amounts. Keep such
+recordings out of shared places and out of the repository.
 
 ## The Suites
 
