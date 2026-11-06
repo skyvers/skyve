@@ -721,13 +721,16 @@
 			<dataEnter binding="members" value="SAIL member {run} a|SAIL member {run} b|SAIL member {run} c" />
 			<listMembershipMove binding="members" rowContaining="SAIL member {run} c" to="0" />
 			<testValue binding="members" value="SAIL member {run} c|SAIL member {run} a|SAIL member {run} b" />
-			<listMembershipMove binding="members" row="1" to="2" />
-			<testValue binding="members" value="SAIL member {run} c|SAIL member {run} b|SAIL member {run} a" />
+			<listMembershipMove binding="members" row="0" to="1" />
+			<testValue binding="members" value="SAIL member {run} a|SAIL member {run} c|SAIL member {run} b" />
 			<save />
+			<comment>The view shown after the save lists the members in the order saved</comment>
+			<testValue binding="members" value="SAIL member {run} a|SAIL member {run} c|SAIL member {run} b" />
 			<ok />
-			<comment>Reopen it from its list, so the order comes from the database</comment>
+			<comment>Reopen it from its list, so the order comes from the database. The order is not sorted either way, so it
+				cannot match the candidates' order by chance: the pick list must show the saved order</comment>
 			<listGridZoom module="kitchensink" document="OrderedGridFixture" rowContaining="SAIL ordered members {run}" />
-			<testValue binding="members" value="SAIL member {run} c|SAIL member {run} b|SAIL member {run} a" />
+			<testValue binding="members" value="SAIL member {run} a|SAIL member {run} c|SAIL member {run} b" />
 			<delete />
 			<navigateList module="kitchensink" document="LookupDescription" />
 			<listGridZoom module="kitchensink" document="LookupDescription" rowContaining="SAIL member {run} a" />
