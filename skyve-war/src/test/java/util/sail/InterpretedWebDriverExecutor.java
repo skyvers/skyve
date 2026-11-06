@@ -1105,9 +1105,12 @@ public abstract class InterpretedWebDriverExecutor<
 	 */
 	private boolean dataGridLinkRunsAction(@Nonnull String binding, @Nonnull String text) {
 		AC context = peek();
-		String moduleName = (context == null) ? null : context.getModuleName();
-		String documentName = (context == null) ? null : context.getDocumentName();
-		ViewType viewType = (context == null) ? null : context.getViewType();
+		if (context == null) {
+			return true;
+		}
+		String moduleName = context.getModuleName();
+		String documentName = context.getDocumentName();
+		ViewType viewType = context.getViewType();
 		if ((moduleName == null) || (documentName == null) || (viewType == null)) {
 			return true;
 		}

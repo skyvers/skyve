@@ -2064,6 +2064,7 @@ public class PrimeFacesSelenide extends Selenide<
 	 * @param triggerId	the element's id
 	 * @return the element, or null if it is not on the page or is disabled
 	 */
+	@SuppressWarnings("static-method") // an instance method, as the other gestures are
 	public @Nullable WebElement uploadTrigger(@Nonnull String triggerId) {
 		SelenideElement trigger = $(byId(triggerId));
 		if ((! trigger.exists()) || disabledClass(trigger) || (trigger.attr("disabled") != null)) {

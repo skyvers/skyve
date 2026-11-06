@@ -90,7 +90,7 @@ class CaptureValueTest {
 		step.setVariable("invoice");
 		step.setPattern("REF-(\\d+");
 		MetaDataException e = assertThrows(MetaDataException.class, () -> step.execute(executor));
-		assertThat(e.getMessage().contains("[pattern] REF-(\\d+ is not a regular expression"), is(true));
+		assertThat(e.getMessage(), org.hamcrest.CoreMatchers.containsString("[pattern] REF-(\\d+ is not a regular expression"));
 		verifyNoInteractions(executor);
 	}
 }
