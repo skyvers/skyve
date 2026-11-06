@@ -17,6 +17,8 @@ import org.skyve.content.MimeType;
 import org.skyve.domain.Bean;
 import org.skyve.domain.messages.ActionUnavailableException;
 import org.skyve.domain.messages.DomainException;
+import org.skyve.domain.messages.Message;
+import org.skyve.domain.messages.MessageException;
 import org.skyve.domain.messages.SecurityException;
 import org.skyve.domain.messages.UploadException;
 import org.skyve.domain.messages.UploadException.Problem;
@@ -558,9 +560,16 @@ public class ContentUploadView extends AbstractUploadView {
 		}
 		catch (Exception e) {
 			persistence.rollback();
-			String reference = WebErrorUtil.logUnexpectedAndGetReference(LOGGER, "Content upload failed for binding " + contentBinding, e);
-			FacesMessage msg = new FacesMessage("Failure", WebErrorUtil.genericMessage(reference));
-			fc.addMessage(null, msg);
+			if (e instanceof MessageException messageException) {
+				// A refusal (such as a validation) is expected: show its messages as errors, as a Faces action does
+				LOGGER.warn("Content upload refused for binding {}", OWASP.sanitiseLog(contentBinding), e);
+				addMessageExceptionMessages(messageException, fc);
+			}
+			else {
+				String reference = WebErrorUtil.logUnexpectedAndGetReference(LOGGER, "Content upload failed for binding " + contentBinding, e);
+				FacesMessage msg = new FacesMessage(FacesMessage.SEVERITY_ERROR, FAILURE_MESSAGE_SUMMARY, WebErrorUtil.genericMessage(reference));
+				fc.addMessage(null, msg);
+			}
 		}
 		// NB No need to disconnect Persistence as it is done in the SkyveFacesPhaseListener after the response is rendered.
 	}
@@ -605,7 +614,10 @@ public class ContentUploadView extends AbstractUploadView {
 	 * conversation bean when the action returns one, rolls persistence back for
 	 * upload errors, and enqueues user-facing JSF messages. A refusal's
 	 * {@link ActionUnavailableException} is caught, not thrown: it is logged as a
-	 * warning, rolled back, and enqueued as the refusal's localised message.
+	 * warning, rolled back, and enqueued as the refusal's localised message. A
+	 * {@link MessageException} (such as a {@code ValidationException}) that the
+	 * upload action throws is shown as the upload's problems, as an
+	 * {@link UploadException}'s are.
 	 *
 	 * @param event PrimeFaces upload event; must not be {@code null}
 	 * @throws Exception if upload preconditions or processing fail unexpectedly
@@ -714,6 +726,16 @@ public class ContentUploadView extends AbstractUploadView {
 				persistence.rollback();
 				exception = e;
 			}
+			catch (RuntimeException e) {
+				if (! (e instanceof MessageException messageException)) {
+					throw e;
+				}
+				// A refusal by a validation (or another message exception) is shown as the upload's problems, as an
+				// UploadException's are, rather than as an unexpected failure
+				LOGGER.warn("File upload refused with a message exception.", e);
+				persistence.rollback();
+				exception = uploadException(messageException);
+			}
 			catch (IOException e) {
 				throw new DomainException("File Upload could not be processed", e);
 			}
@@ -730,14 +752,42 @@ public class ContentUploadView extends AbstractUploadView {
 		catch (ActionUnavailableException e) {
 			// Logged as a warning when refused, so show the user the refusal's message rather than an error reference
 			persistence.rollback();
-			FacesMessage msg = new FacesMessage(FAILURE_MESSAGE_SUMMARY, OWASP.escapeHtml(e.getMessages().get(0).getText()));
+			FacesMessage msg = new FacesMessage(FacesMessage.SEVERITY_ERROR, FAILURE_MESSAGE_SUMMARY, OWASP.escapeHtml(e.getMessages().get(0).getText()));
 			fc.addMessage(null, msg);
 		}
 		catch (Exception e) {
 			persistence.rollback();
 			String reference = WebErrorUtil.logUnexpectedAndGetReference(LOGGER, "File upload failed for action " + actionName, e);
-			FacesMessage msg = new FacesMessage(FAILURE_MESSAGE_SUMMARY, WebErrorUtil.genericMessage(reference));
+			FacesMessage msg = new FacesMessage(FacesMessage.SEVERITY_ERROR, FAILURE_MESSAGE_SUMMARY, WebErrorUtil.genericMessage(reference));
 			fc.addMessage(null, msg);
+		}
+	}
+
+	/**
+	 * Converts a message exception (such as a {@code ValidationException}) that an upload action threw into the
+	 * upload's errors, so that it is shown as an {@link UploadException}'s problems are.
+	 *
+	 * @param messageException the refusal; must not be {@code null}
+	 * @return an upload exception with an error for each of the refusal's messages; where is the message's bindings
+	 */
+	static @Nonnull UploadException uploadException(@Nonnull MessageException messageException) {
+		UploadException result = new UploadException();
+		for (Message message : messageException.getMessages()) {
+			String where = String.join(", ", message.getBindings());
+			result.addError(new Problem(message.getText(), where.isEmpty() ? null : where));
+		}
+		return result;
+	}
+
+	/**
+	 * Adds a message exception's messages as error messages.
+	 *
+	 * @param messageException the refusal; must not be {@code null}
+	 * @param fc active Faces context used for messages; must not be {@code null}
+	 */
+	private static void addMessageExceptionMessages(@Nonnull MessageException messageException, @Nonnull FacesContext fc) {
+		for (Message message : messageException.getMessages()) {
+			fc.addMessage(null, new FacesMessage(FacesMessage.SEVERITY_ERROR, FAILURE_MESSAGE_SUMMARY, OWASP.escapeHtml(message.getText())));
 		}
 	}
 

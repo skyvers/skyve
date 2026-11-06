@@ -1,9 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <!--
 	PrimeFaces conformance for dataGridLink: the Actions Fixture's Run From Row link in a row of its rows grid, declined and
-	confirmed. It is run by PrimeFacesKitchenSinkSailIT.rowLink, which is disabled until runtime issue P9 is fixed: in a
-	PrimeFaces data grid that zooms when a row is selected, clicking the link's text also selects the row, so the view
-	zooms into the row instead of running the link's action.
+	confirmed, run by PrimeFacesKitchenSinkSailIT.rowLink. The grid zooms into a row when the row is selected, so this also
+	checks that clicking the link does not select its row (runtime issue P9, fixed).
 -->
 <automation uxui="tablet"
 			userAgentType="tablet"

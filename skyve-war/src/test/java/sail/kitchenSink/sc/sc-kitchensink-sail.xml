@@ -265,6 +265,9 @@
 			<comment>The upload action refuses this file; testSuccess="false" lets testFailure check the refusal on the upload page</comment>
 			<upload action="ActionsUpload" file="sail/files/sail-refused.txt" testSuccess="false" />
 			<testFailure message="sail-refused.txt already exists" />
+			<comment>This file is refused by a validation, which the upload page shows as a refusal too</comment>
+			<upload action="ActionsUpload" file="sail/files/sail-invalid.txt" testSuccess="false" />
+			<testFailure message="sail-invalid.txt is not a valid upload" />
 			<upload action="ActionsUpload" file="sail/files/sail-upload.txt" />
 			<tabSelect path="Rows" />
 			<dataGridNew binding="rows" />

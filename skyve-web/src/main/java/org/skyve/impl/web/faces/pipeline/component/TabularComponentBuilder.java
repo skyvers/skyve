@@ -6068,12 +6068,19 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 	 * <p>Side effects: mutates {@code link.getChildren()} when {@code text} has a
 	 * value. The resolved escape decision controls the child output-text boundary.
 	 *
+	 * <p>The text's span has PrimeFaces' {@code ui-c} class, as a PrimeFaces button's
+	 * text has. A data table selects (and a data grid zooms into) a row clicked on any
+	 * {@code span:not(.ui-c)}, so without it a click on a row's link would also select
+	 * the row, instead of only running the link's action.
+	 *
 	 * @param link command link receiving visible child text; must not be {@code null}
 	 * @param text raw metadata text and resolved escape decision; may be {@code null}
 	 */
 	private void addCommandLinkText(@Nonnull CommandLink link, @Nullable EscapableText text) {
 		if ((text != null) && (text.getValue() != null)) {
-			link.getChildren().add(outputText(text));
+			HtmlOutputText linkText = outputText(text);
+			linkText.setStyleClass("ui-c");
+			link.getChildren().add(linkText);
 		}
 	}
 

@@ -114,7 +114,7 @@ scripts W1–W8 in the Biz Hub `Apps/src/test/java/sail/apps/` suite.
 |---|---|---|---|
 | 1.1 | **Done (39e5c203fd, fb6e39b010):** `upload testSuccess="false"`, then `testFailure`. Was: `upload` can't expect a refusal | Uploading a file that already exists ("file already exists") can't be tested | Let `testFailure` (and `testSuccess`) follow `upload` and check the upload page's or the view's error. Or add an optional `expectFailure`/`message` on `upload`. Prefer reusing `testFailure` |
 | 1.2 | **Done (39e5c203fd, fb6e39b010):** `captureCell`, `captureTitle` and `pattern` on the capture steps. Was: `captureValue` reads only a view widget by binding | A ToDo's reference number is shown only in the list and the title | Optional `query`/`column` with `row`/`rowContaining` to read a list cell, and a `title="true"` form (or a separate `captureTitle`) to read the view title |
-| 1.3 | **Done (39e5c203fd, fb6e39b010):** `dataGridLink`; its PF conformance waits for runtime issue P9. Was: no step clicks a link in a grid row | W4 can't press "Revoke Access" (a link in each Portal grid row) | Optional `rowContaining`/`row` plus `binding` or grid name on `navigateLink text`, so the link is found within that row. Or a `dataGridLink`/`listGridLink` step |
+| 1.3 | **Done (39e5c203fd, fb6e39b010):** `dataGridLink` (PF conformance since P9's fix, 150d05dddc). Was: no step clicks a link in a grid row | W4 can't press "Revoke Access" (a link in each Portal grid row) | Optional `rowContaining`/`row` plus `binding` or grid name on `navigateLink text`, so the link is found within that row. Or a `dataGridLink`/`listGridLink` step |
 | 1.4 | **Done (39e5c203fd, fb6e39b010):** `sailWorkflow(...)` (`util.sail.SailWorkflow`) and a `<workflow>` root. Was: `{run}` and `{var:}` don't cross automations | W1, W4, W6 and W6b move between the support centre (PF) and SmartClient, so each is 2–4 scripts that the IT stitches together | A harness runner that takes several scripts (or one file with several automations) and shares the run token and variables between them |
 | 1.5 | `viewRoles` can't take a group | Every Apps persona needed its effective roles listed by hand (from SQL) | **Done** (Mike chose C, 2026-11-06, `sail-recorder`): when `sail.recording` is on, `GET sailrecording?roles` returns the signed-in user's effective roles (groups expanded), and the harness builds the views with them after each `<login/>` of a user with no `viewRoles` registration. A registration still wins; without the endpoint (flag off, older server) the views keep every role. See [The test user](../sail.md#the-test-user) |
 | 1.6 | SmartClient `dataGridZoom` on a grid without inline editing reported "the grid's button is disabled" unless a `dataGridSelect` came first | W6b, the timesheet's `timedLines` grid | The executor already selects the row before zooming (`dataGridGesture`), so this is probably the zoom being clicked before the button enables. Reproduce in the kitchen sink and wait for the button to enable. Unconfirmed |
@@ -161,10 +161,10 @@ reproductions are in [sail-runtime-issues.md](../sail-runtime-issues.md).
 - **P6:** Re-run Job of Generate Test Data always fails.
 - **P8:** an action upload page left open hides later error messages
   (unconfirmed).
-- **P9 (new, 2026-11-06):** an action link in a PF data grid row also zooms
-  into the row; blocks PF `dataGridLink` (one-line fix verified, not applied).
-- **P10 (new, 2026-11-06):** an upload action's `ValidationException` shows only
-  a generic error reference.
+- **P9, fixed (150d05dddc), approved by Mike (2026-11-06):** an action link in a
+  PF data grid row also zoomed into the row.
+- **P10, fixed (150d05dddc), approved by Mike (2026-11-06):** an upload action's
+  `ValidationException` showed only a generic error reference.
 - **SC-3:** a list without a menu item fails to load.
 - **SC-4:** ConditionsFixture never settles.
 - **SC-6:** the Backup and Restore "started" growls are not shown.

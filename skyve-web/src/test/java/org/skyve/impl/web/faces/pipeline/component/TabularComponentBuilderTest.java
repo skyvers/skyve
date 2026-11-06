@@ -3202,6 +3202,8 @@ class TabularComponentBuilderTest {
 		assertTrue(commandLinkChildren.contains(outputText));
 		assertEquals("Download", outputText.getValue());
 		assertTrue(outputText.isEscape());
+		// the text's span must not select its data table row when clicked (PrimeFaces skips span.ui-c)
+		assertEquals("ui-c", outputText.getStyleClass());
 		verify(commandLink).setProcess("@form");
 		verify(commandLink).setUpdate("@(form)");
 		verify(commandLink).setActionExpression(actionExpression);

@@ -178,6 +178,36 @@ class ActionsFixtureBizPortAndUploadH2Test extends AbstractSkyveTest {
 	}
 
 	@Test
+	void anUploadRefusedWithAnUploadExceptionShowsItsProblem() throws Exception {
+		String webId = cacheConversation(ActionsFixture.newInstance());
+		ContentUploadView view = actionUploadView(webId, "ActionsUpload");
+
+		view.handleFileUpload(upload("sail-refused.txt", "refused".getBytes(StandardCharsets.UTF_8)));
+
+		assertEquals(List.of("The file sail-refused.txt already exists"), view.getProblems().stream().map(Problem::getWhat).toList());
+		assertEquals(1, messages.size(), messages::toString);
+		assertEquals(FacesMessage.SEVERITY_ERROR, messages.get(0).getSeverity());
+		assertEquals("Unsuccessful", messages.get(0).getSummary());
+		assertNull(cachedFixture(webId).getOutcome());
+	}
+
+	@Test
+	void anUploadRefusedWithAValidationExceptionShowsItsMessageAsAProblem() throws Exception {
+		String webId = cacheConversation(ActionsFixture.newInstance());
+		ContentUploadView view = actionUploadView(webId, "ActionsUpload");
+
+		view.handleFileUpload(upload("sail-invalid.txt", "invalid".getBytes(StandardCharsets.UTF_8)));
+
+		// shown as an UploadException's problems are, not as an unexpected failure's error reference
+		assertEquals(List.of("The file sail-invalid.txt is not a valid upload"), view.getProblems().stream().map(Problem::getWhat).toList());
+		assertTrue(view.getProblems().get(0).isError());
+		assertEquals(1, messages.size(), messages::toString);
+		assertEquals(FacesMessage.SEVERITY_ERROR, messages.get(0).getSeverity());
+		assertEquals("Unsuccessful", messages.get(0).getSummary());
+		assertNull(cachedFixture(webId).getOutcome());
+	}
+
+	@Test
 	void anUploadIsRefusedOnceItsButtonIsDisabled() throws Exception {
 		ActionsFixture fixture = persistedFixture();
 		fixture.setDisableUpload(Boolean.TRUE);
