@@ -41,7 +41,7 @@ public class StartSAILRecording implements ServerSideAction<ControlPanelExtensio
 			throw new ValidationException(new Message(Util.nullSafeI18n("admin.controlPanel.sailRecording.notAllowed")));
 		}
 		SailRecording.start(EXT.getHttpServletRequest().getSession(), user);
-		if (UtilImpl.ENVIRONMENT_IDENTIFIER == null) {
+		if ((UtilImpl.ENVIRONMENT_IDENTIFIER == null) && (webContext != null)) {
 			webContext.message(MessageSeverity.warn, Util.nullSafeI18n("admin.controlPanel.sailRecording.production"));
 		}
 		return new ServerSideActionResult<>(bean);

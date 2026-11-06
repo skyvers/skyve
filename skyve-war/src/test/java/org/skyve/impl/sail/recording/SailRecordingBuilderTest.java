@@ -64,7 +64,7 @@ class SailRecordingBuilderTest {
 	@Test
 	void signsInAsTheRecordingUserWithThePasswordVariableThenSwitchesToSmartClient() {
 		Automation automation = new SailRecordingBuilder("demo", "tester", STARTED, STOPPED).build(List.of()).automation();
-		List<Step> before = automation.getBefore().getSteps();
+		List<Step> before = java.util.Objects.requireNonNull(automation.getBefore()).getSteps();
 		Login login = (Login) before.get(0);
 		assertAll(() -> assertEquals("desktop", automation.getUxui()),
 					() -> assertEquals("desktop", automation.getUserAgentType().name()),

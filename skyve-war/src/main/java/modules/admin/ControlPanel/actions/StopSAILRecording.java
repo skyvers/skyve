@@ -35,7 +35,9 @@ public class StopSAILRecording implements ServerSideAction<ControlPanelExtension
 			throw new ValidationException(new Message(Util.nullSafeI18n("admin.controlPanel.sailRecording.none")));
 		}
 		recording.stop();
-		webContext.growl(MessageSeverity.info, Util.nullSafeI18n("admin.controlPanel.sailRecording.stopped", String.valueOf(recording.getStepCount())));
+		if (webContext != null) {
+			webContext.growl(MessageSeverity.info, Util.nullSafeI18n("admin.controlPanel.sailRecording.stopped", String.valueOf(recording.getStepCount())));
+		}
 		return new ServerSideActionResult<>(bean);
 	}
 }

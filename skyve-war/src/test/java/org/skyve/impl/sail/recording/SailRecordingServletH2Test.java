@@ -126,7 +126,7 @@ class SailRecordingServletH2Test extends AbstractSkyveTest {
 	 */
 	private String token() throws Exception {
 		String body = get(Map.of()).body();
-		Map<?, ?> state = (Map<?, ?>) JSON.unmarshall(body);
+		Map<?, ?> state = (Map<?, ?>) java.util.Objects.requireNonNull(JSON.unmarshall(body), body);
 		assertEquals(Boolean.TRUE, state.get("recording"), body);
 		return String.valueOf(state.get("_csrf"));
 	}

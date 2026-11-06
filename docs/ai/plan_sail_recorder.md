@@ -1,6 +1,6 @@
 # Plan: SAIL recorder
 
-Status: approved to build, 2026-11-04. See [Decisions](#decisions-mike-2026-11-04). On 2026-11-06 Mike said to build it on the `sail` branch. Phase 0 (language gaps 1–4) is done; the recorder itself has not been started. Other open SAIL work is in [plan_sail_completion.md](plan_sail_completion.md).
+Status: approved to build, 2026-11-04. See [Decisions](#decisions-mike-2026-11-04). On 2026-11-06 Mike said to build it on the `sail` branch. Phase 0 (language gaps 1–4) is done, and phase 1 (SmartClient core) is done on `sail-recorder`. Other open SAIL work is in [plan_sail_completion.md](plan_sail_completion.md).
 
 **This run (Mike, 2026-11-06):**
 
@@ -220,7 +220,7 @@ These came from writing real workflows. Details and suggested shapes are in [pla
 ## Phases
 
 0. **SAIL language gaps 1–4** (see [SAIL language gaps](#sail-language-gaps)), in the core and both executors, with conformance scripts in the kitchen sink. **Done** on `sail`, 2026-11-05.
-1. **SC core.** The gate, loading, `navigateMenu`/`navigateEdit`, `dataEnter`, `tabSelect`, actions, `listGridZoom` with `rowContaining`, unmapped-gesture comments, and download. Done when a recording of an admin workflow replays green through the existing SC Selenide executor without edits.
+1. **SC core.** The gate, loading, `navigateMenu`/`navigateEdit`, `dataEnter`, `tabSelect`, actions, `listGridZoom` with `rowContaining`, unmapped-gesture comments, and download. Done when a recording of an admin workflow replays green through the existing SC Selenide executor without edits. **Done** on `sail-recorder`, 2026-11-06: see [Recording](../sail.md#recording). `SmartClientRecorderRoundTripSailIT` records a kitchen sink workflow and the admin contacts workflow and replays both unedited. The recorded login takes its password from `{var:password}`, which the test defines with the new, additive `variable(name, value)` on the test bases. Also built for later phases: a step cap (`sail.maximumSteps`) and `GET sailrecording?from=&count=` for a range of steps.
 2. **Context.** Comments and server-side checks.
 3. **Assertions while recording.** A recorder overlay: alt-click a field to add `testValue` with its current value, or alt-click a message to add `testMessage`.
 4. **PF.** The client-id → binding map and the same step set. Done when the same workflow recorded in PF replays green through the PF executor.

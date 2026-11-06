@@ -265,6 +265,9 @@ generated number, that a later step must find again:
 - Using a variable that has not been captured fails the step, and the message
   lists the variables that are defined.
 - A substituted value is not substituted again.
+- A test can give every script it runs variables to start with: `variable(name, value)` on
+  `AbstractSmartClientInterpretedSail` and `AbstractPrimeFacesInterpretedSail` (or `useVariables` on the executor).
+  A recorded script signs in with `{var:password}`, so its test defines `password`.
 
 `{run}` and `{var:name}` are substituted in:
 
@@ -580,6 +583,7 @@ development server.
    - `environment.showSetup`: `false`. Otherwise admin's first sign in goes to
      the setup page.
    - `environment.jobScheduler`: `false`. The suites expect it off.
+   - `sail.recording`: `true`, only for `SmartClientRecorderRoundTripSailIT`. The other ITs do not mind it.
    - Keep `environment.identifier` non-null and the `bootstrap` section as it
      is (`admin`/`admin`, customer `demo`). The bootstrap user is not created
      in a production environment.
@@ -621,6 +625,7 @@ tests. The SAIL ITs are:
 | `SmartClientKitchenSinkSailIT` | `sail/kitchenSink/sc/sc-kitchensink-sail.xml` | SC |
 | `SmartClientAdminSailIT` | `sail/admin/sc/sc-admin-sail.xml` | SC |
 | `SmartClientAdminSuiteSailIT` | `sail/admin/sc/suite/*.xml` | SC |
+| `SmartClientRecorderRoundTripSailIT` | records `sail/kitchenSink/sc/sc-recorder-round-trip.xml` and an admin contacts workflow, and replays the recordings; see [Recording](#recording). Needs `sail.recording` on. | SC |
 
 To run the SAIL unit tests without any browser IT, exclude ITs and give a base
 URL that nothing answers:
@@ -890,6 +895,102 @@ Both executors use a few script calls that are not gestures:
 
 Scripts follow the same rules. Use `testGridRows timeoutMillis` or
 `testMessage` to wait for a server job, not `<pause>`.
+
+## Recording
+
+The SAIL recorder writes a script of what a user does in SmartClient. The script is a first draft: an editor (a person
+or an AI) adds assertions, puts `{run}` into values that must be unique, and removes steps that do not matter. The plan,
+with the phases still to come (context comments, assertions while recording, PrimeFaces, and the remaining gestures), is
+[plan_sail_recorder.md](ai/plan_sail_recorder.md).
+
+### The gate
+
+A session records only when all three of these hold. When any fails, the server sends no recorder code: the pages are
+byte for byte what they are without the recorder.
+
+1. **Configuration.** `sail.recording` in `skyve.json` is `true`. It defaults to `false`, and an absent `sail` section
+   means `false`. Recording is allowed in production (a null `environment.identifier`), but Skyve then logs a warning at
+   startup, and Start warns the user that the script will hold the data they see and type.
+2. **Role.** The user has `admin.SAILRecorder`. The role is separate from DevOps: it gives the Control Panel menu item
+   and only its recording actions. A user without DevOps sees only the Control Panel's Recording controls.
+3. **Started.** Recording was started for the session in the Control Panel, and has not been stopped.
+
+`sail.maximumSteps` (default 5000) caps the steps one recording keeps. When a recording is full, the recorder stops and
+tells the user to stop and download it; nothing is lost silently.
+
+### Start, stop and download
+
+1. Open **DevOps / Control Panel**, select the **SAIL** tab, and press **Start** in the Recording box. The recorder loads
+   into the page at once, without a reload.
+2. Use the application. Every page of the session loads the recorder until recording stops.
+3. Come back to the Control Panel and press **Stop**. The recorder sends its last steps first, then the server builds the
+   script. Going back to the Control Panel to stop is left out of the script.
+4. Press **Download** for the script, `sail-recording-<yyyyMMdd-HHmm>.xml`. It can be downloaded again until the next
+   recording starts or the session ends.
+
+The recording lives only in the server session. It is never written to the database, and signing out or the session
+expiring discards it, so download it first.
+
+### What is recorded
+
+The script has `uxui="desktop"` and `userAgentType="desktop"`, one step per line, and each element's attributes in a fixed
+order. Its `<before>` signs in as the user who recorded, then switches to SmartClient:
+
+```xml
+<before>
+	<login user="admin" password="{var:password}"/>
+	<switchMode/>
+</before>
+```
+
+The password is never recorded. The login takes it from the variable `password`, so a test runs the script as
+downloaded by defining the variable, with `variable("password", "...")` on the test base (see
+[The run token and variables](#the-run-token-and-variables)); or an editor replaces `{var:password}`. The login names the
+customer only when the sign in page asks for one (no `environment.customer`).
+
+| Gesture | Step |
+|---|---|
+| A menu item | `navigateMenu`, the item's shown labels with its groups, for example `DevOps/Control Panel` |
+| A page loaded with `a=e` or `a=l` in its URL (a link, a typed URL, a reload) | `navigateEdit` (with `bizId` from `i`) or `navigateList` |
+| Typing into or changing a field | `dataEnter` with the final value, written before the next step or server response. Combos and radios record the option's code with `match="code"`; check boxes `true` or `false`; dates and times the text as shown; rich text its plain text. New lines are written as `&#10;`. |
+| Selecting a tab | `tabSelect`, with `::` for nested tabs. Selecting the tab already shown records nothing. |
+| A view's buttons | `ok`, `save`, `cancel`, `delete`, `zoomOut`, `remove`, or `action name="..."` for the view's own actions. A declined confirmation adds `confirm="false"`. |
+| A list grid's New, or zooming into a row | `listGridNew`, `listGridZoom`. A row is named with `rowContaining`: its bizKey when a cell shows it, otherwise the cell the fewest loaded rows show, the leftmost on a tie; `row` only when no text finds the row first. The list view's own grid is named by the context; a grid in a view by `module` and `query` (or `document` and `model`). |
+
+Anything else is written as an `<!-- unmapped: ... -->` comment where it happened, so the editor sees the gap: a click on
+a control that records no step (a grid tool, a data grid row, a link, a header menu item), clearing a field (SAIL cannot
+enter an empty value), and typing into a password field (passwords are never recorded). A gesture is never dropped
+silently.
+
+### How it works
+
+- `desktop/home.xhtml` adds `skyve/sail/recorder-sc-min.js` after `skyve-min.js` only through
+  `#{desktop.sailRecording}`, which checks the gate. The Control Panel's SAIL tab loads the same bundle when Start's
+  response says the session records. The bundle is built by `skyve-web/build.xml` (`compress`) from
+  `skyve-web/src/js/sail/recorder-sc.js`, and is never merged into `skyve-min.js`.
+- Skyve's client code has no recorder checks. The recorder wraps a few of Skyve's SmartClient methods when it loads
+  (each is marked in `skyve-web/src/js/desktop` with a comment) and listens to SmartClient's `ValuesManager.itemChanged()`
+  and to the DOM in the capture phase. It detaches when recording stops.
+- It sends its steps as JSON batches, one request at a time through SmartClient's RPC manager, to the `sailrecording`
+  endpoint (`org.skyve.impl.sail.recording.SailRecordingServlet`). Each page gets a CSRF token from the endpoint, and the
+  endpoint checks the gate on every request. Steps the page has not seen acknowledged are sent again from a beacon as it
+  unloads, and the server adds each step once. `GET sailrecording?from=i&count=n` returns a range of the steps.
+- On Stop, `org.skyve.impl.sail.recording.SailRecordingBuilder` builds the `Automation` and writes its XML.
+- `SmartClientRecorderRoundTripSailIT` records two workflows (kitchen sink widgets, actions, tabs and list grids; admin
+  contacts) and replays each recording unedited. It also checks that the home page is unchanged unless the session
+  records.
+
+### Limits
+
+- SmartClient only. PrimeFaces recording, context comments and server-side checks, assertions added while recording,
+  and lookups, data grids, uploads, server-side questions, list filters and sorting, and tree, map and calendar
+  navigation come in later phases; until then they are unmapped comments (or, for a field such as a lookup, an unmapped
+  comment for its change).
+- A recording starts in the Control Panel. If its first gesture is not a navigation, the script says so in a comment.
+- Recorded values are user data. A recording against real data holds real names and values; edit them out before a
+  script is committed.
+- Replaying a recording finds rows by the text they showed when recorded, so it expects the same data. Records the
+  recording created are created again with the same values: put `{run}` into values that must be unique.
 
 ## Known Limitations
 

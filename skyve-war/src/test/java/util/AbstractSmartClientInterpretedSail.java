@@ -54,6 +54,20 @@ public abstract class AbstractSmartClientInterpretedSail extends AbstractH2Test 
 		viewRoles.register(userName, roleNames);
 	}
 
+	/** The variables every automation of this test starts with; see {@link #variable(String, String)}. */
+	private final java.util.Map<String, String> variables = new java.util.TreeMap<>();
+
+	/**
+	 * Defines a variable that every script this test runs starts with, for {@code {var:name}}. A recorded script signs
+	 * in with {@code password="{var:password}"}: define {@code password} to run it unedited.
+	 *
+	 * @param name	the variable name
+	 * @param value	the value
+	 */
+	protected final void variable(@Nonnull String name, @Nonnull String value) {
+		variables.put(name, value);
+	}
+
 	@BeforeEach
 	void setupBrowser() {
 		// One SAIL test at a time per server, even across forked JVMs (see SailServerLock): may wait for another to finish
@@ -115,6 +129,7 @@ public abstract class AbstractSmartClientInterpretedSail extends AbstractH2Test 
 		try (FacesUtil.SailFacesContextScope ignored = FacesUtil.withSailFacesContextIfNeeded()) {
 			SmartClientInterpretedWebDriverExecutor executor = new SmartClientInterpretedWebDriverExecutor(selenium);
 			executor.useViewRoles(viewRoles);
+			executor.useVariables(variables);
 			automation.execute(executor);
 		}
 		finally {

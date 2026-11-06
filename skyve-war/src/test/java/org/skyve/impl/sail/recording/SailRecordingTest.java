@@ -30,6 +30,7 @@ import jakarta.servlet.http.HttpSession;
  * Tests the recording gate (configuration, role, started) and the session's recording: steps in order, resent steps
  * added once, the step cap, ranges, and stopping.
  */
+@SuppressWarnings("static-method")
 class SailRecordingTest {
 	private boolean originalRecording;
 	private int originalMaximum;
