@@ -1133,7 +1133,7 @@
 			core.handled();
 			return null;
 		}
-		return core.unmapped("pressed " + strip(button.title || name) + " (a " + button.type + " action, not recorded yet)");
+		return core.unmapped("pressed " + strip(button.title || name) + " (a " + button.type + " action, which no SAIL step presses)");
 	}
 
 	function wrapButton(button) {
@@ -1626,7 +1626,7 @@
 			}
 			core.push(step);
 		} else if (params.a) {
-			core.push({ op: "unmapped", text: "opened " + location.search + " (not recorded yet)", view: "" });
+			core.push({ op: "unmapped", text: "opened " + location.search + " (no SAIL step opens this page)", view: "" });
 		}
 	}
 

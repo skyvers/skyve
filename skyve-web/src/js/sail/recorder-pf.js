@@ -215,7 +215,7 @@
 		var view = describeView();
 		var where = screen();
 		unreadable.forEach(function (binding) {
-			core.push({ op: "unmapped", text: "changed " + binding + " (a widget recorded in a later phase)", view: view, screen: where });
+			core.push({ op: "unmapped", text: "changed " + binding + " (a widget SAIL cannot enter, or the recorder cannot read)", view: view, screen: where });
 		});
 		unreadable = [];
 		fields().forEach(function (f) {
@@ -590,6 +590,10 @@
 				move.to = String(to);
 				core.record(move);
 			}
+		} else if (((behaviour === "filter") || (behaviour === "sort")) && !grid.entry.dataGrid) {
+			// a data table list grid's filters and sorts are its columns' (not mapped to bindings): see docs/sail.md
+			core.unmapped((behaviour === "filter" ? "filtered" : "sorted") + " the PrimeFaces data table list grid " +
+							(grid.entry.listGrid || "") + " (recorded only for Vue list grids)");
 		} else if (behaviour === "rowSelect") {
 			var selected = grid.element.querySelector("tbody tr.ui-state-highlight");
 			var rowNum = selected ? rows.indexOf(selected) : -1;
@@ -874,7 +878,7 @@
 			return null;
 		} else {
 			step = { op: "unmapped", text: "pressed " + entry.step + " " + (entry.binding || entry.action || entry.name || "") +
-											" (recorded in a later phase)" };
+											" (not recorded)" };
 		}
 		return step;
 	}
@@ -1146,7 +1150,7 @@
 			}
 			core.push(list);
 		} else if (a) {
-			core.push({ op: "unmapped", text: "opened " + location.search + " (not recorded yet)", view: "" });
+			core.push({ op: "unmapped", text: "opened " + location.search + " (no SAIL step opens this page)", view: "" });
 		}
 	}
 
