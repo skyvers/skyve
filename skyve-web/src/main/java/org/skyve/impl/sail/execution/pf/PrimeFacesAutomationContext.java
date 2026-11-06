@@ -1,10 +1,13 @@
 package org.skyve.impl.sail.execution.pf;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
 
+import org.skyve.domain.Bean;
 import org.skyve.impl.sail.execution.AutomationContext;
 import org.skyve.impl.web.faces.components.ListGrid;
 import org.skyve.impl.web.faces.components.View;
@@ -15,6 +18,7 @@ import org.skyve.impl.web.faces.pipeline.layout.LayoutBuilderChain;
 import org.skyve.impl.web.faces.views.FacesView;
 import org.skyve.metadata.sail.language.step.context.PushEditContext;
 import org.skyve.metadata.sail.language.step.context.PushListContext;
+import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.web.UserAgentType;
 
 import jakarta.annotation.Nonnull;
@@ -31,6 +35,7 @@ public class PrimeFacesAutomationContext extends AutomationContext<PrimeFacesGen
 
 	private Map<String, List<UIComponent>> components = new TreeMap<>();
 	private Map<String, List<Object>> widgets = new TreeMap<>();
+	private Map<String, ListModel<Bean>> listModels = new TreeMap<>();
 
 	/**
 	 * Generates list-view components and widgets for the supplied PrimeFaces list context.
@@ -125,6 +130,35 @@ public class PrimeFacesAutomationContext extends AutomationContext<PrimeFacesGen
 		widgetList.add(widget);
 	}
 	
+	/**
+	 * Records the list model whose columns a list grid shows, under the grid's identifier.
+	 *
+	 * @param identifier the list grid's identifier, as list grid steps name it
+	 * @param model the grid's list model
+	 */
+	void putListModel(@Nonnull String identifier, @Nonnull ListModel<Bean> model) {
+		listModels.put(identifier, model);
+	}
+
+	/**
+	 * Returns every logical identifier that has collected components, in identifier order.
+	 *
+	 * @return the identifiers; a live, unmodifiable view
+	 */
+	public @Nonnull Set<String> getIdentifiers() {
+		return Collections.unmodifiableSet(components.keySet());
+	}
+
+	/**
+	 * Returns the list model whose columns a list grid shows.
+	 *
+	 * @param identifier the list grid's identifier, as list grid steps name it
+	 * @return the list model, or {@code null} when no list grid was collected under the identifier
+	 */
+	public @Nullable ListModel<Bean> getListModel(@Nonnull String identifier) {
+		return listModels.get(identifier);
+	}
+
 	/**
 	 * Returns collected Faces components for a logical identifier.
 	 *

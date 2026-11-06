@@ -14,7 +14,6 @@ import org.skyve.impl.metadata.module.menu.ListItem;
 import org.skyve.impl.metadata.module.menu.MapItem;
 import org.skyve.impl.metadata.module.menu.TreeItem;
 import org.skyve.impl.metadata.user.UserImpl;
-import org.skyve.impl.sail.recording.SailRecording;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.UserAgent;
 import org.skyve.impl.web.WebUtil;
@@ -37,7 +36,6 @@ import org.skyve.metadata.view.View.ViewType;
 import org.skyve.util.Icons;
 import org.skyve.util.OWASP;
 import org.skyve.web.WebAction;
-import org.skyve.web.WebContext;
 
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
@@ -46,7 +44,6 @@ import jakarta.faces.FacesException;
 import jakarta.faces.context.FacesContext;
 import jakarta.inject.Named;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpSession;
 
 /**
  * Models a view interaction and binds it to the active Skyve web context.
@@ -135,22 +132,6 @@ public class DesktopView extends HarnessView {
 	static @Nonnull String buildBannerScript() {
 		String banners = WebUtil.getEnvironmentBannersHtml();
 		return (banners == null) ? "" : "$('body').append('" + OWASP.escapeJsString(banners) + "');";
-	}
-
-	/**
-	 * Indicates whether the page loads the SAIL recorder, because the session is recording: see
-	 * {@link SailRecording#isRecording(HttpSession, User)}. When it is false, the page has no trace of the recorder.
-	 *
-	 * <p>Side effects: none; it does not create a session.
-	 *
-	 * @return true if the session is recording
-	 */
-	@SuppressWarnings("static-method")
-	public boolean isSailRecording() {
-		HttpServletRequest request = (HttpServletRequest) FacesContext.getCurrentInstance().getExternalContext().getRequest();
-		HttpSession session = request.getSession(false);
-		Object user = (session == null) ? null : session.getAttribute(WebContext.USER_SESSION_ATTRIBUTE_NAME);
-		return SailRecording.isRecording(session, (user instanceof User u) ? u : null);
 	}
 
 	/**

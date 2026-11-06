@@ -38,10 +38,12 @@ import org.skyve.impl.metadata.view.widget.bound.ParameterImpl;
 import org.skyve.impl.metadata.view.widget.bound.input.CompleteType;
 import org.skyve.impl.metadata.view.widget.bound.input.ContentCapture;
 import org.skyve.impl.metadata.view.widget.bound.input.ContentDisplay;
+import org.skyve.impl.sail.recording.PrimeFacesRecordingMap;
 import org.skyve.impl.util.ImageUtil;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.AbstractWebContext;
 import org.skyve.impl.web.DynamicImageServlet;
+import org.skyve.impl.web.RequestUxUiSelection;
 import org.skyve.impl.web.UserAgent;
 import org.skyve.impl.web.content.ContentMediaClassifier;
 import org.skyve.impl.web.content.ContentMediaClassifier.ContentMediaKind;
@@ -1641,5 +1643,47 @@ public class FacesView extends HarnessView {
 		List<ResponsiveFormGrid> formStyles = (List<ResponsiveFormGrid>) FacesContext.getCurrentInstance().getViewRoot().getAttributes().get(FacesUtil.FORM_STYLES_KEY);
 		formStyles.get(formIndex).reset();
 		return UtilImpl.PRIMEFLEX ? "p-col-12 p-col-nogutter" : "ui-g-12 ui-g-nopad";
+	}
+
+	/**
+	 * Returns the PrimeFaces SAIL recorder's client-id map of this edit page's view (see {@link PrimeFacesRecordingMap}),
+	 * built as the signed-in user, for the page's UX/UI. The map is built only while the session records
+	 * ({@link #isSailRecording()}).
+	 *
+	 * <p>Complexity: a component tree build of the view on each call; call it once per render.
+	 *
+	 * @return the map as JSON, or {@code null} when the session is not recording or the page names no document
+	 */
+	public @Nullable String getSailRecordingEditMap() {
+		String moduleName = getBizModuleParameter();
+		String documentName = getBizDocumentParameter();
+		if ((moduleName == null) || (documentName == null) || (! isSailRecording())) {
+			return null;
+		}
+		RequestUxUiSelection selection = UserAgent.getSelection((HttpServletRequest) FacesContext.getCurrentInstance().getExternalContext().getRequest());
+		return PrimeFacesRecordingMap.edit(moduleName, documentName, selection.getUxUi().getName(), selection.getUserAgentType());
+	}
+
+	/**
+	 * Returns the PrimeFaces SAIL recorder's client-id map of this list page's list grid (see
+	 * {@link PrimeFacesRecordingMap}), built as the signed-in user, for the page's UX/UI. The map is built only while
+	 * the session records ({@link #isSailRecording()}).
+	 *
+	 * <p>Complexity: a component tree build of the list grid on each call; call it once per render.
+	 *
+	 * @return the map as JSON, or {@code null} when the session is not recording or the page names no module
+	 */
+	public @Nullable String getSailRecordingListMap() {
+		String moduleName = getBizModuleParameter();
+		if ((moduleName == null) || (! isSailRecording())) {
+			return null;
+		}
+		RequestUxUiSelection selection = UserAgent.getSelection((HttpServletRequest) FacesContext.getCurrentInstance().getExternalContext().getRequest());
+		return PrimeFacesRecordingMap.list(moduleName,
+											getBizDocumentParameter(),
+											getQueryNameParameter(),
+											getModelName(),
+											selection.getUxUi().getName(),
+											selection.getUserAgentType());
 	}
 }

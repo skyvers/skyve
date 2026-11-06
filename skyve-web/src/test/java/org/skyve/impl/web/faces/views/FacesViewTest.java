@@ -64,6 +64,7 @@ import jakarta.faces.component.UIViewRoot;
 import jakarta.faces.context.ExternalContext;
 import jakarta.faces.context.FacesContext;
 import jakarta.faces.context.PartialViewContext;
+import jakarta.servlet.http.HttpServletRequest;
 
 /**
  * Tests for FacesView utility methods and state management that do not require a live CDI container.
@@ -374,6 +375,31 @@ class FacesViewTest {
 	void getApiScriptIsNullByDefault() {
 		FacesView view = new FacesView();
 		assertNull(view.getApiScript());
+	}
+
+	/**
+	 * The PrimeFaces recorder's client-id maps are built only while the session records: a page whose session is not
+	 * recording builds nothing. {@code PrimeFacesRecordingMapH2Test} tests the maps themselves.
+	 */
+	@Test
+	void sailRecordingMapsAreNullUnlessRecording() {
+		FacesView view = new FacesView();
+		view.setBizModuleParameter("kitchensink");
+		view.setBizDocumentParameter("ActionsFixture");
+		HttpServletRequest request = mock(HttpServletRequest.class);
+		ExternalContext externalContext = mock(ExternalContext.class);
+		when(externalContext.getRequest()).thenReturn(request);
+		FacesContext facesContext = mock(FacesContext.class);
+		when(facesContext.getExternalContext()).thenReturn(externalContext);
+		FacesContextBridge.setCurrent(facesContext);
+		try {
+			assertNull(view.getSailRecordingEditMap());
+			assertNull(view.getSailRecordingListMap());
+			verify(request, never()).getSession();
+		}
+		finally {
+			FacesContextBridge.setCurrent(null);
+		}
 	}
 
 	@Test

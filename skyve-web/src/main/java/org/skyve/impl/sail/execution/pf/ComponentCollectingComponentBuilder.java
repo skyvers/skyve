@@ -61,6 +61,8 @@ class ComponentCollectingComponentBuilder extends NoOpComponentBuilder implement
 	private String addedViewComponentAliasIdentifier;
 	// the list grid built for addedViewComponent: the layout may add it inside a border, so register this, not what is added
 	private UIComponent addedListGridComponent;
+	// the list model of addedViewComponent, whose columns the grid shows
+	private ListModel<Bean> addedListModel;
 	
 	/**
 	 * Creates a component builder that records generated PrimeFaces components for SAIL execution steps.
@@ -338,6 +340,7 @@ class ComponentCollectingComponentBuilder extends NoOpComponentBuilder implement
 												boolean aggregateQuery) {
 		if (component != null) {
 			addedViewComponent = listGrid;
+			addedListModel = model;
 			if (step instanceof PushEditContext pushEditContext) { // an edit view
 				// Keyed as a list grid step names it (NavigateList.listGridIdentifier): a query's grid by the query
 				// (modelName is the query's name), a model's grid by the model's document and the model (model="..."),
@@ -384,11 +387,19 @@ class ComponentCollectingComponentBuilder extends NoOpComponentBuilder implement
 		if (alias != null) {
 			registerListGrid(alias, listGridComponent);
 		}
+		ListModel<Bean> model = addedListModel;
+		if (model != null) {
+			context.putListModel(addedViewComponentIdentifier, model);
+			if (alias != null) {
+				context.putListModel(alias, model);
+			}
+		}
 
 		addedViewComponent = null;
 		addedViewComponentIdentifier = null;
 		addedViewComponentAliasIdentifier = null;
 		addedListGridComponent = null;
+		addedListModel = null;
 	}
 
 	/**

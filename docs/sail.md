@@ -1083,6 +1083,16 @@ silently.
   endpoint checks the gate on every request. Steps the page has not seen acknowledged are sent again from a beacon as it
   unloads, and the server adds each step once. `GET sailrecording?from=i&count=n` returns a range of the steps.
 - On Stop, `org.skyve.impl.sail.recording.SailRecordingBuilder` builds the `Automation` and writes its XML.
+- PrimeFaces groundwork (phase 4). There is no PrimeFaces recorder bundle yet, so while a session records, PrimeFaces
+  pages ask for it and get a 404.
+  - Each theme's `head-resources.xhtml` adds `skyve/sail/recorder-pf-min.js` after `skyve/prime/skyve-min.js` only
+    through `#{bean.sailRecording}`. That is the same gate, which every page bean inherits from `LocalisableView`.
+  - `org.skyve.impl.sail.recording.PrimeFacesRecordingMap` builds the map a PrimeFaces recorder names gestures with:
+    each element's client id and what a step calls it (a binding and widget kind, an action, a tab path, a grid and its
+    controls), and each grid's columns. It uses the executors' own mock render, as the signed-in user, under a mock
+    Faces context. `FacesView.getSailRecordingEditMap()` and `getSailRecordingListMap()` build it only while the
+    session records.
+  - The PrimeFaces Control Panel (`views/external/edit.xml`) has the Recording controls, as the desktop one does.
 - `SmartClientRecorderRoundTripSailIT` records two workflows (kitchen sink widgets, actions, tabs and list grids; admin
   contacts) and replays each recording unedited. It also checks that the home page is unchanged unless the session
   records.
