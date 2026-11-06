@@ -43,6 +43,7 @@ import org.skyve.metadata.sail.language.step.interaction.grids.ListGridNew;
 import org.skyve.metadata.sail.language.step.interaction.grids.ListGridSelect;
 import org.skyve.metadata.sail.language.step.interaction.grids.ListGridSort;
 import org.skyve.metadata.sail.language.step.interaction.grids.ListGridZoom;
+import org.skyve.metadata.sail.language.step.interaction.grids.ListMembershipMove;
 import org.skyve.metadata.sail.language.step.interaction.lookup.LookupDescriptionAutoComplete;
 import org.skyve.metadata.sail.language.step.interaction.lookup.LookupDescriptionEdit;
 import org.skyve.metadata.sail.language.step.interaction.lookup.LookupDescriptionNew;
@@ -481,4 +482,15 @@ public interface Executor {
 	 * @param move the data grid move step
 	 */
 	public void executeDataGridMove(@Nonnull DataGridMove move);
+
+	/**
+	 * Moves a member of an ordered list membership to another position in its member list with a drag-and-drop gesture,
+	 * as a user reorders members. The context is unchanged.
+	 *
+	 * <p>Precondition: {@link ListMembershipMove#execute(Executor)} has checked the member and that {@code to} is 0 or
+	 * more.
+	 *
+	 * @param move the list membership move step
+	 */
+	public void executeListMembershipMove(@Nonnull ListMembershipMove move);
 }

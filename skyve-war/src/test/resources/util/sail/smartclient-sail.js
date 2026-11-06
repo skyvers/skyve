@@ -20,7 +20,7 @@
 (function () {
 	"use strict";
 
-	var VERSION = 8;
+	var VERSION = 9;
 	if (window._sail && window._sail.version === VERSION) {
 		return;
 	}
@@ -1968,6 +1968,66 @@
 			}
 		}
 		return null;
+	};
+
+	/**
+	 * Checks that a member of an ordered list membership can be dragged to a position, remembers the member's record so
+	 * that membershipMoved() can tell where it went, and scrolls both rows into view: { from } or { error }. The member is
+	 * the one at row, or the first whose description contains text when text is given. Only an ordered membership
+	 * (its member list's canReorderRecords) lets a user drag its members.
+	 */
+	S.membershipMovePlan = function (locator, row, text, to) {
+		var resolved = S.resolve(S.parse(locator).spec);
+		var m = resolved.obj;
+		if (!m || !m._memberList) {
+			return { error: resolved.error || locator + " is not a list membership" };
+		}
+		var list = m._memberList;
+		if (!list.canReorderRecords) {
+			return { error: "it is not an ordered membership, so its members cannot be dragged" };
+		}
+		var data = list.getData() || [];
+		var from = row;
+		if (text != null) {
+			from = -1;
+			for (var i = 0; i < data.length && from < 0; i++) {
+				if (strip(data[i].bizKey).indexOf(text) >= 0) {
+					from = i;
+				}
+			}
+			if (from < 0) {
+				return { error: "no member's description contains '" + text + "': the members are " +
+							data.map(function (r) { return strip(r.bizKey); }).join(" | ") };
+			}
+		}
+		if (from < 0 || from >= data.length) {
+			return { error: "it has no member " + from + " (it has " + data.length + " members)" };
+		}
+		if (to >= data.length) {
+			return { error: "position " + to + " is past its last member (it has " + data.length + " members)" };
+		}
+		list._sailMoving = data[from];
+		list.scrollToRow(to);
+		list.scrollToRow(from);
+		return { from: from };
+	};
+
+	/** The first cell of a row of a list membership's member list, or null. */
+	S.memberCell = function (locator, row) {
+		var m = S.resolve(S.parse(locator).spec).obj;
+		return m && m._memberList ? isc.AutoTest.getElement(S.objectLocator(m._memberList) + "/body/row[" + row + "]/col[0]") : null;
+	};
+
+	/** True if the member membershipMovePlan() remembered is now at the position in the member list; forgets it. */
+	S.membershipMoved = function (locator, to) {
+		var m = S.resolve(S.parse(locator).spec).obj;
+		var list = m && m._memberList;
+		if (!list) {
+			return false;
+		}
+		var moving = list._sailMoving;
+		delete list._sailMoving;
+		return !!moving && list.getRecord(to) === moving;
 	};
 
 	/** The HTML item's Edit button, and the editor window's Apply button and editor iframe when it is open. */

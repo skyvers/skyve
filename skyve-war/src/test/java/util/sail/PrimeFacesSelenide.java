@@ -892,6 +892,60 @@ public class PrimeFacesSelenide extends Selenide<
 	}
 
 	/**
+	 * Moves a member of a pick list (an ordered list membership) to another position, as a user reorders members: clicks
+	 * the member, then its pick list's move up or move down button (the target controls, which Skyve shows only for an
+	 * ordered membership) once for each position, waiting for each move to finish.
+	 *
+	 * @param id	the pick list's client id
+	 * @param row	the zero-based member to move, when {@code text} is {@code null}
+	 * @param text	text the label of the member to move contains (the first such member), or {@code null}
+	 * @param to	the zero-based position to move it to
+	 * @throws IllegalStateException if the pick list is not on the page or has no member ordering, the member is not
+	 * 			found, the position is past the last member, or the member is not at the position afterwards
+	 */
+	@SuppressWarnings("unchecked")
+	public void pickListMove(@Nonnull String id, int row, @Nullable String text, int to) {
+		Map<String, Object> plan = (Map<String, Object>) js("var w = PrimeFaces.getWidgetById(arguments[0]); if ((! w) || (! w.targetList)) return null;" +
+															"var label = function(li) {return (li.getAttribute('data-item-label') || li.textContent || '').replace(/\\s+/g, ' ').trim();};" +
+															"var items = w.targetList.children('li.ui-picklist-item').toArray();" +
+															"var up = w.jq.find('.ui-picklist-target-controls .ui-picklist-button-move-up')[0];" +
+															"var down = w.jq.find('.ui-picklist-target-controls .ui-picklist-button-move-down')[0];" +
+															"if ((! up) || (! down)) return {error: 'it is not an ordered membership: its pick list has no member ordering'};" +
+															"var from = arguments[1], text = arguments[2], to = arguments[3];" +
+															"if (text !== null) {from = -1; for (var i = 0; (i < items.length) && (from < 0); i++) {if (label(items[i]).indexOf(text) >= 0) from = i;}" +
+															"  if (from < 0) return {error: 'no member\\'s label contains \\'' + text + '\\': the members are ' + items.map(label).join(' | ')};}" +
+															"if ((from < 0) || (from >= items.length)) return {error: 'it has no member ' + from + ' (it has ' + items.length + ' members)'};" +
+															"if (to >= items.length) return {error: 'position ' + to + ' is past its last member (it has ' + items.length + ' members)'};" +
+															"return {from: from, item: items[from], label: label(items[from]), up: up, down: down};",
+															id, Integer.valueOf(row), text, Integer.valueOf(to));
+		if (plan == null) {
+			throw new IllegalStateException("Cannot move a member of pick list " + id + ": it is not on the page");
+		}
+		Object error = plan.get("error");
+		if (error != null) {
+			throw new IllegalStateException("Cannot move a member of pick list " + id + ": " + error);
+		}
+		int from = ((Number) plan.get("from")).intValue();
+		String label = String.valueOf(plan.get("label"));
+		if (from == to) {
+			trace("    '" + label + "' is already at position " + to);
+			return;
+		}
+		click($((WebElement) plan.get("item")));
+		SelenideElement button = $((WebElement) plan.get((to < from) ? "up" : "down"));
+		for (int i = 0, l = Math.abs(to - from); i < l; i++) {
+			click(button);
+			// Waits for the pick list's (animated) move to finish and be saved into its submitted input
+			waitFor(d -> Boolean.TRUE.equals(js("var w = PrimeFaces.getWidgetById(arguments[0]); return w.jq.find(':animated').length === 0;", id)) ? Boolean.TRUE : null);
+		}
+		waitForAjaxResponse();
+		List<String> members = pickListMembers(id);
+		if ((members == null) || (members.size() <= to) || (! label.equals(members.get(to)))) {
+			throw new IllegalStateException("Moved '" + label + "' of pick list " + id + " to position " + to + ", but its members are " + members);
+		}
+	}
+
+	/**
 	 * Returns the labels of a pick list's members, in order.
 	 *
 	 * @param id	the pick list's client id

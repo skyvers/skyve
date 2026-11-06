@@ -17,6 +17,8 @@
  *           the row at the specified index.
  *       <li>{@link org.skyve.metadata.sail.language.step.interaction.grids.DataGridMove} — drags a row
  *           of an ordered data grid to another position.
+ *       <li>{@link org.skyve.metadata.sail.language.step.interaction.grids.ListMembershipMove} — drags a
+ *           member of an ordered list membership to another position in its member list.
  *     </ul>
  *   <li><b>List-grid steps</b> — operate on module-level list views:
  *     <ul>

@@ -99,6 +99,7 @@ import org.skyve.metadata.sail.language.step.interaction.grids.ListGridFilter.Fi
 import org.skyve.metadata.sail.language.step.interaction.grids.ListGridSort;
 import org.skyve.metadata.sail.language.step.interaction.grids.ListGridSelect;
 import org.skyve.metadata.sail.language.step.interaction.grids.ListGridZoom;
+import org.skyve.metadata.sail.language.step.interaction.grids.ListMembershipMove;
 import org.skyve.metadata.sail.language.step.interaction.lookup.LookupDescriptionAutoComplete;
 import org.skyve.metadata.sail.language.step.interaction.lookup.LookupDescriptionEdit;
 import org.skyve.metadata.sail.language.step.interaction.lookup.LookupDescriptionNew;
@@ -921,6 +922,38 @@ public class PrimeFacesInterpretedWebDriverExecutor extends InterpretedWebDriver
 			}
 		}
 		throw new DomainException(String.format("<dataGridMove /> with binding [%s] could not be done: the grid is not on the page", binding));
+	}
+
+	/**
+	 * Moves a member of an ordered list membership with its pick list's move up or down buttons, which Skyve shows for an
+	 * ordered membership: see {@link PrimeFacesSelenide#pickListMove(String, int, String, int)}. The view's context is
+	 * unchanged.
+	 *
+	 * @param move	the step
+	 */
+	@Override
+	public void executeListMembershipMove(ListMembershipMove move) {
+		String binding = move.getBinding();
+		PrimeFacesAutomationContext context = peek();
+		@SuppressWarnings("null") // a null here fails the test
+		List<UIComponent> components = context.getFacesComponents(binding);
+		if (components == null) {
+			throw new MetaDataException(String.format("<listMembershipMove /> with binding [%s] is not on the view", binding));
+		}
+		String rowContaining = move.getRowContaining();
+		String text = (rowContaining == null) ? null : substituteTokens(rowContaining);
+		Integer row = move.getRow();
+		int to = move.getTo().intValue();
+		for (UIComponent component : components) {
+			if (component instanceof PickList) {
+				String clientId = PrimeFacesAutomationContext.clientId(component);
+				selenide.trace(String.format("Move the member %s of list membership [%s] to position %d (%s)",
+												(text == null) ? String.valueOf(row) : "containing '" + text + "'", binding, Integer.valueOf(to), clientId));
+				selenide.pickListMove(clientId, (row == null) ? -1 : row.intValue(), text, to);
+				return;
+			}
+		}
+		throw new MetaDataException(String.format("<listMembershipMove /> binding [%s] is not a list membership", binding));
 	}
 
 	/**

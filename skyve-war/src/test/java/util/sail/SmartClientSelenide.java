@@ -1224,6 +1224,65 @@ public class SmartClientSelenide extends Selenide<
 	}
 
 	/**
+	 * Drags a member of an ordered list membership to another position in its member list, as a user reorders members:
+	 * presses the mouse on the member, moves it past the drag threshold and over the member at the position (its upper
+	 * half to drop the member before it when moving up, its lower half to drop it after it when moving down), and
+	 * releases it. SmartClient then moves the member and numbers the members again (the member list's
+	 * {@code recordDrop}).
+	 *
+	 * @param locator	the list membership's locator
+	 * @param row		the zero-based member to move, when {@code text} is {@code null}
+	 * @param text		text the description of the member to move contains (the first such member), or {@code null}
+	 * @param to		the zero-based position to move it to
+	 * @throws IllegalStateException if the membership is not ordered, the member is not found, the position is past the
+	 * 			last member, or the member is not at the position after the drag
+	 */
+	public void listMembershipMove(@Nonnull String locator, int row, @Nullable String text, int to) {
+		String membership = root(locator);
+		require(membership);
+		Map<String, Object> plan = map(script("return _sail.membershipMovePlan(arguments[0], arguments[1], arguments[2], arguments[3])",
+												membership, Integer.valueOf(row), text, Integer.valueOf(to)));
+		Object error = plan.get("error");
+		if (error != null) {
+			throw new IllegalStateException("Cannot move a member of " + membership + ": " + error);
+		}
+		int from = ((Number) plan.get("from")).intValue();
+		if (from == to) {
+			script("_sail.membershipMoved(arguments[0], arguments[1])", membership, Integer.valueOf(to));
+			trace("    Member " + from + " is already at position " + to);
+			return;
+		}
+		// Waits for the member list to draw the rows it scrolled to
+		waitForFullPageResponse();
+		SelenideElement source = $((WebElement) until("member " + from + " of " + membership + " to show",
+														d -> script("return _sail.memberCell(arguments[0], arguments[1])", membership, Integer.valueOf(from))));
+		SelenideElement target = $((WebElement) until("member " + to + " of " + membership + " to show",
+														d -> script("return _sail.memberCell(arguments[0], arguments[1])", membership, Integer.valueOf(to))));
+		prepare(source);
+		prepare(target);
+		WebElement sourceElement = source.toWebElement();
+		WebElement targetElement = target.toWebElement();
+		int quarter = Math.max(1, targetElement.getSize().getHeight() / 4);
+		int direction = (to < from) ? -1 : 1;
+		// Press on the member, move past SmartClient's drag threshold so that the drag starts, then over the half of the
+		// target member that drops it on the far side of that member, and release there. Each move is a pointer event that
+		// SmartClient's drag tracking sees.
+		new org.openqa.selenium.interactions.Actions(driver)
+				.moveToElement(sourceElement)
+				.clickAndHold()
+				.moveByOffset(0, 5 * direction)
+				.moveByOffset(0, 5 * direction)
+				.moveToElement(targetElement, 0, quarter * direction)
+				.moveByOffset(0, direction)
+				.release()
+				.perform();
+		waitForFullPageResponse();
+		if (! Boolean.TRUE.equals(script("return _sail.membershipMoved(arguments[0], arguments[1])", membership, Integer.valueOf(to)))) {
+			throw new IllegalStateException("Dragged member " + from + " of " + membership + " to position " + to + ", but the member list does not show it there");
+		}
+	}
+
+	/**
 	 * Clicks a data grid's column header until the grid is sorted by that column alone, in the direction asked for, as a
 	 * user sorts the rows it shows. No SAIL step does this (an IT that needs the gesture calls it): sorting a data grid is
 	 * a display choice, not something a script means to record.

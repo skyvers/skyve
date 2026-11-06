@@ -18,6 +18,7 @@ import org.skyve.metadata.sail.language.step.interaction.grids.DataGridMove;
 import org.skyve.metadata.sail.language.step.interaction.grids.ListGridClearFilter;
 import org.skyve.metadata.sail.language.step.interaction.grids.ListGridFilter;
 import org.skyve.metadata.sail.language.step.interaction.grids.ListGridSort;
+import org.skyve.metadata.sail.language.step.interaction.grids.ListMembershipMove;
 import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateMenu;
 import org.skyve.metadata.sail.language.step.interaction.navigation.TestMenu;
 import org.skyve.metadata.sail.language.step.interaction.session.SwitchMode;
@@ -237,6 +238,17 @@ public abstract class WebDriverExecutor<T extends AutomationContext> extends Scr
 	@Override
 	public void executeDataGridMove(@Nonnull DataGridMove move) {
 		comment("<dataGridMove/> not supported by this generator");
+	}
+
+	/**
+	 * Emits a comment that {@code <listMembershipMove/>} is not supported, because this generator has no WebDriver equivalent
+	 * yet. The context is left as it is.
+	 *
+	 * @param move the step being skipped
+	 */
+	@Override
+	public void executeListMembershipMove(@Nonnull ListMembershipMove move) {
+		comment("<listMembershipMove/> not supported by this generator");
 	}
 
 	/**

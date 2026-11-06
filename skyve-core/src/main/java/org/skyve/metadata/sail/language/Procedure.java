@@ -45,6 +45,7 @@ import org.skyve.metadata.sail.language.step.interaction.grids.ListGridNew;
 import org.skyve.metadata.sail.language.step.interaction.grids.ListGridSelect;
 import org.skyve.metadata.sail.language.step.interaction.grids.ListGridSort;
 import org.skyve.metadata.sail.language.step.interaction.grids.ListGridZoom;
+import org.skyve.metadata.sail.language.step.interaction.grids.ListMembershipMove;
 import org.skyve.metadata.sail.language.step.interaction.lookup.LookupDescriptionAutoComplete;
 import org.skyve.metadata.sail.language.step.interaction.lookup.LookupDescriptionEdit;
 import org.skyve.metadata.sail.language.step.interaction.lookup.LookupDescriptionNew;
@@ -147,7 +148,8 @@ public class Procedure {
 						@XmlElementRef(type = CaptureCell.class),
 						@XmlElementRef(type = CaptureTitle.class),
 						@XmlElementRef(type = DataGridLink.class),
-						@XmlElementRef(type = DataGridMove.class)})
+						@XmlElementRef(type = DataGridMove.class),
+						@XmlElementRef(type = ListMembershipMove.class)})
 	public @Nonnull List<Step> getSteps() {
 		return steps;
 	}

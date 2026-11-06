@@ -72,6 +72,7 @@ import org.skyve.metadata.sail.language.step.interaction.grids.ListGridNew;
 import org.skyve.metadata.sail.language.step.interaction.grids.ListGridSelect;
 import org.skyve.metadata.sail.language.step.interaction.grids.ListGridSort;
 import org.skyve.metadata.sail.language.step.interaction.grids.ListGridZoom;
+import org.skyve.metadata.sail.language.step.interaction.grids.ListMembershipMove;
 import org.skyve.metadata.sail.language.step.interaction.lookup.LookupDescriptionAutoComplete;
 import org.skyve.metadata.sail.language.step.interaction.lookup.LookupDescriptionEdit;
 import org.skyve.metadata.sail.language.step.interaction.lookup.LookupDescriptionNew;
@@ -814,6 +815,27 @@ public class SmartClientInterpretedWebDriverExecutor extends InterpretedWebDrive
 		int to = move.getTo().intValue();
 		selenide.trace(String.format("Move row %d of data grid [%s] to position %d", Integer.valueOf(from), binding, Integer.valueOf(to)));
 		selenide.dataGridMove(rows.get(0).getLocator(), from, to);
+	}
+
+	/**
+	 * Drags a member of an ordered list membership to the position in its member list, ending any inline edit first: see
+	 * {@link SmartClientSelenide#listMembershipMove(String, int, String, int)}. The view's context is unchanged.
+	 */
+	@Override
+	public void executeListMembershipMove(ListMembershipMove move) {
+		prepareForInteraction();
+		String binding = move.getBinding();
+		List<Locator> locators = context().getLocators(binding);
+		if (locators == null) {
+			throw new MetaDataException(String.format("<listMembershipMove /> with binding [%s] is not on the view", binding));
+		}
+		String rowContaining = move.getRowContaining();
+		String text = (rowContaining == null) ? null : substituteTokens(rowContaining);
+		Integer row = move.getRow();
+		int to = move.getTo().intValue();
+		selenide.trace(String.format("Move the member %s of list membership [%s] to position %d",
+										(text == null) ? String.valueOf(row) : "containing '" + text + "'", binding, Integer.valueOf(to)));
+		selenide.listMembershipMove(locators.get(0).getLocator(), (row == null) ? -1 : row.intValue(), text, to);
 	}
 
 	/**

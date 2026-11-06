@@ -19,6 +19,7 @@ import org.skyve.metadata.sail.language.step.interaction.grids.DataGridMove;
 import org.skyve.metadata.sail.language.step.interaction.grids.ListGridClearFilter;
 import org.skyve.metadata.sail.language.step.interaction.grids.ListGridFilter;
 import org.skyve.metadata.sail.language.step.interaction.grids.ListGridSort;
+import org.skyve.metadata.sail.language.step.interaction.grids.ListMembershipMove;
 import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateMenu;
 import org.skyve.metadata.sail.language.step.interaction.navigation.TestMenu;
 import org.skyve.metadata.sail.language.step.TestFailure;
@@ -135,7 +136,7 @@ class SailExecutorTest {
 
 	private static final String[] UNSUPPORTED = {"upload", "testMessage", "testGridRows", "testWidget", "navigateMenu", "testMenu", "switchMode",
 													"listGridFilter", "listGridClearFilter", "listGridSort", "captureValue",
-													"captureCell", "captureTitle", "dataGridLink", "dataGridMove"};
+													"captureCell", "captureTitle", "dataGridLink", "dataGridMove", "listMembershipMove"};
 
 	private static void executeUnsupportedSteps(ScriptExecutor<?> executor) {
 		executor.executeUpload(new Upload());
@@ -153,6 +154,7 @@ class SailExecutorTest {
 		executor.executeCaptureTitle(new CaptureTitle());
 		executor.executeDataGridLink(new DataGridLink());
 		executor.executeDataGridMove(new DataGridMove());
+		executor.executeListMembershipMove(new ListMembershipMove());
 	}
 
 	private static final class TestContext extends AutomationContext<GenerateListContext, GenerateEditContext> {

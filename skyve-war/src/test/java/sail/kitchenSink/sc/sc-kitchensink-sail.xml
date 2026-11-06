@@ -423,8 +423,12 @@
 			<dataGridMove binding="lines" rowContaining="Third {run}" to="0" />
 			<dataGridEdit binding="lines" row="1" />
 			<dataEnter binding="name" value="First edited {run}" />
-			<comment>The ordered membership. SAIL has no gesture to drag members into a new order; SmartClient assigns them in the order the value names them</comment>
+			<comment>The ordered membership: SmartClient assigns members in the order the value names them, then they are dragged into a new order</comment>
 			<dataEnter binding="members" value="SAIL member {run} c|SAIL member {run} a|SAIL member {run} b" />
+			<listMembershipMove binding="members" rowContaining="SAIL member {run} b" to="0" />
+			<testValue binding="members" value="SAIL member {run} b|SAIL member {run} c|SAIL member {run} a" />
+			<listMembershipMove binding="members" row="1" to="2" />
+			<testValue binding="members" value="SAIL member {run} b|SAIL member {run} a|SAIL member {run} c" />
 			<save />
 			<ok />
 			<comment>Reopen it from its list, so the order comes from the database</comment>
@@ -432,7 +436,7 @@
 			<captureCell binding="lines" row="0" column="name" variable="line0" pattern="^Third " />
 			<captureCell binding="lines" row="1" column="name" variable="line1" pattern="^First edited " />
 			<captureCell binding="lines" row="2" column="name" variable="line2" pattern="^Second " />
-			<testValue binding="members" value="SAIL member {run} c|SAIL member {run} a|SAIL member {run} b" />
+			<testValue binding="members" value="SAIL member {run} b|SAIL member {run} a|SAIL member {run} c" />
 			<delete />
 			<navigateMenu module="kitchensink" item="Lookup values" />
 			<listGridZoom module="kitchensink" document="LookupDescription" rowContaining="SAIL member {run} a" />

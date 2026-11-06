@@ -498,6 +498,7 @@ of these defaults from the current context.
 | `dataGridRemove` | `binding`\*, `row` or `rowContaining` | Removes the row from the collection. The record itself is not deleted. | yes | yes |
 | `dataGridSelect` | `binding`\*, `row` or `rowContaining` | Selects the row without zooming. | only on grids with a `selectedIdBinding`; on other grids a selection zooms | yes |
 | `dataGridMove` | `binding`\*, `row` or `rowContaining`, `to`\* | Drags the row of an ordered data grid to the zero-based position `to`, counted in the rows as shown, with a real drag-and-drop gesture. The rows are numbered again in their new order, which a save keeps. Fails on a grid that is not ordered (its rows cannot be dragged) and when `to` is past the last row. The context is unchanged. | yes: the row is dragged by its drag handle, and the server reorders the collection at once (`rowReorder`) | yes; it ends any inline edit first |
+| `listMembershipMove` | `binding`\*, `row` or `rowContaining`, `to`\* | Drags a member of an ordered list membership to the zero-based position `to` in its member list, counted in the members as shown, with a real drag-and-drop gesture. `row` is the member's position in the member list; `rowContaining` is text its description contains (case-sensitive). The members are numbered again in their new order, which a save keeps. Fails on a membership that is not ordered and when `to` is past the last member. The context is unchanged. | yes: the member is clicked, then its pick list's move up or down button (shown for an ordered membership) once per position | yes; it ends any inline edit first |
 | `dataGridLink` | `binding`\*, `row` or `rowContaining`, `text`\*, `confirm`, `testSuccess` | Clicks the first displayed link in the row whose visible text contains `text` (case-sensitive), such as a "Revoke Access" link in every row. A link that runs an action is pressed as an [action step](#actions) presses its button: `confirm` answers its confirmation and questions, and the step checks for errors unless `testSuccess="false"` or it was declined; the view and its context stay. Any other link is followed as `navigateLink` follows one: the top context loses its document and view type. Which kind a link is comes from the view's metadata: the grid's links whose shown value contains the text (or every link of the grid if none does) all have an action reference. No such link in the row fails the step, listing the row's links. | yes; a click on a row's link does not select the row, so it works on a grid that zooms when a row is selected | yes |
 | `listGridNew` | `module`, `document`, `query`, `model`, `createView` | Presses New and pushes the new document's context. | yes; on a Vue list grid, its toolbar's New button, or the floating one a list view shows above its paginator | yes |
 | `listGridZoom` | as `listGridNew` without `createView`, plus `row` or `rowContaining` | Opens the row and pushes its context. | yes; on a Vue list grid, the row's View Detail button, or a click on the row when the grid zooms on a row click | yes |
@@ -856,11 +857,12 @@ Kitchen sink fixtures for the newer steps:
   - `lines`, an inline data grid. The SC kitchen sink adds lines inline, moves
     one, edits one, saves and checks their positions once reopened (PF cannot
     type into inline cells).
-  - `members`, an ordered list membership of lookup values. SAIL has no
-    gesture to drag members into a new order: in SC, `dataEnter` assigns
-    members in the order its value names them; PF's pick list assigns them in
-    the candidates' order and has no control to reorder them. Both kitchen
-    sinks save the members and check their order once reopened.
+  - `members`, an ordered list membership of lookup values. `dataEnter`
+    assigns members in the order its value names them in SC, and in the
+    candidates' order in PF. Both kitchen sinks then reorder them with
+    `listMembershipMove` (a drag in SC; PF's move up and down buttons, which
+    Skyve shows for an ordered membership, runtime issue P12), save, and check
+    their order once reopened.
 - ListGridFixture's "PrimeFaces data table of column types" has a filter
   parameter (`text` not null), so SmartClient completes its criteria in the
   browser; the SC kitchen sink filters its time column there (runtime issue
@@ -1295,12 +1297,12 @@ other implementations, which generate test code instead of driving a browser:
 The SAIL language changes are additive for script authors. Code that
 implements `Executor` directly is affected.
 
-- **Breaking:** `Executor` has 15 new abstract methods: `executeUpload`,
+- **Breaking:** `Executor` has 16 new abstract methods: `executeUpload`,
   `executeTestMessage`, `executeTestGridRows`, `executeTestWidget`,
   `executeNavigateMenu`, `executeTestMenu`, `executeSwitchMode`,
   `executeListGridFilter`, `executeListGridClearFilter`, `executeListGridSort`,
   `executeCaptureValue`, `executeCaptureCell`, `executeCaptureTitle`,
-  `executeDataGridLink` and `executeDataGridMove`. An executor outside Skyve must implement them,
+  `executeDataGridLink`, `executeDataGridMove` and `executeListMembershipMove`. An executor outside Skyve must implement them,
   even if only to fail or to emit a comment. Executors that extend skyve-ext
   `WebDriverExecutor` or `SeleneseExecutor` inherit comment-emitting
   implementations.

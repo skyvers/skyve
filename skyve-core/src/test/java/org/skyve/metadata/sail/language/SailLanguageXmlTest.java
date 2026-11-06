@@ -48,6 +48,7 @@ import org.skyve.metadata.sail.language.step.interaction.grids.ListGridFilter.Fi
 import org.skyve.metadata.sail.language.step.interaction.grids.ListGridSelect;
 import org.skyve.metadata.sail.language.step.interaction.grids.ListGridSort;
 import org.skyve.metadata.sail.language.step.interaction.grids.ListGridZoom;
+import org.skyve.metadata.sail.language.step.interaction.grids.ListMembershipMove;
 import org.skyve.metadata.sail.language.step.interaction.lookup.LookupDescriptionAutoComplete;
 import org.skyve.metadata.sail.language.step.interaction.lookup.LookupDescriptionPick;
 import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateLink;
@@ -194,6 +195,31 @@ class SailLanguageXmlTest {
 	void dataGridMoveWithoutItsRequiredAttributesIsRejectedByTheSchema() {
 		assertAll(() -> assertThrows(MetaDataException.class, () -> XMLMetaData.unmarshalSAILString(HEAD + "<dataGridMove binding=\"rows\" row=\"0\"/>" + TAIL)),
 					() -> assertThrows(MetaDataException.class, () -> XMLMetaData.unmarshalSAILString(HEAD + "<dataGridMove row=\"0\" to=\"1\"/>" + TAIL)));
+	}
+
+	private static final String LIST_MEMBERSHIP_MOVE = HEAD +
+			"<listMembershipMove binding=\"members\" rowContaining=\"Third {run}\" to=\"0\"/>" +
+			"<listMembershipMove binding=\"members\" row=\"2\" to=\"1\"/>" +
+			TAIL;
+
+	@Test
+	void marshalsAndUnmarshalsListMembershipMove() {
+		String xml = XMLMetaData.marshalSAIL(XMLMetaData.unmarshalSAILString(LIST_MEMBERSHIP_MOVE));
+		List<Step> steps = XMLMetaData.unmarshalSAILString(xml).getInteractions().get(0).getSteps();
+		ListMembershipMove byText = (ListMembershipMove) steps.get(0);
+		ListMembershipMove byRow = (ListMembershipMove) steps.get(1);
+		assertAll(() -> assertEquals(2, steps.size()),
+					() -> assertEquals("members", byText.getBinding()),
+					() -> assertEquals("Third {run}", byText.getRowContaining()),
+					() -> assertEquals(Integer.valueOf(0), byText.getTo()),
+					() -> assertEquals(Integer.valueOf(2), byRow.getRow()),
+					() -> assertEquals(Integer.valueOf(1), byRow.getTo()));
+	}
+
+	@Test
+	void listMembershipMoveWithoutItsRequiredAttributesIsRejectedByTheSchema() {
+		assertAll(() -> assertThrows(MetaDataException.class, () -> XMLMetaData.unmarshalSAILString(HEAD + "<listMembershipMove binding=\"members\" row=\"0\"/>" + TAIL)),
+					() -> assertThrows(MetaDataException.class, () -> XMLMetaData.unmarshalSAILString(HEAD + "<listMembershipMove row=\"0\" to=\"1\"/>" + TAIL)));
 	}
 
 	private static void assertAppsGaps(List<Step> steps) {

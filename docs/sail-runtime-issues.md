@@ -27,6 +27,7 @@ SC-2's suspected cause, which cites the code before its fix, at `2f4c2021b8`.
 | [P9](#p9-fixed-an-action-link-in-a-data-grid-row-also-zooms-into-the-row) | An action link in a data grid row also zooms into the row | PF | Confirmed | fixed (150d05dddc) |
 | [P10](#p10-fixed-an-upload-actions-validationexception-shows-only-an-error-reference) | An upload action's ValidationException shows only an error reference | both | Confirmed | fixed (150d05dddc) |
 | [P11](#p11-fixed-every-pf-response-moves-the-focus-to-the-first-input) | Every PF response moves the focus to the first input | PF | Confirmed | fixed (e19217194e) |
+| [P12](#p12-fixed-pf-ordered-list-memberships-could-not-be-reordered) | PF ordered list memberships could not be reordered | PF | Confirmed | fixed |
 | [SC-1](#sc-1-withdrawn-actions-blocked-after-a-server-field-error) | Actions blocked after a server field error | SC | Withdrawn: a harness fault | withdrawn |
 | [SC-2](#sc-2-fixed-inline-grid-default-values-reach-smartclient-as-objects) | Inline grid default values reach SmartClient as objects | SC | Confirmed | fixed by master |
 | [SC-3](#sc-3-a-list-without-a-menu-item-fails-to-load) | A list without a menu item fails to load | SC | Confirmed | open |
@@ -463,6 +464,39 @@ list grids' New and zoom (a URL), and OK, Cancel and Delete
 that a rerender leaves the scroll and the focus where they were, and that a new
 view and a zoom into an existing row focus their first input. The harness's
 wait for the deferred focus after each response was removed with the fix.
+
+**Status:** fixed.
+
+## P12 (fixed): PF ordered list memberships could not be reordered
+
+**Symptom.** In PrimeFaces, an ordered list membership (its collection has
+`ordered="true"`) showed no way to put its members in a new order, and when it
+was opened again its members were listed in the candidates' order, not the
+order saved. SmartClient's member list can be dragged.
+
+**Cause.** `TabularComponentBuilder.listMembership` built every pick list with
+`setShowTargetControls(false)`, so the members list never showed its move up
+and down buttons. `SkyveDualListModelMap` built the members list by walking
+the candidates (the domain values) in their order. Submitting already kept
+the members list's order: `gather()` moves the beans to match it, and an
+ordered aggregation keeps the order in its join table's list index.
+
+**Fix (a08aa5541d, approved by Mike).** For an ordered membership only:
+- `FacesViewRenderer.renderListMembership` works out whether the collection
+  is ordered, as `renderDataGrid` does, and passes it to a new
+  `ComponentBuilder.listMembership(..., boolean ordered)` overload, whose
+  default calls the existing method, so other builders are unaffected.
+  `TabularComponentBuilder` shows the pick list's target controls when it is
+  ordered.
+- `SkyveDualListModelMap` lists the members in the collection's order.
+
+Unordered memberships are unchanged: no target controls, and the members
+listed in the candidates' order.
+
+**Tests.** `TabularComponentBuilderTest` pins the target controls on for an
+ordered membership and off for an unordered one. The PF kitchen sink moves
+OrderedGridFixture's members with `listMembershipMove` (the real move up and
+down buttons), saves, reopens the fixture from its list and checks the order.
 
 **Status:** fixed.
 

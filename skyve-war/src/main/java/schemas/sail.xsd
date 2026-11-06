@@ -55,6 +55,8 @@
 
   <xs:element name="listGridZoom" type="tns:listGridZoom"/>
 
+  <xs:element name="listMembershipMove" type="tns:listMembershipMove"/>
+
   <xs:element name="login" type="tns:login"/>
 
   <xs:element name="logout" type="tns:logout"/>
@@ -195,6 +197,7 @@
         <xs:element ref="tns:captureTitle"/>
         <xs:element ref="tns:dataGridLink"/>
         <xs:element ref="tns:dataGridMove"/>
+        <xs:element ref="tns:listMembershipMove"/>
       </xs:choice>
     </xs:sequence>
   </xs:complexType>
@@ -625,6 +628,14 @@
     <xs:attribute name="to" type="xs:int" use="required"/>
   </xs:complexType>
 
+  <xs:complexType name="listMembershipMove">
+    <xs:sequence/>
+    <xs:attribute name="binding" type="xs:string" use="required"/>
+    <xs:attribute name="row" type="xs:int"/>
+    <xs:attribute name="rowContaining" type="xs:string"/>
+    <xs:attribute name="to" type="xs:int" use="required"/>
+  </xs:complexType>
+
   <xs:complexType name="interaction">
     <xs:sequence>
       <xs:element name="before" type="tns:procedure" form="qualified" minOccurs="0"/>
@@ -688,6 +699,7 @@
               <xs:element ref="tns:captureTitle"/>
               <xs:element ref="tns:dataGridLink"/>
               <xs:element ref="tns:dataGridMove"/>
+              <xs:element ref="tns:listMembershipMove"/>
             </xs:choice>
           </xs:sequence>
         </xs:complexType>

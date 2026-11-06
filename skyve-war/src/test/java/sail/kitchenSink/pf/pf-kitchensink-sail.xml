@@ -717,13 +717,17 @@
 			<navigateList module="kitchensink" document="OrderedGridFixture" />
 			<listGridNew module="kitchensink" document="OrderedGridFixture" />
 			<dataEnter binding="name" value="SAIL ordered members {run}" />
-			<comment>PrimeFaces' pick list has no control to reorder members: they are assigned in the order of the candidates</comment>
+			<comment>PrimeFaces' pick list assigns members in the order of the candidates; an ordered membership's move up and down buttons then reorder them</comment>
 			<dataEnter binding="members" value="SAIL member {run} a|SAIL member {run} b|SAIL member {run} c" />
+			<listMembershipMove binding="members" rowContaining="SAIL member {run} c" to="0" />
+			<testValue binding="members" value="SAIL member {run} c|SAIL member {run} a|SAIL member {run} b" />
+			<listMembershipMove binding="members" row="1" to="2" />
+			<testValue binding="members" value="SAIL member {run} c|SAIL member {run} b|SAIL member {run} a" />
 			<save />
 			<ok />
 			<comment>Reopen it from its list, so the order comes from the database</comment>
 			<listGridZoom module="kitchensink" document="OrderedGridFixture" rowContaining="SAIL ordered members {run}" />
-			<testValue binding="members" value="SAIL member {run} a|SAIL member {run} b|SAIL member {run} c" />
+			<testValue binding="members" value="SAIL member {run} c|SAIL member {run} b|SAIL member {run} a" />
 			<delete />
 			<navigateList module="kitchensink" document="LookupDescription" />
 			<listGridZoom module="kitchensink" document="LookupDescription" rowContaining="SAIL member {run} a" />
