@@ -118,32 +118,10 @@ public class SkyveDualListModelMap extends TreeMap<String, DualListModel<DomainV
 				List<DomainValue> target = new ArrayList<>(10);
 				if ((targetAttribute instanceof Collection collection) && Boolean.TRUE.equals(collection.getOrdered())) {
 					// an ordered membership shows its members in the collection's order
-					@SuppressWarnings("unchecked")
-					List<Bean> elements = (List<Bean>) Binder.get(bean, binding);
-					if (elements != null) {
-						for (Bean element : elements) {
-							Iterator<DomainValue> i = source.iterator();
-							while (i.hasNext()) {
-								DomainValue domainValue = i.next();
-								if (domainValue.getCode().equals(element.getBizId())) {
-									i.remove();
-									target.add(domainValue);
-									break;
-								}
-							}
-						}
-					}
+					moveMembersInOrder(bean, binding, source, target);
 				}
 				else {
-					Iterator<DomainValue> i = source.iterator();
-					while (i.hasNext()) {
-						DomainValue domainValue = i.next();
-						Bean element = Binder.getElementInCollection(bean, binding, domainValue.getCode());
-						if (element != null) {
-							i.remove();
-							target.add(domainValue);
-						}
-					}
+					moveMembers(bean, binding, source, target);
 				}
 
 				// put in the new list model
@@ -155,6 +133,63 @@ public class SkyveDualListModelMap extends TreeMap<String, DualListModel<DomainV
 		}
 		catch (Exception e) {
 			throw new FacesException("Could not scatter list membership " + binding, e);
+		}
+	}
+
+	/**
+	 * Moves the domain values of a collection's members from the source list to the target list, in the domain values'
+	 * order.
+	 *
+	 * @param bean the bean that holds the collection; must not be {@code null}
+	 * @param binding the collection's binding; must not be {@code null}
+	 * @param source the domain values not yet chosen, which loses each member's value; must not be {@code null}
+	 * @param target the chosen domain values, which gains each member's value; must not be {@code null}
+	 */
+	private static void moveMembers(@Nonnull Bean bean,
+									@Nonnull String binding,
+									@Nonnull List<DomainValue> source,
+									@Nonnull List<DomainValue> target) {
+		Iterator<DomainValue> i = source.iterator();
+		while (i.hasNext()) {
+			DomainValue domainValue = i.next();
+			Bean element = Binder.getElementInCollection(bean, binding, domainValue.getCode());
+			if (element != null) {
+				i.remove();
+				target.add(domainValue);
+			}
+		}
+	}
+
+	/**
+	 * Moves the domain values of an ordered collection's members from the source list to the target list, in the
+	 * collection's order.
+	 *
+	 * <p>Complexity: O(e * s), where e is the number of members and s the number of domain values.
+	 *
+	 * @param bean the bean that holds the collection; must not be {@code null}
+	 * @param binding the collection's binding; must not be {@code null}
+	 * @param source the domain values not yet chosen, which loses each member's value; must not be {@code null}
+	 * @param target the chosen domain values, which gains each member's value in order; must not be {@code null}
+	 */
+	private static void moveMembersInOrder(@Nonnull Bean bean,
+											@Nonnull String binding,
+											@Nonnull List<DomainValue> source,
+											@Nonnull List<DomainValue> target) {
+		@SuppressWarnings("unchecked")
+		List<Bean> elements = (List<Bean>) Binder.get(bean, binding);
+		if (elements == null) {
+			return;
+		}
+		for (Bean element : elements) {
+			Iterator<DomainValue> i = source.iterator();
+			while (i.hasNext()) {
+				DomainValue domainValue = i.next();
+				if (domainValue.getCode().equals(element.getBizId())) {
+					i.remove();
+					target.add(domainValue);
+					break;
+				}
+			}
 		}
 	}
 

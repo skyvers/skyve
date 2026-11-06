@@ -560,16 +560,7 @@ public class ContentUploadView extends AbstractUploadView {
 		}
 		catch (Exception e) {
 			persistence.rollback();
-			if (e instanceof MessageException messageException) {
-				// A refusal (such as a validation) is expected: show its messages as errors, as a Faces action does
-				LOGGER.warn("Content upload refused for binding {}", OWASP.sanitiseLog(contentBinding), e);
-				addMessageExceptionMessages(messageException, fc);
-			}
-			else {
-				String reference = WebErrorUtil.logUnexpectedAndGetReference(LOGGER, "Content upload failed for binding " + contentBinding, e);
-				FacesMessage msg = new FacesMessage(FacesMessage.SEVERITY_ERROR, FAILURE_MESSAGE_SUMMARY, WebErrorUtil.genericMessage(reference));
-				fc.addMessage(null, msg);
-			}
+			addContentUploadFailure(e, fc);
 		}
 		// NB No need to disconnect Persistence as it is done in the SkyveFacesPhaseListener after the response is rendered.
 	}
@@ -777,6 +768,26 @@ public class ContentUploadView extends AbstractUploadView {
 			result.addError(new Problem(message.getText(), where.isEmpty() ? null : where));
 		}
 		return result;
+	}
+
+	/**
+	 * Shows why a content upload failed: a refusal's messages (a {@link MessageException}, such as a validation), or
+	 * else an error reference for an unexpected failure, which is logged.
+	 *
+	 * @param e the failure; must not be {@code null}
+	 * @param fc active Faces context used for messages; must not be {@code null}
+	 */
+	private void addContentUploadFailure(@Nonnull Exception e, @Nonnull FacesContext fc) {
+		if (e instanceof MessageException messageException) {
+			// A refusal (such as a validation) is expected: show its messages as errors, as a Faces action does
+			LOGGER.warn("Content upload refused for binding {}", OWASP.sanitiseLog(contentBinding), e);
+			addMessageExceptionMessages(messageException, fc);
+		}
+		else {
+			String reference = WebErrorUtil.logUnexpectedAndGetReference(LOGGER, "Content upload failed for binding " + contentBinding, e);
+			FacesMessage msg = new FacesMessage(FacesMessage.SEVERITY_ERROR, FAILURE_MESSAGE_SUMMARY, WebErrorUtil.genericMessage(reference));
+			fc.addMessage(null, msg);
+		}
 	}
 
 	/**
