@@ -129,12 +129,16 @@ public final class SailSuite {
 	}
 
 	private @Nullable Throwable runFile(@Nonnull Consumer<String> sailResource, @Nonnull String file) {
+		SailMedia.label(file); // names the file's snapshot and video folders, when they are on
 		try {
 			sailResource.accept(folder + file);
 			return null;
 		}
 		catch (AssertionError | RuntimeException e) { // a step failure, or a missing or invalid script
 			return e;
+		}
+		finally {
+			SailMedia.label(null);
 		}
 	}
 
