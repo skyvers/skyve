@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.skyve.impl.bind.BindUtil;
+import org.skyve.metadata.sail.language.step.CaptureCell;
+import org.skyve.metadata.sail.language.step.CaptureTitle;
 import org.skyve.metadata.sail.language.step.CaptureValue;
 import org.skyve.metadata.sail.language.step.Comment;
 import org.skyve.metadata.sail.language.step.Pause;
@@ -11,6 +13,7 @@ import org.skyve.metadata.sail.language.step.TestGridRows;
 import org.skyve.metadata.sail.language.step.TestMessage;
 import org.skyve.metadata.sail.language.step.TestWidget;
 import org.skyve.metadata.sail.language.step.interaction.Upload;
+import org.skyve.metadata.sail.language.step.interaction.grids.DataGridLink;
 import org.skyve.metadata.sail.language.step.interaction.grids.ListGridClearFilter;
 import org.skyve.metadata.sail.language.step.interaction.grids.ListGridFilter;
 import org.skyve.metadata.sail.language.step.interaction.grids.ListGridSort;
@@ -191,6 +194,37 @@ public abstract class WebDriverExecutor<T extends AutomationContext> extends Scr
 	@Override
 	public void executeCaptureValue(@Nonnull CaptureValue capture) {
 		comment("<captureValue/> not supported by this generator");
+	}
+
+	/**
+	 * Emits a comment that {@code <captureCell/>} is not supported, because this generator has no WebDriver equivalent yet.
+	 *
+	 * @param capture the step being skipped
+	 */
+	@Override
+	public void executeCaptureCell(@Nonnull CaptureCell capture) {
+		comment("<captureCell/> not supported by this generator");
+	}
+
+	/**
+	 * Emits a comment that {@code <captureTitle/>} is not supported, because this generator has no WebDriver equivalent yet.
+	 *
+	 * @param capture the step being skipped
+	 */
+	@Override
+	public void executeCaptureTitle(@Nonnull CaptureTitle capture) {
+		comment("<captureTitle/> not supported by this generator");
+	}
+
+	/**
+	 * Emits a comment that {@code <dataGridLink/>} is not supported, because this generator has no WebDriver equivalent yet.
+	 * The context is left as it is.
+	 *
+	 * @param link the step being skipped
+	 */
+	@Override
+	public void executeDataGridLink(@Nonnull DataGridLink link) {
+		comment("<dataGridLink/> not supported by this generator");
 	}
 
 	/**

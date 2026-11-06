@@ -93,4 +93,29 @@ class NavigateLinkTest {
 		AutomationContext<?, ?> ctx = mock(AutomationContext.class);
 		assertThat(step.getIdentifier(ctx), is("someHref"));
 	}
+
+	@Test
+	void exactDefaultsToNullAndRoundtrips() {
+		assertThat(step.getExact(), is(nullValue()));
+		step.setExact(Boolean.TRUE);
+		assertThat(step.getExact(), is(Boolean.TRUE));
+	}
+
+	@Test
+	void executeByExactTextCallsExecutor() {
+		Executor executor = mock(Executor.class);
+		step.setText("Open");
+		step.setExact(Boolean.TRUE);
+		step.execute(executor);
+		verify(executor).executeNavigateLink(step);
+	}
+
+	@Test
+	void exactWithHrefThrows() {
+		Executor executor = mock(Executor.class);
+		step.setHref("?a=l");
+		step.setExact(Boolean.FALSE);
+		assertThrows(MetaDataException.class, () -> step.execute(executor));
+		verifyNoInteractions(executor);
+	}
 }

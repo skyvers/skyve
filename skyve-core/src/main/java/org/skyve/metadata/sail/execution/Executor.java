@@ -2,6 +2,8 @@ package org.skyve.metadata.sail.execution;
 
 import org.skyve.metadata.sail.language.Automation;
 import org.skyve.metadata.sail.language.Interaction;
+import org.skyve.metadata.sail.language.step.CaptureCell;
+import org.skyve.metadata.sail.language.step.CaptureTitle;
 import org.skyve.metadata.sail.language.step.CaptureValue;
 import org.skyve.metadata.sail.language.step.Comment;
 import org.skyve.metadata.sail.language.step.Execute;
@@ -29,6 +31,7 @@ import org.skyve.metadata.sail.language.step.interaction.actions.Save;
 import org.skyve.metadata.sail.language.step.interaction.actions.ZoomIn;
 import org.skyve.metadata.sail.language.step.interaction.actions.ZoomOut;
 import org.skyve.metadata.sail.language.step.interaction.grids.DataGridEdit;
+import org.skyve.metadata.sail.language.step.interaction.grids.DataGridLink;
 import org.skyve.metadata.sail.language.step.interaction.grids.DataGridNew;
 import org.skyve.metadata.sail.language.step.interaction.grids.DataGridRemove;
 import org.skyve.metadata.sail.language.step.interaction.grids.DataGridSelect;
@@ -78,8 +81,9 @@ import jakarta.annotation.Nonnull;
  * to a value captured by {@link #executeCaptureValue(CaptureValue)}. The attributes are
  * {@code dataEnter@value}, {@code testValue@value}, {@code lookupDescriptionAutoComplete@search},
  * {@code lookupDescriptionAutoComplete@pick}, {@code listGridFilter@value}, {@code login@user},
- * {@code login@password}, {@code testFailure@message}, {@code testMessage@contains} and every
- * {@code rowContaining}.
+ * {@code login@password}, {@code login@customer}, {@code testFailure@message}, {@code testMessage@contains},
+ * {@code navigateLink@href}, {@code navigateLink@text}, {@code dataGridLink@text}, {@code navigateEdit@bizId},
+ * {@code comment} text and every {@code rowContaining}.
  *
  * @see org.skyve.metadata.sail.language.Automation
  * @see org.skyve.metadata.sail.language.Interaction
@@ -436,4 +440,34 @@ public interface Executor {
 	 * @param capture the capture value step
 	 */
 	public void executeCaptureValue(@Nonnull CaptureValue capture);
+
+	/**
+	 * Reads the text a list or data grid cell shows into a variable that later steps use as {@code {var:name}}.
+	 *
+	 * <p>Precondition: {@link CaptureCell#execute(Executor)} has checked the row, the grid attributes, the variable name
+	 * and the pattern.
+	 *
+	 * @param capture the capture cell step
+	 */
+	public void executeCaptureCell(@Nonnull CaptureCell capture);
+
+	/**
+	 * Reads the title the current view shows into a variable that later steps use as {@code {var:name}}.
+	 *
+	 * <p>Precondition: {@link CaptureTitle#execute(Executor)} has checked the variable name and the pattern.
+	 *
+	 * @param capture the capture title step
+	 */
+	public void executeCaptureTitle(@Nonnull CaptureTitle capture);
+
+	/**
+	 * Clicks a link in a row of a data grid: an action's link is pressed as an action step presses its button
+	 * (answering confirmations per {@link DataGridLink#getConfirm()} and checking success per
+	 * {@link DataGridLink#getTestSuccess()}); any other link is followed as {@code navigateLink} follows one.
+	 *
+	 * <p>Precondition: {@link DataGridLink#execute(Executor)} has checked the row and the text.
+	 *
+	 * @param link the data grid link step
+	 */
+	public void executeDataGridLink(@Nonnull DataGridLink link);
 }

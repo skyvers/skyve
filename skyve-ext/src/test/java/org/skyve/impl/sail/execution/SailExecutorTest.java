@@ -5,6 +5,8 @@ import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 import org.junit.jupiter.api.Test;
+import org.skyve.metadata.sail.language.step.CaptureCell;
+import org.skyve.metadata.sail.language.step.CaptureTitle;
 import org.skyve.metadata.sail.language.step.CaptureValue;
 import org.skyve.metadata.sail.language.step.Comment;
 import org.skyve.metadata.sail.language.step.Pause;
@@ -12,6 +14,7 @@ import org.skyve.metadata.sail.language.step.TestGridRows;
 import org.skyve.metadata.sail.language.step.TestMessage;
 import org.skyve.metadata.sail.language.step.TestWidget;
 import org.skyve.metadata.sail.language.step.interaction.Upload;
+import org.skyve.metadata.sail.language.step.interaction.grids.DataGridLink;
 import org.skyve.metadata.sail.language.step.interaction.grids.ListGridClearFilter;
 import org.skyve.metadata.sail.language.step.interaction.grids.ListGridFilter;
 import org.skyve.metadata.sail.language.step.interaction.grids.ListGridSort;
@@ -130,7 +133,8 @@ class SailExecutorTest {
 	}
 
 	private static final String[] UNSUPPORTED = {"upload", "testMessage", "testGridRows", "testWidget", "navigateMenu", "testMenu", "switchMode",
-													"listGridFilter", "listGridClearFilter", "listGridSort", "captureValue"};
+													"listGridFilter", "listGridClearFilter", "listGridSort", "captureValue",
+													"captureCell", "captureTitle", "dataGridLink"};
 
 	private static void executeUnsupportedSteps(ScriptExecutor<?> executor) {
 		executor.executeUpload(new Upload());
@@ -144,6 +148,9 @@ class SailExecutorTest {
 		executor.executeListGridClearFilter(new ListGridClearFilter());
 		executor.executeListGridSort(new ListGridSort());
 		executor.executeCaptureValue(new CaptureValue());
+		executor.executeCaptureCell(new CaptureCell());
+		executor.executeCaptureTitle(new CaptureTitle());
+		executor.executeDataGridLink(new DataGridLink());
 	}
 
 	private static final class TestContext extends AutomationContext<GenerateListContext, GenerateEditContext> {

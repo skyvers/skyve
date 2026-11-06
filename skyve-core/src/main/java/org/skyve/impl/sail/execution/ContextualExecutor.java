@@ -3,7 +3,6 @@ package org.skyve.impl.sail.execution;
 import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.Map;
-import java.util.TreeMap;
 
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
@@ -55,12 +54,10 @@ public abstract class ContextualExecutor<T extends AutomationContext> implements
 	 */
 	public static final String VARIABLE_TOKEN_START = "{var:";
 
-	private String runToken = null;
-
-	/**
-	 * The variables captured in this run, by name. Sorted so that a failure lists the defined names in order.
-	 */
-	private final Map<String, String> variables = new TreeMap<>();
+	/** The run token and the variables of this run, or null before the first automation or token. */
+	private RunState run = null;
+	/** True when the run was given by {@link #shareRun(RunState)}, so that a new automation keeps it. */
+	private boolean runShared = false;
 
 	protected final void push(@Nonnull T context) {
 		String uxui = context.getUxui();
@@ -127,8 +124,37 @@ public abstract class ContextualExecutor<T extends AutomationContext> implements
 		currentUxUi = automation.getUxui();
 		currentUserAgentType = automation.getUserAgentType();
 		testStrategy = automation.getTestStrategy();
-		runToken = newRunToken();
-		variables.clear();
+		if (! runShared) {
+			run = new RunState();
+		}
+	}
+
+	/**
+	 * Shares a run with other automations, which may be executed by other executors: this executor's automations
+	 * use the run's token for {@value #RUN_TOKEN} and read and set its variables, instead of starting a run of their own.
+	 * Call it before the automation is executed. A workflow runner gives every executor it uses the same run.
+	 *
+	 * <p>Side effects: replaces this executor's run, and keeps it for every later automation.
+	 *
+	 * @param shared	the run to share
+	 */
+	public final void shareRun(@Nonnull RunState shared) {
+		run = shared;
+		runShared = true;
+	}
+
+	/**
+	 * Returns this executor's run: its token and variables.
+	 *
+	 * @return the run, made on first use if no automation has started one
+	 */
+	public final @Nonnull RunState getRun() {
+		RunState result = run;
+		if (result == null) {
+			result = new RunState();
+			run = result;
+		}
+		return result;
 	}
 	
 	/**
@@ -306,20 +332,15 @@ public abstract class ContextualExecutor<T extends AutomationContext> implements
 	/**
 	 * Returns the token that replaces {@value #RUN_TOKEN} in this run's values.
 	 *
-	 * <p>A new token is made by each {@link #executeAutomation(Automation)}, and on first use if
-	 * steps are executed without one. It is 8 or more lower-case letters and digits, derived
-	 * from the current time, so reruns against the same database do not clash on unique keys
-	 * such as user and group names.
+	 * <p>A new token is made by each {@link #executeAutomation(Automation)} (unless the run is shared, see
+	 * {@link #shareRun(RunState)}), and on first use if steps are executed without one. It is 8 or more lower-case
+	 * letters and digits, derived from the current time, so reruns against the same database do not clash on unique
+	 * keys such as user and group names.
 	 *
 	 * @return the run token
 	 */
 	public final @Nonnull String getRunToken() {
-		String result = runToken;
-		if (result == null) {
-			result = newRunToken();
-			runToken = result;
-		}
-		return result;
+		return getRun().getRunToken();
 	}
 
 	/**
@@ -359,6 +380,7 @@ public abstract class ContextualExecutor<T extends AutomationContext> implements
 					throw new MetaDataException("'" + value + "' has a " + VARIABLE_TOKEN_START + " with no closing }");
 				}
 				String name = value.substring(brace + VARIABLE_TOKEN_START.length(), close);
+				Map<String, String> variables = getRun().variables();
 				replacement = variables.get(name);
 				if (replacement == null) {
 					throw new MetaDataException(VARIABLE_TOKEN_START + name + "} is not defined: capture it first with <captureValue variable=\"" +
@@ -383,7 +405,8 @@ public abstract class ContextualExecutor<T extends AutomationContext> implements
 
 	/**
 	 * Sets the variable {@code name} to {@code value} for the rest of this run, replacing any earlier value.
-	 * Each {@link #executeAutomation(Automation)} starts with no variables.
+	 * Each {@link #executeAutomation(Automation)} starts with no variables, unless the run is shared
+	 * (see {@link #shareRun(RunState)}).
 	 *
 	 * <p>Side effects: later {@link #substituteTokens(String)} calls replace {@code {var:name}} with {@code value}.
 	 *
@@ -391,7 +414,7 @@ public abstract class ContextualExecutor<T extends AutomationContext> implements
 	 * @param value the value
 	 */
 	public final void putVariable(@Nonnull String name, @Nonnull String value) {
-		variables.put(name, value);
+		getRun().putVariable(name, value);
 	}
 
 	/**
@@ -401,15 +424,6 @@ public abstract class ContextualExecutor<T extends AutomationContext> implements
 	 * @return the value, or {@code null} if the variable has not been captured in this run
 	 */
 	public final @Nullable String getVariable(@Nonnull String name) {
-		return variables.get(name);
-	}
-
-	/**
-	 * Makes a run token from the current time in base 36.
-	 *
-	 * @return a new run token
-	 */
-	private static @Nonnull String newRunToken() {
-		return Long.toString(System.currentTimeMillis(), Character.MAX_RADIX);
+		return getRun().getVariable(name);
 	}
 }

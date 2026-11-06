@@ -80,4 +80,11 @@ class UploadTest {
 		step.setBinding("content");
 		assertThat(step.getIdentifier(ctx), is("content"));
 	}
+
+	@Test
+	void testSuccessDefaultsToNullAndRoundtrips() {
+		assertThat(step.getTestSuccess(), is(nullValue()));
+		step.setTestSuccess(Boolean.FALSE);
+		assertThat(step.getTestSuccess(), is(Boolean.FALSE));
+	}
 }
