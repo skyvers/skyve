@@ -134,7 +134,16 @@ void clientWorkflow() {
   differ. A role the customer does not have fails the login step.
 - The test's user is restored when the automation ends.
 
-Without a registration, a script that signs in as a less privileged user must
+**The server's roles.** When the server has `sail.recording` on, the harness
+does not need the registration: after each successful `<login/>` of a user that
+is not registered, it asks the server (`sailrecording?roles`, in the browser's
+own session) for the signed-in user's effective roles, with the roles their
+groups give, and builds the views for the rest of the run with exactly those.
+The trace says which roles it used, and leaves out a role the test's customer
+does not have. A registration always wins. If the server does not answer (the
+flag is off, or an older server), the views keep every role, as before.
+
+Without a registration, and without `sail.recording` on the server, a script that signs in as a less privileged user must
 keep to navigation and assertions that the full-permission view does not
 affect, as `03-security-admin.xml` does: menus, sign-in outcomes and screens
 where both users see the same thing.
@@ -957,6 +966,22 @@ customer only when the sign in page asks for one (no `environment.customer`).
 | A view's buttons | `ok`, `save`, `cancel`, `delete`, `zoomOut`, `remove`, or `action name="..."` for the view's own actions. A declined confirmation adds `confirm="false"`. |
 | A list grid's New, or zooming into a row | `listGridNew`, `listGridZoom`. A row is named with `rowContaining`: its bizKey when a cell shows it, otherwise the cell the fewest loaded rows show, the leftmost on a tie; `row` only when no text finds the row first. The list view's own grid is named by the context; a grid in a view by `module` and `query` (or `document` and `model`). |
 
+The script also carries context for whoever edits it, as XML comments:
+
+- a header: who recorded it and when, the password note, the user's effective roles (groups expanded) written as
+  `viewRoles("user", "module.Role", ...)` ready to paste into the test, and the UX/UI the user got;
+- a heading whenever the screen changes: module and document (with its name), the edit or create view, and the
+  renderer, or the list's data source;
+- before each `dataEnter`: the field's label and the value it showed before the change;
+- before each `listGridZoom`: the row's bizKey and the values its cells showed;
+- after each step: the growls, messages, problems and field errors the response showed (`shown: ...`), and the bound
+  values the response changed on screen, without the user's own entries (`changed on screen: ...`).
+
+When recording stops, the server checks each step against the metadata, building the views as the recording user
+with the same locators the SmartClient executor uses: a data entry's binding, an action and a tab must be on the
+screen's edit or create view, and a row named by text must have shown that text. A step that fails becomes an
+`<!-- unconfirmed: ... - why -->` comment instead; it is never dropped.
+
 Anything else is written as an `<!-- unmapped: ... -->` comment where it happened, so the editor sees the gap: a click on
 a control that records no step (a grid tool, a data grid row, a link, a header menu item), clearing a field (SAIL cannot
 enter an empty value), and typing into a password field (passwords are never recorded). A gesture is never dropped
@@ -972,17 +997,22 @@ silently.
   (each is marked in `skyve-web/src/js/desktop` with a comment) and listens to SmartClient's `ValuesManager.itemChanged()`
   and to the DOM in the capture phase. It detaches when recording stops.
 - It sends its steps as JSON batches, one request at a time through SmartClient's RPC manager, to the `sailrecording`
-  endpoint (`org.skyve.impl.sail.recording.SailRecordingServlet`). Each page gets a CSRF token from the endpoint, and the
-  endpoint checks the gate on every request. Steps the page has not seen acknowledged are sent again from a beacon as it
+  endpoint (`org.skyve.impl.sail.recording.SailRecordingServlet`). Each page gets the recording's CSRF token from the
+  endpoint (issued once per recording, so the session's tokens do not grow with the pages), and the endpoint checks
+  the gate on every request. Steps the page has not seen acknowledged are sent again from a beacon as it
   unloads, and the server adds each step once. `GET sailrecording?from=i&count=n` returns a range of the steps.
-- On Stop, `org.skyve.impl.sail.recording.SailRecordingBuilder` builds the `Automation` and writes its XML.
+- On Stop, `org.skyve.impl.sail.recording.SailRecordingBuilder` builds the `Automation`, with
+  `SailRecordingChecks` checking the steps, and writes its XML.
+- `GET sailrecording?roles` returns the signed-in user's effective roles whenever `sail.recording` is on, for any
+  signed-in user (no recording or SAILRecorder role needed): the harness uses it (see [The test user](#the-test-user)).
 - `SmartClientRecorderRoundTripSailIT` records two workflows (kitchen sink widgets, actions, tabs and list grids; admin
   contacts) and replays each recording unedited. It also checks that the home page is unchanged unless the session
   records.
 
 ### Limits
 
-- SmartClient only. PrimeFaces recording, context comments and server-side checks, assertions added while recording,
+- Client-side validation that stops a request before it is sent is not noted as context; server errors are.
+- SmartClient only. PrimeFaces recording, assertions added while recording,
   and lookups, data grids, uploads, server-side questions, list filters and sorting, and tree, map and calendar
   navigation come in later phases; until then they are unmapped comments (or, for a field such as a lookup, an unmapped
   comment for its change).
@@ -1018,7 +1048,8 @@ silently.
   them. See [The test user](#the-test-user).
   - `viewRoles` takes module roles and customer roles, not groups. Groups are
     data, which the test JVM cannot read, so list the roles a user gets
-    through their groups.
+    through their groups, or turn `sail.recording` on in the server, and the
+    harness asks the server for them (see [The test user](#the-test-user)).
   - An app whose UX/UI selector routes by role can send the every-role user
     somewhere the script does not expect. Biz Hub Apps, for example, routes
     any user with a client role to its support centre UX/UI. Sign in as a

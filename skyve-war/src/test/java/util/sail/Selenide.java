@@ -5,6 +5,7 @@ import static com.codeborne.selenide.Selenide.$;
 import static com.codeborne.selenide.Selenide.open;
 
 import java.time.Duration;
+import java.util.List;
 
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebElement;
@@ -213,6 +214,32 @@ public abstract class Selenide<
 	 */
 	public @Nullable String getLoginError() {
 		return loginError;
+	}
+
+	/**
+	 * Asks the server for the signed-in user's effective roles, in the browser's own session: {@code module.Role}
+	 * names, with the roles the user's groups give. The server answers only when {@code sail.recording} is on
+	 * (see docs/sail.md, The test user).
+	 *
+	 * @return the role names, or {@code null} if the server does not answer (recording off, an older server, or no
+	 * 			page to ask from)
+	 */
+	@SuppressWarnings("unchecked")
+	public @Nullable List<String> signedInRoleNames() {
+		Object result;
+		try {
+			result = ((org.openqa.selenium.JavascriptExecutor) driver).executeAsyncScript(
+					"var done = arguments[arguments.length - 1];" +
+					"fetch(arguments[0], {credentials: 'same-origin'})" +
+					".then(function (r) { return r.ok ? r.json() : null; })" +
+					".then(function (j) { done(j && Array.isArray(j.roles) ? j.roles : null); }, function () { done(null); });",
+					baseUrl + "sailrecording?roles");
+		}
+		catch (org.openqa.selenium.WebDriverException e) {
+			trace("    could not ask the server for the user's roles: " + e.getClass().getSimpleName());
+			return null;
+		}
+		return (result instanceof List<?> list) ? (List<String>) list : null;
 	}
 
 	/**

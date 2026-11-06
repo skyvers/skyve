@@ -261,6 +261,38 @@ class InterpretedWebDriverExecutorTest {
 					() -> assertSame(fixture.testUser, persistence.getUser()));
 	}
 
+	/**
+	 * A user that is not registered gets the roles the server says it has (sail.recording on); a registration wins,
+	 * and the server is not asked; a role the test's customer does not have is left out.
+	 */
+	@Test
+	void anUnregisteredUserGetsTheRolesTheServerSays() {
+		executor.useViewRoles(new SailViewRoles().register("client", "todo.ToDoClient"));
+		when(executor.selenide.signedInRoleNames()).thenReturn(List.of("todo.ToDoManager", "nope.Nothing"));
+
+		executor.executeLogin(login("manager"));
+		UserImpl manager = (UserImpl) usersSet.get(usersSet.size() - 1);
+		assertAll(() -> assertTrue(manager.isInRole("todo", "ToDoManager")),
+					() -> assertFalse(manager.isInRole("admin", "BasicUser"), "only the server's roles"));
+
+		executor.executeLogin(login("client"));
+		UserImpl client = (UserImpl) usersSet.get(usersSet.size() - 1);
+		assertAll(() -> assertTrue(client.isInRole("todo", "ToDoClient")),
+					() -> assertFalse(client.isInRole("todo", "ToDoManager"), "the registration wins"));
+		verify(executor.selenide, org.mockito.Mockito.times(1)).signedInRoleNames();
+	}
+
+	@Test
+	void withoutAnAnswerFromTheServerAnUnregisteredUserGetsEveryRole() {
+		executor.useViewRoles(new SailViewRoles());
+		when(executor.selenide.signedInRoleNames()).thenReturn(null);
+
+		executor.executeLogin(login("admin"));
+
+		assertAll(() -> assertEquals(1, usersSet.size()),
+					() -> assertTrue(((UserImpl) usersSet.get(0)).isInRole("todo", "ToDoManager")));
+	}
+
 	@Test
 	void withoutViewRolesALoginKeepsThePersistenceUser() {
 		executor.executeLogin(login("client"));

@@ -512,6 +512,46 @@ public abstract class InterpretedWebDriverExecutor<
 		if ((loginError != null) && (! (nextStep instanceof TestFailure)) && (! isNoneStrategy())) {
 			throw new IllegalStateException(String.format("Login as %s failed: %s", user, loginError));
 		}
+		if (loginError == null) {
+			useServerRoles(login.getUser(), user);
+		}
+	}
+
+	/**
+	 * After a sign in, builds the views for the rest of the run with the roles the server says the user has, when
+	 * the user is not registered with {@link SailViewRoles} (a registration always wins). The server says so only when
+	 * {@code sail.recording} is on; otherwise (no answer, or no roles) the views stay as
+	 * {@link #switchViewUser(String, String)} built them (every role). A role the test's customer does not have is
+	 * left out. Does nothing without {@link #useViewRoles}.
+	 *
+	 * <p>Side effects: may set the thread's persistence user; traces which roles the views are built with.
+	 *
+	 * @param scriptUserName	the login's user as written in the script
+	 * @param userName	the login's user with the tokens substituted
+	 */
+	private void useServerRoles(@Nonnull String scriptUserName, @Nonnull String userName) {
+		SailViewRoles roles = viewRoles;
+		User template = viewTemplateUser;
+		if ((roles == null) || (template == null) || (roles.roleNames(scriptUserName, userName) != null)) {
+			return;
+		}
+		List<String> serverRoles = selenide.signedInRoleNames();
+		if ((serverRoles == null) || serverRoles.isEmpty()) {
+			selenide.trace(String.format("Views are built for %s with every role: the server does not say its roles (sail.recording off)", userName));
+			return;
+		}
+		List<String> known = new ArrayList<>(serverRoles.size());
+		for (String roleName : serverRoles) {
+			try {
+				SailUsers.userWithRoles(template, List.of(roleName));
+				known.add(roleName);
+			}
+			catch (@SuppressWarnings("unused") IllegalArgumentException e) {
+				selenide.trace(String.format("    %s's role %s is not a role of the test's customer: left out", userName, roleName));
+			}
+		}
+		selenide.trace(String.format("Views are built for %s with the roles the server says it has: %s", userName, known));
+		AbstractPersistence.get().setUser(SailUsers.userWithRoles(template, known));
 	}
 
 	/**
