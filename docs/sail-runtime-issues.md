@@ -26,6 +26,7 @@ SC-2's suspected cause, which cites the code before its fix, at `2f4c2021b8`.
 | [P8](#p8-an-action-upload-page-left-open-hides-later-error-messages) | An action upload page left open hides later error messages | PF | Not investigated | open (not confirmed) |
 | [P9](#p9-fixed-an-action-link-in-a-data-grid-row-also-zooms-into-the-row) | An action link in a data grid row also zooms into the row | PF | Confirmed | fixed (150d05dddc) |
 | [P10](#p10-fixed-an-upload-actions-validationexception-shows-only-an-error-reference) | An upload action's ValidationException shows only an error reference | both | Confirmed | fixed (150d05dddc) |
+| [P11](#p11-fixed-every-pf-response-moves-the-focus-to-the-first-input) | Every PF response moves the focus to the first input | PF | Confirmed | fixed (COMMIT) |
 | [SC-1](#sc-1-withdrawn-actions-blocked-after-a-server-field-error) | Actions blocked after a server field error | SC | Withdrawn: a harness fault | withdrawn |
 | [SC-2](#sc-2-fixed-inline-grid-default-values-reach-smartclient-as-objects) | Inline grid default values reach SmartClient as objects | SC | Confirmed | fixed by master |
 | [SC-3](#sc-3-a-list-without-a-menu-item-fails-to-load) | A list without a menu item fails to load | SC | Confirmed | open |
@@ -411,6 +412,56 @@ not information.
 **Workaround in the suites.** None needed now: the ActionsFixture's Upload
 action refuses `sail-invalid.txt` with a `ValidationException`, and both
 kitchen sinks check the refusal.
+
+**Status:** fixed.
+
+## P11 (fixed): Every PF response moves the focus to the first input
+
+**Symptom.** In PrimeFaces, after nearly every server round trip (an action, a
+change that rerenders, a lookup), the page focuses its first input, or its
+first invalid input, 50 ms after the response, and scrolls to it. The user's
+page jumps, the focus leaves the field they had tabbed to, and on a tablet or
+phone the keyboard or a picker that opens on focus pops up. Found while
+explaining why a SAIL click straight after an action upload missed its target
+(2026-11-06): closing the upload page refreshes the view, and the focus then
+scrolled the page under the click.
+
+**Reproduction.** In PrimeFaces, open a new Actions Fixture in a window short
+enough that its first check box is out of sight when Event Text is in the
+middle. Type into Event Text and press Tab. When Run From Event's response
+arrives, the page scrolls back to the first check box, which has the focus.
+
+**Suspected cause.** `WEB-INF/pages/includes/formFocusAndPush.xhtml`, which
+every PrimeFaces page's form includes (edit, list, home, map, public,
+selfRegister and startup), has a bare `<p:focus />`. PrimeFaces 13's
+`FocusRenderer` writes `PrimeFaces.focus()` (or `PrimeFaces.focus('<first
+invalid id>')` when there are error messages) each time it is rendered, and
+Skyve's ajax actions and rerenders update the whole form, so it is rendered in
+each response. `PrimeFaces.focus` focuses from a 50 ms timer.
+
+**Checked:** Confirmed, by logging the page's focus and scroll events, and by
+`PrimeFacesFocusSailIT`, which failed before the fix: the response called
+`PrimeFaces.focus` once, the page scrolled from 509 to 60, and the focus moved
+from the Run From Form Button the user had tabbed to, to the first check box.
+
+**Fix.** COMMIT: the include renders `<p:focus rendered="#{not
+facesContext.postback}" />`, so a page focuses its first input only when it is
+loaded (a GET). After a postback, including one that fails validation, the
+focus stays where it is; Mike chose not to jump to the first invalid field.
+PrimeFaces' own focus restore after an ajax update (the element that had the
+focus, by id) is unchanged. A form update without the `p:focus` markup is
+harmless: the whole form is replaced, and nothing updates the `p:focus` by id.
+Skyve has no other `p:focus` or `PrimeFaces.focus` call; PrimeFaces dialogs
+still focus their own first input when they open. Every PrimeFaces view change
+is a page load, so it still focuses its first input: New and zoom in a data
+grid, zoom out and remove (`ActionUtil.redirectViewScopedConversation`), the
+list grids' New and zoom (a URL), and OK, Cancel and Delete
+(`SKYVE.PF.popHistory`).
+
+**Workaround in the suites.** None needed now. `PrimeFacesFocusSailIT` checks
+that a rerender leaves the scroll and the focus where they were, and that a new
+view and a zoom into an existing row focus their first input. The harness's
+wait for the deferred focus after each response was removed with the fix.
 
 **Status:** fixed.
 

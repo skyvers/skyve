@@ -237,6 +237,27 @@ class ThemeFaceletsStructureTest {
 		return result;
 	}
 
+	/**
+	 * The pages focus their first input only when they are loaded (a GET), never after an ajax response or another
+	 * postback (runtime issue P11): the one {@code p:focus} is the shared include's, rendered only when not a postback.
+	 */
+	@Test
+	void pagesFocusTheirFirstInputOnlyWhenLoaded() throws IOException {
+		String include = read("WEB-INF/pages/includes/formFocusAndPush.xhtml");
+		assertTrue(include.contains("<p:focus rendered=\"#{not facesContext.postback}\" />"), include);
+		try (Stream<Path> files = Files.walk(webappRoot())) {
+			for (Path file : files.filter(path -> path.toString().endsWith(".xhtml")).toList()) {
+				String page = Files.readString(file);
+				int focuses = page.split("<p:focus", -1).length - 1;
+				assertTrue(file.endsWith("formFocusAndPush.xhtml") ? (focuses == 1) : (focuses == 0), file + ": " + page);
+			}
+		}
+		for (String page : List.of("external/home.xhtml", "external/edit.xhtml", "external/list.xhtml", "external/map.xhtml",
+									"external/public.xhtml", "external/selfRegister.xhtml", "external/startup.xhtml")) {
+			assertTrue(read(page).contains("<ui:include src=\"/WEB-INF/pages/includes/formFocusAndPush.xhtml\">"), page);
+		}
+	}
+
 	private static String read(String relativePath) throws IOException {
 		return Files.readString(webappRoot().resolve(relativePath));
 	}

@@ -2395,33 +2395,7 @@ public class PrimeFacesSelenide extends Selenide<
 														"}";
 
 	/**
-	 * Returns false from the enclosing script while PrimeFaces' deferred focus is pending. Each view's form has a
-	 * {@code <p:focus/>}, so every response that updates the form runs {@code PrimeFaces.focus()}, which focuses the
-	 * form's first input from a timer. Focusing scrolls that input into view, so a click made before the timer fires
-	 * (on an element low on the page, scrolled to the middle) lands after the page has moved. This is what hit a click
-	 * straight after an action upload: closing the upload page refreshes the view.
-	 * <p>
-	 * The script wraps {@code PrimeFaces.focus} once per page to count the timers it starts, until each has run. It
-	 * only observes: the page's own focus still happens. A focus started by the page's initial load, before the first
-	 * wait wraps it, is not counted.
-	 */
-	private static final String DEFERRED_FOCUS_PENDING_JS = "if (window.PrimeFaces && PrimeFaces.focus && (! PrimeFaces.focus.sail)) {" +
-																"  var focus = PrimeFaces.focus;" +
-																"  window.sailFocusPending = 0;" +
-																"  PrimeFaces.focus = function() {" +
-																"    var setTimeout = window.setTimeout;" +
-																"    window.setTimeout = function(f, ms) {" +
-																"      window.sailFocusPending++;" +
-																"      return setTimeout.call(window, function() {" +
-																"        try {f();} finally {window.sailFocusPending--;}}, ms);};" +
-																"    try {return focus.apply(this, arguments);} finally {window.setTimeout = setTimeout;}};" +
-																"  PrimeFaces.focus.sail = true;" +
-																"}" +
-																"if (window.sailFocusPending > 0) return false;";
-
-	/**
-	 * Indicates if the page has loaded (and its template has set up its layout), no PrimeFaces or jQuery ajax request is
-	 * running, and the form's deferred focus after the last response has been applied.
+	 * Indicates if the page has loaded (and its template has set up its layout) and no PrimeFaces or jQuery ajax request is running.
 	 *
 	 * @return true when idle
 	 */
@@ -2431,8 +2405,6 @@ public class PrimeFacesSelenide extends Selenide<
 										"if (document.body && document.body.classList.contains('is-preload')) return false;" +
 										"if (window.PrimeFaces && PrimeFaces.ajax && PrimeFaces.ajax.Queue && (! PrimeFaces.ajax.Queue.isEmpty())) return false;" +
 										"if (window.jQuery && (jQuery.active > 0)) return false;" +
-										// the form's p:focus has focused its first input after the last response
-										DEFERRED_FOCUS_PENDING_JS +
 										VUE_GRIDS_BUSY_JS +
 										"var w = document.getElementById('wheelOfDeath_start');" +
 										"return (! w) || (w.offsetParent === null);"));
