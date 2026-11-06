@@ -34,6 +34,7 @@ SC-2's suspected cause, which cites the code before its fix, at `2f4c2021b8`.
 | [SC-7](#sc-7-control-panel-jumps-back-to-the-results-tab) | Control Panel jumps back to the Results tab | SC | Confirmed | open |
 | [SC-8](#sc-8-the-user-wizard-password-field-loses-fast-typing) | The User wizard password field loses fast typing | SC | Confirmed | open |
 | [SC-11](#sc-11-fixed-a-model-lookup-column-ends-the-inline-edit-of-a-row-edited-again) | A model lookup column ends the inline edit of a row edited again | SC | Confirmed (stack traced) | fixed |
+| [SC-12](#sc-12-fixed-a-header-sort-of-an-unordered-data-grid-reorders-its-collection) | A header sort of an unordered data grid reorders its collection | SC | Confirmed (on the wire and in unit tests) | fixed |
 
 SC finding 5 is not listed. It was that a view opened by URL hides Delete, OK
 and Cancel, which is by design (`onlyView`); see the note under
@@ -700,7 +701,7 @@ fetch is `filterDataBoundPickList` → `filterData` → `gather` → `_gather` �
 `sortByProperty` → `dataChanged` → `_remapEditRows` → `hideInlineEditor`. Why
 a new row's edit survives the same fetch was not looked into.
 
-**Fix (approved by Mike).** `_gather` no longer sorts a data grid's data. It
+**Fix (d4f3cf87b9, approved by Mike).** `_gather` no longer sorts a data grid's data. It
 still calls `reorderData()`, which numbers an ordered grid's rows (their
 `bizOrdinal`) in the order they show. The sort was a no-op apart from its side
 effect:
@@ -736,5 +737,43 @@ membership, so those were not compared.
 `lookupDescriptionAutoComplete pick`. Before the fix that step failed ("no
 inline editor for column selection of data grid rows (is a row being
 edited?)"); after it, it passes.
+
+**Status:** fixed.
+
+## SC-12 (fixed): A header sort of an unordered data grid reorders its collection
+
+**Symptom.** In SmartClient, sorting an unordered data grid by clicking a
+column header, then saving (or running any action), reorders the domain
+collection to the sorted order. The order is a display choice, but the server
+moves the beans, so Hibernate sees the collection as changed and rewrites it
+on save (for a many-to-many, its join rows are deleted and inserted again).
+
+**Reproduction.** In SmartClient, open the kitchen sink Actions Fixture, add
+rows named b, c and a on its Rows tab and save. Click the Name column's header,
+then save again: the save's response lists the rows as a, b, c.
+
+**Cause (checked on the wire).** A header sort of a grid with local data
+sorts the grid's data array in place, and `_gather` sends that array, so the
+request lists the rows in the sorted order. `ViewJSONManipulator.applyJSON`
+then makes the collection follow the request: it moves each existing bean to
+its index in the request. That is right for an ordered collection, whose order
+is what its grid shows, and wrong for an unordered one.
+
+PrimeFaces is not affected: its data grid columns have no sort, and it
+applies values through `FacesView` in place.
+
+**Fix (approved by Mike, option C).** `ViewJSONManipulator` follows the
+request's order only for an ordered collection (`Collection.getOrdered()`).
+For an unordered collection (or an inverse many), existing beans stay where
+they are, beans missing from the request are removed, and new beans go on
+the end, so a request that only differs in order changes nothing.
+
+**Tests.** Unit tests on `ViewJSONManipulator`: an unordered collection is
+not changed at all when only the order differs, keeps its beans in place,
+removes missing ones and appends new ones; an ordered collection takes the
+request's order and puts a new bean at its position. The unordered ones
+failed before the fix. `SmartClientDataGridSortSailIT` sorts the Actions
+Fixture's rows by a real header click, saves with a real click and checks the
+order in the save's response: a, b, c before the fix, b, c, a after it.
 
 **Status:** fixed.

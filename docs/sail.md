@@ -713,6 +713,7 @@ tests. The SAIL ITs are:
 | `SmartClientKitchenSinkSailIT` | `sail/kitchenSink/sc/sc-kitchensink-sail.xml` | SC |
 | `SmartClientAdminSailIT` | `sail/admin/sc/sc-admin-sail.xml` | SC |
 | `SmartClientAdminSuiteSailIT` | `sail/admin/sc/suite/*.xml` | SC |
+| `SmartClientDataGridSortSailIT` | an inline script, then a column header sort of a data grid and a Save through `SmartClientSelenide` (no SAIL step sorts a data grid); runtime issue SC-12 | SC |
 | `SmartClientServerRolesSailIT` | `sail/admin/sc/suite/03-security-admin.xml` with no `viewRoles` registration: the new user's views are built with the roles the server reports. Needs `sail.recording` on. | SC |
 | `SmartClientRecorderRoundTripSailIT` | records `sail/kitchenSink/sc/sc-recorder-round-trip.xml` and an admin contacts workflow, and replays the recordings; see [Recording](#recording). Needs `sail.recording` on. | SC |
 | `KitchenSinkWorkflowSailIT` | `sail/kitchenSink/workflow/`: three files (PF tablet, SC, PF tablet) and one `<workflow>` file (PF external, then SC in the same browser) | both |
