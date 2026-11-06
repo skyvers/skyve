@@ -269,6 +269,9 @@
 			<comment>This file is refused by a validation, which the upload page shows as a refusal too</comment>
 			<upload action="ActionsUpload" file="sail/files/sail-invalid.txt" testSuccess="false" />
 			<testFailure message="sail-invalid.txt is not a valid upload" />
+			<comment>This file makes the action find itself unavailable: the upload page shows the refusal, as for any action</comment>
+			<upload action="ActionsUpload" file="sail/files/sail-unavailable.txt" testSuccess="false" />
+			<testFailure message="This action is no longer available." />
 			<upload action="ActionsUpload" file="sail/files/sail-upload.txt" />
 			<tabSelect path="Rows" />
 			<dataGridNew binding="rows" />

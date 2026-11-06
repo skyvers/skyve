@@ -208,6 +208,22 @@ class ActionsFixtureBizPortAndUploadH2Test extends AbstractSkyveTest {
 	}
 
 	@Test
+	void anUploadActionThatFindsItselfUnavailableShowsTheRefusal() throws Exception {
+		String webId = cacheConversation(ActionsFixture.newInstance());
+		ContentUploadView view = actionUploadView(webId, "ActionsUpload");
+
+		view.handleFileUpload(upload("sail-unavailable.txt", "unavailable".getBytes(StandardCharsets.UTF_8)));
+
+		// the refusal of an unavailable action, as for every other action; not the upload's problems
+		assertTrue(view.getProblems().isEmpty(), view.getProblems()::toString);
+		assertEquals(1, messages.size(), messages::toString);
+		assertEquals(FacesMessage.SEVERITY_ERROR, messages.get(0).getSeverity());
+		assertEquals("Failure", messages.get(0).getSummary());
+		assertEquals(UNAVAILABLE_MESSAGE, messages.get(0).getDetail());
+		assertNull(cachedFixture(webId).getOutcome());
+	}
+
+	@Test
 	void anUploadIsRefusedOnceItsButtonIsDisabled() throws Exception {
 		ActionsFixture fixture = persistedFixture();
 		fixture.setDisableUpload(Boolean.TRUE);

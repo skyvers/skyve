@@ -918,8 +918,10 @@ Kitchen sink fixtures for the newer steps:
   "The file sail-refused.txt already exists" (an `UploadException`), as Upload
   Backup refuses a backup that exists, and one named `sail-invalid.txt` with
   "The file sail-invalid.txt is not a valid upload" (a `ValidationException`),
-  for `upload testSuccess="false"`. The upload page shows either refusal as the
-  upload's problems.
+  and one named `sail-unavailable.txt` as an unavailable action ("This action
+  is no longer available."), for `upload testSuccess="false"`. The upload page
+  shows the first two as the upload's problems, and the third as the refusal of
+  an unavailable action.
 - ActionsFixture's rows grid has a Run From Row link in each row, whose action
   asks for a confirmation, for `dataGridLink`.
 
