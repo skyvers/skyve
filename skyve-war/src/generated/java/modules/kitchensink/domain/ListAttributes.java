@@ -11,6 +11,7 @@ import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import org.locationtech.jts.geom.Geometry;
 import org.skyve.CORE;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.types.DateOnly;
@@ -27,6 +28,7 @@ import org.skyve.impl.domain.types.jaxb.DateTimeMapper;
 import org.skyve.impl.domain.types.jaxb.Decimal10Mapper;
 import org.skyve.impl.domain.types.jaxb.Decimal2Mapper;
 import org.skyve.impl.domain.types.jaxb.Decimal5Mapper;
+import org.skyve.impl.domain.types.jaxb.GeometryMapper;
 import org.skyve.impl.domain.types.jaxb.TimeOnlyMapper;
 import org.skyve.impl.domain.types.jaxb.TimestampMapper;
 import org.skyve.metadata.model.document.Bizlet.DomainValue;
@@ -88,6 +90,9 @@ public class ListAttributes extends AbstractPersistentBean {
 
 	/** @hidden */
 	public static final String decimal5PropertyName = "decimal5";
+
+	/** @hidden */
+	public static final String geometryPropertyName = "geometry";
 
 	/** @hidden */
 	public static final String idPropertyName = "id";
@@ -241,6 +246,11 @@ public class ListAttributes extends AbstractPersistentBean {
 	 * Decimal 5
 	 **/
 	private Decimal5 decimal5 = (Decimal5) ExpressionEvaluator.evaluate("{el:Decimal5.ZERO}", this);
+
+	/**
+	 * Geometry
+	 **/
+	private Geometry geometry = (Geometry) ExpressionEvaluator.evaluate("{el:newGeometry('POINT(0 0)')}", this);
 
 	/**
 	 * Id
@@ -525,6 +535,25 @@ public class ListAttributes extends AbstractPersistentBean {
 	public void setDecimal5(Decimal5 decimal5) {
 		preset(decimal5PropertyName, decimal5);
 		this.decimal5 = decimal5;
+	}
+
+	/**
+	 * {@link #geometry} accessor.
+	 * @return	The value.
+	 **/
+	public Geometry getGeometry() {
+		return geometry;
+	}
+
+	/**
+	 * {@link #geometry} mutator.
+	 * @param geometry	The new value.
+	 **/
+	@XmlElement
+	@XmlJavaTypeAdapter(GeometryMapper.class)
+	public void setGeometry(Geometry geometry) {
+		preset(geometryPropertyName, geometry);
+		this.geometry = geometry;
 	}
 
 	/**

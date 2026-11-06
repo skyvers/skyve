@@ -4,7 +4,8 @@
 	recorder phase 5 maps in PrimeFaces. Lookups (pick and autocomplete), data grids (new, zoom, remove, a drag and a
 	link in a row), uploads (refused and accepted, by action and into a content widget), Vue list grid filters, sorting
 	and selection, a data table's selection, a number the application generates that the list is then filtered by (a
-	capture), server-side questions, and a data grid's selection (the List Grid Fixture's grid with a selectedIdBinding).
+	capture), server-side questions, a data grid's selection (the List Grid Fixture's grid with a selectedIdBinding), and a
+	map menu item.
 	PrimeFaces has no lookup New or Edit and no row edit. It has no login: it runs in a session that is already signed in
 	and recording. The lookup values it makes sort first ("0 ...") and are deleted again at the end.
 -->
@@ -103,6 +104,11 @@
 			<dataEnter binding="description" value="SAIL selectable {run}" />
 			<zoomOut />
 			<dataGridSelect binding="rows" rowContaining="SAIL selectable {run}" />
+		</method>
+	</interaction>
+	<interaction name="A map">
+		<method>
+			<navigateMenu module="kitchensink" item="List Attribute Map" />
 		</method>
 	</interaction>
 	<interaction name="Delete the lookup values">

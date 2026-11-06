@@ -146,6 +146,7 @@
 		<property name="decimal10" type="Decimal10" precision="28" scale="10" />
 		<property name="decimal2" type="Decimal2" precision="20" scale="2" />
 		<property name="decimal5" type="Decimal5" precision="23" scale="5" />
+		<property name="geometry" />
 		<property name="id" length="36" />
 		<property name="normalInteger" />
 		<property name="longInteger" />
