@@ -31,8 +31,12 @@ import jakarta.servlet.http.HttpSession;
  *
  * <ul>
  * <li>{@code GET} answers whether the session is recording: {@code {"recording":true,"_csrf":token,"steps":n}}, or
- * 		status 403 with {@code {"recording":false}}. Each GET issues a CSRF token for the page that asked, as Skyve's
- * 		SmartClient servlets do ({@link StateUtil#createToken()}).</li>
+ * 		status 403 with {@code {"recording":false}}. The token is a Skyve CSRF token ({@link StateUtil#createToken()}),
+ * 		issued once per recording ({@link SailRecording#token(HttpSession)}) and returned to every page that asks, so the
+ * 		session's tokens do not grow with the pages.</li>
+ * <li>{@code GET} with {@code roles} returns the signed-in user's effective roles, {@code {"user":name,"roles":[...]}},
+ * 		whenever {@code sail.recording} is on: the SAIL harness builds its views with them. It needs no recording and no
+ * 		SAILRecorder role; status 403 when recording is off or nobody is signed in.</li>
  * <li>{@code GET} with {@code from} (and optionally {@code count}, default {@value #DEFAULT_RANGE_COUNT}) returns a
  * 		range of the recorded steps, recording or stopped: {@code {"total":n,"from":i,"steps":[...]}}.</li>
  * <li>{@code GET} with {@code format=xml} returns the script built when the session's recording stopped: the same
@@ -40,10 +44,10 @@ import jakarta.servlet.http.HttpSession;
  * <li>{@code POST} with a JSON body {@code {"_csrf":token,"steps":[...]}} adds the steps (see
  * 		{@link SailRecording#add(List)}) and answers {@code {"received":added,"steps":total}}, with
  * 		{@code "limitReached":true,"maximumSteps":cap} once the recording is full. A token the session did
- * 		not issue is refused with status 403. The token stays valid for the page, so that the recorder can resend
+ * 		not issue is refused with status 403. The token stays valid for the recording, so that the recorder can resend
  * 		steps from a beacon as the page unloads.</li>
  * </ul>
- * Every request is checked against the whole gate ({@link SailRecording#isRecording(HttpSession, User)}, or for the
+ * Every request but the roles is checked against the whole gate ({@link SailRecording#isRecording(HttpSession, User)}, or for the
  * script, {@link SailRecording#isAllowed(User)}): a session that is not recording gets status 403 and nothing else.
  *
  * <p>Threading: thread-safe; the servlet holds no state.
@@ -64,6 +68,8 @@ public class SailRecordingServlet extends HttpServlet {
 	static final String FROM_PARAMETER = "from";
 	/** The parameter that limits a range of steps; see {@link #FROM_PARAMETER}. */
 	static final String COUNT_PARAMETER = "count";
+	/** The parameter that asks a GET for the signed-in user's effective roles. */
+	static final String ROLES_PARAMETER = "roles";
 	/** The steps a range has when it does not say. */
 	static final int DEFAULT_RANGE_COUNT = 50;
 	private static final String NOT_RECORDING = "{\"recording\":false}";
@@ -79,6 +85,10 @@ public class SailRecordingServlet extends HttpServlet {
 		noCache(response);
 		HttpSession session = request.getSession(false);
 		User user = user(request);
+		if (request.getParameter(ROLES_PARAMETER) != null) {
+			writeRoles(user, response);
+			return;
+		}
 		String from = request.getParameter(FROM_PARAMETER);
 		if (from != null) {
 			writeRange(session, user, from, request.getParameter(COUNT_PARAMETER), response);
@@ -109,11 +119,17 @@ public class SailRecordingServlet extends HttpServlet {
 			return;
 		}
 		SailRecording recording = SailRecording.get(session);
-		Integer token = StateUtil.createToken();
-		StateUtil.replaceToken(session, null, token);
+		if (recording == null) { // ended since the gate was checked
+			response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+			try (PrintWriter pw = response.getWriter()) {
+				pw.print(NOT_RECORDING);
+			}
+			return;
+		}
+		Integer token = recording.token(session);
 		try (PrintWriter pw = response.getWriter()) {
 			pw.append("{\"recording\":true,\"").append(AbstractWebContext.CSRF_TOKEN_NAME).append("\":").append(token.toString());
-			pw.append(",\"steps\":").append(String.valueOf((recording == null) ? 0 : recording.getStepCount())).append('}');
+			pw.append(",\"steps\":").append(String.valueOf(recording.getStepCount())).append('}');
 		}
 	}
 
@@ -208,6 +224,26 @@ public class SailRecordingServlet extends HttpServlet {
 			pw.append("{\"total\":").append(String.valueOf(recording.getStepCount()));
 			pw.append(",\"from\":").append(String.valueOf(Math.max(0, start)));
 			pw.append(",\"steps\":").append(JSON.marshall(steps)).append('}');
+		}
+	}
+
+	/**
+	 * Writes the signed-in user's effective roles as {@code {"user":name,"roles":["module.Role",...]}}, for the SAIL
+	 * harness to build its views with (see docs/sail.md, The test user). Allowed whenever {@code sail.recording} is on
+	 * and a user is signed in: the user needs no SAILRecorder role, and sees only their own roles. Status 403 otherwise.
+	 */
+	private static void writeRoles(@Nullable User user, @Nonnull HttpServletResponse response) throws IOException {
+		if ((! UtilImpl.SAIL_RECORDING) || (user == null)) {
+			response.sendError(HttpServletResponse.SC_FORBIDDEN);
+			return;
+		}
+		Map<String, Object> roles = new java.util.LinkedHashMap<>();
+		roles.put("user", user.getName());
+		roles.put("roles", SailRecording.effectiveRoleNames(user));
+		response.setContentType(MimeType.json.toString());
+		response.setCharacterEncoding(StandardCharsets.UTF_8.name());
+		try (PrintWriter pw = response.getWriter()) {
+			pw.print(JSON.marshall(roles));
 		}
 	}
 

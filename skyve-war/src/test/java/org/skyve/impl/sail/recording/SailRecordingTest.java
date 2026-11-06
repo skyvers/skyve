@@ -52,6 +52,7 @@ class SailRecordingTest {
 		User result = mock(User.class);
 		when(result.getName()).thenReturn("admin");
 		when(result.getCustomerName()).thenReturn("demo");
+		when(result.getCustomer()).thenReturn(mock(org.skyve.metadata.customer.Customer.class));
 		when(Boolean.valueOf(result.isInRole(SailRecording.ROLE_MODULE_NAME, SailRecording.ROLE_NAME))).thenReturn(Boolean.valueOf(recorder));
 		return result;
 	}

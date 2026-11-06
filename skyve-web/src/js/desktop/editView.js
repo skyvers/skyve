@@ -911,7 +911,8 @@ isc.EditView.addMethods({
 
 	/**
 	 * Scatter method for distributing values into corresponding UI components and grids.
-	 * The SAIL recorder (src/js/sail/recorder-sc.js) wraps this method to record the user's data entry before a response replaces the values.
+	 * The SAIL recorder (src/js/sail/recorder-sc.js) wraps this method to record the user's data entry before a response
+	 * replaces the values, and what the response changed on screen: keep its values argument (bizId, created).
 	 *
 	 * @param {Object} values - the values to be scattered into the UI components and grids.
 	 * @param {boolean} values.persisted - whether the data has been persisted.
@@ -1195,6 +1196,7 @@ isc.EditView.addMethods({
 
 	/**
 	 * Displays growls and messages based on the provided data.
+	 * The SAIL recorder (src/js/sail/recorder-sc.js) wraps this method to note the messages shown: keep its arguments.
 	 *
 	 * @param {Array} growls - the growl messages to be displayed.
 	 * @param {Array} messages - the informational or warning messages to be displayed.
@@ -1213,6 +1215,7 @@ isc.EditView.addMethods({
 
 	/**
 	 * Displays a failed response: the growls and messages raised before the failure, and the problem.
+	 * The SAIL recorder (src/js/sail/recorder-sc.js) wraps this method to note the problem and errors shown: keep its arguments.
 	 * Status -1 and -51 responses hold the problem as markup in data; the messages are shown in the same
 	 * dialog so that only one dialog is shown. Other failures, such as validation errors (status -4), show
 	 * the messages on their own, as SmartClient shows the errors.

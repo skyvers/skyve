@@ -78,6 +78,34 @@ public final class SailRecordingBuilder {
 	public static final String TARGET = "target";
 	/** The op-code of a gesture the recorder could not map to a step; its {@code text} describes it. */
 	public static final String UNMAPPED = "unmapped";
+	/** The op-code of what the screen showed after a step (messages, changed values); its {@code text} says it. */
+	public static final String CONTEXT = "context";
+	/** The key of a description of the screen the gesture was made on: module, document, view and renderer. */
+	public static final String SCREEN = "screen";
+	/** The key of a data entry's field label. */
+	public static final String LABEL = "label";
+	/** The key of the value a data entry's field showed before the user changed it. */
+	public static final String BEFORE = "before";
+	/** The key of a zoomed row's bizKey. */
+	public static final String ROW_BIZ_KEY = "rowBizKey";
+	/** The key of the text a zoomed row's cells showed, {@value #CELL_SEPARATOR}-separated. */
+	public static final String ROW_TEXTS = "rowTexts";
+	/** Separates a row's cell texts in {@value #ROW_TEXTS}. */
+	public static final String CELL_SEPARATOR = " | ";
+
+	/**
+	 * Checks a recorded step against the metadata, as the server knows it when recording stops.
+	 */
+	@FunctionalInterface
+	public interface StepCheck {
+		/**
+		 * Returns why the step cannot be confirmed, or {@code null} if it can (or cannot be checked).
+		 *
+		 * @param recorded	the recorded step: its op-code, attributes and the screen it was made on
+		 * @return the reason, or {@code null}
+		 */
+		@Nullable String unconfirmed(@Nonnull Map<String, String> recorded);
+	}
 	/** The variable the recorded login takes the password from. */
 	public static final String PASSWORD_VARIABLE = "password";
 	/** The view in which recording is started and stopped. */
@@ -92,6 +120,9 @@ public final class SailRecordingBuilder {
 	private static final String QUERY = "query";
 	private static final String MODEL = "model";
 	private static final String CONFIRM = "confirm";
+	/** The keys of a recorded step that are not attributes of its SAIL step. */
+	private static final java.util.Set<String> CONTEXT_KEYS = java.util.Set.of(OP, VIEW, TARGET, SailRecording.STEP_ID_KEY,
+																				SCREEN, LABEL, BEFORE, ROW_BIZ_KEY, ROW_TEXTS);
 
 	/**
 	 * The order attributes are written in, whatever the element: the identifying attributes first, then the values,
@@ -129,6 +160,10 @@ public final class SailRecordingBuilder {
 	private final long startedMillis;
 	private final long stoppedMillis;
 
+	private List<String> roleNames = List.of();
+	private String uxui = null;
+	private StepCheck check = null;
+
 	private final IdentityHashMap<Object, List<String>> comments = new IdentityHashMap<>();
 	/** Comments waiting for the next step. */
 	private final List<String> pending = new ArrayList<>();
@@ -149,6 +184,39 @@ public final class SailRecordingBuilder {
 	}
 
 	/**
+	 * Sets the recording user's effective roles, which the header writes ready to paste into {@code viewRoles(...)}.
+	 *
+	 * @param roles	the role names, {@code module.Role}; copied
+	 * @return this
+	 */
+	public @Nonnull SailRecordingBuilder roles(@Nonnull List<String> roles) {
+		roleNames = List.copyOf(roles);
+		return this;
+	}
+
+	/**
+	 * Sets the UX/UI the recording user got, which the header says.
+	 *
+	 * @param uxuiName	the UX/UI name, or {@code null} if not known
+	 * @return this
+	 */
+	public @Nonnull SailRecordingBuilder uxui(@Nullable String uxuiName) {
+		uxui = uxuiName;
+		return this;
+	}
+
+	/**
+	 * Sets the check each step must pass to be a step: one it fails becomes a comment that says why.
+	 *
+	 * @param stepCheck	the check, or {@code null} for none
+	 * @return this
+	 */
+	public @Nonnull SailRecordingBuilder check(@Nullable StepCheck stepCheck) {
+		check = stepCheck;
+		return this;
+	}
+
+	/**
 	 * Builds the automation from the recorded steps.
 	 *
 	 * <p>Complexity: O(n) in the number of steps.
@@ -165,7 +233,13 @@ public final class SailRecordingBuilder {
 		automation.setUserAgentType(UserAgentType.desktop);
 
 		int end = endBeforeStoppingSteps(steps);
-		comments.put(automation, header(end));
+		int gestures = 0;
+		for (int i = 0; i < end; i++) {
+			if (! CONTEXT.equals(steps.get(i).get(OP))) {
+				gestures++;
+			}
+		}
+		comments.put(automation, header(gestures));
 
 		Procedure before = new Procedure();
 		Login login = new Login();
@@ -180,10 +254,31 @@ public final class SailRecordingBuilder {
 		interaction.setName("Recording");
 		automation.getInteractions().add(interaction);
 		List<Step> method = interaction.getSteps();
+		String screen = null;
 		for (int i = 0; i < end; i++) {
 			Map<String, String> recorded = steps.get(i);
+			if (CONTEXT.equals(recorded.get(OP))) {
+				String text = text(recorded, TEXT);
+				if (text != null) {
+					pending.add(text);
+				}
+				continue;
+			}
+			String stepScreen = text(recorded, SCREEN);
+			if ((stepScreen != null) && (! stepScreen.equals(screen))) {
+				pending.add("screen: " + stepScreen);
+				screen = stepScreen;
+			}
 			Step step = step(recorded);
 			if (step != null) {
+				String reason = unconfirmed(recorded);
+				if (reason != null) {
+					pending.add("unconfirmed: " + describe(recorded) + " - " + reason);
+					step = null;
+				}
+			}
+			if (step != null) {
+				addOwnContext(recorded);
 				if (method.isEmpty() && (! isNavigation(step))) {
 					pending.add(0, "The recording started in the Control Panel. Navigate to the view of the next step to replay it on its own.");
 				}
@@ -214,7 +309,8 @@ public final class SailRecordingBuilder {
 			if (CONTROL_PANEL.equals(step.get(TARGET))) {
 				return i;
 			}
-			if ((! CONTROL_PANEL.equals(step.get(VIEW))) && (! UNMAPPED.equals(step.get(OP)))) {
+			String op = step.get(OP);
+			if ((! CONTROL_PANEL.equals(step.get(VIEW))) && (! UNMAPPED.equals(op)) && (! CONTEXT.equals(op))) {
 				break;
 			}
 		}
@@ -232,7 +328,55 @@ public final class SailRecordingBuilder {
 									Integer.valueOf(stepCount)));
 		result.add("The password is never recorded: define the variable \"" + PASSWORD_VARIABLE +
 						"\" before running this script, or replace {var:" + PASSWORD_VARIABLE + "}.");
+		if (! roleNames.isEmpty()) {
+			StringBuilder roles = new StringBuilder(64 + roleNames.size() * 24);
+			roles.append("The recorded user's roles, for the test: viewRoles(\"").append(userName).append('"');
+			for (String roleName : roleNames) {
+				roles.append(", \"").append(roleName).append('"');
+			}
+			result.add(roles.append(");").toString());
+		}
+		if (uxui != null) {
+			result.add("The recorded user got the UX/UI " + uxui + ".");
+		}
 		return result;
+	}
+
+	/**
+	 * Returns why a step cannot be confirmed: a row it names by text that the row did not show, or what the
+	 * {@link StepCheck} says.
+	 *
+	 * @return the reason, or {@code null} if the step is confirmed
+	 */
+	private @Nullable String unconfirmed(@Nonnull Map<String, String> recorded) {
+		String rowContaining = recorded.get("rowContaining");
+		String rowTexts = recorded.get(ROW_TEXTS);
+		if ((rowContaining != null) && (rowTexts != null) && (! rowTexts.contains(rowContaining))) {
+			return "the row did not show \"" + rowContaining + '"';
+		}
+		return (check == null) ? null : check.unconfirmed(recorded);
+	}
+
+	/**
+	 * Adds the context a step carries for whoever edits the script: a data entry's field label and the value shown
+	 * before, and a zoomed row's bizKey and values.
+	 */
+	private void addOwnContext(@Nonnull Map<String, String> recorded) {
+		String label = text(recorded, LABEL);
+		if (label != null) {
+			String before = recorded.get(BEFORE);
+			if (before == null) {
+				pending.add('"' + label + '"');
+			}
+			else {
+				pending.add('"' + label + "\" was " + (before.isBlank() ? "empty" : '"' + before + '"'));
+			}
+		}
+		String rowTexts = text(recorded, ROW_TEXTS);
+		if (rowTexts != null) {
+			String bizKey = text(recorded, ROW_BIZ_KEY);
+			pending.add("row: " + ((bizKey == null) ? "" : "bizKey \"" + bizKey + "\", ") + "showing " + rowTexts);
+		}
 	}
 
 	private static boolean isNavigation(@Nonnull Step step) {
@@ -288,7 +432,7 @@ public final class SailRecordingBuilder {
 		result.append((op == null) ? "a step with no op-code" : op);
 		for (Map.Entry<String, String> entry : recorded.entrySet()) {
 			String key = entry.getKey();
-			if (! (OP.equals(key) || VIEW.equals(key) || TARGET.equals(key) || SailRecording.STEP_ID_KEY.equals(key))) {
+			if (! CONTEXT_KEYS.contains(key)) {
 				result.append(' ').append(key).append("=\"").append(entry.getValue()).append('"');
 			}
 		}

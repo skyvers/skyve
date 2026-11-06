@@ -7,12 +7,14 @@ import org.skyve.domain.messages.MessageSeverity;
 import org.skyve.domain.messages.ValidationException;
 import org.skyve.impl.sail.recording.SailRecording;
 import org.skyve.impl.util.UtilImpl;
+import org.skyve.impl.web.UserAgent;
 import org.skyve.metadata.controller.ServerSideAction;
 import org.skyve.metadata.controller.ServerSideActionResult;
 import org.skyve.metadata.user.User;
 import org.skyve.util.Util;
 import org.skyve.web.WebContext;
 
+import jakarta.servlet.http.HttpServletRequest;
 import modules.admin.ControlPanel.ControlPanelExtension;
 
 /**
@@ -40,7 +42,8 @@ public class StartSAILRecording implements ServerSideAction<ControlPanelExtensio
 		if (! SailRecording.isAllowed(user)) {
 			throw new ValidationException(new Message(Util.nullSafeI18n("admin.controlPanel.sailRecording.notAllowed")));
 		}
-		SailRecording.start(EXT.getHttpServletRequest().getSession(), user);
+		HttpServletRequest request = EXT.getHttpServletRequest();
+		SailRecording.start(request.getSession(), user, UserAgent.getSelection(request).getUxUi().getName());
 		if ((UtilImpl.ENVIRONMENT_IDENTIFIER == null) && (webContext != null)) {
 			webContext.message(MessageSeverity.warn, Util.nullSafeI18n("admin.controlPanel.sailRecording.production"));
 		}

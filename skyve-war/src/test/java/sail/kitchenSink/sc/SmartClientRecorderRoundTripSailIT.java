@@ -81,6 +81,7 @@ class SmartClientRecorderRoundTripSailIT extends AbstractSmartClientInterpretedS
 					() -> assertTrue(xml.contains("<tabSelect path=\"Rows\"/>"), xml),
 					() -> assertTrue(xml.contains("<tabSelect path=\"Tab button\"/>"), xml),
 					() -> assertTrue(xml.contains("<action name=\"RunFromTabButton\"/>"), xml),
+					() -> assertTrue(xml.contains("<!-- changed on screen: outcome "), xml),
 					() -> assertTrue(xml.contains("<listGridZoom module=\"kitchensink\" query=\"qModelLookupFixtures\" rowContaining=\"SAIL recorded lookup "), xml));
 		replay(xml);
 	}
@@ -91,7 +92,10 @@ class SmartClientRecorderRoundTripSailIT extends AbstractSmartClientInterpretedS
 		assertAll(() -> assertTrue(xml.contains("<listGridNew/>"), xml),
 					() -> assertTrue(xml.contains("<listGridZoom rowContaining=\"SAIL Recorded Contact "), xml),
 					() -> assertTrue(xml.contains("<delete confirm=\"false\"/>"), xml),
-					() -> assertTrue(xml.contains("<delete/>"), xml));
+					() -> assertTrue(xml.contains("<delete/>"), xml),
+					() -> assertTrue(xml.contains("<!-- screen: admin.Contact (Contact), "), xml),
+					() -> assertTrue(xml.contains("<!-- \"Mobile\" was \"0400 111 222\" -->"), xml),
+					() -> assertTrue(xml.contains("<!-- row: "), xml));
 		replay(xml);
 	}
 
@@ -124,11 +128,15 @@ class SmartClientRecorderRoundTripSailIT extends AbstractSmartClientInterpretedS
 		workflow.run();
 		sailString(STOP);
 		String xml = fetch("sailrecording?format=xml");
+		selenium.trace("Recorded:\n" + xml);
 		assertAll(() -> assertTrue(xml.startsWith("<?xml"), xml),
 					() -> assertTrue(xml.contains("<login user=\"admin\" password=\"{var:password}\"/>"), xml),
 					() -> assertFalse(xml.contains("unmapped"), xml),
 					() -> assertFalse(xml.contains("StopSAILRecording"), xml),
-					() -> assertFalse(xml.contains("Control Panel"), xml));
+					() -> assertFalse(xml.contains("item=\"DevOps/Control Panel\""), xml),
+					() -> assertFalse(xml.contains("unconfirmed"), xml),
+					() -> assertTrue(xml.contains("<!-- The recorded user's roles, for the test: viewRoles(\"admin\", \"admin."), xml),
+					() -> assertTrue(xml.contains("<!-- The recorded user got the UX/UI desktop. -->"), xml));
 		return xml;
 	}
 
