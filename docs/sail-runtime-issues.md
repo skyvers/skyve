@@ -573,7 +573,7 @@ clauses are unchanged.
 A list grid with filter parameters built its criteria again in
 `completeFilterCriteria` from the filter editor's criteria, which had not
 passed through this function, so an advanced time filter on such a grid was
-still sent as a date. Fixed in `BizListGrid`'s `filterData`
+still sent as a date. Fixed (68b85f9586) in `BizListGrid`'s `filterData`
 (`skyve-web/src/js/desktop/listgrid.js`): it now converts the criteria once,
 after completing them, and completes a copy (`isc.clone`, which keeps a
 Date's logical flags) because the filter row is given the editor's criteria
