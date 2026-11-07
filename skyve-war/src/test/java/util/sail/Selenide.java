@@ -234,6 +234,44 @@ public abstract class Selenide<
 	}
 
 	/**
+	 * What a page says about the browser window's OS focus, for a failure's diagnosis.
+	 *
+	 * @param page		a token for the page (each page load gets a new one)
+	 * @param blurs		how often the window lost the OS focus since the counter was installed in this page
+	 * @param installed	whether the counter was installed by this probe, so that losses before it are unknown
+	 * @param hasFocus	whether the page had the OS focus ({@code document.hasFocus()}) when probed
+	 */
+	public record FocusProbe(@Nonnull String page, long blurs, boolean installed, boolean hasFocus) {
+	}
+
+	/**
+	 * Probes the page's count of window blur events (the browser window losing the OS focus), installing the counter
+	 * ({@code window.__sailBlurs}) if the page does not have it yet. A diagnostic only: it never throws.
+	 *
+	 * @return the probe, or {@code null} if there is no page to ask or the script fails
+	 */
+	public @Nullable FocusProbe focusProbe() {
+		try {
+			Object result = ((JavascriptExecutor) driver).executeScript(
+					"var c = window.__sailBlurs, installed = false;" +
+					"if (! c) {" +
+					"  c = window.__sailBlurs = {page: String(Date.now()) + '-' + Math.random(), n: 0};" +
+					"  window.addEventListener('blur', function() {window.__sailBlurs.n++;});" +
+					"  installed = true;" +
+					"}" +
+					"return [c.page, c.n, installed, document.hasFocus()];");
+			if ((result instanceof List<?> list) && (list.size() == 4) && (list.get(1) instanceof Number blurs)) {
+				return new FocusProbe(String.valueOf(list.get(0)), blurs.longValue(),
+										Boolean.TRUE.equals(list.get(2)), Boolean.TRUE.equals(list.get(3)));
+			}
+		}
+		catch (@SuppressWarnings("unused") RuntimeException e) {
+			// no page, a page being replaced, or no driver: say nothing
+		}
+		return null;
+	}
+
+	/**
 	 * Asks the server for the signed-in user's effective roles, in the browser's own session: {@code module.Role}
 	 * names, with the roles the user's groups give. The server answers only when {@code sail.recording} is on
 	 * (see docs/sail.md, The test user).

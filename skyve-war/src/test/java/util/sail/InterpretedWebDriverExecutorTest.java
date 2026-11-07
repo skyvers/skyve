@@ -608,4 +608,36 @@ class InterpretedWebDriverExecutorTest {
 					() -> assertEquals(List.of(), InterpretedWebDriverExecutor.membershipItems(null)),
 					() -> assertEquals(List.of("x"), InterpretedWebDriverExecutor.membershipItems("x||")));
 	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void aFocusLossDuringTheStepIsNoted() {
+		Selenide.FocusProbe before = new Selenide.FocusProbe("p1", 2, false, true);
+		Selenide.FocusProbe after = new Selenide.FocusProbe("p1", 4, false, true);
+		assertEquals("the browser window lost the OS focus during this step (2 times); hint",
+						InterpretedWebDriverExecutor.focusNote(before, after, "hint"));
+		assertEquals("the browser window lost the OS focus during this step (1 time); hint",
+						InterpretedWebDriverExecutor.focusNote(before, new Selenide.FocusProbe("p1", 3, false, true), "hint"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void noFocusLossSaysNothing() {
+		Selenide.FocusProbe probe = new Selenide.FocusProbe("p1", 2, false, true);
+		assertAll(() -> assertEquals(null, InterpretedWebDriverExecutor.focusNote(probe, probe, "hint")),
+					() -> assertEquals(null, InterpretedWebDriverExecutor.focusNote(probe, null, "hint")),
+					() -> assertEquals(null, InterpretedWebDriverExecutor.focusNote(null, null, "hint")));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void aNewPageCountsAsUnknownNotAsNoLoss() {
+		Selenide.FocusProbe before = new Selenide.FocusProbe("p1", 5, false, true);
+		// a page load during the step: a new token, or a counter installed only by the failure's probe
+		assertAll(() -> assertEquals(null, InterpretedWebDriverExecutor.focusNote(before, new Selenide.FocusProbe("p2", 7, false, true), "hint")),
+					() -> assertEquals(null, InterpretedWebDriverExecutor.focusNote(before, new Selenide.FocusProbe("p1", 9, true, true), "hint")),
+					() -> assertEquals(null, InterpretedWebDriverExecutor.focusNote(null, new Selenide.FocusProbe("p1", 9, false, true), "hint")),
+					() -> assertEquals("the browser window did not have the OS focus when this step failed; hint",
+										InterpretedWebDriverExecutor.focusNote(before, new Selenide.FocusProbe("p2", 0, true, false), "hint")));
+	}
 }

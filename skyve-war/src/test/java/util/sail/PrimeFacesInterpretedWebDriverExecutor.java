@@ -912,6 +912,15 @@ public class PrimeFacesInterpretedWebDriverExecutor extends InterpretedWebDriver
 	}
 
 	/**
+	 * PrimeFaces closes an open drop-down or autocomplete panel when its field loses the focus.
+	 */
+	@Override
+	protected @Nonnull String focusLossHint() {
+		return "PrimeFaces closes an open drop-down or autocomplete panel when its field loses the focus, and typing can be " +
+				"interrupted (did another window, such as another headed browser, take it?)";
+	}
+
+	/**
 	 * Moves a member of an ordered list membership with its pick list's move up or down buttons, which Skyve shows for an
 	 * ordered membership: see {@link PrimeFacesSelenide#pickListMove(String, int, String, int)}. The view's context is
 	 * unchanged.
