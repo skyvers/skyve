@@ -1568,6 +1568,16 @@ public class SmartClientInterpretedWebDriverExecutor extends InterpretedWebDrive
 	}
 
 	/**
+	 * SmartClient closes an open pick list when its field loses the focus, and selects a text field's whole value when
+	 * it gets the focus back, so the next key typed replaces it.
+	 */
+	@Override
+	protected @Nonnull String focusLossHint() {
+		return "SmartClient closes an open pick list when its field loses the focus, and selects a text field's whole value " +
+				"when it gets the focus back, so the next key replaces it (did another window, such as another headed browser, take it?)";
+	}
+
+	/**
 	 * Ends any inline grid edit, then checks that no dialog is in the way.
 	 */
 	private void prepareForInteraction() {

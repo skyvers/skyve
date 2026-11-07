@@ -619,6 +619,25 @@ In PF, the messages listed after "but found:" also include the page's script
 errors, as `(page script errors: …)`. A script error can stop a response from
 being applied.
 
+**Lost OS focus.** A headed browser can lose the OS focus to another window,
+such as another headed browser, in the middle of a step. SmartClient then
+closes an open pick list (its field blurs) and, when the focus comes back,
+selects a text field's whole value, so the next key typed replaces it. To show
+when this happened, the harness counts the page's `window` blur events
+(`window.__sailBlurs`, installed in each page) before each step. When a step
+fails and the count went up during it, the message gets, before the URL:
+
+```text
+...; the browser window lost the OS focus during this step (1 time); SmartClient closes an open pick list when its field loses the focus, ... [at ...]
+```
+
+If the window did not have the OS focus when the step failed
+(`document.hasFocus()`), the message says so instead. A page loaded during
+the step (as PF loads a page per view) starts a new count, so losses before it
+are unknown and are not reported as none. This is a diagnostic only: it never
+waits, retries or changes whether a step passes, and if the probe itself fails
+it says nothing.
+
 Under Verify, the message starts with `SAIL automation failed with N failure(s):`
 and lists one failure per line. Each failure from a step that threw is also
 attached to the `AssertionError` as a suppressed exception, with the original
@@ -1076,6 +1095,11 @@ Both executors use a few script calls that are not gestures:
 
 Scripts follow the same rules. Use `testGridRows timeoutMillis` or
 `testMessage` to wait for a server job, not `<pause>`.
+
+A headed run must not share the screen with another headed browser: losing the
+OS focus mid-step closes SmartClient's pick lists and makes it select a field's
+text when the focus returns. The harness does not try to hide this; a failure
+caused by it says so (see [Lost OS focus](#test-strategies-and-failure-reports)).
 
 ## Recording
 

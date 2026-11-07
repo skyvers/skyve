@@ -292,6 +292,8 @@ public abstract class InterpretedWebDriverExecutor<
 			if (media != null) {
 				media.stepStarted(name, stepNumber, step);
 			}
+			// what the page says about the window's OS focus as the step starts, for a failure's diagnosis
+			stepFocus = selenide.focusProbe();
 			try {
 				step.execute(this);
 			}
@@ -402,11 +404,57 @@ public abstract class InterpretedWebDriverExecutor<
 			result.append(' ').append(describe(currentStep));
 		}
 		result.append(": ").append(reason);
+		String focus = focusNote(stepFocus, selenide.focusProbe(), focusLossHint());
+		if (focus != null) {
+			result.append("; ").append(focus);
+		}
 		String url = currentUrl();
 		if (url != null) {
 			result.append(" [at ").append(url).append(']');
 		}
 		return result.toString();
+	}
+
+	/** The page's focus probe as the current step started, or {@code null} if there was none. */
+	private @Nullable Selenide.FocusProbe stepFocus;
+
+	/**
+	 * Composes the diagnostic a failure message gets when the browser window lost the OS focus during the step, or did
+	 * not have it when the step failed. A diagnostic only: it does not change whether the step passes.
+	 *
+	 * @param before	the probe as the step started, or {@code null}
+	 * @param after		the probe when the step failed, or {@code null}
+	 * @param hint		what losing the focus does in this renderer
+	 * @return the note, or {@code null} when there is nothing to say: no probe, or the window kept the focus. A page
+	 * 			that was replaced during the step (a new token, or a counter installed only now) counts as unknown, not
+	 * 			as no loss.
+	 */
+	static @Nullable String focusNote(@Nullable Selenide.FocusProbe before, @Nullable Selenide.FocusProbe after, @Nonnull String hint) {
+		if (after == null) {
+			return null;
+		}
+		long lost = 0L;
+		if ((before != null) && (! after.installed()) && before.page().equals(after.page())) {
+			lost = after.blurs() - before.blurs();
+		}
+		if (lost > 0L) {
+			return String.format("the browser window lost the OS focus during this step (%d time%s); %s",
+									Long.valueOf(lost), (lost == 1L) ? "" : "s", hint);
+		}
+		if (! after.hasFocus()) {
+			return "the browser window did not have the OS focus when this step failed; " + hint;
+		}
+		return null;
+	}
+
+	/**
+	 * Says what losing the OS focus does to the page, for the failure note of {@link #focusNote}.
+	 *
+	 * @return the hint
+	 */
+	@SuppressWarnings("static-method") // the renderer executors override it
+	protected @Nonnull String focusLossHint() {
+		return "another window (such as another headed browser) took it, which can interrupt typing or close an open drop-down";
 	}
 
 	private static @Nonnull String reason(@Nonnull Throwable t) {
