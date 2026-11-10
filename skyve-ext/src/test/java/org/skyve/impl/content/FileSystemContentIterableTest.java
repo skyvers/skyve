@@ -71,6 +71,19 @@ class FileSystemContentIterableTest {
 	}
 
 	@Test
+	void walksTheStoreInFolderPathOrder() throws Exception {
+		// folders 90/00, 90/b0 and a0: not the content ID order
+		String first = "99999000-0000-0000-0000-000000000000";
+		String second = "99999000-0b00-0000-0000-000000000000";
+		String third = "00000a00-0000-0000-0000-000000000000";
+		for (String contentId : List.of(second, third, first)) {
+			put("biz", new Date(), contentId);
+		}
+
+		assertEquals(List.of(first, second, third), all().stream().map(SearchResult::getContentId).toList());
+	}
+
+	@Test
 	void returnsWhatTheContentManagerReadsBack() throws Exception {
 		put("biz1", new Date());
 
@@ -138,6 +151,15 @@ class FileSystemContentIterableTest {
 	}
 
 	@Test
+	void noContentWhenFileStorageIsOff() throws Exception {
+		put("biz1", new Date());
+
+		UtilImpl.CONTENT_FILE_STORAGE = false;
+
+		assertFalse(new FileSystemContentIterable().iterator().hasNext());
+	}
+
+	@Test
 	void totalHitsIsTheContentReturnedPlusOneWhileThereIsMore() throws Exception {
 		for (int i = 0; i < 3; i++) {
 			put("biz" + i, new Date());
@@ -188,8 +210,13 @@ class FileSystemContentIterableTest {
 	}
 
 	private static String put(String bizId, Date lastModified) throws Exception {
+		return put(bizId, lastModified, null);
+	}
+
+	private static String put(String bizId, Date lastModified, String contentId) throws Exception {
 		AttachmentContent attachment = new AttachmentContent("demo", "admin", "User", "group1", "user1", bizId, "avatar")
 				.attachment("avatar.txt", "text/plain", "hello".getBytes(StandardCharsets.UTF_8));
+		attachment.setContentId(contentId);
 		attachment.setLastModified(lastModified);
 		try (FileSystemContentManager manager = new FileSystemContentManager()) {
 			manager.put(attachment, false);

@@ -923,7 +923,7 @@ flowchart LR
 
 - **`ContentManager`** — SPI with `put(BeanContent)`, `put(AttachmentContent)`, `getAttachment(String)`, `removeBean(String)`, `removeAttachment(String)`, `google(String, int)` for federated search.
 - **`AbstractContentManager`** — base with filesystem/metadata helpers; metadata ties content to `bizCustomer`, `bizModule`, `bizDocument`, `bizId`, `attributeName`.
-- **`FileSystemContentManager`** — default store: assigns `contentId`, sniffs MIME via `TextExtractor`, writes bytes + sidecar metadata. `all()` walks the store and reads each sidecar, so content garbage collection works without a search index.
+- **`FileSystemContentManager`** — default store: assigns `contentId`, sniffs MIME via `TextExtractor`, writes bytes + sidecar metadata.
 - **`LuceneContentManager`** — extends filesystem; indexes both `BeanContent` and `AttachmentContent` into a single Lucene `CONTENT` field.
 - **`ElasticContentManager`** — Elasticsearch-backed implementation (two-index search shape).
 - **`DelegatingContentManager`** — facade forwarding to the configured implementation.

@@ -220,6 +220,9 @@ public class FileSystemContentManager extends AbstractContentManager {
 	 * <p>Complexity: each iteration reads every content folder's meta.json, so it is O(n) file system reads
 	 * where n is the number of stored attachments.
 	 *
+	 * <p>The Data Maintenance Content list starts a new walk for each page it fetches, so a page reads
+	 * every content folder before it as well as its own.
+	 *
 	 * @return a content iterable over the stored attachments
 	 * @throws Exception Not thrown by this implementation.
 	 */
