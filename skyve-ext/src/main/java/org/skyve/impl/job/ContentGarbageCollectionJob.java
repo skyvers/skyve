@@ -163,10 +163,10 @@ public class ContentGarbageCollectionJob implements Job {
 										String bogusContentReference = contentChecker.bogusContentReference(contentId, customer);
 										if (bogusContentReference == null) {
 											orphanedAttachmentContentIds.add(contentId);
-											LOGGER.info("ContentGarbageCollectionJob: Remove attachment content with bizid/contentId {}/{}", contentId, bizId);
+											LOGGER.info("ContentGarbageCollectionJob: Remove attachment content with bizid/contentId {}/{}", bizId, contentId);
 										}
 										else {
-											LOGGER.error("ContentGarbageCollectionJob: Cannot remove unreferenced attachment content with bizId/contentId {}/{} and owning document of {}.{} as it is actually referenced by Table#BizId {}", contentId, bizId, moduleName, documentName, bogusContentReference);
+											LOGGER.error("ContentGarbageCollectionJob: Cannot remove unreferenced attachment content with bizId/contentId {}/{} and owning document of {}.{} as it is actually referenced by Table#BizId {}", bizId, contentId, moduleName, documentName, bogusContentReference);
 										}
 									}
 									else {
