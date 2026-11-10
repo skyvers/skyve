@@ -11,14 +11,13 @@ import org.skyve.EXT;
 import org.skyve.content.AttachmentContent;
 import org.skyve.content.BeanContent;
 import org.skyve.content.ContentIterable;
-import org.skyve.content.SearchResult;
 import org.skyve.content.SearchResults;
 import org.skyve.content.TextExtractor;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.util.FileUtil;
 
 /**
- * A content manager class that implements a file system storage but can't be searched or iterated.
+ * A content manager class that implements a file system storage that can be iterated but can't be searched.
  */
 public class FileSystemContentManager extends AbstractContentManager {
 	/**
@@ -216,48 +215,17 @@ public class FileSystemContentManager extends AbstractContentManager {
 	}
 
 	/**
-	 * Iteration is not supported; returns an empty iterable.
+	 * Returns all attachments in the file system content store by walking its folders.
 	 *
-	 * @return A content iterable with no results.
+	 * <p>Complexity: each iteration reads every content folder's meta.json, so it is O(n) file system reads
+	 * where n is the number of stored attachments.
+	 *
+	 * @return a content iterable over the stored attachments
 	 * @throws Exception Not thrown by this implementation.
 	 */
 	@Override
-	@SuppressWarnings("java:S1604") // Not a functional interface, but extends a functional interface
 	public ContentIterable all() throws Exception {
-		return new ContentIterable() {
-			/**
-			 * {@inheritDoc}
-			 */
-			@Override
-			public ContentIterator iterator() {
-				return new ContentIterator() {
-					@Override
-					@SuppressWarnings("java:S2272") // No-op
-					/**
-					 * Performs next.
-					 */
-					public SearchResult next() {
-						return null;
-					}
-					
-					/**
-					 * {@inheritDoc}
-					 */
-					@Override
-					public boolean hasNext() {
-						return false;
-					}
-					
-					/**
-					 * {@inheritDoc}
-					 */
-					@Override
-					public long getTotalHits() {
-						return 0;
-					}
-				};
-			}
-		};
+		return new FileSystemContentIterable();
 	}
 
 	/**
