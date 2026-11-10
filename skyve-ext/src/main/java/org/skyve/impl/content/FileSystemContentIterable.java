@@ -13,8 +13,6 @@ import org.skyve.content.SearchResult;
 import org.skyve.domain.Bean;
 import org.skyve.impl.util.TimeUtil;
 import org.skyve.impl.util.UtilImpl;
-import org.skyve.util.FileUtil;
-import org.skyve.util.JSON;
 import org.skyve.util.logging.Category;
 import org.skyve.util.logging.SkyveLoggerFactory;
 import org.slf4j.Logger;
@@ -129,17 +127,14 @@ public class FileSystemContentIterable implements ContentIterable {
 		}
 
 		/**
-		 * Reads a content folder's meta.json the same way as
-		 * {@link AbstractContentManager#getFromFileSystem(StringBuilder, String, boolean)}.
+		 * Reads a content folder's meta.json into a search result.
 		 *
 		 * @param contentFolder	a folder at the content ID depth of the store, which may be a stray file
 		 * @return the search result for this content folder, or {@code null} if it has no readable meta.json
 		 */
 		private @Nullable SearchResult read(@Nonnull File contentFolder) {
-			File metaFile = new File(contentFolder, AbstractContentManager.META_JSON);
 			try {
-				@SuppressWarnings("unchecked")
-				Map<String, Object> meta = (Map<String, Object>) JSON.unmarshall(FileUtil.string(metaFile));
+				Map<String, Object> meta = AbstractContentManager.readContentMeta(contentFolder);
 
 				SearchResult result = new SearchResult();
 				result.setContentId(contentFolder.getName());
