@@ -61,7 +61,8 @@ public class FileSystemContentIterable implements ContentIterable {
 		private long walkNanos = 0L;
 
 		private FileSystemContentIterator() {
-			pending.push(new Folder(new File(UtilImpl.CONTENT_DIRECTORY, ContentManager.FILE_STORE_NAME), 0));
+			// the same path as the content managers use
+			pending.push(new Folder(new File(UtilImpl.CONTENT_DIRECTORY + ContentManager.FILE_STORE_NAME), 0));
 		}
 
 		/**
