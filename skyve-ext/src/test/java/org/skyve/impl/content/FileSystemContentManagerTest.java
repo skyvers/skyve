@@ -167,7 +167,8 @@ class FileSystemContentManagerTest {
 	}
 
 	@Test
-	void googleReturnsEmptyResultsAndAllReturnsEmptyIterable() throws Exception {
+	void googleReturnsEmptyResultsAndAllReturnsEmptyIterableForAnEmptyStore() throws Exception {
+		configureFileStorage();
 		try (FileSystemContentManager manager = new FileSystemContentManager()) {
 			SearchResults results = manager.google("anything", 10);
 			ContentIterable iterable = manager.all();
