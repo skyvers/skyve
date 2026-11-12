@@ -64,6 +64,8 @@ public class JSONReader {
 		object;
 	}
 
+	// Punctuation tokens are compared by identity (==), not equals(), because string() always
+	// allocates a new String - so a string value such as "]" is never mistaken for punctuation.
 	private static final String OBJECT_END = "}";
 	private static final String ARRAY_END = "]";
 	private static final String COLON = ":";
@@ -215,61 +217,48 @@ public class JSONReader {
 			if (Character.isDigit(c) || c == '-') {
 				token = number();
 			}
+			else if (literal("false")) {
+				token = Boolean.FALSE;
+			}
+			else if (literal("true")) {
+				token = Boolean.TRUE;
+			}
+			else if (literal("null")) {
+				token = null;
+			}
 			else {
-				if (c == 'f') {
-					char a = next();
-					char l = next();
-					char s = next();
-					char e = next();
-					if ((a == 'a') && (l == 'l') && (s == 's') && (e == 'e')) {
-						token = Boolean.FALSE;
-						c = it.next();
-					}
-					else {
-						it.previous();
-						it.previous();
-						it.previous();
-						c = it.previous();
-						token = string('\0');
-					}
-				}
-				else if (c == 't') {
-					char r = next();
-					char u = next();
-					char e = next();
-					if ((r == 'r') && (u == 'u') && (e == 'e')) {
-						token = Boolean.TRUE;
-						c = it.next();
-					}
-					else {
-						it.previous();
-						it.previous();
-						c = it.previous();
-						token = string('\0');
-					}
-				}
-				else if (ch == 'n') {
-					char u = next();
-					char l = next();
-					char nextL = next();
-					if ((u == 'u') && (l == 'l') && (nextL == 'l')) {
-						token = null;
-						c = it.next();
-					}
-					else {
-						it.previous();
-						it.previous();
-						c = it.previous();
-						token = string('\0');
-					}
-				}
-				else {
-					token = string('\0');
-				}
+				token = string('\0');
 			}
 		}
 // Util.LOGGER.info("token: {}", token); // enable this line to see the token stream
 		return token;
+	}
+
+	/**
+	 * Consumes a {@code true}, {@code false} or {@code null} literal at the current position.
+	 *
+	 * <p>The literal must end there, so that an unquoted key such as {@code nullable} or
+	 * {@code trueClientIp} is read as a key and not as the literal it starts with.
+	 *
+	 * <p>Side effects: advances past the literal when it matches, otherwise leaves the
+	 * parser position unchanged.
+	 *
+	 * @param word the literal to match
+	 * @return {@code true} if the literal was consumed
+	 */
+	private boolean literal(@Nonnull String word) {
+		int start = it.getIndex();
+		int length = word.length();
+		int i = 0;
+		while ((i < length) && (c == word.charAt(i))) {
+			next();
+			i++;
+		}
+		if ((i == length) && (! Character.isJavaIdentifierPart(c))) {
+			return true;
+		}
+		c = it.setIndex(start);
+		return false;
 	}
 
 	/**
@@ -322,21 +311,21 @@ public class JSONReader {
 			Bean result = ((DocumentImpl) document).newInstance(customer);
 
 			String propertyName = null;
-			if (COMMA.equals(separator)) {
+			if (separator == COMMA) {
 				propertyName = (String) read();
 			}
-			else if (! OBJECT_END.equals(separator)) {
+			else if (separator != OBJECT_END) {
 				throw new IllegalStateException("Malformed JSON object after bizDocument attribute");
 			}
 
 			int i = 0;
-			while (! OBJECT_END.equals(token)) {
+			while (token != OBJECT_END) {
 				if (propertyName == null) {
 					throw new IllegalStateException("No propertyName in Skyve document bean after a comma");
 				}
 				
 				read(); // should be a colon
-				if (! OBJECT_END.equals(token)) {
+				if (token != OBJECT_END) {
 					Object value = read();
 					if (Bean.DOCUMENT_ID.equals(propertyName)) {
 						try {
@@ -395,7 +384,7 @@ public class JSONReader {
 						}
 					}
 
-					if (COMMA.equals(read())) {
+					if (read() == COMMA) {
 						propertyName = (String) read();
 					}
 				}
@@ -416,11 +405,11 @@ public class JSONReader {
 			// Order can be important - like in constant range map expression
 			Map<Object, Object> result = new LinkedHashMap<>();
 			int i = 0;
-			while (! OBJECT_END.equals(token)) {
+			while (token != OBJECT_END) {
 				read(); // should be a colon
-				if (! OBJECT_END.equals(token)) {
+				if (token != OBJECT_END) {
 					result.put(key, read());
-					if (COMMA.equals(read())) {
+					if (read() == COMMA) {
 						key = read();
 					}
 				}
@@ -466,22 +455,22 @@ public class JSONReader {
 	private @Nonnull Map<String, Object> remainingObjectValues() throws Exception {
 		Map<String, Object> result = new LinkedHashMap<>();
 		Object separator = read();
-		if (OBJECT_END.equals(separator)) {
+		if (separator == OBJECT_END) {
 			return result;
 		}
-		if (! COMMA.equals(separator)) {
+		if (separator != COMMA) {
 			throw new IllegalStateException("Malformed JSON object after class attribute");
 		}
 
 		String propertyName = (String) read();
 		int i = 0;
-		while (! OBJECT_END.equals(token)) {
+		while (token != OBJECT_END) {
 			read(); // should be a colon
-			if (! OBJECT_END.equals(token)) {
+			if (token != OBJECT_END) {
 				result.put(propertyName, read());
-			}
-			if (COMMA.equals(read())) {
-				propertyName = (String) read();
+				if (read() == COMMA) {
+					propertyName = (String) read();
+				}
 			}
 			checkObjectLength(i++, propertyName);
 		}
@@ -550,9 +539,9 @@ public class JSONReader {
 		List<Object> result = new ArrayList<>();
 		Object value = read();
 		int i = 0;
-		while (! ARRAY_END.equals(token)) {
+		while (token != ARRAY_END) {
 			result.add(value);
-			if (COMMA.equals(read())) {
+			if (read() == COMMA) {
 				value = read();
 			}
 			// Defend infinite loop
