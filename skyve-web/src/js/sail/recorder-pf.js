@@ -1387,24 +1387,16 @@
 		} catch (e) {
 			cause = null;
 		}
-		// how the page was loaded (a reload, Back or Forward, a new window's first page): the server makes the window,
-		// back and refresh steps from it (SailRecordingWindows)
 		if (cause) {
 			return;
 		}
-		var how = core.pageLoad();
-		var push = function (step) {
-			Object.keys(how).forEach(function (key) {
-				step[key] = how[key];
-			});
-			core.push(step);
-		};
+		// core.pushPageLoad() adds how the page was loaded (a reload, Back or Forward, a new window's first page): the
+		// server makes the window, back and refresh steps from it (SailRecordingWindows)
+		var push = core.pushPageLoad;
 		var params = new URL(location.href).searchParams;
 		var module = params.get("m");
 		if (!module) {
-			if (how.load || how.opened) {
-				push({ op: "context", view: "" });
-			}
+			push(null);
 			return;
 		}
 		var a = params.get("a");
@@ -1431,8 +1423,8 @@
 			push(mapNavigation);
 		} else if (a) {
 			push({ op: "unmapped", text: "opened " + location.search + " (no SAIL step opens this page)", view: "" });
-		} else if (how.load || how.opened) {
-			push({ op: "context", view: "" });
+		} else {
+			push(null);
 		}
 	}
 
@@ -1453,6 +1445,7 @@
 		},
 		control: control,
 		checkTarget: checkTarget,
+		pageLoad: recordPageLoad,
 		isSignOut: function (element) {
 			var link = element && element.closest ? element.closest("a[href]") : null;
 			return !!link && /(^|\/)loggedOut$/.test(new URL(link.href, location.href).pathname);

@@ -1829,19 +1829,12 @@
 	// ---------------------------------------------------------------- starting and stopping
 
 	/**
-	 * Records the page load as a navigation, when its URL opened a view, with how it was loaded (a reload, Back or
-	 * Forward) and whether it is a new window's first page (see core.pageLoad()); the server makes the window, back
-	 * and refresh steps from these (SailRecordingWindows). A load of a page that names no view says so in a context
-	 * entry, when it was a reload, Back or Forward, or a new window.
+	 * Records the page load as a navigation, when its URL opened a view, through core.pushPageLoad(), which adds how it
+	 * was loaded (a reload, Back or Forward) and whether it is a new window's first page; the server makes the window,
+	 * back and refresh steps from these (SailRecordingWindows).
 	 */
 	function recordPageLoad() {
-		var how = core.pageLoad();
-		var push = function (step) {
-			Object.keys(how).forEach(function (key) {
-				step[key] = how[key];
-			});
-			core.push(step);
-		};
+		var push = core.pushPageLoad;
 		var params = {};
 		location.search.replace(/^\?/, "").split("&").forEach(function (pair) {
 			var equals = pair.indexOf("=");
@@ -1850,9 +1843,7 @@
 			}
 		});
 		if (!params.m) {
-			if (how.load || how.opened) {
-				push({ op: "context", view: "" });
-			}
+			push(null);
 			return;
 		}
 		if (params.a === "e" && params.d) {
@@ -1886,8 +1877,8 @@
 			push(step);
 		} else if (params.a) {
 			push({ op: "unmapped", text: "opened " + location.search + " (no SAIL step opens this page)", view: "" });
-		} else if (how.load || how.opened) {
-			push({ op: "context", view: "" });
+		} else {
+			push(null);
 		}
 	}
 
@@ -2066,6 +2057,7 @@
 		connected: resolvePageList,
 		control: control,
 		checkTarget: checkTarget,
+		pageLoad: recordPageLoad,
 		isSignOut: isSignOut,
 		signOut: function () {
 			window.location = "loggedOut";

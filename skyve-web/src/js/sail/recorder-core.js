@@ -45,6 +45,11 @@
 	var WINDOW_KEY = "skyve.sail.recorder.window";
 	/** Set in a window's sessionStorage when it opens a new window, until it is the window in front again. */
 	var OPENER_KEY = "skyve.sail.recorder.opener";
+	/**
+	 * Set in a window's sessionStorage only while it calls window.open, which copies the sessionStorage into the new
+	 * window: there it says the window id is a copy.
+	 */
+	var COPY_KEY = "skyve.sail.recorder.copy";
 	/** How many entries the expanded panel loads at a time. */
 	var RANGE = 50;
 
@@ -96,9 +101,12 @@
 	 * How the page was loaded: "navigate" (a link, a typed URL, a gesture), "reload", "back", "forward", or "traverse"
 	 * when the browser went through its history in a direction it does not tell (Navigation Timing says only
 	 * back_forward; the Navigation API's activation, where the browser has it, says which).
+	 *
+	 * @param restored	true when the page is being shown again from the back/forward cache, a move through the history
+	 * 					that Navigation Timing (the page's first load) does not describe
 	 */
-	function loadKind() {
-		var type = navigationType();
+	function loadKind(restored) {
+		var type = restored ? "back_forward" : navigationType();
 		if (type === "reload") {
 			return "reload";
 		}
@@ -114,22 +122,41 @@
 		return "traverse";
 	}
 
+	/** The window id in the sessionStorage of the window that opened this one, or null if it has none or cannot be read. */
+	function openerWindowId() {
+		try {
+			var opener = window.opener;
+			return (opener && (opener !== window) && !opener.closed) ? opener.sessionStorage.getItem(WINDOW_KEY) : null;
+		} catch (e) {
+			return null; // another origin, or no sessionStorage
+		}
+	}
+
 	/**
 	 * This window's id, and whether this page is the first page of a window the recording has not seen: a tab with no
 	 * id yet (a link with target _blank opens one without its opener's sessionStorage, as does a tab the browser or a
-	 * test opens), or one whose id was copied from its opener (a window.open keeps the opener's sessionStorage) and
-	 * that has only this page in its history.
+	 * test opens), or one whose id is a copy of its opener's: window.open copies the opener's sessionStorage, which
+	 * carries COPY_KEY while the recorder's window.open runs (see openWindow()), and a window whose opener it can read
+	 * has the opener's id. That holds on the window's first page, and on a later one when the first had no recorder (a
+	 * PDF, another site). A window that keeps its own id is the same window on every page, however it loads them
+	 * (location.replace too).
 	 */
 	function windowIdentity(newId) {
 		var id = sessionValue(WINDOW_KEY);
-		var copied = !!id && !!window.opener && (window.opener !== window) && (history.length === 1) && (navigationType() === "navigate");
+		var copied = !!id && ((sessionValue(COPY_KEY) === "true") || (openerWindowId() === id));
 		var first = !id || copied;
+		setSessionValue(COPY_KEY, null);
 		if (first) {
 			id = newId;
 			setSessionValue(WINDOW_KEY, id);
 			setSessionValue(OPENER_KEY, null);
 		}
 		return { id: id, first: first };
+	}
+
+	/** A URL without its fragment. */
+	function withoutFragment(url) {
+		return String(url || "").replace(/#.*$/, "");
 	}
 
 	/** True if a link opens its page in another window: a target other than _self, _top or _parent. */
@@ -167,7 +194,9 @@
 	function linkStep(link, url) {
 		var text = linkText(link);
 		var links = Array.prototype.filter.call(document.querySelectorAll("a"), displayed);
-		var step = { op: "navigateLink", window: "new", url: url };
+		// the page the link is on, which the new window's page has as its referrer (Referrer-Policy same-origin), and
+		// when: the server matches the new window to the link with them (SailRecordingWindows)
+		var step = { op: "navigateLink", window: "new", url: url, from: withoutFragment(location.href), at: String(Date.now()) };
 		if (text) {
 			var containing = links.filter(function (a) {
 				return linkText(a).indexOf(text) >= 0;
@@ -275,7 +304,8 @@
 	 * Creates the recorder for a renderer.
 	 *
 	 * @param adapter	the renderer's part: transport, attach, flush, describe, connected, control, checkTarget,
-	 * 					isSignOut, signOut, reset (see recorder-sc.js); and optionally where the bar starts: corner
+	 * 					isSignOut, signOut, reset, pageLoad (records the page's load, through pushPageLoad) (see
+	 * 					recorder-sc.js); and optionally where the bar starts: corner
 	 * 					("bottom-right", the default, or "bottom-left") and cornerInset (the pixels between the bar and
 	 * 					that side of the window, 12 by default)
 	 * @return the recorder
@@ -287,6 +317,8 @@
 		var sequence = 0;
 		/** This window's id and whether this page is a new window's first page (see windowIdentity()). */
 		var windowInfo = null;
+		/** True once the page has been shown again from the back/forward cache (see onPageShow()). */
+		var restored = false;
 		var token = null;
 		var queue = [];
 		var inFlight = 0;
@@ -998,7 +1030,13 @@
 						newWindowLink(link, absolute);
 					}
 				}
-				return original.apply(window, arguments);
+				// the new window gets a copy of this sessionStorage: mark it as a copy there (see windowIdentity())
+				setSessionValue(COPY_KEY, "true");
+				try {
+					return original.apply(window, arguments);
+				} finally {
+					setSessionValue(COPY_KEY, null);
+				}
 			};
 		}
 
@@ -1006,6 +1044,18 @@
 		 * The window is in front again (its tab shows, or it has the focus): if it opened a new window, says so, so that
 		 * the windows it opened are closed in the script before its next step.
 		 */
+		/**
+		 * The page is shown again from the back/forward cache: a move through the history that loads nothing, so the
+		 * adapter records it as it records a page load. Skyve's pages are not kept in that cache (their responses are
+		 * Cache-Control: no-store, and SmartClient has an unload listener), so this is a guard.
+		 */
+		function onPageShow(event) {
+			if (active && event.persisted) {
+				restored = true;
+				adapter.pageLoad();
+			}
+		}
+
 		function onFront() {
 			if (active && (document.visibilityState !== "hidden") && (sessionValue(OPENER_KEY) === "true")) {
 				setSessionValue(OPENER_KEY, null);
@@ -1122,6 +1172,7 @@
 			listen(window, "keyup", endKeyGesture, false);
 			listen(window, "click", clicked, false);
 			listen(window, "pagehide", onPageHide, false);
+			listen(window, "pageshow", onPageShow, false);
 			listen(document, "visibilitychange", onFront, false);
 			listen(window, "focus", onFront, false);
 			wrap(window, "open", openWindow);
@@ -1264,17 +1315,37 @@
 			 * back, forward or traverse (absent for an ordinary load), opened is "true" on the first page of a new
 			 * window, with pageHref its URL as navigateLink href takes it, and url is the page's URL.
 			 */
-			pageLoad: function () {
-				var result = { url: location.href };
-				var kind = loadKind();
+			/**
+			 * Pushes the page load's step (null if the page names no view), with how the page was loaded: load (reload,
+			 * back, forward or traverse; absent for an ordinary load), and on the first page of a new window opened
+			 * "true", with its URL as navigateLink href takes it (pageHref), its referrer, the pages its history holds and
+			 * when. A page that names no view is a context entry with these, when it was a reload, Back or Forward, or a
+			 * new window's first page; otherwise nothing.
+			 */
+			pushPageLoad: function (step) {
+				var how = { url: location.href };
+				var kind = loadKind(restored);
 				if (kind !== "navigate") {
-					result.load = kind;
+					how.load = kind;
 				}
-				if (windowInfo && windowInfo.first) {
-					result.opened = "true";
-					result.pageHref = scriptUrl(location.href);
+				if (windowInfo && windowInfo.first && !restored) {
+					how.opened = "true";
+					how.pageHref = scriptUrl(location.href);
+					how.referrer = withoutFragment(document.referrer);
+					how.windowPages = String(history.length);
+					how.at = String(Date.now());
 				}
-				return result;
+				var result = step;
+				if (!result) {
+					if (!how.load && !how.opened) {
+						return;
+					}
+					result = { op: "context", view: "" };
+				}
+				Object.keys(how).forEach(function (key) {
+					result[key] = how[key];
+				});
+				push(result);
 			},
 			/** The element the gesture being handled started on, or null outside a gesture. */
 			gestureTarget: function () {
