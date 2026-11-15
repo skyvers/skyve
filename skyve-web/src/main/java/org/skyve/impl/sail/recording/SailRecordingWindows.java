@@ -19,13 +19,18 @@ import jakarta.annotation.Nullable;
  * from the one above it. The rules, per entry, in the order the server received them:
  * <ul>
  * <li>{@code navigateLink window="new"} opens a window that has no id yet: the next new window whose first page is
- * the link's URL ({@value #URL}) is that window. A window that never records (a PDF) stays open until a step comes from
- * a window under it.</li>
+ * the link's URL ({@value #URL}), or whose referrer ({@value #REFERRER}) is the page the link was on ({@value #FROM}),
+ * as after a redirect, is that window. Windows send their entries independently, so a new window's first page can
+ * reach the server before the link's entry (sent from its window behind an earlier request): such a link, matched the
+ * same way and made no later than the page ({@value #AT}), is taken where the page is, and skipped where it arrives. A
+ * window that never records (a PDF) stays open until a step comes from a window under it.</li>
  * <li>A new window's first page that no recorded link opened (a typed URL, a link opened in a new tab with the browser's
  * menu, a window a button opened) is {@code navigateLink href window="new"} with the page's URL, opened from the
  * window in front.</li>
  * <li>Either way, the new window's first page is not loaded again: its navigation becomes the push of its context
- * ({@code pushEditContext} or {@code pushListContext}), as a script must push one in a new window.</li>
+ * ({@code pushEditContext} or {@code pushListContext}), as a script must push one in a new window; unless the link's
+ * window showed other pages first ({@value #WINDOW_PAGES}, as a PDF that leads to a Skyve page), when the page is
+ * opened by its URL.</li>
  * <li>An entry from a window under the one in front (the user closed the window in front, or came back to the
  * window under it) closes each window above it first: {@code closeWindow}.</li>
  * <li>An entry from a window that is not on the stack (one the script closed, or one the recording did not see opened)
@@ -54,30 +59,49 @@ final class SailRecordingWindows {
 	static final String URL = "url";
 	/** The key of a new window's first page's URL as navigateLink href takes it (relative to the application). */
 	static final String PAGE_HREF = "pageHref";
+	/** The key of a new window's first page's referrer. */
+	static final String REFERRER = "referrer";
+	/** The key of the number of pages a new window's history holds, at its first page that records. */
+	static final String WINDOW_PAGES = "windowPages";
+	/** The key of the URL of the page a link into a new window was on. */
+	static final String FROM = "from";
+	/** The key of when (milliseconds) a link into a new window was clicked, or a new window's first page loaded. */
+	static final String AT = "at";
 
 	private static final String OP = SailRecordingBuilder.OP;
 	private static final String TEXT = "text";
 	private static final String TRUE = "true";
+	/** navigateLink's attribute that opens the link in a new window. */
+	private static final String LINK_WINDOW = "window";
+	private static final String CLOSE_WINDOW = "closeWindow";
 	private static final Set<String> URL_NAVIGATIONS = Set.of("navigateEdit", "navigateList", "navigateTree", "navigateMap", "navigateCalendar");
 
-	/** A window of the stack: its id, null until a window that is the link's opens (or forever, for a PDF). */
+	/**
+	 * A window of the stack: its id, null until a window that is the link's opens (or forever, for a PDF); for a link's
+	 * window, the link's URL and the page it was on.
+	 */
 	private static final class Frame {
 		private String id;
 		private final String url;
+		private final String from;
 
-		private Frame(@Nullable String id, @Nullable String url) {
+		private Frame(@Nullable String id, @Nullable Map<String, String> link) {
 			this.id = id;
-			this.url = url;
+			this.url = (link == null) ? null : link.get(URL);
+			this.from = (link == null) ? null : link.get(FROM);
 		}
 	}
 
+	private final List<? extends Map<String, String>> entries;
+	/** The indexes of the links taken early, where their window's first page was (see {@link #lateLink(Map, int)}). */
+	private final Set<Integer> taken = new HashSet<>();
 	private final List<Frame> stack = new ArrayList<>();
 	private final Set<String> closed = new HashSet<>();
 	/** The window of the last entry that had one, to note a switch to an unknown window once. */
 	private String lastWindow = null;
 
-	private SailRecordingWindows() {
-		// one instance per pass over a recording's entries
+	private SailRecordingWindows(@Nonnull List<? extends Map<String, String>> entries) {
+		this.entries = entries;
 	}
 
 	/**
@@ -90,18 +114,22 @@ final class SailRecordingWindows {
 	 * @return one list per entry, in order, each possibly empty
 	 */
 	static @Nonnull List<List<Map<String, String>>> grouped(@Nonnull List<? extends Map<String, String>> entries) {
-		SailRecordingWindows pass = new SailRecordingWindows();
+		SailRecordingWindows pass = new SailRecordingWindows(entries);
 		List<List<Map<String, String>>> result = new ArrayList<>(entries.size());
-		for (Map<String, String> entry : entries) {
-			result.add(pass.apply(entry));
+		for (int i = 0, l = entries.size(); i < l; i++) {
+			result.add(pass.apply(i));
 		}
 		return result;
 	}
 
-	/** The entries one recorded entry becomes. */
-	private @Nonnull List<Map<String, String>> apply(@Nonnull Map<String, String> entry) {
+	/** The entries the recorded entry at an index becomes. */
+	private @Nonnull List<Map<String, String>> apply(int index) {
+		Map<String, String> entry = entries.get(index);
 		List<Map<String, String>> result = new ArrayList<>(3);
 		String window = entry.get(WINDOW);
+		if (taken.contains(Integer.valueOf(index))) {
+			return result; // a link taken where its window's first page was
+		}
 		if (window == null) {
 			result.add(entry);
 			return result;
@@ -110,44 +138,55 @@ final class SailRecordingWindows {
 			stack.add(new Frame(window, null));
 		}
 		if (TRUE.equals(entry.get(OPENED)) && (indexOf(window) < 0) && (! closed.contains(window))) {
-			opened(entry, window, result);
+			opened(entry, index, window, result);
 		}
 		else {
-			int index = indexOf(window);
-			if (index >= 0) {
-				while (stack.size() > index + 1) {
-					close();
-					result.add(step("closeWindow"));
+			closeAbove(window, result);
+			if (indexOf(window) < 0) {
+				if (! window.equals(lastWindow)) {
+					result.add(unmapped(closed.contains(window) ?
+											"the steps below were made in a window that the script has closed; SAIL cannot switch windows, so they run in the window in front" :
+											"the steps below were made in another browser window, which the recording did not see open; SAIL cannot switch windows, so they run in the window in front"));
 				}
-			}
-			else if (! window.equals(lastWindow)) {
-				result.add(unmapped(closed.contains(window) ?
-										"the steps below were made in a window that the script has closed; SAIL cannot switch windows, so they run in the window in front" :
-										"the steps below were made in another browser window, which the recording did not see open; SAIL cannot switch windows, so they run in the window in front"));
 			}
 			loaded(entry, result);
 		}
 		lastWindow = window;
-		if ("navigateLink".equals(entry.get(OP)) && "new".equals(entry.get(LINK_WINDOW))) {
-			stack.add(new Frame(null, entry.get(URL)));
+		if (newWindowLink(entry)) {
+			stack.add(new Frame(null, entry));
 		}
 		return result;
 	}
 
-	/** navigateLink's attribute that opens the link in a new window. */
-	private static final String LINK_WINDOW = "window";
+	private static boolean newWindowLink(@Nonnull Map<String, String> entry) {
+		return "navigateLink".equals(entry.get(OP)) && "new".equals(entry.get(LINK_WINDOW));
+	}
+
+	/** Closes the windows above a window of the stack (none if it is not on the stack), each a closeWindow step. */
+	private void closeAbove(@Nonnull String window, @Nonnull List<Map<String, String>> result) {
+		int index = indexOf(window);
+		if (index >= 0) {
+			while (stack.size() > index + 1) {
+				close();
+				result.add(step(CLOSE_WINDOW));
+			}
+		}
+	}
 
 	/**
-	 * A new window's first page: the window a recorded link opened, if it is waiting for one and the page is the link's
-	 * URL, otherwise a window opened by its URL from the window in front.
+	 * A new window's first page: the window a recorded link opened, if one is waiting for its window and the page is
+	 * its (see {@link #isLinks(Map, String, String)}), or a link that arrives later but was clicked first; otherwise a
+	 * window opened by its URL from the window in front.
 	 */
-	private void opened(@Nonnull Map<String, String> entry, @Nonnull String window, @Nonnull List<Map<String, String>> result) {
+	private void opened(@Nonnull Map<String, String> entry, int index, @Nonnull String window, @Nonnull List<Map<String, String>> result) {
 		Frame top = stack.get(stack.size() - 1);
 		String url = entry.get(URL);
-		if ((top.id == null) && sameUrl(top.url, url)) {
+		boolean linked = true;
+		if ((top.id == null) && isLinks(entry, top.url, top.from)) {
 			top.id = window;
 		}
-		else {
+		else if (! lateLink(entry, index, window, result)) {
+			linked = false;
 			stack.add(new Frame(window, null));
 			if (url == null) {
 				result.add(unmapped("a new window opened, at a URL the page did not say"));
@@ -159,12 +198,62 @@ final class SailRecordingWindows {
 				result.add(link);
 			}
 		}
-		Map<String, String> push = contextPush(entry);
+		// a link's window that showed other pages first (a PDF that led here) is not at this page: open it by its URL
+		Map<String, String> push = (linked && (pages(entry) > 1)) ? null : contextPush(entry);
 		if (push != null) {
 			result.add(push);
 		}
 		else if (! marker(entry)) {
 			result.add(without(entry, OPENED));
+		}
+	}
+
+	/**
+	 * True if a new window's first page is a link's window: it is at the link's URL, or its referrer is the page the
+	 * link was on (a redirect, or a link that opens another URL than its own, keeps the referrer).
+	 */
+	private static boolean isLinks(@Nonnull Map<String, String> page, @Nullable String linkUrl, @Nullable String linkFrom) {
+		String referrer = page.get(REFERRER);
+		return sameUrl(linkUrl, page.get(URL)) || ((referrer != null) && (! referrer.isEmpty()) && sameUrl(linkFrom, referrer));
+	}
+
+	/**
+	 * Takes, for a new window's first page that no waiting link explains, the first later link into a new window that
+	 * does (see {@link #isLinks(Map, String, String)}), made in a window of the stack no later than the page: its entry
+	 * was sent after the page's. The link's step goes here, after the windows its window closes, and its entry is skipped
+	 * where it arrives.
+	 *
+	 * @return true if a link was taken
+	 */
+	private boolean lateLink(@Nonnull Map<String, String> page, int index, @Nonnull String window, @Nonnull List<Map<String, String>> result) {
+		long pageAt = number(page.get(AT), Long.MAX_VALUE);
+		for (int i = index + 1, l = entries.size(); i < l; i++) {
+			Map<String, String> link = entries.get(i);
+			String linkWindow = link.get(WINDOW);
+			if (newWindowLink(link) && (! taken.contains(Integer.valueOf(i))) && (linkWindow != null) && (indexOf(linkWindow) >= 0) &&
+					(number(link.get(AT), Long.MIN_VALUE) <= pageAt) && isLinks(page, link.get(URL), link.get(FROM))) {
+				taken.add(Integer.valueOf(i));
+				closeAbove(linkWindow, result);
+				result.add(link);
+				Frame frame = new Frame(window, link);
+				stack.add(frame);
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/** The pages a new window's history held at its first page that records; 1 if the page did not say. */
+	private static long pages(@Nonnull Map<String, String> page) {
+		return number(page.get(WINDOW_PAGES), 1);
+	}
+
+	private static long number(@Nullable String value, long otherwise) {
+		try {
+			return (value == null) ? otherwise : Long.parseLong(value.trim());
+		}
+		catch (@SuppressWarnings("unused") NumberFormatException e) {
+			return otherwise;
 		}
 	}
 
@@ -212,6 +301,9 @@ final class SailRecordingWindows {
 		result.remove(OPENED);
 		result.remove(PAGE_HREF);
 		result.remove(URL);
+		result.remove(REFERRER);
+		result.remove(WINDOW_PAGES);
+		result.remove(AT);
 		result.remove("bizId");
 		result.remove("geometryBinding");
 		result.put(OP, "navigateEdit".equals(op) ? "pushEditContext" : "pushListContext");

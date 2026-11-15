@@ -1393,9 +1393,18 @@ dropped silently.
   toolbar Refresh and Deselect (export, chart, tags, snapshots, and the grid's context menu); the browser's Forward
   button; gestures in a window the script has closed or did not see open (SAIL cannot switch windows). A SmartClient
   lookup's pick from the Pick button's pop-up list is recorded as a drop-down pick.
-- Steps are written in the order the server receives them. A new window's first steps reach it after the link's step
-  in the window that opened it, since its page loads first; a window that records is matched to the link that opened
-  it by its URL.
+- Steps are written in the order the server receives them, except that a link into a new window is written before its
+  window's steps even when its entry reaches the server after the window's first page (each window sends on its own,
+  and the link's entry can wait behind an earlier request). A window that records is matched to the link that opened
+  it by its URL, or, when it landed elsewhere (a redirect, a link that opens another URL), by its referrer, the page
+  the link was on; a link with `rel="noreferrer"` whose window lands elsewhere is not matched, and its window is
+  written as opened by its URL. A link's window whose first page with the recorder is not its first page (a PDF or another
+  site that led to a Skyve page) is written with its page's `navigateEdit` or `navigateList` instead of a context push.
+  Windows are told apart by an id in their sessionStorage; a window opened with `window.open` gets a copy of it, which
+  is marked as a copy while the recorder's `window.open` runs.
+- Back and Reload are read from the page that loads. Skyve's pages are never kept in the browser's back/forward cache
+  (their responses are `Cache-Control: no-store`, and SmartClient has an unload listener), so a Back always loads the
+  page; the recorder still handles a page shown from that cache (`pageshow` with `persisted`) as a page load.
 - A filter on a date or time column is written in Skyve's default converter format; an application with other
   converters needs the value edited.
 - The kitchen sink has a tree and a calendar menu item (SmartClient only) and a map menu item: the SmartClient round

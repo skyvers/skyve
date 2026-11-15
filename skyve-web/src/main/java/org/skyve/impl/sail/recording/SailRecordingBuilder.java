@@ -189,7 +189,9 @@ public final class SailRecordingBuilder {
 																				SailRecordingCaptures.TITLE, "file", "refusal",
 																				SailRecordingWindows.WINDOW, SailRecordingWindows.LOAD,
 																				SailRecordingWindows.OPENED, SailRecordingWindows.FOCUS,
-																				SailRecordingWindows.URL, SailRecordingWindows.PAGE_HREF);
+																				SailRecordingWindows.URL, SailRecordingWindows.PAGE_HREF,
+																				SailRecordingWindows.REFERRER, SailRecordingWindows.WINDOW_PAGES,
+																				SailRecordingWindows.FROM, SailRecordingWindows.AT);
 
 	/**
 	 * The order attributes are written in, whatever the element: the identifying attributes first, then the values,
@@ -389,19 +391,40 @@ public final class SailRecordingBuilder {
 
 	/**
 	 * The first {@code end} entries with their window, back and refresh steps (see {@link SailRecordingWindows}), and
-	 * the windows the steps left out after them close: the user came back to the window they were made in to stop.
+	 * the windows the steps left out after them close: the user came back to the window they were made in to stop. A
+	 * window that was opened among the steps left out (a link on the Control Panel) was never opened by the script, so
+	 * its closeWindow is left out too.
 	 */
 	private static @Nonnull List<Map<String, String>> withWindows(@Nonnull List<? extends Map<String, String>> steps, int end) {
 		List<List<Map<String, String>>> groups = SailRecordingWindows.grouped(steps);
 		List<Map<String, String>> result = new ArrayList<>(steps.size() + 8);
+		// windows opened by the steps left out, and not closed yet: the next closeWindows close those first
+		int unopened = 0;
 		for (int i = 0, l = groups.size(); i < l; i++) {
 			for (Map<String, String> entry : groups.get(i)) {
-				if ((i < end) || CLOSE_WINDOW.equals(entry.get(OP))) {
+				String op = entry.get(OP);
+				if (i < end) {
 					result.add(entry);
+				}
+				else if (opensWindow(entry)) {
+					unopened++;
+				}
+				else if (CLOSE_WINDOW.equals(op)) {
+					if (unopened > 0) {
+						unopened--;
+					}
+					else {
+						result.add(entry);
+					}
 				}
 			}
 		}
 		return result;
+	}
+
+	/** True for a navigateLink that opens a new window. */
+	private static boolean opensWindow(@Nonnull Map<String, String> entry) {
+		return "navigateLink".equals(entry.get(OP)) && "new".equals(entry.get("window"));
 	}
 
 	/** The entries with their captures (see {@link SailRecordingCaptures}); without them if they cannot be worked out. */
