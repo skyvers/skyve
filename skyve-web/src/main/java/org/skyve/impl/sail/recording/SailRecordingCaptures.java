@@ -63,8 +63,22 @@ final class SailRecordingCaptures {
 	private record Candidate(@Nonnull String value, int index, boolean before, @Nonnull Map<String, String> capture, @Nonnull String name) {
 	}
 
+	// the state of the pass: the candidates so far, and the captures the uses need
+	private final List<Candidate> candidates = new ArrayList<>();
+	private final Set<String> typed = new HashSet<>();
+	private final Set<String> titles = new HashSet<>();
+	/** Captures to add, by the index of the entry they go before. */
+	private final Map<Integer, List<Map<String, String>>> before = new HashMap<>();
+	/** Captures to add, by the index of the entry they go after. */
+	private final Map<Integer, List<Map<String, String>>> after = new HashMap<>();
+	/** Variable name to value. */
+	private final Map<String, String> names = new HashMap<>();
+	/** Candidate to variable name. */
+	private final Map<Candidate, String> used = new HashMap<>();
+	private boolean navigated = false;
+
 	private SailRecordingCaptures() {
-		// static only
+		// one instance per pass over a recording's entries
 	}
 
 	/**
@@ -78,93 +92,77 @@ final class SailRecordingCaptures {
 	 * 			{@code captureTitle}) in place
 	 */
 	static @Nonnull List<Map<String, String>> apply(@Nonnull List<? extends Map<String, String>> entries) {
-		return new Pass().run(entries);
+		return new SailRecordingCaptures().run(entries);
 	}
 
-	/** One pass over a recording's entries: the candidates so far, and the captures the uses need. */
-	private static final class Pass {
-		private final List<Candidate> candidates = new ArrayList<>();
-		private final Set<String> typed = new HashSet<>();
-		private final Set<String> titles = new HashSet<>();
-		/** Captures to add, by the index of the entry they go before. */
-		private final Map<Integer, List<Map<String, String>>> before = new HashMap<>();
-		/** Captures to add, by the index of the entry they go after. */
-		private final Map<Integer, List<Map<String, String>>> after = new HashMap<>();
-		/** Variable name to value. */
-		private final Map<String, String> names = new HashMap<>();
-		/** Candidate to variable name. */
-		private final Map<Candidate, String> used = new HashMap<>();
-		private boolean navigated = false;
-
-		@Nonnull List<Map<String, String>> run(@Nonnull List<? extends Map<String, String>> entries) {
-			List<Map<String, String>> result = new ArrayList<>(entries.size() + 4);
-			for (int i = 0, l = entries.size(); i < l; i++) {
-				Map<String, String> entry = entries.get(i);
-				// the uses first: a value shown by this entry cannot be reused by the same entry
-				result.add(reused(entry));
-				noteTyped(entry);
-				// a value shown before the first navigation (on the Control Panel, where recording starts) is not on a
-				// page the script opens
-				String op = entry.get(OP);
-				if ((op != null) && op.startsWith("navigate")) {
-					navigated = true;
-				}
-				if (navigated && (! SailRecordingBuilder.CONTROL_PANEL.equals(entry.get(SailRecordingBuilder.VIEW)))) {
-					addCandidates(entry, i, candidates, typed, titles);
-				}
+	/** The pass over the entries: see {@link #apply(List)}. */
+	private @Nonnull List<Map<String, String>> run(@Nonnull List<? extends Map<String, String>> entries) {
+		List<Map<String, String>> result = new ArrayList<>(entries.size() + 4);
+		for (int i = 0, l = entries.size(); i < l; i++) {
+			Map<String, String> entry = entries.get(i);
+			// the uses first: a value shown by this entry cannot be reused by the same entry
+			result.add(reused(entry));
+			noteTyped(entry);
+			// a value shown before the first navigation (on the Control Panel, where recording starts) is not on a
+			// page the script opens
+			String op = entry.get(OP);
+			if ((op != null) && op.startsWith("navigate")) {
+				navigated = true;
 			}
-			return (before.isEmpty() && after.isEmpty()) ? result : withCaptures(result);
-		}
-
-		/** A copy of the entry with each value that reuses a candidate replaced by its variable. */
-		private @Nonnull Map<String, String> reused(@Nonnull Map<String, String> entry) {
-			Map<String, String> result = new LinkedHashMap<>(entry);
-			for (String key : useKeys(entry)) {
-				String value = trimmed(entry.get(key));
-				Candidate candidate = (value == null) ? null : latest(candidates, value);
-				if (candidate != null) {
-					result.put(key, "{var:" + used.computeIfAbsent(candidate, this::capture) + "}");
-				}
-			}
-			return result;
-		}
-
-		/** Plans the capture of a candidate, where it was shown; returns its variable's name. */
-		private @Nonnull String capture(@Nonnull Candidate candidate) {
-			String variable = unique(candidate.name(), candidate.value(), names);
-			Map<String, String> capture = new LinkedHashMap<>(candidate.capture());
-			capture.put(VARIABLE, variable);
-			(candidate.before() ? before : after).computeIfAbsent(Integer.valueOf(candidate.index()), k -> new ArrayList<>(1)).add(capture);
-			return variable;
-		}
-
-		/** Notes what the user typed or chose: a data entry, a filter, a lookup's search and pick. */
-		private void noteTyped(@Nonnull Map<String, String> entry) {
-			for (String key : typedKeys(entry)) {
-				String value = trimmed(entry.get(key));
-				if (value != null) {
-					typed.add(value);
-				}
+			if (navigated && (! SailRecordingBuilder.CONTROL_PANEL.equals(entry.get(SailRecordingBuilder.VIEW)))) {
+				addCandidates(entry, i, candidates, typed, titles);
 			}
 		}
+		return (before.isEmpty() && after.isEmpty()) ? result : withCaptures(result);
+	}
 
-		/** The entries with the captures before and after the entries they go with. */
-		private @Nonnull List<Map<String, String>> withCaptures(@Nonnull List<Map<String, String>> entries) {
-			List<Map<String, String>> result = new ArrayList<>(entries.size() + before.size() + after.size());
-			for (int i = 0, l = entries.size(); i < l; i++) {
-				Map<String, String> entry = entries.get(i);
-				for (Map<String, String> capture : before.getOrDefault(Integer.valueOf(i), List.of())) {
-					result.add(where(capture, entry));
-				}
-				result.add(entry);
-				for (Map<String, String> capture : after.getOrDefault(Integer.valueOf(i), List.of())) {
-					result.add(where(capture, entry));
-				}
+	/** A copy of the entry with each value that reuses a candidate replaced by its variable. */
+	private @Nonnull Map<String, String> reused(@Nonnull Map<String, String> entry) {
+		Map<String, String> result = new LinkedHashMap<>(entry);
+		for (String key : useKeys(entry)) {
+			String value = trimmed(entry.get(key));
+			Candidate candidate = (value == null) ? null : latest(candidates, value);
+			if (candidate != null) {
+				result.put(key, "{var:" + used.computeIfAbsent(candidate, this::capture) + "}");
 			}
-			return result;
+		}
+		return result;
+	}
+
+	/** Plans the capture of a candidate, where it was shown; returns its variable's name. */
+	private @Nonnull String capture(@Nonnull Candidate candidate) {
+		String variable = unique(candidate.name(), candidate.value(), names);
+		Map<String, String> capture = new LinkedHashMap<>(candidate.capture());
+		capture.put(VARIABLE, variable);
+		(candidate.before() ? before : after).computeIfAbsent(Integer.valueOf(candidate.index()), k -> new ArrayList<>(1)).add(capture);
+		return variable;
+	}
+
+	/** Notes what the user typed or chose: a data entry, a filter, a lookup's search and pick. */
+	private void noteTyped(@Nonnull Map<String, String> entry) {
+		for (String key : typedKeys(entry)) {
+			String value = trimmed(entry.get(key));
+			if (value != null) {
+				typed.add(value);
+			}
 		}
 	}
 
+	/** The entries with the captures before and after the entries they go with. */
+	private @Nonnull List<Map<String, String>> withCaptures(@Nonnull List<Map<String, String>> entries) {
+		List<Map<String, String>> result = new ArrayList<>(entries.size() + before.size() + after.size());
+		for (int i = 0, l = entries.size(); i < l; i++) {
+			Map<String, String> entry = entries.get(i);
+			for (Map<String, String> capture : before.getOrDefault(Integer.valueOf(i), List.of())) {
+				result.add(where(capture, entry));
+			}
+			result.add(entry);
+			for (Map<String, String> capture : after.getOrDefault(Integer.valueOf(i), List.of())) {
+				result.add(where(capture, entry));
+			}
+		}
+		return result;
+	}
 
 	/** The keys of an entry whose values may reuse a shown value. */
 	private static @Nonnull List<String> useKeys(@Nonnull Map<String, String> entry) {
