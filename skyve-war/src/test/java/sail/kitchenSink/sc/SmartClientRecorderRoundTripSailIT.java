@@ -350,14 +350,14 @@ class SmartClientRecorderRoundTripSailIT extends AbstractSmartClientInterpretedS
 		return xml;
 	}
 
-	/**
-	 * Runs the recorded script as downloaded, defining only the password it signs in with.
-	 */
 	/** Asserts that the script has each of the texts, reporting every one it lacks. */
 	private static void assertContainsAll(@Nonnull String xml, @Nonnull String... expected) {
 		assertAll(java.util.Arrays.stream(expected).map(text -> (org.junit.jupiter.api.function.Executable) () -> assertTrue(xml.contains(text), "no " + text + " in " + xml)));
 	}
 
+	/**
+	 * Runs the recorded script as downloaded, defining only the password it signs in with.
+	 */
 	private void replay(@Nonnull String xml) {
 		variable("password", "admin");
 		sailString(xml);

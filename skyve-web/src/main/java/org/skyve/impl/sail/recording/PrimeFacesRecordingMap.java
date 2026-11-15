@@ -412,37 +412,51 @@ public final class PrimeFacesRecordingMap {
 		if (widget instanceof DataGrid grid) {
 			String binding = grid.getBinding();
 			if ((binding != null) && (! grids.containsKey(binding))) {
-				List<DataGridColumn> columns = grid.getColumns();
-				List<Map<String, Object>> result = new ArrayList<>(columns.size());
-				for (DataGridColumn column : columns) {
-					Map<String, Object> c = new LinkedHashMap<>();
-					if (column instanceof DataGridBoundColumn bound) {
-						putIfNotNull(c, BINDING, bound.getBinding());
-					}
-					putIfNotNull(c, TITLE, column.getLocalisedTitle());
-					result.add(c);
-				}
-				grids.put(binding, Map.of("columns", result));
+				grids.put(binding, Map.of("columns", dataGridColumns(grid)));
 			}
 		}
 		else if ((widget instanceof String) && (! grids.containsKey(identifier))) {
 			ListModel<Bean> model = context.getListModel(identifier);
 			if (model != null) {
-				List<MetaDataQueryColumn> columns = model.getColumns();
-				List<Map<String, Object>> result = new ArrayList<>(columns.size());
-				for (MetaDataQueryColumn column : columns) {
-					Map<String, Object> c = new LinkedHashMap<>();
-					putIfNotNull(c, BINDING, column.getBinding());
-					putIfNotNull(c, "name", column.getName());
-					putIfNotNull(c, TITLE, model.determineColumnTitle(column));
-					if (column.isHidden()) {
-						c.put("hidden", Boolean.TRUE);
-					}
-					result.add(c);
-				}
-				grids.put(identifier, Map.of("columns", result));
+				grids.put(identifier, Map.of("columns", listGridColumns(model)));
 			}
 		}
+	}
+
+	/**
+	 * A data grid's columns: each one's binding, if it is bound, and title.
+	 */
+	private static @Nonnull List<Map<String, Object>> dataGridColumns(@Nonnull DataGrid grid) {
+		List<DataGridColumn> columns = grid.getColumns();
+		List<Map<String, Object>> result = new ArrayList<>(columns.size());
+		for (DataGridColumn column : columns) {
+			Map<String, Object> c = new LinkedHashMap<>();
+			if (column instanceof DataGridBoundColumn bound) {
+				putIfNotNull(c, BINDING, bound.getBinding());
+			}
+			putIfNotNull(c, TITLE, column.getLocalisedTitle());
+			result.add(c);
+		}
+		return result;
+	}
+
+	/**
+	 * A list grid's columns, from its model: each one's binding, name, title, and whether it is hidden.
+	 */
+	private static @Nonnull List<Map<String, Object>> listGridColumns(@Nonnull ListModel<Bean> model) {
+		List<MetaDataQueryColumn> columns = model.getColumns();
+		List<Map<String, Object>> result = new ArrayList<>(columns.size());
+		for (MetaDataQueryColumn column : columns) {
+			Map<String, Object> c = new LinkedHashMap<>();
+			putIfNotNull(c, BINDING, column.getBinding());
+			putIfNotNull(c, "name", column.getName());
+			putIfNotNull(c, TITLE, model.determineColumnTitle(column));
+			if (column.isHidden()) {
+				c.put("hidden", Boolean.TRUE);
+			}
+			result.add(c);
+		}
+		return result;
 	}
 
 	private static void putIfNotNull(@Nonnull Map<String, Object> map, @Nonnull String key, @Nullable Object value) {
