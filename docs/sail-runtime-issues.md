@@ -30,11 +30,12 @@ SC-2's suspected cause, which cites the code before its fix, at `2f4c2021b8`.
 | [P12](#p12-fixed-pf-ordered-list-memberships-could-not-be-reordered) | PF ordered list memberships could not be reordered | PF | Confirmed | fixed |
 | [SC-1](#sc-1-withdrawn-actions-blocked-after-a-server-field-error) | Actions blocked after a server field error | SC | Withdrawn: a harness fault | withdrawn |
 | [SC-2](#sc-2-fixed-inline-grid-default-values-reach-smartclient-as-objects) | Inline grid default values reach SmartClient as objects | SC | Confirmed | fixed by master |
-| [SC-3](#sc-3-a-list-without-a-menu-item-fails-to-load) | A list without a menu item fails to load | SC | Confirmed | open |
+| [SC-3](#sc-3-fixed-a-list-without-a-menu-item-fails-to-load) | A list without a menu item fails to load | SC | Confirmed | fixed (c42551e257) |
 | [SC-4](#sc-4-conditionsfixture-never-settles) | ConditionsFixture never settles | SC | In SmartClient, not Skyve | open |
-| [SC-6](#sc-6-the-backup-and-restore-started-growls-are-not-shown) | The Backup and Restore "started" growls are not shown | SC | Plausible (client) | open |
-| [SC-7](#sc-7-control-panel-jumps-back-to-the-results-tab) | Control Panel jumps back to the Results tab | SC | Confirmed | open |
-| [SC-8](#sc-8-the-user-wizard-password-field-loses-fast-typing) | The User wizard password field loses fast typing | SC | Confirmed | open |
+| [SC-6](#sc-6-fixed-the-backup-and-restore-started-growls-are-not-shown) | The Backup and Restore "started" growls are not shown | SC | Confirmed (in the browser) | fixed (c42551e257) |
+| [SC-7](#sc-7-fixed-control-panel-jumps-back-to-the-results-tab) | Control Panel jumps back to the Results tab | SC | Confirmed | fixed (c42551e257) |
+| [SC-8](#sc-8-fixed-the-user-wizard-password-field-loses-fast-typing) | The User wizard password field loses fast typing | SC | Confirmed (a different mechanism, in the browser) | fixed (c42551e257) |
+| [SC-10](#sc-10-fixed-selecting-a-row-whose-selected-handler-rerenders-loops-for-ever) | Selecting a row whose selected handler rerenders loops for ever | SC | Confirmed (stack traced) | fixed (c42551e257) |
 | [SC-11](#sc-11-fixed-a-model-lookup-column-ends-the-inline-edit-of-a-row-edited-again) | A model lookup column ends the inline edit of a row edited again | SC | Confirmed (stack traced) | fixed |
 | [SC-12](#sc-12-fixed-a-header-sort-of-an-unordered-data-grid-reorders-its-collection) | A header sort of an unordered data grid reorders its collection | SC | Confirmed (on the wire and in unit tests) | fixed |
 
@@ -548,7 +549,7 @@ null-safety merge (`807f0ef4b8`).
 
 **Status:** fixed by master.
 
-## SC-3: A list without a menu item fails to load
+## SC-3 (fixed): A list without a menu item fails to load
 
 **Symptom.** A SmartClient list for a document or query that has no list menu
 item throws `Cannot read properties of null (reading 'canCreate')`, and the grid
@@ -569,7 +570,30 @@ never shows rows.
 
 **Checked:** Confirmed.
 
-**Status:** open.
+**Fix (c42551e257).** `DesktopView.preRender` now puts the definition of the
+list's data source in the page's UI script, before the list view is given it
+(`listDataSourceDefinition`). It is the definition an edit view writes for its
+list grids, `if(window.<id>){}else{isc.RestDataSource.create(...)}`, so it does
+nothing when the menu defined the data source. It covers a query, a
+document's default query and a model, for lists, trees, maps and calendars.
+
+It is written only when the user may fetch the list's rows: when they have
+access to the list (query, document or model aggregate access, which comes from
+the menu and the router) and can read its driving document. These are the
+checks `SmartClientListServlet` makes for every fetch, so the page offers no
+list the servlet would refuse. A list the user may not fetch still fails as
+before. With access control off, as in the SAIL servers, access is open
+anyway.
+
+Unit tests in `DesktopViewTest` (failed before the fix): a query, a document
+and a model list get a definition before `setGridDataSource`; a list without
+access, or whose document the user cannot read, gets none.
+
+**Suites.** The SC kitchen sink opens ModelLookupFixture's default query and
+the query `qModelLookupFixtures` by their URLs (`navigateList`) and finds the
+saved fixture in each.
+
+**Status:** fixed.
 
 ## SC-4: ConditionsFixture never settles
 
@@ -599,7 +623,7 @@ the admin suite instead.
 
 **Status:** open.
 
-## SC-6: The Backup and Restore started growls are not shown
+## SC-6 (fixed): The Backup and Restore started growls are not shown
 
 **Symptom.** In SmartClient, Data Maintenance > Backup does not show the
 "Backup Job has been started" growl, and Restore does not show "Restore Job has
@@ -626,15 +650,34 @@ messages (`skyve-ext/src/main/java/org/skyve/impl/backup/BackupJob.java:601`,
 arrive through the same widget (`util.js:867-886`). They can replace the
 "started" growl before it is seen.
 
-**Checked:** Not confirmed as a server bug; plausible as a client-side race.
+**Checked:** Confirmed in the browser. With `isc.BizUtil.growl` and
+`isc.BizUtil.onPushMessage` logged and the growl's DOM watched, pressing
+Backup showed "Backup Job has been started" 56 ms after the click. The job's
+push message "Backup Completed" came 74 ms later and replaced it. PrimeFaces'
+`Growl.show()` (13.0.10) removes the messages showing unless the widget's
+`keepAlive` is set. PrimeFaces pages are not affected, because they show
+pushed growls in a second widget, `pushGrowl` (`skyve-web/src/js/prime/pf.js`).
 
-**Workaround in the suites.** The SC suite's 00-backup and 99-restore comment
-out these `testMessage` steps as a "RUNTIME DIFFERENCE". They wait instead for
-the job's row in the completed jobs list.
+**Fix (c42551e257).** `isc.BizUtil.growl` (`skyve-web/src/js/desktop/util.js`)
+takes an optional fourth argument, `keep`, which sets the Growl's `keepAlive`.
+`onPushMessage` passes it, so a pushed growl is added to the growls showing.
+Growls from an action's response replace earlier growls, as before. A
+second SmartClient widget, as PrimeFaces has, would sit at the same fixed
+position, over the first growl.
 
-**Status:** open.
+**Tests.** `SmartClientPushGrowlSailIT` shows a growl as a response does, then
+gives the page a pushed growl as the push stream does, and checks that both
+are showing. Before the fix only the pushed growl was. The suites' steps below
+cannot show the bug reliably. Whether the push comes before the step reads
+the growls is a race: on an unfixed server they passed once.
 
-## SC-7: Control Panel jumps back to the Results tab
+**Suites.** The `testMessage` steps for "Backup Job has been started" in the SC
+suite's 00-backup and "Restore Job has been started" in its 99-restore are
+back. The suite still waits for each job in the completed jobs list.
+
+**Status:** fixed.
+
+## SC-7 (fixed): Control Panel jumps back to the Results tab
 
 **Symptom.** In SmartClient, after Generate Menu SAIL selects the Results tab,
 the user moves to another tab. A later rerender, for example ticking a check
@@ -658,14 +701,29 @@ boxes.
   does not write the user's choice back to the binding. The server therefore
   keeps `tabIndex` at 2.
 
-**Checked:** Confirmed.
+**Checked:** Confirmed. Also, `ViewJSONManipulator.visitTabPane` registered the
+binding as immutable, so the server ignored any value the client sent for it.
+PrimeFaces binds the tab view's `activeIndex` to it, which is written back.
 
-**Workaround in the suites.** The SC suite's 04-devops selects the
-Instrumentation tab again after the check box's rerender, with an XML comment.
+**Fix (c42551e257).** For any tab pane with a `selectedTabIndexBinding`:
+- `BizTabPane.tabSelected` (`skyve-web/src/js/desktop/editView.js`) sets the
+  tab number in the view's values at the binding, so the next request sends
+  it. The view is not made dirty by this, as a list grid's selected id is not.
+  A response that selects the bound tab sets the same number.
+- `ViewJSONManipulator` registers the binding as mutable, so the server applies
+  it.
 
-**Status:** open.
+Unit test: `ViewJSONManipulatorCoreTest.visitTabPaneMakesTheSelectedIndexBindingMutable`
+(failed before the fix). The client half is checked in the browser by the SC
+admin suite.
 
-## SC-8: The User wizard password field loses fast typing
+**Suites.** The SC suite's 04-devops no longer selects the Instrumentation
+tab again after the check box's rerender. It checks that the check box is
+still shown.
+
+**Status:** fixed.
+
+## SC-8 (fixed): The User wizard password field loses fast typing
 
 **Symptom.** In SmartClient's User wizard, typing quickly into the new password
 field loses characters. Typing at human speed works.
@@ -689,12 +747,50 @@ pasting key events). The field ends up with only part of the text.
 - The User edit view (`User/views/edit.xml`) uses `onBlurHandlers` and is not
   affected.
 
-**Checked:** Confirmed.
+**Checked:** Confirmed in the browser, but the keys are lost differently. A
+burst of 26 keys left only the first in the field, and only one request was
+sent. The first key's change handler sent the rerender request.
+SmartClient's prompt for that request put up a click mask that took the
+focus, so the other 25 keys went to the page's body and were dropped. No
+response overwrote them. Keeping the fields edited since the request would
+therefore not help.
 
-**Workaround in the suites.** The SC executor types a field with a change
-handler one key at a time, and waits for what each key starts.
+**Fix (c42551e257).** `SmartClientViewRenderer.visitOnChangedEventHandler` changes
+how a typed form item fires its change handler. This applies to a text field
+without completion, a password, a text area, a spinner or a colour picker,
+when its change handler calls the server (a `rerender` or a `server` action):
+- It renders `changeOnKeypress:false`. The handler fires once, when the value
+  is committed (the user leaves the field), as PrimeFaces' `change` event and
+  Skyve's own date and number items do. So the user can type at any speed.
+- The handler's server events run as a blur handler's do: deferred
+  (`rerenderBlurryAction`, `doBlurryAction`), with the view's `_blurry` marker
+  set. `changeOnKeypress:false` alone lost a click on a button made straight
+  after typing: the button's mousedown commits the field, and the request's
+  mask takes the click. The `_blurry` handling runs the button's action after
+  the request instead.
 
-**Status:** open.
+Other change handlers fire as before. These are handlers with only client-side
+actions, which send no request, and items that are not typed into, such as a
+combo, a check box or a completing text field. SmartClient ties a combo box's
+`changeOnKeypress` to `addUnknownValues`. Skyve's date and number items, which
+had `changeOnKeypress: false` already, now also get the deferral for their
+server change handlers.
+
+The SC executor still types a field with a change handler one key at a time,
+because the Biz Hub Apps scripts rely on the harness as it is.
+
+**Tests.** In `SmartClientViewRendererCoverageTest` (the first failed before the
+fix):
+- `aTypedItemWithAServerChangeHandlerChangesOnCommitAndDefersItsEvents`;
+- `otherChangeHandlersAreUnchanged`.
+
+`SmartClientFastTypingSailIT` types the wizard's new password in one burst of
+key events through Selenium and leaves the field with Tab, then checks the
+value. It then types the password again and clicks Next at once. The wizard
+must move on to its groups step. Before the fix the field kept only the first
+key.
+
+**Status:** fixed.
 
 ## SC-9 (fixed): Filtering a time column in the advanced filter fails
 
@@ -750,7 +846,7 @@ filter row and `lessThan` and `greaterThan` in the advanced filter.
 
 **Status:** fixed.
 
-## SC-10: Selecting a row whose selected handler rerenders loops for ever
+## SC-10 (fixed): Selecting a row whose selected handler rerenders loops for ever
 
 **Symptom.** In SmartClient, on the kitchen sink List Grid Fixture, selecting
 a row in the `qListGridFixtureFaces` list grid makes SmartClient send about 13
@@ -770,11 +866,45 @@ which rerenders again.
 `skyve-min.js` are identical on master, so this is not a null-safety
 regression; the fixture only exposed it.
 
-**Workaround in the suites.** The SC kitchen sink does not select a row in
-that grid. So `navigateEdit bizId="{var:…}"` and `navigateLink href` with
-`{var:}` are run only in PF; the substitution is shared code with unit tests.
+**Cause (stack traced).** In the browser, with the grid's methods wrapped to log
+their stacks, the loop is:
+1. The click runs `selectionUpdated(record)`, which sets `selectedFacesId` and
+   calls `bizSelected` after `doubleClickDelay`. That calls
+   `rerenderBlurryAction`.
+2. The response's callback in `saveInstance` scatters and calls
+   `refreshListGrids(true, ...)`, which calls `BizListGrid.refresh()`.
+3. `refresh()` calls `grid.deselectAllRecords()`, and SmartClient fires
+   `selectionUpdated(null)`. That clears `selectedFacesId` and calls
+   `bizSelected` again, so back to step 1. SmartClient fires it again on every
+   refresh, although nothing is selected after the first.
 
-**Status:** open.
+There were 65 requests in 5 s. The user's selection was lost too: the
+deselection cleared the binding. Admin's list grids with a selected server
+action avoid the loop with a refresh flag that the action clears, for example
+Data Maintenance's `backupsRefreshRequired` and `BackupSelected`.
+
+**Fix (c42551e257).** `BizListGrid.refresh()` (`skyve-web/src/js/desktop/listgrid.js`)
+deselects with the grid's `selectionUpdated` switched off, as
+`EditView._handleGridSelection` does for a data grid. The user selected
+nothing, so the selected event and the binding are left alone. When the rows
+arrive (the `filterData` callback), it selects again, also quietly, the row
+whose bizId is the view's `selectedIdBinding` value. So the selection is kept.
+Selecting a row still runs its selected event once. A restored selection does
+not run it, as in PrimeFaces ([P7](#p7-by-design-a-vue-list-grid-restores-a-selection-without-its-selected-action)).
+
+**Tests.** `SmartClientListGridSelectedEventSailIT` counts the edit requests
+and the grid's selection events. It selects a row of that grid and waits for
+SmartClient to settle, with no request pending and no deferred call due. Then it
+checks that there was 1 request and 1 selection event, that the row is
+selected and that `selectedFacesId` is its bizId. It checks again after a
+second settle. Before the fix the step never settled.
+
+**Suites.** The SC kitchen sink's find script now selects a row in that grid. It
+captures `selectedFacesId`, follows the blurb's link, and runs `navigateEdit
+bizId="{var:…}"` and `navigateLink href` with `{var:}`, as the PF kitchen sink
+does.
+
+**Status:** fixed.
 
 ## SC-11 (fixed): A model lookup column ends the inline edit of a row edited again
 
