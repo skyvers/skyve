@@ -708,10 +708,12 @@ public class PrimeFacesSelenide extends Selenide<
 			element.should(exist);
 			click(element);
 
-			// Wait for the drop down's closing transition to end: at its end PrimeFaces focuses the menu
-			// (aria-expanded is set false just before), which scrolls the window back to it
+			// Wait for the drop down's closing transition to end: at its end PrimeFaces hides the panel and, in the same
+			// handler, focuses the menu, which scrolls the window back to it. Wait for the hidden panel, not for
+			// aria-expanded to be false: an item clicked while the drop down is still opening closes it before
+			// aria-expanded was ever true, so that attribute is false all through the closing transition.
 			waitFor(d -> js("var w = PrimeFaces.getWidgetById(arguments[0]);" +
-								"return ((! w) || (! w.keyboardTarget) || (w.keyboardTarget.attr('aria-expanded') !== 'true')) ? true : null;",
+								"return ((! w) || (! w.panel) || (! w.panel.is(':visible'))) ? true : null;",
 								id));
 			waitForAjaxResponse();
 
