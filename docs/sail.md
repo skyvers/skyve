@@ -728,6 +728,8 @@ tests. The SAIL ITs are:
 | `PrimeFacesKitchenSinkSailIT` | `sail/kitchenSink/pf/pf-kitchensink-sail.xml`, plus a test that switches to SmartClient with PrimeFaces' user menu and checks `<switchMode/>` back, one that checks the find steps' failures, and `rowLink` (`pf-kitchensink-row-link.xml`) | PF, tablet |
 | `PrimeFacesSailTestStrategyIT` | inline scripts, 3 tests | PF, tablet |
 | `PrimeFacesFocusSailIT` | where a page puts the focus (runtime issue P11): a rerender low in a long view keeps the scroll and the focus; a loaded view focuses its first input | PF, tablet |
+| `PrimeFacesRequiredMessagesSailIT` | when required-field messages show (runtime issue P5): not when a view first renders, after a rerender without client validation or for an action with `clientValidation="false"`; only for an action with client validation. One inline script per UX/UI | PF, tablet, phone and external |
+| `PrimeFacesActionUploadSailIT` | a successful action upload closes its upload page and refreshes the view (runtime issue P3), with the close icons hidden so that the upload step cannot close the page itself. One inline script per UX/UI | PF, tablet, phone and external |
 | `PrimeFacesAdminSuiteSailIT` | `sail/admin/pf/suite/*.xml` | PF, tablet |
 | `PrimeFacesAdminSailIT` | `sail/admin/pf/pf-admin-sail.xml` (the older single-file admin script) | PF, tablet |
 | `PrimeFacesAdminPhoneSailIT` | `sail/admin/pf/admin-phone-smoke.xml` | PF, phone |
