@@ -802,8 +802,10 @@ list grids, `if(window.<id>){}else{isc.RestDataSource.create(...)}`, so it does
 nothing when the menu defined the data source. It covers a query, a
 document's default query and a model, for lists, trees, maps and calendars.
 
-It is not written when the menu's data sources include the list's (`listDataSources` returns their ids), and a model is
-built once (review, 4e518f6c2e). It is written only when the user may fetch the list's rows: when they have
+The menu's data source ids (`listDataSources` returns them) are passed to the
+renderer as already visited. So it writes nothing for a data source the menu
+defined, the list's or a lookup's. A model is built once (reviews, 4e518f6c2e
+and 8bac256689). It is written only when the user may fetch the list's rows: when they have
 access to the list (query, document or model aggregate access, which comes from
 the menu and the router) and can read its driving document. These are the
 checks `SmartClientListServlet` makes for every fetch, so the page offers no
@@ -943,12 +945,18 @@ PrimeFaces binds the tab view's `activeIndex` to it, which is written back.
   writes `activeIndex` only when it is not read only: a getter with no setter is
   only read. And it takes only the index of one of the tab pane's tabs (a whole
   number from 0 to one less than the number of tabs). Other values are ignored
-  with a warning. PrimeFaces takes any integer. Tests:
-  `ViewJSONManipulatorApplyJsonTest.aSelectedTabIndexTakesOnlyTheIndexOfATab`
-  and `aSelectedTabIndexBindingWithNoSetterIsOnlyRead`.
+  with a warning. PrimeFaces takes any integer. The index check applies only
+  when tab panes are the binding's only writers (8bac256689). A widget that also
+  sets it, such as a spinner, has its value applied as usual. Two tab panes on
+  one binding take an index of either. Tests in
+  `ViewJSONManipulatorApplyJsonTest`:
+  - `aSelectedTabIndexTakesOnlyTheIndexOfATab`;
+  - `aSelectedTabIndexBindingWithNoSetterIsOnlyRead`;
+  - `aSelectedTabIndexBindingAnotherWidgetSetsTakesAnyValue`;
+  - `twoTabPanesWithOneSelectedTabIndexBindingTakeAnIndexOfEither`.
 
-Unit test: `ViewJSONManipulatorCoreTest.visitTabPaneMakesTheSelectedIndexBindingMutable`
-(failed before the fix). The client half is checked in the browser by the SC
+Unit tests: the `ViewJSONManipulatorApplyJsonTest` tests above, and
+`ViewJSONManipulatorCoreTest.visitTabPaneLeavesASelectedIndexBindingThatIsNotAnAttributeReadOnly`. The client half is checked in the browser by the SC
 admin suite.
 
 **Suites.** The SC suite's 04-devops no longer selects the Instrumentation
@@ -1010,14 +1018,22 @@ combo, a check box or a completing text field. SmartClient ties a combo box's
 had `changeOnKeypress: false` already, now also get the deferral for their
 server change handlers.
 
-After review (4e518f6c2e), `EditView.gather` first commits the value being typed
-into the focused item when it changes on commit (`_commitFocusedItem`), as
-leaving it would. So what is gathered, validated and checked for changes
-includes it, even if the view is left by something that does not take the focus.
-SmartClient's `getValues()` already commits a typed text item, such as the
-wizard's password, but not a date item's text field. That gap was older than this
-fix. `SmartClientFastTypingSailIT.aValueTypedButNotCommittedIsGathered` types a
-date and checks `gather` and `valuesHaveChanged` while the field keeps the focus.
+After review (4e518f6c2e, 8bac256689), a gather the user asked for commits the
+value being typed into the focused item first, when the item changes on commit
+(`gather(validate, true)`, `_commitFocusedItem`), as leaving it would. These
+are gathers for an action, a save, a delete, a zoom, a cancel, a check for
+changes, an upload or a report. So what they gather, validate and check for
+changes includes the typed value, even if the view is left by something that
+does not take the focus. SmartClient's `getValues()` already commits a typed
+text item, such as the wizard's password, but not a date item's text field. That
+gap was older than this fix.
+
+A gather for a background request commits nothing: a list grid's or a pick
+list's fetch, a completion, a refresh or a chart. Committing there runs the
+item's change handler while the user is still typing.
+`SmartClientFastTypingSailIT.aValueTypedButNotCommittedIsGatheredOnlyForTheUser`
+types half a date, checks that a background gather leaves it alone, then checks
+that a user's gather commits the whole date while the field keeps the focus.
 
 The SC executor still types a field with a change handler one key at a time,
 because the Biz Hub Apps scripts rely on the harness as it is.
@@ -1132,12 +1148,17 @@ deselects with the grid's `selectionUpdated` switched off, as
 nothing, so the selected event and the binding are left alone. When the rows
 arrive (the `filterData` callback), it selects again, also quietly, the row
 whose bizId is the view's `selectedIdBinding` value. So the selection is kept.
-After review (4e518f6c2e), when that row is not among the rows that arrive, the
-binding is cleared (still without the selected event), so it does not keep a row
-the grid no longer shows. This is the old behaviour, less the event. A row
-beyond the first page of a paged list counts as gone, as before the fix. If
-`filterData` needs no fetch, its callback does not run, so the rows are checked
-at once instead. Selecting a row still runs its selected event once. A restored selection does
+After review (4e518f6c2e), when that row is known to be gone, the binding is
+cleared (still without the selected event), so it does not keep a row the grid
+no longer shows. The row is gone when all the list's rows are in the browser and
+it is not among them. On a paged list that has fetched only some of its rows,
+the row may be on a page not fetched, so the binding is kept and nothing is
+selected (8bac256689). If `filterData` needs no fetch, its callback does not run,
+so the rows are checked at once instead.
+`SmartClientListGridSelectedEventSailIT.aRefreshThatFetchesPartOfAPagedListKeepsTheSelectedId`
+makes 100 tagged lookup values, then selects one that sorts after them all, and
+refreshes the unfiltered grid. Before the fix the selected id was cleared and the
+view became changed. Selecting a row still runs its selected event once. A restored selection does
 not run it, as in PrimeFaces ([P7](#p7-by-design-a-vue-list-grid-restores-a-selection-without-its-selected-action)).
 
 **Tests.** `SmartClientListGridSelectedEventSailIT` counts the edit requests
