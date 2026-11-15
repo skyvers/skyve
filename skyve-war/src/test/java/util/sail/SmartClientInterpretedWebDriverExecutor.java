@@ -71,18 +71,22 @@ import org.skyve.metadata.sail.language.step.interaction.grids.ListGridFilter.Fi
 import org.skyve.metadata.sail.language.step.interaction.grids.ListGridNew;
 import org.skyve.metadata.sail.language.step.interaction.grids.ListGridSelect;
 import org.skyve.metadata.sail.language.step.interaction.grids.ListGridSort;
+import org.skyve.metadata.sail.language.step.interaction.grids.ListGridTool;
+import org.skyve.metadata.sail.language.step.interaction.grids.ListGridTool.Tool;
 import org.skyve.metadata.sail.language.step.interaction.grids.ListGridZoom;
 import org.skyve.metadata.sail.language.step.interaction.grids.ListMembershipMove;
 import org.skyve.metadata.sail.language.step.interaction.lookup.LookupDescriptionAutoComplete;
 import org.skyve.metadata.sail.language.step.interaction.lookup.LookupDescriptionEdit;
 import org.skyve.metadata.sail.language.step.interaction.lookup.LookupDescriptionNew;
 import org.skyve.metadata.sail.language.step.interaction.lookup.LookupDescriptionPick;
+import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateBack;
 import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateCalendar;
 import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateEdit;
 import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateLink;
 import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateList;
 import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateMap;
 import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateTree;
+import org.skyve.metadata.sail.language.step.interaction.navigation.Refresh;
 import org.skyve.metadata.user.User;
 import org.skyve.metadata.view.View;
 import org.skyve.metadata.view.View.ViewType;
@@ -1580,6 +1584,66 @@ public class SmartClientInterpretedWebDriverExecutor extends InterpretedWebDrive
 	/**
 	 * Ends any inline grid edit, then checks that no dialog is in the way.
 	 */
+	/**
+	 * Follows the link into the new window it opens (see {@link SmartClientSelenide#followLinkContainingIntoNewWindow}),
+	 * after ending any inline edit, as other steps do. Fails listing the page's links if none contains the text.
+	 */
+	@Override
+	protected @Nonnull String clickLinkIntoNewWindow(@Nonnull NavigateLink link, @Nonnull String text) {
+		prepareForInteraction();
+		boolean exact = Boolean.TRUE.equals(link.getExact());
+		String opener = selenide.followLinkContainingIntoNewWindow(text, exact);
+		if (opener == null) {
+			throw new IllegalStateException(String.format("<navigateLink text=\"%s\"%s window=\"new\" /> found no displayed link %s it: the page's links are %s",
+															text, exact ? " exact=\"true\"" : "", exact ? "with exactly that text for" : "containing",
+															selenide.linkTexts()));
+		}
+		return opener;
+	}
+
+	/**
+	 * Goes back, as {@link InterpretedWebDriverExecutor#executeNavigateBack} does; an inline edit in progress is
+	 * abandoned with its page.
+	 */
+	@Override
+	public void executeNavigateBack(@Nonnull NavigateBack back) {
+		abandonInlineEditing();
+		super.executeNavigateBack(back);
+	}
+
+	/**
+	 * Reloads the page, as {@link InterpretedWebDriverExecutor#executeRefresh} does; an inline edit in progress is
+	 * abandoned with its page.
+	 */
+	@Override
+	public void executeRefresh(@Nonnull Refresh refresh) {
+		abandonInlineEditing();
+		super.executeRefresh(refresh);
+	}
+
+	/**
+	 * Forgets an inline edit in progress, without touching the page, for a step that leaves or reloads the page (which
+	 * may not be a SmartClient page, such as a PDF).
+	 */
+	private void abandonInlineEditing() {
+		SmartClientAutomationContext context = peek();
+		if ((context != null) && (context.getInlineGridBinding() != null)) {
+			selenide.trace("    the inline edit of data grid [" + context.getInlineGridBinding() + "] is abandoned with its page");
+			context.setInlineGridBinding(null);
+		}
+	}
+
+	/**
+	 * Presses the list grid toolbar's Refresh or Deselect tool (see {@link SmartClientSelenide#pressListGridTool}), after
+	 * ending any inline edit, as other steps do.
+	 */
+	@Override
+	protected void pressListGridTool(@Nonnull ListGridTool step, @Nonnull Tool tool) {
+		prepareForInteraction();
+		selenide.pressListGridTool(listGridRows(step), tool.name());
+		checkSuccess(String.format("expected no error messages after <listGridTool tool=\"%s\" />", tool));
+	}
+
 	private void prepareForInteraction() {
 		SmartClientAutomationContext context = peek();
 		if ((context != null) && (context.getInlineGridBinding() != null)) {

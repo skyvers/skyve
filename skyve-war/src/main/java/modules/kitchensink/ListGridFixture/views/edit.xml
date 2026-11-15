@@ -36,6 +36,24 @@
 				<blurb escape="false"><![CDATA[<a href="./?a=e&m=kitchensink&d=LookupDescription&i={selectedFacesId}">Open the selected lookup value</a>]]></blurb>
 			</item>
 		</row>
+		<!-- The Vue list grid's selected id, for SAIL's listGridTool clearSelection, and two links that open a new
+			window (target _blank), for navigateLink window="new": a new lookup value, and a PDF (the kitchensink module's
+			resource sail-new-window.pdf) -->
+		<row>
+			<item>
+				<textField binding="selectedVueId" disabled="true" />
+			</item>
+		</row>
+		<row>
+			<item>
+				<blurb escape="false"><![CDATA[<a href="./?a=e&m=kitchensink&d=LookupDescription" target="_blank">Open a new lookup value in a new window</a>]]></blurb>
+			</item>
+		</row>
+		<row>
+			<item>
+				<blurb escape="false"><![CDATA[<a href="resources?_doc=kitchensink.ListGridFixture&_n=sail-new-window.pdf" target="_blank">Open a PDF in a new window</a>]]></blurb>
+			</item>
+		</row>
 	</form>
 	<dataGrid binding="rows" title="Data grid with a selected id" selectedIdBinding="selectedRowId">
 		<boundColumn binding="description" />

@@ -1966,7 +1966,7 @@ public class SmartClientSelenide extends Selenide<
 	 *
 	 * @param text	the text
 	 * @return {@code true} if a link was clicked, {@code false} if no displayed link contains the text
-	 * @throws IllegalStateException	if the link opens another window, which SAIL does not follow
+	 * @throws IllegalStateException	if the link opens another window (follow it with {@code <navigateLink window="new"/>})
 	 */
 	public boolean followLinkContaining(@Nonnull String text) {
 		return followLinkContaining(text, false);
@@ -1980,7 +1980,7 @@ public class SmartClientSelenide extends Selenide<
 	 * @param text	the text
 	 * @param exact	true to match the link's whole text
 	 * @return {@code true} if a link was clicked, {@code false} if no displayed link matches
-	 * @throws IllegalStateException	if the link opens another window, which SAIL does not follow
+	 * @throws IllegalStateException	if the link opens another window (follow it with {@code <navigateLink window="new"/>})
 	 */
 	public boolean followLinkContaining(@Nonnull String text, boolean exact) {
 		waitForFullPageResponse();
@@ -1990,7 +1990,7 @@ public class SmartClientSelenide extends Selenide<
 		}
 		String target = String.valueOf(link.get("target"));
 		if ((! target.isEmpty()) && (! "_self".equals(target)) && (! "_top".equals(target)) && (! "_parent".equals(target))) {
-			throw new IllegalStateException(String.format("The link containing '%s' opens another window (target %s), which SAIL does not follow",
+			throw new IllegalStateException(String.format("The link containing '%s' opens another window (target %s): follow it with <navigateLink window=\"new\" />",
 															text, target));
 		}
 		boolean newPage = Boolean.TRUE.equals(link.get("newPage"));
@@ -2014,6 +2014,74 @@ public class SmartClientSelenide extends Selenide<
 		}
 		waitForFullPageResponse();
 		return true;
+	}
+
+	/**
+	 * Clicks the first displayed link ({@code <a>}) of the page whose visible text contains the text, or with
+	 * {@code exact}, whose visible text (trimmed, white space collapsed) equals it, both case-sensitive, as
+	 * {@link #followLinkContaining(String, boolean)} finds it; then follows it into the new tab or window it opens (see
+	 * {@link Selenide#openNewWindow(Runnable, String)}).
+	 *
+	 * @param text	the text
+	 * @param exact	true to match the link's whole text
+	 * @return the handle of the window the link was clicked in, or null if no displayed link matches
+	 * @throws IllegalStateException	if the link opens no new window
+	 */
+	public @Nullable String followLinkContainingIntoNewWindow(@Nonnull String text, boolean exact) {
+		waitForFullPageResponse();
+		Map<String, Object> link = map(script("return _sail.link(arguments[0], arguments[1])", text, Boolean.valueOf(exact)));
+		if (! (link.get("element") instanceof WebElement element)) {
+			return null;
+		}
+		trace("    click " + link.get("href") + " into a new window");
+		SelenideElement anchor = $(element);
+		prepare(anchor);
+		return openNewWindow(() -> click(anchor), "The link containing '" + text + "'");
+	}
+
+	/**
+	 * Waits for the page to load and, for a SmartClient page, for SmartClient to settle (see
+	 * {@link #waitForFullPageResponse()}). Any other page, such as a PDF, is left once it has loaded.
+	 */
+	@Override
+	public void waitForPageToSettle() {
+		super.waitForPageToSettle();
+		if (isSmartClientPage()) {
+			waitForFullPageResponse();
+		}
+	}
+
+	/**
+	 * Presses a tool of a list grid's toolbar, as a user does, then waits for what it does: {@code refresh} (the Refresh
+	 * tool) waits for the grid to fetch its rows again; {@code clearSelection} (the Deselect tool) waits for SmartClient
+	 * to settle and checks that no row is selected.
+	 *
+	 * @param locator	a locator of the list grid's rows
+	 * @param tool	{@code refresh} or {@code clearSelection}
+	 * @throws IllegalStateException	if the toolbar has no such tool, or it is disabled, or rows are still selected
+	 */
+	public void pressListGridTool(@Nonnull String locator, @Nonnull String tool) {
+		String grid = root(locator);
+		listState(grid); // its first fetch has ended, so that the refresh's fetch is the one waited for below
+		Map<String, Object> result = map(script("return _sail.listToolButton(arguments[0], arguments[1])", grid, tool));
+		if (! (result.get("button") instanceof WebElement button)) {
+			throw new IllegalStateException("Cannot press the " + tool + " tool of " + grid + ": " + result.get("error"));
+		}
+		if (Boolean.TRUE.equals(result.get("disabled"))) {
+			throw new IllegalStateException("The " + result.get("title") + " tool of " + grid + " is disabled");
+		}
+		trace("    Press the list grid's " + result.get("title") + " tool");
+		SelenideElement element = $(button);
+		prepare(element);
+		click(element);
+		// Waits for SmartClient to settle (a refresh's fetch, a deselect's selected action) and the grid's rows to arrive
+		listState(grid);
+		if ("clearSelection".equals(tool)) {
+			Object selected = script("return _sail.listSelectedCount(arguments[0])", grid);
+			if ((selected instanceof Number count) && (count.intValue() > 0)) {
+				throw new IllegalStateException(String.format("The list grid %s still has %d selected row(s) after its Deselect tool", grid, Integer.valueOf(count.intValue())));
+			}
+		}
 	}
 
 	/**

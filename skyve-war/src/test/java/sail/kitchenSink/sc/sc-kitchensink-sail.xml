@@ -4,7 +4,7 @@
 	and every kitchen sink widget that SAIL can enter data into, checking values with testValue.
 
 	Not covered here, and why:
-	- navigateTree, navigateMap, navigateCalendar, navigateLink: implemented in the shared executor base. The kitchen sink's
+	- navigateTree, navigateMap, navigateCalendar: implemented in the shared executor base. The kitchen sink's
 	  Calendar, Map and Tree items are links; its Condition Node Tree, List Attribute Map and List Attribute Calendar items
 	  are navigated by SmartClientRecorderRoundTripSailIT (sc-recorder-round-trip-more.xml).
 	- listMembership: the kitchen sink's only list membership is on ConditionsFixture (see below); the SC admin suite
@@ -153,6 +153,55 @@
 			<testValue binding="description" value="SAIL Gamma {run}" />
 			<zoomOut />
 			<testValue binding="lookupDescription" value="SAIL Gamma {run}" />
+		</method>
+	</interaction>
+
+	<interaction name="Windows, back, refresh and list grid tools">
+		<method>
+			<comment>The List Grid Fixture's first list grid sets selectedVueId, which the view shows; its Deselect tool clears it</comment>
+			<navigateEdit module="kitchensink" document="ListGridFixture" />
+			<listGridSelect module="kitchensink" query="qListGridFixtureVue" rowContaining="SAIL Alpha {run}" />
+			<captureValue binding="selectedVueId" variable="alphaId" />
+			<listGridTool module="kitchensink" query="qListGridFixtureVue" tool="clearSelection" />
+			<testValue binding="selectedVueId" value="" />
+			<comment>A link that opens a new window: make a lookup value there, close it, and refresh the list grid in the
+				window that opened it, which shows the new value only then</comment>
+			<testGridRows module="kitchensink" query="qListGridFixtureVue" rowContaining="SAIL new window {run}" maxRows="0" />
+			<navigateLink text="Open a new lookup value in a new window" window="new" />
+			<pushEditContext module="kitchensink" document="LookupDescription" />
+			<dataEnter binding="description" value="SAIL new window {run}" />
+			<save />
+			<comment>Windows nest: open the List Grid Fixture by its URL in another new window, where its list grid shows the new value</comment>
+			<navigateLink href="?a=e&amp;m=kitchensink&amp;d=ListGridFixture" window="new" />
+			<pushEditContext module="kitchensink" document="ListGridFixture" />
+			<testGridRows module="kitchensink" query="qListGridFixtureVue" rowContaining="SAIL new window {run}" minRows="1" maxRows="1" />
+			<closeWindow />
+			<comment>Back in the lookup value's window, with its context</comment>
+			<testValue binding="description" value="SAIL new window {run}" />
+			<closeWindow />
+			<comment>Back in the List Grid Fixture, with its context: its list grid has not fetched the new value yet</comment>
+			<testGridRows module="kitchensink" query="qListGridFixtureVue" rowContaining="SAIL new window {run}" maxRows="0" />
+			<listGridTool module="kitchensink" query="qListGridFixtureVue" tool="refresh" />
+			<testGridRows module="kitchensink" query="qListGridFixtureVue" rowContaining="SAIL new window {run}" minRows="1" maxRows="1" />
+			<comment>A link to a PDF in a new window: the window closes as any other</comment>
+			<navigateLink text="Open a PDF in a new window" window="new" />
+			<closeWindow />
+			<testGridRows module="kitchensink" query="qListGridFixtureVue" rowContaining="SAIL new window {run}" minRows="1" maxRows="1" />
+			<comment>Back and refresh: open a lookup value by its id, then a list; back returns to the lookup value, and a
+				refresh drops a value that was not saved</comment>
+			<navigateEdit module="kitchensink" document="LookupDescription" bizId="{var:alphaId}" />
+			<testValue binding="description" value="SAIL Alpha {run}" />
+			<navigateList module="kitchensink" document="LookupDescription" />
+			<navigateBack />
+			<pushEditContext module="kitchensink" document="LookupDescription" />
+			<testValue binding="description" value="SAIL Alpha {run}" />
+			<dataEnter binding="description" value="SAIL not saved {run}" />
+			<refresh />
+			<testValue binding="description" value="SAIL Alpha {run}" />
+			<comment>Remove the value made in the new window</comment>
+			<navigateMenu module="kitchensink" item="Lookup values" />
+			<listGridZoom module="kitchensink" document="LookupDescription" rowContaining="SAIL new window {run}" />
+			<delete />
 		</method>
 	</interaction>
 

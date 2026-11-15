@@ -15,6 +15,8 @@ import static org.mockito.Mockito.CALLS_REAL_METHODS;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -29,6 +31,7 @@ import java.util.List;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.InOrder;
 import org.skyve.impl.metadata.user.UserImpl;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.sail.execution.sc.SmartClientAutomationContext;
@@ -52,10 +55,15 @@ import org.skyve.metadata.sail.language.step.interaction.grids.ListGridClearFilt
 import org.skyve.metadata.sail.language.step.interaction.grids.ListGridFilter;
 import org.skyve.metadata.sail.language.step.interaction.grids.ListGridFilter.FilterOperator;
 import org.skyve.metadata.sail.language.step.interaction.grids.ListGridSort;
+import org.skyve.metadata.sail.language.step.interaction.grids.ListGridTool;
+import org.skyve.metadata.sail.language.step.interaction.grids.ListGridTool.Tool;
 import org.skyve.metadata.sail.language.step.interaction.lookup.LookupDescriptionAutoComplete;
 import org.skyve.metadata.sail.language.step.interaction.lookup.LookupDescriptionPick;
+import org.skyve.metadata.sail.language.step.interaction.navigation.CloseWindow;
+import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateBack;
 import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateEdit;
 import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateLink;
+import org.skyve.metadata.sail.language.step.interaction.navigation.Refresh;
 import org.skyve.metadata.sail.language.step.interaction.session.Login;
 import org.skyve.metadata.user.User;
 
@@ -238,6 +246,105 @@ class InterpretedWebDriverExecutorTest {
 
 		verify(executor).clickLinkContaining(link, "Request 42 of " + executor.getRunToken());
 		verify(executor.selenide, never()).get(anyString());
+	}
+
+	@Test
+	void theWindowAndToolHooksFailUntilImplemented() {
+		ListGridTool tool = tool(Tool.refresh);
+		assertAll(() -> assertThrows(UnsupportedOperationException.class, () -> executor.clickLinkIntoNewWindow(new NavigateLink(), "x")),
+					() -> assertThrows(UnsupportedOperationException.class, () -> executor.executeListGridTool(tool)));
+	}
+
+	/**
+	 * A link into a new window, by text or by href, with its tokens substituted; windows nest, and each close returns to
+	 * the opener of the window it closes. In the first window there is nothing to close.
+	 */
+	@Test
+	void navigateLinkIntoANewWindowAndCloseWindowReturnToEachOpener() {
+		executor.putVariable("n", "7");
+		NavigateLink byText = newWindowLink("Print {var:n}");
+		NavigateLink byHref = new NavigateLink();
+		byHref.setHref("/?a=e&m=admin&d=Contact&i={var:n}");
+		byHref.setWindow(NavigateLink.Window.newWindow);
+		doReturn("first").when(executor).clickLinkIntoNewWindow(any(), anyString());
+		when(executor.selenide.getInNewWindow(anyString())).thenReturn("second");
+
+		executor.executeNavigateLink(byText);
+		executor.executeNavigateLink(byHref);
+		executor.executeCloseWindow(new CloseWindow());
+		executor.executeCloseWindow(new CloseWindow());
+
+		verify(executor).clickLinkIntoNewWindow(byText, "Print 7");
+		verify(executor.selenide).getInNewWindow("?a=e&m=admin&d=Contact&i=7");
+		InOrder order = inOrder(executor.selenide);
+		order.verify(executor.selenide).closeWindowAndReturnTo("second");
+		order.verify(executor.selenide).closeWindowAndReturnTo("first");
+		MetaDataException e = assertThrows(MetaDataException.class, () -> executor.executeCloseWindow(new CloseWindow()));
+		assertAll(() -> assertTrue(e.getMessage().contains("has no window to close"), e.getMessage()),
+					() -> verify(executor, never()).clickLinkContaining(any(), anyString()),
+					() -> verify(executor.selenide, never()).get(anyString()));
+	}
+
+	@Test
+	void aLinkThatOpensNoNewWindowLeavesTheStepsInThisWindow() {
+		doThrow(new IllegalStateException("opened no new window")).when(executor).clickLinkIntoNewWindow(any(), anyString());
+
+		assertThrows(IllegalStateException.class, () -> executor.executeNavigateLink(newWindowLink("Print")));
+
+		assertThrows(MetaDataException.class, () -> executor.executeCloseWindow(new CloseWindow()));
+		verify(executor.selenide, never()).closeWindowAndReturnTo(anyString());
+	}
+
+	/**
+	 * A window left open is closed when its interaction does not complete, so the next interaction starts in the first
+	 * window, and when the automation ends.
+	 */
+	@Test
+	void aWindowLeftOpenIsClosedWhenItsInteractionFailsAndWhenTheAutomationEnds() {
+		String script = "<automation uxui=\"desktop\" userAgentType=\"desktop\" testStrategy=\"Verify\" xmlns=\"http://www.skyve.org/xml/sail\">" +
+							"<interaction name=\"fails\"><method><navigateLink text=\"A\" window=\"new\"/><navigateBack/></method></interaction>" +
+							"<interaction name=\"left open\"><method><navigateLink text=\"B\" window=\"new\"/></method></interaction>" +
+						"</automation>";
+		doReturn("first").when(executor).clickLinkIntoNewWindow(any(), anyString());
+		doThrow(new IllegalStateException("There is no earlier page")).when(executor.selenide).back();
+
+		Automation automation = XMLMetaData.unmarshalSAILString(script);
+		AssertionError e = assertThrows(AssertionError.class, () -> executor.executeAutomation(automation));
+
+		assertAll(() -> assertTrue(e.getMessage().contains("with 1 failure(s)"), e.getMessage()),
+					() -> assertTrue(e.getMessage().contains("There is no earlier page"), e.getMessage()),
+					() -> verify(executor.selenide, times(2)).closeWindowAndReturnTo("first"),
+					() -> assertThrows(MetaDataException.class, () -> executor.executeCloseWindow(new CloseWindow())));
+	}
+
+	@Test
+	void backRefreshAndListGridToolDriveTheBrowserAndTheHook() {
+		ListGridTool tool = tool(Tool.clearSelection);
+		doNothing().when(executor).pressListGridTool(any(), any());
+
+		executor.executeNavigateBack(new NavigateBack());
+		executor.executeRefresh(new Refresh());
+		executor.executeListGridTool(tool);
+
+		InOrder order = inOrder(executor.selenide, executor);
+		order.verify(executor.selenide).back();
+		order.verify(executor.selenide).reload();
+		order.verify(executor).pressListGridTool(tool, Tool.clearSelection);
+	}
+
+	private static NavigateLink newWindowLink(String text) {
+		NavigateLink result = new NavigateLink();
+		result.setText(text);
+		result.setWindow(NavigateLink.Window.newWindow);
+		return result;
+	}
+
+	private static ListGridTool tool(Tool which) {
+		ListGridTool result = new ListGridTool();
+		result.setModuleName("admin");
+		result.setQueryName("qContacts");
+		result.setTool(which);
+		return result;
 	}
 
 	@Test

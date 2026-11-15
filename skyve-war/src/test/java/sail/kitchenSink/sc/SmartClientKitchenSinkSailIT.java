@@ -81,4 +81,67 @@ class SmartClientKitchenSinkSailIT extends AbstractSmartClientInterpretedSail {
 								() -> Assertions.assertTrue(message.contains("no option has the label Fourth"), message),
 								() -> Assertions.assertTrue(message.contains("holds an enum, which is filtered with equals, not greaterThan"), message));
 	}
+
+	/**
+	 * The window steps fail with a reason when the page cannot do what they say: a link that opens its page in this
+	 * window rather than a new one, a link that opens a new window without {@code window="new"}, {@code <closeWindow/>}
+	 * with no window to close, and {@code <navigateBack/>} with no earlier page. A window left open by an interaction
+	 * that failed is closed, so the next interaction has no window to close either. Run under Verify, so that every
+	 * interaction runs and each failure is reported.
+	 */
+	@Test
+	void windowFailures() {
+		String script = """
+				<automation uxui="desktop" userAgentType="desktop" testStrategy="Verify" xmlns="http://www.skyve.org/xml/sail">
+					<before>
+						<login user="admin" password="admin" />
+						<switchMode />
+					</before>
+					<interaction name="A link that opens its page in this window">
+						<method>
+							<navigateEdit module="kitchensink" document="ListGridFixture" />
+							<navigateLink text="Open the selected lookup value" exact="true" window="new" />
+						</method>
+					</interaction>
+					<interaction name="No window to close">
+						<method>
+							<navigateEdit module="kitchensink" document="ListGridFixture" />
+							<closeWindow />
+						</method>
+					</interaction>
+					<interaction name="A link that opens a new window, without window">
+						<method>
+							<navigateEdit module="kitchensink" document="ListGridFixture" />
+							<navigateLink text="Open a PDF in a new window" />
+						</method>
+					</interaction>
+					<interaction name="No earlier page in a new window">
+						<method>
+							<navigateEdit module="kitchensink" document="ListGridFixture" />
+							<navigateLink text="Open a PDF in a new window" window="new" />
+							<navigateBack />
+						</method>
+					</interaction>
+					<interaction name="The failed interaction's window was closed">
+						<method>
+							<navigateEdit module="kitchensink" document="ListGridFixture" />
+							<testWidget binding="selectedVueId" />
+							<closeWindow />
+						</method>
+					</interaction>
+					<after>
+						<logout />
+					</after>
+				</automation>
+				""";
+		AssertionError e = Assertions.assertThrows(AssertionError.class, () -> sailString(script));
+		String message = e.getMessage();
+		Assertions.assertAll(() -> Assertions.assertTrue(message.contains("with 5 failure(s)"), message),
+								() -> Assertions.assertTrue(message.contains("opened its page in this window, not a new one"), message),
+								() -> Assertions.assertTrue(message.contains("opens another window (target _blank): follow it with <navigateLink window=\"new\" />"), message),
+								() -> Assertions.assertTrue(message.contains("There is no earlier page in this window's history"), message),
+								() -> Assertions.assertTrue(message.contains("\"The failed interaction's window was closed\" step 3 <closeWindow />: MetaDataException: " +
+																				"<closeWindow /> has no window to close"), message),
+								() -> Assertions.assertEquals(2, message.split("has no window to close", -1).length - 1, message));
+	}
 }

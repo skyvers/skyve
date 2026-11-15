@@ -98,6 +98,8 @@ import org.skyve.metadata.sail.language.step.interaction.grids.ListGridFilter;
 import org.skyve.metadata.sail.language.step.interaction.grids.ListGridFilter.FilterOperator;
 import org.skyve.metadata.sail.language.step.interaction.grids.ListGridSort;
 import org.skyve.metadata.sail.language.step.interaction.grids.ListGridSelect;
+import org.skyve.metadata.sail.language.step.interaction.grids.ListGridTool;
+import org.skyve.metadata.sail.language.step.interaction.grids.ListGridTool.Tool;
 import org.skyve.metadata.sail.language.step.interaction.grids.ListGridZoom;
 import org.skyve.metadata.sail.language.step.interaction.grids.ListMembershipMove;
 import org.skyve.metadata.sail.language.step.interaction.lookup.LookupDescriptionAutoComplete;
@@ -2420,5 +2422,43 @@ public class PrimeFacesInterpretedWebDriverExecutor extends InterpretedWebDriver
 	@Override
 	public void executeExecute(org.skyve.metadata.sail.language.step.Execute execute) {
 		selenide.runScript(execute.getScript());
+	}
+
+	/**
+	 * Follows the link into the new window it opens (see {@link PrimeFacesSelenide#followLinkContainingIntoNewWindow}).
+	 * Fails listing the page's links if none contains the text.
+	 *
+	 * @param link	the step
+	 * @param text	the text
+	 * @return the handle of the window the link was clicked in
+	 * @throws DomainException	if no displayed link contains the text
+	 */
+	@Override
+	protected String clickLinkIntoNewWindow(NavigateLink link, String text) {
+		boolean exact = Boolean.TRUE.equals(link.getExact());
+		String opener = selenide.followLinkContainingIntoNewWindow(text, exact);
+		if (opener == null) {
+			throw new DomainException(String.format("<navigateLink text=\"%s\"%s window=\"new\" /> found no displayed link %s it: the page's links are %s",
+														text, exact ? " exact=\"true\"" : "", exact ? "with exactly that text for" : "containing",
+														selenide.linkTexts()));
+		}
+		return opener;
+	}
+
+	/**
+	 * Fails: neither of PrimeFaces' list grids, the Vue list grid and the data table, has a Refresh or Deselect tool.
+	 * A {@code <refresh />} reloads the page, and with it the list grids' rows and selections.
+	 *
+	 * @param step	the step
+	 * @param tool	the tool
+	 * @throws UnsupportedOperationException	always
+	 */
+	@Override
+	protected void pressListGridTool(ListGridTool step, Tool tool) {
+		PrimeFacesAutomationContext context = peek();
+		String grid = (context == null) ? "a list grid" : "[" + step.getIdentifier(context) + "]";
+		throw new UnsupportedOperationException(String.format("<listGridTool tool=\"%s\" /> on %s is not available in PrimeFaces: " +
+																"its Vue list grids and data tables have no %s tool; use <refresh /> to reload the page",
+																tool, grid, (Tool.refresh == tool) ? "Refresh" : "Deselect"));
 	}
 }
