@@ -890,7 +890,7 @@ isc.ReportDialog.addClassProperties({
 	 * @param {string} format - the format of the report (e.g., 'html', 'pdf').
 	 */
 	_redirectToReport: function (view, params, format) {
-		const instance = view.gather(false); // Don't validate
+		const instance = view.gather(false, true); // Don't validate
 		if (instance) {
 			const { _c: c, _b: b, bizId } = instance;
 

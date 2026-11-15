@@ -80,32 +80,61 @@ class SmartClientFastTypingSailIT extends AbstractSmartClientInterpretedSail {
 								"Next ran and showed the groups step, which has the Save button");
 	}
 
-	/** The date the view gathers, whether the view has changed, and the focused element's name, after a gather. */
-	private static final String GATHERED_DATE = "var v = isc.BizUtil.getCurrentView();" +
-												"var d = v.gather(false).date;" +
-												"return (d ? d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate() : null) +" +
-												"  '|' + v._vm.valuesHaveChanged() + '|' + document.activeElement.name;";
+	/** Counts the date item's change events in window._sailDateChanges. */
+	private static final String COUNT_DATE_CHANGES = "var item = isc.BizUtil.getCurrentView()._vm.getItem('date');" +
+														"window._sailDateChanges = 0;" +
+														"var changed = item.changed;" +
+														"item.changed = function() {" +
+														"  window._sailDateChanges++;" +
+														"  return changed ? changed.apply(this, arguments) : true;" +
+														"};";
 
 	/**
-	 * A value typed into an item that changes on commit, and not committed yet (the field still has the focus), is
-	 * gathered and makes the view changed, as if the user had left the field. A date item's text field is such an item:
-	 * SmartClient does not commit it when its values are read.
+	 * The date a gather returns (committing the typed value or not), whether the view has changed, the text the date's
+	 * field shows, the number of change events, and the focused element's name.
+	 */
+	private static final String GATHERED_DATE = "var v = isc.BizUtil.getCurrentView();" +
+												"var d = v.gather(false, arguments[0]).date;" +
+												"var item = v._vm.getItem('date');" +
+												"return (d ? d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate() : null) +" +
+												"  '|' + v._vm.valuesHaveChanged() + '|' + document.getElementsByName('date_dateTextField')[0].value +" +
+												"  '|' + window._sailDateChanges + '|' + document.activeElement.name;";
+
+	/**
+	 * A value typed into an item that changes on commit, and not committed yet (the field still has the focus), is left
+	 * alone by a gather for a request in the background, such as a list grid's fetch: the user is still typing. A gather
+	 * the user asked for (an action, a save, a cancel, a zoom) commits it first, as if the user had left the field, so it
+	 * is gathered and makes the view changed. A date item's text field is such an item: SmartClient does not commit it
+	 * when its values are read.
 	 */
 	@Test
-	void aValueTypedButNotCommittedIsGathered() {
+	void aValueTypedButNotCommittedIsGatheredOnlyForTheUser() {
 		String script = "<automation uxui=\"desktop\" userAgentType=\"desktop\" testStrategy=\"Assert\" xmlns=\"http://www.skyve.org/xml/sail\">" +
 							"<before><login user=\"admin\" password=\"admin\" /><switchMode /></before>" +
 							"<interaction name=\"A view with a date\"><method>" +
 							"<navigateEdit module=\"kitchensink\" document=\"ListAttributes\" />" +
 							"</method></interaction></automation>";
 		Assertions.assertDoesNotThrow(() -> sailString(script));
+		Selenide.executeJavaScript(COUNT_DATE_CHANGES);
+		String today = Selenide.executeJavaScript("var d = isc.BizUtil.getCurrentView()._vm.getValue('date');" +
+													"return d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate();");
 
 		WebDriver driver = WebDriverRunner.getWebDriver();
 		WebElement date = driver.findElement(org.openqa.selenium.By.name("date_dateTextField"));
 		date.click();
 		Selenide.executeJavaScript("arguments[0].select();", date);
-		new Actions(driver).sendKeys("01 02 2021").perform();
-		Assertions.assertEquals("2021-2-1|true|date_dateTextField", Selenide.executeJavaScript(GATHERED_DATE),
-								"the typed date gathered, the view changed, and the field still focused");
+
+		// Half way through typing, a background gather (as a list grid's fetch makes) leaves the typed text alone
+		new Actions(driver).sendKeys("01 02").perform();
+		Assertions.assertEquals(today + "|false|01 02|0|date_dateTextField", Selenide.executeJavaScript(GATHERED_DATE, Boolean.FALSE),
+								"a background gather while typing");
+
+		// The rest of the date, then a gather the user asked for commits it
+		new Actions(driver).sendKeys(" 2021").perform();
+		// (the date's text is left out: committing can reformat it)
+		String gathered = Selenide.executeJavaScript(GATHERED_DATE, Boolean.TRUE);
+		Assertions.assertTrue(gathered.startsWith("2021-2-1|true|") && gathered.endsWith("|1|date_dateTextField"),
+								"the user's gather: the typed date gathered, the view changed, one change event, and the field still focused: " +
+									gathered);
 	}
 }

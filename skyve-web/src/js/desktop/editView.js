@@ -527,7 +527,7 @@ isc.EditView.addMethods({
 	 * @param {Function} completedCallback(instance, success) - callback function on completion.
 	 */
 	saveInstance: function (validate, action, completedCallback) {
-		const instance = this.gather(validate);
+		const instance = this.gather(validate, true);
 		if (!instance) {
 			this._source = null;
 			if (completedCallback) {
@@ -661,7 +661,7 @@ isc.EditView.addMethods({
 	 * @param {Function} completedCallback - callback function on completion.
 	 */
 	deleteInstance: function (validate, completedCallback) {
-		const instance = this.gather(validate);
+		const instance = this.gather(validate, true);
 		if (!instance) {
 			if (completedCallback) {
 				completedCallback({}, false); // Validation errors occurred, no data
@@ -723,7 +723,7 @@ isc.EditView.addMethods({
 		gridRowBizId,
 		completedCallback,
 	) {
-		const instance = this.gather(validate);
+		const instance = this.gather(validate, true);
 		if (!instance) {
 			if (completedCallback) {
 				completedCallback({}, false); // Did not pass validation, no data
@@ -1326,14 +1326,20 @@ isc.EditView.addMethods({
 	 * its validate argument and null result.
 	 * If validation errors exist, returns null.
 	 *
-	 * The value being typed into the focused item is committed first (see _commitFocusedItem), so that what is gathered,
-	 * validated, and checked for changes afterwards (valuesHaveChanged) includes it.
+	 * For a gather the user asked for (an action, a save, a zoom, a cancel, or a check for changes before leaving the
+	 * view), pass commit: the value being typed into the focused item is committed first (see _commitFocusedItem), so that
+	 * what is gathered, validated, and checked for changes afterwards (valuesHaveChanged) includes it. A gather for a
+	 * request in the background (a list grid's fetch, a pick list, a completion, a refresh) commits nothing, as committing
+	 * runs the item's change handler while the user is still typing.
 	 *
 	 * @param {boolean} validate - determines whether to perform validation before gathering data.
+	 * @param {boolean} [commit] - whether to commit the value being typed into the focused item first.
 	 * @returns {Object|null} - the gathered data object or null if validation fails.
 	 */
-	gather: function (validate) {
-		this._commitFocusedItem();
+	gather: function (validate, commit) {
+		if (commit) {
+			this._commitFocusedItem();
+		}
 		if (validate && !this._vm.validate()) {
 			return null; // Return early if validation fails
 		}
@@ -1854,7 +1860,7 @@ isc.BizButton.addMethods({
 
 				case "ZoomOut": {
 					// Handle ZoomOut action with changes validation
-					const instance = this._view.gather(false);
+					const instance = this._view.gather(false, true);
 					const { _apply: apply, _changed: changedOnServer } = instance;
 					if (apply || changedOnServer || this._view._vm.valuesHaveChanged()) {
 						this._view.saveInstance(validate, this.actionName);
@@ -1868,7 +1874,7 @@ isc.BizButton.addMethods({
 
 				case "Cancel": {
 					// Cancel action with unsaved changes check
-					const instance = this._view.gather(false);
+					const instance = this._view.gather(false, true);
 					const { _changed: changedOnServerCancel } = instance;
 					const opener = isc.WindowStack.getOpener();
 
@@ -1897,7 +1903,7 @@ isc.BizButton.addMethods({
 
 				case "Remove": {
 					// Remove action on child edit view
-					const instance = this._view.gather(false);
+					const instance = this._view.gather(false, true);
 					const bizId = instance.bizId;
 					const gridBinding = this._view._b.substring(
 						this._view._b.lastIndexOf(".") + 1,
@@ -1929,7 +1935,7 @@ isc.BizButton.addMethods({
 
 				case "BizExport": {
 					// BizExport action
-					const instance = this._view.gather(false);
+					const instance = this._view.gather(false, true);
 					if (instance) {
 						this._view.saveInstance(validate, null, (data, success) => {
 							if (success) {
@@ -1949,7 +1955,7 @@ isc.BizButton.addMethods({
 
 				case "BizImport": {
 					// BizImport action
-					const instance = this._view.gather(false);
+					const instance = this._view.gather(false, true);
 					if (instance) {
 						this._view.saveInstance(validate, null, (data, success) => {
 							if (success) {
@@ -1978,7 +1984,7 @@ isc.BizButton.addMethods({
 
 				case "Upload": {
 					// Upload action
-					const instance = this._view.gather(false);
+					const instance = this._view.gather(false, true);
 					if (instance) {
 						this._view.saveInstance(validate, null, (data, success) => {
 							if (success) {
@@ -2052,7 +2058,7 @@ isc.BizZoomIn.addMethods({
 		 */
 		this.action = () => {
 			// Validate here so we can show the zoom message if required
-			const instance = this._view.gather(true);
+			const instance = this._view.gather(true, true);
 
 			if (instance) {
 				const bizId = instance[this.binding];

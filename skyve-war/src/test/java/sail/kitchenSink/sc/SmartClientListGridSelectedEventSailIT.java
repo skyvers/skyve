@@ -106,4 +106,72 @@ class SmartClientListGridSelectedEventSailIT extends AbstractSmartClientInterpre
 							"<after><logout /></after></automation>";
 		Assertions.assertDoesNotThrow(() -> sailString(remove));
 	}
+
+	/**
+	 * A refresh of a paged list fetches only its first page. When the row of the view's selected id is not among those
+	 * rows, it may be on a page not fetched, so the view keeps its selected id (and stays unchanged), and the selected
+	 * event does not run.
+	 * <p>
+	 * The test makes more lookup values than a page holds (75) with the Control Panel's test data generator, tagged so
+	 * they can be deleted afterwards, and one whose description sorts after them all. It selects that one with the grid
+	 * filtered to it, then clears the filter and refreshes the grid, which fetches only the first page.
+	 */
+	@Test
+	void aRefreshThatFetchesPartOfAPagedListKeepsTheSelectedId() {
+		String description = "~ SAIL paged " + System.currentTimeMillis();
+		String tag = "SAILPAGED" + System.currentTimeMillis();
+		String generate = "<automation uxui=\"desktop\" userAgentType=\"desktop\" testStrategy=\"Assert\" xmlns=\"http://www.skyve.org/xml/sail\">" +
+							"<before><login user=\"admin\" password=\"admin\" /><switchMode /></before>" +
+							"<interaction name=\"More lookup values than a page holds\"><method>" +
+							"<navigateMenu module=\"admin\" item=\"DevOps/Control Panel\" />" +
+							"<tabSelect path=\"Design\" />" +
+							"<dataEnter binding=\"testModuleName\" value=\"kitchensink\" match=\"code\" />" +
+							"<dataEnter binding=\"testDocumentNames\" value=\"LookupDescription\" />" +
+							"<dataEnter binding=\"testNumberToGenerate\" value=\"100\" />" +
+							"<dataEnter binding=\"testTagGeneratedData\" value=\"true\" />" +
+							"<dataEnter binding=\"testTagName\" value=\"" + tag + "\" />" +
+							"<action name=\"GenerateTestData\" />" +
+							"<navigateMenu module=\"admin\" item=\"Jobs\" />" +
+							"<tabSelect path=\"Actual\" />" +
+							"<testGridRows module=\"admin\" query=\"qCompletedJobs\" rowContaining=\"Generate Test Data\" minRows=\"1\" timeoutMillis=\"60000\" />" +
+							"</method></interaction>" +
+							"<interaction name=\"A lookup value after them all, selected\"><method>" +
+							"<navigateEdit module=\"kitchensink\" document=\"LookupDescription\" />" +
+							"<dataEnter binding=\"description\" value=\"" + description + "\" />" +
+							"<save />" +
+							"<navigateEdit module=\"kitchensink\" document=\"ListGridFixture\" />" +
+							"<listGridFilter module=\"kitchensink\" query=\"qListGridFixtureFaces\" column=\"description\" value=\"" + description + "\" />" +
+							"<listGridSelect module=\"kitchensink\" query=\"qListGridFixtureFaces\" rowContaining=\"" + description + "\" />" +
+							"<execute>" + COUNT.replace("&", "&amp;").replace("<", "&lt;") + "</execute>" +
+							"</method></interaction></automation>";
+		Assertions.assertDoesNotThrow(() -> sailString(generate));
+		String selectedId = Selenide.executeJavaScript(FACES + "return v._vm.getValue('selectedFacesId');");
+		Assertions.assertNotNull(selectedId, "the selected id");
+
+		// Clear the filter and refresh (as the grid's Clear Filter does): only the first page of rows is fetched
+		Selenide.executeJavaScript(FACES + "faces.grid.setFilterEditorCriteria({}); faces.refresh();");
+		selenium.settle();
+		Assertions.assertEquals("false|" + selectedId + "|false|edits=0 selections=0",
+								Selenide.executeJavaScript(FACES + "return faces.grid.data.allMatchingRowsCached() + '|' +" +
+																	" v._vm.getValue('selectedFacesId') + '|' + v._vm.valuesHaveChanged() +" +
+																	" '|edits=' + window._sailCounts.edits + ' selections=' + window._sailCounts.selections;"),
+								"a first page without the row, the selected id kept, the view unchanged, and no selected event");
+
+		String remove = "<automation uxui=\"desktop\" userAgentType=\"desktop\" testStrategy=\"Assert\" xmlns=\"http://www.skyve.org/xml/sail\">" +
+							"<interaction name=\"Remove the lookup values\"><method>" +
+							"<navigateList module=\"kitchensink\" document=\"LookupDescription\" />" +
+							"<listGridFilter module=\"kitchensink\" document=\"LookupDescription\" column=\"description\" value=\"" + description + "\" />" +
+							"<listGridZoom module=\"kitchensink\" document=\"LookupDescription\" rowContaining=\"" + description + "\" />" +
+							"<delete />" +
+							"<navigateMenu module=\"admin\" item=\"DevOps/Control Panel\" />" +
+							"<tabSelect path=\"Design\" />" +
+							"<dataEnter binding=\"testTagName\" value=\"" + tag + "\" />" +
+							"<action name=\"DeleteTestData\" />" +
+							"<navigateMenu module=\"admin\" item=\"Jobs\" />" +
+							"<tabSelect path=\"Actual\" />" +
+							"<testGridRows module=\"admin\" query=\"qCompletedJobs\" rowContaining=\"Delete all tagged data\" minRows=\"1\" timeoutMillis=\"60000\" />" +
+							"</method></interaction>" +
+							"<after><logout /></after></automation>";
+		Assertions.assertDoesNotThrow(() -> sailString(remove));
+	}
 }

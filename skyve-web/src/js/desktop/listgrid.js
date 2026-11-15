@@ -148,7 +148,7 @@ isc.BizListGrid.addMethods({
 					let contConv = config.contConv || false;
 
 					if (contConv) {
-						const changedOnServer = this._view.gather(false)._changed;
+						const changedOnServer = this._view.gather(false, true)._changed;
 						if (changedOnServer || this._view._vm.valuesHaveChanged()) {
 							isc.say(
                                 isc.i18nMessages.bizListGrid_UnsavedChangesSay.replace(/(\$viewSingular)/g, this._view._singular),
@@ -194,7 +194,7 @@ isc.BizListGrid.addMethods({
 			 */
 			click: () => {
 				if (config && config.contConv) {
-					const changedOnServer = this._view.gather(false)._changed;
+					const changedOnServer = this._view.gather(false, true)._changed;
 
 					// Check for unsaved changes
 					if (changedOnServer || this._view._vm.valuesHaveChanged()) {
@@ -281,7 +281,7 @@ isc.BizListGrid.addMethods({
 					// in the same way as when zooming in
 					if (this._view) {
 						// this is an embedded list grid
-						const instance = this._view.gather(false); // don't validate
+						const instance = this._view.gather(false, true); // don't validate
 						if (config && config.contConv) {
 							if (instance._changed || this._view._vm.valuesHaveChanged()) {
 								isc.say(
@@ -1920,7 +1920,8 @@ isc.BizListGrid.addMethods({
 	 * The selected event does not run for the refresh, as the user selected nothing: a selected event that rerenders the
 	 * view refreshes its list grids, so it would run again for ever (runtime issue SC-10). Once the rows are in, the row
 	 * of the view's selectedIdBinding is selected again, as a data grid's is on a scatter, so a refresh keeps the user's
-	 * selection; if that row has gone, the binding is cleared, so that it holds no row the grid does not show.
+	 * selection; if that row has gone, the binding is cleared, so that it holds no row the grid does not show. On a paged
+	 * list whose rows are not all fetched, a row that is not among them may be on another page, so the binding is kept.
 	 */
 	refresh: function () {
 		const topRowNum = this.grid.getVisibleRows()[0];
@@ -1954,10 +1955,13 @@ isc.BizListGrid.addMethods({
 			reselected = true;
 			const selectedBizId = this.selectedIdBinding && this._view ? this._view._vm.getValue(this.selectedIdBinding) : null;
 			if (selectedBizId) {
-				const index = this.grid.data.findIndex("bizId", selectedBizId);
+				const data = this.grid.data;
+				const index = data.findIndex("bizId", selectedBizId);
 				if (index >= 0) {
 					selectQuietly(() => this.grid.selectSingleRecord(index));
-				} else {
+				} else if (!isc.isA.ResultSet(data) || data.allMatchingRowsCached()) {
+					// The row has gone (all the list's rows are here). A paged list that has fetched only some of its rows
+					// may hold the row on a page not fetched: the binding is kept then.
 					this._setSelectedId(null);
 				}
 			}
@@ -2331,7 +2335,7 @@ isc.BizListGrid.addMethods({
 
 		isc.BizUtil.getEditView(module, document, (view) => {
 			if (_view) {
-				const instance = _view.gather(false); // Don't validate
+				const instance = _view.gather(false, true); // Don't validate
 
 				// If continuing the conversation
 				if (contConv) {
