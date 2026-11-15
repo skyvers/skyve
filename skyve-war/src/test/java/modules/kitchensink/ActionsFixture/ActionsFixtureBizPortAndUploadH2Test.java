@@ -60,7 +60,7 @@ import modules.test.AbstractSkyveTest;
  * fixture row is checked against the row's view. The fixture is always created, so a new admin user stands in for a
  * bean not yet created: its edit view offers Generate Password and its create view does not, so a request for it is
  * refused only when the create view is checked. A mock Faces context stands in for the Faces lifecycle of the upload
- * and import pages, and a mock {@link PrimeFaces} records the scripts the upload page is sent.
+ * and import pages, and a mock {@link PrimeFaces} records the scripts and callback parameters the upload page is sent.
  */
 @SuppressWarnings("java:S1192") // repeated test literals
 class ActionsFixtureBizPortAndUploadH2Test extends AbstractSkyveTest {
@@ -76,6 +76,11 @@ class ActionsFixtureBizPortAndUploadH2Test extends AbstractSkyveTest {
 	 * closing the page refreshes the view (runtime issue P8).
 	 */
 	private static final String UPLOAD_RAN_SCRIPT = "var w=SKYVE.Util.findPrimeFacesWindow();if(w){w.SKYVE.PF.afterActionUpload(window,false)}";
+	/**
+	 * The callback parameter that tells a SmartClient upload window whether its action upload succeeded, so that
+	 * upload.xhtml closes the window (runtime issue P3).
+	 */
+	private static final String UPLOAD_SUCCEEDED_PARAM = "actionUploadSucceeded";
 
 	/**
 	 * Reaches the protected {@link FacesContext#setCurrentInstance(FacesContext)}.
@@ -89,6 +94,7 @@ class ActionsFixtureBizPortAndUploadH2Test extends AbstractSkyveTest {
 	private final MockHttpSession session = new MockHttpSession();
 	private final List<FacesMessage> messages = new ArrayList<>();
 	private final PrimeFaces primeFaces = mock(PrimeFaces.class);
+	private final PrimeFaces.Ajax ajax = mock(PrimeFaces.Ajax.class);
 	private PrimeFaces originalPrimeFaces;
 
 	@BeforeEach
@@ -96,6 +102,7 @@ class ActionsFixtureBizPortAndUploadH2Test extends AbstractSkyveTest {
 		session.setAttribute(WebContext.USER_SESSION_ATTRIBUTE_NAME, u);
 		StateUtil.addSession(u.getId(), session);
 		originalPrimeFaces = PrimeFaces.current();
+		when(primeFaces.ajax()).thenReturn(ajax);
 		PrimeFaces.setCurrent(primeFaces);
 	}
 
@@ -209,6 +216,20 @@ class ActionsFixtureBizPortAndUploadH2Test extends AbstractSkyveTest {
 	}
 
 	/**
+	 * Runtime issue P3: in SmartClient, an action upload that succeeds tells its upload window so, and the window's
+	 * page (upload.xhtml) closes it, as a content upload's is closed, and refreshes the view.
+	 */
+	@Test
+	void aSuccessfulUploadTellsItsSmartClientWindowToClose() throws Exception {
+		String webId = cacheConversation(ActionsFixture.newInstance());
+		ContentUploadView view = actionUploadView(webId, "ActionsUpload");
+
+		view.handleFileUpload(upload("upload.txt", "uploaded".getBytes(StandardCharsets.UTF_8)));
+
+		verify(ajax).addCallbackParam(UPLOAD_SUCCEEDED_PARAM, Boolean.TRUE);
+	}
+
+	/**
 	 * An upload that its action refuses leaves its upload page open, showing why, and tells the page's owner that the
 	 * action ran, so that closing the page refreshes the view (runtime issue P8: a page closed without an upload does
 	 * not refresh it).
@@ -224,6 +245,9 @@ class ActionsFixtureBizPortAndUploadH2Test extends AbstractSkyveTest {
 		assertEquals(2, messages.size(), messages::toString);
 		verify(primeFaces, times(2)).executeScript(UPLOAD_RAN_SCRIPT);
 		verify(primeFaces, never()).executeScript(CLOSE_UPLOAD_PAGE_SCRIPT);
+		// and a SmartClient upload window stays open too
+		verify(ajax, times(2)).addCallbackParam(UPLOAD_SUCCEEDED_PARAM, Boolean.FALSE);
+		verify(ajax, never()).addCallbackParam(UPLOAD_SUCCEEDED_PARAM, Boolean.TRUE);
 	}
 
 	/**
@@ -239,6 +263,7 @@ class ActionsFixtureBizPortAndUploadH2Test extends AbstractSkyveTest {
 
 		assertEquals(1, messages.size(), messages::toString);
 		verify(primeFaces, never()).executeScript(anyString());
+		verify(ajax, never()).addCallbackParam(anyString(), any());
 	}
 
 	@Test

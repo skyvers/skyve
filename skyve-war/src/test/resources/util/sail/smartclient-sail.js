@@ -2120,12 +2120,12 @@
 		return frames.length ? frames[frames.length - 1] : null;
 	};
 
-	/** The close button of the top-most window. */
+	/** The close button of the top-most window, if it shows one. */
 	S.windowClose = function () {
 		var stack = isc.WindowStack._stack || [];
 		var top = stack[stack.length - 1];
 		var button = top && top.closeButton;
-		return button ? button.getClipHandle() : null;
+		return (button && button.isVisible()) ? button.getClipHandle() : null;
 	};
 
 	/**

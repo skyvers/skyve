@@ -1093,8 +1093,10 @@ public class SmartClientSelenide extends Selenide<
 			driver.switchTo().defaultContent();
 		}
 		trace("    upload pressed");
-		// Waits for the upload to be processed: the upload page closes its window (content uploads), or reports the
-		// outcome in its own messages (upload actions), or shows why it could not
+		// Waits for the upload to be processed: the upload page closes its window (content uploads, and upload actions
+		// that succeed), or shows why it could not (an upload action's problems, or a refusal), or reports a success
+		// in its own messages and stays open (upload actions, in a Skyve without runtime issue P3's fix: Apps' A/B runs
+		// on master), when the window is closed below as a user would
 		WebElement uploadFrame = frame;
 		String outcome = until("the upload to finish", d -> {
 			if (! (script("return _sail.uploadFrame()") instanceof WebElement)) {
