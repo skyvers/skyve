@@ -44,10 +44,16 @@
 						$('#stopUpload').appendTo(bar);
 					});
 
-					function skyveAfterActionUpload(uploadKind) {
+					// SmartClient: once an upload action has run, refresh the view, and close the window if the upload
+					// succeeded (args.actionUploadSucceeded); an upload with problems leaves it open, showing them.
+					// The window closes last: the opener is read from the window stack, and closing it removes this page.
+					function skyveAfterActionUpload(uploadKind, args) {
 						var owner = SKYVE.Util.findSmartClientWindow();
 						if (owner && uploadKind === 'action') {
 							owner.isc.WindowStack.getOpener().saveInstance(true, '_PUSH');
+							if (args && args.actionUploadSucceeded) {
+								owner.isc.WindowStack.popoff(false);
+							}
 						}
 					}
 					//]]>
@@ -89,7 +95,7 @@
 									uploadIcon="fa-solid fa-upload"
 									cancelIcon="fa-solid fa-ban"
 									update="messages problems"
-									oncomplete="skyveAfterActionUpload('#{_skyveContent.uploadState.uploadKind}')">
+									oncomplete="skyveAfterActionUpload('#{_skyveContent.uploadState.uploadKind}', args)">
 						<div class="skyve-upload-watermark">
 							<i class="fa-solid fa-cloud-arrow-up" aria-hidden="true"></i>
 							<span>#{_skyveContent.i18n['page.fileUpload.dropInstruction']}</span>

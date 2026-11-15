@@ -85,6 +85,13 @@ public class ContentUploadView extends AbstractUploadView {
 	 */
 	private static final String AFTER_ACTION_UPLOAD_SCRIPT = "var w=SKYVE.Util.findPrimeFacesWindow();if(w){w.SKYVE.PF.afterActionUpload(window,%s)}";
 
+	/**
+	 * The callback parameter that tells a SmartClient upload window, once its upload action has run, whether the upload
+	 * succeeded: upload.xhtml's {@code skyveAfterActionUpload} (the upload's {@code oncomplete}) refreshes the view, and
+	 * closes the window when it is {@code true}, as a content upload's window is closed.
+	 */
+	private static final String ACTION_UPLOAD_SUCCEEDED_PARAM = "actionUploadSucceeded";
+
 	@Inject
 	@ManagedProperty(value = "#{param." + AbstractWebContext.RESOURCE_FILE_NAME + "}")
 	@SuppressWarnings("java:S6813") // allow member injection
@@ -614,8 +621,10 @@ public class ContentUploadView extends AbstractUploadView {
 	 * upload errors, and enqueues user-facing JSF messages. Once the upload action
 	 * has run, the page is sent a script that, in PrimeFaces, has the view
 	 * refreshed when the page closes, and closes the page if the upload had no
-	 * problems; an upload with problems (errors or warnings) leaves the page open,
-	 * showing them. A refusal's
+	 * problems; and a callback parameter that, in SmartClient, has the window
+	 * closed if the upload had no problems (the view is refreshed either way). An
+	 * upload with problems (errors or warnings) leaves the page open, showing
+	 * them. A refusal's
 	 * {@link ActionUnavailableException} is caught, not thrown: it is logged as a
 	 * warning, rolled back, and enqueued as the refusal's localised message. A
 	 * {@link MessageException} (such as a {@code ValidationException}) that the
@@ -757,7 +766,9 @@ public class ContentUploadView extends AbstractUploadView {
 			else {
 				addActionUploadProblems(exception, fc);
 			}
-			PrimeFaces.current().executeScript(String.format(AFTER_ACTION_UPLOAD_SCRIPT, Boolean.toString(success)));
+			PrimeFaces primeFaces = PrimeFaces.current();
+			primeFaces.executeScript(String.format(AFTER_ACTION_UPLOAD_SCRIPT, Boolean.toString(success)));
+			primeFaces.ajax().addCallbackParam(ACTION_UPLOAD_SUCCEEDED_PARAM, Boolean.valueOf(success));
 		}
 		catch (ActionUnavailableException e) {
 			// Logged as a warning when refused, so show the user the refusal's message rather than an error reference

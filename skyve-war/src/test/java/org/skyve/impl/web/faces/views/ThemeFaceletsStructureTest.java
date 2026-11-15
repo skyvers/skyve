@@ -36,7 +36,10 @@ class ThemeFaceletsStructureTest {
 
 		assertSharedIframePage(upload);
 		assertTrue(upload.contains("var owner = SKYVE.Util.findSmartClientWindow();"), upload);
-		assertTrue(upload.contains("oncomplete=\"skyveAfterActionUpload('#{_skyveContent.uploadState.uploadKind}')\""), upload);
+		assertTrue(upload.contains("oncomplete=\"skyveAfterActionUpload('#{_skyveContent.uploadState.uploadKind}', args)\""), upload);
+		// Runtime issue P3: a SmartClient action upload that succeeded closes its window
+		assertTrue(upload.contains("if (args && args.actionUploadSucceeded) {"), upload);
+		assertTrue(upload.contains("owner.isc.WindowStack.popoff(false);"), upload);
 		assertFalse(upload.contains("window.parent.isc"), upload);
 
 		assertSharedIframePage(bizImport);
