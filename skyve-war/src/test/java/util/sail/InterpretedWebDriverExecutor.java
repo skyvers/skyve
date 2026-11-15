@@ -315,8 +315,10 @@ public abstract class InterpretedWebDriverExecutor<
 			if (media != null) {
 				media.stepStarted(name, stepNumber, step);
 			}
-			// what the page says about the window's OS focus as the step starts, for a failure's diagnosis
-			stepFocus = selenide.focusProbe();
+			// what the page says about the window's OS focus as the step starts, for a failure's diagnosis; after a step
+			// that opened, closed or switched windows there is no baseline, as those blur pages, and a blur can arrive late
+			stepFocus = (windowChanges == windowChangesAtStepStart) ? selenide.focusProbe() : null;
+			windowChangesAtStepStart = windowChanges;
 			try {
 				step.execute(this);
 			}
@@ -427,7 +429,9 @@ public abstract class InterpretedWebDriverExecutor<
 			result.append(' ').append(describe(currentStep));
 		}
 		result.append(": ").append(reason);
-		String focus = focusNote(stepFocus, selenide.focusProbe(), focusLossHint());
+		// a step that opened, closed or switched windows has no baseline either (see runSteps)
+		Selenide.FocusProbe before = (windowChanges == windowChangesAtStepStart) ? stepFocus : null;
+		String focus = focusNote(before, selenide.focusProbe(), focusLossHint());
 		if (focus != null) {
 			result.append("; ").append(focus);
 		}
@@ -440,6 +444,13 @@ public abstract class InterpretedWebDriverExecutor<
 
 	/** The page's focus probe as the current step started, or {@code null} if there was none. */
 	private @Nullable Selenide.FocusProbe stepFocus;
+	/**
+	 * How many times the automation has opened, closed or switched windows (attempts included), so that the focus
+	 * diagnostic does not take the blurs the harness itself causes for a loss of the OS focus.
+	 */
+	private long windowChanges = 0L;
+	/** {@link #windowChanges} as the current step started. */
+	private long windowChangesAtStepStart = 0L;
 
 	/**
 	 * Composes the diagnostic a failure message gets when the browser window lost the OS focus during the step, or did
@@ -450,7 +461,8 @@ public abstract class InterpretedWebDriverExecutor<
 	 * @param hint		what losing the focus does in this renderer
 	 * @return the note, or {@code null} when there is nothing to say: no probe, or the window kept the focus. A page
 	 * 			that was replaced during the step (a new token, or a counter installed only now) counts as unknown, not
-	 * 			as no loss.
+	 * 			as no loss; so does a step without a {@code before} probe, which the executor drops for a step that
+	 * 			opened, closed or switched windows and for the step after one.
 	 */
 	static @Nullable String focusNote(@Nullable Selenide.FocusProbe before, @Nullable Selenide.FocusProbe after, @Nonnull String hint) {
 		if (after == null) {
@@ -927,6 +939,7 @@ public abstract class InterpretedWebDriverExecutor<
 	 * @throws IllegalStateException	if no new window opens (the step fails, and the steps stay in this window)
 	 */
 	private void followLinkIntoNewWindow(@Nonnull NavigateLink link) {
+		windowChanges++; // even if it fails: the browser may have opened, switched or closed a window
 		String opener;
 		String text = link.getText();
 		if (text != null) {
@@ -958,6 +971,7 @@ public abstract class InterpretedWebDriverExecutor<
 			throw new MetaDataException("<closeWindow /> has no window to close: the automation is in the window it started in");
 		}
 		selenide.trace("Close the window and return to the window that opened it");
+		windowChanges++;
 		selenide.closeWindowAndReturnTo(opener);
 		openerWindows.pop();
 		closeWindowContexts();
@@ -971,6 +985,7 @@ public abstract class InterpretedWebDriverExecutor<
 		while (! openerWindows.isEmpty()) {
 			String opener = openerWindows.pop();
 			selenide.trace("Close a window that was left open");
+			windowChanges++;
 			try {
 				selenide.closeWindowAndReturnTo(opener);
 			}

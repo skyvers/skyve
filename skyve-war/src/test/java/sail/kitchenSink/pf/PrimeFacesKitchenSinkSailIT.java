@@ -202,6 +202,9 @@ class PrimeFacesKitchenSinkSailIT extends AbstractPrimeFacesInterpretedSail {
 					() -> assertTrue(message.contains("opened its page in this window, not a new one"), message),
 					() -> assertTrue(message.contains("opens another window (target _blank): follow it with <navigateLink window=\"new\" />"), message),
 					() -> assertTrue(message.contains("There is no earlier page in this window's history"), message),
+					// the step follows the harness's own switch into the PDF's window: no focus baseline, so no note of a loss
+					() -> assertTrue(java.util.Arrays.stream(message.split("\n  - ")).filter(f -> f.contains("There is no earlier page"))
+								.noneMatch(f -> f.contains("lost the OS focus")), message),
 					() -> assertTrue(message.contains("\"The failed interaction's window was closed\" step 3 <closeWindow />: MetaDataException: " +
 															"<closeWindow /> has no window to close"), message),
 					() -> assertEquals(2, message.split("has no window to close", -1).length - 1, message),

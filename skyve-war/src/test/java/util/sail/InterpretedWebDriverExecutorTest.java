@@ -716,6 +716,38 @@ class InterpretedWebDriverExecutorTest {
 					() -> assertEquals(List.of("x"), InterpretedWebDriverExecutor.membershipItems("x||")));
 	}
 
+	/**
+	 * Opening, switching or closing windows blurs pages, and a blur can arrive in the step after the switch, so neither
+	 * a step that changes windows nor the step after one says the window lost the OS focus; a step in one window still
+	 * does.
+	 */
+	@Test
+	void theHarnesssOwnWindowChangesAreNotAFocusLoss() {
+		long[] blurs = {0L};
+		// every probe sees one more blur than the last, in the same page: a loss whenever before and after are compared
+		when(executor.selenide.focusProbe()).thenAnswer(i -> new Selenide.FocusProbe("p1", blurs[0]++, false, true));
+		doReturn("first").when(executor).clickLinkIntoNewWindow(any(), eq("Print"));
+		doThrow(new IllegalStateException("opened no new window")).when(executor).clickLinkIntoNewWindow(any(), eq("Nothing"));
+		doThrow(new IllegalStateException("There is no earlier page")).when(executor.selenide).back();
+		String script = "<automation uxui=\"desktop\" userAgentType=\"desktop\" testStrategy=\"Verify\" xmlns=\"http://www.skyve.org/xml/sail\">" +
+							"<interaction name=\"after a new window\"><method><navigateLink text=\"Print\" window=\"new\"/><navigateBack/></method></interaction>" +
+							"<interaction name=\"opening a window\"><method><navigateLink text=\"Nothing\" window=\"new\"/></method></interaction>" +
+							"<interaction name=\"one window\"><method><comment>c</comment><navigateBack/></method></interaction>" +
+						"</automation>";
+
+		Automation automation = XMLMetaData.unmarshalSAILString(script);
+		AssertionError e = assertThrows(AssertionError.class, () -> executor.executeAutomation(automation));
+
+		String[] failures = e.getMessage().split("\n  - ");
+		assertAll(() -> assertEquals(4, failures.length, e.getMessage()),
+					() -> assertTrue(failures[1].startsWith("Interaction \"after a new window\" step 2"), failures[1]),
+					() -> assertFalse(failures[1].contains("lost the OS focus"), failures[1]),
+					() -> assertTrue(failures[2].startsWith("Interaction \"opening a window\" step 1"), failures[2]),
+					() -> assertFalse(failures[2].contains("lost the OS focus"), failures[2]),
+					() -> assertTrue(failures[3].startsWith("Interaction \"one window\" step 2"), failures[3]),
+					() -> assertTrue(failures[3].contains("the browser window lost the OS focus during this step (1 time)"), failures[3]));
+	}
+
 	@Test
 	@SuppressWarnings("static-method")
 	void aFocusLossDuringTheStepIsNoted() {

@@ -247,12 +247,15 @@ public abstract class Selenide<
 	/**
 	 * Probes the page's count of window blur events (the browser window losing the OS focus), installing the counter
 	 * ({@code window.__sailBlurs}) if the page does not have it yet. A diagnostic only: it never throws.
+	 * A page that is not HTML, such as a PDF the browser shows in its viewer, gives no probe: its blurs (the viewer
+	 * taking the focus) say nothing about the window's OS focus.
 	 *
-	 * @return the probe, or {@code null} if there is no page to ask or the script fails
+	 * @return the probe, or {@code null} if there is no HTML page to ask or the script fails
 	 */
 	public @Nullable FocusProbe focusProbe() {
 		try {
 			Object result = ((JavascriptExecutor) driver).executeScript(
+					"if (! /html/.test(String(document.contentType))) return null;" +
 					"var c = window.__sailBlurs, installed = false;" +
 					"if (! c) {" +
 					"  c = window.__sailBlurs = {page: String(Date.now()) + '-' + Math.random(), n: 0};" +
