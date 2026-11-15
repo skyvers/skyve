@@ -360,9 +360,8 @@ So the runtime already follows the rule, reading a `<rerender>` as an event
 action with its own `clientValidation`. That attribute defaults to true, as it
 does in SmartClient (`editView.js` `rerenderAction` validates the form before
 it saves), and its documentation says it controls "whether form validation is
-run first". If Mike means that a rerender should never show required messages,
-whatever its `clientValidation`, that is a change in both renderers and to the
-attribute's meaning; it is not made.
+run first". Mike confirmed this reading (2026-11-16): "rerender should if
+clientValidation is true".
 
 The executor's detection of a request that client-side validation blocked
 (`nothingSent()` in `PrimeFacesSelenide.waitForFullPageResponse`) is removed.
@@ -376,8 +375,8 @@ validation) shows them and does not close the view; and KitchenSink's Date,
 whose blur rerenders with `clientValidation="false"`, leaves its empty required
 Text without one.
 
-**Status:** not reproduced; the runtime matches the rule (see above for the
-rerender reading).
+**Status:** not reproduced; the runtime matches the rule, including the
+rerender reading Mike confirmed.
 
 ## P6 (fixed): Re-run Job of Generate Test Data always fails
 
