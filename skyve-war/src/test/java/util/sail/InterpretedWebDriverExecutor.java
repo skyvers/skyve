@@ -894,12 +894,27 @@ public abstract class InterpretedWebDriverExecutor<
 		}
 		String href = substituteTokens(Objects.requireNonNull(link.getHref(), "href"));
 		selenide.trace("Navigate to link " + href);
-		if (href.matches("^[a-zA-Z][a-zA-Z0-9+.-]*:.*")) {
+		String relative = baseRelative(href);
+		if (relative == null) {
 			selenide.openUrl(href);
 		}
 		else {
-			selenide.get(href.startsWith("/") ? href.substring(1) : href);
+			selenide.get(relative);
 		}
+	}
+
+	/**
+	 * Returns a link's {@code href} relative to the base URL, or null when it is an absolute URL (it has a scheme), which
+	 * is opened as is.
+	 *
+	 * @param href	the href, with its tokens substituted
+	 * @return the href without a leading {@code /}, or null for an absolute URL
+	 */
+	private static @Nullable String baseRelative(@Nonnull String href) {
+		if (href.matches("^[a-zA-Z][a-zA-Z0-9+.-]*:.*")) {
+			return null;
+		}
+		return href.startsWith("/") ? href.substring(1) : href;
 	}
 
 	/**
@@ -922,12 +937,8 @@ public abstract class InterpretedWebDriverExecutor<
 		else {
 			String href = substituteTokens(Objects.requireNonNull(link.getHref(), "href"));
 			selenide.trace("Open link " + href + " in a new window");
-			if (href.matches("^[a-zA-Z][a-zA-Z0-9+.-]*:.*")) {
-				opener = selenide.openUrlInNewWindow(href);
-			}
-			else {
-				opener = selenide.getInNewWindow(href.startsWith("/") ? href.substring(1) : href);
-			}
+			String relative = baseRelative(href);
+			opener = (relative == null) ? selenide.openUrlInNewWindow(href) : selenide.getInNewWindow(relative);
 		}
 		openerWindows.push(opener);
 		openWindowContexts();
@@ -982,11 +993,10 @@ public abstract class InterpretedWebDriverExecutor<
 	public void executeNavigateBack(@Nonnull NavigateBack back) {
 		selenide.trace("Navigate back");
 		selenide.back();
+		// not super.executeNavigateBack(): WebDriverExecutor's writes a generator comment
 		AC context = peek();
 		if (context != null) {
-			context.setDocumentName(null);
-			context.setViewType(null);
-			context.setList(null);
+			forgetView(context);
 		}
 	}
 

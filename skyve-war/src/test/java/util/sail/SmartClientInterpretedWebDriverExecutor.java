@@ -1582,9 +1582,6 @@ public class SmartClientInterpretedWebDriverExecutor extends InterpretedWebDrive
 	}
 
 	/**
-	 * Ends any inline grid edit, then checks that no dialog is in the way.
-	 */
-	/**
 	 * Follows the link into the new window it opens (see {@link SmartClientSelenide#followLinkContainingIntoNewWindow}),
 	 * after ending any inline edit, as other steps do. Fails listing the page's links if none contains the text.
 	 */
@@ -1644,6 +1641,9 @@ public class SmartClientInterpretedWebDriverExecutor extends InterpretedWebDrive
 		checkSuccess(String.format("expected no error messages after <listGridTool tool=\"%s\" />", tool));
 	}
 
+	/**
+	 * Ends any inline grid edit, then checks that no dialog is in the way.
+	 */
 	private void prepareForInteraction() {
 		SmartClientAutomationContext context = peek();
 		if ((context != null) && (context.getInlineGridBinding() != null)) {
