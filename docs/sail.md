@@ -663,7 +663,12 @@ the step (as PF loads a page per view) starts a new count, so losses before it
 are unknown and are not reported as none. Opening, closing or switching
 windows (`navigateLink window="new"`, `closeWindow`, closing windows left open)
 blurs pages, and a blur can arrive in the next step, so losses are unknown in a
-step that changes windows and in the step after one. A page that is not HTML,
+step that changes windows and in the step after one. Focus moving into, within
+or out of the page's frames (SmartClient's upload page, a rich text editor)
+blurs the window it leaves while the browser keeps the OS focus, so a blur
+counts only if the page no longer has the focus (`document.hasFocus()`) as it
+fires; once a same-origin frame has the focus, its window's blur is what
+counts. A page that is not HTML,
 such as a PDF in the browser's viewer, has no count. This is a diagnostic only: it never
 waits, retries or changes whether a step passes, and if the probe itself fails
 it says nothing.

@@ -18,6 +18,8 @@ import util.sail.BrowserConfiguration.Browsers;
  * upload window that does not close itself then fails the step. Before that, a refused upload's window must still be
  * open when the step reads the refusal, then the step closes it.
  * <p>
+ * An upload step that fails does not say the window lost the OS focus for the focus moving into the upload page's frame.
+ * <p>
  * Runs against the server named by {@code -Dsail.baseUrl} (required), headless unless {@code -Dsail.headless=false}.
  */
 class SmartClientActionUploadSailIT extends AbstractSmartClientInterpretedSail {
@@ -52,5 +54,24 @@ class SmartClientActionUploadSailIT extends AbstractSmartClientInterpretedSail {
 		Assertions.assertDoesNotThrow(() -> sailString(script));
 
 		Assertions.assertEquals(Long.valueOf(0), Selenide.executeJavaScript("return isc.WindowStack._stack.length"));
+	}
+
+	/**
+	 * An upload step that fails after working in the upload page's frame does not say the window lost the OS focus:
+	 * the focus moving into the frame blurs the page's window, but the browser window keeps the OS focus.
+	 */
+	@Test
+	void aFailedUploadDoesNotSayTheWindowLostTheFocus() {
+		String script = "<automation uxui=\"desktop\" userAgentType=\"desktop\" testStrategy=\"Verify\" xmlns=\"http://www.skyve.org/xml/sail\">" +
+							"<before><login user=\"admin\" password=\"admin\" /><switchMode /></before>" +
+							"<interaction name=\"Refused upload\"><method>" +
+							"<navigateEdit module=\"kitchensink\" document=\"ActionsFixture\" />" +
+							"<upload action=\"ActionsUpload\" file=\"sail/files/sail-refused.txt\" />" +
+							"</method></interaction></automation>";
+		AssertionError e = Assertions.assertThrows(AssertionError.class, () -> sailString(script));
+		String message = e.getMessage();
+		Assertions.assertAll(() -> Assertions.assertTrue(message.contains("The upload failed: ") &&
+																message.contains("sail-refused.txt already exists"), message),
+								() -> Assertions.assertFalse(message.contains("OS focus"), message));
 	}
 }

@@ -249,6 +249,13 @@ public abstract class Selenide<
 	 * ({@code window.__sailBlurs}) if the page does not have it yet. A diagnostic only: it never throws.
 	 * A page that is not HTML, such as a PDF the browser shows in its viewer, gives no probe: its blurs (the viewer
 	 * taking the focus) say nothing about the window's OS focus.
+	 * <p>
+	 * Focus moving into, within or out of the page's frames (such as SmartClient's upload page) blurs the window it
+	 * leaves while the browser window keeps the OS focus: Chrome has already moved the focus when it fires the blur, so
+	 * the page's {@code document.hasFocus()} is still true, and the blur does not count. Once a frame has the focus, the
+	 * page's window does not blur again when the OS focus goes, the frame's does: so the counter also watches the
+	 * same-origin frames that hold the focus (found as each blur, and each probe, finds them). A frame of another
+	 * origin cannot be watched, and the loss of the OS focus from it is not counted.
 	 *
 	 * @return the probe, or {@code null} if there is no HTML page to ask or the script fails
 	 */
@@ -258,10 +265,25 @@ public abstract class Selenide<
 					"if (! /html/.test(String(document.contentType))) return null;" +
 					"var c = window.__sailBlurs, installed = false;" +
 					"if (! c) {" +
-					"  c = window.__sailBlurs = {page: String(Date.now()) + '-' + Math.random(), n: 0};" +
-					"  window.addEventListener('blur', function() {window.__sailBlurs.n++;});" +
+					"  var page = window;" +
+					"  c = window.__sailBlurs = {page: String(Date.now()) + '-' + Math.random(), n: 0, watch: function() {" +
+					// watches the page's window and each frame on the way to the focused element
+					"    for (var w = page; w; ) {" +
+					"      try {" +
+					"        if (! w.__sailBlurWatched) {" +
+					"          w.__sailBlurWatched = true;" +
+					// a blur that leaves the page with the focus moved it between the page and its frames
+					"          w.addEventListener('blur', function() {if (page.document.hasFocus()) c.watch(); else c.n++;});" +
+					"        }" +
+					"        var a = w.document.activeElement;" +
+					"        w = (a && /^i?frame$/i.test(a.tagName)) ? a.contentWindow : null;" +
+					"      }" +
+					"      catch (e) {w = null;}" + // a frame of another origin
+					"    }" +
+					"  }};" +
 					"  installed = true;" +
 					"}" +
+					"c.watch();" +
 					"return [c.page, c.n, installed, document.hasFocus()];");
 			if ((result instanceof List<?> list) && (list.size() == 4) && (list.get(1) instanceof Number blurs)) {
 				return new FocusProbe(String.valueOf(list.get(0)), blurs.longValue(),
