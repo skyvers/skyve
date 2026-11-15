@@ -181,7 +181,8 @@ failed before the fix and passes with it;
 `aRefusedUploadLeavesItsUploadPageOpen` and `anUnavailableUploadSendsNoScript`
 check that refusals do not close the page. `PrimeFacesActionUploadSailIT` uploads with the close icons hidden in
 the `tablet`, `phone` and `external` UX/UIs, so only the page itself can close
-it, then checks Outcome.
+it, then checks Outcome. Against a server built from `sail` it fails in all
+three (the page stays open); with the fix it passes.
 
 **Workaround in the suites.** None needed now. The kitchen sink checks Outcome
 straight after the upload. The PF executor still closes an upload page that
@@ -465,7 +466,9 @@ only one sent. The probe passes in `tablet` and `external`.
 
 **Workaround in the suites.** None needed now. `pf-admin-sail.xml` uploads an
 image with AddImage, then presses AddImage again and leaves its upload page
-open before the Manage tab's refusals, which must show their messages.
+open before the Manage tab's refusals, which must show their messages. Against
+a server built from `sail`, `PrimeFacesAdminSailIT` then failed with Get Count's
+message missing; with the fix it passes, headless and headed.
 
 **Status:** fixed (35ee72a540).
 
