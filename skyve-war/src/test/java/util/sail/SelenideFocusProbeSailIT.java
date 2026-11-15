@@ -100,13 +100,15 @@ class SelenideFocusProbeSailIT {
 
 	/**
 	 * Another tab taking the focus from a field in the page's frame is a loss of the OS focus too: the frame's window
-	 * blurs, not the page's.
+	 * blurs, not the page's. The focus moves into the frame after the probe, as it does within a step (the executor
+	 * probes only as a step starts and when it fails), so the counter must find the frame as the page's window blurs.
 	 */
 	@Test
 	void anotherTabTakingTheFocusFromAFrameIsALoss() {
-		clickInFrame("inner");
+		click("outer");
 		Selenide.FocusProbe before = probe();
 
+		clickInFrame("inner");
 		anotherTabTakesTheFocus();
 		Selenide.FocusProbe after = probe();
 
@@ -126,22 +128,22 @@ class SelenideFocusProbeSailIT {
 	}
 
 	/**
-	 * Clicks an element of the page. The first click installs the page's counter, so that it sees every blur after it.
+	 * Clicks an element of the page. It does not probe, as a step does not: each probe also finds the frames that hold
+	 * the focus, which would hide a counter that cannot find them as the focus moves.
 	 *
 	 * @param id	the element's id
 	 */
 	private void click(@Nonnull String id) {
-		probe();
 		selenium.driver.findElement(By.id(id)).click();
 	}
 
 	/**
-	 * Clicks an element of the page's frame, which moves the focus into the frame, as the upload step does.
+	 * Clicks an element of the page's frame, which moves the focus into the frame, as the upload step does. It does not
+	 * probe either.
 	 *
 	 * @param id	the element's id
 	 */
 	private void clickInFrame(@Nonnull String id) {
-		probe();
 		selenium.driver.switchTo().frame(selenium.driver.findElement(By.id("frame")));
 		try {
 			selenium.driver.findElement(By.id(id)).click();
