@@ -4,6 +4,8 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -121,10 +123,10 @@ class PrimeFacesRecordingMapH2Test extends AbstractSkyveTest {
 		unnamed.setDisplayName("Made in code");
 		MetaDataQueryProjectedColumnImpl bound = new MetaDataQueryProjectedColumnImpl();
 		bound.setBinding("description");
-		ListModel<Bean> model = org.mockito.Mockito.mock(ListModel.class);
-		org.mockito.Mockito.when(model.getColumns()).thenReturn(List.of(unnamed, bound));
-		org.mockito.Mockito.when(model.determineColumnTitle(unnamed)).thenReturn("Made in code");
-		org.mockito.Mockito.when(model.determineColumnTitle(bound)).thenReturn("Description");
+		ListModel<Bean> model = mock(ListModel.class);
+		when(model.getColumns()).thenReturn(List.of(unnamed, bound));
+		when(model.determineColumnTitle(unnamed)).thenReturn("Made in code");
+		when(model.determineColumnTitle(bound)).thenReturn("Description");
 		List<Map<String, Object>> columns;
 		try (MockFacesContext ignored = MockFacesContext.replacingCurrent()) {
 			DataTable table = new DataTable();

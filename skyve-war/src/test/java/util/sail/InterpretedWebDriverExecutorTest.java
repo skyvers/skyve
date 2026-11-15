@@ -251,7 +251,8 @@ class InterpretedWebDriverExecutorTest {
 	@Test
 	void theWindowAndToolHooksFailUntilImplemented() {
 		ListGridTool tool = tool(Tool.refresh);
-		assertAll(() -> assertThrows(UnsupportedOperationException.class, () -> executor.clickLinkIntoNewWindow(new NavigateLink(), "x")),
+		NavigateLink link = new NavigateLink();
+		assertAll(() -> assertThrows(UnsupportedOperationException.class, () -> executor.clickLinkIntoNewWindow(link, "x")),
 					() -> assertThrows(UnsupportedOperationException.class, () -> executor.executeListGridTool(tool)));
 	}
 
@@ -279,7 +280,8 @@ class InterpretedWebDriverExecutorTest {
 		InOrder order = inOrder(executor.selenide);
 		order.verify(executor.selenide).closeWindowAndReturnTo("second");
 		order.verify(executor.selenide).closeWindowAndReturnTo("first");
-		MetaDataException e = assertThrows(MetaDataException.class, () -> executor.executeCloseWindow(new CloseWindow()));
+		CloseWindow close = new CloseWindow();
+		MetaDataException e = assertThrows(MetaDataException.class, () -> executor.executeCloseWindow(close));
 		assertAll(() -> assertTrue(e.getMessage().contains("has no window to close"), e.getMessage()),
 					() -> verify(executor, never()).clickLinkContaining(any(), anyString()),
 					() -> verify(executor.selenide, never()).get(anyString()));
@@ -289,9 +291,11 @@ class InterpretedWebDriverExecutorTest {
 	void aLinkThatOpensNoNewWindowLeavesTheStepsInThisWindow() {
 		doThrow(new IllegalStateException("opened no new window")).when(executor).clickLinkIntoNewWindow(any(), anyString());
 
-		assertThrows(IllegalStateException.class, () -> executor.executeNavigateLink(newWindowLink("Print")));
+		NavigateLink link = newWindowLink("Print");
+		assertThrows(IllegalStateException.class, () -> executor.executeNavigateLink(link));
 
-		assertThrows(MetaDataException.class, () -> executor.executeCloseWindow(new CloseWindow()));
+		CloseWindow close = new CloseWindow();
+		assertThrows(MetaDataException.class, () -> executor.executeCloseWindow(close));
 		verify(executor.selenide, never()).closeWindowAndReturnTo(anyString());
 	}
 
@@ -310,11 +314,12 @@ class InterpretedWebDriverExecutorTest {
 
 		Automation automation = XMLMetaData.unmarshalSAILString(script);
 		AssertionError e = assertThrows(AssertionError.class, () -> executor.executeAutomation(automation));
+		CloseWindow close = new CloseWindow();
 
 		assertAll(() -> assertTrue(e.getMessage().contains("with 1 failure(s)"), e.getMessage()),
 					() -> assertTrue(e.getMessage().contains("There is no earlier page"), e.getMessage()),
 					() -> verify(executor.selenide, times(2)).closeWindowAndReturnTo("first"),
-					() -> assertThrows(MetaDataException.class, () -> executor.executeCloseWindow(new CloseWindow())));
+					() -> assertThrows(MetaDataException.class, () -> executor.executeCloseWindow(close)));
 	}
 
 	@Test

@@ -10,6 +10,7 @@ import java.io.File;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -102,7 +103,8 @@ class RestoreJobH2Test extends AbstractH2TestDispose {
 		RestoreJob job = restore(backup(DataSensitivity.personal));
 
 		List<String> log = job.getLog();
-		assertTrue(log.stream().anyMatch(line -> line.matches("WARNING: This backup .+ redacted the passwords of [1-9]\\d* user\\(s\\)\\. .+")),
+		Pattern redacted = Pattern.compile(" redacted the passwords of [1-9]\\d* user\\(s\\)\\. \\S");
+		assertTrue(log.stream().anyMatch(line -> line.startsWith("WARNING: This backup ") && redacted.matcher(line).find()),
 					log.toString());
 		p.evictAllCached();
 		String restoredPassword = adminUser(p).getPassword();

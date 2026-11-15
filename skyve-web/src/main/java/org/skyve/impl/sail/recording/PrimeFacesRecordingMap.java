@@ -465,14 +465,7 @@ public final class PrimeFacesRecordingMap {
 	 * @param table	the data table that renders the list grid, or null for a Vue list grid
 	 */
 	static @Nonnull List<Map<String, Object>> listGridColumns(@Nonnull ListModel<Bean> model, @Nullable DataTable table) {
-		Map<String, Column> tableColumns = new TreeMap<>();
-		if (table != null) {
-			for (UIComponent child : table.getChildren()) {
-				if ((child instanceof Column tableColumn) && (tableColumn.getField() != null)) {
-					tableColumns.put(tableColumn.getField(), tableColumn);
-				}
-			}
-		}
+		Map<String, Column> tableColumns = tableColumnsByField(table);
 		List<MetaDataQueryColumn> columns = model.getColumns();
 		List<Map<String, Object>> result = new ArrayList<>(columns.size());
 		for (MetaDataQueryColumn column : columns) {
@@ -489,14 +482,35 @@ public final class PrimeFacesRecordingMap {
 			String field = (name != null) ? name : binding;
 			Column tableColumn = (field == null) ? null : tableColumns.get(field);
 			if (tableColumn != null) {
-				c.put("id", PrimeFacesAutomationContext.clientId(tableColumn));
-				if ((binding != null) && tableColumn.isFilterable()) {
-					c.put("operator", filterOperator(model, binding));
-				}
+				putTableColumn(model, binding, tableColumn, c);
 			}
 			result.add(c);
 		}
 		return result;
+	}
+
+	/** A data table's columns by their field (a list column's name, or else its binding); none for a Vue list grid. */
+	private static @Nonnull Map<String, Column> tableColumnsByField(@Nullable DataTable table) {
+		Map<String, Column> result = new TreeMap<>();
+		if (table != null) {
+			for (UIComponent child : table.getChildren()) {
+				if ((child instanceof Column tableColumn) && (tableColumn.getField() != null)) {
+					result.put(tableColumn.getField(), tableColumn);
+				}
+			}
+		}
+		return result;
+	}
+
+	/** Puts a data table column's header id and, if it can be filtered, its filter's comparison. */
+	private static void putTableColumn(@Nonnull ListModel<Bean> model,
+										@Nullable String binding,
+										@Nonnull Column tableColumn,
+										@Nonnull Map<String, Object> c) {
+		c.put("id", PrimeFacesAutomationContext.clientId(tableColumn));
+		if ((binding != null) && tableColumn.isFilterable()) {
+			c.put("operator", filterOperator(model, binding));
+		}
 	}
 
 	/**
