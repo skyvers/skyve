@@ -2384,6 +2384,9 @@ isc.BizTabPane.addMethods({
 /**
  * Implements the BizListMembership UI component.
  * Extends HLayout from the SmartClient library.
+ * The SAIL recorder (src/js/sail/recorder-sc.js) records a membership's changes from its lists' ListGrid
+ * recordDrop (which each list's recordDrop calls with Super) and transferSelectedData (the buttons'), and reads
+ * _memberList, _candidateList, _b and _view: keep them.
  */
 isc.ClassFactory.defineClass("BizListMembership", "HLayout");
 

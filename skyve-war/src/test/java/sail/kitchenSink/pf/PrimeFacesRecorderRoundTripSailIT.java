@@ -128,7 +128,15 @@ class PrimeFacesRecorderRoundTripSailIT extends AbstractPrimeFacesInterpretedSai
 				"text=\"Run From Row\" confirm=\"false\"/>",
 				"<action name=\"AskYesNo\" confirm=\"false\"/>",
 				"<navigateMap module=\"kitchensink\" document=\"ListAttributes\" geometryBinding=\"geometry\"/>",
-				"<dataGridSelect binding=\"rows\" rowContaining=\"SAIL selectable ");
+				"<dataGridSelect binding=\"rows\" rowContaining=\"SAIL selectable ",
+				"<listGridFilter module=\"kitchensink\" query=\"qListGridFixtureFacesAttributes\" column=\"text\" value=\"",
+				"<listGridFilter module=\"kitchensink\" query=\"qListGridFixtureFacesAttributes\" column=\"constantEnum\" value=\"Two (2)!\" operator=\"equals\"/>",
+				"<listGridFilter module=\"kitchensink\" query=\"qListGridFixtureFacesAttributes\" column=\"booleanFlag\" value=\"true\" operator=\"equals\"/>",
+				"<listGridFilter module=\"kitchensink\" query=\"qListGridFixtureFacesAttributes\" column=\"date\" value=\"15-Jun-2021\" operator=\"equals\"/>",
+				"<listGridSort module=\"kitchensink\" query=\"qListGridFixtureFacesAttributes\" column=\"text\" descending=\"true\"/>",
+				"<listGridFilter module=\"kitchensink\" query=\"qListGridFixtureFacesAttributes\" column=\"booleanFlag\"/>",
+				"<listGridSort module=\"kitchensink\" query=\"qListGridFixtureFacesAttributes\" column=\"text\"/>",
+				"<listGridClearFilter module=\"kitchensink\" query=\"qListGridFixtureFacesAttributes\"/>");
 		replay(xml);
 	}
 

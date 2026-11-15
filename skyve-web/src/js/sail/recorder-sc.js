@@ -21,7 +21,10 @@
  *     isc.EditView._displayGrowlsAndMessages, _displayFailure   note the messages and errors a response shows
  *     isc.BizUtil.growl                 notes the growls shown
  *     isc.BizDataGrid zoom, add, startEditingRow   dataGridZoom, dataGridNew, dataGridEdit
- *     isc.ListGrid removeSelectedData, recordDrop  dataGridRemove, dataGridMove (on a data grid)
+ *     isc.ListGrid removeSelectedData, recordDrop  dataGridRemove, dataGridMove (on a data grid); on a list
+ *                                       membership's lists, its members (dataEnter) and a drag of a member in an
+ *                                       ordered membership (listMembershipMove)
+ *     isc.ListGrid transferSelectedData a list membership's assign and unassign buttons: its members (dataEnter)
  *     isc.ListGrid setEditValue         dataEnter into an inline data grid's cells, after dataGridNew or dataGridEdit
  *     isc.ListGrid handleSortChanged    listGridSort, when the user sorted a list grid
  *     isc.ListGrid filterData           listGridFilter and listGridClearFilter, from the criteria a BizListGrid's user set
@@ -34,10 +37,13 @@
  * - a click on a data grid row selects it (dataGridSelect), and on a link in the row follows it (dataGridLink); a click
  *   on a row of a list grid whose selection does something selects it (listGridSelect). A selection is written only if
  *   the next step does not act on the same grid's row;
+ * - a list membership's members are a dataEnter of the members' descriptions, written as the final value like a field's;
+ *   in an ordered membership, a drag of a member to another position is listMembershipMove, and a member dropped in
+ *   from the candidates anywhere but last is also moved there after the dataEnter (which adds members last);
  * - a lookup's pick is lookupDescriptionPick (rowContaining the chosen description), or, when the user typed into it
  *   first, lookupDescriptionAutoComplete (search and pick);
  * - it describes, for the core, a click that recorded nothing (an "unmapped" comment) and what a Check mode click
- *   checks (a growl or dialog message, a field, a grid row or a grid);
+ *   checks (a growl or dialog message, a field, a list membership, a grid row or a grid);
  * - a page load with a=e, a=l, a=t, a=m or a=c in its URL (a link, a typed URL, a reload) is recorded as navigateEdit,
  *   navigateList, navigateTree, navigateMap or navigateCalendar; a tree, map or calendar menu item likewise.
  */
@@ -74,6 +80,13 @@
 	var lookupTyped = {};
 	/** The data grid a row was just dragged in: the click that ends the drag is not a selection. */
 	var droppedOn = null;
+	/**
+	 * List memberships the user changed whose members are not yet written, in the order first changed: { membership,
+	 * before } with the members shown before the first change (see membersOf()).
+	 */
+	var memberships = [];
+	/** The list membership whose member is being dragged to another position: its own changes are that move. */
+	var reordering = null;
 	/**
 	 * A row link's step, held until its javascript: runs: an action link asks for confirmation then (isc.ask), and the
 	 * answer may decline the step. Released at the next gesture, step or response if nothing asked.
@@ -305,6 +318,149 @@
 				}
 			}
 		}
+		flushMemberships();
+	}
+
+	// ---------------------------------------------------------------- list memberships
+
+	/** The BizListMembership a ListGrid is the candidate or member list of, or null. */
+	function membershipOf(grid) {
+		for (var m = grid; m; m = m.parentElement) {
+			if (isc.isA.BizListMembership && isc.isA.BizListMembership(m)) {
+				return ((m._memberList === grid) || (m._candidateList === grid)) ? m : null;
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * A list membership's members, in the order shown: { key, text } for each, the key its bizId and the text its
+	 * description as the SAIL helper reads it (util/sail/smartclient-sail.js).
+	 */
+	function membersOf(membership) {
+		return (membership._memberList.getData() || []).map(function (record) {
+			var text = strip(record.bizKey);
+			return { key: (record.bizId == null) ? text : String(record.bizId), text: text };
+		});
+	}
+
+	function keysOf(members) {
+		return members.map(function (member) {
+			return member.key;
+		});
+	}
+
+	/** Notes a list membership the user is about to change, with the members it shows before the change. */
+	function membershipChanging(membership) {
+		if ((membership === reordering) || memberships.some(function (p) {
+			return p.membership === membership;
+		})) {
+			return;
+		}
+		memberships.push({ membership: membership, before: membersOf(membership) });
+	}
+
+	/**
+	 * The listMembershipMove step for the member at a position of the members, named by its description when no
+	 * member before it has a description containing it (the executor finds the first that does), else by position.
+	 */
+	function memberMove(membership, members, from, to) {
+		var step = { op: "listMembershipMove", binding: unsanitise(membership._b), to: String(to),
+						view: describe(membership._view), screen: screenOf(membership._view) };
+		var text = members[from].text;
+		var first = -1;
+		for (var i = 0; (i < members.length) && (first < 0); i++) {
+			if (text && (members[i].text.indexOf(text) >= 0)) {
+				first = i;
+			}
+		}
+		if (first === from) {
+			step.rowContaining = text;
+			step.rowTexts = text;
+		} else {
+			step.row = String(from);
+		}
+		return step;
+	}
+
+	/**
+	 * The listMembershipMove steps that put members in the order shown, from the order a replay has them in: each
+	 * position in turn gets its member, moved up from where it is.
+	 */
+	function memberMoves(membership, base, after) {
+		var current = base.slice();
+		var result = [];
+		for (var to = 0; to < after.length; to++) {
+			var from = keysOf(current).indexOf(after[to].key);
+			if (from > to) {
+				result.push(memberMove(membership, current, from, to));
+				current.splice(to, 0, current.splice(from, 1)[0]);
+			}
+		}
+		return result;
+	}
+
+	/**
+	 * Writes the members of the list memberships the user changed as dataEnter steps: the descriptions, |-separated, in
+	 * the order shown. The executor's dataEnter keeps the members it keeps in their order and adds the others last, in
+	 * the value's order, so an ordered membership whose new members were dropped elsewhere also gets the moves that put
+	 * them there.
+	 */
+	function flushMemberships() {
+		var pending = memberships;
+		memberships = [];
+		pending.forEach(function (p) {
+			var membership = p.membership;
+			if (membership.destroyed || !membership._memberList || membership._memberList.destroyed) {
+				return;
+			}
+			var owner = membership._view;
+			var binding = unsanitise(membership._b);
+			var after = membersOf(membership);
+			var beforeKeys = keysOf(p.before);
+			var afterKeys = keysOf(after);
+			var base = p.before;
+			var same = (beforeKeys.length === afterKeys.length) && beforeKeys.every(function (key) {
+				return afterKeys.indexOf(key) >= 0;
+			});
+			if (!same) {
+				var text = function (member) {
+					return member.text;
+				};
+				if (!after.length) {
+					core.push({ op: "unmapped", text: "removed every member of " + binding + " (SAIL cannot enter an empty value)",
+								view: describe(owner), screen: screenOf(owner) });
+					return;
+				}
+				core.push({ op: "dataEnter", binding: binding, value: after.map(text).join("|"), view: describe(owner), screen: screenOf(owner),
+							label: strip(membership.membersHeading || binding), before: p.before.map(text).join("|") });
+				base = p.before.filter(function (member) {
+					return afterKeys.indexOf(member.key) >= 0;
+				}).concat(after.filter(function (member) {
+					return beforeKeys.indexOf(member.key) < 0;
+				}));
+			}
+			if (membership._memberList.canReorderRecords) {
+				memberMoves(membership, base, after).forEach(function (step) {
+					core.push(step);
+				});
+			}
+		});
+	}
+
+	/** A check of a list membership: testValue with its members, as dataEnter would enter them. */
+	function membershipCheck(membership) {
+		var view = membership._view;
+		var value = membersOf(membership).map(function (member) {
+			return member.text;
+		}).join("|");
+		if (!view || !membership._b || !value) {
+			return null;
+		}
+		var binding = unsanitise(membership._b);
+		return { rect: windowRect(membership.getPageRect()), label: "testValue " + binding,
+					step: { op: "testValue", binding: binding, value: value, view: describe(view), screen: screenOf(view),
+							label: strip(membership.membersHeading || binding) } };
 	}
 
 	// ---------------------------------------------------------------- context: what the screen showed
@@ -1373,6 +1529,36 @@
 	}
 
 	/** Wraps the data grid, list grid, lookup and upload methods, and listens for row clicks and lookup typing. */
+	/**
+	 * A drag of members to another position in an ordered membership's member list: writes what is pending first, so
+	 * that the moves start from the members as shown, then drops them and records each move.
+	 */
+	function reorderMembers(membership, dropRecords, original, grid, args) {
+		flush();
+		var before = membersOf(membership);
+		var result;
+		reordering = membership;
+		try {
+			result = original.apply(grid, args);
+		} finally {
+			reordering = null;
+		}
+		var after = membersOf(membership);
+		var moves;
+		if (dropRecords && (dropRecords.length === 1)) {
+			var key = (dropRecords[0].bizId == null) ? strip(dropRecords[0].bizKey) : String(dropRecords[0].bizId);
+			var from = keysOf(before).indexOf(key);
+			var to = keysOf(after).indexOf(key);
+			moves = ((from >= 0) && (to >= 0) && (from !== to)) ? [memberMove(membership, before, from, to)] : [];
+		} else {
+			moves = memberMoves(membership, before, after);
+		}
+		moves.forEach(function (step) {
+			core.record(step);
+		});
+		return result;
+	}
+
 	function attachPhase5() {
 		var wrap = core.wrap;
 		var dataGridProto = isc.BizDataGrid.getPrototype();
@@ -1426,10 +1612,17 @@
 			};
 		});
 		wrap(gridProto, "recordDrop", function (original) {
-			return function (dropRecords) {
+			return function (dropRecords, targetRecord, index, sourceWidget) {
 				var dataGrid = core.active() ? dataGridOf(this) : null;
 				var record = (dataGrid && dropRecords && dropRecords.length) ? dropRecords[0] : null;
 				var step = record ? dataGridStep("dataGridMove", dataGrid, this.getRecordIndex(record)) : null;
+				var membership = core.active() ? membershipOf(this) : null;
+				if (membership && (sourceWidget === this) && (this === membership._memberList) && this.canReorderRecords) {
+					return reorderMembers(membership, dropRecords, original, this, arguments);
+				}
+				if (membership) {
+					membershipChanging(membership);
+				}
 				var result = original.apply(this, arguments);
 				if (step) {
 					var to = this.getRecordIndex(record);
@@ -1440,6 +1633,16 @@
 					}
 				}
 				return result;
+			};
+		});
+		// a list membership's assign and unassign buttons transfer the selected rows to the other list
+		wrap(gridProto, "transferSelectedData", function (original) {
+			return function () {
+				var membership = core.active() ? membershipOf(this) : null;
+				if (membership) {
+					membershipChanging(membership);
+				}
+				return original.apply(this, arguments);
 			};
 		});
 		// the grid stores each inline editor's value with setEditValue (its private _editorChange is not in every build)
@@ -1557,6 +1760,9 @@
 			if (isc.isA.BizDataGrid(c)) {
 				// a data grid's rows and tools record their steps (a selection, a remove after its confirmation)
 				return null;
+			}
+			if (isc.isA.BizListMembership && isc.isA.BizListMembership(c)) {
+				return null; // a list membership's changes are its members (dataEnter) and moves
 			}
 			if (c.parentElement && (c.parentElement.filterEditor === c)) {
 				return null; // a list grid's filter row: its filter is recorded when the grid fetches
@@ -1734,8 +1940,8 @@
 	}
 
 	/**
-	 * What a click in Check mode checks at the pointer: a growl or dialog message (testMessage), a field (testValue)
-	 * or a grid (testGridRows). Returns { rect, label, step } or null.
+	 * What a click in Check mode checks at the pointer: a growl or dialog message (testMessage), a field or a list
+	 * membership (testValue) or a grid (testGridRows). Returns { rect, label, step } or null.
 	 */
 	function checkTarget(element, event) {
 		var growl = (element && element.closest) ? element.closest(".ui-growl-item") : null;
@@ -1755,6 +1961,9 @@
 			}
 			if (isc.isA.BizListGrid(c) || isc.isA.BizDataGrid(c)) {
 				return gridCheck(c, event);
+			}
+			if (isc.isA.BizListMembership && isc.isA.BizListMembership(c)) {
+				return membershipCheck(c);
 			}
 			if (isc.isA.DynamicForm(c) && c._view) {
 				var item = itemAt(c, event);
@@ -1809,7 +2018,7 @@
 		},
 		idle: function () {
 			// a pending selection is not data in flight: the next step decides whether it is written
-			return (changed.length === 0) && (gridEdits.length === 0);
+			return (changed.length === 0) && (gridEdits.length === 0) && (memberships.length === 0);
 		},
 		reset: function () {
 			heldLink = null;
@@ -1818,6 +2027,8 @@
 			pageList = null;
 			pendingSelect = null;
 			gridEdits = [];
+			memberships = [];
+			reordering = null;
 			lookupTyped = {};
 		}
 	});

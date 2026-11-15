@@ -4,8 +4,9 @@
 	recorder phase 5 maps in PrimeFaces. Lookups (pick and autocomplete), data grids (new, zoom, remove, a drag and a
 	link in a row), uploads (refused and accepted, by action and into a content widget), Vue list grid filters, sorting
 	and selection, a data table's selection, a number the application generates that the list is then filtered by (a
-	capture), server-side questions, a data grid's selection (the List Grid Fixture's grid with a selectedIdBinding), and a
-	map menu item.
+	capture), server-side questions, a data grid's selection (the List Grid Fixture's grid with a selectedIdBinding), a
+	PrimeFaces data table list grid's filters (typed text, a combo, a check box and a typed date) and sorts, and a map
+	menu item.
 	PrimeFaces has no lookup New or Edit and no row edit. It has no login: it runs in a session that is already signed in
 	and recording. The lookup values it makes sort first ("0 ...") and are deleted again at the end.
 -->
@@ -104,6 +105,31 @@
 			<dataEnter binding="description" value="SAIL selectable {run}" />
 			<zoomOut />
 			<dataGridSelect binding="rows" rowContaining="SAIL selectable {run}" />
+		</method>
+	</interaction>
+	<interaction name="A PrimeFaces data table list grid: filters of each kind, and sorts">
+		<method>
+			<navigateList module="kitchensink" document="ListAttributes" />
+			<listGridNew module="kitchensink" document="ListAttributes" />
+			<dataEnter binding="text" value="0 SAIL types {run}" />
+			<dataEnter binding="constantEnum" value="two" match="code" />
+			<dataEnter binding="booleanFlag" value="true" />
+			<dataEnter binding="date" value="15-Jun-2021" />
+			<ok />
+			<navigateEdit module="kitchensink" document="ListGridFixture" />
+			<comment>A typed text filter (contains), a combo (equals, by its label), a check box and a typed date (equals)</comment>
+			<listGridFilter module="kitchensink" query="qListGridFixtureFacesAttributes" column="text" value="{run}" />
+			<listGridFilter module="kitchensink" query="qListGridFixtureFacesAttributes" column="constantEnum" value="Two (2)!" operator="equals" />
+			<listGridFilter module="kitchensink" query="qListGridFixtureFacesAttributes" column="booleanFlag" value="true" operator="equals" />
+			<listGridFilter module="kitchensink" query="qListGridFixtureFacesAttributes" column="date" value="15-Jun-2021" operator="equals" />
+			<testGridRows module="kitchensink" query="qListGridFixtureFacesAttributes" rowContaining="0 SAIL types {run}" minRows="1" maxRows="1" />
+			<listGridSort module="kitchensink" query="qListGridFixtureFacesAttributes" column="text" descending="true" />
+			<comment>One filter cleared, then the rest</comment>
+			<listGridFilter module="kitchensink" query="qListGridFixtureFacesAttributes" column="booleanFlag" />
+			<listGridSort module="kitchensink" query="qListGridFixtureFacesAttributes" column="text" />
+			<listGridClearFilter module="kitchensink" query="qListGridFixtureFacesAttributes" />
+			<listGridZoom module="kitchensink" query="qListGridFixtureFacesAttributes" rowContaining="0 SAIL types {run}" />
+			<delete />
 		</method>
 	</interaction>
 	<interaction name="A map">

@@ -30,6 +30,7 @@ import org.skyve.metadata.sail.language.step.interaction.actions.Save;
 import org.skyve.metadata.sail.language.step.interaction.actions.ZoomOut;
 import org.skyve.metadata.sail.language.step.interaction.grids.ListGridNew;
 import org.skyve.metadata.sail.language.step.interaction.grids.ListGridZoom;
+import org.skyve.metadata.sail.language.step.interaction.grids.ListMembershipMove;
 import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateEdit;
 import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateList;
 import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateMenu;
@@ -275,6 +276,30 @@ class SailRecordingBuilderTest {
 					() -> assertEquals("location", map.getGeometryBinding()),
 					() -> assertInstanceOf(NavigateCalendar.class, method.get(20)),
 					() -> assertEquals("date", ((DataEnter) method.get(21)).getBinding()));
+	}
+
+	/**
+	 * A list membership's members are a dataEnter, and a drag of a member a listMembershipMove, named by its
+	 * description or by its position.
+	 */
+	@Test
+	void listMembershipMovesBecomeTheirSteps() {
+		List<Step> method = method(build(List.of(
+				step("op", "dataEnter", "binding", "members", "value", "Second|First", "label", "Members", "before", "First"),
+				step("op", "listMembershipMove", "binding", "members", "rowContaining", "Second", "rowTexts", "Second", "to", "0"),
+				step("op", "listMembershipMove", "binding", "members", "row", "1", "to", "0"),
+				step("op", "listMembershipMove", "binding", "members", "row", "1"))));
+		ListMembershipMove byText = (ListMembershipMove) method.get(1);
+		ListMembershipMove byRow = (ListMembershipMove) method.get(2);
+		assertAll(() -> assertEquals(3, method.size(), "a move with no position is not a step"),
+					() -> assertEquals("Second|First", ((DataEnter) method.get(0)).getValue()),
+					() -> assertEquals("members", byText.getBinding()),
+					() -> assertEquals("Second", byText.getRowContaining()),
+					() -> assertNull(byText.getRow()),
+					() -> assertEquals(Integer.valueOf(0), byText.getTo()),
+					() -> assertEquals(Integer.valueOf(1), byRow.getRow()),
+					() -> assertNull(byRow.getRowContaining()),
+					() -> assertEquals(Integer.valueOf(0), byRow.getTo()));
 	}
 
 

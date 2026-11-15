@@ -6,7 +6,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
+import org.primefaces.component.column.Column;
+import org.primefaces.component.datatable.DataTable;
+import org.skyve.CORE;
 import org.skyve.domain.Bean;
+import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.metadata.view.container.Tab;
 import org.skyve.impl.metadata.view.widget.bound.ZoomIn;
 import org.skyve.impl.metadata.view.widget.bound.tabular.DataGrid;
@@ -20,6 +24,11 @@ import org.skyve.impl.sail.mock.MockFacesContext;
 import org.skyve.impl.web.faces.pipeline.component.SkyveComponentBuilderChain;
 import org.skyve.impl.web.faces.pipeline.layout.ResponsiveLayoutBuilder;
 import org.skyve.metadata.controller.ImplicitActionName;
+import org.skyve.metadata.customer.Customer;
+import org.skyve.metadata.model.Attribute;
+import org.skyve.metadata.model.Attribute.AttributeType;
+import org.skyve.metadata.model.document.Document;
+import org.skyve.metadata.model.document.DomainType;
 import org.skyve.metadata.module.query.MetaDataQueryColumn;
 import org.skyve.metadata.sail.language.step.context.PushEditContext;
 import org.skyve.metadata.sail.language.step.context.PushListContext;
@@ -27,6 +36,7 @@ import org.skyve.metadata.view.Action;
 import org.skyve.metadata.view.View.ViewType;
 import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.metadata.view.widget.bound.Bound;
+import org.skyve.util.Binder.TargetMetaData;
 import org.skyve.util.JSON;
 import org.skyve.web.UserAgentType;
 
@@ -70,7 +80,10 @@ import jakarta.faces.component.UIComponent;
  * {@code path}), {@code zoomIn}, and the data grid and list grid steps for their New, zoom, remove and select controls.</li>
  * <li>A grid's own entry ({@code dataGrid} or {@code listGrid}) names the grid as its steps do, and its columns are
  * under {@code grids} in the grid's order. A list grid's attributes are what a list grid step in the view would name it
- * with; on a list page, the context's own list is {@code list}, and its steps need no attributes.</li>
+ * with; on a list page, the context's own list is {@code list}, and its steps need no attributes. A column of a list
+ * grid rendered as a PrimeFaces data table also has its header's client id ({@code id}) and, if it can be filtered, the
+ * comparison its filter makes ({@code operator}: {@code contains} or {@code equals}), from which the recorder writes
+ * the table's filters and sorts.</li>
  * <li>An element inside a data table has a row in its page id, which the map leaves out: the page's
  * {@code s60:3:s70} is the map's {@code s60:s70} ({@link PrimeFacesAutomationContext#clientId(UIComponent, Integer)}).
  * The recorder takes the row from the page.</li>
@@ -95,6 +108,8 @@ public final class PrimeFacesRecordingMap {
 	private static final String MODEL = "model";
 	private static final String TITLE = "title";
 	private static final String TAB_SUFFIX = " Tab";
+	private static final String CONTAINS = "contains";
+	private static final String EQUALS = "equals";
 
 	private PrimeFacesRecordingMap() {
 		// static only
@@ -219,7 +234,7 @@ public final class PrimeFacesRecordingMap {
 				if ((entry != null) && inPage(component, widget)) {
 					putId(PrimeFacesAutomationContext.clientId(component), identifier, entry, ids, idIdentifiers);
 				}
-				putGrid(context, identifier, widget, grids);
+				putGrid(context, identifier, widget, component, grids);
 			}
 		}
 		result.put("ids", ids);
@@ -408,6 +423,7 @@ public final class PrimeFacesRecordingMap {
 	private static void putGrid(@Nonnull PrimeFacesAutomationContext context,
 									@Nonnull String identifier,
 									@Nonnull Object widget,
+									@Nonnull UIComponent component,
 									@Nonnull Map<String, Object> grids) {
 		if (widget instanceof DataGrid grid) {
 			String binding = grid.getBinding();
@@ -418,7 +434,7 @@ public final class PrimeFacesRecordingMap {
 		else if ((widget instanceof String) && (! grids.containsKey(identifier))) {
 			ListModel<Bean> model = context.getListModel(identifier);
 			if (model != null) {
-				grids.put(identifier, Map.of("columns", listGridColumns(model)));
+				grids.put(identifier, Map.of("columns", listGridColumns(model, findChild(component, DataTable.class))));
 			}
 		}
 	}
@@ -441,22 +457,83 @@ public final class PrimeFacesRecordingMap {
 	}
 
 	/**
-	 * A list grid's columns, from its model: each one's binding, name, title, and whether it is hidden.
+	 * A list grid's columns, from its model: each one's binding, name, title, and whether it is hidden. A column of a
+	 * PrimeFaces data table also has the client id of its header ({@code id}), which its sort request names, and, if
+	 * it can be filtered, the comparison its typed or chosen filter makes ({@code operator}).
+	 *
+	 * @param model	the list grid's model
+	 * @param table	the data table that renders the list grid, or null for a Vue list grid
 	 */
-	private static @Nonnull List<Map<String, Object>> listGridColumns(@Nonnull ListModel<Bean> model) {
+	private static @Nonnull List<Map<String, Object>> listGridColumns(@Nonnull ListModel<Bean> model, @Nullable DataTable table) {
+		Map<String, Column> tableColumns = new TreeMap<>();
+		if (table != null) {
+			for (UIComponent child : table.getChildren()) {
+				if ((child instanceof Column tableColumn) && (tableColumn.getField() != null)) {
+					tableColumns.put(tableColumn.getField(), tableColumn);
+				}
+			}
+		}
 		List<MetaDataQueryColumn> columns = model.getColumns();
 		List<Map<String, Object>> result = new ArrayList<>(columns.size());
 		for (MetaDataQueryColumn column : columns) {
 			Map<String, Object> c = new LinkedHashMap<>();
-			putIfNotNull(c, BINDING, column.getBinding());
-			putIfNotNull(c, "name", column.getName());
+			String binding = column.getBinding();
+			String name = column.getName();
+			putIfNotNull(c, BINDING, binding);
+			putIfNotNull(c, "name", name);
 			putIfNotNull(c, TITLE, model.determineColumnTitle(column));
 			if (column.isHidden()) {
 				c.put("hidden", Boolean.TRUE);
 			}
+			Column tableColumn = tableColumns.get((name != null) ? name : binding);
+			if (tableColumn != null) {
+				c.put("id", PrimeFacesAutomationContext.clientId(tableColumn));
+				if ((binding != null) && tableColumn.isFilterable()) {
+					c.put("operator", filterOperator(model, binding));
+				}
+			}
 			result.add(c);
 		}
 		return result;
+	}
+
+	/**
+	 * The comparison a PrimeFaces data table's filter of a column makes, as {@code SkyveLazyDataModel} applies it:
+	 * {@code contains} for text without a domain, a variant domain's description, an association's business key and
+	 * the implicit bizKey; {@code equals} otherwise (a constant domain's combo, a boolean's check box, numbers, dates).
+	 */
+	private static @Nonnull String filterOperator(@Nonnull ListModel<Bean> model, @Nonnull String binding) {
+		Document driving = model.getDrivingDocument();
+		Attribute attribute = null;
+		if (driving != null) {
+			Customer customer = CORE.getUser().getCustomer();
+			TargetMetaData target = BindUtil.getMetaDataForBinding(customer, customer.getModule(driving.getOwningModuleName()), driving, binding);
+			attribute = target.getAttribute();
+		}
+		if (attribute == null) {
+			return binding.endsWith(Bean.BIZ_KEY) ? CONTAINS : EQUALS;
+		}
+		DomainType domain = attribute.getDomainType();
+		AttributeType type = attribute.getAttributeType();
+		if ((domain == DomainType.variant) || (type == AttributeType.association)) {
+			return CONTAINS;
+		}
+		boolean textual = (type == AttributeType.text) || (type == AttributeType.memo) || (type == AttributeType.markup) || (type == AttributeType.colour);
+		return (textual && (domain == null)) ? CONTAINS : EQUALS;
+	}
+
+	/** The component, or the first of its descendants, that is of the type; or null. */
+	private static @Nullable <T extends UIComponent> T findChild(@Nonnull UIComponent component, @Nonnull Class<T> type) {
+		if (type.isInstance(component)) {
+			return type.cast(component);
+		}
+		for (UIComponent child : component.getChildren()) {
+			T result = findChild(child, type);
+			if (result != null) {
+				return result;
+			}
+		}
+		return null;
 	}
 
 	private static void putIfNotNull(@Nonnull Map<String, Object> map, @Nonnull String key, @Nullable Object value) {

@@ -19,6 +19,9 @@
  *   pfAjaxSend event), as the final value;
  * - PrimeFaces' pfAjaxComplete event marks a response: the adapter notes the messages, growls and field errors it
  *   showed and the values it changed, and reads the map again;
+ * - a Vue list grid's filters and sort are read from the grid's state each time it fetches its rows; a PrimeFaces data
+ *   table list grid's from its filter and sort requests (its column filters, and the sorted column's header, which the
+ *   map's columns name): listGridFilter, listGridClearFilter and listGridSort;
  * - a click on the global confirm dialog's No declines the action that asked (confirm="false");
  * - a page load from a typed URL, a link or a reload is recorded as navigateEdit or navigateList; a load that a recorded
  *   gesture caused (a menu item, a list's New or zoom, OK) is not, as the gesture says it already.
@@ -318,6 +321,7 @@
 			core.push({ op: "context", text: "changed on screen: " + changes.join("; "), shown: JSON.stringify(changedValues) });
 		}
 		shown = now;
+		tableBaseline();
 		recordMessages();
 		release();
 	}
@@ -569,6 +573,22 @@
 		return result;
 	}
 
+	/** "filter" or "sort" if a PrimeFaces ajax request is a data table list grid's filter or sort request, else null. */
+	function tableRequest(settings) {
+		var params = formParams(settings && settings.data);
+		var source = params["jakarta.faces.source"] || params["javax.faces.source"];
+		var behaviour = params["jakarta.faces.behavior.event"] || params["javax.faces.behavior.event"];
+		var table = source ? document.getElementById(source) : null;
+		var grid = table ? dataGridAt(table) : null;
+		if (!grid || grid.entry.dataGrid) {
+			return null;
+		}
+		if ((behaviour === "filter") || (params[source + "_filtering"] === "true")) {
+			return "filter";
+		}
+		return ((behaviour === "sort") || (params[source + "_sorting"] === "true")) ? "sort" : null;
+	}
+
 	/**
 	 * A PrimeFaces ajax request about to go: a data table's rowReorder (a drag) is dataGridMove; its rowSelect is
 	 * dataGridSelect or listGridSelect.
@@ -590,10 +610,10 @@
 				move.to = String(to);
 				core.record(move);
 			}
-		} else if (((behaviour === "filter") || (behaviour === "sort")) && !grid.entry.dataGrid) {
-			// a data table list grid's filters and sorts are its columns' (not mapped to bindings): see docs/sail.md
-			core.unmapped((behaviour === "filter" ? "filtered" : "sorted") + " the PrimeFaces data table list grid " +
-							(grid.entry.listGrid || "") + " (recorded only for Vue list grids)");
+		} else if (tableRequest(settings) === "filter") {
+			tableFiltering(grid);
+		} else if (tableRequest(settings) === "sort") {
+			tableSorting(grid, params[source + "_sortKey"], params[source + "_sortDir"]);
 		} else if (behaviour === "rowSelect") {
 			var selected = grid.element.querySelector("tbody tr.ui-state-highlight");
 			var rowNum = selected ? rows.indexOf(selected) : -1;
@@ -605,6 +625,202 @@
 				core.record(withRow(select, rows, rowNum));
 			}
 		}
+	}
+
+	// ---------------------------------------------------------------- data table list grids' filters and sorts
+
+	/**
+	 * What each PrimeFaces data table list grid's filters showed when last seen, by the table's client id:
+	 * { element, state } (see tableFilterState()).
+	 */
+	var tableFilters = {};
+	/**
+	 * Data table filters the user changed whose steps are not yet written, by the table's client id: { grid, before }
+	 * with the filters shown before the first change. A typed filter sends a request each time the user pauses, and a
+	 * check box filter one for each state it passes through, so the steps are the final filters, written before the
+	 * next other step or request.
+	 */
+	var pendingFilters = {};
+	/**
+	 * Data table sorts not yet written, by the table's client id: { grid, keys, orders } of the last sort request. A
+	 * column's sort turns round with each click on its header, so the step is the final sort, written before the next
+	 * other step or request.
+	 */
+	var pendingSorts = {};
+
+	/** A data table list grid's columns from the map that have a header (their client id): { id, column, operator }. */
+	function tableColumns(entry) {
+		var grid = map.grids[entry.listGrid] || {};
+		return (grid.columns || []).filter(function (c) {
+			return !!c.id;
+		}).map(function (c) {
+			// the table's column is named by its field: the column's name, or else its binding
+			return { id: c.id, column: c.name || c.binding, operator: c.operator };
+		});
+	}
+
+	/**
+	 * What a data table list grid's column filters show, by column: { operator, value } for each that has a value. A
+	 * typed filter's value is its text; a constant domain's combo its option's label; a boolean's check box true or
+	 * false.
+	 */
+	function tableFilterState(entry) {
+		var result = {};
+		tableColumns(entry).forEach(function (c) {
+			var th = c.operator ? document.getElementById(c.id) : null;
+			if (!th) {
+				return;
+			}
+			var value = null;
+			var select = th.querySelector(".ui-column-customfilter select");
+			var check = th.querySelector(".ui-column-customfilter .ui-chkbox input");
+			var input = th.querySelector("input.ui-column-filter");
+			if (select) {
+				var option = select.options[select.selectedIndex];
+				value = ((select.value === "") || !option) ? null : text(option);
+			} else if (check) {
+				value = (check.value === "1") ? "true" : ((check.value === "2") ? "false" : null);
+			} else if (input) {
+				value = input.value.trim() || null;
+			}
+			if (value) {
+				result[c.column] = { operator: c.operator, value: value };
+			}
+		});
+		return result;
+	}
+
+	/** The filters a data table showed when last seen, taken now if the table is new to the page (a load or an update). */
+	function tableSeen(grid) {
+		var seen = tableFilters[grid.id];
+		if (!seen || (seen.element !== grid.element)) {
+			seen = { element: grid.element, state: tableFilterState(grid.entry) };
+			tableFilters[grid.id] = seen;
+		}
+		return seen;
+	}
+
+	/** Notes the data tables the page shows, with their filters, so that only the user's changes are recorded. */
+	function tableBaseline() {
+		Object.keys(map.ids).forEach(function (id) {
+			var element = map.ids[id].listGrid ? document.getElementById(id) : null;
+			var table = element ? (element.classList.contains("ui-datatable") ? element : element.querySelector(".ui-datatable")) : null;
+			var grid = table ? dataGridAt(table) : null;
+			if (grid && !grid.entry.dataGrid) {
+				tableSeen(grid);
+			}
+		});
+	}
+
+	/** A data table list grid sends its filters: notes them, to be written as the final filters (see flushTables()). */
+	function tableFiltering(grid) {
+		if (pendingSorts[grid.id]) {
+			flushTables(); // a sort, then a filter: each is written in turn
+		}
+		var seen = tableSeen(grid);
+		if (!pendingFilters[grid.id]) {
+			pendingFilters[grid.id] = { grid: grid, before: seen.state };
+		}
+		seen.state = tableFilterState(grid.entry);
+	}
+
+	/** A data table list grid sends its sort: notes it, to be written as the final sort (see flushTables()). */
+	function tableSorting(grid, keys, orders) {
+		if (pendingFilters[grid.id]) {
+			flushTables(); // a filter, then a sort: each is written in turn
+		}
+		pendingSorts[grid.id] = { grid: grid, keys: keys, orders: orders };
+	}
+
+	/** Writes the data table filters and sorts the user changed (see writeFilters() and writeSort()). */
+	function flushTables() {
+		var filters = pendingFilters;
+		var sorts = pendingSorts;
+		pendingFilters = {};
+		pendingSorts = {};
+		writeFilters(filters);
+		Object.keys(sorts).forEach(function (id) {
+			writeSort(sorts[id].grid, sorts[id].keys, sorts[id].orders);
+		});
+	}
+
+	/**
+	 * Writes the data table filters the user changed: listGridFilter for each column whose filter changed (no value for
+	 * a column cleared), or listGridClearFilter when the user cleared them all. The operator is written unless it is
+	 * contains.
+	 */
+	function writeFilters(pending) {
+		Object.keys(pending).forEach(function (id) {
+			var grid = pending[id].grid;
+			var before = pending[id].before;
+			var now = tableFilters[id] ? tableFilters[id].state : {};
+			var list = function (op) {
+				var step = gridAttributes(grid.entry);
+				step.op = op;
+				return step;
+			};
+			var names = Object.keys(now);
+			var old = Object.keys(before);
+			if (!names.length && old.length) {
+				core.record(list("listGridClearFilter"));
+				return;
+			}
+			names.forEach(function (name) {
+				var was = before[name];
+				var is = now[name];
+				if (!was || (was.value !== is.value)) {
+					var step = list("listGridFilter");
+					step.column = name;
+					step.value = is.value;
+					if (is.operator !== "contains") {
+						step.operator = is.operator;
+					}
+					core.record(step);
+				}
+			});
+			old.forEach(function (name) {
+				if (!now[name]) {
+					var step = list("listGridFilter");
+					step.column = name;
+					core.record(step);
+				}
+			});
+		});
+	}
+
+	/**
+	 * Writes a data table list grid's sort, from the columns' header ids and their orders (1, -1 or 0) that its sort
+	 * request sent: listGridSort for a sort by one column.
+	 */
+	function writeSort(grid, keys, orders) {
+		var ids = String(keys || "").split(",").filter(function (k) {
+			return !!k;
+		});
+		var order = String(orders || "").split(",")[0];
+		var column = (ids.length === 1) ? tableColumns(grid.entry).filter(function (c) {
+			return c.id === ids[0];
+		})[0] : null;
+		if (ids.length > 1) {
+			core.unmapped("sorted a list by more than one column");
+		} else if (!column || (order === "0")) {
+			core.unmapped(column ? "cleared a list's sort" : "sorted a list by a column SAIL cannot name");
+		} else {
+			var sort = gridAttributes(grid.entry);
+			sort.op = "listGridSort";
+			sort.column = column.column;
+			if (order === "-1") {
+				sort.descending = "true";
+			}
+			core.record(sort);
+		}
+	}
+
+	/** Writes everything the user did that is not yet a step: the data table filters and sorts, then the data entry. */
+	function flushAll() {
+		if (core) {
+			flushTables();
+		}
+		flushDataEntry();
 	}
 
 	/** The Vue list grid component in a container, or null. */
@@ -964,6 +1180,11 @@
 			return;
 		}
 		var m = mapped(target);
+		if (m && (m.entry.step === "listGridSelect")) {
+			// a data table list grid's own element: a row's selection, a filter and a sort are recorded from the
+			// requests they send (see onAjaxRequest)
+			return;
+		}
 		if (m && m.entry.widget && /^content/.test(m.entry.widget)) {
 			core.handled(); // a content widget's upload: the core records it from the upload page
 			return;
@@ -987,7 +1208,7 @@
 				event.preventDefault();
 				event.stopImmediatePropagation();
 				var element = m.element;
-				flushDataEntry();
+				flushAll();
 				core.whenSent(function () {
 					core.stop(true);
 					element.sailStopping = true;
@@ -1083,6 +1304,10 @@
 		if (element.closest(".ui-confirmdialog, .ui-confirm-dialog, .ui-panelmenu, .ui-tabs-nav, .ui-growl, #skyve-sail-recorder")) {
 			return null;
 		}
+		var toggle = element.closest("[onclick*='toggleFilters']");
+		if (toggle && toggle.closest(".ui-datatable thead")) {
+			return null; // a data table's filter toggle shows its filters, which are recorded when the table filters
+		}
 		var target = element.closest("a[href], button, .ui-button, [role=button]");
 		if (!target || disabled(target)) {
 			return null;
@@ -1120,6 +1345,10 @@
 		// PrimeFaces' ajax events, which it triggers through jQuery
 		var send = function (event, xhr, settings) {
 			if (core.active()) {
+				// a data table's filters and sort send a request for each change: their steps wait for the final ones
+				if (!tableRequest(settings)) {
+					flushTables();
+				}
 				flushDataEntry();
 				release();
 				onAjaxRequest(settings);
@@ -1189,10 +1418,14 @@
 	}
 
 	var recorder = SKYVE.SailRecorderCore.create({
-		corner: "bottom-left",
+		// bottom-right, clear of the sidebar's last items, and left of a scrolled list's floating New button (a 48px
+		// button 15px from the window's right edge), which is the only control PrimeFaces keeps at the bottom right:
+		// the action bar and the growls are at the top
+		corner: "bottom-right",
+		cornerInset: 76,
 		transport: transport,
 		attach: attach,
-		flush: flushDataEntry,
+		flush: flushAll,
 		describe: function () {
 			return { view: describeView(), screen: screen(), title: viewTitle() };
 		},
@@ -1217,6 +1450,9 @@
 			unreadable = [];
 			lookupTyped = {};
 			vueStates = {};
+			tableFilters = {};
+			pendingFilters = {};
+			pendingSorts = {};
 		}
 	});
 	SKYVE.SailRecorder = recorder;
@@ -1228,6 +1464,7 @@
 		}
 		readMap();
 		shown = snapshot();
+		tableBaseline();
 		recorder.start(readJson("sailRecorderState", "data-state"));
 		recordPageLoad();
 		recordMessages();

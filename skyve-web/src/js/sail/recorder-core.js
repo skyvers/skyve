@@ -139,7 +139,9 @@
 	 * Creates the recorder for a renderer.
 	 *
 	 * @param adapter	the renderer's part: transport, attach, flush, describe, connected, control, checkTarget,
-	 * 					isSignOut, signOut, reset (see recorder-sc.js)
+	 * 					isSignOut, signOut, reset (see recorder-sc.js); and optionally where the bar starts: corner
+	 * 					("bottom-right", the default, or "bottom-left") and cornerInset (the pixels between the bar and
+	 * 					that side of the window, 12 by default)
 	 * @return the recorder
 	 */
 	function create(adapter) {
@@ -670,10 +672,11 @@
 			var x = ui.x;
 			var y = ui.y;
 			if ((x == null) || (y == null) || (x > window.innerWidth - 40) || (y > window.innerHeight - 20) || (x < 0) || (y < 0)) {
-				// the adapter's corner keeps clear of the renderer's own corner controls (a list's floating New button)
+				// the adapter's corner and inset keep clear of the renderer's own corner controls
 				var left = (adapter.corner === "bottom-left");
-				bar.style.right = left ? "" : "12px";
-				bar.style.left = left ? "12px" : "";
+				var inset = (adapter.cornerInset || 12) + "px";
+				bar.style.right = left ? "" : inset;
+				bar.style.left = left ? inset : "";
 				bar.style.bottom = "12px";
 				bar.style.top = "";
 			} else {
