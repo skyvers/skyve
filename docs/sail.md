@@ -759,6 +759,7 @@ tests. The SAIL ITs are:
 | `PrimeFacesSailTestStrategyIT` | inline scripts, 3 tests | PF, tablet |
 | `PrimeFacesFocusSailIT` | where a page puts the focus (runtime issue P11): a rerender low in a long view keeps the scroll and the focus; a loaded view focuses its first input | PF, tablet |
 | `PrimeFacesRequiredMessagesSailIT` | when required-field messages show (runtime issue P5): not when a view first renders, after a rerender without client validation or for an action with `clientValidation="false"`; only for an action with client validation. One inline script per UX/UI | PF, tablet, phone and external |
+| `PrimeFacesSelectMenuSailIT` | a select menu step ends only when its drop down has closed, even when the item was clicked while the drop down was still opening (its transitions are slowed); the focus PrimeFaces gives the menu at the end of the closing does not scroll the page under the next step | PF, tablet |
 | `PrimeFacesActionUploadSailIT` | a successful action upload closes its upload page and refreshes the view (runtime issue P3), with the close icons hidden so that the upload step cannot close the page itself. One inline script per UX/UI | PF, tablet, phone and external |
 | `PrimeFacesAdminSuiteSailIT` | `sail/admin/pf/suite/*.xml` | PF, tablet |
 | `PrimeFacesAdminSailIT` | `sail/admin/pf/pf-admin-sail.xml` (the older single-file admin script) | PF, tablet |
