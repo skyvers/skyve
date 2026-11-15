@@ -174,6 +174,72 @@ class ViewJSONManipulatorApplyJsonTest {
 		}
 	}
 
+	/**
+	 * A tab pane's selected tab index binding to an attribute takes the tab the user selected (runtime issue SC-7), but
+	 * only the index of one of its tabs: a crafted value is ignored.
+	 */
+	@Test
+	void aSelectedTabIndexTakesOnlyTheIndexOfATab() throws Exception {
+		try (Fixture fixture = new Fixture()) {
+			fixture.manipulator.visitTabPane(tabPane("tabIndex", 3), true, true);
+			ViewBindings bindings = bindingTree(fixture.manipulator);
+			TestOwnerBean owner = new TestOwnerBean();
+
+			for (Object value : new Object[] {Integer.valueOf(2), Long.valueOf(1), "0"}) {
+				applyTabIndex(fixture, bindings, owner, value);
+				assertEquals(Integer.valueOf(String.valueOf(value)), owner.getTabIndex(), "the tab index " + value);
+			}
+			for (Object value : new Object[] {Integer.valueOf(3), Integer.valueOf(-1), Double.valueOf(1.5), "1; drop", Boolean.TRUE}) {
+				applyTabIndex(fixture, bindings, owner, value);
+				assertEquals(Integer.valueOf(0), owner.getTabIndex(), "ignored " + value);
+			}
+		}
+	}
+
+	/**
+	 * A selected tab index binding to a getter with no setter (not an attribute) is not set from the request, which
+	 * goes on without failing.
+	 */
+	@SuppressWarnings("null") // the web context is not used
+	@Test
+	void aSelectedTabIndexBindingWithNoSetterIsOnlyRead() throws Exception {
+		try (Fixture fixture = new Fixture()) {
+			fixture.manipulator.visitTabPane(tabPane("shownTab", 2), true, true);
+			ViewBindings bindings = bindingTree(fixture.manipulator);
+			ViewBinding binding = bindings.getBinding("shownTab");
+			org.junit.jupiter.api.Assertions.assertNotNull(binding);
+			assertFalse(binding.isMutable());
+
+			TestOwnerBean owner = new TestOwnerBean();
+			Map<String, Object> values = new HashMap<>();
+			values.put("shownTab", Integer.valueOf(1));
+			assertDoesNotThrow(() -> fixture.manipulator.applyJSON(bindings, fixture.sourceDocument, values, owner, fixture.persistence, null));
+			assertEquals(Integer.valueOf(0), owner.getShownTab());
+		}
+	}
+
+	private static org.skyve.impl.metadata.view.container.TabPane tabPane(String selectedTabIndexBinding, int tabs) {
+		org.skyve.impl.metadata.view.container.TabPane result = new org.skyve.impl.metadata.view.container.TabPane();
+		result.setSelectedTabIndexBinding(selectedTabIndexBinding);
+		for (int i = 0; i < tabs; i++) {
+			result.getTabs().add(new org.skyve.impl.metadata.view.container.Tab());
+		}
+		return result;
+	}
+
+	@SuppressWarnings("null") // the web context is not used
+	private static void applyTabIndex(Fixture fixture, ViewBindings bindings, TestOwnerBean owner, Object value) throws Exception {
+		Map<String, Object> values = new HashMap<>();
+		values.put("tabIndex", value);
+		fixture.manipulator.applyJSON(bindings, fixture.sourceDocument, values, owner, fixture.persistence, null);
+	}
+
+	private static ViewBindings bindingTree(ViewJSONManipulator manipulator) throws Exception {
+		Field field = ViewJSONManipulator.class.getDeclaredField("bindingTree");
+		field.setAccessible(true);
+		return (ViewBindings) field.get(manipulator);
+	}
+
 	@Test
 	void anUnorderedCollectionIsNotChangedWhenOnlyTheOrderDiffers() throws Exception {
 		try (Fixture fixture = new Fixture(false)) {
@@ -357,6 +423,10 @@ class ViewJSONManipulatorApplyJsonTest {
 			text.setLength(50);
 			sourceDocument.putAttribute(text);
 
+			org.skyve.impl.metadata.model.document.field.Integer tabIndex = new org.skyve.impl.metadata.model.document.field.Integer();
+			tabIndex.setName("tabIndex");
+			sourceDocument.putAttribute(tabIndex);
+
 			AssociationImpl association = new AssociationImpl();
 			association.setName("association");
 			association.setDocumentName("RelatedDoc");
@@ -420,6 +490,7 @@ class ViewJSONManipulatorApplyJsonTest {
 		private static final long serialVersionUID = 1L;
 
 		private String text;
+		private Integer tabIndex;
 		private TestRelatedBean association;
 		private final RecordingList<TestRelatedBean> children = new RecordingList<>();
 
@@ -440,6 +511,21 @@ class ViewJSONManipulatorApplyJsonTest {
 
 		public String getText() {
 			return text;
+		}
+
+		public Integer getTabIndex() {
+			return tabIndex;
+		}
+
+		public void setTabIndex(Integer tabIndex) {
+			this.tabIndex = tabIndex;
+		}
+
+		/**
+		 * A tab index computed from another value, with no setter and no attribute, as an extension class can have.
+		 */
+		public Integer getShownTab() {
+			return (text == null) ? Integer.valueOf(0) : Integer.valueOf(1);
 		}
 
 		public void setText(String text) {

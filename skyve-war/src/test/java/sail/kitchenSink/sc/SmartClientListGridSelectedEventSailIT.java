@@ -21,6 +21,7 @@ import util.sail.BrowserConfiguration.Browsers;
  * clicks the row and waits for SmartClient to settle: no request pending and no deferred call due. A loop never
  * settles, as each refresh queues the next selected event. Once settled, there was one selection event and one
  * request, the row is selected and the view's selected id is its bizId; and nothing more happens when it settles again.
+ * When the row is then filtered out and the grid refreshed, the view's selected id is cleared, without the event.
  * <p>
  * Runs against the server named by {@code -Dsail.baseUrl} (required), headless unless {@code -Dsail.headless=false}.
  */
@@ -84,6 +85,14 @@ class SmartClientListGridSelectedEventSailIT extends AbstractSmartClientInterpre
 		Assertions.assertEquals(expected, Selenide.executeJavaScript(STATE), "after selecting the row");
 		selenium.settle();
 		Assertions.assertEquals(expected, Selenide.executeJavaScript(STATE), "after settling again");
+
+		// Filter the row out and refresh the grid (as its Refresh button does): no row is selected, the view's selected id
+		// is cleared rather than left holding the row, and the selected event does not run
+		Selenide.executeJavaScript(FACES + "faces.grid.setFilterEditorCriteria({description: 'no such row'}); faces.refresh();");
+		selenium.settle();
+		Assertions.assertEquals("edits=1 selections=1 selected=null bound=false", Selenide.executeJavaScript(STATE), "after the row was filtered out");
+		Assertions.assertNull(Selenide.executeJavaScript(FACES + "return v._vm.getValue('selectedFacesId') || null;"),
+								"the view's selected id after the row was filtered out");
 
 		// Remove the lookup value (a view opened by its URL has no Delete, so zoom into it from its list)
 		String remove = "<automation uxui=\"desktop\" userAgentType=\"desktop\" testStrategy=\"Assert\" xmlns=\"http://www.skyve.org/xml/sail\">" +

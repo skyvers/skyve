@@ -4833,6 +4833,81 @@ public class SmartClientViewRenderer extends ViewRenderer {
 																	@Nonnull StringBuilder toAppendTo,
 																	@Nonnull Set<String> visitedQueryNames) {
 		ListModel<Bean> model = owningDocument.getListModel(customer, modelName, true);
+		return appendDataSourceDefinition(user,
+											customer,
+											owningModule,
+											owningDocument,
+											modelName,
+											model,
+											dataSourceIDOverride,
+											forLookup,
+											uxui,
+											config,
+											toAppendTo,
+											visitedQueryNames);
+	}
+
+	/**
+	 * Appends a SmartClient data source definition for a document list model that the caller has already built, so
+	 * that a caller who needs the model too builds it only once.
+	 *
+	 * <p>Side effects: appends generated JavaScript to the supplied buffer and tracks
+	 * visited data-source names to prevent recursive duplication.
+	 *
+	 * @param user active user
+	 * @param customer active customer metadata
+	 * @param owningModule module that owns the model
+	 * @param owningDocument document that owns the model
+	 * @param modelName list model name
+	 * @param model the model, from {@code owningDocument.getListModel(customer, modelName, true)}
+	 * @param uxui active UX/UI profile name
+	 * @param config whether to generate configuration-only output
+	 * @param toAppendTo buffer receiving the generated definition
+	 * @param visitedQueryNames visited data-source names used to break recursion
+	 * @return the generated data-source id
+	 * @throws MetaDataException if the model has no driving document
+	 */
+	@SuppressWarnings("java:S107") // Matches the model data-source overloads.
+	public static @Nullable String appendDataSourceDefinition(@Nonnull User user,
+																	@Nonnull Customer customer,
+																	@Nonnull Module owningModule,
+																	@Nonnull Document owningDocument,
+																	@Nonnull String modelName,
+																	@Nonnull ListModel<Bean> model,
+																	@Nonnull String uxui,
+																	boolean config,
+																	@Nonnull StringBuilder toAppendTo,
+																	@Nonnull Set<String> visitedQueryNames) {
+		return appendDataSourceDefinition(user,
+											customer,
+											owningModule,
+											owningDocument,
+											modelName,
+											model,
+											null,
+											null,
+											uxui,
+											config,
+											toAppendTo,
+											visitedQueryNames);
+	}
+
+	/**
+	 * Appends a model data source from a built model, including lookup-specific fields when supplied.
+	 */
+	@SuppressWarnings("java:S107") // Matches the model data-source overloads.
+	private static @Nullable String appendDataSourceDefinition(@Nonnull User user,
+																	@Nonnull Customer customer,
+																	@Nonnull Module owningModule,
+																	@Nonnull Document owningDocument,
+																	@Nonnull String modelName,
+																	@Nonnull ListModel<Bean> model,
+																	@Nullable String dataSourceIDOverride,
+																	@Nullable LookupDescription forLookup,
+																	@Nonnull String uxui,
+																	boolean config,
+																	@Nonnull StringBuilder toAppendTo,
+																	@Nonnull Set<String> visitedQueryNames) {
 		// Note we cannot set the bean on the model here as we are only generating out the UI.
 		Document drivingDocument = model.getDrivingDocument();
 		if (drivingDocument == null) {

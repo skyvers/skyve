@@ -797,7 +797,8 @@ list grids, `if(window.<id>){}else{isc.RestDataSource.create(...)}`, so it does
 nothing when the menu defined the data source. It covers a query, a
 document's default query and a model, for lists, trees, maps and calendars.
 
-It is written only when the user may fetch the list's rows: when they have
+It is not written when the menu's data sources include the list's (`listDataSources` returns their ids), and a model is
+built once (review, 4e518f6c2e). It is written only when the user may fetch the list's rows: when they have
 access to the list (query, document or model aggregate access, which comes from
 the menu and the router) and can read its driving document. These are the
 checks `SmartClientListServlet` makes for every fetch, so the page offers no
@@ -933,7 +934,13 @@ PrimeFaces binds the tab view's `activeIndex` to it, which is written back.
   it. The view is not made dirty by this, as a list grid's selected id is not.
   A response that selects the bound tab sets the same number.
 - `ViewJSONManipulator` registers the binding as mutable, so the server applies
-  it.
+  it. After review (4e518f6c2e), only when it is a document attribute, as PrimeFaces
+  writes `activeIndex` only when it is not read only: a getter with no setter is
+  only read. And it takes only the index of one of the tab pane's tabs (a whole
+  number from 0 to one less than the number of tabs). Other values are ignored
+  with a warning. PrimeFaces takes any integer. Tests:
+  `ViewJSONManipulatorApplyJsonTest.aSelectedTabIndexTakesOnlyTheIndexOfATab`
+  and `aSelectedTabIndexBindingWithNoSetterIsOnlyRead`.
 
 Unit test: `ViewJSONManipulatorCoreTest.visitTabPaneMakesTheSelectedIndexBindingMutable`
 (failed before the fix). The client half is checked in the browser by the SC
@@ -997,6 +1004,15 @@ combo, a check box or a completing text field. SmartClient ties a combo box's
 `changeOnKeypress` to `addUnknownValues`. Skyve's date and number items, which
 had `changeOnKeypress: false` already, now also get the deferral for their
 server change handlers.
+
+After review (4e518f6c2e), `EditView.gather` first commits the value being typed
+into the focused item when it changes on commit (`_commitFocusedItem`), as
+leaving it would. So what is gathered, validated and checked for changes
+includes it, even if the view is left by something that does not take the focus.
+SmartClient's `getValues()` already commits a typed text item, such as the
+wizard's password, but not a date item's text field. That gap was older than this
+fix. `SmartClientFastTypingSailIT.aValueTypedButNotCommittedIsGathered` types a
+date and checks `gather` and `valuesHaveChanged` while the field keeps the focus.
 
 The SC executor still types a field with a change handler one key at a time,
 because the Biz Hub Apps scripts rely on the harness as it is.
@@ -1111,7 +1127,12 @@ deselects with the grid's `selectionUpdated` switched off, as
 nothing, so the selected event and the binding are left alone. When the rows
 arrive (the `filterData` callback), it selects again, also quietly, the row
 whose bizId is the view's `selectedIdBinding` value. So the selection is kept.
-Selecting a row still runs its selected event once. A restored selection does
+After review (4e518f6c2e), when that row is not among the rows that arrive, the
+binding is cleared (still without the selected event), so it does not keep a row
+the grid no longer shows. This is the old behaviour, less the event. A row
+beyond the first page of a paged list counts as gone, as before the fix. If
+`filterData` needs no fetch, its callback does not run, so the rows are checked
+at once instead. Selecting a row still runs its selected event once. A restored selection does
 not run it, as in PrimeFaces ([P7](#p7-by-design-a-vue-list-grid-restores-a-selection-without-its-selected-action)).
 
 **Tests.** `SmartClientListGridSelectedEventSailIT` counts the edit requests
@@ -1119,7 +1140,8 @@ and the grid's selection events. It selects a row of that grid and waits for
 SmartClient to settle, with no request pending and no deferred call due. Then it
 checks that there was 1 request and 1 selection event, that the row is
 selected and that `selectedFacesId` is its bizId. It checks again after a
-second settle. Before the fix the step never settled.
+second settle. Before the fix the step never settled. It then filters the row out
+and refreshes the grid. No event runs, and `selectedFacesId` is cleared.
 
 **Suites.** The SC kitchen sink's find script now selects a row in that grid. It
 captures `selectedFacesId`, follows the blurb's link, and runs `navigateEdit

@@ -7,6 +7,7 @@ import java.util.Set;
 import java.util.TreeSet;
 
 import org.skyve.CORE;
+import org.skyve.domain.Bean;
 import org.skyve.impl.metadata.module.menu.CalendarItem;
 import org.skyve.impl.metadata.module.menu.EditItem;
 import org.skyve.impl.metadata.module.menu.LinkItem;
@@ -34,6 +35,7 @@ import org.skyve.metadata.router.UxUi;
 import org.skyve.metadata.user.User;
 import org.skyve.metadata.user.UserAccess;
 import org.skyve.metadata.view.View.ViewType;
+import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.util.Icons;
 import org.skyve.util.OWASP;
 import org.skyve.web.WebAction;
@@ -194,7 +196,7 @@ public class DesktopView extends HarnessView {
 					constructMenu(bizModule, uxui.getName(), sb);
 					menuScript = sb.toString();
 					sb.setLength(0); 
-					listDataSources(customer, user, uxui.getName(), sb);
+					Set<String> menuDataSourceIds = listDataSources(customer, user, uxui.getName(), sb);
 					dataSourceScript = sb.toString();
 					sb.setLength(0);
 	
@@ -233,7 +235,7 @@ public class DesktopView extends HarnessView {
 							String modelName = getQueryNameParameter();
 							sb.append("DataSource('").append(bizModule).append('_').append(bizDocument).append("__").append(modelName).append("');");
 							if ((bizModule != null) && (modelName != null)) {
-								definition = listDataSourceDefinition(user, customer, bizModule, bizDocument, modelName, uxui.getName());
+								definition = listDataSourceDefinition(user, customer, bizModule, bizDocument, modelName, uxui.getName(), menuDataSourceIds);
 							}
 						}
 						else {
@@ -246,7 +248,7 @@ public class DesktopView extends HarnessView {
 							}
 							QueryDefinition query = ActionUtil.getMetaDataQuery(bizModule, queryName);
 							sb.append("DataSource('").append(bizModule).append('_').append(query.getName()).append("');");
-							definition = listDataSourceDefinition(user, customer, bizModule, null, queryName, uxui.getName());
+							definition = listDataSourceDefinition(user, customer, bizModule, null, queryName, uxui.getName(), menuDataSourceIds);
 						}
 						sb.insert(0, definition);
 					}
@@ -729,8 +731,8 @@ public class DesktopView extends HarnessView {
 	 *
 	 * <p>The definition is made only when the user may fetch the list's rows: the user has access to the list, as
 	 * {@code SmartClientListServlet} checks for every fetch, and can read its driving document. So it shows no list
-	 * the list servlet would refuse. It defines the data source only if the menu has not
-	 * ({@code if(window.<id>){}else{...}}), as an edit view does for its list grids.
+	 * the list servlet would refuse. None is made when the menu's data sources include the list's; a model is built
+	 * once, and only when the user has access to it.
 	 *
 	 * @param user	the user
 	 * @param customer	the user's customer
@@ -738,34 +740,39 @@ public class DesktopView extends HarnessView {
 	 * @param documentName	the model's document, or {@code null} for a query or a document's default query
 	 * @param queryOrModelName	the model, or the query or document of the default query
 	 * @param uxui	the UX/UI name
-	 * @return the JavaScript defining the data source, or an empty string when the user may not fetch the list
+	 * @param menuDataSourceIds	the ids of the data sources the menu defined (see {@link #listDataSources})
+	 * @return the JavaScript defining the data source, or an empty string when the menu defined it or the user may
+	 * 			not fetch the list
 	 */
 	private static @Nonnull String listDataSourceDefinition(@Nonnull UserImpl user,
 																@Nonnull Customer customer,
 																@Nonnull String moduleName,
 																@Nullable String documentName,
 																@Nonnull String queryOrModelName,
-																@Nonnull String uxui) {
+																@Nonnull String uxui,
+																@Nonnull Set<String> menuDataSourceIds) {
 		StringBuilder result = new StringBuilder(1024);
 		Module module = customer.getModule(moduleName);
 		if (documentName != null) { // a model
-			if (user.canAccess(UserAccess.modelAggregate(moduleName, documentName, queryOrModelName), uxui)) {
+			if ((! menuDataSourceIds.contains(moduleName + '_' + documentName + "__" + queryOrModelName)) &&
+					user.canAccess(UserAccess.modelAggregate(moduleName, documentName, queryOrModelName), uxui)) {
 				Document document = module.getDocument(customer, documentName);
-				Document drivingDocument = document.getListModel(customer, queryOrModelName, true).getDrivingDocument();
+				ListModel<Bean> model = document.getListModel(customer, queryOrModelName, true);
+				Document drivingDocument = model.getDrivingDocument();
 				if ((drivingDocument != null) && user.canReadDocument(drivingDocument)) {
-					SmartClientViewRenderer.appendDataSourceDefinition(user, customer, module, document, queryOrModelName, uxui, false, result, new TreeSet<>());
+					SmartClientViewRenderer.appendDataSourceDefinition(user, customer, module, document, queryOrModelName, model, uxui, false, result, new TreeSet<>());
 				}
 			}
 		}
 		else {
 			MetaDataQueryDefinition query = module.getMetaDataQuery(queryOrModelName);
-			UserAccess access = (query == null) ?
-									UserAccess.documentAggregate(moduleName, queryOrModelName) : // a document's default query
-									UserAccess.queryAggregate(moduleName, queryOrModelName);
-			if (user.canAccess(access, uxui)) {
-				if (query == null) {
-					query = module.getDocumentDefaultQuery(customer, queryOrModelName);
-				}
+			UserAccess access = UserAccess.queryAggregate(moduleName, queryOrModelName);
+			if (query == null) { // a document's default query
+				query = module.getDocumentDefaultQuery(customer, queryOrModelName);
+				access = UserAccess.documentAggregate(moduleName, queryOrModelName);
+			}
+			// the id the list view is given (see preRender())
+			if ((! menuDataSourceIds.contains(moduleName + '_' + query.getName())) && user.canAccess(access, uxui)) {
 				Document drivingDocument = query.getDocumentModule(customer).getDocument(customer, query.getDocumentName());
 				if (user.canReadDocument(drivingDocument)) {
 					SmartClientViewRenderer.appendDataSourceDefinition(user, customer, query, null, null, uxui, false, result, new TreeSet<>());
@@ -782,9 +789,11 @@ public class DesktopView extends HarnessView {
 	 * @param user current user whose permissions determine accessible menus
 	 * @param uxui UX/UI name used to resolve the menu structure
 	 * @param result buffer that receives the generated script
+	 * @return the ids of the data sources defined
 	 */
-	private static void listDataSources(@Nonnull Customer customer, @Nonnull UserImpl user, @Nonnull String uxui, @Nonnull StringBuilder result) {
+	private static @Nonnull Set<String> listDataSources(@Nonnull Customer customer, @Nonnull UserImpl user, @Nonnull String uxui, @Nonnull StringBuilder result) {
 		StringBuilder dataSources = new StringBuilder(1024);
+		Set<String> ids = new TreeSet<>();
 
 		result.append(",[");
 		for (Module module : customer.getModules()) {
@@ -802,12 +811,14 @@ public class DesktopView extends HarnessView {
 				throw new IllegalStateException("User " + user.getName() + " has no menu for module " + moduleName);
 			}
 			listDataSourcesForMenuItems(user, customer, moduleName, module, menu.getItems(), uxui, dataSources, visitedQueryNames);
+			ids.addAll(visitedQueryNames);
 		}
 		if (! dataSources.isEmpty()) { // we have appended some data sources
 			dataSources.setLength(dataSources.length() - 2); // remove the last data source comma
 			result.append(dataSources);
 		}
 		result.append("]);");
+		return ids;
 	}
 
 	/**
