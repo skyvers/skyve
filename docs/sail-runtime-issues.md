@@ -78,8 +78,11 @@ which sorts them above the ad hoc backups.
 `ExternalBackup.listBackups()`, which is modified time descending. Local backups
 are sorted the same way, by last modified time descending, with the name
 descending between backups modified at the same time (a periodic copy keeps its
-daily backup's time). `BackupsModelH2Test` checks both orders and the tie; it
-failed before the fix.
+daily backup's time). Each file's time is read once, before the sort: a backup
+being written changes its time, and a comparator that read it again could
+break the sort's contract ("Comparison method violates its general contract").
+`BackupsModelH2Test` checks both orders, the tie, and times that change while
+the backups are listed; each failed before its fix.
 
 **Workaround in the suites: lifted.** 00-precondition no longer asserts that no
 backup exists, and 99-restore restores, then deletes, row 0, which is now the

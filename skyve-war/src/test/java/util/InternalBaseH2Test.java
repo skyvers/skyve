@@ -41,6 +41,7 @@ import org.springframework.mock.web.MockServletContext;
 
 import jakarta.enterprise.inject.spi.CDI;
 import jakarta.servlet.http.HttpServletRequest;
+import modules.admin.Group.GroupExtension;
 import modules.admin.User.UserExtension;
 import modules.admin.User.UserService;
 import modules.admin.domain.User;
@@ -199,6 +200,12 @@ abstract class InternalBaseH2Test {
 		adminUser.setUserName(superUser.getName());
 		adminUser.setPassword(EXT.hashPassword(PASSWORD));
 		adminUser.setPasswordHistory(null);
+		// DataBuilder names groups with random lorem text, and group names are unique, so a test that builds another
+		// user could build a group of the same name (about 1 test in 500): use names that lorem text never has
+		int groupNumber = 0;
+		for (GroupExtension group : adminUser.getGroups()) {
+			group.setName("Test admin group " + (++groupNumber));
+		}
 		superUser.setContactId(adminUser.getContact().getBizId());
 		adminUser.setBizId(superUser.getId());
 		return adminUser;

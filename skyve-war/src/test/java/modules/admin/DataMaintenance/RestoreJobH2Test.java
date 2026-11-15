@@ -27,13 +27,13 @@ import modules.admin.domain.DataMaintenance;
 import modules.admin.domain.DataMaintenance.ContentRestoreOption;
 import modules.admin.domain.DataMaintenance.RestorePreProcess;
 import modules.admin.domain.User;
-import util.AbstractH2Test;
+import util.AbstractH2TestDispose;
 
 /**
  * Backs up and restores the data store, to check what a restore leaves behind: the shared (second-level) cache, and
- * the user passwords a redacted backup holds.
+ * the user passwords a redacted backup holds. The backups and restores commit, so each test disposes of the database.
  */
-class RestoreJobH2Test extends AbstractH2Test {
+class RestoreJobH2Test extends AbstractH2TestDispose {
 	private final List<File> backups = new ArrayList<>();
 
 	@AfterEach
