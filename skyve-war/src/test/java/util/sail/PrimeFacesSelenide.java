@@ -2317,13 +2317,15 @@ public class PrimeFacesSelenide extends Selenide<
 		// Wait for the upload's response: the page closes the upload page when the upload has succeeded; if it does not
 		// (a refusal, or a Skyve without runtime issue P3's fix), the upload page's growl says how it went. The growl of a
 		// success shows while the page closes, so a page that is closing is waited for until it has closed. The response
-		// shows the growl and starts the close at once, so the growl is read before the page is checked.
+		// shows the growl and starts the close in one go, so the growl is read first, then the page's state in one script:
+		// a growl with the page shown and not closing means that the page stays open.
 		List<String> outcome = waitFor(d -> {
 			List<String> result = uploadPageOutcome(frame);
-			if (uploadPageClosed(frame)) {
+			String state = uploadPageState(frame);
+			if (UPLOAD_PAGE_CLOSED.equals(state)) {
 				return List.of("closed", "");
 			}
-			if (result.isEmpty() || uploadPageClosing(frame)) {
+			if (result.isEmpty() || UPLOAD_PAGE_CLOSING.equals(state)) {
 				return null;
 			}
 			return result;
@@ -2353,7 +2355,7 @@ public class PrimeFacesSelenide extends Selenide<
 	 *
 	 * @param frame	the upload page's frame
 	 * @param said	what the upload page says, for the failure
-	 * @throws IllegalStateException	if the upload page has no close icon
+	 * @throws IllegalStateException	if the upload page is still open and has no close icon
 	 */
 	private void closeUploadPage(@Nonnull WebElement frame, @Nonnull String said) {
 		WebElement close = (WebElement) js("var o = arguments[0].closest('.ui-overlaypanel, .ui-dialog');" +
@@ -2361,6 +2363,13 @@ public class PrimeFacesSelenide extends Selenide<
 											"return (c && c.getClientRects().length > 0) ? c : null;",
 											frame);
 		if (close == null) {
+			// The page may be closing or closed by itself since the growl was read: only a page that is still open fails
+			if (! UPLOAD_PAGE_OPEN.equals(uploadPageState(frame))) {
+				trace("    the upload page is closing by itself after all");
+				// Wait for the upload page to close (its overlay's hide effect)
+				waitFor(d -> uploadPageClosed(frame) ? Boolean.TRUE : null);
+				return;
+			}
 			throw new IllegalStateException("The upload page stayed open after \"" + said + "\" and has no close icon a user could press");
 		}
 		click($(close));
@@ -2368,30 +2377,37 @@ public class PrimeFacesSelenide extends Selenide<
 		waitFor(d -> uploadPageClosed(frame) ? Boolean.TRUE : null);
 	}
 
+	/** {@link #uploadPageState(WebElement)}: the upload page is shown and not closing. */
+	private static final String UPLOAD_PAGE_OPEN = "open";
+	/** {@link #uploadPageState(WebElement)}: the upload page is hidden, or its frame no longer shows it. */
+	private static final String UPLOAD_PAGE_CLOSED = "closed";
+	/** {@link #uploadPageState(WebElement)}: the upload page's overlay is running its hide transition. */
+	private static final String UPLOAD_PAGE_CLOSING = "closing";
+
 	/**
-	 * Indicates if the upload page's overlay is running its hide transition: PrimeFaces marks an overlay that is being
-	 * hidden with {@code ui-connected-overlay-exit} until it has hidden it. (A dialog hides at once.)
+	 * Returns the upload page's state, read in one script so that it is consistent: {@link #UPLOAD_PAGE_CLOSED} when its
+	 * frame is gone, hidden, or no longer shows the upload page; {@link #UPLOAD_PAGE_CLOSING} while its overlay runs its
+	 * hide transition (PrimeFaces marks an overlay being hidden with {@code ui-connected-overlay-exit} until it has hidden
+	 * it; a dialog hides at once); otherwise {@link #UPLOAD_PAGE_OPEN}.
+	 *
+	 * @param frame	the upload page's frame
+	 * @return the state
 	 */
-	private boolean uploadPageClosing(@Nonnull WebElement frame) {
+	private @Nonnull String uploadPageState(@Nonnull WebElement frame) {
 		try {
-			return Boolean.TRUE.equals(js("var o = arguments[0].closest('.ui-overlaypanel');" +
-											"return (o !== null) && o.classList.contains('ui-connected-overlay-exit');", frame));
+			String result = (String) js("var f = arguments[0], o = f.closest('.ui-overlaypanel, .ui-dialog'), src = f.src;" +
+											"if ((! f.isConnected) || (f.getClientRects().length === 0) || (o && getComputedStyle(o).display === 'none') ||" +
+											"    (! src) || (src.indexOf('upload.xhtml') < 0)) return 'closed';" +
+											"return (o && o.classList.contains('ui-connected-overlay-exit')) ? 'closing' : 'open';", frame);
+			return (result == null) ? UPLOAD_PAGE_CLOSED : result;
 		}
 		catch (@SuppressWarnings({"unused", "java:S1166"}) StaleElementReferenceException e) {
-			return false;
+			return UPLOAD_PAGE_CLOSED;
 		}
 	}
 
 	private boolean uploadPageClosed(@Nonnull WebElement frame) {
-		try {
-			String live = (String) js("return arguments[0].src;", frame);
-			Boolean shown = (Boolean) js("var o = arguments[0].closest('.ui-overlaypanel, .ui-dialog');" +
-											"return arguments[0].getClientRects().length > 0 && ((! o) || getComputedStyle(o).display !== 'none');", frame);
-			return (! Boolean.TRUE.equals(shown)) || (live == null) || (! live.contains("upload.xhtml"));
-		}
-		catch (@SuppressWarnings({"unused", "java:S1166"}) StaleElementReferenceException e) {
-			return true;
-		}
+		return UPLOAD_PAGE_CLOSED.equals(uploadPageState(frame));
 	}
 
 	/**
