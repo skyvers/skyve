@@ -10,6 +10,7 @@ import org.skyve.metadata.sail.language.Step;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlAttribute;
+import jakarta.xml.bind.annotation.XmlEnumValue;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
 
@@ -25,17 +26,48 @@ import jakarta.xml.bind.annotation.XmlType;
  * <p>Executors pass both through {@code ContextualExecutor.substituteTokens(String)}, so that {@code {run}} and
  * {@code {var:name}} resolve.
  *
+ * <p>With {@code window="new"} ({@link Window#newWindow}), the step follows a link that opens a new tab or window,
+ * such as {@code <a target="_blank">}, or opens {@code href} in a new tab, as a user does with "Open in new tab". The
+ * later steps run in the new window, which starts with no contexts; {@link CloseWindow} closes it and returns to the
+ * window that opened it, with that window's contexts as they were. Without {@code window}, the step stays in the window
+ * it runs in: a link that opens another window fails it.
+ *
  * @see NavigateList
  * @see NavigateEdit
+ * @see CloseWindow
  * @see org.skyve.metadata.sail.execution.Executor#executeNavigateLink
  */
 @XmlType(namespace = XMLMetaData.SAIL_NAMESPACE)
 @XmlRootElement(namespace = XMLMetaData.SAIL_NAMESPACE)
 public class NavigateLink implements Step {
 
+	/**
+	 * Which window a {@link NavigateLink} leads to, when it is not the window the step runs in.
+	 */
+	@XmlType(namespace = XMLMetaData.SAIL_NAMESPACE)
+	@SuppressWarnings("java:S115") // Enum names follow the SAIL XML values.
+	public enum Window {
+		/**
+		 * A new tab or window, which the later steps run in: written {@code window="new"}, because {@code new} is a
+		 * Java keyword.
+		 */
+		@XmlEnumValue("new")
+		newWindow;
+
+		/**
+		 * Returns the value as a script writes it.
+		 * @return {@code new}
+		 */
+		@Override
+		public @Nonnull String toString() {
+			return "new";
+		}
+	}
+
 	private String href;
 	private String text;
 	private Boolean exact; // null/false: the link's text contains the text; true: equals it
+	private Window window; // null: the window the step runs in
 	
 	/**
 	 * Returns the URL to open: absolute, or relative to the application's base URL.
@@ -87,6 +119,25 @@ public class NavigateLink implements Step {
 	@XmlAttribute(name = "exact")
 	public void setExact(@Nullable Boolean exact) {
 		this.exact = exact;
+	}
+
+	/**
+	 * Returns the window the link leads to.
+	 * @return {@link Window#newWindow} to follow the link into a new tab or window, or {@code null} to stay in the window
+	 * 			the step runs in
+	 */
+	public @Nullable Window getWindow() {
+		return window;
+	}
+
+	/**
+	 * Sets the window the link leads to. Applies with {@code href} and with {@code text}.
+	 * @param window {@link Window#newWindow} to follow the link into a new tab or window, which the later steps run in;
+	 * 					or {@code null} to stay in the window the step runs in
+	 */
+	@XmlAttribute(name = "window")
+	public void setWindow(@Nullable Window window) {
+		this.window = window;
 	}
 
 	/**

@@ -11,7 +11,13 @@
  *       navigates to the list view for a specified module and document.
  *   <li>{@link org.skyve.metadata.sail.language.step.interaction.navigation.NavigateLink} —
  *       opens a URL ({@code href}), or clicks the first displayed link on the page whose text contains
- *       {@code text}.
+ *       {@code text}; with {@code window="new"}, in a new tab or window that the later steps run in.
+ *   <li>{@link org.skyve.metadata.sail.language.step.interaction.navigation.CloseWindow} —
+ *       closes a window that {@code navigateLink} opened and returns to the window that opened it.
+ *   <li>{@link org.skyve.metadata.sail.language.step.interaction.navigation.NavigateBack} —
+ *       goes back to the previous page, as the browser's Back button does.
+ *   <li>{@link org.skyve.metadata.sail.language.step.interaction.navigation.Refresh} —
+ *       reloads the page, as the browser's Reload button does.
  *   <li>{@link org.skyve.metadata.sail.language.step.interaction.navigation.NavigateMap} —
  *       navigates to the map view for a specified module and document.
  *   <li>{@link org.skyve.metadata.sail.language.step.interaction.navigation.NavigateTree} —

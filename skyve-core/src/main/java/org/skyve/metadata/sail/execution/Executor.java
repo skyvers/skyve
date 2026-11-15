@@ -42,12 +42,15 @@ import org.skyve.metadata.sail.language.step.interaction.grids.ListGridFilter;
 import org.skyve.metadata.sail.language.step.interaction.grids.ListGridNew;
 import org.skyve.metadata.sail.language.step.interaction.grids.ListGridSelect;
 import org.skyve.metadata.sail.language.step.interaction.grids.ListGridSort;
+import org.skyve.metadata.sail.language.step.interaction.grids.ListGridTool;
 import org.skyve.metadata.sail.language.step.interaction.grids.ListGridZoom;
 import org.skyve.metadata.sail.language.step.interaction.grids.ListMembershipMove;
 import org.skyve.metadata.sail.language.step.interaction.lookup.LookupDescriptionAutoComplete;
 import org.skyve.metadata.sail.language.step.interaction.lookup.LookupDescriptionEdit;
 import org.skyve.metadata.sail.language.step.interaction.lookup.LookupDescriptionNew;
 import org.skyve.metadata.sail.language.step.interaction.lookup.LookupDescriptionPick;
+import org.skyve.metadata.sail.language.step.interaction.navigation.CloseWindow;
+import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateBack;
 import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateCalendar;
 import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateEdit;
 import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateLink;
@@ -55,6 +58,7 @@ import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateList
 import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateMap;
 import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateMenu;
 import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateTree;
+import org.skyve.metadata.sail.language.step.interaction.navigation.Refresh;
 import org.skyve.metadata.sail.language.step.interaction.navigation.TestMenu;
 import org.skyve.metadata.sail.language.step.interaction.session.Login;
 import org.skyve.metadata.sail.language.step.interaction.session.Logout;
@@ -493,4 +497,38 @@ public interface Executor {
 	 * @param move the list membership move step
 	 */
 	public void executeListMembershipMove(@Nonnull ListMembershipMove move);
+
+	/**
+	 * Goes back to the previous page in the browser's history, as the browser's Back button does, and waits for it.
+	 * The top context, if any, loses its document and view type, as after {@link #executeNavigateLink(NavigateLink)}.
+	 *
+	 * @param back the navigate back step
+	 */
+	public void executeNavigateBack(@Nonnull NavigateBack back);
+
+	/**
+	 * Reloads the page, as the browser's Reload button does, and waits for it. The contexts are unchanged.
+	 *
+	 * @param refresh the refresh step
+	 */
+	public void executeRefresh(@Nonnull Refresh refresh);
+
+	/**
+	 * Closes the window that a {@code <navigateLink window="new"/>} opened and returns to the window that opened it,
+	 * whose contexts are restored as they were; the contexts pushed in the closed window are dropped.
+	 *
+	 * <p>Fails in the window the automation started in, where there is no window to close.
+	 *
+	 * @param close the close window step
+	 */
+	public void executeCloseWindow(@Nonnull CloseWindow close);
+
+	/**
+	 * Presses a list grid's toolbar tool, such as Refresh or Deselect. The context is unchanged.
+	 *
+	 * <p>Precondition: {@link ListGridTool#execute(Executor)} has checked that the step names a tool.
+	 *
+	 * @param tool the list grid tool step
+	 */
+	public void executeListGridTool(@Nonnull ListGridTool tool);
 }

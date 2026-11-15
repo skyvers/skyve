@@ -19,6 +19,8 @@
 
   <xs:element name="clearContext" type="tns:clearContext"/>
 
+  <xs:element name="closeWindow" type="tns:closeWindow"/>
+
   <xs:element name="comment" type="tns:comment"/>
 
   <xs:element name="dataEnter" type="tns:dataEnter"/>
@@ -53,6 +55,8 @@
 
   <xs:element name="listGridSort" type="tns:listGridSort"/>
 
+  <xs:element name="listGridTool" type="tns:listGridTool"/>
+
   <xs:element name="listGridZoom" type="tns:listGridZoom"/>
 
   <xs:element name="listMembershipMove" type="tns:listMembershipMove"/>
@@ -68,6 +72,8 @@
   <xs:element name="lookupDescriptionNew" type="tns:lookupDescriptionNew"/>
 
   <xs:element name="lookupDescriptionPick" type="tns:lookupDescriptionPick"/>
+
+  <xs:element name="navigateBack" type="tns:navigateBack"/>
 
   <xs:element name="navigateCalendar" type="tns:navigateCalendar"/>
 
@@ -94,6 +100,8 @@
   <xs:element name="pushEditContext" type="tns:pushEditContext"/>
 
   <xs:element name="pushListContext" type="tns:pushListContext"/>
+
+  <xs:element name="refresh" type="tns:refresh"/>
 
   <xs:element name="remove" type="tns:remove"/>
 
@@ -198,6 +206,10 @@
         <xs:element ref="tns:dataGridLink"/>
         <xs:element ref="tns:dataGridMove"/>
         <xs:element ref="tns:listMembershipMove"/>
+        <xs:element ref="tns:navigateBack"/>
+        <xs:element ref="tns:refresh"/>
+        <xs:element ref="tns:closeWindow"/>
+        <xs:element ref="tns:listGridTool"/>
       </xs:choice>
     </xs:sequence>
   </xs:complexType>
@@ -262,6 +274,7 @@
     <xs:attribute name="exact" type="xs:boolean"/>
     <xs:attribute name="href" type="xs:string"/>
     <xs:attribute name="text" type="xs:string"/>
+    <xs:attribute name="window" type="tns:window"/>
   </xs:complexType>
 
   <xs:complexType name="tabSelect">
@@ -636,6 +649,27 @@
     <xs:attribute name="to" type="xs:int" use="required"/>
   </xs:complexType>
 
+  <xs:complexType name="navigateBack">
+    <xs:sequence/>
+  </xs:complexType>
+
+  <xs:complexType name="refresh">
+    <xs:sequence/>
+  </xs:complexType>
+
+  <xs:complexType name="closeWindow">
+    <xs:sequence/>
+  </xs:complexType>
+
+  <xs:complexType name="listGridTool">
+    <xs:sequence/>
+    <xs:attribute name="document" type="xs:string"/>
+    <xs:attribute name="model" type="xs:string"/>
+    <xs:attribute name="module" type="xs:string"/>
+    <xs:attribute name="query" type="xs:string"/>
+    <xs:attribute name="tool" type="tns:tool" use="required"/>
+  </xs:complexType>
+
   <xs:complexType name="interaction">
     <xs:sequence>
       <xs:element name="before" type="tns:procedure" form="qualified" minOccurs="0"/>
@@ -700,6 +734,10 @@
               <xs:element ref="tns:dataGridLink"/>
               <xs:element ref="tns:dataGridMove"/>
               <xs:element ref="tns:listMembershipMove"/>
+              <xs:element ref="tns:navigateBack"/>
+              <xs:element ref="tns:refresh"/>
+              <xs:element ref="tns:closeWindow"/>
+              <xs:element ref="tns:listGridTool"/>
             </xs:choice>
           </xs:sequence>
         </xs:complexType>
@@ -720,6 +758,12 @@
       <xs:enumeration value="Assert"/>
       <xs:enumeration value="Verify"/>
       <xs:enumeration value="None"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="window">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="new"/>
     </xs:restriction>
   </xs:simpleType>
 
@@ -747,6 +791,13 @@
       <xs:enumeration value="notEquals"/>
       <xs:enumeration value="lessThan"/>
       <xs:enumeration value="greaterThan"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="tool">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="refresh"/>
+      <xs:enumeration value="clearSelection"/>
     </xs:restriction>
   </xs:simpleType>
 </xs:schema>

@@ -111,6 +111,29 @@ class NavigateLinkTest {
 	}
 
 	@Test
+	void windowDefaultsToNullAndRoundtrips() {
+		assertThat(step.getWindow(), is(nullValue()));
+		step.setWindow(NavigateLink.Window.newWindow);
+		assertThat(step.getWindow(), is(NavigateLink.Window.newWindow));
+		assertThat(String.valueOf(step.getWindow()), is("new"));
+	}
+
+	@Test
+	void executeIntoANewWindowByTextOrHrefCallsExecutor() {
+		Executor executor = mock(Executor.class);
+		step.setText("Print");
+		step.setExact(Boolean.TRUE);
+		step.setWindow(NavigateLink.Window.newWindow);
+		step.execute(executor);
+		NavigateLink byHref = new NavigateLink();
+		byHref.setHref("?a=e&m=admin&d=Contact");
+		byHref.setWindow(NavigateLink.Window.newWindow);
+		byHref.execute(executor);
+		verify(executor).executeNavigateLink(step);
+		verify(executor).executeNavigateLink(byHref);
+	}
+
+	@Test
 	void exactWithHrefThrows() {
 		Executor executor = mock(Executor.class);
 		step.setHref("?a=l");
