@@ -18,12 +18,12 @@ SC-2's suspected cause, which cites the code before its fix, at `2f4c2021b8`.
 |---|---|---|---|---|
 | [P1](#p1-fixed-backups-are-listed-oldest-first) | Backups are listed oldest first | both | Confirmed | fixed (a74e625b8c) |
 | [P2](#p2-fixed-restoring-a-redacted-backup-locks-everyone-out) | Restoring a redacted backup locks everyone out | both | Confirmed | fixed (a74e625b8c) |
-| [P3](#p3-a-tablet-action-upload-never-closes-or-refreshes) | A tablet action upload never closes or refreshes | PF | Plausible | open |
+| [P3](#p3-fixed-an-action-upload-never-closes-or-refreshes) | An action upload never closes or refreshes | PF | Confirmed | fixed (35ee72a540) |
 | [P4](#p4-fixed-update-my-details-fails-with-an-optimistic-lock) | Update My Details fails with an optimistic lock | both | Confirmed (restore); sign ins not reproduced | fixed (a74e625b8c) |
-| [P5](#p5-tablet-escapingfixture-shows-required-field-messages-at-once) | Tablet EscapingFixture shows required-field messages at once | PF | Not investigated | open (may be by design) |
+| [P5](#p5-tablet-escapingfixture-shows-required-field-messages-at-once) | Tablet EscapingFixture shows required-field messages at once | PF | Not reproduced | not reproduced; runtime matches Mike's rule |
 | [P6](#p6-fixed-re-run-job-of-generate-test-data-always-fails) | Re-run Job of Generate Test Data always fails | both | Confirmed | fixed (a74e625b8c) |
 | [P7](#p7-a-vue-list-grid-restores-a-selection-without-its-selected-action) | A Vue list grid restores a selection without its selected action | PF | Confirmed | open |
-| [P8](#p8-an-action-upload-page-left-open-hides-later-error-messages) | An action upload page left open hides later error messages | PF | Not investigated | open (not confirmed) |
+| [P8](#p8-fixed-an-action-upload-page-left-open-hides-later-error-messages) | An action upload page left open hides later error messages | PF | Confirmed | fixed (35ee72a540) |
 | [P9](#p9-fixed-an-action-link-in-a-data-grid-row-also-zooms-into-the-row) | An action link in a data grid row also zooms into the row | PF | Confirmed | fixed (150d05dddc) |
 | [P10](#p10-fixed-an-upload-actions-validationexception-shows-only-an-error-reference) | An upload action's ValidationException shows only an error reference | both | Confirmed | fixed (150d05dddc) |
 | [P11](#p11-fixed-every-pf-response-moves-the-focus-to-the-first-input) | Every PF response moves the focus to the first input | PF | Confirmed | fixed (e19217194e) |
@@ -164,7 +164,7 @@ so the suites still back up with data sensitivity "none".
 
 **Status:** fixed (a74e625b8c).
 
-## P3: A tablet action upload never closes or refreshes
+## P3 (fixed): An action upload never closes or refreshes
 
 **Symptom.** With an iPad user agent (the `tablet` UX/UI), an upload action's
 file uploads, but the upload page stays open showing "Successful ... uploaded"
@@ -196,18 +196,51 @@ in PrimeFaces, on any UX/UI.
   auto-hide, not through Skyve code. That would explain why only tablet shows
   the bug, but it is not proven.
 
-A fix would be for `ContentUploadView` to run a script on success that hides the
-parent overlay or dialog, which also fires the refresh, as content uploads do.
+**Checked:** Confirmed (2026-11-15), on every PrimeFaces UX/UI, not only tablet.
+Driven with Playwright on `sail` at `b3bc873128`, the upload page stays open
+after a successful action upload with an iPad user agent (`tablet`, an overlay),
+a desktop one (`external`, an overlay) and an iPhone one (`phone`, a full-screen
+dialog), and Outcome stays empty.
 
-**Checked:** Plausible. There is no UX/UI-specific code; the
-difference between tablet and external is not explained by Skyve code.
+So there is no tablet and external difference to explain on the current code.
+The only things that close the page without the fix are PrimeFaces': a mouse
+press outside an overlay hides it on every user agent (its `onHide` then
+refreshes the view), and for a desktop user agent an overlay also hides when
+its target's scrollable parents scroll or the window resizes (it only re-aligns
+when `PrimeFaces.env.mobile`, which comes from the user agent, is true;
+`OverlayPanel.handleViewportChange` in PrimeFaces 13.0.10). Scrolling the window
+by 150 pixels after the upload did not hide the `external` overlay, so which of
+these closed it in the run that reported the difference is not known.
 
-**Workaround in the suites.** On tablet, when the upload page reports success
-but stays open, the PF executor closes it as a user would: with a real click on
-its close icon. If there is no close icon, the step fails. The kitchen sink
-rerenders with a check box before checking Outcome.
+**Fix.** `ContentUploadView.handleActionFileUpload` sends the upload page a
+script when an action upload has no problems:
+`SKYVE.PF.afterActionUpload(window, true)`, a new function in `pf.js`, hides the
+overlay or dialog that holds the page's frame, as `afterContentUpload` does for
+a content upload (with `false`, after an upload with problems, it only notes
+that the upload ran; see P8). Hiding it runs its `onHide`, which refreshes the view. An
+upload with problems (errors, or only warnings) still leaves its page open, as
+its message asks the user to review them. In SmartClient the script finds no
+PrimeFaces window and does nothing; SmartClient's upload window still stays open
+after an action upload, with the view refreshed behind it, as before. The prime
+`skyve-min.js` is regenerated with build.xml's Closure command.
 
-**Status:** open.
+`ActionsFixtureBizPortAndUploadH2Test.aSuccessfulUploadClosesItsUploadPage`
+failed before the fix and passes with it;
+`aRefusedUploadLeavesItsUploadPageOpen` and `anUnavailableUploadSendsNoScript`
+check that refusals do not close the page. `PrimeFacesActionUploadSailIT` uploads with the close icons hidden in
+the `tablet`, `phone` and `external` UX/UIs, so only the page itself can close
+it, then checks Outcome. Against a server built from `sail` it fails in all
+three (the page stays open); with the fix it passes.
+
+**Workaround in the suites.** None needed now. The kitchen sink checks Outcome
+straight after the upload. The PF executor still closes an upload page that
+stays open after a success with its close icon: Apps' A/B runs drive Skyve
+without this fix (master) with this harness, and Apps' Secure Drive workflow
+presses an upload action. The executor waits for a closing overlay to finish
+closing, so it does not mistake the success growl shown while the page closes
+for a page that stayed open.
+
+**Status:** fixed (35ee72a540).
 
 ## P4 (fixed): Update My Details fails with an optimistic lock
 
@@ -292,9 +325,51 @@ zoom-in button before entering anything.
 noted because it made the executor's full-page waits time out until the
 executor learned to detect a request that client-side validation had blocked.
 
-**Checked:** Not investigated.
+**Mike's rule (2026-11-15).** "Required messages should not display before an
+action is run (and only when clientValidation is true)."
 
-**Status:** open (may be by design).
+**Checked:** Not reproduced (2026-11-15, on `sail` at `b3bc873128`).
+
+- EscapingFixture's first render shows no message of any kind in `tablet`,
+  `phone` and `external` (Playwright; the SAIL executor's error selector also
+  finds none), nor in SmartClient. The PF kitchen sink's snapshot of the first
+  render shows none.
+- Pressing its zoom-in button sends a request, and the response brings the
+  required messages. Nothing is blocked in the browser: Skyve's PrimeFaces
+  views have no client-side validation (no `primefaces.CLIENT_SIDE_VALIDATION`,
+  no `validateClient`, and inputs are not `required` for JSF; only their
+  required message is set). PrimeFaces' "client validation" is
+  `FacesAction.validateRequiredFields`, on the server.
+- It runs for an action unless the action's `clientValidation` is false
+  (`ExecuteActionAction`, `SaveAction` for Save and OK,
+  `ExecuteDownloadAction`); always for zoom in, zoom out and a data grid's New
+  (not inline); and for a `<rerender>` event action unless its
+  `clientValidation` is false (`RerenderAction`). Nothing else calls it, so a
+  first render, a tab change, an upload page's refresh and every other update
+  show no required message.
+
+So the runtime already follows the rule, reading a `<rerender>` as an event
+action with its own `clientValidation`. That attribute defaults to true, as it
+does in SmartClient (`editView.js` `rerenderAction` validates the form before
+it saves), and its documentation says it controls "whether form validation is
+run first". If Mike means that a rerender should never show required messages,
+whatever its `clientValidation`, that is a change in both renderers and to the
+attribute's meaning; it is not made.
+
+The executor's detection of a request that client-side validation blocked
+(`nothingSent()` in `PrimeFacesSelenide.waitForFullPageResponse`) is removed.
+It could only matter when error messages appear with no request, and neither
+Skyve's nor Biz Hub Apps' PrimeFaces views validate in the browser.
+
+`PrimeFacesRequiredMessagesSailIT` checks the rule in `tablet`, `phone` and
+`external`: no message on EscapingFixture's first render; its Trusted Display
+Name action (`clientValidation="false"`) runs without one; OK (client
+validation) shows them and does not close the view; and KitchenSink's Date,
+whose blur rerenders with `clientValidation="false"`, leaves its empty required
+Text without one.
+
+**Status:** not reproduced; the runtime matches the rule (see above for the
+rerender reading).
 
 ## P6 (fixed): Re-run Job of Generate Test Data always fails
 
@@ -402,7 +477,7 @@ that, after zooming into a row and coming back with OK or Cancel, the user can
 see which row they came from. Selected actions stay disabled until the row is
 selected again, which the suites' workaround does.
 
-## P8: An action upload page left open hides later error messages
+## P8 (fixed): An action upload page left open hides later error messages
 
 **Symptom.** In PrimeFaces, an upload action's upload page that is left open
 over the view can stop later error messages from showing. In the old admin
@@ -429,16 +504,66 @@ page open. Select the Manage tab and press Get Count.
   the message was not in the page at all. The open page covering it would not
   explain that.
 
-**Checked:** Not investigated. The only record is the message of `00482bac03`,
-which changed the script instead. It is not known whether the cause is in
-Skyve or in the harness.
+**Checked:** Confirmed (2026-11-15), in Skyve, on `sail` at `b3bc873128`.
 
-**Workaround in the suites.** `pf-admin-sail.xml` now uploads an image with
-AddImage (`<upload action="AddImage" .../>`), so the upload page closes before
-the next step. The PF kitchen sink uploads with its upload action in the same
-way. The PF admin suite does not press AddImage.
+- Reproduced in SAIL with the old script's Communications steps (an inline
+  probe, not committed): with AddImage's page left open, Get Count's message
+  was missing in `external` in both runs, and in `tablet` in two of six runs
+  (one more failed with a stale element at the next step, from the same
+  cause). In `phone` the upload page is a full-screen modal dialog, so the
+  old script cannot click the tabs behind it, as a user cannot.
+- In the browser (Playwright), logging each request's source: the Get Count
+  request and its response came first, then the upload action's refresh
+  remote command (`FacesView.rerender`, which updates the whole form), whose
+  response re-rendered the form, and its messages, without Get Count's error.
+- A person hits it too. On `tablet`, with AddImage's page open for 1.5 s,
+  pressing Save showed "Saved", and the refresh removed it about 0.4 s later.
+- The refresh is the upload page's hide handler. The mouse press of the next
+  click outside the overlay hides it (PrimeFaces closes an overlay on an
+  outside mouse press), but `onHide` runs only when the overlay's hide
+  transition (about 0.1 s) has ended. So the refresh is sent after the request
+  of the click that closed the page, and its response, the last, re-renders the
+  form without that request's messages. In an `external` run whose Save
+  response arrived within the transition, no refresh was sent at all (the
+  form's update replaces the overlay), which is why it happened only some of
+  the time.
+- In SAIL, steps follow each other faster than a person can click. A tab click
+  during the overlay's show transition does not hide it, so the page stayed
+  open until Get Count's own mouse press closed it. That made the race likely
+  in SAIL, but the race is Skyve's: the refresh follows the closing click's
+  request whenever that request takes longer than the transition.
+- The refresh is not needed when nothing was uploaded: the view has not changed.
 
-**Status:** open (not confirmed).
+**Fix.** The upload page's hide handler refreshes the view only if the page's
+upload action has run since it was shown. `ContentUploadView` sends the page
+`SKYVE.PF.afterActionUpload(window, <close>)` once the upload action has run
+(with or without problems; `true` closes the page, P3), which notes the page's
+frame; the hide script of an upload action's overlay or dialog
+(`TabularComponentBuilder.uploadButton`) calls the refresh only if
+`SKYVE.PF.actionUploadRan('<id>')`, which also forgets the note.
+`contentOverlayOnShow` forgets it when the page is shown again. A refusal before
+the action runs (an unavailable action, an unexpected failure) changes nothing,
+so it is not noted. The refresh still runs when a successful upload closes its
+page, and when the user closes a page that shows an upload's problems.
+
+What is left: after an upload whose page stays open showing its problems, a
+click on another action closes the page, and its refresh can still follow that
+action's request. The upload changed the view then, so it must be refreshed.
+
+`TabularComponentBuilderTest` (the overlay's and the dialogs' hide scripts) and
+`ActionsFixtureBizPortAndUploadH2Test.aRefusedUploadLeavesItsUploadPageOpen`
+failed before the fix and pass with it; `anUnavailableUploadSendsNoScript`
+checks that a refusal before the action runs is not noted. In
+the browser, Save's message stays after the fix and Get Count's request is the
+only one sent. The probe passes in `tablet` and `external`.
+
+**Workaround in the suites.** None needed now. `pf-admin-sail.xml` uploads an
+image with AddImage, then presses AddImage again and leaves its upload page
+open before the Manage tab's refusals, which must show their messages. Against
+a server built from `sail`, `PrimeFacesAdminSailIT` then failed with Get Count's
+message missing; with the fix it passes, headless and headed.
+
+**Status:** fixed (35ee72a540).
 
 ## P9 (fixed): An action link in a data grid row also zooms into the row
 

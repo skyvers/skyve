@@ -527,13 +527,10 @@
 			<comment>This file makes the action find itself unavailable: the upload page shows the refusal, as for any action</comment>
 			<upload action="ActionsUpload" file="sail/files/sail-unavailable.txt" testSuccess="false" />
 			<testFailure message="This action is no longer available." />
+			<comment>A successful action upload closes its upload page, which refreshes the view (runtime issue P3)</comment>
 			<upload action="ActionsUpload" file="sail/files/sail-upload.txt" />
-			<!--
-				RUNTIME BUG (tablet UX/UI): after an action upload the upload page stays open and the view is not refreshed,
-				so the outcome only shows after the next rerender. The executor closes the upload page; the check box rerenders.
-			-->
-			<dataEnter binding="disableUpload" value="true" />
 			<testValue binding="outcome" value="Actions Upload ran" />
+			<dataEnter binding="disableUpload" value="true" />
 			<testWidget action="ActionsUpload" enabled="false" />
 			<dataEnter binding="disableUpload" value="false" />
 			<comment>Each check box makes a trigger unavailable</comment>

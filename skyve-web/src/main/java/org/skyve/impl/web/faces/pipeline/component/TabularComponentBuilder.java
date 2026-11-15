@@ -310,6 +310,20 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 	}
 
 	/**
+	 * Builds the part of an upload action's hide script that refreshes the view, only if the upload page's upload
+	 * action has run since it was shown (see {@code SKYVE.PF.afterActionUpload}). A page closed without an upload has
+	 * changed nothing, and its refresh would be sent when the hide ends, after the request of the click that hid it,
+	 * and re-render the view without that request's messages.
+	 *
+	 * @param panelId the upload overlay's or dialog's id; must not be {@code null}
+	 * @param refreshId the name of the remote command that refreshes the view; must not be {@code null}
+	 * @return script fragment starting with a semicolon, without a trailing one; never {@code null}
+	 */
+	private static @Nonnull String createRefreshIfActionUploadRanScript(@Nonnull String panelId, @Nonnull String refreshId) {
+		return ";if(SKYVE.PF.actionUploadRan('" + panelId + "'))" + refreshId + "()";
+	}
+
+	/**
 	 * Builds the mark-up dialog hide script and guarantees page scroll is unlocked.
 	 *
 	 * @param id generated content id; must not be {@code null}
@@ -4941,8 +4955,8 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 			panelId = dialog.getId();
 			String widgetVar = panelId + "Dialog";
 			dialog.setWidgetVar(widgetVar);
-			// clear the iframe src on hide so there is no flash next open, and call the refresh remote command
-			dialog.setOnHide(createContentOverlayOnHideScript(panelId, false, true) + ';' + refreshId + "()");
+			// clear the iframe src on hide so there is no flash next open, and call the refresh remote command if an upload ran
+			dialog.setOnHide(createContentOverlayOnHideScript(panelId, false, true) + createRefreshIfActionUploadRanScript(panelId, refreshId));
 			panel = dialog;
 
 			uploadButton.setOnclick(createPfShowScript(widgetVar));
@@ -4959,8 +4973,8 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 			// append to <body/> so the overlay is not clipped by a fixed or scrolling action bar
 			overlay.setAppendTo("@(body)");
 			overlay.setStyle("width:50%;height:310px");
-			// clear the iframe src on hide so there is no flash next open, and call the refresh remote command
-			overlay.setOnHide(createContentOverlayOnHideScript(panelId) + ';' + refreshId + "()");
+			// clear the iframe src on hide so there is no flash next open, and call the refresh remote command if an upload ran
+			overlay.setOnHide(createContentOverlayOnHideScript(panelId) + createRefreshIfActionUploadRanScript(panelId, refreshId));
 			panel = overlay;
 		}
 

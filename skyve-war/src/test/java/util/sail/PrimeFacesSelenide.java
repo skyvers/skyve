@@ -2278,14 +2278,19 @@ public class PrimeFacesSelenide extends Selenide<
 			driver.switchTo().defaultContent();
 		}
 		trace("    upload pressed");
-		// Wait for the upload's response: the page closes the upload page when the upload has been processed; if it does
-		// not (the tablet UX/UI), the upload page's growl says how it went (closed with its close icon on success, below)
+		// Wait for the upload's response: the page closes the upload page when the upload has succeeded; if it does not
+		// (a refusal, or a Skyve without runtime issue P3's fix), the upload page's growl says how it went. The growl of a
+		// success shows while the page closes, so a page that is closing is waited for until it has closed. The response
+		// shows the growl and starts the close at once, so the growl is read before the page is checked.
 		List<String> outcome = waitFor(d -> {
+			List<String> result = uploadPageOutcome(frame);
 			if (uploadPageClosed(frame)) {
 				return List.of("closed", "");
 			}
-			List<String> result = uploadPageOutcome(frame);
-			return result.isEmpty() ? null : result;
+			if (result.isEmpty() || uploadPageClosing(frame)) {
+				return null;
+			}
+			return result;
 		});
 		if ("error".equals(outcome.get(0))) {
 			if (! refusable) {
@@ -2297,9 +2302,10 @@ public class PrimeFacesSelenide extends Selenide<
 			return outcome.get(1);
 		}
 		if ("info".equals(outcome.get(0))) {
-			// RUNTIME BUG (report bug 3): with the tablet UX/UI the upload page stays open after a successful upload.
-			// A user closes it with its close icon, so press that; with no close icon the step fails.
-			trace("    the upload page says: " + outcome.get(1) + " - close it with its close icon");
+			// A Skyve without runtime issue P3's fix (such as master, which Apps' A/B runs drive with this harness) leaves
+			// an action upload's page open after it succeeds. A user closes it with its close icon, so press that; with no
+			// close icon the step fails. The kitchen sinks' Skyve closes the page itself, so this is not reached there.
+			trace("    the upload page stayed open, saying: " + outcome.get(1) + " - close it with its close icon");
 			closeUploadPage(frame, outcome.get(1));
 		}
 		waitForAjaxResponse();
@@ -2324,6 +2330,20 @@ public class PrimeFacesSelenide extends Selenide<
 		click($(close));
 		// Wait for the upload page to close (its overlay's hide effect)
 		waitFor(d -> uploadPageClosed(frame) ? Boolean.TRUE : null);
+	}
+
+	/**
+	 * Indicates if the upload page's overlay is running its hide transition: PrimeFaces marks an overlay that is being
+	 * hidden with {@code ui-connected-overlay-exit} until it has hidden it. (A dialog hides at once.)
+	 */
+	private boolean uploadPageClosing(@Nonnull WebElement frame) {
+		try {
+			return Boolean.TRUE.equals(js("var o = arguments[0].closest('.ui-overlaypanel');" +
+											"return (o !== null) && o.classList.contains('ui-connected-overlay-exit');", frame));
+		}
+		catch (@SuppressWarnings({"unused", "java:S1166"}) StaleElementReferenceException e) {
+			return false;
+		}
 	}
 
 	private boolean uploadPageClosed(@Nonnull WebElement frame) {
@@ -2549,13 +2569,12 @@ public class PrimeFacesSelenide extends Selenide<
 
 	/**
 	 * Waits for the response to a click: a new page (or view state), or a response that brings back error messages
-	 * (validation), which leaves the page as it was. When client-side validation stops the request before it is sent,
-	 * there is no response to wait for.
+	 * (validation, which Skyve's PrimeFaces views do on the server), which leaves the page as it was.
 	 *
 	 * @param oldViewState	the view state before the request
 	 */
 	public void waitForFullPageResponse(String oldViewState) {
-		// Wait for the response to the click: a new page or view state, or new errors from the server or client-side validation
+		// Wait for the response to the click: a new page or view state, or a response with new errors
 		// (errors that were on the page before the click, see markPage(), do not count; nor does a page that is unloading)
 		waitFor(d -> {
 			String viewState = getViewState();
@@ -2565,7 +2584,7 @@ public class PrimeFacesSelenide extends Selenide<
 			if ((! ajaxIdle()) || (! newErrorsShown())) {
 				return null;
 			}
-			return (responseArrived() || nothingSent()) ? Boolean.TRUE : null;
+			return responseArrived() ? Boolean.TRUE : null;
 		});
 
 		waitForAjaxResponse();
@@ -2589,7 +2608,7 @@ public class PrimeFacesSelenide extends Selenide<
 
 	/**
 	 * Counts ajax requests and notes page unloads from now on, and marks the error messages already shown, so
-	 * {@link #responseArrived()}, {@link #nothingSent()} and {@link #newErrorsShown()} can tell what the next click did,
+	 * {@link #responseArrived()}, {@link #requestSent()} and {@link #newErrorsShown()} can tell what the next click did,
 	 * and returns the view state, before a click.
 	 *
 	 * @return the view state
@@ -2627,14 +2646,6 @@ public class PrimeFacesSelenide extends Selenide<
 		catch (@SuppressWarnings("unused") WebDriverException e) {
 			return true; // between pages
 		}
-	}
-
-	/**
-	 * Indicates if the click since {@link #markPage()} sent nothing: no ajax request started and the page is not unloading.
-	 */
-	private boolean nothingSent() {
-		return Boolean.TRUE.equals(js("return (window.sailAjaxStartMark !== undefined) && (window.sailAjaxStarts === window.sailAjaxStartMark) && " +
-										"(! window.sailUnloading) && (! (window.PrimeFaces && PrimeFaces.ajax && PrimeFaces.ajax.Queue && (! PrimeFaces.ajax.Queue.isEmpty())));"));
 	}
 
 	/**
