@@ -20,7 +20,7 @@
 (function () {
 	"use strict";
 
-	var VERSION = 9;
+	var VERSION = 10;
 	if (window._sail && window._sail.version === VERSION) {
 		return;
 	}
