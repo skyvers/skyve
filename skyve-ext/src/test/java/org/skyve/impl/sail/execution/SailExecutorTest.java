@@ -19,8 +19,13 @@ import org.skyve.metadata.sail.language.step.interaction.grids.DataGridMove;
 import org.skyve.metadata.sail.language.step.interaction.grids.ListGridClearFilter;
 import org.skyve.metadata.sail.language.step.interaction.grids.ListGridFilter;
 import org.skyve.metadata.sail.language.step.interaction.grids.ListGridSort;
+import org.skyve.metadata.sail.language.step.interaction.grids.ListGridTool;
 import org.skyve.metadata.sail.language.step.interaction.grids.ListMembershipMove;
+import org.skyve.metadata.sail.language.step.interaction.navigation.CloseWindow;
+import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateBack;
+import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateLink;
 import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateMenu;
+import org.skyve.metadata.sail.language.step.interaction.navigation.Refresh;
 import org.skyve.metadata.sail.language.step.interaction.navigation.TestMenu;
 import org.skyve.metadata.sail.language.step.TestFailure;
 import org.skyve.metadata.sail.language.step.TestSuccess;
@@ -136,7 +141,8 @@ class SailExecutorTest {
 
 	private static final String[] UNSUPPORTED = {"upload", "testMessage", "testGridRows", "testWidget", "navigateMenu", "testMenu", "switchMode",
 													"listGridFilter", "listGridClearFilter", "listGridSort", "captureValue",
-													"captureCell", "captureTitle", "dataGridLink", "dataGridMove", "listMembershipMove"};
+													"captureCell", "captureTitle", "dataGridLink", "dataGridMove", "listMembershipMove",
+													"navigateBack", "refresh", "closeWindow", "listGridTool"};
 
 	private static void executeUnsupportedSteps(ScriptExecutor<?> executor) {
 		executor.executeUpload(new Upload());
@@ -155,6 +161,14 @@ class SailExecutorTest {
 		executor.executeDataGridLink(new DataGridLink());
 		executor.executeDataGridMove(new DataGridMove());
 		executor.executeListMembershipMove(new ListMembershipMove());
+		executor.executeNavigateBack(new NavigateBack());
+		executor.executeRefresh(new Refresh());
+		NavigateLink link = new NavigateLink();
+		link.setHref("?a=e&m=admin&d=Contact");
+		link.setWindow(NavigateLink.Window.newWindow);
+		executor.executeNavigateLink(link); // opens a window for closeWindow to close
+		executor.executeCloseWindow(new CloseWindow());
+		executor.executeListGridTool(new ListGridTool());
 	}
 
 	private static final class TestContext extends AutomationContext<GenerateListContext, GenerateEditContext> {

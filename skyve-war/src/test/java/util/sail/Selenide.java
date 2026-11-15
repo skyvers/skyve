@@ -305,6 +305,209 @@ public abstract class Selenide<
 	}
 
 	/**
+	 * Waits for the page in the current window to load, then for the renderer's page to settle. This waits only for
+	 * the document; the renderers' subclasses also wait for their own pages (SmartClient to settle, the PrimeFaces ajax
+	 * queue to empty), and leave any other page, such as a PDF, once it has loaded.
+	 */
+	public void waitForPageToSettle() {
+		// Waits for the window's document to finish loading
+		waitFor(d -> {
+			try {
+				return "complete".equals(((JavascriptExecutor) d).executeScript("return document.readyState")) ? Boolean.TRUE : null;
+			}
+			catch (@SuppressWarnings("unused") org.openqa.selenium.WebDriverException e) {
+				return null; // between pages
+			}
+		});
+	}
+
+	/**
+	 * Marks the current window's document with a token that a new document will not have, so that a wait can tell when
+	 * the window shows another document (a new page, or one the browser kept from before).
+	 *
+	 * @return the token
+	 */
+	private @Nonnull String markDocument() {
+		String token = java.util.UUID.randomUUID().toString();
+		((JavascriptExecutor) driver).executeScript("window.__sailDocument = arguments[0];", token);
+		return token;
+	}
+
+	/**
+	 * Indicates if the current window shows a document that has loaded and is not the one {@link #markDocument()} marked
+	 * with the token, or, when {@code url} is given, is that document at another URL (as after a back to a fragment).
+	 *
+	 * @param driver	the driver
+	 * @param token	the token
+	 * @param url	the URL the marked document had, or null to ignore the URL
+	 * @return true when the window shows another document, or the same one at another URL; false between pages
+	 */
+	private static boolean anotherDocument(@Nonnull org.openqa.selenium.WebDriver driver, @Nonnull String token, @Nullable String url) {
+		try {
+			return Boolean.TRUE.equals(((JavascriptExecutor) driver).executeScript(
+					"return (document.readyState === 'complete') && " +
+					"((window.__sailDocument !== arguments[0]) || ((arguments[1] !== null) && (location.href !== arguments[1])));",
+					token, url));
+		}
+		catch (@SuppressWarnings("unused") org.openqa.selenium.WebDriverException e) {
+			return false; // between pages
+		}
+	}
+
+	/**
+	 * Makes a gesture that opens a new tab or window, such as a click on a link with {@code target="_blank"}, switches to
+	 * the new window and waits for its page (see {@link #waitForPageToSettle()}). A page that is not HTML, such as a PDF,
+	 * counts as loaded once the browser shows it.
+	 *
+	 * <p>Side effects: the driver drives the new window from now on; {@link #closeWindowAndReturnTo(String)} closes it.
+	 *
+	 * @param gesture	makes the gesture in the current window
+	 * @param what	describes the gesture for the messages, such as {@code the link containing 'Print'}
+	 * @return the handle of the window that the gesture was made in (the opener)
+	 * @throws IllegalStateException	if the gesture opened its page in the current window instead, or no new window
+	 * 									opened, or the new window loaded no page
+	 */
+	public @Nonnull String openNewWindow(@Nonnull Runnable gesture, @Nonnull String what) {
+		String opener = driver.getWindowHandle();
+		java.util.Set<String> before = driver.getWindowHandles();
+		String token = markDocument();
+		gesture.run();
+		String opened;
+		try {
+			// Waits for the gesture to open a new window, or to load its page in this window instead
+			opened = waitFor(d -> {
+				for (String handle : d.getWindowHandles()) {
+					if (! before.contains(handle)) {
+						return handle;
+					}
+				}
+				return anotherDocument(d, token, null) ? "" : null;
+			});
+		}
+		catch (org.openqa.selenium.TimeoutException e) {
+			throw new IllegalStateException(String.format("%s opened no new window in %d s", what, Long.valueOf(TIMEOUT.toSeconds())), e);
+		}
+		if (opened.isEmpty()) {
+			throw new IllegalStateException(String.format("%s opened its page in this window, not a new one: %s", what, driver.getCurrentUrl()));
+		}
+		driver.switchTo().window(opened);
+		awaitNewWindowPage(what);
+		return opener;
+	}
+
+	/**
+	 * Opens a URL in a new tab, as a user does with "Open link in new tab", switches to it and waits for its page (see
+	 * {@link #waitForPageToSettle()}).
+	 *
+	 * <p>Side effects: the driver drives the new window from now on; {@link #closeWindowAndReturnTo(String)} closes it.
+	 *
+	 * @param url	the absolute URL
+	 * @return the handle of the window the driver was in (the opener)
+	 */
+	public @Nonnull String openUrlInNewWindow(@Nonnull String url) {
+		String opener = driver.getWindowHandle();
+		driver.switchTo().newWindow(org.openqa.selenium.WindowType.TAB);
+		open(url);
+		awaitNewWindowPage(url);
+		return opener;
+	}
+
+	/**
+	 * Opens a URL relative to the base URL in a new tab, as {@link #openUrlInNewWindow(String)} does.
+	 *
+	 * @param url	the URL relative to the base URL
+	 * @return the handle of the window the driver was in (the opener)
+	 */
+	public @Nonnull String getInNewWindow(@Nonnull String url) {
+		return openUrlInNewWindow(baseUrl + url);
+	}
+
+	/**
+	 * Waits for a new window to load a page, then for the page to settle.
+	 *
+	 * @param what	what opened the window, for the messages
+	 * @throws IllegalStateException	if the window stays blank
+	 */
+	private void awaitNewWindowPage(@Nonnull String what) {
+		try {
+			// Waits for the new window to leave the blank page it opens with and load the page it was opened for
+			waitFor(d -> {
+				try {
+					return Boolean.TRUE.equals(((JavascriptExecutor) d).executeScript(
+							"return (location.href !== 'about:blank') && (document.readyState === 'complete');")) ? Boolean.TRUE : null;
+				}
+				catch (@SuppressWarnings("unused") org.openqa.selenium.WebDriverException e) {
+					return null; // between pages
+				}
+			});
+		}
+		catch (org.openqa.selenium.TimeoutException e) {
+			throw new IllegalStateException(String.format("The new window that %s opened loaded no page in %d s", what, Long.valueOf(TIMEOUT.toSeconds())), e);
+		}
+		waitForPageToSettle();
+		trace(String.format("    In the new window: %s (%s, %s)", driver.getCurrentUrl(), driver.getTitle(),
+								((JavascriptExecutor) driver).executeScript("return document.contentType;")));
+	}
+
+	/**
+	 * Closes the current window, if the page has not closed it already, and switches back to the window that opened it,
+	 * then waits for that window's page to settle (see {@link #waitForPageToSettle()}).
+	 *
+	 * @param opener	the handle of the window to return to
+	 * @throws org.openqa.selenium.NoSuchWindowException	if the opener has been closed
+	 */
+	public void closeWindowAndReturnTo(@Nonnull String opener) {
+		try {
+			driver.close();
+		}
+		catch (@SuppressWarnings("unused") org.openqa.selenium.NoSuchWindowException e) {
+			trace("    the window had closed already");
+		}
+		driver.switchTo().window(opener);
+		waitForPageToSettle();
+		trace(String.format("    Back in: %s (%s)", driver.getCurrentUrl(), driver.getTitle()));
+	}
+
+	/**
+	 * Goes back to the previous page in the window's history, as the browser's Back button does, and waits for it: a
+	 * page that loads (or that the browser kept), or the same page at an earlier URL (a fragment); then for the page to
+	 * settle (see {@link #waitForPageToSettle()}).
+	 *
+	 * @throws IllegalStateException	if the window's history has no earlier page, or the browser does not go back
+	 */
+	public void back() {
+		Object entries = ((JavascriptExecutor) driver).executeScript("return history.length;");
+		if ((entries instanceof Number length) && (length.longValue() <= 1L)) {
+			throw new IllegalStateException("There is no earlier page in this window's history to go back to");
+		}
+		String url = driver.getCurrentUrl();
+		String token = markDocument();
+		driver.navigate().back();
+		try {
+			// Waits for the earlier page: another document that has loaded, or this one at another URL
+			waitFor(d -> anotherDocument(d, token, url) ? Boolean.TRUE : null);
+		}
+		catch (org.openqa.selenium.TimeoutException e) {
+			throw new IllegalStateException(String.format("The browser did not go back from %s in %d s: is there an earlier page in this window's history?",
+															url, Long.valueOf(TIMEOUT.toSeconds())), e);
+		}
+		waitForPageToSettle();
+		trace(String.format("    Back at: %s (%s)", driver.getCurrentUrl(), driver.getTitle()));
+	}
+
+	/**
+	 * Reloads the page, as the browser's Reload button does, and waits for the reloaded page, then for it to settle (see
+	 * {@link #waitForPageToSettle()}).
+	 */
+	public void reload() {
+		String token = markDocument();
+		driver.navigate().refresh();
+		// Waits for the reloaded page: a new document that has loaded
+		waitFor(d -> anotherDocument(d, token, null) ? Boolean.TRUE : null);
+		waitForPageToSettle();
+	}
+
+	/**
 	 * Performs a button interaction based on the given command.
 	 * 
 	 * @param command parameters defining the button interaction

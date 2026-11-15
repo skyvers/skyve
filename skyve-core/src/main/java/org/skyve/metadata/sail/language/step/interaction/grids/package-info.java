@@ -34,6 +34,8 @@
  *           every column filter.
  *       <li>{@link org.skyve.metadata.sail.language.step.interaction.grids.ListGridSort} — sorts by
  *           one column.
+ *       <li>{@link org.skyve.metadata.sail.language.step.interaction.grids.ListGridTool} — presses a
+ *           toolbar tool, such as Refresh or Deselect.
  *     </ul>
  * </ul>
  *

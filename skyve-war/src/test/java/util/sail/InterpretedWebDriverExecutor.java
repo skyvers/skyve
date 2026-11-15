@@ -7,8 +7,10 @@ import java.lang.reflect.Modifier;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Deque;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -69,8 +71,12 @@ import org.skyve.metadata.sail.language.step.interaction.grids.ListGridClearFilt
 import org.skyve.metadata.sail.language.step.interaction.grids.ListGridFilter;
 import org.skyve.metadata.sail.language.step.interaction.grids.ListGridFilter.FilterOperator;
 import org.skyve.metadata.sail.language.step.interaction.grids.ListGridSort;
+import org.skyve.metadata.sail.language.step.interaction.grids.ListGridTool;
+import org.skyve.metadata.sail.language.step.interaction.grids.ListGridTool.Tool;
 import org.skyve.metadata.sail.language.step.interaction.lookup.LookupDescriptionAutoComplete;
 import org.skyve.metadata.sail.language.step.interaction.lookup.LookupDescriptionPick;
+import org.skyve.metadata.sail.language.step.interaction.navigation.CloseWindow;
+import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateBack;
 import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateCalendar;
 import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateEdit;
 import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateLink;
@@ -78,6 +84,7 @@ import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateList
 import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateMap;
 import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateMenu;
 import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateTree;
+import org.skyve.metadata.sail.language.step.interaction.navigation.Refresh;
 import org.skyve.metadata.sail.language.step.interaction.navigation.TestMenu;
 import org.skyve.metadata.sail.language.step.interaction.session.Login;
 import org.skyve.metadata.sail.language.step.interaction.session.Logout;
@@ -135,8 +142,16 @@ import jakarta.annotation.Nullable;
  * <li>{@link #clickLinkContaining(NavigateLink, String)} for {@code <navigateLink text="…"/>};</li>
  * <li>{@link #readGridCell(CaptureCell)} for {@code <captureCell/>};</li>
  * <li>{@link #readViewTitle(CaptureTitle)} for {@code <captureTitle/>};</li>
- * <li>{@link #clickDataGridLink(DataGridLink, String, boolean)} for {@code <dataGridLink/>}.</li>
+ * <li>{@link #clickDataGridLink(DataGridLink, String, boolean)} for {@code <dataGridLink/>};</li>
+ * <li>{@link #clickLinkIntoNewWindow(NavigateLink, String)} for {@code <navigateLink text="…" window="new"/>};</li>
+ * <li>{@link #pressListGridTool(ListGridTool, Tool)} for {@code <listGridTool/>}.</li>
  * </ul>
+ * <b>Windows.</b> {@code <navigateLink window="new"/>} follows a link into the new window it opens (or opens its
+ * {@code href} in a new tab), and the later steps run there; {@code <closeWindow/>} closes it and returns to its opener.
+ * This class keeps the opener of each window it opened, and the core keeps their contexts
+ * (see {@code ContextualExecutor.openWindowContexts()}). A window left open is closed when its interaction does not
+ * complete, and when the automation ends, so the next interaction or automation starts in the window this one started in.
+ * <p>
  * Every hook receives its text values with the tokens already substituted. Like any step, a hook throws when it
  * cannot do what the step says, and makes the implicit success check, {@link #checkSuccess(String)}, where the other
  * steps of its kind do. A hook that changes a list grid waits for the grid's fetch to end before it returns.
@@ -187,6 +202,11 @@ public abstract class InterpretedWebDriverExecutor<
 	private final Map<String, String> startingVariables = new java.util.TreeMap<>();
 	/** The step snapshots and video of the running automation, when the system properties ask for them; or null. */
 	private SailMedia media;
+	/**
+	 * The handles of the windows that opened the windows the automation is in, the most recent opener first, in step
+	 * with the contexts the core sets aside for them; empty in the window the automation started in.
+	 */
+	private final Deque<String> openerWindows = new ArrayDeque<>(4);
 
 	/**
 	 * Runs the automation's before procedure, interactions and after procedure, applying the test strategy.
@@ -198,6 +218,7 @@ public abstract class InterpretedWebDriverExecutor<
 	public void executeAutomation(@Nonnull Automation automation) {
 		testStrategyOverride(); // an invalid override fails here, before any step runs
 		initialiseAutomation(automation);
+		openerWindows.clear();
 		for (Map.Entry<String, String> variable : startingVariables.entrySet()) {
 			putVariable(variable.getKey(), variable.getValue());
 		}
@@ -219,6 +240,7 @@ public abstract class InterpretedWebDriverExecutor<
 			}
 		}
 		finally {
+			closeOpenWindows();
 			restoreViewUser();
 			if (media != null) {
 				media.finish();
@@ -267,7 +289,8 @@ public abstract class InterpretedWebDriverExecutor<
 		}
 
 		if (! completed) {
-			// Start the next interaction with no stale contexts
+			// Start the next interaction in the window this one started in, with no stale contexts
+			closeOpenWindows();
 			clear();
 		}
 	}
@@ -847,11 +870,18 @@ public abstract class InterpretedWebDriverExecutor<
 	 * displayed link on the page whose text contains it (see {@link #clickLinkContaining}). The {@code href}'s or
 	 * {@code text}'s tokens ({@code {run}}, {@code {var:name}}) are substituted first.
 	 * Any current context no longer has a document or view type, as the page is unknown.
+	 * <p>
+	 * With {@code window="new"}, the link is followed into the new window it opens, or the {@code href} is opened in a
+	 * new tab, and the later steps run there: see {@link #followLinkIntoNewWindow(NavigateLink)}.
 	 *
 	 * @param link	the step
 	 */
 	@Override
 	public void executeNavigateLink(NavigateLink link) {
+		if (NavigateLink.Window.newWindow == link.getWindow()) {
+			followLinkIntoNewWindow(link);
+			return;
+		}
 		if (peek() != null) {
 			super.executeNavigateLink(link);
 		}
@@ -870,6 +900,118 @@ public abstract class InterpretedWebDriverExecutor<
 		else {
 			selenide.get(href.startsWith("/") ? href.substring(1) : href);
 		}
+	}
+
+	/**
+	 * Follows a link into the new tab or window it opens, with {@code text} (see {@link #clickLinkIntoNewWindow}), or opens
+	 * the {@code href} in a new tab (an absolute URL as is, otherwise relative to the base URL), with its tokens
+	 * substituted; waits for the new window's page, and makes the new window the one the later steps run in. The opener's
+	 * contexts are set aside, untouched, until {@code <closeWindow/>}: the new window starts with none.
+	 *
+	 * @param link	the step, with {@code window="new"}
+	 * @throws IllegalStateException	if no new window opens (the step fails, and the steps stay in this window)
+	 */
+	private void followLinkIntoNewWindow(@Nonnull NavigateLink link) {
+		String opener;
+		String text = link.getText();
+		if (text != null) {
+			text = substituteTokens(text);
+			selenide.trace("Follow the link containing '" + text + "' into a new window");
+			opener = clickLinkIntoNewWindow(link, text);
+		}
+		else {
+			String href = substituteTokens(Objects.requireNonNull(link.getHref(), "href"));
+			selenide.trace("Open link " + href + " in a new window");
+			if (href.matches("^[a-zA-Z][a-zA-Z0-9+.-]*:.*")) {
+				opener = selenide.openUrlInNewWindow(href);
+			}
+			else {
+				opener = selenide.getInNewWindow(href.startsWith("/") ? href.substring(1) : href);
+			}
+		}
+		openerWindows.push(opener);
+		openWindowContexts();
+	}
+
+	/**
+	 * Closes the window that a {@code <navigateLink window="new"/>} opened and returns to its opener, then waits for the
+	 * opener's page. The contexts pushed in the closed window are dropped and the opener's are put back as they were.
+	 *
+	 * @param close	the step
+	 * @throws MetaDataException	if the automation is in the window it started in, so there is no window to close
+	 */
+	@Override
+	public void executeCloseWindow(@Nonnull CloseWindow close) {
+		String opener = openerWindows.peek();
+		if (opener == null) {
+			throw new MetaDataException("<closeWindow /> has no window to close: the automation is in the window it started in");
+		}
+		selenide.trace("Close the window and return to the window that opened it");
+		selenide.closeWindowAndReturnTo(opener);
+		openerWindows.pop();
+		closeWindowContexts();
+	}
+
+	/**
+	 * Closes every window the automation opened and has not closed, innermost first, returning to the window it started
+	 * in, and forgets their contexts. A window that cannot be closed is traced, not thrown, as this runs after a failure.
+	 */
+	private void closeOpenWindows() {
+		while (! openerWindows.isEmpty()) {
+			String opener = openerWindows.pop();
+			selenide.trace("Close a window that was left open");
+			try {
+				selenide.closeWindowAndReturnTo(opener);
+			}
+			catch (RuntimeException e) {
+				selenide.trace("    could not close it: " + e);
+			}
+		}
+		forgetOpenWindows();
+	}
+
+	/**
+	 * Goes back to the previous page in the window's history, as the browser's Back button does, and waits for it (and
+	 * for its renderer to settle). The executor cannot know which view that page shows, so the top context, if any, no
+	 * longer has a document or view type, as after {@code <navigateLink/>}: a script pushes a context for the page.
+	 *
+	 * @param back	the step
+	 * @throws IllegalStateException	if there is no earlier page in the window's history
+	 */
+	@Override
+	public void executeNavigateBack(@Nonnull NavigateBack back) {
+		selenide.trace("Navigate back");
+		selenide.back();
+		AC context = peek();
+		if (context != null) {
+			context.setDocumentName(null);
+			context.setViewType(null);
+			context.setList(null);
+		}
+	}
+
+	/**
+	 * Reloads the page, as the browser's Reload button does, and waits for it (and for its renderer to settle). The
+	 * contexts are unchanged, as the URL is.
+	 *
+	 * @param refresh	the step
+	 */
+	@Override
+	public void executeRefresh(@Nonnull Refresh refresh) {
+		selenide.trace("Refresh the page");
+		selenide.reload();
+	}
+
+	/**
+	 * Presses a list grid's toolbar tool: see {@link #pressListGridTool}.
+	 *
+	 * @param tool	the step
+	 */
+	@Override
+	public void executeListGridTool(@Nonnull ListGridTool tool) {
+		Tool which = Objects.requireNonNull(tool.getTool(), "tool"); // checked by ListGridTool.execute()
+		selenide.trace(String.format("Press the list grid's %s tool", which));
+		pressListGridTool(tool, which);
 	}
 
 	/**
@@ -1567,6 +1709,34 @@ public abstract class InterpretedWebDriverExecutor<
 	 */
 	protected boolean clickDataGridLink(@Nonnull DataGridLink link, @Nonnull String text, boolean action) {
 		throw notImplementedYet("<dataGridLink/>");
+	}
+
+	/**
+	 * Renderer hook for {@code <navigateLink text="…" window="new"/>}: clicks the first displayed link ({@code <a>}) on the
+	 * page whose visible text contains the text (case-sensitive; with {@code exact}, equals it), as a user does, switches to
+	 * the new tab or window it opens and waits for its page (see {@link Selenide#openNewWindow(Runnable, String)}).
+	 * It fails if no displayed link matches, or if no new window opens.
+	 *
+	 * @param link	the step
+	 * @param text	the text with the tokens substituted
+	 * @return the handle of the window the link was clicked in, which {@code <closeWindow/>} returns to
+	 * @throws UnsupportedOperationException	until the renderer implements it
+	 */
+	protected @Nonnull String clickLinkIntoNewWindow(@Nonnull NavigateLink link, @Nonnull String text) {
+		throw notImplementedYet("<navigateLink text=\"…\" window=\"new\"/>");
+	}
+
+	/**
+	 * Renderer hook for {@code <listGridTool/>}: presses the tool of the step's list grid, as a user does with the grid's
+	 * toolbar, then waits for what it does (the grid's rows fetched again for {@code refresh}; no row selected for
+	 * {@code clearSelection}). A renderer whose list grids have no control for the tool fails, saying so.
+	 *
+	 * @param step	the step, which names the list grid
+	 * @param tool	the tool
+	 * @throws UnsupportedOperationException	until the renderer implements it
+	 */
+	protected void pressListGridTool(@Nonnull ListGridTool step, @Nonnull Tool tool) {
+		throw notImplementedYet("<listGridTool/>");
 	}
 
 	/**

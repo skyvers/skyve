@@ -16,12 +16,15 @@ import org.skyve.metadata.sail.language.Automation;
 import org.skyve.metadata.sail.language.Automation.TestStrategy;
 import org.skyve.metadata.sail.language.step.context.PushEditContext;
 import org.skyve.metadata.sail.language.step.context.PushListContext;
+import org.skyve.metadata.sail.language.step.interaction.navigation.CloseWindow;
+import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateBack;
 import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateCalendar;
 import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateEdit;
 import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateLink;
 import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateList;
 import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateMap;
 import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateTree;
+import org.skyve.metadata.sail.language.step.interaction.navigation.Refresh;
 import org.skyve.metadata.view.View.ViewType;
 import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.web.UserAgentType;
@@ -42,6 +45,11 @@ public abstract class ContextualExecutor<T extends AutomationContext> implements
 	private TestStrategy testStrategy = null;
 
 	private Deque<T> contextStack = new ArrayDeque<>(8);
+	/**
+	 * The context stacks of the windows that opened the windows the automation is in, the most recent opener first;
+	 * empty in the window the automation started in. See {@link #openWindowContexts()}.
+	 */
+	private final Deque<Deque<T>> openerContextStacks = new ArrayDeque<>(4);
 
 	/**
 	 * The token that SAIL authors write in value-like attributes to make values unique to a run.
@@ -105,6 +113,43 @@ public abstract class ContextualExecutor<T extends AutomationContext> implements
 	}
 
 	/**
+	 * Sets the current window's contexts aside, untouched, for a new window that a step has just opened, which starts
+	 * with no contexts. {@link #closeWindowContexts()} puts them back.
+	 *
+	 * <p>Side effects: the context stack is empty until the new window's steps push contexts.
+	 *
+	 * <p>Complexity: O(1).
+	 */
+	protected final void openWindowContexts() {
+		openerContextStacks.push(contextStack);
+		contextStack = new ArrayDeque<>(8);
+	}
+
+	/**
+	 * Drops the contexts of the window being closed and puts back those of the window that opened it, as they were when
+	 * it opened the window.
+	 *
+	 * <p>Complexity: O(1).
+	 *
+	 * @throws MetaDataException	if no window was opened (the automation is in the window it started in)
+	 */
+	protected final void closeWindowContexts() {
+		Deque<T> opener = openerContextStacks.poll();
+		if (opener == null) {
+			throw new MetaDataException("<closeWindow /> has no window to close: the automation is in the window it started in");
+		}
+		contextStack = opener;
+	}
+
+	/**
+	 * Forgets every window opened and not closed, and their openers' contexts, leaving the current window's contexts as
+	 * they are. Executors that drive a browser call it once they have closed those windows themselves.
+	 */
+	protected final void forgetOpenWindows() {
+		openerContextStacks.clear();
+	}
+
+	/**
 	 * Do nothing but populate the current automation context.
 	 * This is intended to be called by sub-classes.
 	 */
@@ -121,6 +166,7 @@ public abstract class ContextualExecutor<T extends AutomationContext> implements
 	 * @param automation	the automation being executed
 	 */
 	protected final void initialiseAutomation(@Nonnull Automation automation) {
+		openerContextStacks.clear(); // an automation starts in one window
 		currentUxUi = automation.getUxui();
 		currentUserAgentType = automation.getUserAgentType();
 		testStrategy = automation.getTestStrategy();
@@ -240,15 +286,64 @@ public abstract class ContextualExecutor<T extends AutomationContext> implements
 	}
 	
 	/**
-	 * Do nothing but clear the automation context.
+	 * Do nothing but clear the automation context, or, for {@code window="new"}, set the contexts aside for the new
+	 * window (see {@link #openWindowContexts()}).
 	 * This is intended to be called by sub-classes.
+	 *
+	 * @throws MetaDataException	if there is no context, unless the link opens a new window
 	 */
 	@Override
 	public void executeNavigateLink(@Nonnull NavigateLink link) {
+		if (NavigateLink.Window.newWindow == link.getWindow()) {
+			openWindowContexts();
+			return;
+		}
 		T context = peek();
 		if (context == null) {
 			throw new MetaDataException("<NavigateLink /> has no context to navigate in");
 		}
+		forgetView(context);
+	}
+
+	/**
+	 * Do nothing but clear the top automation context, if any, as the page that back leads to is unknown.
+	 * This is intended to be called by sub-classes.
+	 */
+	@Override
+	public void executeNavigateBack(@Nonnull NavigateBack back) {
+		T context = peek();
+		if (context != null) {
+			forgetView(context);
+		}
+	}
+
+	/**
+	 * Do nothing: the reloaded page has the same URL, so the contexts are unchanged.
+	 * This is intended to be called by sub-classes.
+	 */
+	@Override
+	public void executeRefresh(@Nonnull Refresh refresh) {
+		// the contexts are unchanged
+	}
+
+	/**
+	 * Do nothing but put back the contexts of the window that opened the one being closed
+	 * (see {@link #closeWindowContexts()}).
+	 * This is intended to be called by sub-classes.
+	 *
+	 * @throws MetaDataException	if no window was opened
+	 */
+	@Override
+	public void executeCloseWindow(@Nonnull CloseWindow close) {
+		closeWindowContexts();
+	}
+
+	/**
+	 * Makes a context name no document, view type or list, for a page the executor cannot know.
+	 *
+	 * @param context	the context
+	 */
+	private static void forgetView(@Nonnull AutomationContext<?, ?> context) {
 		context.setDocumentName(null);
 		context.setViewType(null);
 		context.setList(null);

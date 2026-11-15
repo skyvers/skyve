@@ -1937,7 +1937,7 @@ public class PrimeFacesSelenide extends Selenide<
 	 *
 	 * @param text	the text
 	 * @return true if a link was clicked, false if no displayed link contains the text
-	 * @throws IllegalStateException	if the link opens another window, which SAIL does not follow
+	 * @throws IllegalStateException	if the link opens another window (follow it with {@code <navigateLink window="new"/>})
 	 */
 	public boolean followLinkContaining(@Nonnull String text) {
 		return followLinkContaining(text, false);
@@ -1951,7 +1951,7 @@ public class PrimeFacesSelenide extends Selenide<
 	 * @param text	the text
 	 * @param exact	true to match the link's whole text
 	 * @return true if a link was clicked, false if no displayed link matches
-	 * @throws IllegalStateException	if the link opens another window, which SAIL does not follow
+	 * @throws IllegalStateException	if the link opens another window (follow it with {@code <navigateLink window="new"/>})
 	 */
 	public boolean followLinkContaining(@Nonnull String text, boolean exact) {
 		waitForAjaxResponse();
@@ -1971,12 +1971,12 @@ public class PrimeFacesSelenide extends Selenide<
 	 *
 	 * @param link	the link
 	 * @param text	the text it was found by, for the messages
-	 * @throws IllegalStateException	if the link opens another window, which SAIL does not follow
+	 * @throws IllegalStateException	if the link opens another window (follow it with {@code <navigateLink window="new"/>})
 	 */
 	private void followLink(@Nonnull WebElement link, @Nonnull String text) {
 		String target = link.getDomAttribute("target");
 		if ((target != null) && (! target.isEmpty()) && (! "_self".equals(target)) && (! "_top".equals(target)) && (! "_parent".equals(target))) {
-			throw new IllegalStateException(String.format("The link containing '%s' opens another window (target %s), which SAIL does not follow", text, target));
+			throw new IllegalStateException(String.format("The link containing '%s' opens another window (target %s): follow it with <navigateLink window=\"new\" />", text, target));
 		}
 		trace("    click " + link.getDomAttribute("href"));
 		markPage();
@@ -2008,6 +2008,42 @@ public class PrimeFacesSelenide extends Selenide<
 		List<String> result = (List<String>) js(LINKS_JS + "return links.map(function(a) {return (a.innerText || '').replace(/\\s+/g, ' ').trim();})" +
 													".filter(function(t) {return t;}).slice(0, 30);");
 		return (result == null) ? new ArrayList<>() : result;
+	}
+
+	/**
+	 * Clicks the first displayed link ({@code <a>}) of the page whose visible text contains the text, or with
+	 * {@code exact}, whose visible text (trimmed, white space collapsed) equals it, both case-sensitive, as
+	 * {@link #followLinkContaining(String, boolean)} finds it; then follows it into the new tab or window it opens (see
+	 * {@link Selenide#openNewWindow(Runnable, String)}).
+	 *
+	 * @param text	the text
+	 * @param exact	true to match the link's whole text
+	 * @return the handle of the window the link was clicked in, or null if no displayed link matches
+	 * @throws IllegalStateException	if the link opens no new window
+	 */
+	public @Nullable String followLinkContainingIntoNewWindow(@Nonnull String text, boolean exact) {
+		waitForAjaxResponse();
+		WebElement link = (WebElement) js(LINKS_JS + "var t = arguments[0], exact = arguments[1];" +
+											"return links.find(function(a) {var x = (a.innerText || '');" +
+											"  return exact ? (x.replace(/\\s+/g, ' ').trim() === t) : (x.indexOf(t) >= 0);}) || null;",
+											text, Boolean.valueOf(exact));
+		if (link == null) {
+			return null;
+		}
+		trace("    click " + link.getDomAttribute("href") + " into a new window");
+		return openNewWindow(() -> click($(link)), "The link containing '" + text + "'");
+	}
+
+	/**
+	 * Waits for the page to load and, for a PrimeFaces page, for its ajax requests and Vue list grids (see
+	 * {@link #waitForAjaxResponse()}). Any other page, such as a PDF, is left once it has loaded.
+	 */
+	@Override
+	public void waitForPageToSettle() {
+		super.waitForPageToSettle();
+		if (Boolean.TRUE.equals(js("return !!window.PrimeFaces;"))) {
+			waitForAjaxResponse();
+		}
 	}
 
 	/**

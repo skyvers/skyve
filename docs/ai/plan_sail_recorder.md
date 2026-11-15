@@ -140,7 +140,7 @@ The output stays readable: one step per line, attributes in a fixed order, and s
 
 ## SAIL language gaps
 
-Status: gaps 1–4 were built on `sail` on 2026-11-05 (core 87e1c11cf9; PF fae0246ae9 and SC 62ef938e79; filters on every column type ddd405ab19 and b811c3175d) and are documented in [docs/sail.md](../sail.md). The proposals below are kept for the reasoning; where the built language differs, `docs/sail.md` is right. Gaps 5–10 are still proposals.
+Status: gaps 1–4 were built on `sail` on 2026-11-05 (core 87e1c11cf9; PF fae0246ae9 and SC 62ef938e79; filters on every column type ddd405ab19 and b811c3175d) and are documented in [docs/sail.md](../sail.md). The proposals below are kept for the reasoning; where the built language differs, `docs/sail.md` is right. Gaps 5–10 were proposals; 8 is done, and 6 and 10 are done in part (see each).
 
 These were found by comparing the language on `sail` (afaf79768b) with what a user can do in SC and PF. Gaps 1–4 come up in nearly every real recording, so they come before recorder phase 1. Gaps 5–10 wait for the recorder phase that needs them.
 
@@ -195,11 +195,11 @@ The phase 2 principle still holds: extend existing steps with optional attribute
 ### Later, when the recorder phase needs them
 
 5. **`listGridEdit`**: inline editing of a row in an SC list grid (the list grid's Edit item). It mirrors `dataGridEdit` and is SC only.
-6. **List grid tools:** `<listGridTool query="…" tool="refresh|clearSelection|export|chart"/>` for toolbar features that aren't view actions.
+6. **List grid tools:** `<listGridTool query="…" tool="refresh|clearSelection|export|chart"/>` for toolbar features that aren't view actions. **Done for `refresh` and `clearSelection`** on `sail-nav`, 2026-11-16: `<listGridTool module|document|query|model tool="refresh|clearSelection"/>` presses the SmartClient toolbar's Refresh or Deselect button; PrimeFaces has neither tool, so the step fails there saying so (see [Grids](../sail.md#grids)). `export` and `chart` are still open; the recorder does not write the step yet.
 7. **Tags and snapshots:** select a snapshot, create, update or delete one, and tag or untag rows. These need a way to answer a text prompt, because tag and snapshot names are typed into a prompt and `confirm` only answers yes/no. The recorder must at least note when a snapshot was active, because it changes the list's filter.
 8. **`dataGridMove`:** reorder a row of an ordered data grid, with `row`/`rowContaining` and a target position. **Done** on `sail-sc`, 2026-11-06: `<dataGridMove binding row|rowContaining to/>`, a real drag in both renderers (see [Grids](../sail.md#grids)).
 9. **Trees, maps and calendars** beyond navigation: expanding tree nodes, zooming into tree rows, and clicking map features and calendar events.
-10. **Browser and output:** `navigateBack`, `refresh`, links or reports that open a new tab, and checking a download's contents.
+10. **Browser and output:** `navigateBack`, `refresh`, links or reports that open a new tab, and checking a download's contents. **Done for new windows, back and refresh** on `sail-nav`, 2026-11-16: `<navigateLink … window="new"/>` follows a link (or opens an `href`) into a new tab, `<closeWindow/>` returns to its opener (windows nest, and each has its own contexts), `<navigateBack/>` and `<refresh/>` (see [Navigation](../sail.md#navigation)). Checking a download's contents is still open; the recorder does not write these steps yet.
 
 ### Found by the Apps run (2026-11-05)
 

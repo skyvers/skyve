@@ -1,6 +1,7 @@
 package sail.kitchenSink.pf;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -129,6 +130,85 @@ class PrimeFacesKitchenSinkSailIT extends AbstractPrimeFacesInterpretedSail {
 					() -> assertTrue(message.contains("PrimeFaces does not sort an empty data table"), message),
 					() -> assertTrue(message.contains("found no displayed link containing it: the page's links are ["), message),
 					() -> assertTrue(message.contains("<testWidget /> [NoSuchAction{run}] is not in the view"), message));
+	}
+
+	/**
+	 * The window steps fail with a reason when the page cannot do what they say: a link that opens its page in this
+	 * window rather than a new one, a link that opens a new window without {@code window="new"}, {@code <closeWindow/>}
+	 * with no window to close, and {@code <navigateBack/>} with no earlier page; and {@code <listGridTool/>} fails,
+	 * because PrimeFaces' list grids have no Refresh or Deselect tool. A window left open by an interaction that failed
+	 * is closed, so the next interaction has no window to close either. Run under Verify, so that every interaction runs
+	 * and each failure is reported.
+	 */
+	@Test
+	void windowAndToolFailures() {
+		String script = """
+				<automation uxui="tablet" userAgentType="tablet" testStrategy="Verify" xmlns="http://www.skyve.org/xml/sail">
+					<before>
+						<login user="admin" password="admin" />
+					</before>
+					<interaction name="A link that opens its page in this window">
+						<method>
+							<navigateEdit module="kitchensink" document="ListGridFixture" />
+							<navigateLink text="Open the selected lookup value" exact="true" window="new" />
+						</method>
+					</interaction>
+					<interaction name="No window to close">
+						<method>
+							<navigateEdit module="kitchensink" document="ListGridFixture" />
+							<closeWindow />
+						</method>
+					</interaction>
+					<interaction name="A link that opens a new window, without window">
+						<method>
+							<navigateEdit module="kitchensink" document="ListGridFixture" />
+							<navigateLink text="Open a PDF in a new window" />
+						</method>
+					</interaction>
+					<interaction name="No earlier page in a new window">
+						<method>
+							<navigateEdit module="kitchensink" document="ListGridFixture" />
+							<navigateLink text="Open a PDF in a new window" window="new" />
+							<navigateBack />
+						</method>
+					</interaction>
+					<interaction name="The failed interaction's window was closed">
+						<method>
+							<navigateEdit module="kitchensink" document="ListGridFixture" />
+							<testWidget binding="selectedVueId" />
+							<closeWindow />
+						</method>
+					</interaction>
+					<interaction name="No Refresh tool">
+						<method>
+							<navigateEdit module="kitchensink" document="ListGridFixture" />
+							<listGridTool module="kitchensink" query="qListGridFixtureVue" tool="refresh" />
+						</method>
+					</interaction>
+					<interaction name="No Deselect tool">
+						<method>
+							<navigateEdit module="kitchensink" document="ListGridFixture" />
+							<listGridTool module="kitchensink" query="qListGridFixtureFaces" tool="clearSelection" />
+						</method>
+					</interaction>
+					<after>
+						<logout />
+					</after>
+				</automation>
+				""";
+		AssertionError e = assertThrows(AssertionError.class, () -> sailString(script));
+		String message = e.getMessage();
+		assertAll(() -> assertTrue(message.contains("with 7 failure(s)"), message),
+					() -> assertTrue(message.contains("opened its page in this window, not a new one"), message),
+					() -> assertTrue(message.contains("opens another window (target _blank): follow it with <navigateLink window=\"new\" />"), message),
+					() -> assertTrue(message.contains("There is no earlier page in this window's history"), message),
+					() -> assertTrue(message.contains("\"The failed interaction's window was closed\" step 3 <closeWindow />: MetaDataException: " +
+															"<closeWindow /> has no window to close"), message),
+					() -> assertEquals(2, message.split("has no window to close", -1).length - 1, message),
+					() -> assertTrue(message.contains("<listGridTool tool=\"refresh\" /> on [kitchensink.qListGridFixtureVue] is not available in PrimeFaces: " +
+															"its Vue list grids and data tables have no Refresh tool"), message),
+					() -> assertTrue(message.contains("<listGridTool tool=\"clearSelection\" /> on [kitchensink.qListGridFixtureFaces] is not available in PrimeFaces: " +
+															"its Vue list grids and data tables have no Deselect tool"), message));
 	}
 
 	private static String automation(String steps) {

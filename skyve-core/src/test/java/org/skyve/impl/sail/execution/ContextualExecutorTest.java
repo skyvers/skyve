@@ -25,10 +25,13 @@ import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.query.MetaDataQueryDefinition;
 import org.skyve.metadata.sail.language.Automation;
 import org.skyve.metadata.sail.language.step.context.PushListContext;
+import org.skyve.metadata.sail.language.step.interaction.navigation.CloseWindow;
+import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateBack;
 import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateEdit;
 import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateLink;
 import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateList;
 import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateTree;
+import org.skyve.metadata.sail.language.step.interaction.navigation.Refresh;
 import org.skyve.metadata.user.User;
 import org.skyve.metadata.view.View.ViewType;
 import org.skyve.metadata.view.model.list.ListModel;
@@ -287,6 +290,94 @@ class ContextualExecutorTest {
 
 		assertAll(() -> assertNotSame(before, executor.getRun()),
 					() -> assertEquals(executor.getRun().getRunToken(), executor.getRunToken()));
+	}
+
+	/**
+	 * A link into a new window sets the opener's contexts aside untouched, and the new window starts with none; windows
+	 * nest, and each close drops the closed window's contexts and puts back its opener's.
+	 */
+	@Test
+	void aNewWindowSetsTheOpenersContextsAsideUntilItIsClosed() {
+		ContextualExecutor<AutomationContext<GenerateListContext, GenerateEditContext>> executor = newExecutor();
+		AutomationContext<GenerateListContext, GenerateEditContext> opener = newContext();
+		opener.setDocumentName("Contact");
+		opener.setViewType(ViewType.edit);
+		executor.push(opener);
+
+		executor.executeNavigateLink(newWindowLink());
+		assertNull(executor.peek(), "a new window starts with no contexts");
+		AutomationContext<GenerateListContext, GenerateEditContext> inNewWindow = newContext();
+		executor.push(inNewWindow);
+		executor.executeNavigateLink(newWindowLink());
+		AutomationContext<GenerateListContext, GenerateEditContext> inNestedWindow = newContext();
+		executor.push(inNestedWindow);
+
+		executor.executeCloseWindow(new CloseWindow());
+		AutomationContext<GenerateListContext, GenerateEditContext> afterFirstClose = executor.peek();
+		executor.executeCloseWindow(new CloseWindow());
+
+		assertAll(() -> assertSame(inNewWindow, afterFirstClose),
+					() -> assertSame(opener, executor.peek()),
+					() -> assertEquals("Contact", opener.getDocumentName(), "the opener's context is untouched"),
+					() -> assertEquals(ViewType.edit, opener.getViewType()),
+					() -> assertThrows(MetaDataException.class, () -> executor.executeCloseWindow(new CloseWindow()), "both windows are closed"));
+	}
+
+	@Test
+	void closeWindowInTheFirstWindowThrowsMetaDataException() {
+		ContextualExecutor<AutomationContext<GenerateListContext, GenerateEditContext>> executor = newExecutor();
+		executor.push(newContext());
+
+		MetaDataException e = assertThrows(MetaDataException.class, () -> executor.executeCloseWindow(new CloseWindow()));
+		assertAll(() -> assertTrue(e.getMessage().contains("has no window to close"), e.getMessage()),
+					() -> assertTrue(executor.peek() != null, "the contexts are untouched"));
+	}
+
+	@Test
+	void forgetOpenWindowsAndANewAutomationLeaveOneWindow() {
+		ContextualExecutor<AutomationContext<GenerateListContext, GenerateEditContext>> executor = newExecutor();
+		executor.executeNavigateLink(newWindowLink());
+		executor.forgetOpenWindows();
+		MetaDataException afterForget = assertThrows(MetaDataException.class, () -> executor.executeCloseWindow(new CloseWindow()));
+		executor.executeNavigateLink(newWindowLink());
+		executor.executeAutomation(new Automation());
+
+		assertAll(() -> assertTrue(afterForget.getMessage().contains("has no window to close"), afterForget.getMessage()),
+					() -> assertThrows(MetaDataException.class, () -> executor.executeCloseWindow(new CloseWindow()), "a new automation starts in one window"));
+	}
+
+	/**
+	 * Back leads to a page the executor cannot know, so the top context loses its view as after a link; a refresh keeps
+	 * it, as the URL is the same; neither needs a context.
+	 */
+	@Test
+	void backForgetsTheTopContextsViewAndRefreshKeepsIt() {
+		ContextualExecutor<AutomationContext<GenerateListContext, GenerateEditContext>> executor = newExecutor();
+		executor.executeNavigateBack(new NavigateBack());
+		executor.executeRefresh(new Refresh());
+		AutomationContext<GenerateListContext, GenerateEditContext> context = newContext();
+		context.setModuleName("admin");
+		context.setDocumentName("Contact");
+		context.setViewType(ViewType.edit);
+		context.setList(new PushListContext());
+		executor.push(context);
+
+		executor.executeRefresh(new Refresh());
+		String afterRefresh = context.getDocumentName();
+		executor.executeNavigateBack(new NavigateBack());
+
+		assertAll(() -> assertEquals("Contact", afterRefresh),
+					() -> assertEquals("admin", context.getModuleName()),
+					() -> assertNull(context.getDocumentName()),
+					() -> assertNull(context.getViewType()),
+					() -> assertNull(context.getList()));
+	}
+
+	private static NavigateLink newWindowLink() {
+		NavigateLink result = new NavigateLink();
+		result.setText("Print");
+		result.setWindow(NavigateLink.Window.newWindow);
+		return result;
 	}
 
 	private static ContextualExecutor<AutomationContext<GenerateListContext, GenerateEditContext>> newExecutor() {

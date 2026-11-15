@@ -14,8 +14,12 @@ import org.skyve.metadata.sail.language.step.interaction.grids.DataGridMove;
 import org.skyve.metadata.sail.language.step.interaction.grids.ListGridClearFilter;
 import org.skyve.metadata.sail.language.step.interaction.grids.ListGridFilter;
 import org.skyve.metadata.sail.language.step.interaction.grids.ListGridSort;
+import org.skyve.metadata.sail.language.step.interaction.grids.ListGridTool;
 import org.skyve.metadata.sail.language.step.interaction.grids.ListMembershipMove;
+import org.skyve.metadata.sail.language.step.interaction.navigation.CloseWindow;
+import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateBack;
 import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateMenu;
+import org.skyve.metadata.sail.language.step.interaction.navigation.Refresh;
 import org.skyve.metadata.sail.language.step.interaction.navigation.TestMenu;
 import org.skyve.metadata.sail.language.step.interaction.session.SwitchMode;
 
@@ -277,5 +281,52 @@ public abstract class SeleneseExecutor<T extends AutomationContext> extends Scri
 	@Override
 	public void executeListMembershipMove(@Nonnull ListMembershipMove move) {
 		comment("<listMembershipMove/> not supported by this generator");
+	}
+
+	/**
+	 * Emits a comment that {@code <navigateBack/>} is not supported, because this generator has no Selenese equivalent yet.
+	 * The top context loses its document and view type, as the interpreted executors' does.
+	 *
+	 * @param back the step being skipped
+	 */
+	@Override
+	public void executeNavigateBack(@Nonnull NavigateBack back) {
+		super.executeNavigateBack(back);
+		comment("<navigateBack/> not supported by this generator");
+	}
+
+	/**
+	 * Emits a comment that {@code <refresh/>} is not supported, because this generator has no Selenese equivalent yet.
+	 * The context is left as it is.
+	 *
+	 * @param refresh the step being skipped
+	 */
+	@Override
+	public void executeRefresh(@Nonnull Refresh refresh) {
+		comment("<refresh/> not supported by this generator");
+	}
+
+	/**
+	 * Emits a comment that {@code <closeWindow/>} is not supported, because this generator has no Selenese equivalent yet.
+	 * The contexts of the window that opened the closed one are put back, as the interpreted executors' are.
+	 *
+	 * @param close the step being skipped
+	 * @throws org.skyve.metadata.MetaDataException	if no {@code <navigateLink window="new"/>} opened a window
+	 */
+	@Override
+	public void executeCloseWindow(@Nonnull CloseWindow close) {
+		super.executeCloseWindow(close);
+		comment("<closeWindow/> not supported by this generator");
+	}
+
+	/**
+	 * Emits a comment that {@code <listGridTool/>} is not supported, because this generator has no Selenese equivalent yet.
+	 * The context is left as it is.
+	 *
+	 * @param tool the step being skipped
+	 */
+	@Override
+	public void executeListGridTool(@Nonnull ListGridTool tool) {
+		comment("<listGridTool/> not supported by this generator");
 	}
 }

@@ -47,12 +47,17 @@ import org.skyve.metadata.sail.language.step.interaction.grids.ListGridFilter;
 import org.skyve.metadata.sail.language.step.interaction.grids.ListGridFilter.FilterOperator;
 import org.skyve.metadata.sail.language.step.interaction.grids.ListGridSelect;
 import org.skyve.metadata.sail.language.step.interaction.grids.ListGridSort;
+import org.skyve.metadata.sail.language.step.interaction.grids.ListGridTool;
+import org.skyve.metadata.sail.language.step.interaction.grids.ListGridTool.Tool;
 import org.skyve.metadata.sail.language.step.interaction.grids.ListGridZoom;
 import org.skyve.metadata.sail.language.step.interaction.grids.ListMembershipMove;
 import org.skyve.metadata.sail.language.step.interaction.lookup.LookupDescriptionAutoComplete;
 import org.skyve.metadata.sail.language.step.interaction.lookup.LookupDescriptionPick;
+import org.skyve.metadata.sail.language.step.interaction.navigation.CloseWindow;
+import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateBack;
 import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateLink;
 import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateMenu;
+import org.skyve.metadata.sail.language.step.interaction.navigation.Refresh;
 import org.skyve.metadata.sail.language.step.interaction.navigation.TestMenu;
 import org.skyve.metadata.sail.language.step.interaction.session.Login;
 import org.skyve.metadata.sail.language.step.interaction.session.SwitchMode;
@@ -498,6 +503,77 @@ class SailLanguageXmlTest {
 					() -> assertThrows(MetaDataException.class, () -> steps.get(1).execute(executor)),
 					() -> assertDoesNotThrow(() -> steps.get(2).execute(executor)));
 		verify(executor).executeNavigateLink((NavigateLink) steps.get(2));
+	}
+
+	private static final String WINDOWS_AND_TOOLS = HEAD +
+			"<navigateLink text=\"Print Invoice\" window=\"new\"/>" +
+			"<navigateLink href=\"?a=e&amp;m=admin&amp;d=Contact\" window=\"new\"/>" +
+			"<navigateLink text=\"Print\" exact=\"true\" window=\"new\"/>" +
+			"<closeWindow/>" +
+			"<navigateBack/>" +
+			"<refresh/>" +
+			"<listGridTool query=\"qContacts\" tool=\"refresh\"/>" +
+			"<listGridTool module=\"admin\" document=\"Contact\" model=\"m\" tool=\"clearSelection\"/>" +
+			"<navigateLink text=\"Open\"/>" +
+			TAIL;
+
+	@Test
+	void marshalsAndUnmarshalsTheWindowAndListGridToolSteps() {
+		String xml = XMLMetaData.marshalSAIL(XMLMetaData.unmarshalSAILString(WINDOWS_AND_TOOLS));
+		List<Step> steps = XMLMetaData.unmarshalSAILString(xml).getInteractions().get(0).getSteps();
+		NavigateLink byText = (NavigateLink) steps.get(0);
+		NavigateLink byHref = (NavigateLink) steps.get(1);
+		NavigateLink exact = (NavigateLink) steps.get(2);
+		ListGridTool refresh = (ListGridTool) steps.get(6);
+		ListGridTool clear = (ListGridTool) steps.get(7);
+		NavigateLink sameWindow = (NavigateLink) steps.get(8);
+		assertAll(() -> assertEquals(9, steps.size()),
+					() -> assertTrue(xml.contains("window=\"new\""), xml),
+					() -> assertEquals("Print Invoice", byText.getText()),
+					() -> assertEquals(NavigateLink.Window.newWindow, byText.getWindow()),
+					() -> assertEquals("?a=e&m=admin&d=Contact", byHref.getHref()),
+					() -> assertEquals(NavigateLink.Window.newWindow, byHref.getWindow()),
+					() -> assertEquals(Boolean.TRUE, exact.getExact()),
+					() -> assertEquals(NavigateLink.Window.newWindow, exact.getWindow()),
+					() -> assertThat(steps.get(3), instanceOf(CloseWindow.class)),
+					() -> assertThat(steps.get(4), instanceOf(NavigateBack.class)),
+					() -> assertThat(steps.get(5), instanceOf(Refresh.class)),
+					() -> assertEquals("qContacts", refresh.getQueryName()),
+					() -> assertEquals(Tool.refresh, refresh.getTool()),
+					() -> assertEquals("admin", clear.getModuleName()),
+					() -> assertEquals("Contact", clear.getDocumentName()),
+					() -> assertEquals("m", clear.getModelName()),
+					() -> assertEquals(Tool.clearSelection, clear.getTool()),
+					() -> assertThat(sameWindow.getWindow(), is(nullValue())));
+	}
+
+	@Test
+	void anUnknownWindowOrToolAndAToolStepWithoutAToolAreRejectedByTheSchema() {
+		MetaDataException unknownTool = assertThrows(MetaDataException.class,
+														() -> XMLMetaData.unmarshalSAILString(HEAD + "<listGridTool query=\"q\" tool=\"export\"/>" + TAIL));
+		assertAll(() -> assertTrue(String.valueOf(unknownTool.getCause()).contains("export"), String.valueOf(unknownTool.getCause())),
+					() -> assertThrows(MetaDataException.class, () -> XMLMetaData.unmarshalSAILString(HEAD + "<listGridTool query=\"q\"/>" + TAIL)),
+					() -> assertThrows(MetaDataException.class, () -> XMLMetaData.unmarshalSAILString(HEAD + "<navigateLink text=\"x\" window=\"same\"/>" + TAIL)),
+					() -> assertThrows(MetaDataException.class, () -> XMLMetaData.unmarshalSAILString(HEAD + "<closeWindow name=\"x\"/>" + TAIL)),
+					() -> assertThrows(MetaDataException.class, () -> XMLMetaData.unmarshalSAILString(HEAD + "<refresh query=\"x\"/>" + TAIL)));
+	}
+
+	@Test
+	@SuppressWarnings("null") // before and after are present in the XML
+	void proceduresAcceptTheWindowAndListGridToolSteps() {
+		String xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" +
+						"<automation uxui=\"desktop\" userAgentType=\"desktop\" xmlns=\"http://www.skyve.org/xml/sail\">" +
+						"<before><navigateLink text=\"Print\" window=\"new\"/><closeWindow/><navigateBack/></before>" +
+						"<interaction name=\"i\"><method/></interaction>" +
+						"<after><refresh/><listGridTool query=\"q\" tool=\"clearSelection\"/></after></automation>";
+		Automation automation = XMLMetaData.unmarshalSAILString(xml);
+		List<Step> before = automation.getBefore().getSteps();
+		List<Step> after = automation.getAfter().getSteps();
+		assertAll(() -> assertThat(before.get(0), instanceOf(NavigateLink.class)),
+					() -> assertThat(before.get(1), instanceOf(CloseWindow.class)),
+					() -> assertThat(before.get(2), instanceOf(NavigateBack.class)),
+					() -> assertThat(after.get(0), instanceOf(Refresh.class)),
+					() -> assertThat(after.get(1), instanceOf(ListGridTool.class)));
 	}
 
 	@Test

@@ -1,7 +1,7 @@
 # Plan: completing SAIL
 
 Status: worked through on 2026-11-06 (see each item). Still open: 1.6, a
-child-text multi-line form, following a new window, and the unapproved runtime
+child-text multi-line form, and the unapproved runtime
 bugs in section 3. It collects every SAIL suggestion from the
 Biz Hub Apps regression run (2026-11-05) and the earlier SAIL completion run
 that is not done yet. The recorder has its own plan:
@@ -131,8 +131,10 @@ scripts W1–W8 in the Biz Hub `Apps/src/test/java/sail/apps/` suite.
   written `&#10;`, which works in both renderers and survives marshalling. Only
   worth doing if scripts with long text become painful to read.
 - `navigateLink text` is case-sensitive, takes the first link in page order and
-  refuses links that open a new window. **Done (fb6e39b010):** `exact="true"`. Still
-  open: a way to follow a new window (also recorder gap 10).
+  refuses links that open a new window. **Done (fb6e39b010):** `exact="true"`.
+  **Done (`sail-nav`, 2026-11-16):** following a new window, with
+  `navigateLink window="new"` and `closeWindow` (also recorder gap 10, with
+  `navigateBack` and `refresh`).
 
 ## 2. Harness flakes not yet explained
 

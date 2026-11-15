@@ -1584,6 +1584,41 @@
 		return { button: isc.AutoTest.getElement(S.objectLocator(buttons[0])), disabled: buttons[0].isDisabled() };
 	};
 
+	/** The icons of the list grid toolbar's tools that listGridTool presses, by SAIL tool name, with their names. */
+	var LIST_TOOLS = {
+		refresh: { icon: /icons\/refresh\.png$/, title: "Refresh" },
+		clearSelection: { icon: /icons\/clearSelection\.png$/, title: "Deselect" }
+	};
+
+	/** A list grid toolbar's tool, by SAIL tool name (refresh or clearSelection): { button, disabled, title } or { error }. */
+	S.listToolButton = function (locator, tool) {
+		var l = listOwner(locator);
+		if (l.error) {
+			return l;
+		}
+		var wanted = LIST_TOOLS[tool];
+		if (!wanted) {
+			return { error: "SAIL has no list grid tool " + tool };
+		}
+		var tools = l.owner.getMembers()[0];
+		var buttons = (tools && tools.getMembers ? tools.getMembers() : []).filter(function (m) {
+			return isc.isA.Canvas(m) && wanted.icon.test(String(m.icon || ""));
+		});
+		if (!buttons.length) {
+			return { error: "the list grid's toolbar has no " + wanted.title + " tool" };
+		}
+		return { button: isc.AutoTest.getElement(S.objectLocator(buttons[0])), disabled: buttons[0].isDisabled(), title: wanted.title };
+	};
+
+	/** The number of rows selected in a list grid, or { error }. */
+	S.listSelectedCount = function (locator) {
+		var l = listOwner(locator);
+		if (l.error) {
+			return l;
+		}
+		return (l.grid.getSelectedRecords() || []).length;
+	};
+
 	/**
 	 * The sort a list grid shows, and the header button that sorts by a column: { sorted (the column is the only sort),
 	 * descending, header, canSort } or { error, retry }.
