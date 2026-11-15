@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <!--
-	SmartClient admin suite, restore bracket part 2: restore the backup that 00-backup.xml made (the only one: 00 checks
-	that no other exists, as this restores the oldest listed), which puts back the data as it was before the suite (and
-	before 99-truncate.xml), then delete that backup. SmartClientAdminSuiteSailIT runs this whenever 00-precondition.xml and
+	SmartClient admin suite, restore bracket part 2: restore the backup that 00-backup.xml made (the newest, so the first
+	listed), which puts back the data as it was before the suite (and before 99-truncate.xml), then delete that backup. SmartClientAdminSuiteSailIT runs this whenever 00-precondition.xml and
 	00-backup.xml passed, even when a later file (99-truncate.xml too) fails.
 -->
 <automation uxui="desktop" userAgentType="desktop" testStrategy="Assert"
@@ -18,11 +17,8 @@
 		<method>
 			<navigateEdit module="admin" document="DataMaintenance" />
 			<tabSelect path="Backup/Restore" />
-			<testGridRows module="admin" query="BackupsModel" minRows="1" maxRows="1" />
-			<!--
-				RUNTIME BUG: backups are listed oldest first (BackupsModel re-sorts its descending file list into a TreeMap).
-				On a server the suite keeps clean, the only backup is the one 00-backup.xml made; this restores the oldest.
-			-->
+			<testGridRows module="admin" query="BackupsModel" minRows="1" />
+			<comment>Backups are listed newest first, so the first is the one 00-backup.xml made</comment>
 			<listGridSelect module="admin" query="BackupsModel" row="0" />
 			<comment>Restore options: error on orphaned content, reindex both, delete the existing data first</comment>
 			<dataEnter binding="contentRestoreOption" value="2" />
@@ -54,9 +50,20 @@
 			<testGridRows module="admin" document="DataGroup" rowContaining="SAIL restore marker" maxRows="0" timeoutMillis="30000" />
 			<navigateEdit module="admin" document="DataMaintenance" />
 			<tabSelect path="Backup/Restore" />
+			<comment>The restore keeps the backups, so the first is still the one 00-backup.xml made. Other backups may be listed, so the delete is checked by its deselecting the backup.</comment>
 			<listGridSelect module="admin" query="BackupsModel" row="0" />
 			<action name="DeleteBackup" confirm="true" />
-			<testGridRows module="admin" query="BackupsModel" maxRows="0" timeoutMillis="10000" />
+			<testWidget action="DeleteBackup" enabled="false" />
+		</method>
+	</interaction>
+	<interaction name="Home: Update My Details after the restore">
+		<method>
+			<comment>Runtime issue P4: the restore wrote the tables behind Hibernate's shared cache, so this save failed with an optimistic lock. It runs after the backup's delete, so a failure here leaves no backup behind. It leaves admin's mobile number changed; nothing depends on it.</comment>
+			<navigateEdit module="admin" document="UserDashboard" />
+			<dataEnter binding="currentUser.contact.mobile" value="0400 002 {run}" />
+			<action name="UpdateMyDetails" />
+			<navigateEdit module="admin" document="UserDashboard" />
+			<testValue binding="currentUser.contact.mobile" value="0400 002 {run}" />
 		</method>
 	</interaction>
 	<after>

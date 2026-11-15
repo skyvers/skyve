@@ -42,8 +42,8 @@
 			<tabSelect path="Import/Export" />
 			<tabSelect path="Backup/Restore" />
 			<action name="RefreshBackupList" />
-			<comment>00-backup.xml (always run first, even with -Dsail.suite.only) made the one backup listed</comment>
-			<testGridRows module="admin" query="BackupsModel" minRows="1" maxRows="1" />
+			<comment>00-backup.xml (always run first, even with -Dsail.suite.only) made a backup</comment>
+			<testGridRows module="admin" query="BackupsModel" minRows="1" />
 			<comment>Delete, Download and Restore need a backup selected</comment>
 			<testWidget action="DeleteBackup" enabled="false" />
 			<listGridSelect module="admin" query="BackupsModel" row="0" />

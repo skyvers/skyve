@@ -1,9 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <!--
 	PrimeFaces admin suite, set up after 00-precondition.xml: back up the data before the suite changes it.
-	99-restore.xml restores the first backup listed, which is the oldest (runtime bug 1); 00-precondition.xml has checked
-	that no other backup exists, so the one restored is this one. The suite then leaves the server as it found it (less the
-	completed jobs list, see below) and can be rerun.
+	99-restore.xml restores the first backup listed, the newest, which is this one. The suite then leaves the server as it
+	found it (less the completed jobs list, see below) and can be rerun.
 -->
 <automation uxui="tablet" userAgentType="tablet" testStrategy="Assert"
 			xsi:schemaLocation="http://www.skyve.org/xml/sail ../../../../../../main/java/schemas/sail.xsd"

@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <!--
-	PrimeFaces admin suite, first set up file: check that the server has no backup and no SAIL restore marker.
-	99-restore.xml restores the first backup listed (the oldest, runtime bug 1), so it runs only when this file has passed
-	(PrimeFacesAdminSuiteSailIT, SailSuite): then the only backup is the one 00-backup.xml makes.
+	PrimeFaces admin suite, first set up file: check that no SAIL restore marker is left over. A marker left over means an
+	earlier run did not restore its backup, so the data may not be as the suite expects.
+	Other backups may exist: 99-restore.xml restores the first backup listed, the newest, which is the one 00-backup.xml
+	makes. PrimeFacesAdminSuiteSailIT restores only when this file and 00-backup.xml have passed (SailSuite).
 -->
 <automation uxui="tablet" userAgentType="tablet" testStrategy="Assert"
 			xsi:schemaLocation="http://www.skyve.org/xml/sail ../../../../../../main/java/schemas/sail.xsd"
@@ -12,13 +13,9 @@
 		<login user="admin" password="admin" />
 		<testSuccess />
 	</before>
-	<interaction name="Precondition: no stray backup or restore marker">
+	<interaction name="Precondition: no restore marker left over">
 		<method>
-			<comment>99-restore.xml restores the first backup listed (the oldest), so a stray backup (an interrupted run, a suite whose restore failed) would roll the database back to an unknown state. If this fails, delete the stray backups (Data Maintenance, Backup/Restore) and any SAIL restore marker data group, check the data, and run again. PrimeFacesAdminSuiteSailIT then does not restore.</comment>
-			<navigateEdit module="admin" document="DataMaintenance" />
-			<tabSelect path="Backup/Restore" />
-			<action name="RefreshBackupList" />
-			<testGridRows module="admin" query="BackupsModel" maxRows="0" />
+			<comment>A marker is left over when a run was interrupted or its restore failed, so the data may hold what that run did. If this fails, check the data (or restore that run's backup), delete the SAIL restore marker data group, and run again. PrimeFacesAdminSuiteSailIT then does not restore.</comment>
 			<navigateMenu module="admin" item="Security Admin/Data Groups" />
 			<testGridRows module="admin" document="DataGroup" rowContaining="SAIL restore marker" maxRows="0" />
 		</method>

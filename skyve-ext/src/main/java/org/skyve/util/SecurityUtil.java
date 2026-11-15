@@ -386,7 +386,15 @@ public class SecurityUtil {
 	}
 
 	/**
-	 * Create Skyve's version of Spring Security's DelegatingPasswordEncoder (from their PasswordEncoderFactories class)
+	 * Create Skyve's version of Spring Security's DelegatingPasswordEncoder (from their PasswordEncoderFactories class).
+	 *
+	 * <p>Unlike Spring's, its {@code matches} never throws for a stored password it cannot use: one with no
+	 * {@code {id}} prefix, a malformed or unknown prefix, or a hash its encoder cannot decode. Such a stored
+	 * password matches no password, so a sign in with it fails as bad credentials. This is what a password
+	 * redacted in a backup (sensitivity secret) looks like after a restore.
+	 *
+	 * <p>Side effects: logs a warning, without the stored value, each time a stored password cannot be used.
+	 *
 	 * @return	Skyve's delegating password encoder
 	 */
 	public static @Nonnull PasswordEncoder createDelegatingPasswordEncoder() {
@@ -396,7 +404,20 @@ public class SecurityUtil {
 		encoders.put("bcrypt", BCRYPT_PASSWORD_ENCODER);
 		encoders.put("pbkdf2", Pbkdf2PasswordEncoder.defaultsForSpringSecurity_v5_8());
 		encoders.put("scrypt", SCryptPasswordEncoder.defaultsForSpringSecurity_v5_8());
-		return new DelegatingPasswordEncoder(encodingId, encoders);
+		return new DelegatingPasswordEncoder(encodingId, encoders) {
+			@Override
+			public boolean matches(CharSequence rawPassword, String prefixEncodedPassword) {
+				try {
+					return super.matches(rawPassword, prefixEncodedPassword);
+				}
+				// Spring Security and its encoders throw these for a stored value they cannot decode.
+				// Their messages can hold the stored value, so only the exception type is logged.
+				catch (IllegalArgumentException | IndexOutOfBoundsException e) {
+					LOGGER.warn("A stored password hash cannot be used, so it matches no password ({})", e.getClass().getSimpleName());
+					return false;
+				}
+			}
+		};
 	}
 	
 	/**
