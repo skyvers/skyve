@@ -238,7 +238,12 @@ stays open after a success with its close icon: Apps' A/B runs drive Skyve
 without this fix (master) with this harness, and Apps' Secure Drive workflow
 presses an upload action. The executor waits for a closing overlay to finish
 closing, so it does not mistake the success growl shown while the page closes
-for a page that stayed open.
+for a page that stayed open: it reads the growl, then the page's state (closed,
+closing or open) in one script, and treats the page as stayed open only when it
+is shown and not closing. Before it falls back to the close icon it checks
+again, so a page that closed itself is never taken for one that stayed open.
+(An earlier version read the closed and closing checks separately, and failed
+once when the hide transition ended between them.)
 
 **Status:** fixed (35ee72a540).
 
