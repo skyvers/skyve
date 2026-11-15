@@ -346,6 +346,12 @@
 			<save />
 			<comment>The saved fixture now shows in the view's "Saved selections" list grid</comment>
 			<testGridRows module="kitchensink" query="qModelLookupFixtures" rowContaining="SAIL model lookup {run}" minRows="1" maxRows="1" />
+			<comment>Lists with no menu item, opened by their URLs: the document's default query, and a query (runtime issue SC-3)</comment>
+			<navigateList module="kitchensink" document="ModelLookupFixture" />
+			<testGridRows module="kitchensink" document="ModelLookupFixture" rowContaining="SAIL model lookup {run}" minRows="1" maxRows="1" />
+			<navigateList module="kitchensink" query="qModelLookupFixtures" />
+			<testGridRows module="kitchensink" query="qModelLookupFixtures" rowContaining="SAIL model lookup {run}" minRows="1" maxRows="1" />
+			<navigateEdit module="kitchensink" document="ModelLookupFixture" />
 			<comment>Filter and sort a list grid in a view (sc-kitchensink-sail-find.xml covers the operators on a list view)</comment>
 			<listGridFilter module="kitchensink" query="qModelLookupFixtures" column="name" value="{run}" />
 			<testGridRows module="kitchensink" query="qModelLookupFixtures" minRows="1" maxRows="1" />

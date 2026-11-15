@@ -29,11 +29,8 @@
 			<testWidget binding="queryTrace" enabled="true" />
 			<dataEnter binding="queryTrace" value="true" />
 			<testValue binding="queryTrace" value="true" />
-			<!--
-				RUNTIME BEHAVIOUR (SmartClient): GenerateMenuSAIL set the view's selected tab to Results, and the checkbox's
-				rerender restores that tab, so the view jumps away from Instrumentation. Select it again.
-			-->
-			<tabSelect path="Instrumentation" />
+			<comment>GenerateMenuSAIL set the view's selected tab to Results: the check box's rerender keeps the tab the user selected (runtime issue SC-7)</comment>
+			<testWidget binding="queryTrace" visible="true" />
 			<dataEnter binding="queryTrace" value="false" />
 			<testValue binding="queryTrace" value="false" />
 			<tabSelect path="User Remember-Me Tokens" />

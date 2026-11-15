@@ -735,6 +735,9 @@ tests. The SAIL ITs are:
 | `SmartClientAdminSailIT` | `sail/admin/sc/sc-admin-sail.xml` | SC |
 | `SmartClientAdminSuiteSailIT` | `sail/admin/sc/suite/*.xml` | SC |
 | `SmartClientDataGridSortSailIT` | an inline script, then a column header sort of a data grid and a Save through `SmartClientSelenide` (no SAIL step sorts a data grid); runtime issue SC-12 | SC |
+| `SmartClientFastTypingSailIT` | the User wizard's new password, whose change handler rerenders, typed in one burst of keys through Selenium, then left with Tab, then typed again with Next clicked at once (runtime issue SC-8) | SC |
+| `SmartClientListGridSelectedEventSailIT` | selects a List Grid Fixture list grid row whose selected event rerenders: one request and one selection event, and the selection kept (runtime issue SC-10) | SC |
+| `SmartClientPushGrowlSailIT` | a growl, then a pushed growl: both stay showing (runtime issue SC-6) | SC |
 | `SmartClientServerRolesSailIT` | `sail/admin/sc/suite/03-security-admin.xml` with no `viewRoles` registration: the new user's views are built with the roles the server reports. Needs `sail.recording` on. | SC |
 | `SmartClientRecorderRoundTripSailIT` | records `sail/kitchenSink/sc/sc-recorder-round-trip.xml`, `sc-recorder-round-trip-more.xml` (grids, lookups, uploads, list filters, captures, questions), an admin contacts workflow and checks added through the panel, and replays the recordings; also checks that the home page is unchanged unless recording. See [Recording](#recording). Needs `sail.recording` on. | SC |
 | `PrimeFacesRecorderRoundTripSailIT` | records `sail/kitchenSink/pf/pf-recorder-round-trip.xml`, `pf-recorder-round-trip-more.xml` (grids, lookups, uploads, list filters, captures, questions), an admin contacts workflow and checks added through the panel, and replays the recordings; also checks the sign out warning and that pages are unchanged unless recording. See [Recording](#recording). Needs `sail.recording` on. | PF, tablet |
@@ -1374,14 +1377,13 @@ dropped silently.
   browser has, which is the first page of a paged list. Use `listGridFilter`
   and `listGridSort` to bring the row onto it.
 - **Runtime bugs.** Some runtime bugs have workarounds in the scripts or the
-  executors, such as the second click on a Vue list grid row (P7). SC's missing
-  Backup and Restore "started" growls are left out of its green path. See the
+  executors, such as the second click on a Vue list grid row (P7). See the
   issues list.
 
 ## Runtime Bugs Found
 
-The suites found Skyve runtime bugs that are outside SAIL's scope. They are
-reported, not fixed, and the scripts avoid or work around them. Each one, with
+The suites found Skyve runtime bugs that are outside SAIL's scope. Most are
+now fixed; the scripts avoid or work around the rest. Each one, with
 its reproduction and suspected cause, is in
 [SAIL runtime issues](sail-runtime-issues.md).
 

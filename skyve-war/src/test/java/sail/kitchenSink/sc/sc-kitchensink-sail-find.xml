@@ -401,16 +401,25 @@
 		</method>
 	</interaction>
 
-	<interaction name="Links: a link in page markup">
+	<interaction name="Links: a link in page markup, and tokens in href and bizId">
 		<method>
-			<comment>The List Grid Fixture's blurb links to the lookup value selected in its second list grid. In SmartClient,
-				selecting a row there rerenders the view without end (runtime issue), so the link is followed with nothing
-				selected, which opens a new lookup value.</comment>
+			<comment>Selecting a row of the List Grid Fixture's second list grid rerenders the view, which shows the row's id and
+				a blurb's link to it. The rerender refreshes the grid, which keeps the row selected and does not select it
+				again (runtime issue SC-10).</comment>
 			<navigateEdit module="kitchensink" document="ListGridFixture" />
+			<listGridFilter module="kitchensink" query="qListGridFixtureFaces" column="description" value="SAIL filter {run} b" />
+			<listGridSelect module="kitchensink" query="qListGridFixtureFaces" rowContaining="SAIL filter {run} b" />
+			<captureValue binding="selectedFacesId" variable="lookupId" />
 			<navigateLink text="Open the selected lookup value" exact="true" />
 			<pushEditContext module="kitchensink" document="LookupDescription" />
-			<testWidget binding="description" enabled="true" />
-			<testValue binding="description" value="" />
+			<testValue binding="description" value="SAIL filter {run} b" />
+			<popContext />
+			<comment>The captured id in a bizId and in an href</comment>
+			<navigateEdit module="kitchensink" document="LookupDescription" bizId="{var:lookupId}" />
+			<testValue binding="description" value="SAIL filter {run} b" />
+			<navigateLink href="?a=e&amp;m=kitchensink&amp;d=LookupDescription&amp;i={var:lookupId}" />
+			<pushEditContext module="kitchensink" document="LookupDescription" />
+			<testValue binding="description" value="SAIL filter {run} b" />
 			<popContext />
 		</method>
 	</interaction>

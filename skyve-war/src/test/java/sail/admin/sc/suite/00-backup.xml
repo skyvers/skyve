@@ -31,12 +31,8 @@
 			<dataEnter binding="dataSensitivity" value="1" />
 			<testValue binding="dataSensitivity" value="none" />
 			<action name="Backup" />
-			<!--
-				RUNTIME DIFFERENCE: SmartClient does not show the action's "Backup Job has been started" growl, only the
-				job's "Backup Completed" push message later, which arrives on its own schedule. The Jobs list below waits for
-				the job instead.
+			<comment>The job's "Backup Completed" push message, which can arrive at once, is added to this growl, not put in its place (runtime issue SC-6)</comment>
 			<testMessage contains="Backup Job has been started" type="info" />
-			-->
 			<comment>The backup is a job: wait for it to finish</comment>
 			<navigateMenu module="admin" item="Jobs" />
 			<testGridRows module="admin" query="qCompletedJobs" rowContaining="Backup" minRows="1" timeoutMillis="60000" />

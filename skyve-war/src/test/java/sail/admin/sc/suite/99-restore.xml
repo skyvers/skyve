@@ -29,11 +29,7 @@
 			<testValue binding="restorePreProcess" value="deleteData" />
 			<action name="Restore" confirm="false" />
 			<action name="Restore" confirm="true" />
-			<!--
-				RUNTIME DIFFERENCE: as with Backup (00-backup.xml), SmartClient does not show the action's "Restore Job has been
-				started" growl, only the job's "System Restore complete" push message later. The Jobs list below waits for the job.
 			<testMessage contains="Restore Job has been started" type="info" />
-			-->
 			<comment>The restore is a job: wait for its row in the completed jobs list (00 cleared the list before the backup, so the restored list has no RestoreJob row until this one finishes)</comment>
 			<navigateMenu module="admin" item="Jobs" />
 			<testGridRows module="admin" query="qCompletedJobs" rowContaining="RestoreJob" minRows="1" timeoutMillis="120000" />

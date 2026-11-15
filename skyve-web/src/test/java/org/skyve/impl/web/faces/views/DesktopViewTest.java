@@ -27,6 +27,7 @@ import java.util.Locale;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+import org.skyve.domain.Bean;
 import org.skyve.impl.metadata.module.menu.EditItem;
 import org.skyve.impl.metadata.module.menu.ListItem;
 import org.skyve.impl.metadata.user.UserImpl;
@@ -43,6 +44,8 @@ import org.skyve.metadata.module.menu.MenuItem;
 import org.skyve.metadata.module.query.MetaDataQueryDefinition;
 import org.skyve.metadata.router.UxUi;
 import org.skyve.metadata.user.User;
+import org.skyve.metadata.user.UserAccess;
+import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.util.Icons;
 import org.skyve.web.UserAgentType;
 import org.skyve.web.WebAction;
@@ -278,6 +281,141 @@ class DesktopViewTest {
 
 		verify(facesContext, never()).addMessage(any(), any());
 		assertEquals("details.showMember(isc.ListView.contents);isc.ListView.setGridDataSource('admin_q');", view.getUiScript());
+	}
+
+	/**
+	 * A list opened by its URL, with no menu item, defines its own data source before showing it (runtime issue SC-3),
+	 * when the user may fetch its rows. The definition does nothing when the menu has already defined it.
+	 */
+	@Test
+	void preRenderDefinesTheDataSourceOfAQueryListWithNoMenuItem() {
+		UserImpl user = mockUser();
+		Document document = mockListQuery(user, "admin", "q", "Contact");
+		when(Boolean.valueOf(user.canAccess(UserAccess.queryAggregate("admin", "q"), UxUi.DESKTOP_NAME))).thenReturn(Boolean.TRUE);
+		when(Boolean.valueOf(user.canReadDocument(document))).thenReturn(Boolean.TRUE);
+
+		String script = listUiScript(user, null, "q");
+
+		assertTrue(script.startsWith("if(window.admin_q){}else{isc.RestDataSource.create({"), script);
+		assertTrue(script.contains("ID:'admin_q',modoc:'admin.Contact'"), script);
+		assertTrue(script.endsWith("});}\ndetails.showMember(isc.ListView.contents);isc.ListView.setGridDataSource('admin_q');"), script);
+	}
+
+	/**
+	 * A document name in a list URL means the document's default query, which the user needs document aggregate access to.
+	 */
+	@Test
+	void preRenderDefinesTheDataSourceOfADocumentListWithNoMenuItem() {
+		UserImpl user = mockUser();
+		Customer customer = user.getCustomer();
+		Module module = mockModule(customer, "admin");
+		MetaDataQueryDefinition query = mock(MetaDataQueryDefinition.class);
+		when(module.getDocumentDefaultQuery(customer, "Contact")).thenReturn(query);
+		Document document = mockQueryDocument(customer, module, query, "Contact", "Contact");
+		when(Boolean.valueOf(user.canAccess(UserAccess.documentAggregate("admin", "Contact"), UxUi.DESKTOP_NAME))).thenReturn(Boolean.TRUE);
+		when(Boolean.valueOf(user.canReadDocument(document))).thenReturn(Boolean.TRUE);
+
+		String script = listUiScript(user, null, "Contact");
+
+		assertTrue(script.startsWith("if(window.admin_Contact){}else{isc.RestDataSource.create({"), script);
+		assertTrue(script.endsWith("isc.ListView.setGridDataSource('admin_Contact');"), script);
+	}
+
+	/**
+	 * No data source is defined for a list that the menu does not give the user access to, nor for one whose document
+	 * the user cannot read: the list servlet would refuse their rows.
+	 */
+	@Test
+	void preRenderDefinesNoDataSourceForAListTheUserMayNotFetch() {
+		UserImpl user = mockUser();
+		Document document = mockListQuery(user, "admin", "q", "Contact");
+		when(Boolean.valueOf(user.canReadDocument(document))).thenReturn(Boolean.TRUE);
+		assertEquals("details.showMember(isc.ListView.contents);isc.ListView.setGridDataSource('admin_q');",
+						listUiScript(user, null, "q"),
+						"no access to the query");
+
+		when(Boolean.valueOf(user.canAccess(UserAccess.queryAggregate("admin", "q"), UxUi.DESKTOP_NAME))).thenReturn(Boolean.TRUE);
+		when(Boolean.valueOf(user.canReadDocument(document))).thenReturn(Boolean.FALSE);
+		assertEquals("details.showMember(isc.ListView.contents);isc.ListView.setGridDataSource('admin_q');",
+						listUiScript(user, null, "q"),
+						"cannot read the document");
+	}
+
+	/**
+	 * A model list opened by its URL defines its data source when the user has access to the model.
+	 */
+	@Test
+	void preRenderDefinesTheDataSourceOfAModelListWithNoMenuItem() {
+		UserImpl user = mockUser();
+		Customer customer = user.getCustomer();
+		Module module = mockModule(customer, "admin");
+		Document document = mock(Document.class);
+		when(module.getDocument(customer, "Contact")).thenReturn(document);
+		when(document.getName()).thenReturn("Contact");
+		when(document.getOwningModuleName()).thenReturn("admin");
+		ListModel<Bean> model = mock(ListModel.class);
+		doReturn(model).when(document).getListModel(customer, "m", true);
+		when(model.getDrivingDocument()).thenReturn(document);
+		when(model.getColumns()).thenReturn(new ArrayList<>());
+		when(model.getLocalisedDescription()).thenReturn("Contacts");
+		when(customer.getModule("admin")).thenReturn(module);
+		when(Boolean.valueOf(user.canReadDocument(document))).thenReturn(Boolean.TRUE);
+
+		assertEquals("details.showMember(isc.ListView.contents);isc.ListView.setGridDataSource('admin_Contact__m');",
+						listUiScript(user, "Contact", "m"),
+						"no access to the model");
+
+		when(Boolean.valueOf(user.canAccess(UserAccess.modelAggregate("admin", "Contact", "m"), UxUi.DESKTOP_NAME))).thenReturn(Boolean.TRUE);
+		String script = listUiScript(user, "Contact", "m");
+		assertTrue(script.startsWith("if(window.admin_Contact__m){}else{isc.RestDataSource.create({"), script);
+		assertTrue(script.endsWith("isc.ListView.setGridDataSource('admin_Contact__m');"), script);
+	}
+
+	/**
+	 * Gives module {@code moduleName} the query {@code queryName} of document {@code documentName}, returning the document.
+	 */
+	private static Document mockListQuery(UserImpl user, String moduleName, String queryName, String documentName) {
+		Customer customer = user.getCustomer();
+		Module module = mockModule(customer, moduleName);
+		MetaDataQueryDefinition query = mock(MetaDataQueryDefinition.class);
+		when(module.getMetaDataQuery(queryName)).thenReturn(query);
+		return mockQueryDocument(customer, module, query, queryName, documentName);
+	}
+
+	/**
+	 * Makes the query, named {@code queryName}, list document {@code documentName} of the module, returning the document.
+	 */
+	private static Document mockQueryDocument(Customer customer, Module module, MetaDataQueryDefinition query, String queryName, String documentName) {
+		when(query.getName()).thenReturn(queryName);
+		when(query.getDocumentName()).thenReturn(documentName);
+		when(query.getLocalisedDescription()).thenReturn(documentName + "s");
+		when(query.getDocumentModule(customer)).thenReturn(module);
+		when(query.getOwningModule()).thenReturn(module);
+		when(query.getColumns()).thenReturn(new ArrayList<>());
+		Document result = mock(Document.class);
+		when(module.getDocument(customer, documentName)).thenReturn(result);
+		when(result.getName()).thenReturn(documentName);
+		return result;
+	}
+
+	/**
+	 * Pre-renders a list of module "admin" (a model of the document when one is given), returning the UI script.
+	 */
+	private static String listUiScript(UserImpl user, @Nullable String documentName, String queryOrModelName) {
+		DesktopView view = new PreRenderDesktopView(user);
+		view.setWebActionParameter(WebAction.l);
+		view.setBizModuleParameter("admin");
+		if (documentName != null) {
+			view.setBizDocumentParameter(documentName);
+		}
+		view.setQueryNameParameter(queryOrModelName);
+
+		FacesContext facesContext = preRender(view);
+
+		verify(facesContext, never()).addMessage(any(), any());
+		String result = view.getUiScript();
+		assertNotNull(result);
+		return result;
 	}
 
 	@Test
