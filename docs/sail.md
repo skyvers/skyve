@@ -660,7 +660,11 @@ fails and the count went up during it, the message gets, before the URL:
 If the window did not have the OS focus when the step failed
 (`document.hasFocus()`), the message says so instead. A page loaded during
 the step (as PF loads a page per view) starts a new count, so losses before it
-are unknown and are not reported as none. This is a diagnostic only: it never
+are unknown and are not reported as none. Opening, closing or switching
+windows (`navigateLink window="new"`, `closeWindow`, closing windows left open)
+blurs pages, and a blur can arrive in the next step, so losses are unknown in a
+step that changes windows and in the step after one. A page that is not HTML,
+such as a PDF in the browser's viewer, has no count. This is a diagnostic only: it never
 waits, retries or changes whether a step passes, and if the probe itself fails
 it says nothing.
 

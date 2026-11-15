@@ -75,7 +75,7 @@ class SmartClientKitchenSinkSailIT extends AbstractSmartClientInterpretedSail {
 		// each step that threw is attached with its cause, so its stack trace shows where it failed
 		Throwable[] thrown = e.getSuppressed();
 		Assertions.assertAll(() -> Assertions.assertEquals(3, thrown.length),
-								() -> Assertions.assertTrue(java.util.Arrays.stream(thrown).allMatch(t -> t.getCause() != null)),
+												() -> Assertions.assertTrue(java.util.Arrays.stream(thrown).allMatch(t -> t.getCause() != null)),
 								() -> Assertions.assertTrue(message.contains("with 3 failure(s)"), message),
 								() -> Assertions.assertTrue(message.contains("found no displayed link containing it: the page's links are ["), message),
 								() -> Assertions.assertTrue(message.contains("no option has the label Fourth"), message),
@@ -140,6 +140,9 @@ class SmartClientKitchenSinkSailIT extends AbstractSmartClientInterpretedSail {
 								() -> Assertions.assertTrue(message.contains("opened its page in this window, not a new one"), message),
 								() -> Assertions.assertTrue(message.contains("opens another window (target _blank): follow it with <navigateLink window=\"new\" />"), message),
 								() -> Assertions.assertTrue(message.contains("There is no earlier page in this window's history"), message),
+								// the step follows the harness's own switch into the PDF's window: no focus baseline, so no note of a loss
+								() -> Assertions.assertTrue(java.util.Arrays.stream(message.split("\n  - ")).filter(f -> f.contains("There is no earlier page"))
+											.noneMatch(f -> f.contains("lost the OS focus")), message),
 								() -> Assertions.assertTrue(message.contains("\"The failed interaction's window was closed\" step 3 <closeWindow />: MetaDataException: " +
 																				"<closeWindow /> has no window to close"), message),
 								() -> Assertions.assertEquals(2, message.split("has no window to close", -1).length - 1, message));
