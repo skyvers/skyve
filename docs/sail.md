@@ -1463,8 +1463,10 @@ other implementations, which generate test code instead of driving a browser:
     `switchMode`, `listGridFilter`, `listGridClearFilter`, `listGridSort`,
     `captureValue`, `captureCell`, `captureTitle`, `dataGridLink`,
     `dataGridMove`, `listMembershipMove`, `navigateBack`, `refresh`,
-    `closeWindow` and `listGridTool`. `navigateLink window="new"` and
-    `closeWindow` still move the contexts as the interpreted executors do.
+    `closeWindow` and `listGridTool`, and for `navigateLink window="new"`,
+    whose new window the generated code does not follow. `navigateLink
+    window="new"` and `closeWindow` still move the contexts as the
+    interpreted executors do.
   - The PrimeFaces generators also emit a "not supported" comment, and no
     gesture, for a grid step or `lookupDescriptionPick` with `rowContaining`,
     for a combo or radio `dataEnter` with `match="code"` or `match="label"`,
