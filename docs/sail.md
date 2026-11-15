@@ -169,6 +169,8 @@ passes a step that did nothing.
 | `readViewTitle(CaptureTitle)` | `captureTitle`; returns the view's title as shown |
 | `clickDataGridLink(DataGridLink, String text, boolean action)` | `dataGridLink`; clicks the link in the row, and for an action answers its confirmation; returns true if declined |
 | `clickLinkContaining(NavigateLink, String text)` | `navigateLink text`, with or without `exact` |
+| `clickLinkIntoNewWindow(NavigateLink, String text)` | `navigateLink text window="new"`; returns the handle of the window the link was clicked in |
+| `pressListGridTool(ListGridTool, Tool)` | `listGridTool`; PF fails it, as its list grids have no such tools |
 | `enterOption(DataEnter, String value, Match)` | `dataEnter match="code\|label"`, called from the renderer's `executeDataEnter` |
 | `pickLookupDescriptionRowContaining(LookupDescriptionPick, String text)` | `lookupDescriptionPick rowContaining`, called from the renderer's `executeLookupDescriptionPick` |
 | `autoCompleteLookupDescriptionAndPick(LookupDescriptionAutoComplete, String search, String pick)` | `lookupDescriptionAutoComplete pick`, called from the renderer's `executeLookupDescriptionAutoComplete` |
@@ -305,6 +307,26 @@ cannot follow, for example through `<navigateLink/>` or `<execute>`:
 
 `<clearContext/>` empties the stack.
 
+**Windows.** Each window has its own stack. `<navigateLink window="new"/>`
+sets the stack of the window it runs in aside, untouched, and the new window
+starts with an empty one: push a context for its page. `<closeWindow/>` drops
+the closed window's stack and puts back the opener's, as it was. Windows nest:
+each `<closeWindow/>` returns to the window that opened the one it closes.
+
+```xml
+<navigateLink text="Open a new lookup value in a new window" window="new" />
+<pushEditContext module="kitchensink" document="LookupDescription" />
+<dataEnter binding="description" value="Made in a new window {run}" />
+<save />
+<closeWindow />
+<!-- back in the opener, with its contexts -->
+<listGridTool module="kitchensink" query="qListGridFixtureVue" tool="refresh" />
+```
+
+A window left open is closed when its interaction does not complete, and when
+the automation ends, so the next interaction or automation starts in the first
+window.
+
 ### The run token and variables
 
 `{run}` in a value is replaced with a token unique to the run. The token is the
@@ -417,7 +439,10 @@ Support: **yes** means implemented; **no** means the step fails with a reason
 | `navigateTree` | as `navigateList` | Opens `a=t`. | no: no PF tree page | URL only: waits for the view, with no tree gestures |
 | `navigateMap` | as `navigateList`, plus `geometryBinding`, `refreshTimeInSeconds`, `showRefreshControls` | Opens `a=m` with `&b=<geometryBinding>`. `geometryBinding` is required unless a model is named. The two refresh attributes are accepted and ignored. | yes | URL only |
 | `navigateCalendar` | as `navigateList`, plus `startBinding`, `endBinding` | Opens `a=c`. The bindings are accepted and ignored. | no: no PF calendar page | URL only |
-| `navigateLink` | `href` or `text` (exactly one), `exact` | With `href`, opens an absolute URL as is, or otherwise a URL relative to the base URL. With `text`, clicks the first displayed link (`<a>`), in page order, whose visible text contains the text (case-sensitive), such as a link in a blurb; with `exact="true"`, the link's visible text, trimmed, must equal the text. A link that opens a new window fails the step, and no match fails it with the page's link texts. `exact` with `href` fails the step. The top context, if any, loses its document and view type. Push a context afterwards if later steps need one. | yes | yes; with `text`, if the link leads to another page the step waits for it to load, then for SmartClient to settle |
+| `navigateLink` | `href` or `text` (exactly one), `exact`, `window` | With `href`, opens an absolute URL as is, or otherwise a URL relative to the base URL. With `text`, clicks the first displayed link (`<a>`), in page order, whose visible text contains the text (case-sensitive), such as a link in a blurb; with `exact="true"`, the link's visible text, trimmed, must equal the text. No match fails the step with the page's link texts. `exact` with `href` fails the step. Without `window`, a link that opens a new window (a `target` other than `_self`, `_top` or `_parent`) fails the step, and the top context, if any, loses its document and view type: push a context afterwards if later steps need one. With `window="new"`, `text` follows a link that opens a new tab or window, such as a report or a `target="_blank"` link, and `href` opens the URL in a new tab; the step waits for the new window's page (a PDF or other non-HTML page counts once the browser shows it) and the later steps run in that window, which starts with no contexts (see [Contexts](#contexts)). A link that loads its page in the same window, or opens no window, then fails the step. | yes | yes; with `text`, if the link leads to another page the step waits for it to load, then for SmartClient to settle |
+| `closeWindow` | none | Closes the window that `navigateLink window="new"` opened (or that its page closed already) and returns to the window that opened it, then waits for its page. The closed window's contexts are dropped and the opener's are back as they were. Windows nest. In the window the automation started in, the step fails: there is no window to close. | yes | yes |
+| `navigateBack` | none | Goes back to the previous page, as the browser's Back button does, and waits for it (and for SmartClient to settle); a back to an earlier fragment of the same page counts once the URL changes. No earlier page in the window's history fails the step. The top context, if any, loses its document and view type, as after `navigateLink`: push a context for the page. | yes: PF views are pages, so back returns to the previous view | yes: SmartClient opens views inside one page, so back returns to the previous page load (a navigate step, a link or a sign in), not to the previous view |
+| `refresh` | none | Reloads the page, as the browser's Reload button does, and waits for it (and for SmartClient to settle). Values that were not saved are lost. The contexts are unchanged. | yes | yes: the reload shows the view the page's URL names, which is the last page load's; after menus, zooms or New, pop or push contexts to match |
 | `navigateMenu` | `module`\*, `item`\* | Clicks through the rendered menu, then sets the context as the equivalent navigate step would. `item` is the menu item's name, or its shown label. Use `/` to qualify it with group names, for example `Security Admin/Users`. | yes; tree and calendar items fail | yes; fails if a window covers the menu |
 | `testMenu` | `module`\*, `item`, `present` | Asserts that the module, or an item of it, is shown (`present` true or absent) or not shown (`false`). `item` is named as for `navigateMenu`. | yes | yes |
 
@@ -506,6 +531,7 @@ of these defaults from the current context.
 | `listGridFilter` | `module`, `document`, `query`, `model`; `column`\*, `value`, `operator` | Filters a column, as a user does in the grid's column filters. `column` is the column's binding. `operator` is `contains` (the default), `startsWith`, `equals`, `notEquals`, `lessThan` or `greaterThan`. Filters on different columns are ANDed, and a new filter on a column replaces its old one. Without `value`, the step clears that column's filter; `operator` then fails the step. | yes; see [Filtering lists](#filtering-lists) | yes; see [Filtering lists](#filtering-lists) |
 | `listGridClearFilter` | `module`, `document`, `query`, `model` | Clears every column filter. | yes: Clear in each filtered column's menu (Vue); in a data table it deletes each typed filter's text, chooses each combo filter's empty option and unsets each check box | yes: the toolbar's Clear filter button, which clears the filter row and the advanced filter |
 | `listGridSort` | `module`, `document`, `query`, `model`; `column`\*, `descending` | Sorts by the column alone, ascending unless `descending="true"`. Sort before a `rowContaining` when more than one row could match. | yes: clicks the column title until it alone shows the direction. PrimeFaces ignores a sort click on an empty data table, so that fails | yes: clicks the column header, once for ascending and again to reverse |
+| `listGridTool` | `module`, `document`, `query`, `model`; `tool`\* | Presses a list grid tool that is not a view action, as a user does with the grid's toolbar. `tool` is `refresh`, which fetches the grid's rows again with its filters and sort (rows added elsewhere show up), or `clearSelection`, which deselects the selected rows (and so clears the grid's `selectedIdBinding`); the schema rejects any other value. The context is unchanged. | no: neither the Vue list grid nor the PrimeFaces data table has a Refresh or Deselect tool, so the step fails saying so; `<refresh/>` reloads the page, and its list grids with it | yes: the toolbar's Refresh button, then waits for the rows; the Deselect button, then checks that no row is selected. A toolbar without the tool fails the step |
 
 A list step that names no `module`, `document`, `query` or `model` uses the
 list the context shows: the one `navigateList` or a list menu item opened, with
@@ -725,13 +751,13 @@ tests. The SAIL ITs are:
 
 | IT | Script | Renderer |
 |---|---|---|
-| `PrimeFacesKitchenSinkSailIT` | `sail/kitchenSink/pf/pf-kitchensink-sail.xml`, plus a test that switches to SmartClient with PrimeFaces' user menu and checks `<switchMode/>` back, one that checks the find steps' failures, and `rowLink` (`pf-kitchensink-row-link.xml`) | PF, tablet |
+| `PrimeFacesKitchenSinkSailIT` | `sail/kitchenSink/pf/pf-kitchensink-sail.xml`, plus a test that switches to SmartClient with PrimeFaces' user menu and checks `<switchMode/>` back, one that checks the find steps' failures, one that checks the window steps' and `listGridTool`'s failures (`windowAndToolFailures`), and `rowLink` (`pf-kitchensink-row-link.xml`) | PF, tablet |
 | `PrimeFacesSailTestStrategyIT` | inline scripts, 3 tests | PF, tablet |
 | `PrimeFacesFocusSailIT` | where a page puts the focus (runtime issue P11): a rerender low in a long view keeps the scroll and the focus; a loaded view focuses its first input | PF, tablet |
 | `PrimeFacesAdminSuiteSailIT` | `sail/admin/pf/suite/*.xml` | PF, tablet |
 | `PrimeFacesAdminSailIT` | `sail/admin/pf/pf-admin-sail.xml` (the older single-file admin script) | PF, tablet |
 | `PrimeFacesAdminPhoneSailIT` | `sail/admin/pf/admin-phone-smoke.xml` | PF, phone |
-| `SmartClientKitchenSinkSailIT` | `sail/kitchenSink/sc/sc-kitchensink-sail.xml` | SC |
+| `SmartClientKitchenSinkSailIT` | `sail/kitchenSink/sc/sc-kitchensink-sail.xml`, `sc-kitchensink-sail-find.xml` (`find`), and inline scripts that check the find steps' failures (`findFailures`) and the window steps' failures (`windowFailures`) | SC |
 | `SmartClientAdminSailIT` | `sail/admin/sc/sc-admin-sail.xml` | SC |
 | `SmartClientAdminSuiteSailIT` | `sail/admin/sc/suite/*.xml` | SC |
 | `SmartClientDataGridSortSailIT` | an inline script, then a column header sort of a data grid and a Save through `SmartClientSelenide` (no SAIL step sorts a data grid); runtime issue SC-12 | SC |
@@ -884,6 +910,9 @@ fixtures, with `testStrategy="Assert"`.
 - DialogsFixture: confirmations and server-side questions, answered yes and no;
 - EscapingFixture: zoom in and out;
 - contexts, links, a map, and `execute`;
+- windows, back and refresh: a link into a new window where a lookup value is
+  made, a nested window opened by `href`, a PDF in a new window, then back and
+  refresh with a `testValue` after each;
 - menus;
 - switch mode;
 - sign out.
@@ -893,6 +922,17 @@ membership and ListGridFixture (`componentBuilderClass` only applies to
 PrimeFaces). It also clicks the ActionsFixture's Run From Row link in a row,
 declined and confirmed, which PF does in its separate `rowLink` test. The only kitchen sink membership widget is on ConditionsFixture,
 which never settles in SmartClient (runtime issue SC-4).
+
+The SmartClient windows interaction also presses the List Grid Fixture's list
+grid tools: Deselect, which clears the selected id, and Refresh, which shows
+the lookup value made in the new window. PrimeFaces has no such tools, so its
+kitchen sink reloads the page instead, and `windowAndToolFailures` checks why
+`listGridTool` fails there. Each kitchen sink IT's window failure test checks
+the window steps' failures: a link that loads its page in the same window
+under `window="new"`, a link that opens a new window without it,
+`closeWindow` with no window to close, and `navigateBack` with no earlier
+page; and that a window an interaction left open is closed when the
+interaction fails.
 
 Both kitchen sinks make their records unique with `{run}`, so they can be rerun
 without resetting the database.
@@ -943,6 +983,12 @@ Kitchen sink fixtures for the newer steps:
   an unavailable action.
 - ActionsFixture's rows grid has a Run From Row link in each row, whose action
   asks for a confirmation, for `dataGridLink`.
+- ListGridFixture shows `selectedVueId`, the selected id of its first list grid,
+  for `listGridTool tool="clearSelection"`. It has two blurb links with
+  `target="_blank"`, for `navigateLink window="new"`: "Open a new lookup value in
+  a new window", and "Open a PDF in a new window", which opens the kitchensink
+  module's resource `sail-new-window.pdf`. Chrome shows a PDF in the new tab,
+  headless or headed, and the tab closes like any other.
 
 `KitchenSinkWorkflowSailIT` is the conformance for [workflows](#workflows):
 PrimeFaces makes a lookup value and keeps its number, then SmartClient finds it
@@ -1043,7 +1089,10 @@ The harness follows these rules, and changes to it must keep them.
    - a widget being drawn;
    - a dialog opening or closing;
    - an animation ending;
-   - an upload finishing.
+   - an upload finishing;
+   - a new window opening and loading its page, a back or reload replacing
+     the page (the page is marked with a token first, so the new one can be
+     told from it), and a closed window's opener settling again.
 
    In PF, after a confirmation is accepted, the executor waits for the request
    it sends to start, because the page can look idle in between.
@@ -1311,7 +1360,9 @@ dropped silently.
 
 - Not recorded, as unmapped comments: what is done inside a tree, map or calendar; a PrimeFaces data table list grid's
   filters and sorts (a Vue list grid's are recorded); PrimeFaces inline data grid cells (their inputs are not in the
-  page's map); list grid tools that are not view actions (refresh, export, tags, snapshots); a SmartClient lookup's
+  page's map); list grid tools that are not view actions (refresh, export, tags, snapshots; SAIL has `listGridTool`
+  for refresh and clear selection, which the recorder does not write yet); the browser's Back and Reload, and links
+  into new windows (SAIL has `navigateBack`, `refresh` and `navigateLink window="new"`, not recorded yet); a SmartClient lookup's
   pick from the Pick button's pop-up list is recorded as a drop-down pick.
 - A filter on a date or time column is written in Skyve's default converter format; an application with other
   converters needs the value edited.
@@ -1337,7 +1388,13 @@ dropped silently.
 - **`checkMembership`** is rendered by neither PF nor SmartClient, so it
   cannot be tested.
 - **No step for**: content signatures, downloads (content, reports, exports),
-  opening a collapsed box, or waiting for a job.
+  opening a collapsed box, or waiting for a job. A report or PDF that opens in a
+  new window can be followed with `navigateLink window="new"` and closed, but
+  its content is not checked.
+- **List grid tools in PF.** `listGridTool` fails in PF, whose list grids have
+  no Refresh or Deselect tool. Use `<refresh/>` to reload the page. Only
+  `refresh` and `clearSelection` exist; there is no step for export, chart,
+  tags or snapshots.
   - The Monitoring Dashboard's Refresh buttons sit in boxes that start
     collapsed, so they are not tested.
   - Jobs are waited for through the completed jobs list, which is why the admin
@@ -1390,7 +1447,10 @@ other implementations, which generate test code instead of driving a browser:
   - They emit a "not supported by this generator" comment for `upload`,
     `testMessage`, `testGridRows`, `testWidget`, `navigateMenu`, `testMenu`,
     `switchMode`, `listGridFilter`, `listGridClearFilter`, `listGridSort`,
-    `captureValue`, `captureCell`, `captureTitle` and `dataGridLink`.
+    `captureValue`, `captureCell`, `captureTitle`, `dataGridLink`,
+    `dataGridMove`, `listMembershipMove`, `navigateBack`, `refresh`,
+    `closeWindow` and `listGridTool`. `navigateLink window="new"` and
+    `closeWindow` still move the contexts as the interpreted executors do.
   - The PrimeFaces generators also emit a "not supported" comment, and no
     gesture, for a grid step or `lookupDescriptionPick` with `rowContaining`,
     for a combo or radio `dataEnter` with `match="code"` or `match="label"`,
@@ -1409,12 +1469,14 @@ other implementations, which generate test code instead of driving a browser:
 The SAIL language changes are additive for script authors. Code that
 implements `Executor` directly is affected.
 
-- **Breaking:** `Executor` has 16 new abstract methods: `executeUpload`,
+- **Breaking:** `Executor` has 20 new abstract methods: `executeUpload`,
   `executeTestMessage`, `executeTestGridRows`, `executeTestWidget`,
   `executeNavigateMenu`, `executeTestMenu`, `executeSwitchMode`,
   `executeListGridFilter`, `executeListGridClearFilter`, `executeListGridSort`,
   `executeCaptureValue`, `executeCaptureCell`, `executeCaptureTitle`,
-  `executeDataGridLink`, `executeDataGridMove` and `executeListMembershipMove`. An executor outside Skyve must implement them,
+  `executeDataGridLink`, `executeDataGridMove`, `executeListMembershipMove`,
+  `executeNavigateBack`, `executeRefresh`, `executeCloseWindow` and
+  `executeListGridTool`. An executor outside Skyve must implement them,
   even if only to fail or to emit a comment. Executors that extend skyve-ext
   `WebDriverExecutor` or `SeleneseExecutor` inherit comment-emitting
   implementations.
@@ -1426,7 +1488,11 @@ implements `Executor` directly is affected.
   automation, which is how a workflow shares them; without it, each automation
   starts its own run, as before.
 - `upload`'s new `testSuccess`, the capture steps' `pattern` and
-  `navigateLink`'s `exact` are optional, so existing scripts are unchanged.
+  `navigateLink`'s `exact` and `window` are optional, so existing scripts are
+  unchanged. `ContextualExecutor` implements `executeNavigateBack`,
+  `executeRefresh` and `executeCloseWindow` for the contexts, and
+  `executeNavigateLink` with `window="new"` sets the contexts aside instead of
+  needing one (`openWindowContexts()`, `closeWindowContexts()`).
 - The six row steps (`dataGridZoom`, `dataGridEdit`, `dataGridRemove`,
   `dataGridSelect`, `listGridZoom` and `listGridSelect`) implement
   `GridRowStep`. Their `row` is no longer required in the XSD, and `getRow()`
