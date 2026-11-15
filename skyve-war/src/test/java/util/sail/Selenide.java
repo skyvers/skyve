@@ -391,7 +391,7 @@ public abstract class Selenide<
 			throw new IllegalStateException(String.format("%s opened its page in this window, not a new one: %s", what, driver.getCurrentUrl()));
 		}
 		driver.switchTo().window(opened);
-		awaitNewWindowPage(what);
+		enterNewWindow(opener, what, () -> { /* the gesture opened it */ });
 		return opener;
 	}
 
@@ -407,8 +407,7 @@ public abstract class Selenide<
 	public @Nonnull String openUrlInNewWindow(@Nonnull String url) {
 		String opener = driver.getWindowHandle();
 		driver.switchTo().newWindow(org.openqa.selenium.WindowType.TAB);
-		open(url);
-		awaitNewWindowPage(url);
+		enterNewWindow(opener, url, () -> open(url));
 		return opener;
 	}
 
@@ -420,6 +419,35 @@ public abstract class Selenide<
 	 */
 	public @Nonnull String getInNewWindow(@Nonnull String url) {
 		return openUrlInNewWindow(baseUrl + url);
+	}
+
+	/**
+	 * Loads the page of the new window the driver has just switched to, and waits for it (see
+	 * {@link #awaitNewWindowPage(String)}). If that fails, the new window is closed and the driver goes back to the
+	 * opener before the failure is thrown, so a failed step leaves the automation in the window it was in: nothing
+	 * tracks a window that did not open properly, so nothing else would close it.
+	 *
+	 * @param opener	the handle of the window that opened the new one
+	 * @param what	what opened the window, for the messages
+	 * @param load	loads the new window's page, or does nothing when the gesture that opened it loads it
+	 * @throws RuntimeException	what the load or the wait threw, once the driver is back in the opener
+	 */
+	private void enterNewWindow(@Nonnull String opener, @Nonnull String what, @Nonnull Runnable load) {
+		try {
+			load.run();
+			awaitNewWindowPage(what);
+		}
+		catch (RuntimeException e) {
+			trace("    the new window did not load its page: close it and go back to the window that opened it");
+			try {
+				driver.close();
+			}
+			catch (RuntimeException closing) {
+				e.addSuppressed(closing);
+			}
+			driver.switchTo().window(opener);
+			throw e;
+		}
 	}
 
 	/**

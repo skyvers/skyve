@@ -111,6 +111,31 @@ class SailExecutorTest {
 		assertThat(script, containsString("</table>"));
 	}
 
+	/**
+	 * The generated code cannot follow a new window, so a link into one says so, in both generators; a link in the same
+	 * window says nothing.
+	 */
+	@Test
+	void bothGeneratorsCommentThatTheyDoNotFollowANewWindow() {
+		TestWebDriverExecutor webDriver = new TestWebDriverExecutor();
+		webDriver.open("Windows");
+		NavigateLink newWindow = new NavigateLink();
+		newWindow.setHref("?a=e&m=admin&d=Contact");
+		newWindow.setWindow(NavigateLink.Window.newWindow);
+		webDriver.executeNavigateLink(newWindow);
+		webDriver.close();
+		TestSeleneseExecutor selenese = new TestSeleneseExecutor();
+		selenese.open("Windows");
+		selenese.executeNavigateLink(newWindow);
+		selenese.close();
+
+		assertThat(webDriver.toString(), containsString("trace(\"" + NEW_WINDOW_NOT_FOLLOWED + "\");"));
+		assertThat(selenese.toString(), containsString("<!-- " + NEW_WINDOW_NOT_FOLLOWED + " -->"));
+	}
+
+	private static final String NEW_WINDOW_NOT_FOLLOWED = "<navigateLink window=new/> not supported by this generator: " +
+															"the generated code does not follow the new window";
+
 	@Test
 	void webDriverExecutorCommentsTheStepsItCannotGenerate() {
 		TestWebDriverExecutor executor = new TestWebDriverExecutor();

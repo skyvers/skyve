@@ -339,11 +339,12 @@ public abstract class ContextualExecutor<T extends AutomationContext> implements
 	}
 
 	/**
-	 * Makes a context name no document, view type or list, for a page the executor cannot know.
+	 * Makes a context name no document, view type or list, for a page the executor cannot know, as after a link or a
+	 * back. Executors that implement those steps themselves call it.
 	 *
 	 * @param context	the context
 	 */
-	private static void forgetView(@Nonnull AutomationContext<?, ?> context) {
+	protected static final void forgetView(@Nonnull AutomationContext<?, ?> context) {
 		context.setDocumentName(null);
 		context.setViewType(null);
 		context.setList(null);

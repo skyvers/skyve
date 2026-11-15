@@ -22,6 +22,7 @@ import org.skyve.metadata.sail.language.step.interaction.grids.ListGridTool;
 import org.skyve.metadata.sail.language.step.interaction.grids.ListMembershipMove;
 import org.skyve.metadata.sail.language.step.interaction.navigation.CloseWindow;
 import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateBack;
+import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateLink;
 import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateMenu;
 import org.skyve.metadata.sail.language.step.interaction.navigation.Refresh;
 import org.skyve.metadata.sail.language.step.interaction.navigation.TestMenu;
@@ -253,6 +254,21 @@ public abstract class WebDriverExecutor<T extends AutomationContext> extends Scr
 	@Override
 	public void executeListMembershipMove(@Nonnull ListMembershipMove move) {
 		comment("<listMembershipMove/> not supported by this generator");
+	}
+
+	/**
+	 * Sets the contexts aside for a new window, as the interpreted executors do, and for {@code window="new"} emits a
+	 * comment that the generated code does not follow the new window (the comment has no quotes, as it goes into a
+	 * generated string literal). A link in the same window is handled as before.
+	 *
+	 * @param link the step
+	 */
+	@Override
+	public void executeNavigateLink(@Nonnull NavigateLink link) {
+		super.executeNavigateLink(link);
+		if (NavigateLink.Window.newWindow == link.getWindow()) {
+			comment("<navigateLink window=new/> not supported by this generator: the generated code does not follow the new window");
+		}
 	}
 
 	/**
