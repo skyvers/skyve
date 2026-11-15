@@ -43,6 +43,8 @@ import org.skyve.metadata.sail.language.step.Comment;
 import org.skyve.metadata.sail.language.step.TestGridRows;
 import org.skyve.metadata.sail.language.step.TestMessage;
 import org.skyve.metadata.sail.language.step.TestValue;
+import org.skyve.metadata.sail.language.step.context.PushEditContext;
+import org.skyve.metadata.sail.language.step.context.PushListContext;
 import org.skyve.metadata.sail.language.step.interaction.actions.AbstractAction;
 import org.skyve.metadata.sail.language.step.interaction.DataEnter;
 import org.skyve.metadata.sail.language.step.interaction.DataEnter.Match;
@@ -70,16 +72,21 @@ import org.skyve.metadata.sail.language.step.interaction.grids.ListGridSelect;
 import org.skyve.metadata.sail.language.step.interaction.grids.ListGridSort;
 import org.skyve.metadata.sail.language.step.interaction.grids.ListGridZoom;
 import org.skyve.metadata.sail.language.step.interaction.grids.ListMembershipMove;
+import org.skyve.metadata.sail.language.step.interaction.grids.ListGridTool;
 import org.skyve.metadata.sail.language.step.interaction.lookup.LookupDescriptionAutoComplete;
 import org.skyve.metadata.sail.language.step.interaction.lookup.LookupDescriptionEdit;
 import org.skyve.metadata.sail.language.step.interaction.lookup.LookupDescriptionNew;
 import org.skyve.metadata.sail.language.step.interaction.lookup.LookupDescriptionPick;
+import org.skyve.metadata.sail.language.step.interaction.navigation.CloseWindow;
 import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateCalendar;
 import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateEdit;
+import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateBack;
 import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateList;
+import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateLink;
 import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateMap;
 import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateMenu;
 import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateTree;
+import org.skyve.metadata.sail.language.step.interaction.navigation.Refresh;
 import org.skyve.metadata.sail.language.step.interaction.session.Login;
 import org.skyve.metadata.sail.language.step.interaction.session.SwitchMode;
 import org.skyve.web.UserAgentType;
@@ -174,11 +181,15 @@ public final class SailRecordingBuilder {
 	private static final String ROW_CONTAINING = "rowContaining";
 	private static final String VALUE = "value";
 	private static final String VARIABLE = "variable";
+	private static final String CLOSE_WINDOW = "closeWindow";
 	/** The keys of a recorded step that are not attributes of its SAIL step. */
 	private static final java.util.Set<String> CONTEXT_KEYS = java.util.Set.of(OP, VIEW, TARGET, SailRecording.STEP_ID_KEY,
 																				SCREEN, LABEL, BEFORE, ROW_BIZ_KEY, ROW_TEXTS, ERRORS, GRID, DECLINED,
 																				SailRecordingCaptures.SHOWN, SailRecordingCaptures.CELLS,
-																				SailRecordingCaptures.TITLE, "file", "refusal");
+																				SailRecordingCaptures.TITLE, "file", "refusal",
+																				SailRecordingWindows.WINDOW, SailRecordingWindows.LOAD,
+																				SailRecordingWindows.OPENED, SailRecordingWindows.FOCUS,
+																				SailRecordingWindows.URL, SailRecordingWindows.PAGE_HREF);
 
 	/**
 	 * The order attributes are written in, whatever the element: the identifying attributes first, then the values,
@@ -352,7 +363,7 @@ public final class SailRecordingBuilder {
 		List<Step> method = interaction.getSteps();
 		lastScreen = null;
 		lastStep = null;
-		for (Map<String, String> recorded : withCaptures(steps.subList(0, end))) {
+		for (Map<String, String> recorded : withCaptures(withWindows(steps, end))) {
 			Step step = entry(recorded, true);
 			if (step != null) {
 				addStep(method, step);
@@ -371,6 +382,23 @@ public final class SailRecordingBuilder {
 		for (int i = 0; i < end; i++) {
 			if (! CONTEXT.equals(steps.get(i).get(OP))) {
 				result++;
+			}
+		}
+		return result;
+	}
+
+	/**
+	 * The first {@code end} entries with their window, back and refresh steps (see {@link SailRecordingWindows}), and
+	 * the windows the steps left out after them close: the user came back to the window they were made in to stop.
+	 */
+	private static @Nonnull List<Map<String, String>> withWindows(@Nonnull List<? extends Map<String, String>> steps, int end) {
+		List<List<Map<String, String>>> groups = SailRecordingWindows.grouped(steps);
+		List<Map<String, String>> result = new ArrayList<>(steps.size() + 8);
+		for (int i = 0, l = groups.size(); i < l; i++) {
+			for (Map<String, String> entry : groups.get(i)) {
+				if ((i < end) || CLOSE_WINDOW.equals(entry.get(OP))) {
+					result.add(entry);
+				}
 			}
 		}
 		return result;
@@ -508,17 +536,23 @@ public final class SailRecordingBuilder {
 		// in long arithmetic: start + count overflows for a large count
 		int end = (int) Math.max(start, Math.min((long) start + Math.max(0, count), steps.size()));
 		List<List<String>> result = new ArrayList<>(end - start);
+		// each entry shows the steps it becomes with its window, back and refresh steps
+		List<List<Map<String, String>>> groups = SailRecordingWindows.grouped(steps.subList(0, end));
 		for (int i = 0; i < end; i++) {
-			pending.clear();
-			Step step = entry(steps.get(i), false);
+			List<String> lines = new ArrayList<>(2);
+			for (Map<String, String> recorded : groups.get(i)) {
+				pending.clear();
+				Step step = entry(recorded, false);
+				if (i >= start) {
+					for (String comment : pending) {
+						lines.add("<!--" + commentText(comment) + "-->");
+					}
+					if (step != null) {
+						lines.addAll(safeElementLines(step, recorded));
+					}
+				}
+			}
 			if (i >= start) {
-				List<String> lines = new ArrayList<>(pending.size() + 1);
-				for (String comment : pending) {
-					lines.add("<!--" + commentText(comment) + "-->");
-				}
-				if (step != null) {
-					lines.addAll(safeElementLines(step, steps.get(i)));
-				}
 				result.add(lines);
 			}
 		}
@@ -709,6 +743,13 @@ public final class SailRecordingBuilder {
 		result.put("dataGridSelect", recorded -> gridRow(new DataGridSelect(), DataGridSelect::setBinding, DataGridSelect::setRow,
 															DataGridSelect::setRowContaining, recorded));
 		result.put("dataGridMove", SailRecordingBuilder::dataGridMove);
+		result.put("navigateLink", SailRecordingBuilder::navigateLink);
+		result.put(CLOSE_WINDOW, recorded -> new CloseWindow());
+		result.put("navigateBack", recorded -> new NavigateBack());
+		result.put("refresh", recorded -> new Refresh());
+		result.put("listGridTool", SailRecordingBuilder::listGridTool);
+		result.put("pushEditContext", SailRecordingBuilder::pushEditContext);
+		result.put("pushListContext", recorded -> listNavigation(new PushListContext(), recorded));
 		result.put("listMembershipMove", SailRecordingBuilder::listMembershipMove);
 		result.put("dataGridLink", SailRecordingBuilder::dataGridLink);
 		result.put("lookupDescriptionPick", recorded -> gridRow(new LookupDescriptionPick(), LookupDescriptionPick::setBinding,
@@ -779,6 +820,53 @@ public final class SailRecordingBuilder {
 		result.setModuleName(module);
 		result.setDocumentName(document);
 		result.setBizId(text(recorded, "bizId"));
+		return result;
+	}
+
+	/** navigateLink by text (with exact) or href, in a new window when {@code window} is {@code new}. */
+	private static @Nullable Step navigateLink(@Nonnull Map<String, String> recorded) {
+		String linkText = text(recorded, TEXT);
+		String href = text(recorded, "href");
+		if ((linkText == null) == (href == null)) {
+			return null;
+		}
+		NavigateLink result = new NavigateLink();
+		result.setText(linkText);
+		result.setHref(href);
+		if ((linkText != null) && "true".equals(recorded.get("exact"))) {
+			result.setExact(Boolean.TRUE);
+		}
+		if ("new".equals(recorded.get("window"))) {
+			result.setWindow(NavigateLink.Window.newWindow);
+		}
+		return result;
+	}
+
+	private static @Nullable Step listGridTool(@Nonnull Map<String, String> recorded) {
+		String tool = text(recorded, "tool");
+		if (tool == null) {
+			return null;
+		}
+		ListGridTool result = list(new ListGridTool(), ListGridTool::setModuleName, ListGridTool::setDocumentName,
+									ListGridTool::setQueryName, ListGridTool::setModelName, recorded);
+		try {
+			result.setTool(ListGridTool.Tool.valueOf(tool));
+		}
+		catch (@SuppressWarnings("unused") IllegalArgumentException e) {
+			return null; // a tool SAIL has not: an unmapped comment
+		}
+		return result;
+	}
+
+	private static @Nullable Step pushEditContext(@Nonnull Map<String, String> recorded) {
+		String module = text(recorded, MODULE);
+		String document = text(recorded, DOCUMENT);
+		if ((module == null) || (document == null)) {
+			return null;
+		}
+		PushEditContext result = new PushEditContext();
+		result.setModuleName(module);
+		result.setDocumentName(document);
 		return result;
 	}
 

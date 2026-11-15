@@ -127,6 +127,31 @@ class SmartClientRecorderRoundTripSailIT extends AbstractSmartClientInterpretedS
 		replay(xml);
 	}
 
+	/**
+	 * New windows, list grid tools, Back and Reload: see sc-recorder-round-trip-windows.xml. The links that open a new
+	 * window are navigateLink window="new", a window opened by its URL navigateLink href, each new window's first page
+	 * the push of its context, a step back in the window that opened one closeWindow (once for each window it closes),
+	 * the toolbar's Refresh and Deselect listGridTool, and Back and Reload navigateBack and refresh, each with the push of
+	 * the context of the page they load.
+	 */
+	@Test
+	void windows() {
+		String xml = recordWorkflow(() -> sailResource("sail/kitchenSink/sc/sc-recorder-round-trip-windows.xml"));
+		assertContainsAll(xml,
+				"<navigateLink text=\"Open a new lookup value in a new window\" window=\"new\"/>",
+				"<pushEditContext module=\"kitchensink\" document=\"LookupDescription\"/>",
+				"<navigateLink href=\"?a=e&amp;m=kitchensink&amp;d=ListGridFixture\" window=\"new\"/>",
+				"<pushEditContext module=\"kitchensink\" document=\"ListGridFixture\"/>",
+				"<closeWindow/>",
+				"<listGridTool module=\"kitchensink\" query=\"qListGridFixtureVue\" tool=\"refresh\"/>",
+				"<listGridTool module=\"kitchensink\" query=\"qListGridFixtureVue\" tool=\"clearSelection\"/>",
+				"<navigateLink text=\"Open a PDF in a new window\" window=\"new\"/>",
+				"<navigateBack/>",
+				"<refresh/>");
+		assertEquals(3, xml.split("<closeWindow/>", -1).length - 1, "two windows closed together, then the PDF's: " + xml);
+		replay(xml);
+	}
+
 	@Test
 	void adminContacts() {
 		String xml = recordWorkflow(() -> sailString(CONTACTS));

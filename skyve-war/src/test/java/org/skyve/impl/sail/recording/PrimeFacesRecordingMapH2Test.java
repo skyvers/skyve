@@ -12,7 +12,13 @@ import java.util.Map;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+import org.primefaces.component.column.Column;
+import org.primefaces.component.datatable.DataTable;
+import org.skyve.domain.Bean;
+import org.skyve.impl.metadata.module.query.MetaDataQueryProjectedColumnImpl;
 import org.skyve.impl.persistence.AbstractPersistence;
+import org.skyve.impl.sail.mock.MockFacesContext;
+import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.util.JSON;
 import org.skyve.web.UserAgentType;
 
@@ -102,6 +108,37 @@ class PrimeFacesRecordingMapH2Test extends AbstractSkyveTest {
 					() -> assertTrue(faces.stream().allMatch(column -> String.valueOf(column.get("id")).matches("s\\d+(:s\\d+)+")), "header ids: " + faces),
 					() -> assertEquals(faces.size(), faces.stream().map(column -> column.get("id")).distinct().count(), "one id each: " + faces),
 					() -> assertTrue(vue.stream().noneMatch(column -> column.containsKey("id") || column.containsKey("operator")), "no ids for a Vue grid: " + vue));
+	}
+
+	/**
+	 * A list model column with neither a name nor a binding (one a list model makes in code) has no data table field:
+	 * it is listed with its title and no header id, and the other columns keep theirs.
+	 */
+	@Test
+	@SuppressWarnings("static-method")
+	void aColumnWithoutANameOrBindingIsListedWithoutAnId() {
+		MetaDataQueryProjectedColumnImpl unnamed = new MetaDataQueryProjectedColumnImpl();
+		unnamed.setDisplayName("Made in code");
+		MetaDataQueryProjectedColumnImpl bound = new MetaDataQueryProjectedColumnImpl();
+		bound.setBinding("description");
+		ListModel<Bean> model = org.mockito.Mockito.mock(ListModel.class);
+		org.mockito.Mockito.when(model.getColumns()).thenReturn(List.of(unnamed, bound));
+		org.mockito.Mockito.when(model.determineColumnTitle(unnamed)).thenReturn("Made in code");
+		org.mockito.Mockito.when(model.determineColumnTitle(bound)).thenReturn("Description");
+		List<Map<String, Object>> columns;
+		try (MockFacesContext ignored = MockFacesContext.replacingCurrent()) {
+			DataTable table = new DataTable();
+			table.setId("t");
+			Column column = new Column();
+			column.setId("c");
+			column.setField("description");
+			column.setFilterable(false);
+			table.getChildren().add(column);
+			columns = PrimeFacesRecordingMap.listGridColumns(model, table);
+		}
+		assertAll(() -> assertEquals(Map.of("title", "Made in code"), columns.get(0)),
+					() -> assertEquals("t:c", columns.get(1).get("id")),
+					() -> assertEquals("description", columns.get(1).get("binding")));
 	}
 
 	/**
