@@ -231,6 +231,97 @@ class SmartClientRecorderRoundTripSailIT extends AbstractSmartClientInterpretedS
 	}
 
 	/**
+	 * OrderedGridFixture's ordered list membership, with real gestures: members assigned with its button (the executor's
+	 * dataEnter) and saved, a candidate dragged into the members at the top, and a member dragged to the top (the
+	 * executor's listMembershipMove); then a save, and once the fixture is reopened from its list, an alt-click on the
+	 * members to check their order. The script must have the members as dataEnter (the dragged candidate's dataEnter adds
+	 * it last, so a listMembershipMove puts it at the top), each drag as listMembershipMove and the order as testValue,
+	 * so that its replay, unedited, saves and checks the same order.
+	 */
+	@Test
+	void orderedMembership() {
+		// one name across the scripts below ({run} differs in each)
+		String name = "SAIL members " + Long.toString(System.currentTimeMillis(), 36);
+		String a = name + " a";
+		String b = name + " b";
+		String c = name + " c";
+		String xml = recordWorkflow(() -> {
+			StringBuilder lookups = new StringBuilder(512);
+			for (String description : new String[] {a, b, c}) {
+				lookups.append("<listGridNew module=\"kitchensink\" document=\"LookupDescription\" />")
+						.append("<dataEnter binding=\"description\" value=\"").append(description).append("\" />")
+						.append("<save /><ok />");
+			}
+			sailString(HEAD + "<interaction name=\"Lookup values, then a fixture with members\"><method>" +
+						"<navigateMenu module=\"kitchensink\" item=\"Lookup values\" />" + lookups +
+						"<navigateMenu module=\"kitchensink\" item=\"Ordered Grid Fixtures\" />" +
+						"<listGridNew module=\"kitchensink\" document=\"OrderedGridFixture\" />" +
+						"<dataEnter binding=\"name\" value=\"" + name + "\" />" +
+						"<dataEnter binding=\"members\" value=\"" + a + "|" + b + "\" />" +
+						"<save />" +
+						"</method></interaction>" + TAIL);
+			dragCandidate("members", c, 0);
+			sailString(HEAD + "<interaction name=\"Reorder, save and reopen\"><method>" +
+						"<pushEditContext module=\"kitchensink\" document=\"OrderedGridFixture\" />" +
+						"<listMembershipMove binding=\"members\" rowContaining=\"" + b + "\" to=\"0\" />" +
+						"<testValue binding=\"members\" value=\"" + b + "|" + c + "|" + a + "\" />" +
+						"<save />" +
+						"<ok />" +
+						"<pushListContext module=\"kitchensink\" document=\"OrderedGridFixture\" />" +
+						"<listGridZoom module=\"kitchensink\" document=\"OrderedGridFixture\" rowContaining=\"" + name + "\" />" +
+						"</method></interaction>" + TAIL);
+			click(element(MEMBERSHIP + "return m ? m._memberList.getHandle() : null;"), true);
+			awaitRecorder();
+			StringBuilder deletes = new StringBuilder(512);
+			for (String description : new String[] {a, b, c}) {
+				deletes.append("<listGridZoom module=\"kitchensink\" document=\"LookupDescription\" rowContaining=\"").append(description).append("\" />")
+						.append("<delete />");
+			}
+			sailString(HEAD + "<interaction name=\"Delete the fixture and the lookup values\"><method>" +
+						"<pushEditContext module=\"kitchensink\" document=\"OrderedGridFixture\" />" +
+						"<delete />" +
+						"<navigateMenu module=\"kitchensink\" item=\"Lookup values\" />" + deletes +
+						"</method></interaction>" + TAIL);
+		});
+		assertContainsAll(xml,
+				"<dataEnter binding=\"members\" value=\"" + a + "|" + b + "\"/>",
+				"<dataEnter binding=\"members\" value=\"" + c + "|" + a + "|" + b + "\"/>",
+				"<listMembershipMove binding=\"members\" rowContaining=\"" + c + "\" to=\"0\"/>",
+				"<listMembershipMove binding=\"members\" rowContaining=\"" + b + "\" to=\"0\"/>",
+				"<testValue binding=\"members\" value=\"" + b + "|" + c + "|" + a + "\"/>");
+		replay(xml);
+	}
+
+	/** Finds the top view's list membership as {@code m} (or null), for a script that goes on to use it. */
+	private static final String MEMBERSHIP = "var m = null; isc.Canvas._canvasList.forEach(function (x) {" +
+												"if (x && !x.destroyed && isc.isA.BizListMembership(x) && (x._b === 'members') && x.isDrawn() && x.isVisible()) { m = x; } });";
+
+	/**
+	 * Drags a candidate of a list membership onto the upper half of the member at a position, with a real pointer drag,
+	 * as a user puts a new member there.
+	 */
+	private void dragCandidate(@Nonnull String binding, @Nonnull String text, int to) {
+		String membership = MEMBERSHIP.replace("'members'", "'" + binding + "'");
+		WebElement source = element(membership + "if (!m) return null; var l = m._candidateList; var d = l.getData() || [];" +
+									"for (var i = 0; i < d.length; i++) { if (String(d[i].bizKey).indexOf('" + text + "') >= 0) { l.scrollToRow(i);" +
+									"return isc.AutoTest.getElement(isc.AutoTest.getObjectLocator(l) + '/body/row[' + i + ']/col[0]'); } } return null;");
+		WebElement target = element(membership + "return m ? isc.AutoTest.getElement(isc.AutoTest.getObjectLocator(m._memberList) + '/body/row[" + to + "]/col[0]') : null;");
+		int quarter = Math.max(1, target.getSize().getHeight() / 4);
+		// press on the candidate, move past SmartClient's drag threshold, then over the upper half of the member, and release
+		new Actions(driver()).moveToElement(source)
+								.clickAndHold()
+								.moveByOffset(5, 0)
+								.moveByOffset(5, 0)
+								.moveToElement(target, 0, -quarter)
+								.moveByOffset(0, -1)
+								.release()
+								.perform();
+		// SmartClient moves the record when the drop is handled: wait for the member list to show it at the position
+		element(membership + "var r = m && m._memberList.getRecord(" + to + ");" +
+				"return (r && (String(r.bizKey).indexOf('" + text + "') >= 0)) ? m._memberList.getHandle() : null;");
+	}
+
+	/**
 	 * Clicks a recorder panel button (in its Shadow DOM) with a real click.
 	 */
 	private void panel(@Nonnull String act) {

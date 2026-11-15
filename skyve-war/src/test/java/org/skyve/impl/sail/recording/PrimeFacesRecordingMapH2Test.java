@@ -81,6 +81,30 @@ class PrimeFacesRecordingMapH2Test extends AbstractSkyveTest {
 	}
 
 	/**
+	 * A list grid rendered as a PrimeFaces data table gives each column's header client id, which its sort request
+	 * names, and the comparison its filter makes, as the executor filters it: contains for text, equals for a constant
+	 * domain's combo, a boolean's check box and a date. A Vue list grid's columns have neither.
+	 */
+	@Test
+	void aDataTablesColumnsHaveTheirIdsAndFilterOperators() throws Exception {
+		AbstractPersistence.get().setUser(SailUsers.bootstrapLikeUser(u));
+		Map<String, Object> map = parse(PrimeFacesRecordingMap.edit("kitchensink", "ListGridFixture", "tablet", UserAgentType.tablet));
+		Map<String, Object> grids = (Map<String, Object>) map.get("grids");
+		List<Map<String, Object>> faces = (List<Map<String, Object>>) ((Map<String, Object>) grids.get("kitchensink.qListGridFixtureFacesAttributes")).get("columns");
+		List<Map<String, Object>> vue = (List<Map<String, Object>>) ((Map<String, Object>) grids.get("kitchensink.qListGridFixtureVueAttributes")).get("columns");
+		Map<String, Map<String, Object>> byBinding = new java.util.HashMap<>();
+		faces.forEach(column -> byBinding.put((String) column.get("binding"), column));
+
+		assertAll(() -> assertEquals("contains", byBinding.get("text").get("operator")),
+					() -> assertEquals("equals", byBinding.get("constantEnum").get("operator")),
+					() -> assertEquals("equals", byBinding.get("booleanFlag").get("operator")),
+					() -> assertEquals("equals", byBinding.get("date").get("operator")),
+					() -> assertTrue(faces.stream().allMatch(column -> String.valueOf(column.get("id")).matches("s\\d+(:s\\d+)+")), "header ids: " + faces),
+					() -> assertEquals(faces.size(), faces.stream().map(column -> column.get("id")).distinct().count(), "one id each: " + faces),
+					() -> assertTrue(vue.stream().noneMatch(column -> column.containsKey("id") || column.containsKey("operator")), "no ids for a Vue grid: " + vue));
+	}
+
+	/**
 	 * The map is built with the user's real roles: a recorder without DevOps gets the PrimeFaces Control Panel's
 	 * recording controls and none of its DevOps actions, and a DevOps user without the recorder role the reverse.
 	 */

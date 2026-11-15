@@ -1142,8 +1142,8 @@ and offers to stop and download first.
 While recording, each page shows the recorder's panel. It is drawn in a Shadow DOM root, so the application's styles
 and the panel's cannot affect each other, and nothing done in the panel is recorded or reaches the application.
 
-- **Collapsed**, it is a small bar in the bottom right corner (bottom left in PrimeFaces, clear of a list grid's New
-  button), which can be dragged elsewhere: a red dot, the number of recorded gestures, **Check**, **Note**, **Stop**,
+- **Collapsed**, it is a small bar in the bottom right corner (in PrimeFaces, 76 pixels from the right edge, clear
+  of a scrolled list's floating New button), which can be dragged elsewhere: a red dot, the number of recorded gestures, **Check**, **Note**, **Stop**,
   and a control that expands it.
 - **Expanded**, it slides out on the right and shows the script as it is written, newest at the bottom, with the context
   comments greyed. Scrolling to the top loads earlier entries. The script is read-only: each gesture has a delete
@@ -1152,8 +1152,9 @@ and the panel's cannot affect each other, and nothing done in the panel is recor
 - **Check** turns Check mode on: the field, message or grid under the pointer is outlined, and a click adds a check
   instead of reaching the application. **Esc** turns it off. An alt-click adds a check without turning Check mode on. A
   short notice confirms each step added. Checks go into the script where they are added:
-  - a field adds `testValue` with the value it shows, written as `dataEnter` would enter it (a combo's code); a field
-    showing a validation error adds `testMessage contains` with the error instead;
+  - a field adds `testValue` with the value it shows, written as `dataEnter` would enter it (a combo's code; in
+    SmartClient, a list membership's members, `|`-separated, in order); a field showing a validation error adds
+    `testMessage contains` with the error instead;
   - a growl or a dialog's message (an `isc.say`, `isc.warn` or the Problems dialog) adds `testMessage contains` with
     its text;
   - a grid row adds `testGridRows rowContaining` with the row's bizKey or most distinctive cell, and `minRows="1"`;
@@ -1192,10 +1193,11 @@ customer only when the sign in page asks for one (no `environment.customer`).
 | A view's buttons | `ok`, `save`, `cancel`, `delete`, `zoomOut`, `remove`, or `action name="..."` for the view's own actions. A declined confirmation adds `confirm="false"`. |
 | A list grid's New, or zooming into a row | `listGridNew`, `listGridZoom`. A row is named with `rowContaining`: its bizKey when a cell shows it, otherwise the cell the fewest loaded rows show, the leftmost on a tie; `row` only when no text finds the row first. The list view's own grid is named by the context; a grid in a view by `module` and `query` (or `document` and `model`). In PrimeFaces, both a Vue list grid (its New, its View Detail or a zoomable row) and a PrimeFaces data table. |
 | Selecting a list grid row | `listGridSelect`, for a list grid whose selection does something (a `selectedIdBinding` or a selected action); a click on another list grid's row is not a gesture. In SmartClient the selection is written only if the next step does not act on the same grid. |
-| Filtering, clearing the filter of, or sorting a list grid | `listGridFilter` for each column whose filter changed (no `value` for a column the user cleared), `listGridClearFilter` when the user cleared them all, `listGridSort` with `descending="true"` for a descending sort. `operator` is written unless it is `contains`; an enum's value is its label; a date or time in Skyve's default converter format (`07-Nov-2025`, `07-Nov-2025 15:38`, `11:11`). SmartClient: the filter row and the advanced filter; PrimeFaces: a Vue list grid's column filters and headers. A filter SAIL cannot write as column filters ANDed together (an OR, two clauses on a column, an operator SAIL has not), a sort by more than one column, and a PrimeFaces data table's filters and sorts are unmapped comments. |
+| Filtering, clearing the filter of, or sorting a list grid | `listGridFilter` for each column whose filter changed (no `value` for a column the user cleared), `listGridClearFilter` when the user cleared them all, `listGridSort` with `descending="true"` for a descending sort. `operator` is written unless it is `contains`; an enum's value is its label; a date or time in Skyve's default converter format (`07-Nov-2025`, `07-Nov-2025 15:38`, `11:11`). SmartClient: the filter row and the advanced filter; PrimeFaces: a Vue list grid's column filters and headers, and a PrimeFaces data table's column filters (typed text, a constant domain's combo by its label, a boolean's check box) and headers, whose operator is the one its filter makes (`contains` for text, `equals` otherwise). A data table sends a request for each change (a typed filter at each pause, a check box filter for each state it passes through, a header for each click), so its filters and its sort are written as they end up, once the user goes on to something else. A filter SAIL cannot write as column filters ANDed together (an OR, two clauses on a column, an operator SAIL has not) and a sort by more than one column are unmapped comments. |
 | A data grid's New, zoom, remove, select or row edit | `dataGridNew`, `dataGridZoom`, `dataGridRemove`, `dataGridSelect` and (SmartClient's inline grids) `dataGridEdit`, named by `binding` and the row as for list grids. A selection followed by a step on the same grid's row is written as that step only. |
 | Typing into an inline data grid's cells (SmartClient) | `dataEnter` into the grid's columns, after the `dataGridNew` or `dataGridEdit` that started the row's edit. An inline lookup's pick is `lookupDescriptionPick`. |
 | Dragging an ordered data grid's row | `dataGridMove` with the row and its new position, `to`. |
+| Changing a list membership's members (SmartClient) | `dataEnter` with the members' descriptions, `\|`-separated, in the order shown, written as the final value like a field's, whether the user used the assign and unassign buttons or dragged members between the lists. In an ordered membership, dragging a member to another position is `listMembershipMove` with the member (`rowContaining` its description, or `row` when an earlier member's description contains it) and its new position, `to`; a member dropped in from the candidates anywhere but last is also moved there after the `dataEnter`, which adds new members last. Removing every member is an unmapped comment (SAIL cannot enter an empty value). |
 | A link in a data grid's row | `dataGridLink` with the row and the link's text; a declined confirmation adds `confirm="false"`. |
 | Picking from a lookup | `lookupDescriptionPick rowContaining` the description picked; when the user typed into the lookup first, `lookupDescriptionAutoComplete` with `search` (what was typed) and `pick` (the description picked). Never a row number, and never `dataEnter`. SmartClient's New and Edit on a lookup are `lookupDescriptionNew` and `lookupDescriptionEdit`. |
 | Uploading a file | `upload` with the content widget's `binding` or the upload `action`, and `file="sail/files/<the file's name>"`, with a comment saying the editor supplies the file there (the test classpath). An upload the page refused is written with `testSuccess="false"`, and the refusal as context. |
@@ -1296,8 +1298,10 @@ dropped silently.
   - Its requests to `sailrecording` go through jQuery, so that a page's own ajax wait (and the PrimeFaces Selenide
     harness's) covers them.
   - Lookups are recorded from their drop-down's items, data table drags and selections from the PrimeFaces ajax request
-    they send (`rowReorder`, `rowSelect`), and a Vue list grid's filters and sort from the grid's own state each time it
-    fetches its rows (`smartlist`).
+    they send (`rowReorder`, `rowSelect`), a Vue list grid's filters and sort from the grid's own state each time it
+    fetches its rows (`smartlist`), and a data table list grid's filters and sort from its filter and sort requests: its
+    column filters as the page shows them, and the sorted column's header id, which the map's columns name (with the
+    comparison each column's filter makes).
   - The PrimeFaces Control Panel (`views/external/edit.xml`) has the Recording controls, as the desktop one does.
 - Uploads, in both renderers: the upload page (`upload.xhtml`) opens in an iframe, and the core listens to its file
   upload, naming the binding or action from the page's URL. The PrimeFaces recorder does not start in a frame.

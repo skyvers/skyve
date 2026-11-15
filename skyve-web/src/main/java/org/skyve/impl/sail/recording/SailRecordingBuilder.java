@@ -69,6 +69,7 @@ import org.skyve.metadata.sail.language.step.interaction.grids.ListGridNew;
 import org.skyve.metadata.sail.language.step.interaction.grids.ListGridSelect;
 import org.skyve.metadata.sail.language.step.interaction.grids.ListGridSort;
 import org.skyve.metadata.sail.language.step.interaction.grids.ListGridZoom;
+import org.skyve.metadata.sail.language.step.interaction.grids.ListMembershipMove;
 import org.skyve.metadata.sail.language.step.interaction.lookup.LookupDescriptionAutoComplete;
 import org.skyve.metadata.sail.language.step.interaction.lookup.LookupDescriptionEdit;
 import org.skyve.metadata.sail.language.step.interaction.lookup.LookupDescriptionNew;
@@ -708,6 +709,7 @@ public final class SailRecordingBuilder {
 		result.put("dataGridSelect", recorded -> gridRow(new DataGridSelect(), DataGridSelect::setBinding, DataGridSelect::setRow,
 															DataGridSelect::setRowContaining, recorded));
 		result.put("dataGridMove", SailRecordingBuilder::dataGridMove);
+		result.put("listMembershipMove", SailRecordingBuilder::listMembershipMove);
 		result.put("dataGridLink", SailRecordingBuilder::dataGridLink);
 		result.put("lookupDescriptionPick", recorded -> gridRow(new LookupDescriptionPick(), LookupDescriptionPick::setBinding,
 																	LookupDescriptionPick::setRow, LookupDescriptionPick::setRowContaining, recorded));
@@ -1019,17 +1021,37 @@ public final class SailRecordingBuilder {
 
 	private static @Nullable Step dataGridMove(@Nonnull Map<String, String> recorded) {
 		DataGridMove result = gridRow(new DataGridMove(), DataGridMove::setBinding, DataGridMove::setRow, DataGridMove::setRowContaining, recorded);
-		String to = text(recorded, "to");
+		Integer to = to(recorded);
 		if ((result == null) || (to == null)) {
 			return null;
 		}
+		result.setTo(to);
+		return result;
+	}
+
+	private static @Nullable Step listMembershipMove(@Nonnull Map<String, String> recorded) {
+		ListMembershipMove result = gridRow(new ListMembershipMove(), ListMembershipMove::setBinding, ListMembershipMove::setRow,
+												ListMembershipMove::setRowContaining, recorded);
+		Integer to = to(recorded);
+		if ((result == null) || (to == null)) {
+			return null;
+		}
+		result.setTo(to);
+		return result;
+	}
+
+	/** The position a recorded move puts its row at ({@code to}), or null if it has none. */
+	private static @Nullable Integer to(@Nonnull Map<String, String> recorded) {
+		String to = text(recorded, "to");
+		if (to == null) {
+			return null;
+		}
 		try {
-			result.setTo(Integer.valueOf(to));
+			return Integer.valueOf(to);
 		}
 		catch (@SuppressWarnings("unused") NumberFormatException e) {
 			return null;
 		}
-		return result;
 	}
 
 	private static @Nullable Step dataGridLink(@Nonnull Map<String, String> recorded) {
