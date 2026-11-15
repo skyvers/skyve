@@ -16,12 +16,12 @@ SC-2's suspected cause, which cites the code before its fix, at `2f4c2021b8`.
 
 | Id | Summary | Renderer | Cause checked | Status |
 |---|---|---|---|---|
-| [P1](#p1-backups-are-listed-oldest-first) | Backups are listed oldest first | both | Confirmed | open |
-| [P2](#p2-restoring-a-redacted-backup-locks-everyone-out) | Restoring a redacted backup locks everyone out | both | Confirmed | open |
+| [P1](#p1-fixed-backups-are-listed-oldest-first) | Backups are listed oldest first | both | Confirmed | fixed (a74e625b8c) |
+| [P2](#p2-fixed-restoring-a-redacted-backup-locks-everyone-out) | Restoring a redacted backup locks everyone out | both | Confirmed | fixed (a74e625b8c) |
 | [P3](#p3-a-tablet-action-upload-never-closes-or-refreshes) | A tablet action upload never closes or refreshes | PF | Plausible | open |
-| [P4](#p4-update-my-details-fails-with-an-optimistic-lock) | Update My Details fails with an optimistic lock | both | Partly confirmed | open |
+| [P4](#p4-fixed-update-my-details-fails-with-an-optimistic-lock) | Update My Details fails with an optimistic lock | both | Confirmed (restore); sign ins not reproduced | fixed (a74e625b8c) |
 | [P5](#p5-tablet-escapingfixture-shows-required-field-messages-at-once) | Tablet EscapingFixture shows required-field messages at once | PF | Not investigated | open (may be by design) |
-| [P6](#p6-re-run-job-of-generate-test-data-always-fails) | Re-run Job of Generate Test Data always fails | both | Confirmed | open |
+| [P6](#p6-fixed-re-run-job-of-generate-test-data-always-fails) | Re-run Job of Generate Test Data always fails | both | Confirmed | fixed (a74e625b8c) |
 | [P7](#p7-a-vue-list-grid-restores-a-selection-without-its-selected-action) | A Vue list grid restores a selection without its selected action | PF | Confirmed | open |
 | [P8](#p8-an-action-upload-page-left-open-hides-later-error-messages) | An action upload page left open hides later error messages | PF | Not investigated | open (not confirmed) |
 | [P9](#p9-fixed-an-action-link-in-a-data-grid-row-also-zooms-into-the-row) | An action link in a data grid row also zooms into the row | PF | Confirmed | fixed (150d05dddc) |
@@ -42,7 +42,7 @@ SC finding 5 is not listed. It was that a view opened by URL hides Delete, OK
 and Cancel, which is by design (`onlyView`); see the note under
 [Actions](sail.md#actions). SC finding 9 was the same bug as P1.
 
-## P1: Backups are listed oldest first
+## P1 (fixed): Backups are listed oldest first
 
 **Symptom.** Data Maintenance > Backup/Restore lists the oldest backup in the
 first row, although the list is meant to be newest first.
@@ -68,13 +68,29 @@ would keep the intended order.
 
 **Checked:** Confirmed.
 
-**Workaround in the suites.** 00-precondition asserts that no backup exists,
-00-backup makes the only one, and 99-restore restores row 0. 99-restore is held
-back unless the precondition passed. See [the precondition](sail.md#admin-application-suite).
+**Cause found.** As suspected. Name order was not newest first either:
+scheduled backups have a prefix (`DAILY_`, `WEEKLY_`, `MONTHLY_`, `YEARLY_`),
+which sorts them above the ad hoc backups.
 
-**Status:** open.
+**Fix.** `BackupsModel.fetchBackups` keeps its listing's order in a
+`LinkedHashMap`. External backups keep the order of
+`ExternalBackup.listBackups()`, which is modified time descending. Local backups
+are sorted the same way, by last modified time descending, with the name
+descending between backups modified at the same time (a periodic copy keeps its
+daily backup's time). `BackupsModelH2Test` checks both orders and the tie; it
+failed before the fix.
 
-## P2: Restoring a redacted backup locks everyone out
+**Workaround in the suites: lifted.** 00-precondition no longer asserts that no
+backup exists, and 99-restore restores, then deletes, row 0, which is now the
+newest: the backup 00-backup made. Both suites now hold the restore back unless
+00-backup passed (the PF suite required only 00-precondition). The checks that
+assumed a single backup now accept others. Kept, for another reason: the check
+that no restore marker is left over, which shows that an earlier run did not
+restore its backup. See [which backup is restored](sail.md#admin-application-suite).
+
+**Status:** fixed (a74e625b8c).
+
+## P2 (fixed): Restoring a redacted backup locks everyone out
 
 **Symptom.** A backup made with a data sensitivity above "none" masks password
 hashes, for example `{a**********Nk`. Restoring it succeeds, but afterwards
@@ -114,7 +130,38 @@ instead), or have the restore refuse or warn about a redacted backup.
 The old admin script's `testDataEnter` chose a random sensitivity; that is how
 the test server was locked out twice.
 
-**Status:** open.
+**Cause found.** As suspected. Spring's `DelegatingPasswordEncoder` also throws
+for a stored value with no prefix or an unknown one, and its pbkdf2 and scrypt
+encoders throw for a hash they cannot decode.
+
+**Fix.** Redaction is unchanged, so passwords stay redacted, and old and new
+backups have the same content.
+
+- `SecurityUtil.createDelegatingPasswordEncoder()`, which sign in and
+  `EXT.checkPassword` use, returns an encoder whose `matches` returns false,
+  with a warning that does not include the stored value, for any stored value
+  it cannot use. A sign in with a redacted password is an ordinary bad
+  credentials failure.
+- `RestoreJob` counts the restored user passwords that have the redacted form
+  (`BackupUtil.isRedactedString`; a password hash never holds an asterisk). If
+  there are any, the job's log ends with a warning that the passwords were
+  redacted and must be reset, and the completion growl says so too.
+
+`SecurityUtilTest` (malformed stored values, including redacted ones) and
+`RestoreJobH2Test` (a redacted backup's restore) failed before the fix. In the
+UI, after a restore of a backup made with data sensitivity "Secret", signing in
+as `admin` failed with "Invalid username and/or password", and the restore
+job's log had the warning.
+
+A backup made with a data sensitivity below "Secret" also redacts the user
+names (sensitivity personal), so after its restore a sign in does not find the
+user at all. The restore's warning mentions only the passwords.
+
+**Workaround in the suites: kept, for another reason.** A restore of a redacted
+backup leaves `admin` unable to sign in until its password is reset, by design,
+so the suites still back up with data sensitivity "none".
+
+**Status:** fixed (a74e625b8c).
 
 ## P3: A tablet action upload never closes or refreshes
 
@@ -161,7 +208,7 @@ rerenders with a check box before checking Outcome.
 
 **Status:** open.
 
-## P4: Update My Details fails with an optimistic lock
+## P4 (fixed): Update My Details fails with an optimistic lock
 
 **Symptom.** On the User Dashboard, Update My Details fails with "Failed to
 update this information as it was updated by user admin at <the last sign in>
@@ -201,10 +248,35 @@ mobile number and press Update My Details.
 The sign-in cause is not confirmed, and what makes it fail after sign ins alone
 is unexplained.
 
-**Workaround in the suites.** Update My Details is commented out of both admin
+**Workaround in the suites.** Update My Details was commented out of both admin
 scripts, rather than worked around with a delay.
 
-**Status:** open.
+**Cause found.**
+
+- **Restore: confirmed.** In a PF suite run on the server before the fix, Update
+  My Details after the restore failed. server.log:
+  `update ADM_Contact ... actual row count: 0`. The Contact cached before the
+  restore had a later `bizVersion` than the restored row. `RestoreJobH2Test`
+  reproduces it.
+- **Sign ins: not reproduced.** Six good and bad sign ins, in other sessions and
+  in the same one, left the `bizVersion` and `bizLock` of the user and its
+  Contact unchanged (queried in H2), and Update My Details then succeeded.
+  01-session's Update My Details after its sign ins passed on the server before
+  the fix. Two things explain the report. The time in the message is the
+  failing save's own lock, stamped just before the flush, so it is seconds
+  after the latest sign in. And every admin suite run ends with a restore, so a
+  later run on the same server, without a restart, met the stale cache.
+
+**Fix.** `RestoreJob` evicts Hibernate's shared cache after it writes the
+tables, whether the restore succeeds or fails, and before it reindexes (the
+reindex would otherwise read stale beans).
+
+**Workaround in the suites: lifted.** Both 01-session files use Update My Details
+on the home page, and again after their sign ins. Both 99-restore files use it
+after the restore.
+
+**Status:** fixed (a74e625b8c). DataMaintenance's Truncate action deletes with JDBC
+and does not evict the shared cache either; it is not changed.
 
 ## P5: Tablet EscapingFixture shows required-field messages at once
 
@@ -223,7 +295,7 @@ executor learned to detect a request that client-side validation had blocked.
 
 **Status:** open (may be by design).
 
-## P6: Re-run Job of Generate Test Data always fails
+## P6 (fixed): Re-run Job of Generate Test Data always fails
 
 **Symptom.** Re-running a completed Generate Test Data job fails at once.
 server.log shows
@@ -251,11 +323,31 @@ when it is re-run.
 
 **Checked:** Confirmed.
 
-**Workaround in the suites.** Both 98-destructive files still press Re-run Job,
-and count the failed rerun's row in the completed jobs list (`minRows="2"`).
-The PF file notes the bug in a comment.
+**Workaround in the suites.** Both 98-destructive files pressed Re-run Job, and
+counted the failed rerun's row in the completed jobs list (`minRows="2"`).
 
-**Status:** open.
+**Cause found.** As suspected. The job record keeps only the identity of the
+bean a job was started with (`beanBizId`, `beanModuleName`, `beanDocumentName`,
+set in `AbstractSkyveJob`), not its state. A transient bean, such as the Control
+Panel, cannot be read back. A persistent one would be read back as it is now
+saved, without its transient values. Data Maintenance's backup options, data
+refresh options and audit truncation filters are all transient, so a rerun of a
+filtered Truncate Audit Log with the bean read back would delete the whole
+audit log.
+
+**Fix.** Re-run Job is offered (`JobExtension.rerunnable()`), and run
+(`RerunJob`), only for a job that was started without a bean, such as a
+scheduled job. It is rerun without a bean, as it first ran. For a job started
+with a bean, Re-run Job is hidden, and the action refuses with a warning.
+`JobExtensionH2Test` and `RerunJobH2Test` failed before the fix. Jobs started
+with a bean that ignore it, such as a reindex started from Data Maintenance or a
+job run with Run Job Now, can no longer be rerun.
+
+**Workaround in the suites: lifted.** Both 98-destructive files check that Re-run
+Job is not shown for Generate Test Data, and that the completed jobs list has
+one Generate Test Data row.
+
+**Status:** fixed (a74e625b8c).
 
 ## P7 (by design): A Vue list grid restores a selection without its selected action
 
