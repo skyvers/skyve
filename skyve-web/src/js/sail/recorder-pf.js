@@ -23,8 +23,10 @@
  *   table list grid's from its filter and sort requests (its column filters, and the sorted column's header, which the
  *   map's columns name): listGridFilter, listGridClearFilter and listGridSort;
  * - a click on the global confirm dialog's No declines the action that asked (confirm="false");
- * - a page load from a typed URL, a link or a reload is recorded as navigateEdit or navigateList; a load that a recorded
- *   gesture caused (a menu item, a list's New or zoom, OK) is not, as the gesture says it already.
+ * - a page load from a typed URL, a link or a reload is recorded as navigateEdit or navigateList, with how it was loaded
+ *   (a reload, Back or Forward, or the first page of a new window), from which the server makes refresh, navigateBack
+ *   and the window steps; a load that a recorded gesture caused (a menu item, a list's New or zoom, OK) is not, as the
+ *   gesture says it already.
  */
 (function () {
 	"use strict";
@@ -1385,9 +1387,24 @@
 		} catch (e) {
 			cause = null;
 		}
+		// how the page was loaded (a reload, Back or Forward, a new window's first page): the server makes the window,
+		// back and refresh steps from it (SailRecordingWindows)
+		if (cause) {
+			return;
+		}
+		var how = core.pageLoad();
+		var push = function (step) {
+			Object.keys(how).forEach(function (key) {
+				step[key] = how[key];
+			});
+			core.push(step);
+		};
 		var params = new URL(location.href).searchParams;
 		var module = params.get("m");
-		if (cause || !module) {
+		if (!module) {
+			if (how.load || how.opened) {
+				push({ op: "context", view: "" });
+			}
 			return;
 		}
 		var a = params.get("a");
@@ -1396,7 +1413,7 @@
 			if (params.get("i")) {
 				edit.bizId = params.get("i");
 			}
-			core.push(edit);
+			push(edit);
 		} else if ((a === "l") && params.get("q")) {
 			var list = { op: "navigateList", module: module, view: "" };
 			if (params.get("d")) {
@@ -1407,13 +1424,15 @@
 			} else {
 				list.query = params.get("q");
 			}
-			core.push(list);
+			push(list);
 		} else if (mapStep(params)) {
 			var mapNavigation = mapStep(params);
 			mapNavigation.view = "";
-			core.push(mapNavigation);
+			push(mapNavigation);
 		} else if (a) {
-			core.push({ op: "unmapped", text: "opened " + location.search + " (no SAIL step opens this page)", view: "" });
+			push({ op: "unmapped", text: "opened " + location.search + " (no SAIL step opens this page)", view: "" });
+		} else if (how.load || how.opened) {
+			push({ op: "context", view: "" });
 		}
 	}
 

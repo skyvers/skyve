@@ -767,8 +767,8 @@ tests. The SAIL ITs are:
 | `SmartClientListGridSelectedEventSailIT` | selects a List Grid Fixture list grid row whose selected event rerenders: one request and one selection event, and the selection kept (runtime issue SC-10) | SC |
 | `SmartClientPushGrowlSailIT` | a growl, then a pushed growl: both stay showing (runtime issue SC-6) | SC |
 | `SmartClientServerRolesSailIT` | `sail/admin/sc/suite/03-security-admin.xml` with no `viewRoles` registration: the new user's views are built with the roles the server reports. Needs `sail.recording` on. | SC |
-| `SmartClientRecorderRoundTripSailIT` | records `sail/kitchenSink/sc/sc-recorder-round-trip.xml`, `sc-recorder-round-trip-more.xml` (grids, lookups, uploads, list filters, captures, questions), an admin contacts workflow and checks added through the panel, and replays the recordings; also checks that the home page is unchanged unless recording. See [Recording](#recording). Needs `sail.recording` on. | SC |
-| `PrimeFacesRecorderRoundTripSailIT` | records `sail/kitchenSink/pf/pf-recorder-round-trip.xml`, `pf-recorder-round-trip-more.xml` (grids, lookups, uploads, list filters, captures, questions), an admin contacts workflow and checks added through the panel, and replays the recordings; also checks the sign out warning and that pages are unchanged unless recording. See [Recording](#recording). Needs `sail.recording` on. | PF, tablet |
+| `SmartClientRecorderRoundTripSailIT` | records `sail/kitchenSink/sc/sc-recorder-round-trip.xml`, `sc-recorder-round-trip-more.xml` (grids, lookups, uploads, list filters, captures, questions), `sc-recorder-round-trip-windows.xml` (new windows, list grid tools, back and refresh), an ordered list membership, an admin contacts workflow and checks added through the panel, and replays the recordings; also checks that the home page is unchanged unless recording. See [Recording](#recording). Needs `sail.recording` on. | SC |
+| `PrimeFacesRecorderRoundTripSailIT` | records `sail/kitchenSink/pf/pf-recorder-round-trip.xml`, `pf-recorder-round-trip-more.xml` (grids, lookups, uploads, list filters and a data table's filters and sorts, captures, questions), `pf-recorder-round-trip-windows.xml` (new windows, back and refresh), an admin contacts workflow and checks added through the panel, and replays the recordings; also checks the sign out warning and that pages are unchanged unless recording. See [Recording](#recording). Needs `sail.recording` on. | PF, tablet |
 | `KitchenSinkWorkflowSailIT` | `sail/kitchenSink/workflow/`: three files (PF tablet, SC, PF tablet) and one `<workflow>` file (PF external, then SC in the same browser) | both |
 
 To run the SAIL unit tests without any browser IT, exclude ITs and give a base
@@ -1248,7 +1248,10 @@ customer only when the sign in page asks for one (no `environment.customer`).
 | Gesture | Step |
 |---|---|
 | A menu item | `navigateMenu`, the item's shown labels with its groups, for example `DevOps/Control Panel` |
-| A page loaded with `a=e` or `a=l` in its URL (a link, a typed URL, a reload) | `navigateEdit` (with `bizId` from `i`) or `navigateList` |
+| A page loaded with `a=e` or `a=l` in its URL (a link, a typed URL) | `navigateEdit` (with `bizId` from `i`) or `navigateList` |
+| The browser's Reload, or Back | `refresh` or `navigateBack`, read from how the page that loads was loaded (Navigation Timing's `reload` or `back_forward`; the Navigation API's activation says back from forward), followed by `pushEditContext` or `pushListContext` for the view the page's URL names, since the executors keep the context as it was (refresh) or drop its document (back). In SmartClient, menus, zooms and New do not change the URL, so Back returns to the last full page load (a navigate step, a link or a sign in) and Reload shows the URL's view, and that is what is pushed. Forward, or a move through the history whose direction the browser does not tell, is an unmapped comment before the page's `navigateEdit` or `navigateList`. |
+| A link that opens a new window (a `target` other than `_self`, `_top` or `_parent`, or a `window.open` from the link) | `navigateLink window="new"` with `text`, the link's visible text, when it finds the link (the first displayed link whose text contains it; with `exact="true"` the first whose text equals it), otherwise `href`, the URL relative to the application. Recording goes on in the new window if it shows a Skyve page (the recording is the session's): its first page is not loaded again, but becomes `pushEditContext` or `pushListContext`. A new window that no recorded link opened (a typed URL, the browser's "Open in new tab", a window a button opened) is `navigateLink href window="new"` with its first page's URL, opened from the window in front. |
+| Closing a new window, or coming back to the window that opened it | `closeWindow`, once for each window closed, before the first step made in (or the "in front again" signal of) a window under it. Each step carries its browser window's id, so a step from the opener is a reliable sign that the user left the windows above it; a window that opened one also says when its tab shows or it gets the focus again, which covers coming back from a page that records nothing (a PDF) and then stopping. A step made in a window the script has closed, or in one the recording did not see open, is an unmapped comment: SAIL cannot switch windows. |
 | Typing into or changing a field | `dataEnter` with the final value, written before the next step or server response. Combos and radios record the option's code with `match="code"`; check boxes `true` or `false`; dates and times the text as shown; rich text its plain text. New lines are written as `&#10;`. |
 | Selecting a tab | `tabSelect`, with `::` for nested tabs. Selecting the tab already shown records nothing. |
 | A view's buttons | `ok`, `save`, `cancel`, `delete`, `zoomOut`, `remove`, or `action name="..."` for the view's own actions. A declined confirmation adds `confirm="false"`. |
@@ -1258,6 +1261,7 @@ customer only when the sign in page asks for one (no `environment.customer`).
 | A data grid's New, zoom, remove, select or row edit | `dataGridNew`, `dataGridZoom`, `dataGridRemove`, `dataGridSelect` and (SmartClient's inline grids) `dataGridEdit`, named by `binding` and the row as for list grids. A selection followed by a step on the same grid's row is written as that step only. |
 | Typing into an inline data grid's cells (SmartClient) | `dataEnter` into the grid's columns, after the `dataGridNew` or `dataGridEdit` that started the row's edit. An inline lookup's pick is `lookupDescriptionPick`. |
 | Dragging an ordered data grid's row | `dataGridMove` with the row and its new position, `to`. |
+| The list grid toolbar's Refresh or Deselect (SmartClient) | `listGridTool` with `tool="refresh"` or `tool="clearSelection"`, naming the grid as the other list grid steps do. The same items in the grid's context menu are unmapped comments. |
 | Changing a list membership's members (SmartClient) | `dataEnter` with the members' descriptions, `\|`-separated, in the order shown, written as the final value like a field's, whether the user used the assign and unassign buttons or dragged members between the lists. In an ordered membership, dragging a member to another position is `listMembershipMove` with the member (`rowContaining` its description, or `row` when an earlier member's description contains it) and its new position, `to`; a member dropped in from the candidates anywhere but last is also moved there after the `dataEnter`, which adds new members last. Removing every member is an unmapped comment (SAIL cannot enter an empty value). |
 | A link in a data grid's row | `dataGridLink` with the row and the link's text; a declined confirmation adds `confirm="false"`. |
 | Picking from a lookup | `lookupDescriptionPick rowContaining` the description picked; when the user typed into the lookup first, `lookupDescriptionAutoComplete` with `search` (what was typed) and `pick` (the description picked). Never a row number, and never `dataEnter`. SmartClient's New and Edit on a lookup are `lookupDescriptionNew` and `lookupDescriptionEdit`. |
@@ -1310,7 +1314,8 @@ screen's edit or create view, and a row named by text must have shown that text.
 `<!-- unconfirmed: ... - why -->` comment instead; it is never dropped.
 
 Anything else is written as an `<!-- unmapped: ... -->` comment where it happened, so the editor sees the gap: a click on
-a control that records no step (a list grid tool, a link outside a grid, a header menu item), clearing a field (SAIL
+a control that records no step (a list grid tool other than Refresh and Deselect, a link outside a grid that stays in the
+window, a header menu item), clearing a field (SAIL
 cannot enter an empty value), and typing into a password field (passwords are never recorded). A gesture is never
 dropped silently.
 
@@ -1363,6 +1368,11 @@ dropped silently.
     fetches its rows (`smartlist`), and a data table list grid's filters and sort from its filter and sort requests: its
     column filters as the page shows them, and the sorted column's header id, which the map's columns name (with the
     comparison each column's filter makes).
+- Windows, in both renderers: the core gives each browser window an id in its sessionStorage (a new tab starts
+  without one), which every step carries; it records a link into a new window on its click (or its `window.open`),
+  marks a page load with how it was loaded and whether it is a window's first page, and a window that opened one says
+  when it is in front again (`visibilitychange` or `focus`). On Stop, `SailRecordingWindows` turns these into the
+  window, back and refresh steps and the context pushes; the panel shows each entry as it will be written.
   - The PrimeFaces Control Panel (`views/external/edit.xml`) has the Recording controls, as the desktop one does.
 - Uploads, in both renderers: the upload page (`upload.xhtml`) opens in an iframe, and the core listens to its file
   upload, naming the binding or action from the page's URL. The PrimeFaces recorder does not start in a frame.
@@ -1374,12 +1384,14 @@ dropped silently.
 
 ### Limits
 
-- Not recorded, as unmapped comments: what is done inside a tree, map or calendar; a PrimeFaces data table list grid's
-  filters and sorts (a Vue list grid's are recorded); PrimeFaces inline data grid cells (their inputs are not in the
-  page's map); list grid tools that are not view actions (refresh, export, tags, snapshots; SAIL has `listGridTool`
-  for refresh and clear selection, which the recorder does not write yet); the browser's Back and Reload, and links
-  into new windows (SAIL has `navigateBack`, `refresh` and `navigateLink window="new"`, not recorded yet); a SmartClient lookup's
-  pick from the Pick button's pop-up list is recorded as a drop-down pick.
+- Not recorded, as unmapped comments: what is done inside a tree, map or calendar; PrimeFaces list memberships;
+  PrimeFaces inline data grid cells (their inputs are not in the page's map); list grid tools other than SmartClient's
+  toolbar Refresh and Deselect (export, chart, tags, snapshots, and the grid's context menu); the browser's Forward
+  button; gestures in a window the script has closed or did not see open (SAIL cannot switch windows). A SmartClient
+  lookup's pick from the Pick button's pop-up list is recorded as a drop-down pick.
+- Steps are written in the order the server receives them. A new window's first steps reach it after the link's step
+  in the window that opened it, since its page loads first; a window that records is matched to the link that opened
+  it by its URL.
 - A filter on a date or time column is written in Skyve's default converter format; an application with other
   converters needs the value edited.
 - The kitchen sink has a tree and a calendar menu item (SmartClient only) and a map menu item: the SmartClient round

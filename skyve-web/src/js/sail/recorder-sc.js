@@ -45,7 +45,10 @@
  * - it describes, for the core, a click that recorded nothing (an "unmapped" comment) and what a Check mode click
  *   checks (a growl or dialog message, a field, a list membership, a grid row or a grid);
  * - a page load with a=e, a=l, a=t, a=m or a=c in its URL (a link, a typed URL, a reload) is recorded as navigateEdit,
- *   navigateList, navigateTree, navigateMap or navigateCalendar; a tree, map or calendar menu item likewise.
+ *   navigateList, navigateTree, navigateMap or navigateCalendar, with how it was loaded (a reload, Back or Forward,
+ *   or the first page of a new window), from which the server makes refresh, navigateBack and the window steps; a
+ *   tree, map or calendar menu item likewise;
+ * - the list grid toolbar's Refresh and Deselect buttons are listGridTool refresh and clearSelection.
  */
 (function () {
 	"use strict";
@@ -1028,6 +1031,11 @@
 		}
 		var target = event.target;
 		var canvas = canvasOf(target);
+		var tool = listGridTool(canvas);
+		if (tool) {
+			core.record(tool);
+			return;
+		}
 		if (!canvas || !(isc.isA.GridBody && isc.isA.GridBody(canvas)) || (target.closest && target.closest("a[href]"))) {
 			return;
 		}
@@ -1053,6 +1061,35 @@
 			pendingSelect = { owner: listGrid, step: withRow(select, grid, rowNum) };
 			core.handled();
 		}
+	}
+
+	/** The list grid toolbar's buttons that are listGridTool steps, by the button's name, and the tool each is. */
+	var LIST_GRID_TOOLS = { Refresh: "refresh", Deselect: "clearSelection" };
+
+	/**
+	 * The listGridTool step for a click on a list grid toolbar's Refresh or Deselect button (BizListGrid's
+	 * isc.BizUtil.createImageButton("Refresh" or "Deselect", ...)), or null for any other canvas.
+	 */
+	function listGridTool(canvas) {
+		for (var c = canvas; c; c = c.parentElement) {
+			if (isc.isA.ToolStripButton && isc.isA.ToolStripButton(c)) {
+				var tool = LIST_GRID_TOOLS[c.name];
+				var listGrid = null;
+				for (var g = c.parentElement; g && !listGrid; g = g.parentElement) {
+					if (isc.isA.BizListGrid(g)) {
+						listGrid = g;
+					}
+				}
+				if (!tool || !listGrid || (c.isDisabled && c.isDisabled())) {
+					return null;
+				}
+				var step = gridList(listGrid);
+				step.op = "listGridTool";
+				step.tool = tool;
+				return step;
+			}
+		}
+		return null;
 	}
 
 	/** Writes the pending selection, the inline grid cells and the form fields the user changed. */
@@ -1528,7 +1565,6 @@
 		});
 	}
 
-	/** Wraps the data grid, list grid, lookup and upload methods, and listens for row clicks and lookup typing. */
 	/**
 	 * A drag of members to another position in an ordered membership's member list: writes what is pending first, so
 	 * that the moves start from the members as shown, then drops them and records each move.
@@ -1559,6 +1595,7 @@
 		return result;
 	}
 
+	/** Wraps the data grid, list grid, lookup and upload methods, and listens for row clicks and lookup typing. */
 	function attachPhase5() {
 		var wrap = core.wrap;
 		var dataGridProto = isc.BizDataGrid.getPrototype();
@@ -1791,8 +1828,20 @@
 
 	// ---------------------------------------------------------------- starting and stopping
 
-	/** Records the page load as a navigation, when its URL opened a view. */
+	/**
+	 * Records the page load as a navigation, when its URL opened a view, with how it was loaded (a reload, Back or
+	 * Forward) and whether it is a new window's first page (see core.pageLoad()); the server makes the window, back
+	 * and refresh steps from these (SailRecordingWindows). A load of a page that names no view says so in a context
+	 * entry, when it was a reload, Back or Forward, or a new window.
+	 */
 	function recordPageLoad() {
+		var how = core.pageLoad();
+		var push = function (step) {
+			Object.keys(how).forEach(function (key) {
+				step[key] = how[key];
+			});
+			core.push(step);
+		};
 		var params = {};
 		location.search.replace(/^\?/, "").split("&").forEach(function (pair) {
 			var equals = pair.indexOf("=");
@@ -1801,6 +1850,9 @@
 			}
 		});
 		if (!params.m) {
+			if (how.load || how.opened) {
+				push({ op: "context", view: "" });
+			}
 			return;
 		}
 		if (params.a === "e" && params.d) {
@@ -1808,7 +1860,7 @@
 			if (params.i) {
 				edit.bizId = params.i;
 			}
-			core.push(edit);
+			push(edit);
 		} else if (params.a === "l" && params.q) {
 			var list = { op: "navigateList", module: params.m, view: "" };
 			if (params.d) {
@@ -1819,7 +1871,7 @@
 				list.query = params.q;
 				pageList = list;
 			}
-			core.push(list);
+			push(list);
 		} else if (((params.a === "t") || (params.a === "m") || (params.a === "c")) && params.q) {
 			var step = { op: { t: "navigateTree", m: "navigateMap", c: "navigateCalendar" }[params.a], module: params.m, view: "" };
 			if (params.d) {
@@ -1831,9 +1883,11 @@
 			if (params.b) {
 				step.geometryBinding = params.b;
 			}
-			core.push(step);
+			push(step);
 		} else if (params.a) {
-			core.push({ op: "unmapped", text: "opened " + location.search + " (no SAIL step opens this page)", view: "" });
+			push({ op: "unmapped", text: "opened " + location.search + " (no SAIL step opens this page)", view: "" });
+		} else if (how.load || how.opened) {
+			push({ op: "context", view: "" });
 		}
 	}
 

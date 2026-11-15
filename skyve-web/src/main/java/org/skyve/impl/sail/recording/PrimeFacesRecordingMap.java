@@ -464,7 +464,7 @@ public final class PrimeFacesRecordingMap {
 	 * @param model	the list grid's model
 	 * @param table	the data table that renders the list grid, or null for a Vue list grid
 	 */
-	private static @Nonnull List<Map<String, Object>> listGridColumns(@Nonnull ListModel<Bean> model, @Nullable DataTable table) {
+	static @Nonnull List<Map<String, Object>> listGridColumns(@Nonnull ListModel<Bean> model, @Nullable DataTable table) {
 		Map<String, Column> tableColumns = new TreeMap<>();
 		if (table != null) {
 			for (UIComponent child : table.getChildren()) {
@@ -485,7 +485,9 @@ public final class PrimeFacesRecordingMap {
 			if (column.isHidden()) {
 				c.put("hidden", Boolean.TRUE);
 			}
-			Column tableColumn = tableColumns.get((name != null) ? name : binding);
+			// a column with neither a name nor a binding (a list model's column made in code) is no data table field
+			String field = (name != null) ? name : binding;
+			Column tableColumn = (field == null) ? null : tableColumns.get(field);
 			if (tableColumn != null) {
 				c.put("id", PrimeFacesAutomationContext.clientId(tableColumn));
 				if ((binding != null) && tableColumn.isFilterable()) {

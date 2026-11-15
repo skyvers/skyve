@@ -20,7 +20,13 @@
  * - the warning before signing out while recording;
  * - uploads, the same in every renderer: the content and action upload page (upload.xhtml) opens in an iframe, and the
  *   core listens to its file upload (jQuery fileuploadsend and fileuploadalways in that page) to record an upload step
- *   with the chosen file's name, and the refusal the page shows, if any.
+ *   with the chosen file's name, and the refusal the page shows, if any;
+ * - windows, the same in every renderer: each browser window (tab) has an id, kept in its sessionStorage, that every
+ *   step carries; a click on a link that opens a new window (a target other than _self, _top or _parent, or a
+ *   window.open from the link) is navigateLink window="new"; a window that has opened one says when it is the window
+ *   in front again (a "focus" context entry); and the page load tells how it was loaded (a reload, Back or Forward) and
+ *   whether it is the first page of a new window. The server works out the window steps from these
+ *   (org.skyve.impl.sail.recording.SailRecordingWindows).
  *
  * Panel UI state (expanded, position, scroll) is kept in sessionStorage, never localStorage, and the panel works
  * without it. The recorder uses no timers: it works when a gesture or a response happens.
@@ -35,6 +41,10 @@
 
 	var ENDPOINT = "sailrecording";
 	var UI_STATE_KEY = "skyve.sail.recorder.panel";
+	/** The browser window's (tab's) id, in its sessionStorage, so that each page of the window has the same one. */
+	var WINDOW_KEY = "skyve.sail.recorder.window";
+	/** Set in a window's sessionStorage when it opens a new window, until it is the window in front again. */
+	var OPENER_KEY = "skyve.sail.recorder.opener";
 	/** How many entries the expanded panel loads at a time. */
 	var RANGE = 50;
 
@@ -54,6 +64,132 @@
 		} catch (e) {
 			// the panel works without it
 		}
+	}
+
+	function sessionValue(key) {
+		try {
+			return window.sessionStorage.getItem(key);
+		} catch (e) {
+			return null;
+		}
+	}
+
+	function setSessionValue(key, value) {
+		try {
+			if (value == null) {
+				window.sessionStorage.removeItem(key);
+			} else {
+				window.sessionStorage.setItem(key, value);
+			}
+		} catch (e) {
+			// without sessionStorage, each page counts as a window of its own
+		}
+	}
+
+	/** The type of the page's own load (Navigation Timing): navigate, reload, back_forward or prerender. */
+	function navigationType() {
+		var entries = (window.performance && performance.getEntriesByType) ? performance.getEntriesByType("navigation") : [];
+		return (entries && entries[0] && entries[0].type) ? entries[0].type : "navigate";
+	}
+
+	/**
+	 * How the page was loaded: "navigate" (a link, a typed URL, a gesture), "reload", "back", "forward", or "traverse"
+	 * when the browser went through its history in a direction it does not tell (Navigation Timing says only
+	 * back_forward; the Navigation API's activation, where the browser has it, says which).
+	 */
+	function loadKind() {
+		var type = navigationType();
+		if (type === "reload") {
+			return "reload";
+		}
+		if (type !== "back_forward") {
+			return "navigate";
+		}
+		var activation = window.navigation && window.navigation.activation;
+		var from = activation && activation.from;
+		var entry = activation && activation.entry;
+		if (from && entry && (typeof from.index === "number") && (typeof entry.index === "number") && (from.index >= 0) && (entry.index >= 0)) {
+			return (entry.index < from.index) ? "back" : "forward";
+		}
+		return "traverse";
+	}
+
+	/**
+	 * This window's id, and whether this page is the first page of a window the recording has not seen: a tab with no
+	 * id yet (a link with target _blank opens one without its opener's sessionStorage, as does a tab the browser or a
+	 * test opens), or one whose id was copied from its opener (a window.open keeps the opener's sessionStorage) and
+	 * that has only this page in its history.
+	 */
+	function windowIdentity(newId) {
+		var id = sessionValue(WINDOW_KEY);
+		var copied = !!id && !!window.opener && (window.opener !== window) && (history.length === 1) && (navigationType() === "navigate");
+		var first = !id || copied;
+		if (first) {
+			id = newId;
+			setSessionValue(WINDOW_KEY, id);
+			setSessionValue(OPENER_KEY, null);
+		}
+		return { id: id, first: first };
+	}
+
+	/** True if a link opens its page in another window: a target other than _self, _top or _parent. */
+	function opensNewWindow(link) {
+		var target = String(link.getAttribute("target") || "").trim().toLowerCase();
+		return (target !== "") && (target !== "_self") && (target !== "_top") && (target !== "_parent");
+	}
+
+	/** A link's visible text, as navigateLink compares it. */
+	function linkText(link) {
+		return String(link.innerText || link.textContent || "").replace(/\s+/g, " ").trim();
+	}
+
+	function displayed(element) {
+		return !!(element.offsetWidth || element.offsetHeight || element.getClientRects().length);
+	}
+
+	/**
+	 * A URL as navigateLink href takes it: relative to the application's base (the folder of the page, where the
+	 * sailrecording endpoint is) when it is under it, else absolute.
+	 */
+	function scriptUrl(url) {
+		var base = new URL(".", location.href).href;
+		return (url.indexOf(base) === 0) ? url.substring(base.length) || "./" : url;
+	}
+
+	/**
+	 * The navigateLink step for a link: text when it finds the link (the first displayed link whose text contains it,
+	 * or with exact, the first whose text equals it), else href (the URL the link opens, which must not be a script).
+	 * Returns null if neither names it.
+	 *
+	 * @param link	the link
+	 * @param url	the absolute URL it opens
+	 */
+	function linkStep(link, url) {
+		var text = linkText(link);
+		var links = Array.prototype.filter.call(document.querySelectorAll("a"), displayed);
+		var step = { op: "navigateLink", window: "new", url: url };
+		if (text) {
+			var containing = links.filter(function (a) {
+				return linkText(a).indexOf(text) >= 0;
+			})[0];
+			if (containing === link) {
+				step.text = text;
+				return step;
+			}
+			var equal = links.filter(function (a) {
+				return linkText(a) === text;
+			})[0];
+			if (equal === link) {
+				step.text = text;
+				step.exact = "true";
+				return step;
+			}
+		}
+		if (/^https?:/i.test(url)) {
+			step.href = scriptUrl(url);
+			return step;
+		}
+		return null;
 	}
 
 	var CSS = [
@@ -149,6 +285,8 @@
 		var stopped = false;
 		var pageId = newPageId();
 		var sequence = 0;
+		/** This window's id and whether this page is a new window's first page (see windowIdentity()). */
+		var windowInfo = null;
 		var token = null;
 		var queue = [];
 		var inFlight = 0;
@@ -201,6 +339,9 @@
 		/** Queues a step as it is, and sends it. */
 		function push(step) {
 			step.id = pageId + "-" + (++sequence);
+			if (windowInfo && (step.windowId === undefined)) {
+				step.windowId = windowInfo.id;
+			}
 			if (step.view === undefined) {
 				var where = adapter.describe();
 				step.view = where.view;
@@ -811,9 +952,64 @@
 			if (!active || !g || (g.steps > 0) || isPanelEvent(event)) {
 				return;
 			}
+			var link = (event.target && event.target.closest) ? event.target.closest("a[href]") : null;
+			if (link && opensNewWindow(link) && !event.defaultPrevented) {
+				newWindowLink(link, link.href);
+				return;
+			}
 			var description = adapter.control(event.target);
 			if (description) {
 				unmapped("click on " + description);
+			}
+		}
+
+		// ---------------------------------------------------------------- windows
+
+		/**
+		 * Records a link that opens a new window, as navigateLink window="new", or an unmapped comment if the step
+		 * cannot name it. The window remembers that it opened one, to say when it is the window in front again.
+		 */
+		function newWindowLink(link, url) {
+			var step = linkStep(link, url);
+			if (step) {
+				record(step);
+				setSessionValue(OPENER_KEY, "true");
+			} else {
+				unmapped("click on a link that opens a new window (\"" + linkText(link) + "\"), which navigateLink cannot name");
+			}
+		}
+
+		/**
+		 * window.open from a link the user clicked (a javascript: link, or a handler of the link) opens a new window as
+		 * a target _blank link does. Another window.open (from a button) records nothing: a Skyve page in the new
+		 * window is recorded as a window the script opens by its URL.
+		 */
+		function openWindow(original) {
+			return function (url) {
+				var link = (gesture && (gesture.steps === 0) && gesture.target && gesture.target.closest) ? gesture.target.closest("a") : null;
+				if (active && link && (url != null) && (String(url) !== "")) {
+					var absolute = null;
+					try {
+						absolute = new URL(String(url), location.href).href;
+					} catch (e) {
+						absolute = null;
+					}
+					if (absolute) {
+						newWindowLink(link, absolute);
+					}
+				}
+				return original.apply(window, arguments);
+			};
+		}
+
+		/**
+		 * The window is in front again (its tab shows, or it has the focus): if it opened a new window, says so, so that
+		 * the windows it opened are closed in the script before its next step.
+		 */
+		function onFront() {
+			if (active && (document.visibilityState !== "hidden") && (sessionValue(OPENER_KEY) === "true")) {
+				setSessionValue(OPENER_KEY, null);
+				push({ op: "context", focus: "true" });
 			}
 		}
 
@@ -926,6 +1122,9 @@
 			listen(window, "keyup", endKeyGesture, false);
 			listen(window, "click", clicked, false);
 			listen(window, "pagehide", onPageHide, false);
+			listen(document, "visibilitychange", onFront, false);
+			listen(window, "focus", onFront, false);
+			wrap(window, "open", openWindow);
 			adapter.attach(recorder);
 		}
 
@@ -963,6 +1162,9 @@
 			token = null;
 			pageId = newPageId();
 			sequence = 0;
+			if (!windowInfo) {
+				windowInfo = windowIdentity(newPageId());
+			}
 			var range = null;
 			if (initial) {
 				gestures = initial.gestures || 0;
@@ -1056,6 +1258,23 @@
 			},
 			lastQueued: function () {
 				return queue.length ? queue[queue.length - 1] : null;
+			},
+			/**
+			 * How the page was loaded, for its page load step: { load, opened, pageHref, url } where load is reload,
+			 * back, forward or traverse (absent for an ordinary load), opened is "true" on the first page of a new
+			 * window, with pageHref its URL as navigateLink href takes it, and url is the page's URL.
+			 */
+			pageLoad: function () {
+				var result = { url: location.href };
+				var kind = loadKind();
+				if (kind !== "navigate") {
+					result.load = kind;
+				}
+				if (windowInfo && windowInfo.first) {
+					result.opened = "true";
+					result.pageHref = scriptUrl(location.href);
+				}
+				return result;
 			},
 			/** The element the gesture being handled started on, or null outside a gesture. */
 			gestureTarget: function () {
