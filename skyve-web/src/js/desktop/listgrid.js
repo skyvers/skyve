@@ -1592,19 +1592,7 @@ isc.BizListGrid.addMethods({
 			 */
 			selectionUpdated: (record, recordList) => {
 				if (this.selectedIdBinding) {
-					if (this.selectedIdTrackChanges) {
-						this._view._vm.setValue(
-							this.selectedIdBinding,
-							record ? record.bizId : null,
-						);
-					} else {
-						const changes = this._view._vm.valuesHaveChanged();
-						this._view._vm.setValue(
-							this.selectedIdBinding,
-							record ? record.bizId : null,
-						);
-						if (!changes) this._view._vm.rememberValues();
-					}
+					this._setSelectedId(record ? record.bizId : null);
 				}
 
 				if (this.bizSelected) {
@@ -1912,12 +1900,27 @@ isc.BizListGrid.addMethods({
 	},
 
 	/**
+	 * Sets the view's value at the selectedIdBinding to the selected row's bizId. Unless the grid tracks changes to the
+	 * selection (selectedIdTrackChanges), this does not make an unchanged view dirty.
+	 * @param {string|null} bizId - the selected row's bizId, or null when no row is selected.
+	 */
+	_setSelectedId: function (bizId) {
+		if (this.selectedIdTrackChanges) {
+			this._view._vm.setValue(this.selectedIdBinding, bizId);
+		} else {
+			const changes = this._view._vm.valuesHaveChanged();
+			this._view._vm.setValue(this.selectedIdBinding, bizId);
+			if (!changes) this._view._vm.rememberValues();
+		}
+	},
+
+	/**
 	 * Refreshes the list view by deselecting all records, invalidating the cache,
 	 * applying the appropriate filter criteria, and scrolling to the top row.
-	 * The grid's selection handlers (selectionUpdated: the selectedIdBinding and the selected event) do not run for the
-	 * refresh, as the user selected nothing: a selected event that rerenders the view refreshes its list grids, so it would
-	 * run again for ever (runtime issue SC-10). Once the rows arrive, the row of the view's selectedIdBinding is selected
-	 * again, as a data grid's is on a scatter, so a refresh keeps the user's selection.
+	 * The selected event does not run for the refresh, as the user selected nothing: a selected event that rerenders the
+	 * view refreshes its list grids, so it would run again for ever (runtime issue SC-10). Once the rows are in, the row
+	 * of the view's selectedIdBinding is selected again, as a data grid's is on a scatter, so a refresh keeps the user's
+	 * selection; if that row has gone, the binding is cleared, so that it holds no row the grid does not show.
 	 */
 	refresh: function () {
 		const topRowNum = this.grid.getVisibleRows()[0];
@@ -1945,15 +1948,27 @@ isc.BizListGrid.addMethods({
 		const filterCriteria = this._advancedFilter.toggleButton.selected
 			? this._advancedFilter.getCriteria()
 			: this.grid.getFilterEditorCriteria(true);
-		this.grid.filterData(filterCriteria, () => {
+		let reselected = false;
+		const reselect = () => {
+			if (reselected) return;
+			reselected = true;
 			const selectedBizId = this.selectedIdBinding && this._view ? this._view._vm.getValue(this.selectedIdBinding) : null;
 			if (selectedBizId) {
 				const index = this.grid.data.findIndex("bizId", selectedBizId);
 				if (index >= 0) {
 					selectQuietly(() => this.grid.selectSingleRecord(index));
+				} else {
+					this._setSelectedId(null);
 				}
 			}
-		});
+		};
+		// The callback runs when the fetch the filter needs completes
+		this.grid.filterData(filterCriteria, reselect);
+		// No fetch was needed, as the rows are in already
+		const data = this.grid.data;
+		if (!isc.isA.ResultSet(data) || data.lengthIsKnown()) {
+			reselect();
+		}
 
 		// Scroll to the top row for the refreshed data
 		this.grid.scrollToRow(topRowNum, "top");

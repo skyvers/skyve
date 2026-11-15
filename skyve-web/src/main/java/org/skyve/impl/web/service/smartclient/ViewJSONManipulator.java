@@ -378,6 +378,9 @@ public class ViewJSONManipulator extends ViewVisitor {
 	 */
 	private Map<String, ContentMediaKind> contentMediaKindCache = new TreeMap<>();
 
+	// selected tab index binding -> the number of tabs in its tab pane, for the bindings the client may set
+	private Map<String, Integer> tabCounts = new TreeMap<>();
+
 	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
 	protected ViewJSONManipulator(@Nonnull User user,
 									@Nonnull Module module, 
@@ -877,6 +880,37 @@ public class ViewJSONManipulator extends ViewVisitor {
 		}
 	}
 	
+	/**
+	 * Indicates whether a value sent for a selected tab index binding is the index of one of its tab pane's tabs: a whole
+	 * number, or the text of one, from 0 to one less than the number of tabs.
+	 *
+	 * @param value	the value sent
+	 * @param tabCount	the number of tabs in the tab pane
+	 * @return whether the value is a tab index
+	 */
+	private static boolean isTabIndex(@Nullable Object value, int tabCount) {
+		int index;
+		if (value instanceof Number number) {
+			double d = number.doubleValue();
+			if ((d != Math.rint(d)) || (d < 0) || (d >= tabCount)) {
+				return false;
+			}
+			index = (int) d;
+		}
+		else if (value instanceof String string) {
+			try {
+				index = Integer.parseInt(string.trim());
+			}
+			catch (@SuppressWarnings("unused") NumberFormatException e) {
+				return false;
+			}
+		}
+		else {
+			return false;
+		}
+		return (index >= 0) && (index < tabCount);
+	}
+
 	@SuppressWarnings("java:S3776") // Complexity OK
 	protected void applyJSONProperty(@Nonnull Document startingDocument,
 										@Nonnull String binding, 
@@ -887,6 +921,13 @@ public class ViewJSONManipulator extends ViewVisitor {
 	throws Exception {
 		String valueKey = BindUtil.sanitiseBinding(binding);
 		if (! values.containsKey(valueKey)) {
+			return;
+		}
+		Integer tabCount = tabCounts.get(binding);
+		if ((tabCount != null) && (! isTabIndex(values.get(valueKey), tabCount.intValue()))) {
+			LOGGER.warn("Ignored the selected tab index {} for binding {}: not a tab of its tab pane",
+							OWASP.sanitiseLog(String.valueOf(values.get(valueKey))),
+							OWASP.sanitiseLog(binding));
 			return;
 		}
 		
@@ -1127,8 +1168,23 @@ public class ViewJSONManipulator extends ViewVisitor {
 								boolean parentEnabled) {
 		addCondition(tabPane.getInvisibleCondition());
 		addCondition(tabPane.getDisabledCondition());
-		// mutable: the client sends the tab the user selected, so that a later response does not select the old one again
-		addBinding(tabPane.getSelectedTabIndexBinding(), true, false, Sanitisation.text);
+		String selectedTabIndexBinding = tabPane.getSelectedTabIndexBinding();
+		if (selectedTabIndexBinding != null) {
+			// Mutable when it is a document attribute, which can be set: the client sends the tab the user selected, so that
+			// a later response does not select the old one again (runtime issue SC-7). PrimeFaces likewise writes its tab
+			// view's activeIndex unless the binding is read only. A binding to anything else is only read.
+			boolean attribute = false;
+			try {
+				attribute = (BindUtil.getMetaDataForBinding(customer, module, document, selectedTabIndexBinding).getAttribute() != null);
+			}
+			catch (@SuppressWarnings("unused") MetaDataException e) {
+				// not an attribute
+			}
+			addBinding(selectedTabIndexBinding, attribute, false, Sanitisation.text);
+			if (attribute) {
+				tabCounts.put(selectedTabIndexBinding, Integer.valueOf(tabPane.getTabs().size()));
+			}
+		}
 	}
 
 	@Override

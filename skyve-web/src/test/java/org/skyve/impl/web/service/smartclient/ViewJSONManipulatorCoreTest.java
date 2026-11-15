@@ -125,11 +125,11 @@ class ViewJSONManipulatorCoreTest {
 	}
 
 	/**
-	 * The selected tab index binding takes the tab the user selected, sent by the client, so that a later response does
-	 * not select the old tab again (runtime issue SC-7).
+	 * A selected tab index binding that is not a document attribute (such as a getter in an extension class) is only
+	 * read: the client cannot set it.
 	 */
 	@Test
-	void visitTabPaneMakesTheSelectedIndexBindingMutable() throws Exception {
+	void visitTabPaneLeavesASelectedIndexBindingThatIsNotAnAttributeReadOnly() throws Exception {
 		ViewJSONManipulator manipulator = newManipulator(ViewType.edit.toString(), null, 0, 0);
 		TabPane tabPane = new TabPane();
 		tabPane.setSelectedTabIndexBinding("selectedTab");
@@ -138,7 +138,7 @@ class ViewJSONManipulatorCoreTest {
 
 		ViewBinding binding = bindingTree(manipulator).getBinding("selectedTab");
 		assertNotNull(binding);
-		assertTrue(binding.isMutable());
+		assertFalse(binding.isMutable());
 	}
 
 	@Test

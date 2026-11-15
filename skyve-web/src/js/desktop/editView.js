@@ -1326,10 +1326,14 @@ isc.EditView.addMethods({
 	 * its validate argument and null result.
 	 * If validation errors exist, returns null.
 	 *
+	 * The value being typed into the focused item is committed first (see _commitFocusedItem), so that what is gathered,
+	 * validated, and checked for changes afterwards (valuesHaveChanged) includes it.
+	 *
 	 * @param {boolean} validate - determines whether to perform validation before gathering data.
 	 * @returns {Object|null} - the gathered data object or null if validation fails.
 	 */
 	gather: function (validate) {
+		this._commitFocusedItem();
 		if (validate && !this._vm.validate()) {
 			return null; // Return early if validation fails
 		}
@@ -1337,6 +1341,23 @@ isc.EditView.addMethods({
 		// TODO: Add extra list validation here if necessary
 
 		return this._gather();
+	},
+
+	/**
+	 * Commits the value being typed into the focused item of one of the view's forms, as leaving the item would.
+	 * An item that changes on commit rather than on every keypress (changeOnKeypress false: Skyve's date, time and number
+	 * items, and a typed item whose change handler calls the server) holds the typed text only in its element until the
+	 * user leaves it. SmartClient's getValues() commits such an item only when it is a text item that knows it was typed
+	 * into, which leaves out a date item's text field. Committing fires the item's change handler, as leaving it would.
+	 */
+	_commitFocusedItem: function () {
+		const form = isc.EH.getFocusCanvas();
+		if (form && this._vm.members?.contains(form) && isc.isA.Function(form.getFocusItem)) {
+			const item = form.getFocusItem();
+			if (item && !item.changeOnKeypress && isc.isA.Function(item.updateValue)) {
+				item.updateValue();
+			}
+		}
 	},
 
 	/**

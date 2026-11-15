@@ -79,4 +79,33 @@ class SmartClientFastTypingSailIT extends AbstractSmartClientInterpretedSail {
 		Assertions.assertTrue(selenium.require(Locator.sail(VIEW, Kind.button, "Save", null, null, null, null)).shown(),
 								"Next ran and showed the groups step, which has the Save button");
 	}
+
+	/** The date the view gathers, whether the view has changed, and the focused element's name, after a gather. */
+	private static final String GATHERED_DATE = "var v = isc.BizUtil.getCurrentView();" +
+												"var d = v.gather(false).date;" +
+												"return (d ? d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate() : null) +" +
+												"  '|' + v._vm.valuesHaveChanged() + '|' + document.activeElement.name;";
+
+	/**
+	 * A value typed into an item that changes on commit, and not committed yet (the field still has the focus), is
+	 * gathered and makes the view changed, as if the user had left the field. A date item's text field is such an item:
+	 * SmartClient does not commit it when its values are read.
+	 */
+	@Test
+	void aValueTypedButNotCommittedIsGathered() {
+		String script = "<automation uxui=\"desktop\" userAgentType=\"desktop\" testStrategy=\"Assert\" xmlns=\"http://www.skyve.org/xml/sail\">" +
+							"<before><login user=\"admin\" password=\"admin\" /><switchMode /></before>" +
+							"<interaction name=\"A view with a date\"><method>" +
+							"<navigateEdit module=\"kitchensink\" document=\"ListAttributes\" />" +
+							"</method></interaction></automation>";
+		Assertions.assertDoesNotThrow(() -> sailString(script));
+
+		WebDriver driver = WebDriverRunner.getWebDriver();
+		WebElement date = driver.findElement(org.openqa.selenium.By.name("date_dateTextField"));
+		date.click();
+		Selenide.executeJavaScript("arguments[0].select();", date);
+		new Actions(driver).sendKeys("01 02 2021").perform();
+		Assertions.assertEquals("2021-2-1|true|date_dateTextField", Selenide.executeJavaScript(GATHERED_DATE),
+								"the typed date gathered, the view changed, and the field still focused");
+	}
 }

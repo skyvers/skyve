@@ -15,6 +15,7 @@ import static org.mockito.Mockito.CALLS_REAL_METHODS;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -369,6 +370,30 @@ class DesktopViewTest {
 		String script = listUiScript(user, "Contact", "m");
 		assertTrue(script.startsWith("if(window.admin_Contact__m){}else{isc.RestDataSource.create({"), script);
 		assertTrue(script.endsWith("isc.ListView.setGridDataSource('admin_Contact__m');"), script);
+		// once for each pre-render with access, not again for its data source
+		verify(document, times(1)).getListModel(customer, "m", true);
+	}
+
+	/**
+	 * A list whose data source the menu defined gets no second definition.
+	 */
+	@Test
+	void preRenderDefinesNoDataSourceForAListTheMenuDefined() {
+		UserImpl user = mockUser();
+		Customer customer = user.getCustomer();
+		Document document = mockListQuery(user, "admin", "q", "Contact");
+		Module module = customer.getModule("admin");
+		MetaDataQueryDefinition query = module.getMetaDataQuery("q");
+		when(module.getNullSafeMetaDataQuery("q")).thenReturn(query);
+		when(customer.getModules()).thenReturn(List.of(module));
+		ListItem item = new ListItem();
+		item.setName("Contacts");
+		item.setQueryName("q");
+		mockMenu(user, "admin", item);
+		when(Boolean.valueOf(user.canAccess(UserAccess.queryAggregate("admin", "q"), UxUi.DESKTOP_NAME))).thenReturn(Boolean.TRUE);
+		when(Boolean.valueOf(user.canReadDocument(document))).thenReturn(Boolean.TRUE);
+
+		assertEquals("details.showMember(isc.ListView.contents);isc.ListView.setGridDataSource('admin_q');", listUiScript(user, null, "q"));
 	}
 
 	/**
