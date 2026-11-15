@@ -22,7 +22,7 @@ import jakarta.annotation.Nullable;
  * 		{@value #ONLY_PROPERTY}{@code =03,04} runs only the suite files with those prefixes (the set up and restore still run).</li>
  * <li>The run stops at the first file that fails, as later files build on earlier ones.</li>
  * <li>The restore file runs last, even after a failure, but only if each of the files it requires has passed:
- * 		for example the precondition that no stray backup exists, as the restore takes the first backup listed.
+ * 		for example the backup that the restore restores, as the restore takes the first (newest) backup listed.
  * 		This is decided by which files passed, not by failure message text.</li>
  * <li>The test strategy override ({@value InterpretedWebDriverExecutor#TEST_STRATEGY_PROPERTY}) is refused: under Verify a
  * 		failed precondition would not stop the suite, and under None nothing would be checked before the restore.</li>

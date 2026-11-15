@@ -56,6 +56,25 @@ import org.skyve.metadata.user.User;
 
 class BackupUtilTest {
 	@Test
+	@SuppressWarnings({"static-method", "null"}) // a null here fails the test
+	void isRedactedStringRecognisesRedactedPasswordHashesOnly() {
+		String argon2 = "{argon2}$argon2id$v=19$m=16384,t=2,p=1$c2FsdHNhbHRzYWx0$aGFzaGhhc2hoYXNoaGFzaA";
+		String bcrypt = "{bcrypt}$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy";
+		String pbkdf2 = "{pbkdf2}5d923b44a6d129f3ddf3e3c8d29412723dcbde72445e8ef6bf3b508fbf17fa4ed4d6b99ca763d8dc";
+
+		assertTrue(BackupUtil.isRedactedString((String) redactData(AttributeType.text, argon2)));
+		assertTrue(BackupUtil.isRedactedString((String) redactData(AttributeType.text, bcrypt)));
+		assertTrue(BackupUtil.isRedactedString((String) redactData(AttributeType.text, pbkdf2)));
+		assertTrue(BackupUtil.isRedactedString((String) redactData(AttributeType.text, "ab")));
+		assertFalse(BackupUtil.isRedactedString(argon2));
+		assertFalse(BackupUtil.isRedactedString(bcrypt));
+		assertFalse(BackupUtil.isRedactedString(pbkdf2));
+		assertFalse(BackupUtil.isRedactedString("{a***Nk")); // too few asterisks
+		assertFalse(BackupUtil.isRedactedString("{a***********Nk")); // too many asterisks
+		assertFalse(BackupUtil.isRedactedString("{ar**********Nk")); // too many characters before
+	}
+
+	@Test
 	@SuppressWarnings("static-method")
 	void testRedactSegment() {
 		// setup the test data

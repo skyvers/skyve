@@ -8,9 +8,13 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.attribute.FileTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.TreeMap;
 
 import org.junit.jupiter.api.AfterEach;
@@ -20,6 +24,7 @@ import org.junit.jupiter.api.io.TempDir;
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
 import org.skyve.domain.DynamicBean;
+import org.skyve.impl.backup.ExternalBackup;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.view.model.list.Page;
 
@@ -95,21 +100,47 @@ class BackupsModelH2Test extends AbstractH2Test {
 
 	@SuppressWarnings("null") // a null here fails the test
 	@Test
-	void fetchBackupsReturnsZipFilesSortedByNameWithSizeInMegabytes() throws Exception {
-		Files.write(tempDir.resolve("alpha.zip"), new byte[1024 * 1024]);
-		Files.write(tempDir.resolve("beta.zip"), new byte[2 * 1024 * 1024]);
+	void fetchBackupsListsTheNewestBackupFirstWithSizeInMegabytes() throws Exception {
+		// Neither ascending nor descending name order is newest first here
+		Path oldest = Files.write(tempDir.resolve("DAILY_20240101000000.zip"), new byte[1024 * 1024]);
+		Path middle = Files.write(tempDir.resolve("DAILY_20240102000000.zip"), new byte[2 * 1024 * 1024]);
+		Path newest = Files.write(tempDir.resolve("20240103000000.zip"), new byte[3 * 1024 * 1024]);
+		Files.setLastModifiedTime(oldest, FileTime.fromMillis(1_000_000_000L));
+		Files.setLastModifiedTime(middle, FileTime.fromMillis(2_000_000_000L));
+		Files.setLastModifiedTime(newest, FileTime.fromMillis(3_000_000_000L));
 		Files.writeString(tempDir.resolve("ignored.txt"), "ignored", StandardCharsets.UTF_8);
 
-		Page page = BackupsModel.fetchBackups(tempDir.toString(), 0, 1);
+		Page page = BackupsModel.fetchBackups(tempDir.toString(), 0, 2);
 
-		assertEquals(2L, page.getTotalRows());
-		assertEquals(2, page.getRows().size());
+		assertEquals(3L, page.getTotalRows());
+		assertEquals(List.of("20240103000000.zip", "DAILY_20240102000000.zip", "DAILY_20240101000000.zip"), names(page));
 		DynamicBean first = (DynamicBean) page.getRows().get(0);
-		DynamicBean second = (DynamicBean) page.getRows().get(1);
-		assertThat(first.get(DownloadFolder.namePropertyName), is("alpha.zip"));
-		assertThat(first.get(DownloadFolder.sizePropertyName), is(Long.valueOf(1)));
-		assertThat(second.get(DownloadFolder.namePropertyName), is("beta.zip"));
-		assertThat(second.get(DownloadFolder.sizePropertyName), is(Long.valueOf(2)));
+		DynamicBean third = (DynamicBean) page.getRows().get(2);
+		assertThat(first.get(DownloadFolder.sizePropertyName), is(Long.valueOf(3)));
+		assertThat(third.get(DownloadFolder.sizePropertyName), is(Long.valueOf(1)));
+	}
+
+	@Test
+	void fetchBackupsListsBackupsModifiedAtTheSameTimeByNameDescending() throws Exception {
+		FileTime sameTime = FileTime.fromMillis(2_000_000_000L);
+		Files.setLastModifiedTime(Files.write(tempDir.resolve("DAILY_20240101000000.zip"), new byte[0]), sameTime);
+		Files.setLastModifiedTime(Files.write(tempDir.resolve("WEEKLY_20240101.zip"), new byte[0]), sameTime);
+
+		Page page = BackupsModel.fetchBackups(tempDir.toString(), 0, 10);
+
+		assertEquals(List.of("WEEKLY_20240101.zip", "DAILY_20240101000000.zip"), names(page));
+	}
+
+	@SuppressWarnings("null") // a null here fails the test
+	@Test
+	void fetchBackupsKeepsTheNewestFirstOrderOfExternalBackups() throws Exception {
+		UtilImpl.BACKUP_EXTERNAL_BACKUP_CLASS = NewestFirstExternalBackup.class.getName();
+
+		Page page = BackupsModel.fetchBackups(tempDir.toString(), 0, 10);
+
+		assertEquals(NewestFirstExternalBackup.BACKUPS, names(page));
+		DynamicBean first = (DynamicBean) page.getRows().get(0);
+		assertThat(first.get(DownloadFolder.sizePropertyName), is(Long.valueOf(2)));
 	}
 
 	@SuppressWarnings("null") // a null here fails the test
@@ -133,5 +164,62 @@ class BackupsModelH2Test extends AbstractH2Test {
 		assertThrows(IllegalStateException.class, model::iterate);
 		assertThrows(IllegalStateException.class, () -> model.update("id", properties));
 		assertThrows(IllegalStateException.class, () -> model.remove("id"));
+	}
+
+	@SuppressWarnings("null") // a null here fails the test
+	private static List<Object> names(Page page) {
+		List<Object> result = new ArrayList<>();
+		for (Bean row : page.getRows()) {
+			result.add(((DynamicBean) row).get(DownloadFolder.namePropertyName));
+		}
+		return result;
+	}
+
+	/**
+	 * Lists its backups newest first, as {@link ExternalBackup#listBackups()} promises, in an order that is not
+	 * name order. {@link ExternalBackup#getInstance()} instantiates it by name.
+	 */
+	public static class NewestFirstExternalBackup implements ExternalBackup {
+		static final List<String> BACKUPS = List.of("b_newest.zip", "c_middle.zip", "a_oldest.zip");
+
+		@Override
+		public List<String> listBackups() {
+			return new ArrayList<>(BACKUPS);
+		}
+
+		@Override
+		public boolean exists(String backupName) {
+			return BACKUPS.contains(backupName);
+		}
+
+		@Override
+		public void downloadBackup(String backupName, OutputStream outputStream) {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public void uploadBackup(String backupFilePath) {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public void deleteBackup(String backupName) {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public void copyBackup(String srcBackupName, String destBackupName) {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public void moveBackup(String srcBackupName, String destBackupName) {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public long getFileSize(String fileName) {
+			return 2L * 1024L * 1024L;
+		}
 	}
 }

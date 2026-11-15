@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <!--
-	SmartClient admin suite, step 0: check that the server has no backup and no restore marker.
-	99-restore.xml restores the first backup listed, which is the oldest (runtime bug), so the one restored must be the one
-	00-backup.xml makes. SmartClientAdminSuiteSailIT runs nothing else, and restores nothing, when this fails.
+	SmartClient admin suite, step 0: check that no restore marker is left over. A marker left over means an earlier run did
+	not restore its backup, so the data may not be as the suite expects.
+	Other backups may exist: 99-restore.xml restores the first backup listed, the newest, which is the one 00-backup.xml
+	makes. SmartClientAdminSuiteSailIT runs nothing else, and restores nothing, when this fails.
 -->
 <automation uxui="desktop" userAgentType="desktop" testStrategy="Assert"
 			xsi:schemaLocation="http://www.skyve.org/xml/sail ../../../../../../main/java/schemas/sail.xsd"
@@ -13,12 +14,9 @@
 		<testSuccess />
 		<switchMode />
 	</before>
-	<interaction name="Precondition: no stray backup or restore marker">
+	<interaction name="Precondition: no restore marker left over">
 		<method>
-			<comment>99-restore.xml restores the first backup listed (the oldest), so a stray backup (an interrupted run, a suite whose restore failed) would roll the database back to an unknown state. If this fails, delete the stray backups (Data Maintenance, Backup/Restore) and any SAIL restore marker data group, check the data, and run again. SmartClientAdminSuiteSailIT then runs nothing else.</comment>
-			<navigateEdit module="admin" document="DataMaintenance" />
-			<tabSelect path="Backup/Restore" />
-			<testGridRows module="admin" query="BackupsModel" maxRows="0" />
+			<comment>A marker is left over when a run was interrupted or its restore failed, so the data may hold what that run did. If this fails, check the data (or restore that run's backup), delete the SAIL restore marker data group, and run again. SmartClientAdminSuiteSailIT then runs nothing else.</comment>
 			<navigateMenu module="admin" item="Security Admin/Data Groups" />
 			<testGridRows module="admin" document="DataGroup" rowContaining="SAIL restore marker" maxRows="0" />
 		</method>

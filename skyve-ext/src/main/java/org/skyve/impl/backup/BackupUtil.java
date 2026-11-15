@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TreeMap;
+import java.util.regex.Pattern;
 
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Geometry;
@@ -74,6 +75,8 @@ final class BackupUtil {
 	private static final String PERSISTENT_METADATA_MISSING = " is persistable but has no persistent metadata.";
 	private static final String PERSISTENT_NAME_MISSING = " has persistent metadata with no table name.";
 	private static final String WHERE_SQL = " where ";
+	/** What {@link #redactSegment(String, Integer)} makes of a value with no asterisks. */
+	private static final Pattern REDACTED_SEGMENT = Pattern.compile("[^*]{0,2}\\*{4,10}[^*]{0,2}");
 
 	private BackupUtil() {
 		// nothing to see here
@@ -533,6 +536,20 @@ final class BackupUtil {
 		return redactSegment(data, maxLength);
 	}
 	
+	/**
+	 * Returns whether a value has the form {@link #redactString(String, Integer)} gives a value with no asterisks and
+	 * no {@code @}, such as a password hash: up to two characters, four to ten asterisks, and up to two characters.
+	 *
+	 * <p>A value of this form cannot be a password hash, which never holds an asterisk, so a restore uses this to
+	 * find the passwords a backup redacted. It is not a test for any value, as a value can have this form by chance.
+	 *
+	 * @param value the value restored from a backup
+	 * @return {@code true} if the value has the redacted form
+	 */
+	static boolean isRedactedString(@Nonnull String value) {
+		return REDACTED_SEGMENT.matcher(value).matches();
+	}
+
 	/**
 	 * Redacts a segment of a string, only displaying a fixed number of chars at beginning & end.
 	 * 

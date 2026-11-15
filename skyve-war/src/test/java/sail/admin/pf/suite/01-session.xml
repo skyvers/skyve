@@ -16,13 +16,9 @@
 			<testWidget action="UpdateMyDetails" enabled="true" />
 			<dataEnter binding="currentUser.contact.mobile" value="0400 000 {run}" />
 			<testValue binding="currentUser.contact.mobile" value="0400 000 {run}" />
-			<!--
-				RUNTIME BUG: Update My Details often fails with an optimistic lock error ("updated by user admin at ... after you
-				looked at it") when the server has handled sign ins or a restore since start up. See the PF admin report.
 			<action name="UpdateMyDetails" />
 			<navigateEdit module="admin" document="UserDashboard" />
 			<testValue binding="currentUser.contact.mobile" value="0400 000 {run}" />
-			-->
 		</method>
 	</interaction>
 	<interaction name="Sign in, out, and with a bad password">
@@ -38,6 +34,16 @@
 			<logout />
 			<login user="admin" password="admin" />
 			<testSuccess />
+		</method>
+	</interaction>
+	<interaction name="Home: Update My Details after those sign ins">
+		<method>
+			<comment>Runtime issue P4: Update My Details was reported to fail with an optimistic lock after sign ins, good and bad</comment>
+			<navigateEdit module="admin" document="UserDashboard" />
+			<dataEnter binding="currentUser.contact.mobile" value="0400 001 {run}" />
+			<action name="UpdateMyDetails" />
+			<navigateEdit module="admin" document="UserDashboard" />
+			<testValue binding="currentUser.contact.mobile" value="0400 001 {run}" />
 		</method>
 	</interaction>
 	<after>

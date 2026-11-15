@@ -15,10 +15,10 @@
 	</before>
 	<interaction name="Check that the backup to restore exists">
 		<method>
-			<comment>Truncate only when 99-restore.xml has its backup to restore: 00-backup.xml's, the only one</comment>
+			<comment>Truncate only when 99-restore.xml has its backup to restore: 00-backup.xml's, the newest</comment>
 			<navigateEdit module="admin" document="DataMaintenance" />
 			<tabSelect path="Backup/Restore" />
-			<testGridRows module="admin" query="BackupsModel" minRows="1" maxRows="1" />
+			<testGridRows module="admin" query="BackupsModel" minRows="1" />
 		</method>
 	</interaction>
 	<interaction name="Truncate all the data, keeping the bootstrap user">

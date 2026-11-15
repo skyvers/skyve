@@ -28,6 +28,7 @@ import org.skyve.EXT;
 import org.skyve.content.AttachmentContent;
 import org.skyve.content.ContentManager;
 import org.skyve.domain.Bean;
+import org.skyve.domain.app.AppConstants;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.messages.MessageSeverity;
 import org.skyve.impl.backup.RestoreOptions.ContentOption;
@@ -40,7 +41,9 @@ import org.skyve.impl.persistence.hibernate.AbstractHibernatePersistence;
 import org.skyve.impl.persistence.hibernate.dialect.SkyveDialect;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.job.CancellableJob;
+import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute.AttributeType;
+import org.skyve.metadata.model.Persistent;
 import org.skyve.util.FileUtil;
 import org.skyve.util.PushMessage;
 import org.skyve.util.SecurityUtil;
@@ -49,6 +52,7 @@ import org.supercsv.io.CsvMapReader;
 import org.supercsv.prefs.CsvPreference;
 
 import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 
 /**
  * Restores a Skyve application from a backup ZIP, re-creating table data and
@@ -58,8 +62,17 @@ public class RestoreJob extends CancellableJob {
 	private static final String CREATE_SQL = "create.sql";
 	private static final String ID_COLUMN_SUFFIX = "_id";
 	private static final String KICK_OFF_INSTRUCTION = "Kick off the job with the appropriate options from the Data Maintenance page.";
+	private static final String REDACTED_PASSWORDS_FORMAT = "WARNING: This backup was made with a data sensitivity above none, " +
+																"so it redacted the passwords of %d user(s). " +
+																"They cannot sign in until their passwords are reset: " +
+																"reset them before you sign out.";
 
 	private Calendar gmt = Calendar.getInstance(TimeZone.getTimeZone("GMT"));
+
+	/** The agnostic identifier of the admin User document's table, which holds the user passwords. */
+	private @Nullable String userTableIdentifier;
+	/** The number of restored user passwords that the backup had redacted. */
+	private int redactedPasswordCount;
 
 	/**
 	 * Executes a restore job when invoked with {@link RestoreOptions}.
@@ -211,12 +224,24 @@ public class RestoreJob extends CancellableJob {
 			log.add(trace);
 			LOGGER.info(trace);
 			FileUtil.delete(extractDir);
+			if (redactedPasswordCount > 0) {
+				trace = String.format(REDACTED_PASSWORDS_FORMAT, Integer.valueOf(redactedPasswordCount));
+				log.add(trace);
+				LOGGER.warn(trace);
+			}
 			trace = "DONE";
 			log.add(trace);
 			LOGGER.info(trace);
 			setPercentComplete(100);
 
-			EXT.push(new PushMessage().growl(MessageSeverity.info, "System Restore complete."));
+			if (redactedPasswordCount > 0) {
+				EXT.push(new PushMessage().growl(MessageSeverity.warn,
+													"System Restore complete, but the backup redacted the passwords of " + redactedPasswordCount +
+														" user(s), which must be reset: see the restore job's log."));
+			}
+			else {
+				EXT.push(new PushMessage().growl(MessageSeverity.info, "System Restore complete."));
+			}
 		}
 		catch (IOException zipLimitEx) {
 			String msg = zipLimitEx.getMessage();
@@ -289,6 +314,12 @@ public class RestoreJob extends CancellableJob {
 									BackupUtil.readTables(new File(backupDirectory, "tables.txt")) :
 									BackupUtil.getTables();
 
+		Customer customer = CORE.getCustomer();
+		Persistent userPersistent = customer.getModule(AppConstants.ADMIN_MODULE_NAME)
+												.getDocument(customer, AppConstants.USER_DOCUMENT_NAME)
+												.getPersistent();
+		userTableIdentifier = (userPersistent == null) ? null : userPersistent.getAgnosticIdentifier();
+
 		try (Connection connection = EXT.getDataStoreConnection()) {
 			connection.setAutoCommit(false);
 
@@ -304,6 +335,12 @@ public class RestoreJob extends CancellableJob {
 			// restore collection join tables
 			restoreData(backupDirectory, tables, connection, true, false, contentRestoreOption, indexingOption);
 			setPercentComplete(100);
+		}
+		finally {
+			// The tables were written with JDBC, so Hibernate's shared (second-level) cache still holds the data from
+			// before the restore. Its stale versions would fail the next save with an optimistic lock, and the reindex
+			// that follows would read them.
+			CORE.getPersistence().evictAllSharedCache();
 		}
 	}
 
@@ -360,6 +397,7 @@ public class RestoreJob extends CancellableJob {
 				}
 
 				long rowCount = 0;
+				boolean userTable = (! joinTables) && table.agnosticIdentifier.equalsIgnoreCase(userTableIdentifier);
 
 				try (InputStreamReader in = new InputStreamReader(new FileInputStream(backupFile), StandardCharsets.UTF_8)) {
 					try (CsvMapReader reader = new CsvMapReader(in, CsvPreference.STANDARD_PREFERENCE)) {
@@ -426,6 +464,11 @@ public class RestoreJob extends CancellableJob {
 												AttributeType.enumeration.equals(attributeType) ||
 												AttributeType.id.equals(attributeType)) {
 										statement.setString(index++, stringValue);
+										if (userTable &&
+												AppConstants.PASSWORD_ATTRIBUTE_NAME.equalsIgnoreCase(header) &&
+												BackupUtil.isRedactedString(stringValue)) {
+											redactedPasswordCount++;
+										}
 									}
 									else if (AttributeType.geometry.equals(attributeType)) {
 										Geometry geometry = new WKTReader().read(stringValue);

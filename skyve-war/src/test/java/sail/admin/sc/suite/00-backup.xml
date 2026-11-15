@@ -43,7 +43,7 @@
 			<navigateMenu module="admin" item="DevOps/Data Maintenance" />
 			<tabSelect path="Backup/Restore" />
 			<comment>The SmartClient view has no Refresh Backup List button: testGridRows fetches the list again</comment>
-			<testGridRows module="admin" query="BackupsModel" minRows="1" maxRows="1" timeoutMillis="60000" />
+			<testGridRows module="admin" query="BackupsModel" minRows="1" timeoutMillis="60000" />
 		</method>
 	</interaction>
 	<after>

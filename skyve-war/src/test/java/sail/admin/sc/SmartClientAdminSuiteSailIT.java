@@ -13,15 +13,15 @@ import util.sail.SailSuite;
  * <p>
  * The suite is bracketed by a backup and a restore, so it leaves the server as it found it and can be rerun:
  * <ol>
- * <li>Set up: {@code 00-precondition.xml} checks that the server has no backup and no restore marker (the restore takes
- * the oldest backup listed, a runtime bug, so it must be this run's); {@code 00-backup.xml} clears the completed jobs
- * list and backs up the data; {@code 00-marker.xml} leaves a marker for the restore to remove.</li>
+ * <li>Set up: {@code 00-precondition.xml} checks that no restore marker is left over from an earlier run;
+ * {@code 00-backup.xml} clears the completed jobs list and backs up the data; {@code 00-marker.xml} leaves a marker for
+ * the restore to remove.</li>
  * <li>The suite's files, stopping at the first that fails, as later files build on earlier ones. The destructive
  * actions run last ({@code 98-destructive.xml}), then {@code 99-truncate.xml} (SmartClient's Truncate, which first
  * checks that the backup is there).</li>
  * <li>{@code 99-restore.xml} runs last, even after a failure (the truncate's too, so nothing between the truncate and the
  * restore can leave the server without its data), but only if the precondition and the backup passed: otherwise there
- * is nothing of this run's to restore, and restoring could restore a stray backup.</li>
+ * is nothing of this run's to restore, and the newest backup, which the restore takes, could be another one.</li>
  * </ol>
  * Run it only against a disposable server; the base class lets one SAIL test at a time use a server.
  * <p>

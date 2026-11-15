@@ -12,10 +12,11 @@ import util.sail.SailSuite;
  * Runs the PrimeFaces admin module SAIL suite ({@code sail/admin/pf/suite/*.xml}) in order, in one browser session,
  * with {@link SailSuite}.
  * <p>
- * {@code 00-precondition} checks that the server has no backup and no restore marker; {@code 00-backup} backs up the
- * data; {@code 99-restore} restores that backup, so the suite leaves the server as it found it and can be rerun.
- * 99 restores the first backup listed, which is the oldest (runtime bug), so it runs only when 00-precondition passed:
- * otherwise it could restore a stray backup. It runs even when a later file fails, and the test then reports both outcomes.
+ * {@code 00-precondition} checks that no restore marker is left over from an earlier run; {@code 00-backup} backs up
+ * the data; {@code 99-restore} restores that backup, so the suite leaves the server as it found it and can be rerun.
+ * 99 restores the first backup listed, the newest, so it runs only when 00-precondition and 00-backup passed:
+ * otherwise the newest backup could be another one. It runs even when a later file fails, and the test then reports both
+ * outcomes.
  * The destructive actions run in the file before the restore, so nothing depends on what they destroy.
  * Run it only against a disposable server.
  * <p>
@@ -42,7 +43,7 @@ class PrimeFacesAdminSuiteSailIT extends AbstractPrimeFacesInterpretedSail {
 						"04-devops.xml",
 						"05-reports-misc.xml",
 						"98-destructive.xml")
-				.restore("99-restore.xml", "00-precondition.xml")
+				.restore("99-restore.xml", "00-precondition.xml", "00-backup.xml")
 				.run(this::sailResource);
 	}
 }

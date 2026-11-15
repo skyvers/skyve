@@ -956,15 +956,15 @@ as an administrator would use it. The PF suite is `sail/admin/pf/suite/`, run by
 
 | File | Role | Covers |
 |---|---|---|
-| `00-precondition.xml` | set up | No backup and no "SAIL restore marker" data group exist |
+| `00-precondition.xml` | set up | No "SAIL restore marker" data group is left over from an earlier run |
 | `00-backup.xml` | set up | Clears the completed jobs list. Backs up with no redaction, waits for the backup job, and leaves the restore marker data group. |
-| `01-session.xml` | suite | User Dashboard; sign in with a bad password, an unknown user and the right one; sign out and in |
+| `01-session.xml` | suite | User Dashboard and Update My Details; sign in with a bad password, an unknown user and the right one; sign out and in; Update My Details again |
 | `02-contacts-communications.xml` | suite | Contact create, find, change and delete, with an image upload and a declined delete; Communication Templates; Communications: every tab, attachments, and the send actions' refusals |
 | `03-security-admin.xml` | suite | Data Groups; Groups (roles through list membership); the User wizard; the new user signs in, sees a role-filtered menu and changes their password; Sign In History; Security Log; Configuration tabs; Mail Log |
 | `04-devops.xml` | suite | Control Panel (every tab, a query, cache statistics, generated SAIL); Data Maintenance (the backup list, import/export); Document Creator; Monitoring Dashboard |
 | `05-reports-misc.xml` | suite | Reports, Audits, System Dashboard, Document Numbers, Jobs |
-| `98-destructive.xml` | suite | Configuration saved with safe values (`mailBogusSend` on, so mail is only logged); a mail send that is refused; generate, rerun and delete tagged test data; delete completed jobs (declined, then confirmed) |
-| `99-restore.xml` | restore | Restores the backup (declined, then confirmed) and waits for the restore job. Signs in again, checks that the marker has gone, and deletes the backup. |
+| `98-destructive.xml` | suite | Configuration saved with safe values (`mailBogusSend` on, so mail is only logged); a mail send that is refused; generate tagged test data, check that its job cannot be rerun, and delete the data; delete completed jobs (declined, then confirmed) |
+| `99-restore.xml` | restore | Restores the backup (declined, then confirmed) and waits for the restore job. Signs in again, checks that the marker has gone, deletes the backup, and uses Update My Details. |
 
 The SC suite, `sail/admin/sc/suite/` run by `SmartClientAdminSuiteSailIT`,
 mirrors it file by file and interaction by interaction, with these differences:
@@ -987,8 +987,7 @@ and signs in for itself.
    SC's 99-truncate), after everything that depends on the data they change.
 3. The restore file runs last, even after a failure, including a failure of
    the truncate. It runs only if the set-up files it requires have passed:
-   - PF: `00-precondition.xml`;
-   - SC: `00-precondition.xml` and `00-backup.xml`.
+   `00-precondition.xml` and `00-backup.xml`, in both suites.
 
    If a required file did not pass, the suite prints that the restore was held
    back. The decision depends on which files passed, not on message text.
@@ -1002,16 +1001,24 @@ suites refuse `-Dsail.testStrategy`.
 **The backup/restore bracket.** 00-backup backs up the data and 99-restore
 restores it, so a suite leaves the server as it found it and can be run again.
 
-**The no-stray-backup precondition.** The backups list shows the oldest backup
-first (runtime issue P1), and 99-restore restores row 0. If another backup
-existed, it would be restored instead of the suite's own. 00-precondition
-refreshes the backup list and asserts
-`<testGridRows module="admin" query="BackupsModel" maxRows="0"/>`. It also
-asserts that no restore marker is left over. If it fails, delete the stray
-backups and marker on the server by hand, check the data, and run again. The
-suite asserts rather than deleting them, because a test should not decide to
-delete someone's backup. For the same reason, the older `pf-admin-sail.xml`
-makes no backup.
+**Which backup is restored.** The backups list shows the newest backup first,
+and 99-restore restores row 0, the backup 00-backup made. Other backups can be
+on the server: they are older, so they are not restored. A backup made by
+something else while a suite runs, such as a scheduled backup, would be newer
+and would be restored instead, so run the suites with the job scheduler off,
+as the test servers are. 99-restore deletes row 0 after the restore, and checks
+the delete by the backup being deselected, as other backups may be listed. The
+restore is held back unless 00-backup passed, so it never restores a backup
+that is not this run's. (Until runtime issue P1 was fixed, the list showed the
+oldest backup first, and 00-precondition asserted that no backup existed.)
+
+**The leftover-marker precondition.** 00-precondition asserts that no restore
+marker is left over. A marker is left when a run was interrupted, or its
+restore failed, so the data may hold what that run did. If it fails, check the
+data (or restore that run's backup), delete the marker by hand, and run again.
+The suite asserts rather than restoring or deleting, because a test should not
+decide what someone's data should be. For the same reason, the older
+`pf-admin-sail.xml` makes no backup.
 
 **Waiting for jobs.** Backup, restore and test data generation run as jobs.
 The suites wait for each job with `testGridRows ... timeoutMillis` on its row
@@ -1021,12 +1028,12 @@ server's earlier job history is lost. No `<pause>` is used.
 
 The admin suites must never lock `admin` out. They run no `testDataEnter` on
 Configuration, change passwords only for the user they create, and back up with
-data sensitivity "none". A redacted backup cannot be restored safely (runtime
-issue P2).
+data sensitivity "none". A backup with any other data sensitivity redacts every
+password, by design, so after its restore `admin` could not sign in until its
+password was reset (runtime issue P2).
 
-With both suites following the precondition, and each deleting its own backup
-in 99-restore, the PF and SC suites can run one after the other, in either
-order, against the same server.
+With each suite deleting its own backup in 99-restore, the PF and SC suites can
+run one after the other, in either order, against the same server.
 
 ## Synchronisation Rules
 
@@ -1366,8 +1373,7 @@ dropped silently.
 - **Paged lists.** `rowContaining` and `testGridRows` see only the rows the
   browser has, which is the first page of a paged list. Use `listGridFilter`
   and `listGridSort` to bring the row onto it.
-- **Runtime bugs.** Update My Details is commented out of both admin scripts
-  (runtime issue P4). Other runtime bugs have workarounds in the scripts or the
+- **Runtime bugs.** Some runtime bugs have workarounds in the scripts or the
   executors, such as the second click on a Vue list grid row (P7). SC's missing
   Backup and Restore "started" growls are left out of its green path. See the
   issues list.

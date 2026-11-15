@@ -14,16 +14,19 @@ import org.skyve.web.WebContext;
 import org.slf4j.Logger;
 import org.skyve.util.logging.SkyveLoggerFactory;
 
+import modules.admin.Job.JobExtension;
 import modules.admin.domain.Job;
 
 /**
- * Re-runs a completed job when a unique metadata job definition can be resolved.
+ * Re-runs a completed job when a unique metadata job definition can be resolved, and the job was started without a bean.
+ * A job started with a bean is refused, as its bean cannot be given back to it (see {@link JobExtension#startedWithABean()}).
  */
 public class RerunJob implements ServerSideAction<Job> {
     private static final Logger LOGGER = SkyveLoggerFactory.getLogger(RerunJob.class);
 
 	/**
-	 * Resolves the metadata job by display name and runs it immediately.
+	 * Resolves the metadata job by display name and runs it immediately, without a bean, as it first ran.
+	 * A job that was started with a bean is not run: a warning growl says why.
 	 *
 	 * @param bean
 	 *        the selected historical job entry
@@ -33,6 +36,14 @@ public class RerunJob implements ServerSideAction<Job> {
 	 */
 	@Override
 	public ServerSideActionResult<Job> execute(Job bean, WebContext webContext) {
+		if (((JobExtension) bean).startedWithABean()) {
+			if (webContext != null) {
+				webContext.growl(MessageSeverity.warn,
+									"This job can't be re-run, as the values it was started with are not kept. Start it again where it was started.");
+			}
+			return new ServerSideActionResult<>(bean);
+		}
+
 		// try to find the job to re-run, based on unique display name
 		JobMetaData jobToRerun = null;
 		Customer c = CORE.getCustomer();
@@ -55,8 +66,8 @@ public class RerunJob implements ServerSideAction<Job> {
 			if (isJobAlreadyActive(jobToRerun)) {
 				webContext.growl(MessageSeverity.warn, "This job is already running");
 			} else {
-				// start the job immediately as the current user
-				EXT.getJobScheduler().runOneShotJob(jobToRerun, bean, CORE.getUser());
+				// start the job immediately as the current user, without a bean as it first ran
+				EXT.getJobScheduler().runOneShotJob(jobToRerun, null, CORE.getUser());
 				webContext.growl(MessageSeverity.info, "Started " + jobToRerun.getDisplayName());
 			}
 		} else {
