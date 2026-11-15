@@ -77,6 +77,14 @@ public class ContentUploadView extends AbstractUploadView {
 
 	private static final String FAILURE_MESSAGE_SUMMARY = "Failure";
 
+	/**
+	 * Tells a PrimeFaces upload page's owner, from within the page's frame, that its upload action has run, so that hiding
+	 * the page refreshes the view; with {@code true}, also closes the page (the upload succeeded), as a content upload's
+	 * page is closed. See {@code SKYVE.PF.afterActionUpload}. A SmartClient upload window has no PrimeFaces owner, so the
+	 * script does nothing there.
+	 */
+	private static final String AFTER_ACTION_UPLOAD_SCRIPT = "var w=SKYVE.Util.findPrimeFacesWindow();if(w){w.SKYVE.PF.afterActionUpload(window,%s)}";
+
 	@Inject
 	@ManagedProperty(value = "#{param." + AbstractWebContext.RESOURCE_FILE_NAME + "}")
 	@SuppressWarnings("java:S6813") // allow member injection
@@ -603,7 +611,11 @@ public class ContentUploadView extends AbstractUploadView {
 	 *
 	 * <p>Side effects: executes the configured upload action, updates the cached
 	 * conversation bean when the action returns one, rolls persistence back for
-	 * upload errors, and enqueues user-facing JSF messages. A refusal's
+	 * upload errors, and enqueues user-facing JSF messages. Once the upload action
+	 * has run, the page is sent a script that, in PrimeFaces, has the view
+	 * refreshed when the page closes, and closes the page if the upload had no
+	 * problems; an upload with problems (errors or warnings) leaves the page open,
+	 * showing them. A refusal's
 	 * {@link ActionUnavailableException} is caught, not thrown: it is logged as a
 	 * warning, rolled back, and enqueued as the refusal's localised message. A
 	 * {@link MessageException} (such as a {@code ValidationException}) that the
@@ -738,12 +750,14 @@ public class ContentUploadView extends AbstractUploadView {
 
 			StateUtil.commitAndCacheConversation(webContext);
 
-			if (exception.hasProblems()) {
-				addActionUploadProblems(exception, fc);
-			}
-			else {
+			boolean success = (! exception.hasProblems());
+			if (success) {
 				addActionUploadSuccess(file, fc);
 			}
+			else {
+				addActionUploadProblems(exception, fc);
+			}
+			PrimeFaces.current().executeScript(String.format(AFTER_ACTION_UPLOAD_SCRIPT, Boolean.toString(success)));
 		}
 		catch (ActionUnavailableException e) {
 			// Logged as a warning when refused, so show the user the refusal's message rather than an error reference
@@ -785,7 +799,9 @@ public class ContentUploadView extends AbstractUploadView {
 	private void addContentUploadFailure(@Nonnull Exception e, @Nonnull FacesContext fc) {
 		if (e instanceof MessageException messageException) {
 			// A refusal (such as a validation) is expected: show its messages as errors, as a Faces action does
-			LOGGER.warn("Content upload refused for binding {}", OWASP.sanitiseLog(contentBinding), e);
+			if (LOGGER.isWarnEnabled()) {
+				LOGGER.warn("Content upload refused for binding {}", OWASP.sanitiseLog(contentBinding), e);
+			}
 			addMessageExceptionMessages(messageException, fc);
 		}
 		else {

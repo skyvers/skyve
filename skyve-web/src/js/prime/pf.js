@@ -14,6 +14,8 @@ SKYVE.PF = function() {
 	};
 	
 	var contentOverlayIdsByBinding = {};
+	// The ids of the upload page frames whose upload action has run since they were shown (see afterActionUpload)
+	var actionUploadFrameIds = {};
 	var contentMarkupIdsByBinding = {};
 	var contentMarkupCompanionIdsByBinding = {};
 	var pageScrollLock = {
@@ -741,6 +743,7 @@ SKYVE.PF = function() {
 			if (binding) {
 				contentOverlayIdsByBinding[binding] = id;
 			}
+			delete actionUploadFrameIds[id + '_overlayiframe'];
 			var iframe = SKYVE.PF.getById(id + '_overlayiframe');
 			if (iframe.attr('src') !== url) {
 				iframe.attr('src', url);
@@ -777,6 +780,43 @@ SKYVE.PF = function() {
 			}
 			SKYVE.PF.getById(id + '_overlayiframe').attr('src','');
 			delete contentOverlayIdsByBinding[binding];
+		},
+
+		/**
+		 * Notes that an upload page's upload action has run, so that hiding the page refreshes the view
+		 * (see actionUploadRan), and closes the page of an upload that has succeeded, as afterContentUpload closes a
+		 * content upload's: hides the overlay or dialog that holds the page's frame, whose hide handler then refreshes
+		 * the view.
+		 *
+		 * @param uploadWindow	The upload page's window, in the frame.
+		 * @param close	Whether to close the page: true when the upload succeeded, false when the page shows its problems.
+		 */
+		afterActionUpload: function(uploadWindow, close) {
+			var frame = uploadWindow.frameElement;
+			actionUploadFrameIds[frame.id] = true;
+			if (close) {
+				var panel = $(frame).closest('.ui-overlaypanel, .ui-dialog');
+				var widget = panel.length ? PrimeFaces.getWidgetById(panel.attr('id')) : null;
+				if (widget) {
+					widget.hide();
+				}
+			}
+		},
+
+		/**
+		 * Indicates if the upload page in the overlay or dialog with this id has run its upload action since it was
+		 * shown, and forgets it: its hide handler refreshes the view only then. A page closed without an upload has
+		 * changed nothing, and a refresh sent when its hide ends could follow the request of the click that hid it, and
+		 * re-render the view without that request's messages.
+		 *
+		 * @param id	The overlay's or dialog's id.
+		 * @returns {boolean} true if the upload action has run.
+		 */
+		actionUploadRan: function(id) {
+			var frameId = id + '_overlayiframe';
+			var result = (actionUploadFrameIds[frameId] === true);
+			delete actionUploadFrameIds[frameId];
+			return result;
 		},
 
 		clearContentImage: function(binding, id, companionBinding) {

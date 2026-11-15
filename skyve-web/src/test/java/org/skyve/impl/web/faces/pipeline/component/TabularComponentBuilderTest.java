@@ -4759,6 +4759,8 @@ class TabularComponentBuilderTest {
 		// appended to the body so a fixed or scrolling action bar cannot clip it
 		verify(overlayPanel).setFor("uploadButtonId");
 		verify(overlayPanel).setAppendTo("@(body)");
+		// closing it refreshes the view only after its upload action has run (runtime issue P8)
+		verify(overlayPanel).setOnHide("SKYVE.PF.contentOverlayOnHide('uploadOverlayId');if(SKYVE.PF.actionUploadRan('uploadOverlayId'))uploadRefreshId()");
 		assertEquals(1, overlayChildren.size());
 		assertSame(iframe, overlayChildren.get(0));
 		ArgumentCaptor<String> iframeMarkupCaptor = ArgumentCaptor.forClass(String.class);
@@ -4820,7 +4822,7 @@ class TabularComponentBuilderTest {
 		assertEquals(3, wrapperChildren.size());
 		assertSame(dialog, wrapperChildren.get(2));
 		assertSame(iframe, dialogChildren.get(0));
-		verify(dialog).setOnHide("SKYVE.PF.contentOverlayOnHide('uploadDialogId',false,true);uploadRefreshId()");
+		verify(dialog).setOnHide("SKYVE.PF.contentOverlayOnHide('uploadDialogId',false,true);if(SKYVE.PF.actionUploadRan('uploadDialogId'))uploadRefreshId()");
 		verify(uploadButton).setOnclick("PF('uploadDialogIdDialog').show()");
 		verify(iframe).setValue("<iframe id=\"uploadDialogId_overlayiframe\" src=\"\" loading=\"eager\" scrolling=\"no\" style=\"display:block;width:100%;height:100%;border:none;overflow:hidden\"></iframe>");
 		ArgumentCaptor<String> expressions = ArgumentCaptor.forClass(String.class);
@@ -4950,7 +4952,7 @@ class TabularComponentBuilderTest {
 		verify(dialog).setWidth("96vw");
 		verify(dialog).setHeight("96vh");
 		verify(dialog).setStyle("max-width:100vw;max-height:100vh;");
-		verify(dialog).setOnHide("SKYVE.PF.contentOverlayOnHide('uploadDialogId',false,true);uploadRefreshId()");
+		verify(dialog).setOnHide("SKYVE.PF.contentOverlayOnHide('uploadDialogId',false,true);if(SKYVE.PF.actionUploadRan('uploadDialogId'))uploadRefreshId()");
 		verify(uploadButton).setOnclick("PF('uploadDialogIdDialog').show()");
 		verify(iframe).setValue("<iframe id=\"uploadDialogId_overlayiframe\" src=\"\" loading=\"eager\" scrolling=\"no\" style=\"display:block;width:100%;height:100%;border:none;overflow:hidden\"></iframe>");
 		ArgumentCaptor<String> expressions = ArgumentCaptor.forClass(String.class);

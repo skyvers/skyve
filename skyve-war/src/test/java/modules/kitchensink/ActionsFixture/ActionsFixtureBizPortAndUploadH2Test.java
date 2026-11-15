@@ -5,9 +5,13 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.io.ByteArrayInputStream;
@@ -21,6 +25,7 @@ import java.util.UUID;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.primefaces.PrimeFaces;
 import org.primefaces.event.FileUploadEvent;
 import org.primefaces.model.file.UploadedFile;
 import org.skyve.EXT;
@@ -55,7 +60,7 @@ import modules.test.AbstractSkyveTest;
  * fixture row is checked against the row's view. The fixture is always created, so a new admin user stands in for a
  * bean not yet created: its edit view offers Generate Password and its create view does not, so a request for it is
  * refused only when the create view is checked. A mock Faces context stands in for the Faces lifecycle of the upload
- * and import pages.
+ * and import pages, and a mock {@link PrimeFaces} records the scripts the upload page is sent.
  */
 @SuppressWarnings("java:S1192") // repeated test literals
 class ActionsFixtureBizPortAndUploadH2Test extends AbstractSkyveTest {
@@ -64,6 +69,13 @@ class ActionsFixtureBizPortAndUploadH2Test extends AbstractSkyveTest {
 	private static final String USER_AGENT = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36";
 	/** An action of the admin user's edit view that its create view does not offer. */
 	private static final String EDIT_VIEW_ONLY_ACTION = "GeneratePassword";
+	/** The script that closes a PrimeFaces upload page after its action upload has succeeded (runtime issue P3). */
+	private static final String CLOSE_UPLOAD_PAGE_SCRIPT = "var w=SKYVE.Util.findPrimeFacesWindow();if(w){w.SKYVE.PF.afterActionUpload(window,true)}";
+	/**
+	 * The script that tells a PrimeFaces upload page's owner that its upload action ran and showed problems, so that
+	 * closing the page refreshes the view (runtime issue P8).
+	 */
+	private static final String UPLOAD_RAN_SCRIPT = "var w=SKYVE.Util.findPrimeFacesWindow();if(w){w.SKYVE.PF.afterActionUpload(window,false)}";
 
 	/**
 	 * Reaches the protected {@link FacesContext#setCurrentInstance(FacesContext)}.
@@ -76,15 +88,20 @@ class ActionsFixtureBizPortAndUploadH2Test extends AbstractSkyveTest {
 
 	private final MockHttpSession session = new MockHttpSession();
 	private final List<FacesMessage> messages = new ArrayList<>();
+	private final PrimeFaces primeFaces = mock(PrimeFaces.class);
+	private PrimeFaces originalPrimeFaces;
 
 	@BeforeEach
 	void startSession() {
 		session.setAttribute(WebContext.USER_SESSION_ATTRIBUTE_NAME, u);
 		StateUtil.addSession(u.getId(), session);
+		originalPrimeFaces = PrimeFaces.current();
+		PrimeFaces.setCurrent(primeFaces);
 	}
 
 	@AfterEach
 	void restore() {
+		PrimeFaces.setCurrent(originalPrimeFaces);
 		FacesContextBridge.setCurrent(null);
 		// The export servlet commits and closes the thread's persistence, so give the base class one to clean up with
 		AbstractPersistence.get().setUser(u);
@@ -175,6 +192,53 @@ class ActionsFixtureBizPortAndUploadH2Test extends AbstractSkyveTest {
 
 		assertEquals(List.of("Successful"), messages.stream().map(FacesMessage::getSummary).toList());
 		assertEquals("Actions Upload ran", cachedFixture(webId).getOutcome());
+	}
+
+	/**
+	 * Runtime issue P3: in PrimeFaces, an action upload that succeeds closes its upload page, as a content upload does,
+	 * and closing it refreshes the view.
+	 */
+	@Test
+	void aSuccessfulUploadClosesItsUploadPage() throws Exception {
+		String webId = cacheConversation(ActionsFixture.newInstance());
+		ContentUploadView view = actionUploadView(webId, "ActionsUpload");
+
+		view.handleFileUpload(upload("upload.txt", "uploaded".getBytes(StandardCharsets.UTF_8)));
+
+		verify(primeFaces).executeScript(CLOSE_UPLOAD_PAGE_SCRIPT);
+	}
+
+	/**
+	 * An upload that its action refuses leaves its upload page open, showing why, and tells the page's owner that the
+	 * action ran, so that closing the page refreshes the view (runtime issue P8: a page closed without an upload does
+	 * not refresh it).
+	 */
+	@Test
+	void aRefusedUploadLeavesItsUploadPageOpen() throws Exception {
+		String webId = cacheConversation(ActionsFixture.newInstance());
+		ContentUploadView view = actionUploadView(webId, "ActionsUpload");
+
+		view.handleFileUpload(upload("sail-refused.txt", "refused".getBytes(StandardCharsets.UTF_8)));
+		view.handleFileUpload(upload("sail-invalid.txt", "invalid".getBytes(StandardCharsets.UTF_8)));
+
+		assertEquals(2, messages.size(), messages::toString);
+		verify(primeFaces, times(2)).executeScript(UPLOAD_RAN_SCRIPT);
+		verify(primeFaces, never()).executeScript(CLOSE_UPLOAD_PAGE_SCRIPT);
+	}
+
+	/**
+	 * An upload that is refused before its action runs leaves its upload page open, and closing the page does not
+	 * refresh the view, which has not changed.
+	 */
+	@Test
+	void anUnavailableUploadSendsNoScript() throws Exception {
+		String webId = cacheConversation(ActionsFixture.newInstance());
+		ContentUploadView view = actionUploadView(webId, "ActionsUpload");
+
+		view.handleFileUpload(upload("sail-unavailable.txt", "unavailable".getBytes(StandardCharsets.UTF_8)));
+
+		assertEquals(1, messages.size(), messages::toString);
+		verify(primeFaces, never()).executeScript(anyString());
 	}
 
 	@Test
