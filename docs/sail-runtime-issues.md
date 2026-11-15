@@ -157,9 +157,18 @@ UI, after a restore of a backup made with data sensitivity "Secret", signing in
 as `admin` failed with "Invalid username and/or password", and the restore
 job's log had the warning.
 
-A backup made with a data sensitivity below "Secret" also redacts the user
-names (sensitivity personal), so after its restore a sign in does not find the
-user at all. The restore's warning mentions only the passwords.
+A backup made with a data sensitivity from "Internal" to "Personal" also
+redacts the user names (sensitivity personal), so after its restore a sign in
+does not find the user at all. That redaction stays as it is, and the restore
+warning now covers redacted user names too (Mike, 2026-11-16). `RestoreJob`
+also counts the restored user names that have the redacted form
+(`BackupUtil.isRedactedUserName`: the same form, or that form on each side of
+the `@` of an email address). The log's warning and the growl name both counts,
+for example "the passwords of 2 user(s) and the user names of 2 user(s)", and
+say that the user names must be set again. A backup made with "Secret" redacts
+the passwords only, and its warning is as before. `RestoreJobH2Test` (a
+"Personal" backup's restore) failed before this change; `RestoreJobTest` checks
+the wording for passwords only, user names only and both.
 
 **Workaround in the suites: kept, for another reason.** A restore of a redacted
 backup leaves `admin` unable to sign in until its password is reset, by design,

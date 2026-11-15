@@ -62,17 +62,19 @@ public class RestoreJob extends CancellableJob {
 	private static final String CREATE_SQL = "create.sql";
 	private static final String ID_COLUMN_SUFFIX = "_id";
 	private static final String KICK_OFF_INSTRUCTION = "Kick off the job with the appropriate options from the Data Maintenance page.";
-	private static final String REDACTED_PASSWORDS_FORMAT = "WARNING: This backup was made with a data sensitivity above none, " +
-																"so it redacted the passwords of %d user(s). " +
-																"They cannot sign in until their passwords are reset: " +
-																"reset them before you sign out.";
+	private static final String REDACTED_WARNING_START = "WARNING: This backup was made with a data sensitivity above none, " +
+															"so it redacted ";
+	private static final String REDACTED_PASSWORDS_FORMAT = "the passwords of %d user(s)";
+	private static final String REDACTED_USER_NAMES_FORMAT = "the user names of %d user(s)";
 
 	private Calendar gmt = Calendar.getInstance(TimeZone.getTimeZone("GMT"));
 
-	/** The agnostic identifier of the admin User document's table, which holds the user passwords. */
+	/** The agnostic identifier of the admin User document's table, which holds the user names and passwords. */
 	private @Nullable String userTableIdentifier;
 	/** The number of restored user passwords that the backup had redacted. */
 	private int redactedPasswordCount;
+	/** The number of restored user names that the backup had redacted. */
+	private int redactedUserNameCount;
 
 	/**
 	 * Executes a restore job when invoked with {@link RestoreOptions}.
@@ -224,8 +226,9 @@ public class RestoreJob extends CancellableJob {
 			log.add(trace);
 			LOGGER.info(trace);
 			FileUtil.delete(extractDir);
-			if (redactedPasswordCount > 0) {
-				trace = String.format(REDACTED_PASSWORDS_FORMAT, Integer.valueOf(redactedPasswordCount));
+			boolean redacted = (redactedPasswordCount > 0) || (redactedUserNameCount > 0);
+			if (redacted) {
+				trace = redactedWarning(redactedPasswordCount, redactedUserNameCount);
 				log.add(trace);
 				LOGGER.warn(trace);
 			}
@@ -234,10 +237,9 @@ public class RestoreJob extends CancellableJob {
 			LOGGER.info(trace);
 			setPercentComplete(100);
 
-			if (redactedPasswordCount > 0) {
+			if (redacted) {
 				EXT.push(new PushMessage().growl(MessageSeverity.warn,
-													"System Restore complete, but the backup redacted the passwords of " + redactedPasswordCount +
-														" user(s), which must be reset: see the restore job's log."));
+													redactedGrowl(redactedPasswordCount, redactedUserNameCount)));
 			}
 			else {
 				EXT.push(new PushMessage().growl(MessageSeverity.info, "System Restore complete."));
@@ -295,6 +297,61 @@ public class RestoreJob extends CancellableJob {
 				}
 			}
 		}
+	}
+
+	/**
+	 * Returns the job log's warning for a restore of a redacted backup: what it redacted, and what must be set again
+	 * before the users can sign in.
+	 *
+	 * @param passwordCount the number of restored user passwords that the backup redacted
+	 * @param userNameCount the number of restored user names that the backup redacted
+	 * @return the warning, for at least one count above zero
+	 */
+	static @Nonnull String redactedWarning(int passwordCount, int userNameCount) {
+		String consequence;
+		if (userNameCount == 0) {
+			consequence = "They cannot sign in until their passwords are reset: reset them before you sign out.";
+		}
+		else if (passwordCount == 0) {
+			consequence = "They cannot sign in by name until their user names are set again: set them before you sign out.";
+		}
+		else {
+			consequence = "They cannot sign in until their passwords are reset and their user names are set again: " +
+							"do this before you sign out.";
+		}
+		return REDACTED_WARNING_START + redacted(passwordCount, userNameCount) + ". " + consequence;
+	}
+
+	/**
+	 * Returns the completion growl for a restore of a redacted backup, which points to the job log's warning.
+	 *
+	 * @param passwordCount the number of restored user passwords that the backup redacted
+	 * @param userNameCount the number of restored user names that the backup redacted
+	 * @return the growl's message, for at least one count above zero
+	 */
+	static @Nonnull String redactedGrowl(int passwordCount, int userNameCount) {
+		return "System Restore complete, but the backup redacted " + redacted(passwordCount, userNameCount) +
+				((userNameCount == 0) ? ", which must be reset" : ", which must be set again") +
+				": see the restore job's log.";
+	}
+
+	/**
+	 * Returns what a redacted backup redacted, such as "the passwords of 2 user(s) and the user names of 2 user(s)".
+	 *
+	 * @param passwordCount the number of restored user passwords that the backup redacted
+	 * @param userNameCount the number of restored user names that the backup redacted
+	 * @return the counts that are above zero, joined with "and"
+	 */
+	private static @Nonnull String redacted(int passwordCount, int userNameCount) {
+		String passwords = String.format(REDACTED_PASSWORDS_FORMAT, Integer.valueOf(passwordCount));
+		String userNames = String.format(REDACTED_USER_NAMES_FORMAT, Integer.valueOf(userNameCount));
+		if (userNameCount == 0) {
+			return passwords;
+		}
+		if (passwordCount == 0) {
+			return userNames;
+		}
+		return passwords + " and " + userNames;
 	}
 
 	/**
@@ -464,10 +521,15 @@ public class RestoreJob extends CancellableJob {
 												AttributeType.enumeration.equals(attributeType) ||
 												AttributeType.id.equals(attributeType)) {
 										statement.setString(index++, stringValue);
-										if (userTable &&
-												AppConstants.PASSWORD_ATTRIBUTE_NAME.equalsIgnoreCase(header) &&
-												BackupUtil.isRedactedString(stringValue)) {
-											redactedPasswordCount++;
+										if (userTable) {
+											if (AppConstants.PASSWORD_ATTRIBUTE_NAME.equalsIgnoreCase(header) &&
+													BackupUtil.isRedactedString(stringValue)) {
+												redactedPasswordCount++;
+											}
+											else if (AppConstants.USER_NAME_ATTRIBUTE_NAME.equalsIgnoreCase(header) &&
+														BackupUtil.isRedactedUserName(stringValue)) {
+												redactedUserNameCount++;
+											}
 										}
 									}
 									else if (AttributeType.geometry.equals(attributeType)) {

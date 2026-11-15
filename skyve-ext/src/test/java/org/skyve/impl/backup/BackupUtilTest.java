@@ -75,6 +75,19 @@ class BackupUtilTest {
 	}
 
 	@Test
+	@SuppressWarnings({"static-method", "null"}) // a null here fails the test
+	void isRedactedUserNameRecognisesRedactedNamesAndEmailAddresses() {
+		assertTrue(BackupUtil.isRedactedUserName((String) redactData(AttributeType.text, "admin")));
+		assertTrue(BackupUtil.isRedactedUserName((String) redactData(AttributeType.text, "a")));
+		assertTrue(BackupUtil.isRedactedUserName((String) redactData(AttributeType.text, "someone@example.org")));
+		assertTrue(BackupUtil.isRedactedUserName((String) redactData(AttributeType.text, "a@b.com")));
+		assertFalse(BackupUtil.isRedactedUserName("admin"));
+		assertFalse(BackupUtil.isRedactedUserName("someone@example.org"));
+		assertFalse(BackupUtil.isRedactedUserName("so*******ne@example.org")); // only one side redacted
+		assertFalse(BackupUtil.isRedactedUserName("someone@ex*******rg")); // only one side redacted
+	}
+
+	@Test
 	@SuppressWarnings("static-method")
 	void testRedactSegment() {
 		// setup the test data

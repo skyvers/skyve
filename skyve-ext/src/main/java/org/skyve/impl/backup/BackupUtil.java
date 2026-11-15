@@ -551,6 +551,25 @@ final class BackupUtil {
 	}
 
 	/**
+	 * Returns whether a user name has the form {@link #redactString(String, Integer)} gives: the form
+	 * {@link #isRedactedString(String)} checks, or, for a user name that is an email address, that form on each side
+	 * of the {@code @}.
+	 *
+	 * <p>A restore uses this to find the user names a backup redacted. As with {@link #isRedactedString(String)}, a
+	 * value can have this form by chance, but a user name seldom holds four or more asterisks in a row.
+	 *
+	 * @param value the user name restored from a backup
+	 * @return {@code true} if the user name has the redacted form
+	 */
+	static boolean isRedactedUserName(@Nonnull String value) {
+		int atIndex = value.indexOf('@');
+		if (atIndex < 0) {
+			return isRedactedString(value);
+		}
+		return isRedactedString(value.substring(0, atIndex)) && isRedactedString(value.substring(atIndex + 1));
+	}
+
+	/**
 	 * Redacts a segment of a string, only displaying a fixed number of chars at beginning & end.
 	 * 
 	 * @param data - the segment to be redacted.

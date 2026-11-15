@@ -72,6 +72,34 @@ class RestoreJobTest {
 	}
 
 	@Test
+	void redactedWarningSaysWhatTheBackupRedacted() {
+		assertEquals("WARNING: This backup was made with a data sensitivity above none, so it redacted the passwords of 2 " +
+						"user(s). They cannot sign in until their passwords are reset: reset them before you sign out.",
+						RestoreJob.redactedWarning(2, 0));
+		assertEquals("WARNING: This backup was made with a data sensitivity above none, so it redacted the user names of 3 " +
+						"user(s). They cannot sign in by name until their user names are set again: set them before you " +
+						"sign out.",
+						RestoreJob.redactedWarning(0, 3));
+		assertEquals("WARNING: This backup was made with a data sensitivity above none, so it redacted the passwords of 2 " +
+						"user(s) and the user names of 3 user(s). They cannot sign in until their passwords are reset and " +
+						"their user names are set again: do this before you sign out.",
+						RestoreJob.redactedWarning(2, 3));
+	}
+
+	@Test
+	void redactedGrowlSaysWhatTheBackupRedacted() {
+		assertEquals("System Restore complete, but the backup redacted the passwords of 2 user(s), which must be reset: " +
+						"see the restore job's log.",
+						RestoreJob.redactedGrowl(2, 0));
+		assertEquals("System Restore complete, but the backup redacted the user names of 3 user(s), which must be set " +
+						"again: see the restore job's log.",
+						RestoreJob.redactedGrowl(0, 3));
+		assertEquals("System Restore complete, but the backup redacted the passwords of 2 user(s) and the user names of 3 " +
+						"user(s), which must be set again: see the restore job's log.",
+						RestoreJob.redactedGrowl(2, 3));
+	}
+
+	@Test
 	void restoreDataBindsCsvValuesForNormalTablesAndSkipsForeignKeys() throws Exception {
 		AbstractContentManager.IMPLEMENTATION_CLASS = NoOpContentManager.class;
 		Table table = new Table("demo", "DEMO_TABLE");
