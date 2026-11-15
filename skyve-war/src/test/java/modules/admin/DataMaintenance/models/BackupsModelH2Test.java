@@ -8,14 +8,18 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.io.IOException;
 import java.io.OutputStream;
+import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.FileTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 import java.util.TreeMap;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -129,6 +133,42 @@ class BackupsModelH2Test extends AbstractH2Test {
 		Page page = BackupsModel.fetchBackups(tempDir.toString(), 0, 10);
 
 		assertEquals(List.of("WEEKLY_20240101.zip", "DAILY_20240101000000.zip"), names(page));
+	}
+
+	/**
+	 * A backup being written changes its modified time. The sort read each file's time on every comparison, so a time
+	 * that changed during the sort made the comparator inconsistent, and the sort could fail with "Comparison method
+	 * violates its general contract". Here another thread keeps changing the times while the backups are listed.
+	 */
+	@Test
+	void fetchBackupsListsBackupsWhoseTimesChangeWhileTheyAreListed() throws Exception {
+		int count = 200;
+		List<Path> files = new ArrayList<>(count);
+		for (int i = 0; i < count; i++) {
+			files.add(Files.write(tempDir.resolve(String.format("%014d.zip", Integer.valueOf(i))), new byte[0]));
+		}
+		AtomicBoolean listing = new AtomicBoolean(true);
+		Thread toucher = new Thread(() -> {
+			Random random = new Random(1);
+			while (listing.get()) {
+				try {
+					Files.setLastModifiedTime(files.get(random.nextInt(count)), FileTime.fromMillis(random.nextInt(1_000_000) * 1000L));
+				}
+				catch (IOException e) {
+					throw new UncheckedIOException(e);
+				}
+			}
+		});
+		toucher.start();
+		try {
+			for (int i = 0; i < 100; i++) {
+				assertEquals(count, BackupsModel.fetchBackups(tempDir.toString(), 0, count).getTotalRows());
+			}
+		}
+		finally {
+			listing.set(false);
+			toucher.join();
+		}
 	}
 
 	@SuppressWarnings("null") // a null here fails the test
