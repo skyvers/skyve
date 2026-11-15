@@ -1127,7 +1127,8 @@ public class ViewJSONManipulator extends ViewVisitor {
 								boolean parentEnabled) {
 		addCondition(tabPane.getInvisibleCondition());
 		addCondition(tabPane.getDisabledCondition());
-		addBinding(tabPane.getSelectedTabIndexBinding(), false, false, Sanitisation.text);
+		// mutable: the client sends the tab the user selected, so that a later response does not select the old one again
+		addBinding(tabPane.getSelectedTabIndexBinding(), true, false, Sanitisation.text);
 	}
 
 	@Override

@@ -32,6 +32,7 @@ import org.skyve.metadata.module.query.MetaDataQueryDefinition;
 import org.skyve.metadata.module.query.QueryDefinition;
 import org.skyve.metadata.router.UxUi;
 import org.skyve.metadata.user.User;
+import org.skyve.metadata.user.UserAccess;
 import org.skyve.metadata.view.View.ViewType;
 import org.skyve.util.Icons;
 import org.skyve.util.OWASP;
@@ -211,6 +212,8 @@ public class DesktopView extends HarnessView {
 						}
 					}
 					else {
+						// the definition of the list's data source, when the menu did not define it (see listDataSourceDefinition())
+						String definition = "";
 						sb.append("details.showMember(isc.ListView.contents);");
 						sb.append("isc.ListView.set");
 						if (WebAction.l.equals(a)) {
@@ -227,7 +230,11 @@ public class DesktopView extends HarnessView {
 						}
 						
 						if (bizDocument != null) {
-							sb.append("DataSource('").append(bizModule).append('_').append(bizDocument).append("__").append(getQueryNameParameter()).append("');");
+							String modelName = getQueryNameParameter();
+							sb.append("DataSource('").append(bizModule).append('_').append(bizDocument).append("__").append(modelName).append("');");
+							if ((bizModule != null) && (modelName != null)) {
+								definition = listDataSourceDefinition(user, customer, bizModule, bizDocument, modelName, uxui.getName());
+							}
 						}
 						else {
 							String queryName = getQueryNameParameter();
@@ -239,7 +246,9 @@ public class DesktopView extends HarnessView {
 							}
 							QueryDefinition query = ActionUtil.getMetaDataQuery(bizModule, queryName);
 							sb.append("DataSource('").append(bizModule).append('_').append(query.getName()).append("');");
+							definition = listDataSourceDefinition(user, customer, bizModule, null, queryName, uxui.getName());
 						}
+						sb.insert(0, definition);
 					}
 					uiScript = sb.toString();
 					bannerScript = buildBannerScript();
@@ -711,6 +720,59 @@ public class DesktopView extends HarnessView {
 			throw new IllegalStateException("Cannot render the desktop menu without a session user.");
 		}
 		return result;
+	}
+
+	/**
+	 * Returns the definition of the data source of a list opened by its URL, so that a list with no menu item can show.
+	 * The menu's data sources ({@link #listDataSources}) cover only the module home lists and the menu items, and the
+	 * list view finds the others undefined.
+	 *
+	 * <p>The definition is made only when the user may fetch the list's rows: the user has access to the list, as
+	 * {@code SmartClientListServlet} checks for every fetch, and can read its driving document. So it shows no list
+	 * the list servlet would refuse. It defines the data source only if the menu has not
+	 * ({@code if(window.<id>){}else{...}}), as an edit view does for its list grids.
+	 *
+	 * @param user	the user
+	 * @param customer	the user's customer
+	 * @param moduleName	the list's module
+	 * @param documentName	the model's document, or {@code null} for a query or a document's default query
+	 * @param queryOrModelName	the model, or the query or document of the default query
+	 * @param uxui	the UX/UI name
+	 * @return the JavaScript defining the data source, or an empty string when the user may not fetch the list
+	 */
+	private static @Nonnull String listDataSourceDefinition(@Nonnull UserImpl user,
+																@Nonnull Customer customer,
+																@Nonnull String moduleName,
+																@Nullable String documentName,
+																@Nonnull String queryOrModelName,
+																@Nonnull String uxui) {
+		StringBuilder result = new StringBuilder(1024);
+		Module module = customer.getModule(moduleName);
+		if (documentName != null) { // a model
+			if (user.canAccess(UserAccess.modelAggregate(moduleName, documentName, queryOrModelName), uxui)) {
+				Document document = module.getDocument(customer, documentName);
+				Document drivingDocument = document.getListModel(customer, queryOrModelName, true).getDrivingDocument();
+				if ((drivingDocument != null) && user.canReadDocument(drivingDocument)) {
+					SmartClientViewRenderer.appendDataSourceDefinition(user, customer, module, document, queryOrModelName, uxui, false, result, new TreeSet<>());
+				}
+			}
+		}
+		else {
+			MetaDataQueryDefinition query = module.getMetaDataQuery(queryOrModelName);
+			UserAccess access = (query == null) ?
+									UserAccess.documentAggregate(moduleName, queryOrModelName) : // a document's default query
+									UserAccess.queryAggregate(moduleName, queryOrModelName);
+			if (user.canAccess(access, uxui)) {
+				if (query == null) {
+					query = module.getDocumentDefaultQuery(customer, queryOrModelName);
+				}
+				Document drivingDocument = query.getDocumentModule(customer).getDocument(customer, query.getDocumentName());
+				if (user.canReadDocument(drivingDocument)) {
+					SmartClientViewRenderer.appendDataSourceDefinition(user, customer, query, null, null, uxui, false, result, new TreeSet<>());
+				}
+			}
+		}
+		return result.toString();
 	}
 
 	/**

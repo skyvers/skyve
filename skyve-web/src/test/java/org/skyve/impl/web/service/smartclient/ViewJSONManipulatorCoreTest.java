@@ -124,6 +124,23 @@ class ViewJSONManipulatorCoreTest {
 		assertTrue(bindingTree.getBindings().contains("selectedTab"));
 	}
 
+	/**
+	 * The selected tab index binding takes the tab the user selected, sent by the client, so that a later response does
+	 * not select the old tab again (runtime issue SC-7).
+	 */
+	@Test
+	void visitTabPaneMakesTheSelectedIndexBindingMutable() throws Exception {
+		ViewJSONManipulator manipulator = newManipulator(ViewType.edit.toString(), null, 0, 0);
+		TabPane tabPane = new TabPane();
+		tabPane.setSelectedTabIndexBinding("selectedTab");
+
+		manipulator.visitTabPane(tabPane, true, true);
+
+		ViewBinding binding = bindingTree(manipulator).getBinding("selectedTab");
+		assertNotNull(binding);
+		assertTrue(binding.isMutable());
+	}
+
 	@Test
 	void visitedFormIncrementsTheCorrectIdCounter() throws Exception {
 		Form form = new Form();

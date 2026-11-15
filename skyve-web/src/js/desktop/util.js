@@ -857,22 +857,29 @@ isc.BizUtil.addClassMethods({
 	/**
 	 * Displays growl notifications.
 	 * The SAIL recorder (src/js/sail/recorder-sc.js) wraps this method to note the growls shown: keep its arguments.
+	 * The page has one PrimeFaces Growl, which removes the messages it shows when it shows new ones, unless told to keep
+	 * them.
 	 * @param {Array} msgs - the messages to display.
 	 * @param {number} life - the duration of the notification.
 	 * @param {boolean} sticky - whether the notification is sticky.
+	 * @param {boolean} [keep] - whether to keep the messages already showing, rather than replace them.
 	 */
-	growl: function (msgs, life, sticky) {
+	growl: function (msgs, life, sticky, keep) {
 		PrimeFaces.cw("Growl", "growl", {
 			id: "growl",
 			widgetVar: "growl",
 			life: life || 6000,
 			sticky: sticky || false,
+			keepAlive: keep || false,
 			msgs,
 		});
 	},
 
 	/**
 	 * Handles push messages.
+	 * A pushed growl is added to the growls showing: it arrives on its own schedule, such as a job's when it finishes, and
+	 * must not remove a growl the user has not read yet, such as the "started" growl of the action that started the job
+	 * (runtime issue SC-6). PrimeFaces pages show pushed growls in a growl of their own for the same reason.
 	 * @param {Array} pushMessage - the push messages to handle.
 	 */
 	onPushMessage: function (pushMessage) {
@@ -894,7 +901,7 @@ isc.BizUtil.addClassMethods({
 			}
 		});
 
-		if (growls.length > 0) isc.BizUtil.growl(growls);
+		if (growls.length > 0) isc.BizUtil.growl(growls, null, null, true);
 		if (messages.length > 0) {
 			const markup =
 				messages.length > 1

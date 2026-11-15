@@ -1914,11 +1914,26 @@ isc.BizListGrid.addMethods({
 	/**
 	 * Refreshes the list view by deselecting all records, invalidating the cache,
 	 * applying the appropriate filter criteria, and scrolling to the top row.
+	 * The grid's selection handlers (selectionUpdated: the selectedIdBinding and the selected event) do not run for the
+	 * refresh, as the user selected nothing: a selected event that rerenders the view refreshes its list grids, so it would
+	 * run again for ever (runtime issue SC-10). Once the rows arrive, the row of the view's selectedIdBinding is selected
+	 * again, as a data grid's is on a scatter, so a refresh keeps the user's selection.
 	 */
 	refresh: function () {
 		const topRowNum = this.grid.getVisibleRows()[0];
 
-		this.grid.deselectAllRecords();
+		// Changes the selection without running selectionUpdated, as EditView._handleGridSelection() does for a data grid
+		const selectQuietly = (change) => {
+			const method = this.grid.selectionUpdated;
+			try {
+				this.grid.selectionUpdated = null;
+				change();
+			} finally {
+				this.grid.selectionUpdated = method;
+			}
+		};
+
+		selectQuietly(() => this.grid.deselectAllRecords());
 		this._eventRowNum = null;
 		this._eventColumnNum = null;
 		this._eventRecord = null;
@@ -1930,7 +1945,15 @@ isc.BizListGrid.addMethods({
 		const filterCriteria = this._advancedFilter.toggleButton.selected
 			? this._advancedFilter.getCriteria()
 			: this.grid.getFilterEditorCriteria(true);
-		this.grid.filterData(filterCriteria);
+		this.grid.filterData(filterCriteria, () => {
+			const selectedBizId = this.selectedIdBinding && this._view ? this._view._vm.getValue(this.selectedIdBinding) : null;
+			if (selectedBizId) {
+				const index = this.grid.data.findIndex("bizId", selectedBizId);
+				if (index >= 0) {
+					selectQuietly(() => this.grid.selectSingleRecord(index));
+				}
+			}
+		});
 
 		// Scroll to the top row for the refreshed data
 		this.grid.scrollToRow(topRowNum, "top");

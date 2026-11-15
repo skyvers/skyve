@@ -1,5 +1,6 @@
 package org.skyve.impl.web.service.smartclient;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -58,6 +59,10 @@ import org.skyve.impl.metadata.view.widget.Spacer;
 import org.skyve.impl.metadata.view.widget.StaticImage;
 import org.skyve.impl.metadata.view.widget.bound.Label;
 import org.skyve.impl.metadata.view.widget.bound.ParameterImpl;
+import org.skyve.impl.metadata.view.widget.bound.input.ChangeableInputWidget;
+import org.skyve.impl.metadata.view.widget.bound.input.CheckBox;
+import org.skyve.impl.metadata.view.widget.bound.input.ColourPicker;
+import org.skyve.impl.metadata.view.widget.bound.input.Combo;
 import org.skyve.impl.metadata.view.widget.bound.input.CompleteType;
 import org.skyve.impl.metadata.view.widget.bound.input.ContentCapture;
 import org.skyve.impl.metadata.view.widget.bound.input.ContentDisplay;
@@ -1208,6 +1213,84 @@ class SmartClientViewRendererCoverageTest {
 		assertTrue(code.contains("view.setInvisible('contact_secret','secretHidden');"), code);
 		assertTrue(code.contains("view.toggleDisabled('contact_active');"), code);
 		assertTrue(code.contains("view.toggleVisibility('contact_notes');"), code);
+	}
+
+	/**
+	 * A form item the user types into, whose change handler calls the server, fires it when the value is committed, not
+	 * on every keypress, and runs the handler's server events as a blur handler's (runtime issue SC-8).
+	 */
+	@Test
+	void aTypedItemWithAServerChangeHandlerChangesOnCommitAndDefersItsEvents() {
+		for (ChangeableInputWidget widget : List.of(new TextField(), new Password(), new TextArea(), new Spinner(), new ColourPicker())) {
+			RerenderEventAction rerender = new RerenderEventAction();
+			rerender.setClientValidation(Boolean.FALSE);
+			widget.getChangedActions().add(rerender);
+
+			String code = changedHandlerCode(widget, rerender);
+
+			assertTrue(code.startsWith("changeOnKeypress:false,changed:function(form,item,value){var view=form._view;" +
+										"view._blurry=isc.RPCManager.requestsArePending()?null:item;" +
+										"view.rerenderBlurryAction(false,'newPassword');},"),
+						widget.getClass().getSimpleName() + ": " + code);
+		}
+	}
+
+	/**
+	 * Other change handlers fire as SmartClient fires them: an item with completion or no typing, or a handler that
+	 * makes no request.
+	 */
+	@Test
+	void otherChangeHandlersAreUnchanged() {
+		TextField complete = new TextField();
+		complete.setComplete(CompleteType.previous);
+		List<ChangeableInputWidget> widgets = List.of(complete, new CheckBox(), new Combo(), new Radio(), new Slider());
+		for (ChangeableInputWidget widget : widgets) {
+			RerenderEventAction rerender = new RerenderEventAction();
+			rerender.setClientValidation(Boolean.FALSE);
+			widget.getChangedActions().add(rerender);
+
+			assertEquals("changed:function(form,item,value){var view=form._view;view.rerenderAction(false,'newPassword');},",
+							changedHandlerCode(widget, rerender),
+							widget.getClass().getSimpleName());
+		}
+
+		Password clientOnly = new Password();
+		SetDisabledEventAction setDisabled = new SetDisabledEventAction();
+		setDisabled.setBinding("confirmPassword");
+		setDisabled.setXmlDisabledCondition("noPassword");
+		clientOnly.getChangedActions().add(setDisabled);
+		SmartClientViewRenderer renderer = rendererInAForm();
+		int start = renderer.getCode().length();
+		renderer.visitOnChangedEventHandler(clientOnly, true, true);
+		renderer.visitSetDisabledEventAction(setDisabled, true, true);
+		renderer.visitedOnChangedEventHandler(clientOnly, true, true);
+		assertEquals("changed:function(form,item,value){var view=form._view;view.setDisabled('confirmPassword','noPassword');},",
+						renderer.getCode().substring(start));
+	}
+
+	/**
+	 * Renders a form item's change handler of one rerender, returning its code.
+	 */
+	private String changedHandlerCode(ChangeableInputWidget widget, RerenderEventAction rerender) {
+		SmartClientViewRenderer renderer = rendererInAForm();
+		EventSource source = mock(EventSource.class);
+		when(source.getSource()).thenReturn("newPassword");
+		int start = renderer.getCode().length();
+		renderer.visitOnChangedEventHandler(widget, true, true);
+		renderer.visitRerenderEventAction(rerender, source, true, true);
+		renderer.visitedOnChangedEventHandler(widget, true, true);
+		return renderer.getCode().substring(start);
+	}
+
+	/**
+	 * A renderer visiting a form, so that it renders form items (its current form is set).
+	 */
+	private SmartClientViewRenderer rendererInAForm() {
+		SmartClientViewRenderer renderer = rendererWithViewContainer();
+		Form form = new Form();
+		form.getColumns().add(new FormColumn());
+		renderer.visitForm(form, true, true);
+		return renderer;
 	}
 
 	private SmartClientViewRenderer rendererWithOpenForm() {
