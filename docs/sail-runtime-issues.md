@@ -593,9 +593,11 @@ indefinitely, so neither `isc.AutoTest` nor SAIL ever sees the form as done.
 **Checked:** The cause is in SmartClient, not Skyve. Skyve's part is a plain
 item definition.
 
-**Effect on SAIL.** The SC kitchen sink cannot test ConditionsFixture, which is
-the only kitchen sink fixture with a membership widget. Membership is tested in
-the admin suite instead.
+**Effect on SAIL.** The SC kitchen sink cannot test ConditionsFixture, so its
+conditions (`visible` and `enabled` expressions) go untested in SmartClient.
+Memberships are still tested there: OrderedGridFixture's `members` (an ordered
+list membership) is covered by both kitchen sinks, and the admin suite covers
+unordered ones.
 
 **Status:** open.
 
