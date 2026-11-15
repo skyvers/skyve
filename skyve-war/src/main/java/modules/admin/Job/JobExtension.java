@@ -24,30 +24,33 @@ public class JobExtension extends Job {
 	 * @return {@code true} when this job can be rerun, otherwise {@code false}
 	 */
 	public boolean rerunnable() {
-		if ((getStatus() != null) && (! startedWithABean())) {
-			// count the number of jobs with this job's name
-			int jobCount = 0;
-			Customer c = CORE.getCustomer();
-			List<Module> modules = c.getModules();
-			for (Module m : modules) {
-				List<JobMetaData> jobs = m.getJobs();
+		return (getStatus() != null) && (! startedWithABean()) && (jobsWithThisName() == 1);
+	}
 
-				for (JobMetaData j : jobs) {
-					if (j.getDisplayName().equals(this.getDisplayName())) {
-						jobCount++;
-					}
-				}
+	/**
+	 * Counts the customer's jobs with this job's display name, module by module, and stops after a module once it has
+	 * found more than one.
+	 *
+	 * @return the number of jobs found
+	 */
+	private int jobsWithThisName() {
+		int result = 0;
+		Customer c = CORE.getCustomer();
+		List<Module> modules = c.getModules();
+		for (Module m : modules) {
+			List<JobMetaData> jobs = m.getJobs();
 
-				if (jobCount > 1) {
-					return false;
+			for (JobMetaData j : jobs) {
+				if (j.getDisplayName().equals(this.getDisplayName())) {
+					result++;
 				}
 			}
 
-			if (jobCount == 1) {
-				return true;
+			if (result > 1) {
+				return result;
 			}
 		}
-		return false;
+		return result;
 	}
 
 	/**

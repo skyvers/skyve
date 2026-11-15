@@ -14,6 +14,7 @@ import org.skyve.web.WebContext;
 import org.slf4j.Logger;
 import org.skyve.util.logging.SkyveLoggerFactory;
 
+import jakarta.annotation.Nullable;
 import modules.admin.Job.JobExtension;
 import modules.admin.domain.Job;
 
@@ -45,23 +46,7 @@ public class RerunJob implements ServerSideAction<Job> {
 		}
 
 		// try to find the job to re-run, based on unique display name
-		JobMetaData jobToRerun = null;
-		Customer c = CORE.getCustomer();
-		List<org.skyve.metadata.module.Module> modules = c.getModules();
-		for (org.skyve.metadata.module.Module m : modules) {
-			List<JobMetaData> jobs = m.getJobs();
-			for (JobMetaData j : jobs) {
-				if (j.getDisplayName().equals(bean.getDisplayName())) {
-					jobToRerun = j;
-					break;
-				}
-			}
-
-			if (jobToRerun != null) {
-				break;
-			}
-		}
-
+		JobMetaData jobToRerun = findJob(bean.getDisplayName());
 		if (jobToRerun != null) {
 			if (isJobAlreadyActive(jobToRerun)) {
 				webContext.growl(MessageSeverity.warn, "This job is already running");
@@ -75,6 +60,26 @@ public class RerunJob implements ServerSideAction<Job> {
 		}
 
 		return new ServerSideActionResult<>(bean);
+	}
+
+	/**
+	 * Finds the first of the customer's jobs, module by module, with a display name.
+	 *
+	 * @param displayName	the display name
+	 * @return the job, or {@code null} if no job has the name
+	 */
+	private static @Nullable JobMetaData findJob(@Nullable String displayName) {
+		Customer c = CORE.getCustomer();
+		List<org.skyve.metadata.module.Module> modules = c.getModules();
+		for (org.skyve.metadata.module.Module m : modules) {
+			List<JobMetaData> jobs = m.getJobs();
+			for (JobMetaData j : jobs) {
+				if (j.getDisplayName().equals(displayName)) {
+					return j;
+				}
+			}
+		}
+		return null;
 	}
 
 	/**

@@ -929,9 +929,11 @@ public class ViewJSONManipulator extends ViewVisitor {
 		// a value for a binding only tab panes set must be a tab index; another widget bound to it sets any value it holds
 		Integer tabCount = tabCounts.get(binding);
 		if ((tabCount != null) && (! widgetWriters.contains(binding)) && (! isTabIndex(values.get(valueKey), tabCount.intValue()))) {
-			LOGGER.warn("Ignored the selected tab index {} for binding {}: not a tab of its tab pane",
-							OWASP.sanitiseLog(String.valueOf(values.get(valueKey))),
-							OWASP.sanitiseLog(binding));
+			if (LOGGER.isWarnEnabled()) {
+				LOGGER.warn("Ignored the selected tab index {} for binding {}: not a tab of its tab pane",
+								OWASP.sanitiseLog(String.valueOf(values.get(valueKey))),
+								OWASP.sanitiseLog(binding));
+			}
 			return;
 		}
 		

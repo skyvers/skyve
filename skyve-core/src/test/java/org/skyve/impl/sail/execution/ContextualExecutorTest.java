@@ -3,6 +3,7 @@ package org.skyve.impl.sail.execution;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -312,15 +313,16 @@ class ContextualExecutorTest {
 		AutomationContext<GenerateListContext, GenerateEditContext> inNestedWindow = newContext();
 		executor.push(inNestedWindow);
 
-		executor.executeCloseWindow(new CloseWindow());
+		CloseWindow close = new CloseWindow();
+		executor.executeCloseWindow(close);
 		AutomationContext<GenerateListContext, GenerateEditContext> afterFirstClose = executor.peek();
-		executor.executeCloseWindow(new CloseWindow());
+		executor.executeCloseWindow(close);
 
 		assertAll(() -> assertSame(inNewWindow, afterFirstClose),
 					() -> assertSame(opener, executor.peek()),
 					() -> assertEquals("Contact", opener.getDocumentName(), "the opener's context is untouched"),
 					() -> assertEquals(ViewType.edit, opener.getViewType()),
-					() -> assertThrows(MetaDataException.class, () -> executor.executeCloseWindow(new CloseWindow()), "both windows are closed"));
+					() -> assertThrows(MetaDataException.class, () -> executor.executeCloseWindow(close), "both windows are closed"));
 	}
 
 	@Test
@@ -328,9 +330,10 @@ class ContextualExecutorTest {
 		ContextualExecutor<AutomationContext<GenerateListContext, GenerateEditContext>> executor = newExecutor();
 		executor.push(newContext());
 
-		MetaDataException e = assertThrows(MetaDataException.class, () -> executor.executeCloseWindow(new CloseWindow()));
+		CloseWindow close = new CloseWindow();
+		MetaDataException e = assertThrows(MetaDataException.class, () -> executor.executeCloseWindow(close));
 		assertAll(() -> assertTrue(e.getMessage().contains("has no window to close"), e.getMessage()),
-					() -> assertTrue(executor.peek() != null, "the contexts are untouched"));
+					() -> assertNotNull(executor.peek(), "the contexts are untouched"));
 	}
 
 	@Test
@@ -338,12 +341,13 @@ class ContextualExecutorTest {
 		ContextualExecutor<AutomationContext<GenerateListContext, GenerateEditContext>> executor = newExecutor();
 		executor.executeNavigateLink(newWindowLink());
 		executor.forgetOpenWindows();
-		MetaDataException afterForget = assertThrows(MetaDataException.class, () -> executor.executeCloseWindow(new CloseWindow()));
+		CloseWindow close = new CloseWindow();
+		MetaDataException afterForget = assertThrows(MetaDataException.class, () -> executor.executeCloseWindow(close));
 		executor.executeNavigateLink(newWindowLink());
 		executor.executeAutomation(new Automation());
 
 		assertAll(() -> assertTrue(afterForget.getMessage().contains("has no window to close"), afterForget.getMessage()),
-					() -> assertThrows(MetaDataException.class, () -> executor.executeCloseWindow(new CloseWindow()), "a new automation starts in one window"));
+					() -> assertThrows(MetaDataException.class, () -> executor.executeCloseWindow(close), "a new automation starts in one window"));
 	}
 
 	/**

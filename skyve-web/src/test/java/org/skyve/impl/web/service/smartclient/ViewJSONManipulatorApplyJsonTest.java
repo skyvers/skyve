@@ -560,7 +560,7 @@ class ViewJSONManipulatorApplyJsonTest {
 		 * A tab index computed from another value, with no setter and no attribute, as an extension class can have.
 		 */
 		public Integer getShownTab() {
-			return (text == null) ? Integer.valueOf(0) : Integer.valueOf(1);
+			return Integer.valueOf((text == null) ? 0 : 1);
 		}
 
 		public void setText(String text) {

@@ -142,13 +142,7 @@ final class SailRecordingWindows {
 		}
 		else {
 			closeAbove(window, result);
-			if (indexOf(window) < 0) {
-				if (! window.equals(lastWindow)) {
-					result.add(unmapped(closed.contains(window) ?
-											"the steps below were made in a window that the script has closed; SAIL cannot switch windows, so they run in the window in front" :
-											"the steps below were made in another browser window, which the recording did not see open; SAIL cannot switch windows, so they run in the window in front"));
-				}
-			}
+			unknown(window, result);
 			loaded(entry, result);
 		}
 		lastWindow = window;
@@ -156,6 +150,18 @@ final class SailRecordingWindows {
 			stack.add(new Frame(null, entry));
 		}
 		return result;
+	}
+
+	/**
+	 * Notes, once per switch, entries from a window that is not on the stack (one the script closed, or one the
+	 * recording did not see open): SAIL cannot switch windows.
+	 */
+	private void unknown(@Nonnull String window, @Nonnull List<Map<String, String>> result) {
+		if ((indexOf(window) < 0) && (! window.equals(lastWindow))) {
+			result.add(unmapped(closed.contains(window) ?
+									"the steps below were made in a window that the script has closed; SAIL cannot switch windows, so they run in the window in front" :
+									"the steps below were made in another browser window, which the recording did not see open; SAIL cannot switch windows, so they run in the window in front"));
+		}
 	}
 
 	private static boolean newWindowLink(@Nonnull Map<String, String> entry) {

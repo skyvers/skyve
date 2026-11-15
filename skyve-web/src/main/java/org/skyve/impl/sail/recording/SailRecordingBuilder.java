@@ -562,24 +562,29 @@ public final class SailRecordingBuilder {
 		// each entry shows the steps it becomes with its window, back and refresh steps
 		List<List<Map<String, String>>> groups = SailRecordingWindows.grouped(steps.subList(0, end));
 		for (int i = 0; i < end; i++) {
-			List<String> lines = new ArrayList<>(2);
-			for (Map<String, String> recorded : groups.get(i)) {
-				pending.clear();
-				Step step = entry(recorded, false);
-				if (i >= start) {
-					for (String comment : pending) {
-						lines.add("<!--" + commentText(comment) + "-->");
-					}
-					if (step != null) {
-						lines.addAll(safeElementLines(step, recorded));
-					}
-				}
-			}
+			// the entries before the range only set the screen headings
+			List<String> lines = previewLines(groups.get(i));
 			if (i >= start) {
 				result.add(lines);
 			}
 		}
 		pending.clear();
+		return result;
+	}
+
+	/** The lines of the entries one recorded entry becomes: each one's comments, then its step's XML. */
+	private @Nonnull List<String> previewLines(@Nonnull List<Map<String, String>> group) {
+		List<String> result = new ArrayList<>(2);
+		for (Map<String, String> recorded : group) {
+			pending.clear();
+			Step step = entry(recorded, false);
+			for (String comment : pending) {
+				result.add("<!--" + commentText(comment) + "-->");
+			}
+			if (step != null) {
+				result.addAll(safeElementLines(step, recorded));
+			}
+		}
 		return result;
 	}
 
