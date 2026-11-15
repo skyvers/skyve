@@ -18,7 +18,7 @@ SC-2's suspected cause, which cites the code before its fix, at `2f4c2021b8`.
 |---|---|---|---|---|
 | [P1](#p1-fixed-backups-are-listed-oldest-first) | Backups are listed oldest first | both | Confirmed | fixed (a74e625b8c) |
 | [P2](#p2-fixed-restoring-a-redacted-backup-locks-everyone-out) | Restoring a redacted backup locks everyone out | both | Confirmed | fixed (a74e625b8c) |
-| [P3](#p3-fixed-an-action-upload-never-closes-or-refreshes) | An action upload never closes or refreshes | PF | Confirmed | fixed (35ee72a540) |
+| [P3](#p3-fixed-an-action-upload-never-closes-or-refreshes) | An action upload never closes or refreshes | both | Confirmed | fixed (35ee72a540; SC 1d3b95cd0c) |
 | [P4](#p4-fixed-update-my-details-fails-with-an-optimistic-lock) | Update My Details fails with an optimistic lock | both | Confirmed (restore); sign ins not reproduced | fixed (a74e625b8c) |
 | [P5](#p5-tablet-escapingfixture-shows-required-field-messages-at-once) | Tablet EscapingFixture shows required-field messages at once | PF | Not reproduced | not reproduced; runtime matches Mike's rule |
 | [P6](#p6-fixed-re-run-job-of-generate-test-data-always-fails) | Re-run Job of Generate Test Data always fails | both | Confirmed | fixed (a74e625b8c) |
@@ -215,6 +215,10 @@ when `PrimeFaces.env.mobile`, which comes from the user agent, is true;
 by 150 pixels after the upload did not hide the `external` overlay, so which of
 these closed it in the run that reported the difference is not known.
 
+In SmartClient, confirmed (2026-11-16) on `sail` at `970d4c50f0`: after a
+successful action upload, the upload window stays open showing "Successful ...
+uploaded", with the view refreshed behind it.
+
 **Fix.** `ContentUploadView.handleActionFileUpload` sends the upload page a
 script when an action upload has no problems:
 `SKYVE.PF.afterActionUpload(window, true)`, a new function in `pf.js`, hides the
@@ -223,8 +227,7 @@ a content upload (with `false`, after an upload with problems, it only notes
 that the upload ran; see P8). Hiding it runs its `onHide`, which refreshes the view. An
 upload with problems (errors, or only warnings) still leaves its page open, as
 its message asks the user to review them. In SmartClient the script finds no
-PrimeFaces window and does nothing; SmartClient's upload window still stays open
-after an action upload, with the view refreshed behind it, as before. The prime
+PrimeFaces window and does nothing (see SmartClient below). The prime
 `skyve-min.js` is regenerated with build.xml's Closure command.
 
 `ActionsFixtureBizPortAndUploadH2Test.aSuccessfulUploadClosesItsUploadPage`
@@ -234,6 +237,35 @@ check that refusals do not close the page. `PrimeFacesActionUploadSailIT` upload
 the `tablet`, `phone` and `external` UX/UIs, so only the page itself can close
 it, then checks Outcome. Against a server built from `sail` it fails in all
 three (the page stays open); with the fix it passes.
+
+**SmartClient (Mike, 2026-11-16: "Upload - yes, close on success too").** The
+upload page's `oncomplete` hook (`skyveAfterActionUpload` in
+`skyve-war/src/main/webapp/upload.xhtml`) refreshed the view after every action
+upload (`saveInstance(true, '_PUSH')` on the window stack's opener), and nothing
+closed the window but its close button (`isc.WindowStack.popoff`, which does not
+refresh). Now `ContentUploadView.handleActionFileUpload` also sends the page a
+callback parameter once the upload action has run, `actionUploadSucceeded`:
+`true` when the upload had no problems. The hook refreshes the view as before,
+then closes the window (`isc.WindowStack.popoff(false)`) when it is `true`. It
+closes the window last, because it reads the opener from the window stack and
+closing the window removes the page. An upload with problems (errors, or only
+warnings), a refusal before the action runs and an unexpected failure leave the
+window open, showing their messages, and the view is still refreshed after
+each, as before. Content uploads are unchanged: their own script closes their
+window (`isc.BizUtil.afterContentUpload`). So is the BizPort import window
+(`bizImport.xhtml`), which is not an upload action. No desktop JavaScript
+changed, so `skyve-min.js` is not regenerated.
+
+`ActionsFixtureBizPortAndUploadH2Test.aSuccessfulUploadTellsItsSmartClientWindowToClose`
+and `ThemeFaceletsStructureTest`, which checks the hook, failed before the fix
+and pass with it; `aRefusedUploadLeavesItsUploadPageOpen` checks that refusals
+send `false`, and `anUnavailableUploadSendsNoScript` that a refusal before the
+action runs sends no parameter. `SmartClientActionUploadSailIT` uploads a
+refused file, whose window must still be open when the step reads the refusal,
+then has windows open without a close button and uploads a good file, then
+checks Outcome and that no window is open. Against a server built from `sail`
+at `970d4c50f0` it fails ("The upload window has no close button"); with the
+fix it passes.
 
 **Workaround in the suites.** None needed now. The kitchen sink checks Outcome
 straight after the upload. The PF executor still closes an upload page that
@@ -246,9 +278,15 @@ closing or open) in one script, and treats the page as stayed open only when it
 is shown and not closing. Before it falls back to the close icon it checks
 again, so a page that closed itself is never taken for one that stayed open.
 (An earlier version read the closed and closing checks separately, and failed
-once when the hide transition ended between them.)
+once when the hide transition ended between them.) The SC upload step
+(`SmartClientSelenide.upload`) likewise still closes an action upload's window
+that stays open after a success with its close button, for the same A/B runs.
+With the fix it finds the window closed: the success message and the closing
+come in the same response handling, so the step never reads the message from a
+window that then closes. `_sail.windowClose` now returns the top window's close
+button only when it shows.
 
-**Status:** fixed (35ee72a540).
+**Status:** fixed (35ee72a540); SmartClient fixed (1d3b95cd0c).
 
 ## P4 (fixed): Update My Details fails with an optimistic lock
 
