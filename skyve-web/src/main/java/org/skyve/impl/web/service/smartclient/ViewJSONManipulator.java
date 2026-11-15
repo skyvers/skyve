@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.TreeSet;
 import java.util.function.UnaryOperator;
 
 import org.owasp.encoder.Encode;
@@ -378,8 +379,10 @@ public class ViewJSONManipulator extends ViewVisitor {
 	 */
 	private Map<String, ContentMediaKind> contentMediaKindCache = new TreeMap<>();
 
-	// selected tab index binding -> the number of tabs in its tab pane, for the bindings the client may set
+	// selected tab index binding -> the most tabs of the tab panes it selects, for the bindings the client may set
 	private Map<String, Integer> tabCounts = new TreeMap<>();
+	// the mutable bindings of the view's widgets, other than tab panes' selected tab index bindings
+	private Set<String> widgetWriters = new TreeSet<>();
 
 	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
 	protected ViewJSONManipulator(@Nonnull User user,
@@ -923,8 +926,9 @@ public class ViewJSONManipulator extends ViewVisitor {
 		if (! values.containsKey(valueKey)) {
 			return;
 		}
+		// a value for a binding only tab panes set must be a tab index; another widget bound to it sets any value it holds
 		Integer tabCount = tabCounts.get(binding);
-		if ((tabCount != null) && (! isTabIndex(values.get(valueKey), tabCount.intValue()))) {
+		if ((tabCount != null) && (! widgetWriters.contains(binding)) && (! isTabIndex(values.get(valueKey), tabCount.intValue()))) {
 			LOGGER.warn("Ignored the selected tab index {} for binding {}: not a tab of its tab pane",
 							OWASP.sanitiseLog(String.valueOf(values.get(valueKey))),
 							OWASP.sanitiseLog(binding));
@@ -998,6 +1002,9 @@ public class ViewJSONManipulator extends ViewVisitor {
 		if (binding != null) {
 		    ViewBindings bindings = (noPrefix ? bindingTree : currentBindings);
 			bindings.putBinding(binding, mutable, escape, (sanitise == null) ? Sanitisation.relaxed : sanitise, instantiate);
+			if (mutable) {
+				widgetWriters.add(binding);
+			}
 		}
 	}
 
@@ -1180,9 +1187,10 @@ public class ViewJSONManipulator extends ViewVisitor {
 			catch (@SuppressWarnings("unused") MetaDataException e) {
 				// not an attribute
 			}
-			addBinding(selectedTabIndexBinding, attribute, false, Sanitisation.text);
+			// not through addBinding(), which notes the writers of other widgets
+			currentBindings.putBinding(selectedTabIndexBinding, attribute, false, Sanitisation.text, false);
 			if (attribute) {
-				tabCounts.put(selectedTabIndexBinding, Integer.valueOf(tabPane.getTabs().size()));
+				tabCounts.merge(selectedTabIndexBinding, Integer.valueOf(tabPane.getTabs().size()), (a, b) -> (a.intValue() >= b.intValue()) ? a : b);
 			}
 		}
 	}

@@ -197,6 +197,41 @@ class ViewJSONManipulatorApplyJsonTest {
 	}
 
 	/**
+	 * When another widget, such as a spinner, also sets the attribute of a selected tab index binding, a value that is not
+	 * a tab index is the widget's and is applied.
+	 */
+	@Test
+	void aSelectedTabIndexBindingAnotherWidgetSetsTakesAnyValue() throws Exception {
+		try (Fixture fixture = new Fixture()) {
+			fixture.manipulator.visitTabPane(tabPane("tabIndex", 3), true, true);
+			fixture.manipulator.addBinding("tabIndex", true, false, Sanitisation.text); // as a spinner bound to it does
+			ViewBindings bindings = bindingTree(fixture.manipulator);
+			TestOwnerBean owner = new TestOwnerBean();
+
+			applyTabIndex(fixture, bindings, owner, Integer.valueOf(7));
+			assertEquals(Integer.valueOf(7), owner.getTabIndex());
+		}
+	}
+
+	/**
+	 * Two tab panes that select their tab with one binding take an index of either, whichever was visited last.
+	 */
+	@Test
+	void twoTabPanesWithOneSelectedTabIndexBindingTakeAnIndexOfEither() throws Exception {
+		try (Fixture fixture = new Fixture()) {
+			fixture.manipulator.visitTabPane(tabPane("tabIndex", 5), true, true);
+			fixture.manipulator.visitTabPane(tabPane("tabIndex", 3), true, true);
+			ViewBindings bindings = bindingTree(fixture.manipulator);
+			TestOwnerBean owner = new TestOwnerBean();
+
+			applyTabIndex(fixture, bindings, owner, Integer.valueOf(4));
+			assertEquals(Integer.valueOf(4), owner.getTabIndex(), "a tab of the first tab pane");
+			applyTabIndex(fixture, bindings, owner, Integer.valueOf(5));
+			assertEquals(Integer.valueOf(4), owner.getTabIndex(), "ignored: a tab of neither");
+		}
+	}
+
+	/**
 	 * A selected tab index binding to a getter with no setter (not an attribute) is not set from the request, which
 	 * goes on without failing.
 	 */

@@ -731,8 +731,9 @@ public class DesktopView extends HarnessView {
 	 *
 	 * <p>The definition is made only when the user may fetch the list's rows: the user has access to the list, as
 	 * {@code SmartClientListServlet} checks for every fetch, and can read its driving document. So it shows no list
-	 * the list servlet would refuse. None is made when the menu's data sources include the list's; a model is built
-	 * once, and only when the user has access to it.
+	 * the list servlet would refuse. The menu's data sources are passed to the renderer as visited, so it defines neither
+	 * the list's data source nor a lookup's that the menu defined. A model is built once, and only when the user has
+	 * access to it.
 	 *
 	 * @param user	the user
 	 * @param customer	the user's customer
@@ -754,13 +755,12 @@ public class DesktopView extends HarnessView {
 		StringBuilder result = new StringBuilder(1024);
 		Module module = customer.getModule(moduleName);
 		if (documentName != null) { // a model
-			if ((! menuDataSourceIds.contains(moduleName + '_' + documentName + "__" + queryOrModelName)) &&
-					user.canAccess(UserAccess.modelAggregate(moduleName, documentName, queryOrModelName), uxui)) {
+			if (user.canAccess(UserAccess.modelAggregate(moduleName, documentName, queryOrModelName), uxui)) {
 				Document document = module.getDocument(customer, documentName);
 				ListModel<Bean> model = document.getListModel(customer, queryOrModelName, true);
 				Document drivingDocument = model.getDrivingDocument();
 				if ((drivingDocument != null) && user.canReadDocument(drivingDocument)) {
-					SmartClientViewRenderer.appendDataSourceDefinition(user, customer, module, document, queryOrModelName, model, uxui, false, result, new TreeSet<>());
+					SmartClientViewRenderer.appendDataSourceDefinition(user, customer, module, document, queryOrModelName, model, uxui, false, result, new TreeSet<>(menuDataSourceIds));
 				}
 			}
 		}
@@ -771,11 +771,10 @@ public class DesktopView extends HarnessView {
 				query = module.getDocumentDefaultQuery(customer, queryOrModelName);
 				access = UserAccess.documentAggregate(moduleName, queryOrModelName);
 			}
-			// the id the list view is given (see preRender())
-			if ((! menuDataSourceIds.contains(moduleName + '_' + query.getName())) && user.canAccess(access, uxui)) {
+			if (user.canAccess(access, uxui)) {
 				Document drivingDocument = query.getDocumentModule(customer).getDocument(customer, query.getDocumentName());
 				if (user.canReadDocument(drivingDocument)) {
-					SmartClientViewRenderer.appendDataSourceDefinition(user, customer, query, null, null, uxui, false, result, new TreeSet<>());
+					SmartClientViewRenderer.appendDataSourceDefinition(user, customer, query, null, null, uxui, false, result, new TreeSet<>(menuDataSourceIds));
 				}
 			}
 		}
