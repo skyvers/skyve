@@ -222,7 +222,8 @@ class ActionsFixtureBizPortAndUploadH2Test extends AbstractSkyveTest {
 
 	/**
 	 * The growls an upload action adds to a SmartClient conversation are shown on the upload page, as a PrimeFaces
-	 * conversation's are, so that the page carries them to the view as it closes (runtime issue P3).
+	 * conversation's are, so that the page carries them to the view as it closes (runtime issue P3). The text is the
+	 * summary, with an empty detail, so that the page's growl, which shows details, shows it once.
 	 */
 	@Test
 	void anUploadActionsGrowlIsShownByItsUploadPage() throws Exception {
@@ -234,7 +235,7 @@ class ActionsFixtureBizPortAndUploadH2Test extends AbstractSkyveTest {
 		FacesMessage growl = messages.get(0);
 		assertEquals(FacesMessage.SEVERITY_INFO, growl.getSeverity());
 		assertEquals(ActionsUpload.GROWL, growl.getSummary());
-		assertEquals(ActionsUpload.GROWL, growl.getDetail());
+		assertEquals("", growl.getDetail());
 	}
 
 	/**

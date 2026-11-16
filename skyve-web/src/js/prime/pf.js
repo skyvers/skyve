@@ -52,13 +52,16 @@ SKYVE.PF = function() {
 	};
 
 	// Shows growls from script in the push growl: the view's own growl is updated by every response, which would
-	// remove them (a pushed growl, or an upload page's messages as it closes, before the refresh that follows)
+	// remove them (a pushed growl, or an upload page's messages as it closes, before the refresh that follows).
+	// They are added to the growls showing (keepAlive), so that neither removes the other before it is read: a growl
+	// pushed by a job finishing soon after the action that started it, or an upload's messages (as SmartClient, SC-6).
 	var pushGrowls = function(msgs) {
 		PrimeFaces.cw('Growl', 'pushGrowl', {
 			id: 'pushGrowl',
 			widgetVar: 'pushGrowl',
 			life: 6000,
 			sticky: false,
+			keepAlive: true,
 			msgs: msgs
 		});
 	};

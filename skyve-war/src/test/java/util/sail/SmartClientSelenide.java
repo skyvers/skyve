@@ -1144,8 +1144,11 @@ public class SmartClientSelenide extends Selenide<
 		try {
 			driver.switchTo().frame(frame);
 			// an error, followed by the problems the page lists (an upload action's refusal is in its problems table;
-			// a BizPort import page always shows its table, with an empty message row until the import has problems)
-			Object result = script("var p = document.querySelector('#problems table');" +
+			// a BizPort import page always shows its table, with an empty message row until the import has problems).
+			// Read only from the upload page: when the window closes between the frame switch and the script, the script
+			// can run in the view's document, whose growls (a pushed one, say) are not the upload's outcome
+			Object result = script("if (! /\\/(upload|bizImport)\\.xhtml$/.test(location.pathname)) return [];" +
+									"var p = document.querySelector('#problems table');" +
 									"var listed = p && p.querySelector('tbody tr:not(.ui-datatable-empty-message)');" +
 									"var problems = listed ? p.innerText.replace(/\\s+/g, ' ').trim() : '';" +
 									"var e = Array.from(document.querySelectorAll('.ui-growl-error, .ui-growl-fatal, .ui-messages-error')).find(function(x) {" +

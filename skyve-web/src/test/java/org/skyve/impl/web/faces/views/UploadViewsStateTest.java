@@ -11,6 +11,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -1660,7 +1661,7 @@ class UploadViewsStateTest {
 	 */
 	@Test
 	void messagesJSONKeepsTheTextAndSeveritiesTheUploadPageShows() throws Exception {
-		FacesContext context = Mockito.mock(FacesContext.class);
+		FacesContext context = mock(FacesContext.class);
 		when(context.getMessageList()).thenReturn(List.of(new FacesMessage(FacesMessage.SEVERITY_INFO, "Successful", "a.txt is uploaded"),
 															new FacesMessage(FacesMessage.SEVERITY_WARN, "Successful", "with <b>warnings</b> &amp; more"),
 															new FacesMessage(FacesMessage.SEVERITY_ERROR, "Unsuccessful", null),
@@ -1679,7 +1680,7 @@ class UploadViewsStateTest {
 
 	@Test
 	void messagesJSONIsAnEmptyArrayWithoutMessages() {
-		FacesContext context = Mockito.mock(FacesContext.class);
+		FacesContext context = mock(FacesContext.class);
 		when(context.getMessageList()).thenReturn(List.of());
 
 		assertEquals("[]", AbstractUploadView.messagesJSON(context));

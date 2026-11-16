@@ -34,6 +34,32 @@ class SmartClientActionUploadSailIT extends AbstractSmartClientInterpretedSail {
 													"  return popup.apply(isc.WindowStack, args);" +
 													"};";
 
+	/**
+	 * Hands the view a pushed growl, as the push stream does, when the upload page refreshes it: the pushed growl is
+	 * showing, unread, when the upload's messages are shown.
+	 */
+	private static final String PUSH_ON_REFRESH = "var v = isc.BizUtil.getCurrentView();" +
+													"var save = v.saveInstance;" +
+													"v.saveInstance = function(validate, action) {" +
+													"  if (action === '_PUSH') {" +
+													"    isc.BizUtil.onPushMessage([{type: 'g', severity: 'info', message: 'SAIL job finished'}]);" +
+													"  }" +
+													"  return save.apply(this, arguments);" +
+													"};";
+
+	/**
+	 * Has every response of the view show a growl, as a response does when a bizlet or interceptor growls: the refresh
+	 * after the upload shows one, without keeping the growls showing.
+	 */
+	private static final String GROWL_ON_EACH_RESPONSE = "var v = isc.BizUtil.getCurrentView();" +
+															"var display = v._displayGrowlsAndMessages;" +
+															"v._displayGrowlsAndMessages = function(growls, messages) {" +
+															"  return display.call(this, (growls || []).concat([{severity: 'info', summary: 'SAIL response growl'}]), messages);" +
+															"};";
+
+	/** Removes the growls showing, so that a check sees only what follows. */
+	private static final String NO_GROWLS = "jQuery('.ui-growl-item-container').remove();";
+
 	public SmartClientActionUploadSailIT() {
 		super(new BrowserConfiguration()
 				.browser(Browsers.chrome));
@@ -59,6 +85,41 @@ class SmartClientActionUploadSailIT extends AbstractSmartClientInterpretedSail {
 		Assertions.assertDoesNotThrow(() -> sailString(script));
 
 		Assertions.assertEquals(Long.valueOf(0), Selenide.executeJavaScript("return isc.WindowStack._stack.length"));
+	}
+
+	/**
+	 * The upload's messages are added to the growls showing: a growl pushed just before them is not removed.
+	 */
+	@Test
+	void aGrowlPushedBeforeTheUploadsMessagesStaysShowing() {
+		String script = "<automation uxui=\"desktop\" userAgentType=\"desktop\" testStrategy=\"Assert\" xmlns=\"http://www.skyve.org/xml/sail\">" +
+							"<before><login user=\"admin\" password=\"admin\" /><switchMode /></before>" +
+							"<interaction name=\"A pushed growl, then the upload's\"><method>" +
+							"<navigateEdit module=\"kitchensink\" document=\"ActionsFixture\" />" +
+							"<execute>" + NO_GROWLS + PUSH_ON_REFRESH + "</execute>" +
+							"<upload action=\"ActionsUpload\" file=\"sail/files/sail-upload.txt\" />" +
+							"<testMessage contains=\"SAIL job finished\" type=\"info\" />" +
+							"<testMessage contains=\"sail-upload.txt is uploaded\" type=\"info\" />" +
+							"</method></interaction></automation>";
+		Assertions.assertDoesNotThrow(() -> sailString(script));
+	}
+
+	/**
+	 * The upload's messages are shown once the refresh has returned: a growl in the refresh's response, which is shown
+	 * without keeping the growls showing, does not remove them.
+	 */
+	@Test
+	void aGrowlInTheRefreshDoesNotRemoveTheUploadsMessages() {
+		String script = "<automation uxui=\"desktop\" userAgentType=\"desktop\" testStrategy=\"Assert\" xmlns=\"http://www.skyve.org/xml/sail\">" +
+							"<before><login user=\"admin\" password=\"admin\" /><switchMode /></before>" +
+							"<interaction name=\"A growl in the refresh's response, then the upload's\"><method>" +
+							"<navigateEdit module=\"kitchensink\" document=\"ActionsFixture\" />" +
+							"<execute>" + NO_GROWLS + GROWL_ON_EACH_RESPONSE + "</execute>" +
+							"<upload action=\"ActionsUpload\" file=\"sail/files/sail-upload.txt\" />" +
+							"<testMessage contains=\"SAIL response growl\" type=\"info\" />" +
+							"<testMessage contains=\"sail-upload.txt is uploaded\" type=\"info\" />" +
+							"</method></interaction></automation>";
+		Assertions.assertDoesNotThrow(() -> sailString(script));
 	}
 
 	/**
