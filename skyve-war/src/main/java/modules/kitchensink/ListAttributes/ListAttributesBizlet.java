@@ -23,6 +23,18 @@ public class ListAttributesBizlet extends Bizlet<ListAttributes> {
 	}
 	
 	/**
+	 * Keeps dateTimeAsDate equal to dateTime, so that it has a time that its column (a date-only converter) does not
+	 * show: a view's date-only field would otherwise save it at midnight.
+	 *
+	 * @param bean the list attributes being saved
+	 * @throws Exception if the bean cannot be updated
+	 */
+	@Override
+	public void preSave(@Nonnull ListAttributes bean) throws Exception {
+		bean.setDateTimeAsDate(bean.getDateTime());
+	}
+
+	/**
 	 * Returns the shared constant domain values for the configured sample attribute.
 	 *
 	 * @param attributeName the document attribute requesting values

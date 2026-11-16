@@ -160,6 +160,7 @@
 		<property name="twelveHourDateTime" type="DateTime" />
 		<property name="monthNameTimestamp" type="Timestamp" />
 		<property name="twelveHourTime" type="TimeOnly" />
+		<property name="dateTimeAsDate" type="DateTime" />
 		<filter name="kitchensinkListAttributesNoneFilter" condition="1=0"/>
 		<filter name="kitchensinkListAttributesCustomerFilter" condition="bizCustomer=:customerParam"/>
 		<filter name="kitchensinkListAttributesDataGroupIdFilter" condition="bizDataGroupId=:dataGroupIdParam"/>

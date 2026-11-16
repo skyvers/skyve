@@ -241,6 +241,7 @@
 				<column binding="twelveHourDateTime" displayName="12 Hour Date Time" />
 				<column binding="monthNameTimestamp" displayName="Month Name Timestamp" />
 				<column binding="twelveHourTime" displayName="12 Hour Time" />
+				<column binding="dateTimeAsDate" displayName="Date Time As Date" />
 			</columns>
 		</query>
 		<query name="qListGridFixtureFacesAttributes" documentName="ListAttributes">

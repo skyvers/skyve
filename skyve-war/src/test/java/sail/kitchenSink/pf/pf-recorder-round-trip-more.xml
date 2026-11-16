@@ -144,13 +144,14 @@
 			<dataEnter binding="time" value="10:00" />
 			<ok />
 			<navigateEdit module="kitchensink" document="ListGridFixture" />
-			<comment>A date and a time with the default converters, a month first date, a 12 hour date time and a timestamp with a month name. The 12 hour filters compare with values that were not entered: on a server whose locale writes am and pm, the 12 hour values are typed in lower case and shown in upper case, so a filter with the value shown is recorded as a capture of it</comment>
+			<comment>A date and a time with the default converters, a month first date, a 12 hour date time, a timestamp with a month name and a date time shown as a date. The 12 hour filters compare with values that were not entered: on a server whose locale writes am and pm, the 12 hour values are typed in lower case and shown in upper case, so a filter with the value shown is recorded as a capture of it</comment>
 			<listGridFilter module="kitchensink" query="qListGridFixtureVueAttributes" column="text" value="{run}" />
 			<listGridFilter module="kitchensink" query="qListGridFixtureVueAttributes" column="date" value="15-Jun-2021" operator="equals" />
 			<listGridFilter module="kitchensink" query="qListGridFixtureVueAttributes" column="monthFirstDate" value="05/06/2026" operator="equals" />
 			<listGridFilter module="kitchensink" query="qListGridFixtureVueAttributes" column="twelveHourDateTime" value="05/07/2026 02:47 PM" operator="lessThan" />
 			<listGridFilter module="kitchensink" query="qListGridFixtureVueAttributes" column="monthNameTimestamp" value="May-07-2026 02:47:25 PM" operator="lessThan" />
 			<listGridFilter module="kitchensink" query="qListGridFixtureVueAttributes" column="time" value="10:00" operator="equals" />
+			<listGridFilter module="kitchensink" query="qListGridFixtureVueAttributes" column="dateTimeAsDate" value="12/31/2099" operator="lessThan" />
 			<testGridRows module="kitchensink" query="qListGridFixtureVueAttributes" rowContaining="0 SAIL dates {run}" minRows="1" maxRows="1" />
 			<listGridClearFilter module="kitchensink" query="qListGridFixtureVueAttributes" />
 			<listGridFilter module="kitchensink" query="qListGridFixtureVueAttributes" column="text" value="{run}" />

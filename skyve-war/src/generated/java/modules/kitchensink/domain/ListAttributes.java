@@ -133,6 +133,9 @@ public class ListAttributes extends AbstractPersistentBean {
 	/** @hidden */
 	public static final String twelveHourTimePropertyName = "twelveHourTime";
 
+	/** @hidden */
+	public static final String dateTimeAsDatePropertyName = "dateTimeAsDate";
+
 	/**
 	 * ConstantEnum
 	 **/
@@ -328,6 +331,11 @@ public class ListAttributes extends AbstractPersistentBean {
 	 * 12 Hour Time
 	 **/
 	private TimeOnly twelveHourTime;
+
+	/**
+	 * Date Time As Date
+	 **/
+	private DateTime dateTimeAsDate;
 
 	@Override
 	@XmlTransient
@@ -832,6 +840,26 @@ public class ListAttributes extends AbstractPersistentBean {
 	public void setTwelveHourTime(TimeOnly twelveHourTime) {
 		preset(twelveHourTimePropertyName, twelveHourTime);
 		this.twelveHourTime = twelveHourTime;
+	}
+
+	/**
+	 * {@link #dateTimeAsDate} accessor.
+	 * @return	The value.
+	 **/
+	public DateTime getDateTimeAsDate() {
+		return dateTimeAsDate;
+	}
+
+	/**
+	 * {@link #dateTimeAsDate} mutator.
+	 * @param dateTimeAsDate	The new value.
+	 **/
+	@XmlElement
+	@XmlSchemaType(name = "dateTime")
+	@XmlJavaTypeAdapter(DateTimeMapper.class)
+	public void setDateTimeAsDate(DateTime dateTimeAsDate) {
+		preset(dateTimeAsDatePropertyName, dateTimeAsDate);
+		this.dateTimeAsDate = dateTimeAsDate;
 	}
 
 	/**

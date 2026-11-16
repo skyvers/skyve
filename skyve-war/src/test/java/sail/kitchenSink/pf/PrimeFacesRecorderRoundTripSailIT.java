@@ -142,7 +142,8 @@ class PrimeFacesRecorderRoundTripSailIT extends AbstractPrimeFacesInterpretedSai
 				"<listGridFilter module=\"kitchensink\" query=\"qListGridFixtureVueAttributes\" column=\"monthFirstDate\" value=\"05/06/2026\" operator=\"equals\"/>",
 				"<listGridFilter module=\"kitchensink\" query=\"qListGridFixtureVueAttributes\" column=\"twelveHourDateTime\" value=\"05/07/2026 02:47 PM\" operator=\"lessThan\"/>",
 				"<listGridFilter module=\"kitchensink\" query=\"qListGridFixtureVueAttributes\" column=\"monthNameTimestamp\" value=\"May-07-2026 02:47:25 PM\" operator=\"lessThan\"/>",
-				"<listGridFilter module=\"kitchensink\" query=\"qListGridFixtureVueAttributes\" column=\"time\" value=\"10:00\" operator=\"equals\"/>");
+				"<listGridFilter module=\"kitchensink\" query=\"qListGridFixtureVueAttributes\" column=\"time\" value=\"10:00\" operator=\"equals\"/>",
+				"<listGridFilter module=\"kitchensink\" query=\"qListGridFixtureVueAttributes\" column=\"dateTimeAsDate\" value=\"12/31/2099\" operator=\"lessThan\"/>");
 		replay(xml);
 	}
 
