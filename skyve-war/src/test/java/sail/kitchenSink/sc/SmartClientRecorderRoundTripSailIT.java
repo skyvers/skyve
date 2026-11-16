@@ -123,7 +123,13 @@ class SmartClientRecorderRoundTripSailIT extends AbstractSmartClientInterpretedS
 				"<action name=\"AskYesNo\" confirm=\"false\"/>",
 				"<navigateTree module=\"kitchensink\" query=\"qConditionsFixtureNodes\"/>",
 				"<navigateMap module=\"kitchensink\" document=\"ListAttributes\" geometryBinding=\"geometry\"/>",
-				"<navigateCalendar module=\"kitchensink\" document=\"ListAttributes\"/>");
+				"<navigateCalendar module=\"kitchensink\" document=\"ListAttributes\"/>",
+				"<listGridFilter module=\"kitchensink\" query=\"qListGridFixtureVueAttributes\" column=\"date\" value=\"15-Jun-2021\" operator=\"equals\"/>",
+				"<listGridFilter module=\"kitchensink\" query=\"qListGridFixtureVueAttributes\" column=\"monthFirstDate\" value=\"05/06/2026\" operator=\"equals\"/>",
+				"<listGridFilter module=\"kitchensink\" query=\"qListGridFixtureVueAttributes\" column=\"twelveHourDateTime\" value=\"05/07/2026 02:47 PM\" operator=\"lessThan\"/>",
+				"<listGridFilter module=\"kitchensink\" query=\"qListGridFixtureVueAttributes\" column=\"monthNameTimestamp\" value=\"May-07-2026 02:47:25 PM\" operator=\"lessThan\"/>",
+				"<listGridFilter module=\"kitchensink\" query=\"qListGridFixtureVueAttributes\" column=\"time\" value=\"10:00\" operator=\"equals\"/>",
+				"<listGridFilter module=\"kitchensink\" query=\"qListGridFixtureVueAttributes\" column=\"dateTimeAsDate\" value=\"12/31/2099\" operator=\"lessThan\"/>");
 		replay(xml);
 	}
 

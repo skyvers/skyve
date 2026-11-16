@@ -1116,7 +1116,26 @@
 		return (n < 10) ? "0" + n : String(n);
 	}
 
-	/** A filter value as listGridFilter writes it: an enum's label, a boolean, a date as Skyve's default converter. */
+	/**
+	 * The SimpleType, the field's type or the first type it inherits from, that formats a value as a list grid cell
+	 * shows it (its shortDisplayFormatter); or null. Skyve's date and time types are named for their converters
+	 * (see types.js), and format as the converter does.
+	 */
+	function displayType(typeName) {
+		var type = typeName ? isc.SimpleType.getType(typeName) : null;
+		for (var depth = 0; type && (depth < 10); depth++) {
+			if (isc.isA.Function(type.shortDisplayFormatter)) {
+				return type;
+			}
+			type = type.inheritsFrom ? isc.SimpleType.getType(type.inheritsFrom) : null;
+		}
+		return null;
+	}
+
+	/**
+	 * A filter value as listGridFilter writes it: an enum's label, a boolean, a date or time as the column shows it (its
+	 * type's format, which is its converter's), or else as Skyve's default converter.
+	 */
 	function filterText(grid, fieldName, value) {
 		var field = grid.getField(fieldName) || {};
 		if ((value === true) || (value === false)) {
@@ -1124,6 +1143,10 @@
 		}
 		if (field.valueMap && !isc.isA.Array(field.valueMap) && (field.valueMap[value] != null)) {
 			return strip(field.valueMap[value]);
+		}
+		var type = isc.isA.Date(value) ? displayType(field.type) : null;
+		if (type) {
+			return strip(String(type.shortDisplayFormatter(value, field, grid, {})));
 		}
 		if (isc.isA.Date(value)) {
 			var text = pad(value.getDate()) + "-" + MONTHS[value.getMonth()] + "-" + value.getFullYear();

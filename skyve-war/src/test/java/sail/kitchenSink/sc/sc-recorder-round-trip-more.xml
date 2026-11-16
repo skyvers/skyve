@@ -3,8 +3,9 @@
 	The second kitchen sink workflow that SmartClientRecorderRoundTripSailIT records and replays: the gestures recorder
 	phase 5 maps. Data grids (new, zoom, inline edits, select, remove, a drag and a link in a row), lookups (pick,
 	autocomplete, new and edit, and in an inline grid), uploads (refused and accepted), list filters, sorting and
-	selection, a number the application generates and the list is then filtered by (a capture), and server-side
-	questions, and tree, map and calendar menu items. It has no login: it runs in a session that is already signed in and recording.
+	selection, a number the application generates and the list is then filtered by (a capture), filters on dates and
+	times as their columns show them (each column's converter), and server-side questions, and tree, map and calendar
+	menu items. It has no login: it runs in a session that is already signed in and recording.
 	The lookup values it makes sort first ("0 ...") and are deleted again at the end.
 -->
 <automation uxui="desktop" userAgentType="desktop" testStrategy="Assert"
@@ -123,6 +124,33 @@
 		<method>
 			<navigateEdit module="kitchensink" document="ListGridFixture" />
 			<listGridSelect module="kitchensink" query="qListGridFixtureVue" rowContaining="0 SAIL lookup {run} a" />
+		</method>
+	</interaction>
+	<interaction name="List filters on dates and times, typed as the columns show them">
+		<method>
+			<navigateList module="kitchensink" document="ListAttributes" />
+			<listGridNew module="kitchensink" document="ListAttributes" />
+			<dataEnter binding="text" value="0 SAIL dates {run}" />
+			<dataEnter binding="date" value="15-Jun-2021" />
+			<dataEnter binding="monthFirstDate" value="05/06/2026" />
+			<dataEnter binding="twelveHourDateTime" value="05/06/2026 02:47 PM" />
+			<dataEnter binding="monthNameTimestamp" value="May-06-2026 02:47:25 PM" />
+			<dataEnter binding="time" value="10:00" />
+			<ok />
+			<navigateEdit module="kitchensink" document="ListGridFixture" />
+			<comment>A date and a time with the default converters, a month first date, a 12 hour date time, a timestamp with a month name and a date time shown as a date</comment>
+			<listGridFilter module="kitchensink" query="qListGridFixtureVueAttributes" column="text" value="{run}" />
+			<listGridFilter module="kitchensink" query="qListGridFixtureVueAttributes" column="date" value="15-Jun-2021" operator="equals" />
+			<listGridFilter module="kitchensink" query="qListGridFixtureVueAttributes" column="monthFirstDate" value="05/06/2026" operator="equals" />
+			<listGridFilter module="kitchensink" query="qListGridFixtureVueAttributes" column="twelveHourDateTime" value="05/07/2026 02:47 PM" operator="lessThan" />
+			<listGridFilter module="kitchensink" query="qListGridFixtureVueAttributes" column="monthNameTimestamp" value="May-07-2026 02:47:25 PM" operator="lessThan" />
+			<listGridFilter module="kitchensink" query="qListGridFixtureVueAttributes" column="time" value="10:00" operator="equals" />
+			<listGridFilter module="kitchensink" query="qListGridFixtureVueAttributes" column="dateTimeAsDate" value="12/31/2099" operator="lessThan" />
+			<testGridRows module="kitchensink" query="qListGridFixtureVueAttributes" rowContaining="0 SAIL dates {run}" minRows="1" maxRows="1" />
+			<listGridClearFilter module="kitchensink" query="qListGridFixtureVueAttributes" />
+			<listGridFilter module="kitchensink" query="qListGridFixtureVueAttributes" column="text" value="{run}" />
+			<listGridZoom module="kitchensink" query="qListGridFixtureVueAttributes" rowContaining="0 SAIL dates {run}" />
+			<delete />
 		</method>
 	</interaction>
 	<interaction name="A tree, a map and a calendar">
